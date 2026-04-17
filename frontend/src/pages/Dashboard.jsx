@@ -3,59 +3,71 @@ import { useNavigate } from 'react-router-dom';
 import {
   Box, Grid, Card, CardContent, Typography, Chip, Avatar,
   Table, TableHead, TableBody, TableRow, TableCell, TableContainer,
-  Paper, Skeleton, IconButton, Tooltip
+  Paper, Skeleton, IconButton, Tooltip, Fade, Grow, useTheme
 } from '@mui/material';
 import {
   Inventory2, TrendingDown, ShoppingCart, LocalShipping,
   Warning, People, Warehouse, Receipt, ArrowForward,
-  Circle
+  Circle, TrendingUp
 } from '@mui/icons-material';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RTooltip,
-  ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Legend
+  ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, Legend
 } from 'recharts';
 import api from '../services/api';
 
 const COLORS = ['#1E3A8A', '#2563EB', '#60A5FA', '#93C5FD', '#3B82F6', '#1D4ED8', '#DBEAFE', '#7C3AED'];
 
-function StatCard({ title, value, icon, color, subtitle, onClick }) {
+function StatCard({ title, value, icon, color, subtitle, onClick, index }) {
   return (
-    <Card sx={{
-      cursor: onClick ? 'pointer' : 'default',
-      transition: 'all 0.3s ease',
-      '&:hover': onClick ? { transform: 'translateY(-4px)', boxShadow: '0 8px 25px rgba(0,0,0,0.1)' } : {},
-      position: 'relative', overflow: 'hidden',
-    }}
-      onClick={onClick}>
-      <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <Box>
-            <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.7rem' }}>
-              {title}
-            </Typography>
-            <Typography variant="h4" sx={{ fontWeight: 700, color: '#1E293B', mt: 0.5, mb: 0.5 }}>
-              {value}
-            </Typography>
-            {subtitle && (
-              <Typography variant="caption" sx={{ color: '#94A3B8' }}>
+    <Grow in={true} timeout={(index + 1) * 300}>
+      <Card sx={{
+        height: '100%',
+        cursor: onClick ? 'pointer' : 'default',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        '&:hover': onClick ? { 
+          transform: 'translateY(-6px)', 
+          boxShadow: '0 12px 30px rgba(0,0,0,0.12)',
+          '& .stat-avatar': { transform: 'scale(1.1)' }
+        } : {},
+        position: 'relative', overflow: 'hidden',
+        borderRadius: 4,
+        border: '1px solid rgba(226, 232, 240, 0.6)',
+      }}
+        onClick={onClick}>
+        <CardContent sx={{ p: 2.5, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+            <Box>
+              <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', fontSize: '0.65rem' }}>
+                {title}
+              </Typography>
+              <Typography variant="h4" sx={{ fontWeight: 800, color: '#1E293B', mt: 0.5 }}>
+                {value}
+              </Typography>
+            </Box>
+            <Avatar className="stat-avatar" sx={{
+              width: 44, height: 44, borderRadius: 2.5,
+              background: `linear-gradient(135deg, ${color}22, ${color}11)`,
+              color: color,
+              transition: 'transform 0.3s ease',
+            }}>
+              {icon}
+            </Avatar>
+          </Box>
+          {subtitle && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: '0.72rem' }}>
                 {subtitle}
               </Typography>
-            )}
-          </Box>
-          <Avatar sx={{
-            width: 48, height: 48, borderRadius: 3,
-            background: `linear-gradient(135deg, ${color}22, ${color}11)`,
-            color: color,
-          }}>
-            {icon}
-          </Avatar>
-        </Box>
-        <Box sx={{
-          position: 'absolute', bottom: 0, left: 0, right: 0, height: 3,
-          background: `linear-gradient(90deg, ${color}, ${color}44)`,
-        }} />
-      </CardContent>
-    </Card>
+            </Box>
+          )}
+          <Box sx={{
+            position: 'absolute', bottom: 0, left: 0, right: 0, height: 4,
+            background: `linear-gradient(90deg, ${color}, ${color}22)`,
+          }} />
+        </CardContent>
+      </Card>
+    </Grow>
   );
 }
 
@@ -90,15 +102,23 @@ export default function Dashboard() {
     }).catch(console.error).finally(() => setLoading(false));
   }, []);
 
+  const theme = useTheme();
+
   if (loading) {
     return (
-      <Box>
-        <Grid container spacing={2.5}>
+      <Box sx={{ p: 1 }}>
+        <Grid container spacing={3}>
           {[...Array(6)].map((_, i) => (
-            <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2 }} key={i}>
-              <Skeleton variant="rounded" height={120} sx={{ borderRadius: 3 }} />
+            <Grid item xs={12} sm={6} md={4} lg={2} key={i}>
+              <Skeleton variant="rounded" height={130} sx={{ borderRadius: 4 }} />
             </Grid>
           ))}
+          <Grid item xs={12} lg={8}>
+            <Skeleton variant="rounded" height={400} sx={{ borderRadius: 4 }} />
+          </Grid>
+          <Grid item xs={12} lg={4}>
+            <Skeleton variant="rounded" height={400} sx={{ borderRadius: 4 }} />
+          </Grid>
         </Grid>
       </Box>
     );
@@ -111,157 +131,211 @@ export default function Dashboard() {
     return `₹${v}`;
   };
 
-  return (
-    <Box>
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h5" sx={{ fontWeight: 700, color: '#1E293B' }}>Dashboard</Typography>
-        <Typography variant="body2" sx={{ color: '#64748B' }}>Overview of materials, procurement, and inventory</Typography>
-      </Box>
+  const totalValue = stats?.total_inventory_value || 0;
 
-      {/* Stats Cards */}
-      <Grid container spacing={2.5} sx={{ mb: 3 }}>
-        <Grid size={{ xs: 6, sm: 4, lg: 2 }}>
-          <StatCard title="Materials" value={stats?.total_materials || 0} icon={<Inventory2 />} color="#2563EB"
-            subtitle="Active items" onClick={() => navigate('/materials')} />
+  return (
+    <Box sx={{ pb: 4 }}>
+      <Fade in={true}>
+        <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+          <Box>
+            <Typography variant="h4" sx={{ fontWeight: 800, color: '#1E293B', letterSpacing: '-0.02em' }}>
+              Dashboard
+            </Typography>
+            <Typography variant="body2" sx={{ color: '#64748B', mt: 0.5 }}>
+              Enterprise Resource Overview & Real-time Analytics
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Chip icon={<TrendingUp sx={{ fontSize: '1rem !important' }} />} label="Live Updates" 
+              size="small" sx={{ background: '#F0F9FF', color: '#0369A1', fontWeight: 600, border: '1px solid #BAE6FD' }} />
+          </Box>
+        </Box>
+      </Fade>
+
+      {/* Stats Cards - Responsive Grid */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid item xs={12} sm={6} md={4} lg={2}>
+          <StatCard title="Total Materials" value={stats?.total_materials || 0} icon={<Inventory2 />} color="#2563EB"
+            subtitle="Cataloged Items" onClick={() => navigate('/materials')} index={0} />
         </Grid>
-        <Grid size={{ xs: 6, sm: 4, lg: 2 }}>
-          <StatCard title="Inventory Value" value={formatCurrency(stats?.total_inventory_value || 0)}
-            icon={<Warehouse />} color="#059669" subtitle="Total stock value" onClick={() => navigate('/inventory')} />
+        <Grid item xs={12} sm={6} md={4} lg={2}>
+          <StatCard title="Inventory Value" value={formatCurrency(totalValue)}
+            icon={<Warehouse />} color="#059669" subtitle="On-hand Valuation" onClick={() => navigate('/inventory')} index={1} />
         </Grid>
-        <Grid size={{ xs: 6, sm: 4, lg: 2 }}>
+        <Grid item xs={12} sm={6} md={4} lg={2}>
           <StatCard title="Low Stock" value={stats?.low_stock_items || 0}
-            icon={<Warning />} color="#DC2626" subtitle="Below reorder" onClick={() => navigate('/inventory?low=true')} />
+            icon={<Warning />} color="#DC2626" subtitle="Requires Attention" onClick={() => navigate('/inventory?low=true')} index={2} />
         </Grid>
-        <Grid size={{ xs: 6, sm: 4, lg: 2 }}>
+        <Grid item xs={12} sm={6} md={4} lg={2}>
           <StatCard title="Pending PR" value={stats?.pending_pr || 0}
-            icon={<ShoppingCart />} color="#D97706" subtitle="Awaiting action" onClick={() => navigate('/purchase-requests')} />
+            icon={<ShoppingCart />} color="#D97706" subtitle="Pending Approval" onClick={() => navigate('/purchase-requests')} index={3} />
         </Grid>
-        <Grid size={{ xs: 6, sm: 4, lg: 2 }}>
-          <StatCard title="Pending PO" value={stats?.pending_po || 0}
-            icon={<Receipt />} color="#7C3AED" subtitle="Open orders" onClick={() => navigate('/purchase-orders')} />
+        <Grid item xs={12} sm={6} md={4} lg={2}>
+          <StatCard title="Open PO" value={stats?.pending_po || 0}
+            icon={<Receipt />} color="#7C3AED" subtitle="Track Orders" onClick={() => navigate('/purchase-orders')} index={4} />
         </Grid>
-        <Grid size={{ xs: 6, sm: 4, lg: 2 }}>
-          <StatCard title="GRN" value={stats?.recent_grn_count || 0}
-            icon={<LocalShipping />} color="#0891B2" subtitle="Total receipts" onClick={() => navigate('/grn')} />
+        <Grid item xs={12} sm={6} md={4} lg={2}>
+          <StatCard title="GRN Total" value={stats?.recent_grn_count || 0}
+            icon={<LocalShipping />} color="#0891B2" subtitle="Items Received" onClick={() => navigate('/grn')} index={5} />
         </Grid>
       </Grid>
 
-      {/* Charts Row 1 */}
-      <Grid container spacing={2.5} sx={{ mb: 3 }}>
-        <Grid size={{ xs: 12, lg: 8 }}>
-          <Card sx={{ p: 2.5, height: '100%' }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, color: '#1E293B' }}>
-              Material Consumption by Block
-            </Typography>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={consumption} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-                <XAxis dataKey="block_name" tick={{ fontSize: 11, fill: '#64748B' }} />
-                <YAxis tick={{ fontSize: 11, fill: '#64748B' }} />
-                <RTooltip contentStyle={{ borderRadius: 8, border: '1px solid #E2E8F0' }}
-                  formatter={(v) => [v.toLocaleString(), '']} />
-                <Bar dataKey="total_quantity" name="Quantity" fill="#2563EB" radius={[6, 6, 0, 0]} />
-                <Bar dataKey="total_value" name="Value (₹)" fill="#60A5FA" radius={[6, 6, 0, 0]} />
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        {/* Main Bar Chart - Gradient Enhanced */}
+        <Grid item xs={12} lg={8}>
+          <Card sx={{ p: 3, borderRadius: 4, border: '1px solid rgba(226, 232, 240, 0.6)' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+              <Typography variant="h6" sx={{ fontWeight: 700, color: '#1E293B' }}>
+                Resource Allocation by Block
+              </Typography>
+            </Box>
+            <ResponsiveContainer width="100%" height={350}>
+              <BarChart data={consumption} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorQty" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#2563EB" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="#2563EB" stopOpacity={0.1}/>
+                  </linearGradient>
+                  <linearGradient id="colorVal" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#60A5FA" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="#60A5FA" stopOpacity={0.1}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
+                <XAxis dataKey="block_name" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748B', fontWeight: 500 }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748B' }} />
+                <RTooltip 
+                  cursor={{ fill: 'rgba(241, 245, 249, 0.5)' }}
+                  contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', padding: '12px' }}
+                />
+                <Bar dataKey="total_quantity" name="Quantity" fill="url(#colorQty)" radius={[6, 6, 0, 0]} barSize={24} />
+                <Bar dataKey="total_value" name="Value (₹)" fill="url(#colorVal)" radius={[6, 6, 0, 0]} barSize={24} />
+                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '12px' }} />
               </BarChart>
             </ResponsiveContainer>
           </Card>
         </Grid>
-        <Grid size={{ xs: 12, lg: 4 }}>
-          <Card sx={{ p: 2.5, height: '100%' }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, color: '#1E293B' }}>
+
+        {/* Donut Chart with Center Label */}
+        <Grid item xs={12} lg={4}>
+          <Card sx={{ p: 3, borderRadius: 4, height: '100%', border: '1px solid rgba(226, 232, 240, 0.6)' }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, mb: 3, color: '#1E293B' }}>
               Stock by Warehouse
             </Typography>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie data={stockByWh} cx="50%" cy="50%" innerRadius={60} outerRadius={100}
-                  dataKey="total_value" nameKey="warehouse_name" paddingAngle={3}>
-                  {stockByWh.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                </Pie>
-                <RTooltip formatter={(v) => [`₹${v.toLocaleString()}`, 'Value']}
-                  contentStyle={{ borderRadius: 8 }} />
-                <Legend iconType="circle" wrapperStyle={{ fontSize: 11 }} />
-              </PieChart>
-            </ResponsiveContainer>
+            <Box sx={{ position: 'relative', height: 350 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie data={stockByWh} cx="50%" cy="50%" innerRadius={85} outerRadius={115}
+                    dataKey="total_value" nameKey="warehouse_name" paddingAngle={8} stroke="none">
+                    {stockByWh.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} cornerRadius={4} />)}
+                  </Pie>
+                  <RTooltip formatter={(v) => [`₹${v.toLocaleString()}`, 'Total Value']}
+                    contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
+                  <Legend iconType="circle" wrapperStyle={{ fontSize: 12, bottom: 0 }} />
+                </PieChart>
+              </ResponsiveContainer>
+              <Box sx={{
+                position: 'absolute', top: '44%', left: '50%', transform: 'translate(-50%, -50%)',
+                textAlign: 'center', pointerEvents: 'none'
+              }}>
+                <Typography variant="h5" sx={{ fontWeight: 800, color: '#1E293B' }}>{formatCurrency(totalValue)}</Typography>
+                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600 }}>TOTAL VALUE</Typography>
+              </Box>
+            </Box>
           </Card>
         </Grid>
       </Grid>
 
-      {/* Charts Row 2 */}
-      <Grid container spacing={2.5} sx={{ mb: 3 }}>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Card sx={{ p: 2.5 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, color: '#1E293B' }}>
-              Top Consumed Materials
+      {/* Row 3 - Consumption Details */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid item xs={12} md={6}>
+          <Card sx={{ p: 3, borderRadius: 4, height: '100%', border: '1px solid rgba(226, 232, 240, 0.6)' }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, mb: 3, color: '#1E293B' }}>
+              High-Velocity Materials
             </Typography>
-            <ResponsiveContainer width="100%" height={280}>
-              <BarChart data={topMaterials} layout="vertical" margin={{ left: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-                <XAxis type="number" tick={{ fontSize: 11, fill: '#64748B' }} />
-                <YAxis dataKey="material_name" type="category" width={130} tick={{ fontSize: 10, fill: '#64748B' }} />
-                <RTooltip contentStyle={{ borderRadius: 8 }} />
-                <Bar dataKey="total_consumed" name="Consumed" fill="#1E3A8A" radius={[0, 6, 6, 0]} barSize={18} />
+            <ResponsiveContainer width="100%" height={320}>
+              <BarChart data={topMaterials} layout="vertical" margin={{ left: 30, right: 30 }}>
+                <defs>
+                   <linearGradient id="colorTop" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="5%" stopColor="#1E3A8A" stopOpacity={0.9}/>
+                    <stop offset="95%" stopColor="#2563EB" stopOpacity={0.6}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#F1F5F9" />
+                <XAxis type="number" hide />
+                <YAxis dataKey="material_name" type="category" width={110} axisLine={false} tickLine={false} tick={{ fontSize: 11, fontWeight: 500 }} />
+                <RTooltip contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
+                <Bar dataKey="total_consumed" name="Consumed" fill="url(#colorTop)" radius={[0, 6, 6, 0]} barSize={16} />
               </BarChart>
             </ResponsiveContainer>
           </Card>
         </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Card sx={{ p: 2.5 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, color: '#1E293B' }}>
-              Consumption Trend
+        <Grid item xs={12} md={6}>
+          <Card sx={{ p: 3, borderRadius: 4, height: '100%', border: '1px solid rgba(226, 232, 240, 0.6)' }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, mb: 3, color: '#1E293B' }}>
+              Issuance Trend
             </Typography>
-            <ResponsiveContainer width="100%" height={280}>
-              <LineChart data={trend}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-                <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#64748B' }} />
-                <YAxis tick={{ fontSize: 11, fill: '#64748B' }} />
-                <RTooltip contentStyle={{ borderRadius: 8 }} />
-                <Line type="monotone" dataKey="total" name="Total Consumed" stroke="#2563EB"
-                  strokeWidth={2.5} dot={{ r: 4, fill: '#2563EB' }} activeDot={{ r: 6 }} />
-              </LineChart>
+            <ResponsiveContainer width="100%" height={320}>
+              <AreaChart data={trend}>
+                <defs>
+                  <linearGradient id="colorTrend" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#2563EB" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#2563EB" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748B' }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748B' }} />
+                <RTooltip contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
+                <Area type="monotone" dataKey="total" name="Items Issued" stroke="#2563EB" strokeWidth={3} fillOpacity={1} fill="url(#colorTrend)"
+                  dot={{ r: 4, strokeWidth: 2, fill: '#fff' }} activeDot={{ r: 6, strokeWidth: 0 }} />
+              </AreaChart>
             </ResponsiveContainer>
           </Card>
         </Grid>
       </Grid>
 
-      {/* Bottom Row */}
-      <Grid container spacing={2.5}>
-        <Grid size={{ xs: 12, md: 7 }}>
-          <Card sx={{ p: 2.5 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#1E293B' }}>
-                Recent Transactions
+      {/* Bottom Activity & Alerts */}
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={7}>
+          <Card sx={{ borderRadius: 4, border: '1px solid rgba(226, 232, 240, 0.6)' }}>
+            <Box sx={{ p: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #F1F5F9' }}>
+               <Typography variant="h6" sx={{ fontWeight: 700, color: '#1E293B' }}>
+                Operational Log
               </Typography>
-              <Chip label="View All" size="small" onClick={() => navigate('/inventory')}
-                sx={{ cursor: 'pointer' }} />
+              <Chip label="View History" size="small" variant="outlined" onClick={() => navigate('/inventory')} 
+                sx={{ cursor: 'pointer', borderRadius: 2, fontWeight: 600, color: '#64748B' }} />
             </Box>
-            <TableContainer>
+            <TableContainer sx={{ p: 1 }}>
               <Table size="small">
                 <TableHead>
-                  <TableRow>
+                  <TableRow sx={{ '& th': { border: 'none', color: '#94A3B8', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' } }}>
                     <TableCell>Material</TableCell>
-                    <TableCell>Type</TableCell>
-                    <TableCell align="right">Qty</TableCell>
-                    <TableCell>Warehouse</TableCell>
-                    <TableCell>Reference</TableCell>
+                    <TableCell>Activity</TableCell>
+                    <TableCell align="right">Amount</TableCell>
+                    <TableCell>Location</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {recentTx.slice(0, 8).map((tx) => (
-                    <TableRow key={tx.id}>
-                      <TableCell sx={{ fontSize: '0.8rem' }}>{tx.material_name}</TableCell>
+                  {recentTx.slice(0, 7).map((tx) => (
+                    <TableRow key={tx.id} sx={{ '& td': { borderBottom: '1px solid #F8FAFC' }, '&:last-child td': { border: 'none' } }}>
+                      <TableCell sx={{ fontSize: '0.85rem', fontWeight: 600, color: '#334155' }}>{tx.material_name}</TableCell>
                       <TableCell>
                         <Chip label={tx.transaction_type} size="small"
-                          color={tx.quantity > 0 ? 'success' : 'error'}
-                          variant="outlined" sx={{ fontSize: '0.7rem' }} />
+                          sx={{ 
+                            fontSize: '0.65rem', fontWeight: 700, height: 20,
+                            background: tx.quantity > 0 ? '#ECFDF5' : '#FEF2F2',
+                            color: tx.quantity > 0 ? '#059669' : '#DC2626',
+                            border: `1px solid ${tx.quantity > 0 ? '#A7F3D0' : '#FECACA'}`
+                          }} />
                       </TableCell>
                       <TableCell align="right" sx={{
-                        fontWeight: 600, fontSize: '0.8rem',
+                        fontWeight: 700, fontSize: '0.85rem',
                         color: tx.quantity > 0 ? '#059669' : '#DC2626'
                       }}>
-                        {tx.quantity > 0 ? '+' : ''}{tx.quantity}
+                        {tx.quantity > 0 ? '+' : ''}{tx.quantity.toLocaleString()}
                       </TableCell>
-                      <TableCell sx={{ fontSize: '0.8rem' }}>{tx.warehouse_name}</TableCell>
-                      <TableCell sx={{ fontSize: '0.75rem', color: '#64748B' }}>{tx.reference_number}</TableCell>
+                      <TableCell sx={{ fontSize: '0.85rem', color: '#64748B' }}>{tx.warehouse_name}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -269,43 +343,51 @@ export default function Dashboard() {
             </TableContainer>
           </Card>
         </Grid>
-        <Grid size={{ xs: 12, md: 5 }}>
-          <Card sx={{ p: 2.5 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#1E293B' }}>
-                Active Alerts
+        
+        <Grid item xs={12} md={5}>
+          <Card sx={{ borderRadius: 4, height: '100%', border: '1px solid rgba(226, 232, 240, 0.6)' }}>
+            <Box sx={{ p: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #F1F5F9' }}>
+              <Typography variant="h6" sx={{ fontWeight: 700, color: '#1E293B' }}>
+                Priority Alerts
               </Typography>
-              <Chip label={`${alerts.length} Active`} size="small" color="warning" />
+              <Chip label={`${alerts.length} New`} size="small" sx={{ background: '#FFF7ED', color: '#C2410C', fontWeight: 700 }} />
             </Box>
-            {alerts.length === 0 ? (
-              <Typography variant="body2" sx={{ color: '#94A3B8', textAlign: 'center', py: 4 }}>
-                No active alerts
-              </Typography>
-            ) : (
-              alerts.slice(0, 6).map((alert) => (
-                <Box key={alert.id} sx={{
-                  p: 1.5, mb: 1, borderRadius: 2,
-                  background: alert.severity === 'Critical' ? '#FEF2F2' :
-                    alert.severity === 'Warning' ? '#FFFBEB' : '#F0F9FF',
-                  border: `1px solid ${alert.severity === 'Critical' ? '#FECACA' :
-                    alert.severity === 'Warning' ? '#FDE68A' : '#BAE6FD'}`,
-                }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                    <Circle sx={{
-                      fontSize: 8,
-                      color: alert.severity === 'Critical' ? '#DC2626' :
-                        alert.severity === 'Warning' ? '#D97706' : '#2563EB'
-                    }} />
-                    <Typography variant="caption" sx={{ fontWeight: 600, color: '#1E293B' }}>
-                      {alert.title}
-                    </Typography>
-                  </Box>
-                  <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.7rem' }}>
-                    {alert.message}
-                  </Typography>
+            <Box sx={{ p: 2 }}>
+              {alerts.length === 0 ? (
+                <Box sx={{ py: 8, textAlign: 'center' }}>
+                  <Typography variant="body2" sx={{ color: '#94A3B8' }}>All systems operational. No active alerts.</Typography>
                 </Box>
-              ))
-            )}
+              ) : (
+                alerts.slice(0, 5).map((alert) => (
+                  <Box key={alert.id} sx={{
+                    p: 2, mb: 1.5, borderRadius: 3,
+                    background: alert.severity === 'Critical' ? 'rgba(239, 68, 68, 0.04)' :
+                      alert.severity === 'Warning' ? 'rgba(245, 158, 11, 0.04)' : '#F8FAFC',
+                    border: `1px solid ${alert.severity === 'Critical' ? '#FEE2E2' :
+                      alert.severity === 'Warning' ? '#FEF3C7' : '#E2E8F0'}`,
+                    transition: 'transform 0.2s ease',
+                    '&:hover': { transform: 'scale(1.01)' }
+                  }}>
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+                      <Box sx={{
+                        mt: 0.5, width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
+                        backgroundColor: alert.severity === 'Critical' ? '#EF4444' :
+                          alert.severity === 'Warning' ? '#F59E0B' : '#3B82F6',
+                        boxShadow: `0 0 10px ${alert.severity === 'Critical' ? 'rgba(239, 68, 68, 0.4)' : 'transparent'}`
+                      }} />
+                      <Box>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1E293B', lineHeight: 1.2 }}>
+                          {alert.title}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: '#64748B', mt: 0.5, display: 'block', lineHeight: 1.4 }}>
+                          {alert.message}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                ))
+              )}
+            </Box>
           </Card>
         </Grid>
       </Grid>

@@ -170,9 +170,9 @@ def get_consumption_trend(db: Session = Depends(get_db), current_user: User = De
     """Monthly material consumption spend trend."""
     # Use to_char for PostgreSQL or strftime for SQLite
     if db.bind.dialect.name == 'postgresql':
-        month_func = func.to_char(MaterialIssue.issue_date, 'YYYY-MM')
+        month_func = func.to_char(MaterialIssue.created_at, 'YYYY-MM')
     else:
-        month_func = func.strftime('%Y-%m', MaterialIssue.issue_date)
+        month_func = func.strftime('%Y-%m', MaterialIssue.created_at)
 
     results = db.query(
         month_func.label("month"),

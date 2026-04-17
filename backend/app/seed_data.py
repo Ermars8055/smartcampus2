@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.models import (
     User, Organization, Project, Block, Warehouse,
     Category, SubCategory, UOM, Material, Vendor, VendorCategory,
-    PurchaseRequest, PurchaseOrder, PurchaseOrderItem,
+    PurchaseRequest, PurchaseRequestItem, PurchaseOrder, PurchaseOrderItem,
     GateEntry, GRN, GRNItem,
     MaterialIssue, MaterialIssueItem, MaterialReturn, MaterialReturnItem,
     StockTransfer, StockTransferItem,
@@ -308,8 +308,6 @@ def seed_database(db: Session):
         pr = PurchaseRequest(
             pr_number=f"PR-202603-{i+1:04d}",
             requester_id=users[4].id,
-            material_id=materials[mat_idx].id,
-            quantity=qty,
             required_for_block_id=blocks[blk_idx].id if blk_idx is not None else None,
             project_id=pid,
             required_date=date.today() + timedelta(days=days_ago + 14),
@@ -319,6 +317,15 @@ def seed_database(db: Session):
             created_at=datetime.utcnow() + timedelta(days=days_ago)
         )
         db.add(pr)
+        db.flush()
+        
+        # Add the single item for this PR
+        db.add(PurchaseRequestItem(
+            pr_id=pr.id,
+            material_id=materials[mat_idx].id,
+            quantity=qty
+        ))
+        
         prs.append(pr)
     db.flush()
     print("  ✅ Purchase Requests created")
@@ -638,10 +645,15 @@ def seed_database(db: Session):
     # Pending PR alerts
     pending = db.query(PurchaseRequest).filter(PurchaseRequest.status == "Submitted").all()
     for pr in pending:
+        # Get first item for the alert message
+        first_item = pr.items[0] if pr.items else None
+        mat_name = first_item.material.name if first_item else "Unknown"
+        qty_val = first_item.quantity if first_item else 0
+        
         db.add(Alert(
             alert_type="Pending PR Approval", severity="Info",
             title=f"PR {pr.pr_number} pending approval",
-            message=f"{pr.material.name} - {pr.quantity} units requested by {pr.requester.full_name}",
+            message=f"{mat_name} - {qty_val} units requested by {pr.requester.full_name}",
             reference_type="PurchaseRequest", reference_id=pr.id,
             project_id=pr.project_id
         ))

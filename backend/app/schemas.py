@@ -1,6 +1,6 @@
 """Pydantic schemas for request/response validation."""
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, ConfigDict
 from typing import Optional, List
 from datetime import datetime, date
 
@@ -180,9 +180,11 @@ class MaterialBase(BaseModel):
     description: Optional[str] = None
 
 class MaterialCreate(MaterialBase):
-    pass
+    model_config = ConfigDict(from_attributes=True, extra='ignore')
 
 class MaterialUpdate(BaseModel):
+    model_config = ConfigDict(from_attributes=True, extra='ignore')
+    code: Optional[str] = None
     name: Optional[str] = None
     category_id: Optional[int] = None
     subcategory_id: Optional[int] = None
@@ -195,6 +197,12 @@ class MaterialUpdate(BaseModel):
     hsn_code: Optional[str] = None
     description: Optional[str] = None
     is_active: Optional[bool] = None
+    # Add other potentially incoming fields to ignore them
+    category_name: Optional[str] = None
+    subcategory_name: Optional[str] = None
+    uom_name: Optional[str] = None
+    vendor_name: Optional[str] = None
+    current_stock: Optional[float] = None
 
 class MaterialOut(MaterialBase):
     id: int

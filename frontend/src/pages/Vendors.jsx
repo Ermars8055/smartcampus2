@@ -58,7 +58,7 @@ export default function Vendors() {
       <Card sx={{ mb: 3, p: 2 }}>
         <TextField size="small" placeholder="Search vendors..." value={search}
           onChange={e => setSearch(e.target.value)} sx={{ minWidth: 300 }}
-          InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }} />
+          slotProps={{ input: { startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> } }} />
       </Card>
 
       <Card>

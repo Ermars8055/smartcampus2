@@ -47,16 +47,35 @@ export default function Materials() {
 
   const handleSave = async () => {
     try {
+      // Clean form to match MaterialUpdate/Create schema
+      const payload = {
+        name: form.name,
+        category_id: form.category_id,
+        uom_id: form.uom_id,
+        reorder_level: form.reorder_level,
+        maximum_level: form.maximum_level,
+        standard_cost: form.standard_cost,
+        storage_type: form.storage_type,
+        description: form.description,
+        subcategory_id: form.subcategory_id || null,
+        preferred_vendor_id: form.preferred_vendor_id || null,
+        hsn_code: form.hsn_code || null
+      };
+
+      if (!editing) {
+        payload.code = form.code;
+      }
+
       if (editing) {
-        await api.put(`/api/materials/${editing}`, form);
+        await api.put(`/api/materials/${editing}`, payload);
       } else {
-        await api.post('/api/materials', form);
+        await api.post('/api/materials', payload);
       }
       setDialog(false);
       setEditing(null);
       load();
     } catch (err) {
-      alert(err.response?.data?.detail || 'Error saving material');
+      alert(err.response?.data?.detail?.[0]?.msg || err.response?.data?.detail || 'Error saving material');
     }
   };
 
@@ -93,7 +112,7 @@ export default function Materials() {
         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
           <TextField size="small" placeholder="Search materials..." value={search}
             onChange={e => setSearch(e.target.value)} sx={{ minWidth: 260 }}
-            InputProps={{ startAdornment: <InputAdornment position="start"><Search sx={{ color: '#94A3B8' }} /></InputAdornment> }} />
+            slotProps={{ input: { startAdornment: <InputAdornment position="start"><Search sx={{ color: '#94A3B8' }} /></InputAdornment> } }} />
           <FormControl size="small" sx={{ minWidth: 150 }}>
             <InputLabel>Category</InputLabel>
             <Select value={catFilter} label="Category" onChange={e => setCatFilter(e.target.value)}>

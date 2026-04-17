@@ -84,8 +84,8 @@ export default function Login() {
             fullWidth label="Username" value={username}
             onChange={(e) => setUsername(e.target.value)}
             sx={{ mb: 2 }}
-            InputProps={{
-              startAdornment: <InputAdornment position="start"><Person sx={{ color: '#94A3B8' }} /></InputAdornment>,
+            slotProps={{
+              input: { startAdornment: <InputAdornment position="start"><Person sx={{ color: '#94A3B8' }} /></InputAdornment> },
             }}
             required autoFocus
           />
@@ -94,15 +94,17 @@ export default function Login() {
             onChange={(e) => setPassword(e.target.value)}
             type={showPassword ? 'text' : 'password'}
             sx={{ mb: 3 }}
-            InputProps={{
-              startAdornment: <InputAdornment position="start"><Lock sx={{ color: '#94A3B8' }} /></InputAdornment>,
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton onClick={() => setShowPassword(!showPassword)} size="small">
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
+            slotProps={{
+              input: {
+                startAdornment: <InputAdornment position="start"><Lock sx={{ color: '#94A3B8' }} /></InputAdornment>,
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={() => setShowPassword(!showPassword)} size="small">
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }
             }}
             required
           />

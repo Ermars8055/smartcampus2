@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import {
   Box, Grid, Card, CardContent, Typography, Chip, Avatar,
   Table, TableHead, TableBody, TableRow, TableCell, TableContainer,
-  Paper, Skeleton, IconButton, Tooltip
+  Paper, Skeleton, IconButton, Tooltip, Dialog, DialogTitle, DialogContent,
+  DialogActions, Button
 } from '@mui/material';
 import {
   Inventory2, TrendingDown, ShoppingCart, LocalShipping,
@@ -68,6 +69,12 @@ export default function Dashboard() {
   const [alerts, setAlerts] = useState([]);
   const [trend, setTrend] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  // Drilldown state
+  const [drilldownBlock, setDrilldownBlock] = useState(null);
+  const [drilldownData, setDrilldownData] = useState([]);
+  const [drilldownLoading, setDrilldownLoading] = useState(false);
+  
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -89,6 +96,20 @@ export default function Dashboard() {
       setTrend(tr.data);
     }).catch(console.error).finally(() => setLoading(false));
   }, []);
+
+  const handleBlockClick = (data) => {
+    if (!data || !data.activePayload || !data.activePayload.length) return;
+    const blockName = data.activePayload[0].payload.block_name;
+    setDrilldownBlock(blockName);
+    setDrilldownLoading(true);
+    api.get('/api/dashboard/material-cost-by-block')
+      .then(res => {
+         const specificData = res.data.filter(item => item.block_name === blockName);
+         setDrilldownData(specificData);
+      })
+      .catch(console.error)
+      .finally(() => setDrilldownLoading(false));
+  };
 
   if (loading) {
     return (
@@ -150,18 +171,21 @@ export default function Dashboard() {
       <Grid container spacing={2.5} sx={{ mb: 3 }}>
         <Grid size={{ xs: 12, lg: 8 }}>
           <Card sx={{ p: 2.5, height: '100%' }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, color: '#1E293B' }}>
-              Material Consumption by Block
-            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#1E293B' }}>
+                Project Spend by Block (₹)
+              </Typography>
+              <Typography variant="caption" sx={{ color: '#64748B' }}>*Click on any bar to drilldown into materials</Typography>
+            </Box>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={consumption} margin={{ top: 25, right: 20, bottom: 5, left: 0 }}>
+              <BarChart data={consumption} margin={{ top: 25, right: 20, bottom: 5, left: 0 }} onClick={handleBlockClick} style={{ cursor: 'pointer' }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
                 <XAxis dataKey="block_name" tick={{ fontSize: 12, fontWeight: 600, fill: '#334155' }} />
                 <YAxis tick={{ fontSize: 11, fontWeight: 500, fill: '#475569' }} tickFormatter={(v) => formatCurrency(v)} />
                 <RTooltip contentStyle={{ borderRadius: 8, border: '1px solid #E2E8F0' }}
-                  formatter={(v, name) => [name === 'Value (₹)' ? formatCurrency(v) : v.toLocaleString() + ' Units', name]} />
-                <Bar dataKey="total_quantity" name="Quantity" fill="#2563EB" radius={[6, 6, 0, 0]} />
-                <Bar dataKey="total_value" name="Value (₹)" fill="#60A5FA" radius={[6, 6, 0, 0]}>
+                  cursor={{ fill: 'rgba(37, 99, 235, 0.05)' }}
+                  formatter={(v, name) => [formatCurrency(v), 'Total Spend']} />
+                <Bar dataKey="total_value" name="Value (₹)" fill="#2563EB" radius={[6, 6, 0, 0]}>
                   <LabelList dataKey="total_value" position="top" formatter={(v) => v > 0 ? formatCurrency(v) : ''} style={{ fontSize: 11, fontWeight: 700, fill: '#1E293B' }} />
                 </Bar>
               </BarChart>
@@ -193,16 +217,16 @@ export default function Dashboard() {
         <Grid size={{ xs: 12, md: 6 }}>
           <Card sx={{ p: 2.5 }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, color: '#1E293B' }}>
-              Top Consumed Materials
+              Highest Spend Materials
             </Typography>
             <ResponsiveContainer width="100%" height={280}>
               <BarChart data={topMaterials} layout="vertical" margin={{ left: 20, right: 60 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" horizontal={false} />
-                <XAxis type="number" tick={{ fontSize: 11, fontWeight: 500, fill: '#475569' }} />
+                <XAxis type="number" tick={{ fontSize: 11, fontWeight: 500, fill: '#475569' }} tickFormatter={(v) => formatCurrency(v)} />
                 <YAxis dataKey="material_name" type="category" width={140} tick={{ fontSize: 11, fontWeight: 600, fill: '#334155' }} />
-                <RTooltip contentStyle={{ borderRadius: 8 }} formatter={(v) => [v.toLocaleString() + ' Units', 'Consumed']} />
-                <Bar dataKey="total_consumed" name="Consumed" fill="#1E3A8A" radius={[0, 6, 6, 0]} barSize={20}>
-                  <LabelList dataKey="total_consumed" position="right" formatter={(v) => v.toLocaleString() + ' Units'} style={{ fontSize: 11, fontWeight: 700, fill: '#1E293B' }} />
+                <RTooltip contentStyle={{ borderRadius: 8 }} formatter={(v) => [formatCurrency(v), 'Total Spend']} />
+                <Bar dataKey="total_value" name="Spend" fill="#1D4ED8" radius={[0, 6, 6, 0]} barSize={20}>
+                  <LabelList dataKey="total_value" position="right" formatter={(v) => formatCurrency(v)} style={{ fontSize: 11, fontWeight: 700, fill: '#1E293B' }} />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -211,17 +235,17 @@ export default function Dashboard() {
         <Grid size={{ xs: 12, md: 6 }}>
           <Card sx={{ p: 2.5 }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, color: '#1E293B' }}>
-              Consumption Trend
+              Monthly Spend Trend
             </Typography>
             <ResponsiveContainer width="100%" height={280}>
               <LineChart data={trend} margin={{ top: 25, right: 30, left: 10, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
                 <XAxis dataKey="month" tick={{ fontSize: 12, fontWeight: 600, fill: '#334155' }} />
-                <YAxis tick={{ fontSize: 11, fontWeight: 500, fill: '#475569' }} />
-                <RTooltip contentStyle={{ borderRadius: 8 }} formatter={(v) => [v.toLocaleString() + ' Units', 'Total Consumed']} />
-                <Line type="monotone" dataKey="total" name="Total Consumed" stroke="#2563EB"
+                <YAxis tick={{ fontSize: 11, fontWeight: 500, fill: '#475569' }} tickFormatter={(v) => formatCurrency(v)} />
+                <RTooltip contentStyle={{ borderRadius: 8 }} formatter={(v) => [formatCurrency(v), 'Total Spend']} />
+                <Line type="monotone" dataKey="total_value" name="Total Spend" stroke="#2563EB"
                   strokeWidth={3} dot={{ r: 5, fill: '#2563EB', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 7 }}>
-                  <LabelList dataKey="total" position="top" offset={12} formatter={(v) => v.toLocaleString() + ' Units'} style={{ fontSize: 12, fontWeight: 700, fill: '#2563EB' }} />
+                  <LabelList dataKey="total_value" position="top" offset={12} formatter={(v) => formatCurrency(v)} style={{ fontSize: 12, fontWeight: 700, fill: '#2563EB' }} />
                 </Line>
               </LineChart>
             </ResponsiveContainer>
@@ -315,6 +339,53 @@ export default function Dashboard() {
           </Card>
         </Grid>
       </Grid>
+
+      {/* Drilldown Modal */}
+      <Dialog open={!!drilldownBlock} onClose={() => setDrilldownBlock(null)} maxWidth="md" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700, color: '#1E293B', display: 'flex', justifyContent: 'space-between' }}>
+          Materials Spend Details: {drilldownBlock}
+          <Typography variant="subtitle2" sx={{ color: '#2563EB', fontWeight: 600, alignSelf: 'center' }}>
+            {formatCurrency(drilldownData.reduce((acc, curr) => acc + curr.total_cost, 0))} Total Spend
+          </Typography>
+        </DialogTitle>
+        <DialogContent dividers sx={{ p: 0 }}>
+          {drilldownLoading ? (
+            <Box sx={{ p: 4, textAlign: 'center' }}>
+               <Skeleton variant="rectangular" height={200} />
+            </Box>
+          ) : (
+            <TableContainer>
+              <Table size="small">
+                <TableHead sx={{ bgcolor: '#F8FAFC' }}>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 600 }}>Material Name</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }} align="right">Consumed Quantity</TableCell>
+                    <TableCell sx={{ fontWeight: 600, color: '#1D4ED8' }} align="right">Total Cost (₹)</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {drilldownData.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={3} align="center" sx={{ py: 3, color: '#64748B' }}>No data found for this block.</TableCell>
+                    </TableRow>
+                  ) : (
+                    drilldownData.map((row, idx) => (
+                      <TableRow key={idx} hover>
+                        <TableCell sx={{ fontWeight: 500 }}>{row.material_name}</TableCell>
+                        <TableCell align="right">{row.total_quantity?.toLocaleString()} Units</TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 600, color: '#1E293B' }}>₹ {row.total_cost?.toLocaleString()}</TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setDrilldownBlock(null)} variant="outlined">Close</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

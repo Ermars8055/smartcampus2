@@ -103,18 +103,19 @@ def get_top_consumed(db: Session = Depends(get_db), current_user: User = Depends
     from app.models import UOM
     results = db.query(
         Material.name,
-        func.sum(MaterialIssueItem.quantity).label("total_consumed"),
+        func.sum(MaterialIssueItem.quantity * MaterialIssueItem.rate).label("total_value"),
+        func.sum(MaterialIssueItem.quantity).label("total_qty"),
         UOM.name.label("uom_name")
     ).join(
         MaterialIssueItem, MaterialIssueItem.material_id == Material.id
     ).join(
         UOM, Material.uom_id == UOM.id
     ).group_by(Material.name, UOM.name).order_by(
-        func.sum(MaterialIssueItem.quantity).desc()
+        func.sum(MaterialIssueItem.quantity * MaterialIssueItem.rate).desc()
     ).limit(10).all()
 
     return [
-        {"material_name": r[0], "total_consumed": round(r[1] or 0, 2), "uom": r[2]}
+        {"material_name": r[0], "total_value": round(r[1] or 0, 2), "total_quantity": round(r[2] or 0, 2), "uom": r[3]}
         for r in results
     ]
 
@@ -166,23 +167,23 @@ def get_material_cost_by_block(db: Session = Depends(get_db), current_user: User
 
 @router.get("/consumption-trend")
 def get_consumption_trend(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    """Monthly material consumption trend."""
+    """Monthly material consumption spend trend."""
     # Use to_char for PostgreSQL or strftime for SQLite
     if db.bind.dialect.name == 'postgresql':
-        month_func = func.to_char(StockLedger.created_at, 'YYYY-MM')
+        month_func = func.to_char(MaterialIssue.issue_date, 'YYYY-MM')
     else:
-        month_func = func.strftime('%Y-%m', StockLedger.created_at)
+        month_func = func.strftime('%Y-%m', MaterialIssue.issue_date)
 
     results = db.query(
         month_func.label("month"),
-        func.sum(func.abs(StockLedger.quantity)).label("total")
-    ).filter(
-        StockLedger.transaction_type == "Issue"
+        func.sum(MaterialIssueItem.quantity * MaterialIssueItem.rate).label("total_value")
+    ).join(
+        MaterialIssueItem, MaterialIssueItem.issue_id == MaterialIssue.id
     ).group_by(
         month_func
     ).order_by("month").limit(12).all()
 
-    return [{"month": r[0], "total": round(r[1] or 0, 2)} for r in results]
+    return [{"month": r[0] if r[0] else 'Unknown', "total_value": round(r[1] or 0, 2)} for r in results]
 
 
 @router.get("/alerts")

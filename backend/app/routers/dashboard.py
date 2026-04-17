@@ -167,13 +167,19 @@ def get_material_cost_by_block(db: Session = Depends(get_db), current_user: User
 @router.get("/consumption-trend")
 def get_consumption_trend(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Monthly material consumption trend."""
+    # Use to_char for PostgreSQL or strftime for SQLite
+    if db.bind.dialect.name == 'postgresql':
+        month_func = func.to_char(StockLedger.created_at, 'YYYY-MM')
+    else:
+        month_func = func.strftime('%Y-%m', StockLedger.created_at)
+
     results = db.query(
-        func.strftime('%Y-%m', StockLedger.created_at).label("month"),
+        month_func.label("month"),
         func.sum(func.abs(StockLedger.quantity)).label("total")
     ).filter(
         StockLedger.transaction_type == "Issue"
     ).group_by(
-        func.strftime('%Y-%m', StockLedger.created_at)
+        month_func
     ).order_by("month").limit(12).all()
 
     return [{"month": r[0], "total": round(r[1] or 0, 2)} for r in results]

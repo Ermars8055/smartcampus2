@@ -185,13 +185,27 @@ def stock_report(
     ]
 
 
+from datetime import datetime
+
+def parse_date_report(date_str: Optional[str]):
+    if not date_str: return None
+    try:
+        return datetime.fromisoformat(date_str.replace("Z", "+00:00")).replace(tzinfo=None)
+    except Exception:
+        return None
+
 @router.get("/reports/consumption")
 def consumption_report(
     project_id: Optional[int] = None,
     block_id: Optional[int] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    sd = parse_date_report(start_date)
+    ed = parse_date_report(end_date)
+    
     q = db.query(
         Material.code, Material.name, UOM.name.label("uom"),
         Block.name.label("block_name"),
@@ -208,6 +222,10 @@ def consumption_report(
     )
     if project_id:
         q = q.filter(MaterialIssue.project_id == project_id)
+    if sd:
+        q = q.filter(MaterialIssue.created_at >= sd)
+    if ed:
+        q = q.filter(MaterialIssue.created_at < ed)
     if block_id:
         q = q.filter(MaterialIssue.issued_to_block_id == block_id)
 

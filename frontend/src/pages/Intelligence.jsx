@@ -16,6 +16,7 @@ export default function Intelligence() {
   const [projects, setProjects] = useState([]);
   const [blocks, setBlocks] = useState([]);
   const [projectId, setProjectId] = useState('');
+  const [period, setPeriod] = useState('all');
   const [topMaterials, setTopMaterials] = useState([]);
 
   // Utility to format currency consistently
@@ -32,7 +33,20 @@ export default function Intelligence() {
   }, []);
 
   useEffect(() => {
-    const params = projectId ? { project_id: projectId } : {};
+    let params = projectId ? { project_id: projectId } : {};
+    
+    if (period !== 'all') {
+      const now = new Date();
+      if (period === 'this_month') {
+        params.start_date = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      } else if (period === 'last_month') {
+        params.start_date = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
+        params.end_date = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      } else if (period === 'ytd') {
+        params.start_date = new Date(now.getFullYear(), 0, 1).toISOString();
+      }
+    }
+
     api.get('/api/reports/consumption', { params }).then(r => {
       const data = r.data;
       setConsumption(data);
@@ -51,7 +65,7 @@ export default function Intelligence() {
       });
       setTopMaterials(Object.entries(matMap).map(([name, v]) => ({ material_name: name, quantity: v.qty, value: v.value })).sort((a, b) => b.value - a.value));
     });
-  }, [projectId]);
+  }, [projectId, period]);
 
   // Build block summary
   const blockSummary = {};
@@ -73,13 +87,24 @@ export default function Intelligence() {
           <Typography variant="h5" sx={{ fontWeight: 700 }}>Project Material Intelligence</Typography>
           <Typography variant="body2" sx={{ color: '#64748B' }}>Material usage analytics for project management</Typography>
         </Box>
-        <FormControl size="small" sx={{ minWidth: 200 }}>
-          <InputLabel>Project</InputLabel>
-          <Select value={projectId} label="Project" onChange={e => setProjectId(e.target.value)}>
-            <MenuItem value="">All Projects</MenuItem>
-            {projects.map(p => <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>)}
-          </Select>
-        </FormControl>
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <FormControl size="small" sx={{ minWidth: 150, bgcolor: '#fff' }}>
+            <InputLabel>Time Period</InputLabel>
+            <Select value={period} label="Time Period" onChange={e => setPeriod(e.target.value)} sx={{ fontWeight: 600 }}>
+              <MenuItem value="all">All Time</MenuItem>
+              <MenuItem value="this_month">This Month</MenuItem>
+              <MenuItem value="last_month">Last Month</MenuItem>
+              <MenuItem value="ytd">Year to Date (YTD)</MenuItem>
+            </Select>
+          </FormControl>
+          <FormControl size="small" sx={{ minWidth: 200, bgcolor: '#fff' }}>
+            <InputLabel>Project</InputLabel>
+            <Select value={projectId} label="Project" onChange={e => setProjectId(e.target.value)} sx={{ fontWeight: 600 }}>
+              <MenuItem value="">All Projects</MenuItem>
+              {projects.map(p => <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>)}
+            </Select>
+          </FormControl>
+        </Box>
       </Box>
 
       {/* Charts */}

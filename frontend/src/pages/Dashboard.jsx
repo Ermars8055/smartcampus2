@@ -4,7 +4,7 @@ import {
   Box, Grid, Card, CardContent, Typography, Chip, Avatar,
   Table, TableHead, TableBody, TableRow, TableCell, TableContainer,
   Paper, Skeleton, IconButton, Tooltip, Dialog, DialogTitle, DialogContent,
-  DialogActions, Button
+  DialogActions, Button, FormControl, Select, MenuItem
 } from '@mui/material';
 import {
   Inventory2, TrendingDown, ShoppingCart, LocalShipping,
@@ -69,6 +69,7 @@ export default function Dashboard() {
   const [alerts, setAlerts] = useState([]);
   const [trend, setTrend] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [period, setPeriod] = useState('all');
   
   // Drilldown state
   const [drilldownBlock, setDrilldownBlock] = useState(null);
@@ -78,14 +79,28 @@ export default function Dashboard() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    setLoading(true);
+    let params = {};
+    if (period !== 'all') {
+      const now = new Date();
+      if (period === 'this_month') {
+        params.start_date = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      } else if (period === 'last_month') {
+        params.start_date = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
+        params.end_date = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      } else if (period === 'ytd') {
+        params.start_date = new Date(now.getFullYear(), 0, 1).toISOString();
+      }
+    }
+
     Promise.all([
-      api.get('/api/dashboard/stats'),
-      api.get('/api/dashboard/consumption-by-block'),
-      api.get('/api/dashboard/stock-by-warehouse'),
-      api.get('/api/dashboard/top-consumed-materials'),
-      api.get('/api/dashboard/recent-transactions'),
-      api.get('/api/dashboard/alerts'),
-      api.get('/api/dashboard/consumption-trend'),
+      api.get('/api/dashboard/stats', { params }),
+      api.get('/api/dashboard/consumption-by-block', { params }),
+      api.get('/api/dashboard/stock-by-warehouse', { params }),
+      api.get('/api/dashboard/top-consumed-materials', { params }),
+      api.get('/api/dashboard/recent-transactions', { params }),
+      api.get('/api/dashboard/alerts', { params }),
+      api.get('/api/dashboard/consumption-trend', { params }),
     ]).then(([s, c, sw, tm, tx, al, tr]) => {
       setStats(s.data);
       setConsumption(c.data);
@@ -95,7 +110,7 @@ export default function Dashboard() {
       setAlerts(al.data);
       setTrend(tr.data);
     }).catch(console.error).finally(() => setLoading(false));
-  }, []);
+  }, [period]);
 
   const handleBlockClick = (data) => {
     let blockName = null;
@@ -142,9 +157,19 @@ export default function Dashboard() {
   return (
     <Box sx={{ p: 0 }}>
       {/* Header */}
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h5" sx={{ fontWeight: 800, color: '#1E293B', mb: 0.5 }}>Dashboard</Typography>
-        <Typography variant="body2" sx={{ color: '#64748B' }}>Overview of materials, procurement, and inventory</Typography>
+      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
+        <Box>
+          <Typography variant="h5" sx={{ fontWeight: 800, color: '#1E293B', mb: 0.5 }}>Dashboard</Typography>
+          <Typography variant="body2" sx={{ color: '#64748B' }}>Overview of materials, procurement, and inventory</Typography>
+        </Box>
+        <FormControl size="small" sx={{ minWidth: 200, bgcolor: '#fff' }}>
+          <Select value={period} onChange={(e) => setPeriod(e.target.value)} sx={{ fontWeight: 600, fontSize: '0.875rem' }}>
+            <MenuItem value="all">Time Period: All Time</MenuItem>
+            <MenuItem value="this_month">This Month</MenuItem>
+            <MenuItem value="last_month">Last Month</MenuItem>
+            <MenuItem value="ytd">Year to Date (YTD)</MenuItem>
+          </Select>
+        </FormControl>
       </Box>
 
       {/* --- ROW 1: Stats Cards (6 in a row) --- */}

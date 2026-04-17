@@ -110,138 +110,143 @@ export default function Dashboard() {
         <Typography variant="body2" sx={{ color: '#64748B' }}>Enterprise Materials Governance Platform</Typography>
       </Box>
 
-      {/* Main Single Grid Container for Perfect Vertical Alignment */}
-      <Grid container spacing={2}>
-        {/* Top Aligned Stats Cards */}
-        <Grid item xs={12} sm={4} lg={2}>
+      {/* --- ROW 1: Stats Cards --- */}
+      <Grid container spacing={2} sx={{ mb: 3 }}>
+        <Grid item xs={12} sm={4} lg={2} xl={2}>
           <StatCard title="Total Materials" value={stats?.total_materials || 0} icon={<Inventory2 />} color="#2563EB"
             subtitle="Cataloged items" onClick={() => navigate('/materials')} />
         </Grid>
-        <Grid item xs={12} sm={4} lg={2}>
+        <Grid item xs={12} sm={4} lg={2} xl={2}>
           <StatCard title="Inventory Value" value={formatCurrency(stats?.total_inventory_value || 0)}
             icon={<Warehouse />} color="#059669" subtitle="Total stock value" onClick={() => navigate('/inventory')} />
         </Grid>
-        <Grid item xs={12} sm={4} lg={2}>
+        <Grid item xs={12} sm={4} lg={2} xl={2}>
           <StatCard title="Low Stock" value={stats?.low_stock_items || 0}
             icon={<Warning />} color="#DC2626" subtitle="Below reorder" onClick={() => navigate('/inventory?low=true')} />
         </Grid>
-        <Grid item xs={12} sm={4} lg={2}>
+        <Grid item xs={12} sm={4} lg={2} xl={2}>
           <StatCard title="Pending PR" value={stats?.pending_pr || 0}
             icon={<ShoppingCart />} color="#D97706" subtitle="Awaiting action" onClick={() => navigate('/purchase-requests')} />
         </Grid>
-        <Grid item xs={12} sm={4} lg={2}>
+        <Grid item xs={12} sm={4} lg={2} xl={2}>
           <StatCard title="Open PO" value={stats?.pending_po || 0}
             icon={<Receipt />} color="#7C3AED" subtitle="Open orders" onClick={() => navigate('/purchase-orders')} />
         </Grid>
-        <Grid item xs={12} sm={4} lg={2}>
+        <Grid item xs={12} sm={4} lg={2} xl={2}>
           <StatCard title="GRN Total" value={stats?.recent_grn_count || 0}
             icon={<LocalShipping />} color="#0891B2" subtitle="Total receipts" onClick={() => navigate('/grn')} />
         </Grid>
+      </Grid>
 
-        {/* --- ROW 1: Symmetrical Graphs Row 1 (6/6 Split) --- */}
-        <Grid item xs={12} lg={6}>
+      {/* --- ROW 2: Graphs Part 1 --- */}
+      <Grid container spacing={2} sx={{ mb: 3 }}>
+        <Grid item xs={12} lg={6} xl={6}>
           <Card sx={{ p: 2, border: '1px solid #E2E8F0', borderRadius: 2, boxShadow: 'none', height: '100%' }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 3, color: '#334155', fontSize: '0.9rem' }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 3, color: '#334155', fontSize: '0.95rem' }}>
               Material Consumption by Block (Quantity & Value)
             </Typography>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={consumption} margin={{ top: 20, right: 20, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
-                <XAxis dataKey="block_name" tick={{ fontSize: 10, fill: '#64748B' }} />
-                <YAxis tick={{ fontSize: 10, fill: '#64748B' }} />
-                <RTooltip contentStyle={{ borderRadius: 8 }} />
-                <Bar dataKey="total_quantity" name="Quantity" fill="#3B82F6" radius={[4, 4, 0, 0]}>
-                  <LabelList dataKey="total_quantity" position="top" style={{ fontSize: 9, fill: '#64748B' }} />
+              <BarChart data={consumption} margin={{ top: 20, right: 30, left: 10, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                <XAxis dataKey="block_name" tick={{ fontSize: 11, fill: '#64748B' }} />
+                <YAxis tick={{ fontSize: 11, fill: '#64748B' }} />
+                <RTooltip contentStyle={{ borderRadius: 8, border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                <Bar dataKey="total_quantity" name="Quantity" fill="#3B82F6" radius={[4, 4, 0, 0]} maxBarSize={50}>
+                  <LabelList dataKey="total_quantity" position="top" style={{ fontSize: 10, fill: '#64748B', fontWeight: 600 }} />
                 </Bar>
-                <Bar dataKey="total_value" name="Value (₹)" fill="#93C5FD" radius={[4, 4, 0, 0]} />
-                <Legend verticalAlign="top" align="right" wrapperStyle={{ paddingBottom: 10, fontSize: 11 }} />
+                <Bar dataKey="total_value" name="Value (₹)" fill="#93C5FD" radius={[4, 4, 0, 0]} maxBarSize={50} />
+                <Legend verticalAlign="top" align="right" wrapperStyle={{ paddingBottom: 15, fontSize: 12 }} />
               </BarChart>
             </ResponsiveContainer>
           </Card>
         </Grid>
-        <Grid item xs={12} lg={6}>
+        <Grid item xs={12} lg={6} xl={6}>
           <Card sx={{ p: 2, border: '1px solid #E2E8F0', borderRadius: 2, boxShadow: 'none', height: '100%' }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1, color: '#334155', fontSize: '0.9rem' }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1, color: '#334155', fontSize: '0.95rem' }}>
               Stock Value by Warehouse
             </Typography>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
-                <Pie data={stockByWh} cx="50%" cy="50%" innerRadius={70} outerRadius={110}
-                  dataKey="total_value" nameKey="warehouse_name" paddingAngle={4}>
+                <Pie data={stockByWh} cx="50%" cy="50%" innerRadius={80} outerRadius={120}
+                  dataKey="total_value" nameKey="warehouse_name" paddingAngle={3}>
                   {stockByWh.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} stroke="none" />)}
                 </Pie>
-                <RTooltip formatter={(v) => [`₹${v.toLocaleString()}`, 'Value']} />
-                <Legend layout="horizontal" verticalAlign="bottom" align="center" wrapperStyle={{ fontSize: 10, paddingTop: 10 }} />
+                <RTooltip formatter={(v) => [`₹${v.toLocaleString()}`, 'Value']} contentStyle={{ borderRadius: 8, border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                <Legend layout="horizontal" verticalAlign="bottom" align="center" wrapperStyle={{ fontSize: 12, paddingTop: 15 }} />
               </PieChart>
             </ResponsiveContainer>
           </Card>
         </Grid>
+      </Grid>
 
-        {/* --- ROW 2: Symmetrical Graphs Row 2 (6/6 Split) --- */}
-        <Grid item xs={12} lg={6}>
+      {/* --- ROW 3: Graphs Part 2 --- */}
+      <Grid container spacing={2} sx={{ mb: 3 }}>
+        <Grid item xs={12} lg={6} xl={6}>
           <Card sx={{ p: 2, border: '1px solid #E2E8F0', borderRadius: 2, boxShadow: 'none', height: '100%' }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2, color: '#334155', fontSize: '0.9rem' }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2, color: '#334155', fontSize: '0.95rem' }}>
               Monthly Issuance Trend
             </Typography>
-            <ResponsiveContainer width="100%" height={280}>
-              <LineChart data={trend} margin={{ right: 30, left: 10, top: 10 }}>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={trend} margin={{ right: 40, left: 10, top: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                <XAxis dataKey="month" tick={{ fontSize: 10 }} />
-                <YAxis tick={{ fontSize: 10 }} />
-                <RTooltip />
-                <Line type="monotone" dataKey="total" name="Issued" stroke="#2563EB" strokeWidth={2.5} dot={{ r: 5, fill: '#2563EB', strokeWidth: 2, stroke: '#fff' }}>
-                  <LabelList dataKey="total" position="top" offset={10} style={{ fontSize: 10, fill: '#2563EB', fontWeight: 700 }} />
+                <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#64748B' }} />
+                <YAxis tick={{ fontSize: 11, fill: '#64748B' }} />
+                <RTooltip contentStyle={{ borderRadius: 8, border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                <Line type="monotone" dataKey="total" name="Issued Items" stroke="#2563EB" strokeWidth={3} dot={{ r: 6, fill: '#2563EB', strokeWidth: 2, stroke: '#fff' }}>
+                  <LabelList dataKey="total" position="top" offset={15} style={{ fontSize: 11, fill: '#1E40AF', fontWeight: 700 }} />
                 </Line>
               </LineChart>
             </ResponsiveContainer>
           </Card>
         </Grid>
-        <Grid item xs={12} lg={6}>
+        <Grid item xs={12} lg={6} xl={6}>
           <Card sx={{ p: 2, border: '1px solid #E2E8F0', borderRadius: 2, boxShadow: 'none', height: '100%' }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2, color: '#334155', fontSize: '0.9rem' }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2, color: '#334155', fontSize: '0.95rem' }}>
               Top Consumed Materials
             </Typography>
-            <ResponsiveContainer width="100%" height={280}>
-              <BarChart data={topMaterials} layout="vertical" margin={{ left: 20, right: 30 }}>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={topMaterials} layout="vertical" margin={{ left: 20, right: 40, top: 10 }}>
                 <XAxis type="number" hide />
-                <YAxis dataKey="material_name" type="category" width={140} tick={{ fontSize: 10, fontWeight: 500 }} axisLine={false} tickLine={false} />
-                <RTooltip />
-                <Bar dataKey="total_consumed" name="Total Units" fill="#1E3A8A" radius={[0, 4, 4, 0]} barSize={20}>
-                   <LabelList dataKey="total_consumed" position="right" style={{ fontSize: 10, fill: '#64748B', fontWeight: 600 }} />
+                <YAxis dataKey="material_name" type="category" width={150} tick={{ fontSize: 11, fontWeight: 500, fill: '#475569' }} axisLine={false} tickLine={false} />
+                <RTooltip contentStyle={{ borderRadius: 8, border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                <Bar dataKey="total_consumed" name="Total Units" fill="#1E3A8A" radius={[0, 4, 4, 0]} maxBarSize={30}>
+                   <LabelList dataKey="total_consumed" position="right" style={{ fontSize: 11, fill: '#1E293B', fontWeight: 700 }} />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
           </Card>
         </Grid>
+      </Grid>
 
-        {/* --- ROW 3: Log & Alerts (8/4 Split) --- */}
-        <Grid item xs={12} lg={8}>
-          <Card sx={{ border: '1px solid #E2E8F0', borderRadius: 2, boxShadow: 'none' }}>
-            <Box sx={{ p: 2, borderBottom: '1px solid #F1F5F9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      {/* --- ROW 4: Log & Alerts --- */}
+      <Grid container spacing={2}>
+        <Grid item xs={12} lg={8} xl={8}>
+          <Card sx={{ border: '1px solid #E2E8F0', borderRadius: 2, boxShadow: 'none', height: '100%' }}>
+            <Box sx={{ p: 2.5, borderBottom: '1px solid #F1F5F9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#334155', fontSize: '0.95rem' }}>Recent Activity Log</Typography>
-              <Chip label="Full History" size="small" variant="outlined" sx={{ cursor: 'pointer', fontSize: '0.7rem' }} onClick={() => navigate('/inventory')} />
+              <Chip label="Full History" size="small" variant="outlined" sx={{ cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }} onClick={() => navigate('/inventory')} />
             </Box>
             <TableContainer>
               <Table size="small">
                 <TableHead sx={{ bgcolor: '#F8FAFC' }}>
                   <TableRow>
-                    <TableCell sx={{ fontWeight: 600, color: '#64748B', fontSize: '0.75rem' }}>Material</TableCell>
-                    <TableCell sx={{ fontWeight: 600, color: '#64748B', fontSize: '0.75rem' }}>Activity</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 600, color: '#64748B', fontSize: '0.75rem' }}>Quantity</TableCell>
-                    <TableCell sx={{ fontWeight: 600, color: '#64748B', fontSize: '0.75rem' }}>Warehouse</TableCell>
+                    <TableCell sx={{ fontWeight: 600, color: '#64748B', fontSize: '0.75rem', py: 1.5 }}>MATERIAL</TableCell>
+                    <TableCell sx={{ fontWeight: 600, color: '#64748B', fontSize: '0.75rem', py: 1.5 }}>ACTIVITY</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 600, color: '#64748B', fontSize: '0.75rem', py: 1.5 }}>QUANTITY</TableCell>
+                    <TableCell sx={{ fontWeight: 600, color: '#64748B', fontSize: '0.75rem', py: 1.5 }}>LOCATION / WAREHOUSE</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {recentTx.slice(0, 6).map((tx) => (
                     <TableRow key={tx.id}>
-                      <TableCell sx={{ fontSize: '0.8rem' }}>{tx.material_name}</TableCell>
+                      <TableCell sx={{ fontSize: '0.85rem', fontWeight: 500, color: '#334155' }}>{tx.material_name}</TableCell>
                       <TableCell>
-                        <Chip label={tx.transaction_type} size="small" variant="outlined" sx={{ height: 18, fontSize: '0.65rem' }} />
+                        <Chip label={tx.transaction_type} size="small" variant="outlined" sx={{ height: 22, fontSize: '0.7rem', fontWeight: 600 }} />
                       </TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.8rem', color: tx.quantity > 0 ? '#059669' : '#DC2626' }}>
+                      <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.85rem', color: tx.quantity > 0 ? '#059669' : '#DC2626' }}>
                         {tx.quantity > 0 ? '+' : ''}{tx.quantity.toLocaleString()}
                       </TableCell>
-                      <TableCell sx={{ fontSize: '0.8rem', color: '#64748B' }}>{tx.warehouse_name}</TableCell>
+                      <TableCell sx={{ fontSize: '0.85rem', color: '#64748B' }}>{tx.warehouse_name}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -249,23 +254,27 @@ export default function Dashboard() {
             </TableContainer>
           </Card>
         </Grid>
-        <Grid item xs={12} lg={4}>
+        <Grid item xs={12} lg={4} xl={4}>
           <Card sx={{ border: '1px solid #E2E8F0', borderRadius: 2, boxShadow: 'none', height: '100%' }}>
-            <Box sx={{ p: 2, borderBottom: '1px solid #F1F5F9' }}>
+            <Box sx={{ p: 2.5, borderBottom: '1px solid #F1F5F9' }}>
                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#334155', fontSize: '0.95rem' }}>Critical System Alerts</Typography>
             </Box>
             <Box sx={{ p: 2 }}>
               {alerts.length === 0 ? (
-                <Typography variant="body2" sx={{ color: '#94A3B8', textAlign: 'center', py: 4 }}>System OK</Typography>
+                <Typography variant="body2" sx={{ color: '#94A3B8', textAlign: 'center', py: 4, fontWeight: 500 }}>System OK. No active alerts.</Typography>
               ) : (
                 alerts.slice(0, 4).map((alert) => (
-                  <Box key={alert.id} sx={{
-                    p: 1.2, mb: 1, borderRadius: 1.5,
+                   <Box key={alert.id} sx={{
+                    p: 1.5, mb: 1.5, borderRadius: 1.5,
                     bgcolor: alert.severity === 'Critical' ? '#FEF2F2' : '#F8FAFC',
-                    border: `1px solid ${alert.severity === 'Critical' ? '#FEE2E2' : '#F1F5F9'}`
+                    border: `1px solid ${alert.severity === 'Critical' ? '#FEE2E2' : '#F1F5F9'}`,
+                    display: 'flex', alignItems: 'flex-start', gap: 1.5
                   }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1E293B', fontSize: '0.8rem' }}>{alert.title}</Typography>
-                    <Typography variant="caption" sx={{ color: '#64748B', display: 'block' }}>{alert.message}</Typography>
+                    <Box sx={{ mt: 0.5, width: 8, height: 8, borderRadius: '50%', flexShrink: 0, bgcolor: alert.severity === 'Critical' ? '#EF4444' : '#F59E0B' }} />
+                    <Box>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1E293B', fontSize: '0.85rem', mb: 0.5 }}>{alert.title}</Typography>
+                      <Typography variant="caption" sx={{ color: '#64748B', display: 'block', fontSize: '0.75rem', lineHeight: 1.4 }}>{alert.message}</Typography>
+                    </Box>
                   </Box>
                 ))
               )}

@@ -2,9 +2,15 @@ import axios from 'axios';
 
 //const API_BASE = import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:8007`;
 //const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:8007');
+//const API_BASE = import.meta.env.VITE_API_URL ||
+//  (window.location.hostname.includes('nissigrid.com')
+//    ? '/api'
+//    : `${window.location.protocol}//${window.location.hostname}:8007`);
+
+
 const API_BASE = import.meta.env.VITE_API_URL ||
   (window.location.hostname.includes('nissigrid.com')
-    ? '/api'
+    ? '' // Leave this empty for production
     : `${window.location.protocol}//${window.location.hostname}:8007`);
 
 

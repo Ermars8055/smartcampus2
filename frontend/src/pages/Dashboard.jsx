@@ -138,13 +138,13 @@ export default function Dashboard() {
             icon={<LocalShipping />} color="#0891B2" subtitle="Total receipts" onClick={() => navigate('/grn')} />
         </Grid>
 
-        {/* --- ROW 1: Wide Consumption & Pie --- */}
-        <Grid item xs={12} lg={8}>
-          <Card sx={{ p: 2, border: '1px solid #E2E8F0', borderRadius: 2, boxShadow: 'none' }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 3, color: '#334155', fontSize: '0.95rem' }}>
+        {/* --- ROW 1: Symmetrical Graphs Row 1 (6/6 Split) --- */}
+        <Grid item xs={12} lg={6}>
+          <Card sx={{ p: 2, border: '1px solid #E2E8F0', borderRadius: 2, boxShadow: 'none', height: '100%' }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 3, color: '#334155', fontSize: '0.9rem' }}>
               Material Consumption by Block (Quantity & Value)
             </Typography>
-            <ResponsiveContainer width="100%" height={280}>
+            <ResponsiveContainer width="100%" height={300}>
               <BarChart data={consumption} margin={{ top: 20, right: 20, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
                 <XAxis dataKey="block_name" tick={{ fontSize: 10, fill: '#64748B' }} />
@@ -159,55 +159,55 @@ export default function Dashboard() {
             </ResponsiveContainer>
           </Card>
         </Grid>
-        <Grid item xs={12} lg={4}>
+        <Grid item xs={12} lg={6}>
           <Card sx={{ p: 2, border: '1px solid #E2E8F0', borderRadius: 2, boxShadow: 'none', height: '100%' }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1, color: '#334155', fontSize: '0.95rem' }}>
-              Stock by Warehouse
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1, color: '#334155', fontSize: '0.9rem' }}>
+              Stock Value by Warehouse
             </Typography>
-            <ResponsiveContainer width="100%" height={280}>
+            <ResponsiveContainer width="100%" height={300}>
               <PieChart>
-                <Pie data={stockByWh} cx="50%" cy="50%" innerRadius={60} outerRadius={90}
-                  dataKey="total_value" nameKey="warehouse_name" paddingAngle={2}>
-                  {stockByWh.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                <Pie data={stockByWh} cx="50%" cy="50%" innerRadius={70} outerRadius={110}
+                  dataKey="total_value" nameKey="warehouse_name" paddingAngle={4}>
+                  {stockByWh.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} stroke="none" />)}
                 </Pie>
                 <RTooltip formatter={(v) => [`₹${v.toLocaleString()}`, 'Value']} />
-                <Legend layout="horizontal" verticalAlign="bottom" align="center" wrapperStyle={{ fontSize: 10 }} />
+                <Legend layout="horizontal" verticalAlign="bottom" align="center" wrapperStyle={{ fontSize: 10, paddingTop: 10 }} />
               </PieChart>
             </ResponsiveContainer>
           </Card>
         </Grid>
 
-        {/* --- ROW 2: Wide Trend & Top Materials --- */}
-        <Grid item xs={12} lg={8}>
-          <Card sx={{ p: 2, border: '1px solid #E2E8F0', borderRadius: 2, boxShadow: 'none' }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2, color: '#334155', fontSize: '0.95rem' }}>
+        {/* --- ROW 2: Symmetrical Graphs Row 2 (6/6 Split) --- */}
+        <Grid item xs={12} lg={6}>
+          <Card sx={{ p: 2, border: '1px solid #E2E8F0', borderRadius: 2, boxShadow: 'none', height: '100%' }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2, color: '#334155', fontSize: '0.9rem' }}>
               Monthly Issuance Trend
             </Typography>
-            <ResponsiveContainer width="100%" height={260}>
-              <LineChart data={trend} margin={{ right: 30, left: 10 }}>
+            <ResponsiveContainer width="100%" height={280}>
+              <LineChart data={trend} margin={{ right: 30, left: 10, top: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                 <XAxis dataKey="month" tick={{ fontSize: 10 }} />
                 <YAxis tick={{ fontSize: 10 }} />
                 <RTooltip />
-                <Line type="monotone" dataKey="total" name="Issued" stroke="#2563EB" strokeWidth={2} dot={{ r: 4 }}>
-                  <LabelList dataKey="total" position="top" offset={10} style={{ fontSize: 9, fill: '#2563EB', fontWeight: 700 }} />
+                <Line type="monotone" dataKey="total" name="Issued" stroke="#2563EB" strokeWidth={2.5} dot={{ r: 5, fill: '#2563EB', strokeWidth: 2, stroke: '#fff' }}>
+                  <LabelList dataKey="total" position="top" offset={10} style={{ fontSize: 10, fill: '#2563EB', fontWeight: 700 }} />
                 </Line>
               </LineChart>
             </ResponsiveContainer>
           </Card>
         </Grid>
-        <Grid item xs={12} lg={4}>
+        <Grid item xs={12} lg={6}>
           <Card sx={{ p: 2, border: '1px solid #E2E8F0', borderRadius: 2, boxShadow: 'none', height: '100%' }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1, color: '#334155', fontSize: '0.95rem' }}>
-              Top Consumed
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2, color: '#334155', fontSize: '0.9rem' }}>
+              Top Consumed Materials
             </Typography>
-            <ResponsiveContainer width="100%" height={260}>
-              <BarChart data={topMaterials} layout="vertical" margin={{ left: 10 }}>
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={topMaterials} layout="vertical" margin={{ left: 20, right: 30 }}>
                 <XAxis type="number" hide />
-                <YAxis dataKey="material_name" type="category" width={110} tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
+                <YAxis dataKey="material_name" type="category" width={140} tick={{ fontSize: 10, fontWeight: 500 }} axisLine={false} tickLine={false} />
                 <RTooltip />
-                <Bar dataKey="total_consumed" fill="#1E3A8A" radius={[0, 4, 4, 0]}>
-                   <LabelList dataKey="total_consumed" position="right" style={{ fontSize: 9, fill: '#64748B' }} />
+                <Bar dataKey="total_consumed" name="Total Units" fill="#1E3A8A" radius={[0, 4, 4, 0]} barSize={20}>
+                   <LabelList dataKey="total_consumed" position="right" style={{ fontSize: 10, fill: '#64748B', fontWeight: 600 }} />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>

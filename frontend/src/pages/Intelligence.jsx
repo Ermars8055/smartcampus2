@@ -13,11 +13,18 @@ const COLORS = ['#1E3A8A', '#2563EB', '#60A5FA', '#93C5FD', '#3B82F6', '#1D4ED8'
 
 export default function Intelligence() {
   const [consumption, setConsumption] = useState([]);
-  const [costByBlock, setCostByBlock] = useState([]);
   const [projects, setProjects] = useState([]);
   const [blocks, setBlocks] = useState([]);
   const [projectId, setProjectId] = useState('');
   const [topMaterials, setTopMaterials] = useState([]);
+
+  // Utility to format currency consistently
+  const formatCurrency = (v) => {
+    if (v >= 10000000) return `₹${(v / 10000000).toFixed(1)}Cr`;
+    if (v >= 100000) return `₹${(v / 100000).toFixed(1)}L`;
+    if (v >= 1000) return `₹${(v / 1000).toFixed(1)}K`;
+    return `₹${v}`;
+  };
 
   useEffect(() => {
     api.get('/api/projects').then(r => setProjects(r.data));
@@ -44,7 +51,6 @@ export default function Intelligence() {
       });
       setTopMaterials(Object.entries(matMap).map(([name, v]) => ({ material_name: name, quantity: v.qty, value: v.value })).sort((a, b) => b.value - a.value));
     });
-    api.get('/api/dashboard/material-cost-by-block').then(r => setCostByBlock(r.data));
   }, [projectId]);
 
   // Build block summary
@@ -54,6 +60,11 @@ export default function Intelligence() {
     blockSummary[d.block_name].total += d.total_value;
     blockSummary[d.block_name].materials.push(d);
   });
+
+  // Aggregate data for the bar chart
+  const aggregatedBlockData = Object.entries(blockSummary)
+    .map(([name, data]) => ({ block_name: name, total_cost: data.total }))
+    .sort((a, b) => b.total_cost - a.total_cost);
 
   return (
     <Box>
@@ -77,12 +88,14 @@ export default function Intelligence() {
           <Card sx={{ p: 2.5 }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>Material Cost by Block</Typography>
             <ResponsiveContainer width="100%" height={320}>
-              <BarChart data={costByBlock} margin={{ left: 10 }}>
+              <BarChart data={aggregatedBlockData} margin={{ top: 20, right: 20, bottom: 5, left: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-                <XAxis dataKey="block_name" tick={{ fontSize: 11, fill: '#64748B' }} />
-                <YAxis tick={{ fontSize: 11, fill: '#64748B' }} tickFormatter={v => `₹${(v / 1000).toFixed(0)}K`} />
-                <Tooltip formatter={(v) => [`₹${v.toLocaleString()}`, '']} contentStyle={{ borderRadius: 8 }} />
-                <Bar dataKey="total_cost" name="Cost (₹)" fill="#1E3A8A" radius={[6, 6, 0, 0]} />
+                <XAxis dataKey="block_name" tick={{ fontSize: 11, fontWeight: 600, fill: '#475569' }} />
+                <YAxis tick={{ fontSize: 11, fontWeight: 500, fill: '#475569' }} tickFormatter={formatCurrency} />
+                <Tooltip formatter={(v) => [formatCurrency(v), 'Total Cost']} contentStyle={{ borderRadius: 8, border: '1px solid #E2E8F0' }} cursor={{ fill: 'rgba(37, 99, 235, 0.05)' }} />
+                <Bar dataKey="total_cost" name="Cost (₹)" fill="#2563EB" radius={[6, 6, 0, 0]}>
+                   <LabelList dataKey="total_cost" position="top" formatter={formatCurrency} style={{ fontSize: 11, fontWeight: 700, fill: '#1E293B' }} />
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </Card>
@@ -96,8 +109,8 @@ export default function Intelligence() {
                   cx="50%" cy="50%" innerRadius={50} outerRadius={90} dataKey="value" paddingAngle={3}>
                   {Object.keys(blockSummary).map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                 </Pie>
-                <Legend iconType="circle" wrapperStyle={{ fontSize: 11 }} />
-                <Tooltip formatter={v => `₹${v.toLocaleString()}`} contentStyle={{ borderRadius: 8 }} />
+                <Legend iconType="circle" wrapperStyle={{ fontSize: 11, fontWeight: 500 }} />
+                <Tooltip formatter={formatCurrency} contentStyle={{ borderRadius: 8 }} />
               </PieChart>
             </ResponsiveContainer>
           </Card>
@@ -110,8 +123,8 @@ export default function Intelligence() {
           <Grid size={{ xs: 12, md: 6, lg: 4 }} key={blockName}>
             <Card sx={{ p: 2.5 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5 }}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{blockName}</Typography>
-                <Chip label={`₹${data.total.toLocaleString()}`} size="small" color="primary" sx={{ fontWeight: 600 }} />
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1E293B' }}>{blockName}</Typography>
+                <Chip label={formatCurrency(data.total)} size="small" sx={{ fontWeight: 700, bgcolor: '#EFF6FF', color: '#1D4ED8', border: '1px solid #BFDBFE' }} />
               </Box>
               <Table size="small">
                 <TableHead><TableRow>
@@ -122,9 +135,9 @@ export default function Intelligence() {
                 <TableBody>
                   {data.materials.sort((a, b) => b.total_value - a.total_value).slice(0, 5).map((m, i) => (
                     <TableRow key={i}>
-                      <TableCell sx={{ fontSize: '0.78rem', py: 0.5 }}>{m.material_name}</TableCell>
-                      <TableCell align="right" sx={{ fontSize: '0.78rem', py: 0.5 }}>{m.total_quantity}</TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.78rem', py: 0.5 }}>₹{m.total_value.toLocaleString()}</TableCell>
+                      <TableCell sx={{ fontSize: '0.78rem', py: 0.5, fontWeight: 500 }}>{m.material_name}</TableCell>
+                      <TableCell align="right" sx={{ fontSize: '0.78rem', py: 0.5 }}>{m.total_quantity?.toLocaleString()}</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.78rem', py: 0.5, color: '#334155' }}>₹{m.total_value.toLocaleString()}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -146,10 +159,10 @@ export default function Intelligence() {
             <TableBody>
               {topMaterials.slice(0, 15).map((m, i) => (
                 <TableRow key={i}>
-                  <TableCell sx={{ fontWeight: 600 }}>{i + 1}</TableCell>
-                  <TableCell sx={{ fontWeight: 500 }}>{m.material_name}</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#64748B' }}>{i + 1}</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#1E293B' }}>{m.material_name}</TableCell>
                   <TableCell align="right">{m.quantity.toLocaleString()}</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 600, color: '#1E3A8A' }}>₹{m.value.toLocaleString()}</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700, color: '#2563EB' }}>₹{m.value.toLocaleString()}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

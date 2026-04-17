@@ -98,8 +98,15 @@ export default function Dashboard() {
   }, []);
 
   const handleBlockClick = (data) => {
-    if (!data || !data.activePayload || !data.activePayload.length) return;
-    const blockName = data.activePayload[0].payload.block_name;
+    let blockName = null;
+    if (data && data.activePayload && data.activePayload.length) {
+      blockName = data.activePayload[0].payload.block_name;
+    } else if (data && data.block_name) {
+      blockName = data.block_name;
+    }
+
+    if (!blockName) return;
+
     setDrilldownBlock(blockName);
     setDrilldownLoading(true);
     api.get('/api/dashboard/material-cost-by-block')
@@ -114,10 +121,10 @@ export default function Dashboard() {
   if (loading) {
     return (
       <Box>
-        <Grid container spacing={2.5}>
+        <Grid container spacing={3}>
           {[...Array(6)].map((_, i) => (
-            <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2 }} key={i}>
-              <Skeleton variant="rounded" height={120} sx={{ borderRadius: 3 }} />
+            <Grid size={{ xs: 12, sm: 4, lg: 2 }} key={i}>
+              <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 2 }} />
             </Grid>
           ))}
         </Grid>
@@ -133,29 +140,30 @@ export default function Dashboard() {
   };
 
   return (
-    <Box>
+    <Box sx={{ p: 0 }}>
+      {/* Header */}
       <Box sx={{ mb: 3 }}>
-        <Typography variant="h5" sx={{ fontWeight: 700, color: '#1E293B' }}>Dashboard</Typography>
+        <Typography variant="h5" sx={{ fontWeight: 800, color: '#1E293B', mb: 0.5 }}>Dashboard</Typography>
         <Typography variant="body2" sx={{ color: '#64748B' }}>Overview of materials, procurement, and inventory</Typography>
       </Box>
 
-      {/* Stats Cards */}
-      <Grid container spacing={2.5} sx={{ mb: 3 }}>
+      {/* --- ROW 1: Stats Cards (6 in a row) --- */}
+      <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid size={{ xs: 6, sm: 4, lg: 2 }}>
-          <StatCard title="Materials" value={stats?.total_materials || 0} icon={<Inventory2 />} color="#2563EB"
-            subtitle="Active items" onClick={() => navigate('/materials')} />
+          <StatCard title="Materials" value={stats?.total_materials || 0}
+            icon={<Inventory2 />} color="#2563EB" subtitle="Active items" onClick={() => navigate('/materials')} />
         </Grid>
         <Grid size={{ xs: 6, sm: 4, lg: 2 }}>
           <StatCard title="Inventory Value" value={formatCurrency(stats?.total_inventory_value || 0)}
-            icon={<Warehouse />} color="#059669" subtitle="Total stock value" onClick={() => navigate('/inventory')} />
+            icon={<TrendingDown />} color="#10B981" subtitle="Total stock value" />
         </Grid>
         <Grid size={{ xs: 6, sm: 4, lg: 2 }}>
           <StatCard title="Low Stock" value={stats?.low_stock_items || 0}
-            icon={<Warning />} color="#DC2626" subtitle="Below reorder" onClick={() => navigate('/inventory?low=true')} />
+            icon={<Warning />} color="#EF4444" subtitle="Below reorder" onClick={() => navigate('/inventory')} />
         </Grid>
         <Grid size={{ xs: 6, sm: 4, lg: 2 }}>
           <StatCard title="Pending PR" value={stats?.pending_pr || 0}
-            icon={<ShoppingCart />} color="#D97706" subtitle="Awaiting action" onClick={() => navigate('/purchase-requests')} />
+            icon={<ShoppingCart />} color="#F59E0B" subtitle="Awaiting action" onClick={() => navigate('/purchase-requests')} />
         </Grid>
         <Grid size={{ xs: 6, sm: 4, lg: 2 }}>
           <StatCard title="Pending PO" value={stats?.pending_po || 0}
@@ -178,14 +186,14 @@ export default function Dashboard() {
               <Typography variant="caption" sx={{ color: '#64748B' }}>*Click on any bar to drilldown into materials</Typography>
             </Box>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={consumption} margin={{ top: 25, right: 20, bottom: 5, left: 0 }} onClick={handleBlockClick} style={{ cursor: 'pointer' }}>
+              <BarChart data={consumption} margin={{ top: 25, right: 20, bottom: 5, left: 0 }} onClick={handleBlockClick}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
                 <XAxis dataKey="block_name" tick={{ fontSize: 12, fontWeight: 600, fill: '#334155' }} />
                 <YAxis tick={{ fontSize: 11, fontWeight: 500, fill: '#475569' }} tickFormatter={(v) => formatCurrency(v)} />
                 <RTooltip contentStyle={{ borderRadius: 8, border: '1px solid #E2E8F0' }}
                   cursor={{ fill: 'rgba(37, 99, 235, 0.05)' }}
                   formatter={(v, name) => [formatCurrency(v), 'Total Spend']} />
-                <Bar dataKey="total_value" name="Value (₹)" fill="#2563EB" radius={[6, 6, 0, 0]}>
+                <Bar dataKey="total_value" name="Value (₹)" fill="#2563EB" radius={[6, 6, 0, 0]} onClick={handleBlockClick} style={{ cursor: 'pointer' }}>
                   <LabelList dataKey="total_value" position="top" formatter={(v) => v > 0 ? formatCurrency(v) : ''} style={{ fontSize: 11, fontWeight: 700, fill: '#1E293B' }} />
                 </Bar>
               </BarChart>

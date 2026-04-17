@@ -12,7 +12,7 @@ import {
 } from '@mui/icons-material';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RTooltip,
-  ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Legend
+  ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Legend, LabelList
 } from 'recharts';
 import api from '../services/api';
 
@@ -154,13 +154,15 @@ export default function Dashboard() {
               Material Consumption by Block
             </Typography>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={consumption} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+              <BarChart data={consumption} margin={{ top: 15, right: 20, bottom: 5, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-                <XAxis dataKey="block_name" tick={{ fontSize: 11, fill: '#64748B' }} />
-                <YAxis tick={{ fontSize: 11, fill: '#64748B' }} />
+                <XAxis dataKey="block_name" tick={{ fontSize: 12, fontWeight: 600, fill: '#334155' }} />
+                <YAxis tick={{ fontSize: 11, fontWeight: 500, fill: '#475569' }} />
                 <RTooltip contentStyle={{ borderRadius: 8, border: '1px solid #E2E8F0' }}
                   formatter={(v) => [v.toLocaleString(), '']} />
-                <Bar dataKey="total_quantity" name="Quantity" fill="#2563EB" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="total_quantity" name="Quantity" fill="#2563EB" radius={[6, 6, 0, 0]}>
+                  <LabelList dataKey="total_quantity" position="top" formatter={(v) => v > 0 ? v.toLocaleString() : ''} style={{ fontSize: 11, fontWeight: 700, fill: '#1E293B' }} />
+                </Bar>
                 <Bar dataKey="total_value" name="Value (₹)" fill="#60A5FA" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -173,13 +175,13 @@ export default function Dashboard() {
             </Typography>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
-                <Pie data={stockByWh} cx="50%" cy="50%" innerRadius={60} outerRadius={100}
+                <Pie data={stockByWh} cx="40%" cy="50%" innerRadius={60} outerRadius={100}
                   dataKey="total_value" nameKey="warehouse_name" paddingAngle={3}>
                   {stockByWh.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                 </Pie>
                 <RTooltip formatter={(v) => [`₹${v.toLocaleString()}`, 'Value']}
                   contentStyle={{ borderRadius: 8 }} />
-                <Legend iconType="circle" wrapperStyle={{ fontSize: 11 }} />
+                <Legend layout="vertical" verticalAlign="middle" align="right" iconType="circle" wrapperStyle={{ fontSize: 11, fontWeight: 500, color: '#334155' }} />
               </PieChart>
             </ResponsiveContainer>
           </Card>
@@ -194,12 +196,14 @@ export default function Dashboard() {
               Top Consumed Materials
             </Typography>
             <ResponsiveContainer width="100%" height={280}>
-              <BarChart data={topMaterials} layout="vertical" margin={{ left: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-                <XAxis type="number" tick={{ fontSize: 11, fill: '#64748B' }} />
-                <YAxis dataKey="material_name" type="category" width={130} tick={{ fontSize: 10, fill: '#64748B' }} />
+              <BarChart data={topMaterials} layout="vertical" margin={{ left: 20, right: 40 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" horizontal={false} />
+                <XAxis type="number" tick={{ fontSize: 11, fontWeight: 500, fill: '#475569' }} />
+                <YAxis dataKey="material_name" type="category" width={140} tick={{ fontSize: 11, fontWeight: 600, fill: '#334155' }} />
                 <RTooltip contentStyle={{ borderRadius: 8 }} />
-                <Bar dataKey="total_consumed" name="Consumed" fill="#1E3A8A" radius={[0, 6, 6, 0]} barSize={18} />
+                <Bar dataKey="total_consumed" name="Consumed" fill="#1E3A8A" radius={[0, 6, 6, 0]} barSize={20}>
+                  <LabelList dataKey="total_consumed" position="right" formatter={(v) => v.toLocaleString()} style={{ fontSize: 11, fontWeight: 700, fill: '#1E293B' }} />
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </Card>
@@ -210,13 +214,15 @@ export default function Dashboard() {
               Consumption Trend
             </Typography>
             <ResponsiveContainer width="100%" height={280}>
-              <LineChart data={trend}>
+              <LineChart data={trend} margin={{ top: 20, right: 30, left: 10, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-                <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#64748B' }} />
-                <YAxis tick={{ fontSize: 11, fill: '#64748B' }} />
+                <XAxis dataKey="month" tick={{ fontSize: 12, fontWeight: 600, fill: '#334155' }} />
+                <YAxis tick={{ fontSize: 11, fontWeight: 500, fill: '#475569' }} />
                 <RTooltip contentStyle={{ borderRadius: 8 }} />
                 <Line type="monotone" dataKey="total" name="Total Consumed" stroke="#2563EB"
-                  strokeWidth={2.5} dot={{ r: 4, fill: '#2563EB' }} activeDot={{ r: 6 }} />
+                  strokeWidth={3} dot={{ r: 5, fill: '#2563EB', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 7 }}>
+                  <LabelList dataKey="total" position="top" offset={10} style={{ fontSize: 12, fontWeight: 700, fill: '#2563EB' }} />
+                </Line>
               </LineChart>
             </ResponsiveContainer>
           </Card>

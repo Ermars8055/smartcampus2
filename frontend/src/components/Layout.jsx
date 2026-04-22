@@ -3,7 +3,7 @@ import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import {
   Box, Drawer, AppBar, Toolbar, Typography, IconButton, List, ListItem,
   ListItemButton, ListItemIcon, ListItemText, Avatar, Menu, MenuItem,
-  Badge, Divider, Collapse, useMediaQuery, useTheme, Tooltip, Chip
+  Badge, Divider, Collapse, useMediaQuery, useTheme, Tooltip, Chip, Select
 } from '@mui/material';
 import {
   Menu as MenuIcon, Dashboard, Inventory2, ShoppingCart, Warehouse,
@@ -48,6 +48,7 @@ const menuItems = [
   { text: 'Intelligence', icon: <Build />, path: '/intelligence' },
   { text: 'Reports', icon: <Assessment />, path: '/reports' },
   { text: 'Admin', icon: <Settings />, path: '/admin' },
+  { text: 'SaaS Admin', icon: <Security />, path: '/saas-admin', platformOnly: true },
 ];
 
 export default function Layout() {
@@ -57,9 +58,10 @@ export default function Layout() {
   const [openMenus, setOpenMenus] = useState({ 'Master Data': true });
   const [anchorEl, setAnchorEl] = useState(null);
   const [alertCount, setAlertCount] = useState(0);
-  const { user, logout } = useAuth();
+  const { user, tenant, roles, sites, activeSite, activeSiteId, setActiveSiteId, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const visibleMenuItems = menuItems.filter((item) => !item.platformOnly || user?.is_platform_admin);
 
   useEffect(() => {
     api.get('/api/alerts/count').then(r => setAlertCount(r.data.count)).catch(() => { });
@@ -102,7 +104,7 @@ export default function Layout() {
       {/* Navigation */}
       <Box sx={{ flex: 1, overflowY: 'auto', py: 1, '&::-webkit-scrollbar': { width: 4 }, '&::-webkit-scrollbar-thumb': { background: '#334155', borderRadius: 2 } }}>
         <List disablePadding>
-          {menuItems.map((item) => (
+          {visibleMenuItems.map((item) => (
             <Box key={item.text}>
               <ListItem disablePadding sx={{ px: 1, mb: 0.3 }}>
                 <ListItemButton
@@ -174,8 +176,16 @@ export default function Layout() {
               {user?.full_name}
             </Typography>
             <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.65rem' }}>
-              {user?.role}
+              {roles?.join(', ') || 'No Role'}
             </Typography>
+            <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: '0.65rem', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {tenant?.name || 'Platform Admin'}
+            </Typography>
+            {tenant != null && activeSite && (
+              <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: '0.65rem', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {activeSite.name}
+              </Typography>
+            )}
           </Box>
         </Box>
       </Box>
@@ -218,6 +228,60 @@ export default function Layout() {
               </Typography>
             </Box>
 
+            <Chip
+              label={tenant?.name || 'Platform Admin'}
+              size="small"
+              color={!tenant ? 'secondary' : 'primary'}
+              variant="outlined"
+              sx={{ display: { xs: 'none', md: 'inline-flex' }, fontWeight: 600, maxWidth: 220 }}
+            />
+
+            {tenant != null && (
+            <Box sx={{
+              display: { xs: 'none', sm: 'flex' },
+              alignItems: 'center',
+              gap: 1,
+              px: 1.5,
+              py: 0.4,
+              border: '1px solid #E2E8F0',
+              borderRadius: 2,
+              color: '#475569',
+              minWidth: 210,
+              maxWidth: 280,
+            }}>
+              <Store sx={{ fontSize: 18, color: '#2563EB' }} />
+              <Select
+                variant="standard"
+                disableUnderline
+                size="small"
+                value={activeSiteId || ''}
+                displayEmpty
+                onChange={(e) => setActiveSiteId(e.target.value)}
+                sx={{
+                  flex: 1,
+                  color: '#1E293B',
+                  fontSize: '0.85rem',
+                  '& .MuiSelect-select': {
+                    py: 0.5,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  },
+                }}
+              >
+                {sites.length === 0 ? (
+                  <MenuItem value="" disabled>No Sites</MenuItem>
+                ) : (
+                  sites.map((site) => (
+                    <MenuItem key={site.id} value={String(site.id)}>
+                      {site.name}
+                    </MenuItem>
+                  ))
+                )}
+              </Select>
+            </Box>
+            )}
+
             <Tooltip title="Notifications">
               <IconButton onClick={() => navigate('/alerts')} sx={{ color: '#64748B' }}>
                 <Badge badgeContent={alertCount} color="error" max={99}>
@@ -236,8 +300,9 @@ export default function Layout() {
             <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}
               PaperProps={{ sx: { mt: 1, minWidth: 180 } }}>
               <MenuItem disabled>
-                <Person sx={{ mr: 1, fontSize: 18 }} /> {user?.role}
+                <Person sx={{ mr: 1, fontSize: 18 }} /> {user?.role_name || user?.role}
               </MenuItem>
+              <MenuItem disabled>{user?.tenant_name || 'Platform Admin'}</MenuItem>
               <Divider />
               <MenuItem onClick={() => { logout(); navigate('/login'); setAnchorEl(null); }}>
                 <Logout sx={{ mr: 1, fontSize: 18 }} /> Sign Out

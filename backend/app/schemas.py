@@ -5,6 +5,71 @@ from typing import Optional, List
 from datetime import datetime, date
 
 
+
+# ── SaaS Multi-Tenancy & RBAC ────────────────────────────────────────────
+
+class TenantBase(BaseModel):
+    name: str
+    subscription_type: str = "single_site"
+    is_active: bool = True
+
+class TenantCreate(TenantBase):
+    pass
+
+class TenantOut(TenantBase):
+    id: int
+    slug: str
+    created_at: datetime
+    class Config:
+        from_attributes = True
+
+class SiteBase(BaseModel):
+    name: str
+    location: Optional[str] = None
+    is_active: bool = True
+
+class SiteCreate(SiteBase):
+    pass
+
+class SiteOut(SiteBase):
+    id: int
+    tenant_id: int
+    created_at: datetime
+    class Config:
+        from_attributes = True
+
+class RolePermissionBase(BaseModel):
+    resource: str
+    can_read: bool = False
+    can_create: bool = False
+    can_update: bool = False
+    can_delete: bool = False
+
+class RolePermissionOut(RolePermissionBase):
+    id: int
+    class Config:
+        from_attributes = True
+
+class RoleBase(BaseModel):
+    name: str
+    description: Optional[str] = None
+
+class RoleCreate(RoleBase):
+    permissions: List[RolePermissionBase] = []
+
+class RoleOut(RoleBase):
+    id: int
+    tenant_id: int
+    permissions: List[RolePermissionOut] = []
+    class Config:
+        from_attributes = True
+
+class UserSiteAccessOut(BaseModel):
+    site_id: int
+    site_name: Optional[str] = None
+    class Config:
+        from_attributes = True
+
 # ── Auth ─────────────────────────────────────────────────────────────────
 
 class Token(BaseModel):
@@ -24,22 +89,36 @@ class UserBase(BaseModel):
     email: str
     full_name: str
     role: str = "Engineer"
+    tenant_id: Optional[int] = None
+    tenant_name: Optional[str] = None
+    role_id: Optional[int] = None
+    role_name: Optional[str] = None
     organization_id: Optional[int] = None
 
 class UserCreate(UserBase):
     password: str
+    site_ids: Optional[List[int]] = None
+
+class TenantProvisionCreate(BaseModel):
+    tenant: TenantCreate
+    site: SiteCreate
+    admin: UserCreate
 
 class UserUpdate(BaseModel):
     email: Optional[str] = None
     full_name: Optional[str] = None
     role: Optional[str] = None
+    role_id: Optional[int] = None
     is_active: Optional[bool] = None
     organization_id: Optional[int] = None
+    site_ids: Optional[List[int]] = None
 
 class UserOut(UserBase):
     id: int
     is_active: bool
     created_at: datetime
+    sites: List[UserSiteAccessOut] = []
+    permissions: Optional[List[RolePermissionOut]] = None
     class Config:
         from_attributes = True
 

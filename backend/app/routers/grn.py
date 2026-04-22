@@ -10,27 +10,29 @@ from app.models import (
     CurrentStock, StockLedger, Material, Warehouse, User, AuditLog
 )
 from app.schemas import GRNCreate, GRNOut, GRNItemOut
-from app.auth import get_current_user
+from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
 
 router = APIRouter(prefix="/api/grn", tags=["GRN"])
 
 
-def generate_grn_number(db: Session) -> str:
-    count = db.query(GRN).count() + 1
+def generate_grn_number(db: Session, tenant_id: int, site_id: int) -> str:
+    count = db.query(GRN).filter(GRN.tenant_id == tenant_id, GRN.site_id == site_id).count() + 1
     return f"GRN-{datetime.now().strftime('%Y%m')}-{count:04d}"
 
 
 def update_stock(db: Session, material_id: int, warehouse_id: int, quantity: float,
                  transaction_type: str, reference_type: str, reference_id: int,
-                 reference_number: str, project_id: int = None, block_id: int = None,
+                 reference_number: str, tenant_id: int, site_id: int, project_id: int = None, block_id: int = None,
                  user_id: int = None):
     """Update current stock and create ledger entry."""
     stock = db.query(CurrentStock).filter(
         CurrentStock.material_id == material_id,
-        CurrentStock.warehouse_id == warehouse_id
+        CurrentStock.warehouse_id == warehouse_id,
+        CurrentStock.tenant_id == tenant_id,
+        CurrentStock.site_id == site_id
     ).first()
     if not stock:
-        stock = CurrentStock(material_id=material_id, warehouse_id=warehouse_id, quantity=0)
+        stock = CurrentStock(material_id=material_id, warehouse_id=warehouse_id, quantity=0, tenant_id=tenant_id, site_id=site_id)
         db.add(stock)
         db.flush()
 
@@ -48,7 +50,9 @@ def update_stock(db: Session, material_id: int, warehouse_id: int, quantity: flo
         reference_number=reference_number,
         project_id=project_id,
         block_id=block_id,
-        created_by_id=user_id
+        created_by_id=user_id,
+        tenant_id=tenant_id,
+        site_id=site_id
     )
     db.add(ledger)
 
@@ -58,9 +62,11 @@ def list_grn(
     status: Optional[str] = None,
     project_id: Optional[int] = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_permission("grn", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
 ):
-    q = db.query(GRN)
+    q = db.query(GRN).filter(GRN.tenant_id == tenant_id, GRN.site_id == site_id)
     if status:
         q = q.filter(GRN.status == status)
     if project_id:
@@ -101,9 +107,14 @@ def list_grn(
 
 
 @router.post("")
-def create_grn(data: GRNCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def create_grn(
+    data: GRNCreate, db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("grn", "create")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
     grn = GRN(
-        grn_number=generate_grn_number(db),
+        grn_number=generate_grn_number(db, tenant_id, site_id),
         po_id=data.po_id,
         gate_entry_id=data.gate_entry_id,
         warehouse_id=data.warehouse_id,
@@ -114,13 +125,14 @@ def create_grn(data: GRNCreate, db: Session = Depends(get_db), current_user: Use
         invoice_amount=data.invoice_amount,
         remarks=data.remarks,
         received_by_id=current_user.id,
-        status="Completed"
+        status="Completed",
+        tenant_id=tenant_id,
+        site_id=site_id
     )
     db.add(grn)
     db.flush()
 
     for item_data in data.items:
-        # Update PO item received quantity and validate
         if item_data.po_item_id:
             po_item = db.query(PurchaseOrderItem).filter(PurchaseOrderItem.id == item_data.po_item_id).first()
             if po_item:
@@ -145,7 +157,6 @@ def create_grn(data: GRNCreate, db: Session = Depends(get_db), current_user: Use
         )
         db.add(grn_item)
 
-        # Update stock with accepted quantity
         if item_data.accepted_quantity > 0:
             update_stock(
                 db=db,
@@ -157,21 +168,23 @@ def create_grn(data: GRNCreate, db: Session = Depends(get_db), current_user: Use
                 reference_id=grn.id,
                 reference_number=grn.grn_number,
                 project_id=data.project_id,
-                user_id=current_user.id
+                user_id=current_user.id,
+                tenant_id=tenant_id,
+                site_id=site_id
             )
-
-        # (Moved PO item update to validation above)
 
     grn.completed_at = datetime.utcnow()
 
-    # Update gate entry status
     if data.gate_entry_id:
-        gate = db.query(GateEntry).filter(GateEntry.id == data.gate_entry_id).first()
+        gate = db.query(GateEntry).filter(
+            GateEntry.id == data.gate_entry_id, GateEntry.tenant_id == tenant_id, GateEntry.site_id == site_id
+        ).first()
         if gate:
             gate.status = "Completed"
 
-    # Check and update PO status
-    po = db.query(PurchaseOrder).filter(PurchaseOrder.id == data.po_id).first()
+    po = db.query(PurchaseOrder).filter(
+        PurchaseOrder.id == data.po_id, PurchaseOrder.tenant_id == tenant_id, PurchaseOrder.site_id == site_id
+    ).first()
     if po:
         all_received = all(
             item.received_quantity >= item.quantity for item in po.items
@@ -183,6 +196,7 @@ def create_grn(data: GRNCreate, db: Session = Depends(get_db), current_user: Use
             po.status = "Partially Received"
 
     db.add(AuditLog(
+        tenant_id=tenant_id, site_id=site_id,
         user_id=current_user.id, action="CREATE",
         entity_type="GRN", entity_id=grn.id,
         new_values=f"GRN {grn.grn_number} created"

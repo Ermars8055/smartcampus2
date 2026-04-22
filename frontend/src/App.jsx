@@ -23,7 +23,9 @@ import Inventory from './pages/Inventory';
 import Intelligence from './pages/Intelligence';
 import Reports from './pages/Reports';
 import Admin from './pages/Admin';
+import SaasAdmin from './pages/SaasAdmin';
 import Alerts from './pages/Alerts';
+import PlatformLogin from './pages/PlatformLogin';
 import { Box, CircularProgress } from '@mui/material';
 
 function ProtectedRoute({ children }) {
@@ -43,6 +45,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
+      <Route path="/platform/login" element={user ? <Navigate to="/saas-admin" /> : <PlatformLogin />} />
       <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
         <Route index element={<Dashboard />} />
         <Route path="materials" element={<Materials />} />
@@ -61,6 +64,7 @@ function AppRoutes() {
         <Route path="intelligence" element={<Intelligence />} />
         <Route path="reports" element={<Reports />} />
         <Route path="admin" element={<Admin />} />
+        <Route path="saas-admin" element={<SaasAdmin />} />
         <Route path="alerts" element={<Alerts />} />
       </Route>
     </Routes>

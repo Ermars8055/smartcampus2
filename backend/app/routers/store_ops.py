@@ -16,7 +16,7 @@ from app.schemas import (
     TransferCreate, TransferOut, TransferItemOut
 )
 from app.routers.grn import update_stock
-from app.auth import get_current_user
+from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
 
 router = APIRouter(prefix="/api", tags=["Store Operations"])
 
@@ -27,9 +27,11 @@ router = APIRouter(prefix="/api", tags=["Store Operations"])
 def list_issues(
     project_id: Optional[int] = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_permission("issues", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
 ):
-    q = db.query(MaterialIssue)
+    q = db.query(MaterialIssue).filter(MaterialIssue.tenant_id == tenant_id, MaterialIssue.site_id == site_id)
     if project_id:
         q = q.filter(MaterialIssue.project_id == project_id)
     issues = q.order_by(MaterialIssue.created_at.desc()).all()
@@ -58,15 +60,19 @@ def list_issues(
             warehouse_name=iss.warehouse.name if iss.warehouse else None,
             project_name=iss.project.name if iss.project else None,
             block_name=iss.block.name if iss.block else None,
-            issued_by_name=iss.issued_by.full_name if iss.issued_by else None,
             items=items
         ))
     return result
 
 
 @router.post("/issues")
-def create_issue(data: IssueCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    count = db.query(MaterialIssue).count() + 1
+def create_issue(
+    data: IssueCreate, db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("issues", "create")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    count = db.query(MaterialIssue).filter(MaterialIssue.tenant_id == tenant_id, MaterialIssue.site_id == site_id).count() + 1
     issue_number = f"ISS-{datetime.now().strftime('%Y%m')}-{count:04d}"
 
     issue = MaterialIssue(
@@ -79,35 +85,40 @@ def create_issue(data: IssueCreate, db: Session = Depends(get_db), current_user:
         purpose=data.purpose,
         received_by_name=data.received_by_name,
         issued_by_id=current_user.id,
-        status="Issued"
+        status="Completed",
+        tenant_id=tenant_id,
+        site_id=site_id
     )
     db.add(issue)
     db.flush()
 
     for item_data in data.items:
-        # Check stock availability
+        # Check stock
         stock = db.query(CurrentStock).filter(
             CurrentStock.material_id == item_data.material_id,
-            CurrentStock.warehouse_id == data.warehouse_id
+            CurrentStock.warehouse_id == data.warehouse_id,
+            CurrentStock.tenant_id == tenant_id,
+            CurrentStock.site_id == site_id
         ).first()
         if not stock or stock.quantity < item_data.quantity:
             mat = db.query(Material).filter(Material.id == item_data.material_id).first()
-            available = stock.quantity if stock else 0
             raise HTTPException(
                 status_code=400,
-                detail=f"Insufficient stock for {mat.name if mat else 'material'}. Available: {available}"
+                detail=f"Insufficient stock for {mat.name if mat else 'material'} in selected warehouse"
             )
+
+        mat_info = db.query(Material).filter(Material.id == item_data.material_id).first()
+        rate = mat_info.standard_cost if mat_info else 0.0
 
         issue_item = MaterialIssueItem(
             issue_id=issue.id,
             material_id=item_data.material_id,
             quantity=item_data.quantity,
-            rate=item_data.rate,
+            rate=rate,
             remarks=item_data.remarks
         )
         db.add(issue_item)
 
-        # Decrease stock
         update_stock(
             db=db,
             material_id=item_data.material_id,
@@ -117,6 +128,8 @@ def create_issue(data: IssueCreate, db: Session = Depends(get_db), current_user:
             reference_type="Issue",
             reference_id=issue.id,
             reference_number=issue_number,
+            tenant_id=tenant_id,
+            site_id=site_id,
             project_id=data.project_id,
             block_id=data.issued_to_block_id,
             user_id=current_user.id
@@ -132,9 +145,11 @@ def create_issue(data: IssueCreate, db: Session = Depends(get_db), current_user:
 def list_returns(
     project_id: Optional[int] = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_permission("returns", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
 ):
-    q = db.query(MaterialReturn)
+    q = db.query(MaterialReturn).filter(MaterialReturn.tenant_id == tenant_id, MaterialReturn.site_id == site_id)
     if project_id:
         q = q.filter(MaterialReturn.project_id == project_id)
     returns = q.order_by(MaterialReturn.created_at.desc()).all()
@@ -168,8 +183,13 @@ def list_returns(
 
 
 @router.post("/returns")
-def create_return(data: ReturnCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    count = db.query(MaterialReturn).count() + 1
+def create_return(
+    data: ReturnCreate, db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("returns", "create")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    count = db.query(MaterialReturn).filter(MaterialReturn.tenant_id == tenant_id, MaterialReturn.site_id == site_id).count() + 1
     return_number = f"RET-{datetime.now().strftime('%Y%m')}-{count:04d}"
 
     ret = MaterialReturn(
@@ -181,7 +201,9 @@ def create_return(data: ReturnCreate, db: Session = Depends(get_db), current_use
         return_type=data.return_type,
         remarks=data.remarks,
         returned_by_name=data.returned_by_name,
-        received_by_id=current_user.id
+        received_by_id=current_user.id,
+        tenant_id=tenant_id,
+        site_id=site_id
     )
     db.add(ret)
     db.flush()
@@ -196,7 +218,6 @@ def create_return(data: ReturnCreate, db: Session = Depends(get_db), current_use
         )
         db.add(ret_item)
 
-        # Increase stock for returned materials
         update_stock(
             db=db,
             material_id=item_data.material_id,
@@ -206,6 +227,8 @@ def create_return(data: ReturnCreate, db: Session = Depends(get_db), current_use
             reference_type="Return",
             reference_id=ret.id,
             reference_number=return_number,
+            tenant_id=tenant_id,
+            site_id=site_id,
             project_id=data.project_id,
             block_id=data.returned_from_block_id,
             user_id=current_user.id
@@ -221,9 +244,11 @@ def create_return(data: ReturnCreate, db: Session = Depends(get_db), current_use
 def list_transfers(
     project_id: Optional[int] = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_permission("transfers", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
 ):
-    q = db.query(StockTransfer)
+    q = db.query(StockTransfer).filter(StockTransfer.tenant_id == tenant_id, StockTransfer.site_id == site_id)
     if project_id:
         q = q.filter(StockTransfer.project_id == project_id)
     transfers = q.order_by(StockTransfer.created_at.desc()).all()
@@ -255,11 +280,16 @@ def list_transfers(
 
 
 @router.post("/transfers")
-def create_transfer(data: TransferCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def create_transfer(
+    data: TransferCreate, db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("transfers", "create")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
     if data.from_warehouse_id == data.to_warehouse_id:
         raise HTTPException(status_code=400, detail="Source and destination warehouse cannot be the same")
 
-    count = db.query(StockTransfer).count() + 1
+    count = db.query(StockTransfer).filter(StockTransfer.tenant_id == tenant_id, StockTransfer.site_id == site_id).count() + 1
     transfer_number = f"TRF-{datetime.now().strftime('%Y%m')}-{count:04d}"
 
     transfer = StockTransfer(
@@ -270,16 +300,19 @@ def create_transfer(data: TransferCreate, db: Session = Depends(get_db), current
         remarks=data.remarks,
         created_by_id=current_user.id,
         status="Completed",
-        completed_at=datetime.utcnow()
+        completed_at=datetime.utcnow(),
+        tenant_id=tenant_id,
+        site_id=site_id
     )
     db.add(transfer)
     db.flush()
 
     for item_data in data.items:
-        # Check stock
         stock = db.query(CurrentStock).filter(
             CurrentStock.material_id == item_data.material_id,
-            CurrentStock.warehouse_id == data.from_warehouse_id
+            CurrentStock.warehouse_id == data.from_warehouse_id,
+            CurrentStock.tenant_id == tenant_id,
+            CurrentStock.site_id == site_id
         ).first()
         if not stock or stock.quantity < item_data.quantity:
             mat = db.query(Material).filter(Material.id == item_data.material_id).first()
@@ -296,7 +329,6 @@ def create_transfer(data: TransferCreate, db: Session = Depends(get_db), current
         )
         db.add(t_item)
 
-        # Decrease from source
         update_stock(
             db=db,
             material_id=item_data.material_id,
@@ -306,11 +338,12 @@ def create_transfer(data: TransferCreate, db: Session = Depends(get_db), current
             reference_type="Transfer",
             reference_id=transfer.id,
             reference_number=transfer_number,
+            tenant_id=tenant_id,
+            site_id=site_id,
             project_id=data.project_id,
             user_id=current_user.id
         )
 
-        # Increase in destination
         update_stock(
             db=db,
             material_id=item_data.material_id,
@@ -320,9 +353,12 @@ def create_transfer(data: TransferCreate, db: Session = Depends(get_db), current
             reference_type="Transfer",
             reference_id=transfer.id,
             reference_number=transfer_number,
+            tenant_id=tenant_id,
+            site_id=site_id,
             project_id=data.project_id,
             user_id=current_user.id
         )
 
     db.commit()
     return {"id": transfer.id, "transfer_number": transfer_number, "message": "Stock transfer completed"}
+

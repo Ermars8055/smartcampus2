@@ -12,19 +12,27 @@ from app.models import (
     Material, User, Block, Project, Vendor, AuditLog, UOM
 )
 from app.schemas import PRCreate, PRUpdate, PROut, POCreate, POUpdate, POOut, POItemOut
-from app.auth import get_current_user
+from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
 
 router = APIRouter(prefix="/api/procurement", tags=["Procurement"])
 
 
-def generate_pr_number(db: Session) -> str:
-    count = db.query(PurchaseRequest).count() + 1
+def generate_pr_number(db: Session, tenant_id: int, site_id: int) -> str:
+    count = db.query(PurchaseRequest).filter(
+        PurchaseRequest.tenant_id == tenant_id, PurchaseRequest.site_id == site_id
+    ).count() + 1
     return f"PR-{datetime.now().strftime('%Y%m')}-{count:04d}"
 
 
-def generate_po_number(db: Session) -> str:
-    count = db.query(PurchaseOrder).count() + 1
+def generate_po_number(db: Session, tenant_id: int, site_id: int) -> str:
+    count = db.query(PurchaseOrder).filter(
+        PurchaseOrder.tenant_id == tenant_id, PurchaseOrder.site_id == site_id
+    ).count() + 1
     return f"PO-{datetime.now().strftime('%Y%m')}-{count:04d}"
+
+
+class RejectBody(BaseModel):
+    remarks: Optional[str] = None
 
 
 # ── Purchase Requests ────────────────────────────────────────────────────
@@ -34,9 +42,13 @@ def list_purchase_requests(
     status: Optional[str] = None,
     project_id: Optional[int] = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_permission("purchase_requests", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
 ):
-    q = db.query(PurchaseRequest)
+    q = db.query(PurchaseRequest).filter(
+        PurchaseRequest.tenant_id == tenant_id, PurchaseRequest.site_id == site_id
+    )
     if status:
         q = q.filter(PurchaseRequest.status == status)
     if project_id:
@@ -68,8 +80,15 @@ def list_purchase_requests(
 
 
 @router.get("/pr/{id}")
-def get_purchase_request(id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    pr = db.query(PurchaseRequest).filter(PurchaseRequest.id == id).first()
+def get_purchase_request(
+    id: int, db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("purchase_requests", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    pr = db.query(PurchaseRequest).filter(
+        PurchaseRequest.id == id, PurchaseRequest.tenant_id == tenant_id, PurchaseRequest.site_id == site_id
+    ).first()
     if not pr:
         raise HTTPException(status_code=404, detail="PR not found")
     items = []
@@ -95,14 +114,21 @@ def get_purchase_request(id: int, db: Session = Depends(get_db), current_user: U
 
 
 @router.post("/pr")
-def create_purchase_request(data: PRCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def create_purchase_request(
+    data: PRCreate, db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("purchase_requests", "create")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
     pr = PurchaseRequest(
-        pr_number=generate_pr_number(db),
+        pr_number=generate_pr_number(db, tenant_id, site_id),
         requester_id=current_user.id,
         project_id=data.project_id,
         required_for_block_id=data.required_for_block_id,
         required_date=data.required_date,
-        remarks=data.remarks
+        remarks=data.remarks,
+        tenant_id=tenant_id,
+        site_id=site_id
     )
     db.add(pr)
     db.flush()
@@ -119,8 +145,15 @@ def create_purchase_request(data: PRCreate, db: Session = Depends(get_db), curre
 
 
 @router.put("/pr/{id}")
-def update_purchase_request(id: int, data: PRUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    pr = db.query(PurchaseRequest).filter(PurchaseRequest.id == id).first()
+def update_purchase_request(
+    id: int, data: PRUpdate, db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("purchase_requests", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    pr = db.query(PurchaseRequest).filter(
+        PurchaseRequest.id == id, PurchaseRequest.tenant_id == tenant_id, PurchaseRequest.site_id == site_id
+    ).first()
     if not pr:
         raise HTTPException(status_code=404, detail="PR not found")
     update_data = data.model_dump(exclude_unset=True)
@@ -135,28 +168,38 @@ def update_purchase_request(id: int, data: PRUpdate, db: Session = Depends(get_d
 
 
 @router.post("/pr/{id}/approve")
-def approve_pr(id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    pr = db.query(PurchaseRequest).filter(PurchaseRequest.id == id).first()
+def approve_pr(
+    id: int, db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("purchase_requests", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    pr = db.query(PurchaseRequest).filter(
+        PurchaseRequest.id == id, PurchaseRequest.tenant_id == tenant_id, PurchaseRequest.site_id == site_id
+    ).first()
     if not pr:
         raise HTTPException(status_code=404, detail="PR not found")
-    # Draft → Submitted (needs review), Submitted → Approved
     if pr.status == 'Draft':
         pr.status = "Submitted"
     else:
         pr.status = "Approved"
         pr.approved_by_id = current_user.id
         pr.approved_at = datetime.utcnow()
-    db.add(AuditLog(user_id=current_user.id, action="APPROVE", entity_type="PurchaseRequest", entity_id=id))
+    db.add(AuditLog(tenant_id=tenant_id, site_id=site_id, user_id=current_user.id, action="APPROVE", entity_type="PurchaseRequest", entity_id=id))
     db.commit()
     return {"message": f"PR status changed to {pr.status}"}
 
 
-class RejectBody(BaseModel):
-    remarks: Optional[str] = None
-
 @router.post("/pr/{id}/reject")
-def reject_pr(id: int, body: RejectBody = RejectBody(), db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    pr = db.query(PurchaseRequest).filter(PurchaseRequest.id == id).first()
+def reject_pr(
+    id: int, body: RejectBody = RejectBody(), db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("purchase_requests", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    pr = db.query(PurchaseRequest).filter(
+        PurchaseRequest.id == id, PurchaseRequest.tenant_id == tenant_id, PurchaseRequest.site_id == site_id
+    ).first()
     if not pr:
         raise HTTPException(status_code=404, detail="PR not found")
     pr.status = "Rejected"
@@ -166,9 +209,33 @@ def reject_pr(id: int, body: RejectBody = RejectBody(), db: Session = Depends(ge
     return {"message": "PR rejected"}
 
 
+@router.post("/pr/{id}/hold")
+def hold_pr(
+    id: int, db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("purchase_requests", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    pr = db.query(PurchaseRequest).filter(
+        PurchaseRequest.id == id, PurchaseRequest.tenant_id == tenant_id, PurchaseRequest.site_id == site_id
+    ).first()
+    if not pr:
+        raise HTTPException(status_code=404, detail="PR not found")
+    pr.status = "On Hold"
+    db.commit()
+    return {"message": "PR placed on hold"}
+
+
 @router.post("/pr/{id}/short-close")
-def short_close_pr(id: int, body: RejectBody = RejectBody(), db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    pr = db.query(PurchaseRequest).filter(PurchaseRequest.id == id).first()
+def short_close_pr(
+    id: int, body: RejectBody = RejectBody(), db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("purchase_requests", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    pr = db.query(PurchaseRequest).filter(
+        PurchaseRequest.id == id, PurchaseRequest.tenant_id == tenant_id, PurchaseRequest.site_id == site_id
+    ).first()
     if not pr:
         raise HTTPException(status_code=404, detail="PR not found")
     pr.status = "Short Closed"
@@ -185,9 +252,13 @@ def list_purchase_orders(
     status: Optional[str] = None,
     project_id: Optional[int] = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_permission("purchase_orders", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
 ):
-    q = db.query(PurchaseOrder)
+    q = db.query(PurchaseOrder).filter(
+        PurchaseOrder.tenant_id == tenant_id, PurchaseOrder.site_id == site_id
+    )
     if status:
         q = q.filter(PurchaseOrder.status == status)
     if project_id:
@@ -206,7 +277,6 @@ def list_purchase_orders(
                 material_code=mat.code if mat else None,
                 uom_name=mat.uom.name if mat and mat.uom else None
             ))
-        # Resolve PR number for display
         pr_number = None
         if po.pr_id:
             linked_pr = db.query(PurchaseRequest).filter(PurchaseRequest.id == po.pr_id).first()
@@ -225,8 +295,15 @@ def list_purchase_orders(
 
 
 @router.get("/po/{id}")
-def get_purchase_order(id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    po = db.query(PurchaseOrder).filter(PurchaseOrder.id == id).first()
+def get_purchase_order(
+    id: int, db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("purchase_orders", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    po = db.query(PurchaseOrder).filter(
+        PurchaseOrder.id == id, PurchaseOrder.tenant_id == tenant_id, PurchaseOrder.site_id == site_id
+    ).first()
     if not po:
         raise HTTPException(status_code=404, detail="PO not found")
     items = []
@@ -253,16 +330,23 @@ def get_purchase_order(id: int, db: Session = Depends(get_db), current_user: Use
 
 
 @router.post("/po")
-def create_purchase_order(data: POCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def create_purchase_order(
+    data: POCreate, db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("purchase_orders", "create")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
     po = PurchaseOrder(
-        po_number=generate_po_number(db),
+        po_number=generate_po_number(db, tenant_id, site_id),
         vendor_id=data.vendor_id,
         project_id=data.project_id,
         pr_id=data.pr_id,
         delivery_date=data.delivery_date,
         terms=data.terms,
         created_by_id=current_user.id,
-        total_amount=0
+        total_amount=0,
+        tenant_id=tenant_id,
+        site_id=site_id
     )
     db.add(po)
     db.flush()
@@ -282,9 +366,10 @@ def create_purchase_order(data: POCreate, db: Session = Depends(get_db), current
 
     po.total_amount = total
 
-    # Update PR status if linked
     if data.pr_id:
-        pr = db.query(PurchaseRequest).filter(PurchaseRequest.id == data.pr_id).first()
+        pr = db.query(PurchaseRequest).filter(
+            PurchaseRequest.id == data.pr_id, PurchaseRequest.tenant_id == tenant_id, PurchaseRequest.site_id == site_id
+        ).first()
         if pr:
             pr.status = "Converted to PO"
 
@@ -294,8 +379,15 @@ def create_purchase_order(data: POCreate, db: Session = Depends(get_db), current
 
 
 @router.put("/po/{id}")
-def update_purchase_order(id: int, data: POUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    po = db.query(PurchaseOrder).filter(PurchaseOrder.id == id).first()
+def update_purchase_order(
+    id: int, data: POUpdate, db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("purchase_orders", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    po = db.query(PurchaseOrder).filter(
+        PurchaseOrder.id == id, PurchaseOrder.tenant_id == tenant_id, PurchaseOrder.site_id == site_id
+    ).first()
     if not po:
         raise HTTPException(status_code=404, detail="PO not found")
     update_data = data.model_dump(exclude_unset=True)
@@ -309,8 +401,15 @@ def update_purchase_order(id: int, data: POUpdate, db: Session = Depends(get_db)
 
 
 @router.post("/po/{id}/approve")
-def approve_po(id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    po = db.query(PurchaseOrder).filter(PurchaseOrder.id == id).first()
+def approve_po(
+    id: int, db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("purchase_orders", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    po = db.query(PurchaseOrder).filter(
+        PurchaseOrder.id == id, PurchaseOrder.tenant_id == tenant_id, PurchaseOrder.site_id == site_id
+    ).first()
     if not po:
         raise HTTPException(status_code=404, detail="PO not found")
     po.status = "Approved"
@@ -320,8 +419,15 @@ def approve_po(id: int, db: Session = Depends(get_db), current_user: User = Depe
     return {"message": "PO approved successfully"}
 
 @router.post("/po/{id}/reject")
-def reject_po(id: int, body: RejectBody = RejectBody(), db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    po = db.query(PurchaseOrder).filter(PurchaseOrder.id == id).first()
+def reject_po(
+    id: int, body: RejectBody = RejectBody(), db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("purchase_orders", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    po = db.query(PurchaseOrder).filter(
+        PurchaseOrder.id == id, PurchaseOrder.tenant_id == tenant_id, PurchaseOrder.site_id == site_id
+    ).first()
     if not po:
         raise HTTPException(status_code=404, detail="PO not found")
     po.status = "Rejected"
@@ -331,8 +437,15 @@ def reject_po(id: int, body: RejectBody = RejectBody(), db: Session = Depends(ge
     return {"message": "PO rejected successfully"}
 
 @router.post("/po/{id}/hold")
-def hold_po(id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    po = db.query(PurchaseOrder).filter(PurchaseOrder.id == id).first()
+def hold_po(
+    id: int, db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("purchase_orders", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    po = db.query(PurchaseOrder).filter(
+        PurchaseOrder.id == id, PurchaseOrder.tenant_id == tenant_id, PurchaseOrder.site_id == site_id
+    ).first()
     if not po:
         raise HTTPException(status_code=404, detail="PO not found")
     po.status = "On Hold"
@@ -340,22 +453,35 @@ def hold_po(id: int, db: Session = Depends(get_db), current_user: User = Depends
     return {"message": "PO placed on hold successfully"}
 
 @router.post("/po/{id}/send")
-def send_po(id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    po = db.query(PurchaseOrder).filter(PurchaseOrder.id == id).first()
+def send_po(
+    id: int, db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("purchase_orders", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    po = db.query(PurchaseOrder).filter(
+        PurchaseOrder.id == id, PurchaseOrder.tenant_id == tenant_id, PurchaseOrder.site_id == site_id
+    ).first()
     if not po:
         raise HTTPException(status_code=404, detail="PO not found")
     if po.status != "Approved":
         raise HTTPException(status_code=400, detail="Only approved POs can be sent.")
     
     po.status = "Sent to Vendor"
-    # In a full deployment, trigger PDF generation + SMTP Email task here
     db.commit()
     return {"message": "PO data successfully packaged and sent to Vendor."}
 
 
 @router.post("/po/{id}/short-close")
-def short_close_po(id: int, body: RejectBody = RejectBody(), db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    po = db.query(PurchaseOrder).filter(PurchaseOrder.id == id).first()
+def short_close_po(
+    id: int, body: RejectBody = RejectBody(), db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("purchase_orders", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    po = db.query(PurchaseOrder).filter(
+        PurchaseOrder.id == id, PurchaseOrder.tenant_id == tenant_id, PurchaseOrder.site_id == site_id
+    ).first()
     if not po:
         raise HTTPException(status_code=404, detail="PO not found")
     po.status = "Short Closed"
@@ -363,4 +489,3 @@ def short_close_po(id: int, body: RejectBody = RejectBody(), db: Session = Depen
         po.terms = (po.terms or '') + f'\n[Short Closed: {body.remarks}]'
     db.commit()
     return {"message": "PO Short Closed"}
-

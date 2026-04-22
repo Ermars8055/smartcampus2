@@ -12,7 +12,7 @@ from app.schemas import (
     SubCategoryCreate, SubCategoryOut,
     UOMCreate, UOMOut
 )
-from app.auth import get_current_user
+from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
 
 router = APIRouter(prefix="/api", tags=["Master Data"])
 
@@ -20,13 +20,28 @@ router = APIRouter(prefix="/api", tags=["Master Data"])
 # ── Categories ───────────────────────────────────────────────────────────
 
 @router.get("/categories", response_model=List[CategoryOut])
-def list_categories(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    return db.query(Category).filter(Category.is_active == True).order_by(Category.name).all()
+def list_categories(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("categories", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    return db.query(Category).filter(
+        Category.tenant_id == tenant_id,
+        Category.site_id == site_id,
+        Category.is_active == True
+    ).order_by(Category.name).all()
 
 
 @router.post("/categories", response_model=CategoryOut)
-def create_category(data: CategoryCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    cat = Category(**data.model_dump())
+def create_category(
+    data: CategoryCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("categories", "create")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    cat = Category(**data.model_dump(), tenant_id=tenant_id, site_id=site_id)
     db.add(cat)
     db.commit()
     db.refresh(cat)
@@ -34,8 +49,17 @@ def create_category(data: CategoryCreate, db: Session = Depends(get_db), current
 
 
 @router.put("/categories/{id}", response_model=CategoryOut)
-def update_category(id: int, data: CategoryCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    cat = db.query(Category).filter(Category.id == id).first()
+def update_category(
+    id: int,
+    data: CategoryCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("categories", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    cat = db.query(Category).filter(
+        Category.id == id, Category.tenant_id == tenant_id, Category.site_id == site_id
+    ).first()
     if not cat:
         raise HTTPException(status_code=404, detail="Category not found")
     for k, v in data.model_dump().items():
@@ -46,8 +70,16 @@ def update_category(id: int, data: CategoryCreate, db: Session = Depends(get_db)
 
 
 @router.delete("/categories/{id}")
-def delete_category(id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    cat = db.query(Category).filter(Category.id == id).first()
+def delete_category(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("categories", "delete")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    cat = db.query(Category).filter(
+        Category.id == id, Category.tenant_id == tenant_id, Category.site_id == site_id
+    ).first()
     if not cat:
         raise HTTPException(status_code=404, detail="Category not found")
     cat.is_active = False
@@ -61,9 +93,15 @@ def delete_category(id: int, db: Session = Depends(get_db), current_user: User =
 def list_subcategories(
     category_id: Optional[int] = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_permission("categories", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
 ):
-    q = db.query(SubCategory).filter(SubCategory.is_active == True)
+    q = db.query(SubCategory).filter(
+        SubCategory.tenant_id == tenant_id,
+        SubCategory.site_id == site_id,
+        SubCategory.is_active == True
+    )
     if category_id:
         q = q.filter(SubCategory.category_id == category_id)
     subs = q.order_by(SubCategory.name).all()
@@ -79,8 +117,14 @@ def list_subcategories(
 
 
 @router.post("/subcategories", response_model=SubCategoryOut)
-def create_subcategory(data: SubCategoryCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    sub = SubCategory(**data.model_dump())
+def create_subcategory(
+    data: SubCategoryCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("categories", "create")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    sub = SubCategory(**data.model_dump(), tenant_id=tenant_id, site_id=site_id)
     db.add(sub)
     db.commit()
     db.refresh(sub)
@@ -90,13 +134,28 @@ def create_subcategory(data: SubCategoryCreate, db: Session = Depends(get_db), c
 # ── UOM ──────────────────────────────────────────────────────────────────
 
 @router.get("/uom", response_model=List[UOMOut])
-def list_uom(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    return db.query(UOM).filter(UOM.is_active == True).order_by(UOM.name).all()
+def list_uom(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("materials", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    return db.query(UOM).filter(
+        UOM.tenant_id == tenant_id,
+        UOM.site_id == site_id,
+        UOM.is_active == True
+    ).order_by(UOM.name).all()
 
 
 @router.post("/uom", response_model=UOMOut)
-def create_uom(data: UOMCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    uom = UOM(**data.model_dump())
+def create_uom(
+    data: UOMCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("materials", "create")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    uom = UOM(**data.model_dump(), tenant_id=tenant_id, site_id=site_id)
     db.add(uom)
     db.commit()
     db.refresh(uom)
@@ -112,9 +171,15 @@ def list_materials(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_permission("materials", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
 ):
-    q = db.query(Material).filter(Material.is_active == True)
+    q = db.query(Material).filter(
+        Material.tenant_id == tenant_id,
+        Material.site_id == site_id,
+        Material.is_active == True
+    )
     if search:
         q = q.filter(or_(
             Material.name.ilike(f"%{search}%"),
@@ -128,7 +193,7 @@ def list_materials(
 
     result = []
     for m in materials:
-        stock = db.query(CurrentStock).filter(CurrentStock.material_id == m.id).all()
+        stock = db.query(CurrentStock).filter(CurrentStock.material_id == m.id, CurrentStock.site_id == site_id).all()
         total_stock = sum(s.quantity for s in stock)
         result.append(MaterialOut(
             id=m.id, code=m.code, name=m.name,
@@ -149,11 +214,19 @@ def list_materials(
 
 
 @router.get("/materials/{id}")
-def get_material(id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    m = db.query(Material).filter(Material.id == id).first()
+def get_material(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("materials", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    m = db.query(Material).filter(
+        Material.id == id, Material.tenant_id == tenant_id, Material.site_id == site_id
+    ).first()
     if not m:
         raise HTTPException(status_code=404, detail="Material not found")
-    stock = db.query(CurrentStock).filter(CurrentStock.material_id == m.id).all()
+    stock = db.query(CurrentStock).filter(CurrentStock.material_id == m.id, CurrentStock.site_id == site_id).all()
     total_stock = sum(s.quantity for s in stock)
     return MaterialOut(
         id=m.id, code=m.code, name=m.name,
@@ -173,39 +246,75 @@ def get_material(id: int, db: Session = Depends(get_db), current_user: User = De
 
 
 @router.post("/materials")
-def create_material(data: MaterialCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    existing = db.query(Material).filter(Material.code == data.code).first()
+def create_material(
+    data: MaterialCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("materials", "create")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    existing = db.query(Material).filter(
+        Material.code == data.code, Material.tenant_id == tenant_id, Material.site_id == site_id
+    ).first()
     if existing:
-        raise HTTPException(status_code=400, detail="Material code already exists")
-    mat = Material(**data.model_dump())
+        raise HTTPException(status_code=400, detail="Material code already exists in this site")
+    mat = Material(**data.model_dump(), tenant_id=tenant_id, site_id=site_id)
     db.add(mat)
     db.commit()
     db.refresh(mat)
-    db.add(AuditLog(user_id=current_user.id, action="CREATE", entity_type="Material", entity_id=mat.id,
-                     new_values=f"Created material: {mat.name}"))
+    db.add(AuditLog(
+        tenant_id=tenant_id, site_id=site_id, user_id=current_user.id,
+        action="CREATE", entity_type="Material", entity_id=mat.id,
+        new_values=f"Created material: {mat.name}"
+    ))
     db.commit()
     return {"id": mat.id, "message": "Material created successfully"}
 
 
 @router.put("/materials/{id}")
-def update_material(id: int, data: MaterialUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    mat = db.query(Material).filter(Material.id == id).first()
+def update_material(
+    id: int,
+    data: MaterialUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("materials", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    mat = db.query(Material).filter(
+        Material.id == id, Material.tenant_id == tenant_id, Material.site_id == site_id
+    ).first()
     if not mat:
         raise HTTPException(status_code=404, detail="Material not found")
     update_data = data.model_dump(exclude_unset=True)
     for k, v in update_data.items():
         setattr(mat, k, v)
     db.commit()
-    db.add(AuditLog(user_id=current_user.id, action="UPDATE", entity_type="Material", entity_id=id))
+    db.add(AuditLog(
+        tenant_id=tenant_id, site_id=site_id, user_id=current_user.id,
+        action="UPDATE", entity_type="Material", entity_id=id
+    ))
     db.commit()
     return {"message": "Material updated successfully"}
 
 
 @router.delete("/materials/{id}")
-def delete_material(id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    mat = db.query(Material).filter(Material.id == id).first()
+def delete_material(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("materials", "delete")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    mat = db.query(Material).filter(
+        Material.id == id, Material.tenant_id == tenant_id, Material.site_id == site_id
+    ).first()
     if not mat:
         raise HTTPException(status_code=404, detail="Material not found")
     mat.is_active = False
+    db.commit()
+    db.add(AuditLog(
+        tenant_id=tenant_id, site_id=site_id, user_id=current_user.id,
+        action="DELETE", entity_type="Material", entity_id=id
+    ))
     db.commit()
     return {"message": "Material deactivated"}

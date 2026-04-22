@@ -7,13 +7,15 @@ from typing import Optional
 from app.database import get_db
 from app.models import GateEntry, User, Vendor, PurchaseOrder, PurchaseOrderItem, Material
 from app.schemas import GateEntryCreate, GateEntryOut
-from app.auth import get_current_user
+from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
 
 router = APIRouter(prefix="/api/gate-entries", tags=["Gate Entry"])
 
 
-def generate_entry_number(db: Session) -> str:
-    count = db.query(GateEntry).count() + 1
+def generate_entry_number(db: Session, tenant_id: int, site_id: int) -> str:
+    count = db.query(GateEntry).filter(
+        GateEntry.tenant_id == tenant_id, GateEntry.site_id == site_id
+    ).count() + 1
     return f"GE-{datetime.now().strftime('%Y%m%d')}-{count:04d}"
 
 
@@ -22,9 +24,13 @@ def list_gate_entries(
     status: Optional[str] = None,
     project_id: Optional[int] = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_permission("gate_entry", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
 ):
-    q = db.query(GateEntry)
+    q = db.query(GateEntry).filter(
+        GateEntry.tenant_id == tenant_id, GateEntry.site_id == site_id
+    )
     if status:
         q = q.filter(GateEntry.status == status)
     if project_id:
@@ -49,13 +55,17 @@ def list_gate_entries(
 
 
 @router.post("")
-def create_gate_entry(data: GateEntryCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    # Validate vehicle number
+def create_gate_entry(
+    data: GateEntryCreate, db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("gate_entry", "create")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
     if not data.vehicle_number or not data.vehicle_number.strip():
         raise HTTPException(status_code=400, detail="Vehicle number is required")
 
     entry = GateEntry(
-        entry_number=generate_entry_number(db),
+        entry_number=generate_entry_number(db, tenant_id, site_id),
         recorded_by_id=current_user.id,
         arrival_time=datetime.utcnow(),
         status="Gate Entry Created",
@@ -67,19 +77,19 @@ def create_gate_entry(data: GateEntryCreate, db: Session = Depends(get_db), curr
         quantity=data.quantity,
         driver_name=data.driver_name,
         driver_phone=data.driver_phone,
-        remarks=data.remarks
+        remarks=data.remarks,
+        tenant_id=tenant_id,
+        site_id=site_id
     )
     db.add(entry)
     db.flush()
 
-    # Update PO item received quantities if linked to a PO
     if data.po_id:
-        po = db.query(PurchaseOrder).filter(PurchaseOrder.id == data.po_id).first()
+        po = db.query(PurchaseOrder).filter(
+            PurchaseOrder.id == data.po_id, PurchaseOrder.tenant_id == tenant_id, PurchaseOrder.site_id == site_id
+        ).first()
         if po:
-            # Update the gate entry status
             entry.status = "Awaiting GRN"
-
-            # Update PO status based on receipt
             any_received = any(item.received_quantity > 0 for item in po.items)
             all_received = all(item.received_quantity >= item.quantity for item in po.items)
             if all_received:
@@ -93,8 +103,15 @@ def create_gate_entry(data: GateEntryCreate, db: Session = Depends(get_db), curr
 
 
 @router.put("/{id}/status")
-def update_gate_entry_status(id: int, status: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    entry = db.query(GateEntry).filter(GateEntry.id == id).first()
+def update_gate_entry_status(
+    id: int, status: str, db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("gate_entry", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    entry = db.query(GateEntry).filter(
+        GateEntry.id == id, GateEntry.tenant_id == tenant_id, GateEntry.site_id == site_id
+    ).first()
     if not entry:
         raise HTTPException(status_code=404, detail="Gate Entry not found")
     entry.status = status

@@ -1,68 +1,89 @@
-"""JWT authentication and authorization utilities."""
-
+"""JWT authentication with multi-tenant workspace support."""
 from datetime import datetime, timedelta
-from typing import Optional
-from fastapi import Depends, HTTPException, status
+from typing import Optional, List
+from fastapi import Depends, HTTPException, status, Header
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
-
 from app.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 from app.database import get_db
-from app.models import User
-from app.schemas import TokenData
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
+def verify_password(plain, hashed):
+    return pwd_context.verify(plain, hashed)
 
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
-
-
-def get_password_hash(password: str) -> str:
+def get_password_hash(password):
     return pwd_context.hash(password)
 
-
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
     expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
-
-async def get_current_user(
-    token: str = Depends(oauth2_scheme),
-    db: Session = Depends(get_db)
-) -> User:
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
+async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    from app.models import User
+    cred_exc = HTTPException(status_code=401, detail="Invalid credentials", headers={"WWW-Authenticate": "Bearer"})
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
-            raise credentials_exception
-        token_data = TokenData(username=username, role=payload.get("role"))
+        username = payload.get("sub")
+        if not username:
+            raise cred_exc
     except JWTError:
-        raise credentials_exception
-
-    user = db.query(User).filter(User.username == token_data.username).first()
-    if user is None or not user.is_active:
-        raise credentials_exception
+        raise cred_exc
+    user = db.query(User).filter(User.username == username, User.is_deleted == False).first()
+    if not user or not user.is_active:
+        raise cred_exc
+    # Attach tenant context from JWT
+    user._tenant_id = payload.get("tenant_id")
+    user._site_ids = payload.get("site_ids", [])
+    user._roles = payload.get("roles", [])
+    user._permissions = payload.get("permissions", {})
+    user._is_platform_admin = payload.get("is_platform_admin", False)
+    user._active_site_id = payload.get("active_site_id")
     return user
 
+def get_tenant_id(current_user = Depends(get_current_user)):
+    tid = getattr(current_user, '_tenant_id', None)
+    if not tid and not getattr(current_user, '_is_platform_admin', False):
+        raise HTTPException(400, "No tenant context")
+    return tid
 
-def require_roles(*roles: str):
-    """Dependency factory that checks if current user has one of the required roles."""
-    async def role_checker(current_user: User = Depends(get_current_user)):
-        if current_user.role not in roles:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Access denied. Required roles: {', '.join(roles)}"
-            )
+def get_site_id(current_user = Depends(get_current_user), x_site_id: Optional[str] = Header(None)):
+    if x_site_id:
+        sid = int(x_site_id)
+        if not getattr(current_user, '_is_platform_admin', False):
+            if sid not in getattr(current_user, '_site_ids', []):
+                raise HTTPException(403, "No access to this site")
+        return sid
+    active = getattr(current_user, '_active_site_id', None)
+    if active:
+        return active
+    sites = getattr(current_user, '_site_ids', [])
+    if sites:
+        return sites[0]
+    if getattr(current_user, '_is_platform_admin', False):
+        return None
+    raise HTTPException(400, "No site context")
+
+def require_permission(resource: str, operation: str = "read"):
+    async def checker(current_user = Depends(get_current_user)):
+        if getattr(current_user, '_is_platform_admin', False):
+            return current_user
+        perms = getattr(current_user, '_permissions', {})
+        res_perms = perms.get(resource, {})
+        key = f"can_{operation}"
+        if not res_perms.get(key, False):
+            raise HTTPException(403, f"Permission denied: {operation} on {resource}")
         return current_user
-    return role_checker
+    return checker
+
+def require_platform_admin():
+    async def checker(current_user = Depends(get_current_user)):
+        if not getattr(current_user, '_is_platform_admin', False):
+            raise HTTPException(403, "Platform admin required")
+        return current_user
+    return checker

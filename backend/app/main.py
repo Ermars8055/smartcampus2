@@ -10,8 +10,11 @@ from app.database import engine, SessionLocal, Base
 from app.models import *  # noqa: F401 — import all models so tables are created
 
 # Import routers
-from app.routers import auth, dashboard, materials, vendors, organizations
-from app.routers import procurement, gate_entry, grn, store_ops, inventory_admin
+from app.routers import (
+    auth, dashboard, materials, vendors, organizations,
+    procurement, gate_entry, grn, store_ops, inventory_admin,
+    saas_admin, rbac, sites, auto_pr, alerts
+)
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -38,7 +41,13 @@ os.makedirs("uploads", exist_ok=True)
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 # Register routers
+
 app.include_router(auth.router)
+app.include_router(alerts.router)
+app.include_router(saas_admin.router)
+app.include_router(rbac.router)
+app.include_router(sites.router)
+app.include_router(auto_pr.router)
 app.include_router(dashboard.router)
 app.include_router(materials.router)
 app.include_router(vendors.router)

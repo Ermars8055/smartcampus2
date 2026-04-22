@@ -7,7 +7,7 @@ from typing import Optional, List
 from app.database import get_db
 from app.models import Vendor, VendorCategory, Category, User
 from app.schemas import VendorCreate, VendorUpdate, VendorOut
-from app.auth import get_current_user
+from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
 
 router = APIRouter(prefix="/api/vendors", tags=["Vendors"])
 
@@ -16,9 +16,13 @@ router = APIRouter(prefix="/api/vendors", tags=["Vendors"])
 def list_vendors(
     search: Optional[str] = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_permission("vendors", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
 ):
-    q = db.query(Vendor).filter(Vendor.is_active == True)
+    q = db.query(Vendor).filter(
+        Vendor.tenant_id == tenant_id, Vendor.site_id == site_id, Vendor.is_active == True
+    )
     if search:
         q = q.filter(or_(
             Vendor.name.ilike(f"%{search}%"),
@@ -44,8 +48,15 @@ def list_vendors(
 
 
 @router.get("/{id}")
-def get_vendor(id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    v = db.query(Vendor).filter(Vendor.id == id).first()
+def get_vendor(
+    id: int, db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("vendors", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    v = db.query(Vendor).filter(
+        Vendor.id == id, Vendor.tenant_id == tenant_id, Vendor.site_id == site_id
+    ).first()
     if not v:
         raise HTTPException(status_code=404, detail="Vendor not found")
     cats = db.query(Category.name).join(
@@ -68,12 +79,19 @@ def get_vendor(id: int, db: Session = Depends(get_db), current_user: User = Depe
 
 
 @router.post("")
-def create_vendor(data: VendorCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    existing = db.query(Vendor).filter(Vendor.code == data.code).first()
+def create_vendor(
+    data: VendorCreate, db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("vendors", "create")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    existing = db.query(Vendor).filter(
+        Vendor.code == data.code, Vendor.tenant_id == tenant_id, Vendor.site_id == site_id
+    ).first()
     if existing:
         raise HTTPException(status_code=400, detail="Vendor code already exists")
     vendor_data = data.model_dump(exclude={"category_ids"})
-    vendor = Vendor(**vendor_data)
+    vendor = Vendor(**vendor_data, tenant_id=tenant_id, site_id=site_id)
     db.add(vendor)
     db.flush()
     for cat_id in data.category_ids:
@@ -84,8 +102,15 @@ def create_vendor(data: VendorCreate, db: Session = Depends(get_db), current_use
 
 
 @router.put("/{id}")
-def update_vendor(id: int, data: VendorUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    vendor = db.query(Vendor).filter(Vendor.id == id).first()
+def update_vendor(
+    id: int, data: VendorUpdate, db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("vendors", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    vendor = db.query(Vendor).filter(
+        Vendor.id == id, Vendor.tenant_id == tenant_id, Vendor.site_id == site_id
+    ).first()
     if not vendor:
         raise HTTPException(status_code=404, detail="Vendor not found")
     update_data = data.model_dump(exclude_unset=True, exclude={"category_ids"})
@@ -100,8 +125,15 @@ def update_vendor(id: int, data: VendorUpdate, db: Session = Depends(get_db), cu
 
 
 @router.delete("/{id}")
-def delete_vendor(id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    vendor = db.query(Vendor).filter(Vendor.id == id).first()
+def delete_vendor(
+    id: int, db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("vendors", "delete")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    vendor = db.query(Vendor).filter(
+        Vendor.id == id, Vendor.tenant_id == tenant_id, Vendor.site_id == site_id
+    ).first()
     if not vendor:
         raise HTTPException(status_code=404, detail="Vendor not found")
     vendor.is_active = False

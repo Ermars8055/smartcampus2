@@ -17,6 +17,7 @@ const API_BASE = import.meta.env.VITE_API_URL ||
 const api = axios.create({
   baseURL: API_BASE,
   headers: { 'Content-Type': 'application/json' },
+  timeout: 15000,
 });
 
 // Add auth token to every request
@@ -24,6 +25,10 @@ api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+  }
+  const activeSiteId = localStorage.getItem('activeSiteId');
+  if (activeSiteId) {
+    config.headers['X-Site-Id'] = activeSiteId;
   }
   return config;
 });
@@ -35,6 +40,7 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
+      localStorage.removeItem('activeSiteId');
       if (window.location.pathname !== '/login') {
         window.location.href = '/login';
       }

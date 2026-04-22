@@ -9,7 +9,7 @@ from app.schemas import (
     OrganizationCreate, OrganizationOut, ProjectCreate, ProjectOut,
     BlockCreate, BlockOut, WarehouseCreate, WarehouseOut
 )
-from app.auth import get_current_user
+from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
 
 router = APIRouter(prefix="/api", tags=["Organization Structure"])
 
@@ -17,13 +17,26 @@ router = APIRouter(prefix="/api", tags=["Organization Structure"])
 # ── Organizations ────────────────────────────────────────────────────────
 
 @router.get("/organizations", response_model=List[OrganizationOut])
-def list_organizations(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    return db.query(Organization).filter(Organization.is_active == True).order_by(Organization.name).all()
+def list_organizations(
+    db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("organizations", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    return db.query(Organization).filter(
+        Organization.tenant_id == tenant_id, Organization.site_id == site_id, Organization.is_active == True
+    ).order_by(Organization.name).all()
 
 
 @router.post("/organizations", response_model=OrganizationOut)
-def create_organization(data: OrganizationCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    org = Organization(**data.model_dump())
+def create_organization(
+    data: OrganizationCreate, 
+    db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("organizations", "create")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    org = Organization(**data.model_dump(), tenant_id=tenant_id, site_id=site_id)
     db.add(org)
     db.commit()
     db.refresh(org)
@@ -31,8 +44,16 @@ def create_organization(data: OrganizationCreate, db: Session = Depends(get_db),
 
 
 @router.put("/organizations/{id}", response_model=OrganizationOut)
-def update_organization(id: int, data: OrganizationCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    org = db.query(Organization).filter(Organization.id == id).first()
+def update_organization(
+    id: int, data: OrganizationCreate, 
+    db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("organizations", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    org = db.query(Organization).filter(
+        Organization.id == id, Organization.tenant_id == tenant_id, Organization.site_id == site_id
+    ).first()
     if not org:
         raise HTTPException(status_code=404, detail="Organization not found")
     for k, v in data.model_dump().items():
@@ -45,8 +66,15 @@ def update_organization(id: int, data: OrganizationCreate, db: Session = Depends
 # ── Projects ─────────────────────────────────────────────────────────────
 
 @router.get("/projects")
-def list_projects(org_id: int = None, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    q = db.query(Project).filter(Project.is_active == True)
+def list_projects(
+    org_id: int = None, db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("projects", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    q = db.query(Project).filter(
+        Project.tenant_id == tenant_id, Project.site_id == site_id, Project.is_active == True
+    )
     if org_id:
         q = q.filter(Project.organization_id == org_id)
     projects = q.order_by(Project.name).all()
@@ -64,8 +92,13 @@ def list_projects(org_id: int = None, db: Session = Depends(get_db), current_use
 
 
 @router.post("/projects")
-def create_project(data: ProjectCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    proj = Project(**data.model_dump())
+def create_project(
+    data: ProjectCreate, db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("projects", "create")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    proj = Project(**data.model_dump(), tenant_id=tenant_id, site_id=site_id)
     db.add(proj)
     db.commit()
     db.refresh(proj)
@@ -73,8 +106,15 @@ def create_project(data: ProjectCreate, db: Session = Depends(get_db), current_u
 
 
 @router.put("/projects/{id}")
-def update_project(id: int, data: ProjectCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    proj = db.query(Project).filter(Project.id == id).first()
+def update_project(
+    id: int, data: ProjectCreate, db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("projects", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    proj = db.query(Project).filter(
+        Project.id == id, Project.tenant_id == tenant_id, Project.site_id == site_id
+    ).first()
     if not proj:
         raise HTTPException(status_code=404, detail="Project not found")
     for k, v in data.model_dump().items():
@@ -86,8 +126,15 @@ def update_project(id: int, data: ProjectCreate, db: Session = Depends(get_db), 
 # ── Blocks ───────────────────────────────────────────────────────────────
 
 @router.get("/blocks")
-def list_blocks(project_id: int = None, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    q = db.query(Block).filter(Block.is_active == True)
+def list_blocks(
+    project_id: int = None, db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("projects", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    q = db.query(Block).filter(
+        Block.tenant_id == tenant_id, Block.site_id == site_id, Block.is_active == True
+    )
     if project_id:
         q = q.filter(Block.project_id == project_id)
     blocks = q.order_by(Block.name).all()
@@ -103,8 +150,13 @@ def list_blocks(project_id: int = None, db: Session = Depends(get_db), current_u
 
 
 @router.post("/blocks")
-def create_block(data: BlockCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    block = Block(**data.model_dump())
+def create_block(
+    data: BlockCreate, db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("projects", "create")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    block = Block(**data.model_dump(), tenant_id=tenant_id, site_id=site_id)
     db.add(block)
     db.commit()
     db.refresh(block)
@@ -112,8 +164,15 @@ def create_block(data: BlockCreate, db: Session = Depends(get_db), current_user:
 
 
 @router.put("/blocks/{id}")
-def update_block(id: int, data: BlockCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    block = db.query(Block).filter(Block.id == id).first()
+def update_block(
+    id: int, data: BlockCreate, db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("projects", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    block = db.query(Block).filter(
+        Block.id == id, Block.tenant_id == tenant_id, Block.site_id == site_id
+    ).first()
     if not block:
         raise HTTPException(status_code=404, detail="Block not found")
     for k, v in data.model_dump().items():
@@ -125,8 +184,15 @@ def update_block(id: int, data: BlockCreate, db: Session = Depends(get_db), curr
 # ── Warehouses ───────────────────────────────────────────────────────────
 
 @router.get("/warehouses")
-def list_warehouses(project_id: int = None, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    q = db.query(Warehouse).filter(Warehouse.is_active == True)
+def list_warehouses(
+    project_id: int = None, db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("warehouses", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    q = db.query(Warehouse).filter(
+        Warehouse.tenant_id == tenant_id, Warehouse.site_id == site_id, Warehouse.is_active == True
+    )
     if project_id:
         q = q.filter(Warehouse.project_id == project_id)
     warehouses = q.order_by(Warehouse.name).all()
@@ -144,8 +210,13 @@ def list_warehouses(project_id: int = None, db: Session = Depends(get_db), curre
 
 
 @router.post("/warehouses")
-def create_warehouse(data: WarehouseCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    wh = Warehouse(**data.model_dump())
+def create_warehouse(
+    data: WarehouseCreate, db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("warehouses", "create")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    wh = Warehouse(**data.model_dump(), tenant_id=tenant_id, site_id=site_id)
     db.add(wh)
     db.commit()
     db.refresh(wh)
@@ -153,8 +224,15 @@ def create_warehouse(data: WarehouseCreate, db: Session = Depends(get_db), curre
 
 
 @router.put("/warehouses/{id}")
-def update_warehouse(id: int, data: WarehouseCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    wh = db.query(Warehouse).filter(Warehouse.id == id).first()
+def update_warehouse(
+    id: int, data: WarehouseCreate, db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("warehouses", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    wh = db.query(Warehouse).filter(
+        Warehouse.id == id, Warehouse.tenant_id == tenant_id, Warehouse.site_id == site_id
+    ).first()
     if not wh:
         raise HTTPException(status_code=404, detail="Warehouse not found")
     for k, v in data.model_dump().items():

@@ -189,7 +189,7 @@ def seed_database(db: Session):
     # GRN for PO1
     grn1 = GRN(tenant_id=T, site_id=S, grn_number="GRN-2026-0001", po_id=po1.id, vendor_id=vendors[0].id, project_id=proj1.id, warehouse_id=warehouses[0].id, received_by_id=sk1.id, status="Completed")
     db.add(grn1); db.flush()
-    db.add(GRNItem(grn_id=grn1.id, material_id=materials[0].id, quantity_received=500, rate=380, amount=190000))
+    db.add(GRNItem(grn_id=grn1.id, material_id=materials[0].id, received_quantity=500, accepted_quantity=500, rate=380))
     db.flush()
 
     # Material Issues (Consumptions) - THIS POPULATES THE GRAPHS

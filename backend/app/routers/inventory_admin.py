@@ -93,8 +93,8 @@ def get_stock_ledger(
 
 # ── Reports ──────────────────────────────────────────────────────────────
 
-@router.get("/reports/inventory-valuation")
-def inventory_valuation_report(
+@router.get("/reports/stock")
+def stock_report(
     db: Session = Depends(get_db), 
     current_user: User = Depends(require_permission("reports", "read")),
     tenant_id: int = Depends(get_tenant_id),
@@ -123,6 +123,32 @@ def inventory_valuation_report(
             "total_value": round(r[4] or 0, 2)
         }
         for r in results
+    ]
+
+@router.get("/reports/consumption")
+def consumption_report(
+    db: Session = Depends(get_db),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    results = db.query(
+        Block.name.label("block_name"),
+        Material.name.label("material_name"),
+        func.sum(MaterialIssueItem.quantity).label("total_quantity"),
+        func.sum(MaterialIssueItem.quantity * MaterialIssueItem.rate).label("total_value")
+    ).join(MaterialIssue, MaterialIssueItem.issue_id == MaterialIssue.id)\
+     .join(Material, MaterialIssueItem.material_id == Material.id)\
+     .join(Block, MaterialIssue.issued_to_block_id == Block.id)\
+     .filter(MaterialIssue.tenant_id == tenant_id, MaterialIssue.site_id == site_id)\
+     .group_by(Block.name, Material.name).all()
+    
+    return [
+        {
+            "block_name": r.block_name,
+            "material_name": r.material_name,
+            "total_quantity": r.total_quantity,
+            "total_value": r.total_value
+        } for r in results
     ]
 
 

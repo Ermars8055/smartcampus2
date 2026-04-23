@@ -180,8 +180,33 @@ def seed_database(db: Session):
 
     # PO
     po1 = PurchaseOrder(tenant_id=T, site_id=S, po_number="PO-2026-0001", vendor_id=vendors[0].id, project_id=proj1.id, pr_id=pr1.id, total_amount=190000, delivery_date=date.today()+timedelta(days=10), status="Closed", created_by_id=pm1.id, approved_by_id=admin1.id)
-    db.add(po1); db.flush()
+    po2 = PurchaseOrder(tenant_id=T, site_id=S, po_number="PO-2026-0002", vendor_id=vendors[1].id, project_id=proj1.id, total_amount=120000, delivery_date=date.today()+timedelta(days=5), status="Approved", created_by_id=pm1.id, approved_by_id=admin1.id)
+    db.add_all([po1, po2]); db.flush()
     db.add(PurchaseOrderItem(po_id=po1.id, material_id=materials[0].id, quantity=500, rate=380, amount=190000, received_quantity=500))
+    db.add(PurchaseOrderItem(po_id=po2.id, material_id=materials[1].id, quantity=2000, rate=60, amount=120000))
+    db.flush()
+
+    # GRN for PO1
+    grn1 = GRN(tenant_id=T, site_id=S, grn_number="GRN-2026-0001", po_id=po1.id, vendor_id=vendors[0].id, project_id=proj1.id, warehouse_id=warehouses[0].id, received_by_id=sk1.id, status="Completed")
+    db.add(grn1); db.flush()
+    db.add(GRNItem(grn_id=grn1.id, material_id=materials[0].id, quantity_received=500, rate=380, amount=190000))
+    db.flush()
+
+    # Material Issues (Consumptions) - THIS POPULATES THE GRAPHS
+    # Issue Cement to Tower A
+    iss1 = MaterialIssue(tenant_id=T, site_id=S, issue_number="ISS-202604-0001", warehouse_id=warehouses[0].id, project_id=proj1.id, issued_to_block_id=blocks[0].id, issued_by_id=sk1.id, received_by_name="Contractor A", status="Completed", created_at=datetime.utcnow()-timedelta(days=2))
+    db.add(iss1); db.flush()
+    db.add(MaterialIssueItem(issue_id=iss1.id, material_id=materials[0].id, quantity=50, rate=380))
+    
+    # Issue Steel to Tower B
+    iss2 = MaterialIssue(tenant_id=T, site_id=S, issue_number="ISS-202604-0002", warehouse_id=warehouses[1].id, project_id=proj1.id, issued_to_block_id=blocks[1].id, issued_by_id=sk1.id, received_by_name="Contractor B", status="Completed", created_at=datetime.utcnow()-timedelta(days=1))
+    db.add(iss2); db.flush()
+    db.add(MaterialIssueItem(issue_id=iss2.id, material_id=materials[1].id, quantity=300, rate=60))
+
+    # Issue Electrical Cable to Tower C
+    iss3 = MaterialIssue(tenant_id=T, site_id=S, issue_number="ISS-202604-0003", warehouse_id=warehouses[2].id, project_id=proj1.id, issued_to_block_id=blocks[2].id, issued_by_id=sk1.id, received_by_name="Electrician Team", status="Completed", created_at=datetime.utcnow())
+    db.add(iss3); db.flush()
+    db.add(MaterialIssueItem(issue_id=iss3.id, material_id=materials[7].id, quantity=10, rate=2800))
     db.flush()
 
     # Alerts

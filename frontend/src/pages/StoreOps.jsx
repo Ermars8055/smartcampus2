@@ -223,7 +223,13 @@ export default function StoreOperations() {
                 <MaterialSelect 
                   materials={materials} 
                   value={item.material_id} 
-                  onChange={val => { const items = [...form.items]; items[i].material_id = val; setForm({ ...form, items }); }} 
+                  onChange={val => { 
+                    const items = [...form.items]; 
+                    items[i].material_id = val; 
+                    const mat = materials.find(m => m.id === val);
+                    if (mat) items[i].rate = mat.standard_cost || 0;
+                    setForm({ ...form, items }); 
+                  }} 
                 />
               </Grid>
               <Grid size={3}>
@@ -232,7 +238,17 @@ export default function StoreOperations() {
                   error={available < item.quantity && item.quantity > 0}
                   helperText={<Typography component="span" sx={{ fontSize: '0.65rem' }}>Available: {available}</Typography>} />
               </Grid>
-              <Grid size={3}><TextField fullWidth size="small" label="Rate (₹)" type="number" value={item.rate || ''} onChange={e => { const items = [...form.items]; items[i].rate = e.target.value; setForm({ ...form, items }); }} /></Grid>
+              <Grid size={3}>
+                <TextField 
+                  fullWidth 
+                  size="small" 
+                  label="Rate (₹)" 
+                  type="number" 
+                  value={item.rate || ''} 
+                  slotProps={{ input: { readOnly: true } }}
+                  helperText={<Typography component="span" sx={{ fontSize: '0.65rem' }}>Book Value</Typography>}
+                />
+              </Grid>
               <Grid size={1}>{form.items.length > 1 && <IconButton size="small" color="error" onClick={() => { const items = form.items.filter((_, idx) => idx !== i); setForm({ ...form, items }); }}><Delete fontSize="small" /></IconButton>}</Grid>
             </Grid>
           )})}

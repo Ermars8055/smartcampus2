@@ -359,8 +359,20 @@ export default function PurchaseRequests() {
           <Divider sx={{ my: 2 }} />
           <Typography variant="subtitle2" sx={{ mb: 1 }}>Specify Rates for Items</Typography>
           {convertDialog.items?.map((it, i) => (
-            <Grid container spacing={1} key={i} sx={{ mb: 1, alignItems: 'center' }}>
-              <Grid size={5}><Typography variant="body2">{it.material_name} ({it.quantity} {it.uom_name})</Typography></Grid>
+            <Grid container spacing={1} key={i} sx={{ mb: 2, alignItems: 'center' }}>
+              <Grid size={5}>
+                <Typography variant="body2">{it.material_name} ({it.quantity} {it.uom_name})</Typography>
+                {it.last_purchase_price != null && (
+                  <Typography variant="caption" sx={{ color: '#059669', display: 'block', fontWeight: 600 }}>
+                    LPP Ref: ₹{it.last_purchase_price}
+                  </Typography>
+                )}
+                {it.last_purchase_price == null && (
+                  <Typography variant="caption" sx={{ color: '#94A3B8', display: 'block' }}>
+                    No prior purchases
+                  </Typography>
+                )}
+              </Grid>
               <Grid size={7}>
                 <TextField fullWidth size="small" label="Rate (₹) / unit" type="number" value={it.rate}
                   onChange={e => updateConvertItem(i, e.target.value)} slotProps={{ htmlInput: { min: 0 } }} required />

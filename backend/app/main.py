@@ -13,7 +13,7 @@ from app.models import *  # noqa: F401 — import all models so tables are creat
 from app.routers import (
     auth, dashboard, materials, vendors, organizations,
     procurement, gate_entry, grn, store_ops, inventory_admin,
-    saas_admin, rbac, sites, auto_pr, alerts
+    saas_admin, rbac, sites, auto_pr, alerts, intelligence
 )
 
 # Create database tables
@@ -57,6 +57,7 @@ app.include_router(gate_entry.router)
 app.include_router(grn.router)
 app.include_router(store_ops.router)
 app.include_router(inventory_admin.router)
+app.include_router(intelligence.router)
 
 
 @app.on_event("startup")

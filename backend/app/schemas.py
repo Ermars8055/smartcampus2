@@ -344,6 +344,7 @@ class PRItemOut(PRItemBase):
     material_name: Optional[str] = None
     material_code: Optional[str] = None
     uom_name: Optional[str] = None
+    last_purchase_price: Optional[float] = None
     class Config:
         from_attributes = True
 

@@ -47,7 +47,7 @@ export default function Intelligence() {
       }
     }
 
-    api.get('/api/reports/consumption', { params }).then(r => {
+    api.get('/api/intelligence/consumption', { params }).then(r => {
       const data = r.data;
       setConsumption(data);
       // Group by block

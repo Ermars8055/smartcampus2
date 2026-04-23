@@ -26,6 +26,7 @@ import Admin from './pages/Admin';
 import SaasAdmin from './pages/SaasAdmin';
 import Alerts from './pages/Alerts';
 import PlatformLogin from './pages/PlatformLogin';
+import ChatBot from './components/ChatBot';
 import { Box, CircularProgress } from '@mui/material';
 
 function ProtectedRoute({ children }) {
@@ -78,6 +79,7 @@ export default function App() {
       <BrowserRouter>
         <AuthProvider>
           <AppRoutes />
+          <ChatBot />
         </AuthProvider>
       </BrowserRouter>
     </ThemeProvider>

@@ -17,6 +17,15 @@ from app.auth import get_current_user, require_permission, get_tenant_id, get_si
 router = APIRouter(prefix="/api/procurement", tags=["Procurement"])
 
 
+def get_lpp(db: Session, material_id: int, tenant_id: int, site_id: int) -> float | None:
+    last_po_item = db.query(PurchaseOrderItem).join(PurchaseOrder).filter(
+        PurchaseOrderItem.material_id == material_id,
+        PurchaseOrder.tenant_id == tenant_id,
+        PurchaseOrder.site_id == site_id,
+        PurchaseOrder.status != "Draft"
+    ).order_by(PurchaseOrder.created_at.desc()).first()
+    return last_po_item.rate if last_po_item else None
+
 def generate_pr_number(db: Session, tenant_id: int, site_id: int) -> str:
     count = db.query(PurchaseRequest).filter(
         PurchaseRequest.tenant_id == tenant_id, PurchaseRequest.site_id == site_id
@@ -62,7 +71,8 @@ def list_purchase_requests(
                 "id": it.id, "material_id": it.material_id, "quantity": it.quantity,
                 "material_name": it.material.name if it.material else None,
                 "material_code": it.material.code if it.material else None,
-                "uom_name": it.material.uom.name if it.material and it.material.uom else None
+                "uom_name": it.material.uom.name if it.material and it.material.uom else None,
+                "last_purchase_price": get_lpp(db, it.material_id, tenant_id, site_id)
             })
         result.append(PROut(
             id=pr.id, pr_number=pr.pr_number,
@@ -97,7 +107,8 @@ def get_purchase_request(
             "id": it.id, "material_id": it.material_id, "quantity": it.quantity,
             "material_name": it.material.name if it.material else None,
             "material_code": it.material.code if it.material else None,
-            "uom_name": it.material.uom.name if it.material and it.material.uom else None
+            "uom_name": it.material.uom.name if it.material and it.material.uom else None,
+            "last_purchase_price": get_lpp(db, it.material_id, tenant_id, site_id)
         })
     return PROut(
         id=pr.id, pr_number=pr.pr_number,

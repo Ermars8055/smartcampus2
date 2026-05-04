@@ -168,7 +168,9 @@ class BlockBase(BaseModel):
     code: str
     project_id: int
     block_type: Optional[str] = None
+    block_number: Optional[str] = None
     floors: int = 1
+    rooms: int = 0
 
 class BlockCreate(BlockBase):
     pass
@@ -255,6 +257,7 @@ class MaterialBase(BaseModel):
     standard_cost: float = 0
     preferred_vendor_id: Optional[int] = None
     storage_type: str = "General"
+    material_type: str = "Consumable"
     hsn_code: Optional[str] = None
     description: Optional[str] = None
 
@@ -402,6 +405,8 @@ class POBase(BaseModel):
     vendor_id: int
     project_id: int
     pr_id: Optional[int] = None
+    indent_id: Optional[int] = None
+    po_type: str = "Formal"
     delivery_date: Optional[date] = None
     terms: Optional[str] = None
     items: List[POItemBase] = []
@@ -421,6 +426,9 @@ class POOut(BaseModel):
     project_id: int
     pr_id: Optional[int] = None
     pr_number: Optional[str] = None
+    indent_id: Optional[int] = None
+    indent_number: Optional[str] = None
+    po_type: str = "Formal"
     total_amount: float
     delivery_date: Optional[date] = None
     status: str
@@ -539,6 +547,7 @@ class IssueItemOut(IssueItemBase):
 class IssueBase(BaseModel):
     warehouse_id: int
     project_id: int
+    indent_id: Optional[int] = None
     issued_to_block_id: Optional[int] = None
     issued_to_department: Optional[str] = None
     issued_to_contractor: Optional[str] = None
@@ -554,6 +563,7 @@ class IssueOut(BaseModel):
     issue_number: str
     warehouse_id: int
     project_id: int
+    indent_id: Optional[int] = None
     issued_to_block_id: Optional[int] = None
     issued_to_department: Optional[str] = None
     issued_to_contractor: Optional[str] = None
@@ -747,6 +757,86 @@ class MaterialCostByBlock(BaseModel):
     total_quantity: float
 
 
+# ── Indent & Approval Flows ──────────────────────────────────────────────
+
+class ApprovalFlowBase(BaseModel):
+    document_type: str
+    level: int
+    role_name: str
+    min_amount: float = 0
+    max_amount: Optional[float] = None
+    user_id: Optional[int] = None
+    is_active: bool = True
+
+class ApprovalFlowCreate(ApprovalFlowBase):
+    pass
+
+class ApprovalFlowOut(ApprovalFlowBase):
+    id: int
+    tenant_id: int
+    site_id: int
+    user_full_name: Optional[str] = None
+    class Config:
+        from_attributes = True
+
+class IndentItemBase(BaseModel):
+    material_id: int
+    requested_quantity: float = Field(..., gt=0)
+
+class IndentItemOut(IndentItemBase):
+    id: int
+    issued_quantity: float = 0
+    acknowledged_quantity: float = 0
+    material_name: Optional[str] = None
+    material_code: Optional[str] = None
+    uom_name: Optional[str] = None
+    current_stock: Optional[float] = 0
+    class Config:
+        from_attributes = True
+
+class IndentBase(BaseModel):
+    block_id: Optional[int] = None
+    floor: Optional[str] = None
+    location: Optional[str] = None
+    remarks: Optional[str] = None
+    total_amount: float = 0
+    items: List[IndentItemBase] = []
+
+class IndentCreate(IndentBase):
+    pass
+
+class IndentUpdate(BaseModel):
+    status: Optional[str] = None
+    remarks: Optional[str] = None
+
+class IndentOut(BaseModel):
+    id: int
+    indent_number: str
+    requester_id: int
+    block_id: Optional[int] = None
+    floor: Optional[str] = None
+    location: Optional[str] = None
+    remarks: Optional[str] = None
+    status: str
+    current_approval_level: int
+    approved_by_id: Optional[int] = None
+    approved_at: Optional[datetime] = None
+    created_at: datetime
+    updated_at: datetime
+    requester_name: Optional[str] = None
+    block_name: Optional[str] = None
+    items: List[IndentItemOut] = []
+    class Config:
+        from_attributes = True
+
+class IndentAcknowledgeItem(BaseModel):
+    indent_item_id: int
+    acknowledged_quantity: float = Field(..., ge=0)
+
+class IndentAcknowledgeRequest(BaseModel):
+    items: List[IndentAcknowledgeItem] = []
+
+
 # ── Audit Log ────────────────────────────────────────────────────────────
 
 class AuditLogOut(BaseModel):
@@ -760,5 +850,16 @@ class AuditLogOut(BaseModel):
     ip_address: Optional[str] = None
     created_at: datetime
     username: Optional[str] = None
+    class Config:
+        from_attributes = True
+
+class IndentApprovalOut(BaseModel):
+    id: int
+    indent_id: int
+    approval_flow_id: int
+    approver_id: int
+    approved_at: datetime
+    user_full_name: Optional[str] = None
+    role_name: Optional[str] = None
     class Config:
         from_attributes = True

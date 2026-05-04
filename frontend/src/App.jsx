@@ -14,6 +14,7 @@ import Materials from './pages/Materials';
 import Categories from './pages/Categories';
 import Vendors from './pages/Vendors';
 import Projects from './pages/Projects';
+import Indents from './pages/Indents';
 import PurchaseRequests from './pages/PurchaseRequests';
 import PurchaseOrders from './pages/PurchaseOrders';
 import GateEntry from './pages/GateEntry';
@@ -54,6 +55,7 @@ function AppRoutes() {
         <Route path="vendors" element={<Vendors />} />
         <Route path="projects" element={<Projects />} />
         <Route path="warehouses" element={<Projects />} />
+        <Route path="indents" element={<Indents />} />
         <Route path="purchase-requests" element={<PurchaseRequests />} />
         <Route path="purchase-orders" element={<PurchaseOrders />} />
         <Route path="gate-entry" element={<GateEntry />} />

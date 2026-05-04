@@ -142,7 +142,9 @@ def list_blocks(
         BlockOut(
             id=b.id, name=b.name, code=b.code,
             project_id=b.project_id, block_type=b.block_type,
-            floors=b.floors, is_active=b.is_active, created_at=b.created_at,
+            block_number=b.block_number,
+            floors=b.floors, rooms=b.rooms, 
+            is_active=b.is_active, created_at=b.created_at,
             project_name=b.project.name if b.project else None
         )
         for b in blocks

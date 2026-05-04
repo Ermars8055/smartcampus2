@@ -79,17 +79,24 @@ def seed_database(db: Session):
     org1 = Organization(tenant_id=T, site_id=S, name="ABC Infrastructure Pvt Ltd", code="ABC-INFRA", address="123 Construction Lane, Mumbai", phone="022-12345678", email="info@abcinfra.com")
     db.add(org1); db.flush()
 
-    proj1 = Project(tenant_id=T, site_id=S, name="Green Valley Residency", code="GVR-001", organization_id=org1.id, location="Pune", start_date=date(2025,1,15), end_date=date(2027,6,30), status="Active", budget=50_00_00_000)
+    proj1 = Project(tenant_id=T, site_id=S, name="Campus", code="CAM-001", organization_id=org1.id, location="Bangalore", start_date=date(2025,1,15), end_date=date(2027,6,30), status="Active", budget=50_00_00_000)
     db.add(proj1); db.flush()
 
-    blocks_data = [("Tower A","GVR-TA","Tower",14),("Tower B","GVR-TB","Tower",14),("Tower C","GVR-TC","Tower",10)]
+    blocks_data = ["Admin", "Hospital", "Medical College", "Nursing College", "Boys Hostel", "Engineering College", "Higher Studies"]
     blocks = []
-    for nm, cd, bt, fl in blocks_data:
-        b = Block(tenant_id=T, site_id=S, name=nm, code=cd, project_id=proj1.id, block_type=bt, floors=fl)
+    for nm in blocks_data:
+        code = nm.upper().replace(" ", "_")[:10]
+        b = Block(
+            tenant_id=T, site_id=S, name=nm, code=code, project_id=proj1.id, 
+            block_type="Building", 
+            block_number=str(random.randint(1, 3)),
+            floors=random.randint(1, 14),
+            rooms=random.randint(1, 14)
+        )
         db.add(b); blocks.append(b)
     db.flush()
 
-    wh_data = [("Main Store","WH-GVR-MAIN","Main"),("Civil Yard","WH-GVR-CIVIL","Civil"),("Electrical Store","WH-GVR-ELEC","Electrical")]
+    wh_data = [("Pharmacy Store","WH-CAM-PHARMA","Pharmacy"),("Civil Store","WH-CAM-CIVIL","Civil"),("Stationary Store","WH-CAM-STAT","Stationary")]
     warehouses = []
     for nm, cd, wt in wh_data:
         w = Warehouse(tenant_id=T, site_id=S, name=nm, code=cd, project_id=proj1.id, warehouse_type=wt)
@@ -154,6 +161,7 @@ def seed_database(db: Session):
         m = Material(tenant_id=T, site_id=S, code=code, name=name, category_id=categories[ci].id,
                      subcategory_id=subcats[sci].id if sci is not None else None, uom_id=uoms[ui].id,
                      reorder_level=reorder, maximum_level=maxl, standard_cost=cost,
+                     material_type="Non-Consumable" if code in ["MAT-016", "MAT-010", "MAT-019"] else "Consumable",
                      preferred_vendor_id=vendors[vi].id if vi is not None else None)
         db.add(m); materials.append(m)
     db.flush()
@@ -179,8 +187,8 @@ def seed_database(db: Session):
     db.flush()
 
     # PO
-    po1 = PurchaseOrder(tenant_id=T, site_id=S, po_number="PO-2026-0001", vendor_id=vendors[0].id, project_id=proj1.id, pr_id=pr1.id, total_amount=190000, delivery_date=date.today()+timedelta(days=10), status="Closed", created_by_id=pm1.id, approved_by_id=admin1.id)
-    po2 = PurchaseOrder(tenant_id=T, site_id=S, po_number="PO-2026-0002", vendor_id=vendors[1].id, project_id=proj1.id, total_amount=120000, delivery_date=date.today()+timedelta(days=5), status="Approved", created_by_id=pm1.id, approved_by_id=admin1.id)
+    po1 = PurchaseOrder(tenant_id=T, site_id=S, po_number="PO-2026-0001", vendor_id=vendors[0].id, project_id=proj1.id, pr_id=pr1.id, total_amount=190000, delivery_date=date.today()+timedelta(days=10), status="Closed", po_type="Formal", created_by_id=pm1.id, approved_by_id=admin1.id)
+    po2 = PurchaseOrder(tenant_id=T, site_id=S, po_number="PO-2026-0002", vendor_id=vendors[1].id, project_id=proj1.id, total_amount=120000, delivery_date=date.today()+timedelta(days=5), status="Approved", po_type="Formal", created_by_id=pm1.id, approved_by_id=admin1.id)
     db.add_all([po1, po2]); db.flush()
     db.add(PurchaseOrderItem(po_id=po1.id, material_id=materials[0].id, quantity=500, rate=380, amount=190000, received_quantity=500))
     db.add(PurchaseOrderItem(po_id=po2.id, material_id=materials[1].id, quantity=2000, rate=60, amount=120000))
@@ -212,6 +220,12 @@ def seed_database(db: Session):
     # Alerts
     for cs_obj in db.query(CurrentStock).join(Material).filter(CurrentStock.tenant_id==T, CurrentStock.quantity < Material.reorder_level, CurrentStock.quantity > 0).limit(3).all():
         db.add(Alert(tenant_id=T, site_id=S, alert_type="Low Stock", severity="Warning", title=f"Low stock: {cs_obj.material.name}", message=f"Current: {cs_obj.quantity}, Reorder: {cs_obj.material.reorder_level}", reference_type="Material", reference_id=cs_obj.material_id, project_id=proj1.id))
+    db.flush()
+
+    # Approval Flows
+    db.add(ApprovalFlow(tenant_id=T, site_id=S, document_type="Indent", level=1, role_name="Admin", min_amount=0, max_amount=100000))
+    db.add(ApprovalFlow(tenant_id=T, site_id=S, document_type="Indent", level=1, role_name="Purchase Manager", min_amount=0, max_amount=1000000))
+    db.add(ApprovalFlow(tenant_id=T, site_id=S, document_type="Indent", level=2, role_name="Admin", min_amount=100001, max_amount=10000000))
     db.flush()
 
     db.commit()

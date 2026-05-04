@@ -71,6 +71,21 @@ class AlertSeverity(str, enum.Enum):
     WARNING = "Warning"
     CRITICAL = "Critical"
 
+class IndentStatus(str, enum.Enum):
+    DRAFT = "Draft"
+    AWAITING_APPROVAL = "Awaiting Approval"
+    APPROVED = "Approved"
+    PARTIALLY_ISSUED = "Partially Issued"
+    ISSUED = "Issued"
+    CONVERTED = "Converted to PO"
+    REJECTED = "Rejected"
+    CLOSED = "Closed"
+
+class ApprovalDocumentType(str, enum.Enum):
+    INDENT = "Indent"
+    PURCHASE_REQUEST = "Purchase Request"
+    PURCHASE_ORDER = "Purchase Order"
+
 
 # == Multi-Tenant Core ==
 
@@ -204,7 +219,9 @@ class Block(Base):
     code = Column(String(50), nullable=False)
     project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
     block_type = Column(String(100))
+    block_number = Column(String(50))
     floors = Column(Integer, default=1)
+    rooms = Column(Integer, default=0)
     is_active = Column(Boolean, default=True)
     is_deleted = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -283,6 +300,7 @@ class Material(Base):
     preferred_vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=True)
     storage_type = Column(String(100), default="General")
     hsn_code = Column(String(20))
+    material_type = Column(String(50), default="Consumable") # Consumable, Non-Consumable
     description = Column(Text)
     is_active = Column(Boolean, default=True)
     is_deleted = Column(Boolean, default=False)
@@ -375,6 +393,8 @@ class PurchaseOrder(Base):
     vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=False)
     project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
     pr_id = Column(Integer, ForeignKey("purchase_requests.id"), nullable=True)
+    indent_id = Column(Integer, ForeignKey("indents.id"), nullable=True)
+    po_type = Column(String(50), default="Formal") # Formal, Informal
     total_amount = Column(Float, default=0)
     delivery_date = Column(Date)
     status = Column(String(50), default=POStatus.DRAFT.value)
@@ -388,6 +408,7 @@ class PurchaseOrder(Base):
     vendor = relationship("Vendor")
     project = relationship("Project")
     purchase_request = relationship("PurchaseRequest")
+    indent = relationship("Indent")
     created_by = relationship("User", foreign_keys=[created_by_id])
     approver = relationship("User", foreign_keys=[approved_by_id])
     items = relationship("PurchaseOrderItem", back_populates="purchase_order", cascade="all, delete-orphan")
@@ -496,6 +517,7 @@ class MaterialIssue(Base):
     issue_number = Column(String(50), nullable=False, index=True)
     warehouse_id = Column(Integer, ForeignKey("warehouses.id"), nullable=False)
     project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
+    indent_id = Column(Integer, ForeignKey("indents.id"), nullable=True)
     issued_to_block_id = Column(Integer, ForeignKey("blocks.id"), nullable=True)
     issued_to_department = Column(String(255))
     issued_to_contractor = Column(String(255))
@@ -508,6 +530,7 @@ class MaterialIssue(Base):
     warehouse = relationship("Warehouse")
     project = relationship("Project")
     block = relationship("Block")
+    indent = relationship("Indent")
     issued_by = relationship("User", foreign_keys=[issued_by_id])
     items = relationship("MaterialIssueItem", back_populates="issue", cascade="all, delete-orphan")
     __table_args__ = (UniqueConstraint("tenant_id", "issue_number", name="uq_issue_per_tenant"),)
@@ -651,6 +674,63 @@ class Alert(Base):
     project = relationship("Project")
 
 
+# == Workflows ==
+
+class ApprovalFlow(Base):
+    __tablename__ = "approval_flows"
+    id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
+    site_id = Column(Integer, ForeignKey("sites.id", ondelete="CASCADE"), nullable=False)
+    document_type = Column(String(50), nullable=False)
+    level = Column(Integer, nullable=False)
+    role_name = Column(String(100), nullable=False)
+    min_amount = Column(Float, default=0)
+    max_amount = Column(Float, nullable=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    is_active = Column(Boolean, default=True)
+    
+    user = relationship("User", foreign_keys=[user_id])
+    __table_args__ = (UniqueConstraint("tenant_id", "site_id", "document_type", "level", "role_name", "user_id", name="uq_approval_flow_detailed"),)
+
+class Indent(Base):
+    __tablename__ = "indents"
+    id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
+    site_id = Column(Integer, ForeignKey("sites.id", ondelete="CASCADE"), nullable=False)
+    indent_number = Column(String(50), nullable=False, index=True)
+    requester_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    block_id = Column(Integer, ForeignKey("blocks.id"), nullable=True)
+    floor = Column(String(50))
+    location = Column(String(255))
+    remarks = Column(Text)
+    total_amount = Column(Float, default=0)
+    status = Column(String(50), default=IndentStatus.DRAFT.value)
+    current_approval_level = Column(Integer, default=1)
+    approved_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    approved_at = Column(DateTime, nullable=True)
+    is_deleted = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    requester = relationship("User", foreign_keys=[requester_id])
+    approver = relationship("User", foreign_keys=[approved_by_id])
+    block = relationship("Block")
+    items = relationship("IndentItem", back_populates="indent", cascade="all, delete-orphan")
+    __table_args__ = (UniqueConstraint("tenant_id", "indent_number", name="uq_indent_per_tenant"),)
+
+class IndentItem(Base):
+    __tablename__ = "indent_items"
+    id = Column(Integer, primary_key=True, index=True)
+    indent_id = Column(Integer, ForeignKey("indents.id"), nullable=False)
+    material_id = Column(Integer, ForeignKey("materials.id"), nullable=False)
+    requested_quantity = Column(Float, nullable=False)
+    issued_quantity = Column(Float, default=0)
+    acknowledged_quantity = Column(Float, default=0)
+
+    indent = relationship("Indent", back_populates="items")
+    material = relationship("Material")
+
+
 # == Audit Log ==
 
 class AuditLog(Base):
@@ -667,3 +747,15 @@ class AuditLog(Base):
     ip_address = Column(String(50))
     created_at = Column(DateTime, default=datetime.utcnow)
     user = relationship("User")
+
+class IndentApproval(Base):
+    __tablename__ = "indent_approvals"
+    id = Column(Integer, primary_key=True, index=True)
+    indent_id = Column(Integer, ForeignKey("indents.id", ondelete="CASCADE"), nullable=False)
+    approval_flow_id = Column(Integer, ForeignKey("approval_flows.id"), nullable=False)
+    approver_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    approved_at = Column(DateTime, default=datetime.utcnow)
+    
+    indent = relationship("Indent")
+    flow = relationship("ApprovalFlow")
+    approver = relationship("User")

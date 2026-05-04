@@ -46,8 +46,8 @@ export default function Projects() {
             setForm({ name: '', code: '', organization_id: orgs[0]?.id || '', location: '', budget: 0 }); setDialog('project');
           }}>Project</Button>
           <Button size="small" variant="outlined" startIcon={<Add />} onClick={() => {
-            setForm({ name: '', code: '', project_id: '', block_type: 'Building', floors: 1 }); setDialog('block');
-          }}>Block</Button>
+            setForm({ name: '', code: '', project_id: '', block_type: 'Building', block_number: '', floors: 1, rooms: 0 }); setDialog('block');
+          }}>Building</Button>
           <Button size="small" variant="contained" startIcon={<Add />} onClick={() => {
             setForm({ name: '', code: '', project_id: '', warehouse_type: 'Main', location: '' }); setDialog('warehouse');
           }}>Warehouse</Button>
@@ -81,18 +81,20 @@ export default function Projects() {
                 <Grid container spacing={2}>
                   <Grid size={{ xs: 12, md: 6 }}>
                     <Typography variant="caption" sx={{ fontWeight: 600, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                      Blocks / Buildings
+                      Buildings
                     </Typography>
                     <Table size="small" sx={{ mt: 1 }}>
                       <TableHead><TableRow>
-                        <TableCell>Name</TableCell><TableCell>Type</TableCell><TableCell>Floors</TableCell>
+                        <TableCell>Name</TableCell><TableCell>Type</TableCell><TableCell>Block</TableCell><TableCell>Floors</TableCell><TableCell>Room</TableCell>
                       </TableRow></TableHead>
                       <TableBody>
                         {blocks.filter(b => b.project_id === proj.id).map(b => (
                           <TableRow key={b.id}>
                             <TableCell sx={{ fontWeight: 500, fontSize: '0.85rem' }}>{b.name}</TableCell>
                             <TableCell><Chip label={b.block_type || 'N/A'} size="small" variant="outlined" /></TableCell>
+                            <TableCell>{b.block_number || '-'}</TableCell>
                             <TableCell>{b.floors}</TableCell>
+                            <TableCell>{b.rooms}</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
@@ -127,7 +129,7 @@ export default function Projects() {
       {/* Dialogs */}
       <Dialog open={!!dialog} onClose={() => setDialog('')} maxWidth="sm" fullWidth>
         <DialogTitle sx={{ fontWeight: 600 }}>
-          {dialog === 'org' ? 'New Organization' : dialog === 'project' ? 'New Project' : dialog === 'block' ? 'New Block' : 'New Warehouse'}
+          {dialog === 'org' ? 'New Organization' : dialog === 'project' ? 'New Project' : dialog === 'block' ? 'New Building' : 'New Warehouse'}
         </DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 0.5 }}>
@@ -153,8 +155,9 @@ export default function Projects() {
             )}
             {dialog === 'org' && <Grid size={12}><TextField fullWidth label="Address" value={form.address || ''} onChange={e => setForm({ ...form, address: e.target.value })} /></Grid>}
             {dialog === 'project' && <Grid size={12}><TextField fullWidth label="Location" value={form.location || ''} onChange={e => setForm({ ...form, location: e.target.value })} /></Grid>}
-            {dialog === 'block' && <Grid size={6}><TextField fullWidth label="Block Type" value={form.block_type || ''} onChange={e => setForm({ ...form, block_type: e.target.value })} /></Grid>}
+            {dialog === 'block' && <Grid size={6}><TextField fullWidth label="Block Number" value={form.block_number || ''} onChange={e => setForm({ ...form, block_number: e.target.value })} /></Grid>}
             {dialog === 'block' && <Grid size={6}><TextField fullWidth label="Floors" type="number" value={form.floors || 1} onChange={e => setForm({ ...form, floors: parseInt(e.target.value) || 1 })} /></Grid>}
+            {dialog === 'block' && <Grid size={6}><TextField fullWidth label="Rooms" type="number" value={form.rooms || 0} onChange={e => setForm({ ...form, rooms: parseInt(e.target.value) || 0 })} /></Grid>}
             {dialog === 'warehouse' && <Grid size={6}><TextField fullWidth label="Type" value={form.warehouse_type || ''} onChange={e => setForm({ ...form, warehouse_type: e.target.value })} /></Grid>}
             {dialog === 'warehouse' && <Grid size={6}><TextField fullWidth label="Location" value={form.location || ''} onChange={e => setForm({ ...form, location: e.target.value })} /></Grid>}
           </Grid>

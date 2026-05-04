@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
@@ -12,6 +13,8 @@ import { formatDate } from '../utils/dateUtils';
 import MaterialSelect from '../components/MaterialSelect';
 
 export default function PurchaseOrders() {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [pos, setPos] = useState([]);
   const [vendors, setVendors] = useState([]);
   const [materials, setMaterials] = useState([]);
@@ -19,7 +22,7 @@ export default function PurchaseOrders() {
   const [dialog, setDialog] = useState(false);
   const [detailDialog, setDetailDialog] = useState(null);
   const [form, setForm] = useState({
-    vendor_id: '', project_id: '', delivery_date: '', terms: '', items: [{ material_id: '', quantity: '', rate: '' }]
+    vendor_id: '', project_id: '', delivery_date: '', terms: '', po_type: 'Informal', items: [{ material_id: '', quantity: '', rate: '' }]
   });
 
   // Confirmation dialog state
@@ -40,6 +43,28 @@ export default function PurchaseOrders() {
     api.get('/api/materials').then(r => setMaterials(r.data.items || []));
     api.get('/api/projects').then(r => setProjects(r.data));
   }, []);
+
+  useEffect(() => {
+    if (location.state?.indentData && projects.length > 0) {
+      const ind = location.state.indentData;
+      setForm({
+        vendor_id: '', 
+        project_id: projects[0]?.id || '', 
+        delivery_date: new Date(Date.now() + 21 * 86400000).toISOString().split('T')[0], 
+        terms: '', 
+        po_type: 'Formal',
+        indent_id: ind.id,
+        items: ind.items.filter(it => it.requested_quantity > it.issued_quantity).map(it => ({ 
+          material_id: it.material_id, 
+          quantity: it.requested_quantity - it.issued_quantity, 
+          rate: '' 
+        }))
+      });
+      setDialog(true);
+      // Clean up state so refresh doesn't trigger it again
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location.state, projects, location.pathname, navigate]);
 
   const addItem = () => setForm({ ...form, items: [...form.items, { material_id: '', quantity: '', rate: '' }] });
   const removeItem = (i) => setForm({ ...form, items: form.items.filter((_, idx) => idx !== i) });
@@ -62,7 +87,13 @@ export default function PurchaseOrders() {
         return;
       }
       const payload = { ...form, items: mappedItems };
-      await api.post('/api/procurement/po', payload);
+      if (payload.indent_id) {
+         // Pass indent_id optionally
+         await api.post('/api/procurement/po', payload);
+         // Also could call convert-po endpoint but PO endpoint works if indent_id is set
+      } else {
+         await api.post('/api/procurement/po', payload);
+      }
       setDialog(false); load();
     } catch (err) { alert(err.response?.data?.detail || 'Error'); }
   };
@@ -102,7 +133,7 @@ export default function PurchaseOrders() {
           <Typography variant="body2" sx={{ color: '#64748B' }}>{pos.length} orders</Typography>
         </Box>
         <Button variant="contained" startIcon={<Add />} onClick={() => {
-          setForm({ vendor_id: '', project_id: projects[0]?.id || '', delivery_date: new Date(Date.now() + 21 * 86400000).toISOString().split('T')[0], terms: '', items: [{ material_id: '', quantity: '', rate: '' }] });
+          setForm({ vendor_id: '', project_id: projects[0]?.id || '', delivery_date: new Date(Date.now() + 21 * 86400000).toISOString().split('T')[0], terms: '', po_type: 'Informal', items: [{ material_id: '', quantity: '', rate: '' }] });
           setDialog(true);
         }}>Create PO</Button>
       </Box>
@@ -114,10 +145,12 @@ export default function PurchaseOrders() {
               <TableRow>
                 <TableCell>PO Number</TableCell>
                 <TableCell>PR Ref</TableCell>
+                <TableCell>Indent Ref</TableCell>
                 <TableCell>Vendor</TableCell>
                 <TableCell>Project</TableCell>
                 <TableCell align="right">Items</TableCell>
                 <TableCell align="right">Amount (₹)</TableCell>
+                <TableCell>Type</TableCell>
                 <TableCell>PO Date</TableCell>
                 <TableCell>Delivery</TableCell>
                 <TableCell>Status</TableCell>
@@ -129,10 +162,14 @@ export default function PurchaseOrders() {
                 <TableRow key={po.id} sx={{ cursor: 'pointer' }} onClick={() => setDetailDialog(po)}>
                   <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.8rem' }}>{po.po_number}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem', color: '#64748B' }}>{po.pr_number || '-'}</TableCell>
+                  <TableCell sx={{ fontSize: '0.8rem', color: '#64748B' }}>{po.indent_number || '-'}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem' }}>{po.vendor_name}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem' }}>{po.project_name}</TableCell>
                   <TableCell align="right">{po.items?.length || 0}</TableCell>
                   <TableCell align="right" sx={{ fontWeight: 600 }}>₹{po.total_amount?.toLocaleString()}</TableCell>
+                  <TableCell sx={{ fontSize: '0.8rem' }}>
+                    <Chip label={po.po_type} size="small" variant="outlined" color={po.po_type === 'Formal' ? 'primary' : 'default'} sx={{ fontSize: '0.7rem' }} />
+                  </TableCell>
                   <TableCell sx={{ fontSize: '0.8rem' }}>{formatDate(po.created_at)}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem' }}>{formatDate(po.delivery_date)}</TableCell>
                   <TableCell><Chip label={po.status} size="small" color={statusColor[po.status] || 'default'} sx={{ fontWeight: 600, fontSize: '0.7rem' }} /></TableCell>
@@ -184,7 +221,7 @@ export default function PurchaseOrders() {
           <Grid container spacing={2} sx={{ mb: 2 }}>
             <Grid size={3}><Typography variant="caption" color="textSecondary">Vendor</Typography><Typography sx={{ fontWeight: 600 }}>{detailDialog?.vendor_name}</Typography></Grid>
             <Grid size={3}><Typography variant="caption" color="textSecondary">PR Ref</Typography><Typography sx={{ fontWeight: 600 }}>{detailDialog?.pr_number || 'None'}</Typography></Grid>
-            <Grid size={3}><Typography variant="caption" color="textSecondary">Status</Typography><Box><Chip label={detailDialog?.status} size="small" color={statusColor[detailDialog?.status] || 'default'} /></Box></Grid>
+            <Grid size={3}><Typography variant="caption" color="textSecondary">PO Type</Typography><Box><Chip label={detailDialog?.po_type} size="small" variant="outlined" color={detailDialog?.po_type === 'Formal' ? 'primary' : 'default'} /></Box></Grid>
             <Grid size={3}><Typography variant="caption" color="textSecondary">Total</Typography><Typography sx={{ fontWeight: 700, color: '#059669' }}>₹{detailDialog?.total_amount?.toLocaleString()}</Typography></Grid>
           </Grid>
           <Divider sx={{ mb: 2 }} />
@@ -215,21 +252,29 @@ export default function PurchaseOrders() {
         <DialogTitle sx={{ fontWeight: 600 }}>Create Purchase Order</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 0.5, mb: 2 }}>
-            <Grid size={4}>
+            <Grid size={3}>
               <FormControl fullWidth required><InputLabel>Vendor</InputLabel>
                 <Select value={form.vendor_id} label="Vendor" onChange={e => setForm({ ...form, vendor_id: e.target.value })}>
                   {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.name}</MenuItem>)}
                 </Select>
               </FormControl>
             </Grid>
-            <Grid size={4}>
+            <Grid size={3}>
               <FormControl fullWidth required><InputLabel>Project</InputLabel>
                 <Select value={form.project_id} label="Project" onChange={e => setForm({ ...form, project_id: e.target.value })}>
                   {projects.map(p => <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>)}
                 </Select>
               </FormControl>
             </Grid>
-            <Grid size={4}>
+            <Grid size={3}>
+              <FormControl fullWidth><InputLabel>PO Type</InputLabel>
+                <Select value={form.po_type || 'Informal'} label="PO Type" onChange={e => setForm({ ...form, po_type: e.target.value })}>
+                  <MenuItem value="Formal">Formal</MenuItem>
+                  <MenuItem value="Informal">Informal</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid size={3}>
               <TextField fullWidth label="Delivery Date" type="date" value={form.delivery_date}
                 onChange={e => setForm({ ...form, delivery_date: e.target.value })} slotProps={{ inputLabel: { shrink: true } }} />
             </Grid>
@@ -253,7 +298,9 @@ export default function PurchaseOrders() {
               </Grid>
             </Grid>
           ))}
-          <Button size="small" startIcon={<Add />} onClick={addItem} sx={{ mt: 1 }}>Add Item</Button>
+          {!form.indent_id && (
+            <Button size="small" startIcon={<Add />} onClick={addItem} sx={{ mt: 1 }}>Add Item</Button>
+          )}
         </DialogContent>
         <DialogActions><Button onClick={() => setDialog(false)}>Cancel</Button><Button variant="contained" onClick={handleCreate}>Create PO</Button></DialogActions>
       </Dialog>

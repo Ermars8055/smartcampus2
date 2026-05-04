@@ -26,6 +26,7 @@ export default function Admin() {
   const [tab, setTab] = useState(0);
   const [users, setUsers] = useState([]);
   const [auditLogs, setAuditLogs] = useState([]);
+  const [approvalFlows, setApprovalFlows] = useState([]);
   const [sites, setSites] = useState([]);
   const [roles, setRoles] = useState([]);
   const [tenants, setTenants] = useState([]);
@@ -37,6 +38,7 @@ export default function Admin() {
   const load = () => {
     api.get('/api/admin/users').then(r => setUsers(r.data));
     api.get('/api/admin/audit-logs').then(r => setAuditLogs(r.data.items || []));
+    api.get('/api/approval-flows').then(r => setApprovalFlows(r.data || [])).catch(() => setApprovalFlows([]));
     api.get('/api/sites').then(r => setSites(r.data || [])).catch(() => setSites([]));
     api.get('/api/rbac/roles').then(r => setRoles(r.data || [])).catch(() => setRoles([]));
     if (currentUser?.tenant_id == null) {
@@ -84,6 +86,7 @@ export default function Admin() {
         <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tab label={`Users (${users.length})`} sx={{ textTransform: 'none', fontWeight: 500 }} />
           <Tab label="Audit Logs" sx={{ textTransform: 'none', fontWeight: 500 }} />
+          <Tab label="Approval Flows" sx={{ textTransform: 'none', fontWeight: 500 }} />
         </Tabs>
       </Card>
 
@@ -168,10 +171,90 @@ export default function Admin() {
         </Card>
       )}
 
+      {tab === 2 && (
+        <>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+            <Button variant="contained" startIcon={<Add />} onClick={() => {
+              setEditing(null); 
+              setForm({ document_type: 'INDENT', level: 1, role_name: '', user_id: '', min_amount: 0, max_amount: null, is_active: true }); 
+              setDialog(true);
+            }}>Add Flow</Button>
+          </Box>
+          <Card>
+            <TableContainer>
+              <Table size="small">
+                <TableHead><TableRow>
+                  <TableCell>Document Type</TableCell><TableCell>Level</TableCell><TableCell>Role Required</TableCell>
+                  <TableCell>User</TableCell>
+                  <TableCell>Min Amount</TableCell>
+                  <TableCell>Max Amount</TableCell>
+                  <TableCell>Status</TableCell><TableCell>Actions</TableCell>
+                </TableRow></TableHead>
+                <TableBody>
+                  {approvalFlows.map(f => (
+                    <TableRow key={f.id}>
+                      <TableCell sx={{ fontWeight: 600 }}>{f.document_type}</TableCell>
+                      <TableCell>{f.level}</TableCell>
+                      <TableCell><Chip label={f.role_name} size="small" color="primary" variant="outlined" /></TableCell>
+                      <TableCell sx={{ fontSize: '0.85rem' }}>{f.user_full_name || '-'}</TableCell>
+                      <TableCell>₹{f.min_amount}</TableCell>
+                      <TableCell>{f.max_amount ? `₹${f.max_amount}` : 'No Limit'}</TableCell>
+                      <TableCell><Chip label={f.is_active ? 'Active' : 'Inactive'} size="small" color={f.is_active ? 'success' : 'default'} /></TableCell>
+                      <TableCell>
+                        <Tooltip title="Edit"><IconButton size="small" onClick={() => {
+                          setEditing(f.id);
+                          setForm({ ...f });
+                          setDialog(true);
+                        }}><Edit fontSize="small" /></IconButton></Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Card>
+        </>
+      )}
+
       <Dialog open={dialog} onClose={() => setDialog(false)} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ fontWeight: 600 }}>{editing ? 'Edit User' : 'Create User'}</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 600 }}>
+          {tab === 2 ? (editing ? 'Edit Flow' : 'Create Flow') : (editing ? 'Edit User' : 'Create User')}
+        </DialogTitle>
         <DialogContent>
-          <Grid container spacing={2} sx={{ mt: 0.5 }}>
+          {tab === 2 ? (
+            <Grid container spacing={2} sx={{ mt: 0.5 }}>
+              <Grid size={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Document Type</InputLabel>
+                  <Select value={form.document_type || 'INDENT'} label="Document Type" onChange={e => setForm({ ...form, document_type: e.target.value })}>
+                    <MenuItem value="INDENT">Indent</MenuItem>
+                    <MenuItem value="PURCHASE_REQUEST">Purchase Request</MenuItem>
+                    <MenuItem value="PURCHASE_ORDER">Purchase Order</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid size={6}><TextField fullWidth label="Level (e.g. 1, 2)" type="number" value={form.level} onChange={e => setForm({ ...form, level: Number(e.target.value) })} required /></Grid>
+              <Grid size={6}>
+                <FormControl fullWidth><InputLabel>Role Required</InputLabel>
+                  <Select value={form.role_name || ''} label="Role Required" onChange={e => setForm({ ...form, role_name: e.target.value })}>
+                    {roles.map(r => <MenuItem key={r.id} value={r.name}>{r.name}</MenuItem>)}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid size={6}>
+                <FormControl fullWidth><InputLabel>Specific User (Optional)</InputLabel>
+                  <Select value={form.user_id || ''} label="Specific User (Optional)" onChange={e => setForm({ ...form, user_id: e.target.value })}>
+                    <MenuItem value=""><em>Any User</em></MenuItem>
+                    {users.map(u => <MenuItem key={u.id} value={u.id}>{u.full_name}</MenuItem>)}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid size={6}><TextField fullWidth label="Min Amount" type="number" value={form.min_amount} onChange={e => setForm({ ...form, min_amount: Number(e.target.value) })} /></Grid>
+              <Grid size={6}><TextField fullWidth label="Max Amount (Leave empty for No Limit)" type="number" value={form.max_amount || ''} onChange={e => setForm({ ...form, max_amount: e.target.value ? Number(e.target.value) : null })} /></Grid>
+              <Grid size={12}><FormControlLabel control={<Switch checked={form.is_active !== false} onChange={e => setForm({ ...form, is_active: e.target.checked })} />} label="Active" /></Grid>
+            </Grid>
+          ) : (
+            <Grid container spacing={2} sx={{ mt: 0.5 }}>
             {!editing && <Grid size={6}><TextField fullWidth label="Username" value={form.username} onChange={e => setForm({ ...form, username: e.target.value })} required /></Grid>}
             <Grid size={editing ? 12 : 6}><TextField fullWidth label="Full Name" value={form.full_name} onChange={e => setForm({ ...form, full_name: e.target.value })} required /></Grid>
             <Grid size={6}><TextField fullWidth label="Email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required /></Grid>
@@ -226,8 +309,27 @@ export default function Admin() {
             {!editing && <Grid size={12}><TextField fullWidth label="Password" type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} required /></Grid>}
             {editing && <Grid size={12}><FormControlLabel control={<Switch checked={form.is_active !== false} onChange={e => setForm({ ...form, is_active: e.target.checked })} />} label="Active" /></Grid>}
           </Grid>
+          )}
         </DialogContent>
-        <DialogActions><Button onClick={() => setDialog(false)}>Cancel</Button><Button variant="contained" onClick={handleSave}>{editing ? 'Update' : 'Create'}</Button></DialogActions>
+        <DialogActions>
+          <Button onClick={() => setDialog(false)}>Cancel</Button>
+          <Button variant="contained" onClick={async () => {
+            if (tab === 2) {
+              const payload = { 
+                ...form, 
+                level: Number(form.level), 
+                min_amount: Number(form.min_amount),
+                max_amount: form.max_amount === null || form.max_amount === '' ? null : Number(form.max_amount),
+                user_id: form.user_id || null
+              };
+              if (editing) await api.put(`/api/approval-flows/${editing}`, payload);
+              else await api.post('/api/approval-flows', payload);
+              setDialog(false); setEditing(null); load();
+            } else {
+              handleSave();
+            }
+          }}>{editing ? 'Update' : 'Create'}</Button>
+        </DialogActions>
       </Dialog>
     </Box>
   );

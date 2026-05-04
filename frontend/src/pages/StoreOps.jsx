@@ -231,6 +231,9 @@ export default function StoreOperations() {
                     setForm({ ...form, items }); 
                   }} 
                 />
+                <Typography variant="caption" sx={{ ml: 1, color: '#64748B' }}>
+                  {materials.find(m => m.id === item.material_id)?.material_type || ''}
+                </Typography>
               </Grid>
               <Grid size={3}>
                 <TextField fullWidth size="small" label="Quantity" type="number" value={item.quantity} 
@@ -299,7 +302,11 @@ export default function StoreOperations() {
               <Grid size={3}>
                 <FormControl fullWidth size="small"><InputLabel>Condition</InputLabel>
                   <Select value={item.condition || 'Good'} label="Condition" onChange={e => { const items = [...form.items]; items[i].condition = e.target.value; setForm({ ...form, items }); }}>
-                    <MenuItem value="Good">Good</MenuItem><MenuItem value="Damaged">Damaged</MenuItem>
+                    <MenuItem value="Good">Good</MenuItem>
+                    <MenuItem value="Rejected">Rejected</MenuItem>
+                    <MenuItem value="Scrap">Scrap</MenuItem>
+                    <MenuItem value="Repair">Repair</MenuItem>
+                    <MenuItem value="Reuse">Reuse</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>

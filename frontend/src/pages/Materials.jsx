@@ -20,7 +20,7 @@ export default function Materials() {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({
     code: '', name: '', category_id: '', uom_id: '', reorder_level: 0,
-    maximum_level: 0, standard_cost: 0, storage_type: 'General', description: ''
+    maximum_level: 0, standard_cost: 0, storage_type: 'General', material_type: 'Consumable', description: ''
   });
 
   const load = () => {
@@ -56,6 +56,7 @@ export default function Materials() {
         maximum_level: form.maximum_level,
         standard_cost: form.standard_cost,
         storage_type: form.storage_type,
+        material_type: form.material_type,
         description: form.description,
         subcategory_id: form.subcategory_id || null,
         preferred_vendor_id: form.preferred_vendor_id || null,
@@ -85,6 +86,7 @@ export default function Materials() {
       code: m.code, name: m.name, category_id: m.category_id, uom_id: m.uom_id,
       reorder_level: m.reorder_level, maximum_level: m.maximum_level,
       standard_cost: m.standard_cost, storage_type: m.storage_type || 'General',
+      material_type: m.material_type || 'Consumable',
       description: m.description || '', subcategory_id: m.subcategory_id || '',
       preferred_vendor_id: m.preferred_vendor_id || ''
     });
@@ -94,7 +96,7 @@ export default function Materials() {
   const openNew = () => {
     setEditing(null);
     setForm({ code: '', name: '', category_id: '', uom_id: '', reorder_level: 0,
-      maximum_level: 0, standard_cost: 0, storage_type: 'General', description: '' });
+      maximum_level: 0, standard_cost: 0, storage_type: 'General', material_type: 'Consumable', description: '' });
     setDialog(true);
   };
 
@@ -135,6 +137,7 @@ export default function Materials() {
                 <TableCell align="right">Cost (₹)</TableCell>
                 <TableCell align="right">Reorder</TableCell>
                 <TableCell align="right">Stock</TableCell>
+                <TableCell>Type</TableCell>
                 <TableCell>Status</TableCell>
                 <TableCell>Actions</TableCell>
               </TableRow>
@@ -152,6 +155,10 @@ export default function Materials() {
                     <Chip label={m.current_stock || 0} size="small"
                       color={(m.current_stock || 0) < m.reorder_level ? 'error' : 'success'}
                       sx={{ fontWeight: 600, minWidth: 50 }} />
+                  </TableCell>
+                  <TableCell>
+                    <Chip label={m.material_type} size="small" variant="outlined" 
+                      color={m.material_type === 'Non-Consumable' ? 'secondary' : 'default'} />
                   </TableCell>
                   <TableCell>
                     <Chip label={m.is_active ? 'Active' : 'Inactive'} size="small"
@@ -197,6 +204,14 @@ export default function Materials() {
             </Grid>
             <Grid size={{ xs: 12, sm: 4 }}>
               <TextField fullWidth label="Storage Type" value={form.storage_type} onChange={e => setForm({ ...form, storage_type: e.target.value })} />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 4 }}>
+              <FormControl fullWidth><InputLabel>Material Type</InputLabel>
+                <Select value={form.material_type} label="Material Type" onChange={e => setForm({ ...form, material_type: e.target.value })}>
+                  <MenuItem value="Consumable">Consumable</MenuItem>
+                  <MenuItem value="Non-Consumable">Non-Consumable</MenuItem>
+                </Select>
+              </FormControl>
             </Grid>
             <Grid size={{ xs: 12, sm: 4 }}>
               <TextField fullWidth label="Standard Cost (₹)" type="number" value={form.standard_cost} onChange={e => setForm({ ...form, standard_cost: parseFloat(e.target.value) || 0 })} />

@@ -31,6 +31,7 @@ const menuItems = [
   },
   {
     text: 'Procurement', icon: <ShoppingCart />, children: [
+      { text: 'Indents', icon: <Assignment />, path: '/indents' },
       { text: 'Purchase Requests', icon: <Assignment />, path: '/purchase-requests' },
       { text: 'Purchase Orders', icon: <ReceiptLong />, path: '/purchase-orders' },
     ]

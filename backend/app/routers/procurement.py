@@ -292,10 +292,20 @@ def list_purchase_orders(
         if po.pr_id:
             linked_pr = db.query(PurchaseRequest).filter(PurchaseRequest.id == po.pr_id).first()
             pr_number = linked_pr.pr_number if linked_pr else None
+        
+        indent_number = None
+        if po.indent_id:
+            from app.models import Indent
+            linked_indent = db.query(Indent).filter(Indent.id == po.indent_id).first()
+            indent_number = linked_indent.indent_number if linked_indent else None
+
         result.append(POOut(
             id=po.id, po_number=po.po_number,
             vendor_id=po.vendor_id, project_id=po.project_id,
-            pr_id=po.pr_id, pr_number=pr_number, total_amount=po.total_amount,
+            pr_id=po.pr_id, pr_number=pr_number, 
+            indent_id=po.indent_id, indent_number=indent_number,
+            po_type=po.po_type,
+            total_amount=po.total_amount,
             delivery_date=po.delivery_date, status=po.status,
             terms=po.terms, created_at=po.created_at,
             vendor_name=po.vendor.name if po.vendor else None,
@@ -328,10 +338,18 @@ def get_purchase_order(
             material_code=mat.code if mat else None,
             uom_name=mat.uom.name if mat and mat.uom else None
         ))
+    indent_number = None
+    if po.indent_id:
+        from app.models import Indent
+        linked_indent = db.query(Indent).filter(Indent.id == po.indent_id).first()
+        indent_number = linked_indent.indent_number if linked_indent else None
+
     return POOut(
         id=po.id, po_number=po.po_number,
         vendor_id=po.vendor_id, project_id=po.project_id,
-        pr_id=po.pr_id, total_amount=po.total_amount,
+        pr_id=po.pr_id, indent_id=po.indent_id, indent_number=indent_number,
+        po_type=po.po_type,
+        total_amount=po.total_amount,
         delivery_date=po.delivery_date, status=po.status,
         terms=po.terms, created_at=po.created_at,
         vendor_name=po.vendor.name if po.vendor else None,
@@ -352,6 +370,8 @@ def create_purchase_order(
         vendor_id=data.vendor_id,
         project_id=data.project_id,
         pr_id=data.pr_id,
+        indent_id=data.indent_id,
+        po_type=data.po_type or ("Formal" if (data.pr_id or data.indent_id) else "Informal"),
         delivery_date=data.delivery_date,
         terms=data.terms,
         created_by_id=current_user.id,
@@ -383,6 +403,14 @@ def create_purchase_order(
         ).first()
         if pr:
             pr.status = "Converted to PO"
+
+    from app.models import Indent, IndentStatus
+    if data.indent_id:
+        indent = db.query(Indent).filter(
+            Indent.id == data.indent_id, Indent.tenant_id == tenant_id, Indent.site_id == site_id
+        ).first()
+        if indent:
+            indent.status = IndentStatus.PO_CREATED.value
 
     db.commit()
     db.refresh(po)

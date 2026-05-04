@@ -17,8 +17,8 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "480"))
 
 # Application
-APP_TITLE = "NissiGrid Smart Stores"
-APP_SUBTITLE = "Enterprise Materials Governance Platform"
+APP_TITLE = "NissiGrid Smart Campus"
+APP_SUBTITLE = "Materials Management Platform"
 APP_VERSION = "1.0.0"
 
 # CORS

@@ -1,1 +1,1 @@
-# NissiGrid Smart Stores - Backend Application
+# NissiGrid Smart Campus - Backend Application

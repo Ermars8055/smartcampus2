@@ -1,4 +1,4 @@
-"""SQLAlchemy ORM models for NissiGrid Smart Stores - Multi-Tenant SaaS."""
+"""SQLAlchemy ORM models for NissiGrid Smart Campus - Multi-Tenant SaaS."""
 
 from datetime import datetime, date
 from sqlalchemy import (

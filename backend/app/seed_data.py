@@ -1,4 +1,4 @@
-"""Seed data for multi-tenant NissiGrid Smart Stores."""
+"""Seed data for multi-tenant NissiGrid Smart Campus."""
 from datetime import datetime, date, timedelta
 import random
 from sqlalchemy.orm import Session

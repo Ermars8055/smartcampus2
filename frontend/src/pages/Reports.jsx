@@ -105,7 +105,7 @@ export default function Reports() {
         </TableContainer>
         <Box sx={{ p: 1.5, borderTop: '1px solid #E2E8F0', display: 'flex', justifyContent: 'space-between' }}>
           <Typography variant="caption" sx={{ color: '#64748B' }}>{data.length} records</Typography>
-          <Typography variant="caption" sx={{ color: '#64748B' }}>NissiGrid Smart Stores Report</Typography>
+          <Typography variant="caption" sx={{ color: '#64748B' }}>NissiGrid Smart Campus Report</Typography>
         </Box>
       </Card>
     </Box>

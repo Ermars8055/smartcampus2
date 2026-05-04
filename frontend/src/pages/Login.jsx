@@ -71,7 +71,7 @@ export default function Login() {
           textAlign: 'center', mb: 3,
         }}>
           <Typography variant="h5" sx={{ color: '#fff', fontWeight: 700, letterSpacing: 0.5 }}>
-            🏗️ NissiGrid Smart Stores
+            🏗️ NissiGrid Smart Campus
           </Typography>
           <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)', mt: 0.5 }}>
             Materials Management Platform

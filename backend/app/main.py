@@ -1,4 +1,4 @@
-"""NissiGrid Smart Stores - FastAPI main application."""
+"""NissiGrid Smart Campus - FastAPI main application."""
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware

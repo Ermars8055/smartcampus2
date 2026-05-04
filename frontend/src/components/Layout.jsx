@@ -91,7 +91,7 @@ export default function Layout() {
             NissiGrid
           </Typography>
           <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: '0.65rem' }}>
-            Smart Stores
+            Smart Campus
           </Typography>
         </Box>
         {isMobile && (
@@ -221,7 +221,7 @@ export default function Layout() {
             )}
             <Box sx={{ flex: 1 }}>
               <Typography variant="h6" sx={{ color: '#1E3A8A', fontWeight: 700, fontSize: '1.1rem' }}>
-                NissiGrid Smart Stores
+                NissiGrid Smart Campus
               </Typography>
               <Typography variant="caption" sx={{ color: '#64748B', mt: -0.5, display: 'block' }}>
                 Enterprise Materials Governance Platform

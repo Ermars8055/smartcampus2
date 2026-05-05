@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import List
 from app.database import get_db
 from app.models import (
-    Indent, IndentItem, IndentStatus, ApprovalFlow, User, Material, CurrentStock, IndentApproval
+    Indent, IndentItem, IndentStatus, ApprovalFlow, User, Material, CurrentStock, IndentApproval, PurchaseOrder, PurchaseOrderItem
 )
 from app.schemas import IndentCreate, IndentOut, IndentAcknowledgeRequest
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
@@ -34,9 +34,21 @@ def list_indents(
                 item.material_name = item.material.name
                 item.material_code = item.material.code
                 item.uom_name = item.material.uom.name if item.material.uom else None
-                # Fetch current stock if possible or leave 0
+                
+                # Fetch current stock
                 stock = db.query(CurrentStock).filter(CurrentStock.material_id == item.material_id, CurrentStock.site_id == site_id).first()
                 item.current_stock = stock.quantity if stock else 0
+                
+                # Calculate pending
+                item.pending_quantity = max(0, item.requested_quantity - item.issued_quantity)
+                
+                # Availability status
+                if item.current_stock == 0:
+                    item.availability_status = "No Stock"
+                elif item.current_stock < item.pending_quantity:
+                    item.availability_status = "Low Stock"
+                else:
+                    item.availability_status = "Available"
     return indents
 
 @router.post("", response_model=IndentOut)
@@ -147,7 +159,11 @@ def approve_indent(
 
     # 2. Check which flows the current user can satisfy
     # Check by user_id first, then by role_name if user_id is null
-    applicable_flows = [f for f in flows if (f.user_id == current_user.id) or (not f.user_id and f.role_name == current_user.role_name)]
+    user_roles = getattr(current_user, "_roles", [])
+    applicable_flows = [
+        f for f in flows 
+        if (f.user_id == current_user.id) or (not f.user_id and f.role_name in user_roles)
+    ]
     
     if not applicable_flows:
         raise HTTPException(403, f"You do not have permission to approve at level {indent.current_approval_level}")
@@ -241,3 +257,60 @@ def acknowledge_indent(
     
     db.commit()
     return {"message": "Acknowledged successfully"}
+
+
+@router.post("/{id}/convert-to-po")
+def convert_to_po(
+    id: int,
+    vendor_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("purchase_orders", "create")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    indent = db.query(Indent).filter(Indent.id == id, Indent.tenant_id == tenant_id, Indent.site_id == site_id).first()
+    if not indent:
+        raise HTTPException(404, "Indent not found")
+    
+    # Generate PO number
+    count = db.query(PurchaseOrder).filter(PurchaseOrder.tenant_id == tenant_id, PurchaseOrder.site_id == site_id).count() + 1
+    po_number = f"PO-{datetime.now().strftime('%Y%m')}-{count:04d}"
+
+    project_id = indent.block.project_id if indent.block else 1
+
+    po = PurchaseOrder(
+        tenant_id=tenant_id,
+        site_id=site_id,
+        po_number=po_number,
+        vendor_id=vendor_id,
+        project_id=project_id,
+        indent_id=indent.id,
+        status="Draft",
+        po_type="Formal",
+        total_amount=0,
+        created_by_id=current_user.id
+    )
+    
+    db.add(po)
+    db.flush()
+    
+    total_amount = 0
+    for item in indent.items:
+        pending = max(0, item.requested_quantity - item.issued_quantity)
+        if pending > 0:
+            mat = item.material
+            rate = mat.standard_cost if mat else 0
+            po_item = PurchaseOrderItem(
+                po_id=po.id,
+                material_id=item.material_id,
+                quantity=pending,
+                rate=rate,
+                amount=pending * rate
+            )
+            db.add(po_item)
+            total_amount += po_item.amount
+            
+    po.total_amount = total_amount
+    db.commit()
+    
+    return {"id": po.id, "po_number": po_number, "message": "Purchase Order created from indent"}

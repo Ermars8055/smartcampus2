@@ -1,42 +1,42 @@
-"""Pydantic schemas for request/response validation."""
+"""NissiGrid Smart Campus - Pydantic schemas."""
 
-from pydantic import BaseModel, EmailStr, Field, ConfigDict
-from typing import Optional, List
+from pydantic import BaseModel, Field, EmailStr
+from typing import List, Optional, Dict, Any
 from datetime import datetime, date
 
+# ── Auth & Users ─────────────────────────────────────────────────────────
 
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+    roles: List[str] = []
+    full_name: str
+    tenant_id: Optional[int] = None
+    site_id: Optional[int] = None
 
-# ── SaaS Multi-Tenancy & RBAC ────────────────────────────────────────────
+class TokenData(BaseModel):
+    username: Optional[str] = None
+    tenant_id: Optional[int] = None
+    site_id: Optional[int] = None
 
-class TenantBase(BaseModel):
-    name: str
-    subscription_type: str = "single_site"
+class UserBase(BaseModel):
+    username: str
+    email: EmailStr
+    full_name: str
     is_active: bool = True
+    is_platform_admin: bool = False
 
-class TenantCreate(TenantBase):
-    pass
+class UserCreate(UserBase):
+    password: str
 
-class TenantOut(TenantBase):
+class UserOut(UserBase):
     id: int
-    slug: str
-    created_at: datetime
+    role_name: Optional[str] = None
+    tenant_name: Optional[str] = None
     class Config:
         from_attributes = True
 
-class SiteBase(BaseModel):
-    name: str
-    location: Optional[str] = None
-    is_active: bool = True
-
-class SiteCreate(SiteBase):
-    pass
-
-class SiteOut(SiteBase):
-    id: int
-    tenant_id: int
-    created_at: datetime
-    class Config:
-        from_attributes = True
+# ── RBAC ─────────────────────────────────────────────────────────────────
 
 class RolePermissionBase(BaseModel):
     resource: str
@@ -59,150 +59,59 @@ class RoleCreate(RoleBase):
 
 class RoleOut(RoleBase):
     id: int
-    tenant_id: int
     permissions: List[RolePermissionOut] = []
     class Config:
         from_attributes = True
 
-class UserSiteAccessOut(BaseModel):
-    site_id: int
-    site_name: Optional[str] = None
-    class Config:
-        from_attributes = True
+# ── Multi-tenancy ────────────────────────────────────────────────────────
 
-# ── Auth ─────────────────────────────────────────────────────────────────
+class TenantBase(BaseModel):
+    name: str
+    slug: str
+    subscription_plan: str = "basic"
+    max_sites: int = 1
 
-class Token(BaseModel):
-    access_token: str
-    token_type: str
+class TenantCreate(BaseModel):
+    name: str
+    subscription_type: str = "basic"
+    is_active: bool = True
 
-class TokenData(BaseModel):
-    username: Optional[str] = None
-    role: Optional[str] = None
+class SiteConfigCreate(BaseModel):
+    name: str
+    location: str
+    is_active: bool = True
 
-class LoginRequest(BaseModel):
+class AdminUserCreate(BaseModel):
     username: str
-    password: str
-
-class UserBase(BaseModel):
-    username: str
-    email: str
+    email: EmailStr
     full_name: str
-    role: str = "Engineer"
-    tenant_id: Optional[int] = None
-    tenant_name: Optional[str] = None
-    role_id: Optional[int] = None
-    role_name: Optional[str] = None
-    organization_id: Optional[int] = None
-
-class UserCreate(UserBase):
     password: str
-    site_ids: Optional[List[int]] = None
 
 class TenantProvisionCreate(BaseModel):
     tenant: TenantCreate
-    site: SiteCreate
-    admin: UserCreate
+    site: SiteConfigCreate
+    admin: AdminUserCreate
 
-class UserUpdate(BaseModel):
-    email: Optional[str] = None
-    full_name: Optional[str] = None
-    role: Optional[str] = None
-    role_id: Optional[int] = None
-    is_active: Optional[bool] = None
-    organization_id: Optional[int] = None
-    site_ids: Optional[List[int]] = None
-
-class UserOut(UserBase):
+class TenantOut(TenantBase):
     id: int
-    is_active: bool
-    created_at: datetime
-    sites: List[UserSiteAccessOut] = []
-    permissions: Optional[List[RolePermissionOut]] = None
-    class Config:
-        from_attributes = True
-
-
-# ── Organization Structure ───────────────────────────────────────────────
-
-class OrganizationBase(BaseModel):
-    name: str
-    code: str
-    address: Optional[str] = None
-    phone: Optional[str] = None
-    email: Optional[str] = None
-
-class OrganizationCreate(OrganizationBase):
-    pass
-
-class OrganizationOut(OrganizationBase):
-    id: int
-    is_active: bool
+    status: str
     created_at: datetime
     class Config:
         from_attributes = True
 
-class ProjectBase(BaseModel):
+class SiteBase(BaseModel):
     name: str
     code: str
-    organization_id: int
     location: Optional[str] = None
-    start_date: Optional[date] = None
-    end_date: Optional[date] = None
-    status: str = "Active"
-    budget: float = 0
 
-class ProjectCreate(ProjectBase):
-    pass
+class SiteCreate(SiteBase):
+    tenant_id: int
 
-class ProjectOut(ProjectBase):
+class SiteOut(SiteBase):
     id: int
-    is_active: bool
-    created_at: datetime
-    organization_name: Optional[str] = None
+    tenant_id: int
     class Config:
         from_attributes = True
-
-class BlockBase(BaseModel):
-    name: str
-    code: str
-    project_id: int
-    block_type: Optional[str] = None
-    block_number: Optional[str] = None
-    floors: int = 1
-    rooms: int = 0
-
-class BlockCreate(BlockBase):
-    pass
-
-class BlockOut(BlockBase):
-    id: int
-    is_active: bool
-    created_at: datetime
-    project_name: Optional[str] = None
-    class Config:
-        from_attributes = True
-
-class WarehouseBase(BaseModel):
-    name: str
-    code: str
-    project_id: int
-    warehouse_type: Optional[str] = None
-    location: Optional[str] = None
-    capacity: Optional[str] = None
-    manager_name: Optional[str] = None
-
-class WarehouseCreate(WarehouseBase):
-    pass
-
-class WarehouseOut(WarehouseBase):
-    id: int
-    is_active: bool
-    created_at: datetime
-    project_name: Optional[str] = None
-    class Config:
-        from_attributes = True
-
 
 # ── Master Data ──────────────────────────────────────────────────────────
 
@@ -215,7 +124,6 @@ class CategoryCreate(CategoryBase):
 
 class CategoryOut(CategoryBase):
     id: int
-    is_active: bool
     class Config:
         from_attributes = True
 
@@ -228,8 +136,8 @@ class SubCategoryCreate(SubCategoryBase):
 
 class SubCategoryOut(SubCategoryBase):
     id: int
-    is_active: bool
     category_name: Optional[str] = None
+    is_active: bool = True
     class Config:
         from_attributes = True
 
@@ -242,7 +150,6 @@ class UOMCreate(UOMBase):
 
 class UOMOut(UOMBase):
     id: int
-    is_active: bool
     class Config:
         from_attributes = True
 
@@ -252,25 +159,24 @@ class MaterialBase(BaseModel):
     category_id: int
     subcategory_id: Optional[int] = None
     uom_id: int
+    material_type: str = "Consumable"
     reorder_level: float = 0
-    maximum_level: float = 0
+    maximum_level: Optional[float] = None
     standard_cost: float = 0
     preferred_vendor_id: Optional[int] = None
-    storage_type: str = "General"
-    material_type: str = "Consumable"
+    storage_type: Optional[str] = None
     hsn_code: Optional[str] = None
     description: Optional[str] = None
 
 class MaterialCreate(MaterialBase):
-    model_config = ConfigDict(from_attributes=True, extra='ignore')
+    pass
 
 class MaterialUpdate(BaseModel):
-    model_config = ConfigDict(from_attributes=True, extra='ignore')
-    code: Optional[str] = None
     name: Optional[str] = None
     category_id: Optional[int] = None
     subcategory_id: Optional[int] = None
     uom_id: Optional[int] = None
+    material_type: Optional[str] = None
     reorder_level: Optional[float] = None
     maximum_level: Optional[float] = None
     standard_cost: Optional[float] = None
@@ -279,12 +185,6 @@ class MaterialUpdate(BaseModel):
     hsn_code: Optional[str] = None
     description: Optional[str] = None
     is_active: Optional[bool] = None
-    # Add other potentially incoming fields to ignore them
-    category_name: Optional[str] = None
-    subcategory_name: Optional[str] = None
-    uom_name: Optional[str] = None
-    vendor_name: Optional[str] = None
-    current_stock: Optional[float] = None
 
 class MaterialOut(MaterialBase):
     id: int
@@ -302,39 +202,100 @@ class VendorBase(BaseModel):
     name: str
     code: str
     contact_person: Optional[str] = None
+    email: Optional[EmailStr] = None
     phone: Optional[str] = None
-    email: Optional[str] = None
-    gst_number: Optional[str] = None
-    pan_number: Optional[str] = None
     address: Optional[str] = None
-    city: Optional[str] = None
-    state: Optional[str] = None
-    pincode: Optional[str] = None
+    tax_number: Optional[str] = None
     rating: float = 0
 
 class VendorCreate(VendorBase):
-    category_ids: List[int] = []
+    pass
 
 class VendorUpdate(BaseModel):
     name: Optional[str] = None
+    code: Optional[str] = None
     contact_person: Optional[str] = None
+    email: Optional[EmailStr] = None
     phone: Optional[str] = None
-    email: Optional[str] = None
-    gst_number: Optional[str] = None
     address: Optional[str] = None
-    city: Optional[str] = None
-    state: Optional[str] = None
+    tax_number: Optional[str] = None
+    rating: Optional[float] = None
     is_active: Optional[bool] = None
-    category_ids: Optional[List[int]] = None
 
 class VendorOut(VendorBase):
     id: int
-    is_active: bool
-    created_at: datetime
-    categories: List[str] = []
     class Config:
         from_attributes = True
 
+class OrganizationBase(BaseModel):
+    name: str
+    code: str
+    address: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+
+class OrganizationCreate(OrganizationBase):
+    pass
+
+class OrganizationOut(OrganizationBase):
+    id: int
+    class Config:
+        from_attributes = True
+
+class ProjectBase(BaseModel):
+    name: str
+    code: str
+    organization_id: int
+    location: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    budget: float = 0
+
+class ProjectCreate(ProjectBase):
+    pass
+
+class ProjectOut(ProjectBase):
+    id: int
+    status: str
+    organization_name: Optional[str] = None
+    class Config:
+        from_attributes = True
+
+class BlockBase(BaseModel):
+    name: str
+    code: str
+    project_id: int
+    block_type: str = "Building"
+    block_number: Optional[str] = None
+    floors: int = 1
+    rooms: int = 0
+
+class BlockCreate(BlockBase):
+    pass
+
+class BlockOut(BlockBase):
+    id: int
+    project_name: Optional[str] = None
+    class Config:
+        from_attributes = True
+
+class WarehouseBase(BaseModel):
+    name: str
+    code: str
+    project_id: int
+    warehouse_type: str = "Main"
+    location: Optional[str] = None
+    manager_id: Optional[int] = None
+
+class WarehouseCreate(WarehouseBase):
+    pass
+
+class WarehouseOut(WarehouseBase):
+    id: int
+    project_name: Optional[str] = None
+    manager_name: Optional[str] = None
+    class Config:
+        from_attributes = True
 
 # ── Procurement ──────────────────────────────────────────────────────────
 
@@ -347,14 +308,13 @@ class PRItemOut(PRItemBase):
     material_name: Optional[str] = None
     material_code: Optional[str] = None
     uom_name: Optional[str] = None
-    last_purchase_price: Optional[float] = None
     class Config:
         from_attributes = True
 
 class PRBase(BaseModel):
-    required_for_block_id: Optional[int] = None
     project_id: int
-    required_date: date
+    required_date: Optional[date] = None
+    priority: str = "Normal"
     remarks: Optional[str] = None
     items: List[PRItemBase] = []
 
@@ -363,17 +323,14 @@ class PRCreate(PRBase):
 
 class PRUpdate(BaseModel):
     required_date: Optional[date] = None
+    priority: Optional[str] = None
     remarks: Optional[str] = None
     status: Optional[str] = None
 
-class PROut(BaseModel):
+class PROut(PRBase):
     id: int
     pr_number: str
     requester_id: int
-    required_for_block_id: Optional[int] = None
-    project_id: int
-    required_date: date
-    remarks: Optional[str] = None
     status: str
     approved_by_id: Optional[int] = None
     approved_at: Optional[datetime] = None
@@ -448,10 +405,9 @@ class GateEntryBase(BaseModel):
     vendor_id: Optional[int] = None
     po_id: Optional[int] = None
     project_id: int
-    material_id: int
-    quantity: float
     driver_name: Optional[str] = None
     driver_phone: Optional[str] = None
+    gate_pass_number: Optional[str] = None
     remarks: Optional[str] = None
 
 class GateEntryCreate(GateEntryBase):
@@ -460,12 +416,11 @@ class GateEntryCreate(GateEntryBase):
 class GateEntryOut(GateEntryBase):
     id: int
     entry_number: str
-    arrival_time: datetime
     status: str
     created_at: datetime
     vendor_name: Optional[str] = None
-    material_name: Optional[str] = None
     po_number: Optional[str] = None
+    project_name: Optional[str] = None
     class Config:
         from_attributes = True
 
@@ -473,17 +428,19 @@ class GateEntryOut(GateEntryBase):
 # ── GRN ──────────────────────────────────────────────────────────────────
 
 class GRNItemBase(BaseModel):
+    po_item_id: int
+    received_quantity: float = Field(..., gt=0)
+    accepted_quantity: float = Field(..., gt=0)
+    rejected_quantity: float = 0
+    rejection_reason: Optional[str] = None
+
+class GRNItemOut(BaseModel):
+    id: int
     material_id: int
-    ordered_quantity: float = 0
     received_quantity: float
     accepted_quantity: float
-    rejected_quantity: float = 0
-    rate: float = 0
-    po_item_id: Optional[int] = None
-    remarks: Optional[str] = None
-
-class GRNItemOut(GRNItemBase):
-    id: int
+    rejected_quantity: float
+    rate: float
     material_name: Optional[str] = None
     material_code: Optional[str] = None
     uom_name: Optional[str] = None
@@ -492,10 +449,8 @@ class GRNItemOut(GRNItemBase):
 
 class GRNBase(BaseModel):
     po_id: int
-    gate_entry_id: Optional[int] = None
     warehouse_id: int
-    project_id: int
-    vendor_id: int
+    gate_entry_id: Optional[int] = None
     invoice_number: Optional[str] = None
     invoice_date: Optional[date] = None
     invoice_amount: float = 0
@@ -570,6 +525,10 @@ class IssueOut(BaseModel):
     purpose: Optional[str] = None
     status: str
     received_by_name: Optional[str] = None
+    is_acknowledged: bool = False
+    acknowledged_at: Optional[datetime] = None
+    acknowledged_by_id: Optional[int] = None
+    acknowledgement_remarks: Optional[str] = None
     created_at: datetime
     warehouse_name: Optional[str] = None
     project_name: Optional[str] = None
@@ -785,12 +744,14 @@ class IndentItemBase(BaseModel):
 
 class IndentItemOut(IndentItemBase):
     id: int
-    issued_quantity: float = 0
-    acknowledged_quantity: float = 0
     material_name: Optional[str] = None
     material_code: Optional[str] = None
     uom_name: Optional[str] = None
-    current_stock: Optional[float] = 0
+    issued_quantity: float = 0
+    acknowledged_quantity: float = 0
+    pending_quantity: float = 0
+    current_stock: float = 0
+    availability_status: str = "No Stock"
     class Config:
         from_attributes = True
 
@@ -825,6 +786,7 @@ class IndentOut(BaseModel):
     updated_at: datetime
     requester_name: Optional[str] = None
     block_name: Optional[str] = None
+    total_amount: float
     items: List[IndentItemOut] = []
     class Config:
         from_attributes = True
@@ -841,25 +803,13 @@ class IndentAcknowledgeRequest(BaseModel):
 
 class AuditLogOut(BaseModel):
     id: int
-    user_id: Optional[int] = None
+    user_id: int
     action: str
     entity_type: str
     entity_id: Optional[int] = None
     old_values: Optional[str] = None
     new_values: Optional[str] = None
-    ip_address: Optional[str] = None
     created_at: datetime
-    username: Optional[str] = None
-    class Config:
-        from_attributes = True
-
-class IndentApprovalOut(BaseModel):
-    id: int
-    indent_id: int
-    approval_flow_id: int
-    approver_id: int
-    approved_at: datetime
     user_full_name: Optional[str] = None
-    role_name: Optional[str] = None
     class Config:
         from_attributes = True

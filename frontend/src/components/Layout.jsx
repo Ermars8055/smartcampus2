@@ -229,60 +229,6 @@ export default function Layout() {
               </Typography>
             </Box>
 
-            <Chip
-              label={tenant?.name || 'Platform Admin'}
-              size="small"
-              color={!tenant ? 'secondary' : 'primary'}
-              variant="outlined"
-              sx={{ display: { xs: 'none', md: 'inline-flex' }, fontWeight: 600, maxWidth: 220 }}
-            />
-
-            {tenant != null && (
-            <Box sx={{
-              display: { xs: 'none', sm: 'flex' },
-              alignItems: 'center',
-              gap: 1,
-              px: 1.5,
-              py: 0.4,
-              border: '1px solid #E2E8F0',
-              borderRadius: 2,
-              color: '#475569',
-              minWidth: 210,
-              maxWidth: 280,
-            }}>
-              <Store sx={{ fontSize: 18, color: '#2563EB' }} />
-              <Select
-                variant="standard"
-                disableUnderline
-                size="small"
-                value={activeSiteId || ''}
-                displayEmpty
-                onChange={(e) => setActiveSiteId(e.target.value)}
-                sx={{
-                  flex: 1,
-                  color: '#1E293B',
-                  fontSize: '0.85rem',
-                  '& .MuiSelect-select': {
-                    py: 0.5,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  },
-                }}
-              >
-                {sites.length === 0 ? (
-                  <MenuItem value="" disabled>No Sites</MenuItem>
-                ) : (
-                  sites.map((site) => (
-                    <MenuItem key={site.id} value={String(site.id)}>
-                      {site.name}
-                    </MenuItem>
-                  ))
-                )}
-              </Select>
-            </Box>
-            )}
-
             <Tooltip title="Notifications">
               <IconButton onClick={() => navigate('/alerts')} sx={{ color: '#64748B' }}>
                 <Badge badgeContent={alertCount} color="error" max={99}>

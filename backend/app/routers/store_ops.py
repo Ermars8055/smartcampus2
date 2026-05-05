@@ -8,7 +8,7 @@ from app.database import get_db
 from app.models import (
     MaterialIssue, MaterialIssueItem, MaterialReturn, MaterialReturnItem,
     StockTransfer, StockTransferItem, CurrentStock, StockLedger,
-    Material, Warehouse, Block, User, AuditLog
+    Material, Warehouse, Block, User, AuditLog, Indent, IndentItem
 )
 from app.schemas import (
     IssueCreate, IssueOut, IssueItemOut,
@@ -56,6 +56,9 @@ def list_issues(
             issued_to_contractor=iss.issued_to_contractor,
             purpose=iss.purpose, status=iss.status,
             received_by_name=iss.received_by_name,
+            indent_id=iss.indent_id,
+            is_acknowledged=iss.is_acknowledged,
+            acknowledged_at=iss.acknowledged_at,
             created_at=iss.created_at,
             warehouse_name=iss.warehouse.name if iss.warehouse else None,
             project_name=iss.project.name if iss.project else None,
@@ -79,6 +82,7 @@ def create_issue(
         issue_number=issue_number,
         warehouse_id=data.warehouse_id,
         project_id=data.project_id,
+        indent_id=data.indent_id,
         issued_to_block_id=data.issued_to_block_id,
         issued_to_department=data.issued_to_department,
         issued_to_contractor=data.issued_to_contractor,
@@ -135,8 +139,56 @@ def create_issue(
             user_id=current_user.id
         )
 
+    # If this issue is linked to an indent, update indent item issued quantities
+    if data.indent_id:
+        indent = db.query(Indent).filter(Indent.id == data.indent_id).first()
+        if indent:
+            for item_data in data.items:
+                indent_item = db.query(IndentItem).filter(
+                    IndentItem.indent_id == indent.id,
+                    IndentItem.material_id == item_data.material_id
+                ).first()
+                if indent_item:
+                    indent_item.issued_quantity += item_data.quantity
+
     db.commit()
     return {"id": issue.id, "issue_number": issue_number, "message": "Material issued successfully"}
+
+
+@router.put("/issues/{issue_id}/acknowledge")
+def acknowledge_issue(
+    issue_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    tenant_id: int = Depends(get_tenant_id)
+):
+    issue = db.query(MaterialIssue).filter(
+        MaterialIssue.id == issue_id,
+        MaterialIssue.tenant_id == tenant_id
+    ).first()
+    
+    if not issue:
+        raise HTTPException(status_code=404, detail="Issue not found")
+    
+    if issue.is_acknowledged:
+        return {"message": "Already acknowledged"}
+
+    issue.is_acknowledged = True
+    issue.acknowledged_at = datetime.utcnow()
+    issue.acknowledged_by_id = current_user.id
+    
+    # Update IndentItem acknowledged quantities if linked
+    if issue.indent_id:
+        for item in issue.items:
+            indent_item = db.query(IndentItem).filter(
+                IndentItem.indent_id == issue.indent_id,
+                IndentItem.material_id == item.material_id
+            ).first()
+            if indent_item:
+                indent_item.acknowledged_quantity += item.quantity
+
+    db.commit()
+    return {"message": "Issue acknowledged successfully"}
 
 
 # ── Material Returns ─────────────────────────────────────────────────────

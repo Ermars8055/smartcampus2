@@ -21,6 +21,8 @@ export default function Indents() {
   const [form, setForm] = useState({
     block_id: '', floor: '', location: '', remarks: '', items: [{ material_id: '', requested_quantity: '' }]
   });
+  const [vendorDialog, setVendorDialog] = useState({ open: false, indent: null, vendor_id: '' });
+  const [vendors, setVendors] = useState([]);
   
   const selectedBlock = blocks.find(b => b.id === form.block_id);
   const floorOptions = selectedBlock ? Array.from({ length: selectedBlock.floors }, (_, i) => i + 1) : [];
@@ -42,6 +44,7 @@ export default function Indents() {
     load();
     api.get('/api/materials').then(r => setMaterials(r.data.items || []));
     api.get('/api/blocks').then(r => setBlocks(r.data));
+    api.get('/api/vendors').then(r => setVendors(r.data));
   }, []);
 
   const addItem = () => setForm({ ...form, items: [...form.items, { material_id: '', requested_quantity: '' }] });
@@ -84,6 +87,16 @@ export default function Indents() {
 
   const approveIndent = async (id) => { await api.post(`/api/indents/${id}/approve`); load(); };
   const rejectIndent = async (id) => { await api.post(`/api/indents/${id}/reject`); load(); };
+
+  const handleConvertToPo = async () => {
+    if (!vendorDialog.vendor_id) return;
+    try {
+      await api.post(`/api/indents/${vendorDialog.indent.id}/convert-to-po?vendor_id=${vendorDialog.vendor_id}`);
+      setVendorDialog({ open: false, indent: null, vendor_id: '' });
+      load();
+      alert("PO created successfully!");
+    } catch (err) { alert(err.response?.data?.detail || 'Error converting to PO'); }
+  };
 
   // Status helpers
   const statusColor = { 
@@ -297,7 +310,6 @@ export default function Indents() {
                 <TableCell>Requester</TableCell>
                 <TableCell>Date</TableCell>
                 <TableCell align="center">Items</TableCell>
-                <TableCell align="right">Amount (₹)</TableCell>
                 <TableCell>Status</TableCell>
                 <TableCell align="center">Level</TableCell>
                 <TableCell>Actions</TableCell>
@@ -319,7 +331,6 @@ export default function Indents() {
                   <TableCell sx={{ fontSize: '0.8rem' }}>{ind.requester_name}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem' }}>{formatDate(ind.created_at)}</TableCell>
                   <TableCell align="center">{ind.items?.length || 0}</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 600 }}>₹{ind.total_amount?.toLocaleString()}</TableCell>
                   <TableCell><Chip label={ind.status} size="small" color={statusColor[ind.status] || 'default'} sx={{ fontWeight: 600, fontSize: '0.7rem' }} /></TableCell>
                   <TableCell align="center"><Chip label={`L${ind.current_approval_level}`} size="small" variant="outlined" /></TableCell>
                   <TableCell onClick={e => e.stopPropagation()}>
@@ -338,7 +349,7 @@ export default function Indents() {
                       </Tooltip>
                       <Tooltip title="Convert to PO">
                         <span><IconButton size="small" color="primary" disabled={ind.status !== 'Approved' && ind.status !== 'Partially Issued'}
-                          onClick={() => navigate('/purchase-orders', { state: { indentData: ind } })}>
+                          onClick={() => setVendorDialog({ open: true, indent: ind, vendor_id: '' })}>
                           <ReceiptLong fontSize="small" />
                         </IconButton></span>
                       </Tooltip>
@@ -365,16 +376,16 @@ export default function Indents() {
               <Typography sx={{ fontWeight: 600 }}>{detailDialog?.block_name || '—'}</Typography>
             </Grid>
             <Grid item xs={3}>
+              <Typography variant="caption" color="textSecondary">Floor</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{detailDialog?.floor ? `Floor ${detailDialog.floor}` : '—'}</Typography>
+            </Grid>
+            <Grid item xs={3}>
               <Typography variant="caption" color="textSecondary">Room</Typography>
               <Typography sx={{ fontWeight: 600 }}>{detailDialog?.location || '—'}</Typography>
             </Grid>
             <Grid item xs={3}>
               <Typography variant="caption" color="textSecondary">Status</Typography>
               <Box sx={{ mt: 0.5 }}><Chip label={detailDialog?.status} size="small" color={statusColor[detailDialog?.status] || 'default'} /></Box>
-            </Grid>
-            <Grid item xs={3}>
-              <Typography variant="caption" color="textSecondary">Total Amount</Typography>
-              <Typography sx={{ fontWeight: 700, color: '#059669' }}>₹{detailDialog?.total_amount?.toLocaleString()}</Typography>
             </Grid>
           </Grid>
           {detailDialog?.remarks && (
@@ -387,21 +398,34 @@ export default function Indents() {
             <TableHead>
               <TableRow sx={{ bgcolor: '#f0f4ff' }}>
                 <TableCell sx={{ fontWeight: 600 }}>Material</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Code</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600 }}>Requested</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600 }}>Qty Requested</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600 }}>Current Stock</TableCell>
+                <TableCell align="center" sx={{ fontWeight: 600 }}>Availability</TableCell>
                 <TableCell align="right" sx={{ fontWeight: 600 }}>Issued</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600 }}>Acknowledged</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600 }}>Pending</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {detailDialog?.items?.map(item => (
                 <TableRow key={item.id}>
-                  <TableCell>{item.material_name}</TableCell>
-                  <TableCell sx={{ color: '#64748B' }}>{item.material_code}</TableCell>
-                  <TableCell align="right">{item.requested_quantity} {item.uom_name}</TableCell>
+                  <TableCell>
+                    <Typography sx={{ fontWeight: 500, fontSize: '0.9rem' }}>{item.material_name}</Typography>
+                    <Typography variant="caption" sx={{ color: '#64748B' }}>{item.material_code}</Typography>
+                  </TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 500 }}>{item.requested_quantity} {item.uom_name}</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700 }}>{item.current_stock} {item.uom_name}</TableCell>
+                  <TableCell align="center">
+                    <Chip 
+                      label={item.availability_status === 'Available' ? '✓ AVAILABLE' : (item.availability_status === 'Low Stock' ? 'X LOW' : 'X NO STOCK')} 
+                      size="small" 
+                      color={item.availability_status === 'Available' ? 'success' : (item.availability_status === 'Low Stock' ? 'warning' : 'error')}
+                      variant={item.availability_status === 'Available' ? 'light' : 'outlined'}
+                      sx={{ fontWeight: 700, fontSize: '0.65rem' }}
+                    />
+                  </TableCell>
                   <TableCell align="right">{item.issued_quantity}</TableCell>
-                  <TableCell align="right">
-                    <Chip label={item.acknowledged_quantity} size="small" color={item.acknowledged_quantity >= item.issued_quantity && item.issued_quantity > 0 ? 'success' : 'default'} />
+                  <TableCell align="right" sx={{ fontWeight: 600, color: item.pending_quantity > 0 ? '#ef4444' : '#10b981' }}>
+                    {item.pending_quantity}
                   </TableCell>
                 </TableRow>
               ))}
@@ -409,6 +433,28 @@ export default function Indents() {
           </Table>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}><Button onClick={() => setDetailDialog(null)}>Close</Button></DialogActions>
+      </Dialog>
+
+      {/* Vendor Selection Dialog for PO Conversion */}
+      <Dialog open={vendorDialog.open} onClose={() => setVendorDialog({ ...vendorDialog, open: false })} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ fontWeight: 600 }}>Select Vendor for PO</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ mb: 2 }}>Choose a vendor to create a Purchase Order for the pending items of {vendorDialog.indent?.indent_number}.</Typography>
+          <FormControl fullWidth size="small">
+            <InputLabel>Vendor</InputLabel>
+            <Select
+              value={vendorDialog.vendor_id}
+              label="Vendor"
+              onChange={e => setVendorDialog({ ...vendorDialog, vendor_id: e.target.value })}
+            >
+              {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.name} ({v.code})</MenuItem>)}
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setVendorDialog({ ...vendorDialog, open: false })}>Cancel</Button>
+          <Button variant="contained" disabled={!vendorDialog.vendor_id} onClick={handleConvertToPo}>Convert to PO</Button>
+        </DialogActions>
       </Dialog>
 
       {/* Confirmation Dialog */}

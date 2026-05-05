@@ -75,7 +75,7 @@ export default function Projects() {
                     <Typography variant="caption" sx={{ color: '#64748B' }}>{proj.code} • {proj.location}</Typography>
                   </Box>
                   <Chip label={proj.status} size="small" color="success" />
-                  {proj.budget > 0 && <Chip label={`₹${(proj.budget / 10000000).toFixed(0)} Cr`} size="small" variant="outlined" />}
+                  {/* Removed budget chip as requested */}
                 </Box>
 
                 <Grid container spacing={2}>

@@ -12,23 +12,23 @@ def seed_database(db: Session):
     print("Seeding...")
 
     # Tenants
-    t1 = Tenant(name="ABC Infrastructure Pvt Ltd", slug="abc-infra", subscription_plan="multi_site", max_sites=5)
+    t1 = Tenant(name="East Point Trust", slug="east-point", subscription_plan="multi_site", max_sites=5)
     t2 = Tenant(name="City Medical Campus Trust", slug="cmc-trust", subscription_plan="basic", max_sites=1)
     db.add_all([t1, t2]); db.flush()
 
     # Sites
-    s1 = Site(tenant_id=t1.id, name="Mumbai HQ", code="MUM", location="Mumbai, Maharashtra")
-    s2 = Site(tenant_id=t1.id, name="Pune Site", code="PUN", location="Pune, Maharashtra")
+    s1 = Site(tenant_id=t1.id, name="Bangalore HQ", code="BLR", location="Bangalore, Karnataka")
+    s2 = Site(tenant_id=t1.id, name="Mysore Site", code="MYS", location="Mysore, Karnataka")
     s3 = Site(tenant_id=t2.id, name="CMC Campus", code="CMC", location="Bangalore, Karnataka")
     db.add_all([s1, s2, s3]); db.flush()
 
     # Users
     superadmin = User(username="superadmin", email="super@nissigrid.com", full_name="NissiGrid Super Admin", hashed_password=get_password_hash("admin123"), is_platform_admin=True)
-    admin1 = User(username="admin", email="admin@abcinfra.com", full_name="Vikram Singh", hashed_password=get_password_hash("admin123"))
-    pm1 = User(username="purchase_mgr", email="purchase@abcinfra.com", full_name="Rajesh Kumar", hashed_password=get_password_hash("pass123"))
-    sk1 = User(username="storekeeper", email="store@abcinfra.com", full_name="Anita Sharma", hashed_password=get_password_hash("pass123"))
-    sec1 = User(username="security", email="security@abcinfra.com", full_name="Mohan Das", hashed_password=get_password_hash("pass123"))
-    eng1 = User(username="engineer1", email="engineer1@abcinfra.com", full_name="Priya Patel", hashed_password=get_password_hash("pass123"))
+    admin1 = User(username="admin", email="admin@eastpoint.org", full_name="Vikram Singh", hashed_password=get_password_hash("admin123"))
+    pm1 = User(username="purchase_mgr", email="purchase@eastpoint.org", full_name="Rajesh Kumar", hashed_password=get_password_hash("pass123"))
+    sk1 = User(username="storekeeper", email="store@eastpoint.org", full_name="Anita Sharma", hashed_password=get_password_hash("pass123"))
+    sec1 = User(username="security", email="security@eastpoint.org", full_name="Mohan Das", hashed_password=get_password_hash("pass123"))
+    eng1 = User(username="engineer1", email="engineer1@eastpoint.org", full_name="Priya Patel", hashed_password=get_password_hash("pass123"))
     cmc_admin = User(username="cmc_admin", email="admin@cmc.org", full_name="Lakshmi R", hashed_password=get_password_hash("admin123"))
     db.add_all([superadmin, admin1, pm1, sk1, sec1, eng1, cmc_admin]); db.flush()
     users = [superadmin, admin1, pm1, sk1, sec1, eng1, cmc_admin]
@@ -76,7 +76,7 @@ def seed_database(db: Session):
     # == TENANT 1 SITE 1 DATA ==
     T, S = t1.id, s1.id
 
-    org1 = Organization(tenant_id=T, site_id=S, name="ABC Infrastructure Pvt Ltd", code="ABC-INFRA", address="123 Construction Lane, Mumbai", phone="022-12345678", email="info@abcinfra.com")
+    org1 = Organization(tenant_id=T, site_id=S, name="East Point Trust", code="EPT", address="Bangalore", phone="080-12345678", email="info@eastpoint.org")
     db.add(org1); db.flush()
 
     proj1 = Project(tenant_id=T, site_id=S, name="Campus", code="CAM-001", organization_id=org1.id, location="Bangalore", start_date=date(2025,1,15), end_date=date(2027,6,30), status="Active", budget=50_00_00_000)

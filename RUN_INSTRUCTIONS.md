@@ -70,8 +70,8 @@ Has overarching access to the entire platform. *(Click "Platform Admin Login" at
 - **Username:** `superadmin`
 - **Password:** `admin123`
 
-### 🏢 Tenant 1: ABC Infrastructure Pvt Ltd
-**Workspace ID:** `abc-infra`
+### 🏢 Tenant 1: East Point Trust
+**Workspace ID:** `east-point`
 - **Admin (Full Access):** `admin` | Password: `admin123`
 - **Purchase Manager:** `purchase_mgr` | Password: `pass123`
 - **Store Keeper:** `storekeeper` | Password: `pass123`

@@ -14,7 +14,7 @@ from app.routers import (
     auth, dashboard, materials, vendors, organizations,
     procurement, gate_entry, grn, store_ops, inventory_admin,
     saas_admin, rbac, sites, auto_pr, alerts, intelligence,
-    indents, approval_flows
+    indents, approval_flows, quotations
 )
 
 # Create database tables
@@ -61,6 +61,7 @@ app.include_router(inventory_admin.router)
 app.include_router(intelligence.router)
 app.include_router(indents.router)
 app.include_router(approval_flows.router)
+app.include_router(quotations.router)
 
 
 @app.on_event("startup")

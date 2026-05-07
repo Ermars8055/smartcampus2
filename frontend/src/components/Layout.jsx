@@ -10,7 +10,7 @@ import {
   LocalShipping, People, Assessment, Settings, Notifications,
   ExpandLess, ExpandMore, Logout, Person, Store, Assignment,
   SwapHoriz, Undo, Security, ReceiptLong, AccountTree, Category,
-  Build, ChevronLeft
+  Build, ChevronLeft, RequestQuote
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
@@ -33,6 +33,7 @@ const menuItems = [
     text: 'Procurement', icon: <ShoppingCart />, children: [
       { text: 'Indents', icon: <Assignment />, path: '/indents' },
       { text: 'Purchase Requests', icon: <Assignment />, path: '/purchase-requests' },
+      { text: 'Quotations', icon: <RequestQuote />, path: '/quotations' },
       { text: 'Purchase Orders', icon: <ReceiptLong />, path: '/purchase-orders' },
     ]
   },

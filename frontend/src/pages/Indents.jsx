@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useMessage } from '../context/MessageContext';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
@@ -12,6 +13,7 @@ import { formatDate } from '../utils/dateUtils';
 import MaterialSelect from '../components/MaterialSelect';
 
 export default function Indents() {
+  const { showMessage } = useMessage();
   const [indents, setIndents] = useState([]);
   const [materials, setMaterials] = useState([]);
   const [blocks, setBlocks] = useState([]);
@@ -68,21 +70,22 @@ export default function Indents() {
         requested_quantity: parseFloat(it.requested_quantity) || 0
       }));
       if (mappedItems.some(it => it.requested_quantity <= 0)) {
-        alert("Quantity must be greater than 0.");
+        showMessage("Quantity must be greater than 0.", "Validation Error", "warning");
         return;
       }
       if (!form.block_id) {
-        alert("Please select a building / block.");
+        showMessage("Please select a building / block.", "Selection Required", "warning");
         return;
       }
       if (mappedItems.some(it => !it.material_id)) {
-        alert("Please select a material for every line item.");
+        showMessage("Please select a material for every line item.", "Validation Error", "warning");
         return;
       }
       const payload = { ...form, items: mappedItems };
       await api.post('/api/indents', payload);
       setShowForm(false); load();
-    } catch (err) { alert(err.response?.data?.detail || 'Error'); }
+      showMessage("Indent submitted successfully!", "Success", "success");
+    } catch (err) { showMessage(err.response?.data?.detail || 'Error', "Error", "error"); }
   };
 
   const approveIndent = async (id) => { await api.post(`/api/indents/${id}/approve`); load(); };
@@ -94,8 +97,8 @@ export default function Indents() {
       await api.post(`/api/indents/${vendorDialog.indent.id}/convert-to-po?vendor_id=${vendorDialog.vendor_id}`);
       setVendorDialog({ open: false, indent: null, vendor_id: '' });
       load();
-      alert("PO created successfully!");
-    } catch (err) { alert(err.response?.data?.detail || 'Error converting to PO'); }
+      showMessage("PO created successfully!", "Success", "success");
+    } catch (err) { showMessage(err.response?.data?.detail || 'Error converting to PO', "Error", "error"); }
   };
 
   // Status helpers

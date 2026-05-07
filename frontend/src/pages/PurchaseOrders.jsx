@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useMessage } from '../context/MessageContext';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
@@ -13,6 +14,7 @@ import { formatDate } from '../utils/dateUtils';
 import MaterialSelect from '../components/MaterialSelect';
 
 export default function PurchaseOrders() {
+  const { showMessage } = useMessage();
   const location = useLocation();
   const navigate = useNavigate();
   const [pos, setPos] = useState([]);
@@ -83,7 +85,7 @@ export default function PurchaseOrders() {
       }));
       const hasInvalidNumbers = mappedItems.some(it => it.quantity <= 0 || it.rate < 0);
       if (hasInvalidNumbers) {
-        alert("Quantity must be greater than 0, and rate cannot be negative.");
+        showMessage("Quantity must be greater than 0, and rate cannot be negative.", "Validation Error", "warning");
         return;
       }
       const payload = { ...form, items: mappedItems };
@@ -95,7 +97,8 @@ export default function PurchaseOrders() {
          await api.post('/api/procurement/po', payload);
       }
       setDialog(false); load();
-    } catch (err) { alert(err.response?.data?.detail || 'Error'); }
+      showMessage("Purchase Order created successfully!", "Success", "success");
+    } catch (err) { showMessage(err.response?.data?.detail || 'Error', "Error", "error"); }
   };
 
   const approvePO = async (id) => { await api.post(`/api/procurement/po/${id}/approve`); load(); };
@@ -104,10 +107,10 @@ export default function PurchaseOrders() {
   const sendPO = async (id) => { 
     try {
       const res = await api.post(`/api/procurement/po/${id}/send`); 
-      alert(res.data.message);
+      showMessage(res.data.message, "PO Sent", "success");
       load();
     } catch(err) {
-      alert(err.response?.data?.detail || "Error sending PO");
+      showMessage(err.response?.data?.detail || "Error sending PO", "Error", "error");
     }
   };
   const shortClosePO = async (id, remarks) => { await api.post(`/api/procurement/po/${id}/short-close`, { remarks }); load(); };

@@ -86,6 +86,20 @@ class ApprovalDocumentType(str, enum.Enum):
     PURCHASE_REQUEST = "Purchase Request"
     PURCHASE_ORDER = "Purchase Order"
 
+class QuotationRequestStatus(str, enum.Enum):
+    DRAFT = "Draft"
+    SENT = "Sent to Vendors"
+    RECEIVED = "Quotations Received"
+    COMPARED = "Comparison Done"
+    APPROVED = "Approved"
+    CONVERTED = "Converted to PO"
+    CANCELLED = "Cancelled"
+
+class VendorQuotationStatus(str, enum.Enum):
+    PENDING = "Pending"
+    RECEIVED = "Received"
+    REJECTED = "Rejected"
+
 
 # == Multi-Tenant Core ==
 
@@ -763,3 +777,126 @@ class IndentApproval(Base):
     indent = relationship("Indent")
     flow = relationship("ApprovalFlow")
     approver = relationship("User")
+
+
+# == Quotation Management ==
+
+class QuotationRequest(Base):
+    __tablename__ = "quotation_requests"
+    id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
+    site_id = Column(Integer, ForeignKey("sites.id", ondelete="CASCADE"), nullable=False)
+    qr_number = Column(String(50), nullable=False, index=True)
+    project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
+    created_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    required_date = Column(Date, nullable=True)
+    remarks = Column(Text)
+    status = Column(String(50), default=QuotationRequestStatus.DRAFT.value)
+    approved_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    approved_at = Column(DateTime, nullable=True)
+    is_deleted = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    project = relationship("Project")
+    created_by = relationship("User", foreign_keys=[created_by_id])
+    approver = relationship("User", foreign_keys=[approved_by_id])
+    items = relationship("QuotationRequestItem", back_populates="quotation_request", cascade="all, delete-orphan")
+    linked_prs = relationship("QuotationRequestPR", back_populates="quotation_request", cascade="all, delete-orphan")
+    invited_vendors = relationship("QuotationRequestVendor", back_populates="quotation_request", cascade="all, delete-orphan")
+    vendor_quotations = relationship("VendorQuotation", back_populates="quotation_request", cascade="all, delete-orphan")
+    comparisons = relationship("QuotationComparison", back_populates="quotation_request", cascade="all, delete-orphan")
+    __table_args__ = (UniqueConstraint("tenant_id", "qr_number", name="uq_qr_per_tenant"),)
+
+
+class QuotationRequestItem(Base):
+    __tablename__ = "quotation_request_items"
+    id = Column(Integer, primary_key=True, index=True)
+    qr_id = Column(Integer, ForeignKey("quotation_requests.id", ondelete="CASCADE"), nullable=False)
+    material_id = Column(Integer, ForeignKey("materials.id"), nullable=False)
+    quantity = Column(Float, nullable=False)
+
+    quotation_request = relationship("QuotationRequest", back_populates="items")
+    material = relationship("Material")
+
+
+class QuotationRequestPR(Base):
+    __tablename__ = "quotation_request_prs"
+    id = Column(Integer, primary_key=True, index=True)
+    qr_id = Column(Integer, ForeignKey("quotation_requests.id", ondelete="CASCADE"), nullable=False)
+    pr_id = Column(Integer, ForeignKey("purchase_requests.id"), nullable=False)
+
+    quotation_request = relationship("QuotationRequest", back_populates="linked_prs")
+    purchase_request = relationship("PurchaseRequest")
+    __table_args__ = (UniqueConstraint("qr_id", "pr_id", name="uq_qr_pr"),)
+
+
+class QuotationRequestVendor(Base):
+    __tablename__ = "quotation_request_vendors"
+    id = Column(Integer, primary_key=True, index=True)
+    qr_id = Column(Integer, ForeignKey("quotation_requests.id", ondelete="CASCADE"), nullable=False)
+    vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=False)
+    is_sent = Column(Boolean, default=False)
+    sent_at = Column(DateTime, nullable=True)
+
+    quotation_request = relationship("QuotationRequest", back_populates="invited_vendors")
+    vendor = relationship("Vendor")
+    __table_args__ = (UniqueConstraint("qr_id", "vendor_id", name="uq_qr_vendor"),)
+
+
+class VendorQuotation(Base):
+    __tablename__ = "vendor_quotations"
+    id = Column(Integer, primary_key=True, index=True)
+    qr_id = Column(Integer, ForeignKey("quotation_requests.id", ondelete="CASCADE"), nullable=False)
+    vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=False)
+    quotation_number = Column(String(100))
+    quotation_date = Column(Date, nullable=True)
+    received_date = Column(Date, nullable=True)
+    attachment_path = Column(String(500), nullable=True)
+    remarks = Column(Text)
+    status = Column(String(50), default=VendorQuotationStatus.RECEIVED.value)
+    entered_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    quotation_request = relationship("QuotationRequest", back_populates="vendor_quotations")
+    vendor = relationship("Vendor")
+    entered_by = relationship("User", foreign_keys=[entered_by_id])
+    items = relationship("VendorQuotationItem", back_populates="vendor_quotation", cascade="all, delete-orphan")
+
+
+class VendorQuotationItem(Base):
+    __tablename__ = "vendor_quotation_items"
+    id = Column(Integer, primary_key=True, index=True)
+    vendor_quotation_id = Column(Integer, ForeignKey("vendor_quotations.id", ondelete="CASCADE"), nullable=False)
+    qr_item_id = Column(Integer, ForeignKey("quotation_request_items.id"), nullable=False)
+    material_id = Column(Integer, ForeignKey("materials.id"), nullable=False)
+    quoted_rate = Column(Float, nullable=False)
+    delivery_days = Column(Integer, nullable=True)
+    remarks = Column(Text)
+
+    vendor_quotation = relationship("VendorQuotation", back_populates="items")
+    qr_item = relationship("QuotationRequestItem")
+    material = relationship("Material")
+
+
+class QuotationComparison(Base):
+    __tablename__ = "quotation_comparisons"
+    id = Column(Integer, primary_key=True, index=True)
+    qr_id = Column(Integer, ForeignKey("quotation_requests.id", ondelete="CASCADE"), nullable=False)
+    qr_item_id = Column(Integer, ForeignKey("quotation_request_items.id"), nullable=False)
+    material_id = Column(Integer, ForeignKey("materials.id"), nullable=False)
+    selected_vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=False)
+    auto_rank_vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=False)
+    is_overridden = Column(Boolean, default=False)
+    override_reason = Column(Text, nullable=True)
+    approved_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    approved_at = Column(DateTime, nullable=True)
+
+    quotation_request = relationship("QuotationRequest", back_populates="comparisons")
+    qr_item = relationship("QuotationRequestItem")
+    material = relationship("Material")
+    selected_vendor = relationship("Vendor", foreign_keys=[selected_vendor_id])
+    auto_rank_vendor = relationship("Vendor", foreign_keys=[auto_rank_vendor_id])
+    approver = relationship("User", foreign_keys=[approved_by_id])
+    __table_args__ = (UniqueConstraint("qr_id", "qr_item_id", name="uq_comparison_per_qr_item"),)
+

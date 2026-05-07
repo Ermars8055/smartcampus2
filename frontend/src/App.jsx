@@ -1,5 +1,6 @@
+import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { ThemeProvider, CssBaseline } from '@mui/material';
+import { ThemeProvider, CssBaseline, Typography, Button } from '@mui/material';
 import '@fontsource/inter/300.css';
 import '@fontsource/inter/400.css';
 import '@fontsource/inter/500.css';
@@ -7,6 +8,7 @@ import '@fontsource/inter/600.css';
 import '@fontsource/inter/700.css';
 import theme from './theme';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { MessageProvider } from './context/MessageContext';
 import Layout from './components/Layout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
@@ -16,6 +18,7 @@ import Vendors from './pages/Vendors';
 import Projects from './pages/Projects';
 import Indents from './pages/Indents';
 import PurchaseRequests from './pages/PurchaseRequests';
+import Quotations from './pages/Quotations';
 import PurchaseOrders from './pages/PurchaseOrders';
 import GateEntry from './pages/GateEntry';
 import GRNPage from './pages/GRN';
@@ -30,6 +33,31 @@ import PlatformLogin from './pages/PlatformLogin';
 import ChatBot from './components/ChatBot';
 import { Box, CircularProgress } from '@mui/material';
 
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error("Uncaught error:", error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <Box sx={{ p: 4, textAlign: 'center' }}>
+          <Typography variant="h5" color="error" gutterBottom>Something went wrong.</Typography>
+          <Typography variant="body1" sx={{ mb: 2 }}>{this.state.error?.toString()}</Typography>
+          <Button variant="contained" onClick={() => window.location.reload()}>Reload Page</Button>
+        </Box>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) {
@@ -39,7 +67,7 @@ function ProtectedRoute({ children }) {
       </Box>
     );
   }
-  return user ? children : <Navigate to="/login" />;
+  return user ? <ErrorBoundary>{children}</ErrorBoundary> : <Navigate to="/login" />;
 }
 
 function AppRoutes() {
@@ -57,6 +85,7 @@ function AppRoutes() {
         <Route path="warehouses" element={<Projects />} />
         <Route path="indents" element={<Indents />} />
         <Route path="purchase-requests" element={<PurchaseRequests />} />
+        <Route path="quotations" element={<Quotations />} />
         <Route path="purchase-orders" element={<PurchaseOrders />} />
         <Route path="gate-entry" element={<GateEntry />} />
         <Route path="grn" element={<GRNPage />} />
@@ -80,8 +109,10 @@ export default function App() {
       <CssBaseline />
       <BrowserRouter>
         <AuthProvider>
-          <AppRoutes />
-          <ChatBot />
+          <MessageProvider>
+            <AppRoutes />
+            <ChatBot />
+          </MessageProvider>
         </AuthProvider>
       </BrowserRouter>
     </ThemeProvider>

@@ -813,3 +813,140 @@ class AuditLogOut(BaseModel):
     user_full_name: Optional[str] = None
     class Config:
         from_attributes = True
+
+
+# ── Quotation Management ─────────────────────────────────────────────────
+
+class QRItemBase(BaseModel):
+    material_id: int
+    quantity: float = Field(..., gt=0)
+
+class QRItemOut(QRItemBase):
+    id: int
+    material_name: Optional[str] = None
+    material_code: Optional[str] = None
+    uom_name: Optional[str] = None
+    class Config:
+        from_attributes = True
+
+class QuotationRequestCreate(BaseModel):
+    project_id: int
+    required_date: Optional[date] = None
+    remarks: Optional[str] = None
+    pr_ids: List[int] = []
+    items: List[QRItemBase] = []
+    vendor_ids: List[int] = []
+
+class QRLinkedPROut(BaseModel):
+    id: int
+    pr_id: int
+    pr_number: Optional[str] = None
+    class Config:
+        from_attributes = True
+
+class QRVendorOut(BaseModel):
+    id: int
+    vendor_id: int
+    vendor_name: Optional[str] = None
+    is_sent: bool = False
+    sent_at: Optional[datetime] = None
+    class Config:
+        from_attributes = True
+
+class QuotationRequestOut(BaseModel):
+    id: int
+    qr_number: str
+    project_id: int
+    project_name: Optional[str] = None
+    required_date: Optional[date] = None
+    remarks: Optional[str] = None
+    status: str
+    created_by_id: int
+    created_by_name: Optional[str] = None
+    approved_by_id: Optional[int] = None
+    approved_at: Optional[datetime] = None
+    created_at: datetime
+    updated_at: datetime
+    items: List[QRItemOut] = []
+    linked_prs: List[QRLinkedPROut] = []
+    invited_vendors: List[QRVendorOut] = []
+    vendor_quotation_count: int = 0
+    class Config:
+        from_attributes = True
+
+class VendorQuotationItemBase(BaseModel):
+    qr_item_id: int
+    material_id: int
+    quoted_rate: float = Field(..., ge=0)
+    delivery_days: Optional[int] = None
+    remarks: Optional[str] = None
+
+class VendorQuotationItemOut(VendorQuotationItemBase):
+    id: int
+    material_name: Optional[str] = None
+    material_code: Optional[str] = None
+    uom_name: Optional[str] = None
+    class Config:
+        from_attributes = True
+
+class VendorQuotationCreate(BaseModel):
+    vendor_id: int
+    quotation_number: Optional[str] = None
+    quotation_date: Optional[date] = None
+    remarks: Optional[str] = None
+    items: List[VendorQuotationItemBase] = []
+
+class VendorQuotationOut(BaseModel):
+    id: int
+    qr_id: int
+    vendor_id: int
+    vendor_name: Optional[str] = None
+    quotation_number: Optional[str] = None
+    quotation_date: Optional[date] = None
+    received_date: Optional[date] = None
+    attachment_path: Optional[str] = None
+    remarks: Optional[str] = None
+    status: str
+    entered_by_name: Optional[str] = None
+    created_at: datetime
+    items: List[VendorQuotationItemOut] = []
+    class Config:
+        from_attributes = True
+
+class VendorQuoteDetail(BaseModel):
+    vendor_id: int
+    vendor_name: str
+    quoted_rate: float
+    delivery_days: Optional[int] = None
+    rank: int
+    rank_label: str
+
+class MaterialComparisonOut(BaseModel):
+    qr_item_id: int
+    material_id: int
+    material_name: str
+    material_code: str
+    uom_name: Optional[str] = None
+    quantity: float
+    vendor_quotes: List[VendorQuoteDetail] = []
+    selected_vendor_id: Optional[int] = None
+    selected_vendor_name: Optional[str] = None
+    is_overridden: bool = False
+    override_reason: Optional[str] = None
+
+class VendorOverrideRequest(BaseModel):
+    qr_item_id: int
+    material_id: int
+    selected_vendor_id: int
+    override_reason: str
+
+class ComparativeStatementOut(BaseModel):
+    qr_id: int
+    qr_number: str
+    project_name: str
+    required_date: Optional[date] = None
+    status: str
+    created_by_name: str
+    created_at: datetime
+    materials: List[MaterialComparisonOut] = []
+    vendor_totals: List[Dict[str, Any]] = []

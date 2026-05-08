@@ -47,6 +47,8 @@ def list_gate_entries(
             driver_phone=e.driver_phone, remarks=e.remarks,
             arrival_time=e.arrival_time, status=e.status,
             created_at=e.created_at,
+            entry_type=e.entry_type,
+            delivery_person_name=e.delivery_person_name,
             vendor_name=e.vendor.name if e.vendor else None,
             material_name=e.material.name if e.material else None,
             po_number=e.purchase_order.po_number if e.purchase_order else None
@@ -61,8 +63,11 @@ def create_gate_entry(
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
-    if not data.vehicle_number or not data.vehicle_number.strip():
-        raise HTTPException(status_code=400, detail="Vehicle number is required")
+    if data.entry_type == "Vehicle" and (not data.vehicle_number or not data.vehicle_number.strip()):
+        raise HTTPException(status_code=400, detail="Vehicle number is required for vehicle entry")
+    
+    if data.entry_type == "Carry on hand" and (not data.delivery_person_name or not data.delivery_person_name.strip()):
+        raise HTTPException(status_code=400, detail="Delivery person name is required for hand carry entry")
 
     entry = GateEntry(
         entry_number=generate_entry_number(db, tenant_id, site_id),
@@ -77,6 +82,8 @@ def create_gate_entry(
         quantity=data.quantity,
         driver_name=data.driver_name,
         driver_phone=data.driver_phone,
+        delivery_person_name=data.delivery_person_name,
+        entry_type=data.entry_type,
         remarks=data.remarks,
         tenant_id=tenant_id,
         site_id=site_id

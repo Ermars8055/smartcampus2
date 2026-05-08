@@ -11,13 +11,13 @@ import shutil
 from app.database import get_db
 from app.models import (
     QuotationRequest, QuotationRequestItem, QuotationRequestPR, QuotationRequestVendor,
-    VendorQuotation, VendorQuotationItem, QuotationComparison,
+    VendorQuotation, VendorQuotationItem, QuotationComparison, QuotationRequestItemSource,
     PurchaseRequest, PurchaseOrder, PurchaseOrderItem, User, Vendor, Material
 )
 from app.schemas import (
     QuotationRequestCreate, QuotationRequestOut, VendorQuotationCreate, VendorQuotationOut,
     VendorOverrideRequest, ComparativeStatementOut, MaterialComparisonOut, VendorQuoteDetail,
-    QRItemOut, QRLinkedPROut, QRVendorOut, VendorQuotationItemOut
+    QRItemOut, QRLinkedPROut, QRVendorOut, VendorQuotationItemOut, QRItemSourceOut
 )
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
 from app.models import QuotationRequestStatus, VendorQuotationStatus
@@ -63,10 +63,19 @@ def list_quotation_requests(
     
     result = []
     for qr in qrs:
-        items = [QRItemOut(id=it.id, material_id=it.material_id, quantity=it.quantity,
-                           material_name=it.material.name if it.material else "N/A", 
-                           material_code=it.material.code if it.material else "N/A",
-                           uom_name=it.material.uom.name if it.material and it.material.uom else "Unit") for it in qr.items]
+        items = [QRItemOut(
+            id=it.id, material_id=it.material_id, quantity=it.quantity,
+            material_name=it.material.name if it.material else "N/A", 
+            material_code=it.material.code if it.material else "N/A",
+            uom_name=it.material.uom.name if it.material and it.material.uom else "Unit",
+            source=it.source or "Manual",
+            source_pr_number=it.source_pr.pr_number if it.source_pr else None,
+            sources=[QRItemSourceOut(
+                source=s.source,
+                source_pr_number=s.source_pr.pr_number if s.source_pr else None,
+                quantity=s.quantity
+            ) for s in it.sources]
+        ) for it in qr.items]
         prs = [QRLinkedPROut(id=pr.id, pr_id=pr.pr_id, pr_number=pr.purchase_request.pr_number if pr.purchase_request else "N/A") for pr in qr.linked_prs]
         vendors = [QRVendorOut(id=v.id, vendor_id=v.vendor_id, vendor_name=v.vendor.name if v.vendor else "N/A", 
                                is_sent=v.is_sent, sent_at=v.sent_at) for v in qr.invited_vendors]
@@ -100,9 +109,18 @@ def get_quotation_request(
     if not qr:
         raise HTTPException(status_code=404, detail="Quotation Request not found")
         
-    items = [QRItemOut(id=it.id, material_id=it.material_id, quantity=it.quantity,
-                       material_name=it.material.name, material_code=it.material.code,
-                       uom_name=it.material.uom.name) for it in qr.items]
+    items = [QRItemOut(
+        id=it.id, material_id=it.material_id, quantity=it.quantity,
+        material_name=it.material.name, material_code=it.material.code,
+        uom_name=it.material.uom.name if it.material.uom else "Unit",
+        source=it.source or "Manual",
+        source_pr_number=it.source_pr.pr_number if it.source_pr else None,
+        sources=[QRItemSourceOut(
+            source=s.source,
+            source_pr_number=s.source_pr.pr_number if s.source_pr else None,
+            quantity=s.quantity
+        ) for s in it.sources]
+    ) for it in qr.items]
     prs = [QRLinkedPROut(id=pr.id, pr_id=pr.pr_id, pr_number=pr.purchase_request.pr_number) for pr in qr.linked_prs]
     vendors = [QRVendorOut(id=v.id, vendor_id=v.vendor_id, vendor_name=v.vendor.name, 
                            is_sent=v.is_sent, sent_at=v.sent_at) for v in qr.invited_vendors]
@@ -140,11 +158,57 @@ def create_quotation_request(
     db.add(qr)
     db.flush()
 
+    # Consolidation Map: material_id -> QuotationRequestItem
+    material_map = {}
+
+    # 1. Process Manual Items
     for item in data.items:
-        db.add(QuotationRequestItem(qr_id=qr.id, material_id=item.material_id, quantity=item.quantity))
+        if item.material_id not in material_map:
+            qr_item = QuotationRequestItem(
+                qr_id=qr.id, 
+                material_id=item.material_id, 
+                quantity=0,
+                source="Manual" # Legacy field
+            )
+            db.add(qr_item)
+            db.flush()
+            material_map[item.material_id] = qr_item
+        
+        target_item = material_map[item.material_id]
+        target_item.quantity += item.quantity
+        db.add(QuotationRequestItemSource(
+            qr_item_id=target_item.id,
+            source="Manual",
+            source_pr_id=None,
+            quantity=item.quantity
+        ))
     
+    # 2. Process PR Items and link sources
     for pr_id in data.pr_ids:
         db.add(QuotationRequestPR(qr_id=qr.id, pr_id=pr_id))
+        pr = db.query(PurchaseRequest).filter(PurchaseRequest.id == pr_id).first()
+        if pr:
+            for pr_item in pr.items:
+                if pr_item.material_id not in material_map:
+                    qr_item = QuotationRequestItem(
+                        qr_id=qr.id, 
+                        material_id=pr_item.material_id, 
+                        quantity=0,
+                        source="PR", # Legacy field
+                        source_pr_id=pr_id # Legacy field
+                    )
+                    db.add(qr_item)
+                    db.flush()
+                    material_map[pr_item.material_id] = qr_item
+                
+                target_item = material_map[pr_item.material_id]
+                target_item.quantity += pr_item.quantity
+                db.add(QuotationRequestItemSource(
+                    qr_item_id=target_item.id,
+                    source="PR",
+                    source_pr_id=pr_id,
+                    quantity=pr_item.quantity
+                ))
         
     for vendor_id in data.vendor_ids:
         db.add(QuotationRequestVendor(qr_id=qr.id, vendor_id=vendor_id))
@@ -203,10 +267,8 @@ def enter_vendor_quotation(
     existing = db.query(VendorQuotation).filter(
         VendorQuotation.qr_id == qr_id, VendorQuotation.vendor_id == vendor_id
     ).first()
-    if existing:
-        raise HTTPException(status_code=400, detail="Quotation from this vendor already entered")
 
-    attachment_path = None
+    attachment_path = existing.attachment_path if existing else None
     if file:
         upload_dir = "uploads/quotations"
         os.makedirs(upload_dir, exist_ok=True)
@@ -218,13 +280,23 @@ def enter_vendor_quotation(
         
     q_date = datetime.strptime(quotation_date, "%Y-%m-%d").date() if quotation_date else None
     
-    vq = VendorQuotation(
-        qr_id=qr_id, vendor_id=vendor_id, quotation_number=quotation_number,
-        quotation_date=q_date, received_date=datetime.utcnow().date(),
-        attachment_path=attachment_path, remarks=remarks,
-        entered_by_id=current_user.id
-    )
-    db.add(vq)
+    if existing:
+        vq = existing
+        vq.quotation_number = quotation_number
+        vq.quotation_date = q_date
+        vq.remarks = remarks
+        vq.attachment_path = attachment_path
+        # Delete old items to replace with new ones
+        db.query(VendorQuotationItem).filter(VendorQuotationItem.vendor_quotation_id == vq.id).delete()
+    else:
+        vq = VendorQuotation(
+            qr_id=qr_id, vendor_id=vendor_id, quotation_number=quotation_number,
+            quotation_date=q_date, received_date=datetime.utcnow().date(),
+            attachment_path=attachment_path, remarks=remarks,
+            entered_by_id=current_user.id
+        )
+        db.add(vq)
+    
     db.flush()
 
     try:
@@ -244,7 +316,7 @@ def enter_vendor_quotation(
 
     # Check if all invited vendors have responded
     total_invited = db.query(QuotationRequestVendor).filter(QuotationRequestVendor.qr_id == qr_id).count()
-    total_received = db.query(VendorQuotation).filter(VendorQuotation.qr_id == qr_id).count() + 1
+    total_received = db.query(VendorQuotation).filter(VendorQuotation.qr_id == qr_id).count()
     
     if total_received >= total_invited:
         qr.status = QuotationRequestStatus.RECEIVED.value

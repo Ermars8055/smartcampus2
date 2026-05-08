@@ -3,20 +3,23 @@ import { useMessage } from '../context/MessageContext';
 import {
   Box, Typography, Paper, Tabs, Tab, Button, IconButton, TextField, Stack, Divider,
   Stepper, Step, StepLabel,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel,
   Dialog, DialogTitle, DialogContent, DialogActions, FormControl,
   InputLabel, Select, MenuItem, Chip, OutlinedInput, Checkbox, ListItemText,
   Alert, CircularProgress, Accordion, AccordionSummary, AccordionDetails,
-  Grid, InputAdornment
+  Grid, InputAdornment, Tooltip
 } from '@mui/material';
 import {
   Add as AddIcon, Send as SendIcon, CloudUpload as CloudUploadIcon,
   Visibility as VisibilityIcon, Edit as EditIcon, CheckCircle as CheckCircleIcon,
   Download as DownloadIcon, ExpandMore as ExpandMoreIcon, ArrowBack as ArrowBackIcon,
   AccountTree as ProjectIcon, Event as DateIcon, Group as VendorIcon, Description as RemarkIcon, Link as LinkIcon, Inventory as InventoryIcon,
-  EditNote as ProcessIcon, QueryStats as CompareIcon, FactCheck as ApproveIcon, ShoppingCart as OrderIcon, Send as BlastIcon
+  EditNote as ProcessIcon, Balance as CompareIcon, FactCheck as ApproveIcon, ShoppingCart as OrderIcon, Send as BlastIcon,
+  ArrowDropUp, ArrowDropDown
 } from '@mui/icons-material';
 import api from '../services/api';
+import { formatDate } from '../utils/dateUtils';
+
 
 const Quotations = () => {
   const { showMessage } = useMessage();
@@ -41,6 +44,7 @@ const Quotations = () => {
   // Selected QR details
   const [listFilter, setListFilter] = useState('All');
   const [selectedQR, setSelectedQR] = useState(null);
+  const [detailSection, setDetailSection] = useState(null); // 'quotations', 'comparison', 'approval'
   const [viewingQR, setViewingQR] = useState(null);
   const [viewQRDialogOpen, setViewQRDialogOpen] = useState(false);
 
@@ -71,6 +75,17 @@ const Quotations = () => {
     fetchData();
   }, [selectedQR?.id, selectedQR?.status]);
 
+  useEffect(() => {
+    if (selectedQR && detailSection) {
+      setTimeout(() => {
+        const element = document.getElementById(`${detailSection}-section`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 500); // Wait for data to load and render
+    }
+  }, [selectedQR?.id, detailSection]);
+
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -81,7 +96,7 @@ const Quotations = () => {
           api.get('/api/projects'),
           api.get('/api/vendors'),
           api.get('/api/materials'),
-          api.get('/api/procurement/pr') // Relaxed filter
+          api.get('/api/procurement/pr?status=Approved') // Only approved PRs for link field
         ]);
         setQrs(Array.isArray(qrsRes.data) ? qrsRes.data : []);
         setProjects(Array.isArray(projRes.data) ? projRes.data : []);
@@ -126,14 +141,16 @@ const Quotations = () => {
 
   // --- Actions ---
 
-  const handleAutoProcess = (qr) => {
+  const handleAutoProcess = (qr, section = null) => {
     setSelectedQR(qr);
+    setDetailSection(section);
   };
 
   const handleCreateQR = async () => {
     try {
       const payload = {
         ...newQR,
+        items: (newQR.items || []).filter(it => !it.pr_id),
         required_date: newQR.required_date || null,
         remarks: newQR.remarks || null
       };
@@ -157,7 +174,7 @@ const Quotations = () => {
   const handleSendToVendors = async (id) => {
     try {
       await api.post(`/api/quotations/requests/${id}/send`);
-      showMessage('Sent to vendors successfully!', 'Success', 'success');
+      showMessage('Request sent to vendors successfully!', 'Success', 'success');
       fetchData();
     } catch (err) {
       showMessage(err.response?.data?.detail || 'Failed to send to vendors', 'Error', 'error');
@@ -247,24 +264,55 @@ const Quotations = () => {
   };
 
   // --- Filtering Logic ---
-  const filteredQRs = useMemo(() => {
-    if (listFilter === 'All') return qrs;
-    const filterMap = {
-      'Draft': 'Draft',
-      'Invited': 'Sent to Vendors',
-      'Quoted': 'Quotations Received',
-      'Compared': 'Comparison Done',
-      'Approved': 'Approved',
-      'Ordered': 'Converted to PO'
-    };
-    return qrs.filter(qr => qr.status === filterMap[listFilter]);
-  }, [qrs, listFilter]);
+  const [sortConfig, setSortConfig] = useState({ key: 'qr_number', direction: 'desc' });
+
+  const handleSort = (key) => {
+    setSortConfig(prev => ({
+      key,
+      direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
+    }));
+  };
+
+  const sortedQRs = useMemo(() => {
+    let filtered = listFilter === 'All' ? qrs : qrs.filter(qr => {
+      const filterMap = {
+        'Draft': 'Draft',
+        'Requested': 'Sent to Vendors',
+        'Quoted': 'Quotations Received',
+        'Compared': 'Comparison Done',
+        'Approved': 'Approved',
+        'Ordered': 'Converted to PO'
+      };
+      return qr.status === filterMap[listFilter];
+    });
+
+    return [...filtered].sort((a, b) => {
+      const { key, direction } = sortConfig;
+      let aVal = a[key];
+      let bVal = b[key];
+
+      if (key === 'date') {
+        aVal = new Date(a.created_at).getTime();
+        bVal = new Date(b.created_at).getTime();
+      } else if (key === 'vendors') {
+        aVal = a.invited_vendors?.length || 0;
+        bVal = b.invited_vendors?.length || 0;
+      } else if (key === 'prs') {
+        aVal = a.linked_prs?.length || 0;
+        bVal = b.linked_prs?.length || 0;
+      }
+
+      if (aVal < bVal) return direction === 'asc' ? -1 : 1;
+      if (aVal > bVal) return direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [qrs, listFilter, sortConfig]);
 
   const getStatusCount = (filter) => {
     if (filter === 'All') return qrs.length;
     const filterMap = {
       'Draft': 'Draft',
-      'Invited': 'Sent to Vendors',
+      'Requested': 'Sent to Vendors',
       'Quoted': 'Quotations Received',
       'Compared': 'Comparison Done',
       'Approved': 'Approved',
@@ -308,9 +356,17 @@ const Quotations = () => {
     });
   };
 
+  const updateItemQuantity = (index, val) => {
+    setNewQR(prev => {
+      const newItems = [...prev.items];
+      newItems[index] = { ...newItems[index], quantity: parseFloat(val) || 0 };
+      return { ...prev, items: newItems };
+    });
+  };
+
   // --- UI Renderers ---
 
-  const steps = ['Draft', 'Invited', 'Quoted', 'Compared', 'Approved', 'Ordered'];
+  const steps = ['Draft', 'Requested', 'Quoted', 'Compared', 'Approved', 'Ordered'];
   const getStepIndex = (status) => {
     switch (status) {
       case 'Draft': return 0;
@@ -354,7 +410,7 @@ const Quotations = () => {
               Back to All Requests
             </Button>
             <Typography variant="h6" color="primary" sx={{ fontWeight: 600 }}>
-              {selectedQR.qr_number} - {selectedQR.status}
+              {selectedQR.qr_number} - {selectedQR.status === 'Sent to Vendors' ? 'Request to Vendors' : selectedQR.status}
             </Typography>
           </Box>
 
@@ -379,17 +435,17 @@ const Quotations = () => {
         {!selectedQR && (
           <Box>
             {/* Status Filter Tabs */}
-            <Paper 
-              elevation={0} 
-              sx={{ 
-                mb: 2, 
-                borderBottom: '1px solid #e0e0e0', 
+            <Paper
+              elevation={0}
+              sx={{
+                mb: 2,
+                borderBottom: '1px solid #e0e0e0',
                 borderRadius: '8px 8px 0 0',
-                backgroundColor: '#fff' 
+                backgroundColor: '#fff'
               }}
             >
-              <Tabs 
-                value={listFilter} 
+              <Tabs
+                value={listFilter}
                 onChange={(e, newVal) => setListFilter(newVal)}
                 variant="scrollable"
                 scrollButtons="auto"
@@ -410,140 +466,245 @@ const Quotations = () => {
                   }
                 }}
               >
-                {['All', 'Draft', 'Invited', 'Quoted', 'Compared', 'Approved', 'Ordered'].map(filter => (
-                  <Tab 
-                    key={filter} 
-                    value={filter} 
+                {['All', 'Draft', 'Requested', 'Quoted', 'Compared', 'Approved', 'Ordered'].map(filter => (
+                  <Tab
+                    key={filter}
+                    value={filter}
                     label={
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         {filter}
-                        <Chip 
-                          label={getStatusCount(filter)} 
-                          size="small" 
-                          sx={{ 
-                            height: 20, 
-                            fontSize: '0.7rem', 
+                        <Chip
+                          label={getStatusCount(filter)}
+                          size="small"
+                          sx={{
+                            height: 20,
+                            fontSize: '0.7rem',
                             fontWeight: 700,
                             backgroundColor: listFilter === filter ? 'primary.light' : '#f0f0f0',
                             color: listFilter === filter ? 'primary.contrastText' : 'text.secondary',
                             cursor: 'pointer'
-                          }} 
+                          }}
                         />
                       </Box>
-                    } 
+                    }
                   />
                 ))}
               </Tabs>
             </Paper>
 
-            <TableContainer component={Paper} elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 2 }}>
-              <Table>
+            <TableContainer component={Paper} elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 2, overflowX: 'auto', backgroundColor: '#fff' }}>
+              <Table size="small">
                 <TableHead>
                   <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
-                    <TableCell sx={{ fontWeight: 'bold', color: 'text.secondary' }}>QR Number</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', color: 'text.secondary' }}>Project</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', color: 'text.secondary' }}>Linked PRs</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', color: 'text.secondary' }}>Invited Vendors</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', color: 'text.secondary' }}>Status</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', color: 'text.secondary' }}>Date</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 'bold', color: 'text.secondary' }}>Actions</TableCell>
+                    <TableCell sx={{ py: 2, px: 3, fontWeight: 700, color: '#64748b', fontSize: '0.75rem' }}>
+                      <TableSortLabel
+                        active={sortConfig.key === 'qr_number'}
+                        direction={sortConfig.direction}
+                        onClick={() => handleSort('qr_number')}
+                        IconComponent={ArrowDropDown}
+                        sx={{
+                          '& .MuiTableSortLabel-icon': {
+                            fontSize: '1.2rem !important',
+                            opacity: sortConfig.key === 'qr_number' ? 1 : 0
+                          }
+                        }}
+                      >
+                        QUOTATION NUMBER
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell sx={{ py: 1, px: 2, fontWeight: 700, color: '#64748b', fontSize: '0.75rem' }}>
+                      <TableSortLabel
+                        active={sortConfig.key === 'project_name'}
+                        direction={sortConfig.direction}
+                        onClick={() => handleSort('project_name')}
+                        IconComponent={ArrowDropDown}
+                        sx={{
+                          '& .MuiTableSortLabel-icon': {
+                            fontSize: '1.2rem !important',
+                            opacity: sortConfig.key === 'project_name' ? 1 : 0
+                          }
+                        }}
+                      >
+                        PROJECT
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell sx={{ py: 1, px: 2, fontWeight: 700, color: '#64748b', fontSize: '0.75rem' }}>
+                      <TableSortLabel
+                        active={sortConfig.key === 'prs'}
+                        direction={sortConfig.direction}
+                        onClick={() => handleSort('prs')}
+                        IconComponent={ArrowDropDown}
+                        sx={{
+                          '& .MuiTableSortLabel-icon': {
+                            fontSize: '1.2rem !important',
+                            opacity: sortConfig.key === 'prs' ? 1 : 0
+                          }
+                        }}
+                      >
+                        PURCHASE REQUESTS
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell sx={{ py: 1, px: 2, fontWeight: 700, color: '#64748b', fontSize: '0.75rem' }}>
+                      <TableSortLabel
+                        active={sortConfig.key === 'vendors'}
+                        direction={sortConfig.direction}
+                        onClick={() => handleSort('vendors')}
+                        IconComponent={ArrowDropDown}
+                        sx={{
+                          '& .MuiTableSortLabel-icon': {
+                            fontSize: '1.2rem !important',
+                            opacity: sortConfig.key === 'vendors' ? 1 : 0
+                          }
+                        }}
+                      >
+                        VENDORS
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell sx={{ py: 1, px: 2, fontWeight: 700, color: '#64748b', fontSize: '0.75rem' }}>
+                      <TableSortLabel
+                        active={sortConfig.key === 'status'}
+                        direction={sortConfig.direction}
+                        onClick={() => handleSort('status')}
+                        IconComponent={ArrowDropDown}
+                        sx={{
+                          '& .MuiTableSortLabel-icon': {
+                            fontSize: '1.2rem !important',
+                            opacity: sortConfig.key === 'status' ? 1 : 0
+                          }
+                        }}
+                      >
+                        STATUS
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell sx={{ py: 1, px: 2, fontWeight: 700, color: '#64748b', fontSize: '0.75rem' }}>
+                      <TableSortLabel
+                        active={sortConfig.key === 'date'}
+                        direction={sortConfig.direction}
+                        onClick={() => handleSort('date')}
+                        IconComponent={ArrowDropDown}
+                        sx={{
+                          '& .MuiTableSortLabel-icon': {
+                            fontSize: '1.2rem !important',
+                            opacity: sortConfig.key === 'date' ? 1 : 0
+                          }
+                        }}
+                      >
+                        QUOTATION DATE
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell align="right" sx={{ py: 1, px: 2, fontWeight: 700, color: '#64748b', fontSize: '0.75rem' }}>ACTIONS</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {loading ? (
                     <TableRow><TableCell colSpan={7} align="center"><CircularProgress size={24} sx={{ my: 4 }} /></TableCell></TableRow>
-                  ) : filteredQRs.length === 0 ? (
+                  ) : sortedQRs.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={7} align="center" sx={{ py: 8 }}>
                         <Typography color="text.secondary">No quotations found in this stage.</Typography>
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredQRs.map(qr => (
-                      <TableRow key={qr.id} hover>
-                        <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>{qr.qr_number}</TableCell>
-                        <TableCell>{qr.project_name || 'N/A'}</TableCell>
-                        <TableCell>
+                    sortedQRs.map(qr => (
+                      <TableRow
+                        key={qr.id}
+                        hover
+                        sx={{ cursor: 'pointer' }}
+                        onClick={() => { setViewingQR(qr); setViewQRDialogOpen(true); }}
+                      >
+                        <TableCell sx={{ py: 1, px: 2, fontSize: '0.75rem', fontWeight: 600, color: 'primary.main', whiteSpace: 'nowrap' }}>{qr.qr_number}</TableCell>
+                        <TableCell sx={{ py: 1, px: 2, fontSize: '0.75rem' }}>{qr.project_name || 'N/A'}</TableCell>
+                        <TableCell sx={{ py: 1, px: 2 }}>
                           {qr.linked_prs?.length > 0 ? (
-                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, maxWidth: '180px' }}>
                               {qr.linked_prs.map(p => (
-                                <Chip key={p.id} label={p.pr_number} size="small" variant="outlined" sx={{ fontSize: '0.7rem' }} />
+                                <Typography key={p.id} variant="caption" sx={{ fontSize: '0.7rem', fontWeight: 500, color: 'text.primary' }}>
+                                  {p.pr_number}
+                                </Typography>
                               ))}
                             </Box>
                           ) : (
-                            <Typography variant="body2" color="text.disabled">Direct</Typography>
+                            <Typography variant="caption" color="text.disabled">Direct</Typography>
                           )}
                         </TableCell>
-                        <TableCell>
-                          <Typography variant="body2" fontWeight="500">{qr.invited_vendors?.length || 0} Vendors</Typography>
+                        <TableCell sx={{ py: 1, px: 2 }}>
+                          <Typography variant="caption" fontWeight="500">{qr.invited_vendors?.length || 0} Vendors</Typography>
                         </TableCell>
-                        <TableCell><Chip label={qr.status} color={getStatusColor(qr.status)} size="small" sx={{ fontWeight: 500, fontSize: '0.7rem' }} /></TableCell>
-                        <TableCell>{qr.created_at ? new Date(qr.created_at).toLocaleDateString() : 'N/A'}</TableCell>
-                        <TableCell align="right">
+                        <TableCell sx={{ py: 1, px: 2 }}>
+                          <Chip
+                            label={qr.status === 'Sent to Vendors' ? 'Request to Vendors' : (qr.status === 'Invited' ? 'Requested' : qr.status)}
+                            color={getStatusColor(qr.status)}
+                            size="small"
+                            sx={{ height: 18, fontWeight: 500, fontSize: '0.65rem' }}
+                          />
+                        </TableCell>
+                        <TableCell sx={{ py: 1, px: 2, fontSize: '0.75rem', whiteSpace: 'nowrap' }}>{formatDate(qr.created_at)}</TableCell>
+                        <TableCell align="right" onClick={(e) => e.stopPropagation()}>
                           <Stack direction="row" spacing={0.5} justifyContent="flex-end">
-                            <IconButton 
-                              size="small" 
-                              title="View Details" 
-                              onClick={() => { setViewingQR(qr); setViewQRDialogOpen(true); }}
-                              sx={{ color: 'text.secondary' }}
-                            >
-                              <VisibilityIcon fontSize="small" />
-                            </IconButton>
+                            <Tooltip title="Request to Vendors">
+                              <span>
+                                <IconButton
+                                  size="small"
+                                  onClick={() => handleSendToVendors(qr.id)}
+                                  disabled={qr.status !== 'Draft'}
+                                  sx={{ color: qr.status === 'Draft' ? 'primary.main' : 'text.disabled' }}
+                                >
+                                  <BlastIcon fontSize="small" />
+                                </IconButton>
+                              </span>
+                            </Tooltip>
 
-                            {qr.status === 'Draft' && (
-                              <IconButton 
-                                size="small" 
-                                title="Send to Vendors" 
-                                onClick={() => handleSendToVendors(qr.id)}
-                                sx={{ color: 'primary.main' }}
-                              >
-                                <BlastIcon fontSize="small" />
-                              </IconButton>
-                            )}
+                            <Tooltip title="Enter Quotes">
+                              <span>
+                                <IconButton
+                                  size="small"
+                                  onClick={() => handleAutoProcess(qr)}
+                                  disabled={!['Sent to Vendors', 'Quotations Received'].includes(qr.status)}
+                                  sx={{ color: ['Sent to Vendors', 'Quotations Received'].includes(qr.status) ? 'secondary.main' : 'text.disabled' }}
+                                >
+                                  <ProcessIcon fontSize="small" />
+                                </IconButton>
+                              </span>
+                            </Tooltip>
 
-                            {['Sent to Vendors', 'Quotations Received'].includes(qr.status) && (
-                              <IconButton 
-                                size="small" 
-                                title="Process Quotes" 
-                                onClick={() => handleAutoProcess(qr)}
-                                sx={{ color: 'secondary.main' }}
-                              >
-                                <ProcessIcon fontSize="small" />
-                              </IconButton>
-                            )}
+                            <Tooltip title="View Comparison">
+                              <span>
+                                <IconButton
+                                  size="small"
+                                  onClick={() => handleAutoProcess(qr, 'comparison')}
+                                  disabled={qr.status !== 'Quotations Received'}
+                                  sx={{ color: qr.status === 'Quotations Received' ? 'info.main' : 'text.disabled' }}
+                                >
+                                  <CompareIcon fontSize="small" />
+                                </IconButton>
+                              </span>
+                            </Tooltip>
 
-                            {qr.status === 'Comparison Done' && (
-                              <IconButton 
-                                size="small" 
-                                title="Manage Approval" 
-                                onClick={() => handleAutoProcess(qr)}
-                                sx={{ color: 'warning.main' }}
-                              >
-                                <ApproveIcon fontSize="small" />
-                              </IconButton>
-                            )}
+                            <Tooltip title="Manage Approval">
+                              <span>
+                                <IconButton
+                                  size="small"
+                                  onClick={() => handleAutoProcess(qr, 'approval')}
+                                  disabled={qr.status !== 'Comparison Done'}
+                                  sx={{ color: qr.status === 'Comparison Done' ? 'warning.main' : 'text.disabled' }}
+                                >
+                                  <ApproveIcon fontSize="small" />
+                                </IconButton>
+                              </span>
+                            </Tooltip>
 
-                            {qr.status === 'Approved' && (
-                              <IconButton 
-                                size="small" 
-                                title="Convert to PO" 
-                                onClick={() => handleAutoProcess(qr)}
-                                sx={{ color: 'success.main' }}
-                              >
-                                <OrderIcon fontSize="small" />
-                              </IconButton>
-                            )}
-                            
-                            {qr.status === 'Converted to PO' && (
-                              <IconButton 
-                                size="small" 
-                                title="View Comparison" 
-                                onClick={() => handleAutoProcess(qr)}
-                                sx={{ color: 'info.main' }}
-                              >
-                                <CompareIcon fontSize="small" />
-                              </IconButton>
-                            )}
+                            <Tooltip title="Convert to PO">
+                              <span>
+                                <IconButton
+                                  size="small"
+                                  onClick={() => handleAutoProcess(qr, 'approval')}
+                                  disabled={qr.status !== 'Approved'}
+                                  sx={{ color: qr.status === 'Approved' ? 'success.main' : 'text.disabled' }}
+                                >
+                                  <OrderIcon fontSize="small" />
+                                </IconButton>
+                              </span>
+                            </Tooltip>
                           </Stack>
                         </TableCell>
                       </TableRow>
@@ -558,11 +719,79 @@ const Quotations = () => {
         {/* CASE 2: Adaptive Detail View (QR Selected) */}
         {selectedQR && (
           <Box>
-            {/* Phase 1: Quote Collection (Visible when Sent or Received) */}
+
+            {/* Materials Summary — Consolidated list of all items */}
+            <Box mb={4}>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>Materials Summary</Typography>
+              <TableContainer component={Paper} variant="outlined">
+                <Table size="small">
+                  <TableHead>
+                    <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
+                      <TableCell sx={{ fontWeight: 'bold', width: 40 }}>#</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold' }}>Material Code</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold' }}>Material Name</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold' }}>UOM</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold' }} align="right">Quantity</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold' }}>Source</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {selectedQR.items.map((item, idx) => (
+                      <TableRow key={item.id} hover>
+                        <TableCell sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>{idx + 1}</TableCell>
+                        <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{item.material_code}</TableCell>
+                        <TableCell sx={{ fontWeight: 500 }}>{item.material_name}</TableCell>
+                        <TableCell sx={{ color: 'text.secondary' }}>{item.uom_name}</TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 600 }}>{item.quantity}</TableCell>
+                        <TableCell>
+                          <Box display="flex" flexWrap="wrap" gap={0.5}>
+                            {item.sources && item.sources.length > 0 ? (() => {
+                              // Force Filter: If any PR source exists, ignore Manual entirely
+                              const hasPR = item.sources.some(s => s.source === 'PR' && s.source_pr_number);
+                              const displaySources = item.sources.filter(s => {
+                                if (s.source === 'Manual' && hasPR) return false;
+                                return (s.source === 'PR' && s.source_pr_number) || s.source === 'Manual';
+                              });
+                              
+                              return Array.from(new Set(displaySources.map(s => 
+                                s.source === 'PR' ? `PR:${s.source_pr_number}` : 'Manual'
+                              ))).map((srcKey, sIdx) => {
+                                const isPR = srcKey.startsWith('PR:');
+                                const label = isPR ? srcKey.replace('PR:', '') : 'Manual';
+                                return (
+                                  <Chip 
+                                    key={sIdx}
+                                    size="small" 
+                                    label={label} 
+                                    color={isPR ? "primary" : "default"} 
+                                    variant="outlined" 
+                                    sx={{ fontSize: '0.7rem', height: 20 }} 
+                                  />
+                                );
+                              });
+                            })() : (
+                              <Chip 
+                                size="small" 
+                                label={item.source === 'PR' && item.source_pr_number ? item.source_pr_number : "Manual"} 
+                                color={item.source === 'PR' ? "primary" : "default"}
+                                variant="outlined" 
+                                sx={{ fontSize: '0.7rem', height: 20 }} 
+                              />
+                            )}
+                          </Box>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Box>
+
+            {/* Phase 1: Request to Vendors (Visible when Sent or Received) */}
             {['Sent to Vendors', 'Quotations Received'].includes(selectedQR.status) && (
               <Box mb={4}>
                 <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                  <Typography variant="h6" sx={{ fontWeight: 600 }}>1. Quote Collection Stage</Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>1. Request to Vendors</Typography>
                   {selectedQR.status === 'Quotations Received' && (
                     <Button
                       variant="contained"
@@ -595,20 +824,37 @@ const Quotations = () => {
                             <TableCell><Chip size="small" label={v.is_sent ? "Sent" : "Pending"} color={v.is_sent ? "info" : "default"} /></TableCell>
                             <TableCell><Chip size="small" label={submittedQuote ? "Received" : "Pending"} color={submittedQuote ? "success" : "warning"} /></TableCell>
                             <TableCell align="right">
-                              {!submittedQuote ? (
-                                <Button variant="outlined" size="small" startIcon={<EditIcon />} onClick={() => {
-                                  setSelectedVendorForQuote(v);
+                              <Button variant="outlined" size="small" startIcon={<EditIcon />} onClick={() => {
+                                setSelectedVendorForQuote(v);
+                                if (submittedQuote) {
                                   setNewQuote({
-                                    quotation_number: '', quotation_date: '', remarks: '', file: null,
+                                    quotation_number: submittedQuote.quotation_number || '',
+                                    quotation_date: submittedQuote.quotation_date || '',
+                                    remarks: submittedQuote.remarks || '',
+                                    file: null,
+                                    items: submittedQuote.items.map(i => ({
+                                      qr_item_id: i.qr_item_id, material_id: i.material_id, material_name: i.material_name,
+                                      material_code: i.material_code,
+                                      uom_name: i.uom_name, quoted_rate: i.quoted_rate || '', 
+                                      delivery_days: i.delivery_days || '', remarks: i.remarks || ''
+                                    }))
+                                  });
+                                } else {
+                                  setNewQuote({
+                                    quotation_number: `QT-${selectedQR.qr_number}`,
+                                    quotation_date: new Date().toISOString().split('T')[0],
+                                    remarks: '', file: null,
                                     items: selectedQR.items.map(i => ({
                                       qr_item_id: i.id, material_id: i.material_id, material_name: i.material_name,
+                                      material_code: i.material_code,
                                       uom_name: i.uom_name, quoted_rate: '', delivery_days: '', remarks: ''
                                     }))
                                   });
-                                  setEnterQuoteDialogOpen(true);
-                                }}>Enter Quote</Button>
-                              ) : (
-                                <Button size="small" startIcon={<VisibilityIcon />} onClick={() => {
+                                }
+                                setEnterQuoteDialogOpen(true);
+                              }}>{submittedQuote ? "Edit Quote" : "Enter Quote"}</Button>
+                              {submittedQuote && (
+                                <Button size="small" sx={{ ml: 1 }} startIcon={<VisibilityIcon />} onClick={() => {
                                   setSelectedSubmittedQuote(submittedQuote);
                                   setViewVendorQuoteDialogOpen(true);
                                 }}>View</Button>
@@ -625,12 +871,12 @@ const Quotations = () => {
 
             {/* Phase 2: Material-Wise Comparison (Visible when Received or Compared) */}
             {['Quotations Received', 'Comparison Done'].includes(selectedQR.status) && comparisonData && (
-              <Box mb={4}>
+              <Box mb={4} id="comparison-section">
                 <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>2. Technical Comparison (Item-Wise)</Typography>
                 {comparisonData.materials.map(mat => (
-                  <Accordion key={mat.qr_item_id} variant="outlined" sx={{ mb: 1 }}>
+                  <Accordion key={mat.qr_item_id} variant="outlined" sx={{ mb: 1 }} defaultExpanded>
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                      <Typography fontWeight="bold">{mat.material_name}</Typography>
+                      <Typography fontWeight="bold">[{mat.material_code}] {mat.material_name}</Typography>
                       <Typography sx={{ ml: 2, color: 'text.secondary' }}>Qty: {mat.quantity} {mat.uom_name}</Typography>
                       {mat.is_overridden && <Chip size="small" label="Overridden" color="warning" sx={{ ml: 2 }} />}
                     </AccordionSummary>
@@ -676,7 +922,7 @@ const Quotations = () => {
 
             {/* Phase 3: Final Comparative Statement (Visible when Compared or beyond) */}
             {['Comparison Done', 'Approved', 'Converted to PO'].includes(selectedQR.status) && comparisonData && (
-              <Box>
+              <Box id="approval-section">
                 <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                   <Typography variant="h6" sx={{ fontWeight: 600 }}>3. Comparative Statement & Approval</Typography>
                   <Box>
@@ -722,7 +968,7 @@ const Quotations = () => {
                             const q = mat.vendor_quotes.find(x => x.vendor_id === vt.vendor_id);
                             return (
                               <TableRow key={mat.qr_item_id} sx={{ backgroundColor: mat.selected_vendor_id === vt.vendor_id ? '#f1f8e9' : 'inherit' }}>
-                                <TableCell>{mat.material_name}</TableCell>
+                                <TableCell>[{mat.material_code}] {mat.material_name}</TableCell>
                                 <TableCell align="right">{q ? q.quoted_rate : '-'}</TableCell>
                                 <TableCell align="right">{q ? (q.quoted_rate * mat.quantity).toLocaleString() : '-'}</TableCell>
                                 <TableCell align="center"><Chip label={q?.rank_label || '-'} size="small" variant="outlined" /></TableCell>
@@ -922,7 +1168,16 @@ const Quotations = () => {
                           return (
                             <TableRow key={idx}>
                               <TableCell sx={{ py: 0.5 }}>{m?.name || 'Loading...'}</TableCell>
-                              <TableCell align="right" sx={{ py: 0.5, fontWeight: 500 }}>{it.quantity}</TableCell>
+                              <TableCell align="right" sx={{ py: 0 }}>
+                                <TextField
+                                  type="number"
+                                  size="small"
+                                  value={it.quantity}
+                                  onChange={(e) => updateItemQuantity(idx, e.target.value)}
+                                  sx={{ width: 80, '& .MuiInputBase-input': { py: 0.5, textAlign: 'right' } }}
+                                  slotProps={{ htmlInput: { min: 1 } }}
+                                />
+                              </TableCell>
                               <TableCell align="center" sx={{ py: 0.5 }}>
                                 <Chip size="small" label={it.pr_id ? 'PR' : 'Manual'} variant="outlined" />
                               </TableCell>
@@ -1013,7 +1268,7 @@ const Quotations = () => {
               <TableBody>
                 {newQuote.items.map((it, idx) => (
                   <TableRow key={idx}>
-                    <TableCell>{it.material_name}</TableCell>
+                    <TableCell>[{it.material_code}] {it.material_name}</TableCell>
                     <TableCell>
                       <TextField size="small" type="number" value={it.quoted_rate} onChange={(e) => {
                         const newItems = [...newQuote.items];
@@ -1074,36 +1329,105 @@ const Quotations = () => {
           </DialogActions>
         </Dialog>
 
-      {/* View QR Dialog */}
-      <Dialog open={viewQRDialogOpen} onClose={() => { setViewQRDialogOpen(false); setViewingQR(null); }} maxWidth="md" fullWidth>
-        <DialogTitle>Quotation Request Details - {viewingQR?.qr_number}</DialogTitle>
-        <DialogContent>
-          {viewingQR && (
-            <Box>
-              <Typography><strong>Project:</strong> {viewingQR.project_name}</Typography>
-              <Typography><strong>Status:</strong> {viewingQR.status}</Typography>
-              <Typography><strong>Linked PRs:</strong> {viewingQR.linked_prs.map(p => p.pr_number).join(', ') || 'None'}</Typography>
+        {/* View QR Dialog */}
+        <Dialog open={viewQRDialogOpen} onClose={() => { setViewQRDialogOpen(false); setViewingQR(null); }} maxWidth="md" fullWidth>
+          <DialogTitle>Quotation Request Details - {viewingQR?.qr_number}</DialogTitle>
+          <DialogContent>
+            {viewingQR && (
+              <Box>
+                <Typography><strong>Project:</strong> {viewingQR.project_name}</Typography>
+                <Typography><strong>Status:</strong> {viewingQR.status === 'Sent to Vendors' ? 'Request to Vendors' : viewingQR.status}</Typography>
 
-              <Typography variant="h6" mt={2} mb={1}>Items</Typography>
-              <Table size="small">
-                <TableHead><TableRow><TableCell>Material</TableCell><TableCell>Qty</TableCell><TableCell>UOM</TableCell></TableRow></TableHead>
-                <TableBody>
-                  {viewingQR.items.map(it => (
-                    <TableRow key={it.id}>
-                      <TableCell>{it.material_name} ({it.material_code})</TableCell>
-                      <TableCell>{it.quantity}</TableCell>
-                      <TableCell>{it.uom_name}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Box>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => { setViewQRDialogOpen(false); setViewingQR(null); }}>Close</Button>
-        </DialogActions>
-      </Dialog>
+                <Typography variant="h6" sx={{ fontWeight: 600, mt: 3, mb: 1.5 }}>Materials Summary</Typography>
+                <TableContainer component={Paper} variant="outlined" sx={{ mb: 2 }}>
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
+                        <TableCell sx={{ fontWeight: 'bold' }}>Material Code</TableCell>
+                        <TableCell sx={{ fontWeight: 'bold' }}>Material Name</TableCell>
+                        <TableCell sx={{ fontWeight: 'bold' }}>UOM</TableCell>
+                        <TableCell sx={{ fontWeight: 'bold' }} align="right">Quantity</TableCell>
+                        <TableCell sx={{ fontWeight: 'bold' }}>Source</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {viewingQR.items.map(it => (
+                        <TableRow key={it.id}>
+                          <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{it.material_code}</TableCell>
+                          <TableCell sx={{ fontWeight: 500 }}>{it.material_name}</TableCell>
+                          <TableCell sx={{ color: 'text.secondary' }}>{it.uom_name}</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 600 }}>{it.quantity}</TableCell>
+                          <TableCell>
+                            <Box display="flex" flexWrap="wrap" gap={0.5}>
+                            {it.sources && it.sources.length > 0 ? (() => {
+                              // Force Filter: If any PR source exists, ignore Manual entirely
+                              const hasPR = it.sources.some(s => s.source === 'PR' && s.source_pr_number);
+                              const displaySources = it.sources.filter(s => {
+                                if (s.source === 'Manual' && hasPR) return false;
+                                return (s.source === 'PR' && s.source_pr_number) || s.source === 'Manual';
+                              });
+                              
+                              return Array.from(new Set(displaySources.map(s => 
+                                s.source === 'PR' ? `PR:${s.source_pr_number}` : 'Manual'
+                              ))).map((srcKey, sIdx) => {
+                                const isPR = srcKey.startsWith('PR:');
+                                const label = isPR ? srcKey.replace('PR:', '') : 'Manual';
+                                return (
+                                  <Chip 
+                                    key={sIdx}
+                                    size="small" 
+                                    label={label} 
+                                    color={isPR ? "primary" : "default"} 
+                                    variant="outlined" 
+                                    sx={{ fontSize: '0.65rem', height: 18 }} 
+                                  />
+                                );
+                              });
+                            })() : (
+                              <Chip 
+                                size="small" 
+                                label={it.source === 'PR' && it.source_pr_number ? it.source_pr_number : "Manual"} 
+                                color={it.source === 'PR' ? "primary" : "default"}
+                                variant="outlined" 
+                                sx={{ fontSize: '0.65rem', height: 18 }} 
+                              />
+                            )}
+                            </Box>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+
+                <Typography variant="h6" sx={{ fontWeight: 600, mt: 3, mb: 1.5 }}>Vendors Requested</Typography>
+                <TableContainer component={Paper} variant="outlined">
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
+                        <TableCell sx={{ fontWeight: 'bold' }}>Vendor Name</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {viewingQR.invited_vendors && viewingQR.invited_vendors.length > 0 ? (
+                        viewingQR.invited_vendors.map(v => (
+                          <TableRow key={v.vendor_id}>
+                            <TableCell sx={{ fontWeight: 500 }}>{v.vendor_name}</TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow><TableCell align="center">No vendors invited yet.</TableCell></TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Box>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => { setViewQRDialogOpen(false); setViewingQR(null); }}>Close</Button>
+          </DialogActions>
+        </Dialog>
 
         {/* View Submitted Vendor Quotation Dialog */}
         <Dialog open={viewVendorQuoteDialogOpen} onClose={() => setViewVendorQuoteDialogOpen(false)} maxWidth="md" fullWidth>
@@ -1129,7 +1453,7 @@ const Quotations = () => {
                     <TableBody>
                       {selectedSubmittedQuote.items.map((it, idx) => (
                         <TableRow key={idx}>
-                          <TableCell>{it.material_name}</TableCell>
+                          <TableCell>[{it.material_code}] {it.material_name}</TableCell>
                           <TableCell align="right">₹{it.quoted_rate}</TableCell>
                           <TableCell align="center">{it.delivery_days} days</TableCell>
                           <TableCell>{it.remarks || '-'}</TableCell>

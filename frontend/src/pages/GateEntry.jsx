@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
-  DialogContent, DialogActions, Grid, MenuItem, Select, FormControl, InputLabel, Divider
+  DialogContent, DialogActions, Grid, MenuItem, Select, FormControl, InputLabel, Divider,
+  Radio, RadioGroup, FormControlLabel, FormLabel, ToggleButton, ToggleButtonGroup
 } from '@mui/material';
 import { Add } from '@mui/icons-material';
 import api from '../services/api';
@@ -17,8 +18,9 @@ export default function GateEntry() {
   const [detailDialog, setDetailDialog] = useState(null);
 
   const [form, setForm] = useState({
+    entry_type: 'Vehicle',
     vehicle_number: '', vendor_id: '', po_id: '', project_id: '',
-    material_id: '', quantity: '', driver_name: '', remarks: '',
+    material_id: '', quantity: '', driver_name: '', delivery_person_name: '', remarks: '',
     // When PO is selected, items will be populated
     items: []
   });
@@ -74,15 +76,20 @@ export default function GateEntry() {
   };
 
   const handleCreate = async () => {
-    if (!form.vehicle_number || !form.vehicle_number.trim()) {
+    if (form.entry_type === 'Vehicle' && (!form.vehicle_number || !form.vehicle_number.trim())) {
       alert("Vehicle Number is required.");
+      return;
+    }
+    if (form.entry_type === 'Carry on hand' && (!form.delivery_person_name || !form.delivery_person_name.trim())) {
+      alert("Delivery Person Name is required.");
       return;
     }
     
     try {
       const primaryItem = form.items[0] || {};
       await api.post('/api/gate-entries', {
-        vehicle_number: form.vehicle_number,
+        entry_type: form.entry_type,
+        vehicle_number: form.entry_type === 'Vehicle' ? form.vehicle_number : '',
         vendor_id: form.vendor_id,
         po_id: form.po_id || null,
         project_id: form.project_id,
@@ -90,7 +97,8 @@ export default function GateEntry() {
         quantity: form.items.length > 0
           ? form.items.reduce((sum, it) => sum + (it.received_now || 0), 0)
           : parseFloat(form.quantity),
-        driver_name: form.driver_name,
+        driver_name: form.entry_type === 'Vehicle' ? form.driver_name : '',
+        delivery_person_name: form.entry_type === 'Carry on hand' ? form.delivery_person_name : '',
         remarks: form.remarks
       });
       setDialog(false); load();
@@ -111,7 +119,7 @@ export default function GateEntry() {
           <Typography variant="body2" sx={{ color: '#64748B' }}>Record incoming materials at site gate</Typography>
         </Box>
         <Button variant="contained" startIcon={<Add />} onClick={() => {
-          setForm({ vehicle_number: '', vendor_id: '', po_id: '', project_id: projects[0]?.id || '', material_id: '', quantity: '', driver_name: '', remarks: '', items: [] });
+          setForm({ entry_type: 'Vehicle', vehicle_number: '', vendor_id: '', po_id: '', project_id: projects[0]?.id || '', material_id: '', quantity: '', driver_name: '', delivery_person_name: '', remarks: '', items: [] });
           setDialog(true);
         }}>New Gate Entry</Button>
       </Box>
@@ -120,20 +128,29 @@ export default function GateEntry() {
         <TableContainer>
           <Table size="small">
             <TableHead><TableRow>
-              <TableCell>Entry No.</TableCell><TableCell>Vehicle</TableCell><TableCell>Vendor</TableCell>
+              <TableCell>Entry No.</TableCell><TableCell>Type</TableCell><TableCell>Vehicle/Person</TableCell><TableCell>Vendor</TableCell>
               <TableCell>PO Ref</TableCell><TableCell>Material</TableCell><TableCell align="right">Qty</TableCell>
-              <TableCell>Driver</TableCell><TableCell>Arrival</TableCell><TableCell>Status</TableCell>
+              <TableCell>Arrival</TableCell><TableCell>Status</TableCell>
             </TableRow></TableHead>
             <TableBody>
               {entries.map(e => (
                 <TableRow key={e.id} sx={{ cursor: 'pointer' }} onClick={() => setDetailDialog(e)}>
                   <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.8rem' }}>{e.entry_number}</TableCell>
-                  <TableCell sx={{ fontWeight: 600, fontSize: '0.85rem' }}>{e.vehicle_number}</TableCell>
+                  <TableCell><Chip label={e.entry_type} size="small" variant="outlined" sx={{ fontSize: '0.65rem', height: 20 }} /></TableCell>
+                  <TableCell sx={{ fontWeight: 600, fontSize: '0.85rem' }}>
+                    {e.entry_type === 'Vehicle' ? (
+                      <Box>
+                        <Typography sx={{ fontSize: '0.85rem', fontWeight: 600 }}>{e.vehicle_number}</Typography>
+                        <Typography variant="caption" color="textSecondary">{e.driver_name}</Typography>
+                      </Box>
+                    ) : (
+                      <Typography sx={{ fontSize: '0.85rem', fontWeight: 600 }}>{e.delivery_person_name}</Typography>
+                    )}
+                  </TableCell>
                   <TableCell sx={{ fontSize: '0.8rem' }}>{e.vendor_name}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem', color: '#64748B' }}>{e.po_number || '-'}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem' }}>{e.material_name}</TableCell>
                   <TableCell align="right" sx={{ fontWeight: 600 }}>{e.quantity}</TableCell>
-                  <TableCell sx={{ fontSize: '0.8rem' }}>{e.driver_name}</TableCell>
                   <TableCell sx={{ fontSize: '0.75rem' }}>{formatDateTime(e.arrival_time)}</TableCell>
                   <TableCell><Chip label={e.status} size="small" color={statusColor[e.status] || 'default'} sx={{ fontSize: '0.7rem' }} /></TableCell>
                 </TableRow>
@@ -148,12 +165,19 @@ export default function GateEntry() {
         <DialogTitle sx={{ fontWeight: 600 }}>{detailDialog?.entry_number} — Gate Entry Details</DialogTitle>
         <DialogContent>
           <Grid container spacing={2}>
-            <Grid size={6}><Typography variant="caption" color="textSecondary">Vehicle</Typography><Typography sx={{ fontWeight: 600 }}>{detailDialog?.vehicle_number}</Typography></Grid>
+            <Grid size={6}><Typography variant="caption" color="textSecondary">Entry Type</Typography><Typography sx={{ fontWeight: 600 }}>{detailDialog?.entry_type}</Typography></Grid>
+            {detailDialog?.entry_type === 'Vehicle' ? (
+              <>
+                <Grid size={6}><Typography variant="caption" color="textSecondary">Vehicle</Typography><Typography sx={{ fontWeight: 600 }}>{detailDialog?.vehicle_number}</Typography></Grid>
+                <Grid size={6}><Typography variant="caption" color="textSecondary">Driver</Typography><Typography>{detailDialog?.driver_name}</Typography></Grid>
+              </>
+            ) : (
+              <Grid size={6}><Typography variant="caption" color="textSecondary">Delivery Person</Typography><Typography sx={{ fontWeight: 600 }}>{detailDialog?.delivery_person_name}</Typography></Grid>
+            )}
             <Grid size={6}><Typography variant="caption" color="textSecondary">Vendor</Typography><Typography>{detailDialog?.vendor_name}</Typography></Grid>
             <Grid size={6}><Typography variant="caption" color="textSecondary">PO Ref</Typography><Typography>{detailDialog?.po_number || '-'}</Typography></Grid>
             <Grid size={6}><Typography variant="caption" color="textSecondary">Material</Typography><Typography>{detailDialog?.material_name}</Typography></Grid>
             <Grid size={6}><Typography variant="caption" color="textSecondary">Quantity</Typography><Typography sx={{ fontWeight: 600 }}>{detailDialog?.quantity}</Typography></Grid>
-            <Grid size={6}><Typography variant="caption" color="textSecondary">Driver</Typography><Typography>{detailDialog?.driver_name}</Typography></Grid>
             <Grid size={6}><Typography variant="caption" color="textSecondary">Arrival</Typography><Typography>{formatDateTime(detailDialog?.arrival_time)}</Typography></Grid>
             <Grid size={6}><Typography variant="caption" color="textSecondary">Status</Typography><Chip label={detailDialog?.status} size="small" color={statusColor[detailDialog?.status] || 'default'} /></Grid>
           </Grid>
@@ -165,28 +189,68 @@ export default function GateEntry() {
       <Dialog open={dialog} onClose={() => setDialog(false)} maxWidth="lg" fullWidth>
         <DialogTitle sx={{ fontWeight: 600 }}>Record Gate Entry</DialogTitle>
         <DialogContent>
-          <Grid container spacing={2} sx={{ mt: 0.5 }}>
-            <Grid size={4}><TextField fullWidth label="Vehicle Number" value={form.vehicle_number} onChange={e => setForm({ ...form, vehicle_number: e.target.value })} required /></Grid>
-            <Grid size={4}>
-              <FormControl fullWidth><InputLabel>PO Reference (Pending Orders)</InputLabel>
-                <Select value={form.po_id} label="PO Reference (Pending Orders)" onChange={e => selectPO(e.target.value)}>
-                  <MenuItem value="">None (ad-hoc delivery)</MenuItem>
-                  {pos.map(p => (
-                    <MenuItem key={p.id} value={p.id}>
-                      {p.po_number} — {p.vendor_name} ({p.items?.filter(it => it.quantity - (it.received_quantity || 0) > 0).length} pending items)
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid size={4}>
-              <FormControl fullWidth required><InputLabel>Project</InputLabel>
-                <Select value={form.project_id} label="Project" onChange={e => setForm({ ...form, project_id: e.target.value })}>
-                  {projects.map(p => <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>)}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid size={6}><TextField fullWidth label="Driver Name" value={form.driver_name} onChange={e => setForm({ ...form, driver_name: e.target.value })} /></Grid>
+          <Box sx={{ mb: 3, display: 'flex', justifyContent: 'center' }}>
+            <ToggleButtonGroup
+              color="primary"
+              value={form.entry_type}
+              exclusive
+              onChange={(e, val) => val && setForm({ ...form, entry_type: val })}
+              size="small"
+            >
+              <ToggleButton value="Vehicle" sx={{ px: 4 }}>Vehicle Entry</ToggleButton>
+              <ToggleButton value="Carry on hand" sx={{ px: 4 }}>Carry on hand</ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+
+          <Grid container spacing={2}>
+            {form.entry_type === 'Vehicle' ? (
+              <>
+                <Grid size={4}><TextField fullWidth label="Vehicle Number" value={form.vehicle_number} onChange={e => setForm({ ...form, vehicle_number: e.target.value })} required /></Grid>
+                <Grid size={4}>
+                  <FormControl fullWidth><InputLabel>PO Reference (Pending Orders)</InputLabel>
+                    <Select value={form.po_id} label="PO Reference (Pending Orders)" onChange={e => selectPO(e.target.value)}>
+                      <MenuItem value="">None (ad-hoc delivery)</MenuItem>
+                      {pos.map(p => (
+                        <MenuItem key={p.id} value={p.id}>
+                          {p.po_number} — {p.vendor_name} ({p.items?.filter(it => it.quantity - (it.received_quantity || 0) > 0).length} pending items)
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid size={4}>
+                  <FormControl fullWidth required><InputLabel>Project</InputLabel>
+                    <Select value={form.project_id} label="Project" onChange={e => setForm({ ...form, project_id: e.target.value })}>
+                      {projects.map(p => <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>)}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid size={6}><TextField fullWidth label="Driver Name" value={form.driver_name} onChange={e => setForm({ ...form, driver_name: e.target.value })} /></Grid>
+              </>
+            ) : (
+              <>
+                <Grid size={4}><TextField fullWidth label="Delivery Person Name" value={form.delivery_person_name} onChange={e => setForm({ ...form, delivery_person_name: e.target.value })} required /></Grid>
+                <Grid size={4}>
+                  <FormControl fullWidth><InputLabel>PO Reference (Pending Orders)</InputLabel>
+                    <Select value={form.po_id} label="PO Reference (Pending Orders)" onChange={e => selectPO(e.target.value)}>
+                      <MenuItem value="">None (ad-hoc delivery)</MenuItem>
+                      {pos.map(p => (
+                        <MenuItem key={p.id} value={p.id}>
+                          {p.po_number} — {p.vendor_name} ({p.items?.filter(it => it.quantity - (it.received_quantity || 0) > 0).length} pending items)
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid size={4}>
+                  <FormControl fullWidth required><InputLabel>Project</InputLabel>
+                    <Select value={form.project_id} label="Project" onChange={e => setForm({ ...form, project_id: e.target.value })}>
+                      {projects.map(p => <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>)}
+                    </Select>
+                  </FormControl>
+                </Grid>
+              </>
+            )}
             <Grid size={6}><TextField fullWidth label="Remarks" value={form.remarks} onChange={e => setForm({ ...form, remarks: e.target.value })} /></Grid>
           </Grid>
 

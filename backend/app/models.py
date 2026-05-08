@@ -71,6 +71,10 @@ class AlertSeverity(str, enum.Enum):
     WARNING = "Warning"
     CRITICAL = "Critical"
 
+class GateEntryType(str, enum.Enum):
+    VEHICLE = "Vehicle"
+    CARRY_ON_HAND = "Carry on hand"
+
 class IndentStatus(str, enum.Enum):
     DRAFT = "Draft"
     AWAITING_APPROVAL = "Awaiting Approval"
@@ -314,6 +318,7 @@ class Material(Base):
     preferred_vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=True)
     storage_type = Column(String(100), default="General")
     hsn_code = Column(String(20))
+    gst_rate = Column(Float, default=0)
     material_type = Column(String(50), default="Consumable") # Consumable, Non-Consumable
     description = Column(Text)
     is_active = Column(Boolean, default=True)
@@ -459,6 +464,8 @@ class GateEntry(Base):
     arrival_time = Column(DateTime, default=datetime.utcnow)
     driver_name = Column(String(255))
     driver_phone = Column(String(20))
+    delivery_person_name = Column(String(255))
+    entry_type = Column(String(50), default=GateEntryType.VEHICLE.value)
     photo_url = Column(String(500))
     remarks = Column(Text)
     status = Column(String(50), default=GateEntryStatus.CREATED.value)
@@ -814,10 +821,28 @@ class QuotationRequestItem(Base):
     id = Column(Integer, primary_key=True, index=True)
     qr_id = Column(Integer, ForeignKey("quotation_requests.id", ondelete="CASCADE"), nullable=False)
     material_id = Column(Integer, ForeignKey("materials.id"), nullable=False)
-    quantity = Column(Float, nullable=False)
+    quantity = Column(Float, nullable=False)  # Total consolidated quantity
+    # Legacy columns kept for backward compat (deprecated)
+    source = Column(String(20), default="Manual")
+    source_pr_id = Column(Integer, ForeignKey("purchase_requests.id"), nullable=True)
 
     quotation_request = relationship("QuotationRequest", back_populates="items")
     material = relationship("Material")
+    source_pr = relationship("PurchaseRequest", foreign_keys=[source_pr_id])
+    sources = relationship("QuotationRequestItemSource", back_populates="qr_item", cascade="all, delete-orphan")
+
+
+class QuotationRequestItemSource(Base):
+    __tablename__ = "quotation_request_item_sources"
+    id = Column(Integer, primary_key=True, index=True)
+    qr_item_id = Column(Integer, ForeignKey("quotation_request_items.id", ondelete="CASCADE"), nullable=False)
+    source = Column(String(20), nullable=False)         # "PR" or "Manual"
+    source_pr_id = Column(Integer, ForeignKey("purchase_requests.id"), nullable=True)
+    quantity = Column(Float, nullable=False)             # Qty contributed by this source
+
+    qr_item = relationship("QuotationRequestItem", back_populates="sources")
+    source_pr = relationship("PurchaseRequest", foreign_keys=[source_pr_id])
+
 
 
 class QuotationRequestPR(Base):

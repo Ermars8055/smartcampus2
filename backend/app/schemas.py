@@ -166,6 +166,7 @@ class MaterialBase(BaseModel):
     preferred_vendor_id: Optional[int] = None
     storage_type: Optional[str] = None
     hsn_code: Optional[str] = None
+    gst_rate: float = 0
     description: Optional[str] = None
 
 class MaterialCreate(MaterialBase):
@@ -183,6 +184,7 @@ class MaterialUpdate(BaseModel):
     preferred_vendor_id: Optional[int] = None
     storage_type: Optional[str] = None
     hsn_code: Optional[str] = None
+    gst_rate: Optional[float] = None
     description: Optional[str] = None
     is_active: Optional[bool] = None
 
@@ -316,6 +318,7 @@ class PRBase(BaseModel):
     required_date: Optional[date] = None
     priority: str = "Normal"
     remarks: Optional[str] = None
+    required_for_block_id: Optional[int] = None
     items: List[PRItemBase] = []
 
 class PRCreate(PRBase):
@@ -325,6 +328,7 @@ class PRUpdate(BaseModel):
     required_date: Optional[date] = None
     priority: Optional[str] = None
     remarks: Optional[str] = None
+    required_for_block_id: Optional[int] = None
     status: Optional[str] = None
 
 class PROut(PRBase):
@@ -401,11 +405,15 @@ class POOut(BaseModel):
 # ── Gate Entry ───────────────────────────────────────────────────────────
 
 class GateEntryBase(BaseModel):
-    vehicle_number: str
+    entry_type: str = "Vehicle"
+    vehicle_number: Optional[str] = None
     vendor_id: Optional[int] = None
     po_id: Optional[int] = None
     project_id: int
+    material_id: int
+    quantity: float
     driver_name: Optional[str] = None
+    delivery_person_name: Optional[str] = None
     driver_phone: Optional[str] = None
     gate_pass_number: Optional[str] = None
     remarks: Optional[str] = None
@@ -418,6 +426,8 @@ class GateEntryOut(GateEntryBase):
     entry_number: str
     status: str
     created_at: datetime
+    entry_type: str
+    delivery_person_name: Optional[str] = None
     vendor_name: Optional[str] = None
     po_number: Optional[str] = None
     project_name: Optional[str] = None
@@ -821,11 +831,21 @@ class QRItemBase(BaseModel):
     material_id: int
     quantity: float = Field(..., gt=0)
 
+class QRItemSourceOut(BaseModel):
+    source: str                              # "PR" or "Manual"
+    source_pr_number: Optional[str] = None  # e.g. "PR-2026-0001"
+    quantity: float
+    class Config:
+        from_attributes = True
+
 class QRItemOut(QRItemBase):
     id: int
     material_name: Optional[str] = None
     material_code: Optional[str] = None
     uom_name: Optional[str] = None
+    source: Optional[str] = "Manual"          # Legacy: kept for backward compat
+    source_pr_number: Optional[str] = None    # Legacy: kept for backward compat
+    sources: List[QRItemSourceOut] = []       # NEW: all contributing sources
     class Config:
         from_attributes = True
 

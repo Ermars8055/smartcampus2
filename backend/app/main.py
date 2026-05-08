@@ -1,6 +1,6 @@
 """NissiGrid Smart Campus - FastAPI main application."""
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 import os
@@ -28,14 +28,28 @@ app = FastAPI(
     redoc_url="/api/redoc"
 )
 
-# CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+@app.middleware("http")
+async def cors_handler(request: Request, call_next):
+    if request.method == "OPTIONS":
+        response = Response(content="OK", status_code=200)
+    else:
+        try:
+            response = await call_next(request)
+        except Exception as e:
+            from fastapi.responses import JSONResponse
+            import traceback
+            print(f"ERROR: {traceback.format_exc()}")
+            response = JSONResponse(
+                status_code=500,
+                content={"detail": str(e)}
+            )
+    
+    origin = request.headers.get("Origin", "*")
+    response.headers["Access-Control-Allow-Origin"] = origin
+    response.headers["Access-Control-Allow-Methods"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    return response
 
 # Static files for uploads
 os.makedirs("uploads", exist_ok=True)

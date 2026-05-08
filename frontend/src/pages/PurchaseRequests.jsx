@@ -3,7 +3,7 @@ import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
   DialogContent, DialogActions, Grid, MenuItem, Select, FormControl,
-  InputLabel, IconButton, Tooltip, Tab, Tabs, Divider
+  InputLabel, IconButton, Tooltip, Tab, Tabs, Divider, Paper
 } from '@mui/material';
 import { Add, CheckCircle, Cancel, ShoppingCart, Archive, Delete } from '@mui/icons-material';
 import api from '../services/api';
@@ -159,11 +159,62 @@ export default function PurchaseRequests() {
         }}>Create PR</Button>
       </Box>
 
-      <Card sx={{ mb: 2 }}>
-        <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ px: 2 }} variant="scrollable">
-          {statusFilters.map((s, i) => <Tab key={i} label={`${s} (${i === 0 ? prs.length : prs.filter(p => p.status === s).length})`} sx={{ textTransform: 'none', fontWeight: 500, fontSize: '0.8rem' }} />)}
+      <Paper 
+        elevation={0} 
+        sx={{ 
+          mb: 2, 
+          borderBottom: '1px solid #e0e0e0', 
+          borderRadius: '8px 8px 0 0',
+          backgroundColor: '#fff' 
+        }}
+      >
+        <Tabs 
+          value={tab} 
+          onChange={(_, v) => setTab(v)} 
+          variant="scrollable"
+          scrollButtons="auto"
+          sx={{
+            px: 2,
+            '& .MuiTab-root': {
+              minWidth: 100,
+              fontWeight: 600,
+              fontSize: '0.85rem',
+              textTransform: 'none',
+              py: 1.5,
+            },
+            '& .Mui-selected': {
+              color: 'primary.main',
+            },
+            '& .MuiTabs-indicator': {
+              height: 3,
+              borderRadius: '3px 3px 0 0'
+            }
+          }}
+        >
+          {statusFilters.map((s, i) => (
+            <Tab 
+              key={i} 
+              label={
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  {s}
+                  <Chip 
+                    label={i === 0 ? prs.length : prs.filter(p => p.status === s).length} 
+                    size="small" 
+                    sx={{ 
+                      height: 20, 
+                      fontSize: '0.7rem', 
+                      fontWeight: 700,
+                      backgroundColor: tab === i ? 'primary.light' : '#f0f0f0',
+                      color: tab === i ? 'primary.contrastText' : 'text.secondary',
+                      cursor: 'pointer'
+                    }} 
+                  />
+                </Box>
+              } 
+            />
+          ))}
         </Tabs>
-      </Card>
+      </Paper>
 
       <Card>
         <TableContainer>

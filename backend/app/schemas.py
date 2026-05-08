@@ -870,8 +870,12 @@ class QRVendorOut(BaseModel):
     vendor_name: Optional[str] = None
     is_sent: bool = False
     sent_at: Optional[datetime] = None
+    receipt_status: Optional[str] = "Pending"
     class Config:
         from_attributes = True
+
+class QRVendorReceiptUpdate(BaseModel):
+    receipt_status: str
 
 class QuotationRequestOut(BaseModel):
     id: int
@@ -899,6 +903,7 @@ class VendorQuotationItemBase(BaseModel):
     material_id: int
     quoted_rate: float = Field(..., ge=0)
     delivery_days: Optional[int] = None
+    is_excluded: bool = False
     remarks: Optional[str] = None
 
 class VendorQuotationItemOut(VendorQuotationItemBase):
@@ -906,6 +911,7 @@ class VendorQuotationItemOut(VendorQuotationItemBase):
     material_name: Optional[str] = None
     material_code: Optional[str] = None
     uom_name: Optional[str] = None
+    is_excluded: bool = False
     class Config:
         from_attributes = True
 

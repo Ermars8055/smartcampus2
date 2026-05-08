@@ -9,6 +9,8 @@ import '@fontsource/inter/700.css';
 import theme from './theme';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { MessageProvider } from './context/MessageContext';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import Layout from './components/Layout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
@@ -109,10 +111,12 @@ export default function App() {
       <CssBaseline />
       <BrowserRouter>
         <AuthProvider>
-          <MessageProvider>
-            <AppRoutes />
-            <ChatBot />
-          </MessageProvider>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <MessageProvider>
+              <AppRoutes />
+              <ChatBot />
+            </MessageProvider>
+          </LocalizationProvider>
         </AuthProvider>
       </BrowserRouter>
     </ThemeProvider>

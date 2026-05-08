@@ -17,7 +17,8 @@ from app.models import (
 from app.schemas import (
     QuotationRequestCreate, QuotationRequestOut, VendorQuotationCreate, VendorQuotationOut,
     VendorOverrideRequest, ComparativeStatementOut, MaterialComparisonOut, VendorQuoteDetail,
-    QRItemOut, QRLinkedPROut, QRVendorOut, VendorQuotationItemOut, QRItemSourceOut
+    QRItemOut, QRLinkedPROut, QRVendorOut, VendorQuotationItemOut, QRItemSourceOut,
+    QRVendorReceiptUpdate
 )
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
 from app.models import QuotationRequestStatus, VendorQuotationStatus
@@ -78,7 +79,7 @@ def list_quotation_requests(
         ) for it in qr.items]
         prs = [QRLinkedPROut(id=pr.id, pr_id=pr.pr_id, pr_number=pr.purchase_request.pr_number if pr.purchase_request else "N/A") for pr in qr.linked_prs]
         vendors = [QRVendorOut(id=v.id, vendor_id=v.vendor_id, vendor_name=v.vendor.name if v.vendor else "N/A", 
-                               is_sent=v.is_sent, sent_at=v.sent_at) for v in qr.invited_vendors]
+                               is_sent=v.is_sent, sent_at=v.sent_at, receipt_status=v.receipt_status) for v in qr.invited_vendors]
         
         vendor_quotation_count = db.query(VendorQuotation).filter(VendorQuotation.qr_id == qr.id).count()
 
@@ -123,7 +124,7 @@ def get_quotation_request(
     ) for it in qr.items]
     prs = [QRLinkedPROut(id=pr.id, pr_id=pr.pr_id, pr_number=pr.purchase_request.pr_number) for pr in qr.linked_prs]
     vendors = [QRVendorOut(id=v.id, vendor_id=v.vendor_id, vendor_name=v.vendor.name, 
-                           is_sent=v.is_sent, sent_at=v.sent_at) for v in qr.invited_vendors]
+                           is_sent=v.is_sent, sent_at=v.sent_at, receipt_status=v.receipt_status) for v in qr.invited_vendors]
     
     vendor_quotation_count = db.query(VendorQuotation).filter(VendorQuotation.qr_id == qr.id).count()
 
@@ -231,13 +232,76 @@ def send_quotation_request(
     if not qr:
         raise HTTPException(status_code=404, detail="Quotation Request not found")
         
-    qr.status = QuotationRequestStatus.SENT.value
+    qr.status = QuotationRequestStatus.REQUESTED.value
     for v in qr.invited_vendors:
         v.is_sent = True
         v.sent_at = datetime.utcnow()
         
     db.commit()
     return {"message": "Quotation Request sent to vendors"}
+
+
+@router.post("/requests/{id}/receive")
+def transition_to_receive(
+    id: int, db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("purchase_requests", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    qr = db.query(QuotationRequest).filter(
+        QuotationRequest.id == id, QuotationRequest.tenant_id == tenant_id, QuotationRequest.site_id == site_id
+    ).first()
+    if not qr:
+        raise HTTPException(status_code=404, detail="Quotation Request not found")
+        
+    if qr.status != QuotationRequestStatus.REQUESTED.value:
+        raise HTTPException(status_code=400, detail="Can only start receiving from Requested status")
+        
+    qr.status = QuotationRequestStatus.RECEIVED.value
+    db.commit()
+    return {"message": "Quotation Request transitioned to Receiving stage"}
+
+
+@router.put("/requests/{qr_id}/vendors/{vendor_id}/receipt-status")
+def update_vendor_receipt_status(
+    qr_id: int, vendor_id: int, data: QRVendorReceiptUpdate, db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("purchase_requests", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    vendor_link = db.query(QuotationRequestVendor).filter(
+        QuotationRequestVendor.qr_id == qr_id, QuotationRequestVendor.vendor_id == vendor_id
+    ).first()
+    if not vendor_link:
+        raise HTTPException(status_code=404, detail="Vendor link not found")
+        
+    vendor_link.receipt_status = data.receipt_status
+    db.commit()
+    return {"message": "Vendor receipt status updated"}
+
+
+@router.post("/requests/{id}/entered")
+def transition_to_entered(
+    id: int, db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("purchase_requests", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    qr = db.query(QuotationRequest).filter(
+        QuotationRequest.id == id, QuotationRequest.tenant_id == tenant_id, QuotationRequest.site_id == site_id
+    ).first()
+    if not qr:
+        raise HTTPException(status_code=404, detail="Quotation Request not found")
+        
+    # Validation: No vendor should be in PENDING receipt status
+    pending_vendors = [v for v in qr.invited_vendors if v.receipt_status == "Pending"]
+    if pending_vendors:
+        vendor_names = ", ".join([v.vendor.name for v in pending_vendors])
+        raise HTTPException(status_code=400, detail=f"Cannot proceed. Quotations are pending from: {vendor_names}")
+        
+    qr.status = QuotationRequestStatus.ENTERED.value
+    db.commit()
+    return {"message": "Quotation Request transitioned to Entry stage"}
 
 
 # ── Vendor Quotations ────────────────────────────────────────────────────
@@ -306,21 +370,16 @@ def enter_vendor_quotation(
                 vendor_quotation_id=vq.id,
                 qr_item_id=it['qr_item_id'],
                 material_id=it['material_id'],
-                quoted_rate=it['quoted_rate'],
-                delivery_days=it.get('delivery_days'),
+                quoted_rate=it['quoted_rate'] if not it.get('is_excluded') else 0,
+                delivery_days=it.get('delivery_days') if not it.get('is_excluded') else None,
+                is_excluded=it.get('is_excluded', False),
                 remarks=it.get('remarks')
             ))
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=400, detail=f"Invalid items data: {str(e)}")
 
-    # Check if all invited vendors have responded
-    total_invited = db.query(QuotationRequestVendor).filter(QuotationRequestVendor.qr_id == qr_id).count()
-    total_received = db.query(VendorQuotation).filter(VendorQuotation.qr_id == qr_id).count()
-    
-    if total_received >= total_invited:
-        qr.status = QuotationRequestStatus.RECEIVED.value
-
+    # Status remains in ENTERED (no auto transition)
     db.commit()
     return {"message": "Vendor quotation entered successfully"}
 
@@ -379,7 +438,8 @@ def generate_comparison(
         # Get all vendor quotes for this material
         quotes = db.query(VendorQuotationItem).join(VendorQuotation).filter(
             VendorQuotationItem.qr_item_id == qr_item.id,
-            VendorQuotation.qr_id == qr_id
+            VendorQuotation.qr_id == qr_id,
+            VendorQuotationItem.is_excluded == False
         ).order_by(VendorQuotationItem.quoted_rate.asc()).all()
         
         vendor_quotes = []
@@ -420,7 +480,7 @@ def generate_comparison(
         ))
 
     # If first time comparison, update QR status
-    if qr.status == QuotationRequestStatus.RECEIVED.value:
+    if qr.status == QuotationRequestStatus.ENTERED.value:
         qr.status = QuotationRequestStatus.COMPARED.value
     
     db.commit()
@@ -593,7 +653,7 @@ def convert_to_pos(
         po.total_amount = total
         po_numbers.append(po_number)
 
-    qr.status = QuotationRequestStatus.CONVERTED.value
+    qr.status = QuotationRequestStatus.ORDERED.value
     # Update linked PRs
     for link in qr.linked_prs:
         link.purchase_request.status = "Converted to PO"

@@ -92,12 +92,18 @@ class ApprovalDocumentType(str, enum.Enum):
 
 class QuotationRequestStatus(str, enum.Enum):
     DRAFT = "Draft"
-    SENT = "Sent to Vendors"
-    RECEIVED = "Quotations Received"
-    COMPARED = "Comparison Done"
+    REQUESTED = "Requested"
+    RECEIVED = "Received"
+    ENTERED = "Entered"
+    COMPARED = "Compared"
     APPROVED = "Approved"
-    CONVERTED = "Converted to PO"
+    ORDERED = "Ordered"
     CANCELLED = "Cancelled"
+
+class VendorQuotationReceiptStatus(str, enum.Enum):
+    PENDING = "Pending"
+    RECEIVED = "Received"
+    NOT_REQUIRED = "Not Required"
 
 class VendorQuotationStatus(str, enum.Enum):
     PENDING = "Pending"
@@ -863,6 +869,7 @@ class QuotationRequestVendor(Base):
     vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=False)
     is_sent = Column(Boolean, default=False)
     sent_at = Column(DateTime, nullable=True)
+    receipt_status = Column(String(50), default=VendorQuotationReceiptStatus.PENDING.value)
 
     quotation_request = relationship("QuotationRequest", back_populates="invited_vendors")
     vendor = relationship("Vendor")
@@ -897,6 +904,7 @@ class VendorQuotationItem(Base):
     material_id = Column(Integer, ForeignKey("materials.id"), nullable=False)
     quoted_rate = Column(Float, nullable=False)
     delivery_days = Column(Integer, nullable=True)
+    is_excluded = Column(Boolean, default=False)
     remarks = Column(Text)
 
     vendor_quotation = relationship("VendorQuotation", back_populates="items")

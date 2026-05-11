@@ -28,6 +28,7 @@ import StoreOps from './pages/StoreOps';
 import Inventory from './pages/Inventory';
 import Intelligence from './pages/Intelligence';
 import Reports from './pages/Reports';
+import IssueSummaryReport from './pages/IssueSummaryReport';
 import Admin from './pages/Admin';
 import SaasAdmin from './pages/SaasAdmin';
 import Alerts from './pages/Alerts';
@@ -97,6 +98,7 @@ function AppRoutes() {
         <Route path="inventory" element={<Inventory />} />
         <Route path="intelligence" element={<Intelligence />} />
         <Route path="reports" element={<Reports />} />
+        <Route path="reports/issue-summary" element={<IssueSummaryReport />} />
         <Route path="admin" element={<Admin />} />
         <Route path="saas-admin" element={<SaasAdmin />} />
         <Route path="alerts" element={<Alerts />} />

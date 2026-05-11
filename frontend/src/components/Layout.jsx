@@ -200,12 +200,12 @@ export default function Layout() {
       {isMobile ? (
         <Drawer variant="temporary" open={mobileOpen} onClose={() => setMobileOpen(false)}
           ModalProps={{ keepMounted: true }}
-          sx={{ '& .MuiDrawer-paper': { width: DRAWER_WIDTH, border: 'none' } }}>
+          sx={{ '@media print': { display: 'none' }, '& .MuiDrawer-paper': { width: DRAWER_WIDTH, border: 'none' } }}>
           {drawer}
         </Drawer>
       ) : (
         <Drawer variant="permanent"
-          sx={{ width: DRAWER_WIDTH, flexShrink: 0, '& .MuiDrawer-paper': { width: DRAWER_WIDTH, border: 'none' } }}>
+          sx={{ '@media print': { display: 'none' }, width: DRAWER_WIDTH, flexShrink: 0, '& .MuiDrawer-paper': { width: DRAWER_WIDTH, border: 'none' } }}>
           {drawer}
         </Drawer>
       )}
@@ -214,7 +214,7 @@ export default function Layout() {
       <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
         {/* Top Bar */}
         <AppBar position="sticky" elevation={0}
-          sx={{ background: '#fff', borderBottom: '1px solid #E2E8F0', zIndex: 1100 }}>
+          sx={{ '@media print': { display: 'none' }, background: '#fff', borderBottom: '1px solid #E2E8F0', zIndex: 1100 }}>
           <Toolbar sx={{ gap: 1 }}>
             {isMobile && (
               <IconButton onClick={() => setMobileOpen(true)} sx={{ color: '#334155' }}>

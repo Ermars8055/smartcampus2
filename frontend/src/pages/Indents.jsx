@@ -9,26 +9,24 @@ import {
 } from '@mui/material';
 import { Add, Delete, CheckCircle, Cancel, ReceiptLong, ArrowBack } from '@mui/icons-material';
 import api from '../services/api';
-import { formatDate } from '../utils/dateUtils';
+import { formatDate, formatDateTime } from '../utils/dateUtils';
 import MaterialSelect from '../components/MaterialSelect';
 
 export default function Indents() {
   const { showMessage } = useMessage();
   const [indents, setIndents] = useState([]);
   const [materials, setMaterials] = useState([]);
-  const [blocks, setBlocks] = useState([]);
+  const [buildings, setBuildings] = useState([]);
+  const [floors, setFloors] = useState([]);
+  const [rooms, setRooms] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [detailDialog, setDetailDialog] = useState(null);
-  
+
   const [form, setForm] = useState({
-    block_id: '', floor: '', location: '', remarks: '', items: [{ material_id: '', requested_quantity: '' }]
+    building_id: '', floor_id: '', room_id: '', department: '', remarks: '', items: [{ material_id: '', requested_quantity: '' }]
   });
   const [vendorDialog, setVendorDialog] = useState({ open: false, indent: null, vendor_id: '' });
   const [vendors, setVendors] = useState([]);
-  
-  const selectedBlock = blocks.find(b => b.id === form.block_id);
-  const floorOptions = selectedBlock ? Array.from({ length: selectedBlock.floors }, (_, i) => i + 1) : [];
-  const roomOptions = selectedBlock ? Array.from({ length: selectedBlock.rooms }, (_, i) => i + 1) : [];
 
   const navigate = useNavigate();
 
@@ -42,12 +40,35 @@ export default function Indents() {
   const handleCancelConfirm = () => { setConfirm({ ...confirm, open: false }); };
 
   const load = () => { api.get('/api/indents').then(r => setIndents(r.data)); };
+
   useEffect(() => {
     load();
     api.get('/api/materials').then(r => setMaterials(r.data.items || []));
-    api.get('/api/blocks').then(r => setBlocks(r.data));
+    api.get('/api/buildings').then(r => setBuildings(r.data));
     api.get('/api/vendors').then(r => setVendors(r.data));
   }, []);
+
+  // Fetch floors when building changes
+  useEffect(() => {
+    if (form.building_id) {
+      api.get(`/api/floors?building_id=${form.building_id}`).then(r => setFloors(r.data));
+      setForm(prev => ({ ...prev, floor_id: '', room_id: '' }));
+      setRooms([]);
+    } else {
+      setFloors([]);
+      setRooms([]);
+    }
+  }, [form.building_id]);
+
+  // Fetch rooms when floor changes
+  useEffect(() => {
+    if (form.floor_id) {
+      api.get(`/api/rooms?floor_id=${form.floor_id}`).then(r => setRooms(r.data));
+      setForm(prev => ({ ...prev, room_id: '' }));
+    } else {
+      setRooms([]);
+    }
+  }, [form.floor_id]);
 
   const addItem = () => setForm({ ...form, items: [...form.items, { material_id: '', requested_quantity: '' }] });
   const removeItem = (i) => setForm({ ...form, items: form.items.filter((_, idx) => idx !== i) });
@@ -73,19 +94,34 @@ export default function Indents() {
         showMessage("Quantity must be greater than 0.", "Validation Error", "warning");
         return;
       }
-      if (!form.block_id) {
-        showMessage("Please select a building / block.", "Selection Required", "warning");
+      if (!form.building_id) {
+        showMessage("Please select a building.", "Selection Required", "warning");
         return;
       }
       if (mappedItems.some(it => !it.material_id)) {
         showMessage("Please select a material for every line item.", "Validation Error", "warning");
         return;
       }
-      const payload = { ...form, items: mappedItems };
+
+      const selectedFloor = floors.find(f => f.id === form.floor_id);
+      const selectedRoom = rooms.find(r => r.id === form.room_id);
+
+      // Map to backend fields
+      const payload = {
+        room_id: form.room_id || null,
+        floor: selectedFloor?.name || '',
+        location: selectedRoom?.name || '',
+        department: form.department,
+        remarks: form.remarks,
+        items: mappedItems
+      };
       await api.post('/api/indents', payload);
       setShowForm(false); load();
       showMessage("Indent submitted successfully!", "Success", "success");
-    } catch (err) { showMessage(err.response?.data?.detail || 'Error', "Error", "error"); }
+    } catch (err) {
+      console.error(err);
+      showMessage(err.response?.data?.detail || 'Error', "Error", "error");
+    }
   };
 
   const approveIndent = async (id) => { await api.post(`/api/indents/${id}/approve`); load(); };
@@ -102,8 +138,8 @@ export default function Indents() {
   };
 
   // Status helpers
-  const statusColor = { 
-    'Awaiting Approval': 'warning', 'Approved': 'success', 'Rejected': 'error', 
+  const statusColor = {
+    'Awaiting Approval': 'warning', 'Approved': 'success', 'Rejected': 'error',
     'Partially Issued': 'info', 'Fully Issued': 'primary', 'PO Created': 'secondary', 'Closed': 'default'
   };
 
@@ -128,51 +164,65 @@ export default function Indents() {
 
           {/* ── Location Row ── */}
           <Grid container spacing={2.5} sx={{ mb: 3 }}>
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={12} sm={3}>
               <Typography variant="caption" sx={{ fontWeight: 600, color: '#3b5998', mb: 0.5, display: 'block' }}>
                 Building <span style={{ color: '#d32f2f' }}>*</span>
               </Typography>
               <FormControl fullWidth size="small">
                 <Select
-                  value={form.block_id}
+                  value={form.building_id}
                   displayEmpty
-                  onChange={e => setForm({ ...form, block_id: e.target.value, floor: '', location: '' })}
+                  onChange={e => setForm({ ...form, building_id: e.target.value })}
                   sx={{ bgcolor: '#fff' }}
                 >
                   <MenuItem value="" disabled><em>Select Building</em></MenuItem>
-                  {blocks.map(b => <MenuItem key={b.id} value={b.id}>{b.name}</MenuItem>)}
+                  {buildings.map(b => <MenuItem key={b.id} value={b.id}>{b.name}</MenuItem>)}
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={12} sm={3}>
               <Typography variant="caption" sx={{ fontWeight: 600, color: '#3b5998', mb: 0.5, display: 'block' }}>Floor</Typography>
               <FormControl fullWidth size="small">
                 <Select
-                  value={form.floor}
+                  value={form.floor_id}
                   displayEmpty
-                  onChange={e => setForm({ ...form, floor: e.target.value })}
-                  disabled={!form.block_id}
+                  onChange={e => setForm({ ...form, floor_id: e.target.value })}
+                  disabled={!form.building_id}
                   sx={{ bgcolor: '#fff' }}
                 >
                   <MenuItem value="" disabled><em>Select Floor</em></MenuItem>
-                  {floorOptions.map(f => <MenuItem key={f} value={f.toString()}>{f === 0 ? 'Ground' : `Floor ${f}`}</MenuItem>)}
+                  {floors.map(f => <MenuItem key={f.id} value={f.id}>{f.name}</MenuItem>)}
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={12} sm={3}>
               <Typography variant="caption" sx={{ fontWeight: 600, color: '#3b5998', mb: 0.5, display: 'block' }}>Room</Typography>
               <FormControl fullWidth size="small">
                 <Select
-                  value={form.location}
+                  value={form.room_id}
                   displayEmpty
-                  onChange={e => setForm({ ...form, location: e.target.value })}
-                  disabled={!form.block_id}
+                  onChange={e => {
+                    const selectedRoomId = e.target.value;
+                    const selectedRoom = rooms.find(r => r.id === selectedRoomId);
+                    setForm({ ...form, room_id: selectedRoomId, department: selectedRoom?.department_name || '' });
+                  }}
+                  disabled={!form.floor_id}
                   sx={{ bgcolor: '#fff' }}
                 >
                   <MenuItem value="" disabled><em>Select Room</em></MenuItem>
-                  {roomOptions.map(r => <MenuItem key={r} value={r.toString()}>Room {r}</MenuItem>)}
+                  {rooms.map(r => <MenuItem key={r.id} value={r.id}>{r.name}</MenuItem>)}
                 </Select>
               </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={3}>
+              <Typography variant="caption" sx={{ fontWeight: 600, color: '#3b5998', mb: 0.5, display: 'block' }}>Department</Typography>
+              <TextField
+                fullWidth size="small"
+                value={form.department}
+                placeholder="Select Room first"
+                InputProps={{ readOnly: true }}
+                sx={{ bgcolor: '#f8fafc' }}
+              />
             </Grid>
           </Grid>
 
@@ -218,9 +268,9 @@ export default function Indents() {
                 {form.items.map((item, i) => (
                   <TableRow key={i} sx={{ '&:last-child td': { borderBottom: 0 } }}>
                     <TableCell sx={{ py: 1.5 }}>
-                      <MaterialSelect 
-                        materials={materials} 
-                        value={item.material_id} 
+                      <MaterialSelect
+                        materials={materials}
+                        value={item.material_id}
                         onChange={val => updateItem(i, 'material_id', val)}
                         label="Select Material"
                         size="small"
@@ -267,18 +317,18 @@ export default function Indents() {
           </Card>
 
           {/* ── Action Buttons ── */}
-          <Box sx={{ display: 'flex', gap: 1.5, mt: 3 }}>
+          <Box sx={{ display: 'flex', gap: 1.5, mt: 3, justifyContent: 'flex-end' }}>
+            <Button
+              variant="text" onClick={() => setShowForm(false)}
+              sx={{ textTransform: 'none', fontWeight: 600, px: 3, py: 1 }}
+            >
+              Cancel
+            </Button>
             <Button
               variant="contained" onClick={handleCreate}
               sx={{ textTransform: 'none', fontWeight: 600, px: 4, py: 1, borderRadius: 2 }}
             >
               Submit Indent
-            </Button>
-            <Button
-              variant="contained" color="error" onClick={() => setShowForm(false)}
-              sx={{ textTransform: 'none', fontWeight: 600, px: 4, py: 1, borderRadius: 2 }}
-            >
-              Cancel
             </Button>
           </Box>
         </Card>
@@ -295,7 +345,7 @@ export default function Indents() {
           <Typography variant="body2" sx={{ color: '#64748B' }}>Raise and manage department material requests</Typography>
         </Box>
         <Button variant="contained" startIcon={<Add />} onClick={() => {
-          setForm({ block_id: '', floor: '', location: '', remarks: '', items: [{ material_id: '', requested_quantity: '' }] });
+          setForm({ building_id: '', floor_id: '', room_id: '', department: '', remarks: '', items: [{ material_id: '', requested_quantity: '' }] });
           setShowForm(true);
         }}
           sx={{ textTransform: 'none', fontWeight: 600, borderRadius: 2, px: 2.5 }}
@@ -308,7 +358,8 @@ export default function Indents() {
             <TableHead>
               <TableRow>
                 <TableCell>Indent Number</TableCell>
-                <TableCell>Block</TableCell>
+                <TableCell>Building</TableCell>
+                <TableCell>Dept</TableCell>
                 <TableCell>Room</TableCell>
                 <TableCell>Requester</TableCell>
                 <TableCell>Date</TableCell>
@@ -329,8 +380,9 @@ export default function Indents() {
               {indents.map(ind => (
                 <TableRow key={ind.id} sx={{ cursor: 'pointer', '&:hover': { bgcolor: '#f8fafc' } }} onClick={() => setDetailDialog(ind)}>
                   <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.8rem' }}>{ind.indent_number}</TableCell>
-                  <TableCell sx={{ fontSize: '0.8rem' }}>{ind.block_name || '-'}</TableCell>
-                  <TableCell sx={{ fontSize: '0.8rem' }}>{ind.location || '-'}</TableCell>
+                  <TableCell sx={{ fontSize: '0.8rem' }}>{ind.building_name || '-'}</TableCell>
+                  <TableCell sx={{ fontSize: '0.8rem' }}>{ind.department || '-'}</TableCell>
+                  <TableCell sx={{ fontSize: '0.8rem' }}>{ind.room_name || '-'}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem' }}>{ind.requester_name}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem' }}>{formatDate(ind.created_at)}</TableCell>
                   <TableCell align="center">{ind.items?.length || 0}</TableCell>
@@ -375,16 +427,16 @@ export default function Indents() {
               <Typography sx={{ fontWeight: 600 }}>{detailDialog?.requester_name}</Typography>
             </Grid>
             <Grid item xs={3}>
-              <Typography variant="caption" color="textSecondary">Block</Typography>
-              <Typography sx={{ fontWeight: 600 }}>{detailDialog?.block_name || '—'}</Typography>
+              <Typography variant="caption" color="textSecondary">Department</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{detailDialog?.department || '—'}</Typography>
             </Grid>
             <Grid item xs={3}>
-              <Typography variant="caption" color="textSecondary">Floor</Typography>
-              <Typography sx={{ fontWeight: 600 }}>{detailDialog?.floor ? `Floor ${detailDialog.floor}` : '—'}</Typography>
+              <Typography variant="caption" color="textSecondary">Building</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{detailDialog?.building_name || '—'}</Typography>
             </Grid>
             <Grid item xs={3}>
               <Typography variant="caption" color="textSecondary">Room</Typography>
-              <Typography sx={{ fontWeight: 600 }}>{detailDialog?.location || '—'}</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{detailDialog?.room_name || '—'}</Typography>
             </Grid>
             <Grid item xs={3}>
               <Typography variant="caption" color="textSecondary">Status</Typography>
@@ -418,9 +470,9 @@ export default function Indents() {
                   <TableCell align="right" sx={{ fontWeight: 500 }}>{item.requested_quantity} {item.uom_name}</TableCell>
                   <TableCell align="right" sx={{ fontWeight: 700 }}>{item.current_stock} {item.uom_name}</TableCell>
                   <TableCell align="center">
-                    <Chip 
-                      label={item.availability_status === 'Available' ? '✓ AVAILABLE' : (item.availability_status === 'Low Stock' ? 'X LOW' : 'X NO STOCK')} 
-                      size="small" 
+                    <Chip
+                      label={item.availability_status === 'Available' ? '✓ AVAILABLE' : (item.availability_status === 'Low Stock' ? 'X LOW' : 'X NO STOCK')}
+                      size="small"
                       color={item.availability_status === 'Available' ? 'success' : (item.availability_status === 'Low Stock' ? 'warning' : 'error')}
                       variant={item.availability_status === 'Available' ? 'light' : 'outlined'}
                       sx={{ fontWeight: 700, fontSize: '0.65rem' }}

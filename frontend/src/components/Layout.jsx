@@ -42,13 +42,16 @@ const menuItems = [
       { text: 'Gate Entry', icon: <Security />, path: '/gate-entry' },
       { text: 'GRN', icon: <LocalShipping />, path: '/grn' },
       { text: 'Material Issue', icon: <Inventory2 />, path: '/issues' },
-      { text: 'Returns', icon: <Undo />, path: '/returns' },
-      { text: 'Stock Transfer', icon: <SwapHoriz />, path: '/transfers' },
     ]
   },
   { text: 'Inventory', icon: <Warehouse />, path: '/inventory' },
   { text: 'Intelligence', icon: <Build />, path: '/intelligence' },
-  { text: 'Reports', icon: <Assessment />, path: '/reports' },
+  {
+    text: 'Reports', icon: <Assessment />, children: [
+      { text: 'Issue Summary', icon: <Assessment />, path: '/reports/issue-summary' },
+      { text: 'Rate Analysis', icon: <Assessment />, path: '/reports/rate-analysis' },
+    ]
+  },
   { text: 'Admin', icon: <Settings />, path: '/admin' },
   { text: 'SaaS Admin', icon: <Security />, path: '/saas-admin', platformOnly: true },
 ];

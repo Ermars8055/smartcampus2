@@ -44,6 +44,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     user._permissions = payload.get("permissions", {})
     user._is_platform_admin = payload.get("is_platform_admin", False)
     user._active_site_id = payload.get("active_site_id")
+    print(f"DEBUG AUTH: User {username}, Tenant ID: {user._tenant_id}, Site ID: {user._active_site_id}")
     return user
 
 def get_tenant_id(current_user = Depends(get_current_user)):

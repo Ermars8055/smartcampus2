@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box, Grid, Card, CardContent, Typography, Chip, Avatar,
@@ -19,43 +19,85 @@ import api from '../services/api';
 
 const COLORS = ['#1E3A8A', '#2563EB', '#60A5FA', '#93C5FD', '#3B82F6', '#1D4ED8', '#DBEAFE', '#7C3AED'];
 
+const CustomXAxisTick = ({ x, y, payload }) => {
+  if (!payload.value) return null;
+  const words = payload.value.split(' ');
+  return (
+    <g transform={`translate(${x},${y})`}>
+      {words.map((word, index) => (
+        <text
+          key={index}
+          x={0}
+          y={index * 12}
+          dy={12}
+          textAnchor="middle"
+          fill="#64748B"
+          fontSize="10px"
+          fontWeight="600"
+        >
+          {word}
+        </text>
+      ))}
+    </g>
+  );
+};
+
 function StatCard({ title, value, icon, color, subtitle, onClick }) {
   return (
     <Card sx={{
       cursor: onClick ? 'pointer' : 'default',
-      transition: 'all 0.3s ease',
-      '&:hover': onClick ? { transform: 'translateY(-4px)', boxShadow: '0 8px 25px rgba(0,0,0,0.1)' } : {},
-      position: 'relative', overflow: 'hidden',
-    }}
-      onClick={onClick}>
-      <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+      border: '1px solid #F1F5F9',
+      boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      position: 'relative', 
+      overflow: 'hidden',
+      '&:hover': onClick ? { transform: 'translateY(-4px)', boxShadow: '0 12px 24px -10px rgba(0,0,0,0.1)' } : {},
+    }} onClick={onClick}>
+      <CardContent sx={{ p: '20px 24px', '&:last-child': { pb: '20px' } }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Box>
-            <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.7rem' }}>
+            <Typography variant="caption" sx={{ 
+              color: '#64748B', 
+              fontWeight: 700, 
+              textTransform: 'uppercase', 
+              letterSpacing: '0.12em', 
+              fontSize: '0.65rem',
+              mb: 0.5,
+              display: 'block'
+            }}>
               {title}
             </Typography>
-            <Typography variant="h4" sx={{ fontWeight: 700, color: '#1E293B', mt: 0.5, mb: 0.5 }}>
+            <Typography variant="h4" sx={{ 
+              fontWeight: 800, 
+              color: '#0F172A', 
+              fontSize: '1.75rem',
+              lineHeight: 1.2
+            }}>
               {value}
             </Typography>
             {subtitle && (
-              <Typography variant="caption" sx={{ color: '#94A3B8' }}>
+              <Typography variant="caption" sx={{ color: '#94A3B8', fontWeight: 500, mt: 0.5, display: 'block' }}>
                 {subtitle}
               </Typography>
             )}
           </Box>
           <Avatar sx={{
-            width: 48, height: 48, borderRadius: 3,
-            background: `linear-gradient(135deg, ${color}22, ${color}11)`,
+            width: 48, height: 48, borderRadius: '14px',
+            bgcolor: `${color}10`,
             color: color,
           }}>
-            {icon}
+            {React.cloneElement(icon, { sx: { fontSize: 26 } })}
           </Avatar>
         </Box>
-        <Box sx={{
-          position: 'absolute', bottom: 0, left: 0, right: 0, height: 3,
-          background: `linear-gradient(90deg, ${color}, ${color}44)`,
-        }} />
       </CardContent>
+      <Box sx={{
+        position: 'absolute', bottom: 0, left: 0, width: '100%', height: '4px',
+        background: `linear-gradient(90deg, ${color}, ${color}22)`,
+      }} />
     </Card>
   );
 }
@@ -95,7 +137,7 @@ export default function Dashboard() {
 
     Promise.all([
       api.get('/api/dashboard/stats', { params }),
-      api.get('/api/dashboard/consumption-by-block', { params }),
+      api.get('/api/dashboard/consumption-by-building', { params }),
       api.get('/api/dashboard/stock-by-warehouse', { params }),
       api.get('/api/dashboard/top-consumed-materials', { params }),
       api.get('/api/dashboard/recent-transactions', { params }),
@@ -124,9 +166,9 @@ export default function Dashboard() {
 
     setDrilldownBlock(blockName);
     setDrilldownLoading(true);
-    api.get('/api/dashboard/material-cost-by-block')
+    api.get('/api/dashboard/material-cost-by-building')
       .then(res => {
-         const specificData = res.data.filter(item => item.block_name === blockName);
+         const specificData = res.data.filter(item => item.building_name === blockName);
          setDrilldownData(specificData);
       })
       .catch(console.error)
@@ -205,15 +247,21 @@ export default function Dashboard() {
         <Grid size={{ xs: 12, lg: 8 }}>
           <Card sx={{ p: 2.5, height: '100%' }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#1E293B' }}>
-                Project Spend by Block (₹)
+              <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#1E293B' }}>
+                Project Spend by Building (₹)
               </Typography>
-              <Typography variant="caption" sx={{ color: '#64748B' }}>*Click on any bar to drilldown into materials</Typography>
+              <Typography variant="caption" sx={{ color: '#64748B', fontStyle: 'italic' }}>*Click on any bar to drilldown</Typography>
             </Box>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={consumption} margin={{ top: 25, right: 20, bottom: 5, left: 0 }} onClick={handleBlockClick}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-                <XAxis dataKey="block_name" tick={{ fontSize: 12, fontWeight: 600, fill: '#334155' }} />
+              <BarChart data={consumption} margin={{ top: 20, right: 10, bottom: 40, left: 10 }} onClick={handleBlockClick}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
+                <XAxis 
+                  dataKey="building_name" 
+                  tick={<CustomXAxisTick />} 
+                  interval={0}
+                  axisLine={false} 
+                  tickLine={false}
+                />
                 <YAxis tick={{ fontSize: 11, fontWeight: 500, fill: '#475569' }} tickFormatter={(v) => formatCurrency(v)} />
                 <RTooltip contentStyle={{ borderRadius: 8, border: '1px solid #E2E8F0' }}
                   cursor={{ fill: 'rgba(37, 99, 235, 0.05)' }}
@@ -230,15 +278,30 @@ export default function Dashboard() {
             <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, color: '#1E293B' }}>
               Stock by Warehouse
             </Typography>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie data={stockByWh} cx="40%" cy="50%" innerRadius={60} outerRadius={100}
-                  dataKey="total_value" nameKey="warehouse_name" paddingAngle={3}>
+            <ResponsiveContainer width="100%" height={320}>
+              <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+                <Pie 
+                  data={stockByWh} 
+                  cx="50%" 
+                  cy="45%" 
+                  innerRadius={70} 
+                  outerRadius={100}
+                  dataKey="total_value" 
+                  nameKey="name" 
+                  paddingAngle={5}
+                >
                   {stockByWh.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                 </Pie>
-                <RTooltip formatter={(v) => [`₹${v.toLocaleString()}`, 'Value']}
-                  contentStyle={{ borderRadius: 8 }} />
-                <Legend layout="vertical" verticalAlign="middle" align="right" iconType="circle" wrapperStyle={{ fontSize: 11, fontWeight: 500, color: '#334155' }} />
+                <RTooltip 
+                  formatter={(v) => [`₹${v.toLocaleString()}`, 'Value']}
+                  contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} 
+                />
+                <Legend 
+                  verticalAlign="bottom" 
+                  align="center" 
+                  iconType="circle" 
+                  wrapperStyle={{ paddingTop: '20px', fontSize: 11, fontWeight: 600, color: '#64748B' }} 
+                />
               </PieChart>
             </ResponsiveContainer>
           </Card>
@@ -375,11 +438,14 @@ export default function Dashboard() {
 
       {/* Drilldown Modal */}
       <Dialog open={!!drilldownBlock} onClose={() => setDrilldownBlock(null)} maxWidth="md" fullWidth>
-        <DialogTitle sx={{ fontWeight: 700, color: '#1E293B', display: 'flex', justifyContent: 'space-between' }}>
-          Materials Spend Details: {drilldownBlock}
-          <Typography variant="subtitle2" sx={{ color: '#2563EB', fontWeight: 600, alignSelf: 'center' }}>
-            {formatCurrency(drilldownData.reduce((acc, curr) => acc + curr.total_cost, 0))} Total Spend
-          </Typography>
+        <DialogTitle sx={{ fontWeight: 800, color: '#1E293B', display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
+          Building Spend Details: {drilldownBlock}
+          <Chip 
+            label={`${formatCurrency(drilldownData.reduce((acc, curr) => acc + curr.total_cost, 0))} Total`}
+            color="primary"
+            variant="filled"
+            sx={{ fontWeight: 700, height: 28 }}
+          />
         </DialogTitle>
         <DialogContent dividers sx={{ p: 0 }}>
           {drilldownLoading ? (

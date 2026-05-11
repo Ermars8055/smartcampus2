@@ -8,7 +8,7 @@ from app.database import get_db
 from app.models import (
     MaterialIssue, MaterialIssueItem, MaterialReturn, MaterialReturnItem,
     StockTransfer, StockTransferItem, CurrentStock, StockLedger,
-    Material, Warehouse, Block, User, AuditLog, Indent, IndentItem
+    Material, Warehouse, Building, User, AuditLog, Indent, IndentItem
 )
 from app.schemas import (
     IssueCreate, IssueOut, IssueItemOut,
@@ -51,7 +51,7 @@ def list_issues(
         result.append(IssueOut(
             id=iss.id, issue_number=iss.issue_number,
             warehouse_id=iss.warehouse_id, project_id=iss.project_id,
-            issued_to_block_id=iss.issued_to_block_id,
+            issued_to_room_id=iss.issued_to_room_id,
             issued_to_department=iss.issued_to_department,
             issued_to_contractor=iss.issued_to_contractor,
             purpose=iss.purpose, status=iss.status,
@@ -62,7 +62,9 @@ def list_issues(
             created_at=iss.created_at,
             warehouse_name=iss.warehouse.name if iss.warehouse else None,
             project_name=iss.project.name if iss.project else None,
-            block_name=iss.block.name if iss.block else None,
+            room_name=iss.room.name if iss.room else None,
+            issued_by_name=iss.issued_by.full_name if iss.issued_by else None,
+            indent_number=iss.indent.indent_number if iss.indent else None,
             items=items
         ))
     return result
@@ -83,7 +85,7 @@ def create_issue(
         warehouse_id=data.warehouse_id,
         project_id=data.project_id,
         indent_id=data.indent_id,
-        issued_to_block_id=data.issued_to_block_id,
+        issued_to_room_id=data.issued_to_room_id,
         issued_to_department=data.issued_to_department,
         issued_to_contractor=data.issued_to_contractor,
         purpose=data.purpose,
@@ -135,7 +137,7 @@ def create_issue(
             tenant_id=tenant_id,
             site_id=site_id,
             project_id=data.project_id,
-            block_id=data.issued_to_block_id,
+            room_id=data.issued_to_room_id,
             user_id=current_user.id
         )
 
@@ -221,14 +223,14 @@ def list_returns(
         result.append(ReturnOut(
             id=ret.id, return_number=ret.return_number,
             warehouse_id=ret.warehouse_id, project_id=ret.project_id,
-            returned_from_block_id=ret.returned_from_block_id,
+            returned_from_room_id=ret.returned_from_room_id,
             returned_from_department=ret.returned_from_department,
             return_type=ret.return_type, remarks=ret.remarks,
             returned_by_name=ret.returned_by_name,
             created_at=ret.created_at,
             warehouse_name=ret.warehouse.name if ret.warehouse else None,
             project_name=ret.project.name if ret.project else None,
-            block_name=ret.block.name if ret.block else None,
+            room_name=ret.room.name if ret.room else None,
             items=items
         ))
     return result
@@ -248,7 +250,7 @@ def create_return(
         return_number=return_number,
         warehouse_id=data.warehouse_id,
         project_id=data.project_id,
-        returned_from_block_id=data.returned_from_block_id,
+        returned_from_room_id=data.returned_from_room_id,
         returned_from_department=data.returned_from_department,
         return_type=data.return_type,
         remarks=data.remarks,
@@ -282,7 +284,7 @@ def create_return(
             tenant_id=tenant_id,
             site_id=site_id,
             project_id=data.project_id,
-            block_id=data.returned_from_block_id,
+            room_id=data.returned_from_room_id,
             user_id=current_user.id
         )
 

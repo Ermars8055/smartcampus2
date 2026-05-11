@@ -12,7 +12,7 @@ router = APIRouter(prefix="/api/admin/saas", tags=["SaaS Admin"])
 
 DEFAULT_RESOURCES = [
     "dashboard", "materials", "categories", "vendors", "organizations",
-    "projects", "blocks", "warehouses", "purchase_requests",
+    "projects", "buildings", "warehouses", "purchase_requests",
     "purchase_orders", "gate_entry", "grn", "issues", "returns",
     "transfers", "inventory", "intelligence", "reports", "admin_users",
     "admin_roles", "alerts"

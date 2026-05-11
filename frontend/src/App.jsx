@@ -18,6 +18,7 @@ import Materials from './pages/Materials';
 import Categories from './pages/Categories';
 import Vendors from './pages/Vendors';
 import Projects from './pages/Projects';
+import Warehouses from './pages/Warehouses';
 import Indents from './pages/Indents';
 import PurchaseRequests from './pages/PurchaseRequests';
 import Quotations from './pages/Quotations';
@@ -29,6 +30,7 @@ import Inventory from './pages/Inventory';
 import Intelligence from './pages/Intelligence';
 import Reports from './pages/Reports';
 import IssueSummaryReport from './pages/IssueSummaryReport';
+import RateAnalysisReport from './pages/RateAnalysisReport';
 import Admin from './pages/Admin';
 import SaasAdmin from './pages/SaasAdmin';
 import Alerts from './pages/Alerts';
@@ -85,7 +87,7 @@ function AppRoutes() {
         <Route path="categories" element={<Categories />} />
         <Route path="vendors" element={<Vendors />} />
         <Route path="projects" element={<Projects />} />
-        <Route path="warehouses" element={<Projects />} />
+        <Route path="warehouses" element={<Warehouses />} />
         <Route path="indents" element={<Indents />} />
         <Route path="purchase-requests" element={<PurchaseRequests />} />
         <Route path="quotations" element={<Quotations />} />
@@ -99,6 +101,7 @@ function AppRoutes() {
         <Route path="intelligence" element={<Intelligence />} />
         <Route path="reports" element={<Reports />} />
         <Route path="reports/issue-summary" element={<IssueSummaryReport />} />
+        <Route path="reports/rate-analysis" element={<RateAnalysisReport />} />
         <Route path="admin" element={<Admin />} />
         <Route path="saas-admin" element={<SaasAdmin />} />
         <Route path="alerts" element={<Alerts />} />

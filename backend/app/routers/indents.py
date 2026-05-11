@@ -28,7 +28,8 @@ def list_indents(
     # Add manual material details to items for Out schema
     for indent in indents:
         indent.requester_name = indent.requester.full_name if indent.requester else None
-        indent.block_name = indent.block.name if indent.block else None
+        indent.room_name = indent.room.name if indent.room else None
+        indent.building_name = indent.room.floor.building.name if indent.room and indent.room.floor and indent.room.floor.building else None
         for item in indent.items:
             if item.material:
                 item.material_name = item.material.name
@@ -71,9 +72,10 @@ def create_indent(
         site_id=site_id,
         indent_number=generate_indent_number(db, tenant_id),
         requester_id=current_user.id,
-        block_id=data.block_id,
+        room_id=data.room_id,
         floor=data.floor,
         location=data.location,
+        department=data.department,
         remarks=data.remarks,
         total_amount=total,
         status=IndentStatus.AWAITING_APPROVAL.value,
@@ -94,7 +96,7 @@ def create_indent(
     db.refresh(indent)
     
     indent.requester_name = current_user.full_name
-    indent.block_name = indent.block.name if indent.block else None
+    indent.room_name = indent.room.name if indent.room else None
     for item in indent.items:
         if item.material:
             item.material_name = item.material.name
@@ -117,7 +119,8 @@ def get_indent(
         raise HTTPException(404, "Indent not found")
         
     indent.requester_name = indent.requester.full_name if indent.requester else None
-    indent.block_name = indent.block.name if indent.block else None
+    indent.room_name = indent.room.name if indent.room else None
+    indent.building_name = indent.room.floor.building.name if indent.room and indent.room.floor and indent.room.floor.building else None
     for item in indent.items:
         if item.material:
             item.material_name = item.material.name
@@ -276,7 +279,7 @@ def convert_to_po(
     count = db.query(PurchaseOrder).filter(PurchaseOrder.tenant_id == tenant_id, PurchaseOrder.site_id == site_id).count() + 1
     po_number = f"PO-{datetime.now().strftime('%Y%m')}-{count:04d}"
 
-    project_id = indent.block.project_id if indent.block else 1
+    project_id = indent.room.floor.building.project_id if indent.room and indent.room.floor and indent.room.floor.building else 1
 
     po = PurchaseOrder(
         tenant_id=tenant_id,

@@ -207,11 +207,15 @@ class VendorBase(BaseModel):
     email: Optional[EmailStr] = None
     phone: Optional[str] = None
     address: Optional[str] = None
-    tax_number: Optional[str] = None
+    gst_number: Optional[str] = None
+    pan_number: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    pincode: Optional[str] = None
     rating: float = 0
 
 class VendorCreate(VendorBase):
-    pass
+    category_ids: List[int] = []
 
 class VendorUpdate(BaseModel):
     name: Optional[str] = None
@@ -220,12 +224,20 @@ class VendorUpdate(BaseModel):
     email: Optional[EmailStr] = None
     phone: Optional[str] = None
     address: Optional[str] = None
-    tax_number: Optional[str] = None
+    gst_number: Optional[str] = None
+    pan_number: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    pincode: Optional[str] = None
     rating: Optional[float] = None
     is_active: Optional[bool] = None
+    category_ids: Optional[List[int]] = None
 
 class VendorOut(VendorBase):
     id: int
+    is_active: bool
+    created_at: datetime
+    categories: List[str] = []
     class Config:
         from_attributes = True
 
@@ -263,21 +275,47 @@ class ProjectOut(ProjectBase):
     class Config:
         from_attributes = True
 
-class BlockBase(BaseModel):
+class BuildingBase(BaseModel):
     name: str
     code: str
     project_id: int
-    block_type: str = "Building"
-    block_number: Optional[str] = None
-    floors: int = 1
-    rooms: int = 0
 
-class BlockCreate(BlockBase):
+class BuildingCreate(BuildingBase):
     pass
 
-class BlockOut(BlockBase):
+class BuildingOut(BuildingBase):
     id: int
     project_name: Optional[str] = None
+    class Config:
+        from_attributes = True
+
+class FloorBase(BaseModel):
+    name: str
+    level: int = 0
+    building_id: int
+
+class FloorCreate(FloorBase):
+    pass
+
+class FloorOut(FloorBase):
+    id: int
+    building_name: Optional[str] = None
+    class Config:
+        from_attributes = True
+
+class RoomBase(BaseModel):
+    name: str
+    code: Optional[str] = None
+    department_name: Optional[str] = None
+    floor_id: int
+
+class RoomCreate(RoomBase):
+    pass
+
+class RoomOut(RoomBase):
+    id: int
+    floor_name: Optional[str] = None
+    building_name: Optional[str] = None
     class Config:
         from_attributes = True
 
@@ -318,7 +356,7 @@ class PRBase(BaseModel):
     required_date: Optional[date] = None
     priority: str = "Normal"
     remarks: Optional[str] = None
-    required_for_block_id: Optional[int] = None
+    required_for_room_id: Optional[int] = None
     items: List[PRItemBase] = []
 
 class PRCreate(PRBase):
@@ -328,7 +366,7 @@ class PRUpdate(BaseModel):
     required_date: Optional[date] = None
     priority: Optional[str] = None
     remarks: Optional[str] = None
-    required_for_block_id: Optional[int] = None
+    required_for_room_id: Optional[int] = None
     status: Optional[str] = None
 
 class PROut(PRBase):
@@ -341,7 +379,7 @@ class PROut(PRBase):
     created_at: datetime
     updated_at: datetime
     requester_name: Optional[str] = None
-    block_name: Optional[str] = None
+    room_name: Optional[str] = None
     project_name: Optional[str] = None
     items: List[PRItemOut] = []
     class Config:
@@ -513,7 +551,7 @@ class IssueBase(BaseModel):
     warehouse_id: int
     project_id: int
     indent_id: Optional[int] = None
-    issued_to_block_id: Optional[int] = None
+    issued_to_room_id: Optional[int] = None
     issued_to_department: Optional[str] = None
     issued_to_contractor: Optional[str] = None
     purpose: Optional[str] = None
@@ -529,7 +567,7 @@ class IssueOut(BaseModel):
     warehouse_id: int
     project_id: int
     indent_id: Optional[int] = None
-    issued_to_block_id: Optional[int] = None
+    issued_to_room_id: Optional[int] = None
     issued_to_department: Optional[str] = None
     issued_to_contractor: Optional[str] = None
     purpose: Optional[str] = None
@@ -542,8 +580,9 @@ class IssueOut(BaseModel):
     created_at: datetime
     warehouse_name: Optional[str] = None
     project_name: Optional[str] = None
-    block_name: Optional[str] = None
+    room_name: Optional[str] = None
     issued_by_name: Optional[str] = None
+    indent_number: Optional[str] = None
     items: List[IssueItemOut] = []
     class Config:
         from_attributes = True
@@ -568,7 +607,7 @@ class ReturnItemOut(ReturnItemBase):
 class ReturnBase(BaseModel):
     warehouse_id: int
     project_id: int
-    returned_from_block_id: Optional[int] = None
+    returned_from_room_id: Optional[int] = None
     returned_from_department: Optional[str] = None
     return_type: str = "Unused"
     remarks: Optional[str] = None
@@ -583,7 +622,7 @@ class ReturnOut(BaseModel):
     return_number: str
     warehouse_id: int
     project_id: int
-    returned_from_block_id: Optional[int] = None
+    returned_from_room_id: Optional[int] = None
     returned_from_department: Optional[str] = None
     return_type: str
     remarks: Optional[str] = None
@@ -591,7 +630,7 @@ class ReturnOut(BaseModel):
     created_at: datetime
     warehouse_name: Optional[str] = None
     project_name: Optional[str] = None
-    block_name: Optional[str] = None
+    room_name: Optional[str] = None
     items: List[ReturnItemOut] = []
     class Config:
         from_attributes = True
@@ -704,7 +743,7 @@ class DashboardStats(BaseModel):
     total_vendors: int = 0
     total_warehouses: int = 0
 
-class ConsumptionByBlock(BaseModel):
+class ConsumptionByBuilding(BaseModel):
     block_name: str
     total_quantity: float
     total_value: float
@@ -719,7 +758,7 @@ class TopMaterial(BaseModel):
     total_consumed: float
     uom: str
 
-class MaterialCostByBlock(BaseModel):
+class MaterialCostByBuilding(BaseModel):
     material_name: str
     block_name: str
     total_cost: float
@@ -766,7 +805,7 @@ class IndentItemOut(IndentItemBase):
         from_attributes = True
 
 class IndentBase(BaseModel):
-    block_id: Optional[int] = None
+    room_id: Optional[int] = None
     floor: Optional[str] = None
     location: Optional[str] = None
     remarks: Optional[str] = None
@@ -774,7 +813,7 @@ class IndentBase(BaseModel):
     items: List[IndentItemBase] = []
 
 class IndentCreate(IndentBase):
-    pass
+    department: Optional[str] = None
 
 class IndentUpdate(BaseModel):
     status: Optional[str] = None
@@ -784,9 +823,11 @@ class IndentOut(BaseModel):
     id: int
     indent_number: str
     requester_id: int
-    block_id: Optional[int] = None
+    room_id: Optional[int] = None
     floor: Optional[str] = None
     location: Optional[str] = None
+    department: Optional[str] = None
+    building_name: Optional[str] = None
     remarks: Optional[str] = None
     status: str
     current_approval_level: int
@@ -795,7 +836,7 @@ class IndentOut(BaseModel):
     created_at: datetime
     updated_at: datetime
     requester_name: Optional[str] = None
-    block_name: Optional[str] = None
+    room_name: Optional[str] = None
     total_amount: float
     items: List[IndentItemOut] = []
     class Config:

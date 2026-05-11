@@ -4,7 +4,7 @@ from sqlalchemy import func
 from app.database import get_db
 from app.models import (
     Material, PurchaseOrder, PurchaseOrderItem, GRN, GRNItem,
-    MaterialIssue, MaterialIssueItem, Block, Project, User
+    MaterialIssue, MaterialIssueItem, Building, Project, User, Room, Floor
 )
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
 from typing import Optional, List
@@ -32,13 +32,15 @@ def get_consumption_report(
     ed = parse_date(end_date)
     
     query = db.query(
-        Block.name.label("block_name"),
+        Building.name.label("building_name"),
         Material.name.label("material_name"),
         func.sum(MaterialIssueItem.quantity).label("total_quantity"),
         func.sum(MaterialIssueItem.quantity * MaterialIssueItem.rate).label("total_value")
     ).join(MaterialIssue, MaterialIssueItem.issue_id == MaterialIssue.id)\
      .join(Material, MaterialIssueItem.material_id == Material.id)\
-     .join(Block, MaterialIssue.issued_to_block_id == Block.id)\
+     .join(Room, MaterialIssue.issued_to_room_id == Room.id)\
+     .join(Floor, Room.floor_id == Floor.id)\
+     .join(Building, Floor.building_id == Building.id)\
      .filter(MaterialIssue.tenant_id == tenant_id, MaterialIssue.site_id == site_id)
     
     if project_id:
@@ -48,11 +50,11 @@ def get_consumption_report(
     if ed:
         query = query.filter(MaterialIssue.created_at <= ed)
         
-    results = query.group_by(Block.name, Material.name).all()
+    results = query.group_by(Building.name, Material.name).all()
     
     return [
         {
-            "block_name": r.block_name,
+            "building_name": r.building_name,
             "material_name": r.material_name,
             "total_quantity": r.total_quantity,
             "total_value": r.total_value

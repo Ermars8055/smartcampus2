@@ -24,7 +24,7 @@ export default function Materials() {
   const [sortConfig, setSortConfig] = useState({ key: 'code', direction: 'asc' });
   const [form, setForm] = useState({
     code: '', name: '', category_id: '', uom_id: '', reorder_level: 0,
-    maximum_level: 0, standard_cost: 0, gst_rate: 0, storage_type: 'General', 
+    maximum_level: 0, standard_cost: 0, gst_rate: 18, storage_type: 'General', 
     material_type: 'Consumable', description: ''
   });
 

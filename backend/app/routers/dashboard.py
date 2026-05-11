@@ -7,7 +7,7 @@ from app.database import get_db
 from app.models import (
     Material, CurrentStock, PurchaseRequest, PurchaseOrder,
     GRN, Warehouse, Vendor, MaterialIssue, MaterialIssueItem,
-    Block, StockLedger, User, Alert
+    Building, StockLedger, User, Alert, Room, Floor
 )
 from app.schemas import DashboardStats
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
@@ -89,8 +89,8 @@ def get_dashboard_stats(
     )
 
 
-@router.get("/consumption-by-block")
-def get_consumption_by_block(
+@router.get("/consumption-by-building")
+def get_consumption_by_building(
     start_date: Optional[str] = None, end_date: Optional[str] = None,
     db: Session = Depends(get_db), current_user: User = Depends(require_permission("dashboard", "read")),
     tenant_id: int = Depends(get_tenant_id), site_id: int = Depends(get_site_id)
@@ -98,11 +98,15 @@ def get_consumption_by_block(
     sd = parse_date(start_date)
     ed = parse_date(end_date)
     results = db.query(
-        Block.name,
+        Building.name,
         func.sum(MaterialIssueItem.quantity).label("total_qty"),
         func.sum(MaterialIssueItem.quantity * MaterialIssueItem.rate).label("total_value")
+    ).select_from(Building).join(
+        Floor, Floor.building_id == Building.id
     ).join(
-        MaterialIssue, MaterialIssue.issued_to_block_id == Block.id
+        Room, Room.floor_id == Floor.id
+    ).join(
+        MaterialIssue, MaterialIssue.issued_to_room_id == Room.id
     ).join(
         MaterialIssueItem, MaterialIssueItem.issue_id == MaterialIssue.id
     ).filter(
@@ -110,10 +114,10 @@ def get_consumption_by_block(
     )
     if sd: results = results.filter(MaterialIssue.created_at >= sd)
     if ed: results = results.filter(MaterialIssue.created_at < ed)
-    results = results.group_by(Block.name).all()
+    results = results.group_by(Building.name).all()
 
     return [
-        {"block_name": r[0], "total_quantity": round(r[1] or 0, 2), "total_value": round(r[2] or 0, 2)}
+        {"building_name": r[0], "total_quantity": round(r[1] or 0, 2), "total_value": round(r[2] or 0, 2)}
         for r in results
     ]
 
@@ -204,8 +208,8 @@ def get_recent_transactions(
     ]
 
 
-@router.get("/material-cost-by-block")
-def get_material_cost_by_block(
+@router.get("/material-cost-by-building")
+def get_material_cost_by_building(
     start_date: Optional[str] = None, end_date: Optional[str] = None,
     db: Session = Depends(get_db), current_user: User = Depends(require_permission("dashboard", "read")),
     tenant_id: int = Depends(get_tenant_id), site_id: int = Depends(get_site_id)
@@ -214,7 +218,7 @@ def get_material_cost_by_block(
     ed = parse_date(end_date)
     results = db.query(
         Material.name,
-        Block.name.label("block_name"),
+        Building.name.label("building_name"),
         func.sum(MaterialIssueItem.quantity * MaterialIssueItem.rate).label("total_cost"),
         func.sum(MaterialIssueItem.quantity).label("total_qty")
     ).join(
@@ -222,20 +226,24 @@ def get_material_cost_by_block(
     ).join(
         MaterialIssue, MaterialIssueItem.issue_id == MaterialIssue.id
     ).join(
-        Block, MaterialIssue.issued_to_block_id == Block.id
+        Room, MaterialIssue.issued_to_room_id == Room.id
+    ).join(
+        Floor, Room.floor_id == Floor.id
+    ).join(
+        Building, Floor.building_id == Building.id
     ).filter(
         MaterialIssue.tenant_id == tenant_id, MaterialIssue.site_id == site_id
     )
     if sd: results = results.filter(MaterialIssue.created_at >= sd)
     if ed: results = results.filter(MaterialIssue.created_at < ed)
-    results = results.group_by(Material.name, Block.name).order_by(
+    results = results.group_by(Material.name, Building.name).order_by(
         func.sum(MaterialIssueItem.quantity * MaterialIssueItem.rate).desc()
     ).limit(20).all()
 
     return [
         {
             "material_name": r[0],
-            "block_name": r[1],
+            "building_name": r[1],
             "total_cost": round(r[2] or 0, 2),
             "total_quantity": round(r[3] or 0, 2)
         }

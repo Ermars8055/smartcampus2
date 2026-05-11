@@ -22,7 +22,7 @@ def generate_grn_number(db: Session, tenant_id: int, site_id: int) -> str:
 
 def update_stock(db: Session, material_id: int, warehouse_id: int, quantity: float,
                  transaction_type: str, reference_type: str, reference_id: int,
-                 reference_number: str, tenant_id: int, site_id: int, project_id: int = None, block_id: int = None,
+                 reference_number: str, tenant_id: int, site_id: int, project_id: int = None, room_id: int = None,
                  user_id: int = None):
     """Update current stock and create ledger entry."""
     stock = db.query(CurrentStock).filter(
@@ -49,7 +49,7 @@ def update_stock(db: Session, material_id: int, warehouse_id: int, quantity: flo
         reference_id=reference_id,
         reference_number=reference_number,
         project_id=project_id,
-        block_id=block_id,
+        room_id=room_id,
         created_by_id=user_id,
         tenant_id=tenant_id,
         site_id=site_id

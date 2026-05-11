@@ -9,7 +9,7 @@ from app.database import get_db
 from app.models import (
     CurrentStock, StockLedger, Material, Warehouse, Category, UOM,
     Alert, AuditLog, User, PurchaseRequest, PurchaseOrder,
-    MaterialIssue, MaterialIssueItem, Block, GRN
+    MaterialIssue, MaterialIssueItem, Building, GRN, Room, Floor
 )
 from app.schemas import StockOut, StockLedgerOut, AlertOut, AuditLogOut
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
@@ -132,19 +132,21 @@ def consumption_report(
     site_id: int = Depends(get_site_id)
 ):
     results = db.query(
-        Block.name.label("block_name"),
+        Building.name.label("building_name"),
         Material.name.label("material_name"),
         func.sum(MaterialIssueItem.quantity).label("total_quantity"),
         func.sum(MaterialIssueItem.quantity * MaterialIssueItem.rate).label("total_value")
     ).join(MaterialIssue, MaterialIssueItem.issue_id == MaterialIssue.id)\
      .join(Material, MaterialIssueItem.material_id == Material.id)\
-     .join(Block, MaterialIssue.issued_to_block_id == Block.id)\
+     .join(Room, MaterialIssue.issued_to_room_id == Room.id)\
+     .join(Floor, Room.floor_id == Floor.id)\
+     .join(Building, Floor.building_id == Building.id)\
      .filter(MaterialIssue.tenant_id == tenant_id, MaterialIssue.site_id == site_id)\
-     .group_by(Block.name, Material.name).all()
+     .group_by(Building.name, Material.name).all()
     
     return [
         {
-            "block_name": r.block_name,
+            "building_name": r.building_name,
             "material_name": r.material_name,
             "total_quantity": r.total_quantity,
             "total_value": r.total_value

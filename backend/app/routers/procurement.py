@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from app.database import get_db
 from app.models import (
     PurchaseRequest, PurchaseRequestItem, PurchaseOrder, PurchaseOrderItem,
-    Material, User, Block, Project, Vendor, AuditLog, UOM
+    Material, User, Building, Project, Vendor, AuditLog, UOM
 )
 from app.schemas import PRCreate, PRUpdate, PROut, POCreate, POUpdate, POOut, POItemOut
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
@@ -76,13 +76,13 @@ def list_purchase_requests(
             })
         result.append(PROut(
             id=pr.id, pr_number=pr.pr_number,
-            required_for_block_id=pr.required_for_block_id,
+            required_for_room_id=pr.required_for_room_id,
             project_id=pr.project_id, required_date=pr.required_date,
             remarks=pr.remarks, requester_id=pr.requester_id,
             status=pr.status, created_at=pr.created_at, updated_at=pr.updated_at,
             approved_by_id=pr.approved_by_id, approved_at=pr.approved_at,
             requester_name=pr.requester.full_name if pr.requester else None,
-            block_name=pr.block.name if pr.block else None,
+            room_name=pr.room.name if pr.room else None,
             project_name=pr.project.name if pr.project else None,
             items=items
         ))
@@ -112,13 +112,13 @@ def get_purchase_request(
         })
     return PROut(
         id=pr.id, pr_number=pr.pr_number,
-        required_for_block_id=pr.required_for_block_id,
+        required_for_room_id=pr.required_for_room_id,
         project_id=pr.project_id, required_date=pr.required_date,
         remarks=pr.remarks, requester_id=pr.requester_id,
         status=pr.status, created_at=pr.created_at, updated_at=pr.updated_at,
         approved_by_id=pr.approved_by_id, approved_at=pr.approved_at,
         requester_name=pr.requester.full_name if pr.requester else None,
-        block_name=pr.block.name if pr.block else None,
+        room_name=pr.room.name if pr.room else None,
         project_name=pr.project.name if pr.project else None,
         items=items
     )
@@ -135,7 +135,7 @@ def create_purchase_request(
         pr_number=generate_pr_number(db, tenant_id, site_id),
         requester_id=current_user.id,
         project_id=data.project_id,
-        required_for_block_id=data.required_for_block_id,
+        required_for_room_id=data.required_for_room_id,
         required_date=data.required_date,
         remarks=data.remarks,
         tenant_id=tenant_id,

@@ -205,8 +205,8 @@ export default function GateEntry() {
           <Grid container spacing={2}>
             {form.entry_type === 'Vehicle' ? (
               <>
-                <Grid size={4}><TextField fullWidth label="Vehicle Number" value={form.vehicle_number} onChange={e => setForm({ ...form, vehicle_number: e.target.value })} required /></Grid>
-                <Grid size={4}>
+                <Grid size={6}><TextField fullWidth label="Vehicle Number" value={form.vehicle_number} onChange={e => setForm({ ...form, vehicle_number: e.target.value })} required /></Grid>
+                <Grid size={6}>
                   <FormControl fullWidth><InputLabel>PO Reference (Pending Orders)</InputLabel>
                     <Select value={form.po_id} label="PO Reference (Pending Orders)" onChange={e => selectPO(e.target.value)}>
                       <MenuItem value="">None (ad-hoc delivery)</MenuItem>
@@ -215,13 +215,6 @@ export default function GateEntry() {
                           {p.po_number} — {p.vendor_name} ({p.items?.filter(it => it.quantity - (it.received_quantity || 0) > 0).length} pending items)
                         </MenuItem>
                       ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid size={4}>
-                  <FormControl fullWidth required><InputLabel>Project</InputLabel>
-                    <Select value={form.project_id} label="Project" onChange={e => setForm({ ...form, project_id: e.target.value })}>
-                      {projects.map(p => <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>)}
                     </Select>
                   </FormControl>
                 </Grid>
@@ -229,8 +222,8 @@ export default function GateEntry() {
               </>
             ) : (
               <>
-                <Grid size={4}><TextField fullWidth label="Delivery Person Name" value={form.delivery_person_name} onChange={e => setForm({ ...form, delivery_person_name: e.target.value })} required /></Grid>
-                <Grid size={4}>
+                <Grid size={6}><TextField fullWidth label="Delivery Person Name" value={form.delivery_person_name} onChange={e => setForm({ ...form, delivery_person_name: e.target.value })} required /></Grid>
+                <Grid size={6}>
                   <FormControl fullWidth><InputLabel>PO Reference (Pending Orders)</InputLabel>
                     <Select value={form.po_id} label="PO Reference (Pending Orders)" onChange={e => selectPO(e.target.value)}>
                       <MenuItem value="">None (ad-hoc delivery)</MenuItem>
@@ -239,13 +232,6 @@ export default function GateEntry() {
                           {p.po_number} — {p.vendor_name} ({p.items?.filter(it => it.quantity - (it.received_quantity || 0) > 0).length} pending items)
                         </MenuItem>
                       ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid size={4}>
-                  <FormControl fullWidth required><InputLabel>Project</InputLabel>
-                    <Select value={form.project_id} label="Project" onChange={e => setForm({ ...form, project_id: e.target.value })}>
-                      {projects.map(p => <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>)}
                     </Select>
                   </FormControl>
                 </Grid>

@@ -440,6 +440,28 @@ def list_unique_departments(
     return [r[0] for r in results if r[0]]
 
 
+@router.get("/buildings/{building_id}/departments", response_model=List[str])
+def list_departments_by_building(
+    building_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("projects", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    """Fetch distinct department names from rooms belonging to a specific building."""
+    from sqlalchemy import distinct
+    results = db.query(distinct(Room.department_name)).join(
+        Floor, Room.floor_id == Floor.id
+    ).filter(
+        Floor.building_id == building_id,
+        Room.tenant_id == tenant_id,
+        Room.site_id == site_id,
+        Room.department_name.isnot(None),
+        Room.department_name != ""
+    ).all()
+    return [r[0] for r in results if r[0]]
+
+
 # ── Warehouses ───────────────────────────────────────────────────────────
 
 @router.get("/warehouses")

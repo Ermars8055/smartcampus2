@@ -14,8 +14,7 @@ const COLORS = ['#1E3A8A', '#2563EB', '#60A5FA', '#93C5FD', '#3B82F6', '#1D4ED8'
 export default function Intelligence() {
   const [consumption, setConsumption] = useState([]);
   const [projects, setProjects] = useState([]);
-  const [blocks, setBlocks] = useState([]);
-  const [projectId, setProjectId] = useState('');
+  const [buildings, setBuildings] = useState([]);
   const [period, setPeriod] = useState('all');
   const [topMaterials, setTopMaterials] = useState([]);
 
@@ -28,12 +27,11 @@ export default function Intelligence() {
   };
 
   useEffect(() => {
-    api.get('/api/projects').then(r => setProjects(r.data));
-    api.get('/api/blocks').then(r => setBlocks(r.data));
+    api.get('/api/buildings').then(r => setBuildings(r.data));
   }, []);
 
   useEffect(() => {
-    let params = projectId ? { project_id: projectId } : {};
+    let params = {};
     
     if (period !== 'all') {
       const now = new Date();
@@ -50,11 +48,10 @@ export default function Intelligence() {
     api.get('/api/intelligence/consumption', { params }).then(r => {
       const data = r.data;
       setConsumption(data);
-      // Group by block
-      const blockMap = {};
+      const buildingMap = {};
       data.forEach(d => {
-        if (!blockMap[d.block_name]) blockMap[d.block_name] = 0;
-        blockMap[d.block_name] += d.total_value;
+        if (!buildingMap[d.building_name]) buildingMap[d.building_name] = 0;
+        buildingMap[d.building_name] += d.total_value;
       });
       // Group by material
       const matMap = {};
@@ -65,27 +62,27 @@ export default function Intelligence() {
       });
       setTopMaterials(Object.entries(matMap).map(([name, v]) => ({ material_name: name, quantity: v.qty, value: v.value })).sort((a, b) => b.value - a.value));
     });
-  }, [projectId, period]);
+  }, [period]);
 
-  // Build block summary
-  const blockSummary = {};
+  // Build building summary
+  const buildingSummary = {};
   consumption.forEach(d => {
-    if (!blockSummary[d.block_name]) blockSummary[d.block_name] = { total: 0, materials: [] };
-    blockSummary[d.block_name].total += d.total_value;
-    blockSummary[d.block_name].materials.push(d);
+    if (!buildingSummary[d.building_name]) buildingSummary[d.building_name] = { total: 0, materials: [] };
+    buildingSummary[d.building_name].total += d.total_value;
+    buildingSummary[d.building_name].materials.push(d);
   });
 
   // Aggregate data for the bar chart
-  const aggregatedBlockData = Object.entries(blockSummary)
-    .map(([name, data]) => ({ block_name: name, total_cost: data.total }))
+  const aggregatedBuildingData = Object.entries(buildingSummary)
+    .map(([name, data]) => ({ building_name: name, total_cost: data.total }))
     .sort((a, b) => b.total_cost - a.total_cost);
 
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
         <Box>
-          <Typography variant="h5" sx={{ fontWeight: 700 }}>Project Material Intelligence</Typography>
-          <Typography variant="body2" sx={{ color: '#64748B' }}>Material usage analytics for project management</Typography>
+          <Typography variant="h5" sx={{ fontWeight: 700 }}>Material Intelligence</Typography>
+          <Typography variant="body2" sx={{ color: '#64748B' }}>Usage analytics by building and department</Typography>
         </Box>
         <Box sx={{ display: 'flex', gap: 2 }}>
           <FormControl size="small" sx={{ minWidth: 150, bgcolor: '#fff' }}>
@@ -97,13 +94,6 @@ export default function Intelligence() {
               <MenuItem value="ytd">Year to Date (YTD)</MenuItem>
             </Select>
           </FormControl>
-          <FormControl size="small" sx={{ minWidth: 200, bgcolor: '#fff' }}>
-            <InputLabel>Project</InputLabel>
-            <Select value={projectId} label="Project" onChange={e => setProjectId(e.target.value)} sx={{ fontWeight: 600 }}>
-              <MenuItem value="">All Projects</MenuItem>
-              {projects.map(p => <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>)}
-            </Select>
-          </FormControl>
         </Box>
       </Box>
 
@@ -111,11 +101,11 @@ export default function Intelligence() {
       <Grid container spacing={2.5} sx={{ mb: 3 }}>
         <Grid size={{ xs: 12, md: 8 }}>
           <Card sx={{ p: 2.5 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>Material Cost by Block</Typography>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>Material Cost by Building</Typography>
             <ResponsiveContainer width="100%" height={320}>
-              <BarChart data={aggregatedBlockData} margin={{ top: 20, right: 20, bottom: 5, left: 10 }}>
+              <BarChart data={aggregatedBuildingData} margin={{ top: 20, right: 20, bottom: 5, left: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-                <XAxis dataKey="block_name" tick={{ fontSize: 11, fontWeight: 600, fill: '#475569' }} />
+                <XAxis dataKey="building_name" tick={{ fontSize: 11, fontWeight: 600, fill: '#475569' }} />
                 <YAxis tick={{ fontSize: 11, fontWeight: 500, fill: '#475569' }} tickFormatter={formatCurrency} />
                 <Tooltip formatter={(v) => [formatCurrency(v), 'Total Cost']} contentStyle={{ borderRadius: 8, border: '1px solid #E2E8F0' }} cursor={{ fill: 'rgba(37, 99, 235, 0.05)' }} />
                 <Bar dataKey="total_cost" name="Cost (₹)" fill="#2563EB" radius={[6, 6, 0, 0]}>
@@ -130,9 +120,9 @@ export default function Intelligence() {
             <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>Cost Distribution</Typography>
             <ResponsiveContainer width="100%" height={320}>
               <PieChart>
-                <Pie data={Object.entries(blockSummary).map(([name, v]) => ({ name, value: Math.round(v.total) }))}
+                <Pie data={Object.entries(buildingSummary).map(([name, v]) => ({ name, value: Math.round(v.total) }))}
                   cx="50%" cy="50%" innerRadius={50} outerRadius={90} dataKey="value" paddingAngle={3}>
-                  {Object.keys(blockSummary).map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                  {Object.keys(buildingSummary).map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                 </Pie>
                 <Legend iconType="circle" wrapperStyle={{ fontSize: 11, fontWeight: 500 }} />
                 <Tooltip formatter={formatCurrency} contentStyle={{ borderRadius: 8 }} />
@@ -142,13 +132,13 @@ export default function Intelligence() {
         </Grid>
       </Grid>
 
-      {/* Block-wise material breakdown */}
+      {/* Building-wise material breakdown */}
       <Grid container spacing={2.5} sx={{ mb: 3 }}>
-        {Object.entries(blockSummary).slice(0, 6).map(([blockName, data]) => (
-          <Grid size={{ xs: 12, md: 6, lg: 4 }} key={blockName}>
+        {Object.entries(buildingSummary).slice(0, 6).map(([buildingName, data]) => (
+          <Grid size={{ xs: 12, md: 6, lg: 4 }} key={buildingName}>
             <Card sx={{ p: 2.5 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5 }}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1E293B' }}>{blockName}</Typography>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1E293B' }}>{buildingName}</Typography>
                 <Chip label={formatCurrency(data.total)} size="small" sx={{ fontWeight: 700, bgcolor: '#EFF6FF', color: '#1D4ED8', border: '1px solid #BFDBFE' }} />
               </Box>
               <Table size="small">

@@ -23,7 +23,8 @@ export default function PurchaseRequests() {
   const [prs, setPrs] = useState([]);
   const [materials, setMaterials] = useState([]);
   const [projects, setProjects] = useState([]);
-  const [blocks, setBlocks] = useState([]);
+  const [buildings, setBuildings] = useState([]);
+  const [departments, setDepartments] = useState([]);
   const [vendors, setVendors] = useState([]);
   const [dialog, setDialog] = useState(false);
   const [convertDialog, setConvertDialog] = useState({ open: false, pr: null, vendor_id: '', delivery_date: '', rate: '' });
@@ -32,7 +33,7 @@ export default function PurchaseRequests() {
 
   // Multi-item PR form
   const [form, setForm] = useState({
-    project_id: '', required_for_block_id: '',
+    project_id: '', building_id: '', department_name: '',
     required_date: new Date().toISOString().split('T')[0], remarks: '',
     items: [{ material_id: '', quantity: '' }]
   });
@@ -52,7 +53,7 @@ export default function PurchaseRequests() {
     load();
     api.get('/api/materials').then(r => setMaterials(r.data.items || []));
     api.get('/api/projects').then(r => setProjects(r.data));
-    api.get('/api/blocks').then(r => setBlocks(r.data));
+    api.get('/api/buildings').then(r => setBuildings(r.data));
     api.get('/api/vendors').then(r => setVendors(r.data));
   }, []);
 
@@ -68,8 +69,9 @@ export default function PurchaseRequests() {
   const handleCreate = async () => {
     try {
       const payload = {
-        project_id: form.project_id,
-        required_for_block_id: form.required_for_block_id || null,
+        project_id: form.project_id || projects[0]?.id,
+        building_id: form.building_id || null,
+        department_name: form.department_name || null,
         required_date: form.required_date,
         remarks: form.remarks,
         items: form.items.filter(it => it.material_id && it.quantity).map(it => ({
@@ -152,9 +154,10 @@ export default function PurchaseRequests() {
           <Typography variant="body2" sx={{ color: '#64748B' }}>{prs.length} total requests</Typography>
         </Box>
         <Button variant="contained" startIcon={<Add />} onClick={() => {
-          setForm({ project_id: projects[0]?.id || '', required_for_block_id: '',
+          setForm({ project_id: projects[0]?.id || '', building_id: '', department_name: '',
             required_date: new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0], remarks: '',
             items: [{ material_id: '', quantity: '' }] });
+          setDepartments([]);
           setDialog(true);
         }}>Create PR</Button>
       </Box>
@@ -223,8 +226,8 @@ export default function PurchaseRequests() {
               <TableRow>
                 <TableCell>PR Number</TableCell>
                 <TableCell>Items</TableCell>
-                <TableCell>Project</TableCell>
-                <TableCell>Block</TableCell>
+                <TableCell>Building</TableCell>
+                <TableCell>Department</TableCell>
                 <TableCell>PR Date</TableCell>
                 <TableCell>Req. Date</TableCell>
                 <TableCell>Status</TableCell>
@@ -236,8 +239,8 @@ export default function PurchaseRequests() {
                 <TableRow key={pr.id} sx={{ cursor: 'pointer' }} onClick={() => setDetailDialog(pr)}>
                   <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.8rem' }}>{pr.pr_number}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem' }}>{pr.items?.length || 0} items</TableCell>
-                  <TableCell sx={{ fontSize: '0.8rem' }}>{pr.project_name}</TableCell>
-                  <TableCell sx={{ fontSize: '0.8rem' }}>{pr.block_name || '-'}</TableCell>
+                  <TableCell sx={{ fontSize: '0.8rem' }}>{pr.building_name || '-'}</TableCell>
+                  <TableCell sx={{ fontSize: '0.8rem' }}>{pr.department_name || '-'}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem' }}>{formatDate(pr.created_at)}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem' }}>{formatDate(pr.required_date)}</TableCell>
                   <TableCell><StatusChip status={pr.status} /></TableCell>
@@ -312,8 +315,8 @@ export default function PurchaseRequests() {
                 </Table>
               </Box>
             </Grid>
-            <Grid size={6}><Typography variant="caption" color="textSecondary">Project</Typography><Typography sx={{ fontWeight: 600 }}>{detailDialog?.project_name}</Typography></Grid>
-            <Grid size={6}><Typography variant="caption" color="textSecondary">Block</Typography><Typography>{detailDialog?.block_name || '-'}</Typography></Grid>
+            <Grid size={6}><Typography variant="caption" color="textSecondary">Building</Typography><Typography sx={{ fontWeight: 600 }}>{detailDialog?.building_name || '-'}</Typography></Grid>
+            <Grid size={6}><Typography variant="caption" color="textSecondary">Department</Typography><Typography>{detailDialog?.department_name || '-'}</Typography></Grid>
             <Grid size={6}><Typography variant="caption" color="textSecondary">Requester</Typography><Typography>{detailDialog?.requester_name}</Typography></Grid>
             <Grid size={6}><Typography variant="caption" color="textSecondary">Status</Typography><Box><StatusChip status={detailDialog?.status || ''} /></Box></Grid>
             <Grid size={6}><Typography variant="caption" color="textSecondary">PR Date</Typography><Typography>{formatDate(detailDialog?.created_at)}</Typography></Grid>
@@ -330,17 +333,26 @@ export default function PurchaseRequests() {
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 0.5, mb: 2 }}>
             <Grid size={{ xs: 12, sm: 4 }}>
-              <FormControl fullWidth required><InputLabel>Project</InputLabel>
-                <Select value={form.project_id} label="Project" onChange={e => setForm({ ...form, project_id: e.target.value })}>
-                  {projects.map(p => <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>)}
+              <FormControl fullWidth required><InputLabel>Building</InputLabel>
+                <Select value={form.building_id} label="Building" onChange={e => {
+                  const buildingId = e.target.value;
+                  setForm({ ...form, building_id: buildingId, department_name: '' });
+                  if (buildingId) {
+                    api.get(`/api/buildings/${buildingId}/departments`).then(r => setDepartments(r.data)).catch(() => setDepartments([]));
+                  } else {
+                    setDepartments([]);
+                  }
+                }}>
+                  <MenuItem value="">Select Building</MenuItem>
+                  {buildings.map(b => <MenuItem key={b.id} value={b.id}>{b.name}</MenuItem>)}
                 </Select>
               </FormControl>
             </Grid>
             <Grid size={{ xs: 12, sm: 4 }}>
-              <FormControl fullWidth><InputLabel>For Block</InputLabel>
-                <Select value={form.required_for_block_id} label="For Block" onChange={e => setForm({ ...form, required_for_block_id: e.target.value })}>
-                  <MenuItem value="">None</MenuItem>
-                  {blocks.filter(b => !form.project_id || b.project_id === form.project_id).map(b => <MenuItem key={b.id} value={b.id}>{b.name}</MenuItem>)}
+              <FormControl fullWidth><InputLabel>Department</InputLabel>
+                <Select value={form.department_name} label="Department" onChange={e => setForm({ ...form, department_name: e.target.value })} disabled={!form.building_id}>
+                  <MenuItem value="">Select Department</MenuItem>
+                  {departments.map((d, i) => <MenuItem key={i} value={d}>{d}</MenuItem>)}
                 </Select>
               </FormControl>
             </Grid>

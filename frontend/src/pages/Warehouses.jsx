@@ -26,7 +26,6 @@ export default function Warehouses() {
     if (!form.name?.trim() || !form.code?.trim()) {
       return alert("Name and Code are required.");
     }
-    if (!form.project_id) return alert("Project is required");
 
     try {
       if (form.id) {
@@ -54,7 +53,7 @@ export default function Warehouses() {
         <Button 
           variant="contained" 
           startIcon={<Add />} 
-          onClick={() => { setForm({ name: '', code: '', project_id: '', warehouse_type: 'Central', location: '', manager_name: '' }); setDialogOpen(true); }}
+          onClick={() => { setForm({ name: '', code: '', project_id: projects[0]?.id || '', warehouse_type: 'Central', location: '', manager_name: '' }); setDialogOpen(true); }}
           sx={{ bgcolor: '#1E3A8A' }}
         >
           New Warehouse
@@ -67,7 +66,6 @@ export default function Warehouses() {
             <TableRow>
               <TableCell sx={{ fontWeight: 600 }}>Warehouse Name</TableCell>
               <TableCell sx={{ fontWeight: 600 }}>Code</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Project</TableCell>
               <TableCell sx={{ fontWeight: 600 }}>Type</TableCell>
               <TableCell sx={{ fontWeight: 600 }}>Location</TableCell>
               <TableCell align="right" sx={{ fontWeight: 600 }}>Actions</TableCell>
@@ -78,18 +76,17 @@ export default function Warehouses() {
               <TableRow key={w.id} hover>
                 <TableCell sx={{ fontWeight: 500 }}>{w.name}</TableCell>
                 <TableCell><Chip label={w.code} size="small" variant="outlined" /></TableCell>
-                <TableCell>{w.project_name || 'N/A'}</TableCell>
                 <TableCell><Chip label={w.warehouse_type} size="small" color="primary" variant="outlined" /></TableCell>
                 <TableCell>{w.location}</TableCell>
                 <TableCell align="right">
-                  <IconButton size="small" onClick={() => { setForm(w); setDialogOpen(true); }}><Edit fontSize="small" /></IconButton>
+                  <IconButton size="small" onClick={() => { setForm({...w, project_id: w.project_id || projects[0]?.id || ''}); setDialogOpen(true); }}><Edit fontSize="small" /></IconButton>
                   <IconButton size="small" onClick={() => handleDelete(w.id)} color="error"><Delete fontSize="small" /></IconButton>
                 </TableCell>
               </TableRow>
             ))}
             {warehouses.length === 0 && (
               <TableRow>
-                <TableCell colSpan={6} align="center" sx={{ py: 4, color: 'text.secondary' }}>No warehouses found.</TableCell>
+                <TableCell colSpan={5} align="center" sx={{ py: 4, color: 'text.secondary' }}>No warehouses found.</TableCell>
               </TableRow>
             )}
           </TableBody>
@@ -115,18 +112,6 @@ export default function Warehouses() {
                 InputLabelProps={{ shrink: true }}
                 slotProps={{ input: { startAdornment: <InputAdornment position="start"><VpnKey sx={{ fontSize: 18 }} /></InputAdornment> } }}
               />
-            </Grid>
-            <Grid item xs={12}>
-              <FormControl fullWidth size="small">
-                <InputLabel shrink>Project</InputLabel>
-                <Select 
-                  value={form.project_id || ''} label="Project" notched
-                  onChange={e => setForm({ ...form, project_id: e.target.value })}
-                  startAdornment={<InputAdornment position="start"><Apartment sx={{ fontSize: 18 }} /></InputAdornment>}
-                >
-                  {projects.map(p => <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>)}
-                </Select>
-              </FormControl>
             </Grid>
             <Grid item xs={6}>
               <TextField 

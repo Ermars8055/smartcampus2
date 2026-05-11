@@ -150,7 +150,6 @@ export default function PurchaseOrders() {
                 <TableCell>PR Ref</TableCell>
                 <TableCell>Indent Ref</TableCell>
                 <TableCell>Vendor</TableCell>
-                <TableCell>Project</TableCell>
                 <TableCell align="right">Items</TableCell>
                 <TableCell align="right">Amount (₹)</TableCell>
                 <TableCell>Type</TableCell>
@@ -167,7 +166,6 @@ export default function PurchaseOrders() {
                   <TableCell sx={{ fontSize: '0.8rem', color: '#64748B' }}>{po.pr_number || '-'}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem', color: '#64748B' }}>{po.indent_number || '-'}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem' }}>{po.vendor_name}</TableCell>
-                  <TableCell sx={{ fontSize: '0.8rem' }}>{po.project_name}</TableCell>
                   <TableCell align="right">{po.items?.length || 0}</TableCell>
                   <TableCell align="right" sx={{ fontWeight: 600 }}>₹{po.total_amount?.toLocaleString()}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem' }}>
@@ -262,14 +260,7 @@ export default function PurchaseOrders() {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid size={3}>
-              <FormControl fullWidth required><InputLabel>Project</InputLabel>
-                <Select value={form.project_id} label="Project" onChange={e => setForm({ ...form, project_id: e.target.value })}>
-                  {projects.map(p => <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>)}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid size={3}>
+            <Grid size={4}>
               <FormControl fullWidth><InputLabel>PO Type</InputLabel>
                 <Select value={form.po_type || 'Informal'} label="PO Type" onChange={e => setForm({ ...form, po_type: e.target.value })}>
                   <MenuItem value="Formal">Formal</MenuItem>

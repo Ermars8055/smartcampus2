@@ -152,6 +152,7 @@ const Quotations = () => {
     try {
       const payload = {
         ...newQR,
+        project_id: newQR.project_id || projects[0]?.id,
         items: (newQR.items || []).filter(it => !it.pr_id),
         required_date: newQR.required_date || null,
         remarks: newQR.remarks || null
@@ -159,7 +160,7 @@ const Quotations = () => {
       await api.post('/api/quotations/requests', payload);
       showMessage('Quotation Request created successfully!', 'Success', 'success');
       setCreateQRDialogOpen(false);
-      setNewQR({ project_id: '', required_date: '', remarks: '', pr_ids: [], items: [], vendor_ids: [] });
+      setNewQR({ project_id: projects[0]?.id || '', required_date: '', remarks: '', pr_ids: [], items: [], vendor_ids: [] });
       fetchData();
     } catch (err) {
       const detail = err.response?.data?.detail;
@@ -554,22 +555,6 @@ const Quotations = () => {
                     </TableCell>
                     <TableCell sx={{ py: 1, px: 2, fontWeight: 700, color: '#64748b', fontSize: '0.75rem' }}>
                       <TableSortLabel
-                        active={sortConfig.key === 'project_name'}
-                        direction={sortConfig.direction}
-                        onClick={() => handleSort('project_name')}
-                        IconComponent={ArrowDropDown}
-                        sx={{
-                          '& .MuiTableSortLabel-icon': {
-                            fontSize: '1.2rem !important',
-                            opacity: sortConfig.key === 'project_name' ? 1 : 0
-                          }
-                        }}
-                      >
-                        PROJECT
-                      </TableSortLabel>
-                    </TableCell>
-                    <TableCell sx={{ py: 1, px: 2, fontWeight: 700, color: '#64748b', fontSize: '0.75rem' }}>
-                      <TableSortLabel
                         active={sortConfig.key === 'prs'}
                         direction={sortConfig.direction}
                         onClick={() => handleSort('prs')}
@@ -637,10 +622,10 @@ const Quotations = () => {
                 </TableHead>
                 <TableBody>
                   {loading ? (
-                    <TableRow><TableCell colSpan={7} align="center"><CircularProgress size={24} sx={{ my: 4 }} /></TableCell></TableRow>
+                    <TableRow><TableCell colSpan={6} align="center"><CircularProgress size={24} sx={{ my: 4 }} /></TableCell></TableRow>
                   ) : sortedQRs.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} align="center" sx={{ py: 8 }}>
+                      <TableCell colSpan={6} align="center" sx={{ py: 8 }}>
                         <Typography color="text.secondary">No quotations found in this stage.</Typography>
                       </TableCell>
                     </TableRow>
@@ -653,7 +638,6 @@ const Quotations = () => {
                         onClick={() => { setViewingQR(qr); setViewQRDialogOpen(true); }}
                       >
                         <TableCell sx={{ py: 1, px: 2, fontSize: '0.75rem', fontWeight: 600, color: 'primary.main', whiteSpace: 'nowrap' }}>{qr.qr_number}</TableCell>
-                        <TableCell sx={{ py: 1, px: 2, fontSize: '0.75rem' }}>{qr.project_name || 'N/A'}</TableCell>
                         <TableCell sx={{ py: 1, px: 2 }}>
                           {qr.linked_prs?.length > 0 ? (
                             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, maxWidth: '180px' }}>
@@ -1072,7 +1056,7 @@ const Quotations = () => {
 
                 <Paper sx={{ p: 4, backgroundColor: '#fcfcfc', border: '1px solid #e0e0e0' }}>
                   <Typography variant="h5" align="center" sx={{ fontWeight: 700, mb: 1, letterSpacing: 1 }}>COMPARATIVE STATEMENT</Typography>
-                  <Typography variant="subtitle2" align="center" color="text.secondary" sx={{ mb: 4 }}>QR NO: {comparisonData.qr_number} | PROJECT: {comparisonData.project_name}</Typography>
+                  <Typography variant="subtitle2" align="center" color="text.secondary" sx={{ mb: 4 }}>QR NO: {comparisonData.qr_number}</Typography>
                   <Divider sx={{ mb: 4 }} />
 
                   {comparisonData.vendor_totals.sort((a, b) => a.total_value - b.total_value).map((vt, vIdx) => (
@@ -1142,23 +1126,6 @@ const Quotations = () => {
               }}
             >
               {/* Row 1: Project & Date */}
-              <Box>
-                <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', mb: 0.5, display: 'block', ml: 0.5, textTransform: 'uppercase' }}>
-                  Select Project
-                </Typography>
-                <FormControl fullWidth>
-                  <Select
-                    value={newQR.project_id}
-                    onChange={(e) => setNewQR(prev => ({ ...prev, project_id: e.target.value }))}
-                    startAdornment={<InputAdornment position="start"><ProjectIcon color="action" sx={{ mr: 1 }} /></InputAdornment>}
-                  >
-                    {Array.isArray(projects) && projects.map(p => (
-                      <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Box>
-
               <Box>
                 <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', mb: 0.5, display: 'block', ml: 0.5, textTransform: 'uppercase' }}>
                   Required Date
@@ -1367,7 +1334,7 @@ const Quotations = () => {
               onClick={handleCreateQR}
               variant="contained"
               size="large"
-              disabled={!newQR.project_id || (newQR.items?.length || 0) === 0 || (newQR.vendor_ids?.length || 0) === 0}
+              disabled={(newQR.items?.length || 0) === 0 || (newQR.vendor_ids?.length || 0) === 0}
               sx={{ px: 4, borderRadius: 2, fontWeight: 700, boxShadow: '0 4px 12px rgba(25, 118, 210, 0.3)' }}
             >
               Create Request
@@ -1545,7 +1512,6 @@ const Quotations = () => {
           <DialogContent>
             {viewingQR && (
               <Box>
-                <Typography><strong>Project:</strong> {viewingQR.project_name}</Typography>
                 <Typography><strong>Status:</strong> {viewingQR.status === 'Sent to Vendors' ? 'Request to Vendors' : viewingQR.status}</Typography>
 
                 <Typography variant="h6" sx={{ fontWeight: 600, mt: 3, mb: 1.5 }}>Materials Summary</Typography>

@@ -77,6 +77,8 @@ def list_purchase_requests(
         result.append(PROut(
             id=pr.id, pr_number=pr.pr_number,
             required_for_room_id=pr.required_for_room_id,
+            building_id=pr.building_id,
+            department_name=pr.department_name,
             project_id=pr.project_id, required_date=pr.required_date,
             remarks=pr.remarks, requester_id=pr.requester_id,
             status=pr.status, created_at=pr.created_at, updated_at=pr.updated_at,
@@ -84,6 +86,7 @@ def list_purchase_requests(
             requester_name=pr.requester.full_name if pr.requester else None,
             room_name=pr.room.name if pr.room else None,
             project_name=pr.project.name if pr.project else None,
+            building_name=pr.building.name if pr.building else None,
             items=items
         ))
     return result
@@ -113,6 +116,8 @@ def get_purchase_request(
     return PROut(
         id=pr.id, pr_number=pr.pr_number,
         required_for_room_id=pr.required_for_room_id,
+        building_id=pr.building_id,
+        department_name=pr.department_name,
         project_id=pr.project_id, required_date=pr.required_date,
         remarks=pr.remarks, requester_id=pr.requester_id,
         status=pr.status, created_at=pr.created_at, updated_at=pr.updated_at,
@@ -120,6 +125,7 @@ def get_purchase_request(
         requester_name=pr.requester.full_name if pr.requester else None,
         room_name=pr.room.name if pr.room else None,
         project_name=pr.project.name if pr.project else None,
+        building_name=pr.building.name if pr.building else None,
         items=items
     )
 
@@ -136,6 +142,8 @@ def create_purchase_request(
         requester_id=current_user.id,
         project_id=data.project_id,
         required_for_room_id=data.required_for_room_id,
+        building_id=data.building_id,
+        department_name=data.department_name,
         required_date=data.required_date,
         remarks=data.remarks,
         tenant_id=tenant_id,

@@ -157,9 +157,9 @@ export default function Dashboard() {
   const handleBlockClick = (data) => {
     let blockName = null;
     if (data && data.activePayload && data.activePayload.length) {
-      blockName = data.activePayload[0].payload.block_name;
-    } else if (data && data.block_name) {
-      blockName = data.block_name;
+      blockName = data.activePayload[0].payload.building_name;
+    } else if (data && data.building_name) {
+      blockName = data.building_name;
     }
 
     if (!blockName) return;
@@ -248,7 +248,7 @@ export default function Dashboard() {
           <Card sx={{ p: 2.5, height: '100%' }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#1E293B' }}>
-                Project Spend by Building (₹)
+                Building Spend (₹)
               </Typography>
               <Typography variant="caption" sx={{ color: '#64748B', fontStyle: 'italic' }}>*Click on any bar to drilldown</Typography>
             </Box>

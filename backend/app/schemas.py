@@ -357,6 +357,8 @@ class PRBase(BaseModel):
     priority: str = "Normal"
     remarks: Optional[str] = None
     required_for_room_id: Optional[int] = None
+    building_id: Optional[int] = None
+    department_name: Optional[str] = None
     items: List[PRItemBase] = []
 
 class PRCreate(PRBase):
@@ -381,6 +383,8 @@ class PROut(PRBase):
     requester_name: Optional[str] = None
     room_name: Optional[str] = None
     project_name: Optional[str] = None
+    building_name: Optional[str] = None
+    department_name: Optional[str] = None
     items: List[PRItemOut] = []
     class Config:
         from_attributes = True

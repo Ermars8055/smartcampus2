@@ -168,7 +168,6 @@ def pr_status_report(
         {
             "pr_number": pr.pr_number,
             "requester": pr.requester.full_name if pr.requester else "",
-            "project": pr.project.name if pr.project else "",
             "required_date": pr.required_date.isoformat() if pr.required_date else "",
             "status": pr.status,
             "created_at": pr.created_at.isoformat() if pr.created_at else ""

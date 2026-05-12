@@ -5,7 +5,7 @@ import {
   DialogContent, DialogActions, Grid, MenuItem, Select, FormControl,
   InputLabel, IconButton, Tooltip, Tab, Tabs, Divider, Paper
 } from '@mui/material';
-import { Add, CheckCircle, Cancel, ShoppingCart, Archive, Delete } from '@mui/icons-material';
+import { Add, CheckCircle, Cancel, ShoppingCart, Archive, Delete, Search } from '@mui/icons-material';
 import api from '../services/api';
 import { formatDate } from '../utils/dateUtils';
 import MaterialSelect from '../components/MaterialSelect';
@@ -30,6 +30,7 @@ export default function PurchaseRequests() {
   const [convertDialog, setConvertDialog] = useState({ open: false, pr: null, vendor_id: '', delivery_date: '', rate: '' });
   const [detailDialog, setDetailDialog] = useState(null);
   const [tab, setTab] = useState(0);
+  const [search, setSearch] = useState('');
 
   // Multi-item PR form
   const [form, setForm] = useState({
@@ -48,7 +49,8 @@ export default function PurchaseRequests() {
   const handleConfirm = () => { if (confirm.action) confirm.action(reason); setConfirm({ ...confirm, open: false }); setReason(''); };
   const handleCancelConfirm = () => { setConfirm({ ...confirm, open: false }); setReason(''); };
 
-  const load = () => { api.get('/api/procurement/pr').then(r => setPrs(r.data)); };
+  const load = () => { api.get('/api/procurement/pr', { params: { search: search || undefined } }).then(r => setPrs(r.data)); };
+  useEffect(() => { load(); }, [search]);
   useEffect(() => {
     load();
     api.get('/api/materials').then(r => setMaterials(r.data.items || []));
@@ -161,6 +163,12 @@ export default function PurchaseRequests() {
           setDialog(true);
         }}>Create PR</Button>
       </Box>
+
+      <Card sx={{ mb: 3, p: 2 }}>
+        <TextField size="small" placeholder="Search PR numbers..." value={search}
+          onChange={e => setSearch(e.target.value)} sx={{ minWidth: 300 }}
+          slotProps={{ input: { startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> } }} />
+      </Card>
 
       <Paper 
         elevation={0} 
@@ -352,7 +360,7 @@ export default function PurchaseRequests() {
               <FormControl fullWidth><InputLabel>Department</InputLabel>
                 <Select value={form.department_name} label="Department" onChange={e => setForm({ ...form, department_name: e.target.value })} disabled={!form.building_id}>
                   <MenuItem value="">Select Department</MenuItem>
-                  {departments.map((d, i) => <MenuItem key={i} value={d}>{d}</MenuItem>)}
+                  {departments.map(d => <MenuItem key={d.id} value={d.name}>{d.name} ({d.code})</MenuItem>)}
                 </Select>
               </FormControl>
             </Grid>

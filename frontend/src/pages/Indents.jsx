@@ -7,7 +7,7 @@ import {
   DialogContent, DialogActions, Grid, IconButton, Tooltip, FormControl, InputLabel, Select, MenuItem,
   Divider
 } from '@mui/material';
-import { Add, Delete, CheckCircle, Cancel, ReceiptLong, ArrowBack } from '@mui/icons-material';
+import { Add, Delete, CheckCircle, Cancel, ReceiptLong, ArrowBack, Search } from '@mui/icons-material';
 import api from '../services/api';
 import { formatDate, formatDateTime } from '../utils/dateUtils';
 import MaterialSelect from '../components/MaterialSelect';
@@ -21,6 +21,7 @@ export default function Indents() {
   const [rooms, setRooms] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [detailDialog, setDetailDialog] = useState(null);
+  const [search, setSearch] = useState('');
 
   const [form, setForm] = useState({
     building_id: '', floor_id: '', room_id: '', department: '', remarks: '', items: [{ material_id: '', requested_quantity: '' }]
@@ -39,7 +40,8 @@ export default function Indents() {
   const handleConfirm = () => { if (confirm.action) confirm.action(); setConfirm({ ...confirm, open: false }); };
   const handleCancelConfirm = () => { setConfirm({ ...confirm, open: false }); };
 
-  const load = () => { api.get('/api/indents').then(r => setIndents(r.data)); };
+  const load = () => { api.get('/api/indents', { params: { search: search || undefined } }).then(r => setIndents(r.data)); };
+  useEffect(() => { load(); }, [search]);
 
   useEffect(() => {
     load();
@@ -351,6 +353,12 @@ export default function Indents() {
           sx={{ textTransform: 'none', fontWeight: 600, borderRadius: 2, px: 2.5 }}
         >New Indent</Button>
       </Box>
+
+      <Card sx={{ mb: 3, p: 2 }}>
+        <TextField size="small" placeholder="Search indent number..." value={search}
+          onChange={e => setSearch(e.target.value)} sx={{ minWidth: 300 }}
+          slotProps={{ input: { startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> } }} />
+      </Card>
 
       <Card>
         <TableContainer>

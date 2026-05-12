@@ -9,7 +9,7 @@ from app.models import (
     MaterialIssue, MaterialIssueItem, Material, UOM, StockLedger, User,
     GRN, GRNItem, Vendor, PurchaseOrder, Category, SubCategory, Warehouse
 )
-from app.auth import get_tenant_id, get_site_id, get_current_user
+from app.auth import get_tenant_id, get_site_id, get_current_user, require_permission
 
 router = APIRouter(prefix="/api/reports", tags=["Reports"])
 
@@ -23,6 +23,7 @@ def get_issue_summary(
     search: Optional[str] = None,
     include_zero: bool = False,
     db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("reports", "read")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -170,6 +171,7 @@ def get_issue_summary_details(
     to_date: str = Query(..., description="To Date (YYYY-MM-DD)"),
     warehouse_id: Optional[int] = None,
     db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("reports", "read")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -236,6 +238,7 @@ def get_rate_analysis(
     search: Optional[str] = None,
     variance_type: str = Query("amount", description="amount or percentage"),
     db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("reports", "read")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -347,6 +350,7 @@ def get_rate_analysis_drilldown(
     warehouse_id: Optional[int] = None,
     include_tax: bool = False,
     db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("reports", "read")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):

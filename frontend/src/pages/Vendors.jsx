@@ -27,8 +27,10 @@ export default function Vendors() {
 
   const handleSave = async () => {
     try {
-      if (editing) { await api.put(`/api/vendors/${editing}`, form); }
-      else { await api.post('/api/vendors', form); }
+      const payload = { ...form };
+      if (!editing && !payload.code) delete payload.code;
+      if (editing) { await api.put(`/api/vendors/${editing}`, payload); }
+      else { await api.post('/api/vendors', payload); }
       setDialog(false); setEditing(null); load();
     } catch (err) { alert(err.response?.data?.detail || 'Error'); }
   };
@@ -106,7 +108,7 @@ export default function Vendors() {
         <DialogTitle sx={{ fontWeight: 600 }}>{editing ? 'Edit Vendor' : 'New Vendor'}</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 0.5 }}>
-            <Grid size={{ xs: 12, sm: 4 }}><TextField fullWidth label="Vendor Code" value={form.code} onChange={e => setForm({ ...form, code: e.target.value })} required disabled={!!editing} /></Grid>
+            <Grid size={{ xs: 12, sm: 4 }}><TextField fullWidth label="Vendor Code" value={form.code || ''} placeholder="Auto-generated" onChange={e => setForm({ ...form, code: e.target.value })} disabled /></Grid>
             <Grid size={{ xs: 12, sm: 8 }}><TextField fullWidth label="Vendor Name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required /></Grid>
             <Grid size={{ xs: 12, sm: 4 }}><TextField fullWidth label="Contact Person" value={form.contact_person} onChange={e => setForm({ ...form, contact_person: e.target.value })} /></Grid>
             <Grid size={{ xs: 12, sm: 4 }}><TextField fullWidth label="Phone" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} /></Grid>

@@ -13,6 +13,7 @@ from app.schemas import (
     UOMCreate, UOMOut
 )
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
+from app.utils.sequences import get_next_number
 
 router = APIRouter(prefix="/api", tags=["Master Data"])
 
@@ -253,22 +254,26 @@ def create_material(
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
-    existing = db.query(Material).filter(
-        Material.code == data.code, Material.tenant_id == tenant_id, Material.site_id == site_id
-    ).first()
-    if existing:
-        raise HTTPException(status_code=400, detail="Material code already exists in this site")
-    mat = Material(**data.model_dump(), tenant_id=tenant_id, site_id=site_id)
+    mat_data = data.model_dump()
+    # Auto-generate code if not provided
+    if not mat_data.get("code"):
+        mat_data["code"] = get_next_number(db, tenant_id, site_id, "MATERIAL", "MAT")
+    else:
+        existing = db.query(Material).filter(
+            Material.code == mat_data["code"], Material.tenant_id == tenant_id, Material.site_id == site_id
+        ).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="Material code already exists in this site")
+    mat = Material(**mat_data, tenant_id=tenant_id, site_id=site_id)
     db.add(mat)
-    db.commit()
-    db.refresh(mat)
+    db.flush()
     db.add(AuditLog(
         tenant_id=tenant_id, site_id=site_id, user_id=current_user.id,
         action="CREATE", entity_type="Material", entity_id=mat.id,
         new_values=f"Created material: {mat.name}"
     ))
     db.commit()
-    return {"id": mat.id, "message": "Material created successfully"}
+    return {"id": mat.id, "code": mat.code, "message": "Material created successfully"}
 
 
 @router.put("/materials/{id}")

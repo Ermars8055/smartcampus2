@@ -7,7 +7,7 @@ import {
   DialogContent, DialogActions, Grid, MenuItem, Select, FormControl,
   InputLabel, IconButton, Tooltip, Divider
 } from '@mui/material';
-import { Add, Delete, CheckCircle, Archive, Send, Cancel, Pause } from '@mui/icons-material';
+import { Add, Delete, CheckCircle, Archive, Send, Cancel, Pause, Search } from '@mui/icons-material';
 import api from '../services/api';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { formatDate } from '../utils/dateUtils';
@@ -23,6 +23,7 @@ export default function PurchaseOrders() {
   const [projects, setProjects] = useState([]);
   const [dialog, setDialog] = useState(false);
   const [detailDialog, setDetailDialog] = useState(null);
+  const [search, setSearch] = useState('');
   const [form, setForm] = useState({
     vendor_id: '', project_id: '', delivery_date: '', terms: '', po_type: 'Informal', items: [{ material_id: '', quantity: '', rate: '' }]
   });
@@ -38,7 +39,8 @@ export default function PurchaseOrders() {
   const handleConfirm = () => { if (confirm.action) confirm.action(reason); setConfirm({ ...confirm, open: false }); setReason(''); };
   const handleCancelConfirm = () => { setConfirm({ ...confirm, open: false }); setReason(''); };
 
-  const load = () => { api.get('/api/procurement/po').then(r => setPos(r.data)); };
+  const load = () => { api.get('/api/procurement/po', { params: { search: search || undefined } }).then(r => setPos(r.data)); };
+  useEffect(() => { load(); }, [search]);
   useEffect(() => {
     load();
     api.get('/api/vendors').then(r => setVendors(r.data));
@@ -140,6 +142,12 @@ export default function PurchaseOrders() {
           setDialog(true);
         }}>Create PO</Button>
       </Box>
+
+      <Card sx={{ mb: 3, p: 2 }}>
+        <TextField size="small" placeholder="Search PO numbers..." value={search}
+          onChange={e => setSearch(e.target.value)} sx={{ minWidth: 300 }}
+          slotProps={{ input: { startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> } }} />
+      </Card>
 
       <Card>
         <TableContainer>

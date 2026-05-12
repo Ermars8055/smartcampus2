@@ -2,15 +2,16 @@
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from app.database import get_db
-from app.models import Organization, Project, Building, Warehouse, User, Floor, Room
+from app.models import Organization, Project, Building, Warehouse, User, Floor, Room, Department
 from app.schemas import (
     OrganizationCreate, OrganizationOut, ProjectCreate, ProjectOut,
     BuildingCreate, BuildingOut, WarehouseCreate, WarehouseOut,
-    FloorCreate, FloorOut, RoomCreate, RoomOut
+    FloorCreate, FloorOut, RoomCreate, RoomOut, DepartmentCreate, DepartmentOut
 )
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
+from app.utils.sequences import get_next_number
 
 router = APIRouter(prefix="/api", tags=["Organization Structure"])
 
@@ -39,10 +40,10 @@ def create_organization(
 ):
     if not data.name or not data.name.strip():
         raise HTTPException(status_code=400, detail="Organization name is required")
-    if not data.code or not data.code.strip():
-        raise HTTPException(status_code=400, detail="Organization code is required")
-        
-    org = Organization(**data.model_dump(), tenant_id=tenant_id, site_id=site_id)
+    org_data = data.model_dump()
+    if not org_data.get("code"):
+        org_data["code"] = get_next_number(db, tenant_id, site_id, "ORGANIZATION", "ORG")
+    org = Organization(**org_data, tenant_id=tenant_id, site_id=site_id)
     db.add(org)
     db.commit()
     db.refresh(org)
@@ -135,10 +136,10 @@ def create_project(
 ):
     if not data.name or not data.name.strip():
         raise HTTPException(status_code=400, detail="Project name is required")
-    if not data.code or not data.code.strip():
-        raise HTTPException(status_code=400, detail="Project code is required")
-        
-    proj = Project(**data.model_dump(), tenant_id=tenant_id, site_id=site_id)
+    proj_data = data.model_dump()
+    if not proj_data.get("code"):
+        proj_data["code"] = get_next_number(db, tenant_id, site_id, "PROJECT", "PROJ")
+    proj = Project(**proj_data, tenant_id=tenant_id, site_id=site_id)
     db.add(proj)
     db.commit()
     db.refresh(proj)
@@ -230,8 +231,10 @@ def create_building(
 ):
     if not data.name or not data.name.strip():
         raise HTTPException(status_code=400, detail="Building name is required")
-        
-    building = Building(**data.model_dump(), tenant_id=tenant_id, site_id=site_id)
+    bldg_data = data.model_dump()
+    if not bldg_data.get("code"):
+        bldg_data["code"] = get_next_number(db, tenant_id, site_id, "BUILDING", "BLDG")
+    building = Building(**bldg_data, tenant_id=tenant_id, site_id=site_id)
     db.add(building)
     db.commit()
     db.refresh(building)
@@ -383,7 +386,10 @@ def create_room(
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
-    room = Room(**data.model_dump(), tenant_id=tenant_id, site_id=site_id)
+    room_data = data.model_dump()
+    if not room_data.get("code"):
+        room_data["code"] = get_next_number(db, tenant_id, site_id, "ROOM", "RM")
+    room = Room(**room_data, tenant_id=tenant_id, site_id=site_id)
     db.add(room)
     db.commit()
     db.refresh(room)
@@ -422,7 +428,7 @@ def delete_room(
     return {"message": "Room deleted successfully"}
 
 
-@router.get("/departments", response_model=List[str])
+@router.get("/departments/names", response_model=List[str])
 def list_unique_departments(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("projects", "read")),
@@ -440,7 +446,33 @@ def list_unique_departments(
     return [r[0] for r in results if r[0]]
 
 
-@router.get("/buildings/{building_id}/departments", response_model=List[str])
+@router.get("/departments", response_model=List[DepartmentOut])
+def list_departments(
+    building_id: Optional[int] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("projects", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    """List all departments, optionally filtered by building."""
+    q = db.query(Department).filter(
+        Department.tenant_id == tenant_id,
+        Department.site_id == site_id,
+        Department.is_active == True,
+        Department.is_deleted == False
+    )
+    if building_id:
+        q = q.filter(Department.building_id == building_id)
+    depts = q.order_by(Department.name).all()
+    return [
+        DepartmentOut(
+            id=d.id, name=d.name, code=d.code, accounting_code=d.accounting_code,
+            building_id=d.building_id,
+            building_name=d.building.name if d.building else None
+        ) for d in depts
+    ]
+
+@router.get("/buildings/{building_id}/departments", response_model=List[DepartmentOut])
 def list_departments_by_building(
     building_id: int,
     db: Session = Depends(get_db),
@@ -448,24 +480,87 @@ def list_departments_by_building(
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
-    """Fetch distinct department names from rooms belonging to a specific building."""
-    from sqlalchemy import distinct
-    results = db.query(distinct(Room.department_name)).join(
-        Floor, Room.floor_id == Floor.id
-    ).filter(
-        Floor.building_id == building_id,
-        Room.tenant_id == tenant_id,
-        Room.site_id == site_id,
-        Room.department_name.isnot(None),
-        Room.department_name != ""
-    ).all()
-    return [r[0] for r in results if r[0]]
+    """Fetch departments belonging to a specific building."""
+    depts = db.query(Department).filter(
+        Department.building_id == building_id,
+        Department.tenant_id == tenant_id,
+        Department.site_id == site_id,
+        Department.is_active == True,
+        Department.is_deleted == False
+    ).order_by(Department.name).all()
+    return [
+        DepartmentOut(
+            id=d.id, name=d.name, code=d.code, accounting_code=d.accounting_code,
+            building_id=d.building_id,
+            building_name=d.building.name if d.building else None
+        ) for d in depts
+    ]
+
+@router.post("/departments", response_model=DepartmentOut)
+def create_department(
+    data: DepartmentCreate, db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("projects", "create")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    dept_data = data.model_dump()
+    if not dept_data.get("code"):
+        dept_data["code"] = get_next_number(db, tenant_id, site_id, "DEPARTMENT", "DEPT")
+    dept = Department(**dept_data, tenant_id=tenant_id, site_id=site_id)
+    db.add(dept)
+    db.commit()
+    db.refresh(dept)
+    return DepartmentOut(
+        id=dept.id, name=dept.name, code=dept.code, accounting_code=dept.accounting_code,
+        building_id=dept.building_id,
+        building_name=dept.building.name if dept.building else None
+    )
+
+@router.put("/departments/{id}", response_model=DepartmentOut)
+def update_department(
+    id: int, data: DepartmentCreate, db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("projects", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    dept = db.query(Department).filter(
+        Department.id == id, Department.tenant_id == tenant_id, Department.site_id == site_id
+    ).first()
+    if not dept: raise HTTPException(status_code=404, detail="Department not found")
+    update_data = data.model_dump(exclude_unset=True)
+    if "code" in update_data and not update_data["code"]:
+        del update_data["code"]
+    for k,v in update_data.items(): setattr(dept, k, v)
+    db.commit()
+    db.refresh(dept)
+    return DepartmentOut(
+        id=dept.id, name=dept.name, code=dept.code, accounting_code=dept.accounting_code,
+        building_id=dept.building_id,
+        building_name=dept.building.name if dept.building else None
+    )
+
+@router.delete("/departments/{id}")
+def delete_department(
+    id: int, db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("projects", "delete")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    dept = db.query(Department).filter(
+        Department.id == id, Department.tenant_id == tenant_id, Department.site_id == site_id
+    ).first()
+    if not dept: raise HTTPException(status_code=404, detail="Department not found")
+    dept.is_deleted = True
+    dept.is_active = False
+    db.commit()
+    return {"message": "Department deleted successfully"}
 
 
 # ── Warehouses ───────────────────────────────────────────────────────────
 
 @router.get("/warehouses")
 def list_warehouses(
+    search: Optional[str] = None,
     project_id: int = None, db: Session = Depends(get_db), 
     current_user: User = Depends(require_permission("warehouses", "read")),
     tenant_id: int = Depends(get_tenant_id),
@@ -474,6 +569,8 @@ def list_warehouses(
     q = db.query(Warehouse).filter(
         Warehouse.tenant_id == tenant_id, Warehouse.site_id == site_id, Warehouse.is_active == True
     )
+    if search:
+        q = q.filter(Warehouse.name.ilike(f"%{search}%"))
     if project_id:
         q = q.filter(Warehouse.project_id == project_id)
     warehouses = q.order_by(Warehouse.name).all()
@@ -499,8 +596,10 @@ def create_warehouse(
 ):
     if not data.name or not data.name.strip():
         raise HTTPException(status_code=400, detail="Warehouse name is required")
-        
-    wh = Warehouse(**data.model_dump(), tenant_id=tenant_id, site_id=site_id)
+    wh_data = data.model_dump()
+    if not wh_data.get("code"):
+        wh_data["code"] = get_next_number(db, tenant_id, site_id, "WAREHOUSE", "WH")
+    wh = Warehouse(**wh_data, tenant_id=tenant_id, site_id=site_id)
     db.add(wh)
     db.commit()
     db.refresh(wh)

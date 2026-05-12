@@ -10,12 +10,12 @@ from app.models import (
 )
 from app.schemas import IndentCreate, IndentOut, IndentAcknowledgeRequest
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
+from app.utils.sequences import get_next_number
 
 router = APIRouter(prefix="/api/indents", tags=["Indents"])
 
-def generate_indent_number(db: Session, tenant_id: int) -> str:
-    count = db.query(Indent).filter(Indent.tenant_id == tenant_id).count()
-    return f"IND-{tenant_id}-{count + 1:05d}"
+def generate_indent_number(db: Session, tenant_id: int, site_id: int) -> str:
+    return get_next_number(db, tenant_id, site_id, "INDENT", "IND")
 
 @router.get("", response_model=List[IndentOut])
 def list_indents(
@@ -70,7 +70,7 @@ def create_indent(
     indent = Indent(
         tenant_id=tenant_id,
         site_id=site_id,
-        indent_number=generate_indent_number(db, tenant_id),
+        indent_number=generate_indent_number(db, tenant_id, site_id),
         requester_id=current_user.id,
         room_id=data.room_id,
         floor=data.floor,
@@ -276,10 +276,11 @@ def convert_to_po(
         raise HTTPException(404, "Indent not found")
     
     # Generate PO number
-    count = db.query(PurchaseOrder).filter(PurchaseOrder.tenant_id == tenant_id, PurchaseOrder.site_id == site_id).count() + 1
-    po_number = f"PO-{datetime.now().strftime('%Y%m')}-{count:04d}"
+    po_number = get_next_number(db, tenant_id, site_id, "PURCHASE_ORDER", "PO")
 
-    project_id = indent.room.floor.building.project_id if indent.room and indent.room.floor and indent.room.floor.building else 1
+    project_id = indent.room.floor.building.project_id if indent.room and indent.room.floor and indent.room.floor.building else None
+    if not project_id:
+        raise HTTPException(400, "Indent must be linked to a room with a valid building/project to convert to PO")
 
     po = PurchaseOrder(
         tenant_id=tenant_id,

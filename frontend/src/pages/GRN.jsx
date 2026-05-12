@@ -5,7 +5,7 @@ import {
   DialogContent, DialogActions, Grid, MenuItem, Select, FormControl,
   InputLabel, Divider
 } from '@mui/material';
-import { Add } from '@mui/icons-material';
+import { Add, Search } from '@mui/icons-material';
 import api from '../services/api';
 import { formatDate } from '../utils/dateUtils';
 
@@ -19,12 +19,14 @@ export default function GRNPage() {
   const [materials, setMaterials] = useState([]);
   const [dialog, setDialog] = useState(false);
   const [detailDialog, setDetailDialog] = useState(null);
+  const [search, setSearch] = useState('');
   const [form, setForm] = useState({
     po_id: '', gate_entry_id: '', warehouse_id: '', project_id: '', vendor_id: '',
-    invoice_number: '', invoice_amount: 0, items: []
+    invoice_number: '', invoice_date: '', invoice_amount: 0, items: []
   });
 
-  const load = () => { api.get('/api/grn').then(r => setGrns(r.data)); };
+  const load = () => { api.get('/api/grn', { params: { search: search || undefined } }).then(r => setGrns(r.data)); };
+  useEffect(() => { load(); }, [search]);
   useEffect(() => {
     load();
     api.get('/api/procurement/po').then(r => setPos(r.data));
@@ -105,10 +107,16 @@ export default function GRNPage() {
           <Typography variant="body2" sx={{ color: '#64748B' }}>Verify and accept received materials</Typography>
         </Box>
         <Button variant="contained" startIcon={<Add />} onClick={() => {
-          setForm({ po_id: '', gate_entry_id: '', warehouse_id: warehouses[0]?.id || '', project_id: '', vendor_id: '', invoice_number: '', invoice_amount: 0, items: [] });
+          setForm({ po_id: '', gate_entry_id: '', warehouse_id: warehouses[0]?.id || '', project_id: '', vendor_id: '', invoice_number: '', invoice_date: '', invoice_amount: 0, items: [] });
           setDialog(true);
         }}>Create GRN</Button>
       </Box>
+
+      <Card sx={{ mb: 3, p: 2 }}>
+        <TextField size="small" placeholder="Search GRN number..." value={search}
+          onChange={e => setSearch(e.target.value)} sx={{ minWidth: 300 }}
+          slotProps={{ input: { startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> } }} />
+      </Card>
 
       <Card>
         <TableContainer>
@@ -203,8 +211,8 @@ export default function GRNPage() {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid size={4}><TextField fullWidth label="Invoice Number" value={form.invoice_number} onChange={e => setForm({ ...form, invoice_number: e.target.value })} /></Grid>
-            <Grid size={4}><TextField fullWidth label="Invoice Date" type="date" value={form.invoice_date} onChange={e => setForm({ ...form, invoice_date: e.target.value })} slotProps={{ inputLabel: { shrink: true } }} /></Grid>
+            <Grid size={4}><TextField fullWidth label="Invoice Number" value={form.invoice_number || ''} onChange={e => setForm({ ...form, invoice_number: e.target.value })} /></Grid>
+            <Grid size={4}><TextField fullWidth label="Invoice Date" type="date" value={form.invoice_date || ''} onChange={e => setForm({ ...form, invoice_date: e.target.value })} slotProps={{ inputLabel: { shrink: true } }} /></Grid>
             <Grid size={4}><TextField fullWidth label="Invoice Amount (₹)" type="number" value={form.invoice_amount} onChange={e => setForm({ ...form, invoice_amount: parseFloat(e.target.value) || 0 })} /></Grid>
           </Grid>
 
@@ -232,15 +240,15 @@ export default function GRNPage() {
                       <TableCell>{item.material_name || materials.find(m => m.id === item.material_id)?.name}</TableCell>
                       <TableCell align="right">{item.ordered_quantity}</TableCell>
                       <TableCell align="right">
-                        <TextField size="small" type="number" value={item.received_quantity} sx={{ width: 80 }}
+                        <TextField size="small" type="number" value={item.received_quantity ?? ''} sx={{ width: 80 }}
                           onChange={e => { const items = [...form.items]; items[i].received_quantity = parseFloat(e.target.value) || 0; setForm({ ...form, items }); }} />
                       </TableCell>
                       <TableCell align="right">
-                        <TextField size="small" type="number" value={item.accepted_quantity} sx={{ width: 80 }}
+                        <TextField size="small" type="number" value={item.accepted_quantity ?? ''} sx={{ width: 80 }}
                           onChange={e => { const items = [...form.items]; items[i].accepted_quantity = parseFloat(e.target.value) || 0; setForm({ ...form, items }); }} />
                       </TableCell>
                       <TableCell align="right">
-                        <TextField size="small" type="number" value={item.rejected_quantity} sx={{ width: 80 }}
+                        <TextField size="small" type="number" value={item.rejected_quantity ?? ''} sx={{ width: 80 }}
                           onChange={e => { const items = [...form.items]; items[i].rejected_quantity = parseFloat(e.target.value) || 0; setForm({ ...form, items }); }} />
                       </TableCell>
                       <TableCell align="right">₹{item.rate?.toLocaleString()}</TableCell>

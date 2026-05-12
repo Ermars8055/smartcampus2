@@ -94,7 +94,7 @@ export default function Materials() {
         hsn_code: form.hsn_code || null
       };
 
-      if (!editing) payload.code = form.code;
+      if (!editing && form.code) payload.code = form.code;
 
       if (editing) {
         await api.put(`/api/materials/${editing}`, payload);
@@ -371,10 +371,10 @@ export default function Materials() {
               </Typography>
               <TextField 
                 fullWidth 
-                value={form.code} 
+                value={form.code || ''} 
                 onChange={e => setForm({ ...form, code: e.target.value })} 
-                required 
-                disabled={!!editing} 
+                placeholder="Auto-generated"
+                disabled 
                 slotProps={{ input: { startAdornment: <InputAdornment position="start"><Inventory color="action" sx={{ mr: 1 }} /></InputAdornment> } }} 
               />
             </Box>

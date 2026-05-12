@@ -5,7 +5,7 @@ import {
   DialogContent, DialogActions, MenuItem, Select, FormControl, InputLabel,
   IconButton, Chip
 } from '@mui/material';
-import { Add, Edit, Delete, Warehouse as WarehouseIcon, Business, VpnKey, LocationOn, Apartment } from '@mui/icons-material';
+import { Add, Edit, Delete, Warehouse as WarehouseIcon, Business, VpnKey, LocationOn, Apartment, Search } from '@mui/icons-material';
 import { InputAdornment } from '@mui/material';
 import api from '../services/api';
 
@@ -13,25 +13,29 @@ export default function Warehouses() {
   const [warehouses, setWarehouses] = useState([]);
   const [projects, setProjects] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [search, setSearch] = useState('');
   const [form, setForm] = useState({});
 
   const load = () => {
-    api.get('/api/warehouses').then(r => setWarehouses(r.data));
+    api.get('/api/warehouses', { params: { search: search || undefined } }).then(r => setWarehouses(r.data));
     api.get('/api/projects').then(r => setProjects(r.data));
   };
 
+  useEffect(() => { load(); }, [search]);
   useEffect(() => { load(); }, []);
 
   const save = async () => {
-    if (!form.name?.trim() || !form.code?.trim()) {
-      return alert("Name and Code are required.");
+    if (!form.name?.trim()) {
+      return alert("Name is required.");
     }
+    const payload = { ...form };
+    if (!form.id && !payload.code) delete payload.code;
 
     try {
       if (form.id) {
-        await api.put(`/api/warehouses/${form.id}`, form);
+        await api.put(`/api/warehouses/${form.id}`, payload);
       } else {
-        await api.post('/api/warehouses', form);
+        await api.post('/api/warehouses', payload);
       }
       setDialogOpen(false);
       load();
@@ -59,6 +63,12 @@ export default function Warehouses() {
           New Warehouse
         </Button>
       </Box>
+
+      <Card sx={{ mb: 3, p: 2 }}>
+        <TextField size="small" placeholder="Search warehouse name..." value={search}
+          onChange={e => setSearch(e.target.value)} sx={{ minWidth: 300 }}
+          slotProps={{ input: { startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> } }} />
+      </Card>
 
       <TableContainer component={Card} sx={{ borderRadius: '12px' }}>
         <Table>
@@ -109,6 +119,8 @@ export default function Warehouses() {
               <TextField 
                 fullWidth label="Code" size="small" value={form.code || ''} 
                 onChange={e => setForm({ ...form, code: e.target.value })} 
+                placeholder="Auto-generated"
+                disabled
                 InputLabelProps={{ shrink: true }}
                 slotProps={{ input: { startAdornment: <InputAdornment position="start"><VpnKey sx={{ fontSize: 18 }} /></InputAdornment> } }}
               />

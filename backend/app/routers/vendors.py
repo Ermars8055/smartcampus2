@@ -8,6 +8,7 @@ from app.database import get_db
 from app.models import Vendor, VendorCategory, Category, User
 from app.schemas import VendorCreate, VendorUpdate, VendorOut
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
+from app.utils.sequences import get_next_number
 
 router = APIRouter(prefix="/api/vendors", tags=["Vendors"])
 
@@ -85,20 +86,23 @@ def create_vendor(
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
-    existing = db.query(Vendor).filter(
-        Vendor.code == data.code, Vendor.tenant_id == tenant_id, Vendor.site_id == site_id
-    ).first()
-    if existing:
-        raise HTTPException(status_code=400, detail="Vendor code already exists")
     vendor_data = data.model_dump(exclude={"category_ids"})
+    # Auto-generate code if not provided
+    if not vendor_data.get("code"):
+        vendor_data["code"] = get_next_number(db, tenant_id, site_id, "VENDOR", "VND")
+    else:
+        existing = db.query(Vendor).filter(
+            Vendor.code == vendor_data["code"], Vendor.tenant_id == tenant_id, Vendor.site_id == site_id
+        ).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="Vendor code already exists")
     vendor = Vendor(**vendor_data, tenant_id=tenant_id, site_id=site_id)
     db.add(vendor)
     db.flush()
     for cat_id in data.category_ids:
         db.add(VendorCategory(vendor_id=vendor.id, category_id=cat_id))
     db.commit()
-    db.refresh(vendor)
-    return {"id": vendor.id, "message": "Vendor created successfully"}
+    return {"id": vendor.id, "code": vendor.code, "message": "Vendor created successfully"}
 
 
 @router.put("/{id}")

@@ -1,9 +1,10 @@
 """NissiGrid Smart Campus - FastAPI main application."""
 
-from fastapi import FastAPI, Request, Response
+from contextlib import asynccontextmanager
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-import os
+import os, logging
 
 from app.config import APP_TITLE, APP_SUBTITLE, APP_VERSION, CORS_ORIGINS
 from app.database import engine, SessionLocal, Base
@@ -14,49 +15,49 @@ from app.routers import (
     auth, dashboard, materials, vendors, organizations,
     procurement, gate_entry, grn, store_ops, inventory_admin,
     saas_admin, rbac, sites, auto_pr, alerts, intelligence,
-    indents, approval_flows, quotations, reports
+    indents, approval_flows, quotations, reports, uploads
 )
 
-# Create database tables
-Base.metadata.create_all(bind=engine)
+logging.basicConfig(level=logging.INFO)
+log = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Create tables and seed minimal data on startup."""
+    Base.metadata.create_all(bind=engine)
+    from app.seed_data import seed_database
+    db = SessionLocal()
+    try:
+        seed_database(db)
+    finally:
+        db.close()
+    yield
+
 
 app = FastAPI(
     title=APP_TITLE,
     description=APP_SUBTITLE,
     version=APP_VERSION,
     docs_url="/api/docs",
-    redoc_url="/api/redoc"
+    redoc_url="/api/redoc",
+    lifespan=lifespan,
 )
 
-@app.middleware("http")
-async def cors_handler(request: Request, call_next):
-    if request.method == "OPTIONS":
-        response = Response(content="OK", status_code=200)
-    else:
-        try:
-            response = await call_next(request)
-        except Exception as e:
-            from fastapi.responses import JSONResponse
-            import traceback
-            print(f"ERROR: {traceback.format_exc()}")
-            response = JSONResponse(
-                status_code=500,
-                content={"detail": str(e)}
-            )
-    
-    origin = request.headers.get("Origin", "*")
-    response.headers["Access-Control-Allow-Origin"] = origin
-    response.headers["Access-Control-Allow-Methods"] = "*"
-    response.headers["Access-Control-Allow-Headers"] = "*"
-    response.headers["Access-Control-Allow-Credentials"] = "true"
-    return response
+# Proper CORS middleware (replaces the old wildcard handler)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=CORS_ORIGINS,
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Static files for uploads
 os.makedirs("uploads", exist_ok=True)
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 # Register routers
-
 app.include_router(auth.router)
 app.include_router(alerts.router)
 app.include_router(saas_admin.router)
@@ -77,17 +78,7 @@ app.include_router(indents.router)
 app.include_router(approval_flows.router)
 app.include_router(quotations.router)
 app.include_router(reports.router)
-
-
-@app.on_event("startup")
-def startup_event():
-    """Seed the database on first run."""
-    from app.seed_data import seed_database
-    db = SessionLocal()
-    try:
-        seed_database(db)
-    finally:
-        db.close()
+app.include_router(uploads.router)
 
 
 @app.get("/api/health")

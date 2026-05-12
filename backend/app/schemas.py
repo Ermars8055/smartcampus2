@@ -101,7 +101,7 @@ class TenantOut(TenantBase):
 
 class SiteBase(BaseModel):
     name: str
-    code: str
+    code: Optional[str] = None
     location: Optional[str] = None
 
 class SiteCreate(SiteBase):
@@ -154,7 +154,7 @@ class UOMOut(UOMBase):
         from_attributes = True
 
 class MaterialBase(BaseModel):
-    code: str
+    code: Optional[str] = None
     name: str
     category_id: int
     subcategory_id: Optional[int] = None
@@ -202,7 +202,7 @@ class MaterialOut(MaterialBase):
 
 class VendorBase(BaseModel):
     name: str
-    code: str
+    code: Optional[str] = None
     contact_person: Optional[str] = None
     email: Optional[EmailStr] = None
     phone: Optional[str] = None
@@ -243,7 +243,7 @@ class VendorOut(VendorBase):
 
 class OrganizationBase(BaseModel):
     name: str
-    code: str
+    code: Optional[str] = None
     address: Optional[str] = None
     phone: Optional[str] = None
     email: Optional[str] = None
@@ -258,7 +258,7 @@ class OrganizationOut(OrganizationBase):
 
 class ProjectBase(BaseModel):
     name: str
-    code: str
+    code: Optional[str] = None
     organization_id: int
     location: Optional[str] = None
     start_date: Optional[date] = None
@@ -277,7 +277,7 @@ class ProjectOut(ProjectBase):
 
 class BuildingBase(BaseModel):
     name: str
-    code: str
+    code: Optional[str] = None
     project_id: int
 
 class BuildingCreate(BuildingBase):
@@ -303,6 +303,21 @@ class FloorOut(FloorBase):
     class Config:
         from_attributes = True
 
+class DepartmentBase(BaseModel):
+    name: str
+    code: Optional[str] = None
+    accounting_code: Optional[str] = None
+    building_id: int
+
+class DepartmentCreate(DepartmentBase):
+    pass
+
+class DepartmentOut(DepartmentBase):
+    id: int
+    building_name: Optional[str] = None
+    class Config:
+        from_attributes = True
+
 class RoomBase(BaseModel):
     name: str
     code: Optional[str] = None
@@ -321,7 +336,7 @@ class RoomOut(RoomBase):
 
 class WarehouseBase(BaseModel):
     name: str
-    code: str
+    code: Optional[str] = None
     project_id: int
     warehouse_type: str = "Main"
     location: Optional[str] = None
@@ -451,13 +466,14 @@ class GateEntryBase(BaseModel):
     vehicle_number: Optional[str] = None
     vendor_id: Optional[int] = None
     po_id: Optional[int] = None
-    project_id: int
-    material_id: int
-    quantity: float
+    project_id: Optional[int] = None  # Optional for Direct Invoice
+    material_id: Optional[int] = None  # Optional for Direct Invoice
+    quantity: Optional[float] = None  # Optional for Direct Invoice
     driver_name: Optional[str] = None
     delivery_person_name: Optional[str] = None
     driver_phone: Optional[str] = None
     gate_pass_number: Optional[str] = None
+    invoice_scan_url: Optional[str] = None
     remarks: Optional[str] = None
 
 class GateEntryCreate(GateEntryBase):
@@ -470,7 +486,9 @@ class GateEntryOut(GateEntryBase):
     created_at: datetime
     entry_type: str
     delivery_person_name: Optional[str] = None
+    invoice_scan_url: Optional[str] = None
     vendor_name: Optional[str] = None
+    material_name: Optional[str] = None
     po_number: Optional[str] = None
     project_name: Optional[str] = None
     class Config:
@@ -480,19 +498,42 @@ class GateEntryOut(GateEntryBase):
 # ── GRN ──────────────────────────────────────────────────────────────────
 
 class GRNItemBase(BaseModel):
-    po_item_id: int
+    material_id: Optional[int] = None  # Required for Direct Invoice, derived from PO otherwise
+    po_item_id: Optional[int] = None  # Optional for Direct Invoice
     received_quantity: float = Field(..., gt=0)
     accepted_quantity: float = Field(..., gt=0)
     rejected_quantity: float = 0
+    rate: float = 0
     rejection_reason: Optional[str] = None
+    # GST fields per line
+    hsn_code: Optional[str] = None
+    cgst_rate: float = 0
+    sgst_rate: float = 0
+    igst_rate: float = 0
+    cgst_amount: float = 0
+    sgst_amount: float = 0
+    igst_amount: float = 0
+    taxable_amount: float = 0
+    discount_percent: float = 0
 
 class GRNItemOut(BaseModel):
     id: int
     material_id: int
+    po_item_id: Optional[int] = None
+    ordered_quantity: float = 0
     received_quantity: float
     accepted_quantity: float
     rejected_quantity: float
     rate: float
+    hsn_code: Optional[str] = None
+    cgst_rate: float = 0
+    sgst_rate: float = 0
+    igst_rate: float = 0
+    cgst_amount: float = 0
+    sgst_amount: float = 0
+    igst_amount: float = 0
+    taxable_amount: float = 0
+    discount_percent: float = 0
     material_name: Optional[str] = None
     material_code: Optional[str] = None
     uom_name: Optional[str] = None
@@ -500,12 +541,24 @@ class GRNItemOut(BaseModel):
         from_attributes = True
 
 class GRNBase(BaseModel):
-    po_id: int
+    po_id: Optional[int] = None  # Nullable for Direct Invoice
     warehouse_id: int
     gate_entry_id: Optional[int] = None
+    project_id: Optional[int] = None  # Required — passed explicitly for Direct Invoice
+    vendor_id: Optional[int] = None  # Required — passed explicitly for Direct Invoice
+    receipt_type: str = "PO-Based"
     invoice_number: Optional[str] = None
     invoice_date: Optional[date] = None
     invoice_amount: float = 0
+    invoice_scan_url: Optional[str] = None
+    # GST totals
+    vendor_gstin: Optional[str] = None
+    total_taxable_amount: float = 0
+    total_cgst: float = 0
+    total_sgst: float = 0
+    total_igst: float = 0
+    total_tax: float = 0
+    eway_bill_number: Optional[str] = None
     remarks: Optional[str] = None
     items: List[GRNItemBase] = []
 
@@ -515,13 +568,23 @@ class GRNCreate(GRNBase):
 class GRNOut(BaseModel):
     id: int
     grn_number: str
-    po_id: int
+    po_id: Optional[int] = None
     warehouse_id: int
     project_id: int
     vendor_id: int
+    receipt_type: str = "PO-Based"
     invoice_number: Optional[str] = None
     invoice_date: Optional[date] = None
     invoice_amount: float
+    invoice_scan_url: Optional[str] = None
+    vendor_gstin: Optional[str] = None
+    total_taxable_amount: float = 0
+    total_cgst: float = 0
+    total_sgst: float = 0
+    total_igst: float = 0
+    total_tax: float = 0
+    eway_bill_number: Optional[str] = None
+    payment_status: str = "Not Applicable"
     status: str
     created_at: datetime
     completed_at: Optional[datetime] = None

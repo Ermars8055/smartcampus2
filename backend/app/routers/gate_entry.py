@@ -2,39 +2,42 @@
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 from app.database import get_db
 from app.models import GateEntry, User, Vendor, PurchaseOrder, PurchaseOrderItem, Material
 from app.schemas import GateEntryCreate, GateEntryOut
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
+from app.utils.sequences import get_next_number
 
 router = APIRouter(prefix="/api/gate-entries", tags=["Gate Entry"])
 
 
-def generate_entry_number(db: Session, tenant_id: int, site_id: int) -> str:
-    count = db.query(GateEntry).filter(
-        GateEntry.tenant_id == tenant_id, GateEntry.site_id == site_id
-    ).count() + 1
-    return f"GE-{datetime.now().strftime('%Y%m%d')}-{count:04d}"
 
 
 @router.get("")
 def list_gate_entries(
+    search: Optional[str] = None,
     status: Optional[str] = None,
     project_id: Optional[int] = None,
+    entry_type: Optional[str] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("gate_entry", "read")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
     q = db.query(GateEntry).filter(
-        GateEntry.tenant_id == tenant_id, GateEntry.site_id == site_id
+        GateEntry.tenant_id == tenant_id, GateEntry.site_id == site_id,
+        GateEntry.is_deleted == False
     )
+    if search:
+        q = q.filter(GateEntry.entry_number.ilike(f"%{search}%"))
     if status:
         q = q.filter(GateEntry.status == status)
     if project_id:
         q = q.filter(GateEntry.project_id == project_id)
+    if entry_type:
+        q = q.filter(GateEntry.entry_type == entry_type)
     entries = q.order_by(GateEntry.created_at.desc()).all()
     result = []
     for e in entries:
@@ -49,6 +52,7 @@ def list_gate_entries(
             created_at=e.created_at,
             entry_type=e.entry_type,
             delivery_person_name=e.delivery_person_name,
+            invoice_scan_url=e.invoice_scan_url,
             vendor_name=e.vendor.name if e.vendor else None,
             material_name=e.material.name if e.material else None,
             po_number=e.purchase_order.po_number if e.purchase_order else None
@@ -63,27 +67,43 @@ def create_gate_entry(
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
-    if data.entry_type == "Vehicle" and (not data.vehicle_number or not data.vehicle_number.strip()):
-        raise HTTPException(status_code=400, detail="Vehicle number is required for vehicle entry")
-    
-    if data.entry_type == "Carry on hand" and (not data.delivery_person_name or not data.delivery_person_name.strip()):
-        raise HTTPException(status_code=400, detail="Delivery person name is required for hand carry entry")
+    is_direct = data.entry_type == "Direct Invoice"
+
+    # Validation based on entry type
+    if not is_direct:
+        if not data.project_id:
+            raise HTTPException(status_code=400, detail="Project is required")
+        if not data.material_id:
+            raise HTTPException(status_code=400, detail="Material is required")
+        if not data.quantity or data.quantity <= 0:
+            raise HTTPException(status_code=400, detail="Quantity is required")
+        if data.entry_type == "Vehicle" and (not data.vehicle_number or not data.vehicle_number.strip()):
+            raise HTTPException(status_code=400, detail="Vehicle number is required for vehicle entry")
+        if data.entry_type == "Carry on hand" and (not data.delivery_person_name or not data.delivery_person_name.strip()):
+            raise HTTPException(status_code=400, detail="Delivery person name is required for hand carry entry")
+    else:
+        # Direct Invoice: vendor and invoice scan are mandatory
+        if not data.vendor_id:
+            raise HTTPException(status_code=400, detail="Vendor is required for Direct Invoice entry")
+        if not data.invoice_scan_url:
+            raise HTTPException(status_code=400, detail="Invoice scan is required for Direct Invoice entry")
 
     entry = GateEntry(
-        entry_number=generate_entry_number(db, tenant_id, site_id),
+        entry_number=get_next_number(db, tenant_id, site_id, "GATE_ENTRY", "GE"),
         recorded_by_id=current_user.id,
-        arrival_time=datetime.utcnow(),
-        status="Gate Entry Created",
+        arrival_time=datetime.now(timezone.utc),
+        status="Awaiting Direct GRN" if is_direct else "Gate Entry Created",
         vehicle_number=data.vehicle_number,
         vendor_id=data.vendor_id,
         po_id=data.po_id if data.po_id else None,
-        project_id=data.project_id,
-        material_id=data.material_id,
-        quantity=data.quantity,
+        project_id=data.project_id if data.project_id else None,
+        material_id=data.material_id if data.material_id else None,
+        quantity=data.quantity if data.quantity else None,
         driver_name=data.driver_name,
         driver_phone=data.driver_phone,
         delivery_person_name=data.delivery_person_name,
         entry_type=data.entry_type,
+        invoice_scan_url=data.invoice_scan_url,
         remarks=data.remarks,
         tenant_id=tenant_id,
         site_id=site_id
@@ -91,7 +111,7 @@ def create_gate_entry(
     db.add(entry)
     db.flush()
 
-    if data.po_id:
+    if not is_direct and data.po_id:
         po = db.query(PurchaseOrder).filter(
             PurchaseOrder.id == data.po_id, PurchaseOrder.tenant_id == tenant_id, PurchaseOrder.site_id == site_id
         ).first()
@@ -124,3 +144,4 @@ def update_gate_entry_status(
     entry.status = status
     db.commit()
     return {"message": f"Gate Entry status updated to {status}"}
+

@@ -17,6 +17,7 @@ from app.schemas import (
 )
 from app.routers.grn import update_stock
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
+from app.utils.sequences import get_next_number
 
 router = APIRouter(prefix="/api", tags=["Store Operations"])
 
@@ -25,6 +26,7 @@ router = APIRouter(prefix="/api", tags=["Store Operations"])
 
 @router.get("/issues")
 def list_issues(
+    search: Optional[str] = None,
     project_id: Optional[int] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("issues", "read")),
@@ -32,6 +34,8 @@ def list_issues(
     site_id: int = Depends(get_site_id)
 ):
     q = db.query(MaterialIssue).filter(MaterialIssue.tenant_id == tenant_id, MaterialIssue.site_id == site_id)
+    if search:
+        q = q.filter(MaterialIssue.issue_number.ilike(f"%{search}%"))
     if project_id:
         q = q.filter(MaterialIssue.project_id == project_id)
     issues = q.order_by(MaterialIssue.created_at.desc()).all()
@@ -78,7 +82,7 @@ def create_issue(
     site_id: int = Depends(get_site_id)
 ):
     count = db.query(MaterialIssue).filter(MaterialIssue.tenant_id == tenant_id, MaterialIssue.site_id == site_id).count() + 1
-    issue_number = f"ISS-{datetime.now().strftime('%Y%m')}-{count:04d}"
+    issue_number = get_next_number(db, tenant_id, site_id, "ISSUE", "ISS")
 
     issue = MaterialIssue(
         issue_number=issue_number,
@@ -197,6 +201,7 @@ def acknowledge_issue(
 
 @router.get("/returns")
 def list_returns(
+    search: Optional[str] = None,
     project_id: Optional[int] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("returns", "read")),
@@ -204,6 +209,8 @@ def list_returns(
     site_id: int = Depends(get_site_id)
 ):
     q = db.query(MaterialReturn).filter(MaterialReturn.tenant_id == tenant_id, MaterialReturn.site_id == site_id)
+    if search:
+        q = q.filter(MaterialReturn.return_number.ilike(f"%{search}%"))
     if project_id:
         q = q.filter(MaterialReturn.project_id == project_id)
     returns = q.order_by(MaterialReturn.created_at.desc()).all()
@@ -244,7 +251,7 @@ def create_return(
     site_id: int = Depends(get_site_id)
 ):
     count = db.query(MaterialReturn).filter(MaterialReturn.tenant_id == tenant_id, MaterialReturn.site_id == site_id).count() + 1
-    return_number = f"RET-{datetime.now().strftime('%Y%m')}-{count:04d}"
+    return_number = get_next_number(db, tenant_id, site_id, "RETURN", "RET")
 
     ret = MaterialReturn(
         return_number=return_number,
@@ -296,6 +303,7 @@ def create_return(
 
 @router.get("/transfers")
 def list_transfers(
+    search: Optional[str] = None,
     project_id: Optional[int] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("transfers", "read")),
@@ -303,6 +311,8 @@ def list_transfers(
     site_id: int = Depends(get_site_id)
 ):
     q = db.query(StockTransfer).filter(StockTransfer.tenant_id == tenant_id, StockTransfer.site_id == site_id)
+    if search:
+        q = q.filter(StockTransfer.transfer_number.ilike(f"%{search}%"))
     if project_id:
         q = q.filter(StockTransfer.project_id == project_id)
     transfers = q.order_by(StockTransfer.created_at.desc()).all()
@@ -344,7 +354,7 @@ def create_transfer(
         raise HTTPException(status_code=400, detail="Source and destination warehouse cannot be the same")
 
     count = db.query(StockTransfer).filter(StockTransfer.tenant_id == tenant_id, StockTransfer.site_id == site_id).count() + 1
-    transfer_number = f"TRF-{datetime.now().strftime('%Y%m')}-{count:04d}"
+    transfer_number = get_next_number(db, tenant_id, site_id, "TRANSFER", "TRF")
 
     transfer = StockTransfer(
         transfer_number=transfer_number,

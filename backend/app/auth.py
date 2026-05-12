@@ -1,5 +1,6 @@
 """JWT authentication with multi-tenant workspace support."""
-from datetime import datetime, timedelta
+import logging
+from datetime import datetime, timedelta, timezone
 from typing import Optional, List
 from fastapi import Depends, HTTPException, status, Header
 from fastapi.security import OAuth2PasswordBearer
@@ -8,6 +9,8 @@ from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 from app.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 from app.database import get_db
+
+log = logging.getLogger(__name__)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
@@ -20,7 +23,7 @@ def get_password_hash(password):
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
@@ -44,7 +47,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     user._permissions = payload.get("permissions", {})
     user._is_platform_admin = payload.get("is_platform_admin", False)
     user._active_site_id = payload.get("active_site_id")
-    print(f"DEBUG AUTH: User {username}, Tenant ID: {user._tenant_id}, Site ID: {user._active_site_id}")
+    log.debug("Auth: user=%s tenant=%s site=%s", username, user._tenant_id, user._active_site_id)
     return user
 
 def get_tenant_id(current_user = Depends(get_current_user)):

@@ -13,6 +13,7 @@ from app.models import (
 )
 from app.schemas import PRCreate, PRUpdate, PROut, POCreate, POUpdate, POOut, POItemOut
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
+from app.utils.sequences import get_next_number
 
 router = APIRouter(prefix="/api/procurement", tags=["Procurement"])
 
@@ -26,19 +27,6 @@ def get_lpp(db: Session, material_id: int, tenant_id: int, site_id: int) -> floa
     ).order_by(PurchaseOrder.created_at.desc()).first()
     return last_po_item.rate if last_po_item else None
 
-def generate_pr_number(db: Session, tenant_id: int, site_id: int) -> str:
-    count = db.query(PurchaseRequest).filter(
-        PurchaseRequest.tenant_id == tenant_id, PurchaseRequest.site_id == site_id
-    ).count() + 1
-    return f"PR-{datetime.now().strftime('%Y%m')}-{count:04d}"
-
-
-def generate_po_number(db: Session, tenant_id: int, site_id: int) -> str:
-    count = db.query(PurchaseOrder).filter(
-        PurchaseOrder.tenant_id == tenant_id, PurchaseOrder.site_id == site_id
-    ).count() + 1
-    return f"PO-{datetime.now().strftime('%Y%m')}-{count:04d}"
-
 
 class RejectBody(BaseModel):
     remarks: Optional[str] = None
@@ -48,6 +36,7 @@ class RejectBody(BaseModel):
 
 @router.get("/pr")
 def list_purchase_requests(
+    search: Optional[str] = None,
     status: Optional[str] = None,
     project_id: Optional[int] = None,
     db: Session = Depends(get_db),
@@ -56,8 +45,11 @@ def list_purchase_requests(
     site_id: int = Depends(get_site_id)
 ):
     q = db.query(PurchaseRequest).filter(
-        PurchaseRequest.tenant_id == tenant_id, PurchaseRequest.site_id == site_id
+        PurchaseRequest.tenant_id == tenant_id, PurchaseRequest.site_id == site_id,
+        PurchaseRequest.is_deleted == False
     )
+    if search:
+        q = q.filter(PurchaseRequest.pr_number.ilike(f"%{search}%"))
     if status:
         q = q.filter(PurchaseRequest.status == status)
     if project_id:
@@ -138,7 +130,7 @@ def create_purchase_request(
     site_id: int = Depends(get_site_id)
 ):
     pr = PurchaseRequest(
-        pr_number=generate_pr_number(db, tenant_id, site_id),
+        pr_number=get_next_number(db, tenant_id, site_id, "PURCHASE_REQUEST", "PR"),
         requester_id=current_user.id,
         project_id=data.project_id,
         required_for_room_id=data.required_for_room_id,
@@ -268,6 +260,7 @@ def short_close_pr(
 
 @router.get("/po")
 def list_purchase_orders(
+    search: Optional[str] = None,
     status: Optional[str] = None,
     project_id: Optional[int] = None,
     db: Session = Depends(get_db),
@@ -276,8 +269,11 @@ def list_purchase_orders(
     site_id: int = Depends(get_site_id)
 ):
     q = db.query(PurchaseOrder).filter(
-        PurchaseOrder.tenant_id == tenant_id, PurchaseOrder.site_id == site_id
+        PurchaseOrder.tenant_id == tenant_id, PurchaseOrder.site_id == site_id,
+        PurchaseOrder.is_deleted == False
     )
+    if search:
+        q = q.filter(PurchaseOrder.po_number.ilike(f"%{search}%"))
     if status:
         q = q.filter(PurchaseOrder.status == status)
     if project_id:
@@ -374,7 +370,7 @@ def create_purchase_order(
     site_id: int = Depends(get_site_id)
 ):
     po = PurchaseOrder(
-        po_number=generate_po_number(db, tenant_id, site_id),
+        po_number=get_next_number(db, tenant_id, site_id, "PURCHASE_ORDER", "PO"),
         vendor_id=data.vendor_id,
         project_id=data.project_id,
         pr_id=data.pr_id,
@@ -418,7 +414,7 @@ def create_purchase_order(
             Indent.id == data.indent_id, Indent.tenant_id == tenant_id, Indent.site_id == site_id
         ).first()
         if indent:
-            indent.status = IndentStatus.PO_CREATED.value
+            indent.status = IndentStatus.CONVERTED.value
 
     db.commit()
     db.refresh(po)

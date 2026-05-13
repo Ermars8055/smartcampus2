@@ -5,7 +5,7 @@ import {
   DialogContent, DialogActions, Grid, MenuItem, Select, FormControl, InputLabel, Divider,
   Radio, RadioGroup, FormControlLabel, FormLabel, ToggleButton, ToggleButtonGroup
 } from '@mui/material';
-import { Add, Search, AttachFile, OpenInNew } from '@mui/icons-material';
+import { Add, Search, AttachFile, OpenInNew, LocalShipping } from '@mui/icons-material';
 import api from '../services/api';
 import { formatDate, formatDateTime } from '../utils/dateUtils';
 
@@ -233,9 +233,19 @@ export default function GateEntry() {
       </Dialog>
 
       {/* Create Gate Entry Dialog */}
-      <Dialog open={dialog} onClose={() => setDialog(false)} maxWidth="lg" fullWidth>
-        <DialogTitle sx={{ fontWeight: 600 }}>Record Gate Entry</DialogTitle>
-        <DialogContent>
+      <Dialog open={dialog} onClose={() => setDialog(false)} maxWidth="lg" fullWidth PaperProps={{ sx: { borderRadius: 3, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' } }}>
+        <DialogTitle sx={{ pb: 1, pt: 3, px: 4 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box sx={{ p: 1, bgcolor: '#EFF6FF', borderRadius: 2, color: '#2563EB', display: 'flex' }}>
+              <LocalShipping fontSize="medium" />
+            </Box>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>Record Gate Entry</Typography>
+              <Typography variant="body2" color="text.secondary">Log incoming materials at the security gate.</Typography>
+            </Box>
+          </Box>
+        </DialogTitle>
+        <DialogContent sx={{ px: 4, py: 2 }}>
           <Box sx={{ mb: 3, display: 'flex', justifyContent: 'center' }}>
             <ToggleButtonGroup
               color="primary"
@@ -382,7 +392,10 @@ export default function GateEntry() {
             </>
           )}
         </DialogContent>
-        <DialogActions><Button onClick={() => setDialog(false)}>Cancel</Button><Button variant="contained" onClick={handleCreate}>Record Entry</Button></DialogActions>
+        <DialogActions sx={{ px: 4, pb: 4, pt: 2, justifyContent: 'flex-end', gap: 2 }}>
+          <Button onClick={() => setDialog(false)} sx={{ color: '#64748B', fontWeight: 600 }}>Cancel</Button>
+          <Button variant="contained" onClick={handleCreate} sx={{ borderRadius: 2, px: 4, py: 1, fontWeight: 700, boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)', textTransform: 'none' }}>Record Entry</Button>
+        </DialogActions>
       </Dialog>
     </Box>
   );

@@ -58,20 +58,32 @@ def get_tenant_id(current_user = Depends(get_current_user)):
 
 def get_site_id(current_user = Depends(get_current_user), x_site_id: Optional[str] = Header(None)):
     if x_site_id:
-        sid = int(x_site_id)
-        if not getattr(current_user, '_is_platform_admin', False):
-            if sid not in getattr(current_user, '_site_ids', []):
-                raise HTTPException(403, "No access to this site")
-        return sid
+        try:
+            sid = int(x_site_id)
+            if not getattr(current_user, '_is_platform_admin', False):
+                if sid not in getattr(current_user, '_site_ids', []):
+                    log.error("Site Access Denied: User %s has no access to site %s", current_user.username, sid)
+                    raise HTTPException(403, "No access to this site")
+            return sid
+        except ValueError:
+            raise HTTPException(400, "Invalid X-Site-Id header")
+
+    # If header is missing, check JWT active site
     active = getattr(current_user, '_active_site_id', None)
     if active:
         return active
+
+    # Fallback to site list if only one site exists
     sites = getattr(current_user, '_site_ids', [])
-    if sites:
+    if len(sites) == 1:
         return sites[0]
+    
     if getattr(current_user, '_is_platform_admin', False):
         return None
-    raise HTTPException(400, "No site context")
+
+    # If multiple sites exist and no header/active site, it's ambiguous
+    log.warning("Ambiguous Site Context: User %s has multiple sites %s but no X-Site-Id header", current_user.username, sites)
+    raise HTTPException(400, "Site context required (X-Site-Id header missing)")
 
 def require_permission(resource: str, operation: str = "read"):
     async def checker(current_user = Depends(get_current_user)):

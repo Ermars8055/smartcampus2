@@ -321,16 +321,21 @@ export default function StoreOperations() {
       )}
 
       {/* ISSUE MATERIALS MODAL */}
-      <Dialog open={issueModal.open} onClose={() => setIssueModal({ ...issueModal, open: false })} maxWidth="md" fullWidth>
-        <Box sx={{ bgcolor: '#1E3A8A', color: '#fff', p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Box>
-            <Typography variant="h6" sx={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1 }}>
-              📦 Issue Materials
-            </Typography>
-            <Typography variant="caption">{issueModal.indent?.indent_number} • {issueModal.indent?.requester_name}</Typography>
+      <Dialog open={issueModal.open} onClose={() => setIssueModal({ ...issueModal, open: false })} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 3, boxShadow: '0 20px 40px rgba(0,0,0,0.1)', overflow: 'hidden' } }}>
+        <DialogTitle sx={{ pb: 1, pt: 3, px: 4 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Box sx={{ p: 1, bgcolor: '#EFF6FF', borderRadius: 2, color: '#2563EB', display: 'flex' }}>
+                <Inventory2 fontSize="medium" />
+              </Box>
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>Issue Materials</Typography>
+                <Typography variant="body2" color="text.secondary">{issueModal.indent?.indent_number} • {issueModal.indent?.requester_name}</Typography>
+              </Box>
+            </Box>
+            <IconButton size="small" onClick={() => setIssueModal({ ...issueModal, open: false })} sx={{ color: '#64748B' }}><Close /></IconButton>
           </Box>
-          <IconButton size="small" onClick={() => setIssueModal({ ...issueModal, open: false })} sx={{ color: '#fff' }}><Close /></IconButton>
-        </Box>
+        </DialogTitle>
         <DialogContent sx={{ p: 3 }}>
           <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
             <Typography variant="body2" sx={{ fontWeight: 600 }}>Source Warehouse:</Typography>
@@ -391,9 +396,9 @@ export default function StoreOperations() {
             <Typography variant="caption" color="#92400E">Review the issue quantities carefully before proceeding.</Typography>
           </Box>
         </DialogContent>
-        <DialogActions sx={{ p: 3 }}>
-          <Button onClick={() => setIssueModal({ ...issueModal, open: false })} variant="outlined" sx={{ borderRadius: 1.5 }}>Cancel</Button>
-          <Button onClick={handleIssueSubmit} variant="contained" color="error" sx={{ borderRadius: 1.5 }}>Confirm Issue</Button>
+        <DialogActions sx={{ px: 4, pb: 4, pt: 2, justifyContent: 'flex-end', gap: 2 }}>
+          <Button onClick={() => setIssueModal({ ...issueModal, open: false })} sx={{ color: '#64748B', fontWeight: 600 }}>Cancel</Button>
+          <Button onClick={handleIssueSubmit} variant="contained" color="error" sx={{ borderRadius: 2, px: 4, py: 1, fontWeight: 700, boxShadow: '0 4px 12px rgba(220, 38, 38, 0.25)', textTransform: 'none' }}>Confirm Issue</Button>
         </DialogActions>
       </Dialog>
     </Box>

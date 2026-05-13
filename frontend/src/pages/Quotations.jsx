@@ -1112,9 +1112,16 @@ const Quotations = () => {
           fullWidth
           PaperProps={{ sx: { borderRadius: 3, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' } }}
         >
-          <DialogTitle component="div" sx={{ pb: 1, pt: 3, px: 4 }}>
-            <Typography variant="h5" fontWeight="700" color="primary.main">Create Quotation Request</Typography>
-            <Typography variant="body2" color="text.secondary">Initiate a new procurement cycle by linking PRs and inviting vendors.</Typography>
+          <DialogTitle sx={{ pb: 1, pt: 3, px: 4 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Box sx={{ p: 1, bgcolor: '#EFF6FF', borderRadius: 2, color: '#2563EB', display: 'flex' }}>
+                <SendIcon fontSize="medium" />
+              </Box>
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>Create Quotation Request</Typography>
+                <Typography variant="body2" color="text.secondary">Initiate a new procurement cycle by linking PRs and inviting vendors.</Typography>
+              </Box>
+            </Box>
           </DialogTitle>
           <DialogContent sx={{ px: 4, py: 2 }}>
             <Box
@@ -1322,14 +1329,14 @@ const Quotations = () => {
               </Box>
             </Box>
           </DialogContent>
-          <DialogActions sx={{ p: 4, pt: 1 }}>
-            <Button onClick={() => setCreateQRDialogOpen(false)} sx={{ fontWeight: 600 }}>Cancel</Button>
+          <DialogActions sx={{ px: 4, pb: 4, pt: 2, justifyContent: 'flex-end', gap: 2 }}>
+            <Button onClick={() => setCreateQRDialogOpen(false)} sx={{ color: '#64748B', fontWeight: 600 }}>Cancel</Button>
             <Button
               onClick={handleCreateQR}
               variant="contained"
               size="large"
               disabled={(newQR.items?.length || 0) === 0 || (newQR.vendor_ids?.length || 0) === 0}
-              sx={{ px: 4, borderRadius: 2, fontWeight: 700, boxShadow: '0 4px 12px rgba(25, 118, 210, 0.3)' }}
+              sx={{ px: 4, borderRadius: 2, fontWeight: 700, boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)', textTransform: 'none' }}
             >
               Create Request
             </Button>
@@ -1337,8 +1344,18 @@ const Quotations = () => {
         </Dialog>
 
         {/* Enter Quote Dialog */}
-        <Dialog open={enterQuoteDialogOpen} onClose={() => setEnterQuoteDialogOpen(false)} maxWidth="md" fullWidth>
-          <DialogTitle>{selectedQR?.qr_number} : Enter Quotation - {selectedVendorForQuote?.vendor_name}</DialogTitle>
+        <Dialog open={enterQuoteDialogOpen} onClose={() => setEnterQuoteDialogOpen(false)} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 3, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' } }}>
+          <DialogTitle sx={{ pb: 1, pt: 3, px: 4 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Box sx={{ p: 1, bgcolor: '#EFF6FF', borderRadius: 2, color: '#2563EB', display: 'flex' }}>
+                <EditIcon fontSize="medium" />
+              </Box>
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>{selectedQR?.qr_number} : Enter Quotation</Typography>
+                <Typography variant="body2" color="text.secondary">{selectedVendorForQuote?.vendor_name}</Typography>
+              </Box>
+            </Box>
+          </DialogTitle>
           <DialogContent>
             <Stack direction="row" spacing={3} mb={6} mt={2} alignItems="flex-start">
               <Box>

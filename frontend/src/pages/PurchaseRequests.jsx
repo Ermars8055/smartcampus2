@@ -3,9 +3,9 @@ import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
   DialogContent, DialogActions, Grid, MenuItem, Select, FormControl,
-  InputLabel, IconButton, Tooltip, Tab, Tabs, Divider, Paper
+  InputLabel, IconButton, Tooltip, Tab, Tabs, Divider, Paper, InputAdornment
 } from '@mui/material';
-import { Add, CheckCircle, Cancel, ShoppingCart, Archive, Delete, Search } from '@mui/icons-material';
+import { Add, CheckCircle, Cancel, ShoppingCart, Archive, Delete, Search, Apartment, AccountTree, CalendarMonth, Notes, Store, Numbers } from '@mui/icons-material';
 import api from '../services/api';
 import { formatDate } from '../utils/dateUtils';
 import MaterialSelect from '../components/MaterialSelect';
@@ -336,10 +336,20 @@ export default function PurchaseRequests() {
       </Dialog>
 
       {/* Create PR Dialog - Multi-Item */}
-      <Dialog open={dialog} onClose={() => setDialog(false)} maxWidth="md" fullWidth>
-        <DialogTitle sx={{ fontWeight: 600 }}>Create Purchase Request</DialogTitle>
-        <DialogContent>
-          <Grid container spacing={2} sx={{ mt: 0.5, mb: 2 }}>
+      <Dialog open={dialog} onClose={() => setDialog(false)} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 3, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' } }}>
+        <DialogTitle sx={{ pb: 1, pt: 3, px: 4 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box sx={{ p: 1, bgcolor: '#EFF6FF', borderRadius: 2, color: '#2563EB', display: 'flex' }}>
+              <ShoppingCart fontSize="medium" />
+            </Box>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>Create Purchase Request</Typography>
+              <Typography variant="body2" color="text.secondary">Raise a new material purchase request for approval.</Typography>
+            </Box>
+          </Box>
+        </DialogTitle>
+        <DialogContent sx={{ px: 4, py: 2 }}>
+          <Grid container spacing={2.5} sx={{ mt: 0.5, mb: 2 }}>
             <Grid size={{ xs: 12, sm: 4 }}>
               <FormControl fullWidth required><InputLabel>Building</InputLabel>
                 <Select value={form.building_id} label="Building" onChange={e => {
@@ -350,7 +360,9 @@ export default function PurchaseRequests() {
                   } else {
                     setDepartments([]);
                   }
-                }}>
+                }}
+                  startAdornment={<InputAdornment position="start"><Apartment sx={{ color: '#94A3B8' }} /></InputAdornment>}
+                >
                   <MenuItem value="">Select Building</MenuItem>
                   {buildings.map(b => <MenuItem key={b.id} value={b.id}>{b.name}</MenuItem>)}
                 </Select>
@@ -358,7 +370,9 @@ export default function PurchaseRequests() {
             </Grid>
             <Grid size={{ xs: 12, sm: 4 }}>
               <FormControl fullWidth><InputLabel>Department</InputLabel>
-                <Select value={form.department_name} label="Department" onChange={e => setForm({ ...form, department_name: e.target.value })} disabled={!form.building_id}>
+                <Select value={form.department_name} label="Department" onChange={e => setForm({ ...form, department_name: e.target.value })} disabled={!form.building_id}
+                  startAdornment={<InputAdornment position="start"><AccountTree sx={{ color: '#94A3B8' }} /></InputAdornment>}
+                >
                   <MenuItem value="">Select Department</MenuItem>
                   {departments.map(d => <MenuItem key={d.id} value={d.name}>{d.name} ({d.code})</MenuItem>)}
                 </Select>
@@ -367,7 +381,8 @@ export default function PurchaseRequests() {
             <Grid size={{ xs: 12, sm: 4 }}>
               <TextField fullWidth label="Required Date" type="date" value={form.required_date}
                 onChange={e => setForm({ ...form, required_date: e.target.value })}
-                InputLabelProps={{ shrink: true }} required />
+                InputLabelProps={{ shrink: true }} required
+                InputProps={{ startAdornment: <InputAdornment position="start"><CalendarMonth sx={{ color: '#94A3B8' }} /></InputAdornment> }} />
             </Grid>
           </Grid>
 
@@ -385,7 +400,8 @@ export default function PurchaseRequests() {
               </Grid>
               <Grid size={3}>
                 <TextField fullWidth size="small" label="Quantity" type="number" value={item.quantity}
-                  onChange={e => updateItem(i, 'quantity', e.target.value)} inputProps={{ min: 1 }} required />
+                  onChange={e => updateItem(i, 'quantity', e.target.value)} inputProps={{ min: 1 }} required
+                  InputProps={{ startAdornment: <InputAdornment position="start"><Numbers sx={{ color: '#94A3B8' }} /></InputAdornment> }} />
               </Grid>
               <Grid size={2} sx={{ display: 'flex', alignItems: 'center' }}>
                 {form.items.length > 1 && (
@@ -398,25 +414,41 @@ export default function PurchaseRequests() {
 
           <Grid container spacing={2} sx={{ mt: 2 }}>
             <Grid size={12}>
-              <TextField fullWidth label="Remarks" value={form.remarks} onChange={e => setForm({ ...form, remarks: e.target.value })} multiline rows={2} />
+              <TextField fullWidth label="Remarks" value={form.remarks} onChange={e => setForm({ ...form, remarks: e.target.value })} multiline rows={2}
+                InputProps={{ startAdornment: <InputAdornment position="start" sx={{ alignSelf: 'flex-start', mt: 1.5 }}><Notes sx={{ color: '#94A3B8' }} /></InputAdornment> }} />
             </Grid>
           </Grid>
         </DialogContent>
-        <DialogActions><Button onClick={() => setDialog(false)}>Cancel</Button><Button variant="contained" onClick={handleCreate}>Submit PR</Button></DialogActions>
+        <DialogActions sx={{ px: 4, pb: 4, pt: 2, justifyContent: 'flex-end', gap: 2 }}>
+          <Button onClick={() => setDialog(false)} sx={{ color: '#64748B', fontWeight: 600 }}>Cancel</Button>
+          <Button variant="contained" onClick={handleCreate} sx={{ borderRadius: 2, px: 4, py: 1, fontWeight: 700, boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)', textTransform: 'none' }}>Submit PR</Button>
+        </DialogActions>
       </Dialog>
 
       {/* Convert PR to PO Dialog — ONLY the specific approved PR */}
-      <Dialog open={convertDialog.open} onClose={() => setConvertDialog({ ...convertDialog, open: false })} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ fontWeight: 600 }}>Convert PR to PO</DialogTitle>
-        <DialogContent>
+      <Dialog open={convertDialog.open} onClose={() => setConvertDialog({ ...convertDialog, open: false })} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 3, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' } }}>
+        <DialogTitle sx={{ pb: 1, pt: 3, px: 4 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box sx={{ p: 1, bgcolor: '#EFF6FF', borderRadius: 2, color: '#2563EB', display: 'flex' }}>
+              <ShoppingCart fontSize="medium" />
+            </Box>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>Convert PR to PO</Typography>
+              <Typography variant="body2" color="text.secondary">Create a purchase order from this approved request.</Typography>
+            </Box>
+          </Box>
+        </DialogTitle>
+        <DialogContent sx={{ px: 4, py: 2 }}>
           <Box sx={{ mb: 2, mt: 1, p: 2, bgcolor: '#f8fafc', borderRadius: 1, border: '1px solid #e2e8f0' }}>
             <Typography variant="body2"><strong>PR Number:</strong> {convertDialog.pr?.pr_number}</Typography>
             <Typography variant="body2"><strong>Items:</strong> {convertDialog.pr?.items?.length} materials</Typography>
           </Box>
-          <Grid container spacing={2}>
+          <Grid container spacing={2.5}>
             <Grid size={12}>
               <FormControl fullWidth required><InputLabel>Vendor</InputLabel>
-                <Select value={convertDialog.vendor_id} label="Vendor" onChange={e => setConvertDialog({ ...convertDialog, vendor_id: e.target.value })}>
+                <Select value={convertDialog.vendor_id} label="Vendor" onChange={e => setConvertDialog({ ...convertDialog, vendor_id: e.target.value })}
+                  startAdornment={<InputAdornment position="start"><Store sx={{ color: '#94A3B8' }} /></InputAdornment>}
+                >
                   {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.name}</MenuItem>)}
                 </Select>
               </FormControl>
@@ -424,11 +456,12 @@ export default function PurchaseRequests() {
             <Grid size={6}>
               <TextField fullWidth label="Delivery Date" type="date" value={convertDialog.delivery_date}
                 onChange={e => setConvertDialog({ ...convertDialog, delivery_date: e.target.value })}
-                InputLabelProps={{ shrink: true }} required />
+                InputLabelProps={{ shrink: true }} required
+                InputProps={{ startAdornment: <InputAdornment position="start"><CalendarMonth sx={{ color: '#94A3B8' }} /></InputAdornment> }} />
             </Grid>
           </Grid>
           <Divider sx={{ my: 2 }} />
-          <Typography variant="subtitle2" sx={{ mb: 1 }}>Specify Rates for Items</Typography>
+          <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>Specify Rates for Items</Typography>
           {convertDialog.items?.map((it, i) => (
             <Grid container spacing={1} key={i} sx={{ mb: 2, alignItems: 'center' }}>
               <Grid size={5}>
@@ -451,9 +484,9 @@ export default function PurchaseRequests() {
             </Grid>
           ))}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setConvertDialog({ ...convertDialog, open: false })}>Cancel</Button>
-          <Button variant="contained" onClick={handleConvert}>Create PO</Button>
+        <DialogActions sx={{ px: 4, pb: 4, pt: 2, justifyContent: 'flex-end', gap: 2 }}>
+          <Button onClick={() => setConvertDialog({ ...convertDialog, open: false })} sx={{ color: '#64748B', fontWeight: 600 }}>Cancel</Button>
+          <Button variant="contained" onClick={handleConvert} sx={{ borderRadius: 2, px: 4, py: 1, fontWeight: 700, boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)', textTransform: 'none' }}>Create PO</Button>
         </DialogActions>
       </Dialog>
 

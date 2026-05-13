@@ -8,24 +8,28 @@ import {
 import { 
   Add, Search, Edit, ArrowDropUp, ArrowDropDown, 
   Inventory, Description, Category, Straighten, Warehouse, 
-  Percent, Speed, AttachMoney 
+  Percent, Speed, CurrencyRupee 
 } from '@mui/icons-material';
 import api from '../services/api';
 
 export default function Materials() {
   const [materials, setMaterials] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [subcategories, setSubcategories] = useState([]);
   const [uoms, setUoms] = useState([]);
+  const [vendors, setVendors] = useState([]);
   const [search, setSearch] = useState('');
   const [catFilter, setCatFilter] = useState('');
   const [loading, setLoading] = useState(true);
   const [dialog, setDialog] = useState(false);
   const [editing, setEditing] = useState(null);
+  const [viewOnly, setViewOnly] = useState(false);
+  const [errors, setErrors] = useState({});
   const [sortConfig, setSortConfig] = useState({ key: 'code', direction: 'asc' });
   const [form, setForm] = useState({
     code: '', name: '', category_id: '', uom_id: '', reorder_level: 0,
-    maximum_level: 0, standard_cost: 0, gst_rate: 18, storage_type: 'General', 
-    material_type: 'Consumable', description: ''
+    maximum_level: 0, standard_cost: 0, gst_rate: 0, storage_type: 'General', 
+    material_type: '', description: ''
   });
 
   const load = () => {
@@ -41,9 +45,12 @@ export default function Materials() {
       api.get('/api/categories'),
       api.get('/api/uom'),
       api.get('/api/vendors'),
-    ]).then(([c, u]) => {
+      api.get('/api/subcategories'),
+    ]).then(([c, u, v, s]) => {
       setCategories(c.data);
       setUoms(u.data);
+      setVendors(v.data);
+      setSubcategories(s.data);
     });
   }, []);
 
@@ -54,6 +61,48 @@ export default function Materials() {
       key,
       direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
     }));
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    if (!form.name) newErrors.name = 'Material name is required';
+    if (!form.category_id) newErrors.category_id = 'Category is required';
+    if (!form.uom_id) newErrors.uom_id = 'UOM is required';
+
+    if (form.gst_rate < 0 || form.gst_rate > 100) {
+      newErrors.gst_rate = 'GST Rate must be between 0 and 100';
+    } else if (form.gst_rate.toString().includes('.') && form.gst_rate.toString().split('.')[1].length > 2) {
+      newErrors.gst_rate = 'GST Rate allows maximum 2 decimal places';
+    }
+
+    if (form.standard_cost < 0) {
+      newErrors.standard_cost = 'Standard Cost cannot be negative';
+    } else if (form.standard_cost > 1000000000) {
+      newErrors.standard_cost = 'Standard Cost cannot exceed 100 Crores';
+    } else if (form.standard_cost.toString().includes('.') && form.standard_cost.toString().split('.')[1].length > 2) {
+      newErrors.standard_cost = 'Standard Cost allows maximum 2 decimal places';
+    }
+
+    if (form.reorder_level < 0) {
+      newErrors.reorder_level = 'Reorder Level must be a positive number';
+    } else if (!Number.isInteger(Number(form.reorder_level))) {
+      newErrors.reorder_level = 'Reorder Level must be a whole number';
+    }
+
+    if (form.maximum_level < 0) {
+      newErrors.maximum_level = 'Maximum Level must be a positive number';
+    } else if (!Number.isInteger(Number(form.maximum_level))) {
+      newErrors.maximum_level = 'Maximum Level must be a whole number';
+    }
+    if (Number(form.maximum_level) > 0 && Number(form.maximum_level) <= Number(form.reorder_level)) {
+      newErrors.maximum_level = 'Maximum Level must be greater than Reorder Level';
+    }
+    if (!form.material_type) {
+      newErrors.material_type = 'Material type is required';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const sortedMaterials = useMemo(() => {
@@ -77,26 +126,7 @@ export default function Materials() {
   }, [materials, sortConfig]);
 
   const handleSave = async () => {
-    // Validations
-    if (!form.name) return alert('Material name is required');
-    if (!form.category_id) return alert('Category is required');
-    if (!form.uom_id) return alert('UOM is required');
-
-    if (form.gst_rate < 0 || form.gst_rate > 100) {
-      return alert('GST Rate must be between 0 and 100');
-    }
-    if (form.standard_cost < 0 || form.standard_cost > 1000000000) {
-      return alert('Standard Cost must be between 0 and 100 Crores');
-    }
-    if (!Number.isInteger(Number(form.reorder_level)) || form.reorder_level < 0) {
-      return alert('Reorder Level must be a positive whole number');
-    }
-    if (!Number.isInteger(Number(form.maximum_level)) || form.maximum_level < 0) {
-      return alert('Maximum Level must be a positive whole number');
-    }
-    if (Number(form.maximum_level) <= Number(form.reorder_level)) {
-      return alert('Maximum Level must be greater than Reorder Level');
-    }
+    if (!validateForm()) return;
 
     try {
       const payload = {
@@ -109,10 +139,7 @@ export default function Materials() {
         gst_rate: Number(form.gst_rate),
         storage_type: form.storage_type,
         material_type: form.material_type,
-        description: form.description,
-        subcategory_id: form.subcategory_id || null,
-        preferred_vendor_id: form.preferred_vendor_id || null,
-        hsn_code: form.hsn_code || null
+        description: form.description
       };
 
       if (!editing && form.code) payload.code = form.code;
@@ -124,37 +151,54 @@ export default function Materials() {
       }
       setDialog(false);
       setEditing(null);
+      setErrors({});
       load();
     } catch (err) {
-      alert(err.response?.data?.detail?.[0]?.msg || err.response?.data?.detail || 'Error saving material');
+      const detail = err.response?.data?.detail;
+      if (Array.isArray(detail)) {
+        const serverErrors = {};
+        detail.forEach(e => {
+          if (e.loc?.includes('name')) serverErrors.name = e.msg;
+          else if (e.loc?.includes('code')) serverErrors.code = e.msg;
+        });
+        setErrors(serverErrors);
+      } else {
+        alert(detail || 'Error saving material');
+      }
     }
   };
 
   const formatNumber = (val) => {
-    if (val === null || val === undefined) return '0';
-    return val % 1 === 0 ? val.toString() : parseFloat(val).toFixed(2);
+    if (val === undefined || val === null || isNaN(val)) return '0';
+    const num = parseFloat(val);
+    return num % 1 === 0 ? num.toLocaleString('en-IN') : num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
-  const openEdit = (m) => {
+  const openEdit = (m, view = false) => {
     setEditing(m.id);
+    setViewOnly(view);
+    setErrors({});
     setForm({
       code: m.code, name: m.name, category_id: m.category_id, uom_id: m.uom_id,
-      reorder_level: m.reorder_level, maximum_level: m.maximum_level,
-      standard_cost: m.standard_cost, gst_rate: m.gst_rate || 0,
+      reorder_level: m.reorder_level === 0 ? '' : m.reorder_level, 
+      maximum_level: m.maximum_level === 0 ? '' : m.maximum_level,
+      standard_cost: m.standard_cost === 0 ? '' : m.standard_cost, 
+      gst_rate: m.gst_rate === 0 ? '' : (m.gst_rate || ''),
       storage_type: m.storage_type || 'General',
-      material_type: m.material_type || 'Consumable',
-      description: m.description || '', subcategory_id: m.subcategory_id || '',
-      preferred_vendor_id: m.preferred_vendor_id || ''
+      material_type: m.material_type || '',
+      description: m.description || ''
     });
     setDialog(true);
   };
 
   const openNew = () => {
     setEditing(null);
+    setViewOnly(false);
+    setErrors({});
     setForm({ 
-      code: '', name: '', category_id: '', uom_id: '', reorder_level: 0,
-      maximum_level: 0, standard_cost: 0, gst_rate: 0, storage_type: 'General', 
-      material_type: 'Consumable', description: '' 
+      code: '', name: '', category_id: '', uom_id: '', 
+      reorder_level: '', maximum_level: '', standard_cost: '', gst_rate: '', 
+      storage_type: 'General', material_type: '', description: ''
     });
     setDialog(true);
   };
@@ -169,199 +213,183 @@ export default function Materials() {
         <Button variant="contained" startIcon={<Add />} onClick={openNew}>Add Material</Button>
       </Box>
 
-      <Card sx={{ mb: 3, p: 2 }}>
-        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-          <TextField size="small" placeholder="Search materials..." value={search}
-            onChange={e => setSearch(e.target.value)} sx={{ minWidth: 260 }}
-            InputProps={{ startAdornment: <InputAdornment position="start"><Search sx={{ color: '#94A3B8' }} /></InputAdornment> }} />
-          <FormControl size="small" sx={{ minWidth: 150 }}>
-            <InputLabel>Category</InputLabel>
-            <Select value={catFilter} label="Category" onChange={e => setCatFilter(e.target.value)}>
-              <MenuItem value="">All</MenuItem>
+      <Card sx={{ mb: 3, p: 2, borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+          <TextField 
+            size="small" 
+            placeholder="Search materials by name or code..." 
+            value={search}
+            onChange={e => setSearch(e.target.value)} 
+            sx={{ minWidth: 350 }}
+            InputProps={{ 
+              startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} />,
+              sx: { borderRadius: 2 }
+            }} 
+          />
+          <FormControl size="small" sx={{ minWidth: 200 }}>
+            <InputLabel>Filter by Category</InputLabel>
+            <Select 
+              value={catFilter} 
+              label="Filter by Category" 
+              onChange={e => setCatFilter(e.target.value)}
+              sx={{ borderRadius: 2 }}
+            >
+              <MenuItem value="">All Categories</MenuItem>
               {categories.map(c => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
             </Select>
           </FormControl>
         </Box>
       </Card>
 
-      <Card>
-        <TableContainer sx={{ overflowX: 'auto', backgroundColor: '#fff' }}>
+      <Card sx={{ borderRadius: 2, overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+        <TableContainer>
           <Table size="small">
-            <TableHead>
+            <TableHead sx={{ bgcolor: '#F8FAFC' }}>
               <TableRow>
-                <TableCell sx={{ py: 1, px: 1, fontWeight: 700, color: '#64748b', fontSize: '0.75rem', width: '70px' }}>
+                <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 1 }}>
                   <TableSortLabel 
                     active={sortConfig.key === 'code'} 
                     direction={sortConfig.direction} 
                     onClick={() => handleSort('code')}
-                    IconComponent={ArrowDropDown}
-                    sx={{
-                      '& .MuiTableSortLabel-icon': {
-                        fontSize: '1.2rem !important',
-                        opacity: sortConfig.key === 'code' ? 1 : 0
-                      }
-                    }}
                   >
                     CODE
                   </TableSortLabel>
                 </TableCell>
-                <TableCell sx={{ py: 1, px: 1, fontWeight: 700, color: '#64748b', fontSize: '0.75rem' }}>
+                <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 1 }}>
                   <TableSortLabel 
                     active={sortConfig.key === 'name'} 
                     direction={sortConfig.direction} 
                     onClick={() => handleSort('name')}
-                    IconComponent={ArrowDropDown}
-                    sx={{
-                      '& .MuiTableSortLabel-icon': {
-                        fontSize: '1.2rem !important',
-                        opacity: sortConfig.key === 'name' ? 1 : 0
-                      }
-                    }}
                   >
-                    NAME
+                    MATERIAL NAME
                   </TableSortLabel>
                 </TableCell>
-                <TableCell sx={{ py: 1, px: 1, fontWeight: 700, color: '#64748b', fontSize: '0.75rem', width: '90px' }}>
+                <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 1 }}>
                   <TableSortLabel 
                     active={sortConfig.key === 'category'} 
                     direction={sortConfig.direction} 
                     onClick={() => handleSort('category')}
-                    IconComponent={ArrowDropDown}
-                    sx={{
-                      '& .MuiTableSortLabel-icon': {
-                        fontSize: '1.2rem !important',
-                        opacity: sortConfig.key === 'category' ? 1 : 0
-                      }
-                    }}
                   >
                     CATEGORY
                   </TableSortLabel>
                 </TableCell>
-                <TableCell sx={{ py: 1, px: 1, fontWeight: 700, color: '#64748b', fontSize: '0.75rem', width: '80px' }}>
+                <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 1 }}>
                   <TableSortLabel 
                     active={sortConfig.key === 'uom'} 
                     direction={sortConfig.direction} 
                     onClick={() => handleSort('uom')}
-                    IconComponent={ArrowDropDown}
-                    sx={{
-                      '& .MuiTableSortLabel-icon': {
-                        fontSize: '1.2rem !important',
-                        opacity: sortConfig.key === 'uom' ? 1 : 0
-                      }
-                    }}
                   >
                     UOM
                   </TableSortLabel>
                 </TableCell>
-                <TableCell align="right" sx={{ py: 1, px: 1, fontWeight: 700, color: '#64748b', fontSize: '0.75rem', width: '50px' }}>
+                <TableCell align="right" sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 1 }}>
                   <TableSortLabel 
                     active={sortConfig.key === 'gst_rate'} 
                     direction={sortConfig.direction} 
                     onClick={() => handleSort('gst_rate')}
-                    IconComponent={ArrowDropDown}
-                    sx={{
-                      '& .MuiTableSortLabel-icon': {
-                        fontSize: '1.2rem !important',
-                        opacity: sortConfig.key === 'gst_rate' ? 1 : 0
-                      }
-                    }}
                   >
                     GST
                   </TableSortLabel>
                 </TableCell>
-                <TableCell align="right" sx={{ py: 1, px: 1, fontWeight: 700, color: '#64748b', fontSize: '0.75rem', width: '70px' }}>
+                <TableCell align="right" sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 1 }}>
                   <TableSortLabel 
                     active={sortConfig.key === 'standard_cost'} 
                     direction={sortConfig.direction} 
                     onClick={() => handleSort('standard_cost')}
-                    IconComponent={ArrowDropDown}
-                    sx={{
-                      '& .MuiTableSortLabel-icon': {
-                        fontSize: '1.2rem !important',
-                        opacity: sortConfig.key === 'standard_cost' ? 1 : 0
-                      }
-                    }}
                   >
                     COST
                   </TableSortLabel>
                 </TableCell>
-                <TableCell align="right" sx={{ py: 1, px: 1, fontWeight: 700, color: '#64748b', fontSize: '0.75rem', width: '80px' }}>
+                <TableCell align="right" sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 1 }}>
                   <TableSortLabel 
                     active={sortConfig.key === 'reorder_level'} 
                     direction={sortConfig.direction} 
                     onClick={() => handleSort('reorder_level')}
-                    IconComponent={ArrowDropDown}
-                    sx={{
-                      '& .MuiTableSortLabel-icon': {
-                        fontSize: '1.2rem !important',
-                        opacity: sortConfig.key === 'reorder_level' ? 1 : 0
-                      }
-                    }}
                   >
                     REORDER
                   </TableSortLabel>
                 </TableCell>
-                <TableCell align="right" sx={{ py: 1, px: 1, fontWeight: 700, color: '#64748b', fontSize: '0.75rem', width: '70px' }}>
+                <TableCell align="right" sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 1 }}>
                   <TableSortLabel 
                     active={sortConfig.key === 'stock'} 
                     direction={sortConfig.direction} 
                     onClick={() => handleSort('stock')}
-                    IconComponent={ArrowDropDown}
-                    sx={{
-                      '& .MuiTableSortLabel-icon': {
-                        fontSize: '1.2rem !important',
-                        opacity: sortConfig.key === 'stock' ? 1 : 0
-                      }
-                    }}
                   >
                     STOCK
                   </TableSortLabel>
                 </TableCell>
-                <TableCell sx={{ py: 1, px: 1, fontWeight: 700, color: '#64748b', fontSize: '0.75rem', width: '90px' }}>
+                <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 1 }}>
                   <TableSortLabel 
                     active={sortConfig.key === 'material_type'} 
                     direction={sortConfig.direction} 
                     onClick={() => handleSort('material_type')}
-                    IconComponent={ArrowDropDown}
-                    sx={{
-                      '& .MuiTableSortLabel-icon': {
-                        fontSize: '1.2rem !important',
-                        opacity: sortConfig.key === 'material_type' ? 1 : 0
-                      }
-                    }}
                   >
                     TYPE
                   </TableSortLabel>
                 </TableCell>
-                <TableCell sx={{ py: 1, px: 1, fontWeight: 700, color: '#64748b', fontSize: '0.75rem', width: '70px' }}>STATUS</TableCell>
-                <TableCell align="right" sx={{ py: 1, px: 1, fontWeight: 700, color: '#64748b', fontSize: '0.75rem', width: '80px' }}>ACTIONS</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 1 }}>
+                  <TableSortLabel 
+                    active={sortConfig.key === 'is_active'} 
+                    direction={sortConfig.direction} 
+                    onClick={() => handleSort('is_active')}
+                  >
+                    STATUS
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 1 }}>ACTIONS</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {sortedMaterials.map(m => (
-                 <TableRow key={m.id} hover>
-                  <TableCell sx={{ fontSize: '0.75rem', py: 1, px: 1, whiteSpace: 'nowrap', fontWeight: 500 }}>{m.code}</TableCell>
-                  <TableCell sx={{ fontSize: '0.75rem', py: 1, px: 1 }}>{m.name}</TableCell>
-                  <TableCell sx={{ py: 1, px: 1, whiteSpace: 'nowrap' }}><Chip label={m.category_name} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.7rem' }} /></TableCell>
-                  <TableCell sx={{ fontSize: '0.75rem', py: 1, px: 1, whiteSpace: 'nowrap' }}>{m.uom_name}</TableCell>
-                  <TableCell align="right" sx={{ fontSize: '0.75rem', py: 1, px: 1, whiteSpace: 'nowrap' }}>{formatNumber(m.gst_rate)}%</TableCell>
-                  <TableCell align="right" sx={{ fontSize: '0.75rem', py: 1, px: 1, whiteSpace: 'nowrap' }}>₹{formatNumber(m.standard_cost)}</TableCell>
-                  <TableCell align="right" sx={{ fontSize: '0.75rem', py: 1, px: 1, whiteSpace: 'nowrap' }}>{formatNumber(m.reorder_level)}</TableCell>
-                  <TableCell align="right" sx={{ py: 1, px: 1, whiteSpace: 'nowrap' }}>
-                    <Chip label={formatNumber(m.current_stock)} size="small"
+                 <TableRow 
+                  key={m.id} 
+                  hover 
+                  onClick={() => openEdit(m, true)} 
+                  sx={{ cursor: 'pointer', '&:last-child td, &:last-child th': { border: 0 } }}
+                >
+                  <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.8rem', px: 1 }}>{m.code}</TableCell>
+                  <TableCell sx={{ fontSize: '0.8rem', fontWeight: 500, px: 1 }}>{m.name}</TableCell>
+                  <TableCell sx={{ py: 1, px: 1 }}>
+                    <Chip label={m.category_name} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.65rem' }} />
+                  </TableCell>
+                  <TableCell sx={{ fontSize: '0.8rem', px: 1 }}>{m.uom_name}</TableCell>
+                  <TableCell align="right" sx={{ fontSize: '0.8rem', px: 1 }}>{formatNumber(m.gst_rate)}%</TableCell>
+                  <TableCell align="right" sx={{ fontSize: '0.8rem', fontWeight: 600, px: 1 }}>₹{formatNumber(m.standard_cost)}</TableCell>
+                  <TableCell align="right" sx={{ fontSize: '0.8rem', px: 1 }}>{formatNumber(m.reorder_level)}</TableCell>
+                  <TableCell align="right" sx={{ px: 1 }}>
+                    <Chip 
+                      label={formatNumber(m.current_stock)} 
+                      size="small"
                       color={(m.current_stock || 0) < m.reorder_level ? 'error' : 'success'}
-                      sx={{ fontWeight: 600, minWidth: 50, height: 20, fontSize: '0.7rem' }} />
+                      sx={{ fontWeight: 700, minWidth: 45, height: 22, fontSize: '0.7rem' }} 
+                    />
                   </TableCell>
-                  <TableCell sx={{ py: 0.5, whiteSpace: 'nowrap' }}>
-                    <Chip label={m.material_type} size="small" variant="outlined" 
-                      color={m.material_type === 'Non-Consumable' ? 'secondary' : 'default'} />
+                  <TableCell sx={{ px: 1 }}>
+                    <Chip 
+                      label={m.material_type} 
+                      size="small" 
+                      variant="outlined" 
+                      sx={{ fontSize: '0.65rem', height: 20 }}
+                      color={m.material_type === 'Non-Consumable' ? 'secondary' : 'default'} 
+                    />
                   </TableCell>
-                  <TableCell>
-                    <Chip label={m.is_active ? 'Active' : 'Inactive'} size="small"
-                      color={m.is_active ? 'success' : 'default'} variant="outlined" />
+                  <TableCell sx={{ px: 1 }}>
+                    <Chip 
+                      label={m.is_active ? 'Active' : 'Inactive'} 
+                      size="small"
+                      color={m.is_active ? 'success' : 'default'} 
+                      variant="outlined" 
+                      sx={{ fontSize: '0.65rem', height: 20 }}
+                    />
                   </TableCell>
-                  <TableCell>
-                    <Tooltip title="Edit"><IconButton size="small" onClick={() => openEdit(m)}><Edit fontSize="small" /></IconButton></Tooltip>
+                  <TableCell align="right" sx={{ px: 1 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0 }} onClick={(e) => e.stopPropagation()}>
+                      <Tooltip title="Edit Material">
+                        <IconButton size="small" onClick={() => openEdit(m, false)} sx={{ color: '#64748B' }}>
+                          <Edit fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
                   </TableCell>
                 </TableRow>
               ))}
@@ -378,190 +406,177 @@ export default function Materials() {
         onClose={() => setDialog(false)} 
         maxWidth="md" 
         fullWidth 
-        PaperProps={{ sx: { borderRadius: 3, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' } }}
+        PaperProps={{ sx: { borderRadius: 3, boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' } }}
       >
-        <DialogTitle component="div" sx={{ pb: 1, pt: 3, px: 4 }}>
-          <Typography variant="h5" sx={{ fontWeight: 700, color: '#1E293B' }}>
-            {editing ? 'Edit Material' : 'New Material'}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {editing ? 'Update material details and governance parameters.' : 'Create a new material record for procurement and inventory tracking.'}
-          </Typography>
-        </DialogTitle>
-        <DialogContent sx={{ px: 4, py: 2 }}>
-          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 3, mt: 2 }}>
-            {/* Row 1 */}
-            <Box>
-              <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', mb: 0.5, display: 'block', ml: 0.5, textTransform: 'uppercase' }}>
-                Material Code
-              </Typography>
-              <TextField 
-                fullWidth 
-                value={form.code || ''} 
-                onChange={e => setForm({ ...form, code: e.target.value })} 
-                placeholder="Auto-generated"
-                disabled 
-                InputProps={{ startAdornment: <InputAdornment position="start"><Inventory color="action" sx={{ mr: 1 }} /></InputAdornment> }} 
-              />
+        <DialogTitle sx={{ fontWeight: 700, pb: 1, pt: 3 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box sx={{ p: 1, bgcolor: '#EFF6FF', borderRadius: 2, color: '#2563EB', display: 'flex' }}>
+              <Inventory fontSize="medium" />
             </Box>
             <Box>
-              <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', mb: 0.5, display: 'block', ml: 0.5, textTransform: 'uppercase' }}>
-                Material Name
+              <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
+                {viewOnly ? 'Material Details' : (editing ? 'Edit Material Details' : 'Register New Material')}
               </Typography>
-              <TextField 
-                fullWidth 
-                value={form.name} 
-                onChange={e => setForm({ ...form, name: e.target.value })} 
-                required 
-                InputProps={{ startAdornment: <InputAdornment position="start"><Description color="action" sx={{ mr: 1 }} /></InputAdornment> }} 
-              />
-            </Box>
-
-            {/* Row 2 */}
-            <Box>
-              <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', mb: 0.5, display: 'block', ml: 0.5, textTransform: 'uppercase' }}>
-                Category
+              <Typography variant="body2" color="text.secondary">
+                {viewOnly ? 'Comprehensive information about this material record.' : (editing ? 'Update material governance and inventory parameters.' : 'Enter the details to add a new material to the platform.')}
               </Typography>
-              <FormControl fullWidth>
-                <Select 
-                  value={form.category_id} 
-                  onChange={e => setForm({ ...form, category_id: e.target.value })} 
-                  startAdornment={<InputAdornment position="start"><Category color="action" sx={{ mr: 1 }} /></InputAdornment>}
-                >
-                  {categories.map(c => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
-                </Select>
-              </FormControl>
-            </Box>
-            <Box>
-              <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', mb: 0.5, display: 'block', ml: 0.5, textTransform: 'uppercase' }}>
-                UOM
-              </Typography>
-              <FormControl fullWidth>
-                <Select 
-                  value={form.uom_id} 
-                  onChange={e => setForm({ ...form, uom_id: e.target.value })} 
-                  startAdornment={<InputAdornment position="start"><Straighten color="action" sx={{ mr: 1 }} /></InputAdornment>}
-                >
-                  {uoms.map(u => <MenuItem key={u.id} value={u.id}>{u.name}</MenuItem>)}
-                </Select>
-              </FormControl>
-            </Box>
-
-            {/* Row 3 */}
-            <Box>
-              <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', mb: 0.5, display: 'block', ml: 0.5, textTransform: 'uppercase' }}>
-                Storage Type
-              </Typography>
-              <TextField 
-                fullWidth 
-                value={form.storage_type} 
-                onChange={e => setForm({ ...form, storage_type: e.target.value })} 
-                InputProps={{ startAdornment: <InputAdornment position="start"><Warehouse color="action" sx={{ mr: 1 }} /></InputAdornment> }} 
-              />
-            </Box>
-            <Box>
-              <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', mb: 0.5, display: 'block', ml: 0.5, textTransform: 'uppercase' }}>
-                Material Type
-              </Typography>
-              <FormControl fullWidth>
-                <Select 
-                  value={form.material_type} 
-                  onChange={e => setForm({ ...form, material_type: e.target.value })} 
-                  startAdornment={<InputAdornment position="start"><Category color="action" sx={{ mr: 1 }} /></InputAdornment>}
-                >
-                  <MenuItem value="Consumable">Consumable</MenuItem>
-                  <MenuItem value="Non-Consumable">Non-Consumable</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-
-            {/* Row 4 */}
-            <Box>
-              <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', mb: 0.5, display: 'block', ml: 0.5, textTransform: 'uppercase' }}>
-                GST Rate (%)
-              </Typography>
-              <TextField 
-                fullWidth 
-                type="number" 
-                value={form.gst_rate} 
-                onChange={e => setForm({ ...form, gst_rate: e.target.value })} 
-                inputProps={{ min: 0, max: 100, step: "0.01" }}
-                InputProps={{ startAdornment: <InputAdornment position="start"><Percent color="action" sx={{ mr: 1 }} /></InputAdornment> }} 
-              />
-            </Box>
-            <Box>
-              <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', mb: 0.5, display: 'block', ml: 0.5, textTransform: 'uppercase' }}>
-                Standard Cost (₹)
-              </Typography>
-              <TextField 
-                fullWidth 
-                type="number" 
-                value={form.standard_cost} 
-                onChange={e => setForm({ ...form, standard_cost: e.target.value })} 
-                inputProps={{ min: 0, max: 1000000000, step: "0.01" }}
-                InputProps={{ startAdornment: <InputAdornment position="start"><AttachMoney color="action" sx={{ mr: 1 }} /></InputAdornment> }} 
-              />
-            </Box>
-
-            {/* Row 5 */}
-            <Box>
-              <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', mb: 0.5, display: 'block', ml: 0.5, textTransform: 'uppercase' }}>
-                Reorder Level
-              </Typography>
-              <TextField 
-                fullWidth 
-                type="number" 
-                value={form.reorder_level} 
-                onChange={e => setForm({ ...form, reorder_level: e.target.value })} 
-                inputProps={{ min: 0, step: 1 }}
-                onKeyDown={(e) => { if (e.key === '.') e.preventDefault(); }}
-                InputProps={{ startAdornment: <InputAdornment position="start"><Speed color="action" sx={{ mr: 1 }} /></InputAdornment> }} 
-              />
-            </Box>
-            <Box>
-              <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', mb: 0.5, display: 'block', ml: 0.5, textTransform: 'uppercase' }}>
-                Maximum Level
-              </Typography>
-              <TextField 
-                fullWidth 
-                type="number" 
-                value={form.maximum_level} 
-                onChange={e => setForm({ ...form, maximum_level: e.target.value })} 
-                inputProps={{ min: 0, step: 1 }}
-                onKeyDown={(e) => { if (e.key === '.') e.preventDefault(); }}
-                InputProps={{ startAdornment: <InputAdornment position="start"><Speed color="action" sx={{ mr: 1 }} /></InputAdornment> }} 
-              />
-            </Box>
-
-            {/* Row 6 */}
-            <Box sx={{ gridColumn: 'span 2' }}>
-              <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', mb: 0.5, display: 'block', ml: 0.5, textTransform: 'uppercase' }}>
-                General Description
-              </Typography>
-              <TextField 
-                fullWidth 
-                value={form.description} 
-                onChange={e => setForm({ ...form, description: e.target.value })} 
-                multiline 
-                rows={2} 
-                InputProps={{ startAdornment: <InputAdornment position="start"><Description color="action" sx={{ mr: 1 }} /></InputAdornment> }} 
-              />
             </Box>
           </Box>
+        </DialogTitle>
+        <DialogContent sx={{ mt: 1 }}>
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr 1fr' }, gap: 2.5, pt: 2 }}>
+            <TextField 
+              fullWidth 
+              label="Material Code"
+              value={form.code || ''} 
+              placeholder="Auto-generated"
+              disabled 
+              InputProps={{ startAdornment: <InputAdornment position="start"><Inventory sx={{ color: '#94A3B8' }} /></InputAdornment> }} 
+            />
+            <TextField 
+              fullWidth 
+              label="Material Name"
+              value={form.name} 
+              onChange={e => setForm({ ...form, name: e.target.value })} 
+              required 
+              disabled={viewOnly}
+              error={!!errors.name}
+              helperText={errors.name}
+              sx={{ gridColumn: { sm: 'span 2' } }}
+              InputProps={{ startAdornment: <InputAdornment position="start"><Description sx={{ color: '#94A3B8' }} /></InputAdornment> }} 
+            />
+
+            <FormControl fullWidth error={!!errors.category_id}>
+              <InputLabel>Category</InputLabel>
+              <Select 
+                value={form.category_id} 
+                onChange={e => setForm({ ...form, category_id: e.target.value })} 
+                disabled={viewOnly}
+                label="Category"
+                startAdornment={<InputAdornment position="start"><Category sx={{ color: '#94A3B8' }} /></InputAdornment>}
+              >
+                {categories.map(c => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
+              </Select>
+            </FormControl>
+
+            <FormControl fullWidth error={!!errors.uom_id}>
+              <InputLabel>UOM</InputLabel>
+              <Select 
+                value={form.uom_id} 
+                onChange={e => setForm({ ...form, uom_id: e.target.value })} 
+                disabled={viewOnly}
+                label="UOM"
+                startAdornment={<InputAdornment position="start"><Straighten sx={{ color: '#94A3B8' }} /></InputAdornment>}
+              >
+                {uoms.map(u => <MenuItem key={u.id} value={u.id}>{u.name}</MenuItem>)}
+              </Select>
+            </FormControl>
+
+            <FormControl fullWidth error={!!errors.material_type}>
+              <InputLabel>Material Type</InputLabel>
+              <Select 
+                value={form.material_type} 
+                onChange={e => setForm({ ...form, material_type: e.target.value })} 
+                disabled={viewOnly}
+                label="Material Type"
+                startAdornment={<InputAdornment position="start"><Category sx={{ color: '#94A3B8' }} /></InputAdornment>}
+              >
+                <MenuItem value="Consumable">Consumable</MenuItem>
+                <MenuItem value="Non-Consumable">Non-Consumable</MenuItem>
+              </Select>
+              {errors.material_type && <Typography variant="caption" color="error" sx={{ ml: 2 }}>{errors.material_type}</Typography>}
+            </FormControl>
+
+            <TextField 
+              fullWidth 
+              label="Storage Type"
+              value={form.storage_type} 
+              onChange={e => setForm({ ...form, storage_type: e.target.value })} 
+              disabled={viewOnly}
+              InputProps={{ startAdornment: <InputAdornment position="start"><Warehouse sx={{ color: '#94A3B8' }} /></InputAdornment> }} 
+            />
+
+            <TextField 
+              fullWidth 
+              label="GST Rate (%)"
+              type="number" 
+              value={form.gst_rate} 
+              onChange={e => setForm({ ...form, gst_rate: e.target.value })} 
+              disabled={viewOnly}
+              error={!!errors.gst_rate}
+              helperText={errors.gst_rate}
+              inputProps={{ min: 0, max: 100, step: "0.01" }}
+              InputProps={{ startAdornment: <InputAdornment position="start"><Percent sx={{ color: '#94A3B8' }} /></InputAdornment> }} 
+            />
+
+            <TextField 
+              fullWidth 
+              label="Standard Cost (₹)"
+              type="number" 
+              value={form.standard_cost} 
+              onChange={e => setForm({ ...form, standard_cost: e.target.value })} 
+              disabled={viewOnly}
+              error={!!errors.standard_cost}
+              helperText={errors.standard_cost}
+              inputProps={{ min: 0, step: "0.01" }}
+              InputProps={{ startAdornment: <InputAdornment position="start"><CurrencyRupee sx={{ color: '#94A3B8' }} /></InputAdornment> }} 
+            />
+
+            <TextField 
+              fullWidth 
+              label="Reorder Level"
+              type="number" 
+              value={form.reorder_level} 
+              onChange={e => setForm({ ...form, reorder_level: e.target.value })} 
+              disabled={viewOnly}
+              error={!!errors.reorder_level}
+              helperText={errors.reorder_level}
+              inputProps={{ min: 0 }}
+              InputProps={{ startAdornment: <InputAdornment position="start"><Speed sx={{ color: '#94A3B8' }} /></InputAdornment> }} 
+            />
+
+            <TextField 
+              fullWidth 
+              label="Maximum Level"
+              type="number" 
+              value={form.maximum_level} 
+              onChange={e => setForm({ ...form, maximum_level: e.target.value })} 
+              disabled={viewOnly}
+              error={!!errors.maximum_level}
+              helperText={errors.maximum_level}
+              inputProps={{ min: 0 }}
+              InputProps={{ startAdornment: <InputAdornment position="start"><Speed sx={{ color: '#94A3B8' }} /></InputAdornment> }} 
+            />
+
+            <TextField 
+              fullWidth 
+              label="General Description"
+              value={form.description} 
+              onChange={e => setForm({ ...form, description: e.target.value })} 
+              multiline 
+              rows={2} 
+              disabled={viewOnly}
+              sx={{ gridColumn: { sm: 'span 3' } }}
+              InputProps={{ startAdornment: <InputAdornment position="start" sx={{ alignSelf: 'flex-start', mt: 1.5 }}><Description sx={{ color: '#94A3B8' }} /></InputAdornment> }} 
+            />
+          </Box>
         </DialogContent>
-        <DialogActions sx={{ px: 4, pb: 4, pt: 1 }}>
-          <Button onClick={() => setDialog(false)} sx={{ fontWeight: 600, color: 'text.secondary', textTransform: 'none' }}>
+        <DialogActions sx={{ px: 4, pb: 4, pt: 2, justifyContent: 'flex-end', gap: 2 }}>
+          <Button onClick={() => setDialog(false)} sx={{ color: '#64748B', fontWeight: 600 }}>
             Cancel
           </Button>
           <Button 
             variant="contained" 
-            onClick={handleSave} 
+            onClick={handleSave}
+            disabled={viewOnly}
             sx={{ 
-              px: 4, 
-              fontWeight: 700, 
-              textTransform: 'none', 
               borderRadius: 2, 
-              boxShadow: '0 4px 12px rgba(25, 118, 210, 0.2)' 
+              px: 4, 
+              py: 1, 
+              fontWeight: 700, 
+              boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)',
+              textTransform: 'none',
+              display: viewOnly ? 'none' : 'inline-flex'
             }}
           >
             {editing ? 'Update Material' : 'Create Material'}

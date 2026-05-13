@@ -3,9 +3,9 @@ import {
   Box, Typography, Card, Grid, Button, TextField, Dialog, DialogTitle,
   DialogContent, DialogActions, MenuItem, Select, FormControl,
   IconButton, Chip, Accordion, AccordionSummary, AccordionDetails,
-  Table, TableHead, TableBody, TableRow, TableCell, TableContainer, Divider
+  Table, TableHead, TableBody, TableRow, TableCell, TableContainer, Divider, InputLabel
 } from '@mui/material';
-import { Add, Edit, Delete, ExpandMore, AccountTree, Apartment, Business, VpnKey, LocationOn, Layers, Work, Domain } from '@mui/icons-material';
+import { Add, Edit, Delete, ExpandMore, AccountTree, Apartment, Business, VpnKey, LocationOn, Layers, Work, Domain, Description } from '@mui/icons-material';
 import { InputAdornment } from '@mui/material';
 import api from '../services/api';
 
@@ -54,6 +54,11 @@ export default function Projects() {
       delete payload._building_id;
     }
     if (!form.id && !payload.code) delete payload.code;
+    if (dialog === 'floor') {
+      if (!Number.isInteger(Number(form.level)) || Number(form.level) < 0) {
+        return alert("Floor Level must be a positive whole number.");
+      }
+    }
     try {
       if (form.id) {
         if (dialog === 'org') await api.put(`/api/organizations/${form.id}`, payload);
@@ -87,6 +92,14 @@ export default function Projects() {
       if (deptForm.id) {
         await api.put(`/api/departments/${deptForm.id}`, payload);
       } else {
+        // Bug 14: Frontend check for duplicate department in the same building
+        const isDuplicate = allDepartments.some(d => 
+          d.building_id === payload.building_id && 
+          d.name.toLowerCase() === payload.name.trim().toLowerCase()
+        );
+        if (isDuplicate) {
+          return alert(`Department '${payload.name}' already exists in this building.`);
+        }
         delete payload.code; // auto-generated on create
         await api.post('/api/departments', payload);
       }
@@ -112,7 +125,7 @@ export default function Projects() {
   };
 
   const Label = ({ children }) => (
-    <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748B', textTransform: 'uppercase', mb: 0.8, display: 'block', letterSpacing: '0.025em' }}>
+    <Typography variant="caption" sx={{ fontWeight: 700, color: '#475569', textTransform: 'uppercase', mb: 0.5, display: 'block', letterSpacing: '0.05em' }}>
       {children}
     </Typography>
   );
@@ -137,11 +150,11 @@ export default function Projects() {
           <Button size="small" variant="outlined" startIcon={<Add />} onClick={() => {
             setForm({ name: '', code: '', department_name: '', floor_id: '', _building_id: '' }); setDialog('room');
           }}>Room</Button>
-          <Button size="small" variant="contained" startIcon={<Domain />} onClick={() => {
+          <Button size="small" variant="outlined" startIcon={<Domain />} onClick={() => {
             setDeptFilter(''); setDeptForm({ name: '', code: '', accounting_code: '', building_id: '' });
             setDeptDialog(true);
             api.get('/api/departments').then(r => setAllDepartments(r.data)).catch(() => setAllDepartments([]));
-          }} sx={{ bgcolor: '#7C3AED', '&:hover': { bgcolor: '#6D28D9' } }}>Departments</Button>
+          }}>Departments</Button>
         </Box>
       </Box>
 
@@ -236,57 +249,86 @@ export default function Projects() {
         fullWidth
         PaperProps={{ sx: { borderRadius: '24px', p: 1, boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' } }}
       >
-        <DialogTitle component="div" sx={{ pb: 1, px: 3, pt: 3 }}>
-          <Typography variant="h5" sx={{ fontWeight: 800, color: '#1E3A8A', fontSize: '1.4rem' }}>
-            {form.id ? 'Edit' : 'New'} {dialog === 'org' ? 'Organization' : dialog.charAt(0).toUpperCase() + dialog.slice(1)}
-          </Typography>
-          <Typography variant="caption" sx={{ color: '#64748B', display: 'block', fontWeight: 500, fontSize: '0.85rem' }}>
-            Enter the details to manage your campus hierarchy.
-          </Typography>
+        <DialogTitle sx={{ pb: 1, px: 4, pt: 3 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box sx={{ 
+              p: 1, 
+              bgcolor: dialog === 'org' ? '#EFF6FF' : dialog === 'project' ? '#F0F9FF' : dialog === 'building' ? '#F5F3FF' : '#F8FAFC', 
+              borderRadius: 2, 
+              color: dialog === 'org' ? '#2563EB' : dialog === 'project' ? '#0EA5E9' : dialog === 'building' ? '#7C3AED' : '#64748B', 
+              display: 'flex' 
+            }}>
+              {dialog === 'org' ? <AccountTree fontSize="medium" /> : 
+               dialog === 'project' ? <Apartment fontSize="medium" /> : 
+               dialog === 'building' ? <Business fontSize="medium" /> : 
+               dialog === 'floor' ? <Layers fontSize="medium" /> : <Domain fontSize="medium" />}
+            </Box>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
+                {form.id ? 'Edit' : 'New'} {dialog === 'org' ? 'Organization' : dialog.charAt(0).toUpperCase() + dialog.slice(1)}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {dialog === 'org' ? 'Define the top-level entity for your campus hierarchy.' :
+                 dialog === 'project' ? 'Create a specific project site or campus area.' :
+                 dialog === 'building' ? 'Add a physical structure to your project site.' :
+                 dialog === 'floor' ? 'Specify a vertical level within the building.' :
+                 'Define a functional space or office within a floor.'}
+              </Typography>
+            </Box>
+          </Box>
         </DialogTitle>
-        <DialogContent sx={{ pt: 4, px: 3 }}>
-          <Grid container spacing={3}>
-            <Grid size={6}>
-              <Label>NAME *</Label>
+        <DialogContent sx={{ pt: 2, px: 4 }}>
+          <Grid container spacing={3} sx={{ mt: 0.5 }}>
+            <Grid item xs={dialog === 'floor' ? 12 : 6}>
               <TextField 
                 fullWidth size="small" required variant="outlined"
+                label={`${dialog.charAt(0).toUpperCase() + dialog.slice(1)} Name`}
                 value={form.name || ''} 
                 onChange={e => setForm({ ...form, name: e.target.value })} 
-                InputProps={{ startAdornment: <InputAdornment position="start"><Business sx={{ color: '#64748B', fontSize: 18 }} /></InputAdornment>, sx: { borderRadius: '12px' } }}
+                InputProps={{ 
+                  startAdornment: <InputAdornment position="start">
+                    {dialog === 'org' ? <Business sx={{ color: '#94A3B8', fontSize: 18 }} /> : 
+                     dialog === 'project' ? <Apartment sx={{ color: '#94A3B8', fontSize: 18 }} /> : 
+                     dialog === 'building' ? <Business sx={{ color: '#94A3B8', fontSize: 18 }} /> : 
+                     <Description sx={{ color: '#94A3B8', fontSize: 18 }} />}
+                  </InputAdornment>, 
+                  sx: { borderRadius: '12px' } 
+                }}
               />
             </Grid>
             {dialog !== 'floor' && (
-              <Grid size={6}>
-                <Label>CODE</Label>
+              <Grid item xs={6}>
                 <TextField 
                   fullWidth size="small" variant="outlined"
+                  label={`${dialog.charAt(0).toUpperCase() + dialog.slice(1)} Code`}
                   value={form.code || ''} 
                   placeholder="Auto-generated"
                   disabled
-                  onChange={e => setForm({ ...form, code: e.target.value })} 
-                  InputProps={{ startAdornment: <InputAdornment position="start"><VpnKey sx={{ color: '#64748B', fontSize: 18 }} /></InputAdornment>, sx: { borderRadius: '12px' } }}
+                  InputProps={{ startAdornment: <InputAdornment position="start"><VpnKey sx={{ color: '#94A3B8', fontSize: 18 }} /></InputAdornment>, sx: { borderRadius: '12px' } }}
                 />
               </Grid>
             )}
 
             {dialog === 'org' && (
-              <Grid size={12}>
-                <Label>ADDRESS</Label>
+              <Grid item xs={12}>
                 <TextField 
                   fullWidth size="small" variant="outlined"
+                  label="Registered Address"
                   value={form.address || ''} 
                   onChange={e => setForm({ ...form, address: e.target.value })} 
-                  InputProps={{ startAdornment: <InputAdornment position="start"><LocationOn sx={{ color: '#64748B', fontSize: 18 }} /></InputAdornment>, sx: { borderRadius: '12px' } }}
+                  multiline rows={2}
+                  InputProps={{ startAdornment: <InputAdornment position="start" sx={{ mt: 1, alignSelf: 'flex-start' }}><LocationOn sx={{ color: '#94A3B8', fontSize: 18 }} /></InputAdornment>, sx: { borderRadius: '12px' } }}
                 />
               </Grid>
             )}
 
             {dialog === 'project' && (
               <>
-                <Grid size={12}>
-                  <Label>ORGANIZATION</Label>
+                <Grid item xs={12}>
                   <FormControl fullWidth size="small">
+                    <InputLabel>Parent Organization</InputLabel>
                     <Select 
+                      label="Parent Organization"
                       value={form.organization_id || ''} 
                       onChange={e => setForm({ ...form, organization_id: e.target.value })}
                       startAdornment={<InputAdornment position="start"><AccountTree sx={{ color: '#94A3B8', fontSize: 18, mr: 1 }} /></InputAdornment>}
@@ -296,23 +338,24 @@ export default function Projects() {
                     </Select>
                   </FormControl>
                 </Grid>
-                <Grid size={12}>
-                  <Label>LOCATION</Label>
+                <Grid item xs={12}>
                   <TextField 
                     fullWidth size="small" variant="outlined"
+                    label="Project Location"
                     value={form.location || ''} 
                     onChange={e => setForm({ ...form, location: e.target.value })} 
-                    InputProps={{ startAdornment: <InputAdornment position="start"><LocationOn sx={{ color: '#64748B', fontSize: 18 }} /></InputAdornment>, sx: { borderRadius: '12px' } }}
+                    InputProps={{ startAdornment: <InputAdornment position="start"><LocationOn sx={{ color: '#94A3B8', fontSize: 18 }} /></InputAdornment>, sx: { borderRadius: '12px' } }}
                   />
                 </Grid>
               </>
             )}
 
             {dialog === 'building' && (
-              <Grid size={12}>
-                <Label>PROJECT</Label>
+              <Grid item xs={12}>
                 <FormControl fullWidth size="small">
+                  <InputLabel>Target Project</InputLabel>
                   <Select 
+                    label="Target Project"
                     value={form.project_id || ''} 
                     onChange={e => setForm({ ...form, project_id: e.target.value })}
                     startAdornment={<InputAdornment position="start"><Apartment sx={{ color: '#94A3B8', fontSize: 18, mr: 1 }} /></InputAdornment>}
@@ -326,10 +369,11 @@ export default function Projects() {
 
             {dialog === 'floor' && (
               <>
-                <Grid size={12}>
-                  <Label>BUILDING</Label>
+                <Grid item xs={12}>
                   <FormControl fullWidth size="small">
+                    <InputLabel>Select Building</InputLabel>
                     <Select 
+                      label="Select Building"
                       value={form.building_id || ''} 
                       onChange={e => setForm({ ...form, building_id: e.target.value })}
                       startAdornment={<InputAdornment position="start"><Apartment sx={{ color: '#94A3B8', fontSize: 18, mr: 1 }} /></InputAdornment>}
@@ -339,13 +383,13 @@ export default function Projects() {
                     </Select>
                   </FormControl>
                 </Grid>
-                <Grid size={12}>
-                  <Label>LEVEL / FLOOR NUMBER</Label>
+                <Grid item xs={12}>
                   <TextField 
                     fullWidth type="number" size="small" variant="outlined"
+                    label="Level / Floor Number"
                     value={form.level || 0} 
                     onChange={e => setForm({ ...form, level: parseInt(e.target.value) || 0 })} 
-                    InputProps={{ startAdornment: <InputAdornment position="start"><Layers sx={{ color: '#64748B', fontSize: 18 }} /></InputAdornment>, sx: { borderRadius: '12px' } }}
+                    InputProps={{ startAdornment: <InputAdornment position="start"><Layers sx={{ color: '#94A3B8', fontSize: 18 }} /></InputAdornment>, sx: { borderRadius: '12px' } }}
                   />
                 </Grid>
               </>
@@ -353,10 +397,11 @@ export default function Projects() {
 
             {dialog === 'room' && (
               <>
-                <Grid size={12}>
-                  <Label>BUILDING</Label>
+                <Grid item xs={12}>
                   <FormControl fullWidth size="small">
+                    <InputLabel>Select Building</InputLabel>
                     <Select 
+                      label="Select Building"
                       value={form._building_id || ''} 
                       onChange={e => {
                         const bid = e.target.value;
@@ -370,10 +415,11 @@ export default function Projects() {
                     </Select>
                   </FormControl>
                 </Grid>
-                <Grid size={12}>
-                  <Label>FLOOR</Label>
+                <Grid item xs={12}>
                   <FormControl fullWidth size="small">
+                    <InputLabel>Select Floor</InputLabel>
                     <Select 
+                      label="Select Floor"
                       value={form.floor_id || ''} 
                       onChange={e => setForm({ ...form, floor_id: e.target.value })}
                       startAdornment={<InputAdornment position="start"><Layers sx={{ color: '#94A3B8', fontSize: 18, mr: 1 }} /></InputAdornment>}
@@ -383,10 +429,11 @@ export default function Projects() {
                     </Select>
                   </FormControl>
                 </Grid>
-                <Grid size={12}>
-                  <Label>DEPARTMENT</Label>
+                <Grid item xs={12}>
                   <FormControl fullWidth size="small">
+                    <InputLabel>Assign Department</InputLabel>
                     <Select 
+                      label="Assign Department"
                       value={form.department_name || ''} 
                       onChange={e => setForm({ ...form, department_name: e.target.value })}
                       startAdornment={<InputAdornment position="start"><Work sx={{ color: '#94A3B8', fontSize: 18, mr: 1 }} /></InputAdornment>}
@@ -403,43 +450,54 @@ export default function Projects() {
 
           </Grid>
         </DialogContent>
-        <DialogActions sx={{ px: 4, pb: 4, gap: 1.5 }}>
-          <Button onClick={() => setDialog('')} sx={{ color: '#64748B', fontWeight: 700, fontSize: '0.9rem' }}>Cancel</Button>
+        <DialogActions sx={{ px: 4, pb: 4, pt: 2, justifyContent: 'flex-end', gap: 2 }}>
+          <Button onClick={() => setDialog('')} sx={{ color: '#64748B', fontWeight: 700, textTransform: 'none' }}>Cancel</Button>
           <Button 
             variant="contained" 
             onClick={save}
             sx={{ 
               borderRadius: '12px', 
               px: 4, 
-              py: 1.2,
+              fontWeight: 700,
+              textTransform: 'none',
               bgcolor: '#1E3A8A',
-              fontWeight: 800,
-              fontSize: '0.9rem',
-              boxShadow: '0 4px 6px -1px rgba(30, 58, 138, 0.2)',
-              '&:hover': { bgcolor: '#1E40AF' } 
+              '&:hover': { bgcolor: '#172554' }
             }}
           >
-            {form.id ? 'Save Changes' : `Create ${dialog === 'org' ? 'Organization' : dialog === 'department' ? 'Department' : dialog.charAt(0).toUpperCase() + dialog.slice(1)}`}
+            {form.id ? 'Save Changes' : `Create ${dialog === 'org' ? 'Organization' : dialog.charAt(0).toUpperCase() + dialog.slice(1)}`}
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Department Management Dialog */}
       <Dialog open={deptDialog} onClose={() => setDeptDialog(false)} maxWidth="md" fullWidth
-        PaperProps={{ sx: { borderRadius: '20px', minHeight: 500 } }}>
-        <DialogTitle component="div" sx={{ pb: 1 }}>
-          <Typography variant="h6" sx={{ fontWeight: 800, color: '#7C3AED' }}>Department Master</Typography>
-          <Typography variant="caption" sx={{ color: '#64748B' }}>Manage departments across buildings. Same department name can exist in different buildings.</Typography>
+        PaperProps={{ sx: { borderRadius: '24px', p: 1, boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' } }}>
+        <DialogTitle sx={{ pb: 1, pt: 3, px: 4 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box sx={{ p: 1, bgcolor: '#EFF6FF', borderRadius: 2, color: '#1E3A8A', display: 'flex' }}>
+              <Domain fontSize="medium" />
+            </Box>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>Department Master</Typography>
+              <Typography variant="body2" color="text.secondary">Manage departments across buildings. Same department name can exist in different buildings.</Typography>
+            </Box>
+          </Box>
         </DialogTitle>
-        <DialogContent sx={{ pt: 2 }}>
+        <DialogContent sx={{ px: 4, pt: 3 }}>
           {/* Filter */}
-          <Box sx={{ mb: 2 }}>
-            <FormControl size="small" sx={{ minWidth: 280 }}>
-              <Select value={deptFilter} displayEmpty onChange={e => {
-                setDeptFilter(e.target.value);
-                const params = e.target.value ? { building_id: e.target.value } : {};
-                api.get('/api/departments', { params }).then(r => setAllDepartments(r.data));
-              }} sx={{ borderRadius: '10px' }}>
+          <Box sx={{ mb: 3, mt: 2 }}>
+            <FormControl size="small" sx={{ minWidth: 320 }}>
+              <Select 
+                value={deptFilter} 
+                displayEmpty 
+                onChange={e => {
+                  setDeptFilter(e.target.value);
+                  const params = e.target.value ? { building_id: e.target.value } : {};
+                  api.get('/api/departments', { params }).then(r => setAllDepartments(r.data));
+                }} 
+                sx={{ borderRadius: '12px' }}
+                startAdornment={<InputAdornment position="start"><Business sx={{ color: '#94A3B8', fontSize: 18, mr: 1 }} /></InputAdornment>}
+              >
                 <MenuItem value="">All Buildings</MenuItem>
                 {buildings.map(b => <MenuItem key={b.id} value={b.id}>{b.name}</MenuItem>)}
               </Select>
@@ -447,78 +505,85 @@ export default function Projects() {
           </Box>
 
           {/* List */}
-          <TableContainer sx={{ maxHeight: 280, mb: 2, border: '1px solid #E2E8F0', borderRadius: '10px' }}>
+          <TableContainer sx={{ maxHeight: 280, mb: 4, border: '1px solid #E2E8F0', borderRadius: '16px', overflow: 'hidden' }}>
             <Table size="small" stickyHeader>
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 700, bgcolor: '#F8FAFC' }}>Code</TableCell>
-                  <TableCell sx={{ fontWeight: 700, bgcolor: '#F8FAFC' }}>Name</TableCell>
-                  <TableCell sx={{ fontWeight: 700, bgcolor: '#F8FAFC' }}>Accounting Code</TableCell>
-                  <TableCell sx={{ fontWeight: 700, bgcolor: '#F8FAFC' }}>Building</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 700, bgcolor: '#F8FAFC' }}>Actions</TableCell>
+                  <TableCell sx={{ fontWeight: 700, bgcolor: '#F8FAFC', color: '#475569', fontSize: '0.75rem' }}>CODE</TableCell>
+                  <TableCell sx={{ fontWeight: 700, bgcolor: '#F8FAFC', color: '#475569', fontSize: '0.75rem' }}>DEPARTMENT NAME</TableCell>
+                  <TableCell sx={{ fontWeight: 700, bgcolor: '#F8FAFC', color: '#475569', fontSize: '0.75rem' }}>ACCOUNTING CODE</TableCell>
+                  <TableCell sx={{ fontWeight: 700, bgcolor: '#F8FAFC', color: '#475569', fontSize: '0.75rem' }}>BUILDING</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700, bgcolor: '#F8FAFC', color: '#475569', fontSize: '0.75rem' }}>ACTIONS</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {allDepartments.map(d => (
-                  <TableRow key={d.id} hover>
-                    <TableCell><Chip label={d.code || '-'} size="small" variant="outlined" sx={{ fontWeight: 600 }} /></TableCell>
-                    <TableCell sx={{ fontWeight: 500 }}>{d.name}</TableCell>
-                    <TableCell sx={{ color: '#64748B' }}>{d.accounting_code || '-'}</TableCell>
-                    <TableCell><Chip label={d.building_name || '-'} size="small" color="primary" variant="outlined" /></TableCell>
+                  <TableRow key={d.id} hover sx={{ '&:last-child td': { border: 0 } }}>
+                    <TableCell><Chip label={d.code || '-'} size="small" sx={{ fontWeight: 700, bgcolor: '#F1F5F9', color: '#475569', borderRadius: '6px' }} /></TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#1E293B' }}>{d.name}</TableCell>
+                    <TableCell sx={{ color: '#64748B', fontSize: '0.85rem' }}>{d.accounting_code || '—'}</TableCell>
+                    <TableCell><Chip label={d.building_name || '-'} size="small" sx={{ fontWeight: 600, color: '#2563EB', bgcolor: '#EFF6FF', border: '1px solid #DBEAFE', borderRadius: '6px' }} /></TableCell>
                     <TableCell align="right">
-                      <IconButton size="small" onClick={() => setDeptForm({ ...d })}><Edit sx={{ fontSize: 16 }} /></IconButton>
-                      <IconButton size="small" color="error" onClick={() => deleteDept(d.id)}><Delete sx={{ fontSize: 16 }} /></IconButton>
+                      <IconButton size="small" onClick={() => setDeptForm({ ...d })} sx={{ color: '#64748B' }}><Edit sx={{ fontSize: 18 }} /></IconButton>
+                      <IconButton size="small" color="error" onClick={() => deleteDept(d.id)}><Delete sx={{ fontSize: 18 }} /></IconButton>
                     </TableCell>
                   </TableRow>
                 ))}
                 {allDepartments.length === 0 && (
-                  <TableRow><TableCell colSpan={5} align="center" sx={{ py: 4, color: '#94A3B8' }}>No departments found. Add one below.</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={5} align="center" sx={{ py: 6, color: '#94A3B8' }}>No departments found. Add one below.</TableCell></TableRow>
                 )}
               </TableBody>
             </Table>
           </TableContainer>
 
           {/* Add / Edit Form */}
-          <Divider sx={{ mb: 2 }} />
-          <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#475569', mb: 1.5 }}>
-            {deptForm.id ? '✏️ Edit Department' : '➕ Add New Department'}
-          </Typography>
-          <Grid container spacing={2}>
-            <Grid size={{ xs: 12, sm: 3 }}>
-              <TextField fullWidth size="small" label="Name *" value={deptForm.name}
-                onChange={e => setDeptForm({ ...deptForm, name: e.target.value })} />
+          <Box sx={{ p: 3, bgcolor: '#F8FAFC', borderRadius: '20px', border: '1px solid #E2E8F0' }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#1E293B', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+              {deptForm.id ? '✏️ EDIT DEPARTMENT' : '➕ ADD NEW DEPARTMENT'}
+            </Typography>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={3}>
+                <Label>DEPARTMENT NAME *</Label>
+                <TextField fullWidth size="small" value={deptForm.name}
+                  onChange={e => setDeptForm({ ...deptForm, name: e.target.value })} 
+                  InputProps={{ sx: { borderRadius: '12px', bgcolor: 'white' } }} />
+              </Grid>
+              <Grid item xs={12} sm={3}>
+                <Label>TARGET BUILDING *</Label>
+                <FormControl fullWidth size="small">
+                  <Select value={deptForm.building_id || ''} displayEmpty
+                    onChange={e => setDeptForm({ ...deptForm, building_id: e.target.value })}
+                    sx={{ borderRadius: '12px', bgcolor: 'white' }}>
+                    <MenuItem value="" disabled><em>Select Building...</em></MenuItem>
+                    {buildings.map(b => <MenuItem key={b.id} value={b.id}>{b.name}</MenuItem>)}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={3}>
+                <Label>ACCOUNTING CODE</Label>
+                <TextField fullWidth size="small" value={deptForm.accounting_code || ''}
+                  onChange={e => setDeptForm({ ...deptForm, accounting_code: e.target.value })} 
+                  placeholder="e.g. AC-ADMIN-01" 
+                  InputProps={{ sx: { borderRadius: '12px', bgcolor: 'white' } }} />
+              </Grid>
+              <Grid item xs={12} sm={3}>
+                <Label>&nbsp;</Label>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <Button variant="contained" onClick={saveDept}
+                    sx={{ bgcolor: '#1E3A8A', '&:hover': { bgcolor: '#172554' }, borderRadius: '12px', fontWeight: 700, flex: 1, textTransform: 'none' }}>
+                    {deptForm.id ? 'Update' : 'Add'}
+                  </Button>
+                  {deptForm.id && (
+                    <Button variant="outlined" onClick={() => setDeptForm({ name: '', code: '', accounting_code: '', building_id: deptFilter || '' })}
+                      sx={{ borderRadius: '12px', fontWeight: 700, textTransform: 'none', color: '#64748B' }}>Cancel</Button>
+                  )}
+                </Box>
+              </Grid>
             </Grid>
-            <Grid size={{ xs: 12, sm: 3 }}>
-              <FormControl fullWidth size="small">
-                <Select value={deptForm.building_id || ''} displayEmpty
-                  onChange={e => setDeptForm({ ...deptForm, building_id: e.target.value })}
-                  sx={{ borderRadius: '8px' }}>
-                  <MenuItem value="" disabled><em>Select Building *</em></MenuItem>
-                  {buildings.map(b => <MenuItem key={b.id} value={b.id}>{b.name}</MenuItem>)}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 3 }}>
-              <TextField fullWidth size="small" label="Accounting Code" value={deptForm.accounting_code || ''}
-                onChange={e => setDeptForm({ ...deptForm, accounting_code: e.target.value })} 
-                placeholder="e.g. AC-ADMIN-01" />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 3 }}>
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <Button variant="contained" onClick={saveDept}
-                  sx={{ bgcolor: '#7C3AED', '&:hover': { bgcolor: '#6D28D9' }, borderRadius: '10px', fontWeight: 700, flex: 1 }}>
-                  {deptForm.id ? 'Update' : 'Add'}
-                </Button>
-                {deptForm.id && (
-                  <Button variant="outlined" onClick={() => setDeptForm({ name: '', code: '', accounting_code: '', building_id: deptFilter || '' })}
-                    sx={{ borderRadius: '10px', fontWeight: 700 }}>Cancel</Button>
-                )}
-              </Box>
-            </Grid>
-          </Grid>
+          </Box>
         </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 3 }}>
-          <Button onClick={() => setDeptDialog(false)} sx={{ fontWeight: 700, color: '#64748B' }}>Close</Button>
+        <DialogActions sx={{ px: 4, pb: 4, pt: 2 }}>
+          <Button onClick={() => setDeptDialog(false)} sx={{ fontWeight: 700, color: '#64748B', textTransform: 'none' }}>Close</Button>
         </DialogActions>
       </Dialog>
     </Box>

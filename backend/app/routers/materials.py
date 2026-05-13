@@ -13,7 +13,7 @@ from app.schemas import (
     UOMCreate, UOMOut
 )
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
-from app.utils.sequences import get_next_number
+from app.utils.sequences import get_next_number, get_next_sequence
 
 router = APIRouter(prefix="/api", tags=["Master Data"])
 
@@ -42,7 +42,9 @@ def create_category(
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
-    cat = Category(**data.model_dump(), tenant_id=tenant_id, site_id=site_id)
+    seq = get_next_sequence(db, tenant_id, site_id, "CATEGORY")
+    cat_code = f"CAT-{seq:04d}"
+    cat = Category(**data.model_dump(), tenant_id=tenant_id, site_id=site_id, sequence_number=seq, code=cat_code)
     db.add(cat)
     db.commit()
     db.refresh(cat)
@@ -204,6 +206,7 @@ def list_materials(
             preferred_vendor_id=m.preferred_vendor_id,
             storage_type=m.storage_type, hsn_code=m.hsn_code, gst_rate=m.gst_rate or 0,
             description=m.description, is_active=m.is_active,
+            material_type=m.material_type,
             created_at=m.created_at,
             category_name=m.category.name if m.category else None,
             subcategory_name=m.subcategory.name if m.subcategory else None,
@@ -237,6 +240,7 @@ def get_material(
         preferred_vendor_id=m.preferred_vendor_id,
         storage_type=m.storage_type, hsn_code=m.hsn_code, gst_rate=m.gst_rate or 0,
         description=m.description, is_active=m.is_active,
+        material_type=m.material_type,
         created_at=m.created_at,
         category_name=m.category.name if m.category else None,
         subcategory_name=m.subcategory.name if m.subcategory else None,

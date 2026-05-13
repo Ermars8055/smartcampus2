@@ -103,45 +103,56 @@ export default function Warehouses() {
         </Table>
       </TableContainer>
 
-      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ fontWeight: 700 }}>{form.id ? 'Edit' : 'New'} Warehouse</DialogTitle>
-        <DialogContent>
-          <Grid container spacing={2} sx={{ mt: 0.5 }}>
+      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 3, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' } }}>
+        <DialogTitle sx={{ pb: 1, pt: 3, px: 4 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box sx={{ p: 1, bgcolor: '#EFF6FF', borderRadius: 2, color: '#2563EB', display: 'flex' }}>
+              <WarehouseIcon fontSize="medium" />
+            </Box>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>{form.id ? 'Edit' : 'New'} Warehouse</Typography>
+              <Typography variant="body2" color="text.secondary">{form.id ? 'Update warehouse details.' : 'Register a new warehouse or store location.'}</Typography>
+            </Box>
+          </Box>
+        </DialogTitle>
+        <DialogContent sx={{ px: 4, py: 2 }}>
+          <Grid container spacing={2.5} sx={{ mt: 0.5 }}>
             <Grid item xs={6}>
               <TextField 
-                fullWidth label="Name" size="small" value={form.name || ''} 
+                fullWidth label="Name" value={form.name || ''} 
                 onChange={e => setForm({ ...form, name: e.target.value })} 
                 InputLabelProps={{ shrink: true }}
-                InputProps={{ startAdornment: <InputAdornment position="start"><WarehouseIcon sx={{ fontSize: 18 }} /></InputAdornment> }}
+                InputProps={{ startAdornment: <InputAdornment position="start"><WarehouseIcon sx={{ color: '#94A3B8' }} /></InputAdornment> }}
               />
             </Grid>
             <Grid item xs={6}>
               <TextField 
-                fullWidth label="Code" size="small" value={form.code || ''} 
+                fullWidth label="Code" value={form.code || ''} 
                 onChange={e => setForm({ ...form, code: e.target.value })} 
                 placeholder="Auto-generated"
                 disabled
                 InputLabelProps={{ shrink: true }}
-                InputProps={{ startAdornment: <InputAdornment position="start"><VpnKey sx={{ fontSize: 18 }} /></InputAdornment> }}
+                InputProps={{ startAdornment: <InputAdornment position="start"><VpnKey sx={{ color: '#94A3B8' }} /></InputAdornment> }}
               />
             </Grid>
             <Grid item xs={6}>
               <TextField 
-                fullWidth label="Type" size="small" value={form.warehouse_type || ''} 
+                fullWidth label="Type" value={form.warehouse_type || ''} 
                 onChange={e => setForm({ ...form, warehouse_type: e.target.value })} 
                 placeholder="e.g. Central, Site Store"
                 InputLabelProps={{ shrink: true }}
+                InputProps={{ startAdornment: <InputAdornment position="start"><Apartment sx={{ color: '#94A3B8' }} /></InputAdornment> }}
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControl fullWidth size="small">
+              <FormControl fullWidth>
                 <InputLabel shrink>Project</InputLabel>
                 <Select
                   value={form.project_id || ''}
                   onChange={e => setForm({ ...form, project_id: e.target.value })}
                   label="Project"
                   displayEmpty
-                  startAdornment={<InputAdornment position="start"><Business sx={{ fontSize: 18 }} /></InputAdornment>}
+                  startAdornment={<InputAdornment position="start"><Business sx={{ color: '#94A3B8' }} /></InputAdornment>}
                 >
                   {projects.map(p => (
                     <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>
@@ -151,25 +162,25 @@ export default function Warehouses() {
             </Grid>
             <Grid item xs={6}>
               <TextField 
-                fullWidth label="Location" size="small" value={form.location || ''} 
+                fullWidth label="Location" value={form.location || ''} 
                 onChange={e => setForm({ ...form, location: e.target.value })} 
                 InputLabelProps={{ shrink: true }}
-                InputProps={{ startAdornment: <InputAdornment position="start"><LocationOn sx={{ fontSize: 18 }} /></InputAdornment> }}
+                InputProps={{ startAdornment: <InputAdornment position="start"><LocationOn sx={{ color: '#94A3B8' }} /></InputAdornment> }}
               />
             </Grid>
             <Grid item xs={6}>
               <TextField 
-                fullWidth label="Manager Name" size="small" value={form.manager_name || ''} 
+                fullWidth label="Manager Name" value={form.manager_name || ''} 
                 onChange={e => setForm({ ...form, manager_name: e.target.value })} 
                 InputLabelProps={{ shrink: true }}
-                InputProps={{ startAdornment: <InputAdornment position="start"><Person sx={{ fontSize: 18 }} /></InputAdornment> }}
+                InputProps={{ startAdornment: <InputAdornment position="start"><Person sx={{ color: '#94A3B8' }} /></InputAdornment> }}
               />
             </Grid>
           </Grid>
         </DialogContent>
-        <DialogActions sx={{ p: 2, px: 3 }}>
-          <Button onClick={() => setDialogOpen(false)} sx={{ color: '#64748B' }}>Cancel</Button>
-          <Button variant="contained" onClick={save} sx={{ bgcolor: '#1E3A8A' }}>Save Warehouse</Button>
+        <DialogActions sx={{ px: 4, pb: 4, pt: 2, justifyContent: 'flex-end', gap: 2 }}>
+          <Button onClick={() => setDialogOpen(false)} sx={{ color: '#64748B', fontWeight: 600 }}>Cancel</Button>
+          <Button variant="contained" onClick={save} sx={{ borderRadius: 2, px: 4, py: 1, fontWeight: 700, boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)', textTransform: 'none' }}>Save Warehouse</Button>
         </DialogActions>
       </Dialog>
     </Box>

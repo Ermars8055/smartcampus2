@@ -5,7 +5,7 @@ import {
   DialogContent, DialogActions, Grid, MenuItem, Select, FormControl,
   InputLabel, Divider
 } from '@mui/material';
-import { Add, Search } from '@mui/icons-material';
+import { Add, Search, AssignmentTurnedIn } from '@mui/icons-material';
 import api from '../services/api';
 import { formatDate } from '../utils/dateUtils';
 
@@ -179,9 +179,19 @@ export default function GRNPage() {
       </Dialog>
 
       {/* Create GRN */}
-      <Dialog open={dialog} onClose={() => setDialog(false)} maxWidth="lg" fullWidth>
-        <DialogTitle sx={{ fontWeight: 600 }}>Create Goods Receipt Note</DialogTitle>
-        <DialogContent>
+      <Dialog open={dialog} onClose={() => setDialog(false)} maxWidth="lg" fullWidth PaperProps={{ sx: { borderRadius: 3, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' } }}>
+        <DialogTitle sx={{ pb: 1, pt: 3, px: 4 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box sx={{ p: 1, bgcolor: '#EFF6FF', borderRadius: 2, color: '#2563EB', display: 'flex' }}>
+              <AssignmentTurnedIn fontSize="medium" />
+            </Box>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>Create Goods Receipt Note</Typography>
+              <Typography variant="body2" color="text.secondary">Verify and accept received materials into the warehouse.</Typography>
+            </Box>
+          </Box>
+        </DialogTitle>
+        <DialogContent sx={{ px: 4, py: 2 }}>
           <Grid container spacing={2} sx={{ mt: 0.5, mb: 2 }}>
             {/* Gate Entry Selection (primary link) */}
             <Grid size={4}>
@@ -259,7 +269,10 @@ export default function GRNPage() {
             </>
           )}
         </DialogContent>
-        <DialogActions><Button onClick={() => setDialog(false)}>Cancel</Button><Button variant="contained" onClick={handleCreate}>Complete GRN</Button></DialogActions>
+        <DialogActions sx={{ px: 4, pb: 4, pt: 2, justifyContent: 'flex-end', gap: 2 }}>
+          <Button onClick={() => setDialog(false)} sx={{ color: '#64748B', fontWeight: 600 }}>Cancel</Button>
+          <Button variant="contained" onClick={handleCreate} sx={{ borderRadius: 2, px: 4, py: 1, fontWeight: 700, boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)', textTransform: 'none' }}>Complete GRN</Button>
+        </DialogActions>
       </Dialog>
     </Box>
   );

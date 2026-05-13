@@ -5,9 +5,9 @@ import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
   DialogContent, DialogActions, Grid, MenuItem, Select, FormControl,
-  InputLabel, IconButton, Tooltip, Divider
+  InputLabel, IconButton, Tooltip, Divider, InputAdornment
 } from '@mui/material';
-import { Add, Delete, CheckCircle, Archive, Send, Cancel, Pause, Search } from '@mui/icons-material';
+import { Add, Delete, CheckCircle, Archive, Send, Cancel, Pause, Search, ShoppingCart, Store, Assignment, CalendarMonth } from '@mui/icons-material';
 import api from '../services/api';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { formatDate } from '../utils/dateUtils';
@@ -257,20 +257,34 @@ export default function PurchaseOrders() {
       </Dialog>
 
       {/* Create PO Dialog */}
-      <Dialog open={dialog} onClose={() => setDialog(false)} maxWidth="md" fullWidth>
-        <DialogTitle sx={{ fontWeight: 600 }}>Create Purchase Order</DialogTitle>
-        <DialogContent>
-          <Grid container spacing={2} sx={{ mt: 0.5, mb: 2 }}>
+      <Dialog open={dialog} onClose={() => setDialog(false)} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 3, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' } }}>
+        <DialogTitle sx={{ pb: 1, pt: 3, px: 4 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box sx={{ p: 1, bgcolor: '#EFF6FF', borderRadius: 2, color: '#2563EB', display: 'flex' }}>
+              <ShoppingCart fontSize="medium" />
+            </Box>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>Create Purchase Order</Typography>
+              <Typography variant="body2" color="text.secondary">Issue a new purchase order to the vendor.</Typography>
+            </Box>
+          </Box>
+        </DialogTitle>
+        <DialogContent sx={{ px: 4, py: 2 }}>
+          <Grid container spacing={2.5} sx={{ mt: 0.5, mb: 2 }}>
             <Grid size={3}>
               <FormControl fullWidth required><InputLabel>Vendor</InputLabel>
-                <Select value={form.vendor_id} label="Vendor" onChange={e => setForm({ ...form, vendor_id: e.target.value })}>
+                <Select value={form.vendor_id} label="Vendor" onChange={e => setForm({ ...form, vendor_id: e.target.value })}
+                  startAdornment={<InputAdornment position="start"><Store sx={{ color: '#94A3B8' }} /></InputAdornment>}
+                >
                   {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.name}</MenuItem>)}
                 </Select>
               </FormControl>
             </Grid>
             <Grid size={4}>
               <FormControl fullWidth><InputLabel>PO Type</InputLabel>
-                <Select value={form.po_type || 'Informal'} label="PO Type" onChange={e => setForm({ ...form, po_type: e.target.value })}>
+                <Select value={form.po_type || 'Informal'} label="PO Type" onChange={e => setForm({ ...form, po_type: e.target.value })}
+                  startAdornment={<InputAdornment position="start"><Assignment sx={{ color: '#94A3B8' }} /></InputAdornment>}
+                >
                   <MenuItem value="Formal">Formal</MenuItem>
                   <MenuItem value="Informal">Informal</MenuItem>
                 </Select>
@@ -278,11 +292,12 @@ export default function PurchaseOrders() {
             </Grid>
             <Grid size={3}>
               <TextField fullWidth label="Delivery Date" type="date" value={form.delivery_date}
-                onChange={e => setForm({ ...form, delivery_date: e.target.value })} InputLabelProps={{ shrink: true }} />
+                onChange={e => setForm({ ...form, delivery_date: e.target.value })} InputLabelProps={{ shrink: true }}
+                InputProps={{ startAdornment: <InputAdornment position="start"><CalendarMonth sx={{ color: '#94A3B8' }} /></InputAdornment> }} />
             </Grid>
           </Grid>
           <Divider sx={{ mb: 2 }} />
-          <Typography variant="subtitle2" sx={{ mb: 1 }}>Line Items</Typography>
+          <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>Line Items</Typography>
           {form.items.map((item, i) => (
             <Grid container spacing={1} key={i} sx={{ mb: 1 }}>
               <Grid size={5}>
@@ -304,7 +319,10 @@ export default function PurchaseOrders() {
             <Button size="small" startIcon={<Add />} onClick={addItem} sx={{ mt: 1 }}>Add Item</Button>
           )}
         </DialogContent>
-        <DialogActions><Button onClick={() => setDialog(false)}>Cancel</Button><Button variant="contained" onClick={handleCreate}>Create PO</Button></DialogActions>
+        <DialogActions sx={{ px: 4, pb: 4, pt: 2, justifyContent: 'flex-end', gap: 2 }}>
+          <Button onClick={() => setDialog(false)} sx={{ color: '#64748B', fontWeight: 600 }}>Cancel</Button>
+          <Button variant="contained" onClick={handleCreate} sx={{ borderRadius: 2, px: 4, py: 1, fontWeight: 700, boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)', textTransform: 'none' }}>Create PO</Button>
+        </DialogActions>
       </Dialog>
 
       {/* Confirmation Dialog with optional Reason */}

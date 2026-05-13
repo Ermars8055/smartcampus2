@@ -506,6 +506,17 @@ def create_department(
     dept_data = data.model_dump()
     if not dept_data.get("code"):
         dept_data["code"] = get_next_number(db, tenant_id, site_id, "DEPARTMENT", "DEPT")
+    
+    # Bug 14: Check for duplicate department name in the same building
+    existing = db.query(Department).filter(
+        Department.tenant_id == tenant_id,
+        Department.building_id == data.building_id,
+        Department.name.ilike(data.name),
+        Department.is_deleted == False
+    ).first()
+    if existing:
+        raise HTTPException(status_code=400, detail=f"Department '{data.name}' already exists in this building")
+
     dept = Department(**dept_data, tenant_id=tenant_id, site_id=site_id)
     db.add(dept)
     db.commit()

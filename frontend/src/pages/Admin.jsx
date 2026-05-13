@@ -7,7 +7,7 @@ import {
   Select, FormControl, InputLabel, Switch, FormControlLabel, Checkbox,
   ListItemText
 } from '@mui/material';
-import { Add, Edit, PersonAdd } from '@mui/icons-material';
+import { Add, Edit, PersonAdd, AdminPanelSettings, AccountTree as FlowIcon, Security } from '@mui/icons-material';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
@@ -87,6 +87,7 @@ export default function Admin() {
           <Tab label={`Users (${users.length})`} sx={{ textTransform: 'none', fontWeight: 500 }} />
           <Tab label="Audit Logs" sx={{ textTransform: 'none', fontWeight: 500 }} />
           <Tab label="Approval Flows" sx={{ textTransform: 'none', fontWeight: 500 }} />
+          <Tab label="Roles" sx={{ textTransform: 'none', fontWeight: 500 }} />
         </Tabs>
       </Card>
 
@@ -216,15 +217,64 @@ export default function Admin() {
         </>
       )}
 
-      <Dialog open={dialog} onClose={() => setDialog(false)} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ fontWeight: 600 }}>
-          {tab === 2 ? (editing ? 'Edit Flow' : 'Create Flow') : (editing ? 'Edit User' : 'Create User')}
+      {tab === 3 && (
+        <>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+            <Button variant="contained" startIcon={<Add />} onClick={() => {
+              setEditing(null); 
+              setForm({ name: '', code: '', description: '' }); 
+              setDialog(true);
+            }}>Add Role</Button>
+          </Box>
+          <Card>
+            <TableContainer>
+              <Table size="small">
+                <TableHead><TableRow>
+                  <TableCell>Role Name</TableCell><TableCell>Code</TableCell><TableCell>Description</TableCell><TableCell>Actions</TableCell>
+                </TableRow></TableHead>
+                <TableBody>
+                  {tenantRoles.map(r => (
+                    <TableRow key={r.id}>
+                      <TableCell sx={{ fontWeight: 600 }}>{r.name}</TableCell>
+                      <TableCell><Chip label={r.code} size="small" variant="outlined" /></TableCell>
+                      <TableCell sx={{ fontSize: '0.8rem', color: '#64748B' }}>{r.description || '-'}</TableCell>
+                      <TableCell>
+                        <Tooltip title="Edit"><IconButton size="small" onClick={() => {
+                          setEditing(r.id);
+                          setForm({ ...r });
+                          setDialog(true);
+                        }}><Edit fontSize="small" /></IconButton></Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Card>
+        </>
+      )}
+
+      <Dialog open={dialog} onClose={() => setDialog(false)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 3, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' } }}>
+        <DialogTitle sx={{ pb: 1, pt: 3, px: 4 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box sx={{ p: 1, bgcolor: '#EFF6FF', borderRadius: 2, color: '#2563EB', display: 'flex' }}>
+              {tab === 3 ? <Security fontSize="medium" /> : tab === 2 ? <FlowIcon fontSize="medium" /> : <AdminPanelSettings fontSize="medium" />}
+            </Box>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
+                {tab === 3 ? (editing ? 'Edit Role' : 'Create Role') : (tab === 2 ? (editing ? 'Edit Flow' : 'Create Flow') : (editing ? 'Edit User' : 'Create User'))}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {tab === 3 ? 'Define access roles for the platform.' : tab === 2 ? 'Configure approval workflow rules.' : 'Manage user accounts and permissions.'}
+              </Typography>
+            </Box>
+          </Box>
         </DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ px: 4, py: 2 }}>
           {tab === 2 ? (
             <Grid container spacing={2} sx={{ mt: 0.5 }}>
               <Grid size={6}>
-                <FormControl fullWidth>
+                <FormControl fullWidth required>
                   <InputLabel>Document Type</InputLabel>
                   <Select value={form.document_type || 'INDENT'} label="Document Type" onChange={e => setForm({ ...form, document_type: e.target.value })}>
                     <MenuItem value="INDENT">Indent</MenuItem>
@@ -246,7 +296,7 @@ export default function Admin() {
                 />
               </Grid>
               <Grid size={6}>
-                <FormControl fullWidth><InputLabel>Role Required</InputLabel>
+                <FormControl fullWidth required><InputLabel>Role Required</InputLabel>
                   <Select value={form.role_name || ''} label="Role Required" onChange={e => setForm({ ...form, role_name: e.target.value })}>
                     {roles.map(r => <MenuItem key={r.id} value={r.name}>{r.name}</MenuItem>)}
                   </Select>
@@ -263,6 +313,12 @@ export default function Admin() {
               <Grid size={6}><TextField fullWidth label="Min Amount" type="number" value={form.min_amount} onChange={e => setForm({ ...form, min_amount: Number(e.target.value) })} /></Grid>
               <Grid size={6}><TextField fullWidth label="Max Amount (Leave empty for No Limit)" type="number" value={form.max_amount || ''} onChange={e => setForm({ ...form, max_amount: e.target.value ? Number(e.target.value) : null })} /></Grid>
               <Grid size={12}><FormControlLabel control={<Switch checked={form.is_active !== false} onChange={e => setForm({ ...form, is_active: e.target.checked })} />} label="Active" /></Grid>
+            </Grid>
+          ) : tab === 3 ? (
+            <Grid container spacing={2} sx={{ mt: 0.5 }}>
+              <Grid size={12}><TextField fullWidth label="Role Name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required /></Grid>
+              <Grid size={12}><TextField fullWidth label="Role Code" value={form.code} onChange={e => setForm({ ...form, code: e.target.value.toUpperCase() })} required disabled={editing} /></Grid>
+              <Grid size={12}><TextField fullWidth label="Description" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} multiline rows={2} /></Grid>
             </Grid>
           ) : (
             <Grid container spacing={2} sx={{ mt: 0.5 }}>
@@ -289,6 +345,7 @@ export default function Admin() {
                 <Select
                   value={form.role_id || ''}
                   label="Role"
+                  required
                   onChange={e => {
                     const selectedRole = tenantRoles.find(role => role.id === Number(e.target.value));
                     setForm({ ...form, role_id: e.target.value, role: selectedRole?.name || form.role });
@@ -298,34 +355,38 @@ export default function Admin() {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid size={12}>
-              <FormControl fullWidth>
-                <InputLabel>Site Access</InputLabel>
-                <Select
-                  multiple
-                  value={form.site_ids || []}
-                  label="Site Access"
-                  onChange={e => setForm({ ...form, site_ids: e.target.value })}
-                  renderValue={(selected) => selected.map(id => siteNameById[id] || `Site ${id}`).join(', ')}
-                >
-                  {tenantSites.map(site => (
-                    <MenuItem key={site.id} value={site.id}>
-                      <Checkbox checked={(form.site_ids || []).includes(site.id)} />
-                      <ListItemText primary={site.name} secondary={site.location} />
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
+            {tenantSites.length > 1 && (
+              <Grid size={12}>
+                <FormControl fullWidth>
+                  <InputLabel>Site Access</InputLabel>
+                  <Select
+                    multiple
+                    value={form.site_ids || []}
+                    label="Site Access"
+                    onChange={e => setForm({ ...form, site_ids: e.target.value })}
+                    renderValue={(selected) => selected.map(id => siteNameById[id] || `Site ${id}`).join(', ')}
+                  >
+                    {tenantSites.map(site => (
+                      <MenuItem key={site.id} value={site.id}>
+                        <Checkbox checked={(form.site_ids || []).includes(site.id)} />
+                        <ListItemText primary={site.name} secondary={site.location} />
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+            )}
             {!editing && <Grid size={12}><TextField fullWidth label="Password" type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} required /></Grid>}
             {editing && <Grid size={12}><FormControlLabel control={<Switch checked={form.is_active !== false} onChange={e => setForm({ ...form, is_active: e.target.checked })} />} label="Active" /></Grid>}
           </Grid>
           )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDialog(false)}>Cancel</Button>
-          <Button variant="contained" onClick={async () => {
+        <DialogActions sx={{ px: 4, pb: 4, pt: 2, justifyContent: 'flex-end', gap: 2 }}>
+          <Button onClick={() => setDialog(false)} sx={{ color: '#64748B', fontWeight: 600 }}>Cancel</Button>
+          <Button variant="contained" sx={{ borderRadius: 2, px: 4, py: 1, fontWeight: 700, boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)', textTransform: 'none' }} onClick={async () => {
             if (tab === 2) {
+              if (!form.document_type) return alert('Document Type is required');
+              if (!form.role_name) return alert('Role Required is mandatory');
               if (!Number.isInteger(Number(form.level)) || Number(form.level) < 1) {
                 return alert('Level must be a positive integer (e.g., 1, 2, 3)');
               }
@@ -338,6 +399,11 @@ export default function Admin() {
               };
               if (editing) await api.put(`/api/approval-flows/${editing}`, payload);
               else await api.post('/api/approval-flows', payload);
+              setDialog(false); setEditing(null); load();
+            } else if (tab === 3) {
+              if (!form.name || !form.code) return alert('Role name and code are required');
+              if (editing) await api.put(`/api/rbac/roles/${editing}`, form);
+              else await api.post('/api/rbac/roles', { ...form, tenant_id: currentUser?.tenant_id });
               setDialog(false); setEditing(null); load();
             } else {
               handleSave();

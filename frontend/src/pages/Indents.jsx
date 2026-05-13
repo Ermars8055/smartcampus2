@@ -5,9 +5,9 @@ import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
   DialogContent, DialogActions, Grid, IconButton, Tooltip, FormControl, InputLabel, Select, MenuItem,
-  Divider
+  Divider, InputAdornment
 } from '@mui/material';
-import { Add, Delete, CheckCircle, Cancel, ReceiptLong, ArrowBack, Search } from '@mui/icons-material';
+import { Add, Delete, CheckCircle, Cancel, ReceiptLong, ArrowBack, Search, Apartment, Layers, MeetingRoom, AccountTree, Notes } from '@mui/icons-material';
 import api from '../services/api';
 import { formatDate, formatDateTime } from '../utils/dateUtils';
 import MaterialSelect from '../components/MaterialSelect';
@@ -162,7 +162,15 @@ export default function Indents() {
 
         {/* Create Form Card */}
         <Card sx={{ border: '1.5px solid #e0e7ef', borderRadius: 3, p: { xs: 2, sm: 3, md: 4 }, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-          <Typography variant="h6" sx={{ fontWeight: 700, mb: 3 }}>Create New Indent</Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
+            <Box sx={{ p: 1, bgcolor: '#EFF6FF', borderRadius: 2, color: '#2563EB', display: 'flex' }}>
+              <ReceiptLong fontSize="medium" />
+            </Box>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>Create New Indent</Typography>
+              <Typography variant="body2" color="text.secondary">Raise a department material request with location details.</Typography>
+            </Box>
+          </Box>
 
           {/* ── Location Row ── */}
           <Grid container spacing={2.5} sx={{ mb: 3 }}>
@@ -176,6 +184,7 @@ export default function Indents() {
                   displayEmpty
                   onChange={e => setForm({ ...form, building_id: e.target.value })}
                   sx={{ bgcolor: '#fff' }}
+                  startAdornment={<InputAdornment position="start"><Apartment sx={{ color: '#94A3B8' }} /></InputAdornment>}
                 >
                   <MenuItem value="" disabled><em>Select Building</em></MenuItem>
                   {buildings.map(b => <MenuItem key={b.id} value={b.id}>{b.name}</MenuItem>)}
@@ -191,6 +200,7 @@ export default function Indents() {
                   onChange={e => setForm({ ...form, floor_id: e.target.value })}
                   disabled={!form.building_id}
                   sx={{ bgcolor: '#fff' }}
+                  startAdornment={<InputAdornment position="start"><Layers sx={{ color: '#94A3B8' }} /></InputAdornment>}
                 >
                   <MenuItem value="" disabled><em>Select Floor</em></MenuItem>
                   {floors.map(f => <MenuItem key={f.id} value={f.id}>{f.name}</MenuItem>)}
@@ -210,6 +220,7 @@ export default function Indents() {
                   }}
                   disabled={!form.floor_id}
                   sx={{ bgcolor: '#fff' }}
+                  startAdornment={<InputAdornment position="start"><MeetingRoom sx={{ color: '#94A3B8' }} /></InputAdornment>}
                 >
                   <MenuItem value="" disabled><em>Select Room</em></MenuItem>
                   {rooms.map(r => <MenuItem key={r.id} value={r.id}>{r.name}</MenuItem>)}
@@ -222,7 +233,7 @@ export default function Indents() {
                 fullWidth size="small"
                 value={form.department}
                 placeholder="Select Room first"
-                InputProps={{ readOnly: true }}
+                InputProps={{ readOnly: true, startAdornment: <InputAdornment position="start"><AccountTree sx={{ color: '#94A3B8' }} /></InputAdornment> }}
                 sx={{ bgcolor: '#f8fafc' }}
               />
             </Grid>
@@ -237,6 +248,7 @@ export default function Indents() {
               value={form.remarks}
               onChange={e => setForm({ ...form, remarks: e.target.value })}
               sx={{ bgcolor: '#fff' }}
+              InputProps={{ startAdornment: <InputAdornment position="start"><Notes sx={{ color: '#94A3B8' }} /></InputAdornment> }}
             />
           </Box>
 
@@ -319,16 +331,16 @@ export default function Indents() {
           </Card>
 
           {/* ── Action Buttons ── */}
-          <Box sx={{ display: 'flex', gap: 1.5, mt: 3, justifyContent: 'flex-end' }}>
+          <Box sx={{ display: 'flex', gap: 2, mt: 3, justifyContent: 'flex-end' }}>
             <Button
               variant="text" onClick={() => setShowForm(false)}
-              sx={{ textTransform: 'none', fontWeight: 600, px: 3, py: 1 }}
+              sx={{ textTransform: 'none', fontWeight: 600, px: 3, py: 1, color: '#64748B' }}
             >
               Cancel
             </Button>
             <Button
               variant="contained" onClick={handleCreate}
-              sx={{ textTransform: 'none', fontWeight: 600, px: 4, py: 1, borderRadius: 2 }}
+              sx={{ textTransform: 'none', fontWeight: 700, px: 4, py: 1, borderRadius: 2, boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)' }}
             >
               Submit Indent
             </Button>

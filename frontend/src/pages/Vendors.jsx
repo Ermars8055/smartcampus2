@@ -6,11 +6,12 @@ import {
   InputAdornment, FormControl, InputLabel, Select, MenuItem, OutlinedInput,
   Checkbox, ListItemText
 } from '@mui/material';
-import { 
-  Add, Edit, Search, Store, Person, Phone, Email, 
+import {
+  Add, Edit, Search, Store, Person, Phone, Email,
   Business, LocationOn, Description, Category, PinDrop,
-  Badge, AppRegistration
+  Badge, AppRegistration, ArrowDropDown
 } from '@mui/icons-material';
+import { TableSortLabel } from '@mui/material';
 import api from '../services/api';
 
 export default function Vendors() {
@@ -20,35 +21,56 @@ export default function Vendors() {
   const [editing, setEditing] = useState(null);
   const [categories, setCategories] = useState([]);
   const [form, setForm] = useState({
-    name: '', code: '', contact_person: '', phone: '', email: '',
-    gst_number: '', address: '', city: '', state: '', category_ids: []
+    gst_number: '', address: '', city: '', state: '', category_ids: [], rating: 0
   });
+  const [viewOnly, setViewOnly] = useState(false);
+  const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'asc' });
   const [errors, setErrors] = useState({});
 
   const load = () => {
-    api.get('/api/vendors', { params: { search: search || undefined } }).then(r => setVendors(r.data));
+    api.get('/api/vendors', { params: { search: search || undefined } }).then(r => {
+      let data = [...r.data];
+      if (sortConfig.key) {
+        data.sort((a, b) => {
+          const aVal = a[sortConfig.key] || '';
+          const bVal = b[sortConfig.key] || '';
+          if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
+          if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
+          return 0;
+        });
+      }
+      setVendors(data);
+    });
   };
 
-  useEffect(() => { 
-    load(); 
-    api.get('/api/categories').then(r => setCategories(r.data)); 
+  useEffect(() => {
+    load();
+    api.get('/api/categories').then(r => setCategories(r.data));
   }, []);
-  
-  useEffect(() => { load(); }, [search]);
+
+  useEffect(() => { load(); }, [search, sortConfig]);
+
+  const requestSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
 
   const validateForm = () => {
     const newErrors = {};
     if (!form.name) newErrors.name = 'Vendor name is required';
     if (!form.contact_person) newErrors.contact_person = 'Contact person is required';
-    
+
     // Phone validation: strictly 10 digits
     if (!form.phone) newErrors.phone = 'Phone number is required';
     else if (!/^\d{10}$/.test(form.phone)) newErrors.phone = 'Phone must be exactly 10 digits';
-    
+
     // Email validation: standard regex
     if (!form.email) newErrors.email = 'Email is required';
     else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(form.email)) newErrors.email = 'Invalid email address';
-    
+
     // GST validation: Indian GSTIN format
     const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
     if (!form.gst_number) newErrors.gst_number = 'GST number is required';
@@ -60,22 +82,22 @@ export default function Vendors() {
 
   const handleSave = async () => {
     if (!validateForm()) return;
-    
+
     try {
       const payload = { ...form };
       if (!editing && !payload.code) delete payload.code;
-      
-      if (editing) { 
-        await api.put(`/api/vendors/${editing}`, payload); 
-      } else { 
-        await api.post('/api/vendors', payload); 
+
+      if (editing) {
+        await api.put(`/api/vendors/${editing}`, payload);
+      } else {
+        await api.post('/api/vendors', payload);
       }
-      
-      setDialog(false); 
-      setEditing(null); 
+
+      setDialog(false);
+      setEditing(null);
       setErrors({});
       load();
-    } catch (err) { 
+    } catch (err) {
       const detail = err.response?.data?.detail;
       if (Array.isArray(detail)) {
         const serverErrors = {};
@@ -86,21 +108,23 @@ export default function Vendors() {
         });
         setErrors(serverErrors);
       } else {
-        alert(detail || 'Error saving vendor'); 
+        alert(detail || 'Error saving vendor');
       }
     }
   };
 
-  const openEdit = (v) => {
+  const openEdit = (v, view = false) => {
     setEditing(v.id);
+    setViewOnly(view);
     setErrors({});
     api.get(`/api/vendors/${v.id}`).then(r => {
-      setForm({ 
-        ...r.data, 
+      setForm({
+        ...r.data,
         category_ids: r.data.category_ids || [],
         address: r.data.address || '',
         city: r.data.city || '',
-        state: r.data.state || ''
+        state: r.data.state || '',
+        rating: r.data.rating || 0
       });
       setDialog(true);
     });
@@ -113,12 +137,13 @@ export default function Vendors() {
           <Typography variant="h5" sx={{ fontWeight: 700, color: '#1E293B' }}>Vendor Master</Typography>
           <Typography variant="body2" sx={{ color: '#64748B' }}>{vendors.length} registered vendors</Typography>
         </Box>
-        <Button 
-          variant="contained" 
-          startIcon={<Add />} 
+        <Button
+          variant="contained"
+          startIcon={<Add />}
           onClick={() => {
             setEditing(null);
-            setForm({ name: '', code: '', contact_person: '', phone: '', email: '', gst_number: '', address: '', city: '', state: '', category_ids: [] });
+            setViewOnly(false);
+            setForm({ name: '', code: '', contact_person: '', phone: '', email: '', gst_number: '', address: '', city: '', state: '', category_ids: [], rating: 0 });
             setErrors({});
             setDialog(true);
           }}
@@ -129,16 +154,16 @@ export default function Vendors() {
       </Box>
 
       <Card sx={{ mb: 3, p: 2, borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-        <TextField 
-          size="small" 
-          placeholder="Search vendors by name, code or GST..." 
+        <TextField
+          size="small"
+          placeholder="Search vendors by Code/Name"
           value={search}
-          onChange={e => setSearch(e.target.value)} 
+          onChange={e => setSearch(e.target.value)}
           sx={{ minWidth: 350 }}
-          InputProps={{ 
+          InputProps={{
             startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} />,
             sx: { borderRadius: 2 }
-          }} 
+          }}
         />
       </Card>
 
@@ -147,20 +172,81 @@ export default function Vendors() {
           <Table size="small">
             <TableHead sx={{ bgcolor: '#F8FAFC' }}>
               <TableRow>
-                <TableCell sx={{ fontWeight: 600, color: '#475569' }}>Code</TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#475569' }}>Vendor Name</TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#475569' }}>Contact</TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#475569' }}>Phone</TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#475569' }}>GST</TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#475569' }}>City</TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#475569' }}>Categories</TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#475569' }}>Rating</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600, color: '#475569' }}>Actions</TableCell>
+                <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2 }}>
+                  <TableSortLabel
+                    active={sortConfig.key === 'code'}
+                    direction={sortConfig.direction}
+                    onClick={() => requestSort('code')}
+                  >
+                    CODE
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2 }}>
+                  <TableSortLabel
+                    active={sortConfig.key === 'name'}
+                    direction={sortConfig.direction}
+                    onClick={() => requestSort('name')}
+                  >
+                    VENDOR NAME
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2 }}>
+                  <TableSortLabel
+                    active={sortConfig.key === 'contact_person'}
+                    direction={sortConfig.direction}
+                    onClick={() => requestSort('contact_person')}
+                  >
+                    CONTACT
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2 }}>
+                  <TableSortLabel
+                    active={sortConfig.key === 'phone'}
+                    direction={sortConfig.direction}
+                    onClick={() => requestSort('phone')}
+                  >
+                    PHONE
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2 }}>
+                  <TableSortLabel
+                    active={sortConfig.key === 'gst_number'}
+                    direction={sortConfig.direction}
+                    onClick={() => requestSort('gst_number')}
+                  >
+                    GST
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2 }}>
+                  <TableSortLabel
+                    active={sortConfig.key === 'city'}
+                    direction={sortConfig.direction}
+                    onClick={() => requestSort('city')}
+                  >
+                    CITY
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2 }}>CATEGORIES</TableCell>
+                <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2 }}>
+                  <TableSortLabel
+                    active={sortConfig.key === 'rating'}
+                    direction={sortConfig.direction}
+                    onClick={() => requestSort('rating')}
+                  >
+                    RATING
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell align="right" sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2 }}>ACTIONS</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {vendors.map(v => (
-                <TableRow key={v.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                <TableRow
+                  key={v.id}
+                  hover
+                  onClick={() => openEdit(v, true)}
+                  sx={{ cursor: 'pointer', '&:last-child td, &:last-child th': { border: 0 } }}
+                >
                   <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.8rem' }}>{v.code}</TableCell>
                   <TableCell sx={{ fontSize: '0.85rem', fontWeight: 500 }}>{v.name}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem' }}>{v.contact_person}</TableCell>
@@ -174,11 +260,13 @@ export default function Vendors() {
                   </TableCell>
                   <TableCell><Rating value={v.rating} precision={0.5} size="small" readOnly /></TableCell>
                   <TableCell align="right">
-                    <Tooltip title="Edit Vendor">
-                      <IconButton size="small" onClick={() => openEdit(v)} sx={{ color: '#64748B' }}>
-                        <Edit fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5 }} onClick={(e) => e.stopPropagation()}>
+                      <Tooltip title="Edit Vendor">
+                        <IconButton size="small" onClick={() => openEdit(v, false)} sx={{ color: '#64748B' }}>
+                          <Edit fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
                   </TableCell>
                 </TableRow>
               ))}
@@ -194,10 +282,10 @@ export default function Vendors() {
         </TableContainer>
       </Card>
 
-      <Dialog 
-        open={dialog} 
-        onClose={() => setDialog(false)} 
-        maxWidth="md" 
+      <Dialog
+        open={dialog}
+        onClose={() => setDialog(false)}
+        maxWidth="md"
         fullWidth
         PaperProps={{
           sx: { borderRadius: 3, boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }
@@ -210,32 +298,33 @@ export default function Vendors() {
             </Box>
             <Box>
               <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
-                {editing ? 'Edit Vendor Details' : 'Register New Vendor'}
+                {viewOnly ? 'Vendor Details' : (editing ? 'Edit Vendor Details' : 'Register New Vendor')}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {editing ? 'Update vendor credentials and contact information.' : 'Enter the details to add a new vendor to the platform.'}
+                {viewOnly ? 'Comprehensive information about this vendor partner.' : (editing ? 'Update vendor credentials and contact information.' : 'Enter the details to add a new vendor to the platform.')}
               </Typography>
             </Box>
           </Box>
         </DialogTitle>
         <DialogContent sx={{ mt: 1 }}>
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr 1fr' }, gap: 2.5, pt: 2 }}>
-            <TextField 
-              fullWidth 
-              label="Vendor Code" 
-              value={form.code || ''} 
-              placeholder="Auto-generated" 
-              disabled 
+            <TextField
+              fullWidth
+              label="Vendor Code"
+              value={form.code || ''}
+              placeholder="Auto-generated"
+              disabled
               InputProps={{
                 startAdornment: <InputAdornment position="start"><Badge sx={{ color: '#94A3B8' }} /></InputAdornment>,
               }}
             />
-            <TextField 
-              fullWidth 
-              label="Vendor Name" 
-              value={form.name} 
-              onChange={e => setForm({ ...form, name: e.target.value })} 
-              required 
+            <TextField
+              fullWidth
+              label="Vendor Name"
+              value={form.name}
+              onChange={e => setForm({ ...form, name: e.target.value })}
+              required
+              disabled={viewOnly}
               error={!!errors.name}
               helperText={errors.name}
               sx={{ gridColumn: { sm: 'span 2' } }}
@@ -243,24 +332,26 @@ export default function Vendors() {
                 startAdornment: <InputAdornment position="start"><Business sx={{ color: '#94A3B8' }} /></InputAdornment>,
               }}
             />
-            <TextField 
-              fullWidth 
-              label="Contact Person" 
-              value={form.contact_person} 
-              onChange={e => setForm({ ...form, contact_person: e.target.value })} 
+            <TextField
+              fullWidth
+              label="Contact Person"
+              value={form.contact_person}
+              onChange={e => setForm({ ...form, contact_person: e.target.value })}
               required
+              disabled={viewOnly}
               error={!!errors.contact_person}
               helperText={errors.contact_person}
               InputProps={{
                 startAdornment: <InputAdornment position="start"><Person sx={{ color: '#94A3B8' }} /></InputAdornment>,
               }}
             />
-            <TextField 
-              fullWidth 
-              label="Phone Number" 
-              value={form.phone} 
-              onChange={e => setForm({ ...form, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })} 
+            <TextField
+              fullWidth
+              label="Phone Number"
+              value={form.phone}
+              onChange={e => setForm({ ...form, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })}
               required
+              disabled={viewOnly}
               error={!!errors.phone}
               helperText={errors.phone}
               inputProps={{ maxLength: 10 }}
@@ -268,24 +359,26 @@ export default function Vendors() {
                 startAdornment: <InputAdornment position="start"><Phone sx={{ color: '#94A3B8' }} /></InputAdornment>,
               }}
             />
-            <TextField 
-              fullWidth 
-              label="Email Address" 
-              value={form.email} 
-              onChange={e => setForm({ ...form, email: e.target.value })} 
+            <TextField
+              fullWidth
+              label="Email Address"
+              value={form.email}
+              onChange={e => setForm({ ...form, email: e.target.value })}
               required
+              disabled={viewOnly}
               error={!!errors.email}
               helperText={errors.email}
               InputProps={{
                 startAdornment: <InputAdornment position="start"><Email sx={{ color: '#94A3B8' }} /></InputAdornment>,
               }}
             />
-            <TextField 
-              fullWidth 
-              label="GST Number" 
-              value={form.gst_number} 
-              onChange={e => setForm({ ...form, gst_number: e.target.value.toUpperCase().slice(0, 15) })} 
+            <TextField
+              fullWidth
+              label="GST Number"
+              value={form.gst_number}
+              onChange={e => setForm({ ...form, gst_number: e.target.value.toUpperCase().slice(0, 15) })}
               required
+              disabled={viewOnly}
               error={!!errors.gst_number}
               helperText={errors.gst_number}
               inputProps={{ maxLength: 15 }}
@@ -293,31 +386,46 @@ export default function Vendors() {
                 startAdornment: <InputAdornment position="start"><AppRegistration sx={{ color: '#94A3B8' }} /></InputAdornment>,
               }}
             />
-            <TextField 
-              fullWidth 
-              label="City" 
-              value={form.city} 
-              onChange={e => setForm({ ...form, city: e.target.value })} 
+            <TextField
+              fullWidth
+              label="City"
+              value={form.city}
+              onChange={e => setForm({ ...form, city: e.target.value })}
+              disabled={viewOnly}
               InputProps={{
                 startAdornment: <InputAdornment position="start"><LocationOn sx={{ color: '#94A3B8' }} /></InputAdornment>,
               }}
             />
-            <TextField 
-              fullWidth 
-              label="State" 
-              value={form.state} 
-              onChange={e => setForm({ ...form, state: e.target.value })} 
+            <TextField
+              fullWidth
+              label="State"
+              value={form.state}
+              onChange={e => setForm({ ...form, state: e.target.value })}
+              disabled={viewOnly}
               InputProps={{
                 startAdornment: <InputAdornment position="start"><PinDrop sx={{ color: '#94A3B8' }} /></InputAdornment>,
               }}
             />
-            
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+              <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, ml: 1.5 }}>Vendor Rating</Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 1.5 }}>
+                <Rating
+                  value={form.rating}
+                  onChange={(e, newVal) => setForm({ ...form, rating: newVal })}
+                  precision={0.5}
+                  readOnly={viewOnly}
+                />
+                <Typography variant="body2" sx={{ color: '#64748B', fontWeight: 700 }}>{form.rating || 0}</Typography>
+              </Box>
+            </Box>
+
             <FormControl fullWidth sx={{ gridColumn: { sm: 'span 3' } }}>
               <InputLabel>Vendor Categories</InputLabel>
               <Select
                 multiple
                 value={form.category_ids}
                 onChange={e => setForm({ ...form, category_ids: e.target.value })}
+                disabled={viewOnly}
                 input={<OutlinedInput label="Vendor Categories" startAdornment={<Category sx={{ mr: 1, color: '#94A3B8' }} />} />}
                 renderValue={(selected) => (
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
@@ -336,13 +444,14 @@ export default function Vendors() {
               </Select>
             </FormControl>
 
-            <TextField 
-              fullWidth 
-              label="Registered Address" 
-              value={form.address} 
-              onChange={e => setForm({ ...form, address: e.target.value })} 
-              multiline 
-              rows={3} 
+            <TextField
+              fullWidth
+              label="Registered Address"
+              value={form.address}
+              onChange={e => setForm({ ...form, address: e.target.value })}
+              multiline
+              rows={3}
+              disabled={viewOnly}
               sx={{ gridColumn: { sm: 'span 3' } }}
               InputProps={{
                 startAdornment: <InputAdornment position="start" sx={{ alignSelf: 'flex-start', mt: 1.5 }}><Description sx={{ color: '#94A3B8' }} /></InputAdornment>,
@@ -350,20 +459,22 @@ export default function Vendors() {
             />
           </Box>
         </DialogContent>
-        <DialogActions sx={{ px: 4, pb: 4, pt: 2, justifyContent: 'space-between' }}>
+        <DialogActions sx={{ px: 4, pb: 4, pt: 2, justifyContent: 'flex-end', gap: 2 }}>
           <Button onClick={() => setDialog(false)} sx={{ color: '#64748B', fontWeight: 600 }}>
             Cancel
           </Button>
-          <Button 
-            variant="contained" 
+          <Button
+            variant="contained"
             onClick={handleSave}
-            sx={{ 
-              borderRadius: 2, 
-              px: 4, 
-              py: 1, 
-              fontWeight: 700, 
+            disabled={viewOnly}
+            sx={{
+              borderRadius: 2,
+              px: 4,
+              py: 1,
+              fontWeight: 700,
               boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)',
-              textTransform: 'none'
+              textTransform: 'none',
+              display: viewOnly ? 'none' : 'inline-flex'
             }}
           >
             {editing ? 'Update Vendor' : 'Create Vendor'}

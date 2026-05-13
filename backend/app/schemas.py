@@ -116,7 +116,7 @@ class SiteOut(SiteBase):
 # ── Master Data ──────────────────────────────────────────────────────────
 
 class CategoryBase(BaseModel):
-    name: str
+    name: str = Field(..., min_length=1)
     description: Optional[str] = None
 
 class CategoryCreate(CategoryBase):
@@ -124,6 +124,8 @@ class CategoryCreate(CategoryBase):
 
 class CategoryOut(CategoryBase):
     id: int
+    sequence_number: Optional[int] = None
+    code: Optional[str] = None
     class Config:
         from_attributes = True
 
@@ -142,8 +144,8 @@ class SubCategoryOut(SubCategoryBase):
         from_attributes = True
 
 class UOMBase(BaseModel):
-    name: str
-    abbreviation: str
+    name: str = Field(..., min_length=1)
+    abbreviation: str = Field(..., min_length=1)
 
 class UOMCreate(UOMBase):
     pass

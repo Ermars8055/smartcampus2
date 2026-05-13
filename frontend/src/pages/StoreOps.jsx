@@ -375,7 +375,7 @@ export default function StoreOperations() {
                           newItems[i].issue_qty = e.target.value;
                           setIssueModal({ ...issueModal, items: newItems });
                         }}
-                        slotProps={{ htmlInput: { style: { textAlign: 'center', fontWeight: 600 } } }}
+                        inputProps={{ style: { textAlign: 'center', fontWeight: 600 } }}
                       />
                     </TableCell>
                   </TableRow>

@@ -30,6 +30,9 @@ export default function Categories() {
   };
 
   const saveUom = async () => {
+    if (!uomForm.name || uomForm.name.length > 50) return alert('UOM Name must be between 1 and 50 characters');
+    if (!uomForm.abbreviation || uomForm.abbreviation.length > 10) return alert('Abbreviation must be between 1 and 10 characters');
+    
     try {
       await api.post('/api/uom', uomForm);
       setDialog(''); load();
@@ -126,8 +129,8 @@ export default function Categories() {
       <Dialog open={dialog === 'uom'} onClose={() => setDialog('')} maxWidth="sm" fullWidth>
         <DialogTitle sx={{ fontWeight: 600 }}>New Unit of Measure</DialogTitle>
         <DialogContent>
-          <TextField fullWidth label="UOM Name" value={uomForm.name} onChange={e => setUomForm({ ...uomForm, name: e.target.value })} sx={{ mt: 1, mb: 2 }} required />
-          <TextField fullWidth label="Abbreviation" value={uomForm.abbreviation} onChange={e => setUomForm({ ...uomForm, abbreviation: e.target.value })} required />
+          <TextField fullWidth label="UOM Name" value={uomForm.name} onChange={e => setUomForm({ ...uomForm, name: e.target.value })} sx={{ mt: 1, mb: 2 }} required inputProps={{ maxLength: 50 }} />
+          <TextField fullWidth label="Abbreviation" value={uomForm.abbreviation} onChange={e => setUomForm({ ...uomForm, abbreviation: e.target.value })} required inputProps={{ maxLength: 10 }} />
         </DialogContent>
         <DialogActions><Button onClick={() => setDialog('')}>Cancel</Button><Button variant="contained" onClick={saveUom}>Save</Button></DialogActions>
       </Dialog>

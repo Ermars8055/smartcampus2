@@ -290,7 +290,7 @@ export default function Indents() {
                         placeholder="0"
                         value={item.requested_quantity}
                         onChange={e => updateItem(i, 'requested_quantity', e.target.value)}
-                        slotProps={{ htmlInput: { min: 0, style: { textAlign: 'center' } } }}
+                        inputProps={{ min: 0, style: { textAlign: 'center' } }}
                         sx={{ width: 120, mx: 'auto', bgcolor: '#fff' }}
                       />
                     </TableCell>
@@ -357,7 +357,7 @@ export default function Indents() {
       <Card sx={{ mb: 3, p: 2 }}>
         <TextField size="small" placeholder="Search indent number..." value={search}
           onChange={e => setSearch(e.target.value)} sx={{ minWidth: 300 }}
-          slotProps={{ input: { startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> } }} />
+          InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }} />
       </Card>
 
       <Card>

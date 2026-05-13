@@ -146,7 +146,7 @@ export default function PurchaseOrders() {
       <Card sx={{ mb: 3, p: 2 }}>
         <TextField size="small" placeholder="Search PO numbers..." value={search}
           onChange={e => setSearch(e.target.value)} sx={{ minWidth: 300 }}
-          slotProps={{ input: { startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> } }} />
+          InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }} />
       </Card>
 
       <Card>
@@ -278,7 +278,7 @@ export default function PurchaseOrders() {
             </Grid>
             <Grid size={3}>
               <TextField fullWidth label="Delivery Date" type="date" value={form.delivery_date}
-                onChange={e => setForm({ ...form, delivery_date: e.target.value })} slotProps={{ inputLabel: { shrink: true } }} />
+                onChange={e => setForm({ ...form, delivery_date: e.target.value })} InputLabelProps={{ shrink: true }} />
             </Grid>
           </Grid>
           <Divider sx={{ mb: 2 }} />
@@ -292,8 +292,8 @@ export default function PurchaseOrders() {
                   onChange={val => updateItem(i, 'material_id', val)} 
                 />
               </Grid>
-              <Grid size={2.5}><TextField fullWidth size="small" label="Qty" type="number" value={item.quantity} onChange={e => updateItem(i, 'quantity', e.target.value)} slotProps={{ htmlInput: { min: 0 } }} /></Grid>
-              <Grid size={2.5}><TextField fullWidth size="small" label="Rate (₹)" type="number" value={item.rate} onChange={e => updateItem(i, 'rate', e.target.value)} slotProps={{ htmlInput: { min: 0 } }} /></Grid>
+              <Grid size={2.5}><TextField fullWidth size="small" label="Qty" type="number" value={item.quantity} onChange={e => updateItem(i, 'quantity', e.target.value)} inputProps={{ min: 0 }} /></Grid>
+              <Grid size={2.5}><TextField fullWidth size="small" label="Rate (₹)" type="number" value={item.rate} onChange={e => updateItem(i, 'rate', e.target.value)} inputProps={{ min: 0 }} /></Grid>
               <Grid size={2} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                 <Typography sx={{ fontSize: '0.8rem', fontWeight: 600 }}>₹{((parseFloat(item.quantity) || 0) * (parseFloat(item.rate) || 0)).toLocaleString()}</Typography>
                 {form.items.length > 1 && <IconButton size="small" color="error" onClick={() => removeItem(i)}><Delete fontSize="small" /></IconButton>}

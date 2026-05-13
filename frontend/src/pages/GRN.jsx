@@ -115,7 +115,7 @@ export default function GRNPage() {
       <Card sx={{ mb: 3, p: 2 }}>
         <TextField size="small" placeholder="Search GRN number..." value={search}
           onChange={e => setSearch(e.target.value)} sx={{ minWidth: 300 }}
-          slotProps={{ input: { startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> } }} />
+          InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }} />
       </Card>
 
       <Card>
@@ -212,7 +212,7 @@ export default function GRNPage() {
               </FormControl>
             </Grid>
             <Grid size={4}><TextField fullWidth label="Invoice Number" value={form.invoice_number || ''} onChange={e => setForm({ ...form, invoice_number: e.target.value })} /></Grid>
-            <Grid size={4}><TextField fullWidth label="Invoice Date" type="date" value={form.invoice_date || ''} onChange={e => setForm({ ...form, invoice_date: e.target.value })} slotProps={{ inputLabel: { shrink: true } }} /></Grid>
+            <Grid size={4}><TextField fullWidth label="Invoice Date" type="date" value={form.invoice_date || ''} onChange={e => setForm({ ...form, invoice_date: e.target.value })} InputLabelProps={{ shrink: true }} /></Grid>
             <Grid size={4}><TextField fullWidth label="Invoice Amount (₹)" type="number" value={form.invoice_amount} onChange={e => setForm({ ...form, invoice_amount: parseFloat(e.target.value) || 0 })} /></Grid>
           </Grid>
 

@@ -55,7 +55,7 @@ export default function Inventory() {
         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
           <TextField size="small" placeholder="Search materials..." value={search}
             onChange={e => setSearch(e.target.value)} sx={{ minWidth: 250 }}
-            slotProps={{ input: { startAdornment: <InputAdornment position="start"><Search sx={{ color: '#94A3B8' }} /></InputAdornment> } }} />
+            InputProps={{ startAdornment: <InputAdornment position="start"><Search sx={{ color: '#94A3B8' }} /></InputAdornment> }} />
           <FormControl size="small" sx={{ minWidth: 180 }}>
             <InputLabel>Warehouse</InputLabel>
             <Select value={whFilter} label="Warehouse" onChange={e => setWhFilter(e.target.value)}>

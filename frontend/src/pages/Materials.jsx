@@ -77,15 +77,36 @@ export default function Materials() {
   }, [materials, sortConfig]);
 
   const handleSave = async () => {
+    // Validations
+    if (!form.name) return alert('Material name is required');
+    if (!form.category_id) return alert('Category is required');
+    if (!form.uom_id) return alert('UOM is required');
+
+    if (form.gst_rate < 0 || form.gst_rate > 100) {
+      return alert('GST Rate must be between 0 and 100');
+    }
+    if (form.standard_cost < 0 || form.standard_cost > 1000000000) {
+      return alert('Standard Cost must be between 0 and 100 Crores');
+    }
+    if (!Number.isInteger(Number(form.reorder_level)) || form.reorder_level < 0) {
+      return alert('Reorder Level must be a positive whole number');
+    }
+    if (!Number.isInteger(Number(form.maximum_level)) || form.maximum_level < 0) {
+      return alert('Maximum Level must be a positive whole number');
+    }
+    if (Number(form.maximum_level) <= Number(form.reorder_level)) {
+      return alert('Maximum Level must be greater than Reorder Level');
+    }
+
     try {
       const payload = {
         name: form.name,
         category_id: form.category_id,
         uom_id: form.uom_id,
-        reorder_level: form.reorder_level,
-        maximum_level: form.maximum_level,
-        standard_cost: form.standard_cost,
-        gst_rate: form.gst_rate,
+        reorder_level: Number(form.reorder_level),
+        maximum_level: Number(form.maximum_level),
+        standard_cost: Number(form.standard_cost),
+        gst_rate: Number(form.gst_rate),
         storage_type: form.storage_type,
         material_type: form.material_type,
         description: form.description,
@@ -107,6 +128,11 @@ export default function Materials() {
     } catch (err) {
       alert(err.response?.data?.detail?.[0]?.msg || err.response?.data?.detail || 'Error saving material');
     }
+  };
+
+  const formatNumber = (val) => {
+    if (val === null || val === undefined) return '0';
+    return val % 1 === 0 ? val.toString() : parseFloat(val).toFixed(2);
   };
 
   const openEdit = (m) => {
@@ -147,7 +173,7 @@ export default function Materials() {
         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
           <TextField size="small" placeholder="Search materials..." value={search}
             onChange={e => setSearch(e.target.value)} sx={{ minWidth: 260 }}
-            slotProps={{ input: { startAdornment: <InputAdornment position="start"><Search sx={{ color: '#94A3B8' }} /></InputAdornment> } }} />
+            InputProps={{ startAdornment: <InputAdornment position="start"><Search sx={{ color: '#94A3B8' }} /></InputAdornment> }} />
           <FormControl size="small" sx={{ minWidth: 150 }}>
             <InputLabel>Category</InputLabel>
             <Select value={catFilter} label="Category" onChange={e => setCatFilter(e.target.value)}>
@@ -318,11 +344,11 @@ export default function Materials() {
                   <TableCell sx={{ fontSize: '0.75rem', py: 1, px: 1 }}>{m.name}</TableCell>
                   <TableCell sx={{ py: 1, px: 1, whiteSpace: 'nowrap' }}><Chip label={m.category_name} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.7rem' }} /></TableCell>
                   <TableCell sx={{ fontSize: '0.75rem', py: 1, px: 1, whiteSpace: 'nowrap' }}>{m.uom_name}</TableCell>
-                  <TableCell align="right" sx={{ fontSize: '0.75rem', py: 1, px: 1, whiteSpace: 'nowrap' }}>{m.gst_rate}%</TableCell>
-                  <TableCell align="right" sx={{ fontSize: '0.75rem', py: 1, px: 1, whiteSpace: 'nowrap' }}>₹{m.standard_cost?.toLocaleString()}</TableCell>
-                  <TableCell align="right" sx={{ fontSize: '0.75rem', py: 1, px: 1, whiteSpace: 'nowrap' }}>{m.reorder_level}</TableCell>
+                  <TableCell align="right" sx={{ fontSize: '0.75rem', py: 1, px: 1, whiteSpace: 'nowrap' }}>{formatNumber(m.gst_rate)}%</TableCell>
+                  <TableCell align="right" sx={{ fontSize: '0.75rem', py: 1, px: 1, whiteSpace: 'nowrap' }}>₹{formatNumber(m.standard_cost)}</TableCell>
+                  <TableCell align="right" sx={{ fontSize: '0.75rem', py: 1, px: 1, whiteSpace: 'nowrap' }}>{formatNumber(m.reorder_level)}</TableCell>
                   <TableCell align="right" sx={{ py: 1, px: 1, whiteSpace: 'nowrap' }}>
-                    <Chip label={m.current_stock || 0} size="small"
+                    <Chip label={formatNumber(m.current_stock)} size="small"
                       color={(m.current_stock || 0) < m.reorder_level ? 'error' : 'success'}
                       sx={{ fontWeight: 600, minWidth: 50, height: 20, fontSize: '0.7rem' }} />
                   </TableCell>
@@ -354,7 +380,7 @@ export default function Materials() {
         fullWidth 
         PaperProps={{ sx: { borderRadius: 3, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' } }}
       >
-        <DialogTitle sx={{ pb: 1, pt: 3, px: 4 }}>
+        <DialogTitle component="div" sx={{ pb: 1, pt: 3, px: 4 }}>
           <Typography variant="h5" sx={{ fontWeight: 700, color: '#1E293B' }}>
             {editing ? 'Edit Material' : 'New Material'}
           </Typography>
@@ -375,7 +401,7 @@ export default function Materials() {
                 onChange={e => setForm({ ...form, code: e.target.value })} 
                 placeholder="Auto-generated"
                 disabled 
-                slotProps={{ input: { startAdornment: <InputAdornment position="start"><Inventory color="action" sx={{ mr: 1 }} /></InputAdornment> } }} 
+                InputProps={{ startAdornment: <InputAdornment position="start"><Inventory color="action" sx={{ mr: 1 }} /></InputAdornment> }} 
               />
             </Box>
             <Box>
@@ -387,7 +413,7 @@ export default function Materials() {
                 value={form.name} 
                 onChange={e => setForm({ ...form, name: e.target.value })} 
                 required 
-                slotProps={{ input: { startAdornment: <InputAdornment position="start"><Description color="action" sx={{ mr: 1 }} /></InputAdornment> } }} 
+                InputProps={{ startAdornment: <InputAdornment position="start"><Description color="action" sx={{ mr: 1 }} /></InputAdornment> }} 
               />
             </Box>
 
@@ -430,7 +456,7 @@ export default function Materials() {
                 fullWidth 
                 value={form.storage_type} 
                 onChange={e => setForm({ ...form, storage_type: e.target.value })} 
-                slotProps={{ input: { startAdornment: <InputAdornment position="start"><Warehouse color="action" sx={{ mr: 1 }} /></InputAdornment> } }} 
+                InputProps={{ startAdornment: <InputAdornment position="start"><Warehouse color="action" sx={{ mr: 1 }} /></InputAdornment> }} 
               />
             </Box>
             <Box>
@@ -458,8 +484,9 @@ export default function Materials() {
                 fullWidth 
                 type="number" 
                 value={form.gst_rate} 
-                onChange={e => setForm({ ...form, gst_rate: parseFloat(e.target.value) || 0 })} 
-                slotProps={{ input: { startAdornment: <InputAdornment position="start"><Percent color="action" sx={{ mr: 1 }} /></InputAdornment> } }} 
+                onChange={e => setForm({ ...form, gst_rate: e.target.value })} 
+                inputProps={{ min: 0, max: 100, step: "0.01" }}
+                InputProps={{ startAdornment: <InputAdornment position="start"><Percent color="action" sx={{ mr: 1 }} /></InputAdornment> }} 
               />
             </Box>
             <Box>
@@ -470,8 +497,9 @@ export default function Materials() {
                 fullWidth 
                 type="number" 
                 value={form.standard_cost} 
-                onChange={e => setForm({ ...form, standard_cost: parseFloat(e.target.value) || 0 })} 
-                slotProps={{ input: { startAdornment: <InputAdornment position="start"><AttachMoney color="action" sx={{ mr: 1 }} /></InputAdornment> } }} 
+                onChange={e => setForm({ ...form, standard_cost: e.target.value })} 
+                inputProps={{ min: 0, max: 1000000000, step: "0.01" }}
+                InputProps={{ startAdornment: <InputAdornment position="start"><AttachMoney color="action" sx={{ mr: 1 }} /></InputAdornment> }} 
               />
             </Box>
 
@@ -484,8 +512,10 @@ export default function Materials() {
                 fullWidth 
                 type="number" 
                 value={form.reorder_level} 
-                onChange={e => setForm({ ...form, reorder_level: parseFloat(e.target.value) || 0 })} 
-                slotProps={{ input: { startAdornment: <InputAdornment position="start"><Speed color="action" sx={{ mr: 1 }} /></InputAdornment> } }} 
+                onChange={e => setForm({ ...form, reorder_level: e.target.value })} 
+                inputProps={{ min: 0, step: 1 }}
+                onKeyDown={(e) => { if (e.key === '.') e.preventDefault(); }}
+                InputProps={{ startAdornment: <InputAdornment position="start"><Speed color="action" sx={{ mr: 1 }} /></InputAdornment> }} 
               />
             </Box>
             <Box>
@@ -496,8 +526,10 @@ export default function Materials() {
                 fullWidth 
                 type="number" 
                 value={form.maximum_level} 
-                onChange={e => setForm({ ...form, maximum_level: parseFloat(e.target.value) || 0 })} 
-                slotProps={{ input: { startAdornment: <InputAdornment position="start"><Speed color="action" sx={{ mr: 1 }} /></InputAdornment> } }} 
+                onChange={e => setForm({ ...form, maximum_level: e.target.value })} 
+                inputProps={{ min: 0, step: 1 }}
+                onKeyDown={(e) => { if (e.key === '.') e.preventDefault(); }}
+                InputProps={{ startAdornment: <InputAdornment position="start"><Speed color="action" sx={{ mr: 1 }} /></InputAdornment> }} 
               />
             </Box>
 
@@ -512,7 +544,7 @@ export default function Materials() {
                 onChange={e => setForm({ ...form, description: e.target.value })} 
                 multiline 
                 rows={2} 
-                slotProps={{ input: { startAdornment: <InputAdornment position="start"><Description color="action" sx={{ mr: 1 }} /></InputAdornment> } }} 
+                InputProps={{ startAdornment: <InputAdornment position="start"><Description color="action" sx={{ mr: 1 }} /></InputAdornment> }} 
               />
             </Box>
           </Box>

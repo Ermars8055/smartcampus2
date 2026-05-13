@@ -274,10 +274,10 @@ export default function IssueSummaryReport() {
       <Card sx={{ p: 2, mb: 3, '@media print': { display: 'none' } }}>
         <Grid container spacing={2} alignItems="center">
           <Grid item xs={12} sm={6} md={4} lg={2}>
-            <DatePicker label="From Date" value={filters.fromDate} onChange={d => setFilters({ ...filters, fromDate: d })} slotProps={{ textField: { size: 'small', fullWidth: true } }} format="DD-MMM-YYYY" />
+            <DatePicker label="From Date" value={filters.fromDate} onChange={d => setFilters({ ...filters, fromDate: d })} renderInput={(params) => <TextField {...params} size="small" fullWidth />} format="DD-MMM-YYYY" />
           </Grid>
           <Grid item xs={12} sm={6} md={4} lg={2}>
-            <DatePicker label="To Date" value={filters.toDate} onChange={d => setFilters({ ...filters, toDate: d })} slotProps={{ textField: { size: 'small', fullWidth: true } }} format="DD-MMM-YYYY" />
+            <DatePicker label="To Date" value={filters.toDate} onChange={d => setFilters({ ...filters, toDate: d })} renderInput={(params) => <TextField {...params} size="small" fullWidth />} format="DD-MMM-YYYY" />
           </Grid>
           <Grid item xs={12} sm={6} md={4} lg={3}>
             <FormControl size="small" fullWidth sx={{ minWidth: 150 }}>
@@ -441,7 +441,7 @@ export default function IssueSummaryReport() {
 
       {/* Drill Down Dialog */}
       <Dialog open={drillDownOpen} onClose={() => setDrillDownOpen(false)} maxWidth="md" fullWidth>
-        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
+        <DialogTitle component="div" sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
           <Typography variant="h6">{drillDownTitle}</Typography>
           <IconButton onClick={() => setDrillDownOpen(false)} size="small"><Close /></IconButton>
         </DialogTitle>

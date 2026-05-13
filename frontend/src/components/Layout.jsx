@@ -138,7 +138,7 @@ export default function Layout() {
                   <ListItemIcon sx={{ color: isActive(item.path) ? '#60A5FA' : '#64748B', minWidth: 36, '& svg': { fontSize: '1.2rem' } }}>
                     {item.icon}
                   </ListItemIcon>
-                  <ListItemText primary={item.text} slotProps={{ primary: { sx: { fontSize: '0.82rem', fontWeight: isActive(item.path) ? 600 : 400 } } }} />
+                  <ListItemText primary={item.text} primaryTypographyProps={{ sx: { fontSize: '0.82rem', fontWeight: isActive(item.path) ? 600 : 400 } }} />
                   {item.children && (openMenus[item.text] ? <ExpandLess sx={{ fontSize: 18 }} /> : <ExpandMore sx={{ fontSize: 18 }} />)}
                 </ListItemButton>
               </ListItem>
@@ -158,7 +158,7 @@ export default function Layout() {
                             '&:hover': { background: 'rgba(37,99,235,0.08)', color: '#E2E8F0' },
                           }}
                         >
-                          <ListItemText primary={child.text} slotProps={{ primary: { sx: { fontSize: '0.78rem', fontWeight: isActive(child.path) ? 600 : 400 } } }} />
+                          <ListItemText primary={child.text} primaryTypographyProps={{ sx: { fontSize: '0.78rem', fontWeight: isActive(child.path) ? 600 : 400 } }} />
                         </ListItemButton>
                       </ListItem>
                     ))}

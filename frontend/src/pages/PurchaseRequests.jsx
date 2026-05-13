@@ -167,7 +167,7 @@ export default function PurchaseRequests() {
       <Card sx={{ mb: 3, p: 2 }}>
         <TextField size="small" placeholder="Search PR numbers..." value={search}
           onChange={e => setSearch(e.target.value)} sx={{ minWidth: 300 }}
-          slotProps={{ input: { startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> } }} />
+          InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }} />
       </Card>
 
       <Paper 
@@ -367,7 +367,7 @@ export default function PurchaseRequests() {
             <Grid size={{ xs: 12, sm: 4 }}>
               <TextField fullWidth label="Required Date" type="date" value={form.required_date}
                 onChange={e => setForm({ ...form, required_date: e.target.value })}
-                slotProps={{ inputLabel: { shrink: true } }} required />
+                InputLabelProps={{ shrink: true }} required />
             </Grid>
           </Grid>
 
@@ -385,7 +385,7 @@ export default function PurchaseRequests() {
               </Grid>
               <Grid size={3}>
                 <TextField fullWidth size="small" label="Quantity" type="number" value={item.quantity}
-                  onChange={e => updateItem(i, 'quantity', e.target.value)} slotProps={{ htmlInput: { min: 1 } }} required />
+                  onChange={e => updateItem(i, 'quantity', e.target.value)} inputProps={{ min: 1 }} required />
               </Grid>
               <Grid size={2} sx={{ display: 'flex', alignItems: 'center' }}>
                 {form.items.length > 1 && (
@@ -424,7 +424,7 @@ export default function PurchaseRequests() {
             <Grid size={6}>
               <TextField fullWidth label="Delivery Date" type="date" value={convertDialog.delivery_date}
                 onChange={e => setConvertDialog({ ...convertDialog, delivery_date: e.target.value })}
-                slotProps={{ inputLabel: { shrink: true } }} required />
+                InputLabelProps={{ shrink: true }} required />
             </Grid>
           </Grid>
           <Divider sx={{ my: 2 }} />
@@ -446,7 +446,7 @@ export default function PurchaseRequests() {
               </Grid>
               <Grid size={7}>
                 <TextField fullWidth size="small" label="Rate (₹) / unit" type="number" value={it.rate}
-                  onChange={e => updateConvertItem(i, e.target.value)} slotProps={{ htmlInput: { min: 0 } }} required />
+                  onChange={e => updateConvertItem(i, e.target.value)} inputProps={{ min: 0 }} required />
               </Grid>
             </Grid>
           ))}

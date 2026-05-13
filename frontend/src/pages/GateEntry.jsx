@@ -159,7 +159,7 @@ export default function GateEntry() {
       <Card sx={{ mb: 3, p: 2 }}>
         <TextField size="small" placeholder="Search entry number..." value={search}
           onChange={e => setSearch(e.target.value)} sx={{ minWidth: 300 }}
-          slotProps={{ input: { startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> } }} />
+          InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }} />
       </Card>
 
       <Card>
@@ -373,7 +373,7 @@ export default function GateEntry() {
                       <TableCell align="right">
                         <TextField size="small" type="number" value={item.received_now} sx={{ width: 100 }}
                           onChange={e => updateReceivedNow(idx, e.target.value)}
-                          slotProps={{ htmlInput: { min: 0, max: item.pending_quantity } }} />
+                          inputProps={{ min: 0, max: item.pending_quantity }} />
                       </TableCell>
                     </TableRow>
                   ))}

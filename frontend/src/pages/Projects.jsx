@@ -234,9 +234,9 @@ export default function Projects() {
         onClose={() => setDialog('')} 
         maxWidth="sm" 
         fullWidth
-        slotProps={{ paper: { sx: { borderRadius: '24px', p: 1, boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' } } }}
+        PaperProps={{ sx: { borderRadius: '24px', p: 1, boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' } }}
       >
-        <DialogTitle sx={{ pb: 1, px: 3, pt: 3 }}>
+        <DialogTitle component="div" sx={{ pb: 1, px: 3, pt: 3 }}>
           <Typography variant="h5" sx={{ fontWeight: 800, color: '#1E3A8A', fontSize: '1.4rem' }}>
             {form.id ? 'Edit' : 'New'} {dialog === 'org' ? 'Organization' : dialog.charAt(0).toUpperCase() + dialog.slice(1)}
           </Typography>
@@ -252,7 +252,7 @@ export default function Projects() {
                 fullWidth size="small" required variant="outlined"
                 value={form.name || ''} 
                 onChange={e => setForm({ ...form, name: e.target.value })} 
-                slotProps={{ input: { startAdornment: <InputAdornment position="start"><Business sx={{ color: '#64748B', fontSize: 18 }} /></InputAdornment>, sx: { borderRadius: '12px' } } }}
+                InputProps={{ startAdornment: <InputAdornment position="start"><Business sx={{ color: '#64748B', fontSize: 18 }} /></InputAdornment>, sx: { borderRadius: '12px' } }}
               />
             </Grid>
             {dialog !== 'floor' && (
@@ -264,7 +264,7 @@ export default function Projects() {
                   placeholder="Auto-generated"
                   disabled
                   onChange={e => setForm({ ...form, code: e.target.value })} 
-                  slotProps={{ input: { startAdornment: <InputAdornment position="start"><VpnKey sx={{ color: '#64748B', fontSize: 18 }} /></InputAdornment>, sx: { borderRadius: '12px' } } }}
+                  InputProps={{ startAdornment: <InputAdornment position="start"><VpnKey sx={{ color: '#64748B', fontSize: 18 }} /></InputAdornment>, sx: { borderRadius: '12px' } }}
                 />
               </Grid>
             )}
@@ -276,7 +276,7 @@ export default function Projects() {
                   fullWidth size="small" variant="outlined"
                   value={form.address || ''} 
                   onChange={e => setForm({ ...form, address: e.target.value })} 
-                  slotProps={{ input: { startAdornment: <InputAdornment position="start"><LocationOn sx={{ color: '#64748B', fontSize: 18 }} /></InputAdornment>, sx: { borderRadius: '12px' } } }}
+                  InputProps={{ startAdornment: <InputAdornment position="start"><LocationOn sx={{ color: '#64748B', fontSize: 18 }} /></InputAdornment>, sx: { borderRadius: '12px' } }}
                 />
               </Grid>
             )}
@@ -302,7 +302,7 @@ export default function Projects() {
                     fullWidth size="small" variant="outlined"
                     value={form.location || ''} 
                     onChange={e => setForm({ ...form, location: e.target.value })} 
-                    slotProps={{ input: { startAdornment: <InputAdornment position="start"><LocationOn sx={{ color: '#64748B', fontSize: 18 }} /></InputAdornment>, sx: { borderRadius: '12px' } } }}
+                    InputProps={{ startAdornment: <InputAdornment position="start"><LocationOn sx={{ color: '#64748B', fontSize: 18 }} /></InputAdornment>, sx: { borderRadius: '12px' } }}
                   />
                 </Grid>
               </>
@@ -345,7 +345,7 @@ export default function Projects() {
                     fullWidth type="number" size="small" variant="outlined"
                     value={form.level || 0} 
                     onChange={e => setForm({ ...form, level: parseInt(e.target.value) || 0 })} 
-                    slotProps={{ input: { startAdornment: <InputAdornment position="start"><Layers sx={{ color: '#64748B', fontSize: 18 }} /></InputAdornment>, sx: { borderRadius: '12px' } } }}
+                    InputProps={{ startAdornment: <InputAdornment position="start"><Layers sx={{ color: '#64748B', fontSize: 18 }} /></InputAdornment>, sx: { borderRadius: '12px' } }}
                   />
                 </Grid>
               </>
@@ -426,8 +426,8 @@ export default function Projects() {
 
       {/* Department Management Dialog */}
       <Dialog open={deptDialog} onClose={() => setDeptDialog(false)} maxWidth="md" fullWidth
-        slotProps={{ paper: { sx: { borderRadius: '20px', minHeight: 500 } } }}>
-        <DialogTitle sx={{ pb: 1 }}>
+        PaperProps={{ sx: { borderRadius: '20px', minHeight: 500 } }}>
+        <DialogTitle component="div" sx={{ pb: 1 }}>
           <Typography variant="h6" sx={{ fontWeight: 800, color: '#7C3AED' }}>Department Master</Typography>
           <Typography variant="caption" sx={{ color: '#64748B' }}>Manage departments across buildings. Same department name can exist in different buildings.</Typography>
         </DialogTitle>

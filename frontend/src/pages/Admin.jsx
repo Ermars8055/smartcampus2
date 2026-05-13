@@ -233,7 +233,18 @@ export default function Admin() {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid size={6}><TextField fullWidth label="Level (e.g. 1, 2)" type="number" value={form.level} onChange={e => setForm({ ...form, level: Number(e.target.value) })} required /></Grid>
+              <Grid size={6}>
+                <TextField 
+                  fullWidth 
+                  label="Level (e.g. 1, 2)" 
+                  type="number" 
+                  value={form.level} 
+                  onChange={e => setForm({ ...form, level: e.target.value })} 
+                  required 
+                  inputProps={{ min: 1, step: 1 }}
+                  onKeyDown={(e) => { if (e.key === '.') e.preventDefault(); }}
+                />
+              </Grid>
               <Grid size={6}>
                 <FormControl fullWidth><InputLabel>Role Required</InputLabel>
                   <Select value={form.role_name || ''} label="Role Required" onChange={e => setForm({ ...form, role_name: e.target.value })}>
@@ -315,6 +326,9 @@ export default function Admin() {
           <Button onClick={() => setDialog(false)}>Cancel</Button>
           <Button variant="contained" onClick={async () => {
             if (tab === 2) {
+              if (!Number.isInteger(Number(form.level)) || Number(form.level) < 1) {
+                return alert('Level must be a positive integer (e.g., 1, 2, 3)');
+              }
               const payload = { 
                 ...form, 
                 level: Number(form.level), 

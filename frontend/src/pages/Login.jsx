@@ -86,10 +86,8 @@ export default function Login() {
             onChange={(e) => setWorkspace(e.target.value)} required
             placeholder="e.g. nissi-grid"
             helperText="Enter your company's workspace slug"
-            slotProps={{
-              input: {
-                startAdornment: <InputAdornment position="start"><Business color="action" /></InputAdornment>
-              }
+            InputProps={{
+              startAdornment: <InputAdornment position="start"><Business color="action" /></InputAdornment>
             }}
             sx={{ mb: 2 }}
           />
@@ -97,10 +95,8 @@ export default function Login() {
           <TextField
             fullWidth label="Username" value={username}
             onChange={(e) => setUsername(e.target.value)} required
-            slotProps={{
-              input: {
-                startAdornment: <InputAdornment position="start"><Person color="action" /></InputAdornment>
-              }
+            InputProps={{
+              startAdornment: <InputAdornment position="start"><Person color="action" /></InputAdornment>
             }}
             sx={{ mb: 2 }}
           />
@@ -109,21 +105,19 @@ export default function Login() {
             fullWidth label="Password" value={password}
             onChange={(e) => setPassword(e.target.value)} required
             type={showPassword ? 'text' : 'password'}
-            slotProps={{
-              input: {
-                startAdornment: <InputAdornment position="start"><Lock color="action" /></InputAdornment>,
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton 
-                      onClick={() => setShowPassword(!showPassword)} 
-                      edge="end"
-                      sx={{ color: '#64748B' }}
-                    >
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }
+            InputProps={{
+              startAdornment: <InputAdornment position="start"><Lock color="action" /></InputAdornment>,
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton 
+                    onClick={() => setShowPassword(!showPassword)} 
+                    edge="end"
+                    sx={{ color: '#64748B' }}
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
             }}
             sx={{ mb: 3 }}
           />

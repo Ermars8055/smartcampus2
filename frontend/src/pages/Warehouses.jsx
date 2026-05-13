@@ -5,7 +5,7 @@ import {
   DialogContent, DialogActions, MenuItem, Select, FormControl, InputLabel,
   IconButton, Chip
 } from '@mui/material';
-import { Add, Edit, Delete, Warehouse as WarehouseIcon, Business, VpnKey, LocationOn, Apartment, Search } from '@mui/icons-material';
+import { Add, Edit, Delete, Warehouse as WarehouseIcon, Business, VpnKey, LocationOn, Apartment, Search, Person } from '@mui/icons-material';
 import { InputAdornment } from '@mui/material';
 import api from '../services/api';
 
@@ -67,7 +67,7 @@ export default function Warehouses() {
       <Card sx={{ mb: 3, p: 2 }}>
         <TextField size="small" placeholder="Search warehouse name..." value={search}
           onChange={e => setSearch(e.target.value)} sx={{ minWidth: 300 }}
-          slotProps={{ input: { startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> } }} />
+          InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }} />
       </Card>
 
       <TableContainer component={Card} sx={{ borderRadius: '12px' }}>
@@ -112,7 +112,7 @@ export default function Warehouses() {
                 fullWidth label="Name" size="small" value={form.name || ''} 
                 onChange={e => setForm({ ...form, name: e.target.value })} 
                 InputLabelProps={{ shrink: true }}
-                slotProps={{ input: { startAdornment: <InputAdornment position="start"><WarehouseIcon sx={{ fontSize: 18 }} /></InputAdornment> } }}
+                InputProps={{ startAdornment: <InputAdornment position="start"><WarehouseIcon sx={{ fontSize: 18 }} /></InputAdornment> }}
               />
             </Grid>
             <Grid item xs={6}>
@@ -122,7 +122,7 @@ export default function Warehouses() {
                 placeholder="Auto-generated"
                 disabled
                 InputLabelProps={{ shrink: true }}
-                slotProps={{ input: { startAdornment: <InputAdornment position="start"><VpnKey sx={{ fontSize: 18 }} /></InputAdornment> } }}
+                InputProps={{ startAdornment: <InputAdornment position="start"><VpnKey sx={{ fontSize: 18 }} /></InputAdornment> }}
               />
             </Grid>
             <Grid item xs={6}>
@@ -133,12 +133,36 @@ export default function Warehouses() {
                 InputLabelProps={{ shrink: true }}
               />
             </Grid>
+            <Grid item xs={12}>
+              <FormControl fullWidth size="small">
+                <InputLabel shrink>Project</InputLabel>
+                <Select
+                  value={form.project_id || ''}
+                  onChange={e => setForm({ ...form, project_id: e.target.value })}
+                  label="Project"
+                  displayEmpty
+                  startAdornment={<InputAdornment position="start"><Business sx={{ fontSize: 18 }} /></InputAdornment>}
+                >
+                  {projects.map(p => (
+                    <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
             <Grid item xs={6}>
               <TextField 
                 fullWidth label="Location" size="small" value={form.location || ''} 
                 onChange={e => setForm({ ...form, location: e.target.value })} 
                 InputLabelProps={{ shrink: true }}
-                slotProps={{ input: { startAdornment: <InputAdornment position="start"><LocationOn sx={{ fontSize: 18 }} /></InputAdornment> } }}
+                InputProps={{ startAdornment: <InputAdornment position="start"><LocationOn sx={{ fontSize: 18 }} /></InputAdornment> }}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField 
+                fullWidth label="Manager Name" size="small" value={form.manager_name || ''} 
+                onChange={e => setForm({ ...form, manager_name: e.target.value })} 
+                InputLabelProps={{ shrink: true }}
+                InputProps={{ startAdornment: <InputAdornment position="start"><Person sx={{ fontSize: 18 }} /></InputAdornment> }}
               />
             </Grid>
           </Grid>

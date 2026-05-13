@@ -70,10 +70,8 @@ export default function PlatformLogin() {
               fullWidth value={username}
               onChange={(e) => setUsername(e.target.value)} required
               placeholder="e.g. admin"
-              slotProps={{
-                input: {
-                  startAdornment: <InputAdornment position="start"><Person fontSize="small" color="action" /></InputAdornment>
-                }
+              InputProps={{
+                startAdornment: <InputAdornment position="start"><Person fontSize="small" color="action" /></InputAdornment>
               }}
               sx={{ mb: 3 }}
             />
@@ -84,26 +82,24 @@ export default function PlatformLogin() {
               onChange={(e) => setPassword(e.target.value)} required
               type={showPassword ? 'text' : 'password'}
               placeholder="••••••••"
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Lock fontSize="small" color="action" />
-                    </InputAdornment>
-                  ),
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton 
-                        onClick={() => setShowPassword(!showPassword)} 
-                        edge="end"
-                        size="small"
-                        sx={{ color: '#64748B' }}
-                      >
-                        {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Lock fontSize="small" color="action" />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton 
+                      onClick={() => setShowPassword(!showPassword)} 
+                      edge="end"
+                      size="small"
+                      sx={{ color: '#64748B' }}
+                    >
+                      {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
               }}
               sx={{ mb: 4 }}
             />

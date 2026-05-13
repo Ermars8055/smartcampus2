@@ -340,6 +340,7 @@ class WarehouseBase(BaseModel):
     project_id: int
     warehouse_type: str = "Main"
     location: Optional[str] = None
+    manager_name: Optional[str] = None
     manager_id: Optional[int] = None
 
 class WarehouseCreate(WarehouseBase):

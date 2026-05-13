@@ -67,6 +67,42 @@ def list_inventory(
     return result
 
 
+@router.get("/inventory/ledger")
+def get_full_inventory_ledger(
+    warehouse_id: Optional[int] = None,
+    search: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("inventory", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    q = db.query(StockLedger).join(Material).join(Warehouse).filter(
+        StockLedger.tenant_id == tenant_id, StockLedger.site_id == site_id
+    )
+    if warehouse_id:
+        q = q.filter(StockLedger.warehouse_id == warehouse_id)
+    if search:
+        q = q.filter(or_(
+            Material.name.ilike(f"%{search}%"),
+            Material.code.ilike(f"%{search}%")
+        ))
+    
+    ledger = q.order_by(StockLedger.created_at.desc()).limit(200).all()
+    
+    return {
+        "items": [
+            StockLedgerOut(
+                id=l.id, material_id=l.material_id, warehouse_id=l.warehouse_id,
+                transaction_type=l.transaction_type, quantity=l.quantity, balance=l.balance,
+                reference_type=l.reference_type, reference_number=l.reference_number,
+                created_at=l.created_at, warehouse_name=l.warehouse.name if l.warehouse else None,
+                material_name=l.material.name if l.material else None
+            )
+            for l in ledger
+        ]
+    }
+
+
 @router.get("/inventory/{id}/ledger")
 def get_stock_ledger(
     id: int, db: Session = Depends(get_db), 

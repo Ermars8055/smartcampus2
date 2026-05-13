@@ -1110,7 +1110,7 @@ const Quotations = () => {
           onClose={() => setCreateQRDialogOpen(false)}
           maxWidth="md"
           fullWidth
-          slotProps={{ paper: { sx: { borderRadius: 3, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' } } }}
+          PaperProps={{ sx: { borderRadius: 3, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' } }}
         >
           <DialogTitle component="div" sx={{ pb: 1, pt: 3, px: 4 }}>
             <Typography variant="h5" fontWeight="700" color="primary.main">Create Quotation Request</Typography>
@@ -1135,17 +1135,13 @@ const Quotations = () => {
                   value={newQR.required_date ? dayjs(newQR.required_date) : null}
                   onChange={(val) => setNewQR({ ...newQR, required_date: val ? val.format('YYYY-MM-DD') : '' })}
                   format="DD-MMM-YYYY"
-                  slotProps={{
-                    textField: {
-                      fullWidth: true,
-                      placeholder: 'DD-MMM-YYYY',
-                      slotProps: {
-                        htmlInput: {
-                          placeholder: 'DD-MMM-YYYY'
-                        }
-                      }
-                    }
-                  }}
+                  renderInput={(params) => (
+                    <TextField 
+                      {...params} 
+                      fullWidth 
+                      placeholder="DD-MMM-YYYY"
+                    />
+                  )}
                 />
               </Box>
 
@@ -1286,7 +1282,7 @@ const Quotations = () => {
                                     value={it.quantity}
                                     onChange={(e) => updateItemQuantity(idx, e.target.value)}
                                     sx={{ width: 100, '& .MuiInputBase-input': { py: 0.5, textAlign: 'right', fontWeight: 600 } }}
-                                    slotProps={{ htmlInput: { min: 1 } }}
+                                    inputProps={{ min: 1 }}
                                   />
                                   <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600, minWidth: '60px' }}>
                                     {m?.uom_name || ''}
@@ -1319,10 +1315,8 @@ const Quotations = () => {
                   rows={2}
                   value={newQR.remarks}
                   onChange={(e) => setNewQR({ ...newQR, remarks: e.target.value })}
-                  slotProps={{
-                    input: {
-                      startAdornment: <InputAdornment position="start" sx={{ alignSelf: 'flex-start', mt: 1.5 }}><RemarkIcon color="action" sx={{ mr: 1 }} /></InputAdornment>,
-                    }
+                  InputProps={{
+                    startAdornment: <InputAdornment position="start" sx={{ alignSelf: 'flex-start', mt: 1.5 }}><RemarkIcon color="action" sx={{ mr: 1 }} /></InputAdornment>,
                   }}
                 />
               </Box>
@@ -1363,13 +1357,12 @@ const Quotations = () => {
                   value={newQuote.quotation_date ? dayjs(newQuote.quotation_date) : null}
                   onChange={(val) => setNewQuote({ ...newQuote, quotation_date: val ? val.format('YYYY-MM-DD') : '' })}
                   format="DD-MMM-YYYY"
-                  slotProps={{
-                    textField: {
-                      fullWidth: false,
-                      sx: { width: 220 },
-                      placeholder: 'DD-MMM-YYYY'
-                    }
-                  }}
+                  renderInput={(params) => (
+                    <TextField 
+                      {...params} 
+                      sx={{ width: 220 }}
+                    />
+                  )}
                 />
               </Box>
               <Box sx={{ pt: 3.5 }}>

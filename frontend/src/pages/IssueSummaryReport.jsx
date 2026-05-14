@@ -98,11 +98,12 @@ export default function IssueSummaryReport() {
   };
 
   const calculateTotals = (data, depts) => {
-    const totals = { opening_stock: 0, total_issue: 0, closing_stock: 0 };
+    const totals = { opening_stock: 0, total_received: 0, total_issue: 0, closing_stock: 0 };
     depts.forEach(d => totals[d] = 0);
 
     data.forEach(row => {
       totals.opening_stock += (row.opening_stock || 0);
+      totals.total_received += (row.total_received || 0);
       totals.total_issue += (row.total_issue || 0);
       totals.closing_stock += (row.closing_stock || 0);
       depts.forEach(d => {
@@ -122,6 +123,7 @@ export default function IssueSummaryReport() {
         'Material Name': `${row.material_code} - ${row.material_name}`,
         'UOM': row.uom,
         'Opening Stock': formatQty(row.opening_stock),
+        'Total Received': formatQty(row.total_received),
         'Issue No': row.issue_numbers || '-'
       };
       reportData.departments.forEach(d => {
@@ -165,7 +167,7 @@ export default function IssueSummaryReport() {
     doc.text(`ISSUE SUMMARY FROM ${filters.fromDate.format('DD/MM/YYYY')} TO ${filters.toDate.format('DD/MM/YYYY')}`, doc.internal.pageSize.getWidth() / 2, 22, { align: 'center' });
 
     const headers = [
-      'S.No', 'Material Name', 'UOM', 'Opening\nStock', 'Issue No',
+      'S.No', 'Material Name', 'UOM', 'Opening\nStock', 'Total\nReceived', 'Issue No',
       ...reportData.departments.map(d => (reportData.departments.length === 1 && d === 'UNKNOWN') ? 'Quantity\nIssued' : (d === 'UNKNOWN' ? 'Unspecified' : d)),
       'Total\nIssued', 'Closing\nStock'
     ];
@@ -176,6 +178,7 @@ export default function IssueSummaryReport() {
         `${row.material_code} - ${row.material_name}`,
         row.uom,
         formatQty(row.opening_stock),
+        formatQty(row.total_received),
         row.issue_numbers || '-'
       ];
       reportData.departments.forEach(d => rowData.push(formatQty(row.departments[d] || 0)));
@@ -186,7 +189,7 @@ export default function IssueSummaryReport() {
 
     const totals = calculateTotals(reportData.data, reportData.departments);
     const footer = [
-      '', 'Grand Total', '', formatQty(totals.opening_stock), '',
+      '', 'Grand Total', '', formatQty(totals.opening_stock), formatQty(totals.total_received), '',
       ...reportData.departments.map(d => formatQty(totals[d])),
       formatQty(totals.total_issue), formatQty(totals.closing_stock)
     ];
@@ -203,10 +206,11 @@ export default function IssueSummaryReport() {
         1: { cellWidth: 50 },
         2: { halign: 'center', cellWidth: 15 },
         3: { halign: 'right', cellWidth: 20 },
-        4: { cellWidth: 35 },
-        5: { halign: 'right', cellWidth: 20 },
+        4: { halign: 'right', cellWidth: 20 },
+        5: { cellWidth: 35 },
         6: { halign: 'right', cellWidth: 20 },
-        7: { halign: 'right', cellWidth: 20 }
+        7: { halign: 'right', cellWidth: 20 },
+        8: { halign: 'right', cellWidth: 20 }
       },
       didParseCell: function (data) {
         if (data.row.index === body.length - 1) {
@@ -341,6 +345,7 @@ export default function IssueSummaryReport() {
                   <TableCell sx={stickyStyle(50, true)}>Material Name</TableCell>
                   <TableCell align="center" sx={stickyStyle(300, true)}>UOM</TableCell>
                   <TableCell align="center" sx={stickyStyle(360, true)}>Opening<br />Stock</TableCell>
+                  <TableCell align="center" sx={{ background: '#F8FAFC', fontWeight: 700, color: '#1E293B', minWidth: 100 }}>Total<br />Received</TableCell>
                   <TableCell align="center" sx={{ fontWeight: 600, color: '#334155', minWidth: 100 }}>Issue No</TableCell>
 
                   {reportData.departments.length === 1 && reportData.departments[0] === 'UNKNOWN' ? (
@@ -397,6 +402,7 @@ export default function IssueSummaryReport() {
                   </TableCell>
                   <TableCell align="center" sx={stickyStyle(300, false)}>{row.uom}</TableCell>
                   <TableCell align="center" sx={stickyStyle(360, false)}>{formatQty(row.opening_stock)}</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 600, color: '#059669' }}>{formatQty(row.total_received)}</TableCell>
                   <TableCell align="left">{row.issue_numbers || '-'}</TableCell>
 
                   {reportData.departments.map((dept, i) => (
@@ -429,6 +435,7 @@ export default function IssueSummaryReport() {
                   <TableRow sx={{ background: '#F8FAFC', '& td': { fontWeight: 700 } }}>
                     <TableCell colSpan={3} align="right" sx={stickyStyle(0, false)}>Grand Total</TableCell>
                     <TableCell align="center" sx={stickyStyle(360, false)}>{formatQty(totals.opening_stock)}</TableCell>
+                    <TableCell align="center">{formatQty(totals.total_received)}</TableCell>
                     <TableCell></TableCell>
                     {reportData.departments.map((d, i) => (
                       <TableCell key={i} align="center">{totals[d] ? formatQty(totals[d]) : ''}</TableCell>

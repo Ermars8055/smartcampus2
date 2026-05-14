@@ -190,10 +190,10 @@ export default function Dashboard() {
   }
 
   const formatCurrency = (v) => {
-    if (v >= 10000000) return `₹${(v / 10000000).toFixed(1)}Cr`;
-    if (v >= 100000) return `₹${(v / 100000).toFixed(1)}L`;
-    if (v >= 1000) return `₹${(v / 1000).toFixed(1)}K`;
-    return `₹${v}`;
+    if (v >= 10000000) return `₹${(v / 10000000).toLocaleString('en-IN', { maximumFractionDigits: 1 })}Cr`;
+    if (v >= 100000) return `₹${(v / 100000).toLocaleString('en-IN', { maximumFractionDigits: 1 })}L`;
+    if (v >= 1000) return `₹${(v / 1000).toLocaleString('en-IN', { maximumFractionDigits: 1 })}K`;
+    return `₹${v.toLocaleString('en-IN')}`;
   };
 
   return (
@@ -293,7 +293,7 @@ export default function Dashboard() {
                   {stockByWh.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                 </Pie>
                 <RTooltip 
-                  formatter={(v) => [`₹${v.toLocaleString()}`, 'Value']}
+                  formatter={(v) => [`₹${v.toLocaleString('en-IN')}`, 'Value']}
                   contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} 
                 />
                 <Legend 
@@ -472,7 +472,7 @@ export default function Dashboard() {
                       <TableRow key={idx} hover>
                         <TableCell sx={{ fontWeight: 500 }}>{row.material_name}</TableCell>
                         <TableCell align="right">{row.total_quantity?.toLocaleString()} Units</TableCell>
-                        <TableCell align="right" sx={{ fontWeight: 600, color: '#1E293B' }}>₹ {row.total_cost?.toLocaleString()}</TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 600, color: '#1E293B' }}>₹ {row.total_cost?.toLocaleString('en-IN')}</TableCell>
                       </TableRow>
                     ))
                   )}

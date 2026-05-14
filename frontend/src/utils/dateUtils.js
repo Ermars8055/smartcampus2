@@ -11,14 +11,32 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
  */
 export function formatDate(dateInput) {
   if (!dateInput) return '-';
-  const d = new Date(dateInput);
-  if (isNaN(d.getTime())) return '-';
-  // Convert to IST (UTC+5:30)
-  const ist = new Date(d.getTime() + (5.5 * 60 * 60 * 1000));
-  const day = String(ist.getUTCDate()).padStart(2, '0');
-  const month = MONTHS[ist.getUTCMonth()];
-  const year = ist.getUTCFullYear();
-  return `${day}-${month}-${year}`;
+  
+  if (typeof dateInput === 'string') {
+    let s = dateInput;
+    if (s.includes('T') && !s.endsWith('Z') && !s.includes('+') && !s.match(/-\d\d:\d\d$/)) {
+      s += 'Z';
+    } else if (!s.includes('T')) {
+      s += 'T00:00:00Z';
+    }
+    const d = new Date(s);
+    if (isNaN(d.getTime())) return '-';
+    
+    const day = String(d.getUTCDate()).padStart(2, '0');
+    const month = MONTHS[d.getUTCMonth()];
+    const year = d.getUTCFullYear();
+    return `${day}-${month}-${year}`;
+  } else if (dateInput instanceof Date) {
+    if (isNaN(dateInput.getTime())) return '-';
+    const formatter = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Asia/Kolkata',
+      day: '2-digit', month: 'short', year: 'numeric'
+    });
+    const parts = formatter.formatToParts(dateInput);
+    const getPart = (type) => parts.find(p => p.type === type)?.value;
+    return `${getPart('day')}-${getPart('month')}-${getPart('year')}`;
+  }
+  return '-';
 }
 
 /**
@@ -28,14 +46,31 @@ export function formatDate(dateInput) {
  */
 export function formatDateTime(dateInput) {
   if (!dateInput) return '-';
-  const d = new Date(dateInput);
-  if (isNaN(d.getTime())) return '-';
-  // Convert to IST (UTC+5:30)
-  const ist = new Date(d.getTime() + (5.5 * 60 * 60 * 1000));
-  const day = String(ist.getUTCDate()).padStart(2, '0');
-  const month = MONTHS[ist.getUTCMonth()];
-  const year = ist.getUTCFullYear();
-  const hours = String(ist.getUTCHours()).padStart(2, '0');
-  const minutes = String(ist.getUTCMinutes()).padStart(2, '0');
-  return `${day}-${month}-${year} ${hours}:${minutes}`;
+  
+  if (typeof dateInput === 'string') {
+    let s = dateInput;
+    if (s.includes('T') && !s.endsWith('Z') && !s.includes('+') && !s.match(/-\d\d:\d\d$/)) {
+      s += 'Z';
+    }
+    const d = new Date(s);
+    if (isNaN(d.getTime())) return '-';
+    
+    const day = String(d.getUTCDate()).padStart(2, '0');
+    const month = MONTHS[d.getUTCMonth()];
+    const year = d.getUTCFullYear();
+    const hours = String(d.getUTCHours()).padStart(2, '0');
+    const minutes = String(d.getUTCMinutes()).padStart(2, '0');
+    return `${day}-${month}-${year} ${hours}:${minutes}`;
+  } else if (dateInput instanceof Date) {
+    if (isNaN(dateInput.getTime())) return '-';
+    const formatter = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Asia/Kolkata',
+      day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', hour12: false
+    });
+    const parts = formatter.formatToParts(dateInput);
+    const getPart = (type) => parts.find(p => p.type === type)?.value;
+    return `${getPart('day')}-${getPart('month')}-${getPart('year')} ${getPart('hour')}:${getPart('minute')}`;
+  }
+  return '-';
 }

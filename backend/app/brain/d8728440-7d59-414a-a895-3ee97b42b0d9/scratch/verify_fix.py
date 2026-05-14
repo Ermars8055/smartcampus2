@@ -40,6 +40,16 @@ opening_stocks = {}
 for (m_id, wh_id), bal in op_stocks_per_wh.items():
     opening_stocks[m_id] = opening_stocks.get(m_id, 0) + bal
 
+# --- Receipts Logic ---
+sl_rcpt_query = db.query(StockLedger.material_id, StockLedger.quantity).filter(
+    StockLedger.material_id.in_(material_ids),
+    StockLedger.created_at >= dt_from,
+    StockLedger.created_at <= dt_to,
+    StockLedger.quantity > 0
+)
+sl_rcpt_results = sl_rcpt_query.all()
+total_received = sum(row.quantity for row in sl_rcpt_results)
+
 # --- Closing Stock Logic ---
 sl_cl_query = db.query(StockLedger.material_id, StockLedger.warehouse_id, StockLedger.balance).filter(
     StockLedger.material_id.in_(material_ids),
@@ -57,6 +67,7 @@ for (m_id, wh_id), bal in cl_stocks_per_wh.items():
 
 print(f"Material: {mat.code} - {mat.name}")
 print(f"Opening Stock: {opening_stocks.get(mat.id, 0.0)}")
+print(f"Total Received: {total_received}")
 print(f"Closing Stock: {closing_stocks.get(mat.id, 0.0)}")
 
 db.close()

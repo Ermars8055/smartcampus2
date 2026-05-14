@@ -3,11 +3,13 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func, desc, asc, case
 from typing import List, Optional
 from datetime import datetime
+from app.utils.tz import get_now_ist
 
 from app.database import get_db
 from app.models import (
     MaterialIssue, MaterialIssueItem, Material, UOM, StockLedger, User,
-    GRN, GRNItem, Vendor, PurchaseOrder, Category, SubCategory, Warehouse
+    GRN, GRNItem, Vendor, PurchaseOrder, Category, SubCategory, Warehouse,
+    Department, MaterialReturn, MaterialReturnItem
 )
 from app.auth import get_tenant_id, get_site_id, get_current_user, require_permission
 
@@ -98,6 +100,24 @@ def get_issue_summary(
     for (m_id, wh_id), bal in cl_stocks_per_wh.items():
         closing_stocks[m_id] = closing_stocks.get(m_id, 0) + bal
 
+    # Receipts query within date range (from StockLedger)
+    sl_rcpt_query = db.query(
+        StockLedger.material_id, 
+        func.sum(StockLedger.quantity).label("total_received")
+    ).filter(
+        StockLedger.tenant_id == tenant_id,
+        StockLedger.site_id == site_id,
+        StockLedger.material_id.in_(material_ids),
+        StockLedger.created_at >= dt_from,
+        StockLedger.created_at <= dt_to,
+        StockLedger.quantity > 0
+    )
+    if warehouse_id:
+        sl_rcpt_query = sl_rcpt_query.filter(StockLedger.warehouse_id == warehouse_id)
+    
+    sl_rcpt_results = sl_rcpt_query.group_by(StockLedger.material_id).all()
+    material_receipts = {row.material_id: row.total_received for row in sl_rcpt_results}
+
     # Issues query within date range
     issue_query = db.query(
         MaterialIssueItem.material_id,
@@ -154,18 +174,15 @@ def get_issue_summary(
         issues = aggregated_data.get(m_id, {})
         total_issue = sum(issues.values())
         closing_stock = closing_stocks.get(m_id, 0.0)
+        total_received = material_receipts.get(m_id, 0.0)
         
         issue_numbers_str = ", ".join(sorted(list(material_issue_numbers.get(m_id, set()))))
 
-        has_transactions = total_issue > 0
+        has_transactions = (total_issue > 0) or (total_received > 0)
         
-        # Include logic: Include if include_zero is True and opening_stock > 0 OR if has_transactions is True
-        if include_zero:
-            if op_stock == 0 and not has_transactions:
-                continue
-        else:
-            if not has_transactions:
-                continue
+        # Include logic: Include if include_zero is True and (opening_stock > 0 or has_transactions)
+        if not include_zero and not has_transactions:
+            continue
 
         final_data.append({
             "material_id": mat.id,
@@ -173,6 +190,7 @@ def get_issue_summary(
             "material_name": mat.name,
             "uom": uom,
             "opening_stock": op_stock,
+            "total_received": total_received,
             "departments": issues,
             "total_issue": total_issue,
             "closing_stock": closing_stock,
@@ -358,7 +376,7 @@ def get_rate_analysis(
 
     return {
         "data": data,
-        "generated_at": datetime.now().strftime("%d-%b-%Y %H:%M:%S"),
+        "generated_at": get_now_ist().strftime("%d-%b-%Y %H:%M:%S"),
         "total_materials": len(data),
         "variance_type": variance_type,
         "include_tax": include_tax
@@ -504,3 +522,324 @@ def get_rate_analysis_drilldown(
         "chart_data": chart_data
     }
 
+
+# ==========================================
+# RECEIPT SUMMARY REPORT
+# ==========================================
+
+@router.get("/receipt-summary")
+def get_receipt_summary(
+    from_date: str = Query(..., description="From Date (YYYY-MM-DD)"),
+    to_date: str = Query(..., description="To Date (YYYY-MM-DD)"),
+    warehouse_id: Optional[int] = None,
+    vendor_id: Optional[int] = None,
+    category_id: Optional[int] = None,
+    subcategory_id: Optional[int] = None,
+    search: Optional[str] = None,
+    grn_number: Optional[str] = None,
+    include_cancelled: bool = False,
+    only_receipts: bool = True,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("reports", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    """Main Store Items - Receipt Summary Report with dynamic vendor columns."""
+    try:
+        dt_from = datetime.strptime(from_date, "%Y-%m-%d").replace(hour=0, minute=0, second=0)
+        dt_to = datetime.strptime(to_date, "%Y-%m-%d").replace(hour=23, minute=59, second=59)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD.")
+
+    # 1. Base Query for GRN Items
+    query = db.query(
+        GRNItem.material_id,
+        Material.code.label("material_code"),
+        Material.name.label("material_name"),
+        Material.category_id,
+        Material.subcategory_id,
+        Vendor.id.label("vendor_id"),
+        Vendor.name.label("vendor_name"),
+        GRN.grn_number,
+        GRN.invoice_number,
+        GRN.invoice_date,
+        GRNItem.accepted_quantity,
+        GRNItem.rate,
+        GRNItem.taxable_amount,
+        (GRNItem.taxable_amount + GRNItem.cgst_amount + GRNItem.sgst_amount + GRNItem.igst_amount).label("total_amount")
+    ).join(GRN, GRNItem.grn_id == GRN.id)\
+     .join(Material, GRNItem.material_id == Material.id)\
+     .join(Vendor, GRN.vendor_id == Vendor.id)\
+     .filter(
+        GRN.tenant_id == tenant_id,
+        GRN.site_id == site_id,
+        GRN.status == "Completed",
+        GRN.created_at >= dt_from,
+        GRN.created_at <= dt_to
+    )
+
+    if not include_cancelled:
+        query = query.filter(GRN.is_deleted == False)
+
+    if warehouse_id:
+        query = query.filter(GRN.warehouse_id == warehouse_id)
+    if vendor_id:
+        query = query.filter(GRN.vendor_id == vendor_id)
+    if category_id:
+        query = query.filter(Material.category_id == category_id)
+    if subcategory_id:
+        query = query.filter(Material.subcategory_id == subcategory_id)
+    if search:
+        search_term = f"%{search}%"
+        query = query.filter((Material.code.ilike(search_term)) | (Material.name.ilike(search_term)))
+    if grn_number:
+        query = query.filter(GRN.grn_number.ilike(f"%{grn_number}%"))
+
+    results = query.all()
+
+    # 2. Pivot data in Python
+    # Structure: { material_id: { info: {...}, vendors: { vendor_id: { sum_qty, sum_amt, latest_bill... } } } }
+    pivoted = {}
+    unique_vendors = {} # vendor_id -> name
+
+    for row in results:
+        m_id = row.material_id
+        v_id = row.vendor_id
+        unique_vendors[v_id] = row.vendor_name
+
+        if m_id not in pivoted:
+            pivoted[m_id] = {
+                "material_id": m_id,
+                "material_code": row.material_code,
+                "material_name": row.material_name,
+                "vendor_details": {}
+            }
+        
+        if v_id not in pivoted[m_id]["vendor_details"]:
+            pivoted[m_id]["vendor_details"][v_id] = {
+                "vendor_id": v_id,
+                "vendor_name": row.vendor_name,
+                "qty": 0.0,
+                "amount": 0.0,
+                "total": 0.0,
+                "latest_bill_no": row.invoice_number,
+                "latest_bill_date": row.invoice_date,
+                "rate": row.rate # We'll use the latest rate for display, or could avg
+            }
+        
+        v_data = pivoted[m_id]["vendor_details"][v_id]
+        v_data["qty"] += float(row.accepted_quantity or 0)
+        v_data["amount"] += float(row.taxable_amount or 0)
+        v_data["total"] += float(row.total_amount or 0)
+        
+        # Update latest bill if this one is newer
+        if row.invoice_date and (not v_data["latest_bill_date"] or row.invoice_date > v_data["latest_bill_date"]):
+            v_data["latest_bill_no"] = row.invoice_number
+            v_data["latest_bill_date"] = row.invoice_date
+            v_data["rate"] = row.rate
+
+    # Convert to list and sort
+    final_data = list(pivoted.values())
+    final_data.sort(key=lambda x: x["material_name"])
+
+    # Sorted vendors for column consistency
+    sorted_vendors = [{"id": vid, "name": name} for vid, name in sorted(unique_vendors.items(), key=lambda x: x[1])]
+
+    return {
+        "vendors": sorted_vendors,
+        "data": final_data,
+        "generated_at": get_now_ist().strftime("%d-%b-%Y %H:%M:%S")
+    }
+
+@router.get("/receipt-summary/details")
+def get_receipt_summary_details(
+    material_id: int = Query(...),
+    vendor_id: int = Query(...),
+    from_date: str = Query(...),
+    to_date: str = Query(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("reports", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    """Fetch all GRN items for a specific material and vendor within the range."""
+    try:
+        dt_from = datetime.strptime(from_date, "%Y-%m-%d").replace(hour=0, minute=0, second=0)
+        dt_to = datetime.strptime(to_date, "%Y-%m-%d").replace(hour=23, minute=59, second=59)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid date format.")
+
+    items = db.query(
+        GRN.grn_number,
+        GRN.created_at.label("grn_date"),
+        Vendor.name.label("vendor_name"),
+        GRN.invoice_number,
+        GRN.invoice_date,
+        Material.code.label("material_code"),
+        Material.name.label("material_name"),
+        UOM.name.label("uom"),
+        GRNItem.accepted_quantity,
+        GRNItem.rate,
+        GRNItem.taxable_amount,
+        (GRNItem.cgst_amount + GRNItem.sgst_amount + GRNItem.igst_amount).label("tax_amount"),
+        (GRNItem.taxable_amount + GRNItem.cgst_amount + GRNItem.sgst_amount + GRNItem.igst_amount).label("total_amount"),
+        Warehouse.name.label("warehouse_name"),
+        User.full_name.label("received_by"),
+        GRN.remarks
+    ).join(GRN, GRNItem.grn_id == GRN.id)\
+     .join(Material, GRNItem.material_id == Material.id)\
+     .join(UOM, Material.uom_id == UOM.id)\
+     .join(Vendor, GRN.vendor_id == Vendor.id)\
+     .join(Warehouse, GRN.warehouse_id == Warehouse.id)\
+     .join(User, GRN.received_by_id == User.id)\
+     .filter(
+        GRN.tenant_id == tenant_id,
+        GRN.site_id == site_id,
+        GRNItem.material_id == material_id,
+        GRN.vendor_id == vendor_id,
+        GRN.status == "Completed",
+        GRN.is_deleted == False,
+        GRN.created_at >= dt_from,
+        GRN.created_at <= dt_to
+    ).order_by(GRN.created_at.desc()).all()
+
+    return [
+        {
+            "grn_number": row.grn_number,
+            "grn_date": row.grn_date.strftime("%d-%b-%Y") if row.grn_date else "",
+            "vendor_name": row.vendor_name,
+            "bill_number": row.invoice_number,
+            "bill_date": row.invoice_date.strftime("%d-%b-%Y") if row.invoice_date else "",
+            "material_code": row.material_code,
+            "material_name": row.material_name,
+            "uom": row.uom,
+            "qty_received": row.accepted_quantity,
+            "rate": row.rate,
+            "tax_amount": row.tax_amount,
+            "total_amount": row.total_amount,
+            "store_name": row.warehouse_name,
+            "received_by": row.received_by,
+            "remarks": row.remarks
+        }
+        for row in items
+    ]
+
+
+
+@router.get("/department-inventory")
+def get_department_inventory_report(
+    category_id: Optional[int] = None,
+    search: Optional[str] = None,
+    department_id: Optional[int] = None,
+    only_with_stock: bool = False,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("reports", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    """
+    Consolidated live inventory snapshot across all departments.
+    Calculated as: Issues to Dept - Returns from Dept.
+    """
+    # 1. Fetch all active materials
+    mat_query = db.query(Material, UOM.name.label("uom_name")).join(UOM, Material.uom_id == UOM.id).filter(
+        Material.tenant_id == tenant_id,
+        Material.site_id == site_id,
+        Material.is_deleted == False
+    )
+    if category_id:
+        mat_query = mat_query.filter(Material.category_id == category_id)
+    if search:
+        search_term = f"%{search}%"
+        mat_query = mat_query.filter((Material.code.ilike(search_term)) | (Material.name.ilike(search_term)))
+    
+    materials = mat_query.all()
+    material_ids = [m.Material.id for m in materials]
+    
+    if not material_ids:
+        return {"departments": [], "data": []}
+
+    # 2. Fetch all active departments for dynamic columns
+    dept_query = db.query(Department).filter(
+        Department.tenant_id == tenant_id,
+        Department.site_id == site_id,
+        Department.is_active == True,
+        Department.is_deleted == False
+    )
+    if department_id:
+        dept_query = dept_query.filter(Department.id == department_id)
+    
+    all_depts = dept_query.order_by(Department.name).all()
+    dept_names = [d.name for d in all_depts]
+    
+    if not dept_names:
+        return {"departments": [], "data": []}
+
+    # 3. Calculate Issues per material per department
+    issues_query = db.query(
+        MaterialIssueItem.material_id,
+        MaterialIssue.issued_to_department,
+        func.sum(MaterialIssueItem.quantity).label("total_issued")
+    ).join(MaterialIssue, MaterialIssueItem.issue_id == MaterialIssue.id).filter(
+        MaterialIssue.tenant_id == tenant_id,
+        MaterialIssue.site_id == site_id,
+        MaterialIssue.is_deleted == False,
+        MaterialIssue.status == "Completed",
+        MaterialIssueItem.material_id.in_(material_ids)
+    ).group_by(MaterialIssueItem.material_id, MaterialIssue.issued_to_department).all()
+
+    issues_map = {} # (material_id, department_name) -> qty
+    for row in issues_query:
+        issues_map[(row.material_id, row.issued_to_department)] = row.total_issued
+
+    # 4. Calculate Returns per material per department
+    returns_query = db.query(
+        MaterialReturnItem.material_id,
+        MaterialReturn.returned_from_department,
+        func.sum(MaterialReturnItem.quantity).label("total_returned")
+    ).join(MaterialReturn, MaterialReturnItem.return_id == MaterialReturn.id).filter(
+        MaterialReturn.tenant_id == tenant_id,
+        MaterialReturn.site_id == site_id,
+        MaterialReturn.is_deleted == False,
+        MaterialReturnItem.material_id.in_(material_ids)
+    ).group_by(MaterialReturnItem.material_id, MaterialReturn.returned_from_department).all()
+
+    returns_map = {} # (material_id, department_name) -> qty
+    for row in returns_query:
+        returns_map[(row.material_id, row.returned_from_department)] = row.total_returned
+
+    # 5. Build final data matrix
+    final_data = []
+    for m in materials:
+        mat = m.Material
+        uom = m.uom_name
+        
+        dept_inventory = {}
+        total_mat_inv = 0.0
+        
+        for d_name in dept_names:
+            issued = issues_map.get((mat.id, d_name), 0.0)
+            returned = returns_map.get((mat.id, d_name), 0.0)
+            net = round(max(0.0, issued - returned), 2)
+            
+            dept_inventory[d_name] = net
+            total_mat_inv += net
+        
+        if only_with_stock and total_mat_inv <= 0:
+            continue
+            
+        final_data.append({
+            "material_id": mat.id,
+            "material_code": mat.code,
+            "material_name": mat.name,
+            "uom": uom,
+            "department_inventory": dept_inventory,
+            "total_inventory": round(total_mat_inv, 2)
+        })
+
+    return {
+        "departments": dept_names,
+        "data": final_data,
+        "generated_at": get_now_ist().strftime("%d-%b-%Y %I:%M %p"),
+        "generated_by": current_user.full_name
+    }

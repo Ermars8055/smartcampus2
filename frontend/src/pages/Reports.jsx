@@ -89,7 +89,7 @@ export default function Reports() {
                         <Chip label={row[h]} size="small" color={row[h] === 'Low' ? 'error' : row[h] === 'OK' ? 'success' :
                           row[h] === 'Approved' ? 'success' : row[h] === 'Closed' ? 'default' : 'warning'} sx={{ fontSize: '0.7rem' }} />
                       ) : typeof row[h] === 'number' && h.includes('amount') || h.includes('cost') || h.includes('value') ? (
-                        `₹${row[h]?.toLocaleString()}`
+                        `₹${row[h]?.toLocaleString('en-IN')}`
                       ) : (
                         String(row[h] ?? '')
                       )}

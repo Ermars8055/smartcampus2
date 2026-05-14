@@ -3,6 +3,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from datetime import datetime, timezone
+from app.utils.tz import get_now_ist
 from typing import Optional
 from app.database import get_db
 from app.models import GateEntry, User, Vendor, PurchaseOrder, PurchaseOrderItem, Material
@@ -98,7 +99,7 @@ def create_gate_entry(
     entry = GateEntry(
         entry_number=get_next_number(db, tenant_id, site_id, "GATE_ENTRY", "GE"),
         recorded_by_id=current_user.id,
-        arrival_time=datetime.now(timezone.utc),
+        arrival_time=get_now_ist(),
         status="Awaiting Direct GRN" if is_direct else "Gate Entry Created",
         vehicle_number=data.vehicle_number,
         vendor_id=data.vendor_id,

@@ -49,6 +49,8 @@ const menuItems = [
     text: 'Reports', icon: <Assessment />, children: [
       { text: 'Issue Summary', icon: <Assessment />, path: '/reports/issue-summary' },
       { text: 'Rate Analysis', icon: <Assessment />, path: '/reports/rate-analysis' },
+      { text: 'Receipt Summary', icon: <Assessment />, path: '/reports/receipt-summary' },
+      { text: 'Department Inventory', icon: <Assessment />, path: '/reports/department-inventory' },
     ]
   },
   {

@@ -3,7 +3,8 @@ import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
   DialogContent, DialogActions, Grid, MenuItem, Select, FormControl, InputLabel, Divider,
-  Radio, RadioGroup, FormControlLabel, FormLabel, ToggleButton, ToggleButtonGroup
+  Radio, RadioGroup, FormControlLabel, FormLabel, ToggleButton, ToggleButtonGroup,
+  TableSortLabel
 } from '@mui/material';
 import { Add, Search, AttachFile, OpenInNew, LocalShipping } from '@mui/icons-material';
 import api, { getFileUrl } from '../services/api';
@@ -17,6 +18,7 @@ export default function GateEntry() {
   const [dialog, setDialog] = useState(false);
   const [detailDialog, setDetailDialog] = useState(null);
   const [search, setSearch] = useState('');
+  const [sortConfig, setSortConfig] = useState({ key: 'entry_number', direction: 'desc' });
 
   const [form, setForm] = useState({
     entry_type: 'Vehicle',
@@ -94,6 +96,8 @@ export default function GateEntry() {
   const handleCreate = async () => {
     const isDirect = form.entry_type === 'Direct Invoice';
 
+    if (!form.invoice_scan_url) return alert("Please upload the scanned invoice.");
+
     if (!isDirect) {
       if (form.entry_type === 'Vehicle' && (!form.vehicle_number || !form.vehicle_number.trim())) {
         return alert("Vehicle Number is required.");
@@ -103,7 +107,6 @@ export default function GateEntry() {
       }
     } else {
       if (!form.vendor_id) return alert("Vendor is required for Direct Invoice.");
-      if (!form.invoice_scan_url) return alert("Please upload the scanned invoice.");
     }
     
     try {
@@ -146,6 +149,31 @@ export default function GateEntry() {
 
   const statusColor = { 'Gate Entry Created': 'info', 'Awaiting GRN': 'warning', 'Awaiting Direct GRN': 'secondary', 'Completed': 'success' };
 
+  const handleSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const sortedEntries = [...entries].sort((a, b) => {
+    let valA = a[sortConfig.key];
+    let valB = b[sortConfig.key];
+    
+    if (sortConfig.key === 'vehicle_person') {
+      valA = a.entry_type === 'Vehicle' ? a.vehicle_number : a.delivery_person_name;
+      valB = b.entry_type === 'Vehicle' ? b.vehicle_number : b.delivery_person_name;
+    }
+    
+    if (valA == null) valA = '';
+    if (valB == null) valB = '';
+
+    if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
+    if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
+    return 0;
+  });
+
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
@@ -169,12 +197,18 @@ export default function GateEntry() {
         <TableContainer>
           <Table size="small">
             <TableHead><TableRow>
-              <TableCell>Entry No.</TableCell><TableCell>Type</TableCell><TableCell>Vehicle/Person</TableCell><TableCell>Vendor</TableCell>
-              <TableCell>PO Ref</TableCell><TableCell>Material</TableCell><TableCell align="right">Qty</TableCell>
-              <TableCell>Arrival</TableCell><TableCell>Status</TableCell>
+              <TableCell><TableSortLabel active={sortConfig.key === 'entry_number'} direction={sortConfig.key === 'entry_number' ? sortConfig.direction : 'asc'} onClick={() => handleSort('entry_number')}>Entry No.</TableSortLabel></TableCell>
+              <TableCell><TableSortLabel active={sortConfig.key === 'entry_type'} direction={sortConfig.key === 'entry_type' ? sortConfig.direction : 'asc'} onClick={() => handleSort('entry_type')}>Type</TableSortLabel></TableCell>
+              <TableCell><TableSortLabel active={sortConfig.key === 'vehicle_person'} direction={sortConfig.key === 'vehicle_person' ? sortConfig.direction : 'asc'} onClick={() => handleSort('vehicle_person')}>Vehicle/Person</TableSortLabel></TableCell>
+              <TableCell><TableSortLabel active={sortConfig.key === 'vendor_name'} direction={sortConfig.key === 'vendor_name' ? sortConfig.direction : 'asc'} onClick={() => handleSort('vendor_name')}>Vendor</TableSortLabel></TableCell>
+              <TableCell><TableSortLabel active={sortConfig.key === 'po_number'} direction={sortConfig.key === 'po_number' ? sortConfig.direction : 'asc'} onClick={() => handleSort('po_number')}>PO Ref</TableSortLabel></TableCell>
+              <TableCell><TableSortLabel active={sortConfig.key === 'material_names'} direction={sortConfig.key === 'material_names' ? sortConfig.direction : 'asc'} onClick={() => handleSort('material_names')}>Material</TableSortLabel></TableCell>
+              <TableCell align="right"><TableSortLabel active={sortConfig.key === 'quantity'} direction={sortConfig.key === 'quantity' ? sortConfig.direction : 'asc'} onClick={() => handleSort('quantity')}>Qty</TableSortLabel></TableCell>
+              <TableCell><TableSortLabel active={sortConfig.key === 'arrival_time'} direction={sortConfig.key === 'arrival_time' ? sortConfig.direction : 'asc'} onClick={() => handleSort('arrival_time')}>Arrival</TableSortLabel></TableCell>
+              <TableCell><TableSortLabel active={sortConfig.key === 'status'} direction={sortConfig.key === 'status' ? sortConfig.direction : 'asc'} onClick={() => handleSort('status')}>Status</TableSortLabel></TableCell>
             </TableRow></TableHead>
             <TableBody>
-              {entries.map(e => (
+              {sortedEntries.map(e => (
                 <TableRow key={e.id} sx={{ cursor: 'pointer' }} onClick={() => setDetailDialog(e)}>
                   <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.8rem' }}>{e.entry_number}</TableCell>
                   <TableCell><Chip label={e.entry_type} size="small" variant="outlined" sx={{ fontSize: '0.65rem', height: 20 }} /></TableCell>
@@ -259,118 +293,118 @@ export default function GateEntry() {
             >
               <ToggleButton value="Vehicle" sx={{ px: 4 }}>Vehicle Entry</ToggleButton>
               <ToggleButton value="Carry on hand" sx={{ px: 4 }}>Carry on hand</ToggleButton>
-              <ToggleButton value="Direct Invoice" sx={{ px: 4, color: '#7C3AED', '&.Mui-selected': { bgcolor: '#7C3AED', color: '#fff' } }}>📄 Direct Invoice</ToggleButton>
+              <ToggleButton value="Direct Invoice" sx={{ px: 4 }}>Direct Invoice</ToggleButton>
             </ToggleButtonGroup>
           </Box>
 
-          {form.entry_type === 'Direct Invoice' ? (
-            /* ─── Direct Invoice Form ─── */
-              <Grid container spacing={2}>
-                <Grid item xs={8}>
-                  <Grid container spacing={2}>
+          <Grid container spacing={2}>
+            <Grid item xs={8}>
+              {form.entry_type === 'Direct Invoice' ? (
+                /* ─── Direct Invoice Form ─── */
+                <Grid container spacing={2}>
+                  <Grid item xs={6}>
+                    <FormControl fullWidth required><InputLabel>Vendor</InputLabel>
+                      <Select value={form.vendor_id} label="Vendor" onChange={e => setForm({ ...form, vendor_id: e.target.value })}>
+                        {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.name}</MenuItem>)}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <TextField fullWidth label="Vehicle Number" value={form.vehicle_number}
+                      onChange={e => setForm({ ...form, vehicle_number: e.target.value })} />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <TextField fullWidth label="Driver / Delivery Person" value={form.delivery_person_name}
+                      onChange={e => setForm({ ...form, delivery_person_name: e.target.value })} />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <TextField fullWidth label="Remarks" value={form.remarks}
+                      onChange={e => setForm({ ...form, remarks: e.target.value })}
+                      placeholder="e.g. Phone order" />
+                  </Grid>
+                </Grid>
+              ) : (
+                /* ─── Regular Entry Form ─── */
+                <Grid container spacing={2}>
+                {form.entry_type === 'Vehicle' ? (
+                  <>
+                    <Grid item xs={6}><TextField fullWidth label="Vehicle Number" value={form.vehicle_number} onChange={e => setForm({ ...form, vehicle_number: e.target.value })} required /></Grid>
                     <Grid item xs={6}>
-                      <FormControl fullWidth required><InputLabel>Vendor</InputLabel>
-                        <Select value={form.vendor_id} label="Vendor" onChange={e => setForm({ ...form, vendor_id: e.target.value })}>
-                          {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.name}</MenuItem>)}
+                      <FormControl fullWidth><InputLabel>PO Reference (Pending Orders)</InputLabel>
+                        <Select value={form.po_id} label="PO Reference (Pending Orders)" onChange={e => selectPO(e.target.value)}>
+                          <MenuItem value="">None (ad-hoc delivery)</MenuItem>
+                          {pos.map(p => (
+                            <MenuItem key={p.id} value={p.id}>
+                              {p.po_number} — {p.vendor_name}
+                            </MenuItem>
+                          ))}
                         </Select>
                       </FormControl>
                     </Grid>
+                    <Grid item xs={6}><TextField fullWidth label="Driver Name" value={form.driver_name} onChange={e => setForm({ ...form, driver_name: e.target.value })} /></Grid>
+                  </>
+                ) : (
+                  <>
+                    <Grid item xs={6}><TextField fullWidth label="Delivery Person Name" value={form.delivery_person_name} onChange={e => setForm({ ...form, delivery_person_name: e.target.value })} required /></Grid>
                     <Grid item xs={6}>
-                      <TextField fullWidth label="Vehicle Number" value={form.vehicle_number}
-                        onChange={e => setForm({ ...form, vehicle_number: e.target.value })} />
+                      <FormControl fullWidth><InputLabel>PO Reference (Pending Orders)</InputLabel>
+                        <Select value={form.po_id} label="PO Reference (Pending Orders)" onChange={e => selectPO(e.target.value)}>
+                          <MenuItem value="">None (ad-hoc delivery)</MenuItem>
+                          {pos.map(p => (
+                            <MenuItem key={p.id} value={p.id}>
+                              {p.po_number} — {p.vendor_name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
                     </Grid>
-                    <Grid item xs={6}>
-                      <TextField fullWidth label="Driver / Delivery Person" value={form.delivery_person_name}
-                        onChange={e => setForm({ ...form, delivery_person_name: e.target.value })} />
-                    </Grid>
-                    <Grid item xs={6}>
-                      <TextField fullWidth label="Remarks" value={form.remarks}
-                        onChange={e => setForm({ ...form, remarks: e.target.value })}
-                        placeholder="e.g. Phone order" />
-                    </Grid>
-                  </Grid>
+                  </>
+                )}
+                  <Grid item xs={6}><TextField fullWidth label="Remarks" value={form.remarks} onChange={e => setForm({ ...form, remarks: e.target.value })} /></Grid>
                 </Grid>
-                <Grid item xs={4}>
-                  <Box sx={{ 
-                    p: 2, 
-                    border: '2px dashed #7C3AED', 
-                    borderRadius: 2, 
-                    bgcolor: '#F5F3FF', 
-                    textAlign: 'center',
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center',
-                    alignItems: 'center'
-                  }}>
-                    {form.invoice_scan_url ? (
-                      <Box>
-                        <AttachFile sx={{ color: '#7C3AED', mb: 1 }} />
-                        <Typography variant="body2" sx={{ fontWeight: 600, color: '#7C3AED', mb: 1 }}>Invoice uploaded ✓</Typography>
-                        <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
-                          <Button size="small" variant="outlined" onClick={() => window.open(getFileUrl(form.invoice_scan_url), '_blank')}>View</Button>
-                          <Button size="small" color="error" onClick={() => setForm({ ...form, invoice_scan_url: '' })}>Remove</Button>
-                        </Box>
-                      </Box>
-                    ) : (
-                      <>
-                        <Typography sx={{ mb: 0.5, fontWeight: 600, color: '#7C3AED', fontSize: '0.9rem' }}>
-                          📎 Upload Invoice *
-                        </Typography>
-                        <Typography variant="caption" sx={{ color: '#64748B', display: 'block', mb: 1.5 }}>
-                          PDF, JPG, or PNG
-                        </Typography>
-                        <Button variant="contained" component="label" disabled={uploading} size="small"
-                          sx={{ bgcolor: '#7C3AED', '&:hover': { bgcolor: '#6D28D9' }, textTransform: 'none' }}>
-                          {uploading ? 'Uploading...' : 'Choose File'}
-                          <input type="file" hidden accept=".pdf,.jpg,.jpeg,.png,.webp"
-                            onChange={e => handleUpload(e.target.files[0])} />
-                        </Button>
-                      </>
-                    )}
-                  </Box>
-                </Grid>
-              </Grid>
-          ) : (
-            /* ─── Regular Entry Form ─── */
-            <Grid container spacing={2}>
-            {form.entry_type === 'Vehicle' ? (
-              <>
-                <Grid item xs={6}><TextField fullWidth label="Vehicle Number" value={form.vehicle_number} onChange={e => setForm({ ...form, vehicle_number: e.target.value })} required /></Grid>
-                <Grid item xs={6}>
-                  <FormControl fullWidth><InputLabel>PO Reference (Pending Orders)</InputLabel>
-                    <Select value={form.po_id} label="PO Reference (Pending Orders)" onChange={e => selectPO(e.target.value)}>
-                      <MenuItem value="">None (ad-hoc delivery)</MenuItem>
-                      {pos.map(p => (
-                        <MenuItem key={p.id} value={p.id}>
-                          {p.po_number} — {p.vendor_name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={6}><TextField fullWidth label="Driver Name" value={form.driver_name} onChange={e => setForm({ ...form, driver_name: e.target.value })} /></Grid>
-              </>
-            ) : (
-              <>
-                <Grid item xs={6}><TextField fullWidth label="Delivery Person Name" value={form.delivery_person_name} onChange={e => setForm({ ...form, delivery_person_name: e.target.value })} required /></Grid>
-                <Grid item xs={6}>
-                  <FormControl fullWidth><InputLabel>PO Reference (Pending Orders)</InputLabel>
-                    <Select value={form.po_id} label="PO Reference (Pending Orders)" onChange={e => selectPO(e.target.value)}>
-                      <MenuItem value="">None (ad-hoc delivery)</MenuItem>
-                      {pos.map(p => (
-                        <MenuItem key={p.id} value={p.id}>
-                          {p.po_number} — {p.vendor_name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-              </>
-            )}
-              <Grid item xs={6}><TextField fullWidth label="Remarks" value={form.remarks} onChange={e => setForm({ ...form, remarks: e.target.value })} /></Grid>
+              )}
             </Grid>
-          )}
+            <Grid item xs={4}>
+              <Box sx={{ 
+                p: 2, 
+                border: '2px dashed #1E3A8A', 
+                borderRadius: 2, 
+                bgcolor: '#F0F4F8', 
+                textAlign: 'center',
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center'
+              }}>
+                {form.invoice_scan_url ? (
+                  <Box>
+                    <AttachFile sx={{ color: '#1E3A8A', mb: 1 }} />
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: '#1E3A8A', mb: 1 }}>Invoice uploaded ✓</Typography>
+                    <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
+                      <Button size="small" variant="outlined" onClick={() => window.open(getFileUrl(form.invoice_scan_url), '_blank')}>View</Button>
+                      <Button size="small" color="error" onClick={() => setForm({ ...form, invoice_scan_url: '' })}>Remove</Button>
+                    </Box>
+                  </Box>
+                ) : (
+                  <>
+                    <Typography sx={{ mb: 0.5, fontWeight: 600, color: '#1E3A8A', fontSize: '0.9rem' }}>
+                      📎 Upload Invoice *
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: '#64748B', display: 'block', mb: 1.5 }}>
+                      PDF, JPG, or PNG
+                    </Typography>
+                    <Button variant="contained" component="label" disabled={uploading} size="small"
+                      sx={{ bgcolor: '#1E3A8A', '&:hover': { bgcolor: '#1e2a5a' }, textTransform: 'none' }}>
+                      {uploading ? 'Uploading...' : 'Choose File'}
+                      <input type="file" hidden accept=".pdf,.jpg,.jpeg,.png,.webp"
+                        onChange={e => handleUpload(e.target.files[0])} />
+                    </Button>
+                  </>
+                )}
+              </Box>
+            </Grid>
+          </Grid>
 
           {/* Pending PO Items — only for regular entries */}
           {form.entry_type !== 'Direct Invoice' && form.items.length > 0 && (
@@ -414,7 +448,7 @@ export default function GateEntry() {
         </DialogContent>
         <DialogActions sx={{ px: 4, pb: 4, pt: 2, justifyContent: 'flex-end', gap: 2 }}>
           <Button onClick={() => setDialog(false)} sx={{ color: '#64748B', fontWeight: 600 }}>Cancel</Button>
-          <Button variant="contained" onClick={handleCreate} sx={{ borderRadius: 2, px: 4, py: 1, fontWeight: 700, boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)', textTransform: 'none' }}>Record Entry</Button>
+          <Button variant="contained" onClick={handleCreate} sx={{ borderRadius: 2, px: 4, py: 1, fontWeight: 700, textTransform: 'none' }}>Record Entry</Button>
         </DialogActions>
       </Dialog>
     </Box>

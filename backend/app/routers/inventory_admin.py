@@ -25,6 +25,7 @@ def list_inventory(
     category_id: Optional[int] = None,
     search: Optional[str] = None,
     low_stock_only: bool = False,
+    stock_status: Optional[str] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("inventory", "read")),
     tenant_id: int = Depends(get_tenant_id),
@@ -42,7 +43,14 @@ def list_inventory(
             Material.name.ilike(f"%{search}%"),
             Material.code.ilike(f"%{search}%")
         ))
-    if low_stock_only:
+    
+    if stock_status == 'no':
+        q = q.filter(CurrentStock.quantity == 0)
+    elif stock_status == 'low':
+        q = q.filter(CurrentStock.quantity > 0, CurrentStock.quantity < Material.reorder_level)
+    elif stock_status == 'in':
+        q = q.filter(CurrentStock.quantity >= Material.reorder_level)
+    elif low_stock_only:
         q = q.filter(CurrentStock.quantity < Material.reorder_level)
 
     stocks = q.order_by(Material.name).all()
@@ -62,6 +70,7 @@ def list_inventory(
             warehouse_name=wh.name if wh else None,
             reorder_level=mat.reorder_level if mat else 0,
             standard_cost=mat.standard_cost if mat else 0,
+            stock_value=s.quantity * (mat.standard_cost if mat else 0),
             storage_type=mat.storage_type if mat else None
         ))
     return result

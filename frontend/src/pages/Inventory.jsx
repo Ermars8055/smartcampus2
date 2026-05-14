@@ -4,7 +4,8 @@ import { useSearchParams } from 'react-router-dom';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, TextField, Chip, FormControl, InputLabel, Select,
-  MenuItem, InputAdornment, Grid, Tab, Tabs, ToggleButton, ToggleButtonGroup
+  MenuItem, InputAdornment, Grid, Tab, Tabs, ToggleButton, ToggleButtonGroup,
+  TableSortLabel
 } from '@mui/material';
 import { Search, Warning } from '@mui/icons-material';
 import api from '../services/api';
@@ -17,7 +18,9 @@ export default function Inventory() {
   const [tab, setTab] = useState(0);
   const [search, setSearch] = useState('');
   const [whFilter, setWhFilter] = useState('');
-  const [lowOnly, setLowOnly] = useState(searchParams.get('low') === 'true');
+  const [filter, setFilter] = useState(searchParams.get('low') === 'true' ? 'low' : 'all');
+  const [orderBy, setOrderBy] = useState('material_name');
+  const [order, setOrder] = useState('asc');
 
   useEffect(() => {
     api.get('/api/warehouses').then(r => setWarehouses(r.data));
@@ -27,20 +30,50 @@ export default function Inventory() {
     const params = {};
     if (search) params.search = search;
     if (whFilter) params.warehouse_id = whFilter;
-    if (lowOnly) params.low_stock_only = true;
+    if (filter !== 'all') params.stock_status = filter;
     api.get('/api/inventory', { params }).then(r => setStock(r.data));
     api.get('/api/inventory/ledger', { params: { warehouse_id: whFilter || undefined, search: search || undefined } }).then(r => setLedger(r.data.items || []));
-  }, [search, whFilter, lowOnly]);
+  }, [search, whFilter, filter]);
 
   const totalValue = stock.reduce((s, i) => s + (i.stock_value || 0), 0);
-  const lowItems = stock.filter(s => s.quantity < s.reorder_level && s.quantity > 0);
+  const lowItems = stock.filter(s => s.quantity < s.reorder_level);
+
+  const handleSort = (property) => {
+    const isAsc = orderBy === property && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(property);
+  };
+
+  const sortedStock = [...stock].sort((a, b) => {
+    let aVal = a[orderBy];
+    let bVal = b[orderBy];
+    if (typeof aVal === 'string') {
+      aVal = aVal.toLowerCase();
+      bVal = (bVal || '').toLowerCase();
+    }
+    if (aVal < bVal) return order === 'asc' ? -1 : 1;
+    if (aVal > bVal) return order === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  const sortedLedger = [...ledger].sort((a, b) => {
+    let aVal = a[orderBy];
+    let bVal = b[orderBy];
+    if (typeof aVal === 'string') {
+      aVal = aVal.toLowerCase();
+      bVal = (bVal || '').toLowerCase();
+    }
+    if (aVal < bVal) return order === 'asc' ? -1 : 1;
+    if (aVal > bVal) return order === 'asc' ? 1 : -1;
+    return 0;
+  });
 
   return (
     <Box>
       <Box sx={{ mb: 3 }}>
         <Typography variant="h5" sx={{ fontWeight: 700 }}>Inventory Management</Typography>
         <Typography variant="body2" sx={{ color: '#64748B' }}>
-          {stock.length} {stock.length === 1 ? 'item' : 'items'} • Total Value: ₹{totalValue.toLocaleString()} {lowItems.length > 0 && `• ${lowItems.length} low stock`}
+          {stock.length} {stock.length === 1 ? 'item' : 'items'} • Total Value: ₹{totalValue.toLocaleString('en-IN')} {lowItems.length > 0 && `• ${lowItems.length} below reorder level`}
         </Typography>
       </Box>
 
@@ -63,13 +96,33 @@ export default function Inventory() {
               {warehouses.map(w => <MenuItem key={w.id} value={w.id}>{w.name}</MenuItem>)}
             </Select>
           </FormControl>
-          <ToggleButtonGroup size="small" value={lowOnly ? 'low' : 'all'} exclusive
-            onChange={(_, v) => setLowOnly(v === 'low')}>
-            <ToggleButton value="all">All</ToggleButton>
-            <ToggleButton value="low" sx={{ color: '#DC2626' }}>
-              <Warning sx={{ fontSize: 16, mr: 0.5 }} /> Low Stock
-            </ToggleButton>
-          </ToggleButtonGroup>
+          {tab === 0 && (
+            <ToggleButtonGroup size="small" value={filter} exclusive
+              onChange={(_, v) => v && setFilter(v)} sx={{ bgcolor: '#fff', borderRadius: 2 }}>
+              <ToggleButton value="all" sx={{ 
+                px: 3, fontWeight: 800, 
+                '&.Mui-selected': { bgcolor: '#1E3A8A', color: '#fff', '&:hover': { bgcolor: '#1E3A8A' } } 
+              }}>ALL</ToggleButton>
+              <ToggleButton value="no" sx={{ 
+                px: 3, fontWeight: 800, color: '#64748B',
+                '&.Mui-selected': { bgcolor: '#64748B', color: '#fff', '&:hover': { bgcolor: '#475569' } } 
+              }}>
+                NO STOCK
+              </ToggleButton>
+              <ToggleButton value="low" sx={{ 
+                px: 3, fontWeight: 800, color: '#DC2626',
+                '&.Mui-selected': { bgcolor: '#DC2626', color: '#fff', '&:hover': { bgcolor: '#B91C1C' } } 
+              }}>
+                <Warning sx={{ fontSize: 16, mr: 0.5 }} /> LOW STOCK
+              </ToggleButton>
+              <ToggleButton value="in" sx={{ 
+                px: 3, fontWeight: 800, color: '#059669',
+                '&.Mui-selected': { bgcolor: '#059669', color: '#fff', '&:hover': { bgcolor: '#047857' } } 
+              }}>
+                IN STOCK
+              </ToggleButton>
+            </ToggleButtonGroup>
+          )}
         </Box>
       </Card>
 
@@ -78,14 +131,36 @@ export default function Inventory() {
           <TableContainer>
             <Table size="small">
               <TableHead><TableRow>
-                <TableCell>Code</TableCell><TableCell>Material</TableCell><TableCell>Category</TableCell>
-                <TableCell>UOM</TableCell><TableCell>Warehouse</TableCell><TableCell align="right">Qty</TableCell>
-                <TableCell align="right">Reorder</TableCell><TableCell align="right">Cost (₹)</TableCell>
-                <TableCell align="right">Value (₹)</TableCell><TableCell>Status</TableCell>
+                <TableCell>
+                  <TableSortLabel active={orderBy === 'material_code'} direction={orderBy === 'material_code' ? order : 'asc'} onClick={() => handleSort('material_code')}>CODE</TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel active={orderBy === 'material_name'} direction={orderBy === 'material_name' ? order : 'asc'} onClick={() => handleSort('material_name')}>MATERIAL</TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel active={orderBy === 'category_name'} direction={orderBy === 'category_name' ? order : 'asc'} onClick={() => handleSort('category_name')}>CATEGORY</TableSortLabel>
+                </TableCell>
+                <TableCell>UOM</TableCell>
+                <TableCell>
+                  <TableSortLabel active={orderBy === 'warehouse_name'} direction={orderBy === 'warehouse_name' ? order : 'asc'} onClick={() => handleSort('warehouse_name')}>WAREHOUSE</TableSortLabel>
+                </TableCell>
+                <TableCell align="right">
+                  <TableSortLabel active={orderBy === 'quantity'} direction={orderBy === 'quantity' ? order : 'asc'} onClick={() => handleSort('quantity')}>QTY</TableSortLabel>
+                </TableCell>
+                <TableCell align="right">
+                  <TableSortLabel active={orderBy === 'reorder_level'} direction={orderBy === 'reorder_level' ? order : 'asc'} onClick={() => handleSort('reorder_level')}>REORDER</TableSortLabel>
+                </TableCell>
+                <TableCell align="right">
+                  <TableSortLabel active={orderBy === 'standard_cost'} direction={orderBy === 'standard_cost' ? order : 'asc'} onClick={() => handleSort('standard_cost')}>COST (₹)</TableSortLabel>
+                </TableCell>
+                <TableCell align="right">
+                  <TableSortLabel active={orderBy === 'stock_value'} direction={orderBy === 'stock_value' ? order : 'asc'} onClick={() => handleSort('stock_value')}>VALUE (₹)</TableSortLabel>
+                </TableCell>
+                <TableCell>STATUS</TableCell>
               </TableRow></TableHead>
               <TableBody>
-                {stock.map(s => (
-                  <TableRow key={s.id} sx={{ background: s.quantity < s.reorder_level && s.quantity > 0 ? '#FEF2F2' : 'inherit' }}>
+                {sortedStock.map(s => (
+                  <TableRow key={s.id} sx={{ background: s.quantity < s.reorder_level ? '#FEF2F2' : 'inherit' }}>
                     <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.8rem' }}>{s.material_code}</TableCell>
                     <TableCell sx={{ fontSize: '0.8rem' }}>{s.material_name}</TableCell>
                     <TableCell><Chip label={s.category_name} size="small" variant="outlined" sx={{ fontSize: '0.7rem' }} /></TableCell>
@@ -93,15 +168,15 @@ export default function Inventory() {
                     <TableCell sx={{ fontSize: '0.8rem' }}>{s.warehouse_name}</TableCell>
                     <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.85rem' }}>{s.quantity}</TableCell>
                     <TableCell align="right" sx={{ fontSize: '0.8rem', color: '#64748B' }}>{s.reorder_level}</TableCell>
-                    <TableCell align="right" sx={{ fontSize: '0.8rem' }}>₹{s.standard_cost?.toLocaleString()}</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.8rem' }}>₹{s.stock_value?.toLocaleString()}</TableCell>
+                    <TableCell align="right" sx={{ fontSize: '0.8rem' }}>₹{s.standard_cost?.toLocaleString('en-IN')}</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.8rem' }}>₹{s.stock_value?.toLocaleString('en-IN')}</TableCell>
                     <TableCell>
-                      {s.quantity < s.reorder_level && s.quantity > 0 ? (
-                        <Chip icon={<Warning />} label="Low" size="small" color="error" />
-                      ) : s.quantity === 0 ? (
-                        <Chip label="Out" size="small" color="default" />
+                      {s.quantity === 0 ? (
+                        <Chip label="No Stock" size="small" color="default" sx={{ fontWeight: 600 }} />
+                      ) : s.quantity < s.reorder_level ? (
+                        <Chip icon={<Warning />} label="Low Stock" size="small" color="error" sx={{ fontWeight: 600 }} />
                       ) : (
-                        <Chip label="OK" size="small" color="success" variant="outlined" />
+                        <Chip label="In Stock" size="small" color="success" variant="outlined" sx={{ fontWeight: 600 }} />
                       )}
                     </TableCell>
                   </TableRow>
@@ -117,12 +192,28 @@ export default function Inventory() {
           <TableContainer>
             <Table size="small">
               <TableHead><TableRow>
-                <TableCell>Date</TableCell><TableCell>Material</TableCell><TableCell>Warehouse</TableCell>
-                <TableCell>Type</TableCell><TableCell align="right">Qty</TableCell><TableCell align="right">Balance</TableCell>
-                <TableCell>Reference</TableCell>
+                <TableCell>
+                  <TableSortLabel active={orderBy === 'created_at'} direction={orderBy === 'created_at' ? order : 'asc'} onClick={() => handleSort('created_at')}>DATE</TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel active={orderBy === 'material_name'} direction={orderBy === 'material_name' ? order : 'asc'} onClick={() => handleSort('material_name')}>MATERIAL</TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel active={orderBy === 'warehouse_name'} direction={orderBy === 'warehouse_name' ? order : 'asc'} onClick={() => handleSort('warehouse_name')}>WAREHOUSE</TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel active={orderBy === 'transaction_type'} direction={orderBy === 'transaction_type' ? order : 'asc'} onClick={() => handleSort('transaction_type')}>TYPE</TableSortLabel>
+                </TableCell>
+                <TableCell align="right">
+                  <TableSortLabel active={orderBy === 'quantity'} direction={orderBy === 'quantity' ? order : 'asc'} onClick={() => handleSort('quantity')}>QTY</TableSortLabel>
+                </TableCell>
+                <TableCell align="right">
+                  <TableSortLabel active={orderBy === 'balance'} direction={orderBy === 'balance' ? order : 'asc'} onClick={() => handleSort('balance')}>BALANCE</TableSortLabel>
+                </TableCell>
+                <TableCell>REFERENCE</TableCell>
               </TableRow></TableHead>
               <TableBody>
-                {ledger.map(e => (
+                {sortedLedger.map(e => (
                   <TableRow key={e.id}>
                     <TableCell sx={{ fontSize: '0.75rem' }}>{formatDateTime(e.created_at)}</TableCell>
                     <TableCell sx={{ fontSize: '0.8rem' }}>{e.material_name}</TableCell>

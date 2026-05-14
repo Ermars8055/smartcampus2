@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, File, UploadFile, Form
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from datetime import datetime
+from app.utils.tz import get_now_ist
 from typing import Optional, List, Dict, Any
 import os
 import shutil
@@ -30,14 +31,14 @@ def generate_qr_number(db: Session, tenant_id: int, site_id: int) -> str:
     count = db.query(QuotationRequest).filter(
         QuotationRequest.tenant_id == tenant_id, QuotationRequest.site_id == site_id
     ).count() + 1
-    return f"QR-{datetime.now().strftime('%Y%m')}-{count:04d}"
+    return f"QR-{get_now_ist().strftime('%Y%m')}-{count:04d}"
 
 
 def generate_po_number(db: Session, tenant_id: int, site_id: int) -> str:
     count = db.query(PurchaseOrder).filter(
         PurchaseOrder.tenant_id == tenant_id, PurchaseOrder.site_id == site_id
     ).count() + 1
-    return f"PO-{datetime.now().strftime('%Y%m')}-{count:04d}"
+    return f"PO-{get_now_ist().strftime('%Y%m')}-{count:04d}"
 
 
 # ── Quotation Requests ───────────────────────────────────────────────────
@@ -238,7 +239,7 @@ def send_quotation_request(
     qr.status = QuotationRequestStatus.REQUESTED.value
     for v in qr.invited_vendors:
         v.is_sent = True
-        v.sent_at = datetime.utcnow()
+        v.sent_at = get_now_ist()
         
     db.commit()
     return {"message": "Quotation Request sent to vendors"}
@@ -358,7 +359,7 @@ def enter_vendor_quotation(
     else:
         vq = VendorQuotation(
             qr_id=qr_id, vendor_id=vendor_id, quotation_number=quotation_number,
-            quotation_date=q_date, received_date=datetime.utcnow().date(),
+            quotation_date=q_date, received_date=get_now_ist().date(),
             attachment_path=attachment_path, remarks=remarks,
             entered_by_id=current_user.id
         )
@@ -576,12 +577,12 @@ def approve_comparison(
         
     qr.status = QuotationRequestStatus.APPROVED.value
     qr.approved_by_id = current_user.id
-    qr.approved_at = datetime.utcnow()
+    qr.approved_at = get_now_ist()
     
     comps = db.query(QuotationComparison).filter(QuotationComparison.qr_id == qr_id).all()
     for c in comps:
         c.approved_by_id = current_user.id
-        c.approved_at = datetime.utcnow()
+        c.approved_at = get_now_ist()
         
     db.commit()
     return {"message": "Quotation Comparison approved successfully"}

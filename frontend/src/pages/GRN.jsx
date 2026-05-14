@@ -3,7 +3,7 @@ import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
   DialogContent, DialogActions, Grid, MenuItem, Select, FormControl,
-  InputLabel, Divider
+  InputLabel, Divider, TableSortLabel
 } from '@mui/material';
 import { Add, Search, AssignmentTurnedIn } from '@mui/icons-material';
 import api from '../services/api';
@@ -20,6 +20,7 @@ export default function GRNPage() {
   const [dialog, setDialog] = useState(false);
   const [detailDialog, setDetailDialog] = useState(null);
   const [search, setSearch] = useState('');
+  const [sortConfig, setSortConfig] = useState({ key: 'created_at', direction: 'desc' });
   const initialForm = {
     po_id: '', gate_entry_id: '', warehouse_id: '', project_id: '', vendor_id: '',
     invoice_number: '', invoice_date: '', invoice_amount: 0, items: [],
@@ -110,6 +111,30 @@ export default function GRNPage() {
     }
   };
 
+  const handleSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const sortedGrns = [...grns].sort((a, b) => {
+    let valA = a[sortConfig.key];
+    let valB = b[sortConfig.key];
+    if (sortConfig.key === 'items') {
+      valA = a.items?.length || 0;
+      valB = b.items?.length || 0;
+    }
+
+    if (valA == null) valA = '';
+    if (valB == null) valB = '';
+
+    if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
+    if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
+    return 0;
+  });
+
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
@@ -133,19 +158,25 @@ export default function GRNPage() {
         <TableContainer>
           <Table size="small">
             <TableHead><TableRow>
-              <TableCell>GRN No.</TableCell><TableCell>PO Ref</TableCell><TableCell>Vendor</TableCell>
-              <TableCell>Warehouse</TableCell><TableCell>Invoice</TableCell><TableCell align="right">Amount (₹)</TableCell>
-              <TableCell>Items</TableCell><TableCell>Status</TableCell><TableCell>Date</TableCell>
+              <TableCell><TableSortLabel active={sortConfig.key === 'grn_number'} direction={sortConfig.key === 'grn_number' ? sortConfig.direction : 'asc'} onClick={() => handleSort('grn_number')}>GRN No.</TableSortLabel></TableCell>
+              <TableCell><TableSortLabel active={sortConfig.key === 'po_number'} direction={sortConfig.key === 'po_number' ? sortConfig.direction : 'asc'} onClick={() => handleSort('po_number')}>PO Ref</TableSortLabel></TableCell>
+              <TableCell><TableSortLabel active={sortConfig.key === 'vendor_name'} direction={sortConfig.key === 'vendor_name' ? sortConfig.direction : 'asc'} onClick={() => handleSort('vendor_name')}>Vendor</TableSortLabel></TableCell>
+              <TableCell><TableSortLabel active={sortConfig.key === 'warehouse_name'} direction={sortConfig.key === 'warehouse_name' ? sortConfig.direction : 'asc'} onClick={() => handleSort('warehouse_name')}>Warehouse</TableSortLabel></TableCell>
+              <TableCell><TableSortLabel active={sortConfig.key === 'invoice_number'} direction={sortConfig.key === 'invoice_number' ? sortConfig.direction : 'asc'} onClick={() => handleSort('invoice_number')}>Invoice</TableSortLabel></TableCell>
+              <TableCell align="right"><TableSortLabel active={sortConfig.key === 'invoice_amount'} direction={sortConfig.key === 'invoice_amount' ? sortConfig.direction : 'asc'} onClick={() => handleSort('invoice_amount')}>Amount (₹)</TableSortLabel></TableCell>
+              <TableCell><TableSortLabel active={sortConfig.key === 'items'} direction={sortConfig.key === 'items' ? sortConfig.direction : 'asc'} onClick={() => handleSort('items')}>Items</TableSortLabel></TableCell>
+              <TableCell><TableSortLabel active={sortConfig.key === 'status'} direction={sortConfig.key === 'status' ? sortConfig.direction : 'asc'} onClick={() => handleSort('status')}>Status</TableSortLabel></TableCell>
+              <TableCell><TableSortLabel active={sortConfig.key === 'created_at'} direction={sortConfig.key === 'created_at' ? sortConfig.direction : 'asc'} onClick={() => handleSort('created_at')}>Date</TableSortLabel></TableCell>
             </TableRow></TableHead>
             <TableBody>
-              {grns.map(g => (
+              {sortedGrns.map(g => (
                 <TableRow key={g.id} sx={{ cursor: 'pointer' }} onClick={() => setDetailDialog(g)}>
                   <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.8rem' }}>{g.grn_number}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem' }}>{g.po_number}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem' }}>{g.vendor_name}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem' }}>{g.warehouse_name}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem', color: '#64748B' }}>{g.invoice_number}</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 600 }}>₹{g.invoice_amount?.toLocaleString()}</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 600 }}>₹{g.invoice_amount?.toLocaleString('en-IN')}</TableCell>
                   <TableCell>{g.items?.length}</TableCell>
                   <TableCell><Chip label={g.status} size="small" color={g.status === 'Completed' ? 'success' : 'warning'} sx={{ fontSize: '0.7rem' }} /></TableCell>
                   <TableCell sx={{ fontSize: '0.75rem' }}>{formatDate(g.created_at)}</TableCell>
@@ -180,7 +211,7 @@ export default function GRNPage() {
                   <TableCell align="right">{item.received_quantity}</TableCell>
                   <TableCell align="right" sx={{ fontWeight: 600, color: '#059669' }}>{item.accepted_quantity}</TableCell>
                   <TableCell align="right" sx={{ color: item.rejected_quantity > 0 ? '#DC2626' : '#94A3B8' }}>{item.rejected_quantity}</TableCell>
-                  <TableCell align="right">₹{item.rate?.toLocaleString()}</TableCell>
+                  <TableCell align="right">₹{item.rate?.toLocaleString('en-IN')}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -272,7 +303,7 @@ export default function GRNPage() {
                         <TextField size="small" type="number" value={item.rejected_quantity ?? ''} sx={{ width: 80 }}
                           onChange={e => { const items = [...form.items]; items[i].rejected_quantity = parseFloat(e.target.value) || 0; setForm({ ...form, items }); }} />
                       </TableCell>
-                      <TableCell align="right">₹{item.rate?.toLocaleString()}</TableCell>
+                      <TableCell align="right">₹{item.rate?.toLocaleString('en-IN')}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

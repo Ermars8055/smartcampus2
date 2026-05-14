@@ -20,10 +20,10 @@ export default function Intelligence() {
 
   // Utility to format currency consistently
   const formatCurrency = (v) => {
-    if (v >= 10000000) return `₹${(v / 10000000).toFixed(1)}Cr`;
-    if (v >= 100000) return `₹${(v / 100000).toFixed(1)}L`;
-    if (v >= 1000) return `₹${(v / 1000).toFixed(1)}K`;
-    return `₹${v}`;
+    if (v >= 10000000) return `₹${(v / 10000000).toLocaleString('en-IN', { maximumFractionDigits: 1 })}Cr`;
+    if (v >= 100000) return `₹${(v / 100000).toLocaleString('en-IN', { maximumFractionDigits: 1 })}L`;
+    if (v >= 1000) return `₹${(v / 1000).toLocaleString('en-IN', { maximumFractionDigits: 1 })}K`;
+    return `₹${v.toLocaleString('en-IN')}`;
   };
 
   useEffect(() => {
@@ -152,7 +152,7 @@ export default function Intelligence() {
                     <TableRow key={i}>
                       <TableCell sx={{ fontSize: '0.78rem', py: 0.5, fontWeight: 500 }}>{m.material_name}</TableCell>
                       <TableCell align="right" sx={{ fontSize: '0.78rem', py: 0.5 }}>{m.total_quantity?.toLocaleString()}</TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.78rem', py: 0.5, color: '#334155' }}>₹{m.total_value.toLocaleString()}</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.78rem', py: 0.5, color: '#334155' }}>₹{m.total_value.toLocaleString('en-IN')}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -177,7 +177,7 @@ export default function Intelligence() {
                   <TableCell sx={{ fontWeight: 600, color: '#64748B' }}>{i + 1}</TableCell>
                   <TableCell sx={{ fontWeight: 600, color: '#1E293B' }}>{m.material_name}</TableCell>
                   <TableCell align="right">{m.quantity.toLocaleString()}</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 700, color: '#2563EB' }}>₹{m.value.toLocaleString()}</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700, color: '#2563EB' }}>₹{m.value.toLocaleString('en-IN')}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

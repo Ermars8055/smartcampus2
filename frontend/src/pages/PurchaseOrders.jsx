@@ -520,7 +520,7 @@ export default function PurchaseOrders() {
                 <Box sx={{ textAlign: 'right', pr: 1 }}>
                   <Typography variant="caption" sx={{ color: '#64748B', display: 'block', fontSize: '0.65rem', fontWeight: 600 }}>AMOUNT</Typography>
                   <Typography sx={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b' }}>
-                    ₹{((parseFloat(item.quantity) || 0) * (parseFloat(item.rate) || 0)).toLocaleString()}
+                    ₹{((parseFloat(item.quantity) || 0) * (parseFloat(item.rate) || 0)).toLocaleString('en-IN')}
                   </Typography>
                 </Box>
                 <Box>

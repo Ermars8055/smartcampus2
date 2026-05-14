@@ -10,8 +10,11 @@ from app.database import Base
 import enum
 
 
-def _utcnow():
-    return datetime.now(timezone.utc)
+from app.utils.tz import get_now_ist
+
+
+def _get_now():
+    return get_now_ist()
 
 
 # == Enums ==
@@ -137,7 +140,7 @@ class Tenant(Base):
     status = Column(String(50), default=TenantStatus.ACTIVE.value)
     subscription_plan = Column(String(50), default="basic")
     max_sites = Column(Integer, default=1)
-    created_at = Column(DateTime, default=_utcnow)
+    created_at = Column(DateTime, default=_get_now)
 
 class Site(Base):
     __tablename__ = "sites"
@@ -147,7 +150,7 @@ class Site(Base):
     code = Column(String(50))
     location = Column(String(255))
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=_utcnow)
+    created_at = Column(DateTime, default=_get_now)
     tenant = relationship("Tenant")
     __table_args__ = (UniqueConstraint("tenant_id", "name", name="uq_site_per_tenant"),)
 
@@ -161,8 +164,8 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     is_platform_admin = Column(Boolean, default=False)
     is_deleted = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=_utcnow)
-    updated_at = Column(DateTime, default=_utcnow, onupdate=_utcnow)
+    created_at = Column(DateTime, default=_get_now)
+    updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)
 
 class TenantMembership(Base):
     __tablename__ = "tenant_memberships"
@@ -170,7 +173,7 @@ class TenantMembership(Base):
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
     is_active = Column(Boolean, default=True)
-    joined_at = Column(DateTime, default=_utcnow)
+    joined_at = Column(DateTime, default=_get_now)
     user = relationship("User")
     tenant = relationship("Tenant")
     __table_args__ = (UniqueConstraint("user_id", "tenant_id", name="uq_user_tenant"),)
@@ -183,7 +186,7 @@ class Role(Base):
     code = Column(String(100), nullable=False)
     description = Column(Text)
     is_system = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=_utcnow)
+    created_at = Column(DateTime, default=_get_now)
     permissions = relationship("RolePermission", back_populates="role", cascade="all, delete-orphan")
     __table_args__ = (UniqueConstraint("tenant_id", "code", name="uq_role_code_per_tenant"),)
 
@@ -206,7 +209,7 @@ class UserRoleAssignment(Base):
     tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
     role_id = Column(Integer, ForeignKey("roles.id", ondelete="CASCADE"), nullable=False)
     site_id = Column(Integer, ForeignKey("sites.id", ondelete="CASCADE"), nullable=True)
-    assigned_at = Column(DateTime, default=_utcnow)
+    assigned_at = Column(DateTime, default=_get_now)
     role = relationship("Role")
     site = relationship("Site")
 
@@ -225,7 +228,7 @@ class Organization(Base):
     email = Column(String(255))
     is_active = Column(Boolean, default=True)
     is_deleted = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=_utcnow)
+    created_at = Column(DateTime, default=_get_now)
     projects = relationship("Project", back_populates="organization", cascade="all, delete-orphan")
     __table_args__ = (UniqueConstraint("tenant_id", "code", name="uq_org_code_per_tenant"),)
 
@@ -244,7 +247,7 @@ class Project(Base):
     budget = Column(Float, default=0)
     is_active = Column(Boolean, default=True)
     is_deleted = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=_utcnow)
+    created_at = Column(DateTime, default=_get_now)
     organization = relationship("Organization", back_populates="projects")
     buildings = relationship("Building", back_populates="project", cascade="all, delete-orphan")
     warehouses = relationship("Warehouse", back_populates="project", cascade="all, delete-orphan")
@@ -260,7 +263,7 @@ class Building(Base):
     project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
     is_active = Column(Boolean, default=True)
     is_deleted = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=_utcnow)
+    created_at = Column(DateTime, default=_get_now)
     project = relationship("Project", back_populates="buildings")
     floors = relationship("Floor", back_populates="building", cascade="all, delete-orphan")
     departments = relationship("Department", back_populates="building", cascade="all, delete-orphan")
@@ -276,7 +279,7 @@ class Department(Base):
     building_id = Column(Integer, ForeignKey("buildings.id"), nullable=False)
     is_active = Column(Boolean, default=True)
     is_deleted = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=_utcnow)
+    created_at = Column(DateTime, default=_get_now)
     building = relationship("Building", back_populates="departments")
     __table_args__ = (UniqueConstraint("tenant_id", "building_id", "name", name="uq_dept_per_building"),)
 
@@ -290,7 +293,7 @@ class Floor(Base):
     building_id = Column(Integer, ForeignKey("buildings.id"), nullable=False)
     is_active = Column(Boolean, default=True)
     is_deleted = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=_utcnow)
+    created_at = Column(DateTime, default=_get_now)
     building = relationship("Building", back_populates="floors")
     rooms = relationship("Room", back_populates="floor", cascade="all, delete-orphan")
 
@@ -305,7 +308,7 @@ class Room(Base):
     floor_id = Column(Integer, ForeignKey("floors.id"), nullable=False)
     is_active = Column(Boolean, default=True)
     is_deleted = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=_utcnow)
+    created_at = Column(DateTime, default=_get_now)
     floor = relationship("Floor", back_populates="rooms")
 
 class Warehouse(Base):
@@ -323,7 +326,7 @@ class Warehouse(Base):
     manager_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     is_active = Column(Boolean, default=True)
     is_deleted = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=_utcnow)
+    created_at = Column(DateTime, default=_get_now)
     project = relationship("Project", back_populates="warehouses")
     manager = relationship("User")
     current_stocks = relationship("CurrentStock", back_populates="warehouse")
@@ -390,8 +393,8 @@ class Material(Base):
     description = Column(Text)
     is_active = Column(Boolean, default=True)
     is_deleted = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=_utcnow)
-    updated_at = Column(DateTime, default=_utcnow, onupdate=_utcnow)
+    created_at = Column(DateTime, default=_get_now)
+    updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)
     category = relationship("Category", back_populates="materials")
     subcategory = relationship("SubCategory")
     uom = relationship("UOM")
@@ -420,8 +423,8 @@ class Vendor(Base):
     rating = Column(Float, default=0)
     is_active = Column(Boolean, default=True)
     is_deleted = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=_utcnow)
-    updated_at = Column(DateTime, default=_utcnow, onupdate=_utcnow)
+    created_at = Column(DateTime, default=_get_now)
+    updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)
     vendor_categories = relationship("VendorCategory", back_populates="vendor", cascade="all, delete-orphan")
     __table_args__ = (UniqueConstraint("site_id", "code", name="uq_vendor_code_per_site"),)
 
@@ -454,8 +457,8 @@ class PurchaseRequest(Base):
     approved_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     approved_at = Column(DateTime, nullable=True)
     is_deleted = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=_utcnow)
-    updated_at = Column(DateTime, default=_utcnow, onupdate=_utcnow)
+    created_at = Column(DateTime, default=_get_now)
+    updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)
     requester = relationship("User", foreign_keys=[requester_id])
     approver = relationship("User", foreign_keys=[approved_by_id])
     room = relationship("Room")
@@ -493,8 +496,8 @@ class PurchaseOrder(Base):
     approved_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     approved_at = Column(DateTime, nullable=True)
     is_deleted = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=_utcnow)
-    updated_at = Column(DateTime, default=_utcnow, onupdate=_utcnow)
+    created_at = Column(DateTime, default=_get_now)
+    updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)
     vendor = relationship("Vendor")
     project = relationship("Project")
     purchase_request = relationship("PurchaseRequest")
@@ -533,7 +536,7 @@ class GateEntry(Base):
     project_id = Column(Integer, ForeignKey("projects.id"), nullable=True)
     material_id = Column(Integer, ForeignKey("materials.id"), nullable=True)
     quantity = Column(Float, nullable=True)
-    arrival_time = Column(DateTime, default=_utcnow)
+    arrival_time = Column(DateTime, default=_get_now)
     driver_name = Column(String(255))
     driver_phone = Column(String(20))
     delivery_person_name = Column(String(255))
@@ -544,7 +547,7 @@ class GateEntry(Base):
     status = Column(String(50), default=GateEntryStatus.CREATED.value)
     recorded_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     is_deleted = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=_utcnow)
+    created_at = Column(DateTime, default=_get_now)
     vendor = relationship("Vendor")
     purchase_order = relationship("PurchaseOrder")
     project = relationship("Project")
@@ -584,7 +587,7 @@ class GRN(Base):
     remarks = Column(Text)
     received_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     is_deleted = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=_utcnow)
+    created_at = Column(DateTime, default=_get_now)
     completed_at = Column(DateTime, nullable=True)
     purchase_order = relationship("PurchaseOrder")
     gate_entry = relationship("GateEntry")
@@ -646,7 +649,7 @@ class MaterialIssue(Base):
     acknowledged_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     acknowledgement_remarks = Column(Text)
     is_deleted = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=_utcnow)
+    created_at = Column(DateTime, default=_get_now)
     warehouse = relationship("Warehouse")
     project = relationship("Project")
     building = relationship("Building")
@@ -682,7 +685,7 @@ class MaterialReturn(Base):
     returned_by_name = Column(String(255))
     received_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     is_deleted = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=_utcnow)
+    created_at = Column(DateTime, default=_get_now)
     warehouse = relationship("Warehouse")
     project = relationship("Project")
     room = relationship("Room")
@@ -714,7 +717,7 @@ class StockTransfer(Base):
     remarks = Column(Text)
     created_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     is_deleted = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=_utcnow)
+    created_at = Column(DateTime, default=_get_now)
     completed_at = Column(DateTime, nullable=True)
     from_warehouse = relationship("Warehouse", foreign_keys=[from_warehouse_id])
     to_warehouse = relationship("Warehouse", foreign_keys=[to_warehouse_id])
@@ -744,7 +747,7 @@ class CurrentStock(Base):
     material_id = Column(Integer, ForeignKey("materials.id"), nullable=False)
     warehouse_id = Column(Integer, ForeignKey("warehouses.id"), nullable=False)
     quantity = Column(Float, default=0)
-    last_updated = Column(DateTime, default=_utcnow, onupdate=_utcnow)
+    last_updated = Column(DateTime, default=_get_now, onupdate=_get_now)
     material = relationship("Material")
     warehouse = relationship("Warehouse", back_populates="current_stocks")
     __table_args__ = (UniqueConstraint("material_id", "warehouse_id", name="uq_material_warehouse"),)
@@ -766,7 +769,7 @@ class StockLedger(Base):
     room_id = Column(Integer, ForeignKey("rooms.id"), nullable=True)
     remarks = Column(Text)
     created_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
-    created_at = Column(DateTime, default=_utcnow)
+    created_at = Column(DateTime, default=_get_now)
     material = relationship("Material")
     warehouse = relationship("Warehouse")
     project = relationship("Project")
@@ -790,7 +793,7 @@ class Alert(Base):
     project_id = Column(Integer, ForeignKey("projects.id"), nullable=True)
     is_read = Column(Boolean, default=False)
     is_resolved = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=_utcnow)
+    created_at = Column(DateTime, default=_get_now)
     resolved_at = Column(DateTime, nullable=True)
     project = relationship("Project")
 
@@ -832,8 +835,8 @@ class Indent(Base):
     approved_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     approved_at = Column(DateTime, nullable=True)
     is_deleted = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=_utcnow)
-    updated_at = Column(DateTime, default=_utcnow, onupdate=_utcnow)
+    created_at = Column(DateTime, default=_get_now)
+    updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)
 
     requester = relationship("User", foreign_keys=[requester_id])
     approver = relationship("User", foreign_keys=[approved_by_id])
@@ -869,7 +872,7 @@ class AuditLog(Base):
     old_values = Column(Text)
     new_values = Column(Text)
     ip_address = Column(String(50))
-    created_at = Column(DateTime, default=_utcnow)
+    created_at = Column(DateTime, default=_get_now)
     user = relationship("User")
 
 class IndentApproval(Base):
@@ -878,7 +881,7 @@ class IndentApproval(Base):
     indent_id = Column(Integer, ForeignKey("indents.id", ondelete="CASCADE"), nullable=False)
     approval_flow_id = Column(Integer, ForeignKey("approval_flows.id"), nullable=False)
     approver_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    approved_at = Column(DateTime, default=_utcnow)
+    approved_at = Column(DateTime, default=_get_now)
     
     indent = relationship("Indent")
     flow = relationship("ApprovalFlow")
@@ -901,8 +904,8 @@ class QuotationRequest(Base):
     approved_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     approved_at = Column(DateTime, nullable=True)
     is_deleted = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=_utcnow)
-    updated_at = Column(DateTime, default=_utcnow, onupdate=_utcnow)
+    created_at = Column(DateTime, default=_get_now)
+    updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)
 
     project = relationship("Project")
     created_by = relationship("User", foreign_keys=[created_by_id])
@@ -981,7 +984,7 @@ class VendorQuotation(Base):
     remarks = Column(Text)
     status = Column(String(50), default=VendorQuotationStatus.RECEIVED.value)
     entered_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    created_at = Column(DateTime, default=_utcnow)
+    created_at = Column(DateTime, default=_get_now)
 
     quotation_request = relationship("QuotationRequest", back_populates="vendor_quotations")
     vendor = relationship("Vendor")

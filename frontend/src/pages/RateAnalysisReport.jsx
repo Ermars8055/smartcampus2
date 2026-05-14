@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, Grid, FormControl, InputLabel, Select, MenuItem,
@@ -323,7 +323,7 @@ export default function RateAnalysisReport() {
             <TableBody>
               {loading && <TableRow><TableCell colSpan={8} align="center" sx={{ py: 5 }}><CircularProgress /></TableCell></TableRow>}
               {!loading && sortedData.map(row => (
-                <Box component="tbody" key={row.material_id}>
+                <Fragment key={row.material_id}>
                   <TableRow hover sx={{ cursor: 'pointer', '&:hover td': { background: '#F8FAFC' } }} onClick={() => handleDrillDown(row.material_id)}>
                     <TableCell sx={{ width: 40, textAlign: 'center' }}>
                       <IconButton size="small">{expandedRow === row.material_id ? <KeyboardArrowUp /> : <KeyboardArrowDown />}</IconButton>
@@ -411,7 +411,7 @@ export default function RateAnalysisReport() {
                       </Collapse>
                     </TableCell>
                   </TableRow>
-                </Box>
+                </Fragment>
               ))}
               {!loading && reportData && sortedData.length === 0 && (
                 <TableRow><TableCell colSpan={8} align="center" sx={{ py: 5, color: '#64748B' }}>No records found for the selected criteria</TableCell></TableRow>

@@ -65,7 +65,7 @@ export default function StoreOperations() {
         warehouse_id: issueModal.warehouse_id,
         project_id: issueModal.indent.block?.project_id || 1,
         indent_id: issueModal.indent.id,
-        issued_to_block_id: issueModal.indent.block_id,
+        issued_to_room_id: issueModal.indent.room_id,
         purpose: issueModal.remarks || `Fulfillment for ${issueModal.indent.indent_number}`,
         items: issueModal.items.filter(it => it.issue_qty > 0).map(it => ({
           material_id: it.material_id,
@@ -154,7 +154,7 @@ export default function StoreOperations() {
                     </Box>
                     
                     <Box sx={{ mb: 2.5 }}>
-                      {ind.items?.map((item, idx) => {
+                      {ind.items?.filter(item => (item.requested_quantity - (item.issued_quantity || 0)) > 0).map((item, idx) => {
                         const remaining = item.requested_quantity - (item.issued_quantity || 0);
                         const isLow = (item.current_stock || 0) < remaining;
                         return (

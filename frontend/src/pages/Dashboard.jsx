@@ -180,7 +180,7 @@ export default function Dashboard() {
       <Box>
         <Grid container spacing={3}>
           {[...Array(6)].map((_, i) => (
-            <Grid size={{ xs: 12, sm: 4, lg: 2 }} key={i}>
+            <Grid item xs={12} sm={4} lg={2} key={i}>
               <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 2 }} />
             </Grid>
           ))}
@@ -216,27 +216,27 @@ export default function Dashboard() {
 
       {/* --- ROW 1: Stats Cards (6 in a row) --- */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid size={{ xs: 6, sm: 4, lg: 2 }}>
+        <Grid item xs={6} sm={4} lg={2}>
           <StatCard title="Materials" value={stats?.total_materials || 0}
             icon={<Inventory2 />} color="#2563EB" subtitle="Active items" onClick={() => navigate('/materials')} />
         </Grid>
-        <Grid size={{ xs: 6, sm: 4, lg: 2 }}>
+        <Grid item xs={6} sm={4} lg={2}>
           <StatCard title="Inventory Value" value={formatCurrency(stats?.total_inventory_value || 0)}
             icon={<TrendingDown />} color="#10B981" subtitle="Total stock value" />
         </Grid>
-        <Grid size={{ xs: 6, sm: 4, lg: 2 }}>
+        <Grid item xs={6} sm={4} lg={2}>
           <StatCard title="Low Stock" value={stats?.low_stock_items || 0}
             icon={<Warning />} color="#EF4444" subtitle="Below reorder" onClick={() => navigate('/inventory')} />
         </Grid>
-        <Grid size={{ xs: 6, sm: 4, lg: 2 }}>
+        <Grid item xs={6} sm={4} lg={2}>
           <StatCard title="Pending PR" value={stats?.pending_pr || 0}
             icon={<ShoppingCart />} color="#F59E0B" subtitle="Awaiting action" onClick={() => navigate('/purchase-requests')} />
         </Grid>
-        <Grid size={{ xs: 6, sm: 4, lg: 2 }}>
+        <Grid item xs={6} sm={4} lg={2}>
           <StatCard title="Pending PO" value={stats?.pending_po || 0}
             icon={<Receipt />} color="#7C3AED" subtitle="Open orders" onClick={() => navigate('/purchase-orders')} />
         </Grid>
-        <Grid size={{ xs: 6, sm: 4, lg: 2 }}>
+        <Grid item xs={6} sm={4} lg={2}>
           <StatCard title="GRN" value={stats?.recent_grn_count || 0}
             icon={<LocalShipping />} color="#0891B2" subtitle="Total receipts" onClick={() => navigate('/grn')} />
         </Grid>
@@ -244,7 +244,7 @@ export default function Dashboard() {
 
       {/* Charts Row 1 */}
       <Grid container spacing={2.5} sx={{ mb: 3 }}>
-        <Grid size={{ xs: 12, lg: 8 }}>
+        <Grid item xs={12} lg={8}>
           <Card sx={{ p: 2.5, height: '100%' }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#1E293B' }}>
@@ -273,7 +273,7 @@ export default function Dashboard() {
             </ResponsiveContainer>
           </Card>
         </Grid>
-        <Grid size={{ xs: 12, lg: 4 }}>
+        <Grid item xs={12} lg={4}>
           <Card sx={{ p: 2.5, height: '100%' }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, color: '#1E293B' }}>
               Stock by Warehouse
@@ -310,7 +310,7 @@ export default function Dashboard() {
 
       {/* Charts Row 2 */}
       <Grid container spacing={2.5} sx={{ mb: 3 }}>
-        <Grid size={{ xs: 12, md: 6 }}>
+        <Grid item xs={12} md={6}>
           <Card sx={{ p: 2.5 }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, color: '#1E293B' }}>
               Highest Spend Materials
@@ -328,7 +328,7 @@ export default function Dashboard() {
             </ResponsiveContainer>
           </Card>
         </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
+        <Grid item xs={12} md={6}>
           <Card sx={{ p: 2.5 }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, color: '#1E293B' }}>
               Monthly Spend Trend
@@ -351,7 +351,7 @@ export default function Dashboard() {
 
       {/* Bottom Row */}
       <Grid container spacing={2.5}>
-        <Grid size={{ xs: 12, md: 7 }}>
+        <Grid item xs={12} md={7}>
           <Card sx={{ p: 2.5 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#1E293B' }}>
@@ -395,7 +395,7 @@ export default function Dashboard() {
             </TableContainer>
           </Card>
         </Grid>
-        <Grid size={{ xs: 12, md: 5 }}>
+        <Grid item xs={12} md={5}>
           <Card sx={{ p: 2.5 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#1E293B' }}>

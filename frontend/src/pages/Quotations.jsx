@@ -3,7 +3,7 @@ import { useMessage } from '../context/MessageContext';
 import {
   Box, Typography, Paper, Tabs, Tab, Button, IconButton, TextField, Stack, Divider,
   Stepper, Step, StepLabel,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, TableFooter,
   Dialog, DialogTitle, DialogContent, DialogActions, FormControl, FormHelperText,
   InputLabel, Select, MenuItem, Chip, OutlinedInput, Checkbox, ListItemText,
   Alert, CircularProgress, Accordion, AccordionSummary, AccordionDetails,
@@ -1059,44 +1059,66 @@ const Quotations = () => {
                   <Typography variant="subtitle2" align="center" color="text.secondary" sx={{ mb: 4 }}>QR NO: {comparisonData.qr_number}</Typography>
                   <Divider sx={{ mb: 4 }} />
 
-                  {comparisonData.vendor_totals.sort((a, b) => a.total_value - b.total_value).map((vt, vIdx) => (
-                    <Box
-                      key={vt.vendor_id}
-                      sx={{
-                        mb: 6, p: 3,
-                        border: vt.is_selected_any ? '2px solid #2e7d32' : '1px solid #e0e0e0',
-                        borderRadius: 2,
-                        backgroundColor: vt.is_selected_any ? '#f9fff9' : 'white',
-                        boxShadow: vt.is_selected_any ? '0 4px 8px rgba(46,125,50,0.1)' : 'none'
-                      }}
-                    >
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
-                          <Typography variant="h6" sx={{ fontWeight: 600, color: vt.is_selected_any ? 'success.main' : 'primary.main' }}>{vIdx + 1}. {vt.vendor_name}</Typography>
-                          {vt.is_selected_any && <Chip label="Selected Vendor" color="success" size="small" sx={{ fontWeight: 'bold' }} icon={<CheckCircleIcon />} />}
-                          {vIdx === 0 && <Chip label="Lowest Overall (L1)" variant="outlined" color="success" size="small" sx={{ fontWeight: 'bold' }} />}
-                        </Box>
-                        <Typography variant="h6" sx={{ fontWeight: 700 }}>Total: ₹{vt.total_value.toLocaleString()}</Typography>
-                      </Box>
-
-                      <Table size="small" sx={{ backgroundColor: '#fff' }}>
-                        <TableHead><TableRow sx={{ backgroundColor: '#f8f9fa' }}><TableCell>Material</TableCell><TableCell align="right">Rate</TableCell><TableCell align="right">Amount</TableCell><TableCell align="center">Rank</TableCell></TableRow></TableHead>
-                        <TableBody>
-                          {comparisonData.materials.map(mat => {
-                            const q = mat.vendor_quotes.find(x => x.vendor_id === vt.vendor_id);
-                            return (
-                              <TableRow key={mat.qr_item_id} sx={{ backgroundColor: mat.selected_vendor_id === vt.vendor_id ? '#f1f8e9' : 'inherit' }}>
-                                <TableCell>{mat.material_code} - {mat.material_name}</TableCell>
-                                <TableCell align="right">{q ? q.quoted_rate : '-'}</TableCell>
-                                <TableCell align="right">{q ? (q.quoted_rate * mat.quantity).toLocaleString() : '-'}</TableCell>
-                                <TableCell align="center"><Chip label={q?.rank_label || '-'} size="small" variant="outlined" /></TableCell>
-                              </TableRow>
-                            );
-                          })}
-                        </TableBody>
-                      </Table>
-                    </Box>
-                  ))}
+                  <TableContainer component={Paper} sx={{ mb: 4, boxShadow: 'none', border: '1px solid #e0e0e0' }}>
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
+                          <TableCell sx={{ fontWeight: 700 }}>Material Details</TableCell>
+                          <TableCell align="center" sx={{ fontWeight: 700 }}>Qty</TableCell>
+                          {comparisonData.vendor_totals.sort((a, b) => a.total_value - b.total_value).map(vt => (
+                            <TableCell key={vt.vendor_id} align="right" sx={{ fontWeight: 700, minWidth: 120 }}>
+                              {vt.vendor_name}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {comparisonData.materials.map((mat, mIdx) => (
+                          <TableRow key={mat.material_id} hover>
+                            <TableCell>
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>{mat.material_name}</Typography>
+                              <Typography variant="caption" color="text.secondary">{mat.material_code}</Typography>
+                            </TableCell>
+                            <TableCell align="center">
+                              {mat.quantity} {mat.uom_name}
+                            </TableCell>
+                            {comparisonData.vendor_totals.sort((a, b) => a.total_value - b.total_value).map(vt => {
+                              const quote = mat.vendor_quotes.find(q => q.vendor_id === vt.vendor_id);
+                              const isL1 = quote?.rank === 1;
+                              const isSelected = mat.selected_vendor_id === vt.vendor_id;
+                              
+                              return (
+                                <TableCell 
+                                  key={vt.vendor_id} 
+                                  align="right"
+                                  sx={{ 
+                                    backgroundColor: isL1 ? 'rgba(46, 125, 50, 0.05)' : 'inherit',
+                                    fontWeight: isL1 || isSelected ? 600 : 400
+                                  }}
+                                >
+                                  {quote ? (
+                                    <>
+                                      <Typography variant="body2">
+                                        ₹{quote.quoted_rate.toLocaleString('en-IN')}
+                                      </Typography>
+                                      {(isL1 || isSelected) && (
+                                        <Chip 
+                                          label={isL1 && isSelected ? "L1 Selected" : (isL1 ? "L1" : "Selected")} 
+                                          size="small" 
+                                          color="success" 
+                                          sx={{ height: 16, fontSize: '0.6rem', mt: 0.5, px: 0.5 }} 
+                                        />
+                                      )}
+                                    </>
+                                  ) : '-'}
+                                </TableCell>
+                              );
+                            })}
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
                 </Paper>
               </Box>
             )}

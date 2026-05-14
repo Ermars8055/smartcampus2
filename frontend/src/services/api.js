@@ -17,6 +17,19 @@ const api = axios.create({
   timeout: 15000,
 });
 
+/**
+ * Returns the full URL for a file stored on the backend.
+ * @param {string} path - The relative path of the file (e.g., /uploads/...)
+ * @returns {string} - The full URL
+ */
+export const getFileUrl = (path) => {
+  if (!path) return '';
+  if (path.startsWith('http')) return path;
+  // Ensure the path starts with /
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  return `${API_BASE}${normalizedPath}`;
+};
+
 // Add auth token to every request
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');

@@ -8,7 +8,7 @@ from app.database import get_db
 from app.models import (
     MaterialIssue, MaterialIssueItem, MaterialReturn, MaterialReturnItem,
     StockTransfer, StockTransferItem, CurrentStock, StockLedger,
-    Material, Warehouse, Building, User, AuditLog, Indent, IndentItem
+    Material, Warehouse, Building, User, AuditLog, Indent, IndentItem, IndentStatus
 )
 from app.schemas import (
     IssueCreate, IssueOut, IssueItemOut,
@@ -84,12 +84,23 @@ def create_issue(
     count = db.query(MaterialIssue).filter(MaterialIssue.tenant_id == tenant_id, MaterialIssue.site_id == site_id).count() + 1
     issue_number = get_next_number(db, tenant_id, site_id, "ISSUE", "ISS")
 
+    room_id = data.issued_to_room_id
+    building_id = data.building_id
+
+    # Auto-populate room/building from indent if missing
+    if data.indent_id:
+        indent = db.query(Indent).filter(Indent.id == data.indent_id).first()
+        if indent:
+            if not room_id: room_id = indent.room_id
+            if not building_id: building_id = indent.building_id
+
     issue = MaterialIssue(
         issue_number=issue_number,
         warehouse_id=data.warehouse_id,
         project_id=data.project_id,
         indent_id=data.indent_id,
-        issued_to_room_id=data.issued_to_room_id,
+        building_id=building_id,
+        issued_to_room_id=room_id,
         issued_to_department=data.issued_to_department,
         issued_to_contractor=data.issued_to_contractor,
         purpose=data.purpose,
@@ -141,7 +152,7 @@ def create_issue(
             tenant_id=tenant_id,
             site_id=site_id,
             project_id=data.project_id,
-            room_id=data.issued_to_room_id,
+            room_id=room_id,
             user_id=current_user.id
         )
 
@@ -156,6 +167,18 @@ def create_issue(
                 ).first()
                 if indent_item:
                     indent_item.issued_quantity += item_data.quantity
+
+            # Update overall indent status
+            all_fully_issued = True
+            for it in indent.items:
+                if it.issued_quantity < it.requested_quantity:
+                    all_fully_issued = False
+                    break
+            
+            if all_fully_issued:
+                indent.status = IndentStatus.ISSUED.value
+            else:
+                indent.status = IndentStatus.PARTIALLY_ISSUED.value
 
     db.commit()
     return {"id": issue.id, "issue_number": issue_number, "message": "Material issued successfully"}

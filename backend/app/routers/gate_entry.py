@@ -41,6 +41,12 @@ def list_gate_entries(
     entries = q.order_by(GateEntry.created_at.desc()).all()
     result = []
     for e in entries:
+        material_names = f"{e.material.name} ({e.quantity})" if e.material else None
+        if e.purchase_order:
+            po_materials = [f"{item.material.name} ({item.quantity})" for item in e.purchase_order.items if item.material]
+            if po_materials:
+                material_names = ", ".join(po_materials)
+
         result.append(GateEntryOut(
             id=e.id, entry_number=e.entry_number,
             vehicle_number=e.vehicle_number,
@@ -55,7 +61,8 @@ def list_gate_entries(
             invoice_scan_url=e.invoice_scan_url,
             vendor_name=e.vendor.name if e.vendor else None,
             material_name=e.material.name if e.material else None,
-            po_number=e.purchase_order.po_number if e.purchase_order else None
+            po_number=e.purchase_order.po_number if e.purchase_order else None,
+            material_names=material_names
         ))
     return result
 

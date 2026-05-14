@@ -99,7 +99,7 @@ export default function Intelligence() {
 
       {/* Charts */}
       <Grid container spacing={2.5} sx={{ mb: 3 }}>
-        <Grid size={{ xs: 12, md: 8 }}>
+        <Grid item xs={12} md={8}>
           <Card sx={{ p: 2.5 }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>Material Cost by Building</Typography>
             <ResponsiveContainer width="100%" height={320}>
@@ -115,7 +115,7 @@ export default function Intelligence() {
             </ResponsiveContainer>
           </Card>
         </Grid>
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid item xs={12} md={4}>
           <Card sx={{ p: 2.5 }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>Cost Distribution</Typography>
             <ResponsiveContainer width="100%" height={320}>
@@ -135,7 +135,7 @@ export default function Intelligence() {
       {/* Building-wise material breakdown */}
       <Grid container spacing={2.5} sx={{ mb: 3 }}>
         {Object.entries(buildingSummary).slice(0, 6).map(([buildingName, data]) => (
-          <Grid size={{ xs: 12, md: 6, lg: 4 }} key={buildingName}>
+          <Grid item xs={12} md={6} lg={4} key={buildingName}>
             <Card sx={{ p: 2.5 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5 }}>
                 <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1E293B' }}>{buildingName}</Typography>

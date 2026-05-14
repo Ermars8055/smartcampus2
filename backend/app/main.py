@@ -44,11 +44,19 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Proper CORS middleware (replaces the old wildcard handler)
+# Enhanced CORS middleware with explicit origins for local networking
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=CORS_ORIGINS,
-    allow_credentials=False,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://192.168.0.4:5173",
+        "http://192.168.0.4:8007",
+        "http://192.168.0.4",
+        "http://0.0.0.0:5173",
+    ],
+    allow_origin_regex=r"https?://.*",
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )

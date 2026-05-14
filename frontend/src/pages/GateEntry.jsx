@@ -6,7 +6,7 @@ import {
   Radio, RadioGroup, FormControlLabel, FormLabel, ToggleButton, ToggleButtonGroup
 } from '@mui/material';
 import { Add, Search, AttachFile, OpenInNew, LocalShipping } from '@mui/icons-material';
-import api from '../services/api';
+import api, { getFileUrl } from '../services/api';
 import { formatDate, formatDateTime } from '../utils/dateUtils';
 
 export default function GateEntry() {
@@ -138,7 +138,10 @@ export default function GateEntry() {
       api.get('/api/procurement/po').then(r => setPos(r.data.filter(p =>
         p.status === 'Sent to Vendor' || p.status === 'Approved' || p.status === 'Partially Received'
       )));
-    } catch (err) { alert(err.response?.data?.detail || 'Error'); }
+    } catch (err) { 
+      const detail = err.response?.data?.detail;
+      alert(typeof detail === 'object' ? JSON.stringify(detail) : (detail || 'Error')); 
+    }
   };
 
   const statusColor = { 'Gate Entry Created': 'info', 'Awaiting GRN': 'warning', 'Awaiting Direct GRN': 'secondary', 'Completed': 'success' };
@@ -187,7 +190,7 @@ export default function GateEntry() {
                   </TableCell>
                   <TableCell sx={{ fontSize: '0.8rem' }}>{e.vendor_name}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem', color: '#64748B' }}>{e.po_number || '-'}</TableCell>
-                  <TableCell sx={{ fontSize: '0.8rem' }}>{e.material_name || (e.entry_type === 'Direct Invoice' ? '—' : '')}</TableCell>
+                  <TableCell sx={{ fontSize: '0.8rem' }}>{e.material_names || (e.entry_type === 'Direct Invoice' ? '—' : '')}</TableCell>
                   <TableCell align="right" sx={{ fontWeight: 600 }}>{e.quantity || '—'}</TableCell>
                   <TableCell sx={{ fontSize: '0.75rem' }}>{formatDateTime(e.arrival_time)}</TableCell>
                   <TableCell><Chip label={e.status} size="small" color={statusColor[e.status] || 'default'} sx={{ fontSize: '0.7rem' }} /></TableCell>
@@ -203,27 +206,27 @@ export default function GateEntry() {
         <DialogTitle sx={{ fontWeight: 600 }}>{detailDialog?.entry_number} — Gate Entry Details</DialogTitle>
         <DialogContent>
           <Grid container spacing={2}>
-            <Grid size={6}><Typography variant="caption" color="textSecondary">Entry Type</Typography><Typography sx={{ fontWeight: 600 }}>{detailDialog?.entry_type}</Typography></Grid>
+            <Grid item xs={6}><Typography variant="caption" color="textSecondary">Entry Type</Typography><Typography sx={{ fontWeight: 600 }}>{detailDialog?.entry_type}</Typography></Grid>
             {detailDialog?.entry_type === 'Vehicle' ? (
               <>
-                <Grid size={6}><Typography variant="caption" color="textSecondary">Vehicle</Typography><Typography sx={{ fontWeight: 600 }}>{detailDialog?.vehicle_number}</Typography></Grid>
-                <Grid size={6}><Typography variant="caption" color="textSecondary">Driver</Typography><Typography>{detailDialog?.driver_name}</Typography></Grid>
+                <Grid item xs={6}><Typography variant="caption" color="textSecondary">Vehicle</Typography><Typography sx={{ fontWeight: 600 }}>{detailDialog?.vehicle_number}</Typography></Grid>
+                <Grid item xs={6}><Typography variant="caption" color="textSecondary">Driver</Typography><Typography>{detailDialog?.driver_name}</Typography></Grid>
               </>
             ) : (
-              <Grid size={6}><Typography variant="caption" color="textSecondary">Delivery Person</Typography><Typography sx={{ fontWeight: 600 }}>{detailDialog?.delivery_person_name}</Typography></Grid>
+              <Grid item xs={6}><Typography variant="caption" color="textSecondary">Delivery Person</Typography><Typography sx={{ fontWeight: 600 }}>{detailDialog?.delivery_person_name}</Typography></Grid>
             )}
-            <Grid size={6}><Typography variant="caption" color="textSecondary">Vendor</Typography><Typography>{detailDialog?.vendor_name}</Typography></Grid>
-            <Grid size={6}><Typography variant="caption" color="textSecondary">PO Ref</Typography><Typography>{detailDialog?.po_number || '-'}</Typography></Grid>
-            <Grid size={6}><Typography variant="caption" color="textSecondary">Material</Typography><Typography>{detailDialog?.material_name || '—'}</Typography></Grid>
-            <Grid size={6}><Typography variant="caption" color="textSecondary">Quantity</Typography><Typography sx={{ fontWeight: 600 }}>{detailDialog?.quantity || '—'}</Typography></Grid>
-            <Grid size={6}><Typography variant="caption" color="textSecondary">Arrival</Typography><Typography>{formatDateTime(detailDialog?.arrival_time)}</Typography></Grid>
-            <Grid size={6}><Typography variant="caption" color="textSecondary">Status</Typography><Chip label={detailDialog?.status} size="small" color={statusColor[detailDialog?.status] || 'default'} /></Grid>
+            <Grid item xs={6}><Typography variant="caption" color="textSecondary">Vendor</Typography><Typography>{detailDialog?.vendor_name}</Typography></Grid>
+            <Grid item xs={6}><Typography variant="caption" color="textSecondary">PO Ref</Typography><Typography>{detailDialog?.po_number || '-'}</Typography></Grid>
+            <Grid item xs={6}><Typography variant="caption" color="textSecondary">Material</Typography><Typography>{detailDialog?.material_names || '—'}</Typography></Grid>
+            <Grid item xs={6}><Typography variant="caption" color="textSecondary">Quantity</Typography><Typography sx={{ fontWeight: 600 }}>{detailDialog?.quantity || '—'}</Typography></Grid>
+            <Grid item xs={6}><Typography variant="caption" color="textSecondary">Arrival</Typography><Typography>{formatDateTime(detailDialog?.arrival_time)}</Typography></Grid>
+            <Grid item xs={6}><Typography variant="caption" color="textSecondary">Status</Typography><Chip label={detailDialog?.status} size="small" color={statusColor[detailDialog?.status] || 'default'} /></Grid>
             {detailDialog?.invoice_scan_url && (
-              <Grid size={12}>
+              <Grid item xs={12}>
                 <Typography variant="caption" color="textSecondary">Invoice Scan</Typography>
                 <Box sx={{ mt: 0.5 }}>
                   <Button size="small" variant="outlined" startIcon={<OpenInNew />}
-                    onClick={() => window.open(detailDialog.invoice_scan_url, '_blank')}>View Invoice Scan</Button>
+                    onClick={() => window.open(getFileUrl(detailDialog.invoice_scan_url), '_blank')}>View Invoice Scan</Button>
                 </Box>
               </Grid>
             )}
@@ -262,85 +265,102 @@ export default function GateEntry() {
 
           {form.entry_type === 'Direct Invoice' ? (
             /* ─── Direct Invoice Form ─── */
-            <Grid container spacing={2}>
-              <Grid size={6}>
-                <FormControl fullWidth required><InputLabel>Vendor</InputLabel>
-                  <Select value={form.vendor_id} label="Vendor" onChange={e => setForm({ ...form, vendor_id: e.target.value })}>
-                    {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.name}</MenuItem>)}
-                  </Select>
-                </FormControl>
+              <Grid container spacing={2}>
+                <Grid item xs={8}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                      <FormControl fullWidth required><InputLabel>Vendor</InputLabel>
+                        <Select value={form.vendor_id} label="Vendor" onChange={e => setForm({ ...form, vendor_id: e.target.value })}>
+                          {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.name}</MenuItem>)}
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <TextField fullWidth label="Vehicle Number" value={form.vehicle_number}
+                        onChange={e => setForm({ ...form, vehicle_number: e.target.value })} />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <TextField fullWidth label="Driver / Delivery Person" value={form.delivery_person_name}
+                        onChange={e => setForm({ ...form, delivery_person_name: e.target.value })} />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <TextField fullWidth label="Remarks" value={form.remarks}
+                        onChange={e => setForm({ ...form, remarks: e.target.value })}
+                        placeholder="e.g. Phone order" />
+                    </Grid>
+                  </Grid>
+                </Grid>
+                <Grid item xs={4}>
+                  <Box sx={{ 
+                    p: 2, 
+                    border: '2px dashed #7C3AED', 
+                    borderRadius: 2, 
+                    bgcolor: '#F5F3FF', 
+                    textAlign: 'center',
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center'
+                  }}>
+                    {form.invoice_scan_url ? (
+                      <Box>
+                        <AttachFile sx={{ color: '#7C3AED', mb: 1 }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: '#7C3AED', mb: 1 }}>Invoice uploaded ✓</Typography>
+                        <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
+                          <Button size="small" variant="outlined" onClick={() => window.open(getFileUrl(form.invoice_scan_url), '_blank')}>View</Button>
+                          <Button size="small" color="error" onClick={() => setForm({ ...form, invoice_scan_url: '' })}>Remove</Button>
+                        </Box>
+                      </Box>
+                    ) : (
+                      <>
+                        <Typography sx={{ mb: 0.5, fontWeight: 600, color: '#7C3AED', fontSize: '0.9rem' }}>
+                          📎 Upload Invoice *
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: '#64748B', display: 'block', mb: 1.5 }}>
+                          PDF, JPG, or PNG
+                        </Typography>
+                        <Button variant="contained" component="label" disabled={uploading} size="small"
+                          sx={{ bgcolor: '#7C3AED', '&:hover': { bgcolor: '#6D28D9' }, textTransform: 'none' }}>
+                          {uploading ? 'Uploading...' : 'Choose File'}
+                          <input type="file" hidden accept=".pdf,.jpg,.jpeg,.png,.webp"
+                            onChange={e => handleUpload(e.target.files[0])} />
+                        </Button>
+                      </>
+                    )}
+                  </Box>
+                </Grid>
               </Grid>
-              <Grid size={6}>
-                <TextField fullWidth label="Vehicle Number" value={form.vehicle_number}
-                  onChange={e => setForm({ ...form, vehicle_number: e.target.value })} />
-              </Grid>
-              <Grid size={6}>
-                <TextField fullWidth label="Driver / Delivery Person" value={form.delivery_person_name}
-                  onChange={e => setForm({ ...form, delivery_person_name: e.target.value })} />
-              </Grid>
-              <Grid size={6}>
-                <TextField fullWidth label="Remarks" value={form.remarks}
-                  onChange={e => setForm({ ...form, remarks: e.target.value })}
-                  placeholder="e.g. Phone order from 3-May" />
-              </Grid>
-              <Grid size={12}>
-                <Box sx={{ p: 3, border: '2px dashed #7C3AED', borderRadius: 2, bgcolor: '#F5F3FF', textAlign: 'center' }}>
-                  {form.invoice_scan_url ? (
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
-                      <AttachFile sx={{ color: '#7C3AED' }} />
-                      <Typography sx={{ fontWeight: 600, color: '#7C3AED' }}>Invoice uploaded ✓</Typography>
-                      <Button size="small" variant="outlined" onClick={() => window.open(form.invoice_scan_url, '_blank')}>View</Button>
-                      <Button size="small" color="error" onClick={() => setForm({ ...form, invoice_scan_url: '' })}>Remove</Button>
-                    </Box>
-                  ) : (
-                    <>
-                      <Typography sx={{ mb: 1, fontWeight: 600, color: '#7C3AED' }}>
-                        📎 Upload Scanned Invoice *
-                      </Typography>
-                      <Typography variant="caption" sx={{ color: '#64748B', display: 'block', mb: 1.5 }}>
-                        PDF, JPG, or PNG (max 10MB)
-                      </Typography>
-                      <Button variant="contained" component="label" disabled={uploading}
-                        sx={{ bgcolor: '#7C3AED', '&:hover': { bgcolor: '#6D28D9' } }}>
-                        {uploading ? 'Uploading...' : 'Choose File'}
-                        <input type="file" hidden accept=".pdf,.jpg,.jpeg,.png,.webp"
-                          onChange={e => handleUpload(e.target.files[0])} />
-                      </Button>
-                    </>
-                  )}
-                </Box>
-              </Grid>
-            </Grid>
           ) : (
             /* ─── Regular Entry Form ─── */
             <Grid container spacing={2}>
             {form.entry_type === 'Vehicle' ? (
               <>
-                <Grid size={6}><TextField fullWidth label="Vehicle Number" value={form.vehicle_number} onChange={e => setForm({ ...form, vehicle_number: e.target.value })} required /></Grid>
-                <Grid size={6}>
+                <Grid item xs={6}><TextField fullWidth label="Vehicle Number" value={form.vehicle_number} onChange={e => setForm({ ...form, vehicle_number: e.target.value })} required /></Grid>
+                <Grid item xs={6}>
                   <FormControl fullWidth><InputLabel>PO Reference (Pending Orders)</InputLabel>
                     <Select value={form.po_id} label="PO Reference (Pending Orders)" onChange={e => selectPO(e.target.value)}>
                       <MenuItem value="">None (ad-hoc delivery)</MenuItem>
                       {pos.map(p => (
                         <MenuItem key={p.id} value={p.id}>
-                          {p.po_number} — {p.vendor_name} ({p.items?.filter(it => it.quantity - (it.received_quantity || 0) > 0).length} pending items)
+                          {p.po_number} — {p.vendor_name}
                         </MenuItem>
                       ))}
                     </Select>
                   </FormControl>
                 </Grid>
-                <Grid size={6}><TextField fullWidth label="Driver Name" value={form.driver_name} onChange={e => setForm({ ...form, driver_name: e.target.value })} /></Grid>
+                <Grid item xs={6}><TextField fullWidth label="Driver Name" value={form.driver_name} onChange={e => setForm({ ...form, driver_name: e.target.value })} /></Grid>
               </>
             ) : (
               <>
-                <Grid size={6}><TextField fullWidth label="Delivery Person Name" value={form.delivery_person_name} onChange={e => setForm({ ...form, delivery_person_name: e.target.value })} required /></Grid>
-                <Grid size={6}>
+                <Grid item xs={6}><TextField fullWidth label="Delivery Person Name" value={form.delivery_person_name} onChange={e => setForm({ ...form, delivery_person_name: e.target.value })} required /></Grid>
+                <Grid item xs={6}>
                   <FormControl fullWidth><InputLabel>PO Reference (Pending Orders)</InputLabel>
                     <Select value={form.po_id} label="PO Reference (Pending Orders)" onChange={e => selectPO(e.target.value)}>
                       <MenuItem value="">None (ad-hoc delivery)</MenuItem>
                       {pos.map(p => (
                         <MenuItem key={p.id} value={p.id}>
-                          {p.po_number} — {p.vendor_name} ({p.items?.filter(it => it.quantity - (it.received_quantity || 0) > 0).length} pending items)
+                          {p.po_number} — {p.vendor_name}
                         </MenuItem>
                       ))}
                     </Select>
@@ -348,7 +368,7 @@ export default function GateEntry() {
                 </Grid>
               </>
             )}
-              <Grid size={6}><TextField fullWidth label="Remarks" value={form.remarks} onChange={e => setForm({ ...form, remarks: e.target.value })} /></Grid>
+              <Grid item xs={6}><TextField fullWidth label="Remarks" value={form.remarks} onChange={e => setForm({ ...form, remarks: e.target.value })} /></Grid>
             </Grid>
           )}
 

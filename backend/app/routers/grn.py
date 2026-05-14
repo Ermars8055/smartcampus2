@@ -131,148 +131,154 @@ def create_grn(
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
-    is_direct = data.receipt_type == "Direct Invoice"
+    try:
+        is_direct = data.receipt_type == "Direct Invoice"
 
-    # For Direct Invoice, vendor_id and project_id must come from the payload
-    if is_direct:
-        if not data.vendor_id:
-            raise HTTPException(400, "Vendor is required for Direct Invoice GRN")
-        if not data.project_id:
-            raise HTTPException(400, "Project is required for Direct Invoice GRN")
-        if not data.invoice_number:
-            raise HTTPException(400, "Invoice number is required for Direct Invoice GRN")
-        vendor_id = data.vendor_id
-        project_id = data.project_id
-    else:
-        # PO-based: derive vendor_id and project_id from the PO
-        if not data.po_id:
-            raise HTTPException(400, "PO is required for PO-Based GRN")
-        po = db.query(PurchaseOrder).filter(
-            PurchaseOrder.id == data.po_id, PurchaseOrder.tenant_id == tenant_id, PurchaseOrder.site_id == site_id
-        ).first()
-        if not po:
-            raise HTTPException(404, "Purchase Order not found")
-        vendor_id = po.vendor_id
-        project_id = po.project_id
+        # For Direct Invoice, vendor_id and project_id must come from the payload
+        if is_direct:
+            if not data.vendor_id:
+                raise HTTPException(400, "Vendor is required for Direct Invoice GRN")
+            if not data.project_id:
+                raise HTTPException(400, "Project is required for Direct Invoice GRN")
+            if not data.invoice_number:
+                raise HTTPException(400, "Invoice number is required for Direct Invoice GRN")
+            vendor_id = data.vendor_id
+            project_id = data.project_id
+        else:
+            # PO-based: derive vendor_id and project_id from the PO
+            if not data.po_id:
+                raise HTTPException(400, "PO is required for PO-Based GRN")
+            po = db.query(PurchaseOrder).filter(
+                PurchaseOrder.id == data.po_id, PurchaseOrder.tenant_id == tenant_id, PurchaseOrder.site_id == site_id
+            ).first()
+            if not po:
+                raise HTTPException(404, "Purchase Order not found")
+            vendor_id = po.vendor_id
+            project_id = po.project_id
 
-    grn = GRN(
-        grn_number=get_next_number(db, tenant_id, site_id, "GRN", "GRN"),
-        po_id=data.po_id if data.po_id else None,
-        gate_entry_id=data.gate_entry_id,
-        warehouse_id=data.warehouse_id,
-        project_id=project_id,
-        vendor_id=vendor_id,
-        receipt_type=data.receipt_type,
-        invoice_number=data.invoice_number,
-        invoice_date=data.invoice_date,
-        invoice_amount=data.invoice_amount,
-        invoice_scan_url=data.invoice_scan_url,
-        vendor_gstin=data.vendor_gstin,
-        total_taxable_amount=data.total_taxable_amount,
-        total_cgst=data.total_cgst,
-        total_sgst=data.total_sgst,
-        total_igst=data.total_igst,
-        total_tax=data.total_tax,
-        eway_bill_number=data.eway_bill_number,
-        payment_status="Pending" if is_direct else "Not Applicable",
-        remarks=data.remarks,
-        received_by_id=current_user.id,
-        status="Completed",
-        tenant_id=tenant_id,
-        site_id=site_id
-    )
-    db.add(grn)
-    db.flush()
+        grn = GRN(
+            grn_number=get_next_number(db, tenant_id, site_id, "GRN", "GRN"),
+            po_id=data.po_id if data.po_id else None,
+            gate_entry_id=data.gate_entry_id,
+            warehouse_id=data.warehouse_id,
+            project_id=project_id,
+            vendor_id=vendor_id,
+            receipt_type=data.receipt_type,
+            invoice_number=data.invoice_number,
+            invoice_date=data.invoice_date,
+            invoice_amount=data.invoice_amount,
+            invoice_scan_url=data.invoice_scan_url,
+            vendor_gstin=data.vendor_gstin,
+            total_taxable_amount=data.total_taxable_amount,
+            total_cgst=data.total_cgst,
+            total_sgst=data.total_sgst,
+            total_igst=data.total_igst,
+            total_tax=data.total_tax,
+            eway_bill_number=data.eway_bill_number,
+            payment_status="Pending" if is_direct else "Not Applicable",
+            remarks=data.remarks,
+            received_by_id=current_user.id,
+            status="Completed",
+            tenant_id=tenant_id,
+            site_id=site_id
+        )
+        db.add(grn)
+        db.flush()
 
-    for item_data in data.items:
-        # PO-based: validate against PO item
-        if not is_direct and item_data.po_item_id:
-            po_item = db.query(PurchaseOrderItem).filter(PurchaseOrderItem.id == item_data.po_item_id).first()
-            if po_item:
-                if (po_item.received_quantity + item_data.accepted_quantity) > po_item.quantity:
-                    db.rollback()
-                    raise HTTPException(
-                        status_code=400, 
-                        detail=f"Cannot receive {item_data.accepted_quantity}. Only {po_item.quantity - po_item.received_quantity} remaining for this PO item."
-                    )
-                po_item.received_quantity += item_data.accepted_quantity
+        for item_data in data.items:
+            po_item = None
+            if not is_direct and item_data.po_item_id:
+                po_item = db.query(PurchaseOrderItem).filter(PurchaseOrderItem.id == item_data.po_item_id).first()
+                if po_item:
+                    if (po_item.received_quantity + item_data.accepted_quantity) > po_item.quantity:
+                        db.rollback()
+                        raise HTTPException(
+                            status_code=400, 
+                            detail=f"Cannot receive {item_data.accepted_quantity}. Only {po_item.quantity - po_item.received_quantity} remaining for this PO item."
+                        )
+                    po_item.received_quantity += item_data.accepted_quantity
 
-        # For Direct Invoice, material_id comes from the item payload
-        mat_id = item_data.material_id
-        if not is_direct and item_data.po_item_id:
-            po_item = db.query(PurchaseOrderItem).filter(PurchaseOrderItem.id == item_data.po_item_id).first()
+            # For Direct Invoice, material_id comes from the item payload
+            mat_id = item_data.material_id
             if po_item:
                 mat_id = po_item.material_id
 
-        grn_item = GRNItem(
-            grn_id=grn.id,
-            material_id=mat_id,
-            po_item_id=item_data.po_item_id if item_data.po_item_id else None,
-            ordered_quantity=item_data.ordered_quantity if hasattr(item_data, 'ordered_quantity') else 0,
-            received_quantity=item_data.received_quantity,
-            accepted_quantity=item_data.accepted_quantity,
-            rejected_quantity=item_data.rejected_quantity,
-            rate=item_data.rate,
-            hsn_code=item_data.hsn_code,
-            cgst_rate=item_data.cgst_rate,
-            sgst_rate=item_data.sgst_rate,
-            igst_rate=item_data.igst_rate,
-            cgst_amount=item_data.cgst_amount,
-            sgst_amount=item_data.sgst_amount,
-            igst_amount=item_data.igst_amount,
-            taxable_amount=item_data.taxable_amount,
-            discount_percent=item_data.discount_percent,
-            remarks=item_data.remarks
-        )
-        db.add(grn_item)
-
-        if item_data.accepted_quantity > 0:
-            update_stock(
-                db=db,
+            grn_item = GRNItem(
+                grn_id=grn.id,
                 material_id=mat_id,
-                warehouse_id=data.warehouse_id,
-                quantity=item_data.accepted_quantity,
-                transaction_type="GRN",
-                reference_type="GRN",
-                reference_id=grn.id,
-                reference_number=grn.grn_number,
-                project_id=project_id,
-                user_id=current_user.id,
-                tenant_id=tenant_id,
-                site_id=site_id
+                po_item_id=item_data.po_item_id if item_data.po_item_id else None,
+                ordered_quantity=item_data.ordered_quantity or 0,
+                received_quantity=item_data.received_quantity,
+                accepted_quantity=item_data.accepted_quantity,
+                rejected_quantity=item_data.rejected_quantity,
+                rate=item_data.rate,
+                hsn_code=item_data.hsn_code,
+                cgst_rate=item_data.cgst_rate,
+                sgst_rate=item_data.sgst_rate,
+                igst_rate=item_data.igst_rate,
+                cgst_amount=item_data.cgst_amount,
+                sgst_amount=item_data.sgst_amount,
+                igst_amount=item_data.igst_amount,
+                taxable_amount=item_data.taxable_amount,
+                discount_percent=item_data.discount_percent,
+                remarks=item_data.remarks
             )
+            db.add(grn_item)
 
-    grn.completed_at = datetime.utcnow()
+            if item_data.accepted_quantity > 0:
+                update_stock(
+                    db=db,
+                    material_id=mat_id,
+                    warehouse_id=data.warehouse_id,
+                    quantity=item_data.accepted_quantity,
+                    transaction_type="GRN",
+                    reference_type="GRN",
+                    reference_id=grn.id,
+                    reference_number=grn.grn_number,
+                    project_id=project_id,
+                    user_id=current_user.id,
+                    tenant_id=tenant_id,
+                    site_id=site_id
+                )
 
-    if data.gate_entry_id:
-        gate = db.query(GateEntry).filter(
-            GateEntry.id == data.gate_entry_id, GateEntry.tenant_id == tenant_id, GateEntry.site_id == site_id
-        ).first()
-        if gate:
-            gate.status = "Completed"
+        grn.completed_at = datetime.utcnow()
 
-    # Update PO status for PO-based GRNs
-    if not is_direct and data.po_id:
-        po = db.query(PurchaseOrder).filter(
-            PurchaseOrder.id == data.po_id, PurchaseOrder.tenant_id == tenant_id, PurchaseOrder.site_id == site_id
-        ).first()
-        if po:
-            all_received = all(
-                item.received_quantity >= item.quantity for item in po.items
-            )
-            any_received = any(item.received_quantity > 0 for item in po.items)
-            if all_received:
-                po.status = "Closed"
-            elif any_received:
-                po.status = "Partially Received"
+        if data.gate_entry_id:
+            gate = db.query(GateEntry).filter(
+                GateEntry.id == data.gate_entry_id, GateEntry.tenant_id == tenant_id, GateEntry.site_id == site_id
+            ).first()
+            if gate:
+                gate.status = "Completed"
 
-    db.add(AuditLog(
-        tenant_id=tenant_id, site_id=site_id,
-        user_id=current_user.id, action="CREATE",
-        entity_type="GRN", entity_id=grn.id,
-        new_values=f"GRN {grn.grn_number} created ({data.receipt_type})"
-    ))
-    db.commit()
-    db.refresh(grn)
-    return {"id": grn.id, "grn_number": grn.grn_number, "message": "GRN created and stock updated"}
+        # Update PO status for PO-based GRNs
+        if not is_direct and data.po_id:
+            po = db.query(PurchaseOrder).filter(
+                PurchaseOrder.id == data.po_id, PurchaseOrder.tenant_id == tenant_id, PurchaseOrder.site_id == site_id
+            ).first()
+            if po:
+                all_received = all(
+                    item.received_quantity >= item.quantity for item in po.items
+                )
+                any_received = any(item.received_quantity > 0 for item in po.items)
+                if all_received:
+                    po.status = "Closed"
+                elif any_received:
+                    po.status = "Partially Received"
+
+        db.add(AuditLog(
+            tenant_id=tenant_id, site_id=site_id,
+            user_id=current_user.id, action="CREATE",
+            entity_type="GRN", entity_id=grn.id,
+            new_values=f"GRN {grn.grn_number} created ({data.receipt_type})"
+        ))
+        db.commit()
+        db.refresh(grn)
+        return {"id": grn.id, "grn_number": grn.grn_number, "message": "GRN created and stock updated"}
+    except Exception as e:
+        db.rollback()
+        import logging
+        logging.getLogger("uvicorn").error(f"GRN Creation Error: {str(e)}")
+        if isinstance(e, HTTPException):
+            raise e
+        raise HTTPException(status_code=500, detail=str(e))
 

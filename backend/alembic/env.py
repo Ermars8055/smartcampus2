@@ -17,9 +17,10 @@ config = context.config
 # Load environment variables
 load_dotenv()
 
+from app.config import DATABASE_URL
 # Override DB URL from .env
-database_url = os.getenv("DATABASE_URL")
-config.set_main_option("sqlalchemy.url", database_url)
+database_url = os.getenv("DATABASE_URL", DATABASE_URL)
+config.set_main_option("sqlalchemy.url", str(database_url))
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -57,6 +58,7 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        render_as_batch=True,
     )
 
     with context.begin_transaction():
@@ -78,7 +80,8 @@ def run_migrations_online() -> None:
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection, target_metadata=target_metadata,
+            render_as_batch=True
         )
 
         with context.begin_transaction():

@@ -439,7 +439,9 @@ def generate_comparison(
     material_comparisons = []
     for qr_item in qr.items:
         # Get all vendor quotes for this material
-        quotes = db.query(VendorQuotationItem).join(VendorQuotation).filter(
+        quotes = db.query(VendorQuotationItem).join(
+            VendorQuotation, VendorQuotationItem.vendor_quotation_id == VendorQuotation.id
+        ).filter(
             VendorQuotationItem.qr_item_id == qr_item.id,
             VendorQuotation.qr_id == qr_id,
             VendorQuotationItem.is_excluded == False
@@ -500,27 +502,26 @@ def generate_comparison(
     vendor_totals = {}
     
     # First, identify all vendors who submitted any quote for this QR
-    all_quotes = db.query(VendorQuotationItem).join(VendorQuotation).filter(
-        VendorQuotation.qr_id == qr_id
-    ).all()
+    vqs = db.query(VendorQuotation).filter(VendorQuotation.qr_id == qr_id).all()
     
-    for q in all_quotes:
-        vid = q.vendor_quotation.vendor_id
-        vname = q.vendor_quotation.vendor.name
-        if vid not in vendor_totals:
-            vendor_totals[vid] = {
-                "vendor_id": vid, 
-                "vendor_name": vname, 
-                "total_value": 0, 
-                "items_won": 0,
-                "is_selected_any": False
-            }
+    for vq in vqs:
+        vid = vq.vendor_id
+        vname = vq.vendor.name
+        vendor_totals[vid] = {
+            "vendor_id": vid, 
+            "vendor_name": vname, 
+            "total_value": 0, 
+            "items_won": 0,
+            "is_selected_any": False
+        }
         
         # Calculate potential total if we bought everything from this vendor
-        # (Using the quantity from the QR item)
-        qr_item = next((it for it in qr.items if it.id == q.qr_item_id), None)
-        if qr_item:
-            vendor_totals[vid]["total_value"] += qr_item.quantity * q.quoted_rate
+        # (Only counting items they actually quoted and didn't exclude)
+        for q in vq.items:
+            if not q.is_excluded:
+                qr_item = next((it for it in qr.items if it.id == q.qr_item_id), None)
+                if qr_item:
+                    vendor_totals[vid]["total_value"] += qr_item.quantity * q.quoted_rate
 
     # Now update items_won and selection status
     for mc in material_comparisons:
@@ -722,63 +723,69 @@ def download_comparative_statement_pdf(
     # --- New Vendor-Wise Breakdown PDF Logic ---
     # Instead of wide columns, we create a dedicated section for each vendor
     
-    # Sort vendors by total value (lowest first)
+    # --- Matrix Table Logic ---
+    
+    # Sort vendors by total value (lowest first) for column order
     sorted_vendors = sorted(comp_data.vendor_totals, key=lambda x: x['total_value'])
     
-    for vIdx, vt in enumerate(sorted_vendors):
-        elements.append(Paragraph(f"<b>{vIdx + 1}. {vt['vendor_name']}</b>", styles['Heading3']))
-        
-        # Vendor Section Data
-        table_data = [[
-            Paragraph("<b>Material</b>", styles['Normal']),
-            Paragraph("<b>Qty</b>", styles['Normal']),
-            Paragraph("<b>Rate (₹)</b>", styles['Normal']),
-            Paragraph("<b>Delivery</b>", styles['Normal']),
-            Paragraph("<b>Amount (₹)</b>", styles['Normal']),
-            Paragraph("<b>Rank</b>", styles['Normal'])
-        ]]
-        
-        for mat in comp_data.materials:
-            quote = next((q for q in mat.vendor_quotes if q.vendor_id == vt['vendor_id']), None)
-            row = [
-                Paragraph(mat.material_name, styles['Normal']),
-                f"{mat.quantity} {mat.uom_name}",
-                f"{quote.quoted_rate:.2f}" if quote else "-",
-                f"{quote.delivery_days} days" if quote else "-",
-                f"{(quote.quoted_rate * mat.quantity):,.2f}" if quote else "-",
-                Paragraph(f"<b>{quote.rank_label}</b>" if quote else "-", styles['Normal'])
-            ]
-            table_data.append(row)
-            
-        # Add Total Row for Vendor
-        table_data.append([
-            Paragraph("<b>Grand Total</b>", styles['Normal']),
-            "", "", "",
-            Paragraph(f"<b>₹ {vt['total_value']:,.2f}</b>", styles['Normal']),
-            ""
-        ])
-        
-        v_table = Table(table_data, colWidths=[200, 80, 80, 80, 100, 60], repeatRows=1)
-        
-        # Style for Vendor Table
-        v_style = [
-            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#f8f9fa')),
-            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
-            ('ALIGN', (2, 1), (2, -1), 'RIGHT'), # Rate
-            ('ALIGN', (4, 1), (4, -1), 'RIGHT'), # Amount
-            ('ALIGN', (5, 1), (5, -1), 'CENTER'), # Rank
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-            ('TOPPADDING', (0, 0), (-1, -1), 6),
+    # Prepare Table Header: Material Details + Each Vendor
+    table_header = [
+        Paragraph("<b>Material</b>", styles['Normal']),
+        Paragraph("<b>Qty</b>", styles['Normal'])
+    ]
+    for vt in sorted_vendors:
+        table_header.append(Paragraph(f"<b>{vt['vendor_name']}</b>", styles['Normal']))
+    
+    table_data = [table_header]
+    
+    # Prepare Table Rows: One row per material
+    for mat in comp_data.materials:
+        row = [
+            Paragraph(f"{mat.material_name}<br/><font size='8' color='grey'>{mat.material_code}</font>", styles['Normal']),
+            f"{mat.quantity} {mat.uom_name}"
         ]
-        
-        # Highlight if selected
-        if vt.get('is_selected_any'):
-            v_style.append(('BOX', (0, 0), (-1, -1), 2, colors.HexColor('#2e7d32')))
-            
-        v_table.setStyle(TableStyle(v_style))
-        elements.append(v_table)
-        elements.append(Spacer(1, 20))
+        for vt in sorted_vendors:
+            quote = next((q for q in mat.vendor_quotes if q.vendor_id == vt['vendor_id']), None)
+            if quote:
+                isL1 = quote.rank == 1
+                isSelected = mat.selected_vendor_id == vt['vendor_id']
+                cell_text = f"{quote.quoted_rate:,.2f}"
+                
+                label = ""
+                if isL1 and isSelected: label = " (L1 Selected)"
+                elif isL1: label = " (L1)"
+                elif isSelected: label = " (Selected)"
+                
+                if label:
+                    cell_text = f"<b>{cell_text}</b><br/><font size='7' color='green'>{label}</font>"
+                
+                row.append(Paragraph(cell_text, styles['Normal']))
+            else:
+                row.append("-")
+        table_data.append(row)
+    
+    # Create Matrix Table
+    # Dynamically calculate column widths: Material (150), Qty (60), Vendors (remaining / count)
+    num_vendors = len(sorted_vendors)
+    vendor_col_width = (doc.width - 210) / num_vendors if num_vendors > 0 else 100
+    col_widths = [150, 60] + [vendor_col_width] * num_vendors
+    
+    main_table = Table(table_data, colWidths=col_widths, repeatRows=1)
+    
+    # Style for Matrix Table
+    main_style = [
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#f5f5f5')),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ('ALIGN', (2, 0), (-1, -1), 'RIGHT'), # All vendor columns right aligned
+        ('ALIGN', (1, 1), (1, -1), 'CENTER'), # Qty center aligned
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+    ]
+    
+    main_table.setStyle(TableStyle(main_style))
+    elements.append(main_table)
+    elements.append(Spacer(1, 20))
 
     elements.append(Spacer(1, 10))
     elements.append(Paragraph("<b>Summary & Management Decision</b>", styles['Heading3']))
@@ -797,13 +804,15 @@ def download_comparative_statement_pdf(
             Paragraph(reason, styles['Normal'])
         ])
         
-    sum_table = Table(summary_data, colWidths=[200, 200, 200])
-    sum_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#f0f0f0')),
+    summary_table = Table(summary_data, colWidths=[200, 150, 250])
+    summary_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#f8f9fa')),
         ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
     ]))
-    elements.append(sum_table)
+    elements.append(summary_table)
     
     elements.append(Spacer(1, 50))
     sig_data = [["Prepared By", "Verified By", "Approved By (Management)"]]

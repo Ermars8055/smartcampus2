@@ -273,7 +273,7 @@ export default function Admin() {
         <DialogContent sx={{ px: 4, py: 2 }}>
           {tab === 2 ? (
             <Grid container spacing={2} sx={{ mt: 0.5 }}>
-              <Grid size={6}>
+              <Grid item xs={6}>
                 <FormControl fullWidth required>
                   <InputLabel>Document Type</InputLabel>
                   <Select value={form.document_type || 'INDENT'} label="Document Type" onChange={e => setForm({ ...form, document_type: e.target.value })}>
@@ -283,7 +283,7 @@ export default function Admin() {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid size={6}>
+              <Grid item xs={6}>
                 <TextField 
                   fullWidth 
                   label="Level (e.g. 1, 2)" 
@@ -295,14 +295,14 @@ export default function Admin() {
                   onKeyDown={(e) => { if (e.key === '.') e.preventDefault(); }}
                 />
               </Grid>
-              <Grid size={6}>
+              <Grid item xs={6}>
                 <FormControl fullWidth required><InputLabel>Role Required</InputLabel>
                   <Select value={form.role_name || ''} label="Role Required" onChange={e => setForm({ ...form, role_name: e.target.value })}>
                     {roles.map(r => <MenuItem key={r.id} value={r.name}>{r.name}</MenuItem>)}
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid size={6}>
+              <Grid item xs={6}>
                 <FormControl fullWidth><InputLabel>Specific User (Optional)</InputLabel>
                   <Select value={form.user_id || ''} label="Specific User (Optional)" onChange={e => setForm({ ...form, user_id: e.target.value })}>
                     <MenuItem value=""><em>Any User</em></MenuItem>
@@ -310,23 +310,23 @@ export default function Admin() {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid size={6}><TextField fullWidth label="Min Amount" type="number" value={form.min_amount} onChange={e => setForm({ ...form, min_amount: Number(e.target.value) })} /></Grid>
-              <Grid size={6}><TextField fullWidth label="Max Amount (Leave empty for No Limit)" type="number" value={form.max_amount || ''} onChange={e => setForm({ ...form, max_amount: e.target.value ? Number(e.target.value) : null })} /></Grid>
-              <Grid size={12}><FormControlLabel control={<Switch checked={form.is_active !== false} onChange={e => setForm({ ...form, is_active: e.target.checked })} />} label="Active" /></Grid>
+              <Grid item xs={6}><TextField fullWidth label="Min Amount" type="number" value={form.min_amount} onChange={e => setForm({ ...form, min_amount: Number(e.target.value) })} /></Grid>
+              <Grid item xs={6}><TextField fullWidth label="Max Amount (Leave empty for No Limit)" type="number" value={form.max_amount || ''} onChange={e => setForm({ ...form, max_amount: e.target.value ? Number(e.target.value) : null })} /></Grid>
+              <Grid item xs={12}><FormControlLabel control={<Switch checked={form.is_active !== false} onChange={e => setForm({ ...form, is_active: e.target.checked })} />} label="Active" /></Grid>
             </Grid>
           ) : tab === 3 ? (
             <Grid container spacing={2} sx={{ mt: 0.5 }}>
-              <Grid size={12}><TextField fullWidth label="Role Name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required /></Grid>
-              <Grid size={12}><TextField fullWidth label="Role Code" value={form.code} onChange={e => setForm({ ...form, code: e.target.value.toUpperCase() })} required disabled={editing} /></Grid>
-              <Grid size={12}><TextField fullWidth label="Description" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} multiline rows={2} /></Grid>
+              <Grid item xs={12}><TextField fullWidth label="Role Name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required /></Grid>
+              <Grid item xs={12}><TextField fullWidth label="Role Code" value={form.code} onChange={e => setForm({ ...form, code: e.target.value.toUpperCase() })} required disabled={editing} /></Grid>
+              <Grid item xs={12}><TextField fullWidth label="Description" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} multiline rows={2} /></Grid>
             </Grid>
           ) : (
             <Grid container spacing={2} sx={{ mt: 0.5 }}>
-            {!editing && <Grid size={6}><TextField fullWidth label="Username" value={form.username} onChange={e => setForm({ ...form, username: e.target.value })} required /></Grid>}
-            <Grid size={editing ? 12 : 6}><TextField fullWidth label="Full Name" value={form.full_name} onChange={e => setForm({ ...form, full_name: e.target.value })} required /></Grid>
-            <Grid size={6}><TextField fullWidth label="Email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required /></Grid>
+            {!editing && <Grid item xs={6}><TextField fullWidth label="Username" value={form.username} onChange={e => setForm({ ...form, username: e.target.value })} required /></Grid>}
+            <Grid item xs={editing ? 12 : 6}><TextField fullWidth label="Full Name" value={form.full_name} onChange={e => setForm({ ...form, full_name: e.target.value })} required /></Grid>
+            <Grid item xs={6}><TextField fullWidth label="Email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required /></Grid>
             {currentUser?.tenant_id == null && (
-              <Grid size={6}>
+              <Grid item xs={6}>
                 <FormControl fullWidth required={!editing}>
                   <InputLabel>Tenant</InputLabel>
                   <Select
@@ -340,7 +340,7 @@ export default function Admin() {
                 </FormControl>
               </Grid>
             )}
-            <Grid size={6}>
+            <Grid item xs={6}>
               <FormControl fullWidth><InputLabel>Role</InputLabel>
                 <Select
                   value={form.role_id || ''}
@@ -356,7 +356,7 @@ export default function Admin() {
               </FormControl>
             </Grid>
             {tenantSites.length > 1 && (
-              <Grid size={12}>
+              <Grid item xs={12}>
                 <FormControl fullWidth>
                   <InputLabel>Site Access</InputLabel>
                   <Select
@@ -376,8 +376,8 @@ export default function Admin() {
                 </FormControl>
               </Grid>
             )}
-            {!editing && <Grid size={12}><TextField fullWidth label="Password" type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} required /></Grid>}
-            {editing && <Grid size={12}><FormControlLabel control={<Switch checked={form.is_active !== false} onChange={e => setForm({ ...form, is_active: e.target.checked })} />} label="Active" /></Grid>}
+            {!editing && <Grid item xs={12}><TextField fullWidth label="Password" type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} required /></Grid>}
+            {editing && <Grid item xs={12}><FormControlLabel control={<Switch checked={form.is_active !== false} onChange={e => setForm({ ...form, is_active: e.target.checked })} />} label="Active" /></Grid>}
           </Grid>
           )}
         </DialogContent>

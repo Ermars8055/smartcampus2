@@ -22,4 +22,9 @@ APP_SUBTITLE = "Materials Management Platform"
 APP_VERSION = "2.0.0"
 
 # CORS
-CORS_ORIGINS = ["*"]  # Allow all for local network access
+CORS_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://192.168.0.4:5173",
+    "*"
+]

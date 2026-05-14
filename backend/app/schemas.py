@@ -497,6 +497,7 @@ class GateEntryOut(GateEntryBase):
     material_name: Optional[str] = None
     po_number: Optional[str] = None
     project_name: Optional[str] = None
+    material_names: Optional[str] = None
     class Config:
         from_attributes = True
 
@@ -521,6 +522,8 @@ class GRNItemBase(BaseModel):
     igst_amount: float = 0
     taxable_amount: float = 0
     discount_percent: float = 0
+    remarks: Optional[str] = None
+    ordered_quantity: Optional[float] = 0
 
 class GRNItemOut(BaseModel):
     id: int
@@ -625,6 +628,7 @@ class IssueBase(BaseModel):
     project_id: int
     indent_id: Optional[int] = None
     issued_to_room_id: Optional[int] = None
+    building_id: Optional[int] = None
     issued_to_department: Optional[str] = None
     issued_to_contractor: Optional[str] = None
     purpose: Optional[str] = None
@@ -641,6 +645,7 @@ class IssueOut(BaseModel):
     project_id: int
     indent_id: Optional[int] = None
     issued_to_room_id: Optional[int] = None
+    building_id: Optional[int] = None
     issued_to_department: Optional[str] = None
     issued_to_contractor: Optional[str] = None
     purpose: Optional[str] = None
@@ -654,6 +659,7 @@ class IssueOut(BaseModel):
     warehouse_name: Optional[str] = None
     project_name: Optional[str] = None
     room_name: Optional[str] = None
+    building_name: Optional[str] = None
     issued_by_name: Optional[str] = None
     indent_number: Optional[str] = None
     items: List[IssueItemOut] = []
@@ -879,6 +885,7 @@ class IndentItemOut(IndentItemBase):
 
 class IndentBase(BaseModel):
     room_id: Optional[int] = None
+    building_id: Optional[int] = None
     floor: Optional[str] = None
     location: Optional[str] = None
     remarks: Optional[str] = None

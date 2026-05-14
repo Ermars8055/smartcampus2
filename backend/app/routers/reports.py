@@ -54,25 +54,49 @@ def get_issue_summary(
     if not material_ids:
         return {"departments": [], "data": []}
 
-    # Opening Stocks query (Latest stock ledger entry before from_date)
-    # Since we can't easily do a greatest-n-per-group in simple sqlalchemy across many databases,
-    # we can fetch stock ledgers before from_date ordered by created_at desc, and pick the first per material in Python.
-    sl_query = db.query(StockLedger.material_id, StockLedger.balance).filter(
+    # Opening Stocks query (Sum of latest balance per warehouse before from_date)
+    sl_op_query = db.query(StockLedger.material_id, StockLedger.warehouse_id, StockLedger.balance).filter(
         StockLedger.tenant_id == tenant_id,
         StockLedger.site_id == site_id,
         StockLedger.material_id.in_(material_ids),
         StockLedger.created_at < dt_from
     )
     if warehouse_id:
-        sl_query = sl_query.filter(StockLedger.warehouse_id == warehouse_id)
+        sl_op_query = sl_op_query.filter(StockLedger.warehouse_id == warehouse_id)
 
-    # Order by created_at desc to get the latest balance
-    sl_entries = sl_query.order_by(StockLedger.created_at.desc()).all()
+    sl_op_entries = sl_op_query.order_by(StockLedger.created_at.desc()).all()
+    
+    op_stocks_per_wh = {} # (material_id, warehouse_id) -> balance
+    for entry in sl_op_entries:
+        key = (entry.material_id, entry.warehouse_id)
+        if key not in op_stocks_per_wh:
+            op_stocks_per_wh[key] = entry.balance
     
     opening_stocks = {}
-    for entry in sl_entries:
-        if entry.material_id not in opening_stocks:
-            opening_stocks[entry.material_id] = entry.balance
+    for (m_id, wh_id), bal in op_stocks_per_wh.items():
+        opening_stocks[m_id] = opening_stocks.get(m_id, 0) + bal
+
+    # Closing Stocks query (Sum of latest balance per warehouse before or at to_date)
+    sl_cl_query = db.query(StockLedger.material_id, StockLedger.warehouse_id, StockLedger.balance).filter(
+        StockLedger.tenant_id == tenant_id,
+        StockLedger.site_id == site_id,
+        StockLedger.material_id.in_(material_ids),
+        StockLedger.created_at <= dt_to
+    )
+    if warehouse_id:
+        sl_cl_query = sl_cl_query.filter(StockLedger.warehouse_id == warehouse_id)
+
+    sl_cl_entries = sl_cl_query.order_by(StockLedger.created_at.desc()).all()
+    
+    cl_stocks_per_wh = {} # (material_id, warehouse_id) -> balance
+    for entry in sl_cl_entries:
+        key = (entry.material_id, entry.warehouse_id)
+        if key not in cl_stocks_per_wh:
+            cl_stocks_per_wh[key] = entry.balance
+            
+    closing_stocks = {}
+    for (m_id, wh_id), bal in cl_stocks_per_wh.items():
+        closing_stocks[m_id] = closing_stocks.get(m_id, 0) + bal
 
     # Issues query within date range
     issue_query = db.query(
@@ -129,7 +153,7 @@ def get_issue_summary(
         op_stock = opening_stocks.get(m_id, 0.0)
         issues = aggregated_data.get(m_id, {})
         total_issue = sum(issues.values())
-        closing_stock = op_stock - total_issue
+        closing_stock = closing_stocks.get(m_id, 0.0)
         
         issue_numbers_str = ", ".join(sorted(list(material_issue_numbers.get(m_id, set()))))
 

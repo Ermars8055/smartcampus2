@@ -20,10 +20,15 @@ export default function GRNPage() {
   const [dialog, setDialog] = useState(false);
   const [detailDialog, setDetailDialog] = useState(null);
   const [search, setSearch] = useState('');
-  const [form, setForm] = useState({
+  const initialForm = {
     po_id: '', gate_entry_id: '', warehouse_id: '', project_id: '', vendor_id: '',
-    invoice_number: '', invoice_date: '', invoice_amount: 0, items: []
-  });
+    invoice_number: '', invoice_date: '', invoice_amount: 0, items: [],
+    receipt_type: 'PO-Based'
+  };
+
+  const [form, setForm] = useState(initialForm);
+
+  const resetForm = () => setForm(initialForm);
 
   const load = () => { api.get('/api/grn', { params: { search: search || undefined } }).then(r => setGrns(r.data)); };
   useEffect(() => { load(); }, [search]);
@@ -46,7 +51,7 @@ export default function GRNPage() {
   const selectGateEntry = (geId) => {
     const ge = gateEntries.find(g => g.id === geId);
     if (ge) {
-      const newForm = { ...form, gate_entry_id: geId, vendor_id: ge.vendor_id, project_id: ge.project_id };
+      const newForm = { ...form, gate_entry_id: geId, vendor_id: ge.vendor_id, project_id: ge.project_id, receipt_type: 'PO-Based' };
       if (ge.po_id) {
         newForm.po_id = ge.po_id;
         // Load PO items
@@ -55,14 +60,16 @@ export default function GRNPage() {
           newForm.items = po.items?.map(it => ({
             material_id: it.material_id, po_item_id: it.id,
             ordered_quantity: it.quantity,
-            received_quantity: Math.min(ge.quantity, it.quantity - (it.received_quantity || 0)),
-            accepted_quantity: Math.min(ge.quantity, it.quantity - (it.received_quantity || 0)),
+            received_quantity: Math.min(ge.quantity || it.quantity, it.quantity - (it.received_quantity || 0)),
+            accepted_quantity: Math.min(ge.quantity || it.quantity, it.quantity - (it.received_quantity || 0)),
             rejected_quantity: 0,
             rate: it.rate, material_name: it.material_name
           })) || [];
         }
       }
       setForm(newForm);
+    } else {
+      setForm({ ...form, gate_entry_id: '', po_id: '', items: [] });
     }
   };
 
@@ -70,11 +77,13 @@ export default function GRNPage() {
     const po = pos.find(p => p.id === poId);
     if (po) {
       setForm({
-        ...form, po_id: poId, vendor_id: po.vendor_id, project_id: po.project_id,
+        ...form, po_id: poId, vendor_id: po.vendor_id, project_id: po.project_id, receipt_type: 'PO-Based',
         items: po.items?.map(it => ({
           material_id: it.material_id, po_item_id: it.id,
-          ordered_quantity: it.quantity, received_quantity: it.quantity - (it.received_quantity || 0),
-          accepted_quantity: it.quantity - (it.received_quantity || 0), rejected_quantity: 0,
+          ordered_quantity: it.quantity,
+          received_quantity: it.quantity - (it.received_quantity || 0),
+          accepted_quantity: it.quantity - (it.received_quantity || 0),
+          rejected_quantity: 0,
           rate: it.rate, material_name: it.material_name
         })) || []
       });
@@ -89,7 +98,9 @@ export default function GRNPage() {
         invoice_amount: parseFloat(form.invoice_amount) || 0
       };
       await api.post('/api/grn', payload);
-      setDialog(false); load();
+      setDialog(false); 
+      resetForm();
+      load();
       // Refresh gate entries and POs
       api.get('/api/gate-entries').then(r => setGateEntries(r.data));
       api.get('/api/procurement/po').then(r => setPos(r.data));
@@ -150,10 +161,10 @@ export default function GRNPage() {
         <DialogTitle sx={{ fontWeight: 600 }}>{detailDialog?.grn_number} — GRN Details</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mb: 2 }}>
-            <Grid size={3}><Typography variant="caption" color="textSecondary">Vendor</Typography><Typography sx={{ fontWeight: 600, fontSize: '0.9rem' }}>{detailDialog?.vendor_name}</Typography></Grid>
-            <Grid size={3}><Typography variant="caption" color="textSecondary">Warehouse</Typography><Typography sx={{ fontWeight: 600, fontSize: '0.9rem' }}>{detailDialog?.warehouse_name}</Typography></Grid>
-            <Grid size={3}><Typography variant="caption" color="textSecondary">Invoice</Typography><Typography sx={{ fontSize: '0.9rem' }}>{detailDialog?.invoice_number}</Typography></Grid>
-            <Grid size={3}><Typography variant="caption" color="textSecondary">Received By</Typography><Typography sx={{ fontSize: '0.9rem' }}>{detailDialog?.received_by_name}</Typography></Grid>
+            <Grid item xs={3}><Typography variant="caption" color="textSecondary">Vendor</Typography><Typography sx={{ fontWeight: 600, fontSize: '0.9rem' }}>{detailDialog?.vendor_name}</Typography></Grid>
+            <Grid item xs={3}><Typography variant="caption" color="textSecondary">Warehouse</Typography><Typography sx={{ fontWeight: 600, fontSize: '0.9rem' }}>{detailDialog?.warehouse_name}</Typography></Grid>
+            <Grid item xs={3}><Typography variant="caption" color="textSecondary">Invoice</Typography><Typography sx={{ fontSize: '0.9rem' }}>{detailDialog?.invoice_number}</Typography></Grid>
+            <Grid item xs={3}><Typography variant="caption" color="textSecondary">Received By</Typography><Typography sx={{ fontSize: '0.9rem' }}>{detailDialog?.received_by_name}</Typography></Grid>
           </Grid>
           <Table size="small">
             <TableHead><TableRow>
@@ -179,7 +190,7 @@ export default function GRNPage() {
       </Dialog>
 
       {/* Create GRN */}
-      <Dialog open={dialog} onClose={() => setDialog(false)} maxWidth="lg" fullWidth PaperProps={{ sx: { borderRadius: 3, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' } }}>
+      <Dialog open={dialog} onClose={() => { setDialog(false); resetForm(); }} maxWidth="lg" fullWidth PaperProps={{ sx: { borderRadius: 3, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' } }}>
         <DialogTitle sx={{ pb: 1, pt: 3, px: 4 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Box sx={{ p: 1, bgcolor: '#EFF6FF', borderRadius: 2, color: '#2563EB', display: 'flex' }}>
@@ -194,7 +205,7 @@ export default function GRNPage() {
         <DialogContent sx={{ px: 4, py: 2 }}>
           <Grid container spacing={2} sx={{ mt: 0.5, mb: 2 }}>
             {/* Gate Entry Selection (primary link) */}
-            <Grid size={4}>
+            <Grid item xs={4}>
               <FormControl fullWidth><InputLabel>Gate Entry (Pending)</InputLabel>
                 <Select value={form.gate_entry_id} label="Gate Entry (Pending)" onChange={e => selectGateEntry(e.target.value)}>
                   <MenuItem value="">None (select PO directly)</MenuItem>
@@ -206,7 +217,7 @@ export default function GRNPage() {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid size={4}>
+            <Grid item xs={4}>
               <FormControl fullWidth required><InputLabel>Purchase Order</InputLabel>
                 <Select value={form.po_id} label="Purchase Order" onChange={e => selectPO(e.target.value)}
                   disabled={!!form.gate_entry_id}>
@@ -214,16 +225,16 @@ export default function GRNPage() {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid size={4}>
+            <Grid item xs={4}>
               <FormControl fullWidth required><InputLabel>Warehouse</InputLabel>
                 <Select value={form.warehouse_id} label="Warehouse" onChange={e => setForm({ ...form, warehouse_id: e.target.value })}>
                   {warehouses.map(w => <MenuItem key={w.id} value={w.id}>{w.name}</MenuItem>)}
                 </Select>
               </FormControl>
             </Grid>
-            <Grid size={4}><TextField fullWidth label="Invoice Number" value={form.invoice_number || ''} onChange={e => setForm({ ...form, invoice_number: e.target.value })} /></Grid>
-            <Grid size={4}><TextField fullWidth label="Invoice Date" type="date" value={form.invoice_date || ''} onChange={e => setForm({ ...form, invoice_date: e.target.value })} InputLabelProps={{ shrink: true }} /></Grid>
-            <Grid size={4}><TextField fullWidth label="Invoice Amount (₹)" type="number" value={form.invoice_amount} onChange={e => setForm({ ...form, invoice_amount: parseFloat(e.target.value) || 0 })} /></Grid>
+            <Grid item xs={4}><TextField fullWidth label="Invoice Number" value={form.invoice_number || ''} onChange={e => setForm({ ...form, invoice_number: e.target.value })} /></Grid>
+            <Grid item xs={4}><TextField fullWidth label="Invoice Date" type="date" value={form.invoice_date || ''} onChange={e => setForm({ ...form, invoice_date: e.target.value })} InputLabelProps={{ shrink: true }} /></Grid>
+            <Grid item xs={4}><TextField fullWidth label="Invoice Amount (₹)" type="number" value={form.invoice_amount} onChange={e => setForm({ ...form, invoice_amount: parseFloat(e.target.value) || 0 })} /></Grid>
           </Grid>
 
           {form.gate_entry_id && (

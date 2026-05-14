@@ -10,7 +10,7 @@ import {
   LocalShipping, People, Assessment, Settings, Notifications,
   ExpandLess, ExpandMore, Logout, Person, Store, Assignment,
   SwapHoriz, Undo, Security, ReceiptLong, AccountTree, Category,
-  Build, ChevronLeft, RequestQuote
+  Build, ChevronLeft, RequestQuote, Business
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
@@ -25,7 +25,6 @@ const menuItems = [
       { text: 'Materials', icon: <Inventory2 />, path: '/materials' },
       { text: 'Categories', icon: <Category />, path: '/categories' },
       { text: 'Vendors', icon: <People />, path: '/vendors' },
-      { text: 'Projects', icon: <AccountTree />, path: '/projects' },
       { text: 'Warehouses', icon: <Warehouse />, path: '/warehouses' },
     ]
   },
@@ -52,7 +51,13 @@ const menuItems = [
       { text: 'Rate Analysis', icon: <Assessment />, path: '/reports/rate-analysis' },
     ]
   },
-  { text: 'Admin', icon: <Settings />, path: '/admin' },
+  {
+    text: 'Admin', icon: <Settings />, children: [
+      { text: 'Configurations', icon: <Settings />, path: '/admin' },
+      { text: 'Projects', icon: <AccountTree />, path: '/projects' },
+      { text: 'Departments', icon: <Business />, path: '/departments' },
+    ]
+  },
   { text: 'SaaS Admin', icon: <Security />, path: '/saas-admin', platformOnly: true },
 ];
 

@@ -16,10 +16,6 @@ export default function Projects() {
   const [floors, setFloors] = useState([]);
   const [rooms, setRooms] = useState([]);
   const [departments, setDepartments] = useState([]);
-  const [allDepartments, setAllDepartments] = useState([]);
-  const [deptDialog, setDeptDialog] = useState(false);
-  const [deptFilter, setDeptFilter] = useState('');
-  const [deptForm, setDeptForm] = useState({ name: '', code: '', accounting_code: '', building_id: '' });
   const [dialog, setDialog] = useState('');
   const [form, setForm] = useState({});
 
@@ -39,10 +35,6 @@ export default function Projects() {
     }
   };
 
-  const loadAllDepartments = () => {
-    const params = deptFilter ? { building_id: deptFilter } : {};
-    api.get('/api/departments', { params }).then(r => setAllDepartments(r.data)).catch(() => setAllDepartments([]));
-  };
   useEffect(() => { load(); }, []);
 
   const save = async () => {
@@ -79,42 +71,6 @@ export default function Projects() {
     } catch (err) { alert(err.response?.data?.detail || 'Error saving data'); }
   };
 
-  const saveDept = async () => {
-    if (!deptForm.name?.trim()) return alert('Department name is required.');
-    if (!deptForm.building_id) return alert('Building is required.');
-    const payload = {
-      name: deptForm.name,
-      building_id: deptForm.building_id,
-      accounting_code: deptForm.accounting_code || null,
-      code: deptForm.code || null,
-    };
-    try {
-      if (deptForm.id) {
-        await api.put(`/api/departments/${deptForm.id}`, payload);
-      } else {
-        // Bug 14: Frontend check for duplicate department in the same building
-        const isDuplicate = allDepartments.some(d => 
-          d.building_id === payload.building_id && 
-          d.name.toLowerCase() === payload.name.trim().toLowerCase()
-        );
-        if (isDuplicate) {
-          return alert(`Department '${payload.name}' already exists in this building.`);
-        }
-        delete payload.code; // auto-generated on create
-        await api.post('/api/departments', payload);
-      }
-      setDeptForm({ name: '', code: '', accounting_code: '', building_id: deptFilter || '' });
-      loadAllDepartments();
-    } catch (err) { alert(err.response?.data?.detail || 'Error saving department'); }
-  };
-
-  const deleteDept = async (id) => {
-    if (!window.confirm('Delete this department?')) return;
-    try {
-      await api.delete(`/api/departments/${id}`);
-      loadAllDepartments();
-    } catch (err) { alert(err.response?.data?.detail || 'Error deleting'); }
-  };
 
   const handleDelete = async (type, id) => {
     if (!window.confirm(`Are you sure you want to delete this ${type}?`)) return;
@@ -150,11 +106,6 @@ export default function Projects() {
           <Button size="small" variant="outlined" startIcon={<Add />} onClick={() => {
             setForm({ name: '', code: '', department_name: '', floor_id: '', _building_id: '' }); setDialog('room');
           }}>Room</Button>
-          <Button size="small" variant="outlined" startIcon={<Domain />} onClick={() => {
-            setDeptFilter(''); setDeptForm({ name: '', code: '', accounting_code: '', building_id: '' });
-            setDeptDialog(true);
-            api.get('/api/departments').then(r => setAllDepartments(r.data)).catch(() => setAllDepartments([]));
-          }}>Departments</Button>
         </Box>
       </Box>
 
@@ -469,123 +420,6 @@ export default function Projects() {
         </DialogActions>
       </Dialog>
 
-      {/* Department Management Dialog */}
-      <Dialog open={deptDialog} onClose={() => setDeptDialog(false)} maxWidth="md" fullWidth
-        PaperProps={{ sx: { borderRadius: '24px', p: 1, boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' } }}>
-        <DialogTitle sx={{ pb: 1, pt: 3, px: 4 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Box sx={{ p: 1, bgcolor: '#EFF6FF', borderRadius: 2, color: '#1E3A8A', display: 'flex' }}>
-              <Domain fontSize="medium" />
-            </Box>
-            <Box>
-              <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>Department Master</Typography>
-              <Typography variant="body2" color="text.secondary">Manage departments across buildings. Same department name can exist in different buildings.</Typography>
-            </Box>
-          </Box>
-        </DialogTitle>
-        <DialogContent sx={{ px: 4, pt: 3 }}>
-          {/* Filter */}
-          <Box sx={{ mb: 3, mt: 2 }}>
-            <FormControl size="small" sx={{ minWidth: 320 }}>
-              <Select 
-                value={deptFilter} 
-                displayEmpty 
-                onChange={e => {
-                  setDeptFilter(e.target.value);
-                  const params = e.target.value ? { building_id: e.target.value } : {};
-                  api.get('/api/departments', { params }).then(r => setAllDepartments(r.data));
-                }} 
-                sx={{ borderRadius: '12px' }}
-                startAdornment={<InputAdornment position="start"><Business sx={{ color: '#94A3B8', fontSize: 18, mr: 1 }} /></InputAdornment>}
-              >
-                <MenuItem value="">All Buildings</MenuItem>
-                {buildings.map(b => <MenuItem key={b.id} value={b.id}>{b.name}</MenuItem>)}
-              </Select>
-            </FormControl>
-          </Box>
-
-          {/* List */}
-          <TableContainer sx={{ maxHeight: 280, mb: 4, border: '1px solid #E2E8F0', borderRadius: '16px', overflow: 'hidden' }}>
-            <Table size="small" stickyHeader>
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 700, bgcolor: '#F8FAFC', color: '#475569', fontSize: '0.75rem' }}>CODE</TableCell>
-                  <TableCell sx={{ fontWeight: 700, bgcolor: '#F8FAFC', color: '#475569', fontSize: '0.75rem' }}>DEPARTMENT NAME</TableCell>
-                  <TableCell sx={{ fontWeight: 700, bgcolor: '#F8FAFC', color: '#475569', fontSize: '0.75rem' }}>ACCOUNTING CODE</TableCell>
-                  <TableCell sx={{ fontWeight: 700, bgcolor: '#F8FAFC', color: '#475569', fontSize: '0.75rem' }}>BUILDING</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 700, bgcolor: '#F8FAFC', color: '#475569', fontSize: '0.75rem' }}>ACTIONS</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {allDepartments.map(d => (
-                  <TableRow key={d.id} hover sx={{ '&:last-child td': { border: 0 } }}>
-                    <TableCell><Chip label={d.code || '-'} size="small" sx={{ fontWeight: 700, bgcolor: '#F1F5F9', color: '#475569', borderRadius: '6px' }} /></TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#1E293B' }}>{d.name}</TableCell>
-                    <TableCell sx={{ color: '#64748B', fontSize: '0.85rem' }}>{d.accounting_code || '—'}</TableCell>
-                    <TableCell><Chip label={d.building_name || '-'} size="small" sx={{ fontWeight: 600, color: '#2563EB', bgcolor: '#EFF6FF', border: '1px solid #DBEAFE', borderRadius: '6px' }} /></TableCell>
-                    <TableCell align="right">
-                      <IconButton size="small" onClick={() => setDeptForm({ ...d })} sx={{ color: '#64748B' }}><Edit sx={{ fontSize: 18 }} /></IconButton>
-                      <IconButton size="small" color="error" onClick={() => deleteDept(d.id)}><Delete sx={{ fontSize: 18 }} /></IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {allDepartments.length === 0 && (
-                  <TableRow><TableCell colSpan={5} align="center" sx={{ py: 6, color: '#94A3B8' }}>No departments found. Add one below.</TableCell></TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
-
-          {/* Add / Edit Form */}
-          <Box sx={{ p: 3, bgcolor: '#F8FAFC', borderRadius: '20px', border: '1px solid #E2E8F0' }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#1E293B', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-              {deptForm.id ? '✏️ EDIT DEPARTMENT' : '➕ ADD NEW DEPARTMENT'}
-            </Typography>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={3}>
-                <Label>DEPARTMENT NAME *</Label>
-                <TextField fullWidth size="small" value={deptForm.name}
-                  onChange={e => setDeptForm({ ...deptForm, name: e.target.value })} 
-                  InputProps={{ sx: { borderRadius: '12px', bgcolor: 'white' } }} />
-              </Grid>
-              <Grid item xs={12} sm={3}>
-                <Label>TARGET BUILDING *</Label>
-                <FormControl fullWidth size="small">
-                  <Select value={deptForm.building_id || ''} displayEmpty
-                    onChange={e => setDeptForm({ ...deptForm, building_id: e.target.value })}
-                    sx={{ borderRadius: '12px', bgcolor: 'white' }}>
-                    <MenuItem value="" disabled><em>Select Building...</em></MenuItem>
-                    {buildings.map(b => <MenuItem key={b.id} value={b.id}>{b.name}</MenuItem>)}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} sm={3}>
-                <Label>ACCOUNTING CODE</Label>
-                <TextField fullWidth size="small" value={deptForm.accounting_code || ''}
-                  onChange={e => setDeptForm({ ...deptForm, accounting_code: e.target.value })} 
-                  placeholder="e.g. AC-ADMIN-01" 
-                  InputProps={{ sx: { borderRadius: '12px', bgcolor: 'white' } }} />
-              </Grid>
-              <Grid item xs={12} sm={3}>
-                <Label>&nbsp;</Label>
-                <Box sx={{ display: 'flex', gap: 1 }}>
-                  <Button variant="contained" onClick={saveDept}
-                    sx={{ bgcolor: '#1E3A8A', '&:hover': { bgcolor: '#172554' }, borderRadius: '12px', fontWeight: 700, flex: 1, textTransform: 'none' }}>
-                    {deptForm.id ? 'Update' : 'Add'}
-                  </Button>
-                  {deptForm.id && (
-                    <Button variant="outlined" onClick={() => setDeptForm({ name: '', code: '', accounting_code: '', building_id: deptFilter || '' })}
-                      sx={{ borderRadius: '12px', fontWeight: 700, textTransform: 'none', color: '#64748B' }}>Cancel</Button>
-                  )}
-                </Box>
-              </Grid>
-            </Grid>
-          </Box>
-        </DialogContent>
-        <DialogActions sx={{ px: 4, pb: 4, pt: 2 }}>
-          <Button onClick={() => setDeptDialog(false)} sx={{ fontWeight: 700, color: '#64748B', textTransform: 'none' }}>Close</Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 }

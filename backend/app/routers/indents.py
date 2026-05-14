@@ -19,12 +19,23 @@ def generate_indent_number(db: Session, tenant_id: int, site_id: int) -> str:
 
 @router.get("", response_model=List[IndentOut])
 def list_indents(
+    search: str = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("purchase_requests", "read")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
-    indents = db.query(Indent).filter(Indent.tenant_id == tenant_id, Indent.site_id == site_id).order_by(Indent.created_at.desc()).all()
+    query = db.query(Indent).filter(Indent.tenant_id == tenant_id, Indent.site_id == site_id)
+    
+    if search:
+        search_term = f"%{search}%"
+        query = query.join(User, Indent.requester_id == User.id).filter(
+            (Indent.indent_number.ilike(search_term)) |
+            (Indent.department.ilike(search_term)) |
+            (User.full_name.ilike(search_term))
+        )
+    
+    indents = query.order_by(Indent.created_at.desc()).all()
     # Add manual material details to items for Out schema
     for indent in indents:
         indent.requester_name = indent.requester.full_name if indent.requester else None
@@ -315,6 +326,10 @@ def convert_to_po(
             total_amount += po_item.amount
             
     po.total_amount = total_amount
+    
+    # Update indent status to Converted
+    indent.status = IndentStatus.CONVERTED.value
+    
     db.commit()
     
     return {"id": po.id, "po_number": po_number, "message": "Purchase Order created from indent"}

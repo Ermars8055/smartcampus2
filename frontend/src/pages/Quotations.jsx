@@ -4,7 +4,7 @@ import {
   Box, Typography, Paper, Tabs, Tab, Button, IconButton, TextField, Stack, Divider,
   Stepper, Step, StepLabel,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel,
-  Dialog, DialogTitle, DialogContent, DialogActions, FormControl,
+  Dialog, DialogTitle, DialogContent, DialogActions, FormControl, FormHelperText,
   InputLabel, Select, MenuItem, Chip, OutlinedInput, Checkbox, ListItemText,
   Alert, CircularProgress, Accordion, AccordionSummary, AccordionDetails,
   Grid, InputAdornment, Tooltip
@@ -652,7 +652,7 @@ const Quotations = () => {
                           )}
                         </TableCell>
                         <TableCell sx={{ py: 1, px: 2 }}>
-                          <Typography variant="caption" fontWeight="500">{qr.invited_vendors?.length || 0} Vendors</Typography>
+                          <Typography variant="caption" fontWeight="500">{qr.invited_vendors?.length || 0} {qr.invited_vendors?.length === 1 ? 'Vendor' : 'Vendors'}</Typography>
                         </TableCell>
                         <TableCell sx={{ py: 1, px: 2 }}>
                           <Chip
@@ -1142,13 +1142,12 @@ const Quotations = () => {
                   value={newQR.required_date ? dayjs(newQR.required_date) : null}
                   onChange={(val) => setNewQR({ ...newQR, required_date: val ? val.format('YYYY-MM-DD') : '' })}
                   format="DD-MMM-YYYY"
-                  renderInput={(params) => (
-                    <TextField 
-                      {...params} 
-                      fullWidth 
-                      placeholder="DD-MMM-YYYY"
-                    />
-                  )}
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      placeholder: "DD-MMM-YYYY"
+                    }
+                  }}
                 />
               </Box>
 
@@ -1181,7 +1180,7 @@ const Quotations = () => {
                     {Array.isArray(approvedPrs) && approvedPrs.map(pr => (
                       <MenuItem key={pr.id} value={pr.id}>
                         <Checkbox checked={(newQR.pr_ids || []).indexOf(pr.id) > -1} />
-                        <ListItemText primary={`${pr.pr_number}`} secondary={`${pr.items?.length || 0} items`} />
+                        <ListItemText primary={`${pr.pr_number}`} secondary={`${pr.items?.length || 0} ${pr.items?.length === 1 ? 'item' : 'items'}`} />
                       </MenuItem>
                     ))}
                   </Select>
@@ -1225,16 +1224,16 @@ const Quotations = () => {
 
               {/* Row 3: Invite Vendors */}
               <Box sx={{ gridColumn: 'span 2' }}>
-                <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', mb: 0.5, display: 'block', ml: 0.5, textTransform: 'uppercase' }}>
-                  Invite Vendors
+                <Typography variant="caption" sx={{ fontWeight: 700, color: (newQR.vendor_ids?.length || 0) === 1 ? 'error.main' : 'text.secondary', mb: 0.5, display: 'block', ml: 0.5, textTransform: 'uppercase' }}>
+                  Invite Vendors {(newQR.vendor_ids?.length || 0) === 1 && "(Minimum 2 Required)"}
                 </Typography>
-                <FormControl fullWidth>
+                <FormControl fullWidth error={(newQR.vendor_ids?.length || 0) === 1}>
                   <Select
                     multiple
                     value={newQR.vendor_ids || []}
                     onChange={(e) => setNewQR(prev => ({ ...prev, vendor_ids: e.target.value }))}
                     input={<OutlinedInput />}
-                    startAdornment={<InputAdornment position="start"><VendorIcon color="action" sx={{ mr: 1 }} /></InputAdornment>}
+                    startAdornment={<InputAdornment position="start"><VendorIcon color={(newQR.vendor_ids?.length || 0) === 1 ? "error" : "action"} sx={{ mr: 1 }} /></InputAdornment>}
                     renderValue={(selected) => (
                       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                         {selected.map((id) => (
@@ -1255,6 +1254,9 @@ const Quotations = () => {
                       </MenuItem>
                     ))}
                   </Select>
+                  {(newQR.vendor_ids?.length || 0) === 1 && (
+                    <FormHelperText sx={{ fontWeight: 600 }}>Please invite at least 2 vendors to ensure competitive pricing.</FormHelperText>
+                  )}
                 </FormControl>
               </Box>
 
@@ -1335,7 +1337,7 @@ const Quotations = () => {
               onClick={handleCreateQR}
               variant="contained"
               size="large"
-              disabled={(newQR.items?.length || 0) === 0 || (newQR.vendor_ids?.length || 0) === 0}
+              disabled={(newQR.items?.length || 0) === 0 || (newQR.vendor_ids?.length || 0) < 2}
               sx={{ px: 4, borderRadius: 2, fontWeight: 700, boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)', textTransform: 'none' }}
             >
               Create Request
@@ -1374,12 +1376,11 @@ const Quotations = () => {
                   value={newQuote.quotation_date ? dayjs(newQuote.quotation_date) : null}
                   onChange={(val) => setNewQuote({ ...newQuote, quotation_date: val ? val.format('YYYY-MM-DD') : '' })}
                   format="DD-MMM-YYYY"
-                  renderInput={(params) => (
-                    <TextField 
-                      {...params} 
-                      sx={{ width: 220 }}
-                    />
-                  )}
+                  slotProps={{
+                    textField: {
+                      sx: { width: 220 }
+                    }
+                  }}
                 />
               </Box>
               <Box sx={{ pt: 3.5 }}>

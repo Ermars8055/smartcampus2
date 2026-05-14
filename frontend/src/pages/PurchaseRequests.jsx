@@ -1,14 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
   DialogContent, DialogActions, Grid, MenuItem, Select, FormControl,
-  InputLabel, IconButton, Tooltip, Tab, Tabs, Divider, Paper, InputAdornment
+  InputLabel, IconButton, Tooltip, Tab, Tabs, Divider, Paper, InputAdornment,
+  TableSortLabel
 } from '@mui/material';
-import { Add, CheckCircle, Cancel, ShoppingCart, Archive, Delete, Search, Apartment, AccountTree, CalendarMonth, Notes, Store, Numbers } from '@mui/icons-material';
+import { Add, CheckCircle, Cancel, ShoppingCart, Archive, Delete, Search, Apartment, AccountTree, CalendarMonth, Notes, Store, Numbers, Inventory, ArrowDropDown } from '@mui/icons-material';
 import api from '../services/api';
 import { formatDate } from '../utils/dateUtils';
 import MaterialSelect from '../components/MaterialSelect';
+import { DatePicker } from '@mui/x-date-pickers';
+import dayjs from 'dayjs';
 
 function StatusChip({ status }) {
   const colorMap = {
@@ -31,11 +34,19 @@ export default function PurchaseRequests() {
   const [detailDialog, setDetailDialog] = useState(null);
   const [tab, setTab] = useState(0);
   const [search, setSearch] = useState('');
+  const [sortConfig, setSortConfig] = useState({ key: 'created_at', direction: 'desc' });
+
+  const handleSort = (key) => {
+    setSortConfig(prev => ({
+      key,
+      direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
+    }));
+  };
 
   // Multi-item PR form
   const [form, setForm] = useState({
     project_id: '', building_id: '', department_name: '',
-    required_date: new Date().toISOString().split('T')[0], remarks: '',
+    required_date: dayjs().add(14, 'day'), remarks: '',
     items: [{ material_id: '', quantity: '' }]
   });
 
@@ -74,7 +85,7 @@ export default function PurchaseRequests() {
         project_id: form.project_id || projects[0]?.id,
         building_id: form.building_id || null,
         department_name: form.department_name || null,
-        required_date: form.required_date,
+        required_date: form.required_date ? dayjs(form.required_date).format('YYYY-MM-DD') : null,
         remarks: form.remarks,
         items: form.items.filter(it => it.material_id && it.quantity).map(it => ({
           material_id: it.material_id, quantity: parseFloat(it.quantity)
@@ -99,8 +110,8 @@ export default function PurchaseRequests() {
     setConvertDialog({
       open: true,
       pr,
-      vendor_id: vendors[0]?.id || '',
-      delivery_date: new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0],
+      vendor_id: '',
+      delivery_date: dayjs().add(14, 'day'),
       items: pr.items.map(it => ({ ...it, rate: '' })) // initialize rate for each item
     });
   };
@@ -122,20 +133,28 @@ export default function PurchaseRequests() {
       alert("Rate and Quantity must be positive numbers for all items.");
       return;
     }
+
+    if (!convertDialog.vendor_id) {
+      alert("Please select a vendor.");
+      return;
+    }
     
     try {
       const payload = {
         vendor_id: convertDialog.vendor_id,
         project_id: convertDialog.pr.project_id,
         pr_id: convertDialog.pr.id,
-        delivery_date: convertDialog.delivery_date,
+        delivery_date: convertDialog.delivery_date ? dayjs(convertDialog.delivery_date).format('YYYY-MM-DD') : null,
         terms: '',
         items: mappedItems
       };
       await api.post('/api/procurement/po', payload);
       setConvertDialog({ open: false, pr: null, vendor_id: '', delivery_date: '', items: [] });
       load();
-    } catch (err) { alert(err.response?.data?.detail || 'Error converting PR'); }
+    } catch (err) { 
+      const msg = err.response?.data?.detail;
+      alert(typeof msg === 'string' ? msg : JSON.stringify(msg) || 'Error converting PR'); 
+    }
   };
 
   // Status helpers — approve button label changes based on status
@@ -146,7 +165,27 @@ export default function PurchaseRequests() {
   const approveLabel = (s) => s === 'Draft' ? 'Submit for Approval' : 'Approve';
 
   const statusFilters = ['All', 'Draft', 'Submitted', 'Approved', 'Rejected', 'Converted to PO', 'Short Closed'];
-  const filtered = tab === 0 ? prs : prs.filter(p => p.status === statusFilters[tab]);
+  
+  const sortedPRs = useMemo(() => {
+    let list = tab === 0 ? prs : prs.filter(p => p.status === statusFilters[tab]);
+    
+    return [...list].sort((a, b) => {
+      let aVal = a[sortConfig.key];
+      let bVal = b[sortConfig.key];
+      
+      if (sortConfig.key === 'items') {
+        aVal = a.items?.length || 0;
+        bVal = b.items?.length || 0;
+      }
+      
+      if (aVal == null) aVal = '';
+      if (bVal == null) bVal = '';
+      
+      if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
+      if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [prs, tab, sortConfig, statusFilters]);
 
   return (
     <Box>
@@ -157,7 +196,7 @@ export default function PurchaseRequests() {
         </Box>
         <Button variant="contained" startIcon={<Add />} onClick={() => {
           setForm({ project_id: projects[0]?.id || '', building_id: '', department_name: '',
-            required_date: new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0], remarks: '',
+            required_date: dayjs().add(14, 'day'), remarks: '',
             items: [{ material_id: '', quantity: '' }] });
           setDepartments([]);
           setDialog(true);
@@ -231,36 +270,99 @@ export default function PurchaseRequests() {
         <TableContainer>
           <Table size="small">
             <TableHead>
-              <TableRow>
-                <TableCell>PR Number</TableCell>
-                <TableCell>Items</TableCell>
-                <TableCell>Building</TableCell>
-                <TableCell>Department</TableCell>
-                <TableCell>PR Date</TableCell>
-                <TableCell>Req. Date</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Actions</TableCell>
+              <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
+                <TableCell sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>
+                  <TableSortLabel
+                    active={sortConfig.key === 'pr_number'}
+                    direction={sortConfig.direction}
+                    onClick={() => handleSort('pr_number')}
+                    IconComponent={ArrowDropDown}
+                  >
+                    PR NUMBER
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>
+                  <TableSortLabel
+                    active={sortConfig.key === 'items'}
+                    direction={sortConfig.direction}
+                    onClick={() => handleSort('items')}
+                    IconComponent={ArrowDropDown}
+                  >
+                    ITEMS
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.75rem' }}>
+                  <TableSortLabel
+                    active={sortConfig.key === 'building_name'}
+                    direction={sortConfig.direction}
+                    onClick={() => handleSort('building_name')}
+                    IconComponent={ArrowDropDown}
+                  >
+                    BUILDING
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.75rem' }}>
+                  <TableSortLabel
+                    active={sortConfig.key === 'department_name'}
+                    direction={sortConfig.direction}
+                    onClick={() => handleSort('department_name')}
+                    IconComponent={ArrowDropDown}
+                  >
+                    DEPARTMENT
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>
+                  <TableSortLabel
+                    active={sortConfig.key === 'created_at'}
+                    direction={sortConfig.direction}
+                    onClick={() => handleSort('created_at')}
+                    IconComponent={ArrowDropDown}
+                  >
+                    PR DATE
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>
+                  <TableSortLabel
+                    active={sortConfig.key === 'required_date'}
+                    direction={sortConfig.direction}
+                    onClick={() => handleSort('required_date')}
+                    IconComponent={ArrowDropDown}
+                  >
+                    REQ. DATE
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>
+                  <TableSortLabel
+                    active={sortConfig.key === 'status'}
+                    direction={sortConfig.direction}
+                    onClick={() => handleSort('status')}
+                    IconComponent={ArrowDropDown}
+                  >
+                    STATUS
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>ACTIONS</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {filtered.map(pr => (
+              {sortedPRs.map(pr => (
                 <TableRow key={pr.id} sx={{ cursor: 'pointer' }} onClick={() => setDetailDialog(pr)}>
-                  <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.8rem' }}>{pr.pr_number}</TableCell>
-                  <TableCell sx={{ fontSize: '0.8rem' }}>{pr.items?.length || 0} items</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>{pr.pr_number}</TableCell>
+                  <TableCell sx={{ fontSize: '0.8rem', whiteSpace: 'nowrap' }}>{pr.items?.length || 0} {pr.items?.length === 1 ? 'item' : 'items'}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem' }}>{pr.building_name || '-'}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem' }}>{pr.department_name || '-'}</TableCell>
-                  <TableCell sx={{ fontSize: '0.8rem' }}>{formatDate(pr.created_at)}</TableCell>
-                  <TableCell sx={{ fontSize: '0.8rem' }}>{formatDate(pr.required_date)}</TableCell>
-                  <TableCell><StatusChip status={pr.status} /></TableCell>
-                  <TableCell onClick={e => e.stopPropagation()}>
+                  <TableCell sx={{ fontSize: '0.8rem', whiteSpace: 'nowrap' }}>{formatDate(pr.created_at)}</TableCell>
+                  <TableCell sx={{ fontSize: '0.8rem', whiteSpace: 'nowrap' }}>{formatDate(pr.required_date)}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}><StatusChip status={pr.status} /></TableCell>
+                  <TableCell onClick={e => e.stopPropagation()} sx={{ whiteSpace: 'nowrap' }}>
                     <Box sx={{ display: 'flex', gap: 0.5 }}>
                       <Tooltip title={approveLabel(pr.status)}>
                         <span><IconButton size="small" color="success" disabled={!canApprove(pr.status)}
                           onClick={() => showConfirm(
                             pr.status === 'Draft' ? 'Submit PR?' : 'Approve PR?',
                             pr.status === 'Draft'
-                              ? `Submit ${pr.pr_number} for approval? (${pr.items?.length} items)`
-                              : `Approve ${pr.pr_number}? (${pr.items?.length} items)`,
+                              ? `Submit ${pr.pr_number} for approval? (${pr.items?.length} ${pr.items?.length === 1 ? 'item' : 'items'})`
+                              : `Approve ${pr.pr_number}? (${pr.items?.length} ${pr.items?.length === 1 ? 'item' : 'items'})`,
                             pr.status === 'Draft' ? 'Yes, Submit' : 'Yes, Approve',
                             'success',
                             () => handleApprove(pr.id)
@@ -296,47 +398,92 @@ export default function PurchaseRequests() {
       </Card>
 
       {/* PR Detail Dialog — shows material details for approval review */}
-      <Dialog open={!!detailDialog} onClose={() => setDetailDialog(null)} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ fontWeight: 600 }}>{detailDialog?.pr_number} — PR Details</DialogTitle>
-        <DialogContent>
-          <Grid container spacing={2}>
-            <Grid size={12}>
-              <Box sx={{ p: 2, bgcolor: '#f8fafc', borderRadius: 1, border: '1px solid #e2e8f0' }}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, color: '#1e293b' }}>Material Details</Typography>
-                <Table size="small">
-                  <TableHead><TableRow>
-                    <TableCell sx={{ fontWeight: 600 }}>Material</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Code</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 600 }}>Quantity</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>UOM</TableCell>
-                  </TableRow></TableHead>
-                  <TableBody>
-                    {detailDialog?.items?.map((it, idx) => (
-                      <TableRow key={idx}>
-                        <TableCell>{it.material_name}</TableCell>
-                        <TableCell sx={{ color: '#64748B' }}>{it.material_code}</TableCell>
-                        <TableCell align="right" sx={{ fontWeight: 700 }}>{it.quantity}</TableCell>
-                        <TableCell>{it.uom_name}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </Box>
+      <Dialog open={!!detailDialog} onClose={() => setDetailDialog(null)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 3 } }}>
+        <DialogTitle sx={{ fontWeight: 700, bgcolor: '#f8fafc', borderBottom: '1px solid #e2e8f0', px: 3, py: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <ShoppingCart sx={{ color: 'primary.main' }} />
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>{detailDialog?.pr_number} — PR Details</Typography>
+          </Box>
+        </DialogTitle>
+        <DialogContent sx={{ p: 0 }}>
+          <Box sx={{ p: 3 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2, color: '#1e293b', display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Inventory fontSize="small" sx={{ color: '#64748B' }} />
+              Material Details
+            </Typography>
+            <TableContainer component={Paper} variant="outlined" sx={{ mb: 4, borderRadius: 2 }}>
+              <Table size="small">
+                <TableHead sx={{ bgcolor: '#f8fafc' }}>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 700, color: '#475569' }}>Material</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#475569' }}>Code</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700, color: '#475569' }}>Quantity</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#475569' }}>UOM</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {detailDialog?.items?.map((it, idx) => (
+                    <TableRow key={idx} hover>
+                      <TableCell sx={{ fontWeight: 500 }}>{it.material_name}</TableCell>
+                      <TableCell sx={{ color: '#64748B', fontSize: '0.75rem' }}>{it.material_code}</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 700, color: 'primary.main' }}>{it.quantity}</TableCell>
+                      <TableCell sx={{ color: '#64748B' }}>{it.uom_name}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+
+            <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2, color: '#1e293b' }}>Request Information</Typography>
+            <Grid container spacing={3}>
+              <Grid item xs={6}>
+                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>BUILDING</Typography>
+                <Typography sx={{ fontWeight: 600, color: '#1e293b' }}>{detailDialog?.building_name || '-'}</Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>DEPARTMENT</Typography>
+                <Typography sx={{ fontWeight: 600, color: '#1e293b' }}>{detailDialog?.department_name || '-'}</Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>REQUESTER</Typography>
+                <Typography sx={{ fontWeight: 600, color: '#1e293b' }}>{detailDialog?.requester_name}</Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>STATUS</Typography>
+                <Box><StatusChip status={detailDialog?.status || ''} /></Box>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>PR DATE</Typography>
+                <Typography sx={{ fontWeight: 600, color: '#1e293b' }}>{formatDate(detailDialog?.created_at)}</Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>REQUIRED DATE</Typography>
+                <Typography sx={{ fontWeight: 600, color: '#2563EB' }}>{formatDate(detailDialog?.required_date)}</Typography>
+              </Grid>
+              {detailDialog?.remarks && (
+                <Grid item xs={12}>
+                  <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>REMARKS</Typography>
+                  <Box sx={{ p: 1.5, bgcolor: '#f1f5f9', borderRadius: 2, border: '1px solid #e2e8f0' }}>
+                    <Typography variant="body2" sx={{ whiteSpace: 'pre-line', color: '#334155' }}>{detailDialog?.remarks}</Typography>
+                  </Box>
+                </Grid>
+              )}
             </Grid>
-            <Grid size={6}><Typography variant="caption" color="textSecondary">Building</Typography><Typography sx={{ fontWeight: 600 }}>{detailDialog?.building_name || '-'}</Typography></Grid>
-            <Grid size={6}><Typography variant="caption" color="textSecondary">Department</Typography><Typography>{detailDialog?.department_name || '-'}</Typography></Grid>
-            <Grid size={6}><Typography variant="caption" color="textSecondary">Requester</Typography><Typography>{detailDialog?.requester_name}</Typography></Grid>
-            <Grid size={6}><Typography variant="caption" color="textSecondary">Status</Typography><Box><StatusChip status={detailDialog?.status || ''} /></Box></Grid>
-            <Grid size={6}><Typography variant="caption" color="textSecondary">PR Date</Typography><Typography>{formatDate(detailDialog?.created_at)}</Typography></Grid>
-            <Grid size={6}><Typography variant="caption" color="textSecondary">Required Date</Typography><Typography>{formatDate(detailDialog?.required_date)}</Typography></Grid>
-            {detailDialog?.remarks && <Grid size={12}><Typography variant="caption" color="textSecondary">Remarks</Typography><Typography sx={{ whiteSpace: 'pre-line' }}>{detailDialog?.remarks}</Typography></Grid>}
-          </Grid>
+          </Box>
         </DialogContent>
-        <DialogActions><Button onClick={() => setDetailDialog(null)}>Close</Button></DialogActions>
+        <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid #e2e8f0' }}>
+          <Button onClick={() => setDetailDialog(null)} variant="outlined" sx={{ borderRadius: 2, fontWeight: 600, textTransform: 'none' }}>Close</Button>
+        </DialogActions>
       </Dialog>
 
       {/* Create PR Dialog - Multi-Item */}
-      <Dialog open={dialog} onClose={() => setDialog(false)} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 3, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' } }}>
+      <Dialog 
+        open={dialog} 
+        onClose={() => setDialog(false)} 
+        maxWidth="md" 
+        fullWidth 
+        PaperProps={{ sx: { borderRadius: 3, boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' } }}
+      >
         <DialogTitle sx={{ pb: 1, pt: 3, px: 4 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Box sx={{ p: 1, bgcolor: '#EFF6FF', borderRadius: 2, color: '#2563EB', display: 'flex' }}>
@@ -348,11 +495,14 @@ export default function PurchaseRequests() {
             </Box>
           </Box>
         </DialogTitle>
-        <DialogContent sx={{ px: 4, py: 2 }}>
-          <Grid container spacing={2.5} sx={{ mt: 0.5, mb: 2 }}>
-            <Grid size={{ xs: 12, sm: 4 }}>
-              <FormControl fullWidth required><InputLabel>Building</InputLabel>
-                <Select value={form.building_id} label="Building" onChange={e => {
+        <DialogContent sx={{ px: 3, py: 1 }}>
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr 1fr' }, gap: 2, pt: 1, mb: 2 }}>
+            <FormControl fullWidth required>
+              <InputLabel>Building</InputLabel>
+              <Select 
+                value={form.building_id} 
+                label="Building" 
+                onChange={e => {
                   const buildingId = e.target.value;
                   setForm({ ...form, building_id: buildingId, department_name: '' });
                   if (buildingId) {
@@ -361,72 +511,139 @@ export default function PurchaseRequests() {
                     setDepartments([]);
                   }
                 }}
-                  startAdornment={<InputAdornment position="start"><Apartment sx={{ color: '#94A3B8' }} /></InputAdornment>}
-                >
-                  <MenuItem value="">Select Building</MenuItem>
-                  {buildings.map(b => <MenuItem key={b.id} value={b.id}>{b.name}</MenuItem>)}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 4 }}>
-              <FormControl fullWidth><InputLabel>Department</InputLabel>
-                <Select value={form.department_name} label="Department" onChange={e => setForm({ ...form, department_name: e.target.value })} disabled={!form.building_id}
-                  startAdornment={<InputAdornment position="start"><AccountTree sx={{ color: '#94A3B8' }} /></InputAdornment>}
-                >
-                  <MenuItem value="">Select Department</MenuItem>
-                  {departments.map(d => <MenuItem key={d.id} value={d.name}>{d.name} ({d.code})</MenuItem>)}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 4 }}>
-              <TextField fullWidth label="Required Date" type="date" value={form.required_date}
-                onChange={e => setForm({ ...form, required_date: e.target.value })}
-                InputLabelProps={{ shrink: true }} required
-                InputProps={{ startAdornment: <InputAdornment position="start"><CalendarMonth sx={{ color: '#94A3B8' }} /></InputAdornment> }} />
-            </Grid>
-          </Grid>
+                startAdornment={<InputAdornment position="start"><Apartment sx={{ color: '#94A3B8' }} /></InputAdornment>}
+              >
+                <MenuItem value="">Select Building</MenuItem>
+                {buildings.map(b => <MenuItem key={b.id} value={b.id}>{b.name}</MenuItem>)}
+              </Select>
+            </FormControl>
+
+            <FormControl fullWidth disabled={!form.building_id}>
+              <InputLabel>Department</InputLabel>
+              <Select 
+                value={form.department_name} 
+                label="Department" 
+                onChange={e => setForm({ ...form, department_name: e.target.value })}
+                startAdornment={<InputAdornment position="start"><AccountTree sx={{ color: '#94A3B8' }} /></InputAdornment>}
+              >
+                <MenuItem value="">Select Department</MenuItem>
+                {departments.map(d => <MenuItem key={d.id} value={d.name}>{d.name} ({d.code})</MenuItem>)}
+              </Select>
+            </FormControl>
+
+            <DatePicker 
+              label="Required Date" 
+              value={dayjs(form.required_date)}
+              onChange={val => setForm({ ...form, required_date: val })}
+              format="DD-MMM-YYYY"
+              slotProps={{ 
+                textField: { 
+                  fullWidth: true,
+                  size: "small",
+                  InputProps: {
+                    startAdornment: <InputAdornment position="start"><CalendarMonth sx={{ color: '#94A3B8' }} /></InputAdornment>
+                  }
+                } 
+              }} 
+            />
+          </Box>
 
           <Divider sx={{ mb: 2 }} />
-          <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>Material Items</Typography>
+          
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b' }}>Material Items</Typography>
+            <Button size="small" startIcon={<Add />} onClick={addItem} sx={{ fontWeight: 600 }}>Add Item</Button>
+          </Box>
 
-          {form.items.map((item, i) => (
-            <Grid container spacing={1} key={i} sx={{ mb: 1 }}>
-              <Grid size={7}>
-                <MaterialSelect 
-                  materials={materials} 
-                  value={item.material_id} 
-                  onChange={val => updateItem(i, 'material_id', val)} 
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            {form.items.map((item, i) => (
+              <Box key={i} sx={{ 
+                display: 'grid', 
+                gridTemplateColumns: { xs: '1fr', sm: '1.5fr 1fr 40px' }, 
+                gap: 1.5, 
+                alignItems: 'start',
+                p: 1.5,
+                bgcolor: '#f8fafc',
+                borderRadius: 2,
+                border: '1px solid #e2e8f0'
+              }}>
+                <Box>
+                  <MaterialSelect 
+                    materials={materials} 
+                    value={item.material_id} 
+                    onChange={val => updateItem(i, 'material_id', val)}
+                    size="small"
+                  />
+                </Box>
+                <TextField 
+                  fullWidth 
+                  size="small"
+                  label="Quantity" 
+                  type="number" 
+                  value={item.quantity}
+                  onChange={e => updateItem(i, 'quantity', e.target.value)} 
+                  inputProps={{ min: 1 }} 
+                  required
+                  InputProps={{ 
+                    startAdornment: <InputAdornment position="start"><Numbers sx={{ color: '#94A3B8' }} /></InputAdornment> 
+                  }} 
                 />
-              </Grid>
-              <Grid size={3}>
-                <TextField fullWidth size="small" label="Quantity" type="number" value={item.quantity}
-                  onChange={e => updateItem(i, 'quantity', e.target.value)} inputProps={{ min: 1 }} required
-                  InputProps={{ startAdornment: <InputAdornment position="start"><Numbers sx={{ color: '#94A3B8' }} /></InputAdornment> }} />
-              </Grid>
-              <Grid size={2} sx={{ display: 'flex', alignItems: 'center' }}>
-                {form.items.length > 1 && (
-                  <IconButton size="small" color="error" onClick={() => removeItem(i)}><Delete fontSize="small" /></IconButton>
-                )}
-              </Grid>
-            </Grid>
-          ))}
-          <Button size="small" startIcon={<Add />} onClick={addItem} sx={{ mt: 1 }}>Add Item</Button>
+                <Box sx={{ display: 'flex', justifyContent: 'center', pt: 1 }}>
+                  {form.items.length > 1 && (
+                    <Tooltip title="Remove Item">
+                      <IconButton size="small" color="error" onClick={() => removeItem(i)} sx={{ bgcolor: '#fff', border: '1px solid #fee2e2' }}>
+                        <Delete fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                </Box>
+              </Box>
+            ))}
+          </Box>
 
-          <Grid container spacing={2} sx={{ mt: 2 }}>
-            <Grid size={12}>
-              <TextField fullWidth label="Remarks" value={form.remarks} onChange={e => setForm({ ...form, remarks: e.target.value })} multiline rows={2}
-                InputProps={{ startAdornment: <InputAdornment position="start" sx={{ alignSelf: 'flex-start', mt: 1.5 }}><Notes sx={{ color: '#94A3B8' }} /></InputAdornment> }} />
-            </Grid>
-          </Grid>
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="caption" sx={{ fontWeight: 600, color: '#64748B', mb: 0.5, display: 'block' }}>REMARKS & NOTES</Typography>
+            <TextField 
+              fullWidth 
+              placeholder="Enter any additional instructions or remarks..."
+              value={form.remarks} 
+              onChange={e => setForm({ ...form, remarks: e.target.value })} 
+              multiline 
+              rows={3}
+              InputProps={{ 
+                startAdornment: <InputAdornment position="start" sx={{ alignSelf: 'flex-start', mt: 1.5 }}><Notes sx={{ color: '#94A3B8' }} /></InputAdornment>,
+                sx: { borderRadius: 2 }
+              }} 
+            />
+          </Box>
         </DialogContent>
         <DialogActions sx={{ px: 4, pb: 4, pt: 2, justifyContent: 'flex-end', gap: 2 }}>
           <Button onClick={() => setDialog(false)} sx={{ color: '#64748B', fontWeight: 600 }}>Cancel</Button>
-          <Button variant="contained" onClick={handleCreate} sx={{ borderRadius: 2, px: 4, py: 1, fontWeight: 700, boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)', textTransform: 'none' }}>Submit PR</Button>
+          <Button 
+            variant="contained" 
+            onClick={handleCreate} 
+            sx={{ 
+              borderRadius: 2, 
+              px: 4, 
+              py: 1, 
+              fontWeight: 700, 
+              boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)', 
+              textTransform: 'none' 
+            }}
+          >
+            Submit PR
+          </Button>
         </DialogActions>
       </Dialog>
 
       {/* Convert PR to PO Dialog — ONLY the specific approved PR */}
-      <Dialog open={convertDialog.open} onClose={() => setConvertDialog({ ...convertDialog, open: false })} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 3, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' } }}>
+      <Dialog 
+        open={convertDialog.open} 
+        onClose={() => setConvertDialog({ ...convertDialog, open: false })} 
+        maxWidth="sm" 
+        fullWidth 
+        PaperProps={{ sx: { borderRadius: 3, boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' } }}
+      >
         <DialogTitle sx={{ pb: 1, pt: 3, px: 4 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Box sx={{ p: 1, bgcolor: '#EFF6FF', borderRadius: 2, color: '#2563EB', display: 'flex' }}>
@@ -439,54 +656,115 @@ export default function PurchaseRequests() {
           </Box>
         </DialogTitle>
         <DialogContent sx={{ px: 4, py: 2 }}>
-          <Box sx={{ mb: 2, mt: 1, p: 2, bgcolor: '#f8fafc', borderRadius: 1, border: '1px solid #e2e8f0' }}>
-            <Typography variant="body2"><strong>PR Number:</strong> {convertDialog.pr?.pr_number}</Typography>
-            <Typography variant="body2"><strong>Items:</strong> {convertDialog.pr?.items?.length} materials</Typography>
+          <Box sx={{ mb: 3, mt: 1, p: 2, bgcolor: '#f8fafc', borderRadius: 2, border: '1px solid #e2e8f0' }}>
+            <Grid container spacing={1}>
+              <Grid item xs={6}>
+                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600 }}>PR NUMBER</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 700 }}>{convertDialog.pr?.pr_number}</Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600 }}>ITEMS</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 700 }}>{convertDialog.pr?.items?.length} {convertDialog.pr?.items?.length === 1 ? 'material' : 'materials'}</Typography>
+              </Grid>
+            </Grid>
           </Box>
-          <Grid container spacing={2.5}>
-            <Grid size={12}>
-              <FormControl fullWidth required><InputLabel>Vendor</InputLabel>
-                <Select value={convertDialog.vendor_id} label="Vendor" onChange={e => setConvertDialog({ ...convertDialog, vendor_id: e.target.value })}
+
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <FormControl fullWidth required size="small">
+                <InputLabel>Vendor</InputLabel>
+                <Select 
+                  value={convertDialog.vendor_id} 
+                  label="Vendor" 
+                  displayEmpty
+                  onChange={e => setConvertDialog({ ...convertDialog, vendor_id: e.target.value })}
                   startAdornment={<InputAdornment position="start"><Store sx={{ color: '#94A3B8' }} /></InputAdornment>}
                 >
+                  <MenuItem value="" disabled>Select Vendor</MenuItem>
                   {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.name}</MenuItem>)}
                 </Select>
               </FormControl>
             </Grid>
-            <Grid size={6}>
-              <TextField fullWidth label="Delivery Date" type="date" value={convertDialog.delivery_date}
-                onChange={e => setConvertDialog({ ...convertDialog, delivery_date: e.target.value })}
-                InputLabelProps={{ shrink: true }} required
-                InputProps={{ startAdornment: <InputAdornment position="start"><CalendarMonth sx={{ color: '#94A3B8' }} /></InputAdornment> }} />
+            <Grid item xs={6}>
+              <DatePicker 
+                label="Delivery Date" 
+                value={dayjs(convertDialog.delivery_date)}
+                onChange={val => setConvertDialog({ ...convertDialog, delivery_date: val })}
+                format="DD-MMM-YYYY"
+                slotProps={{ 
+                  textField: { 
+                    fullWidth: true,
+                    size: "small",
+                    InputProps: {
+                      startAdornment: <InputAdornment position="start"><CalendarMonth sx={{ color: '#94A3B8' }} /></InputAdornment>
+                    }
+                  } 
+                }} 
+              />
             </Grid>
           </Grid>
-          <Divider sx={{ my: 2 }} />
-          <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>Specify Rates for Items</Typography>
-          {convertDialog.items?.map((it, i) => (
-            <Grid container spacing={1} key={i} sx={{ mb: 2, alignItems: 'center' }}>
-              <Grid size={5}>
-                <Typography variant="body2">{it.material_name} ({it.quantity} {it.uom_name})</Typography>
-                {it.last_purchase_price != null && (
-                  <Typography variant="caption" sx={{ color: '#059669', display: 'block', fontWeight: 600 }}>
-                    LPP Ref: ₹{it.last_purchase_price}
+
+          <Divider sx={{ my: 3 }} />
+          
+          <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 700, color: '#1e293b' }}>Specify Rates for Items</Typography>
+          
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {convertDialog.items?.map((it, i) => (
+              <Box key={i} sx={{ 
+                display: 'grid', 
+                gridTemplateColumns: '1.2fr 1fr', 
+                gap: 2, 
+                alignItems: 'center',
+                p: 1.5,
+                bgcolor: '#f8fafc',
+                borderRadius: 2,
+                border: '1px solid #e2e8f0'
+              }}>
+                <Box>
+                  <Typography variant="body2" sx={{ fontWeight: 700 }}>{it.material_name}</Typography>
+                  <Typography variant="caption" sx={{ color: '#64748B', display: 'block' }}>
+                    Qty: {it.quantity} {it.uom_name}
                   </Typography>
-                )}
-                {it.last_purchase_price == null && (
-                  <Typography variant="caption" sx={{ color: '#94A3B8', display: 'block' }}>
-                    No prior purchases
-                  </Typography>
-                )}
-              </Grid>
-              <Grid size={7}>
-                <TextField fullWidth size="small" label="Rate (₹) / unit" type="number" value={it.rate}
-                  onChange={e => updateConvertItem(i, e.target.value)} inputProps={{ min: 0 }} required />
-              </Grid>
-            </Grid>
-          ))}
+                  {it.last_purchase_price != null ? (
+                    <Typography variant="caption" sx={{ color: '#059669', fontWeight: 600, mt: 0.5, display: 'block' }}>
+                      LPP: ₹{it.last_purchase_price}
+                    </Typography>
+                  ) : (
+                    <Typography variant="caption" sx={{ color: '#94A3B8', mt: 0.5, display: 'block' }}>
+                      No prior purchases
+                    </Typography>
+                  )}
+                </Box>
+                <TextField 
+                  fullWidth 
+                  size="small" 
+                  label="Rate (₹) / unit" 
+                  type="number" 
+                  value={it.rate}
+                  onChange={e => updateConvertItem(i, e.target.value)} 
+                  inputProps={{ min: 0 }} 
+                  required 
+                />
+              </Box>
+            ))}
+          </Box>
         </DialogContent>
         <DialogActions sx={{ px: 4, pb: 4, pt: 2, justifyContent: 'flex-end', gap: 2 }}>
           <Button onClick={() => setConvertDialog({ ...convertDialog, open: false })} sx={{ color: '#64748B', fontWeight: 600 }}>Cancel</Button>
-          <Button variant="contained" onClick={handleConvert} sx={{ borderRadius: 2, px: 4, py: 1, fontWeight: 700, boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)', textTransform: 'none' }}>Create PO</Button>
+          <Button 
+            variant="contained" 
+            onClick={handleConvert} 
+            sx={{ 
+              borderRadius: 2, 
+              px: 4, 
+              py: 1, 
+              fontWeight: 700, 
+              boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)', 
+              textTransform: 'none' 
+            }}
+          >
+            Create PO
+          </Button>
         </DialogActions>
       </Dialog>
 

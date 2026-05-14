@@ -5,7 +5,7 @@ import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
   DialogContent, DialogActions, Grid, IconButton, Tooltip, FormControl, InputLabel, Select, MenuItem,
-  Divider, InputAdornment
+  Divider, InputAdornment, TableSortLabel
 } from '@mui/material';
 import { Add, Delete, CheckCircle, Cancel, ReceiptLong, ArrowBack, Search, Apartment, Layers, MeetingRoom, AccountTree, Notes } from '@mui/icons-material';
 import api from '../services/api';
@@ -22,6 +22,29 @@ export default function Indents() {
   const [showForm, setShowForm] = useState(false);
   const [detailDialog, setDetailDialog] = useState(null);
   const [search, setSearch] = useState('');
+
+  // Sorting state
+  const [order, setOrder] = useState('desc');
+  const [orderBy, setOrderBy] = useState('created_at');
+
+  const handleRequestSort = (property) => {
+    const isAsc = orderBy === property && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(property);
+  };
+
+  const sortedIndents = [...indents].sort((a, b) => {
+    let valA = a[orderBy] || '';
+    let valB = b[orderBy] || '';
+
+    // Handle string comparison case-insensitively
+    if (typeof valA === 'string') valA = valA.toLowerCase();
+    if (typeof valB === 'string') valB = valB.toLowerCase();
+
+    if (valA < valB) return order === 'asc' ? -1 : 1;
+    if (valA > valB) return order === 'asc' ? 1 : -1;
+    return 0;
+  });
 
   const [form, setForm] = useState({
     building_id: '', floor_id: '', room_id: '', department: '', remarks: '', items: [{ material_id: '', requested_quantity: '' }]
@@ -374,41 +397,75 @@ export default function Indents() {
 
       <Card>
         <TableContainer>
-          <Table size="small">
+          <Table size="small" sx={{ minWidth: '100%', tableLayout: 'auto' }}>
             <TableHead>
-              <TableRow>
-                <TableCell>Indent Number</TableCell>
-                <TableCell>Building</TableCell>
-                <TableCell>Dept</TableCell>
-                <TableCell>Room</TableCell>
-                <TableCell>Requester</TableCell>
-                <TableCell>Date</TableCell>
+              <TableRow sx={{ '& th': { px: 0.5, py: 1, fontSize: '0.78rem', fontWeight: 700, whiteSpace: 'nowrap' } }}>
+                <TableCell>
+                  <TableSortLabel active={orderBy === 'indent_number'} direction={orderBy === 'indent_number' ? order : 'asc'} onClick={() => handleRequestSort('indent_number')}>
+                    Indent No.
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel active={orderBy === 'building_name'} direction={orderBy === 'building_name' ? order : 'asc'} onClick={() => handleRequestSort('building_name')}>
+                    Bldg.
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel active={orderBy === 'department'} direction={orderBy === 'department' ? order : 'asc'} onClick={() => handleRequestSort('department')}>
+                    Dept
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel active={orderBy === 'floor'} direction={orderBy === 'floor' ? order : 'asc'} onClick={() => handleRequestSort('floor')}>
+                    Floor
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel active={orderBy === 'room_name'} direction={orderBy === 'room_name' ? order : 'asc'} onClick={() => handleRequestSort('room_name')}>
+                    Room
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel active={orderBy === 'requester_name'} direction={orderBy === 'requester_name' ? order : 'asc'} onClick={() => handleRequestSort('requester_name')}>
+                    Requester
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel active={orderBy === 'created_at'} direction={orderBy === 'created_at' ? order : 'asc'} onClick={() => handleRequestSort('created_at')}>
+                    Date
+                  </TableSortLabel>
+                </TableCell>
                 <TableCell align="center">Items</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell align="center">Level</TableCell>
+                <TableCell>
+                  <TableSortLabel active={orderBy === 'status'} direction={orderBy === 'status' ? order : 'asc'} onClick={() => handleRequestSort('status')}>
+                    Status
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell align="center">Lvl</TableCell>
                 <TableCell>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {indents.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={9} align="center" sx={{ py: 6, color: '#94a3b8' }}>
+                  <TableCell colSpan={11} align="center" sx={{ py: 6, color: '#94a3b8' }}>
                     <Typography variant="body2">No indents raised yet. Click "New Indent" to create one.</Typography>
                   </TableCell>
                 </TableRow>
               )}
-              {indents.map(ind => (
-                <TableRow key={ind.id} sx={{ cursor: 'pointer', '&:hover': { bgcolor: '#f8fafc' } }} onClick={() => setDetailDialog(ind)}>
-                  <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.8rem' }}>{ind.indent_number}</TableCell>
-                  <TableCell sx={{ fontSize: '0.8rem' }}>{ind.building_name || '-'}</TableCell>
-                  <TableCell sx={{ fontSize: '0.8rem' }}>{ind.department || '-'}</TableCell>
-                  <TableCell sx={{ fontSize: '0.8rem' }}>{ind.room_name || '-'}</TableCell>
-                  <TableCell sx={{ fontSize: '0.8rem' }}>{ind.requester_name}</TableCell>
-                  <TableCell sx={{ fontSize: '0.8rem' }}>{formatDate(ind.created_at)}</TableCell>
-                  <TableCell align="center">{ind.items?.length || 0}</TableCell>
-                  <TableCell><Chip label={ind.status} size="small" color={statusColor[ind.status] || 'default'} sx={{ fontWeight: 600, fontSize: '0.7rem' }} /></TableCell>
-                  <TableCell align="center"><Chip label={`L${ind.current_approval_level}`} size="small" variant="outlined" /></TableCell>
-                  <TableCell onClick={e => e.stopPropagation()}>
+              {sortedIndents.map(ind => (
+                <TableRow key={ind.id} sx={{ cursor: 'pointer', '&:hover': { bgcolor: '#f8fafc' }, '& td': { px: 0.5, py: 0.75 } }} onClick={() => setDetailDialog(ind)}>
+                  <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>{ind.indent_number}</TableCell>
+                  <TableCell sx={{ fontSize: '0.78rem' }}>{ind.building_name || '-'}</TableCell>
+                  <TableCell sx={{ fontSize: '0.78rem' }}>{ind.department || '-'}</TableCell>
+                  <TableCell sx={{ fontSize: '0.78rem' }}>{ind.floor || '-'}</TableCell>
+                  <TableCell sx={{ fontSize: '0.78rem' }}>{ind.room_name || '-'}</TableCell>
+                  <TableCell sx={{ fontSize: '0.78rem' }}>{ind.requester_name}</TableCell>
+                  <TableCell sx={{ fontSize: '0.78rem', whiteSpace: 'nowrap' }}>{formatDate(ind.created_at)}</TableCell>
+                  <TableCell align="center" sx={{ fontSize: '0.78rem' }}>{ind.items?.length || 0}</TableCell>
+                  <TableCell><Chip label={ind.status} size="small" color={statusColor[ind.status] || 'default'} sx={{ fontWeight: 600, fontSize: '0.65rem', height: 18 }} /></TableCell>
+                  <TableCell align="center"><Chip label={`L${ind.current_approval_level}`} size="small" variant="outlined" sx={{ height: 18, fontSize: '0.65rem' }} /></TableCell>
+                  <TableCell onClick={e => e.stopPropagation()} sx={{ whiteSpace: 'nowrap' }}>
                     <Box sx={{ display: 'flex', gap: 0.5 }}>
                       <Tooltip title="Approve">
                         <span><IconButton size="small" color="success" disabled={ind.status !== 'Awaiting Approval'}
@@ -455,8 +512,16 @@ export default function Indents() {
               <Typography sx={{ fontWeight: 600 }}>{detailDialog?.building_name || '—'}</Typography>
             </Grid>
             <Grid item xs={3}>
+              <Typography variant="caption" color="textSecondary">Floor</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{detailDialog?.floor || '—'}</Typography>
+            </Grid>
+            <Grid item xs={3}>
               <Typography variant="caption" color="textSecondary">Room</Typography>
               <Typography sx={{ fontWeight: 600 }}>{detailDialog?.room_name || '—'}</Typography>
+            </Grid>
+            <Grid item xs={3}>
+              <Typography variant="caption" color="textSecondary">Indent Date</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{formatDate(detailDialog?.created_at)}</Typography>
             </Grid>
             <Grid item xs={3}>
               <Typography variant="caption" color="textSecondary">Status</Typography>
@@ -511,24 +576,98 @@ export default function Indents() {
       </Dialog>
 
       {/* Vendor Selection Dialog for PO Conversion */}
-      <Dialog open={vendorDialog.open} onClose={() => setVendorDialog({ ...vendorDialog, open: false })} maxWidth="xs" fullWidth>
-        <DialogTitle sx={{ fontWeight: 600 }}>Select Vendor for PO</DialogTitle>
-        <DialogContent>
-          <Typography variant="body2" sx={{ mb: 2 }}>Choose a vendor to create a Purchase Order for the pending items of {vendorDialog.indent?.indent_number}.</Typography>
-          <FormControl fullWidth size="small">
-            <InputLabel>Vendor</InputLabel>
-            <Select
-              value={vendorDialog.vendor_id}
-              label="Vendor"
-              onChange={e => setVendorDialog({ ...vendorDialog, vendor_id: e.target.value })}
-            >
-              {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.name} ({v.code})</MenuItem>)}
-            </Select>
-          </FormControl>
+      <Dialog open={vendorDialog.open} onClose={() => setVendorDialog({ ...vendorDialog, open: false })} maxWidth="md" fullWidth>
+        <DialogTitle sx={{ fontWeight: 600 }}>Convert {vendorDialog.indent?.indent_number} to Purchase Order</DialogTitle>
+        <DialogContent sx={{ py: 1 }}>
+          <Box sx={{ mb: 1.5, mt: 0.5, p: 1.5, bgcolor: '#f0f4ff', borderRadius: 2, border: '1px solid #dbeafe' }}>
+            <Grid container spacing={1.5} alignItems="center">
+              <Grid item xs={12} sm={8}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e40af', whiteSpace: 'nowrap' }}>Select Vendor:</Typography>
+                  <FormControl fullWidth size="small">
+                    <Select
+                      value={vendorDialog.vendor_id}
+                      displayEmpty
+                      onChange={e => setVendorDialog({ ...vendorDialog, vendor_id: e.target.value })}
+                      sx={{ bgcolor: '#fff' }}
+                    >
+                      <MenuItem value="" disabled><em>Select Vendor</em></MenuItem>
+                      {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.name} ({v.code})</MenuItem>)}
+                    </Select>
+                  </FormControl>
+                </Box>
+              </Grid>
+              <Grid item xs={12} sm={4} sx={{ textAlign: 'right' }}>
+                <Button 
+                  variant="contained" 
+                  disabled={!vendorDialog.vendor_id} 
+                  onClick={handleConvertToPo}
+                  size="small"
+                  sx={{ py: 0.75, px: 3, fontWeight: 700, borderRadius: 1.5, textTransform: 'none' }}
+                >
+                  Confirm & Convert
+                </Button>
+              </Grid>
+            </Grid>
+          </Box>
+
+          <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748B', mb: 0.5, display: 'block', textTransform: 'uppercase', letterSpacing: 0.5 }}>Indent Details</Typography>
+          <Grid container spacing={0.5} sx={{ mb: 1.5 }}>
+            {[
+              { label: 'Requester', value: vendorDialog.indent?.requester_name },
+              { label: 'Dept', value: vendorDialog.indent?.department },
+              { label: 'Bldg', value: vendorDialog.indent?.building_name },
+              { label: 'Floor', value: vendorDialog.indent?.floor },
+              { label: 'Room', value: vendorDialog.indent?.room_name },
+              { label: 'Date', value: formatDate(vendorDialog.indent?.created_at) },
+            ].map((item, idx) => (
+              <Grid item xs={1.7} key={idx}>
+                <Typography variant="caption" color="textSecondary" sx={{ display: 'block', lineHeight: 1, fontSize: '0.65rem' }}>{item.label}</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.75rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.value || '—'}</Typography>
+              </Grid>
+            ))}
+            <Grid item xs={1.8}>
+              <Typography variant="caption" color="textSecondary" sx={{ display: 'block', lineHeight: 1, fontSize: '0.65rem' }}>Status</Typography>
+              <Chip label={vendorDialog.indent?.status} size="small" color={statusColor[vendorDialog.indent?.status] || 'default'} sx={{ height: 16, fontSize: '0.6rem', fontWeight: 700, mt: 0.2 }} />
+            </Grid>
+          </Grid>
+
+          {vendorDialog.indent?.remarks && (
+            <Typography variant="caption" sx={{ mb: 1.5, p: 1, bgcolor: '#f8fafc', borderRadius: 1, border: '1px solid #e2e8f0', display: 'block' }}>
+              <strong>Remarks:</strong> {vendorDialog.indent.remarks}
+            </Typography>
+          )}
+
+          <Divider sx={{ mb: 1.5 }} />
+          <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748B', mb: 1, display: 'block', textTransform: 'uppercase', letterSpacing: 0.5 }}>Items to be converted</Typography>
+          <Table size="small">
+            <TableHead>
+              <TableRow sx={{ bgcolor: '#f8fafc', '& th': { py: 0.75, px: 1 } }}>
+                <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Material</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Requested</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Issued</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Pending (PO Qty)</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {vendorDialog.indent?.items?.map(item => (
+                <TableRow key={item.id} sx={{ '& td': { py: 0.5, px: 1 } }}>
+                  <TableCell>
+                    <Typography sx={{ fontWeight: 600, fontSize: '0.8rem' }}>{item.material_name}</Typography>
+                    <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.7rem' }}>{item.material_code}</Typography>
+                  </TableCell>
+                  <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{item.requested_quantity} {item.uom_name}</TableCell>
+                  <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{item.issued_quantity}</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700, color: '#2563EB', fontSize: '0.8rem' }}>
+                    {item.pending_quantity} {item.uom_name}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button onClick={() => setVendorDialog({ ...vendorDialog, open: false })}>Cancel</Button>
-          <Button variant="contained" disabled={!vendorDialog.vendor_id} onClick={handleConvertToPo}>Convert to PO</Button>
         </DialogActions>
       </Dialog>
 

@@ -147,6 +147,9 @@ def create_quotation_request(
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
+    if len(data.vendor_ids) < 2:
+        raise HTTPException(status_code=400, detail="Minimum two vendors must be invited for a quotation request")
+
     qr = QuotationRequest(
         tenant_id=tenant_id, site_id=site_id,
         qr_number=generate_qr_number(db, tenant_id, site_id),
@@ -467,6 +470,14 @@ def generate_comparison(
             )
             db.add(comp)
             db.flush()
+        elif comp and auto_l1_vendor_id:
+            # Update auto rank to current lowest
+            comp.auto_rank_vendor_id = auto_l1_vendor_id
+            # If no manual override exists, keep selection in sync with lowest
+            if not comp.is_overridden:
+                comp.selected_vendor_id = auto_l1_vendor_id
+            db.add(comp)
+            db.flush()
 
         material_comparisons.append(MaterialComparisonOut(
             qr_item_id=qr_item.id, material_id=qr_item.material_id,
@@ -636,6 +647,7 @@ def convert_to_pos(
             tenant_id=tenant_id, site_id=site_id,
             po_number=po_number, vendor_id=vendor_id,
             project_id=qr.project_id, po_type="Formal",
+            qr_id=qr.id,
             created_by_id=current_user.id,
             status="Draft" # Or auto-approve based on config
         )

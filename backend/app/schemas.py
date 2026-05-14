@@ -427,6 +427,7 @@ class POBase(BaseModel):
     project_id: int
     pr_id: Optional[int] = None
     indent_id: Optional[int] = None
+    qr_id: Optional[int] = None
     po_type: str = "Formal"
     delivery_date: Optional[date] = None
     terms: Optional[str] = None
@@ -449,6 +450,8 @@ class POOut(BaseModel):
     pr_number: Optional[str] = None
     indent_id: Optional[int] = None
     indent_number: Optional[str] = None
+    qr_id: Optional[int] = None
+    qr_number: Optional[str] = None
     po_type: str = "Formal"
     total_amount: float
     delivery_date: Optional[date] = None

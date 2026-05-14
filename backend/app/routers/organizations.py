@@ -10,6 +10,7 @@ from app.schemas import (
     BuildingCreate, BuildingOut, WarehouseCreate, WarehouseOut,
     FloorCreate, FloorOut, RoomCreate, RoomOut, DepartmentCreate, DepartmentOut
 )
+from app.models import Room, PurchaseRequest, MaterialIssue, MaterialReturn
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
 from app.utils.sequences import get_next_number
 
@@ -561,6 +562,27 @@ def delete_department(
         Department.id == id, Department.tenant_id == tenant_id, Department.site_id == site_id
     ).first()
     if not dept: raise HTTPException(status_code=404, detail="Department not found")
+    
+    # Check if used in Rooms
+    has_room = db.query(Room).filter(Room.department_name == dept.name, Room.tenant_id == tenant_id, Room.is_deleted == False).first()
+    if has_room:
+        raise HTTPException(status_code=400, detail=f"Department '{dept.name}' is used in room '{has_room.name}' and cannot be deleted.")
+        
+    # Check if used in Purchase Requests
+    has_pr = db.query(PurchaseRequest).filter(PurchaseRequest.department_name == dept.name, PurchaseRequest.tenant_id == tenant_id, PurchaseRequest.is_deleted == False).first()
+    if has_pr:
+        raise HTTPException(status_code=400, detail=f"Department '{dept.name}' is referenced in Purchase Request {has_pr.pr_number} and cannot be deleted.")
+        
+    # Check if used in Material Issues
+    has_issue = db.query(MaterialIssue).filter(MaterialIssue.issued_to_department == dept.name, MaterialIssue.tenant_id == tenant_id, MaterialIssue.is_deleted == False).first()
+    if has_issue:
+        raise HTTPException(status_code=400, detail=f"Department '{dept.name}' has active material issues (e.g. {has_issue.issue_number}) and cannot be deleted.")
+        
+    # Check if used in Material Returns
+    has_return = db.query(MaterialReturn).filter(MaterialReturn.returned_from_department == dept.name, MaterialReturn.tenant_id == tenant_id, MaterialReturn.is_deleted == False).first()
+    if has_return:
+        raise HTTPException(status_code=400, detail=f"Department '{dept.name}' has material returns (e.g. {has_return.return_number}) and cannot be deleted.")
+
     dept.is_deleted = True
     dept.is_active = False
     db.commit()
@@ -581,7 +603,8 @@ def list_warehouses(
         Warehouse.tenant_id == tenant_id, Warehouse.site_id == site_id, Warehouse.is_active == True
     )
     if search:
-        q = q.filter(Warehouse.name.ilike(f"%{search}%"))
+        from sqlalchemy import or_
+        q = q.filter(or_(Warehouse.name.ilike(f"%{search}%"), Warehouse.code.ilike(f"%{search}%")))
     if project_id:
         q = q.filter(Warehouse.project_id == project_id)
     warehouses = q.order_by(Warehouse.name).all()

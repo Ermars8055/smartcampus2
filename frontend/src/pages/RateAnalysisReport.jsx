@@ -220,11 +220,11 @@ export default function RateAnalysisReport() {
         <Grid container spacing={2} sx={{ mb: 2 }}>
           <Grid item xs={12} sm={6} md={2.4}>
             <DatePicker label="From Date" value={filters.fromDate} onChange={d => setFilters({ ...filters, fromDate: d })}
-              renderInput={(params) => <TextField {...params} size="small" fullWidth InputLabelProps={{ shrink: true }} />} format="DD-MMM-YYYY" />
+              slotProps={{ textField: { size: "small", fullWidth: true, InputLabelProps: { shrink: true } } }} format="DD-MMM-YYYY" />
           </Grid>
           <Grid item xs={12} sm={6} md={2.4}>
             <DatePicker label="To Date" value={filters.toDate} onChange={d => setFilters({ ...filters, toDate: d })}
-              renderInput={(params) => <TextField {...params} size="small" fullWidth InputLabelProps={{ shrink: true }} />} format="DD-MMM-YYYY" />
+              slotProps={{ textField: { size: "small", fullWidth: true, InputLabelProps: { shrink: true } } }} format="DD-MMM-YYYY" />
           </Grid>
           <Grid item xs={12} sm={6} md={2.4}>
             <FormControl size="small" fullWidth>

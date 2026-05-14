@@ -483,6 +483,7 @@ class PurchaseOrder(Base):
     project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
     pr_id = Column(Integer, ForeignKey("purchase_requests.id"), nullable=True)
     indent_id = Column(Integer, ForeignKey("indents.id"), nullable=True)
+    qr_id = Column(Integer, ForeignKey("quotation_requests.id"), nullable=True)
     po_type = Column(String(50), default="Formal") # Formal, Informal
     total_amount = Column(Float, default=0)
     delivery_date = Column(Date)
@@ -498,6 +499,7 @@ class PurchaseOrder(Base):
     project = relationship("Project")
     purchase_request = relationship("PurchaseRequest")
     indent = relationship("Indent")
+    quotation_request = relationship("QuotationRequest")
     created_by = relationship("User", foreign_keys=[created_by_id])
     approver = relationship("User", foreign_keys=[approved_by_id])
     items = relationship("PurchaseOrderItem", back_populates="purchase_order", cascade="all, delete-orphan")

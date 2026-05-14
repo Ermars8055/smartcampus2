@@ -40,7 +40,7 @@ export default function Inventory() {
       <Box sx={{ mb: 3 }}>
         <Typography variant="h5" sx={{ fontWeight: 700 }}>Inventory Management</Typography>
         <Typography variant="body2" sx={{ color: '#64748B' }}>
-          {stock.length} items • Total Value: ₹{totalValue.toLocaleString()} {lowItems.length > 0 && `• ${lowItems.length} low stock`}
+          {stock.length} {stock.length === 1 ? 'item' : 'items'} • Total Value: ₹{totalValue.toLocaleString()} {lowItems.length > 0 && `• ${lowItems.length} low stock`}
         </Typography>
       </Box>
 

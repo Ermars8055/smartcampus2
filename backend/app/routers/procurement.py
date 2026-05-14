@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from app.database import get_db
 from app.models import (
     PurchaseRequest, PurchaseRequestItem, PurchaseOrder, PurchaseOrderItem,
-    Material, User, Building, Project, Vendor, AuditLog, UOM
+    QuotationRequest, Material, User, Building, Project, Vendor, AuditLog, UOM
 )
 from app.schemas import PRCreate, PRUpdate, PROut, POCreate, POUpdate, POOut, POItemOut
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
@@ -303,11 +303,17 @@ def list_purchase_orders(
             linked_indent = db.query(Indent).filter(Indent.id == po.indent_id).first()
             indent_number = linked_indent.indent_number if linked_indent else None
 
+        qr_number = None
+        if po.qr_id:
+            linked_qr = db.query(QuotationRequest).filter(QuotationRequest.id == po.qr_id).first()
+            qr_number = linked_qr.qr_number if linked_qr else None
+
         result.append(POOut(
             id=po.id, po_number=po.po_number,
             vendor_id=po.vendor_id, project_id=po.project_id,
             pr_id=po.pr_id, pr_number=pr_number, 
             indent_id=po.indent_id, indent_number=indent_number,
+            qr_id=po.qr_id, qr_number=qr_number,
             po_type=po.po_type,
             total_amount=po.total_amount,
             delivery_date=po.delivery_date, status=po.status,
@@ -348,10 +354,17 @@ def get_purchase_order(
         linked_indent = db.query(Indent).filter(Indent.id == po.indent_id).first()
         indent_number = linked_indent.indent_number if linked_indent else None
 
+    qr_number = None
+    if po.qr_id:
+        linked_qr = db.query(QuotationRequest).filter(QuotationRequest.id == po.qr_id).first()
+        qr_number = linked_qr.qr_number if linked_qr else None
+
     return POOut(
         id=po.id, po_number=po.po_number,
         vendor_id=po.vendor_id, project_id=po.project_id,
-        pr_id=po.pr_id, indent_id=po.indent_id, indent_number=indent_number,
+        pr_id=po.pr_id, pr_number=po.purchase_request.pr_number if po.purchase_request else None,
+        indent_id=po.indent_id, indent_number=indent_number,
+        qr_id=po.qr_id, qr_number=qr_number,
         po_type=po.po_type,
         total_amount=po.total_amount,
         delivery_date=po.delivery_date, status=po.status,

@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Box, Typography, Card, Grid, Table, TableHead, TableBody, TableRow,
   TableCell, TableContainer, Button, TextField, Dialog, DialogTitle,
   DialogContent, DialogActions, MenuItem, Select, FormControl, InputLabel,
-  IconButton, Chip
+  IconButton, Chip, TableSortLabel
 } from '@mui/material';
 import { Add, Edit, Delete, Warehouse as WarehouseIcon, Business, VpnKey, LocationOn, Apartment, Search, Person } from '@mui/icons-material';
 import { InputAdornment } from '@mui/material';
@@ -15,6 +15,7 @@ export default function Warehouses() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [form, setForm] = useState({});
+  const [sortConfig, setSortConfig] = useState({ key: 'code', direction: 'asc' });
 
   const load = () => {
     api.get('/api/warehouses', { params: { search: search || undefined } }).then(r => setWarehouses(r.data));
@@ -23,6 +24,24 @@ export default function Warehouses() {
 
   useEffect(() => { load(); }, [search]);
   useEffect(() => { load(); }, []);
+
+  const handleSort = (key) => {
+    setSortConfig(prev => ({
+      key,
+      direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
+    }));
+  };
+
+  const sortedWarehouses = useMemo(() => {
+    return [...warehouses].sort((a, b) => {
+      const { key, direction } = sortConfig;
+      let aVal = a[key] || '';
+      let bVal = b[key] || '';
+      if (aVal < bVal) return direction === 'asc' ? -1 : 1;
+      if (aVal > bVal) return direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [warehouses, sortConfig]);
 
   const save = async () => {
     if (!form.name?.trim()) {
@@ -54,9 +73,9 @@ export default function Warehouses() {
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
         <Typography variant="h5" sx={{ fontWeight: 700 }}>Warehouse Management</Typography>
-        <Button 
-          variant="contained" 
-          startIcon={<Add />} 
+        <Button
+          variant="contained"
+          startIcon={<Add />}
           onClick={() => { setForm({ name: '', code: '', project_id: projects[0]?.id || '', warehouse_type: 'Central', location: '', manager_name: '' }); setDialogOpen(true); }}
           sx={{ bgcolor: '#1E3A8A' }}
         >
@@ -65,8 +84,8 @@ export default function Warehouses() {
       </Box>
 
       <Card sx={{ mb: 3, p: 2 }}>
-        <TextField size="small" placeholder="Search warehouse name..." value={search}
-          onChange={e => setSearch(e.target.value)} sx={{ minWidth: 300 }}
+        <TextField size="small" placeholder="Search by warehouse name or code..." value={search}
+          onChange={e => setSearch(e.target.value)} sx={{ minWidth: 350 }}
           InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }} />
       </Card>
 
@@ -74,22 +93,30 @@ export default function Warehouses() {
         <Table>
           <TableHead sx={{ bgcolor: '#F8FAFC' }}>
             <TableRow>
-              <TableCell sx={{ fontWeight: 600 }}>Warehouse Name</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Code</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Type</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Location</TableCell>
-              <TableCell align="right" sx={{ fontWeight: 600 }}>Actions</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>
+                <TableSortLabel active={sortConfig.key === 'code'} direction={sortConfig.direction} onClick={() => handleSort('code')}>CODE</TableSortLabel>
+              </TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>
+                <TableSortLabel active={sortConfig.key === 'name'} direction={sortConfig.direction} onClick={() => handleSort('name')}>WAREHOUSE NAME</TableSortLabel>
+              </TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>
+                <TableSortLabel active={sortConfig.key === 'warehouse_type'} direction={sortConfig.direction} onClick={() => handleSort('warehouse_type')}>TYPE</TableSortLabel>
+              </TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>
+                <TableSortLabel active={sortConfig.key === 'location'} direction={sortConfig.direction} onClick={() => handleSort('location')}>LOCATION</TableSortLabel>
+              </TableCell>
+              <TableCell align="right" sx={{ fontWeight: 600 }}>ACTIONS</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {warehouses.map(w => (
-              <TableRow key={w.id} hover>
+            {sortedWarehouses.map(w => (
+              <TableRow key={w.id} hover onClick={() => { setForm({ ...w, project_id: w.project_id || projects[0]?.id || '' }); setDialogOpen(true); }} sx={{ cursor: 'pointer' }}>
+                <TableCell sx={{ fontWeight: 700, color: '#2563EB', fontSize: '0.85rem' }}>{w.code}</TableCell>
                 <TableCell sx={{ fontWeight: 500 }}>{w.name}</TableCell>
-                <TableCell><Chip label={w.code} size="small" variant="outlined" /></TableCell>
                 <TableCell><Chip label={w.warehouse_type} size="small" color="primary" variant="outlined" /></TableCell>
                 <TableCell>{w.location}</TableCell>
-                <TableCell align="right">
-                  <IconButton size="small" onClick={() => { setForm({...w, project_id: w.project_id || projects[0]?.id || ''}); setDialogOpen(true); }}><Edit fontSize="small" /></IconButton>
+                <TableCell align="right" onClick={e => e.stopPropagation()}>
+                  <IconButton size="small" onClick={() => { setForm({ ...w, project_id: w.project_id || projects[0]?.id || '' }); setDialogOpen(true); }}><Edit fontSize="small" /></IconButton>
                   <IconButton size="small" onClick={() => handleDelete(w.id)} color="error"><Delete fontSize="small" /></IconButton>
                 </TableCell>
               </TableRow>
@@ -118,17 +145,9 @@ export default function Warehouses() {
         <DialogContent sx={{ px: 4, py: 2 }}>
           <Grid container spacing={2.5} sx={{ mt: 0.5 }}>
             <Grid item xs={6}>
-              <TextField 
-                fullWidth label="Name" value={form.name || ''} 
-                onChange={e => setForm({ ...form, name: e.target.value })} 
-                InputLabelProps={{ shrink: true }}
-                InputProps={{ startAdornment: <InputAdornment position="start"><WarehouseIcon sx={{ color: '#94A3B8' }} /></InputAdornment> }}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField 
-                fullWidth label="Code" value={form.code || ''} 
-                onChange={e => setForm({ ...form, code: e.target.value })} 
+              <TextField
+                fullWidth label="Code" value={form.code || ''}
+                onChange={e => setForm({ ...form, code: e.target.value })}
                 placeholder="Auto-generated"
                 disabled
                 InputLabelProps={{ shrink: true }}
@@ -136,42 +155,35 @@ export default function Warehouses() {
               />
             </Grid>
             <Grid item xs={6}>
-              <TextField 
-                fullWidth label="Type" value={form.warehouse_type || ''} 
-                onChange={e => setForm({ ...form, warehouse_type: e.target.value })} 
+              <TextField
+                fullWidth label="Warehouse Name" value={form.name || ''}
+                onChange={e => setForm({ ...form, name: e.target.value })}
+                required
+                InputLabelProps={{ shrink: true }}
+                InputProps={{ startAdornment: <InputAdornment position="start"><WarehouseIcon sx={{ color: '#94A3B8' }} /></InputAdornment> }}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                fullWidth label="Type" value={form.warehouse_type || ''}
+                onChange={e => setForm({ ...form, warehouse_type: e.target.value })}
                 placeholder="e.g. Central, Site Store"
                 InputLabelProps={{ shrink: true }}
                 InputProps={{ startAdornment: <InputAdornment position="start"><Apartment sx={{ color: '#94A3B8' }} /></InputAdornment> }}
               />
             </Grid>
-            <Grid item xs={12}>
-              <FormControl fullWidth>
-                <InputLabel shrink>Project</InputLabel>
-                <Select
-                  value={form.project_id || ''}
-                  onChange={e => setForm({ ...form, project_id: e.target.value })}
-                  label="Project"
-                  displayEmpty
-                  startAdornment={<InputAdornment position="start"><Business sx={{ color: '#94A3B8' }} /></InputAdornment>}
-                >
-                  {projects.map(p => (
-                    <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
             <Grid item xs={6}>
-              <TextField 
-                fullWidth label="Location" value={form.location || ''} 
-                onChange={e => setForm({ ...form, location: e.target.value })} 
+              <TextField
+                fullWidth label="Location" value={form.location || ''}
+                onChange={e => setForm({ ...form, location: e.target.value })}
                 InputLabelProps={{ shrink: true }}
                 InputProps={{ startAdornment: <InputAdornment position="start"><LocationOn sx={{ color: '#94A3B8' }} /></InputAdornment> }}
               />
             </Grid>
-            <Grid item xs={6}>
-              <TextField 
-                fullWidth label="Manager Name" value={form.manager_name || ''} 
-                onChange={e => setForm({ ...form, manager_name: e.target.value })} 
+            <Grid item xs={12}>
+              <TextField
+                fullWidth label="Manager Name" value={form.manager_name || ''}
+                onChange={e => setForm({ ...form, manager_name: e.target.value })}
                 InputLabelProps={{ shrink: true }}
                 InputProps={{ startAdornment: <InputAdornment position="start"><Person sx={{ color: '#94A3B8' }} /></InputAdornment> }}
               />

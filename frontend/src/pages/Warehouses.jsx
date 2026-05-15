@@ -58,11 +58,11 @@ export default function Warehouses() {
       }
       setDialogOpen(false);
       load();
-    } catch (err) { alert(err.response?.data?.detail || 'Error saving warehouse'); }
+    } catch (err) { alert(err.response?.data?.detail || 'Error saving store'); }
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm(`Are you sure you want to delete this warehouse?`)) return;
+    if (!window.confirm(`Are you sure you want to delete this store?`)) return;
     try {
       await api.delete(`/api/warehouses/${id}`);
       load();
@@ -72,19 +72,19 @@ export default function Warehouses() {
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-        <Typography variant="h5" sx={{ fontWeight: 700 }}>Warehouse Management</Typography>
+        <Typography variant="h5" sx={{ fontWeight: 700 }}>Store Management</Typography>
         <Button
           variant="contained"
           startIcon={<Add />}
           onClick={() => { setForm({ name: '', code: '', project_id: projects[0]?.id || '', warehouse_type: 'Central', location: '', manager_name: '' }); setDialogOpen(true); }}
           sx={{ bgcolor: '#1E3A8A' }}
         >
-          New Warehouse
+          New Store
         </Button>
       </Box>
 
       <Card sx={{ mb: 3, p: 2 }}>
-        <TextField size="small" placeholder="Search by warehouse name or code..." value={search}
+        <TextField size="small" placeholder="Search by store name or code..." value={search}
           onChange={e => setSearch(e.target.value)} sx={{ minWidth: 350 }}
           InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }} />
       </Card>
@@ -97,7 +97,7 @@ export default function Warehouses() {
                 <TableSortLabel active={sortConfig.key === 'code'} direction={sortConfig.direction} onClick={() => handleSort('code')}>CODE</TableSortLabel>
               </TableCell>
               <TableCell sx={{ fontWeight: 600 }}>
-                <TableSortLabel active={sortConfig.key === 'name'} direction={sortConfig.direction} onClick={() => handleSort('name')}>WAREHOUSE NAME</TableSortLabel>
+                <TableSortLabel active={sortConfig.key === 'name'} direction={sortConfig.direction} onClick={() => handleSort('name')}>STORE NAME</TableSortLabel>
               </TableCell>
               <TableCell sx={{ fontWeight: 600 }}>
                 <TableSortLabel active={sortConfig.key === 'warehouse_type'} direction={sortConfig.direction} onClick={() => handleSort('warehouse_type')}>TYPE</TableSortLabel>
@@ -123,7 +123,7 @@ export default function Warehouses() {
             ))}
             {warehouses.length === 0 && (
               <TableRow>
-                <TableCell colSpan={5} align="center" sx={{ py: 4, color: 'text.secondary' }}>No warehouses found.</TableCell>
+                <TableCell colSpan={5} align="center" sx={{ py: 4, color: 'text.secondary' }}>No stores found.</TableCell>
               </TableRow>
             )}
           </TableBody>
@@ -137,8 +137,8 @@ export default function Warehouses() {
               <WarehouseIcon fontSize="medium" />
             </Box>
             <Box>
-              <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>{form.id ? 'Edit' : 'New'} Warehouse</Typography>
-              <Typography variant="body2" color="text.secondary">{form.id ? 'Update warehouse details.' : 'Register a new warehouse or store location.'}</Typography>
+              <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>{form.id ? 'Edit' : 'New'} Store</Typography>
+              <Typography variant="body2" color="text.secondary">{form.id ? 'Update store details.' : 'Register a new store location.'}</Typography>
             </Box>
           </Box>
         </DialogTitle>
@@ -156,7 +156,7 @@ export default function Warehouses() {
             </Grid>
             <Grid item xs={6}>
               <TextField
-                fullWidth label="Warehouse Name" value={form.name || ''}
+                fullWidth label="Store Name" value={form.name || ''}
                 onChange={e => setForm({ ...form, name: e.target.value })}
                 required
                 InputLabelProps={{ shrink: true }}
@@ -192,7 +192,7 @@ export default function Warehouses() {
         </DialogContent>
         <DialogActions sx={{ px: 4, pb: 4, pt: 2, justifyContent: 'flex-end', gap: 2 }}>
           <Button onClick={() => setDialogOpen(false)} sx={{ color: '#64748B', fontWeight: 600 }}>Cancel</Button>
-          <Button variant="contained" onClick={save} sx={{ borderRadius: 2, px: 4, py: 1, fontWeight: 700, boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)', textTransform: 'none' }}>Save Warehouse</Button>
+          <Button variant="contained" onClick={save} sx={{ borderRadius: 2, px: 4, py: 1, fontWeight: 700, boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)', textTransform: 'none' }}>Save Store</Button>
         </DialogActions>
       </Dialog>
     </Box>

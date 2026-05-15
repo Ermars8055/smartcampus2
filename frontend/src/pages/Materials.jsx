@@ -17,6 +17,7 @@ export default function Materials() {
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
   const [uoms, setUoms] = useState([]);
+  const [warehouses, setWarehouses] = useState([]);
   const [vendors, setVendors] = useState([]);
   const [search, setSearch] = useState('');
   const [catFilter, setCatFilter] = useState('');
@@ -27,7 +28,7 @@ export default function Materials() {
   const [errors, setErrors] = useState({});
   const [sortConfig, setSortConfig] = useState({ key: 'code', direction: 'asc' });
   const [form, setForm] = useState({
-    code: '', name: '', category_id: '', uom_id: '', reorder_level: 0,
+    code: '', name: '', category_id: '', uom_id: '', warehouse_id: '', reorder_level: 0,
     maximum_level: 0, standard_cost: 0, gst_rate: 0, storage_type: 'General', 
     material_type: '', description: ''
   });
@@ -46,11 +47,13 @@ export default function Materials() {
       api.get('/api/uom'),
       api.get('/api/vendors'),
       api.get('/api/subcategories'),
-    ]).then(([c, u, v, s]) => {
+      api.get('/api/warehouses'),
+    ]).then(([c, u, v, s, w]) => {
       setCategories(c.data);
       setUoms(u.data);
       setVendors(v.data);
       setSubcategories(s.data);
+      setWarehouses(w.data);
     });
   }, []);
 
@@ -133,6 +136,7 @@ export default function Materials() {
         name: form.name,
         category_id: form.category_id,
         uom_id: form.uom_id,
+        warehouse_id: form.warehouse_id || null,
         reorder_level: Number(form.reorder_level),
         maximum_level: Number(form.maximum_level),
         standard_cost: Number(form.standard_cost),
@@ -186,6 +190,7 @@ export default function Materials() {
       gst_rate: m.gst_rate === 0 ? '' : (m.gst_rate || ''),
       storage_type: m.storage_type || 'General',
       material_type: m.material_type || '',
+      warehouse_id: m.warehouse_id || '',
       description: m.description || ''
     });
     setDialog(true);
@@ -198,7 +203,7 @@ export default function Materials() {
     setForm({ 
       code: '', name: '', category_id: '', uom_id: '', 
       reorder_level: '', maximum_level: '', standard_cost: '', gst_rate: '', 
-      storage_type: 'General', material_type: '', description: ''
+      storage_type: 'General', material_type: '', warehouse_id: '', description: ''
     });
     setDialog(true);
   };
@@ -469,6 +474,19 @@ export default function Materials() {
                 startAdornment={<InputAdornment position="start"><Straighten sx={{ color: '#94A3B8' }} /></InputAdornment>}
               >
                 {uoms.map(u => <MenuItem key={u.id} value={u.id}>{u.name}</MenuItem>)}
+              </Select>
+            </FormControl>
+
+            <FormControl fullWidth>
+              <InputLabel>Store</InputLabel>
+              <Select 
+                value={form.warehouse_id} 
+                onChange={e => setForm({ ...form, warehouse_id: e.target.value })} 
+                disabled={viewOnly}
+                label="Store"
+                startAdornment={<InputAdornment position="start"><Warehouse sx={{ color: '#94A3B8' }} /></InputAdornment>}
+              >
+                {warehouses.map(w => <MenuItem key={w.id} value={w.id}>{w.name}</MenuItem>)}
               </Select>
             </FormControl>
 

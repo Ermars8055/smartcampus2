@@ -20,6 +20,7 @@ export default function StoreOperations() {
   const [projects, setProjects] = useState([]);
   const [materials, setMaterials] = useState([]);
   const [stocks, setStocks] = useState([]);
+  const [departments, setDepartments] = useState([]);
 
   // Modal states
   const [issueModal, setIssueModal] = useState({ open: false, indent: null, items: [] });
@@ -61,6 +62,8 @@ export default function StoreOperations() {
       setProjects(pRes.data);
       const mRes = await api.get('/api/materials');
       setMaterials(mRes.data.items || []);
+      const dRes = await api.get('/api/departments');
+      setDepartments(dRes.data);
     } catch (e) { console.error(e); }
   };
 
@@ -499,7 +502,6 @@ export default function StoreOperations() {
               <Undo sx={{ fontSize: 48, color: '#94A3B8', mb: 2 }} />
               <Typography variant="h6" color="textSecondary" sx={{ fontWeight: 600 }}>No Return Records Found</Typography>
               <Typography variant="body2" color="textSecondary">Return operations will appear here once processed.</Typography>
-              <Button variant="contained" startIcon={<Add />} onClick={openReturnModal} sx={{ mt: 3, textTransform: 'none', borderRadius: 2 }}>Initiate Return</Button>
             </Card>
           ) : (
             <Grid container spacing={3}>
@@ -585,7 +587,6 @@ export default function StoreOperations() {
               <SwapHoriz sx={{ fontSize: 48, color: '#94A3B8', mb: 2 }} />
               <Typography variant="h6" color="textSecondary" sx={{ fontWeight: 600 }}>No Stock Transfer Records Found</Typography>
               <Typography variant="body2" color="textSecondary">Stock transfers between locations will appear here.</Typography>
-              <Button variant="contained" startIcon={<Add />} onClick={openTransferModal} sx={{ mt: 3, textTransform: 'none', borderRadius: 2 }}>New Transfer</Button>
             </Card>
           ) : (
             <Grid container spacing={3}>
@@ -786,7 +787,7 @@ export default function StoreOperations() {
         </DialogTitle>
         <DialogContent sx={{ p: 3 }}>
           <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>Source Warehouse:</Typography>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>Source Store:</Typography>
             <Select 
               size="small" 
               value={issueModal.warehouse_id} 
@@ -870,9 +871,9 @@ export default function StoreOperations() {
           <Grid container spacing={2} sx={{ mb: 3, mt: 0.5 }}>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth size="small">
-                <InputLabel>Target Warehouse</InputLabel>
+                <InputLabel>Target Store</InputLabel>
                 <Select 
-                  label="Target Warehouse"
+                  label="Target Store"
                   value={returnModal.warehouse_id} 
                   onChange={e => setReturnModal({ ...returnModal, warehouse_id: e.target.value })}
                   startAdornment={<InputAdornment position="start"><Warehouse sx={{ color: '#94A3B8', fontSize: 20, mr: 1 }} /></InputAdornment>}
@@ -881,28 +882,18 @@ export default function StoreOperations() {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={8}>
               <FormControl fullWidth size="small">
-                <InputLabel>Source Project</InputLabel>
+                <InputLabel>Department / Unit</InputLabel>
                 <Select 
-                  label="Source Project"
-                  value={returnModal.project_id} 
-                  onChange={e => setReturnModal({ ...returnModal, project_id: e.target.value })}
-                  startAdornment={<InputAdornment position="start"><AccountTree sx={{ color: '#94A3B8', fontSize: 20, mr: 1 }} /></InputAdornment>}
+                  label="Department / Unit"
+                  value={returnModal.returned_from_department} 
+                  onChange={e => setReturnModal({ ...returnModal, returned_from_department: e.target.value })}
+                  startAdornment={<InputAdornment position="start"><Business sx={{ color: '#94A3B8', fontSize: 20, mr: 1 }} /></InputAdornment>}
                 >
-                  {projects.map(p => <MenuItem key={p.id} value={p.id}>{p.name} ({p.code})</MenuItem>)}
+                  {departments.map(d => <MenuItem key={d.id} value={d.name}>{d.name}</MenuItem>)}
                 </Select>
               </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={4}>
-              <TextField 
-                fullWidth size="small" label="Department / Unit" 
-                value={returnModal.returned_from_department}
-                onChange={e => setReturnModal({ ...returnModal, returned_from_department: e.target.value })}
-                InputProps={{
-                  startAdornment: <InputAdornment position="start"><Business sx={{ color: '#94A3B8', fontSize: 20 }} /></InputAdornment>,
-                }}
-              />
             </Grid>
             <Grid item xs={12} sm={4}>
               <FormControl fullWidth size="small">
@@ -1051,9 +1042,9 @@ export default function StoreOperations() {
           <Grid container spacing={2} sx={{ mb: 3, mt: 0.5 }}>
             <Grid item xs={12} sm={4}>
               <FormControl fullWidth size="small">
-                <InputLabel>From Warehouse</InputLabel>
+                <InputLabel>From Store</InputLabel>
                 <Select 
-                  label="From Warehouse"
+                  label="From Store"
                   value={transferModal.from_warehouse_id} 
                   onChange={e => setTransferModal({ ...transferModal, from_warehouse_id: e.target.value })}
                   startAdornment={<InputAdornment position="start"><Warehouse sx={{ color: '#94A3B8', fontSize: 20, mr: 1 }} /></InputAdornment>}
@@ -1064,9 +1055,9 @@ export default function StoreOperations() {
             </Grid>
             <Grid item xs={12} sm={4}>
               <FormControl fullWidth size="small">
-                <InputLabel>To Warehouse</InputLabel>
+                <InputLabel>To Store</InputLabel>
                 <Select 
-                  label="To Warehouse"
+                  label="To Store"
                   value={transferModal.to_warehouse_id} 
                   onChange={e => setTransferModal({ ...transferModal, to_warehouse_id: e.target.value })}
                   startAdornment={<InputAdornment position="start"><Warehouse sx={{ color: '#2563EB', fontSize: 20, mr: 1 }} /></InputAdornment>}

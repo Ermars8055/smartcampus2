@@ -212,6 +212,7 @@ def list_materials(
             subcategory_name=m.subcategory.name if m.subcategory else None,
             uom_name=m.uom.name if m.uom else None,
             vendor_name=m.preferred_vendor.name if m.preferred_vendor else None,
+            warehouse_name=m.warehouse.name if m.warehouse else None,
             current_stock=total_stock
         ))
     return {"items": result, "total": total}
@@ -246,6 +247,7 @@ def get_material(
         subcategory_name=m.subcategory.name if m.subcategory else None,
         uom_name=m.uom.name if m.uom else None,
         vendor_name=m.preferred_vendor.name if m.preferred_vendor else None,
+        warehouse_name=m.warehouse.name if m.warehouse else None,
         current_stock=total_stock
     )
 

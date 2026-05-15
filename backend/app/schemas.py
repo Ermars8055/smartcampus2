@@ -169,6 +169,7 @@ class MaterialBase(BaseModel):
     storage_type: Optional[str] = None
     hsn_code: Optional[str] = None
     gst_rate: float = 0
+    warehouse_id: Optional[int] = None
     description: Optional[str] = None
 
 class MaterialCreate(MaterialBase):
@@ -187,6 +188,7 @@ class MaterialUpdate(BaseModel):
     storage_type: Optional[str] = None
     hsn_code: Optional[str] = None
     gst_rate: Optional[float] = None
+    warehouse_id: Optional[int] = None
     description: Optional[str] = None
     is_active: Optional[bool] = None
 
@@ -198,6 +200,7 @@ class MaterialOut(MaterialBase):
     subcategory_name: Optional[str] = None
     uom_name: Optional[str] = None
     vendor_name: Optional[str] = None
+    warehouse_name: Optional[str] = None
     current_stock: Optional[float] = 0
     class Config:
         from_attributes = True

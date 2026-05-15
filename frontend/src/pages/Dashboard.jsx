@@ -276,7 +276,7 @@ export default function Dashboard() {
         <Grid item xs={12} lg={4}>
           <Card sx={{ p: 2.5, height: '100%' }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, color: '#1E293B' }}>
-              Stock by Warehouse
+              Stock by Store
             </Typography>
             <ResponsiveContainer width="100%" height={320}>
               <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
@@ -367,7 +367,7 @@ export default function Dashboard() {
                     <TableCell>Material</TableCell>
                     <TableCell>Type</TableCell>
                     <TableCell align="right">Qty</TableCell>
-                    <TableCell>Warehouse</TableCell>
+                    <TableCell>Store</TableCell>
                     <TableCell>Reference</TableCell>
                   </TableRow>
                 </TableHead>

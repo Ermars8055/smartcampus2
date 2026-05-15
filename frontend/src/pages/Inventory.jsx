@@ -90,9 +90,9 @@ export default function Inventory() {
             onChange={e => setSearch(e.target.value)} sx={{ minWidth: 250 }}
             InputProps={{ startAdornment: <InputAdornment position="start"><Search sx={{ color: '#94A3B8' }} /></InputAdornment> }} />
           <FormControl size="small" sx={{ minWidth: 180 }}>
-            <InputLabel>Warehouse</InputLabel>
-            <Select value={whFilter} label="Warehouse" onChange={e => setWhFilter(e.target.value)}>
-              <MenuItem value="">All Warehouses</MenuItem>
+            <InputLabel>Store</InputLabel>
+            <Select value={whFilter} label="Store" onChange={e => setWhFilter(e.target.value)}>
+              <MenuItem value="">All Stores</MenuItem>
               {warehouses.map(w => <MenuItem key={w.id} value={w.id}>{w.name}</MenuItem>)}
             </Select>
           </FormControl>
@@ -142,7 +142,7 @@ export default function Inventory() {
                 </TableCell>
                 <TableCell>UOM</TableCell>
                 <TableCell>
-                  <TableSortLabel active={orderBy === 'warehouse_name'} direction={orderBy === 'warehouse_name' ? order : 'asc'} onClick={() => handleSort('warehouse_name')}>WAREHOUSE</TableSortLabel>
+                  <TableSortLabel active={orderBy === 'warehouse_name'} direction={orderBy === 'warehouse_name' ? order : 'asc'} onClick={() => handleSort('warehouse_name')}>STORE</TableSortLabel>
                 </TableCell>
                 <TableCell align="right">
                   <TableSortLabel active={orderBy === 'quantity'} direction={orderBy === 'quantity' ? order : 'asc'} onClick={() => handleSort('quantity')}>QTY</TableSortLabel>
@@ -199,7 +199,7 @@ export default function Inventory() {
                   <TableSortLabel active={orderBy === 'material_name'} direction={orderBy === 'material_name' ? order : 'asc'} onClick={() => handleSort('material_name')}>MATERIAL</TableSortLabel>
                 </TableCell>
                 <TableCell>
-                  <TableSortLabel active={orderBy === 'warehouse_name'} direction={orderBy === 'warehouse_name' ? order : 'asc'} onClick={() => handleSort('warehouse_name')}>WAREHOUSE</TableSortLabel>
+                  <TableSortLabel active={orderBy === 'warehouse_name'} direction={orderBy === 'warehouse_name' ? order : 'asc'} onClick={() => handleSort('warehouse_name')}>STORE</TableSortLabel>
                 </TableCell>
                 <TableCell>
                   <TableSortLabel active={orderBy === 'transaction_type'} direction={orderBy === 'transaction_type' ? order : 'asc'} onClick={() => handleSort('transaction_type')}>TYPE</TableSortLabel>

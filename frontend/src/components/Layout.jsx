@@ -25,7 +25,7 @@ const menuItems = [
       { text: 'Materials', icon: <Inventory2 />, path: '/materials' },
       { text: 'Categories', icon: <Category />, path: '/categories' },
       { text: 'Vendors', icon: <People />, path: '/vendors' },
-      { text: 'Warehouses', icon: <Warehouse />, path: '/warehouses' },
+      { text: 'Stores', icon: <Warehouse />, path: '/warehouses' },
     ]
   },
   {

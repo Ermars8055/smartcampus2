@@ -629,7 +629,7 @@ def create_warehouse(
     site_id: int = Depends(get_site_id)
 ):
     if not data.name or not data.name.strip():
-        raise HTTPException(status_code=400, detail="Warehouse name is required")
+        raise HTTPException(status_code=400, detail="Store name is required")
     wh_data = data.model_dump()
     if not wh_data.get("code"):
         wh_data["code"] = get_next_number(db, tenant_id, site_id, "WAREHOUSE", "WH")
@@ -648,13 +648,13 @@ def update_warehouse(
     site_id: int = Depends(get_site_id)
 ):
     if not data.name or not data.name.strip():
-        raise HTTPException(status_code=400, detail="Warehouse name is required")
+        raise HTTPException(status_code=400, detail="Store name is required")
         
     wh = db.query(Warehouse).filter(
         Warehouse.id == id, Warehouse.tenant_id == tenant_id, Warehouse.site_id == site_id
     ).first()
     if not wh:
-        raise HTTPException(status_code=404, detail="Warehouse not found")
+        raise HTTPException(status_code=404, detail="Store not found")
     for k, v in data.model_dump().items():
         setattr(wh, k, v)
     db.commit()
@@ -672,9 +672,9 @@ def delete_warehouse(
         Warehouse.id == id, Warehouse.tenant_id == tenant_id, Warehouse.site_id == site_id
     ).first()
     if not wh:
-        raise HTTPException(status_code=404, detail="Warehouse not found")
+        raise HTTPException(status_code=404, detail="Store not found")
         
     wh.is_deleted = True
     wh.is_active = False
     db.commit()
-    return {"message": "Warehouse deleted successfully"}
+    return {"message": "Store deleted successfully"}

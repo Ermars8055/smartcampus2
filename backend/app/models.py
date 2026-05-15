@@ -390,6 +390,7 @@ class Material(Base):
     hsn_code = Column(String(20))
     gst_rate = Column(Float, default=0)
     material_type = Column(String(50), default="Consumable") # Consumable, Non-Consumable
+    warehouse_id = Column(Integer, ForeignKey("warehouses.id"), nullable=True)
     description = Column(Text)
     is_active = Column(Boolean, default=True)
     is_deleted = Column(Boolean, default=False)
@@ -398,6 +399,7 @@ class Material(Base):
     category = relationship("Category", back_populates="materials")
     subcategory = relationship("SubCategory")
     uom = relationship("UOM")
+    warehouse = relationship("Warehouse")
     preferred_vendor = relationship("Vendor", foreign_keys=[preferred_vendor_id])
     __table_args__ = (UniqueConstraint("site_id", "code", name="uq_mat_code_per_site"),)
 

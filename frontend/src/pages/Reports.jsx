@@ -59,8 +59,8 @@ export default function Reports() {
       {tab === 0 && (
         <Card sx={{ mb: 2, p: 2 }}>
           <FormControl size="small" sx={{ minWidth: 200 }}>
-            <InputLabel>Warehouse</InputLabel>
-            <Select value={whFilter} label="Warehouse" onChange={e => setWhFilter(e.target.value)}>
+            <InputLabel>Store</InputLabel>
+            <Select value={whFilter} label="Store" onChange={e => setWhFilter(e.target.value)}>
               <MenuItem value="">All</MenuItem>
               {warehouses.map(w => <MenuItem key={w.id} value={w.id}>{w.name}</MenuItem>)}
             </Select>

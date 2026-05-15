@@ -78,34 +78,35 @@ export default function StoreOperations() {
 
   const openIssueModal = (indent) => {
     const items = indent.items.map(it => {
-      const available = it.current_stock || 0;
       const remaining = it.requested_quantity - it.issued_quantity;
       return {
         material_id: it.material_id,
         material_name: it.material_name,
         material_code: it.material_code,
+        warehouse_id: it.warehouse_id,
+        warehouse_name: it.warehouse_name,
         uom_name: it.uom_name,
         approved: it.requested_quantity,
         issued: it.issued_quantity,
         remaining: remaining,
-        in_stock: available,
-        issue_qty: Math.min(remaining, available)
+        in_stock: it.current_stock || 0,
+        issue_qty: remaining
       };
     });
-    setIssueModal({ open: true, indent, items, warehouse_id: warehouses[0]?.id || '', remarks: '' });
+    setIssueModal({ open: true, indent, items, remarks: '' });
   };
 
   const handleIssueSubmit = async () => {
     try {
       const payload = {
-        warehouse_id: issueModal.warehouse_id,
-        project_id: issueModal.indent.block?.project_id || 1,
-        indent_id: issueModal.indent.id,
-        issued_to_room_id: issueModal.indent.room_id,
-        purpose: issueModal.remarks || `Fulfillment for ${issueModal.indent.indent_number}`,
+        warehouse_id: issueModal.items[0]?.warehouse_id, // Backward compatibility
+        project_id: issueModal.indent?.project_id || 1,
+        indent_id: issueModal.indent?.id,
+        issued_to_room_id: issueModal.indent?.room_id,
+        purpose: issueModal.remarks || `Fulfillment for ${issueModal.indent?.indent_number}`,
         items: issueModal.items.filter(it => it.issue_qty > 0).map(it => ({
           material_id: it.material_id,
-          quantity: parseFloat(it.issue_qty)
+          quantity: Math.round(parseFloat(it.issue_qty))
         }))
       };
       await api.post('/api/issues', payload);
@@ -156,7 +157,7 @@ export default function StoreOperations() {
         returned_by_name: returnModal.returned_by_name,
         items: validItems.map(it => ({
           material_id: it.material_id,
-          quantity: parseFloat(it.quantity),
+          quantity: Math.round(parseFloat(it.quantity)),
           condition: it.condition,
           remarks: it.remarks
         }))
@@ -221,7 +222,7 @@ export default function StoreOperations() {
         remarks: transferModal.remarks,
         items: validItems.map(it => ({
           material_id: it.material_id,
-          quantity: parseFloat(it.quantity),
+          quantity: Math.round(parseFloat(it.quantity)),
           remarks: it.remarks
         }))
       };
@@ -431,7 +432,7 @@ export default function StoreOperations() {
                     <Box sx={{ mb: 2.5 }}>
                       <Typography variant="caption" sx={{ fontWeight: 800, color: '#1E293B', mb: 1, display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Items Issued</Typography>
                       <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2, border: '1px solid #E2E8F0' }}>
-                        <Table size="small">
+                        <Table size="small" sx={{ '& .MuiTableCell-root': { px: 1, py: 0.75, fontSize: '0.72rem' } }}>
                           <TableHead sx={{ bgcolor: '#F8FAFC' }}>
                             <TableRow>
                               <TableCell sx={{ fontWeight: 700, py: 1, fontSize: '0.7rem', color: '#64748B' }}>ITEM</TableCell>
@@ -525,7 +526,9 @@ export default function StoreOperations() {
                     </Box>
 
                     <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2, mb: 1 }}>
-                      <Table size="small">
+                      <Table size="small" sx={{ 
+                  '& .MuiTableCell-root': { px: 0.75, py: 1.2, fontSize: '0.72rem', borderColor: '#F1F5F9' } 
+                }}>
                         <TableHead sx={{ bgcolor: '#F8FAFC' }}>
                           <TableRow>
                             <TableCell sx={{ fontWeight: 700, fontSize: '0.7rem' }}>ITEM</TableCell>
@@ -616,7 +619,9 @@ export default function StoreOperations() {
                     </Box>
 
                     <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2, mb: 1 }}>
-                      <Table size="small">
+                      <Table size="small" sx={{ 
+                  '& .MuiTableCell-root': { px: 0.75, py: 1.2, fontSize: '0.72rem', borderColor: '#F1F5F9' } 
+                }}>
                         <TableHead sx={{ bgcolor: '#F8FAFC' }}>
                           <TableRow>
                             <TableCell sx={{ fontWeight: 700, fontSize: '0.7rem' }}>ITEM</TableCell>
@@ -664,8 +669,10 @@ export default function StoreOperations() {
             </Box>
           ) : (
             <Card sx={{ borderRadius: 3, border: '1px solid #E2E8F0', overflow: 'hidden' }}>
-              <TableContainer>
-                <Table size="small">
+              <TableContainer sx={{ borderRadius: 2, overflow: 'hidden' }}>
+                <Table size="small" sx={{ 
+                  '& .MuiTableCell-root': { px: 0.75, py: 1.2, fontSize: '0.72rem', borderColor: '#F1F5F9' } 
+                }}>
                   <TableHead sx={{ bgcolor: '#F8FAFC' }}>
                     <TableRow>
                       <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem', color: '#64748B' }}>ISSUE NO.</TableCell>
@@ -726,8 +733,10 @@ export default function StoreOperations() {
             </Box>
           ) : (
             <Card sx={{ borderRadius: 3, border: '1px solid #E2E8F0', overflow: 'hidden' }}>
-              <TableContainer>
-                <Table size="small">
+              <TableContainer sx={{ borderRadius: 2, overflow: 'hidden' }}>
+                <Table size="small" sx={{ 
+                  '& .MuiTableCell-root': { px: 0.75, py: 1.2, fontSize: '0.72rem', borderColor: '#F1F5F9' } 
+                }}>
                   <TableHead sx={{ bgcolor: '#F8FAFC' }}>
                     <TableRow>
                       <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem', color: '#64748B' }}>ISSUE NO.</TableCell>
@@ -786,23 +795,13 @@ export default function StoreOperations() {
           </Box>
         </DialogTitle>
         <DialogContent sx={{ p: 3 }}>
-          <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>Source Store:</Typography>
-            <Select 
-              size="small" 
-              value={issueModal.warehouse_id} 
-              onChange={e => setIssueModal({ ...issueModal, warehouse_id: e.target.value })}
-              sx={{ width: 300, bgcolor: '#fff' }}
-            >
-              {warehouses.map(w => <MenuItem key={w.id} value={w.id}>{w.name}</MenuItem>)}
-            </Select>
-          </Box>
 
           <TableContainer component={Paper} variant="outlined" sx={{ mb: 3, borderRadius: 2 }}>
             <Table size="small">
               <TableHead sx={{ bgcolor: '#F8FAFC' }}>
                 <TableRow>
                   <TableCell sx={{ fontWeight: 700 }}>ITEM</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>SOURCE STORE</TableCell>
                   <TableCell align="center" sx={{ fontWeight: 700 }}>APPROVED</TableCell>
                   <TableCell align="center" sx={{ fontWeight: 700 }}>REMAINING</TableCell>
                   <TableCell align="center" sx={{ fontWeight: 700 }}>IN STOCK</TableCell>
@@ -814,22 +813,32 @@ export default function StoreOperations() {
                   <TableRow key={i}>
                     <TableCell>
                       <Typography variant="body2" sx={{ fontWeight: 700 }}>{it.material_name}</Typography>
-                      <Typography variant="caption" sx={{ color: '#64748B' }}>{it.material_code}</Typography>
+                      <Typography variant="caption" sx={{ color: '#64748B', fontFamily: 'monospace' }}>{it.material_code}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Chip 
+                        label={it.warehouse_name || 'Mapped Store'} 
+                        size="small" 
+                        sx={{ height: 22, fontSize: '0.7rem', bgcolor: '#F1F5F9', color: '#475569', fontWeight: 600, borderRadius: 1.5 }} 
+                      />
                     </TableCell>
                     <TableCell align="center">{it.approved}</TableCell>
                     <TableCell align="center" sx={{ color: '#1E40AF', fontWeight: 600 }}>{it.remaining}</TableCell>
-                    <TableCell align="center">
-                      {stocks.find(s => s.warehouse_id === issueModal.warehouse_id && s.material_id === it.material_id)?.quantity || 0}
+                    <TableCell align="center" sx={{ fontWeight: 700, color: (stocks.find(s => s.warehouse_id === it.warehouse_id && s.material_id === it.material_id)?.quantity || 0) > 0 ? '#059669' : '#DC2626' }}>
+                      {Math.round(stocks.find(s => s.warehouse_id === it.warehouse_id && s.material_id === it.material_id)?.quantity || 0)}
                     </TableCell>
                     <TableCell align="center">
                       <TextField 
-                        size="small" type="number" value={it.issue_qty} 
+                        size="small" 
+                        type="number" 
+                        inputProps={{ step: "1", min: "0" }}
+                        value={it.issue_qty} 
                         onChange={e => {
                           const newItems = [...issueModal.items];
-                          newItems[i].issue_qty = e.target.value;
+                          newItems[i].issue_qty = Math.round(parseFloat(e.target.value) || 0);
                           setIssueModal({ ...issueModal, items: newItems });
                         }}
-                        inputProps={{ style: { textAlign: 'center', fontWeight: 600 } }}
+                        sx={{ width: 100 }}
                       />
                     </TableCell>
                   </TableRow>
@@ -951,29 +960,29 @@ export default function StoreOperations() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {returnModal.items.map((it, i) => (
-                  <TableRow key={i}>
+                {returnModal.items.map((item, idx) => (
+                  <TableRow key={idx}>
                     <TableCell>
                       <MaterialSelect 
                         materials={materials} 
-                        value={it.material_id} 
-                        onChange={(val) => updateReturnItem(i, 'material_id', val)}
+                        value={item.material_id} 
+                        onChange={(val) => updateReturnItem(idx, 'material_id', val)}
                       />
                     </TableCell>
-                    <TableCell align="center">
+                    <TableCell align="right" sx={{ width: 120 }}>
                       <TextField 
-                        size="small" type="number" value={it.quantity} 
-                        onChange={e => updateReturnItem(i, 'quantity', e.target.value)}
-                        inputProps={{ style: { textAlign: 'center' } }}
-                        InputProps={{
-                          startAdornment: <InputAdornment position="start"><Inventory2 sx={{ color: '#94A3B8', fontSize: 16 }} /></InputAdornment>,
-                        }}
+                        size="small" 
+                        type="number" 
+                        inputProps={{ step: "1" }}
+                        fullWidth 
+                        value={item.quantity} 
+                        onChange={e => updateReturnItem(idx, 'quantity', Math.round(parseFloat(e.target.value) || 0))} 
                       />
                     </TableCell>
                     <TableCell align="center">
                       <Select 
-                        size="small" value={it.condition} 
-                        onChange={e => updateReturnItem(i, 'condition', e.target.value)}
+                        size="small" value={item.condition} 
+                        onChange={e => updateReturnItem(idx, 'condition', e.target.value)}
                         fullWidth
                         startAdornment={<InputAdornment position="start"><InfoOutlined sx={{ color: '#94A3B8', fontSize: 16, mr: 1 }} /></InputAdornment>}
                       >
@@ -985,8 +994,8 @@ export default function StoreOperations() {
                     </TableCell>
                     <TableCell>
                       <TextField 
-                        size="small" fullWidth value={it.remarks} 
-                        onChange={e => updateReturnItem(i, 'remarks', e.target.value)}
+                        size="small" fullWidth value={item.remarks} 
+                        onChange={e => updateReturnItem(idx, 'remarks', e.target.value)}
                         InputProps={{
                           startAdornment: <InputAdornment position="start"><Comment sx={{ color: '#94A3B8', fontSize: 16 }} /></InputAdornment>,
                         }}
@@ -994,7 +1003,7 @@ export default function StoreOperations() {
                     </TableCell>
 
                     <TableCell align="center">
-                      <IconButton size="small" color="error" onClick={() => removeReturnItem(i)} disabled={returnModal.items.length === 1}>
+                      <IconButton size="small" color="error" onClick={() => removeReturnItem(idx)} disabled={returnModal.items.length === 1}>
                         <Delete fontSize="small" />
                       </IconButton>
                     </TableCell>
@@ -1107,36 +1116,36 @@ export default function StoreOperations() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {transferModal.items.map((it, i) => (
-                  <TableRow key={i}>
+                {transferModal.items.map((item, idx) => (
+                  <TableRow key={idx}>
                     <TableCell>
                       <MaterialSelect 
                         materials={materials} 
-                        value={it.material_id} 
-                        onChange={(val) => updateTransferItem(i, 'material_id', val)}
+                        value={item.material_id} 
+                        onChange={(val) => updateTransferItem(idx, 'material_id', val)}
                       />
                     </TableCell>
-                    <TableCell align="center">
+                    <TableCell align="right" sx={{ width: 120 }}>
                       <TextField 
-                        size="small" type="number" value={it.quantity} 
-                        onChange={e => updateTransferItem(i, 'quantity', e.target.value)}
-                        inputProps={{ style: { textAlign: 'center' } }}
-                        InputProps={{
-                          startAdornment: <InputAdornment position="start"><Inventory2 sx={{ color: '#94A3B8', fontSize: 16 }} /></InputAdornment>,
-                        }}
+                        size="small" 
+                        type="number" 
+                        inputProps={{ step: "1" }}
+                        fullWidth 
+                        value={item.quantity} 
+                        onChange={e => updateTransferItem(idx, 'quantity', Math.round(parseFloat(e.target.value) || 0))} 
                       />
                     </TableCell>
                     <TableCell>
                       <TextField 
-                        size="small" fullWidth value={it.remarks} 
-                        onChange={e => updateTransferItem(i, 'remarks', e.target.value)}
+                        size="small" fullWidth value={item.remarks} 
+                        onChange={e => updateTransferItem(idx, 'remarks', e.target.value)}
                         InputProps={{
                           startAdornment: <InputAdornment position="start"><Comment sx={{ color: '#94A3B8', fontSize: 16 }} /></InputAdornment>,
                         }}
                       />
                     </TableCell>
                     <TableCell align="center">
-                      <IconButton size="small" color="error" onClick={() => removeTransferItem(i)} disabled={transferModal.items.length === 1}>
+                      <IconButton size="small" color="error" onClick={() => removeTransferItem(idx)} disabled={transferModal.items.length === 1}>
                         <Delete fontSize="small" />
                       </IconButton>
                     </TableCell>

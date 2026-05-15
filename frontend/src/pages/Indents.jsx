@@ -134,12 +134,14 @@ export default function Indents() {
       // Map to backend fields
       const payload = {
         room_id: form.room_id || null,
+        building_id: form.building_id || null,
         floor: selectedFloor?.name || '',
         location: selectedRoom?.name || '',
         department: form.department,
         remarks: form.remarks,
         items: mappedItems
       };
+
       await api.post('/api/indents', payload);
       setShowForm(false); load();
       showMessage("Indent submitted successfully!", "Success", "success");

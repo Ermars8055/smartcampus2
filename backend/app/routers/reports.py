@@ -170,11 +170,11 @@ def get_issue_summary(
     for m_id, info in material_dict.items():
         mat = info["material"]
         uom = info["uom"]
-        op_stock = opening_stocks.get(m_id, 0.0)
+        op_stock = round(opening_stocks.get(m_id, 0.0))
         issues = aggregated_data.get(m_id, {})
-        total_issue = sum(issues.values())
-        closing_stock = closing_stocks.get(m_id, 0.0)
-        total_received = material_receipts.get(m_id, 0.0)
+        total_issue = round(sum(issues.values()))
+        closing_stock = round(closing_stocks.get(m_id, 0.0))
+        total_received = round(material_receipts.get(m_id, 0.0))
         
         issue_numbers_str = ", ".join(sorted(list(material_issue_numbers.get(m_id, set()))))
 
@@ -255,7 +255,7 @@ def get_issue_summary_details(
         {
             "issue_no": row.issue_number,
             "date": row.created_at.strftime("%Y-%m-%d %H:%M") if row.created_at else "",
-            "qty": row.quantity,
+            "qty": round(row.quantity or 0),
             "by": row.full_name or "System",
             "remarks": row.remarks or "-"
         }
@@ -446,7 +446,7 @@ def get_rate_analysis_drilldown(
         tax_amount = round(base_rate * (tax_pct / 100.0), 2)
         net_rate = round(base_rate + tax_amount, 2) if include_tax else base_rate
         display_rate = net_rate if include_tax else base_rate
-        qty = float(grn_item.accepted_quantity or grn_item.received_quantity or 0)
+        qty = round(float(grn_item.accepted_quantity or grn_item.received_quantity or 0))
         total_amount = round(display_rate * qty, 2)
 
         grn_date = grn.created_at.strftime("%Y-%m-%d") if grn.created_at else ""
@@ -628,9 +628,9 @@ def get_receipt_summary(
             }
         
         v_data = pivoted[m_id]["vendor_details"][v_id]
-        v_data["qty"] += float(row.accepted_quantity or 0)
-        v_data["amount"] += float(row.taxable_amount or 0)
-        v_data["total"] += float(row.total_amount or 0)
+        v_data["qty"] = round(v_data["qty"] + float(row.accepted_quantity or 0))
+        v_data["amount"] = round(v_data["amount"] + float(row.taxable_amount or 0), 2)
+        v_data["total"] = round(v_data["total"] + float(row.total_amount or 0), 2)
         
         # Update latest bill if this one is newer
         if row.invoice_date and (not v_data["latest_bill_date"] or row.invoice_date > v_data["latest_bill_date"]):
@@ -713,10 +713,10 @@ def get_receipt_summary_details(
             "material_code": row.material_code,
             "material_name": row.material_name,
             "uom": row.uom,
-            "qty_received": row.accepted_quantity,
-            "rate": row.rate,
-            "tax_amount": row.tax_amount,
-            "total_amount": row.total_amount,
+            "qty_received": round(row.accepted_quantity or 0),
+            "rate": round(float(row.rate or 0), 2),
+            "tax_amount": round(float(row.tax_amount or 0), 2),
+            "total_amount": round(float(row.total_amount or 0), 2),
             "store_name": row.warehouse_name,
             "received_by": row.received_by,
             "remarks": row.remarks
@@ -820,7 +820,7 @@ def get_department_inventory_report(
         for d_name in dept_names:
             issued = issues_map.get((mat.id, d_name), 0.0)
             returned = returns_map.get((mat.id, d_name), 0.0)
-            net = round(max(0.0, issued - returned), 2)
+            net = round(max(0.0, issued - returned))
             
             dept_inventory[d_name] = net
             total_mat_inv += net
@@ -834,7 +834,7 @@ def get_department_inventory_report(
             "material_name": mat.name,
             "uom": uom,
             "department_inventory": dept_inventory,
-            "total_inventory": round(total_mat_inv, 2)
+            "total_inventory": round(total_mat_inv)
         })
 
     return {

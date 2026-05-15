@@ -482,6 +482,7 @@ class GateEntryBase(BaseModel):
     delivery_person_name: Optional[str] = None
     driver_phone: Optional[str] = None
     gate_pass_number: Optional[str] = None
+    arrival_time: Optional[datetime] = None
     invoice_scan_url: Optional[str] = None
     remarks: Optional[str] = None
 
@@ -501,6 +502,7 @@ class GateEntryOut(GateEntryBase):
     po_number: Optional[str] = None
     project_name: Optional[str] = None
     material_names: Optional[str] = None
+    material_qtys: Optional[str] = None
     class Config:
         from_attributes = True
 
@@ -627,7 +629,7 @@ class IssueItemOut(IssueItemBase):
         from_attributes = True
 
 class IssueBase(BaseModel):
-    warehouse_id: int
+    warehouse_id: Optional[int] = None
     project_id: int
     indent_id: Optional[int] = None
     issued_to_room_id: Optional[int] = None
@@ -882,6 +884,8 @@ class IndentItemOut(IndentItemBase):
     acknowledged_quantity: float = 0
     pending_quantity: float = 0
     current_stock: float = 0
+    warehouse_id: Optional[int] = None
+    warehouse_name: Optional[str] = None
     availability_status: str = "No Stock"
     class Config:
         from_attributes = True
@@ -921,6 +925,7 @@ class IndentOut(BaseModel):
     requester_name: Optional[str] = None
     room_name: Optional[str] = None
     total_amount: float
+    project_id: Optional[int] = None
     items: List[IndentItemOut] = []
     class Config:
         from_attributes = True

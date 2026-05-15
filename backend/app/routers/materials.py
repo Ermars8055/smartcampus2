@@ -197,11 +197,11 @@ def list_materials(
     result = []
     for m in materials:
         stock = db.query(CurrentStock).filter(CurrentStock.material_id == m.id, CurrentStock.site_id == site_id).all()
-        total_stock = sum(s.quantity for s in stock)
+        total_stock = round(sum(s.quantity for s in stock))
         result.append(MaterialOut(
             id=m.id, code=m.code, name=m.name,
             category_id=m.category_id, subcategory_id=m.subcategory_id,
-            uom_id=m.uom_id, reorder_level=m.reorder_level,
+            uom_id=m.uom_id, reorder_level=round(m.reorder_level or 0),
             maximum_level=m.maximum_level, standard_cost=m.standard_cost,
             preferred_vendor_id=m.preferred_vendor_id,
             storage_type=m.storage_type, hsn_code=m.hsn_code, gst_rate=m.gst_rate or 0,
@@ -212,6 +212,7 @@ def list_materials(
             subcategory_name=m.subcategory.name if m.subcategory else None,
             uom_name=m.uom.name if m.uom else None,
             vendor_name=m.preferred_vendor.name if m.preferred_vendor else None,
+            warehouse_id=m.warehouse_id,
             warehouse_name=m.warehouse.name if m.warehouse else None,
             current_stock=total_stock
         ))
@@ -232,11 +233,11 @@ def get_material(
     if not m:
         raise HTTPException(status_code=404, detail="Material not found")
     stock = db.query(CurrentStock).filter(CurrentStock.material_id == m.id, CurrentStock.site_id == site_id).all()
-    total_stock = sum(s.quantity for s in stock)
+    total_stock = round(sum(s.quantity for s in stock))
     return MaterialOut(
         id=m.id, code=m.code, name=m.name,
         category_id=m.category_id, subcategory_id=m.subcategory_id,
-        uom_id=m.uom_id, reorder_level=m.reorder_level,
+        uom_id=m.uom_id, reorder_level=round(m.reorder_level or 0),
         maximum_level=m.maximum_level, standard_cost=m.standard_cost,
         preferred_vendor_id=m.preferred_vendor_id,
         storage_type=m.storage_type, hsn_code=m.hsn_code, gst_rate=m.gst_rate or 0,
@@ -247,6 +248,7 @@ def get_material(
         subcategory_name=m.subcategory.name if m.subcategory else None,
         uom_name=m.uom.name if m.uom else None,
         vendor_name=m.preferred_vendor.name if m.preferred_vendor else None,
+        warehouse_id=m.warehouse_id,
         warehouse_name=m.warehouse.name if m.warehouse else None,
         current_stock=total_stock
     )

@@ -102,10 +102,7 @@ def get_consumption_by_building(
         func.sum(MaterialIssueItem.quantity).label("total_qty"),
         func.sum(MaterialIssueItem.quantity * MaterialIssueItem.rate).label("total_value")
     ).select_from(Building).join(
-        MaterialIssue, (MaterialIssue.building_id == Building.id) | 
-                       (MaterialIssue.issued_to_room_id.in_(
-                           db.query(Room.id).join(Floor).filter(Floor.building_id == Building.id)
-                       ))
+        MaterialIssue, MaterialIssue.building_id == Building.id
     ).join(
         MaterialIssueItem, MaterialIssueItem.issue_id == MaterialIssue.id
     ).filter(
@@ -225,10 +222,7 @@ def get_material_cost_by_building(
     ).join(
         MaterialIssue, MaterialIssueItem.issue_id == MaterialIssue.id
     ).join(
-        Building, (MaterialIssue.building_id == Building.id) | 
-                  (MaterialIssue.issued_to_room_id.in_(
-                      db.query(Room.id).join(Floor).filter(Floor.building_id == Building.id)
-                  ))
+        Building, MaterialIssue.building_id == Building.id
     ).filter(
         MaterialIssue.tenant_id == tenant_id, MaterialIssue.site_id == site_id
     )

@@ -1,6 +1,7 @@
 """Material Issue, Returns, and Stock Transfer routes."""
 
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from datetime import datetime
 from typing import Optional
@@ -8,7 +9,8 @@ from app.database import get_db
 from app.models import (
     MaterialIssue, MaterialIssueItem, MaterialReturn, MaterialReturnItem,
     StockTransfer, StockTransferItem, CurrentStock, StockLedger,
-    Material, Warehouse, Building, User, AuditLog, Indent, IndentItem, IndentStatus
+    Material, Warehouse, User, AuditLog, Indent, IndentItem, IndentStatus,
+    Room, Floor, Building, DocumentSequence
 )
 from app.schemas import (
     IssueCreate, IssueOut, IssueItemOut,
@@ -46,7 +48,7 @@ def list_issues(
             mat = item.material
             items.append(IssueItemOut(
                 id=item.id, material_id=item.material_id,
-                quantity=item.quantity, rate=item.rate,
+                quantity=round(item.quantity or 0), rate=item.rate,
                 remarks=item.remarks,
                 material_name=mat.name if mat else None,
                 material_code=mat.code if mat else None,
@@ -81,107 +83,133 @@ def create_issue(
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
-    count = db.query(MaterialIssue).filter(MaterialIssue.tenant_id == tenant_id, MaterialIssue.site_id == site_id).count() + 1
-    issue_number = get_next_number(db, tenant_id, site_id, "ISSUE", "ISS")
+    # Self-healing sequence check: Ensure current_number is ahead of existing issues
+    seq = db.query(DocumentSequence).filter_by(tenant_id=tenant_id, site_id=site_id, document_type="ISSUE").first()
+    if seq:
+        max_iss = db.query(func.max(MaterialIssue.issue_number)).filter(MaterialIssue.tenant_id == tenant_id, MaterialIssue.site_id == site_id).scalar()
+        if max_iss:
+            try:
+                num_part = int(max_iss.split('-')[-1])
+                if seq.current_number < num_part:
+                    seq.current_number = num_part
+                    db.flush()
+            except: pass
 
-    room_id = data.issued_to_room_id
-    building_id = data.building_id
-
-    # Auto-populate room/building from indent if missing
-    if data.indent_id:
-        indent = db.query(Indent).filter(Indent.id == data.indent_id).first()
-        if indent:
-            if not room_id: room_id = indent.room_id
-            if not building_id: building_id = indent.building_id
-
-    issue = MaterialIssue(
-        issue_number=issue_number,
-        warehouse_id=data.warehouse_id,
-        project_id=data.project_id,
-        indent_id=data.indent_id,
-        building_id=building_id,
-        issued_to_room_id=room_id,
-        issued_to_department=data.issued_to_department,
-        issued_to_contractor=data.issued_to_contractor,
-        purpose=data.purpose,
-        received_by_name=data.received_by_name,
-        issued_by_id=current_user.id,
-        status="Completed",
-        tenant_id=tenant_id,
-        site_id=site_id
-    )
-    db.add(issue)
-    db.flush()
-
-    for item_data in data.items:
-        # Check stock
-        stock = db.query(CurrentStock).filter(
-            CurrentStock.material_id == item_data.material_id,
-            CurrentStock.warehouse_id == data.warehouse_id,
-            CurrentStock.tenant_id == tenant_id,
-            CurrentStock.site_id == site_id
-        ).first()
-        if not stock or stock.quantity < item_data.quantity:
+    try:
+        # Group items by their material's default warehouse
+        items_by_warehouse = {}
+        for item_data in data.items:
             mat = db.query(Material).filter(Material.id == item_data.material_id).first()
-            raise HTTPException(
-                status_code=400,
-                detail=f"Insufficient stock for {mat.name if mat else 'material'} in selected warehouse"
+            if not mat: continue
+            w_id = mat.warehouse_id or data.warehouse_id # Fallback to global if set
+            if not w_id:
+                raise HTTPException(400, f"No warehouse mapped for {mat.name}")
+            if w_id not in items_by_warehouse:
+                items_by_warehouse[w_id] = []
+            items_by_warehouse[w_id].append((item_data, mat))
+
+        if not items_by_warehouse:
+            raise HTTPException(400, "No valid items to issue")
+
+        room_id = data.issued_to_room_id
+        building_id = data.building_id
+        if data.indent_id:
+            indent = db.query(Indent).filter(Indent.id == data.indent_id).first()
+            if indent:
+                if not room_id: room_id = indent.room_id
+                if not building_id: building_id = indent.building_id
+
+        if not building_id and room_id:
+            room_data = db.query(Room).filter(Room.id == room_id).first()
+            if room_data and room_data.floor:
+                building_id = room_data.floor.building_id
+
+        created_issues = []
+        for w_id, items in items_by_warehouse.items():
+            issue_number = get_next_number(db, tenant_id, site_id, "ISSUE", "ISS")
+            issue = MaterialIssue(
+                issue_number=issue_number,
+                warehouse_id=w_id,
+                project_id=data.project_id,
+                indent_id=data.indent_id,
+                building_id=building_id,
+                issued_to_room_id=room_id,
+                issued_to_department=data.issued_to_department,
+                issued_to_contractor=data.issued_to_contractor,
+                purpose=data.purpose,
+                received_by_name=data.received_by_name,
+                issued_by_id=current_user.id,
+                status="Completed",
+                tenant_id=tenant_id,
+                site_id=site_id
             )
+            db.add(issue)
+            db.flush()
 
-        mat_info = db.query(Material).filter(Material.id == item_data.material_id).first()
-        rate = mat_info.standard_cost if mat_info else 0.0
-
-        issue_item = MaterialIssueItem(
-            issue_id=issue.id,
-            material_id=item_data.material_id,
-            quantity=item_data.quantity,
-            rate=rate,
-            remarks=item_data.remarks
-        )
-        db.add(issue_item)
-
-        update_stock(
-            db=db,
-            material_id=item_data.material_id,
-            warehouse_id=data.warehouse_id,
-            quantity=-item_data.quantity,
-            transaction_type="Issue",
-            reference_type="Issue",
-            reference_id=issue.id,
-            reference_number=issue_number,
-            tenant_id=tenant_id,
-            site_id=site_id,
-            project_id=data.project_id,
-            room_id=room_id,
-            user_id=current_user.id
-        )
-
-    # If this issue is linked to an indent, update indent item issued quantities
-    if data.indent_id:
-        indent = db.query(Indent).filter(Indent.id == data.indent_id).first()
-        if indent:
-            for item_data in data.items:
-                indent_item = db.query(IndentItem).filter(
-                    IndentItem.indent_id == indent.id,
-                    IndentItem.material_id == item_data.material_id
+            for item_data, mat in items:
+                # Check stock
+                stock = db.query(CurrentStock).filter(
+                    CurrentStock.material_id == item_data.material_id,
+                    CurrentStock.warehouse_id == w_id,
+                    CurrentStock.tenant_id == tenant_id,
+                    CurrentStock.site_id == site_id
                 ).first()
-                if indent_item:
-                    indent_item.issued_quantity += item_data.quantity
+                if not stock or stock.quantity < item_data.quantity:
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"Insufficient stock for {mat.name} in mapped warehouse"
+                    )
 
-            # Update overall indent status
-            all_fully_issued = True
-            for it in indent.items:
-                if it.issued_quantity < it.requested_quantity:
-                    all_fully_issued = False
-                    break
-            
-            if all_fully_issued:
-                indent.status = IndentStatus.ISSUED.value
-            else:
-                indent.status = IndentStatus.PARTIALLY_ISSUED.value
+                rate = mat.standard_cost or 0.0
+                issue_item = MaterialIssueItem(
+                    issue_id=issue.id,
+                    material_id=item_data.material_id,
+                    quantity=round(item_data.quantity),
+                    rate=rate,
+                    remarks=item_data.remarks
+                )
+                db.add(issue_item)
 
-    db.commit()
-    return {"id": issue.id, "issue_number": issue_number, "message": "Material issued successfully"}
+                update_stock(
+                    db=db,
+                    material_id=item_data.material_id,
+                    warehouse_id=w_id,
+                    quantity=-item_data.quantity,
+                    transaction_type="Issue",
+                    reference_type="Issue",
+                    reference_id=issue.id,
+                    reference_number=issue_number,
+                    tenant_id=tenant_id,
+                    site_id=site_id,
+                    project_id=data.project_id,
+                    room_id=room_id,
+                    user_id=current_user.id
+                )
+            created_issues.append({"id": issue.id, "issue_number": issue_number})
+
+        # Update indent items
+        if data.indent_id:
+            indent = db.query(Indent).filter(Indent.id == data.indent_id).first()
+            if indent:
+                for item_data in data.items:
+                    indent_item = db.query(IndentItem).filter(
+                        IndentItem.indent_id == indent.id,
+                        IndentItem.material_id == item_data.material_id
+                    ).first()
+                    if indent_item:
+                        indent_item.issued_quantity += item_data.quantity
+                
+                all_fully_issued = all(it.issued_quantity >= it.requested_quantity for it in indent.items)
+                indent.status = IndentStatus.ISSUED.value if all_fully_issued else IndentStatus.PARTIALLY_ISSUED.value
+
+        db.commit()
+        return {
+            "created_ids": [iss["id"] for iss in created_issues],
+            "message": f"{len(created_issues)} issue(s) created successfully"
+        }
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=f"Creation Error: {str(e)}")
 
 
 @router.put("/issues/{issue_id}/acknowledge")
@@ -244,7 +272,7 @@ def list_returns(
             mat = item.material
             items.append(ReturnItemOut(
                 id=item.id, material_id=item.material_id,
-                quantity=item.quantity, condition=item.condition,
+                quantity=round(item.quantity or 0), condition=item.condition,
                 remarks=item.remarks,
                 material_name=mat.name if mat else None,
                 material_code=mat.code if mat else None,
@@ -296,7 +324,7 @@ def create_return(
         ret_item = MaterialReturnItem(
             return_id=ret.id,
             material_id=item_data.material_id,
-            quantity=item_data.quantity,
+            quantity=round(item_data.quantity),
             condition=item_data.condition,
             remarks=item_data.remarks
         )
@@ -346,7 +374,7 @@ def list_transfers(
             mat = item.material
             items.append(TransferItemOut(
                 id=item.id, material_id=item.material_id,
-                quantity=item.quantity, remarks=item.remarks,
+                quantity=round(item.quantity or 0), remarks=item.remarks,
                 material_name=mat.name if mat else None,
                 material_code=mat.code if mat else None,
                 uom_name=mat.uom.name if mat and mat.uom else None
@@ -411,7 +439,7 @@ def create_transfer(
         t_item = StockTransferItem(
             transfer_id=transfer.id,
             material_id=item_data.material_id,
-            quantity=item_data.quantity,
+            quantity=round(item_data.quantity),
             remarks=item_data.remarks
         )
         db.add(t_item)

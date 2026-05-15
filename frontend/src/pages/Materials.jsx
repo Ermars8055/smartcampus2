@@ -172,10 +172,14 @@ export default function Materials() {
     }
   };
 
-  const formatNumber = (val) => {
+  const formatQty = (val) => {
     if (val === undefined || val === null || isNaN(val)) return '0';
-    const num = parseFloat(val);
-    return num % 1 === 0 ? num.toLocaleString('en-IN') : num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return Math.round(Number(val)).toLocaleString('en-IN');
+  };
+
+  const formatAmt = (val) => {
+    if (val === undefined || val === null || isNaN(val)) return '0.00';
+    return Number(val).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
   const openEdit = (m, view = false) => {
@@ -358,12 +362,12 @@ export default function Materials() {
                     <Chip label={m.category_name} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.65rem' }} />
                   </TableCell>
                   <TableCell sx={{ fontSize: '0.8rem', px: 1 }}>{m.uom_name}</TableCell>
-                  <TableCell align="right" sx={{ fontSize: '0.8rem', px: 1 }}>{formatNumber(m.gst_rate)}%</TableCell>
-                  <TableCell align="right" sx={{ fontSize: '0.8rem', fontWeight: 600, px: 1 }}>₹{formatNumber(m.standard_cost)}</TableCell>
-                  <TableCell align="right" sx={{ fontSize: '0.8rem', px: 1 }}>{formatNumber(m.reorder_level)}</TableCell>
+                  <TableCell align="right" sx={{ fontSize: '0.8rem', px: 1 }}>{formatAmt(m.gst_rate)}%</TableCell>
+                  <TableCell align="right" sx={{ fontSize: '0.8rem', fontWeight: 600, px: 1 }}>₹{formatAmt(m.standard_cost)}</TableCell>
+                  <TableCell align="right" sx={{ fontSize: '0.8rem', px: 1 }}>{formatQty(m.reorder_level)}</TableCell>
                   <TableCell align="right" sx={{ px: 1 }}>
                     <Chip 
-                      label={formatNumber(m.current_stock)} 
+                      label={formatQty(m.current_stock)} 
                       size="small"
                       color={(m.current_stock || 0) < m.reorder_level ? 'error' : 'success'}
                       sx={{ fontWeight: 700, minWidth: 45, height: 22, fontSize: '0.7rem' }} 

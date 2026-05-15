@@ -436,15 +436,29 @@ def list_unique_departments(
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
-    """Fetch unique department names from the rooms table for the current site."""
+    """Fetch unique department names from BOTH Room and Department tables."""
     from sqlalchemy import distinct
-    results = db.query(distinct(Room.department_name)).filter(
+    # Names from Rooms
+    room_depts = db.query(distinct(Room.department_name)).filter(
         Room.tenant_id == tenant_id,
         Room.site_id == site_id,
         Room.department_name.isnot(None),
         Room.department_name != ""
     ).all()
-    return [r[0] for r in results if r[0]]
+    
+    # Names from Department master
+    dept_master = db.query(distinct(Department.name)).filter(
+        Department.tenant_id == tenant_id,
+        Department.site_id == site_id,
+        Department.is_active == True,
+        Department.is_deleted == False
+    ).all()
+    
+    # Combine and sort
+    all_names = set([r[0] for r in room_depts if r[0]])
+    all_names.update([d[0] for d in dept_master if d[0]])
+    
+    return sorted(list(all_names))
 
 
 @router.get("/departments", response_model=List[DepartmentOut])

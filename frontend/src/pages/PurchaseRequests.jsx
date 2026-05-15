@@ -585,7 +585,14 @@ export default function PurchaseRequests() {
                   inputProps={{ min: 1 }} 
                   required
                   InputProps={{ 
-                    startAdornment: <InputAdornment position="start"><Numbers sx={{ color: '#94A3B8' }} /></InputAdornment> 
+                    startAdornment: <InputAdornment position="start"><Numbers sx={{ color: '#94A3B8' }} /></InputAdornment>,
+                    endAdornment: item.material_id && (
+                      <InputAdornment position="end">
+                        <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748B' }}>
+                          {materials.find(m => m.id === item.material_id)?.uom_name || ''}
+                        </Typography>
+                      </InputAdornment>
+                    )
                   }} 
                 />
                 <Box sx={{ display: 'flex', justifyContent: 'center', pt: 1 }}>

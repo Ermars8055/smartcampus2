@@ -41,11 +41,14 @@ def list_indents(
         indent.requester_name = indent.requester.full_name if indent.requester else None
         indent.room_name = indent.room.name if indent.room else None
         indent.building_name = indent.room.floor.building.name if indent.room and indent.room.floor and indent.room.floor.building else None
+        indent.project_id = indent.room.floor.building.project_id if indent.room and indent.room.floor and indent.room.floor.building else None
         for item in indent.items:
             if item.material:
                 item.material_name = item.material.name
                 item.material_code = item.material.code
                 item.uom_name = item.material.uom.name if item.material.uom else None
+                item.warehouse_id = item.material.warehouse_id
+                item.warehouse_name = item.material.warehouse.name if item.material.warehouse else None
                 
                 # Fetch current stock
                 stock = db.query(CurrentStock).filter(CurrentStock.material_id == item.material_id, CurrentStock.site_id == site_id).first()
@@ -71,40 +74,48 @@ def create_indent(
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
-    # Calculate total amount based on material standard costs
-    total = 0
-    for item_data in data.items:
-        mat = db.query(Material).filter(Material.id == item_data.material_id).first()
-        if mat:
-            total += (mat.standard_cost or 0) * item_data.requested_quantity
+    try:
+        # Calculate total amount based on material standard costs
+        total = 0
+        for item_data in data.items:
+            mat = db.query(Material).filter(Material.id == item_data.material_id).first()
+            if mat:
+                total += (mat.standard_cost or 0) * item_data.requested_quantity
 
-    indent = Indent(
-        tenant_id=tenant_id,
-        site_id=site_id,
-        indent_number=generate_indent_number(db, tenant_id, site_id),
-        requester_id=current_user.id,
-        room_id=data.room_id,
-        floor=data.floor,
-        location=data.location,
-        department=data.department,
-        remarks=data.remarks,
-        total_amount=total,
-        status=IndentStatus.AWAITING_APPROVAL.value,
-        current_approval_level=1
-    )
-    db.add(indent)
-    db.flush()
-    
-    for item_data in data.items:
-        item = IndentItem(
-            indent_id=indent.id,
-            material_id=item_data.material_id,
-            requested_quantity=item_data.requested_quantity
+        indent = Indent(
+            tenant_id=tenant_id,
+            site_id=site_id,
+            indent_number=generate_indent_number(db, tenant_id, site_id),
+            requester_id=current_user.id,
+            room_id=data.room_id,
+            building_id=data.building_id,
+            floor=data.floor,
+            location=data.location,
+            department=data.department,
+            remarks=data.remarks,
+            total_amount=total,
+            status=IndentStatus.AWAITING_APPROVAL.value,
+            current_approval_level=1
         )
-        db.add(item)
+        db.add(indent)
+        db.flush()
         
-    db.commit()
-    db.refresh(indent)
+        for item_data in data.items:
+            item = IndentItem(
+                indent_id=indent.id,
+                material_id=item_data.material_id,
+                requested_quantity=item_data.requested_quantity
+            )
+            db.add(item)
+            
+        db.commit()
+        db.refresh(indent)
+    except Exception as e:
+        db.rollback()
+        import logging
+        logging.error(f"Error creating indent: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
     
     indent.requester_name = current_user.full_name
     indent.room_name = indent.room.name if indent.room else None
@@ -132,11 +143,14 @@ def get_indent(
     indent.requester_name = indent.requester.full_name if indent.requester else None
     indent.room_name = indent.room.name if indent.room else None
     indent.building_name = indent.room.floor.building.name if indent.room and indent.room.floor and indent.room.floor.building else None
+    indent.project_id = indent.room.floor.building.project_id if indent.room and indent.room.floor and indent.room.floor.building else None
     for item in indent.items:
         if item.material:
             item.material_name = item.material.name
             item.material_code = item.material.code
             item.uom_name = item.material.uom.name if item.material.uom else None
+            item.warehouse_id = item.material.warehouse_id
+            item.warehouse_name = item.material.warehouse.name if item.material.warehouse else None
             stock = db.query(CurrentStock).filter(CurrentStock.material_id == item.material_id, CurrentStock.site_id == site_id).first()
             item.current_stock = stock.quantity if stock else 0
             

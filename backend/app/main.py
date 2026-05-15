@@ -44,22 +44,22 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Enhanced CORS middleware with explicit origins for local networking
+# Improved CORS middleware for local and production networking
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "http://192.168.0.4:5173",
-        "http://192.168.0.4:8007",
-        "http://192.168.0.4",
         "http://0.0.0.0:5173",
     ],
-    allow_origin_regex=r"https?://.*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
+
+
 
 # Static files for uploads
 os.makedirs("uploads", exist_ok=True)

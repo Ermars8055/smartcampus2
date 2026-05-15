@@ -128,55 +128,57 @@ export default function Inventory() {
 
       {tab === 0 && (
         <Card>
-          <TableContainer>
-            <Table size="small">
+          <TableContainer sx={{ borderRadius: 2, overflow: 'hidden' }}>
+            <Table size="small" sx={{ 
+              '& .MuiTableCell-root': { px: 0.75, py: 1.2, fontSize: '0.72rem', borderColor: '#F1F5F9' } 
+            }}>
               <TableHead><TableRow>
-                <TableCell>
+                <TableCell sx={{ fontWeight: 700, color: '#64748B' }}>
                   <TableSortLabel active={orderBy === 'material_code'} direction={orderBy === 'material_code' ? order : 'asc'} onClick={() => handleSort('material_code')}>CODE</TableSortLabel>
                 </TableCell>
-                <TableCell>
+                <TableCell sx={{ fontWeight: 700, color: '#64748B' }}>
                   <TableSortLabel active={orderBy === 'material_name'} direction={orderBy === 'material_name' ? order : 'asc'} onClick={() => handleSort('material_name')}>MATERIAL</TableSortLabel>
                 </TableCell>
-                <TableCell>
+                <TableCell sx={{ fontWeight: 700, color: '#64748B' }}>
                   <TableSortLabel active={orderBy === 'category_name'} direction={orderBy === 'category_name' ? order : 'asc'} onClick={() => handleSort('category_name')}>CATEGORY</TableSortLabel>
                 </TableCell>
-                <TableCell>UOM</TableCell>
-                <TableCell>
+                <TableCell sx={{ fontWeight: 700, color: '#64748B' }}>UOM</TableCell>
+                <TableCell sx={{ fontWeight: 700, color: '#64748B' }}>
                   <TableSortLabel active={orderBy === 'warehouse_name'} direction={orderBy === 'warehouse_name' ? order : 'asc'} onClick={() => handleSort('warehouse_name')}>STORE</TableSortLabel>
                 </TableCell>
-                <TableCell align="right">
+                <TableCell align="right" sx={{ fontWeight: 700, color: '#64748B' }}>
                   <TableSortLabel active={orderBy === 'quantity'} direction={orderBy === 'quantity' ? order : 'asc'} onClick={() => handleSort('quantity')}>QTY</TableSortLabel>
                 </TableCell>
-                <TableCell align="right">
+                <TableCell align="right" sx={{ fontWeight: 700, color: '#64748B' }}>
                   <TableSortLabel active={orderBy === 'reorder_level'} direction={orderBy === 'reorder_level' ? order : 'asc'} onClick={() => handleSort('reorder_level')}>REORDER</TableSortLabel>
                 </TableCell>
-                <TableCell align="right">
+                <TableCell align="right" sx={{ fontWeight: 700, color: '#64748B' }}>
                   <TableSortLabel active={orderBy === 'standard_cost'} direction={orderBy === 'standard_cost' ? order : 'asc'} onClick={() => handleSort('standard_cost')}>COST (₹)</TableSortLabel>
                 </TableCell>
-                <TableCell align="right">
+                <TableCell align="right" sx={{ fontWeight: 700, color: '#64748B' }}>
                   <TableSortLabel active={orderBy === 'stock_value'} direction={orderBy === 'stock_value' ? order : 'asc'} onClick={() => handleSort('stock_value')}>VALUE (₹)</TableSortLabel>
                 </TableCell>
-                <TableCell>STATUS</TableCell>
+                <TableCell sx={{ fontWeight: 700, color: '#64748B' }}>STATUS</TableCell>
               </TableRow></TableHead>
               <TableBody>
                 {sortedStock.map(s => (
-                  <TableRow key={s.id} sx={{ background: s.quantity < s.reorder_level ? '#FEF2F2' : 'inherit' }}>
-                    <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.8rem' }}>{s.material_code}</TableCell>
-                    <TableCell sx={{ fontSize: '0.8rem' }}>{s.material_name}</TableCell>
-                    <TableCell><Chip label={s.category_name} size="small" variant="outlined" sx={{ fontSize: '0.7rem' }} /></TableCell>
-                    <TableCell sx={{ fontSize: '0.8rem' }}>{s.uom_name}</TableCell>
-                    <TableCell sx={{ fontSize: '0.8rem' }}>{s.warehouse_name}</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.85rem' }}>{s.quantity}</TableCell>
-                    <TableCell align="right" sx={{ fontSize: '0.8rem', color: '#64748B' }}>{s.reorder_level}</TableCell>
-                    <TableCell align="right" sx={{ fontSize: '0.8rem' }}>₹{s.standard_cost?.toLocaleString('en-IN')}</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.8rem' }}>₹{s.stock_value?.toLocaleString('en-IN')}</TableCell>
-                    <TableCell>
+                  <TableRow key={s.id} sx={{ '&:hover': { bgcolor: '#F8FAFC' }, background: s.quantity < s.reorder_level ? '#FEF2F2' : 'inherit' }}>
+                    <TableCell sx={{ fontWeight: 600, color: '#2563EB' }}>{s.material_code}</TableCell>
+                    <TableCell sx={{ fontWeight: 500 }}>{s.material_name}</TableCell>
+                    <TableCell><Chip label={s.category_name} size="small" variant="outlined" sx={{ fontSize: '0.65rem', height: 20 }} /></TableCell>
+                    <TableCell>{s.uom_name}</TableCell>
+                    <TableCell>{s.warehouse_name}</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700 }}>{Math.round(s.quantity)}</TableCell>
+                    <TableCell align="right" sx={{ color: '#64748B' }}>{Math.round(s.reorder_level)}</TableCell>
+                    <TableCell align="right">₹{s.standard_cost?.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 600 }}>₹{s.stock_value?.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                    <TableCell sx={{ whiteSpace: 'nowrap' }}>
                       {s.quantity === 0 ? (
-                        <Chip label="No Stock" size="small" color="default" sx={{ fontWeight: 600 }} />
+                        <Chip label="No Stock" size="small" sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} />
                       ) : s.quantity < s.reorder_level ? (
-                        <Chip icon={<Warning />} label="Low Stock" size="small" color="error" sx={{ fontWeight: 600 }} />
+                        <Chip icon={<Warning style={{ fontSize: 12 }} />} label="Low Stock" size="small" color="error" sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} />
                       ) : (
-                        <Chip label="In Stock" size="small" color="success" variant="outlined" sx={{ fontWeight: 600 }} />
+                        <Chip label="In Stock" size="small" color="success" variant="outlined" sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} />
                       )}
                     </TableCell>
                   </TableRow>
@@ -189,43 +191,45 @@ export default function Inventory() {
 
       {tab === 1 && (
         <Card>
-          <TableContainer>
-            <Table size="small">
-              <TableHead><TableRow>
-                <TableCell>
+          <TableContainer sx={{ borderRadius: 2, overflow: 'hidden' }}>
+            <Table size="small" sx={{ 
+              '& .MuiTableCell-root': { px: 0.75, py: 1.2, fontSize: '0.72rem', borderColor: '#F1F5F9' } 
+            }}>
+              <TableHead sx={{ bgcolor: '#F8FAFC' }}><TableRow>
+                <TableCell sx={{ fontWeight: 700, color: '#64748B' }}>
                   <TableSortLabel active={orderBy === 'created_at'} direction={orderBy === 'created_at' ? order : 'asc'} onClick={() => handleSort('created_at')}>DATE</TableSortLabel>
                 </TableCell>
-                <TableCell>
+                <TableCell sx={{ fontWeight: 700, color: '#64748B' }}>
                   <TableSortLabel active={orderBy === 'material_name'} direction={orderBy === 'material_name' ? order : 'asc'} onClick={() => handleSort('material_name')}>MATERIAL</TableSortLabel>
                 </TableCell>
-                <TableCell>
+                <TableCell sx={{ fontWeight: 700, color: '#64748B' }}>
                   <TableSortLabel active={orderBy === 'warehouse_name'} direction={orderBy === 'warehouse_name' ? order : 'asc'} onClick={() => handleSort('warehouse_name')}>STORE</TableSortLabel>
                 </TableCell>
-                <TableCell>
+                <TableCell sx={{ fontWeight: 700, color: '#64748B' }}>
                   <TableSortLabel active={orderBy === 'transaction_type'} direction={orderBy === 'transaction_type' ? order : 'asc'} onClick={() => handleSort('transaction_type')}>TYPE</TableSortLabel>
                 </TableCell>
-                <TableCell align="right">
+                <TableCell align="right" sx={{ fontWeight: 700, color: '#64748B' }}>
                   <TableSortLabel active={orderBy === 'quantity'} direction={orderBy === 'quantity' ? order : 'asc'} onClick={() => handleSort('quantity')}>QTY</TableSortLabel>
                 </TableCell>
-                <TableCell align="right">
+                <TableCell align="right" sx={{ fontWeight: 700, color: '#64748B' }}>
                   <TableSortLabel active={orderBy === 'balance'} direction={orderBy === 'balance' ? order : 'asc'} onClick={() => handleSort('balance')}>BALANCE</TableSortLabel>
                 </TableCell>
-                <TableCell>REFERENCE</TableCell>
+                <TableCell sx={{ fontWeight: 700, color: '#64748B' }}>REFERENCE</TableCell>
               </TableRow></TableHead>
               <TableBody>
                 {sortedLedger.map(e => (
-                  <TableRow key={e.id}>
-                    <TableCell sx={{ fontSize: '0.75rem' }}>{formatDateTime(e.created_at)}</TableCell>
-                    <TableCell sx={{ fontSize: '0.8rem' }}>{e.material_name}</TableCell>
-                    <TableCell sx={{ fontSize: '0.8rem' }}>{e.warehouse_name}</TableCell>
+                  <TableRow key={e.id} hover>
+                    <TableCell sx={{ fontSize: '0.7rem', whiteSpace: 'nowrap' }}>{formatDateTime(e.created_at)}</TableCell>
+                    <TableCell sx={{ fontWeight: 500 }}>{e.material_name}</TableCell>
+                    <TableCell>{e.warehouse_name}</TableCell>
                     <TableCell>
-                      <Chip label={e.transaction_type} size="small" color={e.quantity > 0 ? 'success' : 'error'} variant="outlined" sx={{ fontSize: '0.7rem' }} />
+                      <Chip label={e.transaction_type} size="small" color={e.quantity > 0 ? 'success' : 'error'} variant="outlined" sx={{ fontSize: '0.65rem', height: 20 }} />
                     </TableCell>
                     <TableCell align="right" sx={{ fontWeight: 600, color: e.quantity > 0 ? '#059669' : '#DC2626' }}>
-                      {e.quantity > 0 ? '+' : ''}{e.quantity}
+                      {e.quantity > 0 ? '+' : ''}{Math.round(e.quantity)}
                     </TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 600 }}>{e.balance}</TableCell>
-                    <TableCell sx={{ fontSize: '0.75rem', color: '#64748B' }}>{e.reference_number}</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 600 }}>{Math.round(e.balance)}</TableCell>
+                    <TableCell sx={{ fontSize: '0.7rem', color: '#64748B' }}>{e.reference_number}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

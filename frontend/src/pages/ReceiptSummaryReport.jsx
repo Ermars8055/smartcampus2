@@ -55,8 +55,8 @@ export default function ReceiptSummaryReport() {
     }
   }, [filters.categoryId]);
 
-  const fmt = (v) => v != null ? v.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00';
-  const fmtQty = (v) => v != null ? v.toLocaleString('en-IN') : '0';
+  const fmt = (v) => v != null ? Number(v).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00';
+  const fmtQty = (v) => v != null ? Math.round(Number(v)).toLocaleString('en-IN') : '0';
 
   const handleGenerate = async () => {
     setLoading(true);

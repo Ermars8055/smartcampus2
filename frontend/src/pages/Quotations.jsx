@@ -1015,9 +1015,9 @@ const Quotations = () => {
                             return (
                               <TableRow key={q.vendor_id} sx={{ backgroundColor: isSelected ? '#f1f8e9' : 'inherit' }}>
                                 <TableCell>{q.vendor_name}</TableCell>
-                                <TableCell>{q.quoted_rate}</TableCell>
+                                <TableCell>₹{Number(q.quoted_rate).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                                 <TableCell>{q.delivery_days || '-'} days</TableCell>
-                                <TableCell><Chip size="small" label={q.rank_label} color={q.rank === 1 ? "success" : "default"} /></TableCell>
+                                <TableCell><Chip size="small" label={isSelected ? `${q.rank_label} Selected` : q.rank_label} color={isSelected ? "success" : "default"} /></TableCell>
                                 <TableCell align="right">
                                   {!isSelected && !['Approved', 'Ordered'].includes(selectedQR.status) && (
                                     <Button size="small" onClick={() => {
@@ -1092,23 +1092,21 @@ const Quotations = () => {
                                   key={vt.vendor_id} 
                                   align="right"
                                   sx={{ 
-                                    backgroundColor: isL1 ? 'rgba(46, 125, 50, 0.05)' : 'inherit',
-                                    fontWeight: isL1 || isSelected ? 600 : 400
+                                    backgroundColor: isSelected ? 'rgba(46, 125, 50, 0.05)' : 'inherit',
+                                    fontWeight: isSelected ? 600 : 400
                                   }}
                                 >
                                   {quote ? (
                                     <>
                                       <Typography variant="body2">
-                                        ₹{quote.quoted_rate.toLocaleString('en-IN')}
+                                        ₹{Number(quote.quoted_rate).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                       </Typography>
-                                      {(isL1 || isSelected) && (
-                                        <Chip 
-                                          label={isL1 && isSelected ? "L1 Selected" : (isL1 ? "L1" : "Selected")} 
-                                          size="small" 
-                                          color="success" 
-                                          sx={{ height: 16, fontSize: '0.6rem', mt: 0.5, px: 0.5 }} 
-                                        />
-                                      )}
+                                      <Chip 
+                                        label={isSelected ? `${quote.rank_label} Selected` : quote.rank_label} 
+                                        size="small" 
+                                        color={isSelected ? "success" : "default"} 
+                                        sx={{ height: 16, fontSize: '0.6rem', mt: 0.5, px: 0.5 }} 
+                                      />
                                     </>
                                   ) : '-'}
                                 </TableCell>

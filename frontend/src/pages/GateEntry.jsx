@@ -202,8 +202,7 @@ export default function GateEntry() {
               <TableCell><TableSortLabel active={sortConfig.key === 'vehicle_person'} direction={sortConfig.key === 'vehicle_person' ? sortConfig.direction : 'asc'} onClick={() => handleSort('vehicle_person')}>Vehicle/Person</TableSortLabel></TableCell>
               <TableCell><TableSortLabel active={sortConfig.key === 'vendor_name'} direction={sortConfig.key === 'vendor_name' ? sortConfig.direction : 'asc'} onClick={() => handleSort('vendor_name')}>Vendor</TableSortLabel></TableCell>
               <TableCell><TableSortLabel active={sortConfig.key === 'po_number'} direction={sortConfig.key === 'po_number' ? sortConfig.direction : 'asc'} onClick={() => handleSort('po_number')}>PO Ref</TableSortLabel></TableCell>
-              <TableCell><TableSortLabel active={sortConfig.key === 'material_names'} direction={sortConfig.key === 'material_names' ? sortConfig.direction : 'asc'} onClick={() => handleSort('material_names')}>Material</TableSortLabel></TableCell>
-              <TableCell align="right"><TableSortLabel active={sortConfig.key === 'quantity'} direction={sortConfig.key === 'quantity' ? sortConfig.direction : 'asc'} onClick={() => handleSort('quantity')}>Qty</TableSortLabel></TableCell>
+              <TableCell><TableSortLabel active={sortConfig.key === 'material_names'} direction={sortConfig.key === 'material_names' ? sortConfig.direction : 'asc'} onClick={() => handleSort('material_names')}>Material (Qty)</TableSortLabel></TableCell>
               <TableCell><TableSortLabel active={sortConfig.key === 'arrival_time'} direction={sortConfig.key === 'arrival_time' ? sortConfig.direction : 'asc'} onClick={() => handleSort('arrival_time')}>Arrival</TableSortLabel></TableCell>
               <TableCell><TableSortLabel active={sortConfig.key === 'status'} direction={sortConfig.key === 'status' ? sortConfig.direction : 'asc'} onClick={() => handleSort('status')}>Status</TableSortLabel></TableCell>
             </TableRow></TableHead>
@@ -225,7 +224,6 @@ export default function GateEntry() {
                   <TableCell sx={{ fontSize: '0.8rem' }}>{e.vendor_name}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem', color: '#64748B' }}>{e.po_number || '-'}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem' }}>{e.material_names || (e.entry_type === 'Direct Invoice' ? '—' : '')}</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 600 }}>{e.quantity || '—'}</TableCell>
                   <TableCell sx={{ fontSize: '0.75rem' }}>{formatDateTime(e.arrival_time)}</TableCell>
                   <TableCell><Chip label={e.status} size="small" color={statusColor[e.status] || 'default'} sx={{ fontSize: '0.7rem' }} /></TableCell>
                 </TableRow>
@@ -251,8 +249,7 @@ export default function GateEntry() {
             )}
             <Grid item xs={6}><Typography variant="caption" color="textSecondary">Vendor</Typography><Typography>{detailDialog?.vendor_name}</Typography></Grid>
             <Grid item xs={6}><Typography variant="caption" color="textSecondary">PO Ref</Typography><Typography>{detailDialog?.po_number || '-'}</Typography></Grid>
-            <Grid item xs={6}><Typography variant="caption" color="textSecondary">Material</Typography><Typography>{detailDialog?.material_names || '—'}</Typography></Grid>
-            <Grid item xs={6}><Typography variant="caption" color="textSecondary">Quantity</Typography><Typography sx={{ fontWeight: 600 }}>{detailDialog?.quantity || '—'}</Typography></Grid>
+            <Grid item xs={12}><Typography variant="caption" color="textSecondary">Material (Qty)</Typography><Typography>{detailDialog?.material_names || '—'}</Typography></Grid>
             <Grid item xs={6}><Typography variant="caption" color="textSecondary">Arrival</Typography><Typography>{formatDateTime(detailDialog?.arrival_time)}</Typography></Grid>
             <Grid item xs={6}><Typography variant="caption" color="textSecondary">Status</Typography><Chip label={detailDialog?.status} size="small" color={statusColor[detailDialog?.status] || 'default'} /></Grid>
             {detailDialog?.invoice_scan_url && (

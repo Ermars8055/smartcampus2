@@ -390,7 +390,7 @@ export default function RateAnalysisReport() {
                                           <TableCell>{t.grn_number}</TableCell>
                                           <TableCell>{t.grn_date_display}</TableCell>
                                           <TableCell>{t.vendor_name}</TableCell>
-                                          <TableCell align="right">{t.qty_received}</TableCell>
+                                          <TableCell align="right">{Math.round(t.qty_received)}</TableCell>
                                           <TableCell align="right" sx={{ color: getRateColor(t.purchase_rate, minR, maxR), fontWeight: isLatest ? 700 : 500 }}>{fmt(t.purchase_rate)}</TableCell>
                                           <TableCell align="right">{t.tax_pct}%</TableCell>
                                           <TableCell align="right">{fmt(t.tax_amount)}</TableCell>

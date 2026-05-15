@@ -62,15 +62,15 @@ def list_inventory(
         uom = mat.uom if mat else None
         result.append(StockOut(
             id=s.id, material_id=s.material_id,
-            warehouse_id=s.warehouse_id, quantity=s.quantity,
+            warehouse_id=s.warehouse_id, quantity=round(s.quantity or 0),
             material_name=mat.name if mat else None,
             material_code=mat.code if mat else None,
             category_name=cat.name if cat else None,
             uom_name=uom.name if uom else None,
             warehouse_name=wh.name if wh else None,
-            reorder_level=mat.reorder_level if mat else 0,
-            standard_cost=mat.standard_cost if mat else 0,
-            stock_value=s.quantity * (mat.standard_cost if mat else 0),
+            reorder_level=round(mat.reorder_level or 0) if mat else 0,
+            standard_cost=round(float(mat.standard_cost or 0), 2),
+            stock_value=round(float(s.quantity or 0) * float(mat.standard_cost or 0), 2),
             storage_type=mat.storage_type if mat else None
         ))
     return result
@@ -102,7 +102,7 @@ def get_full_inventory_ledger(
         "items": [
             StockLedgerOut(
                 id=l.id, material_id=l.material_id, warehouse_id=l.warehouse_id,
-                transaction_type=l.transaction_type, quantity=l.quantity, balance=l.balance,
+                transaction_type=l.transaction_type, quantity=round(l.quantity or 0), balance=round(l.balance or 0),
                 reference_type=l.reference_type, reference_number=l.reference_number,
                 created_at=l.created_at, warehouse_name=l.warehouse.name if l.warehouse else None,
                 material_name=l.material.name if l.material else None
@@ -129,7 +129,7 @@ def get_stock_ledger(
         wh = l.warehouse
         result.append(StockLedgerOut(
             id=l.id, material_id=l.material_id, warehouse_id=l.warehouse_id,
-            transaction_type=l.transaction_type, quantity=l.quantity, balance=l.balance,
+            transaction_type=l.transaction_type, quantity=round(l.quantity or 0), balance=round(l.balance or 0),
             reference_type=l.reference_type, reference_number=l.reference_number,
             created_at=l.created_at, warehouse_name=wh.name if wh else None
         ))
@@ -164,7 +164,7 @@ def stock_report(
     return [
         {
             "material_code": r[0], "material_name": r[1], "uom": r[2],
-            "total_quantity": round(r[3] or 0, 2),
+            "total_quantity": round(r[3] or 0),
             "total_value": round(r[4] or 0, 2)
         }
         for r in results
@@ -193,8 +193,8 @@ def consumption_report(
         {
             "building_name": r.building_name,
             "material_name": r.material_name,
-            "total_quantity": r.total_quantity,
-            "total_value": r.total_value
+            "total_quantity": round(r.total_quantity or 0),
+            "total_value": round(r.total_value or 0, 2)
         } for r in results
     ]
 
@@ -266,8 +266,8 @@ def material_movement_report(
             "material_name": e.material.name if e.material else "",
             "warehouse": e.warehouse.name if e.warehouse else "",
             "transaction_type": e.transaction_type,
-            "quantity": e.quantity,
-            "balance": e.balance,
+            "quantity": round(e.quantity or 0),
+            "balance": round(e.balance or 0),
             "reference": e.reference_number or ""
         }
         for e in ledger

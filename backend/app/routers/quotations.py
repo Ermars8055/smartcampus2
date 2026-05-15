@@ -28,17 +28,13 @@ router = APIRouter(prefix="/api/quotations", tags=["Quotations"])
 
 
 def generate_qr_number(db: Session, tenant_id: int, site_id: int) -> str:
-    count = db.query(QuotationRequest).filter(
-        QuotationRequest.tenant_id == tenant_id, QuotationRequest.site_id == site_id
-    ).count() + 1
-    return f"QR-{get_now_ist().strftime('%Y%m')}-{count:04d}"
+    from app.utils.sequences import get_next_number
+    return get_next_number(db, tenant_id, site_id, "QUOTATION_REQUEST", "QR")
 
 
 def generate_po_number(db: Session, tenant_id: int, site_id: int) -> str:
-    count = db.query(PurchaseOrder).filter(
-        PurchaseOrder.tenant_id == tenant_id, PurchaseOrder.site_id == site_id
-    ).count() + 1
-    return f"PO-{get_now_ist().strftime('%Y%m')}-{count:04d}"
+    from app.utils.sequences import get_next_number
+    return get_next_number(db, tenant_id, site_id, "PURCHASE_ORDER", "PO")
 
 
 # ── Quotation Requests ───────────────────────────────────────────────────

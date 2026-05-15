@@ -23,6 +23,7 @@ def update_stock(db: Session, material_id: int, warehouse_id: int, quantity: flo
                  reference_number: str, tenant_id: int, site_id: int, project_id: int = None, room_id: int = None,
                  user_id: int = None):
     """Update current stock and create ledger entry."""
+    quantity = round(quantity)
     stock = db.query(CurrentStock).filter(
         CurrentStock.material_id == material_id,
         CurrentStock.warehouse_id == warehouse_id,
@@ -34,7 +35,7 @@ def update_stock(db: Session, material_id: int, warehouse_id: int, quantity: flo
         db.add(stock)
         db.flush()
 
-    stock.quantity += quantity
+    stock.quantity = round(stock.quantity + quantity)
     new_balance = stock.quantity
 
     ledger = StockLedger(
@@ -156,6 +157,14 @@ def create_grn(
             vendor_id = po.vendor_id
             project_id = po.project_id
 
+        # Auto-calculate totals if not provided
+        invoice_amt = data.invoice_amount
+        total_taxable = data.total_taxable_amount
+        if not invoice_amt or invoice_amt == 0:
+            invoice_amt = round(sum((item.accepted_quantity * item.rate) for item in data.items), 2)
+        if not total_taxable or total_taxable == 0:
+            total_taxable = round(sum((item.accepted_quantity * item.rate) for item in data.items), 2)
+
         grn = GRN(
             grn_number=get_next_number(db, tenant_id, site_id, "GRN", "GRN"),
             po_id=data.po_id if data.po_id else None,
@@ -166,10 +175,10 @@ def create_grn(
             receipt_type=data.receipt_type,
             invoice_number=data.invoice_number,
             invoice_date=data.invoice_date,
-            invoice_amount=data.invoice_amount,
+            invoice_amount=invoice_amt,
             invoice_scan_url=data.invoice_scan_url,
             vendor_gstin=data.vendor_gstin,
-            total_taxable_amount=data.total_taxable_amount,
+            total_taxable_amount=total_taxable,
             total_cgst=data.total_cgst,
             total_sgst=data.total_sgst,
             total_igst=data.total_igst,
@@ -219,7 +228,7 @@ def create_grn(
                 cgst_amount=item_data.cgst_amount,
                 sgst_amount=item_data.sgst_amount,
                 igst_amount=item_data.igst_amount,
-                taxable_amount=item_data.taxable_amount,
+                taxable_amount=item_data.taxable_amount if item_data.taxable_amount > 0 else round(item_data.accepted_quantity * item_data.rate, 2),
                 discount_percent=item_data.discount_percent,
                 remarks=item_data.remarks
             )

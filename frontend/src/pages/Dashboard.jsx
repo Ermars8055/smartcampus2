@@ -287,7 +287,7 @@ export default function Dashboard() {
                   innerRadius={70} 
                   outerRadius={100}
                   dataKey="total_value" 
-                  nameKey="name" 
+                  nameKey="warehouse_name" 
                   paddingAngle={5}
                 >
                   {stockByWh.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}

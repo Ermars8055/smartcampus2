@@ -46,10 +46,10 @@ export default function IssueSummaryReport() {
   }, []);
 
   const formatQty = (val) => {
-    if (val == null) return '';
+    if (val == null || val === '') return '';
     const num = Number(val);
     if (isNaN(num)) return val;
-    return Number.isInteger(num) ? num.toString() : num.toFixed(2);
+    return Math.round(num).toString();
   };
 
   const handleGenerate = async () => {

@@ -27,12 +27,8 @@ export default function Projects() {
     api.get('/api/rooms').then(r => setRooms(r.data));
   };
 
-  const loadDepartments = (buildingId) => {
-    if (buildingId) {
-      api.get(`/api/buildings/${buildingId}/departments`).then(r => setDepartments(r.data)).catch(() => setDepartments([]));
-    } else {
-      setDepartments([]);
-    }
+  const loadDepartments = () => {
+    api.get('/api/departments/names').then(r => setDepartments(r.data)).catch(() => setDepartments([]));
   };
 
   useEffect(() => { load(); }, []);
@@ -104,7 +100,9 @@ export default function Projects() {
             setForm({ name: '', level: 0, building_id: '' }); setDialog('floor');
           }}>Floor</Button>
           <Button size="small" variant="outlined" startIcon={<Add />} onClick={() => {
-            setForm({ name: '', code: '', department_name: '', floor_id: '', _building_id: '' }); setDialog('room');
+            setForm({ name: '', code: '', department_name: '', floor_id: '', _building_id: '' }); 
+            loadDepartments();
+            setDialog('room');
           }}>Room</Button>
         </Box>
       </Box>
@@ -172,7 +170,7 @@ export default function Projects() {
                                     <IconButton size="small" sx={{ ml: 1 }} onClick={() => {
                                       const floor = floors.find(f => f.id === r.floor_id);
                                       setForm({ ...r, _building_id: floor?.building_id || '', department_name: r.department_name || '' });
-                                      if (floor?.building_id) loadDepartments(floor.building_id);
+                                      if (floor?.building_id) loadDepartments();
                                       setDialog('room');
                                     }}><Edit sx={{ fontSize: 14 }} /></IconButton>
                                     <IconButton size="small" color="error" onClick={() => handleDelete('room', r.id)}><Delete sx={{ fontSize: 14 }} /></IconButton>
@@ -357,7 +355,7 @@ export default function Projects() {
                       onChange={e => {
                         const bid = e.target.value;
                         setForm({ ...form, _building_id: bid, floor_id: '', department_name: '' });
-                        loadDepartments(bid);
+                        loadDepartments();
                       }}
                       startAdornment={<InputAdornment position="start"><Apartment sx={{ color: '#94A3B8', fontSize: 18, mr: 1 }} /></InputAdornment>}
                       sx={{ borderRadius: '12px' }}
@@ -392,7 +390,7 @@ export default function Projects() {
                       displayEmpty
                     >
                       <MenuItem value="" disabled><em>Select department...</em></MenuItem>
-                      {departments.map(d => <MenuItem key={d.id} value={d.name}>{d.name} ({d.code})</MenuItem>)}
+                      {departments.map(name => <MenuItem key={name} value={name}>{name}</MenuItem>)}
                     </Select>
                   </FormControl>
                 </Grid>

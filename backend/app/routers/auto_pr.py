@@ -7,7 +7,8 @@ from datetime import date
 from typing import List, Dict, Any
 from app.database import get_db
 from app.models import User, Material, CurrentStock, PurchaseRequest, PurchaseRequestItem, Project
-from app.auth import get_current_user, get_site_id, require_permission
+from app.auth import get_current_user, get_tenant_id, get_site_id, require_permission
+from app.utils.sequences import get_next_number
 from pydantic import BaseModel
 
 router = APIRouter(prefix="/api/auto-pr", tags=["Auto PR"])
@@ -63,6 +64,7 @@ def get_materials_below_reorder(
 @router.post("/generate")
 def generate_auto_pr(
     request: AutoPRRequest,
+    tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id),
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("purchase_requests", "create"))
@@ -92,7 +94,7 @@ def generate_auto_pr(
             continue
             
         pr = PurchaseRequest(
-            pr_number=f"PR-AUTO-{date.today().strftime('%Y%m%d')}-{len(prs_created)+1}",
+            pr_number=get_next_number(db, tenant_id, site_id, "PURCHASE_REQUEST", "PR"),
             requester_id=current_user.id,
             project_id=project_id,
             required_date=date.today(), # Or add delta

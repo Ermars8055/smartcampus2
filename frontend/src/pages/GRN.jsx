@@ -52,23 +52,17 @@ export default function GRNPage() {
   const selectGateEntry = (geId) => {
     const ge = gateEntries.find(g => g.id === geId);
     if (ge) {
-      const newForm = { ...form, gate_entry_id: geId, vendor_id: ge.vendor_id, project_id: ge.project_id, receipt_type: 'PO-Based' };
-      if (ge.po_id) {
-        newForm.po_id = ge.po_id;
-        // Load PO items
-        const po = pos.find(p => p.id === ge.po_id);
-        if (po) {
-          newForm.items = po.items?.map(it => ({
-            material_id: it.material_id, po_item_id: it.id,
-            ordered_quantity: it.quantity,
-            received_quantity: Math.min(ge.quantity || it.quantity, it.quantity - (it.received_quantity || 0)),
-            accepted_quantity: Math.min(ge.quantity || it.quantity, it.quantity - (it.received_quantity || 0)),
-            rejected_quantity: 0,
-            rate: it.rate, material_name: it.material_name
-          })) || [];
-        }
-      }
-      setForm(newForm);
+      const newForm = { ...form, gate_entry_id: geId, po_id: ge.po_id, vendor_id: ge.vendor_id, project_id: ge.project_id, receipt_type: 'PO-Based' };
+      const items = ge.po_id ? (pos.find(p => p.id === ge.po_id)?.items?.map(it => ({
+        material_id: it.material_id, po_item_id: it.id,
+        ordered_quantity: it.quantity,
+        received_quantity: Math.min(ge.quantity || it.quantity, it.quantity - (it.received_quantity || 0)),
+        accepted_quantity: Math.min(ge.quantity || it.quantity, it.quantity - (it.received_quantity || 0)),
+        rejected_quantity: 0,
+        rate: it.rate, material_name: it.material_name
+      })) || []) : [];
+      const total = items.reduce((sum, it) => sum + (it.accepted_quantity * it.rate), 0);
+      setForm({ ...newForm, items, invoice_amount: Number(total.toFixed(2)) });
     } else {
       setForm({ ...form, gate_entry_id: '', po_id: '', items: [] });
     }
@@ -77,16 +71,18 @@ export default function GRNPage() {
   const selectPO = (poId) => {
     const po = pos.find(p => p.id === poId);
     if (po) {
+      const items = po.items?.map(it => ({
+        material_id: it.material_id, po_item_id: it.id,
+        ordered_quantity: it.quantity,
+        received_quantity: it.quantity - (it.received_quantity || 0),
+        accepted_quantity: it.quantity - (it.received_quantity || 0),
+        rejected_quantity: 0,
+        rate: it.rate, material_name: it.material_name
+      })) || [];
+      const total = items.reduce((sum, it) => sum + (it.accepted_quantity * it.rate), 0);
       setForm({
         ...form, po_id: poId, vendor_id: po.vendor_id, project_id: po.project_id, receipt_type: 'PO-Based',
-        items: po.items?.map(it => ({
-          material_id: it.material_id, po_item_id: it.id,
-          ordered_quantity: it.quantity,
-          received_quantity: it.quantity - (it.received_quantity || 0),
-          accepted_quantity: it.quantity - (it.received_quantity || 0),
-          rejected_quantity: 0,
-          rate: it.rate, material_name: it.material_name
-        })) || []
+        items, invoice_amount: Number(total.toFixed(2))
       });
     }
   };
@@ -96,7 +92,7 @@ export default function GRNPage() {
       const payload = {
         ...form,
         invoice_date: form.invoice_date || null,
-        invoice_amount: parseFloat(form.invoice_amount) || 0
+        invoice_amount: Number(parseFloat(form.invoice_amount).toFixed(2)) || 0
       };
       await api.post('/api/grn', payload);
       setDialog(false); 
@@ -176,7 +172,7 @@ export default function GRNPage() {
                   <TableCell sx={{ fontSize: '0.8rem' }}>{g.vendor_name}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem' }}>{g.warehouse_name}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem', color: '#64748B' }}>{g.invoice_number}</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 600 }}>₹{g.invoice_amount?.toLocaleString('en-IN')}</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 600 }}>₹{g.invoice_amount?.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                   <TableCell>{g.items?.length}</TableCell>
                   <TableCell><Chip label={g.status} size="small" color={g.status === 'Completed' ? 'success' : 'warning'} sx={{ fontSize: '0.7rem' }} /></TableCell>
                   <TableCell sx={{ fontSize: '0.75rem' }}>{formatDate(g.created_at)}</TableCell>
@@ -207,11 +203,11 @@ export default function GRNPage() {
               {detailDialog?.items?.map(item => (
                 <TableRow key={item.id}>
                   <TableCell>{item.material_name}</TableCell>
-                  <TableCell align="right">{item.ordered_quantity}</TableCell>
-                  <TableCell align="right">{item.received_quantity}</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 600, color: '#059669' }}>{item.accepted_quantity}</TableCell>
-                  <TableCell align="right" sx={{ color: item.rejected_quantity > 0 ? '#DC2626' : '#94A3B8' }}>{item.rejected_quantity}</TableCell>
-                  <TableCell align="right">₹{item.rate?.toLocaleString('en-IN')}</TableCell>
+                  <TableCell align="right">{Math.round(item.ordered_quantity)}</TableCell>
+                  <TableCell align="right">{Math.round(item.received_quantity)}</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 600, color: '#059669' }}>{Math.round(item.accepted_quantity)}</TableCell>
+                  <TableCell align="right" sx={{ color: item.rejected_quantity > 0 ? '#DC2626' : '#94A3B8' }}>{Math.round(item.rejected_quantity)}</TableCell>
+                  <TableCell align="right">₹{item.rate?.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -265,7 +261,7 @@ export default function GRNPage() {
             </Grid>
             <Grid item xs={4}><TextField fullWidth label="Invoice Number" value={form.invoice_number || ''} onChange={e => setForm({ ...form, invoice_number: e.target.value })} /></Grid>
             <Grid item xs={4}><TextField fullWidth label="Invoice Date" type="date" value={form.invoice_date || ''} onChange={e => setForm({ ...form, invoice_date: e.target.value })} InputLabelProps={{ shrink: true }} /></Grid>
-            <Grid item xs={4}><TextField fullWidth label="Invoice Amount (₹)" type="number" value={form.invoice_amount} onChange={e => setForm({ ...form, invoice_amount: parseFloat(e.target.value) || 0 })} /></Grid>
+            <Grid item xs={4}><TextField fullWidth label="Invoice Amount (₹)" type="number" inputProps={{ step: "0.01" }} value={form.invoice_amount} onChange={e => setForm({ ...form, invoice_amount: parseFloat(e.target.value) || 0 })} /></Grid>
           </Grid>
 
           {form.gate_entry_id && (
@@ -292,18 +288,32 @@ export default function GRNPage() {
                       <TableCell>{item.material_name || materials.find(m => m.id === item.material_id)?.name}</TableCell>
                       <TableCell align="right">{item.ordered_quantity}</TableCell>
                       <TableCell align="right">
-                        <TextField size="small" type="number" value={item.received_quantity ?? ''} sx={{ width: 80 }}
-                          onChange={e => { const items = [...form.items]; items[i].received_quantity = parseFloat(e.target.value) || 0; setForm({ ...form, items }); }} />
+                        <TextField size="small" type="number" inputProps={{ step: "1" }} value={item.received_quantity ?? ''} sx={{ width: 80 }}
+                          onChange={e => {
+                            const items = [...form.items];
+                            items[i].received_quantity = Math.round(parseFloat(e.target.value) || 0);
+                            const total = items.reduce((sum, it) => sum + (it.accepted_quantity * it.rate), 0);
+                            setForm({ ...form, items, invoice_amount: Number(total.toFixed(2)) });
+                          }} />
                       </TableCell>
                       <TableCell align="right">
-                        <TextField size="small" type="number" value={item.accepted_quantity ?? ''} sx={{ width: 80 }}
-                          onChange={e => { const items = [...form.items]; items[i].accepted_quantity = parseFloat(e.target.value) || 0; setForm({ ...form, items }); }} />
+                        <TextField size="small" type="number" inputProps={{ step: "1" }} value={item.accepted_quantity ?? ''} sx={{ width: 80 }}
+                          onChange={e => {
+                            const items = [...form.items];
+                            items[i].accepted_quantity = Math.round(parseFloat(e.target.value) || 0);
+                            const total = items.reduce((sum, it) => sum + (it.accepted_quantity * it.rate), 0);
+                            setForm({ ...form, items, invoice_amount: Number(total.toFixed(2)) });
+                          }} />
                       </TableCell>
                       <TableCell align="right">
-                        <TextField size="small" type="number" value={item.rejected_quantity ?? ''} sx={{ width: 80 }}
-                          onChange={e => { const items = [...form.items]; items[i].rejected_quantity = parseFloat(e.target.value) || 0; setForm({ ...form, items }); }} />
+                        <TextField size="small" type="number" inputProps={{ step: "1" }} value={item.rejected_quantity ?? ''} sx={{ width: 80 }}
+                          onChange={e => {
+                            const items = [...form.items];
+                            items[i].rejected_quantity = Math.round(parseFloat(e.target.value) || 0);
+                            setForm({ ...form, items });
+                          }} />
                       </TableCell>
-                      <TableCell align="right">₹{item.rate?.toLocaleString('en-IN')}</TableCell>
+                      <TableCell align="right">₹{item.rate?.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

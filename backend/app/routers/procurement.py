@@ -292,21 +292,26 @@ def list_purchase_orders(
                 material_code=mat.code if mat else None,
                 uom_name=mat.uom.name if mat and mat.uom else None
             ))
+        
+        # Populate numbers
         pr_number = None
         if po.pr_id:
-            linked_pr = db.query(PurchaseRequest).filter(PurchaseRequest.id == po.pr_id).first()
-            pr_number = linked_pr.pr_number if linked_pr else None
+            pr_number = po.purchase_request.pr_number if po.purchase_request else None
+        elif po.qr_id:
+            # If no direct PR, check linked PRs in the QR
+            pr_nums = [pr.purchase_request.pr_number for pr in po.quotation_request.linked_prs if pr.purchase_request]
+            if pr_nums:
+                pr_number = ", ".join(pr_nums)
         
         indent_number = None
         if po.indent_id:
-            from app.models import Indent
-            linked_indent = db.query(Indent).filter(Indent.id == po.indent_id).first()
-            indent_number = linked_indent.indent_number if linked_indent else None
+            indent_number = po.indent.indent_number if po.indent else None
+        elif po.qr_id:
+            # Check if any linked PRs have an indent (if that link ever exists) 
+            # Or if QR was somehow linked to indents (currently not in schema)
+            pass
 
-        qr_number = None
-        if po.qr_id:
-            linked_qr = db.query(QuotationRequest).filter(QuotationRequest.id == po.qr_id).first()
-            qr_number = linked_qr.qr_number if linked_qr else None
+        qr_number = po.quotation_request.qr_number if po.quotation_request else None
 
         result.append(POOut(
             id=po.id, po_number=po.po_number,
@@ -348,21 +353,22 @@ def get_purchase_order(
             material_code=mat.code if mat else None,
             uom_name=mat.uom.name if mat and mat.uom else None
         ))
-    indent_number = None
-    if po.indent_id:
-        from app.models import Indent
-        linked_indent = db.query(Indent).filter(Indent.id == po.indent_id).first()
-        indent_number = linked_indent.indent_number if linked_indent else None
-
-    qr_number = None
-    if po.qr_id:
-        linked_qr = db.query(QuotationRequest).filter(QuotationRequest.id == po.qr_id).first()
-        qr_number = linked_qr.qr_number if linked_qr else None
+    # Populate numbers
+    pr_number = None
+    if po.pr_id:
+        pr_number = po.purchase_request.pr_number if po.purchase_request else None
+    elif po.qr_id:
+        pr_nums = [pr.purchase_request.pr_number for pr in po.quotation_request.linked_prs if pr.purchase_request]
+        if pr_nums:
+            pr_number = ", ".join(pr_nums)
+    
+    indent_number = po.indent.indent_number if po.indent else None
+    qr_number = po.quotation_request.qr_number if po.quotation_request else None
 
     return POOut(
         id=po.id, po_number=po.po_number,
         vendor_id=po.vendor_id, project_id=po.project_id,
-        pr_id=po.pr_id, pr_number=po.purchase_request.pr_number if po.purchase_request else None,
+        pr_id=po.pr_id, pr_number=pr_number,
         indent_id=po.indent_id, indent_number=indent_number,
         qr_id=po.qr_id, qr_number=qr_number,
         po_type=po.po_type,
@@ -388,7 +394,8 @@ def create_purchase_order(
         project_id=data.project_id,
         pr_id=data.pr_id,
         indent_id=data.indent_id,
-        po_type=data.po_type or ("Formal" if (data.pr_id or data.indent_id) else "Informal"),
+        qr_id=data.qr_id,
+        po_type=data.po_type or ("Formal" if (data.pr_id or data.indent_id or data.qr_id) else "Informal"),
         delivery_date=data.delivery_date,
         terms=data.terms,
         created_by_id=current_user.id,

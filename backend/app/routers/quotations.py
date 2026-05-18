@@ -638,6 +638,9 @@ def convert_to_pos(
             "rate": vqi.quoted_rate if vqi else 0
         })
 
+    linked_pr_ids = [lp.pr_id for lp in qr.linked_prs]
+    default_pr_id = linked_pr_ids[0] if len(linked_pr_ids) == 1 else None
+
     po_numbers = []
     for vendor_id, items in vendor_items.items():
         po_number = generate_po_number(db, tenant_id, site_id)
@@ -646,6 +649,7 @@ def convert_to_pos(
             po_number=po_number, vendor_id=vendor_id,
             project_id=qr.project_id, po_type="Formal",
             qr_id=qr.id,
+            pr_id=default_pr_id,
             created_by_id=current_user.id,
             status="Draft" # Or auto-approve based on config
         )

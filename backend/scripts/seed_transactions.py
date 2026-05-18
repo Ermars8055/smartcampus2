@@ -171,14 +171,39 @@ def seed_transactions():
     # 4. POs (15)
     print("Seeding 15 POs...")
     pos = []
+    # Fetch indents, prs, qrs to link
+    indents_list = db.query(Indent).filter_by(tenant_id=tenant_id).order_by(Indent.id).all()
+    prs_list = db.query(PurchaseRequest).filter_by(tenant_id=tenant_id).order_by(PurchaseRequest.id).all()
+    qrs_list = db.query(QuotationRequest).filter_by(tenant_id=tenant_id).order_by(QuotationRequest.id).all()
+
     for i in range(1, 16):
         status = random.choice([POStatus.APPROVED.value, POStatus.SENT.value, POStatus.PARTIAL.value, POStatus.CLOSED.value])
+        
+        indent_id = None
+        pr_id = None
+        qr_id = None
+        po_type = "Informal"
+
+        if i <= 5: # First 5 from Indents
+            indent_id = indents_list[i-1].id if len(indents_list) >= i else None
+            po_type = "Formal"
+        elif i <= 10: # Next 5 from PRs
+            pr_id = prs_list[i-1].id if len(prs_list) >= i else None
+            po_type = "Formal"
+        else: # Last 5 from QRs
+            qr_id = qrs_list[i-1].id if len(qrs_list) >= i else None
+            po_type = "Formal"
+
         po = PurchaseOrder(
             tenant_id=tenant_id, site_id=site_id,
             po_number=f"PO-{str(i).zfill(5)}",
             vendor_id=random.choice(vendors).id,
             project_id=project_id,
             status=status,
+            indent_id=indent_id,
+            pr_id=pr_id,
+            qr_id=qr_id,
+            po_type=po_type,
             created_by_id=user_id,
             created_at=base_date + timedelta(days=i + 5)
         )

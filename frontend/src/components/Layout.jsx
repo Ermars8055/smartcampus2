@@ -10,7 +10,7 @@ import {
   LocalShipping, People, Assessment, Settings, Notifications,
   ExpandLess, ExpandMore, Logout, Person, Store, Assignment,
   SwapHoriz, Undo, Security, ReceiptLong, AccountTree, Category,
-  Build, ChevronLeft, RequestQuote, Business
+  Build, ChevronLeft, RequestQuote, Business, AssignmentTurnedIn
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
@@ -41,6 +41,7 @@ const menuItems = [
       { text: 'Gate Entry', icon: <Security />, path: '/gate-entry' },
       { text: 'GRN', icon: <LocalShipping />, path: '/grn' },
       { text: 'Material Issue', icon: <Inventory2 />, path: '/issues' },
+      { text: 'Issue Acknowledgement', icon: <AssignmentTurnedIn />, path: '/pending-acknowledgments' },
     ]
   },
   { text: 'Inventory', icon: <Warehouse />, path: '/inventory' },
@@ -58,6 +59,7 @@ const menuItems = [
       { text: 'Configurations', icon: <Settings />, path: '/admin' },
       { text: 'Projects', icon: <AccountTree />, path: '/projects' },
       { text: 'Departments', icon: <Business />, path: '/departments' },
+      { text: 'Terms & Conditions', icon: <Assignment />, path: '/terms' },
     ]
   },
   { text: 'SaaS Admin', icon: <Security />, path: '/saas-admin', platformOnly: true },

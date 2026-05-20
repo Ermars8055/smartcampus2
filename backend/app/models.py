@@ -1047,3 +1047,45 @@ class DocumentSequence(Base):
         UniqueConstraint("tenant_id", "site_id", "document_type", name="uq_doc_seq"),
     )
 
+
+class TermsAndConditions(Base):
+    __tablename__ = "terms_and_conditions"
+    id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
+    site_id = Column(Integer, ForeignKey("sites.id", ondelete="CASCADE"), nullable=False)
+    name = Column(String(255), nullable=False)
+    content = Column(Text, nullable=False)
+    is_default = Column(Boolean, default=False)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=_get_now)
+    
+    tenant = relationship("Tenant")
+    site = relationship("Site")
+
+
+class GatePass(Base):
+    __tablename__ = "gate_passes"
+    id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
+    site_id = Column(Integer, ForeignKey("sites.id", ondelete="CASCADE"), nullable=False)
+    gate_pass_number = Column(String(50), nullable=False, index=True)
+    return_id = Column(Integer, ForeignKey("material_returns.id", ondelete="SET NULL"), nullable=True)
+    project_id = Column(Integer, ForeignKey("projects.id", ondelete="CASCADE"), nullable=False)
+    material_id = Column(Integer, ForeignKey("materials.id", ondelete="CASCADE"), nullable=False)
+    quantity = Column(Float, nullable=False)
+    vendor_id = Column(Integer, ForeignKey("vendors.id", ondelete="SET NULL"), nullable=True)
+    status = Column(String(50), default="Pending Repair")
+    gate_pass_type = Column(String(50), default="Outward Repair")
+    driver_name = Column(String(255), nullable=True)
+    vehicle_number = Column(String(50), nullable=True)
+    remarks = Column(Text, nullable=True)
+    created_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime, default=_get_now)
+    
+    tenant = relationship("Tenant")
+    site = relationship("Site")
+    material = relationship("Material")
+    project = relationship("Project")
+    vendor = relationship("Vendor")
+    created_by = relationship("User")
+    material_return = relationship("MaterialReturn")

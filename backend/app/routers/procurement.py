@@ -324,6 +324,8 @@ def list_purchase_orders(
             delivery_date=po.delivery_date, status=po.status,
             terms=po.terms, created_at=po.created_at,
             vendor_name=po.vendor.name if po.vendor else None,
+            vendor_address=po.vendor.address if po.vendor else None,
+            vendor_gst_number=po.vendor.gst_number if po.vendor else None,
             project_name=po.project.name if po.project else None,
             items=items
         ))
@@ -376,6 +378,8 @@ def get_purchase_order(
         delivery_date=po.delivery_date, status=po.status,
         terms=po.terms, created_at=po.created_at,
         vendor_name=po.vendor.name if po.vendor else None,
+        vendor_address=po.vendor.address if po.vendor else None,
+        vendor_gst_number=po.vendor.gst_number if po.vendor else None,
         project_name=po.project.name if po.project else None,
         items=items
     )

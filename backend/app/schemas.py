@@ -462,6 +462,8 @@ class POOut(BaseModel):
     terms: Optional[str] = None
     created_at: datetime
     vendor_name: Optional[str] = None
+    vendor_address: Optional[str] = None
+    vendor_gst_number: Optional[str] = None
     project_name: Optional[str] = None
     items: List[POItemOut] = []
     class Config:
@@ -1105,3 +1107,56 @@ class ComparativeStatementOut(BaseModel):
     created_at: datetime
     materials: List[MaterialComparisonOut] = []
     vendor_totals: List[Dict[str, Any]] = []
+
+
+# == Terms and Conditions ==
+
+class TermBase(BaseModel):
+    name: str
+    content: str
+    is_default: bool = False
+    is_active: bool = True
+
+class TermCreate(TermBase):
+    pass
+
+class TermUpdate(BaseModel):
+    name: Optional[str] = None
+    content: Optional[str] = None
+    is_default: Optional[bool] = None
+    is_active: Optional[bool] = None
+
+class TermOut(TermBase):
+    id: int
+    created_at: datetime
+    class Config:
+        from_attributes = True
+
+# == Gate Pass ==
+
+class GatePassUpdate(BaseModel):
+    status: str
+    remarks: Optional[str] = None
+
+class GatePassOut(BaseModel):
+    id: int
+    gate_pass_number: str
+    gate_pass_type: str
+    project_id: int
+    project_name: Optional[str] = None
+    material_id: int
+    material_name: Optional[str] = None
+    material_code: Optional[str] = None
+    uom_name: Optional[str] = None
+    quantity: float
+    vendor_id: Optional[int] = None
+    vendor_name: Optional[str] = None
+    vendor_address: Optional[str] = None
+    reference_return_number: Optional[str] = None
+    status: str
+    driver_name: Optional[str] = None
+    vehicle_number: Optional[str] = None
+    remarks: Optional[str] = None
+    created_at: datetime
+    class Config:
+        from_attributes = True

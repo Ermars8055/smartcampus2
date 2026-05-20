@@ -6,7 +6,7 @@ import {
   DialogContent, DialogActions, Grid, MenuItem, Select, FormControl,
   InputLabel, IconButton, Divider, Tab, Tabs, Stack, Paper, Autocomplete, InputAdornment
 } from '@mui/material';
-import { Add, Delete, Close, CheckCircle, InfoOutlined, Undo, SwapHoriz, Inventory2, ArrowBack, History, Warehouse, AccountTree, Business, Assignment, Person, Comment, Description } from '@mui/icons-material';
+import { Add, Delete, Close, CheckCircle, InfoOutlined, Undo, SwapHoriz, Inventory2, ArrowBack, History, Warehouse, AccountTree, Business, Assignment, Person, Comment, Description, LocalShipping, Print, Warning } from '@mui/icons-material';
 import api from '../services/api';
 import MaterialSelect from '../components/MaterialSelect';
 
@@ -21,6 +21,7 @@ export default function StoreOperations() {
   const [materials, setMaterials] = useState([]);
   const [stocks, setStocks] = useState([]);
   const [departments, setDepartments] = useState([]);
+  const [gatePasses, setGatePasses] = useState([]);
 
   // Modal states
   const [issueModal, setIssueModal] = useState({ open: false, indent: null, items: [] });
@@ -64,6 +65,8 @@ export default function StoreOperations() {
       setMaterials(mRes.data.items || []);
       const dRes = await api.get('/api/departments');
       setDepartments(dRes.data);
+      const gpRes = await api.get('/api/gate-passes');
+      setGatePasses(gpRes.data);
     } catch (e) { console.error(e); }
   };
 
@@ -132,7 +135,7 @@ export default function StoreOperations() {
       return_type: 'Unused',
       remarks: '',
       returned_by_name: '',
-      items: [{ material_id: '', quantity: 0, condition: 'Good', remarks: '' }]
+      items: [{ material_id: '', quantity: 0, condition: 'Usable', remarks: '' }]
     });
   };
 
@@ -171,7 +174,7 @@ export default function StoreOperations() {
   const addReturnItem = () => {
     setReturnModal({
       ...returnModal,
-      items: [...returnModal.items, { material_id: '', quantity: 0, condition: 'Good', remarks: '' }]
+      items: [...returnModal.items, { material_id: '', quantity: 0, condition: 'Usable', remarks: '' }]
     });
   };
 
@@ -253,8 +256,76 @@ export default function StoreOperations() {
 
 
 
+  const completeGatePass = async (id) => {
+    if (!window.confirm('Mark this repair as complete and move items back to usable stock?')) return;
+    try {
+      await api.put(`/api/gate-passes/${id}`, { status: 'Repaired & Returned' });
+      load();
+    } catch (err) { alert(err.response?.data?.detail || 'Error'); }
+  };
+
+  const scrapGatePass = async (id) => {
+    if (!window.confirm('Mark this item as unrepairable and move to scrap?')) return;
+    try {
+      await api.put(`/api/gate-passes/${id}`, { status: 'Scrapped' });
+      load();
+    } catch (err) { alert(err.response?.data?.detail || 'Error'); }
+  };
+
+  const printGatePass = (gp) => {
+    const printWindow = window.open('', '_blank');
+    const html = `
+      <html>
+        <head>
+          <title>Gate Pass - ${gp.gate_pass_number}</title>
+          <style>
+            body { font-family: Arial, sans-serif; font-size: 14px; margin: 40px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #000; padding: 10px; text-align: left; }
+            h2 { text-align: center; }
+            .signatures { display: flex; justify-content: space-between; margin-top: 80px; }
+          </style>
+        </head>
+        <body onload="window.print(); window.close();">
+          <h2>OUTWARD GATE PASS</h2>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+            <div>
+              <p><strong>To:</strong><br/>
+                 ${gp.vendor_name || 'Vendor'}<br/>
+                 ${gp.vendor_address ? gp.vendor_address : ''}
+              </p>
+            </div>
+            <div style="text-align: right;">
+              <p><strong>Gate Pass No:</strong> ${gp.gate_pass_number}</p>
+              <p><strong>Date:</strong> ${formatDate(gp.created_at)}</p>
+              <p><strong>Reference Return No:</strong> ${gp.reference_return_number || 'N/A'}</p>
+              <p><strong>Purpose:</strong> Sent for Repair</p>
+            </div>
+          </div>
+          
+          <table>
+            <tr>
+              <th>Material</th>
+              <th>Quantity</th>
+            </tr>
+            <tr>
+              <td>${gp.material_name}</td>
+              <td>${gp.quantity}</td>
+            </tr>
+          </table>
+          
+          <div class="signatures">
+            <div>Authorized Signatory</div>
+            <div>Security Check</div>
+          </div>
+        </body>
+      </html>
+    `;
+    printWindow.document.write(html);
+    printWindow.document.close();
+  };
+
   const pendingIndents = indents.filter(ind => ind.status === 'Approved' || ind.status === 'Partially Issued');
-  const pendingAcks = issues.filter(iss => !iss.is_acknowledged && iss.indent_id);
 
   return (
     <Box>
@@ -263,14 +334,16 @@ export default function StoreOperations() {
           {activeTab === 0 ? 'Material Issues' : 
            activeTab === 1 ? 'Material Returns' : 
            activeTab === 2 ? 'Stock Transfers' : 
-           activeTab === 3 ? 'Issue Details' : 'Acknowledged Issues'}
+           activeTab === 3 ? 'Issue Details' : 
+           activeTab === 4 ? 'Acknowledged Issues' : 'Gate Passes'}
         </Typography>
         <Typography variant="body2" sx={{ color: '#64748B' }}>
           {activeTab === 0 ? 'Manage central store fulfillment and material receipts' : 
            activeTab === 1 ? 'Process returns from projects to central store' : 
-           activeTab === 2 ? 'Move stock between warehouses and project stores' :
+           activeTab === 2 ? 'Move stock between warehouses and project stores' : 
            activeTab === 3 ? 'Comprehensive history of all material issues' :
-           'Archive of all acknowledged and completed material receipts'}
+           activeTab === 4 ? 'Archive of all acknowledged and completed material receipts' :
+           'Manage outward gate passes for repairable items'}
         </Typography>
       </Box>
 
@@ -289,13 +362,14 @@ export default function StoreOperations() {
           <Tab icon={<SwapHoriz sx={{ fontSize: 18 }} />} iconPosition="start" label="Stock Transfer" />
           <Tab icon={<Description sx={{ fontSize: 18 }} />} iconPosition="start" label="Issue Details" />
           <Tab icon={<CheckCircle sx={{ fontSize: 18 }} />} iconPosition="start" label="Acknowledged" />
+          <Tab icon={<LocalShipping sx={{ fontSize: 18 }} />} iconPosition="start" label="Gate Passes" />
         </Tabs>
       </Paper>
 
 
       {activeTab === 0 && (
         <Grid container spacing={4}>
-          <Grid item xs={12} lg={6}>
+          <Grid item xs={12}>
             <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1.5 }}>
               <Box sx={{ fontSize: '1.5rem' }}>📦</Box>
               <Box>
@@ -379,96 +453,6 @@ export default function StoreOperations() {
                       }}
                     >
                       {ind.status === 'Partially Issued' ? 'Issue Remaining Materials' : 'Issue Materials'}
-                    </Button>
-                  </Box>
-                </Card>
-              ))}
-            </Stack>
-          </Grid>
-
-          <Grid item xs={12} lg={6}>
-            <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <Box sx={{ fontSize: '1.5rem' }}>✅</Box>
-              <Box>
-                <Typography variant="h6" sx={{ fontWeight: 800, color: '#1E293B', lineHeight: 1.2 }}>My Pending Acknowledgments</Typography>
-                <Typography variant="caption" sx={{ color: '#64748B' }}>Materials issued to you by the store. Please acknowledge receipt.</Typography>
-              </Box>
-            </Box>
-            <Stack spacing={2.5}>
-              {pendingAcks.length === 0 && (
-                <Box sx={{ textAlign: 'center', py: 8, bgcolor: '#F8FAFC', borderRadius: 3, border: '2px dashed #E2E8F0' }}>
-                  <Typography variant="body1" sx={{ color: '#94A3B8', fontWeight: 600 }}>No pending materials to acknowledge.</Typography>
-                </Box>
-              )}
-              {pendingAcks.map(iss => (
-                <Card key={iss.id} sx={{ 
-                  borderRadius: 3, 
-                  border: '1px solid #E2E8F0', 
-                  boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)',
-                  borderLeft: '4px solid #F59E0B'
-                }}>
-                  <Box sx={{ p: 2.5 }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Typography variant="subtitle1" sx={{ fontWeight: 800, color: '#0F172A' }}>{iss.issue_number}</Typography>
-                        <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600 }}>Against: {iss.indent_number}</Typography>
-                      </Box>
-                      <Typography variant="caption" sx={{ color: '#94A3B8', fontWeight: 600 }}>{formatDate(iss.created_at)}</Typography>
-                    </Box>
-                    
-                    <Box sx={{ bgcolor: '#FFFBEB', p: 1.5, borderRadius: 2, mb: 2, border: '1px solid #FEF3C7' }}>
-                      <Grid container spacing={2}>
-                        <Grid item xs={6}>
-                          <Typography variant="caption" sx={{ color: '#92400E', fontWeight: 600, display: 'block' }}>Issued by:</Typography>
-                          <Typography variant="body2" sx={{ fontWeight: 700, color: '#451A03' }}>{iss.issued_by_name || 'Store Admin'}</Typography>
-                        </Grid>
-                        <Grid item xs={6}>
-                          <Typography variant="caption" sx={{ color: '#92400E', fontWeight: 600, display: 'block' }}>Remarks:</Typography>
-                          <Typography variant="body2" sx={{ fontWeight: 700, color: '#451A03' }}>{iss.purpose || 'Issued from store'}</Typography>
-                        </Grid>
-                      </Grid>
-                    </Box>
-
-                    <Box sx={{ mb: 2.5 }}>
-                      <Typography variant="caption" sx={{ fontWeight: 800, color: '#1E293B', mb: 1, display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Items Issued</Typography>
-                      <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2, border: '1px solid #E2E8F0' }}>
-                        <Table size="small" sx={{ '& .MuiTableCell-root': { px: 1, py: 0.75, fontSize: '0.72rem' } }}>
-                          <TableHead sx={{ bgcolor: '#F8FAFC' }}>
-                            <TableRow>
-                              <TableCell sx={{ fontWeight: 700, py: 1, fontSize: '0.7rem', color: '#64748B' }}>ITEM</TableCell>
-                              <TableCell align="center" sx={{ fontWeight: 700, py: 1, fontSize: '0.7rem', color: '#64748B' }}>UNIT</TableCell>
-                              <TableCell align="center" sx={{ fontWeight: 700, py: 1, fontSize: '0.7rem', color: '#64748B' }}>QTY ISSUED</TableCell>
-                            </TableRow>
-                          </TableHead>
-                          <TableBody>
-                            {iss.items?.map((item, idx) => (
-                              <TableRow key={idx}>
-                                <TableCell sx={{ fontWeight: 700, py: 1, color: '#1E293B' }}>{item.material_name}</TableCell>
-                                <TableCell align="center" sx={{ py: 1, color: '#64748B' }}>{item.uom_name || 'Unit'}</TableCell>
-                                <TableCell align="center" sx={{ fontWeight: 800, py: 1, color: '#1E293B' }}>{item.quantity}</TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </TableContainer>
-                    </Box>
-
-                    <Button 
-                      fullWidth 
-                      variant="contained" 
-                      startIcon={<CheckCircle />}
-                      onClick={() => acknowledgeIssue(iss.id)}
-                      sx={{ 
-                        textTransform: 'none', 
-                        borderRadius: 2, 
-                        fontWeight: 700,
-                        py: 1.2,
-                        bgcolor: '#F59E0B',
-                        boxShadow: '0 4px 12px rgba(245, 158, 11, 0.2)',
-                        '&:hover': { bgcolor: '#D97706' }
-                      }}
-                    >
-                      Acknowledge Receipt
                     </Button>
                   </Box>
                 </Card>
@@ -778,6 +762,78 @@ export default function StoreOperations() {
 
 
 
+      {activeTab === 5 && (
+        <Box>
+          <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Box sx={{ fontSize: '1.5rem' }}>🚚</Box>
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 800, color: '#1E293B', lineHeight: 1.2 }}>Outward Gate Passes</Typography>
+                <Typography variant="caption" sx={{ color: '#64748B' }}>Track items sent out for repair and manage their return or scrap.</Typography>
+              </Box>
+            </Box>
+          </Box>
+          {gatePasses.length === 0 ? (
+            <Box sx={{ textAlign: 'center', py: 8, bgcolor: '#F8FAFC', borderRadius: 3, border: '2px dashed #E2E8F0' }}>
+              <Typography variant="body1" sx={{ color: '#94A3B8', fontWeight: 600 }}>No gate passes found.</Typography>
+            </Box>
+          ) : (
+            <Card sx={{ borderRadius: 3, border: '1px solid #E2E8F0', overflow: 'hidden' }}>
+              <TableContainer sx={{ borderRadius: 2, overflow: 'hidden' }}>
+                <Table size="small" sx={{ '& .MuiTableCell-root': { px: 2, py: 1.5, fontSize: '0.8rem', borderColor: '#F1F5F9' } }}>
+                  <TableHead sx={{ bgcolor: '#F8FAFC' }}>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: 700, color: '#64748B' }}>GATE PASS NO.</TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: '#64748B' }}>DATE</TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: '#64748B' }}>MATERIAL (QTY)</TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: '#64748B' }}>REF RETURN</TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: '#64748B' }}>STATUS</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 700, color: '#64748B' }}>ACTIONS</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {gatePasses.map(gp => (
+                      <TableRow key={gp.id} hover>
+                        <TableCell sx={{ fontWeight: 800, color: '#0F172A' }}>{gp.gate_pass_number}</TableCell>
+                        <TableCell sx={{ color: '#64748B' }}>{formatDate(gp.created_at)}</TableCell>
+                        <TableCell>
+                          <Typography variant="body2" sx={{ fontWeight: 600, color: '#1E293B' }}>{gp.material_name}</Typography>
+                          <Typography variant="caption" sx={{ color: '#64748B' }}>Qty: {gp.quantity}</Typography>
+                        </TableCell>
+                        <TableCell sx={{ color: '#475569', fontWeight: 600 }}>{gp.reference_return_number}</TableCell>
+                        <TableCell>
+                          <Chip 
+                            label={gp.status} 
+                            size="small" 
+                            color={gp.status === 'Issued' ? 'warning' : gp.status === 'Repaired & Returned' ? 'success' : 'error'} 
+                            sx={{ fontWeight: 700, height: 22, fontSize: '0.7rem' }} 
+                          />
+                        </TableCell>
+                        <TableCell align="right">
+                          <IconButton size="small" color="primary" onClick={() => printGatePass(gp)}>
+                            <Print fontSize="small" />
+                          </IconButton>
+                          {gp.status === 'Issued' && (
+                            <>
+                              <IconButton size="small" color="success" onClick={() => completeGatePass(gp.id)}>
+                                <CheckCircle fontSize="small" />
+                              </IconButton>
+                              <IconButton size="small" color="error" onClick={() => scrapGatePass(gp.id)}>
+                                <Warning fontSize="small" />
+                              </IconButton>
+                            </>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Card>
+          )}
+        </Box>
+      )}
+
       {/* ISSUE MATERIALS MODAL */}
       <Dialog open={issueModal.open} onClose={() => setIssueModal({ ...issueModal, open: false })} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 3, boxShadow: '0 20px 40px rgba(0,0,0,0.1)', overflow: 'hidden' } }}>
         <DialogTitle sx={{ pb: 1, pt: 3, px: 4 }}>
@@ -986,7 +1042,10 @@ export default function StoreOperations() {
                         fullWidth
                         startAdornment={<InputAdornment position="start"><InfoOutlined sx={{ color: '#94A3B8', fontSize: 16, mr: 1 }} /></InputAdornment>}
                       >
-                        <MenuItem value="Good">Good</MenuItem>
+                        <MenuItem value="Usable">Usable</MenuItem>
+                        <MenuItem value="Scrap">Scrap</MenuItem>
+                        <MenuItem value="Repairable">Repairable</MenuItem>
+                        <MenuItem value="Good">Good (Consumable)</MenuItem>
                         <MenuItem value="Fair">Fair</MenuItem>
                         <MenuItem value="Poor">Poor</MenuItem>
                         <MenuItem value="Broken">Broken</MenuItem>

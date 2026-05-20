@@ -5,7 +5,7 @@ import axios from 'axios';
 // use the backend host IP instead of localhost:8007.
 const API_BASE = import.meta.env.VITE_API_URL ||
   (window.location.hostname === 'localhost'
-    ? 'http://192.168.0.4:8007'
+    ? 'http://localhost:8007'
     : (window.location.hostname.includes('nissigrid.com')
       ? '' // Leave this empty for production
       : `${window.location.protocol}//${window.location.hostname}:8007`));

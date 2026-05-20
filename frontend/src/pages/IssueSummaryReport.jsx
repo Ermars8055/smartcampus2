@@ -98,13 +98,14 @@ export default function IssueSummaryReport() {
   };
 
   const calculateTotals = (data, depts) => {
-    const totals = { opening_stock: 0, total_received: 0, total_issue: 0, closing_stock: 0 };
+    const totals = { opening_stock: 0, total_received: 0, total_issue: 0, other_outward: 0, closing_stock: 0 };
     depts.forEach(d => totals[d] = 0);
 
     data.forEach(row => {
       totals.opening_stock += (row.opening_stock || 0);
       totals.total_received += (row.total_received || 0);
       totals.total_issue += (row.total_issue || 0);
+      totals.other_outward += (row.other_outward || 0);
       totals.closing_stock += (row.closing_stock || 0);
       depts.forEach(d => {
         totals[d] += (row.departments[d] || 0);
@@ -131,6 +132,7 @@ export default function IssueSummaryReport() {
         obj[colName] = formatQty(row.departments[d] || 0);
       });
       obj['Total Issued'] = formatQty(row.total_issue);
+      obj['Other Outward'] = formatQty(row.other_outward);
       obj['Closing Stock'] = formatQty(row.closing_stock);
       return obj;
     });
@@ -169,7 +171,7 @@ export default function IssueSummaryReport() {
     const headers = [
       'S.No', 'Material Name', 'UOM', 'Opening\nStock', 'Total\nReceived', 'Issue No',
       ...reportData.departments.map(d => (reportData.departments.length === 1 && d === 'UNKNOWN') ? 'Quantity\nIssued' : (d === 'UNKNOWN' ? 'Unspecified' : d)),
-      'Total\nIssued', 'Closing\nStock'
+      'Total\nIssued', 'Other\nOutward', 'Closing\nStock'
     ];
 
     const body = reportData.data.map((row, index) => {
@@ -183,6 +185,7 @@ export default function IssueSummaryReport() {
       ];
       reportData.departments.forEach(d => rowData.push(formatQty(row.departments[d] || 0)));
       rowData.push(formatQty(row.total_issue));
+      rowData.push(formatQty(row.other_outward));
       rowData.push(formatQty(row.closing_stock));
       return rowData;
     });
@@ -191,7 +194,7 @@ export default function IssueSummaryReport() {
     const footer = [
       '', 'Grand Total', '', formatQty(totals.opening_stock), formatQty(totals.total_received), '',
       ...reportData.departments.map(d => formatQty(totals[d])),
-      formatQty(totals.total_issue), formatQty(totals.closing_stock)
+      formatQty(totals.total_issue), formatQty(totals.other_outward), formatQty(totals.closing_stock)
     ];
     body.push(footer);
 
@@ -209,8 +212,9 @@ export default function IssueSummaryReport() {
         4: { halign: 'right', cellWidth: 20 },
         5: { cellWidth: 35 },
         6: { halign: 'right', cellWidth: 20 },
-        7: { halign: 'right', cellWidth: 20 },
-        8: { halign: 'right', cellWidth: 20 }
+        7: { halign: 'right', cellWidth: 15 },
+        8: { halign: 'right', cellWidth: 15 },
+        9: { halign: 'right', cellWidth: 20 }
       },
       didParseCell: function (data) {
         if (data.row.index === body.length - 1) {
@@ -386,6 +390,7 @@ export default function IssueSummaryReport() {
                   )}
 
                   <TableCell align="center">Total<br />Issued</TableCell>
+                  <TableCell align="center">Other<br />Outward</TableCell>
                   <TableCell align="center">Closing<br />Stock</TableCell>
                 </TableRow>
               )}
@@ -421,6 +426,7 @@ export default function IssueSummaryReport() {
                   ))}
 
                   <TableCell align="center" sx={{ fontWeight: 600 }}>{formatQty(row.total_issue)}</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 600, color: '#DC2626' }}>{formatQty(row.other_outward)}</TableCell>
                   <TableCell align="center" sx={{ fontWeight: 600, background: '#F8FAFC' }}>{formatQty(row.closing_stock)}</TableCell>
                 </TableRow>
               ))}
@@ -441,6 +447,7 @@ export default function IssueSummaryReport() {
                       <TableCell key={i} align="center">{totals[d] ? formatQty(totals[d]) : ''}</TableCell>
                     ))}
                     <TableCell align="center">{formatQty(totals.total_issue)}</TableCell>
+                    <TableCell align="center">{formatQty(totals.other_outward)}</TableCell>
                     <TableCell align="center">{formatQty(totals.closing_stock)}</TableCell>
                   </TableRow>
                 )

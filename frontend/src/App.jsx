@@ -27,6 +27,7 @@ import PurchaseOrders from './pages/PurchaseOrders';
 import GateEntry from './pages/GateEntry';
 import GRNPage from './pages/GRN';
 import StoreOps from './pages/StoreOps';
+import PendingAcknowledgments from './pages/PendingAcknowledgments';
 import Inventory from './pages/Inventory';
 import Intelligence from './pages/Intelligence';
 import Reports from './pages/Reports';
@@ -38,6 +39,7 @@ import Admin from './pages/Admin';
 import SaasAdmin from './pages/SaasAdmin';
 import Alerts from './pages/Alerts';
 import PlatformLogin from './pages/PlatformLogin';
+import TermsAndConditions from './pages/TermsAndConditions';
 import ChatBot from './components/ChatBot';
 import { Box, CircularProgress } from '@mui/material';
 
@@ -99,6 +101,7 @@ function AppRoutes() {
         <Route path="gate-entry" element={<GateEntry />} />
         <Route path="grn" element={<GRNPage />} />
         <Route path="issues" element={<StoreOps />} />
+        <Route path="pending-acknowledgments" element={<PendingAcknowledgments />} />
         <Route path="returns" element={<StoreOps />} />
         <Route path="transfers" element={<StoreOps />} />
         <Route path="inventory" element={<Inventory />} />
@@ -109,6 +112,7 @@ function AppRoutes() {
         <Route path="reports/receipt-summary" element={<ReceiptSummaryReport />} />
         <Route path="reports/department-inventory" element={<DepartmentWiseInventoryReport />} />
         <Route path="admin" element={<Admin />} />
+        <Route path="terms" element={<TermsAndConditions />} />
         <Route path="saas-admin" element={<SaasAdmin />} />
         <Route path="alerts" element={<Alerts />} />
       </Route>

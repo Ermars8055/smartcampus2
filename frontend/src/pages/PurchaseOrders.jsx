@@ -23,6 +23,7 @@ export default function PurchaseOrders() {
   const [vendors, setVendors] = useState([]);
   const [materials, setMaterials] = useState([]);
   const [projects, setProjects] = useState([]);
+  const [termsTemplates, setTermsTemplates] = useState([]);
   const [dialog, setDialog] = useState(false);
   const [detailDialog, setDetailDialog] = useState(null);
   const [search, setSearch] = useState('');
@@ -64,12 +65,12 @@ export default function PurchaseOrders() {
   };
 
   // Confirmation dialog state
-  const [confirm, setConfirm] = useState({ open: false, title: '', message: '', confirmText: '', confirmColor: 'primary', action: null, needsReason: false });
+  const [confirm, setConfirm] = useState({ open: false, title: '', message: '', confirmText: '', confirmColor: 'primary', action: null, needsReason: false, po: null });
   const [reason, setReason] = useState('');
 
-  const showConfirm = (title, message, confirmText, confirmColor, action, needsReason = false) => {
+  const showConfirm = (title, message, confirmText, confirmColor, action, needsReason = false, po = null) => {
     setReason('');
-    setConfirm({ open: true, title, message, confirmText, confirmColor, action, needsReason });
+    setConfirm({ open: true, title, message, confirmText, confirmColor, action, needsReason, po });
   };
   const handleConfirm = () => { if (confirm.action) confirm.action(reason); setConfirm({ ...confirm, open: false }); setReason(''); };
   const handleCancelConfirm = () => { setConfirm({ ...confirm, open: false }); setReason(''); };
@@ -81,6 +82,7 @@ export default function PurchaseOrders() {
     api.get('/api/vendors').then(r => setVendors(r.data));
     api.get('/api/materials').then(r => setMaterials(r.data.items || []));
     api.get('/api/projects').then(r => setProjects(r.data));
+    api.get('/api/terms').then(r => setTermsTemplates(r.data));
   }, []);
 
   useEffect(() => {
@@ -90,7 +92,7 @@ export default function PurchaseOrders() {
         vendor_id: '',
         project_id: projects[0]?.id || '',
         delivery_date: dayjs().add(21, 'day'),
-        terms: '',
+        terms: termsTemplates.find(t => t.is_default)?.content || '',
         po_type: 'Formal',
         indent_id: ind.id,
         items: ind.items.filter(it => it.requested_quantity > it.issued_quantity).map(it => ({
@@ -169,6 +171,175 @@ export default function PurchaseOrders() {
   const canSend = (s) => s === 'Approved';
   const canShortClose = (s) => s !== 'Short Closed' && s !== 'Closed' && s !== 'Rejected' && s !== 'Draft';
 
+  const numberToWords = (num) => {
+    const a = ['','One ','Two ','Three ','Four ', 'Five ','Six ','Seven ','Eight ','Nine ','Ten ','Eleven ','Twelve ','Thirteen ','Fourteen ','Fifteen ','Sixteen ','Seventeen ','Eighteen ','Nineteen '];
+    const b = ['', '', 'Twenty','Thirty','Forty','Fifty', 'Sixty','Seventy','Eighty','Ninety'];
+    if ((num = num.toString()).length > 9) return 'overflow';
+    let n = ('000000000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+    if (!n) return ''; let str = '';
+    str += (n[1] != 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + 'Crore ' : '';
+    str += (n[2] != 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + 'Lakh ' : '';
+    str += (n[3] != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'Thousand ' : '';
+    str += (n[4] != 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + 'Hundred ' : '';
+    str += (n[5] != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) : '';
+    return str.trim() || 'Zero';
+  };
+
+  const handlePrintPO = (poToPrint = null) => {
+    const po = poToPrint || detailDialog;
+    if (!po) return;
+    const printWindow = window.open('', '_blank');
+    let rowsHtml = '';
+    let grandTotal = 0;
+    
+    po.items.forEach((item, idx) => {
+      const qty = parseFloat(item.quantity) || 0;
+      const rate = parseFloat(item.rate) || 0;
+      const amount = qty * rate;
+      grandTotal += amount;
+      
+      rowsHtml += `
+        <tr>
+          <td>${idx + 1}</td>
+          <td>${item.material_name}<br/><small>${item.material_code}</small></td>
+          <td>-</td>
+          <td>${qty.toFixed(2)}</td>
+          <td>${item.uom_name || 'NOS'}</td>
+          <td style="text-align:right">${rate.toFixed(2)}</td>
+          <td style="text-align:right">0.00</td>
+          <td style="text-align:right">2.50</td>
+          <td style="text-align:right">2.50</td>
+          <td style="text-align:right">0.00</td>
+          <td style="text-align:right">${amount.toFixed(2)}</td>
+        </tr>
+      `;
+    });
+    
+    const roundOff = (Math.round(grandTotal) - grandTotal).toFixed(2);
+    const totalNetAmount = Math.round(grandTotal).toFixed(2);
+    const activeTerms = po.terms || termsTemplates.find(t => t.is_default)?.content || (termsTemplates.length > 0 ? termsTemplates[0].content : '');
+    const termsHtml = (activeTerms || '').split('\n').filter(t => t.trim()).map(t => `<li>${t}</li>`).join('');
+
+    const html = `
+      <html>
+        <head>
+          <title>PO - ${po.po_number}</title>
+          <style>
+            @media print {
+              @page { size: A4; margin: 10mm; }
+              body { margin: 0; padding: 0; font-family: Arial, sans-serif; font-size: 11px; color: #000; -webkit-print-color-adjust: exact; }
+            }
+            body { font-family: Arial, sans-serif; font-size: 11px; margin: 0; padding: 20px; color: #000; }
+            .header-container { text-align: center; margin-bottom: 20px; }
+            .org-title { font-size: 16px; font-weight: bold; margin: 0; }
+            .org-address { font-size: 11px; margin: 5px 0; }
+            .doc-title { font-size: 14px; font-weight: bold; text-decoration: underline; margin-top: 15px; }
+            .info-table { width: 100%; border: none; margin-bottom: 15px; }
+            .info-table td { vertical-align: top; }
+            .items-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 11px; }
+            .items-table th, .items-table td { border: 1px solid #000; padding: 4px; text-align: center; }
+            .items-table th { font-weight: bold; }
+            .items-table td:nth-child(2) { text-align: left; }
+            .terms-list { margin: 5px 0 20px 0; padding-left: 20px; list-style-type: none; font-size: 10px; }
+            .terms-list li { margin-bottom: 3px; }
+            .signatures { display: flex; justify-content: space-between; margin-top: 60px; }
+            .sig-box { text-align: center; }
+          </style>
+        </head>
+        <body onload="setTimeout(function(){ window.print(); window.close(); }, 500);">
+          <div class="header-container">
+            <h2 class="org-title">EAST POINT COLLEGE OF MEDICAL SCIENCES & RESEARCH CENTER</h2>
+            <p class="org-address">113, JNANA PRABHA CAMPUS, BIDARAHALLI, VIRGO NAGAR POST, BANGALORE - 560049</p>
+            <div class="doc-title">PURCHASE ORDER</div>
+          </div>
+          
+          <table class="info-table">
+            <tr>
+              <td style="width: 60%;">
+                <b>To,</b><br/>
+                <b>M/S. ${po.vendor_name || 'VENDOR'}</b><br/>
+                ${po.vendor_address ? `<span style="font-size: 10px; color: #333;">${po.vendor_address}</span><br/>` : ''}
+                ${po.vendor_gst_number ? `<span style="font-size: 10px; color: #333;">GSTIN: ${po.vendor_gst_number}</span><br/>` : ''}
+              </td>
+              <td style="width: 40%;">
+                <table style="width: 100%">
+                  <tr><td style="width: 40%">PO Number</td><td>: <b>${po.po_number}</b></td></tr>
+                  <tr><td>PO Date</td><td>: ${formatDate(po.created_at)}</td></tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+          
+          <div style="margin-bottom: 15px;">
+            Dear Sir/Madam,<br/>
+            We are pleased to place an order for the following items, terms & conditions mentioned below.
+          </div>
+          
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th>Sr.<br/>No.</th>
+                <th style="width:30%">Item Description</th>
+                <th>HSN<br/>Code</th>
+                <th>Qty</th>
+                <th>UOM</th>
+                <th>RATE</th>
+                <th>Disc.<br/>%</th>
+                <th>CGST<br/>%</th>
+                <th>SGST/<br/>UTGST %</th>
+                <th>IGST<br/>%</th>
+                <th>Item<br/>Amt.</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
+          
+          <div style="display:flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; border-bottom: 1px dashed #ccc; padding-bottom: 10px;">
+            <div style="width: 60%">
+              Total Amount in Word : <b>Rupees ${numberToWords(Math.round(grandTotal))} Only -/</b>
+            </div>
+            <div style="width: 40%">
+              <table style="width:100%; border-collapse: collapse;">
+                <tr><td style="text-align:right">Total Amount</td><td style="text-align:right; width: 100px;">: ${grandTotal.toFixed(2)}</td></tr>
+                <tr><td style="text-align:right">Round Off</td><td style="text-align:right">: ${roundOff}</td></tr>
+                <tr><td style="text-align:right"><b>Total Net Amount</b></td><td style="text-align:right"><b>: ${totalNetAmount}</b></td></tr>
+              </table>
+            </div>
+          </div>
+          
+          <div style="margin-bottom: 15px;">
+            Please expedite supplies accordingly, and arrange to send the bill of cost in duplicate for arranging payment of the same on receipt and inspection of materials at our end.
+          </div>
+          
+          <b style="font-size:10px;">TERMS AND CONDITIONS:</b>
+          <ul class="terms-list">
+            ${termsHtml}
+          </ul>
+          
+          <div style="margin-top: 10px;">Thanking You</div>
+          <div style="margin-top: 20px; margin-bottom: 30px;"><b>For EAST POINT COLLEGE OF MEDICAL SCIENCES & RESEARCH CENTER</b></div>
+          
+          <div class="signatures">
+            <div class="sig-box" style="text-align: left;">
+              Managing Trustee
+              <br/><br/>
+              CC: Manager Accounts<br/>
+              Remarks: ${po.remarks || ''}
+            </div>
+            <div class="sig-box" style="text-align: right;">
+              ${formatDate(new Date())}<br/>
+              Prepared By ADMIN
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+    printWindow.document.write(html);
+    printWindow.document.close();
+  };
+
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
@@ -177,7 +348,7 @@ export default function PurchaseOrders() {
           <Typography variant="body2" sx={{ color: '#64748B' }}>{pos.length} orders</Typography>
         </Box>
         <Button variant="contained" startIcon={<Add />} onClick={() => {
-          setForm({ vendor_id: '', project_id: projects[0]?.id || '', delivery_date: dayjs().add(21, 'day'), terms: '', po_type: 'Informal', items: [{ material_id: '', quantity: '', rate: '' }] });
+          setForm({ vendor_id: '', project_id: projects[0]?.id || '', delivery_date: dayjs().add(21, 'day'), terms: termsTemplates.find(t => t.is_default)?.content || '', po_type: 'Informal', items: [{ material_id: '', quantity: '', rate: '' }] });
           setDialog(true);
         }}>Create PO</Button>
       </Box>
@@ -325,7 +496,7 @@ export default function PurchaseOrders() {
                       </Tooltip>
                       <Tooltip title="Send to Vendor">
                         <span><IconButton size="small" color="primary" disabled={!canSend(po.status)}
-                          onClick={() => showConfirm('Send to Vendor?', `Send ${po.po_number} to vendor?`, 'Yes, Send', 'primary', () => sendPO(po.id))}>
+                          onClick={() => showConfirm('Send to Vendor?', `Send ${po.po_number} to vendor?`, 'Yes, Send', 'primary', () => sendPO(po.id), false, po)}>
                           <Send fontSize="small" />
                         </IconButton></span>
                       </Tooltip>
@@ -411,6 +582,9 @@ export default function PurchaseOrders() {
           </Box>
         </DialogContent>
         <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid #e2e8f0' }}>
+          {detailDialog?.status !== 'Draft' && detailDialog?.status !== 'Rejected' && detailDialog?.status !== 'On Hold' && (
+            <Button onClick={() => handlePrintPO()} variant="contained" sx={{ borderRadius: 2, fontWeight: 700, textTransform: 'none', mr: 2, bgcolor: '#2563EB' }}>Print PO</Button>
+          )}
           <Button onClick={() => setDetailDialog(null)} variant="outlined" sx={{ borderRadius: 2, fontWeight: 600, textTransform: 'none' }}>Close</Button>
         </DialogActions>
       </Dialog>
@@ -535,6 +709,31 @@ export default function PurchaseOrders() {
               </Box>
             ))}
           </Box>
+          <Divider sx={{ my: 2 }} />
+          <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b', mb: 1.5 }}>Terms & Conditions</Typography>
+          <FormControl fullWidth size="small" sx={{ mb: 2 }}>
+            <InputLabel>Load Template</InputLabel>
+            <Select
+              label="Load Template"
+              onChange={e => {
+                const t = termsTemplates.find(x => x.id === e.target.value);
+                if (t) setForm({ ...form, terms: t.content });
+              }}
+              defaultValue=""
+            >
+              <MenuItem value=""><em>Select a Template</em></MenuItem>
+              {termsTemplates.map(t => <MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>)}
+            </Select>
+          </FormControl>
+          <TextField
+            fullWidth
+            multiline
+            rows={4}
+            label="Terms and Conditions"
+            value={form.terms}
+            onChange={e => setForm({ ...form, terms: e.target.value })}
+            placeholder="Enter terms and conditions..."
+          />
         </DialogContent>
         <DialogActions sx={{ px: 4, pb: 4, pt: 2, justifyContent: 'flex-end', gap: 2 }}>
           <Button onClick={() => setDialog(false)} sx={{ color: '#64748B', fontWeight: 600 }}>Cancel</Button>
@@ -553,10 +752,15 @@ export default function PurchaseOrders() {
           )}
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={handleCancelConfirm}>Cancel</Button>
+          <Button onClick={handleCancelConfirm} sx={{ textTransform: 'none' }}>Cancel</Button>
+          {confirm.title === 'Send to Vendor?' && (
+            <Button onClick={() => handlePrintPO(confirm.po)} variant="outlined" size="small" sx={{ fontWeight: 600, textTransform: 'none', mx: 1 }}>
+              Print PO
+            </Button>
+          )}
           <Button variant="contained" color={confirm.confirmColor}
             disabled={confirm.needsReason && !reason.trim()}
-            onClick={handleConfirm} sx={{ fontWeight: 600 }}>
+            onClick={handleConfirm} sx={{ fontWeight: 600, textTransform: 'none' }}>
             {confirm.confirmText}
           </Button>
         </DialogActions>

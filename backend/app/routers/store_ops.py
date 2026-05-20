@@ -10,12 +10,13 @@ from app.models import (
     MaterialIssue, MaterialIssueItem, MaterialReturn, MaterialReturnItem,
     StockTransfer, StockTransferItem, CurrentStock, StockLedger,
     Material, Warehouse, User, AuditLog, Indent, IndentItem, IndentStatus,
-    Room, Floor, Building, DocumentSequence
+    Room, Floor, Building, DocumentSequence, GatePass
 )
 from app.schemas import (
     IssueCreate, IssueOut, IssueItemOut,
     ReturnCreate, ReturnOut, ReturnItemOut,
-    TransferCreate, TransferOut, TransferItemOut
+    TransferCreate, TransferOut, TransferItemOut,
+    GatePassOut, GatePassUpdate
 )
 from app.routers.grn import update_stock
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
@@ -255,7 +256,7 @@ def list_returns(
     search: Optional[str] = None,
     project_id: Optional[int] = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("returns", "read")),
+    current_user: User = Depends(require_permission("issues", "read")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -297,7 +298,7 @@ def list_returns(
 @router.post("/returns")
 def create_return(
     data: ReturnCreate, db: Session = Depends(get_db), 
-    current_user: User = Depends(require_permission("returns", "create")),
+    current_user: User = Depends(require_permission("issues", "create")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -330,10 +331,20 @@ def create_return(
         )
         db.add(ret_item)
 
+        # Determine target warehouse
+        target_warehouse_id = data.warehouse_id
+        if item_data.condition == "Scrap":
+            scrap_w = db.query(Warehouse).filter(Warehouse.tenant_id == tenant_id, Warehouse.site_id == site_id, Warehouse.code == "SCRAP").first()
+            if not scrap_w:
+                scrap_w = Warehouse(tenant_id=tenant_id, site_id=site_id, code="SCRAP", name="Scrap Store", warehouse_type="Scrap", project_id=data.project_id)
+                db.add(scrap_w)
+                db.flush()
+            target_warehouse_id = scrap_w.id
+
         update_stock(
             db=db,
             material_id=item_data.material_id,
-            warehouse_id=data.warehouse_id,
+            warehouse_id=target_warehouse_id,
             quantity=item_data.quantity,
             transaction_type="Return",
             reference_type="Return",
@@ -346,6 +357,39 @@ def create_return(
             user_id=current_user.id
         )
 
+        if item_data.condition == "Repairable":
+            mat = db.query(Material).filter(Material.id == item_data.material_id).first()
+            gp_num = get_next_number(db, tenant_id, site_id, "GATEPASS", "GP")
+            gp = GatePass(
+                tenant_id=tenant_id,
+                site_id=site_id,
+                gate_pass_number=gp_num,
+                return_id=ret.id,
+                project_id=data.project_id,
+                material_id=item_data.material_id,
+                quantity=item_data.quantity,
+                vendor_id=mat.preferred_vendor_id if mat else None,
+                created_by_id=current_user.id
+            )
+            db.add(gp)
+            db.flush()
+            # Deduct stock immediately because it's going out for repair
+            update_stock(
+                db=db,
+                material_id=item_data.material_id,
+                warehouse_id=target_warehouse_id,
+                quantity=-item_data.quantity,
+                transaction_type="Outward Repair",
+                reference_type="GatePass",
+                reference_id=gp.id,
+                reference_number=gp_num,
+                tenant_id=tenant_id,
+                site_id=site_id,
+                project_id=data.project_id,
+                room_id=data.returned_from_room_id,
+                user_id=current_user.id
+            )
+
     db.commit()
     return {"id": ret.id, "return_number": return_number, "message": "Material return recorded"}
 
@@ -357,7 +401,7 @@ def list_transfers(
     search: Optional[str] = None,
     project_id: Optional[int] = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("transfers", "read")),
+    current_user: User = Depends(require_permission("issues", "read")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -397,7 +441,7 @@ def list_transfers(
 @router.post("/transfers")
 def create_transfer(
     data: TransferCreate, db: Session = Depends(get_db), 
-    current_user: User = Depends(require_permission("transfers", "create")),
+    current_user: User = Depends(require_permission("issues", "create")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -476,4 +520,92 @@ def create_transfer(
 
     db.commit()
     return {"id": transfer.id, "transfer_number": transfer_number, "message": "Stock transfer completed"}
+
+
+# ── Gate Passes ──────────────────────────────────────────────────────────
+
+@router.get("/gate-passes")
+def list_gate_passes(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("issues", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    passes = db.query(GatePass).filter(
+        GatePass.tenant_id == tenant_id, GatePass.site_id == site_id
+    ).order_by(GatePass.created_at.desc()).all()
+    
+    result = []
+    for gp in passes:
+        mat = gp.material
+        vend = gp.vendor
+        proj = gp.project
+        result.append(GatePassOut(
+            id=gp.id,
+            gate_pass_number=gp.gate_pass_number,
+            gate_pass_type=gp.gate_pass_type,
+            project_id=gp.project_id,
+            project_name=proj.name if proj else None,
+            material_id=gp.material_id,
+            material_name=mat.name if mat else None,
+            material_code=mat.code if mat else None,
+            uom_name=mat.uom.name if mat and mat.uom else None,
+            quantity=gp.quantity,
+            vendor_id=gp.vendor_id,
+            vendor_name=vend.name if vend else None,
+            vendor_address=vend.address if vend else None,
+            reference_return_number=gp.material_return.return_number if gp.material_return else None,
+            status=gp.status,
+            driver_name=gp.driver_name,
+            vehicle_number=gp.vehicle_number,
+            remarks=gp.remarks,
+            created_at=gp.created_at
+        ))
+    return result
+
+@router.put("/gate-passes/{id}")
+def update_gate_pass(
+    id: int,
+    data: GatePassUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("issues", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    gp = db.query(GatePass).filter(
+        GatePass.id == id, GatePass.tenant_id == tenant_id, GatePass.site_id == site_id
+    ).first()
+    
+    if not gp:
+        raise HTTPException(status_code=404, detail="Gate Pass not found")
+        
+    old_status = gp.status
+    gp.status = data.status
+    if data.remarks is not None:
+        gp.remarks = data.remarks
+        
+    # If transitioning from "Pending Repair" to "Repaired & Received"
+    if old_status == "Pending Repair" and data.status == "Repaired & Received":
+        # Put stock back into the usable warehouse
+        ret = db.query(MaterialReturn).filter(MaterialReturn.id == gp.return_id).first()
+        warehouse_id = ret.warehouse_id if ret else None
+        
+        if warehouse_id:
+            update_stock(
+                db=db,
+                material_id=gp.material_id,
+                warehouse_id=warehouse_id,
+                quantity=gp.quantity,
+                transaction_type="Repair Received",
+                reference_type="GatePass",
+                reference_id=gp.id,
+                reference_number=gp.gate_pass_number,
+                tenant_id=tenant_id,
+                site_id=site_id,
+                project_id=gp.project_id,
+                user_id=current_user.id
+            )
+            
+    db.commit()
+    return {"message": f"Gate Pass updated to {data.status}"}
 

@@ -118,6 +118,24 @@ def get_issue_summary(
     sl_rcpt_results = sl_rcpt_query.group_by(StockLedger.material_id).all()
     material_receipts = {row.material_id: row.total_received for row in sl_rcpt_results}
 
+    # Total Outward query within date range (from StockLedger where quantity < 0)
+    sl_outward_query = db.query(
+        StockLedger.material_id, 
+        func.sum(StockLedger.quantity).label("total_outward")
+    ).filter(
+        StockLedger.tenant_id == tenant_id,
+        StockLedger.site_id == site_id,
+        StockLedger.material_id.in_(material_ids),
+        StockLedger.created_at >= dt_from,
+        StockLedger.created_at <= dt_to,
+        StockLedger.quantity < 0
+    )
+    if warehouse_id:
+        sl_outward_query = sl_outward_query.filter(StockLedger.warehouse_id == warehouse_id)
+    
+    sl_outward_results = sl_outward_query.group_by(StockLedger.material_id).all()
+    material_outward = {row.material_id: abs(row.total_outward) for row in sl_outward_results}
+
     # Issues query within date range
     issue_query = db.query(
         MaterialIssueItem.material_id,
@@ -175,6 +193,8 @@ def get_issue_summary(
         total_issue = round(sum(issues.values()))
         closing_stock = round(closing_stocks.get(m_id, 0.0))
         total_received = round(material_receipts.get(m_id, 0.0))
+        total_outward_all = round(material_outward.get(m_id, 0.0))
+        other_outward = max(0, total_outward_all - total_issue)
         
         issue_numbers_str = ", ".join(sorted(list(material_issue_numbers.get(m_id, set()))))
 
@@ -193,6 +213,7 @@ def get_issue_summary(
             "total_received": total_received,
             "departments": issues,
             "total_issue": total_issue,
+            "other_outward": other_outward,
             "closing_stock": closing_stock,
             "issue_numbers": issue_numbers_str
         })

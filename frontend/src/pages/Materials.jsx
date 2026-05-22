@@ -2,13 +2,13 @@ import { useState, useEffect, useMemo } from 'react';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, InputAdornment, Chip, Dialog,
-  DialogTitle, DialogContent, DialogActions, Grid, MenuItem, IconButton,
-  Tooltip, Select, FormControl, InputLabel, TableSortLabel
+  Tooltip, Select, FormControl, InputLabel, TableSortLabel, useTheme, useMediaQuery, MenuItem, DialogTitle, DialogContent, DialogActions, IconButton
 } from '@mui/material';
-import { 
-  Add, Search, Edit, ArrowDropUp, ArrowDropDown, 
-  Inventory, Description, Category, Straighten, Warehouse, 
-  Percent, Speed, CurrencyRupee 
+import { QRCodeSVG } from 'qrcode.react';
+import {
+  Add, Search, Edit, ArrowDropUp, ArrowDropDown,
+  Inventory, Description, Category, Straighten, Warehouse,
+  Percent, Speed, CurrencyRupee, Tag, QrCodeScanner, Print
 } from '@mui/icons-material';
 import api from '../services/api';
 
@@ -27,11 +27,16 @@ export default function Materials() {
   const [viewOnly, setViewOnly] = useState(false);
   const [errors, setErrors] = useState({});
   const [sortConfig, setSortConfig] = useState({ key: 'code', direction: 'asc' });
+  const [qrDialog, setQrDialog] = useState(false);
+  const [selectedQrMaterial, setSelectedQrMaterial] = useState(null);
   const [form, setForm] = useState({
     code: '', name: '', category_id: '', uom_id: '', warehouse_id: '', reorder_level: 0,
-    maximum_level: 0, standard_cost: 0, gst_rate: 0, storage_type: 'General', 
-    material_type: '', description: ''
+    maximum_level: 0, standard_cost: 0, gst_rate: 0, storage_type: 'General',
+    material_type: '', hsn_code: '', description: ''
   });
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const load = () => {
     setLoading(true);
@@ -104,6 +109,10 @@ export default function Materials() {
       newErrors.material_type = 'Material type is required';
     }
 
+    if (form.hsn_code && !/^(\d{2}|\d{4}|\d{6}|\d{8})$/.test(form.hsn_code)) {
+      newErrors.hsn_code = 'HSN Code must be 2, 4, 6, or 8 digits';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -143,6 +152,7 @@ export default function Materials() {
         gst_rate: Number(form.gst_rate),
         storage_type: form.storage_type,
         material_type: form.material_type,
+        hsn_code: form.hsn_code,
         description: form.description
       };
 
@@ -188,12 +198,13 @@ export default function Materials() {
     setErrors({});
     setForm({
       code: m.code, name: m.name, category_id: m.category_id, uom_id: m.uom_id,
-      reorder_level: m.reorder_level === 0 ? '' : m.reorder_level, 
+      reorder_level: m.reorder_level === 0 ? '' : m.reorder_level,
       maximum_level: m.maximum_level === 0 ? '' : m.maximum_level,
-      standard_cost: m.standard_cost === 0 ? '' : m.standard_cost, 
+      standard_cost: m.standard_cost === 0 ? '' : m.standard_cost,
       gst_rate: m.gst_rate === 0 ? '' : (m.gst_rate || ''),
       storage_type: m.storage_type || 'General',
       material_type: m.material_type || '',
+      hsn_code: m.hsn_code || '',
       warehouse_id: m.warehouse_id || '',
       description: m.description || ''
     });
@@ -204,12 +215,56 @@ export default function Materials() {
     setEditing(null);
     setViewOnly(false);
     setErrors({});
-    setForm({ 
-      code: '', name: '', category_id: '', uom_id: '', 
-      reorder_level: '', maximum_level: '', standard_cost: '', gst_rate: '', 
-      storage_type: 'General', material_type: '', warehouse_id: '', description: ''
+    setForm({
+      code: '', name: '', category_id: '', uom_id: '',
+      reorder_level: '', maximum_level: '', standard_cost: '', gst_rate: '',
+      storage_type: 'General', material_type: '', hsn_code: '', warehouse_id: '', description: ''
     });
     setDialog(true);
+  };
+
+  const openQr = (m) => {
+    setSelectedQrMaterial(m);
+    setQrDialog(true);
+  };
+
+  const handlePrintQr = () => {
+    if (!selectedQrMaterial) return;
+    const printWindow = window.open('', '', 'width=600,height=600');
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Print QR Label</title>
+          <style>
+            body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+            .label-container { text-align: center; border: 1px solid #ccc; padding: 20px; border-radius: 8px; }
+            .material-name { font-weight: bold; font-size: 1.2rem; margin-bottom: 5px; }
+            .material-code { color: #666; margin-bottom: 15px; }
+            .uom { font-size: 0.9rem; margin-top: 10px; color: #444; }
+          </style>
+        </head>
+        <body>
+          <div class="label-container">
+            <div class="material-name">${selectedQrMaterial.name}</div>
+            <div class="material-code">${selectedQrMaterial.code}</div>
+            <div id="qr-code-container"></div>
+            <div class="uom">UOM: ${selectedQrMaterial.uom_name}</div>
+          </div>
+        </body>
+      </html>
+    `);
+    
+    const svgElement = document.getElementById('material-qr-svg');
+    if (svgElement) {
+      printWindow.document.getElementById('qr-code-container').innerHTML = svgElement.outerHTML;
+    }
+    
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 250);
   };
 
   return (
@@ -224,22 +279,22 @@ export default function Materials() {
 
       <Card sx={{ mb: 3, p: 2, borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
-          <TextField 
-            size="small" 
-            placeholder="Search materials by name or code..." 
+          <TextField
+            size="small"
+            placeholder="Search materials by name or code..."
             value={search}
-            onChange={e => setSearch(e.target.value)} 
+            onChange={e => setSearch(e.target.value)}
             sx={{ minWidth: 350 }}
-            InputProps={{ 
+            InputProps={{
               startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} />,
               sx: { borderRadius: 2 }
-            }} 
+            }}
           />
           <FormControl size="small" sx={{ minWidth: 200 }}>
             <InputLabel>Filter by Category</InputLabel>
-            <Select 
-              value={catFilter} 
-              label="Filter by Category" 
+            <Select
+              value={catFilter}
+              label="Filter by Category"
               onChange={e => setCatFilter(e.target.value)}
               sx={{ borderRadius: 2 }}
             >
@@ -251,171 +306,232 @@ export default function Materials() {
       </Card>
 
       <Card sx={{ borderRadius: 2, overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
-        <TableContainer>
-          <Table size="small">
-            <TableHead sx={{ bgcolor: '#F8FAFC' }}>
-              <TableRow>
-                <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 1 }}>
-                  <TableSortLabel 
-                    active={sortConfig.key === 'code'} 
-                    direction={sortConfig.direction} 
-                    onClick={() => handleSort('code')}
-                  >
-                    CODE
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 1 }}>
-                  <TableSortLabel 
-                    active={sortConfig.key === 'name'} 
-                    direction={sortConfig.direction} 
-                    onClick={() => handleSort('name')}
-                  >
-                    MATERIAL NAME
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 1 }}>
-                  <TableSortLabel 
-                    active={sortConfig.key === 'category'} 
-                    direction={sortConfig.direction} 
-                    onClick={() => handleSort('category')}
-                  >
-                    CATEGORY
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 1 }}>
-                  <TableSortLabel 
-                    active={sortConfig.key === 'uom'} 
-                    direction={sortConfig.direction} 
-                    onClick={() => handleSort('uom')}
-                  >
-                    UOM
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 1 }}>
-                  <TableSortLabel 
-                    active={sortConfig.key === 'gst_rate'} 
-                    direction={sortConfig.direction} 
-                    onClick={() => handleSort('gst_rate')}
-                  >
-                    GST
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 1 }}>
-                  <TableSortLabel 
-                    active={sortConfig.key === 'standard_cost'} 
-                    direction={sortConfig.direction} 
-                    onClick={() => handleSort('standard_cost')}
-                  >
-                    COST
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 1 }}>
-                  <TableSortLabel 
-                    active={sortConfig.key === 'reorder_level'} 
-                    direction={sortConfig.direction} 
-                    onClick={() => handleSort('reorder_level')}
-                  >
-                    REORDER
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 1 }}>
-                  <TableSortLabel 
-                    active={sortConfig.key === 'stock'} 
-                    direction={sortConfig.direction} 
-                    onClick={() => handleSort('stock')}
-                  >
-                    STOCK
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 1 }}>
-                  <TableSortLabel 
-                    active={sortConfig.key === 'material_type'} 
-                    direction={sortConfig.direction} 
-                    onClick={() => handleSort('material_type')}
-                  >
-                    TYPE
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 1 }}>
-                  <TableSortLabel 
-                    active={sortConfig.key === 'is_active'} 
-                    direction={sortConfig.direction} 
-                    onClick={() => handleSort('is_active')}
-                  >
-                    STATUS
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 1 }}>ACTIONS</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {sortedMaterials.map(m => (
-                 <TableRow 
-                  key={m.id} 
-                  hover 
-                  onClick={() => openEdit(m, true)} 
-                  sx={{ cursor: 'pointer', '&:last-child td, &:last-child th': { border: 0 } }}
-                >
-                  <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.8rem', px: 1 }}>{m.code}</TableCell>
-                  <TableCell sx={{ fontSize: '0.8rem', fontWeight: 500, px: 1 }}>{m.name}</TableCell>
-                  <TableCell sx={{ py: 1, px: 1 }}>
-                    <Chip label={m.category_name} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.65rem' }} />
-                  </TableCell>
-                  <TableCell sx={{ fontSize: '0.8rem', px: 1 }}>{m.uom_name}</TableCell>
-                  <TableCell align="right" sx={{ fontSize: '0.8rem', px: 1 }}>{formatAmt(m.gst_rate)}%</TableCell>
-                  <TableCell align="right" sx={{ fontSize: '0.8rem', fontWeight: 600, px: 1 }}>₹{formatAmt(m.standard_cost)}</TableCell>
-                  <TableCell align="right" sx={{ fontSize: '0.8rem', px: 1 }}>{formatQty(m.reorder_level)}</TableCell>
-                  <TableCell align="right" sx={{ px: 1 }}>
-                    <Chip 
-                      label={formatQty(m.current_stock)} 
-                      size="small"
-                      color={(m.current_stock || 0) < m.reorder_level ? 'error' : 'success'}
-                      sx={{ fontWeight: 700, minWidth: 45, height: 22, fontSize: '0.7rem' }} 
-                    />
-                  </TableCell>
-                  <TableCell sx={{ px: 1 }}>
-                    <Chip 
-                      label={m.material_type} 
-                      size="small" 
-                      variant="outlined" 
-                      sx={{ fontSize: '0.65rem', height: 20 }}
-                      color={m.material_type === 'Non-Consumable' ? 'secondary' : 'default'} 
-                    />
-                  </TableCell>
-                  <TableCell sx={{ px: 1 }}>
-                    <Chip 
-                      label={m.is_active ? 'Active' : 'Inactive'} 
-                      size="small"
-                      color={m.is_active ? 'success' : 'default'} 
-                      variant="outlined" 
-                      sx={{ fontSize: '0.65rem', height: 20 }}
-                    />
-                  </TableCell>
-                  <TableCell align="right" sx={{ px: 1 }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0 }} onClick={(e) => e.stopPropagation()}>
-                      <Tooltip title="Edit Material">
-                        <IconButton size="small" onClick={() => openEdit(m, false)} sx={{ color: '#64748B' }}>
-                          <Edit fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
+        {isMobile ? (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, p: 1.5 }}>
+            {sortedMaterials.length === 0 && !loading && (
+              <Typography variant="body2" align="center" sx={{ py: 4, color: '#94A3B8' }}>
+                No materials found.
+              </Typography>
+            )}
+            {sortedMaterials.map(m => (
+              <Card key={m.id} variant="outlined" sx={{ p: 2, borderRadius: 2, cursor: 'pointer', '&:hover': { borderColor: '#2563EB' } }} onClick={() => openEdit(m, true)}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, gap: 1, alignItems: 'flex-start' }}>
+                  <Box>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1E293B' }}>{m.name}</Typography>
+                    <Typography variant="caption" sx={{ fontWeight: 600, color: '#2563EB' }}>{m.code}</Typography>
+                  </Box>
+                  <Chip
+                    label={m.is_active ? 'Active' : 'Inactive'}
+                    size="small"
+                    color={m.is_active ? 'success' : 'default'}
+                    variant="outlined"
+                    sx={{ fontSize: '0.65rem', height: 20 }}
+                  />
+                </Box>
+                <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#334155' }}><strong>Category:</strong> {m.category_name} | <strong>UOM:</strong> {m.uom_name}</Typography>
+                <Typography variant="caption" sx={{ display: 'block', mb: 1, color: '#334155' }}><strong>Type:</strong> {m.material_type}</Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Box>
+                    <Typography variant="caption" sx={{ color: '#64748B', display: 'block' }}>Stock / Reorder</Typography>
+                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                      <Chip
+                        label={formatQty(m.current_stock)}
+                        size="small"
+                        color={(m.current_stock || 0) < m.reorder_level ? 'error' : 'success'}
+                        sx={{ fontWeight: 700, minWidth: 40, height: 20, fontSize: '0.7rem' }}
+                      />
+                      <Typography variant="caption" sx={{ color: '#64748B' }}>/ {formatQty(m.reorder_level)}</Typography>
                     </Box>
+                  </Box>
+                  <Box onClick={(e) => e.stopPropagation()}>
+                    <Tooltip title="QR Code">
+                      <IconButton size="small" onClick={() => openQr(m)} sx={{ color: '#64748B', mr: 0.5 }}>
+                        <QrCodeScanner fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Edit Material">
+                      <IconButton size="small" onClick={() => openEdit(m, false)} sx={{ color: '#64748B' }}>
+                        <Edit fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+                </Box>
+              </Card>
+            ))}
+          </Box>
+        ) : (
+          <TableContainer>
+            <Table size="small">
+              <TableHead sx={{ bgcolor: '#F8FAFC' }}>
+                <TableRow>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 1 }}>
+                    <TableSortLabel
+                      active={sortConfig.key === 'code'}
+                      direction={sortConfig.direction}
+                      onClick={() => handleSort('code')}
+                    >
+                      CODE
+                    </TableSortLabel>
                   </TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 1 }}>
+                    <TableSortLabel
+                      active={sortConfig.key === 'name'}
+                      direction={sortConfig.direction}
+                      onClick={() => handleSort('name')}
+                    >
+                      MATERIAL NAME
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 1 }}>
+                    <TableSortLabel
+                      active={sortConfig.key === 'category'}
+                      direction={sortConfig.direction}
+                      onClick={() => handleSort('category')}
+                    >
+                      CATEGORY
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 1 }}>
+                    <TableSortLabel
+                      active={sortConfig.key === 'uom'}
+                      direction={sortConfig.direction}
+                      onClick={() => handleSort('uom')}
+                    >
+                      UOM
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 1 }}>
+                    <TableSortLabel
+                      active={sortConfig.key === 'gst_rate'}
+                      direction={sortConfig.direction}
+                      onClick={() => handleSort('gst_rate')}
+                    >
+                      GST
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 1 }}>
+                    <TableSortLabel
+                      active={sortConfig.key === 'standard_cost'}
+                      direction={sortConfig.direction}
+                      onClick={() => handleSort('standard_cost')}
+                    >
+                      COST
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 1 }}>
+                    <TableSortLabel
+                      active={sortConfig.key === 'reorder_level'}
+                      direction={sortConfig.direction}
+                      onClick={() => handleSort('reorder_level')}
+                    >
+                      REORDER
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 1 }}>
+                    <TableSortLabel
+                      active={sortConfig.key === 'stock'}
+                      direction={sortConfig.direction}
+                      onClick={() => handleSort('stock')}
+                    >
+                      STOCK
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 1 }}>
+                    <TableSortLabel
+                      active={sortConfig.key === 'material_type'}
+                      direction={sortConfig.direction}
+                      onClick={() => handleSort('material_type')}
+                    >
+                      TYPE
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 1 }}>
+                    <TableSortLabel
+                      active={sortConfig.key === 'is_active'}
+                      direction={sortConfig.direction}
+                      onClick={() => handleSort('is_active')}
+                    >
+                      STATUS
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 1 }}>ACTIONS</TableCell>
                 </TableRow>
-              ))}
-              {materials.length === 0 && !loading && (
-                <TableRow><TableCell colSpan={11} sx={{ textAlign: 'center', py: 4, color: '#94A3B8' }}>No materials found</TableCell></TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
+              </TableHead>
+              <TableBody>
+                {sortedMaterials.map(m => (
+                  <TableRow
+                    key={m.id}
+                    hover
+                    onClick={() => openEdit(m, true)}
+                    sx={{ cursor: 'pointer', '&:last-child td, &:last-child th': { border: 0 } }}
+                  >
+                    <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.8rem', px: 1 }}>{m.code}</TableCell>
+                    <TableCell sx={{ fontSize: '0.8rem', fontWeight: 500, px: 1 }}>{m.name}</TableCell>
+                    <TableCell sx={{ py: 1, px: 1 }}>
+                      <Chip label={m.category_name} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.65rem' }} />
+                    </TableCell>
+                    <TableCell sx={{ fontSize: '0.8rem', px: 1 }}>{m.uom_name}</TableCell>
+                    <TableCell align="right" sx={{ fontSize: '0.8rem', px: 1 }}>{formatAmt(m.gst_rate)}%</TableCell>
+                    <TableCell align="right" sx={{ fontSize: '0.8rem', fontWeight: 600, px: 1 }}>₹{formatAmt(m.standard_cost)}</TableCell>
+                    <TableCell align="right" sx={{ fontSize: '0.8rem', px: 1 }}>{formatQty(m.reorder_level)}</TableCell>
+                    <TableCell align="right" sx={{ px: 1 }}>
+                      <Chip
+                        label={formatQty(m.current_stock)}
+                        size="small"
+                        color={(m.current_stock || 0) < m.reorder_level ? 'error' : 'success'}
+                        sx={{ fontWeight: 700, minWidth: 45, height: 22, fontSize: '0.7rem' }}
+                      />
+                    </TableCell>
+                    <TableCell sx={{ px: 1 }}>
+                      <Chip
+                        label={m.material_type}
+                        size="small"
+                        variant="outlined"
+                        sx={{ fontSize: '0.65rem', height: 20 }}
+                        color={m.material_type === 'Non-Consumable' ? 'secondary' : 'default'}
+                      />
+                    </TableCell>
+                    <TableCell sx={{ px: 1 }}>
+                      <Chip
+                        label={m.is_active ? 'Active' : 'Inactive'}
+                        size="small"
+                        color={m.is_active ? 'success' : 'default'}
+                        variant="outlined"
+                        sx={{ fontSize: '0.65rem', height: 20 }}
+                      />
+                    </TableCell>
+                    <TableCell align="right" sx={{ px: 1 }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0 }} onClick={(e) => e.stopPropagation()}>
+                        <Tooltip title="QR Code">
+                          <IconButton size="small" onClick={() => openQr(m)} sx={{ color: '#64748B' }}>
+                            <QrCodeScanner fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Edit Material">
+                          <IconButton size="small" onClick={() => openEdit(m, false)} sx={{ color: '#64748B' }}>
+                            <Edit fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {materials.length === 0 && !loading && (
+                  <TableRow><TableCell colSpan={11} sx={{ textAlign: 'center', py: 4, color: '#94A3B8' }}>No materials found</TableCell></TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
       </Card>
 
-      <Dialog 
-        open={dialog} 
-        onClose={() => setDialog(false)} 
-        maxWidth="md" 
-        fullWidth 
-        PaperProps={{ sx: { borderRadius: 3, boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' } }}
+      <Dialog
+        open={dialog}
+        onClose={() => setDialog(false)}
+        maxWidth="md"
+        fullWidth
+        fullScreen={isMobile}
+        PaperProps={{ sx: { borderRadius: isMobile ? 0 : 3, boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' } }}
       >
         <DialogTitle sx={{ fontWeight: 700, pb: 1, pt: 3 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -434,32 +550,32 @@ export default function Materials() {
         </DialogTitle>
         <DialogContent sx={{ mt: 1 }}>
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr 1fr' }, gap: 2.5, pt: 2 }}>
-            <TextField 
-              fullWidth 
+            <TextField
+              fullWidth
               label="Material Code"
-              value={form.code || ''} 
+              value={form.code || ''}
               placeholder="Auto-generated"
-              disabled 
-              InputProps={{ startAdornment: <InputAdornment position="start"><Inventory sx={{ color: '#94A3B8' }} /></InputAdornment> }} 
+              disabled
+              InputProps={{ startAdornment: <InputAdornment position="start"><Inventory sx={{ color: '#94A3B8' }} /></InputAdornment> }}
             />
-            <TextField 
-              fullWidth 
+            <TextField
+              fullWidth
               label="Material Name"
-              value={form.name} 
-              onChange={e => setForm({ ...form, name: e.target.value })} 
-              required 
+              value={form.name}
+              onChange={e => setForm({ ...form, name: e.target.value })}
+              required
               disabled={viewOnly}
               error={!!errors.name}
               helperText={errors.name}
               sx={{ gridColumn: { sm: 'span 2' } }}
-              InputProps={{ startAdornment: <InputAdornment position="start"><Description sx={{ color: '#94A3B8' }} /></InputAdornment> }} 
+              InputProps={{ startAdornment: <InputAdornment position="start"><Description sx={{ color: '#94A3B8' }} /></InputAdornment> }}
             />
 
             <FormControl fullWidth error={!!errors.category_id}>
               <InputLabel>Category</InputLabel>
-              <Select 
-                value={form.category_id} 
-                onChange={e => setForm({ ...form, category_id: e.target.value })} 
+              <Select
+                value={form.category_id}
+                onChange={e => setForm({ ...form, category_id: e.target.value })}
                 disabled={viewOnly}
                 label="Category"
                 startAdornment={<InputAdornment position="start"><Category sx={{ color: '#94A3B8' }} /></InputAdornment>}
@@ -470,9 +586,9 @@ export default function Materials() {
 
             <FormControl fullWidth error={!!errors.uom_id}>
               <InputLabel>UOM</InputLabel>
-              <Select 
-                value={form.uom_id} 
-                onChange={e => setForm({ ...form, uom_id: e.target.value })} 
+              <Select
+                value={form.uom_id}
+                onChange={e => setForm({ ...form, uom_id: e.target.value })}
                 disabled={viewOnly}
                 label="UOM"
                 startAdornment={<InputAdornment position="start"><Straighten sx={{ color: '#94A3B8' }} /></InputAdornment>}
@@ -483,9 +599,9 @@ export default function Materials() {
 
             <FormControl fullWidth>
               <InputLabel>Store</InputLabel>
-              <Select 
-                value={form.warehouse_id} 
-                onChange={e => setForm({ ...form, warehouse_id: e.target.value })} 
+              <Select
+                value={form.warehouse_id}
+                onChange={e => setForm({ ...form, warehouse_id: e.target.value })}
                 disabled={viewOnly}
                 label="Store"
                 startAdornment={<InputAdornment position="start"><Warehouse sx={{ color: '#94A3B8' }} /></InputAdornment>}
@@ -496,9 +612,9 @@ export default function Materials() {
 
             <FormControl fullWidth error={!!errors.material_type}>
               <InputLabel>Material Type</InputLabel>
-              <Select 
-                value={form.material_type} 
-                onChange={e => setForm({ ...form, material_type: e.target.value })} 
+              <Select
+                value={form.material_type}
+                onChange={e => setForm({ ...form, material_type: e.target.value })}
                 disabled={viewOnly}
                 label="Material Type"
                 startAdornment={<InputAdornment position="start"><Category sx={{ color: '#94A3B8' }} /></InputAdornment>}
@@ -509,77 +625,89 @@ export default function Materials() {
               {errors.material_type && <Typography variant="caption" color="error" sx={{ ml: 2 }}>{errors.material_type}</Typography>}
             </FormControl>
 
-            <TextField 
-              fullWidth 
+            <TextField
+              fullWidth
               label="Storage Type"
-              value={form.storage_type} 
-              onChange={e => setForm({ ...form, storage_type: e.target.value })} 
+              value={form.storage_type}
+              onChange={e => setForm({ ...form, storage_type: e.target.value })}
               disabled={viewOnly}
-              InputProps={{ startAdornment: <InputAdornment position="start"><Warehouse sx={{ color: '#94A3B8' }} /></InputAdornment> }} 
+              InputProps={{ startAdornment: <InputAdornment position="start"><Warehouse sx={{ color: '#94A3B8' }} /></InputAdornment> }}
             />
 
-            <TextField 
-              fullWidth 
+            <TextField
+              fullWidth
               label="GST Rate (%)"
-              type="number" 
-              value={form.gst_rate} 
-              onChange={e => setForm({ ...form, gst_rate: e.target.value })} 
+              type="number"
+              value={form.gst_rate}
+              onChange={e => setForm({ ...form, gst_rate: e.target.value })}
               disabled={viewOnly}
               error={!!errors.gst_rate}
               helperText={errors.gst_rate}
               inputProps={{ min: 0, max: 100, step: "0.01" }}
-              InputProps={{ startAdornment: <InputAdornment position="start"><Percent sx={{ color: '#94A3B8' }} /></InputAdornment> }} 
+              InputProps={{ startAdornment: <InputAdornment position="start"><Percent sx={{ color: '#94A3B8' }} /></InputAdornment> }}
             />
 
-            <TextField 
-              fullWidth 
+            <TextField
+              fullWidth
+              label="HSN Code"
+              value={form.hsn_code}
+              onChange={e => setForm({ ...form, hsn_code: e.target.value.replace(/\D/g, '') })}
+              disabled={viewOnly}
+              error={!!errors.hsn_code}
+              helperText={errors.hsn_code}
+              inputProps={{ maxLength: 8 }}
+              InputProps={{ startAdornment: <InputAdornment position="start"><Tag sx={{ color: '#94A3B8' }} /></InputAdornment> }}
+            />
+
+            <TextField
+              fullWidth
               label="Standard Cost (₹)"
-              type="number" 
-              value={form.standard_cost} 
-              onChange={e => setForm({ ...form, standard_cost: e.target.value })} 
+              type="number"
+              value={form.standard_cost}
+              onChange={e => setForm({ ...form, standard_cost: e.target.value })}
               disabled={viewOnly}
               error={!!errors.standard_cost}
               helperText={errors.standard_cost}
               inputProps={{ min: 0, step: "0.01" }}
-              InputProps={{ startAdornment: <InputAdornment position="start"><CurrencyRupee sx={{ color: '#94A3B8' }} /></InputAdornment> }} 
+              InputProps={{ startAdornment: <InputAdornment position="start"><CurrencyRupee sx={{ color: '#94A3B8' }} /></InputAdornment> }}
             />
 
-            <TextField 
-              fullWidth 
+            <TextField
+              fullWidth
               label="Reorder Level"
-              type="number" 
-              value={form.reorder_level} 
-              onChange={e => setForm({ ...form, reorder_level: e.target.value })} 
+              type="number"
+              value={form.reorder_level}
+              onChange={e => setForm({ ...form, reorder_level: e.target.value })}
               disabled={viewOnly}
               error={!!errors.reorder_level}
               helperText={errors.reorder_level}
               inputProps={{ min: 0 }}
-              InputProps={{ startAdornment: <InputAdornment position="start"><Speed sx={{ color: '#94A3B8' }} /></InputAdornment> }} 
+              InputProps={{ startAdornment: <InputAdornment position="start"><Speed sx={{ color: '#94A3B8' }} /></InputAdornment> }}
             />
 
-            <TextField 
-              fullWidth 
+            <TextField
+              fullWidth
               label="Maximum Level"
-              type="number" 
-              value={form.maximum_level} 
-              onChange={e => setForm({ ...form, maximum_level: e.target.value })} 
+              type="number"
+              value={form.maximum_level}
+              onChange={e => setForm({ ...form, maximum_level: e.target.value })}
               disabled={viewOnly}
               error={!!errors.maximum_level}
               helperText={errors.maximum_level}
               inputProps={{ min: 0 }}
-              InputProps={{ startAdornment: <InputAdornment position="start"><Speed sx={{ color: '#94A3B8' }} /></InputAdornment> }} 
+              InputProps={{ startAdornment: <InputAdornment position="start"><Speed sx={{ color: '#94A3B8' }} /></InputAdornment> }}
             />
 
-            <TextField 
-              fullWidth 
+            <TextField
+              fullWidth
               label="General Description"
-              value={form.description} 
-              onChange={e => setForm({ ...form, description: e.target.value })} 
-              multiline 
-              rows={2} 
+              value={form.description}
+              onChange={e => setForm({ ...form, description: e.target.value })}
+              multiline
+              rows={2}
               disabled={viewOnly}
               sx={{ gridColumn: { sm: 'span 3' } }}
-              InputProps={{ startAdornment: <InputAdornment position="start" sx={{ alignSelf: 'flex-start', mt: 1.5 }}><Description sx={{ color: '#94A3B8' }} /></InputAdornment> }} 
+              InputProps={{ startAdornment: <InputAdornment position="start" sx={{ alignSelf: 'flex-start', mt: 1.5 }}><Description sx={{ color: '#94A3B8' }} /></InputAdornment> }}
             />
           </Box>
         </DialogContent>
@@ -587,21 +715,67 @@ export default function Materials() {
           <Button onClick={() => setDialog(false)} sx={{ color: '#64748B', fontWeight: 600 }}>
             Cancel
           </Button>
-          <Button 
-            variant="contained" 
+          <Button
+            variant="contained"
             onClick={handleSave}
             disabled={viewOnly}
-            sx={{ 
-              borderRadius: 2, 
-              px: 4, 
-              py: 1, 
-              fontWeight: 700, 
+            sx={{
+              borderRadius: 2,
+              px: 4,
+              py: 1,
+              fontWeight: 700,
               boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)',
               textTransform: 'none',
               display: viewOnly ? 'none' : 'inline-flex'
             }}
           >
             {editing ? 'Update Material' : 'Create Material'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={qrDialog} onClose={() => setQrDialog(false)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700, textAlign: 'center' }}>
+          Material QR Code
+        </DialogTitle>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 3 }}>
+          {selectedQrMaterial && (
+            <>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 0.5, textAlign: 'center' }}>
+                {selectedQrMaterial.name}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                {selectedQrMaterial.code}
+              </Typography>
+              <Box sx={{ p: 2, bgcolor: '#fff', borderRadius: 2, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+                <QRCodeSVG 
+                  id="material-qr-svg"
+                  value={JSON.stringify({ 
+                    code: selectedQrMaterial.code, 
+                    name: selectedQrMaterial.name, 
+                    uom: selectedQrMaterial.uom_name 
+                  })}
+                  size={200}
+                  level="M"
+                />
+              </Box>
+              <Typography variant="caption" sx={{ mt: 3, color: '#64748B' }}>
+                UOM: {selectedQrMaterial.uom_name}
+              </Typography>
+            </>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: 'center', pb: 3 }}>
+          <Button variant="outlined" onClick={() => setQrDialog(false)} sx={{ borderRadius: 2, fontWeight: 600 }}>
+            Close
+          </Button>
+          <Button 
+            variant="contained" 
+            startIcon={<Print />} 
+            onClick={handlePrintQr}
+            sx={{ borderRadius: 2, fontWeight: 700, boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)' }}
+          >
+            Print Label
           </Button>
         </DialogActions>
       </Dialog>

@@ -3,7 +3,7 @@ import {
   Box, Typography, Card, Grid, Table, TableHead, TableBody, TableRow,
   TableCell, TableContainer, Button, TextField, Dialog, DialogTitle,
   DialogContent, DialogActions, MenuItem, Select, FormControl, InputLabel,
-  IconButton, Chip, TableSortLabel
+  IconButton, Chip, TableSortLabel, useTheme, useMediaQuery
 } from '@mui/material';
 import { Add, Edit, Delete, Warehouse as WarehouseIcon, Business, VpnKey, LocationOn, Apartment, Search, Person } from '@mui/icons-material';
 import { InputAdornment } from '@mui/material';
@@ -16,6 +16,9 @@ export default function Warehouses() {
   const [search, setSearch] = useState('');
   const [form, setForm] = useState({});
   const [sortConfig, setSortConfig] = useState({ key: 'code', direction: 'asc' });
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const load = () => {
     api.get('/api/warehouses', { params: { search: search || undefined } }).then(r => setWarehouses(r.data));
@@ -89,48 +92,77 @@ export default function Warehouses() {
           InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }} />
       </Card>
 
-      <TableContainer component={Card} sx={{ borderRadius: '12px' }}>
-        <Table>
-          <TableHead sx={{ bgcolor: '#F8FAFC' }}>
-            <TableRow>
-              <TableCell sx={{ fontWeight: 600 }}>
-                <TableSortLabel active={sortConfig.key === 'code'} direction={sortConfig.direction} onClick={() => handleSort('code')}>CODE</TableSortLabel>
-              </TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>
-                <TableSortLabel active={sortConfig.key === 'name'} direction={sortConfig.direction} onClick={() => handleSort('name')}>STORE NAME</TableSortLabel>
-              </TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>
-                <TableSortLabel active={sortConfig.key === 'warehouse_type'} direction={sortConfig.direction} onClick={() => handleSort('warehouse_type')}>TYPE</TableSortLabel>
-              </TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>
-                <TableSortLabel active={sortConfig.key === 'location'} direction={sortConfig.direction} onClick={() => handleSort('location')}>LOCATION</TableSortLabel>
-              </TableCell>
-              <TableCell align="right" sx={{ fontWeight: 600 }}>ACTIONS</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {sortedWarehouses.map(w => (
-              <TableRow key={w.id} hover onClick={() => { setForm({ ...w, project_id: w.project_id || projects[0]?.id || '' }); setDialogOpen(true); }} sx={{ cursor: 'pointer' }}>
-                <TableCell sx={{ fontWeight: 700, color: '#2563EB', fontSize: '0.85rem' }}>{w.code}</TableCell>
-                <TableCell sx={{ fontWeight: 500 }}>{w.name}</TableCell>
-                <TableCell><Chip label={w.warehouse_type} size="small" color="primary" variant="outlined" /></TableCell>
-                <TableCell>{w.location}</TableCell>
-                <TableCell align="right" onClick={e => e.stopPropagation()}>
-                  <IconButton size="small" onClick={() => { setForm({ ...w, project_id: w.project_id || projects[0]?.id || '' }); setDialogOpen(true); }}><Edit fontSize="small" /></IconButton>
-                  <IconButton size="small" onClick={() => handleDelete(w.id)} color="error"><Delete fontSize="small" /></IconButton>
-                </TableCell>
-              </TableRow>
-            ))}
-            {warehouses.length === 0 && (
+      {isMobile ? (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+          {sortedWarehouses.length === 0 && (
+            <Typography variant="body2" align="center" sx={{ py: 4, color: '#94a3b8' }}>
+              No stores found.
+            </Typography>
+          )}
+          {sortedWarehouses.map(w => (
+            <Card key={w.id} variant="outlined" sx={{ p: 2, borderRadius: 2, cursor: 'pointer', '&:hover': { borderColor: '#2563EB' } }} onClick={() => { setForm({ ...w, project_id: w.project_id || projects[0]?.id || '' }); setDialogOpen(true); }}>
+               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, gap: 1, alignItems: 'flex-start' }}>
+                  <Box>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1E293B' }}>{w.name}</Typography>
+                    <Typography variant="caption" sx={{ fontWeight: 600, color: '#2563EB' }}>{w.code}</Typography>
+                  </Box>
+                  <Chip label={w.warehouse_type} size="small" color="primary" variant="outlined" sx={{ height: 20, fontSize: '0.65rem' }} />
+               </Box>
+               <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#334155' }}><strong>Location:</strong> {w.location || '-'}</Typography>
+               <Typography variant="caption" sx={{ display: 'block', mb: 1, color: '#334155' }}><strong>Manager:</strong> {w.manager_name || '-'}</Typography>
+               <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+                  <Box onClick={e => e.stopPropagation()}>
+                    <IconButton size="small" onClick={() => { setForm({ ...w, project_id: w.project_id || projects[0]?.id || '' }); setDialogOpen(true); }}><Edit fontSize="small" /></IconButton>
+                    <IconButton size="small" onClick={() => handleDelete(w.id)} color="error"><Delete fontSize="small" /></IconButton>
+                  </Box>
+               </Box>
+            </Card>
+          ))}
+        </Box>
+      ) : (
+        <TableContainer component={Card} sx={{ borderRadius: '12px' }}>
+          <Table>
+            <TableHead sx={{ bgcolor: '#F8FAFC' }}>
               <TableRow>
-                <TableCell colSpan={5} align="center" sx={{ py: 4, color: 'text.secondary' }}>No stores found.</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>
+                  <TableSortLabel active={sortConfig.key === 'code'} direction={sortConfig.direction} onClick={() => handleSort('code')}>CODE</TableSortLabel>
+                </TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>
+                  <TableSortLabel active={sortConfig.key === 'name'} direction={sortConfig.direction} onClick={() => handleSort('name')}>STORE NAME</TableSortLabel>
+                </TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>
+                  <TableSortLabel active={sortConfig.key === 'warehouse_type'} direction={sortConfig.direction} onClick={() => handleSort('warehouse_type')}>TYPE</TableSortLabel>
+                </TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>
+                  <TableSortLabel active={sortConfig.key === 'location'} direction={sortConfig.direction} onClick={() => handleSort('location')}>LOCATION</TableSortLabel>
+                </TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600 }}>ACTIONS</TableCell>
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {sortedWarehouses.map(w => (
+                <TableRow key={w.id} hover onClick={() => { setForm({ ...w, project_id: w.project_id || projects[0]?.id || '' }); setDialogOpen(true); }} sx={{ cursor: 'pointer' }}>
+                  <TableCell sx={{ fontWeight: 700, color: '#2563EB', fontSize: '0.85rem' }}>{w.code}</TableCell>
+                  <TableCell sx={{ fontWeight: 500 }}>{w.name}</TableCell>
+                  <TableCell><Chip label={w.warehouse_type} size="small" color="primary" variant="outlined" /></TableCell>
+                  <TableCell>{w.location}</TableCell>
+                  <TableCell align="right" onClick={e => e.stopPropagation()}>
+                    <IconButton size="small" onClick={() => { setForm({ ...w, project_id: w.project_id || projects[0]?.id || '' }); setDialogOpen(true); }}><Edit fontSize="small" /></IconButton>
+                    <IconButton size="small" onClick={() => handleDelete(w.id)} color="error"><Delete fontSize="small" /></IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {warehouses.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={5} align="center" sx={{ py: 4, color: 'text.secondary' }}>No stores found.</TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
 
-      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 3, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' } }}>
+      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth fullScreen={isMobile} PaperProps={{ sx: { borderRadius: isMobile ? 0 : 3, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' } }}>
         <DialogTitle sx={{ pb: 1, pt: 3, px: 4 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Box sx={{ p: 1, bgcolor: '#EFF6FF', borderRadius: 2, color: '#2563EB', display: 'flex' }}>

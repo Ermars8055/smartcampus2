@@ -5,7 +5,7 @@ import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
   DialogContent, DialogActions, Grid, IconButton, Tooltip, FormControl, InputLabel, Select, MenuItem,
-  Divider, InputAdornment, TableSortLabel
+  Divider, InputAdornment, TableSortLabel, useTheme, useMediaQuery
 } from '@mui/material';
 import { Add, Delete, CheckCircle, Cancel, ReceiptLong, ArrowBack, Search, Apartment, Layers, MeetingRoom, AccountTree, Notes } from '@mui/icons-material';
 import api from '../services/api';
@@ -22,6 +22,9 @@ export default function Indents() {
   const [showForm, setShowForm] = useState(false);
   const [detailDialog, setDetailDialog] = useState(null);
   const [search, setSearch] = useState('');
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   // Sorting state
   const [order, setOrder] = useState('desc');
@@ -398,77 +401,25 @@ export default function Indents() {
       </Card>
 
       <Card>
-        <TableContainer>
-          <Table size="small" sx={{ minWidth: '100%', tableLayout: 'auto' }}>
-            <TableHead>
-              <TableRow sx={{ '& th': { px: 0.5, py: 1, fontSize: '0.78rem', fontWeight: 700, whiteSpace: 'nowrap' } }}>
-                <TableCell>
-                  <TableSortLabel active={orderBy === 'indent_number'} direction={orderBy === 'indent_number' ? order : 'asc'} onClick={() => handleRequestSort('indent_number')}>
-                    Indent No.
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell>
-                  <TableSortLabel active={orderBy === 'building_name'} direction={orderBy === 'building_name' ? order : 'asc'} onClick={() => handleRequestSort('building_name')}>
-                    Bldg.
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell>
-                  <TableSortLabel active={orderBy === 'department'} direction={orderBy === 'department' ? order : 'asc'} onClick={() => handleRequestSort('department')}>
-                    Dept
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell>
-                  <TableSortLabel active={orderBy === 'floor'} direction={orderBy === 'floor' ? order : 'asc'} onClick={() => handleRequestSort('floor')}>
-                    Floor
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell>
-                  <TableSortLabel active={orderBy === 'room_name'} direction={orderBy === 'room_name' ? order : 'asc'} onClick={() => handleRequestSort('room_name')}>
-                    Room
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell>
-                  <TableSortLabel active={orderBy === 'requester_name'} direction={orderBy === 'requester_name' ? order : 'asc'} onClick={() => handleRequestSort('requester_name')}>
-                    Requester
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell>
-                  <TableSortLabel active={orderBy === 'created_at'} direction={orderBy === 'created_at' ? order : 'asc'} onClick={() => handleRequestSort('created_at')}>
-                    Date
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell align="center">Items</TableCell>
-                <TableCell>
-                  <TableSortLabel active={orderBy === 'status'} direction={orderBy === 'status' ? order : 'asc'} onClick={() => handleRequestSort('status')}>
-                    Status
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell align="center">Lvl</TableCell>
-                <TableCell>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {indents.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={11} align="center" sx={{ py: 6, color: '#94a3b8' }}>
-                    <Typography variant="body2">No indents raised yet. Click "New Indent" to create one.</Typography>
-                  </TableCell>
-                </TableRow>
-              )}
-              {sortedIndents.map(ind => (
-                <TableRow key={ind.id} sx={{ cursor: 'pointer', '&:hover': { bgcolor: '#f8fafc' }, '& td': { px: 0.5, py: 0.75 } }} onClick={() => setDetailDialog(ind)}>
-                  <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>{ind.indent_number}</TableCell>
-                  <TableCell sx={{ fontSize: '0.78rem' }}>{ind.building_name || '-'}</TableCell>
-                  <TableCell sx={{ fontSize: '0.78rem' }}>{ind.department || '-'}</TableCell>
-                  <TableCell sx={{ fontSize: '0.78rem' }}>{ind.floor || '-'}</TableCell>
-                  <TableCell sx={{ fontSize: '0.78rem' }}>{ind.room_name || '-'}</TableCell>
-                  <TableCell sx={{ fontSize: '0.78rem' }}>{ind.requester_name}</TableCell>
-                  <TableCell sx={{ fontSize: '0.78rem', whiteSpace: 'nowrap' }}>{formatDate(ind.created_at)}</TableCell>
-                  <TableCell align="center" sx={{ fontSize: '0.78rem' }}>{ind.items?.length || 0}</TableCell>
-                  <TableCell><Chip label={ind.status} size="small" color={statusColor[ind.status] || 'default'} sx={{ fontWeight: 600, fontSize: '0.65rem', height: 18 }} /></TableCell>
-                  <TableCell align="center"><Chip label={`L${ind.current_approval_level}`} size="small" variant="outlined" sx={{ height: 18, fontSize: '0.65rem' }} /></TableCell>
-                  <TableCell onClick={e => e.stopPropagation()} sx={{ whiteSpace: 'nowrap' }}>
-                    <Box sx={{ display: 'flex', gap: 0.5 }}>
+        {isMobile ? (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, p: 1.5 }}>
+            {indents.length === 0 && (
+              <Typography variant="body2" align="center" sx={{ py: 4, color: '#94a3b8' }}>
+                No indents raised yet. Click "New Indent" to create one.
+              </Typography>
+            )}
+            {sortedIndents.map(ind => (
+              <Card key={ind.id} variant="outlined" sx={{ p: 2, borderRadius: 2, cursor: 'pointer', '&:hover': { borderColor: '#2563EB' } }} onClick={() => setDetailDialog(ind)}>
+                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, gap: 1 }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#2563EB' }}>{ind.indent_number}</Typography>
+                    <Chip label={ind.status} size="small" color={statusColor[ind.status] || 'default'} sx={{ fontWeight: 600, fontSize: '0.65rem', height: 20 }} />
+                 </Box>
+                 <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#334155' }}><strong>Bldg:</strong> {ind.building_name || '-'} | <strong>Dept:</strong> {ind.department || '-'}</Typography>
+                 <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#334155' }}><strong>Requester:</strong> {ind.requester_name}</Typography>
+                 <Typography variant="caption" sx={{ display: 'block', mb: 1.5, color: '#64748B' }}>{formatDate(ind.created_at)} • {ind.items?.length || 0} items</Typography>
+                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Chip label={`L${ind.current_approval_level}`} size="small" variant="outlined" sx={{ height: 22, fontSize: '0.7rem' }} />
+                    <Box sx={{ display: 'flex', gap: 0.5 }} onClick={e => e.stopPropagation()}>
                       <Tooltip title="Approve">
                         <span><IconButton size="small" color="success" disabled={ind.status !== 'Awaiting Approval'}
                           onClick={() => showConfirm('Approve Indent?', `Are you sure you want to approve ${ind.indent_number}?`, 'Yes, Approve', 'success', () => approveIndent(ind.id))}>
@@ -488,16 +439,112 @@ export default function Indents() {
                         </IconButton></span>
                       </Tooltip>
                     </Box>
+                 </Box>
+              </Card>
+            ))}
+          </Box>
+        ) : (
+          <TableContainer>
+            <Table size="small" sx={{ minWidth: '100%', tableLayout: 'auto' }}>
+              <TableHead>
+                <TableRow sx={{ '& th': { px: 0.5, py: 1, fontSize: '0.78rem', fontWeight: 700, whiteSpace: 'nowrap' } }}>
+                  <TableCell>
+                    <TableSortLabel active={orderBy === 'indent_number'} direction={orderBy === 'indent_number' ? order : 'asc'} onClick={() => handleRequestSort('indent_number')}>
+                      Indent No.
+                    </TableSortLabel>
                   </TableCell>
+                  <TableCell>
+                    <TableSortLabel active={orderBy === 'building_name'} direction={orderBy === 'building_name' ? order : 'asc'} onClick={() => handleRequestSort('building_name')}>
+                      Bldg.
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell>
+                    <TableSortLabel active={orderBy === 'department'} direction={orderBy === 'department' ? order : 'asc'} onClick={() => handleRequestSort('department')}>
+                      Dept
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell>
+                    <TableSortLabel active={orderBy === 'floor'} direction={orderBy === 'floor' ? order : 'asc'} onClick={() => handleRequestSort('floor')}>
+                      Floor
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell>
+                    <TableSortLabel active={orderBy === 'room_name'} direction={orderBy === 'room_name' ? order : 'asc'} onClick={() => handleRequestSort('room_name')}>
+                      Room
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell>
+                    <TableSortLabel active={orderBy === 'requester_name'} direction={orderBy === 'requester_name' ? order : 'asc'} onClick={() => handleRequestSort('requester_name')}>
+                      Requester
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell>
+                    <TableSortLabel active={orderBy === 'created_at'} direction={orderBy === 'created_at' ? order : 'asc'} onClick={() => handleRequestSort('created_at')}>
+                      Date
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell align="center">Items</TableCell>
+                  <TableCell>
+                    <TableSortLabel active={orderBy === 'status'} direction={orderBy === 'status' ? order : 'asc'} onClick={() => handleRequestSort('status')}>
+                      Status
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell align="center">Lvl</TableCell>
+                  <TableCell>Actions</TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+              </TableHead>
+              <TableBody>
+                {indents.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={11} align="center" sx={{ py: 6, color: '#94a3b8' }}>
+                      <Typography variant="body2">No indents raised yet. Click "New Indent" to create one.</Typography>
+                    </TableCell>
+                  </TableRow>
+                )}
+                {sortedIndents.map(ind => (
+                  <TableRow key={ind.id} sx={{ cursor: 'pointer', '&:hover': { bgcolor: '#f8fafc' }, '& td': { px: 0.5, py: 0.75 } }} onClick={() => setDetailDialog(ind)}>
+                    <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>{ind.indent_number}</TableCell>
+                    <TableCell sx={{ fontSize: '0.78rem' }}>{ind.building_name || '-'}</TableCell>
+                    <TableCell sx={{ fontSize: '0.78rem' }}>{ind.department || '-'}</TableCell>
+                    <TableCell sx={{ fontSize: '0.78rem' }}>{ind.floor || '-'}</TableCell>
+                    <TableCell sx={{ fontSize: '0.78rem' }}>{ind.room_name || '-'}</TableCell>
+                    <TableCell sx={{ fontSize: '0.78rem' }}>{ind.requester_name}</TableCell>
+                    <TableCell sx={{ fontSize: '0.78rem', whiteSpace: 'nowrap' }}>{formatDate(ind.created_at)}</TableCell>
+                    <TableCell align="center" sx={{ fontSize: '0.78rem' }}>{ind.items?.length || 0}</TableCell>
+                    <TableCell><Chip label={ind.status} size="small" color={statusColor[ind.status] || 'default'} sx={{ fontWeight: 600, fontSize: '0.65rem', height: 18 }} /></TableCell>
+                    <TableCell align="center"><Chip label={`L${ind.current_approval_level}`} size="small" variant="outlined" sx={{ height: 18, fontSize: '0.65rem' }} /></TableCell>
+                    <TableCell onClick={e => e.stopPropagation()} sx={{ whiteSpace: 'nowrap' }}>
+                      <Box sx={{ display: 'flex', gap: 0.5 }}>
+                        <Tooltip title="Approve">
+                          <span><IconButton size="small" color="success" disabled={ind.status !== 'Awaiting Approval'}
+                            onClick={() => showConfirm('Approve Indent?', `Are you sure you want to approve ${ind.indent_number}?`, 'Yes, Approve', 'success', () => approveIndent(ind.id))}>
+                            <CheckCircle fontSize="small" />
+                          </IconButton></span>
+                        </Tooltip>
+                        <Tooltip title="Reject">
+                          <span><IconButton size="small" color="error" disabled={ind.status !== 'Awaiting Approval'}
+                            onClick={() => showConfirm('Reject Indent?', `Are you sure you want to reject ${ind.indent_number}?`, 'Yes, Reject', 'error', () => rejectIndent(ind.id))}>
+                            <Cancel fontSize="small" />
+                          </IconButton></span>
+                        </Tooltip>
+                        <Tooltip title="Convert to PO">
+                          <span><IconButton size="small" color="primary" disabled={ind.status !== 'Approved' && ind.status !== 'Partially Issued'}
+                            onClick={() => setVendorDialog({ open: true, indent: ind, vendor_id: '' })}>
+                            <ReceiptLong fontSize="small" />
+                          </IconButton></span>
+                        </Tooltip>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
       </Card>
 
       {/* Indent Detail Dialog */}
-      <Dialog open={!!detailDialog} onClose={() => setDetailDialog(null)} maxWidth="md" fullWidth>
+      <Dialog open={!!detailDialog} onClose={() => setDetailDialog(null)} maxWidth="md" fullWidth fullScreen={isMobile}>
         <DialogTitle sx={{ fontWeight: 600 }}>{detailDialog?.indent_number} — Indent Details</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mb: 2, mt: 0.5 }}>
@@ -578,7 +625,7 @@ export default function Indents() {
       </Dialog>
 
       {/* Vendor Selection Dialog for PO Conversion */}
-      <Dialog open={vendorDialog.open} onClose={() => setVendorDialog({ ...vendorDialog, open: false })} maxWidth="md" fullWidth>
+      <Dialog open={vendorDialog.open} onClose={() => setVendorDialog({ ...vendorDialog, open: false })} maxWidth="md" fullWidth fullScreen={isMobile}>
         <DialogTitle sx={{ fontWeight: 600 }}>Convert {vendorDialog.indent?.indent_number} to Purchase Order</DialogTitle>
         <DialogContent sx={{ py: 1 }}>
           <Box sx={{ mb: 1.5, mt: 0.5, p: 1.5, bgcolor: '#f0f4ff', borderRadius: 2, border: '1px solid #dbeafe' }}>

@@ -22,6 +22,7 @@ export default function StoreOperations() {
   const [stocks, setStocks] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [gatePasses, setGatePasses] = useState([]);
+  const [previewGatePass, setPreviewGatePass] = useState(null);
 
   // Modal states
   const [issueModal, setIssueModal] = useState({ open: false, indent: null, items: [] });
@@ -272,57 +273,88 @@ export default function StoreOperations() {
     } catch (err) { alert(err.response?.data?.detail || 'Error'); }
   };
 
-  const printGatePass = (gp) => {
-    const printWindow = window.open('', '_blank');
-    const html = `
+  const generateGatePassHTML = (gp) => {
+    return `
+      <!DOCTYPE html>
       <html>
         <head>
           <title>Gate Pass - ${gp.gate_pass_number}</title>
           <style>
-            body { font-family: Arial, sans-serif; font-size: 14px; margin: 40px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-            th, td { border: 1px solid #000; padding: 10px; text-align: left; }
-            h2 { text-align: center; }
-            .signatures { display: flex; justify-content: space-between; margin-top: 80px; }
+            body { font-family: 'Inter', Arial, sans-serif; font-size: 14px; margin: 0; padding: 40px; color: #000; line-height: 1.4; }
+            .header-container { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 15px; }
+            .hospital-name { font-size: 26px; font-weight: 800; letter-spacing: 1px; margin: 0; }
+            .title-section { text-align: right; }
+            .doc-title { font-size: 20px; font-weight: bold; margin: 0 0 10px 0; }
+            .meta-grid { display: flex; justify-content: space-between; margin-bottom: 20px; line-height: 1.8; }
+            .meta-column { width: 48%; }
+            .meta-label { font-weight: bold; margin-right: 10px; min-width: 90px; display: inline-block; }
+            .address-box { border: 1px solid #ccc; padding: 12px; min-height: 80px; margin-top: 5px; border-radius: 4px; line-height: 1.5; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; margin-bottom: 50px; }
+            th, td { border: 1px solid #000; padding: 12px 10px; text-align: left; }
+            th { background-color: #f8f8f8; font-weight: bold; }
+            .signatures { display: flex; justify-content: space-between; margin-top: 100px; }
+            .sig-block { text-align: center; font-weight: bold; width: 30%; border-top: 1px solid #000; padding-top: 10px; }
           </style>
         </head>
-        <body onload="window.print(); window.close();">
-          <h2>OUTWARD GATE PASS</h2>
-          <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+        <body>
+          <div class="header-container">
             <div>
-              <p><strong>To:</strong><br/>
-                 ${gp.vendor_name || 'Vendor'}<br/>
-                 ${gp.vendor_address ? gp.vendor_address : ''}
-              </p>
+              <h1 class="hospital-name">SMART CAMPUS</h1>
+              <div style="font-size: 13px; margin-top: 4px; color: #555;">Store Operations Division</div>
             </div>
-            <div style="text-align: right;">
-              <p><strong>Gate Pass No:</strong> ${gp.gate_pass_number}</p>
-              <p><strong>Date:</strong> ${formatDate(gp.created_at)}</p>
-              <p><strong>Reference Return No:</strong> ${gp.reference_return_number || 'N/A'}</p>
-              <p><strong>Purpose:</strong> Sent for Repair</p>
+            <div class="title-section">
+              <h2 class="doc-title">Non / Returnable Gate Pass</h2>
+              <div style="font-size: 15px;"><span class="meta-label" style="min-width: 50px;">No:</span> <strong>${gp.gate_pass_number}</strong></div>
+              <div style="font-size: 15px;"><span class="meta-label" style="min-width: 50px;">Date:</span> ${formatDate(gp.created_at)}</div>
+            </div>
+          </div>
+          
+          <div class="meta-grid">
+            <div class="meta-column">
+              <div><span class="meta-label">From Dept:</span> Central Store</div>
+              <div style="margin-top: 15px;"><span class="meta-label">To:</span></div>
+              <div class="address-box">
+                 <strong>${gp.vendor_name || 'Vendor'}</strong><br/>
+                 ${gp.vendor_address ? gp.vendor_address : 'Address not provided'}
+              </div>
+            </div>
+            <div class="meta-column" style="text-align: right;">
+              <div><span class="meta-label" style="min-width: auto; margin-right: 5px;">Ref Return No:</span> ${gp.reference_return_number || 'N/A'}</div>
+              <div><span class="meta-label" style="min-width: auto; margin-right: 5px;">Purpose:</span> Sent for Repair</div>
             </div>
           </div>
           
           <table>
-            <tr>
-              <th>Material</th>
-              <th>Quantity</th>
-            </tr>
-            <tr>
-              <td>${gp.material_name}</td>
-              <td>${gp.quantity}</td>
-            </tr>
+            <thead>
+              <tr>
+                <th style="width: 8%; text-align: center;">Sl. No.</th>
+                <th style="width: 45%;">Item / Description</th>
+                <th style="width: 17%; text-align: center;">Qty.</th>
+                <th style="width: 30%;">Remarks</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="text-align: center;">1</td>
+                <td><strong>${gp.material_name}</strong></td>
+                <td style="text-align: center;">${gp.quantity}</td>
+                <td></td>
+              </tr>
+            </tbody>
           </table>
           
           <div class="signatures">
-            <div>Authorized Signatory</div>
-            <div>Security Check</div>
+            <div class="sig-block">Receiver's Sign.</div>
+            <div class="sig-block">Issue Sign. Stores</div>
+            <div class="sig-block">Authorised Sign. MD / MS</div>
           </div>
         </body>
       </html>
     `;
-    printWindow.document.write(html);
-    printWindow.document.close();
+  };
+
+  const printGatePass = (gp) => {
+    setPreviewGatePass(gp);
   };
 
   const pendingIndents = indents.filter(ind => ind.status === 'Approved' || ind.status === 'Partially Issued');
@@ -1228,6 +1260,46 @@ export default function StoreOperations() {
             sx={{ borderRadius: 2, px: 4, py: 1, fontWeight: 700, bgcolor: '#2563EB', '&:hover': { bgcolor: '#1D4ED8' }, textTransform: 'none' }}
           >
             Complete Transfer
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={!!previewGatePass} onClose={() => setPreviewGatePass(null)} maxWidth="md" fullWidth>
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          Gate Pass Preview
+          <IconButton onClick={() => setPreviewGatePass(null)} size="small"><Close /></IconButton>
+        </DialogTitle>
+        <DialogContent dividers sx={{ p: 0, height: '70vh' }}>
+          {previewGatePass && (
+            <iframe 
+              srcDoc={generateGatePassHTML(previewGatePass)} 
+              style={{ width: '100%', height: '100%', border: 'none' }} 
+              title="Gate Pass Preview"
+            />
+          )}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, py: 2 }}>
+          <Button onClick={() => setPreviewGatePass(null)} color="inherit" sx={{ fontWeight: 600 }}>Cancel</Button>
+          <Button 
+            variant="contained" 
+            startIcon={<Print />}
+            onClick={() => {
+              const iframe = document.createElement('iframe');
+              iframe.style.display = 'none';
+              document.body.appendChild(iframe);
+              iframe.contentDocument.write(generateGatePassHTML(previewGatePass));
+              iframe.contentDocument.close();
+              setTimeout(() => {
+                iframe.contentWindow.focus();
+                iframe.contentWindow.print();
+                setTimeout(() => {
+                  document.body.removeChild(iframe);
+                }, 1000);
+              }, 200);
+            }}
+            sx={{ fontWeight: 700, px: 4, bgcolor: '#2563EB', '&:hover': { bgcolor: '#1D4ED8' } }}
+          >
+            Print Gate Pass
           </Button>
         </DialogActions>
       </Dialog>

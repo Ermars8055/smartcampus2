@@ -4,7 +4,7 @@ import {
   Box, Grid, Card, CardContent, Typography, Chip, Avatar,
   Table, TableHead, TableBody, TableRow, TableCell, TableContainer,
   Paper, Skeleton, IconButton, Tooltip, Dialog, DialogTitle, DialogContent,
-  DialogActions, Button, FormControl, Select, MenuItem
+  DialogActions, Button, FormControl, Select, MenuItem, useTheme, useMediaQuery
 } from '@mui/material';
 import {
   Inventory2, TrendingDown, ShoppingCart, LocalShipping,
@@ -112,6 +112,9 @@ export default function Dashboard() {
   const [trend, setTrend] = useState([]);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState('all');
+  
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   
   // Drilldown state
   const [drilldownBlock, setDrilldownBlock] = useState(null);
@@ -253,7 +256,7 @@ export default function Dashboard() {
               <Typography variant="caption" sx={{ color: '#64748B', fontStyle: 'italic' }}>*Click on any bar to drilldown</Typography>
             </Box>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={consumption} margin={{ top: 20, right: 10, bottom: 40, left: 10 }} onClick={handleBlockClick}>
+              <BarChart data={consumption} margin={{ top: 20, right: isMobile ? 0 : 10, bottom: isMobile ? 60 : 40, left: isMobile ? -20 : 10 }} onClick={handleBlockClick}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
                 <XAxis 
                   dataKey="building_name" 
@@ -274,36 +277,58 @@ export default function Dashboard() {
           </Card>
         </Grid>
         <Grid item xs={12} lg={4}>
-          <Card sx={{ p: 2.5, height: '100%' }}>
+          <Card sx={{ p: 2.5, height: '100%', display: 'flex', flexDirection: 'column' }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, color: '#1E293B' }}>
               Stock by Store
             </Typography>
-            <ResponsiveContainer width="100%" height={320}>
-              <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
-                <Pie 
-                  data={stockByWh} 
-                  cx="50%" 
-                  cy="45%" 
-                  innerRadius={70} 
-                  outerRadius={100}
-                  dataKey="total_value" 
-                  nameKey="warehouse_name" 
-                  paddingAngle={5}
-                >
-                  {stockByWh.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                </Pie>
-                <RTooltip 
-                  formatter={(v) => [`₹${v.toLocaleString('en-IN')}`, 'Value']}
-                  contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} 
-                />
-                <Legend 
-                  verticalAlign="bottom" 
-                  align="center" 
-                  iconType="circle" 
-                  wrapperStyle={{ paddingTop: '20px', fontSize: 11, fontWeight: 600, color: '#64748B' }} 
-                />
-              </PieChart>
-            </ResponsiveContainer>
+            <Box sx={{ flex: 1, minHeight: 0 }}>
+              <ResponsiveContainer width="100%" height={350}>
+                <PieChart margin={{ top: 10, right: 0, bottom: 0, left: 0 }}>
+                  <Pie 
+                    data={stockByWh} 
+                    cx="50%" 
+                    cy="42%" 
+                    innerRadius={60} 
+                    outerRadius={85}
+                    dataKey="total_value" 
+                    nameKey="warehouse_name" 
+                    paddingAngle={5}
+                  >
+                    {stockByWh.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                  </Pie>
+                  <RTooltip 
+                    formatter={(v) => [`₹${v.toLocaleString('en-IN')}`, 'Value']}
+                    contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} 
+                  />
+                  <Legend 
+                    verticalAlign="bottom"
+                    content={(props) => {
+                      const { payload } = props;
+                      return (
+                        <Box sx={{ 
+                          maxHeight: '130px', 
+                          overflowY: 'auto', 
+                          display: 'flex', 
+                          flexWrap: 'wrap', 
+                          gap: 0.5, 
+                          justifyContent: 'center',
+                          mt: -2,
+                          '&::-webkit-scrollbar': { width: '4px' },
+                          '&::-webkit-scrollbar-thumb': { backgroundColor: '#CBD5E1', borderRadius: '4px' }
+                        }}>
+                          {payload.map((entry, index) => (
+                            <Box key={`item-${index}`} sx={{ display: 'flex', alignItems: 'center', fontSize: 10, fontWeight: 600, color: '#64748B', px: 0.5 }}>
+                              <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: entry.color, mr: 0.5 }} />
+                              {entry.value}
+                            </Box>
+                          ))}
+                        </Box>
+                      );
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </Box>
           </Card>
         </Grid>
       </Grid>
@@ -360,39 +385,61 @@ export default function Dashboard() {
               <Chip label="View All" size="small" onClick={() => navigate('/inventory')}
                 sx={{ cursor: 'pointer' }} />
             </Box>
-            <TableContainer>
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Material</TableCell>
-                    <TableCell>Type</TableCell>
-                    <TableCell align="right">Qty</TableCell>
-                    <TableCell>Store</TableCell>
-                    <TableCell>Reference</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {recentTx.slice(0, 8).map((tx) => (
-                    <TableRow key={tx.id}>
-                      <TableCell sx={{ fontSize: '0.8rem' }}>{tx.material_name}</TableCell>
-                      <TableCell>
-                        <Chip label={tx.transaction_type} size="small"
-                          color={tx.quantity > 0 ? 'success' : 'error'}
-                          variant="outlined" sx={{ fontSize: '0.7rem' }} />
-                      </TableCell>
-                      <TableCell align="right" sx={{
-                        fontWeight: 600, fontSize: '0.8rem',
-                        color: tx.quantity > 0 ? '#059669' : '#DC2626'
-                      }}>
+            {isMobile ? (
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                {recentTx.slice(0, 8).map(tx => (
+                  <Card key={tx.id} variant="outlined" sx={{ p: 1.5, borderRadius: 2 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, gap: 1 }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600, lineHeight: 1.2 }}>{tx.material_name}</Typography>
+                      <Chip label={tx.transaction_type} size="small" color={tx.quantity > 0 ? 'success' : 'error'} variant="outlined" sx={{ fontSize: '0.65rem', height: 20 }} />
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                      <Box>
+                        <Typography variant="caption" sx={{ display: 'block', color: '#64748B' }}>Store: {tx.warehouse_name}</Typography>
+                        <Typography variant="caption" sx={{ display: 'block', color: '#64748B' }}>Ref: {tx.reference_number}</Typography>
+                      </Box>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: tx.quantity > 0 ? '#059669' : '#DC2626' }}>
                         {tx.quantity > 0 ? '+' : ''}{tx.quantity}
-                      </TableCell>
-                      <TableCell sx={{ fontSize: '0.8rem' }}>{tx.warehouse_name}</TableCell>
-                      <TableCell sx={{ fontSize: '0.75rem', color: '#64748B' }}>{tx.reference_number}</TableCell>
+                      </Typography>
+                    </Box>
+                  </Card>
+                ))}
+              </Box>
+            ) : (
+              <TableContainer>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Material</TableCell>
+                      <TableCell>Type</TableCell>
+                      <TableCell align="right">Qty</TableCell>
+                      <TableCell>Store</TableCell>
+                      <TableCell>Reference</TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                  </TableHead>
+                  <TableBody>
+                    {recentTx.slice(0, 8).map((tx) => (
+                      <TableRow key={tx.id}>
+                        <TableCell sx={{ fontSize: '0.8rem' }}>{tx.material_name}</TableCell>
+                        <TableCell>
+                          <Chip label={tx.transaction_type} size="small"
+                            color={tx.quantity > 0 ? 'success' : 'error'}
+                            variant="outlined" sx={{ fontSize: '0.7rem' }} />
+                        </TableCell>
+                        <TableCell align="right" sx={{
+                          fontWeight: 600, fontSize: '0.8rem',
+                          color: tx.quantity > 0 ? '#059669' : '#DC2626'
+                        }}>
+                          {tx.quantity > 0 ? '+' : ''}{tx.quantity}
+                        </TableCell>
+                        <TableCell sx={{ fontSize: '0.8rem' }}>{tx.warehouse_name}</TableCell>
+                        <TableCell sx={{ fontSize: '0.75rem', color: '#64748B' }}>{tx.reference_number}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )}
           </Card>
         </Grid>
         <Grid item xs={12} md={5}>

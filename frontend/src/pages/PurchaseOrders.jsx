@@ -4,8 +4,8 @@ import { useMessage } from '../context/MessageContext';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
-  DialogContent, DialogActions, Grid, MenuItem, Select, FormControl,
-  InputLabel, IconButton, Tooltip, Divider, InputAdornment, Paper, TableSortLabel
+  InputLabel, IconButton, Tooltip, Divider, InputAdornment, Paper, TableSortLabel, useTheme, useMediaQuery,
+  DialogContent, DialogActions, Grid, MenuItem, Select, FormControl
 } from '@mui/material';
 import { Add, Delete, CheckCircle, Archive, Send, Cancel, Pause, Search, ShoppingCart, Store, Assignment, CalendarMonth, ArrowDropDown } from '@mui/icons-material';
 import api from '../services/api';
@@ -31,6 +31,9 @@ export default function PurchaseOrders() {
     vendor_id: '', project_id: '', delivery_date: dayjs().add(14, 'day'), terms: '', po_type: 'Informal', items: [{ material_id: '', quantity: '', rate: '' }]
   });
   const [sortConfig, setSortConfig] = useState({ key: 'created_at', direction: 'desc' });
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const handleSort = (key) => {
     setSortConfig(prev => ({
@@ -360,122 +363,25 @@ export default function PurchaseOrders() {
       </Card>
 
       <Card>
-        <TableContainer>
-          <Table size="small" sx={{ '& .MuiTableCell-root': { px: 0.5, py: 0.5, borderBottom: '1px solid #f1f5f9' } }}>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
-                <TableCell sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
-                  <TableSortLabel
-                    active={sortConfig.key === 'po_number'}
-                    direction={sortConfig.direction}
-                    onClick={() => handleSort('po_number')}
-                    IconComponent={ArrowDropDown}
-                    sx={{ '& .MuiTableSortLabel-icon': { fontSize: '1rem' } }}
-                  >
-                    PO No
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
-                  <TableSortLabel
-                    active={sortConfig.key === 'indent_number'}
-                    direction={sortConfig.direction}
-                    onClick={() => handleSort('indent_number')}
-                    IconComponent={ArrowDropDown}
-                    sx={{ '& .MuiTableSortLabel-icon': { fontSize: '1rem' } }}
-                  >
-                    INDENT
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
-                  <TableSortLabel
-                    active={sortConfig.key === 'pr_number'}
-                    direction={sortConfig.direction}
-                    onClick={() => handleSort('pr_number')}
-                    IconComponent={ArrowDropDown}
-                    sx={{ '& .MuiTableSortLabel-icon': { fontSize: '1rem' } }}
-                  >
-                    PR
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
-                  <TableSortLabel
-                    active={sortConfig.key === 'qr_number'}
-                    direction={sortConfig.direction}
-                    onClick={() => handleSort('qr_number')}
-                    IconComponent={ArrowDropDown}
-                    sx={{ '& .MuiTableSortLabel-icon': { fontSize: '1rem' } }}
-                  >
-                    QUOTATION
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.65rem' }}>
-                  <TableSortLabel
-                    active={sortConfig.key === 'vendor'}
-                    direction={sortConfig.direction}
-                    onClick={() => handleSort('vendor')}
-                    IconComponent={ArrowDropDown}
-                    sx={{ '& .MuiTableSortLabel-icon': { fontSize: '1rem' } }}
-                  >
-                    VENDOR
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell align="right" sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.65rem' }}>ITEMS</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.65rem' }}>
-                   <TableSortLabel
-                    active={sortConfig.key === 'total_amount'}
-                    direction={sortConfig.direction}
-                    onClick={() => handleSort('total_amount')}
-                    IconComponent={ArrowDropDown}
-                    sx={{ '& .MuiTableSortLabel-icon': { fontSize: '1rem' } }}
-                  >
-                    AMOUNT
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.65rem' }}>TYPE</TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
-                  <TableSortLabel
-                    active={sortConfig.key === 'created_at'}
-                    direction={sortConfig.direction}
-                    onClick={() => handleSort('created_at')}
-                    IconComponent={ArrowDropDown}
-                    sx={{ '& .MuiTableSortLabel-icon': { fontSize: '1rem' } }}
-                  >
-                    DATE
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>DELIVERY</TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.65rem' }}>
-                  <TableSortLabel
-                    active={sortConfig.key === 'status'}
-                    direction={sortConfig.direction}
-                    onClick={() => handleSort('status')}
-                    IconComponent={ArrowDropDown}
-                    sx={{ '& .MuiTableSortLabel-icon': { fontSize: '1rem' } }}
-                  >
-                    STATUS
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.65rem' }}>ACTIONS</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {sortedPOs.map(po => (
-                <TableRow key={po.id} sx={{ cursor: 'pointer', '&:hover': { backgroundColor: '#f1f5f9' } }} onClick={() => setDetailDialog(po)}>
-                  <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.7rem', whiteSpace: 'nowrap' }}>{po.po_number}</TableCell>
-                  <TableCell sx={{ fontSize: '0.7rem', color: '#64748B', whiteSpace: 'nowrap' }}>{po.indent_number || '-'}</TableCell>
-                  <TableCell sx={{ fontSize: '0.7rem', color: '#64748B', whiteSpace: 'nowrap' }}>{po.pr_number || '-'}</TableCell>
-                  <TableCell sx={{ fontSize: '0.7rem', color: '#64748B', whiteSpace: 'nowrap' }}>{po.qr_number || '-'}</TableCell>
-                  <TableCell sx={{ fontSize: '0.7rem' }}>{po.vendor_name}</TableCell>
-                  <TableCell align="right" sx={{ fontSize: '0.7rem' }}>{po.items?.length || 0}</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.7rem' }}>{formatCurrency(po.total_amount)}</TableCell>
-                  <TableCell sx={{ fontSize: '0.7rem' }}>
-                    <Chip label={po.po_type} size="small" variant="outlined" color={po.po_type === 'Formal' ? 'primary' : 'default'} sx={{ fontSize: '0.6rem', height: 18 }} />
-                  </TableCell>
-                  <TableCell sx={{ fontSize: '0.7rem', whiteSpace: 'nowrap' }}>{formatDate(po.created_at)}</TableCell>
-                  <TableCell sx={{ fontSize: '0.7rem', whiteSpace: 'nowrap' }}>{formatDate(po.delivery_date)}</TableCell>
-                  <TableCell sx={{ whiteSpace: 'nowrap' }}><Chip label={po.status} size="small" color={statusColor[po.status] || 'default'} sx={{ fontWeight: 600, fontSize: '0.6rem', height: 18 }} /></TableCell>
-                  <TableCell onClick={e => e.stopPropagation()}>
-                    <Box sx={{ display: 'flex', gap: 0.5 }}>
+        {isMobile ? (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, p: 1.5 }}>
+            {sortedPOs.length === 0 && (
+              <Typography variant="body2" align="center" sx={{ py: 4, color: '#94a3b8' }}>
+                No purchase orders found.
+              </Typography>
+            )}
+            {sortedPOs.map(po => (
+              <Card key={po.id} variant="outlined" sx={{ p: 2, borderRadius: 2, cursor: 'pointer', '&:hover': { borderColor: '#2563EB' } }} onClick={() => setDetailDialog(po)}>
+                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, gap: 1 }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#2563EB' }}>{po.po_number}</Typography>
+                    <Chip label={po.status} size="small" color={statusColor[po.status] || 'default'} sx={{ fontWeight: 600, fontSize: '0.65rem', height: 20 }} />
+                 </Box>
+                 <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#334155' }}><strong>Vendor:</strong> {po.vendor_name}</Typography>
+                 <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#334155' }}><strong>Amount:</strong> <span style={{ color: '#059669', fontWeight: 600 }}>{formatCurrency(po.total_amount)}</span></Typography>
+                 <Typography variant="caption" sx={{ display: 'block', mb: 1.5, color: '#64748B' }}>{formatDate(po.created_at)} • {po.items?.length || 0} items</Typography>
+                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Chip label={po.po_type} size="small" variant="outlined" color={po.po_type === 'Formal' ? 'primary' : 'default'} sx={{ height: 22, fontSize: '0.7rem' }} />
+                    <Box sx={{ display: 'flex', gap: 0.5 }} onClick={e => e.stopPropagation()}>
                       <Tooltip title="Approve">
                         <span><IconButton size="small" color="success" disabled={!canApprove(po.status)}
                           onClick={() => showConfirm('Approve PO?', `Are you sure you want to approve ${po.po_number}?`, 'Yes, Approve', 'success', () => approvePO(po.id))}>
@@ -500,23 +406,170 @@ export default function PurchaseOrders() {
                           <Send fontSize="small" />
                         </IconButton></span>
                       </Tooltip>
-                      <Tooltip title="Short Close">
-                        <span><IconButton size="small" color="warning" disabled={!canShortClose(po.status)}
-                          onClick={() => showConfirm('Short Close PO?', `Short close ${po.po_number}?`, 'Yes, Short Close', 'warning', (r) => shortClosePO(po.id, r), true)}>
-                          <Archive fontSize="small" />
-                        </IconButton></span>
-                      </Tooltip>
                     </Box>
+                 </Box>
+              </Card>
+            ))}
+          </Box>
+        ) : (
+          <TableContainer>
+            <Table size="small" sx={{ '& .MuiTableCell-root': { px: 0.5, py: 0.5, borderBottom: '1px solid #f1f5f9' } }}>
+              <TableHead>
+                <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
+                  <TableCell sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
+                    <TableSortLabel
+                      active={sortConfig.key === 'po_number'}
+                      direction={sortConfig.direction}
+                      onClick={() => handleSort('po_number')}
+                      IconComponent={ArrowDropDown}
+                      sx={{ '& .MuiTableSortLabel-icon': { fontSize: '1rem' } }}
+                    >
+                      PO No
+                    </TableSortLabel>
                   </TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
+                    <TableSortLabel
+                      active={sortConfig.key === 'indent_number'}
+                      direction={sortConfig.direction}
+                      onClick={() => handleSort('indent_number')}
+                      IconComponent={ArrowDropDown}
+                      sx={{ '& .MuiTableSortLabel-icon': { fontSize: '1rem' } }}
+                    >
+                      INDENT
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
+                    <TableSortLabel
+                      active={sortConfig.key === 'pr_number'}
+                      direction={sortConfig.direction}
+                      onClick={() => handleSort('pr_number')}
+                      IconComponent={ArrowDropDown}
+                      sx={{ '& .MuiTableSortLabel-icon': { fontSize: '1rem' } }}
+                    >
+                      PR
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
+                    <TableSortLabel
+                      active={sortConfig.key === 'qr_number'}
+                      direction={sortConfig.direction}
+                      onClick={() => handleSort('qr_number')}
+                      IconComponent={ArrowDropDown}
+                      sx={{ '& .MuiTableSortLabel-icon': { fontSize: '1rem' } }}
+                    >
+                      QUOTATION
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.65rem' }}>
+                    <TableSortLabel
+                      active={sortConfig.key === 'vendor'}
+                      direction={sortConfig.direction}
+                      onClick={() => handleSort('vendor')}
+                      IconComponent={ArrowDropDown}
+                      sx={{ '& .MuiTableSortLabel-icon': { fontSize: '1rem' } }}
+                    >
+                      VENDOR
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.65rem' }}>ITEMS</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.65rem' }}>
+                     <TableSortLabel
+                      active={sortConfig.key === 'total_amount'}
+                      direction={sortConfig.direction}
+                      onClick={() => handleSort('total_amount')}
+                      IconComponent={ArrowDropDown}
+                      sx={{ '& .MuiTableSortLabel-icon': { fontSize: '1rem' } }}
+                    >
+                      AMOUNT
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.65rem' }}>TYPE</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
+                    <TableSortLabel
+                      active={sortConfig.key === 'created_at'}
+                      direction={sortConfig.direction}
+                      onClick={() => handleSort('created_at')}
+                      IconComponent={ArrowDropDown}
+                      sx={{ '& .MuiTableSortLabel-icon': { fontSize: '1rem' } }}
+                    >
+                      DATE
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>DELIVERY</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.65rem' }}>
+                    <TableSortLabel
+                      active={sortConfig.key === 'status'}
+                      direction={sortConfig.direction}
+                      onClick={() => handleSort('status')}
+                      IconComponent={ArrowDropDown}
+                      sx={{ '& .MuiTableSortLabel-icon': { fontSize: '1rem' } }}
+                    >
+                      STATUS
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.65rem' }}>ACTIONS</TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+              </TableHead>
+              <TableBody>
+                {sortedPOs.map(po => (
+                  <TableRow key={po.id} sx={{ cursor: 'pointer', '&:hover': { backgroundColor: '#f1f5f9' } }} onClick={() => setDetailDialog(po)}>
+                    <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.7rem', whiteSpace: 'nowrap' }}>{po.po_number}</TableCell>
+                    <TableCell sx={{ fontSize: '0.7rem', color: '#64748B', whiteSpace: 'nowrap' }}>{po.indent_number || '-'}</TableCell>
+                    <TableCell sx={{ fontSize: '0.7rem', color: '#64748B', whiteSpace: 'nowrap' }}>{po.pr_number || '-'}</TableCell>
+                    <TableCell sx={{ fontSize: '0.7rem', color: '#64748B', whiteSpace: 'nowrap' }}>{po.qr_number || '-'}</TableCell>
+                    <TableCell sx={{ fontSize: '0.7rem' }}>{po.vendor_name}</TableCell>
+                    <TableCell align="right" sx={{ fontSize: '0.7rem' }}>{po.items?.length || 0}</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.7rem' }}>{formatCurrency(po.total_amount)}</TableCell>
+                    <TableCell sx={{ fontSize: '0.7rem' }}>
+                      <Chip label={po.po_type} size="small" variant="outlined" color={po.po_type === 'Formal' ? 'primary' : 'default'} sx={{ fontSize: '0.6rem', height: 18 }} />
+                    </TableCell>
+                    <TableCell sx={{ fontSize: '0.7rem', whiteSpace: 'nowrap' }}>{formatDate(po.created_at)}</TableCell>
+                    <TableCell sx={{ fontSize: '0.7rem', whiteSpace: 'nowrap' }}>{formatDate(po.delivery_date)}</TableCell>
+                    <TableCell sx={{ whiteSpace: 'nowrap' }}><Chip label={po.status} size="small" color={statusColor[po.status] || 'default'} sx={{ fontWeight: 600, fontSize: '0.6rem', height: 18 }} /></TableCell>
+                    <TableCell onClick={e => e.stopPropagation()}>
+                      <Box sx={{ display: 'flex', gap: 0.5 }}>
+                        <Tooltip title="Approve">
+                          <span><IconButton size="small" color="success" disabled={!canApprove(po.status)}
+                            onClick={() => showConfirm('Approve PO?', `Are you sure you want to approve ${po.po_number}?`, 'Yes, Approve', 'success', () => approvePO(po.id))}>
+                            <CheckCircle fontSize="small" />
+                          </IconButton></span>
+                        </Tooltip>
+                        <Tooltip title="Reject">
+                          <span><IconButton size="small" color="error" disabled={!canReject(po.status)}
+                            onClick={() => showConfirm('Reject PO?', `Are you sure you want to reject ${po.po_number}? This action cannot be undone.`, 'Yes, Reject', 'error', (r) => rejectPO(po.id, r), true)}>
+                            <Cancel fontSize="small" />
+                          </IconButton></span>
+                        </Tooltip>
+                        <Tooltip title="Put on Hold">
+                          <span><IconButton size="small" color="secondary" disabled={!canHold(po.status)}
+                            onClick={() => showConfirm('Hold PO?', `Place ${po.po_number} on hold?`, 'Yes, Hold', 'warning', () => holdPO(po.id))}>
+                            <Pause fontSize="small" />
+                          </IconButton></span>
+                        </Tooltip>
+                        <Tooltip title="Send to Vendor">
+                          <span><IconButton size="small" color="primary" disabled={!canSend(po.status)}
+                            onClick={() => showConfirm('Send to Vendor?', `Send ${po.po_number} to vendor?`, 'Yes, Send', 'primary', () => sendPO(po.id), false, po)}>
+                            <Send fontSize="small" />
+                          </IconButton></span>
+                        </Tooltip>
+                        <Tooltip title="Short Close">
+                          <span><IconButton size="small" color="warning" disabled={!canShortClose(po.status)}
+                            onClick={() => showConfirm('Short Close PO?', `Short close ${po.po_number}?`, 'Yes, Short Close', 'warning', (r) => shortClosePO(po.id, r), true)}>
+                            <Archive fontSize="small" />
+                          </IconButton></span>
+                        </Tooltip>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
       </Card>
 
       {/* PO Detail Dialog */}
-      <Dialog open={!!detailDialog} onClose={() => setDetailDialog(null)} maxWidth="md" fullWidth>
+      <Dialog open={!!detailDialog} onClose={() => setDetailDialog(null)} maxWidth="md" fullWidth fullScreen={isMobile}>
         <DialogTitle sx={{ fontWeight: 600 }}>{detailDialog?.po_number} — Order Details</DialogTitle>
         <DialogContent sx={{ p: 0 }}>
           <Box sx={{ p: 3 }}>
@@ -590,7 +643,7 @@ export default function PurchaseOrders() {
       </Dialog>
 
       {/* Create PO Dialog */}
-      <Dialog open={dialog} onClose={() => setDialog(false)} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 3, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' } }}>
+      <Dialog open={dialog} onClose={() => setDialog(false)} maxWidth="md" fullWidth fullScreen={isMobile} PaperProps={{ sx: { borderRadius: isMobile ? 0 : 3, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' } }}>
         <DialogTitle sx={{ pb: 1, pt: 3, px: 4 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Box sx={{ p: 1, bgcolor: '#EFF6FF', borderRadius: 2, color: '#2563EB', display: 'flex' }}>

@@ -4,7 +4,7 @@ import {
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
   DialogContent, DialogActions, Grid, IconButton, Tooltip, Rating,
   InputAdornment, FormControl, InputLabel, Select, MenuItem, OutlinedInput,
-  Checkbox, ListItemText
+  Checkbox, ListItemText, useTheme, useMediaQuery
 } from '@mui/material';
 import {
   Add, Edit, Search, Store, Person, Phone, Email,
@@ -26,6 +26,9 @@ export default function Vendors() {
   const [viewOnly, setViewOnly] = useState(false);
   const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'asc' });
   const [errors, setErrors] = useState({});
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const load = () => {
     api.get('/api/vendors', { params: { search: search || undefined } }).then(r => {
@@ -168,118 +171,146 @@ export default function Vendors() {
       </Card>
 
       <Card sx={{ borderRadius: 2, overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
-        <TableContainer>
-          <Table size="small">
-            <TableHead sx={{ bgcolor: '#F8FAFC' }}>
-              <TableRow>
-                <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2 }}>
-                  <TableSortLabel
-                    active={sortConfig.key === 'code'}
-                    direction={sortConfig.direction}
-                    onClick={() => requestSort('code')}
-                  >
-                    CODE
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2 }}>
-                  <TableSortLabel
-                    active={sortConfig.key === 'name'}
-                    direction={sortConfig.direction}
-                    onClick={() => requestSort('name')}
-                  >
-                    VENDOR NAME
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2 }}>
-                  <TableSortLabel
-                    active={sortConfig.key === 'contact_person'}
-                    direction={sortConfig.direction}
-                    onClick={() => requestSort('contact_person')}
-                  >
-                    CONTACT
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2 }}>
-                  <TableSortLabel
-                    active={sortConfig.key === 'phone'}
-                    direction={sortConfig.direction}
-                    onClick={() => requestSort('phone')}
-                  >
-                    PHONE
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2 }}>
-                  <TableSortLabel
-                    active={sortConfig.key === 'gst_number'}
-                    direction={sortConfig.direction}
-                    onClick={() => requestSort('gst_number')}
-                  >
-                    GST
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2 }}>
-                  <TableSortLabel
-                    active={sortConfig.key === 'city'}
-                    direction={sortConfig.direction}
-                    onClick={() => requestSort('city')}
-                  >
-                    CITY
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2 }}>CATEGORIES</TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2 }}>
-                  <TableSortLabel
-                    active={sortConfig.key === 'rating'}
-                    direction={sortConfig.direction}
-                    onClick={() => requestSort('rating')}
-                  >
-                    RATING
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell align="right" sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2 }}>ACTIONS</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {vendors.map(v => (
-                <TableRow
-                  key={v.id}
-                  hover
-                  onClick={() => openEdit(v, true)}
-                  sx={{ cursor: 'pointer', '&:last-child td, &:last-child th': { border: 0 } }}
-                >
-                  <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.8rem' }}>{v.code}</TableCell>
-                  <TableCell sx={{ fontSize: '0.85rem', fontWeight: 500 }}>{v.name}</TableCell>
-                  <TableCell sx={{ fontSize: '0.8rem' }}>{v.contact_person}</TableCell>
-                  <TableCell sx={{ fontSize: '0.8rem' }}>{v.phone}</TableCell>
-                  <TableCell sx={{ fontSize: '0.75rem', color: '#64748B' }}>{v.gst_number}</TableCell>
-                  <TableCell sx={{ fontSize: '0.8rem' }}>{v.city}</TableCell>
-                  <TableCell>
-                    <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-                      {v.categories?.map((c, i) => <Chip key={i} label={c} size="small" variant="outlined" sx={{ fontSize: '0.65rem', height: 20 }} />)}
+        {isMobile ? (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, p: 1.5 }}>
+            {vendors.length === 0 && (
+              <Typography variant="body2" align="center" sx={{ py: 4, color: '#94a3b8' }}>
+                No vendors found.
+              </Typography>
+            )}
+            {vendors.map(v => (
+              <Card key={v.id} variant="outlined" sx={{ p: 2, borderRadius: 2, cursor: 'pointer', '&:hover': { borderColor: '#2563EB' } }} onClick={() => openEdit(v, true)}>
+                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, gap: 1, alignItems: 'flex-start' }}>
+                    <Box>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1E293B' }}>{v.name}</Typography>
+                      <Typography variant="caption" sx={{ fontWeight: 600, color: '#2563EB' }}>{v.code}</Typography>
                     </Box>
-                  </TableCell>
-                  <TableCell><Rating value={v.rating} precision={0.5} size="small" readOnly /></TableCell>
-                  <TableCell align="right">
-                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5 }} onClick={(e) => e.stopPropagation()}>
+                    <Rating value={v.rating} precision={0.5} size="small" readOnly />
+                 </Box>
+                 <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#334155' }}><strong>Contact:</strong> {v.contact_person} | {v.phone}</Typography>
+
+                 <Typography variant="caption" sx={{ display: 'block', mb: 1.5, color: '#64748B' }}>Email: {v.email || '-'}</Typography>
+                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', flex: 1 }}>
+                      {v.categories?.slice(0, 2).map((c, i) => <Chip key={i} label={c} size="small" variant="outlined" sx={{ fontSize: '0.65rem', height: 20 }} />)}
+                      {v.categories?.length > 2 && <Typography variant="caption" sx={{ color: '#64748B', ml: 0.5 }}>+{v.categories.length - 2}</Typography>}
+                    </Box>
+                    <Box onClick={(e) => e.stopPropagation()}>
                       <Tooltip title="Edit Vendor">
                         <IconButton size="small" onClick={() => openEdit(v, false)} sx={{ color: '#64748B' }}>
                           <Edit fontSize="small" />
                         </IconButton>
                       </Tooltip>
                     </Box>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {vendors.length === 0 && (
+                 </Box>
+              </Card>
+            ))}
+          </Box>
+        ) : (
+          <TableContainer>
+            <Table size="small">
+              <TableHead sx={{ bgcolor: '#F8FAFC' }}>
                 <TableRow>
-                  <TableCell colSpan={9} align="center" sx={{ py: 4, color: '#94A3B8' }}>
-                    No vendors found matching your search.
+                  <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2, whiteSpace: 'nowrap' }}>
+                    <TableSortLabel
+                      active={sortConfig.key === 'code'}
+                      direction={sortConfig.direction}
+                      onClick={() => requestSort('code')}
+                    >
+                      CODE
+                    </TableSortLabel>
                   </TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2, whiteSpace: 'nowrap' }}>
+                    <TableSortLabel
+                      active={sortConfig.key === 'name'}
+                      direction={sortConfig.direction}
+                      onClick={() => requestSort('name')}
+                    >
+                      VENDOR NAME
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2, whiteSpace: 'nowrap' }}>
+                    <TableSortLabel
+                      active={sortConfig.key === 'contact_person'}
+                      direction={sortConfig.direction}
+                      onClick={() => requestSort('contact_person')}
+                    >
+                      CONTACT
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2, whiteSpace: 'nowrap' }}>
+                    <TableSortLabel
+                      active={sortConfig.key === 'phone'}
+                      direction={sortConfig.direction}
+                      onClick={() => requestSort('phone')}
+                    >
+                      PHONE
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2, whiteSpace: 'nowrap' }}>
+                    <TableSortLabel
+                      active={sortConfig.key === 'email'}
+                      direction={sortConfig.direction}
+                      onClick={() => requestSort('email')}
+                    >
+                      MAIL ID
+                    </TableSortLabel>
+                  </TableCell>
+
+                  <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2, whiteSpace: 'nowrap' }}>CATEGORIES</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2, whiteSpace: 'nowrap' }}>
+                    <TableSortLabel
+                      active={sortConfig.key === 'rating'}
+                      direction={sortConfig.direction}
+                      onClick={() => requestSort('rating')}
+                    >
+                      RATING
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2, whiteSpace: 'nowrap' }}>ACTIONS</TableCell>
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
+              </TableHead>
+              <TableBody>
+                {vendors.map(v => (
+                  <TableRow
+                    key={v.id}
+                    hover
+                    onClick={() => openEdit(v, true)}
+                    sx={{ cursor: 'pointer', '&:last-child td, &:last-child th': { border: 0 } }}
+                  >
+                    <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>{v.code}</TableCell>
+                    <TableCell sx={{ fontSize: '0.85rem', fontWeight: 500, whiteSpace: 'normal', wordBreak: 'break-word', minWidth: '120px' }}>{v.name}</TableCell>
+                    <TableCell sx={{ fontSize: '0.8rem', whiteSpace: 'nowrap' }}>{v.contact_person}</TableCell>
+                    <TableCell sx={{ fontSize: '0.8rem', whiteSpace: 'nowrap' }}>{v.phone}</TableCell>
+                    <TableCell sx={{ fontSize: '0.75rem', color: '#64748B', whiteSpace: 'nowrap' }}>{v.email}</TableCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                        {v.categories?.map((c, i) => <Chip key={i} label={c} size="small" variant="outlined" sx={{ fontSize: '0.65rem', height: 20 }} />)}
+                      </Box>
+                    </TableCell>
+                    <TableCell><Rating value={v.rating} precision={0.5} size="small" readOnly /></TableCell>
+                    <TableCell align="right">
+                      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5 }} onClick={(e) => e.stopPropagation()}>
+                        <Tooltip title="Edit Vendor">
+                          <IconButton size="small" onClick={() => openEdit(v, false)} sx={{ color: '#64748B' }}>
+                            <Edit fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {vendors.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={9} align="center" sx={{ py: 4, color: '#94A3B8' }}>
+                      No vendors found matching your search.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
       </Card>
 
       <Dialog
@@ -287,8 +318,9 @@ export default function Vendors() {
         onClose={() => setDialog(false)}
         maxWidth="md"
         fullWidth
+        fullScreen={isMobile}
         PaperProps={{
-          sx: { borderRadius: 3, boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }
+          sx: { borderRadius: isMobile ? 0 : 3, boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }
         }}
       >
         <DialogTitle sx={{ fontWeight: 700, pb: 1, pt: 3 }}>

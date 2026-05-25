@@ -29,8 +29,9 @@ export default function PurchaseRequests() {
   const [buildings, setBuildings] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [vendors, setVendors] = useState([]);
+  const [termsTemplates, setTermsTemplates] = useState([]);
   const [dialog, setDialog] = useState(false);
-  const [convertDialog, setConvertDialog] = useState({ open: false, pr: null, vendor_id: '', delivery_date: '', rate: '' });
+  const [convertDialog, setConvertDialog] = useState({ open: false, pr: null, vendor_id: '', delivery_date: '', rate: '', terms: '' });
   const [detailDialog, setDetailDialog] = useState(null);
   const [tab, setTab] = useState(0);
   const [search, setSearch] = useState('');
@@ -68,6 +69,7 @@ export default function PurchaseRequests() {
     api.get('/api/projects').then(r => setProjects(r.data));
     api.get('/api/buildings').then(r => setBuildings(r.data));
     api.get('/api/vendors').then(r => setVendors(r.data));
+    api.get('/api/terms').then(r => setTermsTemplates(r.data));
   }, []);
 
   // Multi-item form helpers
@@ -112,6 +114,7 @@ export default function PurchaseRequests() {
       pr,
       vendor_id: '',
       delivery_date: dayjs().add(14, 'day'),
+      terms: termsTemplates.find(t => t.is_default)?.content || '',
       items: pr.items.map(it => ({ ...it, rate: '' })) // initialize rate for each item
     });
   };
@@ -145,11 +148,11 @@ export default function PurchaseRequests() {
         project_id: convertDialog.pr.project_id,
         pr_id: convertDialog.pr.id,
         delivery_date: convertDialog.delivery_date ? dayjs(convertDialog.delivery_date).format('YYYY-MM-DD') : null,
-        terms: '',
+        terms: convertDialog.terms,
         items: mappedItems
       };
       await api.post('/api/procurement/po', payload);
-      setConvertDialog({ open: false, pr: null, vendor_id: '', delivery_date: '', items: [] });
+      setConvertDialog({ open: false, pr: null, vendor_id: '', delivery_date: '', items: [], terms: '' });
       load();
     } catch (err) { 
       const msg = err.response?.data?.detail;
@@ -754,6 +757,37 @@ export default function PurchaseRequests() {
                 />
               </Box>
             ))}
+          </Box>
+
+          <Box sx={{ mt: 3 }}>
+            <Typography variant="caption" sx={{ fontWeight: 600, color: '#64748B', mb: 0.5, display: 'block', textTransform: 'uppercase' }}>
+              Terms and Conditions
+            </Typography>
+            <FormControl fullWidth size="small" sx={{ mb: 1.5 }}>
+              <InputLabel>Load Template</InputLabel>
+              <Select
+                label="Load Template"
+                onChange={e => {
+                  const t = termsTemplates.find(x => x.id === e.target.value);
+                  if (t) setConvertDialog({ ...convertDialog, terms: t.content });
+                }}
+                defaultValue=""
+                sx={{ bgcolor: '#fff' }}
+              >
+                <MenuItem value=""><em>Select a Template</em></MenuItem>
+                {termsTemplates.map(t => <MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>)}
+              </Select>
+            </FormControl>
+            <TextField 
+              fullWidth 
+              size="small" 
+              multiline 
+              rows={3} 
+              placeholder="Enter terms and conditions to be included in the PO..."
+              value={convertDialog.terms}
+              onChange={e => setConvertDialog({ ...convertDialog, terms: e.target.value })}
+              sx={{ bgcolor: '#fff' }}
+            />
           </Box>
         </DialogContent>
         <DialogActions sx={{ px: 4, pb: 4, pt: 2, justifyContent: 'flex-end', gap: 2 }}>

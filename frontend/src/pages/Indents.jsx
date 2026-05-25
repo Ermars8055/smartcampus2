@@ -52,8 +52,9 @@ export default function Indents() {
   const [form, setForm] = useState({
     building_id: '', floor_id: '', room_id: '', department: '', remarks: '', items: [{ material_id: '', requested_quantity: '' }]
   });
-  const [vendorDialog, setVendorDialog] = useState({ open: false, indent: null, vendor_id: '' });
+  const [vendorDialog, setVendorDialog] = useState({ open: false, indent: null, vendor_id: '', terms: '' });
   const [vendors, setVendors] = useState([]);
+  const [termsTemplates, setTermsTemplates] = useState([]);
 
   const navigate = useNavigate();
 
@@ -74,6 +75,7 @@ export default function Indents() {
     api.get('/api/materials').then(r => setMaterials(r.data.items || []));
     api.get('/api/buildings').then(r => setBuildings(r.data));
     api.get('/api/vendors').then(r => setVendors(r.data));
+    api.get('/api/terms').then(r => setTermsTemplates(r.data));
   }, []);
 
   // Fetch floors when building changes
@@ -160,8 +162,11 @@ export default function Indents() {
   const handleConvertToPo = async () => {
     if (!vendorDialog.vendor_id) return;
     try {
-      await api.post(`/api/indents/${vendorDialog.indent.id}/convert-to-po?vendor_id=${vendorDialog.vendor_id}`);
-      setVendorDialog({ open: false, indent: null, vendor_id: '' });
+      await api.post(`/api/indents/${vendorDialog.indent.id}/convert-to-po`, {
+        vendor_id: vendorDialog.vendor_id,
+        terms: vendorDialog.terms
+      });
+      setVendorDialog({ open: false, indent: null, vendor_id: '', terms: '' });
       load();
       showMessage("PO created successfully!", "Success", "success");
     } catch (err) { showMessage(err.response?.data?.detail || 'Error converting to PO', "Error", "error"); }
@@ -432,12 +437,12 @@ export default function Indents() {
                           <Cancel fontSize="small" />
                         </IconButton></span>
                       </Tooltip>
-                      <Tooltip title="Convert to PO">
-                        <span><IconButton size="small" color="primary" disabled={ind.status !== 'Approved' && ind.status !== 'Partially Issued'}
-                          onClick={() => setVendorDialog({ open: true, indent: ind, vendor_id: '' })}>
-                          <ReceiptLong fontSize="small" />
-                        </IconButton></span>
-                      </Tooltip>
+                        <Tooltip title="Convert to PO">
+                          <span><IconButton size="small" color="primary" disabled={ind.status !== 'Approved' && ind.status !== 'Partially Issued'}
+                            onClick={() => setVendorDialog({ open: true, indent: ind, vendor_id: '', terms: termsTemplates.find(t => t.is_default)?.content || '' })}>
+                            <ReceiptLong fontSize="small" />
+                          </IconButton></span>
+                        </Tooltip>
                     </Box>
                  </Box>
               </Card>
@@ -658,6 +663,33 @@ export default function Indents() {
                 </Button>
               </Grid>
             </Grid>
+          </Box>
+
+          <Box sx={{ mb: 1.5 }}>
+            <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748B', mb: 0.5, display: 'block', textTransform: 'uppercase', letterSpacing: 0.5 }}>Terms and Conditions</Typography>
+            <FormControl fullWidth size="small" sx={{ mb: 1.5 }}>
+              <InputLabel>Load Template</InputLabel>
+              <Select
+                label="Load Template"
+                onChange={e => {
+                  const t = termsTemplates.find(x => x.id === e.target.value);
+                  if (t) setVendorDialog({ ...vendorDialog, terms: t.content });
+                }}
+                defaultValue=""
+                sx={{ bgcolor: '#fff' }}
+              >
+                <MenuItem value=""><em>Select a Template</em></MenuItem>
+                {termsTemplates.map(t => <MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>)}
+              </Select>
+            </FormControl>
+            <TextField
+              fullWidth size="small"
+              multiline rows={3}
+              placeholder="Enter terms and conditions to be included in the PO..."
+              value={vendorDialog.terms}
+              onChange={e => setVendorDialog({ ...vendorDialog, terms: e.target.value })}
+              sx={{ bgcolor: '#fff' }}
+            />
           </Box>
 
           <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748B', mb: 0.5, display: 'block', textTransform: 'uppercase', letterSpacing: 0.5 }}>Indent Details</Typography>

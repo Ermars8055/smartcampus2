@@ -72,6 +72,12 @@ const Quotations = () => {
     selected_vendor_id: '',
     override_reason: ''
   });
+  const [convertToPoDialog, setConvertToPoDialog] = useState({ open: false, terms: '' });
+  const [termsTemplates, setTermsTemplates] = useState([]);
+
+  useEffect(() => {
+    api.get('/api/terms').then(r => setTermsTemplates(r.data));
+  }, []);
 
   useEffect(() => {
     fetchData();
@@ -241,8 +247,11 @@ const Quotations = () => {
 
   const handleConvertToPO = async () => {
     try {
-      const res = await api.post(`/api/quotations/${selectedQR.id}/convert-to-po`);
+      const res = await api.post(`/api/quotations/${selectedQR.id}/convert-to-po`, {
+        terms: convertToPoDialog.terms
+      });
       showMessage(res.data.message, 'Success', 'success');
+      setConvertToPoDialog({ open: false, terms: '' });
       fetchComparison(selectedQR.id);
       const qrRes = await api.get(`/api/quotations/requests/${selectedQR.id}`);
       setSelectedQR(qrRes.data);
@@ -1048,8 +1057,8 @@ const Quotations = () => {
                     {selectedQR.status === 'Compared' && (
                       <Button variant="contained" color="primary" onClick={handleApprove}>Management Approve</Button>
                     )}
-                    {selectedQR.status === 'Approved' && (
-                      <Button variant="contained" color="success" onClick={handleConvertToPO}>Convert to POs</Button>
+                     {selectedQR.status === 'Approved' && (
+                      <Button variant="contained" color="success" onClick={() => setConvertToPoDialog({ open: true, terms: termsTemplates.find(t => t.is_default)?.content || '' })}>Convert to POs</Button>
                     )}
                   </Box>
                 </Box>
@@ -1702,6 +1711,47 @@ const Quotations = () => {
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setViewVendorQuoteDialogOpen(false)}>Close</Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Convert to PO Dialog */}
+        <Dialog open={convertToPoDialog.open} onClose={() => setConvertToPoDialog({ open: false, terms: '' })} maxWidth="sm" fullWidth>
+          <DialogTitle sx={{ fontWeight: 600, color: '#1E293B', pb: 1 }}>Convert to Purchase Order</DialogTitle>
+          <DialogContent>
+            <Typography variant="body2" sx={{ mb: 3, color: '#64748B' }}>
+              This will generate Purchase Orders for all approved vendor selections.
+            </Typography>
+            <Typography variant="caption" sx={{ fontWeight: 600, color: '#64748B', mb: 0.5, display: 'block', textTransform: 'uppercase' }}>
+              Terms and Conditions
+            </Typography>
+            <FormControl fullWidth size="small" sx={{ mb: 1.5 }}>
+              <InputLabel>Load Template</InputLabel>
+              <Select
+                label="Load Template"
+                onChange={e => {
+                  const t = termsTemplates.find(x => x.id === e.target.value);
+                  if (t) setConvertToPoDialog({ ...convertToPoDialog, terms: t.content });
+                }}
+                defaultValue=""
+                sx={{ bgcolor: '#fff' }}
+              >
+                <MenuItem value=""><em>Select a Template</em></MenuItem>
+                {termsTemplates.map(t => <MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>)}
+              </Select>
+            </FormControl>
+            <TextField 
+              fullWidth 
+              size="small" 
+              multiline 
+              rows={4} 
+              placeholder="Enter general terms and conditions to be included in all generated POs..."
+              value={convertToPoDialog.terms}
+              onChange={e => setConvertToPoDialog({ ...convertToPoDialog, terms: e.target.value })}
+            />
+          </DialogContent>
+          <DialogActions sx={{ px: 3, pb: 2 }}>
+            <Button onClick={() => setConvertToPoDialog({ open: false, terms: '' })} sx={{ color: '#64748B', fontWeight: 600 }}>Cancel</Button>
+            <Button variant="contained" color="success" onClick={handleConvertToPO} sx={{ fontWeight: 600 }}>Create POs</Button>
           </DialogActions>
         </Dialog>
 

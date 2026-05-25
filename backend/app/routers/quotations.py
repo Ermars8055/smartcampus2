@@ -21,6 +21,7 @@ from app.schemas import (
     QRItemOut, QRLinkedPROut, QRVendorOut, VendorQuotationItemOut, QRItemSourceOut,
     QRVendorReceiptUpdate
 )
+from pydantic import BaseModel
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
 from app.models import QuotationRequestStatus, VendorQuotationStatus
 
@@ -602,9 +603,14 @@ def finalize_comparison(
     return {"message": "Quotation Comparison finalized"}
 
 
+class QuotationConvertRequest(BaseModel):
+    terms: Optional[str] = None
+
 @router.post("/{qr_id}/convert-to-po")
 def convert_to_pos(
-    qr_id: int, db: Session = Depends(get_db),
+    qr_id: int, 
+    data: QuotationConvertRequest,
+    db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("purchase_requests", "update")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
@@ -651,6 +657,7 @@ def convert_to_pos(
             qr_id=qr.id,
             pr_id=default_pr_id,
             created_by_id=current_user.id,
+            terms=data.terms,
             status="Draft" # Or auto-approve based on config
         )
         db.add(po)

@@ -194,11 +194,17 @@ export default function PurchaseOrders() {
     const printWindow = window.open('', '_blank');
     let rowsHtml = '';
     let grandTotal = 0;
+    let totalCgst = 0;
+    let totalSgst = 0;
     
     po.items.forEach((item, idx) => {
       const qty = parseFloat(item.quantity) || 0;
       const rate = parseFloat(item.rate) || 0;
       const amount = qty * rate;
+      const cgstVal = amount * 0.025;
+      const sgstVal = amount * 0.025;
+      totalCgst += cgstVal;
+      totalSgst += sgstVal;
       grandTotal += amount;
       
       rowsHtml += `
@@ -218,8 +224,9 @@ export default function PurchaseOrders() {
       `;
     });
     
-    const roundOff = (Math.round(grandTotal) - grandTotal).toFixed(2);
-    const totalNetAmount = Math.round(grandTotal).toFixed(2);
+    const grandTotalWithTax = grandTotal + totalCgst + totalSgst;
+    const roundOff = (Math.round(grandTotalWithTax) - grandTotalWithTax).toFixed(2);
+    const totalNetAmount = Math.round(grandTotalWithTax).toFixed(2);
     const activeTerms = po.terms || termsTemplates.find(t => t.is_default)?.content || (termsTemplates.length > 0 ? termsTemplates[0].content : '');
     const termsHtml = (activeTerms || '').split('\n').filter(t => t.trim()).map(t => `<li>${t}</li>`).join('');
 
@@ -231,8 +238,20 @@ export default function PurchaseOrders() {
             @media print {
               @page { size: A4; margin: 10mm; }
               body { margin: 0; padding: 0; font-family: Arial, sans-serif; font-size: 11px; color: #000; -webkit-print-color-adjust: exact; }
+              .no-print { display: none !important; }
             }
-            body { font-family: Arial, sans-serif; font-size: 11px; margin: 0; padding: 20px; color: #000; }
+            body { font-family: Arial, sans-serif; font-size: 11px; margin: 0; padding: 20px; color: #000; background-color: #f8fafc; }
+            .print-wrapper { max-width: 800px; margin: 0 auto; background: white; padding: 30px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); border-radius: 8px; }
+            @media print {
+              body { background-color: white; padding: 0; }
+              .print-wrapper { max-width: 100%; margin: 0; padding: 0; box-shadow: none; border-radius: 0; }
+            }
+            .action-bar { display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 20px; }
+            .btn { padding: 8px 20px; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; border: none; display: flex; align-items: center; gap: 6px; font-family: Arial, sans-serif; }
+            .btn-print { background: #2563EB; color: white; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.3); }
+            .btn-print:hover { background: #1D4ED8; }
+            .btn-close { background: #e2e8f0; color: #334155; }
+            .btn-close:hover { background: #cbd5e1; }
             .header-container { text-align: center; margin-bottom: 20px; }
             .org-title { font-size: 16px; font-weight: bold; margin: 0; }
             .org-address { font-size: 11px; margin: 5px 0; }
@@ -249,8 +268,16 @@ export default function PurchaseOrders() {
             .sig-box { text-align: center; }
           </style>
         </head>
-        <body onload="setTimeout(function(){ window.print(); window.close(); }, 500);">
-          <div class="header-container">
+        <body>
+          <div class="print-wrapper">
+            <div class="action-bar no-print">
+              <button class="btn btn-close" onclick="window.close()">Close</button>
+              <button class="btn btn-print" onclick="window.print()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                Print
+              </button>
+            </div>
+            <div class="header-container">
             <h2 class="org-title">EAST POINT COLLEGE OF MEDICAL SCIENCES & RESEARCH CENTER</h2>
             <p class="org-address">113, JNANA PRABHA CAMPUS, BIDARAHALLI, VIRGO NAGAR POST, BANGALORE - 560049</p>
             <div class="doc-title">PURCHASE ORDER</div>
@@ -301,11 +328,13 @@ export default function PurchaseOrders() {
           
           <div style="display:flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; border-bottom: 1px dashed #ccc; padding-bottom: 10px;">
             <div style="width: 60%">
-              Total Amount in Word : <b>Rupees ${numberToWords(Math.round(grandTotal))} Only -/</b>
+              Total Amount in Word : <b>Rupees ${numberToWords(Math.round(grandTotalWithTax))} Only -/</b>
             </div>
             <div style="width: 40%">
               <table style="width:100%; border-collapse: collapse;">
                 <tr><td style="text-align:right">Total Amount</td><td style="text-align:right; width: 100px;">: ${grandTotal.toFixed(2)}</td></tr>
+                <tr><td style="text-align:right">Add: CGST @ 2.5%</td><td style="text-align:right">: ${totalCgst.toFixed(2)}</td></tr>
+                <tr><td style="text-align:right">Add: SGST @ 2.5%</td><td style="text-align:right">: ${totalSgst.toFixed(2)}</td></tr>
                 <tr><td style="text-align:right">Round Off</td><td style="text-align:right">: ${roundOff}</td></tr>
                 <tr><td style="text-align:right"><b>Total Net Amount</b></td><td style="text-align:right"><b>: ${totalNetAmount}</b></td></tr>
               </table>
@@ -324,16 +353,17 @@ export default function PurchaseOrders() {
           <div style="margin-top: 10px;">Thanking You</div>
           <div style="margin-top: 20px; margin-bottom: 30px;"><b>For EAST POINT COLLEGE OF MEDICAL SCIENCES & RESEARCH CENTER</b></div>
           
-          <div class="signatures">
-            <div class="sig-box" style="text-align: left;">
-              Managing Trustee
-              <br/><br/>
-              CC: Manager Accounts<br/>
-              Remarks: ${po.remarks || ''}
-            </div>
-            <div class="sig-box" style="text-align: right;">
-              ${formatDate(new Date())}<br/>
-              Prepared By ADMIN
+            <div class="signatures">
+              <div class="sig-box" style="text-align: left;">
+                Managing Trustee
+                <br/><br/>
+                CC: Manager Accounts<br/>
+                Remarks: ${po.remarks || ''}
+              </div>
+              <div class="sig-box" style="text-align: right;">
+                ${formatDate(new Date())}<br/>
+                Prepared By ADMIN
+              </div>
             </div>
           </div>
         </body>

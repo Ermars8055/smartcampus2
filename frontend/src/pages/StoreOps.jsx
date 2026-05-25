@@ -966,7 +966,7 @@ export default function StoreOperations() {
         </DialogTitle>
         <DialogContent sx={{ p: 3 }}>
           <Grid container spacing={2} sx={{ mb: 3, mt: 0.5 }}>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={4}>
               <FormControl fullWidth size="small">
                 <InputLabel>Target Store</InputLabel>
                 <Select 
@@ -974,12 +974,13 @@ export default function StoreOperations() {
                   value={returnModal.warehouse_id} 
                   onChange={e => setReturnModal({ ...returnModal, warehouse_id: e.target.value })}
                   startAdornment={<InputAdornment position="start"><Warehouse sx={{ color: '#94A3B8', fontSize: 20, mr: 1 }} /></InputAdornment>}
+                  disabled
                 >
                   {warehouses.map(w => <MenuItem key={w.id} value={w.id}>{w.name} ({w.code})</MenuItem>)}
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} sm={8}>
+            <Grid item xs={12} sm={4}>
               <FormControl fullWidth size="small">
                 <InputLabel>Department / Unit</InputLabel>
                 <Select 
@@ -989,22 +990,6 @@ export default function StoreOperations() {
                   startAdornment={<InputAdornment position="start"><Business sx={{ color: '#94A3B8', fontSize: 20, mr: 1 }} /></InputAdornment>}
                 >
                   {departments.map(d => <MenuItem key={d.id} value={d.name}>{d.name}</MenuItem>)}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={4}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Return Type</InputLabel>
-                <Select 
-                  label="Return Type"
-                  value={returnModal.return_type} 
-                  onChange={e => setReturnModal({ ...returnModal, return_type: e.target.value })}
-                  startAdornment={<InputAdornment position="start"><Assignment sx={{ color: '#94A3B8', fontSize: 20, mr: 1 }} /></InputAdornment>}
-                >
-                  <MenuItem value="Unused">Unused / Surplus</MenuItem>
-                  <MenuItem value="Damaged">Damaged / Broken</MenuItem>
-                  <MenuItem value="Wrong Item">Incorrect Specification</MenuItem>
-                  <MenuItem value="Scrap">Scrap / End of Life</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -1040,10 +1025,9 @@ export default function StoreOperations() {
             <Table size="small">
               <TableHead sx={{ bgcolor: '#F8FAFC' }}>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 700, width: '40%' }}>MATERIAL</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 700, width: '15%' }}>QTY</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 700, width: '20%' }}>CONDITION</TableCell>
-                  <TableCell sx={{ fontWeight: 700, width: '20%' }}>REMARKS</TableCell>
+                  <TableCell sx={{ fontWeight: 700, width: '50%' }}>MATERIAL</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 700, width: '20%' }}>QTY</TableCell>
+                  <TableCell sx={{ fontWeight: 700, width: '25%' }}>REMARKS</TableCell>
                   <TableCell align="center" sx={{ width: '5%' }}></TableCell>
                 </TableRow>
               </TableHead>
@@ -1066,22 +1050,6 @@ export default function StoreOperations() {
                         value={item.quantity} 
                         onChange={e => updateReturnItem(idx, 'quantity', Math.round(parseFloat(e.target.value) || 0))} 
                       />
-                    </TableCell>
-                    <TableCell align="center">
-                      <Select 
-                        size="small" value={item.condition} 
-                        onChange={e => updateReturnItem(idx, 'condition', e.target.value)}
-                        fullWidth
-                        startAdornment={<InputAdornment position="start"><InfoOutlined sx={{ color: '#94A3B8', fontSize: 16, mr: 1 }} /></InputAdornment>}
-                      >
-                        <MenuItem value="Usable">Usable</MenuItem>
-                        <MenuItem value="Scrap">Scrap</MenuItem>
-                        <MenuItem value="Repairable">Repairable</MenuItem>
-                        <MenuItem value="Good">Good (Consumable)</MenuItem>
-                        <MenuItem value="Fair">Fair</MenuItem>
-                        <MenuItem value="Poor">Poor</MenuItem>
-                        <MenuItem value="Broken">Broken</MenuItem>
-                      </Select>
                     </TableCell>
                     <TableCell>
                       <TextField 

@@ -29,6 +29,8 @@ export default function Materials() {
   const [sortConfig, setSortConfig] = useState({ key: 'code', direction: 'asc' });
   const [qrDialog, setQrDialog] = useState(false);
   const [selectedQrMaterial, setSelectedQrMaterial] = useState(null);
+  const [printLabelCount, setPrintLabelCount] = useState(12);
+  const [labelFormat, setLabelFormat] = useState(32);
   const [form, setForm] = useState({
     code: '', name: '', category_id: '', uom_id: '', warehouse_id: '', reorder_level: 0,
     maximum_level: 0, standard_cost: 0, gst_rate: 0, storage_type: 'General',
@@ -225,39 +227,95 @@ export default function Materials() {
 
   const openQr = (m) => {
     setSelectedQrMaterial(m);
+    setPrintLabelCount(12);
     setQrDialog(true);
   };
 
   const handlePrintQr = () => {
     if (!selectedQrMaterial) return;
-    const printWindow = window.open('', '', 'width=600,height=600');
+    const printWindow = window.open('', '', 'width=800,height=800');
+    
+    const svgElement = document.getElementById('material-qr-svg');
+    const svgHtml = svgElement ? svgElement.outerHTML : '';
+    
+    const formatConfigs = {
+      1: { columns: 1, height: '95vh', svgSize: 300, nameSize: '2rem', codeSize: '1.5rem', uomSize: '1.2rem', padding: '40px', gap: '20px' },
+      2: { columns: 1, height: '46vh', svgSize: 200, nameSize: '1.5rem', codeSize: '1.2rem', uomSize: '1rem', padding: '30px', gap: '20px' },
+      4: { columns: 2, height: '46vh', svgSize: 180, nameSize: '1.3rem', codeSize: '1.1rem', uomSize: '0.9rem', padding: '20px', gap: '20px' },
+      8: { columns: 2, height: '23vh', svgSize: 150, nameSize: '1.1rem', codeSize: '0.9rem', uomSize: '0.8rem', padding: '15px', gap: '15px' },
+      12: { columns: 3, height: '23vh', svgSize: 120, nameSize: '0.9rem', codeSize: '0.8rem', uomSize: '0.7rem', padding: '12px', gap: '15px' },
+      16: { columns: 4, height: '23vh', svgSize: 100, nameSize: '0.8rem', codeSize: '0.7rem', uomSize: '0.65rem', padding: '10px', gap: '10px' },
+      32: { columns: 4, height: '11.5vh', svgSize: 80, nameSize: '0.7rem', codeSize: '0.6rem', uomSize: '0.55rem', padding: '5px', gap: '5px' }
+    };
+    
+    const config = formatConfigs[labelFormat] || formatConfigs[32];
+
+    let labelsHtml = '';
+    for (let i = 0; i < printLabelCount; i++) {
+      labelsHtml += `
+        <div class="label-container">
+          <div class="material-name" title="${selectedQrMaterial.name}">${selectedQrMaterial.name}</div>
+          <div class="material-code">${selectedQrMaterial.code}</div>
+          <div class="qr-code-container">${svgHtml}</div>
+          <div class="uom">UOM: ${selectedQrMaterial.uom_name}</div>
+        </div>
+      `;
+    }
+
     printWindow.document.write(`
       <html>
         <head>
           <title>Print QR Label</title>
           <style>
-            body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-            .label-container { text-align: center; border: 1px solid #ccc; padding: 20px; border-radius: 8px; }
-            .material-name { font-weight: bold; font-size: 1.2rem; margin-bottom: 5px; }
-            .material-code { color: #666; margin-bottom: 15px; }
-            .uom { font-size: 0.9rem; margin-top: 10px; color: #444; }
+            @page { margin: 0; size: auto; }
+            body { 
+              font-family: sans-serif; 
+              margin: 0; 
+              padding: 15px; 
+              box-sizing: border-box;
+            }
+            .grid-container {
+              display: grid;
+              grid-template-columns: repeat(${config.columns}, 1fr);
+              gap: ${config.gap};
+              justify-content: start;
+              align-content: start;
+            }
+            .label-container { 
+              text-align: center; 
+              border: 1px dashed #999; 
+              padding: ${config.padding}; 
+              border-radius: 4px; 
+              page-break-inside: avoid; 
+              background: #fff;
+              overflow: hidden;
+              height: ${config.height};
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              align-items: center;
+              box-sizing: border-box;
+            }
+            .material-name { 
+              font-weight: bold; 
+              font-size: ${config.nameSize}; 
+              margin-bottom: 2px; 
+              white-space: nowrap; 
+              overflow: hidden; 
+              text-overflow: ellipsis; 
+            }
+            .material-code { color: #666; margin-bottom: 5px; font-size: ${config.codeSize}; }
+            .uom { font-size: ${config.uomSize}; margin-top: 3px; color: #444; }
+            .qr-code-container svg { width: ${config.svgSize}px; height: ${config.svgSize}px; }
           </style>
         </head>
         <body>
-          <div class="label-container">
-            <div class="material-name">${selectedQrMaterial.name}</div>
-            <div class="material-code">${selectedQrMaterial.code}</div>
-            <div id="qr-code-container"></div>
-            <div class="uom">UOM: ${selectedQrMaterial.uom_name}</div>
+          <div class="grid-container">
+            ${labelsHtml}
           </div>
         </body>
       </html>
     `);
-    
-    const svgElement = document.getElementById('material-qr-svg');
-    if (svgElement) {
-      printWindow.document.getElementById('qr-code-container').innerHTML = svgElement.outerHTML;
-    }
     
     printWindow.document.close();
     printWindow.focus();
@@ -762,6 +820,38 @@ export default function Materials() {
               <Typography variant="caption" sx={{ mt: 3, color: '#64748B' }}>
                 UOM: {selectedQrMaterial.uom_name}
               </Typography>
+              <Box sx={{ display: 'flex', gap: 2, mt: 3, flexWrap: 'wrap', justifyContent: 'center' }}>
+                <FormControl size="small" sx={{ minWidth: 180 }}>
+                  <InputLabel>Format (Labels/Page)</InputLabel>
+                  <Select
+                    value={labelFormat}
+                    label="Format (Labels/Page)"
+                    onChange={e => setLabelFormat(e.target.value)}
+                  >
+                    <MenuItem value={1}>1 Label (Full Page)</MenuItem>
+                    <MenuItem value={2}>2 Labels per page</MenuItem>
+                    <MenuItem value={4}>4 Labels per page</MenuItem>
+                    <MenuItem value={8}>8 Labels per page</MenuItem>
+                    <MenuItem value={12}>12 Labels per page</MenuItem>
+                    <MenuItem value={16}>16 Labels per page</MenuItem>
+                    <MenuItem value={32}>32 Labels per page</MenuItem>
+                  </Select>
+                </FormControl>
+                <TextField
+                  type="number"
+                  label="Total to Print"
+                  size="small"
+                  value={printLabelCount}
+                  onChange={e => {
+                    let val = parseInt(e.target.value);
+                    if (isNaN(val) || val < 1) val = 1;
+                    if (val > 180) val = 180;
+                    setPrintLabelCount(val);
+                  }}
+                  inputProps={{ min: 1, max: 180 }}
+                  sx={{ width: 140 }}
+                />
+              </Box>
             </>
           )}
         </DialogContent>

@@ -11,6 +11,8 @@ from app.models import (
 from app.schemas import IndentCreate, IndentOut, IndentAcknowledgeRequest
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
 from app.utils.sequences import get_next_number
+from pydantic import BaseModel
+from typing import Optional
 
 router = APIRouter(prefix="/api/indents", tags=["Indents"])
 
@@ -287,10 +289,14 @@ def acknowledge_indent(
     return {"message": "Acknowledged successfully"}
 
 
+class IndentConvertRequest(BaseModel):
+    vendor_id: int
+    terms: Optional[str] = None
+
 @router.post("/{id}/convert-to-po")
 def convert_to_po(
     id: int,
-    vendor_id: int,
+    data: IndentConvertRequest,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("purchase_orders", "create")),
     tenant_id: int = Depends(get_tenant_id),
@@ -311,11 +317,12 @@ def convert_to_po(
         tenant_id=tenant_id,
         site_id=site_id,
         po_number=po_number,
-        vendor_id=vendor_id,
+        vendor_id=data.vendor_id,
         project_id=project_id,
         indent_id=indent.id,
         status="Draft",
         po_type="Formal",
+        terms=data.terms,
         total_amount=0,
         created_by_id=current_user.id
     )

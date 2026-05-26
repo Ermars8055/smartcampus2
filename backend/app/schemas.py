@@ -666,6 +666,7 @@ class IssueOut(BaseModel):
     warehouse_name: Optional[str] = None
     project_name: Optional[str] = None
     room_name: Optional[str] = None
+    floor_name: Optional[str] = None
     building_name: Optional[str] = None
     issued_by_name: Optional[str] = None
     indent_number: Optional[str] = None

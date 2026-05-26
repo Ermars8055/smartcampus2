@@ -55,11 +55,17 @@ def list_issues(
                 material_code=mat.code if mat else None,
                 uom_name=mat.uom.name if mat and mat.uom else None
             ))
+        room_name = iss.room.name if iss.room else None
+        floor_name = iss.room.floor.name if iss.room and iss.room.floor else None
+        building_name = iss.room.floor.building.name if iss.room and iss.room.floor and iss.room.floor.building else (iss.building.name if iss.building else None)
+
+        dept_name = iss.issued_to_department or (iss.room.department_name if iss.room else None) or (iss.indent.department_name if getattr(iss, 'indent', None) else None)
+
         result.append(IssueOut(
             id=iss.id, issue_number=iss.issue_number,
             warehouse_id=iss.warehouse_id, project_id=iss.project_id,
             issued_to_room_id=iss.issued_to_room_id,
-            issued_to_department=iss.issued_to_department,
+            issued_to_department=dept_name,
             issued_to_contractor=iss.issued_to_contractor,
             purpose=iss.purpose, status=iss.status,
             received_by_name=iss.received_by_name,
@@ -69,7 +75,9 @@ def list_issues(
             created_at=iss.created_at,
             warehouse_name=iss.warehouse.name if iss.warehouse else None,
             project_name=iss.project.name if iss.project else None,
-            room_name=iss.room.name if iss.room else None,
+            room_name=room_name,
+            floor_name=floor_name,
+            building_name=building_name,
             issued_by_name=iss.issued_by.full_name if iss.issued_by else None,
             indent_number=iss.indent.indent_number if iss.indent else None,
             items=items

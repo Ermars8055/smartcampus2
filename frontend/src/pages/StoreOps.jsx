@@ -81,22 +81,24 @@ export default function StoreOperations() {
   };
 
   const openIssueModal = (indent) => {
-    const items = indent.items.map(it => {
-      const remaining = it.requested_quantity - it.issued_quantity;
-      return {
-        material_id: it.material_id,
-        material_name: it.material_name,
-        material_code: it.material_code,
-        warehouse_id: it.warehouse_id,
-        warehouse_name: it.warehouse_name,
-        uom_name: it.uom_name,
-        approved: it.requested_quantity,
-        issued: it.issued_quantity,
-        remaining: remaining,
-        in_stock: it.current_stock || 0,
-        issue_qty: remaining
-      };
-    });
+    const items = indent.items
+      .map(it => {
+        const remaining = it.requested_quantity - it.issued_quantity;
+        return {
+          material_id: it.material_id,
+          material_name: it.material_name,
+          material_code: it.material_code,
+          warehouse_id: it.warehouse_id,
+          warehouse_name: it.warehouse_name,
+          uom_name: it.uom_name,
+          approved: it.requested_quantity,
+          issued: it.issued_quantity,
+          remaining: remaining,
+          in_stock: it.current_stock || 0,
+          issue_qty: 0
+        };
+      })
+      .filter(it => it.remaining > 0);
     setIssueModal({ open: true, indent, items, remarks: '' });
   };
 
@@ -876,7 +878,16 @@ export default function StoreOperations() {
               </Box>
               <Box>
                 <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>Issue Materials</Typography>
-                <Typography variant="body2" color="text.secondary">{issueModal.indent?.indent_number} • {issueModal.indent?.requester_name}</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {issueModal.indent?.indent_number} • {issueModal.indent?.requester_name}
+                  {(() => {
+                    const ind = issueModal.indent;
+                    if (!ind) return '';
+                    const dept = ind.department || 'Store / User';
+                    const loc = [ind.building_name, ind.floor, ind.room_name].filter(Boolean).join('-');
+                    return loc ? ` • Issue to: ${dept} (${loc})` : ` • Issue to: ${dept}`;
+                  })()}
+                </Typography>
               </Box>
             </Box>
             <IconButton size="small" onClick={() => setIssueModal({ ...issueModal, open: false })} sx={{ color: '#64748B' }}><Close /></IconButton>
@@ -916,18 +927,26 @@ export default function StoreOperations() {
                       {Math.round(stocks.find(s => s.warehouse_id === it.warehouse_id && s.material_id === it.material_id)?.quantity || 0)}
                     </TableCell>
                     <TableCell align="center">
-                      <TextField 
-                        size="small" 
-                        type="number" 
-                        inputProps={{ step: "1", min: "0" }}
-                        value={it.issue_qty} 
-                        onChange={e => {
-                          const newItems = [...issueModal.items];
-                          newItems[i].issue_qty = Math.round(parseFloat(e.target.value) || 0);
-                          setIssueModal({ ...issueModal, items: newItems });
-                        }}
-                        sx={{ width: 100 }}
-                      />
+                      {(() => {
+                        const inStock = Math.round(stocks.find(s => s.warehouse_id === it.warehouse_id && s.material_id === it.material_id)?.quantity || 0);
+                        const maxQty = Math.min(it.remaining, inStock);
+                        return (
+                          <TextField 
+                            size="small" 
+                            type="number" 
+                            inputProps={{ step: "1", min: "0", max: String(maxQty) }}
+                            value={it.issue_qty} 
+                            disabled={inStock <= 0}
+                            onChange={e => {
+                              const newItems = [...issueModal.items];
+                              const val = Math.round(parseFloat(e.target.value) || 0);
+                              newItems[i].issue_qty = Math.max(0, Math.min(val, maxQty));
+                              setIssueModal({ ...issueModal, items: newItems });
+                            }}
+                            sx={{ width: 100 }}
+                          />
+                        );
+                      })()}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -944,7 +963,7 @@ export default function StoreOperations() {
         </DialogContent>
         <DialogActions sx={{ px: 4, pb: 4, pt: 2, justifyContent: 'flex-end', gap: 2 }}>
           <Button onClick={() => setIssueModal({ ...issueModal, open: false })} sx={{ color: '#64748B', fontWeight: 600 }}>Cancel</Button>
-          <Button onClick={handleIssueSubmit} variant="contained" color="error" sx={{ borderRadius: 2, px: 4, py: 1, fontWeight: 700, boxShadow: '0 4px 12px rgba(220, 38, 38, 0.25)', textTransform: 'none' }}>Confirm Issue</Button>
+          <Button onClick={handleIssueSubmit} variant="contained" color="error" disabled={issueModal.items.every(it => it.issue_qty <= 0)} sx={{ borderRadius: 2, px: 4, py: 1, fontWeight: 700, boxShadow: '0 4px 12px rgba(220, 38, 38, 0.25)', textTransform: 'none' }}>Confirm Issue</Button>
         </DialogActions>
       </Dialog>
 

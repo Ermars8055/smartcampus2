@@ -43,6 +43,8 @@ def list_indents(
         indent.requester_name = indent.requester.full_name if indent.requester else None
         indent.room_name = indent.room.name if indent.room else None
         indent.building_name = indent.room.floor.building.name if indent.room and indent.room.floor and indent.room.floor.building else None
+        indent.floor = indent.floor or (indent.room.floor.name if indent.room and indent.room.floor else None)
+        indent.department = indent.department or (indent.room.department_name if indent.room else None)
         indent.project_id = indent.room.floor.building.project_id if indent.room and indent.room.floor and indent.room.floor.building else None
         for item in indent.items:
             if item.material:
@@ -145,6 +147,8 @@ def get_indent(
     indent.requester_name = indent.requester.full_name if indent.requester else None
     indent.room_name = indent.room.name if indent.room else None
     indent.building_name = indent.room.floor.building.name if indent.room and indent.room.floor and indent.room.floor.building else None
+    indent.floor = indent.floor or (indent.room.floor.name if indent.room and indent.room.floor else None)
+    indent.department = indent.department or (indent.room.department_name if indent.room else None)
     indent.project_id = indent.room.floor.building.project_id if indent.room and indent.room.floor and indent.room.floor.building else None
     for item in indent.items:
         if item.material:

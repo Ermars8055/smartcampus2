@@ -21,6 +21,7 @@ export default function Materials() {
   const [vendors, setVendors] = useState([]);
   const [search, setSearch] = useState('');
   const [catFilter, setCatFilter] = useState('');
+  const [storeFilter, setStoreFilter] = useState('');
   const [loading, setLoading] = useState(true);
   const [dialog, setDialog] = useState(false);
   const [editing, setEditing] = useState(null);
@@ -32,7 +33,7 @@ export default function Materials() {
   const [printLabelCount, setPrintLabelCount] = useState(12);
   const [labelFormat, setLabelFormat] = useState(32);
   const [form, setForm] = useState({
-    code: '', name: '', category_id: '', uom_id: '', warehouse_id: '', reorder_level: 0,
+    code: '', name: '', category_id: '', subcategory_id: '', uom_id: '', warehouse_id: '', reorder_level: 0,
     maximum_level: 0, standard_cost: 0, gst_rate: 0, storage_type: 'General',
     material_type: '', hsn_code: '', description: ''
   });
@@ -45,6 +46,7 @@ export default function Materials() {
     const params = {};
     if (search) params.search = search;
     if (catFilter) params.category_id = catFilter;
+    if (storeFilter) params.warehouse_id = storeFilter;
     api.get('/api/materials', { params }).then(r => setMaterials(r.data.items || [])).finally(() => setLoading(false));
   };
 
@@ -64,7 +66,7 @@ export default function Materials() {
     });
   }, []);
 
-  useEffect(() => { load(); }, [search, catFilter]);
+  useEffect(() => { load(); }, [search, catFilter, storeFilter]);
 
   const handleSort = (key) => {
     setSortConfig(prev => ({
@@ -146,6 +148,7 @@ export default function Materials() {
       const payload = {
         name: form.name,
         category_id: form.category_id,
+        subcategory_id: form.subcategory_id || null,
         uom_id: form.uom_id,
         warehouse_id: form.warehouse_id || null,
         reorder_level: Number(form.reorder_level),
@@ -199,7 +202,7 @@ export default function Materials() {
     setViewOnly(view);
     setErrors({});
     setForm({
-      code: m.code, name: m.name, category_id: m.category_id, uom_id: m.uom_id,
+      code: m.code, name: m.name, category_id: m.category_id, subcategory_id: m.subcategory_id || '', uom_id: m.uom_id,
       reorder_level: m.reorder_level === 0 ? '' : m.reorder_level,
       maximum_level: m.maximum_level === 0 ? '' : m.maximum_level,
       standard_cost: m.standard_cost === 0 ? '' : m.standard_cost,
@@ -218,7 +221,7 @@ export default function Materials() {
     setViewOnly(false);
     setErrors({});
     setForm({
-      code: '', name: '', category_id: '', uom_id: '',
+      code: '', name: '', category_id: '', subcategory_id: '', uom_id: '',
       reorder_level: '', maximum_level: '', standard_cost: '', gst_rate: '',
       storage_type: 'General', material_type: '', hsn_code: '', warehouse_id: '', description: ''
     });
@@ -348,6 +351,18 @@ export default function Materials() {
               sx: { borderRadius: 2 }
             }}
           />
+          <FormControl size="small" sx={{ minWidth: 200 }}>
+            <InputLabel>Filter by Store</InputLabel>
+            <Select
+              value={storeFilter}
+              label="Filter by Store"
+              onChange={e => setStoreFilter(e.target.value)}
+              sx={{ borderRadius: 2 }}
+            >
+              <MenuItem value="">All Stores</MenuItem>
+              {warehouses.map(w => <MenuItem key={w.id} value={w.id}>{w.name}</MenuItem>)}
+            </Select>
+          </FormControl>
           <FormControl size="small" sx={{ minWidth: 200 }}>
             <InputLabel>Filter by Category</InputLabel>
             <Select
@@ -633,12 +648,28 @@ export default function Materials() {
               <InputLabel>Category</InputLabel>
               <Select
                 value={form.category_id}
-                onChange={e => setForm({ ...form, category_id: e.target.value })}
+                onChange={e => setForm({ ...form, category_id: e.target.value, subcategory_id: '' })}
                 disabled={viewOnly}
                 label="Category"
                 startAdornment={<InputAdornment position="start"><Category sx={{ color: '#94A3B8' }} /></InputAdornment>}
               >
                 {categories.map(c => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
+              </Select>
+            </FormControl>
+
+            <FormControl fullWidth>
+              <InputLabel>Sub Category</InputLabel>
+              <Select
+                value={form.subcategory_id}
+                onChange={e => setForm({ ...form, subcategory_id: e.target.value })}
+                disabled={viewOnly || !form.category_id}
+                label="Sub Category"
+                startAdornment={<InputAdornment position="start"><Category sx={{ color: '#94A3B8' }} /></InputAdornment>}
+              >
+                <MenuItem value=""><em>None</em></MenuItem>
+                {form.category_id && subcategories.filter(s => s.category_id === form.category_id).map(s => (
+                  <MenuItem key={s.id} value={s.id}>{s.name}</MenuItem>
+                ))}
               </Select>
             </FormControl>
 

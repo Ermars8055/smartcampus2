@@ -133,6 +133,29 @@ def create_subcategory(
     db.refresh(sub)
     return SubCategoryOut(id=sub.id, name=sub.name, category_id=sub.category_id, is_active=sub.is_active)
 
+@router.put("/subcategories/{subcategory_id}", response_model=SubCategoryOut)
+def update_subcategory(
+    subcategory_id: int,
+    data: SubCategoryCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("categories", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    sub = db.query(SubCategory).filter(
+        SubCategory.id == subcategory_id,
+        SubCategory.tenant_id == tenant_id,
+        SubCategory.site_id == site_id
+    ).first()
+    if not sub:
+        raise HTTPException(status_code=404, detail="Subcategory not found")
+    
+    sub.name = data.name
+    sub.category_id = data.category_id
+    db.commit()
+    db.refresh(sub)
+    return SubCategoryOut(id=sub.id, name=sub.name, category_id=sub.category_id, is_active=sub.is_active)
+
 
 # ── UOM ──────────────────────────────────────────────────────────────────
 
@@ -171,6 +194,7 @@ def create_uom(
 def list_materials(
     search: Optional[str] = None,
     category_id: Optional[int] = None,
+    warehouse_id: Optional[int] = None,
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
@@ -190,6 +214,8 @@ def list_materials(
         ))
     if category_id:
         q = q.filter(Material.category_id == category_id)
+    if warehouse_id:
+        q = q.filter(Material.warehouse_id == warehouse_id)
 
     total = q.count()
     materials = q.order_by(Material.name).offset(skip).limit(limit).all()

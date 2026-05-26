@@ -85,8 +85,20 @@ export default function PendingAcknowledgments() {
                         </Box>
                       </Grid>
                       <Grid item xs={6}>
-                        <Typography variant="caption" sx={{ color: '#92400E', fontWeight: 600, display: 'block', mb: 0.25 }}>Remarks:</Typography>
-                        <Typography variant="body2" sx={{ fontWeight: 700, color: '#451A03' }}>{iss.purpose || 'Issued from store'}</Typography>
+                        <Box sx={{ mb: 1.5 }}>
+                          <Typography variant="caption" sx={{ color: '#92400E', fontWeight: 600, display: 'block', mb: 0.25 }}>Remarks:</Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 700, color: '#451A03' }}>{iss.purpose || 'Issued from store'}</Typography>
+                        </Box>
+                        <Box>
+                          <Typography variant="caption" sx={{ color: '#92400E', fontWeight: 600, display: 'block', mb: 0.25 }}>Issued to:</Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 700, color: '#451A03' }}>
+                            {(() => {
+                              const dept = iss.issued_to_department || iss.issued_to_contractor || iss.received_by_name || 'Store / User';
+                              const loc = [iss.building_name, iss.floor_name, iss.room_name].filter(Boolean).join('-');
+                              return loc ? `${dept} (${loc})` : dept;
+                            })()}
+                          </Typography>
+                        </Box>
                       </Grid>
                     </Grid>
                   </Box>

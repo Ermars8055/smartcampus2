@@ -811,7 +811,9 @@ def get_department_inventory_report(
 
     issues_map = {} # (material_id, department_name) -> qty
     for row in issues_query:
-        issues_map[(row.material_id, row.issued_to_department)] = row.total_issued
+        dept = row.issued_to_department.upper() if row.issued_to_department else "UNKNOWN"
+        # Since multiple casings could map to the same upper-case, we accumulate
+        issues_map[(row.material_id, dept)] = issues_map.get((row.material_id, dept), 0) + row.total_issued
 
     # 4. Calculate Returns per material per department
     returns_query = db.query(
@@ -827,7 +829,8 @@ def get_department_inventory_report(
 
     returns_map = {} # (material_id, department_name) -> qty
     for row in returns_query:
-        returns_map[(row.material_id, row.returned_from_department)] = row.total_returned
+        dept = row.returned_from_department.upper() if row.returned_from_department else "UNKNOWN"
+        returns_map[(row.material_id, dept)] = returns_map.get((row.material_id, dept), 0) + row.total_returned
 
     # 5. Build final data matrix
     final_data = []
@@ -839,8 +842,8 @@ def get_department_inventory_report(
         total_mat_inv = 0.0
         
         for d_name in dept_names:
-            issued = issues_map.get((mat.id, d_name), 0.0)
-            returned = returns_map.get((mat.id, d_name), 0.0)
+            issued = issues_map.get((mat.id, d_name.upper()), 0.0)
+            returned = returns_map.get((mat.id, d_name.upper()), 0.0)
             net = round(max(0.0, issued - returned))
             
             dept_inventory[d_name] = net

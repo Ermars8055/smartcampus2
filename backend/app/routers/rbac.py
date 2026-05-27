@@ -15,9 +15,10 @@ def list_roles(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("admin_roles", "read"))
 ):
-    if current_user.tenant_id is None:
+    tenant_id = getattr(current_user, '_tenant_id', None)
+    if tenant_id is None:
         return db.query(Role).all()
-    return db.query(Role).filter(Role.tenant_id == current_user.tenant_id).all()
+    return db.query(Role).filter(Role.tenant_id == tenant_id).all()
 
 @router.post("/roles", response_model=RoleOut)
 def create_role(
@@ -25,13 +26,15 @@ def create_role(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("admin_roles", "create"))
 ):
-    if current_user.tenant_id is None:
+    tenant_id = getattr(current_user, '_tenant_id', None)
+    if tenant_id is None:
         raise HTTPException(status_code=400, detail="Super Admins cannot create tenant roles this way.")
         
     role = Role(
         name=data.name,
+        code=data.code,
         description=data.description,
-        tenant_id=current_user.tenant_id
+        tenant_id=tenant_id
     )
     db.add(role)
     db.flush()
@@ -58,14 +61,16 @@ def update_role(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("admin_roles", "update"))
 ):
+    tenant_id = getattr(current_user, '_tenant_id', None)
     role = db.query(Role).filter(
         Role.id == id,
-        Role.tenant_id == current_user.tenant_id
+        Role.tenant_id == tenant_id
     ).first()
     if not role:
         raise HTTPException(status_code=404, detail="Role not found")
         
     role.name = data.name
+    role.code = data.code
     role.description = data.description
     
     # Simple approach: clear old permissions and add new ones
@@ -92,9 +97,10 @@ def delete_role(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("admin_roles", "delete"))
 ):
+    tenant_id = getattr(current_user, '_tenant_id', None)
     role = db.query(Role).filter(
         Role.id == id,
-        Role.tenant_id == current_user.tenant_id
+        Role.tenant_id == tenant_id
     ).first()
     if not role:
         raise HTTPException(status_code=404, detail="Role not found")

@@ -43,6 +43,12 @@ class GateEntryStatus(str, enum.Enum):
     AWAITING_DIRECT_GRN = "Awaiting Direct GRN"
     COMPLETED = "Completed"
 
+class InvoiceStatus(str, enum.Enum):
+    DRAFT = "Draft"
+    PENDING = "Pending Approval"
+    APPROVED = "Approved"
+    REJECTED = "Rejected"
+
 class GRNStatus(str, enum.Enum):
     DRAFT = "Draft"
     COMPLETED = "Completed"
@@ -558,6 +564,35 @@ class GateEntry(Base):
     __table_args__ = (UniqueConstraint("tenant_id", "entry_number", name="uq_ge_per_tenant"),)
 
 
+# == Invoices ==
+
+class Invoice(Base):
+    __tablename__ = "invoices"
+    id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
+    site_id = Column(Integer, ForeignKey("sites.id", ondelete="CASCADE"), nullable=False)
+    invoice_number = Column(String(100), nullable=False, index=True)
+    invoice_date = Column(Date, nullable=False)
+    gate_entry_id = Column(Integer, ForeignKey("gate_entries.id"), nullable=True)
+    vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=False)
+    po_id = Column(Integer, ForeignKey("purchase_orders.id"), nullable=True)
+    total_amount = Column(Float, default=0)
+    tax_amount = Column(Float, default=0)
+    status = Column(String(50), default=InvoiceStatus.DRAFT.value)
+    scan_url = Column(String(500))
+    remarks = Column(Text)
+    created_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    is_deleted = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=_get_now)
+    updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)
+
+    gate_entry = relationship("GateEntry")
+    vendor = relationship("Vendor")
+    purchase_order = relationship("PurchaseOrder")
+    created_by = relationship("User", foreign_keys=[created_by_id])
+    __table_args__ = (UniqueConstraint("tenant_id", "invoice_number", "vendor_id", name="uq_invoice_per_vendor_tenant"),)
+
+
 # == GRN ==
 
 class GRN(Base):
@@ -568,6 +603,7 @@ class GRN(Base):
     grn_number = Column(String(50), nullable=False, index=True)
     po_id = Column(Integer, ForeignKey("purchase_orders.id"), nullable=True)  # Nullable for Direct Invoice
     gate_entry_id = Column(Integer, ForeignKey("gate_entries.id"), nullable=True)
+    invoice_id = Column(Integer, ForeignKey("invoices.id"), nullable=True)
     warehouse_id = Column(Integer, ForeignKey("warehouses.id"), nullable=False)
     project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
     vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=False)
@@ -593,6 +629,7 @@ class GRN(Base):
     completed_at = Column(DateTime, nullable=True)
     purchase_order = relationship("PurchaseOrder")
     gate_entry = relationship("GateEntry")
+    invoice = relationship("Invoice")
     warehouse = relationship("Warehouse")
     project = relationship("Project")
     vendor = relationship("Vendor")

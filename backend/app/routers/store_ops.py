@@ -133,6 +133,17 @@ def create_issue(
             if room_data and room_data.floor:
                 building_id = room_data.floor.building_id
 
+        issued_to_dept = data.issued_to_department
+        if not issued_to_dept:
+            if room_id:
+                r_data = db.query(Room).filter(Room.id == room_id).first()
+                if r_data and r_data.department_name:
+                    issued_to_dept = r_data.department_name
+            if not issued_to_dept and data.indent_id:
+                ind_data = db.query(Indent).filter(Indent.id == data.indent_id).first()
+                if ind_data and ind_data.department:
+                    issued_to_dept = ind_data.department
+
         created_issues = []
         for w_id, items in items_by_warehouse.items():
             issue_number = get_next_number(db, tenant_id, site_id, "ISSUE", "ISS")
@@ -143,7 +154,7 @@ def create_issue(
                 indent_id=data.indent_id,
                 building_id=building_id,
                 issued_to_room_id=room_id,
-                issued_to_department=data.issued_to_department,
+                issued_to_department=issued_to_dept,
                 issued_to_contractor=data.issued_to_contractor,
                 purpose=data.purpose,
                 received_by_name=data.received_by_name,

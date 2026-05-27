@@ -5,9 +5,9 @@ import {
   TableContainer, Button, TextField, Grid, Tab, Tabs, Dialog, DialogTitle,
   DialogContent, DialogActions, Chip, IconButton, Tooltip, MenuItem,
   Select, FormControl, InputLabel, Switch, FormControlLabel, Checkbox,
-  ListItemText
+  ListItemText, InputAdornment
 } from '@mui/material';
-import { Add, Edit, PersonAdd, AdminPanelSettings, AccountTree as FlowIcon, Security } from '@mui/icons-material';
+import { Add, Edit, PersonAdd, AdminPanelSettings, AccountTree as FlowIcon, Security, Visibility, VisibilityOff } from '@mui/icons-material';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
@@ -33,6 +33,7 @@ export default function Admin() {
   const [dialog, setDialog] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [editing, setEditing] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
   const { user: currentUser } = useAuth();
 
   const load = () => {
@@ -103,7 +104,7 @@ export default function Admin() {
               <Table size="small">
                 <TableHead><TableRow>
                   <TableCell>Username</TableCell><TableCell>Full Name</TableCell><TableCell>Email</TableCell>
-                  <TableCell>Tenant</TableCell><TableCell>Role</TableCell><TableCell>Sites</TableCell>
+                  <TableCell>Role</TableCell>
                   <TableCell>Status</TableCell><TableCell>Created</TableCell><TableCell>Actions</TableCell>
                 </TableRow></TableHead>
                 <TableBody>
@@ -112,17 +113,8 @@ export default function Admin() {
                       <TableCell sx={{ fontWeight: 600, fontSize: '0.85rem' }}>{u.username}</TableCell>
                       <TableCell sx={{ fontSize: '0.85rem' }}>{u.full_name}</TableCell>
                       <TableCell sx={{ fontSize: '0.8rem', color: '#64748B' }}>{u.email}</TableCell>
-                      <TableCell sx={{ fontSize: '0.8rem' }}>{u.tenant_name || 'Platform'}</TableCell>
+
                       <TableCell><Chip label={u.role_name || u.role} size="small" color={roleColor[u.role_name || u.role] || 'default'} sx={{ fontWeight: 600, fontSize: '0.7rem' }} /></TableCell>
-                      <TableCell sx={{ maxWidth: 240 }}>
-                        {(u.sites || []).length === 0 ? (
-                          <Typography variant="caption" color="text.secondary">No site access</Typography>
-                        ) : (
-                          (u.sites || []).map(site => (
-                            <Chip key={site.site_id} label={site.site_name || `Site ${site.site_id}`} size="small" variant="outlined" sx={{ mr: 0.5, mb: 0.5 }} />
-                          ))
-                        )}
-                      </TableCell>
                       <TableCell><Chip label={u.is_active ? 'Active' : 'Inactive'} size="small" color={u.is_active ? 'success' : 'default'} variant="outlined" /></TableCell>
                       <TableCell sx={{ fontSize: '0.75rem' }}>{formatDate(u.created_at)}</TableCell>
                       <TableCell>
@@ -325,21 +317,7 @@ export default function Admin() {
             {!editing && <Grid item xs={6}><TextField fullWidth label="Username" value={form.username} onChange={e => setForm({ ...form, username: e.target.value })} required /></Grid>}
             <Grid item xs={editing ? 12 : 6}><TextField fullWidth label="Full Name" value={form.full_name} onChange={e => setForm({ ...form, full_name: e.target.value })} required /></Grid>
             <Grid item xs={6}><TextField fullWidth label="Email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required /></Grid>
-            {currentUser?.tenant_id == null && (
-              <Grid item xs={6}>
-                <FormControl fullWidth required={!editing}>
-                  <InputLabel>Tenant</InputLabel>
-                  <Select
-                    value={form.tenant_id || ''}
-                    label="Tenant"
-                    disabled={editing}
-                    onChange={e => setForm({ ...form, tenant_id: e.target.value, role_id: '', site_ids: [] })}
-                  >
-                    {tenants.map(t => <MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>)}
-                  </Select>
-                </FormControl>
-              </Grid>
-            )}
+
             <Grid item xs={6}>
               <FormControl fullWidth><InputLabel>Role</InputLabel>
                 <Select
@@ -376,7 +354,7 @@ export default function Admin() {
                 </FormControl>
               </Grid>
             )}
-            {!editing && <Grid item xs={12}><TextField fullWidth label="Password" type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} required /></Grid>}
+            {!editing && <Grid item xs={12}><TextField fullWidth label="Password" type={showPassword ? 'text' : 'password'} value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} required InputProps={{ endAdornment: <InputAdornment position="end"><IconButton onClick={() => setShowPassword(!showPassword)} edge="end">{showPassword ? <VisibilityOff /> : <Visibility />}</IconButton></InputAdornment> }} /></Grid>}
             {editing && <Grid item xs={12}><FormControlLabel control={<Switch checked={form.is_active !== false} onChange={e => setForm({ ...form, is_active: e.target.checked })} />} label="Active" /></Grid>}
           </Grid>
           )}
@@ -384,29 +362,33 @@ export default function Admin() {
         <DialogActions sx={{ px: 4, pb: 4, pt: 2, justifyContent: 'flex-end', gap: 2 }}>
           <Button onClick={() => setDialog(false)} sx={{ color: '#64748B', fontWeight: 600 }}>Cancel</Button>
           <Button variant="contained" sx={{ borderRadius: 2, px: 4, py: 1, fontWeight: 700, boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)', textTransform: 'none' }} onClick={async () => {
-            if (tab === 2) {
-              if (!form.document_type) return alert('Document Type is required');
-              if (!form.role_name) return alert('Role Required is mandatory');
-              if (!Number.isInteger(Number(form.level)) || Number(form.level) < 1) {
-                return alert('Level must be a positive integer (e.g., 1, 2, 3)');
+            try {
+              if (tab === 2) {
+                if (!form.document_type) return alert('Document Type is required');
+                if (!form.role_name) return alert('Role Required is mandatory');
+                if (!Number.isInteger(Number(form.level)) || Number(form.level) < 1) {
+                  return alert('Level must be a positive integer (e.g., 1, 2, 3)');
+                }
+                const payload = { 
+                  ...form, 
+                  level: Number(form.level), 
+                  min_amount: Number(form.min_amount),
+                  max_amount: form.max_amount === null || form.max_amount === '' ? null : Number(form.max_amount),
+                  user_id: form.user_id || null
+                };
+                if (editing) await api.put(`/api/approval-flows/${editing}`, payload);
+                else await api.post('/api/approval-flows', payload);
+                setDialog(false); setEditing(null); load();
+              } else if (tab === 3) {
+                if (!form.name || !form.code) return alert('Role name and code are required');
+                if (editing) await api.put(`/api/rbac/roles/${editing}`, form);
+                else await api.post('/api/rbac/roles', { ...form, tenant_id: currentUser?.tenant_id });
+                setDialog(false); setEditing(null); load();
+              } else {
+                handleSave();
               }
-              const payload = { 
-                ...form, 
-                level: Number(form.level), 
-                min_amount: Number(form.min_amount),
-                max_amount: form.max_amount === null || form.max_amount === '' ? null : Number(form.max_amount),
-                user_id: form.user_id || null
-              };
-              if (editing) await api.put(`/api/approval-flows/${editing}`, payload);
-              else await api.post('/api/approval-flows', payload);
-              setDialog(false); setEditing(null); load();
-            } else if (tab === 3) {
-              if (!form.name || !form.code) return alert('Role name and code are required');
-              if (editing) await api.put(`/api/rbac/roles/${editing}`, form);
-              else await api.post('/api/rbac/roles', { ...form, tenant_id: currentUser?.tenant_id });
-              setDialog(false); setEditing(null); load();
-            } else {
-              handleSave();
+            } catch (err) {
+              alert(err.response?.data?.detail || 'An error occurred while saving.');
             }
           }}>{editing ? 'Update' : 'Create'}</Button>
         </DialogActions>

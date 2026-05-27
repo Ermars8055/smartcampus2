@@ -39,6 +39,7 @@ const menuItems = [
   {
     text: 'Store Operations', icon: <Store />, children: [
       { text: 'Gate Entry', icon: <Security />, path: '/gate-entry' },
+      { text: 'Invoices', icon: <ReceiptLong />, path: '/invoices' },
       { text: 'GRN', icon: <LocalShipping />, path: '/grn' },
       { text: 'Material Issue', icon: <Inventory2 />, path: '/issues' },
       { text: 'Issue Acknowledgement', icon: <AssignmentTurnedIn />, path: '/pending-acknowledgments' },

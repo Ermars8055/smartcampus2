@@ -373,6 +373,37 @@ export default function PurchaseOrders() {
     printWindow.document.close();
   };
 
+  const detailData = useMemo(() => {
+    if (!detailDialog) return null;
+    let grandTotal = 0;
+    let totalCgst = 0;
+    let totalSgst = 0;
+    
+    (detailDialog.items || []).forEach(item => {
+      const qty = parseFloat(item.quantity) || 0;
+      const rate = parseFloat(item.rate) || 0;
+      const amount = qty * rate;
+      totalCgst += amount * 0.025;
+      totalSgst += amount * 0.025;
+      grandTotal += amount;
+    });
+    
+    const grandTotalWithTax = grandTotal + totalCgst + totalSgst;
+    const roundOff = (Math.round(grandTotalWithTax) - grandTotalWithTax).toFixed(2);
+    const totalNetAmount = Math.round(grandTotalWithTax).toFixed(2);
+    const activeTerms = detailDialog.terms || termsTemplates.find(t => t.is_default)?.content || (termsTemplates.length > 0 ? termsTemplates[0].content : '');
+
+    return {
+      grandTotal,
+      totalCgst,
+      totalSgst,
+      grandTotalWithTax,
+      roundOff,
+      totalNetAmount,
+      activeTerms
+    };
+  }, [detailDialog, termsTemplates]);
+
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
@@ -607,6 +638,9 @@ export default function PurchaseOrders() {
               <Grid item xs={3}>
                 <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>VENDOR</Typography>
                 <Typography sx={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>{detailDialog?.vendor_name}</Typography>
+                {detailDialog?.vendor_gst_number && (
+                  <Typography variant="caption" sx={{ color: '#64748B', display: 'block' }}>GSTIN: {detailDialog.vendor_gst_number}</Typography>
+                )}
               </Grid>
               <Grid item xs={2.25}>
                 <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>INDENT</Typography>
@@ -645,23 +679,95 @@ export default function PurchaseOrders() {
             <Divider sx={{ mb: 3 }} />
             <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2, color: '#1e293b' }}>Material Items</Typography>
             <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2 }}>
-              <TableHead><TableRow>
-                <TableCell>Material</TableCell><TableCell>Code</TableCell><TableCell align="right">Qty</TableCell>
-                <TableCell align="right">Rate</TableCell><TableCell align="right">Amount</TableCell><TableCell align="right">Received</TableCell>
-              </TableRow></TableHead>
-              <TableBody>
-                {detailDialog?.items?.map(item => (
-                  <TableRow key={item.id}>
-                    <TableCell>{item.material_name}</TableCell>
-                    <TableCell sx={{ color: '#64748B' }}>{item.material_code}</TableCell>
-                    <TableCell align="right">{item.quantity}</TableCell>
-                    <TableCell align="right">{formatCurrency(item.rate)}</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 600 }}>{formatCurrency(item.amount)}</TableCell>
-                    <TableCell align="right"><Chip label={item.received_quantity} size="small" color={item.received_quantity >= item.quantity ? 'success' : 'warning'} /></TableCell>
+              <Table size="small">
+                <TableHead>
+                  <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
+                    <TableCell sx={{ fontWeight: 700, fontSize: '0.7rem' }}>Sr. No.</TableCell>
+                    <TableCell sx={{ fontWeight: 700, fontSize: '0.7rem' }}>Item Description</TableCell>
+                    <TableCell sx={{ fontWeight: 700, fontSize: '0.7rem' }}>HSN Code</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.7rem' }}>Qty</TableCell>
+                    <TableCell sx={{ fontWeight: 700, fontSize: '0.7rem' }}>UOM</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.7rem' }}>RATE</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.7rem' }}>Disc. %</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.7rem' }}>CGST %</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.7rem' }}>SGST %</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.7rem' }}>IGST %</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.7rem' }}>Item Amt.</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.7rem' }}>Received</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
+                </TableHead>
+                <TableBody>
+                  {detailDialog?.items?.map((item, idx) => {
+                    const qty = parseFloat(item.quantity) || 0;
+                    const rate = parseFloat(item.rate) || 0;
+                    const amount = qty * rate;
+                    return (
+                      <TableRow key={item.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                        <TableCell sx={{ fontSize: '0.75rem' }}>{idx + 1}</TableCell>
+                        <TableCell sx={{ fontSize: '0.75rem' }}>
+                          {item.material_name}<br/>
+                          <Typography variant="caption" sx={{ color: '#64748B' }}>{item.material_code}</Typography>
+                        </TableCell>
+                        <TableCell sx={{ fontSize: '0.75rem' }}>-</TableCell>
+                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{qty.toFixed(2)}</TableCell>
+                        <TableCell sx={{ fontSize: '0.75rem' }}>{item.uom_name || 'NOS'}</TableCell>
+                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{rate.toFixed(2)}</TableCell>
+                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>0.00</TableCell>
+                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>2.50</TableCell>
+                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>2.50</TableCell>
+                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>0.00</TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem' }}>{amount.toFixed(2)}</TableCell>
+                        <TableCell align="right">
+                          <Chip label={item.received_quantity} size="small" color={item.received_quantity >= item.quantity ? 'success' : 'warning'} sx={{ fontSize: '0.65rem', height: 20 }} />
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
             </TableContainer>
+
+            {detailData && (
+              <Box sx={{ mt: 3, display: 'flex', flexDirection: { xs: 'column', md: 'row' }, justifyContent: 'flex-end', alignItems: 'flex-start', borderBottom: '1px dashed #cbd5e1', pb: 2, gap: 3 }}>
+                <Box sx={{ width: { xs: '100%', md: '40%' } }}>
+                  <Table size="small" sx={{ '& td': { borderBottom: 'none', py: 0.5, px: 1 } }}>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell align="right" sx={{ color: '#64748B', fontWeight: 600 }}>Total Amount</TableCell>
+                        <TableCell align="right" sx={{ width: '120px' }}>: {detailData.grandTotal.toFixed(2)}</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell align="right" sx={{ color: '#64748B', fontWeight: 600 }}>Add: CGST @ 2.5%</TableCell>
+                        <TableCell align="right">: {detailData.totalCgst.toFixed(2)}</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell align="right" sx={{ color: '#64748B', fontWeight: 600 }}>Add: SGST @ 2.5%</TableCell>
+                        <TableCell align="right">: {detailData.totalSgst.toFixed(2)}</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell align="right" sx={{ color: '#64748B', fontWeight: 600 }}>Round Off</TableCell>
+                        <TableCell align="right">: {detailData.roundOff}</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell align="right" sx={{ fontWeight: 700, fontSize: '1rem', color: '#1e293b' }}>Total Net Amount</TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 700, fontSize: '1rem', color: '#1e293b' }}>: {detailData.totalNetAmount}</TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </Box>
+              </Box>
+            )}
+
+            {detailData && detailData.activeTerms && (
+              <Box sx={{ mt: 3 }}>
+                <Typography variant="caption" sx={{ fontWeight: 700, color: '#1e293b', display: 'block', mb: 1 }}>TERMS AND CONDITIONS:</Typography>
+                <Box component="ul" sx={{ m: 0, pl: 2, '& li': { mb: 0.5, fontSize: '0.75rem', color: '#334155' } }}>
+                  {detailData.activeTerms.split('\n').filter(t => t.trim()).map((t, idx) => (
+                    <li key={idx}>{t}</li>
+                  ))}
+                </Box>
+              </Box>
+            )}
           </Box>
         </DialogContent>
         <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid #e2e8f0' }}>

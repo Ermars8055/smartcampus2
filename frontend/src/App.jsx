@@ -25,6 +25,7 @@ import PurchaseRequests from './pages/PurchaseRequests';
 import Quotations from './pages/Quotations';
 import PurchaseOrders from './pages/PurchaseOrders';
 import GateEntry from './pages/GateEntry';
+import Invoices from './pages/Invoices';
 import GRNPage from './pages/GRN';
 import StoreOps from './pages/StoreOps';
 import PendingAcknowledgments from './pages/PendingAcknowledgments';
@@ -99,6 +100,7 @@ function AppRoutes() {
         <Route path="quotations" element={<Quotations />} />
         <Route path="purchase-orders" element={<PurchaseOrders />} />
         <Route path="gate-entry" element={<GateEntry />} />
+        <Route path="invoices" element={<Invoices />} />
         <Route path="grn" element={<GRNPage />} />
         <Route path="issues" element={<StoreOps />} />
         <Route path="pending-acknowledgments" element={<PendingAcknowledgments />} />

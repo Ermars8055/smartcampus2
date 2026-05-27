@@ -52,6 +52,7 @@ class RolePermissionOut(RolePermissionBase):
 
 class RoleBase(BaseModel):
     name: str
+    code: str
     description: Optional[str] = None
 
 class RoleCreate(RoleBase):
@@ -59,6 +60,7 @@ class RoleCreate(RoleBase):
 
 class RoleOut(RoleBase):
     id: int
+    tenant_id: Optional[int] = None
     permissions: List[RolePermissionOut] = []
     class Config:
         from_attributes = True
@@ -505,6 +507,46 @@ class GateEntryOut(GateEntryBase):
     project_name: Optional[str] = None
     material_names: Optional[str] = None
     material_qtys: Optional[str] = None
+    class Config:
+        from_attributes = True
+
+
+# ── Invoices ─────────────────────────────────────────────────────────────
+
+class InvoiceBase(BaseModel):
+    invoice_number: str
+    invoice_date: date
+    gate_entry_id: Optional[int] = None
+    vendor_id: int
+    po_id: Optional[int] = None
+    total_amount: float = 0
+    tax_amount: float = 0
+    scan_url: Optional[str] = None
+    remarks: Optional[str] = None
+
+class InvoiceCreate(InvoiceBase):
+    pass
+
+class InvoiceUpdate(BaseModel):
+    invoice_number: Optional[str] = None
+    invoice_date: Optional[date] = None
+    gate_entry_id: Optional[int] = None
+    vendor_id: Optional[int] = None
+    po_id: Optional[int] = None
+    total_amount: Optional[float] = None
+    tax_amount: Optional[float] = None
+    status: Optional[str] = None
+    scan_url: Optional[str] = None
+    remarks: Optional[str] = None
+
+class InvoiceOut(InvoiceBase):
+    id: int
+    status: str
+    created_at: datetime
+    vendor_name: Optional[str] = None
+    po_number: Optional[str] = None
+    gate_entry_number: Optional[str] = None
+    created_by_name: Optional[str] = None
     class Config:
         from_attributes = True
 

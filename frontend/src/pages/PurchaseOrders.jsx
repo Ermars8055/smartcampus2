@@ -30,7 +30,7 @@ export default function PurchaseOrders() {
   const [detailDialog, setDetailDialog] = useState(null);
   const [search, setSearch] = useState('');
   const [form, setForm] = useState({
-    vendor_id: '', project_id: '', delivery_date: dayjs().add(14, 'day'), terms: '', po_type: 'Informal', items: [{ material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0 }]
+    vendor_id: '', project_id: '', delivery_date: dayjs().add(14, 'day'), terms: '', po_type: 'Informal', items: [{ material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }]
   });
   const [sortConfig, setSortConfig] = useState({ key: 'created_at', direction: 'desc' });
 
@@ -97,7 +97,7 @@ export default function PurchaseOrders() {
         vendor_id: '',
         project_id: projects[0]?.id || '',
         delivery_date: dayjs().add(21, 'day'),
-        terms: termsTemplates.find(t => t.is_default)?.content || '',
+        terms: '',
         po_type: 'Formal',
         indent_id: ind.id,
         items: ind.items.filter(it => it.requested_quantity > it.issued_quantity).map(it => ({
@@ -107,7 +107,10 @@ export default function PurchaseOrders() {
           discount_percent: 0,
           cgst_percentage: 0,
           sgst_percentage: 0,
-          igst_percentage: 0
+          igst_percentage: 0,
+          is_gst_inclusive: false,
+          uom_name: '',
+          base_rate: 0
         }))
       });
       setDialog(true);
@@ -116,25 +119,44 @@ export default function PurchaseOrders() {
     }
   }, [location.state, projects, location.pathname, navigate]);
 
-  const addItem = () => setForm({ ...form, items: [...form.items, { material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0 }] });
+  const addItem = () => setForm({ ...form, items: [...form.items, { material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }] });
   const removeItem = (i) => setForm({ ...form, items: form.items.filter((_, idx) => idx !== i) });
   const updateItem = (i, field, val) => {
     const items = [...form.items];
     items[i] = { ...items[i], [field]: val };
+    if (field === 'material_id') {
+      const mat = materials.find(m => m.id === val);
+      if (mat) {
+        items[i].uom_name = mat.uom_name || '';
+        items[i].base_rate = mat.standard_cost || 0;
+      }
+    }
     setForm({ ...form, items });
   };
 
   const handleCreate = async () => {
+    if (!form.terms || !form.terms.trim()) {
+      showMessage("Terms and Conditions are mandatory.", "Validation Error", "warning");
+      return;
+    }
     try {
-      const mappedItems = form.items.map(it => ({
-        material_id: it.material_id,
-        quantity: parseFloat(it.quantity) || 0,
-        rate: parseFloat(it.rate) || 0,
-        discount_percent: parseFloat(it.discount_percent) || 0,
-        cgst_percentage: parseFloat(it.cgst_percentage) || 0,
-        sgst_percentage: parseFloat(it.sgst_percentage) || 0,
-        igst_percentage: parseFloat(it.igst_percentage) || 0
-      }));
+      const mappedItems = form.items.map(it => {
+        const inputRate = parseFloat(it.rate) || 0;
+        const totalGstPercent = (parseFloat(it.cgst_percentage) || 0) + (parseFloat(it.sgst_percentage) || 0) + (parseFloat(it.igst_percentage) || 0);
+        let finalBaseRate = inputRate;
+        if (it.is_gst_inclusive && totalGstPercent > 0) {
+          finalBaseRate = inputRate / (1 + (totalGstPercent / 100));
+        }
+        return {
+          material_id: it.material_id,
+          quantity: parseFloat(it.quantity) || 0,
+          rate: finalBaseRate,
+          discount_percent: parseFloat(it.discount_percent) || 0,
+          cgst_percentage: parseFloat(it.cgst_percentage) || 0,
+          sgst_percentage: parseFloat(it.sgst_percentage) || 0,
+          igst_percentage: parseFloat(it.igst_percentage) || 0
+        };
+      });
       const hasInvalidNumbers = mappedItems.some(it => it.quantity <= 0 || it.rate < 0);
       if (hasInvalidNumbers) {
         showMessage("Quantity must be greater than 0, and rate cannot be negative.", "Validation Error", "warning");
@@ -423,7 +445,7 @@ export default function PurchaseOrders() {
         </Box>
         {hasPermission('purchase_orders', 'can_create') && (
           <Button variant="contained" startIcon={<Add />} onClick={() => {
-            setForm({ vendor_id: '', project_id: projects[0]?.id || '', delivery_date: dayjs().add(21, 'day'), terms: termsTemplates.find(t => t.is_default)?.content || '', po_type: 'Informal', items: [{ material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0 }] });
+            setForm({ vendor_id: '', project_id: projects[0]?.id || '', delivery_date: dayjs().add(21, 'day'), terms: '', po_type: 'Informal', items: [{ material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }] });
             setDialog(true);
           }}>Create PO</Button>
         )}
@@ -855,17 +877,39 @@ export default function PurchaseOrders() {
           </Box>
 
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-            {form.items.map((item, i) => (
+            {form.items.map((item, i) => {
+              const qty = parseFloat(item.quantity) || 0;
+              const inputRate = parseFloat(item.rate) || 0;
+              const discPercent = parseFloat(item.discount_percent) || 0;
+              const cgstPercent = parseFloat(item.cgst_percentage) || 0;
+              const sgstPercent = parseFloat(item.sgst_percentage) || 0;
+              const igstPercent = parseFloat(item.igst_percentage) || 0;
+              const totalGstPercent = cgstPercent + sgstPercent + igstPercent;
+              
+              let baseRate = inputRate;
+              if (item.is_gst_inclusive && totalGstPercent > 0) {
+                baseRate = inputRate / (1 + (totalGstPercent / 100));
+              }
+              const grossAmt = qty * baseRate;
+              const discAmt = grossAmt * (discPercent / 100);
+              const taxableAmt = grossAmt - discAmt;
+              const cgstAmt = taxableAmt * (cgstPercent / 100);
+              const sgstAmt = taxableAmt * (sgstPercent / 100);
+              const igstAmt = taxableAmt * (igstPercent / 100);
+              const netAmt = taxableAmt + cgstAmt + sgstAmt + igstAmt;
+
+              return (
               <Box key={i} sx={{
-                display: 'flex', flexWrap: 'wrap',
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', md: '1.5fr 0.5fr 0.8fr 1fr 0.8fr' },
                 gap: 1.5,
-                alignItems: 'center',
                 p: 1.5,
                 bgcolor: '#f8fafc',
                 borderRadius: 2,
-                border: '1px solid #e2e8f0'
+                border: '1px solid #e2e8f0',
+                position: 'relative'
               }}>
-                <Box sx={{ flex: '1 1 200px' }}>
+                <Box>
                   <MaterialSelect
                     materials={materials}
                     value={item.material_id}
@@ -873,84 +917,60 @@ export default function PurchaseOrders() {
                     size="small"
                   />
                 </Box>
-                <TextField
-                  sx={{ flex: '1 1 80px' }}
-                  size="small"
-                  label="Qty"
-                  type="number"
-                  value={item.quantity}
-                  onChange={e => updateItem(i, 'quantity', e.target.value)}
-                  inputProps={{ min: 0 }}
-                />
-                <TextField
-                  sx={{ flex: '1 1 80px' }}
-                  size="small"
-                  label="Rate (₹)"
-                  type="number"
-                  value={item.rate}
-                  onChange={e => updateItem(i, 'rate', e.target.value)}
-                  inputProps={{ min: 0 }}
-                />
-                <TextField
-                  sx={{ flex: '1 1 70px' }}
-                  size="small"
-                  label="Disc %"
-                  type="number"
-                  value={item.discount_percent}
-                  onChange={e => updateItem(i, 'discount_percent', e.target.value)}
-                  inputProps={{ min: 0, max: 100 }}
-                />
-                <TextField
-                  sx={{ flex: '1 1 70px' }}
-                  size="small"
-                  label="CGST %"
-                  type="number"
-                  value={item.cgst_percentage}
-                  onChange={e => updateItem(i, 'cgst_percentage', e.target.value)}
-                  inputProps={{ min: 0, max: 100 }}
-                />
-                <TextField
-                  sx={{ flex: '1 1 70px' }}
-                  size="small"
-                  label="SGST %"
-                  type="number"
-                  value={item.sgst_percentage}
-                  onChange={e => updateItem(i, 'sgst_percentage', e.target.value)}
-                  inputProps={{ min: 0, max: 100 }}
-                />
-                <TextField
-                  sx={{ flex: '1 1 70px' }}
-                  size="small"
-                  label="IGST %"
-                  type="number"
-                  value={item.igst_percentage}
-                  onChange={e => updateItem(i, 'igst_percentage', e.target.value)}
-                  inputProps={{ min: 0, max: 100 }}
-                />
-                <Box sx={{ flex: '1 1 100px', textAlign: 'right', pr: 1 }}>
-                  <Typography variant="caption" sx={{ color: '#64748B', display: 'block', fontSize: '0.65rem', fontWeight: 600 }}>AMOUNT</Typography>
-                  <Typography sx={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b' }}>
-                    ₹{((parseFloat(item.quantity) || 0) * (parseFloat(item.rate) || 0)).toLocaleString('en-IN')}
-                  </Typography>
+                <TextField size="small" label="Unit" value={item.uom_name || '-'} InputProps={{ readOnly: true }} />
+                <TextField size="small" label="Qty" type="number" value={item.quantity} onChange={e => updateItem(i, 'quantity', e.target.value)} inputProps={{ min: 0 }} />
+                <Box>
+                  <TextField fullWidth size="small" label="Rate (₹)" type="number" value={item.rate} onChange={e => updateItem(i, 'rate', e.target.value)} inputProps={{ min: 0 }} />
+                  {item.base_rate > 0 && <Typography variant="caption" sx={{ color: '#64748B', display: 'block', mt: 0.5 }}>Base Rate: ₹{item.base_rate}</Typography>}
                 </Box>
-                <Box sx={{ flex: '0 0 40px', display: 'flex', justifyContent: 'center' }}>
-                  {form.items.length > 1 && (
-                    <Tooltip title="Remove Item">
-                      <IconButton size="small" color="error" onClick={() => removeItem(i)}>
-                        <Delete fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                  )}
+                <FormControl size="small">
+                  <InputLabel>GST</InputLabel>
+                  <Select label="GST" value={item.is_gst_inclusive ? 'inclusive' : 'exclusive'} onChange={e => updateItem(i, 'is_gst_inclusive', e.target.value === 'inclusive')}>
+                    <MenuItem value="exclusive">Exclusive</MenuItem>
+                    <MenuItem value="inclusive">Inclusive</MenuItem>
+                  </Select>
+                </FormControl>
+
+                <Box sx={{ gridColumn: { xs: '1 / -1', md: '1 / -1' }, display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', md: '1fr 1fr 1fr 1fr' }, gap: 1.5 }}>
+                  <Box display="flex" gap={1}>
+                    <TextField size="small" label="Disc %" type="number" value={item.discount_percent} onChange={e => updateItem(i, 'discount_percent', e.target.value)} inputProps={{ min: 0, max: 100 }} sx={{ flex: 1 }} />
+                    <TextField size="small" label="Disc (₹)" value={discAmt.toFixed(2)} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
+                  </Box>
+                  <Box display="flex" gap={1}>
+                    <TextField size="small" label="CGST %" type="number" value={item.cgst_percentage} onChange={e => updateItem(i, 'cgst_percentage', e.target.value)} inputProps={{ min: 0, max: 100 }} sx={{ flex: 1 }} />
+                    <TextField size="small" label="CGST (₹)" value={cgstAmt.toFixed(2)} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
+                  </Box>
+                  <Box display="flex" gap={1}>
+                    <TextField size="small" label="SGST %" type="number" value={item.sgst_percentage} onChange={e => updateItem(i, 'sgst_percentage', e.target.value)} inputProps={{ min: 0, max: 100 }} sx={{ flex: 1 }} />
+                    <TextField size="small" label="SGST (₹)" value={sgstAmt.toFixed(2)} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
+                  </Box>
+                  <Box display="flex" gap={1}>
+                    <TextField size="small" label="IGST %" type="number" value={item.igst_percentage} onChange={e => updateItem(i, 'igst_percentage', e.target.value)} inputProps={{ min: 0, max: 100 }} sx={{ flex: 1 }} />
+                    <TextField size="small" label="IGST (₹)" value={igstAmt.toFixed(2)} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
+                  </Box>
+                </Box>
+                
+                <Box sx={{ gridColumn: { xs: '1 / -1', md: '1 / -1' }, display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1, pt: 1, borderTop: '1px dashed #e2e8f0' }}>
+                  {form.items.length > 1 ? (
+                    <Button size="small" color="error" startIcon={<Delete />} onClick={() => removeItem(i)}>Remove</Button>
+                  ) : <Box />}
+                  <Box sx={{ textAlign: 'right' }}>
+                    <Typography variant="caption" sx={{ color: '#64748B', display: 'block', fontSize: '0.65rem', fontWeight: 600 }}>NET AMOUNT</Typography>
+                    <Typography sx={{ fontSize: '1rem', fontWeight: 700, color: '#1e293b' }}>
+                      ₹{netAmt.toLocaleString('en-IN', { maximumFractionDigits: 2, minimumFractionDigits: 2 })}
+                    </Typography>
+                  </Box>
                 </Box>
               </Box>
-            ))}
+            );
+            })}
           </Box>
           <Divider sx={{ my: 2 }} />
-          <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b', mb: 1.5 }}>Terms & Conditions</Typography>
+          <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b', mb: 1.5 }}>Terms & Conditions *</Typography>
           <FormControl fullWidth size="small" sx={{ mb: 2 }}>
-            <InputLabel>Load Template</InputLabel>
+            <InputLabel>Select Template</InputLabel>
             <Select
-              label="Load Template"
+              label="Select Template"
               onChange={e => {
                 const t = termsTemplates.find(x => x.id === e.target.value);
                 if (t) setForm({ ...form, terms: t.content });
@@ -964,6 +984,7 @@ export default function PurchaseOrders() {
           <TextField
             fullWidth
             multiline
+            required
             rows={4}
             label="Terms and Conditions"
             value={form.terms}

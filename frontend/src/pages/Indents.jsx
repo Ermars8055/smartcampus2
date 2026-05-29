@@ -441,7 +441,7 @@ export default function Indents() {
                       </Tooltip>
                         <Tooltip title="Convert to PO">
                           <span><IconButton size="small" color="primary" disabled={(ind.status !== 'Approved' && ind.status !== 'Partially Issued') || !hasAction('indents', 'can_convert_to_po')}
-                            onClick={() => setVendorDialog({ open: true, indent: ind, vendor_id: '', terms: termsTemplates.find(t => t.is_default)?.content || '' })}>
+                            onClick={() => setVendorDialog({ open: true, indent: ind, vendor_id: '', terms: '' })}>
                             <ReceiptLong fontSize="small" />
                           </IconButton></span>
                         </Tooltip>
@@ -667,33 +667,6 @@ export default function Indents() {
             </Grid>
           </Box>
 
-          <Box sx={{ mb: 1.5 }}>
-            <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748B', mb: 0.5, display: 'block', textTransform: 'uppercase', letterSpacing: 0.5 }}>Terms and Conditions</Typography>
-            <FormControl fullWidth size="small" sx={{ mb: 1.5 }}>
-              <InputLabel>Load Template</InputLabel>
-              <Select
-                label="Load Template"
-                onChange={e => {
-                  const t = termsTemplates.find(x => x.id === e.target.value);
-                  if (t) setVendorDialog({ ...vendorDialog, terms: t.content });
-                }}
-                defaultValue=""
-                sx={{ bgcolor: '#fff' }}
-              >
-                <MenuItem value=""><em>Select a Template</em></MenuItem>
-                {termsTemplates.map(t => <MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>)}
-              </Select>
-            </FormControl>
-            <TextField
-              fullWidth size="small"
-              multiline rows={3}
-              placeholder="Enter terms and conditions to be included in the PO..."
-              value={vendorDialog.terms}
-              onChange={e => setVendorDialog({ ...vendorDialog, terms: e.target.value })}
-              sx={{ bgcolor: '#fff' }}
-            />
-          </Box>
-
           <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748B', mb: 0.5, display: 'block', textTransform: 'uppercase', letterSpacing: 0.5 }}>Indent Details</Typography>
           <Grid container spacing={0.5} sx={{ mb: 1.5 }}>
             {[
@@ -723,7 +696,7 @@ export default function Indents() {
 
           <Divider sx={{ mb: 1.5 }} />
           <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748B', mb: 1, display: 'block', textTransform: 'uppercase', letterSpacing: 0.5 }}>Items to be converted</Typography>
-          <Table size="small">
+          <Table size="small" sx={{ mb: 2 }}>
             <TableHead>
               <TableRow sx={{ bgcolor: '#f8fafc', '& th': { py: 0.75, px: 1 } }}>
                 <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Material</TableCell>
@@ -733,7 +706,7 @@ export default function Indents() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {vendorDialog.indent?.items?.map(item => (
+              {vendorDialog.indent?.items?.filter(item => item.pending_quantity > 0).map(item => (
                 <TableRow key={item.id} sx={{ '& td': { py: 0.5, px: 1 } }}>
                   <TableCell>
                     <Typography sx={{ fontWeight: 600, fontSize: '0.8rem' }}>{item.material_name}</Typography>
@@ -748,6 +721,34 @@ export default function Indents() {
               ))}
             </TableBody>
           </Table>
+
+          <Divider sx={{ mb: 1.5 }} />
+          <Box sx={{ mb: 1.5 }}>
+            <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748B', mb: 0.5, display: 'block', textTransform: 'uppercase', letterSpacing: 0.5 }}>Terms and Conditions</Typography>
+            <FormControl fullWidth size="small" sx={{ mb: 1.5 }}>
+              <InputLabel>Select Template</InputLabel>
+              <Select
+                label="Select Template"
+                onChange={e => {
+                  const t = termsTemplates.find(x => x.id === e.target.value);
+                  if (t) setVendorDialog({ ...vendorDialog, terms: t.content });
+                }}
+                defaultValue=""
+                sx={{ bgcolor: '#fff' }}
+              >
+                <MenuItem value=""><em>Select a Template</em></MenuItem>
+                {termsTemplates.map(t => <MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>)}
+              </Select>
+            </FormControl>
+            <TextField
+              fullWidth size="small"
+              multiline rows={3}
+              placeholder="Enter terms and conditions to be included in the PO..."
+              value={vendorDialog.terms}
+              onChange={e => setVendorDialog({ ...vendorDialog, terms: e.target.value })}
+              sx={{ bgcolor: '#fff' }}
+            />
+          </Box>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button onClick={() => setVendorDialog({ ...vendorDialog, open: false })}>Cancel</Button>

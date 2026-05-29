@@ -149,6 +149,10 @@ def get_me(current_user: User = Depends(get_current_user), db: Session = Depends
     tid = getattr(current_user, '_tenant_id', None)
     sites_info = []
     tenant_info = None
+    
+    roles = getattr(current_user, '_roles', [])
+    permissions = getattr(current_user, '_permissions', {})
+
     if tid:
         tenant = db.query(Tenant).filter_by(id=tid).first()
         if tenant:
@@ -157,14 +161,40 @@ def get_me(current_user: User = Depends(get_current_user), db: Session = Depends
         if site_ids:
             sites_db = db.query(Site).filter(Site.id.in_(site_ids)).all()
             sites_info = [{"id": s.id, "name": s.name, "location": s.location} for s in sites_db]
+            
+        # Refresh roles and permissions from DB to ensure frontend gets latest updates
+        if not getattr(current_user, '_is_platform_admin', False):
+            assignments = db.query(UserRoleAssignment).filter_by(
+                user_id=current_user.id, tenant_id=tid
+            ).all()
+            if assignments:
+                fresh_roles = []
+                fresh_permissions = {}
+                for a in assignments:
+                    if a.role:
+                        fresh_roles.append(a.role.code)
+                        for p in a.role.permissions:
+                            if p.resource not in fresh_permissions:
+                                fresh_permissions[p.resource] = {"can_read": False, "can_create": False, "can_update": False, "can_delete": False, "extended_actions": {}}
+                            if p.can_read: fresh_permissions[p.resource]["can_read"] = True
+                            if p.can_create: fresh_permissions[p.resource]["can_create"] = True
+                            if p.can_update: fresh_permissions[p.resource]["can_update"] = True
+                            if p.can_delete: fresh_permissions[p.resource]["can_delete"] = True
+                            if p.extended_actions:
+                                for action_key, action_val in p.extended_actions.items():
+                                    if action_val:
+                                        fresh_permissions[p.resource]["extended_actions"][action_key] = True
+                roles = list(set(fresh_roles))
+                permissions = fresh_permissions
+
     return {
         "id": current_user.id, "username": current_user.username,
         "email": current_user.email, "full_name": current_user.full_name,
         "is_platform_admin": getattr(current_user, '_is_platform_admin', False),
         "tenant": tenant_info, "sites": sites_info,
         "active_site_id": getattr(current_user, '_active_site_id', None),
-        "roles": getattr(current_user, '_roles', []),
-        "permissions": getattr(current_user, '_permissions', {})
+        "roles": roles,
+        "permissions": permissions
     }
 
 @router.post("/change-password")

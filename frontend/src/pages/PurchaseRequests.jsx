@@ -116,14 +116,14 @@ export default function PurchaseRequests() {
       pr,
       vendor_id: '',
       delivery_date: dayjs().add(14, 'day'),
-      terms: termsTemplates.find(t => t.is_default)?.content || '',
-      items: pr.items.map(it => ({ ...it, rate: '' })) // initialize rate for each item
+      terms: '',
+      items: pr.items.map(it => ({ ...it, rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0 }))
     });
   };
 
-  const updateConvertItem = (i, rate) => {
+  const updateConvertItem = (i, field, value) => {
     const items = [...convertDialog.items];
-    items[i].rate = rate;
+    items[i][field] = value;
     setConvertDialog({ ...convertDialog, items });
   };
 
@@ -131,11 +131,15 @@ export default function PurchaseRequests() {
     const mappedItems = convertDialog.items.map(it => ({
       material_id: it.material_id,
       quantity: parseFloat(it.quantity),
-      rate: parseFloat(it.rate)
+      rate: parseFloat(it.rate),
+      discount_percent: parseFloat(it.discount_percent || 0),
+      cgst_percentage: parseFloat(it.cgst_percentage || 0),
+      sgst_percentage: parseFloat(it.sgst_percentage || 0),
+      igst_percentage: parseFloat(it.igst_percentage || 0),
     }));
     
-    if (mappedItems.some(it => isNaN(it.rate) || it.rate < 0 || isNaN(it.quantity) || it.quantity <= 0)) {
-      alert("Rate and Quantity must be positive numbers for all items.");
+    if (mappedItems.some(it => isNaN(it.rate) || it.rate < 0 || isNaN(it.quantity) || it.quantity <= 0 || isNaN(it.discount_percent) || it.discount_percent < 0 || isNaN(it.cgst_percentage) || it.cgst_percentage < 0 || isNaN(it.sgst_percentage) || it.sgst_percentage < 0 || isNaN(it.igst_percentage) || it.igst_percentage < 0)) {
+      alert("Rate, Quantity, Discount and Taxes must be valid non-negative numbers.");
       return;
     }
 
@@ -659,7 +663,7 @@ export default function PurchaseRequests() {
       <Dialog 
         open={convertDialog.open} 
         onClose={() => setConvertDialog({ ...convertDialog, open: false })} 
-        maxWidth="sm" 
+        maxWidth="md" 
         fullWidth 
         PaperProps={{ sx: { borderRadius: 3, boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' } }}
       >
@@ -727,55 +731,62 @@ export default function PurchaseRequests() {
           
           <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 700, color: '#1e293b' }}>Specify Rates for Items</Typography>
           
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {convertDialog.items?.map((it, i) => (
-              <Box key={i} sx={{ 
-                display: 'grid', 
-                gridTemplateColumns: '1.2fr 1fr', 
-                gap: 2, 
-                alignItems: 'center',
-                p: 1.5,
-                bgcolor: '#f8fafc',
-                borderRadius: 2,
-                border: '1px solid #e2e8f0'
-              }}>
-                <Box>
-                  <Typography variant="body2" sx={{ fontWeight: 700 }}>{it.material_name}</Typography>
-                  <Typography variant="caption" sx={{ color: '#64748B', display: 'block' }}>
-                    Qty: {it.quantity} {it.uom_name}
-                  </Typography>
-                  {it.last_purchase_price != null ? (
-                    <Typography variant="caption" sx={{ color: '#059669', fontWeight: 600, mt: 0.5, display: 'block' }}>
-                      LPP: ₹{it.last_purchase_price}
-                    </Typography>
-                  ) : (
-                    <Typography variant="caption" sx={{ color: '#94A3B8', mt: 0.5, display: 'block' }}>
-                      No prior purchases
-                    </Typography>
-                  )}
-                </Box>
-                <TextField 
-                  fullWidth 
-                  size="small" 
-                  label="Rate (₹) / unit" 
-                  type="number" 
-                  value={it.rate}
-                  onChange={e => updateConvertItem(i, e.target.value)} 
-                  inputProps={{ min: 0 }} 
-                  required 
-                />
-              </Box>
-            ))}
-          </Box>
+          <Table size="small" sx={{ mb: 2 }}>
+            <TableHead>
+              <TableRow sx={{ bgcolor: '#f8fafc', '& th': { py: 0.75, px: 1 } }}>
+                <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Material</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Qty</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', width: 100 }}>Rate (₹)</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', width: 80 }}>Disc %</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', width: 80 }}>CGST %</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', width: 80 }}>SGST %</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', width: 80 }}>IGST %</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {convertDialog.items?.map((it, i) => (
+                <TableRow key={i} sx={{ '& td': { py: 0.5, px: 1 } }}>
+                  <TableCell>
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>{it.material_name}</Typography>
+                    {it.last_purchase_price != null ? (
+                      <Typography variant="caption" sx={{ color: '#059669', fontWeight: 600, display: 'block' }}>
+                        LPP: ₹{it.last_purchase_price}
+                      </Typography>
+                    ) : (
+                      <Typography variant="caption" sx={{ color: '#94A3B8', display: 'block' }}>
+                        No prior purchases
+                      </Typography>
+                    )}
+                  </TableCell>
+                  <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{it.quantity} {it.uom_name}</TableCell>
+                  <TableCell align="right">
+                    <TextField size="small" type="number" value={it.rate} onChange={e => updateConvertItem(i, 'rate', e.target.value)} inputProps={{ min: 0 }} required sx={{ width: 90 }} />
+                  </TableCell>
+                  <TableCell align="right">
+                    <TextField size="small" type="number" value={it.discount_percent} onChange={e => updateConvertItem(i, 'discount_percent', e.target.value)} inputProps={{ min: 0 }} sx={{ width: 70 }} />
+                  </TableCell>
+                  <TableCell align="right">
+                    <TextField size="small" type="number" value={it.cgst_percentage} onChange={e => updateConvertItem(i, 'cgst_percentage', e.target.value)} inputProps={{ min: 0 }} sx={{ width: 70 }} />
+                  </TableCell>
+                  <TableCell align="right">
+                    <TextField size="small" type="number" value={it.sgst_percentage} onChange={e => updateConvertItem(i, 'sgst_percentage', e.target.value)} inputProps={{ min: 0 }} sx={{ width: 70 }} />
+                  </TableCell>
+                  <TableCell align="right">
+                    <TextField size="small" type="number" value={it.igst_percentage} onChange={e => updateConvertItem(i, 'igst_percentage', e.target.value)} inputProps={{ min: 0 }} sx={{ width: 70 }} />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
 
           <Box sx={{ mt: 3 }}>
             <Typography variant="caption" sx={{ fontWeight: 600, color: '#64748B', mb: 0.5, display: 'block', textTransform: 'uppercase' }}>
               Terms and Conditions
             </Typography>
             <FormControl fullWidth size="small" sx={{ mb: 1.5 }}>
-              <InputLabel>Load Template</InputLabel>
+              <InputLabel>Select Template</InputLabel>
               <Select
-                label="Load Template"
+                label="Select Template"
                 onChange={e => {
                   const t = termsTemplates.find(x => x.id === e.target.value);
                   if (t) setConvertDialog({ ...convertDialog, terms: t.content });

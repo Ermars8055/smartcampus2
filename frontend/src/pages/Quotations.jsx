@@ -75,7 +75,7 @@ const Quotations = () => {
     selected_vendor_id: '',
     override_reason: ''
   });
-  const [convertToPoDialog, setConvertToPoDialog] = useState({ open: false, terms: '' });
+  const [convertToPoDialog, setConvertToPoDialog] = useState({ open: false, terms: '', items: [] });
   const [termsTemplates, setTermsTemplates] = useState([]);
 
   useEffect(() => {
@@ -248,13 +248,34 @@ const Quotations = () => {
     }
   };
 
+  const updateConvertToPoItem = (idx, field, value) => {
+    const newItems = [...convertToPoDialog.items];
+    newItems[idx][field] = value;
+    setConvertToPoDialog({ ...convertToPoDialog, items: newItems });
+  };
+
   const handleConvertToPO = async () => {
     try {
+      const mappedItems = convertToPoDialog.items.map(it => ({
+        qr_item_id: it.qr_item_id,
+        rate: parseFloat(it.rate),
+        discount_percent: parseFloat(it.discount_percent || 0),
+        cgst_percentage: parseFloat(it.cgst_percentage || 0),
+        sgst_percentage: parseFloat(it.sgst_percentage || 0),
+        igst_percentage: parseFloat(it.igst_percentage || 0),
+      }));
+
+      if (mappedItems.some(it => isNaN(it.rate) || it.rate < 0 || isNaN(it.discount_percent) || it.discount_percent < 0 || isNaN(it.cgst_percentage) || it.cgst_percentage < 0 || isNaN(it.sgst_percentage) || it.sgst_percentage < 0 || isNaN(it.igst_percentage) || it.igst_percentage < 0)) {
+        showMessage("Rate, Discount and Taxes must be valid non-negative numbers.", 'Error', 'error');
+        return;
+      }
+
       const res = await api.post(`/api/quotations/${selectedQR.id}/convert-to-po`, {
-        terms: convertToPoDialog.terms
+        terms: convertToPoDialog.terms,
+        items: mappedItems
       });
       showMessage(res.data.message, 'Success', 'success');
-      setConvertToPoDialog({ open: false, terms: '' });
+      setConvertToPoDialog({ open: false, terms: '', items: [] });
       fetchComparison(selectedQR.id);
       const qrRes = await api.get(`/api/quotations/requests/${selectedQR.id}`);
       setSelectedQR(qrRes.data);
@@ -1061,7 +1082,27 @@ const Quotations = () => {
                       <Button variant="contained" color="primary" onClick={handleApprove}>Management Approve</Button>
                     )}
                      {selectedQR.status === 'Approved' && (
-                      <Button variant="contained" color="success" onClick={() => setConvertToPoDialog({ open: true, terms: termsTemplates.find(t => t.is_default)?.content || '' })}>Convert to POs</Button>
+                      <Button variant="contained" color="success" onClick={() => {
+                        const itemsToConvert = comparisonData.materials
+                          .filter(mat => mat.selected_vendor_id)
+                          .map(mat => {
+                            const quote = mat.vendor_quotes.find(q => q.vendor_id === mat.selected_vendor_id);
+                            return {
+                              qr_item_id: mat.qr_item_id,
+                              material_name: mat.material_name,
+                              material_code: mat.material_code,
+                              quantity: mat.quantity,
+                              uom_name: mat.uom_name,
+                              vendor_name: mat.selected_vendor_name,
+                              rate: quote ? quote.quoted_rate : 0,
+                              discount_percent: 0,
+                              cgst_percentage: 0,
+                              sgst_percentage: 0,
+                              igst_percentage: 0
+                            };
+                          });
+                        setConvertToPoDialog({ open: true, terms: '', items: itemsToConvert });
+                      }}>Convert to POs</Button>
                     )}
                   </Box>
                 </Box>
@@ -1718,19 +1759,65 @@ const Quotations = () => {
         </Dialog>
 
         {/* Convert to PO Dialog */}
-        <Dialog open={convertToPoDialog.open} onClose={() => setConvertToPoDialog({ open: false, terms: '' })} maxWidth="sm" fullWidth>
-          <DialogTitle sx={{ fontWeight: 600, color: '#1E293B', pb: 1 }}>Convert to Purchase Order</DialogTitle>
+        <Dialog open={convertToPoDialog.open} onClose={() => setConvertToPoDialog({ open: false, terms: '', items: [] })} maxWidth="md" fullWidth>
+          <DialogTitle sx={{ fontWeight: 600, color: '#1E293B', pb: 1 }}>Convert to Purchase Orders</DialogTitle>
           <DialogContent>
             <Typography variant="body2" sx={{ mb: 3, color: '#64748B' }}>
-              This will generate Purchase Orders for all approved vendor selections.
+              This will generate Purchase Orders for all approved vendor selections. Please verify the quoted rates and specify any applicable discounts and taxes.
             </Typography>
+
+            <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 700, color: '#1e293b' }}>Item Details</Typography>
+            <Table size="small" sx={{ mb: 4 }}>
+              <TableHead>
+                <TableRow sx={{ bgcolor: '#f8fafc', '& th': { py: 0.75, px: 1 } }}>
+                  <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Material</TableCell>
+                  <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Assigned Vendor</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Qty</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', width: 100 }}>Rate (₹)</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', width: 80 }}>Disc %</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', width: 80 }}>CGST %</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', width: 80 }}>SGST %</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', width: 80 }}>IGST %</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {convertToPoDialog.items?.map((it, i) => (
+                  <TableRow key={i} sx={{ '& td': { py: 0.5, px: 1 } }}>
+                    <TableCell>
+                      <Typography variant="body2" sx={{ fontWeight: 700 }}>{it.material_name}</Typography>
+                      <Typography variant="caption" sx={{ color: '#94A3B8', display: 'block' }}>{it.material_code}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Chip label={it.vendor_name} size="small" color="primary" variant="outlined" sx={{ fontSize: '0.7rem', height: 20 }} />
+                    </TableCell>
+                    <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{it.quantity} {it.uom_name}</TableCell>
+                    <TableCell align="right">
+                      <TextField size="small" type="number" value={it.rate} onChange={e => updateConvertToPoItem(i, 'rate', e.target.value)} inputProps={{ min: 0 }} required sx={{ width: 90 }} />
+                    </TableCell>
+                    <TableCell align="right">
+                      <TextField size="small" type="number" value={it.discount_percent} onChange={e => updateConvertToPoItem(i, 'discount_percent', e.target.value)} inputProps={{ min: 0 }} sx={{ width: 70 }} />
+                    </TableCell>
+                    <TableCell align="right">
+                      <TextField size="small" type="number" value={it.cgst_percentage} onChange={e => updateConvertToPoItem(i, 'cgst_percentage', e.target.value)} inputProps={{ min: 0 }} sx={{ width: 70 }} />
+                    </TableCell>
+                    <TableCell align="right">
+                      <TextField size="small" type="number" value={it.sgst_percentage} onChange={e => updateConvertToPoItem(i, 'sgst_percentage', e.target.value)} inputProps={{ min: 0 }} sx={{ width: 70 }} />
+                    </TableCell>
+                    <TableCell align="right">
+                      <TextField size="small" type="number" value={it.igst_percentage} onChange={e => updateConvertToPoItem(i, 'igst_percentage', e.target.value)} inputProps={{ min: 0 }} sx={{ width: 70 }} />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+
             <Typography variant="caption" sx={{ fontWeight: 600, color: '#64748B', mb: 0.5, display: 'block', textTransform: 'uppercase' }}>
               Terms and Conditions
             </Typography>
             <FormControl fullWidth size="small" sx={{ mb: 1.5 }}>
-              <InputLabel>Load Template</InputLabel>
+              <InputLabel>Select Template</InputLabel>
               <Select
-                label="Load Template"
+                label="Select Template"
                 onChange={e => {
                   const t = termsTemplates.find(x => x.id === e.target.value);
                   if (t) setConvertToPoDialog({ ...convertToPoDialog, terms: t.content });

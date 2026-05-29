@@ -603,8 +603,17 @@ def finalize_comparison(
     return {"message": "Quotation Comparison finalized"}
 
 
+class QuotationConvertItem(BaseModel):
+    qr_item_id: int
+    rate: float
+    discount_percent: float = 0
+    cgst_percentage: float = 0
+    sgst_percentage: float = 0
+    igst_percentage: float = 0
+
 class QuotationConvertRequest(BaseModel):
     terms: Optional[str] = None
+    items: List[QuotationConvertItem] = []
 
 @router.post("/{qr_id}/convert-to-po")
 def convert_to_pos(
@@ -625,6 +634,8 @@ def convert_to_pos(
 
     comps = db.query(QuotationComparison).filter(QuotationComparison.qr_id == qr_id).all()
     
+    item_data = {it.qr_item_id: it for it in data.items}
+
     # Group by selected vendor
     vendor_items = {}
     for c in comps:
@@ -641,7 +652,11 @@ def convert_to_pos(
         vendor_items[c.selected_vendor_id].append({
             "material_id": c.material_id,
             "quantity": c.qr_item.quantity,
-            "rate": vqi.quoted_rate if vqi else 0
+            "rate": item_data.get(c.qr_item_id).rate if c.qr_item_id in item_data else (vqi.quoted_rate if vqi else 0),
+            "discount_percent": item_data.get(c.qr_item_id).discount_percent if c.qr_item_id in item_data else 0,
+            "cgst_percentage": item_data.get(c.qr_item_id).cgst_percentage if c.qr_item_id in item_data else 0,
+            "sgst_percentage": item_data.get(c.qr_item_id).sgst_percentage if c.qr_item_id in item_data else 0,
+            "igst_percentage": item_data.get(c.qr_item_id).igst_percentage if c.qr_item_id in item_data else 0
         })
 
     linked_pr_ids = [lp.pr_id for lp in qr.linked_prs]
@@ -670,7 +685,7 @@ def convert_to_pos(
             db.add(PurchaseOrderItem(
                 po_id=po.id, material_id=it["material_id"],
                 quantity=it["quantity"], rate=it["rate"], amount=amount,
-                discount_percent=0, cgst_percentage=0, sgst_percentage=0, igst_percentage=0
+                discount_percent=it["discount_percent"], cgst_percentage=it["cgst_percentage"], sgst_percentage=it["sgst_percentage"], igst_percentage=it["igst_percentage"]
             ))
         po.total_amount = round(total, 2)
         po_numbers.append(po_number)

@@ -288,6 +288,10 @@ def list_purchase_orders(
                 id=item.id, material_id=item.material_id,
                 quantity=item.quantity, rate=item.rate,
                 amount=item.amount, received_quantity=item.received_quantity,
+                discount_percent=item.discount_percent,
+                cgst_percentage=item.cgst_percentage,
+                sgst_percentage=item.sgst_percentage,
+                igst_percentage=item.igst_percentage,
                 material_name=mat.name if mat else None,
                 material_code=mat.code if mat else None,
                 uom_name=mat.uom.name if mat and mat.uom else None
@@ -351,6 +355,10 @@ def get_purchase_order(
             id=item.id, material_id=item.material_id,
             quantity=item.quantity, rate=item.rate,
             amount=item.amount, received_quantity=item.received_quantity,
+            discount_percent=item.discount_percent,
+            cgst_percentage=item.cgst_percentage,
+            sgst_percentage=item.sgst_percentage,
+            igst_percentage=item.igst_percentage,
             material_name=mat.name if mat else None,
             material_code=mat.code if mat else None,
             uom_name=mat.uom.name if mat and mat.uom else None

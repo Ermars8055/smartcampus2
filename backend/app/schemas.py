@@ -1,6 +1,6 @@
 """NissiGrid Smart Campus - Pydantic schemas."""
 
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field, EmailStr, field_validator
 from typing import List, Optional, Dict, Any
 from datetime import datetime, date
 
@@ -186,6 +186,15 @@ class MaterialBase(BaseModel):
     warehouse_id: Optional[int] = None
     description: Optional[str] = None
 
+    @field_validator("hsn_code")
+    @classmethod
+    def validate_hsn_code(cls, v):
+        if v:
+            import re
+            if not re.match(r'^(\d{2}|\d{4}|\d{6}|\d{8})$', v):
+                raise ValueError("HSN Code must be exactly 2, 4, 6, or 8 numeric digits")
+        return v
+
 class MaterialCreate(MaterialBase):
     pass
 
@@ -205,6 +214,15 @@ class MaterialUpdate(BaseModel):
     warehouse_id: Optional[int] = None
     description: Optional[str] = None
     is_active: Optional[bool] = None
+
+    @field_validator("hsn_code")
+    @classmethod
+    def validate_hsn_code(cls, v):
+        if v:
+            import re
+            if not re.match(r'^(\d{2}|\d{4}|\d{6}|\d{8})$', v):
+                raise ValueError("HSN Code must be exactly 2, 4, 6, or 8 numeric digits")
+        return v
 
 class MaterialOut(MaterialBase):
     id: int
@@ -529,16 +547,69 @@ class GateEntryOut(GateEntryBase):
 
 # ── Invoices ─────────────────────────────────────────────────────────────
 
+class InvoiceItemBase(BaseModel):
+    material_id: Optional[int] = None
+    description: Optional[str] = None
+    hsn_sac: Optional[str] = None
+    quantity: float = Field(..., gt=0)
+    rate: float = Field(..., ge=0)
+    uom: Optional[str] = None
+    discount_percent: float = 0
+    cgst_rate: float = 0
+    sgst_rate: float = 0
+    igst_rate: float = 0
+    cgst_amount: float = 0
+    sgst_amount: float = 0
+    igst_amount: float = 0
+
+    @field_validator("hsn_sac")
+    @classmethod
+    def validate_hsn(cls, v):
+        if v:
+            import re
+            if not re.match(r'^(\d{2}|\d{4}|\d{6}|\d{8})$', v):
+                raise ValueError("HSN/SAC must be exactly 2, 4, 6, or 8 numeric digits")
+        return v
+    taxable_amount: float = 0
+    amount: float = 0
+
+class InvoiceItemOut(InvoiceItemBase):
+    id: int
+    material_name: Optional[str] = None
+    material_code: Optional[str] = None
+    class Config:
+        from_attributes = True
+
 class InvoiceBase(BaseModel):
     invoice_number: str
     invoice_date: date
     gate_entry_id: Optional[int] = None
     vendor_id: int
     po_id: Optional[int] = None
+    
+    eway_bill_number: Optional[str] = None
+    delivery_note: Optional[str] = None
+    delivery_note_date: Optional[date] = None
+    payment_terms: Optional[str] = None
+    reference_number: Optional[str] = None
+    reference_date: Optional[date] = None
+    dispatch_doc_number: Optional[str] = None
+    dispatched_through: Optional[str] = None
+    destination: Optional[str] = None
+    lr_rr_number: Optional[str] = None
+    vehicle_number: Optional[str] = None
+    terms_of_delivery: Optional[str] = None
+
+    total_taxable_amount: float = 0
+    total_cgst: float = 0
+    total_sgst: float = 0
+    total_igst: float = 0
+    total_discount: float = 0
     total_amount: float = 0
     tax_amount: float = 0
     scan_url: Optional[str] = None
     remarks: Optional[str] = None
+    items: List[InvoiceItemBase] = []
 
 class InvoiceCreate(InvoiceBase):
     pass
@@ -549,6 +620,25 @@ class InvoiceUpdate(BaseModel):
     gate_entry_id: Optional[int] = None
     vendor_id: Optional[int] = None
     po_id: Optional[int] = None
+    
+    eway_bill_number: Optional[str] = None
+    delivery_note: Optional[str] = None
+    delivery_note_date: Optional[date] = None
+    payment_terms: Optional[str] = None
+    reference_number: Optional[str] = None
+    reference_date: Optional[date] = None
+    dispatch_doc_number: Optional[str] = None
+    dispatched_through: Optional[str] = None
+    destination: Optional[str] = None
+    lr_rr_number: Optional[str] = None
+    vehicle_number: Optional[str] = None
+    terms_of_delivery: Optional[str] = None
+
+    total_taxable_amount: Optional[float] = None
+    total_cgst: Optional[float] = None
+    total_sgst: Optional[float] = None
+    total_igst: Optional[float] = None
+    total_discount: Optional[float] = None
     total_amount: Optional[float] = None
     tax_amount: Optional[float] = None
     status: Optional[str] = None
@@ -563,6 +653,7 @@ class InvoiceOut(InvoiceBase):
     po_number: Optional[str] = None
     gate_entry_number: Optional[str] = None
     created_by_name: Optional[str] = None
+    items: List[InvoiceItemOut] = []
     class Config:
         from_attributes = True
 
@@ -589,6 +680,15 @@ class GRNItemBase(BaseModel):
     discount_percent: float = 0
     remarks: Optional[str] = None
     ordered_quantity: Optional[float] = 0
+
+    @field_validator("hsn_code")
+    @classmethod
+    def validate_hsn_code(cls, v):
+        if v:
+            import re
+            if not re.match(r'^(\d{2}|\d{4}|\d{6}|\d{8})$', v):
+                raise ValueError("HSN Code must be exactly 2, 4, 6, or 8 numeric digits")
+        return v
 
 class GRNItemOut(BaseModel):
     id: int

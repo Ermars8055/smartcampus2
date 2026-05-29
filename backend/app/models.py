@@ -581,8 +581,28 @@ class Invoice(Base):
     gate_entry_id = Column(Integer, ForeignKey("gate_entries.id"), nullable=True)
     vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=False)
     po_id = Column(Integer, ForeignKey("purchase_orders.id"), nullable=True)
+    
+    eway_bill_number = Column(String(100))
+    delivery_note = Column(String(100))
+    delivery_note_date = Column(Date)
+    payment_terms = Column(String(255))
+    reference_number = Column(String(100))
+    reference_date = Column(Date)
+    dispatch_doc_number = Column(String(100))
+    dispatched_through = Column(String(100))
+    destination = Column(String(255))
+    lr_rr_number = Column(String(100))
+    vehicle_number = Column(String(50))
+    terms_of_delivery = Column(Text)
+    
+    total_taxable_amount = Column(Float, default=0)
+    total_cgst = Column(Float, default=0)
+    total_sgst = Column(Float, default=0)
+    total_igst = Column(Float, default=0)
+    total_discount = Column(Float, default=0)
     total_amount = Column(Float, default=0)
     tax_amount = Column(Float, default=0)
+    
     status = Column(String(50), default=InvoiceStatus.DRAFT.value)
     scan_url = Column(String(500))
     remarks = Column(Text)
@@ -595,7 +615,31 @@ class Invoice(Base):
     vendor = relationship("Vendor")
     purchase_order = relationship("PurchaseOrder")
     created_by = relationship("User", foreign_keys=[created_by_id])
+    items = relationship("InvoiceItem", back_populates="invoice", cascade="all, delete-orphan")
     __table_args__ = (UniqueConstraint("tenant_id", "invoice_number", "vendor_id", name="uq_invoice_per_vendor_tenant"),)
+
+class InvoiceItem(Base):
+    __tablename__ = "invoice_items"
+    id = Column(Integer, primary_key=True, index=True)
+    invoice_id = Column(Integer, ForeignKey("invoices.id", ondelete="CASCADE"), nullable=False)
+    material_id = Column(Integer, ForeignKey("materials.id"), nullable=True)
+    description = Column(String(255), nullable=True)
+    hsn_sac = Column(String(50))
+    quantity = Column(Float, nullable=False)
+    rate = Column(Float, nullable=False)
+    uom = Column(String(50), nullable=True)
+    discount_percent = Column(Float, default=0)
+    cgst_rate = Column(Float, default=0)
+    sgst_rate = Column(Float, default=0)
+    igst_rate = Column(Float, default=0)
+    cgst_amount = Column(Float, default=0)
+    sgst_amount = Column(Float, default=0)
+    igst_amount = Column(Float, default=0)
+    taxable_amount = Column(Float, default=0)
+    amount = Column(Float, nullable=False)
+    
+    invoice = relationship("Invoice", back_populates="items")
+    material = relationship("Material")
 
 
 # == GRN ==

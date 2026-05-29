@@ -11,9 +11,11 @@ import { Add, Delete, CheckCircle, Cancel, ReceiptLong, ArrowBack, Search, Apart
 import api from '../services/api';
 import { formatDate, formatDateTime } from '../utils/dateUtils';
 import MaterialSelect from '../components/MaterialSelect';
+import { useAuth } from '../context/AuthContext';
 
 export default function Indents() {
   const { showMessage } = useMessage();
+  const { hasAction } = useAuth();
   const [indents, setIndents] = useState([]);
   const [materials, setMaterials] = useState([]);
   const [buildings, setBuildings] = useState([]);
@@ -426,19 +428,19 @@ export default function Indents() {
                     <Chip label={`L${ind.current_approval_level}`} size="small" variant="outlined" sx={{ height: 22, fontSize: '0.7rem' }} />
                     <Box sx={{ display: 'flex', gap: 0.5 }} onClick={e => e.stopPropagation()}>
                       <Tooltip title="Approve">
-                        <span><IconButton size="small" color="success" disabled={ind.status !== 'Awaiting Approval'}
+                        <span><IconButton size="small" color="success" disabled={ind.status !== 'Awaiting Approval' || !hasAction('indents', 'can_approve')}
                           onClick={() => showConfirm('Approve Indent?', `Are you sure you want to approve ${ind.indent_number}?`, 'Yes, Approve', 'success', () => approveIndent(ind.id))}>
                           <CheckCircle fontSize="small" />
                         </IconButton></span>
                       </Tooltip>
                       <Tooltip title="Reject">
-                        <span><IconButton size="small" color="error" disabled={ind.status !== 'Awaiting Approval'}
+                        <span><IconButton size="small" color="error" disabled={ind.status !== 'Awaiting Approval' || !hasAction('indents', 'can_reject')}
                           onClick={() => showConfirm('Reject Indent?', `Are you sure you want to reject ${ind.indent_number}?`, 'Yes, Reject', 'error', () => rejectIndent(ind.id))}>
                           <Cancel fontSize="small" />
                         </IconButton></span>
                       </Tooltip>
                         <Tooltip title="Convert to PO">
-                          <span><IconButton size="small" color="primary" disabled={ind.status !== 'Approved' && ind.status !== 'Partially Issued'}
+                          <span><IconButton size="small" color="primary" disabled={(ind.status !== 'Approved' && ind.status !== 'Partially Issued') || !hasAction('indents', 'can_convert_to_po')}
                             onClick={() => setVendorDialog({ open: true, indent: ind, vendor_id: '', terms: termsTemplates.find(t => t.is_default)?.content || '' })}>
                             <ReceiptLong fontSize="small" />
                           </IconButton></span>
@@ -521,19 +523,19 @@ export default function Indents() {
                     <TableCell onClick={e => e.stopPropagation()} sx={{ whiteSpace: 'nowrap' }}>
                       <Box sx={{ display: 'flex', gap: 0.5 }}>
                         <Tooltip title="Approve">
-                          <span><IconButton size="small" color="success" disabled={ind.status !== 'Awaiting Approval'}
+                          <span><IconButton size="small" color="success" disabled={ind.status !== 'Awaiting Approval' || !hasAction('indents', 'can_approve')}
                             onClick={() => showConfirm('Approve Indent?', `Are you sure you want to approve ${ind.indent_number}?`, 'Yes, Approve', 'success', () => approveIndent(ind.id))}>
                             <CheckCircle fontSize="small" />
                           </IconButton></span>
                         </Tooltip>
                         <Tooltip title="Reject">
-                          <span><IconButton size="small" color="error" disabled={ind.status !== 'Awaiting Approval'}
+                          <span><IconButton size="small" color="error" disabled={ind.status !== 'Awaiting Approval' || !hasAction('indents', 'can_reject')}
                             onClick={() => showConfirm('Reject Indent?', `Are you sure you want to reject ${ind.indent_number}?`, 'Yes, Reject', 'error', () => rejectIndent(ind.id))}>
                             <Cancel fontSize="small" />
                           </IconButton></span>
                         </Tooltip>
                         <Tooltip title="Convert to PO">
-                          <span><IconButton size="small" color="primary" disabled={ind.status !== 'Approved' && ind.status !== 'Partially Issued'}
+                          <span><IconButton size="small" color="primary" disabled={(ind.status !== 'Approved' && ind.status !== 'Partially Issued') || !hasAction('indents', 'can_convert_to_po')}
                             onClick={() => setVendorDialog({ open: true, indent: ind, vendor_id: '' })}>
                             <ReceiptLong fontSize="small" />
                           </IconButton></span>

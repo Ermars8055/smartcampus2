@@ -98,9 +98,28 @@ def require_permission(resource: str, operation: str = "read"):
         return current_user
     return checker
 
+def require_action(resource: str, action: str):
+    """Check extended action permission (e.g. 'can_approve', 'can_reject').
+    Falls back to can_update if extended_actions not configured (backward compat)."""
+    async def checker(current_user = Depends(get_current_user)):
+        if getattr(current_user, '_is_platform_admin', False):
+            return current_user
+        perms = getattr(current_user, '_permissions', {})
+        res_perms = perms.get(resource, {})
+        # Check extended_actions first
+        ext = res_perms.get('extended_actions', {})
+        if ext.get(action, False):
+            return current_user
+        # Fallback: if no extended_actions configured at all, fall back to can_update
+        if not ext and res_perms.get('can_update', False):
+            return current_user
+        raise HTTPException(403, f"Permission denied: {action} on {resource}")
+    return checker
+
 def require_platform_admin():
     async def checker(current_user = Depends(get_current_user)):
         if not getattr(current_user, '_is_platform_admin', False):
             raise HTTPException(403, "Platform admin required")
         return current_user
     return checker
+

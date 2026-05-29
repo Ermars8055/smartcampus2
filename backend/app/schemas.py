@@ -44,9 +44,11 @@ class RolePermissionBase(BaseModel):
     can_create: bool = False
     can_update: bool = False
     can_delete: bool = False
+    extended_actions: Dict[str, bool] = {}
 
 class RolePermissionOut(RolePermissionBase):
     id: int
+    extended_actions: Dict[str, bool] = {}
     class Config:
         from_attributes = True
 

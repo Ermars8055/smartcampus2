@@ -14,9 +14,11 @@ import { formatDate } from '../utils/dateUtils';
 import MaterialSelect from '../components/MaterialSelect';
 import { DatePicker } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
+import { useAuth } from '../context/AuthContext';
 
 export default function PurchaseOrders() {
   const { showMessage } = useMessage();
+  const { hasAction, hasPermission } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [pos, setPos] = useState([]);
@@ -419,10 +421,12 @@ export default function PurchaseOrders() {
           <Typography variant="h5" sx={{ fontWeight: 700 }}>Purchase Orders</Typography>
           <Typography variant="body2" sx={{ color: '#64748B' }}>{pos.length} orders</Typography>
         </Box>
-        <Button variant="contained" startIcon={<Add />} onClick={() => {
-          setForm({ vendor_id: '', project_id: projects[0]?.id || '', delivery_date: dayjs().add(21, 'day'), terms: termsTemplates.find(t => t.is_default)?.content || '', po_type: 'Informal', items: [{ material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0 }] });
-          setDialog(true);
-        }}>Create PO</Button>
+        {hasPermission('purchase_orders', 'can_create') && (
+          <Button variant="contained" startIcon={<Add />} onClick={() => {
+            setForm({ vendor_id: '', project_id: projects[0]?.id || '', delivery_date: dayjs().add(21, 'day'), terms: termsTemplates.find(t => t.is_default)?.content || '', po_type: 'Informal', items: [{ material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0 }] });
+            setDialog(true);
+          }}>Create PO</Button>
+        )}
       </Box>
 
       <Card sx={{ mb: 3, p: 2 }}>
@@ -452,25 +456,25 @@ export default function PurchaseOrders() {
                     <Chip label={po.po_type} size="small" variant="outlined" color={po.po_type === 'Formal' ? 'primary' : 'default'} sx={{ height: 22, fontSize: '0.7rem' }} />
                     <Box sx={{ display: 'flex', gap: 0.5 }} onClick={e => e.stopPropagation()}>
                       <Tooltip title="Approve">
-                        <span><IconButton size="small" color="success" disabled={!canApprove(po.status)}
+                        <span><IconButton size="small" color="success" disabled={!canApprove(po.status) || !hasAction('purchase_orders', 'can_approve')}
                           onClick={() => showConfirm('Approve PO?', `Are you sure you want to approve ${po.po_number}?`, 'Yes, Approve', 'success', () => approvePO(po.id))}>
                           <CheckCircle fontSize="small" />
                         </IconButton></span>
                       </Tooltip>
                       <Tooltip title="Reject">
-                        <span><IconButton size="small" color="error" disabled={!canReject(po.status)}
+                        <span><IconButton size="small" color="error" disabled={!canReject(po.status) || !hasAction('purchase_orders', 'can_reject')}
                           onClick={() => showConfirm('Reject PO?', `Are you sure you want to reject ${po.po_number}? This action cannot be undone.`, 'Yes, Reject', 'error', (r) => rejectPO(po.id, r), true)}>
                           <Cancel fontSize="small" />
                         </IconButton></span>
                       </Tooltip>
                       <Tooltip title="Put on Hold">
-                        <span><IconButton size="small" color="secondary" disabled={!canHold(po.status)}
+                        <span><IconButton size="small" color="secondary" disabled={!canHold(po.status) || !hasAction('purchase_orders', 'can_hold')}
                           onClick={() => showConfirm('Hold PO?', `Place ${po.po_number} on hold?`, 'Yes, Hold', 'warning', () => holdPO(po.id))}>
                           <Pause fontSize="small" />
                         </IconButton></span>
                       </Tooltip>
                       <Tooltip title="Send to Vendor">
-                        <span><IconButton size="small" color="primary" disabled={!canSend(po.status)}
+                        <span><IconButton size="small" color="primary" disabled={!canSend(po.status) || !hasAction('purchase_orders', 'can_send_to_vendor')}
                           onClick={() => showConfirm('Send to Vendor?', `Send ${po.po_number} to vendor?`, 'Yes, Send', 'primary', () => sendPO(po.id), false, po)}>
                           <Send fontSize="small" />
                         </IconButton></span>
@@ -598,31 +602,31 @@ export default function PurchaseOrders() {
                     <TableCell onClick={e => e.stopPropagation()}>
                       <Box sx={{ display: 'flex', gap: 0.5 }}>
                         <Tooltip title="Approve">
-                          <span><IconButton size="small" color="success" disabled={!canApprove(po.status)}
+                          <span><IconButton size="small" color="success" disabled={!canApprove(po.status) || !hasAction('purchase_orders', 'can_approve')}
                             onClick={() => showConfirm('Approve PO?', `Are you sure you want to approve ${po.po_number}?`, 'Yes, Approve', 'success', () => approvePO(po.id))}>
                             <CheckCircle fontSize="small" />
                           </IconButton></span>
                         </Tooltip>
                         <Tooltip title="Reject">
-                          <span><IconButton size="small" color="error" disabled={!canReject(po.status)}
+                          <span><IconButton size="small" color="error" disabled={!canReject(po.status) || !hasAction('purchase_orders', 'can_reject')}
                             onClick={() => showConfirm('Reject PO?', `Are you sure you want to reject ${po.po_number}? This action cannot be undone.`, 'Yes, Reject', 'error', (r) => rejectPO(po.id, r), true)}>
                             <Cancel fontSize="small" />
                           </IconButton></span>
                         </Tooltip>
                         <Tooltip title="Put on Hold">
-                          <span><IconButton size="small" color="secondary" disabled={!canHold(po.status)}
+                          <span><IconButton size="small" color="secondary" disabled={!canHold(po.status) || !hasAction('purchase_orders', 'can_hold')}
                             onClick={() => showConfirm('Hold PO?', `Place ${po.po_number} on hold?`, 'Yes, Hold', 'warning', () => holdPO(po.id))}>
                             <Pause fontSize="small" />
                           </IconButton></span>
                         </Tooltip>
                         <Tooltip title="Send to Vendor">
-                          <span><IconButton size="small" color="primary" disabled={!canSend(po.status)}
+                          <span><IconButton size="small" color="primary" disabled={!canSend(po.status) || !hasAction('purchase_orders', 'can_send_to_vendor')}
                             onClick={() => showConfirm('Send to Vendor?', `Send ${po.po_number} to vendor?`, 'Yes, Send', 'primary', () => sendPO(po.id), false, po)}>
                             <Send fontSize="small" />
                           </IconButton></span>
                         </Tooltip>
                         <Tooltip title="Short Close">
-                          <span><IconButton size="small" color="warning" disabled={!canShortClose(po.status)}
+                          <span><IconButton size="small" color="warning" disabled={!canShortClose(po.status) || !hasAction('purchase_orders', 'can_short_close')}
                             onClick={() => showConfirm('Short Close PO?', `Short close ${po.po_number}?`, 'Yes, Short Close', 'warning', (r) => shortClosePO(po.id, r), true)}>
                             <Archive fontSize="small" />
                           </IconButton></span>

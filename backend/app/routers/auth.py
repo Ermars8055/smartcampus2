@@ -94,11 +94,16 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
             roles.append(a.role.code)
             for p in a.role.permissions:
                 if p.resource not in permissions:
-                    permissions[p.resource] = {"can_read": False, "can_create": False, "can_update": False, "can_delete": False}
+                    permissions[p.resource] = {"can_read": False, "can_create": False, "can_update": False, "can_delete": False, "extended_actions": {}}
                 if p.can_read: permissions[p.resource]["can_read"] = True
                 if p.can_create: permissions[p.resource]["can_create"] = True
                 if p.can_update: permissions[p.resource]["can_update"] = True
                 if p.can_delete: permissions[p.resource]["can_delete"] = True
+                # Merge extended actions (OR across roles)
+                if p.extended_actions:
+                    for action_key, action_val in p.extended_actions.items():
+                        if action_val:
+                            permissions[p.resource]["extended_actions"][action_key] = True
         if a.site_id and a.site_id not in site_ids:
             site_ids.append(a.site_id)
 

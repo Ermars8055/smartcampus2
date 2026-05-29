@@ -80,12 +80,22 @@ export function AuthProvider({ children }) {
     return permissions[resource]?.[operation] || false;
   };
 
+  const hasAction = (resource, action) => {
+    if (user?.is_platform_admin) return true;
+    const resPerms = permissions[resource] || {};
+    const ext = resPerms.extended_actions || {};
+    if (ext[action]) return true;
+    // Fallback: if no extended actions at all, fall back to can_update
+    if (Object.keys(ext).length === 0 && resPerms.can_update) return true;
+    return false;
+  };
+
   const activeSite = sites.find((s) => String(s.id) === String(activeSiteId)) || null;
 
   return (
     <AuthContext.Provider value={{
       user, tenant, sites, activeSite, activeSiteId, setActiveSiteId,
-      permissions, roles, hasPermission, login, logout, loading
+      permissions, roles, hasPermission, hasAction, login, logout, loading
     }}>
       {children}
     </AuthContext.Provider>

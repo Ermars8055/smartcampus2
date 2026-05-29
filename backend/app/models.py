@@ -3,7 +3,7 @@
 from datetime import datetime, date, timezone
 from sqlalchemy import (
     Column, Integer, String, Float, Boolean, Text, DateTime, Date,
-    ForeignKey, Enum, UniqueConstraint
+    ForeignKey, Enum, UniqueConstraint, JSON
 )
 from sqlalchemy.orm import relationship
 from app.database import Base
@@ -205,6 +205,7 @@ class RolePermission(Base):
     can_create = Column(Boolean, default=False)
     can_update = Column(Boolean, default=False)
     can_delete = Column(Boolean, default=False)
+    extended_actions = Column(JSON, default=dict)
     role = relationship("Role", back_populates="permissions")
     __table_args__ = (UniqueConstraint("role_id", "resource", name="uq_role_resource"),)
 

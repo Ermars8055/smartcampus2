@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   Box, Typography, Card, Button, TextField, Grid, Checkbox, IconButton,
@@ -36,10 +36,35 @@ const MODULE_TREE = [
     module: 'Procurement',
     icon: 'shopping_cart',
     children: [
-      { label: 'Indents', resource: 'indents' },
-      { label: 'Purchase Requests', resource: 'purchase_requests' },
-      { label: 'Quotations', resource: 'quotations' },
-      { label: 'Purchase Orders', resource: 'purchase_orders' },
+      { label: 'Indents', resource: 'indents', extendedActions: [
+        { key: 'can_approve', label: 'Approve', color: '#10B981' },
+        { key: 'can_reject', label: 'Reject', color: '#EF4444' },
+        { key: 'can_convert_to_po', label: 'Convert to PO', color: '#3B82F6' },
+        { key: 'can_acknowledge', label: 'Acknowledge', color: '#F59E0B' },
+      ]},
+      { label: 'Purchase Requests', resource: 'purchase_requests', extendedActions: [
+        { key: 'can_submit', label: 'Submit', color: '#3B82F6' },
+        { key: 'can_approve', label: 'Approve', color: '#10B981' },
+        { key: 'can_reject', label: 'Reject', color: '#EF4444' },
+        { key: 'can_convert_to_po', label: 'Convert to PO', color: '#3B82F6' },
+        { key: 'can_hold', label: 'Hold', color: '#F59E0B' },
+        { key: 'can_short_close', label: 'Short Close', color: '#F97316' },
+      ]},
+      { label: 'Quotations', resource: 'quotations', extendedActions: [
+        { key: 'can_send_to_vendors', label: 'Send to Vendors', color: '#3B82F6' },
+        { key: 'can_receive', label: 'Receive', color: '#10B981' },
+        { key: 'can_enter_quotes', label: 'Enter Quotes', color: '#F59E0B' },
+        { key: 'can_compare', label: 'Compare', color: '#8B5CF6' },
+        { key: 'can_approve', label: 'Approve', color: '#10B981' },
+        { key: 'can_convert_to_po', label: 'Convert to PO', color: '#3B82F6' },
+      ]},
+      { label: 'Purchase Orders', resource: 'purchase_orders', extendedActions: [
+        { key: 'can_approve', label: 'Approve', color: '#10B981' },
+        { key: 'can_reject', label: 'Reject', color: '#EF4444' },
+        { key: 'can_hold', label: 'Hold', color: '#F59E0B' },
+        { key: 'can_send_to_vendor', label: 'Send to Vendor', color: '#3B82F6' },
+        { key: 'can_short_close', label: 'Short Close', color: '#F97316' },
+      ]},
     ],
   },
   {
@@ -107,6 +132,7 @@ function buildPermMap(permissions = []) {
       can_create: p.can_create,
       can_update: p.can_update,
       can_delete: p.can_delete,
+      extended_actions: p.extended_actions || {},
     };
   });
   return map;
@@ -115,7 +141,12 @@ function buildPermMap(permissions = []) {
 // ── Helper: Convert permMap back to API payload ─────────────────────────
 function permMapToArray(permMap) {
   return Object.entries(permMap)
-    .filter(([_, perms]) => Object.values(perms).some(Boolean))
+    .filter(([_, perms]) => {
+      // Keep if any CRUD action is true OR any extended action is true
+      const hasCrud = [perms.can_read, perms.can_create, perms.can_update, perms.can_delete].some(Boolean);
+      const hasExtended = Object.values(perms.extended_actions || {}).some(Boolean);
+      return hasCrud || hasExtended;
+    })
     .map(([resource, perms]) => ({ resource, ...perms }));
 }
 
@@ -167,8 +198,23 @@ export default function RoleConfiguration() {
     });
   };
 
+  const toggleExtPerm = (resource, extKey) => {
+    setPermMap((prev) => {
+      const cur = prev[resource] || {};
+      const ext = cur.extended_actions || {};
+      return {
+        ...prev,
+        [resource]: { ...cur, extended_actions: { ...ext, [extKey]: !ext[extKey] } },
+      };
+    });
+  };
+
   const isChecked = (resource, action) => {
     return !!permMap[resource]?.[`can_${action}`];
+  };
+
+  const isExtChecked = (resource, extKey) => {
+    return !!permMap[resource]?.extended_actions?.[extKey];
   };
 
   // Module-level select-all for a specific action
@@ -203,11 +249,17 @@ export default function RoleConfiguration() {
     MODULE_TREE.forEach((mod) =>
       mod.children.forEach((c) => {
         const actions = c.actions || ALL_ACTIONS;
-        const perms = {};
+        const perms = { extended_actions: {} };
         actions.forEach((a) => (perms[`can_${a}`] = true));
         ALL_ACTIONS.forEach((a) => {
           if (!perms[`can_${a}`]) perms[`can_${a}`] = false;
         });
+        // Also grant all extended actions if present
+        if (c.extendedActions) {
+          c.extendedActions.forEach((ext) => {
+            perms.extended_actions[ext.key] = true;
+          });
+        }
         next[c.resource] = { ...(next[c.resource] || {}), ...perms };
       })
     );
@@ -279,9 +331,18 @@ export default function RoleConfiguration() {
   // ── Count total granted permissions ───────────────────────────────────
   const totalGranted = useMemo(() => {
     let count = 0;
-    Object.values(permMap).forEach((perms) =>
-      Object.values(perms).forEach((v) => { if (v) count++; })
-    );
+    Object.values(permMap).forEach((perms) => {
+      // Count CRUD
+      ['can_read', 'can_create', 'can_update', 'can_delete'].forEach(k => {
+        if (perms[k]) count++;
+      });
+      // Count extended actions
+      if (perms.extended_actions) {
+        Object.values(perms.extended_actions).forEach(v => {
+          if (v) count++;
+        });
+      }
+    });
     return count;
   }, [permMap]);
 
@@ -409,6 +470,8 @@ export default function RoleConfiguration() {
                   onToggleExpand={() => toggleExpand(mod.module)}
                   isChecked={isChecked}
                   togglePerm={togglePerm}
+                  isExtChecked={isExtChecked}
+                  toggleExtPerm={toggleExtPerm}
                   getModuleActionState={getModuleActionState}
                   toggleModuleAction={toggleModuleAction}
                 />
@@ -527,7 +590,7 @@ export default function RoleConfiguration() {
 
 
 // ── Module Group Component (collapsible row group) ──────────────────────
-function ModuleGroup({ mod, expanded, onToggleExpand, isChecked, togglePerm, getModuleActionState, toggleModuleAction }) {
+function ModuleGroup({ mod, expanded, onToggleExpand, isChecked, togglePerm, isExtChecked, toggleExtPerm, getModuleActionState, toggleModuleAction }) {
   // Deduplicate children for header-level checkbox (Reports shares resource)
   const uniqueResources = [...new Map(mod.children.map(c => [c.resource, c])).values()];
 
@@ -587,42 +650,75 @@ function ModuleGroup({ mod, expanded, onToggleExpand, isChecked, togglePerm, get
                 {mod.children.map((child, idx) => {
                   const actions = child.actions || ALL_ACTIONS;
                   return (
-                    <TableRow
-                      key={`${child.resource}-${idx}`}
-                      sx={{
-                        bgcolor: idx % 2 === 0 ? '#fff' : '#FAFBFC',
-                        '&:hover': { bgcolor: '#F0F9FF' },
-                        transition: 'background 0.15s',
-                      }}
-                    >
-                      <TableCell sx={{ pl: 6, py: 0.8, width: '40%', borderBottom: '1px solid #F1F5F9' }}>
-                        <Typography sx={{ fontSize: '0.82rem', color: '#334155' }}>
-                          {child.label}
-                        </Typography>
-                      </TableCell>
-                      {ALL_ACTIONS.map((action) => {
-                        if (!actions.includes(action)) {
+                    <React.Fragment key={`${child.resource}-${idx}`}>
+                      <TableRow
+                        sx={{
+                          bgcolor: idx % 2 === 0 ? '#fff' : '#FAFBFC',
+                          '&:hover': { bgcolor: '#F0F9FF' },
+                          transition: 'background 0.15s',
+                        }}
+                      >
+                        <TableCell sx={{ pl: 6, py: 0.8, width: '40%', borderBottom: child.extendedActions ? 'none' : '1px solid #F1F5F9' }}>
+                          <Typography sx={{ fontSize: '0.82rem', color: '#334155' }}>
+                            {child.label}
+                          </Typography>
+                        </TableCell>
+                        {ALL_ACTIONS.map((action) => {
+                          if (!actions.includes(action)) {
+                            return (
+                              <TableCell key={action} align="center" sx={{ width: '15%', borderBottom: child.extendedActions ? 'none' : '1px solid #F1F5F9' }}>
+                                <Box sx={{ color: '#E2E8F0' }}>—</Box>
+                              </TableCell>
+                            );
+                          }
                           return (
-                            <TableCell key={action} align="center" sx={{ width: '15%', borderBottom: '1px solid #F1F5F9' }}>
-                              <Box sx={{ color: '#E2E8F0' }}>—</Box>
+                            <TableCell key={action} align="center" sx={{ width: '15%', borderBottom: child.extendedActions ? 'none' : '1px solid #F1F5F9' }}>
+                              <Checkbox
+                                size="small"
+                                checked={isChecked(child.resource, action)}
+                                onChange={() => togglePerm(child.resource, action)}
+                                sx={{
+                                  color: '#CBD5E1',
+                                  '&.Mui-checked': { color: ACTION_COLORS[action] },
+                                }}
+                              />
                             </TableCell>
                           );
-                        }
-                        return (
-                          <TableCell key={action} align="center" sx={{ width: '15%', borderBottom: '1px solid #F1F5F9' }}>
-                            <Checkbox
-                              size="small"
-                              checked={isChecked(child.resource, action)}
-                              onChange={() => togglePerm(child.resource, action)}
-                              sx={{
-                                color: '#CBD5E1',
-                                '&.Mui-checked': { color: ACTION_COLORS[action] },
-                              }}
-                            />
+                        })}
+                      </TableRow>
+                      {child.extendedActions && (
+                        <TableRow>
+                          <TableCell colSpan={5} sx={{ pt: 0, pb: 1, pl: 6, pr: 2, borderBottom: '1px solid #F1F5F9' }}>
+                            <Box sx={{ p: 1.5, bgcolor: '#F8FAFC', borderRadius: 2, border: '1px solid #E2E8F0', display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
+                              <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748B', mr: 1, textTransform: 'uppercase', letterSpacing: 0.5 }}>Workflow Actions:</Typography>
+                              {child.extendedActions.map(ext => {
+                                const extChecked = isExtChecked(child.resource, ext.key);
+                                return (
+                                  <Chip
+                                    key={ext.key}
+                                    label={ext.label}
+                                    size="small"
+                                    onClick={() => toggleExtPerm(child.resource, ext.key)}
+                                    icon={extChecked ? <CheckBoxIcon fontSize="small" /> : <CheckBoxOutlineBlank fontSize="small" />}
+                                    sx={{
+                                      bgcolor: extChecked ? `${ext.color}15` : '#fff',
+                                      color: extChecked ? ext.color : '#64748B',
+                                      borderColor: extChecked ? ext.color : '#CBD5E1',
+                                      borderWidth: 1,
+                                      borderStyle: 'solid',
+                                      fontWeight: extChecked ? 700 : 500,
+                                      transition: 'all 0.2s',
+                                      '&:hover': { bgcolor: extChecked ? `${ext.color}25` : '#F1F5F9' },
+                                      '& .MuiChip-icon': { color: 'inherit', ml: 0.5 }
+                                    }}
+                                  />
+                                );
+                              })}
+                            </Box>
                           </TableCell>
-                        );
-                      })}
-                    </TableRow>
+                        </TableRow>
+                      )}
+                    </React.Fragment>
                   );
                 })}
               </TableBody>

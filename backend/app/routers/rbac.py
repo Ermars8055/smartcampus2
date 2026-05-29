@@ -27,6 +27,7 @@ def _build_role_out(role, db, tenant_id, site_id):
                 "can_create": p.can_create,
                 "can_update": p.can_update,
                 "can_delete": p.can_delete,
+                "extended_actions": p.extended_actions or {},
             }
             for p in (role.permissions or [])
         ],
@@ -117,6 +118,7 @@ def create_role(
             can_create=perm_data.can_create,
             can_update=perm_data.can_update,
             can_delete=perm_data.can_delete,
+            extended_actions=perm_data.extended_actions or {},
         )
         db.add(perm)
 
@@ -169,6 +171,7 @@ def update_role(
             can_create=perm_data.can_create,
             can_update=perm_data.can_update,
             can_delete=perm_data.can_delete,
+            extended_actions=perm_data.extended_actions or {},
         )
         db.add(perm)
 

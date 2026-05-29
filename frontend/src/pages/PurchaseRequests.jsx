@@ -12,6 +12,7 @@ import { formatDate } from '../utils/dateUtils';
 import MaterialSelect from '../components/MaterialSelect';
 import { DatePicker } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
+import { useAuth } from '../context/AuthContext';
 
 function StatusChip({ status }) {
   const colorMap = {
@@ -23,6 +24,7 @@ function StatusChip({ status }) {
 }
 
 export default function PurchaseRequests() {
+  const { hasAction, hasPermission } = useAuth();
   const [prs, setPrs] = useState([]);
   const [materials, setMaterials] = useState([]);
   const [projects, setProjects] = useState([]);
@@ -197,13 +199,15 @@ export default function PurchaseRequests() {
           <Typography variant="h5" sx={{ fontWeight: 700 }}>Purchase Requests</Typography>
           <Typography variant="body2" sx={{ color: '#64748B' }}>{prs.length} total requests</Typography>
         </Box>
-        <Button variant="contained" startIcon={<Add />} onClick={() => {
-          setForm({ project_id: projects[0]?.id || '', building_id: '', department_name: '',
-            required_date: dayjs().add(14, 'day'), remarks: '',
-            items: [{ material_id: '', quantity: '' }] });
-          setDepartments([]);
-          setDialog(true);
-        }}>Create PR</Button>
+        {hasPermission('purchase_requests', 'can_create') && (
+          <Button variant="contained" startIcon={<Add />} onClick={() => {
+            setForm({ project_id: projects[0]?.id || '', building_id: '', department_name: '',
+              required_date: dayjs().add(14, 'day'), remarks: '',
+              items: [{ material_id: '', quantity: '' }] });
+            setDepartments([]);
+            setDialog(true);
+          }}>Create PR</Button>
+        )}
       </Box>
 
       <Card sx={{ mb: 3, p: 2 }}>
@@ -360,7 +364,12 @@ export default function PurchaseRequests() {
                   <TableCell onClick={e => e.stopPropagation()} sx={{ whiteSpace: 'nowrap' }}>
                     <Box sx={{ display: 'flex', gap: 0.5 }}>
                       <Tooltip title={approveLabel(pr.status)}>
-                        <span><IconButton size="small" color="success" disabled={!canApprove(pr.status)}
+                        <span><IconButton size="small" color="success" 
+                          disabled={
+                            (pr.status === 'Draft' && !hasAction('purchase_requests', 'can_submit')) || 
+                            (pr.status === 'Submitted' && !hasAction('purchase_requests', 'can_approve')) || 
+                            !canApprove(pr.status)
+                          }
                           onClick={() => showConfirm(
                             pr.status === 'Draft' ? 'Submit PR?' : 'Approve PR?',
                             pr.status === 'Draft'
@@ -374,19 +383,19 @@ export default function PurchaseRequests() {
                         </IconButton></span>
                       </Tooltip>
                       <Tooltip title="Reject">
-                        <span><IconButton size="small" color="error" disabled={!canReject(pr.status)}
+                        <span><IconButton size="small" color="error" disabled={!canReject(pr.status) || !hasAction('purchase_requests', 'can_reject')}
                           onClick={() => showConfirm('Reject PR?', `Reject ${pr.pr_number}? This cannot be undone.`, 'Yes, Reject', 'error', (r) => handleReject(pr.id, r), true)}>
                           <Cancel fontSize="small" />
                         </IconButton></span>
                       </Tooltip>
                       <Tooltip title="Convert to PO">
-                        <span><IconButton size="small" color="primary" disabled={!canConvert(pr.status)}
+                        <span><IconButton size="small" color="primary" disabled={!canConvert(pr.status) || !hasAction('purchase_requests', 'can_convert_to_po')}
                           onClick={() => openConvertDialog(pr)}>
                           <ShoppingCart fontSize="small" />
                         </IconButton></span>
                       </Tooltip>
                       <Tooltip title="Short Close">
-                        <span><IconButton size="small" color="warning" disabled={!canShortClose(pr.status)}
+                        <span><IconButton size="small" color="warning" disabled={!canShortClose(pr.status) || !hasAction('purchase_requests', 'can_short_close')}
                           onClick={() => showConfirm('Short Close PR?', `Short close ${pr.pr_number}?`, 'Yes, Short Close', 'warning', (r) => handleShortClose(pr.id, r), true)}>
                           <Archive fontSize="small" />
                         </IconButton></span>

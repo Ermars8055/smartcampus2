@@ -23,8 +23,11 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
 
 
+import { useAuth } from '../context/AuthContext';
+
 const Quotations = () => {
   const { showMessage } = useMessage();
+  const { hasAction, hasPermission } = useAuth();
   const [loading, setLoading] = useState(false);
   const [qrs, setQrs] = useState([]);
   const [projects, setProjects] = useState([]);
@@ -445,7 +448,7 @@ const Quotations = () => {
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
         <Typography variant="h5" fontWeight="600">Quotation Management</Typography>
-        {!selectedQR && (
+        {!selectedQR && hasPermission('quotations', 'can_create') && (
           <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreateQRDialogOpen(true)}>
             Create Quotation Request
           </Button>
@@ -679,7 +682,7 @@ const Quotations = () => {
                                 <IconButton
                                   size="small"
                                   onClick={() => handleSendToVendors(qr.id)}
-                                  disabled={qr.status !== 'Draft'}
+                                  disabled={qr.status !== 'Draft' || !hasAction('quotations', 'can_send_to_vendors')}
                                   sx={{ color: qr.status === 'Draft' ? 'primary.main' : 'text.disabled' }}
                                 >
                                   <BlastIcon fontSize="small" />
@@ -692,7 +695,7 @@ const Quotations = () => {
                                 <IconButton
                                   size="small"
                                   onClick={() => handleAutoProcess(qr)}
-                                  disabled={qr.status !== 'Requested'}
+                                  disabled={qr.status !== 'Requested' || !hasAction('quotations', 'can_receive')}
                                   sx={{ color: qr.status === 'Requested' ? 'info.main' : 'text.disabled' }}
                                 >
                                   <InventoryIcon fontSize="small" />
@@ -705,7 +708,7 @@ const Quotations = () => {
                                 <IconButton
                                   size="small"
                                   onClick={() => handleAutoProcess(qr)}
-                                  disabled={qr.status !== 'Received'}
+                                  disabled={qr.status !== 'Received' || !hasAction('quotations', 'can_enter_quotes')}
                                   sx={{ color: qr.status === 'Received' ? 'secondary.main' : 'text.disabled' }}
                                 >
                                   <ProcessIcon fontSize="small" />
@@ -718,7 +721,7 @@ const Quotations = () => {
                                 <IconButton
                                   size="small"
                                   onClick={() => handleAutoProcess(qr, 'comparison')}
-                                  disabled={qr.status !== 'Entered'}
+                                  disabled={qr.status !== 'Entered' || !hasAction('quotations', 'can_compare')}
                                   sx={{ color: qr.status === 'Entered' ? 'info.main' : 'text.disabled' }}
                                 >
                                   <CompareIcon fontSize="small" />
@@ -731,7 +734,7 @@ const Quotations = () => {
                                 <IconButton
                                   size="small"
                                   onClick={() => handleAutoProcess(qr, 'approval')}
-                                  disabled={qr.status !== 'Compared'}
+                                  disabled={qr.status !== 'Compared' || !hasAction('quotations', 'can_approve')}
                                   sx={{ color: qr.status === 'Compared' ? 'warning.main' : 'text.disabled' }}
                                 >
                                   <ApproveIcon fontSize="small" />
@@ -744,7 +747,7 @@ const Quotations = () => {
                                 <IconButton
                                   size="small"
                                   onClick={() => handleAutoProcess(qr, 'approval')}
-                                  disabled={qr.status !== 'Approved'}
+                                  disabled={qr.status !== 'Approved' || !hasAction('quotations', 'can_convert_to_po')}
                                   sx={{ color: qr.status === 'Approved' ? 'success.main' : 'text.disabled' }}
                                 >
                                   <OrderIcon fontSize="small" />

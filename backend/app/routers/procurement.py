@@ -412,18 +412,22 @@ def create_purchase_order(
 
     total = 0
     for item_data in data.items:
-        amount = item_data.quantity * item_data.rate
+        amount = round(item_data.quantity * item_data.rate, 2)
         total += amount
         po_item = PurchaseOrderItem(
             po_id=po.id,
             material_id=item_data.material_id,
             quantity=item_data.quantity,
             rate=item_data.rate,
-            amount=amount
+            amount=amount,
+            discount_percent=item_data.discount_percent,
+            cgst_percentage=item_data.cgst_percentage,
+            sgst_percentage=item_data.sgst_percentage,
+            igst_percentage=item_data.igst_percentage
         )
         db.add(po_item)
 
-    po.total_amount = total
+    po.total_amount = round(total, 2)
 
     if data.pr_id:
         pr = db.query(PurchaseRequest).filter(

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { formatDate, formatDateTime } from '../utils/dateUtils';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
@@ -35,6 +36,7 @@ export default function Admin() {
   const [editing, setEditing] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const { user: currentUser } = useAuth();
+  const navigate = useNavigate();
 
   const load = () => {
     api.get('/api/admin/users').then(r => setUsers(r.data));
@@ -212,30 +214,29 @@ export default function Admin() {
       {tab === 3 && (
         <>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-            <Button variant="contained" startIcon={<Add />} onClick={() => {
-              setEditing(null); 
-              setForm({ name: '', code: '', description: '' }); 
-              setDialog(true);
-            }}>Add Role</Button>
+            <Button variant="contained" startIcon={<Add />} onClick={() => navigate('/admin/roles/new')}>Add Role</Button>
           </Box>
           <Card>
             <TableContainer>
               <Table size="small">
                 <TableHead><TableRow>
-                  <TableCell>Role Name</TableCell><TableCell>Code</TableCell><TableCell>Description</TableCell><TableCell>Actions</TableCell>
+                  <TableCell>Role Name</TableCell><TableCell>Code</TableCell><TableCell>Description</TableCell><TableCell>Permissions</TableCell><TableCell>Actions</TableCell>
                 </TableRow></TableHead>
                 <TableBody>
                   {tenantRoles.map(r => (
-                    <TableRow key={r.id}>
+                    <TableRow key={r.id} sx={{ '&:hover': { bgcolor: '#F8FAFC' } }}>
                       <TableCell sx={{ fontWeight: 600 }}>{r.name}</TableCell>
                       <TableCell><Chip label={r.code} size="small" variant="outlined" /></TableCell>
                       <TableCell sx={{ fontSize: '0.8rem', color: '#64748B' }}>{r.description || '-'}</TableCell>
                       <TableCell>
-                        <Tooltip title="Edit"><IconButton size="small" onClick={() => {
-                          setEditing(r.id);
-                          setForm({ ...r });
-                          setDialog(true);
-                        }}><Edit fontSize="small" /></IconButton></Tooltip>
+                        <Chip
+                          label={`${(r.permissions || []).filter(p => p.can_read || p.can_create || p.can_update || p.can_delete).length} modules`}
+                          size="small"
+                          sx={{ fontWeight: 600, fontSize: '0.7rem', bgcolor: (r.permissions || []).length > 0 ? '#DCFCE7' : '#F1F5F9', color: (r.permissions || []).length > 0 ? '#166534' : '#94A3B8' }}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Tooltip title="Configure"><IconButton size="small" onClick={() => navigate(`/admin/roles/${r.id}`)}><Edit fontSize="small" /></IconButton></Tooltip>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -250,14 +251,14 @@ export default function Admin() {
         <DialogTitle sx={{ pb: 1, pt: 3, px: 4 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Box sx={{ p: 1, bgcolor: '#EFF6FF', borderRadius: 2, color: '#2563EB', display: 'flex' }}>
-              {tab === 3 ? <Security fontSize="medium" /> : tab === 2 ? <FlowIcon fontSize="medium" /> : <AdminPanelSettings fontSize="medium" />}
+              {tab === 2 ? <FlowIcon fontSize="medium" /> : <AdminPanelSettings fontSize="medium" />}
             </Box>
             <Box>
               <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
-                {tab === 3 ? (editing ? 'Edit Role' : 'Create Role') : (tab === 2 ? (editing ? 'Edit Flow' : 'Create Flow') : (editing ? 'Edit User' : 'Create User'))}
+                {tab === 2 ? (editing ? 'Edit Flow' : 'Create Flow') : (editing ? 'Edit User' : 'Create User')}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {tab === 3 ? 'Define access roles for the platform.' : tab === 2 ? 'Configure approval workflow rules.' : 'Manage user accounts and permissions.'}
+                {tab === 2 ? 'Configure approval workflow rules.' : 'Manage user accounts and permissions.'}
               </Typography>
             </Box>
           </Box>
@@ -305,12 +306,6 @@ export default function Admin() {
               <Grid item xs={6}><TextField fullWidth label="Min Amount" type="number" value={form.min_amount} onChange={e => setForm({ ...form, min_amount: Number(e.target.value) })} /></Grid>
               <Grid item xs={6}><TextField fullWidth label="Max Amount (Leave empty for No Limit)" type="number" value={form.max_amount || ''} onChange={e => setForm({ ...form, max_amount: e.target.value ? Number(e.target.value) : null })} /></Grid>
               <Grid item xs={12}><FormControlLabel control={<Switch checked={form.is_active !== false} onChange={e => setForm({ ...form, is_active: e.target.checked })} />} label="Active" /></Grid>
-            </Grid>
-          ) : tab === 3 ? (
-            <Grid container spacing={2} sx={{ mt: 0.5 }}>
-              <Grid item xs={12}><TextField fullWidth label="Role Name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required /></Grid>
-              <Grid item xs={12}><TextField fullWidth label="Role Code" value={form.code} onChange={e => setForm({ ...form, code: e.target.value.toUpperCase() })} required disabled={editing} /></Grid>
-              <Grid item xs={12}><TextField fullWidth label="Description" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} multiline rows={2} /></Grid>
             </Grid>
           ) : (
             <Grid container spacing={2} sx={{ mt: 0.5 }}>
@@ -378,11 +373,6 @@ export default function Admin() {
                 };
                 if (editing) await api.put(`/api/approval-flows/${editing}`, payload);
                 else await api.post('/api/approval-flows', payload);
-                setDialog(false); setEditing(null); load();
-              } else if (tab === 3) {
-                if (!form.name || !form.code) return alert('Role name and code are required');
-                if (editing) await api.put(`/api/rbac/roles/${editing}`, form);
-                else await api.post('/api/rbac/roles', { ...form, tenant_id: currentUser?.tenant_id });
                 setDialog(false); setEditing(null); load();
               } else {
                 handleSave();

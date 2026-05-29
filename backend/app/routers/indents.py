@@ -84,7 +84,7 @@ def create_indent(
         for item_data in data.items:
             mat = db.query(Material).filter(Material.id == item_data.material_id).first()
             if mat:
-                total += (mat.standard_cost or 0) * item_data.requested_quantity
+                total += round((mat.standard_cost or 0) * item_data.requested_quantity, 2)
 
         indent = Indent(
             tenant_id=tenant_id,
@@ -97,7 +97,7 @@ def create_indent(
             location=data.location,
             department=data.department,
             remarks=data.remarks,
-            total_amount=total,
+            total_amount=round(total, 2),
             status=IndentStatus.AWAITING_APPROVAL.value,
             current_approval_level=1
         )
@@ -345,12 +345,16 @@ def convert_to_po(
                 material_id=item.material_id,
                 quantity=pending,
                 rate=rate,
-                amount=pending * rate
+                amount=round(pending * rate, 2),
+                discount_percent=0,
+                cgst_percentage=0,
+                sgst_percentage=0,
+                igst_percentage=0
             )
             db.add(po_item)
             total_amount += po_item.amount
             
-    po.total_amount = total_amount
+    po.total_amount = round(total_amount, 2)
     
     # Update indent status to Converted
     indent.status = IndentStatus.CONVERTED.value

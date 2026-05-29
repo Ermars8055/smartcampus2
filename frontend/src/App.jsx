@@ -37,6 +37,7 @@ import RateAnalysisReport from './pages/RateAnalysisReport';
 import ReceiptSummaryReport from './pages/ReceiptSummaryReport';
 import DepartmentWiseInventoryReport from './pages/DepartmentWiseInventoryReport';
 import Admin from './pages/Admin';
+import RoleConfiguration from './pages/RoleConfiguration';
 import SaasAdmin from './pages/SaasAdmin';
 import Alerts from './pages/Alerts';
 import PlatformLogin from './pages/PlatformLogin';
@@ -114,6 +115,8 @@ function AppRoutes() {
         <Route path="reports/receipt-summary" element={<ReceiptSummaryReport />} />
         <Route path="reports/department-inventory" element={<DepartmentWiseInventoryReport />} />
         <Route path="admin" element={<Admin />} />
+        <Route path="admin/roles/new" element={<RoleConfiguration />} />
+        <Route path="admin/roles/:id" element={<RoleConfiguration />} />
         <Route path="terms" element={<TermsAndConditions />} />
         <Route path="saas-admin" element={<SaasAdmin />} />
         <Route path="alerts" element={<Alerts />} />

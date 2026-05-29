@@ -55,13 +55,23 @@ class RoleBase(BaseModel):
     code: str
     description: Optional[str] = None
 
+class WorkflowRuleBase(BaseModel):
+    document_type: str  # "INDENT", "PURCHASE_REQUEST", "PURCHASE_ORDER"
+    level: int = 1
+    min_amount: float = 0
+    max_amount: Optional[float] = None
+    user_id: Optional[int] = None
+    is_active: bool = True
+
 class RoleCreate(RoleBase):
     permissions: List[RolePermissionBase] = []
+    workflow_rules: List[WorkflowRuleBase] = []
 
 class RoleOut(RoleBase):
     id: int
     tenant_id: Optional[int] = None
     permissions: List[RolePermissionOut] = []
+    workflow_rules: List[Dict[str, Any]] = []
     class Config:
         from_attributes = True
 
@@ -416,6 +426,10 @@ class POItemBase(BaseModel):
     material_id: int
     quantity: float = Field(..., gt=0, description="Quantity must be positive")
     rate: float = Field(..., ge=0, description="Rate cannot be negative")
+    discount_percent: float = 0
+    cgst_percentage: float = 0
+    sgst_percentage: float = 0
+    igst_percentage: float = 0
 
 class POItemOut(POItemBase):
     id: int

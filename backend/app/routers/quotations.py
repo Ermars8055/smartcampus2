@@ -665,13 +665,14 @@ def convert_to_pos(
         
         total = 0
         for it in items:
-            amount = it["quantity"] * it["rate"]
+            amount = round(it["quantity"] * it["rate"], 2)
             total += amount
             db.add(PurchaseOrderItem(
                 po_id=po.id, material_id=it["material_id"],
-                quantity=it["quantity"], rate=it["rate"], amount=amount
+                quantity=it["quantity"], rate=it["rate"], amount=amount,
+                discount_percent=0, cgst_percentage=0, sgst_percentage=0, igst_percentage=0
             ))
-        po.total_amount = total
+        po.total_amount = round(total, 2)
         po_numbers.append(po_number)
 
     qr.status = QuotationRequestStatus.ORDERED.value

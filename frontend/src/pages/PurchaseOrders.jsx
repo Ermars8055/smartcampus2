@@ -28,7 +28,7 @@ export default function PurchaseOrders() {
   const [detailDialog, setDetailDialog] = useState(null);
   const [search, setSearch] = useState('');
   const [form, setForm] = useState({
-    vendor_id: '', project_id: '', delivery_date: dayjs().add(14, 'day'), terms: '', po_type: 'Informal', items: [{ material_id: '', quantity: '', rate: '' }]
+    vendor_id: '', project_id: '', delivery_date: dayjs().add(14, 'day'), terms: '', po_type: 'Informal', items: [{ material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0 }]
   });
   const [sortConfig, setSortConfig] = useState({ key: 'created_at', direction: 'desc' });
 
@@ -101,7 +101,11 @@ export default function PurchaseOrders() {
         items: ind.items.filter(it => it.requested_quantity > it.issued_quantity).map(it => ({
           material_id: it.material_id,
           quantity: it.requested_quantity - it.issued_quantity,
-          rate: ''
+          rate: '',
+          discount_percent: 0,
+          cgst_percentage: 0,
+          sgst_percentage: 0,
+          igst_percentage: 0
         }))
       });
       setDialog(true);
@@ -110,7 +114,7 @@ export default function PurchaseOrders() {
     }
   }, [location.state, projects, location.pathname, navigate]);
 
-  const addItem = () => setForm({ ...form, items: [...form.items, { material_id: '', quantity: '', rate: '' }] });
+  const addItem = () => setForm({ ...form, items: [...form.items, { material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0 }] });
   const removeItem = (i) => setForm({ ...form, items: form.items.filter((_, idx) => idx !== i) });
   const updateItem = (i, field, val) => {
     const items = [...form.items];
@@ -123,7 +127,11 @@ export default function PurchaseOrders() {
       const mappedItems = form.items.map(it => ({
         material_id: it.material_id,
         quantity: parseFloat(it.quantity) || 0,
-        rate: parseFloat(it.rate) || 0
+        rate: parseFloat(it.rate) || 0,
+        discount_percent: parseFloat(it.discount_percent) || 0,
+        cgst_percentage: parseFloat(it.cgst_percentage) || 0,
+        sgst_percentage: parseFloat(it.sgst_percentage) || 0,
+        igst_percentage: parseFloat(it.igst_percentage) || 0
       }));
       const hasInvalidNumbers = mappedItems.some(it => it.quantity <= 0 || it.rate < 0);
       if (hasInvalidNumbers) {
@@ -201,8 +209,8 @@ export default function PurchaseOrders() {
       const qty = parseFloat(item.quantity) || 0;
       const rate = parseFloat(item.rate) || 0;
       const amount = qty * rate;
-      const cgstVal = amount * 0.025;
-      const sgstVal = amount * 0.025;
+      const cgstVal = amount * ((item.cgst_percentage || 0) / 100);
+      const sgstVal = amount * ((item.sgst_percentage || 0) / 100);
       totalCgst += cgstVal;
       totalSgst += sgstVal;
       grandTotal += amount;
@@ -215,10 +223,10 @@ export default function PurchaseOrders() {
           <td>${qty.toFixed(2)}</td>
           <td>${item.uom_name || 'NOS'}</td>
           <td style="text-align:right">${rate.toFixed(2)}</td>
-          <td style="text-align:right">0.00</td>
-          <td style="text-align:right">2.50</td>
-          <td style="text-align:right">2.50</td>
-          <td style="text-align:right">0.00</td>
+          <td style="text-align:right">${(item.discount_percent || 0).toFixed(2)}</td>
+          <td style="text-align:right">${(item.cgst_percentage || 0).toFixed(2)}</td>
+          <td style="text-align:right">${(item.sgst_percentage || 0).toFixed(2)}</td>
+          <td style="text-align:right">${(item.igst_percentage || 0).toFixed(2)}</td>
           <td style="text-align:right">${amount.toFixed(2)}</td>
         </tr>
       `;
@@ -383,8 +391,8 @@ export default function PurchaseOrders() {
       const qty = parseFloat(item.quantity) || 0;
       const rate = parseFloat(item.rate) || 0;
       const amount = qty * rate;
-      totalCgst += amount * 0.025;
-      totalSgst += amount * 0.025;
+      totalCgst += amount * ((item.cgst_percentage || 0) / 100);
+      totalSgst += amount * ((item.sgst_percentage || 0) / 100);
       grandTotal += amount;
     });
     
@@ -412,7 +420,7 @@ export default function PurchaseOrders() {
           <Typography variant="body2" sx={{ color: '#64748B' }}>{pos.length} orders</Typography>
         </Box>
         <Button variant="contained" startIcon={<Add />} onClick={() => {
-          setForm({ vendor_id: '', project_id: projects[0]?.id || '', delivery_date: dayjs().add(21, 'day'), terms: termsTemplates.find(t => t.is_default)?.content || '', po_type: 'Informal', items: [{ material_id: '', quantity: '', rate: '' }] });
+          setForm({ vendor_id: '', project_id: projects[0]?.id || '', delivery_date: dayjs().add(21, 'day'), terms: termsTemplates.find(t => t.is_default)?.content || '', po_type: 'Informal', items: [{ material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0 }] });
           setDialog(true);
         }}>Create PO</Button>
       </Box>
@@ -712,10 +720,10 @@ export default function PurchaseOrders() {
                         <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{qty.toFixed(2)}</TableCell>
                         <TableCell sx={{ fontSize: '0.75rem' }}>{item.uom_name || 'NOS'}</TableCell>
                         <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{rate.toFixed(2)}</TableCell>
-                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>0.00</TableCell>
-                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>2.50</TableCell>
-                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>2.50</TableCell>
-                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>0.00</TableCell>
+                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{(item.discount_percent || 0).toFixed(2)}</TableCell>
+                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{(item.cgst_percentage || 0).toFixed(2)}</TableCell>
+                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{(item.sgst_percentage || 0).toFixed(2)}</TableCell>
+                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{(item.igst_percentage || 0).toFixed(2)}</TableCell>
                         <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem' }}>{amount.toFixed(2)}</TableCell>
                         <TableCell align="right">
                           <Chip label={item.received_quantity} size="small" color={item.received_quantity >= item.quantity ? 'success' : 'warning'} sx={{ fontSize: '0.65rem', height: 20 }} />
@@ -845,8 +853,7 @@ export default function PurchaseOrders() {
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
             {form.items.map((item, i) => (
               <Box key={i} sx={{
-                display: 'grid',
-                gridTemplateColumns: { xs: '1fr', sm: '1.2fr 1fr 1fr 110px 40px' },
+                display: 'flex', flexWrap: 'wrap',
                 gap: 1.5,
                 alignItems: 'center',
                 p: 1.5,
@@ -854,7 +861,7 @@ export default function PurchaseOrders() {
                 borderRadius: 2,
                 border: '1px solid #e2e8f0'
               }}>
-                <Box>
+                <Box sx={{ flex: '1 1 200px' }}>
                   <MaterialSelect
                     materials={materials}
                     value={item.material_id}
@@ -863,7 +870,7 @@ export default function PurchaseOrders() {
                   />
                 </Box>
                 <TextField
-                  fullWidth
+                  sx={{ flex: '1 1 80px' }}
                   size="small"
                   label="Qty"
                   type="number"
@@ -872,7 +879,7 @@ export default function PurchaseOrders() {
                   inputProps={{ min: 0 }}
                 />
                 <TextField
-                  fullWidth
+                  sx={{ flex: '1 1 80px' }}
                   size="small"
                   label="Rate (₹)"
                   type="number"
@@ -880,13 +887,49 @@ export default function PurchaseOrders() {
                   onChange={e => updateItem(i, 'rate', e.target.value)}
                   inputProps={{ min: 0 }}
                 />
-                <Box sx={{ textAlign: 'right', pr: 1 }}>
+                <TextField
+                  sx={{ flex: '1 1 70px' }}
+                  size="small"
+                  label="Disc %"
+                  type="number"
+                  value={item.discount_percent}
+                  onChange={e => updateItem(i, 'discount_percent', e.target.value)}
+                  inputProps={{ min: 0, max: 100 }}
+                />
+                <TextField
+                  sx={{ flex: '1 1 70px' }}
+                  size="small"
+                  label="CGST %"
+                  type="number"
+                  value={item.cgst_percentage}
+                  onChange={e => updateItem(i, 'cgst_percentage', e.target.value)}
+                  inputProps={{ min: 0, max: 100 }}
+                />
+                <TextField
+                  sx={{ flex: '1 1 70px' }}
+                  size="small"
+                  label="SGST %"
+                  type="number"
+                  value={item.sgst_percentage}
+                  onChange={e => updateItem(i, 'sgst_percentage', e.target.value)}
+                  inputProps={{ min: 0, max: 100 }}
+                />
+                <TextField
+                  sx={{ flex: '1 1 70px' }}
+                  size="small"
+                  label="IGST %"
+                  type="number"
+                  value={item.igst_percentage}
+                  onChange={e => updateItem(i, 'igst_percentage', e.target.value)}
+                  inputProps={{ min: 0, max: 100 }}
+                />
+                <Box sx={{ flex: '1 1 100px', textAlign: 'right', pr: 1 }}>
                   <Typography variant="caption" sx={{ color: '#64748B', display: 'block', fontSize: '0.65rem', fontWeight: 600 }}>AMOUNT</Typography>
                   <Typography sx={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b' }}>
                     ₹{((parseFloat(item.quantity) || 0) * (parseFloat(item.rate) || 0)).toLocaleString('en-IN')}
                   </Typography>
                 </Box>
-                <Box>
+                <Box sx={{ flex: '0 0 40px', display: 'flex', justifyContent: 'center' }}>
                   {form.items.length > 1 && (
                     <Tooltip title="Remove Item">
                       <IconButton size="small" color="error" onClick={() => removeItem(i)}>

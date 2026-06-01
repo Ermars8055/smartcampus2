@@ -308,18 +308,20 @@ export default function RateAnalysisReport() {
       <Card sx={{ borderRadius: 1, boxShadow: 'none', border: '1px solid #E2E8F0' }}>
         <TableContainer sx={{ maxHeight: 'calc(100vh - 320px)', '@media print': { maxHeight: 'none', overflow: 'visible' } }}>
           <Table size="small" stickyHeader sx={{ '& th, & td': { border: '1px solid #E2E8F0', fontSize: '0.82rem', py: 1, px: 1.5 } }}>
-            <TableHead>
-              <TableRow sx={{ '& th': { background: '#F1F5F9', fontWeight: 700, color: '#1E293B', whiteSpace: 'nowrap' } }}>
-                <TableCell sx={{ width: 40 }} />
-                {colDefs.map(col => (
-                  <TableCell key={col.id} align={col.align}>
-                    <TableSortLabel active={sortField === col.id} direction={sortField === col.id ? sortDir : 'asc'} onClick={() => handleSort(col.id)}>
-                      {col.label}
-                    </TableSortLabel>
-                  </TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
+            {(reportData && reportData.data && reportData.data.length > 0) && (
+              <TableHead>
+                <TableRow sx={{ '& th': { background: '#F1F5F9', fontWeight: 700, color: '#1E293B', whiteSpace: 'nowrap' } }}>
+                  <TableCell sx={{ width: 40 }} />
+                  {colDefs.map(col => (
+                    <TableCell key={col.id} align={col.align}>
+                      <TableSortLabel active={sortField === col.id} direction={sortField === col.id ? sortDir : 'asc'} onClick={() => handleSort(col.id)}>
+                        {col.label}
+                      </TableSortLabel>
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+            )}
             <TableBody>
               {loading && <TableRow><TableCell colSpan={8} align="center" sx={{ py: 5 }}><CircularProgress /></TableCell></TableRow>}
               {!loading && sortedData.map(row => (

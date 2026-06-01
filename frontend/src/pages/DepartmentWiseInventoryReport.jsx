@@ -233,7 +233,7 @@ export default function DepartmentWiseInventoryReport() {
       </Card>
 
       {/* Report Container */}
-      {reportData && (
+      {reportData && reportData.data && reportData.data.length > 0 && (
         <Box sx={{ '@media print': { mt: 0 } }}>
           {/* Header Section */}
           <Box sx={{ mb: 3, textAlign: 'center' }}>

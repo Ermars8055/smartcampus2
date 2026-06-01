@@ -24,6 +24,7 @@ export default function SaasAdmin() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [selectedTenantDetails, setSelectedTenantDetails] = useState(null);
 
   const loadTenants = async () => {
     const res = await api.get('/api/admin/saas/tenants');
@@ -73,6 +74,15 @@ export default function SaasAdmin() {
     }
   };
 
+  const handleTenantClick = async (tenantId) => {
+    try {
+      const res = await api.get(`/api/admin/saas/tenants/${tenantId}/details`);
+      setSelectedTenantDetails(res.data);
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Unable to load workspace details');
+    }
+  };
+
   const StatCard = ({ title, value, icon, color }) => (
     <Card sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 2, height: '100%', borderRadius: 3 }}>
       <Box sx={{ p: 1.5, borderRadius: 3, backgroundColor: `${color}15`, color: color }}>
@@ -112,10 +122,10 @@ export default function SaasAdmin() {
           <StatCard title="Total Workspaces" value={tenants.length} icon={<Business />} color="#3B82F6" />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Active Subscriptions" value={tenants.filter(t => t.is_active).length} icon={<Subscriptions />} color="#10B981" />
+          <StatCard title="Active Subscriptions" value={tenants.filter(t => t.status === 'Active').length} icon={<Subscriptions />} color="#10B981" />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Multi-Site Tenants" value={tenants.filter(t => t.subscription_type === 'multi_site').length} icon={<Apartment />} color="#8B5CF6" />
+          <StatCard title="Multi-Site Tenants" value={tenants.filter(t => t.subscription_plan === 'multi_site').length} icon={<Apartment />} color="#8B5CF6" />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <StatCard title="Avg. Growth" value="+12%" icon={<Refresh />} color="#F59E0B" />
@@ -126,7 +136,94 @@ export default function SaasAdmin() {
       {success && <Alert severity="success" sx={{ mb: 3, borderRadius: 2 }}>{success}</Alert>}
 
       <Grid container spacing={4}>
-        {/* Provisioning Form */}
+        {/* Left Pane: Details or Provisioning Form */}
+        {selectedTenantDetails ? (
+          <Grid item xs={12} lg={5}>
+            <Card sx={{ borderRadius: 4, overflow: 'hidden', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}>
+              <Box sx={{ p: 3, background: 'linear-gradient(135deg, #1E293B 0%, #0F172A 100%)', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <Box>
+                  <Typography variant="h6" sx={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                    <Business sx={{ color: '#60A5FA' }} /> Workspace Details
+                  </Typography>
+                  <Typography variant="caption" sx={{ opacity: 0.8 }}>Review configuration and admin access.</Typography>
+                </Box>
+                <Button 
+                  size="small" 
+                  variant="outlined" 
+                  onClick={() => setSelectedTenantDetails(null)}
+                  sx={{ color: '#fff', borderColor: 'rgba(255,255,255,0.3)', '&:hover': { borderColor: '#fff' }, textTransform: 'none' }}
+                >
+                  Close
+                </Button>
+              </Box>
+              <Box sx={{ p: 3 }}>
+                <Stack spacing={3}>
+                  <Box>
+                    <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 700, color: '#334155', display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Business fontSize="small" /> Workspace Information
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12}>
+                        <Typography variant="caption" sx={{ color: '#64748B' }}>Company Name</Typography>
+                        <Typography variant="body1" sx={{ fontWeight: 600, color: '#0F172A' }}>{selectedTenantDetails.tenant.name}</Typography>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Typography variant="caption" sx={{ color: '#64748B' }}>Subscription Tier</Typography>
+                        <Typography variant="body1" sx={{ fontWeight: 600, color: '#0F172A' }}>
+                          {selectedTenantDetails.tenant.subscription_plan === 'multi_site' ? 'Enterprise (Multi Site)' : 'Professional (Single Site)'}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                  </Box>
+
+                  <Divider />
+
+                  <Box>
+                    <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 700, color: '#334155', display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Apartment fontSize="small" /> Primary Site Details
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} md={6}>
+                        <Typography variant="caption" sx={{ color: '#64748B' }}>Site Name</Typography>
+                        <Typography variant="body1" sx={{ fontWeight: 600, color: '#0F172A' }}>{selectedTenantDetails.site.name}</Typography>
+                      </Grid>
+                      <Grid item xs={12} md={6}>
+                        <Typography variant="caption" sx={{ color: '#64748B' }}>Location</Typography>
+                        <Typography variant="body1" sx={{ fontWeight: 600, color: '#0F172A' }}>{selectedTenantDetails.site.location || 'N/A'}</Typography>
+                      </Grid>
+                    </Grid>
+                  </Box>
+
+                  <Divider />
+
+                  <Box>
+                    <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 700, color: '#334155', display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <AccountBox fontSize="small" /> Admin Credentials
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} md={6}>
+                        <Typography variant="caption" sx={{ color: '#64748B' }}>Username</Typography>
+                        <Typography variant="body1" sx={{ fontWeight: 600, color: '#0F172A' }}>{selectedTenantDetails.admin.username}</Typography>
+                      </Grid>
+                      <Grid item xs={12} md={6}>
+                        <Typography variant="caption" sx={{ color: '#64748B' }}>Password</Typography>
+                        <Typography variant="body1" sx={{ fontWeight: 600, color: '#0F172A', letterSpacing: 2 }}>••••••••</Typography>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Typography variant="caption" sx={{ color: '#64748B' }}>Full Name</Typography>
+                        <Typography variant="body1" sx={{ fontWeight: 600, color: '#0F172A' }}>{selectedTenantDetails.admin.full_name}</Typography>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Typography variant="caption" sx={{ color: '#64748B' }}>Email Address</Typography>
+                        <Typography variant="body1" sx={{ fontWeight: 600, color: '#0F172A' }}>{selectedTenantDetails.admin.email}</Typography>
+                      </Grid>
+                    </Grid>
+                  </Box>
+                </Stack>
+              </Box>
+            </Card>
+          </Grid>
+        ) : (
         <Grid item xs={12} lg={5}>
           <Card sx={{ borderRadius: 4, overflow: 'hidden', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}>
             <Box sx={{ p: 3, background: 'linear-gradient(135deg, #1E293B 0%, #0F172A 100%)', color: '#fff' }}>
@@ -214,6 +311,7 @@ export default function SaasAdmin() {
             </Box>
           </Card>
         </Grid>
+        )}
 
         {/* Workspace List */}
         <Grid item xs={12} lg={7}>
@@ -234,7 +332,15 @@ export default function SaasAdmin() {
                 </TableHead>
                 <TableBody>
                   {tenants.map((tenant) => (
-                    <TableRow key={tenant.id} sx={{ '&:hover': { backgroundColor: '#F8FAFC' } }}>
+                    <TableRow 
+                      key={tenant.id} 
+                      onClick={() => handleTenantClick(tenant.id)}
+                      sx={{ 
+                        cursor: 'pointer',
+                        backgroundColor: selectedTenantDetails?.tenant?.id === tenant.id ? '#EFF6FF' : 'inherit',
+                        '&:hover': { backgroundColor: selectedTenantDetails?.tenant?.id === tenant.id ? '#DBEAFE' : '#F8FAFC' } 
+                      }}
+                    >
                       <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                           <Paper sx={{ p: 1, borderRadius: 2, display: 'flex', backgroundColor: '#F1F5F9' }}>
@@ -248,21 +354,21 @@ export default function SaasAdmin() {
                       </TableCell>
                       <TableCell>
                         <Chip 
-                          label={tenant.subscription_type === 'multi_site' ? 'Enterprise' : 'Professional'} 
+                          label={tenant.subscription_plan === 'multi_site' ? 'Enterprise' : 'Professional'} 
                           size="small" 
                           sx={{ 
                             fontWeight: 700, 
-                            backgroundColor: tenant.subscription_type === 'multi_site' ? '#EEF2FF' : '#F0FDF4',
-                            color: tenant.subscription_type === 'multi_site' ? '#4F46E5' : '#16A34A',
+                            backgroundColor: tenant.subscription_plan === 'multi_site' ? '#EEF2FF' : '#F0FDF4',
+                            color: tenant.subscription_plan === 'multi_site' ? '#4F46E5' : '#16A34A',
                             border: '1px solid transparent'
                           }} 
                         />
                       </TableCell>
                       <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
-                          <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: tenant.is_active ? '#10B981' : '#CBD5E1' }} />
-                          <Typography variant="body2" sx={{ fontWeight: 600, color: tenant.is_active ? '#065F46' : '#64748B' }}>
-                            {tenant.is_active ? 'Online' : 'Suspended'}
+                          <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: tenant.status === 'Active' ? '#10B981' : '#CBD5E1' }} />
+                          <Typography variant="body2" sx={{ fontWeight: 600, color: tenant.status === 'Active' ? '#065F46' : '#64748B' }}>
+                            {tenant.status === 'Active' ? 'Online' : 'Suspended'}
                           </Typography>
                         </Box>
                       </TableCell>

@@ -143,18 +143,15 @@ export default function PurchaseOrders() {
       const mappedItems = form.items.map(it => {
         const inputRate = parseFloat(it.rate) || 0;
         const totalGstPercent = (parseFloat(it.cgst_percentage) || 0) + (parseFloat(it.sgst_percentage) || 0) + (parseFloat(it.igst_percentage) || 0);
-        let finalBaseRate = inputRate;
-        if (it.is_gst_inclusive && totalGstPercent > 0) {
-          finalBaseRate = inputRate / (1 + (totalGstPercent / 100));
-        }
         return {
           material_id: it.material_id,
           quantity: parseFloat(it.quantity) || 0,
-          rate: finalBaseRate,
+          rate: inputRate,
           discount_percent: parseFloat(it.discount_percent) || 0,
           cgst_percentage: parseFloat(it.cgst_percentage) || 0,
           sgst_percentage: parseFloat(it.sgst_percentage) || 0,
-          igst_percentage: parseFloat(it.igst_percentage) || 0
+          igst_percentage: parseFloat(it.igst_percentage) || 0,
+          is_gst_inclusive: it.is_gst_inclusive || false
         };
       });
       const hasInvalidNumbers = mappedItems.some(it => it.quantity <= 0 || it.rate < 0);
@@ -226,18 +223,40 @@ export default function PurchaseOrders() {
     const printWindow = window.open('', '_blank');
     let rowsHtml = '';
     let grandTotal = 0;
+    let totalDiscount = 0;
     let totalCgst = 0;
     let totalSgst = 0;
+    let totalIgst = 0;
+    let totalNetAmountSum = 0;
     
     po.items.forEach((item, idx) => {
       const qty = parseFloat(item.quantity) || 0;
       const rate = parseFloat(item.rate) || 0;
       const amount = qty * rate;
-      const cgstVal = amount * ((item.cgst_percentage || 0) / 100);
-      const sgstVal = amount * ((item.sgst_percentage || 0) / 100);
+      const discAmt = amount * ((item.discount_percent || 0) / 100);
+      const netAmtAfterDisc = amount - discAmt;
+      
+      let taxable = netAmtAfterDisc;
+      const totalGst = (item.cgst_percentage || 0) + (item.sgst_percentage || 0) + (item.igst_percentage || 0);
+      if (item.is_gst_inclusive && totalGst > 0) {
+          taxable = netAmtAfterDisc / (1 + (totalGst / 100));
+      }
+      
+      const cgstVal = taxable * ((item.cgst_percentage || 0) / 100);
+      const sgstVal = taxable * ((item.sgst_percentage || 0) / 100);
+      const igstVal = taxable * ((item.igst_percentage || 0) / 100);
+      
       totalCgst += cgstVal;
       totalSgst += sgstVal;
+      totalIgst += igstVal;
+      totalDiscount += discAmt;
       grandTotal += amount;
+      
+      if (item.is_gst_inclusive) {
+          totalNetAmountSum += netAmtAfterDisc;
+      } else {
+          totalNetAmountSum += (netAmtAfterDisc + cgstVal + sgstVal + igstVal);
+      }
       
       rowsHtml += `
         <tr>
@@ -256,7 +275,7 @@ export default function PurchaseOrders() {
       `;
     });
     
-    const grandTotalWithTax = grandTotal + totalCgst + totalSgst;
+    const grandTotalWithTax = totalNetAmountSum;
     const roundOff = (Math.round(grandTotalWithTax) - grandTotalWithTax).toFixed(2);
     const totalNetAmount = Math.round(grandTotalWithTax).toFixed(2);
     const activeTerms = po.terms || termsTemplates.find(t => t.is_default)?.content || (termsTemplates.length > 0 ? termsTemplates[0].content : '');
@@ -365,8 +384,11 @@ export default function PurchaseOrders() {
             <div style="width: 40%">
               <table style="width:100%; border-collapse: collapse;">
                 <tr><td style="text-align:right">Total Amount</td><td style="text-align:right; width: 100px;">: ${grandTotal.toFixed(2)}</td></tr>
-                <tr><td style="text-align:right">Add: CGST @ 2.5%</td><td style="text-align:right">: ${totalCgst.toFixed(2)}</td></tr>
-                <tr><td style="text-align:right">Add: SGST @ 2.5%</td><td style="text-align:right">: ${totalSgst.toFixed(2)}</td></tr>
+                <tr><td style="text-align:right; color: #d97706;">Less: Discount</td><td style="text-align:right; color: #d97706;">: ${totalDiscount.toFixed(2)}</td></tr>
+                <tr><td style="text-align:right">Taxable Amount</td><td style="text-align:right">: ${(grandTotal - totalDiscount).toFixed(2)}</td></tr>
+                <tr><td style="text-align:right">Add: CGST</td><td style="text-align:right">: ${totalCgst.toFixed(2)}</td></tr>
+                <tr><td style="text-align:right">Add: SGST</td><td style="text-align:right">: ${totalSgst.toFixed(2)}</td></tr>
+                ${totalIgst > 0 ? `<tr><td style="text-align:right">Add: IGST</td><td style="text-align:right">: ${totalIgst.toFixed(2)}</td></tr>` : ''}
                 <tr><td style="text-align:right">Round Off</td><td style="text-align:right">: ${roundOff}</td></tr>
                 <tr><td style="text-align:right"><b>Total Net Amount</b></td><td style="text-align:right"><b>: ${totalNetAmount}</b></td></tr>
               </table>
@@ -408,27 +430,53 @@ export default function PurchaseOrders() {
   const detailData = useMemo(() => {
     if (!detailDialog) return null;
     let grandTotal = 0;
+    let totalDiscount = 0;
     let totalCgst = 0;
     let totalSgst = 0;
+    let totalIgst = 0;
+    let totalNetAmountSum = 0;
     
     (detailDialog.items || []).forEach(item => {
       const qty = parseFloat(item.quantity) || 0;
       const rate = parseFloat(item.rate) || 0;
       const amount = qty * rate;
-      totalCgst += amount * ((item.cgst_percentage || 0) / 100);
-      totalSgst += amount * ((item.sgst_percentage || 0) / 100);
+      const discAmt = amount * ((item.discount_percent || 0) / 100);
+      const netAmtAfterDisc = amount - discAmt;
+      
+      let taxable = netAmtAfterDisc;
+      const totalGst = (item.cgst_percentage || 0) + (item.sgst_percentage || 0) + (item.igst_percentage || 0);
+      if (item.is_gst_inclusive && totalGst > 0) {
+          taxable = netAmtAfterDisc / (1 + (totalGst / 100));
+      }
+      
+      const cgstVal = taxable * ((item.cgst_percentage || 0) / 100);
+      const sgstVal = taxable * ((item.sgst_percentage || 0) / 100);
+      const igstVal = taxable * ((item.igst_percentage || 0) / 100);
+      
+      totalDiscount += discAmt;
+      totalCgst += cgstVal;
+      totalSgst += sgstVal;
+      totalIgst += igstVal;
       grandTotal += amount;
+      
+      if (item.is_gst_inclusive) {
+          totalNetAmountSum += netAmtAfterDisc;
+      } else {
+          totalNetAmountSum += (netAmtAfterDisc + cgstVal + sgstVal + igstVal);
+      }
     });
     
-    const grandTotalWithTax = grandTotal + totalCgst + totalSgst;
+    const grandTotalWithTax = totalNetAmountSum;
     const roundOff = (Math.round(grandTotalWithTax) - grandTotalWithTax).toFixed(2);
     const totalNetAmount = Math.round(grandTotalWithTax).toFixed(2);
     const activeTerms = detailDialog.terms || termsTemplates.find(t => t.is_default)?.content || (termsTemplates.length > 0 ? termsTemplates[0].content : '');
 
     return {
       grandTotal,
+      totalDiscount,
       totalCgst,
       totalSgst,
+      totalIgst,
       grandTotalWithTax,
       roundOff,
       totalNetAmount,
@@ -773,13 +821,27 @@ export default function PurchaseOrders() {
                         <TableCell align="right" sx={{ width: '120px' }}>: {detailData.grandTotal.toFixed(2)}</TableCell>
                       </TableRow>
                       <TableRow>
-                        <TableCell align="right" sx={{ color: '#64748B', fontWeight: 600 }}>Add: CGST @ 2.5%</TableCell>
+                        <TableCell align="right" sx={{ color: '#d97706', fontWeight: 600 }}>Less: Discount</TableCell>
+                        <TableCell align="right" sx={{ color: '#d97706' }}>: {detailData.totalDiscount.toFixed(2)}</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell align="right" sx={{ color: '#64748B', fontWeight: 600 }}>Taxable Amount</TableCell>
+                        <TableCell align="right">: {(detailData.grandTotal - detailData.totalDiscount).toFixed(2)}</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell align="right" sx={{ color: '#64748B', fontWeight: 600 }}>Add: CGST</TableCell>
                         <TableCell align="right">: {detailData.totalCgst.toFixed(2)}</TableCell>
                       </TableRow>
                       <TableRow>
-                        <TableCell align="right" sx={{ color: '#64748B', fontWeight: 600 }}>Add: SGST @ 2.5%</TableCell>
+                        <TableCell align="right" sx={{ color: '#64748B', fontWeight: 600 }}>Add: SGST</TableCell>
                         <TableCell align="right">: {detailData.totalSgst.toFixed(2)}</TableCell>
                       </TableRow>
+                      {detailData.totalIgst > 0 && (
+                        <TableRow>
+                          <TableCell align="right" sx={{ color: '#64748B', fontWeight: 600 }}>Add: IGST</TableCell>
+                          <TableCell align="right">: {detailData.totalIgst.toFixed(2)}</TableCell>
+                        </TableRow>
+                      )}
                       <TableRow>
                         <TableCell align="right" sx={{ color: '#64748B', fontWeight: 600 }}>Round Off</TableCell>
                         <TableCell align="right">: {detailData.roundOff}</TableCell>
@@ -888,17 +950,18 @@ export default function PurchaseOrders() {
               const igstPercent = parseFloat(item.igst_percentage) || 0;
               const totalGstPercent = cgstPercent + sgstPercent + igstPercent;
               
-              let baseRate = inputRate;
-              if (item.is_gst_inclusive && totalGstPercent > 0) {
-                baseRate = inputRate / (1 + (totalGstPercent / 100));
-              }
-              const grossAmt = qty * baseRate;
+              const grossAmt = qty * inputRate;
               const discAmt = grossAmt * (discPercent / 100);
-              const taxableAmt = grossAmt - discAmt;
+              const netAmtAfterDisc = grossAmt - discAmt;
+              
+              let taxableAmt = netAmtAfterDisc;
+              if (item.is_gst_inclusive && totalGstPercent > 0) {
+                taxableAmt = netAmtAfterDisc / (1 + (totalGstPercent / 100));
+              }
               const cgstAmt = taxableAmt * (cgstPercent / 100);
               const sgstAmt = taxableAmt * (sgstPercent / 100);
               const igstAmt = taxableAmt * (igstPercent / 100);
-              const netAmt = taxableAmt + cgstAmt + sgstAmt + igstAmt;
+              const netAmt = item.is_gst_inclusive ? netAmtAfterDisc : (taxableAmt + cgstAmt + sgstAmt + igstAmt);
 
               return (
               <Box key={i} sx={{

@@ -332,28 +332,30 @@ export default function ReceiptSummaryReport() {
             '& th, & td': { border: '1px solid #E2E8F0', fontSize: '0.75rem', p: 0.5 },
             '& th': { background: '#F8FAFC', fontWeight: 700, textAlign: 'center' }
           }}>
-            <TableHead>
-              <TableRow>
-                <TableCell rowSpan={2} sx={{ width: 40, background: '#F1F5F9' }}>S.No</TableCell>
-                <TableCell rowSpan={2} sx={{ minWidth: 200, background: '#F1F5F9', position: 'sticky', left: 0, zIndex: 3 }}>Material Name</TableCell>
-                {reportData?.vendors.map(v => (
-                  <TableCell key={v.id} colSpan={5} sx={{ background: '#EFF6FF', color: '#1E40AF', borderBottom: '2px solid #3B82F6' }}>
-                    <Typography variant="caption" sx={{ fontWeight: 800, textTransform: 'uppercase' }}>{v.name}</Typography>
-                  </TableCell>
-                ))}
-              </TableRow>
-              <TableRow>
-                {reportData?.vendors.map(v => (
-                  <Fragment key={v.id}>
-                    <TableCell sx={{ minWidth: 100 }}>Bill No & Date</TableCell>
-                    <TableCell sx={{ minWidth: 60 }}>Qty</TableCell>
-                    <TableCell sx={{ minWidth: 70 }}>Rate</TableCell>
-                    <TableCell sx={{ minWidth: 90 }}>Amount</TableCell>
-                    <TableCell sx={{ minWidth: 90 }}>Total</TableCell>
-                  </Fragment>
-                ))}
-              </TableRow>
-            </TableHead>
+            {(reportData && reportData.data && reportData.data.length > 0) && (
+              <TableHead>
+                <TableRow>
+                  <TableCell rowSpan={2} sx={{ width: 40, background: '#F1F5F9' }}>S.No</TableCell>
+                  <TableCell rowSpan={2} sx={{ minWidth: 200, background: '#F1F5F9', position: 'sticky', left: 0, zIndex: 3 }}>Material Name</TableCell>
+                  {reportData?.vendors.map(v => (
+                    <TableCell key={v.id} colSpan={5} sx={{ background: '#EFF6FF', color: '#1E40AF', borderBottom: '2px solid #3B82F6' }}>
+                      <Typography variant="caption" sx={{ fontWeight: 800, textTransform: 'uppercase' }}>{v.name}</Typography>
+                    </TableCell>
+                  ))}
+                </TableRow>
+                <TableRow>
+                  {reportData?.vendors.map(v => (
+                    <Fragment key={v.id}>
+                      <TableCell sx={{ minWidth: 100 }}>Bill No & Date</TableCell>
+                      <TableCell sx={{ minWidth: 60 }}>Qty</TableCell>
+                      <TableCell sx={{ minWidth: 70 }}>Rate</TableCell>
+                      <TableCell sx={{ minWidth: 90 }}>Amount</TableCell>
+                      <TableCell sx={{ minWidth: 90 }}>Total</TableCell>
+                    </Fragment>
+                  ))}
+                </TableRow>
+              </TableHead>
+            )}
             <TableBody>
               {loading && <TableRow><TableCell colSpan={2 + (reportData?.vendors.length || 0) * 5} align="center" sx={{ py: 5 }}><CircularProgress /></TableCell></TableRow>}
               {!loading && reportData?.data.map((row, idx) => (

@@ -538,6 +538,7 @@ class PurchaseOrderItem(Base):
     cgst_percentage = Column(Float, default=0)
     sgst_percentage = Column(Float, default=0)
     igst_percentage = Column(Float, default=0)
+    is_gst_inclusive = Column(Boolean, default=False)
     remarks = Column(Text)
     purchase_order = relationship("PurchaseOrder", back_populates="items")
     material = relationship("Material")

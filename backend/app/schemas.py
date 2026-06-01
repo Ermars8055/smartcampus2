@@ -129,6 +129,12 @@ class SiteOut(SiteBase):
     class Config:
         from_attributes = True
 
+class TenantDetailsOut(BaseModel):
+    tenant: TenantOut
+    site: SiteOut
+    admin: UserOut
+
+
 # ── Master Data ──────────────────────────────────────────────────────────
 
 class CategoryBase(BaseModel):
@@ -452,6 +458,7 @@ class POItemBase(BaseModel):
     cgst_percentage: float = 0
     sgst_percentage: float = 0
     igst_percentage: float = 0
+    is_gst_inclusive: bool = False
 
 class POItemOut(POItemBase):
     id: int

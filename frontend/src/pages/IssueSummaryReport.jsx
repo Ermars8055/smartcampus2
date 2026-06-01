@@ -343,7 +343,7 @@ export default function IssueSummaryReport() {
         <TableContainer sx={{ maxHeight: 'calc(100vh - 250px)', overflow: 'auto', '@media print': { maxHeight: 'none', overflow: 'visible' } }} ref={tableRef}>
           <Table size="small" sx={{ minWidth: 1000, borderCollapse: 'collapse', '& th, & td': { border: '1px solid #CBD5E1', padding: '6px 10px', fontSize: '0.85rem' } }} stickyHeader>
             <TableHead>
-              {reportData && (
+              {reportData && reportData.data && reportData.data.length > 0 && (
                 <TableRow sx={{ '& th': { background: '#F8FAFC', fontWeight: 700, color: '#1E293B', py: 1.5 } }}>
                   <TableCell align="center" sx={stickyStyle(0, true)}>S.No</TableCell>
                   <TableCell sx={stickyStyle(50, true)}>Material Name</TableCell>

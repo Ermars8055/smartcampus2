@@ -6,7 +6,8 @@ import {
 import { Add, Delete, ArrowBack, AttachFile, OpenInNew } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import api, { getFileUrl } from '../services/api';
-
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import dayjs from 'dayjs';
 export default function RegisterInvoice() {
   const navigate = useNavigate();
   const [vendors, setVendors] = useState([]);
@@ -120,6 +121,29 @@ export default function RegisterInvoice() {
     setForm(prev => ({ ...prev, items: newItems }));
   };
 
+  const handleMaterialSelect = (index, materialId) => {
+    const material = materials.find(m => m.id === materialId);
+    if (!material) {
+      updateItem(index, 'material_id', '');
+      return;
+    }
+    
+    const newItems = [...form.items];
+    const halfGst = (material.gst_rate || 0) / 2;
+    newItems[index] = {
+      ...newItems[index],
+      material_id: material.id,
+      description: material.name || '',
+      hsn_sac: material.hsn_code || '',
+      uom: material.uom_name || '',
+      rate: material.standard_cost || 0,
+      cgst_rate: halfGst,
+      sgst_rate: halfGst,
+      igst_rate: 0
+    };
+    setForm(prev => ({ ...prev, items: newItems }));
+  };
+
   const calculateTotals = () => {
     let total_taxable_amount = 0;
     let total_cgst = 0;
@@ -156,6 +180,9 @@ export default function RegisterInvoice() {
   const handleSave = async () => {
     if (!form.invoice_number.trim()) return alert("Invoice Number is required.");
     if (!form.invoice_date) return alert("Invoice Date is required.");
+    if (dayjs(form.invoice_date).isAfter(dayjs(), 'day')) return alert("Invoice Date cannot be in the future.");
+    if (form.delivery_note_date && dayjs(form.delivery_note_date).isAfter(dayjs(), 'day')) return alert("Delivery Note Date cannot be in the future.");
+    if (form.reference_date && dayjs(form.reference_date).isAfter(dayjs(), 'day')) return alert("Reference Date cannot be in the future.");
     if (!form.vendor_id) return alert("Vendor is required.");
     if (form.items.length === 0) return alert("At least one item is required.");
 
@@ -210,7 +237,14 @@ export default function RegisterInvoice() {
                 <TextField fullWidth label="Invoice No." value={form.invoice_number} onChange={e => setForm({ ...form, invoice_number: e.target.value })} required size="small" />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField fullWidth type="date" label="Invoice Date" InputLabelProps={{ shrink: true }} value={form.invoice_date} onChange={e => setForm({ ...form, invoice_date: e.target.value })} required size="small" />
+                <DatePicker 
+                  label="Invoice Date *" 
+                  format="DD-MMM-YYYY"
+                  value={form.invoice_date ? dayjs(form.invoice_date) : null}
+                  onChange={(newValue) => setForm({ ...form, invoice_date: newValue ? newValue.format('YYYY-MM-DD') : '' })}
+                  disableFuture
+                  slotProps={{ textField: { fullWidth: true, size: 'small', required: true } }}
+                />
               </Grid>
               <Grid item xs={12} sm={6}>
                 <FormControl fullWidth required size="small">
@@ -245,7 +279,14 @@ export default function RegisterInvoice() {
                 <TextField fullWidth label="Delivery Note" value={form.delivery_note} onChange={e => setForm({ ...form, delivery_note: e.target.value })} size="small" />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField fullWidth type="date" label="Delivery Note Date" InputLabelProps={{ shrink: true }} value={form.delivery_note_date} onChange={e => setForm({ ...form, delivery_note_date: e.target.value })} size="small" />
+                <DatePicker 
+                  label="Delivery Note Date" 
+                  format="DD-MMM-YYYY"
+                  value={form.delivery_note_date ? dayjs(form.delivery_note_date) : null}
+                  onChange={(newValue) => setForm({ ...form, delivery_note_date: newValue ? newValue.format('YYYY-MM-DD') : '' })}
+                  disableFuture
+                  slotProps={{ textField: { fullWidth: true, size: 'small' } }}
+                />
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField fullWidth label="Dispatch Doc No." value={form.dispatch_doc_number} onChange={e => setForm({ ...form, dispatch_doc_number: e.target.value })} size="small" />
@@ -296,7 +337,14 @@ export default function RegisterInvoice() {
                 <TextField fullWidth label="Reference No." value={form.reference_number} onChange={e => setForm({ ...form, reference_number: e.target.value })} size="small" />
               </Grid>
               <Grid item xs={12}>
-                <TextField fullWidth type="date" label="Reference Date" InputLabelProps={{ shrink: true }} value={form.reference_date} onChange={e => setForm({ ...form, reference_date: e.target.value })} size="small" />
+                <DatePicker 
+                  label="Reference Date" 
+                  format="DD-MMM-YYYY"
+                  value={form.reference_date ? dayjs(form.reference_date) : null}
+                  onChange={(newValue) => setForm({ ...form, reference_date: newValue ? newValue.format('YYYY-MM-DD') : '' })}
+                  disableFuture
+                  slotProps={{ textField: { fullWidth: true, size: 'small' } }}
+                />
               </Grid>
               <Grid item xs={12}>
                 <FormControl fullWidth size="small">
@@ -347,7 +395,7 @@ export default function RegisterInvoice() {
                     <Select 
                       displayEmpty 
                       value={item.material_id || ''} 
-                      onChange={e => updateItem(idx, 'material_id', e.target.value)} 
+                      onChange={e => handleMaterialSelect(idx, e.target.value)} 
                       disableUnderline 
                       sx={{ fontSize: '0.8rem' }}
                       renderValue={(selected) => {

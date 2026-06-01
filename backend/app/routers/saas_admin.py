@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from app.database import get_db
 from app.models import Tenant, User, Site, Role, RolePermission, UserRoleAssignment, TenantMembership
-from app.schemas import TenantCreate, TenantOut, TenantProvisionCreate, UserCreate, UserOut
+from app.schemas import TenantCreate, TenantOut, TenantProvisionCreate, UserCreate, UserOut, TenantDetailsOut
 from app.auth import get_current_user, require_platform_admin, get_password_hash
 
 router = APIRouter(prefix="/api/admin/saas", tags=["SaaS Admin"])
@@ -15,7 +15,8 @@ DEFAULT_RESOURCES = [
     "projects", "buildings", "warehouses", "purchase_requests",
     "purchase_orders", "gate_entry", "grn", "issues", "returns",
     "transfers", "inventory", "intelligence", "reports", "admin_users",
-    "admin_roles", "alerts"
+    "admin_roles", "alerts", "indents", "quotations", "invoice",
+    "acknowledgements", "departments", "terms"
 ]
 
 
@@ -125,6 +126,45 @@ def provision_tenant(
             "tenant": tenant.name,
             "site": site.name,
         }
+    }
+@router.get("/tenants/{id}/details", response_model=TenantDetailsOut)
+def get_tenant_details(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_platform_admin())
+):
+    tenant = db.query(Tenant).filter(Tenant.id == id).first()
+    if not tenant:
+        raise HTTPException(status_code=404, detail="Tenant not found")
+        
+    site = db.query(Site).filter(Site.tenant_id == id).first()
+    
+    # Get the admin role for this tenant
+    admin_role = db.query(Role).filter(Role.tenant_id == id, Role.code == "admin").first()
+    
+    # Get the user assigned to this admin role
+    admin_user = None
+    if admin_role:
+        assignment = db.query(UserRoleAssignment).filter(
+            UserRoleAssignment.tenant_id == id,
+            UserRoleAssignment.role_id == admin_role.id
+        ).first()
+        if assignment:
+            admin_user = db.query(User).filter(User.id == assignment.user_id).first()
+            
+    # Fallback to just getting a user linked to this tenant if admin_role/assignment missing
+    if not admin_user:
+        membership = db.query(TenantMembership).filter(TenantMembership.tenant_id == id).first()
+        if membership:
+            admin_user = db.query(User).filter(User.id == membership.user_id).first()
+            
+    if not site or not admin_user:
+        raise HTTPException(status_code=404, detail="Tenant site or admin not found")
+        
+    return {
+        "tenant": tenant,
+        "site": site,
+        "admin": admin_user
     }
 
 

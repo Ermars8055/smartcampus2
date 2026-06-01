@@ -1451,14 +1451,18 @@ const Quotations = () => {
                 />
               </Box>
               <Box>
-                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 500, color: 'text.secondary' }}>Vendor Quotation Date</Typography>
+                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 500, color: 'text.secondary' }}>
+                  Vendor Quotation Date <span style={{ color: '#d32f2f' }}>*</span>
+                </Typography>
                 <DatePicker
                   value={newQuote.quotation_date ? dayjs(newQuote.quotation_date) : null}
                   onChange={(val) => setNewQuote({ ...newQuote, quotation_date: val ? val.format('YYYY-MM-DD') : '' })}
                   format="DD-MMM-YYYY"
+                  disableFuture
                   slotProps={{
                     textField: {
-                      sx: { width: 220 }
+                      sx: { width: 220 },
+                      placeholder: "DD-MMM-YYYY"
                     }
                   }}
                 />

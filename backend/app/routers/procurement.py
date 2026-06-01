@@ -319,6 +319,7 @@ def list_purchase_orders(
                 cgst_percentage=item.cgst_percentage,
                 sgst_percentage=item.sgst_percentage,
                 igst_percentage=item.igst_percentage,
+                is_gst_inclusive=item.is_gst_inclusive,
                 material_name=mat.name if mat else None,
                 material_code=mat.code if mat else None,
                 uom_name=mat.uom.name if mat and mat.uom else None
@@ -386,6 +387,7 @@ def get_purchase_order(
             cgst_percentage=item.cgst_percentage,
             sgst_percentage=item.sgst_percentage,
             igst_percentage=item.igst_percentage,
+            is_gst_inclusive=item.is_gst_inclusive,
             material_name=mat.name if mat else None,
             material_code=mat.code if mat else None,
             uom_name=mat.uom.name if mat and mat.uom else None
@@ -447,18 +449,30 @@ def create_purchase_order(
 
     total = 0
     for item_data in data.items:
-        amount = round(item_data.quantity * item_data.rate, 2)
-        total += amount
+        gross_amt = round(item_data.quantity * item_data.rate, 2)
+        disc_amt = round(gross_amt * (item_data.discount_percent / 100), 2)
+        net_amt = gross_amt - disc_amt
+        
+        total_gst_pct = item_data.cgst_percentage + item_data.sgst_percentage + item_data.igst_percentage
+        if item_data.is_gst_inclusive and total_gst_pct > 0:
+            item_total = net_amt
+        else:
+            tax_amt = round(net_amt * (total_gst_pct / 100), 2)
+            item_total = net_amt + tax_amt
+            
+        total += item_total
+        
         po_item = PurchaseOrderItem(
             po_id=po.id,
             material_id=item_data.material_id,
             quantity=item_data.quantity,
             rate=item_data.rate,
-            amount=amount,
+            amount=gross_amt,
             discount_percent=item_data.discount_percent,
             cgst_percentage=item_data.cgst_percentage,
             sgst_percentage=item_data.sgst_percentage,
-            igst_percentage=item_data.igst_percentage
+            igst_percentage=item_data.igst_percentage,
+            is_gst_inclusive=item_data.is_gst_inclusive
         )
         db.add(po_item)
 

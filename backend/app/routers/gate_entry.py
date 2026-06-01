@@ -31,6 +31,14 @@ def list_gate_entries(
         GateEntry.tenant_id == tenant_id, GateEntry.site_id == site_id,
         GateEntry.is_deleted == False
     )
+    
+    # --- ROW-LEVEL SECURITY ---
+    is_platform_admin = getattr(current_user, "_is_platform_admin", False)
+    if not is_platform_admin:
+        scope = getattr(current_user, "_data_access_scope", "Self Only")
+        if scope not in ["Full Administrative Access", "Organization"]:
+            q = q.filter(GateEntry.recorded_by_id == current_user.id)
+            
     if search:
         q = q.filter(GateEntry.entry_number.ilike(f"%{search}%"))
     if status:

@@ -135,6 +135,12 @@ class VendorQuotationStatus(str, enum.Enum):
     RECEIVED = "Received"
     REJECTED = "Rejected"
 
+class DataAccessScope(str, enum.Enum):
+    SELF_ONLY = "Self Only"
+    DEPARTMENT = "Department"
+    ORGANIZATION = "Organization"
+    ADMIN = "Full Administrative Access"
+
 
 # == Multi-Tenant Core ==
 
@@ -166,6 +172,7 @@ class User(Base):
     username = Column(String(100), unique=True, nullable=False, index=True)
     email = Column(String(255), unique=True, nullable=False)
     full_name = Column(String(255), nullable=False)
+    department = Column(String(255), nullable=True)
     hashed_password = Column(String(255), nullable=False)
     is_active = Column(Boolean, default=True)
     is_platform_admin = Column(Boolean, default=False)
@@ -191,6 +198,7 @@ class Role(Base):
     name = Column(String(100), nullable=False)
     code = Column(String(100), nullable=False)
     description = Column(Text)
+    data_access_scope = Column(String(50), default=DataAccessScope.SELF_ONLY.value)
     is_system = Column(Boolean, default=False)
     created_at = Column(DateTime, default=_get_now)
     permissions = relationship("RolePermission", back_populates="role", cascade="all, delete-orphan")

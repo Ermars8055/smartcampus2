@@ -48,6 +48,32 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     user._permissions = payload.get("permissions", {})
     user._is_platform_admin = payload.get("is_platform_admin", False)
     user._active_site_id = payload.get("active_site_id")
+    
+    # Dynamically fetch latest data_access_scope to handle role updates without re-login
+    if user._tenant_id and not user._is_platform_admin:
+        from app.models import UserRoleAssignment
+        SCOPE_RANKS = {
+            "Self Only": 1,
+            "Department": 2,
+            "Organization": 3,
+            "Full Administrative Access": 4
+        }
+        assignments = db.query(UserRoleAssignment).filter_by(
+            user_id=user.id, tenant_id=user._tenant_id
+        ).all()
+        
+        highest_scope_val = 0
+        data_access_scope = "Self Only"
+        for a in assignments:
+            if a.role:
+                scope = a.role.data_access_scope or "Self Only"
+                if SCOPE_RANKS.get(scope, 1) > highest_scope_val:
+                    highest_scope_val = SCOPE_RANKS.get(scope, 1)
+                    data_access_scope = scope
+        user._data_access_scope = data_access_scope
+    else:
+        user._data_access_scope = payload.get("data_access_scope", "Self Only")
+
     log.debug("Auth: user=%s tenant=%s site=%s", username, user._tenant_id, user._active_site_id)
     return user
 

@@ -6,14 +6,14 @@ from typing import Optional
 from app.database import get_db
 from app.models import TermsAndConditions, User
 from app.schemas import TermCreate, TermUpdate, TermOut
-from app.auth import require_permission, get_tenant_id, get_site_id
+from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
 
 router = APIRouter(prefix="/api/terms", tags=["Terms & Conditions"])
 
 @router.get("")
 def list_terms(
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("purchase_orders", "read")),
+    current_user: User = Depends(get_current_user),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):

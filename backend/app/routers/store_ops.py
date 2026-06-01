@@ -22,6 +22,14 @@ from app.routers.grn import update_stock
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
 from app.utils.sequences import get_next_number
 
+def require_issues_or_acks(current_user: User = Depends(get_current_user)):
+    if getattr(current_user, '_is_platform_admin', False):
+        return current_user
+    perms = getattr(current_user, '_permissions', {})
+    if perms.get('issues', {}).get('can_read', False) or perms.get('acknowledgements', {}).get('can_read', False):
+        return current_user
+    raise HTTPException(403, "Permission denied: read on issues or acknowledgements")
+
 router = APIRouter(prefix="/api", tags=["Store Operations"])
 
 
@@ -32,11 +40,35 @@ def list_issues(
     search: Optional[str] = None,
     project_id: Optional[int] = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("issues", "read")),
+    current_user: User = Depends(require_issues_or_acks),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
     q = db.query(MaterialIssue).filter(MaterialIssue.tenant_id == tenant_id, MaterialIssue.site_id == site_id)
+    
+    # --- ROW-LEVEL SECURITY ---
+    is_platform_admin = getattr(current_user, "_is_platform_admin", False)
+    if not is_platform_admin:
+        scope = getattr(current_user, "_data_access_scope", "Self Only")
+        if scope not in ["Full Administrative Access", "Organization"]:
+            q = q.outerjoin(Indent, MaterialIssue.indent_id == Indent.id)
+            if scope == "Department":
+                if current_user.department:
+                    q = q.filter(
+                        (MaterialIssue.issued_to_department == current_user.department) |
+                        (Indent.department == current_user.department)
+                    )
+                else:
+                    q = q.filter(
+                        (MaterialIssue.issued_by_id == current_user.id) |
+                        (Indent.requester_id == current_user.id)
+                    )
+            else:
+                q = q.filter(
+                    (MaterialIssue.issued_by_id == current_user.id) |
+                    (Indent.requester_id == current_user.id)
+                )
+
     if search:
         q = q.filter(MaterialIssue.issue_number.ilike(f"%{search}%"))
     if project_id:
@@ -280,6 +312,17 @@ def list_returns(
     site_id: int = Depends(get_site_id)
 ):
     q = db.query(MaterialReturn).filter(MaterialReturn.tenant_id == tenant_id, MaterialReturn.site_id == site_id)
+    
+    # --- ROW-LEVEL SECURITY ---
+    is_platform_admin = getattr(current_user, "_is_platform_admin", False)
+    if not is_platform_admin:
+        scope = getattr(current_user, "_data_access_scope", "Self Only")
+        if scope not in ["Full Administrative Access", "Organization"]:
+            if scope == "Department" and current_user.department:
+                q = q.filter(MaterialReturn.returned_from_department == current_user.department)
+            else:
+                q = q.filter(MaterialReturn.received_by_id == current_user.id)
+    
     if search:
         q = q.filter(MaterialReturn.return_number.ilike(f"%{search}%"))
     if project_id:
@@ -425,6 +468,14 @@ def list_transfers(
     site_id: int = Depends(get_site_id)
 ):
     q = db.query(StockTransfer).filter(StockTransfer.tenant_id == tenant_id, StockTransfer.site_id == site_id)
+    
+    # --- ROW-LEVEL SECURITY ---
+    is_platform_admin = getattr(current_user, "_is_platform_admin", False)
+    if not is_platform_admin:
+        scope = getattr(current_user, "_data_access_scope", "Self Only")
+        if scope not in ["Full Administrative Access", "Organization"]:
+            q = q.filter(StockTransfer.created_by_id == current_user.id)
+            
     if search:
         q = q.filter(StockTransfer.transfer_number.ilike(f"%{search}%"))
     if project_id:
@@ -552,7 +603,16 @@ def list_gate_passes(
 ):
     passes = db.query(GatePass).filter(
         GatePass.tenant_id == tenant_id, GatePass.site_id == site_id
-    ).order_by(GatePass.created_at.desc()).all()
+    )
+    
+    # --- ROW-LEVEL SECURITY ---
+    is_platform_admin = getattr(current_user, "_is_platform_admin", False)
+    if not is_platform_admin:
+        scope = getattr(current_user, "_data_access_scope", "Self Only")
+        if scope not in ["Full Administrative Access", "Organization"]:
+            passes = passes.filter(GatePass.created_by_id == current_user.id)
+            
+    passes = passes.order_by(GatePass.created_at.desc()).all()
     
     result = []
     for gp in passes:

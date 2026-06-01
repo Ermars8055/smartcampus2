@@ -29,6 +29,14 @@ def list_invoices(
         Invoice.tenant_id == tenant_id, Invoice.site_id == site_id,
         Invoice.is_deleted == False
     )
+    
+    # --- ROW-LEVEL SECURITY ---
+    is_platform_admin = getattr(current_user, "_is_platform_admin", False)
+    if not is_platform_admin:
+        scope = getattr(current_user, "_data_access_scope", "Self Only")
+        if scope not in ["Full Administrative Access", "Organization"]:
+            q = q.filter(Invoice.created_by_id == current_user.id)
+            
     if status:
         q = q.filter(Invoice.status == status)
     if vendor_id:

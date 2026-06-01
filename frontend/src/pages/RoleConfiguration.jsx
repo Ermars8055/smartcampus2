@@ -71,11 +71,26 @@ const MODULE_TREE = [
     module: 'Store Operations',
     icon: 'store',
     children: [
-      { label: 'Gate Entry', resource: 'gate_entry' },
-      { label: 'Invoices', resource: 'invoice' },
-      { label: 'GRN', resource: 'grn' },
-      { label: 'Material Issue', resource: 'issues' },
-      { label: 'Issue Acknowledgement', resource: 'acknowledgements' },
+      { label: 'Gate Entry', resource: 'gate_entry', extendedActions: [
+        { key: 'can_record_entry', label: 'Record Entry', color: '#3B82F6' },
+        { key: 'can_verify', label: 'Verify', color: '#10B981' },
+      ]},
+      { label: 'Invoices', resource: 'invoice', extendedActions: [
+        { key: 'can_register', label: 'Register', color: '#3B82F6' },
+        { key: 'can_approve', label: 'Approve', color: '#10B981' },
+        { key: 'can_reject', label: 'Reject', color: '#EF4444' },
+      ]},
+      { label: 'GRN', resource: 'grn', extendedActions: [
+        { key: 'can_create_grn', label: 'Create GRN', color: '#3B82F6' },
+        { key: 'can_complete', label: 'Complete', color: '#10B981' },
+      ]},
+      { label: 'Material Issue', resource: 'issues', extendedActions: [
+        { key: 'can_issue', label: 'Issue Materials', color: '#3B82F6' },
+        { key: 'can_print', label: 'Print', color: '#8B5CF6' },
+      ]},
+      { label: 'Issue Acknowledgement', resource: 'acknowledgements', extendedActions: [
+        { key: 'can_acknowledge', label: 'Acknowledge Receipt', color: '#F59E0B' },
+      ]},
     ],
   },
   {
@@ -163,6 +178,7 @@ export default function RoleConfiguration() {
   const [roleName, setRoleName] = useState('');
   const [roleCode, setRoleCode] = useState('');
   const [roleDescription, setRoleDescription] = useState('');
+  const [dataAccessScope, setDataAccessScope] = useState('Self Only');
   const [permMap, setPermMap] = useState({});
   const [workflowRules, setWorkflowRules] = useState([]);
   const [expandedModules, setExpandedModules] = useState(
@@ -180,6 +196,7 @@ export default function RoleConfiguration() {
         setRoleName(data.name || '');
         setRoleCode(data.code || '');
         setRoleDescription(data.description || '');
+        setDataAccessScope(data.data_access_scope || 'Self Only');
         setPermMap(buildPermMap(data.permissions || []));
         setWorkflowRules(
           (data.workflow_rules || []).map((w, i) => ({ ...w, _key: i }))
@@ -243,6 +260,26 @@ export default function RoleConfiguration() {
     });
   };
 
+  const toggleEntireModule = (children, enabled) => {
+    setPermMap((prev) => {
+      const next = { ...prev };
+      children.forEach((c) => {
+        if (enabled) {
+          next[c.resource] = { ...(next[c.resource] || {}), can_read: true };
+        } else {
+          next[c.resource] = { 
+            can_read: false, 
+            can_create: false, 
+            can_update: false, 
+            can_delete: false, 
+            extended_actions: {} 
+          };
+        }
+      });
+      return next;
+    });
+  };
+
   // Global select-all / revoke-all
   const grantAll = () => {
     const next = {};
@@ -299,6 +336,7 @@ export default function RoleConfiguration() {
       name: roleName.trim(),
       code: roleCode.trim().toUpperCase(),
       description: roleDescription.trim() || null,
+      data_access_scope: dataAccessScope,
       permissions: permMapToArray(permMap),
       workflow_rules: workflowRules.map(({ _key, id: _id, ...rest }) => ({
         ...rest,
@@ -392,7 +430,7 @@ export default function RoleConfiguration() {
           </Typography>
         </Box>
         <Grid container spacing={2.5}>
-          <Grid item xs={12} sm={4}>
+          <Grid item xs={12} sm={3}>
             <TextField
               fullWidth label="Role Name" value={roleName}
               onChange={(e) => setRoleName(e.target.value)}
@@ -400,7 +438,7 @@ export default function RoleConfiguration() {
               size="small"
             />
           </Grid>
-          <Grid item xs={12} sm={4}>
+          <Grid item xs={12} sm={3}>
             <TextField
               fullWidth label="Role Code" value={roleCode}
               onChange={(e) => setRoleCode(e.target.value.toUpperCase())}
@@ -408,7 +446,22 @@ export default function RoleConfiguration() {
               placeholder="e.g. STORE_KEEPER" size="small"
             />
           </Grid>
-          <Grid item xs={12} sm={4}>
+          <Grid item xs={12} sm={3}>
+            <FormControl fullWidth size="small">
+              <InputLabel>Data Access Scope</InputLabel>
+              <Select
+                value={dataAccessScope}
+                label="Data Access Scope"
+                onChange={(e) => setDataAccessScope(e.target.value)}
+              >
+                <MenuItem value="Self Only">Self Only</MenuItem>
+                <MenuItem value="Department">Department</MenuItem>
+                <MenuItem value="Organization">Organization</MenuItem>
+                <MenuItem value="Full Administrative Access">Full Administrative Access</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={3}>
             <TextField
               fullWidth label="Description" value={roleDescription}
               onChange={(e) => setRoleDescription(e.target.value)}
@@ -474,6 +527,7 @@ export default function RoleConfiguration() {
                   toggleExtPerm={toggleExtPerm}
                   getModuleActionState={getModuleActionState}
                   toggleModuleAction={toggleModuleAction}
+                  toggleEntireModule={toggleEntireModule}
                 />
               ))}
             </TableBody>
@@ -590,9 +644,15 @@ export default function RoleConfiguration() {
 
 
 // ── Module Group Component (collapsible row group) ──────────────────────
-function ModuleGroup({ mod, expanded, onToggleExpand, isChecked, togglePerm, isExtChecked, toggleExtPerm, getModuleActionState, toggleModuleAction }) {
+function ModuleGroup({ mod, expanded, onToggleExpand, isChecked, togglePerm, isExtChecked, toggleExtPerm, getModuleActionState, toggleModuleAction, toggleEntireModule }) {
   // Deduplicate children for header-level checkbox (Reports shares resource)
   const uniqueResources = [...new Map(mod.children.map(c => [c.resource, c])).values()];
+  // Check if ANY permission is granted for ANY child in this module
+  const isModuleEnabled = mod.children.some(c => {
+    const hasBasic = ALL_ACTIONS.some(a => isChecked(c.resource, a));
+    const hasExt = c.extendedActions ? c.extendedActions.some(ext => isExtChecked(c.resource, ext.key)) : false;
+    return hasBasic || hasExt;
+  });
 
   return (
     <>
@@ -608,6 +668,18 @@ function ModuleGroup({ mod, expanded, onToggleExpand, isChecked, togglePerm, isE
       >
         <TableCell sx={{ pl: 2, py: 1.2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Tooltip title={isModuleEnabled ? "Disable Entire Module" : "Enable Entire Module"}>
+              <Switch
+                size="small"
+                checked={isModuleEnabled}
+                onClick={(e) => e.stopPropagation()}
+                onChange={(e) => {
+                  e.stopPropagation();
+                  toggleEntireModule(mod.children, e.target.checked);
+                }}
+                color="primary"
+              />
+            </Tooltip>
             {expanded ? <ExpandLess sx={{ fontSize: 18, color: '#64748B' }} /> : <ExpandMore sx={{ fontSize: 18, color: '#64748B' }} />}
             <Typography sx={{ fontWeight: 700, fontSize: '0.85rem', color: '#1E293B' }}>
               {mod.module}

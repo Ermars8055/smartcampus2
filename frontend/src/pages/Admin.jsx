@@ -19,6 +19,7 @@ const emptyForm = {
   password: '',
   role: 'Engineer',
   role_id: '',
+  department: '',
   tenant_id: '',
   site_ids: [],
 };
@@ -31,10 +32,14 @@ export default function Admin() {
   const [sites, setSites] = useState([]);
   const [roles, setRoles] = useState([]);
   const [tenants, setTenants] = useState([]);
+  const [departments, setDepartments] = useState([]);
   const [dialog, setDialog] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [editing, setEditing] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterRole, setFilterRole] = useState('');
+  const [filterDept, setFilterDept] = useState('');
   const { user: currentUser } = useAuth();
   const navigate = useNavigate();
 
@@ -44,6 +49,7 @@ export default function Admin() {
     api.get('/api/approval-flows').then(r => setApprovalFlows(r.data || [])).catch(() => setApprovalFlows([]));
     api.get('/api/sites').then(r => setSites(r.data || [])).catch(() => setSites([]));
     api.get('/api/rbac/roles').then(r => setRoles(r.data || [])).catch(() => setRoles([]));
+    api.get('/api/departments').then(r => setDepartments(r.data || [])).catch(() => setDepartments([]));
     if (currentUser?.tenant_id == null) {
       api.get('/api/admin/saas/tenants').then(r => setTenants(r.data || [])).catch(() => setTenants([]));
     }
@@ -55,6 +61,16 @@ export default function Admin() {
   const tenantRoles = roles.filter(role => !selectedTenantId || role.tenant_id === Number(selectedTenantId));
   const siteNameById = Object.fromEntries(sites.map(site => [site.id, site.name]));
 
+  const filteredUsers = users.filter(u => {
+    const matchSearch = !searchQuery || 
+      (u.full_name || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
+      (u.username || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (u.role_name || u.role || '').toLowerCase().includes(searchQuery.toLowerCase());
+    const matchRole = !filterRole || (u.role_name || u.role) === filterRole;
+    const matchDept = !filterDept || (u.department || '') === filterDept;
+    return matchSearch && matchRole && matchDept;
+  });
+
   const handleSave = async () => {
     try {
       const payload = {
@@ -62,11 +78,15 @@ export default function Admin() {
         email: form.email,
         role: form.role,
         role_id: form.role_id || null,
+        department: form.department || null,
         tenant_id: currentUser?.tenant_id || form.tenant_id || null,
         site_ids: form.site_ids || [],
         is_active: form.is_active,
       };
       if (editing) {
+        if (form.password && form.password !== '********') {
+          payload.password = form.password;
+        }
         await api.put(`/api/admin/users/${editing}`, payload);
       } else {
         await api.post('/api/admin/users', {
@@ -96,9 +116,34 @@ export default function Admin() {
 
       {tab === 0 && (
         <>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, gap: 2, flexWrap: 'wrap' }}>
+            <Box sx={{ display: 'flex', gap: 2, flex: 1, flexWrap: 'wrap' }}>
+              <TextField 
+                size="small" 
+                placeholder="Search name, username, or role..." 
+                value={searchQuery} 
+                onChange={e => setSearchQuery(e.target.value)}
+                sx={{ flex: 3, minWidth: 320 }}
+                autoComplete="off"
+                inputProps={{ autoComplete: 'off', form: { autocomplete: 'off' } }}
+              />
+              <FormControl size="small" sx={{ flex: 1, minWidth: 200, maxWidth: 250 }}>
+                <InputLabel>Filter by Department</InputLabel>
+                <Select value={filterDept} label="Filter by Department" onChange={e => setFilterDept(e.target.value)}>
+                  <MenuItem value=""><em>All Departments</em></MenuItem>
+                  {departments.map(d => <MenuItem key={d.id} value={d.name}>{d.name}</MenuItem>)}
+                </Select>
+              </FormControl>
+              <FormControl size="small" sx={{ flex: 1, minWidth: 160, maxWidth: 200 }}>
+                <InputLabel>Filter by Role</InputLabel>
+                <Select value={filterRole} label="Filter by Role" onChange={e => setFilterRole(e.target.value)}>
+                  <MenuItem value=""><em>All Roles</em></MenuItem>
+                  {Array.from(new Set(users.map(u => u.role_name || u.role).filter(Boolean))).map(r => <MenuItem key={r} value={r}>{r}</MenuItem>)}
+                </Select>
+              </FormControl>
+            </Box>
             <Button variant="contained" startIcon={<PersonAdd />} onClick={() => {
-              setEditing(null); setForm({ ...emptyForm, tenant_id: currentUser?.tenant_id || '' }); setDialog(true);
+              setEditing(null); setShowPassword(false); setForm({ ...emptyForm, tenant_id: currentUser?.tenant_id || '' }); setDialog(true);
             }}>Add User</Button>
           </Box>
           <Card>
@@ -106,28 +151,32 @@ export default function Admin() {
               <Table size="small">
                 <TableHead><TableRow>
                   <TableCell>Username</TableCell><TableCell>Full Name</TableCell><TableCell>Email</TableCell>
-                  <TableCell>Role</TableCell>
+                  <TableCell>Role</TableCell><TableCell>Department</TableCell>
                   <TableCell>Status</TableCell><TableCell>Created</TableCell><TableCell>Actions</TableCell>
                 </TableRow></TableHead>
                 <TableBody>
-                  {users.map(u => (
+                  {filteredUsers.map(u => (
                     <TableRow key={u.id}>
                       <TableCell sx={{ fontWeight: 600, fontSize: '0.85rem' }}>{u.username}</TableCell>
                       <TableCell sx={{ fontSize: '0.85rem' }}>{u.full_name}</TableCell>
                       <TableCell sx={{ fontSize: '0.8rem', color: '#64748B' }}>{u.email}</TableCell>
 
                       <TableCell><Chip label={u.role_name || u.role} size="small" color={roleColor[u.role_name || u.role] || 'default'} sx={{ fontWeight: 600, fontSize: '0.7rem' }} /></TableCell>
+                      <TableCell sx={{ fontSize: '0.8rem', color: '#64748B' }}>{u.department || '-'}</TableCell>
                       <TableCell><Chip label={u.is_active ? 'Active' : 'Inactive'} size="small" color={u.is_active ? 'success' : 'default'} variant="outlined" /></TableCell>
                       <TableCell sx={{ fontSize: '0.75rem' }}>{formatDate(u.created_at)}</TableCell>
                       <TableCell>
                         <Tooltip title="Edit"><IconButton size="small" onClick={() => {
                           setEditing(u.id);
+                          setShowPassword(false);
                           setForm({
                             ...emptyForm,
                             ...u,
                             role_id: u.role_id || '',
+                            department: u.department || '',
                             tenant_id: u.tenant_id || '',
                             site_ids: (u.sites || []).map(site => site.site_id),
+                            password: '********', // Dummy password to show field is populated
                           });
                           setDialog(true);
                         }}><Edit fontSize="small" /></IconButton></Tooltip>
@@ -309,12 +358,13 @@ export default function Admin() {
             </Grid>
           ) : (
             <Grid container spacing={2} sx={{ mt: 0.5 }}>
-            {!editing && <Grid item xs={6}><TextField fullWidth label="Username" value={form.username} onChange={e => setForm({ ...form, username: e.target.value })} required /></Grid>}
-            <Grid item xs={editing ? 12 : 6}><TextField fullWidth label="Full Name" value={form.full_name} onChange={e => setForm({ ...form, full_name: e.target.value })} required /></Grid>
-            <Grid item xs={6}><TextField fullWidth label="Email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required /></Grid>
+            <Grid item xs={6}><TextField fullWidth label="Username" value={form.username || ''} onChange={e => setForm({ ...form, username: e.target.value })} required disabled={!!editing} /></Grid>
+            <Grid item xs={6}><TextField fullWidth label="Full Name" value={form.full_name || ''} onChange={e => setForm({ ...form, full_name: e.target.value })} required /></Grid>
+            <Grid item xs={6}><TextField fullWidth label="Email" value={form.email || ''} onChange={e => setForm({ ...form, email: e.target.value })} required /></Grid>
 
             <Grid item xs={6}>
-              <FormControl fullWidth><InputLabel>Role</InputLabel>
+              <FormControl fullWidth required>
+                <InputLabel>Role</InputLabel>
                 <Select
                   value={form.role_id || ''}
                   label="Role"
@@ -349,8 +399,21 @@ export default function Admin() {
                 </FormControl>
               </Grid>
             )}
-            {!editing && <Grid item xs={12}><TextField fullWidth label="Password" type={showPassword ? 'text' : 'password'} value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} required InputProps={{ endAdornment: <InputAdornment position="end"><IconButton onClick={() => setShowPassword(!showPassword)} edge="end">{showPassword ? <VisibilityOff /> : <Visibility />}</IconButton></InputAdornment> }} /></Grid>}
-            {editing && <Grid item xs={12}><FormControlLabel control={<Switch checked={form.is_active !== false} onChange={e => setForm({ ...form, is_active: e.target.checked })} />} label="Active" /></Grid>}
+            <Grid item xs={6}>
+              <FormControl fullWidth>
+                <InputLabel>Department</InputLabel>
+                <Select
+                  value={form.department || ''}
+                  label="Department"
+                  onChange={e => setForm({ ...form, department: e.target.value })}
+                >
+                  <MenuItem value=""><em>None</em></MenuItem>
+                  {departments.map(d => <MenuItem key={d.id} value={d.name}>{d.name}</MenuItem>)}
+                </Select>
+              </FormControl>
+            </Grid>
+            {!editing && <Grid item xs={6}><TextField fullWidth label="Password" type={showPassword ? 'text' : 'password'} value={form.password || ''} onChange={e => setForm({ ...form, password: e.target.value })} required={!editing} autoComplete="new-password" InputProps={{ endAdornment: <InputAdornment position="end"><IconButton onClick={() => setShowPassword(!showPassword)} edge="end">{showPassword ? <VisibilityOff /> : <Visibility />}</IconButton></InputAdornment> }} /></Grid>}
+            {editing && <Grid item xs={6}><FormControlLabel control={<Switch checked={form.is_active !== false} onChange={e => setForm({ ...form, is_active: e.target.checked })} />} label="Active" /></Grid>}
           </Grid>
           )}
         </DialogContent>

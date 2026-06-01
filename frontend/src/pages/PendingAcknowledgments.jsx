@@ -6,8 +6,10 @@ import {
 } from '@mui/material';
 import { CheckCircle, AssignmentTurnedIn } from '@mui/icons-material';
 import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 export default function PendingAcknowledgments() {
+  const { hasAction } = useAuth();
   const [issues, setIssues] = useState([]);
 
   const load = async () => {
@@ -134,6 +136,7 @@ export default function PendingAcknowledgments() {
                     variant="contained"
                     startIcon={<CheckCircle />}
                     onClick={() => acknowledgeIssue(iss.id)}
+                    disabled={!hasAction('acknowledgements', 'can_acknowledge')}
                     size="large"
                     sx={{
                       textTransform: 'none',

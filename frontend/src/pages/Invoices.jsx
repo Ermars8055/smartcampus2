@@ -9,9 +9,11 @@ import { Add, Search, AttachFile, OpenInNew, ReceiptLong } from '@mui/icons-mate
 import api, { getFileUrl } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { formatDate, formatDateTime } from '../utils/dateUtils';
+import { useAuth } from '../context/AuthContext';
 
 export default function Invoices() {
   const navigate = useNavigate();
+  const { hasAction } = useAuth();
   const [invoices, setInvoices] = useState([]);
   const [gateEntries, setGateEntries] = useState([]);
   const [vendors, setVendors] = useState([]);
@@ -77,7 +79,7 @@ export default function Invoices() {
           <Typography variant="h5" sx={{ fontWeight: 700 }}>Invoices</Typography>
           <Typography variant="body2" sx={{ color: '#64748B' }}>Register vendor invoices prior to GRN</Typography>
         </Box>
-        <Button variant="contained" startIcon={<Add />} onClick={() => navigate('/invoices/register')}>Register Invoice</Button>
+        <Button variant="contained" startIcon={<Add />} disabled={!hasAction('invoice', 'can_register')} onClick={() => navigate('/invoices/register')}>Register Invoice</Button>
       </Box>
 
       <Card sx={{ mb: 3, p: 2 }}>
@@ -154,7 +156,7 @@ export default function Invoices() {
         <DialogActions sx={{ p: 2, justifyContent: 'space-between' }}>
           <Box>
             {detailDialog?.status === 'Draft' && (
-              <Button size="small" variant="contained" color="primary" onClick={() => handleStatusUpdate(detailDialog.id, 'Approved')}>Approve</Button>
+              <Button size="small" variant="contained" color="primary" disabled={!hasAction('invoice', 'can_approve')} onClick={() => handleStatusUpdate(detailDialog.id, 'Approved')}>Approve</Button>
             )}
           </Box>
           <Button onClick={() => setDetailDialog(null)}>Close</Button>

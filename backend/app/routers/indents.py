@@ -23,11 +23,27 @@ def generate_indent_number(db: Session, tenant_id: int, site_id: int) -> str:
 def list_indents(
     search: str = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("purchase_requests", "read")),
+    current_user: User = Depends(require_permission("indents", "read")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
     query = db.query(Indent).filter(Indent.tenant_id == tenant_id, Indent.site_id == site_id)
+    
+    # --- ROW-LEVEL SECURITY / DATA SCOPING ---
+    is_platform_admin = getattr(current_user, "_is_platform_admin", False)
+    if not is_platform_admin:
+        scope = getattr(current_user, "_data_access_scope", "Self Only")
+        
+        if scope in ["Full Administrative Access", "Organization"]:
+            pass # No additional filtering
+        elif scope == "Department":
+            if current_user.department:
+                query = query.filter(Indent.department == current_user.department)
+            else:
+                query = query.filter(Indent.requester_id == current_user.id)
+        else:
+            # Self Only
+            query = query.filter(Indent.requester_id == current_user.id)
     
     if search:
         search_term = f"%{search}%"
@@ -74,7 +90,7 @@ def list_indents(
 def create_indent(
     data: IndentCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("purchase_requests", "create")),
+    current_user: User = Depends(require_permission("indents", "create")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -136,7 +152,7 @@ def create_indent(
 def get_indent(
     id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("purchase_requests", "read")),
+    current_user: User = Depends(require_permission("indents", "read")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -194,19 +210,29 @@ def approve_indent(
     # 2. Check which flows the current user can satisfy
     # Check by user_id first, then by role_name if user_id is null
     user_roles = getattr(current_user, "_roles", [])
+    
+    is_admin = getattr(current_user, "_is_platform_admin", False)
+    perms = getattr(current_user, "_permissions", {})
+    can_override = is_admin or perms.get('indents', {}).get('extended_actions', {}).get('can_approve', False)
+    
     applicable_flows = [
         f for f in flows 
-        if (f.user_id == current_user.id) or (not f.user_id and f.role_name in user_roles)
+        if can_override or (f.user_id == current_user.id) or (not f.user_id and f.role_name in user_roles)
     ]
     
     if not applicable_flows:
         raise HTTPException(403, f"You do not have permission to approve at level {indent.current_approval_level}")
 
     # 3. Record approvals for applicable flows
+    new_approvals = 0
     for f in applicable_flows:
         existing = db.query(IndentApproval).filter(IndentApproval.indent_id == id, IndentApproval.approval_flow_id == f.id).first()
         if not existing:
             db.add(IndentApproval(indent_id=id, approval_flow_id=f.id, approver_id=current_user.id))
+            new_approvals += 1
+
+    if new_approvals == 0:
+        raise HTTPException(400, "You have already approved this indent at the current level")
 
     db.commit()
 
@@ -247,7 +273,7 @@ def handle_next_level(db, indent, tenant_id, site_id, user_id=None):
 def reject_indent(
     id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("purchase_requests", "update")),
+    current_user: User = Depends(require_permission("indents", "update")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -264,7 +290,7 @@ def acknowledge_indent(
     id: int,
     data: IndentAcknowledgeRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("purchase_requests", "read")),
+    current_user: User = Depends(require_permission("indents", "read")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -293,9 +319,19 @@ def acknowledge_indent(
     return {"message": "Acknowledged successfully"}
 
 
+class IndentConvertItemRequest(BaseModel):
+    material_id: int
+    quantity: float
+    rate: float
+    discount_percent: float = 0
+    cgst_percentage: float = 0
+    sgst_percentage: float = 0
+    igst_percentage: float = 0
+
 class IndentConvertRequest(BaseModel):
     vendor_id: int
     terms: Optional[str] = None
+    items: List[IndentConvertItemRequest]
 
 @router.post("/{id}/convert-to-po")
 def convert_to_po(
@@ -335,24 +371,33 @@ def convert_to_po(
     db.flush()
     
     total_amount = 0
-    for item in indent.items:
-        pending = max(0, item.requested_quantity - item.issued_quantity)
-        if pending > 0:
-            mat = item.material
-            rate = mat.standard_cost if mat else 0
-            po_item = PurchaseOrderItem(
-                po_id=po.id,
-                material_id=item.material_id,
-                quantity=pending,
-                rate=rate,
-                amount=round(pending * rate, 2),
-                discount_percent=0,
-                cgst_percentage=0,
-                sgst_percentage=0,
-                igst_percentage=0
-            )
-            db.add(po_item)
-            total_amount += po_item.amount
+    for item_data in data.items:
+        qty = item_data.quantity
+        rate = item_data.rate
+        disc_pct = item_data.discount_percent or 0
+        cgst_pct = item_data.cgst_percentage or 0
+        sgst_pct = item_data.sgst_percentage or 0
+        igst_pct = item_data.igst_percentage or 0
+
+        base_amt = qty * rate
+        disc_amt = base_amt * (disc_pct / 100.0)
+        after_disc = base_amt - disc_amt
+        tax_amt = after_disc * ((cgst_pct + sgst_pct + igst_pct) / 100.0)
+        item_total = after_disc + tax_amt
+
+        po_item = PurchaseOrderItem(
+            po_id=po.id,
+            material_id=item_data.material_id,
+            quantity=qty,
+            rate=rate,
+            amount=round(item_total, 2),
+            discount_percent=disc_pct,
+            cgst_percentage=cgst_pct,
+            sgst_percentage=sgst_pct,
+            igst_percentage=igst_pct
+        )
+        db.add(po_item)
+        total_amount += po_item.amount
             
     po.total_amount = round(total_amount, 2)
     

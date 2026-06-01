@@ -53,6 +53,14 @@ def list_quotation_requests(
         QuotationRequest.tenant_id == tenant_id, QuotationRequest.site_id == site_id,
         QuotationRequest.is_deleted == False
     )
+    
+    # --- ROW-LEVEL SECURITY ---
+    is_platform_admin = getattr(current_user, "_is_platform_admin", False)
+    if not is_platform_admin:
+        scope = getattr(current_user, "_data_access_scope", "Self Only")
+        if scope not in ["Full Administrative Access", "Organization"]:
+            q = q.filter(QuotationRequest.created_by_id == current_user.id)
+            
     if status:
         q = q.filter(QuotationRequest.status == status)
     if project_id:
@@ -398,7 +406,16 @@ def list_vendor_quotations(
     if not qr:
         raise HTTPException(status_code=404, detail="Quotation Request not found")
 
-    vqs = db.query(VendorQuotation).filter(VendorQuotation.qr_id == qr_id).all()
+    vqs_query = db.query(VendorQuotation).filter(VendorQuotation.qr_id == qr_id)
+    
+    # --- ROW-LEVEL SECURITY ---
+    is_platform_admin = getattr(current_user, "_is_platform_admin", False)
+    if not is_platform_admin:
+        scope = getattr(current_user, "_data_access_scope", "Self Only")
+        if scope not in ["Full Administrative Access", "Organization"]:
+            vqs_query = vqs_query.filter(VendorQuotation.entered_by_id == current_user.id)
+            
+    vqs = vqs_query.all()
     result = []
     for vq in vqs:
         items = [VendorQuotationItemOut(

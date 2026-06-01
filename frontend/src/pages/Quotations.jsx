@@ -270,6 +270,11 @@ const Quotations = () => {
         return;
       }
 
+      if (!convertToPoDialog.terms?.trim()) {
+        showMessage("Please provide terms and conditions.", 'Error', 'error');
+        return;
+      }
+
       const res = await api.post(`/api/quotations/${selectedQR.id}/convert-to-po`, {
         terms: convertToPoDialog.terms,
         items: mappedItems
@@ -704,7 +709,7 @@ const Quotations = () => {
                                   size="small"
                                   onClick={() => handleSendToVendors(qr.id)}
                                   disabled={qr.status !== 'Draft' || !hasAction('quotations', 'can_send_to_vendors')}
-                                  sx={{ color: qr.status === 'Draft' ? 'primary.main' : 'text.disabled' }}
+                                  sx={{ color: qr.status === 'Draft' ? '#8b5cf6' : 'text.disabled' }}
                                 >
                                   <BlastIcon fontSize="small" />
                                 </IconButton>
@@ -769,7 +774,7 @@ const Quotations = () => {
                                   size="small"
                                   onClick={() => handleAutoProcess(qr, 'approval')}
                                   disabled={qr.status !== 'Approved' || !hasAction('quotations', 'can_convert_to_po')}
-                                  sx={{ color: qr.status === 'Approved' ? 'success.main' : 'text.disabled' }}
+                                  sx={{ color: qr.status === 'Approved' ? 'primary.main' : 'text.disabled' }}
                                 >
                                   <OrderIcon fontSize="small" />
                                 </IconButton>
@@ -1087,6 +1092,8 @@ const Quotations = () => {
                           .filter(mat => mat.selected_vendor_id)
                           .map(mat => {
                             const quote = mat.vendor_quotes.find(q => q.vendor_id === mat.selected_vendor_id);
+                            const material = materials.find(m => m.id === mat.material_id);
+                            const gstRate = material?.gst_rate || 0;
                             return {
                               qr_item_id: mat.qr_item_id,
                               material_name: mat.material_name,
@@ -1096,8 +1103,8 @@ const Quotations = () => {
                               vendor_name: mat.selected_vendor_name,
                               rate: quote ? quote.quoted_rate : 0,
                               discount_percent: 0,
-                              cgst_percentage: 0,
-                              sgst_percentage: 0,
+                              cgst_percentage: gstRate / 2,
+                              sgst_percentage: gstRate / 2,
                               igst_percentage: 0
                             };
                           });
@@ -1792,19 +1799,19 @@ const Quotations = () => {
                     </TableCell>
                     <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{it.quantity} {it.uom_name}</TableCell>
                     <TableCell align="right">
-                      <TextField size="small" type="number" value={it.rate} onChange={e => updateConvertToPoItem(i, 'rate', e.target.value)} inputProps={{ min: 0 }} required sx={{ width: 90 }} />
+                      <TextField size="small" type="number" value={it.rate} onChange={e => updateConvertToPoItem(i, 'rate', e.target.value)} inputProps={{ min: 0 }} required sx={{ width: 110 }} />
                     </TableCell>
                     <TableCell align="right">
                       <TextField size="small" type="number" value={it.discount_percent} onChange={e => updateConvertToPoItem(i, 'discount_percent', e.target.value)} inputProps={{ min: 0 }} sx={{ width: 70 }} />
                     </TableCell>
                     <TableCell align="right">
-                      <TextField size="small" type="number" value={it.cgst_percentage} onChange={e => updateConvertToPoItem(i, 'cgst_percentage', e.target.value)} inputProps={{ min: 0 }} sx={{ width: 70 }} />
+                      <TextField size="small" variant="standard" type="number" value={it.cgst_percentage} onChange={e => updateConvertToPoItem(i, 'cgst_percentage', e.target.value)} InputProps={{ disableUnderline: true, readOnly: true }} inputProps={{ min: 0, style: { textAlign: 'right' } }} sx={{ width: 70, '& .MuiInputBase-input.Mui-readOnly': { color: '#64748b' } }} />
                     </TableCell>
                     <TableCell align="right">
-                      <TextField size="small" type="number" value={it.sgst_percentage} onChange={e => updateConvertToPoItem(i, 'sgst_percentage', e.target.value)} inputProps={{ min: 0 }} sx={{ width: 70 }} />
+                      <TextField size="small" variant="standard" type="number" value={it.sgst_percentage} onChange={e => updateConvertToPoItem(i, 'sgst_percentage', e.target.value)} InputProps={{ disableUnderline: true, readOnly: true }} inputProps={{ min: 0, style: { textAlign: 'right' } }} sx={{ width: 70, '& .MuiInputBase-input.Mui-readOnly': { color: '#64748b' } }} />
                     </TableCell>
                     <TableCell align="right">
-                      <TextField size="small" type="number" value={it.igst_percentage} onChange={e => updateConvertToPoItem(i, 'igst_percentage', e.target.value)} inputProps={{ min: 0 }} sx={{ width: 70 }} />
+                      <TextField size="small" variant="standard" type="number" value={it.igst_percentage} onChange={e => updateConvertToPoItem(i, 'igst_percentage', e.target.value)} InputProps={{ disableUnderline: true, readOnly: true }} inputProps={{ min: 0, style: { textAlign: 'right' } }} sx={{ width: 70, '& .MuiInputBase-input.Mui-readOnly': { color: '#64748b' } }} />
                     </TableCell>
                   </TableRow>
                 ))}
@@ -1841,7 +1848,7 @@ const Quotations = () => {
           </DialogContent>
           <DialogActions sx={{ px: 3, pb: 2 }}>
             <Button onClick={() => setConvertToPoDialog({ open: false, terms: '' })} sx={{ color: '#64748B', fontWeight: 600 }}>Cancel</Button>
-            <Button variant="contained" color="success" onClick={handleConvertToPO} sx={{ fontWeight: 600 }}>Create POs</Button>
+            <Button variant="contained" color="success" disabled={!convertToPoDialog.terms?.trim()} onClick={handleConvertToPO} sx={{ fontWeight: 600 }}>Create POs</Button>
           </DialogActions>
         </Dialog>
 

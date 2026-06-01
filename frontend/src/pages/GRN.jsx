@@ -8,8 +8,10 @@ import {
 import { Add, Search, AssignmentTurnedIn } from '@mui/icons-material';
 import api from '../services/api';
 import { formatDate } from '../utils/dateUtils';
+import { useAuth } from '../context/AuthContext';
 
 export default function GRNPage() {
+  const { hasAction } = useAuth();
   const [grns, setGrns] = useState([]);
   const [pos, setPos] = useState([]);
   const [gateEntries, setGateEntries] = useState([]);
@@ -141,7 +143,7 @@ export default function GRNPage() {
           <Typography variant="h5" sx={{ fontWeight: 700 }}>Goods Receipt Notes</Typography>
           <Typography variant="body2" sx={{ color: '#64748B' }}>Verify and accept received materials</Typography>
         </Box>
-        <Button variant="contained" startIcon={<Add />} onClick={() => {
+        <Button variant="contained" startIcon={<Add />} disabled={!hasAction('grn', 'can_create_grn')} onClick={() => {
           setForm({ po_id: '', gate_entry_id: '', warehouse_id: warehouses[0]?.id || '', project_id: '', vendor_id: '', invoice_number: '', invoice_date: '', invoice_amount: 0, items: [] });
           setDialog(true);
         }}>Create GRN</Button>
@@ -356,7 +358,7 @@ export default function GRNPage() {
         </DialogContent>
         <DialogActions sx={{ px: 4, pb: 4, pt: 2, justifyContent: 'flex-end', gap: 2 }}>
           <Button onClick={() => setDialog(false)} sx={{ color: '#64748B', fontWeight: 600 }}>Cancel</Button>
-          <Button variant="contained" onClick={handleCreate} sx={{ borderRadius: 2, px: 4, py: 1, fontWeight: 700, boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)', textTransform: 'none' }}>Complete GRN</Button>
+          <Button variant="contained" disabled={!hasAction('grn', 'can_complete')} onClick={handleCreate} sx={{ borderRadius: 2, px: 4, py: 1, fontWeight: 700, boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)', textTransform: 'none' }}>Complete GRN</Button>
         </DialogActions>
       </Dialog>
     </Box>

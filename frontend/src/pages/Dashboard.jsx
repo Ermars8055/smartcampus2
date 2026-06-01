@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import {
   Box, Grid, Card, CardContent, Typography, Chip, Avatar,
   Table, TableHead, TableBody, TableRow, TableCell, TableContainer,
@@ -122,8 +123,10 @@ export default function Dashboard() {
   const [drilldownLoading, setDrilldownLoading] = useState(false);
   
   const navigate = useNavigate();
+  const { hasPermission } = useAuth();
 
   useEffect(() => {
+    if (!hasPermission('dashboard', 'can_read')) return;
     setLoading(true);
     let params = {};
     if (period !== 'all') {
@@ -177,6 +180,22 @@ export default function Dashboard() {
       .catch(console.error)
       .finally(() => setDrilldownLoading(false));
   };
+
+  if (!hasPermission('dashboard', 'can_read')) {
+    return (
+      <Box sx={{ p: 4, textAlign: 'center', mt: 10 }}>
+        <Avatar sx={{ width: 64, height: 64, bgcolor: '#EFF6FF', color: '#3B82F6', mx: 'auto', mb: 2 }}>
+          <Inventory2 sx={{ fontSize: 32 }} />
+        </Avatar>
+        <Typography variant="h5" sx={{ fontWeight: 800, color: '#1E293B', mb: 1 }}>
+          Welcome to SmartCampus
+        </Typography>
+        <Typography variant="body1" sx={{ color: '#64748B', maxWidth: 500, mx: 'auto' }}>
+          Please select a module from the sidebar on the left to begin working. If you don't see any modules, contact your system administrator to assign you a role.
+        </Typography>
+      </Box>
+    );
+  }
 
   if (loading) {
     return (

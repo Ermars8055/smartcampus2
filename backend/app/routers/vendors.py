@@ -17,7 +17,7 @@ router = APIRouter(prefix="/api/vendors", tags=["Vendors"])
 def list_vendors(
     search: Optional[str] = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("vendors", "read")),
+    current_user: User = Depends(get_current_user),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -51,7 +51,7 @@ def list_vendors(
 @router.get("/{id}")
 def get_vendor(
     id: int, db: Session = Depends(get_db), 
-    current_user: User = Depends(require_permission("vendors", "read")),
+    current_user: User = Depends(get_current_user),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):

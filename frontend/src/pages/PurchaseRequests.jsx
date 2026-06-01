@@ -117,7 +117,18 @@ export default function PurchaseRequests() {
       vendor_id: '',
       delivery_date: dayjs().add(14, 'day'),
       terms: '',
-      items: pr.items.map(it => ({ ...it, rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0 }))
+      items: pr.items.map(it => {
+        const material = materials.find(m => m.id === it.material_id);
+        const gstRate = material?.gst_rate || 0;
+        return { 
+          ...it, 
+          rate: '', 
+          discount_percent: 0, 
+          cgst_percentage: gstRate / 2, 
+          sgst_percentage: gstRate / 2, 
+          igst_percentage: 0 
+        };
+      })
     });
   };
 
@@ -143,8 +154,8 @@ export default function PurchaseRequests() {
       return;
     }
 
-    if (!convertDialog.vendor_id) {
-      alert("Please select a vendor.");
+    if (!convertDialog.vendor_id || !convertDialog.terms?.trim()) {
+      alert("Please select a vendor and provide terms and conditions.");
       return;
     }
     
@@ -748,6 +759,7 @@ export default function PurchaseRequests() {
                 <TableRow key={i} sx={{ '& td': { py: 0.5, px: 1 } }}>
                   <TableCell>
                     <Typography variant="body2" sx={{ fontWeight: 700 }}>{it.material_name}</Typography>
+                    <Typography variant="caption" sx={{ color: '#64748B', display: 'block' }}>{it.material_code}</Typography>
                     {it.last_purchase_price != null ? (
                       <Typography variant="caption" sx={{ color: '#059669', fontWeight: 600, display: 'block' }}>
                         LPP: ₹{it.last_purchase_price}
@@ -760,19 +772,24 @@ export default function PurchaseRequests() {
                   </TableCell>
                   <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{it.quantity} {it.uom_name}</TableCell>
                   <TableCell align="right">
-                    <TextField size="small" type="number" value={it.rate} onChange={e => updateConvertItem(i, 'rate', e.target.value)} inputProps={{ min: 0 }} required sx={{ width: 90 }} />
+                    <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'flex-end' }}>
+                      <TextField size="small" type="number" value={it.rate} onChange={e => updateConvertItem(i, 'rate', e.target.value)} inputProps={{ min: 0 }} required sx={{ width: 110 }} />
+                      <Typography sx={{ position: 'absolute', top: '100%', right: 0, fontSize: '0.65rem', color: '#2563EB', mt: 0.5, whiteSpace: 'nowrap' }}>
+                        Base: ₹{materials.find(m => m.id === it.material_id)?.standard_cost || 0}
+                      </Typography>
+                    </Box>
                   </TableCell>
                   <TableCell align="right">
                     <TextField size="small" type="number" value={it.discount_percent} onChange={e => updateConvertItem(i, 'discount_percent', e.target.value)} inputProps={{ min: 0 }} sx={{ width: 70 }} />
                   </TableCell>
                   <TableCell align="right">
-                    <TextField size="small" type="number" value={it.cgst_percentage} onChange={e => updateConvertItem(i, 'cgst_percentage', e.target.value)} inputProps={{ min: 0 }} sx={{ width: 70 }} />
+                    <TextField size="small" variant="standard" type="number" value={it.cgst_percentage} onChange={e => updateConvertItem(i, 'cgst_percentage', e.target.value)} InputProps={{ disableUnderline: true, readOnly: true }} inputProps={{ min: 0, style: { textAlign: 'right' } }} sx={{ width: 70, '& .MuiInputBase-input.Mui-readOnly': { color: '#64748b' } }} />
                   </TableCell>
                   <TableCell align="right">
-                    <TextField size="small" type="number" value={it.sgst_percentage} onChange={e => updateConvertItem(i, 'sgst_percentage', e.target.value)} inputProps={{ min: 0 }} sx={{ width: 70 }} />
+                    <TextField size="small" variant="standard" type="number" value={it.sgst_percentage} onChange={e => updateConvertItem(i, 'sgst_percentage', e.target.value)} InputProps={{ disableUnderline: true, readOnly: true }} inputProps={{ min: 0, style: { textAlign: 'right' } }} sx={{ width: 70, '& .MuiInputBase-input.Mui-readOnly': { color: '#64748b' } }} />
                   </TableCell>
                   <TableCell align="right">
-                    <TextField size="small" type="number" value={it.igst_percentage} onChange={e => updateConvertItem(i, 'igst_percentage', e.target.value)} inputProps={{ min: 0 }} sx={{ width: 70 }} />
+                    <TextField size="small" variant="standard" type="number" value={it.igst_percentage} onChange={e => updateConvertItem(i, 'igst_percentage', e.target.value)} InputProps={{ disableUnderline: true, readOnly: true }} inputProps={{ min: 0, style: { textAlign: 'right' } }} sx={{ width: 70, '& .MuiInputBase-input.Mui-readOnly': { color: '#64748b' } }} />
                   </TableCell>
                 </TableRow>
               ))}
@@ -814,6 +831,7 @@ export default function PurchaseRequests() {
           <Button onClick={() => setConvertDialog({ ...convertDialog, open: false })} sx={{ color: '#64748B', fontWeight: 600 }}>Cancel</Button>
           <Button 
             variant="contained" 
+            disabled={!convertDialog.vendor_id || !convertDialog.terms?.trim()}
             onClick={handleConvert} 
             sx={{ 
               borderRadius: 2, 

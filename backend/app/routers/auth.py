@@ -4,9 +4,16 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import Optional, List
 from app.database import get_db
-from app.models import User, Tenant, TenantMembership, Role, RolePermission, UserRoleAssignment, Site
+from app.models import User, Tenant, TenantMembership, Role, RolePermission, UserRoleAssignment, Site, DataAccessScope
 from app.auth import verify_password, get_password_hash, create_access_token, get_current_user
 from app.models import AuditLog
+
+SCOPE_RANKS = {
+    "Self Only": 1,
+    "Department": 2,
+    "Organization": 3,
+    "Full Administrative Access": 4
+}
 
 router = APIRouter(prefix="/api/auth", tags=["Auth"])
 
@@ -43,7 +50,8 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
     if user.is_platform_admin and not request.workspace:
         token = create_access_token({
             "sub": user.username, "is_platform_admin": True,
-            "tenant_id": None, "site_ids": [], "roles": [], "permissions": {}
+            "tenant_id": None, "site_ids": [], "roles": [], "permissions": {},
+            "data_access_scope": "Full Administrative Access"
         })
         db.add(AuditLog(user_id=user.id, action="LOGIN", entity_type="User", entity_id=user.id))
         db.commit()
@@ -60,7 +68,8 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
             "tenant": None,
             "sites": [],
             "roles": ["PLATFORM_ADMIN"],
-            "permissions": {}
+            "permissions": {},
+            "data_access_scope": "Full Administrative Access"
         }
 
     # Workspace required for non-platform-admins
@@ -89,9 +98,16 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
     roles = []
     site_ids = []
     permissions = {}
+    highest_scope_val = 0
+    data_access_scope = "Self Only"
+    
     for a in assignments:
         if a.role:
             roles.append(a.role.code)
+            scope = a.role.data_access_scope or "Self Only"
+            if SCOPE_RANKS.get(scope, 1) > highest_scope_val:
+                highest_scope_val = SCOPE_RANKS.get(scope, 1)
+                data_access_scope = scope
             for p in a.role.permissions:
                 if p.resource not in permissions:
                     permissions[p.resource] = {"can_read": False, "can_create": False, "can_update": False, "can_delete": False, "extended_actions": {}}
@@ -102,8 +118,10 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
                 # Merge extended actions (OR across roles)
                 if p.extended_actions:
                     for action_key, action_val in p.extended_actions.items():
-                        if action_val:
-                            permissions[p.resource]["extended_actions"][action_key] = True
+                        if action_key not in permissions[p.resource]["extended_actions"]:
+                            permissions[p.resource]["extended_actions"][action_key] = action_val
+                        else:
+                            permissions[p.resource]["extended_actions"][action_key] = permissions[p.resource]["extended_actions"][action_key] or action_val
         if a.site_id and a.site_id not in site_ids:
             site_ids.append(a.site_id)
 
@@ -128,7 +146,8 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
         "active_site_id": active_site_id,
         "roles": roles,
         "permissions": permissions,
-        "is_platform_admin": user.is_platform_admin
+        "is_platform_admin": user.is_platform_admin,
+        "data_access_scope": data_access_scope
     })
 
     db.add(AuditLog(tenant_id=tenant.id, user_id=user.id, action="LOGIN", entity_type="User", entity_id=user.id))
@@ -141,7 +160,8 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
         "sites": sites_info,
         "active_site_id": active_site_id,
         "roles": roles,
-        "permissions": permissions
+        "permissions": permissions,
+        "data_access_scope": data_access_scope
     }
 
 @router.get("/me")
@@ -152,6 +172,7 @@ def get_me(current_user: User = Depends(get_current_user), db: Session = Depends
     
     roles = getattr(current_user, '_roles', [])
     permissions = getattr(current_user, '_permissions', {})
+    data_access_scope = getattr(current_user, '_data_access_scope', "Self Only")
 
     if tid:
         tenant = db.query(Tenant).filter_by(id=tid).first()
@@ -170,9 +191,16 @@ def get_me(current_user: User = Depends(get_current_user), db: Session = Depends
             if assignments:
                 fresh_roles = []
                 fresh_permissions = {}
+                highest_scope_val = 0
+                
                 for a in assignments:
                     if a.role:
                         fresh_roles.append(a.role.code)
+                        scope = a.role.data_access_scope or "Self Only"
+                        if SCOPE_RANKS.get(scope, 1) > highest_scope_val:
+                            highest_scope_val = SCOPE_RANKS.get(scope, 1)
+                            data_access_scope = scope
+                            
                         for p in a.role.permissions:
                             if p.resource not in fresh_permissions:
                                 fresh_permissions[p.resource] = {"can_read": False, "can_create": False, "can_update": False, "can_delete": False, "extended_actions": {}}
@@ -182,8 +210,10 @@ def get_me(current_user: User = Depends(get_current_user), db: Session = Depends
                             if p.can_delete: fresh_permissions[p.resource]["can_delete"] = True
                             if p.extended_actions:
                                 for action_key, action_val in p.extended_actions.items():
-                                    if action_val:
-                                        fresh_permissions[p.resource]["extended_actions"][action_key] = True
+                                    if action_key not in fresh_permissions[p.resource]["extended_actions"]:
+                                        fresh_permissions[p.resource]["extended_actions"][action_key] = action_val
+                                    else:
+                                        fresh_permissions[p.resource]["extended_actions"][action_key] = fresh_permissions[p.resource]["extended_actions"][action_key] or action_val
                 roles = list(set(fresh_roles))
                 permissions = fresh_permissions
 
@@ -194,7 +224,8 @@ def get_me(current_user: User = Depends(get_current_user), db: Session = Depends
         "tenant": tenant_info, "sites": sites_info,
         "active_site_id": getattr(current_user, '_active_site_id', None),
         "roles": roles,
-        "permissions": permissions
+        "permissions": permissions,
+        "data_access_scope": data_access_scope
     }
 
 @router.post("/change-password")

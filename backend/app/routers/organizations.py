@@ -22,7 +22,7 @@ router = APIRouter(prefix="/api", tags=["Organization Structure"])
 @router.get("/organizations", response_model=List[OrganizationOut])
 def list_organizations(
     db: Session = Depends(get_db), 
-    current_user: User = Depends(require_permission("organizations", "read")),
+    current_user: User = Depends(get_current_user),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -105,7 +105,7 @@ def delete_organization(
 @router.get("/projects", response_model=List[ProjectOut])
 def list_projects(
     org_id: int = None, db: Session = Depends(get_db), 
-    current_user: User = Depends(require_permission("projects", "read")),
+    current_user: User = Depends(get_current_user),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -202,7 +202,7 @@ def delete_project(
 @router.get("/buildings")
 def list_buildings(
     project_id: int = None, db: Session = Depends(get_db), 
-    current_user: User = Depends(require_permission("projects", "read")),
+    current_user: User = Depends(get_current_user),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -211,6 +211,21 @@ def list_buildings(
     )
     if project_id:
         q = q.filter(Building.project_id == project_id)
+        
+    # --- ROW-LEVEL SECURITY ---
+    is_platform_admin = getattr(current_user, "_is_platform_admin", False)
+    if not is_platform_admin:
+        scope = getattr(current_user, "_data_access_scope", "Self Only")
+        if scope in ["Self Only", "Department"]:
+            if current_user.department:
+                q = q.outerjoin(Department, Department.building_id == Building.id)\
+                     .outerjoin(Floor, Floor.building_id == Building.id)\
+                     .outerjoin(Room, Room.floor_id == Floor.id)\
+                     .filter(
+                         (Department.name == current_user.department) |
+                         (Room.department_name == current_user.department)
+                     ).distinct()
+                     
     buildings = q.order_by(Building.name).all()
     return [
         BuildingOut(
@@ -292,7 +307,7 @@ def delete_building(
 @router.get("/floors", response_model=List[FloorOut])
 def list_floors(
     building_id: int = None, db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("projects", "read")),
+    current_user: User = Depends(get_current_user),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -301,6 +316,28 @@ def list_floors(
     )
     if building_id:
         q = q.filter(Floor.building_id == building_id)
+        
+    # --- ROW-LEVEL SECURITY ---
+    is_platform_admin = getattr(current_user, "_is_platform_admin", False)
+    if not is_platform_admin:
+        scope = getattr(current_user, "_data_access_scope", "Self Only")
+        if scope in ["Self Only", "Department"]:
+            if current_user.department:
+                q = q.outerjoin(Room, Room.floor_id == Floor.id)\
+                     .outerjoin(Building, Building.id == Floor.building_id)\
+                     .outerjoin(Department, Department.building_id == Building.id)\
+                     .filter(
+                         (Room.department_name == current_user.department) |
+                         (
+                             (Department.name == current_user.department) &
+                             (Room.id.is_(None))
+                         ) |
+                         (
+                             (Department.name == current_user.department) &
+                             (Room.department_name.is_(None))
+                         )
+                     ).distinct()
+                     
     return q.order_by(Floor.level).all()
 
 @router.post("/floors", response_model=FloorOut)
@@ -359,7 +396,7 @@ def delete_floor(
 @router.get("/rooms", response_model=List[RoomOut])
 def list_rooms(
     floor_id: int = None, db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("projects", "read")),
+    current_user: User = Depends(get_current_user),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -368,6 +405,24 @@ def list_rooms(
     )
     if floor_id:
         q = q.filter(Room.floor_id == floor_id)
+        
+    # --- ROW-LEVEL SECURITY ---
+    is_platform_admin = getattr(current_user, "_is_platform_admin", False)
+    if not is_platform_admin:
+        scope = getattr(current_user, "_data_access_scope", "Self Only")
+        if scope in ["Self Only", "Department"]:
+            if current_user.department:
+                q = q.outerjoin(Floor, Floor.id == Room.floor_id)\
+                     .outerjoin(Building, Building.id == Floor.building_id)\
+                     .outerjoin(Department, Department.building_id == Building.id)\
+                     .filter(
+                         (Room.department_name == current_user.department) |
+                         (
+                             (Department.name == current_user.department) &
+                             (Room.department_name.is_(None))
+                         )
+                     ).distinct()
+                     
     rooms = q.order_by(Room.name).all()
     return [
         RoomOut(
@@ -432,7 +487,7 @@ def delete_room(
 @router.get("/departments/names", response_model=List[str])
 def list_unique_departments(
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("projects", "read")),
+    current_user: User = Depends(get_current_user),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -465,7 +520,7 @@ def list_unique_departments(
 def list_departments(
     building_id: Optional[int] = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("projects", "read")),
+    current_user: User = Depends(get_current_user),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -491,7 +546,7 @@ def list_departments(
 def list_departments_by_building(
     building_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("projects", "read")),
+    current_user: User = Depends(get_current_user),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -609,7 +664,7 @@ def delete_department(
 def list_warehouses(
     search: Optional[str] = None,
     project_id: int = None, db: Session = Depends(get_db), 
-    current_user: User = Depends(require_permission("warehouses", "read")),
+    current_user: User = Depends(get_current_user),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):

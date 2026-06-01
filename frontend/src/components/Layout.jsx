@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import {
   Box, Drawer, AppBar, Toolbar, Typography, IconButton, List, ListItem,
@@ -14,53 +14,52 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
-import { useEffect } from 'react';
 
 const DRAWER_WIDTH = 260;
 
 const menuItems = [
-  { text: 'Dashboard', icon: <Dashboard />, path: '/' },
+  { text: 'Dashboard', icon: <Dashboard />, path: '/', resource: 'dashboard' },
   {
     text: 'Master Data', icon: <Category />, children: [
-      { text: 'Materials', icon: <Inventory2 />, path: '/materials' },
-      { text: 'Categories', icon: <Category />, path: '/categories' },
-      { text: 'Vendors', icon: <People />, path: '/vendors' },
-      { text: 'Stores', icon: <Warehouse />, path: '/warehouses' },
+      { text: 'Materials', icon: <Inventory2 />, path: '/materials', resource: 'materials' },
+      { text: 'Categories', icon: <Category />, path: '/categories', resource: 'categories' },
+      { text: 'Vendors', icon: <People />, path: '/vendors', resource: 'vendors' },
+      { text: 'Stores', icon: <Warehouse />, path: '/warehouses', resource: 'warehouses' },
     ]
   },
   {
     text: 'Procurement', icon: <ShoppingCart />, children: [
-      { text: 'Indents', icon: <Assignment />, path: '/indents' },
-      { text: 'Purchase Requests', icon: <Assignment />, path: '/purchase-requests' },
-      { text: 'Quotations', icon: <RequestQuote />, path: '/quotations' },
-      { text: 'Purchase Orders', icon: <ReceiptLong />, path: '/purchase-orders' },
+      { text: 'Indents', icon: <Assignment />, path: '/indents', resource: 'indents' },
+      { text: 'Purchase Requests', icon: <Assignment />, path: '/purchase-requests', resource: 'purchase_requests' },
+      { text: 'Quotations', icon: <RequestQuote />, path: '/quotations', resource: 'quotations' },
+      { text: 'Purchase Orders', icon: <ReceiptLong />, path: '/purchase-orders', resource: 'purchase_orders' },
     ]
   },
   {
     text: 'Store Operations', icon: <Store />, children: [
-      { text: 'Gate Entry', icon: <Security />, path: '/gate-entry' },
-      { text: 'Invoices', icon: <ReceiptLong />, path: '/invoices' },
-      { text: 'GRN', icon: <LocalShipping />, path: '/grn' },
-      { text: 'Material Issue', icon: <Inventory2 />, path: '/issues' },
-      { text: 'Issue Acknowledgement', icon: <AssignmentTurnedIn />, path: '/pending-acknowledgments' },
+      { text: 'Gate Entry', icon: <Security />, path: '/gate-entry', resource: 'gate_entry' },
+      { text: 'Invoices', icon: <ReceiptLong />, path: '/invoices', resource: 'invoice' },
+      { text: 'GRN', icon: <LocalShipping />, path: '/grn', resource: 'grn' },
+      { text: 'Material Issue', icon: <Inventory2 />, path: '/issues', resource: 'issues' },
+      { text: 'Issue Acknowledgement', icon: <AssignmentTurnedIn />, path: '/pending-acknowledgments', resource: 'acknowledgements' },
     ]
   },
-  { text: 'Inventory', icon: <Warehouse />, path: '/inventory' },
-  { text: 'Intelligence', icon: <Build />, path: '/intelligence' },
+  { text: 'Inventory', icon: <Warehouse />, path: '/inventory', resource: 'inventory' },
+  { text: 'Intelligence', icon: <Build />, path: '/intelligence', resource: 'intelligence' },
   {
     text: 'Reports', icon: <Assessment />, children: [
-      { text: 'Issue Summary', icon: <Assessment />, path: '/reports/issue-summary' },
-      { text: 'Rate Analysis', icon: <Assessment />, path: '/reports/rate-analysis' },
-      { text: 'Receipt Summary', icon: <Assessment />, path: '/reports/receipt-summary' },
-      { text: 'Department Inventory', icon: <Assessment />, path: '/reports/department-inventory' },
+      { text: 'Issue Summary', icon: <Assessment />, path: '/reports/issue-summary', resource: 'reports' },
+      { text: 'Rate Analysis', icon: <Assessment />, path: '/reports/rate-analysis', resource: 'reports' },
+      { text: 'Receipt Summary', icon: <Assessment />, path: '/reports/receipt-summary', resource: 'reports' },
+      { text: 'Department Inventory', icon: <Assessment />, path: '/reports/department-inventory', resource: 'reports' },
     ]
   },
   {
     text: 'Admin', icon: <Settings />, children: [
-      { text: 'Configurations', icon: <Settings />, path: '/admin' },
-      { text: 'Projects', icon: <AccountTree />, path: '/projects' },
-      { text: 'Departments', icon: <Business />, path: '/departments' },
-      { text: 'Terms & Conditions', icon: <Assignment />, path: '/terms' },
+      { text: 'Configurations', icon: <Settings />, path: '/admin', resource: 'admin_users' }, // Using 'admin_users' as a representative for Configs based on RoleConfiguration
+      { text: 'Projects', icon: <AccountTree />, path: '/projects', resource: 'projects' },
+      { text: 'Departments', icon: <Business />, path: '/departments', resource: 'departments' },
+      { text: 'Terms & Conditions', icon: <Assignment />, path: '/terms', resource: 'terms' },
     ]
   },
   { text: 'SaaS Admin', icon: <Security />, path: '/saas-admin', platformOnly: true },
@@ -73,10 +72,25 @@ export default function Layout() {
   const [openMenus, setOpenMenus] = useState({ 'Master Data': true });
   const [anchorEl, setAnchorEl] = useState(null);
   const [alertCount, setAlertCount] = useState(0);
-  const { user, tenant, roles, sites, activeSite, activeSiteId, setActiveSiteId, logout } = useAuth();
+  const { user, tenant, roles, sites, activeSite, activeSiteId, setActiveSiteId, logout, hasPermission } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const visibleMenuItems = menuItems.filter((item) => !item.platformOnly || user?.is_platform_admin);
+
+  const visibleMenuItems = useMemo(() => {
+    return menuItems.map(item => {
+      if (item.platformOnly && !user?.is_platform_admin) return null;
+      if (item.text === 'SaaS Admin') return item;
+
+      if (item.children) {
+        const visibleChildren = item.children.filter(child => hasPermission(child.resource, 'can_read'));
+        if (visibleChildren.length === 0) return null;
+        return { ...item, children: visibleChildren };
+      } else {
+        if (item.resource && !hasPermission(item.resource, 'can_read')) return null;
+        return item;
+      }
+    }).filter(Boolean);
+  }, [user, hasPermission]);
 
   useEffect(() => {
     api.get('/api/alerts/count').then(r => setAlertCount(r.data.count)).catch(() => { });

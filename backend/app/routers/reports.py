@@ -153,6 +153,15 @@ def get_issue_summary(
 
     if warehouse_id:
         issue_query = issue_query.filter(MaterialIssue.warehouse_id == warehouse_id)
+        
+    is_platform_admin = getattr(current_user, "_is_platform_admin", False)
+    if not is_platform_admin:
+        scope = getattr(current_user, "_data_access_scope", "Self Only")
+        if scope == "Department" and current_user.department:
+            department = current_user.department
+        elif scope == "Self Only":
+            issue_query = issue_query.filter(MaterialIssue.issued_by_id == current_user.id)
+
     if department:
         issue_query = issue_query.filter(MaterialIssue.issued_to_department.ilike(f"%{department}%"))
 
@@ -264,6 +273,14 @@ def get_issue_summary_details(
 
     if warehouse_id:
         query = query.filter(MaterialIssue.warehouse_id == warehouse_id)
+
+    is_platform_admin = getattr(current_user, "_is_platform_admin", False)
+    if not is_platform_admin:
+        scope = getattr(current_user, "_data_access_scope", "Self Only")
+        if scope == "Department" and current_user.department:
+            department = current_user.department
+        elif scope == "Self Only":
+            query = query.filter(MaterialIssue.issued_by_id == current_user.id)
 
     if department == "UNKNOWN":
         query = query.filter((MaterialIssue.issued_to_department == None) | (MaterialIssue.issued_to_department == ""))

@@ -26,6 +26,7 @@ class AdminUserOut(BaseModel):
     role_name: Optional[str] = None
     role: Optional[str] = None
     role_id: Optional[int] = None
+    department: Optional[str] = None
     sites: List[SiteInfo] = []
     
     class Config:
@@ -38,14 +39,17 @@ class AdminUserCreate(BaseModel):
     password: str
     role_id: Optional[int] = None
     tenant_id: Optional[int] = None
+    department: Optional[str] = None
     site_ids: List[int] = []
     is_active: bool = True
 
 class AdminUserUpdate(BaseModel):
     full_name: str
     email: EmailStr
+    password: Optional[str] = None
     role_id: Optional[int] = None
     tenant_id: Optional[int] = None
+    department: Optional[str] = None
     site_ids: List[int] = []
     is_active: bool = True
 
@@ -113,6 +117,7 @@ def list_users(
             role_name=role_name,
             role=role_name,
             role_id=role_id,
+            department=u.department,
             sites=sites
         ))
     return result
@@ -152,6 +157,7 @@ def create_user(
         username=data.username,
         email=data.email,
         full_name=data.full_name,
+        department=data.department,
         hashed_password=get_password_hash(data.password),
         is_active=data.is_active
     )
@@ -177,6 +183,7 @@ def create_user(
         username=user.username,
         email=user.email,
         full_name=user.full_name,
+        department=user.department,
         is_active=user.is_active,
         created_at=user.created_at.isoformat() if user.created_at else "",
     )
@@ -208,7 +215,11 @@ def update_user(
     # Update basic fields
     user.full_name = data.full_name
     user.email = data.email
+    user.department = data.department
     user.is_active = data.is_active
+    
+    if data.password:
+        user.hashed_password = get_password_hash(data.password)
     
     membership = db.query(TenantMembership).filter(
         TenantMembership.user_id == user.id, 
@@ -243,6 +254,7 @@ def update_user(
         username=user.username,
         email=user.email,
         full_name=user.full_name,
+        department=user.department,
         is_active=user.is_active,
         created_at=user.created_at.isoformat() if user.created_at else "",
     )

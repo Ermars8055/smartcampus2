@@ -496,7 +496,8 @@ export default function PurchaseOrders() {
                         </IconButton></span>
                       </Tooltip>
                       <Tooltip title="Send to Vendor">
-                        <span><IconButton size="small" color="primary" disabled={!canSend(po.status) || !hasAction('purchase_orders', 'can_send_to_vendor')}
+                        <span><IconButton size="small" disabled={!canSend(po.status) || !hasAction('purchase_orders', 'can_send_to_vendor')}
+                          sx={{ color: '#8b5cf6', '&.Mui-disabled': { color: 'text.disabled' } }}
                           onClick={() => showConfirm('Send to Vendor?', `Send ${po.po_number} to vendor?`, 'Yes, Send', 'primary', () => sendPO(po.id), false, po)}>
                           <Send fontSize="small" />
                         </IconButton></span>
@@ -642,7 +643,8 @@ export default function PurchaseOrders() {
                           </IconButton></span>
                         </Tooltip>
                         <Tooltip title="Send to Vendor">
-                          <span><IconButton size="small" color="primary" disabled={!canSend(po.status) || !hasAction('purchase_orders', 'can_send_to_vendor')}
+                          <span><IconButton size="small" disabled={!canSend(po.status) || !hasAction('purchase_orders', 'can_send_to_vendor')}
+                            sx={{ color: '#8b5cf6', '&.Mui-disabled': { color: 'text.disabled' } }}
                             onClick={() => showConfirm('Send to Vendor?', `Send ${po.po_number} to vendor?`, 'Yes, Send', 'primary', () => sendPO(po.id), false, po)}>
                             <Send fontSize="small" />
                           </IconButton></span>

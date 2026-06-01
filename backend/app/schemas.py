@@ -23,6 +23,7 @@ class UserBase(BaseModel):
     username: str
     email: EmailStr
     full_name: str
+    department: Optional[str] = None
     is_active: bool = True
     is_platform_admin: bool = False
 
@@ -56,6 +57,7 @@ class RoleBase(BaseModel):
     name: str
     code: str
     description: Optional[str] = None
+    data_access_scope: Optional[str] = "Self Only"
 
 class WorkflowRuleBase(BaseModel):
     document_type: str  # "INDENT", "PURCHASE_REQUEST", "PURCHASE_ORDER"

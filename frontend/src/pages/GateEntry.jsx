@@ -9,8 +9,10 @@ import {
 import { Add, Search, AttachFile, OpenInNew, LocalShipping } from '@mui/icons-material';
 import api, { getFileUrl } from '../services/api';
 import { formatDate, formatDateTime } from '../utils/dateUtils';
+import { useAuth } from '../context/AuthContext';
 
 export default function GateEntry() {
+  const { hasAction } = useAuth();
   const [entries, setEntries] = useState([]);
   const [vendors, setVendors] = useState([]);
   const [projects, setProjects] = useState([]);
@@ -181,7 +183,7 @@ export default function GateEntry() {
           <Typography variant="h5" sx={{ fontWeight: 700 }}>Security Gate Entry</Typography>
           <Typography variant="body2" sx={{ color: '#64748B' }}>Record incoming materials at site gate</Typography>
         </Box>
-        <Button variant="contained" startIcon={<Add />} onClick={() => {
+        <Button variant="contained" startIcon={<Add />} disabled={!hasAction('gate_entry', 'can_record_entry')} onClick={() => {
           setForm({ entry_type: 'Vehicle', vehicle_number: '', vendor_id: '', po_id: '', project_id: projects[0]?.id || '', material_id: '', quantity: '', driver_name: '', delivery_person_name: '', remarks: '', invoice_scan_url: '', items: [] });
           setDialog(true);
         }}>New Gate Entry</Button>

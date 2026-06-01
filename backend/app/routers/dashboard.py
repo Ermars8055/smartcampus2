@@ -54,15 +54,32 @@ def get_dashboard_stats(
         CurrentStock.quantity > 0
     ).count()
 
-    pending_pr = db.query(PurchaseRequest).filter(
+    pr_q = db.query(PurchaseRequest).filter(
         PurchaseRequest.tenant_id == tenant_id, PurchaseRequest.site_id == site_id,
         PurchaseRequest.status.in_(["Draft", "Submitted"])
-    ).count()
+    )
 
-    pending_po = db.query(PurchaseOrder).filter(
+    po_q = db.query(PurchaseOrder).filter(
         PurchaseOrder.tenant_id == tenant_id, PurchaseOrder.site_id == site_id,
         PurchaseOrder.status.in_(["Draft", "Approved", "Sent to Vendor"])
-    ).count()
+    )
+
+    is_platform_admin = getattr(current_user, "_is_platform_admin", False)
+    if not is_platform_admin:
+        scope = getattr(current_user, "_data_access_scope", "Self Only")
+        if scope not in ["Full Administrative Access", "Organization"]:
+            if scope == "Department":
+                if current_user.department:
+                    pr_q = pr_q.filter(PurchaseRequest.department_name == current_user.department)
+                else:
+                    pr_q = pr_q.filter(PurchaseRequest.requester_id == current_user.id)
+            else:
+                pr_q = pr_q.filter(PurchaseRequest.requester_id == current_user.id)
+            
+            po_q = po_q.filter(PurchaseOrder.created_by_id == current_user.id)
+
+    pending_pr = pr_q.count()
+    pending_po = po_q.count()
 
     grn_query = db.query(GRN).filter(GRN.tenant_id == tenant_id, GRN.site_id == site_id)
     if sd: grn_query = grn_query.filter(GRN.created_at >= sd)

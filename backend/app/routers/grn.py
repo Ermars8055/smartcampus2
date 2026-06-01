@@ -68,6 +68,14 @@ def list_grn(
     site_id: int = Depends(get_site_id)
 ):
     q = db.query(GRN).filter(GRN.tenant_id == tenant_id, GRN.site_id == site_id, GRN.is_deleted == False)
+    
+    # --- ROW-LEVEL SECURITY ---
+    is_platform_admin = getattr(current_user, "_is_platform_admin", False)
+    if not is_platform_admin:
+        scope = getattr(current_user, "_data_access_scope", "Self Only")
+        if scope not in ["Full Administrative Access", "Organization"]:
+            q = q.filter(GRN.received_by_id == current_user.id)
+            
     if search:
         q = q.filter(GRN.grn_number.ilike(f"%{search}%"))
     if status:

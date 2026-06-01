@@ -7,7 +7,7 @@ import {
   DialogContent, DialogActions, Grid, IconButton, Tooltip, FormControl, InputLabel, Select, MenuItem,
   Divider, InputAdornment, TableSortLabel, useTheme, useMediaQuery
 } from '@mui/material';
-import { Add, Delete, CheckCircle, Cancel, ReceiptLong, ArrowBack, Search, Apartment, Layers, MeetingRoom, AccountTree, Notes } from '@mui/icons-material';
+import { Add, Delete, CheckCircle, Cancel, ReceiptLong, ShoppingCart, ArrowBack, Search, Apartment, Layers, MeetingRoom, AccountTree, Notes } from '@mui/icons-material';
 import api from '../services/api';
 import { formatDate, formatDateTime } from '../utils/dateUtils';
 import MaterialSelect from '../components/MaterialSelect';
@@ -54,7 +54,7 @@ export default function Indents() {
   const [form, setForm] = useState({
     building_id: '', floor_id: '', room_id: '', department: '', remarks: '', items: [{ material_id: '', requested_quantity: '' }]
   });
-  const [vendorDialog, setVendorDialog] = useState({ open: false, indent: null, vendor_id: '', terms: '' });
+  const [vendorDialog, setVendorDialog] = useState({ open: false, indent: null, vendor_id: '', terms: '', items: [] });
   const [vendors, setVendors] = useState([]);
   const [termsTemplates, setTermsTemplates] = useState([]);
 
@@ -158,17 +158,81 @@ export default function Indents() {
     }
   };
 
-  const approveIndent = async (id) => { await api.post(`/api/indents/${id}/approve`); load(); };
-  const rejectIndent = async (id) => { await api.post(`/api/indents/${id}/reject`); load(); };
+  const approveIndent = async (id) => {
+    try {
+      const res = await api.post(`/api/indents/${id}/approve`);
+      load();
+      showMessage(res.data.message || "Indent approved successfully", "Success", "success");
+    } catch (err) {
+      showMessage(err.response?.data?.detail || "Error approving indent", "Error", "error");
+    }
+  };
+
+  const rejectIndent = async (id) => {
+    try {
+      const res = await api.post(`/api/indents/${id}/reject`);
+      load();
+      showMessage(res.data.message || "Indent rejected successfully", "Success", "success");
+    } catch (err) {
+      showMessage(err.response?.data?.detail || "Error rejecting indent", "Error", "error");
+    }
+  };
+
+  const openConvertDialog = (indent) => {
+    setVendorDialog({
+      open: true,
+      indent,
+      vendor_id: '',
+      terms: '',
+      items: indent.items.filter(it => it.pending_quantity > 0).map(it => {
+        const material = materials.find(m => m.id === it.material_id);
+        const gstRate = material?.gst_rate || 0;
+        return {
+          ...it,
+          rate: '',
+          discount_percent: 0,
+          cgst_percentage: gstRate / 2,
+          sgst_percentage: gstRate / 2,
+          igst_percentage: 0
+        };
+      })
+    });
+  };
+
+  const updateConvertItem = (i, field, value) => {
+    const items = [...vendorDialog.items];
+    items[i][field] = value;
+    setVendorDialog({ ...vendorDialog, items });
+  };
 
   const handleConvertToPo = async () => {
-    if (!vendorDialog.vendor_id) return;
+    if (!vendorDialog.vendor_id || !vendorDialog.terms?.trim()) {
+      showMessage("Please select a vendor and provide terms and conditions.", "Validation Error", "warning");
+      return;
+    }
+    
+    const mappedItems = vendorDialog.items.map(it => ({
+      material_id: it.material_id,
+      quantity: parseFloat(it.pending_quantity),
+      rate: parseFloat(it.rate),
+      discount_percent: parseFloat(it.discount_percent || 0),
+      cgst_percentage: parseFloat(it.cgst_percentage || 0),
+      sgst_percentage: parseFloat(it.sgst_percentage || 0),
+      igst_percentage: parseFloat(it.igst_percentage || 0),
+    }));
+
+    if (mappedItems.some(it => isNaN(it.rate) || it.rate < 0 || isNaN(it.quantity) || it.quantity <= 0 || isNaN(it.discount_percent) || it.discount_percent < 0 || isNaN(it.cgst_percentage) || it.cgst_percentage < 0 || isNaN(it.sgst_percentage) || it.sgst_percentage < 0 || isNaN(it.igst_percentage) || it.igst_percentage < 0)) {
+      showMessage("Rate, Quantity, Discount and Taxes must be valid non-negative numbers.", "Validation Error", "warning");
+      return;
+    }
+
     try {
       await api.post(`/api/indents/${vendorDialog.indent.id}/convert-to-po`, {
         vendor_id: vendorDialog.vendor_id,
-        terms: vendorDialog.terms
+        terms: vendorDialog.terms,
+        items: mappedItems
       });
-      setVendorDialog({ open: false, indent: null, vendor_id: '', terms: '' });
+      setVendorDialog({ open: false, indent: null, vendor_id: '', terms: '', items: [] });
       load();
       showMessage("PO created successfully!", "Success", "success");
     } catch (err) { showMessage(err.response?.data?.detail || 'Error converting to PO', "Error", "error"); }
@@ -441,8 +505,8 @@ export default function Indents() {
                       </Tooltip>
                         <Tooltip title="Convert to PO">
                           <span><IconButton size="small" color="primary" disabled={(ind.status !== 'Approved' && ind.status !== 'Partially Issued') || !hasAction('indents', 'can_convert_to_po')}
-                            onClick={() => setVendorDialog({ open: true, indent: ind, vendor_id: '', terms: '' })}>
-                            <ReceiptLong fontSize="small" />
+                            onClick={() => openConvertDialog(ind)}>
+                            <ShoppingCart fontSize="small" />
                           </IconButton></span>
                         </Tooltip>
                     </Box>
@@ -536,8 +600,8 @@ export default function Indents() {
                         </Tooltip>
                         <Tooltip title="Convert to PO">
                           <span><IconButton size="small" color="primary" disabled={(ind.status !== 'Approved' && ind.status !== 'Partially Issued') || !hasAction('indents', 'can_convert_to_po')}
-                            onClick={() => setVendorDialog({ open: true, indent: ind, vendor_id: '' })}>
-                            <ReceiptLong fontSize="small" />
+                            onClick={() => openConvertDialog(ind)}>
+                            <ShoppingCart fontSize="small" />
                           </IconButton></span>
                         </Tooltip>
                       </Box>
@@ -656,7 +720,7 @@ export default function Indents() {
               <Grid item xs={12} sm={4} sx={{ textAlign: 'right' }}>
                 <Button 
                   variant="contained" 
-                  disabled={!vendorDialog.vendor_id} 
+                  disabled={!vendorDialog.vendor_id || !vendorDialog.terms?.trim()} 
                   onClick={handleConvertToPo}
                   size="small"
                   sx={{ py: 0.75, px: 3, fontWeight: 700, borderRadius: 1.5, textTransform: 'none' }}
@@ -702,20 +766,45 @@ export default function Indents() {
                 <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Material</TableCell>
                 <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Requested</TableCell>
                 <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Issued</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Pending (PO Qty)</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Pending</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', width: 90 }}>Rate (₹)</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', width: 70 }}>Disc %</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', width: 70 }}>CGST %</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', width: 70 }}>SGST %</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', width: 70 }}>IGST %</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {vendorDialog.indent?.items?.filter(item => item.pending_quantity > 0).map(item => (
+              {vendorDialog.items?.map((item, i) => (
                 <TableRow key={item.id} sx={{ '& td': { py: 0.5, px: 1 } }}>
                   <TableCell>
                     <Typography sx={{ fontWeight: 600, fontSize: '0.8rem' }}>{item.material_name}</Typography>
-                    <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.7rem' }}>{item.material_code}</Typography>
+                    <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.7rem', display: 'block' }}>{item.material_code}</Typography>
                   </TableCell>
                   <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{item.requested_quantity} {item.uom_name}</TableCell>
                   <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{item.issued_quantity}</TableCell>
                   <TableCell align="right" sx={{ fontWeight: 700, color: '#2563EB', fontSize: '0.8rem' }}>
                     {item.pending_quantity} {item.uom_name}
+                  </TableCell>
+                  <TableCell align="right">
+                    <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'flex-end' }}>
+                      <TextField size="small" type="number" value={item.rate} onChange={e => updateConvertItem(i, 'rate', e.target.value)} inputProps={{ min: 0 }} required sx={{ width: 110 }} />
+                      <Typography sx={{ position: 'absolute', top: '100%', right: 0, fontSize: '0.65rem', color: '#2563EB', mt: 0.5, whiteSpace: 'nowrap' }}>
+                        Base: ₹{materials.find(m => m.id === item.material_id)?.standard_cost || 0}
+                      </Typography>
+                    </Box>
+                  </TableCell>
+                  <TableCell align="right">
+                    <TextField size="small" type="number" value={item.discount_percent} onChange={e => updateConvertItem(i, 'discount_percent', e.target.value)} inputProps={{ min: 0 }} sx={{ width: 60 }} />
+                  </TableCell>
+                  <TableCell align="right">
+                    <TextField size="small" variant="standard" type="number" value={item.cgst_percentage} onChange={e => updateConvertItem(i, 'cgst_percentage', e.target.value)} InputProps={{ disableUnderline: true, readOnly: true }} inputProps={{ min: 0, style: { textAlign: 'right' } }} sx={{ width: 60, '& .MuiInputBase-input.Mui-readOnly': { color: '#64748b' } }} />
+                  </TableCell>
+                  <TableCell align="right">
+                    <TextField size="small" variant="standard" type="number" value={item.sgst_percentage} onChange={e => updateConvertItem(i, 'sgst_percentage', e.target.value)} InputProps={{ disableUnderline: true, readOnly: true }} inputProps={{ min: 0, style: { textAlign: 'right' } }} sx={{ width: 60, '& .MuiInputBase-input.Mui-readOnly': { color: '#64748b' } }} />
+                  </TableCell>
+                  <TableCell align="right">
+                    <TextField size="small" variant="standard" type="number" value={item.igst_percentage} onChange={e => updateConvertItem(i, 'igst_percentage', e.target.value)} InputProps={{ disableUnderline: true, readOnly: true }} inputProps={{ min: 0, style: { textAlign: 'right' } }} sx={{ width: 60, '& .MuiInputBase-input.Mui-readOnly': { color: '#64748b' } }} />
                   </TableCell>
                 </TableRow>
               ))}

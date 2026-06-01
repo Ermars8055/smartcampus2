@@ -18,6 +18,7 @@ def _build_role_out(role, db, tenant_id, site_id):
         "name": role.name,
         "code": role.code,
         "description": role.description,
+        "data_access_scope": role.data_access_scope,
         "tenant_id": role.tenant_id,
         "permissions": [
             {
@@ -104,6 +105,7 @@ def create_role(
         name=data.name,
         code=data.code,
         description=data.description,
+        data_access_scope=data.data_access_scope,
         tenant_id=tenant_id,
     )
     db.add(role)
@@ -160,6 +162,7 @@ def update_role(
     role.name = data.name
     role.code = data.code
     role.description = data.description
+    role.data_access_scope = data.data_access_scope
 
     # Replace permissions
     db.query(RolePermission).filter(RolePermission.role_id == id).delete()

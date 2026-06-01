@@ -9,8 +9,10 @@ import {
 import { Add, Delete, Close, CheckCircle, InfoOutlined, Undo, SwapHoriz, Inventory2, ArrowBack, History, Warehouse, AccountTree, Business, Assignment, Person, Comment, Description, LocalShipping, Print, Warning } from '@mui/icons-material';
 import api from '../services/api';
 import MaterialSelect from '../components/MaterialSelect';
+import { useAuth } from '../context/AuthContext';
 
 export default function StoreOperations() {
+  const { hasAction } = useAuth();
   const [activeTab, setActiveTab] = useState(0); // 0: Material Issue, 1: Returns, 2: Stock Transfer
   const [indents, setIndents] = useState([]);
   const [issues, setIssues] = useState([]);
@@ -476,6 +478,7 @@ export default function StoreOperations() {
                       fullWidth 
                       variant="contained" 
                       onClick={() => openIssueModal(ind)}
+                      disabled={!hasAction('issues', 'can_issue')}
                       sx={{ 
                         textTransform: 'none', 
                         borderRadius: 2, 
@@ -844,7 +847,7 @@ export default function StoreOperations() {
                           />
                         </TableCell>
                         <TableCell align="right">
-                          <IconButton size="small" color="primary" onClick={() => printGatePass(gp)}>
+                          <IconButton size="small" color="primary" disabled={!hasAction('issues', 'can_print')} onClick={() => printGatePass(gp)}>
                             <Print fontSize="small" />
                           </IconButton>
                           {gp.status === 'Issued' && (

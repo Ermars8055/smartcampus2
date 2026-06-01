@@ -23,7 +23,7 @@ router = APIRouter(prefix="/api", tags=["Master Data"])
 @router.get("/categories", response_model=List[CategoryOut])
 def list_categories(
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("categories", "read")),
+    current_user: User = Depends(get_current_user),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -96,7 +96,7 @@ def delete_category(
 def list_subcategories(
     category_id: Optional[int] = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("categories", "read")),
+    current_user: User = Depends(get_current_user),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -162,7 +162,7 @@ def update_subcategory(
 @router.get("/uom", response_model=List[UOMOut])
 def list_uom(
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("materials", "read")),
+    current_user: User = Depends(get_current_user),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -198,7 +198,7 @@ def list_materials(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("materials", "read")),
+    current_user: User = Depends(get_current_user),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -249,7 +249,7 @@ def list_materials(
 def get_material(
     id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("materials", "read")),
+    current_user: User = Depends(get_current_user),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):

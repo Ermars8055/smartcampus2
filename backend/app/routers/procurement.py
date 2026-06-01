@@ -48,6 +48,21 @@ def list_purchase_requests(
         PurchaseRequest.tenant_id == tenant_id, PurchaseRequest.site_id == site_id,
         PurchaseRequest.is_deleted == False
     )
+    
+    # --- ROW-LEVEL SECURITY / DATA SCOPING ---
+    is_platform_admin = getattr(current_user, "_is_platform_admin", False)
+    if not is_platform_admin:
+        scope = getattr(current_user, "_data_access_scope", "Self Only")
+        if scope in ["Full Administrative Access", "Organization"]:
+            pass
+        elif scope == "Department":
+            if current_user.department:
+                q = q.filter(PurchaseRequest.department_name == current_user.department)
+            else:
+                q = q.filter(PurchaseRequest.requester_id == current_user.id)
+        else:
+            q = q.filter(PurchaseRequest.requester_id == current_user.id)
+            
     if search:
         q = q.filter(PurchaseRequest.pr_number.ilike(f"%{search}%"))
     if status:
@@ -272,6 +287,18 @@ def list_purchase_orders(
         PurchaseOrder.tenant_id == tenant_id, PurchaseOrder.site_id == site_id,
         PurchaseOrder.is_deleted == False
     )
+
+    # --- ROW-LEVEL SECURITY / DATA SCOPING ---
+    is_platform_admin = getattr(current_user, "_is_platform_admin", False)
+    if not is_platform_admin:
+        scope = getattr(current_user, "_data_access_scope", "Self Only")
+        if scope in ["Full Administrative Access", "Organization"]:
+            pass
+        else:
+            # For POs, if they don't have Org/Admin access, they only see what they created
+            # as POs don't have a strict department mapping.
+            q = q.filter(PurchaseOrder.created_by_id == current_user.id)
+
     if search:
         q = q.filter(PurchaseOrder.po_number.ilike(f"%{search}%"))
     if status:

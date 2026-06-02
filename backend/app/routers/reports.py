@@ -78,27 +78,6 @@ def get_issue_summary(
     for (m_id, wh_id), bal in op_stocks_per_wh.items():
         opening_stocks[m_id] = opening_stocks.get(m_id, 0) + bal
 
-    # Closing Stocks query (Sum of latest balance per warehouse before or at to_date)
-    sl_cl_query = db.query(StockLedger.material_id, StockLedger.warehouse_id, StockLedger.balance).filter(
-        StockLedger.tenant_id == tenant_id,
-        StockLedger.site_id == site_id,
-        StockLedger.material_id.in_(material_ids),
-        StockLedger.created_at <= dt_to
-    )
-    if warehouse_id:
-        sl_cl_query = sl_cl_query.filter(StockLedger.warehouse_id == warehouse_id)
-
-    sl_cl_entries = sl_cl_query.order_by(StockLedger.created_at.desc()).all()
-    
-    cl_stocks_per_wh = {} # (material_id, warehouse_id) -> balance
-    for entry in sl_cl_entries:
-        key = (entry.material_id, entry.warehouse_id)
-        if key not in cl_stocks_per_wh:
-            cl_stocks_per_wh[key] = entry.balance
-            
-    closing_stocks = {}
-    for (m_id, wh_id), bal in cl_stocks_per_wh.items():
-        closing_stocks[m_id] = closing_stocks.get(m_id, 0) + bal
 
     # Receipts query within date range (from StockLedger)
     sl_rcpt_query = db.query(
@@ -201,10 +180,10 @@ def get_issue_summary(
         op_stock = round(opening_stocks.get(m_id, 0.0))
         issues = aggregated_data.get(m_id, {})
         total_issue = round(sum(issues.values()))
-        closing_stock = round(closing_stocks.get(m_id, 0.0))
         total_received = round(material_receipts.get(m_id, 0.0))
         total_outward_all = round(material_outward.get(m_id, 0.0))
         other_outward = max(0, total_outward_all - total_issue)
+        closing_stock = op_stock + total_received - (total_issue + other_outward)
         
         issue_numbers_str = ", ".join(sorted(list(material_issue_numbers.get(m_id, set()))))
 

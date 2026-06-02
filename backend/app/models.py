@@ -580,6 +580,35 @@ class GateEntry(Base):
     __table_args__ = (UniqueConstraint("tenant_id", "entry_number", name="uq_ge_per_tenant"),)
 
 
+# == Company Addresses ==
+
+class CompanyAddress(Base):
+    __tablename__ = "company_addresses"
+    id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
+    site_id = Column(Integer, ForeignKey("sites.id", ondelete="CASCADE"), nullable=False)
+    name = Column(String(255), nullable=False)
+    code = Column(String(50), nullable=False)
+    address_type = Column(String(50), default="Billing")
+    contact_person = Column(String(255))
+    phone = Column(String(20))
+    email = Column(String(255))
+    gst_number = Column(String(20))
+    pan_number = Column(String(15))
+    address = Column(Text, nullable=False)
+    city = Column(String(100))
+    state = Column(String(100))
+    pincode = Column(String(10))
+    bank_name = Column(String(100))
+    bank_account = Column(String(50))
+    ifsc_code = Column(String(20))
+    is_active = Column(Boolean, default=True)
+    is_deleted = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=_get_now)
+    updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)
+    __table_args__ = (UniqueConstraint("tenant_id", "site_id", "name", "address_type", name="uq_company_addr_per_site"),)
+
+
 # == Invoices ==
 
 class Invoice(Base):
@@ -587,11 +616,19 @@ class Invoice(Base):
     id = Column(Integer, primary_key=True, index=True)
     tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
     site_id = Column(Integer, ForeignKey("sites.id", ondelete="CASCADE"), nullable=False)
+    code = Column(String(50), nullable=False, index=True)
     invoice_number = Column(String(100), nullable=False, index=True)
     invoice_date = Column(Date, nullable=False)
     gate_entry_id = Column(Integer, ForeignKey("gate_entries.id"), nullable=True)
     vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=False)
     po_id = Column(Integer, ForeignKey("purchase_orders.id"), nullable=True)
+    consignee_id = Column(Integer, ForeignKey("company_addresses.id"), nullable=True)
+    buyer_id = Column(Integer, ForeignKey("company_addresses.id"), nullable=True)
+    internal_reference_number = Column(String(100), nullable=True)
+    srf_number = Column(String(100), nullable=True)
+    irn = Column(Text, nullable=True)
+    ack_number = Column(String(100), nullable=True)
+    ack_date = Column(Date, nullable=True)
     
     eway_bill_number = Column(String(100))
     delivery_note = Column(String(100))
@@ -613,6 +650,12 @@ class Invoice(Base):
     total_discount = Column(Float, default=0)
     total_amount = Column(Float, default=0)
     tax_amount = Column(Float, default=0)
+    transport_charges = Column(Float, default=0)
+    transport_hsn = Column(String(50))
+    transport_cgst_rate = Column(Float, default=0)
+    transport_sgst_rate = Column(Float, default=0)
+    transport_igst_rate = Column(Float, default=0)
+    transport_discount_percent = Column(Float, default=0)
     
     status = Column(String(50), default=InvoiceStatus.DRAFT.value)
     scan_url = Column(String(500))
@@ -625,6 +668,8 @@ class Invoice(Base):
     gate_entry = relationship("GateEntry")
     vendor = relationship("Vendor")
     purchase_order = relationship("PurchaseOrder")
+    consignee = relationship("CompanyAddress", foreign_keys=[consignee_id])
+    buyer = relationship("CompanyAddress", foreign_keys=[buyer_id])
     created_by = relationship("User", foreign_keys=[created_by_id])
     items = relationship("InvoiceItem", back_populates="invoice", cascade="all, delete-orphan")
     __table_args__ = (UniqueConstraint("tenant_id", "invoice_number", "vendor_id", name="uq_invoice_per_vendor_tenant"),)
@@ -648,6 +693,7 @@ class InvoiceItem(Base):
     igst_amount = Column(Float, default=0)
     taxable_amount = Column(Float, default=0)
     amount = Column(Float, nullable=False)
+    remarks = Column(Text, nullable=True)
     
     invoice = relationship("Invoice", back_populates="items")
     material = relationship("Material")

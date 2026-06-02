@@ -1016,9 +1016,9 @@ export default function PurchaseOrders() {
                   />
                 </Box>
                 <TextField size="small" label="Unit" value={item.uom_name || '-'} InputProps={{ readOnly: true }} />
-                <TextField size="small" label="Qty" type="number" value={item.quantity} onChange={e => updateItem(i, 'quantity', e.target.value)} inputProps={{ min: 0 }} />
+                <TextField size="small" label="Qty" type="number" value={item.quantity} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'quantity', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0 }} />
                 <Box>
-                  <TextField fullWidth size="small" label="Rate (₹)" type="number" value={item.rate} onChange={e => updateItem(i, 'rate', e.target.value)} inputProps={{ min: 0 }} />
+                  <TextField fullWidth size="small" label="Rate (₹)" type="number" value={item.rate} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'rate', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0 }} />
                   {item.base_rate > 0 && <Typography variant="caption" sx={{ color: '#64748B', display: 'block', mt: 0.5 }}>Base Rate: ₹{item.base_rate}</Typography>}
                 </Box>
                 <FormControl size="small">
@@ -1031,19 +1031,19 @@ export default function PurchaseOrders() {
 
                 <Box sx={{ gridColumn: { xs: '1 / -1', md: '1 / -1' }, display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', md: '1fr 1fr 1fr 1fr' }, gap: 1.5 }}>
                   <Box display="flex" gap={1}>
-                    <TextField size="small" label="Disc %" type="number" value={item.discount_percent} onChange={e => updateItem(i, 'discount_percent', e.target.value)} inputProps={{ min: 0, max: 100 }} sx={{ flex: 1 }} />
+                    <TextField size="small" label="Disc %" type="number" value={item.discount_percent} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'discount_percent', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100 }} sx={{ flex: 1 }} />
                     <TextField size="small" label="Disc (₹)" value={discAmt.toFixed(2)} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
                   </Box>
                   <Box display="flex" gap={1}>
-                    <TextField size="small" label="CGST %" type="number" value={item.cgst_percentage} onChange={e => updateItem(i, 'cgst_percentage', e.target.value)} inputProps={{ min: 0, max: 100 }} sx={{ flex: 1 }} />
+                    <TextField size="small" label="CGST %" type="number" value={item.cgst_percentage} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'cgst_percentage', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100 }} sx={{ flex: 1 }} />
                     <TextField size="small" label="CGST (₹)" value={cgstAmt.toFixed(2)} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
                   </Box>
                   <Box display="flex" gap={1}>
-                    <TextField size="small" label="SGST %" type="number" value={item.sgst_percentage} onChange={e => updateItem(i, 'sgst_percentage', e.target.value)} inputProps={{ min: 0, max: 100 }} sx={{ flex: 1 }} />
+                    <TextField size="small" label="SGST %" type="number" value={item.sgst_percentage} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'sgst_percentage', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100 }} sx={{ flex: 1 }} />
                     <TextField size="small" label="SGST (₹)" value={sgstAmt.toFixed(2)} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
                   </Box>
                   <Box display="flex" gap={1}>
-                    <TextField size="small" label="IGST %" type="number" value={item.igst_percentage} onChange={e => updateItem(i, 'igst_percentage', e.target.value)} inputProps={{ min: 0, max: 100 }} sx={{ flex: 1 }} />
+                    <TextField size="small" label="IGST %" type="number" value={item.igst_percentage} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'igst_percentage', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100 }} sx={{ flex: 1 }} />
                     <TextField size="small" label="IGST (₹)" value={igstAmt.toFixed(2)} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
                   </Box>
                 </Box>

@@ -938,11 +938,12 @@ export default function StoreOperations() {
                             size="small" 
                             type="number" 
                             inputProps={{ step: "1", min: "0", max: String(maxQty) }}
+                            onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()}
                             value={it.issue_qty} 
                             disabled={inStock <= 0}
                             onChange={e => {
                               const newItems = [...issueModal.items];
-                              const val = Math.round(parseFloat(e.target.value) || 0);
+                              const val = Math.round(parseFloat(e.target.value.replace(/-/g, '')) || 0);
                               newItems[i].issue_qty = Math.max(0, Math.min(val, maxQty));
                               setIssueModal({ ...issueModal, items: newItems });
                             }}
@@ -1067,10 +1068,11 @@ export default function StoreOperations() {
                       <TextField 
                         size="small" 
                         type="number" 
-                        inputProps={{ step: "1" }}
+                        inputProps={{ step: "1", min: "0" }}
+                        onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()}
                         fullWidth 
                         value={item.quantity} 
-                        onChange={e => updateReturnItem(idx, 'quantity', Math.round(parseFloat(e.target.value) || 0))} 
+                        onChange={e => updateReturnItem(idx, 'quantity', Math.round(parseFloat(e.target.value.replace(/-/g, '')) || 0))} 
                       />
                     </TableCell>
                     <TableCell>
@@ -1210,10 +1212,11 @@ export default function StoreOperations() {
                       <TextField 
                         size="small" 
                         type="number" 
-                        inputProps={{ step: "1" }}
+                        inputProps={{ step: "1", min: "0" }}
+                        onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()}
                         fullWidth 
                         value={item.quantity} 
-                        onChange={e => updateTransferItem(idx, 'quantity', Math.round(parseFloat(e.target.value) || 0))} 
+                        onChange={e => updateTransferItem(idx, 'quantity', Math.round(parseFloat(e.target.value.replace(/-/g, '')) || 0))} 
                       />
                     </TableCell>
                     <TableCell>

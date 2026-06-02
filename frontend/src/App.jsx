@@ -43,6 +43,7 @@ import SaasAdmin from './pages/SaasAdmin';
 import Alerts from './pages/Alerts';
 import PlatformLogin from './pages/PlatformLogin';
 import TermsAndConditions from './pages/TermsAndConditions';
+import CompanyAddresses from './pages/CompanyAddresses';
 import ChatBot from './components/ChatBot';
 import { Box, CircularProgress } from '@mui/material';
 
@@ -120,6 +121,7 @@ function AppRoutes() {
         <Route path="admin/roles/new" element={<RoleConfiguration />} />
         <Route path="admin/roles/:id" element={<RoleConfiguration />} />
         <Route path="terms" element={<TermsAndConditions />} />
+        <Route path="company-addresses" element={<CompanyAddresses />} />
         <Route path="saas-admin" element={<SaasAdmin />} />
         <Route path="alerts" element={<Alerts />} />
       </Route>

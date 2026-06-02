@@ -60,6 +60,7 @@ const menuItems = [
       { text: 'Projects', icon: <AccountTree />, path: '/projects', resource: 'projects' },
       { text: 'Departments', icon: <Business />, path: '/departments', resource: 'departments' },
       { text: 'Terms & Conditions', icon: <Assignment />, path: '/terms', resource: 'terms' },
+      { text: 'Company Addresses', icon: <Business />, path: '/company-addresses', resource: 'admin_users' },
     ]
   },
   { text: 'SaaS Admin', icon: <Security />, path: '/saas-admin', platformOnly: true },

@@ -608,7 +608,8 @@ export default function PurchaseRequests() {
                   label="Quantity" 
                   type="number" 
                   value={item.quantity}
-                  onChange={e => updateItem(i, 'quantity', e.target.value)} 
+                  onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()}
+                  onChange={e => updateItem(i, 'quantity', e.target.value.replace(/-/g, ''))}
                   inputProps={{ min: 1 }} 
                   required
                   InputProps={{ 
@@ -773,23 +774,23 @@ export default function PurchaseRequests() {
                   <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{it.quantity} {it.uom_name}</TableCell>
                   <TableCell align="right">
                     <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'flex-end' }}>
-                      <TextField size="small" type="number" value={it.rate} onChange={e => updateConvertItem(i, 'rate', e.target.value)} inputProps={{ min: 0 }} required sx={{ width: 110 }} />
+                      <TextField size="small" type="number" value={it.rate} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateConvertItem(i, 'rate', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0 }} required sx={{ width: 110 }} />
                       <Typography sx={{ position: 'absolute', top: '100%', right: 0, fontSize: '0.65rem', color: '#2563EB', mt: 0.5, whiteSpace: 'nowrap' }}>
                         Base: ₹{materials.find(m => m.id === it.material_id)?.standard_cost || 0}
                       </Typography>
                     </Box>
                   </TableCell>
                   <TableCell align="right">
-                    <TextField size="small" type="number" value={it.discount_percent} onChange={e => updateConvertItem(i, 'discount_percent', e.target.value)} inputProps={{ min: 0 }} sx={{ width: 70 }} />
+                    <TextField size="small" type="number" value={it.discount_percent} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateConvertItem(i, 'discount_percent', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0 }} sx={{ width: 70 }} />
                   </TableCell>
                   <TableCell align="right">
-                    <TextField size="small" variant="standard" type="number" value={it.cgst_percentage} onChange={e => updateConvertItem(i, 'cgst_percentage', e.target.value)} InputProps={{ disableUnderline: true, readOnly: true }} inputProps={{ min: 0, style: { textAlign: 'right' } }} sx={{ width: 70, '& .MuiInputBase-input.Mui-readOnly': { color: '#64748b' } }} />
+                    <TextField size="small" variant="standard" type="number" value={it.cgst_percentage} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateConvertItem(i, 'cgst_percentage', e.target.value.replace(/-/g, ''))} InputProps={{ disableUnderline: true, readOnly: true }} inputProps={{ min: 0, style: { textAlign: 'right' } }} sx={{ width: 70, '& .MuiInputBase-input.Mui-readOnly': { color: '#64748b' } }} />
                   </TableCell>
                   <TableCell align="right">
-                    <TextField size="small" variant="standard" type="number" value={it.sgst_percentage} onChange={e => updateConvertItem(i, 'sgst_percentage', e.target.value)} InputProps={{ disableUnderline: true, readOnly: true }} inputProps={{ min: 0, style: { textAlign: 'right' } }} sx={{ width: 70, '& .MuiInputBase-input.Mui-readOnly': { color: '#64748b' } }} />
+                    <TextField size="small" variant="standard" type="number" value={it.sgst_percentage} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateConvertItem(i, 'sgst_percentage', e.target.value.replace(/-/g, ''))} InputProps={{ disableUnderline: true, readOnly: true }} inputProps={{ min: 0, style: { textAlign: 'right' } }} sx={{ width: 70, '& .MuiInputBase-input.Mui-readOnly': { color: '#64748b' } }} />
                   </TableCell>
                   <TableCell align="right">
-                    <TextField size="small" variant="standard" type="number" value={it.igst_percentage} onChange={e => updateConvertItem(i, 'igst_percentage', e.target.value)} InputProps={{ disableUnderline: true, readOnly: true }} inputProps={{ min: 0, style: { textAlign: 'right' } }} sx={{ width: 70, '& .MuiInputBase-input.Mui-readOnly': { color: '#64748b' } }} />
+                    <TextField size="small" variant="standard" type="number" value={it.igst_percentage} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateConvertItem(i, 'igst_percentage', e.target.value.replace(/-/g, ''))} InputProps={{ disableUnderline: true, readOnly: true }} inputProps={{ min: 0, style: { textAlign: 'right' } }} sx={{ width: 70, '& .MuiInputBase-input.Mui-readOnly': { color: '#64748b' } }} />
                   </TableCell>
                 </TableRow>
               ))}

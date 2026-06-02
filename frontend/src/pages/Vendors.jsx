@@ -9,7 +9,7 @@ import {
 import {
   Add, Edit, Search, Store, Person, Phone, Email,
   Business, LocationOn, Description, Category, PinDrop,
-  Badge, AppRegistration, ArrowDropDown
+  Badge, AppRegistration, ArrowDropDown, Numbers
 } from '@mui/icons-material';
 import { TableSortLabel } from '@mui/material';
 import api from '../services/api';
@@ -62,7 +62,8 @@ export default function Vendors() {
   const [editing, setEditing] = useState(null);
   const [categories, setCategories] = useState([]);
   const [form, setForm] = useState({
-    gst_number: '', address: '', city: '', state: '', category_ids: [], rating: 0
+    name: '', code: '', contact_person: '', phone: '', email: '',
+    gst_number: '', address: '', city: '', pincode: '', state: '', category_ids: [], rating: 0
   });
   const [viewOnly, setViewOnly] = useState(false);
   const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'asc' });
@@ -105,11 +106,15 @@ export default function Vendors() {
   const validateForm = () => {
     const newErrors = {};
     if (!form.name) newErrors.name = 'Vendor name is required';
-    if (!form.contact_person) newErrors.contact_person = 'Contact person is required';
+    if (!form.contact_person) {
+      newErrors.contact_person = 'Contact person is required';
+    } else if (/[^a-zA-Z\s]/.test(form.contact_person)) {
+      newErrors.contact_person = 'Contact Person cannot contain numbers or special characters';
+    }
 
-    // Phone validation: strictly 10 digits
-    if (!form.phone) newErrors.phone = 'Phone number is required';
-    else if (!/^\d{10}$/.test(form.phone)) newErrors.phone = 'Phone must be exactly 10 digits';
+    // Contact Number validation: 10 to 11 digits
+    if (!form.phone) newErrors.phone = 'Contact Number is required';
+    else if (!/^\d{10,11}$/.test(form.phone)) newErrors.phone = 'Contact Number must be 10 to 11 digits';
 
     // Email validation: standard regex
     if (!form.email) newErrors.email = 'Email is required';
@@ -172,6 +177,7 @@ export default function Vendors() {
         category_ids: r.data.category_ids || [],
         address: r.data.address || '',
         city: r.data.city || '',
+        pincode: r.data.pincode || '',
         state: r.data.state || '',
         rating: r.data.rating || 0
       });
@@ -192,7 +198,7 @@ export default function Vendors() {
           onClick={() => {
             setEditing(null);
             setViewOnly(false);
-            setForm({ name: '', code: '', contact_person: '', phone: '', email: '', gst_number: '', address: '', city: '', state: '', category_ids: [], rating: 0 });
+            setForm({ name: '', code: '', contact_person: '', phone: '', email: '', gst_number: '', address: '', city: '', pincode: '', state: '', category_ids: [], rating: 0 });
             setErrors({});
             setDialog(true);
           }}
@@ -425,14 +431,14 @@ export default function Vendors() {
             />
             <TextField
               fullWidth
-              label="Phone Number"
+              label="Contact Number"
               value={form.phone}
-              onChange={e => setForm({ ...form, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })}
+              onChange={e => setForm({ ...form, phone: e.target.value.replace(/\D/g, '').slice(0, 11) })}
               required
               disabled={viewOnly}
               error={!!errors.phone}
               helperText={errors.phone}
-              inputProps={{ maxLength: 10 }}
+              inputProps={{ maxLength: 11 }}
               InputProps={{
                 startAdornment: <InputAdornment position="start"><Phone sx={{ color: '#94A3B8' }} /></InputAdornment>,
               }}
@@ -475,6 +481,20 @@ export default function Vendors() {
               helperText={errors.city}
               InputProps={{
                 startAdornment: <InputAdornment position="start"><LocationOn sx={{ color: '#94A3B8' }} /></InputAdornment>,
+              }}
+            />
+            <TextField
+              fullWidth
+              label="Pincode"
+              value={form.pincode}
+              onChange={e => setForm({ ...form, pincode: e.target.value.replace(/\D/g, '').slice(0, 6) })}
+              inputProps={{ maxLength: 6 }}
+              required
+              disabled={viewOnly}
+              error={!!errors.pincode}
+              helperText={errors.pincode}
+              InputProps={{
+                startAdornment: <InputAdornment position="start"><Numbers sx={{ color: '#94A3B8' }} /></InputAdornment>,
               }}
             />
             <TextField

@@ -557,6 +557,51 @@ class GateEntryOut(GateEntryBase):
     class Config:
         from_attributes = True
 
+# ── Company Addresses ────────────────────────────────────────────────────
+
+class CompanyAddressBase(BaseModel):
+    name: str
+    code: Optional[str] = None
+    address_type: str = "Billing"
+    contact_person: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    gst_number: Optional[str] = None
+    pan_number: Optional[str] = None
+    address: str
+    city: Optional[str] = None
+    state: Optional[str] = None
+    pincode: Optional[str] = None
+    bank_name: Optional[str] = None
+    bank_account: Optional[str] = None
+    ifsc_code: Optional[str] = None
+
+class CompanyAddressCreate(CompanyAddressBase):
+    pass
+
+class CompanyAddressUpdate(BaseModel):
+    name: Optional[str] = None
+    code: Optional[str] = None
+    address_type: Optional[str] = None
+    contact_person: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    gst_number: Optional[str] = None
+    pan_number: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    pincode: Optional[str] = None
+    bank_name: Optional[str] = None
+    bank_account: Optional[str] = None
+    ifsc_code: Optional[str] = None
+
+class CompanyAddressOut(CompanyAddressBase):
+    id: int
+    is_active: bool = True
+    class Config:
+        from_attributes = True
+
 
 # ── Invoices ─────────────────────────────────────────────────────────────
 
@@ -585,11 +630,13 @@ class InvoiceItemBase(BaseModel):
         return v
     taxable_amount: float = 0
     amount: float = 0
+    remarks: Optional[str] = None
 
 class InvoiceItemOut(InvoiceItemBase):
     id: int
     material_name: Optional[str] = None
     material_code: Optional[str] = None
+    remarks: Optional[str] = None
     class Config:
         from_attributes = True
 
@@ -599,6 +646,12 @@ class InvoiceBase(BaseModel):
     gate_entry_id: Optional[int] = None
     vendor_id: int
     po_id: Optional[int] = None
+    consignee_id: Optional[int] = None
+    buyer_id: Optional[int] = None
+    srf_number: Optional[str] = None
+    irn: Optional[str] = None
+    ack_number: Optional[str] = None
+    ack_date: Optional[date] = None
     
     eway_bill_number: Optional[str] = None
     delivery_note: Optional[str] = None
@@ -620,6 +673,12 @@ class InvoiceBase(BaseModel):
     total_discount: float = 0
     total_amount: float = 0
     tax_amount: float = 0
+    transport_charges: float = 0
+    transport_hsn: Optional[str] = None
+    transport_cgst_rate: float = 0
+    transport_sgst_rate: float = 0
+    transport_igst_rate: float = 0
+    transport_discount_percent: float = 0
     scan_url: Optional[str] = None
     remarks: Optional[str] = None
     items: List[InvoiceItemBase] = []
@@ -633,6 +692,12 @@ class InvoiceUpdate(BaseModel):
     gate_entry_id: Optional[int] = None
     vendor_id: Optional[int] = None
     po_id: Optional[int] = None
+    consignee_id: Optional[int] = None
+    buyer_id: Optional[int] = None
+    srf_number: Optional[str] = None
+    irn: Optional[str] = None
+    ack_number: Optional[str] = None
+    ack_date: Optional[date] = None
     
     eway_bill_number: Optional[str] = None
     delivery_note: Optional[str] = None
@@ -654,18 +719,28 @@ class InvoiceUpdate(BaseModel):
     total_discount: Optional[float] = None
     total_amount: Optional[float] = None
     tax_amount: Optional[float] = None
+    transport_charges: Optional[float] = None
+    transport_hsn: Optional[str] = None
+    transport_cgst_rate: Optional[float] = None
+    transport_sgst_rate: Optional[float] = None
+    transport_igst_rate: Optional[float] = None
+    transport_discount_percent: Optional[float] = None
     status: Optional[str] = None
     scan_url: Optional[str] = None
     remarks: Optional[str] = None
 
 class InvoiceOut(InvoiceBase):
     id: int
+    code: str
     status: str
     created_at: datetime
+    internal_reference_number: Optional[str] = None
     vendor_name: Optional[str] = None
     po_number: Optional[str] = None
     gate_entry_number: Optional[str] = None
     created_by_name: Optional[str] = None
+    consignee_title: Optional[str] = None
+    buyer_title: Optional[str] = None
     items: List[InvoiceItemOut] = []
     class Config:
         from_attributes = True

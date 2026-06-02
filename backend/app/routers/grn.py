@@ -126,7 +126,7 @@ def list_grn(
             po_number=g.purchase_order.po_number if g.purchase_order else None,
             warehouse_name=g.warehouse.name if g.warehouse else None,
             project_name=g.project.name if g.project else None,
-            vendor_name=g.vendor.name if g.vendor else None,
+            vendor_name=f"{g.vendor.code} - {g.vendor.name}" if g.vendor else None,
             received_by_name=g.received_by.full_name if g.received_by else None,
             items=items
         ))

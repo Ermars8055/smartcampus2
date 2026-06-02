@@ -631,7 +631,7 @@ def list_gate_passes(
             uom_name=mat.uom.name if mat and mat.uom else None,
             quantity=gp.quantity,
             vendor_id=gp.vendor_id,
-            vendor_name=vend.name if vend else None,
+            vendor_name=f"{vend.code} - {vend.name}" if vend else None,
             vendor_address=vend.address if vend else None,
             reference_return_number=gp.material_return.return_number if gp.material_return else None,
             status=gp.status,

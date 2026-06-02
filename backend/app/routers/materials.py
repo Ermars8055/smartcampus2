@@ -210,7 +210,8 @@ def list_materials(
     if search:
         q = q.filter(or_(
             Material.name.ilike(f"%{search}%"),
-            Material.code.ilike(f"%{search}%")
+            Material.code.ilike(f"%{search}%"),
+            Material.alias.ilike(f"%{search}%")
         ))
     if category_id:
         q = q.filter(Material.category_id == category_id)
@@ -226,6 +227,7 @@ def list_materials(
         total_stock = round(sum(s.quantity for s in stock))
         result.append(MaterialOut(
             id=m.id, code=m.code, name=m.name,
+            alias=m.alias, reference_no=m.reference_no,
             category_id=m.category_id, subcategory_id=m.subcategory_id,
             uom_id=m.uom_id, reorder_level=round(m.reorder_level or 0),
             maximum_level=m.maximum_level, standard_cost=m.standard_cost,
@@ -237,7 +239,7 @@ def list_materials(
             category_name=m.category.name if m.category else None,
             subcategory_name=m.subcategory.name if m.subcategory else None,
             uom_name=m.uom.name if m.uom else None,
-            vendor_name=m.preferred_vendor.name if m.preferred_vendor else None,
+            vendor_name=f"{m.preferred_vendor.code} - {m.preferred_vendor.name}" if m.preferred_vendor else None,
             warehouse_id=m.warehouse_id,
             warehouse_name=m.warehouse.name if m.warehouse else None,
             current_stock=total_stock
@@ -262,6 +264,7 @@ def get_material(
     total_stock = round(sum(s.quantity for s in stock))
     return MaterialOut(
         id=m.id, code=m.code, name=m.name,
+        alias=m.alias, reference_no=m.reference_no,
         category_id=m.category_id, subcategory_id=m.subcategory_id,
         uom_id=m.uom_id, reorder_level=round(m.reorder_level or 0),
         maximum_level=m.maximum_level, standard_cost=m.standard_cost,
@@ -273,7 +276,7 @@ def get_material(
         category_name=m.category.name if m.category else None,
         subcategory_name=m.subcategory.name if m.subcategory else None,
         uom_name=m.uom.name if m.uom else None,
-        vendor_name=m.preferred_vendor.name if m.preferred_vendor else None,
+        vendor_name=f"{m.preferred_vendor.code} - {m.preferred_vendor.name}" if m.preferred_vendor else None,
         warehouse_id=m.warehouse_id,
         warehouse_name=m.warehouse.name if m.warehouse else None,
         current_stock=total_stock

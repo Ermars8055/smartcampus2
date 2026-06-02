@@ -33,7 +33,7 @@ export default function Materials() {
   const [printLabelCount, setPrintLabelCount] = useState(12);
   const [labelFormat, setLabelFormat] = useState(32);
   const [form, setForm] = useState({
-    code: '', name: '', category_id: '', subcategory_id: '', uom_id: '', warehouse_id: '', reorder_level: 0,
+    code: '', name: '', alias: '', reference_no: '', category_id: '', subcategory_id: '', uom_id: '', warehouse_id: '', reorder_level: 0,
     maximum_level: 0, standard_cost: 0, gst_rate: 0, storage_type: 'General',
     material_type: '', hsn_code: '', description: ''
   });
@@ -147,6 +147,8 @@ export default function Materials() {
     try {
       const payload = {
         name: form.name,
+        alias: form.alias,
+        reference_no: form.reference_no,
         category_id: form.category_id,
         subcategory_id: form.subcategory_id || null,
         uom_id: form.uom_id,
@@ -202,7 +204,7 @@ export default function Materials() {
     setViewOnly(view);
     setErrors({});
     setForm({
-      code: m.code, name: m.name, category_id: m.category_id, subcategory_id: m.subcategory_id || '', uom_id: m.uom_id,
+      code: m.code, name: m.name, alias: m.alias || '', reference_no: m.reference_no || '', category_id: m.category_id, subcategory_id: m.subcategory_id || '', uom_id: m.uom_id,
       reorder_level: m.reorder_level === 0 ? '' : m.reorder_level,
       maximum_level: m.maximum_level === 0 ? '' : m.maximum_level,
       standard_cost: m.standard_cost === 0 ? '' : m.standard_cost,
@@ -221,7 +223,7 @@ export default function Materials() {
     setViewOnly(false);
     setErrors({});
     setForm({
-      code: '', name: '', category_id: '', subcategory_id: '', uom_id: '',
+      code: '', name: '', alias: '', reference_no: '', category_id: '', subcategory_id: '', uom_id: '',
       reorder_level: '', maximum_level: '', standard_cost: '', gst_rate: '',
       storage_type: 'General', material_type: '', hsn_code: '', warehouse_id: '', description: ''
     });
@@ -342,10 +344,10 @@ export default function Materials() {
         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
           <TextField
             size="small"
-            placeholder="Search materials by name or code..."
+            placeholder="Search materials by name, code or alias..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            sx={{ minWidth: 350 }}
+            sx={{ minWidth: 400 }}
             InputProps={{
               startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} />,
               sx: { borderRadius: 2 }
@@ -642,6 +644,26 @@ export default function Materials() {
               helperText={errors.name}
               sx={{ gridColumn: { sm: 'span 2' } }}
               InputProps={{ startAdornment: <InputAdornment position="start"><Description sx={{ color: '#94A3B8' }} /></InputAdornment> }}
+            />
+            
+            <TextField
+              fullWidth
+              label="Material Alias (comma separated)"
+              value={form.alias}
+              onChange={e => setForm({ ...form, alias: e.target.value })}
+              disabled={viewOnly}
+              placeholder="Enter alias names"
+              sx={{ gridColumn: { sm: 'span 2' } }}
+              InputProps={{ startAdornment: <InputAdornment position="start"><Description sx={{ color: '#94A3B8' }} /></InputAdornment> }}
+            />
+            <TextField
+              fullWidth
+              label="Material Reference No."
+              value={form.reference_no}
+              onChange={e => setForm({ ...form, reference_no: e.target.value })}
+              disabled={viewOnly}
+              placeholder="Enter old material number"
+              InputProps={{ startAdornment: <InputAdornment position="start"><Tag sx={{ color: '#94A3B8' }} /></InputAdornment> }}
             />
 
             <FormControl fullWidth error={!!errors.category_id}>

@@ -1319,7 +1319,7 @@ const Quotations = () => {
                         {selected.map((id) => (
                           <Chip
                             key={id}
-                            label={(vendors || []).find(v => v.id === id)?.name}
+                            label={(() => { const v = (vendors || []).find(x => x.id === id); return v ? `${v.code} - ${v.name}` : ''; })()}
                             size="small"
                             sx={{ bgcolor: 'secondary.light', color: 'secondary.contrastText' }}
                           />
@@ -1330,7 +1330,7 @@ const Quotations = () => {
                     {Array.isArray(vendors) && vendors.map(v => (
                       <MenuItem key={v.id} value={v.id}>
                         <Checkbox checked={(newQR.vendor_ids || []).indexOf(v.id) > -1} />
-                        <ListItemText primary={v.name} />
+                        <ListItemText primary={`${v.code} - ${v.name}`} />
                       </MenuItem>
                     ))}
                   </Select>

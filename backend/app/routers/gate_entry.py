@@ -77,7 +77,7 @@ def list_gate_entries(
             entry_type=e.entry_type,
             delivery_person_name=e.delivery_person_name,
             invoice_scan_url=e.invoice_scan_url,
-            vendor_name=e.vendor.name if e.vendor else None,
+            vendor_name=f"{e.vendor.code} - {e.vendor.name}" if e.vendor else None,
             material_name=e.material.name if e.material else None,
             po_number=e.purchase_order.po_number if e.purchase_order else None,
             material_names=material_names,

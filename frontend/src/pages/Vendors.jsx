@@ -14,6 +14,47 @@ import {
 import { TableSortLabel } from '@mui/material';
 import api from '../services/api';
 
+const STATES_LIST = [
+  '01 - Jammu And Kashmir',
+  '02 - Himachal Pradesh',
+  '03 - Punjab',
+  '04 - Chandigarh',
+  '05 - Uttarakhand',
+  '06 - Haryana',
+  '07 - Delhi',
+  '08 - Rajasthan',
+  '09 - Uttar Pradesh',
+  '10 - Bihar',
+  '11 - Sikkim',
+  '12 - Arunachal Pradesh',
+  '13 - Nagaland',
+  '14 - Manipur',
+  '15 - Mizoram',
+  '16 - Tripura',
+  '17 - Meghalaya',
+  '18 - Assam',
+  '19 - West Bengal',
+  '20 - Jharkhand',
+  '21 - Orissa',
+  '22 - Chhattisgarh',
+  '23 - Madhya Pradesh',
+  '24 - Gujarat',
+  '26 - Dadra And Nagar Haveli & Daman And Diu',
+  '27 - Maharashtra',
+  '29 - Karnataka',
+  '30 - Goa',
+  '31 - Lakshadweep',
+  '32 - Kerala',
+  '33 - Tamil Nadu',
+  '34 - Puducherry',
+  '35 - Andaman And Nicobar',
+  '36 - Telangana',
+  '37 - Andhra Pradesh',
+  '38 - Ladakh',
+  '97 - Other Territory',
+  '99 - Other Country'
+];
+
 export default function Vendors() {
   const [vendors, setVendors] = useState([]);
   const [search, setSearch] = useState('');
@@ -78,6 +119,11 @@ export default function Vendors() {
     const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
     if (!form.gst_number) newErrors.gst_number = 'GST number is required';
     else if (!gstRegex.test(form.gst_number)) newErrors.gst_number = 'Invalid GSTIN format (e.g. 22AAAAA0000A1Z5)';
+
+    if (!form.city) newErrors.city = 'City is required';
+    if (!form.state) newErrors.state = 'State is required';
+    if (!form.address) newErrors.address = 'Registered Address is required';
+    if (!form.category_ids || form.category_ids.length === 0) newErrors.category_ids = 'At least one vendor category is required';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -423,21 +469,34 @@ export default function Vendors() {
               label="City"
               value={form.city}
               onChange={e => setForm({ ...form, city: e.target.value })}
+              required
               disabled={viewOnly}
+              error={!!errors.city}
+              helperText={errors.city}
               InputProps={{
                 startAdornment: <InputAdornment position="start"><LocationOn sx={{ color: '#94A3B8' }} /></InputAdornment>,
               }}
             />
             <TextField
+              select
               fullWidth
               label="State"
               value={form.state}
               onChange={e => setForm({ ...form, state: e.target.value })}
+              required
               disabled={viewOnly}
+              error={!!errors.state}
+              helperText={errors.state}
               InputProps={{
                 startAdornment: <InputAdornment position="start"><PinDrop sx={{ color: '#94A3B8' }} /></InputAdornment>,
               }}
-            />
+            >
+              {STATES_LIST.map((stateOption) => (
+                <MenuItem key={stateOption} value={stateOption}>
+                  {stateOption}
+                </MenuItem>
+              ))}
+            </TextField>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
               <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, ml: 1.5 }}>Vendor Rating</Typography>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 1.5 }}>
@@ -451,7 +510,7 @@ export default function Vendors() {
               </Box>
             </Box>
 
-            <FormControl fullWidth sx={{ gridColumn: { sm: 'span 3' } }}>
+            <FormControl fullWidth sx={{ gridColumn: { sm: 'span 3' } }} required error={!!errors.category_ids}>
               <InputLabel>Vendor Categories</InputLabel>
               <Select
                 multiple
@@ -474,6 +533,7 @@ export default function Vendors() {
                   </MenuItem>
                 ))}
               </Select>
+              {errors.category_ids && <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 1.5, mb: -1 }}>{errors.category_ids}</Typography>}
             </FormControl>
 
             <TextField
@@ -483,7 +543,10 @@ export default function Vendors() {
               onChange={e => setForm({ ...form, address: e.target.value })}
               multiline
               rows={3}
+              required
               disabled={viewOnly}
+              error={!!errors.address}
+              helperText={errors.address}
               sx={{ gridColumn: { sm: 'span 3' } }}
               InputProps={{
                 startAdornment: <InputAdornment position="start" sx={{ alignSelf: 'flex-start', mt: 1.5 }}><Description sx={{ color: '#94A3B8' }} /></InputAdornment>,

@@ -494,7 +494,7 @@ def get_rate_analysis_drilldown(
             "grn_number": grn.grn_number,
             "grn_date": grn_date,
             "grn_date_display": grn_date_display,
-            "vendor_name": vendor.name,
+            "vendor_name": f"{vendor.code} - {vendor.name}",
             "vendor_id": vendor.id,
             "material_code": material.code,
             "material_name": material.name,
@@ -522,7 +522,7 @@ def get_rate_analysis_drilldown(
         if vendor.id not in vendor_rates:
             vendor_rates[vendor.id] = {
                 "vendor_id": vendor.id,
-                "vendor_name": vendor.name,
+                "vendor_name": f"{vendor.code} - {vendor.name}",
                 "rates": [],
                 "latest_date": None,
                 "latest_rate": 0
@@ -597,6 +597,7 @@ def get_receipt_summary(
         Material.category_id,
         Material.subcategory_id,
         Vendor.id.label("vendor_id"),
+        Vendor.code.label("vendor_code"),
         Vendor.name.label("vendor_name"),
         GRN.grn_number,
         GRN.invoice_number,
@@ -643,7 +644,7 @@ def get_receipt_summary(
     for row in results:
         m_id = row.material_id
         v_id = row.vendor_id
-        unique_vendors[v_id] = row.vendor_name
+        unique_vendors[v_id] = {"name": row.vendor_name, "code": row.vendor_code}
 
         if m_id not in pivoted:
             pivoted[m_id] = {
@@ -681,7 +682,7 @@ def get_receipt_summary(
     final_data.sort(key=lambda x: x["material_name"])
 
     # Sorted vendors for column consistency
-    sorted_vendors = [{"id": vid, "name": name} for vid, name in sorted(unique_vendors.items(), key=lambda x: x[1])]
+    sorted_vendors = [{"id": vid, "name": vdata["name"], "code": vdata["code"]} for vid, vdata in sorted(unique_vendors.items(), key=lambda x: x[1]["name"])]
 
     return {
         "vendors": sorted_vendors,
@@ -710,6 +711,7 @@ def get_receipt_summary_details(
     items = db.query(
         GRN.grn_number,
         GRN.created_at.label("grn_date"),
+        Vendor.code.label("vendor_code"),
         Vendor.name.label("vendor_name"),
         GRN.invoice_number,
         GRN.invoice_date,
@@ -745,7 +747,7 @@ def get_receipt_summary_details(
         {
             "grn_number": row.grn_number,
             "grn_date": row.grn_date.strftime("%d-%b-%Y") if row.grn_date else "",
-            "vendor_name": row.vendor_name,
+            "vendor_name": f"{row.vendor_code} - {row.vendor_name}",
             "bill_number": row.invoice_number,
             "bill_date": row.invoice_date.strftime("%d-%b-%Y") if row.invoice_date else "",
             "material_code": row.material_code,

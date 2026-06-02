@@ -180,6 +180,8 @@ class UOMOut(UOMBase):
 class MaterialBase(BaseModel):
     code: Optional[str] = None
     name: str
+    alias: Optional[str] = None
+    reference_no: Optional[str] = None
     category_id: int
     subcategory_id: Optional[int] = None
     uom_id: int
@@ -208,6 +210,8 @@ class MaterialCreate(MaterialBase):
 
 class MaterialUpdate(BaseModel):
     name: Optional[str] = None
+    alias: Optional[str] = None
+    reference_no: Optional[str] = None
     category_id: Optional[int] = None
     subcategory_id: Optional[int] = None
     uom_id: Optional[int] = None

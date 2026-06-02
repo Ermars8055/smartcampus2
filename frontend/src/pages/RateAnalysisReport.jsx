@@ -244,7 +244,7 @@ export default function RateAnalysisReport() {
                 onChange={e => setFilters({ ...filters, vendorId: e.target.value })}
                 sx={{ mt: 1 }}>
                 <MenuItem value="">All Vendors</MenuItem>
-                {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.name}</MenuItem>)}
+                {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.code} - {v.name}</MenuItem>)}
               </Select>
             </FormControl>
           </Grid>

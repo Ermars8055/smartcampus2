@@ -124,7 +124,7 @@ export default function ReceiptSummaryReport() {
     if (!reportData) return;
     
     // Header setup
-    const vendorHeads = reportData.vendors.map(v => [v.name, '', '', '', '']);
+    const vendorHeads = reportData.vendors.map(v => [`${v.code} - ${v.name}`, '', '', '', '']);
     const subHeads = reportData.vendors.map(() => ['Bill No & Date', 'Qty', 'Rate', 'Amount', 'Total']);
     
     const aoa = [
@@ -185,7 +185,7 @@ export default function ReceiptSummaryReport() {
       [
         { content: 'S.No', rowSpan: 2, styles: { halign: 'center', valign: 'middle' } },
         { content: 'Material Name', rowSpan: 2, styles: { halign: 'center', valign: 'middle' } },
-        ...reportData.vendors.map(v => ({ content: v.name, colSpan: 5, styles: { halign: 'center' } }))
+        ...reportData.vendors.map(v => ({ content: `${v.code} - ${v.name}`, colSpan: 5, styles: { halign: 'center' } }))
       ],
       [
         ...reportData.vendors.map(() => 'Bill No & Date').flat(),
@@ -269,7 +269,7 @@ export default function ReceiptSummaryReport() {
               <InputLabel>Vendor</InputLabel>
               <Select value={filters.vendorId} label="Vendor" onChange={e => setFilters({ ...filters, vendorId: e.target.value })}>
                 <MenuItem value="">All Vendors</MenuItem>
-                {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.name}</MenuItem>)}
+                {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.code} - {v.name}</MenuItem>)}
               </Select>
             </FormControl>
           </Grid>
@@ -339,7 +339,7 @@ export default function ReceiptSummaryReport() {
                   <TableCell rowSpan={2} sx={{ minWidth: 200, background: '#F1F5F9', position: 'sticky', left: 0, zIndex: 3 }}>Material Name</TableCell>
                   {reportData?.vendors.map(v => (
                     <TableCell key={v.id} colSpan={5} sx={{ background: '#EFF6FF', color: '#1E40AF', borderBottom: '2px solid #3B82F6' }}>
-                      <Typography variant="caption" sx={{ fontWeight: 800, textTransform: 'uppercase' }}>{v.name}</Typography>
+                      <Typography variant="caption" sx={{ fontWeight: 800, textTransform: 'uppercase' }}>{v.code} - {v.name}</Typography>
                     </TableCell>
                   ))}
                 </TableRow>

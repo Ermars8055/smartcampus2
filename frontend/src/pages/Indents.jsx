@@ -712,7 +712,7 @@ export default function Indents() {
                       sx={{ bgcolor: '#fff' }}
                     >
                       <MenuItem value="" disabled><em>Select Vendor</em></MenuItem>
-                      {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.name} ({v.code})</MenuItem>)}
+                      {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.code} - {v.name}</MenuItem>)}
                     </Select>
                   </FormControl>
                 </Box>

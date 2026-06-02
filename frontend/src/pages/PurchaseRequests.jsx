@@ -715,7 +715,7 @@ export default function PurchaseRequests() {
                   startAdornment={<InputAdornment position="start"><Store sx={{ color: '#94A3B8' }} /></InputAdornment>}
                 >
                   <MenuItem value="" disabled>Select Vendor</MenuItem>
-                  {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.name}</MenuItem>)}
+                  {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.code} - {v.name}</MenuItem>)}
                 </Select>
               </FormControl>
             </Grid>

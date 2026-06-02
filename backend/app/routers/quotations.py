@@ -84,7 +84,7 @@ def list_quotation_requests(
             ) for s in it.sources]
         ) for it in qr.items]
         prs = [QRLinkedPROut(id=pr.id, pr_id=pr.pr_id, pr_number=pr.purchase_request.pr_number if pr.purchase_request else "N/A") for pr in qr.linked_prs]
-        vendors = [QRVendorOut(id=v.id, vendor_id=v.vendor_id, vendor_name=v.vendor.name if v.vendor else "N/A", 
+        vendors = [QRVendorOut(id=v.id, vendor_id=v.vendor_id, vendor_name=f"{v.vendor.code} - {v.vendor.name}" if v.vendor else "N/A", 
                                is_sent=v.is_sent, sent_at=v.sent_at, receipt_status=v.receipt_status) for v in qr.invited_vendors]
         
         vendor_quotation_count = db.query(VendorQuotation).filter(VendorQuotation.qr_id == qr.id).count()
@@ -129,7 +129,7 @@ def get_quotation_request(
         ) for s in it.sources]
     ) for it in qr.items]
     prs = [QRLinkedPROut(id=pr.id, pr_id=pr.pr_id, pr_number=pr.purchase_request.pr_number) for pr in qr.linked_prs]
-    vendors = [QRVendorOut(id=v.id, vendor_id=v.vendor_id, vendor_name=v.vendor.name, 
+    vendors = [QRVendorOut(id=v.id, vendor_id=v.vendor_id, vendor_name=f"{v.vendor.code} - {v.vendor.name}" if v.vendor else "N/A", 
                            is_sent=v.is_sent, sent_at=v.sent_at, receipt_status=v.receipt_status) for v in qr.invited_vendors]
     
     vendor_quotation_count = db.query(VendorQuotation).filter(VendorQuotation.qr_id == qr.id).count()
@@ -305,7 +305,7 @@ def transition_to_entered(
     # Validation: No vendor should be in PENDING receipt status
     pending_vendors = [v for v in qr.invited_vendors if v.receipt_status == "Pending"]
     if pending_vendors:
-        vendor_names = ", ".join([v.vendor.name for v in pending_vendors])
+        vendor_names = ", ".join([f"{v.vendor.code} - {v.vendor.name}" for v in pending_vendors])
         raise HTTPException(status_code=400, detail=f"Cannot proceed. Quotations are pending from: {vendor_names}")
         
     qr.status = QuotationRequestStatus.ENTERED.value
@@ -425,7 +425,7 @@ def list_vendor_quotations(
         ) for it in vq.items]
         
         result.append(VendorQuotationOut(
-            id=vq.id, qr_id=vq.qr_id, vendor_id=vq.vendor_id, vendor_name=vq.vendor.name,
+            id=vq.id, qr_id=vq.qr_id, vendor_id=vq.vendor_id, vendor_name=f"{vq.vendor.code} - {vq.vendor.name}" if vq.vendor else "N/A",
             quotation_number=vq.quotation_number, quotation_date=vq.quotation_date,
             received_date=vq.received_date, attachment_path=vq.attachment_path,
             remarks=vq.remarks, status=vq.status,
@@ -468,7 +468,7 @@ def generate_comparison(
         for idx, q in enumerate(quotes):
             vendor_quotes.append(VendorQuoteDetail(
                 vendor_id=q.vendor_quotation.vendor_id,
-                vendor_name=q.vendor_quotation.vendor.name,
+                vendor_name=f"{q.vendor_quotation.vendor.code} - {q.vendor_quotation.vendor.name}" if q.vendor_quotation and q.vendor_quotation.vendor else "N/A",
                 quoted_rate=q.quoted_rate,
                 delivery_days=q.delivery_days,
                 rank=idx + 1,
@@ -502,7 +502,7 @@ def generate_comparison(
             uom_name=qr_item.material.uom.name, quantity=qr_item.quantity,
             vendor_quotes=vendor_quotes,
             selected_vendor_id=comp.selected_vendor_id if comp else None,
-            selected_vendor_name=comp.selected_vendor.name if comp and comp.selected_vendor else None,
+            selected_vendor_name=f"{comp.selected_vendor.code} - {comp.selected_vendor.name}" if comp and comp.selected_vendor else None,
             is_overridden=comp.is_overridden if comp else False,
             override_reason=comp.override_reason if comp else None
         ))
@@ -521,7 +521,7 @@ def generate_comparison(
     
     for vq in vqs:
         vid = vq.vendor_id
-        vname = vq.vendor.name
+        vname = f"{vq.vendor.code} - {vq.vendor.name}" if vq.vendor else "N/A"
         vendor_totals[vid] = {
             "vendor_id": vid, 
             "vendor_name": vname, 

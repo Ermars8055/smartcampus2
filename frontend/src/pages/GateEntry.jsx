@@ -304,7 +304,7 @@ export default function GateEntry() {
                   <Grid item xs={6}>
                     <FormControl fullWidth required><InputLabel>Vendor</InputLabel>
                       <Select value={form.vendor_id} label="Vendor" onChange={e => setForm({ ...form, vendor_id: e.target.value })}>
-                        {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.name}</MenuItem>)}
+                        {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.code} - {v.name}</MenuItem>)}
                       </Select>
                     </FormControl>
                   </Grid>

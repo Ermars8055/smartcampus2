@@ -371,7 +371,7 @@ export default function PurchaseOrders() {
             <tr>
               <td style="width: 60%;">
                 <b>To,</b><br/>
-                <b>M/S. ${po.vendor_name || 'VENDOR'}</b><br/>
+                <b>M/S. ${po.vendor_name ? (po.vendor_name.includes(' - ') ? po.vendor_name.split(' - ').slice(1).join(' - ') : po.vendor_name) : 'VENDOR'}</b><br/>
                 ${po.vendor_address ? `<span style="font-size: 10px; color: #333;">${po.vendor_address}</span><br/>` : ''}
                 ${po.vendor_gst_number ? `<span style="font-size: 10px; color: #333;">GSTIN: ${po.vendor_gst_number}</span><br/>` : ''}
               </td>
@@ -932,7 +932,7 @@ export default function PurchaseOrders() {
                 onChange={e => setForm({ ...form, vendor_id: e.target.value })}
                 startAdornment={<InputAdornment position="start"><Store sx={{ color: '#94A3B8' }} /></InputAdornment>}
               >
-                {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.name}</MenuItem>)}
+                {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.code} - {v.name}</MenuItem>)}
               </Select>
             </FormControl>
 

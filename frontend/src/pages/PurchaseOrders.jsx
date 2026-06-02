@@ -53,6 +53,10 @@ export default function PurchaseOrders() {
         
         if (sortConfig.key === 'vendor') aVal = a.vendor_name;
         if (sortConfig.key === 'vendor') bVal = b.vendor_name;
+        if (sortConfig.key === 'total_amount') {
+           aVal = calculatePOTotalNet(a);
+           bVal = calculatePOTotalNet(b);
+        }
         
         if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
         if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
@@ -61,6 +65,35 @@ export default function PurchaseOrders() {
     }
     return list;
   }, [pos, sortConfig]);
+
+  const calculatePOTotalNet = (po) => {
+    if (!po || !po.items) return 0;
+    let totalNetAmountSum = 0;
+    po.items.forEach(item => {
+      const qty = parseFloat(item.quantity) || 0;
+      const rate = parseFloat(item.rate) || 0;
+      const amount = qty * rate;
+      const discAmt = amount * ((item.discount_percent || 0) / 100);
+      const netAmtAfterDisc = amount - discAmt;
+      
+      let taxable = netAmtAfterDisc;
+      const totalGst = (item.cgst_percentage || 0) + (item.sgst_percentage || 0) + (item.igst_percentage || 0);
+      if (item.is_gst_inclusive && totalGst > 0) {
+          taxable = netAmtAfterDisc / (1 + (totalGst / 100));
+      }
+      
+      const cgstVal = taxable * ((item.cgst_percentage || 0) / 100);
+      const sgstVal = taxable * ((item.sgst_percentage || 0) / 100);
+      const igstVal = taxable * ((item.igst_percentage || 0) / 100);
+      
+      if (item.is_gst_inclusive) {
+          totalNetAmountSum += netAmtAfterDisc;
+      } else {
+          totalNetAmountSum += (netAmtAfterDisc + cgstVal + sgstVal + igstVal);
+      }
+    });
+    return Math.round(totalNetAmountSum);
+  };
 
   const formatCurrency = (amount) => {
     return '₹' + new Intl.NumberFormat('en-IN', {
@@ -379,11 +412,11 @@ export default function PurchaseOrders() {
           
           <div style="display:flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; border-bottom: 1px dashed #ccc; padding-bottom: 10px;">
             <div style="width: 60%">
-              Total Amount in Word : <b>Rupees ${numberToWords(Math.round(grandTotalWithTax))} Only -/</b>
+              Total Net Amount in Word : <b>Rupees ${numberToWords(Math.round(grandTotalWithTax))} Only -/</b>
             </div>
             <div style="width: 40%">
               <table style="width:100%; border-collapse: collapse;">
-                <tr><td style="text-align:right">Total Amount</td><td style="text-align:right; width: 100px;">: ${grandTotal.toFixed(2)}</td></tr>
+                <tr><td style="text-align:right">Total Net Amount</td><td style="text-align:right; width: 100px;">: ${grandTotal.toFixed(2)}</td></tr>
                 <tr><td style="text-align:right; color: #d97706;">Less: Discount</td><td style="text-align:right; color: #d97706;">: ${totalDiscount.toFixed(2)}</td></tr>
                 <tr><td style="text-align:right">Taxable Amount</td><td style="text-align:right">: ${(grandTotal - totalDiscount).toFixed(2)}</td></tr>
                 <tr><td style="text-align:right">Add: CGST</td><td style="text-align:right">: ${totalCgst.toFixed(2)}</td></tr>
@@ -520,7 +553,7 @@ export default function PurchaseOrders() {
                     <Chip label={po.status} size="small" color={statusColor[po.status] || 'default'} sx={{ fontWeight: 600, fontSize: '0.65rem', height: 20 }} />
                  </Box>
                  <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#334155' }}><strong>Vendor:</strong> {po.vendor_name}</Typography>
-                 <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#334155' }}><strong>Amount:</strong> <span style={{ color: '#059669', fontWeight: 600 }}>{formatCurrency(po.total_amount)}</span></Typography>
+                 <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#334155' }}><strong>Amount:</strong> <span style={{ color: '#059669', fontWeight: 600 }}>{formatCurrency(calculatePOTotalNet(po))}</span></Typography>
                  <Typography variant="caption" sx={{ display: 'block', mb: 1.5, color: '#64748B' }}>{formatDate(po.created_at)} • {po.items?.length || 0} items</Typography>
                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Chip label={po.po_type} size="small" variant="outlined" color={po.po_type === 'Formal' ? 'primary' : 'default'} sx={{ height: 22, fontSize: '0.7rem' }} />
@@ -663,7 +696,7 @@ export default function PurchaseOrders() {
                     <TableCell sx={{ fontSize: '0.7rem', color: '#64748B', whiteSpace: 'nowrap' }}>{po.qr_number || '-'}</TableCell>
                     <TableCell sx={{ fontSize: '0.7rem' }}>{po.vendor_name}</TableCell>
                     <TableCell align="right" sx={{ fontSize: '0.7rem' }}>{po.items?.length || 0}</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.7rem' }}>{formatCurrency(po.total_amount)}</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.7rem' }}>{formatCurrency(calculatePOTotalNet(po))}</TableCell>
                     <TableCell sx={{ fontSize: '0.7rem' }}>
                       <Chip label={po.po_type} size="small" variant="outlined" color={po.po_type === 'Formal' ? 'primary' : 'default'} sx={{ fontSize: '0.6rem', height: 18 }} />
                     </TableCell>
@@ -756,8 +789,8 @@ export default function PurchaseOrders() {
                 <Typography sx={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>{formatDate(detailDialog?.delivery_date) || '-'}</Typography>
               </Grid>
               <Grid item xs={4.5}>
-                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>TOTAL AMOUNT</Typography>
-                <Typography sx={{ fontWeight: 700, color: '#059669', fontSize: '1.2rem' }}>{formatCurrency(detailDialog?.total_amount)}</Typography>
+                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>TOTAL NET AMOUNT</Typography>
+                <Typography sx={{ fontWeight: 700, color: '#059669', fontSize: '1.2rem' }}>{formatCurrency(calculatePOTotalNet(detailDialog))}</Typography>
               </Grid>
             </Grid>
             <Divider sx={{ mb: 3 }} />
@@ -817,7 +850,7 @@ export default function PurchaseOrders() {
                   <Table size="small" sx={{ '& td': { borderBottom: 'none', py: 0.5, px: 1 } }}>
                     <TableBody>
                       <TableRow>
-                        <TableCell align="right" sx={{ color: '#64748B', fontWeight: 600 }}>Total Amount</TableCell>
+                        <TableCell align="right" sx={{ color: '#64748B', fontWeight: 600 }}>Total Net Amount</TableCell>
                         <TableCell align="right" sx={{ width: '120px' }}>: {detailData.grandTotal.toFixed(2)}</TableCell>
                       </TableRow>
                       <TableRow>

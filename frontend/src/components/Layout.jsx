@@ -48,10 +48,10 @@ const menuItems = [
   { text: 'Intelligence', icon: <Build />, path: '/intelligence', resource: 'intelligence' },
   {
     text: 'Reports', icon: <Assessment />, children: [
-      { text: 'Issue Summary', icon: <Assessment />, path: '/reports/issue-summary', resource: 'reports' },
-      { text: 'Rate Analysis', icon: <Assessment />, path: '/reports/rate-analysis', resource: 'reports' },
-      { text: 'Receipt Summary', icon: <Assessment />, path: '/reports/receipt-summary', resource: 'reports' },
-      { text: 'Department Inventory', icon: <Assessment />, path: '/reports/department-inventory', resource: 'reports' },
+      { text: 'Issue Summary', icon: <Assessment />, path: '/reports/issue-summary', resource: 'report_issue_summary' },
+      { text: 'Rate Analysis', icon: <Assessment />, path: '/reports/rate-analysis', resource: 'report_rate_analysis' },
+      { text: 'Receipt Summary', icon: <Assessment />, path: '/reports/receipt-summary', resource: 'report_receipt_summary' },
+      { text: 'Department Inventory', icon: <Assessment />, path: '/reports/department-inventory', resource: 'report_dept_inventory' },
     ]
   },
   {
@@ -95,6 +95,18 @@ export default function Layout() {
   useEffect(() => {
     api.get('/api/alerts/count').then(r => setAlertCount(r.data.count)).catch(() => { });
   }, [location.pathname]);
+
+  useEffect(() => {
+    if (visibleMenuItems && visibleMenuItems.length <= 3) {
+      const autoExpandedMenus = {};
+      visibleMenuItems.forEach(item => {
+        if (item.children) {
+          autoExpandedMenus[item.text] = true;
+        }
+      });
+      setOpenMenus(prev => ({ ...prev, ...autoExpandedMenus }));
+    }
+  }, [visibleMenuItems]);
 
   const handleToggle = (text) => {
     setOpenMenus(prev => ({ ...prev, [text]: !prev[text] }));

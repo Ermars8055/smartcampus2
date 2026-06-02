@@ -107,10 +107,10 @@ const MODULE_TREE = [
     module: 'Reports',
     icon: 'assessment',
     children: [
-      { label: 'Issue Summary', resource: 'reports', actions: ['read'] },
-      { label: 'Rate Analysis', resource: 'reports', actions: ['read'] },
-      { label: 'Receipt Summary', resource: 'reports', actions: ['read'] },
-      { label: 'Dept. Inventory', resource: 'reports', actions: ['read'] },
+      { label: 'Issue Summary', resource: 'report_issue_summary', actions: ['read'] },
+      { label: 'Rate Analysis', resource: 'report_rate_analysis', actions: ['read'] },
+      { label: 'Receipt Summary', resource: 'report_receipt_summary', actions: ['read'] },
+      { label: 'Dept. Inventory', resource: 'report_dept_inventory', actions: ['read'] },
     ],
   },
   {
@@ -276,6 +276,24 @@ export default function RoleConfiguration() {
           };
         }
       });
+      return next;
+    });
+  };
+
+  const toggleSubmodule = (resource, enabled) => {
+    setPermMap((prev) => {
+      const next = { ...prev };
+      if (enabled) {
+        next[resource] = { ...(next[resource] || {}), can_read: true };
+      } else {
+        next[resource] = {
+          can_read: false,
+          can_create: false,
+          can_update: false,
+          can_delete: false,
+          extended_actions: {}
+        };
+      }
       return next;
     });
   };
@@ -528,6 +546,7 @@ export default function RoleConfiguration() {
                   getModuleActionState={getModuleActionState}
                   toggleModuleAction={toggleModuleAction}
                   toggleEntireModule={toggleEntireModule}
+                  toggleSubmodule={toggleSubmodule}
                 />
               ))}
             </TableBody>
@@ -644,7 +663,7 @@ export default function RoleConfiguration() {
 
 
 // ── Module Group Component (collapsible row group) ──────────────────────
-function ModuleGroup({ mod, expanded, onToggleExpand, isChecked, togglePerm, isExtChecked, toggleExtPerm, getModuleActionState, toggleModuleAction, toggleEntireModule }) {
+function ModuleGroup({ mod, expanded, onToggleExpand, isChecked, togglePerm, isExtChecked, toggleExtPerm, getModuleActionState, toggleModuleAction, toggleEntireModule, toggleSubmodule }) {
   // Deduplicate children for header-level checkbox (Reports shares resource)
   const uniqueResources = [...new Map(mod.children.map(c => [c.resource, c])).values()];
   // Check if ANY permission is granted for ANY child in this module
@@ -731,9 +750,23 @@ function ModuleGroup({ mod, expanded, onToggleExpand, isChecked, togglePerm, isE
                         }}
                       >
                         <TableCell sx={{ pl: 6, py: 0.8, width: '40%', borderBottom: child.extendedActions ? 'none' : '1px solid #F1F5F9' }}>
-                          <Typography sx={{ fontSize: '0.82rem', color: '#334155' }}>
-                            {child.label}
-                          </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            {mod.children.length > 1 && (
+                              <Tooltip title={ALL_ACTIONS.some(a => isChecked(child.resource, a)) || (child.extendedActions && child.extendedActions.some(ext => isExtChecked(child.resource, ext.key))) ? "Disable Submodule" : "Enable Submodule"}>
+                                <Switch
+                                  size="small"
+                                  checked={ALL_ACTIONS.some(a => isChecked(child.resource, a)) || (child.extendedActions && child.extendedActions.some(ext => isExtChecked(child.resource, ext.key)))}
+                                  onChange={(e) => {
+                                    toggleSubmodule(child.resource, e.target.checked);
+                                  }}
+                                  color="primary"
+                                />
+                              </Tooltip>
+                            )}
+                            <Typography sx={{ fontSize: '0.82rem', color: '#334155' }}>
+                              {child.label}
+                            </Typography>
+                          </Box>
                         </TableCell>
                         {ALL_ACTIONS.map((action) => {
                           if (!actions.includes(action)) {

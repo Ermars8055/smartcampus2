@@ -25,7 +25,7 @@ def get_issue_summary(
     search: Optional[str] = None,
     include_zero: bool = False,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("reports", "read")),
+    current_user: User = Depends(require_permission("report_issue_summary", "read")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -243,7 +243,7 @@ def get_issue_summary_details(
     to_date: str = Query(..., description="To Date (YYYY-MM-DD)"),
     warehouse_id: Optional[int] = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("reports", "read")),
+    current_user: User = Depends(require_permission("report_issue_summary", "read")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -318,7 +318,7 @@ def get_rate_analysis(
     search: Optional[str] = None,
     variance_type: str = Query("amount", description="amount or percentage"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("reports", "read")),
+    current_user: User = Depends(require_permission("report_rate_analysis", "read")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -430,7 +430,7 @@ def get_rate_analysis_drilldown(
     warehouse_id: Optional[int] = None,
     include_tax: bool = False,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("reports", "read")),
+    current_user: User = Depends(require_permission("report_rate_analysis", "read")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -578,7 +578,7 @@ def get_receipt_summary(
     include_cancelled: bool = False,
     only_receipts: bool = True,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("reports", "read")),
+    current_user: User = Depends(require_permission("report_receipt_summary", "read")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -696,7 +696,7 @@ def get_receipt_summary_details(
     from_date: str = Query(...),
     to_date: str = Query(...),
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("reports", "read")),
+    current_user: User = Depends(require_permission("report_receipt_summary", "read")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -771,7 +771,7 @@ def get_department_inventory_report(
     department_id: Optional[int] = None,
     only_with_stock: bool = False,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("reports", "read")),
+    current_user: User = Depends(require_permission("report_dept_inventory", "read")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):

@@ -2,13 +2,15 @@ import { useState, useEffect, useRef } from 'react';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, Grid, FormControl, InputLabel, Select, MenuItem,
-  TextField, FormControlLabel, Switch, CircularProgress, IconButton
+  TextField, FormControlLabel, Switch, CircularProgress, IconButton,
+  Checkbox, ListItemText, OutlinedInput, ListSubheader
 } from '@mui/material';
 import {
   Search, Assessment, FileDownload, PictureAsPdf, Print, Refresh
 } from '@mui/icons-material';
 import dayjs from 'dayjs';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import api from '../services/api';
@@ -16,10 +18,11 @@ import api from '../services/api';
 export default function DepartmentWiseInventoryReport() {
   const [categories, setCategories] = useState([]);
   const [departments, setAllDepartments] = useState([]);
+  const [deptSearch, setDeptSearch] = useState('');
 
   const [filters, setFilters] = useState({
     categoryId: '',
-    departmentId: '',
+    departmentIds: [],
     search: '',
     onlyWithStock: true
   });
@@ -48,7 +51,7 @@ export default function DepartmentWiseInventoryReport() {
         only_with_stock: filters.onlyWithStock
       };
       if (filters.categoryId) params.category_id = filters.categoryId;
-      if (filters.departmentId) params.department_id = filters.departmentId;
+      if (filters.departmentIds.length > 0) params.department_id = filters.departmentIds.join(',');
       if (filters.search) params.search = filters.search;
 
       const res = await api.get('/api/reports/department-inventory', { params });
@@ -64,7 +67,7 @@ export default function DepartmentWiseInventoryReport() {
   const handleReset = () => {
     setFilters({
       categoryId: '',
-      departmentId: '',
+      departmentIds: [],
       search: '',
       onlyWithStock: true
     });
@@ -84,38 +87,114 @@ export default function DepartmentWiseInventoryReport() {
     return totals;
   };
 
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     if (!reportData?.data.length) return;
-
-    const excelData = reportData.data.map((row, index) => {
-      const obj = {
-        'S.No': index + 1,
-        'Material Name': `${row.material_code} - ${row.material_name}`,
-        'UOM': row.uom
-      };
+    
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('Dept Inventory');
+    
+    // Filters and Titles
+    ws.addRow(['DEPARTMENT WISE INVENTORY REPORT']);
+    ws.addRow([`INVENTORY AS ON: ${reportData.generated_at}`]);
+    ws.addRow([]);
+    ws.addRow(['Category:', categories.find(c => c.id === filters.categoryId)?.name || 'All']);
+    ws.addRow(['Departments:', filters.departmentIds.length > 0 ? departments.filter(d => filters.departmentIds.includes(d.id)).map(d => d.name).join(', ') : 'All']);
+    ws.addRow(['Search:', filters.search || 'None']);
+    ws.addRow(['Stock Only:', filters.onlyWithStock ? 'Yes' : 'No']);
+    ws.addRow([]);
+    
+    ws.getCell('A1').font = { size: 14, bold: true };
+    ws.getCell('A2').font = { size: 11, bold: true };
+    
+    // Header Row
+    const headerRow = ['S.No', 'Material Name', 'UOM', ...reportData.departments, 'Total Inventory'];
+    ws.addRow(headerRow);
+    
+    const headerRowIdx = 8;
+    const totalCols = headerRow.length;
+    
+    const border = {
+      top: { style: 'thin' }, left: { style: 'thin' },
+      bottom: { style: 'thin' }, right: { style: 'thin' }
+    };
+    
+    const headerFill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9E1F2' } };
+    
+    // Formatting Headers
+    for (let c = 1; c <= totalCols; c++) {
+      const cell = ws.getCell(headerRowIdx, c);
+      cell.fill = headerFill;
+      cell.border = border;
+      cell.font = { bold: true };
+      
+      if (c === 2) {
+        cell.alignment = { wrapText: true, vertical: 'bottom', horizontal: 'left' };
+      } else {
+        cell.alignment = { textRotation: 90, vertical: 'bottom', horizontal: 'center' };
+      }
+    }
+    
+    // Data Rows
+    reportData.data.forEach((row, i) => {
+      const rowData = [i + 1, `${row.material_code} - ${row.material_name}`, row.uom];
       reportData.departments.forEach(d => {
-        obj[d] = formatQty(row.department_inventory[d] || 0);
+        rowData.push(row.department_inventory[d] || 0);
       });
-      obj['Total Inventory'] = formatQty(row.total_inventory);
-      return obj;
+      rowData.push(row.total_inventory || 0);
+      ws.addRow(rowData);
     });
-
-    const worksheet = XLSX.utils.json_to_sheet([]);
-    const filterRows = [
-      ['DEPARTMENT WISE INVENTORY REPORT'],
-      [`INVENTORY AS ON: ${reportData.generated_at}`],
-      [],
-      ['Category:', categories.find(c => c.id === filters.categoryId)?.name || 'All'],
-      ['Search:', filters.search || 'None'],
-      ['Stock Only:', filters.onlyWithStock ? 'Yes' : 'No'],
-      []
-    ];
-    XLSX.utils.sheet_add_aoa(worksheet, filterRows, { origin: 'A1' });
-    XLSX.utils.sheet_add_json(worksheet, excelData, { origin: 'A8' });
-
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Dept Inventory');
-    XLSX.writeFile(workbook, `Dept_Inventory_${dayjs().format('YYYYMMDD_HHmm')}.xlsx`);
+    
+    // Totals Row
+    const totals = calculateTotals(reportData.data, reportData.departments);
+    const totalRow = ['', 'Grand Total', ''];
+    reportData.departments.forEach(d => totalRow.push(totals[d] || 0));
+    totalRow.push(totals.total_inventory || 0);
+    ws.addRow(totalRow);
+    
+    // Formatting Data Rows
+    const lastRowIdx = headerRowIdx + reportData.data.length + 1;
+    for (let r = headerRowIdx + 1; r <= lastRowIdx; r++) {
+      const row = ws.getRow(r);
+      for (let c = 1; c <= totalCols; c++) {
+        const cell = row.getCell(c);
+        cell.border = border;
+        
+        if (r === lastRowIdx) {
+          cell.font = { bold: true };
+        }
+        
+        if (c === 2) {
+          cell.alignment = { wrapText: true, vertical: 'middle', horizontal: 'left' };
+        } else {
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        }
+        
+        // Number format
+        if (c > 3 || c === 1) {
+           if (typeof cell.value === 'number') {
+             cell.numFmt = '#,##0';
+           }
+        }
+      }
+    }
+    
+    // Merge Grand Total label
+    ws.mergeCells(lastRowIdx, 1, lastRowIdx, 3);
+    const gtCell = ws.getCell(lastRowIdx, 1);
+    gtCell.value = 'Grand Total';
+    gtCell.alignment = { horizontal: 'right', vertical: 'middle' };
+    
+    // Column widths
+    ws.getColumn(1).width = 5; // S.No
+    ws.getColumn(2).width = 35; // Material
+    ws.getColumn(3).width = 6; // UOM
+    for (let i = 4; i <= totalCols; i++) {
+      ws.getColumn(i).width = 6;
+    }
+    
+    const buffer = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    saveAs(blob, `Dept_Inventory_${dayjs().format('YYYYMMDD_HHmm')}.xlsx`);
   };
 
   const handleExportPDF = () => {
@@ -208,9 +287,46 @@ export default function DepartmentWiseInventoryReport() {
           <Grid item xs={12} sm={6} md={3}>
             <FormControl size="small" fullWidth>
               <InputLabel>Department</InputLabel>
-              <Select value={filters.departmentId} label="Department" onChange={e => setFilters({ ...filters, departmentId: e.target.value })}>
-                <MenuItem value="">All Departments</MenuItem>
-                {departments.map(d => <MenuItem key={d.id} value={d.id}>{d.name}</MenuItem>)}
+              <Select
+                multiple
+                value={filters.departmentIds}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val.includes('ALL')) {
+                    setFilters({ ...filters, departmentIds: [] });
+                  } else {
+                    setFilters({ ...filters, departmentIds: typeof val === 'string' ? val.split(',') : val });
+                  }
+                }}
+                input={<OutlinedInput label="Department" />}
+                renderValue={(selected) => selected.length === 0 ? 'All Departments' : selected.map(id => departments.find(d => d.id === id)?.name).filter(Boolean).join(', ')}
+                MenuProps={{ autoFocus: false }}
+              >
+                <ListSubheader>
+                  <TextField
+                    size="small"
+                    autoFocus
+                    placeholder="Type to search..."
+                    fullWidth
+                    value={deptSearch}
+                    onChange={(e) => setDeptSearch(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key !== 'Escape') {
+                        e.stopPropagation();
+                      }
+                    }}
+                  />
+                </ListSubheader>
+                <MenuItem value="ALL">
+                  <Checkbox checked={filters.departmentIds.length === 0} />
+                  <ListItemText primary="All Departments" sx={{ fontWeight: 'bold' }} />
+                </MenuItem>
+                {departments.filter(d => d.name.toLowerCase().includes(deptSearch.toLowerCase())).map(d => (
+                  <MenuItem key={d.id} value={d.id}>
+                    <Checkbox checked={filters.departmentIds.indexOf(d.id) > -1} />
+                    <ListItemText primary={d.name} />
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
           </Grid>

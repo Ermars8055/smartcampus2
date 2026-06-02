@@ -4,16 +4,19 @@ import {
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
   DialogContent, DialogActions, Grid, MenuItem, Select, FormControl, InputLabel, Divider,
   Radio, RadioGroup, FormControlLabel, FormLabel, ToggleButton, ToggleButtonGroup,
-  TableSortLabel
+  TableSortLabel, FormHelperText
 } from '@mui/material';
 import { Add, Search, AttachFile, OpenInNew, LocalShipping } from '@mui/icons-material';
 import api, { getFileUrl } from '../services/api';
 import { formatDate, formatDateTime } from '../utils/dateUtils';
 import { useAuth } from '../context/AuthContext';
+import { useMessage } from '../context/MessageContext';
 
 export default function GateEntry() {
   const { hasAction } = useAuth();
+  const { showMessage } = useMessage();
   const [entries, setEntries] = useState([]);
+  const [errors, setErrors] = useState({});
   const [vendors, setVendors] = useState([]);
   const [projects, setProjects] = useState([]);
   const [pos, setPos] = useState([]);
@@ -91,25 +94,31 @@ export default function GateEntry() {
       fd.append('file', file);
       const res = await api.post('/api/upload', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
       setForm(prev => ({ ...prev, invoice_scan_url: res.data.url }));
-    } catch (err) { alert('Upload failed: ' + (err.response?.data?.detail || err.message)); }
+    } catch (err) { showMessage('Upload failed: ' + (err.response?.data?.detail || err.message), 'Error', 'error'); }
     setUploading(false);
   };
 
   const handleCreate = async () => {
     const isDirect = form.entry_type === 'Direct Invoice';
+    const newErrors = {};
 
-    if (!form.invoice_scan_url) return alert("Please upload the scanned invoice.");
+    if (!form.invoice_scan_url) newErrors.invoice_scan_url = "Please upload the scanned invoice.";
 
     if (!isDirect) {
-      if (form.entry_type === 'Vehicle' && (!form.vehicle_number || !form.vehicle_number.trim())) {
-        return alert("Vehicle Number is required.");
+      if (form.entry_type === 'Vehicle') {
+        if (!form.vehicle_number || !form.vehicle_number.trim()) newErrors.vehicle_number = "Vehicle Number is required.";
+        if (!form.po_id) newErrors.po_id = "PO Reference is required.";
+        if (!form.driver_name || !form.driver_name.trim()) newErrors.driver_name = "Driver Name is required.";
       }
       if (form.entry_type === 'Carry on hand' && (!form.delivery_person_name || !form.delivery_person_name.trim())) {
-        return alert("Delivery Person Name is required.");
+        newErrors.delivery_person_name = "Delivery Person Name is required.";
       }
     } else {
-      if (!form.vendor_id) return alert("Vendor is required for Direct Invoice.");
+      if (!form.vendor_id) newErrors.vendor_id = "Vendor is required.";
     }
+    
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
     
     try {
       const payload = {
@@ -131,21 +140,22 @@ export default function GateEntry() {
       } else {
         const primaryItem = form.items[0] || {};
         payload.po_id = form.po_id || null;
-        payload.project_id = form.project_id;
-        payload.material_id = primaryItem.material_id || form.material_id;
+        payload.project_id = form.project_id || null;
+        payload.material_id = primaryItem.material_id || form.material_id || null;
         payload.quantity = form.items.length > 0
           ? form.items.reduce((sum, it) => sum + (it.received_now || 0), 0)
-          : parseFloat(form.quantity);
+          : (parseFloat(form.quantity) || null);
       }
 
       await api.post('/api/gate-entries', payload);
       setDialog(false); load();
+      showMessage('Gate Entry recorded successfully!', 'Success', 'success');
       api.get('/api/procurement/po').then(r => setPos(r.data.filter(p =>
         p.status === 'Sent to Vendor' || p.status === 'Approved' || p.status === 'Partially Received'
       )));
     } catch (err) { 
       const detail = err.response?.data?.detail;
-      alert(typeof detail === 'object' ? JSON.stringify(detail) : (detail || 'Error')); 
+      showMessage(typeof detail === 'object' ? JSON.stringify(detail) : (detail || 'Error'), 'Error', 'error'); 
     }
   };
 
@@ -185,6 +195,7 @@ export default function GateEntry() {
         </Box>
         <Button variant="contained" startIcon={<Add />} disabled={!hasAction('gate_entry', 'can_record_entry')} onClick={() => {
           setForm({ entry_type: 'Vehicle', vehicle_number: '', vendor_id: '', po_id: '', project_id: projects[0]?.id || '', material_id: '', quantity: '', driver_name: '', delivery_person_name: '', remarks: '', invoice_scan_url: '', items: [] });
+          setErrors({});
           setDialog(true);
         }}>New Gate Entry</Button>
       </Box>
@@ -287,7 +298,7 @@ export default function GateEntry() {
               color="primary"
               value={form.entry_type}
               exclusive
-              onChange={(e, val) => val && setForm({ ...form, entry_type: val })}
+              onChange={(e, val) => { if (val) { setForm({ ...form, entry_type: val }); setErrors({}); } }}
               size="small"
             >
               <ToggleButton value="Vehicle" sx={{ px: 4 }}>Vehicle Entry</ToggleButton>
@@ -302,10 +313,11 @@ export default function GateEntry() {
                 /* ─── Direct Invoice Form ─── */
                 <Grid container spacing={2}>
                   <Grid item xs={6}>
-                    <FormControl fullWidth required><InputLabel>Vendor</InputLabel>
+                    <FormControl fullWidth required error={!!errors.vendor_id}><InputLabel>Vendor</InputLabel>
                       <Select value={form.vendor_id} label="Vendor" onChange={e => setForm({ ...form, vendor_id: e.target.value })}>
                         {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.code} - {v.name}</MenuItem>)}
                       </Select>
+                      {errors.vendor_id && <FormHelperText>{errors.vendor_id}</FormHelperText>}
                     </FormControl>
                   </Grid>
                   <Grid item xs={6}>
@@ -327,24 +339,24 @@ export default function GateEntry() {
                 <Grid container spacing={2}>
                 {form.entry_type === 'Vehicle' ? (
                   <>
-                    <Grid item xs={6}><TextField fullWidth label="Vehicle Number" value={form.vehicle_number} onChange={e => setForm({ ...form, vehicle_number: e.target.value })} required /></Grid>
+                    <Grid item xs={6}><TextField fullWidth label="Vehicle Number" value={form.vehicle_number} onChange={e => setForm({ ...form, vehicle_number: e.target.value })} required error={!!errors.vehicle_number} helperText={errors.vehicle_number} /></Grid>
                     <Grid item xs={6}>
-                      <FormControl fullWidth><InputLabel>PO Reference (Pending Orders)</InputLabel>
+                      <FormControl fullWidth required error={!!errors.po_id}><InputLabel>PO Reference (Pending Orders)</InputLabel>
                         <Select value={form.po_id} label="PO Reference (Pending Orders)" onChange={e => selectPO(e.target.value)}>
-                          <MenuItem value="">None (ad-hoc delivery)</MenuItem>
                           {pos.map(p => (
                             <MenuItem key={p.id} value={p.id}>
                               {p.po_number} — {p.vendor_name}
                             </MenuItem>
                           ))}
                         </Select>
+                        {errors.po_id && <FormHelperText>{errors.po_id}</FormHelperText>}
                       </FormControl>
                     </Grid>
-                    <Grid item xs={6}><TextField fullWidth label="Driver Name" value={form.driver_name} onChange={e => setForm({ ...form, driver_name: e.target.value })} /></Grid>
+                    <Grid item xs={6}><TextField fullWidth label="Driver Name" value={form.driver_name} onChange={e => setForm({ ...form, driver_name: e.target.value })} required error={!!errors.driver_name} helperText={errors.driver_name} /></Grid>
                   </>
                 ) : (
                   <>
-                    <Grid item xs={6}><TextField fullWidth label="Delivery Person Name" value={form.delivery_person_name} onChange={e => setForm({ ...form, delivery_person_name: e.target.value })} required /></Grid>
+                    <Grid item xs={6}><TextField fullWidth label="Delivery Person Name" value={form.delivery_person_name} onChange={e => setForm({ ...form, delivery_person_name: e.target.value })} required error={!!errors.delivery_person_name} helperText={errors.delivery_person_name} /></Grid>
                     <Grid item xs={6}>
                       <FormControl fullWidth><InputLabel>PO Reference (Pending Orders)</InputLabel>
                         <Select value={form.po_id} label="PO Reference (Pending Orders)" onChange={e => selectPO(e.target.value)}>
@@ -363,14 +375,14 @@ export default function GateEntry() {
                 </Grid>
               )}
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={4} sx={{ display: 'flex', flexDirection: 'column' }}>
               <Box sx={{ 
                 p: 2, 
-                border: '2px dashed #1E3A8A', 
+                border: errors.invoice_scan_url ? '2px dashed #d32f2f' : '2px dashed #1E3A8A', 
                 borderRadius: 2, 
-                bgcolor: '#F0F4F8', 
+                bgcolor: errors.invoice_scan_url ? '#fdeded' : '#F0F4F8', 
                 textAlign: 'center',
-                height: '100%',
+                flexGrow: 1,
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'center',
@@ -387,14 +399,15 @@ export default function GateEntry() {
                   </Box>
                 ) : (
                   <>
-                    <Typography sx={{ mb: 0.5, fontWeight: 600, color: '#1E3A8A', fontSize: '0.9rem' }}>
+                    <Typography sx={{ mb: 0.5, fontWeight: 600, color: errors.invoice_scan_url ? '#d32f2f' : '#1E3A8A', fontSize: '0.9rem' }}>
                       📎 Upload Invoice *
                     </Typography>
-                    <Typography variant="caption" sx={{ color: '#64748B', display: 'block', mb: 1.5 }}>
+                    <Typography variant="caption" sx={{ color: errors.invoice_scan_url ? '#d32f2f' : '#64748B', display: 'block', mb: 1.5 }}>
                       PDF, JPG, or PNG
                     </Typography>
                     <Button variant="contained" component="label" disabled={uploading} size="small"
-                      sx={{ bgcolor: '#1E3A8A', '&:hover': { bgcolor: '#1e2a5a' }, textTransform: 'none' }}>
+                      color={errors.invoice_scan_url ? 'error' : 'primary'}
+                      sx={{ bgcolor: errors.invoice_scan_url ? '#d32f2f' : '#1E3A8A', '&:hover': { bgcolor: errors.invoice_scan_url ? '#b71c1c' : '#1e2a5a' }, textTransform: 'none' }}>
                       {uploading ? 'Uploading...' : 'Choose File'}
                       <input type="file" hidden accept=".pdf,.jpg,.jpeg,.png,.webp"
                         onChange={e => handleUpload(e.target.files[0])} />
@@ -402,6 +415,11 @@ export default function GateEntry() {
                   </>
                 )}
               </Box>
+              {errors.invoice_scan_url && (
+                <FormHelperText error sx={{ mt: 1, textAlign: 'center' }}>
+                  {errors.invoice_scan_url}
+                </FormHelperText>
+              )}
             </Grid>
           </Grid>
 

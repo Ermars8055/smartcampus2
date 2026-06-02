@@ -3,14 +3,15 @@ import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, Grid, FormControl, InputLabel, Select, MenuItem,
   TextField, FormControlLabel, Switch, CircularProgress, Dialog, DialogTitle,
-  DialogContent, DialogActions, IconButton
+  DialogContent, DialogActions, IconButton, Checkbox, ListItemText, OutlinedInput, ListSubheader
 } from '@mui/material';
 import {
   Search, Assessment, FileDownload, PictureAsPdf, Print, Refresh, Close
 } from '@mui/icons-material';
 import { DatePicker } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import api from '../services/api';
@@ -18,13 +19,15 @@ import api from '../services/api';
 export default function IssueSummaryReport() {
   const [warehouses, setWarehouses] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [departmentsList, setDepartmentsList] = useState([]);
+  const [deptSearch, setDeptSearch] = useState('');
 
   const [filters, setFilters] = useState({
     fromDate: dayjs().startOf('month'),
     toDate: dayjs(),
     warehouseId: '',
     categoryId: '',
-    department: '',
+    departments: [],
     search: '',
     includeZero: false
   });
@@ -43,6 +46,7 @@ export default function IssueSummaryReport() {
   useEffect(() => {
     api.get('/api/warehouses').then(r => setWarehouses(r.data)).catch(() => { });
     api.get('/api/categories').then(r => setCategories(r.data)).catch(() => { });
+    api.get('/api/departments').then(r => setDepartmentsList(r.data)).catch(() => { });
   }, []);
 
   const formatQty = (val) => {
@@ -71,7 +75,7 @@ export default function IssueSummaryReport() {
       };
       if (filters.warehouseId) params.warehouse_id = filters.warehouseId;
       if (filters.categoryId) params.category_id = filters.categoryId;
-      if (filters.department) params.department = filters.department;
+      if (filters.departments.length > 0) params.department = filters.departments.join(',');
       if (filters.search) params.search = filters.search;
 
       const res = await api.get('/api/reports/issue-summary', { params });
@@ -90,7 +94,7 @@ export default function IssueSummaryReport() {
       toDate: dayjs(),
       warehouseId: '',
       categoryId: '',
-      department: '',
+      departments: [],
       search: '',
       includeZero: false
     });
@@ -114,48 +118,135 @@ export default function IssueSummaryReport() {
     return totals;
   };
 
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     if (!reportData?.data.length) return;
 
-    // Format data for excel
-    const excelData = reportData.data.map((row, index) => {
-      const obj = {
-        'S.No': index + 1,
-        'Material Name': `${row.material_code} - ${row.material_name}`,
-        'UOM': row.uom,
-        'Opening Stock': formatQty(row.opening_stock),
-        'Total Received': formatQty(row.total_received),
-        'Issue No': row.issue_numbers || '-'
-      };
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('Issue Summary');
+
+    // Filters and Titles
+    ws.addRow(['Report:', 'Issue Summary']);
+    ws.addRow(['Date Range:', `${filters.fromDate.format('DD-MMM-YYYY')} to ${filters.toDate.format('DD-MMM-YYYY')}`]);
+    ws.addRow(['Store:', warehouses.find(w => w.id === filters.warehouseId)?.name || 'All Stores']);
+    ws.addRow(['Category:', categories.find(c => c.id === filters.categoryId)?.name || 'All Categories']);
+    ws.addRow(['Department:', filters.departments.length > 0 ? filters.departments.join(', ') : 'All']);
+    ws.addRow(['Search:', filters.search || 'None']);
+    ws.addRow(['Include Zero:', filters.includeZero ? 'Yes' : 'No']);
+    ws.addRow([]);
+
+    ws.getCell('A1').font = { size: 12, bold: true };
+    ws.getCell('B1').font = { size: 12, bold: true };
+
+    // Header Row
+    const headerRow = [
+      'S.No', 'Material Name', 'UOM', 'Opening Stock', 'Total Received', 'Issue No'
+    ];
+    reportData.departments.forEach(d => {
+      headerRow.push(reportData.departments.length === 1 && d === 'UNKNOWN' ? 'Quantity Issued' : (d === 'UNKNOWN' ? 'Unspecified' : d));
+    });
+    headerRow.push('Total Issued', 'Other Outward', 'Closing Stock');
+    
+    ws.addRow(headerRow);
+    
+    const headerRowIdx = 9;
+    const totalCols = headerRow.length;
+    
+    const border = {
+      top: { style: 'thin' }, left: { style: 'thin' },
+      bottom: { style: 'thin' }, right: { style: 'thin' }
+    };
+
+    const headerFill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9E1F2' } };
+
+    // Formatting Headers
+    for (let c = 1; c <= totalCols; c++) {
+      const cell = ws.getCell(headerRowIdx, c);
+      cell.fill = headerFill;
+      cell.border = border;
+      cell.font = { bold: true };
+      
+      if (c === 1 || c === 2) {
+        cell.alignment = { wrapText: true, vertical: 'bottom', horizontal: c === 1 ? 'center' : 'left' };
+      } else {
+        cell.alignment = { textRotation: 90, vertical: 'bottom', horizontal: 'center' };
+      }
+    }
+
+    // Data Rows
+    reportData.data.forEach((row, i) => {
+      const rowData = [
+        i + 1,
+        `${row.material_code} - ${row.material_name}`,
+        row.uom,
+        row.opening_stock || 0,
+        row.total_received || 0,
+        row.issue_numbers || '-'
+      ];
       reportData.departments.forEach(d => {
-        const colName = (reportData.departments.length === 1 && d === 'UNKNOWN') ? 'Quantity Issued' : (d === 'UNKNOWN' ? 'Unspecified' : d);
-        obj[colName] = formatQty(row.departments[d] || 0);
+        rowData.push(row.departments[d] || 0);
       });
-      obj['Total Issued'] = formatQty(row.total_issue);
-      obj['Other Outward'] = formatQty(row.other_outward);
-      obj['Closing Stock'] = formatQty(row.closing_stock);
-      return obj;
+      rowData.push(row.total_issue || 0, row.other_outward || 0, row.closing_stock || 0);
+      ws.addRow(rowData);
     });
 
-    const worksheet = XLSX.utils.json_to_sheet([]);
+    // Totals Row
+    const totals = calculateTotals(reportData.data, reportData.departments);
+    const totalRow = ['', 'Grand Total', '', totals.opening_stock, totals.total_received, '-'];
+    reportData.departments.forEach(d => totalRow.push(totals[d] || 0));
+    totalRow.push(totals.total_issue, totals.other_outward, totals.closing_stock);
+    ws.addRow(totalRow);
 
-    // Add applied filters at the top
-    const filterRows = [
-      ['Report:', 'Issue Summary'],
-      ['Date Range:', `${filters.fromDate.format('DD-MMM-YYYY')} to ${filters.toDate.format('DD-MMM-YYYY')}`],
-      ['Store:', warehouses.find(w => w.id === filters.warehouseId)?.name || 'All Stores'],
-      ['Category:', categories.find(c => c.id === filters.categoryId)?.name || 'All Categories'],
-      ['Department:', filters.department || 'All'],
-      ['Search:', filters.search || 'None'],
-      ['Include Zero Transaction:', filters.includeZero ? 'Yes' : 'No'],
-      [] // Empty row before data
-    ];
-    XLSX.utils.sheet_add_aoa(worksheet, filterRows, { origin: 'A1' });
-    XLSX.utils.sheet_add_json(worksheet, excelData, { origin: 'A10' });
+    // Formatting Data Rows
+    const lastRowIdx = headerRowIdx + reportData.data.length + 1;
+    for (let r = headerRowIdx + 1; r <= lastRowIdx; r++) {
+      const row = ws.getRow(r);
+      for (let c = 1; c <= totalCols; c++) {
+        const cell = row.getCell(c);
+        cell.border = border;
+        
+        if (r === lastRowIdx) {
+          cell.font = { bold: true };
+        }
+        
+        if (c === 1) {
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        } else if (c === 2) {
+          cell.alignment = { wrapText: true, vertical: 'middle', horizontal: 'left' };
+        } else if (c === 6) { // Issue No
+          cell.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
+        } else {
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        }
+        
+        // Number format
+        if (c > 2 && c !== 6) {
+           if (typeof cell.value === 'number') {
+             cell.numFmt = '#,##0';
+           }
+        }
+      }
+    }
 
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Issue Summary');
-    XLSX.writeFile(workbook, `Issue_Summary_${dayjs().format('YYYYMMDD')}.xlsx`);
+    // Merge Grand Total label
+    ws.mergeCells(lastRowIdx, 1, lastRowIdx, 3);
+    const gtCell = ws.getCell(lastRowIdx, 1);
+    gtCell.value = 'Grand Total';
+    gtCell.alignment = { horizontal: 'right', vertical: 'middle' };
+
+    // Column widths
+    ws.getColumn(1).width = 5; // S.No
+    ws.getColumn(2).width = 35; // Material
+    ws.getColumn(3).width = 6; // UOM
+    ws.getColumn(4).width = 6; // Opening Stock
+    ws.getColumn(5).width = 6; // Total Received
+    ws.getColumn(6).width = 15; // Issue No
+    for (let i = 7; i <= totalCols; i++) {
+      ws.getColumn(i).width = 6; // Depts + Total Issued, Other Outward, Closing Stock
+    }
+
+    const buffer = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    saveAs(blob, `Issue_Summary_${dayjs().format('YYYYMMDD')}.xlsx`);
   };
 
   const handleExportPDF = () => {
@@ -310,7 +401,50 @@ export default function IssueSummaryReport() {
             </FormControl>
           </Grid>
           <Grid item xs={12} sm={6} md={4} lg={2}>
-            <TextField size="small" fullWidth label="Department" value={filters.department} onChange={e => setFilters({ ...filters, department: e.target.value })} />
+            <FormControl size="small" fullWidth>
+              <InputLabel>Department</InputLabel>
+              <Select
+                multiple
+                value={filters.departments}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val.includes('ALL')) {
+                    setFilters({ ...filters, departments: [] });
+                  } else {
+                    setFilters({ ...filters, departments: typeof val === 'string' ? val.split(',') : val });
+                  }
+                }}
+                input={<OutlinedInput label="Department" />}
+                renderValue={(selected) => selected.length === 0 ? 'All Departments' : selected.join(', ')}
+                MenuProps={{ autoFocus: false }}
+              >
+                <ListSubheader>
+                  <TextField
+                    size="small"
+                    autoFocus
+                    placeholder="Type to search..."
+                    fullWidth
+                    value={deptSearch}
+                    onChange={(e) => setDeptSearch(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key !== 'Escape') {
+                        e.stopPropagation();
+                      }
+                    }}
+                  />
+                </ListSubheader>
+                <MenuItem value="ALL">
+                  <Checkbox checked={filters.departments.length === 0} />
+                  <ListItemText primary="All Departments" sx={{ fontWeight: 'bold' }} />
+                </MenuItem>
+                {departmentsList.filter(d => d.name.toLowerCase().includes(deptSearch.toLowerCase())).map((d) => (
+                  <MenuItem key={d.id} value={d.name}>
+                    <Checkbox checked={filters.departments.indexOf(d.name) > -1} />
+                    <ListItemText primary={d.name} />
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </Grid>
           <Grid item xs={12} sm={6} md={4} lg={2}>
             <TextField size="small" fullWidth label="Material Search" placeholder="Code / Name" value={filters.search} onChange={e => setFilters({ ...filters, search: e.target.value })} />

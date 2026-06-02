@@ -19,6 +19,8 @@
     "@mui/x-date-pickers": "6.20.2",
     "axios": "1.6.8",
     "dayjs": "1.11.10",
+    "exceljs": "^4.4.0",
+    "file-saver": "^2.0.5",
     "jspdf": "2.5.1",
     "jspdf-autotable": "3.8.2",
     "qrcode.react": "^4.2.0",

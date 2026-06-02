@@ -163,7 +163,8 @@ def get_issue_summary(
             issue_query = issue_query.filter(MaterialIssue.issued_by_id == current_user.id)
 
     if department:
-        issue_query = issue_query.filter(MaterialIssue.issued_to_department.ilike(f"%{department}%"))
+        dept_list = [d.strip() for d in department.split(',')]
+        issue_query = issue_query.filter(MaterialIssue.issued_to_department.in_(dept_list))
 
     issue_query = issue_query.filter(MaterialIssueItem.material_id.in_(material_ids))
 
@@ -770,7 +771,7 @@ def get_receipt_summary_details(
 def get_department_inventory_report(
     category_id: Optional[int] = None,
     search: Optional[str] = None,
-    department_id: Optional[int] = None,
+    department_id: Optional[str] = None,
     only_with_stock: bool = False,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("report_dept_inventory", "read")),
@@ -807,7 +808,8 @@ def get_department_inventory_report(
         Department.is_deleted == False
     )
     if department_id:
-        dept_query = dept_query.filter(Department.id == department_id)
+        dept_ids = [int(id.strip()) for id in department_id.split(',')]
+        dept_query = dept_query.filter(Department.id.in_(dept_ids))
     
     all_depts = dept_query.order_by(Department.name).all()
     dept_names = [d.name for d in all_depts]

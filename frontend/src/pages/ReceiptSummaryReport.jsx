@@ -11,7 +11,8 @@ import {
 } from '@mui/icons-material';
 import { DatePicker } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import api from '../services/api';
@@ -120,22 +121,33 @@ export default function ReceiptSummaryReport() {
     }
   };
 
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     if (!reportData) return;
     
-    // Header setup
-    const vendorHeads = reportData.vendors.map(v => [`${v.code} - ${v.name}`, '', '', '', '']);
-    const subHeads = reportData.vendors.map(() => ['Bill No & Date', 'Qty', 'Rate', 'Amount', 'Total']);
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('Receipt Summary');
     
-    const aoa = [
-      ['MAIN STORE ITEMS - RECEIPT SUMMARY REPORT'],
-      [`Period: ${filters.fromDate.format('DD-MMM-YYYY')} to ${filters.toDate.format('DD-MMM-YYYY')}`],
-      [],
-      ['S.No', 'Material Name', ...vendorHeads.flat()],
-      ['', '', ...subHeads.flat()]
-    ];
-
-    // Data rows
+    // Row 1 and 2: Titles
+    ws.addRow(['MAIN STORE ITEMS - RECEIPT SUMMARY REPORT']);
+    ws.addRow([`Period: ${filters.fromDate.format('DD-MMM-YYYY')} to ${filters.toDate.format('DD-MMM-YYYY')}`]);
+    ws.addRow([]);
+    
+    // Row 4: Main Headers
+    const headerRow1 = ['S.No', 'Material Name'];
+    reportData.vendors.forEach(v => {
+      headerRow1.push(`${v.code} - ${v.name}`);
+      headerRow1.push('', '', '', ''); // Merge spaces
+    });
+    ws.addRow(headerRow1);
+    
+    // Row 5: Sub Headers
+    const headerRow2 = ['', ''];
+    reportData.vendors.forEach(() => {
+      headerRow2.push('Bill No & Date', 'Qty', 'Rate', 'Amount', 'Total');
+    });
+    ws.addRow(headerRow2);
+    
+    // Data Rows
     reportData.data.forEach((row, i) => {
       const matRow = [i + 1, `${row.material_code} - ${row.material_name}`];
       reportData.vendors.forEach(v => {
@@ -147,29 +159,116 @@ export default function ReceiptSummaryReport() {
           matRow.push('-', '-', '-', '-', '-');
         }
       });
-      aoa.push(matRow);
+      ws.addRow(matRow);
     });
 
-    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    // Grand Total Row
+    const totalRow = ['', 'GRAND TOTAL'];
+    reportData.vendors.forEach(v => {
+      const vTotalQty = reportData.data.reduce((acc, row) => acc + (row.vendor_details[v.id]?.qty || 0), 0);
+      const vTotalAmt = reportData.data.reduce((acc, row) => acc + (row.vendor_details[v.id]?.amount || 0), 0);
+      const vTotalSum = reportData.data.reduce((acc, row) => acc + (row.vendor_details[v.id]?.total || 0), 0);
+      totalRow.push('', vTotalQty, '', vTotalAmt, vTotalSum);
+    });
+    ws.addRow(totalRow);
     
-    // Merges for headers
-    const merges = [
-      { s: { r: 0, c: 0 }, e: { r: 0, c: 1 + reportData.vendors.length * 5 } }, // Title
-      { s: { r: 1, c: 0 }, e: { r: 1, c: 1 + reportData.vendors.length * 5 } }, // Period
-      { s: { r: 3, c: 0 }, e: { r: 4, c: 0 } }, // S.No
-      { s: { r: 3, c: 1 }, e: { r: 4, c: 1 } }, // Material Name
-    ];
-
+    const totalCols = 2 + reportData.vendors.length * 5;
+    
+    // Merges
+    ws.mergeCells(1, 1, 1, totalCols);
+    ws.mergeCells(2, 1, 2, totalCols);
+    ws.mergeCells(4, 1, 5, 1); // S.No
+    ws.mergeCells(4, 2, 5, 2); // Material Name
+    
     reportData.vendors.forEach((v, i) => {
-      const colStart = 2 + i * 5;
-      merges.push({ s: { r: 3, c: colStart }, e: { r: 3, c: colStart + 4 } });
+      const colStart = 3 + i * 5; // C
+      ws.mergeCells(4, colStart, 4, colStart + 4);
     });
-
-    ws['!merges'] = merges;
     
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Receipt Summary');
-    XLSX.writeFile(wb, `Receipt_Summary_${dayjs().format('YYYYMMDD')}.xlsx`);
+    // Formatting Header row 4 and 5
+    const headerFill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9E1F2' } }; // Light blue color
+    const border = {
+      top: { style: 'thin' },
+      left: { style: 'thin' },
+      bottom: { style: 'thin' },
+      right: { style: 'thin' }
+    };
+    
+    for (let col = 1; col <= totalCols; col++) {
+      const cell4 = ws.getCell(4, col);
+      const cell5 = ws.getCell(5, col);
+      cell4.fill = headerFill;
+      cell5.fill = headerFill;
+      cell4.font = { bold: true };
+      cell5.font = { bold: true };
+      cell4.border = border;
+      cell5.border = border;
+      cell4.alignment = { horizontal: 'center', vertical: 'middle' };
+      
+      if (col > 2) {
+        // Vertical text for subheaders
+        cell5.alignment = { textRotation: 90, horizontal: 'center', vertical: 'middle' };
+      }
+    }
+    
+    ws.getCell(4, 1).alignment = { horizontal: 'center', vertical: 'middle' };
+    ws.getCell(4, 2).alignment = { horizontal: 'center', vertical: 'middle' };
+    
+    // Formatting data rows
+    const lastRow = 5 + reportData.data.length + 1;
+    for (let r = 6; r <= lastRow; r++) {
+      const row = ws.getRow(r);
+      for (let c = 1; c <= totalCols; c++) {
+        const cell = row.getCell(c);
+        cell.border = border;
+        
+        if (r === lastRow) { // Total row
+          cell.font = { bold: true };
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF1F5F9' } };
+        }
+        
+        if (c === 1) {
+           cell.alignment = { horizontal: 'center', vertical: 'middle' };
+        } else if (c === 2) {
+           cell.alignment = { vertical: 'middle', wrapText: true };
+        } else {
+           const colType = (c - 3) % 5;
+           if (colType === 0) { // Bill No & Date
+             cell.alignment = { wrapText: true, vertical: 'middle', horizontal: 'center' };
+           } else { // Qty, Rate, Amount, Total
+             cell.alignment = { horizontal: 'right', vertical: 'middle' };
+             if (typeof cell.value === 'number') {
+               if (colType === 1) { // Qty
+                  cell.numFmt = '#,##0';
+               } else { // Rate, Amount, Total
+                  cell.numFmt = '#,##0.00';
+               }
+             }
+           }
+        }
+      }
+    }
+    
+    // Column widths
+    ws.getColumn(1).width = 5;
+    ws.getColumn(2).width = 35;
+    
+    for (let i = 0; i < reportData.vendors.length; i++) {
+      const start = 3 + i * 5;
+      ws.getColumn(start).width = 12; // Bill No & Date
+      ws.getColumn(start + 1).width = 6; // Qty
+      ws.getColumn(start + 2).width = 8; // Rate
+      ws.getColumn(start + 3).width = 10; // Amount
+      ws.getColumn(start + 4).width = 10; // Total
+    }
+    
+    // Title styling
+    ws.getCell('A1').font = { size: 14, bold: true };
+    ws.getCell('A2').font = { size: 11, bold: true };
+    
+    const buffer = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    saveAs(blob, `Receipt_Summary_${dayjs().format('YYYYMMDD')}.xlsx`);
   };
 
   const handleExportPDF = () => {

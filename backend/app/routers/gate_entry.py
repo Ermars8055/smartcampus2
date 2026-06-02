@@ -97,14 +97,20 @@ def create_gate_entry(
 
     # Validation based on entry type
     if not is_direct:
-        if not data.project_id:
-            raise HTTPException(status_code=400, detail="Project is required")
-        if not data.material_id:
-            raise HTTPException(status_code=400, detail="Material is required")
-        if not data.quantity or data.quantity <= 0:
-            raise HTTPException(status_code=400, detail="Quantity is required")
-        if data.entry_type == "Vehicle" and (not data.vehicle_number or not data.vehicle_number.strip()):
-            raise HTTPException(status_code=400, detail="Vehicle number is required for vehicle entry")
+        if data.po_id:
+            if not data.project_id:
+                raise HTTPException(status_code=400, detail="Project is required for PO-based entries")
+            if not data.material_id:
+                raise HTTPException(status_code=400, detail="Material is required for PO-based entries")
+            if not data.quantity or data.quantity <= 0:
+                raise HTTPException(status_code=400, detail="Quantity is required for PO-based entries")
+        if data.entry_type == "Vehicle":
+            if not data.vehicle_number or not data.vehicle_number.strip():
+                raise HTTPException(status_code=400, detail="Vehicle number is required for vehicle entry")
+            if not data.po_id:
+                raise HTTPException(status_code=400, detail="PO Reference is required for vehicle entry")
+            if not data.driver_name or not data.driver_name.strip():
+                raise HTTPException(status_code=400, detail="Driver Name is required for vehicle entry")
         if data.entry_type == "Carry on hand" and (not data.delivery_person_name or not data.delivery_person_name.strip()):
             raise HTTPException(status_code=400, detail="Delivery person name is required for hand carry entry")
     else:

@@ -260,6 +260,7 @@ export default function PurchaseOrders() {
     let totalCgst = 0;
     let totalSgst = 0;
     let totalIgst = 0;
+    let totalTaxable = 0;
     let totalNetAmountSum = 0;
     
     po.items.forEach((item, idx) => {
@@ -279,10 +280,16 @@ export default function PurchaseOrders() {
       const sgstVal = taxable * ((item.sgst_percentage || 0) / 100);
       const igstVal = taxable * ((item.igst_percentage || 0) / 100);
       
+      let itemBaseAmount = amount;
+      if (item.is_gst_inclusive && totalGst > 0) {
+          itemBaseAmount = amount / (1 + (totalGst / 100));
+      }
+
       totalCgst += cgstVal;
       totalSgst += sgstVal;
       totalIgst += igstVal;
       totalDiscount += discAmt;
+      totalTaxable += taxable;
       grandTotal += amount;
       
       if (item.is_gst_inclusive) {
@@ -300,10 +307,10 @@ export default function PurchaseOrders() {
           <td>${item.uom_name || 'NOS'}</td>
           <td style="text-align:right">${rate.toFixed(2)}</td>
           <td style="text-align:right">${(item.discount_percent || 0).toFixed(2)}</td>
-          <td style="text-align:right">${(item.cgst_percentage || 0).toFixed(2)}</td>
-          <td style="text-align:right">${(item.sgst_percentage || 0).toFixed(2)}</td>
-          <td style="text-align:right">${(item.igst_percentage || 0).toFixed(2)}</td>
-          <td style="text-align:right">${amount.toFixed(2)}</td>
+          <td style="text-align:right">${(item.cgst_percentage || 0).toFixed(2)}<br/><span style="font-size: 8px;">${item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</span></td>
+          <td style="text-align:right">${(item.sgst_percentage || 0).toFixed(2)}<br/><span style="font-size: 8px;">${item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</span></td>
+          <td style="text-align:right">${(item.igst_percentage || 0).toFixed(2)}<br/><span style="font-size: 8px;">${item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</span></td>
+          <td style="text-align:right">${itemBaseAmount.toFixed(2)}</td>
         </tr>
       `;
     });
@@ -416,9 +423,9 @@ export default function PurchaseOrders() {
             </div>
             <div style="width: 40%">
               <table style="width:100%; border-collapse: collapse;">
-                <tr><td style="text-align:right">Total Net Amount</td><td style="text-align:right; width: 100px;">: ${grandTotal.toFixed(2)}</td></tr>
+                <tr><td style="text-align:right">Total Amount</td><td style="text-align:right; width: 100px;">: ${(totalTaxable + totalDiscount).toFixed(2)}</td></tr>
                 <tr><td style="text-align:right; color: #d97706;">Less: Discount</td><td style="text-align:right; color: #d97706;">: ${totalDiscount.toFixed(2)}</td></tr>
-                <tr><td style="text-align:right">Taxable Amount</td><td style="text-align:right">: ${(grandTotal - totalDiscount).toFixed(2)}</td></tr>
+                <tr><td style="text-align:right">Taxable Amount</td><td style="text-align:right">: ${totalTaxable.toFixed(2)}</td></tr>
                 <tr><td style="text-align:right">Add: CGST</td><td style="text-align:right">: ${totalCgst.toFixed(2)}</td></tr>
                 <tr><td style="text-align:right">Add: SGST</td><td style="text-align:right">: ${totalSgst.toFixed(2)}</td></tr>
                 ${totalIgst > 0 ? `<tr><td style="text-align:right">Add: IGST</td><td style="text-align:right">: ${totalIgst.toFixed(2)}</td></tr>` : ''}
@@ -467,6 +474,7 @@ export default function PurchaseOrders() {
     let totalCgst = 0;
     let totalSgst = 0;
     let totalIgst = 0;
+    let totalTaxable = 0;
     let totalNetAmountSum = 0;
     
     (detailDialog.items || []).forEach(item => {
@@ -490,6 +498,7 @@ export default function PurchaseOrders() {
       totalCgst += cgstVal;
       totalSgst += sgstVal;
       totalIgst += igstVal;
+      totalTaxable += taxable;
       grandTotal += amount;
       
       if (item.is_gst_inclusive) {
@@ -510,6 +519,7 @@ export default function PurchaseOrders() {
       totalCgst,
       totalSgst,
       totalIgst,
+      totalTaxable,
       grandTotalWithTax,
       roundOff,
       totalNetAmount,
@@ -830,10 +840,25 @@ export default function PurchaseOrders() {
                         <TableCell sx={{ fontSize: '0.75rem' }}>{item.uom_name || 'NOS'}</TableCell>
                         <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{rate.toFixed(2)}</TableCell>
                         <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{(item.discount_percent || 0).toFixed(2)}</TableCell>
-                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{(item.cgst_percentage || 0).toFixed(2)}</TableCell>
-                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{(item.sgst_percentage || 0).toFixed(2)}</TableCell>
-                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{(item.igst_percentage || 0).toFixed(2)}</TableCell>
-                        <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem' }}>{amount.toFixed(2)}</TableCell>
+                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>
+                          {(item.cgst_percentage || 0).toFixed(2)}<br/><Typography variant="caption" sx={{ fontSize: '0.6rem', color: '#64748B' }}>{item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</Typography>
+                        </TableCell>
+                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>
+                          {(item.sgst_percentage || 0).toFixed(2)}<br/><Typography variant="caption" sx={{ fontSize: '0.6rem', color: '#64748B' }}>{item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</Typography>
+                        </TableCell>
+                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>
+                          {(item.igst_percentage || 0).toFixed(2)}<br/><Typography variant="caption" sx={{ fontSize: '0.6rem', color: '#64748B' }}>{item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</Typography>
+                        </TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem' }}>
+                          {(() => {
+                            const totalGst = (item.cgst_percentage || 0) + (item.sgst_percentage || 0) + (item.igst_percentage || 0);
+                            let itemBaseAmount = amount;
+                            if (item.is_gst_inclusive && totalGst > 0) {
+                                itemBaseAmount = amount / (1 + (totalGst / 100));
+                            }
+                            return itemBaseAmount.toFixed(2);
+                          })()}
+                        </TableCell>
                         <TableCell align="right">
                           <Chip label={item.received_quantity} size="small" color={item.received_quantity >= item.quantity ? 'success' : 'warning'} sx={{ fontSize: '0.65rem', height: 20 }} />
                         </TableCell>
@@ -850,8 +875,8 @@ export default function PurchaseOrders() {
                   <Table size="small" sx={{ '& td': { borderBottom: 'none', py: 0.5, px: 1 } }}>
                     <TableBody>
                       <TableRow>
-                        <TableCell align="right" sx={{ color: '#64748B', fontWeight: 600 }}>Total Net Amount</TableCell>
-                        <TableCell align="right" sx={{ width: '120px' }}>: {detailData.grandTotal.toFixed(2)}</TableCell>
+                        <TableCell align="right" sx={{ color: '#64748B', fontWeight: 600 }}>Total Amount</TableCell>
+                        <TableCell align="right" sx={{ width: '120px' }}>: {(detailData.totalTaxable + detailData.totalDiscount).toFixed(2)}</TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell align="right" sx={{ color: '#d97706', fontWeight: 600 }}>Less: Discount</TableCell>
@@ -859,7 +884,7 @@ export default function PurchaseOrders() {
                       </TableRow>
                       <TableRow>
                         <TableCell align="right" sx={{ color: '#64748B', fontWeight: 600 }}>Taxable Amount</TableCell>
-                        <TableCell align="right">: {(detailData.grandTotal - detailData.totalDiscount).toFixed(2)}</TableCell>
+                        <TableCell align="right">: {detailData.totalTaxable.toFixed(2)}</TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell align="right" sx={{ color: '#64748B', fontWeight: 600 }}>Add: CGST</TableCell>

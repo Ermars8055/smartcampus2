@@ -74,7 +74,7 @@ export default function Indents() {
 
   useEffect(() => {
     load();
-    api.get('/api/materials').then(r => setMaterials(r.data.items || []));
+    api.get('/api/materials', { params: { limit: 10000 } }).then(r => setMaterials(r.data.items || []));
     api.get('/api/buildings').then(r => setBuildings(r.data));
     api.get('/api/vendors').then(r => setVendors(r.data));
     api.get('/api/terms').then(r => setTermsTemplates(r.data));

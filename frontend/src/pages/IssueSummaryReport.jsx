@@ -3,7 +3,7 @@ import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, Grid, FormControl, InputLabel, Select, MenuItem,
   TextField, FormControlLabel, Switch, CircularProgress, Dialog, DialogTitle,
-  DialogContent, DialogActions, IconButton, Checkbox, ListItemText, OutlinedInput, ListSubheader
+  DialogContent, DialogActions, IconButton, Checkbox, ListItemText, OutlinedInput, ListSubheader, TablePagination
 } from '@mui/material';
 import {
   Search, Assessment, FileDownload, PictureAsPdf, Print, Refresh, Close
@@ -29,11 +29,13 @@ export default function IssueSummaryReport() {
     categoryId: '',
     departments: [],
     search: '',
-    includeZero: false
+    includeZero: true
   });
 
   const [loading, setLoading] = useState(false);
   const [reportData, setReportData] = useState(null);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(100);
 
   // Drill-down states
   const [drillDownOpen, setDrillDownOpen] = useState(false);
@@ -80,6 +82,7 @@ export default function IssueSummaryReport() {
 
       const res = await api.get('/api/reports/issue-summary', { params });
       setReportData(res.data);
+      setPage(0);
     } catch (err) {
       console.error(err);
       alert("Failed to fetch report data");
@@ -96,9 +99,10 @@ export default function IssueSummaryReport() {
       categoryId: '',
       departments: [],
       search: '',
-      includeZero: false
+      includeZero: true
     });
     setReportData(null);
+    setPage(0);
   };
 
   const calculateTotals = (data, depts) => {
@@ -165,8 +169,8 @@ export default function IssueSummaryReport() {
       cell.border = border;
       cell.font = { bold: true };
       
-      if (c === 1 || c === 2) {
-        cell.alignment = { wrapText: true, vertical: 'bottom', horizontal: c === 1 ? 'center' : 'left' };
+      if (c <= 3) {
+        cell.alignment = { wrapText: true, vertical: 'bottom', horizontal: c === 2 ? 'left' : 'center' };
       } else {
         cell.alignment = { textRotation: 90, vertical: 'bottom', horizontal: 'center' };
       }
@@ -210,7 +214,7 @@ export default function IssueSummaryReport() {
         
         if (c === 1) {
           cell.alignment = { vertical: 'middle', horizontal: 'center' };
-        } else if (c === 2) {
+        } else if (c === 2 || c === 3) {
           cell.alignment = { wrapText: true, vertical: 'middle', horizontal: 'left' };
         } else if (c === 6) { // Issue No
           cell.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
@@ -236,7 +240,7 @@ export default function IssueSummaryReport() {
     // Column widths
     ws.getColumn(1).width = 5; // S.No
     ws.getColumn(2).width = 35; // Material
-    ws.getColumn(3).width = 6; // UOM
+    ws.getColumn(3).width = 15; // UOM
     ws.getColumn(4).width = 6; // Opening Stock
     ws.getColumn(5).width = 6; // Total Received
     ws.getColumn(6).width = 15; // Issue No
@@ -533,9 +537,9 @@ export default function IssueSummaryReport() {
               {loading && (
                 <TableRow><TableCell colSpan={20} align="center" sx={{ py: 5 }}><CircularProgress /></TableCell></TableRow>
               )}
-              {!loading && reportData?.data.map((row, idx) => (
+              {!loading && reportData?.data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, idx) => (
                 <TableRow key={row.material_id} hover sx={{ '&:hover td': { background: '#F1F5F9' } }}>
-                  <TableCell align="center" sx={stickyStyle(0, false)}>{idx + 1}</TableCell>
+                  <TableCell align="center" sx={stickyStyle(0, false)}>{page * rowsPerPage + idx + 1}</TableCell>
                   <TableCell sx={{ ...stickyStyle(50, false), minWidth: 250, whiteSpace: 'nowrap' }}>
                     {row.material_code} - {row.material_name}
                   </TableCell>
@@ -589,6 +593,18 @@ export default function IssueSummaryReport() {
             </TableBody>
           </Table>
         </TableContainer>
+        <TablePagination
+          component="div"
+          count={reportData?.data.length || 0}
+          page={page}
+          onPageChange={(e, newPage) => setPage(newPage)}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={(e) => {
+            setRowsPerPage(parseInt(e.target.value, 10));
+            setPage(0);
+          }}
+          rowsPerPageOptions={[50, 100, 250, 500]}
+        />
       </Card>
 
       {/* Drill Down Dialog */}

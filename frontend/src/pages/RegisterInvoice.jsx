@@ -55,7 +55,7 @@ export default function RegisterInvoice() {
 
   useEffect(() => {
     api.get('/api/vendors').then(r => setVendors(r.data));
-    api.get('/api/materials').then(r => setMaterials(r.data.items || r.data || []));
+    api.get('/api/materials', { params: { limit: 10000 } }).then(r => setMaterials(r.data.items || r.data || []));
     api.get('/api/procurement/po').then(r => setPos(r.data));
     api.get('/api/uom').then(r => setUoms(r.data));
     api.get('/api/company-addresses').then(r => setCompanyAddresses(r.data));

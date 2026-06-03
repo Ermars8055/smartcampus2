@@ -106,7 +106,7 @@ const Quotations = () => {
           api.get('/api/quotations/requests'),
           api.get('/api/projects'),
           api.get('/api/vendors'),
-          api.get('/api/materials'),
+          api.get('/api/materials', { params: { limit: 10000 } }),
           api.get('/api/procurement/pr?status=Approved') // Only approved PRs for link field
         ]);
         setQrs(Array.isArray(qrsRes.data) ? qrsRes.data : []);

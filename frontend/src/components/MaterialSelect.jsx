@@ -1,5 +1,10 @@
-import { Autocomplete, TextField, InputAdornment } from '@mui/material';
+import { Autocomplete, TextField, InputAdornment, createFilterOptions } from '@mui/material';
 import { Inventory } from '@mui/icons-material';
+
+const filterOptions = createFilterOptions({
+  matchFrom: 'any',
+  stringify: (option) => `${option.code || ''} ${option.name || ''} ${option.alias || ''}`
+});
 
 export default function MaterialSelect({ value, onChange, materials, label = "Material", size = "small", disabled = false, error = false, helperText = "" }) {
   // value is the material_id
@@ -12,6 +17,7 @@ export default function MaterialSelect({ value, onChange, materials, label = "Ma
       options={materialsList}
       value={selectedMaterial}
       disabled={disabled}
+      filterOptions={filterOptions}
       onChange={(event, newValue) => {
         onChange(newValue ? newValue.id : '');
       }}

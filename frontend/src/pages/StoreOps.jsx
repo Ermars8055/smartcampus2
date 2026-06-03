@@ -64,7 +64,7 @@ export default function StoreOperations() {
       setWarehouses(wRes.data);
       const pRes = await api.get('/api/projects');
       setProjects(pRes.data);
-      const mRes = await api.get('/api/materials');
+      const mRes = await api.get('/api/materials', { params: { limit: 10000 } });
       setMaterials(mRes.data.items || []);
       const dRes = await api.get('/api/departments');
       setDepartments(dRes.data);

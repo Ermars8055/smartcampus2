@@ -45,7 +45,7 @@ export default function GRNPage() {
     api.get('/api/warehouses').then(r => setWarehouses(r.data));
     api.get('/api/vendors').then(r => setVendors(r.data));
     api.get('/api/projects').then(r => setProjects(r.data));
-    api.get('/api/materials').then(r => setMaterials(r.data.items || []));
+    api.get('/api/materials', { params: { limit: 10000 } }).then(r => setMaterials(r.data.items || []));
   }, []);
 
   // Filter gate entries that are pending GRN (not yet completed)

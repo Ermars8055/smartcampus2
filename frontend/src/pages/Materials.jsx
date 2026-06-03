@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, InputAdornment, Chip, Dialog,
-  Tooltip, Select, FormControl, InputLabel, TableSortLabel, useTheme, useMediaQuery, MenuItem, DialogTitle, DialogContent, DialogActions, IconButton
+  Tooltip, Select, FormControl, InputLabel, TableSortLabel, useTheme, useMediaQuery, MenuItem, DialogTitle, DialogContent, DialogActions, IconButton, TablePagination
 } from '@mui/material';
 import { QRCodeSVG } from 'qrcode.react';
 import {
@@ -37,17 +37,26 @@ export default function Materials() {
     maximum_level: 0, standard_cost: 0, gst_rate: 0, storage_type: 'General',
     material_type: '', hsn_code: '', description: ''
   });
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(100);
+  const [totalCount, setTotalCount] = useState(0);
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const load = () => {
     setLoading(true);
-    const params = {};
+    const params = {
+      skip: page * rowsPerPage,
+      limit: rowsPerPage
+    };
     if (search) params.search = search;
     if (catFilter) params.category_id = catFilter;
     if (storeFilter) params.warehouse_id = storeFilter;
-    api.get('/api/materials', { params }).then(r => setMaterials(r.data.items || [])).finally(() => setLoading(false));
+    api.get('/api/materials', { params }).then(r => {
+      setMaterials(r.data.items || []);
+      setTotalCount(r.data.total || 0);
+    }).finally(() => setLoading(false));
   };
 
   useEffect(() => {
@@ -66,7 +75,8 @@ export default function Materials() {
     });
   }, []);
 
-  useEffect(() => { load(); }, [search, catFilter, storeFilter]);
+  useEffect(() => { setPage(0); }, [search, catFilter, storeFilter]);
+  useEffect(() => { load(); }, [search, catFilter, storeFilter, page, rowsPerPage]);
 
   const handleSort = (key) => {
     setSortConfig(prev => ({
@@ -335,7 +345,7 @@ export default function Materials() {
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
         <Box>
           <Typography variant="h5" sx={{ fontWeight: 700, color: '#1E293B' }}>Material Master</Typography>
-          <Typography variant="body2" sx={{ color: '#64748B' }}>{materials.length} materials</Typography>
+          <Typography variant="body2" sx={{ color: '#64748B' }}>{totalCount} materials</Typography>
         </Box>
         <Button variant="contained" startIcon={<Add />} onClick={openNew}>Add Material</Button>
       </Box>
@@ -598,6 +608,18 @@ export default function Materials() {
             </Table>
           </TableContainer>
         )}
+        <TablePagination
+          component="div"
+          count={totalCount}
+          page={page}
+          onPageChange={(e, newPage) => setPage(newPage)}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={(e) => {
+            setRowsPerPage(parseInt(e.target.value, 10));
+            setPage(0);
+          }}
+          rowsPerPageOptions={[10, 25, 50, 100, 250]}
+        />
       </Card>
 
       <Dialog

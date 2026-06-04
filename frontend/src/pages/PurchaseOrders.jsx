@@ -5,9 +5,9 @@ import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
   InputLabel, IconButton, Tooltip, Divider, InputAdornment, Paper, TableSortLabel, useTheme, useMediaQuery,
-  DialogContent, DialogActions, Grid, MenuItem, Select, FormControl
+  DialogContent, DialogActions, Grid, MenuItem, Select, FormControl, Link
 } from '@mui/material';
-import { Add, Delete, CheckCircle, Archive, Send, Cancel, Pause, Search, ShoppingCart, Store, Assignment, CalendarMonth, ArrowDropDown } from '@mui/icons-material';
+import { Add, Delete, CheckCircle, Archive, Send, Cancel, Pause, Search, ShoppingCart, Store, Assignment, CalendarMonth, ArrowDropDown, Inventory } from '@mui/icons-material';
 import api from '../services/api';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { formatDate } from '../utils/dateUtils';
@@ -28,6 +28,37 @@ export default function PurchaseOrders() {
   const [termsTemplates, setTermsTemplates] = useState([]);
   const [dialog, setDialog] = useState(false);
   const [detailDialog, setDetailDialog] = useState(null);
+  const [linkedIndent, setLinkedIndent] = useState(null);
+  const [linkedPR, setLinkedPR] = useState(null);
+  const [linkedQR, setLinkedQR] = useState(null);
+
+  const fetchAndShowIndent = async (id) => {
+    try {
+      const res = await api.get(`/api/indents/${id}`);
+      setLinkedIndent(res.data);
+    } catch (err) {
+      showMessage('Failed to load Indent details', 'Error', 'error');
+    }
+  };
+
+  const fetchAndShowPR = async (id) => {
+    try {
+      const res = await api.get(`/api/procurement/pr/${id}`);
+      setLinkedPR(res.data);
+    } catch (err) {
+      showMessage('Failed to load PR details', 'Error', 'error');
+    }
+  };
+
+  const fetchAndShowQR = async (id) => {
+    try {
+      const res = await api.get(`/api/quotations/requests/${id}`);
+      setLinkedQR(res.data);
+    } catch (err) {
+      showMessage('Failed to load Quotation details', 'Error', 'error');
+    }
+  };
+
   const [search, setSearch] = useState('');
   const [form, setForm] = useState({
     vendor_id: '', project_id: '', delivery_date: dayjs().add(14, 'day'), terms: '', po_type: 'Informal', items: [{ material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }]
@@ -701,9 +732,27 @@ export default function PurchaseOrders() {
                 {sortedPOs.map(po => (
                   <TableRow key={po.id} sx={{ cursor: 'pointer', '&:hover': { backgroundColor: '#f1f5f9' } }} onClick={() => setDetailDialog(po)}>
                     <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.7rem', whiteSpace: 'nowrap' }}>{po.po_number}</TableCell>
-                    <TableCell sx={{ fontSize: '0.7rem', color: '#64748B', whiteSpace: 'nowrap' }}>{po.indent_number || '-'}</TableCell>
-                    <TableCell sx={{ fontSize: '0.7rem', color: '#64748B', whiteSpace: 'nowrap' }}>{po.pr_number || '-'}</TableCell>
-                    <TableCell sx={{ fontSize: '0.7rem', color: '#64748B', whiteSpace: 'nowrap' }}>{po.qr_number || '-'}</TableCell>
+                    <TableCell sx={{ fontSize: '0.7rem', color: '#64748B', whiteSpace: 'nowrap' }}>
+                      {po.indent_number ? (
+                        <Link component="button" variant="body2" sx={{ fontSize: '0.7rem', fontWeight: 600, color: '#2563EB', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }} onClick={(e) => { e.stopPropagation(); fetchAndShowIndent(po.indent_id); }}>
+                          {po.indent_number}
+                        </Link>
+                      ) : '-'}
+                    </TableCell>
+                    <TableCell sx={{ fontSize: '0.7rem', color: '#64748B', whiteSpace: 'nowrap' }}>
+                      {po.pr_number ? (
+                        <Link component="button" variant="body2" sx={{ fontSize: '0.7rem', fontWeight: 600, color: '#2563EB', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }} onClick={(e) => { e.stopPropagation(); fetchAndShowPR(po.pr_id); }}>
+                          {po.pr_number}
+                        </Link>
+                      ) : '-'}
+                    </TableCell>
+                    <TableCell sx={{ fontSize: '0.7rem', color: '#64748B', whiteSpace: 'nowrap' }}>
+                      {po.qr_number ? (
+                        <Link component="button" variant="body2" sx={{ fontSize: '0.7rem', fontWeight: 600, color: '#2563EB', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }} onClick={(e) => { e.stopPropagation(); fetchAndShowQR(po.qr_id); }}>
+                          {po.qr_number}
+                        </Link>
+                      ) : '-'}
+                    </TableCell>
                     <TableCell sx={{ fontSize: '0.7rem' }}>{po.vendor_name}</TableCell>
                     <TableCell align="right" sx={{ fontSize: '0.7rem' }}>{po.items?.length || 0}</TableCell>
                     <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.7rem' }}>{formatCurrency(calculatePOTotalNet(po))}</TableCell>
@@ -771,15 +820,33 @@ export default function PurchaseOrders() {
               </Grid>
               <Grid item xs={2.25}>
                 <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>INDENT</Typography>
-                <Typography sx={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>{detailDialog?.indent_number || '-'}</Typography>
+                {detailDialog?.indent_number ? (
+                  <Link component="button" variant="body2" sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.9rem', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }} onClick={(e) => { e.stopPropagation(); fetchAndShowIndent(detailDialog.indent_id); }}>
+                    {detailDialog.indent_number}
+                  </Link>
+                ) : (
+                  <Typography sx={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>-</Typography>
+                )}
               </Grid>
               <Grid item xs={2.25}>
                 <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>PR</Typography>
-                <Typography sx={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>{detailDialog?.pr_number || '-'}</Typography>
+                {detailDialog?.pr_number ? (
+                  <Link component="button" variant="body2" sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.9rem', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }} onClick={(e) => { e.stopPropagation(); fetchAndShowPR(detailDialog.pr_id); }}>
+                    {detailDialog.pr_number}
+                  </Link>
+                ) : (
+                  <Typography sx={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>-</Typography>
+                )}
               </Grid>
               <Grid item xs={2.25}>
                 <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>QUOTATION</Typography>
-                <Typography sx={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>{detailDialog?.qr_number || '-'}</Typography>
+                {detailDialog?.qr_number ? (
+                  <Link component="button" variant="body2" sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.9rem', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }} onClick={(e) => { e.stopPropagation(); fetchAndShowQR(detailDialog.qr_id); }}>
+                    {detailDialog.qr_number}
+                  </Link>
+                ) : (
+                  <Typography sx={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>-</Typography>
+                )}
               </Grid>
               <Grid item xs={2.25}>
                 <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>STATUS</Typography>
@@ -1143,6 +1210,281 @@ export default function PurchaseOrders() {
             onClick={handleConfirm} sx={{ fontWeight: 600, textTransform: 'none' }}>
             {confirm.confirmText}
           </Button>
+        </DialogActions>
+      </Dialog>
+      {/* Linked Indent Detail Dialog */}
+      <Dialog open={!!linkedIndent} onClose={() => setLinkedIndent(null)} maxWidth="md" fullWidth>
+        <DialogTitle sx={{ fontWeight: 600 }}>{linkedIndent?.indent_number} — Indent Details</DialogTitle>
+        <DialogContent>
+          <Grid container spacing={2} sx={{ mb: 2, mt: 0.5 }}>
+            <Grid item xs={3}>
+              <Typography variant="caption" color="textSecondary">Requester</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{linkedIndent?.requester_name}</Typography>
+            </Grid>
+            <Grid item xs={3}>
+              <Typography variant="caption" color="textSecondary">Department</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{linkedIndent?.department || '—'}</Typography>
+            </Grid>
+            <Grid item xs={3}>
+              <Typography variant="caption" color="textSecondary">Building</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{linkedIndent?.building_name || '—'}</Typography>
+            </Grid>
+            <Grid item xs={3}>
+              <Typography variant="caption" color="textSecondary">Floor</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{linkedIndent?.floor || '—'}</Typography>
+            </Grid>
+            <Grid item xs={3}>
+              <Typography variant="caption" color="textSecondary">Room</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{linkedIndent?.room_name || '—'}</Typography>
+            </Grid>
+            <Grid item xs={3}>
+              <Typography variant="caption" color="textSecondary">Indent Date</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{formatDate(linkedIndent?.created_at)}</Typography>
+            </Grid>
+            <Grid item xs={3}>
+              <Typography variant="caption" color="textSecondary">Status</Typography>
+              <Box sx={{ mt: 0.5 }}>
+                <Chip 
+                  label={linkedIndent?.status} 
+                  size="small" 
+                  color={{
+                    'Awaiting Approval': 'warning', 'Approved': 'success', 'Rejected': 'error',
+                    'Partially Issued': 'info', 'Fully Issued': 'primary', 'PO Created': 'secondary', 'Closed': 'default'
+                  }[linkedIndent?.status] || 'default'} 
+                />
+              </Box>
+            </Grid>
+          </Grid>
+          {linkedIndent?.remarks && (
+            <Typography variant="body2" sx={{ mb: 2, p: 1.5, bgcolor: '#f8fafc', borderRadius: 1, border: '1px solid #e2e8f0' }}>
+              <strong>Remarks:</strong> {linkedIndent.remarks}
+            </Typography>
+          )}
+          <Divider sx={{ mb: 2 }} />
+          <Table size="small">
+            <TableHead>
+              <TableRow sx={{ bgcolor: '#f0f4ff' }}>
+                <TableCell sx={{ fontWeight: 600 }}>Material</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600 }}>Qty Requested</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600 }}>Current Stock</TableCell>
+                <TableCell align="center" sx={{ fontWeight: 600 }}>Availability</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600 }}>Issued</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600 }}>Pending</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {linkedIndent?.items?.map(item => (
+                <TableRow key={item.id}>
+                  <TableCell>
+                    <Typography sx={{ fontWeight: 500, fontSize: '0.9rem' }}>{item.material_name}</Typography>
+                    <Typography variant="caption" sx={{ color: '#64748B' }}>{item.material_code}</Typography>
+                  </TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 500 }}>{item.requested_quantity} {item.uom_name}</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700 }}>{item.current_stock || 0} {item.uom_name}</TableCell>
+                  <TableCell align="center">
+                    <Chip
+                      label={item.availability_status === 'Available' ? '✓ AVAILABLE' : (item.availability_status === 'Low Stock' ? 'X LOW' : 'X NO STOCK')}
+                      size="small"
+                      color={item.availability_status === 'Available' ? 'success' : (item.availability_status === 'Low Stock' ? 'warning' : 'error')}
+                      variant={item.availability_status === 'Available' ? 'light' : 'outlined'}
+                      sx={{ fontWeight: 700, fontSize: '0.65rem' }}
+                    />
+                  </TableCell>
+                  <TableCell align="right">{item.issued_quantity}</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 600, color: item.pending_quantity > 0 ? '#ef4444' : '#10b981' }}>
+                    {item.pending_quantity}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}><Button onClick={() => setLinkedIndent(null)}>Close</Button></DialogActions>
+      </Dialog>
+
+      {/* Linked PR Detail Dialog */}
+      <Dialog open={!!linkedPR} onClose={() => setLinkedPR(null)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 3 } }}>
+        <DialogTitle sx={{ fontWeight: 700, bgcolor: '#f8fafc', borderBottom: '1px solid #e2e8f0', px: 3, py: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <ShoppingCart sx={{ color: 'primary.main' }} />
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>{linkedPR?.pr_number} — PR Details</Typography>
+          </Box>
+        </DialogTitle>
+        <DialogContent sx={{ p: 0 }}>
+          <Box sx={{ p: 3 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2, color: '#1e293b', display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Inventory fontSize="small" sx={{ color: '#64748B' }} />
+              Material Details
+            </Typography>
+            <TableContainer component={Paper} variant="outlined" sx={{ mb: 4, borderRadius: 2 }}>
+              <Table size="small">
+                <TableHead sx={{ bgcolor: '#f8fafc' }}>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 700, color: '#475569' }}>Material</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#475569' }}>Code</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700, color: '#475569' }}>Quantity</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#475569' }}>UOM</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {linkedPR?.items?.map((it, idx) => (
+                    <TableRow key={idx} hover>
+                      <TableCell sx={{ fontWeight: 500 }}>{it.material_name}</TableCell>
+                      <TableCell sx={{ color: '#64748B', fontSize: '0.75rem' }}>{it.material_code}</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 700, color: 'primary.main' }}>{it.quantity}</TableCell>
+                      <TableCell sx={{ color: '#64748B' }}>{it.uom_name}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+
+            <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2, color: '#1e293b' }}>Request Information</Typography>
+            <Grid container spacing={3}>
+              <Grid item xs={6}>
+                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>BUILDING</Typography>
+                <Typography sx={{ fontWeight: 600, color: '#1e293b' }}>{linkedPR?.building_name || '-'}</Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>DEPARTMENT</Typography>
+                <Typography sx={{ fontWeight: 600, color: '#1e293b' }}>{linkedPR?.department_name || '-'}</Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>REQUESTER</Typography>
+                <Typography sx={{ fontWeight: 600, color: '#1e293b' }}>{linkedPR?.requester_name}</Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>STATUS</Typography>
+                <Box>
+                  <Chip 
+                    label={linkedPR?.status} 
+                    size="small" 
+                    color={{
+                      'Draft': 'default', 'Submitted': 'info', 'Approved': 'success',
+                      'Rejected': 'error', 'Converted to PO': 'secondary',
+                      'Short Closed': 'warning'
+                    }[linkedPR?.status] || 'default'} 
+                    sx={{ fontWeight: 600, fontSize: '0.7rem' }} 
+                  />
+                </Box>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>PR DATE</Typography>
+                <Typography sx={{ fontWeight: 600, color: '#1e293b' }}>{formatDate(linkedPR?.created_at)}</Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>REQUIRED DATE</Typography>
+                <Typography sx={{ fontWeight: 600, color: '#2563EB' }}>{formatDate(linkedPR?.required_date)}</Typography>
+              </Grid>
+              {linkedPR?.remarks && (
+                <Grid item xs={12}>
+                  <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>REMARKS</Typography>
+                  <Box sx={{ p: 1.5, bgcolor: '#f1f5f9', borderRadius: 2, border: '1px solid #e2e8f0' }}>
+                    <Typography variant="body2" sx={{ whiteSpace: 'pre-line', color: '#334155' }}>{linkedPR?.remarks}</Typography>
+                  </Box>
+                </Grid>
+              )}
+            </Grid>
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid #e2e8f0' }}>
+          <Button onClick={() => setLinkedPR(null)} variant="outlined" sx={{ borderRadius: 2, fontWeight: 600, textTransform: 'none' }}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Linked QR Detail Dialog */}
+      <Dialog open={!!linkedQR} onClose={() => setLinkedQR(null)} maxWidth="md" fullWidth>
+        <DialogTitle>Quotation Request Details - {linkedQR?.qr_number}</DialogTitle>
+        <DialogContent>
+          <Box>
+            <Typography><strong>Status:</strong> {linkedQR?.status === 'Sent to Vendors' ? 'Request to Vendors' : linkedQR?.status}</Typography>
+
+            <Typography variant="h6" sx={{ fontWeight: 600, mt: 3, mb: 1.5 }}>Materials Summary</Typography>
+            <TableContainer component={Paper} variant="outlined" sx={{ mb: 2 }}>
+              <Table size="small">
+                <TableHead>
+                  <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Material Code</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Material Name</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }} align="right">Quantity</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>UOM</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Source</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {linkedQR?.items?.map(it => (
+                    <TableRow key={it.id}>
+                      <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{it.material_code}</TableCell>
+                      <TableCell sx={{ fontWeight: 500 }}>{it.material_name}</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 600 }}>{it.quantity}</TableCell>
+                      <TableCell sx={{ color: 'text.secondary' }}>{it.uom_name}</TableCell>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                        {it.sources && it.sources.length > 0 ? (() => {
+                          const hasPR = it.sources.some(s => s.source === 'PR' && s.source_pr_number);
+                          const displaySources = it.sources.filter(s => {
+                            if (s.source === 'Manual' && hasPR) return false;
+                            return (s.source === 'PR' && s.source_pr_number) || s.source === 'Manual';
+                          });
+                          
+                          return Array.from(new Set(displaySources.map(s => 
+                            s.source === 'PR' ? `PR:${s.source_pr_number}` : 'Manual'
+                          ))).map((srcKey, sIdx) => {
+                            const isPR = srcKey.startsWith('PR:');
+                            const label = isPR ? srcKey.replace('PR:', '') : 'Manual';
+                            return (
+                              <Chip 
+                                key={sIdx}
+                                size="small" 
+                                label={label} 
+                                color={isPR ? "primary" : "default"} 
+                                variant="outlined" 
+                                sx={{ fontSize: '0.65rem', height: 18 }} 
+                              />
+                            );
+                          });
+                        })() : (
+                          <Chip 
+                            size="small" 
+                            label={it.source === 'PR' && it.source_pr_number ? it.source_pr_number : "Manual"} 
+                            color={it.source === 'PR' ? "primary" : "default"}
+                            variant="outlined" 
+                            sx={{ fontSize: '0.65rem', height: 18 }} 
+                          />
+                        )}
+                        </Box>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+
+            <Typography variant="h6" sx={{ fontWeight: 600, mt: 3, mb: 1.5 }}>Vendors Requested</Typography>
+            <TableContainer component={Paper} variant="outlined">
+              <Table size="small">
+                <TableHead>
+                  <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Vendor Name</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {linkedQR?.invited_vendors && linkedQR.invited_vendors.length > 0 ? (
+                    linkedQR.invited_vendors.map(v => (
+                      <TableRow key={v.vendor_id}>
+                        <TableCell sx={{ fontWeight: 500 }}>{v.vendor_name}</TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow><TableCell align="center">No vendors invited yet.</TableCell></TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setLinkedQR(null)}>Close</Button>
         </DialogActions>
       </Dialog>
     </Box>

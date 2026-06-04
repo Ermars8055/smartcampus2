@@ -1381,6 +1381,16 @@ class TermOut(TermBase):
 
 # == Gate Pass ==
 
+class GatePassCreate(BaseModel):
+    gate_pass_type: str = "Returnable"
+    project_id: int
+    material_id: int
+    quantity: float = Field(..., gt=0)
+    vendor_id: Optional[int] = None
+    driver_name: Optional[str] = None
+    vehicle_number: Optional[str] = None
+    remarks: Optional[str] = None
+
 class GatePassUpdate(BaseModel):
     status: str
     remarks: Optional[str] = None

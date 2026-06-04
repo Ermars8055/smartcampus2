@@ -88,6 +88,16 @@ const MODULE_TREE = [
         { key: 'can_issue', label: 'Issue Materials', color: '#3B82F6' },
         { key: 'can_print', label: 'Print', color: '#8B5CF6' },
       ]},
+      { label: 'Returns', resource: 'returns', extendedActions: [
+        { key: 'can_return', label: 'Return Materials', color: '#3B82F6' },
+      ]},
+      { label: 'Stock Transfer', resource: 'transfers', extendedActions: [
+        { key: 'can_transfer', label: 'Transfer Stock', color: '#3B82F6' },
+      ]},
+      { label: 'Gate Passes', resource: 'gate_passes', extendedActions: [
+        { key: 'can_create', label: 'Create', color: '#3B82F6' },
+        { key: 'can_print', label: 'Print', color: '#8B5CF6' },
+      ]},
       { label: 'Issue Acknowledgement', resource: 'acknowledgements', extendedActions: [
         { key: 'can_acknowledge', label: 'Acknowledge Receipt', color: '#F59E0B' },
       ]},

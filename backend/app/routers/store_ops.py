@@ -16,7 +16,7 @@ from app.schemas import (
     IssueCreate, IssueOut, IssueItemOut,
     ReturnCreate, ReturnOut, ReturnItemOut,
     TransferCreate, TransferOut, TransferItemOut,
-    GatePassOut, GatePassUpdate
+    GatePassCreate, GatePassOut, GatePassUpdate
 )
 from app.routers.grn import update_stock
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
@@ -641,6 +641,35 @@ def list_gate_passes(
             created_at=gp.created_at
         ))
     return result
+
+@router.post("/gate-passes", response_model=GatePassOut)
+def create_gate_pass(
+    data: GatePassCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("gate_passes", "create")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    gp_num = get_next_number(db, tenant_id, site_id, "GATEPASS", "GP")
+    gp = GatePass(
+        tenant_id=tenant_id,
+        site_id=site_id,
+        gate_pass_number=gp_num,
+        project_id=data.project_id,
+        material_id=data.material_id,
+        quantity=data.quantity,
+        vendor_id=data.vendor_id,
+        status="Pending Repair",
+        gate_pass_type=data.gate_pass_type,
+        driver_name=data.driver_name,
+        vehicle_number=data.vehicle_number,
+        remarks=data.remarks,
+        created_by_id=current_user.id
+    )
+    db.add(gp)
+    db.commit()
+    db.refresh(gp)
+    return gp
 
 @router.put("/gate-passes/{id}")
 def update_gate_pass(

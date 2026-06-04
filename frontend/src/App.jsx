@@ -28,7 +28,10 @@ import GateEntry from './pages/GateEntry';
 import Invoices from './pages/Invoices';
 import RegisterInvoice from './pages/RegisterInvoice';
 import GRNPage from './pages/GRN';
-import StoreOps from './pages/StoreOps';
+import MaterialIssue from './pages/MaterialIssue';
+import Returns from './pages/Returns';
+import StockTransfers from './pages/StockTransfers';
+import GatePasses from './pages/GatePasses';
 import PendingAcknowledgments from './pages/PendingAcknowledgments';
 import Inventory from './pages/Inventory';
 import Intelligence from './pages/Intelligence';
@@ -106,10 +109,11 @@ function AppRoutes() {
         <Route path="invoices" element={<Invoices />} />
         <Route path="invoices/register" element={<RegisterInvoice />} />
         <Route path="grn" element={<GRNPage />} />
-        <Route path="issues" element={<StoreOps />} />
+        <Route path="issues" element={<MaterialIssue />} />
         <Route path="pending-acknowledgments" element={<PendingAcknowledgments />} />
-        <Route path="returns" element={<StoreOps />} />
-        <Route path="transfers" element={<StoreOps />} />
+        <Route path="returns" element={<Returns />} />
+        <Route path="transfers" element={<StockTransfers />} />
+        <Route path="gate-passes" element={<GatePasses />} />
         <Route path="inventory" element={<Inventory />} />
         <Route path="intelligence" element={<Intelligence />} />
         <Route path="reports" element={<Reports />} />

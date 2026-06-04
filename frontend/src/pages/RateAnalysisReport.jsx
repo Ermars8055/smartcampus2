@@ -12,8 +12,7 @@ import {
 import { DatePicker } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
 import * as XLSX from 'xlsx';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import html2pdf from 'html2pdf.js';
 import api from '../services/api';
 
 const QUICK_RANGES = [
@@ -33,9 +32,10 @@ export default function RateAnalysisReport() {
   const [reportData, setReportData] = useState(null);
   const [sortField, setSortField] = useState('material_code');
   const [sortDir, setSortDir] = useState('asc');
-  const [expandedRow, setExpandedRow] = useState(null);
-  const [drillData, setDrillData] = useState(null);
+  const [expandedRows, setExpandedRows] = useState({});
+  const [drillDataMap, setDrillDataMap] = useState({});
   const [drillLoading, setDrillLoading] = useState(false);
+  const [isExportingPDF, setIsExportingPDF] = useState(false);
 
   const [filters, setFilters] = useState({
     fromDate: dayjs().subtract(90, 'day'),
@@ -62,8 +62,8 @@ export default function RateAnalysisReport() {
     if (!filters.fromDate || !filters.toDate) return alert('Select date range');
     if (filters.fromDate.isAfter(filters.toDate)) return alert('From Date cannot exceed To Date');
     setLoading(true);
-    setExpandedRow(null);
-    setDrillData(null);
+    setExpandedRows({});
+    setDrillDataMap({});
     try {
       const params = {
         from_date: filters.fromDate.format('YYYY-MM-DD'),
@@ -88,7 +88,7 @@ export default function RateAnalysisReport() {
 
   const handleReset = () => {
     setFilters({ fromDate: dayjs().subtract(90, 'day'), toDate: dayjs(), categoryId: '', vendorId: '', warehouseId: '', search: '', includeTax: false, varianceType: 'amount' });
-    setReportData(null); setExpandedRow(null); setDrillData(null);
+    setReportData(null); setExpandedRows({}); setDrillDataMap({});
   };
 
   const handleSort = (field) => {
@@ -106,8 +106,14 @@ export default function RateAnalysisReport() {
   };
 
   const handleDrillDown = async (matId) => {
-    if (expandedRow === matId) { setExpandedRow(null); return; }
-    setExpandedRow(matId);
+    if (expandedRows[matId]) { 
+      setExpandedRows(prev => ({ ...prev, [matId]: false })); 
+      return; 
+    }
+    
+    setExpandedRows(prev => ({ ...prev, [matId]: true }));
+    if (drillDataMap[matId]) return;
+
     setDrillLoading(true);
     try {
       const params = {
@@ -119,8 +125,8 @@ export default function RateAnalysisReport() {
       if (filters.vendorId) params.vendor_id = filters.vendorId;
       if (filters.warehouseId) params.warehouse_id = filters.warehouseId;
       const res = await api.get('/api/reports/rate-analysis/drilldown', { params });
-      setDrillData(res.data);
-    } catch { setDrillData(null); } finally { setDrillLoading(false); }
+      setDrillDataMap(prev => ({ ...prev, [matId]: res.data }));
+    } catch { } finally { setDrillLoading(false); }
   };
 
   const getVarianceColor = (row) => {
@@ -157,28 +163,53 @@ export default function RateAnalysisReport() {
     XLSX.writeFile(wb, `Rate_Analysis_${dayjs().format('YYYYMMDD')}.xlsx`);
   };
 
-  const handleExportPDF = () => {
+  const handleExportPDF = async () => {
     if (!reportData?.data?.length) return;
-    const doc = new jsPDF('landscape');
-    doc.setFontSize(14);
-    doc.text('MATERIAL RATE ANALYSIS REPORT', doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
-    doc.setFontSize(9);
-    doc.text(`Period: ${filters.fromDate.format('DD-MMM-YYYY')} to ${filters.toDate.format('DD-MMM-YYYY')} | Tax: ${filters.includeTax ? 'Inclusive' : 'Exclusive'} | Generated: ${reportData.generated_at}`, doc.internal.pageSize.getWidth() / 2, 22, { align: 'center' });
+    setIsExportingPDF(true);
+    
+    const materialsToFetch = reportData.data.filter(r => !drillDataMap[r.material_id]);
+    if (materialsToFetch.length > 0) {
+      setDrillLoading(true);
+      for (let i = 0; i < materialsToFetch.length; i += 5) {
+        const chunk = materialsToFetch.slice(i, i + 5);
+        await Promise.all(chunk.map(async (row) => {
+          try {
+            const params = {
+              material_id: row.material_id,
+              from_date: filters.fromDate.format('YYYY-MM-DD'),
+              to_date: filters.toDate.format('YYYY-MM-DD'),
+              include_tax: filters.includeTax
+            };
+            if (filters.vendorId) params.vendor_id = filters.vendorId;
+            if (filters.warehouseId) params.warehouse_id = filters.warehouseId;
+            const res = await api.get('/api/reports/rate-analysis/drilldown', { params });
+            setDrillDataMap(prev => ({ ...prev, [row.material_id]: res.data }));
+          } catch (err) { console.error(err); }
+        }));
+      }
+      setDrillLoading(false);
+    }
 
-    const heads = [['S.No', 'Material Code', 'Material Name', 'Min Rate', 'Max Rate', 'Avg Rate', 'Variance', 'GRN Txns']];
-    const body = reportData.data.map((r, i) => [
-      i + 1, r.material_code, r.material_name,
-      fmt(r.min_rate), fmt(r.max_rate), fmt(r.avg_rate),
-      filters.varianceType === 'percentage' ? `${r.variance_pct}%` : fmt(r.variance_amt),
-      r.grn_txn_count
-    ]);
-    autoTable(doc, {
-      head: heads, body, startY: 28,
-      styles: { fontSize: 8, cellPadding: 2 },
-      headStyles: { fillColor: [241, 245, 249], textColor: [30, 41, 59], fontStyle: 'bold' },
-      columnStyles: { 0: { halign: 'center', cellWidth: 12 }, 3: { halign: 'right' }, 4: { halign: 'right' }, 5: { halign: 'right' }, 6: { halign: 'right' }, 7: { halign: 'center' } }
-    });
-    doc.save(`Rate_Analysis_${dayjs().format('YYYYMMDD')}.pdf`);
+    const allExpanded = {};
+    reportData.data.forEach(r => allExpanded[r.material_id] = true);
+    setExpandedRows(allExpanded);
+    
+    setTimeout(() => {
+      const element = document.getElementById('report-print-container');
+      const opt = {
+        margin:       [0.3, 0.3, 0.3, 0.3],
+        filename:     `Rate_Analysis_${dayjs().format('YYYYMMDD')}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true },
+        jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' },
+        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+      };
+
+      html2pdf().set(opt).from(element).save().then(() => {
+        setIsExportingPDF(false);
+        setExpandedRows({});
+      });
+    }, 1500);
   };
 
   const sortedData = getSortedData();
@@ -298,15 +329,16 @@ export default function RateAnalysisReport() {
         </Box>
       </Card>
 
-      {/* Print Header */}
-      <Box sx={{ display: 'none', '@media print': { display: 'block', textAlign: 'center', mb: 2 } }}>
-        <Typography variant="h5" sx={{ fontWeight: 'bold' }}>MATERIAL RATE ANALYSIS REPORT</Typography>
-        <Typography variant="subtitle2">Period: {filters.fromDate?.format('DD-MMM-YYYY')} to {filters.toDate?.format('DD-MMM-YYYY')}</Typography>
-      </Box>
+      <Box id="report-print-container" sx={{ p: isExportingPDF ? 2 : 0, background: isExportingPDF ? '#fff' : 'transparent' }}>
+        {/* Print Header */}
+        <Box sx={{ display: isExportingPDF ? 'block' : 'none', '@media print': { display: 'block', textAlign: 'center', mb: 2 }, textAlign: 'center', mb: 2 }}>
+          <Typography variant="h5" sx={{ fontWeight: 'bold' }}>MATERIAL RATE ANALYSIS REPORT</Typography>
+          <Typography variant="subtitle2">Period: {filters.fromDate?.format('DD-MMM-YYYY')} to {filters.toDate?.format('DD-MMM-YYYY')}</Typography>
+        </Box>
 
-      {/* Main Grid */}
-      <Card sx={{ borderRadius: 1, boxShadow: 'none', border: '1px solid #E2E8F0' }}>
-        <TableContainer sx={{ maxHeight: 'calc(100vh - 320px)', '@media print': { maxHeight: 'none', overflow: 'visible' } }}>
+        {/* Main Grid */}
+        <Card sx={{ borderRadius: 1, boxShadow: 'none', border: '1px solid #E2E8F0' }}>
+          <TableContainer sx={{ maxHeight: isExportingPDF ? 'none' : 'calc(100vh - 320px)', overflow: isExportingPDF ? 'visible' : 'auto', '@media print': { maxHeight: 'none', overflow: 'visible' } }}>
           <Table size="small" stickyHeader sx={{ '& th, & td': { border: '1px solid #E2E8F0', fontSize: '0.82rem', py: 1, px: 1.5 } }}>
             {(reportData && reportData.data && reportData.data.length > 0) && (
               <TableHead>
@@ -328,7 +360,7 @@ export default function RateAnalysisReport() {
                 <Fragment key={row.material_id}>
                   <TableRow hover sx={{ cursor: 'pointer', '&:hover td': { background: '#F8FAFC' } }} onClick={() => handleDrillDown(row.material_id)}>
                     <TableCell sx={{ width: 40, textAlign: 'center' }}>
-                      <IconButton size="small">{expandedRow === row.material_id ? <KeyboardArrowUp /> : <KeyboardArrowDown />}</IconButton>
+                      <IconButton size="small">{expandedRows[row.material_id] ? <KeyboardArrowUp /> : <KeyboardArrowDown />}</IconButton>
                     </TableCell>
                     <TableCell sx={{ color: '#2563EB', fontWeight: 600, cursor: 'pointer' }}>{row.material_code}</TableCell>
                     <TableCell>{row.material_name}</TableCell>
@@ -343,20 +375,20 @@ export default function RateAnalysisReport() {
                   </TableRow>
                   {/* Drill-down row */}
                   <TableRow>
-                    <TableCell colSpan={8} sx={{ p: 0, borderBottom: expandedRow === row.material_id ? '2px solid #2563EB' : 'none' }}>
-                      <Collapse in={expandedRow === row.material_id} timeout="auto" unmountOnExit>
+                    <TableCell colSpan={8} sx={{ p: 0, borderBottom: expandedRows[row.material_id] ? '2px solid #2563EB' : 'none' }}>
+                      <Collapse in={expandedRows[row.material_id]} timeout="auto" unmountOnExit>
                         <Box sx={{ p: 2, background: '#F8FAFC' }}>
-                          {drillLoading ? (
+                          {drillLoading && !drillDataMap[row.material_id] ? (
                             <Box sx={{ textAlign: 'center', py: 3 }}><CircularProgress size={28} /></Box>
-                          ) : drillData ? (
+                          ) : drillDataMap[row.material_id] ? (
                             <Box>
                               <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, color: '#1E293B' }}>
-                                {drillData.material.code} — {drillData.material.name} | GST: {drillData.material.gst_rate}%
+                                {drillDataMap[row.material_id].material.code} — {drillDataMap[row.material_id].material.name} | GST: {drillDataMap[row.material_id].material.gst_rate}%
                               </Typography>
                               {/* Vendor Summary */}
-                              {drillData.vendor_summary.length > 0 && (
+                              {drillDataMap[row.material_id].vendor_summary.length > 0 && (
                                 <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap' }}>
-                                  {drillData.vendor_summary.map(vs => (
+                                  {drillDataMap[row.material_id].vendor_summary.map(vs => (
                                     <Card key={vs.vendor_id} sx={{ p: 1.5, minWidth: 180, border: '1px solid #E2E8F0', borderRadius: 2 }}>
                                       <Typography variant="caption" sx={{ fontWeight: 700, color: '#1E3A8A', display: 'block' }}>{vs.vendor_name}</Typography>
                                       <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0.5, mt: 0.5, fontSize: '0.75rem' }}>
@@ -371,7 +403,7 @@ export default function RateAnalysisReport() {
                                 </Box>
                               )}
                               {/* Transaction Table */}
-                              <TableContainer sx={{ maxHeight: 350 }}>
+                              <TableContainer sx={{ maxHeight: isExportingPDF ? 'none' : 350, overflow: isExportingPDF ? 'visible' : 'auto' }}>
                                 <Table size="small" sx={{ '& th, & td': { fontSize: '0.78rem', border: '1px solid #E2E8F0', py: 0.5, px: 1 } }}>
                                   <TableHead>
                                     <TableRow sx={{ '& th': { background: '#EFF6FF', fontWeight: 600, whiteSpace: 'nowrap' } }}>
@@ -383,10 +415,10 @@ export default function RateAnalysisReport() {
                                     </TableRow>
                                   </TableHead>
                                   <TableBody>
-                                    {drillData.transactions.map((t, i) => {
-                                      const allRates = drillData.transactions.map(x => x.purchase_rate);
+                                    {drillDataMap[row.material_id].transactions.map((t, i) => {
+                                      const allRates = drillDataMap[row.material_id].transactions.map(x => x.purchase_rate);
                                       const minR = Math.min(...allRates), maxR = Math.max(...allRates);
-                                      const isLatest = i === drillData.transactions.length - 1;
+                                      const isLatest = i === drillDataMap[row.material_id].transactions.length - 1;
                                       return (
                                         <TableRow key={i} sx={{ background: isLatest ? '#FFFBEB' : 'inherit' }}>
                                           <TableCell>{t.grn_number}</TableCell>
@@ -431,6 +463,7 @@ export default function RateAnalysisReport() {
           </Box>
         )}
       </Card>
+      </Box>
     </Box>
   );
 }

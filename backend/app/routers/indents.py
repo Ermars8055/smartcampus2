@@ -5,10 +5,11 @@ from sqlalchemy.orm import Session
 from datetime import datetime
 from typing import List
 from app.database import get_db
+from sqlalchemy import func
 from app.models import (
-    Indent, IndentItem, IndentStatus, ApprovalFlow, User, Material, CurrentStock, IndentApproval, PurchaseOrder, PurchaseOrderItem
+    Indent, IndentItem, IndentStatus, ApprovalFlow, User, Material, CurrentStock, IndentApproval, PurchaseOrder, PurchaseOrderItem, DepartmentMaterialLimit
 )
-from app.schemas import IndentCreate, IndentOut, IndentAcknowledgeRequest
+from app.schemas import IndentCreate, IndentOut, IndentAcknowledgeRequest, IndentApproveRequest
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
 from app.utils.sequences import get_next_number
 from pydantic import BaseModel
@@ -75,7 +76,8 @@ def list_indents(
                 item.current_stock = stock.quantity if stock else 0
                 
                 # Calculate pending
-                item.pending_quantity = max(0, item.requested_quantity - item.issued_quantity)
+                approved_qty = item.approved_quantity if item.approved_quantity is not None else item.requested_quantity
+                item.pending_quantity = max(0, approved_qty - item.issued_quantity)
                 
                 # Availability status
                 if item.current_stock == 0:
@@ -95,6 +97,38 @@ def create_indent(
     site_id: int = Depends(get_site_id)
 ):
     try:
+        # Check material limits first
+        department = data.department or (current_user.department if current_user else None)
+        if department:
+            first_day_of_month = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            for item_data in data.items:
+                limit_obj = db.query(DepartmentMaterialLimit).filter(
+                    DepartmentMaterialLimit.tenant_id == tenant_id,
+                    DepartmentMaterialLimit.site_id == site_id,
+                    DepartmentMaterialLimit.department == department,
+                    DepartmentMaterialLimit.material_id == item_data.material_id
+                ).first()
+
+                if limit_obj:
+                    # Calculate total requested this month
+                    total_requested = db.query(func.sum(IndentItem.requested_quantity)).join(Indent).filter(
+                        Indent.tenant_id == tenant_id,
+                        Indent.site_id == site_id,
+                        Indent.department == department,
+                        IndentItem.material_id == item_data.material_id,
+                        Indent.created_at >= first_day_of_month,
+                        Indent.status != IndentStatus.REJECTED.value
+                    ).scalar() or 0.0
+
+                    if total_requested + item_data.requested_quantity > limit_obj.monthly_limit:
+                        mat = db.query(Material).filter(Material.id == item_data.material_id).first()
+                        mat_name = mat.name if mat else "Unknown Material"
+                        remaining = max(0, limit_obj.monthly_limit - total_requested)
+                        raise HTTPException(
+                            status_code=400,
+                            detail=f"The limit per month for '{mat_name}' is {int(limit_obj.monthly_limit)}. You can request only {int(remaining)} more."
+                        )
+
         # Calculate total amount based on material standard costs
         total = 0
         for item_data in data.items:
@@ -130,6 +164,9 @@ def create_indent(
             
         db.commit()
         db.refresh(indent)
+    except HTTPException:
+        db.rollback()
+        raise
     except Exception as e:
         db.rollback()
         import logging
@@ -176,11 +213,22 @@ def get_indent(
             stock = db.query(CurrentStock).filter(CurrentStock.material_id == item.material_id, CurrentStock.site_id == site_id).first()
             item.current_stock = stock.quantity if stock else 0
             
+            approved_qty = item.approved_quantity if item.approved_quantity is not None else item.requested_quantity
+            item.pending_quantity = max(0, approved_qty - item.issued_quantity)
+            
+            if item.current_stock == 0:
+                item.availability_status = "No Stock"
+            elif item.current_stock < item.pending_quantity:
+                item.availability_status = "Low Stock"
+            else:
+                item.availability_status = "Available"
+            
     return indent
 
 @router.post("/{id}/approve")
 def approve_indent(
     id: int,
+    data: Optional[IndentApproveRequest] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
     tenant_id: int = Depends(get_tenant_id),
@@ -225,10 +273,23 @@ def approve_indent(
 
     # 3. Record approvals for applicable flows
     new_approvals = 0
+    approved_quantities_dict = {}
+    if data and data.items:
+        for it in data.items:
+            approved_quantities_dict[str(it.indent_item_id)] = it.approved_quantity
+            db_item = next((i for i in indent.items if i.id == it.indent_item_id), None)
+            if db_item:
+                db_item.approved_quantity = it.approved_quantity
+
     for f in applicable_flows:
         existing = db.query(IndentApproval).filter(IndentApproval.indent_id == id, IndentApproval.approval_flow_id == f.id).first()
         if not existing:
-            db.add(IndentApproval(indent_id=id, approval_flow_id=f.id, approver_id=current_user.id))
+            db.add(IndentApproval(
+                indent_id=id, 
+                approval_flow_id=f.id, 
+                approver_id=current_user.id,
+                approved_quantities=approved_quantities_dict
+            ))
             new_approvals += 1
 
     if new_approvals == 0:

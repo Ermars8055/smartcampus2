@@ -5,7 +5,7 @@ import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
   DialogContent, DialogActions, Grid, IconButton, Tooltip, FormControl, InputLabel, Select, MenuItem,
-  Divider, InputAdornment, TableSortLabel, useTheme, useMediaQuery
+  Divider, InputAdornment, TableSortLabel, useTheme, useMediaQuery, Autocomplete
 } from '@mui/material';
 import { Add, Delete, CheckCircle, Cancel, ReceiptLong, ShoppingCart, ArrowBack, Search, Apartment, Layers, MeetingRoom, AccountTree, Notes } from '@mui/icons-material';
 import api from '../services/api';
@@ -21,8 +21,11 @@ export default function Indents() {
   const [buildings, setBuildings] = useState([]);
   const [floors, setFloors] = useState([]);
   const [rooms, setRooms] = useState([]);
+  const [departmentsList, setDepartmentsList] = useState([]);
+  const [allDepartments, setAllDepartments] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [detailDialog, setDetailDialog] = useState(null);
+  const [approvalDialog, setApprovalDialog] = useState({ open: false, indent: null, items: {} });
   const [search, setSearch] = useState('');
 
   const theme = useTheme();
@@ -75,32 +78,87 @@ export default function Indents() {
   useEffect(() => {
     load();
     api.get('/api/materials', { params: { limit: 10000 } }).then(r => setMaterials(r.data.items || []));
-    api.get('/api/buildings').then(r => setBuildings(r.data));
     api.get('/api/vendors').then(r => setVendors(r.data));
     api.get('/api/terms').then(r => setTermsTemplates(r.data));
+    api.get('/api/departments/names').then(r => setDepartmentsList(r.data)).catch(() => setDepartmentsList([]));
+    api.get('/api/departments').then(r => setAllDepartments(r.data)).catch(() => setAllDepartments([]));
   }, []);
 
-  // Fetch floors when building changes
-  useEffect(() => {
-    if (form.building_id) {
-      api.get(`/api/floors?building_id=${form.building_id}`).then(r => setFloors(r.data));
-      setForm(prev => ({ ...prev, floor_id: '', room_id: '' }));
-      setRooms([]);
+  const handleDepartmentChange = (newDept) => {
+    if (newDept) {
+      api.get(`/api/rooms?department_name=${encodeURIComponent(newDept)}`).then(r => {
+        const fetchedRooms = r.data || [];
+        const uniqueBuildings = new Map();
+        const uniqueFloors = new Map();
+
+        fetchedRooms.forEach(room => {
+          if (room.building_id && room.building_name) {
+            uniqueBuildings.set(room.building_id, { id: room.building_id, name: room.building_name });
+          }
+          if (room.floor_id && room.floor_name) {
+            uniqueFloors.set(room.floor_id, { id: room.floor_id, name: room.floor_name, building_id: room.building_id });
+          }
+        });
+
+        const masterDepts = allDepartments.filter(d => d.name === newDept);
+        masterDepts.forEach(d => {
+          if (d.building_id && d.building_name) {
+            uniqueBuildings.set(d.building_id, { id: d.building_id, name: d.building_name });
+          }
+        });
+
+        const bldgs = Array.from(uniqueBuildings.values());
+        const flrs = Array.from(uniqueFloors.values());
+
+        setBuildings(bldgs);
+        setFloors(flrs);
+        setRooms(fetchedRooms);
+
+        let nextBuildingId = '';
+        let nextFloorId = '';
+        let nextRoomId = '';
+
+        if (bldgs.length === 1) nextBuildingId = bldgs[0].id;
+
+        const availableFloors = flrs.filter(f => !nextBuildingId || f.building_id === nextBuildingId);
+        if (availableFloors.length === 1) nextFloorId = availableFloors[0].id;
+
+        const availableRooms = fetchedRooms.filter(rm => !nextFloorId || rm.floor_id === nextFloorId);
+        if (availableRooms.length === 1) nextRoomId = availableRooms[0].id;
+
+        setForm(prev => ({ ...prev, department: newDept, building_id: nextBuildingId, floor_id: nextFloorId, room_id: nextRoomId }));
+      }).catch(() => {
+        setBuildings([]);
+        setFloors([]);
+        setRooms([]);
+        setForm(prev => ({ ...prev, department: newDept, building_id: '', floor_id: '', room_id: '' }));
+      });
     } else {
+      setBuildings([]);
       setFloors([]);
       setRooms([]);
+      setForm(prev => ({ ...prev, department: '', building_id: '', floor_id: '', room_id: '' }));
     }
-  }, [form.building_id]);
+  };
 
-  // Fetch rooms when floor changes
-  useEffect(() => {
-    if (form.floor_id) {
-      api.get(`/api/rooms?floor_id=${form.floor_id}`).then(r => setRooms(r.data));
-      setForm(prev => ({ ...prev, room_id: '' }));
-    } else {
-      setRooms([]);
+  const handleBuildingChange = (buildingId) => {
+    let nextFloorId = '';
+    let nextRoomId = '';
+    const availableFloors = floors.filter(f => f.building_id === buildingId);
+    if (availableFloors.length === 1) {
+      nextFloorId = availableFloors[0].id;
+      const availableRooms = rooms.filter(rm => rm.floor_id === nextFloorId);
+      if (availableRooms.length === 1) nextRoomId = availableRooms[0].id;
     }
-  }, [form.floor_id]);
+    setForm(prev => ({ ...prev, building_id: buildingId, floor_id: nextFloorId, room_id: nextRoomId }));
+  };
+
+  const handleFloorChange = (floorId) => {
+    let nextRoomId = '';
+    const availableRooms = rooms.filter(rm => rm.floor_id === floorId);
+    if (availableRooms.length === 1) nextRoomId = availableRooms[0].id;
+    setForm(prev => ({ ...prev, floor_id: floorId, room_id: nextRoomId }));
+  };
 
   const addItem = () => setForm({ ...form, items: [...form.items, { material_id: '', requested_quantity: '' }] });
   const removeItem = (i) => setForm({ ...form, items: form.items.filter((_, idx) => idx !== i) });
@@ -154,17 +212,76 @@ export default function Indents() {
       showMessage("Indent submitted successfully!", "Success", "success");
     } catch (err) {
       console.error(err);
-      showMessage(err.response?.data?.detail || 'Error', "Error", "error");
+      const detail = err.response?.data?.detail || 'Error';
+      if (detail.includes('limit per month')) {
+        showMessage(detail, "Limit Reached", "warning");
+      } else {
+        showMessage(detail, "Error", "error");
+      }
     }
   };
 
-  const approveIndent = async (id) => {
+  const submitApproval = async () => {
+    const { indent, items } = approvalDialog;
+    if (!indent) return;
+
+    const payloadItems = indent.items.map(it => {
+      const val = items[it.id];
+      return {
+        indent_item_id: it.id,
+        approved_quantity: parseFloat(val)
+      };
+    });
+
+    if (payloadItems.some(it => isNaN(it.approved_quantity) || it.approved_quantity < 0)) {
+      showMessage("Please enter a valid approved quantity for all items.", "Validation Error", "warning");
+      return;
+    }
+
     try {
-      const res = await api.post(`/api/indents/${id}/approve`);
+      const res = await api.post(`/api/indents/${indent.id}/approve`, { items: payloadItems });
       load();
-      showMessage(res.data.message || "Indent approved successfully", "Success", "success");
+      setApprovalDialog({ open: false, indent: null, items: {} });
+      let msg = res.data.message || "Indent approved successfully";
+      if (msg === "Fully Approved") {
+        msg = `${indent.indent_number} successfully approved`;
+      } else if (msg.startsWith("Moved to level")) {
+        msg = `${indent.indent_number} successfully approved. ${msg}`;
+      }
+      showMessage(msg, "Success", "success");
     } catch (err) {
       showMessage(err.response?.data?.detail || "Error approving indent", "Error", "error");
+    }
+  };
+
+  const handleApproveClick = () => {
+    const { indent, items } = approvalDialog;
+    if (!indent) return;
+
+    let hasLargerQuantity = false;
+    let largerQuantityMessage = "You have entered an approved quantity larger than the requested quantity for the following items:\n";
+
+    for (const it of indent.items) {
+      const val = items[it.id];
+      const qty = parseFloat(val);
+      if (qty > it.requested_quantity) {
+        hasLargerQuantity = true;
+        largerQuantityMessage += `\n• ${it.material_name}:\n   Requested: ${it.requested_quantity} ${it.uom_name}\n   Approved: ${qty} ${it.uom_name}\n`;
+      }
+    }
+
+    largerQuantityMessage += "\nDo you want to proceed?";
+
+    if (hasLargerQuantity) {
+      showConfirm(
+        'Confirm Higher Quantity',
+        largerQuantityMessage,
+        'Proceed',
+        'warning',
+        submitApproval
+      );
+    } else {
+      submitApproval();
     }
   };
 
@@ -210,7 +327,7 @@ export default function Indents() {
       showMessage("Please select a vendor and provide terms and conditions.", "Validation Error", "warning");
       return;
     }
-    
+
     const mappedItems = vendorDialog.items.map(it => ({
       material_id: it.material_id,
       quantity: parseFloat(it.pending_quantity),
@@ -274,6 +391,17 @@ export default function Indents() {
           {/* ── Location Row ── */}
           <Grid container spacing={2.5} sx={{ mb: 3 }}>
             <Grid item xs={12} sm={3}>
+              <Typography variant="caption" sx={{ fontWeight: 600, color: '#3b5998', mb: 0.5, display: 'block' }}>Department <span style={{ color: '#d32f2f' }}>*</span></Typography>
+              <Autocomplete
+                options={departmentsList}
+                value={form.department || null}
+                onChange={(e, val) => handleDepartmentChange(val)}
+                renderInput={(params) => (
+                  <TextField {...params} size="small" placeholder="Select Department" InputProps={{ ...params.InputProps, startAdornment: <><InputAdornment position="start"><AccountTree sx={{ color: '#94A3B8', ml: 1 }} /></InputAdornment>{params.InputProps.startAdornment}</> }} sx={{ bgcolor: '#fff' }} />
+                )}
+              />
+            </Grid>
+            <Grid item xs={12} sm={3}>
               <Typography variant="caption" sx={{ fontWeight: 600, color: '#3b5998', mb: 0.5, display: 'block' }}>
                 Building <span style={{ color: '#d32f2f' }}>*</span>
               </Typography>
@@ -281,7 +409,8 @@ export default function Indents() {
                 <Select
                   value={form.building_id}
                   displayEmpty
-                  onChange={e => setForm({ ...form, building_id: e.target.value })}
+                  onChange={e => handleBuildingChange(e.target.value)}
+                  disabled={!form.department || buildings.length === 0}
                   sx={{ bgcolor: '#fff' }}
                   startAdornment={<InputAdornment position="start"><Apartment sx={{ color: '#94A3B8' }} /></InputAdornment>}
                 >
@@ -296,13 +425,13 @@ export default function Indents() {
                 <Select
                   value={form.floor_id}
                   displayEmpty
-                  onChange={e => setForm({ ...form, floor_id: e.target.value })}
-                  disabled={!form.building_id}
+                  onChange={e => handleFloorChange(e.target.value)}
+                  disabled={!form.building_id || floors.filter(f => f.building_id === form.building_id).length === 0}
                   sx={{ bgcolor: '#fff' }}
                   startAdornment={<InputAdornment position="start"><Layers sx={{ color: '#94A3B8' }} /></InputAdornment>}
                 >
                   <MenuItem value="" disabled><em>Select Floor</em></MenuItem>
-                  {floors.map(f => <MenuItem key={f.id} value={f.id}>{f.name}</MenuItem>)}
+                  {floors.filter(f => !form.building_id || f.building_id === form.building_id).map(f => <MenuItem key={f.id} value={f.id}>{f.name}</MenuItem>)}
                 </Select>
               </FormControl>
             </Grid>
@@ -312,29 +441,15 @@ export default function Indents() {
                 <Select
                   value={form.room_id}
                   displayEmpty
-                  onChange={e => {
-                    const selectedRoomId = e.target.value;
-                    const selectedRoom = rooms.find(r => r.id === selectedRoomId);
-                    setForm({ ...form, room_id: selectedRoomId, department: selectedRoom?.department_name || '' });
-                  }}
-                  disabled={!form.floor_id}
+                  onChange={e => setForm(prev => ({ ...prev, room_id: e.target.value }))}
+                  disabled={!form.floor_id || rooms.filter(rm => rm.floor_id === form.floor_id).length === 0}
                   sx={{ bgcolor: '#fff' }}
                   startAdornment={<InputAdornment position="start"><MeetingRoom sx={{ color: '#94A3B8' }} /></InputAdornment>}
                 >
                   <MenuItem value="" disabled><em>Select Room</em></MenuItem>
-                  {rooms.map(r => <MenuItem key={r.id} value={r.id}>{r.name}</MenuItem>)}
+                  {rooms.filter(rm => !form.floor_id || rm.floor_id === form.floor_id).map(r => <MenuItem key={r.id} value={r.id}>{r.name}</MenuItem>)}
                 </Select>
               </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={3}>
-              <Typography variant="caption" sx={{ fontWeight: 600, color: '#3b5998', mb: 0.5, display: 'block' }}>Department</Typography>
-              <TextField
-                fullWidth size="small"
-                value={form.department}
-                placeholder="Select Room first"
-                InputProps={{ readOnly: true, startAdornment: <InputAdornment position="start"><AccountTree sx={{ color: '#94A3B8' }} /></InputAdornment> }}
-                sx={{ bgcolor: '#f8fafc' }}
-              />
             </Grid>
           </Grid>
 
@@ -482,36 +597,36 @@ export default function Indents() {
             )}
             {sortedIndents.map(ind => (
               <Card key={ind.id} variant="outlined" sx={{ p: 2, borderRadius: 2, cursor: 'pointer', '&:hover': { borderColor: '#2563EB' } }} onClick={() => setDetailDialog(ind)}>
-                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, gap: 1 }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#2563EB' }}>{ind.indent_number}</Typography>
-                    <Chip label={ind.status} size="small" color={statusColor[ind.status] || 'default'} sx={{ fontWeight: 600, fontSize: '0.65rem', height: 20 }} />
-                 </Box>
-                 <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#334155' }}><strong>Bldg:</strong> {ind.building_name || '-'} | <strong>Dept:</strong> {ind.department || '-'}</Typography>
-                 <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#334155' }}><strong>Requester:</strong> {ind.requester_name}</Typography>
-                 <Typography variant="caption" sx={{ display: 'block', mb: 1.5, color: '#64748B' }}>{formatDate(ind.created_at)} • {ind.items?.length || 0} items</Typography>
-                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Chip label={`L${ind.current_approval_level}`} size="small" variant="outlined" sx={{ height: 22, fontSize: '0.7rem' }} />
-                    <Box sx={{ display: 'flex', gap: 0.5 }} onClick={e => e.stopPropagation()}>
-                      <Tooltip title="Approve">
-                        <span><IconButton size="small" color="success" disabled={ind.status !== 'Awaiting Approval' || !hasAction('indents', 'can_approve')}
-                          onClick={() => showConfirm('Approve Indent?', `Are you sure you want to approve ${ind.indent_number}?`, 'Yes, Approve', 'success', () => approveIndent(ind.id))}>
-                          <CheckCircle fontSize="small" />
-                        </IconButton></span>
-                      </Tooltip>
-                      <Tooltip title="Reject">
-                        <span><IconButton size="small" color="error" disabled={ind.status !== 'Awaiting Approval' || !hasAction('indents', 'can_reject')}
-                          onClick={() => showConfirm('Reject Indent?', `Are you sure you want to reject ${ind.indent_number}?`, 'Yes, Reject', 'error', () => rejectIndent(ind.id))}>
-                          <Cancel fontSize="small" />
-                        </IconButton></span>
-                      </Tooltip>
-                        <Tooltip title="Convert to PO">
-                          <span><IconButton size="small" color="primary" disabled={(ind.status !== 'Approved' && ind.status !== 'Partially Issued') || !hasAction('indents', 'can_convert_to_po')}
-                            onClick={() => openConvertDialog(ind)}>
-                            <ShoppingCart fontSize="small" />
-                          </IconButton></span>
-                        </Tooltip>
-                    </Box>
-                 </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, gap: 1 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#2563EB' }}>{ind.indent_number}</Typography>
+                  <Chip label={ind.status} size="small" color={statusColor[ind.status] || 'default'} sx={{ fontWeight: 600, fontSize: '0.65rem', height: 20 }} />
+                </Box>
+                <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#334155' }}><strong>Dept:</strong> {ind.department || '-'} | <strong>Bldg:</strong> {ind.building_name || '-'}</Typography>
+                <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#334155' }}><strong>Requester:</strong> {ind.requester_name}</Typography>
+                <Typography variant="caption" sx={{ display: 'block', mb: 1.5, color: '#64748B' }}>{formatDate(ind.created_at)} • {ind.items?.length || 0} items</Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Chip label={`L${ind.current_approval_level}`} size="small" variant="outlined" sx={{ height: 22, fontSize: '0.7rem' }} />
+                  <Box sx={{ display: 'flex', gap: 0.5 }} onClick={e => e.stopPropagation()}>
+                    <Tooltip title="Approve">
+                      <span><IconButton size="small" color="success" disabled={ind.status !== 'Awaiting Approval' || !hasAction('indents', 'can_approve')}
+                        onClick={() => setApprovalDialog({ open: true, indent: ind, items: {} })}>
+                        <CheckCircle fontSize="small" />
+                      </IconButton></span>
+                    </Tooltip>
+                    <Tooltip title="Reject">
+                      <span><IconButton size="small" color="error" disabled={ind.status !== 'Awaiting Approval' || !hasAction('indents', 'can_reject')}
+                        onClick={() => showConfirm('Reject Indent?', `Are you sure you want to reject ${ind.indent_number}?`, 'Yes, Reject', 'error', () => rejectIndent(ind.id))}>
+                        <Cancel fontSize="small" />
+                      </IconButton></span>
+                    </Tooltip>
+                    <Tooltip title="Convert to PO">
+                      <span><IconButton size="small" color="primary" disabled={(ind.status !== 'Approved' && ind.status !== 'Partially Issued') || !hasAction('indents', 'can_convert_to_po')}
+                        onClick={() => openConvertDialog(ind)}>
+                        <ShoppingCart fontSize="small" />
+                      </IconButton></span>
+                    </Tooltip>
+                  </Box>
+                </Box>
               </Card>
             ))}
           </Box>
@@ -526,13 +641,13 @@ export default function Indents() {
                     </TableSortLabel>
                   </TableCell>
                   <TableCell>
-                    <TableSortLabel active={orderBy === 'building_name'} direction={orderBy === 'building_name' ? order : 'asc'} onClick={() => handleRequestSort('building_name')}>
-                      Bldg.
+                    <TableSortLabel active={orderBy === 'department'} direction={orderBy === 'department' ? order : 'asc'} onClick={() => handleRequestSort('department')}>
+                      Dept
                     </TableSortLabel>
                   </TableCell>
                   <TableCell>
-                    <TableSortLabel active={orderBy === 'department'} direction={orderBy === 'department' ? order : 'asc'} onClick={() => handleRequestSort('department')}>
-                      Dept
+                    <TableSortLabel active={orderBy === 'building_name'} direction={orderBy === 'building_name' ? order : 'asc'} onClick={() => handleRequestSort('building_name')}>
+                      Bldg.
                     </TableSortLabel>
                   </TableCell>
                   <TableCell>
@@ -576,8 +691,8 @@ export default function Indents() {
                 {sortedIndents.map(ind => (
                   <TableRow key={ind.id} sx={{ cursor: 'pointer', '&:hover': { bgcolor: '#f8fafc' }, '& td': { px: 0.5, py: 0.75 } }} onClick={() => setDetailDialog(ind)}>
                     <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>{ind.indent_number}</TableCell>
-                    <TableCell sx={{ fontSize: '0.78rem' }}>{ind.building_name || '-'}</TableCell>
                     <TableCell sx={{ fontSize: '0.78rem' }}>{ind.department || '-'}</TableCell>
+                    <TableCell sx={{ fontSize: '0.78rem' }}>{ind.building_name || '-'}</TableCell>
                     <TableCell sx={{ fontSize: '0.78rem' }}>{ind.floor || '-'}</TableCell>
                     <TableCell sx={{ fontSize: '0.78rem' }}>{ind.room_name || '-'}</TableCell>
                     <TableCell sx={{ fontSize: '0.78rem' }}>{ind.requester_name}</TableCell>
@@ -589,7 +704,7 @@ export default function Indents() {
                       <Box sx={{ display: 'flex', gap: 0.5 }}>
                         <Tooltip title="Approve">
                           <span><IconButton size="small" color="success" disabled={ind.status !== 'Awaiting Approval' || !hasAction('indents', 'can_approve')}
-                            onClick={() => showConfirm('Approve Indent?', `Are you sure you want to approve ${ind.indent_number}?`, 'Yes, Approve', 'success', () => approveIndent(ind.id))}>
+                            onClick={() => setApprovalDialog({ open: true, indent: ind, items: {} })}>
                             <CheckCircle fontSize="small" />
                           </IconButton></span>
                         </Tooltip>
@@ -659,11 +774,15 @@ export default function Indents() {
             <TableHead>
               <TableRow sx={{ bgcolor: '#f0f4ff' }}>
                 <TableCell sx={{ fontWeight: 600 }}>Material</TableCell>
+                <TableCell align="left" sx={{ fontWeight: 600 }}>UOM</TableCell>
                 <TableCell align="right" sx={{ fontWeight: 600 }}>Qty Requested</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600 }}>Current Stock</TableCell>
-                <TableCell align="center" sx={{ fontWeight: 600 }}>Availability</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600 }}>Issued</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600 }}>Pending</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600 }}>Qty Approved</TableCell>
+                {detailDialog?.status !== 'Awaiting Approval' && (
+                  <>
+                    <TableCell align="right" sx={{ fontWeight: 600 }}>Issued</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 600 }}>Pending</TableCell>
+                  </>
+                )}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -673,21 +792,19 @@ export default function Indents() {
                     <Typography sx={{ fontWeight: 500, fontSize: '0.9rem' }}>{item.material_name}</Typography>
                     <Typography variant="caption" sx={{ color: '#64748B' }}>{item.material_code}</Typography>
                   </TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 500 }}>{item.requested_quantity} {item.uom_name}</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 700 }}>{item.current_stock} {item.uom_name}</TableCell>
-                  <TableCell align="center">
-                    <Chip
-                      label={item.availability_status === 'Available' ? '✓ AVAILABLE' : (item.availability_status === 'Low Stock' ? 'X LOW' : 'X NO STOCK')}
-                      size="small"
-                      color={item.availability_status === 'Available' ? 'success' : (item.availability_status === 'Low Stock' ? 'warning' : 'error')}
-                      variant={item.availability_status === 'Available' ? 'light' : 'outlined'}
-                      sx={{ fontWeight: 700, fontSize: '0.65rem' }}
-                    />
+                  <TableCell align="left" sx={{ fontWeight: 500, color: '#64748B' }}>{item.uom_name}</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 500 }}>{item.requested_quantity}</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700, color: '#1d4ed8' }}>
+                    {item.approved_quantity !== null && item.approved_quantity !== undefined ? item.approved_quantity : '—'}
                   </TableCell>
-                  <TableCell align="right">{item.issued_quantity}</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 600, color: item.pending_quantity > 0 ? '#ef4444' : '#10b981' }}>
-                    {item.pending_quantity}
-                  </TableCell>
+                  {detailDialog?.status !== 'Awaiting Approval' && (
+                    <>
+                      <TableCell align="right">{item.issued_quantity}</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 600, color: item.pending_quantity > 0 ? '#ef4444' : '#10b981' }}>
+                        {item.pending_quantity}
+                      </TableCell>
+                    </>
+                  )}
                 </TableRow>
               ))}
             </TableBody>
@@ -719,9 +836,9 @@ export default function Indents() {
                 </Box>
               </Grid>
               <Grid item xs={12} sm={4} sx={{ textAlign: 'right' }}>
-                <Button 
-                  variant="contained" 
-                  disabled={!vendorDialog.vendor_id || !vendorDialog.terms?.trim()} 
+                <Button
+                  variant="contained"
+                  disabled={!vendorDialog.vendor_id || !vendorDialog.terms?.trim()}
                   onClick={handleConvertToPo}
                   size="small"
                   sx={{ py: 0.75, px: 3, fontWeight: 700, borderRadius: 1.5, textTransform: 'none' }}
@@ -765,7 +882,8 @@ export default function Indents() {
             <TableHead>
               <TableRow sx={{ bgcolor: '#f8fafc', '& th': { py: 0.75, px: 1 } }}>
                 <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Material</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Requested</TableCell>
+                <TableCell align="left" sx={{ fontWeight: 600, fontSize: '0.75rem' }}>UOM</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Approved</TableCell>
                 <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Issued</TableCell>
                 <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Pending</TableCell>
                 <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', width: 90 }}>Rate (₹)</TableCell>
@@ -782,10 +900,11 @@ export default function Indents() {
                     <Typography sx={{ fontWeight: 600, fontSize: '0.8rem' }}>{item.material_name}</Typography>
                     <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.7rem', display: 'block' }}>{item.material_code}</Typography>
                   </TableCell>
-                  <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{item.requested_quantity} {item.uom_name}</TableCell>
+                  <TableCell align="left" sx={{ fontSize: '0.75rem', color: '#64748B' }}>{item.uom_name}</TableCell>
+                  <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{item.approved_quantity}</TableCell>
                   <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{item.issued_quantity}</TableCell>
                   <TableCell align="right" sx={{ fontWeight: 700, color: '#2563EB', fontSize: '0.8rem' }}>
-                    {item.pending_quantity} {item.uom_name}
+                    {item.pending_quantity}
                   </TableCell>
                   <TableCell align="right">
                     <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'flex-end' }}>
@@ -849,11 +968,104 @@ export default function Indents() {
       <Dialog open={confirm.open} onClose={handleCancelConfirm} maxWidth="xs" fullWidth>
         <DialogTitle sx={{ fontWeight: 600 }}>{confirm.title}</DialogTitle>
         <DialogContent>
-          <Typography variant="body2" sx={{ mb: 2 }}>{confirm.message}</Typography>
+          <Typography variant="body2" sx={{ mb: 2, whiteSpace: 'pre-line' }}>{confirm.message}</Typography>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button onClick={handleCancelConfirm}>Cancel</Button>
           <Button variant="contained" color={confirm.confirmColor} onClick={handleConfirm} sx={{ fontWeight: 600 }}>{confirm.confirmText}</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Approval Dialog */}
+      <Dialog open={approvalDialog.open} onClose={() => setApprovalDialog({ open: false, indent: null, items: {} })} maxWidth="md" fullWidth fullScreen={isMobile}>
+        <DialogTitle sx={{ fontWeight: 600 }}>Approve Indent — {approvalDialog.indent?.indent_number}</DialogTitle>
+        <DialogContent>
+          <Grid container spacing={2} sx={{ mb: 2, mt: 0.5 }}>
+            <Grid item xs={3}>
+              <Typography variant="caption" color="textSecondary">Requester</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{approvalDialog.indent?.requester_name}</Typography>
+            </Grid>
+            <Grid item xs={3}>
+              <Typography variant="caption" color="textSecondary">Department</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{approvalDialog.indent?.department || '—'}</Typography>
+            </Grid>
+            <Grid item xs={3}>
+              <Typography variant="caption" color="textSecondary">Building</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{approvalDialog.indent?.building_name || '—'}</Typography>
+            </Grid>
+            <Grid item xs={3}>
+              <Typography variant="caption" color="textSecondary">Floor</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{approvalDialog.indent?.floor || '—'}</Typography>
+            </Grid>
+            <Grid item xs={3}>
+              <Typography variant="caption" color="textSecondary">Room</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{approvalDialog.indent?.room_name || '—'}</Typography>
+            </Grid>
+            <Grid item xs={3}>
+              <Typography variant="caption" color="textSecondary">Date</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{formatDate(approvalDialog.indent?.created_at)}</Typography>
+            </Grid>
+            <Grid item xs={3}>
+              <Typography variant="caption" color="textSecondary">Approval Level</Typography>
+              <Typography sx={{ fontWeight: 600 }}>L{approvalDialog.indent?.current_approval_level}</Typography>
+            </Grid>
+            <Grid item xs={3}>
+              <Typography variant="caption" color="textSecondary">Status</Typography>
+              <Box sx={{ mt: 0.5 }}><Chip label={approvalDialog.indent?.status} size="small" color={statusColor[approvalDialog.indent?.status] || 'default'} /></Box>
+            </Grid>
+          </Grid>
+          {approvalDialog.indent?.remarks && (
+            <Typography variant="body2" sx={{ mb: 2, p: 1.5, bgcolor: '#f8fafc', borderRadius: 1, border: '1px solid #e2e8f0' }}>
+              <strong>Remarks:</strong> {approvalDialog.indent.remarks}
+            </Typography>
+          )}
+          <Divider sx={{ mb: 2 }} />
+          <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748B', mb: 1, display: 'block', textTransform: 'uppercase' }}>Items to Approve</Typography>
+          <Table size="small">
+            <TableHead>
+              <TableRow sx={{ bgcolor: '#f0f4ff' }}>
+                <TableCell sx={{ fontWeight: 600 }}>Material</TableCell>
+                <TableCell align="left" sx={{ fontWeight: 600 }}>UOM</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600 }}>Qty Requested</TableCell>
+                <TableCell align="center" sx={{ fontWeight: 600, bgcolor: '#e0e7ff', color: '#1e40af' }}>Qty Approved</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {approvalDialog.indent?.items?.map(item => {
+                const defaultQty = item.approved_quantity !== null && item.approved_quantity !== undefined ? item.approved_quantity : item.requested_quantity;
+                return (
+                  <TableRow key={item.id}>
+                    <TableCell>
+                      <Typography sx={{ fontWeight: 500, fontSize: '0.9rem' }}>{item.material_name}</Typography>
+                      <Typography variant="caption" sx={{ color: '#64748B' }}>{item.material_code}</Typography>
+                    </TableCell>
+                    <TableCell align="left" sx={{ fontWeight: 500, color: '#64748B' }}>{item.uom_name}</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 500 }}>{item.requested_quantity}</TableCell>
+                    <TableCell align="center" sx={{ bgcolor: '#eff6ff' }}>
+                      <TextField
+                        size="small"
+                        type="number"
+                        placeholder=""
+                        value={approvalDialog.items[item.id] !== undefined ? approvalDialog.items[item.id] : ''}
+                        onChange={e => setApprovalDialog(prev => ({ ...prev, items: { ...prev.items, [item.id]: e.target.value } }))}
+                        inputProps={{ min: 0, style: { textAlign: 'center', fontWeight: 'bold', color: '#1d4ed8' } }}
+                        sx={{ width: 90, bgcolor: '#fff' }}
+                      />
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setApprovalDialog({ open: false, indent: null, items: {} })}>Cancel</Button>
+          <Button
+            variant="contained" color="primary" onClick={handleApproveClick} sx={{ fontWeight: 600 }}
+            disabled={!approvalDialog.indent?.items?.every(item => approvalDialog.items[item.id] !== undefined && approvalDialog.items[item.id] !== '')}
+          >
+            Confirm & Approve
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>

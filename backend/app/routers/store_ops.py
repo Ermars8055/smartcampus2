@@ -10,13 +10,15 @@ from app.models import (
     MaterialIssue, MaterialIssueItem, MaterialReturn, MaterialReturnItem,
     StockTransfer, StockTransferItem, CurrentStock, StockLedger,
     Material, Warehouse, User, AuditLog, Indent, IndentItem, IndentStatus,
-    Room, Floor, Building, DocumentSequence, GatePass
+    Room, Floor, Building, DocumentSequence, GatePass, GatePassItem,
+    DepartmentMaterialLimit
 )
 from app.schemas import (
     IssueCreate, IssueOut, IssueItemOut,
     ReturnCreate, ReturnOut, ReturnItemOut,
     TransferCreate, TransferOut, TransferItemOut,
-    GatePassCreate, GatePassOut, GatePassUpdate
+    GatePassCreate, GatePassOut, GatePassUpdate,
+    GatePassItemOut, GatePassItemBase
 )
 from app.routers.grn import update_stock
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
@@ -140,7 +142,7 @@ def create_issue(
         # Group items by their material's default warehouse
         items_by_warehouse = {}
         for item_data in data.items:
-            mat = db.query(Material).filter(Material.id == item_data.material_id).first()
+            mat = db.query(Material).filter(Material.id == item_data.material_id, Material.tenant_id == tenant_id, Material.site_id == site_id).first()
             if not mat: continue
             w_id = mat.warehouse_id or data.warehouse_id # Fallback to global if set
             if not w_id:
@@ -175,6 +177,47 @@ def create_issue(
                 ind_data = db.query(Indent).filter(Indent.id == data.indent_id).first()
                 if ind_data and ind_data.department:
                     issued_to_dept = ind_data.department
+
+        # Direct Issue Limit Enforcement
+        if not data.indent_id and issued_to_dept:
+            first_day_of_month = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            for item_data in data.items:
+                limit_obj = db.query(DepartmentMaterialLimit).filter(
+                    DepartmentMaterialLimit.tenant_id == tenant_id,
+                    DepartmentMaterialLimit.site_id == site_id,
+                    DepartmentMaterialLimit.department == issued_to_dept,
+                    DepartmentMaterialLimit.material_id == item_data.material_id
+                ).first()
+                if limit_obj:
+                    # Sum up requested/issued quantities this month
+                    total_requested = db.query(func.sum(IndentItem.requested_quantity)).join(Indent).filter(
+                        Indent.tenant_id == tenant_id,
+                        Indent.site_id == site_id,
+                        Indent.department == issued_to_dept,
+                        IndentItem.material_id == item_data.material_id,
+                        Indent.created_at >= first_day_of_month,
+                        Indent.status != IndentStatus.REJECTED.value
+                    ).scalar() or 0.0
+
+                    # Also sum up any other direct issues
+                    total_direct_issued = db.query(func.sum(MaterialIssueItem.quantity)).join(MaterialIssue).filter(
+                        MaterialIssue.tenant_id == tenant_id,
+                        MaterialIssue.site_id == site_id,
+                        MaterialIssue.issued_to_department == issued_to_dept,
+                        MaterialIssue.indent_id == None,
+                        MaterialIssueItem.material_id == item_data.material_id,
+                        MaterialIssue.created_at >= first_day_of_month,
+                        MaterialIssue.status != "Cancelled"
+                    ).scalar() or 0.0
+
+                    if total_requested + total_direct_issued + item_data.quantity > limit_obj.monthly_limit:
+                        mat = db.query(Material).filter(Material.id == item_data.material_id, Material.tenant_id == tenant_id, Material.site_id == site_id).first()
+                        mat_name = mat.name if mat else "Unknown Material"
+                        remaining = max(0, limit_obj.monthly_limit - (total_requested + total_direct_issued))
+                        raise HTTPException(
+                            status_code=400,
+                            detail=f"The limit per month for '{mat_name}' is {int(limit_obj.monthly_limit)}. You can issue only {int(remaining)} more."
+                        )
 
         created_issues = []
         for w_id, items in items_by_warehouse.items():
@@ -259,6 +302,9 @@ def create_issue(
             "created_ids": [iss["id"] for iss in created_issues],
             "message": f"{len(created_issues)} issue(s) created successfully"
         }
+    except HTTPException:
+        db.rollback()
+        raise
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=400, detail=f"Creation Error: {str(e)}")
@@ -420,21 +466,34 @@ def create_return(
         )
 
         if item_data.condition == "Repairable":
-            mat = db.query(Material).filter(Material.id == item_data.material_id).first()
+            mat = db.query(Material).filter(Material.id == item_data.material_id, Material.tenant_id == tenant_id, Material.site_id == site_id).first()
             gp_num = get_next_number(db, tenant_id, site_id, "GATEPASS", "GP")
+            
+            wh = db.query(Warehouse).filter(Warehouse.id == data.warehouse_id).first()
+            wh_name = wh.name if wh else None
+
             gp = GatePass(
                 tenant_id=tenant_id,
                 site_id=site_id,
                 gate_pass_number=gp_num,
                 return_id=ret.id,
                 project_id=data.project_id,
-                material_id=item_data.material_id,
-                quantity=item_data.quantity,
                 vendor_id=mat.preferred_vendor_id if mat else None,
+                from_department=data.returned_from_department,
+                from_store=wh_name,
                 created_by_id=current_user.id
             )
             db.add(gp)
             db.flush()
+
+            gp_item = GatePassItem(
+                gate_pass_id=gp.id,
+                material_id=item_data.material_id,
+                quantity=item_data.quantity,
+                remarks="Created from Material Return"
+            )
+            db.add(gp_item)
+            
             # Deduct stock immediately because it's going out for repair
             update_stock(
                 db=db,
@@ -544,7 +603,7 @@ def create_transfer(
             CurrentStock.site_id == site_id
         ).first()
         if not stock or stock.quantity < item_data.quantity:
-            mat = db.query(Material).filter(Material.id == item_data.material_id).first()
+            mat = db.query(Material).filter(Material.id == item_data.material_id, Material.tenant_id == tenant_id, Material.site_id == site_id).first()
             raise HTTPException(
                 status_code=400,
                 detail=f"Insufficient stock for {mat.name if mat else 'material'} in source warehouse"
@@ -594,6 +653,45 @@ def create_transfer(
 
 # ── Gate Passes ──────────────────────────────────────────────────────────
 
+def format_gate_pass(gp: GatePass) -> GatePassOut:
+    vend = gp.vendor
+    proj = gp.project
+    
+    items_out = []
+    for item in gp.items:
+        mat = item.material
+        items_out.append(GatePassItemOut(
+            id=item.id,
+            material_id=item.material_id,
+            quantity=item.quantity,
+            remarks=item.remarks,
+            material_name=mat.name if mat else None,
+            material_code=mat.code if mat else None,
+            uom_name=mat.uom.name if mat and mat.uom else None
+        ))
+        
+    return GatePassOut(
+        id=gp.id,
+        gate_pass_number=gp.gate_pass_number,
+        gate_pass_type=gp.gate_pass_type,
+        project_id=gp.project_id,
+        project_name=proj.name if proj else None,
+        vendor_id=gp.vendor_id,
+        vendor_name=f"{vend.code} - {vend.name}" if vend else None,
+        vendor_address=vend.address if vend else None,
+        vendor_custom_name=gp.vendor_custom_name,
+        vendor_custom_address=gp.vendor_custom_address,
+        from_department=gp.from_department,
+        from_store=gp.from_store,
+        reference_return_number=gp.material_return.return_number if gp.material_return else None,
+        status=gp.status,
+        driver_name=gp.driver_name,
+        vehicle_number=gp.vehicle_number,
+        remarks=gp.remarks,
+        created_at=gp.created_at,
+        items=items_out
+    )
+
 @router.get("/gate-passes")
 def list_gate_passes(
     db: Session = Depends(get_db),
@@ -613,34 +711,7 @@ def list_gate_passes(
             passes = passes.filter(GatePass.created_by_id == current_user.id)
             
     passes = passes.order_by(GatePass.created_at.desc()).all()
-    
-    result = []
-    for gp in passes:
-        mat = gp.material
-        vend = gp.vendor
-        proj = gp.project
-        result.append(GatePassOut(
-            id=gp.id,
-            gate_pass_number=gp.gate_pass_number,
-            gate_pass_type=gp.gate_pass_type,
-            project_id=gp.project_id,
-            project_name=proj.name if proj else None,
-            material_id=gp.material_id,
-            material_name=mat.name if mat else None,
-            material_code=mat.code if mat else None,
-            uom_name=mat.uom.name if mat and mat.uom else None,
-            quantity=gp.quantity,
-            vendor_id=gp.vendor_id,
-            vendor_name=f"{vend.code} - {vend.name}" if vend else None,
-            vendor_address=vend.address if vend else None,
-            reference_return_number=gp.material_return.return_number if gp.material_return else None,
-            status=gp.status,
-            driver_name=gp.driver_name,
-            vehicle_number=gp.vehicle_number,
-            remarks=gp.remarks,
-            created_at=gp.created_at
-        ))
-    return result
+    return [format_gate_pass(gp) for gp in passes]
 
 @router.post("/gate-passes", response_model=GatePassOut)
 def create_gate_pass(
@@ -656,10 +727,12 @@ def create_gate_pass(
         site_id=site_id,
         gate_pass_number=gp_num,
         project_id=data.project_id,
-        material_id=data.material_id,
-        quantity=data.quantity,
         vendor_id=data.vendor_id,
-        status="Pending Repair",
+        vendor_custom_name=data.vendor_custom_name,
+        vendor_custom_address=data.vendor_custom_address,
+        from_department=data.from_department,
+        from_store=data.from_store,
+        status="Sent Out" if data.gate_pass_type == "Non-Returnable" else "Pending Repair",
         gate_pass_type=data.gate_pass_type,
         driver_name=data.driver_name,
         vehicle_number=data.vehicle_number,
@@ -667,9 +740,23 @@ def create_gate_pass(
         created_by_id=current_user.id
     )
     db.add(gp)
+    db.flush()
+    
+    for item_data in data.items:
+        mat = db.query(Material).filter(Material.id == item_data.material_id, Material.tenant_id == tenant_id, Material.site_id == site_id).first()
+        if not mat:
+            raise HTTPException(status_code=400, detail=f"Material ID {item_data.material_id} is invalid or does not belong to your workspace.")
+        item = GatePassItem(
+            gate_pass_id=gp.id,
+            material_id=item_data.material_id,
+            quantity=item_data.quantity,
+            remarks=item_data.remarks
+        )
+        db.add(item)
+        
     db.commit()
     db.refresh(gp)
-    return gp
+    return format_gate_pass(gp)
 
 @router.put("/gate-passes/{id}")
 def update_gate_pass(
@@ -699,20 +786,21 @@ def update_gate_pass(
         warehouse_id = ret.warehouse_id if ret else None
         
         if warehouse_id:
-            update_stock(
-                db=db,
-                material_id=gp.material_id,
-                warehouse_id=warehouse_id,
-                quantity=gp.quantity,
-                transaction_type="Repair Received",
-                reference_type="GatePass",
-                reference_id=gp.id,
-                reference_number=gp.gate_pass_number,
-                tenant_id=tenant_id,
-                site_id=site_id,
-                project_id=gp.project_id,
-                user_id=current_user.id
-            )
+            for item in gp.items:
+                update_stock(
+                    db=db,
+                    material_id=item.material_id,
+                    warehouse_id=warehouse_id,
+                    quantity=item.quantity,
+                    transaction_type="Repair Received",
+                    reference_type="GatePass",
+                    reference_id=gp.id,
+                    reference_number=gp.gate_pass_number,
+                    tenant_id=tenant_id,
+                    site_id=site_id,
+                    project_id=gp.project_id,
+                    user_id=current_user.id
+                )
             
     db.commit()
     return {"message": f"Gate Pass updated to {data.status}"}

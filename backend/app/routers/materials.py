@@ -27,11 +27,16 @@ def list_categories(
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
-    return db.query(Category).filter(
+    categories = db.query(Category).filter(
         Category.tenant_id == tenant_id,
         Category.site_id == site_id,
         Category.is_active == True
     ).order_by(Category.name).all()
+    
+    for c in categories:
+        c.has_materials = db.query(Material).filter(Material.category_id == c.id, Material.is_active == True).first() is not None
+        
+    return categories
 
 
 @router.post("/categories", response_model=CategoryOut)
@@ -42,6 +47,16 @@ def create_category(
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
+    if data.material_code_prefix:
+        existing = db.query(Category).filter(
+            Category.tenant_id == tenant_id,
+            Category.site_id == site_id,
+            Category.is_active == True,
+            Category.material_code_prefix == data.material_code_prefix
+        ).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="Material code prefix is already used by another category.")
+
     seq = get_next_sequence(db, tenant_id, site_id, "CATEGORY")
     cat_code = f"CAT-{seq:04d}"
     cat = Category(**data.model_dump(), tenant_id=tenant_id, site_id=site_id, sequence_number=seq, code=cat_code)
@@ -65,6 +80,21 @@ def update_category(
     ).first()
     if not cat:
         raise HTTPException(status_code=404, detail="Category not found")
+        
+    if data.material_code_prefix and data.material_code_prefix != cat.material_code_prefix:
+        has_materials = db.query(Material).filter(Material.category_id == id, Material.is_active == True).first() is not None
+        if has_materials:
+            raise HTTPException(status_code=400, detail="Cannot modify material prefix: materials already exist for this category.")
+
+        existing = db.query(Category).filter(
+            Category.tenant_id == tenant_id,
+            Category.site_id == site_id,
+            Category.is_active == True,
+            Category.material_code_prefix == data.material_code_prefix
+        ).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="Material code prefix is already used by another category.")
+            
     for k, v in data.model_dump().items():
         setattr(cat, k, v)
     db.commit()
@@ -195,6 +225,8 @@ def list_materials(
     search: Optional[str] = None,
     category_id: Optional[int] = None,
     warehouse_id: Optional[int] = None,
+    sort_by: Optional[str] = "name",
+    sort_desc: Optional[bool] = False,
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
@@ -219,7 +251,27 @@ def list_materials(
         q = q.filter(Material.warehouse_id == warehouse_id)
 
     total = q.count()
-    materials = q.order_by(Material.name).offset(skip).limit(limit).all()
+    
+    if sort_by == "code":
+        q = q.order_by(Material.code.desc() if sort_desc else Material.code.asc())
+    elif sort_by == "category":
+        q = q.join(Category).order_by(Category.name.desc() if sort_desc else Category.name.asc())
+    elif sort_by == "uom":
+        q = q.join(UOM).order_by(UOM.name.desc() if sort_desc else UOM.name.asc())
+    elif sort_by == "gst_rate":
+        q = q.order_by(Material.gst_rate.desc() if sort_desc else Material.gst_rate.asc())
+    elif sort_by == "standard_cost":
+        q = q.order_by(Material.standard_cost.desc() if sort_desc else Material.standard_cost.asc())
+    elif sort_by == "reorder_level":
+        q = q.order_by(Material.reorder_level.desc() if sort_desc else Material.reorder_level.asc())
+    elif sort_by == "material_type":
+        q = q.order_by(Material.material_type.desc() if sort_desc else Material.material_type.asc())
+    elif sort_by == "is_active":
+        q = q.order_by(Material.is_active.desc() if sort_desc else Material.is_active.asc())
+    else:
+        q = q.order_by(Material.name.desc() if sort_desc else Material.name.asc())
+
+    materials = q.offset(skip).limit(limit).all()
 
     result = []
     for m in materials:
@@ -294,7 +346,10 @@ def create_material(
     mat_data = data.model_dump()
     # Auto-generate code if not provided
     if not mat_data.get("code"):
-        mat_data["code"] = get_next_number(db, tenant_id, site_id, "MATERIAL", "MAT")
+        cat = db.query(Category).get(mat_data["category_id"])
+        prefix = cat.material_code_prefix if cat and cat.material_code_prefix else "MAT"
+        doc_type = f"MATERIAL_{cat.id}" if cat else "MATERIAL"
+        mat_data["code"] = get_next_number(db, tenant_id, site_id, doc_type, prefix)
     else:
         existing = db.query(Material).filter(
             Material.code == mat_data["code"], Material.tenant_id == tenant_id, Material.site_id == site_id

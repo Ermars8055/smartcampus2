@@ -48,7 +48,9 @@ export default function Materials() {
     setLoading(true);
     const params = {
       skip: page * rowsPerPage,
-      limit: rowsPerPage
+      limit: rowsPerPage,
+      sort_by: sortConfig.key,
+      sort_desc: sortConfig.direction === 'desc'
     };
     if (search) params.search = search;
     if (catFilter) params.category_id = catFilter;
@@ -75,8 +77,8 @@ export default function Materials() {
     });
   }, []);
 
-  useEffect(() => { setPage(0); }, [search, catFilter, storeFilter]);
-  useEffect(() => { load(); }, [search, catFilter, storeFilter, page, rowsPerPage]);
+  useEffect(() => { setPage(0); }, [search, catFilter, storeFilter, sortConfig]);
+  useEffect(() => { load(); }, [search, catFilter, storeFilter, page, rowsPerPage, sortConfig]);
 
   const handleSort = (key) => {
     setSortConfig(prev => ({

@@ -139,6 +139,7 @@ class TenantDetailsOut(BaseModel):
 
 class CategoryBase(BaseModel):
     name: str = Field(..., min_length=1)
+    material_code_prefix: str = Field(..., min_length=3, max_length=3, pattern=r"^[A-Za-z]{3}$")
     description: Optional[str] = None
 
 class CategoryCreate(CategoryBase):
@@ -148,6 +149,7 @@ class CategoryOut(CategoryBase):
     id: int
     sequence_number: Optional[int] = None
     code: Optional[str] = None
+    has_materials: bool = False
     class Config:
         from_attributes = True
 
@@ -380,6 +382,7 @@ class RoomOut(RoomBase):
     id: int
     floor_name: Optional[str] = None
     building_name: Optional[str] = None
+    building_id: Optional[int] = None
     class Config:
         from_attributes = True
 
@@ -1131,6 +1134,7 @@ class IndentItemOut(IndentItemBase):
     uom_name: Optional[str] = None
     issued_quantity: float = 0
     acknowledged_quantity: float = 0
+    approved_quantity: Optional[float] = None
     pending_quantity: float = 0
     current_stock: float = 0
     warehouse_id: Optional[int] = None
@@ -1185,6 +1189,13 @@ class IndentAcknowledgeItem(BaseModel):
 
 class IndentAcknowledgeRequest(BaseModel):
     items: List[IndentAcknowledgeItem] = []
+
+class IndentApproveItemRequest(BaseModel):
+    indent_item_id: int
+    approved_quantity: float = Field(..., ge=0)
+
+class IndentApproveRequest(BaseModel):
+    items: List[IndentApproveItemRequest] = []
 
 
 # ── Audit Log ────────────────────────────────────────────────────────────
@@ -1381,15 +1392,31 @@ class TermOut(TermBase):
 
 # == Gate Pass ==
 
+class GatePassItemBase(BaseModel):
+    material_id: int
+    quantity: float = Field(..., gt=0)
+    remarks: Optional[str] = None
+
+class GatePassItemOut(GatePassItemBase):
+    id: int
+    material_name: Optional[str] = None
+    material_code: Optional[str] = None
+    uom_name: Optional[str] = None
+    class Config:
+        from_attributes = True
+
 class GatePassCreate(BaseModel):
     gate_pass_type: str = "Returnable"
     project_id: int
-    material_id: int
-    quantity: float = Field(..., gt=0)
     vendor_id: Optional[int] = None
+    vendor_custom_name: Optional[str] = None
+    vendor_custom_address: Optional[str] = None
+    from_department: Optional[str] = None
+    from_store: Optional[str] = None
     driver_name: Optional[str] = None
     vehicle_number: Optional[str] = None
     remarks: Optional[str] = None
+    items: List[GatePassItemBase]
 
 class GatePassUpdate(BaseModel):
     status: str
@@ -1401,19 +1428,46 @@ class GatePassOut(BaseModel):
     gate_pass_type: str
     project_id: int
     project_name: Optional[str] = None
-    material_id: int
-    material_name: Optional[str] = None
-    material_code: Optional[str] = None
-    uom_name: Optional[str] = None
-    quantity: float
     vendor_id: Optional[int] = None
     vendor_name: Optional[str] = None
     vendor_address: Optional[str] = None
+    vendor_custom_name: Optional[str] = None
+    vendor_custom_address: Optional[str] = None
+    from_department: Optional[str] = None
+    from_store: Optional[str] = None
     reference_return_number: Optional[str] = None
     status: str
     driver_name: Optional[str] = None
     vehicle_number: Optional[str] = None
     remarks: Optional[str] = None
     created_at: datetime
+    items: List[GatePassItemOut] = []
+    class Config:
+        from_attributes = True
+
+
+# == Material Limits ==
+
+class DepartmentMaterialLimitBase(BaseModel):
+    material_id: int
+    monthly_limit: float = Field(..., gt=0)
+
+class DepartmentMaterialLimitCreate(DepartmentMaterialLimitBase):
+    departments: List[str]
+
+class DepartmentMaterialLimitUpdate(BaseModel):
+    monthly_limit: float = Field(..., gt=0)
+
+class DepartmentMaterialLimitOut(DepartmentMaterialLimitBase):
+    department: str
+    id: int
+    tenant_id: int
+    site_id: int
+    created_at: datetime
+    created_by_id: int
+    created_by_name: Optional[str] = None
+    material_name: Optional[str] = None
+    material_code: Optional[str] = None
+    uom_name: Optional[str] = None
     class Config:
         from_attributes = True

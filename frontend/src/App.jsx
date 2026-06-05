@@ -16,6 +16,8 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Materials from './pages/Materials';
 import Categories from './pages/Categories';
+import SubCategories from './pages/SubCategories';
+import UOM from './pages/UOM';
 import Vendors from './pages/Vendors';
 import Projects from './pages/Projects';
 import Departments from './pages/Departments';
@@ -32,6 +34,7 @@ import MaterialIssue from './pages/MaterialIssue';
 import Returns from './pages/Returns';
 import StockTransfers from './pages/StockTransfers';
 import GatePasses from './pages/GatePasses';
+import Repair from './pages/Repair';
 import PendingAcknowledgments from './pages/PendingAcknowledgments';
 import Inventory from './pages/Inventory';
 import Intelligence from './pages/Intelligence';
@@ -97,6 +100,8 @@ function AppRoutes() {
         <Route index element={<Dashboard />} />
         <Route path="materials" element={<Materials />} />
         <Route path="categories" element={<Categories />} />
+        <Route path="subcategories" element={<SubCategories />} />
+        <Route path="uom" element={<UOM />} />
         <Route path="vendors" element={<Vendors />} />
         <Route path="projects" element={<Projects />} />
         <Route path="departments" element={<Departments />} />
@@ -114,6 +119,7 @@ function AppRoutes() {
         <Route path="returns" element={<Returns />} />
         <Route path="transfers" element={<StockTransfers />} />
         <Route path="gate-passes" element={<GatePasses />} />
+        <Route path="repair" element={<Repair />} />
         <Route path="inventory" element={<Inventory />} />
         <Route path="intelligence" element={<Intelligence />} />
         <Route path="reports" element={<Reports />} />

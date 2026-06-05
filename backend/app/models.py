@@ -358,6 +358,7 @@ class Category(Base):
     name = Column(String(100), nullable=False)
     sequence_number = Column(Integer)
     code = Column(String(50))
+    material_code_prefix = Column(String(3), nullable=True)
     description = Column(Text)
     is_active = Column(Boolean, default=True)
     is_deleted = Column(Boolean, default=False)
@@ -996,6 +997,7 @@ class IndentItem(Base):
     indent_id = Column(Integer, ForeignKey("indents.id"), nullable=False)
     material_id = Column(Integer, ForeignKey("materials.id"), nullable=False)
     requested_quantity = Column(Float, nullable=False)
+    approved_quantity = Column(Float, nullable=True)
     issued_quantity = Column(Float, default=0)
     acknowledged_quantity = Column(Float, default=0)
 
@@ -1026,6 +1028,7 @@ class IndentApproval(Base):
     indent_id = Column(Integer, ForeignKey("indents.id", ondelete="CASCADE"), nullable=False)
     approval_flow_id = Column(Integer, ForeignKey("approval_flows.id"), nullable=False)
     approver_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    approved_quantities = Column(JSON, default=dict)
     approved_at = Column(DateTime, default=_get_now)
     
     indent = relationship("Indent")
@@ -1214,9 +1217,11 @@ class GatePass(Base):
     gate_pass_number = Column(String(50), nullable=False, index=True)
     return_id = Column(Integer, ForeignKey("material_returns.id", ondelete="SET NULL"), nullable=True)
     project_id = Column(Integer, ForeignKey("projects.id", ondelete="CASCADE"), nullable=False)
-    material_id = Column(Integer, ForeignKey("materials.id", ondelete="CASCADE"), nullable=False)
-    quantity = Column(Float, nullable=False)
     vendor_id = Column(Integer, ForeignKey("vendors.id", ondelete="SET NULL"), nullable=True)
+    vendor_custom_name = Column(String(255), nullable=True)
+    vendor_custom_address = Column(Text, nullable=True)
+    from_department = Column(String(255), nullable=True)
+    from_store = Column(String(255), nullable=True)
     status = Column(String(50), default="Pending Repair")
     gate_pass_type = Column(String(50), default="Outward Repair")
     driver_name = Column(String(255), nullable=True)
@@ -1227,8 +1232,38 @@ class GatePass(Base):
     
     tenant = relationship("Tenant")
     site = relationship("Site")
-    material = relationship("Material")
     project = relationship("Project")
     vendor = relationship("Vendor")
     created_by = relationship("User")
     material_return = relationship("MaterialReturn")
+    items = relationship("GatePassItem", back_populates="gate_pass", cascade="all, delete-orphan")
+
+
+class GatePassItem(Base):
+    __tablename__ = "gate_pass_items"
+    id = Column(Integer, primary_key=True, index=True)
+    gate_pass_id = Column(Integer, ForeignKey("gate_passes.id", ondelete="CASCADE"), nullable=False)
+    material_id = Column(Integer, ForeignKey("materials.id", ondelete="CASCADE"), nullable=False)
+    quantity = Column(Float, nullable=False)
+    remarks = Column(Text, nullable=True)
+    
+    gate_pass = relationship("GatePass", back_populates="items")
+    material = relationship("Material")
+
+
+class DepartmentMaterialLimit(Base):
+    __tablename__ = "department_material_limits"
+    id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
+    site_id = Column(Integer, ForeignKey("sites.id", ondelete="CASCADE"), nullable=False)
+    department = Column(String(255), nullable=False)
+    material_id = Column(Integer, ForeignKey("materials.id", ondelete="CASCADE"), nullable=False)
+    monthly_limit = Column(Float, nullable=False)
+    created_at = Column(DateTime, default=_get_now)
+    created_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    
+    tenant = relationship("Tenant")
+    site = relationship("Site")
+    material = relationship("Material")
+    created_by = relationship("User")
+    __table_args__ = (UniqueConstraint("tenant_id", "site_id", "department", "material_id", name="uq_dept_mat_limit"),)

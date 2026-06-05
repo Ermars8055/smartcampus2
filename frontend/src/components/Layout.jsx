@@ -10,7 +10,7 @@ import {
   LocalShipping, People, Assessment, Settings, Notifications,
   ExpandLess, ExpandMore, Logout, Person, Store, Assignment,
   SwapHoriz, Undo, Security, ReceiptLong, AccountTree, Category,
-  Build, ChevronLeft, RequestQuote, Business, AssignmentTurnedIn
+  Build, ChevronLeft, RequestQuote, Business, AssignmentTurnedIn, Straighten
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
@@ -23,6 +23,8 @@ const menuItems = [
     text: 'Master Data', icon: <Category />, children: [
       { text: 'Materials', icon: <Inventory2 />, path: '/materials', resource: 'materials' },
       { text: 'Categories', icon: <Category />, path: '/categories', resource: 'categories' },
+      { text: 'Sub Categories', icon: <Category />, path: '/subcategories', resource: 'categories' },
+      { text: 'UOM', icon: <Straighten />, path: '/uom', resource: 'categories' },
       { text: 'Vendors', icon: <People />, path: '/vendors', resource: 'vendors' },
       { text: 'Stores', icon: <Warehouse />, path: '/warehouses', resource: 'warehouses' },
     ]
@@ -44,6 +46,7 @@ const menuItems = [
       { text: 'Returns', icon: <Undo />, path: '/returns', resource: 'returns' },
       { text: 'Stock Transfer', icon: <SwapHoriz />, path: '/transfers', resource: 'transfers' },
       { text: 'Gate Passes', icon: <LocalShipping />, path: '/gate-passes', resource: 'gate_passes' },
+      { text: 'Repair', icon: <Build />, path: '/repair', resource: 'returns' },
       { text: 'Issue Acknowledgement', icon: <AssignmentTurnedIn />, path: '/pending-acknowledgments', resource: 'acknowledgements' },
     ]
   },

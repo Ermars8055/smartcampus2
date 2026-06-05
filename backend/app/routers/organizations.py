@@ -395,7 +395,9 @@ def delete_floor(
 
 @router.get("/rooms", response_model=List[RoomOut])
 def list_rooms(
-    floor_id: int = None, db: Session = Depends(get_db),
+    floor_id: int = None,
+    department_name: Optional[str] = None,
+    db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
@@ -405,6 +407,8 @@ def list_rooms(
     )
     if floor_id:
         q = q.filter(Room.floor_id == floor_id)
+    if department_name:
+        q = q.filter(Room.department_name == department_name)
         
     # --- ROW-LEVEL SECURITY ---
     is_platform_admin = getattr(current_user, "_is_platform_admin", False)
@@ -430,7 +434,8 @@ def list_rooms(
             department_name=r.department_name,
             floor_id=r.floor_id,
             floor_name=r.floor.name if r.floor else None,
-            building_name=r.floor.building.name if r.floor and r.floor.building else None
+            building_name=r.floor.building.name if r.floor and r.floor.building else None,
+            building_id=r.floor.building.id if r.floor and r.floor.building else None
         )
         for r in rooms
     ]

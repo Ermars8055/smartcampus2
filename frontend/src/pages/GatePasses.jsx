@@ -84,7 +84,7 @@ export default function GatePasses() {
         ...prev,
         vendor_id: selectedVendor.id,
         vendor_custom_name: selectedVendor.name,
-        vendor_custom_address: selectedVendor.address || ''
+        vendor_custom_address: selectedVendor.address_line_1 ? `${selectedVendor.address_line_1}${selectedVendor.address_line_2 ? ', ' + selectedVendor.address_line_2 : ''}` : ''
       }));
     } else {
       setGpModal(prev => ({

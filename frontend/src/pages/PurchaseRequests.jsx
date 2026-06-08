@@ -13,6 +13,8 @@ import MaterialSelect from '../components/MaterialSelect';
 import { DatePicker } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
 import { useAuth } from '../context/AuthContext';
+import { useConfig } from '../context/ConfigContext';
+import { computeGstSplit } from '../utils/gstCalculations';
 
 function StatusChip({ status }) {
   const colorMap = {
@@ -25,6 +27,7 @@ function StatusChip({ status }) {
 
 export default function PurchaseRequests() {
   const { hasAction, hasPermission } = useAuth();
+  const { tenantConfig } = useConfig();
   const [prs, setPrs] = useState([]);
   const [materials, setMaterials] = useState([]);
   const [projects, setProjects] = useState([]);
@@ -118,14 +121,12 @@ export default function PurchaseRequests() {
       delivery_date: dayjs().add(14, 'day'),
       terms: '',
       items: pr.items.map(it => {
-        const material = materials.find(m => m.id === it.material_id);
-        const gstRate = material?.gst_rate || 0;
         return { 
           ...it, 
           rate: '', 
           discount_percent: 0, 
-          cgst_percentage: gstRate / 2, 
-          sgst_percentage: gstRate / 2, 
+          cgst_percentage: 0, 
+          sgst_percentage: 0, 
           igst_percentage: 0 
         };
       })
@@ -712,7 +713,21 @@ export default function PurchaseRequests() {
                   value={convertDialog.vendor_id} 
                   label="Vendor" 
                   displayEmpty
-                  onChange={e => setConvertDialog({ ...convertDialog, vendor_id: e.target.value })}
+                  onChange={e => {
+                    const vId = e.target.value;
+                    const vendor = vendors.find(v => v.id === vId);
+                    const vendorState = vendor?.state || '';
+                    const updatedItems = convertDialog.items.map(it => {
+                      const material = materials.find(m => m.id === it.material_id);
+                      const gstRate = material?.gst_rate || 0;
+                      const { cgst_percentage, sgst_percentage, igst_percentage } = computeGstSplit(
+                        gstRate, vendorState, tenantConfig?.base_state,
+                        tenantConfig?.cgst_share_percent, tenantConfig?.sgst_share_percent
+                      );
+                      return { ...it, cgst_percentage, sgst_percentage, igst_percentage };
+                    });
+                    setConvertDialog({ ...convertDialog, vendor_id: vId, items: updatedItems });
+                  }}
                   startAdornment={<InputAdornment position="start"><Store sx={{ color: '#94A3B8' }} /></InputAdornment>}
                 >
                   <MenuItem value="" disabled>Select Vendor</MenuItem>

@@ -8,8 +8,11 @@ import { useNavigate } from 'react-router-dom';
 import api, { getFileUrl } from '../services/api';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
+import { useConfig } from '../context/ConfigContext';
+import { computeGstSplit } from '../utils/gstCalculations';
 export default function RegisterInvoice() {
   const navigate = useNavigate();
+  const { tenantConfig } = useConfig();
   const [vendors, setVendors] = useState([]);
   const [materials, setMaterials] = useState([]);
   const [pos, setPos] = useState([]);
@@ -146,7 +149,15 @@ export default function RegisterInvoice() {
     }
     
     const newItems = [...form.items];
-    const halfGst = (material.gst_rate || 0) / 2;
+    const vendor = vendors.find(v => v.id === form.vendor_id);
+    const vendorState = vendor?.state || '';
+    const gstRate = material.gst_rate || 0;
+    
+    const { cgst_percentage, sgst_percentage, igst_percentage } = computeGstSplit(
+      gstRate, vendorState, tenantConfig?.base_state,
+      tenantConfig?.cgst_share_percent, tenantConfig?.sgst_share_percent
+    );
+
     newItems[index] = {
       ...newItems[index],
       material_id: material.id,
@@ -154,9 +165,9 @@ export default function RegisterInvoice() {
       hsn_sac: material.hsn_code || '',
       uom: material.uom_name || '',
       rate: material.standard_cost || 0,
-      cgst_rate: halfGst,
-      sgst_rate: halfGst,
-      igst_rate: 0
+      cgst_rate: cgst_percentage,
+      sgst_rate: sgst_percentage,
+      igst_rate: igst_percentage
     };
     setForm(prev => ({ ...prev, items: newItems }));
   };
@@ -288,13 +299,34 @@ export default function RegisterInvoice() {
               <Grid item xs={12} sm={6}>
                 <FormControl fullWidth required size="small">
                   <InputLabel>Vendor</InputLabel>
-                  <Select value={form.vendor_id} label="Vendor" onChange={e => setForm({ ...form, vendor_id: e.target.value })}>
+                  <Select 
+                    value={form.vendor_id} 
+                    label="Vendor" 
+                    onChange={e => {
+                      const vId = e.target.value;
+                      const vendor = vendors.find(v => v.id === vId);
+                      const vendorState = vendor?.state || '';
+                      
+                      const updatedItems = form.items.map(it => {
+                        const material = materials.find(m => m.id === it.material_id);
+                        if (!material) return it;
+                        const gstRate = material.gst_rate || 0;
+                        const { cgst_percentage, sgst_percentage, igst_percentage } = computeGstSplit(
+                          gstRate, vendorState, tenantConfig?.base_state,
+                          tenantConfig?.cgst_share_percent, tenantConfig?.sgst_share_percent
+                        );
+                        return { ...it, cgst_rate: cgst_percentage, sgst_rate: sgst_percentage, igst_rate: igst_percentage };
+                      });
+                      
+                      setForm({ ...form, vendor_id: vId, items: updatedItems });
+                    }}
+                  >
                     {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.code} - {v.name}</MenuItem>)}
                   </Select>
                 </FormControl>
                 {form.vendor_id && vendors.find(v => v.id === form.vendor_id) && (
                   <Typography variant="caption" sx={{ color: '#64748B', display: 'block', mt: 1, ml: 1, lineHeight: 1.2 }}>
-                    {vendors.find(v => v.id === form.vendor_id).address}, {vendors.find(v => v.id === form.vendor_id).city}, {vendors.find(v => v.id === form.vendor_id).state}
+                    {vendors.find(v => v.id === form.vendor_id).address_line_1}, {vendors.find(v => v.id === form.vendor_id).address_line_2 ? vendors.find(v => v.id === form.vendor_id).address_line_2 + ', ' : ''}{vendors.find(v => v.id === form.vendor_id).city}, {vendors.find(v => v.id === form.vendor_id).state}
                   </Typography>
                 )}
               </Grid>

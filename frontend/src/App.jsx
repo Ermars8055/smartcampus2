@@ -8,6 +8,7 @@ import '@fontsource/inter/600.css';
 import '@fontsource/inter/700.css';
 import theme from './theme';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ConfigProvider } from './context/ConfigContext';
 import { MessageProvider } from './context/MessageContext';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -43,7 +44,12 @@ import IssueSummaryReport from './pages/IssueSummaryReport';
 import RateAnalysisReport from './pages/RateAnalysisReport';
 import ReceiptSummaryReport from './pages/ReceiptSummaryReport';
 import DepartmentWiseInventoryReport from './pages/DepartmentWiseInventoryReport';
-import Admin from './pages/Admin';
+import Users from './pages/Users';
+import AuditLogs from './pages/AuditLogs';
+import ApprovalFlows from './pages/ApprovalFlows';
+import RolesList from './pages/RolesList';
+import MaterialAllowances from './pages/MaterialAllowances';
+import Configurations from './pages/Configurations';
 import RoleConfiguration from './pages/RoleConfiguration';
 import SaasAdmin from './pages/SaasAdmin';
 import Alerts from './pages/Alerts';
@@ -127,7 +133,13 @@ function AppRoutes() {
         <Route path="reports/rate-analysis" element={<RateAnalysisReport />} />
         <Route path="reports/receipt-summary" element={<ReceiptSummaryReport />} />
         <Route path="reports/department-inventory" element={<DepartmentWiseInventoryReport />} />
-        <Route path="admin" element={<Admin />} />
+        <Route path="admin" element={<Navigate to="/admin/configurations" replace />} />
+        <Route path="admin/users" element={<Users />} />
+        <Route path="admin/audit-logs" element={<AuditLogs />} />
+        <Route path="admin/approval-flows" element={<ApprovalFlows />} />
+        <Route path="admin/roles" element={<RolesList />} />
+        <Route path="admin/material-allowances" element={<MaterialAllowances />} />
+        <Route path="admin/configurations" element={<Configurations />} />
         <Route path="admin/roles/new" element={<RoleConfiguration />} />
         <Route path="admin/roles/:id" element={<RoleConfiguration />} />
         <Route path="terms" element={<TermsAndConditions />} />
@@ -146,10 +158,12 @@ export default function App() {
       <BrowserRouter>
         <AuthProvider>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <MessageProvider>
-              <AppRoutes />
-              <ChatBot />
-            </MessageProvider>
+            <ConfigProvider>
+              <MessageProvider>
+                <AppRoutes />
+                <ChatBot />
+              </MessageProvider>
+            </ConfigProvider>
           </LocalizationProvider>
         </AuthProvider>
       </BrowserRouter>

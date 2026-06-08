@@ -15,10 +15,13 @@ import MaterialSelect from '../components/MaterialSelect';
 import { DatePicker } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
 import { useAuth } from '../context/AuthContext';
+import { useConfig } from '../context/ConfigContext';
+import { computeGstSplit } from '../utils/gstCalculations';
 
 export default function PurchaseOrders() {
   const { showMessage } = useMessage();
   const { hasAction, hasPermission } = useAuth();
+  const { tenantConfig } = useConfig();
   const location = useLocation();
   const navigate = useNavigate();
   const [pos, setPos] = useState([]);
@@ -1021,7 +1024,24 @@ export default function PurchaseOrders() {
               <Select
                 value={form.vendor_id}
                 label="Vendor"
-                onChange={e => setForm({ ...form, vendor_id: e.target.value })}
+                onChange={e => {
+                  const vId = e.target.value;
+                  const vendor = vendors.find(v => v.id === vId);
+                  const vendorState = vendor?.state || '';
+                  
+                  const updatedItems = form.items.map(it => {
+                    const material = materials.find(m => m.id === it.material_id);
+                    if (!material) return it;
+                    const gstRate = material.gst_rate || 0;
+                    const { cgst_percentage, sgst_percentage, igst_percentage } = computeGstSplit(
+                      gstRate, vendorState, tenantConfig?.base_state,
+                      tenantConfig?.cgst_share_percent, tenantConfig?.sgst_share_percent
+                    );
+                    return { ...it, cgst_percentage, sgst_percentage, igst_percentage };
+                  });
+                  
+                  setForm({ ...form, vendor_id: vId, items: updatedItems });
+                }}
                 startAdornment={<InputAdornment position="start"><Store sx={{ color: '#94A3B8' }} /></InputAdornment>}
               >
                 {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.code} - {v.name}</MenuItem>)}
@@ -1103,7 +1123,32 @@ export default function PurchaseOrders() {
                   <MaterialSelect
                     materials={materials}
                     value={item.material_id}
-                    onChange={val => updateItem(i, 'material_id', val)}
+                    onChange={val => {
+                      const material = materials.find(m => m.id === val);
+                      if (material) {
+                        const vendor = vendors.find(v => v.id === form.vendor_id);
+                        const vendorState = vendor?.state || '';
+                        const gstRate = material.gst_rate || 0;
+                        const { cgst_percentage, sgst_percentage, igst_percentage } = computeGstSplit(
+                          gstRate, vendorState, tenantConfig?.base_state,
+                          tenantConfig?.cgst_share_percent, tenantConfig?.sgst_share_percent
+                        );
+                        const newItems = [...form.items];
+                        newItems[i] = {
+                          ...newItems[i],
+                          material_id: val,
+                          uom_name: material.uom_name || '',
+                          rate: material.standard_cost || 0,
+                          base_rate: material.standard_cost || 0,
+                          cgst_percentage,
+                          sgst_percentage,
+                          igst_percentage
+                        };
+                        setForm({ ...form, items: newItems });
+                      } else {
+                        updateItem(i, 'material_id', val);
+                      }
+                    }}
                     size="small"
                   />
                 </Box>

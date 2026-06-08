@@ -134,6 +134,23 @@ class TenantDetailsOut(BaseModel):
     site: SiteOut
     admin: UserOut
 
+class TenantConfigurationBase(BaseModel):
+    base_state: str
+    cgst_share_percent: float
+    sgst_share_percent: float
+
+class TenantConfigurationCreate(TenantConfigurationBase):
+    pass
+
+class TenantConfigurationUpdate(TenantConfigurationBase):
+    pass
+
+class TenantConfigurationOut(TenantConfigurationBase):
+    id: int
+    tenant_id: int
+    class Config:
+        from_attributes = True
+
 
 # ── Master Data ──────────────────────────────────────────────────────────
 
@@ -257,7 +274,8 @@ class VendorBase(BaseModel):
     contact_person: Optional[str] = None
     email: Optional[EmailStr] = None
     phone: Optional[str] = None
-    address: Optional[str] = None
+    address_line_1: Optional[str] = None
+    address_line_2: Optional[str] = None
     gst_number: Optional[str] = None
     pan_number: Optional[str] = None
     city: Optional[str] = None
@@ -274,7 +292,8 @@ class VendorUpdate(BaseModel):
     contact_person: Optional[str] = None
     email: Optional[EmailStr] = None
     phone: Optional[str] = None
-    address: Optional[str] = None
+    address_line_1: Optional[str] = None
+    address_line_2: Optional[str] = None
     gst_number: Optional[str] = None
     pan_number: Optional[str] = None
     city: Optional[str] = None
@@ -1193,9 +1212,36 @@ class IndentAcknowledgeRequest(BaseModel):
 class IndentApproveItemRequest(BaseModel):
     indent_item_id: int
     approved_quantity: float = Field(..., ge=0)
+    remarks: Optional[str] = None
 
 class IndentApproveRequest(BaseModel):
     items: List[IndentApproveItemRequest] = []
+    remarks: Optional[str] = None
+
+
+class ApprovalHistoryItemOut(BaseModel):
+    material_id: int
+    material_name: Optional[str] = None
+    material_code: Optional[str] = None
+    uom_name: Optional[str] = None
+    requested_quantity: float = 0
+    approved_quantity: Optional[float] = None
+    remarks: Optional[str] = None
+
+class ApprovalHistoryEntryOut(BaseModel):
+    level: int
+    approver_name: str
+    role_name: str
+    approved_at: datetime
+    remarks: Optional[str] = None
+    status: str
+    items: List[ApprovalHistoryItemOut] = []
+
+class IndentApprovalHistoryOut(BaseModel):
+    indent_id: int
+    indent_number: str
+    current_approval_level: int
+    entries: List[ApprovalHistoryEntryOut] = []
 
 
 # ── Audit Log ────────────────────────────────────────────────────────────

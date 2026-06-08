@@ -276,7 +276,10 @@ def approve_indent(
     approved_quantities_dict = {}
     if data and data.items:
         for it in data.items:
-            approved_quantities_dict[str(it.indent_item_id)] = it.approved_quantity
+            approved_quantities_dict[str(it.indent_item_id)] = {
+                "quantity": it.approved_quantity,
+                "remarks": it.remarks
+            }
             db_item = next((i for i in indent.items if i.id == it.indent_item_id), None)
             if db_item:
                 db_item.approved_quantity = it.approved_quantity
@@ -288,7 +291,8 @@ def approve_indent(
                 indent_id=id, 
                 approval_flow_id=f.id, 
                 approver_id=current_user.id,
-                approved_quantities=approved_quantities_dict
+                approved_quantities=approved_quantities_dict,
+                remarks=data.remarks if data else None
             ))
             new_approvals += 1
 
@@ -329,6 +333,78 @@ def handle_next_level(db, indent, tenant_id, site_id, user_id=None):
         indent.approved_at = datetime.utcnow()
         db.commit()
         return {"message": "Fully Approved", "status": indent.status, "current_level": indent.current_approval_level}
+
+@router.get("/{id}/approval-history")
+def get_approval_history(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("indents", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    """Get the complete approval history for an indent, showing per-material quantities at each level."""
+    indent = db.query(Indent).filter(
+        Indent.id == id, Indent.tenant_id == tenant_id, Indent.site_id == site_id
+    ).first()
+    if not indent:
+        raise HTTPException(404, "Indent not found")
+
+    approvals = db.query(IndentApproval).filter(
+        IndentApproval.indent_id == id
+    ).order_by(IndentApproval.approved_at.asc()).all()
+
+    entries = []
+    for approval in approvals:
+        flow = approval.flow
+        approver = approval.approver
+
+        items = []
+        for item in indent.items:
+            item_id_str = str(item.id)
+            qty_val = (approval.approved_quantities or {}).get(item_id_str)
+            if isinstance(qty_val, dict):
+                qty = qty_val.get("quantity")
+                item_rem = qty_val.get("remarks")
+            else:
+                qty = qty_val
+                item_rem = None
+
+            items.append({
+                "material_id": item.material_id,
+                "material_name": item.material.name if item.material else None,
+                "material_code": item.material.code if item.material else None,
+                "uom_name": item.material.uom.name if item.material and item.material.uom else None,
+                "requested_quantity": item.requested_quantity,
+                "approved_quantity": qty,
+                "remarks": item_rem
+            })
+
+        # Determine status: if any qty differs from requested, it's "Modified"
+        status = "Approved"
+        for item in indent.items:
+            item_id_str = str(item.id)
+            qty_val = (approval.approved_quantities or {}).get(item_id_str)
+            qty = qty_val.get("quantity") if isinstance(qty_val, dict) else qty_val
+            if qty is not None and qty != item.requested_quantity:
+                status = "Modified"
+                break
+
+        entries.append({
+            "level": flow.level if flow else 0,
+            "approver_name": approver.full_name if approver else "Unknown",
+            "role_name": flow.role_name if flow else "Unknown",
+            "approved_at": approval.approved_at,
+            "remarks": approval.remarks,
+            "status": status,
+            "items": items
+        })
+
+    return {
+        "indent_id": indent.id,
+        "indent_number": indent.indent_number,
+        "current_approval_level": indent.current_approval_level,
+        "entries": entries
+    }
 
 @router.post("/{id}/reject")
 def reject_indent(

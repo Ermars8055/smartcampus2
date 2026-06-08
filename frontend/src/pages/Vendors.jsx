@@ -175,7 +175,8 @@ export default function Vendors() {
       setForm({
         ...r.data,
         category_ids: r.data.category_ids || [],
-        address: r.data.address || '',
+        address_line_1: r.data.address_line_1 || '',
+        address_line_2: r.data.address_line_2 || '',
         city: r.data.city || '',
         pincode: r.data.pincode || '',
         state: r.data.state || '',
@@ -198,7 +199,7 @@ export default function Vendors() {
           onClick={() => {
             setEditing(null);
             setViewOnly(false);
-            setForm({ name: '', code: '', contact_person: '', phone: '', email: '', gst_number: '', address: '', city: '', pincode: '', state: '', category_ids: [], rating: 0 });
+            setForm({ name: '', code: '', contact_person: '', phone: '', email: '', gst_number: '', address_line_1: '', address_line_2: '', city: '', pincode: '', state: '', category_ids: [], rating: 0 });
             setErrors({});
             setDialog(true);
           }}
@@ -416,6 +417,46 @@ export default function Vendors() {
                 startAdornment: <InputAdornment position="start"><Business sx={{ color: '#94A3B8' }} /></InputAdornment>,
               }}
             />
+
+            <FormControl fullWidth sx={{ gridColumn: { sm: 'span 2' } }} required error={!!errors.category_ids}>
+              <InputLabel>Vendor Categories</InputLabel>
+              <Select
+                multiple
+                value={form.category_ids}
+                onChange={e => setForm({ ...form, category_ids: e.target.value })}
+                disabled={viewOnly}
+                input={<OutlinedInput label="Vendor Categories" startAdornment={<Category sx={{ mr: 1, color: '#94A3B8' }} />} />}
+                renderValue={(selected) => (
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                    {selected.map((id) => (
+                      <Chip key={id} label={categories.find(c => c.id === id)?.name} size="small" />
+                    ))}
+                  </Box>
+                )}
+              >
+                {categories.map((cat) => (
+                  <MenuItem key={cat.id} value={cat.id}>
+                    <Checkbox checked={form.category_ids.indexOf(cat.id) > -1} />
+                    <ListItemText primary={cat.name} />
+                  </MenuItem>
+                ))}
+              </Select>
+              {errors.category_ids && <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 1.5, mb: -1 }}>{errors.category_ids}</Typography>}
+            </FormControl>
+
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+              <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, ml: 1.5 }}>Vendor Rating</Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 1.5 }}>
+                <Rating
+                  value={form.rating}
+                  onChange={(e, newVal) => setForm({ ...form, rating: newVal })}
+                  precision={0.5}
+                  readOnly={viewOnly}
+                />
+                <Typography variant="body2" sx={{ color: '#64748B', fontWeight: 700 }}>{form.rating || 0}</Typography>
+              </Box>
+            </Box>
+
             <TextField
               fullWidth
               label="Contact Person"
@@ -456,6 +497,7 @@ export default function Vendors() {
                 startAdornment: <InputAdornment position="start"><Email sx={{ color: '#94A3B8' }} /></InputAdornment>,
               }}
             />
+
             <TextField
               fullWidth
               label="GST Number"
@@ -466,10 +508,41 @@ export default function Vendors() {
               error={!!errors.gst_number}
               helperText={errors.gst_number}
               inputProps={{ maxLength: 15 }}
+              sx={{ gridColumn: { sm: 'span 3' } }}
               InputProps={{
                 startAdornment: <InputAdornment position="start"><AppRegistration sx={{ color: '#94A3B8' }} /></InputAdornment>,
               }}
             />
+
+            <TextField
+              fullWidth
+              label="Address Line 1"
+              value={form.address_line_1}
+              onChange={e => setForm({ ...form, address_line_1: e.target.value })}
+              required
+              disabled={viewOnly}
+              error={!!errors.address_line_1}
+              helperText={errors.address_line_1}
+              sx={{ gridColumn: { sm: 'span 3' } }}
+              InputProps={{
+                startAdornment: <InputAdornment position="start"><Description sx={{ color: '#94A3B8' }} /></InputAdornment>,
+              }}
+            />
+
+            <TextField
+              fullWidth
+              label="Address Line 2"
+              value={form.address_line_2}
+              onChange={e => setForm({ ...form, address_line_2: e.target.value })}
+              disabled={viewOnly}
+              error={!!errors.address_line_2}
+              helperText={errors.address_line_2}
+              sx={{ gridColumn: { sm: 'span 3' } }}
+              InputProps={{
+                startAdornment: <InputAdornment position="start"><Description sx={{ color: '#94A3B8' }} /></InputAdornment>,
+              }}
+            />
+
             <TextField
               fullWidth
               label="City"
@@ -517,61 +590,6 @@ export default function Vendors() {
                 </MenuItem>
               ))}
             </TextField>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-              <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, ml: 1.5 }}>Vendor Rating</Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 1.5 }}>
-                <Rating
-                  value={form.rating}
-                  onChange={(e, newVal) => setForm({ ...form, rating: newVal })}
-                  precision={0.5}
-                  readOnly={viewOnly}
-                />
-                <Typography variant="body2" sx={{ color: '#64748B', fontWeight: 700 }}>{form.rating || 0}</Typography>
-              </Box>
-            </Box>
-
-            <FormControl fullWidth sx={{ gridColumn: { sm: 'span 3' } }} required error={!!errors.category_ids}>
-              <InputLabel>Vendor Categories</InputLabel>
-              <Select
-                multiple
-                value={form.category_ids}
-                onChange={e => setForm({ ...form, category_ids: e.target.value })}
-                disabled={viewOnly}
-                input={<OutlinedInput label="Vendor Categories" startAdornment={<Category sx={{ mr: 1, color: '#94A3B8' }} />} />}
-                renderValue={(selected) => (
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                    {selected.map((id) => (
-                      <Chip key={id} label={categories.find(c => c.id === id)?.name} size="small" />
-                    ))}
-                  </Box>
-                )}
-              >
-                {categories.map((cat) => (
-                  <MenuItem key={cat.id} value={cat.id}>
-                    <Checkbox checked={form.category_ids.indexOf(cat.id) > -1} />
-                    <ListItemText primary={cat.name} />
-                  </MenuItem>
-                ))}
-              </Select>
-              {errors.category_ids && <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 1.5, mb: -1 }}>{errors.category_ids}</Typography>}
-            </FormControl>
-
-            <TextField
-              fullWidth
-              label="Registered Address"
-              value={form.address}
-              onChange={e => setForm({ ...form, address: e.target.value })}
-              multiline
-              rows={3}
-              required
-              disabled={viewOnly}
-              error={!!errors.address}
-              helperText={errors.address}
-              sx={{ gridColumn: { sm: 'span 3' } }}
-              InputProps={{
-                startAdornment: <InputAdornment position="start" sx={{ alignSelf: 'flex-start', mt: 1.5 }}><Description sx={{ color: '#94A3B8' }} /></InputAdornment>,
-              }}
-            />
           </Box>
         </DialogContent>
         <DialogActions sx={{ px: 4, pb: 4, pt: 2, justifyContent: 'flex-end', gap: 2 }}>

@@ -678,7 +678,7 @@ def format_gate_pass(gp: GatePass) -> GatePassOut:
         project_name=proj.name if proj else None,
         vendor_id=gp.vendor_id,
         vendor_name=f"{vend.code} - {vend.name}" if vend else None,
-        vendor_address=vend.address if vend else None,
+        vendor_address=f"{vend.address_line_1 or ''}{', ' + vend.address_line_2 if vend.address_line_2 else ''}" if vend else None,
         vendor_custom_name=gp.vendor_custom_name,
         vendor_custom_address=gp.vendor_custom_address,
         from_department=gp.from_department,

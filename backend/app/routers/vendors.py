@@ -39,8 +39,8 @@ def list_vendors(
             id=v.id, name=v.name, code=v.code,
             contact_person=v.contact_person, phone=v.phone,
             email=v.email, gst_number=v.gst_number,
-            pan_number=v.pan_number, address=v.address,
-            city=v.city, state=v.state, pincode=v.pincode,
+            pan_number=v.pan_number, address_line_1=v.address_line_1,
+            address_line_2=v.address_line_2, city=v.city, state=v.state, pincode=v.pincode,
             rating=v.rating, is_active=v.is_active,
             created_at=v.created_at,
             categories=[c[0] for c in cats]
@@ -69,8 +69,8 @@ def get_vendor(
             id=v.id, name=v.name, code=v.code,
             contact_person=v.contact_person, phone=v.phone,
             email=v.email, gst_number=v.gst_number,
-            pan_number=v.pan_number, address=v.address,
-            city=v.city, state=v.state, pincode=v.pincode,
+            pan_number=v.pan_number, address_line_1=v.address_line_1,
+            address_line_2=v.address_line_2, city=v.city, state=v.state, pincode=v.pincode,
             rating=v.rating, is_active=v.is_active,
             created_at=v.created_at,
             categories=[c[0] for c in cats]

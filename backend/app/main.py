@@ -16,7 +16,7 @@ from app.routers import (
     procurement, gate_entry, grn, store_ops, inventory_admin,
     saas_admin, rbac, sites, auto_pr, alerts, intelligence,
     indents, approval_flows, quotations, reports, uploads, terms,
-    admin_users, invoices, company_addresses, material_limits
+    admin_users, invoices, company_addresses, material_limits, configurations
 )
 
 logging.basicConfig(level=logging.INFO)
@@ -55,6 +55,7 @@ app.add_middleware(
         "http://192.168.0.5:5173",
         "http://192.168.0.3:5173",
         "http://0.0.0.0:5173",
+        "http://192.168.0.8:5173",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -95,6 +96,7 @@ app.include_router(admin_users.router)
 app.include_router(invoices.router)
 app.include_router(company_addresses.router)
 app.include_router(material_limits.router)
+app.include_router(configurations.router)
 
 
 @app.get("/api/health")

@@ -62,7 +62,12 @@ const menuItems = [
   },
   {
     text: 'Admin', icon: <Settings />, children: [
-      { text: 'Configurations', icon: <Settings />, path: '/admin', resource: 'admin_users' }, // Using 'admin_users' as a representative for Configs based on RoleConfiguration
+      { text: 'Users', icon: <People />, path: '/admin/users', resource: 'admin_users' },
+      { text: 'Audit Logs', icon: <Assessment />, path: '/admin/audit-logs', resource: 'admin_users' },
+      { text: 'Approval Flows', icon: <AccountTree />, path: '/admin/approval-flows', resource: 'admin_users' },
+      { text: 'Roles', icon: <Security />, path: '/admin/roles', resource: 'admin_users' },
+      { text: 'Material Allowances', icon: <Inventory2 />, path: '/admin/material-allowances', resource: 'admin_users' },
+      { text: 'Configurations', icon: <Settings />, path: '/admin/configurations', resource: 'admin_users' }, // Using 'admin_users' as a representative for Configs based on RoleConfiguration
       { text: 'Projects', icon: <AccountTree />, path: '/projects', resource: 'projects' },
       { text: 'Departments', icon: <Business />, path: '/departments', resource: 'departments' },
       { text: 'Terms & Conditions', icon: <Assignment />, path: '/terms', resource: 'terms' },

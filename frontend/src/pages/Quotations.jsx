@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useMessage } from '../context/MessageContext';
+import { useConfig } from '../context/ConfigContext';
+import { computeGstSplit } from '../utils/gstCalculations';
 import {
   Box, Typography, Paper, Tabs, Tab, Button, IconButton, TextField, Stack, Divider,
   Stepper, Step, StepLabel,
@@ -27,6 +29,7 @@ import { useAuth } from '../context/AuthContext';
 
 const Quotations = () => {
   const { showMessage } = useMessage();
+  const { tenantConfig } = useConfig();
   const { hasAction, hasPermission } = useAuth();
   const [loading, setLoading] = useState(false);
   const [qrs, setQrs] = useState([]);
@@ -1094,6 +1097,16 @@ const Quotations = () => {
                             const quote = mat.vendor_quotes.find(q => q.vendor_id === mat.selected_vendor_id);
                             const material = materials.find(m => m.id === mat.material_id);
                             const gstRate = material?.gst_rate || 0;
+                            const vendor = vendors.find(v => v.id === mat.selected_vendor_id);
+                            const vendorState = vendor?.state || '';
+                            const { cgst_percentage, sgst_percentage, igst_percentage } = computeGstSplit(
+                              gstRate, 
+                              vendorState, 
+                              tenantConfig?.base_state, 
+                              tenantConfig?.cgst_share_percent, 
+                              tenantConfig?.sgst_share_percent
+                            );
+
                             return {
                               qr_item_id: mat.qr_item_id,
                               material_name: mat.material_name,
@@ -1103,9 +1116,9 @@ const Quotations = () => {
                               vendor_name: mat.selected_vendor_name,
                               rate: quote ? quote.quoted_rate : 0,
                               discount_percent: 0,
-                              cgst_percentage: gstRate / 2,
-                              sgst_percentage: gstRate / 2,
-                              igst_percentage: 0
+                              cgst_percentage,
+                              sgst_percentage,
+                              igst_percentage
                             };
                           });
                         setConvertToPoDialog({ open: true, terms: '', items: itemsToConvert });

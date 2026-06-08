@@ -5,17 +5,21 @@ import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
   DialogContent, DialogActions, Grid, IconButton, Tooltip, FormControl, InputLabel, Select, MenuItem,
-  Divider, InputAdornment, TableSortLabel, useTheme, useMediaQuery, Autocomplete
+  Divider, InputAdornment, TableSortLabel, useTheme, useMediaQuery, Autocomplete,
+  Accordion, AccordionSummary, AccordionDetails, Collapse
 } from '@mui/material';
-import { Add, Delete, CheckCircle, Cancel, ReceiptLong, ShoppingCart, ArrowBack, Search, Apartment, Layers, MeetingRoom, AccountTree, Notes } from '@mui/icons-material';
+import { Add, Delete, CheckCircle, Cancel, ReceiptLong, ShoppingCart, ArrowBack, Search, Apartment, Layers, MeetingRoom, AccountTree, Notes, Visibility, ExpandMore, History, Textsms } from '@mui/icons-material';
 import api from '../services/api';
 import { formatDate, formatDateTime } from '../utils/dateUtils';
 import MaterialSelect from '../components/MaterialSelect';
 import { useAuth } from '../context/AuthContext';
+import { useConfig } from '../context/ConfigContext';
+import { computeGstSplit } from '../utils/gstCalculations';
 
 export default function Indents() {
   const { showMessage } = useMessage();
   const { hasAction } = useAuth();
+  const { tenantConfig } = useConfig();
   const [indents, setIndents] = useState([]);
   const [materials, setMaterials] = useState([]);
   const [buildings, setBuildings] = useState([]);
@@ -26,6 +30,10 @@ export default function Indents() {
   const [showForm, setShowForm] = useState(false);
   const [detailDialog, setDetailDialog] = useState(null);
   const [approvalDialog, setApprovalDialog] = useState({ open: false, indent: null, items: {} });
+  const [approvalRemarks, setApprovalRemarks] = useState('');
+  const [historyDialog, setHistoryDialog] = useState({ open: false, materialId: null, data: null, loading: false });
+  const [detailHistoryData, setDetailHistoryData] = useState(null);
+  const [detailHistoryOpen, setDetailHistoryOpen] = useState(false);
   const [search, setSearch] = useState('');
 
   const theme = useTheme();
@@ -221,15 +229,39 @@ export default function Indents() {
     }
   };
 
+  const fetchApprovalHistory = async (indentId, materialId) => {
+    setHistoryDialog({ open: true, materialId, data: null, loading: true });
+    try {
+      const res = await api.get(`/api/indents/${indentId}/approval-history`);
+      setHistoryDialog({ open: true, materialId, data: res.data, loading: false });
+    } catch (err) {
+      showMessage('Failed to load approval history', 'Error', 'error');
+      setHistoryDialog({ open: false, materialId: null, data: null, loading: false });
+    }
+  };
+
+  const fetchDetailHistory = async (indentId) => {
+    try {
+      const res = await api.get(`/api/indents/${indentId}/approval-history`);
+      setDetailHistoryData(res.data);
+      setDetailHistoryOpen(true);
+    } catch (err) {
+      console.error(err);
+      const detail = err.response?.data?.detail || err.message || 'Unknown error';
+      showMessage(`Failed to load: ${detail}`, 'Error', 'error');
+    }
+  };
+
   const submitApproval = async () => {
     const { indent, items } = approvalDialog;
     if (!indent) return;
 
     const payloadItems = indent.items.map(it => {
-      const val = items[it.id];
+      const itemData = items[it.id] || {};
       return {
         indent_item_id: it.id,
-        approved_quantity: parseFloat(val)
+        approved_quantity: parseFloat(itemData.qty),
+        remarks: itemData.rem || null
       };
     });
 
@@ -239,9 +271,13 @@ export default function Indents() {
     }
 
     try {
-      const res = await api.post(`/api/indents/${indent.id}/approve`, { items: payloadItems });
+      const res = await api.post(`/api/indents/${indent.id}/approve`, {
+        items: payloadItems,
+        remarks: approvalRemarks || null
+      });
       load();
       setApprovalDialog({ open: false, indent: null, items: {} });
+      setApprovalRemarks('');
       let msg = res.data.message || "Indent approved successfully";
       if (msg === "Fully Approved") {
         msg = `${indent.indent_number} successfully approved`;
@@ -262,7 +298,7 @@ export default function Indents() {
     let largerQuantityMessage = "You have entered an approved quantity larger than the requested quantity for the following items:\n";
 
     for (const it of indent.items) {
-      const val = items[it.id];
+      const val = items[it.id]?.qty;
       const qty = parseFloat(val);
       if (qty > it.requested_quantity) {
         hasLargerQuantity = true;
@@ -302,14 +338,12 @@ export default function Indents() {
       vendor_id: '',
       terms: '',
       items: indent.items.filter(it => it.pending_quantity > 0).map(it => {
-        const material = materials.find(m => m.id === it.material_id);
-        const gstRate = material?.gst_rate || 0;
         return {
           ...it,
           rate: '',
           discount_percent: 0,
-          cgst_percentage: gstRate / 2,
-          sgst_percentage: gstRate / 2,
+          cgst_percentage: 0,
+          sgst_percentage: 0,
           igst_percentage: 0
         };
       })
@@ -809,8 +843,113 @@ export default function Indents() {
               ))}
             </TableBody>
           </Table>
+
+          {/* Collapsible Approval History Section */}
+          {detailDialog?.status !== 'Draft' && (
+            <Box sx={{ mt: 3 }}>
+              <Accordion
+                expanded={detailHistoryOpen}
+                onChange={() => {
+                  if (!detailHistoryOpen && detailDialog?.id) {
+                    fetchDetailHistory(detailDialog.id);
+                  } else {
+                    setDetailHistoryOpen(!detailHistoryOpen);
+                  }
+                }}
+                sx={{ border: '1px solid #e2e8f0', boxShadow: 'none', borderRadius: '8px !important', '&:before': { display: 'none' } }}
+              >
+                <AccordionSummary expandIcon={<ExpandMore />} sx={{ bgcolor: '#f8fafc', borderRadius: '8px' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <History sx={{ color: '#6366f1', fontSize: 20 }} />
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#334155' }}>Approval History</Typography>
+                  </Box>
+                </AccordionSummary>
+                <AccordionDetails sx={{ p: 2 }}>
+                  {detailHistoryData && detailHistoryData.entries?.length > 0 ? (
+                    <Box>
+                      <TableContainer component={Box} sx={{ border: '1px solid #e5e7eb', borderRadius: 2, overflow: 'auto' }}>
+                        <Table size="small">
+                          <TableHead>
+                            <TableRow sx={{ '& th': { py: 1, fontSize: '0.75rem', fontWeight: 700, color: '#475569', bgcolor: '#f8fafc', whiteSpace: 'nowrap' } }}>
+                              <TableCell>Material</TableCell>
+                              <TableCell>UOM</TableCell>
+                              <TableCell align="right">Req Qty</TableCell>
+                              {detailHistoryData.entries.map((entry, idx) => (
+                                <TableCell key={idx} align="center">L{entry.level} Approved</TableCell>
+                              ))}
+                              <TableCell align="right">Final Approved Quantity</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {detailDialog?.items?.map(item => {
+                              const hasHistory = detailHistoryData.entries.some(entry => entry.items?.some(hi => hi.material_id === item.material_id));
+                              if (!hasHistory) return null;
+
+                              return (
+                                <TableRow key={item.id} sx={{ '& td': { py: 1, fontSize: '0.8rem' } }}>
+                                  <TableCell>
+                                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{item.material_name}</Typography>
+                                    <Typography variant="caption" sx={{ color: '#64748B' }}>{item.material_code}</Typography>
+                                  </TableCell>
+                                  <TableCell sx={{ color: '#64748B', whiteSpace: 'nowrap' }}>{item.uom_name}</TableCell>
+                                  <TableCell align="right" sx={{ fontWeight: 600 }}>{item.requested_quantity}</TableCell>
+
+                                  {detailHistoryData.entries.map((entry, idx) => {
+                                    const histItem = entry.items?.find(hi => hi.material_id === item.material_id);
+                                    return (
+                                      <TableCell key={idx} align="center">
+                                        {histItem ? (
+                                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                              <Typography variant="body2" sx={{ fontWeight: 700, color: '#1d4ed8' }}>{histItem.approved_quantity}</Typography>
+                                              {histItem.remarks && (
+                                                <Tooltip title={histItem.remarks} arrow placement="top">
+                                                  <Textsms sx={{ fontSize: 14, color: '#94a3b8', cursor: 'help' }} />
+                                                </Tooltip>
+                                              )}
+                                            </Box>
+                                            <Typography variant="caption" sx={{ fontWeight: 600, mt: 0.5, lineHeight: 1.1, whiteSpace: 'nowrap' }}>{entry.approver_name}</Typography>
+                                            <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.65rem', mt: 0.25, whiteSpace: 'nowrap' }}>{formatDateTime(entry.approved_at)}</Typography>
+                                          </Box>
+                                        ) : (
+                                          <Typography variant="caption" sx={{ color: '#cbd5e1' }}>—</Typography>
+                                        )}
+                                      </TableCell>
+                                    );
+                                  })}
+
+                                  <TableCell align="right" sx={{ fontWeight: 700, color: '#059669' }}>
+                                    {item.approved_quantity !== null && item.approved_quantity !== undefined ? item.approved_quantity : '—'}
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            })}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                      {detailHistoryData.entries.some(e => e.remarks) && (
+                        <Box sx={{ mt: 2 }}>
+                          <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748B', mb: 1, display: 'block', textTransform: 'uppercase' }}>General Approval Remarks</Typography>
+                          {detailHistoryData.entries.filter(e => e.remarks).map((e, idx) => (
+                            <Box key={idx} sx={{ mb: 1, p: 1.5, bgcolor: '#f8fafc', borderRadius: 1, border: '1px solid #e2e8f0' }}>
+                              <Typography variant="caption" sx={{ fontWeight: 700, color: '#1d4ed8', display: 'block', mb: 0.5 }}>L{e.level} Approval - {e.approver_name}</Typography>
+                              <Typography variant="body2" sx={{ color: '#334155' }}>{e.remarks}</Typography>
+                            </Box>
+                          ))}
+                        </Box>
+                      )}
+                    </Box>
+                  ) : (
+                    <Typography variant="body2" sx={{ color: '#94a3b8', textAlign: 'center', py: 2 }}>
+                      {detailHistoryData ? 'No approval history yet.' : 'Loading...'}
+                    </Typography>
+                  )}
+                </AccordionDetails>
+              </Accordion>
+            </Box>
+          )}
         </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2 }}><Button onClick={() => setDetailDialog(null)}>Close</Button></DialogActions>
+        <DialogActions sx={{ px: 3, pb: 2 }}><Button onClick={() => { setDetailDialog(null); setDetailHistoryOpen(false); setDetailHistoryData(null); }}>Close</Button></DialogActions>
       </Dialog>
 
       {/* Vendor Selection Dialog for PO Conversion */}
@@ -818,21 +957,53 @@ export default function Indents() {
         <DialogTitle sx={{ fontWeight: 600 }}>Convert {vendorDialog.indent?.indent_number} to Purchase Order</DialogTitle>
         <DialogContent sx={{ py: 1 }}>
           <Box sx={{ mb: 1.5, mt: 0.5, p: 1.5, bgcolor: '#f0f4ff', borderRadius: 2, border: '1px solid #dbeafe' }}>
-            <Grid container spacing={1.5} alignItems="center">
+            <Grid container spacing={1.5} alignItems="flex-start">
               <Grid item xs={12} sm={8}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e40af', whiteSpace: 'nowrap' }}>Select Vendor:</Typography>
-                  <FormControl fullWidth size="small">
-                    <Select
-                      value={vendorDialog.vendor_id}
-                      displayEmpty
-                      onChange={e => setVendorDialog({ ...vendorDialog, vendor_id: e.target.value })}
-                      sx={{ bgcolor: '#fff' }}
-                    >
-                      <MenuItem value="" disabled><em>Select Vendor</em></MenuItem>
-                      {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.code} - {v.name}</MenuItem>)}
-                    </Select>
-                  </FormControl>
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e40af', whiteSpace: 'nowrap', mt: 1 }}>Select Vendor:</Typography>
+                  <Box sx={{ flexGrow: 1 }}>
+                    <FormControl fullWidth size="small">
+                      <Select
+                        value={vendorDialog.vendor_id}
+                        displayEmpty
+                        onChange={e => {
+                          const vId = e.target.value;
+                          const vendor = vendors.find(v => v.id === vId);
+                          const vendorState = vendor?.state || '';
+                          const updatedItems = vendorDialog.items.map(it => {
+                            const material = materials.find(m => m.id === it.material_id);
+                            const gstRate = material?.gst_rate || 0;
+                            const { cgst_percentage, sgst_percentage, igst_percentage } = computeGstSplit(
+                              gstRate, vendorState, tenantConfig?.base_state,
+                              tenantConfig?.cgst_share_percent, tenantConfig?.sgst_share_percent
+                            );
+                            return { ...it, cgst_percentage, sgst_percentage, igst_percentage };
+                          });
+                          setVendorDialog({ ...vendorDialog, vendor_id: vId, items: updatedItems });
+                        }}
+                        sx={{ bgcolor: '#fff' }}
+                      >
+                        <MenuItem value="" disabled><em>Select Vendor</em></MenuItem>
+                        {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.code} - {v.name}</MenuItem>)}
+                      </Select>
+                    </FormControl>
+                    {vendorDialog.vendor_id && (
+                      <Box sx={{ mt: 0.5 }}>
+                        {(() => {
+                          const v = vendors.find(x => x.id === vendorDialog.vendor_id);
+                          if (v) {
+                            return (
+                              <Typography variant="caption" sx={{ color: '#475569', display: 'block', lineHeight: 1.3 }}>
+                                {v.address_line_1 ? `${v.address_line_1}, ` : ''}{v.address_line_2 ? `${v.address_line_2}, ` : ''}{v.city ? `${v.city}, ` : ''}{v.state ? `${v.state} ` : ''}{v.pincode ? `- ${v.pincode}` : ''}
+                                {(!v.address_line_1 && !v.address_line_2 && !v.city && !v.state) && 'Address not provided'}
+                              </Typography>
+                            );
+                          }
+                          return null;
+                        })()}
+                      </Box>
+                    )}
+                  </Box>
                 </Box>
               </Grid>
               <Grid item xs={12} sm={4} sx={{ textAlign: 'right' }}>
@@ -977,7 +1148,7 @@ export default function Indents() {
       </Dialog>
 
       {/* Approval Dialog */}
-      <Dialog open={approvalDialog.open} onClose={() => setApprovalDialog({ open: false, indent: null, items: {} })} maxWidth="md" fullWidth fullScreen={isMobile}>
+      <Dialog open={approvalDialog.open} onClose={() => { setApprovalDialog({ open: false, indent: null, items: {} }); setApprovalRemarks(''); }} maxWidth="md" fullWidth fullScreen={isMobile}>
         <DialogTitle sx={{ fontWeight: 600 }}>Approve Indent — {approvalDialog.indent?.indent_number}</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mb: 2, mt: 0.5 }}>
@@ -1027,12 +1198,16 @@ export default function Indents() {
                 <TableCell sx={{ fontWeight: 600 }}>Material</TableCell>
                 <TableCell align="left" sx={{ fontWeight: 600 }}>UOM</TableCell>
                 <TableCell align="right" sx={{ fontWeight: 600 }}>Qty Requested</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600, color: '#6366f1' }}>
+                  Qty Last Approved {approvalDialog.indent?.current_approval_level > 1 ? `(L${approvalDialog.indent.current_approval_level - 1})` : ''}
+                </TableCell>
                 <TableCell align="center" sx={{ fontWeight: 600, bgcolor: '#e0e7ff', color: '#1e40af' }}>Qty Approved</TableCell>
+                <TableCell align="left" sx={{ fontWeight: 600 }}>Remarks</TableCell>
+                <TableCell align="center" sx={{ fontWeight: 600 }}>History</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {approvalDialog.indent?.items?.map(item => {
-                const defaultQty = item.approved_quantity !== null && item.approved_quantity !== undefined ? item.approved_quantity : item.requested_quantity;
                 return (
                   <TableRow key={item.id}>
                     <TableCell>
@@ -1041,31 +1216,171 @@ export default function Indents() {
                     </TableCell>
                     <TableCell align="left" sx={{ fontWeight: 500, color: '#64748B' }}>{item.uom_name}</TableCell>
                     <TableCell align="right" sx={{ fontWeight: 500 }}>{item.requested_quantity}</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 500, color: '#6366f1' }}>
+                      {item.approved_quantity !== null && item.approved_quantity !== undefined && approvalDialog.indent?.current_approval_level > 1 ? item.approved_quantity : '—'}
+                    </TableCell>
                     <TableCell align="center" sx={{ bgcolor: '#eff6ff' }}>
                       <TextField
                         size="small"
                         type="number"
                         placeholder=""
-                        value={approvalDialog.items[item.id] !== undefined ? approvalDialog.items[item.id] : ''}
-                        onChange={e => setApprovalDialog(prev => ({ ...prev, items: { ...prev.items, [item.id]: e.target.value } }))}
+                        value={approvalDialog.items[item.id]?.qty !== undefined ? approvalDialog.items[item.id].qty : ''}
+                        onChange={e => setApprovalDialog(prev => ({ ...prev, items: { ...prev.items, [item.id]: { ...(prev.items[item.id] || {}), qty: e.target.value } } }))}
                         inputProps={{ min: 0, style: { textAlign: 'center', fontWeight: 'bold', color: '#1d4ed8' } }}
                         sx={{ width: 90, bgcolor: '#fff' }}
                       />
+                    </TableCell>
+                    <TableCell align="left" sx={{ bgcolor: '#eff6ff' }}>
+                      <TextField
+                        size="small"
+                        placeholder=""
+                        value={approvalDialog.items[item.id]?.rem || ''}
+                        onChange={e => setApprovalDialog(prev => ({ ...prev, items: { ...prev.items, [item.id]: { ...(prev.items[item.id] || {}), rem: e.target.value } } }))}
+                        sx={{ width: 130, bgcolor: '#fff', '& .MuiInputBase-input': { fontSize: '0.8rem' } }}
+                      />
+                    </TableCell>
+                    <TableCell align="center">
+                      <Tooltip title="View Approval History">
+                        <IconButton size="small" onClick={() => fetchApprovalHistory(approvalDialog.indent.id, item.material_id)}
+                          sx={{ color: '#6366f1', '&:hover': { bgcolor: '#ede9fe' } }}>
+                          <Visibility fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
                     </TableCell>
                   </TableRow>
                 );
               })}
             </TableBody>
           </Table>
+
+          {/* Approval Remarks */}
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748B', mb: 0.5, display: 'block', textTransform: 'uppercase' }}>
+              General Approval Remarks
+            </Typography>
+            <TextField
+              fullWidth size="small" multiline rows={2}
+              placeholder="Enter remarks for this approval action..."
+              value={approvalRemarks}
+              onChange={e => setApprovalRemarks(e.target.value)}
+              sx={{ bgcolor: '#fff' }}
+            />
+          </Box>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={() => setApprovalDialog({ open: false, indent: null, items: {} })}>Cancel</Button>
+          <Button onClick={() => { setApprovalDialog({ open: false, indent: null, items: {} }); setApprovalRemarks(''); }}>Cancel</Button>
           <Button
             variant="contained" color="primary" onClick={handleApproveClick} sx={{ fontWeight: 600 }}
-            disabled={!approvalDialog.indent?.items?.every(item => approvalDialog.items[item.id] !== undefined && approvalDialog.items[item.id] !== '')}
+            disabled={!approvalDialog.indent?.items?.every(item => approvalDialog.items[item.id]?.qty !== undefined && approvalDialog.items[item.id]?.qty !== '')}
           >
             Confirm & Approve
           </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Approval History Dialog */}
+      <Dialog
+        open={historyDialog.open}
+        onClose={() => setHistoryDialog({ open: false, materialId: null, data: null, loading: false })}
+        maxWidth="sm" fullWidth
+      >
+        <DialogTitle sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
+          <History sx={{ color: '#6366f1' }} />
+          Approval History
+        </DialogTitle>
+        <DialogContent>
+          {historyDialog.loading ? (
+            <Typography variant="body2" sx={{ color: '#94a3b8', textAlign: 'center', py: 4 }}>Loading...</Typography>
+          ) : historyDialog.data ? (
+            <Box>
+              {(() => {
+                const materialEntries = historyDialog.data.entries?.map(entry => {
+                  const matItem = entry.items?.find(i => i.material_id === historyDialog.materialId);
+                  return matItem ? { ...entry, material_name: matItem.material_name, material_code: matItem.material_code, uom_name: matItem.uom_name, requested_quantity: matItem.requested_quantity, approved_qty: matItem.approved_quantity, item_remarks: matItem.remarks } : null;
+                }).filter(Boolean) || [];
+
+                const firstEntry = materialEntries[0];
+                return (
+                  <Box>
+                    {firstEntry && (
+                      <Box sx={{ mb: 2, p: 2, bgcolor: '#f8fafc', borderRadius: 2, border: '1px solid #e2e8f0' }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 0.5 }}>{firstEntry.material_name}</Typography>
+                        <Typography variant="caption" sx={{ color: '#64748B' }}>{firstEntry.material_code}</Typography>
+                        <Box sx={{ display: 'flex', gap: 3, mt: 1 }}>
+                          <Box>
+                            <Typography variant="caption" color="textSecondary">Requested Quantity</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 700 }}>{firstEntry.requested_quantity} {firstEntry.uom_name}</Typography>
+                          </Box>
+                          {materialEntries.length > 0 && (
+                            <Box>
+                              <Typography variant="caption" color="textSecondary">Last Approved Quantity</Typography>
+                              <Typography variant="body2" sx={{ fontWeight: 700, color: '#1d4ed8' }}>
+                                {materialEntries[materialEntries.length - 1].approved_qty} {firstEntry.uom_name}
+                              </Typography>
+                            </Box>
+                          )}
+                          <Box>
+                            <Typography variant="caption" color="textSecondary">Current Level</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 700 }}>L{historyDialog.data.current_approval_level}</Typography>
+                          </Box>
+                        </Box>
+                      </Box>
+                    )}
+
+                    {materialEntries.length > 0 ? (
+                      <Box>
+                        <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748B', mb: 1, display: 'block', textTransform: 'uppercase' }}>Approval Trail</Typography>
+                        <Table size="small">
+                          <TableHead>
+                            <TableRow sx={{ bgcolor: '#f0f4ff', '& th': { py: 0.75, fontSize: '0.75rem', fontWeight: 700 } }}>
+                              <TableCell>Level</TableCell>
+                              <TableCell>Approver</TableCell>
+                              <TableCell align="right">Qty</TableCell>
+                              <TableCell>Date & Time</TableCell>
+                              <TableCell>Remarks</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {materialEntries.map((entry, idx) => (
+                              <TableRow key={idx} sx={{ '& td': { py: 0.75, fontSize: '0.8rem' } }}>
+                                <TableCell>
+                                  <Chip label={`L${entry.level}`} size="small" sx={{ height: 22, fontSize: '0.7rem', fontWeight: 700, bgcolor: '#ede9fe', color: '#6d28d9' }} />
+                                </TableCell>
+                                <TableCell sx={{ fontWeight: 600 }}>{entry.approver_name}</TableCell>
+                                <TableCell align="right" sx={{ fontWeight: 700, color: '#1d4ed8' }}>{entry.approved_qty}</TableCell>
+                                <TableCell sx={{ color: '#64748B', whiteSpace: 'nowrap' }}>{formatDateTime(entry.approved_at)}</TableCell>
+                                <TableCell sx={{ color: '#64748B', fontStyle: entry.item_remarks ? 'normal' : 'italic', maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                  {entry.item_remarks || '—'}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                        {materialEntries.some(e => e.remarks) && (
+                          <Box sx={{ mt: 3 }}>
+                            <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748B', mb: 1, display: 'block', textTransform: 'uppercase' }}>General Approval Remarks</Typography>
+                            {materialEntries.filter(e => e.remarks).map((e, idx) => (
+                              <Box key={idx} sx={{ mb: 1, p: 1.5, bgcolor: '#f8fafc', borderRadius: 1, border: '1px solid #e2e8f0' }}>
+                                <Typography variant="caption" sx={{ fontWeight: 700, color: '#1d4ed8', display: 'block', mb: 0.5 }}>L{e.level} Approval - {e.approver_name}</Typography>
+                                <Typography variant="body2" sx={{ color: '#334155' }}>{e.remarks}</Typography>
+                              </Box>
+                            ))}
+                          </Box>
+                        )}
+                      </Box>
+                    ) : (
+                      <Typography variant="body2" sx={{ color: '#94a3b8', textAlign: 'center', py: 3 }}>
+                        No approval history available for this material yet.
+                      </Typography>
+                    )}
+                  </Box>
+                );
+              })()}
+            </Box>
+          ) : null}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setHistoryDialog({ open: false, materialId: null, data: null, loading: false })}>Close</Button>
         </DialogActions>
       </Dialog>
     </Box>

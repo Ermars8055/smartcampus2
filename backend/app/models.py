@@ -144,6 +144,17 @@ class DataAccessScope(str, enum.Enum):
 
 # == Multi-Tenant Core ==
 
+class TenantConfiguration(Base):
+    __tablename__ = "tenant_configurations"
+    id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), unique=True, nullable=False)
+    base_state = Column(String(100), nullable=False)
+    cgst_share_percent = Column(Float, nullable=False)
+    sgst_share_percent = Column(Float, nullable=False)
+    created_at = Column(DateTime, default=_get_now)
+    updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)
+    tenant = relationship("Tenant")
+
 class Tenant(Base):
     __tablename__ = "tenants"
     id = Column(Integer, primary_key=True, index=True)
@@ -433,7 +444,8 @@ class Vendor(Base):
     email = Column(String(255))
     gst_number = Column(String(20))
     pan_number = Column(String(15))
-    address = Column(Text)
+    address_line_1 = Column(Text)
+    address_line_2 = Column(Text)
     city = Column(String(100))
     state = Column(String(100))
     pincode = Column(String(10))
@@ -1029,6 +1041,7 @@ class IndentApproval(Base):
     approval_flow_id = Column(Integer, ForeignKey("approval_flows.id"), nullable=False)
     approver_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     approved_quantities = Column(JSON, default=dict)
+    remarks = Column(Text, nullable=True)
     approved_at = Column(DateTime, default=_get_now)
     
     indent = relationship("Indent")

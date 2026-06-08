@@ -6,7 +6,7 @@ import {
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
   InputLabel, IconButton, Tooltip, Divider, InputAdornment, Paper, TableSortLabel, useTheme, useMediaQuery,
   DialogContent, DialogActions, Grid, MenuItem, Select, FormControl, Link,
-  Accordion, AccordionSummary, AccordionDetails, Tab, Tabs,
+  Accordion, AccordionSummary, AccordionDetails, Tab, Tabs, Autocomplete
 } from '@mui/material';
 import { Add, Delete, CheckCircle, Archive, Send, Cancel, Search, ShoppingCart, Store, Assignment, CalendarMonth, ArrowDropDown, Inventory, History, ExpandMore, Textsms } from '@mui/icons-material';
 import api from '../services/api';
@@ -639,8 +639,8 @@ export default function PurchaseOrders() {
 
       <Card sx={{ mb: 3 }}>
         <Box sx={{ p: 2 }}>
-          <TextField size="small" placeholder="Search PO numbers..." value={search}
-            onChange={e => setSearch(e.target.value)} sx={{ minWidth: 300 }}
+          <TextField size="small" placeholder="Search PO/Indent/PR/Quotation numbers..." value={search}
+            onChange={e => setSearch(e.target.value)} sx={{ minWidth: 450 }}
             InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }} />
         </Box>
         <Tabs
@@ -1205,34 +1205,35 @@ export default function PurchaseOrders() {
         </DialogTitle>
         <DialogContent sx={{ px: 3, py: 1 }}>
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr 1fr' }, gap: 2, pt: 1, mb: 2 }}>
-            <FormControl fullWidth required size="small">
-              <InputLabel>Vendor</InputLabel>
-              <Select
-                value={form.vendor_id}
-                label="Vendor"
-                onChange={e => {
-                  const vId = e.target.value;
-                  const vendor = vendors.find(v => v.id === vId);
-                  const vendorState = vendor?.state || '';
+            <Autocomplete
+              options={vendors}
+              getOptionLabel={(option) => `${option.code} - ${option.name}`}
+              value={vendors.find(v => v.id === form.vendor_id) || null}
+              onChange={(e, newValue) => {
+                const vId = newValue ? newValue.id : '';
+                const vendor = newValue;
+                const vendorState = vendor?.state || '';
 
-                  const updatedItems = form.items.map(it => {
-                    const material = materials.find(m => m.id === it.material_id);
-                    if (!material) return it;
-                    const gstRate = material.gst_rate || 0;
-                    const { cgst_percentage, sgst_percentage, igst_percentage } = computeGstSplit(
-                      gstRate, vendorState, tenantConfig?.base_state,
-                      tenantConfig?.cgst_share_percent, tenantConfig?.sgst_share_percent
-                    );
-                    return { ...it, cgst_percentage, sgst_percentage, igst_percentage };
-                  });
+                const updatedItems = form.items.map(it => {
+                  const material = materials.find(m => m.id === it.material_id);
+                  if (!material) return it;
+                  const gstRate = material.gst_rate || 0;
+                  const { cgst_percentage, sgst_percentage, igst_percentage } = computeGstSplit(
+                    gstRate, vendorState, tenantConfig?.base_state,
+                    tenantConfig?.cgst_share_percent, tenantConfig?.sgst_share_percent
+                  );
+                  return { ...it, cgst_percentage, sgst_percentage, igst_percentage };
+                });
 
-                  setForm({ ...form, vendor_id: vId, items: updatedItems });
-                }}
-                startAdornment={<InputAdornment position="start"><Store sx={{ color: '#94A3B8' }} /></InputAdornment>}
-              >
-                {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.code} - {v.name}</MenuItem>)}
-              </Select>
-            </FormControl>
+                setForm({ ...form, vendor_id: vId, items: updatedItems });
+              }}
+              renderInput={(params) => (
+                <TextField {...params} label="Vendor *" size="small" />
+              )}
+              fullWidth
+              size="small"
+              disableClearable
+            />
 
             <FormControl fullWidth size="small">
               <InputLabel>PO Type</InputLabel>

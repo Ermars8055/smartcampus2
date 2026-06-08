@@ -4,7 +4,7 @@ import {
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
   DialogContent, DialogActions, Grid, MenuItem, Select, FormControl,
   InputLabel, IconButton, Tooltip, Tab, Tabs, Divider, Paper, InputAdornment,
-  TableSortLabel, Accordion, AccordionSummary, AccordionDetails
+  TableSortLabel, Accordion, AccordionSummary, AccordionDetails, Autocomplete
 } from '@mui/material';
 import { Add, CheckCircle, Cancel, ShoppingCart, Archive, Delete, Search, Apartment, AccountTree, CalendarMonth, Notes, Store, Numbers, Inventory, ArrowDropDown, Visibility, History, Textsms, ExpandMore } from '@mui/icons-material';
 import api from '../services/api';
@@ -944,34 +944,32 @@ export default function PurchaseRequests() {
                     <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
                       <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1d4ed8', whiteSpace: 'nowrap', mt: 1 }}>Select Vendor:</Typography>
                       <Box sx={{ flexGrow: 1 }}>
-                        <FormControl fullWidth required size="small">
-                          <InputLabel>Vendor</InputLabel>
-                          <Select
-                            value={convertDialog.vendor_id}
-                            label="Vendor"
-                            displayEmpty
-                            onChange={e => {
-                              const vId = e.target.value;
-                              const vendor = vendors.find(v => v.id === vId);
-                              const vendorState = vendor?.state || '';
-                              const updatedItems = convertDialog.items.map(it => {
-                                const material = materials.find(m => m.id === it.material_id);
-                                const gstRate = material?.gst_rate || 0;
-                                const { cgst_percentage, sgst_percentage, igst_percentage } = computeGstSplit(
-                                  gstRate, vendorState, tenantConfig?.base_state,
-                                  tenantConfig?.cgst_share_percent, tenantConfig?.sgst_share_percent
-                                );
-                                return { ...it, cgst_percentage, sgst_percentage, igst_percentage };
-                              });
-                              setConvertDialog({ ...convertDialog, vendor_id: vId, items: updatedItems });
-                            }}
-                            startAdornment={<InputAdornment position="start"><Store sx={{ color: '#94A3B8' }} /></InputAdornment>}
-                            sx={{ bgcolor: '#fff' }}
-                          >
-                            <MenuItem value="" disabled>Select Vendor</MenuItem>
-                            {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.code} - {v.name}</MenuItem>)}
-                          </Select>
-                        </FormControl>
+                        <Autocomplete
+                          options={vendors}
+                          getOptionLabel={(option) => `${option.code} - ${option.name}`}
+                          value={vendors.find(v => v.id === convertDialog.vendor_id) || null}
+                          onChange={(e, newValue) => {
+                            const vId = newValue ? newValue.id : '';
+                            const vendor = newValue;
+                            const vendorState = vendor?.state || '';
+                            const updatedItems = convertDialog.items.map(it => {
+                              const material = materials.find(m => m.id === it.material_id);
+                              const gstRate = material?.gst_rate || 0;
+                              const { cgst_percentage, sgst_percentage, igst_percentage } = computeGstSplit(
+                                gstRate, vendorState, tenantConfig?.base_state,
+                                tenantConfig?.cgst_share_percent, tenantConfig?.sgst_share_percent
+                              );
+                              return { ...it, cgst_percentage, sgst_percentage, igst_percentage };
+                            });
+                            setConvertDialog({ ...convertDialog, vendor_id: vId, items: updatedItems });
+                          }}
+                          renderInput={(params) => (
+                            <TextField {...params} label="Vendor *" size="small" />
+                          )}
+                          fullWidth
+                          size="small"
+                          disableClearable
+                        />
                         {convertDialog.vendor_id && (() => {
                           const vendor = vendors.find(v => v.id === convertDialog.vendor_id);
                           if (!vendor) return null;

@@ -7,7 +7,7 @@ import {
   Stepper, Step, StepLabel,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, TableFooter,
   Dialog, DialogTitle, DialogContent, DialogActions, FormControl, FormHelperText,
-  InputLabel, Select, MenuItem, Chip, OutlinedInput, Checkbox, ListItemText,
+  InputLabel, Select, MenuItem, Chip, OutlinedInput, Checkbox, ListItemText, Autocomplete,
   Alert, CircularProgress, Accordion, AccordionSummary, AccordionDetails, Card,
   Grid, InputAdornment, Tooltip
 } from '@mui/material';
@@ -1310,32 +1310,39 @@ const Quotations = () => {
                   Invite Vendors {(newQR.vendor_ids?.length || 0) === 1 && "(Minimum 2 Required)"}
                 </Typography>
                 <FormControl fullWidth error={(newQR.vendor_ids?.length || 0) === 1}>
-                  <Select
+                  <Autocomplete
                     multiple
-                    value={newQR.vendor_ids || []}
-                    onChange={(e) => setNewQR(prev => ({ ...prev, vendor_ids: e.target.value }))}
-                    input={<OutlinedInput />}
-                    startAdornment={<InputAdornment position="start"><VendorIcon color={(newQR.vendor_ids?.length || 0) === 1 ? "error" : "action"} sx={{ mr: 1 }} /></InputAdornment>}
-                    renderValue={(selected) => (
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                        {selected.map((id) => (
-                          <Chip
-                            key={id}
-                            label={(() => { const v = (vendors || []).find(x => x.id === id); return v ? `${v.code} - ${v.name}` : ''; })()}
-                            size="small"
-                            sx={{ bgcolor: 'secondary.light', color: 'secondary.contrastText' }}
-                          />
-                        ))}
-                      </Box>
+                    options={vendors || []}
+                    getOptionLabel={(option) => `${option.code} - ${option.name}`}
+                    value={(vendors || []).filter(v => (newQR.vendor_ids || []).includes(v.id))}
+                    onChange={(e, newValue) => {
+                      setNewQR(prev => ({ ...prev, vendor_ids: newValue.map(v => v.id) }));
+                    }}
+                    renderInput={(params) => (
+                      <TextField 
+                        {...params} 
+                        placeholder="Search Vendors..." 
+                        error={(newQR.vendor_ids?.length || 0) === 1}
+                      />
                     )}
-                  >
-                    {Array.isArray(vendors) && vendors.map(v => (
-                      <MenuItem key={v.id} value={v.id}>
-                        <Checkbox checked={(newQR.vendor_ids || []).indexOf(v.id) > -1} />
-                        <ListItemText primary={`${v.code} - ${v.name}`} />
-                      </MenuItem>
-                    ))}
-                  </Select>
+                    disableCloseOnSelect
+                    renderOption={(props, option, { selected }) => (
+                      <li {...props}>
+                        <Checkbox checked={selected} />
+                        <ListItemText primary={`${option.code} - ${option.name}`} />
+                      </li>
+                    )}
+                    renderTags={(value, getTagProps) =>
+                      value.map((option, index) => (
+                        <Chip
+                          {...getTagProps({ index })}
+                          label={`${option.code} - ${option.name}`}
+                          size="small"
+                          sx={{ bgcolor: 'secondary.light', color: 'secondary.contrastText' }}
+                        />
+                      ))
+                    }
+                  />
                   {(newQR.vendor_ids?.length || 0) === 1 && (
                     <FormHelperText sx={{ fontWeight: 600 }}>Please invite at least 2 vendors to ensure competitive pricing.</FormHelperText>
                   )}

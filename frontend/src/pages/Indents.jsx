@@ -997,31 +997,32 @@ export default function Indents() {
                 <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e40af', whiteSpace: 'nowrap', mt: 1 }}>Select Vendor:</Typography>
                   <Box sx={{ flexGrow: 1 }}>
-                    <FormControl fullWidth size="small">
-                      <Select
-                        value={vendorDialog.vendor_id}
-                        displayEmpty
-                        onChange={e => {
-                          const vId = e.target.value;
-                          const vendor = vendors.find(v => v.id === vId);
-                          const vendorState = vendor?.state || '';
-                          const updatedItems = vendorDialog.items.map(it => {
-                            const material = materials.find(m => m.id === it.material_id);
-                            const gstRate = material?.gst_rate || 0;
-                            const { cgst_percentage, sgst_percentage, igst_percentage } = computeGstSplit(
-                              gstRate, vendorState, tenantConfig?.base_state,
-                              tenantConfig?.cgst_share_percent, tenantConfig?.sgst_share_percent
-                            );
-                            return { ...it, cgst_percentage, sgst_percentage, igst_percentage };
-                          });
-                          setVendorDialog({ ...vendorDialog, vendor_id: vId, items: updatedItems });
-                        }}
-                        sx={{ bgcolor: '#fff' }}
-                      >
-                        <MenuItem value="" disabled><em>Select Vendor</em></MenuItem>
-                        {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.code} - {v.name}</MenuItem>)}
-                      </Select>
-                    </FormControl>
+                    <Autocomplete
+                      options={vendors}
+                      getOptionLabel={(option) => `${option.code} - ${option.name}`}
+                      value={vendors.find(v => v.id === vendorDialog.vendor_id) || null}
+                      onChange={(e, newValue) => {
+                        const vId = newValue ? newValue.id : '';
+                        const vendor = newValue;
+                        const vendorState = vendor?.state || '';
+                        const updatedItems = vendorDialog.items.map(it => {
+                          const material = materials.find(m => m.id === it.material_id);
+                          const gstRate = material?.gst_rate || 0;
+                          const { cgst_percentage, sgst_percentage, igst_percentage } = computeGstSplit(
+                            gstRate, vendorState, tenantConfig?.base_state,
+                            tenantConfig?.cgst_share_percent, tenantConfig?.sgst_share_percent
+                          );
+                          return { ...it, cgst_percentage, sgst_percentage, igst_percentage };
+                        });
+                        setVendorDialog({ ...vendorDialog, vendor_id: vId, items: updatedItems });
+                      }}
+                      renderInput={(params) => (
+                        <TextField {...params} placeholder="Search Vendor..." size="small" sx={{ bgcolor: '#fff' }} />
+                      )}
+                      fullWidth
+                      size="small"
+                      disableClearable
+                    />
                     {vendorDialog.vendor_id && (
                       <Box sx={{ mt: 0.5 }}>
                         {(() => {

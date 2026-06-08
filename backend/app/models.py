@@ -32,6 +32,7 @@ class PRStatus(str, enum.Enum):
 
 class POStatus(str, enum.Enum):
     DRAFT = "Draft"
+    SUBMITTED = "Submitted"
     APPROVED = "Approved"
     SENT = "Sent to Vendor"
     PARTIAL = "Partially Received"
@@ -486,6 +487,7 @@ class PurchaseRequest(Base):
     required_date = Column(Date, nullable=False)
     remarks = Column(Text)
     status = Column(String(50), default=PRStatus.DRAFT.value)
+    current_approval_level = Column(Integer, default=1)
     approved_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     approved_at = Column(DateTime, nullable=True)
     is_deleted = Column(Boolean, default=False)
@@ -504,7 +506,8 @@ class PurchaseRequestItem(Base):
     id = Column(Integer, primary_key=True, index=True)
     pr_id = Column(Integer, ForeignKey("purchase_requests.id"), nullable=False)
     material_id = Column(Integer, ForeignKey("materials.id"), nullable=False)
-    quantity = Column(Float, nullable=False)
+    quantity = Column(Float, nullable=False)  # requested quantity
+    approved_quantity = Column(Float, nullable=True)
     purchase_request = relationship("PurchaseRequest", back_populates="items")
     material = relationship("Material")
 
@@ -523,6 +526,7 @@ class PurchaseOrder(Base):
     total_amount = Column(Float, default=0)
     delivery_date = Column(Date)
     status = Column(String(50), default=POStatus.DRAFT.value)
+    current_approval_level = Column(Integer, default=1)
     terms = Column(Text)
     created_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     approved_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
@@ -1045,6 +1049,36 @@ class IndentApproval(Base):
     approved_at = Column(DateTime, default=_get_now)
     
     indent = relationship("Indent")
+    flow = relationship("ApprovalFlow")
+    approver = relationship("User")
+
+
+class PurchaseRequestApproval(Base):
+    __tablename__ = "purchase_request_approvals"
+    id = Column(Integer, primary_key=True, index=True)
+    pr_id = Column(Integer, ForeignKey("purchase_requests.id", ondelete="CASCADE"), nullable=False)
+    approval_flow_id = Column(Integer, ForeignKey("approval_flows.id"), nullable=False)
+    approver_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    approved_quantities = Column(JSON, default=dict)
+    remarks = Column(Text, nullable=True)
+    approved_at = Column(DateTime, default=_get_now)
+    
+    purchase_request = relationship("PurchaseRequest")
+    flow = relationship("ApprovalFlow")
+    approver = relationship("User")
+
+
+class PurchaseOrderApproval(Base):
+    __tablename__ = "purchase_order_approvals"
+    id = Column(Integer, primary_key=True, index=True)
+    po_id = Column(Integer, ForeignKey("purchase_orders.id", ondelete="CASCADE"), nullable=False)
+    approval_flow_id = Column(Integer, ForeignKey("approval_flows.id"), nullable=False)
+    approver_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    approved_quantities = Column(JSON, default=dict)
+    remarks = Column(Text, nullable=True)
+    approved_at = Column(DateTime, default=_get_now)
+    
+    purchase_order = relationship("PurchaseOrder")
     flow = relationship("ApprovalFlow")
     approver = relationship("User")
 

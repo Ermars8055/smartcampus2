@@ -59,10 +59,10 @@ def list_indents(
     for indent in indents:
         indent.requester_name = indent.requester.full_name if indent.requester else None
         indent.room_name = indent.room.name if indent.room else None
-        indent.building_name = indent.room.floor.building.name if indent.room and indent.room.floor and indent.room.floor.building else None
+        indent.building_name = indent.building.name if indent.building else (indent.room.floor.building.name if indent.room and indent.room.floor and indent.room.floor.building else None)
         indent.floor = indent.floor or (indent.room.floor.name if indent.room and indent.room.floor else None)
         indent.department = indent.department or (indent.room.department_name if indent.room else None)
-        indent.project_id = indent.room.floor.building.project_id if indent.room and indent.room.floor and indent.room.floor.building else None
+        indent.project_id = indent.building.project_id if indent.building else (indent.room.floor.building.project_id if indent.room and indent.room.floor and indent.room.floor.building else None)
         for item in indent.items:
             if item.material:
                 item.material_name = item.material.name
@@ -199,10 +199,10 @@ def get_indent(
         
     indent.requester_name = indent.requester.full_name if indent.requester else None
     indent.room_name = indent.room.name if indent.room else None
-    indent.building_name = indent.room.floor.building.name if indent.room and indent.room.floor and indent.room.floor.building else None
+    indent.building_name = indent.building.name if indent.building else (indent.room.floor.building.name if indent.room and indent.room.floor and indent.room.floor.building else None)
     indent.floor = indent.floor or (indent.room.floor.name if indent.room and indent.room.floor else None)
     indent.department = indent.department or (indent.room.department_name if indent.room else None)
-    indent.project_id = indent.room.floor.building.project_id if indent.room and indent.room.floor and indent.room.floor.building else None
+    indent.project_id = indent.building.project_id if indent.building else (indent.room.floor.building.project_id if indent.room and indent.room.floor and indent.room.floor.building else None)
     for item in indent.items:
         if item.material:
             item.material_name = item.material.name
@@ -406,9 +406,13 @@ def get_approval_history(
         "entries": entries
     }
 
+class IndentRejectRequest(BaseModel):
+    remarks: Optional[str] = None
+
 @router.post("/{id}/reject")
 def reject_indent(
     id: int,
+    data: IndentRejectRequest = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("indents", "update")),
     tenant_id: int = Depends(get_tenant_id),
@@ -419,6 +423,8 @@ def reject_indent(
         raise HTTPException(404, "Indent not found")
         
     indent.status = IndentStatus.REJECTED.value
+    if data and data.remarks:
+        indent.remarks = (indent.remarks or '') + f'\n[Rejected: {data.remarks}]'
     db.commit()
     return {"message": "Rejected", "status": indent.status}
 

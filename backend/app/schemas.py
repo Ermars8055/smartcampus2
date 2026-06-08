@@ -430,8 +430,18 @@ class PRItemBase(BaseModel):
     material_id: int
     quantity: float = Field(..., gt=0, description="Quantity must be positive")
 
+class PRApproveItemRequest(BaseModel):
+    pr_item_id: int
+    approved_quantity: float = Field(..., ge=0)
+    remarks: Optional[str] = None
+
+class PRApproveRequest(BaseModel):
+    items: List[PRApproveItemRequest] = []
+    remarks: Optional[str] = None
+
 class PRItemOut(PRItemBase):
     id: int
+    approved_quantity: Optional[float] = None
     material_name: Optional[str] = None
     material_code: Optional[str] = None
     uom_name: Optional[str] = None
@@ -449,7 +459,7 @@ class PRBase(BaseModel):
     items: List[PRItemBase] = []
 
 class PRCreate(PRBase):
-    pass
+    status: Optional[str] = "Draft"
 
 class PRUpdate(BaseModel):
     required_date: Optional[date] = None
@@ -458,11 +468,15 @@ class PRUpdate(BaseModel):
     required_for_room_id: Optional[int] = None
     status: Optional[str] = None
 
+class PRFullUpdate(PRBase):
+    status: Optional[str] = None
+
 class PROut(PRBase):
     id: int
     pr_number: str
     requester_id: int
     status: str
+    current_approval_level: int
     approved_by_id: Optional[int] = None
     approved_at: Optional[datetime] = None
     created_at: datetime
@@ -507,8 +521,20 @@ class POBase(BaseModel):
     terms: Optional[str] = None
     items: List[POItemBase] = []
 
+class POApproveItemRequest(BaseModel):
+    po_item_id: int
+    approved_quantity: float = Field(..., ge=0)
+    remarks: Optional[str] = None
+
+class POApproveRequest(BaseModel):
+    items: List[POApproveItemRequest] = []
+    remarks: Optional[str] = None
+
 class POCreate(POBase):
-    pass
+    status: Optional[str] = "Draft"
+
+class POFullUpdate(POBase):
+    status: Optional[str] = None
 
 class POUpdate(BaseModel):
     delivery_date: Optional[date] = None
@@ -530,6 +556,7 @@ class POOut(BaseModel):
     total_amount: float
     delivery_date: Optional[date] = None
     status: str
+    current_approval_level: int = 1
     terms: Optional[str] = None
     created_at: datetime
     vendor_name: Optional[str] = None

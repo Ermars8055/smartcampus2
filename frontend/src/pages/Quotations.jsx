@@ -8,7 +8,7 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, TableFooter,
   Dialog, DialogTitle, DialogContent, DialogActions, FormControl, FormHelperText,
   InputLabel, Select, MenuItem, Chip, OutlinedInput, Checkbox, ListItemText,
-  Alert, CircularProgress, Accordion, AccordionSummary, AccordionDetails,
+  Alert, CircularProgress, Accordion, AccordionSummary, AccordionDetails, Card,
   Grid, InputAdornment, Tooltip
 } from '@mui/material';
 import {
@@ -17,7 +17,7 @@ import {
   Download as DownloadIcon, ExpandMore as ExpandMoreIcon, ArrowBack as ArrowBackIcon,
   AccountTree as ProjectIcon, Event as DateIcon, Group as VendorIcon, Description as RemarkIcon, Link as LinkIcon, Inventory as InventoryIcon,
   EditNote as ProcessIcon, Balance as CompareIcon, FactCheck as ApproveIcon, ShoppingCart as OrderIcon, Send as BlastIcon,
-  ArrowDropUp, ArrowDropDown
+  ArrowDropUp, ArrowDropDown, Search
 } from '@mui/icons-material';
 import api from '../services/api';
 import { formatDate } from '../utils/dateUtils';
@@ -37,6 +37,7 @@ const Quotations = () => {
   const [vendors, setVendors] = useState([]);
   const [materials, setMaterials] = useState([]);
   const [approvedPrs, setApprovedPrs] = useState([]);
+  const [search, setSearch] = useState('');
 
   // Create QR state
   const [createQRDialogOpen, setCreateQRDialogOpen] = useState(false);
@@ -365,6 +366,11 @@ const Quotations = () => {
       return qr.status === filterMap[listFilter];
     });
 
+    if (search) {
+      const s = search.toLowerCase();
+      filtered = filtered.filter(qr => qr.qr_number.toLowerCase().includes(s));
+    }
+
     return [...filtered].sort((a, b) => {
       const { key, direction } = sortConfig;
       let aVal = a[key];
@@ -517,36 +523,18 @@ const Quotations = () => {
         {!selectedQR && (
           <Box>
             {/* Status Filter Tabs */}
-            <Paper
-              elevation={0}
-              sx={{
-                mb: 2,
-                borderBottom: '1px solid #e0e0e0',
-                borderRadius: '8px 8px 0 0',
-                backgroundColor: '#fff'
-              }}
-            >
+            <Card sx={{ mb: 3 }}>
+              <Box sx={{ p: 2 }}>
+                <TextField size="small" placeholder="Search QR numbers..." value={search}
+                  onChange={e => setSearch(e.target.value)} sx={{ minWidth: 300 }}
+                  InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }} />
+              </Box>
               <Tabs
                 value={listFilter}
                 onChange={(e, newVal) => setListFilter(newVal)}
                 variant="scrollable"
                 scrollButtons="auto"
-                sx={{
-                  '& .MuiTab-root': {
-                    minWidth: 100,
-                    fontWeight: 600,
-                    fontSize: '0.85rem',
-                    textTransform: 'none',
-                    py: 1.5,
-                  },
-                  '& .Mui-selected': {
-                    color: 'primary.main',
-                  },
-                  '& .MuiTabs-indicator': {
-                    height: 3,
-                    borderRadius: '3px 3px 0 0'
-                  }
-                }}
+                sx={{ borderBottom: 1, borderColor: 'divider' }}
               >
                 {['All', 'Draft', 'Requested', 'Received', 'Entered', 'Compared', 'Approved', 'Ordered'].map(filter => (
                   <Tab
@@ -569,10 +557,11 @@ const Quotations = () => {
                         />
                       </Box>
                     }
+                    sx={{ textTransform: 'none', fontWeight: 600, minHeight: 48, minWidth: 'auto', px: 2 }}
                   />
                 ))}
               </Tabs>
-            </Paper>
+            </Card>
 
             <TableContainer component={Paper} elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 2, overflowX: 'auto', backgroundColor: '#fff' }}>
               <Table size="small">
@@ -830,30 +819,30 @@ const Quotations = () => {
                                 if (s.source === 'Manual' && hasPR) return false;
                                 return (s.source === 'PR' && s.source_pr_number) || s.source === 'Manual';
                               });
-                              
-                              return Array.from(new Set(displaySources.map(s => 
+
+                              return Array.from(new Set(displaySources.map(s =>
                                 s.source === 'PR' ? `PR:${s.source_pr_number}` : 'Manual'
                               ))).map((srcKey, sIdx) => {
                                 const isPR = srcKey.startsWith('PR:');
                                 const label = isPR ? srcKey.replace('PR:', '') : 'Manual';
                                 return (
-                                  <Chip 
+                                  <Chip
                                     key={sIdx}
-                                    size="small" 
-                                    label={label} 
-                                    color={isPR ? "primary" : "default"} 
-                                    variant="outlined" 
-                                    sx={{ fontSize: '0.7rem', height: 20 }} 
+                                    size="small"
+                                    label={label}
+                                    color={isPR ? "primary" : "default"}
+                                    variant="outlined"
+                                    sx={{ fontSize: '0.7rem', height: 20 }}
                                   />
                                 );
                               });
                             })() : (
-                              <Chip 
-                                size="small" 
-                                label={item.source === 'PR' && item.source_pr_number ? item.source_pr_number : "Manual"} 
+                              <Chip
+                                size="small"
+                                label={item.source === 'PR' && item.source_pr_number ? item.source_pr_number : "Manual"}
                                 color={item.source === 'PR' ? "primary" : "default"}
-                                variant="outlined" 
-                                sx={{ fontSize: '0.7rem', height: 20 }} 
+                                variant="outlined"
+                                sx={{ fontSize: '0.7rem', height: 20 }}
                               />
                             )}
                           </Box>
@@ -920,10 +909,10 @@ const Quotations = () => {
                         <TableRow key={v.vendor_id}>
                           <TableCell>{v.vendor_name}</TableCell>
                           <TableCell>
-                            <Chip 
-                              size="small" 
-                              label={v.receipt_status || "Pending"} 
-                              color={v.receipt_status === 'Received' ? 'success' : (v.receipt_status === 'Not Required' ? 'default' : 'warning')} 
+                            <Chip
+                              size="small"
+                              label={v.receipt_status || "Pending"}
+                              color={v.receipt_status === 'Received' ? 'success' : (v.receipt_status === 'Not Required' ? 'default' : 'warning')}
                             />
                           </TableCell>
                           <TableCell align="right">
@@ -991,7 +980,7 @@ const Quotations = () => {
                                       items: submittedQuote.items.map(i => ({
                                         qr_item_id: i.qr_item_id, material_id: i.material_id, material_name: i.material_name,
                                         material_code: i.material_code,
-                                        uom_name: i.uom_name, quoted_rate: i.quoted_rate || '', 
+                                        uom_name: i.uom_name, quoted_rate: i.quoted_rate || '',
                                         delivery_days: i.delivery_days || '', remarks: i.remarks || '',
                                         is_excluded: i.is_excluded || false
                                       }))
@@ -1089,7 +1078,7 @@ const Quotations = () => {
                     {selectedQR.status === 'Compared' && (
                       <Button variant="contained" color="primary" onClick={handleApprove}>Management Approve</Button>
                     )}
-                     {selectedQR.status === 'Approved' && (
+                    {selectedQR.status === 'Approved' && (
                       <Button variant="contained" color="success" onClick={() => {
                         const itemsToConvert = comparisonData.materials
                           .filter(mat => mat.selected_vendor_id)
@@ -1100,10 +1089,10 @@ const Quotations = () => {
                             const vendor = vendors.find(v => v.id === mat.selected_vendor_id);
                             const vendorState = vendor?.state || '';
                             const { cgst_percentage, sgst_percentage, igst_percentage } = computeGstSplit(
-                              gstRate, 
-                              vendorState, 
-                              tenantConfig?.base_state, 
-                              tenantConfig?.cgst_share_percent, 
+                              gstRate,
+                              vendorState,
+                              tenantConfig?.base_state,
+                              tenantConfig?.cgst_share_percent,
                               tenantConfig?.sgst_share_percent
                             );
 
@@ -1159,12 +1148,12 @@ const Quotations = () => {
                               const quote = mat.vendor_quotes.find(q => q.vendor_id === vt.vendor_id);
                               const isL1 = quote?.rank === 1;
                               const isSelected = mat.selected_vendor_id === vt.vendor_id;
-                              
+
                               return (
-                                <TableCell 
-                                  key={vt.vendor_id} 
+                                <TableCell
+                                  key={vt.vendor_id}
                                   align="right"
-                                  sx={{ 
+                                  sx={{
                                     backgroundColor: isSelected ? 'rgba(46, 125, 50, 0.05)' : 'inherit',
                                     fontWeight: isSelected ? 600 : 400
                                   }}
@@ -1174,11 +1163,11 @@ const Quotations = () => {
                                       <Typography variant="body2">
                                         ₹{Number(quote.quoted_rate).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                       </Typography>
-                                      <Chip 
-                                        label={isSelected ? `${quote.rank_label} Selected` : quote.rank_label} 
-                                        size="small" 
-                                        color={isSelected ? "success" : "default"} 
-                                        sx={{ height: 16, fontSize: '0.6rem', mt: 0.5, px: 0.5 }} 
+                                      <Chip
+                                        label={isSelected ? `${quote.rank_label} Selected` : quote.rank_label}
+                                        size="small"
+                                        color={isSelected ? "success" : "default"}
+                                        sx={{ height: 16, fontSize: '0.6rem', mt: 0.5, px: 0.5 }}
                                       />
                                     </>
                                   ) : '-'}
@@ -1200,7 +1189,7 @@ const Quotations = () => {
 
         <Dialog
           open={createQRDialogOpen}
-          onClose={() => setCreateQRDialogOpen(false)}
+          onClose={(e, reason) => { if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') setCreateQRDialogOpen(false); }}
           maxWidth="md"
           fullWidth
           PaperProps={{ sx: { borderRadius: 3, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' } }}
@@ -1392,11 +1381,11 @@ const Quotations = () => {
                                 </Box>
                               </TableCell>
                               <TableCell align="center" sx={{ py: 0.5 }}>
-                                <Chip 
-                                  size="small" 
-                                  label={it.pr_id ? (pr?.pr_number || 'PR') : 'Manual'} 
+                                <Chip
+                                  size="small"
+                                  label={it.pr_id ? (pr?.pr_number || 'PR') : 'Manual'}
                                   color={it.pr_id ? "primary" : "default"}
-                                  variant="outlined" 
+                                  variant="outlined"
                                 />
                               </TableCell>
                             </TableRow>
@@ -1439,7 +1428,7 @@ const Quotations = () => {
         </Dialog>
 
         {/* Enter Quote Dialog */}
-        <Dialog open={enterQuoteDialogOpen} onClose={() => setEnterQuoteDialogOpen(false)} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 3, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' } }}>
+        <Dialog open={enterQuoteDialogOpen} onClose={(e, reason) => { if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') setEnterQuoteDialogOpen(false); }} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 3, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' } }}>
           <DialogTitle sx={{ pb: 1, pt: 3, px: 4 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
               <Box sx={{ p: 1, bgcolor: '#EFF6FF', borderRadius: 2, color: '#2563EB', display: 'flex' }}>
@@ -1506,12 +1495,12 @@ const Quotations = () => {
                   <TableRow key={idx} sx={{ opacity: it.is_excluded ? 0.5 : 1 }}>
                     <TableCell>{it.material_code} - {it.material_name}</TableCell>
                     <TableCell>
-                      <TextField 
-                        size="small" 
-                        type="number" 
+                      <TextField
+                        size="small"
+                        type="number"
                         disabled={it.is_excluded}
                         onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()}
-                        value={it.quoted_rate} 
+                        value={it.quoted_rate}
                         onChange={(e) => {
                           const val = e.target.value.replace(/-/g, '');
                           if (val === '' || (/^\d*\.?\d{0,2}$/.test(val))) {
@@ -1519,16 +1508,16 @@ const Quotations = () => {
                             newItems[idx].quoted_rate = val;
                             setNewQuote({ ...newQuote, items: newItems });
                           }
-                        }} 
+                        }}
                       />
                     </TableCell>
                     <TableCell>
-                      <TextField 
-                        size="small" 
-                        type="number" 
+                      <TextField
+                        size="small"
+                        type="number"
                         disabled={it.is_excluded}
                         onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()}
-                        value={it.delivery_days} 
+                        value={it.delivery_days}
                         onChange={(e) => {
                           const val = e.target.value.replace(/-/g, '');
                           if (val === '' || /^\d+$/.test(val)) {
@@ -1536,23 +1525,23 @@ const Quotations = () => {
                             newItems[idx].delivery_days = val;
                             setNewQuote({ ...newQuote, items: newItems });
                           }
-                        }} 
+                        }}
                       />
                     </TableCell>
                     <TableCell>
-                      <TextField 
-                        size="small" 
+                      <TextField
+                        size="small"
                         disabled={it.is_excluded}
-                        value={it.remarks} 
+                        value={it.remarks}
                         onChange={(e) => {
                           const newItems = [...newQuote.items];
                           newItems[idx].remarks = e.target.value;
                           setNewQuote({ ...newQuote, items: newItems });
-                        }} 
+                        }}
                       />
                     </TableCell>
                     <TableCell align="center">
-                      <Checkbox 
+                      <Checkbox
                         size="small"
                         checked={it.is_excluded}
                         onChange={(e) => {
@@ -1573,12 +1562,12 @@ const Quotations = () => {
           </DialogContent>
           <DialogActions sx={{ p: 3 }}>
             <Button onClick={() => setEnterQuoteDialogOpen(false)}>Cancel</Button>
-            <Button 
-              onClick={handleEnterQuote} 
-              variant="contained" 
+            <Button
+              onClick={handleEnterQuote}
+              variant="contained"
               disabled={
-                !newQuote.quotation_number || 
-                !newQuote.quotation_date || 
+                !newQuote.quotation_number ||
+                !newQuote.quotation_date ||
                 newQuote.items.some(i => !i.is_excluded && (!i.quoted_rate || !i.delivery_days)) ||
                 newQuote.items.every(i => i.is_excluded)
               }
@@ -1589,7 +1578,7 @@ const Quotations = () => {
         </Dialog>
 
         {/* Override Dialog */}
-        <Dialog open={overrideDialogOpen} onClose={() => setOverrideDialogOpen(false)}>
+        <Dialog open={overrideDialogOpen} onClose={(e, reason) => { if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') setOverrideDialogOpen(false); }}>
           <DialogTitle>Override Vendor Selection</DialogTitle>
           <DialogContent>
             <Typography mb={2}>Material: <strong>{selectedMaterialForOverride?.material_name}</strong></Typography>
@@ -1617,7 +1606,7 @@ const Quotations = () => {
         </Dialog>
 
         {/* View QR Dialog */}
-        <Dialog open={viewQRDialogOpen} onClose={() => { setViewQRDialogOpen(false); setViewingQR(null); }} maxWidth="md" fullWidth>
+        <Dialog open={viewQRDialogOpen} onClose={(e, reason) => { if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') { setViewQRDialogOpen(false); setViewingQR(null); } }} maxWidth="md" fullWidth>
           <DialogTitle>Quotation Request Details - {viewingQR?.qr_number}</DialogTitle>
           <DialogContent>
             {viewingQR && (
@@ -1645,39 +1634,39 @@ const Quotations = () => {
                           <TableCell sx={{ color: 'text.secondary' }}>{it.uom_name}</TableCell>
                           <TableCell>
                             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                            {it.sources && it.sources.length > 0 ? (() => {
-                              // Force Filter: If any PR source exists, ignore Manual entirely
-                              const hasPR = it.sources.some(s => s.source === 'PR' && s.source_pr_number);
-                              const displaySources = it.sources.filter(s => {
-                                if (s.source === 'Manual' && hasPR) return false;
-                                return (s.source === 'PR' && s.source_pr_number) || s.source === 'Manual';
-                              });
-                              
-                              return Array.from(new Set(displaySources.map(s => 
-                                s.source === 'PR' ? `PR:${s.source_pr_number}` : 'Manual'
-                              ))).map((srcKey, sIdx) => {
-                                const isPR = srcKey.startsWith('PR:');
-                                const label = isPR ? srcKey.replace('PR:', '') : 'Manual';
-                                return (
-                                  <Chip 
-                                    key={sIdx}
-                                    size="small" 
-                                    label={label} 
-                                    color={isPR ? "primary" : "default"} 
-                                    variant="outlined" 
-                                    sx={{ fontSize: '0.65rem', height: 18 }} 
-                                  />
-                                );
-                              });
-                            })() : (
-                              <Chip 
-                                size="small" 
-                                label={it.source === 'PR' && it.source_pr_number ? it.source_pr_number : "Manual"} 
-                                color={it.source === 'PR' ? "primary" : "default"}
-                                variant="outlined" 
-                                sx={{ fontSize: '0.65rem', height: 18 }} 
-                              />
-                            )}
+                              {it.sources && it.sources.length > 0 ? (() => {
+                                // Force Filter: If any PR source exists, ignore Manual entirely
+                                const hasPR = it.sources.some(s => s.source === 'PR' && s.source_pr_number);
+                                const displaySources = it.sources.filter(s => {
+                                  if (s.source === 'Manual' && hasPR) return false;
+                                  return (s.source === 'PR' && s.source_pr_number) || s.source === 'Manual';
+                                });
+
+                                return Array.from(new Set(displaySources.map(s =>
+                                  s.source === 'PR' ? `PR:${s.source_pr_number}` : 'Manual'
+                                ))).map((srcKey, sIdx) => {
+                                  const isPR = srcKey.startsWith('PR:');
+                                  const label = isPR ? srcKey.replace('PR:', '') : 'Manual';
+                                  return (
+                                    <Chip
+                                      key={sIdx}
+                                      size="small"
+                                      label={label}
+                                      color={isPR ? "primary" : "default"}
+                                      variant="outlined"
+                                      sx={{ fontSize: '0.65rem', height: 18 }}
+                                    />
+                                  );
+                                });
+                              })() : (
+                                <Chip
+                                  size="small"
+                                  label={it.source === 'PR' && it.source_pr_number ? it.source_pr_number : "Manual"}
+                                  color={it.source === 'PR' ? "primary" : "default"}
+                                  variant="outlined"
+                                  sx={{ fontSize: '0.65rem', height: 18 }}
+                                />
+                              )}
                             </Box>
                           </TableCell>
                         </TableRow>
@@ -1716,7 +1705,7 @@ const Quotations = () => {
         </Dialog>
 
         {/* View Submitted Vendor Quotation Dialog */}
-        <Dialog open={viewVendorQuoteDialogOpen} onClose={() => setViewVendorQuoteDialogOpen(false)} maxWidth="md" fullWidth>
+        <Dialog open={viewVendorQuoteDialogOpen} onClose={(e, reason) => { if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') setViewVendorQuoteDialogOpen(false); }} maxWidth="md" fullWidth>
           <DialogTitle>{selectedQR?.qr_number} : View Quotation - {selectedSubmittedQuote?.vendor_name}</DialogTitle>
           <DialogContent>
             {selectedSubmittedQuote && (
@@ -1785,7 +1774,7 @@ const Quotations = () => {
         </Dialog>
 
         {/* Convert to PO Dialog */}
-        <Dialog open={convertToPoDialog.open} onClose={() => setConvertToPoDialog({ open: false, terms: '', items: [] })} maxWidth="md" fullWidth>
+        <Dialog open={convertToPoDialog.open} onClose={(e, reason) => { if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') setConvertToPoDialog({ open: false, terms: '', items: [] }); }} maxWidth="md" fullWidth>
           <DialogTitle sx={{ fontWeight: 600, color: '#1E293B', pb: 1 }}>Convert to Purchase Orders</DialogTitle>
           <DialogContent>
             <Typography variant="body2" sx={{ mb: 3, color: '#64748B' }}>
@@ -1855,11 +1844,11 @@ const Quotations = () => {
                 {termsTemplates.map(t => <MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>)}
               </Select>
             </FormControl>
-            <TextField 
-              fullWidth 
-              size="small" 
-              multiline 
-              rows={4} 
+            <TextField
+              fullWidth
+              size="small"
+              multiline
+              rows={4}
               placeholder="Enter general terms and conditions to be included in all generated POs..."
               value={convertToPoDialog.terms}
               onChange={e => setConvertToPoDialog({ ...convertToPoDialog, terms: e.target.value })}

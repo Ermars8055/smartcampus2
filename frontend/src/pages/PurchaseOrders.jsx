@@ -5,12 +5,13 @@ import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
   InputLabel, IconButton, Tooltip, Divider, InputAdornment, Paper, TableSortLabel, useTheme, useMediaQuery,
-  DialogContent, DialogActions, Grid, MenuItem, Select, FormControl, Link
+  DialogContent, DialogActions, Grid, MenuItem, Select, FormControl, Link,
+  Accordion, AccordionSummary, AccordionDetails, Tab, Tabs,
 } from '@mui/material';
-import { Add, Delete, CheckCircle, Archive, Send, Cancel, Pause, Search, ShoppingCart, Store, Assignment, CalendarMonth, ArrowDropDown, Inventory } from '@mui/icons-material';
+import { Add, Delete, CheckCircle, Archive, Send, Cancel, Search, ShoppingCart, Store, Assignment, CalendarMonth, ArrowDropDown, Inventory, History, ExpandMore, Textsms } from '@mui/icons-material';
 import api from '../services/api';
 import ConfirmDialog from '../components/ConfirmDialog';
-import { formatDate } from '../utils/dateUtils';
+import { formatDate, formatDateTime } from '../utils/dateUtils';
 import MaterialSelect from '../components/MaterialSelect';
 import { DatePicker } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
@@ -34,9 +35,25 @@ export default function PurchaseOrders() {
   const [linkedIndent, setLinkedIndent] = useState(null);
   const [linkedPR, setLinkedPR] = useState(null);
   const [linkedQR, setLinkedQR] = useState(null);
+  const [detailHistoryOpen, setDetailHistoryOpen] = useState(false);
+  const [detailHistoryData, setDetailHistoryData] = useState(null);
+
+  const fetchDetailHistory = async (id, type) => {
+    try {
+      const endpoint = type === 'indent' ? `/api/indents/${id}/approval-history` : `/api/procurement/pr/${id}/approval-history`;
+      const res = await api.get(endpoint);
+      setDetailHistoryData(res.data);
+      setDetailHistoryOpen(true);
+    } catch (err) {
+      console.error(err);
+      showMessage(`Failed to load history`, 'Error', 'error');
+    }
+  };
 
   const fetchAndShowIndent = async (id) => {
     try {
+      setDetailHistoryOpen(false);
+      setDetailHistoryData(null);
       const res = await api.get(`/api/indents/${id}`);
       setLinkedIndent(res.data);
     } catch (err) {
@@ -46,6 +63,8 @@ export default function PurchaseOrders() {
 
   const fetchAndShowPR = async (id) => {
     try {
+      setDetailHistoryOpen(false);
+      setDetailHistoryData(null);
       const res = await api.get(`/api/procurement/pr/${id}`);
       setLinkedPR(res.data);
     } catch (err) {
@@ -63,6 +82,8 @@ export default function PurchaseOrders() {
   };
 
   const [search, setSearch] = useState('');
+  const [tabValue, setTabValue] = useState('All');
+  const [editingPOId, setEditingPOId] = useState(null);
   const [form, setForm] = useState({
     vendor_id: '', project_id: '', delivery_date: dayjs().add(14, 'day'), terms: '', po_type: 'Informal', items: [{ material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }]
   });
@@ -79,26 +100,37 @@ export default function PurchaseOrders() {
   };
 
   const sortedPOs = useMemo(() => {
-    const list = [...pos];
+    let list = pos.filter(po => tabValue === 'All' || po.status === tabValue);
+
+    if (search) {
+      const s = search.toLowerCase();
+      list = list.filter(po =>
+        (po.po_number && po.po_number.toLowerCase().includes(s)) ||
+        (po.indent_number && po.indent_number.toLowerCase().includes(s)) ||
+        (po.pr_number && po.pr_number.toLowerCase().includes(s)) ||
+        (po.qr_number && po.qr_number.toLowerCase().includes(s))
+      );
+    }
+
     if (sortConfig.key) {
       list.sort((a, b) => {
         let aVal = a[sortConfig.key];
         let bVal = b[sortConfig.key];
-        
+
         if (sortConfig.key === 'vendor') aVal = a.vendor_name;
         if (sortConfig.key === 'vendor') bVal = b.vendor_name;
         if (sortConfig.key === 'total_amount') {
-           aVal = calculatePOTotalNet(a);
-           bVal = calculatePOTotalNet(b);
+          aVal = calculatePOTotalNet(a);
+          bVal = calculatePOTotalNet(b);
         }
-        
+
         if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
         if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
         return 0;
       });
     }
     return list;
-  }, [pos, sortConfig]);
+  }, [pos, sortConfig, tabValue, search]);
 
   const calculatePOTotalNet = (po) => {
     if (!po || !po.items) return 0;
@@ -109,21 +141,21 @@ export default function PurchaseOrders() {
       const amount = qty * rate;
       const discAmt = amount * ((item.discount_percent || 0) / 100);
       const netAmtAfterDisc = amount - discAmt;
-      
+
       let taxable = netAmtAfterDisc;
       const totalGst = (item.cgst_percentage || 0) + (item.sgst_percentage || 0) + (item.igst_percentage || 0);
       if (item.is_gst_inclusive && totalGst > 0) {
-          taxable = netAmtAfterDisc / (1 + (totalGst / 100));
+        taxable = netAmtAfterDisc / (1 + (totalGst / 100));
       }
-      
+
       const cgstVal = taxable * ((item.cgst_percentage || 0) / 100);
       const sgstVal = taxable * ((item.sgst_percentage || 0) / 100);
       const igstVal = taxable * ((item.igst_percentage || 0) / 100);
-      
+
       if (item.is_gst_inclusive) {
-          totalNetAmountSum += netAmtAfterDisc;
+        totalNetAmountSum += netAmtAfterDisc;
       } else {
-          totalNetAmountSum += (netAmtAfterDisc + cgstVal + sgstVal + igstVal);
+        totalNetAmountSum += (netAmtAfterDisc + cgstVal + sgstVal + igstVal);
       }
     });
     return Math.round(totalNetAmountSum);
@@ -140,15 +172,42 @@ export default function PurchaseOrders() {
   const [confirm, setConfirm] = useState({ open: false, title: '', message: '', confirmText: '', confirmColor: 'primary', action: null, needsReason: false, po: null });
   const [reason, setReason] = useState('');
 
+  const handleRowClick = (po) => {
+    if (po.status === 'Draft') {
+      setForm({
+        vendor_id: po.vendor_id || '',
+        project_id: po.project_id || (projects.length > 0 ? projects[0].id : ''),
+        delivery_date: po.delivery_date ? dayjs(po.delivery_date) : dayjs().add(21, 'day'),
+        terms: po.terms || '',
+        po_type: po.po_type || 'Informal',
+        items: po.items && po.items.length > 0 ? po.items.map(it => ({
+          material_id: it.material_id,
+          quantity: it.quantity,
+          rate: it.rate,
+          discount_percent: it.discount_percent || 0,
+          cgst_percentage: it.cgst_percentage || 0,
+          sgst_percentage: it.sgst_percentage || 0,
+          igst_percentage: it.igst_percentage || 0,
+          is_gst_inclusive: it.is_gst_inclusive || false,
+          uom_name: it.uom_name || '',
+          base_rate: 0
+        })) : [{ material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }]
+      });
+      setEditingPOId(po.id);
+      setDialog(true);
+    } else {
+      setDetailDialog(po);
+    }
+  };
+
   const showConfirm = (title, message, confirmText, confirmColor, action, needsReason = false, po = null) => {
     setReason('');
     setConfirm({ open: true, title, message, confirmText, confirmColor, action, needsReason, po });
   };
   const handleConfirm = () => { if (confirm.action) confirm.action(reason); setConfirm({ ...confirm, open: false }); setReason(''); };
-  const handleCancelConfirm = () => { setConfirm({ ...confirm, open: false }); setReason(''); };
+  const handleCancelConfirm = (e, reason) => { if (reason === 'backdropClick' || reason === 'escapeKeyDown') return; setConfirm({ ...confirm, open: false }); setReason(''); };
 
-  const load = () => { api.get('/api/procurement/po', { params: { search: search || undefined } }).then(r => setPos(r.data)); };
-  useEffect(() => { load(); }, [search]);
+  const load = () => { api.get('/api/procurement/po').then(r => setPos(r.data)); };
   useEffect(() => {
     load();
     api.get('/api/vendors').then(r => setVendors(r.data));
@@ -201,7 +260,7 @@ export default function PurchaseOrders() {
     setForm({ ...form, items });
   };
 
-  const handleCreate = async () => {
+  const handleSave = async (isDraft = false) => {
     if (!form.terms || !form.terms.trim()) {
       showMessage("Terms and Conditions are mandatory.", "Validation Error", "warning");
       return;
@@ -229,23 +288,26 @@ export default function PurchaseOrders() {
       const payload = {
         ...form,
         delivery_date: form.delivery_date ? dayjs(form.delivery_date).format('YYYY-MM-DD') : null,
+        status: isDraft ? 'Draft' : 'Submitted',
         items: mappedItems
       };
-      if (payload.indent_id) {
-        // Pass indent_id optionally
-        await api.post('/api/procurement/po', payload);
-        // Also could call convert-po endpoint but PO endpoint works if indent_id is set
+
+      if (editingPOId) {
+        await api.put(`/api/procurement/po/${editingPOId}`, payload);
+        showMessage(`Purchase Order ${isDraft ? 'draft updated' : 'updated and submitted'}`, "Success", "success");
       } else {
         await api.post('/api/procurement/po', payload);
+        showMessage(`Purchase Order ${isDraft ? 'draft saved' : 'created'}`, "Success", "success");
       }
-      setDialog(false); load();
-      showMessage("Purchase Order created successfully!", "Success", "success");
+
+      setDialog(false);
+      setEditingPOId(null);
+      load();
     } catch (err) { showMessage(err.response?.data?.detail || 'Error', "Error", "error"); }
   };
 
   const approvePO = async (id) => { await api.post(`/api/procurement/po/${id}/approve`); load(); };
   const rejectPO = async (id, remarks) => { await api.post(`/api/procurement/po/${id}/reject`, { remarks }); load(); };
-  const holdPO = async (id) => { await api.post(`/api/procurement/po/${id}/hold`); load(); };
   const sendPO = async (id) => {
     try {
       const res = await api.post(`/api/procurement/po/${id}/send`);
@@ -259,20 +321,19 @@ export default function PurchaseOrders() {
 
   // Status helpers
   const statusColor = {
-    'Draft': 'default', 'Approved': 'success', 'Sent to Vendor': 'info',
+    'Draft': 'default', 'Submitted': 'info', 'Approved': 'success', 'Sent to Vendor': 'primary',
     'Partially Received': 'warning', 'Closed': 'default', 'Short Closed': 'warning',
-    'Rejected': 'error', 'On Hold': 'secondary'
+    'Rejected': 'error'
   };
 
-  const canApprove = (s) => s === 'Draft' || s === 'On Hold';
-  const canReject = (s) => s === 'Draft';
-  const canHold = (s) => s === 'Draft' || s === 'Approved';
+  const canApprove = (s) => s === 'Submitted';
+  const canReject = (s) => s === 'Submitted';
   const canSend = (s) => s === 'Approved';
   const canShortClose = (s) => s !== 'Short Closed' && s !== 'Closed' && s !== 'Rejected' && s !== 'Draft';
 
   const numberToWords = (num) => {
-    const a = ['','One ','Two ','Three ','Four ', 'Five ','Six ','Seven ','Eight ','Nine ','Ten ','Eleven ','Twelve ','Thirteen ','Fourteen ','Fifteen ','Sixteen ','Seventeen ','Eighteen ','Nineteen '];
-    const b = ['', '', 'Twenty','Thirty','Forty','Fifty', 'Sixty','Seventy','Eighty','Ninety'];
+    const a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
+    const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
     if ((num = num.toString()).length > 9) return 'overflow';
     let n = ('000000000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
     if (!n) return ''; let str = '';
@@ -296,27 +357,27 @@ export default function PurchaseOrders() {
     let totalIgst = 0;
     let totalTaxable = 0;
     let totalNetAmountSum = 0;
-    
+
     po.items.forEach((item, idx) => {
       const qty = parseFloat(item.quantity) || 0;
       const rate = parseFloat(item.rate) || 0;
       const amount = qty * rate;
       const discAmt = amount * ((item.discount_percent || 0) / 100);
       const netAmtAfterDisc = amount - discAmt;
-      
+
       let taxable = netAmtAfterDisc;
       const totalGst = (item.cgst_percentage || 0) + (item.sgst_percentage || 0) + (item.igst_percentage || 0);
       if (item.is_gst_inclusive && totalGst > 0) {
-          taxable = netAmtAfterDisc / (1 + (totalGst / 100));
+        taxable = netAmtAfterDisc / (1 + (totalGst / 100));
       }
-      
+
       const cgstVal = taxable * ((item.cgst_percentage || 0) / 100);
       const sgstVal = taxable * ((item.sgst_percentage || 0) / 100);
       const igstVal = taxable * ((item.igst_percentage || 0) / 100);
-      
+
       let itemBaseAmount = amount;
       if (item.is_gst_inclusive && totalGst > 0) {
-          itemBaseAmount = amount / (1 + (totalGst / 100));
+        itemBaseAmount = amount / (1 + (totalGst / 100));
       }
 
       totalCgst += cgstVal;
@@ -325,13 +386,13 @@ export default function PurchaseOrders() {
       totalDiscount += discAmt;
       totalTaxable += taxable;
       grandTotal += amount;
-      
+
       if (item.is_gst_inclusive) {
-          totalNetAmountSum += netAmtAfterDisc;
+        totalNetAmountSum += netAmtAfterDisc;
       } else {
-          totalNetAmountSum += (netAmtAfterDisc + cgstVal + sgstVal + igstVal);
+        totalNetAmountSum += (netAmtAfterDisc + cgstVal + sgstVal + igstVal);
       }
-      
+
       rowsHtml += `
         <tr>
           <td>${idx + 1}</td>
@@ -348,7 +409,7 @@ export default function PurchaseOrders() {
         </tr>
       `;
     });
-    
+
     const grandTotalWithTax = totalNetAmountSum;
     const roundOff = (Math.round(grandTotalWithTax) - grandTotalWithTax).toFixed(2);
     const totalNetAmount = Math.round(grandTotalWithTax).toFixed(2);
@@ -510,38 +571,38 @@ export default function PurchaseOrders() {
     let totalIgst = 0;
     let totalTaxable = 0;
     let totalNetAmountSum = 0;
-    
+
     (detailDialog.items || []).forEach(item => {
       const qty = parseFloat(item.quantity) || 0;
       const rate = parseFloat(item.rate) || 0;
       const amount = qty * rate;
       const discAmt = amount * ((item.discount_percent || 0) / 100);
       const netAmtAfterDisc = amount - discAmt;
-      
+
       let taxable = netAmtAfterDisc;
       const totalGst = (item.cgst_percentage || 0) + (item.sgst_percentage || 0) + (item.igst_percentage || 0);
       if (item.is_gst_inclusive && totalGst > 0) {
-          taxable = netAmtAfterDisc / (1 + (totalGst / 100));
+        taxable = netAmtAfterDisc / (1 + (totalGst / 100));
       }
-      
+
       const cgstVal = taxable * ((item.cgst_percentage || 0) / 100);
       const sgstVal = taxable * ((item.sgst_percentage || 0) / 100);
       const igstVal = taxable * ((item.igst_percentage || 0) / 100);
-      
+
       totalDiscount += discAmt;
       totalCgst += cgstVal;
       totalSgst += sgstVal;
       totalIgst += igstVal;
       totalTaxable += taxable;
       grandTotal += amount;
-      
+
       if (item.is_gst_inclusive) {
-          totalNetAmountSum += netAmtAfterDisc;
+        totalNetAmountSum += netAmtAfterDisc;
       } else {
-          totalNetAmountSum += (netAmtAfterDisc + cgstVal + sgstVal + igstVal);
+        totalNetAmountSum += (netAmtAfterDisc + cgstVal + sgstVal + igstVal);
       }
     });
-    
+
     const grandTotalWithTax = totalNetAmountSum;
     const roundOff = (Math.round(grandTotalWithTax) - grandTotalWithTax).toFixed(2);
     const totalNetAmount = Math.round(grandTotalWithTax).toFixed(2);
@@ -576,10 +637,37 @@ export default function PurchaseOrders() {
         )}
       </Box>
 
-      <Card sx={{ mb: 3, p: 2 }}>
-        <TextField size="small" placeholder="Search PO numbers..." value={search}
-          onChange={e => setSearch(e.target.value)} sx={{ minWidth: 300 }}
-          InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }} />
+      <Card sx={{ mb: 3 }}>
+        <Box sx={{ p: 2 }}>
+          <TextField size="small" placeholder="Search PO numbers..." value={search}
+            onChange={e => setSearch(e.target.value)} sx={{ minWidth: 300 }}
+            InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }} />
+        </Box>
+        <Tabs
+          value={tabValue}
+          onChange={(e, v) => setTabValue(v)}
+          variant="scrollable"
+          scrollButtons="auto"
+          sx={{ borderBottom: 1, borderColor: 'divider' }}
+        >
+          {['All', 'Draft', 'Submitted', 'Approved', 'Sent to Vendor', 'Partially Received', 'Closed', 'Rejected'].map(s => (
+            <Tab
+              key={s}
+              label={
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  {s}
+                  <Chip
+                    label={s === 'All' ? pos.length : pos.filter(po => po.status === s).length}
+                    size="small"
+                    sx={{ height: 20, fontSize: '0.7rem', fontWeight: 600, bgcolor: tabValue === s ? 'primary.main' : 'action.selected', color: tabValue === s ? 'white' : 'text.primary' }}
+                  />
+                </Box>
+              }
+              value={s}
+              sx={{ textTransform: 'none', fontWeight: 600, minHeight: 48, minWidth: 'auto', px: 2 }}
+            />
+          ))}
+        </Tabs>
       </Card>
 
       <Card>
@@ -591,44 +679,38 @@ export default function PurchaseOrders() {
               </Typography>
             )}
             {sortedPOs.map(po => (
-              <Card key={po.id} variant="outlined" sx={{ p: 2, borderRadius: 2, cursor: 'pointer', '&:hover': { borderColor: '#2563EB' } }} onClick={() => setDetailDialog(po)}>
-                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, gap: 1 }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#2563EB' }}>{po.po_number}</Typography>
-                    <Chip label={po.status} size="small" color={statusColor[po.status] || 'default'} sx={{ fontWeight: 600, fontSize: '0.65rem', height: 20 }} />
-                 </Box>
-                 <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#334155' }}><strong>Vendor:</strong> {po.vendor_name}</Typography>
-                 <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#334155' }}><strong>Amount:</strong> <span style={{ color: '#059669', fontWeight: 600 }}>{formatCurrency(calculatePOTotalNet(po))}</span></Typography>
-                 <Typography variant="caption" sx={{ display: 'block', mb: 1.5, color: '#64748B' }}>{formatDate(po.created_at)} • {po.items?.length || 0} items</Typography>
-                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Chip label={po.po_type} size="small" variant="outlined" color={po.po_type === 'Formal' ? 'primary' : 'default'} sx={{ height: 22, fontSize: '0.7rem' }} />
-                    <Box sx={{ display: 'flex', gap: 0.5 }} onClick={e => e.stopPropagation()}>
-                      <Tooltip title="Approve">
-                        <span><IconButton size="small" color="success" disabled={!canApprove(po.status) || !hasAction('purchase_orders', 'can_approve')}
-                          onClick={() => showConfirm('Approve PO?', `Are you sure you want to approve ${po.po_number}?`, 'Yes, Approve', 'success', () => approvePO(po.id))}>
-                          <CheckCircle fontSize="small" />
-                        </IconButton></span>
-                      </Tooltip>
-                      <Tooltip title="Reject">
-                        <span><IconButton size="small" color="error" disabled={!canReject(po.status) || !hasAction('purchase_orders', 'can_reject')}
-                          onClick={() => showConfirm('Reject PO?', `Are you sure you want to reject ${po.po_number}? This action cannot be undone.`, 'Yes, Reject', 'error', (r) => rejectPO(po.id, r), true)}>
-                          <Cancel fontSize="small" />
-                        </IconButton></span>
-                      </Tooltip>
-                      <Tooltip title="Put on Hold">
-                        <span><IconButton size="small" color="secondary" disabled={!canHold(po.status) || !hasAction('purchase_orders', 'can_hold')}
-                          onClick={() => showConfirm('Hold PO?', `Place ${po.po_number} on hold?`, 'Yes, Hold', 'warning', () => holdPO(po.id))}>
-                          <Pause fontSize="small" />
-                        </IconButton></span>
-                      </Tooltip>
-                      <Tooltip title="Send to Vendor">
-                        <span><IconButton size="small" disabled={!canSend(po.status) || !hasAction('purchase_orders', 'can_send_to_vendor')}
-                          sx={{ color: '#8b5cf6', '&.Mui-disabled': { color: 'text.disabled' } }}
-                          onClick={() => showConfirm('Send to Vendor?', `Send ${po.po_number} to vendor?`, 'Yes, Send', 'primary', () => sendPO(po.id), false, po)}>
-                          <Send fontSize="small" />
-                        </IconButton></span>
-                      </Tooltip>
-                    </Box>
-                 </Box>
+              <Card key={po.id} variant="outlined" sx={{ p: 2, borderRadius: 2, cursor: 'pointer', '&:hover': { borderColor: '#2563EB' } }} onClick={() => handleRowClick(po)}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, gap: 1 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#2563EB' }}>{po.po_number}</Typography>
+                  <Chip label={po.status} size="small" color={statusColor[po.status] || 'default'} sx={{ fontWeight: 600, fontSize: '0.65rem', height: 20 }} />
+                </Box>
+                <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#334155' }}><strong>Vendor:</strong> {po.vendor_name}</Typography>
+                <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#334155' }}><strong>Amount:</strong> <span style={{ color: '#059669', fontWeight: 600 }}>{formatCurrency(calculatePOTotalNet(po))}</span></Typography>
+                <Typography variant="caption" sx={{ display: 'block', mb: 1.5, color: '#64748B' }}>{formatDate(po.created_at)} • {po.items?.length || 0} items</Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Chip label={po.po_type} size="small" variant="outlined" color={po.po_type === 'Formal' ? 'primary' : 'default'} sx={{ height: 22, fontSize: '0.7rem' }} />
+                  <Box sx={{ display: 'flex', gap: 0.5 }} onClick={e => e.stopPropagation()}>
+                    <Tooltip title="Approve">
+                      <span><IconButton size="small" color="success" disabled={!canApprove(po.status) || !hasAction('purchase_orders', 'can_approve')}
+                        onClick={() => showConfirm('Approve PO?', `Are you sure you want to approve ${po.po_number}?`, 'Yes, Approve', 'success', () => approvePO(po.id))}>
+                        <CheckCircle fontSize="small" />
+                      </IconButton></span>
+                    </Tooltip>
+                    <Tooltip title="Reject">
+                      <span><IconButton size="small" color="error" disabled={!canReject(po.status) || !hasAction('purchase_orders', 'can_reject')}
+                        onClick={() => showConfirm('Reject PO?', `Are you sure you want to reject ${po.po_number}? This action cannot be undone.`, 'Yes, Reject', 'error', (r) => rejectPO(po.id, r), true)}>
+                        <Cancel fontSize="small" />
+                      </IconButton></span>
+                    </Tooltip>
+                    <Tooltip title="Send to Vendor">
+                      <span><IconButton size="small" disabled={!canSend(po.status) || !hasAction('purchase_orders', 'can_send_to_vendor')}
+                        sx={{ color: '#8b5cf6', '&.Mui-disabled': { color: 'text.disabled' } }}
+                        onClick={() => showConfirm('Send to Vendor?', `Send ${po.po_number} to vendor?`, 'Yes, Send', 'primary', () => sendPO(po.id), false, po)}>
+                        <Send fontSize="small" />
+                      </IconButton></span>
+                    </Tooltip>
+                  </Box>
+                </Box>
               </Card>
             ))}
           </Box>
@@ -694,7 +776,7 @@ export default function PurchaseOrders() {
                   </TableCell>
                   <TableCell align="right" sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.65rem' }}>ITEMS</TableCell>
                   <TableCell align="right" sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.65rem' }}>
-                     <TableSortLabel
+                    <TableSortLabel
                       active={sortConfig.key === 'total_amount'}
                       direction={sortConfig.direction}
                       onClick={() => handleSort('total_amount')}
@@ -733,25 +815,25 @@ export default function PurchaseOrders() {
               </TableHead>
               <TableBody>
                 {sortedPOs.map(po => (
-                  <TableRow key={po.id} sx={{ cursor: 'pointer', '&:hover': { backgroundColor: '#f1f5f9' } }} onClick={() => setDetailDialog(po)}>
+                  <TableRow key={po.id} sx={{ cursor: 'pointer', '&:hover': { backgroundColor: '#f1f5f9' } }} onClick={() => handleRowClick(po)}>
                     <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.7rem', whiteSpace: 'nowrap' }}>{po.po_number}</TableCell>
                     <TableCell sx={{ fontSize: '0.7rem', color: '#64748B', whiteSpace: 'nowrap' }}>
                       {po.indent_number ? (
-                        <Link component="button" variant="body2" sx={{ fontSize: '0.7rem', fontWeight: 600, color: '#2563EB', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }} onClick={(e) => { e.stopPropagation(); fetchAndShowIndent(po.indent_id); }}>
+                        <Link component="button" variant="body2" sx={{ fontSize: '0.7rem', fontWeight: 600, color: '#0d9488', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }} onClick={(e) => { e.stopPropagation(); fetchAndShowIndent(po.indent_id); }}>
                           {po.indent_number}
                         </Link>
                       ) : '-'}
                     </TableCell>
                     <TableCell sx={{ fontSize: '0.7rem', color: '#64748B', whiteSpace: 'nowrap' }}>
                       {po.pr_number ? (
-                        <Link component="button" variant="body2" sx={{ fontSize: '0.7rem', fontWeight: 600, color: '#2563EB', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }} onClick={(e) => { e.stopPropagation(); fetchAndShowPR(po.pr_id); }}>
+                        <Link component="button" variant="body2" sx={{ fontSize: '0.7rem', fontWeight: 600, color: '#7c3aed', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }} onClick={(e) => { e.stopPropagation(); fetchAndShowPR(po.pr_id); }}>
                           {po.pr_number}
                         </Link>
                       ) : '-'}
                     </TableCell>
                     <TableCell sx={{ fontSize: '0.7rem', color: '#64748B', whiteSpace: 'nowrap' }}>
                       {po.qr_number ? (
-                        <Link component="button" variant="body2" sx={{ fontSize: '0.7rem', fontWeight: 600, color: '#2563EB', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }} onClick={(e) => { e.stopPropagation(); fetchAndShowQR(po.qr_id); }}>
+                        <Link component="button" variant="body2" sx={{ fontSize: '0.7rem', fontWeight: 600, color: '#d97706', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }} onClick={(e) => { e.stopPropagation(); fetchAndShowQR(po.qr_id); }}>
                           {po.qr_number}
                         </Link>
                       ) : '-'}
@@ -779,12 +861,6 @@ export default function PurchaseOrders() {
                             <Cancel fontSize="small" />
                           </IconButton></span>
                         </Tooltip>
-                        <Tooltip title="Put on Hold">
-                          <span><IconButton size="small" color="secondary" disabled={!canHold(po.status) || !hasAction('purchase_orders', 'can_hold')}
-                            onClick={() => showConfirm('Hold PO?', `Place ${po.po_number} on hold?`, 'Yes, Hold', 'warning', () => holdPO(po.id))}>
-                            <Pause fontSize="small" />
-                          </IconButton></span>
-                        </Tooltip>
                         <Tooltip title="Send to Vendor">
                           <span><IconButton size="small" disabled={!canSend(po.status) || !hasAction('purchase_orders', 'can_send_to_vendor')}
                             sx={{ color: '#8b5cf6', '&.Mui-disabled': { color: 'text.disabled' } }}
@@ -809,7 +885,7 @@ export default function PurchaseOrders() {
       </Card>
 
       {/* PO Detail Dialog */}
-      <Dialog open={!!detailDialog} onClose={() => setDetailDialog(null)} maxWidth="md" fullWidth fullScreen={isMobile}>
+      <Dialog open={!!detailDialog} onClose={(e, reason) => { if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') setDetailDialog(null); }} maxWidth="md" fullWidth fullScreen={isMobile}>
         <DialogTitle sx={{ fontWeight: 600 }}>{detailDialog?.po_number} — Order Details</DialogTitle>
         <DialogContent sx={{ p: 0 }}>
           <Box sx={{ p: 3 }}>
@@ -824,7 +900,7 @@ export default function PurchaseOrders() {
               <Grid item xs={2.25}>
                 <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>INDENT</Typography>
                 {detailDialog?.indent_number ? (
-                  <Link component="button" variant="body2" sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.9rem', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }} onClick={(e) => { e.stopPropagation(); fetchAndShowIndent(detailDialog.indent_id); }}>
+                  <Link component="button" variant="body2" sx={{ fontWeight: 600, color: '#0d9488', fontSize: '0.9rem', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }} onClick={(e) => { e.stopPropagation(); fetchAndShowIndent(detailDialog.indent_id); }}>
                     {detailDialog.indent_number}
                   </Link>
                 ) : (
@@ -834,7 +910,7 @@ export default function PurchaseOrders() {
               <Grid item xs={2.25}>
                 <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>PR</Typography>
                 {detailDialog?.pr_number ? (
-                  <Link component="button" variant="body2" sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.9rem', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }} onClick={(e) => { e.stopPropagation(); fetchAndShowPR(detailDialog.pr_id); }}>
+                  <Link component="button" variant="body2" sx={{ fontWeight: 600, color: '#7c3aed', fontSize: '0.9rem', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }} onClick={(e) => { e.stopPropagation(); fetchAndShowPR(detailDialog.pr_id); }}>
                     {detailDialog.pr_number}
                   </Link>
                 ) : (
@@ -844,7 +920,7 @@ export default function PurchaseOrders() {
               <Grid item xs={2.25}>
                 <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>QUOTATION</Typography>
                 {detailDialog?.qr_number ? (
-                  <Link component="button" variant="body2" sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.9rem', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }} onClick={(e) => { e.stopPropagation(); fetchAndShowQR(detailDialog.qr_id); }}>
+                  <Link component="button" variant="body2" sx={{ fontWeight: 600, color: '#d97706', fontSize: '0.9rem', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }} onClick={(e) => { e.stopPropagation(); fetchAndShowQR(detailDialog.qr_id); }}>
                     {detailDialog.qr_number}
                   </Link>
                 ) : (
@@ -902,7 +978,7 @@ export default function PurchaseOrders() {
                       <TableRow key={item.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                         <TableCell sx={{ fontSize: '0.75rem' }}>{idx + 1}</TableCell>
                         <TableCell sx={{ fontSize: '0.75rem' }}>
-                          {item.material_name}<br/>
+                          {item.material_name}<br />
                           <Typography variant="caption" sx={{ color: '#64748B' }}>{item.material_code}</Typography>
                         </TableCell>
                         <TableCell sx={{ fontSize: '0.75rem' }}>-</TableCell>
@@ -911,20 +987,20 @@ export default function PurchaseOrders() {
                         <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{rate.toFixed(2)}</TableCell>
                         <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{(item.discount_percent || 0).toFixed(2)}</TableCell>
                         <TableCell align="right" sx={{ fontSize: '0.75rem' }}>
-                          {(item.cgst_percentage || 0).toFixed(2)}<br/><Typography variant="caption" sx={{ fontSize: '0.6rem', color: '#64748B' }}>{item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</Typography>
+                          {(item.cgst_percentage || 0).toFixed(2)}<br /><Typography variant="caption" sx={{ fontSize: '0.6rem', color: '#64748B' }}>{item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</Typography>
                         </TableCell>
                         <TableCell align="right" sx={{ fontSize: '0.75rem' }}>
-                          {(item.sgst_percentage || 0).toFixed(2)}<br/><Typography variant="caption" sx={{ fontSize: '0.6rem', color: '#64748B' }}>{item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</Typography>
+                          {(item.sgst_percentage || 0).toFixed(2)}<br /><Typography variant="caption" sx={{ fontSize: '0.6rem', color: '#64748B' }}>{item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</Typography>
                         </TableCell>
                         <TableCell align="right" sx={{ fontSize: '0.75rem' }}>
-                          {(item.igst_percentage || 0).toFixed(2)}<br/><Typography variant="caption" sx={{ fontSize: '0.6rem', color: '#64748B' }}>{item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</Typography>
+                          {(item.igst_percentage || 0).toFixed(2)}<br /><Typography variant="caption" sx={{ fontSize: '0.6rem', color: '#64748B' }}>{item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</Typography>
                         </TableCell>
                         <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem' }}>
                           {(() => {
                             const totalGst = (item.cgst_percentage || 0) + (item.sgst_percentage || 0) + (item.igst_percentage || 0);
                             let itemBaseAmount = amount;
                             if (item.is_gst_inclusive && totalGst > 0) {
-                                itemBaseAmount = amount / (1 + (totalGst / 100));
+                              itemBaseAmount = amount / (1 + (totalGst / 100));
                             }
                             return itemBaseAmount.toFixed(2);
                           })()}
@@ -994,25 +1070,135 @@ export default function PurchaseOrders() {
                 </Box>
               </Box>
             )}
+
+            {/* Collapsible Approval History Section for PO */}
+            {detailDialog?.status !== 'Draft' && (
+              <Box sx={{ mt: 3 }}>
+                <Accordion
+                  expanded={detailHistoryOpen}
+                  onChange={() => {
+                    if (!detailHistoryOpen && detailDialog?.id) {
+                      fetchDetailHistory(detailDialog.id, 'po');
+                    } else {
+                      setDetailHistoryOpen(!detailHistoryOpen);
+                    }
+                  }}
+                  sx={{ border: '1px solid #e2e8f0', boxShadow: 'none', borderRadius: '8px !important', '&:before': { display: 'none' } }}
+                >
+                  <AccordionSummary expandIcon={<ExpandMore />} sx={{ bgcolor: '#f8fafc', borderRadius: '8px' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <History sx={{ color: '#6366f1', fontSize: 20 }} />
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#334155' }}>Approval History</Typography>
+                    </Box>
+                  </AccordionSummary>
+                  <AccordionDetails sx={{ p: 2 }}>
+                    {detailHistoryData && detailHistoryData.entries?.length > 0 ? (
+                      <Box>
+                        <TableContainer component={Box} sx={{ border: '1px solid #e5e7eb', borderRadius: 2, overflow: 'auto' }}>
+                          <Table size="small">
+                            <TableHead>
+                              <TableRow sx={{ '& th': { py: 1, fontSize: '0.75rem', fontWeight: 700, color: '#475569', bgcolor: '#f8fafc', whiteSpace: 'nowrap', verticalAlign: 'bottom' } }}>
+                                <TableCell>MATERIAL</TableCell>
+                                <TableCell>UOM</TableCell>
+                                <TableCell align="right">REQ QTY</TableCell>
+                                {detailHistoryData.entries.map((entry, idx) => (
+                                  <TableCell key={idx} align="center">
+                                    <Box sx={{ whiteSpace: 'normal', maxWidth: 80, lineHeight: 1.2, margin: '0 auto', textTransform: 'uppercase' }}>
+                                      L{entry.level} APPROVED QTY
+                                    </Box>
+                                  </TableCell>
+                                ))}
+                                <TableCell align="right">
+                                  <Box sx={{ whiteSpace: 'normal', maxWidth: 80, lineHeight: 1.2, ml: 'auto', textTransform: 'uppercase' }}>
+                                    FINAL APPROVED QTY
+                                  </Box>
+                                </TableCell>
+                              </TableRow>
+                            </TableHead>
+                            <TableBody>
+                              {detailHistoryData.entries[0]?.items?.map(item => {
+                                return (
+                                  <TableRow key={item.material_id} sx={{ '& td': { py: 1, fontSize: '0.8rem' } }}>
+                                    <TableCell>
+                                      <Typography variant="body2" sx={{ fontWeight: 600 }}>{item.material_name}</Typography>
+                                      <Typography variant="caption" sx={{ color: '#64748B' }}>{item.material_code}</Typography>
+                                    </TableCell>
+                                    <TableCell sx={{ color: '#64748B', whiteSpace: 'nowrap' }}>{item.uom_name}</TableCell>
+                                    <TableCell align="right" sx={{ fontWeight: 600 }}>{item.requested_quantity}</TableCell>
+
+                                    {detailHistoryData.entries.map((entry, idx) => {
+                                      const histItem = entry.items?.find(hi => hi.material_id === item.material_id);
+                                      return (
+                                        <TableCell key={idx} align="center">
+                                          {histItem ? (
+                                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                                <Typography variant="body2" sx={{ fontWeight: 700, color: '#1d4ed8' }}>{histItem.approved_quantity}</Typography>
+                                                {histItem.remarks && (
+                                                  <Tooltip title={histItem.remarks} arrow placement="top">
+                                                    <Textsms sx={{ fontSize: 14, color: '#94a3b8', cursor: 'help' }} />
+                                                  </Tooltip>
+                                                )}
+                                              </Box>
+                                              <Typography variant="caption" sx={{ fontWeight: 600, mt: 0.5, lineHeight: 1.1, whiteSpace: 'nowrap' }}>{entry.approver_name}</Typography>
+                                              <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.65rem', mt: 0.25, whiteSpace: 'nowrap' }}>{formatDateTime(entry.approved_at)}</Typography>
+                                            </Box>
+                                          ) : (
+                                            <Typography variant="caption" sx={{ color: '#cbd5e1' }}>—</Typography>
+                                          )}
+                                        </TableCell>
+                                      );
+                                    })}
+
+                                    <TableCell align="right" sx={{ fontWeight: 700, color: '#059669' }}>
+                                      {item.approved_quantity !== null && item.approved_quantity !== undefined ? item.approved_quantity : '—'}
+                                    </TableCell>
+                                  </TableRow>
+                                );
+                              })}
+                            </TableBody>
+                          </Table>
+                        </TableContainer>
+                        {detailHistoryData.entries.some(e => e.remarks) && (
+                          <Box sx={{ mt: 2 }}>
+                            <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748B', mb: 1, display: 'block', textTransform: 'uppercase' }}>General Approval Remarks</Typography>
+                            {detailHistoryData.entries.filter(e => e.remarks).map((e, idx) => (
+                              <Box key={idx} sx={{ mb: 1, p: 1.5, bgcolor: '#f8fafc', borderRadius: 1, border: '1px solid #e2e8f0' }}>
+                                <Typography variant="caption" sx={{ fontWeight: 700, color: '#1d4ed8', display: 'block', mb: 0.5 }}>L{e.level} Approval - {e.approver_name}</Typography>
+                                <Typography variant="body2" sx={{ color: '#334155' }}>{e.remarks}</Typography>
+                              </Box>
+                            ))}
+                          </Box>
+                        )}
+                      </Box>
+                    ) : (
+                      <Typography variant="body2" sx={{ color: '#64748B', fontStyle: 'italic', p: 2, textAlign: 'center' }}>
+                        No approval history available yet.
+                      </Typography>
+                    )}
+                  </AccordionDetails>
+                </Accordion>
+              </Box>
+            )}
           </Box>
         </DialogContent>
         <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid #e2e8f0' }}>
-          {detailDialog?.status !== 'Draft' && detailDialog?.status !== 'Rejected' && detailDialog?.status !== 'On Hold' && (
+          {detailDialog?.status !== 'Draft' && detailDialog?.status !== 'Rejected' && (
             <Button onClick={() => handlePrintPO()} variant="contained" sx={{ borderRadius: 2, fontWeight: 700, textTransform: 'none', mr: 2, bgcolor: '#2563EB' }}>Print PO</Button>
           )}
-          <Button onClick={() => setDetailDialog(null)} variant="outlined" sx={{ borderRadius: 2, fontWeight: 600, textTransform: 'none' }}>Close</Button>
+          <Button onClick={() => { setDetailDialog(null); setDetailHistoryOpen(false); setDetailHistoryData(null); }} variant="outlined" sx={{ borderRadius: 2, fontWeight: 600, textTransform: 'none' }}>Close</Button>
         </DialogActions>
       </Dialog>
 
       {/* Create PO Dialog */}
-      <Dialog open={dialog} onClose={() => setDialog(false)} maxWidth="md" fullWidth fullScreen={isMobile} PaperProps={{ sx: { borderRadius: isMobile ? 0 : 3, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' } }}>
+      <Dialog open={dialog} onClose={(e, reason) => { if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') setDialog(false); }} maxWidth="md" fullWidth fullScreen={isMobile} PaperProps={{ sx: { borderRadius: isMobile ? 0 : 3, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' } }}>
         <DialogTitle sx={{ pb: 1, pt: 3, px: 4 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Box sx={{ p: 1, bgcolor: '#EFF6FF', borderRadius: 2, color: '#2563EB', display: 'flex' }}>
               <ShoppingCart fontSize="medium" />
             </Box>
             <Box>
-              <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>Create Purchase Order</Typography>
+              <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>{editingPOId ? 'Edit Draft Purchase Order' : 'Create Purchase Order'}</Typography>
               <Typography variant="body2" color="text.secondary">Issue a new purchase order to the vendor.</Typography>
             </Box>
           </Box>
@@ -1028,7 +1214,7 @@ export default function PurchaseOrders() {
                   const vId = e.target.value;
                   const vendor = vendors.find(v => v.id === vId);
                   const vendorState = vendor?.state || '';
-                  
+
                   const updatedItems = form.items.map(it => {
                     const material = materials.find(m => m.id === it.material_id);
                     if (!material) return it;
@@ -1039,7 +1225,7 @@ export default function PurchaseOrders() {
                     );
                     return { ...it, cgst_percentage, sgst_percentage, igst_percentage };
                   });
-                  
+
                   setForm({ ...form, vendor_id: vId, items: updatedItems });
                 }}
                 startAdornment={<InputAdornment position="start"><Store sx={{ color: '#94A3B8' }} /></InputAdornment>}
@@ -1094,11 +1280,11 @@ export default function PurchaseOrders() {
               const sgstPercent = parseFloat(item.sgst_percentage) || 0;
               const igstPercent = parseFloat(item.igst_percentage) || 0;
               const totalGstPercent = cgstPercent + sgstPercent + igstPercent;
-              
+
               const grossAmt = qty * inputRate;
               const discAmt = grossAmt * (discPercent / 100);
               const netAmtAfterDisc = grossAmt - discAmt;
-              
+
               let taxableAmt = netAmtAfterDisc;
               if (item.is_gst_inclusive && totalGstPercent > 0) {
                 taxableAmt = netAmtAfterDisc / (1 + (totalGstPercent / 100));
@@ -1109,95 +1295,95 @@ export default function PurchaseOrders() {
               const netAmt = item.is_gst_inclusive ? netAmtAfterDisc : (taxableAmt + cgstAmt + sgstAmt + igstAmt);
 
               return (
-              <Box key={i} sx={{
-                display: 'grid',
-                gridTemplateColumns: { xs: '1fr', md: '1.5fr 0.5fr 0.8fr 1fr 0.8fr' },
-                gap: 1.5,
-                p: 1.5,
-                bgcolor: '#f8fafc',
-                borderRadius: 2,
-                border: '1px solid #e2e8f0',
-                position: 'relative'
-              }}>
-                <Box>
-                  <MaterialSelect
-                    materials={materials}
-                    value={item.material_id}
-                    onChange={val => {
-                      const material = materials.find(m => m.id === val);
-                      if (material) {
-                        const vendor = vendors.find(v => v.id === form.vendor_id);
-                        const vendorState = vendor?.state || '';
-                        const gstRate = material.gst_rate || 0;
-                        const { cgst_percentage, sgst_percentage, igst_percentage } = computeGstSplit(
-                          gstRate, vendorState, tenantConfig?.base_state,
-                          tenantConfig?.cgst_share_percent, tenantConfig?.sgst_share_percent
-                        );
-                        const newItems = [...form.items];
-                        newItems[i] = {
-                          ...newItems[i],
-                          material_id: val,
-                          uom_name: material.uom_name || '',
-                          rate: material.standard_cost || 0,
-                          base_rate: material.standard_cost || 0,
-                          cgst_percentage,
-                          sgst_percentage,
-                          igst_percentage
-                        };
-                        setForm({ ...form, items: newItems });
-                      } else {
-                        updateItem(i, 'material_id', val);
-                      }
-                    }}
-                    size="small"
-                  />
-                </Box>
-                <TextField size="small" label="Unit" value={item.uom_name || '-'} InputProps={{ readOnly: true }} />
-                <TextField size="small" label="Qty" type="number" value={item.quantity} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'quantity', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0 }} />
-                <Box>
-                  <TextField fullWidth size="small" label="Rate (₹)" type="number" value={item.rate} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'rate', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0 }} />
-                  {item.base_rate > 0 && <Typography variant="caption" sx={{ color: '#64748B', display: 'block', mt: 0.5 }}>Base Rate: ₹{item.base_rate}</Typography>}
-                </Box>
-                <FormControl size="small">
-                  <InputLabel>GST</InputLabel>
-                  <Select label="GST" value={item.is_gst_inclusive ? 'inclusive' : 'exclusive'} onChange={e => updateItem(i, 'is_gst_inclusive', e.target.value === 'inclusive')}>
-                    <MenuItem value="exclusive">Exclusive</MenuItem>
-                    <MenuItem value="inclusive">Inclusive</MenuItem>
-                  </Select>
-                </FormControl>
+                <Box key={i} sx={{
+                  display: 'grid',
+                  gridTemplateColumns: { xs: '1fr', md: '1.5fr 0.5fr 0.8fr 1fr 0.8fr' },
+                  gap: 1.5,
+                  p: 1.5,
+                  bgcolor: '#f8fafc',
+                  borderRadius: 2,
+                  border: '1px solid #e2e8f0',
+                  position: 'relative'
+                }}>
+                  <Box>
+                    <MaterialSelect
+                      materials={materials}
+                      value={item.material_id}
+                      onChange={val => {
+                        const material = materials.find(m => m.id === val);
+                        if (material) {
+                          const vendor = vendors.find(v => v.id === form.vendor_id);
+                          const vendorState = vendor?.state || '';
+                          const gstRate = material.gst_rate || 0;
+                          const { cgst_percentage, sgst_percentage, igst_percentage } = computeGstSplit(
+                            gstRate, vendorState, tenantConfig?.base_state,
+                            tenantConfig?.cgst_share_percent, tenantConfig?.sgst_share_percent
+                          );
+                          const newItems = [...form.items];
+                          newItems[i] = {
+                            ...newItems[i],
+                            material_id: val,
+                            uom_name: material.uom_name || '',
+                            rate: material.standard_cost || 0,
+                            base_rate: material.standard_cost || 0,
+                            cgst_percentage,
+                            sgst_percentage,
+                            igst_percentage
+                          };
+                          setForm({ ...form, items: newItems });
+                        } else {
+                          updateItem(i, 'material_id', val);
+                        }
+                      }}
+                      size="small"
+                    />
+                  </Box>
+                  <TextField size="small" label="Unit" value={item.uom_name || '-'} InputProps={{ readOnly: true }} />
+                  <TextField size="small" label="Qty" type="number" value={item.quantity} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'quantity', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0 }} />
+                  <Box>
+                    <TextField fullWidth size="small" label="Rate (₹)" type="number" value={item.rate} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'rate', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0 }} />
+                    {item.base_rate > 0 && <Typography variant="caption" sx={{ color: '#64748B', display: 'block', mt: 0.5 }}>Base Rate: ₹{item.base_rate}</Typography>}
+                  </Box>
+                  <FormControl size="small">
+                    <InputLabel>GST</InputLabel>
+                    <Select label="GST" value={item.is_gst_inclusive ? 'inclusive' : 'exclusive'} onChange={e => updateItem(i, 'is_gst_inclusive', e.target.value === 'inclusive')}>
+                      <MenuItem value="exclusive">Exclusive</MenuItem>
+                      <MenuItem value="inclusive">Inclusive</MenuItem>
+                    </Select>
+                  </FormControl>
 
-                <Box sx={{ gridColumn: { xs: '1 / -1', md: '1 / -1' }, display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', md: '1fr 1fr 1fr 1fr' }, gap: 1.5 }}>
-                  <Box display="flex" gap={1}>
-                    <TextField size="small" label="Disc %" type="number" value={item.discount_percent} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'discount_percent', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100 }} sx={{ flex: 1 }} />
-                    <TextField size="small" label="Disc (₹)" value={discAmt.toFixed(2)} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
+                  <Box sx={{ gridColumn: { xs: '1 / -1', md: '1 / -1' }, display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', md: '1fr 1fr 1fr 1fr' }, gap: 1.5 }}>
+                    <Box display="flex" gap={1}>
+                      <TextField size="small" label="Disc %" type="number" value={item.discount_percent} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'discount_percent', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100 }} sx={{ flex: 1 }} />
+                      <TextField size="small" label="Disc (₹)" value={discAmt.toFixed(2)} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
+                    </Box>
+                    <Box display="flex" gap={1}>
+                      <TextField size="small" label="CGST %" type="number" value={item.cgst_percentage} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'cgst_percentage', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100 }} sx={{ flex: 1 }} />
+                      <TextField size="small" label="CGST (₹)" value={cgstAmt.toFixed(2)} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
+                    </Box>
+                    <Box display="flex" gap={1}>
+                      <TextField size="small" label="SGST %" type="number" value={item.sgst_percentage} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'sgst_percentage', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100 }} sx={{ flex: 1 }} />
+                      <TextField size="small" label="SGST (₹)" value={sgstAmt.toFixed(2)} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
+                    </Box>
+                    <Box display="flex" gap={1}>
+                      <TextField size="small" label="IGST %" type="number" value={item.igst_percentage} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'igst_percentage', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100 }} sx={{ flex: 1 }} />
+                      <TextField size="small" label="IGST (₹)" value={igstAmt.toFixed(2)} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
+                    </Box>
                   </Box>
-                  <Box display="flex" gap={1}>
-                    <TextField size="small" label="CGST %" type="number" value={item.cgst_percentage} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'cgst_percentage', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100 }} sx={{ flex: 1 }} />
-                    <TextField size="small" label="CGST (₹)" value={cgstAmt.toFixed(2)} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
-                  </Box>
-                  <Box display="flex" gap={1}>
-                    <TextField size="small" label="SGST %" type="number" value={item.sgst_percentage} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'sgst_percentage', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100 }} sx={{ flex: 1 }} />
-                    <TextField size="small" label="SGST (₹)" value={sgstAmt.toFixed(2)} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
-                  </Box>
-                  <Box display="flex" gap={1}>
-                    <TextField size="small" label="IGST %" type="number" value={item.igst_percentage} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'igst_percentage', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100 }} sx={{ flex: 1 }} />
-                    <TextField size="small" label="IGST (₹)" value={igstAmt.toFixed(2)} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
+
+                  <Box sx={{ gridColumn: { xs: '1 / -1', md: '1 / -1' }, display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1, pt: 1, borderTop: '1px dashed #e2e8f0' }}>
+                    {form.items.length > 1 ? (
+                      <Button size="small" color="error" startIcon={<Delete />} onClick={() => removeItem(i)}>Remove</Button>
+                    ) : <Box />}
+                    <Box sx={{ textAlign: 'right' }}>
+                      <Typography variant="caption" sx={{ color: '#64748B', display: 'block', fontSize: '0.65rem', fontWeight: 600 }}>NET AMOUNT</Typography>
+                      <Typography sx={{ fontSize: '1rem', fontWeight: 700, color: '#1e293b' }}>
+                        ₹{netAmt.toLocaleString('en-IN', { maximumFractionDigits: 2, minimumFractionDigits: 2 })}
+                      </Typography>
+                    </Box>
                   </Box>
                 </Box>
-                
-                <Box sx={{ gridColumn: { xs: '1 / -1', md: '1 / -1' }, display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1, pt: 1, borderTop: '1px dashed #e2e8f0' }}>
-                  {form.items.length > 1 ? (
-                    <Button size="small" color="error" startIcon={<Delete />} onClick={() => removeItem(i)}>Remove</Button>
-                  ) : <Box />}
-                  <Box sx={{ textAlign: 'right' }}>
-                    <Typography variant="caption" sx={{ color: '#64748B', display: 'block', fontSize: '0.65rem', fontWeight: 600 }}>NET AMOUNT</Typography>
-                    <Typography sx={{ fontSize: '1rem', fontWeight: 700, color: '#1e293b' }}>
-                      ₹{netAmt.toLocaleString('en-IN', { maximumFractionDigits: 2, minimumFractionDigits: 2 })}
-                    </Typography>
-                  </Box>
-                </Box>
-              </Box>
-            );
+              );
             })}
           </Box>
           <Divider sx={{ my: 2 }} />
@@ -1228,8 +1414,11 @@ export default function PurchaseOrders() {
           />
         </DialogContent>
         <DialogActions sx={{ px: 4, pb: 4, pt: 2, justifyContent: 'flex-end', gap: 2 }}>
-          <Button onClick={() => setDialog(false)} sx={{ color: '#64748B', fontWeight: 600 }}>Cancel</Button>
-          <Button variant="contained" onClick={handleCreate} sx={{ borderRadius: 2, px: 4, py: 1, fontWeight: 700, boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)', textTransform: 'none' }}>Create PO</Button>
+          <Button onClick={() => { setDialog(false); setEditingPOId(null); }} sx={{ color: '#64748B', fontWeight: 600 }}>Cancel</Button>
+          {!(form.pr_id || form.indent_id || form.qr_id) && (
+            <Button onClick={() => handleSave(true)} color="secondary" variant="outlined" sx={{ fontWeight: 600 }}>Save Draft</Button>
+          )}
+          <Button variant="contained" onClick={() => handleSave(false)} sx={{ borderRadius: 2, px: 4, py: 1, fontWeight: 700, boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)', textTransform: 'none' }}>{editingPOId ? 'Update PO' : 'Create PO'}</Button>
         </DialogActions>
       </Dialog>
 
@@ -1258,7 +1447,7 @@ export default function PurchaseOrders() {
         </DialogActions>
       </Dialog>
       {/* Linked Indent Detail Dialog */}
-      <Dialog open={!!linkedIndent} onClose={() => setLinkedIndent(null)} maxWidth="md" fullWidth>
+      <Dialog open={!!linkedIndent} onClose={(e, reason) => { if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') { setLinkedIndent(null); setDetailHistoryOpen(false); setDetailHistoryData(null); } }} maxWidth="md" fullWidth fullScreen={isMobile}>
         <DialogTitle sx={{ fontWeight: 600 }}>{linkedIndent?.indent_number} — Indent Details</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mb: 2, mt: 0.5 }}>
@@ -1289,13 +1478,13 @@ export default function PurchaseOrders() {
             <Grid item xs={3}>
               <Typography variant="caption" color="textSecondary">Status</Typography>
               <Box sx={{ mt: 0.5 }}>
-                <Chip 
-                  label={linkedIndent?.status} 
-                  size="small" 
+                <Chip
+                  label={linkedIndent?.status}
+                  size="small"
                   color={{
                     'Awaiting Approval': 'warning', 'Approved': 'success', 'Rejected': 'error',
                     'Partially Issued': 'info', 'Fully Issued': 'primary', 'PO Created': 'secondary', 'Closed': 'default'
-                  }[linkedIndent?.status] || 'default'} 
+                  }[linkedIndent?.status] || 'default'}
                 />
               </Box>
             </Grid>
@@ -1309,12 +1498,16 @@ export default function PurchaseOrders() {
           <Table size="small">
             <TableHead>
               <TableRow sx={{ bgcolor: '#f0f4ff' }}>
-                <TableCell sx={{ fontWeight: 600 }}>Material</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600 }}>Qty Requested</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600 }}>Current Stock</TableCell>
-                <TableCell align="center" sx={{ fontWeight: 600 }}>Availability</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600 }}>Issued</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600 }}>Pending</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>MATERIAL</TableCell>
+                <TableCell align="left" sx={{ fontWeight: 600 }}>UOM</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600 }}>REQUESTED QTY</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600 }}>APPROVED QTY</TableCell>
+                {linkedIndent?.status !== 'Awaiting Approval' && (
+                  <>
+                    <TableCell align="right" sx={{ fontWeight: 600 }}>ISSUED QTY</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 600 }}>PENDING QTY</TableCell>
+                  </>
+                )}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -1324,121 +1517,329 @@ export default function PurchaseOrders() {
                     <Typography sx={{ fontWeight: 500, fontSize: '0.9rem' }}>{item.material_name}</Typography>
                     <Typography variant="caption" sx={{ color: '#64748B' }}>{item.material_code}</Typography>
                   </TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 500 }}>{item.requested_quantity} {item.uom_name}</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 700 }}>{item.current_stock || 0} {item.uom_name}</TableCell>
-                  <TableCell align="center">
-                    <Chip
-                      label={item.availability_status === 'Available' ? '✓ AVAILABLE' : (item.availability_status === 'Low Stock' ? 'X LOW' : 'X NO STOCK')}
-                      size="small"
-                      color={item.availability_status === 'Available' ? 'success' : (item.availability_status === 'Low Stock' ? 'warning' : 'error')}
-                      variant={item.availability_status === 'Available' ? 'light' : 'outlined'}
-                      sx={{ fontWeight: 700, fontSize: '0.65rem' }}
-                    />
+                  <TableCell align="left" sx={{ fontWeight: 500, color: '#64748B' }}>{item.uom_name}</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 500 }}>{item.requested_quantity}</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700, color: '#1d4ed8' }}>
+                    {item.approved_quantity !== null && item.approved_quantity !== undefined ? item.approved_quantity : '—'}
                   </TableCell>
-                  <TableCell align="right">{item.issued_quantity}</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 600, color: item.pending_quantity > 0 ? '#ef4444' : '#10b981' }}>
-                    {item.pending_quantity}
+                  {linkedIndent?.status !== 'Awaiting Approval' && (
+                    <>
+                      <TableCell align="right">{item.issued_quantity}</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 600, color: item.pending_quantity > 0 ? '#ef4444' : '#10b981' }}>
+                        {item.pending_quantity}
+                      </TableCell>
+                    </>
+                  )}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+
+          {/* Collapsible Approval History Section */}
+          {linkedIndent?.status !== 'Draft' && (
+            <Box sx={{ mt: 3 }}>
+              <Accordion
+                expanded={detailHistoryOpen}
+                onChange={() => {
+                  if (!detailHistoryOpen && linkedIndent?.id) {
+                    fetchDetailHistory(linkedIndent.id, 'indent');
+                  } else {
+                    setDetailHistoryOpen(!detailHistoryOpen);
+                  }
+                }}
+                sx={{ border: '1px solid #e2e8f0', boxShadow: 'none', borderRadius: '8px !important', '&:before': { display: 'none' } }}
+              >
+                <AccordionSummary expandIcon={<ExpandMore />} sx={{ bgcolor: '#f8fafc', borderRadius: '8px' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <History sx={{ color: '#6366f1', fontSize: 20 }} />
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#334155' }}>Approval History</Typography>
+                  </Box>
+                </AccordionSummary>
+                <AccordionDetails sx={{ p: 2 }}>
+                  {detailHistoryData && detailHistoryData.entries?.length > 0 ? (
+                    <Box>
+                      <TableContainer component={Box} sx={{ border: '1px solid #e5e7eb', borderRadius: 2, overflow: 'auto' }}>
+                        <Table size="small">
+                          <TableHead>
+                            <TableRow sx={{ '& th': { py: 1, fontSize: '0.75rem', fontWeight: 700, color: '#475569', bgcolor: '#f8fafc', whiteSpace: 'normal', verticalAlign: 'bottom' } }}>
+                              <TableCell>MATERIAL</TableCell>
+                              <TableCell>UOM</TableCell>
+                              <TableCell align="right">REQ QTY</TableCell>
+                              {detailHistoryData.entries.map((entry, idx) => (
+                                <TableCell key={idx} align="center">L{entry.level} APPROVED QTY</TableCell>
+                              ))}
+                              <TableCell align="right">FINAL APPROVED QTY</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {linkedIndent?.items?.map(item => {
+                              const hasHistory = detailHistoryData.entries.some(entry => entry.items?.some(hi => hi.material_id === item.material_id));
+                              if (!hasHistory) return null;
+
+                              return (
+                                <TableRow key={item.id} sx={{ '& td': { py: 1, fontSize: '0.8rem' } }}>
+                                  <TableCell>
+                                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{item.material_name}</Typography>
+                                    <Typography variant="caption" sx={{ color: '#64748B' }}>{item.material_code}</Typography>
+                                  </TableCell>
+                                  <TableCell sx={{ color: '#64748B', whiteSpace: 'nowrap' }}>{item.uom_name}</TableCell>
+                                  <TableCell align="right" sx={{ fontWeight: 600 }}>{item.requested_quantity}</TableCell>
+
+                                  {detailHistoryData.entries.map((entry, idx) => {
+                                    const histItem = entry.items?.find(hi => hi.material_id === item.material_id);
+                                    return (
+                                      <TableCell key={idx} align="center">
+                                        {histItem ? (
+                                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                              <Typography variant="body2" sx={{ fontWeight: 700, color: '#1d4ed8' }}>{histItem.approved_quantity}</Typography>
+                                              {histItem.remarks && (
+                                                <Tooltip title={histItem.remarks} arrow placement="top">
+                                                  <Textsms sx={{ fontSize: 14, color: '#94a3b8', cursor: 'help' }} />
+                                                </Tooltip>
+                                              )}
+                                            </Box>
+                                            <Typography variant="caption" sx={{ fontWeight: 600, mt: 0.5, lineHeight: 1.1, whiteSpace: 'nowrap' }}>{entry.approver_name}</Typography>
+                                            <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.65rem', mt: 0.25, whiteSpace: 'nowrap' }}>{formatDateTime(entry.approved_at)}</Typography>
+                                          </Box>
+                                        ) : (
+                                          <Typography variant="caption" sx={{ color: '#cbd5e1' }}>—</Typography>
+                                        )}
+                                      </TableCell>
+                                    );
+                                  })}
+
+                                  <TableCell align="right" sx={{ fontWeight: 700, color: '#059669' }}>
+                                    {item.approved_quantity !== null && item.approved_quantity !== undefined ? item.approved_quantity : '—'}
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            })}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                      {detailHistoryData.entries.some(e => e.remarks) && (
+                        <Box sx={{ mt: 2 }}>
+                          <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748B', mb: 1, display: 'block', textTransform: 'uppercase' }}>General Approval Remarks</Typography>
+                          {detailHistoryData.entries.filter(e => e.remarks).map((e, idx) => (
+                            <Box key={idx} sx={{ mb: 1, p: 1.5, bgcolor: '#f8fafc', borderRadius: 1, border: '1px solid #e2e8f0' }}>
+                              <Typography variant="caption" sx={{ fontWeight: 700, color: '#1d4ed8', display: 'block', mb: 0.5 }}>L{e.level} Approval - {e.approver_name}</Typography>
+                              <Typography variant="body2" sx={{ color: '#334155' }}>{e.remarks}</Typography>
+                            </Box>
+                          ))}
+                        </Box>
+                      )}
+                    </Box>
+                  ) : (
+                    <Typography variant="body2" sx={{ color: '#94a3b8', textAlign: 'center', py: 2 }}>
+                      {detailHistoryData ? 'No approval history yet.' : 'Loading...'}
+                    </Typography>
+                  )}
+                </AccordionDetails>
+              </Accordion>
+            </Box>
+          )}
+
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}><Button onClick={() => { setLinkedIndent(null); setDetailHistoryOpen(false); setDetailHistoryData(null); }}>Close</Button></DialogActions>
+      </Dialog>
+
+      {/* Linked PR Detail Dialog */}
+      <Dialog open={!!linkedPR} onClose={(e, reason) => { if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') { setLinkedPR(null); setDetailHistoryOpen(false); setDetailHistoryData(null); } }} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 3 } }}>
+        <DialogTitle sx={{ fontWeight: 600 }}>{linkedPR?.pr_number} — PR Details</DialogTitle>
+        <DialogContent>
+          <Grid container spacing={2} sx={{ mb: 2, mt: 0.5 }}>
+            <Grid item xs={4}>
+              <Typography variant="caption" color="textSecondary">Requester</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{linkedPR?.requester_name}</Typography>
+            </Grid>
+            <Grid item xs={4}>
+              <Typography variant="caption" color="textSecondary">Department</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{linkedPR?.department_name || '—'}</Typography>
+            </Grid>
+            <Grid item xs={4}>
+              <Typography variant="caption" color="textSecondary">Building</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{linkedPR?.building_name || '—'}</Typography>
+            </Grid>
+            <Grid item xs={4}>
+              <Typography variant="caption" color="textSecondary">PR Date</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{formatDate(linkedPR?.created_at)}</Typography>
+            </Grid>
+            <Grid item xs={4}>
+              <Typography variant="caption" color="textSecondary">Required Date</Typography>
+              <Typography sx={{ fontWeight: 600, color: '#2563EB' }}>{formatDate(linkedPR?.required_date)}</Typography>
+            </Grid>
+            <Grid item xs={4}>
+              <Typography variant="caption" color="textSecondary">Status</Typography>
+              <Box sx={{ mt: 0.5 }}>
+                <Chip
+                  label={linkedPR?.status}
+                  size="small"
+                  color={{
+                    'Draft': 'default', 'Submitted': 'info', 'Approved': 'success',
+                    'Rejected': 'error', 'Converted to PO': 'secondary',
+                    'Short Closed': 'warning'
+                  }[linkedPR?.status] || 'default'}
+                  sx={{ fontWeight: 600, fontSize: '0.7rem' }}
+                />
+              </Box>
+            </Grid>
+          </Grid>
+
+          {linkedPR?.remarks && (
+            <Typography variant="body2" sx={{ mb: 2, p: 1.5, bgcolor: '#f8fafc', borderRadius: 1, border: '1px solid #e2e8f0' }}>
+              <strong>Remarks:</strong> {linkedPR.remarks}
+            </Typography>
+          )}
+          <Divider sx={{ mb: 2 }} />
+
+          <Table size="small">
+            <TableHead>
+              <TableRow sx={{ bgcolor: '#f8fafc' }}>
+                <TableCell sx={{ fontWeight: 600 }}>MATERIAL</TableCell>
+                <TableCell align="left" sx={{ fontWeight: 600 }}>UOM</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600 }}>REQ QTY</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600 }}>APPROVED QTY</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {linkedPR?.items?.map((it, idx) => (
+                <TableRow key={idx}>
+                  <TableCell>
+                    <Typography sx={{ fontWeight: 500, fontSize: '0.9rem' }}>{it.material_name}</Typography>
+                    <Typography variant="caption" sx={{ color: '#64748B' }}>{it.material_code}</Typography>
+                  </TableCell>
+                  <TableCell align="left" sx={{ fontWeight: 500, color: '#64748B' }}>{it.uom_name}</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 500 }}>{it.quantity}</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700, color: '#1d4ed8' }}>
+                    {it.approved_quantity !== null && it.approved_quantity !== undefined ? it.approved_quantity : '—'}
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2 }}><Button onClick={() => setLinkedIndent(null)}>Close</Button></DialogActions>
-      </Dialog>
 
-      {/* Linked PR Detail Dialog */}
-      <Dialog open={!!linkedPR} onClose={() => setLinkedPR(null)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 3 } }}>
-        <DialogTitle sx={{ fontWeight: 700, bgcolor: '#f8fafc', borderBottom: '1px solid #e2e8f0', px: 3, py: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <ShoppingCart sx={{ color: 'primary.main' }} />
-            <Typography variant="h6" sx={{ fontWeight: 700 }}>{linkedPR?.pr_number} — PR Details</Typography>
-          </Box>
-        </DialogTitle>
-        <DialogContent sx={{ p: 0 }}>
-          <Box sx={{ p: 3 }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2, color: '#1e293b', display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Inventory fontSize="small" sx={{ color: '#64748B' }} />
-              Material Details
-            </Typography>
-            <TableContainer component={Paper} variant="outlined" sx={{ mb: 4, borderRadius: 2 }}>
-              <Table size="small">
-                <TableHead sx={{ bgcolor: '#f8fafc' }}>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 700, color: '#475569' }}>Material</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#475569' }}>Code</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700, color: '#475569' }}>Quantity</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#475569' }}>UOM</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {linkedPR?.items?.map((it, idx) => (
-                    <TableRow key={idx} hover>
-                      <TableCell sx={{ fontWeight: 500 }}>{it.material_name}</TableCell>
-                      <TableCell sx={{ color: '#64748B', fontSize: '0.75rem' }}>{it.material_code}</TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 700, color: 'primary.main' }}>{it.quantity}</TableCell>
-                      <TableCell sx={{ color: '#64748B' }}>{it.uom_name}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-
-            <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2, color: '#1e293b' }}>Request Information</Typography>
-            <Grid container spacing={3}>
-              <Grid item xs={6}>
-                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>BUILDING</Typography>
-                <Typography sx={{ fontWeight: 600, color: '#1e293b' }}>{linkedPR?.building_name || '-'}</Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>DEPARTMENT</Typography>
-                <Typography sx={{ fontWeight: 600, color: '#1e293b' }}>{linkedPR?.department_name || '-'}</Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>REQUESTER</Typography>
-                <Typography sx={{ fontWeight: 600, color: '#1e293b' }}>{linkedPR?.requester_name}</Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>STATUS</Typography>
-                <Box>
-                  <Chip 
-                    label={linkedPR?.status} 
-                    size="small" 
-                    color={{
-                      'Draft': 'default', 'Submitted': 'info', 'Approved': 'success',
-                      'Rejected': 'error', 'Converted to PO': 'secondary',
-                      'Short Closed': 'warning'
-                    }[linkedPR?.status] || 'default'} 
-                    sx={{ fontWeight: 600, fontSize: '0.7rem' }} 
-                  />
-                </Box>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>PR DATE</Typography>
-                <Typography sx={{ fontWeight: 600, color: '#1e293b' }}>{formatDate(linkedPR?.created_at)}</Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>REQUIRED DATE</Typography>
-                <Typography sx={{ fontWeight: 600, color: '#2563EB' }}>{formatDate(linkedPR?.required_date)}</Typography>
-              </Grid>
-              {linkedPR?.remarks && (
-                <Grid item xs={12}>
-                  <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>REMARKS</Typography>
-                  <Box sx={{ p: 1.5, bgcolor: '#f1f5f9', borderRadius: 2, border: '1px solid #e2e8f0' }}>
-                    <Typography variant="body2" sx={{ whiteSpace: 'pre-line', color: '#334155' }}>{linkedPR?.remarks}</Typography>
+          {/* Collapsible Approval History Section */}
+          {linkedPR?.status !== 'Draft' && (
+            <Box sx={{ mt: 3 }}>
+              <Accordion
+                expanded={detailHistoryOpen}
+                onChange={() => {
+                  if (!detailHistoryOpen && linkedPR?.id) {
+                    fetchDetailHistory(linkedPR.id, 'pr');
+                  } else {
+                    setDetailHistoryOpen(!detailHistoryOpen);
+                  }
+                }}
+                sx={{ border: '1px solid #e2e8f0', boxShadow: 'none', borderRadius: '8px !important', '&:before': { display: 'none' } }}
+              >
+                <AccordionSummary expandIcon={<ExpandMore />} sx={{ bgcolor: '#f8fafc', borderRadius: '8px' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <History sx={{ color: '#6366f1', fontSize: 20 }} />
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#334155' }}>Approval History</Typography>
                   </Box>
-                </Grid>
-              )}
-            </Grid>
-          </Box>
+                </AccordionSummary>
+                <AccordionDetails sx={{ p: 2 }}>
+                  {detailHistoryData && detailHistoryData.entries?.length > 0 ? (
+                    <Box>
+                      <TableContainer component={Box} sx={{ border: '1px solid #e5e7eb', borderRadius: 2, overflow: 'auto' }}>
+                        <Table size="small">
+                          <TableHead>
+                            <TableRow sx={{ '& th': { py: 1, fontSize: '0.75rem', fontWeight: 700, color: '#475569', bgcolor: '#f8fafc', whiteSpace: 'nowrap', verticalAlign: 'bottom' } }}>
+                              <TableCell>MATERIAL</TableCell>
+                              <TableCell>UOM</TableCell>
+                              <TableCell align="right">REQ QTY</TableCell>
+                              {detailHistoryData.entries.map((entry, idx) => (
+                                <TableCell key={idx} align="center">
+                                  <Box sx={{ whiteSpace: 'normal', maxWidth: 80, lineHeight: 1.2, margin: '0 auto', textTransform: 'uppercase' }}>
+                                    L{entry.level} APPROVED QTY
+                                  </Box>
+                                </TableCell>
+                              ))}
+                              <TableCell align="right">
+                                <Box sx={{ whiteSpace: 'normal', maxWidth: 80, lineHeight: 1.2, ml: 'auto', textTransform: 'uppercase' }}>
+                                  FINAL APPROVED QTY
+                                </Box>
+                              </TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {linkedPR?.items?.map(item => {
+                              const hasHistory = detailHistoryData.entries.some(entry => entry.items?.some(hi => hi.material_id === item.material_id));
+                              if (!hasHistory) return null;
+
+                              return (
+                                <TableRow key={item.id} sx={{ '& td': { py: 1, fontSize: '0.8rem' } }}>
+                                  <TableCell>
+                                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{item.material_name}</Typography>
+                                    <Typography variant="caption" sx={{ color: '#64748B' }}>{item.material_code}</Typography>
+                                  </TableCell>
+                                  <TableCell sx={{ color: '#64748B', whiteSpace: 'nowrap' }}>{item.uom_name}</TableCell>
+                                  <TableCell align="right" sx={{ fontWeight: 600 }}>{item.quantity}</TableCell>
+
+                                  {detailHistoryData.entries.map((entry, idx) => {
+                                    const histItem = entry.items?.find(hi => hi.material_id === item.material_id);
+                                    return (
+                                      <TableCell key={idx} align="center">
+                                        {histItem ? (
+                                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                              <Typography variant="body2" sx={{ fontWeight: 700, color: '#1d4ed8' }}>{histItem.approved_quantity}</Typography>
+                                              {histItem.remarks && (
+                                                <Tooltip title={histItem.remarks} arrow placement="top">
+                                                  <Textsms sx={{ fontSize: 14, color: '#94a3b8', cursor: 'help' }} />
+                                                </Tooltip>
+                                              )}
+                                            </Box>
+                                            <Typography variant="caption" sx={{ fontWeight: 600, mt: 0.5, lineHeight: 1.1, whiteSpace: 'nowrap' }}>{entry.approver_name}</Typography>
+                                            <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.65rem', mt: 0.25, whiteSpace: 'nowrap' }}>{formatDateTime(entry.approved_at)}</Typography>
+                                          </Box>
+                                        ) : (
+                                          <Typography variant="caption" sx={{ color: '#cbd5e1' }}>—</Typography>
+                                        )}
+                                      </TableCell>
+                                    );
+                                  })}
+
+                                  <TableCell align="right" sx={{ fontWeight: 700, color: '#059669' }}>
+                                    {item.approved_quantity !== null && item.approved_quantity !== undefined ? item.approved_quantity : '—'}
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            })}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                      {detailHistoryData.entries.some(e => e.remarks) && (
+                        <Box sx={{ mt: 2 }}>
+                          <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748B', mb: 1, display: 'block', textTransform: 'uppercase' }}>General Approval Remarks</Typography>
+                          {detailHistoryData.entries.filter(e => e.remarks).slice().reverse().map((e, idx) => (
+                            <Box key={idx} sx={{ mb: 1, p: 1.5, bgcolor: '#f8fafc', borderRadius: 1, border: '1px solid #e2e8f0' }}>
+                              <Typography variant="caption" sx={{ fontWeight: 700, color: '#1d4ed8', display: 'block', mb: 0.5 }}>L{e.level} Approval - {e.approver_name}</Typography>
+                              <Typography variant="body2" sx={{ color: '#334155' }}>{e.remarks}</Typography>
+                            </Box>
+                          ))}
+                        </Box>
+                      )}
+                    </Box>
+                  ) : (
+                    <Typography variant="body2" sx={{ color: '#94a3b8', textAlign: 'center', py: 2 }}>
+                      {detailHistoryData ? 'No approval history yet.' : 'Loading...'}
+                    </Typography>
+                  )}
+                </AccordionDetails>
+              </Accordion>
+            </Box>
+          )}
+
         </DialogContent>
         <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid #e2e8f0' }}>
-          <Button onClick={() => setLinkedPR(null)} variant="outlined" sx={{ borderRadius: 2, fontWeight: 600, textTransform: 'none' }}>Close</Button>
+          <Button onClick={() => { setLinkedPR(null); setDetailHistoryOpen(false); setDetailHistoryData(null); }} variant="outlined" sx={{ borderRadius: 2, fontWeight: 600, textTransform: 'none' }}>Close</Button>
         </DialogActions>
       </Dialog>
 
       {/* Linked QR Detail Dialog */}
-      <Dialog open={!!linkedQR} onClose={() => setLinkedQR(null)} maxWidth="md" fullWidth>
+      <Dialog open={!!linkedQR} onClose={(e, reason) => { if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') setLinkedQR(null); }} maxWidth="md" fullWidth>
         <DialogTitle>Quotation Request Details - {linkedQR?.qr_number}</DialogTitle>
         <DialogContent>
           <Box>
@@ -1465,38 +1866,38 @@ export default function PurchaseOrders() {
                       <TableCell sx={{ color: 'text.secondary' }}>{it.uom_name}</TableCell>
                       <TableCell>
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                        {it.sources && it.sources.length > 0 ? (() => {
-                          const hasPR = it.sources.some(s => s.source === 'PR' && s.source_pr_number);
-                          const displaySources = it.sources.filter(s => {
-                            if (s.source === 'Manual' && hasPR) return false;
-                            return (s.source === 'PR' && s.source_pr_number) || s.source === 'Manual';
-                          });
-                          
-                          return Array.from(new Set(displaySources.map(s => 
-                            s.source === 'PR' ? `PR:${s.source_pr_number}` : 'Manual'
-                          ))).map((srcKey, sIdx) => {
-                            const isPR = srcKey.startsWith('PR:');
-                            const label = isPR ? srcKey.replace('PR:', '') : 'Manual';
-                            return (
-                              <Chip 
-                                key={sIdx}
-                                size="small" 
-                                label={label} 
-                                color={isPR ? "primary" : "default"} 
-                                variant="outlined" 
-                                sx={{ fontSize: '0.65rem', height: 18 }} 
-                              />
-                            );
-                          });
-                        })() : (
-                          <Chip 
-                            size="small" 
-                            label={it.source === 'PR' && it.source_pr_number ? it.source_pr_number : "Manual"} 
-                            color={it.source === 'PR' ? "primary" : "default"}
-                            variant="outlined" 
-                            sx={{ fontSize: '0.65rem', height: 18 }} 
-                          />
-                        )}
+                          {it.sources && it.sources.length > 0 ? (() => {
+                            const hasPR = it.sources.some(s => s.source === 'PR' && s.source_pr_number);
+                            const displaySources = it.sources.filter(s => {
+                              if (s.source === 'Manual' && hasPR) return false;
+                              return (s.source === 'PR' && s.source_pr_number) || s.source === 'Manual';
+                            });
+
+                            return Array.from(new Set(displaySources.map(s =>
+                              s.source === 'PR' ? `PR:${s.source_pr_number}` : 'Manual'
+                            ))).map((srcKey, sIdx) => {
+                              const isPR = srcKey.startsWith('PR:');
+                              const label = isPR ? srcKey.replace('PR:', '') : 'Manual';
+                              return (
+                                <Chip
+                                  key={sIdx}
+                                  size="small"
+                                  label={label}
+                                  color={isPR ? "primary" : "default"}
+                                  variant="outlined"
+                                  sx={{ fontSize: '0.65rem', height: 18 }}
+                                />
+                              );
+                            });
+                          })() : (
+                            <Chip
+                              size="small"
+                              label={it.source === 'PR' && it.source_pr_number ? it.source_pr_number : "Manual"}
+                              color={it.source === 'PR' ? "primary" : "default"}
+                              variant="outlined"
+                              sx={{ fontSize: '0.65rem', height: 18 }}
+                            />
+                          )}
                         </Box>
                       </TableCell>
                     </TableRow>

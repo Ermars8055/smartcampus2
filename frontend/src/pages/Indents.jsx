@@ -9,6 +9,7 @@ import {
   Accordion, AccordionSummary, AccordionDetails, Collapse
 } from '@mui/material';
 import { Add, Delete, CheckCircle, Cancel, ReceiptLong, ShoppingCart, ArrowBack, Search, Apartment, Layers, MeetingRoom, AccountTree, Notes, Visibility, ExpandMore, History, Textsms } from '@mui/icons-material';
+import { Tab, Tabs } from '@mui/material';
 import api from '../services/api';
 import { formatDate, formatDateTime } from '../utils/dateUtils';
 import MaterialSelect from '../components/MaterialSelect';
@@ -35,6 +36,7 @@ export default function Indents() {
   const [detailHistoryData, setDetailHistoryData] = useState(null);
   const [detailHistoryOpen, setDetailHistoryOpen] = useState(false);
   const [search, setSearch] = useState('');
+  const [tabValue, setTabValue] = useState('All');
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -49,7 +51,7 @@ export default function Indents() {
     setOrderBy(property);
   };
 
-  const sortedIndents = [...indents].sort((a, b) => {
+  const sortedIndents = [...indents].filter(i => tabValue === 'All' || i.status === tabValue).sort((a, b) => {
     let valA = a[orderBy] || '';
     let valB = b[orderBy] || '';
 
@@ -72,13 +74,15 @@ export default function Indents() {
   const navigate = useNavigate();
 
   // Confirmation dialog state
-  const [confirm, setConfirm] = useState({ open: false, title: '', message: '', confirmText: '', confirmColor: 'primary', action: null });
+  const [confirm, setConfirm] = useState({ open: false, title: '', message: '', confirmText: '', confirmColor: 'primary', action: null, needsReason: false });
+  const [reason, setReason] = useState('');
 
-  const showConfirm = (title, message, confirmText, confirmColor, action) => {
-    setConfirm({ open: true, title, message, confirmText, confirmColor, action });
+  const showConfirm = (title, message, confirmText, confirmColor, action, needsReason = false) => {
+    setReason('');
+    setConfirm({ open: true, title, message, confirmText, confirmColor, action, needsReason });
   };
-  const handleConfirm = () => { if (confirm.action) confirm.action(); setConfirm({ ...confirm, open: false }); };
-  const handleCancelConfirm = () => { setConfirm({ ...confirm, open: false }); };
+  const handleConfirm = () => { if (confirm.action) confirm.action(reason); setConfirm({ ...confirm, open: false }); };
+  const handleCancelConfirm = (e, reason) => { if (reason === 'backdropClick' || reason === 'escapeKeyDown') return; setConfirm({ ...confirm, open: false }); };
 
   const load = () => { api.get('/api/indents', { params: { search: search || undefined } }).then(r => setIndents(r.data)); };
   useEffect(() => { load(); }, [search]);
@@ -321,9 +325,9 @@ export default function Indents() {
     }
   };
 
-  const rejectIndent = async (id) => {
+  const rejectIndent = async (id, remarks) => {
     try {
-      const res = await api.post(`/api/indents/${id}/reject`);
+      const res = await api.post(`/api/indents/${id}/reject`, { remarks });
       load();
       showMessage(res.data.message || "Indent rejected successfully", "Success", "success");
     } catch (err) {
@@ -392,7 +396,8 @@ export default function Indents() {
   // Status helpers
   const statusColor = {
     'Awaiting Approval': 'warning', 'Approved': 'success', 'Rejected': 'error',
-    'Partially Issued': 'info', 'Fully Issued': 'primary', 'PO Created': 'secondary', 'Closed': 'default'
+    'Partially Issued': 'info', 'Issued': 'secondary', 'Fully Issued': 'secondary', 
+    'Converted to PO': 'primary', 'PO Created': 'primary', 'Closed': 'default'
   };
 
   /* ─── INLINE CREATE FORM (reference-style card) ─── */
@@ -615,10 +620,40 @@ export default function Indents() {
         >New Indent</Button>
       </Box>
 
-      <Card sx={{ mb: 3, p: 2 }}>
-        <TextField size="small" placeholder="Search indent number..." value={search}
-          onChange={e => setSearch(e.target.value)} sx={{ minWidth: 300 }}
-          InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }} />
+      <Card sx={{ mb: 3 }}>
+        <Box sx={{ p: 2 }}>
+          <TextField size="small" placeholder="Search indent number..." value={search}
+            onChange={e => setSearch(e.target.value)} sx={{ minWidth: 300 }}
+            InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }} />
+        </Box>
+        <Tabs
+          value={tabValue}
+          onChange={(e, v) => setTabValue(v)}
+          variant="scrollable"
+          scrollButtons="auto"
+          sx={{ borderBottom: 1, borderColor: 'divider' }}
+        >
+          {['All', 'Awaiting Approval', 'Approved', 'Rejected', 'Partially Issued', 'Fully Issued', 'PO Created', 'Closed'].map(s => {
+            const count = s === 'All' ? indents.length : indents.filter(i => i.status === s).length;
+            if (s !== 'All' && count === 0 && !['Awaiting Approval', 'Approved', 'Partially Issued'].includes(s)) return null;
+            return (
+            <Tab
+              key={s}
+              label={
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  {s}
+                  <Chip
+                    label={count}
+                    size="small"
+                    sx={{ height: 20, fontSize: '0.7rem', fontWeight: 600, bgcolor: tabValue === s ? 'primary.main' : 'action.selected', color: tabValue === s ? 'white' : 'text.primary' }}
+                  />
+                </Box>
+              }
+              value={s}
+              sx={{ textTransform: 'none', fontWeight: 600, minHeight: 48, minWidth: 'auto', px: 2 }}
+            />
+          )})}
+        </Tabs>
       </Card>
 
       <Card>
@@ -649,7 +684,7 @@ export default function Indents() {
                     </Tooltip>
                     <Tooltip title="Reject">
                       <span><IconButton size="small" color="error" disabled={ind.status !== 'Awaiting Approval' || !hasAction('indents', 'can_reject')}
-                        onClick={() => showConfirm('Reject Indent?', `Are you sure you want to reject ${ind.indent_number}?`, 'Yes, Reject', 'error', () => rejectIndent(ind.id))}>
+                        onClick={() => showConfirm('Reject Indent?', `Are you sure you want to reject ${ind.indent_number}?`, 'Yes, Reject', 'error', (r) => rejectIndent(ind.id, r), true)}>
                         <Cancel fontSize="small" />
                       </IconButton></span>
                     </Tooltip>
@@ -675,13 +710,13 @@ export default function Indents() {
                     </TableSortLabel>
                   </TableCell>
                   <TableCell>
-                    <TableSortLabel active={orderBy === 'department'} direction={orderBy === 'department' ? order : 'asc'} onClick={() => handleRequestSort('department')}>
-                      Dept
+                    <TableSortLabel active={orderBy === 'building_name'} direction={orderBy === 'building_name' ? order : 'asc'} onClick={() => handleRequestSort('building_name')}>
+                      Bldg.
                     </TableSortLabel>
                   </TableCell>
                   <TableCell>
-                    <TableSortLabel active={orderBy === 'building_name'} direction={orderBy === 'building_name' ? order : 'asc'} onClick={() => handleRequestSort('building_name')}>
-                      Bldg.
+                    <TableSortLabel active={orderBy === 'department'} direction={orderBy === 'department' ? order : 'asc'} onClick={() => handleRequestSort('department')}>
+                      Dept
                     </TableSortLabel>
                   </TableCell>
                   <TableCell>
@@ -725,8 +760,8 @@ export default function Indents() {
                 {sortedIndents.map(ind => (
                   <TableRow key={ind.id} sx={{ cursor: 'pointer', '&:hover': { bgcolor: '#f8fafc' }, '& td': { px: 0.5, py: 0.75 } }} onClick={() => setDetailDialog(ind)}>
                     <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>{ind.indent_number}</TableCell>
-                    <TableCell sx={{ fontSize: '0.78rem' }}>{ind.department || '-'}</TableCell>
                     <TableCell sx={{ fontSize: '0.78rem' }}>{ind.building_name || '-'}</TableCell>
+                    <TableCell sx={{ fontSize: '0.78rem' }}>{ind.department || '-'}</TableCell>
                     <TableCell sx={{ fontSize: '0.78rem' }}>{ind.floor || '-'}</TableCell>
                     <TableCell sx={{ fontSize: '0.78rem' }}>{ind.room_name || '-'}</TableCell>
                     <TableCell sx={{ fontSize: '0.78rem' }}>{ind.requester_name}</TableCell>
@@ -744,7 +779,7 @@ export default function Indents() {
                         </Tooltip>
                         <Tooltip title="Reject">
                           <span><IconButton size="small" color="error" disabled={ind.status !== 'Awaiting Approval' || !hasAction('indents', 'can_reject')}
-                            onClick={() => showConfirm('Reject Indent?', `Are you sure you want to reject ${ind.indent_number}?`, 'Yes, Reject', 'error', () => rejectIndent(ind.id))}>
+                            onClick={() => showConfirm('Reject Indent?', `Are you sure you want to reject ${ind.indent_number}?`, 'Yes, Reject', 'error', (r) => rejectIndent(ind.id, r), true)}>
                             <Cancel fontSize="small" />
                           </IconButton></span>
                         </Tooltip>
@@ -765,7 +800,7 @@ export default function Indents() {
       </Card>
 
       {/* Indent Detail Dialog */}
-      <Dialog open={!!detailDialog} onClose={() => setDetailDialog(null)} maxWidth="md" fullWidth fullScreen={isMobile}>
+      <Dialog open={!!detailDialog} onClose={(e, reason) => { if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') setDetailDialog(null); }} maxWidth="md" fullWidth fullScreen={isMobile}>
         <DialogTitle sx={{ fontWeight: 600 }}>{detailDialog?.indent_number} — Indent Details</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mb: 2, mt: 0.5 }}>
@@ -807,14 +842,14 @@ export default function Indents() {
           <Table size="small">
             <TableHead>
               <TableRow sx={{ bgcolor: '#f0f4ff' }}>
-                <TableCell sx={{ fontWeight: 600 }}>Material</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>MATERIAL</TableCell>
                 <TableCell align="left" sx={{ fontWeight: 600 }}>UOM</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600 }}>Qty Requested</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600 }}>Qty Approved</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600 }}>REQUESTED QTY</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600 }}>APPROVED QTY</TableCell>
                 {detailDialog?.status !== 'Awaiting Approval' && (
                   <>
-                    <TableCell align="right" sx={{ fontWeight: 600 }}>Issued</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 600 }}>Pending</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 600 }}>ISSUED QTY</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 600 }}>PENDING QTY</TableCell>
                   </>
                 )}
               </TableRow>
@@ -870,14 +905,14 @@ export default function Indents() {
                       <TableContainer component={Box} sx={{ border: '1px solid #e5e7eb', borderRadius: 2, overflow: 'auto' }}>
                         <Table size="small">
                           <TableHead>
-                            <TableRow sx={{ '& th': { py: 1, fontSize: '0.75rem', fontWeight: 700, color: '#475569', bgcolor: '#f8fafc', whiteSpace: 'nowrap' } }}>
-                              <TableCell>Material</TableCell>
+                            <TableRow sx={{ '& th': { py: 1, fontSize: '0.75rem', fontWeight: 700, color: '#475569', bgcolor: '#f8fafc', whiteSpace: 'normal', verticalAlign: 'bottom' } }}>
+                              <TableCell>MATERIAL</TableCell>
                               <TableCell>UOM</TableCell>
-                              <TableCell align="right">Req Qty</TableCell>
+                              <TableCell align="right">REQ QTY</TableCell>
                               {detailHistoryData.entries.map((entry, idx) => (
-                                <TableCell key={idx} align="center">L{entry.level} Approved</TableCell>
+                                <TableCell key={idx} align="center">L{entry.level} APPROVED QTY</TableCell>
                               ))}
-                              <TableCell align="right">Final Approved Quantity</TableCell>
+                              <TableCell align="right">FINAL APPROVED QTY</TableCell>
                             </TableRow>
                           </TableHead>
                           <TableBody>
@@ -953,7 +988,7 @@ export default function Indents() {
       </Dialog>
 
       {/* Vendor Selection Dialog for PO Conversion */}
-      <Dialog open={vendorDialog.open} onClose={() => setVendorDialog({ ...vendorDialog, open: false })} maxWidth="md" fullWidth fullScreen={isMobile}>
+      <Dialog open={vendorDialog.open} onClose={(e, reason) => { if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') setVendorDialog({ ...vendorDialog, open: false }); }} maxWidth="md" fullWidth fullScreen={isMobile}>
         <DialogTitle sx={{ fontWeight: 600 }}>Convert {vendorDialog.indent?.indent_number} to Purchase Order</DialogTitle>
         <DialogContent sx={{ py: 1 }}>
           <Box sx={{ mb: 1.5, mt: 0.5, p: 1.5, bgcolor: '#f0f4ff', borderRadius: 2, border: '1px solid #dbeafe' }}>
@@ -1140,15 +1175,19 @@ export default function Indents() {
         <DialogTitle sx={{ fontWeight: 600 }}>{confirm.title}</DialogTitle>
         <DialogContent>
           <Typography variant="body2" sx={{ mb: 2, whiteSpace: 'pre-line' }}>{confirm.message}</Typography>
+          {confirm.needsReason && (
+            <TextField fullWidth label="Reason (required)" value={reason} onChange={e => setReason(e.target.value)}
+              multiline rows={2} required autoFocus />
+          )}
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button onClick={handleCancelConfirm}>Cancel</Button>
-          <Button variant="contained" color={confirm.confirmColor} onClick={handleConfirm} sx={{ fontWeight: 600 }}>{confirm.confirmText}</Button>
+          <Button variant="contained" color={confirm.confirmColor} disabled={confirm.needsReason && !reason.trim()} onClick={handleConfirm} sx={{ fontWeight: 600 }}>{confirm.confirmText}</Button>
         </DialogActions>
       </Dialog>
 
       {/* Approval Dialog */}
-      <Dialog open={approvalDialog.open} onClose={() => { setApprovalDialog({ open: false, indent: null, items: {} }); setApprovalRemarks(''); }} maxWidth="md" fullWidth fullScreen={isMobile}>
+      <Dialog open={approvalDialog.open} onClose={(e, reason) => { if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') { setApprovalDialog({ open: false, indent: null, items: {} }); setApprovalRemarks(''); } }} maxWidth="md" fullWidth fullScreen={isMobile}>
         <DialogTitle sx={{ fontWeight: 600 }}>Approve Indent — {approvalDialog.indent?.indent_number}</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mb: 2, mt: 0.5 }}>
@@ -1281,7 +1320,7 @@ export default function Indents() {
       {/* Approval History Dialog */}
       <Dialog
         open={historyDialog.open}
-        onClose={() => setHistoryDialog({ open: false, materialId: null, data: null, loading: false })}
+        onClose={(e, reason) => { if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') setHistoryDialog({ open: false, materialId: null, data: null, loading: false }); }}
         maxWidth="sm" fullWidth
       >
         <DialogTitle sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>

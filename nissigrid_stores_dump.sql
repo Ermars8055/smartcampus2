@@ -2,10 +2,10 @@
 -- PostgreSQL database dump
 --
 
-\restrict ZR2iY1W2qqdANghMEVcxYNyPaBUCAvLVgbdTfhS4Y6AnTMb3aqC1HdyHNWOuz62
+\restrict exlJlSh3JFvqlk5aANF7fxhLsj9HDfcakvvXnxgs8Um9dipCbzFv34wE7hOzvQB
 
 -- Dumped from database version 17.10 (Ubuntu 17.10-1.pgdg22.04+1)
--- Dumped by pg_dump version 17.10 (Ubuntu 17.10-1.pgdg22.04+1)
+-- Dumped by pg_dump version 18.4 (Ubuntu 18.4-1.pgdg22.04+1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -774,7 +774,8 @@ CREATE TABLE public.indent_approvals (
     approval_flow_id integer NOT NULL,
     approver_id integer NOT NULL,
     approved_at timestamp without time zone,
-    approved_quantities json
+    approved_quantities json,
+    remarks text
 );
 
 
@@ -1032,7 +1033,8 @@ CREATE TABLE public.material_issue_items (
     material_id integer NOT NULL,
     quantity double precision NOT NULL,
     rate double precision,
-    remarks text
+    remarks text,
+    warehouse_id integer
 );
 
 
@@ -1121,9 +1123,11 @@ CREATE TABLE public.material_return_items (
     id integer NOT NULL,
     return_id integer NOT NULL,
     material_id integer NOT NULL,
-    quantity double precision NOT NULL,
-    condition character varying(50),
-    remarks text
+    returned_qty double precision NOT NULL,
+    remarks text,
+    received_qty double precision,
+    variance_qty double precision,
+    receipt_remarks text
 );
 
 
@@ -1167,9 +1171,12 @@ CREATE TABLE public.material_returns (
     return_type character varying(50),
     remarks text,
     returned_by_name character varying(255),
-    received_by_id integer NOT NULL,
+    received_by_id integer,
     is_deleted boolean,
-    created_at timestamp without time zone
+    created_at timestamp without time zone,
+    status character varying(50),
+    received_date timestamp without time zone,
+    initiated_by_id integer NOT NULL
 );
 
 
@@ -1343,6 +1350,45 @@ ALTER SEQUENCE public.projects_id_seq OWNED BY public.projects.id;
 
 
 --
+-- Name: purchase_order_approvals; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.purchase_order_approvals (
+    id integer NOT NULL,
+    po_id integer NOT NULL,
+    approval_flow_id integer NOT NULL,
+    approver_id integer NOT NULL,
+    approved_quantities json,
+    remarks text,
+    approved_at timestamp without time zone
+);
+
+
+ALTER TABLE public.purchase_order_approvals OWNER TO postgres;
+
+--
+-- Name: purchase_order_approvals_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.purchase_order_approvals_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.purchase_order_approvals_id_seq OWNER TO postgres;
+
+--
+-- Name: purchase_order_approvals_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.purchase_order_approvals_id_seq OWNED BY public.purchase_order_approvals.id;
+
+
+--
 -- Name: purchase_order_items; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -1411,7 +1457,8 @@ CREATE TABLE public.purchase_orders (
     approved_at timestamp without time zone,
     is_deleted boolean,
     created_at timestamp without time zone,
-    updated_at timestamp without time zone
+    updated_at timestamp without time zone,
+    current_approval_level integer
 );
 
 
@@ -1440,6 +1487,45 @@ ALTER SEQUENCE public.purchase_orders_id_seq OWNED BY public.purchase_orders.id;
 
 
 --
+-- Name: purchase_request_approvals; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.purchase_request_approvals (
+    id integer NOT NULL,
+    pr_id integer NOT NULL,
+    approval_flow_id integer NOT NULL,
+    approver_id integer NOT NULL,
+    approved_quantities json,
+    remarks text,
+    approved_at timestamp without time zone
+);
+
+
+ALTER TABLE public.purchase_request_approvals OWNER TO postgres;
+
+--
+-- Name: purchase_request_approvals_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.purchase_request_approvals_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.purchase_request_approvals_id_seq OWNER TO postgres;
+
+--
+-- Name: purchase_request_approvals_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.purchase_request_approvals_id_seq OWNED BY public.purchase_request_approvals.id;
+
+
+--
 -- Name: purchase_request_items; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -1447,7 +1533,8 @@ CREATE TABLE public.purchase_request_items (
     id integer NOT NULL,
     pr_id integer NOT NULL,
     material_id integer NOT NULL,
-    quantity double precision NOT NULL
+    quantity double precision NOT NULL,
+    approved_quantity double precision
 );
 
 
@@ -1496,7 +1583,8 @@ CREATE TABLE public.purchase_requests (
     approved_at timestamp without time zone,
     is_deleted boolean,
     created_at timestamp without time zone,
-    updated_at timestamp without time zone
+    updated_at timestamp without time zone,
+    current_approval_level integer
 );
 
 
@@ -2091,6 +2179,45 @@ ALTER SEQUENCE public.subcategories_id_seq OWNED BY public.subcategories.id;
 
 
 --
+-- Name: tenant_configurations; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.tenant_configurations (
+    id integer NOT NULL,
+    tenant_id integer NOT NULL,
+    base_state character varying(100) NOT NULL,
+    cgst_share_percent double precision NOT NULL,
+    sgst_share_percent double precision NOT NULL,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone
+);
+
+
+ALTER TABLE public.tenant_configurations OWNER TO postgres;
+
+--
+-- Name: tenant_configurations_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.tenant_configurations_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.tenant_configurations_id_seq OWNER TO postgres;
+
+--
+-- Name: tenant_configurations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.tenant_configurations_id_seq OWNED BY public.tenant_configurations.id;
+
+
+--
 -- Name: tenant_memberships; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -2459,7 +2586,6 @@ CREATE TABLE public.vendors (
     email character varying(255),
     gst_number character varying(20),
     pan_number character varying(15),
-    address text,
     city character varying(100),
     state character varying(100),
     pincode character varying(10),
@@ -2470,7 +2596,9 @@ CREATE TABLE public.vendors (
     is_active boolean,
     is_deleted boolean,
     created_at timestamp without time zone,
-    updated_at timestamp without time zone
+    updated_at timestamp without time zone,
+    address_line_1 text,
+    address_line_2 text
 );
 
 
@@ -2741,6 +2869,13 @@ ALTER TABLE ONLY public.projects ALTER COLUMN id SET DEFAULT nextval('public.pro
 
 
 --
+-- Name: purchase_order_approvals id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.purchase_order_approvals ALTER COLUMN id SET DEFAULT nextval('public.purchase_order_approvals_id_seq'::regclass);
+
+
+--
 -- Name: purchase_order_items id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -2752,6 +2887,13 @@ ALTER TABLE ONLY public.purchase_order_items ALTER COLUMN id SET DEFAULT nextval
 --
 
 ALTER TABLE ONLY public.purchase_orders ALTER COLUMN id SET DEFAULT nextval('public.purchase_orders_id_seq'::regclass);
+
+
+--
+-- Name: purchase_request_approvals id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.purchase_request_approvals ALTER COLUMN id SET DEFAULT nextval('public.purchase_request_approvals_id_seq'::regclass);
 
 
 --
@@ -2867,6 +3009,13 @@ ALTER TABLE ONLY public.subcategories ALTER COLUMN id SET DEFAULT nextval('publi
 
 
 --
+-- Name: tenant_configurations id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tenant_configurations ALTER COLUMN id SET DEFAULT nextval('public.tenant_configurations_id_seq'::regclass);
+
+
+--
 -- Name: tenant_memberships id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -2948,7 +3097,7 @@ ALTER TABLE ONLY public.warehouses ALTER COLUMN id SET DEFAULT nextval('public.w
 --
 
 COPY public.alembic_version (version_num) FROM stdin;
-af5b3e461803
+e1ed248356b4
 \.
 
 
@@ -2969,6 +3118,11 @@ COPY public.alerts (id, tenant_id, site_id, alert_type, severity, title, message
 COPY public.approval_flows (id, tenant_id, site_id, document_type, level, role_name, min_amount, max_amount, user_id, is_active) FROM stdin;
 3	3	3	INDENT	1	Admin	0	\N	4	t
 4	3	3	INDENT	2	Admin	0	\N	\N	t
+5	3	3	PURCHASE_REQUEST	1	Admin	0	\N	\N	t
+6	3	3	PURCHASE_REQUEST	2	Admin	0	\N	\N	t
+7	3	3	PURCHASE_REQUEST	3	Admin	0	\N	\N	t
+8	3	3	PURCHASE_ORDER	1	Admin	0	\N	\N	t
+9	3	3	PURCHASE_ORDER	2	Admin	0	\N	\N	t
 \.
 
 
@@ -3099,6 +3253,50 @@ COPY public.audit_logs (id, tenant_id, site_id, user_id, action, entity_type, en
 120	\N	\N	1	LOGIN	User	1	\N	\N	\N	2026-06-05 17:18:06.909987
 121	1	\N	2	LOGIN	User	2	\N	\N	\N	2026-06-05 17:18:24.650872
 122	3	\N	4	LOGIN	User	4	\N	\N	\N	2026-06-05 18:13:23.666206
+123	3	\N	4	LOGIN	User	4	\N	\N	\N	2026-06-08 10:36:28.15407
+124	3	\N	4	LOGIN	User	4	\N	\N	\N	2026-06-08 10:44:54.901314
+125	3	\N	4	LOGIN	User	4	\N	\N	\N	2026-06-08 10:56:03.358792
+126	3	\N	4	LOGIN	User	4	\N	\N	\N	2026-06-08 11:03:35.636925
+127	3	\N	4	LOGIN	User	4	\N	\N	\N	2026-06-08 11:14:51.918442
+128	3	\N	4	LOGIN	User	4	\N	\N	\N	2026-06-08 11:37:43.607634
+129	3	\N	4	LOGIN	User	4	\N	\N	\N	2026-06-08 11:37:43.648442
+130	3	\N	4	LOGIN	User	4	\N	\N	\N	2026-06-08 11:38:13.802069
+131	3	\N	4	LOGIN	User	4	\N	\N	\N	2026-06-08 11:38:13.818254
+132	3	\N	4	LOGIN	User	4	\N	\N	\N	2026-06-08 11:43:46.548538
+133	3	3	4	APPROVE	PurchaseRequest	186	\N	\N	\N	2026-06-08 12:36:15.051443
+134	3	3	4	APPROVE	PurchaseRequest	186	\N	\N	\N	2026-06-08 12:36:20.631339
+135	3	3	4	APPROVE	PurchaseRequest	186	\N	\N	\N	2026-06-08 12:36:20.772229
+136	3	\N	4	LOGIN	User	4	\N	\N	\N	2026-06-08 12:54:11.36952
+137	3	\N	4	LOGIN	User	4	\N	\N	\N	2026-06-08 14:31:57.46113
+138	3	3	4	APPROVE	PurchaseRequest	180	\N	\N	\N	2026-06-08 15:31:24.544052
+139	3	3	4	APPROVE	PurchaseRequest	180	\N	\N	\N	2026-06-08 15:35:05.231144
+140	3	3	4	APPROVE	PurchaseRequest	180	\N	\N	\N	2026-06-08 15:35:58.174623
+141	3	3	4	APPROVE	PurchaseRequest	181	\N	\N	\N	2026-06-08 15:54:14.200665
+142	3	\N	4	LOGIN	User	4	\N	\N	\N	2026-06-09 10:12:04.965966
+143	3	3	4	APPROVE	PurchaseOrder	211	\N	\N	\N	2026-06-09 10:29:29.013903
+144	3	3	4	APPROVE	PurchaseOrder	211	\N	\N	\N	2026-06-09 10:29:33.225052
+145	3	3	4	APPROVE	PurchaseOrder	199	\N	\N	\N	2026-06-09 10:42:56.351734
+146	3	3	4	APPROVE	PurchaseOrder	199	\N	\N	\N	2026-06-09 10:43:04.600742
+147	3	\N	4	LOGIN	User	4	\N	\N	\N	2026-06-09 11:03:48.056627
+148	3	3	4	CREATE	GRN	199	\N	GRN GRN-00019 created (PO-Based)	\N	2026-06-09 11:11:19.173994
+149	3	3	4	APPROVE	PurchaseOrder	187	\N	\N	\N	2026-06-09 11:31:41.910204
+150	3	3	4	APPROVE	PurchaseOrder	187	\N	\N	\N	2026-06-09 11:31:45.231055
+151	3	3	4	APPROVE	PurchaseOrder	188	\N	\N	\N	2026-06-09 11:32:22.51534
+152	3	3	4	APPROVE	PurchaseOrder	188	\N	\N	\N	2026-06-09 11:32:25.785359
+153	3	3	4	APPROVE	PurchaseOrder	185	\N	\N	\N	2026-06-09 11:33:25.315963
+154	3	3	4	APPROVE	PurchaseOrder	185	\N	\N	\N	2026-06-09 11:33:28.404183
+155	3	\N	4	LOGIN	User	4	\N	\N	\N	2026-06-09 11:55:46.171643
+156	3	3	4	APPROVE	PurchaseOrder	210	\N	\N	\N	2026-06-09 12:09:41.993879
+157	3	3	4	APPROVE	PurchaseOrder	210	\N	\N	\N	2026-06-09 12:09:44.885861
+158	3	3	4	APPROVE	PurchaseOrder	198	\N	\N	\N	2026-06-09 12:41:47.603301
+159	3	3	4	APPROVE	PurchaseOrder	198	\N	\N	\N	2026-06-09 12:41:54.764073
+160	3	3	4	APPROVE	PurchaseOrder	209	\N	\N	\N	2026-06-09 12:55:52.248355
+161	3	3	4	APPROVE	PurchaseOrder	209	\N	\N	\N	2026-06-09 12:55:54.997255
+162	3	3	4	APPROVE	PurchaseOrder	207	\N	\N	\N	2026-06-09 13:01:43.298281
+163	3	3	4	APPROVE	PurchaseOrder	207	\N	\N	\N	2026-06-09 13:01:47.96403
+164	3	\N	4	LOGIN	User	4	\N	\N	\N	2026-06-09 15:52:06.180553
+165	3	\N	4	LOGIN	User	4	\N	\N	\N	2026-06-09 16:37:27.174753
+166	3	\N	4	LOGIN	User	4	\N	\N	\N	2026-06-09 16:37:40.023897
 \.
 
 
@@ -3281,7 +3479,6 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 349	3	3	224	60	182	2026-05-15 15:24:51.648252
 375	3	3	220	52	160	2026-05-15 18:52:30.997207
 338	3	3	240	48	128	2026-05-15 15:41:44.140833
-326	3	3	228	55	3395	2026-05-20 11:11:02.723881
 340	3	3	242	52	98	2026-05-20 11:11:02.774579
 464	3	3	247	56	83	2026-05-15 15:44:34.729607
 359	3	3	236	48	85	2026-05-15 15:24:51.690161
@@ -3291,7 +3488,6 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 431	3	3	239	49	137	2026-05-15 17:47:32.97587
 356	3	3	224	55	156	2026-05-15 15:26:15.942561
 428	3	3	249	60	83	2026-05-15 15:44:34.740129
-320	3	3	222	47	185	2026-05-15 15:41:43.979955
 358	3	3	230	48	85	2026-05-15 15:19:37.749602
 324	3	3	226	54	201	2026-05-15 15:26:15.956815
 414	3	3	217	47	66	2026-05-15 15:26:15.971509
@@ -3304,7 +3500,7 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 422	3	3	248	53	55	2026-05-15 15:26:16.015421
 423	3	3	235	53	98	2026-05-15 15:26:16.017249
 354	3	3	231	55	278	2026-05-15 15:44:34.747439
-328	3	3	230	47	1	2026-05-15 16:34:56.901455
+342	3	3	244	55	46	2026-06-09 18:22:36.829713
 426	3	3	242	48	26.5	2026-05-15 15:26:16.0358
 427	3	3	231	48	25	2026-05-15 15:26:16.038057
 429	3	3	222	60	29.5	2026-05-15 15:26:16.046
@@ -3320,13 +3516,11 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 362	3	3	220	49	60	2026-05-15 15:26:16.131087
 314	3	3	216	54	115	2026-05-15 15:19:36.65486
 316	3	3	218	46	1018	2026-05-15 15:19:36.661376
-317	3	3	219	54	303	2026-05-15 15:19:36.663625
 325	3	3	227	46	4	2026-05-15 15:19:36.68029
 329	3	3	231	47	246	2026-05-15 15:19:36.688023
 331	3	3	233	54	25	2026-05-15 15:19:36.692338
 1284	3	3	974	46	59	2026-06-03 12:31:53.879054
 337	3	3	239	46	7	2026-05-15 15:19:36.704119
-341	3	3	243	51	6	2026-05-15 15:19:36.711535
 345	3	3	247	52	31	2026-05-15 15:19:36.718793
 350	3	3	228	60	84	2026-05-15 15:19:37.70502
 353	3	3	235	55	76	2026-05-15 15:19:37.722644
@@ -3355,7 +3549,7 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 415	3	3	237	47	73	2026-05-15 15:54:48.277251
 1285	3	3	975	46	39	2026-06-03 12:31:53.881155
 468	3	3	237	54	97	2026-05-15 15:44:34.77051
-342	3	3	244	55	47	2026-06-01 14:57:06.723764
+320	3	3	222	47	175	2026-06-09 18:46:30.762459
 376	3	3	233	52	142.5	2026-05-15 15:44:34.778431
 334	3	3	236	49	204	2026-05-15 18:52:31.001641
 470	3	3	247	60	63	2026-05-15 15:44:34.788539
@@ -3364,6 +3558,7 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 474	3	3	234	52	35.5	2026-05-15 15:44:34.814627
 476	3	3	222	56	39.5	2026-05-15 15:44:34.82239
 463	3	3	242	56	124	2026-05-15 15:44:34.824201
+341	3	3	243	51	5	2026-06-09 18:22:36.835395
 339	3	3	241	46	66	2026-05-15 18:52:31.024473
 367	3	3	228	58	68	2026-05-15 15:44:34.924303
 352	3	3	249	55	139	2026-05-15 15:44:34.928441
@@ -3384,7 +3579,7 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 411	3	3	228	54	182	2026-05-15 18:52:30.833114
 374	3	3	233	60	166.5	2026-05-15 18:52:30.846946
 360	3	3	224	48	161	2026-05-15 18:52:30.881407
-327	3	3	229	46	71	2026-05-15 18:52:31.038678
+326	3	3	228	55	3385	2026-06-09 18:46:30.762494
 1288	3	3	978	46	70	2026-06-03 12:31:53.887377
 1289	3	3	979	46	425	2026-06-03 12:31:53.889432
 1290	3	3	980	46	486	2026-06-03 12:31:53.891353
@@ -3409,7 +3604,6 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 544	3	3	242	51	95	2026-05-15 18:52:30.815074
 536	3	3	232	54	150	2026-05-15 18:52:30.82924
 545	3	3	218	59	74	2026-05-15 18:52:30.838992
-546	3	3	225	59	91	2026-05-15 18:52:30.840875
 547	3	3	234	60	92	2026-05-15 18:52:30.848691
 548	3	3	226	60	68	2026-05-15 18:52:30.85091
 550	3	3	225	54	69	2026-05-15 18:52:30.858285
@@ -3422,6 +3616,7 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 557	3	3	246	46	42.5	2026-05-15 18:52:31.006869
 556	3	3	216	47	42	2026-05-15 18:52:31.043239
 1294	3	3	984	46	28	2026-06-03 12:31:53.899285
+546	3	3	225	59	190	2026-06-09 11:11:19.008622
 1295	3	3	985	46	59	2026-06-03 12:31:53.901226
 559	3	3	230	56	0	2026-05-20 12:50:39.839919
 538	3	3	246	59	85	2026-05-20 12:51:33.8159
@@ -3504,11 +3699,11 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 1369	3	3	1059	59	9	2026-06-03 12:31:54.052562
 1370	3	3	1060	59	41	2026-06-03 12:31:54.054865
 1371	3	3	1061	59	22	2026-06-03 12:31:54.056889
-1372	3	3	1062	59	75	2026-06-03 12:31:54.058791
 1373	3	3	1063	59	113	2026-06-03 12:31:54.060842
 1374	3	3	1064	59	363	2026-06-03 12:31:54.062795
-1375	3	3	1065	59	64	2026-06-03 12:31:54.064674
 1376	3	3	1066	59	139	2026-06-03 12:31:54.066669
+1375	3	3	1065	59	56	2026-06-09 18:18:42.224166
+1372	3	3	1062	59	88	2026-06-09 16:37:52.725659
 1377	3	3	1067	59	179	2026-06-03 12:31:54.068542
 1378	3	3	1068	59	59	2026-06-03 12:31:54.070791
 1379	3	3	1069	59	60	2026-06-03 12:31:54.072848
@@ -3537,11 +3732,9 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 1402	3	3	1092	59	120	2026-06-03 12:31:54.118902
 1403	3	3	1093	59	39	2026-06-03 12:31:54.121106
 1404	3	3	1094	59	33	2026-06-03 12:31:54.123209
-1405	3	3	1095	59	22	2026-06-03 12:31:54.125128
 1406	3	3	1096	59	37	2026-06-03 12:31:54.127041
 1407	3	3	1097	59	22	2026-06-03 12:31:54.12912
 1408	3	3	1098	59	276	2026-06-03 12:31:54.130882
-1409	3	3	1099	59	88	2026-06-03 12:31:54.132955
 1410	3	3	1100	59	588	2026-06-03 12:31:54.134968
 1411	3	3	1101	59	74	2026-06-03 12:31:54.137176
 1412	3	3	1102	59	512	2026-06-03 12:31:54.139354
@@ -3629,6 +3822,7 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 1494	3	3	1184	59	3	2026-06-03 12:31:54.312894
 1495	3	3	1185	59	1	2026-06-03 12:31:54.314828
 1496	3	3	1186	59	1	2026-06-03 12:31:54.316845
+1409	3	3	1099	59	86	2026-06-09 17:40:08.666813
 1497	3	3	1187	59	16	2026-06-03 12:31:54.318725
 1498	3	3	1188	59	6	2026-06-03 12:31:54.320966
 1499	3	3	1189	59	18	2026-06-03 12:31:54.323395
@@ -3820,7 +4014,6 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 1685	3	3	1375	59	33	2026-06-03 12:31:54.704979
 1686	3	3	1376	59	70	2026-06-03 12:31:54.707493
 1687	3	3	1377	59	67	2026-06-03 12:31:54.709608
-1688	3	3	1378	59	5	2026-06-03 12:31:54.711589
 1689	3	3	1379	59	4	2026-06-03 12:31:54.713436
 1690	3	3	1380	59	10	2026-06-03 12:31:54.715313
 1691	3	3	1381	59	9	2026-06-03 12:31:54.717214
@@ -4576,7 +4769,6 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 2442	3	3	2132	59	29	2026-06-03 12:31:56.495511
 2443	3	3	2133	59	1387	2026-06-03 12:31:56.498516
 2444	3	3	2134	59	138	2026-06-03 12:31:56.50093
-2445	3	3	2135	59	108	2026-06-03 12:31:56.503288
 2446	3	3	2136	59	21	2026-06-03 12:31:56.505549
 2447	3	3	2137	59	1139	2026-06-03 12:31:56.50789
 2448	3	3	2138	59	32	2026-06-03 12:31:56.510402
@@ -4588,6 +4780,7 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 2454	3	3	2144	51	110	2026-06-03 12:31:56.525353
 2455	3	3	2145	51	23	2026-06-03 12:31:56.527944
 2456	3	3	2146	51	645	2026-06-03 12:31:56.530918
+2445	3	3	2135	59	107	2026-06-09 18:15:33.788981
 2457	3	3	2147	51	923	2026-06-03 12:31:56.533422
 2458	3	3	2148	51	906	2026-06-03 12:31:56.535798
 2459	3	3	2149	51	113	2026-06-03 12:31:56.538063
@@ -4779,10 +4972,17 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 558	3	3	244	56	2	2026-06-04 18:13:56.359496
 2412	3	3	2102	59	32	2026-06-05 12:06:45.093822
 2645	3	3	2102	53	1	2026-06-05 12:06:45.262454
-315	3	3	217	46	111	2026-06-05 12:10:28.806154
 455	3	3	219	55	44	2026-06-05 12:10:28.806198
 499	3	3	219	46	94	2026-06-05 12:10:28.806216
 2646	3	3	217	55	1	2026-06-05 12:10:28.828177
+2647	3	3	216	59	86	2026-06-09 11:11:19.176706
+2648	1	1	2335	46	8	2026-06-09 14:32:57.566429
+1405	3	3	1095	59	15	2026-06-09 17:55:02.946784
+328	3	3	230	47	0	2026-06-09 17:58:53.377797
+317	3	3	219	54	277	2026-06-09 18:02:23.657298
+315	3	3	217	46	58	2026-06-09 18:02:23.686031
+327	3	3	229	46	70	2026-06-09 18:22:36.842783
+1688	3	3	1378	59	3	2026-06-09 18:48:05.259932
 \.
 
 
@@ -5329,10 +5529,10 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 29	2	2	BUILDING	BLDG	1
 3	3	3	BUILDING	BLDG	3
 30	2	2	DEPARTMENT	DEPT	1
+25	3	3	RETURN	RET	11
 4	3	3	ROOM	RM	3
 6	3	3	DEPARTMENT	DEPT	258
-11	3	3	ISSUE	ISS	27
-12	3	3	PURCHASE_REQUEST	PR	24
+11	3	3	ISSUE	ISS	42
 17	3	3	MATERIAL	MAT	36
 34	1	1	GATEPASS	GP	3
 16	3	3	QUOTATION_REQUEST	QR	20
@@ -5342,12 +5542,9 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 31	3	3	COMPANY_ADDRESS	ADDR	3
 27	2	2	ORGANIZATION	ORG	1
 28	2	2	PROJECT	PROJ	1
-15	3	3	GRN	GRN	18
 26	3	3	GATEPASS	GP	8
 36	3	3	MATERIAL_42	SAA	3
-25	3	3	RETURN	RET	7
 37	3	3	MATERIAL_43	STR	3
-14	3	3	GATE_ENTRY	GE	24
 38	3	3	MATERIAL_44	BRK	2
 39	3	3	MATERIAL_45	PLS	3
 40	3	3	MATERIAL_46	EES	2
@@ -5370,8 +5567,12 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 57	3	3	MATERIAL_41	CEM	4
 58	3	3	MATERIAL_57	ITI	40
 59	1	1	CATEGORY		1
-13	3	3	PURCHASE_ORDER	PO	43
-5	3	3	INDENT	IND	34
+5	3	3	INDENT	IND	40
+13	3	3	PURCHASE_ORDER	PO	47
+12	3	3	PURCHASE_REQUEST	PR	28
+15	3	3	GRN	GRN	19
+14	3	3	GATE_ENTRY	GE	26
+60	1	1	RETURN	RET	1
 \.
 
 
@@ -5428,10 +5629,12 @@ COPY public.gate_entries (id, tenant_id, site_id, entry_number, vehicle_number, 
 183	3	3	GE-00018	167267	53	\N	\N	\N	\N	2026-06-02 12:17:28.628437		\N	Ramc	Direct Invoice	\N	/uploads/invoices/3/20260602_064725_aad44eed.png		Awaiting Direct GRN	4	f	2026-06-02 12:17:28.633357
 185	3	3	GE-00020		52	184	1	246	147	2026-06-02 12:32:14.875097		\N	Akbar	Carry on hand	\N	/uploads/invoices/3/20260602_070133_5d5c0dd4.png		Completed	4	f	2026-06-02 12:32:14.876346
 184	3	3	GE-00019	23782	54	189	1	224	100	2026-06-02 12:28:26.738356	Suresh	\N		Vehicle	\N	/uploads/invoices/3/20260602_065717_fce2f380.png		Completed	4	f	2026-06-02 12:28:26.743214
-186	3	3	GE-00021	Ka7982	52	183	1	225	185	2026-06-02 18:14:16.578833	Test	\N		Vehicle	\N	/uploads/invoices/3/20260602_124341_aecb6b5f.png		Awaiting GRN	4	f	2026-06-02 18:14:16.581254
 187	3	3	GE-00022		\N	\N	1	\N	\N	2026-06-02 18:29:58.082946		\N	WWEEDD	Carry on hand	\N	/uploads/invoices/3/20260602_125424_ff02de50.pdf		Gate Entry Created	4	f	2026-06-02 18:29:58.084494
 188	3	3	GE-00023		\N	\N	1	\N	\N	2026-06-02 18:34:35.142102		\N	Charan	Carry on hand	\N	/uploads/invoices/3/20260602_130433_be899148.png		Gate Entry Created	4	f	2026-06-02 18:34:35.142668
 189	3	3	GE-00024		53	\N	\N	\N	\N	2026-06-02 18:35:30.858193		\N		Direct Invoice	\N	/uploads/invoices/3/20260602_130522_f8a7b3f2.png		Awaiting Direct GRN	4	f	2026-06-02 18:35:30.859342
+186	3	3	GE-00021	Ka7982	52	183	1	225	185	2026-06-02 18:14:16.578833	Test	\N		Vehicle	\N	/uploads/invoices/3/20260602_124341_aecb6b5f.png		Completed	4	f	2026-06-02 18:14:16.581254
+190	3	3	GE-00025	KA03NA3627	59	199	1	230	100	2026-06-09 13:11:31.283664	Drive	\N		Vehicle	\N	/uploads/invoices/3/20260609_074110_0f1aa6b0.png	Rem	Awaiting GRN	4	f	2026-06-09 13:11:31.288362
+191	3	3	GE-00026		\N	\N	1	\N	\N	2026-06-09 13:20:57.289156		\N	Ram	Carry on hand	\N	/uploads/invoices/3/20260609_075056_fb8cf3be.png		Gate Entry Created	4	f	2026-06-09 13:20:57.290369
 \.
 
 
@@ -5462,9 +5665,9 @@ COPY public.gate_passes (id, tenant_id, site_id, gate_pass_number, return_id, pr
 3	3	3	GP-00003	\N	1	\N	Repaired & Received	Returnable				4	2026-06-05 11:05:45.354263	\N	\N	\N	\N
 9	3	3	GP-00004	\N	1	53	Repaired & Received	Returnable	\N	\N	\N	4	2026-06-05 11:59:29.838417	ACC Limited	Cement House, 121, Maharshi Karve Road, Bangalore - 560020, Karnataka	103 WARD	\N
 10	3	3	GP-00005	\N	1	54	Scrapped	Returnable	\N	\N	\N	4	2026-06-05 14:29:15.047268	Asian Paints Ltd.	6A, Shanti Nagar, Santacruz (East)	102 WARD	\N
-11	3	3	GP-00006	\N	1	59	Pending Repair	Returnable	\N	\N	\N	4	2026-06-05 14:44:15.325829	Dalmia Bharat Ltd.	11th & 12th Floor, Hansalaya Building, 15, Barakhamba Road	102 WARD	\N
-12	3	3	GP-00007	\N	1	54	Pending Repair	Non-Returnable	\N	\N	\N	4	2026-06-05 15:40:19.160787	Asian Paints Ltd.	6A, Shanti Nagar, Santacruz (East)	102 WARD	\N
 13	3	3	GP-00008	\N	1	57	Sent Out	Returnable	\N	\N	\N	4	2026-06-05 15:41:12.44409	Havells India Ltd.	QRG Towers, 2D, Sector-126, Expressway, Noida - 201304	103 WARD	\N
+12	3	3	GP-00007	\N	1	54	Sent Out	Non-Returnable	\N	\N	\N	4	2026-06-05 15:40:19.160787	Asian Paints Ltd.	6A, Shanti Nagar, Santacruz (East)	102 WARD	\N
+11	3	3	GP-00006	\N	1	59	Repaired & Received	Returnable	\N	\N	\N	4	2026-06-05 14:44:15.325829	Dalmia Bharat Ltd.	11th & 12th Floor, Hansalaya Building, 15, Barakhamba Road	102 WARD	\N
 \.
 
 
@@ -5490,6 +5693,7 @@ COPY public.grn (id, tenant_id, site_id, grn_number, po_id, gate_entry_id, wareh
 196	3	3	GRN-00013	182	180	48	1	55	PO-Based	INV-1599	2026-05-15	75249.7	\N	\N	75249.7	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-05-15 18:52:30.883845	2026-05-15 18:52:30.883845	\N
 197	3	3	GRN-00014	183	181	47	1	52	PO-Based	INV-1722	2026-05-15	19438.81	\N	\N	19438.81	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-05-15 18:52:30.894827	2026-05-15 18:52:30.894827	\N
 198	3	3	GRN-00015	184	182	46	1	52	PO-Based	INV-1845	2026-05-15	40821.7	\N	\N	40821.7	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-05-15 18:52:30.902895	2026-05-15 18:52:30.902895	\N
+199	3	3	GRN-00019	183	186	59	1	52	PO-Based	Inv5	2026-06-01	38877.63	\N	\N	38877.63	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-06-09 11:11:18.972663	2026-06-09 05:41:19.159588	\N
 \.
 
 
@@ -5537,6 +5741,8 @@ COPY public.grn_items (id, grn_id, material_id, po_item_id, ordered_quantity, re
 499	197	216	462	86	43	43	0	240.24	\N	0	0	0	0	0	0	10330.32	0	\N
 500	198	246	463	93	46.5	46.5	0	501.93	\N	0	0	0	0	0	0	23339.74	0	\N
 501	198	232	464	54	27	27	0	647.48	\N	0	0	0	0	0	0	17481.96	0	\N
+502	199	225	461	99	99	99	0	184.01	\N	0	0	0	0	0	0	18216.99	0	\N
+503	199	216	462	86	86	86	0	240.24	\N	0	0	0	0	0	0	20660.64	0	\N
 \.
 
 
@@ -5544,11 +5750,23 @@ COPY public.grn_items (id, grn_id, material_id, po_item_id, ordered_quantity, re
 -- Data for Name: indent_approvals; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.indent_approvals (id, indent_id, approval_flow_id, approver_id, approved_at, approved_quantities) FROM stdin;
-1	201	3	4	2026-06-01 16:56:53.341524	\N
-2	202	3	4	2026-06-01 17:02:07.228679	\N
-3	206	3	4	2026-06-05 17:21:09.367343	{"479": 12.0}
-4	192	3	4	2026-06-05 18:36:36.062601	{"451": 41.0, "452": 16.0, "453": 17.0}
+COPY public.indent_approvals (id, indent_id, approval_flow_id, approver_id, approved_at, approved_quantities, remarks) FROM stdin;
+1	201	3	4	2026-06-01 16:56:53.341524	\N	\N
+2	202	3	4	2026-06-01 17:02:07.228679	\N	\N
+3	206	3	4	2026-06-05 17:21:09.367343	{"479": 12.0}	\N
+4	192	3	4	2026-06-05 18:36:36.062601	{"451": 41.0, "452": 16.0, "453": 17.0}	\N
+5	208	3	4	2026-06-08 11:04:25.062504	{"481": 25.0}	\N
+6	208	4	4	2026-06-08 11:04:52.959496	{"481": 20.0}	\N
+7	192	4	4	2026-06-08 11:07:36.63714	{"451": 35.0, "452": 8.0, "453": 10.0}	Test Approval Remark1
+8	191	3	4	2026-06-08 11:23:19.464186	{"449": 16.0, "450": 23.0}	\N
+9	191	4	4	2026-06-08 11:55:38.698906	{"449": {"quantity": 15.0, "remarks": "FLT-00001 Remark"}, "450": {"quantity": 5.0, "remarks": "STR-00001 Remark"}}	Full Remark L2
+10	190	3	4	2026-06-08 11:57:40.173642	{"446": {"quantity": 40.0, "remarks": "HWT-00012 Remark"}, "447": {"quantity": 20.0, "remarks": "CEM-00003 Remark"}, "448": {"quantity": 10.0, "remarks": "WOT-00002 Remark"}}	L1 Approval Remarks (Optional) for entire indent 
+11	209	3	4	2026-06-08 15:17:40.61866	{"482": {"quantity": 3.0, "remarks": "re1"}}	\N
+12	209	4	4	2026-06-08 15:18:45.500418	{"482": {"quantity": 3.0, "remarks": "approved"}}	\N
+13	210	3	4	2026-06-08 16:12:04.245389	{"483": {"quantity": 8.0, "remarks": null}}	\N
+14	210	4	4	2026-06-08 16:12:23.300721	{"483": {"quantity": 9.0, "remarks": null}}	\N
+15	211	3	4	2026-06-08 16:49:47.729986	{"484": {"quantity": 10.0, "remarks": null}}	\N
+16	211	4	4	2026-06-08 16:50:02.306172	{"484": {"quantity": 10.0, "remarks": null}}	\N
 \.
 
 
@@ -5580,18 +5798,8 @@ COPY public.indent_items (id, indent_id, material_id, requested_quantity, issued
 443	189	240	31	6	0	\N
 444	189	220	27	7	0	\N
 445	189	223	27	7	0	\N
-446	190	247	48	0	0	\N
-447	190	249	21	0	0	\N
-448	190	229	14	0	0	\N
-449	191	228	16	0	0	\N
-450	191	222	23	0	0	\N
-454	193	219	26	0	0	\N
-455	193	217	50	0	0	\N
-456	193	230	34	0	0	\N
 435	186	228	15	15	0	\N
-477	205	1099	2	0	0	\N
 458	195	224	100	0	0	\N
-478	205	217	3	0	0	\N
 479	206	1191	18	0	0	12
 459	196	222	25	0	0	\N
 460	196	232	40	40	0	\N
@@ -5616,9 +5824,25 @@ COPY public.indent_items (id, indent_id, material_id, requested_quantity, issued
 475	204	1057	5	0	0	\N
 476	204	1062	5	0	0	\N
 480	207	1062	5	0	0	\N
-451	192	244	41	0	0	41
-452	192	243	16	0	0	16
-453	192	229	17	0	0	17
+481	208	1062	30	0	0	20
+446	190	247	48	0	0	40
+447	190	249	21	0	0	20
+448	190	229	14	0	0	10
+482	209	980	5	0	0	3
+483	210	1378	10	0	0	9
+485	212	2040	10	0	0	\N
+486	213	2102	6	0	0	\N
+477	205	1099	2	2	0	\N
+478	205	217	3	3	0	\N
+484	211	1095	10	10	0	10
+456	193	230	34	1	0	\N
+454	193	219	26	26	0	\N
+455	193	217	50	50	0	\N
+451	192	244	41	1	0	35
+452	192	243	16	1	0	8
+449	191	228	16	10	0	15
+450	191	222	23	10	0	5
+453	192	229	17	1	1	10
 \.
 
 
@@ -5631,10 +5855,12 @@ COPY public.indents (id, tenant_id, site_id, indent_number, requester_id, room_i
 197	3	3	IND-00024	9	1	1	Ground Floor	Room1	CIVIL		1100	Converted to PO	1	\N	2026-06-01 07:30:22.172181	f	2026-06-01 12:46:09.107484	2026-06-01 16:03:23.72615
 196	3	3	IND-00023	4	1	1	Ground Floor	Room1	CIVIL		13325	Converted to PO	1	\N	2026-05-26 12:55:06.808856	f	2026-05-26 18:24:51.88147	2026-06-01 16:36:50.181893
 198	3	3	IND-00025	9	1	1	Ground Floor	Room1	CIVIL		11400	Approved	1	\N	2026-06-01 11:12:10.805868	f	2026-06-01 13:04:34.087373	2026-06-01 16:42:10.806351
+205	3	3	IND-00032	4	91	2	1	Room 103	LABOUR ROOM		8014.08	Issued	1	\N	2026-06-05 12:38:06.514087	f	2026-06-03 13:24:54.10457	2026-06-09 17:40:08.694838
 201	3	3	IND-00028	4	1	1	Ground Floor	Room1	CIVIL		96000	Converted to PO	1	4	2026-06-01 11:26:53.378164	f	2026-06-01 16:41:16.232062	2026-06-01 16:58:23.602685
 188	3	3	IND-00010	4	1	1	Floor 1	\N	Civil	\N	0	Converted to PO	1	\N	\N	f	2026-04-20 18:52:30.375564	2026-05-20 11:09:40.430772
 186	3	3	IND-00008	4	1	1	Floor 1	\N	Civil	\N	0	Issued	1	\N	\N	f	2026-04-19 18:52:30.375564	2026-05-20 11:11:02.774926
 195	3	3	IND-00022	4	2	1	Floor 1	Room1	CIVIL	General	6500000	Converted to PO	1	\N	2026-05-20 07:13:59.374666	f	2026-05-20 12:43:53.178501	2026-05-20 12:44:10.337933
+211	3	3	IND-00038	4	223	3	Floor 6	Room 601	103 WARD		7097.3	Issued	2	4	2026-06-08 11:20:02.381294	f	2026-06-08 16:27:37.42724	2026-06-09 17:55:02.947891
 182	3	3	IND-00004	4	2	3	Floor 1	\N	Civil	\N	0	Issued	1	\N	\N	f	2026-04-17 18:52:30.375564	2026-05-26 18:19:24.672223
 179	3	3	IND-00001	4	1	1	Floor 1	\N	Civil	\N	0	Issued	1	\N	\N	f	2026-04-16 06:52:30.375564	2026-05-15 18:52:30.376955
 180	3	3	IND-00002	4	1	3	Floor 1	\N	Civil	\N	0	Issued	1	\N	\N	f	2026-04-16 18:52:30.375564	2026-05-15 18:52:30.379177
@@ -5644,18 +5870,22 @@ COPY public.indents (id, tenant_id, site_id, indent_number, requester_id, room_i
 185	3	3	IND-00007	4	2	3	Floor 1	\N	Civil	\N	0	Issued	1	\N	\N	f	2026-04-19 06:52:30.375564	2026-05-15 18:52:30.389676
 187	3	3	IND-00009	4	2	1	Floor 1	\N	Civil	\N	0	Issued	1	\N	\N	f	2026-04-20 06:52:30.375564	2026-05-15 18:52:30.392759
 189	3	3	IND-00011	4	1	2	Floor 1	\N	Civil	\N	0	Issued	1	\N	\N	f	2026-04-21 06:52:30.375564	2026-05-15 18:52:30.395849
-190	3	3	IND-00012	4	1	2	Floor 1	\N	Civil	\N	0	Awaiting Approval	1	\N	\N	f	2026-04-21 18:52:30.375564	2026-05-15 18:52:30.397383
-191	3	3	IND-00013	4	2	2	Floor 1	\N	Civil	\N	0	Awaiting Approval	1	\N	\N	f	2026-04-22 06:52:30.375564	2026-05-15 18:52:30.398946
-193	3	3	IND-00015	4	1	2	Floor 1	\N	Civil	\N	0	Approved	1	\N	2026-06-01 11:32:27.323138	f	2026-04-23 06:52:30.375564	2026-06-01 17:02:27.324977
+193	3	3	IND-00015	4	1	2	Floor 1	\N	Civil	\N	0	Partially Issued	1	\N	2026-06-01 11:32:27.323138	f	2026-04-23 06:52:30.375564	2026-06-09 17:58:53.379211
+192	3	3	IND-00014	4	2	1	Floor 1	\N	Civil	\N	0	Partially Issued	2	4	2026-06-08 05:37:36.683826	f	2026-04-22 18:52:30.375564	2026-06-09 18:22:36.843183
+190	3	3	IND-00012	4	1	2	Floor 1	\N	Civil	\N	0	Awaiting Approval	2	\N	\N	f	2026-04-21 18:52:30.375564	2026-06-08 11:57:40.208249
+208	3	3	IND-00035	4	170	3	Floor 2	Room 206	102 WARD		139727.1	Converted to PO	2	4	2026-06-08 05:34:52.991266	f	2026-06-08 10:58:08.257706	2026-06-08 14:45:41.0709
+191	3	3	IND-00013	4	2	2	Floor 1	\N	Civil	\N	0	Partially Issued	2	4	2026-06-08 06:25:38.754012	f	2026-04-22 06:52:30.375564	2026-06-09 18:46:30.76527
+209	3	3	IND-00036	4	\N	3	Floor 2		102 WARD		3847.95	Approved	2	4	2026-06-08 09:48:45.531409	f	2026-06-08 15:16:28.123647	2026-06-08 15:18:45.533288
 202	3	3	IND-00029	4	1	1	Ground Floor	Room1	CIVIL		240000	Converted to PO	1	4	2026-06-01 11:32:07.268603	f	2026-06-01 17:02:01.395733	2026-06-01 17:07:09.000518
 200	3	3	IND-00027	9	3	1	Floor 3	Room31	ADMIN		2750	Converted to PO	1	\N	2026-06-01 11:12:34.506509	f	2026-06-01 16:00:02.887037	2026-06-02 13:18:45.622315
-203	3	3	IND-00030	9	2	1	Floor 2	Room1	CIVIL	Ggggh	1569000	Awaiting Approval	1	\N	\N	f	2026-06-02 13:46:47.613015	2026-06-02 13:46:47.613056
 206	3	3	IND-00033	4	170	3	Floor 2	Room 206	102 WARD		297470.88	Approved	1	4	2026-06-05 11:51:09.455073	f	2026-06-05 14:21:22.619349	2026-06-05 17:21:09.457481
-205	3	3	IND-00032	4	91	2	1	Room 103	LABOUR ROOM		8014.08	Approved	1	\N	2026-06-05 12:38:06.514087	f	2026-06-03 13:24:54.10457	2026-06-05 18:08:06.516183
 194	3	3	IND-00021	4	2	1	Floor 1	Room1	CIVIL		6500000	Converted to PO	1	\N	2026-05-26 09:56:13.62006	f	2026-05-20 10:55:54.69627	2026-06-05 18:10:20.094634
 204	3	3	IND-00031	4	17	1	Ground Floor	Room 015	ANATOMY		44928.05	Approved	1	\N	2026-06-05 12:40:37.348323	f	2026-06-03 13:16:47.251194	2026-06-05 18:10:37.349326
 207	3	3	IND-00034	4	223	3	Floor 6	Room 601	103 WARD		23287.85	Approved	1	\N	2026-06-05 12:54:59.043078	f	2026-06-05 18:14:47.419437	2026-06-05 18:24:59.044127
-192	3	3	IND-00014	4	2	1	Floor 1	\N	Civil	\N	0	Awaiting Approval	2	\N	\N	f	2026-04-22 18:52:30.375564	2026-06-05 18:36:36.100395
+210	3	3	IND-00037	4	223	3	Floor 6	Room 601	103 WARD		104434.3	Approved	2	4	2026-06-08 10:42:23.32504	f	2026-06-08 16:11:43.866856	2026-06-08 16:12:23.326921
+203	3	3	IND-00030	9	2	1	Floor 2	Room1	CIVIL	Ggggh\n[Rejected: no required]	1569000	Rejected	1	\N	\N	f	2026-06-02 13:46:47.613015	2026-06-08 16:19:35.587119
+212	3	3	IND-00039	4	170	3	Floor 2	Room 206	102 WARD		29476	Awaiting Approval	1	\N	\N	f	2026-06-08 16:29:10.943772	2026-06-08 16:29:10.943813
+213	3	3	IND-00040	4	170	3	Floor 2	Room 206	102 WARD		19575.48	Awaiting Approval	1	\N	\N	f	2026-06-08 16:51:34.292996	2026-06-08 16:51:34.293008
 \.
 
 
@@ -5679,30 +5909,46 @@ COPY public.invoices (id, tenant_id, site_id, invoice_number, invoice_date, gate
 -- Data for Name: material_issue_items; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.material_issue_items (id, issue_id, material_id, quantity, rate, remarks) FROM stdin;
-167	190	241	2	450	\N
-168	191	243	4	12000	\N
-169	192	220	1	650	\N
-170	193	236	1	250	\N
-171	194	246	4	1800	\N
-172	195	232	2	280	\N
-173	196	217	5	150	\N
-174	197	216	2	1200	\N
-175	198	241	3	450	\N
-176	199	224	5	65000	\N
-177	200	232	4	280	\N
-178	201	248	2	9200	\N
-179	202	229	3	12500	\N
-180	203	216	1	1200	\N
-181	204	245	4	120	\N
-182	205	228	15	45	\N
-183	206	242	19	3500	\N
-184	207	224	5	65000	\N
-185	208	238	21	65000	\N
-186	209	225	25	750	\N
-187	210	232	40	280	\N
-188	211	234	50	65	\N
-189	212	244	4	550	\N
+COPY public.material_issue_items (id, issue_id, material_id, quantity, rate, remarks, warehouse_id) FROM stdin;
+167	190	241	2	450	\N	\N
+168	191	243	4	12000	\N	\N
+169	192	220	1	650	\N	\N
+170	193	236	1	250	\N	\N
+171	194	246	4	1800	\N	\N
+172	195	232	2	280	\N	\N
+173	196	217	5	150	\N	\N
+174	197	216	2	1200	\N	\N
+175	198	241	3	450	\N	\N
+176	199	224	5	65000	\N	\N
+177	200	232	4	280	\N	\N
+178	201	248	2	9200	\N	\N
+179	202	229	3	12500	\N	\N
+180	203	216	1	1200	\N	\N
+181	204	245	4	120	\N	\N
+182	205	228	15	45	\N	\N
+183	206	242	19	3500	\N	\N
+184	207	224	5	65000	\N	\N
+185	208	238	21	65000	\N	\N
+186	209	225	25	750	\N	\N
+187	210	232	40	280	\N	\N
+188	211	234	50	65	\N	\N
+189	212	244	4	550	\N	\N
+190	213	1099	2	3782.04	\N	\N
+191	214	217	3	150	\N	\N
+192	215	1095	10	709.73	\N	\N
+193	216	219	20	800	\N	\N
+194	217	217	20	150	\N	\N
+195	218	230	1	4500	\N	\N
+196	219	219	6	800	\N	\N
+197	220	217	30	150	\N	\N
+198	221	2135	5	4349	\N	\N
+199	222	1065	8	4930.95	\N	\N
+200	223	244	1	550	\N	\N
+201	224	243	1	12000	\N	\N
+202	225	229	1	12500	\N	\N
+203	226	228	10	45	\N	55
+204	226	222	10	85	\N	47
+205	227	1378	2	10443.43	\N	59
 \.
 
 
@@ -5727,6 +5973,9 @@ COPY public.material_issues (id, tenant_id, site_id, issue_number, warehouse_id,
 203	3	3	ISS-00014	47	1	\N	1	1	CIVIL	\N	\N	Issued	4	\N	f	\N	\N	\N	f	2026-05-14 18:52:30.375564
 204	3	3	ISS-00015	53	1	\N	1	2	CIVIL	\N	\N	Issued	4	\N	f	\N	\N	\N	f	2026-05-15 18:52:30.375564
 205	3	3	ISS-00020	55	1	186	1	1	CIVIL	\N	Fulfillment for IND-00008	Completed	4	\N	f	\N	\N	\N	f	2026-05-20 11:11:02.704331
+226	3	3	ISS-00041	55	1	191	2	2	CIVIL	\N	Fulfillment for IND-00013	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 18:46:30.737339
+227	3	3	ISS-00042	59	1	\N	3	\N	102 WARD	\N	Direct Issue	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 18:48:05.252708
+225	3	3	ISS-00040	46	1	192	1	2	CIVIL	\N	Fulfillment for IND-00014	Completed	4	\N	t	2026-06-09 13:37:24.911862	4	\N	f	2026-06-09 18:22:36.837641
 210	3	3	ISS-00025	50	1	196	1	1	CIVIL	\N	Fulfillment for IND-00023	Completed	4	\N	f	\N	\N	\N	f	2026-05-26 18:25:34.285748
 211	3	3	ISS-00026	54	1	199	1	3	ADMIN	\N	Fulfillment for IND-00026	Completed	4	\N	f	\N	\N	\N	f	2026-06-01 14:57:06.593084
 212	3	3	ISS-00027	55	1	199	1	3	ADMIN	\N	Fulfillment for IND-00026	Completed	4	\N	f	\N	\N	\N	f	2026-06-01 14:57:06.70319
@@ -5734,6 +5983,18 @@ COPY public.material_issues (id, tenant_id, site_id, issue_number, warehouse_id,
 208	3	3	ISS-00023	46	1	182	3	2	CIVIL	\N	Fulfillment for IND-00004	Completed	4	\N	t	2026-06-02 08:17:11.419923	9	\N	f	2026-05-26 18:18:05.503323
 207	3	3	ISS-00022	46	1	194	1	2	CIVIL	\N	Fulfillment for IND-00021	Completed	4	\N	t	2026-06-02 08:17:12.594518	9	\N	f	2026-05-26 17:33:32.403852
 206	3	3	ISS-00021	52	1	186	1	1	CIVIL	\N	Fulfillment for IND-00008	Completed	4	\N	t	2026-06-02 08:17:15.451563	9	\N	f	2026-05-20 11:11:02.769222
+213	3	3	ISS-00028	59	1	205	2	91	LABOUR ROOM	\N	Fulfillment for IND-00032	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 17:40:08.636194
+214	3	3	ISS-00029	46	1	205	2	91	LABOUR ROOM	\N	Fulfillment for IND-00032	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 17:40:08.685862
+215	3	3	ISS-00030	59	1	211	3	223	103 WARD	\N	Fulfillment for IND-00038	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 17:55:02.933996
+216	3	3	ISS-00031	54	1	193	2	1	CIVIL	\N	Fulfillment for IND-00015	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 17:58:53.314125
+217	3	3	ISS-00032	46	1	193	2	1	CIVIL	\N	Fulfillment for IND-00015	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 17:58:53.337679
+218	3	3	ISS-00033	47	1	193	2	1	CIVIL	\N	Fulfillment for IND-00015	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 17:58:53.357308
+219	3	3	ISS-00034	54	1	193	2	1	CIVIL	\N	Fulfillment for IND-00015	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 18:02:23.643377
+220	3	3	ISS-00035	46	1	193	2	1	CIVIL	\N	Fulfillment for IND-00015	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 18:02:23.667511
+221	3	3	ISS-00036	59	1	\N	3	221	104 WARD	\N	Direct Issue	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 18:15:33.778175
+222	3	3	ISS-00037	59	1	\N	3	218	108 WARD	\N	Direct Issue	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 18:18:42.21266
+223	3	3	ISS-00038	55	1	192	1	2	CIVIL	\N	Fulfillment for IND-00014	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 18:22:36.82658
+224	3	3	ISS-00039	51	1	192	1	2	CIVIL	\N	Fulfillment for IND-00014	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 18:22:36.832307
 \.
 
 
@@ -5741,14 +6002,19 @@ COPY public.material_issues (id, tenant_id, site_id, issue_number, warehouse_id,
 -- Data for Name: material_return_items; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.material_return_items (id, return_id, material_id, quantity, condition, remarks) FROM stdin;
-1	6	244	2	Repairable	
-2	9	230	2	Repairable	
-3	10	246	1	Poor	
-4	11	222	10	Usable	
-5	12	230	1	Usable	
-6	15	230	1	Scrap	
-7	16	222	2	Usable	Not used
+COPY public.material_return_items (id, return_id, material_id, returned_qty, remarks, received_qty, variance_qty, receipt_remarks) FROM stdin;
+1	6	244	2		2	0	\N
+2	9	230	2		2	0	\N
+3	10	246	1		1	0	\N
+4	11	222	10		10	0	\N
+5	12	230	1		1	0	\N
+6	15	230	1		1	0	\N
+7	16	222	2	Not used	2	0	\N
+8	17	2335	10	\N	8	-2	Missing 2 items
+9	18	1062	3		2	-1	
+11	20	2135	4		4	0	
+10	19	1062	14		11	-3	
+12	21	1095	5	ELE00056 Remark	3	-2	
 \.
 
 
@@ -5756,14 +6022,19 @@ COPY public.material_return_items (id, return_id, material_id, quantity, conditi
 -- Data for Name: material_returns; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.material_returns (id, tenant_id, site_id, return_number, warehouse_id, project_id, returned_from_room_id, returned_from_department, return_type, remarks, returned_by_name, received_by_id, is_deleted, created_at) FROM stdin;
-6	3	3	RET-00001	56	1	\N	CIVIL	Damaged	abcd	abc	4	f	2026-05-20 12:47:03.263719
-9	3	3	RET-00002	56	1	\N	CIVIL	Scrap		Ram	4	f	2026-05-20 12:50:39.830354
-10	3	3	RET-00003	59	1	\N	CIVIL	Scrap		General	4	f	2026-05-20 12:51:33.814251
-11	3	3	RET-00004	59	1	\N	CIVIL	Unused			4	f	2026-05-20 12:52:59.884987
-12	3	3	RET-00005	59	1	\N	CIVIL	Wrong Item		Raju	4	f	2026-05-20 12:53:43.085522
-15	3	3	RET-00006	56	1	\N	CIVIL	Scrap			4	f	2026-05-20 12:59:53.290802
-16	3	3	RET-00007	59	1	\N	CIVIL	Unused		Pradnesh	4	f	2026-06-02 18:31:45.238038
+COPY public.material_returns (id, tenant_id, site_id, return_number, warehouse_id, project_id, returned_from_room_id, returned_from_department, return_type, remarks, returned_by_name, received_by_id, is_deleted, created_at, status, received_date, initiated_by_id) FROM stdin;
+6	3	3	RET-00001	56	1	\N	CIVIL	Damaged	abcd	abc	4	f	2026-05-20 12:47:03.263719	Received	2026-05-20 12:47:03.263719	4
+9	3	3	RET-00002	56	1	\N	CIVIL	Scrap		Ram	4	f	2026-05-20 12:50:39.830354	Received	2026-05-20 12:50:39.830354	4
+10	3	3	RET-00003	59	1	\N	CIVIL	Scrap		General	4	f	2026-05-20 12:51:33.814251	Received	2026-05-20 12:51:33.814251	4
+11	3	3	RET-00004	59	1	\N	CIVIL	Unused			4	f	2026-05-20 12:52:59.884987	Received	2026-05-20 12:52:59.884987	4
+12	3	3	RET-00005	59	1	\N	CIVIL	Wrong Item		Raju	4	f	2026-05-20 12:53:43.085522	Received	2026-05-20 12:53:43.085522	4
+15	3	3	RET-00006	56	1	\N	CIVIL	Scrap			4	f	2026-05-20 12:59:53.290802	Received	2026-05-20 12:59:53.290802	4
+16	3	3	RET-00007	59	1	\N	CIVIL	Unused		Pradnesh	4	f	2026-06-02 18:31:45.238038	Received	2026-06-02 18:31:45.238038	4
+17	1	1	RET-00001	46	2	\N	\N	Unused	\N	\N	8	f	2026-06-09 14:32:57.508074	Received	2026-06-09 09:02:57.565484	8
+18	3	3	RET-00008	59	1	\N	106 WARD	Unused	GRInfra	Central	4	f	2026-06-09 15:25:25.741683	Partially Received	2026-06-09 10:24:19.831825	4
+20	3	3	RET-00010	59	1	\N	106 WARD	Unused		wwww	4	f	2026-06-09 16:00:08.811247	Closed	2026-06-09 10:33:02.170344	4
+19	3	3	RET-00009	59	1	\N	107 WARD	Unused		ngtest	4	f	2026-06-09 15:57:41.163092	Partially Received	2026-06-09 11:07:52.724123	4
+21	3	3	RET-00011	59	1	\N	203 WARD	Unused	General Remark1	Suresh	4	f	2026-06-09 16:54:33.084703	Partially Received	2026-06-09 11:25:55.91434	4
 \.
 
 
@@ -7205,6 +7476,32 @@ COPY public.projects (id, tenant_id, site_id, name, code, organization_id, locat
 
 
 --
+-- Data for Name: purchase_order_approvals; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.purchase_order_approvals (id, po_id, approval_flow_id, approver_id, approved_quantities, remarks, approved_at) FROM stdin;
+1	211	8	4	{}	\N	2026-06-09 10:29:29.01579
+2	211	9	4	{}	\N	2026-06-09 10:29:33.226328
+3	199	8	4	{}	\N	2026-06-09 10:42:56.355415
+4	199	9	4	{}	\N	2026-06-09 10:43:04.60174
+5	187	8	4	{}	\N	2026-06-09 11:31:41.912276
+6	187	9	4	{}	\N	2026-06-09 11:31:45.232364
+7	188	8	4	{}	\N	2026-06-09 11:32:22.51717
+8	188	9	4	{}	\N	2026-06-09 11:32:25.785977
+9	185	8	4	{}	\N	2026-06-09 11:33:25.31696
+10	185	9	4	{}	\N	2026-06-09 11:33:28.404691
+11	210	8	4	{}	\N	2026-06-09 12:09:41.995951
+12	210	9	4	{}	\N	2026-06-09 12:09:44.886888
+13	198	8	4	{}	\N	2026-06-09 12:41:47.604807
+14	198	9	4	{}	\N	2026-06-09 12:41:54.765072
+15	209	8	4	{}	\N	2026-06-09 12:55:52.248982
+16	209	9	4	{}	\N	2026-06-09 12:55:54.99894
+17	207	8	4	{}	\N	2026-06-09 13:01:43.299614
+18	207	9	4	{}	\N	2026-06-09 13:01:47.96691
+\.
+
+
+--
 -- Data for Name: purchase_order_items; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -7241,6 +7538,8 @@ COPY public.purchase_order_items (id, po_id, material_id, quantity, rate, amount
 493	201	246	11	12111	133221	0	\N	2	2	2	0	f
 495	203	246	10	1800	18000	0	\N	0	5	5	0	t
 498	206	1191	10	16500	165000	0	\N	0	5	5	0	f
+502	210	246	10	33	330	0	\N	0	9.9	8.1	0	f
+504	212	246	10	33	330	0	\N	0	9	9	0	f
 450	178	226	68	275.36	18724.56	34	\N	0	0	0	0	f
 451	179	241	78	264.13	20602.24	0	\N	0	0	0	0	f
 452	179	225	69	943.86	65126.52	0	\N	0	0	0	0	f
@@ -7252,8 +7551,6 @@ COPY public.purchase_order_items (id, po_id, material_id, quantity, rate, amount
 458	182	224	72	549.16	39539.86	36	\N	0	0	0	0	f
 459	182	220	97	654.04	63441.88	48.5	\N	0	0	0	0	f
 460	182	218	50	950.36	47518.08	25	\N	0	0	0	0	f
-461	183	225	99	184.01	18217.39	0	\N	0	0	0	0	f
-462	183	216	86	240.24	20660.79	0	\N	0	0	0	0	f
 465	185	249	18	420	7560	0	\N	0	0	0	0	f
 466	185	243	40	12000	480000	0	\N	0	0	0	0	f
 467	185	249	43	420	18060	0	\N	0	0	0	0	f
@@ -7279,8 +7576,13 @@ COPY public.purchase_order_items (id, po_id, material_id, quantity, rate, amount
 464	184	232	54	647.48	34963.88	54	\N	0	0	0	0	f
 476	189	224	100	336.29	33629	100	\N	0	0	0	0	f
 497	205	2135	10	4300	43000	0	\N	0	6	6	0	f
-499	207	1191	12	1000	12000	0	\N	20	5	5	0	f
 500	208	224	95	111111	12455543.1	0	\N	0	9	9	0	f
+501	209	1062	20	4658	109928.8	0	\N	0	0	0	18	f
+513	211	2134	10	2188.78	21887.8	0	\N	0	9	9	0	f
+514	211	1378	10	10443.43	104434.3	0	\N	0	9	9	0	f
+461	183	225	99	184.01	18217.39	99	\N	0	0	0	0	f
+462	183	216	86	240.24	20660.79	86	\N	0	0	0	0	f
+515	207	1191	12	1000	12000	0	\N	20	5	5	0	f
 \.
 
 
@@ -7288,46 +7590,62 @@ COPY public.purchase_order_items (id, po_id, material_id, quantity, rate, amount
 -- Data for Name: purchase_orders; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.purchase_orders (id, tenant_id, site_id, po_number, vendor_id, project_id, pr_id, indent_id, qr_id, po_type, total_amount, delivery_date, status, terms, created_by_id, approved_by_id, approved_at, is_deleted, created_at, updated_at) FROM stdin;
-184	3	3	PO-00015	52	1	\N	\N	182	Formal	81643.63	\N	Closed	\N	4	\N	\N	f	2026-05-05 18:52:30.375564	2026-06-02 18:01:24.106204
-172	3	3	PO-00003	54	1	\N	181	\N	Formal	41190.84	\N	Closed	\N	4	\N	\N	f	2026-04-23 18:52:30.375564	2026-05-15 18:52:30.668781
-173	3	3	PO-00004	51	1	\N	182	\N	Formal	158700.81	\N	Approved	\N	4	\N	\N	f	2026-04-24 18:52:30.375564	2026-05-15 18:52:30.673538
-174	3	3	PO-00005	59	1	\N	183	\N	Formal	94040.94	\N	Approved	\N	4	\N	\N	f	2026-04-25 18:52:30.375564	2026-05-15 18:52:30.677358
-175	3	3	PO-00006	60	1	175	\N	\N	Formal	106458.67	\N	Closed	\N	4	\N	\N	f	2026-04-26 18:52:30.375564	2026-05-15 18:52:30.680082
-176	3	3	PO-00007	56	1	176	\N	\N	Formal	154430.78	\N	Approved	\N	4	\N	\N	f	2026-04-27 18:52:30.375564	2026-05-15 18:52:30.683986
-177	3	3	PO-00008	52	1	177	\N	\N	Formal	65342.52	\N	Closed	\N	4	\N	\N	f	2026-04-28 18:52:30.375564	2026-05-15 18:52:30.687165
-178	3	3	PO-00009	60	1	178	\N	\N	Formal	147399.23	\N	Partially Received	\N	4	\N	\N	f	2026-04-29 18:52:30.375564	2026-05-15 18:52:30.691324
-179	3	3	PO-00010	60	1	179	\N	\N	Formal	85728.76	\N	Sent to Vendor	\N	4	\N	\N	f	2026-04-30 18:52:30.375564	2026-05-15 18:52:30.694624
-180	3	3	PO-00011	58	1	\N	\N	178	Formal	60541.49	\N	Partially Received	\N	4	\N	\N	f	2026-05-01 18:52:30.375564	2026-05-15 18:52:30.696708
-181	3	3	PO-00012	53	1	\N	\N	179	Formal	124991.86	\N	Closed	\N	4	\N	\N	f	2026-05-02 18:52:30.375564	2026-05-15 18:52:30.700679
-182	3	3	PO-00013	55	1	\N	\N	180	Formal	150499.81	\N	Partially Received	\N	4	\N	\N	f	2026-05-03 18:52:30.375564	2026-05-15 18:52:30.703739
-183	3	3	PO-00014	52	1	\N	\N	181	Formal	38878.18	\N	Sent to Vendor	\N	4	\N	\N	f	2026-05-04 18:52:30.375564	2026-05-15 18:52:30.706816
-170	3	3	PO-00001	54	1	\N	179	\N	Formal	59200.55	\N	Approved	\N	4	\N	\N	f	2026-04-21 18:52:30.375564	2026-05-15 18:52:30.658953
-171	3	3	PO-00002	53	1	\N	180	\N	Formal	90907.27	\N	Partially Received	\N	4	\N	\N	f	2026-04-22 18:52:30.375564	2026-05-15 18:52:30.664194
-185	3	3	PO-00020	56	1	\N	188	\N	Formal	505620	\N	Draft	\N	4	\N	\N	f	2026-05-20 11:09:40.396549	2026-05-20 11:09:40.431655
-186	3	3	PO-00021	51	1	185	\N	\N	Formal	2029750	2026-06-03	Approved		4	4	2026-05-20 07:11:03.64198	f	2026-05-20 12:31:17.847185	2026-05-20 12:41:03.642637
-187	3	3	PO-00022	59	1	\N	195	\N	Formal	6500000	\N	Draft	\N	4	\N	\N	f	2026-05-20 12:44:10.329878	2026-05-20 12:44:10.338882
-188	3	3	PO-00023	53	1	\N	\N	179	Formal	7057	\N	Draft	\N	4	\N	\N	f	2026-05-25 18:43:27.659778	2026-05-25 18:43:27.678332
-190	3	3	PO-00025	56	1	179	\N	\N	Formal	6853250	2026-06-15	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 15:23:31.597258	2026-06-01 15:23:31.66009
-191	3	3	PO-00026	53	1	\N	197	\N	Formal	1298	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 16:03:23.716584	2026-06-01 16:03:23.728687
-202	3	3	PO-00037	54	1	\N	200	\N	Formal	5605	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-02 13:18:45.56214	2026-06-02 13:18:45.624949
-192	3	3	PO-00027	54	1	\N	196	\N	Formal	2507.5	\N	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-01 11:07:15.238732	f	2026-06-01 16:36:50.172223	2026-06-01 16:37:32.738439
-193	3	3	PO-00028	57	1	178	\N	\N	Formal	3813570	2026-06-15	Draft		4	\N	\N	f	2026-06-01 16:39:26.934331	2026-06-01 16:39:26.948969
-194	3	3	PO-00029	54	1	\N	201	\N	Formal	100800	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 16:58:23.591671	2026-06-01 16:58:23.603727
-195	3	3	PO-00030	59	1	188	\N	\N	Formal	3250	2026-06-15	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 17:03:57.421434	2026-06-01 17:03:57.441155
-196	3	3	PO-00031	53	1	\N	202	\N	Formal	226800	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 17:07:08.990299	2026-06-01 17:07:09.002256
-197	3	3	PO-00032	53	1	187	\N	185	Formal	225000	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 17:32:30.423259	2026-06-01 17:32:30.438244
-198	3	3	PO-00033	53	1	\N	\N	175	Formal	20438	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 17:37:01.162383	2026-06-01 17:37:01.172695
-199	3	3	PO-00034	59	1	\N	\N	175	Formal	2042	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 17:37:01.189809	2026-06-01 17:37:01.195657
-203	3	3	PO-00038	53	1	\N	\N	\N	Informal	18000	2026-06-23	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-02 13:25:01.313929	2026-06-02 13:25:01.322517
-201	3	3	PO-00036	54	1	\N	\N	\N	Formal	135778.84	2026-06-22	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-02 06:00:37.696127	f	2026-06-01 19:53:47.799287	2026-06-02 11:30:37.696589
-200	3	3	PO-00035	53	1	\N	\N	\N	Informal	196	2026-06-22	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-02 06:01:19.439678	f	2026-06-01 19:52:04.979427	2026-06-02 11:31:19.444167
-204	3	3	PO-00039	53	1	\N	\N	\N	Informal	19800	2026-06-23	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-02 17:42:31.823143	2026-06-02 17:42:31.82497
-189	3	3	PO-00024	54	1	\N	\N	179	Formal	33629	\N	Closed	\N	4	4	2026-05-25 13:22:18.605025	f	2026-05-25 18:43:27.751179	2026-06-02 18:01:36.986163
-205	3	3	PO-00040	54	1	189	\N	\N	Formal	48160	2026-06-17	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-03 14:31:01.896958	2026-06-03 14:31:01.946011
-207	3	3	PO-00042	53	1	\N	\N	\N	Informal	10560	2026-06-25	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-04 14:19:18.399032	2026-06-04 14:19:18.421716
-206	3	3	PO-00041	53	1	\N	\N	\N	Informal	181500	2026-06-24	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-03 09:03:42.850278	f	2026-06-03 14:33:32.175397	2026-06-03 14:33:49.738142
-208	3	3	PO-00043	54	1	\N	194	\N	Formal	12455543.1	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-05 18:10:20.039447	2026-06-05 18:10:20.097297
+COPY public.purchase_orders (id, tenant_id, site_id, po_number, vendor_id, project_id, pr_id, indent_id, qr_id, po_type, total_amount, delivery_date, status, terms, created_by_id, approved_by_id, approved_at, is_deleted, created_at, updated_at, current_approval_level) FROM stdin;
+184	3	3	PO-00015	52	1	\N	\N	182	Formal	81643.63	\N	Closed	\N	4	\N	\N	f	2026-05-05 18:52:30.375564	2026-06-02 18:01:24.106204	\N
+188	3	3	PO-00023	53	1	\N	\N	179	Formal	7057	\N	Sent to Vendor	\N	4	4	2026-06-09 06:02:25.803756	f	2026-05-25 18:43:27.659778	2026-06-09 11:32:29.137317	2
+185	3	3	PO-00020	56	1	\N	188	\N	Formal	505620	\N	Sent to Vendor	\N	4	4	2026-06-09 06:03:28.427074	f	2026-05-20 11:09:40.396549	2026-06-09 12:03:22.436884	2
+183	3	3	PO-00014	52	1	\N	\N	181	Formal	38878.18	\N	Closed	\N	4	\N	\N	f	2026-05-04 18:52:30.375564	2026-06-09 11:11:19.17997	\N
+186	3	3	PO-00021	51	1	185	\N	\N	Formal	2029750	2026-06-03	Sent to Vendor		4	4	2026-05-20 07:11:03.64198	f	2026-05-20 12:31:17.847185	2026-06-09 11:28:51.718097	\N
+187	3	3	PO-00022	59	1	\N	195	\N	Formal	6500000	\N	Sent to Vendor	\N	4	4	2026-06-09 06:01:45.255291	f	2026-05-20 12:44:10.329878	2026-06-09 11:31:54.352679	2
+172	3	3	PO-00003	54	1	\N	181	\N	Formal	41190.84	\N	Closed	\N	4	\N	\N	f	2026-04-23 18:52:30.375564	2026-05-15 18:52:30.668781	\N
+173	3	3	PO-00004	51	1	\N	182	\N	Formal	158700.81	\N	Approved	\N	4	\N	\N	f	2026-04-24 18:52:30.375564	2026-05-15 18:52:30.673538	\N
+174	3	3	PO-00005	59	1	\N	183	\N	Formal	94040.94	\N	Approved	\N	4	\N	\N	f	2026-04-25 18:52:30.375564	2026-05-15 18:52:30.677358	\N
+175	3	3	PO-00006	60	1	175	\N	\N	Formal	106458.67	\N	Closed	\N	4	\N	\N	f	2026-04-26 18:52:30.375564	2026-05-15 18:52:30.680082	\N
+176	3	3	PO-00007	56	1	176	\N	\N	Formal	154430.78	\N	Approved	\N	4	\N	\N	f	2026-04-27 18:52:30.375564	2026-05-15 18:52:30.683986	\N
+177	3	3	PO-00008	52	1	177	\N	\N	Formal	65342.52	\N	Closed	\N	4	\N	\N	f	2026-04-28 18:52:30.375564	2026-05-15 18:52:30.687165	\N
+178	3	3	PO-00009	60	1	178	\N	\N	Formal	147399.23	\N	Partially Received	\N	4	\N	\N	f	2026-04-29 18:52:30.375564	2026-05-15 18:52:30.691324	\N
+179	3	3	PO-00010	60	1	179	\N	\N	Formal	85728.76	\N	Sent to Vendor	\N	4	\N	\N	f	2026-04-30 18:52:30.375564	2026-05-15 18:52:30.694624	\N
+180	3	3	PO-00011	58	1	\N	\N	178	Formal	60541.49	\N	Partially Received	\N	4	\N	\N	f	2026-05-01 18:52:30.375564	2026-05-15 18:52:30.696708	\N
+181	3	3	PO-00012	53	1	\N	\N	179	Formal	124991.86	\N	Closed	\N	4	\N	\N	f	2026-05-02 18:52:30.375564	2026-05-15 18:52:30.700679	\N
+182	3	3	PO-00013	55	1	\N	\N	180	Formal	150499.81	\N	Partially Received	\N	4	\N	\N	f	2026-05-03 18:52:30.375564	2026-05-15 18:52:30.703739	\N
+170	3	3	PO-00001	54	1	\N	179	\N	Formal	59200.55	\N	Approved	\N	4	\N	\N	f	2026-04-21 18:52:30.375564	2026-05-15 18:52:30.658953	\N
+171	3	3	PO-00002	53	1	\N	180	\N	Formal	90907.27	\N	Partially Received	\N	4	\N	\N	f	2026-04-22 18:52:30.375564	2026-05-15 18:52:30.664194	\N
+190	3	3	PO-00025	56	1	179	\N	\N	Formal	6853250	2026-06-15	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 15:23:31.597258	2026-06-08 18:55:17.925857	1
+191	3	3	PO-00026	53	1	\N	197	\N	Formal	1298	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 16:03:23.716584	2026-06-08 18:55:17.942199	1
+202	3	3	PO-00037	54	1	\N	200	\N	Formal	5605	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-02 13:18:45.56214	2026-06-08 18:55:17.958852	1
+192	3	3	PO-00027	54	1	\N	196	\N	Formal	2507.5	\N	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-01 11:07:15.238732	f	2026-06-01 16:36:50.172223	2026-06-01 16:37:32.738439	\N
+193	3	3	PO-00028	57	1	178	\N	\N	Formal	3813570	2026-06-15	Submitted		4	\N	\N	f	2026-06-01 16:39:26.934331	2026-06-08 18:55:17.975319	1
+194	3	3	PO-00029	54	1	\N	201	\N	Formal	100800	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 16:58:23.591671	2026-06-08 18:55:17.992417	1
+195	3	3	PO-00030	59	1	188	\N	\N	Formal	3250	2026-06-15	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 17:03:57.421434	2026-06-08 18:55:18.042481	1
+196	3	3	PO-00031	53	1	\N	202	\N	Formal	226800	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 17:07:08.990299	2026-06-08 18:55:18.059001	1
+197	3	3	PO-00032	53	1	187	\N	185	Formal	225000	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 17:32:30.423259	2026-06-08 18:55:18.075356	1
+198	3	3	PO-00033	53	1	\N	\N	175	Formal	20438	\N	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 07:11:54.780151	f	2026-06-01 17:37:01.162383	2026-06-09 12:41:54.78066	2
+210	3	3	PO-00045	53	1	186	\N	\N	Formal	389.4	2026-06-22	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 06:39:44.953387	f	2026-06-08 16:14:50.262386	2026-06-09 12:09:51.002593	2
+203	3	3	PO-00038	53	1	\N	\N	\N	Informal	18000	2026-06-23	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-02 13:25:01.313929	2026-06-02 13:25:01.322517	\N
+200	3	3	PO-00035	53	1	\N	\N	\N	Informal	196	2026-06-22	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-02 06:01:19.439678	f	2026-06-01 19:52:04.979427	2026-06-09 11:23:05.561822	\N
+199	3	3	PO-00034	59	1	\N	\N	175	Formal	2042	\N	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 05:13:04.621484	f	2026-06-01 17:37:01.189809	2026-06-09 11:26:24.208347	2
+204	3	3	PO-00039	53	1	\N	\N	\N	Informal	19800	2026-06-23	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-02 17:42:31.823143	2026-06-02 17:42:31.82497	\N
+189	3	3	PO-00024	54	1	\N	\N	179	Formal	33629	\N	Closed	\N	4	4	2026-05-25 13:22:18.605025	f	2026-05-25 18:43:27.751179	2026-06-02 18:01:36.986163	\N
+205	3	3	PO-00040	54	1	189	\N	\N	Formal	48160	2026-06-17	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-03 14:31:01.896958	2026-06-08 18:55:18.125425	1
+206	3	3	PO-00041	53	1	\N	\N	\N	Informal	181500	2026-06-24	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-03 09:03:42.850278	f	2026-06-03 14:33:32.175397	2026-06-03 14:33:49.738142	\N
+208	3	3	PO-00043	54	1	\N	194	\N	Formal	12455543.1	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-05 18:10:20.039447	2026-06-08 18:55:18.142376	1
+207	3	3	PO-00042	53	1	\N	\N	\N	Informal	10560	2026-06-25	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 07:31:48.001221	f	2026-06-04 14:19:18.399032	2026-06-09 13:05:42.79919	2
+201	3	3	PO-00036	54	1	\N	\N	\N	Formal	135778.84	2026-06-22	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-02 06:00:37.696127	f	2026-06-01 19:53:47.799287	2026-06-09 11:19:25.214361	\N
+209	3	3	PO-00044	55	1	\N	208	\N	Formal	109928.8	\N	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: 15 Days\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 07:25:55.019454	f	2026-06-08 14:45:41.037419	2026-06-09 12:56:21.865994	2
+212	3	3	PO-00047	59	1	\N	\N	\N	Informal	389.4	2026-06-29	Short Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR\n[Short Closed: short closed \n]	4	4	2026-06-08 12:47:36.231711	f	2026-06-08 17:19:34.563694	2026-06-08 19:19:46.178721	\N
+211	3	3	PO-00046	53	1	\N	\N	\N	Informal	149060.07	2026-06-29	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 04:59:33.248268	f	2026-06-08 17:18:43.689083	2026-06-09 11:16:03.62895	2
+\.
+
+
+--
+-- Data for Name: purchase_request_approvals; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.purchase_request_approvals (id, pr_id, approval_flow_id, approver_id, approved_quantities, remarks, approved_at) FROM stdin;
+1	180	5	4	{"538": {"quantity": 100.0, "remarks": "R1"}, "539": {"quantity": 110.0, "remarks": "R2"}}	G1	2026-06-08 15:31:24.548194
+2	180	6	4	{"538": {"quantity": 101.0, "remarks": "R21"}, "539": {"quantity": 100.0, "remarks": "R22"}}	G2	2026-06-08 15:35:05.237457
+3	180	7	4	{"538": {"quantity": 100.0, "remarks": "R31"}, "539": {"quantity": 110.0, "remarks": "R32"}}	G3	2026-06-08 15:35:58.178751
+4	181	5	4	{"540": {"quantity": 120.0, "remarks": null}, "541": {"quantity": 110.0, "remarks": null}, "542": {"quantity": 170.0, "remarks": null}, "543": {"quantity": 70.0, "remarks": null}}	\N	2026-06-08 15:54:14.206965
 \.
 
 
@@ -7335,63 +7653,69 @@ COPY public.purchase_orders (id, tenant_id, site_id, po_number, vendor_id, proje
 -- Data for Name: purchase_request_items; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.purchase_request_items (id, pr_id, material_id, quantity) FROM stdin;
-508	170	247	167
-509	170	240	130
-510	171	246	76
-511	171	245	64
-512	171	228	63
-513	171	238	76
-514	172	229	151
-515	172	241	69
-516	172	238	125
-517	173	242	138
-518	173	222	113
-519	174	229	143
-520	174	226	172
-521	174	232	68
-522	175	231	95
-523	175	233	74
-524	176	227	134
-525	176	217	93
-526	176	216	145
-527	176	233	196
-528	177	230	166
-529	177	242	168
-530	177	246	119
-531	178	220	54
-532	178	224	57
-533	178	249	141
-534	178	236	57
-535	179	236	50
-536	179	247	63
-537	179	238	105
-538	180	225	102
-539	180	216	136
-540	181	223	123
-541	181	243	120
-542	181	225	177
-543	181	234	72
-544	182	243	158
-545	182	244	185
-546	182	228	105
-547	183	221	110
-548	183	222	129
-549	183	221	75
-550	184	221	85
-551	184	234	121
-552	184	225	55
-553	184	245	71
-554	185	234	150
-555	185	226	200
-556	185	239	200
-557	185	216	200
-558	185	238	100
-559	185	224	100
-560	186	246	10
-561	187	238	50
-562	188	234	50
-563	189	2135	10
+COPY public.purchase_request_items (id, pr_id, material_id, quantity, approved_quantity) FROM stdin;
+508	170	247	167	\N
+509	170	240	130	\N
+510	171	246	76	\N
+511	171	245	64	\N
+512	171	228	63	\N
+513	171	238	76	\N
+514	172	229	151	\N
+515	172	241	69	\N
+516	172	238	125	\N
+517	173	242	138	\N
+518	173	222	113	\N
+519	174	229	143	\N
+520	174	226	172	\N
+521	174	232	68	\N
+522	175	231	95	\N
+523	175	233	74	\N
+524	176	227	134	\N
+525	176	217	93	\N
+526	176	216	145	\N
+527	176	233	196	\N
+528	177	230	166	\N
+529	177	242	168	\N
+530	177	246	119	\N
+531	178	220	54	\N
+532	178	224	57	\N
+533	178	249	141	\N
+534	178	236	57	\N
+535	179	236	50	\N
+536	179	247	63	\N
+537	179	238	105	\N
+544	182	243	158	\N
+545	182	244	185	\N
+546	182	228	105	\N
+547	183	221	110	\N
+548	183	222	129	\N
+549	183	221	75	\N
+550	184	221	85	\N
+551	184	234	121	\N
+552	184	225	55	\N
+553	184	245	71	\N
+554	185	234	150	\N
+555	185	226	200	\N
+556	185	239	200	\N
+557	185	216	200	\N
+558	185	238	100	\N
+559	185	224	100	\N
+560	186	246	10	\N
+561	187	238	50	\N
+562	188	234	50	\N
+563	189	2135	10	\N
+592	193	988	30	\N
+593	193	979	25	\N
+538	180	225	102	100
+539	180	216	136	110
+540	181	223	123	120
+541	181	243	120	110
+542	181	225	177	170
+543	181	234	72	70
+564	190	1378	10	\N
+581	191	2132	8	\N
+582	191	1192	10	\N
+583	192	1192	12	\N
 \.
 
 
@@ -7399,27 +7723,31 @@ COPY public.purchase_request_items (id, pr_id, material_id, quantity) FROM stdin
 -- Data for Name: purchase_requests; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.purchase_requests (id, tenant_id, site_id, pr_number, requester_id, required_for_room_id, building_id, department_name, project_id, required_date, remarks, status, approved_by_id, approved_at, is_deleted, created_at, updated_at) FROM stdin;
-176	3	3	PR-00007	4	\N	2	Civil	1	2026-05-02	\N	Converted to PO	\N	\N	f	2026-04-22 18:52:30.375564	2026-05-15 18:52:30.43899
-177	3	3	PR-00008	4	\N	2	Civil	1	2026-05-03	\N	Submitted	\N	\N	f	2026-04-23 18:52:30.375564	2026-05-15 18:52:30.442117
-180	3	3	PR-00011	4	\N	3	Civil	1	2026-05-06	\N	Submitted	\N	\N	f	2026-04-26 18:52:30.375564	2026-05-15 18:52:30.449684
-181	3	3	PR-00012	4	\N	2	Civil	1	2026-05-07	\N	Submitted	\N	\N	f	2026-04-27 18:52:30.375564	2026-05-15 18:52:30.452094
-182	3	3	PR-00013	4	\N	1	Civil	1	2026-05-08	\N	Converted to PO	\N	\N	f	2026-04-28 18:52:30.375564	2026-05-15 18:52:30.455874
-170	3	3	PR-00001	4	\N	1	Civil	1	2026-04-26	\N	Converted to PO	\N	\N	f	2026-04-16 18:52:30.375564	2026-05-15 18:52:30.416644
-171	3	3	PR-00002	4	\N	3	Civil	1	2026-04-27	\N	Submitted	\N	\N	f	2026-04-17 18:52:30.375564	2026-05-15 18:52:30.421314
-172	3	3	PR-00003	4	\N	1	Civil	1	2026-04-28	\N	Submitted	\N	\N	f	2026-04-18 18:52:30.375564	2026-05-15 18:52:30.426352
-173	3	3	PR-00004	4	\N	2	Civil	1	2026-04-29	\N	Converted to PO	\N	\N	f	2026-04-19 18:52:30.375564	2026-05-15 18:52:30.429889
-174	3	3	PR-00005	4	\N	2	Civil	1	2026-04-30	\N	Submitted	\N	\N	f	2026-04-20 18:52:30.375564	2026-05-15 18:52:30.432731
-175	3	3	PR-00006	4	\N	1	Civil	1	2026-05-01	\N	Approved	\N	\N	f	2026-04-21 18:52:30.375564	2026-05-15 18:52:30.43576
-183	3	3	PR-00014	4	\N	2	Civil	1	2026-05-09	\N	Submitted	\N	\N	f	2026-04-29 18:52:30.375564	2026-05-15 18:52:30.458309
-184	3	3	PR-00015	4	\N	2	Civil	1	2026-05-10	\N	Converted to PO	\N	\N	f	2026-04-30 18:52:30.375564	2026-05-15 18:52:30.460726
-185	3	3	PR-00020	4	\N	1	CIVIL	1	2026-06-03		Converted to PO	4	2026-05-20 06:57:55.499327	f	2026-05-20 12:27:38.929279	2026-05-20 12:31:17.850162
-186	3	3	PR-00021	4	\N	1	CIVIL	1	2026-06-03		Draft	\N	\N	f	2026-05-20 14:06:53.134145	2026-05-20 14:06:53.134159
-179	3	3	PR-00010	4	\N	2	Civil	1	2026-05-05	\N	Converted to PO	\N	\N	f	2026-04-25 18:52:30.375564	2026-06-01 15:23:31.656676
-178	3	3	PR-00009	4	\N	3	Civil	1	2026-05-04	\N	Converted to PO	\N	\N	f	2026-04-24 18:52:30.375564	2026-06-01 16:39:26.947196
-188	3	3	PR-00023	4	\N	1	CIVIL	1	2026-06-15		Converted to PO	4	2026-06-01 11:17:45.135642	f	2026-06-01 16:47:36.211265	2026-06-01 17:03:57.438438
-187	3	3	PR-00022	4	\N	1	ADMIN	1	2026-06-15		Converted to PO	4	2026-06-01 11:17:10.199457	f	2026-06-01 16:47:00.870149	2026-06-01 17:32:30.435217
-189	3	3	PR-00024	4	\N	1	BIOCHEMISTRY MEDICAL COLLEGE	1	2026-06-17		Converted to PO	4	2026-06-03 09:00:37.495367	f	2026-06-03 14:30:29.971745	2026-06-03 14:31:01.94332
+COPY public.purchase_requests (id, tenant_id, site_id, pr_number, requester_id, required_for_room_id, building_id, department_name, project_id, required_date, remarks, status, approved_by_id, approved_at, is_deleted, created_at, updated_at, current_approval_level) FROM stdin;
+176	3	3	PR-00007	4	\N	2	Civil	1	2026-05-02	\N	Converted to PO	\N	\N	f	2026-04-22 18:52:30.375564	2026-05-15 18:52:30.43899	\N
+177	3	3	PR-00008	4	\N	2	Civil	1	2026-05-03	\N	Submitted	\N	\N	f	2026-04-23 18:52:30.375564	2026-05-15 18:52:30.442117	\N
+182	3	3	PR-00013	4	\N	1	Civil	1	2026-05-08	\N	Converted to PO	\N	\N	f	2026-04-28 18:52:30.375564	2026-05-15 18:52:30.455874	\N
+170	3	3	PR-00001	4	\N	1	Civil	1	2026-04-26	\N	Converted to PO	\N	\N	f	2026-04-16 18:52:30.375564	2026-05-15 18:52:30.416644	\N
+171	3	3	PR-00002	4	\N	3	Civil	1	2026-04-27	\N	Submitted	\N	\N	f	2026-04-17 18:52:30.375564	2026-05-15 18:52:30.421314	\N
+172	3	3	PR-00003	4	\N	1	Civil	1	2026-04-28	\N	Submitted	\N	\N	f	2026-04-18 18:52:30.375564	2026-05-15 18:52:30.426352	\N
+173	3	3	PR-00004	4	\N	2	Civil	1	2026-04-29	\N	Converted to PO	\N	\N	f	2026-04-19 18:52:30.375564	2026-05-15 18:52:30.429889	\N
+174	3	3	PR-00005	4	\N	2	Civil	1	2026-04-30	\N	Submitted	\N	\N	f	2026-04-20 18:52:30.375564	2026-05-15 18:52:30.432731	\N
+175	3	3	PR-00006	4	\N	1	Civil	1	2026-05-01	\N	Approved	\N	\N	f	2026-04-21 18:52:30.375564	2026-05-15 18:52:30.43576	\N
+183	3	3	PR-00014	4	\N	2	Civil	1	2026-05-09	\N	Submitted	\N	\N	f	2026-04-29 18:52:30.375564	2026-05-15 18:52:30.458309	\N
+184	3	3	PR-00015	4	\N	2	Civil	1	2026-05-10	\N	Converted to PO	\N	\N	f	2026-04-30 18:52:30.375564	2026-05-15 18:52:30.460726	\N
+185	3	3	PR-00020	4	\N	1	CIVIL	1	2026-06-03		Converted to PO	4	2026-05-20 06:57:55.499327	f	2026-05-20 12:27:38.929279	2026-05-20 12:31:17.850162	\N
+179	3	3	PR-00010	4	\N	2	Civil	1	2026-05-05	\N	Converted to PO	\N	\N	f	2026-04-25 18:52:30.375564	2026-06-01 15:23:31.656676	\N
+178	3	3	PR-00009	4	\N	3	Civil	1	2026-05-04	\N	Converted to PO	\N	\N	f	2026-04-24 18:52:30.375564	2026-06-01 16:39:26.947196	\N
+188	3	3	PR-00023	4	\N	1	CIVIL	1	2026-06-15		Converted to PO	4	2026-06-01 11:17:45.135642	f	2026-06-01 16:47:36.211265	2026-06-01 17:03:57.438438	\N
+187	3	3	PR-00022	4	\N	1	ADMIN	1	2026-06-15		Converted to PO	4	2026-06-01 11:17:10.199457	f	2026-06-01 16:47:00.870149	2026-06-01 17:32:30.435217	\N
+189	3	3	PR-00024	4	\N	1	BIOCHEMISTRY MEDICAL COLLEGE	1	2026-06-17		Converted to PO	4	2026-06-03 09:00:37.495367	f	2026-06-03 14:30:29.971745	2026-06-03 14:31:01.94332	\N
+180	3	3	PR-00011	4	\N	3	Civil	1	2026-05-06	\N	Approved	4	2026-06-08 10:05:58.206107	f	2026-04-26 18:52:30.375564	2026-06-08 15:35:58.208066	3
+181	3	3	PR-00012	4	\N	2	Civil	1	2026-05-07	\N	Submitted	\N	\N	f	2026-04-27 18:52:30.375564	2026-06-08 15:54:14.266406	2
+186	3	3	PR-00021	4	\N	1	CIVIL	1	2026-06-03		Converted to PO	4	2026-06-08 07:06:20.77098	f	2026-05-20 14:06:53.134145	2026-06-08 16:14:50.273921	\N
+190	3	3	PR-00025	4	\N	1	ADMIN BLOCK	1	2026-06-22		Submitted	\N	\N	f	2026-06-08 16:47:30.328866	2026-06-08 17:05:19.224985	1
+192	3	3	PR-00027	4	\N	1	ART CENTRE	1	2026-06-22		Submitted	\N	\N	f	2026-06-08 17:55:00.531189	2026-06-08 17:59:01.111296	1
+191	3	3	PR-00026	4	\N	1	ADMIN BLOCK	1	2026-06-22	\n[Short Closed: Not Required]	Short Closed	\N	\N	f	2026-06-08 17:06:00.229077	2026-06-08 18:04:14.067753	1
+193	3	3	PR-00028	4	\N	2	IP GENERIC PHARMACY MAIN STORE	1	2026-06-23		Draft	\N	\N	f	2026-06-08 18:05:29.772886	2026-06-08 18:06:38.06265	1
 \.
 
 
@@ -7668,7 +7996,6 @@ COPY public.role_permissions (id, role_id, resource, can_read, can_create, can_u
 468	11	acknowledgements	t	t	t	t	{}
 469	11	departments	t	t	t	t	{}
 470	11	terms	t	t	t	t	{}
-597	12	returns	t	t	t	t	{"can_return": true}
 598	12	transfers	t	t	t	t	{"can_transfer": true}
 599	12	gate_passes	t	t	t	t	{"can_create": true, "can_print": true}
 600	12	acknowledgements	t	t	t	t	{"can_acknowledge": true}
@@ -7715,6 +8042,7 @@ COPY public.role_permissions (id, role_id, resource, can_read, can_create, can_u
 634	10	report_rate_analysis	t	f	f	f	{}
 635	10	report_receipt_summary	t	f	f	f	{}
 636	10	report_dept_inventory	t	f	f	f	{}
+597	12	returns	t	t	t	t	{"can_return": true, "receive": true}
 368	8	dashboard	t	f	f	f	{}
 369	8	quotations	f	f	f	f	{"can_approve": true}
 370	8	purchase_orders	f	f	f	f	{"can_approve": true, "can_reject": true}
@@ -9545,6 +9873,31 @@ COPY public.stock_ledger (id, tenant_id, site_id, material_id, warehouse_id, tra
 2975	3	3	219	55	Transfer In	1	44	Transfer	13	TRF-00002	1	\N	\N	4	2026-06-05 12:10:28.814994
 2976	3	3	217	46	Transfer Out	-1	111	Transfer	13	TRF-00002	1	\N	\N	4	2026-06-05 12:10:28.815016
 2977	3	3	217	55	Transfer In	1	1	Transfer	13	TRF-00002	1	\N	\N	4	2026-06-05 12:10:28.83025
+2978	3	3	225	59	GRN	99	190	GRN	199	GRN-00019	1	\N	\N	4	2026-06-09 11:11:19.106982
+2979	3	3	216	59	GRN	86	86	GRN	199	GRN-00019	1	\N	\N	4	2026-06-09 11:11:19.18175
+2980	1	1	2335	46	Return	8	8	Return	17	RET-00001	2	\N	\N	8	2026-06-09 14:32:57.570065
+2981	3	3	1062	59	Return	2	77	Return	18	RET-00008	1	\N	\N	4	2026-06-09 15:54:13.602686
+2982	3	3	1062	59	Return	4	81	Return	19	RET-00009	1	\N	\N	4	2026-06-09 15:59:50.820696
+2983	3	3	2135	59	Return	4	112	Return	20	RET-00010	1	\N	\N	4	2026-06-09 16:03:02.17487
+2984	3	3	1062	59	Return	3	84	Return	19	RET-00009	1	\N	\N	4	2026-06-09 16:37:45.938556
+2985	3	3	1062	59	Return	4	88	Return	19	RET-00009	1	\N	\N	4	2026-06-09 16:37:52.72855
+2986	3	3	1095	59	Return	3	25	Return	21	RET-00011	1	\N	\N	4	2026-06-09 16:54:55.39257
+2987	3	3	1099	59	Issue	-2	86	Issue	213	ISS-00028	1	91	\N	4	2026-06-09 17:40:08.683572
+2988	3	3	217	46	Issue	-3	108	Issue	214	ISS-00029	1	91	\N	4	2026-06-09 17:40:08.69634
+2989	3	3	1095	59	Issue	-10	15	Issue	215	ISS-00030	1	223	\N	4	2026-06-09 17:55:02.950612
+2990	3	3	219	54	Issue	-20	283	Issue	216	ISS-00031	1	1	\N	4	2026-06-09 17:58:53.332768
+2991	3	3	217	46	Issue	-20	88	Issue	217	ISS-00032	1	1	\N	4	2026-06-09 17:58:53.35357
+2992	3	3	230	47	Issue	-1	0	Issue	218	ISS-00033	1	1	\N	4	2026-06-09 17:58:53.382383
+2993	3	3	219	54	Issue	-6	277	Issue	219	ISS-00034	1	1	\N	4	2026-06-09 18:02:23.662659
+2994	3	3	217	46	Issue	-30	58	Issue	220	ISS-00035	1	1	\N	4	2026-06-09 18:02:23.689259
+2995	3	3	2135	59	Issue	-5	107	Issue	221	ISS-00036	1	221	\N	4	2026-06-09 18:15:33.792872
+2996	3	3	1065	59	Issue	-8	56	Issue	222	ISS-00037	1	218	\N	4	2026-06-09 18:18:42.227884
+2997	3	3	244	55	Issue	-1	46	Issue	223	ISS-00038	1	2	\N	4	2026-06-09 18:22:36.831107
+2998	3	3	243	51	Issue	-1	5	Issue	224	ISS-00039	1	2	\N	4	2026-06-09 18:22:36.836669
+2999	3	3	229	46	Issue	-1	70	Issue	225	ISS-00040	1	2	\N	4	2026-06-09 18:22:36.844031
+3000	3	3	228	55	Issue	-10	3385	Issue	226	ISS-00041	1	2	\N	4	2026-06-09 18:46:30.774281
+3001	3	3	222	47	Issue	-10	175	Issue	226	ISS-00041	1	2	\N	4	2026-06-09 18:46:30.774312
+3002	3	3	1378	59	Issue	-2	3	Issue	227	ISS-00042	1	\N	\N	4	2026-06-09 18:48:05.263072
 \.
 
 
@@ -9629,6 +9982,15 @@ COPY public.subcategories (id, tenant_id, site_id, name, category_id, is_active,
 53	3	3	STATIONERY	62	t	f
 54	3	3	GEN	63	t	f
 55	3	3	LAB	63	t	f
+\.
+
+
+--
+-- Data for Name: tenant_configurations; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.tenant_configurations (id, tenant_id, base_state, cgst_share_percent, sgst_share_percent, created_at, updated_at) FROM stdin;
+1	3	29 - Karnataka	50	50	2026-06-08 12:39:42.146831	2026-06-08 17:11:25.816677
 \.
 
 
@@ -9750,16 +10112,16 @@ COPY public.users (id, username, email, full_name, hashed_password, is_active, i
 --
 
 COPY public.vendor_categories (id, vendor_id, category_id) FROM stdin;
-41	51	41
-42	52	43
-45	55	49
-46	56	45
-47	57	46
-48	58	45
-50	60	43
-53	54	47
-55	59	41
-56	53	41
+59	54	47
+60	59	41
+61	57	46
+63	60	43
+64	58	45
+66	55	49
+67	52	43
+68	51	41
+69	53	41
+70	56	45
 \.
 
 
@@ -9926,17 +10288,17 @@ COPY public.vendor_quotations (id, qr_id, vendor_id, quotation_number, quotation
 -- Data for Name: vendors; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.vendors (id, tenant_id, site_id, name, code, contact_person, phone, email, gst_number, pan_number, address, city, state, pincode, bank_name, bank_account, ifsc_code, rating, is_active, is_deleted, created_at, updated_at) FROM stdin;
-54	3	3	Asian Paints Ltd.	VEN-0004	Vijay Mallya	9876543213	vijay.mallya@asian.com	27ASIAN1234F1Z5	\N	6A, Shanti Nagar, Santacruz (East)	Mumbai	27 - Maharashtra	400055	\N	\N	\N	4.6	t	f	2026-05-15 15:19:36.628989	2026-06-02 17:02:56.145519
-59	3	3	Dalmia Bharat Ltd.	VEN-0009	Arun Jaitley	9876543218	arun.jaitley@dalmia.com	29AALMA1234F1Z5	\N	11th & 12th Floor, Hansalaya Building, 15, Barakhamba Road	Bangalore	29 - Karnataka	560001	\N	\N	\N	4.5	t	f	2026-05-15 15:19:36.63549	2026-06-02 17:28:09.908722
-53	3	3	ACC Limited	VEN-0003	Amit Shah	9876543212	amit.shah@acc.com	27ACCCC1234F1Z5	\N	Cement House, 121, Maharshi Karve Road, Bangalore - 560020, Karnataka	Bangalore	29 - Karnataka	560020	\N	\N	\N	4.7	t	f	2026-05-15 15:19:36.627527	2026-06-02 17:28:59.599208
-51	3	3	UltraTech Cement Ltd.	VEN-0001	Rajesh Kumar	9876543210	rajesh.kumar@ultratech.com	29ULTRA1234F1Z5	\N	Ahura Centre, B-Wing, 2nd Floor, Mahakali Caves Road, Andheri (East), Mumbai - 400093	Bangalore	\N	\N	\N	\N	\N	4.8	t	f	2026-05-15 15:19:36.623721	2026-05-21 18:15:25.970621
-52	3	3	Tata Steel Ltd.	VEN-0002	Sanjay Singh	9876543211	sanjay.singh@tata.com	29TATA1234F1Z5	\N	Bombay House, 24, Homi Mody Street, Fort, Mumbai - 400001	Bangalore	\N	\N	\N	\N	\N	4.9	t	f	2026-05-15 15:19:36.625324	2026-05-21 18:15:25.970634
-55	3	3	Kajaria Ceramics Ltd.	VEN-0005	Ramesh Patel	9876543214	ramesh.patel@kajaria.com	29KAJAR1234F1Z5	\N	J1/B1 (Extn.), Mohan Co-op Industrial Estate, Mathura Road, New Delhi - 110044	Bangalore	\N	\N	\N	\N	\N	4.5	t	f	2026-05-15 15:19:36.630558	2026-05-21 18:15:25.970645
-56	3	3	Hindware Home Innovation Ltd.	VEN-0006	Suresh Raina	9876543215	suresh.raina@hindware.com	29HIND1234F1Z5	\N	301-302, 3rd Floor, Park Centra, Sector-30, Gurugram - 122001	Bangalore	\N	\N	\N	\N	\N	4.4	t	f	2026-05-15 15:19:36.631833	2026-05-21 18:15:25.970648
-57	3	3	Havells India Ltd.	VEN-0007	Deepak Chahar	9876543216	deepak.chahar@havells.com	29HAVEL1234F1Z5	\N	QRG Towers, 2D, Sector-126, Expressway, Noida - 201304	Bangalore	\N	\N	\N	\N	\N	4.8	t	f	2026-05-15 15:19:36.633077	2026-05-21 18:15:25.970651
-58	3	3	Jaquar & Company Pvt Ltd.	VEN-0008	Pankaj Tripathi	9876543217	pankaj.tripathi@jaquar.com	29JAQU1234F1Z5	\N	Plot No. 3, Sector - 11, IMT Manesar, Gurugram - 122050	Bangalore	\N	\N	\N	\N	\N	4.7	t	f	2026-05-15 15:19:36.634253	2026-05-21 18:15:25.970654
-60	3	3	JSW Steel Ltd.	VEN-0010	Sajjan Jindal	9876543219	sajjan.jindal@jsw.com	29JSW1234F1Z5	\N	JSW Centre, Bandra Kurla Complex, Bandra (East), Mumbai - 400051	Bangalore	\N	\N	\N	\N	\N	4.9	t	f	2026-05-15 15:19:36.636606	2026-05-21 18:15:25.970659
+COPY public.vendors (id, tenant_id, site_id, name, code, contact_person, phone, email, gst_number, pan_number, city, state, pincode, bank_name, bank_account, ifsc_code, rating, is_active, is_deleted, created_at, updated_at, address_line_1, address_line_2) FROM stdin;
+54	3	3	Asian Paints Ltd.	VEN-0004	Vijay Mallya	9876543213	sc.asianpaint@atomicmail.io	27ASIAN1234F1Z5	\N	Mumbai	27 - Maharashtra	400055	\N	\N	\N	4.6	t	f	2026-05-15 15:19:36.628989	2026-06-09 11:42:53.944333	6A, Shanti Nagar	Santacruz (East)
+59	3	3	Dalmia Bharat Ltd.	VEN-0009	Arun Jaitley	9876543218	sc.dalmia@atomicmail.io	29AALMA1234F1Z5	\N	Bangalore	29 - Karnataka	560001	\N	\N	\N	4.5	t	f	2026-05-15 15:19:36.63549	2026-06-09 11:43:13.253248	11th & 12th Floor, Hansalaya Building, 15, Barakhamba Road	
+57	3	3	Havells India Ltd.	VEN-0007	Deepak Chahar	9876543216	sc.havell@atomicmail.io	29HAVEL1234F1Z5	\N	Bangalore	29 - Karnataka	560016	\N	\N	\N	4.8	t	f	2026-05-15 15:19:36.633077	2026-06-09 11:44:25.585076	QRG Towers, 	2D, Sector-126, Expressway, 
+60	3	3	JSW Steel Ltd.	VEN-0010	Sajjan Jindal	9876543219	sc.jsw@atomicmail.io	29JSWIT1234F1Z5	\N	Bangalore	29 - Karnataka	560100	\N	\N	\N	4.9	t	f	2026-05-15 15:19:36.636606	2026-06-09 11:47:12.040761	JSW Centre, Bandra Kurla Complex, 	
+58	3	3	Jaquar & Company Pvt Ltd.	VEN-0008	Pankaj Tripathi	9876543217	sc.jaquar@atomicmail.io	29JAQUR1234F1Z5	\N	Bangalore	29 - Karnataka	560111	\N	\N	\N	4.7	t	f	2026-05-15 15:19:36.634253	2026-06-09 11:48:43.293235	Plot No. 3, Sector - 11, IMT Manesar, 	
+55	3	3	Kajaria Ceramics Ltd.	VEN-0005	Ramesh Patel	9876543214	sc.kajaria@atomicmail.io	29KAJAR1234F1Z5	\N	New Delhi	07 - Delhi	110044	\N	\N	\N	4.5	t	f	2026-05-15 15:19:36.630558	2026-06-09 11:49:49.459	J1/B1 (Extn.), Mohan Co-op Industrial Estate, 	Mathura Road, 
+52	3	3	Tata Steel Ltd.	VEN-0002	Sanjay Singh	9876543211	sc.tatasteel@atomicmail.io	29TATAS1234F1Z5	\N	Bangalore	29 - Karnataka	560555	\N	\N	\N	4.9	t	f	2026-05-15 15:19:36.625324	2026-06-09 11:50:42.234369	Bombay House, 	24, Homi Mody Street, Fort, 
+51	3	3	UltraTech Cement Ltd.	VEN-0001	Rajesh Kumar	9876543210	sc.ultratech@atomicmail.io	29ULTRA1234F1Z5	\N	Bangalore	29 - Karnataka	560116	\N	\N	\N	4.8	t	f	2026-05-15 15:19:36.623721	2026-06-09 11:52:09.365556	Ahura Centre, B-Wing, 2nd Floor, Mahakali Caves Road, 	
+53	3	3	ACC Limited	VEN-0003	Amit Shah	9876543212	sc.acc@atomicmail.io	29ACCCC1234F1Z5	\N	Bangalore	29 - Karnataka	560020	\N	\N	\N	4.7	t	f	2026-05-15 15:19:36.627527	2026-06-09 12:38:58.299555	Cement House, 	121, Maharshi Karve Road,
+56	3	3	Hindware Home Innovation Ltd.	VEN-0006	Suresh Raina	9876543215	sc.hindware@atomicmail.io	29HINDV1234F1Z5	\N	Bangalore	29 - Karnataka	560061	\N	\N	\N	4.4	t	f	2026-05-15 15:19:36.631833	2026-06-09 12:40:31.762475	301-302, 	3rd Floor, Park Centra, Sector-30,
 \.
 
 
@@ -9975,14 +10337,14 @@ SELECT pg_catalog.setval('public.alerts_id_seq', 2, true);
 -- Name: approval_flows_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.approval_flows_id_seq', 4, true);
+SELECT pg_catalog.setval('public.approval_flows_id_seq', 9, true);
 
 
 --
 -- Name: audit_logs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.audit_logs_id_seq', 122, true);
+SELECT pg_catalog.setval('public.audit_logs_id_seq', 166, true);
 
 
 --
@@ -10010,7 +10372,7 @@ SELECT pg_catalog.setval('public.company_addresses_id_seq', 3, true);
 -- Name: current_stock_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.current_stock_id_seq', 2646, true);
+SELECT pg_catalog.setval('public.current_stock_id_seq', 2648, true);
 
 
 --
@@ -10031,7 +10393,7 @@ SELECT pg_catalog.setval('public.departments_id_seq', 259, true);
 -- Name: document_sequences_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.document_sequences_id_seq', 59, true);
+SELECT pg_catalog.setval('public.document_sequences_id_seq', 60, true);
 
 
 --
@@ -10045,7 +10407,7 @@ SELECT pg_catalog.setval('public.floors_id_seq', 22, true);
 -- Name: gate_entries_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.gate_entries_id_seq', 189, true);
+SELECT pg_catalog.setval('public.gate_entries_id_seq', 191, true);
 
 
 --
@@ -10066,35 +10428,35 @@ SELECT pg_catalog.setval('public.gate_passes_id_seq', 13, true);
 -- Name: grn_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.grn_id_seq', 198, true);
+SELECT pg_catalog.setval('public.grn_id_seq', 199, true);
 
 
 --
 -- Name: grn_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.grn_items_id_seq', 501, true);
+SELECT pg_catalog.setval('public.grn_items_id_seq', 503, true);
 
 
 --
 -- Name: indent_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.indent_approvals_id_seq', 4, true);
+SELECT pg_catalog.setval('public.indent_approvals_id_seq', 16, true);
 
 
 --
 -- Name: indent_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.indent_items_id_seq', 480, true);
+SELECT pg_catalog.setval('public.indent_items_id_seq', 486, true);
 
 
 --
 -- Name: indents_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.indents_id_seq', 207, true);
+SELECT pg_catalog.setval('public.indents_id_seq', 213, true);
 
 
 --
@@ -10115,28 +10477,28 @@ SELECT pg_catalog.setval('public.invoices_id_seq', 1, true);
 -- Name: material_issue_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.material_issue_items_id_seq', 189, true);
+SELECT pg_catalog.setval('public.material_issue_items_id_seq', 205, true);
 
 
 --
 -- Name: material_issues_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.material_issues_id_seq', 212, true);
+SELECT pg_catalog.setval('public.material_issues_id_seq', 227, true);
 
 
 --
 -- Name: material_return_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.material_return_items_id_seq', 7, true);
+SELECT pg_catalog.setval('public.material_return_items_id_seq', 12, true);
 
 
 --
 -- Name: material_returns_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.material_returns_id_seq', 16, true);
+SELECT pg_catalog.setval('public.material_returns_id_seq', 21, true);
 
 
 --
@@ -10161,31 +10523,45 @@ SELECT pg_catalog.setval('public.projects_id_seq', 3, true);
 
 
 --
+-- Name: purchase_order_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.purchase_order_approvals_id_seq', 18, true);
+
+
+--
 -- Name: purchase_order_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_order_items_id_seq', 500, true);
+SELECT pg_catalog.setval('public.purchase_order_items_id_seq', 515, true);
 
 
 --
 -- Name: purchase_orders_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_orders_id_seq', 208, true);
+SELECT pg_catalog.setval('public.purchase_orders_id_seq', 212, true);
+
+
+--
+-- Name: purchase_request_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.purchase_request_approvals_id_seq', 4, true);
 
 
 --
 -- Name: purchase_request_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_request_items_id_seq', 563, true);
+SELECT pg_catalog.setval('public.purchase_request_items_id_seq', 593, true);
 
 
 --
 -- Name: purchase_requests_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_requests_id_seq', 189, true);
+SELECT pg_catalog.setval('public.purchase_requests_id_seq', 193, true);
 
 
 --
@@ -10262,7 +10638,7 @@ SELECT pg_catalog.setval('public.sites_id_seq', 3, true);
 -- Name: stock_ledger_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.stock_ledger_id_seq', 2977, true);
+SELECT pg_catalog.setval('public.stock_ledger_id_seq', 3002, true);
 
 
 --
@@ -10284,6 +10660,13 @@ SELECT pg_catalog.setval('public.stock_transfers_id_seq', 13, true);
 --
 
 SELECT pg_catalog.setval('public.subcategories_id_seq', 55, true);
+
+
+--
+-- Name: tenant_configurations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.tenant_configurations_id_seq', 1, true);
 
 
 --
@@ -10332,7 +10715,7 @@ SELECT pg_catalog.setval('public.users_id_seq', 12, true);
 -- Name: vendor_categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_categories_id_seq', 56, true);
+SELECT pg_catalog.setval('public.vendor_categories_id_seq', 70, true);
 
 
 --
@@ -10596,6 +10979,14 @@ ALTER TABLE ONLY public.projects
 
 
 --
+-- Name: purchase_order_approvals purchase_order_approvals_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.purchase_order_approvals
+    ADD CONSTRAINT purchase_order_approvals_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: purchase_order_items purchase_order_items_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -10609,6 +11000,14 @@ ALTER TABLE ONLY public.purchase_order_items
 
 ALTER TABLE ONLY public.purchase_orders
     ADD CONSTRAINT purchase_orders_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: purchase_request_approvals purchase_request_approvals_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.purchase_request_approvals
+    ADD CONSTRAINT purchase_request_approvals_pkey PRIMARY KEY (id);
 
 
 --
@@ -10737,6 +11136,22 @@ ALTER TABLE ONLY public.stock_transfers
 
 ALTER TABLE ONLY public.subcategories
     ADD CONSTRAINT subcategories_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: tenant_configurations tenant_configurations_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tenant_configurations
+    ADD CONSTRAINT tenant_configurations_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: tenant_configurations tenant_configurations_tenant_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tenant_configurations
+    ADD CONSTRAINT tenant_configurations_tenant_id_key UNIQUE (tenant_id);
 
 
 --
@@ -11350,6 +11765,13 @@ CREATE INDEX ix_projects_id ON public.projects USING btree (id);
 
 
 --
+-- Name: ix_purchase_order_approvals_id; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX ix_purchase_order_approvals_id ON public.purchase_order_approvals USING btree (id);
+
+
+--
 -- Name: ix_purchase_order_items_id; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -11368,6 +11790,13 @@ CREATE INDEX ix_purchase_orders_id ON public.purchase_orders USING btree (id);
 --
 
 CREATE INDEX ix_purchase_orders_po_number ON public.purchase_orders USING btree (po_number);
+
+
+--
+-- Name: ix_purchase_request_approvals_id; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX ix_purchase_request_approvals_id ON public.purchase_request_approvals USING btree (id);
 
 
 --
@@ -11501,6 +11930,13 @@ CREATE INDEX ix_stock_transfers_transfer_number ON public.stock_transfers USING 
 --
 
 CREATE INDEX ix_subcategories_id ON public.subcategories USING btree (id);
+
+
+--
+-- Name: ix_tenant_configurations_id; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX ix_tenant_configurations_id ON public.tenant_configurations USING btree (id);
 
 
 --
@@ -11824,6 +12260,14 @@ ALTER TABLE ONLY public.document_sequences
 
 ALTER TABLE ONLY public.document_sequences
     ADD CONSTRAINT document_sequences_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES public.tenants(id) ON DELETE CASCADE;
+
+
+--
+-- Name: material_returns fk_material_returns_initiated_by; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.material_returns
+    ADD CONSTRAINT fk_material_returns_initiated_by FOREIGN KEY (initiated_by_id) REFERENCES public.users(id);
 
 
 --
@@ -12259,6 +12703,14 @@ ALTER TABLE ONLY public.material_issue_items
 
 
 --
+-- Name: material_issue_items material_issue_items_warehouse_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.material_issue_items
+    ADD CONSTRAINT material_issue_items_warehouse_id_fkey FOREIGN KEY (warehouse_id) REFERENCES public.warehouses(id);
+
+
+--
 -- Name: material_issues material_issues_acknowledged_by_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -12483,6 +12935,30 @@ ALTER TABLE ONLY public.projects
 
 
 --
+-- Name: purchase_order_approvals purchase_order_approvals_approval_flow_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.purchase_order_approvals
+    ADD CONSTRAINT purchase_order_approvals_approval_flow_id_fkey FOREIGN KEY (approval_flow_id) REFERENCES public.approval_flows(id);
+
+
+--
+-- Name: purchase_order_approvals purchase_order_approvals_approver_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.purchase_order_approvals
+    ADD CONSTRAINT purchase_order_approvals_approver_id_fkey FOREIGN KEY (approver_id) REFERENCES public.users(id);
+
+
+--
+-- Name: purchase_order_approvals purchase_order_approvals_po_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.purchase_order_approvals
+    ADD CONSTRAINT purchase_order_approvals_po_id_fkey FOREIGN KEY (po_id) REFERENCES public.purchase_orders(id) ON DELETE CASCADE;
+
+
+--
 -- Name: purchase_order_items purchase_order_items_material_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -12568,6 +13044,30 @@ ALTER TABLE ONLY public.purchase_orders
 
 ALTER TABLE ONLY public.purchase_orders
     ADD CONSTRAINT purchase_orders_vendor_id_fkey FOREIGN KEY (vendor_id) REFERENCES public.vendors(id);
+
+
+--
+-- Name: purchase_request_approvals purchase_request_approvals_approval_flow_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.purchase_request_approvals
+    ADD CONSTRAINT purchase_request_approvals_approval_flow_id_fkey FOREIGN KEY (approval_flow_id) REFERENCES public.approval_flows(id);
+
+
+--
+-- Name: purchase_request_approvals purchase_request_approvals_approver_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.purchase_request_approvals
+    ADD CONSTRAINT purchase_request_approvals_approver_id_fkey FOREIGN KEY (approver_id) REFERENCES public.users(id);
+
+
+--
+-- Name: purchase_request_approvals purchase_request_approvals_pr_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.purchase_request_approvals
+    ADD CONSTRAINT purchase_request_approvals_pr_id_fkey FOREIGN KEY (pr_id) REFERENCES public.purchase_requests(id) ON DELETE CASCADE;
 
 
 --
@@ -12995,6 +13495,14 @@ ALTER TABLE ONLY public.subcategories
 
 
 --
+-- Name: tenant_configurations tenant_configurations_tenant_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tenant_configurations
+    ADD CONSTRAINT tenant_configurations_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES public.tenants(id) ON DELETE CASCADE;
+
+
+--
 -- Name: tenant_memberships tenant_memberships_tenant_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -13198,5 +13706,5 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict ZR2iY1W2qqdANghMEVcxYNyPaBUCAvLVgbdTfhS4Y6AnTMb3aqC1HdyHNWOuz62
+\unrestrict exlJlSh3JFvqlk5aANF7fxhLsj9HDfcakvvXnxgs8Um9dipCbzFv34wE7hOzvQB
 

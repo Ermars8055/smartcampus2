@@ -67,7 +67,6 @@ export default function Repair() {
                 <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.8rem' }}>RETURN #</TableCell>
                 <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.8rem' }}>MATERIAL</TableCell>
                 <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.8rem' }}>QTY</TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.8rem' }}>CONDITION</TableCell>
                 <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.8rem' }}>FROM PROJECT</TableCell>
                 <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.8rem' }}>TO WAREHOUSE</TableCell>
                 <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.8rem' }}>REMARKS</TableCell>
@@ -79,16 +78,7 @@ export default function Repair() {
                   <TableCell sx={{ color: '#64748B' }}>{formatDate(item.created_at)}</TableCell>
                   <TableCell sx={{ fontWeight: 600, color: '#0F172A' }}>{item.return_number}</TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>{item.material_name}</TableCell>
-                  <TableCell>{item.quantity} {item.uom_name}</TableCell>
-                  <TableCell>
-                    <Chip 
-                      label={item.condition} 
-                      size="small" 
-                      color={item.condition === 'Good' || item.condition === 'Usable' ? 'success' : 'warning'} 
-                      variant="outlined" 
-                      sx={{ height: 20, fontSize: '0.65rem', fontWeight: 600 }} 
-                    />
-                  </TableCell>
+                  <TableCell>{item.returned_qty} {item.uom_name}</TableCell>
                   <TableCell sx={{ color: '#64748B' }}>{item.project_name}</TableCell>
                   <TableCell sx={{ color: '#64748B' }}>{item.warehouse_name}</TableCell>
                   <TableCell sx={{ color: '#64748B' }}>{item.remarks || '-'}</TableCell>

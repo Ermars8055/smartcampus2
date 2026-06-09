@@ -158,6 +158,7 @@ def update_role(
     if not role:
         raise HTTPException(status_code=404, detail="Role not found")
 
+    print("RECEIVED PERMS:", data.permissions)
     old_name = role.name
     role.name = data.name
     role.code = data.code

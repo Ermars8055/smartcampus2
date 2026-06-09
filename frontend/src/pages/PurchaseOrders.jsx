@@ -84,6 +84,7 @@ export default function PurchaseOrders() {
   };
 
   const [search, setSearch] = useState('');
+  const [filterVendor, setFilterVendor] = useState(null);
   const [tabValue, setTabValue] = useState('All');
   const [editingPOId, setEditingPOId] = useState(null);
   const [form, setForm] = useState({
@@ -114,6 +115,10 @@ export default function PurchaseOrders() {
       );
     }
 
+    if (filterVendor) {
+      list = list.filter(po => po.vendor_id === filterVendor.id);
+    }
+
     if (sortConfig.key) {
       list.sort((a, b) => {
         let aVal = a[sortConfig.key];
@@ -132,7 +137,7 @@ export default function PurchaseOrders() {
       });
     }
     return list;
-  }, [pos, sortConfig, tabValue, search]);
+  }, [pos, sortConfig, tabValue, search, filterVendor]);
 
   const calculatePOTotalNet = (po) => {
     if (!po || !po.items) return 0;
@@ -663,10 +668,19 @@ export default function PurchaseOrders() {
       </Box>
 
       <Card sx={{ mb: 3 }}>
-        <Box sx={{ p: 2 }}>
+        <Box sx={{ p: 2, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
           <TextField size="small" placeholder="Search PO/Indent/PR/Quotation Numbers..." value={search}
-            onChange={e => setSearch(e.target.value)} sx={{ minWidth: 450 }}
+            onChange={e => setSearch(e.target.value)} sx={{ minWidth: 400 }}
             InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }} />
+          <Autocomplete
+            size="small"
+            options={vendors}
+            getOptionLabel={(option) => `${option.code} - ${option.name}`}
+            value={filterVendor}
+            onChange={(e, val) => setFilterVendor(val)}
+            renderInput={(params) => <TextField {...params} placeholder="Filter by Vendor" sx={{ minWidth: 250 }} />}
+            isOptionEqualToValue={(option, value) => option.id === value.id}
+          />
         </Box>
         <Tabs
           value={tabValue}

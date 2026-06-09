@@ -90,6 +90,7 @@ const MODULE_TREE = [
       ]},
       { label: 'Returns', resource: 'returns', extendedActions: [
         { key: 'can_return', label: 'Return Materials', color: '#3B82F6' },
+        { key: 'receive', label: 'Receive Return', color: '#10B981' },
       ]},
       { label: 'Stock Transfer', resource: 'transfers', extendedActions: [
         { key: 'can_transfer', label: 'Transfer Stock', color: '#3B82F6' },

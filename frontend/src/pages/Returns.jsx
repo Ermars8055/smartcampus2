@@ -6,68 +6,11 @@ import {
   DialogContent, DialogActions, Grid, Select, FormControl,
   InputLabel, IconButton, Paper, InputAdornment, MenuItem, Collapse
 } from '@mui/material';
-import { Add, Delete, Close, Undo, Warehouse, AccountTree, Business, Person, Comment, InfoOutlined, KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
+import { Add, Delete, Close, Undo, Warehouse, AccountTree, Business, Person, Comment, InfoOutlined, KeyboardArrowDown, KeyboardArrowUp, CheckCircle, Lock } from '@mui/icons-material';
 import api from '../services/api';
 import MaterialSelect from '../components/MaterialSelect';
 import { useAuth } from '../context/AuthContext';
 
-function ReturnRow({ ret }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <>
-      <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
-        <TableCell>
-          <IconButton aria-label="expand row" size="small" onClick={() => setOpen(!open)}>
-            {open ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
-          </IconButton>
-        </TableCell>
-        <TableCell sx={{ fontWeight: 600 }}>{ret.return_number}</TableCell>
-        <TableCell>{formatDate(ret.created_at)}</TableCell>
-        <TableCell>{ret.project_name} {ret.room_name ? `(${ret.room_name})` : ''}</TableCell>
-        <TableCell>{ret.warehouse_name}</TableCell>
-        <TableCell><Chip label={ret.return_type} size="small" sx={{ fontWeight: 600, bgcolor: '#EFF6FF', color: '#2563EB' }} /></TableCell>
-      </TableRow>
-      <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-          <Collapse in={open} timeout="auto" unmountOnExit>
-            <Box sx={{ margin: 2, borderLeft: '2px solid #2563EB', pl: 2 }}>
-              <Typography variant="subtitle2" gutterBottom component="div" sx={{ fontWeight: 700, color: '#1E293B' }}>
-                Returned Items
-              </Typography>
-              <Table size="small" aria-label="items">
-                <TableHead sx={{ bgcolor: '#F1F5F9' }}>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem', color: '#475569' }}>MATERIAL</TableCell>
-                    <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem', color: '#475569' }}>QTY</TableCell>
-                    <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem', color: '#475569' }}>CONDITION</TableCell>
-                    <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem', color: '#475569' }}>REMARKS</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {ret.items?.map((item, idx) => (
-                    <TableRow key={idx}>
-                      <TableCell sx={{ fontWeight: 600 }}>{item.material_name}</TableCell>
-                      <TableCell>{item.quantity} {item.uom_name}</TableCell>
-                      <TableCell>
-                        <Chip label={item.condition} size="small" color={item.condition === 'Good' || item.condition === 'Usable' ? 'success' : 'warning'} variant="outlined" sx={{ height: 20, fontSize: '0.65rem', fontWeight: 600 }} />
-                      </TableCell>
-                      <TableCell sx={{ color: '#64748B' }}>{item.remarks || '-'}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              {ret.remarks && (
-                  <Typography variant="caption" sx={{ color: '#64748B', fontStyle: 'italic', mt: 1, display: 'block' }}>
-                    Note: {ret.remarks}
-                  </Typography>
-              )}
-            </Box>
-          </Collapse>
-        </TableCell>
-      </TableRow>
-    </>
-  );
-}
 
 export default function Returns() {
   const { hasAction } = useAuth();
@@ -88,11 +31,13 @@ export default function Returns() {
     returned_by_name: '',
     items: [] 
   });
+  
+  const [viewModal, setViewModal] = useState({ open: false, ret: null, items: [] });
 
   const load = async () => {
     try {
       const retRes = await api.get('/api/returns');
-      setReturns(retRes.data);
+      setReturns(retRes.data.map(r => ({ ...r, status: r.status === 'Received' ? 'Closed' : r.status })));
       const wRes = await api.get('/api/warehouses');
       setWarehouses(wRes.data);
       const pRes = await api.get('/api/projects');
@@ -117,7 +62,23 @@ export default function Returns() {
       return_type: 'Unused',
       remarks: '',
       returned_by_name: '',
-      items: [{ material_id: '', quantity: 0, condition: 'Usable', remarks: '' }]
+      items: [{ material_id: '', quantity: 0, remarks: '' }]
+    });
+  };
+
+  const openViewModal = (ret) => {
+    setViewModal({
+      open: true,
+      ret,
+      items: ret.items ? ret.items.map(it => ({
+        return_item_id: it.id,
+        material_code: it.material_code,
+        material_name: it.material_name,
+        uom_name: it.uom_name,
+        returned_qty: it.returned_qty,
+        received_qty: it.received_qty !== null ? it.received_qty : '',
+        receipt_remarks: it.receipt_remarks || ''
+      })) : []
     });
   };
 
@@ -142,8 +103,7 @@ export default function Returns() {
         returned_by_name: returnModal.returned_by_name,
         items: validItems.map(it => ({
           material_id: it.material_id,
-          quantity: Math.round(parseFloat(it.quantity)),
-          condition: it.condition,
+          returned_qty: Math.round(parseFloat(it.quantity)),
           remarks: it.remarks
         }))
       };
@@ -153,10 +113,25 @@ export default function Returns() {
     } catch (err) { alert(err.response?.data?.detail || 'Error'); }
   };
 
+  const handleReceiveSubmit = async () => {
+    try {
+      const payload = {
+        items: viewModal.items.map(it => ({
+          return_item_id: it.return_item_id,
+          received_qty: parseFloat(it.received_qty) || 0,
+          receipt_remarks: it.receipt_remarks
+        }))
+      };
+      await api.post(`/api/returns/${viewModal.ret.id}/receive`, payload);
+      setViewModal({ open: false, ret: null, items: [] });
+      load();
+    } catch (err) { alert(err.response?.data?.detail || 'Error receiving return'); }
+  };
+
   const addReturnItem = () => {
     setReturnModal({
       ...returnModal,
-      items: [...returnModal.items, { material_id: '', quantity: 0, condition: 'Usable', remarks: '' }]
+      items: [...returnModal.items, { material_id: '', quantity: 0, remarks: '' }]
     });
   };
 
@@ -200,25 +175,64 @@ export default function Returns() {
           <Typography variant="body2" color="textSecondary">Return operations will appear here once processed.</Typography>
         </Card>
       ) : (
-        <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2, border: '1px solid #E2E8F0' }}>
-          <Table aria-label="returns table">
-            <TableHead sx={{ bgcolor: '#F8FAFC' }}>
-              <TableRow>
-                <TableCell sx={{ width: 50 }} />
-                <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.8rem' }}>RETURN #</TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.8rem' }}>DATE</TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.8rem' }}>FROM</TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.8rem' }}>TO WAREHOUSE</TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.8rem' }}>TYPE</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {returns.map(ret => (
-                <ReturnRow key={ret.id} ret={ret} />
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+        <Card sx={{ borderRadius: 2, overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+          <TableContainer>
+            <Table size="small" aria-label="returns table">
+              <TableHead sx={{ bgcolor: '#F8FAFC' }}>
+                <TableRow>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2, py: 1.5 }}>RETURN #</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>DATE</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>FROM</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>TO STORE</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>RETURNED BY</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>ITEMS</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>STATUS</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>ACTIONS</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {returns.map(ret => (
+                  <TableRow 
+                    key={ret.id} 
+                    hover 
+                    onClick={() => openViewModal(ret)} 
+                    sx={{ cursor: 'pointer', '&:last-child td, &:last-child th': { border: 0 } }}
+                  >
+                    <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.8rem', px: 2 }}>{ret.return_number}</TableCell>
+                    <TableCell sx={{ fontSize: '0.8rem', px: 2 }}>{formatDate(ret.created_at)}</TableCell>
+                    <TableCell sx={{ fontSize: '0.8rem', px: 2 }}>{ret.returned_from_department || '-'}</TableCell>
+                    <TableCell sx={{ fontSize: '0.8rem', px: 2 }}>{ret.warehouse_name}</TableCell>
+                    <TableCell sx={{ fontSize: '0.8rem', px: 2 }}>{ret.returned_by_name || '-'}</TableCell>
+                    <TableCell align="center" sx={{ fontSize: '0.8rem', px: 2 }}>
+                      <Chip label={ret.items?.length || 0} size="small" sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem', bgcolor: '#F1F5F9', color: '#475569' }} />
+                    </TableCell>
+                    <TableCell sx={{ px: 2 }}>
+                      <Chip label={ret.status} size="small" color={ret.status === 'Closed' ? 'error' : (ret.status === 'Partially Received' ? 'info' : (ret.status === 'Initiated' ? 'success' : 'default'))} variant="outlined" sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} />
+                    </TableCell>
+                    <TableCell align="right" sx={{ px: 2, whiteSpace: 'nowrap' }}>
+                      <IconButton 
+                        size="small" 
+                        disabled={ret.status === 'Closed'}
+                        onClick={(e) => { e.stopPropagation(); openViewModal(ret); }} 
+                        sx={{ color: ret.status === 'Closed' ? 'action.disabled' : '#10B981', mr: 1 }}
+                      >
+                        <CheckCircle fontSize="small" />
+                      </IconButton>
+                      <IconButton 
+                        size="small" 
+                        disabled={ret.status === 'Closed'}
+                        onClick={(e) => { e.stopPropagation(); openViewModal(ret); }} 
+                        sx={{ color: ret.status === 'Closed' ? 'action.disabled' : '#EF4444' }}
+                      >
+                        <Lock fontSize="small" />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Card>
       )}
 
       {/* INITIATE RETURN MODAL */}
@@ -346,7 +360,7 @@ export default function Returns() {
 
           <Box sx={{ bgcolor: '#F8FAFC', p: 2, borderRadius: 2, border: '1px solid #E2E8F0' }}>
             <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <InfoOutlined fontSize="inherit" /> Stock will be automatically increased in the target warehouse upon submission.
+              <InfoOutlined fontSize="inherit" /> Stock will be updated only after physical receipt and verification by the store.
             </Typography>
           </Box>
         </DialogContent>
@@ -360,6 +374,119 @@ export default function Returns() {
             Confirm Return
           </Button>
         </DialogActions>
+      </Dialog>
+
+      {/* VIEW DIALOG */}
+      <Dialog open={viewModal.open} onClose={() => setViewModal({ open: false, ret: null, items: [] })} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 3 } }}>
+        {viewModal.ret && (
+          <>
+            <DialogTitle sx={{ pb: 1, pt: 3, px: 4 }}>
+              <Typography variant="h6" sx={{ fontWeight: 700 }}>Return Details - {viewModal.ret.return_number}</Typography>
+            </DialogTitle>
+            <DialogContent sx={{ p: 4 }}>
+              <Grid container spacing={2} sx={{ mb: 3 }}>
+                <Grid item xs={12} sm={4}>
+                  <Typography variant="caption" color="text.secondary">Date</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>{formatDate(viewModal.ret.created_at)}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Typography variant="caption" color="text.secondary">From</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>{viewModal.ret.returned_from_department || '-'}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Typography variant="caption" color="text.secondary">To Store</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>{viewModal.ret.warehouse_name}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Typography variant="caption" color="text.secondary">Returned By</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>{viewModal.ret.returned_by_name || '-'}</Typography>
+                </Grid>
+
+                <Grid item xs={12} sm={4}>
+                  <Typography variant="caption" color="text.secondary">Status</Typography>
+                  <Box sx={{ mt: 0.5 }}>
+                    <Chip label={viewModal.ret.status} size="small" color={viewModal.ret.status === 'Closed' ? 'error' : (viewModal.ret.status === 'Partially Received' ? 'info' : (viewModal.ret.status === 'Initiated' ? 'success' : 'default'))} sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} />
+                  </Box>
+                </Grid>
+              </Grid>
+
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5, color: '#1E293B' }}>Returned Items</Typography>
+              <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2 }}>
+                <Table size="small">
+                  <TableHead sx={{ bgcolor: '#F8FAFC' }}>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: 700 }}>MATERIAL</TableCell>
+                      <TableCell align="center" sx={{ fontWeight: 700 }}>UOM</TableCell>
+                      <TableCell align="center" sx={{ fontWeight: 700 }}>RETURNED QTY</TableCell>
+                      <TableCell align="center" sx={{ fontWeight: 700 }}>RECEIVED QTY</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>REMARKS</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {viewModal.items.map((item, idx) => (
+                      <TableRow key={idx}>
+                        <TableCell>
+                          <Typography variant="body2" sx={{ fontWeight: 600, color: '#1E293B' }}>{item.material_name}</Typography>
+                          {item.material_code && <Typography variant="caption" sx={{ color: '#64748B' }}>{item.material_code}</Typography>}
+                        </TableCell>
+                        <TableCell align="center" sx={{ color: '#64748B' }}>{item.uom_name}</TableCell>
+                        <TableCell align="center">{item.returned_qty}</TableCell>
+                        {['Initiated', 'Partially Received'].includes(viewModal.ret.status) ? (
+                          <>
+                            <TableCell align="center">
+                              <TextField 
+                                size="small" 
+                                type="number" 
+                                inputProps={{ step: "1", min: "0", max: item.returned_qty }}
+                                onKeyDown={e => ['-', '+', 'e', 'E', '.'].includes(e.key) && e.preventDefault()}
+                                sx={{ width: 100 }}
+                                value={item.received_qty} 
+                                onChange={e => {
+                                  const newItems = [...viewModal.items];
+                                  newItems[idx].received_qty = e.target.value ? Math.round(parseFloat(e.target.value.replace(/-/g, ''))) : '';
+                                  setViewModal({ ...viewModal, items: newItems });
+                                }} 
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <TextField 
+                                size="small" fullWidth value={item.receipt_remarks} 
+                                placeholder="Variance notes"
+                                onChange={e => {
+                                  const newItems = [...viewModal.items];
+                                  newItems[idx].receipt_remarks = e.target.value;
+                                  setViewModal({ ...viewModal, items: newItems });
+                                }}
+                              />
+                            </TableCell>
+                          </>
+                        ) : (
+                          <>
+                            <TableCell align="center">{item.received_qty !== null && item.received_qty !== '' ? item.received_qty : '-'}</TableCell>
+                            <TableCell sx={{ color: '#64748B' }}>{item.receipt_remarks || '-'}</TableCell>
+                          </>
+                        )}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+              {viewModal.ret.remarks && (
+                <Typography variant="caption" sx={{ color: '#64748B', fontStyle: 'italic', mt: 2, display: 'block' }}>
+                  Note: {viewModal.ret.remarks}
+                </Typography>
+              )}
+            </DialogContent>
+            <DialogActions sx={{ px: 4, pb: 4 }}>
+              <Button onClick={() => setViewModal({ open: false, ret: null, items: [] })} sx={{ color: '#64748B' }}>Close</Button>
+              {['Initiated', 'Partially Received'].includes(viewModal.ret.status) && (
+                <Button onClick={handleReceiveSubmit} variant="contained" sx={{ bgcolor: '#10B981', '&:hover': { bgcolor: '#059669' } }}>
+                  Confirm Receipt
+                </Button>
+              )}
+            </DialogActions>
+          </>
+        )}
       </Dialog>
     </Box>
   );

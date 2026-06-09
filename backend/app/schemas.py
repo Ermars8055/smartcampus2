@@ -977,12 +977,14 @@ class IssueOut(BaseModel):
 
 class ReturnItemBase(BaseModel):
     material_id: int
-    quantity: float
-    condition: str = "Good"
+    returned_qty: float = Field(..., gt=0)
     remarks: Optional[str] = None
 
 class ReturnItemOut(ReturnItemBase):
     id: int
+    received_qty: Optional[float] = None
+    variance_qty: Optional[float] = None
+    receipt_remarks: Optional[str] = None
     material_name: Optional[str] = None
     material_code: Optional[str] = None
     uom_name: Optional[str] = None
@@ -1012,13 +1014,27 @@ class ReturnOut(BaseModel):
     return_type: str
     remarks: Optional[str] = None
     returned_by_name: Optional[str] = None
+    status: str
+    received_date: Optional[datetime] = None
+    initiated_by_id: int
+    received_by_id: Optional[int] = None
     created_at: datetime
     warehouse_name: Optional[str] = None
     project_name: Optional[str] = None
     room_name: Optional[str] = None
+    initiated_by_name: Optional[str] = None
+    received_by_name_user: Optional[str] = None
     items: List[ReturnItemOut] = []
     class Config:
         from_attributes = True
+
+class ReturnReceiptItem(BaseModel):
+    return_item_id: int
+    received_qty: float = Field(..., ge=0)
+    receipt_remarks: Optional[str] = None
+
+class ReturnReceiptRequest(BaseModel):
+    items: List[ReturnReceiptItem] = []
 
 
 # ── Stock Transfer ───────────────────────────────────────────────────────

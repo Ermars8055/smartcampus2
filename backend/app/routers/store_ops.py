@@ -15,13 +15,13 @@ from app.models import (
 )
 from app.schemas import (
     IssueCreate, IssueOut, IssueItemOut,
-    ReturnCreate, ReturnOut, ReturnItemOut,
+    ReturnCreate, ReturnOut, ReturnItemOut, ReturnReceiptRequest,
     TransferCreate, TransferOut, TransferItemOut,
     GatePassCreate, GatePassOut, GatePassUpdate,
     GatePassItemOut, GatePassItemBase
 )
 from app.routers.grn import update_stock
-from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
+from app.auth import get_current_user, require_permission, require_action, get_tenant_id, get_site_id
 from app.utils.sequences import get_next_number
 
 def require_issues_or_acks(current_user: User = Depends(get_current_user)):
@@ -381,7 +381,10 @@ def list_returns(
             mat = item.material
             items.append(ReturnItemOut(
                 id=item.id, material_id=item.material_id,
-                quantity=round(item.quantity or 0), condition=item.condition,
+                returned_qty=round(item.returned_qty or 0),
+                received_qty=round(item.received_qty) if item.received_qty is not None else None,
+                variance_qty=item.variance_qty,
+                receipt_remarks=item.receipt_remarks,
                 remarks=item.remarks,
                 material_name=mat.name if mat else None,
                 material_code=mat.code if mat else None,
@@ -394,10 +397,16 @@ def list_returns(
             returned_from_department=ret.returned_from_department,
             return_type=ret.return_type, remarks=ret.remarks,
             returned_by_name=ret.returned_by_name,
+            status=ret.status,
+            received_date=ret.received_date,
+            initiated_by_id=ret.initiated_by_id,
+            received_by_id=ret.received_by_id,
             created_at=ret.created_at,
             warehouse_name=ret.warehouse.name if ret.warehouse else None,
             project_name=ret.project.name if ret.project else None,
             room_name=ret.room.name if ret.room else None,
+            initiated_by_name=ret.initiated_by.full_name if ret.initiated_by else None,
+            received_by_name_user=ret.received_by.full_name if ret.received_by else None,
             items=items
         ))
     return result
@@ -422,7 +431,8 @@ def create_return(
         return_type=data.return_type,
         remarks=data.remarks,
         returned_by_name=data.returned_by_name,
-        received_by_id=current_user.id,
+        initiated_by_id=current_user.id,
+        status="Initiated",
         tenant_id=tenant_id,
         site_id=site_id
     )
@@ -433,86 +443,95 @@ def create_return(
         ret_item = MaterialReturnItem(
             return_id=ret.id,
             material_id=item_data.material_id,
-            quantity=round(item_data.quantity),
-            condition=item_data.condition,
+            returned_qty=round(item_data.returned_qty),
             remarks=item_data.remarks
         )
         db.add(ret_item)
 
-        # Determine target warehouse
-        target_warehouse_id = data.warehouse_id
-        if item_data.condition == "Scrap":
-            scrap_w = db.query(Warehouse).filter(Warehouse.tenant_id == tenant_id, Warehouse.site_id == site_id, Warehouse.code == "SCRAP").first()
-            if not scrap_w:
-                scrap_w = Warehouse(tenant_id=tenant_id, site_id=site_id, code="SCRAP", name="Scrap Store", warehouse_type="Scrap", project_id=data.project_id)
-                db.add(scrap_w)
-                db.flush()
-            target_warehouse_id = scrap_w.id
+    db.commit()
+    return {"id": ret.id, "return_number": return_number, "message": "Material return initiated"}
 
-        update_stock(
-            db=db,
-            material_id=item_data.material_id,
-            warehouse_id=target_warehouse_id,
-            quantity=item_data.quantity,
-            transaction_type="Return",
-            reference_type="Return",
-            reference_id=ret.id,
-            reference_number=return_number,
-            tenant_id=tenant_id,
-            site_id=site_id,
-            project_id=data.project_id,
-            room_id=data.returned_from_room_id,
-            user_id=current_user.id
-        )
+@router.post("/returns/{id}/receive")
+def receive_return(
+    id: int,
+    data: ReturnReceiptRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_action("returns", "receive")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    ret = db.query(MaterialReturn).filter(
+        MaterialReturn.id == id,
+        MaterialReturn.tenant_id == tenant_id,
+        MaterialReturn.site_id == site_id
+    ).first()
 
-        if item_data.condition == "Repairable":
-            mat = db.query(Material).filter(Material.id == item_data.material_id, Material.tenant_id == tenant_id, Material.site_id == site_id).first()
-            gp_num = get_next_number(db, tenant_id, site_id, "GATEPASS", "GP")
-            
-            wh = db.query(Warehouse).filter(Warehouse.id == data.warehouse_id).first()
-            wh_name = wh.name if wh else None
+    if not ret:
+        raise HTTPException(status_code=404, detail="Return not found")
+    
+    if ret.status == "Closed":
+        raise HTTPException(status_code=400, detail="Return has already been fully received")
 
-            gp = GatePass(
-                tenant_id=tenant_id,
-                site_id=site_id,
-                gate_pass_number=gp_num,
-                return_id=ret.id,
-                project_id=data.project_id,
-                vendor_id=mat.preferred_vendor_id if mat else None,
-                from_department=data.returned_from_department,
-                from_store=wh_name,
-                created_by_id=current_user.id
-            )
-            db.add(gp)
-            db.flush()
+    total_returned = 0
+    total_received = 0
 
-            gp_item = GatePassItem(
-                gate_pass_id=gp.id,
-                material_id=item_data.material_id,
-                quantity=item_data.quantity,
-                remarks="Created from Material Return"
-            )
-            db.add(gp_item)
-            
-            # Deduct stock immediately because it's going out for repair
+    for item_data in data.items:
+        ret_item = db.query(MaterialReturnItem).filter(
+            MaterialReturnItem.id == item_data.return_item_id,
+            MaterialReturnItem.return_id == ret.id
+        ).first()
+
+        if not ret_item:
+            raise HTTPException(status_code=404, detail=f"Return item {item_data.return_item_id} not found")
+
+        if item_data.received_qty > ret_item.returned_qty:
+            raise HTTPException(status_code=400, detail=f"Received quantity cannot exceed returned quantity for item {ret_item.material.name if ret_item.material else ret_item.id}")
+
+        previously_received = ret_item.received_qty or 0
+        newly_received = round(item_data.received_qty)
+
+        if newly_received < previously_received:
+            raise HTTPException(status_code=400, detail=f"Cannot reduce received quantity for item {ret_item.material.name if ret_item.material else ret_item.id}")
+
+        diff = newly_received - previously_received
+
+        ret_item.received_qty = newly_received
+        ret_item.variance_qty = ret_item.received_qty - ret_item.returned_qty
+        ret_item.receipt_remarks = item_data.receipt_remarks
+
+        if diff > 0:
             update_stock(
                 db=db,
-                material_id=item_data.material_id,
-                warehouse_id=target_warehouse_id,
-                quantity=-item_data.quantity,
-                transaction_type="Outward Repair",
-                reference_type="GatePass",
-                reference_id=gp.id,
-                reference_number=gp_num,
+                material_id=ret_item.material_id,
+                warehouse_id=ret.warehouse_id,
+                quantity=diff,
+                transaction_type="Return",
+                reference_type="Return",
+                reference_id=ret.id,
+                reference_number=ret.return_number,
                 tenant_id=tenant_id,
                 site_id=site_id,
-                project_id=data.project_id,
-                room_id=data.returned_from_room_id,
+                project_id=ret.project_id,
+                room_id=ret.returned_from_room_id,
                 user_id=current_user.id
             )
 
+
+    # Calculate totals to determine final status
+    for ret_item in ret.items:
+        total_returned += ret_item.returned_qty
+        total_received += (ret_item.received_qty or 0)
+
+    if total_received == total_returned:
+        ret.status = "Closed"
+    else:
+        ret.status = "Partially Received"
+
+    ret.received_by_id = current_user.id
+    ret.received_date = datetime.utcnow()
+
     db.commit()
-    return {"id": ret.id, "return_number": return_number, "message": "Material return recorded"}
+    return {"message": "Return received successfully"}
 
 
 # ── Stock Transfers ──────────────────────────────────────────────────────

@@ -284,17 +284,17 @@ def generate_po_pdf(po, db=None) -> bytes:
         ])
 
     col_widths = [
-        W * 0.04,   # Sr No
-        W * 0.22,   # Item Description
+        W * 0.05,   # Sr No
+        W * 0.20,   # Item Description
         W * 0.06,   # HSN
-        W * 0.06,   # Qty
-        W * 0.08,   # UOM
+        W * 0.07,   # Qty
+        W * 0.09,   # UOM
         W * 0.08,   # Rate
-        W * 0.06,   # Disc
-        W * 0.08,   # CGST
-        W * 0.10,   # SGST
-        W * 0.08,   # IGST
-        W * 0.14,   # Item Amt
+        W * 0.055,  # Disc
+        W * 0.07,   # CGST
+        W * 0.09,   # SGST
+        W * 0.065,  # IGST
+        W * 0.10,   # Item Amt
     ]
 
     items_table = Table(table_data, colWidths=col_widths, repeatRows=1)
@@ -375,9 +375,11 @@ def generate_po_pdf(po, db=None) -> bytes:
     elements.append(Spacer(1, 50))
 
     # ── Signatures ──────────────────────────────────────────────────────
+    remarks_text = getattr(po, 'remarks', '') or ''
     sig_left = Paragraph(
         "Managing Trustee<br/><br/>"
-        "CC: Manager Accounts",
+        "CC: Manager Accounts<br/>"
+        f"Remarks: {remarks_text}",
         _normal_small,
     )
     sig_right = Paragraph(
@@ -389,8 +391,6 @@ def generate_po_pdf(po, db=None) -> bytes:
         colWidths=[W * 0.4, W * 0.2, W * 0.4],
     )
     sig_table.setStyle(TableStyle([
-        ("LINEABOVE", (0, 0), (0, 0), 0.5, colors.black),
-        ("LINEABOVE", (2, 0), (2, 0), 0.5, colors.black),
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
     ]))
     elements.append(sig_table)

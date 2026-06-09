@@ -7,6 +7,7 @@ import {
   Chat, Close, Send, SmartToy, Person 
 } from '@mui/icons-material';
 import api from '../services/api';
+import Draggable from 'react-draggable';
 
 export default function ChatBot() {
   const [open, setOpen] = useState(false);
@@ -16,6 +17,7 @@ export default function ChatBot() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef(null);
+  const nodeRef = useRef(null);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -44,8 +46,9 @@ export default function ChatBot() {
   return (
     <>
       {/* Floating Action Button */}
-      <Box sx={{ position: 'fixed', bottom: 24, right: 24, zIndex: 2000 }}>
-        <Zoom in={true}>
+      <Draggable nodeRef={nodeRef} cancel=".no-drag">
+        <div ref={nodeRef} style={{ position: 'fixed', bottom: 24, right: 24, zIndex: 2000, cursor: 'grab' }}>
+          <Zoom in={true}>
           <Fab 
             color="primary" 
             size="medium"
@@ -58,8 +61,9 @@ export default function ChatBot() {
           >
             {open ? <Close /> : <Chat />}
           </Fab>
-        </Zoom>
-      </Box>
+          </Zoom>
+        </div>
+      </Draggable>
 
       {/* Chat Window */}
       <Zoom in={open}>

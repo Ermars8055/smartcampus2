@@ -145,7 +145,7 @@ export default function SubCategories() {
         </TableContainer>
       </Card>
 
-      <Dialog open={dialog === 'subcategory'} onClose={() => setDialog('')} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: '24px', p: 1 } }}>
+      <Dialog open={dialog === 'subcategory'} onClose={(e, reason) => { if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') setDialog(''); }} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: '24px', p: 1 } }}>
         <DialogTitle sx={{ pb: 1, pt: 3, px: 4 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Box sx={{ p: 1, bgcolor: '#FFFBEB', borderRadius: 2, color: '#D97706', display: 'flex' }}>

@@ -525,7 +525,7 @@ const Quotations = () => {
             {/* Status Filter Tabs */}
             <Card sx={{ mb: 3 }}>
               <Box sx={{ p: 2 }}>
-                <TextField size="small" placeholder="Search QR numbers..." value={search}
+                <TextField size="small" placeholder="Search QR Numbers..." value={search}
                   onChange={e => setSearch(e.target.value)} sx={{ minWidth: 300 }}
                   InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }} />
               </Box>
@@ -1319,9 +1319,9 @@ const Quotations = () => {
                       setNewQR(prev => ({ ...prev, vendor_ids: newValue.map(v => v.id) }));
                     }}
                     renderInput={(params) => (
-                      <TextField 
-                        {...params} 
-                        placeholder="Search Vendors..." 
+                      <TextField
+                        {...params}
+                        placeholder="Search Vendors..."
                         error={(newQR.vendor_ids?.length || 0) === 1}
                       />
                     )}

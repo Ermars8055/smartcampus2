@@ -48,6 +48,9 @@ export default function PurchaseRequests() {
   const [search, setSearch] = useState('');
   const [tabValue, setTabValue] = useState('All');
   const [sortConfig, setSortConfig] = useState({ key: 'created_at', direction: 'desc' });
+  const [filterDepartment, setFilterDepartment] = useState(null);
+  const [filterBuilding, setFilterBuilding] = useState(null);
+  const [allDepartmentsList, setAllDepartmentsList] = useState([]);
 
   const handleSort = (key) => {
     setSortConfig(prev => ({
@@ -82,6 +85,7 @@ export default function PurchaseRequests() {
     api.get('/api/buildings').then(r => setBuildings(r.data));
     api.get('/api/vendors').then(r => setVendors(r.data));
     api.get('/api/terms').then(r => setTermsTemplates(r.data));
+    api.get('/api/departments/names').then(r => setAllDepartmentsList(r.data)).catch(() => setAllDepartmentsList([]));
   }, []);
 
   // Multi-item form helpers
@@ -315,6 +319,9 @@ export default function PurchaseRequests() {
   const sortedPRs = useMemo(() => {
     let list = tab === 0 ? prs : prs.filter(p => p.status === statusFilters[tab]);
 
+    list = list.filter(p => !filterDepartment || p.department_name === filterDepartment);
+    list = list.filter(p => !filterBuilding || p.building_id === filterBuilding.id || p.building_name === filterBuilding.name);
+
     return [...list].sort((a, b) => {
       let aVal = a[sortConfig.key];
       let bVal = b[sortConfig.key];
@@ -354,10 +361,25 @@ export default function PurchaseRequests() {
       </Box>
 
       <Card sx={{ mb: 3 }}>
-        <Box sx={{ p: 2 }}>
-          <TextField size="small" placeholder="Search PR numbers..." value={search}
+        <Box sx={{ p: 2, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+          <TextField size="small" placeholder="Search PR Numbers..." value={search}
             onChange={e => setSearch(e.target.value)} sx={{ minWidth: 300 }}
             InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }} />
+          <Autocomplete
+            size="small"
+            options={allDepartmentsList}
+            value={filterDepartment}
+            onChange={(e, val) => setFilterDepartment(val)}
+            renderInput={(params) => <TextField {...params} placeholder="Filter by Department" sx={{ minWidth: 220 }} />}
+          />
+          <Autocomplete
+            size="small"
+            options={buildings}
+            getOptionLabel={(option) => option.name || ''}
+            value={filterBuilding}
+            onChange={(e, val) => setFilterBuilding(val)}
+            renderInput={(params) => <TextField {...params} placeholder="Filter by Building" sx={{ minWidth: 220 }} />}
+          />
         </Box>
         <Tabs
           value={tab}

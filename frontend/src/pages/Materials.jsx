@@ -626,7 +626,7 @@ export default function Materials() {
 
       <Dialog
         open={dialog}
-        onClose={() => setDialog(false)}
+        onClose={(e, reason) => { if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') setDialog(false); }}
         maxWidth="md"
         fullWidth
         fullScreen={isMobile}

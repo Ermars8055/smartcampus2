@@ -37,6 +37,9 @@ export default function Indents() {
   const [detailHistoryOpen, setDetailHistoryOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [tabValue, setTabValue] = useState('All');
+  const [filterDepartment, setFilterDepartment] = useState(null);
+  const [filterBuilding, setFilterBuilding] = useState(null);
+  const [allBuildings, setAllBuildings] = useState([]);
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -51,18 +54,22 @@ export default function Indents() {
     setOrderBy(property);
   };
 
-  const sortedIndents = [...indents].filter(i => tabValue === 'All' || i.status === tabValue).sort((a, b) => {
-    let valA = a[orderBy] || '';
-    let valB = b[orderBy] || '';
+  const sortedIndents = [...indents]
+    .filter(i => tabValue === 'All' || i.status === tabValue)
+    .filter(i => !filterDepartment || i.department === filterDepartment)
+    .filter(i => !filterBuilding || i.building_id === filterBuilding.id || i.building_name === filterBuilding.name)
+    .sort((a, b) => {
+      let valA = a[orderBy] || '';
+      let valB = b[orderBy] || '';
 
-    // Handle string comparison case-insensitively
-    if (typeof valA === 'string') valA = valA.toLowerCase();
-    if (typeof valB === 'string') valB = valB.toLowerCase();
+      // Handle string comparison case-insensitively
+      if (typeof valA === 'string') valA = valA.toLowerCase();
+      if (typeof valB === 'string') valB = valB.toLowerCase();
 
-    if (valA < valB) return order === 'asc' ? -1 : 1;
-    if (valA > valB) return order === 'asc' ? 1 : -1;
-    return 0;
-  });
+      if (valA < valB) return order === 'asc' ? -1 : 1;
+      if (valA > valB) return order === 'asc' ? 1 : -1;
+      return 0;
+    });
 
   const [form, setForm] = useState({
     building_id: '', floor_id: '', room_id: '', department: '', remarks: '', items: [{ material_id: '', requested_quantity: '' }]
@@ -94,6 +101,7 @@ export default function Indents() {
     api.get('/api/terms').then(r => setTermsTemplates(r.data));
     api.get('/api/departments/names').then(r => setDepartmentsList(r.data)).catch(() => setDepartmentsList([]));
     api.get('/api/departments').then(r => setAllDepartments(r.data)).catch(() => setAllDepartments([]));
+    api.get('/api/buildings').then(r => setAllBuildings(r.data)).catch(() => setAllBuildings([]));
   }, []);
 
   const handleDepartmentChange = (newDept) => {
@@ -396,7 +404,7 @@ export default function Indents() {
   // Status helpers
   const statusColor = {
     'Awaiting Approval': 'warning', 'Approved': 'success', 'Rejected': 'error',
-    'Partially Issued': 'info', 'Issued': 'secondary', 'Fully Issued': 'secondary', 
+    'Partially Issued': 'info', 'Issued': 'secondary', 'Fully Issued': 'secondary',
     'Converted to PO': 'primary', 'PO Created': 'primary', 'Closed': 'default'
   };
 
@@ -621,10 +629,25 @@ export default function Indents() {
       </Box>
 
       <Card sx={{ mb: 3 }}>
-        <Box sx={{ p: 2 }}>
-          <TextField size="small" placeholder="Search indent number..." value={search}
+        <Box sx={{ p: 2, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+          <TextField size="small" placeholder="Search Indent Numbers..." value={search}
             onChange={e => setSearch(e.target.value)} sx={{ minWidth: 300 }}
             InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }} />
+          <Autocomplete
+            size="small"
+            options={departmentsList}
+            value={filterDepartment}
+            onChange={(e, val) => setFilterDepartment(val)}
+            renderInput={(params) => <TextField {...params} placeholder="Filter by Department" sx={{ minWidth: 220 }} />}
+          />
+          <Autocomplete
+            size="small"
+            options={allBuildings}
+            getOptionLabel={(option) => option.name || ''}
+            value={filterBuilding}
+            onChange={(e, val) => setFilterBuilding(val)}
+            renderInput={(params) => <TextField {...params} placeholder="Filter by Building" sx={{ minWidth: 220 }} />}
+          />
         </Box>
         <Tabs
           value={tabValue}
@@ -637,22 +660,23 @@ export default function Indents() {
             const count = s === 'All' ? indents.length : indents.filter(i => i.status === s).length;
             if (s !== 'All' && count === 0 && !['Awaiting Approval', 'Approved', 'Partially Issued'].includes(s)) return null;
             return (
-            <Tab
-              key={s}
-              label={
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  {s}
-                  <Chip
-                    label={count}
-                    size="small"
-                    sx={{ height: 20, fontSize: '0.7rem', fontWeight: 600, bgcolor: tabValue === s ? 'primary.main' : 'action.selected', color: tabValue === s ? 'white' : 'text.primary' }}
-                  />
-                </Box>
-              }
-              value={s}
-              sx={{ textTransform: 'none', fontWeight: 600, minHeight: 48, minWidth: 'auto', px: 2 }}
-            />
-          )})}
+              <Tab
+                key={s}
+                label={
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    {s}
+                    <Chip
+                      label={count}
+                      size="small"
+                      sx={{ height: 20, fontSize: '0.7rem', fontWeight: 600, bgcolor: tabValue === s ? 'primary.main' : 'action.selected', color: tabValue === s ? 'white' : 'text.primary' }}
+                    />
+                  </Box>
+                }
+                value={s}
+                sx={{ textTransform: 'none', fontWeight: 600, minHeight: 48, minWidth: 'auto', px: 2 }}
+              />
+            )
+          })}
         </Tabs>
       </Card>
 

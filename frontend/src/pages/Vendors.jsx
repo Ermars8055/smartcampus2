@@ -63,7 +63,7 @@ export default function Vendors() {
   const [categories, setCategories] = useState([]);
   const [form, setForm] = useState({
     name: '', code: '', contact_person: '', phone: '', email: '',
-    gst_number: '', address: '', city: '', pincode: '', state: '', category_ids: [], rating: 0
+    gst_number: '', address_line_1: '', address_line_2: '', city: '', pincode: '', state: '', category_ids: [], rating: 0
   });
   const [viewOnly, setViewOnly] = useState(false);
   const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'asc' });
@@ -127,7 +127,7 @@ export default function Vendors() {
 
     if (!form.city) newErrors.city = 'City is required';
     if (!form.state) newErrors.state = 'State is required';
-    if (!form.address) newErrors.address = 'Registered Address is required';
+    if (!form.address_line_1) newErrors.address_line_1 = 'Address Line 1 is required';
     if (!form.category_ids || form.category_ids.length === 0) newErrors.category_ids = 'At least one vendor category is required';
 
     setErrors(newErrors);
@@ -368,7 +368,7 @@ export default function Vendors() {
 
       <Dialog
         open={dialog}
-        onClose={() => setDialog(false)}
+        onClose={(e, reason) => { if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') setDialog(false); }}
         maxWidth="md"
         fullWidth
         fullScreen={isMobile}

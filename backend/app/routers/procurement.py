@@ -17,6 +17,9 @@ from app.utils.sequences import get_next_number
 
 router = APIRouter(prefix="/api/procurement", tags=["Procurement"])
 
+# Organisation name used in email templates (matches frontend print layout)
+ORG_NAME = "EAST POINT COLLEGE OF MEDICAL SCIENCES & RESEARCH CENTER"
+
 
 def get_lpp(db: Session, material_id: int, tenant_id: int, site_id: int) -> float | None:
     last_po_item = db.query(PurchaseOrderItem).join(PurchaseOrder).filter(
@@ -353,8 +356,6 @@ def handle_pr_next_level(db, pr, tenant_id, site_id, total_amount, user_id=None)
         return {"message": "Fully Approved", "status": pr.status, "current_level": pr.current_approval_level}
 
 
-@router.get("/pr/{id}/approval-history")
-
 def handle_po_next_level(db, po, tenant_id, site_id, total_amount, user_id=None):
     current_lvl = po.current_approval_level or 0
     next_level = current_lvl + 1
@@ -588,9 +589,13 @@ def list_purchase_orders(
             po_type=po.po_type,
             total_amount=po.total_amount,
             delivery_date=po.delivery_date, status=po.status,
+            current_approval_level=po.current_approval_level or 1,
             terms=po.terms, created_at=po.created_at,
             vendor_name=f"{po.vendor.code} - {po.vendor.name}" if po.vendor else None,
             vendor_address=f"{po.vendor.address_line_1 or ''}{', ' + po.vendor.address_line_2 if po.vendor.address_line_2 else ''}" if po.vendor else None,
+            vendor_city=po.vendor.city if po.vendor else None,
+            vendor_state=(po.vendor.state.split(' - ', 1)[1] if po.vendor.state and ' - ' in po.vendor.state else po.vendor.state) if po.vendor else None,
+            vendor_pincode=po.vendor.pincode if po.vendor else None,
             vendor_gst_number=po.vendor.gst_number if po.vendor else None,
             project_name=po.project.name if po.project else None,
             items=items
@@ -647,9 +652,13 @@ def get_purchase_order(
         po_type=po.po_type,
         total_amount=po.total_amount,
         delivery_date=po.delivery_date, status=po.status,
+        current_approval_level=po.current_approval_level or 1,
         terms=po.terms, created_at=po.created_at,
         vendor_name=f"{po.vendor.code} - {po.vendor.name}" if po.vendor else None,
         vendor_address=f"{po.vendor.address_line_1 or ''}{', ' + po.vendor.address_line_2 if po.vendor.address_line_2 else ''}" if po.vendor else None,
+        vendor_city=po.vendor.city if po.vendor else None,
+        vendor_state=(po.vendor.state.split(' - ', 1)[1] if po.vendor.state and ' - ' in po.vendor.state else po.vendor.state) if po.vendor else None,
+        vendor_pincode=po.vendor.pincode if po.vendor else None,
         vendor_gst_number=po.vendor.gst_number if po.vendor else None,
         project_name=po.project.name if po.project else None,
         items=items
@@ -1006,9 +1015,97 @@ def hold_po(
     db.commit()
     return {"message": "PO placed on hold successfully"}
 
+
+# ── Email template helper ────────────────────────────────────────────────
+
+def _build_po_email_template(po):
+    """Build subject + html_body for a PO email. Reused by preview and send."""
+    subject = f"Purchase Order {po.po_number} — {ORG_NAME}"
+    html_body = f"""
+    <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333;">
+        <h2 style="color: #2563EB;">Purchase Order — {po.po_number}</h2>
+        <p>Dear Sir/Madam,</p>
+        <p>
+            Please find attached the Purchase Order <strong>{po.po_number}</strong>
+            dated <strong>{po.created_at.strftime('%d-%b-%Y') if po.created_at else '-'}</strong>.
+        </p>
+        <p>
+            Kindly acknowledge receipt of this order and confirm the delivery schedule
+            at the earliest.
+        </p>
+        <table style="margin: 16px 0; border-collapse: collapse; font-size: 13px;">
+            <tr>
+                <td style="padding: 4px 12px 4px 0; font-weight: bold;">PO Number</td>
+                <td style="padding: 4px 0;">{po.po_number}</td>
+            </tr>
+            <tr>
+                <td style="padding: 4px 12px 4px 0; font-weight: bold;">Delivery Date</td>
+                <td style="padding: 4px 0;">{po.delivery_date.strftime('%d-%b-%Y') if po.delivery_date else 'As per PO'}</td>
+            </tr>
+            <tr>
+                <td style="padding: 4px 12px 4px 0; font-weight: bold;">Total Amount</td>
+                <td style="padding: 4px 0;">₹ {po.total_amount:,.2f}</td>
+            </tr>
+        </table>
+        <p>Please expedite the supplies accordingly.</p>
+        <br/>
+        <p>Regards,</p>
+        <p><strong>{ORG_NAME}</strong></p>
+        <hr style="border: none; border-top: 1px solid #e2e8f0; margin-top: 24px;"/>
+        <p style="font-size: 11px; color: #94a3b8;">
+            This is a system-generated email from NissiGrid Smart Campus.
+            Please do not reply to this email.
+        </p>
+    </div>
+    """
+    return subject, html_body
+
+
+@router.get("/po/{id}/email-preview")
+def get_po_email_preview(
+    id: int, db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("purchase_orders", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    """Return email preview data for the Send to Vendor dialog."""
+    from app.config import SMTP_FROM_EMAIL, SMTP_FROM_NAME, TEST_EMAIL_OVERRIDE
+
+    po = db.query(PurchaseOrder).filter(
+        PurchaseOrder.id == id, PurchaseOrder.tenant_id == tenant_id, PurchaseOrder.site_id == site_id
+    ).first()
+    if not po:
+        raise HTTPException(status_code=404, detail="PO not found")
+
+    vendor = po.vendor
+    vendor_email = vendor.email if vendor else ""
+    vendor_name = vendor.name if vendor else "Vendor"
+    actual_to = TEST_EMAIL_OVERRIDE if TEST_EMAIL_OVERRIDE else vendor_email
+
+    subject, html_body = _build_po_email_template(po)
+
+    return {
+        "from_name": SMTP_FROM_NAME,
+        "from_email": SMTP_FROM_EMAIL,
+        "to_email": actual_to,
+        "vendor_email": vendor_email,
+        "vendor_name": vendor_name,
+        "subject": subject,
+        "html_body": html_body,
+        "attachment_filename": f"{po.po_number}.pdf",
+        "test_mode": bool(TEST_EMAIL_OVERRIDE),
+    }
+
+
+class SendPORequest(BaseModel):
+    cc: Optional[str] = ""
+    bcc: Optional[str] = ""
+
+
 @router.post("/po/{id}/send")
 def send_po(
-    id: int, db: Session = Depends(get_db), 
+    id: int, body: SendPORequest = SendPORequest(),
+    db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("purchase_orders", "update")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
@@ -1020,10 +1117,49 @@ def send_po(
         raise HTTPException(status_code=404, detail="PO not found")
     if po.status != "Approved":
         raise HTTPException(status_code=400, detail="Only approved POs can be sent.")
-    
+
+    # 1. Update status first — this must always succeed
     po.status = "Sent to Vendor"
     db.commit()
-    return {"message": "PO data successfully packaged and sent to Vendor."}
+
+    # 2. Generate PDF and send email (non-blocking — failures won't revert the status)
+    email_status = {"success": False, "message": "Email not attempted"}
+    try:
+        from app.utils.pdf_utils import generate_po_pdf
+        from app.utils.email_utils import send_email_with_attachment
+
+        pdf_bytes = generate_po_pdf(po)
+
+        vendor = po.vendor
+        vendor_email = vendor.email if vendor else ""
+        vendor_name = vendor.name if vendor else "Vendor"
+
+        subject, html_body = _build_po_email_template(po)
+
+        email_status = send_email_with_attachment(
+            to_email=vendor_email,
+            subject=subject,
+            html_body=html_body,
+            attachment_bytes=pdf_bytes,
+            attachment_filename=f"{po.po_number}.pdf",
+            vendor_name=vendor_name,
+            cc=body.cc or "",
+            bcc=body.bcc or "",
+        )
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error("Error generating/sending PO email for %s: %s", po.po_number, e, exc_info=True)
+        email_status = {"success": False, "message": f"Email error: {str(e)}"}
+
+    # Build response — always report status change as success
+    response = {"message": "PO sent to Vendor successfully."}
+    if email_status.get("success"):
+        response["email_status"] = "Email sent successfully"
+    else:
+        response["email_status"] = f"Email not sent: {email_status.get('message', 'Unknown error')}"
+
+    return response
+
 
 
 @router.post("/po/{id}/short-close")

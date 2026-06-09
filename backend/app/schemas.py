@@ -561,6 +561,9 @@ class POOut(BaseModel):
     created_at: datetime
     vendor_name: Optional[str] = None
     vendor_address: Optional[str] = None
+    vendor_city: Optional[str] = None
+    vendor_state: Optional[str] = None
+    vendor_pincode: Optional[str] = None
     vendor_gst_number: Optional[str] = None
     project_name: Optional[str] = None
     items: List[POItemOut] = []

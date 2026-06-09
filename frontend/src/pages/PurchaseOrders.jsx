@@ -8,7 +8,7 @@ import {
   DialogContent, DialogActions, Grid, MenuItem, Select, FormControl, Link,
   Accordion, AccordionSummary, AccordionDetails, Tab, Tabs, Autocomplete
 } from '@mui/material';
-import { Add, Delete, CheckCircle, Archive, Send, Cancel, Search, ShoppingCart, Store, Assignment, CalendarMonth, ArrowDropDown, Inventory, History, ExpandMore, Textsms } from '@mui/icons-material';
+import { Add, Delete, CheckCircle, Archive, Send, Cancel, Search, ShoppingCart, Store, Assignment, CalendarMonth, ArrowDropDown, Inventory, History, ExpandMore, Textsms, AttachFile, Email } from '@mui/icons-material';
 import api from '../services/api';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { formatDate, formatDateTime } from '../utils/dateUtils';
@@ -40,7 +40,9 @@ export default function PurchaseOrders() {
 
   const fetchDetailHistory = async (id, type) => {
     try {
-      const endpoint = type === 'indent' ? `/api/indents/${id}/approval-history` : `/api/procurement/pr/${id}/approval-history`;
+      const endpoint = type === 'indent' ? `/api/indents/${id}/approval-history` : 
+                       type === 'po' ? `/api/procurement/po/${id}/approval-history` : 
+                       `/api/procurement/pr/${id}/approval-history`;
       const res = await api.get(endpoint);
       setDetailHistoryData(res.data);
       setDetailHistoryOpen(true);
@@ -171,6 +173,9 @@ export default function PurchaseOrders() {
   // Confirmation dialog state
   const [confirm, setConfirm] = useState({ open: false, title: '', message: '', confirmText: '', confirmColor: 'primary', action: null, needsReason: false, po: null });
   const [reason, setReason] = useState('');
+
+  // Email preview dialog state
+  const [emailPreview, setEmailPreview] = useState({ open: false, loading: false, data: null, po: null, cc: '', bcc: '', sending: false });
 
   const handleRowClick = (po) => {
     if (po.status === 'Draft') {
@@ -308,13 +313,32 @@ export default function PurchaseOrders() {
 
   const approvePO = async (id) => { await api.post(`/api/procurement/po/${id}/approve`); load(); };
   const rejectPO = async (id, remarks) => { await api.post(`/api/procurement/po/${id}/reject`, { remarks }); load(); };
-  const sendPO = async (id) => {
+  const openEmailPreview = async (po) => {
+    setEmailPreview({ open: true, loading: true, data: null, po, cc: '', bcc: '', sending: false });
     try {
-      const res = await api.post(`/api/procurement/po/${id}/send`);
-      showMessage(res.data.message, "PO Sent", "success");
+      const res = await api.get(`/api/procurement/po/${po.id}/email-preview`);
+      setEmailPreview(prev => ({ ...prev, loading: false, data: res.data }));
+    } catch (err) {
+      showMessage('Failed to load email preview', 'Error', 'error');
+      setEmailPreview(prev => ({ ...prev, open: false, loading: false }));
+    }
+  };
+
+  const handleSendWithEmail = async () => {
+    const po = emailPreview.po;
+    setEmailPreview(prev => ({ ...prev, sending: true }));
+    try {
+      const res = await api.post(`/api/procurement/po/${po.id}/send`, {
+        cc: emailPreview.cc,
+        bcc: emailPreview.bcc,
+      });
+      const emailInfo = res.data.email_status ? `\n${res.data.email_status}` : '';
+      showMessage(res.data.message + emailInfo, "PO EMAIL SEND", "success");
+      setEmailPreview({ open: false, loading: false, data: null, po: null, cc: '', bcc: '', sending: false });
       load();
     } catch (err) {
       showMessage(err.response?.data?.detail || "Error sending PO", "Error", "error");
+      setEmailPreview(prev => ({ ...prev, sending: false }));
     }
   };
   const shortClosePO = async (id, remarks) => { await api.post(`/api/procurement/po/${id}/short-close`, { remarks }); load(); };
@@ -475,6 +499,7 @@ export default function PurchaseOrders() {
                 <b>To,</b><br/>
                 <b>M/S. ${po.vendor_name ? (po.vendor_name.includes(' - ') ? po.vendor_name.split(' - ').slice(1).join(' - ') : po.vendor_name) : 'VENDOR'}</b><br/>
                 ${po.vendor_address ? `<span style="font-size: 10px; color: #333;">${po.vendor_address}</span><br/>` : ''}
+                ${(po.vendor_city || po.vendor_state || po.vendor_pincode) ? `<span style="font-size: 10px; color: #333;">${[po.vendor_city, po.vendor_state, po.vendor_pincode ? '- ' + po.vendor_pincode : ''].filter(Boolean).join(' ')}</span><br/>` : ''}
                 ${po.vendor_gst_number ? `<span style="font-size: 10px; color: #333;">GSTIN: ${po.vendor_gst_number}</span><br/>` : ''}
               </td>
               <td style="width: 40%;">
@@ -639,7 +664,7 @@ export default function PurchaseOrders() {
 
       <Card sx={{ mb: 3 }}>
         <Box sx={{ p: 2 }}>
-          <TextField size="small" placeholder="Search PO/Indent/PR/Quotation numbers..." value={search}
+          <TextField size="small" placeholder="Search PO/Indent/PR/Quotation Numbers..." value={search}
             onChange={e => setSearch(e.target.value)} sx={{ minWidth: 450 }}
             InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }} />
         </Box>
@@ -682,7 +707,10 @@ export default function PurchaseOrders() {
               <Card key={po.id} variant="outlined" sx={{ p: 2, borderRadius: 2, cursor: 'pointer', '&:hover': { borderColor: '#2563EB' } }} onClick={() => handleRowClick(po)}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, gap: 1 }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#2563EB' }}>{po.po_number}</Typography>
-                  <Chip label={po.status} size="small" color={statusColor[po.status] || 'default'} sx={{ fontWeight: 600, fontSize: '0.65rem', height: 20 }} />
+                  <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+                    <Chip label={`L${po.current_approval_level || 1}`} size="small" variant="outlined" sx={{ height: 18, fontSize: '0.6rem' }} />
+                    <Chip label={po.status} size="small" color={statusColor[po.status] || 'default'} sx={{ fontWeight: 600, fontSize: '0.65rem', height: 20 }} />
+                  </Box>
                 </Box>
                 <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#334155' }}><strong>Vendor:</strong> {po.vendor_name}</Typography>
                 <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#334155' }}><strong>Amount:</strong> <span style={{ color: '#059669', fontWeight: 600 }}>{formatCurrency(calculatePOTotalNet(po))}</span></Typography>
@@ -705,7 +733,7 @@ export default function PurchaseOrders() {
                     <Tooltip title="Send to Vendor">
                       <span><IconButton size="small" disabled={!canSend(po.status) || !hasAction('purchase_orders', 'can_send_to_vendor')}
                         sx={{ color: '#8b5cf6', '&.Mui-disabled': { color: 'text.disabled' } }}
-                        onClick={() => showConfirm('Send to Vendor?', `Send ${po.po_number} to vendor?`, 'Yes, Send', 'primary', () => sendPO(po.id), false, po)}>
+                        onClick={() => openEmailPreview(po)}>
                         <Send fontSize="small" />
                       </IconButton></span>
                     </Tooltip>
@@ -810,6 +838,7 @@ export default function PurchaseOrders() {
                       STATUS
                     </TableSortLabel>
                   </TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.65rem', textAlign: 'center' }}>LVL</TableCell>
                   <TableCell sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.65rem' }}>ACTIONS</TableCell>
                 </TableRow>
               </TableHead>
@@ -847,6 +876,9 @@ export default function PurchaseOrders() {
                     <TableCell sx={{ fontSize: '0.7rem', whiteSpace: 'nowrap' }}>{formatDate(po.created_at)}</TableCell>
                     <TableCell sx={{ fontSize: '0.7rem', whiteSpace: 'nowrap' }}>{formatDate(po.delivery_date)}</TableCell>
                     <TableCell sx={{ whiteSpace: 'nowrap' }}><Chip label={po.status} size="small" color={statusColor[po.status] || 'default'} sx={{ fontWeight: 600, fontSize: '0.6rem', height: 18 }} /></TableCell>
+                    <TableCell align="center" sx={{ whiteSpace: 'nowrap' }}>
+                      <Chip label={`L${po.current_approval_level || 1}`} size="small" variant="outlined" sx={{ height: 18, fontSize: '0.65rem' }} />
+                    </TableCell>
                     <TableCell onClick={e => e.stopPropagation()}>
                       <Box sx={{ display: 'flex', gap: 0.5 }}>
                         <Tooltip title="Approve">
@@ -864,7 +896,7 @@ export default function PurchaseOrders() {
                         <Tooltip title="Send to Vendor">
                           <span><IconButton size="small" disabled={!canSend(po.status) || !hasAction('purchase_orders', 'can_send_to_vendor')}
                             sx={{ color: '#8b5cf6', '&.Mui-disabled': { color: 'text.disabled' } }}
-                            onClick={() => showConfirm('Send to Vendor?', `Send ${po.po_number} to vendor?`, 'Yes, Send', 'primary', () => sendPO(po.id), false, po)}>
+                            onClick={() => openEmailPreview(po)}>
                             <Send fontSize="small" />
                           </IconButton></span>
                         </Tooltip>
@@ -1183,7 +1215,7 @@ export default function PurchaseOrders() {
           </Box>
         </DialogContent>
         <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid #e2e8f0' }}>
-          {detailDialog?.status !== 'Draft' && detailDialog?.status !== 'Rejected' && (
+          {!['Draft', 'Submitted', 'Rejected'].includes(detailDialog?.status) && (
             <Button onClick={() => handlePrintPO()} variant="contained" sx={{ borderRadius: 2, fontWeight: 700, textTransform: 'none', mr: 2, bgcolor: '#2563EB' }}>Print PO</Button>
           )}
           <Button onClick={() => { setDetailDialog(null); setDetailHistoryOpen(false); setDetailHistoryData(null); }} variant="outlined" sx={{ borderRadius: 2, fontWeight: 600, textTransform: 'none' }}>Close</Button>
@@ -1435,15 +1467,107 @@ export default function PurchaseOrders() {
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button onClick={handleCancelConfirm} sx={{ textTransform: 'none' }}>Cancel</Button>
-          {confirm.title === 'Send to Vendor?' && (
-            <Button onClick={() => handlePrintPO(confirm.po)} variant="outlined" size="small" sx={{ fontWeight: 600, textTransform: 'none', mx: 1 }}>
-              Print PO
-            </Button>
-          )}
           <Button variant="contained" color={confirm.confirmColor}
             disabled={confirm.needsReason && !reason.trim()}
             onClick={handleConfirm} sx={{ fontWeight: 600, textTransform: 'none' }}>
             {confirm.confirmText}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Email Preview Dialog for Send to Vendor */}
+      <Dialog open={emailPreview.open} onClose={() => !emailPreview.sending && setEmailPreview({ open: false, loading: false, data: null, po: null, cc: '', bcc: '', sending: false })} maxWidth="md" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1, borderBottom: '1px solid #e2e8f0', pb: 2 }}>
+          <Email sx={{ color: '#2563EB' }} /> Send PO to Vendor — {emailPreview.po?.po_number}
+        </DialogTitle>
+        <DialogContent sx={{ pt: 3 }}>
+          {emailPreview.loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
+              <Typography color="textSecondary">Loading email preview...</Typography>
+            </Box>
+          ) : emailPreview.data && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, mt: 1 }}>
+              {/* Test Mode Banner */}
+              {emailPreview.data.test_mode && (
+                <Box sx={{ bgcolor: '#fef3c7', border: '1px solid #f59e0b', borderRadius: 2, px: 2, py: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography variant="caption" sx={{ color: '#92400e', fontWeight: 600 }}>
+                    ⚠️ TEST MODE — Email will be sent to {emailPreview.data.to_email} instead of vendor ({emailPreview.data.vendor_email || 'no email'})
+                  </Typography>
+                </Box>
+              )}
+
+              {/* From */}
+              <Box>
+                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>FROM</Typography>
+                <Box sx={{ bgcolor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 1.5, px: 2, py: 1.5 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>{emailPreview.data.from_name}</Typography>
+                  <Typography variant="caption" sx={{ color: '#64748B' }}>{emailPreview.data.from_email}</Typography>
+                </Box>
+              </Box>
+
+              {/* To */}
+              <Box>
+                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>TO</Typography>
+                <Box sx={{ bgcolor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 1.5, px: 2, py: 1.5 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>{emailPreview.data.to_email}</Typography>
+                  {emailPreview.data.vendor_name && (
+                    <Typography variant="caption" sx={{ color: '#64748B' }}>{emailPreview.data.vendor_name}</Typography>
+                  )}
+                </Box>
+              </Box>
+
+              {/* CC & BCC */}
+              <Grid container spacing={2}>
+                <Grid item xs={6}>
+                  <TextField fullWidth size="small" label="CC" placeholder="email1@example.com, email2@example.com"
+                    value={emailPreview.cc} onChange={e => setEmailPreview(prev => ({ ...prev, cc: e.target.value }))}
+                    helperText="Comma-separated email addresses" />
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField fullWidth size="small" label="BCC" placeholder="email@example.com"
+                    value={emailPreview.bcc} onChange={e => setEmailPreview(prev => ({ ...prev, bcc: e.target.value }))}
+                    helperText="Comma-separated email addresses" />
+                </Grid>
+              </Grid>
+
+              {/* Subject */}
+              <Box>
+                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>SUBJECT</Typography>
+                <Box sx={{ bgcolor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 1.5, px: 2, py: 1.5 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>{emailPreview.data.subject}</Typography>
+                </Box>
+              </Box>
+
+              {/* Attachment */}
+              <Box>
+                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>ATTACHMENT</Typography>
+                <Box sx={{ bgcolor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 1.5, px: 2, py: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <AttachFile sx={{ fontSize: 18, color: '#16a34a' }} />
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: '#15803d' }}>{emailPreview.data.attachment_filename}</Typography>
+                  <Chip label="PDF" size="small" sx={{ ml: 'auto', bgcolor: '#dcfce7', color: '#15803d', fontWeight: 700, fontSize: '0.65rem', height: 20 }} />
+                </Box>
+              </Box>
+
+              {/* Email Body Preview */}
+              <Box>
+                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>EMAIL BODY PREVIEW</Typography>
+                <Box sx={{ bgcolor: '#fff', border: '1px solid #e2e8f0', borderRadius: 1.5, p: 2.5, maxHeight: 280, overflow: 'auto', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.04)' }}>
+                  <div dangerouslySetInnerHTML={{ __html: emailPreview.data.html_body }} />
+                </Box>
+              </Box>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2.5, pt: 2, borderTop: '1px solid #e2e8f0', gap: 1 }}>
+          <Button onClick={() => setEmailPreview({ open: false, loading: false, data: null, po: null, cc: '', bcc: '', sending: false })}
+            disabled={emailPreview.sending} sx={{ textTransform: 'none', color: '#64748B' }}>Cancel</Button>
+          <Button onClick={() => handlePrintPO(emailPreview.po)} variant="outlined" sx={{ fontWeight: 600, textTransform: 'none' }}>
+            Print PO
+          </Button>
+          <Button variant="contained" onClick={handleSendWithEmail} disabled={emailPreview.loading || emailPreview.sending}
+            startIcon={<Send />}
+            sx={{ fontWeight: 700, textTransform: 'none', px: 4, borderRadius: 2, boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)' }}>
+            {emailPreview.sending ? 'Sending...' : 'Send Email & Update Status'}
           </Button>
         </DialogActions>
       </Dialog>

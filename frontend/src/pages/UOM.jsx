@@ -129,7 +129,7 @@ export default function UOM() {
         </TableContainer>
       </Card>
 
-      <Dialog open={dialog === 'uom'} onClose={() => setDialog('')} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: '24px', p: 1 } }}>
+      <Dialog open={dialog === 'uom'} onClose={(e, reason) => { if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') setDialog(''); }} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: '24px', p: 1 } }}>
         <DialogTitle sx={{ pb: 1, pt: 3, px: 4 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Box sx={{ p: 1, bgcolor: '#F5F3FF', borderRadius: 2, color: '#7C3AED', display: 'flex' }}>

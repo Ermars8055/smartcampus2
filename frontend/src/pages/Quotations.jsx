@@ -352,8 +352,21 @@ const Quotations = () => {
     }));
   };
 
+  const filteredQRsBase = useMemo(() => {
+    let list = qrs;
+    if (search) {
+      const s = search.toLowerCase();
+      list = list.filter(qr => {
+        const matchQR = qr.qr_number?.toLowerCase().includes(s);
+        const matchPR = qr.linked_prs?.some(pr => pr.pr_number?.toLowerCase().includes(s));
+        return matchQR || matchPR;
+      });
+    }
+    return list;
+  }, [qrs, search]);
+
   const sortedQRs = useMemo(() => {
-    let filtered = listFilter === 'All' ? qrs : qrs.filter(qr => {
+    let filtered = listFilter === 'All' ? filteredQRsBase : filteredQRsBase.filter(qr => {
       const filterMap = {
         'Draft': 'Draft',
         'Requested': 'Requested',
@@ -365,11 +378,6 @@ const Quotations = () => {
       };
       return qr.status === filterMap[listFilter];
     });
-
-    if (search) {
-      const s = search.toLowerCase();
-      filtered = filtered.filter(qr => qr.qr_number.toLowerCase().includes(s));
-    }
 
     return [...filtered].sort((a, b) => {
       const { key, direction } = sortConfig;
@@ -391,10 +399,10 @@ const Quotations = () => {
       if (aVal > bVal) return direction === 'asc' ? 1 : -1;
       return 0;
     });
-  }, [qrs, listFilter, sortConfig]);
+  }, [filteredQRsBase, listFilter, sortConfig]);
 
   const getStatusCount = (filter) => {
-    if (filter === 'All') return qrs.length;
+    if (filter === 'All') return filteredQRsBase.length;
     const filterMap = {
       'Draft': 'Draft',
       'Requested': 'Requested',
@@ -404,7 +412,7 @@ const Quotations = () => {
       'Approved': 'Approved',
       'Ordered': 'Ordered'
     };
-    return qrs.filter(qr => qr.status === filterMap[filter]).length;
+    return filteredQRsBase.filter(qr => qr.status === filterMap[filter]).length;
   };
 
   // --- Selection Logic ---

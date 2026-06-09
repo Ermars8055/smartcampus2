@@ -4,114 +4,13 @@ import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
   DialogContent, DialogActions, Grid, Select, FormControl,
-  InputLabel, IconButton, Paper, InputAdornment, MenuItem, Collapse
+  InputLabel, IconButton, Paper, InputAdornment, MenuItem, Tooltip, TableSortLabel, Tabs, Tab, Autocomplete
 } from '@mui/material';
-import { Close, Inventory2, KeyboardArrowDown, KeyboardArrowUp, Add, Delete, AccountTree, Warehouse, Comment, InfoOutlined } from '@mui/icons-material';
+import { Close, Inventory2, Add, Delete, AccountTree, Warehouse, Comment, InfoOutlined, Outbox, CheckCircle, Apartment, Layers, MeetingRoom } from '@mui/icons-material';
 import api from '../services/api';
 import MaterialSelect from '../components/MaterialSelect';
 import { useAuth } from '../context/AuthContext';
 import { useMessage } from '../context/MessageContext';
-
-function IssueRow({ row, openIssueModal, stocks }) {
-  const [open, setOpen] = useState(false);
-
-  const isIndent = row.type === 'indent';
-  const idStr = isIndent ? row.indent_number : row.issue_number;
-  const personStr = isIndent ? row.requester_name : row.issued_by_name;
-  
-  let statusColor = 'default';
-  let statusLabel = row.status;
-  if (isIndent) {
-    if (row.status === 'Approved') { statusColor = 'primary'; statusLabel = 'Pending'; }
-    if (row.status === 'Partially Issued') { statusColor = 'warning'; statusLabel = 'Partial'; }
-  } else {
-    if (row.is_acknowledged) { statusColor = 'success'; statusLabel = 'Acknowledged'; }
-    else { statusColor = 'success'; statusLabel = 'Completed'; }
-  }
-
-  return (
-    <>
-      <TableRow sx={{ '& > *': { borderBottom: 'unset' } }} hover>
-        <TableCell>
-          <IconButton size="small" onClick={() => setOpen(!open)}>
-            {open ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
-          </IconButton>
-        </TableCell>
-        <TableCell sx={{ fontWeight: 800, color: '#0F172A' }}>{idStr}</TableCell>
-        <TableCell sx={{ color: '#64748B' }}>{formatDate(row.created_at)}</TableCell>
-        <TableCell sx={{ fontWeight: 600, color: '#475569' }}>{personStr}</TableCell>
-        <TableCell>
-          <Chip label={statusLabel} size="small" color={statusColor} sx={{ fontWeight: 700, height: 22, fontSize: '0.7rem' }} />
-        </TableCell>
-        <TableCell align="right">
-          {isIndent && (
-             <Button size="small" variant="contained" onClick={() => openIssueModal(row)} sx={{ textTransform: 'none', fontWeight: 700, borderRadius: 2 }}>
-               Issue Materials
-             </Button>
-          )}
-        </TableCell>
-      </TableRow>
-      <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-          <Collapse in={open} timeout="auto" unmountOnExit>
-            <Box sx={{ margin: 2, borderLeft: `2px solid ${isIndent ? '#3B82F6' : '#10B981'}`, pl: 2 }}>
-              <Typography variant="subtitle2" gutterBottom component="div" sx={{ fontWeight: 700, color: '#1E293B' }}>
-                {isIndent ? 'Pending Items to Issue' : 'Issued Items'}
-              </Typography>
-              {row.project_name && (
-                <Typography variant="caption" sx={{ color: '#64748B', display: 'block', mb: 1 }}>
-                  Project: {row.project_name}
-                </Typography>
-              )}
-              
-              <Table size="small" aria-label="items">
-                <TableHead sx={{ bgcolor: '#F1F5F9' }}>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem', color: '#475569' }}>MATERIAL</TableCell>
-                    <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem', color: '#475569' }}>{isIndent ? 'PENDING QTY' : 'ISSUED QTY'}</TableCell>
-                    {isIndent && <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem', color: '#475569' }}>STOCK STATUS</TableCell>}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {isIndent ? (
-                    row.items?.filter(item => (item.requested_quantity - (item.issued_quantity || 0)) > 0).map((item, idx) => {
-                      const remaining = item.requested_quantity - (item.issued_quantity || 0);
-                      const isLow = (item.current_stock || 0) < remaining;
-                      return (
-                        <TableRow key={idx}>
-                          <TableCell sx={{ fontWeight: 600 }}>{item.material_name}</TableCell>
-                          <TableCell sx={{ fontWeight: 700 }}>{remaining} {item.uom_name}</TableCell>
-                          <TableCell>
-                            {isLow ? (
-                                <Typography variant="caption" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontWeight: 700, color: '#DC2626' }}>
-                                  ⚠️ Low Stock
-                                </Typography>
-                              ) : (
-                                <Typography variant="caption" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontWeight: 700, color: '#059669' }}>
-                                  ✓ Stock OK
-                                </Typography>
-                              )}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })
-                  ) : (
-                    row.items?.map((item, idx) => (
-                      <TableRow key={idx}>
-                        <TableCell sx={{ fontWeight: 600 }}>{item.material_name}</TableCell>
-                        <TableCell sx={{ fontWeight: 700 }}>{item.quantity} {item.uom_name || 'unit'}</TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </Box>
-          </Collapse>
-        </TableCell>
-      </TableRow>
-    </>
-  )
-}
 
 export default function MaterialIssue() {
   const { showMessage } = useMessage();
@@ -122,9 +21,15 @@ export default function MaterialIssue() {
   const [warehouses, setWarehouses] = useState([]);
   const [projects, setProjects] = useState([]);
   const [materials, setMaterials] = useState([]);
+  const [departmentsList, setDepartmentsList] = useState([]);
+  const [allDepartments, setAllDepartments] = useState([]);
+  const [buildings, setBuildings] = useState([]);
+  const [floors, setFloors] = useState([]);
+  const [rooms, setRooms] = useState([]);
 
   // Modal states: if indent is null, it's a direct issue
-  const [issueModal, setIssueModal] = useState({ open: false, isDirect: false, indent: null, items: [], project_id: '', warehouse_id: '', remarks: '' });
+  const [issueModal, setIssueModal] = useState({ open: false, isDirect: false, indent: null, items: [], project_id: '', warehouse_id: '', remarks: '', department: '', building_id: '', floor_id: '', room_id: '' });
+  const [viewIssueModal, setViewIssueModal] = useState({ open: false, issue: null });
 
   const load = async () => {
     try {
@@ -140,6 +45,8 @@ export default function MaterialIssue() {
       setProjects(pRes.data);
       const mRes = await api.get('/api/materials', { params: { limit: 10000 } });
       setMaterials(mRes.data.items || []);
+      api.get('/api/departments/names').then(r => setDepartmentsList(r.data)).catch(() => setDepartmentsList([]));
+      api.get('/api/departments').then(r => setAllDepartments(r.data)).catch(() => setAllDepartments([]));
     } catch (e) { console.error(e); }
   };
 
@@ -149,12 +56,129 @@ export default function MaterialIssue() {
 
   const pendingIndents = indents.filter(ind => ind.status === 'Approved' || ind.status === 'Partially Issued');
 
+  const [tabValue, setTabValue] = useState('Pending');
+  const [sortConfig, setSortConfig] = useState({ key: 'sortDate', direction: 'desc' });
+
+  const handleDepartmentChange = (newDept) => {
+    if (newDept) {
+      api.get(`/api/rooms?department_name=${encodeURIComponent(newDept)}`).then(r => {
+        const fetchedRooms = r.data || [];
+        const uniqueBuildings = new Map();
+        const uniqueFloors = new Map();
+
+        fetchedRooms.forEach(room => {
+          if (room.building_id && room.building_name) {
+            uniqueBuildings.set(room.building_id, { id: room.building_id, name: room.building_name });
+          }
+          if (room.floor_id && room.floor_name) {
+            uniqueFloors.set(room.floor_id, { id: room.floor_id, name: room.floor_name, building_id: room.building_id });
+          }
+        });
+
+        const masterDepts = allDepartments.filter(d => d.name === newDept);
+        masterDepts.forEach(d => {
+          if (d.building_id && d.building_name) {
+            uniqueBuildings.set(d.building_id, { id: d.building_id, name: d.building_name });
+          }
+        });
+
+        const bldgs = Array.from(uniqueBuildings.values());
+        const flrs = Array.from(uniqueFloors.values());
+
+        setBuildings(bldgs);
+        setFloors(flrs);
+        setRooms(fetchedRooms);
+
+        let nextBuildingId = '';
+        let nextFloorId = '';
+        let nextRoomId = '';
+
+        if (bldgs.length === 1) nextBuildingId = bldgs[0].id;
+        const availableFloors = flrs.filter(f => !nextBuildingId || f.building_id === nextBuildingId);
+        if (availableFloors.length === 1) nextFloorId = availableFloors[0].id;
+        const availableRooms = fetchedRooms.filter(rm => !nextFloorId || rm.floor_id === nextFloorId);
+        if (availableRooms.length === 1) nextRoomId = availableRooms[0].id;
+
+        setIssueModal(prev => ({ ...prev, department: newDept, building_id: nextBuildingId, floor_id: nextFloorId, room_id: nextRoomId }));
+      }).catch(() => {
+        setBuildings([]); setFloors([]); setRooms([]);
+        setIssueModal(prev => ({ ...prev, department: newDept, building_id: '', floor_id: '', room_id: '' }));
+      });
+    } else {
+      setBuildings([]); setFloors([]); setRooms([]);
+      setIssueModal(prev => ({ ...prev, department: '', building_id: '', floor_id: '', room_id: '' }));
+    }
+  };
+
+  const handleBuildingChange = (buildingId) => {
+    let nextFloorId = ''; let nextRoomId = '';
+    const availableFloors = floors.filter(f => f.building_id === buildingId);
+    if (availableFloors.length === 1) {
+      nextFloorId = availableFloors[0].id;
+      const availableRooms = rooms.filter(rm => rm.floor_id === nextFloorId);
+      if (availableRooms.length === 1) nextRoomId = availableRooms[0].id;
+    }
+    setIssueModal(prev => ({ ...prev, building_id: buildingId, floor_id: nextFloorId, room_id: nextRoomId }));
+  };
+
+  const handleFloorChange = (floorId) => {
+    let nextRoomId = '';
+    const availableRooms = rooms.filter(rm => rm.floor_id === floorId);
+    if (availableRooms.length === 1) nextRoomId = availableRooms[0].id;
+    setIssueModal(prev => ({ ...prev, floor_id: floorId, room_id: nextRoomId }));
+  };
+
+  const handleRequestSort = (property) => {
+    const isAsc = sortConfig.key === property && sortConfig.direction === 'asc';
+    setSortConfig({ key: property, direction: isAsc ? 'desc' : 'asc' });
+  };
+
   const combinedList = useMemo(() => {
-    return [
-      ...pendingIndents.map(ind => ({ type: 'indent', ...ind, sortDate: new Date(ind.created_at) })),
-      ...issues.map(iss => ({ type: 'issue', ...iss, sortDate: new Date(iss.created_at) }))
-    ].sort((a, b) => b.sortDate - a.sortDate);
-  }, [pendingIndents, issues]);
+    let list = [
+      ...pendingIndents.map(ind => {
+        const loc = [ind.building_name, ind.floor, ind.room_name].filter(Boolean).join('-');
+        const personStrValue = (ind.department && loc) ? `${ind.department} (${loc})` : (ind.department || loc || ind.requester_name || 'Not Specified');
+        const pendingItemsCount = ind.items?.filter(it => it.requested_quantity > (it.issued_quantity || 0)).length || 0;
+        return {
+          type: 'indent', ...ind, sortDate: new Date(ind.created_at).getTime(),
+          idStr: ind.indent_number, personStr: personStrValue, itemCount: ind.items?.length || 0,
+          pendingItemCount: pendingItemsCount,
+          derivedStatus: ind.status === 'Approved' ? 'Pending' : 'Partial'
+        };
+      }),
+      ...issues.map(iss => {
+        const dept = iss.issued_to_department || iss.issued_to_contractor || iss.received_by_name;
+        const loc = [iss.building_name, iss.floor_name, iss.room_name].filter(Boolean).join('-');
+        const personStrValue = (dept && loc) ? `${dept} (${loc})` : (dept || loc || iss.issued_by_name || 'Not Specified');
+        return {
+          type: 'issue', ...iss, sortDate: new Date(iss.created_at).getTime(),
+          idStr: iss.issue_number, personStr: personStrValue, itemCount: iss.items?.length || 0,
+          derivedStatus: iss.is_acknowledged ? 'Acknowledged' : 'Completed'
+        };
+      })
+    ];
+
+    list.sort((a, b) => {
+      let aVal = a[sortConfig.key];
+      let bVal = b[sortConfig.key];
+
+      if (sortConfig.key === 'status') {
+        aVal = a.derivedStatus;
+        bVal = b.derivedStatus;
+      }
+
+      if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
+      if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    return list;
+  }, [pendingIndents, issues, sortConfig]);
+
+  const filteredList = useMemo(() => {
+    if (tabValue === 'All') return combinedList;
+    return combinedList.filter(row => row.derivedStatus === tabValue);
+  }, [combinedList, tabValue]);
 
   const openIssueModal = (indent) => {
     const items = indent.items
@@ -171,7 +195,7 @@ export default function MaterialIssue() {
           issued: it.issued_quantity,
           remaining: remaining,
           in_stock: it.current_stock || 0,
-          issue_qty: 0
+          issue_qty: ''
         };
       })
       .filter(it => it.remaining > 0);
@@ -179,21 +203,29 @@ export default function MaterialIssue() {
   };
 
   const openDirectIssueModal = () => {
+    setBuildings([]);
+    setFloors([]);
+    setRooms([]);
     setIssueModal({
       open: true,
       isDirect: true,
       indent: null,
-      project_id: projects[0]?.id || '',
+      project_id: '',
       warehouse_id: warehouses[0]?.id || '',
+      department: '', building_id: '', floor_id: '', room_id: '',
       remarks: '',
-      items: [{ material_id: '', issue_qty: 0 }]
+      items: [{ material_id: '', issue_qty: '' }]
     });
+  };
+
+  const openViewIssueModal = (issue) => {
+    setViewIssueModal({ open: true, issue });
   };
 
   const handleIssueSubmit = async () => {
     try {
-      if (issueModal.isDirect && (!issueModal.warehouse_id || !issueModal.project_id)) {
-        showMessage('Please select a warehouse and project for direct issue.', 'Validation Error', 'warning');
+      if (issueModal.isDirect && (!issueModal.warehouse_id || !issueModal.department || !issueModal.building_id)) {
+        showMessage('Please select a warehouse, department and building for direct issue.', 'Validation Error', 'warning');
         return;
       }
       const validItems = issueModal.items.filter(it => it.material_id && it.issue_qty > 0);
@@ -204,9 +236,11 @@ export default function MaterialIssue() {
 
       const payload = {
         warehouse_id: issueModal.isDirect ? issueModal.warehouse_id : issueModal.items[0]?.warehouse_id,
-        project_id: issueModal.isDirect ? issueModal.project_id : (issueModal.indent?.project_id || 1),
+        project_id: issueModal.isDirect ? (projects[0]?.id || 1) : (issueModal.indent?.project_id || 1),
         indent_id: issueModal.indent?.id,
-        issued_to_room_id: issueModal.indent?.room_id,
+        issued_to_department: issueModal.isDirect ? issueModal.department : undefined,
+        building_id: issueModal.isDirect ? issueModal.building_id : undefined,
+        issued_to_room_id: issueModal.isDirect ? (issueModal.room_id || null) : issueModal.indent?.room_id,
         purpose: issueModal.remarks || (issueModal.isDirect ? 'Direct Issue' : `Fulfillment for ${issueModal.indent?.indent_number}`),
         items: validItems.map(it => ({
           material_id: it.material_id,
@@ -217,7 +251,7 @@ export default function MaterialIssue() {
       setIssueModal({ ...issueModal, open: false });
       load();
       showMessage('Material issued successfully!', 'Success', 'success');
-    } catch (err) { 
+    } catch (err) {
       const detail = err.response?.data?.detail || 'Error';
       if (detail.includes('limit per month')) {
         showMessage(detail, "Limit Reached", "warning");
@@ -230,7 +264,7 @@ export default function MaterialIssue() {
   const addDirectItem = () => {
     setIssueModal({
       ...issueModal,
-      items: [...issueModal.items, { material_id: '', issue_qty: 0 }]
+      items: [...issueModal.items, { material_id: '', issue_qty: '' }]
     });
   };
 
@@ -246,19 +280,27 @@ export default function MaterialIssue() {
     setIssueModal({ ...issueModal, items: newItems });
   };
 
+  const handleRowClick = (row) => {
+    if (row.type === 'indent') {
+      openIssueModal(row);
+    } else {
+      openViewIssueModal(row);
+    }
+  };
+
   return (
     <Box>
       <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <Box sx={{ fontSize: '1.5rem' }}>📦</Box>
+
           <Box>
-            <Typography variant="h5" sx={{ fontWeight: 800, color: '#1E293B', lineHeight: 1.2 }}>Material Issues</Typography>
+            <Typography variant="h6" sx={{ fontWeight: 800, color: '#1E293B', lineHeight: 1.2 }}>Material Issues</Typography>
             <Typography variant="caption" sx={{ color: '#64748B' }}>Manage central store fulfillment, track pending indents, and log direct issues.</Typography>
           </Box>
         </Box>
-        <Button 
-          variant="contained" 
-          startIcon={<Add />} 
+        <Button
+          variant="contained"
+          startIcon={<Add />}
           onClick={openDirectIssueModal}
           disabled={!hasAction('issues', 'can_issue')}
           sx={{ textTransform: 'none', borderRadius: 2, fontWeight: 700, px: 3, bgcolor: '#2563EB' }}
@@ -267,32 +309,130 @@ export default function MaterialIssue() {
         </Button>
       </Box>
 
-      {combinedList.length === 0 ? (
+      <Card sx={{ mb: 3 }}>
+        <Tabs
+          value={tabValue}
+          onChange={(e, v) => setTabValue(v)}
+          variant="scrollable"
+          scrollButtons="auto"
+          sx={{ borderBottom: 1, borderColor: 'divider' }}
+        >
+          {['Pending', 'Partial', 'Completed', 'Acknowledged', 'All'].map(s => {
+            const count = s === 'All' ? combinedList.length : combinedList.filter(i => i.derivedStatus === s).length;
+            if (s !== 'All' && count === 0) return null;
+            return (
+              <Tab
+                key={s}
+                label={
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    {s}
+                    <Chip
+                      label={count}
+                      size="small"
+                      sx={{ height: 20, fontSize: '0.7rem', fontWeight: 600, bgcolor: tabValue === s ? 'primary.main' : 'action.selected', color: tabValue === s ? 'white' : 'text.primary' }}
+                    />
+                  </Box>
+                }
+                value={s}
+                sx={{ textTransform: 'none', fontWeight: 600, minHeight: 48, minWidth: 'auto', px: 2 }}
+              />
+            )
+          })}
+        </Tabs>
+      </Card>
+
+      {filteredList.length === 0 ? (
         <Card sx={{ p: 8, textAlign: 'center', border: '1px dashed #CBD5E1', bgcolor: '#F8FAFC', borderRadius: 3 }}>
           <Inventory2 sx={{ fontSize: 48, color: '#94A3B8', mb: 2 }} />
           <Typography variant="h6" color="textSecondary" sx={{ fontWeight: 600 }}>No Issue Records Found</Typography>
           <Typography variant="body2" color="textSecondary">Pending indents and completed issues will appear here.</Typography>
         </Card>
       ) : (
-        <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2, border: '1px solid #E2E8F0' }}>
-          <Table aria-label="issues table">
-            <TableHead sx={{ bgcolor: '#F8FAFC' }}>
-              <TableRow>
-                <TableCell sx={{ width: 50 }} />
-                <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.8rem' }}>RECORD NO.</TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.8rem' }}>DATE</TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.8rem' }}>REQUESTER / ISSUER</TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.8rem' }}>STATUS</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 700, color: '#475569', fontSize: '0.8rem' }}>ACTION</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {combinedList.map((row, index) => (
-                <IssueRow key={index} row={row} openIssueModal={openIssueModal} stocks={stocks} />
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+        <Card sx={{ borderRadius: 2, overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+          <TableContainer>
+            <Table size="small" aria-label="issues table">
+              <TableHead sx={{ bgcolor: '#F8FAFC' }}>
+                <TableRow>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2, py: 1.5 }}>
+                    <TableSortLabel active={sortConfig.key === 'idStr'} direction={sortConfig.key === 'idStr' ? sortConfig.direction : 'asc'} onClick={() => handleRequestSort('idStr')}>RECORD NO.</TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>
+                    <TableSortLabel active={sortConfig.key === 'sortDate'} direction={sortConfig.key === 'sortDate' ? sortConfig.direction : 'asc'} onClick={() => handleRequestSort('sortDate')}>DATE</TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>
+                    <TableSortLabel active={sortConfig.key === 'personStr'} direction={sortConfig.key === 'personStr' ? sortConfig.direction : 'asc'} onClick={() => handleRequestSort('personStr')}>ISSUED TO</TableSortLabel>
+                  </TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>
+                    <TableSortLabel active={sortConfig.key === 'itemCount'} direction={sortConfig.key === 'itemCount' ? sortConfig.direction : 'asc'} onClick={() => handleRequestSort('itemCount')}>ITEMS</TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>
+                    <TableSortLabel active={sortConfig.key === 'status'} direction={sortConfig.key === 'status' ? sortConfig.direction : 'asc'} onClick={() => handleRequestSort('status')}>STATUS</TableSortLabel>
+                  </TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>ACTIONS</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filteredList.map((row, index) => {
+                  const isIndent = row.type === 'indent';
+                  const idStr = row.idStr;
+                  const personStr = row.personStr;
+                  const itemCount = row.itemCount;
+
+                  let statusColor = 'default';
+                  let statusLabel = row.derivedStatus;
+                  if (isIndent) {
+                    if (statusLabel === 'Pending') { statusColor = 'primary'; }
+                    if (statusLabel === 'Partial') { statusColor = 'warning'; }
+                  } else {
+                    if (statusLabel === 'Acknowledged') { statusColor = 'success'; }
+                    else { statusColor = 'success'; }
+                  }
+
+                  return (
+                    <TableRow
+                      key={index}
+                      hover
+                      onClick={() => handleRowClick(row)}
+                      sx={{ cursor: 'pointer', '&:last-child td, &:last-child th': { border: 0 } }}
+                    >
+                      <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.8rem', px: 2 }}>{idStr}</TableCell>
+                      <TableCell sx={{ fontSize: '0.8rem', px: 2 }}>{formatDate(row.created_at)}</TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>{personStr}</TableCell>
+                      <TableCell align="center" sx={{ fontSize: '0.8rem', px: 2 }}>
+                        {row.derivedStatus === 'Partial' && row.pendingItemCount > 0 ? (
+                          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.5, flexWrap: 'wrap' }}>
+                            <Chip label={`Total: ${itemCount}`} size="small" sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem', bgcolor: '#F1F5F9', color: '#475569' }} />
+                            <Chip label={`Pending: ${row.pendingItemCount}`} size="small" color="error" variant="outlined" sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} />
+                          </Box>
+                        ) : (
+                          <Chip label={itemCount} size="small" sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem', bgcolor: '#F1F5F9', color: '#475569' }} />
+                        )}
+                      </TableCell>
+                      <TableCell sx={{ px: 2 }}>
+                        <Chip label={statusLabel} size="small" color={statusColor} variant="outlined" sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} />
+                      </TableCell>
+                      <TableCell align="right" sx={{ px: 2, whiteSpace: 'nowrap' }}>
+                        <Tooltip title={isIndent ? "Issue Materials" : "Issue Completed"}>
+                          <IconButton
+                            size="small"
+                            disabled={!isIndent}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (isIndent) openIssueModal(row);
+                            }}
+                            sx={{ color: isIndent ? '#2563EB' : 'action.disabled' }}
+                          >
+                            <Outbox fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Card>
       )}
 
       {/* ISSUE MATERIALS MODAL */}
@@ -308,15 +448,16 @@ export default function MaterialIssue() {
                   {issueModal.isDirect ? 'Direct Material Issue' : 'Issue Materials for Indent'}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {issueModal.isDirect ? 'Issue items directly to a project without an indent' : (
+                  {issueModal.isDirect ? 'Issue items directly without an indent' : (
                     <>
-                      {issueModal.indent?.indent_number} • {issueModal.indent?.requester_name}
+                      {issueModal.indent?.indent_number}
                       {(() => {
                         const ind = issueModal.indent;
                         if (!ind) return '';
-                        const dept = ind.department || 'Store / User';
                         const loc = [ind.building_name, ind.floor, ind.room_name].filter(Boolean).join('-');
-                        return loc ? ` • Issue to: ${dept} (${loc})` : ` • Issue to: ${dept}`;
+                        const dept = ind.department;
+                        const formattedLoc = (dept && loc) ? `${dept} (${loc})` : (dept || loc);
+                        return formattedLoc ? ` • Issued to: ${formattedLoc}` : '';
                       })()}
                     </>
                   )}
@@ -329,12 +470,12 @@ export default function MaterialIssue() {
         <DialogContent sx={{ p: 3 }}>
           {issueModal.isDirect && (
             <Grid container spacing={2} sx={{ mb: 3, mt: 0.5 }}>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12}>
                 <FormControl fullWidth size="small">
                   <InputLabel>Source Store</InputLabel>
-                  <Select 
+                  <Select
                     label="Source Store"
-                    value={issueModal.warehouse_id} 
+                    value={issueModal.warehouse_id}
                     onChange={e => setIssueModal({ ...issueModal, warehouse_id: e.target.value })}
                     startAdornment={<InputAdornment position="start"><Warehouse sx={{ color: '#94A3B8', fontSize: 20, mr: 1 }} /></InputAdornment>}
                   >
@@ -342,16 +483,62 @@ export default function MaterialIssue() {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={3}>
+                <Typography variant="caption" sx={{ fontWeight: 600, color: '#3b5998', mb: 0.5, display: 'block' }}>Department <span style={{ color: '#d32f2f' }}>*</span></Typography>
+                <Autocomplete
+                  options={departmentsList}
+                  value={issueModal.department || null}
+                  onChange={(e, val) => handleDepartmentChange(val)}
+                  renderInput={(params) => (
+                    <TextField {...params} size="small" placeholder="Select Department" InputProps={{ ...params.InputProps, startAdornment: <><InputAdornment position="start"><AccountTree sx={{ color: '#94A3B8', ml: 1, fontSize: 18 }} /></InputAdornment>{params.InputProps.startAdornment}</> }} sx={{ bgcolor: '#fff' }} />
+                  )}
+                />
+              </Grid>
+              <Grid item xs={12} sm={3}>
+                <Typography variant="caption" sx={{ fontWeight: 600, color: '#3b5998', mb: 0.5, display: 'block' }}>Building <span style={{ color: '#d32f2f' }}>*</span></Typography>
                 <FormControl fullWidth size="small">
-                  <InputLabel>Associated Project</InputLabel>
-                  <Select 
-                    label="Associated Project"
-                    value={issueModal.project_id} 
-                    onChange={e => setIssueModal({ ...issueModal, project_id: e.target.value })}
-                    startAdornment={<InputAdornment position="start"><AccountTree sx={{ color: '#94A3B8', fontSize: 20, mr: 1 }} /></InputAdornment>}
+                  <Select
+                    value={issueModal.building_id || ''}
+                    displayEmpty
+                    onChange={e => handleBuildingChange(e.target.value)}
+                    disabled={!issueModal.department || buildings.length === 0}
+                    sx={{ bgcolor: '#fff' }}
+                    startAdornment={<InputAdornment position="start"><Apartment sx={{ color: '#94A3B8', fontSize: 18 }} /></InputAdornment>}
                   >
-                    {projects.map(p => <MenuItem key={p.id} value={p.id}>{p.name} ({p.code})</MenuItem>)}
+                    <MenuItem value="" disabled><em>Select Building</em></MenuItem>
+                    {buildings.map(b => <MenuItem key={b.id} value={b.id}>{b.name}</MenuItem>)}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={3}>
+                <Typography variant="caption" sx={{ fontWeight: 600, color: '#3b5998', mb: 0.5, display: 'block' }}>Floor</Typography>
+                <FormControl fullWidth size="small">
+                  <Select
+                    value={issueModal.floor_id || ''}
+                    displayEmpty
+                    onChange={e => handleFloorChange(e.target.value)}
+                    disabled={!issueModal.building_id || floors.filter(f => f.building_id === issueModal.building_id).length === 0}
+                    sx={{ bgcolor: '#fff' }}
+                    startAdornment={<InputAdornment position="start"><Layers sx={{ color: '#94A3B8', fontSize: 18 }} /></InputAdornment>}
+                  >
+                    <MenuItem value="" disabled><em>Select Floor</em></MenuItem>
+                    {floors.filter(f => !issueModal.building_id || f.building_id === issueModal.building_id).map(f => <MenuItem key={f.id} value={f.id}>{f.name}</MenuItem>)}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={3}>
+                <Typography variant="caption" sx={{ fontWeight: 600, color: '#3b5998', mb: 0.5, display: 'block' }}>Room</Typography>
+                <FormControl fullWidth size="small">
+                  <Select
+                    value={issueModal.room_id || ''}
+                    displayEmpty
+                    onChange={e => setIssueModal({ ...issueModal, room_id: e.target.value })}
+                    disabled={!issueModal.floor_id || rooms.filter(rm => rm.floor_id === issueModal.floor_id).length === 0}
+                    sx={{ bgcolor: '#fff' }}
+                    startAdornment={<InputAdornment position="start"><MeetingRoom sx={{ color: '#94A3B8', fontSize: 18 }} /></InputAdornment>}
+                  >
+                    <MenuItem value="" disabled><em>Select Room</em></MenuItem>
+                    {rooms.filter(rm => !issueModal.floor_id || rm.floor_id === issueModal.floor_id).map(r => <MenuItem key={r.id} value={r.id}>{r.name}</MenuItem>)}
                   </Select>
                 </FormControl>
               </Grid>
@@ -392,9 +579,9 @@ export default function MaterialIssue() {
                     <TableRow key={i}>
                       <TableCell>
                         {issueModal.isDirect ? (
-                          <MaterialSelect 
-                            materials={materials} 
-                            value={it.material_id} 
+                          <MaterialSelect
+                            materials={materials}
+                            value={it.material_id}
                             onChange={(val) => updateDirectItem(i, 'material_id', val)}
                           />
                         ) : (
@@ -406,10 +593,10 @@ export default function MaterialIssue() {
                       </TableCell>
                       {!issueModal.isDirect && (
                         <TableCell>
-                          <Chip 
-                            label={it.warehouse_name || 'Mapped Store'} 
-                            size="small" 
-                            sx={{ height: 22, fontSize: '0.7rem', bgcolor: '#F1F5F9', color: '#475569', fontWeight: 600, borderRadius: 1.5 }} 
+                          <Chip
+                            label={it.warehouse_name || 'Mapped Store'}
+                            size="small"
+                            sx={{ height: 22, fontSize: '0.7rem', bgcolor: '#F1F5F9', color: '#475569', fontWeight: 600, borderRadius: 1.5 }}
                           />
                         </TableCell>
                       )}
@@ -419,17 +606,22 @@ export default function MaterialIssue() {
                         {it.material_id ? inStock : '-'}
                       </TableCell>
                       <TableCell align="center">
-                        <TextField 
-                          size="small" 
-                          type="number" 
+                        <TextField
+                          size="small"
+                          type="number"
                           inputProps={{ step: "1", min: "0", max: String(maxQty) }}
                           onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()}
-                          value={it.issue_qty} 
+                          value={it.issue_qty}
                           disabled={inStock <= 0 || !it.material_id}
                           onChange={e => {
                             const newItems = [...issueModal.items];
-                            const val = Math.round(parseFloat(e.target.value.replace(/-/g, '')) || 0);
-                            newItems[i].issue_qty = Math.max(0, Math.min(val, maxQty));
+                            let valStr = e.target.value.replace(/-/g, '');
+                            if (valStr === '') {
+                              newItems[i].issue_qty = '';
+                            } else {
+                              const val = Math.round(parseFloat(valStr) || 0);
+                              newItems[i].issue_qty = Math.max(0, Math.min(val, maxQty));
+                            }
                             setIssueModal({ ...issueModal, items: newItems });
                           }}
                           sx={{ width: 100 }}
@@ -449,8 +641,8 @@ export default function MaterialIssue() {
             </Table>
           </TableContainer>
 
-          <TextField 
-            fullWidth size="small" label="Remarks" 
+          <TextField
+            fullWidth size="small" label="Remarks"
             value={issueModal.remarks}
             onChange={e => setIssueModal({ ...issueModal, remarks: e.target.value })}
             InputProps={{
@@ -470,6 +662,82 @@ export default function MaterialIssue() {
           <Button onClick={() => setIssueModal({ ...issueModal, open: false })} sx={{ color: '#64748B', fontWeight: 600 }}>Cancel</Button>
           <Button onClick={handleIssueSubmit} variant="contained" color="error" disabled={issueModal.items.every(it => it.issue_qty <= 0)} sx={{ borderRadius: 2, px: 4, py: 1, fontWeight: 700, boxShadow: '0 4px 12px rgba(220, 38, 38, 0.25)', textTransform: 'none' }}>Confirm Issue</Button>
         </DialogActions>
+      </Dialog>
+
+      {/* VIEW COMPLETED ISSUE MODAL */}
+      <Dialog open={viewIssueModal.open} onClose={() => setViewIssueModal({ open: false, issue: null })} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 3 } }}>
+        {viewIssueModal.issue && (
+          <>
+            <DialogTitle sx={{ pb: 1, pt: 3, px: 4 }}>
+              <Typography variant="h6" sx={{ fontWeight: 700 }}>Issue Details - {viewIssueModal.issue.issue_number}</Typography>
+            </DialogTitle>
+            <DialogContent sx={{ p: 4 }}>
+              <Grid container spacing={2} sx={{ mb: 3 }}>
+                <Grid item xs={12} sm={4}>
+                  <Typography variant="caption" color="text.secondary">Date</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>{formatDate(viewIssueModal.issue.created_at)}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Typography variant="caption" color="text.secondary">Issued By</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>{viewIssueModal.issue.issued_by_name || '-'}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Typography variant="caption" color="text.secondary">Project</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>{viewIssueModal.issue.project_name || '-'}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Typography variant="caption" color="text.secondary">Status</Typography>
+                  <Box sx={{ mt: 0.5 }}>
+                    <Chip
+                      label={viewIssueModal.issue.is_acknowledged ? 'Acknowledged' : 'Completed'}
+                      size="small"
+                      color="success"
+                      variant="outlined"
+                      sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }}
+                    />
+                  </Box>
+                </Grid>
+                {viewIssueModal.issue.purpose && (
+                  <Grid item xs={12}>
+                    <Typography variant="caption" color="text.secondary">Purpose / Remarks</Typography>
+                    <Typography variant="body2">{viewIssueModal.issue.purpose}</Typography>
+                  </Grid>
+                )}
+              </Grid>
+
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5, color: '#1E293B' }}>Issued Items</Typography>
+              <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2 }}>
+                <Table size="small">
+                  <TableHead sx={{ bgcolor: '#F8FAFC' }}>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: 700 }}>MATERIAL</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>ISSUED FROM</TableCell>
+                      <TableCell align="center" sx={{ fontWeight: 700 }}>ISSUED QTY</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {viewIssueModal.issue.items?.map((item, idx) => (
+                      <TableRow key={idx}>
+                        <TableCell>
+                          <Typography variant="body2" sx={{ fontWeight: 600, color: '#1E293B' }}>{item.material_name}</Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2" sx={{ fontWeight: 600, color: '#475569' }}>{item.warehouse_name || 'Central Store'}</Typography>
+                        </TableCell>
+                        <TableCell align="center">
+                          <Typography variant="body2" sx={{ fontWeight: 700 }}>{item.quantity} {item.uom_name || 'unit'}</Typography>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </DialogContent>
+            <DialogActions sx={{ px: 4, pb: 4 }}>
+              <Button onClick={() => setViewIssueModal({ open: false, issue: null })} sx={{ color: '#64748B' }}>Close</Button>
+            </DialogActions>
+          </>
+        )}
       </Dialog>
     </Box>
   );

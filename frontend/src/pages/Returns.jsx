@@ -4,7 +4,7 @@ import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
   DialogContent, DialogActions, Grid, Select, FormControl,
-  InputLabel, IconButton, Paper, InputAdornment, MenuItem, Collapse
+  InputLabel, IconButton, Paper, InputAdornment, MenuItem, Collapse, Tooltip
 } from '@mui/material';
 import { Add, Delete, Close, Undo, Warehouse, AccountTree, Business, Person, Comment, InfoOutlined, KeyboardArrowDown, KeyboardArrowUp, CheckCircle, Lock } from '@mui/icons-material';
 import api from '../services/api';
@@ -21,23 +21,23 @@ export default function Returns() {
   const [departments, setDepartments] = useState([]);
 
   // Modal states
-  const [returnModal, setReturnModal] = useState({ 
-    open: false, 
-    warehouse_id: '', 
-    project_id: '', 
+  const [returnModal, setReturnModal] = useState({
+    open: false,
+    warehouse_id: '',
+    project_id: '',
     returned_from_department: '',
     return_type: 'Unused',
     remarks: '',
     returned_by_name: '',
-    items: [] 
+    items: []
   });
-  
+
   const [viewModal, setViewModal] = useState({ open: false, ret: null, items: [] });
 
   const load = async () => {
     try {
       const retRes = await api.get('/api/returns');
-      setReturns(retRes.data.map(r => ({ ...r, status: r.status === 'Received' ? 'Closed' : r.status })));
+      setReturns(retRes.data.map(r => ({ ...r, status: ['Received', 'Closed', 'Completed'].includes(r.status) ? 'Completed' : r.status })));
       const wRes = await api.get('/api/warehouses');
       setWarehouses(wRes.data);
       const pRes = await api.get('/api/projects');
@@ -151,15 +151,15 @@ export default function Returns() {
     <Box>
       <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <Box sx={{ fontSize: '1.5rem' }}>🔄</Box>
+
           <Box>
             <Typography variant="h6" sx={{ fontWeight: 800, color: '#1E293B', lineHeight: 1.2 }}>Return Records</Typography>
             <Typography variant="caption" sx={{ color: '#64748B' }}>View and manage material returns from projects to store.</Typography>
           </Box>
         </Box>
-        <Button 
-          variant="contained" 
-          startIcon={<Add />} 
+        <Button
+          variant="contained"
+          startIcon={<Add />}
           onClick={openReturnModal}
           disabled={!hasAction('returns', 'can_return') && !hasAction('issues', 'can_issue')} // Fallback to issues permission if returns not defined yet
           sx={{ textTransform: 'none', borderRadius: 2, fontWeight: 700, px: 3, bgcolor: '#2563EB' }}
@@ -192,10 +192,10 @@ export default function Returns() {
               </TableHead>
               <TableBody>
                 {returns.map(ret => (
-                  <TableRow 
-                    key={ret.id} 
-                    hover 
-                    onClick={() => openViewModal(ret)} 
+                  <TableRow
+                    key={ret.id}
+                    hover
+                    onClick={() => openViewModal(ret)}
                     sx={{ cursor: 'pointer', '&:last-child td, &:last-child th': { border: 0 } }}
                   >
                     <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.8rem', px: 2 }}>{ret.return_number}</TableCell>
@@ -207,25 +207,27 @@ export default function Returns() {
                       <Chip label={ret.items?.length || 0} size="small" sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem', bgcolor: '#F1F5F9', color: '#475569' }} />
                     </TableCell>
                     <TableCell sx={{ px: 2 }}>
-                      <Chip label={ret.status} size="small" color={ret.status === 'Closed' ? 'error' : (ret.status === 'Partially Received' ? 'info' : (ret.status === 'Initiated' ? 'success' : 'default'))} variant="outlined" sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} />
+                      <Chip label={ret.status} size="small" color={ret.status === 'Completed' ? 'error' : (ret.status === 'Partially Received' ? 'info' : (ret.status === 'Initiated' ? 'success' : 'default'))} variant="outlined" sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} />
                     </TableCell>
                     <TableCell align="right" sx={{ px: 2, whiteSpace: 'nowrap' }}>
-                      <IconButton 
-                        size="small" 
-                        disabled={ret.status === 'Closed'}
-                        onClick={(e) => { e.stopPropagation(); openViewModal(ret); }} 
-                        sx={{ color: ret.status === 'Closed' ? 'action.disabled' : '#10B981', mr: 1 }}
+                      <IconButton
+                        size="small"
+                        disabled={ret.status === 'Completed'}
+                        onClick={(e) => { e.stopPropagation(); openViewModal(ret); }}
+                        sx={{ color: ret.status === 'Completed' ? 'action.disabled' : '#10B981', mr: 1 }}
                       >
                         <CheckCircle fontSize="small" />
                       </IconButton>
-                      <IconButton 
-                        size="small" 
-                        disabled={ret.status === 'Closed'}
-                        onClick={(e) => { e.stopPropagation(); openViewModal(ret); }} 
-                        sx={{ color: ret.status === 'Closed' ? 'action.disabled' : '#EF4444' }}
-                      >
-                        <Lock fontSize="small" />
-                      </IconButton>
+                      <Tooltip title="Complete Return">
+                        <IconButton
+                          size="small"
+                          disabled={ret.status === 'Completed'}
+                          onClick={(e) => { e.stopPropagation(); openViewModal(ret); }}
+                          sx={{ color: ret.status === 'Completed' ? 'action.disabled' : '#EF4444' }}
+                        >
+                          <Lock fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -256,9 +258,9 @@ export default function Returns() {
             <Grid item xs={12} sm={4}>
               <FormControl fullWidth size="small">
                 <InputLabel>Target Store</InputLabel>
-                <Select 
+                <Select
                   label="Target Store"
-                  value={returnModal.warehouse_id} 
+                  value={returnModal.warehouse_id}
                   onChange={e => setReturnModal({ ...returnModal, warehouse_id: e.target.value })}
                   startAdornment={<InputAdornment position="start"><Warehouse sx={{ color: '#94A3B8', fontSize: 20, mr: 1 }} /></InputAdornment>}
                   disabled
@@ -270,9 +272,9 @@ export default function Returns() {
             <Grid item xs={12} sm={4}>
               <FormControl fullWidth size="small">
                 <InputLabel>Department / Unit</InputLabel>
-                <Select 
+                <Select
                   label="Department / Unit"
-                  value={returnModal.returned_from_department} 
+                  value={returnModal.returned_from_department}
                   onChange={e => setReturnModal({ ...returnModal, returned_from_department: e.target.value })}
                   startAdornment={<InputAdornment position="start"><Business sx={{ color: '#94A3B8', fontSize: 20, mr: 1 }} /></InputAdornment>}
                 >
@@ -281,8 +283,8 @@ export default function Returns() {
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={4}>
-              <TextField 
-                fullWidth size="small" label="Returned By" 
+              <TextField
+                fullWidth size="small" label="Returned By"
                 value={returnModal.returned_by_name}
                 onChange={e => setReturnModal({ ...returnModal, returned_by_name: e.target.value })}
                 InputProps={{
@@ -291,8 +293,8 @@ export default function Returns() {
               />
             </Grid>
             <Grid item xs={12}>
-              <TextField 
-                fullWidth size="small" label="General Remarks" 
+              <TextField
+                fullWidth size="small" label="General Remarks"
                 value={returnModal.remarks}
                 onChange={e => setReturnModal({ ...returnModal, remarks: e.target.value })}
                 InputProps={{
@@ -321,26 +323,26 @@ export default function Returns() {
                 {returnModal.items.map((item, idx) => (
                   <TableRow key={idx}>
                     <TableCell>
-                      <MaterialSelect 
-                        materials={materials} 
-                        value={item.material_id} 
+                      <MaterialSelect
+                        materials={materials}
+                        value={item.material_id}
                         onChange={(val) => updateReturnItem(idx, 'material_id', val)}
                       />
                     </TableCell>
                     <TableCell align="right" sx={{ width: 120 }}>
-                      <TextField 
-                        size="small" 
-                        type="number" 
+                      <TextField
+                        size="small"
+                        type="number"
                         inputProps={{ step: "1", min: "0" }}
                         onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()}
-                        fullWidth 
-                        value={item.quantity} 
-                        onChange={e => updateReturnItem(idx, 'quantity', Math.round(parseFloat(e.target.value.replace(/-/g, '')) || 0))} 
+                        fullWidth
+                        value={item.quantity}
+                        onChange={e => updateReturnItem(idx, 'quantity', Math.round(parseFloat(e.target.value.replace(/-/g, '')) || 0))}
                       />
                     </TableCell>
                     <TableCell>
-                      <TextField 
-                        size="small" fullWidth value={item.remarks} 
+                      <TextField
+                        size="small" fullWidth value={item.remarks}
                         onChange={e => updateReturnItem(idx, 'remarks', e.target.value)}
                         InputProps={{
                           startAdornment: <InputAdornment position="start"><Comment sx={{ color: '#94A3B8', fontSize: 16 }} /></InputAdornment>,
@@ -366,12 +368,12 @@ export default function Returns() {
         </DialogContent>
         <DialogActions sx={{ px: 4, pb: 4, pt: 2, justifyContent: 'flex-end', gap: 2 }}>
           <Button onClick={() => setReturnModal({ ...returnModal, open: false })} sx={{ color: '#64748B', fontWeight: 600 }}>Cancel</Button>
-          <Button 
-            onClick={handleReturnSubmit} 
-            variant="contained" 
+          <Button
+            onClick={handleReturnSubmit}
+            variant="contained"
             sx={{ borderRadius: 2, px: 4, py: 1, fontWeight: 700, bgcolor: '#2563EB', '&:hover': { bgcolor: '#1D4ED8' }, textTransform: 'none' }}
           >
-            Confirm Return
+            Initiate Return
           </Button>
         </DialogActions>
       </Dialog>
@@ -405,7 +407,7 @@ export default function Returns() {
                 <Grid item xs={12} sm={4}>
                   <Typography variant="caption" color="text.secondary">Status</Typography>
                   <Box sx={{ mt: 0.5 }}>
-                    <Chip label={viewModal.ret.status} size="small" color={viewModal.ret.status === 'Closed' ? 'error' : (viewModal.ret.status === 'Partially Received' ? 'info' : (viewModal.ret.status === 'Initiated' ? 'success' : 'default'))} sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} />
+                    <Chip label={viewModal.ret.status} size="small" color={viewModal.ret.status === 'Completed' ? 'error' : (viewModal.ret.status === 'Partially Received' ? 'info' : (viewModal.ret.status === 'Initiated' ? 'success' : 'default'))} sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} />
                   </Box>
                 </Grid>
               </Grid>
@@ -434,23 +436,23 @@ export default function Returns() {
                         {['Initiated', 'Partially Received'].includes(viewModal.ret.status) ? (
                           <>
                             <TableCell align="center">
-                              <TextField 
-                                size="small" 
-                                type="number" 
+                              <TextField
+                                size="small"
+                                type="number"
                                 inputProps={{ step: "1", min: "0", max: item.returned_qty }}
                                 onKeyDown={e => ['-', '+', 'e', 'E', '.'].includes(e.key) && e.preventDefault()}
                                 sx={{ width: 100 }}
-                                value={item.received_qty} 
+                                value={item.received_qty}
                                 onChange={e => {
                                   const newItems = [...viewModal.items];
                                   newItems[idx].received_qty = e.target.value ? Math.round(parseFloat(e.target.value.replace(/-/g, ''))) : '';
                                   setViewModal({ ...viewModal, items: newItems });
-                                }} 
+                                }}
                               />
                             </TableCell>
                             <TableCell>
-                              <TextField 
-                                size="small" fullWidth value={item.receipt_remarks} 
+                              <TextField
+                                size="small" fullWidth value={item.receipt_remarks}
                                 placeholder="Variance notes"
                                 onChange={e => {
                                   const newItems = [...viewModal.items];

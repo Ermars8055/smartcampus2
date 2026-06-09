@@ -102,9 +102,8 @@ export default function PurchaseOrders() {
     }));
   };
 
-  const sortedPOs = useMemo(() => {
-    let list = pos.filter(po => tabValue === 'All' || po.status === tabValue);
-
+  const filteredPOsBase = useMemo(() => {
+    let list = pos;
     if (search) {
       const s = search.toLowerCase();
       list = list.filter(po =>
@@ -114,10 +113,14 @@ export default function PurchaseOrders() {
         (po.qr_number && po.qr_number.toLowerCase().includes(s))
       );
     }
-
     if (filterVendor) {
       list = list.filter(po => po.vendor_id === filterVendor.id);
     }
+    return list;
+  }, [pos, search, filterVendor]);
+
+  const sortedPOs = useMemo(() => {
+    let list = filteredPOsBase.filter(po => tabValue === 'All' || po.status === tabValue);
 
     if (sortConfig.key) {
       list.sort((a, b) => {
@@ -137,7 +140,7 @@ export default function PurchaseOrders() {
       });
     }
     return list;
-  }, [pos, sortConfig, tabValue, search, filterVendor]);
+  }, [filteredPOsBase, sortConfig, tabValue]);
 
   const calculatePOTotalNet = (po) => {
     if (!po || !po.items) return 0;
@@ -696,7 +699,7 @@ export default function PurchaseOrders() {
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   {s}
                   <Chip
-                    label={s === 'All' ? pos.length : pos.filter(po => po.status === s).length}
+                    label={s === 'All' ? filteredPOsBase.length : filteredPOsBase.filter(po => po.status === s).length}
                     size="small"
                     sx={{ height: 20, fontSize: '0.7rem', fontWeight: 600, bgcolor: tabValue === s ? 'primary.main' : 'action.selected', color: tabValue === s ? 'white' : 'text.primary' }}
                   />

@@ -6,69 +6,10 @@ import {
   DialogContent, DialogActions, Grid, Select, FormControl,
   InputLabel, IconButton, Paper, InputAdornment, MenuItem, Collapse
 } from '@mui/material';
-import { Add, Delete, Close, SwapHoriz, Warehouse, AccountTree, Comment, InfoOutlined, KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
+import { Add, Delete, Close, SwapHoriz, Warehouse, AccountTree, Comment, InfoOutlined, CheckCircle } from '@mui/icons-material';
 import api from '../services/api';
 import MaterialSelect from '../components/MaterialSelect';
 import { useAuth } from '../context/AuthContext';
-
-function TransferRow({ trf }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <>
-      <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
-        <TableCell>
-          <IconButton aria-label="expand row" size="small" onClick={() => setOpen(!open)}>
-            {open ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
-          </IconButton>
-        </TableCell>
-        <TableCell sx={{ fontWeight: 600 }}>{trf.transfer_number}</TableCell>
-        <TableCell>{formatDate(trf.created_at)}</TableCell>
-        <TableCell sx={{ fontWeight: 600, color: '#475569' }}>{trf.from_warehouse_name}</TableCell>
-        <TableCell sx={{ fontWeight: 600, color: '#0F172A' }}>{trf.to_warehouse_name}</TableCell>
-        <TableCell><Chip label={trf.status} size="small" color="success" sx={{ fontWeight: 700, height: 20, fontSize: '0.65rem' }} /></TableCell>
-      </TableRow>
-      <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-          <Collapse in={open} timeout="auto" unmountOnExit>
-            <Box sx={{ margin: 2, borderLeft: '2px solid #2563EB', pl: 2 }}>
-              <Typography variant="subtitle2" gutterBottom component="div" sx={{ fontWeight: 700, color: '#1E293B' }}>
-                Transferred Items
-              </Typography>
-              {trf.project_name && (
-                <Typography variant="caption" sx={{ color: '#64748B', display: 'block', mb: 1 }}>
-                  Project: {trf.project_name}
-                </Typography>
-              )}
-              <Table size="small" aria-label="items">
-                <TableHead sx={{ bgcolor: '#F1F5F9' }}>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem', color: '#475569' }}>MATERIAL</TableCell>
-                    <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem', color: '#475569' }}>QTY</TableCell>
-                    <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem', color: '#475569' }}>REMARKS</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {trf.items?.map((item, idx) => (
-                    <TableRow key={idx}>
-                      <TableCell sx={{ fontWeight: 600 }}>{item.material_name}</TableCell>
-                      <TableCell>{item.quantity} {item.uom_name}</TableCell>
-                      <TableCell sx={{ color: '#64748B' }}>{item.remarks || '-'}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              {trf.remarks && (
-                  <Typography variant="caption" sx={{ color: '#64748B', fontStyle: 'italic', mt: 1, display: 'block' }}>
-                    Note: {trf.remarks}
-                  </Typography>
-              )}
-            </Box>
-          </Collapse>
-        </TableCell>
-      </TableRow>
-    </>
-  );
-}
 
 export default function StockTransfers() {
   const { hasAction } = useAuth();
@@ -86,6 +27,11 @@ export default function StockTransfers() {
     remarks: '',
     items: [{ material_id: '', quantity: 0, remarks: '' }]
   });
+  const [viewTransferModal, setViewTransferModal] = useState({ open: false, transfer: null });
+
+  const openViewTransferModal = (transfer) => {
+    setViewTransferModal({ open: true, transfer });
+  };
 
   const load = async () => {
     try {
@@ -171,7 +117,7 @@ export default function StockTransfers() {
     <Box>
       <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <Box sx={{ fontSize: '1.5rem' }}>🚛</Box>
+
           <Box>
             <Typography variant="h6" sx={{ fontWeight: 800, color: '#1E293B', lineHeight: 1.2 }}>Stock Transfers</Typography>
             <Typography variant="caption" sx={{ color: '#64748B' }}>Monitor and record material movements between different locations.</Typography>
@@ -195,25 +141,53 @@ export default function StockTransfers() {
           <Typography variant="body2" color="textSecondary">Stock transfers between locations will appear here.</Typography>
         </Card>
       ) : (
-        <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2, border: '1px solid #E2E8F0' }}>
-          <Table aria-label="transfers table">
-            <TableHead sx={{ bgcolor: '#F8FAFC' }}>
-              <TableRow>
-                <TableCell sx={{ width: 50 }} />
-                <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.8rem' }}>TRANSFER #</TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.8rem' }}>DATE</TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.8rem' }}>FROM WAREHOUSE</TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.8rem' }}>TO WAREHOUSE</TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.8rem' }}>STATUS</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {transfers.map(trf => (
-                <TransferRow key={trf.id} trf={trf} />
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+        <Card sx={{ borderRadius: 2, overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+          <TableContainer>
+            <Table size="small" aria-label="transfers table">
+              <TableHead sx={{ bgcolor: '#F8FAFC' }}>
+                <TableRow>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2, py: 1.5 }}>TRANSFER #</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>DATE</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>FROM WAREHOUSE</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>TO WAREHOUSE</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>ITEMS</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>STATUS</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>ACTIONS</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {transfers.map(trf => (
+                  <TableRow 
+                    key={trf.id} 
+                    hover 
+                    onClick={() => openViewTransferModal(trf)}
+                    sx={{ cursor: 'pointer', '&:last-child td, &:last-child th': { border: 0 } }}
+                  >
+                    <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.8rem', px: 2 }}>{trf.transfer_number}</TableCell>
+                    <TableCell sx={{ fontSize: '0.8rem', px: 2 }}>{formatDate(trf.created_at)}</TableCell>
+                    <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>{trf.from_warehouse_name}</TableCell>
+                    <TableCell sx={{ fontWeight: 600, color: '#0F172A', fontSize: '0.8rem', px: 2 }}>{trf.to_warehouse_name}</TableCell>
+                    <TableCell align="center" sx={{ fontSize: '0.8rem', px: 2 }}>
+                      <Chip label={trf.items?.length || 0} size="small" sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem', bgcolor: '#F1F5F9', color: '#475569' }} />
+                    </TableCell>
+                    <TableCell sx={{ px: 2 }}>
+                      <Chip label={trf.status} size="small" color="success" variant="outlined" sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} />
+                    </TableCell>
+                    <TableCell align="right" sx={{ px: 2, whiteSpace: 'nowrap' }}>
+                      <IconButton 
+                        size="small" 
+                        onClick={(e) => { e.stopPropagation(); openViewTransferModal(trf); }}
+                        sx={{ color: '#64748B' }}
+                      >
+                        <CheckCircle fontSize="small" />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Card>
       )}
 
       {/* STOCK TRANSFER MODAL */}
@@ -357,6 +331,86 @@ export default function StockTransfers() {
             Complete Transfer
           </Button>
         </DialogActions>
+      </Dialog>
+
+      {/* VIEW TRANSFER MODAL */}
+      <Dialog open={viewTransferModal.open} onClose={() => setViewTransferModal({ open: false, transfer: null })} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 3 } }}>
+        {viewTransferModal.transfer && (
+          <>
+            <DialogTitle sx={{ pb: 1, pt: 3, px: 4 }}>
+              <Typography variant="h6" sx={{ fontWeight: 700 }}>Transfer Details - {viewTransferModal.transfer.transfer_number}</Typography>
+            </DialogTitle>
+            <DialogContent sx={{ p: 4 }}>
+              <Grid container spacing={2} sx={{ mb: 3 }}>
+                <Grid item xs={12} sm={4}>
+                  <Typography variant="caption" color="text.secondary">Date</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>{formatDate(viewTransferModal.transfer.created_at)}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Typography variant="caption" color="text.secondary">From Store</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>{viewTransferModal.transfer.from_warehouse_name}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Typography variant="caption" color="text.secondary">To Store</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>{viewTransferModal.transfer.to_warehouse_name}</Typography>
+                </Grid>
+                {viewTransferModal.transfer.project_name && (
+                  <Grid item xs={12} sm={4}>
+                    <Typography variant="caption" color="text.secondary">Project</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{viewTransferModal.transfer.project_name}</Typography>
+                  </Grid>
+                )}
+                <Grid item xs={12} sm={4}>
+                  <Typography variant="caption" color="text.secondary">Status</Typography>
+                  <Box sx={{ mt: 0.5 }}>
+                    <Chip 
+                      label={viewTransferModal.transfer.status} 
+                      size="small" 
+                      color="success" 
+                      variant="outlined"
+                      sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} 
+                    />
+                  </Box>
+                </Grid>
+                {viewTransferModal.transfer.remarks && (
+                  <Grid item xs={12}>
+                    <Typography variant="caption" color="text.secondary">Remarks</Typography>
+                    <Typography variant="body2">{viewTransferModal.transfer.remarks}</Typography>
+                  </Grid>
+                )}
+              </Grid>
+
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5, color: '#1E293B' }}>Transferred Items</Typography>
+              <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2 }}>
+                <Table size="small">
+                  <TableHead sx={{ bgcolor: '#F8FAFC' }}>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: 700 }}>MATERIAL</TableCell>
+                      <TableCell align="center" sx={{ fontWeight: 700 }}>QTY</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>REMARKS</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {viewTransferModal.transfer.items?.map((item, idx) => (
+                      <TableRow key={idx}>
+                        <TableCell>
+                          <Typography variant="body2" sx={{ fontWeight: 600, color: '#1E293B' }}>{item.material_name}</Typography>
+                        </TableCell>
+                        <TableCell align="center">
+                          <Typography variant="body2" sx={{ fontWeight: 700 }}>{item.quantity} {item.uom_name || 'unit'}</Typography>
+                        </TableCell>
+                        <TableCell sx={{ color: '#64748B' }}>{item.remarks || '-'}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </DialogContent>
+            <DialogActions sx={{ px: 4, pb: 4 }}>
+              <Button onClick={() => setViewTransferModal({ open: false, transfer: null })} sx={{ color: '#64748B' }}>Close</Button>
+            </DialogActions>
+          </>
+        )}
       </Dialog>
     </Box>
   );

@@ -54,10 +54,12 @@ export default function Indents() {
     setOrderBy(property);
   };
 
-  const sortedIndents = [...indents]
-    .filter(i => tabValue === 'All' || i.status === tabValue)
+  const filteredIndentsBase = indents
     .filter(i => !filterDepartment || i.department === filterDepartment)
-    .filter(i => !filterBuilding || i.building_id === filterBuilding.id || i.building_name === filterBuilding.name)
+    .filter(i => !filterBuilding || i.building_id === filterBuilding.id || i.building_name === filterBuilding.name);
+
+  const sortedIndents = [...filteredIndentsBase]
+    .filter(i => tabValue === 'All' || i.status === tabValue)
     .sort((a, b) => {
       let valA = a[orderBy] || '';
       let valB = b[orderBy] || '';
@@ -656,8 +658,8 @@ export default function Indents() {
           scrollButtons="auto"
           sx={{ borderBottom: 1, borderColor: 'divider' }}
         >
-          {['All', 'Awaiting Approval', 'Approved', 'Rejected', 'Partially Issued', 'Fully Issued', 'PO Created', 'Closed'].map(s => {
-            const count = s === 'All' ? indents.length : indents.filter(i => i.status === s).length;
+          {['All', 'Awaiting Approval', 'Approved', 'Rejected', 'Partially Issued', 'Issued', 'Converted to PO', 'Closed'].map(s => {
+            const count = s === 'All' ? filteredIndentsBase.length : filteredIndentsBase.filter(i => i.status === s).length;
             if (s !== 'All' && count === 0 && !['Awaiting Approval', 'Approved', 'Partially Issued'].includes(s)) return null;
             return (
               <Tab

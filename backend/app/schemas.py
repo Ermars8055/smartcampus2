@@ -925,6 +925,8 @@ class IssueItemOut(IssueItemBase):
     material_name: Optional[str] = None
     material_code: Optional[str] = None
     uom_name: Optional[str] = None
+    warehouse_id: Optional[int] = None
+    warehouse_name: Optional[str] = None
     class Config:
         from_attributes = True
 

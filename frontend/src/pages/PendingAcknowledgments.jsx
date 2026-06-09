@@ -82,15 +82,11 @@ export default function PendingAcknowledgments() {
                           <Typography variant="body2" sx={{ fontWeight: 700, color: '#451A03' }}>{iss.issued_by_name || 'Store Admin'}</Typography>
                         </Box>
                         <Box>
-                          <Typography variant="caption" sx={{ color: '#92400E', fontWeight: 600, display: 'block', mb: 0.25 }}>Issued from:</Typography>
-                          <Typography variant="body2" sx={{ fontWeight: 700, color: '#451A03' }}>{iss.warehouse_name || 'Central Store'}</Typography>
-                        </Box>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <Box sx={{ mb: 1.5 }}>
                           <Typography variant="caption" sx={{ color: '#92400E', fontWeight: 600, display: 'block', mb: 0.25 }}>Remarks:</Typography>
                           <Typography variant="body2" sx={{ fontWeight: 700, color: '#451A03' }}>{iss.purpose || 'Issued from store'}</Typography>
                         </Box>
+                      </Grid>
+                      <Grid item xs={6}>
                         <Box>
                           <Typography variant="caption" sx={{ color: '#92400E', fontWeight: 600, display: 'block', mb: 0.25 }}>Issued to:</Typography>
                           <Typography variant="body2" sx={{ fontWeight: 700, color: '#451A03' }}>
@@ -114,6 +110,7 @@ export default function PendingAcknowledgments() {
                         <TableHead sx={{ bgcolor: '#F8FAFC' }}>
                           <TableRow>
                             <TableCell sx={{ fontWeight: 700, color: '#64748B' }}>ITEM</TableCell>
+                            <TableCell sx={{ fontWeight: 700, color: '#64748B' }}>ISSUED FROM</TableCell>
                             <TableCell align="center" sx={{ fontWeight: 700, color: '#64748B' }}>UNIT</TableCell>
                             <TableCell align="center" sx={{ fontWeight: 700, color: '#64748B' }}>QTY</TableCell>
                           </TableRow>
@@ -122,6 +119,7 @@ export default function PendingAcknowledgments() {
                           {iss.items?.map((item, idx) => (
                             <TableRow key={idx} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                               <TableCell sx={{ fontWeight: 700, color: '#1E293B' }}>{item.material_name}</TableCell>
+                              <TableCell sx={{ color: '#475569', fontWeight: 600 }}>{item.warehouse_name || 'Central Store'}</TableCell>
                               <TableCell align="center" sx={{ color: '#64748B' }}>{item.uom_name || 'Unit'}</TableCell>
                               <TableCell align="center" sx={{ fontWeight: 800, color: '#1E293B' }}>{item.quantity}</TableCell>
                             </TableRow>

@@ -81,8 +81,11 @@ def list_issues(
         items = []
         for item in iss.items:
             mat = item.material
+            wh = item.warehouse
             items.append(IssueItemOut(
                 id=item.id, material_id=item.material_id,
+                warehouse_id=item.warehouse_id,
+                warehouse_name=wh.name if wh else None,
                 quantity=round(item.quantity or 0), rate=item.rate,
                 remarks=item.remarks,
                 material_name=mat.name if mat else None,
@@ -139,19 +142,16 @@ def create_issue(
             except: pass
 
     try:
-        # Group items by their material's default warehouse
-        items_by_warehouse = {}
+        processed_items = []
         for item_data in data.items:
             mat = db.query(Material).filter(Material.id == item_data.material_id, Material.tenant_id == tenant_id, Material.site_id == site_id).first()
             if not mat: continue
-            w_id = mat.warehouse_id or data.warehouse_id # Fallback to global if set
+            w_id = mat.warehouse_id or data.warehouse_id
             if not w_id:
                 raise HTTPException(400, f"No warehouse mapped for {mat.name}")
-            if w_id not in items_by_warehouse:
-                items_by_warehouse[w_id] = []
-            items_by_warehouse[w_id].append((item_data, mat))
+            processed_items.append((item_data, mat, w_id))
 
-        if not items_by_warehouse:
+        if not processed_items:
             raise HTTPException(400, "No valid items to issue")
 
         room_id = data.issued_to_room_id
@@ -219,68 +219,68 @@ def create_issue(
                             detail=f"The limit per month for '{mat_name}' is {int(limit_obj.monthly_limit)}. You can issue only {int(remaining)} more."
                         )
 
-        created_issues = []
-        for w_id, items in items_by_warehouse.items():
-            issue_number = get_next_number(db, tenant_id, site_id, "ISSUE", "ISS")
-            issue = MaterialIssue(
-                issue_number=issue_number,
+        header_w_id = data.warehouse_id or processed_items[0][2]
+        issue_number = get_next_number(db, tenant_id, site_id, "ISSUE", "ISS")
+        issue = MaterialIssue(
+            issue_number=issue_number,
+            warehouse_id=header_w_id,
+            project_id=data.project_id,
+            indent_id=data.indent_id,
+            building_id=building_id,
+            issued_to_room_id=room_id,
+            issued_to_department=issued_to_dept,
+            issued_to_contractor=data.issued_to_contractor,
+            purpose=data.purpose,
+            received_by_name=data.received_by_name,
+            issued_by_id=current_user.id,
+            status="Completed",
+            tenant_id=tenant_id,
+            site_id=site_id
+        )
+        db.add(issue)
+        db.flush()
+
+        for item_data, mat, w_id in processed_items:
+            # Check stock
+            stock = db.query(CurrentStock).filter(
+                CurrentStock.material_id == item_data.material_id,
+                CurrentStock.warehouse_id == w_id,
+                CurrentStock.tenant_id == tenant_id,
+                CurrentStock.site_id == site_id
+            ).first()
+            if not stock or stock.quantity < item_data.quantity:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Insufficient stock for {mat.name} in mapped warehouse"
+                )
+
+            rate = mat.standard_cost or 0.0
+            issue_item = MaterialIssueItem(
+                issue_id=issue.id,
+                material_id=item_data.material_id,
                 warehouse_id=w_id,
-                project_id=data.project_id,
-                indent_id=data.indent_id,
-                building_id=building_id,
-                issued_to_room_id=room_id,
-                issued_to_department=issued_to_dept,
-                issued_to_contractor=data.issued_to_contractor,
-                purpose=data.purpose,
-                received_by_name=data.received_by_name,
-                issued_by_id=current_user.id,
-                status="Completed",
-                tenant_id=tenant_id,
-                site_id=site_id
+                quantity=round(item_data.quantity),
+                rate=rate,
+                remarks=item_data.remarks
             )
-            db.add(issue)
-            db.flush()
+            db.add(issue_item)
 
-            for item_data, mat in items:
-                # Check stock
-                stock = db.query(CurrentStock).filter(
-                    CurrentStock.material_id == item_data.material_id,
-                    CurrentStock.warehouse_id == w_id,
-                    CurrentStock.tenant_id == tenant_id,
-                    CurrentStock.site_id == site_id
-                ).first()
-                if not stock or stock.quantity < item_data.quantity:
-                    raise HTTPException(
-                        status_code=400,
-                        detail=f"Insufficient stock for {mat.name} in mapped warehouse"
-                    )
-
-                rate = mat.standard_cost or 0.0
-                issue_item = MaterialIssueItem(
-                    issue_id=issue.id,
-                    material_id=item_data.material_id,
-                    quantity=round(item_data.quantity),
-                    rate=rate,
-                    remarks=item_data.remarks
-                )
-                db.add(issue_item)
-
-                update_stock(
-                    db=db,
-                    material_id=item_data.material_id,
-                    warehouse_id=w_id,
-                    quantity=-item_data.quantity,
-                    transaction_type="Issue",
-                    reference_type="Issue",
-                    reference_id=issue.id,
-                    reference_number=issue_number,
-                    tenant_id=tenant_id,
-                    site_id=site_id,
-                    project_id=data.project_id,
-                    room_id=room_id,
-                    user_id=current_user.id
-                )
-            created_issues.append({"id": issue.id, "issue_number": issue_number})
+            update_stock(
+                db=db,
+                material_id=item_data.material_id,
+                warehouse_id=w_id,
+                quantity=-item_data.quantity,
+                transaction_type="Issue",
+                reference_type="Issue",
+                reference_id=issue.id,
+                reference_number=issue_number,
+                tenant_id=tenant_id,
+                site_id=site_id,
+                project_id=data.project_id,
+                room_id=room_id,
+                user_id=current_user.id
+            )
+        created_issues = [{"id": issue.id, "issue_number": issue_number}]
 
         # Update indent items
         if data.indent_id:
@@ -469,7 +469,7 @@ def receive_return(
     if not ret:
         raise HTTPException(status_code=404, detail="Return not found")
     
-    if ret.status == "Closed":
+    if ret.status == "Completed":
         raise HTTPException(status_code=400, detail="Return has already been fully received")
 
     total_returned = 0
@@ -523,7 +523,7 @@ def receive_return(
         total_received += (ret_item.received_qty or 0)
 
     if total_received == total_returned:
-        ret.status = "Closed"
+        ret.status = "Completed"
     else:
         ret.status = "Partially Received"
 

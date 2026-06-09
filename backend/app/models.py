@@ -826,11 +826,13 @@ class MaterialIssueItem(Base):
     id = Column(Integer, primary_key=True, index=True)
     issue_id = Column(Integer, ForeignKey("material_issues.id"), nullable=False)
     material_id = Column(Integer, ForeignKey("materials.id"), nullable=False)
+    warehouse_id = Column(Integer, ForeignKey("warehouses.id"), nullable=True)
     quantity = Column(Float, nullable=False)
     rate = Column(Float, default=0)
     remarks = Column(Text)
     issue = relationship("MaterialIssue", back_populates="items")
     material = relationship("Material")
+    warehouse = relationship("Warehouse")
 
 class MaterialReturn(Base):
     __tablename__ = "material_returns"

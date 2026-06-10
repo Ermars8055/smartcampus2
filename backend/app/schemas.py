@@ -736,7 +736,7 @@ class InvoiceBase(BaseModel):
     items: List[InvoiceItemBase] = []
 
 class InvoiceCreate(InvoiceBase):
-    pass
+    status: Optional[str] = "Draft"
 
 class InvoiceUpdate(BaseModel):
     invoice_number: Optional[str] = None
@@ -780,6 +780,7 @@ class InvoiceUpdate(BaseModel):
     status: Optional[str] = None
     scan_url: Optional[str] = None
     remarks: Optional[str] = None
+    items: Optional[List[InvoiceItemBase]] = None
 
 class InvoiceOut(InvoiceBase):
     id: int
@@ -1049,11 +1050,22 @@ class TransferItemBase(BaseModel):
 
 class TransferItemOut(TransferItemBase):
     id: int
+    received_qty: Optional[float] = None
+    variance_qty: Optional[float] = None
+    receipt_remarks: Optional[str] = None
     material_name: Optional[str] = None
     material_code: Optional[str] = None
     uom_name: Optional[str] = None
     class Config:
         from_attributes = True
+
+class TransferReceiptItem(BaseModel):
+    transfer_item_id: int
+    received_qty: float = Field(..., ge=0)
+    receipt_remarks: Optional[str] = None
+
+class TransferReceiptRequest(BaseModel):
+    items: List[TransferReceiptItem] = []
 
 class TransferBase(BaseModel):
     from_warehouse_id: int
@@ -1075,9 +1087,11 @@ class TransferOut(BaseModel):
     remarks: Optional[str] = None
     created_at: datetime
     completed_at: Optional[datetime] = None
+    received_date: Optional[datetime] = None
     from_warehouse_name: Optional[str] = None
     to_warehouse_name: Optional[str] = None
     project_name: Optional[str] = None
+    received_by_name: Optional[str] = None
     items: List[TransferItemOut] = []
     class Config:
         from_attributes = True
@@ -1502,6 +1516,7 @@ class GatePassItemOut(GatePassItemBase):
 
 class GatePassCreate(BaseModel):
     gate_pass_type: str = "Returnable"
+    reason_code: Optional[str] = None
     project_id: int
     vendor_id: Optional[int] = None
     vendor_custom_name: Optional[str] = None
@@ -1516,6 +1531,8 @@ class GatePassCreate(BaseModel):
 class GatePassUpdate(BaseModel):
     status: str
     remarks: Optional[str] = None
+    gate_entry_number: Optional[str] = None
+    grn_number: Optional[str] = None
     completed_by_name: Optional[str] = None
     completed_at: Optional[datetime] = None
 
@@ -1523,6 +1540,7 @@ class GatePassOut(BaseModel):
     id: int
     gate_pass_number: str
     gate_pass_type: str
+    reason_code: Optional[str] = None
     project_id: int
     project_name: Optional[str] = None
     vendor_id: Optional[int] = None
@@ -1537,6 +1555,8 @@ class GatePassOut(BaseModel):
     driver_name: Optional[str] = None
     vehicle_number: Optional[str] = None
     remarks: Optional[str] = None
+    gate_entry_number: Optional[str] = None
+    grn_number: Optional[str] = None
     created_at: datetime
     completed_by_name: Optional[str] = None
     completed_at: Optional[datetime] = None

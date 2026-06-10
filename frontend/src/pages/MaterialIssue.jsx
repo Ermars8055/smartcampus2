@@ -59,14 +59,6 @@ export default function MaterialIssue() {
   const [tabValue, setTabValue] = useState('Pending');
   const [sortConfig, setSortConfig] = useState({ key: 'sortDate', direction: 'desc' });
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortOption, setSortOption] = useState('sortDate-desc');
-
-  const handleSortOptionChange = (e) => {
-    const val = e.target.value;
-    setSortOption(val);
-    const [key, direction] = val.split('-');
-    setSortConfig({ key, direction });
-  };
 
   const handleDepartmentChange = (newDept) => {
     if (newDept) {
@@ -141,7 +133,6 @@ export default function MaterialIssue() {
     const isAsc = sortConfig.key === property && sortConfig.direction === 'asc';
     const newDir = isAsc ? 'desc' : 'asc';
     setSortConfig({ key: property, direction: newDir });
-    setSortOption(`${property}-${newDir}`);
   };
 
   const combinedList = useMemo(() => {
@@ -328,6 +319,23 @@ export default function MaterialIssue() {
         </Button>
       </Box>
 
+      <Box sx={{ mb: 3 }}>
+        <TextField
+          size="small"
+          placeholder="Search by Record No (e.g. IND-0001)..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search sx={{ color: 'text.secondary', fontSize: 20 }} />
+              </InputAdornment>
+            ),
+          }}
+          sx={{ bgcolor: 'white', borderRadius: 1, minWidth: 300, width: '100%', maxWidth: 400 }}
+        />
+      </Box>
+
       <Card sx={{ mb: 3 }}>
         <Tabs
           value={tabValue}
@@ -359,36 +367,6 @@ export default function MaterialIssue() {
           })}
         </Tabs>
       </Card>
-
-      <Box sx={{ mb: 3, display: 'flex', gap: 2, alignItems: 'center' }}>
-        <TextField
-          size="small"
-          placeholder="Search by Record No (e.g. IND-0001)..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Search sx={{ color: 'text.secondary', fontSize: 20 }} />
-              </InputAdornment>
-            ),
-          }}
-          sx={{ bgcolor: 'white', borderRadius: 1, minWidth: 300 }}
-        />
-        <FormControl size="small" sx={{ minWidth: 200 }}>
-          <Select
-            value={sortOption}
-            onChange={handleSortOptionChange}
-            displayEmpty
-            sx={{ bgcolor: 'white', borderRadius: 1 }}
-          >
-            <MenuItem value="sortDate-desc">Date (Newest First)</MenuItem>
-            <MenuItem value="sortDate-asc">Date (Oldest First)</MenuItem>
-            <MenuItem value="idStr-asc">Record No (A-Z)</MenuItem>
-            <MenuItem value="idStr-desc">Record No (Z-A)</MenuItem>
-          </Select>
-        </FormControl>
-      </Box>
 
       {filteredList.length === 0 ? (
         <Card sx={{ p: 8, textAlign: 'center', border: '1px dashed #CBD5E1', bgcolor: '#F8FAFC', borderRadius: 3 }}>
@@ -488,7 +466,7 @@ export default function MaterialIssue() {
       )}
 
       {/* ISSUE MATERIALS MODAL */}
-      <Dialog open={issueModal.open} onClose={() => setIssueModal({ ...issueModal, open: false })} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 3, boxShadow: '0 20px 40px rgba(0,0,0,0.1)', overflow: 'hidden' } }}>
+      <Dialog open={issueModal.open} onClose={(e, reason) => { if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') setIssueModal({ ...issueModal, open: false }); }} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 3, boxShadow: '0 20px 40px rgba(0,0,0,0.1)', overflow: 'hidden' } }}>
         <DialogTitle sx={{ pb: 1, pt: 3, px: 4 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -717,7 +695,7 @@ export default function MaterialIssue() {
       </Dialog>
 
       {/* VIEW COMPLETED ISSUE MODAL */}
-      <Dialog open={viewIssueModal.open} onClose={() => setViewIssueModal({ open: false, issue: null })} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 3 } }}>
+      <Dialog open={viewIssueModal.open} onClose={(e, reason) => { if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') setViewIssueModal({ open: false, issue: null }); }} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 3 } }}>
         {viewIssueModal.issue && (
           <>
             <DialogTitle sx={{ pb: 1, pt: 3, px: 4 }}>

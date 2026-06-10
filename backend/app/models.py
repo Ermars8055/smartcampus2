@@ -74,7 +74,8 @@ class ReturnType(str, enum.Enum):
 
 class TransferStatus(str, enum.Enum):
     DRAFT = "Draft"
-    IN_TRANSIT = "In Transit"
+    INITIATED = "Initiated"
+    PARTIALLY_RECEIVED = "Partially Received"
     COMPLETED = "Completed"
 
 class TransactionType(str, enum.Enum):
@@ -887,13 +888,16 @@ class StockTransfer(Base):
     status = Column(String(50), default=TransferStatus.DRAFT.value)
     remarks = Column(Text)
     created_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    received_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     is_deleted = Column(Boolean, default=False)
     created_at = Column(DateTime, default=_get_now)
     completed_at = Column(DateTime, nullable=True)
+    received_date = Column(DateTime, nullable=True)
     from_warehouse = relationship("Warehouse", foreign_keys=[from_warehouse_id])
     to_warehouse = relationship("Warehouse", foreign_keys=[to_warehouse_id])
     project = relationship("Project")
     created_by = relationship("User", foreign_keys=[created_by_id])
+    received_by = relationship("User", foreign_keys=[received_by_id])
     items = relationship("StockTransferItem", back_populates="transfer", cascade="all, delete-orphan")
     __table_args__ = (UniqueConstraint("tenant_id", "transfer_number", name="uq_trf_per_tenant"),)
 
@@ -903,6 +907,9 @@ class StockTransferItem(Base):
     transfer_id = Column(Integer, ForeignKey("stock_transfers.id"), nullable=False)
     material_id = Column(Integer, ForeignKey("materials.id"), nullable=False)
     quantity = Column(Float, nullable=False)
+    received_qty = Column(Float, nullable=True)
+    variance_qty = Column(Float, nullable=True)
+    receipt_remarks = Column(Text, nullable=True)
     remarks = Column(Text)
     transfer = relationship("StockTransfer", back_populates="items")
     material = relationship("Material")
@@ -1280,9 +1287,12 @@ class GatePass(Base):
     from_store = Column(String(255), nullable=True)
     status = Column(String(50), default="Pending Repair")
     gate_pass_type = Column(String(50), default="Outward Repair")
+    reason_code = Column(String(50), nullable=True)
     driver_name = Column(String(255), nullable=True)
     vehicle_number = Column(String(50), nullable=True)
     remarks = Column(Text, nullable=True)
+    gate_entry_number = Column(String(100), nullable=True)
+    grn_number = Column(String(100), nullable=True)
     created_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime, default=_get_now)
     completed_by_name = Column(String(255), nullable=True)

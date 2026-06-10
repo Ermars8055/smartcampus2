@@ -45,8 +45,7 @@ const menuItems = [
       { text: 'Material Issue', icon: <Inventory2 />, path: '/issues', resource: 'issues' },
       { text: 'Returns', icon: <Undo />, path: '/returns', resource: 'returns' },
       { text: 'Stock Transfer', icon: <SwapHoriz />, path: '/transfers', resource: 'transfers' },
-      { text: 'Gate Passes', icon: <LocalShipping />, path: '/gate-passes', resource: 'gate_passes' },
-      { text: 'Repair', icon: <Build />, path: '/repair', resource: 'returns' },
+      { text: 'Gate Pass', icon: <LocalShipping />, path: '/gate-passes', resource: 'gate_passes' },
       { text: 'Issue Acknowledgement', icon: <AssignmentTurnedIn />, path: '/pending-acknowledgments', resource: 'acknowledgements' },
     ]
   },

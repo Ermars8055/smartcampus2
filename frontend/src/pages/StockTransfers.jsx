@@ -4,9 +4,9 @@ import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
   DialogContent, DialogActions, Grid, Select, FormControl,
-  InputLabel, IconButton, Paper, InputAdornment, MenuItem, Collapse
+  InputLabel, IconButton, Paper, InputAdornment, MenuItem, Collapse, Tooltip
 } from '@mui/material';
-import { Add, Delete, Close, SwapHoriz, Warehouse, AccountTree, Comment, InfoOutlined, CheckCircle } from '@mui/icons-material';
+import { Add, Delete, Close, SwapHoriz, Warehouse, AccountTree, Comment, InfoOutlined, CheckCircle, Lock } from '@mui/icons-material';
 import api from '../services/api';
 import MaterialSelect from '../components/MaterialSelect';
 import { useAuth } from '../context/AuthContext';
@@ -27,10 +27,37 @@ export default function StockTransfers() {
     remarks: '',
     items: [{ material_id: '', quantity: 0, remarks: '' }]
   });
-  const [viewTransferModal, setViewTransferModal] = useState({ open: false, transfer: null });
+  const [viewTransferModal, setViewTransferModal] = useState({ open: false, transfer: null, items: [] });
 
   const openViewTransferModal = (transfer) => {
-    setViewTransferModal({ open: true, transfer });
+    setViewTransferModal({ 
+      open: true, 
+      transfer,
+      items: transfer.items ? transfer.items.map(it => ({
+        transfer_item_id: it.id,
+        material_code: it.material_code,
+        material_name: it.material_name,
+        uom_name: it.uom_name,
+        quantity: it.quantity,
+        received_qty: it.received_qty !== null ? it.received_qty : '',
+        receipt_remarks: it.receipt_remarks || ''
+      })) : []
+    });
+  };
+
+  const handleReceiveSubmit = async () => {
+    try {
+      const payload = {
+        items: viewTransferModal.items.map(it => ({
+          transfer_item_id: it.transfer_item_id,
+          received_qty: parseFloat(it.received_qty) || 0,
+          receipt_remarks: it.receipt_remarks
+        }))
+      };
+      await api.post(`/api/transfers/${viewTransferModal.transfer.id}/receive`, payload);
+      setViewTransferModal({ open: false, transfer: null, items: [] });
+      load();
+    } catch (err) { alert(err.response?.data?.detail || 'Error receiving transfer'); }
   };
 
   const load = async () => {
@@ -53,8 +80,8 @@ export default function StockTransfers() {
   const openTransferModal = () => {
     setTransferModal({
       open: true,
-      from_warehouse_id: warehouses[0]?.id || '',
-      to_warehouse_id: warehouses[1]?.id || warehouses[0]?.id || '',
+      from_warehouse_id: '',
+      to_warehouse_id: '',
       project_id: null,
       remarks: '',
       items: [{ material_id: '', quantity: 0, remarks: '' }]
@@ -80,7 +107,7 @@ export default function StockTransfers() {
       const payload = {
         from_warehouse_id: transferModal.from_warehouse_id,
         to_warehouse_id: transferModal.to_warehouse_id,
-        project_id: transferModal.project_id,
+        project_id: transferModal.project_id || (projects.length > 0 ? projects[0].id : 1),
         remarks: transferModal.remarks,
         items: validItems.map(it => ({
           material_id: it.material_id,
@@ -91,7 +118,15 @@ export default function StockTransfers() {
       await api.post('/api/transfers', payload);
       setTransferModal({ ...transferModal, open: false });
       load();
-    } catch (err) { alert(err.response?.data?.detail || 'Error'); }
+    } catch (err) { 
+      let errMsg = 'Error processing request';
+      if (err.response?.data?.detail) {
+        if (typeof err.response.data.detail === 'string') errMsg = err.response.data.detail;
+        else if (Array.isArray(err.response.data.detail)) errMsg = err.response.data.detail.map(d => d.msg || JSON.stringify(d)).join(', ');
+        else errMsg = JSON.stringify(err.response.data.detail);
+      }
+      alert(errMsg); 
+    }
   };
 
   const addTransferItem = () => {
@@ -123,9 +158,9 @@ export default function StockTransfers() {
             <Typography variant="caption" sx={{ color: '#64748B' }}>Monitor and record material movements between different locations.</Typography>
           </Box>
         </Box>
-        <Button 
-          variant="contained" 
-          startIcon={<Add />} 
+        <Button
+          variant="contained"
+          startIcon={<Add />}
           onClick={openTransferModal}
           disabled={!hasAction('transfers', 'can_transfer') && !hasAction('issues', 'can_issue')} // Fallback
           sx={{ textTransform: 'none', borderRadius: 2, fontWeight: 700, px: 3, bgcolor: '#2563EB' }}
@@ -157,9 +192,9 @@ export default function StockTransfers() {
               </TableHead>
               <TableBody>
                 {transfers.map(trf => (
-                  <TableRow 
-                    key={trf.id} 
-                    hover 
+                  <TableRow
+                    key={trf.id}
+                    hover
                     onClick={() => openViewTransferModal(trf)}
                     sx={{ cursor: 'pointer', '&:last-child td, &:last-child th': { border: 0 } }}
                   >
@@ -171,16 +206,27 @@ export default function StockTransfers() {
                       <Chip label={trf.items?.length || 0} size="small" sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem', bgcolor: '#F1F5F9', color: '#475569' }} />
                     </TableCell>
                     <TableCell sx={{ px: 2 }}>
-                      <Chip label={trf.status} size="small" color="success" variant="outlined" sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} />
+                      <Chip label={trf.status} size="small" color={trf.status === 'Completed' ? 'error' : (trf.status === 'Partially Received' ? 'info' : (trf.status === 'Initiated' ? 'success' : 'default'))} variant="outlined" sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} />
                     </TableCell>
                     <TableCell align="right" sx={{ px: 2, whiteSpace: 'nowrap' }}>
-                      <IconButton 
-                        size="small" 
+                      <IconButton
+                        size="small"
+                        disabled={trf.status === 'Completed'}
                         onClick={(e) => { e.stopPropagation(); openViewTransferModal(trf); }}
-                        sx={{ color: '#64748B' }}
+                        sx={{ color: trf.status === 'Completed' ? 'action.disabled' : '#10B981', mr: 1 }}
                       >
                         <CheckCircle fontSize="small" />
                       </IconButton>
+                      <Tooltip title="Complete Transfer">
+                        <IconButton
+                          size="small"
+                          disabled={trf.status === 'Completed'}
+                          onClick={(e) => { e.stopPropagation(); openViewTransferModal(trf); }}
+                          sx={{ color: trf.status === 'Completed' ? 'action.disabled' : '#EF4444' }}
+                        >
+                          <Lock fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -191,7 +237,7 @@ export default function StockTransfers() {
       )}
 
       {/* STOCK TRANSFER MODAL */}
-      <Dialog open={transferModal.open} onClose={() => setTransferModal({ ...transferModal, open: false })} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 3, boxShadow: '0 20px 40px rgba(0,0,0,0.1)', overflow: 'hidden' } }}>
+      <Dialog open={transferModal.open} onClose={(e, reason) => { if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') setTransferModal({ ...transferModal, open: false }); }} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 3, boxShadow: '0 20px 40px rgba(0,0,0,0.1)', overflow: 'hidden' } }}>
         <DialogTitle sx={{ pb: 1, pt: 3, px: 4 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -200,7 +246,7 @@ export default function StockTransfers() {
               </Box>
               <Box>
                 <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>Stock Transfer</Typography>
-                <Typography variant="body2" color="text.secondary">Move materials between different warehouses or locations</Typography>
+                <Typography variant="body2" color="text.secondary">Move materials between different stores or locations</Typography>
               </Box>
             </Box>
             <IconButton size="small" onClick={() => setTransferModal({ ...transferModal, open: false })} sx={{ color: '#64748B' }}><Close /></IconButton>
@@ -211,9 +257,9 @@ export default function StockTransfers() {
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth size="small">
                 <InputLabel>From Store</InputLabel>
-                <Select 
+                <Select
                   label="From Store"
-                  value={transferModal.from_warehouse_id} 
+                  value={transferModal.from_warehouse_id}
                   onChange={e => setTransferModal({ ...transferModal, from_warehouse_id: e.target.value })}
                   startAdornment={<InputAdornment position="start"><Warehouse sx={{ color: '#94A3B8', fontSize: 20, mr: 1 }} /></InputAdornment>}
                 >
@@ -224,9 +270,9 @@ export default function StockTransfers() {
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth size="small">
                 <InputLabel>To Store</InputLabel>
-                <Select 
+                <Select
                   label="To Store"
-                  value={transferModal.to_warehouse_id} 
+                  value={transferModal.to_warehouse_id}
                   onChange={e => setTransferModal({ ...transferModal, to_warehouse_id: e.target.value })}
                   startAdornment={<InputAdornment position="start"><Warehouse sx={{ color: '#2563EB', fontSize: 20, mr: 1 }} /></InputAdornment>}
                 >
@@ -235,8 +281,8 @@ export default function StockTransfers() {
               </FormControl>
             </Grid>
             <Grid item xs={12}>
-              <TextField 
-                fullWidth size="small" label="Transfer Remarks" 
+              <TextField
+                fullWidth size="small" label="Transfer Remarks"
                 value={transferModal.remarks}
                 onChange={e => setTransferModal({ ...transferModal, remarks: e.target.value })}
                 InputProps={{
@@ -265,26 +311,26 @@ export default function StockTransfers() {
                 {transferModal.items.map((item, idx) => (
                   <TableRow key={idx}>
                     <TableCell>
-                      <MaterialSelect 
-                        materials={materials} 
-                        value={item.material_id} 
+                      <MaterialSelect
+                        materials={materials}
+                        value={item.material_id}
                         onChange={(val) => updateTransferItem(idx, 'material_id', val)}
                       />
                     </TableCell>
                     <TableCell align="right" sx={{ width: 120 }}>
-                      <TextField 
-                        size="small" 
-                        type="number" 
+                      <TextField
+                        size="small"
+                        type="number"
                         inputProps={{ step: "1", min: "0" }}
                         onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()}
-                        fullWidth 
-                        value={item.quantity} 
-                        onChange={e => updateTransferItem(idx, 'quantity', Math.round(parseFloat(e.target.value.replace(/-/g, '')) || 0))} 
+                        fullWidth
+                        value={item.quantity}
+                        onChange={e => updateTransferItem(idx, 'quantity', Math.round(parseFloat(e.target.value.replace(/-/g, '')) || 0))}
                       />
                     </TableCell>
                     <TableCell>
-                      <TextField 
-                        size="small" fullWidth value={item.remarks} 
+                      <TextField
+                        size="small" fullWidth value={item.remarks}
                         onChange={e => updateTransferItem(idx, 'remarks', e.target.value)}
                         InputProps={{
                           startAdornment: <InputAdornment position="start"><Comment sx={{ color: '#94A3B8', fontSize: 16 }} /></InputAdornment>,
@@ -304,24 +350,24 @@ export default function StockTransfers() {
 
           <Box sx={{ bgcolor: '#EFF6FF', p: 2, borderRadius: 2, border: '1px solid #BFDBFE' }}>
             <Typography variant="caption" color="primary.main" sx={{ display: 'flex', alignItems: 'center', gap: 1, fontWeight: 600 }}>
-              <InfoOutlined fontSize="inherit" /> Stock will be deducted from the source and added to the destination warehouse immediately.
+              <InfoOutlined fontSize="inherit" /> Stock will be transferred and updated only after physical receipt and verification at the destination store.
             </Typography>
           </Box>
         </DialogContent>
         <DialogActions sx={{ px: 4, pb: 4, pt: 2, justifyContent: 'flex-end', gap: 2 }}>
           <Button onClick={() => setTransferModal({ ...transferModal, open: false })} sx={{ color: '#64748B', fontWeight: 600 }}>Cancel</Button>
-          <Button 
-            onClick={handleTransferSubmit} 
-            variant="contained" 
+          <Button
+            onClick={handleTransferSubmit}
+            variant="contained"
             sx={{ borderRadius: 2, px: 4, py: 1, fontWeight: 700, bgcolor: '#2563EB', '&:hover': { bgcolor: '#1D4ED8' }, textTransform: 'none' }}
           >
-            Complete Transfer
+            Initiate Transfer
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* VIEW TRANSFER MODAL */}
-      <Dialog open={viewTransferModal.open} onClose={() => setViewTransferModal({ open: false, transfer: null })} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 3 } }}>
+      <Dialog open={viewTransferModal.open} onClose={(e, reason) => { if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') setViewTransferModal({ open: false, transfer: null }); }} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 3 } }}>
         {viewTransferModal.transfer && (
           <>
             <DialogTitle sx={{ pb: 1, pt: 3, px: 4 }}>
@@ -345,12 +391,12 @@ export default function StockTransfers() {
                 <Grid item xs={12} sm={4}>
                   <Typography variant="caption" color="text.secondary">Status</Typography>
                   <Box sx={{ mt: 0.5 }}>
-                    <Chip 
-                      label={viewTransferModal.transfer.status} 
-                      size="small" 
-                      color="success" 
+                    <Chip
+                      label={viewTransferModal.transfer.status}
+                      size="small"
+                      color="success"
                       variant="outlined"
-                      sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} 
+                      sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }}
                     />
                   </Box>
                 </Grid>
@@ -368,20 +414,62 @@ export default function StockTransfers() {
                   <TableHead sx={{ bgcolor: '#F8FAFC' }}>
                     <TableRow>
                       <TableCell sx={{ fontWeight: 700 }}>MATERIAL</TableCell>
-                      <TableCell align="center" sx={{ fontWeight: 700 }}>QTY</TableCell>
+                      <TableCell align="center" sx={{ fontWeight: 700 }}>UOM</TableCell>
+                      <TableCell align="center" sx={{ fontWeight: 700 }}>SENT QTY</TableCell>
+                      <TableCell align="center" sx={{ fontWeight: 700 }}>RECEIVED QTY</TableCell>
                       <TableCell sx={{ fontWeight: 700 }}>REMARKS</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {viewTransferModal.transfer.items?.map((item, idx) => (
+                    {viewTransferModal.items.map((item, idx) => (
                       <TableRow key={idx}>
                         <TableCell>
                           <Typography variant="body2" sx={{ fontWeight: 600, color: '#1E293B' }}>{item.material_name}</Typography>
+                          {item.material_code && <Typography variant="caption" sx={{ color: '#64748B' }}>{item.material_code}</Typography>}
                         </TableCell>
+                        <TableCell align="center" sx={{ color: '#64748B' }}>{item.uom_name || 'unit'}</TableCell>
                         <TableCell align="center">
-                          <Typography variant="body2" sx={{ fontWeight: 700 }}>{item.quantity} {item.uom_name || 'unit'}</Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 700 }}>{item.quantity}</Typography>
                         </TableCell>
-                        <TableCell sx={{ color: '#64748B' }}>{item.remarks || '-'}</TableCell>
+                        {['Initiated', 'Partially Received'].includes(viewTransferModal.transfer.status) ? (
+                          <>
+                            <TableCell align="center">
+                              <TextField
+                                size="small"
+                                type="number"
+                                inputProps={{ step: "1", min: "0", max: item.quantity }}
+                                onKeyDown={e => ['-', '+', 'e', 'E', '.'].includes(e.key) && e.preventDefault()}
+                                sx={{ width: 100 }}
+                                value={item.received_qty}
+                                onChange={e => {
+                                  const newItems = [...viewTransferModal.items];
+                                  newItems[idx].received_qty = e.target.value ? Math.round(parseFloat(e.target.value.replace(/-/g, ''))) : '';
+                                  setViewTransferModal({ ...viewTransferModal, items: newItems });
+                                }}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <TextField
+                                size="small" fullWidth value={item.receipt_remarks}
+                                placeholder="Variance notes"
+                                onChange={e => {
+                                  const newItems = [...viewTransferModal.items];
+                                  newItems[idx].receipt_remarks = e.target.value;
+                                  setViewTransferModal({ ...viewTransferModal, items: newItems });
+                                }}
+                              />
+                            </TableCell>
+                          </>
+                        ) : (
+                          <>
+                            <TableCell align="center">
+                              <Typography variant="body2" sx={{ fontWeight: 700, color: item.received_qty !== item.quantity ? '#EF4444' : 'inherit' }}>
+                                {item.received_qty !== null && item.received_qty !== '' ? item.received_qty : '-'}
+                              </Typography>
+                            </TableCell>
+                            <TableCell sx={{ color: '#64748B' }}>{item.receipt_remarks || '-'}</TableCell>
+                          </>
+                        )}
                       </TableRow>
                     ))}
                   </TableBody>
@@ -389,7 +477,16 @@ export default function StockTransfers() {
               </TableContainer>
             </DialogContent>
             <DialogActions sx={{ px: 4, pb: 4 }}>
-              <Button onClick={() => setViewTransferModal({ open: false, transfer: null })} sx={{ color: '#64748B' }}>Close</Button>
+              <Button onClick={() => setViewTransferModal({ open: false, transfer: null, items: [] })} sx={{ color: '#64748B' }}>Close</Button>
+              {['Initiated', 'Partially Received'].includes(viewTransferModal.transfer.status) && (
+                <Button
+                  onClick={handleReceiveSubmit}
+                  variant="contained"
+                  sx={{ borderRadius: 2, px: 4, py: 1, fontWeight: 700, bgcolor: '#10B981', '&:hover': { bgcolor: '#059669' }, textTransform: 'none' }}
+                >
+                  Confirm Receipt
+                </Button>
+              )}
             </DialogActions>
           </>
         )}

@@ -23,6 +23,7 @@ export default function Invoices() {
   const [search, setSearch] = useState('');
   const [sortConfig, setSortConfig] = useState({ key: 'created_at', direction: 'desc' });
   const [uploading, setUploading] = useState(false);
+  const [confirmSubmit, setConfirmSubmit] = useState(false);
 
 
   const load = () => {
@@ -102,7 +103,10 @@ export default function Invoices() {
             </TableRow></TableHead>
             <TableBody>
               {sortedInvoices.map(i => (
-                <TableRow key={i.id} sx={{ cursor: 'pointer' }} onClick={() => setDetailDialog(i)}>
+                <TableRow key={i.id} sx={{ cursor: 'pointer' }} onClick={() => {
+                  if (i.status === 'Draft') navigate(`/invoices/edit/${i.id}`);
+                  else setDetailDialog(i);
+                }}>
                   <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.8rem' }}>{i.invoice_number}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem' }}>{formatDate(i.invoice_date)}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem' }}>{i.vendor_name}</TableCell>
@@ -235,16 +239,36 @@ export default function Invoices() {
             </TableContainer>
           </Card>
         </DialogContent>
-        <DialogActions sx={{ p: 2, justifyContent: 'space-between' }}>
-          <Box>
+        <DialogActions sx={{ p: 2, justifyContent: 'flex-end' }}>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button onClick={() => setDetailDialog(null)}>Close</Button>
             {detailDialog?.status === 'Draft' && (
+              <>
+                <Button size="small" variant="outlined" color="primary" onClick={() => setDetailDialog(null)}>Save Draft</Button>
+                <Button size="small" variant="contained" color="primary" onClick={() => setConfirmSubmit(true)}>Submit Invoice</Button>
+              </>
+            )}
+            {detailDialog?.status === 'Pending Approval' && (
               <Button size="small" variant="contained" color="primary" disabled={!hasAction('invoice', 'can_approve')} onClick={() => handleStatusUpdate(detailDialog.id, 'Approved')}>Approve</Button>
             )}
           </Box>
-          <Button onClick={() => setDetailDialog(null)}>Close</Button>
         </DialogActions>
       </Dialog>
 
+      {/* Submit Confirmation Dialog */}
+      <Dialog open={confirmSubmit} onClose={() => setConfirmSubmit(false)} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ fontWeight: 600 }}>Confirm Submission</DialogTitle>
+        <DialogContent dividers>
+          <Typography>Submitted invoices cannot be modified. If you need to make further changes, save the invoice as a draft by clicking "Save Draft" and submit it once all updates are completed.</Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setConfirmSubmit(false)}>Cancel</Button>
+          <Button variant="contained" color="primary" onClick={() => {
+            setConfirmSubmit(false);
+            if (detailDialog) handleStatusUpdate(detailDialog.id, 'Pending Approval');
+          }}>Submit</Button>
+        </DialogActions>
+      </Dialog>
 
     </Box>
   );

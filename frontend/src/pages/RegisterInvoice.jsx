@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import {
   Box, Typography, Card, Grid, TextField, Button, IconButton,
-  MenuItem, Select, FormControl, InputLabel, Divider, Paper, Autocomplete
+  MenuItem, Select, FormControl, InputLabel, Divider, Paper, Autocomplete,
+  Dialog, DialogTitle, DialogContent, DialogActions
 } from '@mui/material';
 import { Add, Delete, ArrowBack, AttachFile, OpenInNew } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import api, { getFileUrl } from '../services/api';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
@@ -12,6 +13,7 @@ import { useConfig } from '../context/ConfigContext';
 import { computeGstSplit } from '../utils/gstCalculations';
 export default function RegisterInvoice() {
   const navigate = useNavigate();
+  const { id } = useParams();
   const { tenantConfig } = useConfig();
   const [vendors, setVendors] = useState([]);
   const [materials, setMaterials] = useState([]);
@@ -19,6 +21,7 @@ export default function RegisterInvoice() {
   const [uoms, setUoms] = useState([]);
   const [companyAddresses, setCompanyAddresses] = useState([]);
   const [uploading, setUploading] = useState(false);
+  const [confirmSubmit, setConfirmSubmit] = useState(false);
 
   const [form, setForm] = useState({
     invoice_number: '',
@@ -62,8 +65,63 @@ export default function RegisterInvoice() {
     api.get('/api/procurement/po').then(r => setPos(r.data));
     api.get('/api/uom').then(r => setUoms(r.data));
     api.get('/api/company-addresses').then(r => setCompanyAddresses(r.data));
-    addItem();
-  }, []);
+    
+    if (id) {
+      api.get(`/api/invoices`).then(r => {
+        const inv = r.data.find(i => i.id === parseInt(id));
+        if (inv) {
+          setForm({
+            invoice_number: inv.invoice_number || '',
+            invoice_date: inv.invoice_date || '',
+            vendor_id: inv.vendor_id || '',
+            po_id: inv.po_id || '',
+            eway_bill_number: inv.eway_bill_number || '',
+            delivery_note: inv.delivery_note || '',
+            delivery_note_date: inv.delivery_note_date || '',
+            payment_terms: inv.payment_terms || '',
+            reference_number: inv.reference_number || '',
+            reference_date: inv.reference_date || '',
+            dispatch_doc_number: inv.dispatch_doc_number || '',
+            dispatched_through: inv.dispatched_through || '',
+            destination: inv.destination || '',
+            lr_rr_number: inv.lr_rr_number || '',
+            vehicle_number: inv.vehicle_number || '',
+            terms_of_delivery: inv.terms_of_delivery || '',
+            scan_url: inv.scan_url || '',
+            scan_file_name: inv.scan_url ? inv.scan_url.split('/').pop() : '',
+            remarks: inv.remarks || '',
+            consignee_id: inv.consignee_id || '',
+            buyer_id: inv.buyer_id || '',
+            srf_number: inv.srf_number || '',
+            irn: inv.irn || '',
+            ack_number: inv.ack_number || '',
+            ack_date: inv.ack_date || '',
+            transport_charges: inv.transport_charges || 0,
+            transport_hsn: inv.transport_hsn || '',
+            transport_cgst_rate: inv.transport_cgst_rate || 0,
+            transport_sgst_rate: inv.transport_sgst_rate || 0,
+            transport_igst_rate: inv.transport_igst_rate || 0,
+            transport_discount_percent: inv.transport_discount_percent || 0,
+            items: inv.items ? inv.items.map(item => ({
+              material_id: item.material_id || '',
+              description: item.description || '',
+              hsn_sac: item.hsn_sac || '',
+              quantity: item.quantity || 1,
+              rate: item.rate || 0,
+              uom: item.uom || '',
+              discount_percent: item.discount_percent || 0,
+              cgst_rate: item.cgst_rate || 0,
+              sgst_rate: item.sgst_rate || 0,
+              igst_rate: item.igst_rate || 0,
+              remarks: item.remarks || ''
+            })) : []
+          });
+        }
+      });
+    } else {
+      addItem();
+    }
+  }, [id]);
 
   const handlePOChange = async (poId) => {
     setForm(prev => ({ ...prev, po_id: poId }));
@@ -218,8 +276,8 @@ export default function RegisterInvoice() {
     return { items, total_taxable_amount, total_cgst, total_sgst, total_igst, total_discount, tax_amount, transport_charges: t_rate, total_amount };
   };
 
-  const handleSave = async () => {
-    if (!form.invoice_number.trim()) return alert("Invoice Number is required.");
+  const handleSave = async (submitStatus = null) => {
+    if (!form.invoice_number?.trim?.()) return alert("Invoice Number is required.");
     if (!form.invoice_date) return alert("Invoice Date is required.");
     if (dayjs(form.invoice_date).isAfter(dayjs(), 'day')) return alert("Invoice Date cannot be in the future.");
     if (form.delivery_note_date && dayjs(form.delivery_note_date).isAfter(dayjs(), 'day')) return alert("Delivery Note Date cannot be in the future.");
@@ -255,9 +313,14 @@ export default function RegisterInvoice() {
         material_id: item.material_id || null,
       }))
     };
+    if (submitStatus) payload.status = submitStatus;
 
     try {
-      await api.post('/api/invoices', payload);
+      if (id) {
+        await api.put(`/api/invoices/${id}`, payload);
+      } else {
+        await api.post('/api/invoices', payload);
+      }
       navigate('/invoices');
     } catch (err) {
       alert("Failed to save invoice: " + (err.response?.data?.detail || err.message));
@@ -271,12 +334,8 @@ export default function RegisterInvoice() {
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, gap: 2 }}>
         <IconButton onClick={() => navigate('/invoices')}><ArrowBack /></IconButton>
         <Box>
-          <Typography variant="h5" sx={{ fontWeight: 700 }}>Register Tax Invoice</Typography>
+          <Typography variant="h5" sx={{ fontWeight: 700 }}>{id ? 'Edit Tax Invoice' : 'Register Tax Invoice'}</Typography>
           <Typography variant="body2" sx={{ color: '#64748B' }}>Enter comprehensive invoice details</Typography>
-        </Box>
-        <Box sx={{ ml: 'auto' }}>
-          <Button variant="outlined" sx={{ mr: 2 }} onClick={() => navigate('/invoices')}>Cancel</Button>
-          <Button variant="contained" onClick={handleSave}>Save Invoice</Button>
         </Box>
       </Box>
 
@@ -651,8 +710,28 @@ export default function RegisterInvoice() {
             <Divider sx={{ mb: 2 }} />
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}><Typography variant="h6" sx={{ fontWeight: 700 }}>Grand Total</Typography><Typography variant="h6" sx={{ fontWeight: 700, color: '#059669' }}>₹{totals.total_amount.toFixed(2)}</Typography></Box>
           </Paper>
+          <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', mt: 3 }}>
+            <Button variant="outlined" onClick={() => navigate('/invoices')}>Cancel</Button>
+            <Button variant="outlined" onClick={() => handleSave('Draft')}>Save Draft</Button>
+            <Button variant="contained" color="primary" onClick={() => setConfirmSubmit(true)}>Submit Invoice</Button>
+          </Box>
         </Grid>
       </Grid>
+
+      {/* Submit Confirmation Dialog */}
+      <Dialog open={confirmSubmit} onClose={() => setConfirmSubmit(false)} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ fontWeight: 600 }}>Confirm Submission</DialogTitle>
+        <DialogContent dividers>
+          <Typography>Submitted invoices cannot be modified. If you need to make further changes, save the invoice as a draft by clicking "Save Draft" and submit it once all updates are completed.</Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setConfirmSubmit(false)}>Cancel</Button>
+          <Button variant="contained" color="primary" onClick={() => {
+            setConfirmSubmit(false);
+            handleSave('Pending Approval');
+          }}>Submit</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

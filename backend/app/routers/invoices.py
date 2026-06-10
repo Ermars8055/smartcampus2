@@ -176,7 +176,7 @@ def create_invoice(
         scan_url=data.scan_url,
         remarks=data.remarks,
         created_by_id=current_user.id,
-        status="Draft"
+        status=data.status or "Draft"
     )
     db.add(invoice)
     db.flush()
@@ -231,6 +231,30 @@ def update_invoice(
     for key, value in data.model_dump(exclude_unset=True, exclude={"items"}).items():
         setattr(invoice, key, value)
         
+    if data.items is not None:
+        db.query(InvoiceItem).filter(InvoiceItem.invoice_id == id).delete()
+        for item_data in data.items:
+            item = InvoiceItem(
+                invoice_id=invoice.id,
+                material_id=item_data.material_id,
+                description=item_data.description,
+                hsn_sac=item_data.hsn_sac,
+                quantity=item_data.quantity,
+                rate=item_data.rate,
+                uom=item_data.uom,
+                discount_percent=item_data.discount_percent,
+                cgst_rate=item_data.cgst_rate,
+                sgst_rate=item_data.sgst_rate,
+                igst_rate=item_data.igst_rate,
+                cgst_amount=item_data.cgst_amount,
+                sgst_amount=item_data.sgst_amount,
+                igst_amount=item_data.igst_amount,
+                taxable_amount=item_data.taxable_amount,
+                amount=item_data.amount,
+                remarks=item_data.remarks
+            )
+            db.add(item)
+            
     db.commit()
     db.refresh(invoice)
     

@@ -238,7 +238,7 @@ export default function Returns() {
       )}
 
       {/* INITIATE RETURN MODAL */}
-      <Dialog open={returnModal.open} onClose={() => setReturnModal({ ...returnModal, open: false })} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 3, boxShadow: '0 20px 40px rgba(0,0,0,0.1)', overflow: 'hidden' } }}>
+      <Dialog open={returnModal.open} onClose={(e, reason) => { if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') setReturnModal({ ...returnModal, open: false }); }} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 3, boxShadow: '0 20px 40px rgba(0,0,0,0.1)', overflow: 'hidden' } }}>
         <DialogTitle sx={{ pb: 1, pt: 3, px: 4 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -379,7 +379,7 @@ export default function Returns() {
       </Dialog>
 
       {/* VIEW DIALOG */}
-      <Dialog open={viewModal.open} onClose={() => setViewModal({ open: false, ret: null, items: [] })} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 3 } }}>
+      <Dialog open={viewModal.open} onClose={(e, reason) => { if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') setViewModal({ open: false, ret: null, items: [] }); }} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 3 } }}>
         {viewModal.ret && (
           <>
             <DialogTitle sx={{ pb: 1, pt: 3, px: 4 }}>

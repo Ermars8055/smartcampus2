@@ -16,7 +16,7 @@ from app.models import (
 from app.schemas import (
     IssueCreate, IssueOut, IssueItemOut,
     ReturnCreate, ReturnOut, ReturnItemOut, ReturnReceiptRequest,
-    TransferCreate, TransferOut, TransferItemOut,
+    TransferCreate, TransferOut, TransferItemOut, TransferReceiptRequest,
     GatePassCreate, GatePassOut, GatePassUpdate,
     GatePassItemOut, GatePassItemBase
 )
@@ -568,6 +568,9 @@ def list_transfers(
             items.append(TransferItemOut(
                 id=item.id, material_id=item.material_id,
                 quantity=round(item.quantity or 0), remarks=item.remarks,
+                received_qty=round(item.received_qty) if item.received_qty is not None else None,
+                variance_qty=item.variance_qty,
+                receipt_remarks=item.receipt_remarks,
                 material_name=mat.name if mat else None,
                 material_code=mat.code if mat else None,
                 uom_name=mat.uom.name if mat and mat.uom else None
@@ -579,9 +582,11 @@ def list_transfers(
             project_id=t.project_id, status=t.status,
             remarks=t.remarks, created_at=t.created_at,
             completed_at=t.completed_at,
+            received_date=t.received_date,
             from_warehouse_name=t.from_warehouse.name if t.from_warehouse else None,
             to_warehouse_name=t.to_warehouse.name if t.to_warehouse else None,
             project_name=t.project.name if t.project else None,
+            received_by_name=t.received_by.full_name if t.received_by else None,
             items=items
         ))
     return result
@@ -607,8 +612,7 @@ def create_transfer(
         project_id=data.project_id,
         remarks=data.remarks,
         created_by_id=current_user.id,
-        status="Completed",
-        completed_at=datetime.utcnow(),
+        status="Initiated",
         tenant_id=tenant_id,
         site_id=site_id
     )
@@ -637,38 +641,118 @@ def create_transfer(
         )
         db.add(t_item)
 
-        update_stock(
-            db=db,
-            material_id=item_data.material_id,
-            warehouse_id=data.from_warehouse_id,
-            quantity=-item_data.quantity,
-            transaction_type="Transfer Out",
-            reference_type="Transfer",
-            reference_id=transfer.id,
-            reference_number=transfer_number,
-            tenant_id=tenant_id,
-            site_id=site_id,
-            project_id=data.project_id,
-            user_id=current_user.id
-        )
+    db.commit()
+    return {"id": transfer.id, "transfer_number": transfer_number, "message": "Stock transfer initiated"}
 
-        update_stock(
-            db=db,
-            material_id=item_data.material_id,
-            warehouse_id=data.to_warehouse_id,
-            quantity=item_data.quantity,
-            transaction_type="Transfer In",
-            reference_type="Transfer",
-            reference_id=transfer.id,
-            reference_number=transfer_number,
-            tenant_id=tenant_id,
-            site_id=site_id,
-            project_id=data.project_id,
-            user_id=current_user.id
-        )
+@router.post("/transfers/{id}/receive")
+def receive_transfer(
+    id: int,
+    data: TransferReceiptRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("issues", "create")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    transfer = db.query(StockTransfer).filter(
+        StockTransfer.id == id,
+        StockTransfer.tenant_id == tenant_id,
+        StockTransfer.site_id == site_id
+    ).first()
+
+    if not transfer:
+        raise HTTPException(status_code=404, detail="Transfer not found")
+    
+    if transfer.status == "Completed":
+        raise HTTPException(status_code=400, detail="Transfer has already been fully received")
+
+    total_sent = 0
+    total_received = 0
+
+    for item_data in data.items:
+        t_item = db.query(StockTransferItem).filter(
+            StockTransferItem.id == item_data.transfer_item_id,
+            StockTransferItem.transfer_id == transfer.id
+        ).first()
+
+        if not t_item:
+            raise HTTPException(status_code=404, detail=f"Transfer item {item_data.transfer_item_id} not found")
+
+        if item_data.received_qty > t_item.quantity:
+            raise HTTPException(status_code=400, detail=f"Received quantity cannot exceed sent quantity for item {t_item.material.name if t_item.material else t_item.id}")
+
+        previously_received = t_item.received_qty or 0
+        newly_received = round(item_data.received_qty)
+
+        if newly_received < previously_received:
+            raise HTTPException(status_code=400, detail=f"Cannot reduce received quantity for item {t_item.material.name if t_item.material else t_item.id}")
+
+        diff = newly_received - previously_received
+
+        t_item.received_qty = newly_received
+        t_item.variance_qty = t_item.received_qty - t_item.quantity
+        t_item.receipt_remarks = item_data.receipt_remarks
+
+        if diff > 0:
+            # Check stock one more time before deducting from source warehouse
+            stock = db.query(CurrentStock).filter(
+                CurrentStock.material_id == t_item.material_id,
+                CurrentStock.warehouse_id == transfer.from_warehouse_id,
+                CurrentStock.tenant_id == tenant_id,
+                CurrentStock.site_id == site_id
+            ).first()
+            if not stock or stock.quantity < diff:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Insufficient stock for {t_item.material.name if t_item.material else 'material'} in source warehouse to accept receipt"
+                )
+
+            # Deduct from source
+            update_stock(
+                db=db,
+                material_id=t_item.material_id,
+                warehouse_id=transfer.from_warehouse_id,
+                quantity=-diff,
+                transaction_type="Transfer Out",
+                reference_type="Transfer",
+                reference_id=transfer.id,
+                reference_number=transfer.transfer_number,
+                tenant_id=tenant_id,
+                site_id=site_id,
+                project_id=transfer.project_id,
+                user_id=current_user.id
+            )
+
+            # Add to destination
+            update_stock(
+                db=db,
+                material_id=t_item.material_id,
+                warehouse_id=transfer.to_warehouse_id,
+                quantity=diff,
+                transaction_type="Transfer In",
+                reference_type="Transfer",
+                reference_id=transfer.id,
+                reference_number=transfer.transfer_number,
+                tenant_id=tenant_id,
+                site_id=site_id,
+                project_id=transfer.project_id,
+                user_id=current_user.id
+            )
+
+    for t_item in transfer.items:
+        total_sent += t_item.quantity
+        total_received += (t_item.received_qty or 0)
+
+    if total_received == total_sent:
+        transfer.status = "Completed"
+        transfer.completed_at = datetime.utcnow()
+    else:
+        transfer.status = "Partially Received"
+
+    transfer.received_by_id = current_user.id
+    transfer.received_date = datetime.utcnow()
 
     db.commit()
-    return {"id": transfer.id, "transfer_number": transfer_number, "message": "Stock transfer completed"}
+    return {"message": "Transfer received successfully"}
 
 
 # ── Gate Passes ──────────────────────────────────────────────────────────
@@ -718,6 +802,7 @@ def format_gate_pass(gp: GatePass) -> GatePassOut:
         id=gp.id,
         gate_pass_number=gp.gate_pass_number,
         gate_pass_type=gp.gate_pass_type,
+        reason_code=gp.reason_code,
         project_id=gp.project_id,
         project_name=proj.name if proj else None,
         vendor_id=gp.vendor_id,
@@ -732,6 +817,8 @@ def format_gate_pass(gp: GatePass) -> GatePassOut:
         driver_name=gp.driver_name,
         vehicle_number=gp.vehicle_number,
         remarks=gp.remarks,
+        gate_entry_number=gp.gate_entry_number,
+        grn_number=gp.grn_number,
         created_at=gp.created_at,
         completed_by_name=gp.completed_by_name,
         completed_at=gp.completed_at,
@@ -778,8 +865,9 @@ def create_gate_pass(
         vendor_custom_address=data.vendor_custom_address,
         from_department=data.from_department,
         from_store=data.from_store,
-        status="Sent Out" if data.gate_pass_type == "Non-Returnable" else "Pending Repair",
+        status="Sent Out" if data.gate_pass_type == "Non-Returnable" else "Yet to Receive",
         gate_pass_type=data.gate_pass_type,
+        reason_code=data.reason_code,
         driver_name=data.driver_name,
         vehicle_number=data.vehicle_number,
         remarks=data.remarks,
@@ -824,13 +912,17 @@ def update_gate_pass(
     gp.status = data.status
     if data.remarks is not None:
         gp.remarks = data.remarks
+    if data.gate_entry_number is not None:
+        gp.gate_entry_number = data.gate_entry_number
+    if data.grn_number is not None:
+        gp.grn_number = data.grn_number
     if data.completed_by_name is not None:
         gp.completed_by_name = data.completed_by_name
     if data.completed_at is not None:
         gp.completed_at = data.completed_at
         
-    # If transitioning from "Pending Repair" to "Repaired & Received"
-    if old_status == "Pending Repair" and data.status == "Repaired & Received":
+    # If transitioning from "Yet to Receive" (or "Pending Repair") to "Received"
+    if old_status in ["Pending Repair", "Yet to Receive"] and data.status == "Received":
         # Put stock back into the usable warehouse
         ret = db.query(MaterialReturn).filter(MaterialReturn.id == gp.return_id).first()
         warehouse_id = ret.warehouse_id if ret else None

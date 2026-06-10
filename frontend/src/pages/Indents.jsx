@@ -36,7 +36,7 @@ export default function Indents() {
   const [detailHistoryData, setDetailHistoryData] = useState(null);
   const [detailHistoryOpen, setDetailHistoryOpen] = useState(false);
   const [search, setSearch] = useState('');
-  const [tabValue, setTabValue] = useState('All');
+  const [tabValue, setTabValue] = useState('Awaiting Approval');
   const [filterDepartment, setFilterDepartment] = useState(null);
   const [filterBuilding, setFilterBuilding] = useState(null);
   const [allBuildings, setAllBuildings] = useState([]);
@@ -658,7 +658,7 @@ export default function Indents() {
           scrollButtons="auto"
           sx={{ borderBottom: 1, borderColor: 'divider' }}
         >
-          {['All', 'Awaiting Approval', 'Approved', 'Rejected', 'Partially Issued', 'Issued', 'Converted to PO', 'Closed'].map(s => {
+          {['Awaiting Approval', 'Approved', 'Rejected', 'Partially Issued', 'Issued', 'Converted to PO', 'Closed', 'All'].map(s => {
             const count = s === 'All' ? filteredIndentsBase.length : filteredIndentsBase.filter(i => i.status === s).length;
             if (s !== 'All' && count === 0 && !['Awaiting Approval', 'Approved', 'Partially Issued'].includes(s)) return null;
             return (

@@ -85,7 +85,7 @@ export default function PurchaseOrders() {
 
   const [search, setSearch] = useState('');
   const [filterVendor, setFilterVendor] = useState(null);
-  const [tabValue, setTabValue] = useState('All');
+  const [tabValue, setTabValue] = useState('Draft');
   const [editingPOId, setEditingPOId] = useState(null);
   const [form, setForm] = useState({
     vendor_id: '', project_id: '', delivery_date: dayjs().add(14, 'day'), terms: '', po_type: 'Informal', items: [{ material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }]
@@ -692,7 +692,7 @@ export default function PurchaseOrders() {
           scrollButtons="auto"
           sx={{ borderBottom: 1, borderColor: 'divider' }}
         >
-          {['All', 'Draft', 'Submitted', 'Approved', 'Sent to Vendor', 'Partially Received', 'Closed', 'Rejected'].map(s => (
+          {['Draft', 'Submitted', 'Approved', 'Sent to Vendor', 'Partially Received', 'Closed', 'Rejected', 'All'].map(s => (
             <Tab
               key={s}
               label={

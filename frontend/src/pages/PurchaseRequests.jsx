@@ -46,7 +46,7 @@ export default function PurchaseRequests() {
   const [detailHistoryOpen, setDetailHistoryOpen] = useState(false);
   const [tab, setTab] = useState(0);
   const [search, setSearch] = useState('');
-  const [tabValue, setTabValue] = useState('All');
+  const [tabValue, setTabValue] = useState('Draft');
   const [sortConfig, setSortConfig] = useState({ key: 'created_at', direction: 'desc' });
   const [filterDepartment, setFilterDepartment] = useState(null);
   const [filterBuilding, setFilterBuilding] = useState(null);
@@ -314,7 +314,7 @@ export default function PurchaseRequests() {
   const canShortClose = (s) => s !== 'Converted to PO' && s !== 'Short Closed' && s !== 'Rejected';
   const approveLabel = (s) => s === 'Draft' ? 'Submit for Approval' : 'Approve';
 
-  const statusFilters = ['All', 'Draft', 'Submitted', 'Approved', 'Rejected', 'Converted to PO', 'Short Closed'];
+  const statusFilters = ['Draft', 'Submitted', 'Approved', 'Rejected', 'Converted to PO', 'Short Closed', 'All'];
 
   const filteredPRsBase = useMemo(() => {
     let list = prs;

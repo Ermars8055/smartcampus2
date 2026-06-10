@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict exlJlSh3JFvqlk5aANF7fxhLsj9HDfcakvvXnxgs8Um9dipCbzFv34wE7hOzvQB
+\restrict aKmr3IDjsKR414qJVm7VHdnJhvV0p9mFcTi9rwPFeeuwGwHEJEncUp7CiTeJ14P
 
 -- Dumped from database version 17.10 (Ubuntu 17.10-1.pgdg22.04+1)
 -- Dumped by pg_dump version 18.4 (Ubuntu 18.4-1.pgdg22.04+1)
@@ -624,7 +624,12 @@ CREATE TABLE public.gate_passes (
     vendor_custom_name character varying(255),
     vendor_custom_address text,
     from_department character varying(255),
-    from_store character varying(255)
+    from_store character varying(255),
+    completed_by_name character varying(255),
+    completed_at timestamp without time zone,
+    reason_code character varying(50),
+    gate_entry_number character varying(100),
+    grn_number character varying(100)
 );
 
 
@@ -2066,7 +2071,10 @@ CREATE TABLE public.stock_transfer_items (
     transfer_id integer NOT NULL,
     material_id integer NOT NULL,
     quantity double precision NOT NULL,
-    remarks text
+    remarks text,
+    received_qty double precision,
+    variance_qty double precision,
+    receipt_remarks text
 );
 
 
@@ -2111,7 +2119,9 @@ CREATE TABLE public.stock_transfers (
     created_by_id integer NOT NULL,
     is_deleted boolean,
     created_at timestamp without time zone,
-    completed_at timestamp without time zone
+    completed_at timestamp without time zone,
+    received_by_id integer,
+    received_date timestamp without time zone
 );
 
 
@@ -3097,7 +3107,7 @@ ALTER TABLE ONLY public.warehouses ALTER COLUMN id SET DEFAULT nextval('public.w
 --
 
 COPY public.alembic_version (version_num) FROM stdin;
-e1ed248356b4
+596b08a65445
 \.
 
 
@@ -3297,6 +3307,9 @@ COPY public.audit_logs (id, tenant_id, site_id, user_id, action, entity_type, en
 164	3	\N	4	LOGIN	User	4	\N	\N	\N	2026-06-09 15:52:06.180553
 165	3	\N	4	LOGIN	User	4	\N	\N	\N	2026-06-09 16:37:27.174753
 166	3	\N	4	LOGIN	User	4	\N	\N	\N	2026-06-09 16:37:40.023897
+167	3	\N	4	LOGIN	User	4	\N	\N	\N	2026-06-10 11:34:34.861791
+168	3	\N	4	LOGIN	User	4	\N	\N	\N	2026-06-10 15:14:08.985152
+169	3	\N	4	LOGIN	User	4	\N	\N	\N	2026-06-10 19:36:21.096871
 \.
 
 
@@ -3479,6 +3492,7 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 349	3	3	224	60	182	2026-05-15 15:24:51.648252
 375	3	3	220	52	160	2026-05-15 18:52:30.997207
 338	3	3	240	48	128	2026-05-15 15:41:44.140833
+356	3	3	224	55	169	2026-06-10 17:51:14.970452
 340	3	3	242	52	98	2026-05-20 11:11:02.774579
 464	3	3	247	56	83	2026-05-15 15:44:34.729607
 359	3	3	236	48	85	2026-05-15 15:24:51.690161
@@ -3486,7 +3500,6 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 1282	3	3	972	46	393	2026-06-03 12:31:53.874738
 410	3	3	247	55	64	2026-05-15 15:26:15.932694
 431	3	3	239	49	137	2026-05-15 17:47:32.97587
-356	3	3	224	55	156	2026-05-15 15:26:15.942561
 428	3	3	249	60	83	2026-05-15 15:44:34.740129
 358	3	3	230	48	85	2026-05-15 15:19:37.749602
 324	3	3	226	54	201	2026-05-15 15:26:15.956815
@@ -3599,7 +3612,6 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 539	3	3	238	59	97	2026-05-15 18:52:30.791972
 540	3	3	230	53	62	2026-05-15 18:52:30.798739
 541	3	3	243	53	90	2026-05-15 18:52:30.800722
-542	3	3	224	51	71	2026-05-15 18:52:30.81069
 543	3	3	246	51	56	2026-05-15 18:52:30.812706
 544	3	3	242	51	95	2026-05-15 18:52:30.815074
 536	3	3	232	54	150	2026-05-15 18:52:30.82924
@@ -3704,6 +3716,7 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 1376	3	3	1066	59	139	2026-06-03 12:31:54.066669
 1375	3	3	1065	59	56	2026-06-09 18:18:42.224166
 1372	3	3	1062	59	88	2026-06-09 16:37:52.725659
+542	3	3	224	51	58	2026-06-10 17:51:14.970487
 1377	3	3	1067	59	179	2026-06-03 12:31:54.068542
 1378	3	3	1068	59	59	2026-06-03 12:31:54.070791
 1379	3	3	1069	59	60	2026-06-03 12:31:54.072848
@@ -5535,14 +5548,16 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 11	3	3	ISSUE	ISS	42
 17	3	3	MATERIAL	MAT	36
 34	1	1	GATEPASS	GP	3
+26	3	3	GATEPASS	GP	13
 16	3	3	QUOTATION_REQUEST	QR	20
+35	3	3	TRANSFER	TRF	6
+13	3	3	PURCHASE_ORDER	PO	48
+61	3	3	INVOICE_REF	INV	5
 18	3	3	CATEGORY	CAT	10
 19	3	3	VENDOR	VND	10
-35	3	3	TRANSFER	TRF	2
 31	3	3	COMPANY_ADDRESS	ADDR	3
 27	2	2	ORGANIZATION	ORG	1
 28	2	2	PROJECT	PROJ	1
-26	3	3	GATEPASS	GP	8
 36	3	3	MATERIAL_42	SAA	3
 37	3	3	MATERIAL_43	STR	3
 38	3	3	MATERIAL_44	BRK	2
@@ -5568,7 +5583,6 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 58	3	3	MATERIAL_57	ITI	40
 59	1	1	CATEGORY		1
 5	3	3	INDENT	IND	40
-13	3	3	PURCHASE_ORDER	PO	47
 12	3	3	PURCHASE_REQUEST	PR	28
 15	3	3	GRN	GRN	19
 14	3	3	GATE_ENTRY	GE	26
@@ -5652,6 +5666,11 @@ COPY public.gate_pass_items (id, gate_pass_id, material_id, quantity, remarks) F
 12	12	1378	5	\N
 13	13	1378	5	R1
 14	13	1192	6	R2
+15	14	1378	5	\N
+16	15	1062	1	\N
+17	16	1062	1	\N
+18	17	986	2	\N
+19	18	1712	1	\N
 \.
 
 
@@ -5659,15 +5678,20 @@ COPY public.gate_pass_items (id, gate_pass_id, material_id, quantity, remarks) F
 -- Data for Name: gate_passes; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.gate_passes (id, tenant_id, site_id, gate_pass_number, return_id, project_id, vendor_id, status, gate_pass_type, driver_name, vehicle_number, remarks, created_by_id, created_at, vendor_custom_name, vendor_custom_address, from_department, from_store) FROM stdin;
-2	3	3	GP-00002	9	1	51	Scrapped	Outward Repair	\N	\N	\N	4	2026-05-20 12:50:39.837946	\N	\N	\N	\N
-1	3	3	GP-00001	6	1	58	Repaired & Received	Outward Repair	\N	\N	\N	4	2026-05-20 12:47:03.327093	\N	\N	\N	\N
-3	3	3	GP-00003	\N	1	\N	Repaired & Received	Returnable				4	2026-06-05 11:05:45.354263	\N	\N	\N	\N
-9	3	3	GP-00004	\N	1	53	Repaired & Received	Returnable	\N	\N	\N	4	2026-06-05 11:59:29.838417	ACC Limited	Cement House, 121, Maharshi Karve Road, Bangalore - 560020, Karnataka	103 WARD	\N
-10	3	3	GP-00005	\N	1	54	Scrapped	Returnable	\N	\N	\N	4	2026-06-05 14:29:15.047268	Asian Paints Ltd.	6A, Shanti Nagar, Santacruz (East)	102 WARD	\N
-13	3	3	GP-00008	\N	1	57	Sent Out	Returnable	\N	\N	\N	4	2026-06-05 15:41:12.44409	Havells India Ltd.	QRG Towers, 2D, Sector-126, Expressway, Noida - 201304	103 WARD	\N
-12	3	3	GP-00007	\N	1	54	Sent Out	Non-Returnable	\N	\N	\N	4	2026-06-05 15:40:19.160787	Asian Paints Ltd.	6A, Shanti Nagar, Santacruz (East)	102 WARD	\N
-11	3	3	GP-00006	\N	1	59	Repaired & Received	Returnable	\N	\N	\N	4	2026-06-05 14:44:15.325829	Dalmia Bharat Ltd.	11th & 12th Floor, Hansalaya Building, 15, Barakhamba Road	102 WARD	\N
+COPY public.gate_passes (id, tenant_id, site_id, gate_pass_number, return_id, project_id, vendor_id, status, gate_pass_type, driver_name, vehicle_number, remarks, created_by_id, created_at, vendor_custom_name, vendor_custom_address, from_department, from_store, completed_by_name, completed_at, reason_code, gate_entry_number, grn_number) FROM stdin;
+1	3	3	GP-00001	6	1	58	Repaired & Received	Outward Repair	\N	\N	\N	4	2026-05-20 12:47:03.327093	\N	\N	\N	\N	\N	\N	\N	\N	\N
+3	3	3	GP-00003	\N	1	\N	Repaired & Received	Returnable				4	2026-06-05 11:05:45.354263	\N	\N	\N	\N	\N	\N	\N	\N	\N
+9	3	3	GP-00004	\N	1	53	Repaired & Received	Returnable	\N	\N	\N	4	2026-06-05 11:59:29.838417	ACC Limited	Cement House, 121, Maharshi Karve Road, Bangalore - 560020, Karnataka	103 WARD	\N	\N	\N	\N	\N	\N
+13	3	3	GP-00008	\N	1	57	Sent Out	Returnable	\N	\N	\N	4	2026-06-05 15:41:12.44409	Havells India Ltd.	QRG Towers, 2D, Sector-126, Expressway, Noida - 201304	103 WARD	\N	\N	\N	\N	\N	\N
+12	3	3	GP-00007	\N	1	54	Sent Out	Non-Returnable	\N	\N	\N	4	2026-06-05 15:40:19.160787	Asian Paints Ltd.	6A, Shanti Nagar, Santacruz (East)	102 WARD	\N	\N	\N	\N	\N	\N
+11	3	3	GP-00006	\N	1	59	Repaired & Received	Returnable	\N	\N	\N	4	2026-06-05 14:44:15.325829	Dalmia Bharat Ltd.	11th & 12th Floor, Hansalaya Building, 15, Barakhamba Road	102 WARD	\N	\N	\N	\N	\N	\N
+2	3	3	GP-00002	9	1	51	Sent Out	Outward Repair	\N	\N	\N	4	2026-05-20 12:50:39.837946	\N	\N	\N	\N	\N	\N	\N	\N	\N
+10	3	3	GP-00005	\N	1	54	Sent Out	Returnable	\N	\N	\N	4	2026-06-05 14:29:15.047268	Asian Paints Ltd.	6A, Shanti Nagar, Santacruz (East)	102 WARD	\N	\N	\N	\N	\N	\N
+14	3	3	GP-00009	\N	1	54	Sent Out	Returnable	\N	\N	\N	4	2026-06-10 15:21:10.292081	Asian Paints Ltd.	6A, Shanti Nagar, Santacruz (East), Mumbai, Maharashtra - 400055	102 WARD	\N	\N	\N	\N	\N	\N
+15	3	3	GP-00010	\N	1	53	Pending Repair	Returnable	\N	\N	\N	4	2026-06-10 15:25:40.057678	ACC Limited	Cement House, 121, Maharshi Karve Road, Bangalore, Karnataka - 560020	102 WARD	\N	\N	\N	\N	\N	\N
+16	3	3	GP-00011	\N	1	54	Sent Out	Non-Returnable	\N	\N	\N	4	2026-06-10 15:26:37.128609	Asian Paints Ltd.	6A, Shanti Nagar, Santacruz (East), Mumbai, Maharashtra - 400055	103 WARD	\N	\N	\N	\N	\N	\N
+17	3	3	GP-00012	\N	1	56	Yet to Receive	Returnable	\N	\N	\N	4	2026-06-10 15:51:33.963981	Hindware Home Innovation Ltd.	301-302, 3rd Floor, Park Centra, Sector-30, Bangalore, Karnataka - 560061	102 WARD	\N	\N	\N	REPAIR	\N	\N
+18	3	3	GP-00013	\N	1	\N	Yet to Receive	Returnable	\N	\N	Repair	4	2026-06-10 16:32:39.002374	Ram Repair shop	Bangalore	105 WARD	\N	\N	\N	REPAIR	\N	\N
 \.
 
 
@@ -5894,6 +5918,16 @@ COPY public.indents (id, tenant_id, site_id, indent_number, requester_id, room_i
 --
 
 COPY public.invoice_items (id, invoice_id, material_id, description, hsn_sac, quantity, rate, uom, discount_percent, cgst_rate, sgst_rate, igst_rate, cgst_amount, sgst_amount, igst_amount, taxable_amount, amount, remarks) FROM stdin;
+12	2	246	2.5sqmm Copper Wire	44555554	10	1800	Rolls	0	5	5	0	900	900	0	18000	19800	
+13	2	2135	10*8 AGFA FILMS		5	4349	Numbers	0	6	6	0	1304.7	1304.7	0	21745	24354.4	
+26	3	220	Iron Pickaxe		54	650	Numbers	0	9	9	0	3159	3159	0	35100	41418	
+27	3	224	12mm TMT Bars		57	65000	Metric Ton	0	9	9	0	333450	333450	0	3705000	4371900	
+28	3	249	PPC Cement		141	420	Bags	0	9	9	0	5329.8	5329.8	0	59220	69879.59999999999	
+29	3	236	PVC Pipe 4 inch		57	250	Running Meter	0	9	9	0	1282.5	1282.5	0	14250	16815	
+34	4	1191	0.032 X 150 TERUMO GUIDE WIRE		10	16500	Numbers	0	5	5	0	8250	8250	0	165000	181500	
+37	5	1192	0.035X150CM TEFLON WIRE J.TIP		20	26703.28	Numbers	0	6	6	0	32043.935999999998	32043.935999999998	0	534065.6	598153.472	
+38	5	2133	110mmx75mm Bush		10	761.41	Numbers	0	9	9	0	685.2689999999999	685.2689999999999	0	7614.099999999999	8984.637999999999	
+44	6	2133	110mmx75mm Bush		10	761.41	Numbers	0	9	9	0	685.2689999999999	685.2689999999999	0	7614.099999999999	8984.637999999999	
 \.
 
 
@@ -5902,6 +5936,11 @@ COPY public.invoice_items (id, invoice_id, material_id, description, hsn_sac, qu
 --
 
 COPY public.invoices (id, tenant_id, site_id, invoice_number, invoice_date, gate_entry_id, vendor_id, po_id, total_amount, tax_amount, status, scan_url, remarks, created_by_id, is_deleted, created_at, updated_at, eway_bill_number, delivery_note, delivery_note_date, payment_terms, reference_number, reference_date, dispatch_doc_number, dispatched_through, destination, lr_rr_number, vehicle_number, terms_of_delivery, total_taxable_amount, total_cgst, total_sgst, total_igst, total_discount, consignee_id, buyer_id, internal_reference_number, srf_number, irn, ack_number, ack_date, transport_charges, transport_hsn, transport_cgst_rate, transport_sgst_rate, transport_igst_rate, transport_discount_percent, code) FROM stdin;
+4	3	3	aisax19238918239183	2026-06-03	\N	53	206	181500	16500	Verified	/uploads/invoices/3/20260610_134321_9103f01f.png		4	f	2026-06-10 19:13:38.480074	2026-06-10 19:27:45.185722			\N	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR		\N							165000	8250	8250	0	0	\N	\N	INV-00003				\N	0		0	0	0	0	INV-00003
+5	3	3	wuq2389482394	2026-06-03	\N	56	\N	607638.11	65458.409999999996	Draft	/uploads/invoices/3/20260610_135918_d988d4be.png		4	f	2026-06-10 19:30:10.241491	2026-06-10 19:30:10.241532			\N			\N							542179.7	32729.204999999998	32729.204999999998	0	0	\N	\N	INV-00004				\N	500		0	0	0	0	INV-00004
+2	3	3	560049	2026-06-04	\N	53	204	46654.4	4409.4	Verified	/uploads/invoices/3/20260610_130825_30b8e727.png		4	f	2026-06-10 11:49:14.494865	2026-06-10 18:39:45.341677			\N	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR		\N							42245	2204.7	2204.7	0	0	1	2	INV-00001				2026-06-10	2500	425411	0	0	0	0	INV-00001
+3	3	3	in4324	2026-06-02	\N	57	193	4500112.6	686442.6	Verified	/uploads/invoices/3/20260610_133541_e49271d3.png		4	f	2026-06-10 19:03:01.323243	2026-06-10 19:05:56.557962			\N	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR		\N							3813670	343221.3	343221.3	0	0	\N	\N	INV-00002				\N	100		0	0	0	0	INV-00002
+6	3	3	Bill23562	2026-06-01	\N	58	\N	9084.637999999999	1370.5379999999998	Verified	/uploads/invoices/3/20260610_140125_0ed94965.png		4	f	2026-06-10 19:31:10.596268	2026-06-10 19:42:12.900234			\N			\N							7714.099999999999	685.2689999999999	685.2689999999999	0	0	\N	\N	INV-00005				\N	100		0	0	0	0	INV-00005
 \.
 
 
@@ -6034,7 +6073,7 @@ COPY public.material_returns (id, tenant_id, site_id, return_number, warehouse_i
 18	3	3	RET-00008	59	1	\N	106 WARD	Unused	GRInfra	Central	4	f	2026-06-09 15:25:25.741683	Partially Received	2026-06-09 10:24:19.831825	4
 20	3	3	RET-00010	59	1	\N	106 WARD	Unused		wwww	4	f	2026-06-09 16:00:08.811247	Closed	2026-06-09 10:33:02.170344	4
 19	3	3	RET-00009	59	1	\N	107 WARD	Unused		ngtest	4	f	2026-06-09 15:57:41.163092	Partially Received	2026-06-09 11:07:52.724123	4
-21	3	3	RET-00011	59	1	\N	203 WARD	Unused	General Remark1	Suresh	4	f	2026-06-09 16:54:33.084703	Partially Received	2026-06-09 11:25:55.91434	4
+21	3	3	RET-00011	59	1	\N	203 WARD	Unused	General Remark1	Suresh	4	f	2026-06-09 16:54:33.084703	Partially Received	2026-06-10 12:22:39.346884	4
 \.
 
 
@@ -7583,6 +7622,7 @@ COPY public.purchase_order_items (id, po_id, material_id, quantity, rate, amount
 461	183	225	99	184.01	18217.39	99	\N	0	0	0	0	f
 462	183	216	86	240.24	20660.79	86	\N	0	0	0	0	f
 515	207	1191	12	1000	12000	0	\N	20	5	5	0	f
+516	213	1192	2	26703.28	53406.56	0	\N	0	6	6	0	f
 \.
 
 
@@ -7594,6 +7634,7 @@ COPY public.purchase_orders (id, tenant_id, site_id, po_number, vendor_id, proje
 184	3	3	PO-00015	52	1	\N	\N	182	Formal	81643.63	\N	Closed	\N	4	\N	\N	f	2026-05-05 18:52:30.375564	2026-06-02 18:01:24.106204	\N
 188	3	3	PO-00023	53	1	\N	\N	179	Formal	7057	\N	Sent to Vendor	\N	4	4	2026-06-09 06:02:25.803756	f	2026-05-25 18:43:27.659778	2026-06-09 11:32:29.137317	2
 185	3	3	PO-00020	56	1	\N	188	\N	Formal	505620	\N	Sent to Vendor	\N	4	4	2026-06-09 06:03:28.427074	f	2026-05-20 11:09:40.396549	2026-06-09 12:03:22.436884	2
+213	3	3	PO-00048	53	1	\N	\N	\N	Informal	59815.35	2026-07-01	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-10 18:09:04.764216	2026-06-10 18:09:04.786544	1
 183	3	3	PO-00014	52	1	\N	\N	181	Formal	38878.18	\N	Closed	\N	4	\N	\N	f	2026-05-04 18:52:30.375564	2026-06-09 11:11:19.17997	\N
 186	3	3	PO-00021	51	1	185	\N	\N	Formal	2029750	2026-06-03	Sent to Vendor		4	4	2026-05-20 07:11:03.64198	f	2026-05-20 12:31:17.847185	2026-06-09 11:28:51.718097	\N
 187	3	3	PO-00022	59	1	\N	195	\N	Formal	6500000	\N	Sent to Vendor	\N	4	4	2026-06-09 06:01:45.255291	f	2026-05-20 12:44:10.329878	2026-06-09 11:31:54.352679	2
@@ -9898,6 +9939,16 @@ COPY public.stock_ledger (id, tenant_id, site_id, material_id, warehouse_id, tra
 3000	3	3	228	55	Issue	-10	3385	Issue	226	ISS-00041	1	2	\N	4	2026-06-09 18:46:30.774281
 3001	3	3	222	47	Issue	-10	175	Issue	226	ISS-00041	1	2	\N	4	2026-06-09 18:46:30.774312
 3002	3	3	1378	59	Issue	-2	3	Issue	227	ISS-00042	1	\N	\N	4	2026-06-09 18:48:05.263072
+3003	3	3	224	51	Transfer Out	-4	67	Transfer	14	TRF-00003	1	\N	\N	4	2026-06-10 17:29:32.767831
+3004	3	3	224	55	Transfer In	4	160	Transfer	14	TRF-00003	1	\N	\N	4	2026-06-10 17:29:32.767847
+3005	3	3	224	51	Transfer Out	-5	62	Transfer	15	TRF-00004	1	\N	\N	4	2026-06-10 17:45:23.165825
+3006	3	3	224	55	Transfer In	5	165	Transfer	15	TRF-00004	1	\N	\N	4	2026-06-10 17:45:23.165864
+3007	3	3	224	51	Transfer Out	-1	61	Transfer	16	TRF-00005	1	\N	\N	4	2026-06-10 17:46:51.189193
+3008	3	3	224	55	Transfer In	1	166	Transfer	16	TRF-00005	1	\N	\N	4	2026-06-10 17:46:51.189222
+3009	3	3	224	51	Transfer Out	-1	60	Transfer	16	TRF-00005	1	\N	\N	4	2026-06-10 17:49:35.001956
+3010	3	3	224	55	Transfer In	1	167	Transfer	16	TRF-00005	1	\N	\N	4	2026-06-10 17:49:35.001994
+3011	3	3	224	51	Transfer Out	-2	58	Transfer	17	TRF-00006	1	\N	\N	4	2026-06-10 17:51:14.972787
+3012	3	3	224	55	Transfer In	2	169	Transfer	17	TRF-00006	1	\N	\N	4	2026-06-10 17:51:14.972818
 \.
 
 
@@ -9905,10 +9956,14 @@ COPY public.stock_ledger (id, tenant_id, site_id, material_id, warehouse_id, tra
 -- Data for Name: stock_transfer_items; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.stock_transfer_items (id, transfer_id, material_id, quantity, remarks) FROM stdin;
-1	1	2102	1	
-2	13	219	1	
-3	13	217	1	
+COPY public.stock_transfer_items (id, transfer_id, material_id, quantity, remarks, received_qty, variance_qty, receipt_remarks) FROM stdin;
+1	1	2102	1		\N	\N	\N
+2	13	219	1		\N	\N	\N
+3	13	217	1		\N	\N	\N
+4	14	224	4	str-00002 remark	\N	\N	\N
+5	15	224	5		5	0	
+6	16	224	2		2	0	
+7	17	224	5		2	-3	
 \.
 
 
@@ -9916,9 +9971,13 @@ COPY public.stock_transfer_items (id, transfer_id, material_id, quantity, remark
 -- Data for Name: stock_transfers; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.stock_transfers (id, tenant_id, site_id, transfer_number, from_warehouse_id, to_warehouse_id, project_id, status, remarks, created_by_id, is_deleted, created_at, completed_at) FROM stdin;
-1	3	3	TRF-00001	59	53	1	Completed		4	f	2026-06-05 12:06:45.059766	2026-06-05 06:36:45.056711
-13	3	3	TRF-00002	46	55	1	Completed		4	f	2026-06-05 12:10:28.784624	2026-06-05 06:40:28.783642
+COPY public.stock_transfers (id, tenant_id, site_id, transfer_number, from_warehouse_id, to_warehouse_id, project_id, status, remarks, created_by_id, is_deleted, created_at, completed_at, received_by_id, received_date) FROM stdin;
+1	3	3	TRF-00001	59	53	1	Completed		4	f	2026-06-05 12:06:45.059766	2026-06-05 06:36:45.056711	\N	\N
+13	3	3	TRF-00002	46	55	1	Completed		4	f	2026-06-05 12:10:28.784624	2026-06-05 06:40:28.783642	\N	\N
+14	3	3	TRF-00003	51	55	1	Completed	Transfer Remark1	4	f	2026-06-10 17:29:32.684518	2026-06-10 11:59:32.682341	\N	\N
+15	3	3	TRF-00004	51	55	1	Completed		4	f	2026-06-10 17:43:58.454661	2026-06-10 12:15:23.156814	4	2026-06-10 12:15:23.156866
+16	3	3	TRF-00005	51	55	1	Completed		4	f	2026-06-10 17:46:46.628573	2026-06-10 12:19:34.997562	4	2026-06-10 12:19:34.997601
+17	3	3	TRF-00006	51	55	1	Partially Received		4	f	2026-06-10 17:50:40.664258	\N	4	2026-06-10 12:22:05.454638
 \.
 
 
@@ -10344,7 +10403,7 @@ SELECT pg_catalog.setval('public.approval_flows_id_seq', 9, true);
 -- Name: audit_logs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.audit_logs_id_seq', 166, true);
+SELECT pg_catalog.setval('public.audit_logs_id_seq', 169, true);
 
 
 --
@@ -10393,7 +10452,7 @@ SELECT pg_catalog.setval('public.departments_id_seq', 259, true);
 -- Name: document_sequences_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.document_sequences_id_seq', 60, true);
+SELECT pg_catalog.setval('public.document_sequences_id_seq', 61, true);
 
 
 --
@@ -10414,14 +10473,14 @@ SELECT pg_catalog.setval('public.gate_entries_id_seq', 191, true);
 -- Name: gate_pass_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.gate_pass_items_id_seq', 14, true);
+SELECT pg_catalog.setval('public.gate_pass_items_id_seq', 19, true);
 
 
 --
 -- Name: gate_passes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.gate_passes_id_seq', 13, true);
+SELECT pg_catalog.setval('public.gate_passes_id_seq', 18, true);
 
 
 --
@@ -10463,14 +10522,14 @@ SELECT pg_catalog.setval('public.indents_id_seq', 213, true);
 -- Name: invoice_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.invoice_items_id_seq', 1, true);
+SELECT pg_catalog.setval('public.invoice_items_id_seq', 44, true);
 
 
 --
 -- Name: invoices_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.invoices_id_seq', 1, true);
+SELECT pg_catalog.setval('public.invoices_id_seq', 6, true);
 
 
 --
@@ -10533,14 +10592,14 @@ SELECT pg_catalog.setval('public.purchase_order_approvals_id_seq', 18, true);
 -- Name: purchase_order_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_order_items_id_seq', 515, true);
+SELECT pg_catalog.setval('public.purchase_order_items_id_seq', 516, true);
 
 
 --
 -- Name: purchase_orders_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_orders_id_seq', 212, true);
+SELECT pg_catalog.setval('public.purchase_orders_id_seq', 213, true);
 
 
 --
@@ -10638,21 +10697,21 @@ SELECT pg_catalog.setval('public.sites_id_seq', 3, true);
 -- Name: stock_ledger_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.stock_ledger_id_seq', 3002, true);
+SELECT pg_catalog.setval('public.stock_ledger_id_seq', 3012, true);
 
 
 --
 -- Name: stock_transfer_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.stock_transfer_items_id_seq', 3, true);
+SELECT pg_catalog.setval('public.stock_transfer_items_id_seq', 7, true);
 
 
 --
 -- Name: stock_transfers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.stock_transfers_id_seq', 13, true);
+SELECT pg_catalog.setval('public.stock_transfers_id_seq', 17, true);
 
 
 --
@@ -13447,6 +13506,14 @@ ALTER TABLE ONLY public.stock_transfers
 
 
 --
+-- Name: stock_transfers stock_transfers_received_by_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.stock_transfers
+    ADD CONSTRAINT stock_transfers_received_by_id_fkey FOREIGN KEY (received_by_id) REFERENCES public.users(id);
+
+
+--
 -- Name: stock_transfers stock_transfers_site_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -13706,5 +13773,5 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict exlJlSh3JFvqlk5aANF7fxhLsj9HDfcakvvXnxgs8Um9dipCbzFv34wE7hOzvQB
+\unrestrict aKmr3IDjsKR414qJVm7VHdnJhvV0p9mFcTi9rwPFeeuwGwHEJEncUp7CiTeJ14P
 

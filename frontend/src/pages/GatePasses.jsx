@@ -39,6 +39,8 @@ export default function GatePasses() {
     items: [{ material_id: '', quantity: '', remarks: '' }]
   });
 
+  const [receiveModal, setReceiveModal] = useState({ open: false, id: null, driver_name: '' });
+
   const load = async () => {
     try {
       const gpRes = await api.get('/api/gate-passes');
@@ -80,11 +82,35 @@ export default function GatePasses() {
 
   const handleVendorChange = (selectedVendor) => {
     if (selectedVendor) {
+      let parts = [];
+      if (selectedVendor.address_line_1) {
+        let l1 = selectedVendor.address_line_1.trim();
+        if (l1.endsWith(',')) l1 = l1.slice(0, -1).trim();
+        if (l1) parts.push(l1);
+      }
+      if (selectedVendor.address_line_2) {
+        let l2 = selectedVendor.address_line_2.trim();
+        if (l2.endsWith(',')) l2 = l2.slice(0, -1).trim();
+        if (l2) parts.push(l2);
+      }
+      if (selectedVendor.city) {
+        let city = selectedVendor.city.trim();
+        if (city.endsWith(',')) city = city.slice(0, -1).trim();
+        if (city) parts.push(city);
+      }
+      if (selectedVendor.state) {
+        let stateName = selectedVendor.state.replace(/^\d{2}\s*-\s*/, '').trim();
+        if (stateName) parts.push(stateName);
+      }
+      
+      let addr = parts.join(', ');
+      if (selectedVendor.pincode) addr += ` - ${selectedVendor.pincode.trim()}`;
+      
       setGpModal(prev => ({
         ...prev,
         vendor_id: selectedVendor.id,
         vendor_custom_name: selectedVendor.name,
-        vendor_custom_address: selectedVendor.address_line_1 ? `${selectedVendor.address_line_1}${selectedVendor.address_line_2 ? ', ' + selectedVendor.address_line_2 : ''}` : ''
+        vendor_custom_address: addr
       }));
     } else {
       setGpModal(prev => ({
@@ -172,8 +198,27 @@ export default function GatePasses() {
 
   const completeGatePass = async (id, type) => {
     try {
-      const newStatus = type === 'Non-Returnable' ? 'Sent Out' : 'Repaired & Received';
-      await api.put(`/api/gate-passes/${id}`, { status: newStatus });
+      if (type === 'Non-Returnable') {
+        await api.put(`/api/gate-passes/${id}`, { status: 'Sent Out' });
+        load();
+      } else {
+        setReceiveModal({ open: true, id, driver_name: '' });
+      }
+    } catch (e) { console.error(e); }
+  };
+
+  const submitReceive = async () => {
+    try {
+      if (!receiveModal.driver_name.trim()) {
+        alert("Please enter the name of the person who brought the items.");
+        return;
+      }
+      await api.put(`/api/gate-passes/${receiveModal.id}`, { 
+        status: 'Repaired & Received',
+        completed_by_name: receiveModal.driver_name,
+        completed_at: new Date().toISOString()
+      });
+      setReceiveModal({ open: false, id: null, driver_name: '' });
       load();
     } catch (e) { console.error(e); }
   };
@@ -351,9 +396,15 @@ export default function GatePasses() {
                       <Chip
                         label={gp.status}
                         size="small"
-                        color={['Issued', 'Pending Repair'].includes(gp.status) ? 'warning' : ['Repaired & Received', 'Repaired & Returned', 'Sent Out'].includes(gp.status) ? 'success' : 'error'}
+                        color={['Issued', 'Pending Repair'].includes(gp.status) ? 'warning' : ['Repaired & Received', 'Repaired & Returned'].includes(gp.status) ? 'success' : 'error'}
                         sx={{ fontWeight: 700, height: 22, fontSize: '0.7rem' }}
                       />
+                      {gp.status === 'Repaired & Received' && (gp.completed_by_name || gp.completed_at) && (
+                        <Box sx={{ mt: 0.5 }}>
+                          {gp.completed_by_name && <Typography variant="caption" display="block" sx={{ color: '#64748B', lineHeight: 1.1 }}>By: {gp.completed_by_name}</Typography>}
+                          {gp.completed_at && <Typography variant="caption" display="block" sx={{ color: '#64748B', lineHeight: 1.1 }}>On: {formatDate(gp.completed_at)}</Typography>}
+                        </Box>
+                      )}
                     </TableCell>
                     <TableCell align="right">
                       <IconButton size="small" color="primary" onClick={() => printGatePass(gp)}>
@@ -605,6 +656,39 @@ export default function GatePasses() {
           >
             Print Gate Pass
           </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* RECEIVE MODAL */}
+      <Dialog open={receiveModal.open} onClose={() => setReceiveModal({ ...receiveModal, open: false })} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ pb: 1, pt: 3, px: 4 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Box sx={{ p: 1, bgcolor: '#ECFDF5', borderRadius: 2, color: '#10B981', display: 'flex' }}>
+                <TaskAlt fontSize="medium" />
+              </Box>
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>Receive Repaired Items</Typography>
+                <Typography variant="body2" color="text.secondary">Record details of the returned material</Typography>
+              </Box>
+            </Box>
+            <IconButton size="small" onClick={() => setReceiveModal({ ...receiveModal, open: false })} sx={{ color: '#64748B' }}><Close /></IconButton>
+          </Box>
+        </DialogTitle>
+        <DialogContent sx={{ px: 4, py: 3 }}>
+          <TextField
+            fullWidth
+            label="Received By / Driver Name *"
+            variant="outlined"
+            value={receiveModal.driver_name}
+            onChange={(e) => setReceiveModal({ ...receiveModal, driver_name: e.target.value })}
+            placeholder="Who brought these items?"
+            autoFocus
+          />
+        </DialogContent>
+        <DialogActions sx={{ px: 4, pb: 4, pt: 1 }}>
+          <Button onClick={() => setReceiveModal({ ...receiveModal, open: false })} sx={{ color: '#64748B', fontWeight: 600 }}>Cancel</Button>
+          <Button onClick={submitReceive} variant="contained" color="success" sx={{ px: 3, fontWeight: 700, borderRadius: 2 }}>Confirm Receipt</Button>
         </DialogActions>
       </Dialog>
 

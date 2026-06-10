@@ -116,6 +116,7 @@ def list_issues(
             floor_name=floor_name,
             building_name=building_name,
             issued_by_name=iss.issued_by.full_name if iss.issued_by else None,
+            acknowledged_by_name=iss.acknowledged_by.full_name if getattr(iss, 'acknowledged_by', None) else None,
             indent_number=iss.indent.indent_number if iss.indent else None,
             items=items
         ))
@@ -689,6 +690,30 @@ def format_gate_pass(gp: GatePass) -> GatePassOut:
             uom_name=mat.uom.name if mat and mat.uom else None
         ))
         
+    let_vend_addr = None
+    if vend:
+        parts = []
+        if vend.address_line_1:
+            clean_l1 = vend.address_line_1.strip()
+            if clean_l1.endswith(','): clean_l1 = clean_l1[:-1].strip()
+            if clean_l1: parts.append(clean_l1)
+        if vend.address_line_2:
+            clean_l2 = vend.address_line_2.strip()
+            if clean_l2.endswith(','): clean_l2 = clean_l2[:-1].strip()
+            if clean_l2: parts.append(clean_l2)
+        if vend.city:
+            clean_city = vend.city.strip()
+            if clean_city.endswith(','): clean_city = clean_city[:-1].strip()
+            if clean_city: parts.append(clean_city)
+        if vend.state:
+            import re
+            state_clean = re.sub(r'^\d{2}\s*-\s*', '', vend.state).strip()
+            if state_clean: parts.append(state_clean)
+        
+        let_vend_addr = ", ".join(parts)
+        if vend.pincode:
+            let_vend_addr += f" - {vend.pincode.strip()}"
+
     return GatePassOut(
         id=gp.id,
         gate_pass_number=gp.gate_pass_number,
@@ -697,7 +722,7 @@ def format_gate_pass(gp: GatePass) -> GatePassOut:
         project_name=proj.name if proj else None,
         vendor_id=gp.vendor_id,
         vendor_name=f"{vend.code} - {vend.name}" if vend else None,
-        vendor_address=f"{vend.address_line_1 or ''}{', ' + vend.address_line_2 if vend.address_line_2 else ''}" if vend else None,
+        vendor_address=let_vend_addr,
         vendor_custom_name=gp.vendor_custom_name,
         vendor_custom_address=gp.vendor_custom_address,
         from_department=gp.from_department,
@@ -708,6 +733,8 @@ def format_gate_pass(gp: GatePass) -> GatePassOut:
         vehicle_number=gp.vehicle_number,
         remarks=gp.remarks,
         created_at=gp.created_at,
+        completed_by_name=gp.completed_by_name,
+        completed_at=gp.completed_at,
         items=items_out
     )
 
@@ -797,6 +824,10 @@ def update_gate_pass(
     gp.status = data.status
     if data.remarks is not None:
         gp.remarks = data.remarks
+    if data.completed_by_name is not None:
+        gp.completed_by_name = data.completed_by_name
+    if data.completed_at is not None:
+        gp.completed_at = data.completed_at
         
     # If transitioning from "Pending Repair" to "Repaired & Received"
     if old_status == "Pending Repair" and data.status == "Repaired & Received":

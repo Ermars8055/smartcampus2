@@ -55,7 +55,7 @@ export default function StockTransfers() {
       open: true,
       from_warehouse_id: warehouses[0]?.id || '',
       to_warehouse_id: warehouses[1]?.id || warehouses[0]?.id || '',
-      project_id: projects[0]?.id || '',
+      project_id: null,
       remarks: '',
       items: [{ material_id: '', quantity: 0, remarks: '' }]
     });
@@ -208,7 +208,7 @@ export default function StockTransfers() {
         </DialogTitle>
         <DialogContent sx={{ p: 3 }}>
           <Grid container spacing={2} sx={{ mb: 3, mt: 0.5 }}>
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={12} sm={6}>
               <FormControl fullWidth size="small">
                 <InputLabel>From Store</InputLabel>
                 <Select 
@@ -221,7 +221,7 @@ export default function StockTransfers() {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={12} sm={6}>
               <FormControl fullWidth size="small">
                 <InputLabel>To Store</InputLabel>
                 <Select 
@@ -231,19 +231,6 @@ export default function StockTransfers() {
                   startAdornment={<InputAdornment position="start"><Warehouse sx={{ color: '#2563EB', fontSize: 20, mr: 1 }} /></InputAdornment>}
                 >
                   {warehouses.map(w => <MenuItem key={w.id} value={w.id}>{w.name} ({w.code})</MenuItem>)}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={4}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Associated Project</InputLabel>
-                <Select 
-                  label="Associated Project"
-                  value={transferModal.project_id} 
-                  onChange={e => setTransferModal({ ...transferModal, project_id: e.target.value })}
-                  startAdornment={<InputAdornment position="start"><AccountTree sx={{ color: '#94A3B8', fontSize: 20, mr: 1 }} /></InputAdornment>}
-                >
-                  {projects.map(p => <MenuItem key={p.id} value={p.id}>{p.name} ({p.code})</MenuItem>)}
                 </Select>
               </FormControl>
             </Grid>
@@ -354,12 +341,7 @@ export default function StockTransfers() {
                   <Typography variant="caption" color="text.secondary">To Store</Typography>
                   <Typography variant="body2" sx={{ fontWeight: 600 }}>{viewTransferModal.transfer.to_warehouse_name}</Typography>
                 </Grid>
-                {viewTransferModal.transfer.project_name && (
-                  <Grid item xs={12} sm={4}>
-                    <Typography variant="caption" color="text.secondary">Project</Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{viewTransferModal.transfer.project_name}</Typography>
-                  </Grid>
-                )}
+
                 <Grid item xs={12} sm={4}>
                   <Typography variant="caption" color="text.secondary">Status</Typography>
                   <Box sx={{ mt: 0.5 }}>

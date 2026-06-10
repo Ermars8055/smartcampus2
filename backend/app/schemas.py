@@ -961,6 +961,7 @@ class IssueOut(BaseModel):
     is_acknowledged: bool = False
     acknowledged_at: Optional[datetime] = None
     acknowledged_by_id: Optional[int] = None
+    acknowledged_by_name: Optional[str] = None
     acknowledgement_remarks: Optional[str] = None
     created_at: datetime
     warehouse_name: Optional[str] = None
@@ -1515,6 +1516,8 @@ class GatePassCreate(BaseModel):
 class GatePassUpdate(BaseModel):
     status: str
     remarks: Optional[str] = None
+    completed_by_name: Optional[str] = None
+    completed_at: Optional[datetime] = None
 
 class GatePassOut(BaseModel):
     id: int
@@ -1535,6 +1538,8 @@ class GatePassOut(BaseModel):
     vehicle_number: Optional[str] = None
     remarks: Optional[str] = None
     created_at: datetime
+    completed_by_name: Optional[str] = None
+    completed_at: Optional[datetime] = None
     items: List[GatePassItemOut] = []
     class Config:
         from_attributes = True

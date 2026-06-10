@@ -7,10 +7,12 @@ import {
 import { CheckCircle, AssignmentTurnedIn } from '@mui/icons-material';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 export default function PendingAcknowledgments() {
   const { hasAction } = useAuth();
   const [issues, setIssues] = useState([]);
+  const [confirm, setConfirm] = useState({ open: false, issue: null });
 
   const load = async () => {
     try {
@@ -133,7 +135,7 @@ export default function PendingAcknowledgments() {
                     fullWidth
                     variant="contained"
                     startIcon={<CheckCircle />}
-                    onClick={() => acknowledgeIssue(iss.id)}
+                    onClick={() => setConfirm({ open: true, issue: iss })}
                     disabled={!hasAction('acknowledgements', 'can_acknowledge')}
                     size="large"
                     sx={{
@@ -153,6 +155,19 @@ export default function PendingAcknowledgments() {
           ))}
         </Grid>
       )}
+
+      <ConfirmDialog
+        open={confirm.open}
+        title="Confirm Acknowledgment"
+        message={confirm.issue ? `Are you sure you want to acknowledge receipt for issue ${confirm.issue.issue_number}? This issue contains ${confirm.issue.items?.length || 0} item(s).` : ''}
+        confirmText="Acknowledge Receipt"
+        confirmColor="warning"
+        onConfirm={() => {
+          if (confirm.issue) acknowledgeIssue(confirm.issue.id);
+          setConfirm({ open: false, issue: null });
+        }}
+        onCancel={() => setConfirm({ open: false, issue: null })}
+      />
     </Box>
   );
 }

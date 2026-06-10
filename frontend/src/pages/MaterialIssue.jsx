@@ -6,7 +6,7 @@ import {
   DialogContent, DialogActions, Grid, Select, FormControl,
   InputLabel, IconButton, Paper, InputAdornment, MenuItem, Tooltip, TableSortLabel, Tabs, Tab, Autocomplete
 } from '@mui/material';
-import { Close, Inventory2, Add, Delete, AccountTree, Warehouse, Comment, InfoOutlined, Outbox, CheckCircle, Apartment, Layers, MeetingRoom } from '@mui/icons-material';
+import { Close, Inventory2, Add, Delete, AccountTree, Warehouse, Comment, InfoOutlined, Outbox, CheckCircle, Apartment, Layers, MeetingRoom, Search } from '@mui/icons-material';
 import api from '../services/api';
 import MaterialSelect from '../components/MaterialSelect';
 import { useAuth } from '../context/AuthContext';
@@ -58,6 +58,15 @@ export default function MaterialIssue() {
 
   const [tabValue, setTabValue] = useState('Pending');
   const [sortConfig, setSortConfig] = useState({ key: 'sortDate', direction: 'desc' });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortOption, setSortOption] = useState('sortDate-desc');
+
+  const handleSortOptionChange = (e) => {
+    const val = e.target.value;
+    setSortOption(val);
+    const [key, direction] = val.split('-');
+    setSortConfig({ key, direction });
+  };
 
   const handleDepartmentChange = (newDept) => {
     if (newDept) {
@@ -130,7 +139,9 @@ export default function MaterialIssue() {
 
   const handleRequestSort = (property) => {
     const isAsc = sortConfig.key === property && sortConfig.direction === 'asc';
-    setSortConfig({ key: property, direction: isAsc ? 'desc' : 'asc' });
+    const newDir = isAsc ? 'desc' : 'asc';
+    setSortConfig({ key: property, direction: newDir });
+    setSortOption(`${property}-${newDir}`);
   };
 
   const combinedList = useMemo(() => {
@@ -153,7 +164,8 @@ export default function MaterialIssue() {
         return {
           type: 'issue', ...iss, sortDate: new Date(iss.created_at).getTime(),
           idStr: iss.issue_number, personStr: personStrValue, itemCount: iss.items?.length || 0,
-          derivedStatus: iss.is_acknowledged ? 'Acknowledged' : 'Completed'
+          derivedStatus: iss.is_acknowledged ? 'Acknowledged' : 'Completed',
+          acknowledgedByName: iss.acknowledged_by_name
         };
       })
     ];
@@ -176,9 +188,16 @@ export default function MaterialIssue() {
   }, [pendingIndents, issues, sortConfig]);
 
   const filteredList = useMemo(() => {
-    if (tabValue === 'All') return combinedList;
-    return combinedList.filter(row => row.derivedStatus === tabValue);
-  }, [combinedList, tabValue]);
+    let list = combinedList;
+    if (tabValue !== 'All') {
+      list = list.filter(row => row.derivedStatus === tabValue);
+    }
+    if (searchTerm.trim()) {
+      const lowerSearch = searchTerm.toLowerCase();
+      list = list.filter(row => row.idStr?.toLowerCase().includes(lowerSearch));
+    }
+    return list;
+  }, [combinedList, tabValue, searchTerm]);
 
   const openIssueModal = (indent) => {
     const items = indent.items
@@ -341,6 +360,36 @@ export default function MaterialIssue() {
         </Tabs>
       </Card>
 
+      <Box sx={{ mb: 3, display: 'flex', gap: 2, alignItems: 'center' }}>
+        <TextField
+          size="small"
+          placeholder="Search by Record No (e.g. IND-0001)..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search sx={{ color: 'text.secondary', fontSize: 20 }} />
+              </InputAdornment>
+            ),
+          }}
+          sx={{ bgcolor: 'white', borderRadius: 1, minWidth: 300 }}
+        />
+        <FormControl size="small" sx={{ minWidth: 200 }}>
+          <Select
+            value={sortOption}
+            onChange={handleSortOptionChange}
+            displayEmpty
+            sx={{ bgcolor: 'white', borderRadius: 1 }}
+          >
+            <MenuItem value="sortDate-desc">Date (Newest First)</MenuItem>
+            <MenuItem value="sortDate-asc">Date (Oldest First)</MenuItem>
+            <MenuItem value="idStr-asc">Record No (A-Z)</MenuItem>
+            <MenuItem value="idStr-desc">Record No (Z-A)</MenuItem>
+          </Select>
+        </FormControl>
+      </Box>
+
       {filteredList.length === 0 ? (
         <Card sx={{ p: 8, textAlign: 'center', border: '1px dashed #CBD5E1', bgcolor: '#F8FAFC', borderRadius: 3 }}>
           <Inventory2 sx={{ fontSize: 48, color: '#94A3B8', mb: 2 }} />
@@ -410,6 +459,9 @@ export default function MaterialIssue() {
                       </TableCell>
                       <TableCell sx={{ px: 2 }}>
                         <Chip label={statusLabel} size="small" color={statusColor} variant="outlined" sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} />
+                        {row.derivedStatus === 'Acknowledged' && row.acknowledgedByName && (
+                          <Typography variant="caption" sx={{ display: 'block', mt: 0.5, fontSize: '0.6rem', color: '#64748B' }}>By {row.acknowledgedByName}</Typography>
+                        )}
                       </TableCell>
                       <TableCell align="right" sx={{ px: 2, whiteSpace: 'nowrap' }}>
                         <Tooltip title={isIndent ? "Issue Materials" : "Issue Completed"}>
@@ -695,6 +747,9 @@ export default function MaterialIssue() {
                       variant="outlined"
                       sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }}
                     />
+                    {viewIssueModal.issue.is_acknowledged && viewIssueModal.issue.acknowledged_by_name && (
+                      <Typography variant="caption" sx={{ display: 'block', mt: 0.5, fontSize: '0.65rem', color: '#64748B' }}>By {viewIssueModal.issue.acknowledged_by_name}</Typography>
+                    )}
                   </Box>
                 </Grid>
                 {viewIssueModal.issue.purpose && (

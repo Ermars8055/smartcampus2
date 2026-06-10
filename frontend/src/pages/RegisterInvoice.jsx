@@ -245,8 +245,15 @@ export default function RegisterInvoice() {
       transport_charges: totals.transport_charges,
       gate_entry_id: null,
       po_id: form.po_id || null,
+      consignee_id: form.consignee_id || null,
+      buyer_id: form.buyer_id || null,
       delivery_note_date: form.delivery_note_date || null,
-      reference_date: form.reference_date || null
+      reference_date: form.reference_date || null,
+      ack_date: form.ack_date || null,
+      items: form.items.map(item => ({
+        ...item,
+        material_id: item.material_id || null,
+      }))
     };
 
     try {
@@ -283,7 +290,7 @@ export default function RegisterInvoice() {
                 <TextField fullWidth label="Invoice Code" value={form.code || 'Auto-generated'} disabled size="small" />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField fullWidth label="Invoice No. *" value={form.invoice_number} onChange={e => setForm({ ...form, invoice_number: e.target.value })} required size="small" />
+                <TextField fullWidth label="Invoice No." value={form.invoice_number} onChange={e => setForm({ ...form, invoice_number: e.target.value })} required size="small" />
               </Grid>
               <Grid item xs={12} sm={6}>
                 <DatePicker 

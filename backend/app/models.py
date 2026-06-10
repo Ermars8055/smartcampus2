@@ -818,6 +818,7 @@ class MaterialIssue(Base):
     room = relationship("Room")
     indent = relationship("Indent")
     issued_by = relationship("User", foreign_keys=[issued_by_id])
+    acknowledged_by = relationship("User", foreign_keys=[acknowledged_by_id])
     items = relationship("MaterialIssueItem", back_populates="issue", cascade="all, delete-orphan")
     __table_args__ = (UniqueConstraint("tenant_id", "issue_number", name="uq_issue_per_tenant"),)
 
@@ -1284,6 +1285,8 @@ class GatePass(Base):
     remarks = Column(Text, nullable=True)
     created_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime, default=_get_now)
+    completed_by_name = Column(String(255), nullable=True)
+    completed_at = Column(DateTime, nullable=True)
     
     tenant = relationship("Tenant")
     site = relationship("Site")

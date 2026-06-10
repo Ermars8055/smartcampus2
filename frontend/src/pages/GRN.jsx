@@ -3,10 +3,10 @@ import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
   InputLabel, Divider, TableSortLabel, useTheme, useMediaQuery,
-  DialogContent, DialogActions, Grid, MenuItem, Select, FormControl
+  DialogContent, DialogActions, Grid, MenuItem, Select, FormControl, FormHelperText
 } from '@mui/material';
-import { Add, Search, AssignmentTurnedIn } from '@mui/icons-material';
-import api from '../services/api';
+import { Add, Search, AssignmentTurnedIn, AttachFile, OpenInNew } from '@mui/icons-material';
+import api, { getFileUrl } from '../services/api';
 import { formatDate } from '../utils/dateUtils';
 import { useAuth } from '../context/AuthContext';
 
@@ -25,11 +25,12 @@ export default function GRNPage() {
   const [sortConfig, setSortConfig] = useState({ key: 'created_at', direction: 'desc' });
   const initialForm = {
     po_id: '', gate_entry_id: '', warehouse_id: '', project_id: '', vendor_id: '',
-    invoice_number: '', invoice_date: '', invoice_amount: 0, items: [],
+    invoice_number: '', invoice_date: '', invoice_amount: 0, invoice_scan_url: '', items: [],
     receipt_type: 'PO-Based'
   };
 
   const [form, setForm] = useState(initialForm);
+  const [uploading, setUploading] = useState(false);
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -57,7 +58,7 @@ export default function GRNPage() {
   const selectGateEntry = (geId) => {
     const ge = gateEntries.find(g => g.id === geId);
     if (ge) {
-      const newForm = { ...form, gate_entry_id: geId, po_id: ge.po_id, vendor_id: ge.vendor_id, project_id: ge.project_id, receipt_type: 'PO-Based' };
+      const newForm = { ...form, gate_entry_id: geId, po_id: ge.po_id, vendor_id: ge.vendor_id, project_id: ge.project_id, invoice_scan_url: ge.invoice_scan_url || '', receipt_type: 'PO-Based' };
       const items = ge.po_id ? (pos.find(p => p.id === ge.po_id)?.items?.map(it => ({
         material_id: it.material_id, po_item_id: it.id,
         ordered_quantity: it.quantity,
@@ -92,6 +93,20 @@ export default function GRNPage() {
     }
   };
 
+  const handleUpload = async (file) => {
+    if (!file) return;
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await api.post('/api/upload', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      setForm(prev => ({ ...prev, invoice_scan_url: res.data.url }));
+    } catch (err) {
+      alert('Upload failed: ' + (err.response?.data?.detail || err.message));
+    }
+    setUploading(false);
+  };
+
   const handleCreate = async () => {
     try {
       const payload = {
@@ -100,7 +115,7 @@ export default function GRNPage() {
         invoice_amount: Number(parseFloat(form.invoice_amount).toFixed(2)) || 0
       };
       await api.post('/api/grn', payload);
-      setDialog(false); 
+      setDialog(false);
       resetForm();
       load();
       // Refresh gate entries and POs
@@ -144,7 +159,7 @@ export default function GRNPage() {
           <Typography variant="body2" sx={{ color: '#64748B' }}>Verify and accept received materials</Typography>
         </Box>
         <Button variant="contained" startIcon={<Add />} disabled={!hasAction('grn', 'can_create_grn')} onClick={() => {
-          setForm({ po_id: '', gate_entry_id: '', warehouse_id: warehouses[0]?.id || '', project_id: '', vendor_id: '', invoice_number: '', invoice_date: '', invoice_amount: 0, items: [] });
+          setForm({ ...initialForm, warehouse_id: warehouses[0]?.id || '' });
           setDialog(true);
         }}>Create GRN</Button>
       </Box>
@@ -165,22 +180,22 @@ export default function GRNPage() {
             )}
             {sortedGrns.map(g => (
               <Card key={g.id} variant="outlined" sx={{ p: 2, borderRadius: 2, cursor: 'pointer', '&:hover': { borderColor: '#2563EB' } }} onClick={() => setDetailDialog(g)}>
-                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, gap: 1 }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#2563EB' }}>{g.grn_number}</Typography>
-                    <Chip label={g.status} size="small" color={g.status === 'Completed' ? 'success' : 'warning'} sx={{ fontWeight: 600, fontSize: '0.65rem', height: 20 }} />
-                 </Box>
-                 <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#334155' }}><strong>Vendor:</strong> {g.vendor_name}</Typography>
-                 <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#334155' }}><strong>PO Ref:</strong> {g.po_number}</Typography>
-                 <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#334155' }}><strong>Store:</strong> {g.warehouse_name}</Typography>
-                 <Typography variant="caption" sx={{ display: 'block', mb: 1.5, color: '#64748B' }}>{formatDate(g.created_at)} • {g.items?.length || 0} items</Typography>
-                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#059669' }}>
-                      ₹{g.invoice_amount?.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: '#64748B' }}>
-                      Invoice: {g.invoice_number || '-'}
-                    </Typography>
-                 </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, gap: 1 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#2563EB' }}>{g.grn_number}</Typography>
+                  <Chip label={g.status} size="small" color={g.status === 'Completed' ? 'success' : 'warning'} sx={{ fontWeight: 600, fontSize: '0.65rem', height: 20 }} />
+                </Box>
+                <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#334155' }}><strong>Vendor:</strong> {g.vendor_name}</Typography>
+                <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#334155' }}><strong>PO Ref:</strong> {g.po_number}</Typography>
+                <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#334155' }}><strong>Store:</strong> {g.warehouse_name}</Typography>
+                <Typography variant="caption" sx={{ display: 'block', mb: 1.5, color: '#64748B' }}>{formatDate(g.created_at)} • {g.items?.length || 0} items</Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#059669' }}>
+                    ₹{g.invoice_amount?.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: '#64748B' }}>
+                    Invoice: {g.invoice_number || '-'}
+                  </Typography>
+                </Box>
               </Card>
             ))}
           </Box>
@@ -227,6 +242,15 @@ export default function GRNPage() {
             <Grid item xs={3}><Typography variant="caption" color="textSecondary">Store</Typography><Typography sx={{ fontWeight: 600, fontSize: '0.9rem' }}>{detailDialog?.warehouse_name}</Typography></Grid>
             <Grid item xs={3}><Typography variant="caption" color="textSecondary">Invoice</Typography><Typography sx={{ fontSize: '0.9rem' }}>{detailDialog?.invoice_number}</Typography></Grid>
             <Grid item xs={3}><Typography variant="caption" color="textSecondary">Received By</Typography><Typography sx={{ fontSize: '0.9rem' }}>{detailDialog?.received_by_name}</Typography></Grid>
+            {detailDialog?.invoice_scan_url && (
+              <Grid item xs={12}>
+                <Typography variant="caption" color="textSecondary">Invoice Scan</Typography>
+                <Box sx={{ mt: 0.5 }}>
+                  <Button size="small" variant="outlined" startIcon={<OpenInNew />}
+                    onClick={() => window.open(getFileUrl(detailDialog.invoice_scan_url), '_blank')}>View Invoice Scan</Button>
+                </Box>
+              </Grid>
+            )}
           </Grid>
           <Table size="small">
             <TableHead><TableRow>
@@ -297,6 +321,48 @@ export default function GRNPage() {
             <Grid item xs={4}><TextField fullWidth label="Invoice Number" value={form.invoice_number || ''} onChange={e => setForm({ ...form, invoice_number: e.target.value })} /></Grid>
             <Grid item xs={4}><TextField fullWidth label="Invoice Date" type="date" value={form.invoice_date || ''} onChange={e => setForm({ ...form, invoice_date: e.target.value })} InputLabelProps={{ shrink: true }} /></Grid>
             <Grid item xs={4}><TextField fullWidth label="Invoice Amount (₹)" type="number" inputProps={{ step: "0.01" }} value={form.invoice_amount} onChange={e => setForm({ ...form, invoice_amount: parseFloat(e.target.value) || 0 })} /></Grid>
+
+            {/* Invoice Upload Section */}
+            <Grid item xs={12}>
+              <Box sx={{
+                p: 2,
+                border: '2px dashed #1E3A8A',
+                borderRadius: 2,
+                bgcolor: '#F0F4F8',
+                textAlign: 'center',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center'
+              }}>
+                {form.invoice_scan_url ? (
+                  <Box>
+                    <AttachFile sx={{ color: '#1E3A8A', mb: 1 }} />
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: '#1E3A8A', mb: 1 }}>Invoice attached ✓</Typography>
+                    <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
+                      <Button size="small" variant="outlined" onClick={() => window.open(getFileUrl(form.invoice_scan_url), '_blank')}>View Invoice</Button>
+                      <Button size="small" color="error" onClick={() => setForm({ ...form, invoice_scan_url: '' })}>Update</Button>
+                    </Box>
+                  </Box>
+                ) : (
+                  <>
+                    <Typography sx={{ mb: 0.5, fontWeight: 600, color: '#1E3A8A', fontSize: '0.9rem' }}>
+                      📎 Upload / Update Invoice
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: '#64748B', display: 'block', mb: 1.5 }}>
+                      PDF, JPG, or PNG
+                    </Typography>
+                    <Button variant="contained" component="label" disabled={uploading} size="small"
+                      color="primary"
+                      sx={{ bgcolor: '#1E3A8A', '&:hover': { bgcolor: '#1e2a5a' }, textTransform: 'none' }}>
+                      {uploading ? 'Uploading...' : 'Choose File'}
+                      <input type="file" hidden accept=".pdf,.jpg,.jpeg,.png,.webp"
+                        onChange={e => handleUpload(e.target.files[0])} />
+                    </Button>
+                  </>
+                )}
+              </Box>
+            </Grid>
           </Grid>
 
           {form.gate_entry_id && (

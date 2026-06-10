@@ -507,7 +507,7 @@ export default function PurchaseOrders() {
                 <b>To,</b><br/>
                 <b>M/S. ${po.vendor_name ? (po.vendor_name.includes(' - ') ? po.vendor_name.split(' - ').slice(1).join(' - ') : po.vendor_name) : 'VENDOR'}</b><br/>
                 ${po.vendor_address ? `<span style="font-size: 10px; color: #333;">${po.vendor_address}</span><br/>` : ''}
-                ${(po.vendor_city || po.vendor_state || po.vendor_pincode) ? `<span style="font-size: 10px; color: #333;">${[po.vendor_city, po.vendor_state, po.vendor_pincode ? '- ' + po.vendor_pincode : ''].filter(Boolean).join(' ')}</span><br/>` : ''}
+                ${(po.vendor_city || po.vendor_state || po.vendor_pincode) ? `<span style="font-size: 10px; color: #333;">${[po.vendor_city, po.vendor_state ? po.vendor_state.replace(/^\\d{2}\\s*-\\s*/, '').trim() : '', po.vendor_pincode ? '- ' + po.vendor_pincode : ''].filter(Boolean).join(' ')}</span><br/>` : ''}
                 ${po.vendor_gst_number ? `<span style="font-size: 10px; color: #333;">GSTIN: ${po.vendor_gst_number}</span><br/>` : ''}
               </td>
               <td style="width: 40%;">

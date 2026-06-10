@@ -50,12 +50,12 @@ export default function RegisterInvoice() {
     irn: '',
     ack_number: '',
     ack_date: '',
-    transport_charges: 0,
+    transport_charges: '',
     transport_hsn: '',
-    transport_cgst_rate: 0,
-    transport_sgst_rate: 0,
-    transport_igst_rate: 0,
-    transport_discount_percent: 0,
+    transport_cgst_rate: '',
+    transport_sgst_rate: '',
+    transport_igst_rate: '',
+    transport_discount_percent: '',
     items: []
   });
 
@@ -96,23 +96,23 @@ export default function RegisterInvoice() {
             irn: inv.irn || '',
             ack_number: inv.ack_number || '',
             ack_date: inv.ack_date || '',
-            transport_charges: inv.transport_charges || 0,
+            transport_charges: inv.transport_charges || '',
             transport_hsn: inv.transport_hsn || '',
-            transport_cgst_rate: inv.transport_cgst_rate || 0,
-            transport_sgst_rate: inv.transport_sgst_rate || 0,
-            transport_igst_rate: inv.transport_igst_rate || 0,
-            transport_discount_percent: inv.transport_discount_percent || 0,
+            transport_cgst_rate: inv.transport_cgst_rate || '',
+            transport_sgst_rate: inv.transport_sgst_rate || '',
+            transport_igst_rate: inv.transport_igst_rate || '',
+            transport_discount_percent: inv.transport_discount_percent || '',
             items: inv.items ? inv.items.map(item => ({
               material_id: item.material_id || '',
               description: item.description || '',
               hsn_sac: item.hsn_sac || '',
               quantity: item.quantity || 1,
-              rate: item.rate || 0,
+              rate: item.rate || '',
               uom: item.uom || '',
-              discount_percent: item.discount_percent || 0,
-              cgst_rate: item.cgst_rate || 0,
-              sgst_rate: item.sgst_rate || 0,
-              igst_rate: item.igst_rate || 0,
+              discount_percent: item.discount_percent || '',
+              cgst_rate: item.cgst_rate || '',
+              sgst_rate: item.sgst_rate || '',
+              igst_rate: item.igst_rate || '',
               remarks: item.remarks || ''
             })) : []
           });
@@ -136,12 +136,12 @@ export default function RegisterInvoice() {
         description: item.material_name || '',
         hsn_sac: '',
         quantity: item.quantity || 1,
-        rate: item.rate || 0,
+        rate: item.rate || '',
         uom: item.uom_name || '',
-        discount_percent: item.discount_percent || 0,
-        cgst_rate: item.cgst_percentage || 0,
-        sgst_rate: item.sgst_percentage || 0,
-        igst_rate: item.igst_percentage || 0
+        discount_percent: item.discount_percent || '',
+        cgst_rate: item.cgst_percentage || '',
+        sgst_rate: item.sgst_percentage || '',
+        igst_rate: item.igst_percentage || ''
       }));
 
       setForm(prev => ({
@@ -176,12 +176,12 @@ export default function RegisterInvoice() {
         description: '',
         hsn_sac: '',
         quantity: '',
-        rate: 0,
+        rate: '',
         uom: '',
-        discount_percent: 0,
-        cgst_rate: 0,
-        sgst_rate: 0,
-        igst_rate: 0
+        discount_percent: '',
+        cgst_rate: '',
+        sgst_rate: '',
+        igst_rate: ''
       }]
     }));
   };
@@ -254,7 +254,20 @@ export default function RegisterInvoice() {
       total_igst += igstAmt;
       total_discount += discAmt;
 
-      return { ...item, cgst_amount: cgstAmt, sgst_amount: sgstAmt, igst_amount: igstAmt, taxable_amount: taxable, amount };
+      return { 
+        ...item, 
+        quantity: qty, 
+        rate: rate, 
+        discount_percent: parseFloat(item.discount_percent) || 0, 
+        cgst_rate: parseFloat(item.cgst_rate) || 0, 
+        sgst_rate: parseFloat(item.sgst_rate) || 0, 
+        igst_rate: parseFloat(item.igst_rate) || 0, 
+        cgst_amount: cgstAmt, 
+        sgst_amount: sgstAmt, 
+        igst_amount: igstAmt, 
+        taxable_amount: taxable, 
+        amount 
+      };
     });
 
     const t_rate = parseFloat(form.transport_charges) || 0;
@@ -273,7 +286,21 @@ export default function RegisterInvoice() {
     const tax_amount = total_cgst + total_sgst + total_igst;
     const total_amount = total_taxable_amount + tax_amount;
 
-    return { items, total_taxable_amount, total_cgst, total_sgst, total_igst, total_discount, tax_amount, transport_charges: t_rate, total_amount };
+    return { 
+      items, 
+      total_taxable_amount, 
+      total_cgst, 
+      total_sgst, 
+      total_igst, 
+      total_discount, 
+      tax_amount, 
+      transport_charges: t_rate, 
+      transport_cgst_rate: parseFloat(form.transport_cgst_rate) || 0,
+      transport_sgst_rate: parseFloat(form.transport_sgst_rate) || 0,
+      transport_igst_rate: parseFloat(form.transport_igst_rate) || 0,
+      transport_discount_percent: parseFloat(form.transport_discount_percent) || 0,
+      total_amount 
+    };
   };
 
   const handleSave = async (submitStatus = null) => {
@@ -308,12 +335,17 @@ export default function RegisterInvoice() {
       delivery_note_date: form.delivery_note_date || null,
       reference_date: form.reference_date || null,
       ack_date: form.ack_date || null,
-      items: form.items.map(item => ({
+      items: totals.items.map(item => ({
         ...item,
         material_id: item.material_id || null,
       }))
     };
     if (submitStatus) payload.status = submitStatus;
+
+    if (submitStatus === 'Submitted' && !payload.scan_url) {
+      alert("Invoice Scan is mandatory for submitting the invoice.");
+      return;
+    }
 
     try {
       if (id) {
@@ -330,7 +362,16 @@ export default function RegisterInvoice() {
   const totals = calculateTotals();
 
   return (
-    <Box sx={{ pb: 6 }}>
+    <Box sx={{ 
+      pb: 6,
+      '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button': {
+        display: 'none',
+        margin: 0
+      },
+      '& input[type=number]': {
+        '-moz-appearance': 'textfield'
+      }
+    }}>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, gap: 2 }}>
         <IconButton onClick={() => navigate('/invoices')}><ArrowBack /></IconButton>
         <Box>
@@ -594,7 +635,7 @@ export default function RegisterInvoice() {
                     ListboxProps={{ style: { fontSize: '0.8rem' } }}
                   />
                   {item.material_id && materials.find(m => m.id === item.material_id) ? (
-                    <Box sx={{ display: 'flex', gap: 1, position: 'absolute', left: 0, bottom: -16, width: '200%', zIndex: 1, pl: 1, alignItems: 'center' }}>
+                    <Box sx={{ display: 'flex', gap: 1, position: 'absolute', left: 0, bottom: -16, width: '170%', zIndex: 1, pl: 1, alignItems: 'center' }}>
                       <Typography sx={{ fontSize: '0.65rem', fontWeight: 700, color: '#475569', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {materials.find(m => m.id === item.material_id).name}
                       </Typography>
@@ -623,7 +664,7 @@ export default function RegisterInvoice() {
                 <Grid item xs={2} sx={{ position: 'relative' }}>
                   <TextField fullWidth type="number" value={item.rate} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(idx, 'rate', e.target.value.replace(/-/g, ''))} size="small" variant="standard" inputProps={{ style: { textAlign: 'right', fontSize: '0.8rem' }, min: 0 }} />
                   {item.material_id && materials.find(m => m.id === item.material_id)?.standard_cost ? (
-                    <Typography sx={{ fontSize: '0.65rem', color: '#2563EB', textAlign: 'right', position: 'absolute', right: 0, bottom: -16, width: '100%', pr: 1 }}>
+                    <Typography sx={{ fontSize: '0.65rem', color: '#2563EB', textAlign: 'right', position: 'absolute', top: '100%', right: 0, width: '100%', pt: 0.5 }}>
                       Base: ₹{materials.find(m => m.id === item.material_id).standard_cost}
                     </Typography>
                   ) : null}
@@ -698,9 +739,9 @@ export default function RegisterInvoice() {
       </Card>
 
       {/* Summary */}
-      <Grid container justifyContent="flex-end">
-        <Grid item xs={12} sm={6} md={4}>
-          <Paper elevation={0} sx={{ p: 3, border: '1px solid #E2E8F0', borderRadius: 2, bgcolor: '#F8FAFC' }}>
+      <Card sx={{ p: 3, mb: 3, border: '1px solid #E2E8F0', borderRadius: 2, bgcolor: '#F8FAFC' }} elevation={0}>
+        <Grid container justifyContent="flex-end">
+          <Grid item xs={12} sm={8} md={5}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>Invoice Summary</Typography>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}><Typography color="textSecondary">Total Taxable Value</Typography><Typography>₹{totals.total_taxable_amount.toFixed(2)}</Typography></Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}><Typography color="textSecondary">Total CGST</Typography><Typography>₹{totals.total_cgst.toFixed(2)}</Typography></Box>
@@ -709,14 +750,15 @@ export default function RegisterInvoice() {
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}><Typography color="textSecondary">Transport Charges</Typography><Typography>₹{totals.transport_charges.toFixed(2)}</Typography></Box>
             <Divider sx={{ mb: 2 }} />
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}><Typography variant="h6" sx={{ fontWeight: 700 }}>Grand Total</Typography><Typography variant="h6" sx={{ fontWeight: 700, color: '#059669' }}>₹{totals.total_amount.toFixed(2)}</Typography></Box>
-          </Paper>
-          <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', mt: 3 }}>
-            <Button variant="outlined" onClick={() => navigate('/invoices')}>Cancel</Button>
-            <Button variant="outlined" onClick={() => handleSave('Draft')}>Save Draft</Button>
-            <Button variant="contained" color="primary" onClick={() => setConfirmSubmit(true)}>Submit Invoice</Button>
-          </Box>
+          </Grid>
         </Grid>
-      </Grid>
+      </Card>
+
+      <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', mb: 4 }}>
+        <Button variant="outlined" onClick={() => navigate('/invoices')}>Cancel</Button>
+        <Button variant="outlined" onClick={() => handleSave('Draft')}>Save Draft</Button>
+        <Button variant="contained" color="primary" onClick={() => setConfirmSubmit(true)}>Submit Invoice</Button>
+      </Box>
 
       {/* Submit Confirmation Dialog */}
       <Dialog open={confirmSubmit} onClose={() => setConfirmSubmit(false)} maxWidth="sm" fullWidth>
@@ -728,7 +770,7 @@ export default function RegisterInvoice() {
           <Button onClick={() => setConfirmSubmit(false)}>Cancel</Button>
           <Button variant="contained" color="primary" onClick={() => {
             setConfirmSubmit(false);
-            handleSave('Pending Approval');
+            handleSave('Submitted');
           }}>Submit</Button>
         </DialogActions>
       </Dialog>

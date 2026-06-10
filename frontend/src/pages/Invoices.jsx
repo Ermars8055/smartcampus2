@@ -3,9 +3,9 @@ import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
   DialogContent, DialogActions, Grid, MenuItem, Select, FormControl, InputLabel,
-  TableSortLabel, Divider
+  TableSortLabel, Divider, IconButton, Tooltip, Tabs, Tab
 } from '@mui/material';
-import { Add, Search, AttachFile, OpenInNew, ReceiptLong } from '@mui/icons-material';
+import { Add, Search, AttachFile, OpenInNew, ReceiptLong, Edit, CheckCircle, Cancel } from '@mui/icons-material';
 import api, { getFileUrl } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { formatDate, formatDateTime } from '../utils/dateUtils';
@@ -23,7 +23,8 @@ export default function Invoices() {
   const [search, setSearch] = useState('');
   const [sortConfig, setSortConfig] = useState({ key: 'created_at', direction: 'desc' });
   const [uploading, setUploading] = useState(false);
-  const [confirmSubmit, setConfirmSubmit] = useState(false);
+  const [currentTab, setCurrentTab] = useState('Draft');
+
 
 
   const load = () => {
@@ -48,7 +49,7 @@ export default function Invoices() {
     }
   };
 
-  const statusColor = { 'Draft': 'default', 'Pending Approval': 'warning', 'Approved': 'success', 'Rejected': 'error' };
+  const statusColor = { 'Draft': 'default', 'Submitted': 'warning', 'Verified': 'success', 'Change Required': 'error' };
 
   const handleSort = (key) => {
     let direction = 'asc';
@@ -59,8 +60,9 @@ export default function Invoices() {
   };
 
   const filteredInvoices = invoices.filter(i => 
-    i.invoice_number?.toLowerCase().includes(search.toLowerCase()) || 
-    i.vendor_name?.toLowerCase().includes(search.toLowerCase())
+    (currentTab === 'All' || i.status === currentTab) &&
+    (i.invoice_number?.toLowerCase().includes(search.toLowerCase()) || 
+    i.vendor_name?.toLowerCase().includes(search.toLowerCase()))
   );
 
   const sortedInvoices = [...filteredInvoices].sort((a, b) => {
@@ -85,8 +87,15 @@ export default function Invoices() {
 
       <Card sx={{ mb: 3, p: 2 }}>
         <TextField size="small" placeholder="Search invoices..." value={search}
-          onChange={e => setSearch(e.target.value)} sx={{ minWidth: 300 }}
+          onChange={e => setSearch(e.target.value)} sx={{ minWidth: 300, mb: 2 }}
           InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }} />
+        <Tabs value={currentTab} onChange={(e, v) => setCurrentTab(v)} sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tab label={`Draft (${invoices.filter(i => i.status === 'Draft').length})`} value="Draft" sx={{ textTransform: 'none', fontWeight: 600, minWidth: 'auto', mr: 2 }} />
+          <Tab label={`Submitted (${invoices.filter(i => i.status === 'Submitted').length})`} value="Submitted" sx={{ textTransform: 'none', fontWeight: 600, minWidth: 'auto', mr: 2 }} />
+          <Tab label={`Change Required (${invoices.filter(i => i.status === 'Change Required').length})`} value="Change Required" sx={{ textTransform: 'none', fontWeight: 600, minWidth: 'auto', mr: 2 }} />
+          <Tab label={`Verified (${invoices.filter(i => i.status === 'Verified').length})`} value="Verified" sx={{ textTransform: 'none', fontWeight: 600, minWidth: 'auto', mr: 2 }} />
+          <Tab label={`All (${invoices.length})`} value="All" sx={{ textTransform: 'none', fontWeight: 600, minWidth: 'auto' }} />
+        </Tabs>
       </Card>
 
       <Card>
@@ -97,9 +106,9 @@ export default function Invoices() {
               <TableCell><TableSortLabel active={sortConfig.key === 'invoice_date'} direction={sortConfig.key === 'invoice_date' ? sortConfig.direction : 'asc'} onClick={() => handleSort('invoice_date')}>Date</TableSortLabel></TableCell>
               <TableCell><TableSortLabel active={sortConfig.key === 'vendor_name'} direction={sortConfig.key === 'vendor_name' ? sortConfig.direction : 'asc'} onClick={() => handleSort('vendor_name')}>Vendor</TableSortLabel></TableCell>
               <TableCell><TableSortLabel active={sortConfig.key === 'po_number'} direction={sortConfig.key === 'po_number' ? sortConfig.direction : 'asc'} onClick={() => handleSort('po_number')}>PO Ref</TableSortLabel></TableCell>
-              <TableCell><TableSortLabel active={sortConfig.key === 'gate_entry_number'} direction={sortConfig.key === 'gate_entry_number' ? sortConfig.direction : 'asc'} onClick={() => handleSort('gate_entry_number')}>Gate Entry Ref</TableSortLabel></TableCell>
               <TableCell align="right"><TableSortLabel active={sortConfig.key === 'total_amount'} direction={sortConfig.key === 'total_amount' ? sortConfig.direction : 'asc'} onClick={() => handleSort('total_amount')}>Total Amount</TableSortLabel></TableCell>
               <TableCell><TableSortLabel active={sortConfig.key === 'status'} direction={sortConfig.key === 'status' ? sortConfig.direction : 'asc'} onClick={() => handleSort('status')}>Status</TableSortLabel></TableCell>
+              <TableCell align="center">Actions</TableCell>
             </TableRow></TableHead>
             <TableBody>
               {sortedInvoices.map(i => (
@@ -111,13 +120,30 @@ export default function Invoices() {
                   <TableCell sx={{ fontSize: '0.8rem' }}>{formatDate(i.invoice_date)}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem' }}>{i.vendor_name}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem', color: '#64748B' }}>{i.po_number || '-'}</TableCell>
-                  <TableCell sx={{ fontSize: '0.8rem', color: '#64748B' }}>{i.gate_entry_number || '-'}</TableCell>
                   <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.8rem' }}>₹{i.total_amount?.toFixed(2)}</TableCell>
                   <TableCell><Chip label={i.status} size="small" color={statusColor[i.status] || 'default'} sx={{ fontSize: '0.7rem' }} /></TableCell>
+                  <TableCell align="center" sx={{ whiteSpace: 'nowrap' }}>
+                    <Tooltip title="Edit">
+                      <span>
+                        <IconButton size="small" color={(i.status === 'Draft' || i.status === 'Change Required') ? "warning" : "default"} disabled={i.status !== 'Draft' && i.status !== 'Change Required'} onClick={(e) => { e.stopPropagation(); navigate(`/invoices/edit/${i.id}`); }}>
+                          <Edit fontSize="small" />
+                        </IconButton>
+                      </span>
+                    </Tooltip>
+                    
+                    <Tooltip title="Verify">
+                      <span>
+                        <IconButton size="small" color={i.status === 'Submitted' ? "success" : "default"} disabled={i.status !== 'Submitted'} onClick={(e) => { e.stopPropagation(); setDetailDialog(i); }}>
+                          <CheckCircle fontSize="small" />
+                        </IconButton>
+                      </span>
+                    </Tooltip>
+
+                  </TableCell>
                 </TableRow>
               ))}
               {sortedInvoices.length === 0 && (
-                <TableRow><TableCell colSpan={7} align="center" sx={{ py: 3, color: '#64748B' }}>No invoices found</TableCell></TableRow>
+                <TableRow><TableCell colSpan={8} align="center" sx={{ py: 3, color: '#64748B' }}>No invoices found</TableCell></TableRow>
               )}
             </TableBody>
           </Table>
@@ -184,15 +210,6 @@ export default function Invoices() {
                 </Grid>
               </Card>
 
-              <Card sx={{ p: 3 }}>
-                <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>Invoice Summary</Typography>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}><Typography color="textSecondary">Total Taxable Value</Typography><Typography>₹{detailDialog?.total_taxable_amount?.toFixed(2)}</Typography></Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}><Typography color="textSecondary">Total CGST</Typography><Typography>₹{detailDialog?.total_cgst?.toFixed(2)}</Typography></Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}><Typography color="textSecondary">Total SGST</Typography><Typography>₹{detailDialog?.total_sgst?.toFixed(2)}</Typography></Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}><Typography color="textSecondary">Total IGST</Typography><Typography>₹{detailDialog?.total_igst?.toFixed(2)}</Typography></Box>
-                <Divider sx={{ mb: 2 }} />
-                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}><Typography variant="h6" sx={{ fontWeight: 700 }}>Grand Total</Typography><Typography variant="h6" sx={{ fontWeight: 700, color: '#059669' }}>₹{detailDialog?.total_amount?.toFixed(2)}</Typography></Box>
-              </Card>
             </Grid>
           </Grid>
 
@@ -238,35 +255,33 @@ export default function Invoices() {
               </Table>
             </TableContainer>
           </Card>
+
+          {/* Summary */}
+          <Card sx={{ p: 3, mb: 3, border: '1px solid #E2E8F0', borderRadius: 2, bgcolor: '#F8FAFC' }} elevation={0}>
+            <Grid container justifyContent="flex-end">
+              <Grid item xs={12} sm={8} md={5}>
+                <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>Invoice Summary</Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}><Typography color="textSecondary">Total Taxable Value</Typography><Typography>₹{detailDialog?.total_taxable_amount?.toFixed(2)}</Typography></Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}><Typography color="textSecondary">Total CGST</Typography><Typography>₹{detailDialog?.total_cgst?.toFixed(2)}</Typography></Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}><Typography color="textSecondary">Total SGST</Typography><Typography>₹{detailDialog?.total_sgst?.toFixed(2)}</Typography></Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}><Typography color="textSecondary">Total IGST</Typography><Typography>₹{detailDialog?.total_igst?.toFixed(2)}</Typography></Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}><Typography color="textSecondary">Transport Charges</Typography><Typography>₹{detailDialog?.transport_charges?.toFixed(2) || '0.00'}</Typography></Box>
+                <Divider sx={{ mb: 2 }} />
+                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}><Typography variant="h6" sx={{ fontWeight: 700 }}>Grand Total</Typography><Typography variant="h6" sx={{ fontWeight: 700, color: '#059669' }}>₹{detailDialog?.total_amount?.toFixed(2)}</Typography></Box>
+              </Grid>
+            </Grid>
+          </Card>
         </DialogContent>
         <DialogActions sx={{ p: 2, justifyContent: 'flex-end' }}>
           <Box sx={{ display: 'flex', gap: 1 }}>
             <Button onClick={() => setDetailDialog(null)}>Close</Button>
-            {detailDialog?.status === 'Draft' && (
+            {detailDialog?.status === 'Submitted' && (
               <>
-                <Button size="small" variant="outlined" color="primary" onClick={() => setDetailDialog(null)}>Save Draft</Button>
-                <Button size="small" variant="contained" color="primary" onClick={() => setConfirmSubmit(true)}>Submit Invoice</Button>
+                <Button variant="contained" color="error" startIcon={<ReceiptLong />} onClick={() => { handleStatusUpdate(detailDialog.id, 'Change Required'); setDetailDialog(null); }}>Change Required</Button>
+                <Button variant="contained" color="success" startIcon={<CheckCircle />} onClick={() => { handleStatusUpdate(detailDialog.id, 'Verified'); setDetailDialog(null); }}>Verify Invoice</Button>
               </>
             )}
-            {detailDialog?.status === 'Pending Approval' && (
-              <Button size="small" variant="contained" color="primary" disabled={!hasAction('invoice', 'can_approve')} onClick={() => handleStatusUpdate(detailDialog.id, 'Approved')}>Approve</Button>
-            )}
           </Box>
-        </DialogActions>
-      </Dialog>
-
-      {/* Submit Confirmation Dialog */}
-      <Dialog open={confirmSubmit} onClose={() => setConfirmSubmit(false)} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ fontWeight: 600 }}>Confirm Submission</DialogTitle>
-        <DialogContent dividers>
-          <Typography>Submitted invoices cannot be modified. If you need to make further changes, save the invoice as a draft by clicking "Save Draft" and submit it once all updates are completed.</Typography>
-        </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
-          <Button onClick={() => setConfirmSubmit(false)}>Cancel</Button>
-          <Button variant="contained" color="primary" onClick={() => {
-            setConfirmSubmit(false);
-            if (detailDialog) handleStatusUpdate(detailDialog.id, 'Pending Approval');
-          }}>Submit</Button>
         </DialogActions>
       </Dialog>
 

@@ -46,9 +46,9 @@ class GateEntryStatus(str, enum.Enum):
 
 class InvoiceStatus(str, enum.Enum):
     DRAFT = "Draft"
-    PENDING = "Pending Approval"
-    APPROVED = "Approved"
-    REJECTED = "Rejected"
+    SUBMITTED = "Submitted"
+    VERIFIED = "Verified"
+    CHANGE_REQUIRED = "Change Required"
 
 class GRNStatus(str, enum.Enum):
     DRAFT = "Draft"

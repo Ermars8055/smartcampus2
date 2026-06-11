@@ -65,7 +65,7 @@ export default function VendorPendingPaymentsReport() {
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
         <Box>
           <Typography variant="h5" sx={{ fontWeight: 700 }}>Vendor-wise Pending Payments</Typography>
-          <Typography variant="body2" sx={{ color: '#64748B' }}>Outstanding payment amounts for each vendor based on unpaid invoices</Typography>
+          <Typography variant="body2" sx={{ color: '#64748B' }}>Outstanding payment amounts for each vendor based on invoices sent for payment</Typography>
         </Box>
         {report.generated_at && (
           <Typography variant="caption" sx={{ color: '#94A3B8', alignSelf: 'flex-end' }}>Generated: {report.generated_at}</Typography>

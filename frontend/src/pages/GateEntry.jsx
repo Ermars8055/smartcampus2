@@ -49,10 +49,21 @@ export default function GateEntry() {
     const newErrors = {};
 
     if (!form.invoice_scan_url) newErrors.invoice_scan_url = "Please upload the scanned invoice.";
-    if (!form.vehicle_number.trim() && !form.delivery_person_name.trim()) {
-        newErrors.vehicle_number = "Either Vehicle Number or Delivery Person is required.";
-        newErrors.delivery_person_name = "Either Vehicle Number or Delivery Person is required.";
+    if (!form.invoice_number?.trim()) newErrors.invoice_number = "Invoice Number is required.";
+    
+    if (!form.invoice_date) {
+        newErrors.invoice_date = "Invoice Date is required.";
+    } else {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const selectedDate = new Date(form.invoice_date);
+        selectedDate.setHours(0, 0, 0, 0);
+        if (selectedDate > today) {
+            newErrors.invoice_date = "Future dates are not allowed.";
+        }
     }
+
+    if (!form.delivery_person_name?.trim()) newErrors.delivery_person_name = "Delivery Person Name is required.";
 
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
@@ -203,10 +214,10 @@ export default function GateEntry() {
               <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>Invoice Details</Typography>
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
-                  <TextField fullWidth label="Invoice Number" value={form.invoice_number} onChange={e => setForm({ ...form, invoice_number: e.target.value })} />
+                  <TextField fullWidth label="Invoice Number *" value={form.invoice_number} onChange={e => { setForm({ ...form, invoice_number: e.target.value }); setErrors(prev => ({...prev, invoice_number: null})); }} error={!!errors.invoice_number} helperText={errors.invoice_number} />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <TextField fullWidth label="Invoice Date" type="date" value={form.invoice_date} onChange={e => setForm({ ...form, invoice_date: e.target.value })} InputLabelProps={{ shrink: true }} />
+                  <TextField fullWidth label="Invoice Date *" type="date" value={form.invoice_date} onChange={e => { setForm({ ...form, invoice_date: e.target.value }); setErrors(prev => ({...prev, invoice_date: null})); }} InputLabelProps={{ shrink: true }} inputProps={{ max: new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0] }} error={!!errors.invoice_date} helperText={errors.invoice_date} />
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField fullWidth label="Invoice Amount" type="number" inputProps={{ step: "0.01" }} value={form.invoice_amount} onChange={e => setForm({ ...form, invoice_amount: e.target.value })} />
@@ -216,10 +227,10 @@ export default function GateEntry() {
               <Typography variant="subtitle2" sx={{ mt: 3, mb: 2, fontWeight: 600 }}>Transport Details</Typography>
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
-                  <TextField fullWidth label="Vehicle Number" value={form.vehicle_number} onChange={e => { setForm({ ...form, vehicle_number: e.target.value }); setErrors(prev => ({...prev, vehicle_number: null, delivery_person_name: null})); }} error={!!errors.vehicle_number} helperText={errors.vehicle_number} />
+                  <TextField fullWidth label="Vehicle Number" value={form.vehicle_number} onChange={e => setForm({ ...form, vehicle_number: e.target.value })} />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <TextField fullWidth label="Delivery Person Name" value={form.delivery_person_name} onChange={e => { setForm({ ...form, delivery_person_name: e.target.value }); setErrors(prev => ({...prev, vehicle_number: null, delivery_person_name: null})); }} error={!!errors.delivery_person_name} helperText={errors.delivery_person_name} />
+                  <TextField fullWidth label="Delivery Person Name *" value={form.delivery_person_name} onChange={e => { setForm({ ...form, delivery_person_name: e.target.value }); setErrors(prev => ({...prev, delivery_person_name: null})); }} error={!!errors.delivery_person_name} helperText={errors.delivery_person_name} />
                 </Grid>
                 <Grid item xs={12}>
                   <TextField fullWidth label="Remarks" value={form.remarks} onChange={e => setForm({ ...form, remarks: e.target.value })} placeholder="Any additional notes..." />

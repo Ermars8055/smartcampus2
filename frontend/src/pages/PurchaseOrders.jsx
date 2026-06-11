@@ -263,6 +263,18 @@ export default function PurchaseOrders() {
   const updateItem = (i, field, val) => {
     const items = [...form.items];
     items[i] = { ...items[i], [field]: val };
+    if (field === 'cgst_percentage') {
+      items[i].sgst_percentage = val;
+      items[i].igst_percentage = 0;
+    } else if (field === 'sgst_percentage') {
+      items[i].cgst_percentage = val;
+      items[i].igst_percentage = 0;
+    } else if (field === 'igst_percentage') {
+      if (val !== '' && val !== '0' && parseFloat(val) !== 0) {
+        items[i].cgst_percentage = 0;
+        items[i].sgst_percentage = 0;
+      }
+    }
     if (field === 'material_id') {
       const mat = materials.find(m => m.id === val);
       if (mat) {
@@ -1382,15 +1394,15 @@ export default function PurchaseOrders() {
                       <TextField size="small" label="Disc (₹)" value={discAmt.toFixed(2)} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
                     </Box>
                     <Box display="flex" gap={1}>
-                      <TextField size="small" label="CGST %" type="number" value={item.cgst_percentage} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'cgst_percentage', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100 }} sx={{ flex: 1 }} />
+                      <TextField size="small" label="CGST %" type="number" value={item.cgst_percentage} disabled={parseFloat(item.igst_percentage) > 0} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'cgst_percentage', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100 }} sx={{ flex: 1 }} />
                       <TextField size="small" label="CGST (₹)" value={cgstAmt.toFixed(2)} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
                     </Box>
                     <Box display="flex" gap={1}>
-                      <TextField size="small" label="SGST %" type="number" value={item.sgst_percentage} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'sgst_percentage', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100 }} sx={{ flex: 1 }} />
+                      <TextField size="small" label="SGST %" type="number" value={item.sgst_percentage} disabled={parseFloat(item.igst_percentage) > 0} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'sgst_percentage', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100 }} sx={{ flex: 1 }} />
                       <TextField size="small" label="SGST (₹)" value={sgstAmt.toFixed(2)} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
                     </Box>
                     <Box display="flex" gap={1}>
-                      <TextField size="small" label="IGST %" type="number" value={item.igst_percentage} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'igst_percentage', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100 }} sx={{ flex: 1 }} />
+                      <TextField size="small" label="IGST %" type="number" value={item.igst_percentage} disabled={parseFloat(item.cgst_percentage) > 0 || parseFloat(item.sgst_percentage) > 0} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'igst_percentage', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100 }} sx={{ flex: 1 }} />
                       <TextField size="small" label="IGST (₹)" value={igstAmt.toFixed(2)} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
                     </Box>
                   </Box>

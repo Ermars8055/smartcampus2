@@ -64,7 +64,7 @@ export default function VendorPendingInvoicesReport() {
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
         <Box>
           <Typography variant="h5" sx={{ fontWeight: 700 }}>Vendor-wise Pending Invoices</Typography>
-          <Typography variant="body2" sx={{ color: '#64748B' }}>Total count and value of invoices pending verification per vendor</Typography>
+          <Typography variant="body2" sx={{ color: '#64748B' }}>Total count and value of approved invoices pending payment per vendor</Typography>
         </Box>
         {report.generated_at && (
           <Typography variant="caption" sx={{ color: '#94A3B8', alignSelf: 'flex-end' }}>Generated: {report.generated_at}</Typography>

@@ -287,7 +287,8 @@ def vendor_pending_invoices_report(
         Invoice.tenant_id == tenant_id,
         Invoice.site_id == site_id,
         Invoice.is_deleted == False,
-        Invoice.status.in_(["Draft", "Submitted", "Change Required"])
+        Invoice.status == "Approved",
+        Invoice.payment_status == "Pending"
     ).group_by(
         Vendor.id, Vendor.code, Vendor.name
     ).order_by(
@@ -342,7 +343,7 @@ def vendor_pending_payments_report(
         Invoice.site_id == site_id,
         Invoice.is_deleted == False,
         Invoice.status == "Approved",
-        Invoice.payment_status.in_(["Pending", "Sent for Payment"])
+        Invoice.payment_status == "Sent for Payment"
     ).group_by(
         Vendor.id, Vendor.code, Vendor.name
     ).order_by(
@@ -396,11 +397,12 @@ def vendor_pending_invoices_details(
     if report_type == "pending_payments":
         q = q.filter(
             Invoice.status == "Approved",
-            Invoice.payment_status.in_(["Pending", "Sent for Payment"])
+            Invoice.payment_status == "Sent for Payment"
         )
     else:
         q = q.filter(
-            Invoice.status.in_(["Draft", "Submitted", "Change Required"])
+            Invoice.status == "Approved",
+            Invoice.payment_status == "Pending"
         )
 
     invoices = q.order_by(Invoice.invoice_date.desc()).all()

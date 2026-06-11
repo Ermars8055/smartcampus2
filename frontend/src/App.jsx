@@ -29,6 +29,7 @@ import Quotations from './pages/Quotations';
 import PurchaseOrders from './pages/PurchaseOrders';
 import GateEntry from './pages/GateEntry';
 import Invoices from './pages/Invoices';
+import InvoiceTracking from './pages/InvoiceTracking';
 import RegisterInvoice from './pages/RegisterInvoice';
 import GRNPage from './pages/GRN';
 import MaterialIssue from './pages/MaterialIssue';
@@ -55,6 +56,9 @@ import Alerts from './pages/Alerts';
 import PlatformLogin from './pages/PlatformLogin';
 import TermsAndConditions from './pages/TermsAndConditions';
 import CompanyAddresses from './pages/CompanyAddresses';
+import ComplaintsList from './pages/ComplaintsList';
+import ComplaintForm from './pages/ComplaintForm';
+import ComplaintDetail from './pages/ComplaintDetail';
 import ChatBot from './components/ChatBot';
 import { Box, CircularProgress } from '@mui/material';
 
@@ -117,6 +121,7 @@ function AppRoutes() {
         <Route path="purchase-orders" element={<PurchaseOrders />} />
         <Route path="gate-entry" element={<GateEntry />} />
         <Route path="invoices" element={<Invoices />} />
+        <Route path="invoice-tracking" element={<InvoiceTracking />} />
         <Route path="invoices/register" element={<RegisterInvoice />} />
         <Route path="invoices/edit/:id" element={<RegisterInvoice />} />
         <Route path="grn" element={<GRNPage />} />
@@ -145,6 +150,9 @@ function AppRoutes() {
         <Route path="company-addresses" element={<CompanyAddresses />} />
         <Route path="saas-admin" element={<SaasAdmin />} />
         <Route path="alerts" element={<Alerts />} />
+        <Route path="complaints" element={<ComplaintsList />} />
+        <Route path="complaints/new" element={<ComplaintForm />} />
+        <Route path="complaints/:id" element={<ComplaintDetail />} />
       </Route>
     </Routes>
   );

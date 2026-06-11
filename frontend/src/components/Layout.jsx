@@ -41,6 +41,7 @@ const menuItems = [
     text: 'Store Operations', icon: <Store />, children: [
       { text: 'Gate Entry', icon: <Security />, path: '/gate-entry', resource: 'gate_entry' },
       { text: 'Invoices', icon: <ReceiptLong />, path: '/invoices', resource: 'invoice' },
+      { text: 'Invoice Tracking', icon: <AssignmentTurnedIn />, path: '/invoice-tracking', resource: 'invoice' },
       { text: 'GRN', icon: <LocalShipping />, path: '/grn', resource: 'grn' },
       { text: 'Material Issue', icon: <Inventory2 />, path: '/issues', resource: 'issues' },
       { text: 'Returns', icon: <Undo />, path: '/returns', resource: 'returns' },
@@ -50,6 +51,11 @@ const menuItems = [
     ]
   },
   { text: 'Inventory', icon: <Warehouse />, path: '/inventory', resource: 'inventory' },
+  {
+    text: 'Maintenance', icon: <Build />, children: [
+      { text: 'Complaints', icon: <Assignment />, path: '/complaints', resource: 'dashboard' }, // Assuming dashboard permission for now or complaints
+    ]
+  },
   { text: 'Intelligence', icon: <Build />, path: '/intelligence', resource: 'intelligence' },
   {
     text: 'Reports', icon: <Assessment />, children: [
@@ -80,7 +86,7 @@ export default function Layout() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [openMenus, setOpenMenus] = useState({ 'Master Data': true });
+  const [openMenus, setOpenMenus] = useState({});
   const [anchorEl, setAnchorEl] = useState(null);
   const [alertCount, setAlertCount] = useState(0);
   const { user, tenant, roles, sites, activeSite, activeSiteId, setActiveSiteId, logout, hasPermission } = useAuth();

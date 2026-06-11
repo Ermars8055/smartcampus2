@@ -15,6 +15,7 @@ UPLOAD_DIR = "uploads/invoices"
 @router.post("")
 async def upload_file(
     file: UploadFile = File(...),
+    folder: str = "invoices",
     current_user: User = Depends(get_current_user),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
@@ -32,8 +33,14 @@ async def upload_file(
     if len(contents) > 10 * 1024 * 1024:
         raise HTTPException(400, "File too large. Maximum 10MB.")
 
-    # Create directory structure: uploads/invoices/{tenant_id}/
-    dir_path = os.path.join(UPLOAD_DIR, str(tenant_id))
+    # Sanitize folder path
+    safe_folder = "".join([c for c in folder if c.isalnum() or c in "-_"])
+    if not safe_folder:
+        safe_folder = "files"
+
+    # Create directory structure: uploads/{folder}/{tenant_id}/
+    base_dir = f"uploads/{safe_folder}"
+    dir_path = os.path.join(base_dir, str(tenant_id))
     os.makedirs(dir_path, exist_ok=True)
 
     # Generate unique filename

@@ -16,7 +16,8 @@ from app.routers import (
     procurement, gate_entry, grn, store_ops, inventory_admin,
     saas_admin, rbac, sites, auto_pr, alerts, intelligence,
     indents, approval_flows, quotations, reports, uploads, terms,
-    admin_users, invoices, company_addresses, material_limits, configurations
+    admin_users, invoices, company_addresses, material_limits, configurations,
+    complaints
 )
 
 logging.basicConfig(level=logging.INFO)
@@ -103,6 +104,7 @@ app.include_router(invoices.router)
 app.include_router(company_addresses.router)
 app.include_router(material_limits.router)
 app.include_router(configurations.router)
+app.include_router(complaints.router)
 
 
 @app.get("/api/health")

@@ -143,6 +143,12 @@ class DataAccessScope(str, enum.Enum):
     ORGANIZATION = "Organization"
     ADMIN = "Full Administrative Access"
 
+class ComplaintStatus(str, enum.Enum):
+    OPEN = "Open"
+    IN_PROGRESS = "In Progress"
+    RESOLVED = "Resolved"
+    REJECTED = "Rejected"
+
 
 # == Multi-Tenant Core ==
 
@@ -585,6 +591,9 @@ class GateEntry(Base):
     entry_type = Column(String(50), default=GateEntryType.VEHICLE.value)
     photo_url = Column(String(500))
     invoice_scan_url = Column(String(500))  # Scanned invoice attachment
+    invoice_number = Column(String(100))
+    invoice_date = Column(Date)
+    invoice_amount = Column(Float, default=0)
     remarks = Column(Text)
     status = Column(String(50), default=GateEntryStatus.CREATED.value)
     recorded_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
@@ -625,6 +634,57 @@ class CompanyAddress(Base):
     created_at = Column(DateTime, default=_get_now)
     updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)
     __table_args__ = (UniqueConstraint("tenant_id", "site_id", "name", "address_type", name="uq_company_addr_per_site"),)
+
+
+# == Maintenance & Complaints ==
+
+class Complaint(Base):
+    __tablename__ = "complaints"
+    id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
+    site_id = Column(Integer, ForeignKey("sites.id", ondelete="CASCADE"), nullable=False)
+    docket_no = Column(String(50), nullable=False, index=True)
+    complaint_date = Column(Date, nullable=False)
+    complaint_time = Column(String(20), nullable=True)
+    department_name = Column(String(255), nullable=True) # Name of Ward/Dept I/C or Occupant
+    building_id = Column(Integer, ForeignKey("buildings.id"), nullable=True)
+    room_id = Column(Integer, ForeignKey("rooms.id"), nullable=True)
+    location = Column(String(255), nullable=True) # General location text if not building/room
+    nature_of_complaint = Column(Text, nullable=True)
+    individual_detailed = Column(Text, nullable=True)
+    name_and_trade = Column(String(255), nullable=True)
+    
+    status = Column(String(50), default=ComplaintStatus.OPEN.value)
+    assigned_to_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    resolution_remarks = Column(Text, nullable=True)
+    
+    created_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    resolved_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    
+    is_deleted = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=_get_now)
+    updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)
+    resolved_at = Column(DateTime, nullable=True)
+    
+    building = relationship("Building")
+    room = relationship("Room")
+    assigned_to = relationship("User", foreign_keys=[assigned_to_id])
+    created_by = relationship("User", foreign_keys=[created_by_id])
+    resolved_by = relationship("User", foreign_keys=[resolved_by_id])
+    images = relationship("ComplaintImage", back_populates="complaint", cascade="all, delete-orphan")
+    material_issues = relationship("MaterialIssue", back_populates="complaint")
+    __table_args__ = (UniqueConstraint("tenant_id", "docket_no", name="uq_complaint_docket_per_tenant"),)
+
+
+class ComplaintImage(Base):
+    __tablename__ = "complaint_images"
+    id = Column(Integer, primary_key=True, index=True)
+    complaint_id = Column(Integer, ForeignKey("complaints.id", ondelete="CASCADE"), nullable=False)
+    image_url = Column(String(500), nullable=False)
+    is_resolution_image = Column(Boolean, default=False)
+    uploaded_at = Column(DateTime, default=_get_now)
+    
+    complaint = relationship("Complaint", back_populates="images")
 
 
 # == Invoices ==
@@ -793,12 +853,14 @@ class GRNItem(Base):
 class MaterialIssue(Base):
     __tablename__ = "material_issues"
     id = Column(Integer, primary_key=True, index=True)
+
     tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
     site_id = Column(Integer, ForeignKey("sites.id", ondelete="CASCADE"), nullable=False)
     issue_number = Column(String(50), nullable=False, index=True)
     warehouse_id = Column(Integer, ForeignKey("warehouses.id"), nullable=False)
     project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
     indent_id = Column(Integer, ForeignKey("indents.id"), nullable=True)
+    complaint_id = Column(Integer, ForeignKey("complaints.id"), nullable=True)
     building_id = Column(Integer, ForeignKey("buildings.id"), nullable=True)
     issued_to_room_id = Column(Integer, ForeignKey("rooms.id"), nullable=True)
     issued_to_department = Column(String(255))
@@ -818,6 +880,7 @@ class MaterialIssue(Base):
     building = relationship("Building")
     room = relationship("Room")
     indent = relationship("Indent")
+    complaint = relationship("Complaint", back_populates="material_issues")
     issued_by = relationship("User", foreign_keys=[issued_by_id])
     acknowledged_by = relationship("User", foreign_keys=[acknowledged_by_id])
     items = relationship("MaterialIssueItem", back_populates="issue", cascade="all, delete-orphan")

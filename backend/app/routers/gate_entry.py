@@ -93,69 +93,25 @@ def create_gate_entry(
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
-    is_direct = data.entry_type == "Direct Invoice"
-
-    # Validation based on entry type
-    if not is_direct:
-        if data.po_id:
-            if not data.project_id:
-                raise HTTPException(status_code=400, detail="Project is required for PO-based entries")
-            if not data.material_id:
-                raise HTTPException(status_code=400, detail="Material is required for PO-based entries")
-            if not data.quantity or data.quantity <= 0:
-                raise HTTPException(status_code=400, detail="Quantity is required for PO-based entries")
-        if data.entry_type == "Vehicle":
-            if not data.vehicle_number or not data.vehicle_number.strip():
-                raise HTTPException(status_code=400, detail="Vehicle number is required for vehicle entry")
-            if not data.po_id:
-                raise HTTPException(status_code=400, detail="PO Reference is required for vehicle entry")
-            if not data.driver_name or not data.driver_name.strip():
-                raise HTTPException(status_code=400, detail="Driver Name is required for vehicle entry")
-        if data.entry_type == "Carry on hand" and (not data.delivery_person_name or not data.delivery_person_name.strip()):
-            raise HTTPException(status_code=400, detail="Delivery person name is required for hand carry entry")
-    else:
-        # Direct Invoice: vendor and invoice scan are mandatory
-        if not data.vendor_id:
-            raise HTTPException(status_code=400, detail="Vendor is required for Direct Invoice entry")
-        if not data.invoice_scan_url:
-            raise HTTPException(status_code=400, detail="Invoice scan is required for Direct Invoice entry")
-
     entry = GateEntry(
         entry_number=get_next_number(db, tenant_id, site_id, "GATE_ENTRY", "GE"),
         recorded_by_id=current_user.id,
         arrival_time=get_now_ist(),
-        status="Awaiting Direct GRN" if is_direct else "Gate Entry Created",
+        status="Gate Entry Created",
         vehicle_number=data.vehicle_number,
-        vendor_id=data.vendor_id,
-        po_id=data.po_id if data.po_id else None,
-        project_id=data.project_id if data.project_id else None,
-        material_id=data.material_id if data.material_id else None,
-        quantity=data.quantity if data.quantity else None,
         driver_name=data.driver_name,
         driver_phone=data.driver_phone,
         delivery_person_name=data.delivery_person_name,
-        entry_type=data.entry_type,
+        entry_type="Standard",
+        invoice_number=data.invoice_number,
+        invoice_date=data.invoice_date,
+        invoice_amount=data.invoice_amount,
         invoice_scan_url=data.invoice_scan_url,
         remarks=data.remarks,
         tenant_id=tenant_id,
         site_id=site_id
     )
     db.add(entry)
-    db.flush()
-
-    if not is_direct and data.po_id:
-        po = db.query(PurchaseOrder).filter(
-            PurchaseOrder.id == data.po_id, PurchaseOrder.tenant_id == tenant_id, PurchaseOrder.site_id == site_id
-        ).first()
-        if po:
-            entry.status = "Awaiting GRN"
-            any_received = any(item.received_quantity > 0 for item in po.items)
-            all_received = all(item.received_quantity >= item.quantity for item in po.items)
-            if all_received:
-                po.status = "Closed"
-            elif any_received:
-                po.status = "Partially Received"
-
     db.commit()
     db.refresh(entry)
     return {"id": entry.id, "entry_number": entry.entry_number, "message": "Gate Entry recorded successfully"}

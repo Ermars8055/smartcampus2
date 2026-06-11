@@ -54,23 +54,20 @@ export default function GRNPage() {
     ge.status === 'Gate Entry Created' || ge.status === 'Awaiting GRN'
   );
 
-  // When a gate entry is selected, auto-populate PO and items from the linked PO
+  // When a gate entry is selected, auto-populate invoice details
   const selectGateEntry = (geId) => {
     const ge = gateEntries.find(g => g.id === geId);
     if (ge) {
-      const newForm = { ...form, gate_entry_id: geId, po_id: ge.po_id, vendor_id: ge.vendor_id, project_id: ge.project_id, invoice_scan_url: ge.invoice_scan_url || '', receipt_type: 'PO-Based' };
-      const items = ge.po_id ? (pos.find(p => p.id === ge.po_id)?.items?.map(it => ({
-        material_id: it.material_id, po_item_id: it.id,
-        ordered_quantity: it.quantity,
-        received_quantity: Math.min(ge.quantity || it.quantity, it.quantity - (it.received_quantity || 0)),
-        accepted_quantity: Math.min(ge.quantity || it.quantity, it.quantity - (it.received_quantity || 0)),
-        rejected_quantity: 0,
-        rate: it.rate, material_name: it.material_name
-      })) || []) : [];
-      const total = items.reduce((sum, it) => sum + (it.accepted_quantity * it.rate), 0);
-      setForm({ ...newForm, items, invoice_amount: Number(total.toFixed(2)) });
+      setForm(prev => ({
+        ...prev, 
+        gate_entry_id: geId, 
+        invoice_scan_url: ge.invoice_scan_url || '',
+        invoice_number: ge.invoice_number || '',
+        invoice_date: ge.invoice_date || '',
+        invoice_amount: ge.invoice_amount || prev.invoice_amount || 0
+      }));
     } else {
-      setForm({ ...form, gate_entry_id: '', po_id: '', items: [] });
+      setForm(prev => ({ ...prev, gate_entry_id: '', invoice_scan_url: '', invoice_number: '', invoice_date: '', invoice_amount: prev.items.reduce((sum, it) => sum + (it.accepted_quantity * it.rate), 0) }));
     }
   };
 
@@ -305,8 +302,7 @@ export default function GRNPage() {
             </Grid>
             <Grid item xs={4}>
               <FormControl fullWidth required><InputLabel>Purchase Order</InputLabel>
-                <Select value={form.po_id} label="Purchase Order" onChange={e => selectPO(e.target.value)}
-                  disabled={!!form.gate_entry_id}>
+                <Select value={form.po_id} label="Purchase Order" onChange={e => selectPO(e.target.value)}>
                   {pos.filter(p => p.status !== 'Closed' && p.status !== 'Draft').map(p => <MenuItem key={p.id} value={p.id}>{p.po_number} - {p.vendor_name}</MenuItem>)}
                 </Select>
               </FormControl>

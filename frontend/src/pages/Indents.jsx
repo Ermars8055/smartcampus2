@@ -76,7 +76,7 @@ export default function Indents() {
   const [form, setForm] = useState({
     building_id: '', floor_id: '', room_id: '', department: '', remarks: '', items: [{ material_id: '', requested_quantity: '' }]
   });
-  const [vendorDialog, setVendorDialog] = useState({ open: false, indent: null, vendor_id: '', terms: '', items: [] });
+
   const [vendors, setVendors] = useState([]);
   const [termsTemplates, setTermsTemplates] = useState([]);
 
@@ -345,63 +345,7 @@ export default function Indents() {
     }
   };
 
-  const openConvertDialog = (indent) => {
-    setVendorDialog({
-      open: true,
-      indent,
-      vendor_id: '',
-      terms: '',
-      items: indent.items.filter(it => it.pending_quantity > 0).map(it => {
-        return {
-          ...it,
-          rate: '',
-          discount_percent: 0,
-          cgst_percentage: 0,
-          sgst_percentage: 0,
-          igst_percentage: 0
-        };
-      })
-    });
-  };
 
-  const updateConvertItem = (i, field, value) => {
-    const items = [...vendorDialog.items];
-    items[i][field] = value;
-    setVendorDialog({ ...vendorDialog, items });
-  };
-
-  const handleConvertToPo = async () => {
-    if (!vendorDialog.vendor_id || !vendorDialog.terms?.trim()) {
-      showMessage("Please select a vendor and provide terms and conditions.", "Validation Error", "warning");
-      return;
-    }
-
-    const mappedItems = vendorDialog.items.map(it => ({
-      material_id: it.material_id,
-      quantity: parseFloat(it.pending_quantity),
-      rate: parseFloat(it.rate),
-      discount_percent: parseFloat(it.discount_percent || 0),
-      cgst_percentage: parseFloat(it.cgst_percentage || 0),
-      sgst_percentage: parseFloat(it.sgst_percentage || 0),
-      igst_percentage: parseFloat(it.igst_percentage || 0),
-    }));
-
-    if (mappedItems.some(it => isNaN(it.rate) || it.rate < 0 || isNaN(it.quantity) || it.quantity <= 0 || isNaN(it.discount_percent) || it.discount_percent < 0 || isNaN(it.cgst_percentage) || it.cgst_percentage < 0 || isNaN(it.sgst_percentage) || it.sgst_percentage < 0 || isNaN(it.igst_percentage) || it.igst_percentage < 0)) {
-      showMessage("Rate, Quantity, Discount and Taxes must be valid non-negative numbers.", "Validation Error", "warning");
-      return;
-    }
-
-    try {
-      await api.post(`/api/indents/${vendorDialog.indent.id}/convert-to-po`, {
-        vendor_id: vendorDialog.vendor_id,
-        terms: vendorDialog.terms,
-        items: mappedItems
-      });
-      setVendorDialog({ open: false, indent: null, vendor_id: '', terms: '', items: [] });
-      load();
-      showMessage("PO created successfully!", "Success", "success");
-    } catch (err) { showMessage(err.response?.data?.detail || 'Error converting to PO', "Error", "error"); }
-  };
 
   // Status helpers
   const statusColor = {
@@ -714,12 +658,7 @@ export default function Indents() {
                         <Cancel fontSize="small" />
                       </IconButton></span>
                     </Tooltip>
-                    <Tooltip title="Convert to PO">
-                      <span><IconButton size="small" color="primary" disabled={(ind.status !== 'Approved' && ind.status !== 'Partially Issued') || !hasAction('indents', 'can_convert_to_po')}
-                        onClick={() => openConvertDialog(ind)}>
-                        <ShoppingCart fontSize="small" />
-                      </IconButton></span>
-                    </Tooltip>
+
                   </Box>
                 </Box>
               </Card>
@@ -809,12 +748,7 @@ export default function Indents() {
                             <Cancel fontSize="small" />
                           </IconButton></span>
                         </Tooltip>
-                        <Tooltip title="Convert to PO">
-                          <span><IconButton size="small" color="primary" disabled={(ind.status !== 'Approved' && ind.status !== 'Partially Issued') || !hasAction('indents', 'can_convert_to_po')}
-                            onClick={() => openConvertDialog(ind)}>
-                            <ShoppingCart fontSize="small" />
-                          </IconButton></span>
-                        </Tooltip>
+
                       </Box>
                     </TableCell>
                   </TableRow>
@@ -1013,189 +947,7 @@ export default function Indents() {
         <DialogActions sx={{ px: 3, pb: 2 }}><Button onClick={() => { setDetailDialog(null); setDetailHistoryOpen(false); setDetailHistoryData(null); }}>Close</Button></DialogActions>
       </Dialog>
 
-      {/* Vendor Selection Dialog for PO Conversion */}
-      <Dialog open={vendorDialog.open} onClose={(e, reason) => { if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') setVendorDialog({ ...vendorDialog, open: false }); }} maxWidth="md" fullWidth fullScreen={isMobile}>
-        <DialogTitle sx={{ fontWeight: 600 }}>Convert {vendorDialog.indent?.indent_number} to Purchase Order</DialogTitle>
-        <DialogContent sx={{ py: 1 }}>
-          <Box sx={{ mb: 1.5, mt: 0.5, p: 1.5, bgcolor: '#f0f4ff', borderRadius: 2, border: '1px solid #dbeafe' }}>
-            <Grid container spacing={1.5} alignItems="flex-start">
-              <Grid item xs={12} sm={8}>
-                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e40af', whiteSpace: 'nowrap', mt: 1 }}>Select Vendor:</Typography>
-                  <Box sx={{ flexGrow: 1 }}>
-                    <Autocomplete
-                      options={vendors}
-                      getOptionLabel={(option) => `${option.code} - ${option.name}`}
-                      value={vendors.find(v => v.id === vendorDialog.vendor_id) || null}
-                      onChange={(e, newValue) => {
-                        const vId = newValue ? newValue.id : '';
-                        const vendor = newValue;
-                        const vendorState = vendor?.state || '';
-                        const updatedItems = vendorDialog.items.map(it => {
-                          const material = materials.find(m => m.id === it.material_id);
-                          const gstRate = material?.gst_rate || 0;
-                          const { cgst_percentage, sgst_percentage, igst_percentage } = computeGstSplit(
-                            gstRate, vendorState, tenantConfig?.base_state,
-                            tenantConfig?.cgst_share_percent, tenantConfig?.sgst_share_percent
-                          );
-                          return { ...it, cgst_percentage, sgst_percentage, igst_percentage };
-                        });
-                        setVendorDialog({ ...vendorDialog, vendor_id: vId, items: updatedItems });
-                      }}
-                      renderInput={(params) => (
-                        <TextField {...params} placeholder="Search Vendor..." size="small" sx={{ bgcolor: '#fff' }} />
-                      )}
-                      fullWidth
-                      size="small"
-                      disableClearable
-                    />
-                    {vendorDialog.vendor_id && (
-                      <Box sx={{ mt: 0.5 }}>
-                        {(() => {
-                          const v = vendors.find(x => x.id === vendorDialog.vendor_id);
-                          if (v) {
-                            return (
-                              <Typography variant="caption" sx={{ color: '#475569', display: 'block', lineHeight: 1.3 }}>
-                                {v.address_line_1 ? `${v.address_line_1}, ` : ''}{v.address_line_2 ? `${v.address_line_2}, ` : ''}{v.city ? `${v.city}, ` : ''}{v.state ? `${v.state} ` : ''}{v.pincode ? `- ${v.pincode}` : ''}
-                                {(!v.address_line_1 && !v.address_line_2 && !v.city && !v.state) && 'Address not provided'}
-                              </Typography>
-                            );
-                          }
-                          return null;
-                        })()}
-                      </Box>
-                    )}
-                  </Box>
-                </Box>
-              </Grid>
-              <Grid item xs={12} sm={4} sx={{ textAlign: 'right' }}>
-                <Button
-                  variant="contained"
-                  disabled={!vendorDialog.vendor_id || !vendorDialog.terms?.trim()}
-                  onClick={handleConvertToPo}
-                  size="small"
-                  sx={{ py: 0.75, px: 3, fontWeight: 700, borderRadius: 1.5, textTransform: 'none' }}
-                >
-                  Confirm & Convert
-                </Button>
-              </Grid>
-            </Grid>
-          </Box>
 
-          <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748B', mb: 0.5, display: 'block', textTransform: 'uppercase', letterSpacing: 0.5 }}>Indent Details</Typography>
-          <Grid container spacing={0.5} sx={{ mb: 1.5 }}>
-            {[
-              { label: 'Requester', value: vendorDialog.indent?.requester_name },
-              { label: 'Dept', value: vendorDialog.indent?.department },
-              { label: 'Bldg', value: vendorDialog.indent?.building_name },
-              { label: 'Floor', value: vendorDialog.indent?.floor },
-              { label: 'Room', value: vendorDialog.indent?.room_name },
-              { label: 'Date', value: formatDate(vendorDialog.indent?.created_at) },
-            ].map((item, idx) => (
-              <Grid item xs={1.7} key={idx}>
-                <Typography variant="caption" color="textSecondary" sx={{ display: 'block', lineHeight: 1, fontSize: '0.65rem' }}>{item.label}</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.75rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.value || '—'}</Typography>
-              </Grid>
-            ))}
-            <Grid item xs={1.8}>
-              <Typography variant="caption" color="textSecondary" sx={{ display: 'block', lineHeight: 1, fontSize: '0.65rem' }}>Status</Typography>
-              <Chip label={vendorDialog.indent?.status} size="small" color={statusColor[vendorDialog.indent?.status] || 'default'} sx={{ height: 16, fontSize: '0.6rem', fontWeight: 700, mt: 0.2 }} />
-            </Grid>
-          </Grid>
-
-          {vendorDialog.indent?.remarks && (
-            <Typography variant="caption" sx={{ mb: 1.5, p: 1, bgcolor: '#f8fafc', borderRadius: 1, border: '1px solid #e2e8f0', display: 'block' }}>
-              <strong>Remarks:</strong> {vendorDialog.indent.remarks}
-            </Typography>
-          )}
-
-          <Divider sx={{ mb: 1.5 }} />
-          <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748B', mb: 1, display: 'block', textTransform: 'uppercase', letterSpacing: 0.5 }}>Items to be converted</Typography>
-          <Table size="small" sx={{ mb: 2 }}>
-            <TableHead>
-              <TableRow sx={{ bgcolor: '#f8fafc', '& th': { py: 0.75, px: 1 } }}>
-                <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Material</TableCell>
-                <TableCell align="left" sx={{ fontWeight: 600, fontSize: '0.75rem' }}>UOM</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Approved</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Issued</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Pending</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', width: 90 }}>Rate (₹)</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', width: 70 }}>Disc %</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', width: 70 }}>CGST %</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', width: 70 }}>SGST %</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', width: 70 }}>IGST %</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {vendorDialog.items?.map((item, i) => (
-                <TableRow key={item.id} sx={{ '& td': { py: 0.5, px: 1 } }}>
-                  <TableCell>
-                    <Typography sx={{ fontWeight: 600, fontSize: '0.8rem' }}>{item.material_name}</Typography>
-                    <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.7rem', display: 'block' }}>{item.material_code}</Typography>
-                  </TableCell>
-                  <TableCell align="left" sx={{ fontSize: '0.75rem', color: '#64748B' }}>{item.uom_name}</TableCell>
-                  <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{item.approved_quantity}</TableCell>
-                  <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{item.issued_quantity}</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 700, color: '#2563EB', fontSize: '0.8rem' }}>
-                    {item.pending_quantity}
-                  </TableCell>
-                  <TableCell align="right">
-                    <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'flex-end' }}>
-                      <TextField size="small" type="number" value={item.rate} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateConvertItem(i, 'rate', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0 }} required sx={{ width: 110 }} />
-                      <Typography sx={{ position: 'absolute', top: '100%', right: 0, fontSize: '0.65rem', color: '#2563EB', mt: 0.5, whiteSpace: 'nowrap' }}>
-                        Base: ₹{materials.find(m => m.id === item.material_id)?.standard_cost || 0}
-                      </Typography>
-                    </Box>
-                  </TableCell>
-                  <TableCell align="right">
-                    <TextField size="small" type="number" value={item.discount_percent} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateConvertItem(i, 'discount_percent', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0 }} sx={{ width: 60 }} />
-                  </TableCell>
-                  <TableCell align="right">
-                    <TextField size="small" variant="standard" type="number" value={item.cgst_percentage} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateConvertItem(i, 'cgst_percentage', e.target.value.replace(/-/g, ''))} InputProps={{ disableUnderline: true, readOnly: true }} inputProps={{ min: 0, style: { textAlign: 'right' } }} sx={{ width: 60, '& .MuiInputBase-input.Mui-readOnly': { color: '#64748b' } }} />
-                  </TableCell>
-                  <TableCell align="right">
-                    <TextField size="small" variant="standard" type="number" value={item.sgst_percentage} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateConvertItem(i, 'sgst_percentage', e.target.value.replace(/-/g, ''))} InputProps={{ disableUnderline: true, readOnly: true }} inputProps={{ min: 0, style: { textAlign: 'right' } }} sx={{ width: 60, '& .MuiInputBase-input.Mui-readOnly': { color: '#64748b' } }} />
-                  </TableCell>
-                  <TableCell align="right">
-                    <TextField size="small" variant="standard" type="number" value={item.igst_percentage} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateConvertItem(i, 'igst_percentage', e.target.value.replace(/-/g, ''))} InputProps={{ disableUnderline: true, readOnly: true }} inputProps={{ min: 0, style: { textAlign: 'right' } }} sx={{ width: 60, '& .MuiInputBase-input.Mui-readOnly': { color: '#64748b' } }} />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-
-          <Divider sx={{ mb: 1.5 }} />
-          <Box sx={{ mb: 1.5 }}>
-            <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748B', mb: 0.5, display: 'block', textTransform: 'uppercase', letterSpacing: 0.5 }}>Terms and Conditions</Typography>
-            <FormControl fullWidth size="small" sx={{ mb: 1.5 }}>
-              <InputLabel>Select Template</InputLabel>
-              <Select
-                label="Select Template"
-                onChange={e => {
-                  const t = termsTemplates.find(x => x.id === e.target.value);
-                  if (t) setVendorDialog({ ...vendorDialog, terms: t.content });
-                }}
-                defaultValue=""
-                sx={{ bgcolor: '#fff' }}
-              >
-                <MenuItem value=""><em>Select a Template</em></MenuItem>
-                {termsTemplates.map(t => <MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>)}
-              </Select>
-            </FormControl>
-            <TextField
-              fullWidth size="small"
-              multiline rows={3}
-              placeholder="Enter terms and conditions to be included in the PO..."
-              value={vendorDialog.terms}
-              onChange={e => setVendorDialog({ ...vendorDialog, terms: e.target.value })}
-              sx={{ bgcolor: '#fff' }}
-            />
-          </Box>
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={() => setVendorDialog({ ...vendorDialog, open: false })}>Cancel</Button>
-        </DialogActions>
-      </Dialog>
 
       {/* Confirmation Dialog */}
       <Dialog open={confirm.open} onClose={handleCancelConfirm} maxWidth="xs" fullWidth>

@@ -587,6 +587,9 @@ class GateEntryBase(BaseModel):
     gate_pass_number: Optional[str] = None
     arrival_time: Optional[datetime] = None
     invoice_scan_url: Optional[str] = None
+    invoice_number: Optional[str] = None
+    invoice_date: Optional[date] = None
+    invoice_amount: Optional[float] = 0
     remarks: Optional[str] = None
 
 class GateEntryCreate(GateEntryBase):
@@ -600,6 +603,9 @@ class GateEntryOut(GateEntryBase):
     entry_type: str
     delivery_person_name: Optional[str] = None
     invoice_scan_url: Optional[str] = None
+    invoice_number: Optional[str] = None
+    invoice_date: Optional[date] = None
+    invoice_amount: Optional[float] = 0
     vendor_name: Optional[str] = None
     material_name: Optional[str] = None
     po_number: Optional[str] = None
@@ -1590,3 +1596,62 @@ class DepartmentMaterialLimitOut(DepartmentMaterialLimitBase):
     uom_name: Optional[str] = None
     class Config:
         from_attributes = True
+
+# == Maintenance & Complaints ==
+
+class ComplaintImageOut(BaseModel):
+    id: int
+    image_url: str
+    is_resolution_image: bool
+    uploaded_at: datetime
+    class Config:
+        from_attributes = True
+
+class ComplaintBase(BaseModel):
+    docket_no: str
+    complaint_date: date
+    complaint_time: Optional[str] = None
+    department_name: Optional[str] = None
+    building_id: Optional[int] = None
+    room_id: Optional[int] = None
+    location: Optional[str] = None
+    nature_of_complaint: Optional[str] = None
+    individual_detailed: Optional[str] = None
+    name_and_trade: Optional[str] = None
+    status: str = "Open"
+    assigned_to_id: Optional[int] = None
+    resolution_remarks: Optional[str] = None
+
+class ComplaintCreate(BaseModel):
+    docket_no: str
+    complaint_date: date
+    complaint_time: Optional[str] = None
+    department_name: Optional[str] = None
+    building_id: Optional[int] = None
+    room_id: Optional[int] = None
+    location: Optional[str] = None
+    nature_of_complaint: Optional[str] = None
+    individual_detailed: Optional[str] = None
+    name_and_trade: Optional[str] = None
+    image_urls: List[str] = []
+
+class ComplaintUpdate(BaseModel):
+    status: Optional[str] = None
+    assigned_to_id: Optional[int] = None
+    resolution_remarks: Optional[str] = None
+    resolution_image_urls: List[str] = []
+
+class ComplaintOut(ComplaintBase):
+    id: int
+    created_at: datetime
+    updated_at: datetime
+    resolved_at: Optional[datetime] = None
+    building_name: Optional[str] = None
+    room_name: Optional[str] = None
+    assigned_to_name: Optional[str] = None
+    created_by_name: Optional[str] = None
+    resolved_by_name: Optional[str] = None
+    images: List[ComplaintImageOut] = []
+    class Config:
+        from_attributes = True
+

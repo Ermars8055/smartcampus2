@@ -23,9 +23,9 @@ APP_VERSION = "2.0.0"
 
 # CORS
 CORS_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://192.168.0.4:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:5174",
+    "http://192.168.0.4:5174",
     "*"
 ]
 

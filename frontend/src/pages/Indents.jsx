@@ -55,6 +55,7 @@ export default function Indents() {
   };
 
   const filteredIndentsBase = indents
+    .filter(i => i.status !== 'Converted to PO')
     .filter(i => !filterDepartment || i.department === filterDepartment)
     .filter(i => !filterBuilding || i.building_id === filterBuilding.id || i.building_name === filterBuilding.name);
 
@@ -351,7 +352,7 @@ export default function Indents() {
   const statusColor = {
     'Awaiting Approval': 'warning', 'Approved': 'success', 'Rejected': 'error',
     'Partially Issued': 'info', 'Issued': 'secondary', 'Fully Issued': 'secondary',
-    'Converted to PO': 'primary', 'PO Created': 'primary', 'Closed': 'default'
+    'PO Created': 'primary', 'Closed': 'default'
   };
 
   /* ─── INLINE CREATE FORM (reference-style card) ─── */
@@ -602,7 +603,7 @@ export default function Indents() {
           scrollButtons="auto"
           sx={{ borderBottom: 1, borderColor: 'divider' }}
         >
-          {['Awaiting Approval', 'Approved', 'Rejected', 'Partially Issued', 'Issued', 'Converted to PO', 'Closed', 'All'].map(s => {
+          {['Awaiting Approval', 'Approved', 'Rejected', 'Partially Issued', 'Issued', 'Closed', 'All'].map(s => {
             const count = s === 'All' ? filteredIndentsBase.length : filteredIndentsBase.filter(i => i.status === s).length;
             if (s !== 'All' && count === 0 && !['Awaiting Approval', 'Approved', 'Partially Issued'].includes(s)) return null;
             return (

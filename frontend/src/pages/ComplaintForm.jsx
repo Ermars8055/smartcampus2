@@ -1,6 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
-  Box, Typography, Paper, Grid, TextField, Button, IconButton, Divider, Snackbar, Alert, CircularProgress
+  Box, Typography, Paper, Grid, TextField, Button, IconButton, Divider, Snackbar, Alert, CircularProgress,
+  Autocomplete, FormControl, InputLabel, Select, MenuItem
 } from '@mui/material';
 import { ArrowBack, PhotoCamera, Close, CloudUpload } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
@@ -11,17 +12,68 @@ export default function ComplaintForm() {
   const fileInputRef = useRef(null);
 
   const [formData, setFormData] = useState({
-    docket_no: '',
-    complaint_date: new Date().toISOString().split('T')[0],
-    complaint_time: new Date().toTimeString().split(' ')[0].substring(0, 5),
     department_name: '',
     building_id: '',
+    floor_id: '',
     room_id: '',
     location: '',
     nature_of_complaint: '',
     individual_detailed: '',
     name_and_trade: ''
   });
+
+  const [departmentsList, setDepartmentsList] = useState([]);
+  const [allDepartments, setAllDepartments] = useState([]);
+  const [buildings, setBuildings] = useState([]);
+  const [floors, setFloors] = useState([]);
+  const [rooms, setRooms] = useState([]);
+
+  useEffect(() => {
+    api.get('/api/departments/names').then(r => setDepartmentsList(r.data)).catch(() => setDepartmentsList([]));
+    api.get('/api/departments').then(r => setAllDepartments(r.data)).catch(() => setAllDepartments([]));
+  }, []);
+
+  const handleDepartmentChange = (newDept) => {
+    if (newDept) {
+      api.get(`/api/rooms?department_name=${encodeURIComponent(newDept)}`).then(r => {
+        const fetchedRooms = r.data || [];
+        const uniqueBuildings = new Map();
+        const uniqueFloors = new Map();
+        fetchedRooms.forEach(room => {
+          if (room.building_id && room.building_name) {
+            uniqueBuildings.set(room.building_id, { id: room.building_id, name: room.building_name });
+          }
+          if (room.floor_id && room.floor_name) {
+            uniqueFloors.set(room.floor_id, { id: room.floor_id, name: room.floor_name, building_id: room.building_id });
+          }
+        });
+        const masterDepts = allDepartments.filter(d => d.name === newDept);
+        masterDepts.forEach(d => {
+          if (d.building_id && d.building_name) {
+            uniqueBuildings.set(d.building_id, { id: d.building_id, name: d.building_name });
+          }
+        });
+        setBuildings(Array.from(uniqueBuildings.values()));
+        setFloors(Array.from(uniqueFloors.values()));
+        setRooms(fetchedRooms);
+        setFormData(prev => ({ ...prev, department_name: newDept, building_id: '', floor_id: '', room_id: '' }));
+      }).catch(() => {
+        setBuildings([]); setFloors([]); setRooms([]);
+        setFormData(prev => ({ ...prev, department_name: newDept, building_id: '', floor_id: '', room_id: '' }));
+      });
+    } else {
+      setBuildings([]); setFloors([]); setRooms([]);
+      setFormData(prev => ({ ...prev, department_name: '', building_id: '', floor_id: '', room_id: '' }));
+    }
+  };
+
+  const handleBuildingChange = (buildingId) => {
+    setFormData(prev => ({ ...prev, building_id: buildingId, floor_id: '', room_id: '' }));
+  };
+
+  const handleFloorChange = (floorId) => {
+    setFormData(prev => ({ ...prev, floor_id: floorId, room_id: '' }));
+  };
 
   const [images, setImages] = useState([]); // File objects
   const [imagePreviewUrls, setImagePreviewUrls] = useState([]);
@@ -49,10 +101,6 @@ export default function ComplaintForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.docket_no) {
-      setSnackbar({ open: true, message: 'Docket No is required', severity: 'error' });
-      return;
-    }
 
     setUploading(true);
     try {
@@ -100,21 +148,61 @@ export default function ComplaintForm() {
         <form onSubmit={handleSubmit}>
           <Typography variant="h6" sx={{ mb: 2, color: '#1E3A8A' }}>Complaint Slip Details</Typography>
           <Grid container spacing={3}>
-            <Grid item xs={12} sm={6} md={4}>
-              <TextField required fullWidth label="Docket No" name="docket_no" value={formData.docket_no} onChange={handleChange} />
+            <Grid item xs={12} md={6}>
+              <Autocomplete
+                options={departmentsList}
+                value={formData.department_name || null}
+                onChange={(e, val) => handleDepartmentChange(val)}
+                renderInput={(params) => (
+                  <TextField {...params} required label="Department" fullWidth />
+                )}
+              />
             </Grid>
-            <Grid item xs={12} sm={6} md={4}>
-              <TextField required fullWidth type="date" label="Date" name="complaint_date" InputLabelProps={{ shrink: true }} value={formData.complaint_date} onChange={handleChange} />
+            <Grid item xs={12} sm={6} md={3}>
+              <FormControl fullWidth>
+                <InputLabel>Building</InputLabel>
+                <Select
+                  value={formData.building_id}
+                  label="Building"
+                  onChange={e => handleBuildingChange(e.target.value)}
+                  disabled={!formData.department_name || buildings.length === 0}
+                >
+                  <MenuItem value="" disabled><em>Select Building</em></MenuItem>
+                  {buildings.map(b => <MenuItem key={b.id} value={b.id}>{b.name}</MenuItem>)}
+                </Select>
+              </FormControl>
             </Grid>
-            <Grid item xs={12} sm={6} md={4}>
-              <TextField fullWidth type="time" label="Time" name="complaint_time" InputLabelProps={{ shrink: true }} value={formData.complaint_time} onChange={handleChange} />
+            <Grid item xs={12} sm={6} md={3}>
+              <FormControl fullWidth>
+                <InputLabel>Floor</InputLabel>
+                <Select
+                  value={formData.floor_id}
+                  label="Floor"
+                  onChange={e => handleFloorChange(e.target.value)}
+                  disabled={!formData.building_id || floors.filter(f => f.building_id === formData.building_id).length === 0}
+                >
+                  <MenuItem value="" disabled><em>Select Floor</em></MenuItem>
+                  {floors.filter(f => !formData.building_id || f.building_id === formData.building_id).map(f => <MenuItem key={f.id} value={f.id}>{f.name}</MenuItem>)}
+                </Select>
+              </FormControl>
             </Grid>
 
             <Grid item xs={12} md={6}>
-              <TextField fullWidth label="Name of Ward/Dept I/C or Occupant" name="department_name" value={formData.department_name} onChange={handleChange} />
+              <FormControl fullWidth>
+                <InputLabel>Room</InputLabel>
+                <Select
+                  value={formData.room_id}
+                  label="Room"
+                  onChange={e => setFormData(prev => ({ ...prev, room_id: e.target.value }))}
+                  disabled={!formData.floor_id || rooms.filter(rm => rm.floor_id === formData.floor_id).length === 0}
+                >
+                  <MenuItem value="" disabled><em>Select Room</em></MenuItem>
+                  {rooms.filter(rm => !formData.floor_id || rm.floor_id === formData.floor_id).map(r => <MenuItem key={r.id} value={r.id}>{r.name}</MenuItem>)}
+                </Select>
+              </FormControl>
             </Grid>
             <Grid item xs={12} md={6}>
-              <TextField fullWidth label="Qtr/Bldg No & Location" name="location" value={formData.location} onChange={handleChange} placeholder="E.g. Building A, Ground Floor" />
+              <TextField fullWidth label="Name (Occupant / Trade)" name="name_and_trade" value={formData.name_and_trade} onChange={handleChange} />
             </Grid>
 
             <Grid item xs={12}>
@@ -123,10 +211,6 @@ export default function ComplaintForm() {
             
             <Grid item xs={12}>
               <TextField fullWidth multiline rows={3} label="Individual Detailed" name="individual_detailed" value={formData.individual_detailed} onChange={handleChange} />
-            </Grid>
-            
-            <Grid item xs={12} md={6}>
-              <TextField fullWidth label="Name and Trade" name="name_and_trade" value={formData.name_and_trade} onChange={handleChange} />
             </Grid>
           </Grid>
 

@@ -115,6 +115,13 @@ const MODULE_TREE = [
     children: [{ label: 'Intelligence', resource: 'intelligence', actions: ['read'] }],
   },
   {
+    module: 'Finance',
+    icon: 'account_balance',
+    children: [
+      { label: 'Invoices & Payments', resource: 'finance_invoices' }
+    ],
+  },
+  {
     module: 'Reports',
     icon: 'assessment',
     children: [
@@ -122,6 +129,7 @@ const MODULE_TREE = [
       { label: 'Rate Analysis', resource: 'report_rate_analysis', actions: ['read'] },
       { label: 'Receipt Summary', resource: 'report_receipt_summary', actions: ['read'] },
       { label: 'Dept. Inventory', resource: 'report_dept_inventory', actions: ['read'] },
+      { label: 'Finance Reports', resource: 'report_finance', actions: ['read'] },
     ],
   },
   {

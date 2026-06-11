@@ -79,7 +79,7 @@ export default function GateEntry() {
     }
   };
 
-  const statusColor = { 'Gate Entry Created': 'info', 'Awaiting GRN': 'warning', 'Awaiting Direct GRN': 'secondary', 'Completed': 'success' };
+  const statusColor = { 'Awaiting GRN': 'warning', 'Completed': 'success' };
 
   const handleSort = (key) => {
     let direction = 'asc';

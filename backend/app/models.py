@@ -39,16 +39,19 @@ class POStatus(str, enum.Enum):
     CLOSED = "Closed"
 
 class GateEntryStatus(str, enum.Enum):
-    CREATED = "Gate Entry Created"
     AWAITING_GRN = "Awaiting GRN"
-    AWAITING_DIRECT_GRN = "Awaiting Direct GRN"
     COMPLETED = "Completed"
 
 class InvoiceStatus(str, enum.Enum):
     DRAFT = "Draft"
     SUBMITTED = "Submitted"
-    VERIFIED = "Verified"
+    APPROVED = "Approved"
     CHANGE_REQUIRED = "Change Required"
+
+class InvoicePaymentStatus(str, enum.Enum):
+    PENDING = "Pending"
+    SENT_FOR_PAYMENT = "Sent for Payment"
+    PAID = "Paid"
 
 class GRNStatus(str, enum.Enum):
     DRAFT = "Draft"
@@ -595,7 +598,7 @@ class GateEntry(Base):
     invoice_date = Column(Date)
     invoice_amount = Column(Float, default=0)
     remarks = Column(Text)
-    status = Column(String(50), default=GateEntryStatus.CREATED.value)
+    status = Column(String(50), default=GateEntryStatus.AWAITING_GRN.value)
     recorded_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     is_deleted = Column(Boolean, default=False)
     created_at = Column(DateTime, default=_get_now)
@@ -743,12 +746,33 @@ class Invoice(Base):
     created_at = Column(DateTime, default=_get_now)
     updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)
 
+    # Finance fields
+    payment_status = Column(String(50), default=InvoicePaymentStatus.PENDING.value)
+    sent_for_payment_at = Column(DateTime, nullable=True)
+    sent_for_payment_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    
+    hard_copy_sent = Column(Boolean, default=False)
+    hard_copy_sent_at = Column(DateTime, nullable=True)
+    hard_copy_sent_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    
+    hard_copy_received = Column(Boolean, default=False)
+    hard_copy_received_at = Column(DateTime, nullable=True)
+    hard_copy_received_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    hard_copy_remarks = Column(Text, nullable=True)
+    payment_completed_at = Column(DateTime, nullable=True)
+    payment_completed_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    payment_reference = Column(String(255), nullable=True)
+
     gate_entry = relationship("GateEntry")
     vendor = relationship("Vendor")
     purchase_order = relationship("PurchaseOrder")
     consignee = relationship("CompanyAddress", foreign_keys=[consignee_id])
     buyer = relationship("CompanyAddress", foreign_keys=[buyer_id])
     created_by = relationship("User", foreign_keys=[created_by_id])
+    sent_for_payment_by = relationship("User", foreign_keys=[sent_for_payment_by_id])
+    hard_copy_sent_by = relationship("User", foreign_keys=[hard_copy_sent_by_id])
+    hard_copy_received_by = relationship("User", foreign_keys=[hard_copy_received_by_id])
+    payment_completed_by = relationship("User", foreign_keys=[payment_completed_by_id])
     items = relationship("InvoiceItem", back_populates="invoice", cascade="all, delete-orphan")
     __table_args__ = (UniqueConstraint("tenant_id", "invoice_number", "vendor_id", name="uq_invoice_per_vendor_tenant"),)
 

@@ -8,6 +8,7 @@ from app.database import get_db
 from app.auth import get_current_user, get_tenant_id, get_site_id
 from app.models import User, Complaint, ComplaintImage, ComplaintStatus, Building, Room, MaterialIssue
 from app.schemas import ComplaintCreate, ComplaintUpdate, ComplaintOut, ComplaintImageOut
+from app.utils.sequences import get_next_number
 
 router = APIRouter(prefix="/api/complaints", tags=["Complaints"])
 
@@ -20,12 +21,20 @@ def create_complaint(
     site_id: int = Depends(get_site_id)
 ):
     try:
+        docket_no = complaint_in.docket_no
+        if not docket_no:
+            docket_no = get_next_number(db, tenant_id, site_id, "COMPLAINT", "CMP")
+            
+        now = datetime.now()
+        c_date = complaint_in.complaint_date or now.date()
+        c_time = complaint_in.complaint_time or now.strftime("%H:%M")
+
         new_complaint = Complaint(
             tenant_id=tenant_id,
             site_id=site_id,
-            docket_no=complaint_in.docket_no,
-            complaint_date=complaint_in.complaint_date,
-            complaint_time=complaint_in.complaint_time,
+            docket_no=docket_no,
+            complaint_date=c_date,
+            complaint_time=c_time,
             department_name=complaint_in.department_name,
             building_id=complaint_in.building_id,
             room_id=complaint_in.room_id,
@@ -64,6 +73,7 @@ def create_complaint(
 def get_complaints(
     status: Optional[str] = Query(None),
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -72,6 +82,9 @@ def get_complaints(
         Complaint.site_id == site_id,
         Complaint.is_deleted == False
     )
+    
+    if not getattr(current_user, "_is_platform_admin", False):
+        query = query.filter(Complaint.created_by_id == current_user.id)
     
     if status:
         query = query.filter(Complaint.status == status)

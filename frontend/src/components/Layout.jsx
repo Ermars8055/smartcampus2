@@ -10,7 +10,8 @@ import {
   LocalShipping, People, Assessment, Settings, Notifications,
   ExpandLess, ExpandMore, Logout, Person, Store, Assignment,
   SwapHoriz, Undo, Security, ReceiptLong, AccountTree, Category,
-  Build, ChevronLeft, RequestQuote, Business, AssignmentTurnedIn, Straighten
+  Build, ChevronLeft, RequestQuote, Business, AssignmentTurnedIn, Straighten,
+  AccountBalance
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
@@ -41,7 +42,6 @@ const menuItems = [
     text: 'Store Operations', icon: <Store />, children: [
       { text: 'Gate Entry', icon: <Security />, path: '/gate-entry', resource: 'gate_entry' },
       { text: 'Invoices', icon: <ReceiptLong />, path: '/invoices', resource: 'invoice' },
-      { text: 'Invoice Tracking', icon: <AssignmentTurnedIn />, path: '/invoice-tracking', resource: 'invoice' },
       { text: 'GRN', icon: <LocalShipping />, path: '/grn', resource: 'grn' },
       { text: 'Material Issue', icon: <Inventory2 />, path: '/issues', resource: 'issues' },
       { text: 'Returns', icon: <Undo />, path: '/returns', resource: 'returns' },
@@ -57,6 +57,13 @@ const menuItems = [
     ]
   },
   { text: 'Intelligence', icon: <Build />, path: '/intelligence', resource: 'intelligence' },
+  {
+    text: 'Finance', icon: <AccountBalance />, children: [
+      { text: 'Invoice Tracking', icon: <AssignmentTurnedIn />, path: '/invoice-tracking', resource: 'finance_invoices' },
+      { text: 'Pending Invoices Report', icon: <Assessment />, path: '/finance/reports/pending-invoices', resource: 'report_finance' },
+      { text: 'Pending Payments Report', icon: <Assessment />, path: '/finance/reports/pending-payments', resource: 'report_finance' },
+    ]
+  },
   {
     text: 'Reports', icon: <Assessment />, children: [
       { text: 'Issue Summary', icon: <Assessment />, path: '/reports/issue-summary', resource: 'report_issue_summary' },

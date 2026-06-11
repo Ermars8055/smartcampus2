@@ -51,7 +51,7 @@ export default function GRNPage() {
 
   // Filter gate entries that are pending GRN (not yet completed)
   const pendingGateEntries = gateEntries.filter(ge =>
-    ge.status === 'Gate Entry Created' || ge.status === 'Awaiting GRN'
+    ge.status === 'Awaiting GRN'
   );
 
   // When a gate entry is selected, auto-populate invoice details
@@ -72,6 +72,10 @@ export default function GRNPage() {
   };
 
   const selectPO = (poId) => {
+    if (!poId) {
+      setForm(prev => ({ ...prev, po_id: '', receipt_type: 'Direct Invoice', items: [], invoice_amount: 0, vendor_id: '', project_id: '' }));
+      return;
+    }
     const po = pos.find(p => p.id === poId);
     if (po) {
       const items = po.items?.map(it => ({
@@ -294,19 +298,38 @@ export default function GRNPage() {
                   <MenuItem value="">None (select PO directly)</MenuItem>
                   {pendingGateEntries.map(ge => (
                     <MenuItem key={ge.id} value={ge.id}>
-                      {ge.entry_number} — {ge.vehicle_number} ({ge.vendor_name})
+                      {ge.entry_number} — {ge.vehicle_number}{ge.vendor_name ? ` (${ge.vendor_name})` : ''}
                     </MenuItem>
                   ))}
                 </Select>
               </FormControl>
             </Grid>
             <Grid item xs={4}>
-              <FormControl fullWidth required><InputLabel>Purchase Order</InputLabel>
+              <FormControl fullWidth><InputLabel>Purchase Order</InputLabel>
                 <Select value={form.po_id} label="Purchase Order" onChange={e => selectPO(e.target.value)}>
+                  <MenuItem value="">None (Direct Invoice)</MenuItem>
                   {pos.filter(p => p.status !== 'Closed' && p.status !== 'Draft').map(p => <MenuItem key={p.id} value={p.id}>{p.po_number} - {p.vendor_name}</MenuItem>)}
                 </Select>
               </FormControl>
             </Grid>
+            {form.receipt_type === 'Direct Invoice' && (
+              <>
+                <Grid item xs={4}>
+                  <FormControl fullWidth required><InputLabel>Vendor</InputLabel>
+                    <Select value={form.vendor_id} label="Vendor" onChange={e => setForm({...form, vendor_id: e.target.value})}>
+                      {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.name}</MenuItem>)}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={4}>
+                  <FormControl fullWidth required><InputLabel>Project</InputLabel>
+                    <Select value={form.project_id} label="Project" onChange={e => setForm({...form, project_id: e.target.value})}>
+                      {projects.map(p => <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>)}
+                    </Select>
+                  </FormControl>
+                </Grid>
+              </>
+            )}
             <Grid item xs={4}>
               <FormControl fullWidth required><InputLabel>Store</InputLabel>
                 <Select value={form.warehouse_id} label="Store" onChange={e => setForm({ ...form, warehouse_id: e.target.value })}>
@@ -369,10 +392,15 @@ export default function GRNPage() {
             </Box>
           )}
 
-          {form.items.length > 0 && (
+          {(form.items.length > 0 || form.receipt_type === 'Direct Invoice') && (
             <>
               <Divider sx={{ mb: 2 }} />
-              <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>Items from PO</Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{form.receipt_type === 'Direct Invoice' ? 'Items' : 'Items from PO'}</Typography>
+                {form.receipt_type === 'Direct Invoice' && (
+                  <Button size="small" startIcon={<Add />} onClick={() => setForm({...form, items: [...form.items, { material_id: '', ordered_quantity: 0, received_quantity: 0, accepted_quantity: 0, rejected_quantity: 0, rate: 0 }]})}>Add Item</Button>
+                )}
+              </Box>
               <Table size="small">
                 <TableHead><TableRow>
                   <TableCell>Material</TableCell><TableCell align="right">Ordered</TableCell>
@@ -382,7 +410,19 @@ export default function GRNPage() {
                 <TableBody>
                   {form.items.map((item, i) => (
                     <TableRow key={i}>
-                      <TableCell>{item.material_name || materials.find(m => m.id === item.material_id)?.name}</TableCell>
+                      <TableCell>
+                        {form.receipt_type === 'Direct Invoice' ? (
+                          <Select size="small" fullWidth value={item.material_id || ''} onChange={e => {
+                            const items = [...form.items];
+                            items[i].material_id = e.target.value;
+                            setForm({ ...form, items });
+                          }}>
+                            {materials.map(m => <MenuItem key={m.id} value={m.id}>{m.name}</MenuItem>)}
+                          </Select>
+                        ) : (
+                          item.material_name || materials.find(m => m.id === item.material_id)?.name
+                        )}
+                      </TableCell>
                       <TableCell align="right">{item.ordered_quantity}</TableCell>
                       <TableCell align="right">
                         <TextField size="small" type="number" inputProps={{ step: "1" }} value={item.received_quantity ?? ''} sx={{ width: 80 }}
@@ -410,7 +450,19 @@ export default function GRNPage() {
                             setForm({ ...form, items });
                           }} />
                       </TableCell>
-                      <TableCell align="right">₹{item.rate?.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                      <TableCell align="right">
+                        {form.receipt_type === 'Direct Invoice' ? (
+                          <TextField size="small" type="number" inputProps={{ step: "0.01" }} value={item.rate ?? ''} sx={{ width: 80 }}
+                            onChange={e => {
+                              const items = [...form.items];
+                              items[i].rate = parseFloat(e.target.value) || 0;
+                              const total = items.reduce((sum, it) => sum + (it.accepted_quantity * it.rate), 0);
+                              setForm({ ...form, items, invoice_amount: Number(total.toFixed(2)) });
+                            }} />
+                        ) : (
+                          `₹${item.rate?.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                        )}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

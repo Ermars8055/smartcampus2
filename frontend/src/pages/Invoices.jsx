@@ -49,7 +49,7 @@ export default function Invoices() {
     }
   };
 
-  const statusColor = { 'Draft': 'default', 'Submitted': 'warning', 'Verified': 'success', 'Change Required': 'error' };
+  const statusColor = { 'Draft': 'default', 'Submitted': 'warning', 'Approved': 'success', 'Change Required': 'error' };
 
   const handleSort = (key) => {
     let direction = 'asc';
@@ -93,7 +93,7 @@ export default function Invoices() {
           <Tab label={`Draft (${invoices.filter(i => i.status === 'Draft').length})`} value="Draft" sx={{ textTransform: 'none', fontWeight: 600, minWidth: 'auto', mr: 2 }} />
           <Tab label={`Submitted (${invoices.filter(i => i.status === 'Submitted').length})`} value="Submitted" sx={{ textTransform: 'none', fontWeight: 600, minWidth: 'auto', mr: 2 }} />
           <Tab label={`Change Required (${invoices.filter(i => i.status === 'Change Required').length})`} value="Change Required" sx={{ textTransform: 'none', fontWeight: 600, minWidth: 'auto', mr: 2 }} />
-          <Tab label={`Verified (${invoices.filter(i => i.status === 'Verified').length})`} value="Verified" sx={{ textTransform: 'none', fontWeight: 600, minWidth: 'auto', mr: 2 }} />
+          <Tab label={`Approved (${invoices.filter(i => i.status === 'Approved').length})`} value="Approved" sx={{ textTransform: 'none', fontWeight: 600, minWidth: 'auto', mr: 2 }} />
           <Tab label={`All (${invoices.length})`} value="All" sx={{ textTransform: 'none', fontWeight: 600, minWidth: 'auto' }} />
         </Tabs>
       </Card>
@@ -131,7 +131,7 @@ export default function Invoices() {
                       </span>
                     </Tooltip>
                     
-                    <Tooltip title="Verify">
+                    <Tooltip title="Approve">
                       <span>
                         <IconButton size="small" color={i.status === 'Submitted' ? "success" : "default"} disabled={i.status !== 'Submitted'} onClick={(e) => { e.stopPropagation(); setDetailDialog(i); }}>
                           <CheckCircle fontSize="small" />
@@ -278,7 +278,7 @@ export default function Invoices() {
             {detailDialog?.status === 'Submitted' && (
               <>
                 <Button variant="contained" color="error" startIcon={<ReceiptLong />} onClick={() => { handleStatusUpdate(detailDialog.id, 'Change Required'); setDetailDialog(null); }}>Change Required</Button>
-                <Button variant="contained" color="success" startIcon={<CheckCircle />} onClick={() => { handleStatusUpdate(detailDialog.id, 'Verified'); setDetailDialog(null); }}>Verify Invoice</Button>
+                <Button variant="contained" color="success" startIcon={<CheckCircle />} onClick={() => { handleStatusUpdate(detailDialog.id, 'Approved'); setDetailDialog(null); }}>Approve Invoice</Button>
               </>
             )}
           </Box>

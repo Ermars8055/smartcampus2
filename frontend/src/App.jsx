@@ -59,6 +59,9 @@ import CompanyAddresses from './pages/CompanyAddresses';
 import ComplaintsList from './pages/ComplaintsList';
 import ComplaintForm from './pages/ComplaintForm';
 import ComplaintDetail from './pages/ComplaintDetail';
+
+import VendorPendingInvoicesReport from './pages/VendorPendingInvoicesReport';
+import VendorPendingPaymentsReport from './pages/VendorPendingPaymentsReport';
 import ChatBot from './components/ChatBot';
 import { Box, CircularProgress } from '@mui/material';
 
@@ -153,6 +156,9 @@ function AppRoutes() {
         <Route path="complaints" element={<ComplaintsList />} />
         <Route path="complaints/new" element={<ComplaintForm />} />
         <Route path="complaints/:id" element={<ComplaintDetail />} />
+
+        <Route path="finance/reports/pending-invoices" element={<VendorPendingInvoicesReport />} />
+        <Route path="finance/reports/pending-payments" element={<VendorPendingPaymentsReport />} />
       </Route>
     </Routes>
   );

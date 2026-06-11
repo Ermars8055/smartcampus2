@@ -775,17 +775,7 @@ export default function PurchaseOrders() {
                       PO No
                     </TableSortLabel>
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
-                    <TableSortLabel
-                      active={sortConfig.key === 'indent_number'}
-                      direction={sortConfig.direction}
-                      onClick={() => handleSort('indent_number')}
-                      IconComponent={ArrowDropDown}
-                      sx={{ '& .MuiTableSortLabel-icon': { fontSize: '1rem' } }}
-                    >
-                      INDENT
-                    </TableSortLabel>
-                  </TableCell>
+
                   <TableCell sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
                     <TableSortLabel
                       active={sortConfig.key === 'pr_number'}
@@ -863,13 +853,7 @@ export default function PurchaseOrders() {
                 {sortedPOs.map(po => (
                   <TableRow key={po.id} sx={{ cursor: 'pointer', '&:hover': { backgroundColor: '#f1f5f9' } }} onClick={() => handleRowClick(po)}>
                     <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.7rem', whiteSpace: 'nowrap' }}>{po.po_number}</TableCell>
-                    <TableCell sx={{ fontSize: '0.7rem', color: '#64748B', whiteSpace: 'nowrap' }}>
-                      {po.indent_number ? (
-                        <Link component="button" variant="body2" sx={{ fontSize: '0.7rem', fontWeight: 600, color: '#0d9488', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }} onClick={(e) => { e.stopPropagation(); fetchAndShowIndent(po.indent_id); }}>
-                          {po.indent_number}
-                        </Link>
-                      ) : '-'}
-                    </TableCell>
+
                     <TableCell sx={{ fontSize: '0.7rem', color: '#64748B', whiteSpace: 'nowrap' }}>
                       {po.pr_number ? (
                         <Link component="button" variant="body2" sx={{ fontSize: '0.7rem', fontWeight: 600, color: '#7c3aed', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }} onClick={(e) => { e.stopPropagation(); fetchAndShowPR(po.pr_id); }}>
@@ -946,17 +930,7 @@ export default function PurchaseOrders() {
                   <Typography variant="caption" sx={{ color: '#64748B', display: 'block' }}>GSTIN: {detailDialog.vendor_gst_number}</Typography>
                 )}
               </Grid>
-              <Grid item xs={2.25}>
-                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>INDENT</Typography>
-                {detailDialog?.indent_number ? (
-                  <Link component="button" variant="body2" sx={{ fontWeight: 600, color: '#0d9488', fontSize: '0.9rem', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }} onClick={(e) => { e.stopPropagation(); fetchAndShowIndent(detailDialog.indent_id); }}>
-                    {detailDialog.indent_number}
-                  </Link>
-                ) : (
-                  <Typography sx={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>-</Typography>
-                )}
-              </Grid>
-              <Grid item xs={2.25}>
+              <Grid item xs={3}>
                 <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>PR</Typography>
                 {detailDialog?.pr_number ? (
                   <Link component="button" variant="body2" sx={{ fontWeight: 600, color: '#7c3aed', fontSize: '0.9rem', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }} onClick={(e) => { e.stopPropagation(); fetchAndShowPR(detailDialog.pr_id); }}>
@@ -966,7 +940,7 @@ export default function PurchaseOrders() {
                   <Typography sx={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>-</Typography>
                 )}
               </Grid>
-              <Grid item xs={2.25}>
+              <Grid item xs={3}>
                 <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>QUOTATION</Typography>
                 {detailDialog?.qr_number ? (
                   <Link component="button" variant="body2" sx={{ fontWeight: 600, color: '#d97706', fontSize: '0.9rem', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }} onClick={(e) => { e.stopPropagation(); fetchAndShowQR(detailDialog.qr_id); }}>
@@ -976,7 +950,7 @@ export default function PurchaseOrders() {
                   <Typography sx={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>-</Typography>
                 )}
               </Grid>
-              <Grid item xs={2.25}>
+              <Grid item xs={3}>
                 <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>STATUS</Typography>
                 <Chip label={detailDialog?.status} size="small" color={statusColor[detailDialog?.status] || 'default'} sx={{ fontWeight: 600, fontSize: '0.65rem', height: 20 }} />
               </Grid>

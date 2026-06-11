@@ -800,9 +800,44 @@ class InvoiceOut(InvoiceBase):
     created_by_name: Optional[str] = None
     consignee_title: Optional[str] = None
     buyer_title: Optional[str] = None
+    # Finance fields
+    payment_status: Optional[str] = "Pending"
+    sent_for_payment_at: Optional[datetime] = None
+    sent_for_payment_by_name: Optional[str] = None
+    
+    hard_copy_sent: bool = False
+    hard_copy_sent_at: Optional[datetime] = None
+    hard_copy_sent_by_name: Optional[str] = None
+    
+    hard_copy_received: bool = False
+    hard_copy_received_at: Optional[datetime] = None
+    hard_copy_received_by_name: Optional[str] = None
+    hard_copy_remarks: Optional[str] = None
+    payment_completed_at: Optional[datetime] = None
+    payment_completed_by_name: Optional[str] = None
+    payment_reference: Optional[str] = None
     items: List[InvoiceItemOut] = []
     class Config:
         from_attributes = True
+
+
+# ── Finance ──────────────────────────────────────────────────────────────
+
+class SendForPaymentRequest(BaseModel):
+    invoice_ids: List[int]
+    target_amount: float = 0
+
+class HardCopySentRequest(BaseModel):
+    invoice_id: int
+
+class HardCopyUpdate(BaseModel):
+    invoice_id: int
+    hard_copy_received: bool = True
+    hard_copy_remarks: Optional[str] = None
+
+class PaymentStatusUpdate(BaseModel):
+    invoice_ids: List[int]
+    payment_reference: Optional[str] = None
 
 
 # ── GRN ──────────────────────────────────────────────────────────────────
@@ -1623,8 +1658,8 @@ class ComplaintBase(BaseModel):
     resolution_remarks: Optional[str] = None
 
 class ComplaintCreate(BaseModel):
-    docket_no: str
-    complaint_date: date
+    docket_no: Optional[str] = None
+    complaint_date: Optional[date] = None
     complaint_time: Optional[str] = None
     department_name: Optional[str] = None
     building_id: Optional[int] = None

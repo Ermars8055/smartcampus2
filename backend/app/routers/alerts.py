@@ -26,7 +26,7 @@ def get_alert_count(
     ).filter(
         GateEntry.tenant_id == tenant_id,
         GateEntry.site_id == site_id,
-        GateEntry.status == "Awaiting Direct GRN",
+        GateEntry.status == "Awaiting GRN",
         GateEntry.is_deleted == False,
         (Alert.id == None) | (and_(Alert.is_read == False, Alert.is_resolved == False))
     ).count()
@@ -66,7 +66,7 @@ def get_alerts(
     pending_direct = db.query(GateEntry).filter(
         GateEntry.tenant_id == tenant_id,
         GateEntry.site_id == site_id,
-        GateEntry.status == "Awaiting Direct GRN",
+        GateEntry.status == "Awaiting GRN",
         GateEntry.is_deleted == False
     ).all()
     

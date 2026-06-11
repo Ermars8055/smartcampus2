@@ -73,6 +73,20 @@ def list_purchase_requests(
     if project_id:
         q = q.filter(PurchaseRequest.project_id == project_id)
     prs = q.order_by(PurchaseRequest.created_at.desc()).all()
+    
+    # Pre-fetch all active approval flows for PURCHASE_REQUEST
+    from app.models import ApprovalFlow
+    flows = db.query(ApprovalFlow).filter(
+        ApprovalFlow.tenant_id == tenant_id,
+        ApprovalFlow.site_id == site_id,
+        ApprovalFlow.document_type == "PURCHASE_REQUEST",
+        ApprovalFlow.is_active == True
+    ).all()
+    
+    user_roles = getattr(current_user, "_roles", [])
+    is_admin = getattr(current_user, "_is_platform_admin", False)
+    can_override = is_admin or getattr(current_user, '_data_access_scope', '') == 'Full Administrative Access'
+
     result = []
     for pr in prs:
         items = []
@@ -85,6 +99,19 @@ def list_purchase_requests(
                 "uom_name": it.material.uom.name if it.material and it.material.uom else None,
                 "last_purchase_price": get_lpp(db, it.material_id, tenant_id, site_id)
             })
+            
+        can_user_approve = False
+        if pr.status == "Submitted":
+            total_amount = sum(item.quantity * (item.material.standard_cost or 0) for item in pr.items if item.material)
+            applicable_flows = [
+                f for f in flows
+                if f.level == pr.current_approval_level and
+                   f.min_amount <= total_amount and
+                   (f.max_amount is None or f.max_amount >= total_amount) and
+                   (can_override or (f.user_id == current_user.id) or (not f.user_id and f.role_name in user_roles))
+            ]
+            can_user_approve = len(applicable_flows) > 0
+
         result.append(PROut(
             id=pr.id, pr_number=pr.pr_number,
             required_for_room_id=pr.required_for_room_id,
@@ -98,7 +125,8 @@ def list_purchase_requests(
             room_name=pr.room.name if pr.room else None,
             project_name=pr.project.name if pr.project else None,
             building_name=pr.building.name if pr.building else None,
-            items=items
+            items=items,
+            can_user_approve=can_user_approve
         ))
     return result
 
@@ -286,7 +314,7 @@ def approve_pr(
     user_roles = getattr(current_user, "_roles", [])
     is_admin = getattr(current_user, "_is_platform_admin", False)
     perms = getattr(current_user, "_permissions", {})
-    can_override = is_admin or perms.get('purchase_requests', {}).get('extended_actions', {}).get('can_approve', False)
+    can_override = is_admin or getattr(current_user, '_data_access_scope', '') == 'Full Administrative Access'
 
     applicable_flows = [
         f for f in flows 
@@ -326,8 +354,7 @@ def approve_pr(
     db.add(AuditLog(tenant_id=tenant_id, site_id=site_id, user_id=current_user.id, action="APPROVE", entity_type="PurchaseRequest", entity_id=id))
     db.commit()
 
-    approvals_count = db.query(PurchaseRequestApproval).filter(PurchaseRequestApproval.pr_id == id).join(ApprovalFlow).filter(ApprovalFlow.level == pr.current_approval_level).count()
-    if approvals_count >= len(flows):
+    if new_approvals > 0:
         return handle_pr_next_level(db, pr, tenant_id, site_id, total_amount, current_user.id)
 
     return {"message": "Approval recorded", "status": pr.status, "current_level": pr.current_approval_level}
@@ -342,12 +369,12 @@ def handle_pr_next_level(db, pr, tenant_id, site_id, total_amount, user_id=None)
         ApprovalFlow.is_active == True,
         ApprovalFlow.min_amount <= total_amount,
         (ApprovalFlow.max_amount == None) | (ApprovalFlow.max_amount >= total_amount)
-    ).first()
+    ).order_by(ApprovalFlow.level.asc()).first()
 
     if has_more:
-        pr.current_approval_level = next_level
+        pr.current_approval_level = has_more.level
         db.commit()
-        return {"message": f"Moved to level {next_level}", "status": pr.status, "current_level": pr.current_approval_level}
+        return {"message": f"Moved to level {has_more.level}", "status": pr.status, "current_level": pr.current_approval_level}
     else:
         pr.status = "Approved"
         pr.approved_by_id = user_id
@@ -367,12 +394,12 @@ def handle_po_next_level(db, po, tenant_id, site_id, total_amount, user_id=None)
         ApprovalFlow.is_active == True,
         ApprovalFlow.min_amount <= total_amount,
         (ApprovalFlow.max_amount == None) | (ApprovalFlow.max_amount >= total_amount)
-    ).first()
+    ).order_by(ApprovalFlow.level.asc()).first()
 
     if has_more:
-        po.current_approval_level = next_level
+        po.current_approval_level = has_more.level
         db.commit()
-        return {"message": f"Moved to level {next_level}", "status": po.status, "current_level": po.current_approval_level}
+        return {"message": f"Moved to level {has_more.level}", "status": po.status, "current_level": po.current_approval_level}
     else:
         po.status = "Approved"
         po.approved_by_id = user_id
@@ -541,6 +568,17 @@ def list_purchase_orders(
     if project_id:
         q = q.filter(PurchaseOrder.project_id == project_id)
     pos = q.order_by(PurchaseOrder.created_at.desc()).all()
+    
+    # Pre-fetch flows and user permissions for efficient check
+    flows = db.query(ApprovalFlow).filter(
+        ApprovalFlow.tenant_id == tenant_id,
+        ApprovalFlow.site_id == site_id,
+        ApprovalFlow.document_type == "PURCHASE_ORDER",
+        ApprovalFlow.is_active == True
+    ).all()
+    user_roles = getattr(current_user, "_roles", [])
+    can_override = getattr(current_user, "_is_platform_admin", False) or getattr(current_user, '_data_access_scope', '') == 'Full Administrative Access'
+
     result = []
     for po in pos:
         items = []
@@ -550,6 +588,7 @@ def list_purchase_orders(
                 id=item.id, material_id=item.material_id,
                 quantity=item.quantity, rate=item.rate,
                 amount=item.amount, received_quantity=item.received_quantity,
+                approved_quantity=item.approved_quantity,
                 discount_percent=item.discount_percent,
                 cgst_percentage=item.cgst_percentage,
                 sgst_percentage=item.sgst_percentage,
@@ -580,6 +619,18 @@ def list_purchase_orders(
 
         qr_number = po.quotation_request.qr_number if po.quotation_request else None
 
+        can_user_approve = False
+        if po.status == "Submitted":
+            total_amount = po.total_amount
+            applicable_flows = [
+                f for f in flows
+                if f.level == (po.current_approval_level or 1) and
+                   f.min_amount <= total_amount and
+                   (f.max_amount is None or f.max_amount >= total_amount) and
+                   (can_override or (f.user_id == current_user.id) or (not f.user_id and f.role_name in user_roles))
+            ]
+            can_user_approve = len(applicable_flows) > 0
+
         result.append(POOut(
             id=po.id, po_number=po.po_number,
             vendor_id=po.vendor_id, project_id=po.project_id,
@@ -598,6 +649,7 @@ def list_purchase_orders(
             vendor_pincode=po.vendor.pincode if po.vendor else None,
             vendor_gst_number=po.vendor.gst_number if po.vendor else None,
             project_name=po.project.name if po.project else None,
+            can_user_approve=can_user_approve,
             items=items
         ))
     return result
@@ -622,6 +674,7 @@ def get_purchase_order(
             id=item.id, material_id=item.material_id,
             quantity=item.quantity, rate=item.rate,
             amount=item.amount, received_quantity=item.received_quantity,
+            approved_quantity=item.approved_quantity,
             discount_percent=item.discount_percent,
             cgst_percentage=item.cgst_percentage,
             sgst_percentage=item.sgst_percentage,
@@ -643,6 +696,28 @@ def get_purchase_order(
     indent_number = po.indent.indent_number if po.indent else None
     qr_number = po.quotation_request.qr_number if po.quotation_request else None
 
+    # Calculate can_user_approve
+    flows = db.query(ApprovalFlow).filter(
+        ApprovalFlow.tenant_id == tenant_id,
+        ApprovalFlow.site_id == site_id,
+        ApprovalFlow.document_type == "PURCHASE_ORDER",
+        ApprovalFlow.is_active == True
+    ).all()
+    user_roles = getattr(current_user, "_roles", [])
+    can_override = getattr(current_user, "_is_platform_admin", False) or getattr(current_user, '_data_access_scope', '') == 'Full Administrative Access'
+
+    can_user_approve = False
+    if po.status == "Submitted":
+        total_amount = po.total_amount
+        applicable_flows = [
+            f for f in flows
+            if f.level == (po.current_approval_level or 1) and
+               f.min_amount <= total_amount and
+               (f.max_amount is None or f.max_amount >= total_amount) and
+               (can_override or (f.user_id == current_user.id) or (not f.user_id and f.role_name in user_roles))
+        ]
+        can_user_approve = len(applicable_flows) > 0
+
     return POOut(
         id=po.id, po_number=po.po_number,
         vendor_id=po.vendor_id, project_id=po.project_id,
@@ -661,6 +736,7 @@ def get_purchase_order(
         vendor_pincode=po.vendor.pincode if po.vendor else None,
         vendor_gst_number=po.vendor.gst_number if po.vendor else None,
         project_name=po.project.name if po.project else None,
+        can_user_approve=can_user_approve,
         items=items
     )
 
@@ -746,6 +822,7 @@ def create_purchase_order(
     
     res = {"id": po.id, "po_number": po.po_number, "message": "Purchase Order created"}
     if po.status == "Submitted":
+        po.current_approval_level = 0
         flow_res = handle_po_next_level(db, po, tenant_id, site_id, po.total_amount, current_user.id)
         res.update(flow_res)
         
@@ -863,7 +940,7 @@ def approve_po(
     user_roles = getattr(current_user, "_roles", [])
     is_admin = getattr(current_user, "_is_platform_admin", False)
     perms = getattr(current_user, "_permissions", {})
-    can_override = is_admin or perms.get('purchase_orders', {}).get('extended_actions', {}).get('can_approve', False)
+    can_override = is_admin or getattr(current_user, '_data_access_scope', '') == 'Full Administrative Access'
 
     applicable_flows = [
         f for f in flows 
@@ -881,6 +958,9 @@ def approve_po(
                 "quantity": it.approved_quantity,
                 "remarks": it.remarks
             }
+            db_item = next((i for i in po.items if i.id == it.po_item_id), None)
+            if db_item:
+                db_item.approved_quantity = it.approved_quantity
 
     for f in applicable_flows:
         existing = db.query(PurchaseOrderApproval).filter(PurchaseOrderApproval.po_id == id, PurchaseOrderApproval.approval_flow_id == f.id).first()
@@ -900,8 +980,7 @@ def approve_po(
     db.add(AuditLog(tenant_id=tenant_id, site_id=site_id, user_id=current_user.id, action="APPROVE", entity_type="PurchaseOrder", entity_id=id))
     db.commit()
 
-    approvals_count = db.query(PurchaseOrderApproval).filter(PurchaseOrderApproval.po_id == id).join(ApprovalFlow).filter(ApprovalFlow.level == po.current_approval_level).count()
-    if approvals_count >= len(flows):
+    if new_approvals > 0:
         return handle_po_next_level(db, po, tenant_id, site_id, total_amount, current_user.id)
 
     return {"message": "Approval recorded", "status": po.status, "current_level": po.current_approval_level}

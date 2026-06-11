@@ -8,7 +8,7 @@ import {
   DialogContent, DialogActions, Grid, MenuItem, Select, FormControl, Link,
   Accordion, AccordionSummary, AccordionDetails, Tab, Tabs, Autocomplete
 } from '@mui/material';
-import { Add, Delete, CheckCircle, Archive, Send, Cancel, Search, ShoppingCart, Store, Assignment, CalendarMonth, ArrowDropDown, Inventory, History, ExpandMore, Textsms, AttachFile, Email } from '@mui/icons-material';
+import { Add, Delete, CheckCircle, Archive, Send, Cancel, Search, ShoppingCart, Store, Assignment, CalendarMonth, ArrowDropDown, Inventory, History, ExpandMore, Textsms, AttachFile, Email, Visibility } from '@mui/icons-material';
 import api from '../services/api';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { formatDate, formatDateTime } from '../utils/dateUtils';
@@ -37,6 +37,52 @@ export default function PurchaseOrders() {
   const [linkedQR, setLinkedQR] = useState(null);
   const [detailHistoryOpen, setDetailHistoryOpen] = useState(false);
   const [detailHistoryData, setDetailHistoryData] = useState(null);
+  const [approvalDialog, setApprovalDialog] = useState({ open: false, po: null, items: {} });
+  const [approvalRemarks, setApprovalRemarks] = useState('');
+  const [historyDialog, setHistoryDialog] = useState({ open: false, materialId: null, data: null, loading: false });
+
+  const fetchApprovalHistory = async (poId, materialId) => {
+    setHistoryDialog({ open: true, materialId, data: null, loading: true });
+    try {
+      const res = await api.get(`/api/procurement/po/${poId}/approval-history`);
+      setHistoryDialog({ open: true, materialId, data: res.data, loading: false });
+    } catch (err) {
+      showMessage('Failed to load approval history', 'Error', 'error');
+      setHistoryDialog({ open: false, materialId: null, data: null, loading: false });
+    }
+  };
+
+  const handleApproveClick = async () => {
+    const { po, items } = approvalDialog;
+    if (!po) return;
+
+    const payloadItems = po.items.map(it => {
+      const itemData = items[it.id] || {};
+      return {
+        po_item_id: it.id,
+        approved_quantity: parseFloat(itemData.qty !== undefined ? itemData.qty : it.quantity),
+        remarks: itemData.rem || null
+      };
+    });
+
+    if (payloadItems.some(it => isNaN(it.approved_quantity) || it.approved_quantity < 0)) {
+      showMessage("Please enter a valid approved quantity for all items.", "Validation Error", "warning");
+      return;
+    }
+
+    try {
+      await api.post(`/api/procurement/po/${po.id}/approve`, {
+        items: payloadItems,
+        remarks: approvalRemarks || null
+      });
+      setApprovalDialog({ open: false, po: null, items: {} });
+      setApprovalRemarks('');
+      load();
+    } catch (err) {
+      showMessage(err.response?.data?.detail || 'Error approving PO', 'Approval Failed', 'error');
+    }
+  };
+
 
   const fetchDetailHistory = async (id, type) => {
     try {
@@ -257,6 +303,20 @@ export default function PurchaseOrders() {
       navigate(location.pathname, { replace: true });
     }
   }, [location.state, projects, location.pathname, navigate]);
+
+  useEffect(() => {
+    if (location.state?.openPOId && pos.length > 0) {
+      const poToOpen = pos.find(p => p.id === location.state.openPOId);
+      if (poToOpen) {
+        if (poToOpen.can_user_approve && hasAction('purchase_orders', 'can_approve')) {
+          setApprovalDialog({ open: true, po: poToOpen, items: {} });
+        } else {
+          setDetailDialog(poToOpen);
+        }
+      }
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location.state, pos, location.pathname, navigate, hasAction]);
 
   const addItem = () => setForm({ ...form, items: [...form.items, { material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }] });
   const removeItem = (i) => setForm({ ...form, items: form.items.filter((_, idx) => idx !== i) });
@@ -748,8 +808,8 @@ export default function PurchaseOrders() {
                   <Chip label={po.po_type} size="small" variant="outlined" color={po.po_type === 'Formal' ? 'primary' : 'default'} sx={{ height: 22, fontSize: '0.7rem' }} />
                   <Box sx={{ display: 'flex', gap: 0.5 }} onClick={e => e.stopPropagation()}>
                     <Tooltip title="Approve">
-                      <span><IconButton size="small" color="success" disabled={!canApprove(po.status) || !hasAction('purchase_orders', 'can_approve')}
-                        onClick={() => showConfirm('Approve PO?', `Are you sure you want to approve ${po.po_number}?`, 'Yes, Approve', 'success', () => approvePO(po.id))}>
+                      <span><IconButton size="small" color="success" disabled={!po.can_user_approve || !hasAction('purchase_orders', 'can_approve')}
+                        onClick={() => setApprovalDialog({ open: true, po, items: {} })}>
                         <CheckCircle fontSize="small" />
                       </IconButton></span>
                     </Tooltip>
@@ -895,8 +955,8 @@ export default function PurchaseOrders() {
                     <TableCell onClick={e => e.stopPropagation()}>
                       <Box sx={{ display: 'flex', gap: 0.5 }}>
                         <Tooltip title="Approve">
-                          <span><IconButton size="small" color="success" disabled={!canApprove(po.status) || !hasAction('purchase_orders', 'can_approve')}
-                            onClick={() => showConfirm('Approve PO?', `Are you sure you want to approve ${po.po_number}?`, 'Yes, Approve', 'success', () => approvePO(po.id))}>
+                          <span><IconButton size="small" color="success" disabled={!po.can_user_approve || !hasAction('purchase_orders', 'can_approve')}
+                            onClick={() => setApprovalDialog({ open: true, po, items: {} })}>
                             <CheckCircle fontSize="small" />
                           </IconButton></span>
                         </Tooltip>
@@ -2059,6 +2119,234 @@ export default function PurchaseOrders() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setLinkedQR(null)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Approval Dialog */}
+      <Dialog open={approvalDialog.open} onClose={(e, reason) => { if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') { setApprovalDialog({ open: false, po: null, items: {} }); setApprovalRemarks(''); } }} maxWidth="md" fullWidth>
+        <DialogTitle sx={{ fontWeight: 600 }}>Approve PO? — {approvalDialog.po?.po_number}</DialogTitle>
+        <DialogContent>
+          <Grid container spacing={2} sx={{ mb: 2, mt: 0.5 }}>
+            <Grid item xs={3}>
+              <Typography variant="caption" color="textSecondary">Vendor</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{approvalDialog.po?.vendor_name}</Typography>
+            </Grid>
+            <Grid item xs={3}>
+              <Typography variant="caption" color="textSecondary">Institution</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{approvalDialog.po?.project_name || '—'}</Typography>
+            </Grid>
+            <Grid item xs={3}>
+              <Typography variant="caption" color="textSecondary">Total Amount</Typography>
+              <Typography sx={{ fontWeight: 600, color: '#059669' }}>{formatCurrency(calculatePOTotalNet(approvalDialog.po || {}))}</Typography>
+            </Grid>
+            <Grid item xs={3}>
+              <Typography variant="caption" color="textSecondary">Date</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{formatDate(approvalDialog.po?.created_at)}</Typography>
+            </Grid>
+            <Grid item xs={3}>
+              <Typography variant="caption" color="textSecondary">Approval Level</Typography>
+              <Typography sx={{ fontWeight: 600 }}>L{approvalDialog.po?.current_approval_level}</Typography>
+            </Grid>
+            <Grid item xs={3}>
+              <Typography variant="caption" color="textSecondary">Status</Typography>
+              <Box sx={{ mt: 0.5 }}><Chip label={approvalDialog.po?.status} size="small" color={statusColor[approvalDialog.po?.status] || 'default'} /></Box>
+            </Grid>
+          </Grid>
+          {approvalDialog.po?.remarks && (
+            <Typography variant="body2" sx={{ mb: 2, p: 1.5, bgcolor: '#f8fafc', borderRadius: 1, border: '1px solid #e2e8f0' }}>
+              <strong>Remarks:</strong> {approvalDialog.po.remarks}
+            </Typography>
+          )}
+          <Divider sx={{ mb: 2 }} />
+          <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748B', mb: 1, display: 'block', textTransform: 'uppercase' }}>Items to Approve</Typography>
+          <Table size="small">
+            <TableHead>
+              <TableRow sx={{ bgcolor: '#f0f4ff' }}>
+                <TableCell sx={{ fontWeight: 600 }}>Material</TableCell>
+                <TableCell align="left" sx={{ fontWeight: 600 }}>UOM</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600 }}>Qty Requested</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600, color: '#6366f1' }}>
+                  Qty Last Approved {approvalDialog.po?.current_approval_level > 1 ? `(L${approvalDialog.po.current_approval_level - 1})` : ''}
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: 600, bgcolor: '#e0e7ff', color: '#1e40af' }}>Qty Approved</TableCell>
+                <TableCell align="left" sx={{ fontWeight: 600 }}>Remarks</TableCell>
+                <TableCell align="center" sx={{ fontWeight: 600 }}>History</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {approvalDialog.po?.items?.map(item => {
+                return (
+                  <TableRow key={item.id}>
+                    <TableCell>
+                      <Typography sx={{ fontWeight: 500, fontSize: '0.9rem' }}>{item.material_name}</Typography>
+                      <Typography variant="caption" sx={{ color: '#64748B' }}>{item.material_code}</Typography>
+                    </TableCell>
+                    <TableCell align="left" sx={{ fontWeight: 500, color: '#64748B' }}>{item.uom_name}</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 500 }}>{item.quantity}</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 500, color: '#6366f1' }}>
+                      {item.approved_quantity !== null && item.approved_quantity !== undefined && approvalDialog.po?.current_approval_level > 1 ? item.approved_quantity : '—'}
+                    </TableCell>
+                    <TableCell align="center" sx={{ bgcolor: '#eff6ff' }}>
+                      <TextField
+                        size="small"
+                        type="number"
+                        placeholder=""
+                        value={approvalDialog.items[item.id]?.qty !== undefined ? approvalDialog.items[item.id].qty : ''}
+                        onChange={e => setApprovalDialog(prev => ({ ...prev, items: { ...prev.items, [item.id]: { ...(prev.items[item.id] || {}), qty: e.target.value } } }))}
+                        inputProps={{ min: 0, style: { textAlign: 'center', fontWeight: 'bold', color: '#1d4ed8' } }}
+                        sx={{ width: 90, bgcolor: '#fff' }}
+                      />
+                    </TableCell>
+                    <TableCell align="left" sx={{ bgcolor: '#eff6ff' }}>
+                      <TextField
+                        size="small"
+                        placeholder=""
+                        value={approvalDialog.items[item.id]?.rem || ''}
+                        onChange={e => setApprovalDialog(prev => ({ ...prev, items: { ...prev.items, [item.id]: { ...(prev.items[item.id] || {}), rem: e.target.value } } }))}
+                        sx={{ width: 130, bgcolor: '#fff', '& .MuiInputBase-input': { fontSize: '0.8rem' } }}
+                      />
+                    </TableCell>
+                    <TableCell align="center">
+                      <Tooltip title="View Approval History">
+                        <IconButton size="small" onClick={() => fetchApprovalHistory(approvalDialog.po.id, item.material_id)}
+                          sx={{ color: '#6366f1', '&:hover': { bgcolor: '#ede9fe' } }}>
+                          <Visibility fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748B', mb: 0.5, display: 'block', textTransform: 'uppercase' }}>
+              General Approval Remarks
+            </Typography>
+            <TextField
+              fullWidth size="small" multiline rows={2}
+              placeholder="Enter remarks for this approval action..."
+              value={approvalRemarks}
+              onChange={e => setApprovalRemarks(e.target.value)}
+              sx={{ bgcolor: '#fff' }}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => { setApprovalDialog({ open: false, po: null, items: {} }); setApprovalRemarks(''); }}>Cancel</Button>
+          <Button
+            variant="contained" color="primary" onClick={handleApproveClick} sx={{ fontWeight: 600 }}
+            disabled={!approvalDialog.po?.items?.every(item => approvalDialog.items[item.id]?.qty !== undefined && approvalDialog.items[item.id]?.qty !== '')}
+          >
+            Confirm & Approve
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Approval History Dialog */}
+      <Dialog
+        open={historyDialog.open}
+        onClose={(e, reason) => { if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') setHistoryDialog({ open: false, materialId: null, data: null, loading: false }); }}
+        maxWidth="sm" fullWidth
+      >
+        <DialogTitle sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
+          <History sx={{ color: '#6366f1' }} />
+          Approval History
+        </DialogTitle>
+        <DialogContent>
+          {historyDialog.loading ? (
+            <Typography variant="body2" sx={{ color: '#94a3b8', textAlign: 'center', py: 4 }}>Loading...</Typography>
+          ) : historyDialog.data ? (
+            <Box>
+              {(() => {
+                const materialEntries = historyDialog.data.entries?.map(entry => {
+                  const matItem = entry.items?.find(i => i.material_id === historyDialog.materialId);
+                  return matItem ? { ...entry, material_name: matItem.material_name, material_code: matItem.material_code, uom_name: matItem.uom_name, requested_quantity: matItem.requested_quantity, approved_qty: matItem.approved_quantity, item_remarks: matItem.remarks } : null;
+                }).filter(Boolean) || [];
+
+                const firstEntry = materialEntries[0];
+                return (
+                  <Box>
+                    {firstEntry && (
+                      <Box sx={{ mb: 2, p: 2, bgcolor: '#f8fafc', borderRadius: 2, border: '1px solid #e2e8f0' }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 0.5 }}>{firstEntry.material_name}</Typography>
+                        <Typography variant="caption" sx={{ color: '#64748B' }}>{firstEntry.material_code}</Typography>
+                        <Box sx={{ display: 'flex', gap: 3, mt: 1 }}>
+                          <Box>
+                            <Typography variant="caption" color="textSecondary">Requested Quantity</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 700 }}>{firstEntry.requested_quantity} {firstEntry.uom_name}</Typography>
+                          </Box>
+                          {materialEntries.length > 0 && (
+                            <Box>
+                              <Typography variant="caption" color="textSecondary">Last Approved Quantity</Typography>
+                              <Typography variant="body2" sx={{ fontWeight: 700, color: '#1d4ed8' }}>
+                                {materialEntries[materialEntries.length - 1].approved_qty} {firstEntry.uom_name}
+                              </Typography>
+                            </Box>
+                          )}
+                          <Box>
+                            <Typography variant="caption" color="textSecondary">Current Level</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 700 }}>L{historyDialog.data.current_approval_level}</Typography>
+                          </Box>
+                        </Box>
+                      </Box>
+                    )}
+
+                    {materialEntries.length > 0 ? (
+                      <Box>
+                        <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748B', mb: 1, display: 'block', textTransform: 'uppercase' }}>Approval Trail</Typography>
+                        <Table size="small">
+                          <TableHead>
+                            <TableRow sx={{ bgcolor: '#f0f4ff', '& th': { py: 0.75, fontSize: '0.75rem', fontWeight: 700 } }}>
+                              <TableCell>Level</TableCell>
+                              <TableCell>Approver</TableCell>
+                              <TableCell align="right">Qty</TableCell>
+                              <TableCell>Date & Time</TableCell>
+                              <TableCell>Remarks</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {materialEntries.map((entry, idx) => (
+                              <TableRow key={idx} sx={{ '& td': { py: 0.75, fontSize: '0.8rem' } }}>
+                                <TableCell>
+                                  <Chip label={`L${entry.level}`} size="small" sx={{ height: 22, fontSize: '0.7rem', fontWeight: 700, bgcolor: '#ede9fe', color: '#6d28d9' }} />
+                                </TableCell>
+                                <TableCell sx={{ fontWeight: 600 }}>{entry.approver_name}</TableCell>
+                                <TableCell align="right" sx={{ fontWeight: 700, color: '#1d4ed8' }}>{entry.approved_qty}</TableCell>
+                                <TableCell sx={{ color: '#64748B', whiteSpace: 'nowrap' }}>{formatDateTime(entry.approved_at)}</TableCell>
+                                <TableCell sx={{ color: '#64748B', fontStyle: entry.item_remarks ? 'normal' : 'italic', maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                  {entry.item_remarks || '—'}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                        {materialEntries.some(e => e.remarks) && (
+                          <Box sx={{ mt: 3 }}>
+                            <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748B', mb: 1, display: 'block', textTransform: 'uppercase' }}>General Approval Remarks</Typography>
+                            {materialEntries.filter(e => e.remarks).map((e, idx) => (
+                              <Box key={idx} sx={{ mb: 1, p: 1.5, bgcolor: '#f8fafc', borderRadius: 1, border: '1px solid #e2e8f0' }}>
+                                <Typography variant="caption" sx={{ fontWeight: 700, color: '#1d4ed8', display: 'block', mb: 0.5 }}>L{e.level} Approval - {e.approver_name}</Typography>
+                                <Typography variant="body2" sx={{ color: '#334155' }}>{e.remarks}</Typography>
+                              </Box>
+                            ))}
+                          </Box>
+                        )}
+                      </Box>
+                    ) : (
+                      <Typography variant="body2" sx={{ color: '#94a3b8', textAlign: 'center', py: 3 }}>
+                        No approval history available for this material yet.
+                      </Typography>
+                    )}
+                  </Box>
+                );
+              })()}
+            </Box>
+          ) : null}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setHistoryDialog({ open: false, materialId: null, data: null, loading: false })}>Close</Button>
         </DialogActions>
       </Dialog>
     </Box>

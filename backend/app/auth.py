@@ -64,13 +64,17 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
         
         highest_scope_val = 0
         data_access_scope = "Self Only"
+        fresh_roles = []
         for a in assignments:
             if a.role:
+                fresh_roles.append(a.role.code)
+                fresh_roles.append(a.role.name)
                 scope = a.role.data_access_scope or "Self Only"
                 if SCOPE_RANKS.get(scope, 1) > highest_scope_val:
                     highest_scope_val = SCOPE_RANKS.get(scope, 1)
                     data_access_scope = scope
         user._data_access_scope = data_access_scope
+        user._roles = list(set(fresh_roles))
     else:
         user._data_access_scope = payload.get("data_access_scope", "Self Only")
 

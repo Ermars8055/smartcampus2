@@ -584,6 +584,7 @@ class PurchaseOrderItem(Base):
     rate = Column(Float, nullable=False)
     amount = Column(Float, nullable=False)
     received_quantity = Column(Float, default=0)
+    approved_quantity = Column(Float, nullable=True)
     discount_percent = Column(Float, default=0)
     cgst_percentage = Column(Float, default=0)
     sgst_percentage = Column(Float, default=0)

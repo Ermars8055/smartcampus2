@@ -264,7 +264,7 @@ def approve_indent(
     
     is_admin = getattr(current_user, "_is_platform_admin", False)
     perms = getattr(current_user, "_permissions", {})
-    can_override = is_admin or perms.get('indents', {}).get('extended_actions', {}).get('can_approve', False)
+    can_override = is_admin or getattr(current_user, '_data_access_scope', '') == 'Full Administrative Access'
     
     applicable_flows = [
         f for f in flows 
@@ -304,11 +304,8 @@ def approve_indent(
 
     db.commit()
 
-    # 4. Check if ALL required flows for this level are met
-    approvals_count = db.query(IndentApproval).filter(IndentApproval.indent_id == id).join(ApprovalFlow).filter(ApprovalFlow.level == indent.current_approval_level).count()
-    
-    if approvals_count >= len(flows):
-        # All flows for current level met, move to next
+    if new_approvals > 0:
+        # Move to next level if at least one approval is recorded
         return handle_next_level(db, indent, tenant_id, site_id, current_user.id)
 
     return {"message": "Approval recorded", "status": indent.status, "current_level": indent.current_approval_level}

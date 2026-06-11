@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
@@ -28,11 +29,16 @@ function StatusChip({ status }) {
 export default function PurchaseRequests() {
   const { hasAction, hasPermission } = useAuth();
   const { tenantConfig } = useConfig();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [prs, setPrs] = useState([]);
   const [materials, setMaterials] = useState([]);
   const [projects, setProjects] = useState([]);
+  const [institutions, setInstitutions] = useState([]);
   const [buildings, setBuildings] = useState([]);
+  const [allBuildings, setAllBuildings] = useState([]);
   const [departments, setDepartments] = useState([]);
+  const [allDepartments, setAllDepartments] = useState([]);
   const [vendors, setVendors] = useState([]);
   const [termsTemplates, setTermsTemplates] = useState([]);
   const [dialog, setDialog] = useState(false);
@@ -49,8 +55,9 @@ export default function PurchaseRequests() {
   const [tabValue, setTabValue] = useState('Draft');
   const [sortConfig, setSortConfig] = useState({ key: 'created_at', direction: 'desc' });
   const [filterDepartment, setFilterDepartment] = useState(null);
-  const [filterBuilding, setFilterBuilding] = useState(null);
+  const [filterInstitution, setFilterInstitution] = useState(null);
   const [allDepartmentsList, setAllDepartmentsList] = useState([]);
+  const [formDepartmentsList, setFormDepartmentsList] = useState([]);
 
   const handleSort = (key) => {
     setSortConfig(prev => ({
@@ -61,7 +68,7 @@ export default function PurchaseRequests() {
 
   // Multi-item PR form
   const [form, setForm] = useState({
-    project_id: '', building_id: '', department_name: '',
+    institution_id: '', project_id: '', building_id: '', department_name: '',
     required_date: dayjs().add(14, 'day'), remarks: '',
     items: [{ material_id: '', quantity: '' }]
   });
@@ -82,11 +89,57 @@ export default function PurchaseRequests() {
     load();
     api.get('/api/materials', { params: { limit: 10000 } }).then(r => setMaterials(r.data.items || []));
     api.get('/api/projects').then(r => setProjects(r.data));
-    api.get('/api/buildings').then(r => setBuildings(r.data));
+    api.get('/api/institutions').then(r => setInstitutions(r.data)).catch(() => setInstitutions([]));
+    api.get('/api/buildings').then(r => setAllBuildings(r.data)).catch(() => setAllBuildings([]));
+    api.get('/api/departments').then(r => setAllDepartments(r.data)).catch(() => setAllDepartments([]));
     api.get('/api/vendors').then(r => setVendors(r.data));
     api.get('/api/terms').then(r => setTermsTemplates(r.data));
     api.get('/api/departments/names').then(r => setAllDepartmentsList(r.data)).catch(() => setAllDepartmentsList([]));
   }, []);
+
+  useEffect(() => {
+    if (location.state?.openPRId && prs.length > 0) {
+      const prToOpen = prs.find(p => p.id === location.state.openPRId);
+      if (prToOpen) {
+        setApprovalDialog({ open: true, pr: prToOpen, items: {} });
+      }
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location.state, prs, location.pathname, navigate]);
+
+  const handleInstitutionChange = (instId) => {
+    const inst = institutions.find(i => i.id === instId);
+    setForm(prev => ({ ...prev, institution_id: instId, project_id: inst ? inst.project_id : '', department_name: '', building_id: '' }));
+    setBuildings([]);
+    if (instId) {
+      const depts = allDepartments.filter(d => d.institution_id === instId).map(d => d.name);
+      setFormDepartmentsList(Array.from(new Set(depts)));
+    } else {
+      setFormDepartmentsList([]);
+    }
+  };
+
+  const handleDepartmentChange = (newDept) => {
+    if (newDept) {
+      const masterDepts = allDepartments.filter(d => d.name === newDept);
+      const masterBldgs = allBuildings.filter(b => b.department_name === newDept);
+      const uniqueBuildings = new Map();
+      masterDepts.forEach(d => {
+        if (d.building_id && d.building_name) uniqueBuildings.set(d.building_id, { id: d.building_id, name: d.building_name });
+      });
+      masterBldgs.forEach(b => {
+        uniqueBuildings.set(b.id, { id: b.id, name: b.name });
+      });
+      const bldgs = Array.from(uniqueBuildings.values());
+      setBuildings(bldgs);
+
+      let nextBuildingId = bldgs.length === 1 ? bldgs[0].id : '';
+      setForm(prev => ({ ...prev, department_name: newDept, building_id: nextBuildingId }));
+    } else {
+      setBuildings([]);
+      setForm(prev => ({ ...prev, department_name: '', building_id: '' }));
+    }
+  };
 
   // Multi-item form helpers
   const addItem = () => setForm({ ...form, items: [...form.items, { material_id: '', quantity: '' }] });
@@ -112,8 +165,12 @@ export default function PurchaseRequests() {
 
   const handleSave = async (status) => {
     try {
+      if (!form.project_id) {
+        alert("Please select an institution.");
+        return;
+      }
       const payload = {
-        project_id: form.project_id || projects[0]?.id,
+        project_id: form.project_id,
         building_id: form.building_id || null,
         department_name: form.department_name || null,
         required_date: form.required_date ? dayjs(form.required_date).format('YYYY-MM-DD') : null,
@@ -308,7 +365,7 @@ export default function PurchaseRequests() {
   };
 
   // Status helpers — approve button label changes based on status
-  const canApprove = (s) => s === 'Submitted';
+  const canApprove = (pr) => pr.status === 'Submitted' && pr.can_user_approve;
   const canReject = (s) => s === 'Submitted';
   const canConvert = (s) => s === 'Approved';
   const canShortClose = (s) => s !== 'Converted to PO' && s !== 'Short Closed' && s !== 'Rejected';
@@ -319,9 +376,9 @@ export default function PurchaseRequests() {
   const filteredPRsBase = useMemo(() => {
     let list = prs;
     list = list.filter(p => !filterDepartment || p.department_name === filterDepartment);
-    list = list.filter(p => !filterBuilding || p.building_id === filterBuilding.id || p.building_name === filterBuilding.name);
+    list = list.filter(p => !filterInstitution || p.project_id === filterInstitution.project_id);
     return list;
-  }, [prs, filterDepartment, filterBuilding]);
+  }, [prs, filterDepartment, filterInstitution]);
 
   const sortedPRs = useMemo(() => {
     let list = tab === 6 ? filteredPRsBase : filteredPRsBase.filter(p => p.status === statusFilters[tab]);
@@ -354,11 +411,12 @@ export default function PurchaseRequests() {
         {hasPermission('purchase_requests', 'can_create') && (
           <Button variant="contained" startIcon={<Add />} onClick={() => {
             setForm({
-              project_id: projects[0]?.id || '', building_id: '', department_name: '',
+              institution_id: '', project_id: '', building_id: '', department_name: '',
               required_date: dayjs().add(14, 'day'), remarks: '',
               items: [{ material_id: '', quantity: '' }]
             });
-            setDepartments([]);
+            setFormDepartmentsList([]);
+            setBuildings([]);
             setDialog(true);
           }}>Create PR</Button>
         )}
@@ -371,18 +429,18 @@ export default function PurchaseRequests() {
             InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }} />
           <Autocomplete
             size="small"
+            options={institutions}
+            getOptionLabel={(option) => option.name || ''}
+            value={filterInstitution}
+            onChange={(e, val) => setFilterInstitution(val)}
+            renderInput={(params) => <TextField {...params} placeholder="Filter by Institution" sx={{ minWidth: 220 }} />}
+          />
+          <Autocomplete
+            size="small"
             options={allDepartmentsList}
             value={filterDepartment}
             onChange={(e, val) => setFilterDepartment(val)}
             renderInput={(params) => <TextField {...params} placeholder="Filter by Department" sx={{ minWidth: 220 }} />}
-          />
-          <Autocomplete
-            size="small"
-            options={buildings}
-            getOptionLabel={(option) => option.name || ''}
-            value={filterBuilding}
-            onChange={(e, val) => setFilterBuilding(val)}
-            renderInput={(params) => <TextField {...params} placeholder="Filter by Building" sx={{ minWidth: 220 }} />}
           />
         </Box>
         <Tabs
@@ -435,12 +493,12 @@ export default function PurchaseRequests() {
                 </TableCell>
                 <TableCell sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.75rem' }}>
                   <TableSortLabel
-                    active={sortConfig.key === 'building_name'}
+                    active={sortConfig.key === 'project_name'}
                     direction={sortConfig.direction}
-                    onClick={() => handleSort('building_name')}
+                    onClick={() => handleSort('project_name')}
                     IconComponent={ArrowDropDown}
                   >
-                    BUILDING
+                    INSTITUTION
                   </TableSortLabel>
                 </TableCell>
                 <TableCell sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.75rem' }}>
@@ -501,8 +559,10 @@ export default function PurchaseRequests() {
               {sortedPRs.map(pr => (
                 <TableRow key={pr.id} sx={{ cursor: 'pointer' }} onClick={() => {
                   if (pr.status === 'Draft') {
+                    const inst = institutions.find(i => i.project_id === pr.project_id);
                     setForm({
-                      project_id: pr.project_id || (projects.length > 0 ? projects[0].id : ''),
+                      institution_id: inst ? inst.id : '',
+                      project_id: pr.project_id || '',
                       building_id: pr.building_id || '',
                       department_name: pr.department_name || '',
                       required_date: pr.required_date ? dayjs(pr.required_date) : dayjs().add(14, 'day'),
@@ -510,12 +570,25 @@ export default function PurchaseRequests() {
                       items: pr.items && pr.items.length > 0 ? pr.items.map(it => ({ material_id: it.material_id, quantity: it.quantity })) : [{ material_id: '', quantity: '' }]
                     });
                     setEditingPRId(pr.id);
-                    if (pr.building_id) {
-                      api.get(`/api/buildings/${pr.building_id}/departments`)
-                        .then(r => setDepartments(r.data))
-                        .catch(() => setDepartments([]));
+                    if (inst) {
+                      const depts = allDepartments.filter(d => d.institution_id === inst.id).map(d => d.name);
+                      setFormDepartmentsList(Array.from(new Set(depts)));
                     } else {
-                      setDepartments([]);
+                      setFormDepartmentsList([]);
+                    }
+                    if (pr.department_name) {
+                      const masterDepts = allDepartments.filter(d => d.name === pr.department_name);
+                      const masterBldgs = allBuildings.filter(b => b.department_name === pr.department_name);
+                      const uniqueBuildings = new Map();
+                      masterDepts.forEach(d => {
+                        if (d.building_id && d.building_name) uniqueBuildings.set(d.building_id, { id: d.building_id, name: d.building_name });
+                      });
+                      masterBldgs.forEach(b => {
+                        uniqueBuildings.set(b.id, { id: b.id, name: b.name });
+                      });
+                      setBuildings(Array.from(uniqueBuildings.values()));
+                    } else {
+                      setBuildings([]);
                     }
                     setDialog(true);
                   } else {
@@ -523,7 +596,7 @@ export default function PurchaseRequests() {
                   }
                 }}>
                   <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>{pr.pr_number}</TableCell>
-                  <TableCell sx={{ fontSize: '0.8rem' }}>{pr.building_name || '-'}</TableCell>
+                  <TableCell sx={{ fontSize: '0.8rem' }}>{pr.project_name || '-'}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem' }}>{pr.department_name || '-'}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem', whiteSpace: 'nowrap' }}>{formatDate(pr.created_at)}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem', whiteSpace: 'nowrap' }}>{formatDate(pr.required_date)}</TableCell>
@@ -539,7 +612,7 @@ export default function PurchaseRequests() {
                           disabled={
                             (pr.status === 'Draft' && !hasAction('purchase_requests', 'can_submit')) ||
                             (pr.status === 'Submitted' && !hasAction('purchase_requests', 'can_approve')) ||
-                            !canApprove(pr.status)
+                            !canApprove(pr)
                           }
                           onClick={() => {
                             if (pr.status === 'Draft') {
@@ -594,12 +667,12 @@ export default function PurchaseRequests() {
               <Typography sx={{ fontWeight: 600 }}>{detailDialog?.requester_name}</Typography>
             </Grid>
             <Grid item xs={4}>
-              <Typography variant="caption" color="textSecondary">Department</Typography>
-              <Typography sx={{ fontWeight: 600 }}>{detailDialog?.department_name || '—'}</Typography>
+              <Typography variant="caption" color="textSecondary">Institution</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{detailDialog?.project_name || '—'}</Typography>
             </Grid>
             <Grid item xs={4}>
-              <Typography variant="caption" color="textSecondary">Building</Typography>
-              <Typography sx={{ fontWeight: 600 }}>{detailDialog?.building_name || '—'}</Typography>
+              <Typography variant="caption" color="textSecondary">Department</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{detailDialog?.department_name || '—'}</Typography>
             </Grid>
             <Grid item xs={4}>
               <Typography variant="caption" color="textSecondary">PR Date</Typography>
@@ -789,39 +862,43 @@ export default function PurchaseRequests() {
         <DialogContent sx={{ px: 3, py: 1 }}>
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr 1fr' }, gap: 2, pt: 1, mb: 2 }}>
             <FormControl fullWidth required>
+              <InputLabel>Institution</InputLabel>
+              <Select
+                value={form.institution_id}
+                label="Institution"
+                onChange={e => handleInstitutionChange(e.target.value)}
+                startAdornment={<InputAdornment position="start"><Apartment sx={{ color: '#94A3B8' }} /></InputAdornment>}
+              >
+                <MenuItem value="" disabled>Select Institution</MenuItem>
+                {institutions.map(inst => <MenuItem key={inst.id} value={inst.id}>{inst.name}</MenuItem>)}
+              </Select>
+            </FormControl>
+
+            <FormControl fullWidth required disabled={!form.institution_id}>
+              <Autocomplete
+                options={formDepartmentsList}
+                value={form.department_name || null}
+                onChange={(e, val) => handleDepartmentChange(val)}
+                renderInput={(params) => (
+                  <TextField {...params} label="Department" required InputProps={{ ...params.InputProps, startAdornment: <><InputAdornment position="start"><AccountTree sx={{ color: '#94A3B8', ml: 1 }} /></InputAdornment>{params.InputProps.startAdornment}</> }} />
+                )}
+              />
+            </FormControl>
+
+            <FormControl fullWidth disabled={!form.department_name || buildings.length === 0}>
               <InputLabel>Building</InputLabel>
               <Select
                 value={form.building_id}
                 label="Building"
-                onChange={e => {
-                  const buildingId = e.target.value;
-                  setForm({ ...form, building_id: buildingId, department_name: '' });
-                  if (buildingId) {
-                    api.get(`/api/buildings/${buildingId}/departments`).then(r => setDepartments(r.data)).catch(() => setDepartments([]));
-                  } else {
-                    setDepartments([]);
-                  }
-                }}
+                onChange={e => setForm({ ...form, building_id: e.target.value })}
                 startAdornment={<InputAdornment position="start"><Apartment sx={{ color: '#94A3B8' }} /></InputAdornment>}
               >
-                <MenuItem value="">Select Building</MenuItem>
+                <MenuItem value="">Select Building (Optional)</MenuItem>
                 {buildings.map(b => <MenuItem key={b.id} value={b.id}>{b.name}</MenuItem>)}
               </Select>
             </FormControl>
-
-            <FormControl fullWidth disabled={!form.building_id}>
-              <InputLabel>Department</InputLabel>
-              <Select
-                value={form.department_name}
-                label="Department"
-                onChange={e => setForm({ ...form, department_name: e.target.value })}
-                startAdornment={<InputAdornment position="start"><AccountTree sx={{ color: '#94A3B8' }} /></InputAdornment>}
-              >
-                <MenuItem value="">Select Department</MenuItem>
-                {departments.map(d => <MenuItem key={d.id} value={d.name}>{d.name} ({d.code})</MenuItem>)}
-              </Select>
-            </FormControl>
-
+          </Box>
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr 1fr' }, gap: 2, pt: 1, mb: 2 }}>
             <DatePicker
               label="Required Date"
               value={dayjs(form.required_date)}
@@ -1185,12 +1262,12 @@ export default function PurchaseRequests() {
               <Typography sx={{ fontWeight: 600 }}>{approvalDialog.pr?.requester_name}</Typography>
             </Grid>
             <Grid item xs={3}>
-              <Typography variant="caption" color="textSecondary">Department</Typography>
-              <Typography sx={{ fontWeight: 600 }}>{approvalDialog.pr?.department_name || '—'}</Typography>
+              <Typography variant="caption" color="textSecondary">Institution</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{approvalDialog.pr?.project_name || '—'}</Typography>
             </Grid>
             <Grid item xs={3}>
-              <Typography variant="caption" color="textSecondary">Building</Typography>
-              <Typography sx={{ fontWeight: 600 }}>{approvalDialog.pr?.building_name || '—'}</Typography>
+              <Typography variant="caption" color="textSecondary">Department</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{approvalDialog.pr?.department_name || '—'}</Typography>
             </Grid>
             <Grid item xs={3}>
               <Typography variant="caption" color="textSecondary">Date</Typography>

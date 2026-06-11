@@ -383,9 +383,9 @@ export default function Layout() {
                 <Box key={copyIdx} sx={{ display: 'flex', minWidth: '100vw', justifyContent: 'space-around' }}>
                   {activeAlerts.map((alert, index) => (
                     <Box key={`${alert.id}-${copyIdx}`} component="span" sx={{ mx: 4, display: 'inline-flex', alignItems: 'center', gap: 1 }}>
-                      <Typography variant="body2" sx={{ fontWeight: 700 }}>⚠️ {alert.title}:</Typography>
-                      <Typography variant="body2">{alert.message}</Typography>
-                      {alert.reference_type === 'Indent' && (
+                      <Typography variant="body2" sx={{ fontWeight: 700, whiteSpace: 'nowrap' }}>⚠️ {alert.title}:</Typography>
+                      <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>{alert.message}</Typography>
+                      {(alert.reference_type === 'Indent' || alert.reference_type === 'PurchaseOrder' || alert.reference_type === 'PurchaseRequest') && (
                         <Button 
                           size="small"
                           variant="contained"
@@ -398,6 +398,7 @@ export default function Layout() {
                             bgcolor: '#EF4444', 
                             color: '#fff',
                             borderRadius: 8,
+                            whiteSpace: 'nowrap',
                             textTransform: 'none',
                             boxShadow: '0 2px 4px rgba(239,68,68,0.4)',
                             '&:hover': { 
@@ -407,7 +408,13 @@ export default function Layout() {
                           }}
                           onClick={() => {
                             api.put(`/api/alerts/${alert.id}/read`).catch(() => {});
-                            navigate('/indents', { state: { openIndentId: alert.reference_id } });
+                            if (alert.reference_type === 'Indent') {
+                              navigate('/indents', { state: { openIndentId: alert.reference_id } });
+                            } else if (alert.reference_type === 'PurchaseOrder') {
+                              navigate('/purchase-orders', { state: { openPOId: alert.reference_id } });
+                            } else if (alert.reference_type === 'PurchaseRequest') {
+                              navigate('/purchase-requests', { state: { openPRId: alert.reference_id } });
+                            }
                           }}
                         >
                           Review Now

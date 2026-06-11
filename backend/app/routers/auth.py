@@ -104,6 +104,7 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
     for a in assignments:
         if a.role:
             roles.append(a.role.code)
+            roles.append(a.role.name)
             scope = a.role.data_access_scope or "Self Only"
             if SCOPE_RANKS.get(scope, 1) > highest_scope_val:
                 highest_scope_val = SCOPE_RANKS.get(scope, 1)
@@ -196,6 +197,7 @@ def get_me(current_user: User = Depends(get_current_user), db: Session = Depends
                 for a in assignments:
                     if a.role:
                         fresh_roles.append(a.role.code)
+                        fresh_roles.append(a.role.name)
                         scope = a.role.data_access_scope or "Self Only"
                         if SCOPE_RANKS.get(scope, 1) > highest_scope_val:
                             highest_scope_val = SCOPE_RANKS.get(scope, 1)

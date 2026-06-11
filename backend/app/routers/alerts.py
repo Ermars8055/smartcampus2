@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import outerjoin, and_
 from app.database import get_db
-from app.models import GateEntry, User, Alert, Indent, ApprovalFlow
+from app.models import GateEntry, User, Alert, Indent, ApprovalFlow, PurchaseOrder, PurchaseRequest
 from app.auth import get_current_user, get_tenant_id, get_site_id
 from app.utils.tz import get_now_ist
 
@@ -35,7 +35,7 @@ def get_pending_indent_alerts(db, current_user, tenant_id, site_id, tracked_ind_
     user_roles = getattr(current_user, "_roles", [])
     is_admin = getattr(current_user, "_is_platform_admin", False)
     perms = getattr(current_user, "_permissions", {})
-    can_override = is_admin or perms.get('indents', {}).get('extended_actions', {}).get('can_approve', False)
+    can_override = is_admin or getattr(current_user, '_data_access_scope', '') == 'Full Administrative Access'
     
     for ind in pending_indents:
         if tracked_ind_map and ind.id in tracked_ind_map and tracked_ind_map[ind.id].is_resolved:
@@ -68,6 +68,120 @@ def get_pending_indent_alerts(db, current_user, tenant_id, site_id, tracked_ind_
     return alerts
 
 
+def get_pending_po_alerts(db, current_user, tenant_id, site_id, tracked_po_map=None):
+    """Helper to get dynamic PO alerts for the current user."""
+    alerts = []
+    
+    # Get POs awaiting approval
+    pending_pos = db.query(PurchaseOrder).filter(
+        PurchaseOrder.tenant_id == tenant_id,
+        PurchaseOrder.site_id == site_id,
+        PurchaseOrder.status == "Submitted"
+    ).all()
+    
+    if not pending_pos:
+        return alerts
+        
+    # Pre-fetch all active approval flows for PURCHASE_ORDER
+    flows = db.query(ApprovalFlow).filter(
+        ApprovalFlow.tenant_id == tenant_id,
+        ApprovalFlow.site_id == site_id,
+        ApprovalFlow.document_type == "PURCHASE_ORDER",
+        ApprovalFlow.is_active == True
+    ).all()
+    
+    user_roles = getattr(current_user, "_roles", [])
+    is_admin = getattr(current_user, "_is_platform_admin", False)
+    perms = getattr(current_user, "_permissions", {})
+    can_override = is_admin or getattr(current_user, '_data_access_scope', '') == 'Full Administrative Access'
+    
+    for po in pending_pos:
+        if tracked_po_map and po.id in tracked_po_map and tracked_po_map[po.id].is_resolved:
+            continue
+            
+        # Check if user can approve this PO
+        applicable_flows = [
+            f for f in flows
+            if f.level == po.current_approval_level and
+               f.min_amount <= po.total_amount and
+               (f.max_amount is None or f.max_amount >= po.total_amount) and
+               (can_override or (f.user_id == current_user.id) or (not f.user_id and f.role_name in user_roles))
+        ]
+        
+        if applicable_flows:
+            is_read = tracked_po_map[po.id].is_read if (tracked_po_map and po.id in tracked_po_map) else False
+            alerts.append({
+                "id": f"po_{po.id}",
+                "title": f"Action Required: PO {po.po_number} Approval",
+                "severity": "Warning",
+                "alert_type": "Pending Action",
+                "message": f"Purchase Order {po.po_number} for Vendor '{po.vendor.name if po.vendor else 'Unknown'}' is awaiting Level {po.current_approval_level} approval.",
+                "created_at": po.created_at,
+                "is_read": is_read,
+                "is_resolved": False,
+                "reference_type": "PurchaseOrder",
+                "reference_id": po.id
+            })
+            
+    return alerts
+
+
+def get_pending_pr_alerts(db, current_user, tenant_id, site_id, tracked_pr_map=None):
+    """Helper to get dynamic PR alerts for the current user."""
+    alerts = []
+    
+    pending_prs = db.query(PurchaseRequest).filter(
+        PurchaseRequest.tenant_id == tenant_id,
+        PurchaseRequest.site_id == site_id,
+        PurchaseRequest.status == "Submitted"
+    ).all()
+    
+    if not pending_prs:
+        return alerts
+        
+    flows = db.query(ApprovalFlow).filter(
+        ApprovalFlow.tenant_id == tenant_id,
+        ApprovalFlow.site_id == site_id,
+        ApprovalFlow.document_type == "PURCHASE_REQUEST",
+        ApprovalFlow.is_active == True
+    ).all()
+    
+    user_roles = getattr(current_user, "_roles", [])
+    is_admin = getattr(current_user, "_is_platform_admin", False)
+    perms = getattr(current_user, "_permissions", {})
+    can_override = is_admin or getattr(current_user, '_data_access_scope', '') == 'Full Administrative Access'
+    
+    for pr in pending_prs:
+        if tracked_pr_map and pr.id in tracked_pr_map and tracked_pr_map[pr.id].is_resolved:
+            continue
+            
+        total_amount = sum(item.quantity * (item.material.standard_cost or 0) for item in pr.items if item.material)
+        
+        applicable_flows = [
+            f for f in flows
+            if f.level == pr.current_approval_level and
+               f.min_amount <= total_amount and
+               (f.max_amount is None or f.max_amount >= total_amount) and
+               (can_override or (f.user_id == current_user.id) or (not f.user_id and f.role_name in user_roles))
+        ]
+        
+        if applicable_flows:
+            is_read = tracked_pr_map[pr.id].is_read if (tracked_pr_map and pr.id in tracked_pr_map) else False
+            alerts.append({
+                "id": f"pr_{pr.id}",
+                "title": f"Action Required: PR {pr.pr_number} Approval",
+                "severity": "Warning",
+                "alert_type": "Pending Action",
+                "message": f"Purchase Request {pr.pr_number} from {pr.department_name or 'Unknown'} is awaiting Level {pr.current_approval_level} approval.",
+                "created_at": pr.created_at,
+                "is_read": is_read,
+                "is_resolved": False,
+                "reference_type": "PurchaseRequest",
+                "reference_id": pr.id
+            })
+            
+    return alerts
+
 @router.get("/count")
 def get_alert_count(
     db: Session = Depends(get_db),
@@ -95,7 +209,9 @@ def get_alert_count(
         Alert.is_read == False,
         Alert.is_resolved == False,
         (Alert.reference_type != "GateEntry"),
-        (Alert.reference_type != "Indent")
+        (Alert.reference_type != "Indent"),
+        (Alert.reference_type != "PurchaseOrder"),
+        (Alert.reference_type != "PurchaseRequest")
     ).count()
     
     # Indent alerts count
@@ -109,10 +225,34 @@ def get_alert_count(
     ind_alerts = get_pending_indent_alerts(db, current_user, tenant_id, site_id, tracked_ind_map)
     unread_ind_count = sum(1 for a in ind_alerts if not a["is_read"])
 
+    # PO alerts count
+    tracked_po_alerts = db.query(Alert).filter(
+        Alert.tenant_id == tenant_id,
+        Alert.site_id == site_id,
+        Alert.reference_type == "PurchaseOrder"
+    ).all()
+    tracked_po_map = {a.reference_id: a for a in tracked_po_alerts}
+    
+    po_alerts = get_pending_po_alerts(db, current_user, tenant_id, site_id, tracked_po_map)
+    unread_po_count = sum(1 for a in po_alerts if not a["is_read"])
+
+    # PR alerts count
+    tracked_pr_alerts = db.query(Alert).filter(
+        Alert.tenant_id == tenant_id,
+        Alert.site_id == site_id,
+        Alert.reference_type == "PurchaseRequest"
+    ).all()
+    tracked_pr_map = {a.reference_id: a for a in tracked_pr_alerts}
+    
+    pr_alerts = get_pending_pr_alerts(db, current_user, tenant_id, site_id, tracked_pr_map)
+    unread_pr_count = sum(1 for a in pr_alerts if not a["is_read"])
+
     return {
-        "count": unread_ge_count + db_alerts_count + unread_ind_count,
+        "count": unread_ge_count + db_alerts_count + unread_ind_count + unread_po_count + unread_pr_count,
         "pending_direct_invoices": unread_ge_count,
         "pending_indents": unread_ind_count,
+        "pending_pos": unread_po_count,
+        "pending_prs": unread_pr_count,
         "db_alerts": db_alerts_count
     }
 
@@ -170,14 +310,38 @@ def get_alerts(
     
     ind_alerts = get_pending_indent_alerts(db, current_user, tenant_id, site_id, tracked_ind_map)
     alerts.extend(ind_alerts)
+
+    # 3. Dynamic alerts from pending POs
+    tracked_po_alerts = db.query(Alert).filter(
+        Alert.tenant_id == tenant_id,
+        Alert.site_id == site_id,
+        Alert.reference_type == "PurchaseOrder"
+    ).all()
+    tracked_po_map = {a.reference_id: a for a in tracked_po_alerts}
+    
+    po_alerts = get_pending_po_alerts(db, current_user, tenant_id, site_id, tracked_po_map)
+    alerts.extend(po_alerts)
+
+    # 4. Dynamic alerts from pending PRs
+    tracked_pr_alerts = db.query(Alert).filter(
+        Alert.tenant_id == tenant_id,
+        Alert.site_id == site_id,
+        Alert.reference_type == "PurchaseRequest"
+    ).all()
+    tracked_pr_map = {a.reference_id: a for a in tracked_pr_alerts}
+    
+    pr_alerts = get_pending_pr_alerts(db, current_user, tenant_id, site_id, tracked_pr_map)
+    alerts.extend(pr_alerts)
         
-    # 3. Database alerts
+    # 5. Database alerts
     db_alerts = db.query(Alert).filter(
         Alert.tenant_id == tenant_id,
         Alert.site_id == site_id,
         Alert.is_resolved == False,
         (Alert.reference_type != "GateEntry"),
-        (Alert.reference_type != "Indent")
+        (Alert.reference_type != "Indent"),
+        (Alert.reference_type != "PurchaseOrder"),
+        (Alert.reference_type != "PurchaseRequest")
     ).all()
     
     for a in db_alerts:
@@ -211,16 +375,24 @@ def mark_alert_read(
         if alert:
             alert.is_read = True
             db.commit()
-    elif alert_id.startswith("ge_") or alert_id.startswith("ind_"):
+    elif alert_id.startswith("ge_") or alert_id.startswith("ind_") or alert_id.startswith("po_") or alert_id.startswith("pr_"):
         is_ge = alert_id.startswith("ge_")
-        ref_type = "GateEntry" if is_ge else "Indent"
-        ref_id = int(alert_id.replace("ge_", "").replace("ind_", ""))
+        is_po = alert_id.startswith("po_")
+        is_pr = alert_id.startswith("pr_")
+        ref_type = "GateEntry" if is_ge else ("PurchaseOrder" if is_po else ("PurchaseRequest" if is_pr else "Indent"))
+        ref_id = int(alert_id.replace("ge_", "").replace("ind_", "").replace("po_", "").replace("pr_", ""))
         
         alert = db.query(Alert).filter(Alert.reference_type == ref_type, Alert.reference_id == ref_id, Alert.tenant_id == tenant_id, Alert.site_id == site_id).first()
         if not alert:
             if is_ge:
                 ge = db.query(GateEntry).filter(GateEntry.id == ref_id).first()
                 title = f"Action Required: Gate Entry {ge.entry_number}" if ge else "Gate Entry Alert"
+            elif is_po:
+                po = db.query(PurchaseOrder).filter(PurchaseOrder.id == ref_id).first()
+                title = f"Action Required: PO {po.po_number} Approval" if po else "PO Alert"
+            elif is_pr:
+                pr = db.query(PurchaseRequest).filter(PurchaseRequest.id == ref_id).first()
+                title = f"Action Required: PR {pr.pr_number} Approval" if pr else "PR Alert"
             else:
                 ind = db.query(Indent).filter(Indent.id == ref_id).first()
                 title = f"Action Required: Indent {ind.indent_number} Approval" if ind else "Indent Alert"
@@ -258,16 +430,24 @@ def resolve_alert(
             alert.is_resolved = True
             alert.resolved_at = get_now_ist()
             db.commit()
-    elif alert_id.startswith("ge_") or alert_id.startswith("ind_"):
+    elif alert_id.startswith("ge_") or alert_id.startswith("ind_") or alert_id.startswith("po_") or alert_id.startswith("pr_"):
         is_ge = alert_id.startswith("ge_")
-        ref_type = "GateEntry" if is_ge else "Indent"
-        ref_id = int(alert_id.replace("ge_", "").replace("ind_", ""))
+        is_po = alert_id.startswith("po_")
+        is_pr = alert_id.startswith("pr_")
+        ref_type = "GateEntry" if is_ge else ("PurchaseOrder" if is_po else ("PurchaseRequest" if is_pr else "Indent"))
+        ref_id = int(alert_id.replace("ge_", "").replace("ind_", "").replace("po_", "").replace("pr_", ""))
         
         alert = db.query(Alert).filter(Alert.reference_type == ref_type, Alert.reference_id == ref_id, Alert.tenant_id == tenant_id, Alert.site_id == site_id).first()
         if not alert:
             if is_ge:
                 ge = db.query(GateEntry).filter(GateEntry.id == ref_id).first()
                 title = f"Action Required: Gate Entry {ge.entry_number}" if ge else "Gate Entry Alert"
+            elif is_po:
+                po = db.query(PurchaseOrder).filter(PurchaseOrder.id == ref_id).first()
+                title = f"Action Required: PO {po.po_number} Approval" if po else "PO Alert"
+            elif is_pr:
+                pr = db.query(PurchaseRequest).filter(PurchaseRequest.id == ref_id).first()
+                title = f"Action Required: PR {pr.pr_number} Approval" if pr else "PR Alert"
             else:
                 ind = db.query(Indent).filter(Indent.id == ref_id).first()
                 title = f"Action Required: Indent {ind.indent_number} Approval" if ind else "Indent Alert"

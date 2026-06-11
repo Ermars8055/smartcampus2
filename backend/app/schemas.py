@@ -507,6 +507,7 @@ class PROut(PRBase):
     building_name: Optional[str] = None
     department_name: Optional[str] = None
     items: List[PRItemOut] = []
+    can_user_approve: Optional[bool] = False
     class Config:
         from_attributes = True
 
@@ -524,6 +525,7 @@ class POItemOut(POItemBase):
     id: int
     amount: float
     received_quantity: float
+    approved_quantity: Optional[float] = None
     material_name: Optional[str] = None
     material_code: Optional[str] = None
     uom_name: Optional[str] = None
@@ -586,6 +588,7 @@ class POOut(BaseModel):
     vendor_pincode: Optional[str] = None
     vendor_gst_number: Optional[str] = None
     project_name: Optional[str] = None
+    can_user_approve: Optional[bool] = False
     items: List[POItemOut] = []
     class Config:
         from_attributes = True

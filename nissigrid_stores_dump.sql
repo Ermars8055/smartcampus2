@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict aKmr3IDjsKR414qJVm7VHdnJhvV0p9mFcTi9rwPFeeuwGwHEJEncUp7CiTeJ14P
+\restrict MTHjzGytRoGPD0ivi2qMw1XamefEZxEmNTBNgsiZRttyRFqoj8HD9hjnDFmlddV
 
 -- Dumped from database version 17.10 (Ubuntu 17.10-1.pgdg22.04+1)
 -- Dumped by pg_dump version 18.4 (Ubuntu 18.4-1.pgdg22.04+1)
@@ -26,6 +26,7 @@ SET row_security = off;
 -- *not* creating schema, since initdb creates it
 
 
+ALTER SCHEMA public OWNER TO postgres;
 
 SET default_tablespace = '';
 
@@ -40,6 +41,7 @@ CREATE TABLE public.alembic_version (
 );
 
 
+ALTER TABLE public.alembic_version OWNER TO postgres;
 
 --
 -- Name: alerts; Type: TABLE; Schema: public; Owner: postgres
@@ -63,6 +65,7 @@ CREATE TABLE public.alerts (
 );
 
 
+ALTER TABLE public.alerts OWNER TO postgres;
 
 --
 -- Name: alerts_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -77,6 +80,7 @@ CREATE SEQUENCE public.alerts_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.alerts_id_seq OWNER TO postgres;
 
 --
 -- Name: alerts_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -103,6 +107,7 @@ CREATE TABLE public.approval_flows (
 );
 
 
+ALTER TABLE public.approval_flows OWNER TO postgres;
 
 --
 -- Name: approval_flows_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -117,6 +122,7 @@ CREATE SEQUENCE public.approval_flows_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.approval_flows_id_seq OWNER TO postgres;
 
 --
 -- Name: approval_flows_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -144,6 +150,7 @@ CREATE TABLE public.audit_logs (
 );
 
 
+ALTER TABLE public.audit_logs OWNER TO postgres;
 
 --
 -- Name: audit_logs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -158,6 +165,7 @@ CREATE SEQUENCE public.audit_logs_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.audit_logs_id_seq OWNER TO postgres;
 
 --
 -- Name: audit_logs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -176,13 +184,16 @@ CREATE TABLE public.buildings (
     site_id integer NOT NULL,
     name character varying(255) NOT NULL,
     code character varying(50) NOT NULL,
-    project_id integer NOT NULL,
+    project_id integer,
     is_active boolean,
     is_deleted boolean,
-    created_at timestamp without time zone
+    created_at timestamp without time zone,
+    institution_id integer,
+    department_name character varying(255)
 );
 
 
+ALTER TABLE public.buildings OWNER TO postgres;
 
 --
 -- Name: buildings_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -197,6 +208,7 @@ CREATE SEQUENCE public.buildings_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.buildings_id_seq OWNER TO postgres;
 
 --
 -- Name: buildings_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -223,6 +235,7 @@ CREATE TABLE public.categories (
 );
 
 
+ALTER TABLE public.categories OWNER TO postgres;
 
 --
 -- Name: categories_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -237,6 +250,7 @@ CREATE SEQUENCE public.categories_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.categories_id_seq OWNER TO postgres;
 
 --
 -- Name: categories_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -275,6 +289,7 @@ CREATE TABLE public.company_addresses (
 );
 
 
+ALTER TABLE public.company_addresses OWNER TO postgres;
 
 --
 -- Name: company_addresses_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -289,12 +304,104 @@ CREATE SEQUENCE public.company_addresses_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.company_addresses_id_seq OWNER TO postgres;
 
 --
 -- Name: company_addresses_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.company_addresses_id_seq OWNED BY public.company_addresses.id;
+
+
+--
+-- Name: complaint_images; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.complaint_images (
+    id integer NOT NULL,
+    complaint_id integer NOT NULL,
+    image_url character varying(500) NOT NULL,
+    is_resolution_image boolean,
+    uploaded_at timestamp without time zone
+);
+
+
+ALTER TABLE public.complaint_images OWNER TO postgres;
+
+--
+-- Name: complaint_images_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.complaint_images_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.complaint_images_id_seq OWNER TO postgres;
+
+--
+-- Name: complaint_images_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.complaint_images_id_seq OWNED BY public.complaint_images.id;
+
+
+--
+-- Name: complaints; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.complaints (
+    id integer NOT NULL,
+    tenant_id integer NOT NULL,
+    site_id integer NOT NULL,
+    docket_no character varying(50) NOT NULL,
+    complaint_date date NOT NULL,
+    complaint_time character varying(20),
+    department_name character varying(255),
+    building_id integer,
+    room_id integer,
+    location character varying(255),
+    nature_of_complaint text,
+    individual_detailed text,
+    name_and_trade character varying(255),
+    status character varying(50),
+    assigned_to_id integer,
+    resolution_remarks text,
+    created_by_id integer NOT NULL,
+    resolved_by_id integer,
+    is_deleted boolean,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    resolved_at timestamp without time zone
+);
+
+
+ALTER TABLE public.complaints OWNER TO postgres;
+
+--
+-- Name: complaints_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.complaints_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.complaints_id_seq OWNER TO postgres;
+
+--
+-- Name: complaints_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.complaints_id_seq OWNED BY public.complaints.id;
 
 
 --
@@ -312,6 +419,7 @@ CREATE TABLE public.current_stock (
 );
 
 
+ALTER TABLE public.current_stock OWNER TO postgres;
 
 --
 -- Name: current_stock_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -326,6 +434,7 @@ CREATE SEQUENCE public.current_stock_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.current_stock_id_seq OWNER TO postgres;
 
 --
 -- Name: current_stock_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -350,6 +459,7 @@ CREATE TABLE public.department_material_limits (
 );
 
 
+ALTER TABLE public.department_material_limits OWNER TO postgres;
 
 --
 -- Name: department_material_limits_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -364,6 +474,7 @@ CREATE SEQUENCE public.department_material_limits_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.department_material_limits_id_seq OWNER TO postgres;
 
 --
 -- Name: department_material_limits_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -383,13 +494,15 @@ CREATE TABLE public.departments (
     name character varying(255) NOT NULL,
     code character varying(50),
     accounting_code character varying(100),
-    building_id integer NOT NULL,
+    building_id integer,
     is_active boolean,
     is_deleted boolean,
-    created_at timestamp without time zone
+    created_at timestamp without time zone,
+    institution_id integer
 );
 
 
+ALTER TABLE public.departments OWNER TO postgres;
 
 --
 -- Name: departments_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -404,6 +517,7 @@ CREATE SEQUENCE public.departments_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.departments_id_seq OWNER TO postgres;
 
 --
 -- Name: departments_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -426,6 +540,7 @@ CREATE TABLE public.document_sequences (
 );
 
 
+ALTER TABLE public.document_sequences OWNER TO postgres;
 
 --
 -- Name: document_sequences_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -440,6 +555,7 @@ CREATE SEQUENCE public.document_sequences_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.document_sequences_id_seq OWNER TO postgres;
 
 --
 -- Name: document_sequences_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -458,13 +574,15 @@ CREATE TABLE public.floors (
     site_id integer NOT NULL,
     name character varying(255) NOT NULL,
     level integer,
-    building_id integer NOT NULL,
+    building_id integer,
     is_active boolean,
     is_deleted boolean,
-    created_at timestamp without time zone
+    created_at timestamp without time zone,
+    department_name character varying(255)
 );
 
 
+ALTER TABLE public.floors OWNER TO postgres;
 
 --
 -- Name: floors_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -479,6 +597,7 @@ CREATE SEQUENCE public.floors_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.floors_id_seq OWNER TO postgres;
 
 --
 -- Name: floors_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -513,10 +632,14 @@ CREATE TABLE public.gate_entries (
     status character varying(50),
     recorded_by_id integer NOT NULL,
     is_deleted boolean,
-    created_at timestamp without time zone
+    created_at timestamp without time zone,
+    invoice_number character varying(100),
+    invoice_date date,
+    invoice_amount double precision DEFAULT 0
 );
 
 
+ALTER TABLE public.gate_entries OWNER TO postgres;
 
 --
 -- Name: gate_entries_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -531,6 +654,7 @@ CREATE SEQUENCE public.gate_entries_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.gate_entries_id_seq OWNER TO postgres;
 
 --
 -- Name: gate_entries_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -552,6 +676,7 @@ CREATE TABLE public.gate_pass_items (
 );
 
 
+ALTER TABLE public.gate_pass_items OWNER TO postgres;
 
 --
 -- Name: gate_pass_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -566,6 +691,7 @@ CREATE SEQUENCE public.gate_pass_items_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.gate_pass_items_id_seq OWNER TO postgres;
 
 --
 -- Name: gate_pass_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -605,6 +731,7 @@ CREATE TABLE public.gate_passes (
 );
 
 
+ALTER TABLE public.gate_passes OWNER TO postgres;
 
 --
 -- Name: gate_passes_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -619,6 +746,7 @@ CREATE SEQUENCE public.gate_passes_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.gate_passes_id_seq OWNER TO postgres;
 
 --
 -- Name: gate_passes_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -664,6 +792,7 @@ CREATE TABLE public.grn (
 );
 
 
+ALTER TABLE public.grn OWNER TO postgres;
 
 --
 -- Name: grn_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -678,6 +807,7 @@ CREATE SEQUENCE public.grn_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.grn_id_seq OWNER TO postgres;
 
 --
 -- Name: grn_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -713,6 +843,7 @@ CREATE TABLE public.grn_items (
 );
 
 
+ALTER TABLE public.grn_items OWNER TO postgres;
 
 --
 -- Name: grn_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -727,6 +858,7 @@ CREATE SEQUENCE public.grn_items_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.grn_items_id_seq OWNER TO postgres;
 
 --
 -- Name: grn_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -750,6 +882,7 @@ CREATE TABLE public.indent_approvals (
 );
 
 
+ALTER TABLE public.indent_approvals OWNER TO postgres;
 
 --
 -- Name: indent_approvals_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -764,6 +897,7 @@ CREATE SEQUENCE public.indent_approvals_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.indent_approvals_id_seq OWNER TO postgres;
 
 --
 -- Name: indent_approvals_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -787,6 +921,7 @@ CREATE TABLE public.indent_items (
 );
 
 
+ALTER TABLE public.indent_items OWNER TO postgres;
 
 --
 -- Name: indent_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -801,6 +936,7 @@ CREATE SEQUENCE public.indent_items_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.indent_items_id_seq OWNER TO postgres;
 
 --
 -- Name: indent_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -832,10 +968,12 @@ CREATE TABLE public.indents (
     approved_at timestamp without time zone,
     is_deleted boolean,
     created_at timestamp without time zone,
-    updated_at timestamp without time zone
+    updated_at timestamp without time zone,
+    institution_id integer
 );
 
 
+ALTER TABLE public.indents OWNER TO postgres;
 
 --
 -- Name: indents_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -850,12 +988,54 @@ CREATE SEQUENCE public.indents_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.indents_id_seq OWNER TO postgres;
 
 --
 -- Name: indents_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.indents_id_seq OWNED BY public.indents.id;
+
+
+--
+-- Name: institutions; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.institutions (
+    id integer NOT NULL,
+    tenant_id integer NOT NULL,
+    site_id integer NOT NULL,
+    name character varying(255) NOT NULL,
+    code character varying(50) NOT NULL,
+    project_id integer NOT NULL,
+    is_active boolean,
+    is_deleted boolean,
+    created_at timestamp without time zone
+);
+
+
+ALTER TABLE public.institutions OWNER TO postgres;
+
+--
+-- Name: institutions_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.institutions_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.institutions_id_seq OWNER TO postgres;
+
+--
+-- Name: institutions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.institutions_id_seq OWNED BY public.institutions.id;
 
 
 --
@@ -884,6 +1064,7 @@ CREATE TABLE public.invoice_items (
 );
 
 
+ALTER TABLE public.invoice_items OWNER TO postgres;
 
 --
 -- Name: invoice_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -898,6 +1079,7 @@ CREATE SEQUENCE public.invoice_items_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.invoice_items_id_seq OWNER TO postgres;
 
 --
 -- Name: invoice_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -958,10 +1140,24 @@ CREATE TABLE public.invoices (
     transport_sgst_rate double precision,
     transport_igst_rate double precision,
     transport_discount_percent double precision,
-    code character varying(50) NOT NULL
+    code character varying(50) NOT NULL,
+    payment_status character varying(50) DEFAULT 'Pending'::character varying,
+    sent_for_payment_at timestamp without time zone,
+    sent_for_payment_by_id integer,
+    hard_copy_received boolean DEFAULT false,
+    hard_copy_received_at timestamp without time zone,
+    hard_copy_received_by_id integer,
+    hard_copy_remarks text,
+    payment_completed_at timestamp without time zone,
+    payment_completed_by_id integer,
+    payment_reference character varying(255),
+    hard_copy_sent boolean DEFAULT false,
+    hard_copy_sent_at timestamp without time zone,
+    hard_copy_sent_by_id integer
 );
 
 
+ALTER TABLE public.invoices OWNER TO postgres;
 
 --
 -- Name: invoices_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -976,6 +1172,7 @@ CREATE SEQUENCE public.invoices_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.invoices_id_seq OWNER TO postgres;
 
 --
 -- Name: invoices_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -999,6 +1196,7 @@ CREATE TABLE public.material_issue_items (
 );
 
 
+ALTER TABLE public.material_issue_items OWNER TO postgres;
 
 --
 -- Name: material_issue_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1013,6 +1211,7 @@ CREATE SEQUENCE public.material_issue_items_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.material_issue_items_id_seq OWNER TO postgres;
 
 --
 -- Name: material_issue_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1046,10 +1245,12 @@ CREATE TABLE public.material_issues (
     acknowledged_by_id integer,
     acknowledgement_remarks text,
     is_deleted boolean,
-    created_at timestamp without time zone
+    created_at timestamp without time zone,
+    complaint_id integer
 );
 
 
+ALTER TABLE public.material_issues OWNER TO postgres;
 
 --
 -- Name: material_issues_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1064,6 +1265,7 @@ CREATE SEQUENCE public.material_issues_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.material_issues_id_seq OWNER TO postgres;
 
 --
 -- Name: material_issues_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1088,6 +1290,7 @@ CREATE TABLE public.material_return_items (
 );
 
 
+ALTER TABLE public.material_return_items OWNER TO postgres;
 
 --
 -- Name: material_return_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1102,6 +1305,7 @@ CREATE SEQUENCE public.material_return_items_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.material_return_items_id_seq OWNER TO postgres;
 
 --
 -- Name: material_return_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1135,6 +1339,7 @@ CREATE TABLE public.material_returns (
 );
 
 
+ALTER TABLE public.material_returns OWNER TO postgres;
 
 --
 -- Name: material_returns_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1149,6 +1354,7 @@ CREATE SEQUENCE public.material_returns_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.material_returns_id_seq OWNER TO postgres;
 
 --
 -- Name: material_returns_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1189,6 +1395,7 @@ CREATE TABLE public.materials (
 );
 
 
+ALTER TABLE public.materials OWNER TO postgres;
 
 --
 -- Name: materials_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1203,6 +1410,7 @@ CREATE SEQUENCE public.materials_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.materials_id_seq OWNER TO postgres;
 
 --
 -- Name: materials_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1230,6 +1438,7 @@ CREATE TABLE public.organizations (
 );
 
 
+ALTER TABLE public.organizations OWNER TO postgres;
 
 --
 -- Name: organizations_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1244,6 +1453,7 @@ CREATE SEQUENCE public.organizations_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.organizations_id_seq OWNER TO postgres;
 
 --
 -- Name: organizations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1274,6 +1484,7 @@ CREATE TABLE public.projects (
 );
 
 
+ALTER TABLE public.projects OWNER TO postgres;
 
 --
 -- Name: projects_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1288,6 +1499,7 @@ CREATE SEQUENCE public.projects_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.projects_id_seq OWNER TO postgres;
 
 --
 -- Name: projects_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1311,6 +1523,7 @@ CREATE TABLE public.purchase_order_approvals (
 );
 
 
+ALTER TABLE public.purchase_order_approvals OWNER TO postgres;
 
 --
 -- Name: purchase_order_approvals_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1325,6 +1538,7 @@ CREATE SEQUENCE public.purchase_order_approvals_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.purchase_order_approvals_id_seq OWNER TO postgres;
 
 --
 -- Name: purchase_order_approvals_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1350,10 +1564,12 @@ CREATE TABLE public.purchase_order_items (
     cgst_percentage double precision DEFAULT 0,
     sgst_percentage double precision DEFAULT 0,
     igst_percentage double precision DEFAULT 0,
-    is_gst_inclusive boolean
+    is_gst_inclusive boolean,
+    approved_quantity double precision
 );
 
 
+ALTER TABLE public.purchase_order_items OWNER TO postgres;
 
 --
 -- Name: purchase_order_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1368,6 +1584,7 @@ CREATE SEQUENCE public.purchase_order_items_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.purchase_order_items_id_seq OWNER TO postgres;
 
 --
 -- Name: purchase_order_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1405,6 +1622,7 @@ CREATE TABLE public.purchase_orders (
 );
 
 
+ALTER TABLE public.purchase_orders OWNER TO postgres;
 
 --
 -- Name: purchase_orders_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1419,6 +1637,7 @@ CREATE SEQUENCE public.purchase_orders_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.purchase_orders_id_seq OWNER TO postgres;
 
 --
 -- Name: purchase_orders_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1442,6 +1661,7 @@ CREATE TABLE public.purchase_request_approvals (
 );
 
 
+ALTER TABLE public.purchase_request_approvals OWNER TO postgres;
 
 --
 -- Name: purchase_request_approvals_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1456,6 +1676,7 @@ CREATE SEQUENCE public.purchase_request_approvals_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.purchase_request_approvals_id_seq OWNER TO postgres;
 
 --
 -- Name: purchase_request_approvals_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1477,6 +1698,7 @@ CREATE TABLE public.purchase_request_items (
 );
 
 
+ALTER TABLE public.purchase_request_items OWNER TO postgres;
 
 --
 -- Name: purchase_request_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1491,6 +1713,7 @@ CREATE SEQUENCE public.purchase_request_items_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.purchase_request_items_id_seq OWNER TO postgres;
 
 --
 -- Name: purchase_request_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1525,6 +1748,7 @@ CREATE TABLE public.purchase_requests (
 );
 
 
+ALTER TABLE public.purchase_requests OWNER TO postgres;
 
 --
 -- Name: purchase_requests_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1539,6 +1763,7 @@ CREATE SEQUENCE public.purchase_requests_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.purchase_requests_id_seq OWNER TO postgres;
 
 --
 -- Name: purchase_requests_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1565,6 +1790,7 @@ CREATE TABLE public.quotation_comparisons (
 );
 
 
+ALTER TABLE public.quotation_comparisons OWNER TO postgres;
 
 --
 -- Name: quotation_comparisons_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1579,6 +1805,7 @@ CREATE SEQUENCE public.quotation_comparisons_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.quotation_comparisons_id_seq OWNER TO postgres;
 
 --
 -- Name: quotation_comparisons_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1600,6 +1827,7 @@ CREATE TABLE public.quotation_request_item_sources (
 );
 
 
+ALTER TABLE public.quotation_request_item_sources OWNER TO postgres;
 
 --
 -- Name: quotation_request_item_sources_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1614,6 +1842,7 @@ CREATE SEQUENCE public.quotation_request_item_sources_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.quotation_request_item_sources_id_seq OWNER TO postgres;
 
 --
 -- Name: quotation_request_item_sources_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1636,6 +1865,7 @@ CREATE TABLE public.quotation_request_items (
 );
 
 
+ALTER TABLE public.quotation_request_items OWNER TO postgres;
 
 --
 -- Name: quotation_request_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1650,6 +1880,7 @@ CREATE SEQUENCE public.quotation_request_items_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.quotation_request_items_id_seq OWNER TO postgres;
 
 --
 -- Name: quotation_request_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1669,6 +1900,7 @@ CREATE TABLE public.quotation_request_prs (
 );
 
 
+ALTER TABLE public.quotation_request_prs OWNER TO postgres;
 
 --
 -- Name: quotation_request_prs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1683,6 +1915,7 @@ CREATE SEQUENCE public.quotation_request_prs_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.quotation_request_prs_id_seq OWNER TO postgres;
 
 --
 -- Name: quotation_request_prs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1705,6 +1938,7 @@ CREATE TABLE public.quotation_request_vendors (
 );
 
 
+ALTER TABLE public.quotation_request_vendors OWNER TO postgres;
 
 --
 -- Name: quotation_request_vendors_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1719,6 +1953,7 @@ CREATE SEQUENCE public.quotation_request_vendors_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.quotation_request_vendors_id_seq OWNER TO postgres;
 
 --
 -- Name: quotation_request_vendors_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1749,6 +1984,7 @@ CREATE TABLE public.quotation_requests (
 );
 
 
+ALTER TABLE public.quotation_requests OWNER TO postgres;
 
 --
 -- Name: quotation_requests_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1763,6 +1999,7 @@ CREATE SEQUENCE public.quotation_requests_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.quotation_requests_id_seq OWNER TO postgres;
 
 --
 -- Name: quotation_requests_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1787,6 +2024,7 @@ CREATE TABLE public.role_permissions (
 );
 
 
+ALTER TABLE public.role_permissions OWNER TO postgres;
 
 --
 -- Name: role_permissions_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1801,6 +2039,7 @@ CREATE SEQUENCE public.role_permissions_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.role_permissions_id_seq OWNER TO postgres;
 
 --
 -- Name: role_permissions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1825,6 +2064,7 @@ CREATE TABLE public.roles (
 );
 
 
+ALTER TABLE public.roles OWNER TO postgres;
 
 --
 -- Name: roles_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1839,6 +2079,7 @@ CREATE SEQUENCE public.roles_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.roles_id_seq OWNER TO postgres;
 
 --
 -- Name: roles_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1865,6 +2106,7 @@ CREATE TABLE public.rooms (
 );
 
 
+ALTER TABLE public.rooms OWNER TO postgres;
 
 --
 -- Name: rooms_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1879,6 +2121,7 @@ CREATE SEQUENCE public.rooms_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.rooms_id_seq OWNER TO postgres;
 
 --
 -- Name: rooms_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1902,6 +2145,7 @@ CREATE TABLE public.sites (
 );
 
 
+ALTER TABLE public.sites OWNER TO postgres;
 
 --
 -- Name: sites_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1916,6 +2160,7 @@ CREATE SEQUENCE public.sites_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.sites_id_seq OWNER TO postgres;
 
 --
 -- Name: sites_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1948,6 +2193,7 @@ CREATE TABLE public.stock_ledger (
 );
 
 
+ALTER TABLE public.stock_ledger OWNER TO postgres;
 
 --
 -- Name: stock_ledger_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1962,6 +2208,7 @@ CREATE SEQUENCE public.stock_ledger_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.stock_ledger_id_seq OWNER TO postgres;
 
 --
 -- Name: stock_ledger_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1986,6 +2233,7 @@ CREATE TABLE public.stock_transfer_items (
 );
 
 
+ALTER TABLE public.stock_transfer_items OWNER TO postgres;
 
 --
 -- Name: stock_transfer_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2000,6 +2248,7 @@ CREATE SEQUENCE public.stock_transfer_items_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.stock_transfer_items_id_seq OWNER TO postgres;
 
 --
 -- Name: stock_transfer_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2031,6 +2280,7 @@ CREATE TABLE public.stock_transfers (
 );
 
 
+ALTER TABLE public.stock_transfers OWNER TO postgres;
 
 --
 -- Name: stock_transfers_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2045,6 +2295,7 @@ CREATE SEQUENCE public.stock_transfers_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.stock_transfers_id_seq OWNER TO postgres;
 
 --
 -- Name: stock_transfers_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2068,6 +2319,7 @@ CREATE TABLE public.subcategories (
 );
 
 
+ALTER TABLE public.subcategories OWNER TO postgres;
 
 --
 -- Name: subcategories_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2082,6 +2334,7 @@ CREATE SEQUENCE public.subcategories_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.subcategories_id_seq OWNER TO postgres;
 
 --
 -- Name: subcategories_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2105,6 +2358,7 @@ CREATE TABLE public.tenant_configurations (
 );
 
 
+ALTER TABLE public.tenant_configurations OWNER TO postgres;
 
 --
 -- Name: tenant_configurations_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2119,6 +2373,7 @@ CREATE SEQUENCE public.tenant_configurations_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.tenant_configurations_id_seq OWNER TO postgres;
 
 --
 -- Name: tenant_configurations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2140,6 +2395,7 @@ CREATE TABLE public.tenant_memberships (
 );
 
 
+ALTER TABLE public.tenant_memberships OWNER TO postgres;
 
 --
 -- Name: tenant_memberships_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2154,6 +2410,7 @@ CREATE SEQUENCE public.tenant_memberships_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.tenant_memberships_id_seq OWNER TO postgres;
 
 --
 -- Name: tenant_memberships_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2177,6 +2434,7 @@ CREATE TABLE public.tenants (
 );
 
 
+ALTER TABLE public.tenants OWNER TO postgres;
 
 --
 -- Name: tenants_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2191,6 +2449,7 @@ CREATE SEQUENCE public.tenants_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.tenants_id_seq OWNER TO postgres;
 
 --
 -- Name: tenants_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2215,6 +2474,7 @@ CREATE TABLE public.terms_and_conditions (
 );
 
 
+ALTER TABLE public.terms_and_conditions OWNER TO postgres;
 
 --
 -- Name: terms_and_conditions_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2229,6 +2489,7 @@ CREATE SEQUENCE public.terms_and_conditions_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.terms_and_conditions_id_seq OWNER TO postgres;
 
 --
 -- Name: terms_and_conditions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2252,6 +2513,7 @@ CREATE TABLE public.uom (
 );
 
 
+ALTER TABLE public.uom OWNER TO postgres;
 
 --
 -- Name: uom_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2266,6 +2528,7 @@ CREATE SEQUENCE public.uom_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.uom_id_seq OWNER TO postgres;
 
 --
 -- Name: uom_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2288,6 +2551,7 @@ CREATE TABLE public.user_role_assignments (
 );
 
 
+ALTER TABLE public.user_role_assignments OWNER TO postgres;
 
 --
 -- Name: user_role_assignments_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2302,6 +2566,7 @@ CREATE SEQUENCE public.user_role_assignments_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.user_role_assignments_id_seq OWNER TO postgres;
 
 --
 -- Name: user_role_assignments_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2329,6 +2594,7 @@ CREATE TABLE public.users (
 );
 
 
+ALTER TABLE public.users OWNER TO postgres;
 
 --
 -- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2343,6 +2609,7 @@ CREATE SEQUENCE public.users_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.users_id_seq OWNER TO postgres;
 
 --
 -- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2362,6 +2629,7 @@ CREATE TABLE public.vendor_categories (
 );
 
 
+ALTER TABLE public.vendor_categories OWNER TO postgres;
 
 --
 -- Name: vendor_categories_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2376,6 +2644,7 @@ CREATE SEQUENCE public.vendor_categories_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.vendor_categories_id_seq OWNER TO postgres;
 
 --
 -- Name: vendor_categories_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2400,6 +2669,7 @@ CREATE TABLE public.vendor_quotation_items (
 );
 
 
+ALTER TABLE public.vendor_quotation_items OWNER TO postgres;
 
 --
 -- Name: vendor_quotation_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2414,6 +2684,7 @@ CREATE SEQUENCE public.vendor_quotation_items_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.vendor_quotation_items_id_seq OWNER TO postgres;
 
 --
 -- Name: vendor_quotation_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2441,6 +2712,7 @@ CREATE TABLE public.vendor_quotations (
 );
 
 
+ALTER TABLE public.vendor_quotations OWNER TO postgres;
 
 --
 -- Name: vendor_quotations_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2455,6 +2727,7 @@ CREATE SEQUENCE public.vendor_quotations_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.vendor_quotations_id_seq OWNER TO postgres;
 
 --
 -- Name: vendor_quotations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2494,6 +2767,7 @@ CREATE TABLE public.vendors (
 );
 
 
+ALTER TABLE public.vendors OWNER TO postgres;
 
 --
 -- Name: vendors_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2508,6 +2782,7 @@ CREATE SEQUENCE public.vendors_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.vendors_id_seq OWNER TO postgres;
 
 --
 -- Name: vendors_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2538,6 +2813,7 @@ CREATE TABLE public.warehouses (
 );
 
 
+ALTER TABLE public.warehouses OWNER TO postgres;
 
 --
 -- Name: warehouses_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2552,6 +2828,7 @@ CREATE SEQUENCE public.warehouses_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.warehouses_id_seq OWNER TO postgres;
 
 --
 -- Name: warehouses_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2600,6 +2877,20 @@ ALTER TABLE ONLY public.categories ALTER COLUMN id SET DEFAULT nextval('public.c
 --
 
 ALTER TABLE ONLY public.company_addresses ALTER COLUMN id SET DEFAULT nextval('public.company_addresses_id_seq'::regclass);
+
+
+--
+-- Name: complaint_images id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.complaint_images ALTER COLUMN id SET DEFAULT nextval('public.complaint_images_id_seq'::regclass);
+
+
+--
+-- Name: complaints id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.complaints ALTER COLUMN id SET DEFAULT nextval('public.complaints_id_seq'::regclass);
 
 
 --
@@ -2691,6 +2982,13 @@ ALTER TABLE ONLY public.indent_items ALTER COLUMN id SET DEFAULT nextval('public
 --
 
 ALTER TABLE ONLY public.indents ALTER COLUMN id SET DEFAULT nextval('public.indents_id_seq'::regclass);
+
+
+--
+-- Name: institutions id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.institutions ALTER COLUMN id SET DEFAULT nextval('public.institutions_id_seq'::regclass);
 
 
 --
@@ -2985,7 +3283,7 @@ ALTER TABLE ONLY public.warehouses ALTER COLUMN id SET DEFAULT nextval('public.w
 --
 
 COPY public.alembic_version (version_num) FROM stdin;
-596b08a65445
+808e8586e35b
 \.
 
 
@@ -2996,6 +3294,14 @@ COPY public.alembic_version (version_num) FROM stdin;
 COPY public.alerts (id, tenant_id, site_id, alert_type, severity, title, message, reference_type, reference_id, project_id, is_read, is_resolved, created_at, resolved_at) FROM stdin;
 1	3	3	Pending Action	Warning	Action Required: Gate Entry GE-00024	\N	GateEntry	189	\N	t	t	2026-06-03 11:53:22.926354	2026-06-03 11:53:27.499255
 2	3	3	Pending Action	Warning	Action Required: Gate Entry GE-00018	\N	GateEntry	183	\N	t	t	2026-06-03 11:53:25.711798	2026-06-03 11:53:28.313831
+3	2	2	Pending Action	Warning	Action Required: Indent IND-00004 Approval	\N	Indent	217	\N	t	f	2026-06-11 23:28:43.146	\N
+4	2	2	Pending Action	Warning	Action Required: Indent IND-00005 Approval	\N	Indent	218	\N	t	f	2026-06-11 23:38:11.599771	\N
+5	2	2	Pending Action	Warning	Action Required: Indent IND-00006 Approval	\N	Indent	219	\N	t	f	2026-06-11 23:59:07.622102	\N
+6	2	2	Pending Action	Warning	Action Required: PR PR-00001 Approval	\N	PurchaseRequest	194	\N	t	f	2026-06-12 00:24:14.543327	\N
+7	2	2	Pending Action	Warning	Action Required: PR PR-00002 Approval	\N	PurchaseRequest	195	\N	t	f	2026-06-12 00:43:34.903359	\N
+8	2	2	Pending Action	Warning	Action Required: PO PO-00001 Approval	\N	PurchaseOrder	214	\N	t	f	2026-06-12 01:06:27.231222	\N
+9	2	2	Pending Action	Warning	Action Required: PR PR-00004 Approval	\N	PurchaseRequest	197	\N	t	f	2026-06-12 01:09:05.332821	\N
+10	2	2	Pending Action	Warning	Action Required: PO PO-00002 Approval	\N	PurchaseOrder	215	\N	t	f	2026-06-12 01:19:39.214213	\N
 \.
 
 
@@ -3011,6 +3317,16 @@ COPY public.approval_flows (id, tenant_id, site_id, document_type, level, role_n
 7	3	3	PURCHASE_REQUEST	3	Admin	0	\N	\N	t
 8	3	3	PURCHASE_ORDER	1	Admin	0	\N	\N	t
 9	3	3	PURCHASE_ORDER	2	Admin	0	\N	\N	t
+10	2	2	INDENT	1	Admin	0	\N	\N	t
+11	2	2	INDENT	2	Admin	0	\N	\N	t
+12	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	t
+13	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	t
+14	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	t
+15	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	t
+16	2	2	INDENT	2	CEO	0	\N	\N	t
+17	2	2	PURCHASE_REQUEST	2	CEO	0	\N	\N	t
+18	2	2	PURCHASE_ORDER	2	CEO	0	\N	\N	t
+19	2	2	PURCHASE_REQUEST	1	Store Manager	0	\N	\N	t
 \.
 
 
@@ -3188,6 +3504,76 @@ COPY public.audit_logs (id, tenant_id, site_id, user_id, action, entity_type, en
 167	3	\N	4	LOGIN	User	4	\N	\N	\N	2026-06-10 11:34:34.861791
 168	3	\N	4	LOGIN	User	4	\N	\N	\N	2026-06-10 15:14:08.985152
 169	3	\N	4	LOGIN	User	4	\N	\N	\N	2026-06-10 19:36:21.096871
+170	3	\N	4	LOGIN	User	4	\N	\N	\N	2026-06-11 09:57:34.404884
+171	3	\N	4	LOGIN	User	4	\N	\N	\N	2026-06-11 10:57:08.322894
+172	3	\N	4	LOGIN	User	4	\N	\N	\N	2026-06-11 11:00:08.961643
+173	\N	\N	1	LOGIN	User	1	\N	\N	\N	2026-06-11 11:50:06.5708
+174	3	\N	4	LOGIN	User	4	\N	\N	\N	2026-06-11 11:55:13.673302
+175	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-06-11 12:19:23.963208
+176	3	\N	4	LOGIN	User	4	\N	\N	\N	2026-06-11 13:04:45.552105
+177	3	\N	4	LOGIN	User	4	\N	\N	\N	2026-06-11 13:09:16.940199
+178	3	\N	4	LOGIN	User	4	\N	\N	\N	2026-06-11 14:31:09.938052
+179	3	\N	4	LOGIN	User	4	\N	\N	\N	2026-06-11 14:42:47.397493
+180	3	\N	4	LOGIN	User	4	\N	\N	\N	2026-06-11 14:43:04.972067
+181	3	3	4	CREATE	GRN	201	\N	GRN GRN-00020 created (PO-Based)	\N	2026-06-11 15:04:41.073493
+182	3	3	4	CREATE	GRN	202	\N	GRN GRN-00021 created (PO-Based)	\N	2026-06-11 15:05:34.847112
+183	3	3	4	CREATE	GRN	203	\N	GRN GRN-00022 created (PO-Based)	\N	2026-06-11 16:24:46.265451
+184	3	\N	4	LOGIN	User	4	\N	\N	\N	2026-06-11 16:57:49.453568
+185	3	\N	4	LOGIN	User	4	\N	\N	\N	2026-06-11 18:20:48.716427
+186	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-06-11 18:21:45.018285
+187	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-06-11 18:42:47.623727
+188	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-06-11 20:56:37.373712
+189	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-06-11 23:09:55.636054
+190	2	\N	9	LOGIN	User	9	\N	\N	\N	2026-06-11 23:14:51.003316
+191	2	\N	11	LOGIN	User	11	\N	\N	\N	2026-06-11 23:21:35.54295
+192	2	\N	11	LOGIN	User	11	\N	\N	\N	2026-06-11 23:31:17.700281
+193	2	\N	11	LOGIN	User	11	\N	\N	\N	2026-06-11 23:36:08.331479
+194	2	\N	9	LOGIN	User	9	\N	\N	\N	2026-06-11 23:37:21.681411
+195	2	\N	11	LOGIN	User	11	\N	\N	\N	2026-06-11 23:38:43.74619
+196	2	\N	11	LOGIN	User	11	\N	\N	\N	2026-06-11 23:39:37.146076
+197	2	\N	11	LOGIN	User	11	\N	\N	\N	2026-06-11 23:43:21.423521
+198	2	\N	9	LOGIN	User	9	\N	\N	\N	2026-06-11 23:44:17.385996
+199	2	\N	11	LOGIN	User	11	\N	\N	\N	2026-06-11 23:45:48.503223
+200	2	\N	11	LOGIN	User	11	\N	\N	\N	2026-06-11 23:51:07.657567
+201	2	\N	11	LOGIN	User	11	\N	\N	\N	2026-06-11 23:52:05.366161
+202	2	\N	9	LOGIN	User	9	\N	\N	\N	2026-06-11 23:56:45.261947
+203	2	\N	11	LOGIN	User	11	\N	\N	\N	2026-06-12 00:00:13.201919
+204	2	\N	10	LOGIN	User	10	\N	\N	\N	2026-06-12 00:04:26.088141
+205	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-06-12 00:15:16.442455
+206	2	\N	10	LOGIN	User	10	\N	\N	\N	2026-06-12 00:18:49.331388
+207	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-06-12 00:21:52.001405
+208	2	\N	12	LOGIN	User	12	\N	\N	\N	2026-06-12 00:27:28.563942
+209	2	2	12	APPROVE	PurchaseRequest	194	\N	\N	\N	2026-06-12 00:28:43.05827
+210	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-06-12 00:34:13.835633
+211	2	\N	12	LOGIN	User	12	\N	\N	\N	2026-06-12 00:34:52.238698
+212	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-06-12 00:38:02.265406
+213	2	\N	12	LOGIN	User	12	\N	\N	\N	2026-06-12 00:41:38.515646
+214	2	\N	12	LOGIN	User	12	\N	\N	\N	2026-06-12 00:42:35.510057
+215	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-06-12 00:48:06.910445
+216	2	\N	12	LOGIN	User	12	\N	\N	\N	2026-06-12 00:48:55.651546
+217	2	\N	10	LOGIN	User	10	\N	\N	\N	2026-06-12 00:55:54.007726
+218	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-06-12 00:58:15.109555
+219	2	2	3	APPROVE	PurchaseRequest	194	\N	\N	\N	2026-06-12 00:59:40.514928
+220	2	2	3	APPROVE	PurchaseOrder	214	\N	\N	\N	2026-06-12 01:05:55.782185
+221	2	\N	11	LOGIN	User	11	\N	\N	\N	2026-06-12 01:06:16.029988
+222	2	\N	8	LOGIN	User	8	\N	\N	\N	2026-06-12 01:08:18.915357
+223	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-06-12 01:09:46.559534
+224	2	2	3	APPROVE	PurchaseRequest	197	\N	\N	\N	2026-06-12 01:10:01.883019
+225	2	\N	11	LOGIN	User	11	\N	\N	\N	2026-06-12 01:10:22.616061
+226	2	2	11	APPROVE	PurchaseRequest	197	\N	\N	\N	2026-06-12 01:10:57.025962
+227	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-06-12 01:14:44.337964
+228	2	2	3	APPROVE	PurchaseOrder	214	\N	\N	\N	2026-06-12 01:16:17.564291
+229	2	2	3	APPROVE	PurchaseOrder	215	\N	\N	\N	2026-06-12 01:19:17.935876
+230	2	\N	11	LOGIN	User	11	\N	\N	\N	2026-06-12 01:19:30.859998
+231	2	\N	12	LOGIN	User	12	\N	\N	\N	2026-06-12 01:22:44.361694
+232	2	2	12	APPROVE	PurchaseRequest	196	\N	\N	\N	2026-06-12 01:23:17.657285
+233	2	2	12	APPROVE	PurchaseRequest	195	\N	\N	\N	2026-06-12 01:23:48.83845
+234	2	\N	11	LOGIN	User	11	\N	\N	\N	2026-06-12 01:24:25.551239
+235	2	\N	11	LOGIN	User	11	\N	\N	\N	2026-06-12 01:25:12.622533
+236	2	2	11	APPROVE	PurchaseOrder	215	\N	\N	\N	2026-06-12 01:25:56.997721
+237	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-06-12 01:26:30.419408
+238	2	2	3	APPROVE	PurchaseRequest	197	\N	\N	\N	2026-06-12 01:28:16.865581
+239	2	2	3	APPROVE	PurchaseRequest	195	\N	\N	\N	2026-06-12 01:28:30.022609
 \.
 
 
@@ -3195,11 +3581,15 @@ COPY public.audit_logs (id, tenant_id, site_id, user_id, action, entity_type, en
 -- Data for Name: buildings; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.buildings (id, tenant_id, site_id, name, code, project_id, is_active, is_deleted, created_at) FROM stdin;
-1	3	3	Tower1	BLDG-00001	1	t	f	2026-05-15 12:14:17.940478
-2	3	3	Tower2	BLDG-00002	1	t	f	2026-05-15 12:14:28.610068
-3	3	3	Tower3	BLDG-00003	1	t	f	2026-05-15 12:14:40.682067
-4	2	2	Hospital	BLDG-00001	3	t	f	2026-05-21 16:21:49.868317
+COPY public.buildings (id, tenant_id, site_id, name, code, project_id, is_active, is_deleted, created_at, institution_id, department_name) FROM stdin;
+2	3	3	EPH	BLDG-00002	1	t	t	2026-05-15 12:14:28.610068	\N	\N
+3	3	3	EPH	BLDG-00003	1	t	t	2026-05-15 12:14:40.682067	\N	\N
+1	3	3	EP1	BLDG-00001	1	t	t	2026-05-15 12:14:17.940478	\N	\N
+6	3	3	EPCET	BLDG-00004	1	t	t	2026-06-11 15:14:55.871273	\N	\N
+4	2	2	EPCET	BLDG-00001	3	f	t	2026-05-21 16:21:49.868317	\N	\N
+5	2	2	EPH1	BLDG-00002	4	f	t	2026-06-11 12:32:43.863768	\N	\N
+7	2	2	A BLOCK	BLDG-00003	\N	t	f	2026-06-11 21:17:39.334329	11	HEALTH 
+8	2	2	B BLOCK	BLDG-00004	\N	t	f	2026-06-11 22:05:04.486763	11	HEALTH 
 \.
 
 
@@ -3230,8 +3620,20 @@ COPY public.categories (id, tenant_id, site_id, name, sequence_number, code, des
 61	3	3	RADIOLOGY	\N	CAT-0021	Hospital category: RADIOLOGY	t	f	RAD
 41	3	3	Cement	\N	CAT-0001	All types of cement	t	f	CEM
 57	3	3	IT	\N	CAT-0017	Hospital category: IT	t	f	ITI
-64	1	1	CIVIL	1	CAT-0001		t	f	\N
 55	3	3	INSTRUMENTS	\N	CAT-0015	Hospital category: INSTRUMENTS	t	f	INS
+64	1	1	CIVIL	1	CAT-0001		t	f	CIV
+65	2	2	CIVIL	1	CAT-0001	Hospital category: CIVIL	t	f	CIV
+66	2	2	ELECTRICAL	2	CAT-0002	Hospital category: ELECTRICAL	t	f	ELE
+67	2	2	HOSP EQPT	3	CAT-0003	Hospital category: HOSP EQPT	t	f	HOS
+68	2	2	HOSPITAL	4	CAT-0004	Hospital category: HOSPITAL	t	f	HOS
+69	2	2	HOUSE KEEPING	5	CAT-0005	Hospital category: HOUSE KEEPING	t	f	HOU
+70	2	2	IT	6	CAT-0006	Hospital category: IT	t	f	ITX
+71	2	2	LAB	7	CAT-0007	Hospital category: LAB	t	f	LAB
+72	2	2	LINEN	8	CAT-0008	Hospital category: LINEN	t	f	LIN
+73	2	2	PLUMBING	9	CAT-0009	Hospital category: PLUMBING	t	f	PLU
+74	2	2	RADIOLOGY	10	CAT-0010	Hospital category: RADIOLOGY	t	f	RAD
+75	2	2	STATIONERY	11	CAT-0011	Hospital category: STATIONERY	t	f	STA
+76	2	2	HOSPITAL INSTRUMENTS	12	CAT-0012	Hospital Category: HOSPITAL INSTRUMENTS	t	f	HOS
 \.
 
 
@@ -3243,6 +3645,30 @@ COPY public.company_addresses (id, tenant_id, site_id, address_type, address, gs
 2	3	3	Billing	Jnana Prabha Campus,\nBidarahalli, Virgonagar	29AAAAA0000A1Z5	29 - Karnataka	t	f	2026-06-02 16:55:06.024509	Helios Construction LLP	ADDR-00002	kumar	98000004444	helios@gmail.com		Bangalore	560049				2026-06-02 17:22:10.040431
 3	3	3	Billing	113, JNANA PRABHA CAMPUS, BIDARAHALLI, VIRGO NAGAR POST	29AAAAA0000A1Z5	29 - Karnataka	t	f	2026-06-02 17:37:58.632191	EAST POINT COLLEGE OF MEDICAL SCIENCES & RESEARCH CENTER	ADDR-00003					Bangalore	560049				2026-06-02 17:37:58.63221
 1	3	3	Billing	Jnana Prabha Campus,\nBidarahalli, Virgonagar	29AAAAA0000A1Z5	29 - Karnataka	t	f	2026-06-02 16:41:32.765533	MG Charitable Trust	ADDR-00001	pradnesh	9842003333	mgcharitabletrust@gmail.com		Bangalore	560049				2026-06-02 17:38:37.233401
+4	2	2	Billing	Jnana Prabha Campus,\nBidarahalli, Virgonagar	29AAAAA0000A1Z5	29 - Karnataka	t	f	2026-06-11 19:06:31.637393	MG Charitable Trust	ADDR-00001	MGCTrust	9898989898	MGCTrust@MGCTrust.com		Bangalore	560049				2026-06-11 19:06:31.637437
+5	2	2	Billing	113, JNANA PRABHA CAMPUS, BIDARAHALLI, VIRGO NAGAR POST	29AAAAA0000A1Z5	29 - Karnataka	t	f	2026-06-11 19:07:27.428128	EAST POINT COLLEGE OF MEDICAL SCIENCES & RESEARCH CENTER	ADDR-00002					Bangalore	560049				2026-06-11 19:07:27.428172
+6	2	2	Billing	Jnana Prabha Campus,\nBidarahalli, Virgonagar	29AAAAA0000A1Z5	29 - Karnataka	t	f	2026-06-11 19:08:42.935422	Helios Construction LLP	ADDR-00003					Bangalore	560049				2026-06-11 19:08:42.93545
+\.
+
+
+--
+-- Data for Name: complaint_images; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.complaint_images (id, complaint_id, image_url, is_resolution_image, uploaded_at) FROM stdin;
+1	1	/uploads/complaints/3/20260611_060355_a5fab991.png	f	2026-06-11 11:33:55.089527
+2	2	/uploads/complaints/3/20260611_060932_705f4906.png	f	2026-06-11 11:39:32.824201
+3	2	/uploads/complaints/3/20260611_060932_8bb96e0b.png	f	2026-06-11 11:39:32.824213
+\.
+
+
+--
+-- Data for Name: complaints; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.complaints (id, tenant_id, site_id, docket_no, complaint_date, complaint_time, department_name, building_id, room_id, location, nature_of_complaint, individual_detailed, name_and_trade, status, assigned_to_id, resolution_remarks, created_by_id, resolved_by_id, is_deleted, created_at, updated_at, resolved_at) FROM stdin;
+1	3	3	123	2026-06-11	11:33	eng college	\N	\N	1	Broken chair	Chair is broken		In Progress	\N	\N	4	\N	f	2026-06-11 11:33:55.08691	2026-06-11 11:36:53.102193	\N
+2	3	3	124	2026-06-11	11:38	eng college	\N	\N	2	Machine is not working	Machine is not working		Open	\N	\N	4	\N	f	2026-06-11 11:39:32.822274	2026-06-11 11:39:32.822295	\N
 \.
 
 
@@ -3593,7 +4019,6 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 1374	3	3	1064	59	363	2026-06-03 12:31:54.062795
 1376	3	3	1066	59	139	2026-06-03 12:31:54.066669
 1375	3	3	1065	59	56	2026-06-09 18:18:42.224166
-1372	3	3	1062	59	88	2026-06-09 16:37:52.725659
 542	3	3	224	51	58	2026-06-10 17:51:14.970487
 1377	3	3	1067	59	179	2026-06-03 12:31:54.068542
 1378	3	3	1068	59	59	2026-06-03 12:31:54.070791
@@ -3718,7 +4143,6 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 1498	3	3	1188	59	6	2026-06-03 12:31:54.320966
 1499	3	3	1189	59	18	2026-06-03 12:31:54.323395
 1500	3	3	1190	59	5	2026-06-03 12:31:54.325411
-1501	3	3	1191	59	1	2026-06-03 12:31:54.327335
 1502	3	3	1192	59	6	2026-06-03 12:31:54.329193
 1503	3	3	1193	59	1	2026-06-03 12:31:54.331097
 1504	3	3	1194	59	9	2026-06-03 12:31:54.333002
@@ -4874,6 +5298,1227 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 315	3	3	217	46	58	2026-06-09 18:02:23.686031
 327	3	3	229	46	70	2026-06-09 18:22:36.842783
 1688	3	3	1378	59	3	2026-06-09 18:48:05.259932
+1372	3	3	1062	59	108	2026-06-11 15:04:41.077953
+1501	3	3	1191	59	23	2026-06-11 16:24:46.270008
+2649	2	2	2337	62	76	2026-06-11 21:58:45.848907
+2650	2	2	2339	62	77	2026-06-11 21:58:45.848919
+2651	2	2	2357	62	37	2026-06-11 21:58:45.848923
+2652	2	2	2340	62	315	2026-06-11 21:58:45.848926
+2653	2	2	2341	62	372	2026-06-11 21:58:45.848929
+2654	2	2	2342	62	71	2026-06-11 21:58:45.848932
+2655	2	2	2343	62	23	2026-06-11 21:58:45.848934
+2656	2	2	2344	62	39	2026-06-11 21:58:45.848937
+2657	2	2	2345	62	276	2026-06-11 21:58:45.84894
+2658	2	2	2346	62	140	2026-06-11 21:58:45.848943
+2659	2	2	2347	62	142	2026-06-11 21:58:45.848946
+2660	2	2	2348	62	34	2026-06-11 21:58:45.848949
+2661	2	2	2350	62	16	2026-06-11 21:58:45.848951
+2662	2	2	2351	62	89	2026-06-11 21:58:45.848954
+2663	2	2	2352	62	232	2026-06-11 21:58:45.848957
+2664	2	2	2353	62	539	2026-06-11 21:58:45.84896
+2665	2	2	2354	62	107	2026-06-11 21:58:45.848963
+2666	2	2	2355	62	84	2026-06-11 21:58:45.848966
+2667	2	2	2356	62	66	2026-06-11 21:58:45.848969
+2668	2	2	2358	62	118	2026-06-11 21:58:45.848972
+2669	2	2	2359	62	22	2026-06-11 21:58:45.848974
+2670	2	2	2360	62	142	2026-06-11 21:58:45.848977
+2671	2	2	2361	62	118	2026-06-11 21:58:45.84898
+2672	2	2	2363	62	193	2026-06-11 21:58:45.848983
+2673	2	2	2364	62	346	2026-06-11 21:58:45.848986
+2674	2	2	2365	62	100	2026-06-11 21:58:45.848989
+2675	2	2	2366	62	72	2026-06-11 21:58:45.848991
+2676	2	2	2367	62	27	2026-06-11 21:58:45.848994
+2677	2	2	2368	62	70	2026-06-11 21:58:45.848997
+2678	2	2	2369	62	92	2026-06-11 21:58:45.849001
+2679	2	2	2370	62	118	2026-06-11 21:58:45.849004
+2680	2	2	2372	62	112	2026-06-11 21:58:45.849007
+2681	2	2	2373	62	160	2026-06-11 21:58:45.84901
+2682	2	2	2374	62	60	2026-06-11 21:58:45.849013
+2683	2	2	2375	62	397	2026-06-11 21:58:45.849016
+2684	2	2	2376	62	9	2026-06-11 21:58:45.849019
+2685	2	2	2377	62	5	2026-06-11 21:58:45.849021
+2686	2	2	2378	62	16	2026-06-11 21:58:45.849024
+2687	2	2	2379	62	103	2026-06-11 21:58:45.849027
+2688	2	2	2382	62	87	2026-06-11 21:58:45.84903
+2689	2	2	2383	62	109	2026-06-11 21:58:45.849033
+2690	2	2	2384	62	174	2026-06-11 21:58:45.849035
+2691	2	2	2385	62	70	2026-06-11 21:58:45.849038
+2692	2	2	2387	62	52	2026-06-11 21:58:45.849041
+2693	2	2	2388	62	410	2026-06-11 21:58:45.849044
+2694	2	2	2389	62	127	2026-06-11 21:58:45.849047
+2695	2	2	2390	62	43	2026-06-11 21:58:45.84905
+2696	2	2	2392	62	46	2026-06-11 21:58:45.849052
+2697	2	2	2393	62	120	2026-06-11 21:58:45.849055
+2698	2	2	2394	62	62	2026-06-11 21:58:45.849058
+2699	2	2	2395	62	55	2026-06-11 21:58:45.849061
+2700	2	2	2396	62	58	2026-06-11 21:58:45.849064
+2701	2	2	2397	62	29	2026-06-11 21:58:45.849067
+2702	2	2	2398	62	68	2026-06-11 21:58:45.84907
+2703	2	2	2399	62	104	2026-06-11 21:58:45.849073
+2704	2	2	2400	62	105	2026-06-11 21:58:45.849076
+2705	2	2	2401	62	119	2026-06-11 21:58:45.849079
+2706	2	2	2402	62	84	2026-06-11 21:58:45.849081
+2707	2	2	2403	62	45	2026-06-11 21:58:45.849084
+2708	2	2	2404	62	285	2026-06-11 21:58:45.849087
+2709	2	2	2405	62	65	2026-06-11 21:58:45.84909
+2710	2	2	2406	62	275	2026-06-11 21:58:45.849092
+2711	2	2	2408	62	64	2026-06-11 21:58:45.849095
+2712	2	2	2410	62	471	2026-06-11 21:58:45.849098
+2713	2	2	2411	62	9	2026-06-11 21:58:45.849101
+2714	2	2	2412	62	487	2026-06-11 21:58:45.849103
+2715	2	2	2413	62	67	2026-06-11 21:58:45.849106
+2716	2	2	2415	62	244	2026-06-11 21:58:45.849109
+2717	2	2	2418	62	6	2026-06-11 21:58:45.849112
+2718	2	2	2419	62	523	2026-06-11 21:58:45.849115
+2719	2	2	2420	62	93	2026-06-11 21:58:45.849117
+2720	2	2	2421	62	357	2026-06-11 21:58:45.84912
+2721	2	2	2422	62	26	2026-06-11 21:58:45.849123
+2722	2	2	2423	62	11	2026-06-11 21:58:45.849126
+2723	2	2	2424	62	115	2026-06-11 21:58:45.849129
+2724	2	2	2425	62	23	2026-06-11 21:58:45.849131
+2725	2	2	2426	62	147	2026-06-11 21:58:45.849134
+2726	2	2	2427	62	86	2026-06-11 21:58:45.849137
+2727	2	2	2428	62	23	2026-06-11 21:58:45.84914
+2728	2	2	2429	62	51	2026-06-11 21:58:45.849142
+2729	2	2	2430	62	104	2026-06-11 21:58:45.849145
+2730	2	2	2431	62	143	2026-06-11 21:58:45.849148
+2731	2	2	2432	62	75	2026-06-11 21:58:45.849151
+2732	2	2	2433	62	87	2026-06-11 21:58:45.849154
+2733	2	2	2434	62	98	2026-06-11 21:58:45.849156
+2734	2	2	2435	62	120	2026-06-11 21:58:45.849159
+2735	2	2	2436	62	133	2026-06-11 21:58:45.849162
+2736	2	2	2437	62	139	2026-06-11 21:58:45.849165
+2737	2	2	2439	62	102	2026-06-11 21:58:45.849168
+2738	2	2	2440	62	111	2026-06-11 21:58:45.84917
+2739	2	2	2441	62	117	2026-06-11 21:58:45.849173
+2740	2	2	2442	62	108	2026-06-11 21:58:45.849176
+2741	2	2	2443	62	18	2026-06-11 21:58:45.849179
+2742	2	2	2444	62	50	2026-06-11 21:58:45.849182
+2743	2	2	2445	62	112	2026-06-11 21:58:45.849184
+2744	2	2	2446	62	62	2026-06-11 21:58:45.849187
+2745	2	2	2447	62	61	2026-06-11 21:58:45.84919
+2746	2	2	2448	62	30	2026-06-11 21:58:45.849193
+2747	2	2	2449	62	55	2026-06-11 21:58:45.849196
+2748	2	2	2450	62	117	2026-06-11 21:58:45.849198
+2749	2	2	2451	62	59	2026-06-11 21:58:45.849201
+2750	2	2	2452	62	86	2026-06-11 21:58:45.849204
+2751	2	2	2453	62	49	2026-06-11 21:58:45.849207
+2752	2	2	2454	62	17	2026-06-11 21:58:45.84921
+2753	2	2	2456	62	44	2026-06-11 21:58:45.849212
+2754	2	2	2457	62	126	2026-06-11 21:58:45.849215
+2755	2	2	2458	62	10	2026-06-11 21:58:45.849218
+2756	2	2	2459	62	47	2026-06-11 21:58:45.849221
+2757	2	2	2460	62	141	2026-06-11 21:58:45.849224
+2758	2	2	2461	62	78	2026-06-11 21:58:45.849226
+2759	2	2	2462	62	118	2026-06-11 21:58:45.849229
+2760	2	2	2464	62	54	2026-06-11 21:58:45.849232
+2761	2	2	2465	62	27	2026-06-11 21:58:45.849235
+2762	2	2	2466	62	30	2026-06-11 21:58:45.849238
+2763	2	2	2467	62	14	2026-06-11 21:58:45.84924
+2764	2	2	2468	62	362	2026-06-11 21:58:45.849243
+2765	2	2	2469	62	102	2026-06-11 21:58:45.849246
+2766	2	2	2470	62	89	2026-06-11 21:58:45.849249
+2767	2	2	2471	62	485	2026-06-11 21:58:45.849252
+2768	2	2	2472	62	81	2026-06-11 21:58:45.849254
+2769	2	2	2473	62	306	2026-06-11 21:58:45.849257
+2770	2	2	2474	62	32	2026-06-11 21:58:45.84926
+2771	2	2	2475	62	266	2026-06-11 21:58:45.849263
+2772	2	2	2476	62	132	2026-06-11 21:58:45.849266
+2773	2	2	2477	62	35	2026-06-11 21:58:45.849268
+2774	2	2	2480	62	89	2026-06-11 21:58:45.849271
+2775	2	2	2481	62	28	2026-06-11 21:58:45.849274
+2776	2	2	2482	62	61	2026-06-11 21:58:45.849277
+2777	2	2	2483	62	34	2026-06-11 21:58:45.84928
+2778	2	2	2484	62	140	2026-06-11 21:58:45.849282
+2779	2	2	2485	62	161	2026-06-11 21:58:45.849285
+2780	2	2	2487	62	90	2026-06-11 21:58:45.849288
+2781	2	2	2488	62	27	2026-06-11 21:58:45.849291
+2782	2	2	2489	62	61	2026-06-11 21:58:45.849294
+2783	2	2	2490	62	75	2026-06-11 21:58:45.849297
+2784	2	2	2491	62	9	2026-06-11 21:58:45.849299
+2785	2	2	2492	62	384	2026-06-11 21:58:45.849302
+2786	2	2	2493	62	17	2026-06-11 21:58:45.849305
+2787	2	2	2494	62	283	2026-06-11 21:58:45.849308
+2788	2	2	2495	62	30	2026-06-11 21:58:45.849311
+2789	2	2	2496	62	175	2026-06-11 21:58:45.849314
+2790	2	2	2497	62	72	2026-06-11 21:58:45.849316
+2791	2	2	2498	62	94	2026-06-11 21:58:45.849319
+2792	2	2	2499	62	132	2026-06-11 21:58:45.849322
+2793	2	2	2500	62	254	2026-06-11 21:58:45.849325
+2794	2	2	2501	62	69	2026-06-11 21:58:45.849327
+2795	2	2	2502	62	32	2026-06-11 21:58:45.84933
+2796	2	2	2503	62	26	2026-06-11 21:58:45.84934
+2797	2	2	2505	62	89	2026-06-11 21:58:45.849343
+2798	2	2	2506	62	92	2026-06-11 21:58:45.849345
+2799	2	2	2507	62	81	2026-06-11 21:58:45.849348
+2800	2	2	2508	62	42	2026-06-11 21:58:45.849351
+2801	2	2	2509	62	19	2026-06-11 21:58:45.849354
+2802	2	2	2510	62	45	2026-06-11 21:58:45.849357
+2803	2	2	2511	62	88	2026-06-11 21:58:45.849359
+2804	2	2	2512	62	104	2026-06-11 21:58:45.849362
+2805	2	2	2513	62	3	2026-06-11 21:58:45.849365
+2806	2	2	2514	62	102	2026-06-11 21:58:45.849368
+2807	2	2	2515	62	92	2026-06-11 21:58:45.84937
+2808	2	2	2516	62	59	2026-06-11 21:58:45.849373
+2809	2	2	2517	62	60	2026-06-11 21:58:45.849376
+2810	2	2	2518	62	95	2026-06-11 21:58:45.849379
+2811	2	2	2519	62	99	2026-06-11 21:58:45.849382
+2812	2	2	2520	62	103	2026-06-11 21:58:45.849384
+2813	2	2	2521	62	2	2026-06-11 21:58:45.849387
+2814	2	2	2522	62	3	2026-06-11 21:58:45.84939
+2815	2	2	2523	62	42	2026-06-11 21:58:45.849393
+2816	2	2	2524	62	31	2026-06-11 21:58:45.849395
+2817	2	2	2525	62	27	2026-06-11 21:58:45.849398
+2818	2	2	2526	62	59	2026-06-11 21:58:45.849401
+2819	2	2	2527	62	50	2026-06-11 21:58:45.849404
+2820	2	2	2528	62	3	2026-06-11 21:58:45.849407
+2821	2	2	2529	62	92	2026-06-11 21:58:45.849409
+2822	2	2	2530	62	63	2026-06-11 21:58:45.849412
+2823	2	2	2532	62	91	2026-06-11 21:58:45.849415
+2824	2	2	2533	62	85	2026-06-11 21:58:45.849418
+2825	2	2	2534	62	73	2026-06-11 21:58:45.84942
+2826	2	2	2535	62	24	2026-06-11 21:58:45.849423
+2827	2	2	2536	62	82	2026-06-11 21:58:45.849426
+2828	2	2	2538	62	51	2026-06-11 21:58:45.849429
+2829	2	2	2539	62	18	2026-06-11 21:58:45.849431
+2830	2	2	2540	62	91	2026-06-11 21:58:45.849434
+2831	2	2	2541	62	50	2026-06-11 21:58:45.849437
+2832	2	2	2542	62	38	2026-06-11 21:58:45.84944
+2833	2	2	2543	62	61	2026-06-11 21:58:45.849443
+2834	2	2	2544	62	93	2026-06-11 21:58:45.849445
+2835	2	2	2545	62	76	2026-06-11 21:58:45.849448
+2836	2	2	2546	62	30	2026-06-11 21:58:45.849451
+2837	2	2	2547	62	75	2026-06-11 21:58:45.849454
+2838	2	2	2548	62	88	2026-06-11 21:58:45.849457
+2839	2	2	2549	62	2	2026-06-11 21:58:45.849459
+2840	2	2	2550	62	66	2026-06-11 21:58:45.849462
+2841	2	2	2551	62	46	2026-06-11 21:58:45.849465
+2842	2	2	2552	62	51	2026-06-11 21:58:45.849468
+2843	2	2	2553	62	39	2026-06-11 21:58:45.84947
+2844	2	2	2554	62	62	2026-06-11 21:58:45.849473
+2845	2	2	2555	62	28	2026-06-11 21:58:45.849476
+2846	2	2	2556	62	10	2026-06-11 21:58:45.849479
+2847	2	2	2557	62	75	2026-06-11 21:58:45.849482
+2848	2	2	2558	62	78	2026-06-11 21:58:45.849484
+2849	2	2	2559	62	1	2026-06-11 21:58:45.849487
+2850	2	2	2560	62	76	2026-06-11 21:58:45.84949
+2851	2	2	2561	62	103	2026-06-11 21:58:45.849493
+2852	2	2	2562	62	32	2026-06-11 21:58:45.849496
+2853	2	2	2563	62	30	2026-06-11 21:58:45.849498
+2854	2	2	2564	62	43	2026-06-11 21:58:45.849501
+2855	2	2	2565	62	46	2026-06-11 21:58:45.849504
+2856	2	2	2566	62	34	2026-06-11 21:58:45.849507
+2857	2	2	2567	62	31	2026-06-11 21:58:45.84951
+2858	2	2	2568	62	21	2026-06-11 21:58:45.849512
+2859	2	2	2570	62	68	2026-06-11 21:58:45.849515
+2860	2	2	2572	62	90	2026-06-11 21:58:45.849518
+2861	2	2	2573	62	77	2026-06-11 21:58:45.849521
+2862	2	2	2574	62	79	2026-06-11 21:58:45.849523
+2863	2	2	2575	62	84	2026-06-11 21:58:45.849526
+2864	2	2	2576	62	24	2026-06-11 21:58:45.849529
+2865	2	2	2577	62	1	2026-06-11 21:58:45.849532
+2866	2	2	2578	62	12	2026-06-11 21:58:45.849535
+2867	2	2	2579	62	57	2026-06-11 21:58:45.849537
+2868	2	2	2580	62	2	2026-06-11 21:58:45.84954
+2869	2	2	2581	62	87	2026-06-11 21:58:45.849543
+2870	2	2	2582	62	72	2026-06-11 21:58:45.849546
+2871	2	2	2583	62	93	2026-06-11 21:58:45.849548
+2872	2	2	2584	62	122	2026-06-11 21:58:45.849551
+2873	2	2	2585	62	69	2026-06-11 21:58:45.849554
+2874	2	2	2586	62	27	2026-06-11 21:58:45.849557
+2875	2	2	2588	62	54	2026-06-11 21:58:45.849559
+2876	2	2	2590	62	100	2026-06-11 21:58:45.849562
+2877	2	2	2591	62	73	2026-06-11 21:58:45.849565
+2878	2	2	2593	62	102	2026-06-11 21:58:45.849568
+2879	2	2	2594	62	81	2026-06-11 21:58:45.849571
+2880	2	2	2595	62	17	2026-06-11 21:58:45.849574
+2881	2	2	2596	62	23	2026-06-11 21:58:45.849576
+2882	2	2	2597	62	81	2026-06-11 21:58:45.849579
+2883	2	2	2598	62	11	2026-06-11 21:58:45.849582
+2884	2	2	2599	62	67	2026-06-11 21:58:45.849585
+2885	2	2	2675	62	68	2026-06-11 21:58:45.849588
+2886	2	2	2600	62	23	2026-06-11 21:58:45.84959
+2887	2	2	2601	62	47	2026-06-11 21:58:45.849593
+2888	2	2	2602	62	81	2026-06-11 21:58:45.849596
+2889	2	2	2603	62	59	2026-06-11 21:58:45.849599
+2890	2	2	2605	62	70	2026-06-11 21:58:45.849601
+2891	2	2	2606	62	103	2026-06-11 21:58:45.849604
+2892	2	2	2607	62	112	2026-06-11 21:58:45.849607
+2893	2	2	2608	62	63	2026-06-11 21:58:45.84961
+2894	2	2	2609	62	52	2026-06-11 21:58:45.849613
+2895	2	2	2610	62	54	2026-06-11 21:58:45.849616
+2896	2	2	2611	62	116	2026-06-11 21:58:45.849618
+2897	2	2	2613	62	56	2026-06-11 21:58:45.849621
+2898	2	2	2614	62	1	2026-06-11 21:58:45.849624
+2899	2	2	2615	62	2	2026-06-11 21:58:45.849627
+2900	2	2	2616	62	75	2026-06-11 21:58:45.84963
+2901	2	2	2617	62	100	2026-06-11 21:58:45.849633
+2902	2	2	2618	62	50	2026-06-11 21:58:45.849635
+2903	2	2	2619	62	54	2026-06-11 21:58:45.849638
+2904	2	2	2620	62	8	2026-06-11 21:58:45.849641
+2905	2	2	2621	62	130	2026-06-11 21:58:45.849644
+2906	2	2	2622	62	99	2026-06-11 21:58:45.849646
+2907	2	2	2623	62	90	2026-06-11 21:58:45.849649
+2908	2	2	2624	62	82	2026-06-11 21:58:45.849652
+2909	2	2	2626	62	123	2026-06-11 21:58:45.849655
+2910	2	2	2628	62	1	2026-06-11 21:58:45.849658
+2911	2	2	2629	62	44	2026-06-11 21:58:45.84966
+2912	2	2	2630	62	13	2026-06-11 21:58:45.849663
+2913	2	2	2631	62	10	2026-06-11 21:58:45.849666
+2914	2	2	2632	62	52	2026-06-11 21:58:45.849669
+2915	2	2	2633	62	47	2026-06-11 21:58:45.849672
+2916	2	2	2635	62	1	2026-06-11 21:58:45.849674
+2917	2	2	2676	62	97	2026-06-11 21:58:45.849677
+2918	2	2	2636	62	70	2026-06-11 21:58:45.84968
+2919	2	2	2637	62	93	2026-06-11 21:58:45.849683
+2920	2	2	2638	62	80	2026-06-11 21:58:45.849686
+2921	2	2	2639	62	65	2026-06-11 21:58:45.849688
+2922	2	2	2640	62	23	2026-06-11 21:58:45.849691
+2923	2	2	2641	62	12	2026-06-11 21:58:45.849694
+2924	2	2	2642	62	33	2026-06-11 21:58:45.849697
+2925	2	2	2643	62	55	2026-06-11 21:58:45.849699
+2926	2	2	2644	62	1	2026-06-11 21:58:45.849702
+2927	2	2	2645	62	95	2026-06-11 21:58:45.849705
+2928	2	2	2646	62	28	2026-06-11 21:58:45.849708
+2929	2	2	2647	62	53	2026-06-11 21:58:45.84971
+2930	2	2	2649	62	102	2026-06-11 21:58:45.849713
+2931	2	2	2650	62	101	2026-06-11 21:58:45.849716
+2932	2	2	2651	62	39	2026-06-11 21:58:45.849719
+2933	2	2	2652	62	51	2026-06-11 21:58:45.849722
+2934	2	2	2653	62	12	2026-06-11 21:58:45.849724
+2935	2	2	2654	62	58	2026-06-11 21:58:45.849727
+2936	2	2	2655	62	101	2026-06-11 21:58:45.84973
+2937	2	2	2656	62	33	2026-06-11 21:58:45.849733
+2938	2	2	2657	62	83	2026-06-11 21:58:45.849736
+2939	2	2	2659	62	56	2026-06-11 21:58:45.849739
+2940	2	2	2660	62	26	2026-06-11 21:58:45.849742
+2941	2	2	2661	62	101	2026-06-11 21:58:45.849744
+2942	2	2	2662	62	2	2026-06-11 21:58:45.849747
+2943	2	2	2663	62	30	2026-06-11 21:58:45.84975
+2944	2	2	2665	62	126	2026-06-11 21:58:45.849753
+2945	2	2	2666	62	60	2026-06-11 21:58:45.849755
+2946	2	2	2667	62	61	2026-06-11 21:58:45.849758
+2947	2	2	2668	62	87	2026-06-11 21:58:45.849761
+2948	2	2	2669	62	3	2026-06-11 21:58:45.849764
+2949	2	2	2671	62	37	2026-06-11 21:58:45.849767
+2950	2	2	2672	62	58	2026-06-11 21:58:45.849769
+2951	2	2	2673	62	44	2026-06-11 21:58:45.849772
+2952	2	2	2674	62	93	2026-06-11 21:58:45.849775
+2953	2	2	2677	62	78	2026-06-11 21:58:45.849778
+2954	2	2	2679	62	50	2026-06-11 21:58:45.849781
+2955	2	2	2680	62	56	2026-06-11 21:58:45.849783
+2956	2	2	2681	62	86	2026-06-11 21:58:45.849786
+2957	2	2	2682	62	116	2026-06-11 21:58:45.849789
+2958	2	2	2683	62	16	2026-06-11 21:58:45.849792
+2959	2	2	2684	62	3	2026-06-11 21:58:45.849795
+2960	2	2	2685	62	3	2026-06-11 21:58:45.849797
+2961	2	2	2686	62	100	2026-06-11 21:58:45.8498
+2962	2	2	2687	62	33	2026-06-11 21:58:45.849803
+2963	2	2	2693	62	97	2026-06-11 21:58:45.849806
+2964	2	2	2694	62	92	2026-06-11 21:58:45.849808
+2965	2	2	2695	62	65	2026-06-11 21:58:45.849811
+2966	2	2	2696	62	65	2026-06-11 21:58:45.849814
+2967	2	2	2697	62	35	2026-06-11 21:58:45.849817
+2968	2	2	2698	62	11	2026-06-11 21:58:45.849819
+2969	2	2	2699	62	43	2026-06-11 21:58:45.849822
+2970	2	2	2701	62	100	2026-06-11 21:58:45.849825
+2971	2	2	2703	62	2	2026-06-11 21:58:45.849828
+2972	2	2	2704	62	2	2026-06-11 21:58:45.849831
+2973	2	2	2705	62	23	2026-06-11 21:58:45.849834
+2974	2	2	2706	62	102	2026-06-11 21:58:45.849837
+2975	2	2	2707	62	63	2026-06-11 21:58:45.84984
+2976	2	2	2709	62	60	2026-06-11 21:58:45.849843
+2977	2	2	2710	62	35	2026-06-11 21:58:45.849846
+2978	2	2	2711	62	94	2026-06-11 21:58:45.849849
+2979	2	2	2712	62	2	2026-06-11 21:58:45.849852
+2980	2	2	2713	62	49	2026-06-11 21:58:45.849854
+2981	2	2	2714	62	3	2026-06-11 21:58:45.849857
+2982	2	2	2715	62	43	2026-06-11 21:58:45.84986
+2983	2	2	2716	62	94	2026-06-11 21:58:45.849863
+2984	2	2	2717	62	1	2026-06-11 21:58:45.849866
+2985	2	2	2718	62	97	2026-06-11 21:58:45.849869
+2986	2	2	2719	62	88	2026-06-11 21:58:45.849872
+2987	2	2	2720	62	31	2026-06-11 21:58:45.849875
+2988	2	2	2721	62	42	2026-06-11 21:58:45.849877
+2989	2	2	2722	62	101	2026-06-11 21:58:45.84988
+2990	2	2	2723	62	64	2026-06-11 21:58:45.849883
+2991	2	2	2725	62	100	2026-06-11 21:58:45.849886
+2992	2	2	2726	62	66	2026-06-11 21:58:45.849889
+2993	2	2	2727	62	30	2026-06-11 21:58:45.849891
+2994	2	2	2728	62	88	2026-06-11 21:58:45.849894
+2995	2	2	2729	62	52	2026-06-11 21:58:45.849897
+2996	2	2	2730	62	40	2026-06-11 21:58:45.8499
+2997	2	2	2731	62	2	2026-06-11 21:58:45.849903
+2998	2	2	2733	62	101	2026-06-11 21:58:45.849905
+2999	2	2	2734	62	68	2026-06-11 21:58:45.849908
+3000	2	2	2735	62	26	2026-06-11 21:58:45.849911
+3001	2	2	2737	62	99	2026-06-11 21:58:45.849914
+3002	2	2	2738	62	13	2026-06-11 21:58:45.849917
+3003	2	2	2739	62	60	2026-06-11 21:58:45.849919
+3004	2	2	2740	62	17	2026-06-11 21:58:45.849922
+3005	2	2	2742	62	94	2026-06-11 21:58:45.849925
+3006	2	2	2743	62	58	2026-06-11 21:58:45.849928
+3007	2	2	2744	62	96	2026-06-11 21:58:45.849931
+3008	2	2	2745	62	65	2026-06-11 21:58:45.849934
+3009	2	2	2747	62	61	2026-06-11 21:58:45.849936
+3010	2	2	2748	62	40	2026-06-11 21:58:45.849939
+3011	2	2	2749	62	107	2026-06-11 21:58:45.849942
+3012	2	2	2750	62	97	2026-06-11 21:58:45.849945
+3014	2	2	2752	62	62	2026-06-11 21:58:45.84995
+3015	2	2	2754	62	53	2026-06-11 21:58:45.849953
+3016	2	2	2832	62	21	2026-06-11 21:58:45.849956
+3017	2	2	2755	62	32	2026-06-11 21:58:45.849959
+3018	2	2	2756	62	3	2026-06-11 21:58:45.849961
+3019	2	2	2757	62	104	2026-06-11 21:58:45.849964
+3020	2	2	2758	62	3	2026-06-11 21:58:45.849967
+3021	2	2	2759	62	9	2026-06-11 21:58:45.84997
+3022	2	2	2760	62	66	2026-06-11 21:58:45.849972
+3023	2	2	2761	62	103	2026-06-11 21:58:45.849975
+3024	2	2	2762	62	92	2026-06-11 21:58:45.849978
+3025	2	2	2763	62	62	2026-06-11 21:58:45.849981
+3026	2	2	2764	62	50	2026-06-11 21:58:45.849984
+3027	2	2	2766	62	57	2026-06-11 21:58:45.849987
+3028	2	2	2767	62	14	2026-06-11 21:58:45.84999
+3029	2	2	2768	62	78	2026-06-11 21:58:45.849992
+3030	2	2	2769	62	36	2026-06-11 21:58:45.849995
+3031	2	2	2770	62	71	2026-06-11 21:58:45.849998
+3032	2	2	2772	62	3	2026-06-11 21:58:45.850001
+3033	2	2	2773	62	94	2026-06-11 21:58:45.850004
+3034	2	2	2774	62	110	2026-06-11 21:58:45.850006
+3035	2	2	2775	62	99	2026-06-11 21:58:45.850009
+3036	2	2	2776	62	68	2026-06-11 21:58:45.850012
+3037	2	2	2777	62	1	2026-06-11 21:58:45.850015
+3038	2	2	2778	62	70	2026-06-11 21:58:45.850018
+3039	2	2	2779	62	22	2026-06-11 21:58:45.85002
+3040	2	2	2780	62	86	2026-06-11 21:58:45.850023
+3041	2	2	2781	62	70	2026-06-11 21:58:45.850026
+3042	2	2	2782	62	79	2026-06-11 21:58:45.850029
+3043	2	2	2783	62	54	2026-06-11 21:58:45.850032
+3044	2	2	2784	62	7	2026-06-11 21:58:45.850034
+3045	2	2	2785	62	91	2026-06-11 21:58:45.850037
+3046	2	2	2787	62	84	2026-06-11 21:58:45.85004
+3047	2	2	2788	62	45	2026-06-11 21:58:45.850043
+3048	2	2	2790	62	3	2026-06-11 21:58:45.850046
+3049	2	2	2791	62	2	2026-06-11 21:58:45.850049
+3050	2	2	2792	62	100	2026-06-11 21:58:45.850051
+3051	2	2	2793	62	3	2026-06-11 21:58:45.850054
+3052	2	2	2794	62	84	2026-06-11 21:58:45.850057
+3053	2	2	2795	62	20	2026-06-11 21:58:45.85006
+3054	2	2	2796	62	99	2026-06-11 21:58:45.850062
+3055	2	2	2797	62	93	2026-06-11 21:58:45.850065
+3056	2	2	2798	62	31	2026-06-11 21:58:45.850068
+3057	2	2	2799	62	100	2026-06-11 21:58:45.850071
+3058	2	2	2800	62	28	2026-06-11 21:58:45.850074
+3059	2	2	2801	62	95	2026-06-11 21:58:45.850076
+3060	2	2	2802	62	148	2026-06-11 21:58:45.850079
+3061	2	2	2804	62	26	2026-06-11 21:58:45.850082
+3062	2	2	2806	62	97	2026-06-11 21:58:45.850085
+3063	2	2	2807	62	53	2026-06-11 21:58:45.850088
+3064	2	2	2808	62	65	2026-06-11 21:58:45.85009
+3065	2	2	2809	62	1	2026-06-11 21:58:45.850093
+3066	2	2	2810	62	60	2026-06-11 21:58:45.850096
+3067	2	2	2811	62	86	2026-06-11 21:58:45.850099
+3068	2	2	2812	62	16	2026-06-11 21:58:45.850102
+3069	2	2	2813	62	87	2026-06-11 21:58:45.850104
+3070	2	2	2815	62	3	2026-06-11 21:58:45.850107
+3071	2	2	2816	62	1	2026-06-11 21:58:45.85011
+3072	2	2	2817	62	1	2026-06-11 21:58:45.850113
+3073	2	2	2818	62	31	2026-06-11 21:58:45.850116
+3074	2	2	2819	62	83	2026-06-11 21:58:45.850119
+3075	2	2	2820	62	44	2026-06-11 21:58:45.850121
+3076	2	2	2821	62	2	2026-06-11 21:58:45.850124
+3077	2	2	2822	62	3	2026-06-11 21:58:45.850127
+3078	2	2	2823	62	57	2026-06-11 21:58:45.85013
+3079	2	2	2824	62	2	2026-06-11 21:58:45.850133
+3080	2	2	2825	62	23	2026-06-11 21:58:45.850136
+3081	2	2	2827	62	64	2026-06-11 21:58:45.850139
+3082	2	2	2828	62	16	2026-06-11 21:58:45.850141
+3083	2	2	2829	62	72	2026-06-11 21:58:45.850144
+3084	2	2	2830	62	102	2026-06-11 21:58:45.850147
+3085	2	2	2831	62	91	2026-06-11 21:58:45.85015
+3086	2	2	2833	62	64	2026-06-11 21:58:45.850153
+3087	2	2	2834	62	22	2026-06-11 21:58:45.850156
+3088	2	2	2835	62	37	2026-06-11 21:58:45.850159
+3089	2	2	2837	62	1	2026-06-11 21:58:45.850162
+3090	2	2	2838	62	30	2026-06-11 21:58:45.850165
+3091	2	2	2839	62	1	2026-06-11 21:58:45.850167
+3092	2	2	2840	62	111	2026-06-11 21:58:45.85017
+3093	2	2	2843	62	77	2026-06-11 21:58:45.850173
+3094	2	2	2844	62	78	2026-06-11 21:58:45.850176
+3095	2	2	2845	62	87	2026-06-11 21:58:45.850178
+3096	2	2	2846	62	66	2026-06-11 21:58:45.850181
+3097	2	2	2847	62	68	2026-06-11 21:58:45.850184
+3098	2	2	2848	62	3	2026-06-11 21:58:45.850187
+3099	2	2	2849	62	75	2026-06-11 21:58:45.85019
+3100	2	2	2850	62	55	2026-06-11 21:58:45.850192
+3101	2	2	2851	62	47	2026-06-11 21:58:45.850195
+3102	2	2	2853	62	79	2026-06-11 21:58:45.850198
+3103	2	2	2854	62	10	2026-06-11 21:58:45.850201
+3104	2	2	2855	62	31	2026-06-11 21:58:45.850204
+3105	2	2	2856	62	54	2026-06-11 21:58:45.850206
+3106	2	2	2857	62	104	2026-06-11 21:58:45.850209
+3107	2	2	2858	62	7	2026-06-11 21:58:45.850212
+3108	2	2	2859	62	22	2026-06-11 21:58:45.850215
+3109	2	2	2860	62	34	2026-06-11 21:58:45.850217
+3110	2	2	2861	62	92	2026-06-11 21:58:45.85022
+3111	2	2	2862	62	112	2026-06-11 21:58:45.850223
+3112	2	2	2863	62	2	2026-06-11 21:58:45.850226
+3113	2	2	2864	62	98	2026-06-11 21:58:45.850229
+3114	2	2	2865	62	99	2026-06-11 21:58:45.850232
+3115	2	2	2866	62	46	2026-06-11 21:58:45.850234
+3116	2	2	2867	62	90	2026-06-11 21:58:45.850237
+3117	2	2	2868	62	97	2026-06-11 21:58:45.85024
+3118	2	2	2869	62	13	2026-06-11 21:58:45.850243
+3119	2	2	2870	62	124	2026-06-11 21:58:45.850245
+3120	2	2	2872	62	36	2026-06-11 21:58:45.850248
+3121	2	2	2873	62	17	2026-06-11 21:58:45.850251
+3122	2	2	2874	62	2	2026-06-11 21:58:45.850254
+3123	2	2	2875	62	113	2026-06-11 21:58:45.850257
+3124	2	2	2876	62	58	2026-06-11 21:58:45.850259
+3125	2	2	2878	62	58	2026-06-11 21:58:45.850262
+3126	2	2	2879	62	25	2026-06-11 21:58:45.850265
+3127	2	2	2880	62	58	2026-06-11 21:58:45.850268
+3128	2	2	2881	62	31	2026-06-11 21:58:45.850271
+3129	2	2	2882	62	10	2026-06-11 21:58:45.850274
+3130	2	2	2883	62	47	2026-06-11 21:58:45.850276
+3131	2	2	2884	62	92	2026-06-11 21:58:45.850279
+3132	2	2	2886	62	65	2026-06-11 21:58:45.850282
+3133	2	2	2887	62	12	2026-06-11 21:58:45.850285
+3134	2	2	2889	62	25	2026-06-11 21:58:45.850288
+3135	2	2	2890	62	20	2026-06-11 21:58:45.85029
+3136	2	2	2892	62	43	2026-06-11 21:58:45.850293
+3137	2	2	2893	62	44	2026-06-11 21:58:45.850296
+3138	2	2	2894	62	77	2026-06-11 21:58:45.850299
+3139	2	2	2895	62	29	2026-06-11 21:58:45.850301
+3140	2	2	2896	62	32	2026-06-11 21:58:45.850304
+3141	2	2	2897	62	1	2026-06-11 21:58:45.850307
+3142	2	2	2898	62	57	2026-06-11 21:58:45.85031
+3143	2	2	2899	62	75	2026-06-11 21:58:45.850313
+3144	2	2	2900	62	4	2026-06-11 21:58:45.850316
+3145	2	2	2901	62	50	2026-06-11 21:58:45.850319
+3146	2	2	2902	62	24	2026-06-11 21:58:45.850322
+3147	2	2	2903	62	63	2026-06-11 21:58:45.850324
+3148	2	2	2904	62	51	2026-06-11 21:58:45.850327
+3149	2	2	2905	62	24	2026-06-11 21:58:45.85033
+3150	2	2	2906	62	84	2026-06-11 21:58:45.850337
+3151	2	2	2907	62	109	2026-06-11 21:58:45.85034
+3152	2	2	2908	62	22	2026-06-11 21:58:45.850343
+3153	2	2	2909	62	1	2026-06-11 21:58:45.850346
+3154	2	2	2910	62	11	2026-06-11 21:58:45.850349
+3155	2	2	2911	62	84	2026-06-11 21:58:45.850352
+3156	2	2	2912	62	79	2026-06-11 21:58:45.850354
+3157	2	2	2913	62	2	2026-06-11 21:58:45.850357
+3158	2	2	2914	62	72	2026-06-11 21:58:45.85036
+3159	2	2	2915	62	88	2026-06-11 21:58:45.850363
+3160	2	2	2916	62	24	2026-06-11 21:58:45.850366
+3161	2	2	2917	62	68	2026-06-11 21:58:45.850368
+3162	2	2	2918	62	4	2026-06-11 21:58:45.850371
+3163	2	2	2919	62	82	2026-06-11 21:58:45.850374
+3164	2	2	2920	62	56	2026-06-11 21:58:45.850377
+3165	2	2	2922	62	101	2026-06-11 21:58:45.85038
+3166	2	2	2923	62	72	2026-06-11 21:58:45.850383
+3167	2	2	2924	62	68	2026-06-11 21:58:45.850386
+3168	2	2	2925	62	47	2026-06-11 21:58:45.850388
+3169	2	2	2926	62	40	2026-06-11 21:58:45.850391
+3170	2	2	2927	62	69	2026-06-11 21:58:45.850394
+3171	2	2	2928	62	16	2026-06-11 21:58:45.850397
+3172	2	2	2929	62	36	2026-06-11 21:58:45.8504
+3173	2	2	2930	62	45	2026-06-11 21:58:45.850402
+3174	2	2	2931	62	13	2026-06-11 21:58:45.850405
+3175	2	2	2932	62	78	2026-06-11 21:58:45.850408
+3176	2	2	2933	62	94	2026-06-11 21:58:45.850411
+3177	2	2	2934	62	75	2026-06-11 21:58:45.850414
+3178	2	2	2935	62	56	2026-06-11 21:58:45.850417
+3179	2	2	2936	62	4	2026-06-11 21:58:45.850419
+3180	2	2	2937	62	2	2026-06-11 21:58:45.850422
+3181	2	2	2938	62	4	2026-06-11 21:58:45.850425
+3182	2	2	2939	62	63	2026-06-11 21:58:45.850428
+3183	2	2	2941	62	87	2026-06-11 21:58:45.850431
+3184	2	2	2942	62	25	2026-06-11 21:58:45.850434
+3185	2	2	2943	62	31	2026-06-11 21:58:45.850437
+3186	2	2	2944	62	77	2026-06-11 21:58:45.850439
+3187	2	2	2945	62	98	2026-06-11 21:58:45.850442
+3188	2	2	2946	62	32	2026-06-11 21:58:45.850445
+3189	2	2	2948	62	91	2026-06-11 21:58:45.850448
+3190	2	2	2949	62	57	2026-06-11 21:58:45.850451
+3191	2	2	2950	62	75	2026-06-11 21:58:45.850453
+3192	2	2	2951	62	29	2026-06-11 21:58:45.850456
+3193	2	2	2952	62	39	2026-06-11 21:58:45.850459
+3194	2	2	2953	62	2	2026-06-11 21:58:45.850462
+3195	2	2	2954	62	7	2026-06-11 21:58:45.850465
+3196	2	2	2955	62	87	2026-06-11 21:58:45.850468
+3197	2	2	2956	62	87	2026-06-11 21:58:45.850471
+3198	2	2	2957	62	101	2026-06-11 21:58:45.850473
+3199	2	2	2958	62	110	2026-06-11 21:58:45.850476
+3200	2	2	2959	62	43	2026-06-11 21:58:45.850479
+3201	2	2	2961	62	73	2026-06-11 21:58:45.850482
+3202	2	2	2962	62	102	2026-06-11 21:58:45.850485
+3203	2	2	2963	62	50	2026-06-11 21:58:45.850487
+3204	2	2	2964	62	86	2026-06-11 21:58:45.85049
+3205	2	2	2965	62	69	2026-06-11 21:58:45.850493
+3206	2	2	2966	62	91	2026-06-11 21:58:45.850496
+3207	2	2	2967	62	16	2026-06-11 21:58:45.850499
+3208	2	2	2968	62	96	2026-06-11 21:58:45.850501
+3209	2	2	2970	62	56	2026-06-11 21:58:45.850504
+3210	2	2	2971	62	86	2026-06-11 21:58:45.850507
+3211	2	2	2973	62	24	2026-06-11 21:58:45.85051
+3212	2	2	2974	62	2	2026-06-11 21:58:45.850513
+3213	2	2	2975	62	92	2026-06-11 21:58:45.850515
+3214	2	2	2978	62	19	2026-06-11 21:58:45.850518
+3215	2	2	2980	62	17	2026-06-11 21:58:45.850521
+3216	2	2	2981	62	94	2026-06-11 21:58:45.850524
+3217	2	2	2982	62	2	2026-06-11 21:58:45.850527
+3218	2	2	2983	62	33	2026-06-11 21:58:45.85053
+3219	2	2	2984	62	20	2026-06-11 21:58:45.850533
+3220	2	2	2985	62	41	2026-06-11 21:58:45.850535
+3221	2	2	2986	62	21	2026-06-11 21:58:45.850538
+3222	2	2	2987	62	70	2026-06-11 21:58:45.850541
+3223	2	2	2988	62	44	2026-06-11 21:58:45.850544
+3224	2	2	2989	62	35	2026-06-11 21:58:45.850546
+3225	2	2	2990	62	98	2026-06-11 21:58:45.850549
+3226	2	2	2991	62	51	2026-06-11 21:58:45.850552
+3227	2	2	2992	62	3	2026-06-11 21:58:45.850555
+3228	2	2	2993	62	13	2026-06-11 21:58:45.850558
+3229	2	2	2994	62	2	2026-06-11 21:58:45.85056
+3230	2	2	2995	62	57	2026-06-11 21:58:45.850563
+3231	2	2	2996	62	66	2026-06-11 21:58:45.850566
+3232	2	2	2998	62	13	2026-06-11 21:58:45.850569
+3233	2	2	2999	62	50	2026-06-11 21:58:45.850572
+3234	2	2	3000	62	16	2026-06-11 21:58:45.850575
+3235	2	2	3001	62	16	2026-06-11 21:58:45.850577
+3236	2	2	3002	62	43	2026-06-11 21:58:45.85058
+3237	2	2	3003	62	99	2026-06-11 21:58:45.850583
+3238	2	2	3004	62	55	2026-06-11 21:58:45.850586
+3239	2	2	3005	62	71	2026-06-11 21:58:45.850589
+3240	2	2	3006	62	80	2026-06-11 21:58:45.850591
+3241	2	2	3007	62	95	2026-06-11 21:58:45.850594
+3242	2	2	3008	62	128	2026-06-11 21:58:45.850597
+3243	2	2	3010	62	134	2026-06-11 21:58:45.8506
+3244	2	2	3011	62	58	2026-06-11 21:58:45.850603
+3245	2	2	3012	62	42	2026-06-11 21:58:45.850606
+3246	2	2	3013	62	181	2026-06-11 21:58:45.850608
+3247	2	2	3014	62	263	2026-06-11 21:58:45.850611
+3248	2	2	3015	62	92	2026-06-11 21:58:45.850614
+3249	2	2	3016	62	26	2026-06-11 21:58:45.850617
+3250	2	2	3017	62	23	2026-06-11 21:58:45.85062
+3251	2	2	3018	62	120	2026-06-11 21:58:45.850622
+3252	2	2	3019	62	139	2026-06-11 21:58:45.850625
+3253	2	2	3020	62	223	2026-06-11 21:58:45.850628
+3254	2	2	3021	62	93	2026-06-11 21:58:45.850631
+3255	2	2	3022	62	61	2026-06-11 21:58:45.850634
+3256	2	2	3023	62	114	2026-06-11 21:58:45.850636
+3257	2	2	3024	62	83	2026-06-11 21:58:45.850639
+3258	2	2	3025	62	36	2026-06-11 21:58:45.850642
+3259	2	2	3026	62	72	2026-06-11 21:58:45.850645
+3260	2	2	3027	62	37	2026-06-11 21:58:45.850648
+3261	2	2	3028	62	441	2026-06-11 21:58:45.85065
+3262	2	2	3029	62	89	2026-06-11 21:58:45.850653
+3263	2	2	3030	62	59	2026-06-11 21:58:45.850656
+3264	2	2	3031	62	199	2026-06-11 21:58:45.850659
+3265	2	2	3032	62	58	2026-06-11 21:58:45.850662
+3266	2	2	3033	62	21	2026-06-11 21:58:45.850664
+3267	2	2	3034	62	349	2026-06-11 21:58:45.850667
+3268	2	2	3035	62	38	2026-06-11 21:58:45.85067
+3269	2	2	3036	62	118	2026-06-11 21:58:45.850673
+3270	2	2	3037	62	140	2026-06-11 21:58:45.850676
+3271	2	2	3038	62	108	2026-06-11 21:58:45.850679
+3272	2	2	3039	62	44	2026-06-11 21:58:45.850681
+3273	2	2	3040	62	94	2026-06-11 21:58:45.850684
+3274	2	2	3041	62	32	2026-06-11 21:58:45.850687
+3275	2	2	3042	62	84	2026-06-11 21:58:45.85069
+3276	2	2	3043	62	32	2026-06-11 21:58:45.850693
+3277	2	2	3044	62	26	2026-06-11 21:58:45.850695
+3278	2	2	3045	62	117	2026-06-11 21:58:45.850698
+3279	2	2	3046	62	35	2026-06-11 21:58:45.850701
+3280	2	2	3048	62	47	2026-06-11 21:58:45.850704
+3281	2	2	3050	62	16	2026-06-11 21:58:45.850707
+3282	2	2	3051	62	83	2026-06-11 21:58:45.850709
+3283	2	2	3052	62	76	2026-06-11 21:58:45.850712
+3284	2	2	3053	62	116	2026-06-11 21:58:45.850715
+3285	2	2	3055	62	122	2026-06-11 21:58:45.850718
+3286	2	2	3056	62	32	2026-06-11 21:58:45.850721
+3287	2	2	3057	62	52	2026-06-11 21:58:45.850723
+3288	2	2	3058	62	128	2026-06-11 21:58:45.850726
+3289	2	2	3059	62	22	2026-06-11 21:58:45.850729
+3290	2	2	3060	62	91	2026-06-11 21:58:45.850732
+3291	2	2	3061	62	45	2026-06-11 21:58:45.850735
+3292	2	2	3062	62	85	2026-06-11 21:58:45.850738
+3293	2	2	3063	62	9	2026-06-11 21:58:45.85074
+3294	2	2	3064	62	10	2026-06-11 21:58:45.850743
+3295	2	2	3065	62	59	2026-06-11 21:58:45.850746
+3296	2	2	3066	62	74	2026-06-11 21:58:45.850749
+3297	2	2	3067	62	315	2026-06-11 21:58:45.850751
+3298	2	2	3068	62	303	2026-06-11 21:58:45.850754
+3299	2	2	3069	62	9	2026-06-11 21:58:45.850757
+3300	2	2	3070	62	122	2026-06-11 21:58:45.85076
+3301	2	2	3071	62	55	2026-06-11 21:58:45.850763
+3302	2	2	3072	62	31	2026-06-11 21:58:45.850766
+3303	2	2	3073	62	530	2026-06-11 21:58:45.850768
+3304	2	2	3074	62	74	2026-06-11 21:58:45.850771
+3305	2	2	3075	62	104	2026-06-11 21:58:45.850774
+3306	2	2	3076	62	45	2026-06-11 21:58:45.850777
+3307	2	2	3077	62	138	2026-06-11 21:58:45.850779
+3308	2	2	3078	62	522	2026-06-11 21:58:45.850782
+3309	2	2	3079	62	50	2026-06-11 21:58:45.850785
+3310	2	2	3082	62	89	2026-06-11 21:58:45.850788
+3311	2	2	3083	62	44	2026-06-11 21:58:45.85079
+3312	2	2	3084	62	111	2026-06-11 21:58:45.850793
+3313	2	2	3085	62	25	2026-06-11 21:58:45.850796
+3314	2	2	3086	62	81	2026-06-11 21:58:45.850799
+3315	2	2	3087	62	35	2026-06-11 21:58:45.850803
+3316	2	2	3088	62	93	2026-06-11 21:58:45.850806
+3317	2	2	3089	62	89	2026-06-11 21:58:45.850808
+3318	2	2	3090	62	16	2026-06-11 21:58:45.850811
+3319	2	2	3091	62	497	2026-06-11 21:58:45.850814
+3320	2	2	3092	62	60	2026-06-11 21:58:45.850817
+3321	2	2	3093	62	198	2026-06-11 21:58:45.85082
+3322	2	2	3094	62	7	2026-06-11 21:58:45.850823
+3323	2	2	3095	62	111	2026-06-11 21:58:45.850825
+3324	2	2	3096	62	104	2026-06-11 21:58:45.850828
+3325	2	2	3097	62	98	2026-06-11 21:58:45.850831
+3326	2	2	3098	62	112	2026-06-11 21:58:45.850834
+3327	2	2	3099	62	524	2026-06-11 21:58:45.850836
+3328	2	2	3100	62	17	2026-06-11 21:58:45.850839
+3329	2	2	3101	62	159	2026-06-11 21:58:45.850842
+3330	2	2	3103	62	48	2026-06-11 21:58:45.850845
+3331	2	2	3104	62	49	2026-06-11 21:58:45.850848
+3332	2	2	3105	62	44	2026-06-11 21:58:45.850851
+3333	2	2	3106	62	143	2026-06-11 21:58:45.850854
+3334	2	2	3107	62	30	2026-06-11 21:58:45.850856
+3335	2	2	3109	62	107	2026-06-11 21:58:45.850859
+3336	2	2	3110	62	96	2026-06-11 21:58:45.850862
+3337	2	2	3111	62	425	2026-06-11 21:58:45.850865
+3338	2	2	3112	62	116	2026-06-11 21:58:45.850868
+3339	2	2	3113	62	96	2026-06-11 21:58:45.85087
+3340	2	2	3114	62	23	2026-06-11 21:58:45.850873
+3341	2	2	3115	62	35	2026-06-11 21:58:45.850876
+3342	2	2	3116	62	88	2026-06-11 21:58:45.850879
+3343	2	2	3117	62	122	2026-06-11 21:58:45.850882
+3344	2	2	3118	62	26	2026-06-11 21:58:45.850885
+3345	2	2	3119	62	141	2026-06-11 21:58:45.850888
+3346	2	2	3120	62	533	2026-06-11 21:58:45.85089
+3347	2	2	3121	62	25	2026-06-11 21:58:45.850893
+3348	2	2	3122	62	177	2026-06-11 21:58:45.850896
+3349	2	2	3123	62	143	2026-06-11 21:58:45.850899
+3350	2	2	3124	62	116	2026-06-11 21:58:45.850902
+3351	2	2	3125	62	49	2026-06-11 21:58:45.850904
+3352	2	2	3126	62	132	2026-06-11 21:58:45.850907
+3353	2	2	3127	62	129	2026-06-11 21:58:45.85091
+3354	2	2	3128	62	92	2026-06-11 21:58:45.850913
+3355	2	2	3129	62	20	2026-06-11 21:58:45.850915
+3356	2	2	3130	62	130	2026-06-11 21:58:45.850918
+3357	2	2	3131	62	28	2026-06-11 21:58:45.850921
+3358	2	2	3132	62	41	2026-06-11 21:58:45.850924
+3359	2	2	3133	62	34	2026-06-11 21:58:45.850927
+3360	2	2	3134	62	24	2026-06-11 21:58:45.85093
+3361	2	2	3135	62	36	2026-06-11 21:58:45.850932
+3362	2	2	3137	62	119	2026-06-11 21:58:45.850935
+3363	2	2	3139	62	28	2026-06-11 21:58:45.850938
+3364	2	2	3141	62	37	2026-06-11 21:58:45.850941
+3365	2	2	3142	62	91	2026-06-11 21:58:45.850944
+3366	2	2	3144	62	262	2026-06-11 21:58:45.850947
+3367	2	2	3145	62	132	2026-06-11 21:58:45.850949
+3368	2	2	3146	62	97	2026-06-11 21:58:45.850952
+3369	2	2	3147	62	477	2026-06-11 21:58:45.850955
+3370	2	2	3148	62	52	2026-06-11 21:58:45.850958
+3371	2	2	3149	62	51	2026-06-11 21:58:45.85096
+3372	2	2	3150	62	90	2026-06-11 21:58:45.850963
+3373	2	2	3151	62	96	2026-06-11 21:58:45.850966
+3374	2	2	3153	62	37	2026-06-11 21:58:45.850969
+3375	2	2	3154	62	43	2026-06-11 21:58:45.850972
+3376	2	2	3155	62	89	2026-06-11 21:58:45.850975
+3377	2	2	3156	62	20	2026-06-11 21:58:45.850977
+3378	2	2	3157	62	76	2026-06-11 21:58:45.85098
+3379	2	2	3158	62	24	2026-06-11 21:58:45.850983
+3380	2	2	3159	62	492	2026-06-11 21:58:45.850986
+3381	2	2	3160	62	99	2026-06-11 21:58:45.850989
+3382	2	2	3161	62	85	2026-06-11 21:58:45.850991
+3383	2	2	3162	62	117	2026-06-11 21:58:45.850994
+3384	2	2	3163	62	43	2026-06-11 21:58:45.850997
+3385	2	2	3164	62	57	2026-06-11 21:58:45.851
+3386	2	2	3166	62	440	2026-06-11 21:58:45.851003
+3387	2	2	3168	62	60	2026-06-11 21:58:45.851006
+3388	2	2	3169	62	32	2026-06-11 21:58:45.851008
+3389	2	2	3171	62	27	2026-06-11 21:58:45.851011
+3390	2	2	3172	62	137	2026-06-11 21:58:45.851014
+3391	2	2	3173	62	284	2026-06-11 21:58:45.851017
+3392	2	2	3174	62	103	2026-06-11 21:58:45.85102
+3393	2	2	3175	62	102	2026-06-11 21:58:45.851023
+3394	2	2	3177	62	118	2026-06-11 21:58:45.851025
+3395	2	2	3178	62	299	2026-06-11 21:58:45.851028
+3396	2	2	3179	62	106	2026-06-11 21:58:45.851031
+3397	2	2	3180	62	49	2026-06-11 21:58:45.851034
+3398	2	2	3181	62	85	2026-06-11 21:58:45.851037
+3399	2	2	3182	62	41	2026-06-11 21:58:45.851039
+3400	2	2	3183	62	103	2026-06-11 21:58:45.851042
+3401	2	2	3184	62	118	2026-06-11 21:58:45.851045
+3402	2	2	3185	62	24	2026-06-11 21:58:45.851048
+3403	2	2	3186	62	74	2026-06-11 21:58:45.851051
+3404	2	2	3187	62	27	2026-06-11 21:58:45.851053
+3405	2	2	3188	62	82	2026-06-11 21:58:45.851056
+3406	2	2	3189	62	85	2026-06-11 21:58:45.851059
+3407	2	2	3190	62	63	2026-06-11 21:58:45.851062
+3408	2	2	3191	62	52	2026-06-11 21:58:45.851065
+3409	2	2	3192	62	52	2026-06-11 21:58:45.851068
+3410	2	2	3193	62	77	2026-06-11 21:58:45.85107
+3411	2	2	3194	62	28	2026-06-11 21:58:45.851073
+3412	2	2	3195	62	32	2026-06-11 21:58:45.851076
+3413	2	2	3196	62	90	2026-06-11 21:58:45.851079
+3414	2	2	3197	62	113	2026-06-11 21:58:45.851082
+3415	2	2	3198	62	327	2026-06-11 21:58:45.851085
+3416	2	2	3199	62	123	2026-06-11 21:58:45.851087
+3417	2	2	3201	62	125	2026-06-11 21:58:45.85109
+3418	2	2	3202	62	133	2026-06-11 21:58:45.851093
+3419	2	2	3203	62	27	2026-06-11 21:58:45.851096
+3420	2	2	3204	62	75	2026-06-11 21:58:45.851099
+3421	2	2	3205	62	40	2026-06-11 21:58:45.851102
+3422	2	2	3206	62	43	2026-06-11 21:58:45.851104
+3423	2	2	3207	62	8	2026-06-11 21:58:45.851107
+3424	2	2	3208	62	100	2026-06-11 21:58:45.85111
+3425	2	2	3209	62	22	2026-06-11 21:58:45.851113
+3426	2	2	3210	62	25	2026-06-11 21:58:45.851116
+3427	2	2	3211	62	84	2026-06-11 21:58:45.851118
+3428	2	2	3212	62	80	2026-06-11 21:58:45.851121
+3429	2	2	3214	62	99	2026-06-11 21:58:45.851124
+3430	2	2	3215	62	34	2026-06-11 21:58:45.851127
+3431	2	2	3216	62	255	2026-06-11 21:58:45.85113
+3432	2	2	3217	62	114	2026-06-11 21:58:45.851133
+3433	2	2	3218	62	362	2026-06-11 21:58:45.851136
+3434	2	2	3219	62	111	2026-06-11 21:58:45.851139
+3435	2	2	3221	62	71	2026-06-11 21:58:45.851141
+3436	2	2	3222	62	41	2026-06-11 21:58:45.851144
+3437	2	2	3223	62	100	2026-06-11 21:58:45.851147
+3438	2	2	3224	62	75	2026-06-11 21:58:45.85115
+3439	2	2	3226	62	119	2026-06-11 21:58:45.851153
+3440	2	2	3227	62	115	2026-06-11 21:58:45.851155
+3441	2	2	3228	62	41	2026-06-11 21:58:45.851158
+3442	2	2	3229	62	36	2026-06-11 21:58:45.851161
+3443	2	2	3231	62	238	2026-06-11 21:58:45.851164
+3444	2	2	3232	62	99	2026-06-11 21:58:45.851167
+3445	2	2	3233	62	11	2026-06-11 21:58:45.85117
+3446	2	2	3234	62	31	2026-06-11 21:58:45.851172
+3447	2	2	3235	62	91	2026-06-11 21:58:45.851175
+3448	2	2	3236	62	90	2026-06-11 21:58:45.851178
+3449	2	2	3238	62	108	2026-06-11 21:58:45.851181
+3450	2	2	3239	62	61	2026-06-11 21:58:45.851184
+3451	2	2	3241	62	16	2026-06-11 21:58:45.851187
+3452	2	2	3242	62	25	2026-06-11 21:58:45.851189
+3453	2	2	3243	62	136	2026-06-11 21:58:45.851192
+3454	2	2	3245	62	99	2026-06-11 21:58:45.851195
+3455	2	2	3246	62	84	2026-06-11 21:58:45.851198
+3456	2	2	3247	62	129	2026-06-11 21:58:45.851201
+3457	2	2	3248	62	93	2026-06-11 21:58:45.851203
+3458	2	2	3249	62	85	2026-06-11 21:58:45.851206
+3459	2	2	3250	62	105	2026-06-11 21:58:45.851209
+3460	2	2	3251	62	27	2026-06-11 21:58:45.851212
+3461	2	2	3252	62	115	2026-06-11 21:58:45.851215
+3462	2	2	3253	62	488	2026-06-11 21:58:45.851217
+3463	2	2	3254	62	17	2026-06-11 21:58:45.85122
+3464	2	2	3255	62	63	2026-06-11 21:58:45.851223
+3465	2	2	3257	62	142	2026-06-11 21:58:45.851226
+3466	2	2	3258	62	37	2026-06-11 21:58:45.851229
+3467	2	2	3259	62	247	2026-06-11 21:58:45.851231
+3468	2	2	3260	62	57	2026-06-11 21:58:45.851234
+3469	2	2	3261	62	140	2026-06-11 21:58:45.851237
+3470	2	2	3262	62	59	2026-06-11 21:58:45.85124
+3471	2	2	3263	62	55	2026-06-11 21:58:45.851243
+3472	2	2	3264	62	65	2026-06-11 21:58:45.851246
+3473	2	2	3265	62	122	2026-06-11 21:58:45.851248
+3474	2	2	3266	62	91	2026-06-11 21:58:45.851251
+3475	2	2	3267	62	14	2026-06-11 21:58:45.851254
+3476	2	2	3268	62	39	2026-06-11 21:58:45.851257
+3477	2	2	3269	62	109	2026-06-11 21:58:45.85126
+3478	2	2	3270	62	98	2026-06-11 21:58:45.851263
+3479	2	2	3271	62	301	2026-06-11 21:58:45.851266
+3480	2	2	3272	62	104	2026-06-11 21:58:45.851268
+3481	2	2	3273	62	61	2026-06-11 21:58:45.851271
+3482	2	2	3274	62	43	2026-06-11 21:58:45.851274
+3483	2	2	3275	62	128	2026-06-11 21:58:45.851277
+3484	2	2	3277	62	107	2026-06-11 21:58:45.85128
+3485	2	2	3278	62	121	2026-06-11 21:58:45.851283
+3486	2	2	3279	62	115	2026-06-11 21:58:45.851285
+3487	2	2	3280	62	288	2026-06-11 21:58:45.851288
+3488	2	2	3281	62	79	2026-06-11 21:58:45.851291
+3489	2	2	3282	62	141	2026-06-11 21:58:45.851294
+3490	2	2	3283	62	72	2026-06-11 21:58:45.851297
+3491	2	2	3284	62	41	2026-06-11 21:58:45.8513
+3492	2	2	3285	62	131	2026-06-11 21:58:45.851303
+3493	2	2	3286	62	95	2026-06-11 21:58:45.851306
+3494	2	2	3287	62	15	2026-06-11 21:58:45.851308
+3495	2	2	3289	62	18	2026-06-11 21:58:45.851311
+3496	2	2	3290	62	311	2026-06-11 21:58:45.851314
+3497	2	2	3291	62	33	2026-06-11 21:58:45.851317
+3498	2	2	3292	62	38	2026-06-11 21:58:45.85132
+3499	2	2	3294	62	31	2026-06-11 21:58:45.851322
+3500	2	2	3295	62	136	2026-06-11 21:58:45.851325
+3501	2	2	3296	62	134	2026-06-11 21:58:45.851328
+3502	2	2	3297	62	46	2026-06-11 21:58:45.851331
+3503	2	2	3298	62	89	2026-06-11 21:58:45.851338
+3504	2	2	3299	62	108	2026-06-11 21:58:45.851341
+3505	2	2	3300	62	75	2026-06-11 21:58:45.851344
+3506	2	2	3301	62	80	2026-06-11 21:58:45.851346
+3507	2	2	3302	62	516	2026-06-11 21:58:45.851349
+3508	2	2	3303	62	108	2026-06-11 21:58:45.851352
+3509	2	2	3304	62	531	2026-06-11 21:58:45.851355
+3510	2	2	3305	62	54	2026-06-11 21:58:45.851358
+3511	2	2	3307	62	25	2026-06-11 21:58:45.851361
+3512	2	2	3308	62	48	2026-06-11 21:58:45.851363
+3513	2	2	3309	62	23	2026-06-11 21:58:45.851367
+3514	2	2	3311	62	21	2026-06-11 21:58:45.85137
+3515	2	2	3312	62	107	2026-06-11 21:58:45.851373
+3516	2	2	3313	62	67	2026-06-11 21:58:45.851376
+3517	2	2	3315	62	94	2026-06-11 21:58:45.851378
+3518	2	2	3316	62	118	2026-06-11 21:58:45.851381
+3519	2	2	3318	62	37	2026-06-11 21:58:45.851384
+3520	2	2	3319	62	91	2026-06-11 21:58:45.851387
+3521	2	2	3320	62	126	2026-06-11 21:58:45.85139
+3522	2	2	3321	62	131	2026-06-11 21:58:45.851392
+3523	2	2	3322	62	32	2026-06-11 21:58:45.851395
+3524	2	2	3324	62	122	2026-06-11 21:58:45.851398
+3525	2	2	3325	62	109	2026-06-11 21:58:45.851401
+3526	2	2	3326	62	107	2026-06-11 21:58:45.851404
+3527	2	2	3327	62	25	2026-06-11 21:58:45.851407
+3528	2	2	3328	62	111	2026-06-11 21:58:45.85141
+3529	2	2	3330	62	68	2026-06-11 21:58:45.851413
+3530	2	2	3331	62	24	2026-06-11 21:58:45.851415
+3531	2	2	3332	62	76	2026-06-11 21:58:45.851418
+3532	2	2	3334	62	58	2026-06-11 21:58:45.851421
+3533	2	2	3335	62	93	2026-06-11 21:58:45.851424
+3534	2	2	3336	62	45	2026-06-11 21:58:45.851427
+3535	2	2	3337	62	200	2026-06-11 21:58:45.85143
+3536	2	2	3338	62	42	2026-06-11 21:58:45.851433
+3537	2	2	3339	62	82	2026-06-11 21:58:45.851436
+3538	2	2	3340	62	74	2026-06-11 21:58:45.851438
+3539	2	2	3341	62	111	2026-06-11 21:58:45.851441
+3540	2	2	3342	62	85	2026-06-11 21:58:45.851444
+3541	2	2	3343	62	118	2026-06-11 21:58:45.851447
+3542	2	2	3344	62	45	2026-06-11 21:58:45.85145
+3543	2	2	3345	62	311	2026-06-11 21:58:45.851453
+3544	2	2	3346	62	20	2026-06-11 21:58:45.851456
+3545	2	2	3347	62	85	2026-06-11 21:58:45.851459
+3546	2	2	3349	62	530	2026-06-11 21:58:45.851461
+3547	2	2	3350	62	372	2026-06-11 21:58:45.851464
+3548	2	2	3351	62	61	2026-06-11 21:58:45.851467
+3549	2	2	3352	62	557	2026-06-11 21:58:45.85147
+3550	2	2	3353	62	263	2026-06-11 21:58:45.851473
+3551	2	2	3354	62	78	2026-06-11 21:58:45.851476
+3552	2	2	3355	62	106	2026-06-11 21:58:45.851479
+3553	2	2	3356	62	26	2026-06-11 21:58:45.851482
+3554	2	2	3357	62	138	2026-06-11 21:58:45.851484
+3555	2	2	3358	62	122	2026-06-11 21:58:45.851487
+3556	2	2	3359	62	31	2026-06-11 21:58:45.85149
+3557	2	2	3360	62	24	2026-06-11 21:58:45.851493
+3558	2	2	3361	62	114	2026-06-11 21:58:45.851496
+3559	2	2	3362	62	84	2026-06-11 21:58:45.851499
+3560	2	2	3363	62	120	2026-06-11 21:58:45.851502
+3561	2	2	3364	62	117	2026-06-11 21:58:45.851505
+3562	2	2	3365	62	26	2026-06-11 21:58:45.851507
+3563	2	2	3366	62	110	2026-06-11 21:58:45.85151
+3564	2	2	3367	62	18	2026-06-11 21:58:45.851513
+3565	2	2	3368	62	94	2026-06-11 21:58:45.851516
+3566	2	2	3369	62	39	2026-06-11 21:58:45.851519
+3567	2	2	3372	62	340	2026-06-11 21:58:45.851521
+3568	2	2	3373	62	495	2026-06-11 21:58:45.851524
+3569	2	2	3374	62	30	2026-06-11 21:58:45.851527
+3570	2	2	3375	62	38	2026-06-11 21:58:45.85153
+3571	2	2	3376	62	188	2026-06-11 21:58:45.851533
+3572	2	2	3378	62	58	2026-06-11 21:58:45.851535
+3573	2	2	3379	62	469	2026-06-11 21:58:45.851538
+3574	2	2	3380	62	415	2026-06-11 21:58:45.851541
+3575	2	2	3381	62	398	2026-06-11 21:58:45.851544
+3576	2	2	3382	62	428	2026-06-11 21:58:45.851547
+3577	2	2	3383	62	11	2026-06-11 21:58:45.851549
+3578	2	2	3384	62	54	2026-06-11 21:58:45.851552
+3579	2	2	3385	62	99	2026-06-11 21:58:45.851555
+3580	2	2	3386	62	53	2026-06-11 21:58:45.851558
+3581	2	2	3387	62	431	2026-06-11 21:58:45.851561
+3582	2	2	3388	62	121	2026-06-11 21:58:45.851564
+3583	2	2	3389	62	431	2026-06-11 21:58:45.851567
+3584	2	2	3390	62	44	2026-06-11 21:58:45.851569
+3585	2	2	3391	62	172	2026-06-11 21:58:45.851572
+3586	2	2	3392	62	143	2026-06-11 21:58:45.851575
+3587	2	2	3393	62	32	2026-06-11 21:58:45.851578
+3588	2	2	3395	62	107	2026-06-11 21:58:45.851581
+3589	2	2	3396	62	108	2026-06-11 21:58:45.851583
+3590	2	2	3397	62	34	2026-06-11 21:58:45.851586
+3591	2	2	3398	62	140	2026-06-11 21:58:45.851589
+3592	2	2	3399	62	121	2026-06-11 21:58:45.851592
+3593	2	2	3401	62	460	2026-06-11 21:58:45.851595
+3594	2	2	3402	62	60	2026-06-11 21:58:45.851598
+3595	2	2	3403	62	273	2026-06-11 21:58:45.851601
+3596	2	2	3405	62	430	2026-06-11 21:58:45.851603
+3597	2	2	3406	62	88	2026-06-11 21:58:45.851606
+3598	2	2	3407	62	205	2026-06-11 21:58:45.851609
+3599	2	2	3408	62	102	2026-06-11 21:58:45.851612
+3600	2	2	3409	62	66	2026-06-11 21:58:45.851615
+3601	2	2	3410	62	184	2026-06-11 21:58:45.851618
+3602	2	2	3411	62	105	2026-06-11 21:58:45.851621
+3603	2	2	3412	62	40	2026-06-11 21:58:45.851624
+3604	2	2	3413	62	442	2026-06-11 21:58:45.851627
+3605	2	2	3414	62	63	2026-06-11 21:58:45.85163
+3606	2	2	3415	62	107	2026-06-11 21:58:45.851633
+3607	2	2	3416	62	27	2026-06-11 21:58:45.851636
+3608	2	2	3417	62	65	2026-06-11 21:58:45.851638
+3609	2	2	3418	62	41	2026-06-11 21:58:45.851641
+3610	2	2	3419	62	47	2026-06-11 21:58:45.851644
+3611	2	2	3420	62	129	2026-06-11 21:58:45.851647
+3612	2	2	3421	62	100	2026-06-11 21:58:45.85165
+3613	2	2	3422	62	10	2026-06-11 21:58:45.851652
+3614	2	2	3423	62	132	2026-06-11 21:58:45.851655
+3615	2	2	3424	62	98	2026-06-11 21:58:45.851658
+3616	2	2	3425	62	70	2026-06-11 21:58:45.851661
+3617	2	2	3426	62	40	2026-06-11 21:58:45.851664
+3618	2	2	3427	62	146	2026-06-11 21:58:45.851667
+3619	2	2	3428	62	199	2026-06-11 21:58:45.85167
+3620	2	2	3429	62	124	2026-06-11 21:58:45.851673
+3621	2	2	3430	62	510	2026-06-11 21:58:45.851676
+3622	2	2	3431	62	242	2026-06-11 21:58:45.851679
+3623	2	2	3432	62	41	2026-06-11 21:58:45.851682
+3624	2	2	3433	62	201	2026-06-11 21:58:45.851684
+3625	2	2	3434	62	352	2026-06-11 21:58:45.851687
+3626	2	2	3435	62	430	2026-06-11 21:58:45.85169
+3627	2	2	3436	62	69	2026-06-11 21:58:45.851693
+3628	2	2	3438	62	87	2026-06-11 21:58:45.851696
+3629	2	2	3439	62	92	2026-06-11 21:58:45.851699
+3630	2	2	3440	62	78	2026-06-11 21:58:45.851702
+3631	2	2	3441	62	204	2026-06-11 21:58:45.851704
+3632	2	2	3442	62	92	2026-06-11 21:58:45.851707
+3633	2	2	3443	62	273	2026-06-11 21:58:45.85171
+3634	2	2	3444	62	107	2026-06-11 21:58:45.851714
+3635	2	2	3445	62	97	2026-06-11 21:58:45.851717
+3636	2	2	3446	62	114	2026-06-11 21:58:45.85172
+3637	2	2	3447	62	84	2026-06-11 21:58:45.851722
+3638	2	2	3448	62	24	2026-06-11 21:58:45.851725
+3639	2	2	3449	62	69	2026-06-11 21:58:45.851728
+3640	2	2	3450	62	151	2026-06-11 21:58:45.851731
+3641	2	2	3451	62	225	2026-06-11 21:58:45.851734
+3642	2	2	3452	62	370	2026-06-11 21:58:45.851736
+3643	2	2	3453	62	362	2026-06-11 21:58:45.851739
+3644	2	2	3455	62	111	2026-06-11 21:58:45.851742
+3645	2	2	3456	62	129	2026-06-11 21:58:45.851745
+3646	2	2	3457	62	29	2026-06-11 21:58:45.851747
+3647	2	2	3458	62	37	2026-06-11 21:58:45.85175
+3648	2	2	3459	62	95	2026-06-11 21:58:45.851753
+3649	2	2	3460	62	226	2026-06-11 21:58:45.851756
+3650	2	2	3461	62	74	2026-06-11 21:58:45.851758
+3651	2	2	3462	62	52	2026-06-11 21:58:45.851761
+3652	2	2	3464	62	95	2026-06-11 21:58:45.851764
+3653	2	2	3465	62	10	2026-06-11 21:58:45.851767
+3654	2	2	3468	62	71	2026-06-11 21:58:45.85177
+3655	2	2	3469	62	77	2026-06-11 21:58:45.851772
+3656	2	2	3470	62	123	2026-06-11 21:58:45.851775
+3657	2	2	3471	62	138	2026-06-11 21:58:45.851778
+3658	2	2	3472	62	96	2026-06-11 21:58:45.851781
+3659	2	2	3473	62	14	2026-06-11 21:58:45.851783
+3660	2	2	3474	62	68	2026-06-11 21:58:45.851786
+3661	2	2	3475	62	87	2026-06-11 21:58:45.851789
+3662	2	2	3476	62	65	2026-06-11 21:58:45.851792
+3663	2	2	3478	62	85	2026-06-11 21:58:45.851795
+3664	2	2	3479	62	21	2026-06-11 21:58:45.851798
+3665	2	2	3480	62	41	2026-06-11 21:58:45.8518
+3666	2	2	3481	62	138	2026-06-11 21:58:45.851803
+3667	2	2	3482	62	36	2026-06-11 21:58:45.851806
+3668	2	2	3483	62	30	2026-06-11 21:58:45.851809
+3669	2	2	3484	62	46	2026-06-11 21:58:45.851811
+3670	2	2	3485	62	84	2026-06-11 21:58:45.851814
+3671	2	2	3486	62	50	2026-06-11 21:58:45.851817
+3672	2	2	3487	62	106	2026-06-11 21:58:45.85182
+3673	2	2	3489	62	487	2026-06-11 21:58:45.851823
+3674	2	2	3490	62	36	2026-06-11 21:58:45.851825
+3675	2	2	3491	62	503	2026-06-11 21:58:45.851828
+3676	2	2	3492	62	28	2026-06-11 21:58:45.851831
+3677	2	2	3493	62	74	2026-06-11 21:58:45.851834
+3678	2	2	3494	62	91	2026-06-11 21:58:45.851836
+3679	2	2	3495	62	31	2026-06-11 21:58:45.851839
+3680	2	2	3496	62	48	2026-06-11 21:58:45.851842
+3681	2	2	3497	62	65	2026-06-11 21:58:45.851845
+3682	2	2	3498	62	100	2026-06-11 21:58:45.851848
+3683	2	2	3499	62	80	2026-06-11 21:58:45.85185
+3684	2	2	3501	62	9	2026-06-11 21:58:45.851853
+3685	2	2	3502	62	44	2026-06-11 21:58:45.851856
+3686	2	2	3503	62	35	2026-06-11 21:58:45.851859
+3687	2	2	3504	62	18	2026-06-11 21:58:45.851862
+3688	2	2	3505	62	498	2026-06-11 21:58:45.851864
+3689	2	2	3506	62	137	2026-06-11 21:58:45.851867
+3690	2	2	3507	62	77	2026-06-11 21:58:45.85187
+3691	2	2	3508	62	19	2026-06-11 21:58:45.851873
+3692	2	2	3509	62	565	2026-06-11 21:58:45.851876
+3693	2	2	3511	62	18	2026-06-11 21:58:45.851878
+3694	2	2	3512	62	550	2026-06-11 21:58:45.851881
+3695	2	2	3513	62	236	2026-06-11 21:58:45.851884
+3696	2	2	3516	62	137	2026-06-11 21:58:45.851887
+3697	2	2	3517	62	136	2026-06-11 21:58:45.85189
+3698	2	2	3518	62	228	2026-06-11 21:58:45.851893
+3699	2	2	3519	62	249	2026-06-11 21:58:45.851895
+3700	2	2	3520	62	415	2026-06-11 21:58:45.851898
+3701	2	2	3521	62	397	2026-06-11 21:58:45.851901
+3702	2	2	3522	62	377	2026-06-11 21:58:45.851904
+3703	2	2	3564	62	482	2026-06-11 21:58:45.851907
+3704	2	2	3525	62	420	2026-06-11 21:58:45.85191
+3705	2	2	3526	62	446	2026-06-11 21:58:45.851913
+3706	2	2	3528	62	391	2026-06-11 21:58:45.851916
+3707	2	2	3529	62	434	2026-06-11 21:58:45.851919
+3708	2	2	3530	62	432	2026-06-11 21:58:45.851921
+3709	2	2	3531	62	352	2026-06-11 21:58:45.851924
+3710	2	2	3532	62	259	2026-06-11 21:58:45.851927
+3711	2	2	3533	62	225	2026-06-11 21:58:45.85193
+3712	2	2	3534	62	302	2026-06-11 21:58:45.851933
+3713	2	2	3535	62	584	2026-06-11 21:58:45.851935
+3714	2	2	3536	62	201	2026-06-11 21:58:45.851938
+3715	2	2	3537	62	307	2026-06-11 21:58:45.851941
+3716	2	2	3539	62	304	2026-06-11 21:58:45.851944
+3717	2	2	3540	62	176	2026-06-11 21:58:45.851947
+3718	2	2	3541	62	396	2026-06-11 21:58:45.85195
+3719	2	2	3542	62	242	2026-06-11 21:58:45.851952
+3720	2	2	3543	62	512	2026-06-11 21:58:45.851955
+3721	2	2	3544	62	79	2026-06-11 21:58:45.851958
+3722	2	2	3545	62	96	2026-06-11 21:58:45.851961
+3723	2	2	3546	62	553	2026-06-11 21:58:45.851963
+3724	2	2	3547	62	394	2026-06-11 21:58:45.851966
+3725	2	2	3548	62	336	2026-06-11 21:58:45.851969
+3726	2	2	3549	62	535	2026-06-11 21:58:45.851972
+3727	2	2	3550	62	140	2026-06-11 21:58:45.851975
+3728	2	2	3552	62	305	2026-06-11 21:58:45.851977
+3729	2	2	3553	62	369	2026-06-11 21:58:45.85198
+3730	2	2	3554	62	455	2026-06-11 21:58:45.851983
+3731	2	2	3555	62	271	2026-06-11 21:58:45.851986
+3732	2	2	3556	62	218	2026-06-11 21:58:45.851989
+3733	2	2	3557	62	174	2026-06-11 21:58:45.851991
+3734	2	2	3558	62	460	2026-06-11 21:58:45.851994
+3735	2	2	3559	62	326	2026-06-11 21:58:45.851997
+3736	2	2	3560	62	427	2026-06-11 21:58:45.852
+3737	2	2	3561	62	418	2026-06-11 21:58:45.852002
+3738	2	2	3563	62	313	2026-06-11 21:58:45.852005
+3739	2	2	3565	62	235	2026-06-11 21:58:45.852008
+3740	2	2	3566	62	566	2026-06-11 21:58:45.852011
+3741	2	2	3567	62	169	2026-06-11 21:58:45.852013
+3742	2	2	3568	62	432	2026-06-11 21:58:45.852016
+3743	2	2	3569	62	252	2026-06-11 21:58:45.852019
+3744	2	2	3570	62	380	2026-06-11 21:58:45.852022
+3745	2	2	3571	62	464	2026-06-11 21:58:45.852025
+3746	2	2	3572	62	306	2026-06-11 21:58:45.852027
+3747	2	2	3573	62	375	2026-06-11 21:58:45.85203
+3748	2	2	3574	62	346	2026-06-11 21:58:45.852033
+3749	2	2	3575	62	382	2026-06-11 21:58:45.852036
+3750	2	2	3576	62	174	2026-06-11 21:58:45.852038
+3751	2	2	3577	62	418	2026-06-11 21:58:45.852041
+3752	2	2	3578	62	225	2026-06-11 21:58:45.852044
+3753	2	2	3579	62	444	2026-06-11 21:58:45.852047
+3754	2	2	3580	62	462	2026-06-11 21:58:45.85205
+3755	2	2	3581	62	502	2026-06-11 21:58:45.852052
+3756	2	2	3582	62	395	2026-06-11 21:58:45.852055
+3757	2	2	3583	62	458	2026-06-11 21:58:45.852058
+3758	2	2	3584	62	476	2026-06-11 21:58:45.852061
+3759	2	2	3585	62	255	2026-06-11 21:58:45.852063
+3760	2	2	3586	62	505	2026-06-11 21:58:45.852066
+3761	2	2	3587	62	296	2026-06-11 21:58:45.852069
+3762	2	2	3588	62	392	2026-06-11 21:58:45.852072
+3763	2	2	3589	62	475	2026-06-11 21:58:45.852075
+3764	2	2	3590	62	569	2026-06-11 21:58:45.852077
+3765	2	2	3591	62	472	2026-06-11 21:58:45.85208
+3766	2	2	3593	62	191	2026-06-11 21:58:45.852083
+3767	2	2	3594	62	56	2026-06-11 21:58:45.852086
+3768	2	2	3595	62	152	2026-06-11 21:58:45.852088
+3769	2	2	3596	62	493	2026-06-11 21:58:45.852091
+3770	2	2	3597	62	179	2026-06-11 21:58:45.852094
+3771	2	2	3598	62	151	2026-06-11 21:58:45.852097
+3772	2	2	3599	62	320	2026-06-11 21:58:45.8521
+3773	2	2	3600	62	297	2026-06-11 21:58:45.852103
+3774	2	2	3601	62	323	2026-06-11 21:58:45.852105
+3775	2	2	3602	62	356	2026-06-11 21:58:45.852108
+3776	2	2	3603	62	218	2026-06-11 21:58:45.852111
+3777	2	2	3604	62	380	2026-06-11 21:58:45.852114
+3778	2	2	3605	62	255	2026-06-11 21:58:45.852116
+3779	2	2	3607	62	453	2026-06-11 21:58:45.852119
+3780	2	2	3608	62	339	2026-06-11 21:58:45.852122
+3781	2	2	3611	62	442	2026-06-11 21:58:45.852125
+3782	2	2	3612	62	170	2026-06-11 21:58:45.852128
+3783	2	2	3613	62	271	2026-06-11 21:58:45.852131
+3784	2	2	3614	62	305	2026-06-11 21:58:45.852134
+3785	2	2	3615	62	307	2026-06-11 21:58:45.852136
+3786	2	2	3617	62	301	2026-06-11 21:58:45.852139
+3787	2	2	3618	62	534	2026-06-11 21:58:45.852142
+3788	2	2	3619	62	92	2026-06-11 21:58:45.852145
+3789	2	2	3620	62	322	2026-06-11 21:58:45.852147
+3790	2	2	3621	62	212	2026-06-11 21:58:45.85215
+3791	2	2	3622	62	432	2026-06-11 21:58:45.852153
+3792	2	2	3623	62	335	2026-06-11 21:58:45.852156
+3793	2	2	3624	62	520	2026-06-11 21:58:45.852159
+3794	2	2	3625	62	167	2026-06-11 21:58:45.852162
+3795	2	2	3626	62	210	2026-06-11 21:58:45.852164
+3796	2	2	3627	62	393	2026-06-11 21:58:45.852167
+3797	2	2	3628	62	412	2026-06-11 21:58:45.85217
+3798	2	2	3629	62	468	2026-06-11 21:58:45.852173
+3799	2	2	3630	62	324	2026-06-11 21:58:45.852176
+3800	2	2	3631	62	121	2026-06-11 21:58:45.852178
+3801	2	2	3632	62	396	2026-06-11 21:58:45.852181
+3802	2	2	3634	62	324	2026-06-11 21:58:45.852184
+3803	2	2	3635	62	283	2026-06-11 21:58:45.852187
+3804	2	2	3636	62	510	2026-06-11 21:58:45.85219
+3805	2	2	3637	62	206	2026-06-11 21:58:45.852193
+3806	2	2	3638	62	134	2026-06-11 21:58:45.852195
+3807	2	2	3639	62	139	2026-06-11 21:58:45.852198
+3808	2	2	3640	62	409	2026-06-11 21:58:45.852201
+3809	2	2	3641	62	176	2026-06-11 21:58:45.852204
+3810	2	2	3642	62	407	2026-06-11 21:58:45.852207
+3811	2	2	3643	62	253	2026-06-11 21:58:45.85221
+3812	2	2	3644	62	170	2026-06-11 21:58:45.852213
+3813	2	2	3646	62	459	2026-06-11 21:58:45.852216
+3814	2	2	3647	62	481	2026-06-11 21:58:45.852219
+3815	2	2	3648	62	146	2026-06-11 21:58:45.852222
+3816	2	2	3650	62	415	2026-06-11 21:58:45.852225
+3817	2	2	3651	62	186	2026-06-11 21:58:45.852228
+3818	2	2	3652	62	229	2026-06-11 21:58:45.852231
+3819	2	2	3653	62	439	2026-06-11 21:58:45.852234
+3820	2	2	3654	62	445	2026-06-11 21:58:45.852236
+3821	2	2	3655	62	325	2026-06-11 21:58:45.852239
+3822	2	2	3656	62	298	2026-06-11 21:58:45.852242
+3823	2	2	3657	62	474	2026-06-11 21:58:45.852245
+3824	2	2	3658	62	384	2026-06-11 21:58:45.852248
+3825	2	2	3660	62	205	2026-06-11 21:58:45.85225
+3826	2	2	3661	62	429	2026-06-11 21:58:45.852253
+3827	2	2	3662	62	106	2026-06-11 21:58:45.852256
+3828	2	2	3663	62	328	2026-06-11 21:58:45.852259
+3829	2	2	3664	62	296	2026-06-11 21:58:45.852262
+3830	2	2	3665	62	323	2026-06-11 21:58:45.852265
+3831	2	2	3666	62	94	2026-06-11 21:58:45.852268
+3832	2	2	3667	62	226	2026-06-11 21:58:45.852271
+3833	2	2	3668	62	486	2026-06-11 21:58:45.852274
+3834	2	2	3669	62	140	2026-06-11 21:58:45.852277
+3835	2	2	3670	62	399	2026-06-11 21:58:45.852279
+3836	2	2	3671	62	368	2026-06-11 21:58:45.852283
+3837	2	2	3673	62	355	2026-06-11 21:58:45.852285
+3838	2	2	3674	62	337	2026-06-11 21:58:45.852288
+3839	2	2	3675	62	519	2026-06-11 21:58:45.852291
+3840	2	2	3676	62	338	2026-06-11 21:58:45.852294
+3841	2	2	3677	62	301	2026-06-11 21:58:45.852297
+3842	2	2	3678	62	376	2026-06-11 21:58:45.8523
+3843	2	2	3680	62	235	2026-06-11 21:58:45.852302
+3844	2	2	3681	62	188	2026-06-11 21:58:45.852305
+3845	2	2	3682	62	72	2026-06-11 21:58:45.852308
+3846	2	2	3683	62	118	2026-06-11 21:58:45.852311
+3847	2	2	3685	62	212	2026-06-11 21:58:45.852314
+3848	2	2	3686	62	125	2026-06-11 21:58:45.852317
+3849	2	2	3688	62	368	2026-06-11 21:58:45.85232
+3850	2	2	3689	62	346	2026-06-11 21:58:45.852322
+3851	2	2	3691	62	509	2026-06-11 21:58:45.852325
+3852	2	2	3692	62	526	2026-06-11 21:58:45.852328
+3853	2	2	3693	62	540	2026-06-11 21:58:45.852331
+3854	2	2	3694	62	358	2026-06-11 21:58:45.852339
+3855	2	2	3695	62	360	2026-06-11 21:58:45.852343
+3856	2	2	3696	62	202	2026-06-11 21:58:45.852346
+3857	2	2	3697	62	403	2026-06-11 21:58:45.852348
+3858	2	2	3698	62	475	2026-06-11 21:58:45.852352
+3859	2	2	3699	62	275	2026-06-11 21:58:45.852355
+3860	2	2	3700	62	492	2026-06-11 21:58:45.852358
+3861	2	2	3701	62	74	2026-06-11 21:58:45.852361
+3862	2	2	3702	62	261	2026-06-11 21:58:45.852364
+3863	2	2	3703	62	150	2026-06-11 21:58:45.852367
+3864	2	2	3704	62	70	2026-06-11 21:58:45.852369
+3865	2	2	3705	62	219	2026-06-11 21:58:45.852373
+3866	2	2	3706	62	293	2026-06-11 21:58:45.852376
+3867	2	2	2338	62	50	\N
+3013	2	2	2751	62	27	2026-06-11 22:45:15.19132
 \.
 
 
@@ -5147,266 +6792,273 @@ COPY public.department_material_limits (id, tenant_id, site_id, department, mate
 -- Data for Name: departments; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.departments (id, tenant_id, site_id, name, code, accounting_code, building_id, is_active, is_deleted, created_at) FROM stdin;
-1	3	3	CIVIL	DEPT-00001	\N	1	t	f	2026-05-15 13:15:35.449236
-2	3	3	ADMIN	DEPT-00002	\N	1	t	f	2026-05-15 13:19:20.067632
-3	2	2	Physiotherapy Dept	DEPT-00001	\N	4	t	f	2026-05-21 16:31:55.999016
-5	3	3	CAMP WARD 2 ND FLOOR	DEPT-00004	\N	1	t	f	2026-06-03 11:00:15.062725
-6	3	3	CLINICAL DEPARTMENT	DEPT-00005	\N	1	t	f	2026-06-03 11:00:15.107155
-7	3	3	COMM- CENTRE BELUVAl	DEPT-00006	\N	1	t	f	2026-06-03 11:00:15.127705
-8	3	3	COMMUNITY CENTRE - SHAKTHI	DEPT-00007	\N	1	t	f	2026-06-03 11:00:15.143898
-9	3	3	GAS MANIFOLD	DEPT-00008	\N	1	t	f	2026-06-03 11:00:15.157028
-10	3	3	GENERIC PHARMACY	DEPT-00009	\N	1	t	f	2026-06-03 11:00:15.172452
-11	3	3	2DECHO AND TMT ROOM	DEPT-00010	\N	1	t	f	2026-06-03 11:00:15.189215
-12	3	3	ACCOUNTS DEPT	DEPT-00011	\N	1	t	f	2026-06-03 11:00:15.205808
-13	3	3	ADMIN BLOCK	DEPT-00012	\N	1	t	f	2026-06-03 11:00:15.222158
-14	3	3	AIR-CONDITIONING -MAINTENANCE	DEPT-00013	\N	1	t	f	2026-06-03 11:00:15.260498
-15	3	3	ALLIED HEALTH SCIENCE	DEPT-00014	\N	1	t	f	2026-06-03 11:00:15.285483
-16	3	3	ANATOMY	DEPT-00015	\N	1	t	f	2026-06-03 11:00:15.301317
-17	3	3	ART CENTRE	DEPT-00016	\N	1	t	f	2026-06-03 11:00:15.313807
-18	3	3	BILLING SECTION	DEPT-00017	\N	1	t	f	2026-06-03 11:00:15.330569
-19	3	3	BIO CHEMISTRY	DEPT-00018	\N	1	t	f	2026-06-03 11:00:15.347301
-20	3	3	BIOCHEMISTRY MEDICAL COLLEGE	DEPT-00019	\N	1	t	f	2026-06-03 11:00:15.363949
-21	3	3	BIO-MEDICAL	DEPT-00020	\N	1	t	f	2026-06-03 11:00:15.381985
-22	3	3	BLOOD BANK	DEPT-00021	\N	1	t	f	2026-06-03 11:00:15.3984
-23	3	3	CAFETERIA	DEPT-00022	\N	1	t	f	2026-06-03 11:00:15.41507
-24	3	3	CAMP,	DEPT-00023	\N	1	t	f	2026-06-03 11:00:15.431827
-25	3	3	Camp-Inpatient	DEPT-00024	\N	1	t	f	2026-06-03 11:00:15.446594
-26	3	3	CARDIO THORACIC 0.T	DEPT-00025	\N	1	t	f	2026-06-03 11:00:15.453746
-27	3	3	CARDIO THORACIC UNIT	DEPT-00026	\N	1	t	f	2026-06-03 11:00:15.461088
-28	3	3	CARPENTER DEPARTMENT	DEPT-00027	\N	1	t	f	2026-06-03 11:00:15.469223
-29	3	3	CASUALTY	DEPT-00028	\N	1	t	f	2026-06-03 11:00:15.485772
-30	3	3	CEO SIR CABIN	DEPT-00029	\N	1	t	f	2026-06-03 11:00:15.501756
-31	3	3	CHINNAPPA CANTEEN	DEPT-00030	\N	1	t	f	2026-06-03 11:00:15.515912
-32	3	3	CIVIL DEPARTMENT	DEPT-00031	\N	1	t	f	2026-06-03 11:00:15.53275
-33	3	3	CLINICAL PHARMACOLOGY	DEPT-00032	\N	1	t	f	2026-06-03 11:00:15.549347
-34	3	3	COLLEGE OF NURSING	DEPT-00033	\N	1	t	f	2026-06-03 11:00:15.565946
-35	3	3	COMMUNITY CENTER PERAR	DEPT-00034	\N	1	t	f	2026-06-03 11:00:15.582602
-36	3	3	Community Centre - Goodshedde	DEPT-00035	\N	1	t	f	2026-06-03 11:00:15.599383
-37	3	3	COMMUNITY CENTRE - KAVOOR	DEPT-00036	\N	1	t	f	2026-06-03 11:00:15.615782
-38	3	3	COMMUNITY CENTRE - PANE MANGAL	DEPT-00037	\N	1	t	f	2026-06-03 11:00:15.63266
-39	3	3	COMMUNITY MEDICINE	DEPT-00038	\N	1	t	f	2026-06-03 11:00:15.64817
-40	3	3	COMPUTER DEPARTMENT	DEPT-00039	\N	1	t	f	2026-06-03 11:00:15.66311
-41	3	3	CORPORATE	DEPT-00040	\N	1	t	f	2026-06-03 11:00:15.670243
-42	3	3	COU	DEPT-00041	\N	1	t	f	2026-06-03 11:00:15.677917
-43	3	3	COUNCIL ROOM MEDICAL COLLEGE	DEPT-00042	\N	1	t	f	2026-06-03 11:00:15.685943
-44	3	3	CVS	DEPT-00043	\N	1	t	f	2026-06-03 11:00:15.694155
-45	3	3	CYTO PATHOLOGY	DEPT-00044	\N	1	t	f	2026-06-03 11:00:15.702243
-46	3	3	DENTAL - ORTHODONTICS	DEPT-00045	\N	1	t	f	2026-06-03 11:00:15.710881
-47	3	3	DENTAL DEPARTMENTS MATERIAL	DEPT-00046	\N	1	t	f	2026-06-03 11:00:15.718845
-48	3	3	DENTAL LIBRARY	DEPT-00047	\N	1	t	f	2026-06-03 11:00:15.736009
-49	3	3	Dental O.P.D Oral Surgery	DEPT-00048	\N	1	t	f	2026-06-03 11:00:15.752811
-50	3	3	DENTAL ORAL MEDICINE & RADIOLOGY	DEPT-00049	\N	1	t	f	2026-06-03 11:00:15.768918
-51	3	3	DENTAL PEDODONTICS	DEPT-00050	\N	1	t	f	2026-06-03 11:00:15.785619
-52	3	3	DENTAL PROSTHODONTICS	DEPT-00051	\N	1	t	f	2026-06-03 11:00:15.80002
-53	3	3	DENTAL-LIBRARY	DEPT-00052	\N	1	t	f	2026-06-03 11:00:15.812888
-54	3	3	DENTAL-PERIODONTICS	DEPT-00053	\N	1	t	f	2026-06-03 11:00:15.820975
-55	3	3	DEPARTMENT OF PHARMACY PRACTICE	DEPT-00054	\N	1	t	f	2026-06-03 11:00:15.829545
-56	3	3	DEPT OF CSSD	DEPT-00055	\N	1	t	f	2026-06-03 11:00:15.83826
-57	3	3	DEPT OF OPTHALMOLOGY	DEPT-00056	\N	1	t	f	2026-06-03 11:00:15.846134
-58	3	3	DEPT OF ORTHOPAEDIC	DEPT-00057	\N	1	t	f	2026-06-03 11:00:15.854306
-59	3	3	DIALYSIS	DEPT-00058	\N	1	t	f	2026-06-03 11:00:15.862714
-60	3	3	DIETARY DEPARTMENT	DEPT-00059	\N	1	t	f	2026-06-03 11:00:15.870898
-61	3	3	DRUG INFORMATION CENTRE	DEPT-00060	\N	1	t	f	2026-06-03 11:00:15.879604
-62	3	3	EAST POINT COLLEGE OF ENGINEERING AND TECHNOLOGY	DEPT-00061	\N	1	t	f	2026-06-03 11:00:15.888281
-63	3	3	EAST POINT COLLEGE OF HIGHER EDUCATION	DEPT-00062	\N	1	t	f	2026-06-03 11:00:15.896104
-64	3	3	EAST POINT COLLEGE OF NURSING	DEPT-00063	\N	1	t	f	2026-06-03 11:00:15.904421
-65	3	3	EAST POINT COLLEGE OF PHARMACY	DEPT-00064	\N	1	t	f	2026-06-03 11:00:15.912967
-66	3	3	ELECTRICAL DG -MAINTENANCE	DEPT-00065	\N	1	t	f	2026-06-03 11:00:15.921136
-67	3	3	EMERGENCY GREEN ZONE	DEPT-00066	\N	1	t	f	2026-06-03 11:00:15.929348
-68	3	3	EMERGENCY ICU	DEPT-00067	\N	1	t	f	2026-06-03 11:00:15.938235
-69	3	3	EMERGENCY YELLOW ZONE	DEPT-00068	\N	1	t	f	2026-06-03 11:00:15.945742
-70	3	3	ENDOSCOPY	DEPT-00069	\N	1	t	f	2026-06-03 11:00:15.953069
-71	3	3	ENGINEERING COLLEGE DEPARTMENT	DEPT-00070	\N	1	t	f	2026-06-03 11:00:15.961755
-72	3	3	EQUIPMENT -DEPT	DEPT-00071	\N	1	t	f	2026-06-03 11:00:15.969626
-73	3	3	EXAMINATION HALL,	DEPT-00072	\N	1	t	f	2026-06-03 11:00:15.986145
-74	3	3	FACILITIES MANAGEMENT	DEPT-00073	\N	1	t	f	2026-06-03 11:00:15.99994
-75	3	3	FACULTY SECTION MEDICAL COLLEGE	DEPT-00074	\N	1	t	f	2026-06-03 11:00:16.014275
-76	3	3	FORENSIC MEDICINE	DEPT-00075	\N	1	t	f	2026-06-03 11:00:16.030933
-77	3	3	GRAPHIC DESIGNING SECTION	DEPT-00076	\N	1	t	f	2026-06-03 11:00:16.047464
-78	3	3	HELIOS CONSTRUCTION DEPARTMENT	DEPT-00077	\N	1	t	f	2026-06-03 11:00:16.064286
-79	3	3	HELP	DEPT-00078	\N	1	t	f	2026-06-03 11:00:16.080882
-80	3	3	HISTOPATHOLOGY	DEPT-00079	\N	1	t	f	2026-06-03 11:00:16.097657
-81	3	3	HOSPITAL ADMINISTRATION	DEPT-00080	\N	1	t	f	2026-06-03 11:00:16.11911
-82	3	3	HOSPITAL SUPERVISOR	DEPT-00081	\N	1	t	f	2026-06-03 11:00:16.135996
-83	3	3	ICT	DEPT-00082	\N	1	t	f	2026-06-03 11:00:16.151539
-84	3	3	INFECTION CONTROL DEPARTMENT	DEPT-00083	\N	1	t	f	2026-06-03 11:00:16.164103
-85	3	3	INSTITUTIONAL ETHICS DEPARTMENT	DEPT-00084	\N	1	t	f	2026-06-03 11:00:16.180906
-86	3	3	INSURANCE DEPARTMENT	DEPT-00085	\N	1	t	f	2026-06-03 11:00:16.197609
-87	3	3	INTERNAL AUDIT DEPARTMENT	DEPT-00086	\N	1	t	f	2026-06-03 11:00:16.214201
-88	3	3	IT DEPARTMENT	DEPT-00087	\N	1	t	f	2026-06-03 11:00:16.231018
-89	3	3	ITU	DEPT-00088	\N	1	t	f	2026-06-03 11:00:16.247504
-90	3	3	LAUNDRY	DEPT-00089	\N	1	t	f	2026-06-03 11:00:16.269351
-91	3	3	M.G CHARITABLE TRUST	DEPT-00090	\N	1	t	f	2026-06-03 11:00:16.28624
-92	3	3	MAINTENANCE	DEPT-00091	\N	1	t	f	2026-06-03 11:00:16.301892
-93	3	3	MAINTENANCE MEDICAL OXYGEN	DEPT-00092	\N	1	t	f	2026-06-03 11:00:16.314325
-94	3	3	MARKETING DEPARTMENT	DEPT-00093	\N	1	t	f	2026-06-03 11:00:16.331003
-95	3	3	MECHANICAL MAINTENANCE	DEPT-00094	\N	1	t	f	2026-06-03 11:00:16.347596
-96	3	3	MEDICAL COLLEGE	DEPT-00095	\N	1	t	f	2026-06-03 11:00:16.369334
-97	3	3	MEDICAL COLLEGE HSK SUPERVISOR	DEPT-00096	\N	1	t	f	2026-06-03 11:00:16.38596
-98	3	3	MEDICAL EDUCATION UNIT - AJIMS	DEPT-00097	\N	1	t	f	2026-06-03 11:00:16.402986
-99	3	3	MEDICAL SOCIAL WORKER	DEPT-00098	\N	1	t	f	2026-06-03 11:00:16.417667
-100	3	3	MEDICAL-LIBRARY	DEPT-00099	\N	1	t	f	2026-06-03 11:00:16.429741
-101	3	3	MICU	DEPT-00100	\N	1	t	f	2026-06-03 11:00:16.43737
-102	3	3	MORTUARY	DEPT-00101	\N	1	t	f	2026-06-03 11:00:16.44474
-103	3	3	MRD	DEPT-00102	\N	1	t	f	2026-06-03 11:00:16.452391
-104	3	3	NABH	DEPT-00103	\N	2	t	f	2026-06-03 11:00:16.469215
-105	3	3	NESCAFE	DEPT-00104	\N	2	t	f	2026-06-03 11:00:16.4864
-106	3	3	NEW ROYAL COLLEGE OF NURSING	DEPT-00105	\N	2	t	f	2026-06-03 11:00:16.499692
-107	3	3	NICU	DEPT-00106	\N	2	t	f	2026-06-03 11:00:16.518976
-108	3	3	NUCLEAR MEDICINE	DEPT-00107	\N	2	t	f	2026-06-03 11:00:16.535557
-109	3	3	OBG ADMINISTRATION	DEPT-00108	\N	2	t	f	2026-06-03 11:00:16.549752
-110	3	3	OBG MARKETING	DEPT-00109	\N	2	t	f	2026-06-03 11:00:16.564709
-111	3	3	OBG-HDU	DEPT-00110	\N	2	t	f	2026-06-03 11:00:16.581313
-112	3	3	OCCUPATIONAL THERAPY DEPARTMENT	DEPT-00111	\N	2	t	f	2026-06-03 11:00:16.597825
-113	3	3	PACKAGE - ASD CLOSURE	DEPT-00112	\N	2	t	f	2026-06-03 11:00:16.61455
-114	3	3	PAINTING DEPARTMENT	DEPT-00113	\N	2	t	f	2026-06-03 11:00:16.63144
-115	3	3	PARAMEDICAL	DEPT-00114	\N	2	t	f	2026-06-03 11:00:16.647855
-116	3	3	PATHOLOGY	DEPT-00115	\N	2	t	f	2026-06-03 11:00:16.66456
-117	3	3	PATHOLOGY MEDICAL COLLEGE	DEPT-00116	\N	2	t	f	2026-06-03 11:00:16.682755
-118	3	3	PHARMACOLOGY	DEPT-00117	\N	2	t	f	2026-06-03 11:00:16.699412
-119	3	3	PHARMACOLOGY CLINICAL TRIAL UNIT	DEPT-00118	\N	2	t	f	2026-06-03 11:00:16.719047
-120	3	3	PHARMACY COLLEGE	DEPT-00119	\N	2	t	f	2026-06-03 11:00:16.736553
-121	3	3	PHYSIOLOGY	DEPT-00120	\N	2	t	f	2026-06-03 11:00:16.750434
-122	3	3	PICU	DEPT-00121	\N	2	t	f	2026-06-03 11:00:16.766783
-123	3	3	PLUMBING -MAINTENANCE	DEPT-00122	\N	2	t	f	2026-06-03 11:00:16.783486
-124	3	3	POST OPERATIVE	DEPT-00123	\N	2	t	f	2026-06-03 11:00:16.798639
-125	3	3	POW&SPW	DEPT-00124	\N	2	t	f	2026-06-03 11:00:16.819337
-126	3	3	PRO MARKETING	DEPT-00125	\N	2	t	f	2026-06-03 11:00:16.835915
-127	3	3	PROJECT MANAGER SECTION	DEPT-00126	\N	2	t	f	2026-06-03 11:00:16.848339
-128	3	3	PUC DEPARTMENT	DEPT-00127	\N	2	t	f	2026-06-03 11:00:16.869212
-129	3	3	PURCHASE DEPARTMENT	DEPT-00128	\N	2	t	f	2026-06-03 11:00:16.885744
-130	3	3	RADIOLOGY	DEPT-00129	\N	2	t	f	2026-06-03 11:00:16.899773
-131	3	3	REGISTRATION	DEPT-00130	\N	2	t	f	2026-06-03 11:00:16.914257
-132	3	3	RHTC	DEPT-00131	\N	2	t	f	2026-06-03 11:00:16.9287
-133	3	3	SAMPLE COLLECTION	DEPT-00132	\N	2	t	f	2026-06-03 11:00:16.93643
-134	3	3	SECURITY	DEPT-00133	\N	2	t	f	2026-06-03 11:00:16.944687
-135	3	3	SECURITY DEPT	DEPT-00134	\N	2	t	f	2026-06-03 11:00:16.952661
-136	3	3	SEROLOGY	DEPT-00135	\N	2	t	f	2026-06-03 11:00:16.969264
-137	3	3	SICU	DEPT-00136	\N	2	t	f	2026-06-03 11:00:16.986009
-138	3	3	SOCIAL AND PREVENTIVE MEDICINE	DEPT-00137	\N	2	t	f	2026-06-03 11:00:17.002896
-139	3	3	SPORTS DEPARTMENT	DEPT-00138	\N	2	t	f	2026-06-03 11:00:17.014576
-140	3	3	STUDENT SECTION MEDICAL COLLEGE	DEPT-00139	\N	2	t	f	2026-06-03 11:00:17.031363
-141	3	3	TAILORING DEPARTMENT	DEPT-00140	\N	2	t	f	2026-06-03 11:00:17.047742
-142	3	3	TRANSPORT DEPARTMENT	DEPT-00141	\N	2	t	f	2026-06-03 11:00:17.064344
-143	3	3	UHTC	DEPT-00142	\N	2	t	f	2026-06-03 11:00:17.081311
-144	3	3	WELDING DEPARTMENT	DEPT-00143	\N	2	t	f	2026-06-03 11:00:17.098045
-145	3	3	CATH LAB	DEPT-00144	\N	2	t	f	2026-06-03 11:00:17.115563
-146	3	3	CATH LAB TECHNICIAN	DEPT-00145	\N	2	t	f	2026-06-03 11:00:17.136099
-147	3	3	CATH LABORATORY	DEPT-00146	\N	2	t	f	2026-06-03 11:00:17.151689
-148	3	3	LAB COMMUNITY CENTER - KAROOR	DEPT-00147	\N	2	t	f	2026-06-03 11:00:17.164498
-149	3	3	LAB COMMUNITY CENTRE - PANEMAN	DEPT-00148	\N	2	t	f	2026-06-03 11:00:17.181127
-150	3	3	LABORATORY	DEPT-00149	\N	2	t	f	2026-06-03 11:00:17.198001
-151	3	3	LABOUR ROOM	DEPT-00150	\N	2	t	f	2026-06-03 11:00:17.214432
-152	3	3	MICROBIOLOGY	DEPT-00151	\N	2	t	f	2026-06-03 11:00:17.23138
-153	3	3	MICROBIOLOGY MEDICAL COLLEGE	DEPT-00152	\N	2	t	f	2026-06-03 11:00:17.247973
-154	3	3	ONCOPATHOLOGY-LAB	DEPT-00153	\N	2	t	f	2026-06-03 11:00:17.264616
-155	3	3	PCR LAB	DEPT-00154	\N	2	t	f	2026-06-03 11:00:17.286265
-156	3	3	SKILL LAB FOR JEEVA RAKSHA WORKSHOP	DEPT-00155	\N	2	t	f	2026-06-03 11:00:17.301754
-157	3	3	DEAN OFFICE,	DEPT-00156	\N	2	t	f	2026-06-03 11:00:17.316272
-158	3	3	FRONT OFFICE	DEPT-00157	\N	2	t	f	2026-06-03 11:00:17.333113
-159	3	3	MATRON OFFICE	DEPT-00158	\N	2	t	f	2026-06-03 11:00:17.349978
-160	3	3	MEDICAL DIRECTOR	DEPT-00159	\N	2	t	f	2026-06-03 11:00:17.366563
-161	3	3	MEDICAL SUPERINTENDENT OFFICE	DEPT-00160	\N	2	t	f	2026-06-03 11:00:17.38607
-162	3	3	MS OFFICE AJIMS	DEPT-00161	\N	2	t	f	2026-06-03 11:00:17.401641
-163	3	3	NURSING SUPERINTENDENT	DEPT-00162	\N	2	t	f	2026-06-03 11:00:17.416557
-164	3	3	PHYSICAL EDUCATIONAL DIRECTOR	DEPT-00163	\N	2	t	f	2026-06-03 11:00:17.430658
-165	3	3	PRINCIPLE OFFICE MEDICAL COLLEGE	DEPT-00164	\N	2	t	f	2026-06-03 11:00:17.445527
-166	3	3	TRUST OFFICE	DEPT-00165	\N	2	t	f	2026-06-03 11:00:17.458266
-167	3	3	CARDIOLOGY OPD	DEPT-00166	\N	2	t	f	2026-06-03 11:00:17.475391
-168	3	3	Dental OPD	DEPT-00167	\N	2	t	f	2026-06-03 11:00:17.49242
-169	3	3	DERMOTOLOGY OPD	DEPT-00168	\N	2	t	f	2026-06-03 11:00:17.508704
-170	3	3	ENT OPD	DEPT-00169	\N	2	t	f	2026-06-03 11:00:17.52544
-171	3	3	MEDICINE OPD	DEPT-00170	\N	2	t	f	2026-06-03 11:00:17.54261
-172	3	3	NEPHROLOGY OPD	DEPT-00171	\N	2	t	f	2026-06-03 11:00:17.555547
-173	3	3	NEUROLOGY OPD	DEPT-00172	\N	2	t	f	2026-06-03 11:00:17.578218
-174	3	3	OBG OPD	DEPT-00173	\N	2	t	f	2026-06-03 11:00:17.594645
-175	3	3	OPD	DEPT-00174	\N	2	t	f	2026-06-03 11:00:17.611367
-176	3	3	OPD Medical College	DEPT-00175	\N	2	t	f	2026-06-03 11:00:17.628111
-177	3	3	OPD MEDICAL COLLEGE FREE	DEPT-00176	\N	2	t	f	2026-06-03 11:00:17.644449
-178	3	3	OPD RECEPTION	DEPT-00177	\N	2	t	f	2026-06-03 11:00:17.656316
-179	3	3	OPTHALMOLOGY OPD	DEPT-00178	\N	2	t	f	2026-06-03 11:00:17.677852
-180	3	3	ORTHOPAEDIC OPD	DEPT-00179	\N	2	t	f	2026-06-03 11:00:17.69476
-181	3	3	PEADATRIC OPD	DEPT-00180	\N	2	t	f	2026-06-03 11:00:17.706376
-182	3	3	PSYCHIATRY OPD	DEPT-00181	\N	2	t	f	2026-06-03 11:00:17.728669
-183	3	3	RESPIRATORY OPD	DEPT-00182	\N	2	t	f	2026-06-03 11:00:17.744598
-184	3	3	SUPER SPECIALITY OPD	DEPT-00183	\N	2	t	f	2026-06-03 11:00:17.755806
-185	3	3	SURGERY OPD	DEPT-00184	\N	2	t	f	2026-06-03 11:00:17.771774
-186	3	3	UROLOGY OPD	DEPT-00185	\N	2	t	f	2026-06-03 11:00:17.780543
-187	3	3	HAEMOTOLOGY	DEPT-00186	\N	2	t	f	2026-06-03 11:00:17.788334
-188	3	3	MAJOR OT	DEPT-00187	\N	2	t	f	2026-06-03 11:00:17.797043
-189	3	3	MINOR OPERATION THEATRE	DEPT-00188	\N	2	t	f	2026-06-03 11:00:17.810851
-190	3	3	MINOR OT	DEPT-00189	\N	2	t	f	2026-06-03 11:00:17.827798
-191	3	3	OT- PLASTIC SURGERY	DEPT-00190	\N	2	t	f	2026-06-03 11:00:17.844984
-192	3	3	OT SUB STORE	DEPT-00191	\N	2	t	f	2026-06-03 11:00:17.857999
-193	3	3	OT-NEURO	DEPT-00192	\N	2	t	f	2026-06-03 11:00:17.8749
-194	3	3	OT-ORTHO	DEPT-00193	\N	2	t	f	2026-06-03 11:00:17.891838
-195	3	3	OT-UROLOGY	DEPT-00194	\N	2	t	f	2026-06-03 11:00:17.911585
-196	3	3	PHYSIOTHERAPY	DEPT-00195	\N	2	t	f	2026-06-03 11:00:17.928567
-197	3	3	PHYSIOTHERAPY COLLEGE	DEPT-00196	\N	2	t	f	2026-06-03 11:00:17.939468
-198	3	3	IP GENERIC PHARMACY MAIN STORE	DEPT-00197	\N	2	t	f	2026-06-03 11:00:17.953819
-199	3	3	IP PHARMACY MAIN STORE	DEPT-00198	\N	2	t	f	2026-06-03 11:00:17.961658
-200	3	3	PHARMACY MAIN STORE	DEPT-00199	\N	2	t	f	2026-06-03 11:00:17.970063
-201	3	3	102 WARD	DEPT-00200	\N	3	t	f	2026-06-03 11:00:17.978618
-202	3	3	103 WARD	DEPT-00201	\N	3	t	f	2026-06-03 11:00:17.986589
-203	3	3	104 WARD	DEPT-00202	\N	3	t	f	2026-06-03 11:00:17.995002
-204	3	3	105 WARD	DEPT-00203	\N	3	t	f	2026-06-03 11:00:18.003319
-205	3	3	106 WARD	DEPT-00204	\N	3	t	f	2026-06-03 11:00:18.011668
-206	3	3	107 WARD	DEPT-00205	\N	3	t	f	2026-06-03 11:00:18.020052
-207	3	3	108 WARD	DEPT-00206	\N	3	t	f	2026-06-03 11:00:18.028706
-208	3	3	109 WARD	DEPT-00207	\N	3	t	f	2026-06-03 11:00:18.036789
-209	3	3	110 WARD	DEPT-00208	\N	3	t	f	2026-06-03 11:00:18.045001
-210	3	3	111 WARD	DEPT-00209	\N	3	t	f	2026-06-03 11:00:18.053374
-211	3	3	112 WARD	DEPT-00210	\N	3	t	f	2026-06-03 11:00:18.062208
-212	3	3	2 ND FLOOR SPECIAL WARD	DEPT-00211	\N	3	t	f	2026-06-03 11:00:18.071363
-213	3	3	201 WARD	DEPT-00212	\N	3	t	f	2026-06-03 11:00:18.081146
-214	3	3	202 WARD	DEPT-00213	\N	3	t	f	2026-06-03 11:00:18.097764
-215	3	3	203 WARD	DEPT-00214	\N	3	t	f	2026-06-03 11:00:18.119491
-216	3	3	204 WARD	DEPT-00215	\N	3	t	f	2026-06-03 11:00:18.136489
-217	3	3	205 WARD	DEPT-00216	\N	3	t	f	2026-06-03 11:00:18.151961
-218	3	3	206 WARD	DEPT-00217	\N	3	t	f	2026-06-03 11:00:18.166609
-219	3	3	207 WARD	DEPT-00218	\N	3	t	f	2026-06-03 11:00:18.183203
-220	3	3	208 WARD	DEPT-00219	\N	3	t	f	2026-06-03 11:00:18.198865
-221	3	3	209 WARD	DEPT-00220	\N	3	t	f	2026-06-03 11:00:18.219612
-222	3	3	210 WARD	DEPT-00221	\N	3	t	f	2026-06-03 11:00:18.236501
-223	3	3	212WARD	DEPT-00222	\N	3	t	f	2026-06-03 11:00:18.251963
-224	3	3	213 WARD	DEPT-00223	\N	3	t	f	2026-06-03 11:00:18.266663
-225	3	3	214 WARD	DEPT-00224	\N	3	t	f	2026-06-03 11:00:18.283123
-226	3	3	215 WARD	DEPT-00225	\N	3	t	f	2026-06-03 11:00:18.298787
-227	3	3	216 WARD	DEPT-00226	\N	3	t	f	2026-06-03 11:00:18.319595
-228	3	3	217 WARD	DEPT-00227	\N	3	t	f	2026-06-03 11:00:18.336571
-229	3	3	401 WARD	DEPT-00228	\N	3	t	f	2026-06-03 11:00:18.352028
-230	3	3	402 WARD	DEPT-00229	\N	3	t	f	2026-06-03 11:00:18.366949
-231	3	3	403 WARD	DEPT-00230	\N	3	t	f	2026-06-03 11:00:18.383355
-232	3	3	404 WARD	DEPT-00231	\N	3	t	f	2026-06-03 11:00:18.400347
-233	3	3	405 WARD	DEPT-00232	\N	3	t	f	2026-06-03 11:00:18.420069
-234	3	3	406 WARD	DEPT-00233	\N	3	t	f	2026-06-03 11:00:18.436603
-235	3	3	4TH FLOOR ASHRAMA WARD	DEPT-00234	\N	3	t	f	2026-06-03 11:00:18.44901
-236	3	3	4TH FLOOR SPECIAL WARD	DEPT-00235	\N	3	t	f	2026-06-03 11:00:18.462375
-237	3	3	4TH FLOOR WARD	DEPT-00236	\N	3	t	f	2026-06-03 11:00:18.470603
-238	3	3	ASHRAMA WARD 2 ND FLOOR	DEPT-00237	\N	3	t	f	2026-06-03 11:00:18.479049
-239	3	3	CARDIAC WARD 217	DEPT-00238	\N	3	t	f	2026-06-03 11:00:18.487269
-240	3	3	CASUALITY OBSERVATION WARD	DEPT-00239	\N	3	t	f	2026-06-03 11:00:18.49545
-241	3	3	COVID-19 WARD	DEPT-00240	\N	3	t	f	2026-06-03 11:00:18.504025
-242	3	3	ENT WARD	DEPT-00241	\N	3	t	f	2026-06-03 11:00:18.512424
-243	3	3	FEMALE MEDICINE WARD-110	DEPT-00242	\N	3	t	f	2026-06-03 11:00:18.520617
-244	3	3	FEMALE ORTHO SURGERY WARD-111	DEPT-00243	\N	3	t	f	2026-06-03 11:00:18.529448
-245	3	3	FEMALE SURGERY WARD-108	DEPT-00244	\N	3	t	f	2026-06-03 11:00:18.537619
-246	3	3	MALE MEDICINE WARD-216	DEPT-00245	\N	3	t	f	2026-06-03 11:00:18.545536
-247	3	3	MALE ORTHO WARD 109	DEPT-00246	\N	3	t	f	2026-06-03 11:00:18.554182
-248	3	3	MALE SURGERY WARD-210	DEPT-00247	\N	3	t	f	2026-06-03 11:00:18.562088
-249	3	3	OBG WARD	DEPT-00248	\N	3	t	f	2026-06-03 11:00:18.570579
-250	3	3	OBSERVATION WARD -17	DEPT-00249	\N	3	t	f	2026-06-03 11:00:18.579109
-251	3	3	OBSERVATION WARD -18	DEPT-00250	\N	3	t	f	2026-06-03 11:00:18.587369
-252	3	3	OPTHALMOLOGY WARD	DEPT-00251	\N	3	t	f	2026-06-03 11:00:18.595433
-253	3	3	PAEDIATRIC WARD	DEPT-00252	\N	3	t	f	2026-06-03 11:00:18.604028
-254	3	3	PSYCHIATRY WARD 214 & 215	DEPT-00253	\N	3	t	f	2026-06-03 11:00:18.612177
-255	3	3	RESPIRATORY WARD	DEPT-00254	\N	3	t	f	2026-06-03 11:00:18.620766
-256	3	3	SPECIAL WARD	DEPT-00255	\N	3	t	f	2026-06-03 11:00:18.629406
-257	3	3	SPECIAL WARD 1ST. FLOOR	DEPT-00256	\N	3	t	f	2026-06-03 11:00:18.637557
-258	3	3	SRD FLOOR SPECIAL WARD	DEPT-00257	\N	3	t	f	2026-06-03 11:00:18.645612
-259	3	3	WARD SECRATORY	DEPT-00258	\N	3	t	f	2026-06-03 11:00:18.654029
-4	3	3	PURCHASE	DEPT-00003	\N	1	t	f	2026-06-01 16:57:14.985075
+COPY public.departments (id, tenant_id, site_id, name, code, accounting_code, building_id, is_active, is_deleted, created_at, institution_id) FROM stdin;
+1	3	3	CIVIL	DEPT-00001	\N	1	t	f	2026-05-15 13:15:35.449236	\N
+2	3	3	ADMIN	DEPT-00002	\N	1	t	f	2026-05-15 13:19:20.067632	\N
+5	3	3	CAMP WARD 2 ND FLOOR	DEPT-00004	\N	1	t	f	2026-06-03 11:00:15.062725	\N
+6	3	3	CLINICAL DEPARTMENT	DEPT-00005	\N	1	t	f	2026-06-03 11:00:15.107155	\N
+7	3	3	COMM- CENTRE BELUVAl	DEPT-00006	\N	1	t	f	2026-06-03 11:00:15.127705	\N
+8	3	3	COMMUNITY CENTRE - SHAKTHI	DEPT-00007	\N	1	t	f	2026-06-03 11:00:15.143898	\N
+9	3	3	GAS MANIFOLD	DEPT-00008	\N	1	t	f	2026-06-03 11:00:15.157028	\N
+10	3	3	GENERIC PHARMACY	DEPT-00009	\N	1	t	f	2026-06-03 11:00:15.172452	\N
+11	3	3	2DECHO AND TMT ROOM	DEPT-00010	\N	1	t	f	2026-06-03 11:00:15.189215	\N
+12	3	3	ACCOUNTS DEPT	DEPT-00011	\N	1	t	f	2026-06-03 11:00:15.205808	\N
+13	3	3	ADMIN BLOCK	DEPT-00012	\N	1	t	f	2026-06-03 11:00:15.222158	\N
+14	3	3	AIR-CONDITIONING -MAINTENANCE	DEPT-00013	\N	1	t	f	2026-06-03 11:00:15.260498	\N
+15	3	3	ALLIED HEALTH SCIENCE	DEPT-00014	\N	1	t	f	2026-06-03 11:00:15.285483	\N
+16	3	3	ANATOMY	DEPT-00015	\N	1	t	f	2026-06-03 11:00:15.301317	\N
+17	3	3	ART CENTRE	DEPT-00016	\N	1	t	f	2026-06-03 11:00:15.313807	\N
+18	3	3	BILLING SECTION	DEPT-00017	\N	1	t	f	2026-06-03 11:00:15.330569	\N
+19	3	3	BIO CHEMISTRY	DEPT-00018	\N	1	t	f	2026-06-03 11:00:15.347301	\N
+20	3	3	BIOCHEMISTRY MEDICAL COLLEGE	DEPT-00019	\N	1	t	f	2026-06-03 11:00:15.363949	\N
+21	3	3	BIO-MEDICAL	DEPT-00020	\N	1	t	f	2026-06-03 11:00:15.381985	\N
+22	3	3	BLOOD BANK	DEPT-00021	\N	1	t	f	2026-06-03 11:00:15.3984	\N
+23	3	3	CAFETERIA	DEPT-00022	\N	1	t	f	2026-06-03 11:00:15.41507	\N
+24	3	3	CAMP,	DEPT-00023	\N	1	t	f	2026-06-03 11:00:15.431827	\N
+25	3	3	Camp-Inpatient	DEPT-00024	\N	1	t	f	2026-06-03 11:00:15.446594	\N
+26	3	3	CARDIO THORACIC 0.T	DEPT-00025	\N	1	t	f	2026-06-03 11:00:15.453746	\N
+27	3	3	CARDIO THORACIC UNIT	DEPT-00026	\N	1	t	f	2026-06-03 11:00:15.461088	\N
+28	3	3	CARPENTER DEPARTMENT	DEPT-00027	\N	1	t	f	2026-06-03 11:00:15.469223	\N
+29	3	3	CASUALTY	DEPT-00028	\N	1	t	f	2026-06-03 11:00:15.485772	\N
+30	3	3	CEO SIR CABIN	DEPT-00029	\N	1	t	f	2026-06-03 11:00:15.501756	\N
+31	3	3	CHINNAPPA CANTEEN	DEPT-00030	\N	1	t	f	2026-06-03 11:00:15.515912	\N
+32	3	3	CIVIL DEPARTMENT	DEPT-00031	\N	1	t	f	2026-06-03 11:00:15.53275	\N
+33	3	3	CLINICAL PHARMACOLOGY	DEPT-00032	\N	1	t	f	2026-06-03 11:00:15.549347	\N
+34	3	3	COLLEGE OF NURSING	DEPT-00033	\N	1	t	f	2026-06-03 11:00:15.565946	\N
+35	3	3	COMMUNITY CENTER PERAR	DEPT-00034	\N	1	t	f	2026-06-03 11:00:15.582602	\N
+36	3	3	Community Centre - Goodshedde	DEPT-00035	\N	1	t	f	2026-06-03 11:00:15.599383	\N
+37	3	3	COMMUNITY CENTRE - KAVOOR	DEPT-00036	\N	1	t	f	2026-06-03 11:00:15.615782	\N
+38	3	3	COMMUNITY CENTRE - PANE MANGAL	DEPT-00037	\N	1	t	f	2026-06-03 11:00:15.63266	\N
+39	3	3	COMMUNITY MEDICINE	DEPT-00038	\N	1	t	f	2026-06-03 11:00:15.64817	\N
+40	3	3	COMPUTER DEPARTMENT	DEPT-00039	\N	1	t	f	2026-06-03 11:00:15.66311	\N
+41	3	3	CORPORATE	DEPT-00040	\N	1	t	f	2026-06-03 11:00:15.670243	\N
+42	3	3	COU	DEPT-00041	\N	1	t	f	2026-06-03 11:00:15.677917	\N
+43	3	3	COUNCIL ROOM MEDICAL COLLEGE	DEPT-00042	\N	1	t	f	2026-06-03 11:00:15.685943	\N
+44	3	3	CVS	DEPT-00043	\N	1	t	f	2026-06-03 11:00:15.694155	\N
+45	3	3	CYTO PATHOLOGY	DEPT-00044	\N	1	t	f	2026-06-03 11:00:15.702243	\N
+46	3	3	DENTAL - ORTHODONTICS	DEPT-00045	\N	1	t	f	2026-06-03 11:00:15.710881	\N
+47	3	3	DENTAL DEPARTMENTS MATERIAL	DEPT-00046	\N	1	t	f	2026-06-03 11:00:15.718845	\N
+48	3	3	DENTAL LIBRARY	DEPT-00047	\N	1	t	f	2026-06-03 11:00:15.736009	\N
+49	3	3	Dental O.P.D Oral Surgery	DEPT-00048	\N	1	t	f	2026-06-03 11:00:15.752811	\N
+50	3	3	DENTAL ORAL MEDICINE & RADIOLOGY	DEPT-00049	\N	1	t	f	2026-06-03 11:00:15.768918	\N
+51	3	3	DENTAL PEDODONTICS	DEPT-00050	\N	1	t	f	2026-06-03 11:00:15.785619	\N
+52	3	3	DENTAL PROSTHODONTICS	DEPT-00051	\N	1	t	f	2026-06-03 11:00:15.80002	\N
+53	3	3	DENTAL-LIBRARY	DEPT-00052	\N	1	t	f	2026-06-03 11:00:15.812888	\N
+54	3	3	DENTAL-PERIODONTICS	DEPT-00053	\N	1	t	f	2026-06-03 11:00:15.820975	\N
+55	3	3	DEPARTMENT OF PHARMACY PRACTICE	DEPT-00054	\N	1	t	f	2026-06-03 11:00:15.829545	\N
+56	3	3	DEPT OF CSSD	DEPT-00055	\N	1	t	f	2026-06-03 11:00:15.83826	\N
+57	3	3	DEPT OF OPTHALMOLOGY	DEPT-00056	\N	1	t	f	2026-06-03 11:00:15.846134	\N
+58	3	3	DEPT OF ORTHOPAEDIC	DEPT-00057	\N	1	t	f	2026-06-03 11:00:15.854306	\N
+59	3	3	DIALYSIS	DEPT-00058	\N	1	t	f	2026-06-03 11:00:15.862714	\N
+60	3	3	DIETARY DEPARTMENT	DEPT-00059	\N	1	t	f	2026-06-03 11:00:15.870898	\N
+61	3	3	DRUG INFORMATION CENTRE	DEPT-00060	\N	1	t	f	2026-06-03 11:00:15.879604	\N
+62	3	3	EAST POINT COLLEGE OF ENGINEERING AND TECHNOLOGY	DEPT-00061	\N	1	t	f	2026-06-03 11:00:15.888281	\N
+63	3	3	EAST POINT COLLEGE OF HIGHER EDUCATION	DEPT-00062	\N	1	t	f	2026-06-03 11:00:15.896104	\N
+64	3	3	EAST POINT COLLEGE OF NURSING	DEPT-00063	\N	1	t	f	2026-06-03 11:00:15.904421	\N
+65	3	3	EAST POINT COLLEGE OF PHARMACY	DEPT-00064	\N	1	t	f	2026-06-03 11:00:15.912967	\N
+66	3	3	ELECTRICAL DG -MAINTENANCE	DEPT-00065	\N	1	t	f	2026-06-03 11:00:15.921136	\N
+67	3	3	EMERGENCY GREEN ZONE	DEPT-00066	\N	1	t	f	2026-06-03 11:00:15.929348	\N
+68	3	3	EMERGENCY ICU	DEPT-00067	\N	1	t	f	2026-06-03 11:00:15.938235	\N
+69	3	3	EMERGENCY YELLOW ZONE	DEPT-00068	\N	1	t	f	2026-06-03 11:00:15.945742	\N
+70	3	3	ENDOSCOPY	DEPT-00069	\N	1	t	f	2026-06-03 11:00:15.953069	\N
+71	3	3	ENGINEERING COLLEGE DEPARTMENT	DEPT-00070	\N	1	t	f	2026-06-03 11:00:15.961755	\N
+72	3	3	EQUIPMENT -DEPT	DEPT-00071	\N	1	t	f	2026-06-03 11:00:15.969626	\N
+73	3	3	EXAMINATION HALL,	DEPT-00072	\N	1	t	f	2026-06-03 11:00:15.986145	\N
+74	3	3	FACILITIES MANAGEMENT	DEPT-00073	\N	1	t	f	2026-06-03 11:00:15.99994	\N
+75	3	3	FACULTY SECTION MEDICAL COLLEGE	DEPT-00074	\N	1	t	f	2026-06-03 11:00:16.014275	\N
+76	3	3	FORENSIC MEDICINE	DEPT-00075	\N	1	t	f	2026-06-03 11:00:16.030933	\N
+77	3	3	GRAPHIC DESIGNING SECTION	DEPT-00076	\N	1	t	f	2026-06-03 11:00:16.047464	\N
+78	3	3	HELIOS CONSTRUCTION DEPARTMENT	DEPT-00077	\N	1	t	f	2026-06-03 11:00:16.064286	\N
+79	3	3	HELP	DEPT-00078	\N	1	t	f	2026-06-03 11:00:16.080882	\N
+80	3	3	HISTOPATHOLOGY	DEPT-00079	\N	1	t	f	2026-06-03 11:00:16.097657	\N
+81	3	3	HOSPITAL ADMINISTRATION	DEPT-00080	\N	1	t	f	2026-06-03 11:00:16.11911	\N
+82	3	3	HOSPITAL SUPERVISOR	DEPT-00081	\N	1	t	f	2026-06-03 11:00:16.135996	\N
+83	3	3	ICT	DEPT-00082	\N	1	t	f	2026-06-03 11:00:16.151539	\N
+84	3	3	INFECTION CONTROL DEPARTMENT	DEPT-00083	\N	1	t	f	2026-06-03 11:00:16.164103	\N
+85	3	3	INSTITUTIONAL ETHICS DEPARTMENT	DEPT-00084	\N	1	t	f	2026-06-03 11:00:16.180906	\N
+86	3	3	INSURANCE DEPARTMENT	DEPT-00085	\N	1	t	f	2026-06-03 11:00:16.197609	\N
+87	3	3	INTERNAL AUDIT DEPARTMENT	DEPT-00086	\N	1	t	f	2026-06-03 11:00:16.214201	\N
+88	3	3	IT DEPARTMENT	DEPT-00087	\N	1	t	f	2026-06-03 11:00:16.231018	\N
+89	3	3	ITU	DEPT-00088	\N	1	t	f	2026-06-03 11:00:16.247504	\N
+90	3	3	LAUNDRY	DEPT-00089	\N	1	t	f	2026-06-03 11:00:16.269351	\N
+91	3	3	M.G CHARITABLE TRUST	DEPT-00090	\N	1	t	f	2026-06-03 11:00:16.28624	\N
+92	3	3	MAINTENANCE	DEPT-00091	\N	1	t	f	2026-06-03 11:00:16.301892	\N
+93	3	3	MAINTENANCE MEDICAL OXYGEN	DEPT-00092	\N	1	t	f	2026-06-03 11:00:16.314325	\N
+94	3	3	MARKETING DEPARTMENT	DEPT-00093	\N	1	t	f	2026-06-03 11:00:16.331003	\N
+95	3	3	MECHANICAL MAINTENANCE	DEPT-00094	\N	1	t	f	2026-06-03 11:00:16.347596	\N
+96	3	3	MEDICAL COLLEGE	DEPT-00095	\N	1	t	f	2026-06-03 11:00:16.369334	\N
+97	3	3	MEDICAL COLLEGE HSK SUPERVISOR	DEPT-00096	\N	1	t	f	2026-06-03 11:00:16.38596	\N
+98	3	3	MEDICAL EDUCATION UNIT - AJIMS	DEPT-00097	\N	1	t	f	2026-06-03 11:00:16.402986	\N
+99	3	3	MEDICAL SOCIAL WORKER	DEPT-00098	\N	1	t	f	2026-06-03 11:00:16.417667	\N
+100	3	3	MEDICAL-LIBRARY	DEPT-00099	\N	1	t	f	2026-06-03 11:00:16.429741	\N
+101	3	3	MICU	DEPT-00100	\N	1	t	f	2026-06-03 11:00:16.43737	\N
+102	3	3	MORTUARY	DEPT-00101	\N	1	t	f	2026-06-03 11:00:16.44474	\N
+103	3	3	MRD	DEPT-00102	\N	1	t	f	2026-06-03 11:00:16.452391	\N
+104	3	3	NABH	DEPT-00103	\N	2	t	f	2026-06-03 11:00:16.469215	\N
+105	3	3	NESCAFE	DEPT-00104	\N	2	t	f	2026-06-03 11:00:16.4864	\N
+106	3	3	NEW ROYAL COLLEGE OF NURSING	DEPT-00105	\N	2	t	f	2026-06-03 11:00:16.499692	\N
+107	3	3	NICU	DEPT-00106	\N	2	t	f	2026-06-03 11:00:16.518976	\N
+108	3	3	NUCLEAR MEDICINE	DEPT-00107	\N	2	t	f	2026-06-03 11:00:16.535557	\N
+109	3	3	OBG ADMINISTRATION	DEPT-00108	\N	2	t	f	2026-06-03 11:00:16.549752	\N
+110	3	3	OBG MARKETING	DEPT-00109	\N	2	t	f	2026-06-03 11:00:16.564709	\N
+111	3	3	OBG-HDU	DEPT-00110	\N	2	t	f	2026-06-03 11:00:16.581313	\N
+112	3	3	OCCUPATIONAL THERAPY DEPARTMENT	DEPT-00111	\N	2	t	f	2026-06-03 11:00:16.597825	\N
+113	3	3	PACKAGE - ASD CLOSURE	DEPT-00112	\N	2	t	f	2026-06-03 11:00:16.61455	\N
+114	3	3	PAINTING DEPARTMENT	DEPT-00113	\N	2	t	f	2026-06-03 11:00:16.63144	\N
+115	3	3	PARAMEDICAL	DEPT-00114	\N	2	t	f	2026-06-03 11:00:16.647855	\N
+116	3	3	PATHOLOGY	DEPT-00115	\N	2	t	f	2026-06-03 11:00:16.66456	\N
+117	3	3	PATHOLOGY MEDICAL COLLEGE	DEPT-00116	\N	2	t	f	2026-06-03 11:00:16.682755	\N
+118	3	3	PHARMACOLOGY	DEPT-00117	\N	2	t	f	2026-06-03 11:00:16.699412	\N
+119	3	3	PHARMACOLOGY CLINICAL TRIAL UNIT	DEPT-00118	\N	2	t	f	2026-06-03 11:00:16.719047	\N
+120	3	3	PHARMACY COLLEGE	DEPT-00119	\N	2	t	f	2026-06-03 11:00:16.736553	\N
+121	3	3	PHYSIOLOGY	DEPT-00120	\N	2	t	f	2026-06-03 11:00:16.750434	\N
+122	3	3	PICU	DEPT-00121	\N	2	t	f	2026-06-03 11:00:16.766783	\N
+123	3	3	PLUMBING -MAINTENANCE	DEPT-00122	\N	2	t	f	2026-06-03 11:00:16.783486	\N
+124	3	3	POST OPERATIVE	DEPT-00123	\N	2	t	f	2026-06-03 11:00:16.798639	\N
+125	3	3	POW&SPW	DEPT-00124	\N	2	t	f	2026-06-03 11:00:16.819337	\N
+126	3	3	PRO MARKETING	DEPT-00125	\N	2	t	f	2026-06-03 11:00:16.835915	\N
+127	3	3	PROJECT MANAGER SECTION	DEPT-00126	\N	2	t	f	2026-06-03 11:00:16.848339	\N
+128	3	3	PUC DEPARTMENT	DEPT-00127	\N	2	t	f	2026-06-03 11:00:16.869212	\N
+129	3	3	PURCHASE DEPARTMENT	DEPT-00128	\N	2	t	f	2026-06-03 11:00:16.885744	\N
+130	3	3	RADIOLOGY	DEPT-00129	\N	2	t	f	2026-06-03 11:00:16.899773	\N
+131	3	3	REGISTRATION	DEPT-00130	\N	2	t	f	2026-06-03 11:00:16.914257	\N
+132	3	3	RHTC	DEPT-00131	\N	2	t	f	2026-06-03 11:00:16.9287	\N
+133	3	3	SAMPLE COLLECTION	DEPT-00132	\N	2	t	f	2026-06-03 11:00:16.93643	\N
+134	3	3	SECURITY	DEPT-00133	\N	2	t	f	2026-06-03 11:00:16.944687	\N
+135	3	3	SECURITY DEPT	DEPT-00134	\N	2	t	f	2026-06-03 11:00:16.952661	\N
+136	3	3	SEROLOGY	DEPT-00135	\N	2	t	f	2026-06-03 11:00:16.969264	\N
+137	3	3	SICU	DEPT-00136	\N	2	t	f	2026-06-03 11:00:16.986009	\N
+138	3	3	SOCIAL AND PREVENTIVE MEDICINE	DEPT-00137	\N	2	t	f	2026-06-03 11:00:17.002896	\N
+139	3	3	SPORTS DEPARTMENT	DEPT-00138	\N	2	t	f	2026-06-03 11:00:17.014576	\N
+140	3	3	STUDENT SECTION MEDICAL COLLEGE	DEPT-00139	\N	2	t	f	2026-06-03 11:00:17.031363	\N
+141	3	3	TAILORING DEPARTMENT	DEPT-00140	\N	2	t	f	2026-06-03 11:00:17.047742	\N
+142	3	3	TRANSPORT DEPARTMENT	DEPT-00141	\N	2	t	f	2026-06-03 11:00:17.064344	\N
+143	3	3	UHTC	DEPT-00142	\N	2	t	f	2026-06-03 11:00:17.081311	\N
+144	3	3	WELDING DEPARTMENT	DEPT-00143	\N	2	t	f	2026-06-03 11:00:17.098045	\N
+145	3	3	CATH LAB	DEPT-00144	\N	2	t	f	2026-06-03 11:00:17.115563	\N
+146	3	3	CATH LAB TECHNICIAN	DEPT-00145	\N	2	t	f	2026-06-03 11:00:17.136099	\N
+147	3	3	CATH LABORATORY	DEPT-00146	\N	2	t	f	2026-06-03 11:00:17.151689	\N
+148	3	3	LAB COMMUNITY CENTER - KAROOR	DEPT-00147	\N	2	t	f	2026-06-03 11:00:17.164498	\N
+149	3	3	LAB COMMUNITY CENTRE - PANEMAN	DEPT-00148	\N	2	t	f	2026-06-03 11:00:17.181127	\N
+150	3	3	LABORATORY	DEPT-00149	\N	2	t	f	2026-06-03 11:00:17.198001	\N
+151	3	3	LABOUR ROOM	DEPT-00150	\N	2	t	f	2026-06-03 11:00:17.214432	\N
+152	3	3	MICROBIOLOGY	DEPT-00151	\N	2	t	f	2026-06-03 11:00:17.23138	\N
+153	3	3	MICROBIOLOGY MEDICAL COLLEGE	DEPT-00152	\N	2	t	f	2026-06-03 11:00:17.247973	\N
+154	3	3	ONCOPATHOLOGY-LAB	DEPT-00153	\N	2	t	f	2026-06-03 11:00:17.264616	\N
+155	3	3	PCR LAB	DEPT-00154	\N	2	t	f	2026-06-03 11:00:17.286265	\N
+156	3	3	SKILL LAB FOR JEEVA RAKSHA WORKSHOP	DEPT-00155	\N	2	t	f	2026-06-03 11:00:17.301754	\N
+157	3	3	DEAN OFFICE,	DEPT-00156	\N	2	t	f	2026-06-03 11:00:17.316272	\N
+158	3	3	FRONT OFFICE	DEPT-00157	\N	2	t	f	2026-06-03 11:00:17.333113	\N
+159	3	3	MATRON OFFICE	DEPT-00158	\N	2	t	f	2026-06-03 11:00:17.349978	\N
+160	3	3	MEDICAL DIRECTOR	DEPT-00159	\N	2	t	f	2026-06-03 11:00:17.366563	\N
+161	3	3	MEDICAL SUPERINTENDENT OFFICE	DEPT-00160	\N	2	t	f	2026-06-03 11:00:17.38607	\N
+162	3	3	MS OFFICE AJIMS	DEPT-00161	\N	2	t	f	2026-06-03 11:00:17.401641	\N
+163	3	3	NURSING SUPERINTENDENT	DEPT-00162	\N	2	t	f	2026-06-03 11:00:17.416557	\N
+164	3	3	PHYSICAL EDUCATIONAL DIRECTOR	DEPT-00163	\N	2	t	f	2026-06-03 11:00:17.430658	\N
+165	3	3	PRINCIPLE OFFICE MEDICAL COLLEGE	DEPT-00164	\N	2	t	f	2026-06-03 11:00:17.445527	\N
+166	3	3	TRUST OFFICE	DEPT-00165	\N	2	t	f	2026-06-03 11:00:17.458266	\N
+167	3	3	CARDIOLOGY OPD	DEPT-00166	\N	2	t	f	2026-06-03 11:00:17.475391	\N
+168	3	3	Dental OPD	DEPT-00167	\N	2	t	f	2026-06-03 11:00:17.49242	\N
+169	3	3	DERMOTOLOGY OPD	DEPT-00168	\N	2	t	f	2026-06-03 11:00:17.508704	\N
+170	3	3	ENT OPD	DEPT-00169	\N	2	t	f	2026-06-03 11:00:17.52544	\N
+171	3	3	MEDICINE OPD	DEPT-00170	\N	2	t	f	2026-06-03 11:00:17.54261	\N
+172	3	3	NEPHROLOGY OPD	DEPT-00171	\N	2	t	f	2026-06-03 11:00:17.555547	\N
+173	3	3	NEUROLOGY OPD	DEPT-00172	\N	2	t	f	2026-06-03 11:00:17.578218	\N
+174	3	3	OBG OPD	DEPT-00173	\N	2	t	f	2026-06-03 11:00:17.594645	\N
+175	3	3	OPD	DEPT-00174	\N	2	t	f	2026-06-03 11:00:17.611367	\N
+176	3	3	OPD Medical College	DEPT-00175	\N	2	t	f	2026-06-03 11:00:17.628111	\N
+177	3	3	OPD MEDICAL COLLEGE FREE	DEPT-00176	\N	2	t	f	2026-06-03 11:00:17.644449	\N
+178	3	3	OPD RECEPTION	DEPT-00177	\N	2	t	f	2026-06-03 11:00:17.656316	\N
+179	3	3	OPTHALMOLOGY OPD	DEPT-00178	\N	2	t	f	2026-06-03 11:00:17.677852	\N
+180	3	3	ORTHOPAEDIC OPD	DEPT-00179	\N	2	t	f	2026-06-03 11:00:17.69476	\N
+181	3	3	PEADATRIC OPD	DEPT-00180	\N	2	t	f	2026-06-03 11:00:17.706376	\N
+182	3	3	PSYCHIATRY OPD	DEPT-00181	\N	2	t	f	2026-06-03 11:00:17.728669	\N
+183	3	3	RESPIRATORY OPD	DEPT-00182	\N	2	t	f	2026-06-03 11:00:17.744598	\N
+184	3	3	SUPER SPECIALITY OPD	DEPT-00183	\N	2	t	f	2026-06-03 11:00:17.755806	\N
+185	3	3	SURGERY OPD	DEPT-00184	\N	2	t	f	2026-06-03 11:00:17.771774	\N
+186	3	3	UROLOGY OPD	DEPT-00185	\N	2	t	f	2026-06-03 11:00:17.780543	\N
+187	3	3	HAEMOTOLOGY	DEPT-00186	\N	2	t	f	2026-06-03 11:00:17.788334	\N
+188	3	3	MAJOR OT	DEPT-00187	\N	2	t	f	2026-06-03 11:00:17.797043	\N
+189	3	3	MINOR OPERATION THEATRE	DEPT-00188	\N	2	t	f	2026-06-03 11:00:17.810851	\N
+190	3	3	MINOR OT	DEPT-00189	\N	2	t	f	2026-06-03 11:00:17.827798	\N
+191	3	3	OT- PLASTIC SURGERY	DEPT-00190	\N	2	t	f	2026-06-03 11:00:17.844984	\N
+192	3	3	OT SUB STORE	DEPT-00191	\N	2	t	f	2026-06-03 11:00:17.857999	\N
+193	3	3	OT-NEURO	DEPT-00192	\N	2	t	f	2026-06-03 11:00:17.8749	\N
+194	3	3	OT-ORTHO	DEPT-00193	\N	2	t	f	2026-06-03 11:00:17.891838	\N
+195	3	3	OT-UROLOGY	DEPT-00194	\N	2	t	f	2026-06-03 11:00:17.911585	\N
+196	3	3	PHYSIOTHERAPY	DEPT-00195	\N	2	t	f	2026-06-03 11:00:17.928567	\N
+197	3	3	PHYSIOTHERAPY COLLEGE	DEPT-00196	\N	2	t	f	2026-06-03 11:00:17.939468	\N
+198	3	3	IP GENERIC PHARMACY MAIN STORE	DEPT-00197	\N	2	t	f	2026-06-03 11:00:17.953819	\N
+199	3	3	IP PHARMACY MAIN STORE	DEPT-00198	\N	2	t	f	2026-06-03 11:00:17.961658	\N
+200	3	3	PHARMACY MAIN STORE	DEPT-00199	\N	2	t	f	2026-06-03 11:00:17.970063	\N
+201	3	3	102 WARD	DEPT-00200	\N	3	t	f	2026-06-03 11:00:17.978618	\N
+202	3	3	103 WARD	DEPT-00201	\N	3	t	f	2026-06-03 11:00:17.986589	\N
+203	3	3	104 WARD	DEPT-00202	\N	3	t	f	2026-06-03 11:00:17.995002	\N
+204	3	3	105 WARD	DEPT-00203	\N	3	t	f	2026-06-03 11:00:18.003319	\N
+205	3	3	106 WARD	DEPT-00204	\N	3	t	f	2026-06-03 11:00:18.011668	\N
+206	3	3	107 WARD	DEPT-00205	\N	3	t	f	2026-06-03 11:00:18.020052	\N
+207	3	3	108 WARD	DEPT-00206	\N	3	t	f	2026-06-03 11:00:18.028706	\N
+208	3	3	109 WARD	DEPT-00207	\N	3	t	f	2026-06-03 11:00:18.036789	\N
+209	3	3	110 WARD	DEPT-00208	\N	3	t	f	2026-06-03 11:00:18.045001	\N
+210	3	3	111 WARD	DEPT-00209	\N	3	t	f	2026-06-03 11:00:18.053374	\N
+211	3	3	112 WARD	DEPT-00210	\N	3	t	f	2026-06-03 11:00:18.062208	\N
+212	3	3	2 ND FLOOR SPECIAL WARD	DEPT-00211	\N	3	t	f	2026-06-03 11:00:18.071363	\N
+213	3	3	201 WARD	DEPT-00212	\N	3	t	f	2026-06-03 11:00:18.081146	\N
+214	3	3	202 WARD	DEPT-00213	\N	3	t	f	2026-06-03 11:00:18.097764	\N
+215	3	3	203 WARD	DEPT-00214	\N	3	t	f	2026-06-03 11:00:18.119491	\N
+216	3	3	204 WARD	DEPT-00215	\N	3	t	f	2026-06-03 11:00:18.136489	\N
+217	3	3	205 WARD	DEPT-00216	\N	3	t	f	2026-06-03 11:00:18.151961	\N
+218	3	3	206 WARD	DEPT-00217	\N	3	t	f	2026-06-03 11:00:18.166609	\N
+219	3	3	207 WARD	DEPT-00218	\N	3	t	f	2026-06-03 11:00:18.183203	\N
+220	3	3	208 WARD	DEPT-00219	\N	3	t	f	2026-06-03 11:00:18.198865	\N
+221	3	3	209 WARD	DEPT-00220	\N	3	t	f	2026-06-03 11:00:18.219612	\N
+222	3	3	210 WARD	DEPT-00221	\N	3	t	f	2026-06-03 11:00:18.236501	\N
+223	3	3	212WARD	DEPT-00222	\N	3	t	f	2026-06-03 11:00:18.251963	\N
+224	3	3	213 WARD	DEPT-00223	\N	3	t	f	2026-06-03 11:00:18.266663	\N
+225	3	3	214 WARD	DEPT-00224	\N	3	t	f	2026-06-03 11:00:18.283123	\N
+226	3	3	215 WARD	DEPT-00225	\N	3	t	f	2026-06-03 11:00:18.298787	\N
+227	3	3	216 WARD	DEPT-00226	\N	3	t	f	2026-06-03 11:00:18.319595	\N
+228	3	3	217 WARD	DEPT-00227	\N	3	t	f	2026-06-03 11:00:18.336571	\N
+229	3	3	401 WARD	DEPT-00228	\N	3	t	f	2026-06-03 11:00:18.352028	\N
+230	3	3	402 WARD	DEPT-00229	\N	3	t	f	2026-06-03 11:00:18.366949	\N
+231	3	3	403 WARD	DEPT-00230	\N	3	t	f	2026-06-03 11:00:18.383355	\N
+232	3	3	404 WARD	DEPT-00231	\N	3	t	f	2026-06-03 11:00:18.400347	\N
+233	3	3	405 WARD	DEPT-00232	\N	3	t	f	2026-06-03 11:00:18.420069	\N
+234	3	3	406 WARD	DEPT-00233	\N	3	t	f	2026-06-03 11:00:18.436603	\N
+235	3	3	4TH FLOOR ASHRAMA WARD	DEPT-00234	\N	3	t	f	2026-06-03 11:00:18.44901	\N
+236	3	3	4TH FLOOR SPECIAL WARD	DEPT-00235	\N	3	t	f	2026-06-03 11:00:18.462375	\N
+237	3	3	4TH FLOOR WARD	DEPT-00236	\N	3	t	f	2026-06-03 11:00:18.470603	\N
+238	3	3	ASHRAMA WARD 2 ND FLOOR	DEPT-00237	\N	3	t	f	2026-06-03 11:00:18.479049	\N
+239	3	3	CARDIAC WARD 217	DEPT-00238	\N	3	t	f	2026-06-03 11:00:18.487269	\N
+240	3	3	CASUALITY OBSERVATION WARD	DEPT-00239	\N	3	t	f	2026-06-03 11:00:18.49545	\N
+241	3	3	COVID-19 WARD	DEPT-00240	\N	3	t	f	2026-06-03 11:00:18.504025	\N
+242	3	3	ENT WARD	DEPT-00241	\N	3	t	f	2026-06-03 11:00:18.512424	\N
+243	3	3	FEMALE MEDICINE WARD-110	DEPT-00242	\N	3	t	f	2026-06-03 11:00:18.520617	\N
+244	3	3	FEMALE ORTHO SURGERY WARD-111	DEPT-00243	\N	3	t	f	2026-06-03 11:00:18.529448	\N
+245	3	3	FEMALE SURGERY WARD-108	DEPT-00244	\N	3	t	f	2026-06-03 11:00:18.537619	\N
+246	3	3	MALE MEDICINE WARD-216	DEPT-00245	\N	3	t	f	2026-06-03 11:00:18.545536	\N
+247	3	3	MALE ORTHO WARD 109	DEPT-00246	\N	3	t	f	2026-06-03 11:00:18.554182	\N
+248	3	3	MALE SURGERY WARD-210	DEPT-00247	\N	3	t	f	2026-06-03 11:00:18.562088	\N
+249	3	3	OBG WARD	DEPT-00248	\N	3	t	f	2026-06-03 11:00:18.570579	\N
+250	3	3	OBSERVATION WARD -17	DEPT-00249	\N	3	t	f	2026-06-03 11:00:18.579109	\N
+251	3	3	OBSERVATION WARD -18	DEPT-00250	\N	3	t	f	2026-06-03 11:00:18.587369	\N
+252	3	3	OPTHALMOLOGY WARD	DEPT-00251	\N	3	t	f	2026-06-03 11:00:18.595433	\N
+253	3	3	PAEDIATRIC WARD	DEPT-00252	\N	3	t	f	2026-06-03 11:00:18.604028	\N
+254	3	3	PSYCHIATRY WARD 214 & 215	DEPT-00253	\N	3	t	f	2026-06-03 11:00:18.612177	\N
+255	3	3	RESPIRATORY WARD	DEPT-00254	\N	3	t	f	2026-06-03 11:00:18.620766	\N
+256	3	3	SPECIAL WARD	DEPT-00255	\N	3	t	f	2026-06-03 11:00:18.629406	\N
+257	3	3	SPECIAL WARD 1ST. FLOOR	DEPT-00256	\N	3	t	f	2026-06-03 11:00:18.637557	\N
+258	3	3	SRD FLOOR SPECIAL WARD	DEPT-00257	\N	3	t	f	2026-06-03 11:00:18.645612	\N
+259	3	3	WARD SECRATORY	DEPT-00258	\N	3	t	f	2026-06-03 11:00:18.654029	\N
+4	3	3	PURCHASE	DEPT-00003	\N	1	t	f	2026-06-01 16:57:14.985075	\N
+264	2	2	Civil	DEPT-00006	\N	\N	t	f	2026-06-11 18:59:26.254218	3
+265	2	2	Mechanical	DEPT-00007	\N	\N	t	f	2026-06-11 19:13:41.061438	3
+266	2	2	HEALTH 	DEPT-00008	\N	\N	t	f	2026-06-11 21:17:14.240449	11
+262	2	2	CIVIL	DEPT-00004	\N	4	f	t	2026-06-11 15:36:26.754601	\N
+260	2	2	CSE	DEPT-00002	\N	4	f	t	2026-06-11 15:35:36.252221	\N
+261	2	2	EC	DEPT-00003	\N	4	f	t	2026-06-11 15:35:47.007192	\N
+263	2	2	Mechanical	DEPT-00005	\N	4	f	t	2026-06-11 15:36:35.049928	\N
+3	2	2	Physiotherapy Dept	DEPT-00001	\N	4	f	t	2026-05-21 16:31:55.999016	\N
 \.
 
 
@@ -5417,9 +7069,6 @@ COPY public.departments (id, tenant_id, site_id, name, code, accounting_code, bu
 COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, current_number) FROM stdin;
 1	3	3	ORGANIZATION	ORG	1
 2	3	3	PROJECT	PROJ	2
-29	2	2	BUILDING	BLDG	1
-3	3	3	BUILDING	BLDG	3
-30	2	2	DEPARTMENT	DEPT	1
 25	3	3	RETURN	RET	11
 4	3	3	ROOM	RM	3
 6	3	3	DEPARTMENT	DEPT	258
@@ -5432,10 +7081,8 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 13	3	3	PURCHASE_ORDER	PO	48
 61	3	3	INVOICE_REF	INV	5
 18	3	3	CATEGORY	CAT	10
-19	3	3	VENDOR	VND	10
 31	3	3	COMPANY_ADDRESS	ADDR	3
 27	2	2	ORGANIZATION	ORG	1
-28	2	2	PROJECT	PROJ	1
 36	3	3	MATERIAL_42	SAA	3
 37	3	3	MATERIAL_43	STR	3
 38	3	3	MATERIAL_44	BRK	2
@@ -5462,9 +7109,22 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 59	1	1	CATEGORY		1
 5	3	3	INDENT	IND	40
 12	3	3	PURCHASE_REQUEST	PR	28
-15	3	3	GRN	GRN	19
-14	3	3	GATE_ENTRY	GE	26
 60	1	1	RETURN	RET	1
+28	2	2	PROJECT	PROJ	2
+19	3	3	VENDOR	VND	11
+15	3	3	GRN	GRN	22
+14	3	3	GATE_ENTRY	GE	30
+63	2	2	INSTITUTION	INST	14
+64	2	2	COMPANY_ADDRESS	ADDR	3
+30	2	2	DEPARTMENT	DEPT	8
+62	2	2	ROOM	RM	3
+29	2	2	BUILDING	BLDG	4
+67	2	2	ISSUE	ISS	1
+66	2	2	INDENT	IND	6
+68	2	2	PURCHASE_REQUEST	PR	4
+69	2	2	PURCHASE_ORDER	PO	2
+65	2	2	VENDOR	VND	2
+3	3	3	BUILDING	BLDG	4
 \.
 
 
@@ -5472,29 +7132,35 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 -- Data for Name: floors; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.floors (id, tenant_id, site_id, name, level, building_id, is_active, is_deleted, created_at) FROM stdin;
-1	3	3	Ground Floor	0	1	t	f	2026-05-15 12:19:09.73572
-6	3	3	Ground floor	0	2	t	f	2026-05-15 12:24:34.804756
-7	3	3	1	1	2	t	f	2026-05-15 12:25:04.364684
-8	3	3	2	2	2	t	f	2026-05-15 12:25:29.061682
-9	3	3	Floor1	1	3	t	f	2026-05-15 15:43:19.625551
-4	3	3	Floor 1	1	1	t	f	2026-05-15 12:23:09.04142
-2	3	3	Floor 2	2	1	t	f	2026-05-15 12:19:37.70249
-3	3	3	Floor 3	3	1	t	f	2026-05-15 12:21:57.777667
-5	3	3	Floor 4	4	1	t	f	2026-05-15 12:23:47.539477
-10	2	2	Basement	0	4	t	f	2026-05-21 16:23:03.219982
-11	2	2	Ground Floor	1	4	t	f	2026-05-21 16:23:40.244112
-12	2	2	1st Floor	2	4	t	f	2026-05-21 16:24:50.428678
-13	2	2	2nd Floor	3	4	t	f	2026-05-21 16:25:09.460793
-14	3	3	Floor 5	5	1	t	f	2026-06-03 13:09:42.497072
-15	3	3	Floor 3	3	2	t	f	2026-06-03 13:09:42.662227
-16	3	3	Floor 4	4	2	t	f	2026-06-03 13:09:42.662241
-17	3	3	Floor 5	5	2	t	f	2026-06-03 13:09:42.662246
-18	3	3	Floor 2	2	3	t	f	2026-06-03 13:09:42.879157
-19	3	3	Floor 3	3	3	t	f	2026-06-03 13:09:42.879177
-20	3	3	Floor 4	4	3	t	f	2026-06-03 13:09:42.879184
-21	3	3	Floor 5	5	3	t	f	2026-06-03 13:09:42.87919
-22	3	3	Floor 6	6	3	t	f	2026-06-03 13:09:42.879196
+COPY public.floors (id, tenant_id, site_id, name, level, building_id, is_active, is_deleted, created_at, department_name) FROM stdin;
+1	3	3	Ground Floor	0	1	t	f	2026-05-15 12:19:09.73572	\N
+6	3	3	Ground floor	0	2	t	f	2026-05-15 12:24:34.804756	\N
+7	3	3	1	1	2	t	f	2026-05-15 12:25:04.364684	\N
+8	3	3	2	2	2	t	f	2026-05-15 12:25:29.061682	\N
+9	3	3	Floor1	1	3	t	f	2026-05-15 15:43:19.625551	\N
+4	3	3	Floor 1	1	1	t	f	2026-05-15 12:23:09.04142	\N
+2	3	3	Floor 2	2	1	t	f	2026-05-15 12:19:37.70249	\N
+3	3	3	Floor 3	3	1	t	f	2026-05-15 12:21:57.777667	\N
+5	3	3	Floor 4	4	1	t	f	2026-05-15 12:23:47.539477	\N
+14	3	3	Floor 5	5	1	t	f	2026-06-03 13:09:42.497072	\N
+15	3	3	Floor 3	3	2	t	f	2026-06-03 13:09:42.662227	\N
+16	3	3	Floor 4	4	2	t	f	2026-06-03 13:09:42.662241	\N
+17	3	3	Floor 5	5	2	t	f	2026-06-03 13:09:42.662246	\N
+18	3	3	Floor 2	2	3	t	f	2026-06-03 13:09:42.879157	\N
+19	3	3	Floor 3	3	3	t	f	2026-06-03 13:09:42.879177	\N
+20	3	3	Floor 4	4	3	t	f	2026-06-03 13:09:42.879184	\N
+21	3	3	Floor 5	5	3	t	f	2026-06-03 13:09:42.87919	\N
+22	3	3	Floor 6	6	3	t	f	2026-06-03 13:09:42.879196	\N
+23	3	3	CS AI	0	1	t	f	2026-06-11 15:12:49.568109	\N
+24	3	3	CS DOT	0	1	t	f	2026-06-11 15:13:29.215599	\N
+25	3	3	Mechanical	0	1	t	f	2026-06-11 15:13:56.343729	\N
+26	3	3	CIVIL	0	1	t	f	2026-06-11 15:14:14.967824	\N
+12	2	2	CIVIL	2	4	t	f	2026-05-21 16:24:50.428678	\N
+13	2	2	Mechanical	3	4	t	f	2026-05-21 16:25:09.460793	\N
+10	2	2	CSE	0	4	t	f	2026-05-21 16:23:03.219982	\N
+11	2	2	EC	1	4	t	f	2026-05-21 16:23:40.244112	\N
+27	2	2	FIRST FLOOR	1	7	f	t	2026-06-11 21:18:00.559482	HEALTH 
+28	2	2	FIRST FLOOR	1	7	t	f	2026-06-11 21:22:08.644001	HEALTH 
 \.
 
 
@@ -5502,31 +7168,35 @@ COPY public.floors (id, tenant_id, site_id, name, level, building_id, is_active,
 -- Data for Name: gate_entries; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.gate_entries (id, tenant_id, site_id, entry_number, vehicle_number, vendor_id, po_id, project_id, material_id, quantity, arrival_time, driver_name, driver_phone, delivery_person_name, entry_type, photo_url, invoice_scan_url, remarks, status, recorded_by_id, is_deleted, created_at) FROM stdin;
-168	3	3	GE-00001	KA-01-HH-9073	54	170	\N	\N	\N	2026-04-26 18:52:30.375564	Sunil Yadav	\N	\N	Vehicle	\N	\N	\N	Completed	4	f	2026-05-15 18:52:30.744964
-169	3	3	GE-00002	KA-01-HH-5693	53	171	\N	\N	\N	2026-04-27 18:52:30.375564	Manoj Kumar	\N	\N	Vehicle	\N	\N	\N	Completed	4	f	2026-05-15 18:52:30.744977
-170	3	3	GE-00003	KA-01-HH-5456	54	172	\N	\N	\N	2026-04-28 18:52:30.375564	Manoj Kumar	\N	\N	Vehicle	\N	\N	\N	Completed	4	f	2026-05-15 18:52:30.744981
-171	3	3	GE-00004	KA-01-HH-1889	51	173	\N	\N	\N	2026-04-29 18:52:30.375564	Amit Sharma	\N	\N	Vehicle	\N	\N	\N	Completed	4	f	2026-05-15 18:52:30.744985
-172	3	3	GE-00005	KA-01-HH-7150	59	174	\N	\N	\N	2026-04-30 18:52:30.375564	Amit Sharma	\N	\N	Vehicle	\N	\N	\N	Completed	4	f	2026-05-15 18:52:30.744988
-173	3	3	GE-00006	KA-01-HH-1973	60	175	\N	\N	\N	2026-05-01 18:52:30.375564	Vikram Singh	\N	\N	Vehicle	\N	\N	\N	Completed	4	f	2026-05-15 18:52:30.744991
-174	3	3	GE-00007	KA-01-HH-4766	56	176	\N	\N	\N	2026-05-02 18:52:30.375564	Vikram Singh	\N	\N	Vehicle	\N	\N	\N	Completed	4	f	2026-05-15 18:52:30.744994
-175	3	3	GE-00008	KA-01-HH-8357	52	177	\N	\N	\N	2026-05-03 18:52:30.375564	Sunil Yadav	\N	\N	Vehicle	\N	\N	\N	Completed	4	f	2026-05-15 18:52:30.744997
-176	3	3	GE-00009	KA-01-HH-4396	60	178	\N	\N	\N	2026-05-04 18:52:30.375564	Manoj Kumar	\N	\N	Vehicle	\N	\N	\N	Completed	4	f	2026-05-15 18:52:30.745
-177	3	3	GE-00010	KA-01-HH-1293	60	179	\N	\N	\N	2026-05-05 18:52:30.375564	Vikram Singh	\N	\N	Vehicle	\N	\N	\N	Completed	4	f	2026-05-15 18:52:30.745003
-178	3	3	GE-00011	KA-01-HH-2993	58	180	\N	\N	\N	2026-05-06 18:52:30.375564	Deepak Gupta	\N	\N	Vehicle	\N	\N	\N	Completed	4	f	2026-05-15 18:52:30.745007
-179	3	3	GE-00012	KA-01-HH-1818	53	181	\N	\N	\N	2026-05-07 18:52:30.375564	Vikram Singh	\N	\N	Vehicle	\N	\N	\N	Completed	4	f	2026-05-15 18:52:30.74501
-180	3	3	GE-00013	KA-01-HH-7978	55	182	\N	\N	\N	2026-05-08 18:52:30.375564	Suresh Raina	\N	\N	Vehicle	\N	\N	\N	Completed	4	f	2026-05-15 18:52:30.745013
-181	3	3	GE-00014	KA-01-HH-1520	52	183	\N	\N	\N	2026-05-09 18:52:30.375564	Amit Sharma	\N	\N	Vehicle	\N	\N	\N	Completed	4	f	2026-05-15 18:52:30.745016
-182	3	3	GE-00015	KA-01-HH-8667	52	184	\N	\N	\N	2026-05-10 18:52:30.375564	Vikram Singh	\N	\N	Vehicle	\N	\N	\N	Completed	4	f	2026-05-15 18:52:30.745019
-183	3	3	GE-00018	167267	53	\N	\N	\N	\N	2026-06-02 12:17:28.628437		\N	Ramc	Direct Invoice	\N	/uploads/invoices/3/20260602_064725_aad44eed.png		Awaiting Direct GRN	4	f	2026-06-02 12:17:28.633357
-185	3	3	GE-00020		52	184	1	246	147	2026-06-02 12:32:14.875097		\N	Akbar	Carry on hand	\N	/uploads/invoices/3/20260602_070133_5d5c0dd4.png		Completed	4	f	2026-06-02 12:32:14.876346
-184	3	3	GE-00019	23782	54	189	1	224	100	2026-06-02 12:28:26.738356	Suresh	\N		Vehicle	\N	/uploads/invoices/3/20260602_065717_fce2f380.png		Completed	4	f	2026-06-02 12:28:26.743214
-187	3	3	GE-00022		\N	\N	1	\N	\N	2026-06-02 18:29:58.082946		\N	WWEEDD	Carry on hand	\N	/uploads/invoices/3/20260602_125424_ff02de50.pdf		Gate Entry Created	4	f	2026-06-02 18:29:58.084494
-188	3	3	GE-00023		\N	\N	1	\N	\N	2026-06-02 18:34:35.142102		\N	Charan	Carry on hand	\N	/uploads/invoices/3/20260602_130433_be899148.png		Gate Entry Created	4	f	2026-06-02 18:34:35.142668
-189	3	3	GE-00024		53	\N	\N	\N	\N	2026-06-02 18:35:30.858193		\N		Direct Invoice	\N	/uploads/invoices/3/20260602_130522_f8a7b3f2.png		Awaiting Direct GRN	4	f	2026-06-02 18:35:30.859342
-186	3	3	GE-00021	Ka7982	52	183	1	225	185	2026-06-02 18:14:16.578833	Test	\N		Vehicle	\N	/uploads/invoices/3/20260602_124341_aecb6b5f.png		Completed	4	f	2026-06-02 18:14:16.581254
-190	3	3	GE-00025	KA03NA3627	59	199	1	230	100	2026-06-09 13:11:31.283664	Drive	\N		Vehicle	\N	/uploads/invoices/3/20260609_074110_0f1aa6b0.png	Rem	Awaiting GRN	4	f	2026-06-09 13:11:31.288362
-191	3	3	GE-00026		\N	\N	1	\N	\N	2026-06-09 13:20:57.289156		\N	Ram	Carry on hand	\N	/uploads/invoices/3/20260609_075056_fb8cf3be.png		Gate Entry Created	4	f	2026-06-09 13:20:57.290369
+COPY public.gate_entries (id, tenant_id, site_id, entry_number, vehicle_number, vendor_id, po_id, project_id, material_id, quantity, arrival_time, driver_name, driver_phone, delivery_person_name, entry_type, photo_url, invoice_scan_url, remarks, status, recorded_by_id, is_deleted, created_at, invoice_number, invoice_date, invoice_amount) FROM stdin;
+168	3	3	GE-00001	KA-01-HH-9073	54	170	\N	\N	\N	2026-04-26 18:52:30.375564	Sunil Yadav	\N	\N	Vehicle	\N	\N	\N	Completed	4	f	2026-05-15 18:52:30.744964	\N	\N	0
+169	3	3	GE-00002	KA-01-HH-5693	53	171	\N	\N	\N	2026-04-27 18:52:30.375564	Manoj Kumar	\N	\N	Vehicle	\N	\N	\N	Completed	4	f	2026-05-15 18:52:30.744977	\N	\N	0
+170	3	3	GE-00003	KA-01-HH-5456	54	172	\N	\N	\N	2026-04-28 18:52:30.375564	Manoj Kumar	\N	\N	Vehicle	\N	\N	\N	Completed	4	f	2026-05-15 18:52:30.744981	\N	\N	0
+171	3	3	GE-00004	KA-01-HH-1889	51	173	\N	\N	\N	2026-04-29 18:52:30.375564	Amit Sharma	\N	\N	Vehicle	\N	\N	\N	Completed	4	f	2026-05-15 18:52:30.744985	\N	\N	0
+172	3	3	GE-00005	KA-01-HH-7150	59	174	\N	\N	\N	2026-04-30 18:52:30.375564	Amit Sharma	\N	\N	Vehicle	\N	\N	\N	Completed	4	f	2026-05-15 18:52:30.744988	\N	\N	0
+173	3	3	GE-00006	KA-01-HH-1973	60	175	\N	\N	\N	2026-05-01 18:52:30.375564	Vikram Singh	\N	\N	Vehicle	\N	\N	\N	Completed	4	f	2026-05-15 18:52:30.744991	\N	\N	0
+174	3	3	GE-00007	KA-01-HH-4766	56	176	\N	\N	\N	2026-05-02 18:52:30.375564	Vikram Singh	\N	\N	Vehicle	\N	\N	\N	Completed	4	f	2026-05-15 18:52:30.744994	\N	\N	0
+175	3	3	GE-00008	KA-01-HH-8357	52	177	\N	\N	\N	2026-05-03 18:52:30.375564	Sunil Yadav	\N	\N	Vehicle	\N	\N	\N	Completed	4	f	2026-05-15 18:52:30.744997	\N	\N	0
+176	3	3	GE-00009	KA-01-HH-4396	60	178	\N	\N	\N	2026-05-04 18:52:30.375564	Manoj Kumar	\N	\N	Vehicle	\N	\N	\N	Completed	4	f	2026-05-15 18:52:30.745	\N	\N	0
+177	3	3	GE-00010	KA-01-HH-1293	60	179	\N	\N	\N	2026-05-05 18:52:30.375564	Vikram Singh	\N	\N	Vehicle	\N	\N	\N	Completed	4	f	2026-05-15 18:52:30.745003	\N	\N	0
+178	3	3	GE-00011	KA-01-HH-2993	58	180	\N	\N	\N	2026-05-06 18:52:30.375564	Deepak Gupta	\N	\N	Vehicle	\N	\N	\N	Completed	4	f	2026-05-15 18:52:30.745007	\N	\N	0
+179	3	3	GE-00012	KA-01-HH-1818	53	181	\N	\N	\N	2026-05-07 18:52:30.375564	Vikram Singh	\N	\N	Vehicle	\N	\N	\N	Completed	4	f	2026-05-15 18:52:30.74501	\N	\N	0
+180	3	3	GE-00013	KA-01-HH-7978	55	182	\N	\N	\N	2026-05-08 18:52:30.375564	Suresh Raina	\N	\N	Vehicle	\N	\N	\N	Completed	4	f	2026-05-15 18:52:30.745013	\N	\N	0
+181	3	3	GE-00014	KA-01-HH-1520	52	183	\N	\N	\N	2026-05-09 18:52:30.375564	Amit Sharma	\N	\N	Vehicle	\N	\N	\N	Completed	4	f	2026-05-15 18:52:30.745016	\N	\N	0
+182	3	3	GE-00015	KA-01-HH-8667	52	184	\N	\N	\N	2026-05-10 18:52:30.375564	Vikram Singh	\N	\N	Vehicle	\N	\N	\N	Completed	4	f	2026-05-15 18:52:30.745019	\N	\N	0
+185	3	3	GE-00020		52	184	1	246	147	2026-06-02 12:32:14.875097		\N	Akbar	Carry on hand	\N	/uploads/invoices/3/20260602_070133_5d5c0dd4.png		Completed	4	f	2026-06-02 12:32:14.876346	\N	\N	0
+184	3	3	GE-00019	23782	54	189	1	224	100	2026-06-02 12:28:26.738356	Suresh	\N		Vehicle	\N	/uploads/invoices/3/20260602_065717_fce2f380.png		Completed	4	f	2026-06-02 12:28:26.743214	\N	\N	0
+186	3	3	GE-00021	Ka7982	52	183	1	225	185	2026-06-02 18:14:16.578833	Test	\N		Vehicle	\N	/uploads/invoices/3/20260602_124341_aecb6b5f.png		Completed	4	f	2026-06-02 18:14:16.581254	\N	\N	0
+190	3	3	GE-00025	KA03NA3627	59	199	1	230	100	2026-06-09 13:11:31.283664	Drive	\N		Vehicle	\N	/uploads/invoices/3/20260609_074110_0f1aa6b0.png	Rem	Awaiting GRN	4	f	2026-06-09 13:11:31.288362	\N	\N	0
+187	3	3	GE-00022		\N	\N	1	\N	\N	2026-06-02 18:29:58.082946		\N	WWEEDD	Carry on hand	\N	/uploads/invoices/3/20260602_125424_ff02de50.pdf		Awaiting GRN	4	f	2026-06-02 18:29:58.084494	\N	\N	0
+188	3	3	GE-00023		\N	\N	1	\N	\N	2026-06-02 18:34:35.142102		\N	Charan	Carry on hand	\N	/uploads/invoices/3/20260602_130433_be899148.png		Awaiting GRN	4	f	2026-06-02 18:34:35.142668	\N	\N	0
+191	3	3	GE-00026		\N	\N	1	\N	\N	2026-06-09 13:20:57.289156		\N	Ram	Carry on hand	\N	/uploads/invoices/3/20260609_075056_fb8cf3be.png		Awaiting GRN	4	f	2026-06-09 13:20:57.290369	\N	\N	0
+183	3	3	GE-00018	167267	53	\N	\N	\N	\N	2026-06-02 12:17:28.628437		\N	Ramc	Direct Invoice	\N	/uploads/invoices/3/20260602_064725_aad44eed.png		Awaiting GRN	4	f	2026-06-02 12:17:28.633357	\N	\N	0
+189	3	3	GE-00024		53	\N	\N	\N	\N	2026-06-02 18:35:30.858193		\N		Direct Invoice	\N	/uploads/invoices/3/20260602_130522_f8a7b3f2.png		Awaiting GRN	4	f	2026-06-02 18:35:30.859342	\N	\N	0
+193	3	3	GE-00028	KA78GH4523	\N	\N	\N	\N	\N	2026-06-11 11:05:40.674417	Balu	\N	Balu	Standard	\N	/uploads/invoices/3/20260611_053538_b269ebd6.png		Completed	4	f	2026-06-11 11:05:40.675261	INV31	2026-06-02	2360
+192	3	3	GE-00027	KA54fd4567	\N	\N	\N	\N	\N	2026-06-11 11:03:38.492861	Shivan	\N	Shivan	Standard	\N	/uploads/invoices/3/20260611_053215_64b67715.jpg		Completed	4	f	2026-06-11 11:03:38.494318	Vi/26-27/273	2026-04-25	2360
+194	3	3	GE-00029		\N	\N	\N	\N	\N	2026-06-11 15:53:53.500456	Raju	\N	Raju	Standard	\N	/uploads/invoices/3/20260611_102351_1310c34c.png		Completed	4	f	2026-06-11 15:53:53.504252	IBILL897	2026-06-01	59000
+195	3	3	GE-00030		\N	\N	\N	\N	\N	2026-06-11 16:45:41.236254	Hari	\N	Hari	Standard	\N	/uploads/invoices/3/20260611_111537_f1f41053.png		Awaiting GRN	4	f	2026-06-11 16:45:41.237476	Bill872	2026-06-10	45000
 \.
 
 
@@ -5596,6 +7266,9 @@ COPY public.grn (id, tenant_id, site_id, grn_number, po_id, gate_entry_id, wareh
 197	3	3	GRN-00014	183	181	47	1	52	PO-Based	INV-1722	2026-05-15	19438.81	\N	\N	19438.81	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-05-15 18:52:30.894827	2026-05-15 18:52:30.894827	\N
 198	3	3	GRN-00015	184	182	46	1	52	PO-Based	INV-1845	2026-05-15	40821.7	\N	\N	40821.7	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-05-15 18:52:30.902895	2026-05-15 18:52:30.902895	\N
 199	3	3	GRN-00019	183	186	59	1	52	PO-Based	Inv5	2026-06-01	38877.63	\N	\N	38877.63	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-06-09 11:11:18.972663	2026-06-09 05:41:19.159588	\N
+201	3	3	GRN-00020	209	193	59	1	55	PO-Based	INV31	2026-06-02	93160	/uploads/invoices/3/20260611_053538_b269ebd6.png	\N	93160	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-06-11 15:04:41.051409	2026-06-11 09:34:41.062897	\N
+202	3	3	GRN-00021	207	192	59	1	53	PO-Based	Vi/26-27/273	2026-04-25	2360	/uploads/invoices/3/20260611_053215_64b67715.jpg	\N	12000	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-06-11 15:05:34.824889	2026-06-11 09:35:34.836038	\N
+203	3	3	GRN-00022	206	194	59	1	53	PO-Based	IBILL897	2026-06-01	165000	/uploads/invoices/3/20260611_102351_1310c34c.png	\N	165000	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-06-11 16:24:46.227164	2026-06-11 10:54:46.247199	\N
 \.
 
 
@@ -5645,6 +7318,9 @@ COPY public.grn_items (id, grn_id, material_id, po_item_id, ordered_quantity, re
 501	198	232	464	54	27	27	0	647.48	\N	0	0	0	0	0	0	17481.96	0	\N
 502	199	225	461	99	99	99	0	184.01	\N	0	0	0	0	0	0	18216.99	0	\N
 503	199	216	462	86	86	86	0	240.24	\N	0	0	0	0	0	0	20660.64	0	\N
+504	201	1062	501	20	20	20	0	4658	\N	0	0	0	0	0	0	93160	0	\N
+505	202	1191	515	12	12	12	0	1000	\N	0	0	0	0	0	0	12000	0	\N
+506	203	1191	498	10	10	10	0	16500	\N	0	0	0	0	0	0	165000	0	\N
 \.
 
 
@@ -5669,6 +7345,21 @@ COPY public.indent_approvals (id, indent_id, approval_flow_id, approver_id, appr
 14	210	4	4	2026-06-08 16:12:23.300721	{"483": {"quantity": 9.0, "remarks": null}}	\N
 15	211	3	4	2026-06-08 16:49:47.729986	{"484": {"quantity": 10.0, "remarks": null}}	\N
 16	211	4	4	2026-06-08 16:50:02.306172	{"484": {"quantity": 10.0, "remarks": null}}	\N
+17	213	3	4	2026-06-11 19:21:55.419311	{"486": {"quantity": 6.0, "remarks": null}}	\N
+18	213	4	4	2026-06-11 19:22:02.687318	{"486": {"quantity": 6.0, "remarks": "6"}}	\N
+19	215	10	3	2026-06-11 22:08:16.731596	{"488": {"quantity": 5.0, "remarks": "remark1"}}	\N
+20	215	11	3	2026-06-11 22:08:27.142324	{"488": {"quantity": 5.0, "remarks": null}}	\N
+21	216	10	3	2026-06-11 23:04:10.424179	{"489": {"quantity": 5.0, "remarks": null}}	\N
+22	216	11	3	2026-06-11 23:04:21.245937	{"489": {"quantity": 5.0, "remarks": null}}	\N
+23	217	10	3	2026-06-11 23:29:13.131871	{"490": {"quantity": 4.0, "remarks": null}}	\N
+24	218	10	3	2026-06-11 23:39:08.812865	{"491": {"quantity": 5.0, "remarks": null}}	\N
+25	218	11	11	2026-06-11 23:48:47.181967	{"491": {"quantity": 5.0, "remarks": null}}	\N
+26	218	16	11	2026-06-11 23:48:47.182	{"491": {"quantity": 5.0, "remarks": null}}	\N
+27	217	11	11	2026-06-11 23:53:55.085143	{"490": {"quantity": 4.0, "remarks": null}}	\N
+28	217	16	11	2026-06-11 23:53:55.085176	{"490": {"quantity": 4.0, "remarks": null}}	\N
+29	219	10	3	2026-06-11 23:59:24.572757	{"492": {"quantity": 7.0, "remarks": "Wrongly mentioned as 75"}}	\N
+30	219	11	11	2026-06-12 00:00:24.359678	{"492": {"quantity": 7.0, "remarks": null}}	\N
+31	219	16	11	2026-06-12 00:00:24.359689	{"492": {"quantity": 7.0, "remarks": null}}	\N
 \.
 
 
@@ -5733,7 +7424,6 @@ COPY public.indent_items (id, indent_id, material_id, requested_quantity, issued
 482	209	980	5	0	0	3
 483	210	1378	10	0	0	9
 485	212	2040	10	0	0	\N
-486	213	2102	6	0	0	\N
 477	205	1099	2	2	0	\N
 478	205	217	3	3	0	\N
 484	211	1095	10	10	0	10
@@ -5745,6 +7435,13 @@ COPY public.indent_items (id, indent_id, material_id, requested_quantity, issued
 449	191	228	16	10	0	15
 450	191	222	23	10	0	5
 453	192	229	17	1	1	10
+486	213	2102	6	0	0	6
+487	214	2564	10	0	0	\N
+488	215	2751	10	5	0	5
+489	216	2472	5	0	0	5
+490	217	2482	4	0	0	4
+491	218	2426	5	0	0	5
+492	219	2923	75	0	0	7
 \.
 
 
@@ -5752,42 +7449,70 @@ COPY public.indent_items (id, indent_id, material_id, requested_quantity, issued
 -- Data for Name: indents; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.indents (id, tenant_id, site_id, indent_number, requester_id, room_id, building_id, floor, location, department, remarks, total_amount, status, current_approval_level, approved_by_id, approved_at, is_deleted, created_at, updated_at) FROM stdin;
-199	3	3	IND-00026	9	3	1	Floor 3	Room31	ADMIN		5450	Issued	1	\N	2026-06-01 09:26:21.313376	f	2026-06-01 14:51:39.482646	2026-06-01 14:57:06.725872
-197	3	3	IND-00024	9	1	1	Ground Floor	Room1	CIVIL		1100	Converted to PO	1	\N	2026-06-01 07:30:22.172181	f	2026-06-01 12:46:09.107484	2026-06-01 16:03:23.72615
-196	3	3	IND-00023	4	1	1	Ground Floor	Room1	CIVIL		13325	Converted to PO	1	\N	2026-05-26 12:55:06.808856	f	2026-05-26 18:24:51.88147	2026-06-01 16:36:50.181893
-198	3	3	IND-00025	9	1	1	Ground Floor	Room1	CIVIL		11400	Approved	1	\N	2026-06-01 11:12:10.805868	f	2026-06-01 13:04:34.087373	2026-06-01 16:42:10.806351
-205	3	3	IND-00032	4	91	2	1	Room 103	LABOUR ROOM		8014.08	Issued	1	\N	2026-06-05 12:38:06.514087	f	2026-06-03 13:24:54.10457	2026-06-09 17:40:08.694838
-201	3	3	IND-00028	4	1	1	Ground Floor	Room1	CIVIL		96000	Converted to PO	1	4	2026-06-01 11:26:53.378164	f	2026-06-01 16:41:16.232062	2026-06-01 16:58:23.602685
-188	3	3	IND-00010	4	1	1	Floor 1	\N	Civil	\N	0	Converted to PO	1	\N	\N	f	2026-04-20 18:52:30.375564	2026-05-20 11:09:40.430772
-186	3	3	IND-00008	4	1	1	Floor 1	\N	Civil	\N	0	Issued	1	\N	\N	f	2026-04-19 18:52:30.375564	2026-05-20 11:11:02.774926
-195	3	3	IND-00022	4	2	1	Floor 1	Room1	CIVIL	General	6500000	Converted to PO	1	\N	2026-05-20 07:13:59.374666	f	2026-05-20 12:43:53.178501	2026-05-20 12:44:10.337933
-211	3	3	IND-00038	4	223	3	Floor 6	Room 601	103 WARD		7097.3	Issued	2	4	2026-06-08 11:20:02.381294	f	2026-06-08 16:27:37.42724	2026-06-09 17:55:02.947891
-182	3	3	IND-00004	4	2	3	Floor 1	\N	Civil	\N	0	Issued	1	\N	\N	f	2026-04-17 18:52:30.375564	2026-05-26 18:19:24.672223
-179	3	3	IND-00001	4	1	1	Floor 1	\N	Civil	\N	0	Issued	1	\N	\N	f	2026-04-16 06:52:30.375564	2026-05-15 18:52:30.376955
-180	3	3	IND-00002	4	1	3	Floor 1	\N	Civil	\N	0	Issued	1	\N	\N	f	2026-04-16 18:52:30.375564	2026-05-15 18:52:30.379177
-181	3	3	IND-00003	4	1	3	Floor 1	\N	Civil	\N	0	Issued	1	\N	\N	f	2026-04-17 06:52:30.375564	2026-05-15 18:52:30.382076
-183	3	3	IND-00005	4	2	2	Floor 1	\N	Civil	\N	0	Issued	1	\N	\N	f	2026-04-18 06:52:30.375564	2026-05-15 18:52:30.385998
-184	3	3	IND-00006	4	2	3	Floor 1	\N	Civil	\N	0	Issued	1	\N	\N	f	2026-04-18 18:52:30.375564	2026-05-15 18:52:30.387969
-185	3	3	IND-00007	4	2	3	Floor 1	\N	Civil	\N	0	Issued	1	\N	\N	f	2026-04-19 06:52:30.375564	2026-05-15 18:52:30.389676
-187	3	3	IND-00009	4	2	1	Floor 1	\N	Civil	\N	0	Issued	1	\N	\N	f	2026-04-20 06:52:30.375564	2026-05-15 18:52:30.392759
-189	3	3	IND-00011	4	1	2	Floor 1	\N	Civil	\N	0	Issued	1	\N	\N	f	2026-04-21 06:52:30.375564	2026-05-15 18:52:30.395849
-193	3	3	IND-00015	4	1	2	Floor 1	\N	Civil	\N	0	Partially Issued	1	\N	2026-06-01 11:32:27.323138	f	2026-04-23 06:52:30.375564	2026-06-09 17:58:53.379211
-192	3	3	IND-00014	4	2	1	Floor 1	\N	Civil	\N	0	Partially Issued	2	4	2026-06-08 05:37:36.683826	f	2026-04-22 18:52:30.375564	2026-06-09 18:22:36.843183
-190	3	3	IND-00012	4	1	2	Floor 1	\N	Civil	\N	0	Awaiting Approval	2	\N	\N	f	2026-04-21 18:52:30.375564	2026-06-08 11:57:40.208249
-208	3	3	IND-00035	4	170	3	Floor 2	Room 206	102 WARD		139727.1	Converted to PO	2	4	2026-06-08 05:34:52.991266	f	2026-06-08 10:58:08.257706	2026-06-08 14:45:41.0709
-191	3	3	IND-00013	4	2	2	Floor 1	\N	Civil	\N	0	Partially Issued	2	4	2026-06-08 06:25:38.754012	f	2026-04-22 06:52:30.375564	2026-06-09 18:46:30.76527
-209	3	3	IND-00036	4	\N	3	Floor 2		102 WARD		3847.95	Approved	2	4	2026-06-08 09:48:45.531409	f	2026-06-08 15:16:28.123647	2026-06-08 15:18:45.533288
-202	3	3	IND-00029	4	1	1	Ground Floor	Room1	CIVIL		240000	Converted to PO	1	4	2026-06-01 11:32:07.268603	f	2026-06-01 17:02:01.395733	2026-06-01 17:07:09.000518
-200	3	3	IND-00027	9	3	1	Floor 3	Room31	ADMIN		2750	Converted to PO	1	\N	2026-06-01 11:12:34.506509	f	2026-06-01 16:00:02.887037	2026-06-02 13:18:45.622315
-206	3	3	IND-00033	4	170	3	Floor 2	Room 206	102 WARD		297470.88	Approved	1	4	2026-06-05 11:51:09.455073	f	2026-06-05 14:21:22.619349	2026-06-05 17:21:09.457481
-194	3	3	IND-00021	4	2	1	Floor 1	Room1	CIVIL		6500000	Converted to PO	1	\N	2026-05-26 09:56:13.62006	f	2026-05-20 10:55:54.69627	2026-06-05 18:10:20.094634
-204	3	3	IND-00031	4	17	1	Ground Floor	Room 015	ANATOMY		44928.05	Approved	1	\N	2026-06-05 12:40:37.348323	f	2026-06-03 13:16:47.251194	2026-06-05 18:10:37.349326
-207	3	3	IND-00034	4	223	3	Floor 6	Room 601	103 WARD		23287.85	Approved	1	\N	2026-06-05 12:54:59.043078	f	2026-06-05 18:14:47.419437	2026-06-05 18:24:59.044127
-210	3	3	IND-00037	4	223	3	Floor 6	Room 601	103 WARD		104434.3	Approved	2	4	2026-06-08 10:42:23.32504	f	2026-06-08 16:11:43.866856	2026-06-08 16:12:23.326921
-203	3	3	IND-00030	9	2	1	Floor 2	Room1	CIVIL	Ggggh\n[Rejected: no required]	1569000	Rejected	1	\N	\N	f	2026-06-02 13:46:47.613015	2026-06-08 16:19:35.587119
-212	3	3	IND-00039	4	170	3	Floor 2	Room 206	102 WARD		29476	Awaiting Approval	1	\N	\N	f	2026-06-08 16:29:10.943772	2026-06-08 16:29:10.943813
-213	3	3	IND-00040	4	170	3	Floor 2	Room 206	102 WARD		19575.48	Awaiting Approval	1	\N	\N	f	2026-06-08 16:51:34.292996	2026-06-08 16:51:34.293008
+COPY public.indents (id, tenant_id, site_id, indent_number, requester_id, room_id, building_id, floor, location, department, remarks, total_amount, status, current_approval_level, approved_by_id, approved_at, is_deleted, created_at, updated_at, institution_id) FROM stdin;
+199	3	3	IND-00026	9	3	1	Floor 3	Room31	ADMIN		5450	Issued	1	\N	2026-06-01 09:26:21.313376	f	2026-06-01 14:51:39.482646	2026-06-01 14:57:06.725872	\N
+197	3	3	IND-00024	9	1	1	Ground Floor	Room1	CIVIL		1100	Converted to PO	1	\N	2026-06-01 07:30:22.172181	f	2026-06-01 12:46:09.107484	2026-06-01 16:03:23.72615	\N
+196	3	3	IND-00023	4	1	1	Ground Floor	Room1	CIVIL		13325	Converted to PO	1	\N	2026-05-26 12:55:06.808856	f	2026-05-26 18:24:51.88147	2026-06-01 16:36:50.181893	\N
+198	3	3	IND-00025	9	1	1	Ground Floor	Room1	CIVIL		11400	Approved	1	\N	2026-06-01 11:12:10.805868	f	2026-06-01 13:04:34.087373	2026-06-01 16:42:10.806351	\N
+205	3	3	IND-00032	4	91	2	1	Room 103	LABOUR ROOM		8014.08	Issued	1	\N	2026-06-05 12:38:06.514087	f	2026-06-03 13:24:54.10457	2026-06-09 17:40:08.694838	\N
+201	3	3	IND-00028	4	1	1	Ground Floor	Room1	CIVIL		96000	Converted to PO	1	4	2026-06-01 11:26:53.378164	f	2026-06-01 16:41:16.232062	2026-06-01 16:58:23.602685	\N
+188	3	3	IND-00010	4	1	1	Floor 1	\N	Civil	\N	0	Converted to PO	1	\N	\N	f	2026-04-20 18:52:30.375564	2026-05-20 11:09:40.430772	\N
+186	3	3	IND-00008	4	1	1	Floor 1	\N	Civil	\N	0	Issued	1	\N	\N	f	2026-04-19 18:52:30.375564	2026-05-20 11:11:02.774926	\N
+195	3	3	IND-00022	4	2	1	Floor 1	Room1	CIVIL	General	6500000	Converted to PO	1	\N	2026-05-20 07:13:59.374666	f	2026-05-20 12:43:53.178501	2026-05-20 12:44:10.337933	\N
+211	3	3	IND-00038	4	223	3	Floor 6	Room 601	103 WARD		7097.3	Issued	2	4	2026-06-08 11:20:02.381294	f	2026-06-08 16:27:37.42724	2026-06-09 17:55:02.947891	\N
+182	3	3	IND-00004	4	2	3	Floor 1	\N	Civil	\N	0	Issued	1	\N	\N	f	2026-04-17 18:52:30.375564	2026-05-26 18:19:24.672223	\N
+179	3	3	IND-00001	4	1	1	Floor 1	\N	Civil	\N	0	Issued	1	\N	\N	f	2026-04-16 06:52:30.375564	2026-05-15 18:52:30.376955	\N
+180	3	3	IND-00002	4	1	3	Floor 1	\N	Civil	\N	0	Issued	1	\N	\N	f	2026-04-16 18:52:30.375564	2026-05-15 18:52:30.379177	\N
+181	3	3	IND-00003	4	1	3	Floor 1	\N	Civil	\N	0	Issued	1	\N	\N	f	2026-04-17 06:52:30.375564	2026-05-15 18:52:30.382076	\N
+183	3	3	IND-00005	4	2	2	Floor 1	\N	Civil	\N	0	Issued	1	\N	\N	f	2026-04-18 06:52:30.375564	2026-05-15 18:52:30.385998	\N
+184	3	3	IND-00006	4	2	3	Floor 1	\N	Civil	\N	0	Issued	1	\N	\N	f	2026-04-18 18:52:30.375564	2026-05-15 18:52:30.387969	\N
+185	3	3	IND-00007	4	2	3	Floor 1	\N	Civil	\N	0	Issued	1	\N	\N	f	2026-04-19 06:52:30.375564	2026-05-15 18:52:30.389676	\N
+187	3	3	IND-00009	4	2	1	Floor 1	\N	Civil	\N	0	Issued	1	\N	\N	f	2026-04-20 06:52:30.375564	2026-05-15 18:52:30.392759	\N
+189	3	3	IND-00011	4	1	2	Floor 1	\N	Civil	\N	0	Issued	1	\N	\N	f	2026-04-21 06:52:30.375564	2026-05-15 18:52:30.395849	\N
+193	3	3	IND-00015	4	1	2	Floor 1	\N	Civil	\N	0	Partially Issued	1	\N	2026-06-01 11:32:27.323138	f	2026-04-23 06:52:30.375564	2026-06-09 17:58:53.379211	\N
+192	3	3	IND-00014	4	2	1	Floor 1	\N	Civil	\N	0	Partially Issued	2	4	2026-06-08 05:37:36.683826	f	2026-04-22 18:52:30.375564	2026-06-09 18:22:36.843183	\N
+190	3	3	IND-00012	4	1	2	Floor 1	\N	Civil	\N	0	Awaiting Approval	2	\N	\N	f	2026-04-21 18:52:30.375564	2026-06-08 11:57:40.208249	\N
+208	3	3	IND-00035	4	170	3	Floor 2	Room 206	102 WARD		139727.1	Converted to PO	2	4	2026-06-08 05:34:52.991266	f	2026-06-08 10:58:08.257706	2026-06-08 14:45:41.0709	\N
+191	3	3	IND-00013	4	2	2	Floor 1	\N	Civil	\N	0	Partially Issued	2	4	2026-06-08 06:25:38.754012	f	2026-04-22 06:52:30.375564	2026-06-09 18:46:30.76527	\N
+209	3	3	IND-00036	4	\N	3	Floor 2		102 WARD		3847.95	Approved	2	4	2026-06-08 09:48:45.531409	f	2026-06-08 15:16:28.123647	2026-06-08 15:18:45.533288	\N
+202	3	3	IND-00029	4	1	1	Ground Floor	Room1	CIVIL		240000	Converted to PO	1	4	2026-06-01 11:32:07.268603	f	2026-06-01 17:02:01.395733	2026-06-01 17:07:09.000518	\N
+200	3	3	IND-00027	9	3	1	Floor 3	Room31	ADMIN		2750	Converted to PO	1	\N	2026-06-01 11:12:34.506509	f	2026-06-01 16:00:02.887037	2026-06-02 13:18:45.622315	\N
+206	3	3	IND-00033	4	170	3	Floor 2	Room 206	102 WARD		297470.88	Approved	1	4	2026-06-05 11:51:09.455073	f	2026-06-05 14:21:22.619349	2026-06-05 17:21:09.457481	\N
+194	3	3	IND-00021	4	2	1	Floor 1	Room1	CIVIL		6500000	Converted to PO	1	\N	2026-05-26 09:56:13.62006	f	2026-05-20 10:55:54.69627	2026-06-05 18:10:20.094634	\N
+204	3	3	IND-00031	4	17	1	Ground Floor	Room 015	ANATOMY		44928.05	Approved	1	\N	2026-06-05 12:40:37.348323	f	2026-06-03 13:16:47.251194	2026-06-05 18:10:37.349326	\N
+207	3	3	IND-00034	4	223	3	Floor 6	Room 601	103 WARD		23287.85	Approved	1	\N	2026-06-05 12:54:59.043078	f	2026-06-05 18:14:47.419437	2026-06-05 18:24:59.044127	\N
+210	3	3	IND-00037	4	223	3	Floor 6	Room 601	103 WARD		104434.3	Approved	2	4	2026-06-08 10:42:23.32504	f	2026-06-08 16:11:43.866856	2026-06-08 16:12:23.326921	\N
+203	3	3	IND-00030	9	2	1	Floor 2	Room1	CIVIL	Ggggh\n[Rejected: no required]	1569000	Rejected	1	\N	\N	f	2026-06-02 13:46:47.613015	2026-06-08 16:19:35.587119	\N
+212	3	3	IND-00039	4	170	3	Floor 2	Room 206	102 WARD		29476	Awaiting Approval	1	\N	\N	f	2026-06-08 16:29:10.943772	2026-06-08 16:29:10.943813	\N
+213	3	3	IND-00040	4	170	3	Floor 2	Room 206	102 WARD		19575.48	Approved	2	4	2026-06-11 13:52:02.724655	f	2026-06-08 16:51:34.292996	2026-06-11 19:22:02.726591	\N
+214	2	2	IND-00001	3	237	7	FIRST FLOOR	ROOM101	HEALTH 		165261.6	Approved	1	\N	2026-06-11 16:32:44.703679	f	2026-06-11 22:02:08.325471	2026-06-11 22:02:44.704866	11
+215	2	2	IND-00002	3	\N	\N			Civil		104434.3	Issued	2	3	2026-06-11 16:38:27.171486	f	2026-06-11 22:07:29.592847	2026-06-11 22:45:15.19368	3
+216	2	2	IND-00003	3	\N	\N			Mechanical		18910.2	Approved	2	3	2026-06-11 17:34:21.268105	f	2026-06-11 23:04:00.934119	2026-06-11 23:04:21.269407	3
+218	2	2	IND-00005	9	\N	\N			Civil		16275.55	Approved	2	11	2026-06-11 18:18:47.211047	f	2026-06-11 23:38:00.003556	2026-06-11 23:48:47.212504	3
+217	2	2	IND-00004	9	\N	\N			Mechanical		18290.56	Approved	2	11	2026-06-11 18:23:55.112512	f	2026-06-11 23:16:37.330482	2026-06-11 23:53:55.113013	3
+219	2	2	IND-00006	9	\N	\N			HEALTH 		2621508	Approved	2	11	2026-06-11 18:30:24.383628	f	2026-06-11 23:57:59.307653	2026-06-12 00:00:24.384186	11
+\.
+
+
+--
+-- Data for Name: institutions; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.institutions (id, tenant_id, site_id, name, code, project_id, is_active, is_deleted, created_at) FROM stdin;
+1	2	2	EPCMSR (East Point College of Medical Sciences & Research Centre)	INST-00001	3	t	f	2026-06-11 18:24:47.773831
+2	2	2	EPH (East Point Medical College Hospital)	INST-00002	3	t	f	2026-06-11 18:25:16.728341
+3	2	2	EPCET (East Point College of Engineering & Technology)	INST-00003	3	t	f	2026-06-11 18:25:40.456786
+4	2	2	EPCP (East Point College of Pharmacy)	INST-00004	3	t	f	2026-06-11 18:26:03.736184
+5	2	2	EPCHE (East Point College of Higher Education)	INST-00005	3	t	f	2026-06-11 18:30:29.453281
+6	2	2	EPCM (East Point College of Management)	INST-00006	3	t	f	2026-06-11 18:30:57.207904
+7	2	2	EPCN (East Point College of Nursing)	INST-00007	3	t	f	2026-06-11 18:36:53.158049
+8	2	2	EPSN (East Point School of Nursing)	INST-00008	3	t	f	2026-06-11 18:37:59.004537
+9	2	2	NRCN (New Royal College of Nursing)	INST-00009	3	t	f	2026-06-11 18:38:44.400161
+10	2	2	EPCPT (East Point College of Physiotherapy)	INST-00010	3	t	f	2026-06-11 18:39:14.085426
+11	2	2	EPAHS (East Point Allied Health Sciences)	INST-00011	3	t	f	2026-06-11 18:39:37.004609
+12	2	2	EPPUC - Jnanaprabha Campus (East Point Pre-University College)	INST-00012	3	t	f	2026-06-11 18:40:08.337282
+13	2	2	EPPUC - Academy Campus (East Point Pre-University College)	INST-00013	3	t	f	2026-06-11 18:40:41.96241
+14	2	2	EPS (East Point School)	INST-00014	3	t	f	2026-06-11 18:41:02.503547
 \.
 
 
@@ -5803,9 +7528,9 @@ COPY public.invoice_items (id, invoice_id, material_id, description, hsn_sac, qu
 28	3	249	PPC Cement		141	420	Bags	0	9	9	0	5329.8	5329.8	0	59220	69879.59999999999	
 29	3	236	PVC Pipe 4 inch		57	250	Running Meter	0	9	9	0	1282.5	1282.5	0	14250	16815	
 34	4	1191	0.032 X 150 TERUMO GUIDE WIRE		10	16500	Numbers	0	5	5	0	8250	8250	0	165000	181500	
-37	5	1192	0.035X150CM TEFLON WIRE J.TIP		20	26703.28	Numbers	0	6	6	0	32043.935999999998	32043.935999999998	0	534065.6	598153.472	
-38	5	2133	110mmx75mm Bush		10	761.41	Numbers	0	9	9	0	685.2689999999999	685.2689999999999	0	7614.099999999999	8984.637999999999	
 44	6	2133	110mmx75mm Bush		10	761.41	Numbers	0	9	9	0	685.2689999999999	685.2689999999999	0	7614.099999999999	8984.637999999999	
+45	5	1192	0.035X150CM TEFLON WIRE J.TIP		20	26703.28	Numbers	0	6	6	0	32043.935999999998	32043.935999999998	0	534065.6	598153.472	
+46	5	2133	110mmx75mm Bush		10	761.41	Numbers	0	9	9	0	685.2689999999999	685.2689999999999	0	7614.099999999999	8984.637999999999	
 \.
 
 
@@ -5813,12 +7538,12 @@ COPY public.invoice_items (id, invoice_id, material_id, description, hsn_sac, qu
 -- Data for Name: invoices; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.invoices (id, tenant_id, site_id, invoice_number, invoice_date, gate_entry_id, vendor_id, po_id, total_amount, tax_amount, status, scan_url, remarks, created_by_id, is_deleted, created_at, updated_at, eway_bill_number, delivery_note, delivery_note_date, payment_terms, reference_number, reference_date, dispatch_doc_number, dispatched_through, destination, lr_rr_number, vehicle_number, terms_of_delivery, total_taxable_amount, total_cgst, total_sgst, total_igst, total_discount, consignee_id, buyer_id, internal_reference_number, srf_number, irn, ack_number, ack_date, transport_charges, transport_hsn, transport_cgst_rate, transport_sgst_rate, transport_igst_rate, transport_discount_percent, code) FROM stdin;
-4	3	3	aisax19238918239183	2026-06-03	\N	53	206	181500	16500	Verified	/uploads/invoices/3/20260610_134321_9103f01f.png		4	f	2026-06-10 19:13:38.480074	2026-06-10 19:27:45.185722			\N	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR		\N							165000	8250	8250	0	0	\N	\N	INV-00003				\N	0		0	0	0	0	INV-00003
-5	3	3	wuq2389482394	2026-06-03	\N	56	\N	607638.11	65458.409999999996	Draft	/uploads/invoices/3/20260610_135918_d988d4be.png		4	f	2026-06-10 19:30:10.241491	2026-06-10 19:30:10.241532			\N			\N							542179.7	32729.204999999998	32729.204999999998	0	0	\N	\N	INV-00004				\N	500		0	0	0	0	INV-00004
-2	3	3	560049	2026-06-04	\N	53	204	46654.4	4409.4	Verified	/uploads/invoices/3/20260610_130825_30b8e727.png		4	f	2026-06-10 11:49:14.494865	2026-06-10 18:39:45.341677			\N	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR		\N							42245	2204.7	2204.7	0	0	1	2	INV-00001				2026-06-10	2500	425411	0	0	0	0	INV-00001
-3	3	3	in4324	2026-06-02	\N	57	193	4500112.6	686442.6	Verified	/uploads/invoices/3/20260610_133541_e49271d3.png		4	f	2026-06-10 19:03:01.323243	2026-06-10 19:05:56.557962			\N	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR		\N							3813670	343221.3	343221.3	0	0	\N	\N	INV-00002				\N	100		0	0	0	0	INV-00002
-6	3	3	Bill23562	2026-06-01	\N	58	\N	9084.637999999999	1370.5379999999998	Verified	/uploads/invoices/3/20260610_140125_0ed94965.png		4	f	2026-06-10 19:31:10.596268	2026-06-10 19:42:12.900234			\N			\N							7714.099999999999	685.2689999999999	685.2689999999999	0	0	\N	\N	INV-00005				\N	100		0	0	0	0	INV-00005
+COPY public.invoices (id, tenant_id, site_id, invoice_number, invoice_date, gate_entry_id, vendor_id, po_id, total_amount, tax_amount, status, scan_url, remarks, created_by_id, is_deleted, created_at, updated_at, eway_bill_number, delivery_note, delivery_note_date, payment_terms, reference_number, reference_date, dispatch_doc_number, dispatched_through, destination, lr_rr_number, vehicle_number, terms_of_delivery, total_taxable_amount, total_cgst, total_sgst, total_igst, total_discount, consignee_id, buyer_id, internal_reference_number, srf_number, irn, ack_number, ack_date, transport_charges, transport_hsn, transport_cgst_rate, transport_sgst_rate, transport_igst_rate, transport_discount_percent, code, payment_status, sent_for_payment_at, sent_for_payment_by_id, hard_copy_received, hard_copy_received_at, hard_copy_received_by_id, hard_copy_remarks, payment_completed_at, payment_completed_by_id, payment_reference, hard_copy_sent, hard_copy_sent_at, hard_copy_sent_by_id) FROM stdin;
+5	3	3	wuq2389482394	2026-06-03	\N	56	\N	607638.11	65458.409999999996	Submitted	/uploads/invoices/3/20260610_135918_d988d4be.png		4	f	2026-06-10 19:30:10.241491	2026-06-11 11:46:55.235686			\N			\N							542179.7	32729.204999999998	32729.204999999998	0	0	\N	\N	INV-00004				\N	500		0	0	0	0	INV-00004	Pending	\N	\N	f	\N	\N	\N	\N	\N	\N	f	\N	\N
+2	3	3	560049	2026-06-04	\N	53	204	46654.4	4409.4	Approved	/uploads/invoices/3/20260610_130825_30b8e727.png		4	f	2026-06-10 11:49:14.494865	2026-06-10 18:39:45.341677			\N	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR		\N							42245	2204.7	2204.7	0	0	1	2	INV-00001				2026-06-10	2500	425411	0	0	0	0	INV-00001	Pending	\N	\N	f	\N	\N	\N	\N	\N	\N	f	\N	\N
+4	3	3	aisax19238918239183	2026-06-03	\N	53	206	181500	16500	Approved	/uploads/invoices/3/20260610_134321_9103f01f.png		4	f	2026-06-10 19:13:38.480074	2026-06-11 15:06:06.519046			\N	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR		\N							165000	8250	8250	0	0	\N	\N	INV-00003				\N	0		0	0	0	0	INV-00003	Pending	\N	\N	t	2026-06-11 15:06:06.516154	4		\N	\N	\N	t	2026-06-11 13:09:32.208184	4
+6	3	3	Bill23562	2026-06-01	\N	58	\N	9084.637999999999	1370.5379999999998	Approved	/uploads/invoices/3/20260610_140125_0ed94965.png		4	f	2026-06-10 19:31:10.596268	2026-06-11 13:56:48.777113			\N			\N							7714.099999999999	685.2689999999999	685.2689999999999	0	0	\N	\N	INV-00005				\N	100		0	0	0	0	INV-00005	Sent for Payment	2026-06-11 13:56:48.775835	4	t	2026-06-11 13:09:44.449712	4		\N	\N	\N	t	2026-06-11 13:04:52.835469	4
+3	3	3	in4324	2026-06-02	\N	57	193	4500112.6	686442.6	Approved	/uploads/invoices/3/20260610_133541_e49271d3.png		4	f	2026-06-10 19:03:01.323243	2026-06-11 13:57:09.017903			\N	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR		\N							3813670	343221.3	343221.3	0	0	\N	\N	INV-00002				\N	100		0	0	0	0	INV-00002	Pending	\N	\N	t	2026-06-11 13:57:09.01705	4		\N	\N	\N	t	2026-06-11 13:08:50.988039	4
 \.
 
 
@@ -5866,6 +7591,7 @@ COPY public.material_issue_items (id, issue_id, material_id, quantity, rate, rem
 203	226	228	10	45	\N	55
 204	226	222	10	85	\N	47
 205	227	1378	2	10443.43	\N	59
+206	228	2751	5	10443.43	\N	62
 \.
 
 
@@ -5873,45 +7599,46 @@ COPY public.material_issue_items (id, issue_id, material_id, quantity, rate, rem
 -- Data for Name: material_issues; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.material_issues (id, tenant_id, site_id, issue_number, warehouse_id, project_id, indent_id, building_id, issued_to_room_id, issued_to_department, issued_to_contractor, purpose, status, issued_by_id, received_by_name, is_acknowledged, acknowledged_at, acknowledged_by_id, acknowledgement_remarks, is_deleted, created_at) FROM stdin;
-190	3	3	ISS-00001	54	1	\N	2	2	CIVIL	\N	\N	Issued	4	\N	f	\N	\N	\N	f	2026-05-01 18:52:30.375564
-191	3	3	ISS-00002	52	1	\N	3	2	CIVIL	\N	\N	Issued	4	\N	f	\N	\N	\N	f	2026-05-02 18:52:30.375564
-192	3	3	ISS-00003	52	1	\N	1	1	CIVIL	\N	\N	Issued	4	\N	f	\N	\N	\N	f	2026-05-03 18:52:30.375564
-193	3	3	ISS-00004	49	1	\N	3	1	CIVIL	\N	\N	Issued	4	\N	f	\N	\N	\N	f	2026-05-04 18:52:30.375564
-194	3	3	ISS-00005	46	1	\N	3	1	CIVIL	\N	\N	Issued	4	\N	f	\N	\N	\N	f	2026-05-05 18:52:30.375564
-195	3	3	ISS-00006	59	1	\N	3	1	CIVIL	\N	\N	Issued	4	\N	f	\N	\N	\N	f	2026-05-06 18:52:30.375564
-196	3	3	ISS-00007	46	1	\N	2	2	CIVIL	\N	\N	Issued	4	\N	f	\N	\N	\N	f	2026-05-07 18:52:30.375564
-197	3	3	ISS-00008	57	1	\N	2	1	CIVIL	\N	\N	Issued	4	\N	f	\N	\N	\N	f	2026-05-08 18:52:30.375564
-198	3	3	ISS-00009	46	1	\N	1	1	CIVIL	\N	\N	Issued	4	\N	f	\N	\N	\N	f	2026-05-09 18:52:30.375564
-199	3	3	ISS-00010	46	1	\N	2	2	CIVIL	\N	\N	Issued	4	\N	f	\N	\N	\N	f	2026-05-10 18:52:30.375564
-200	3	3	ISS-00011	46	1	\N	2	2	CIVIL	\N	\N	Issued	4	\N	f	\N	\N	\N	f	2026-05-11 18:52:30.375564
-201	3	3	ISS-00012	52	1	\N	3	1	CIVIL	\N	\N	Issued	4	\N	f	\N	\N	\N	f	2026-05-12 18:52:30.375564
-202	3	3	ISS-00013	46	1	\N	1	1	CIVIL	\N	\N	Issued	4	\N	f	\N	\N	\N	f	2026-05-13 18:52:30.375564
-203	3	3	ISS-00014	47	1	\N	1	1	CIVIL	\N	\N	Issued	4	\N	f	\N	\N	\N	f	2026-05-14 18:52:30.375564
-204	3	3	ISS-00015	53	1	\N	1	2	CIVIL	\N	\N	Issued	4	\N	f	\N	\N	\N	f	2026-05-15 18:52:30.375564
-205	3	3	ISS-00020	55	1	186	1	1	CIVIL	\N	Fulfillment for IND-00008	Completed	4	\N	f	\N	\N	\N	f	2026-05-20 11:11:02.704331
-226	3	3	ISS-00041	55	1	191	2	2	CIVIL	\N	Fulfillment for IND-00013	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 18:46:30.737339
-227	3	3	ISS-00042	59	1	\N	3	\N	102 WARD	\N	Direct Issue	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 18:48:05.252708
-225	3	3	ISS-00040	46	1	192	1	2	CIVIL	\N	Fulfillment for IND-00014	Completed	4	\N	t	2026-06-09 13:37:24.911862	4	\N	f	2026-06-09 18:22:36.837641
-210	3	3	ISS-00025	50	1	196	1	1	CIVIL	\N	Fulfillment for IND-00023	Completed	4	\N	f	\N	\N	\N	f	2026-05-26 18:25:34.285748
-211	3	3	ISS-00026	54	1	199	1	3	ADMIN	\N	Fulfillment for IND-00026	Completed	4	\N	f	\N	\N	\N	f	2026-06-01 14:57:06.593084
-212	3	3	ISS-00027	55	1	199	1	3	ADMIN	\N	Fulfillment for IND-00026	Completed	4	\N	f	\N	\N	\N	f	2026-06-01 14:57:06.70319
-209	3	3	ISS-00024	50	1	182	3	2	CIVIL	\N	Fulfillment for IND-00004	Completed	4	\N	t	2026-06-02 08:17:09.301701	9	\N	f	2026-05-26 18:19:24.650895
-208	3	3	ISS-00023	46	1	182	3	2	CIVIL	\N	Fulfillment for IND-00004	Completed	4	\N	t	2026-06-02 08:17:11.419923	9	\N	f	2026-05-26 18:18:05.503323
-207	3	3	ISS-00022	46	1	194	1	2	CIVIL	\N	Fulfillment for IND-00021	Completed	4	\N	t	2026-06-02 08:17:12.594518	9	\N	f	2026-05-26 17:33:32.403852
-206	3	3	ISS-00021	52	1	186	1	1	CIVIL	\N	Fulfillment for IND-00008	Completed	4	\N	t	2026-06-02 08:17:15.451563	9	\N	f	2026-05-20 11:11:02.769222
-213	3	3	ISS-00028	59	1	205	2	91	LABOUR ROOM	\N	Fulfillment for IND-00032	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 17:40:08.636194
-214	3	3	ISS-00029	46	1	205	2	91	LABOUR ROOM	\N	Fulfillment for IND-00032	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 17:40:08.685862
-215	3	3	ISS-00030	59	1	211	3	223	103 WARD	\N	Fulfillment for IND-00038	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 17:55:02.933996
-216	3	3	ISS-00031	54	1	193	2	1	CIVIL	\N	Fulfillment for IND-00015	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 17:58:53.314125
-217	3	3	ISS-00032	46	1	193	2	1	CIVIL	\N	Fulfillment for IND-00015	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 17:58:53.337679
-218	3	3	ISS-00033	47	1	193	2	1	CIVIL	\N	Fulfillment for IND-00015	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 17:58:53.357308
-219	3	3	ISS-00034	54	1	193	2	1	CIVIL	\N	Fulfillment for IND-00015	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 18:02:23.643377
-220	3	3	ISS-00035	46	1	193	2	1	CIVIL	\N	Fulfillment for IND-00015	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 18:02:23.667511
-221	3	3	ISS-00036	59	1	\N	3	221	104 WARD	\N	Direct Issue	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 18:15:33.778175
-222	3	3	ISS-00037	59	1	\N	3	218	108 WARD	\N	Direct Issue	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 18:18:42.21266
-223	3	3	ISS-00038	55	1	192	1	2	CIVIL	\N	Fulfillment for IND-00014	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 18:22:36.82658
-224	3	3	ISS-00039	51	1	192	1	2	CIVIL	\N	Fulfillment for IND-00014	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 18:22:36.832307
+COPY public.material_issues (id, tenant_id, site_id, issue_number, warehouse_id, project_id, indent_id, building_id, issued_to_room_id, issued_to_department, issued_to_contractor, purpose, status, issued_by_id, received_by_name, is_acknowledged, acknowledged_at, acknowledged_by_id, acknowledgement_remarks, is_deleted, created_at, complaint_id) FROM stdin;
+190	3	3	ISS-00001	54	1	\N	2	2	CIVIL	\N	\N	Issued	4	\N	f	\N	\N	\N	f	2026-05-01 18:52:30.375564	\N
+191	3	3	ISS-00002	52	1	\N	3	2	CIVIL	\N	\N	Issued	4	\N	f	\N	\N	\N	f	2026-05-02 18:52:30.375564	\N
+192	3	3	ISS-00003	52	1	\N	1	1	CIVIL	\N	\N	Issued	4	\N	f	\N	\N	\N	f	2026-05-03 18:52:30.375564	\N
+193	3	3	ISS-00004	49	1	\N	3	1	CIVIL	\N	\N	Issued	4	\N	f	\N	\N	\N	f	2026-05-04 18:52:30.375564	\N
+194	3	3	ISS-00005	46	1	\N	3	1	CIVIL	\N	\N	Issued	4	\N	f	\N	\N	\N	f	2026-05-05 18:52:30.375564	\N
+195	3	3	ISS-00006	59	1	\N	3	1	CIVIL	\N	\N	Issued	4	\N	f	\N	\N	\N	f	2026-05-06 18:52:30.375564	\N
+196	3	3	ISS-00007	46	1	\N	2	2	CIVIL	\N	\N	Issued	4	\N	f	\N	\N	\N	f	2026-05-07 18:52:30.375564	\N
+197	3	3	ISS-00008	57	1	\N	2	1	CIVIL	\N	\N	Issued	4	\N	f	\N	\N	\N	f	2026-05-08 18:52:30.375564	\N
+198	3	3	ISS-00009	46	1	\N	1	1	CIVIL	\N	\N	Issued	4	\N	f	\N	\N	\N	f	2026-05-09 18:52:30.375564	\N
+199	3	3	ISS-00010	46	1	\N	2	2	CIVIL	\N	\N	Issued	4	\N	f	\N	\N	\N	f	2026-05-10 18:52:30.375564	\N
+200	3	3	ISS-00011	46	1	\N	2	2	CIVIL	\N	\N	Issued	4	\N	f	\N	\N	\N	f	2026-05-11 18:52:30.375564	\N
+201	3	3	ISS-00012	52	1	\N	3	1	CIVIL	\N	\N	Issued	4	\N	f	\N	\N	\N	f	2026-05-12 18:52:30.375564	\N
+202	3	3	ISS-00013	46	1	\N	1	1	CIVIL	\N	\N	Issued	4	\N	f	\N	\N	\N	f	2026-05-13 18:52:30.375564	\N
+203	3	3	ISS-00014	47	1	\N	1	1	CIVIL	\N	\N	Issued	4	\N	f	\N	\N	\N	f	2026-05-14 18:52:30.375564	\N
+204	3	3	ISS-00015	53	1	\N	1	2	CIVIL	\N	\N	Issued	4	\N	f	\N	\N	\N	f	2026-05-15 18:52:30.375564	\N
+205	3	3	ISS-00020	55	1	186	1	1	CIVIL	\N	Fulfillment for IND-00008	Completed	4	\N	f	\N	\N	\N	f	2026-05-20 11:11:02.704331	\N
+226	3	3	ISS-00041	55	1	191	2	2	CIVIL	\N	Fulfillment for IND-00013	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 18:46:30.737339	\N
+227	3	3	ISS-00042	59	1	\N	3	\N	102 WARD	\N	Direct Issue	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 18:48:05.252708	\N
+225	3	3	ISS-00040	46	1	192	1	2	CIVIL	\N	Fulfillment for IND-00014	Completed	4	\N	t	2026-06-09 13:37:24.911862	4	\N	f	2026-06-09 18:22:36.837641	\N
+210	3	3	ISS-00025	50	1	196	1	1	CIVIL	\N	Fulfillment for IND-00023	Completed	4	\N	f	\N	\N	\N	f	2026-05-26 18:25:34.285748	\N
+211	3	3	ISS-00026	54	1	199	1	3	ADMIN	\N	Fulfillment for IND-00026	Completed	4	\N	f	\N	\N	\N	f	2026-06-01 14:57:06.593084	\N
+212	3	3	ISS-00027	55	1	199	1	3	ADMIN	\N	Fulfillment for IND-00026	Completed	4	\N	f	\N	\N	\N	f	2026-06-01 14:57:06.70319	\N
+209	3	3	ISS-00024	50	1	182	3	2	CIVIL	\N	Fulfillment for IND-00004	Completed	4	\N	t	2026-06-02 08:17:09.301701	9	\N	f	2026-05-26 18:19:24.650895	\N
+208	3	3	ISS-00023	46	1	182	3	2	CIVIL	\N	Fulfillment for IND-00004	Completed	4	\N	t	2026-06-02 08:17:11.419923	9	\N	f	2026-05-26 18:18:05.503323	\N
+207	3	3	ISS-00022	46	1	194	1	2	CIVIL	\N	Fulfillment for IND-00021	Completed	4	\N	t	2026-06-02 08:17:12.594518	9	\N	f	2026-05-26 17:33:32.403852	\N
+206	3	3	ISS-00021	52	1	186	1	1	CIVIL	\N	Fulfillment for IND-00008	Completed	4	\N	t	2026-06-02 08:17:15.451563	9	\N	f	2026-05-20 11:11:02.769222	\N
+213	3	3	ISS-00028	59	1	205	2	91	LABOUR ROOM	\N	Fulfillment for IND-00032	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 17:40:08.636194	\N
+214	3	3	ISS-00029	46	1	205	2	91	LABOUR ROOM	\N	Fulfillment for IND-00032	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 17:40:08.685862	\N
+215	3	3	ISS-00030	59	1	211	3	223	103 WARD	\N	Fulfillment for IND-00038	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 17:55:02.933996	\N
+216	3	3	ISS-00031	54	1	193	2	1	CIVIL	\N	Fulfillment for IND-00015	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 17:58:53.314125	\N
+217	3	3	ISS-00032	46	1	193	2	1	CIVIL	\N	Fulfillment for IND-00015	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 17:58:53.337679	\N
+218	3	3	ISS-00033	47	1	193	2	1	CIVIL	\N	Fulfillment for IND-00015	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 17:58:53.357308	\N
+219	3	3	ISS-00034	54	1	193	2	1	CIVIL	\N	Fulfillment for IND-00015	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 18:02:23.643377	\N
+220	3	3	ISS-00035	46	1	193	2	1	CIVIL	\N	Fulfillment for IND-00015	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 18:02:23.667511	\N
+221	3	3	ISS-00036	59	1	\N	3	221	104 WARD	\N	Direct Issue	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 18:15:33.778175	\N
+222	3	3	ISS-00037	59	1	\N	3	218	108 WARD	\N	Direct Issue	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 18:18:42.21266	\N
+223	3	3	ISS-00038	55	1	192	1	2	CIVIL	\N	Fulfillment for IND-00014	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 18:22:36.82658	\N
+224	3	3	ISS-00039	51	1	192	1	2	CIVIL	\N	Fulfillment for IND-00014	Completed	4	\N	f	\N	\N	\N	f	2026-06-09 18:22:36.832307	\N
+228	2	2	ISS-00001	62	3	215	\N	\N	Civil	\N	Fulfillment for IND-00002	Completed	3	\N	f	\N	\N	\N	f	2026-06-11 22:45:15.173707	\N
 \.
 
 
@@ -7368,6 +9095,1376 @@ COPY public.materials (id, tenant_id, site_id, code, name, category_id, subcateg
 2332	3	3	STY-00193	BOX FILE SMALL	62	53	5	105	337	407.82	\N	Covered	\N	5	Consumable	BOX FILE SMALL	t	f	2026-06-03 12:31:56.995104	2026-06-05 16:47:46.705923	51	\N	STY0193
 2333	3	3	STY-00194	CARTRIDGE TK-7120	62	53	5	153	320	105.69	\N	Covered	\N	18	Consumable	CARTRIDGE TK-7120	t	f	2026-06-03 12:31:56.997835	2026-06-05 16:47:46.705926	51	\N	STY0194
 2334	3	3	STY-00195	CARTRIDGE 103A	62	53	5	233	588	34.8	\N	Covered	\N	18	Consumable	CARTRIDGE 103A	t	f	2026-06-03 12:31:57.000629	2026-06-05 16:47:46.705929	51	\N	STY0195
+2873	2	2	HOU-00374	SCISSOR 128MM	68	74	29	4	9	47096.75	\N	Covered	\N	12	Non-Consumable	SCISSOR 128MM	t	f	2026-06-11 21:48:30.716119	2026-06-11 21:58:45.594818	62	\N	HOS0374
+3444	2	2	PLB-00037	40mm FTA	73	87	29	38	98	1262.61	\N	Covered	\N	18	Consumable	40mm FTA	t	f	2026-06-11 21:48:30.71942	2026-06-11 21:58:45.596426	62	\N	PLB0037
+2337	2	2	HOI-00029	KNEE HAMMER	76	95	29	3	7	18841.64	\N	Covered	\N	12	Non-Consumable	KNEE HAMMER	t	f	2026-06-11 21:48:30.712841	2026-06-11 21:58:45.593271	62	\N	HOI0029
+2338	2	2	CIV-00001	AB15 APEX 4LTR	65	56	36	37	102	4352.49	\N	Covered	\N	18	Consumable	AB15 APEX 4LTR	t	f	2026-06-11 21:48:30.712865	2026-06-11 21:58:45.59329	62	\N	CIV0001
+2339	2	2	CIV-00002	SE2 SATIN 4 LTR	65	56	36	42	156	3701.64	\N	Covered	\N	18	Consumable	SE2 SATIN 4 LTR	t	f	2026-06-11 21:48:30.712873	2026-06-11 21:58:45.593295	62	\N	CIV0002
+2340	2	2	CIV-00003	SILVER GRAY APCO PREMIUM SATIN	65	56	31	263	539	398.32	\N	Covered	\N	18	Consumable	SILVER GRAY APCO PREMIUM SATIN	t	f	2026-06-11 21:48:30.71288	2026-06-11 21:58:45.593298	62	\N	CIV0003
+2341	2	2	CIV-00004	AB2 Apex 1Ltr	65	56	31	360	1396	352.41	\N	Covered	\N	18	Consumable	AB2 Apex 1Ltr	t	f	2026-06-11 21:48:30.712885	2026-06-11 21:58:45.593302	62	\N	CIV0004
+2342	2	2	CIV-00005	AB2 APEX 20LTR	65	56	36	11	24	2912.11	\N	Covered	\N	18	Consumable	AB2 APEX 20LTR	t	f	2026-06-11 21:48:30.712891	2026-06-11 21:58:45.593305	62	\N	CIV0005
+2343	2	2	CIV-00006	TE3 TE 20 LTR	65	56	36	33	98	3375.74	\N	Covered	\N	18	Consumable	TE3 TE 20 LTR	t	f	2026-06-11 21:48:30.712897	2026-06-11 21:58:45.593307	62	\N	CIV0006
+2344	2	2	CIV-00007	AC2G ACE 4 LTR	65	56	36	32	125	1520.46	\N	Covered	\N	18	Consumable	AC2G ACE 4 LTR	t	f	2026-06-11 21:48:30.712903	2026-06-11 21:58:45.59331	62	\N	CIV0007
+2345	2	2	CIV-00008	ANTIQUE WHITE APCO PREMIUM SATIN	65	56	31	210	630	407.75	\N	Covered	\N	18	Consumable	ANTIQUE WHITE APCO PREMIUM SATIN	t	f	2026-06-11 21:48:30.712909	2026-06-11 21:58:45.593313	62	\N	CIV0008
+2346	2	2	CIV-00009	ANTIQUE WHITE-APCO PREMIUM  20 LTR	65	56	36	50	193	1822.17	\N	Covered	\N	18	Consumable	ANTIQUE WHITE-APCO PREMIUM  20 LTR	t	f	2026-06-11 21:48:30.712915	2026-06-11 21:58:45.593316	62	\N	CIV0009
+2347	2	2	CIV-00010	ANTYI WHITE APCO 20LTR PREMIUM ENAMA	65	56	36	50	115	3338.49	\N	Covered	\N	18	Consumable	ANTYI WHITE APCO 20LTR PREMIUM ENAMA	t	f	2026-06-11 21:48:30.712921	2026-06-11 21:58:45.593319	62	\N	CIV0010
+2348	2	2	CIV-00011	SE2 SATIN 20 LTR	65	56	36	41	164	2988.62	\N	Covered	\N	18	Consumable	SE2 SATIN 20 LTR	t	f	2026-06-11 21:48:30.712927	2026-06-11 21:58:45.593322	62	\N	CIV0011
+2349	2	2	CIV-00012	TE3 TE 20LTR	65	56	36	32	111	2818.46	\N	Covered	\N	18	Consumable	TE3 TE 20LTR	t	f	2026-06-11 21:48:30.712933	2026-06-11 21:58:45.593325	62	\N	CIV0012
+2350	2	2	CIV-00013	SE2 SATIN 20 Ltr	65	56	36	11	40	3598.42	\N	Covered	\N	18	Consumable	SE2 SATIN 20 Ltr	t	f	2026-06-11 21:48:30.712939	2026-06-11 21:58:45.593328	62	\N	CIV0013
+2351	2	2	CIV-00014	SE2 SATIN 4 Ltr	65	56	36	25	76	4446.17	\N	Covered	\N	18	Consumable	SE2 SATIN 4 Ltr	t	f	2026-06-11 21:48:30.712945	2026-06-11 21:58:45.593331	62	\N	CIV0014
+2352	2	2	CIV-00015	1 1/2 Cpvc NRV	65	56	29	335	748	726.57	\N	Covered	\N	18	Consumable	1 1/2 Cpvc NRV	t	f	2026-06-11 21:48:30.712951	2026-06-11 21:58:45.593341	62	\N	CIV0015
+2353	2	2	CIV-00016	1 1/4 Cpvc FTA	65	56	29	476	1591	769.59	\N	Covered	\N	18	Consumable	1 1/4 Cpvc FTA	t	f	2026-06-11 21:48:30.712956	2026-06-11 21:58:45.593344	62	\N	CIV0016
+2354	2	2	CIV-00017	1 1/4 CPVC PIPE	65	56	29	48	129	1209.93	\N	Covered	\N	18	Consumable	1 1/4 CPVC PIPE	t	f	2026-06-11 21:48:30.712962	2026-06-11 21:58:45.593347	62	\N	CIV0017
+2355	2	2	CIV-00018	1 1/4 CPVC UNION	65	56	29	44	171	1388.23	\N	Covered	\N	18	Consumable	1 1/4 CPVC UNION	t	f	2026-06-11 21:48:30.712968	2026-06-11 21:58:45.593349	62	\N	CIV0018
+2356	2	2	CIV-00019	1 Inch Square Bush	65	56	29	16	50	1097.1	\N	Covered	\N	18	Consumable	1 Inch Square Bush	t	f	2026-06-11 21:48:30.712974	2026-06-11 21:58:45.593352	62	\N	CIV0019
+2357	2	2	CIV-00020	1" COTTON ROLL	65	56	29	16	54	1217.73	\N	Covered	\N	18	Consumable	1" COTTON ROLL	t	f	2026-06-11 21:48:30.71298	2026-06-11 21:58:45.593355	62	\N	CIV0020
+2358	2	2	CIV-00021	1*3/4 BUSH	65	56	29	44	100	1116.03	\N	Covered	\N	18	Consumable	1*3/4 BUSH	t	f	2026-06-11 21:48:30.712985	2026-06-11 21:58:45.593358	62	\N	CIV0021
+2359	2	2	CIV-00022	1.25 Inch Round Bush	65	56	29	27	69	1224.33	\N	Covered	\N	18	Consumable	1.25 Inch Round Bush	t	f	2026-06-11 21:48:30.712991	2026-06-11 21:58:45.593361	62	\N	CIV0022
+2360	2	2	CIV-00023	1.25 Inch Square Ineer Bush	65	56	29	43	145	1205.51	\N	Covered	\N	18	Consumable	1.25 Inch Square Ineer Bush	t	f	2026-06-11 21:48:30.712997	2026-06-11 21:58:45.593363	62	\N	CIV0023
+2361	2	2	CIV-00024	12*13 SPANNER	65	56	29	37	128	1387.74	\N	Covered	\N	18	Non-Consumable	12*13 SPANNER	t	f	2026-06-11 21:48:30.713003	2026-06-11 21:58:45.593366	62	\N	CIV0024
+2362	2	2	CIV-00025	15 MTR TAPE	65	56	29	10	37	1327.65	\N	Covered	\N	18	Consumable	15 MTR TAPE	t	f	2026-06-11 21:48:30.713009	2026-06-11 21:58:45.593369	62	\N	CIV0025
+2363	2	2	CIV-00026	18*24 TARFAULIN	65	56	29	222	661	842.8	\N	Covered	\N	18	Consumable	18*24 TARFAULIN	t	f	2026-06-11 21:48:30.713015	2026-06-11 21:58:45.593372	62	\N	CIV0026
+2364	2	2	CIV-00027	2 Inch Brush	65	56	29	312	946	821.89	\N	Covered	\N	18	Consumable	2 Inch Brush	t	f	2026-06-11 21:48:30.713021	2026-06-11 21:58:45.593375	62	\N	CIV0027
+2365	2	2	CIV-00028	2" Magic Blue Brush	65	56	29	144	404	753.04	\N	Covered	\N	18	Consumable	2" Magic Blue Brush	t	f	2026-06-11 21:48:30.713027	2026-06-11 21:58:45.593378	62	\N	CIV0028
+2366	2	2	CIV-00029	2" SUNRISE BRUSH	65	56	29	63	170	779.97	\N	Covered	\N	18	Consumable	2" SUNRISE BRUSH	t	f	2026-06-11 21:48:30.713033	2026-06-11 21:58:45.593381	62	\N	CIV0029
+2367	2	2	CIV-00030	20 LTRS GEM YELLOW PRIMER	65	56	36	45	169	2034.97	\N	Covered	\N	18	Consumable	20 LTRS GEM YELLOW PRIMER	t	f	2026-06-11 21:48:30.713038	2026-06-11 21:58:45.593383	62	\N	CIV0030
+2368	2	2	CIV-00031	20*2.4 SUPER MASKING TAPE	65	56	29	133	499	868.39	\N	Covered	\N	18	Consumable	20*2.4 SUPER MASKING TAPE	t	f	2026-06-11 21:48:30.713044	2026-06-11 21:58:45.593386	62	\N	CIV0031
+2369	2	2	CIV-00032	SE13 SATIN 4 LTR	65	56	36	33	93	3740.9	\N	Covered	\N	18	Consumable	SE13 SATIN 4 LTR	t	f	2026-06-11 21:48:30.71305	2026-06-11 21:58:45.593389	62	\N	CIV0032
+2370	2	2	CIV-00033	MEHENDI-N  APCO PREMIUM  ENAMAl 4Ltrs	65	56	36	24	59	1911.19	\N	Covered	\N	18	Consumable	MEHENDI-N  APCO PREMIUM  ENAMAl 4Ltrs	t	f	2026-06-11 21:48:30.713056	2026-06-11 21:58:45.593392	62	\N	CIV0033
+2371	2	2	CIV-00034	25 X 4.8 Super Masking Tape 1 PC	65	56	29	344	1346	653.76	\N	Covered	\N	18	Consumable	25 X 4.8 Super Masking Tape 1 PC	t	f	2026-06-11 21:48:30.713062	2026-06-11 21:58:45.593395	62	\N	CIV0034
+2372	2	2	CIV-00035	2X1 CPVC TEE	65	56	29	50	157	579.36	\N	Covered	\N	18	Consumable	2X1 CPVC TEE	t	f	2026-06-11 21:48:30.713067	2026-06-11 21:58:45.593398	62	\N	CIV0035
+2373	2	2	CIV-00036	3" SUNRISE BRUSH	65	56	29	146	337	875.24	\N	Covered	\N	18	Consumable	3" SUNRISE BRUSH	t	f	2026-06-11 21:48:30.713073	2026-06-11 21:58:45.593401	62	\N	CIV0036
+2374	2	2	CIV-00037	4 Inch Refill	65	56	29	40	83	1182.14	\N	Covered	\N	18	Consumable	4 Inch Refill	t	f	2026-06-11 21:48:30.713079	2026-06-11 21:58:45.593403	62	\N	CIV0037
+2375	2	2	CIV-00038	4" BRUSH	65	56	29	302	994	568.22	\N	Covered	\N	18	Consumable	4" BRUSH	t	f	2026-06-11 21:48:30.713085	2026-06-11 21:58:45.593407	62	\N	CIV0038
+2376	2	2	CIV-00039	4" COTTON ROLL	65	56	29	14	29	1390.48	\N	Covered	\N	18	Consumable	4" COTTON ROLL	t	f	2026-06-11 21:48:30.71309	2026-06-11 21:58:45.593409	62	\N	CIV0039
+2377	2	2	CIV-00040	4" Cotton Roller Set	65	56	29	10	30	1131.57	\N	Covered	\N	18	Consumable	4" Cotton Roller Set	t	f	2026-06-11 21:48:30.713096	2026-06-11 21:58:45.593412	62	\N	CIV0040
+2378	2	2	CIV-00041	4" GRADING DC WHEEL	65	56	29	18	65	1150.53	\N	Covered	\N	18	Consumable	4" GRADING DC WHEEL	t	f	2026-06-11 21:48:30.713102	2026-06-11 21:58:45.593415	62	\N	CIV0041
+2379	2	2	CIV-00042	4" Roller Refil	65	56	29	18	67	1338.79	\N	Covered	\N	18	Consumable	4" Roller Refil	t	f	2026-06-11 21:48:30.713108	2026-06-11 21:58:45.593418	62	\N	CIV0042
+2380	2	2	CIV-00043	4115-AB11 APEX 1 Ltr	65	56	36	28	65	4459.72	\N	Covered	\N	18	Consumable	4115-AB11 APEX 1 Ltr	t	f	2026-06-11 21:48:30.713113	2026-06-11 21:58:45.59342	62	\N	CIV0043
+2381	2	2	CIV-00044	4202-BW1 PE 20 Ltr	65	56	36	27	98	3288.75	\N	Covered	\N	18	Consumable	4202-BW1 PE 20 Ltr	t	f	2026-06-11 21:48:30.713119	2026-06-11 21:58:45.593423	62	\N	CIV0044
+2382	2	2	CIV-00045	4202-SE2 SATIN 20 LTR	65	56	36	23	47	2503.69	\N	Covered	\N	18	Consumable	4202-SE2 SATIN 20 LTR	t	f	2026-06-11 21:48:30.713125	2026-06-11 21:58:45.593426	62	\N	CIV0045
+2383	2	2	CIV-00046	4M PVC BOX	65	56	29	12	48	1277.49	\N	Covered	\N	18	Consumable	4M PVC BOX	t	f	2026-06-11 21:48:30.713131	2026-06-11 21:58:45.593429	62	\N	CIV0046
+2384	2	2	CIV-00047	5.5 TR OUT DOOR COIL	65	56	29	153	530	669.48	\N	Covered	\N	18	Consumable	5.5 TR OUT DOOR COIL	t	f	2026-06-11 21:48:30.713136	2026-06-11 21:58:45.593432	62	\N	CIV0047
+2385	2	2	CIV-00048	50x40 R BUSH	65	56	29	35	103	1367.03	\N	Covered	\N	18	Consumable	50x40 R BUSH	t	f	2026-06-11 21:48:30.713142	2026-06-11 21:58:45.593435	62	\N	CIV0048
+2386	2	2	CIV-00050	6 MODULE PLATE MODULAR	65	56	29	31	77	1230.22	\N	Covered	\N	18	Consumable	6 MODULE PLATE MODULAR	t	f	2026-06-11 21:48:30.713148	2026-06-11 21:58:45.593437	62	\N	CIV0050
+2387	2	2	CIV-00051	6" COTTON  ROLLER SET	65	56	29	17	43	1093.84	\N	Covered	\N	18	Consumable	6" COTTON  ROLLER SET	t	f	2026-06-11 21:48:30.713154	2026-06-11 21:58:45.59344	62	\N	CIV0051
+2388	2	2	CIV-00052	6" COTTON ROLL	65	56	29	491	1899	781.96	\N	Covered	\N	18	Consumable	6" COTTON ROLL	t	f	2026-06-11 21:48:30.71316	2026-06-11 21:58:45.593443	62	\N	CIV0052
+2389	2	2	CIV-00053	6" Cotton Roller Set	65	56	29	78	169	968.23	\N	Covered	\N	18	Consumable	6" Cotton Roller Set	t	f	2026-06-11 21:48:30.713166	2026-06-11 21:58:45.593446	62	\N	CIV0053
+2390	2	2	CIV-00054	6" ROLLAR RIFFIL	65	56	29	34	113	1206.9	\N	Covered	\N	18	Consumable	6" ROLLAR RIFFIL	t	f	2026-06-11 21:48:30.713172	2026-06-11 21:58:45.593449	62	\N	CIV0054
+2391	2	2	CIV-00055	6" Roller Refil	65	56	29	479	1016	747.1	\N	Covered	\N	18	Consumable	6" Roller Refil	t	f	2026-06-11 21:48:30.713177	2026-06-11 21:58:45.593451	62	\N	CIV0055
+2392	2	2	CIV-00056	8 JK REGULAR PLIER	65	56	29	47	149	1136.37	\N	Covered	\N	18	Consumable	8 JK REGULAR PLIER	t	f	2026-06-11 21:48:30.713183	2026-06-11 21:58:45.593454	62	\N	CIV0056
+2393	2	2	CIV-00057	8 MODULE PLATE MODULAR	65	56	29	45	141	1213.06	\N	Covered	\N	18	Consumable	8 MODULE PLATE MODULAR	t	f	2026-06-11 21:48:30.713189	2026-06-11 21:58:45.593457	62	\N	CIV0057
+2394	2	2	CIV-00058	8" PUTTY BLADE	65	56	29	14	56	1000.61	\N	Covered	\N	18	Consumable	8" PUTTY BLADE	t	f	2026-06-11 21:48:30.713195	2026-06-11 21:58:45.59346	62	\N	CIV0058
+2395	2	2	CIV-00059	8251 AB2 APEX 1Ltr	65	56	36	14	49	2138.73	\N	Covered	\N	18	Consumable	8251 AB2 APEX 1Ltr	t	f	2026-06-11 21:48:30.7132	2026-06-11 21:58:45.593463	62	\N	CIV0059
+2396	2	2	CIV-00060	8251 AB2 APEX 20LTR	65	56	36	14	51	3889.37	\N	Covered	\N	18	Consumable	8251 AB2 APEX 20LTR	t	f	2026-06-11 21:48:30.713206	2026-06-11 21:58:45.593466	62	\N	CIV0060
+2397	2	2	CIV-00061	8255-AB11 APEX 10 Ltr	65	56	36	38	96	2243.21	\N	Covered	\N	18	Consumable	8255-AB11 APEX 10 Ltr	t	f	2026-06-11 21:48:30.713212	2026-06-11 21:58:45.593468	62	\N	CIV0061
+2398	2	2	CIV-00062	8255-AC9G ACE 1 Ltr	65	56	36	45	128	3878.78	\N	Covered	\N	18	Consumable	8255-AC9G ACE 1 Ltr	t	f	2026-06-11 21:48:30.713218	2026-06-11 21:58:45.593471	62	\N	CIV0062
+2399	2	2	CIV-00063	8287-EB10 PEG 1Ltr	65	56	36	29	62	1755.49	\N	Covered	\N	18	Consumable	8287-EB10 PEG 1Ltr	t	f	2026-06-11 21:48:30.713224	2026-06-11 21:58:45.593474	62	\N	CIV0063
+2400	2	2	CIV-00064	8308 TE3 TE 20LTR	65	56	36	18	38	3179.82	\N	Covered	\N	18	Consumable	8308 TE3 TE 20LTR	t	f	2026-06-11 21:48:30.71323	2026-06-11 21:58:45.593477	62	\N	CIV0064
+2401	2	2	CIV-00065	8603 SE2 SATIN 4LTR	65	56	36	41	89	1926.19	\N	Covered	\N	18	Consumable	8603 SE2 SATIN 4LTR	t	f	2026-06-11 21:48:30.713235	2026-06-11 21:58:45.593484	62	\N	CIV0065
+2402	2	2	CIV-00066	8603-AB2 APEX 1Ltr	65	56	36	13	32	2592.64	\N	Covered	\N	18	Consumable	8603-AB2 APEX 1Ltr	t	f	2026-06-11 21:48:30.713241	2026-06-11 21:58:45.593487	62	\N	CIV0066
+2403	2	2	CIV-00067	8603-AB2 APEX 20 Ltr	65	56	36	31	69	2490.34	\N	Covered	\N	18	Consumable	8603-AB2 APEX 20 Ltr	t	f	2026-06-11 21:48:30.713247	2026-06-11 21:58:45.59349	62	\N	CIV0067
+2404	2	2	CIV-00068	9" Exterior Roller	65	56	29	254	693	940.78	\N	Covered	\N	18	Consumable	9" Exterior Roller	t	f	2026-06-11 21:48:30.713253	2026-06-11 21:58:45.593493	62	\N	CIV0068
+2405	2	2	CIV-00069	9" Interior Roller	65	56	29	45	145	1084.11	\N	Covered	\N	18	Consumable	9" Interior Roller	t	f	2026-06-11 21:48:30.713258	2026-06-11 21:58:45.593495	62	\N	CIV0069
+2406	2	2	CIV-00070	9" ROLLAR  YELLOW / BLUE	65	56	29	230	907	649.5	\N	Covered	\N	18	Consumable	9" ROLLAR  YELLOW / BLUE	t	f	2026-06-11 21:48:30.713264	2026-06-11 21:58:45.593498	62	\N	CIV0070
+2407	2	2	CIV-00072	AB2 APEX 1 LTR	65	56	36	32	67	3909.66	\N	Covered	\N	18	Consumable	AB2 APEX 1 LTR	t	f	2026-06-11 21:48:30.71327	2026-06-11 21:58:45.593501	62	\N	CIV0072
+2408	2	2	CIV-00073	AB2 APEX 20 LTR	65	56	36	43	166	4407.21	\N	Covered	\N	18	Consumable	AB2 APEX 20 LTR	t	f	2026-06-11 21:48:30.713276	2026-06-11 21:58:45.593504	62	\N	CIV0073
+2409	2	2	CIV-00074	Abro Paper Tape 1" 40mtr	65	56	29	19	47	1229.05	\N	Covered	\N	18	Consumable	Abro Paper Tape 1" 40mtr	t	f	2026-06-11 21:48:30.713281	2026-06-11 21:58:45.593507	62	\N	CIV0074
+2410	2	2	CIV-00075	Adh Roff Cement 30 KG	65	56	28	442	1092	649.52	\N	Covered	\N	28.000000000000004	Consumable	Adh Roff Cement 30 KG	t	f	2026-06-11 21:48:30.713287	2026-06-11 21:58:45.593509	62	\N	CIV0075
+2411	2	2	CIV-00076	ALUMINIUM ALUMINIUM PAINT 1 LTR	65	56	36	12	41	2427.63	\N	Covered	\N	18	Consumable	ALUMINIUM ALUMINIUM PAINT 1 LTR	t	f	2026-06-11 21:48:30.713293	2026-06-11 21:58:45.593512	62	\N	CIV0076
+2412	2	2	CIV-00077	PATTY BLADES	65	56	29	434	912	557.14	\N	Covered	\N	18	Consumable	PATTY BLADES	t	f	2026-06-11 21:48:30.713299	2026-06-11 21:58:45.593515	62	\N	CIV0077
+2413	2	2	ELE-00001	DIGITAL CLAMP METER (MODEL 1000 A AC)	66	57	29	50	174	3210.26	\N	Covered	\N	18	Non-Consumable	DIGITAL CLAMP METER (MODEL 1000 A AC)	t	f	2026-06-11 21:48:30.713304	2026-06-11 21:58:45.593518	62	\N	ELE0001
+2414	2	2	ELE-00002	DIGITAL EARTH TESTER WITH KIT (MODEL DET.WACO)	66	57	29	17	43	1303.19	\N	Covered	\N	18	Non-Consumable	DIGITAL EARTH TESTER WITH KIT (MODEL DET.WACO)	t	f	2026-06-11 21:48:30.713314	2026-06-11 21:58:45.593521	62	\N	ELE0002
+2415	2	2	ELE-00003	LEAKAGE CURRENT TESTER (MODEL ALCT60A)	66	57	29	220	598	977.01	\N	Covered	\N	18	Non-Consumable	LEAKAGE CURRENT TESTER (MODEL ALCT60A)	t	f	2026-06-11 21:48:30.71332	2026-06-11 21:58:45.593524	62	\N	ELE0003
+2416	2	2	ELE-00004	MULTIMETER MODEL 13S (DIGITAL)	66	57	29	19	49	1747.22	\N	Covered	\N	18	Non-Consumable	MULTIMETER MODEL 13S (DIGITAL)	t	f	2026-06-11 21:48:30.713325	2026-06-11 21:58:45.593526	62	\N	ELE0004
+2417	2	2	ELE-00005	2M Plate Legrand	66	57	29	30	66	1873.84	\N	Covered	\N	18	Consumable	2M Plate Legrand	t	f	2026-06-11 21:48:30.713331	2026-06-11 21:58:45.593529	62	\N	ELE0005
+2418	2	2	ELE-00006	3M Plate Legrand	66	57	29	10	26	2084.87	\N	Covered	\N	18	Consumable	3M Plate Legrand	t	f	2026-06-11 21:48:30.713341	2026-06-11 21:58:45.593532	62	\N	ELE0006
+2419	2	2	ELE-00007	4M Plate Legrand	66	57	29	467	1356	796.41	\N	Covered	\N	18	Consumable	4M Plate Legrand	t	f	2026-06-11 21:48:30.713347	2026-06-11 21:58:45.593535	62	\N	ELE0007
+2420	2	2	ELE-00008	6M Plate Legrand	66	57	29	30	103	2373.52	\N	Covered	\N	18	Consumable	6M Plate Legrand	t	f	2026-06-11 21:48:30.713353	2026-06-11 21:58:45.593538	62	\N	ELE0008
+2421	2	2	ELE-00009	8M Plate Legrand (white)	66	57	29	302	1073	441.95	\N	Covered	\N	18	Consumable	8M Plate Legrand (white)	t	f	2026-06-11 21:48:30.713359	2026-06-11 21:58:45.59354	62	\N	ELE0009
+2422	2	2	ELE-00010	8M Plate Legrand (Charcoalgrey)	66	57	29	20	76	2368.28	\N	Covered	\N	18	Consumable	8M Plate Legrand (Charcoalgrey)	t	f	2026-06-11 21:48:30.713364	2026-06-11 21:58:45.593543	62	\N	ELE0010
+2423	2	2	ELE-00011	12M Plate Legrand	66	57	29	21	60	3569.11	\N	Covered	\N	18	Consumable	12M Plate Legrand	t	f	2026-06-11 21:48:30.71337	2026-06-11 21:58:45.593546	62	\N	ELE0011
+2424	2	2	ELE-00012	16M Plate Legrand	66	57	29	44	150	1434.91	\N	Covered	\N	18	Consumable	16M Plate Legrand	t	f	2026-06-11 21:48:30.713376	2026-06-11 21:58:45.593549	62	\N	ELE0012
+2425	2	2	ELE-00013	Footing Light Legrand	66	57	29	37	75	1115.57	\N	Covered	\N	18	Consumable	Footing Light Legrand	t	f	2026-06-11 21:48:30.713382	2026-06-11 21:58:45.593552	62	\N	ELE0013
+2426	2	2	ELE-00014	32A DP Switch Legrand	66	57	29	50	192	3255.11	\N	Covered	\N	18	Consumable	32A DP Switch Legrand	t	f	2026-06-11 21:48:30.713388	2026-06-11 21:58:45.593555	62	\N	ELE0014
+2427	2	2	ELE-00015	6A Switch Legrand	66	57	29	48	115	1979.52	\N	Covered	\N	18	Consumable	6A Switch Legrand	t	f	2026-06-11 21:48:30.713393	2026-06-11 21:58:45.593558	62	\N	ELE0015
+2428	2	2	ELE-00016	6A Socket Legrand	66	57	29	37	123	4151.82	\N	Covered	\N	18	Consumable	6A Socket Legrand	t	f	2026-06-11 21:48:30.713399	2026-06-11 21:58:45.59356	62	\N	ELE0016
+2429	2	2	ELE-00017	Dummy Plate  Legrand	66	57	29	21	69	4788.76	\N	Covered	\N	18	Consumable	Dummy Plate  Legrand	t	f	2026-06-11 21:48:30.713405	2026-06-11 21:58:45.593563	62	\N	ELE0017
+2430	2	2	ELE-00018	16A Socket  Legrand	66	57	29	43	124	4328.04	\N	Covered	\N	18	Consumable	16A Socket  Legrand	t	f	2026-06-11 21:48:30.713411	2026-06-11 21:58:45.593566	62	\N	ELE0018
+2431	2	2	ELE-00019	16A Switch with indicator  Legrand	66	57	29	84	208	171.24	\N	Covered	\N	18	Consumable	16A Switch with indicator  Legrand	t	f	2026-06-11 21:48:30.713417	2026-06-11 21:58:45.593569	62	\N	ELE0019
+2432	2	2	ELE-00020	6A Plug Top	66	57	29	18	68	1425.5	\N	Covered	\N	18	Consumable	6A Plug Top	t	f	2026-06-11 21:48:30.713422	2026-06-11 21:58:45.593571	62	\N	ELE0020
+2433	2	2	ELE-00021	Cable Tie 300mm	66	57	37	26	61	2870.54	\N	Covered	\N	18	Consumable	Cable Tie 300mm	t	f	2026-06-11 21:48:30.713428	2026-06-11 21:58:45.593574	62	\N	ELE0021
+2434	2	2	ELE-00022	Cable Tie 200mm	66	57	37	26	54	3141.65	\N	Covered	\N	18	Consumable	Cable Tie 200mm	t	f	2026-06-11 21:48:30.713434	2026-06-11 21:58:45.593577	62	\N	ELE0022
+2435	2	2	ELE-00023	10A Switch A/R	66	57	29	30	115	4657.57	\N	Covered	\N	18	Consumable	10A Switch A/R	t	f	2026-06-11 21:48:30.71344	2026-06-11 21:58:45.59358	62	\N	ELE0023
+2436	2	2	ELE-00024	6A Switch A/R	66	57	29	39	135	3711.96	\N	Covered	\N	18	Consumable	6A Switch A/R	t	f	2026-06-11 21:48:30.713446	2026-06-11 21:58:45.593583	62	\N	ELE0024
+2437	2	2	ELE-00025	16A Switch with indicator  A/R	66	57	29	146	474	292.91	\N	Covered	\N	18	Consumable	16A Switch with indicator  A/R	t	f	2026-06-11 21:48:30.713452	2026-06-11 21:58:45.593585	62	\N	ELE0025
+2438	2	2	ELE-00026	16A Socket A/R	66	57	29	50	133	4930.95	\N	Covered	\N	18	Consumable	16A Socket A/R	t	f	2026-06-11 21:48:30.713457	2026-06-11 21:58:45.593588	62	\N	ELE0026
+2439	2	2	ELE-00027	2M Fan Regulator A/R	66	57	29	42	167	2451.04	\N	Covered	\N	18	Consumable	2M Fan Regulator A/R	t	f	2026-06-11 21:48:30.713463	2026-06-11 21:58:45.593591	62	\N	ELE0027
+2440	2	2	ELE-00028	6M Surface Box with Plate A/R	66	57	29	98	252	175.24	\N	Covered	\N	18	Consumable	6M Surface Box with Plate A/R	t	f	2026-06-11 21:48:30.713469	2026-06-11 21:58:45.593594	62	\N	ELE0028
+2441	2	2	ELE-00029	8M Surface Box with Plate A/R	66	57	29	34	128	2227.48	\N	Covered	\N	18	Consumable	8M Surface Box with Plate A/R	t	f	2026-06-11 21:48:30.713475	2026-06-11 21:58:45.593597	62	\N	ELE0029
+2442	2	2	ELE-00030	12M Surface Box with Plate A/R	66	57	29	33	87	3788.93	\N	Covered	\N	18	Consumable	12M Surface Box with Plate A/R	t	f	2026-06-11 21:48:30.71348	2026-06-11 21:58:45.593599	62	\N	ELE0030
+2443	2	2	ELE-00031	1" PVC Bend VIP (Black)	66	57	29	13	31	3952.85	\N	Covered	\N	18	Consumable	1" PVC Bend VIP (Black)	t	f	2026-06-11 21:48:30.713486	2026-06-11 21:58:45.593602	62	\N	ELE0031
+2444	2	2	ELE-00032	1M Plate PVC A/R	66	57	29	32	74	2183.22	\N	Covered	\N	18	Consumable	1M Plate PVC A/R	t	f	2026-06-11 21:48:30.713492	2026-06-11 21:58:45.593605	62	\N	ELE0032
+2445	2	2	ELE-00033	2M Plate PVC A/R	66	57	29	12	45	4188.51	\N	Covered	\N	18	Consumable	2M Plate PVC A/R	t	f	2026-06-11 21:48:30.713498	2026-06-11 21:58:45.593608	62	\N	ELE0033
+2446	2	2	ELE-00034	3M Plate PVC A/R	66	57	29	20	49	4605.63	\N	Covered	\N	18	Consumable	3M Plate PVC A/R	t	f	2026-06-11 21:48:30.713504	2026-06-11 21:58:45.59361	62	\N	ELE0034
+2447	2	2	ELE-00035	4M Plate PVC A/R	66	57	29	35	94	4030.69	\N	Covered	\N	18	Consumable	4M Plate PVC A/R	t	f	2026-06-11 21:48:30.71351	2026-06-11 21:58:45.593613	62	\N	ELE0035
+2448	2	2	ELE-00036	6M Plate PVC A/R	66	57	29	24	90	3641.78	\N	Covered	\N	18	Consumable	6M Plate PVC A/R	t	f	2026-06-11 21:48:30.713515	2026-06-11 21:58:45.593616	62	\N	ELE0036
+2449	2	2	ELE-00037	8M Plate PVC A/R	66	57	29	15	42	3635.76	\N	Covered	\N	18	Consumable	8M Plate PVC A/R	t	f	2026-06-11 21:48:30.713521	2026-06-11 21:58:45.593619	62	\N	ELE0037
+2450	2	2	ELE-00038	12M Plate PVC A/R	66	57	29	47	124	4429.23	\N	Covered	\N	18	Consumable	12M Plate PVC A/R	t	f	2026-06-11 21:48:30.713527	2026-06-11 21:58:45.593621	62	\N	ELE0038
+2451	2	2	ELE-00039	8M Plate Legrand	66	57	29	45	180	4915.19	\N	Covered	\N	18	Consumable	8M Plate Legrand	t	f	2026-06-11 21:48:30.713533	2026-06-11 21:58:45.593624	62	\N	ELE0039
+2452	2	2	ELE-00040	8M Metal Box	66	57	29	42	87	3804.98	\N	Covered	\N	18	Consumable	8M Metal Box	t	f	2026-06-11 21:48:30.713539	2026-06-11 21:58:45.593627	62	\N	ELE0040
+2453	2	2	ELE-00041	1 1/4" Bend PVC	66	57	29	41	141	1100.38	\N	Covered	\N	18	Consumable	1 1/4" Bend PVC	t	f	2026-06-11 21:48:30.713544	2026-06-11 21:58:45.59363	62	\N	ELE0041
+2454	2	2	ELE-00042	Fan Box (Red Colour)	66	57	29	31	122	3374.22	\N	Covered	\N	18	Consumable	Fan Box (Red Colour)	t	f	2026-06-11 21:48:30.713551	2026-06-11 21:58:45.593633	62	\N	ELE0042
+2455	2	2	ELE-00043	2M Surface Box with Plate	66	57	29	35	135	4041.55	\N	Covered	\N	18	Consumable	2M Surface Box with Plate	t	f	2026-06-11 21:48:30.713556	2026-06-11 21:58:45.593636	62	\N	ELE0043
+2456	2	2	ELE-00044	3/4" Junction Box PVC	66	57	29	19	52	3502.99	\N	Covered	\N	18	Consumable	3/4" Junction Box PVC	t	f	2026-06-11 21:48:30.713564	2026-06-11 21:58:45.593639	62	\N	ELE0044
+2457	2	2	ELE-00045	1" Junction Box PVC	66	57	29	38	102	4720.27	\N	Covered	\N	18	Consumable	1" Junction Box PVC	t	f	2026-06-11 21:48:30.71357	2026-06-11 21:58:45.593642	62	\N	ELE0045
+2458	2	2	ELE-00046	1 1/4" Junction box PVC	66	57	29	19	55	1251.65	\N	Covered	\N	18	Consumable	1 1/4" Junction box PVC	t	f	2026-06-11 21:48:30.713576	2026-06-11 21:58:45.593645	62	\N	ELE0046
+2459	2	2	ELE-00047	4 Way Deep Junction Box	66	57	29	15	47	2880.27	\N	Covered	\N	18	Consumable	4 Way Deep Junction Box	t	f	2026-06-11 21:48:30.713582	2026-06-11 21:58:45.593647	62	\N	ELE0047
+2460	2	2	ELE-00048	3 Way Deep Junction Box	66	57	29	44	140	3011.87	\N	Covered	\N	18	Consumable	3 Way Deep Junction Box	t	f	2026-06-11 21:48:30.713588	2026-06-11 21:58:45.59365	62	\N	ELE0048
+2461	2	2	ELE-00049	1" Coller PVC	66	57	29	12	38	1507.94	\N	Covered	\N	18	Consumable	1" Coller PVC	t	f	2026-06-11 21:48:30.713594	2026-06-11 21:58:45.593653	62	\N	ELE0049
+2462	2	2	ELE-00050	2" Bend PVC	66	57	29	25	87	3786.19	\N	Covered	\N	18	Consumable	2" Bend PVC	t	f	2026-06-11 21:48:30.713599	2026-06-11 21:58:45.593656	62	\N	ELE0050
+2463	2	2	ELE-00051	2M Metal Box	66	57	29	47	145	1498.42	\N	Covered	\N	18	Consumable	2M Metal Box	t	f	2026-06-11 21:48:30.713605	2026-06-11 21:58:45.593658	62	\N	ELE0051
+2464	2	2	ELE-00052	3M Metal Box	66	57	29	44	131	1380.96	\N	Covered	\N	18	Consumable	3M Metal Box	t	f	2026-06-11 21:48:30.713611	2026-06-11 21:58:45.593661	62	\N	ELE0052
+2465	2	2	ELE-00053	4M Metal Box	66	57	29	50	183	1221.19	\N	Covered	\N	18	Consumable	4M Metal Box	t	f	2026-06-11 21:48:30.713617	2026-06-11 21:58:45.593664	62	\N	ELE0053
+2466	2	2	ELE-00054	6M Metal Box	66	57	29	18	49	3301.66	\N	Covered	\N	18	Consumable	6M Metal Box	t	f	2026-06-11 21:48:30.713622	2026-06-11 21:58:45.593667	62	\N	ELE0054
+2467	2	2	ELE-00055	8M Metal Box	66	57	29	16	41	4683.8	\N	Covered	\N	18	Consumable	8M Metal Box	t	f	2026-06-11 21:48:30.713628	2026-06-11 21:58:45.59367	62	\N	ELE0055
+2468	2	2	ELE-00056	12M Metal Box	66	57	29	312	663	709.73	\N	Covered	\N	18	Consumable	12M Metal Box	t	f	2026-06-11 21:48:30.713634	2026-06-11 21:58:45.593672	62	\N	ELE0056
+2469	2	2	ELE-00057	16M Metal Box	66	57	29	21	60	1698.06	\N	Covered	\N	18	Consumable	16M Metal Box	t	f	2026-06-11 21:48:30.71364	2026-06-11 21:58:45.593675	62	\N	ELE0057
+2470	2	2	ELE-00058	1" Baseb Sadle	66	57	29	29	78	4403.35	\N	Covered	\N	18	Consumable	1" Baseb Sadle	t	f	2026-06-11 21:48:30.713646	2026-06-11 21:58:45.593678	62	\N	ELE0058
+2471	2	2	ELE-00059	1 1/4" Base Sadle	66	57	29	477	979	301.97	\N	Covered	\N	18	Consumable	1 1/4" Base Sadle	t	f	2026-06-11 21:48:30.713651	2026-06-11 21:58:45.593681	62	\N	ELE0059
+2472	2	2	ELE-00060	1 1/4" Flex Pipe	66	57	32	42	99	3782.04	\N	Covered	\N	18	Consumable	1 1/4" Flex Pipe	t	f	2026-06-11 21:48:30.713657	2026-06-11 21:58:45.593683	62	\N	ELE0060
+2473	2	2	ELE-00061	1" Flex Pipe	66	57	32	279	930	719.11	\N	Covered	\N	18	Consumable	1" Flex Pipe	t	f	2026-06-11 21:48:30.713662	2026-06-11 21:58:45.593686	62	\N	ELE0061
+2474	2	2	ELE-00062	3/4" Flex Pipe	66	57	32	35	126	4667.24	\N	Covered	\N	18	Consumable	3/4" Flex Pipe	t	f	2026-06-11 21:48:30.713668	2026-06-11 21:58:45.593689	62	\N	ELE0062
+2475	2	2	ELE-00063	Chakka Plate	66	57	29	256	671	911.82	\N	Covered	\N	18	Consumable	Chakka Plate	t	f	2026-06-11 21:48:30.713674	2026-06-11 21:58:45.593692	62	\N	ELE0063
+2476	2	2	ELE-00064	Ceiling Fan Crompton 1200mm	66	57	29	46	95	1271.16	\N	Covered	\N	18	Non-Consumable	Ceiling Fan Crompton 1200mm	t	f	2026-06-11 21:48:30.71368	2026-06-11 21:58:45.593695	62	\N	ELE0064
+2477	2	2	ELE-00065	63A MCB 4P	66	57	29	49	172	4869.23	\N	Covered	\N	18	Consumable	63A MCB 4P	t	f	2026-06-11 21:48:30.713685	2026-06-11 21:58:45.593697	62	\N	ELE0065
+2478	2	2	ELE-00066	63A MCB 2P	66	57	29	26	103	2811.44	\N	Covered	\N	18	Consumable	63A MCB 2P	t	f	2026-06-11 21:48:30.713691	2026-06-11 21:58:45.5937	62	\N	ELE0066
+2479	2	2	ELE-00067	63A MCB 1P	66	57	29	35	76	4215.6	\N	Covered	\N	18	Consumable	63A MCB 1P	t	f	2026-06-11 21:48:30.713697	2026-06-11 21:58:45.593703	62	\N	ELE0067
+2480	2	2	ELE-00068	16A MCB 2P	66	57	29	39	85	3018.82	\N	Covered	\N	18	Consumable	16A MCB 2P	t	f	2026-06-11 21:48:30.713703	2026-06-11 21:58:45.593706	62	\N	ELE0068
+2481	2	2	ELE-00069	16A MCB 1P	66	57	29	34	79	2336.93	\N	Covered	\N	18	Consumable	16A MCB 1P	t	f	2026-06-11 21:48:30.713764	2026-06-11 21:58:45.593708	62	\N	ELE0069
+2482	2	2	ELE-00070	20A MCB 1P	66	57	29	45	110	4572.64	\N	Covered	\N	18	Consumable	20A MCB 1P	t	f	2026-06-11 21:48:30.71377	2026-06-11 21:58:45.593711	62	\N	ELE0070
+2483	2	2	ELE-00071	40A MCB 1P	66	57	29	46	108	3639.96	\N	Covered	\N	18	Consumable	40A MCB 1P	t	f	2026-06-11 21:48:30.713776	2026-06-11 21:58:45.593714	62	\N	ELE0071
+2484	2	2	ELE-00072	28M Gland	66	57	29	49	159	2923.87	\N	Covered	\N	18	Consumable	28M Gland	t	f	2026-06-11 21:48:30.713781	2026-06-11 21:58:45.593717	62	\N	ELE0072
+2485	2	2	ELE-00073	2M MCB waterproof Box	66	57	29	66	157	869.91	\N	Covered	\N	18	Consumable	2M MCB waterproof Box	t	f	2026-06-11 21:48:30.713787	2026-06-11 21:58:45.593722	62	\N	ELE0073
+2486	2	2	ELE-00074	4M MCB waterproof Box	66	57	29	16	38	1396.74	\N	Covered	\N	18	Consumable	4M MCB waterproof Box	t	f	2026-06-11 21:48:30.713793	2026-06-11 21:58:45.593725	62	\N	ELE0074
+2487	2	2	ELE-00075	POP Screw 3.5x38	66	57	35	42	86	1195.3	\N	Covered	\N	18	Consumable	POP Screw 3.5x38	t	f	2026-06-11 21:48:30.713799	2026-06-11 21:58:45.593728	62	\N	ELE0075
+2488	2	2	ELE-00076	POP Screw 3.5x25	66	57	35	41	86	3055.26	\N	Covered	\N	18	Consumable	POP Screw 3.5x25	t	f	2026-06-11 21:48:30.713805	2026-06-11 21:58:45.593731	62	\N	ELE0076
+2489	2	2	ELE-00077	Dry wall Screw 3.5x50	66	57	35	27	85	1080.95	\N	Covered	\N	18	Consumable	Dry wall Screw 3.5x50	t	f	2026-06-11 21:48:30.71381	2026-06-11 21:58:45.593733	62	\N	ELE0077
+2490	2	2	ELE-00078	Dry wall Screw 25x6	66	57	35	17	55	2566.45	\N	Covered	\N	18	Consumable	Dry wall Screw 25x6	t	f	2026-06-11 21:48:30.713816	2026-06-11 21:58:45.593736	62	\N	ELE0078
+2491	2	2	ELE-00079	2" Concrete Steel Nail	66	57	30	10	39	3710.98	\N	Covered	\N	18	Consumable	2" Concrete Steel Nail	t	f	2026-06-11 21:48:30.713822	2026-06-11 21:58:45.593739	62	\N	ELE0079
+2492	2	2	ELE-00080	40mm Fisher	66	57	37	376	1145	826.12	\N	Covered	\N	18	Consumable	40mm Fisher	t	f	2026-06-11 21:48:30.713828	2026-06-11 21:58:45.593742	62	\N	ELE0080
+2493	2	2	ELE-00081	4" Cutt off Wheel	66	57	29	10	34	1419.92	\N	Covered	\N	18	Consumable	4" Cutt off Wheel	t	f	2026-06-11 21:48:30.713834	2026-06-11 21:58:45.593744	62	\N	ELE0081
+2494	2	2	ELE-00082	Bulk Head LED light	66	57	29	369	952	612.75	\N	Covered	\N	18	Consumable	Bulk Head LED light	t	f	2026-06-11 21:48:30.71384	2026-06-11 21:58:45.593747	62	\N	ELE0082
+2495	2	2	ELE-00083	Strip light (Luker)	66	57	29	31	118	3732.83	\N	Covered	\N	18	Consumable	Strip light (Luker)	t	f	2026-06-11 21:48:30.713846	2026-06-11 21:58:45.59375	62	\N	ELE0083
+2496	2	2	ELE-00084	Double Door MCB Box	66	57	29	84	288	60.8	\N	Covered	\N	18	Consumable	Double Door MCB Box	t	f	2026-06-11 21:48:30.713852	2026-06-11 21:58:45.593753	62	\N	ELE0084
+2497	2	2	ELE-00085	LED Strip outdoor connector	66	57	29	39	142	3395	\N	Covered	\N	18	Consumable	LED Strip outdoor connector	t	f	2026-06-11 21:48:30.713858	2026-06-11 21:58:45.593756	62	\N	ELE0085
+2498	2	2	ELE-00086	Cat 6 Cable	66	57	29	59	194	353.27	\N	Covered	\N	18	Consumable	Cat 6 Cable	t	f	2026-06-11 21:48:30.713863	2026-06-11 21:58:45.593759	62	\N	ELE0086
+2499	2	2	ELE-00087	2" LED Battern	66	57	29	35	130	1208.02	\N	Covered	\N	18	Consumable	2" LED Battern	t	f	2026-06-11 21:48:30.713872	2026-06-11 21:58:45.593761	62	\N	ELE0087
+2500	2	2	ELE-00088	4" LED Battern	66	57	29	231	533	96.14	\N	Covered	\N	18	Consumable	4" LED Battern	t	f	2026-06-11 21:48:30.713878	2026-06-11 21:58:45.593764	62	\N	ELE0088
+2501	2	2	HOU-00001	PHARMACY CLOTH COVERS - 13X16	68	72	30	4	16	25218.56	\N	Covered	\N	5	Consumable	PHARMACY CLOTH COVERS - 13X16	t	f	2026-06-11 21:48:30.713884	2026-06-11 21:58:45.593767	62	\N	HOS0001
+2502	2	2	HOU-00002	PHARMACY CLOTH COVERS - 16X20	68	72	30	13	44	9699.42	\N	Covered	\N	5	Consumable	PHARMACY CLOTH COVERS - 16X20	t	f	2026-06-11 21:48:30.713889	2026-06-11 21:58:45.59377	62	\N	HOS0002
+2503	2	2	HOU-00003	PHARMACY CLOTH COVERS - 9X13	68	72	30	4	14	47777.02	\N	Covered	\N	5	Consumable	PHARMACY CLOTH COVERS - 9X13	t	f	2026-06-11 21:48:30.713895	2026-06-11 21:58:45.593773	62	\N	HOS0003
+2504	2	2	HOU-00004	STETHOSCOPE MICROTOME	68	69	29	5	14	15728.29	\N	Covered	\N	12	Non-Consumable	STETHOSCOPE MICROTOME	t	f	2026-06-11 21:48:30.713901	2026-06-11 21:58:45.593775	62	\N	HOS0004
+2505	2	2	HOU-00005	CLENZYME (MULTIENZYME CLEANER)1000ML.	68	69	29	5	11	20144.9	\N	Covered	\N	18	Consumable	CLENZYME (MULTIENZYME CLEANER)1000ML.	t	f	2026-06-11 21:48:30.713906	2026-06-11 21:58:45.593778	62	\N	HOS0005
+2506	2	2	HOU-00006	BUCKET PLASTIC 20Ltrs	68	69	29	5	18	32845.83	\N	Covered	\N	18	Non-Consumable	BUCKET PLASTIC 20Ltrs	t	f	2026-06-11 21:48:30.713912	2026-06-11 21:58:45.593781	62	\N	HOS0006
+2507	2	2	HOU-00007	KIRAN COAT APRON 0.5MM PB 100CM X 60CM	68	71	29	5	17	10818.26	\N	Covered	\N	12	Consumable	KIRAN COAT APRON 0.5MM PB 100CM X 60CM	t	f	2026-06-11 21:48:30.713918	2026-06-11 21:58:45.593784	62	\N	HOS0007
+2508	2	2	HOU-00008	BAYER 190ML HIGH PRESSURE INJECTOR SYRINGE	68	73	29	4	12	39682.9	\N	Covered	\N	12	Consumable	BAYER 190ML HIGH PRESSURE INJECTOR SYRINGE	t	f	2026-06-11 21:48:30.713923	2026-06-11 21:58:45.593787	62	\N	HOS0008
+2509	2	2	HOU-00009	BED PAN STEEL	68	69	29	5	16	30531.96	\N	Covered	\N	18	Non-Consumable	BED PAN STEEL	t	f	2026-06-11 21:48:30.713929	2026-06-11 21:58:45.59379	62	\N	HOS0009
+2510	2	2	HOU-00010	BED PAN PLASTIC	68	69	29	4	16	41874.87	\N	Covered	\N	18	Non-Consumable	BED PAN PLASTIC	t	f	2026-06-11 21:48:30.713935	2026-06-11 21:58:45.593792	62	\N	HOS0010
+2511	2	2	HOU-00011	URINE CANE (MALE)	68	69	29	3	7	25531.88	\N	Covered	\N	12	Non-Consumable	URINE CANE (MALE)	t	f	2026-06-11 21:48:30.713941	2026-06-11 21:58:45.593795	62	\N	HOS0011
+2512	2	2	HOU-00012	STEEL BUCKET 5 LTRS	68	69	29	4	14	30747	\N	Covered	\N	18	Non-Consumable	STEEL BUCKET 5 LTRS	t	f	2026-06-11 21:48:30.713947	2026-06-11 21:58:45.593798	62	\N	HOS0012
+2513	2	2	HOU-00013	DRESSING BIN 6 X 6 SS	68	69	29	5	17	11616.55	\N	Covered	\N	18	Non-Consumable	DRESSING BIN 6 X 6 SS	t	f	2026-06-11 21:48:30.713953	2026-06-11 21:58:45.593801	62	\N	HOS0013
+2514	2	2	HOU-00014	TRAY WITH COVER 10 X8	68	69	34	5	17	32278.21	\N	Covered	\N	18	Non-Consumable	TRAY WITH COVER 10 X8	t	f	2026-06-11 21:48:30.713958	2026-06-11 21:58:45.593804	62	\N	HOS0014
+2515	2	2	HOU-00015	TRAY WITH COVER 12 X 10	68	69	34	3	10	13739.84	\N	Covered	\N	18	Non-Consumable	TRAY WITH COVER 12 X 10	t	f	2026-06-11 21:48:30.713964	2026-06-11 21:58:45.593806	62	\N	HOS0015
+2516	2	2	HOU-00016	TRAY WITH COVER 9 X 6	68	69	34	2	8	16241.02	\N	Covered	\N	18	Non-Consumable	TRAY WITH COVER 9 X 6	t	f	2026-06-11 21:48:30.71397	2026-06-11 21:58:45.593809	62	\N	HOS0016
+2517	2	2	HOU-00017	TRAY WITH COVER SS 12 X 10	68	69	34	4	13	46179.91	\N	Covered	\N	18	Non-Consumable	TRAY WITH COVER SS 12 X 10	t	f	2026-06-11 21:48:30.713976	2026-06-11 21:58:45.593812	62	\N	HOS0017
+2518	2	2	HOU-00018	TRAY WITH COVER SS 18 X 12	68	69	34	5	17	28057.06	\N	Covered	\N	18	Non-Consumable	TRAY WITH COVER SS 18 X 12	t	f	2026-06-11 21:48:30.713982	2026-06-11 21:58:45.593815	62	\N	HOS0018
+2519	2	2	HOU-00019	TRAY WITH COVER SS 8 X 3	68	69	34	3	11	42302.32	\N	Covered	\N	18	Non-Consumable	TRAY WITH COVER SS 8 X 3	t	f	2026-06-11 21:48:30.713987	2026-06-11 21:58:45.593818	62	\N	HOS0019
+2520	2	2	HOU-00020	Mindray SpO2 Adult Probe	68	61	29	4	16	28396.63	\N	Covered	\N	12	Consumable	Mindray SpO2 Adult Probe	t	f	2026-06-11 21:48:30.713993	2026-06-11 21:58:45.593821	62	\N	HOS0020
+2521	2	2	HOU-00021	Mindray SpO2 Pediatric Probe	68	61	29	3	9	14585.87	\N	Covered	\N	12	Consumable	Mindray SpO2 Pediatric Probe	t	f	2026-06-11 21:48:30.713999	2026-06-11 21:58:45.593823	62	\N	HOS0021
+2522	2	2	HOU-00022	Mindray SpO2 Neonatal Probe	68	61	29	5	13	35708.56	\N	Covered	\N	12	Consumable	Mindray SpO2 Neonatal Probe	t	f	2026-06-11 21:48:30.714005	2026-06-11 21:58:45.593826	62	\N	HOS0022
+2523	2	2	HOU-00023	Mindray ECG Cable	68	61	29	3	7	30824.89	\N	Covered	\N	12	Consumable	Mindray ECG Cable	t	f	2026-06-11 21:48:30.714011	2026-06-11 21:58:45.593829	62	\N	HOS0023
+2524	2	2	HOU-00024	Mindray NIBP Hose	68	61	29	2	7	39929.38	\N	Covered	\N	12	Consumable	Mindray NIBP Hose	t	f	2026-06-11 21:48:30.714016	2026-06-11 21:58:45.593832	62	\N	HOS0024
+2525	2	2	HOU-00025	Philips SpO2 Adult Probe	68	61	29	4	12	14907.95	\N	Covered	\N	12	Consumable	Philips SpO2 Adult Probe	t	f	2026-06-11 21:48:30.714022	2026-06-11 21:58:45.593835	62	\N	HOS0025
+2526	2	2	HOU-00026	Philips SpO2 Pediatric Probe	68	61	29	43	146	7679.63	\N	Covered	\N	12	Consumable	Philips SpO2 Pediatric Probe	t	f	2026-06-11 21:48:30.714028	2026-06-11 21:58:45.593837	62	\N	HOS0026
+2527	2	2	HOU-00027	Philips SpO2 Neonatal Probe	68	61	29	4	12	34011.43	\N	Covered	\N	12	Consumable	Philips SpO2 Neonatal Probe	t	f	2026-06-11 21:48:30.714034	2026-06-11 21:58:45.59384	62	\N	HOS0027
+2528	2	2	HOU-00028	Philips ECG Cable	68	61	29	4	13	33761.49	\N	Covered	\N	12	Consumable	Philips ECG Cable	t	f	2026-06-11 21:48:30.714039	2026-06-11 21:58:45.593843	62	\N	HOS0028
+2529	2	2	HOU-00029	Philips NIBP Hose	68	61	29	2	5	28663.04	\N	Covered	\N	12	Consumable	Philips NIBP Hose	t	f	2026-06-11 21:48:30.714045	2026-06-11 21:58:45.593846	62	\N	HOS0029
+2530	2	2	HOU-00030	Comen SpO2 Adult Probe	68	61	29	4	14	27583.36	\N	Covered	\N	12	Consumable	Comen SpO2 Adult Probe	t	f	2026-06-11 21:48:30.714051	2026-06-11 21:58:45.593849	62	\N	HOS0030
+2531	2	2	HOU-00031	Comen SpO2 Pediatric Probe	68	61	29	4	9	26109.32	\N	Covered	\N	12	Consumable	Comen SpO2 Pediatric Probe	t	f	2026-06-11 21:48:30.714057	2026-06-11 21:58:45.593852	62	\N	HOS0031
+2532	2	2	HOU-00032	Comen SpO2 Neonatal Probe	68	61	29	5	12	40196.65	\N	Covered	\N	12	Consumable	Comen SpO2 Neonatal Probe	t	f	2026-06-11 21:48:30.714063	2026-06-11 21:58:45.593854	62	\N	HOS0032
+2533	2	2	HOU-00033	Comen ECG Cable	68	61	29	2	5	22272.98	\N	Covered	\N	12	Consumable	Comen ECG Cable	t	f	2026-06-11 21:48:30.714068	2026-06-11 21:58:45.593857	62	\N	HOS0033
+2534	2	2	HOU-00034	Comen NIBP Hose	68	61	29	2	7	30445.33	\N	Covered	\N	12	Consumable	Comen NIBP Hose	t	f	2026-06-11 21:48:30.714074	2026-06-11 21:58:45.59386	62	\N	HOS0034
+2535	2	2	HOU-00035	Edan SpO2 Adult Probe	68	61	29	2	8	43429.35	\N	Covered	\N	12	Consumable	Edan SpO2 Adult Probe	t	f	2026-06-11 21:48:30.71408	2026-06-11 21:58:45.593863	62	\N	HOS0035
+2536	2	2	HOU-00036	Edan SpO2 Pediatric Probe	68	61	29	2	7	11528.14	\N	Covered	\N	12	Consumable	Edan SpO2 Pediatric Probe	t	f	2026-06-11 21:48:30.714086	2026-06-11 21:58:45.593866	62	\N	HOS0036
+2537	2	2	HOU-00037	Edan SpO2 Neonatal Probe	68	61	29	3	11	42685.66	\N	Covered	\N	12	Consumable	Edan SpO2 Neonatal Probe	t	f	2026-06-11 21:48:30.714091	2026-06-11 21:58:45.593869	62	\N	HOS0037
+2538	2	2	HOU-00038	Edan ECG Cable	68	61	29	4	16	15007.85	\N	Covered	\N	12	Consumable	Edan ECG Cable	t	f	2026-06-11 21:48:30.714097	2026-06-11 21:58:45.593871	62	\N	HOS0038
+2539	2	2	HOU-00039	Edan NIBP Hose	68	61	29	3	11	46249.16	\N	Covered	\N	12	Consumable	Edan NIBP Hose	t	f	2026-06-11 21:48:30.714103	2026-06-11 21:58:45.593874	62	\N	HOS0039
+2540	2	2	HOU-00040	GE SpO2 Adult Probe	68	61	29	4	13	49341.02	\N	Covered	\N	12	Consumable	GE SpO2 Adult Probe	t	f	2026-06-11 21:48:30.714108	2026-06-11 21:58:45.593877	62	\N	HOS0040
+2541	2	2	HOU-00041	GE SpO2 Pediatric Probe	68	61	29	5	16	27138.7	\N	Covered	\N	12	Consumable	GE SpO2 Pediatric Probe	t	f	2026-06-11 21:48:30.714116	2026-06-11 21:58:45.59388	62	\N	HOS0041
+2542	2	2	HOU-00042	GE SpO2 Neonatal Probe	68	61	29	2	6	21012.11	\N	Covered	\N	12	Consumable	GE SpO2 Neonatal Probe	t	f	2026-06-11 21:48:30.714122	2026-06-11 21:58:45.593882	62	\N	HOS0042
+2543	2	2	HOU-00043	GE ECG Cable	68	61	29	4	12	30635.68	\N	Covered	\N	12	Consumable	GE ECG Cable	t	f	2026-06-11 21:48:30.714128	2026-06-11 21:58:45.593885	62	\N	HOS0043
+2544	2	2	HOU-00044	GE NIBP Hose	68	61	29	4	16	18506.34	\N	Covered	\N	12	Consumable	GE NIBP Hose	t	f	2026-06-11 21:48:30.714134	2026-06-11 21:58:45.593888	62	\N	HOS0044
+2545	2	2	HOU-00045	NIBP Cuff Adult	68	61	29	5	20	29779.06	\N	Covered	\N	12	Consumable	NIBP Cuff Adult	t	f	2026-06-11 21:48:30.71414	2026-06-11 21:58:45.593891	62	\N	HOS0045
+2546	2	2	HOU-00046	NIBP Cuff Pediatric	68	61	29	3	8	21809.45	\N	Covered	\N	12	Consumable	NIBP Cuff Pediatric	t	f	2026-06-11 21:48:30.714145	2026-06-11 21:58:45.593894	62	\N	HOS0046
+2547	2	2	HOU-00047	NIBP Cuff Neonatal	68	61	29	4	12	16813.02	\N	Covered	\N	12	Consumable	NIBP Cuff Neonatal	t	f	2026-06-11 21:48:30.714151	2026-06-11 21:58:45.593896	62	\N	HOS0047
+2548	2	2	HOU-00048	BP Apparatus Bladder Adult	68	61	29	2	8	48701.77	\N	Covered	\N	12	Non-Consumable	BP Apparatus Bladder Adult	t	f	2026-06-11 21:48:30.714157	2026-06-11 21:58:45.593899	62	\N	HOS0048
+2549	2	2	HOU-00049	BP Apparatus Bladder with Bag Pediatric	68	61	29	3	11	23041.66	\N	Covered	\N	12	Non-Consumable	BP Apparatus Bladder with Bag Pediatric	t	f	2026-06-11 21:48:30.714162	2026-06-11 21:58:45.593902	62	\N	HOS0049
+2550	2	2	HOU-00050	BP Apparatus Bulb	68	61	29	2	7	48366.14	\N	Covered	\N	12	Consumable	BP Apparatus Bulb	t	f	2026-06-11 21:48:30.714168	2026-06-11 21:58:45.593905	62	\N	HOS0050
+2551	2	2	HOU-00051	BP Apparatus Bag	68	61	29	4	14	16005.15	\N	Covered	\N	12	Non-Consumable	BP Apparatus Bag	t	f	2026-06-11 21:48:30.714174	2026-06-11 21:58:45.593907	62	\N	HOS0051
+2552	2	2	HOU-00052	Digital BP Apparatus Cuff	68	61	29	5	12	33083.39	\N	Covered	\N	12	Non-Consumable	Digital BP Apparatus Cuff	t	f	2026-06-11 21:48:30.71418	2026-06-11 21:58:45.59391	62	\N	HOS0052
+2553	2	2	HOU-00053	3-Pin Power Cord	68	61	29	3	12	24958.01	\N	Covered	\N	18	Consumable	3-Pin Power Cord	t	f	2026-06-11 21:48:30.714186	2026-06-11 21:58:45.593913	62	\N	HOS0053
+2554	2	2	HOU-00054	ECG Machine Cable	68	61	29	4	15	33615.39	\N	Covered	\N	12	Consumable	ECG Machine Cable	t	f	2026-06-11 21:48:30.714191	2026-06-11 21:58:45.593916	62	\N	HOS0054
+2555	2	2	HOU-00055	ECG Machine Clamp	68	61	29	5	15	11133.42	\N	Covered	\N	12	Consumable	ECG Machine Clamp	t	f	2026-06-11 21:48:30.714197	2026-06-11 21:58:45.593918	62	\N	HOS0055
+2556	2	2	HOU-00056	ECG Machine Bulb	68	61	29	5	11	23753.77	\N	Covered	\N	12	Consumable	ECG Machine Bulb	t	f	2026-06-11 21:48:30.714203	2026-06-11 21:58:45.593921	62	\N	HOS0056
+2557	2	2	HOU-00057	Ventilator Oxygen Sensor	68	61	29	2	7	43733.61	\N	Covered	\N	12	Non-Consumable	Ventilator Oxygen Sensor	t	f	2026-06-11 21:48:30.714209	2026-06-11 21:58:45.593924	62	\N	HOS0057
+2558	2	2	HOU-00058	Ventilator Battery	68	61	29	2	8	40562.32	\N	Covered	\N	12	Consumable	Ventilator Battery	t	f	2026-06-11 21:48:30.714215	2026-06-11 21:58:45.593927	62	\N	HOS0058
+2559	2	2	HOU-00059	Monitor Battery	68	61	29	2	5	39903.79	\N	Covered	\N	12	Consumable	Monitor Battery	t	f	2026-06-11 21:48:30.71422	2026-06-11 21:58:45.59393	62	\N	HOS0059
+2560	2	2	HOU-00060	Syringe Pump Battery	68	61	29	4	16	33292.48	\N	Covered	\N	12	Consumable	Syringe Pump Battery	t	f	2026-06-11 21:48:30.714226	2026-06-11 21:58:45.593932	62	\N	HOS0060
+2561	2	2	HOU-00061	Infusion Pump Battery	68	61	29	3	10	13782.48	\N	Covered	\N	12	Consumable	Infusion Pump Battery	t	f	2026-06-11 21:48:30.714232	2026-06-11 21:58:45.593935	62	\N	HOS0061
+2562	2	2	HOU-00062	ECG Machine Battery	68	61	29	42	119	8739.31	\N	Covered	\N	12	Consumable	ECG Machine Battery	t	f	2026-06-11 21:48:30.714238	2026-06-11 21:58:45.593938	62	\N	HOS0062
+2563	2	2	HOU-00063	X-Ray View Box 12V DC Adaptor	68	61	29	2	8	41675.63	\N	Covered	\N	18	Non-Consumable	X-Ray View Box 12V DC Adaptor	t	f	2026-06-11 21:48:30.714243	2026-06-11 21:58:45.593941	62	\N	HOS0063
+2564	2	2	HOU-00064	0.032 X 150 TERUMO GUIDE WIRE	68	62	29	3	10	16526.16	\N	Covered	\N	12	Consumable	0.032 X 150 TERUMO GUIDE WIRE	t	f	2026-06-11 21:48:30.714249	2026-06-11 21:58:45.593943	62	\N	HOS0064
+2565	2	2	HOU-00065	0.035X150CM TEFLON WIRE J.TIP	68	62	29	2	8	26703.28	\N	Covered	\N	12	Consumable	0.035X150CM TEFLON WIRE J.TIP	t	f	2026-06-11 21:48:30.714255	2026-06-11 21:58:45.593946	62	\N	HOS0065
+2566	2	2	HOU-00066	ACCURA BMV BALLOON KIT WILL ALL ACCESSORIES	68	62	29	4	14	15813.16	\N	Covered	\N	12	Consumable	ACCURA BMV BALLOON KIT WILL ALL ACCESSORIES	t	f	2026-06-11 21:48:30.71426	2026-06-11 21:58:45.593949	62	\N	HOS0066
+2567	2	2	HOU-00067	ANGI DAIG JR 3.5 6FR CORDIS	68	62	29	5	13	16732.04	\N	Covered	\N	12	Consumable	ANGI DAIG JR 3.5 6FR CORDIS	t	f	2026-06-11 21:48:30.714266	2026-06-11 21:58:45.593952	62	\N	HOS0067
+2568	2	2	HOU-00068	APNEALINK CANNULA- 25 PACK	68	62	29	4	16	12432.24	\N	Covered	\N	12	Consumable	APNEALINK CANNULA- 25 PACK	t	f	2026-06-11 21:48:30.714272	2026-06-11 21:58:45.593955	62	\N	HOS0068
+2569	2	2	HOU-00069	ASAHI GW GAIA THIRD	68	62	29	5	15	48367.03	\N	Covered	\N	12	Consumable	ASAHI GW GAIA THIRD	t	f	2026-06-11 21:48:30.714278	2026-06-11 21:58:45.593957	62	\N	HOS0069
+2570	2	2	HOU-00070	BI-PHASIC DEFIBRILLATOR MODEL: RELIFE 900 - MAKE BPL	68	62	29	3	7	20706.22	\N	Covered	\N	12	Consumable	BI-PHASIC DEFIBRILLATOR MODEL: RELIFE 900 - MAKE BPL	t	f	2026-06-11 21:48:30.714283	2026-06-11 21:58:45.593962	62	\N	HOS0070
+2571	2	2	HOU-00071	BL LIFESCIENCES . 1/2  X 3/32  10 FEET TUBING STERILE	68	62	29	40	107	8529.68	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 1/2  X 3/32  10 FEET TUBING STERILE	t	f	2026-06-11 21:48:30.714289	2026-06-11 21:58:45.593965	62	\N	HOS0071
+2572	2	2	HOU-00072	BL LIFESCIENCES . 1/2 X 1/2 ST	68	62	29	3	8	14243.26	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 1/2 X 1/2 ST	t	f	2026-06-11 21:48:30.714295	2026-06-11 21:58:45.593968	62	\N	HOS0072
+2573	2	2	HOU-00073	BL LIFESCIENCES . 1/4  X 3/32  10 FEET TUBING STERILE	68	62	29	2	8	26824.34	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 1/4  X 3/32  10 FEET TUBING STERILE	t	f	2026-06-11 21:48:30.714301	2026-06-11 21:58:45.59397	62	\N	HOS0073
+2574	2	2	HOU-00074	BL LIFESCIENCES . 1/4 X 1/4 ST	68	62	29	2	8	29261.5	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 1/4 X 1/4 ST	t	f	2026-06-11 21:48:30.714306	2026-06-11 21:58:45.593973	62	\N	HOS0074
+2575	2	2	HOU-00075	BL LIFESCIENCES . 1/4 X 1/4 WITH LEUR	68	62	29	4	12	27006.57	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 1/4 X 1/4 WITH LEUR	t	f	2026-06-11 21:48:30.714312	2026-06-11 21:58:45.593976	62	\N	HOS0075
+2576	2	2	HOU-00076	BL LIFESCIENCES . 1/4 X 1/4 X 1/4  Y	68	62	29	3	11	29504.57	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 1/4 X 1/4 X 1/4  Y	t	f	2026-06-11 21:48:30.714318	2026-06-11 21:58:45.593979	62	\N	HOS0076
+2577	2	2	HOU-00077	BL LIFESCIENCES . 3/8 X 3/32  10 FEET TUBING STERILE	68	62	29	2	5	19791.15	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 3/8 X 3/32  10 FEET TUBING STERILE	t	f	2026-06-11 21:48:30.714324	2026-06-11 21:58:45.593981	62	\N	HOS0077
+2578	2	2	HOU-00078	BL LIFESCIENCES . 3/8 X 3/8 ST	68	62	29	4	14	15621.87	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 3/8 X 3/8 ST	t	f	2026-06-11 21:48:30.714329	2026-06-11 21:58:45.593984	62	\N	HOS0078
+2579	2	2	HOU-00079	BL LIFESCIENCES . 3/8 X 3/8 X 3/8  Y	68	62	29	2	8	20930.03	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 3/8 X 3/8 X 3/8  Y	t	f	2026-06-11 21:48:30.71434	2026-06-11 21:58:45.593987	62	\N	HOS0079
+2580	2	2	HOU-00080	BL LIFESCIENCES BCP 03 WITH HOLDER	68	62	29	3	10	45535.32	\N	Covered	\N	12	Consumable	BL LIFESCIENCES BCP 03 WITH HOLDER	t	f	2026-06-11 21:48:30.714346	2026-06-11 21:58:45.59399	62	\N	HOS0080
+2581	2	2	HOU-00081	BL LIFESCIENCES MISTER BLOWER	68	62	29	15	35	8921.51	\N	Covered	\N	12	Consumable	BL LIFESCIENCES MISTER BLOWER	t	f	2026-06-11 21:48:30.714352	2026-06-11 21:58:45.593993	62	\N	HOS0081
+2582	2	2	HOU-00082	COOK - ONE-PART PERCUTANEOUS ENTRY THINWALL NEEDLE-SDN-20-4.0 20G/4CM	68	62	29	5	12	11522.83	\N	Covered	\N	12	Consumable	COOK - ONE-PART PERCUTANEOUS ENTRY THINWALL NEEDLE-SDN-20-4.0 20G/4CM	t	f	2026-06-11 21:48:30.714358	2026-06-11 21:58:45.593995	62	\N	HOS0082
+2583	2	2	HOU-00083	CORONARY SHUNT - SHT-1210S - 1.0MM	68	62	29	2	7	24375	\N	Covered	\N	12	Consumable	CORONARY SHUNT - SHT-1210S - 1.0MM	t	f	2026-06-11 21:48:30.714363	2026-06-11 21:58:45.593998	62	\N	HOS0083
+2584	2	2	HOU-00084	CORONARY SHUNT - SHT-1213S - 1.25MM	68	62	29	44	159	9191.76	\N	Covered	\N	12	Consumable	CORONARY SHUNT - SHT-1213S - 1.25MM	t	f	2026-06-11 21:48:30.714372	2026-06-11 21:58:45.594001	62	\N	HOS0084
+2585	2	2	HOU-00085	CORONARY SHUNT - SHT-1215S - 1.50MM	68	62	29	44	89	7848.13	\N	Covered	\N	12	Consumable	CORONARY SHUNT - SHT-1215S - 1.50MM	t	f	2026-06-11 21:48:30.714378	2026-06-11 21:58:45.594004	62	\N	HOS0085
+2586	2	2	HOU-00086	CORONARY SHUNT - SHT-1218S - 2.0MM	68	62	29	2	5	49134.49	\N	Covered	\N	12	Consumable	CORONARY SHUNT - SHT-1218S - 2.0MM	t	f	2026-06-11 21:48:30.714384	2026-06-11 21:58:45.594007	62	\N	HOS0086
+2587	2	2	HOU-00087	CORONARY SHUNT - SHT-1220S - 2.25MM	68	62	29	2	8	10137.59	\N	Covered	\N	12	Consumable	CORONARY SHUNT - SHT-1220S - 2.25MM	t	f	2026-06-11 21:48:30.71439	2026-06-11 21:58:45.59401	62	\N	HOS0087
+2588	2	2	HOU-00088	CORONARY SHUNT - SHT-1223S - 2.50MM	68	62	29	3	12	32847.94	\N	Covered	\N	12	Consumable	CORONARY SHUNT - SHT-1223S - 2.50MM	t	f	2026-06-11 21:48:30.714395	2026-06-11 21:58:45.594012	62	\N	HOS0088
+2589	2	2	HOU-00089	CORONARY SHUNT - SHT-1225S - 2.0MM	68	62	29	2	5	15823.34	\N	Covered	\N	12	Consumable	CORONARY SHUNT - SHT-1225S - 2.0MM	t	f	2026-06-11 21:48:30.714402	2026-06-11 21:58:45.594015	62	\N	HOS0089
+2590	2	2	HOU-00090	DOLPHIN-RADIL INTRODUCER SHEATH 5F/7CM	68	62	29	4	15	27079.56	\N	Covered	\N	12	Consumable	DOLPHIN-RADIL INTRODUCER SHEATH 5F/7CM	t	f	2026-06-11 21:48:30.714408	2026-06-11 21:58:45.594018	62	\N	HOS0090
+2591	2	2	HOU-00091	DVI MALE TO HDMI FEMALE CONVERTOR - NT	68	62	29	5	15	36349.97	\N	Covered	\N	18	Consumable	DVI MALE TO HDMI FEMALE CONVERTOR - NT	t	f	2026-06-11 21:48:30.714414	2026-06-11 21:58:45.594021	62	\N	HOS0091
+2592	2	2	HOU-00092	HDMI TO DVI CABLE 20MTR - NT	68	62	29	4	15	12438.79	\N	Covered	\N	18	Consumable	HDMI TO DVI CABLE 20MTR - NT	t	f	2026-06-11 21:48:30.714419	2026-06-11 21:58:45.594024	62	\N	HOS0092
+2593	2	2	HOU-00093	HDMI TO HDMI CABLE 20MTR - NT	68	62	29	4	15	11697.61	\N	Covered	\N	18	Consumable	HDMI TO HDMI CABLE 20MTR - NT	t	f	2026-06-11 21:48:30.714425	2026-06-11 21:58:45.594026	62	\N	HOS0093
+2594	2	2	HOU-00094	HEAD PROTECTION KIRAN MAKE LEADLITE – 0.25MM PB	68	62	29	4	9	22336.14	\N	Covered	\N	12	Consumable	HEAD PROTECTION KIRAN MAKE LEADLITE – 0.25MM PB	t	f	2026-06-11 21:48:30.714431	2026-06-11 21:58:45.594029	62	\N	HOS0094
+2595	2	2	HOU-00095	HIGH PRESSURE LINE (110CMS)	68	62	29	33	101	6342.2	\N	Covered	\N	12	Consumable	HIGH PRESSURE LINE (110CMS)	t	f	2026-06-11 21:48:30.714437	2026-06-11 21:58:45.594032	62	\N	HOS0095
+2596	2	2	HOU-00096	HIGH PRESSURE LINE 150CM 1200 PSI	68	62	29	3	11	45511.21	\N	Covered	\N	12	Consumable	HIGH PRESSURE LINE 150CM 1200 PSI	t	f	2026-06-11 21:48:30.714443	2026-06-11 21:58:45.594035	62	\N	HOS0096
+2597	2	2	HOU-00097	INTRODUCER SHEATH 9F X 11CM	68	62	29	2	6	17512.4	\N	Covered	\N	12	Consumable	INTRODUCER SHEATH 9F X 11CM	t	f	2026-06-11 21:48:30.714449	2026-06-11 21:58:45.594038	62	\N	HOS0097
+2598	2	2	HOU-00098	MANIFOLD 3 PORT	68	62	29	20	60	5485.15	\N	Covered	\N	12	Consumable	MANIFOLD 3 PORT	t	f	2026-06-11 21:48:30.714455	2026-06-11 21:58:45.59404	62	\N	HOS0098
+2599	2	2	HOU-00099	MEDICAL BED ROLLS - 10 ROLLS PACKING	68	69	29	4	16	47181.69	\N	Covered	\N	5	Consumable	MEDICAL BED ROLLS - 10 ROLLS PACKING	t	f	2026-06-11 21:48:30.714461	2026-06-11 21:58:45.594043	62	\N	HOS0099
+2600	2	2	HOU-00100	MERIT MANIFOLDS 200PSI, 3PORT, HALF BODY, RIGHT OFF(25NOS/BOX)- 203HF-R	68	62	29	5	20	40224.69	\N	Covered	\N	12	Consumable	MERIT MANIFOLDS 200PSI, 3PORT, HALF BODY, RIGHT OFF(25NOS/BOX)- 203HF-R	t	f	2026-06-11 21:48:30.714467	2026-06-11 21:58:45.594046	62	\N	HOS0100
+2601	2	2	HOU-00101	OMNIPAQUE 350MG*100ML-LONG	68	62	29	5	19	38349.89	\N	Covered	\N	12	Consumable	OMNIPAQUE 350MG*100ML-LONG	t	f	2026-06-11 21:48:30.714473	2026-06-11 21:58:45.594049	62	\N	HOS0101
+2602	2	2	HOU-00102	PATIENT SAFE SLIDE TRANSFER BOARD	68	62	29	2	5	15566.94	\N	Covered	\N	12	Consumable	PATIENT SAFE SLIDE TRANSFER BOARD	t	f	2026-06-11 21:48:30.714479	2026-06-11 21:58:45.594051	62	\N	HOS0102
+2603	2	2	HOU-00103	PRESSURE MONITORING KIT - DOUBLE LUMEN	68	62	29	2	6	35100.21	\N	Covered	\N	12	Consumable	PRESSURE MONITORING KIT - DOUBLE LUMEN	t	f	2026-06-11 21:48:30.714485	2026-06-11 21:58:45.594054	62	\N	HOS0103
+2604	2	2	HOU-00104	SAPPHIRE BALLOON NC 2.0 X  8MM	68	62	29	3	11	40772.13	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.0 X  8MM	t	f	2026-06-11 21:48:30.714491	2026-06-11 21:58:45.594057	62	\N	HOS0104
+2605	2	2	HOU-00105	SAPPHIRE BALLOON NC 2.0 X 10MM	68	62	29	5	17	19046.55	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.0 X 10MM	t	f	2026-06-11 21:48:30.714497	2026-06-11 21:58:45.59406	62	\N	HOS0105
+2606	2	2	HOU-00106	SAPPHIRE BALLOON NC 2.0 X 15MM	68	62	29	5	15	42810.99	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.0 X 15MM	t	f	2026-06-11 21:48:30.714503	2026-06-11 21:58:45.594062	62	\N	HOS0106
+2607	2	2	HOU-00107	SAPPHIRE BALLOON NC 2.5 X 10MM	68	62	29	40	145	9177.82	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.5 X 10MM	t	f	2026-06-11 21:48:30.714509	2026-06-11 21:58:45.594065	62	\N	HOS0107
+2608	2	2	HOU-00108	SAPPHIRE BALLOON NC 2.5 X 12MM	68	62	29	5	14	38376.24	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.5 X 12MM	t	f	2026-06-11 21:48:30.714516	2026-06-11 21:58:45.594068	62	\N	HOS0108
+2609	2	2	HOU-00109	SAPPHIRE BALLOON NC 2.5 X 15MM	68	62	29	5	12	32018.21	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.5 X 15MM	t	f	2026-06-11 21:48:30.714522	2026-06-11 21:58:45.594071	62	\N	HOS0109
+2610	2	2	HOU-00110	SAPPHIRE BALLOON NC 2.5 X 8MM	68	62	29	35	103	5872.24	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.5 X 8MM	t	f	2026-06-11 21:48:30.714528	2026-06-11 21:58:45.594074	62	\N	HOS0110
+2611	2	2	HOU-00111	SAPPHIRE BALLOON NC 2.75 X 10MM	68	62	29	35	121	7045.4	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.75 X 10MM	t	f	2026-06-11 21:48:30.714534	2026-06-11 21:58:45.594076	62	\N	HOS0111
+2612	2	2	HOU-00112	SAPPHIRE BALLOON NC 2.75 X 12MM	68	62	29	3	12	20068.58	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.75 X 12MM	t	f	2026-06-11 21:48:30.71454	2026-06-11 21:58:45.594079	62	\N	HOS0112
+2613	2	2	HOU-00113	SAPPHIRE BALLOON NC 2.75 X 15MM	68	62	29	4	9	30408.41	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.75 X 15MM	t	f	2026-06-11 21:48:30.714546	2026-06-11 21:58:45.594082	62	\N	HOS0113
+2614	2	2	HOU-00114	SAPPHIRE BALLOON NC 2.75 X 8MM	68	62	29	2	7	35600.43	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.75 X 8MM	t	f	2026-06-11 21:48:30.714552	2026-06-11 21:58:45.594085	62	\N	HOS0114
+2615	2	2	HOU-00115	SAPPHIRE BALLOON NC 3.0 X 10MM	68	62	29	3	7	31429.34	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.0 X 10MM	t	f	2026-06-11 21:48:30.714558	2026-06-11 21:58:45.594087	62	\N	HOS0115
+2616	2	2	HOU-00116	SAPPHIRE BALLOON NC 3.0 X 12MM	68	62	29	5	16	19713.24	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.0 X 12MM	t	f	2026-06-11 21:48:30.714564	2026-06-11 21:58:45.59409	62	\N	HOS0116
+2617	2	2	HOU-00117	SAPPHIRE BALLOON NC 3.0 X 15MM	68	62	29	4	9	23819.89	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.0 X 15MM	t	f	2026-06-11 21:48:30.71457	2026-06-11 21:58:45.594093	62	\N	HOS0117
+2618	2	2	HOU-00118	SAPPHIRE BALLOON NC 3.0 X 8MM	68	62	29	22	50	5278.34	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.0 X 8MM	t	f	2026-06-11 21:48:30.714576	2026-06-11 21:58:45.594096	62	\N	HOS0118
+2619	2	2	HOU-00119	SAPPHIRE BALLOON NC 3.5 X 10MM	68	62	29	29	76	5831.78	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.5 X 10MM	t	f	2026-06-11 21:48:30.714581	2026-06-11 21:58:45.594099	62	\N	HOS0119
+2620	2	2	HOU-00120	SAPPHIRE BALLOON NC 3.5 X 12MM	68	62	29	3	9	15726.17	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.5 X 12MM	t	f	2026-06-11 21:48:30.714588	2026-06-11 21:58:45.594101	62	\N	HOS0120
+2621	2	2	HOU-00121	SAPPHIRE BALLOON NC 3.5 X 15MM	68	62	29	49	150	9807.13	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.5 X 15MM	t	f	2026-06-11 21:48:30.714593	2026-06-11 21:58:45.594104	62	\N	HOS0121
+2622	2	2	HOU-00122	SAPPHIRE BALLOON NC 3.5 X 8MM	68	62	29	2	6	11644.53	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.5 X 8MM	t	f	2026-06-11 21:48:30.7146	2026-06-11 21:58:45.594107	62	\N	HOS0122
+2623	2	2	HOU-00123	SAPPHIRE BALLOON NC 4.0 X 10MM	68	62	29	4	11	28227.78	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 4.0 X 10MM	t	f	2026-06-11 21:48:30.714606	2026-06-11 21:58:45.59411	62	\N	HOS0123
+2624	2	2	HOU-00124	SAPPHIRE BALLOON NC 4.0 X 12MM	68	62	29	5	20	29696.2	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 4.0 X 12MM	t	f	2026-06-11 21:48:30.714612	2026-06-11 21:58:45.594112	62	\N	HOS0124
+2625	2	2	HOU-00125	SAPPHIRE BALLOON NC 4.0 X 15MM	68	62	29	37	138	5578.79	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 4.0 X 15MM	t	f	2026-06-11 21:48:30.714619	2026-06-11 21:58:45.594115	62	\N	HOS0125
+2626	2	2	HOU-00126	SAPPHIRE BALLOON NC 4.0 X 8MM	68	62	29	39	87	5694.61	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 4.0 X 8MM	t	f	2026-06-11 21:48:30.714627	2026-06-11 21:58:45.594118	62	\N	HOS0126
+2627	2	2	HOU-00127	SAPPHIRE BALLOON SC 1.25 X 10MM	68	62	29	2	5	28293.36	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 1.25 X 10MM	t	f	2026-06-11 21:48:30.714634	2026-06-11 21:58:45.594121	62	\N	HOS0127
+2628	2	2	HOU-00128	SAPPHIRE BALLOON SC 1.25 X 12MM	68	62	29	2	6	20721.93	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 1.25 X 12MM	t	f	2026-06-11 21:48:30.714639	2026-06-11 21:58:45.594123	62	\N	HOS0128
+2629	2	2	HOU-00129	SAPPHIRE BALLOON SC 1.25 X 15MM	68	62	29	2	8	37570.34	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 1.25 X 15MM	t	f	2026-06-11 21:48:30.714646	2026-06-11 21:58:45.594126	62	\N	HOS0129
+2630	2	2	HOU-00130	SAPPHIRE BALLOON SC 1.5 X 10MM	68	62	29	2	6	31807.89	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 1.5 X 10MM	t	f	2026-06-11 21:48:30.714652	2026-06-11 21:58:45.594129	62	\N	HOS0130
+2631	2	2	HOU-00131	SAPPHIRE BALLOON SC 1.5 X 12MM	68	62	29	12	26	9579.32	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 1.5 X 12MM	t	f	2026-06-11 21:48:30.714658	2026-06-11 21:58:45.594132	62	\N	HOS0131
+2632	2	2	HOU-00132	SAPPHIRE BALLOON SC 1.5 X 15MM	68	62	29	3	11	41669.52	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 1.5 X 15MM	t	f	2026-06-11 21:48:30.714665	2026-06-11 21:58:45.594134	62	\N	HOS0132
+2633	2	2	HOU-00133	SAPPHIRE BALLOON SC 1.5 X 8MM	68	62	29	2	5	15241.99	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 1.5 X 8MM	t	f	2026-06-11 21:48:30.71467	2026-06-11 21:58:45.594137	62	\N	HOS0133
+2634	2	2	HOU-00134	SAPPHIRE BALLOON SC 2.0 X 10MM	68	62	29	2	6	20174.98	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.0 X 10MM	t	f	2026-06-11 21:48:30.714677	2026-06-11 21:58:45.59414	62	\N	HOS0134
+2635	2	2	HOU-00135	SAPPHIRE BALLOON SC 2.0 X 12MM	68	62	29	2	8	49190.09	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.0 X 12MM	t	f	2026-06-11 21:48:30.714683	2026-06-11 21:58:45.594143	62	\N	HOS0135
+2636	2	2	HOU-00136	SAPPHIRE BALLOON SC 2.0 X 15MM	68	62	29	4	10	48065.39	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.0 X 15MM	t	f	2026-06-11 21:48:30.714689	2026-06-11 21:58:45.594146	62	\N	HOS0136
+2637	2	2	HOU-00137	SAPPHIRE BALLOON SC 2.0 X 8MM	68	62	29	2	8	22533.69	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.0 X 8MM	t	f	2026-06-11 21:48:30.714695	2026-06-11 21:58:45.594148	62	\N	HOS0137
+2638	2	2	HOU-00138	SAPPHIRE BALLOON SC 2.5 X 10MM	68	62	29	3	9	38005.95	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.5 X 10MM	t	f	2026-06-11 21:48:30.714701	2026-06-11 21:58:45.594152	62	\N	HOS0138
+2639	2	2	HOU-00139	SAPPHIRE BALLOON SC 2.5 X 12MM	68	62	29	3	8	28522.88	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.5 X 12MM	t	f	2026-06-11 21:48:30.714707	2026-06-11 21:58:45.594154	62	\N	HOS0139
+2640	2	2	HOU-00140	SAPPHIRE BALLOON SC 2.5 X 15MM	68	62	29	3	10	13460.5	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.5 X 15MM	t	f	2026-06-11 21:48:30.714713	2026-06-11 21:58:45.594157	62	\N	HOS0140
+2641	2	2	HOU-00141	SAPPHIRE BALLOON SC 2.5 X 8MM	68	62	29	3	11	23367.64	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.5 X 8MM	t	f	2026-06-11 21:48:30.714719	2026-06-11 21:58:45.59416	62	\N	HOS0141
+2642	2	2	HOU-00142	SAPPHIRE BALLOON SC 2.75 X 10MM	68	62	29	4	15	34558.77	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.75 X 10MM	t	f	2026-06-11 21:48:30.714725	2026-06-11 21:58:45.594163	62	\N	HOS0142
+2643	2	2	HOU-00143	SAPPHIRE BALLOON SC 2.75 X 12MM	68	62	29	5	17	37307.58	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.75 X 12MM	t	f	2026-06-11 21:48:30.714731	2026-06-11 21:58:45.594165	62	\N	HOS0143
+2644	2	2	HOU-00144	SAPPHIRE BALLOON SC 2.75 X 15MM	68	62	29	2	6	43673.19	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.75 X 15MM	t	f	2026-06-11 21:48:30.714738	2026-06-11 21:58:45.594168	62	\N	HOS0144
+2645	2	2	HOU-00145	SAPPHIRE BALLOON SC 2.75 X 8MM	68	62	29	3	10	41474.27	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.75 X 8MM	t	f	2026-06-11 21:48:30.714744	2026-06-11 21:58:45.594171	62	\N	HOS0145
+2646	2	2	HOU-00146	SAPPHIRE BALLOON SC 3.0 X 10 MM	68	62	29	4	12	30601.76	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.0 X 10 MM	t	f	2026-06-11 21:48:30.71475	2026-06-11 21:58:45.594174	62	\N	HOS0146
+2647	2	2	HOU-00147	SAPPHIRE BALLOON SC 3.0 X 12 MM	68	62	29	10	40	9574.71	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.0 X 12 MM	t	f	2026-06-11 21:48:30.714756	2026-06-11 21:58:45.594177	62	\N	HOS0147
+2648	2	2	HOU-00148	SAPPHIRE BALLOON SC 3.0 X 15 MM	68	62	29	3	7	14873.99	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.0 X 15 MM	t	f	2026-06-11 21:48:30.714763	2026-06-11 21:58:45.594179	62	\N	HOS0148
+2649	2	2	HOU-00149	SAPPHIRE BALLOON SC 3.0 X 8 MM	68	62	29	3	8	13931.39	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.0 X 8 MM	t	f	2026-06-11 21:48:30.714769	2026-06-11 21:58:45.594182	62	\N	HOS0149
+2650	2	2	HOU-00150	SAPPHIRE BALLOON SC 3.5 X 10 MM	68	62	29	2	7	19344.59	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.5 X 10 MM	t	f	2026-06-11 21:48:30.714776	2026-06-11 21:58:45.594185	62	\N	HOS0150
+2651	2	2	HOU-00151	SAPPHIRE BALLOON SC 3.5 X 12 MM	68	62	29	2	6	41821.12	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.5 X 12 MM	t	f	2026-06-11 21:48:30.714782	2026-06-11 21:58:45.594188	62	\N	HOS0151
+2652	2	2	HOU-00152	SAPPHIRE BALLOON SC 3.5 X 15 MM	68	62	29	4	12	43020.18	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.5 X 15 MM	t	f	2026-06-11 21:48:30.714788	2026-06-11 21:58:45.594191	62	\N	HOS0152
+2653	2	2	HOU-00153	SAPPHIRE BALLOON SC 3.5 X 8MM	68	62	29	3	8	44607.31	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.5 X 8MM	t	f	2026-06-11 21:48:30.714795	2026-06-11 21:58:45.594194	62	\N	HOS0153
+2654	2	2	HOU-00154	SAPPHIRE BALLOON SC 4.0 X 10 MM	68	62	29	4	14	11280.13	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 4.0 X 10 MM	t	f	2026-06-11 21:48:30.714802	2026-06-11 21:58:45.594196	62	\N	HOS0154
+2655	2	2	HOU-00155	SAPPHIRE BALLOON SC 4.0 X 12 MM	68	62	29	5	16	25264.08	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 4.0 X 12 MM	t	f	2026-06-11 21:48:30.714808	2026-06-11 21:58:45.594201	62	\N	HOS0155
+2656	2	2	HOU-00156	SAPPHIRE BALLOON SC 4.0 X 15 MM	68	62	29	4	12	28093.07	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 4.0 X 15 MM	t	f	2026-06-11 21:48:30.714815	2026-06-11 21:58:45.594204	62	\N	HOS0156
+2657	2	2	HOU-00157	SAPPHIRE BALLOON SC 4.0 X 8 MM	68	62	29	4	16	41898.91	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 4.0 X 8 MM	t	f	2026-06-11 21:48:30.714821	2026-06-11 21:58:45.594207	62	\N	HOS0157
+2658	2	2	HOU-00158	SCANLAN AORTIC PUNCH 2.5MM	68	62	29	5	12	34292.15	\N	Covered	\N	12	Consumable	SCANLAN AORTIC PUNCH 2.5MM	t	f	2026-06-11 21:48:30.714827	2026-06-11 21:58:45.59421	62	\N	HOS0158
+2659	2	2	HOU-00159	SCANLAN AORTIC PUNCH 3.0MM	68	62	29	3	7	45470.55	\N	Covered	\N	12	Consumable	SCANLAN AORTIC PUNCH 3.0MM	t	f	2026-06-11 21:48:30.714834	2026-06-11 21:58:45.594213	62	\N	HOS0159
+2660	2	2	HOU-00160	SCANLAN AORTIC PUNCH 3.5MM	68	62	29	2	6	15175.95	\N	Covered	\N	12	Consumable	SCANLAN AORTIC PUNCH 3.5MM	t	f	2026-06-11 21:48:30.71484	2026-06-11 21:58:45.594215	62	\N	HOS0160
+2661	2	2	HOU-00161	STENT 2.5X32MM	68	62	29	3	7	21265.62	\N	Covered	\N	12	Consumable	STENT 2.5X32MM	t	f	2026-06-11 21:48:30.714846	2026-06-11 21:58:45.594218	62	\N	HOS0161
+2662	2	2	HOU-00162	STENT 2.75 X 28MM	68	62	29	4	15	40111.37	\N	Covered	\N	12	Consumable	STENT 2.75 X 28MM	t	f	2026-06-11 21:48:30.714853	2026-06-11 21:58:45.594221	62	\N	HOS0162
+2663	2	2	HOU-00163	STENT 2.75 X 36 MM	68	62	29	4	9	38848.81	\N	Covered	\N	12	Consumable	STENT 2.75 X 36 MM	t	f	2026-06-11 21:48:30.71486	2026-06-11 21:58:45.594224	62	\N	HOS0163
+2664	2	2	HOU-00164	STENT 2.75 X 44 MM	68	62	29	4	13	37241.53	\N	Covered	\N	12	Consumable	STENT 2.75 X 44 MM	t	f	2026-06-11 21:48:30.714866	2026-06-11 21:58:45.594226	62	\N	HOS0164
+2665	2	2	HOU-00165	STENT 2.75X13MM	68	62	29	45	178	9463.92	\N	Covered	\N	12	Consumable	STENT 2.75X13MM	t	f	2026-06-11 21:48:30.714872	2026-06-11 21:58:45.594229	62	\N	HOS0165
+2666	2	2	HOU-00166	STENT 2.75X16MM	68	62	29	5	19	41195.94	\N	Covered	\N	12	Consumable	STENT 2.75X16MM	t	f	2026-06-11 21:48:30.714878	2026-06-11 21:58:45.594232	62	\N	HOS0166
+2667	2	2	HOU-00167	STENT 2.75X24MM	68	62	29	5	14	38265.57	\N	Covered	\N	12	Consumable	STENT 2.75X24MM	t	f	2026-06-11 21:48:30.714884	2026-06-11 21:58:45.594235	62	\N	HOS0167
+2668	2	2	HOU-00168	STENT 2.75X32MM	68	62	29	28	96	5050.55	\N	Covered	\N	12	Consumable	STENT 2.75X32MM	t	f	2026-06-11 21:48:30.71489	2026-06-11 21:58:45.594238	62	\N	HOS0168
+2669	2	2	HOU-00169	STENT 3.0 X 10 MM	68	62	29	5	19	27948.52	\N	Covered	\N	12	Consumable	STENT 3.0 X 10 MM	t	f	2026-06-11 21:48:30.7149	2026-06-11 21:58:45.59424	62	\N	HOS0169
+2670	2	2	HOU-00170	STENT 3.0 X 44 MM	68	62	29	2	8	23100.77	\N	Covered	\N	12	Consumable	STENT 3.0 X 44 MM	t	f	2026-06-11 21:48:30.714907	2026-06-11 21:58:45.594243	62	\N	HOS0170
+2671	2	2	HOU-00171	STENT 3.0X18MM	68	62	29	3	10	25471.61	\N	Covered	\N	12	Consumable	STENT 3.0X18MM	t	f	2026-06-11 21:48:30.714914	2026-06-11 21:58:45.594246	62	\N	HOS0171
+2672	2	2	HOU-00172	STENT 3.0X24MM	68	62	29	4	15	22018.67	\N	Covered	\N	12	Consumable	STENT 3.0X24MM	t	f	2026-06-11 21:48:30.71492	2026-06-11 21:58:45.594249	62	\N	HOS0172
+2673	2	2	HOU-00173	STENT 3.0X28MM	68	62	29	2	5	48491.89	\N	Covered	\N	12	Consumable	STENT 3.0X28MM	t	f	2026-06-11 21:48:30.714926	2026-06-11 21:58:45.594251	62	\N	HOS0173
+2674	2	2	HOU-00174	STENT 3.0X32MM	68	62	29	4	15	40780.68	\N	Covered	\N	12	Consumable	STENT 3.0X32MM	t	f	2026-06-11 21:48:30.714932	2026-06-11 21:58:45.594254	62	\N	HOS0174
+2675	2	2	HOU-00175	STENT 3.0X40MM	68	62	29	2	6	15985.82	\N	Covered	\N	12	Consumable	STENT 3.0X40MM	t	f	2026-06-11 21:48:30.714938	2026-06-11 21:58:45.594257	62	\N	HOS0175
+2676	2	2	HOU-00176	STENT 3.5 X 10 MM	68	62	29	4	13	37041.39	\N	Covered	\N	12	Consumable	STENT 3.5 X 10 MM	t	f	2026-06-11 21:48:30.714944	2026-06-11 21:58:45.59426	62	\N	HOS0176
+2677	2	2	HOU-00177	STENT 3.5 X 15 MM	68	62	29	3	12	16801.56	\N	Covered	\N	12	Consumable	STENT 3.5 X 15 MM	t	f	2026-06-11 21:48:30.71495	2026-06-11 21:58:45.594262	62	\N	HOS0177
+2678	2	2	HOU-00178	STENT 3.5 X 28 MM	68	62	29	5	14	26453.15	\N	Covered	\N	12	Consumable	STENT 3.5 X 28 MM	t	f	2026-06-11 21:48:30.714956	2026-06-11 21:58:45.594265	62	\N	HOS0178
+2679	2	2	HOU-00179	STENT 3.5X14MM	68	62	29	2	5	27590	\N	Covered	\N	12	Consumable	STENT 3.5X14MM	t	f	2026-06-11 21:48:30.714962	2026-06-11 21:58:45.594268	62	\N	HOS0179
+2680	2	2	HOU-00180	STENT 3.5X16MM	68	62	29	4	16	16861.54	\N	Covered	\N	12	Consumable	STENT 3.5X16MM	t	f	2026-06-11 21:48:30.714968	2026-06-11 21:58:45.594271	62	\N	HOS0180
+2681	2	2	HOU-00181	STENT 3.5X18MM	68	62	29	3	10	41863.62	\N	Covered	\N	12	Consumable	STENT 3.5X18MM	t	f	2026-06-11 21:48:30.714974	2026-06-11 21:58:45.594273	62	\N	HOS0181
+2682	2	2	HOU-00182	STENT 3.5X24MM	68	62	29	30	65	7022.44	\N	Covered	\N	12	Consumable	STENT 3.5X24MM	t	f	2026-06-11 21:48:30.71498	2026-06-11 21:58:45.594276	62	\N	HOS0182
+2683	2	2	HOU-00183	STENT 3.5X28MM	68	62	29	3	7	36814.54	\N	Covered	\N	12	Consumable	STENT 3.5X28MM	t	f	2026-06-11 21:48:30.714986	2026-06-11 21:58:45.594279	62	\N	HOS0183
+2684	2	2	HOU-00184	STENT 3.5X32MM	68	62	29	4	13	11109.34	\N	Covered	\N	12	Consumable	STENT 3.5X32MM	t	f	2026-06-11 21:48:30.714992	2026-06-11 21:58:45.594282	62	\N	HOS0184
+2685	2	2	HOU-00185	STENT 4.0 X 16 MM	68	62	29	5	17	43194.14	\N	Covered	\N	12	Consumable	STENT 4.0 X 16 MM	t	f	2026-06-11 21:48:30.714998	2026-06-11 21:58:45.594285	62	\N	HOS0185
+2686	2	2	HOU-00186	TERUMO I KARI IL 3.5 - 5FR	68	62	29	3	8	24850.98	\N	Covered	\N	12	Consumable	TERUMO I KARI IL 3.5 - 5FR	t	f	2026-06-11 21:48:30.715004	2026-06-11 21:58:45.594288	62	\N	HOS0186
+2687	2	2	HOU-00187	TERUMO I KARI IL 3.5 - 6FR	68	62	29	5	12	27882.31	\N	Covered	\N	12	Consumable	TERUMO I KARI IL 3.5 - 6FR	t	f	2026-06-11 21:48:30.71501	2026-06-11 21:58:45.594291	62	\N	HOS0187
+2688	2	2	HOU-00188	TERUMO I KARI IR 1.5 - 5FR	68	62	29	5	17	45006.67	\N	Covered	\N	12	Consumable	TERUMO I KARI IR 1.5 - 5FR	t	f	2026-06-11 21:48:30.715015	2026-06-11 21:58:45.594294	62	\N	HOS0188
+2689	2	2	HOU-00189	TERUMO J.TIP 0.35X150	68	62	29	15	37	5319.92	\N	Covered	\N	12	Consumable	TERUMO J.TIP 0.35X150	t	f	2026-06-11 21:48:30.715021	2026-06-11 21:58:45.594297	62	\N	HOS0189
+2690	2	2	HOU-00190	TOP MANIFOLD 3 PORT	68	62	29	3	9	34938.16	\N	Covered	\N	12	Consumable	TOP MANIFOLD 3 PORT	t	f	2026-06-11 21:48:30.715027	2026-06-11 21:58:45.594299	62	\N	HOS0190
+2691	2	2	HOU-00191	TPI  - PACEL 5F (BALLOON TIP)	68	62	29	5	14	34169.31	\N	Covered	\N	12	Consumable	TPI  - PACEL 5F (BALLOON TIP)	t	f	2026-06-11 21:48:30.715033	2026-06-11 21:58:45.594302	62	\N	HOS0191
+2692	2	2	HOU-00192	TRANSDUCER KIT	68	62	29	5	12	32530.49	\N	Covered	\N	12	Consumable	TRANSDUCER KIT	t	f	2026-06-11 21:48:30.715039	2026-06-11 21:58:45.594305	62	\N	HOS0192
+2693	2	2	HOU-00193	ULTRA FLEX IABP 7.5 X 40 CC - ARROW MAKE	68	62	29	4	16	49380.3	\N	Covered	\N	12	Consumable	ULTRA FLEX IABP 7.5 X 40 CC - ARROW MAKE	t	f	2026-06-11 21:48:30.715045	2026-06-11 21:58:45.594308	62	\N	HOS0193
+2694	2	2	HOU-00194	VISIPAQUE 320MG*100ML-LONG	68	62	29	2	7	15551.72	\N	Covered	\N	12	Consumable	VISIPAQUE 320MG*100ML-LONG	t	f	2026-06-11 21:48:30.715051	2026-06-11 21:58:45.594311	62	\N	HOS0194
+2695	2	2	HOU-00195	VISIPAQUE 50ML	68	62	29	5	19	17174.45	\N	Covered	\N	12	Consumable	VISIPAQUE 50ML	t	f	2026-06-11 21:48:30.715057	2026-06-11 21:58:45.594313	62	\N	HOS0195
+2696	2	2	HOU-00196	2X2 DOOR GASKET FOR BIG MACHINE	68	63	29	4	14	24028.99	\N	Covered	\N	18	Consumable	2X2 DOOR GASKET FOR BIG MACHINE	t	f	2026-06-11 21:48:30.715063	2026-06-11 21:58:45.594316	62	\N	HOS0196
+2697	2	2	HOU-00197	BLADE FOR GUAGE CUTTING MACHINE	68	63	29	5	19	13635.13	\N	Covered	\N	18	Consumable	BLADE FOR GUAGE CUTTING MACHINE	t	f	2026-06-11 21:48:30.715069	2026-06-11 21:58:45.594319	62	\N	HOS0197
+2698	2	2	HOU-00198	BOILER GASKET - SMALL MACHINE	68	63	29	2	7	10767.58	\N	Covered	\N	18	Consumable	BOILER GASKET - SMALL MACHINE	t	f	2026-06-11 21:48:30.715075	2026-06-11 21:58:45.594322	62	\N	HOS0198
+2699	2	2	HOU-00199	BOLT & NUTS	68	63	30	2	6	34882.18	\N	Covered	\N	18	Consumable	BOLT & NUTS	t	f	2026-06-11 21:48:30.71508	2026-06-11 21:58:45.594324	62	\N	HOS0199
+2700	2	2	HOU-00200	BRAIDED TUBE 1/2" X 2 MTRS	68	63	29	4	12	22125.42	\N	Covered	\N	18	Consumable	BRAIDED TUBE 1/2" X 2 MTRS	t	f	2026-06-11 21:48:30.715086	2026-06-11 21:58:45.594327	62	\N	HOS0200
+2701	2	2	HOU-00201	BROWN TEFLON BELT- SEALING MACHINE	68	63	29	2	8	27741.37	\N	Covered	\N	18	Consumable	BROWN TEFLON BELT- SEALING MACHINE	t	f	2026-06-11 21:48:30.715092	2026-06-11 21:58:45.59433	62	\N	HOS0201
+2702	2	2	HOU-00202	LOW WATER CUT OFF - SENSOR TYPE	68	63	29	3	9	42545.35	\N	Covered	\N	18	Consumable	LOW WATER CUT OFF - SENSOR TYPE	t	f	2026-06-11 21:48:30.715098	2026-06-11 21:58:45.594337	62	\N	HOS0202
+2703	2	2	HOU-00203	OPERATING VALVE GASKET - BIG	68	63	29	3	11	40105.74	\N	Covered	\N	18	Consumable	OPERATING VALVE GASKET - BIG	t	f	2026-06-11 21:48:30.715104	2026-06-11 21:58:45.594341	62	\N	HOS0203
+2704	2	2	HOU-00204	PRINTING ROLLS ETO MACHINE	68	63	29	3	10	49267.01	\N	Covered	\N	18	Consumable	PRINTING ROLLS ETO MACHINE	t	f	2026-06-11 21:48:30.71511	2026-06-11 21:58:45.594343	62	\N	HOS0204
+2705	2	2	HOU-00205	SAFETY VALVE	68	63	29	2	5	27360.66	\N	Covered	\N	18	Consumable	SAFETY VALVE	t	f	2026-06-11 21:48:30.715116	2026-06-11 21:58:45.594346	62	\N	HOS0205
+2706	2	2	HOU-00206	SHARPENER BELT FOR GUAGE CUTTING MACHINE	68	63	29	30	89	8664.4	\N	Covered	\N	18	Consumable	SHARPENER BELT FOR GUAGE CUTTING MACHINE	t	f	2026-06-11 21:48:30.715122	2026-06-11 21:58:45.594349	62	\N	HOS0206
+2707	2	2	HOU-00207	SILICON GASKET FOR HEATER	68	63	29	2	8	49305.41	\N	Covered	\N	18	Consumable	SILICON GASKET FOR HEATER	t	f	2026-06-11 21:48:30.715128	2026-06-11 21:58:45.594351	62	\N	HOS0207
+2708	2	2	HOU-00208	SILICON WHEEL FOR SEALING MACHINE	68	63	29	3	7	20126.75	\N	Covered	\N	18	Consumable	SILICON WHEEL FOR SEALING MACHINE	t	f	2026-06-11 21:48:30.715133	2026-06-11 21:58:45.594354	62	\N	HOS0208
+2709	2	2	HOU-00209	TEFLON TAPE ROLL(SMALL MACHINE)	68	63	33	4	13	47865.15	\N	Covered	\N	18	Consumable	TEFLON TAPE ROLL(SMALL MACHINE)	t	f	2026-06-11 21:48:30.715139	2026-06-11 21:58:45.594357	62	\N	HOS0209
+2710	2	2	HOU-00210	ASSEMBLIES ORTHO DIRECT	68	64	29	3	8	13569.44	\N	Covered	\N	12	Consumable	ASSEMBLIES ORTHO DIRECT	t	f	2026-06-11 21:48:30.715145	2026-06-11 21:58:45.59436	62	\N	HOS0210
+2711	2	2	HOU-00211	BAND SEATER GDC	68	64	29	3	11	12025.08	\N	Covered	\N	12	Consumable	BAND SEATER GDC	t	f	2026-06-11 21:48:30.715154	2026-06-11 21:58:45.594362	62	\N	HOS0211
+2712	2	2	HOU-00212	BLUE BITE	68	64	29	3	10	11895.17	\N	Covered	\N	12	Consumable	BLUE BITE	t	f	2026-06-11 21:48:30.715161	2026-06-11 21:58:45.594365	62	\N	HOS0212
+2713	2	2	HOU-00213	BONDABLE 1ST MOLAR TUBES D-TECH	68	64	29	3	9	13847.05	\N	Covered	\N	12	Consumable	BONDABLE 1ST MOLAR TUBES D-TECH	t	f	2026-06-11 21:48:30.715167	2026-06-11 21:58:45.594368	62	\N	HOS0213
+2714	2	2	HOU-00214	BONDABLE BUTTONS PKT OF 10	68	64	29	4	13	10652.57	\N	Covered	\N	12	Consumable	BONDABLE BUTTONS PKT OF 10	t	f	2026-06-11 21:48:30.715172	2026-06-11 21:58:45.594371	62	\N	HOS0214
+2715	2	2	HOU-00215	BRACKET IRIDIUM MBT 022 KIT	68	64	29	2	6	13179.23	\N	Covered	\N	12	Consumable	BRACKET IRIDIUM MBT 022 KIT	t	f	2026-06-11 21:48:30.715178	2026-06-11 21:58:45.594373	62	\N	HOS0215
+2716	2	2	HOU-00216	CERAMIC KIT MBT 022 5-5	68	64	29	22	54	7056.16	\N	Covered	\N	12	Consumable	CERAMIC KIT MBT 022 5-5	t	f	2026-06-11 21:48:30.715184	2026-06-11 21:58:45.594376	62	\N	HOS0216
+2717	2	2	HOU-00217	CHEEK RETRACTOR WITH HANDLE	68	64	29	2	5	28137.67	\N	Covered	\N	12	Consumable	CHEEK RETRACTOR WITH HANDLE	t	f	2026-06-11 21:48:30.71519	2026-06-11 21:58:45.594379	62	\N	HOS0217
+2718	2	2	HOU-00218	CRIMPING PLIER	68	64	29	3	10	43834.48	\N	Covered	\N	12	Consumable	CRIMPING PLIER	t	f	2026-06-11 21:48:30.715196	2026-06-11 21:58:45.594382	62	\N	HOS0218
+2719	2	2	HOU-00219	DEBONDING BUR HORICO	68	64	29	5	14	14390.92	\N	Covered	\N	12	Consumable	DEBONDING BUR HORICO	t	f	2026-06-11 21:48:30.715202	2026-06-11 21:58:45.594384	62	\N	HOS0219
+2720	2	2	HOU-00220	DENTAL PENCIL	68	64	29	2	5	29772.16	\N	Covered	\N	12	Consumable	DENTAL PENCIL	t	f	2026-06-11 21:48:30.715208	2026-06-11 21:58:45.594387	62	\N	HOS0220
+2721	2	2	HOU-00221	D-TECH ROTH KIT 018	68	64	29	3	8	32447.26	\N	Covered	\N	12	Consumable	D-TECH ROTH KIT 018	t	f	2026-06-11 21:48:30.715215	2026-06-11 21:58:45.59439	62	\N	HOS0221
+2722	2	2	HOU-00222	E-CHAIN OO 15FT- CONT. CLEAR & GREY	68	64	29	4	15	20626.7	\N	Covered	\N	12	Consumable	E-CHAIN OO 15FT- CONT. CLEAR & GREY	t	f	2026-06-11 21:48:30.71522	2026-06-11 21:58:45.594393	62	\N	HOS0222
+2723	2	2	HOU-00223	E-CHAIN OO 15FT- SHORT. CLEAR & GREY	68	64	29	2	5	32134.02	\N	Covered	\N	12	Consumable	E-CHAIN OO 15FT- SHORT. CLEAR & GREY	t	f	2026-06-11 21:48:30.715227	2026-06-11 21:58:45.594396	62	\N	HOS0223
+2724	2	2	HOU-00224	ENLIGHT LC COMPOSITE KIT ORMCO WITH ETCHANT	68	64	29	3	9	45420.78	\N	Covered	\N	12	Consumable	ENLIGHT LC COMPOSITE KIT ORMCO WITH ETCHANT	t	f	2026-06-11 21:48:30.715233	2026-06-11 21:58:45.594398	62	\N	HOS0224
+2725	2	2	HOU-00225	HOE PLIER GDC STR/CVD	68	64	29	4	9	32274.05	\N	Covered	\N	12	Consumable	HOE PLIER GDC STR/CVD	t	f	2026-06-11 21:48:30.715239	2026-06-11 21:58:45.594401	62	\N	HOS0225
+2726	2	2	HOU-00226	HORICO FG BU 166 010	68	64	29	30	105	5532.71	\N	Covered	\N	12	Consumable	HORICO FG BU 166 010	t	f	2026-06-11 21:48:30.715245	2026-06-11 21:58:45.594404	62	\N	HOS0226
+2727	2	2	HOU-00227	HP ELASTIC 5000 - PINK, GREEN, BLUE & RED	68	64	29	2	7	42043.95	\N	Covered	\N	12	Consumable	HP ELASTIC 5000 - PINK, GREEN, BLUE & RED	t	f	2026-06-11 21:48:30.715251	2026-06-11 21:58:45.594407	62	\N	HOS0227
+2728	2	2	HOU-00228	HP SPOT WELDER	68	64	29	2	6	17460.99	\N	Covered	\N	12	Consumable	HP SPOT WELDER	t	f	2026-06-11 21:48:30.715257	2026-06-11 21:58:45.594409	62	\N	HOS0228
+2729	2	2	HOU-00229	LIGARINGS (1040) CLEAR & GREY	68	64	29	2	7	24747.81	\N	Covered	\N	12	Consumable	LIGARINGS (1040) CLEAR & GREY	t	f	2026-06-11 21:48:30.715263	2026-06-11 21:58:45.594412	62	\N	HOS0229
+2730	2	2	HOU-00230	LINGUAL SHEATH HP (PKT OF 50)	68	64	29	4	11	11910.81	\N	Covered	\N	12	Consumable	LINGUAL SHEATH HP (PKT OF 50)	t	f	2026-06-11 21:48:30.715269	2026-06-11 21:58:45.594415	62	\N	HOS0230
+2731	2	2	HOU-00231	NITI 014 PKT OF 25 U/L	68	64	29	4	9	19412.86	\N	Covered	\N	12	Consumable	NITI 014 PKT OF 25 U/L	t	f	2026-06-11 21:48:30.715275	2026-06-11 21:58:45.594418	62	\N	HOS0231
+2732	2	2	HOU-00232	NITI 016 PKT OF 25 U/L	68	64	29	4	10	15280.31	\N	Covered	\N	12	Consumable	NITI 016 PKT OF 25 U/L	t	f	2026-06-11 21:48:30.715281	2026-06-11 21:58:45.59442	62	\N	HOS0232
+2733	2	2	HOU-00233	PLIER STAND	68	64	29	4	11	39780.01	\N	Covered	\N	12	Consumable	PLIER STAND	t	f	2026-06-11 21:48:30.715288	2026-06-11 21:58:45.594423	62	\N	HOS0233
+2734	2	2	HOU-00234	RELIEF WAX	68	64	29	5	18	42881.58	\N	Covered	\N	12	Consumable	RELIEF WAX	t	f	2026-06-11 21:48:30.715294	2026-06-11 21:58:45.594426	62	\N	HOS0234
+2735	2	2	HOU-00235	UNIVERSAL PLIER GDC	68	64	29	2	6	36371.84	\N	Covered	\N	12	Consumable	UNIVERSAL PLIER GDC	t	f	2026-06-11 21:48:30.715299	2026-06-11 21:58:45.594429	62	\N	HOS0235
+2736	2	2	HOU-00236	AVF NEEDLE 16G	68	65	29	4	16	43244.64	\N	Covered	\N	12	Consumable	AVF NEEDLE 16G	t	f	2026-06-11 21:48:30.715305	2026-06-11 21:58:45.594431	62	\N	HOS0236
+2737	2	2	HOU-00237	AVF NEEDLE 17G	68	65	29	3	10	48314.91	\N	Covered	\N	12	Consumable	AVF NEEDLE 17G	t	f	2026-06-11 21:48:30.715311	2026-06-11 21:58:45.594434	62	\N	HOS0237
+2738	2	2	HOU-00238	BICARB MIXER MACHINE 100 LITRES	68	65	29	3	12	13344.08	\N	Covered	\N	12	Non-Consumable	BICARB MIXER MACHINE 100 LITRES	t	f	2026-06-11 21:48:30.715317	2026-06-11 21:58:45.594437	62	\N	HOS0238
+2739	2	2	HOU-00239	BICARBONATE PART B- 10LTR PACK	68	65	29	5	18	13515.59	\N	Covered	\N	12	Consumable	BICARBONATE PART B- 10LTR PACK	t	f	2026-06-11 21:48:30.715323	2026-06-11 21:58:45.59444	62	\N	HOS0239
+2740	2	2	HOU-00240	CHLORITEST PAPERS FOR CHLORINE TEST	68	65	29	4	14	21108.67	\N	Covered	\N	18	Consumable	CHLORITEST PAPERS FOR CHLORINE TEST	t	f	2026-06-11 21:48:30.715329	2026-06-11 21:58:45.594443	62	\N	HOS0240
+2741	2	2	HOU-00241	DIALYSATE CONNECTOR BLUE	68	65	29	4	9	49176.54	\N	Covered	\N	12	Consumable	DIALYSATE CONNECTOR BLUE	t	f	2026-06-11 21:48:30.71534	2026-06-11 21:58:45.594448	62	\N	HOS0241
+2742	2	2	HOU-00242	DIALYSATE CONNECTOR RED	68	65	29	16	35	9348.73	\N	Covered	\N	12	Consumable	DIALYSATE CONNECTOR RED	t	f	2026-06-11 21:48:30.715347	2026-06-11 21:58:45.594451	62	\N	HOS0242
+2743	2	2	HOU-00243	DOOR 22MM BUBBLE C.HOLDER 4008SV10 - M561711	68	65	29	4	15	29315.77	\N	Covered	\N	18	Consumable	DOOR 22MM BUBBLE C.HOLDER 4008SV10 - M561711	t	f	2026-06-11 21:48:30.715353	2026-06-11 21:58:45.594453	62	\N	HOS0243
+2744	2	2	HOU-00244	DRY CITRATE PART A-40LTR/PACK	68	65	29	2	6	31257.65	\N	Covered	\N	12	Consumable	DRY CITRATE PART A-40LTR/PACK	t	f	2026-06-11 21:48:30.715359	2026-06-11 21:58:45.594456	62	\N	HOS0244
+2745	2	2	HOU-00245	HIGH POTASSIUM CAN	68	65	29	5	14	45229.74	\N	Covered	\N	12	Consumable	HIGH POTASSIUM CAN	t	f	2026-06-11 21:48:30.715364	2026-06-11 21:58:45.594459	62	\N	HOS0245
+2746	2	2	HOU-00246	INFORMED CONSENT FOR HAEMODIALYSIS	68	74	29	4	14	43761.04	\N	Covered	\N	18	Consumable	INFORMED CONSENT FOR HAEMODIALYSIS	t	f	2026-06-11 21:48:30.71537	2026-06-11 21:58:45.594462	62	\N	HOS0246
+2747	2	2	HOU-00247	ON/OFF KIT	68	65	29	5	11	39494.21	\N	Covered	\N	12	Consumable	ON/OFF KIT	t	f	2026-06-11 21:48:30.715376	2026-06-11 21:58:45.594464	62	\N	HOS0247
+2748	2	2	HOU-00249	STEPPER MOTOR WITH GEAR BOX 4-POLES *4008B/H/S *4008S V10-PART NO: M393211	68	65	29	17	55	5372.14	\N	Covered	\N	18	Non-Consumable	STEPPER MOTOR WITH GEAR BOX 4-POLES *4008B/H/S *4008S V10-PART NO: M393211	t	f	2026-06-11 21:48:30.715382	2026-06-11 21:58:45.594467	62	\N	HOS0249
+2749	2	2	HOU-00250	TUBE FIXING ROLLER PUMP	68	65	29	29	78	5210.01	\N	Covered	\N	18	Non-Consumable	TUBE FIXING ROLLER PUMP	t	f	2026-06-11 21:48:30.715388	2026-06-11 21:58:45.59447	62	\N	HOS0250
+2750	2	2	HOU-00251	ULTRAFILTRATION PUMP 40008B/H/S/S V10 - PART NO:6707061	68	65	29	35	126	6499.34	\N	Covered	\N	18	Non-Consumable	ULTRAFILTRATION PUMP 40008B/H/S/S V10 - PART NO:6707061	t	f	2026-06-11 21:48:30.715394	2026-06-11 21:58:45.594473	62	\N	HOS0251
+2751	2	2	HOU-00252	10A FUSE - 100NOS-BOX	68	66	29	3	11	10443.43	\N	Covered	\N	18	Consumable	10A FUSE - 100NOS-BOX	t	f	2026-06-11 21:48:30.7154	2026-06-11 21:58:45.594475	62	\N	HOS0252
+2752	2	2	HOU-00253	16X24 DOOR GASKET	68	66	29	2	5	31170.49	\N	Covered	\N	18	Consumable	16X24 DOOR GASKET	t	f	2026-06-11 21:48:30.715406	2026-06-11 21:58:45.594478	62	\N	HOS0253
+2753	2	2	HOU-00254	24 POET POE SWITCH (DGS TO 26P)	68	66	29	4	13	37487.18	\N	Covered	\N	18	Consumable	24 POET POE SWITCH (DGS TO 26P)	t	f	2026-06-11 21:48:30.715412	2026-06-11 21:58:45.594481	62	\N	HOS0254
+2754	2	2	HOU-00255	6A FUSE - 100NOS-BOX	68	66	29	5	12	33036.78	\N	Covered	\N	18	Consumable	6A FUSE - 100NOS-BOX	t	f	2026-06-11 21:48:30.715421	2026-06-11 21:58:45.594484	62	\N	HOS0255
+2755	2	2	HOU-00256	ABG RADIOMETER - SBP SOLUTION PACK - 944-506	68	67	29	38	119	7501.07	\N	Covered	\N	12	Consumable	ABG RADIOMETER - SBP SOLUTION PACK - 944-506	t	f	2026-06-11 21:48:30.715428	2026-06-11 21:58:45.594487	62	\N	HOS0256
+2756	2	2	HOU-00257	AEROSEPT 5LTRS - DISINFECTANT	68	71	29	4	10	10054.47	\N	Covered	\N	18	Consumable	AEROSEPT 5LTRS - DISINFECTANT	t	f	2026-06-11 21:48:30.715433	2026-06-11 21:58:45.594489	62	\N	HOS0257
+2757	2	2	HOU-00258	ALL OUT MACHINE WITH REFILL	68	69	29	4	11	36519.29	\N	Covered	\N	18	Consumable	ALL OUT MACHINE WITH REFILL	t	f	2026-06-11 21:48:30.715439	2026-06-11 21:58:45.594492	62	\N	HOS0258
+2758	2	2	HOU-00259	ALL OUT MOSQUITO REPELLENT - REFILL	68	69	29	5	20	34513.15	\N	Covered	\N	18	Consumable	ALL OUT MOSQUITO REPELLENT - REFILL	t	f	2026-06-11 21:48:30.715445	2026-06-11 21:58:45.594495	62	\N	HOS0259
+2759	2	2	HOU-00260	ANASTHESIA BOOKLET	68	74	29	2	8	19712.34	\N	Covered	\N	12	Consumable	ANASTHESIA BOOKLET	t	f	2026-06-11 21:48:30.715451	2026-06-11 21:58:45.594498	62	\N	HOS0260
+2760	2	2	HOU-00261	AUDIOLOGICAL EVALUATION	68	74	29	4	13	33238.36	\N	Covered	\N	12	Consumable	AUDIOLOGICAL EVALUATION	t	f	2026-06-11 21:48:30.715457	2026-06-11 21:58:45.5945	62	\N	HOS0261
+2761	2	2	HOU-00262	BASKET FOR MONITOR STAND	68	69	29	3	8	24369.43	\N	Covered	\N	18	Non-Consumable	BASKET FOR MONITOR STAND	t	f	2026-06-11 21:48:30.715462	2026-06-11 21:58:45.594503	62	\N	HOS0262
+2762	2	2	HOU-00263	BED SIDE LOCKERS	68	69	29	2	7	43336.49	\N	Covered	\N	18	Non-Consumable	BED SIDE LOCKERS	t	f	2026-06-11 21:48:30.715468	2026-06-11 21:58:45.594506	62	\N	HOS0263
+2763	2	2	HOU-00264	BENEFUSION USP_SYRINGE PUMP	68	68	29	2	5	10679.45	\N	Covered	\N	12	Non-Consumable	BENEFUSION USP_SYRINGE PUMP	t	f	2026-06-11 21:48:30.715474	2026-06-11 21:58:45.594509	62	\N	HOS0264
+2764	2	2	HOU-00265	BIOCHEMISTRY REGISTER	68	74	29	5	18	34986.14	\N	Covered	\N	12	Consumable	BIOCHEMISTRY REGISTER	t	f	2026-06-11 21:48:30.71548	2026-06-11 21:58:45.594511	62	\N	HOS0265
+2765	2	2	HOU-00266	BIRTH CERTIFICATE	68	74	29	5	15	42198.21	\N	Covered	\N	12	Consumable	BIRTH CERTIFICATE	t	f	2026-06-11 21:48:30.715486	2026-06-11 21:58:45.594514	62	\N	HOS0266
+2766	2	2	HOU-00267	BLOOD PRESSURE MONITORING CHART	68	74	29	13	29	6877.84	\N	Covered	\N	12	Consumable	BLOOD PRESSURE MONITORING CHART	t	f	2026-06-11 21:48:30.715491	2026-06-11 21:58:45.594517	62	\N	HOS0267
+2767	2	2	HOU-00268	BLUE BED SHEET	68	70	29	3	11	12899.78	\N	Covered	\N	5	Non-Consumable	BLUE BED SHEET	t	f	2026-06-11 21:48:30.715497	2026-06-11 21:58:45.59452	62	\N	HOS0268
+2768	2	2	HOU-00269	BLUE COLOUR COAT	68	70	29	3	9	19537.67	\N	Covered	\N	5	Non-Consumable	BLUE COLOUR COAT	t	f	2026-06-11 21:48:30.715503	2026-06-11 21:58:45.594523	62	\N	HOS0269
+2769	2	2	HOU-00270	BLUE PILLOW COVER	68	70	29	3	12	19603.12	\N	Covered	\N	5	Non-Consumable	BLUE PILLOW COVER	t	f	2026-06-11 21:48:30.715509	2026-06-11 21:58:45.594525	62	\N	HOS0270
+2770	2	2	HOU-00271	BP APPARATUS - DIAMOND LED 141 BP MONITOR	68	69	29	2	8	16600.18	\N	Covered	\N	12	Non-Consumable	BP APPARATUS - DIAMOND LED 141 BP MONITOR	t	f	2026-06-11 21:48:30.715514	2026-06-11 21:58:45.594528	62	\N	HOS0271
+2771	2	2	HOU-00272	BP APPARATUS - DIGITAL  - PAED	68	68	29	2	7	32194.67	\N	Covered	\N	12	Non-Consumable	BP APPARATUS - DIGITAL  - PAED	t	f	2026-06-11 21:48:30.71552	2026-06-11 21:58:45.594531	62	\N	HOS0272
+2772	2	2	HOU-00273	BPL ECG 9108D Z-FOLD PAPERS (150 SHEETS)	68	68	29	4	9	15401.35	\N	Covered	\N	12	Consumable	BPL ECG 9108D Z-FOLD PAPERS (150 SHEETS)	t	f	2026-06-11 21:48:30.715526	2026-06-11 21:58:45.594533	62	\N	HOS0273
+2773	2	2	HOU-00274	BPL ECG PAPERS - 50MM	68	74	29	4	11	43902.38	\N	Covered	\N	12	Consumable	BPL ECG PAPERS - 50MM	t	f	2026-06-11 21:48:30.715532	2026-06-11 21:58:45.594536	62	\N	HOS0274
+2774	2	2	HOU-00275	BPL ECG PAPERS - 80MM	68	74	29	36	122	9133.01	\N	Covered	\N	12	Consumable	BPL ECG PAPERS - 80MM	t	f	2026-06-11 21:48:30.715538	2026-06-11 21:58:45.594539	62	\N	HOS0275
+2775	2	2	HOU-00276	BPL FOETAL DOPPLER PROBE - MODEL: FD 9713	68	68	29	2	7	26524.84	\N	Covered	\N	12	Consumable	BPL FOETAL DOPPLER PROBE - MODEL: FD 9713	t	f	2026-06-11 21:48:30.715544	2026-06-11 21:58:45.594542	62	\N	HOS0276
+2776	2	2	HOU-00277	BPL MONOPHASIC DEFIBRILLATOR MODEL-DF 2509R - PRINTER	68	68	29	4	11	29423.66	\N	Covered	\N	12	Consumable	BPL MONOPHASIC DEFIBRILLATOR MODEL-DF 2509R - PRINTER	t	f	2026-06-11 21:48:30.715549	2026-06-11 21:58:45.594544	62	\N	HOS0277
+2777	2	2	HOU-00278	BREAST PUMP ACCESSORIES FOR MEDELA LACTINA	68	68	29	2	6	25335.95	\N	Covered	\N	12	Consumable	BREAST PUMP ACCESSORIES FOR MEDELA LACTINA	t	f	2026-06-11 21:48:30.715555	2026-06-11 21:58:45.594547	62	\N	HOS0278
+2778	2	2	HOU-00279	BREAST PUMP SYRINGE	68	68	29	2	6	15075.48	\N	Covered	\N	12	Consumable	BREAST PUMP SYRINGE	t	f	2026-06-11 21:48:30.71556	2026-06-11 21:58:45.59455	62	\N	HOS0279
+2779	2	2	HOU-00280	CARDIOLOGY INVESTIGATION FORM	68	74	29	5	11	27954.71	\N	Covered	\N	12	Consumable	CARDIOLOGY INVESTIGATION FORM	t	f	2026-06-11 21:48:30.715566	2026-06-11 21:58:45.594553	62	\N	HOS0280
+2780	2	2	HOU-00281	CARTRIDGE 104 DRUM	68	74	29	5	19	26651.83	\N	Covered	\N	18	Consumable	CARTRIDGE 104 DRUM	t	f	2026-06-11 21:48:30.715572	2026-06-11 21:58:45.594556	62	\N	HOS0281
+2781	2	2	HOU-00282	CARTRIDGE 110A	68	74	29	5	12	28285.67	\N	Covered	\N	18	Consumable	CARTRIDGE 110A	t	f	2026-06-11 21:48:30.715578	2026-06-11 21:58:45.594558	62	\N	HOS0282
+2782	2	2	HOU-00283	CARTRIDGE 119A	68	74	29	5	14	36868.49	\N	Covered	\N	18	Consumable	CARTRIDGE 119A	t	f	2026-06-11 21:48:30.715583	2026-06-11 21:58:45.594561	62	\N	HOS0283
+2783	2	2	HOU-00284	CARTRIDGE 12A	68	74	29	4	13	21745.11	\N	Covered	\N	18	Consumable	CARTRIDGE 12A	t	f	2026-06-11 21:48:30.715589	2026-06-11 21:58:45.594564	62	\N	HOS0284
+2784	2	2	HOU-00285	CARTRIDGE 166A	68	74	29	2	6	16174.55	\N	Covered	\N	18	Consumable	CARTRIDGE 166A	t	f	2026-06-11 21:48:30.715594	2026-06-11 21:58:45.594566	62	\N	HOS0285
+2785	2	2	HOU-00286	CARTRIDGE 673	68	74	29	4	14	13293.03	\N	Covered	\N	18	Consumable	CARTRIDGE 673	t	f	2026-06-11 21:48:30.7156	2026-06-11 21:58:45.594569	62	\N	HOS0286
+2786	2	2	HOU-00287	CARTRIDGE 680A	68	74	29	4	13	44760.69	\N	Covered	\N	18	Consumable	CARTRIDGE 680A	t	f	2026-06-11 21:48:30.715606	2026-06-11 21:58:45.594572	62	\N	HOS0287
+2787	2	2	HOU-00288	CARTRIDGE 88A	68	74	29	2	5	42502.66	\N	Covered	\N	18	Consumable	CARTRIDGE 88A	t	f	2026-06-11 21:48:30.715612	2026-06-11 21:58:45.594575	62	\N	HOS0288
+2788	2	2	HOU-00289	CARTRIDGE B021 BROTHER	68	74	29	4	12	23429.6	\N	Covered	\N	18	Consumable	CARTRIDGE B021 BROTHER	t	f	2026-06-11 21:48:30.715617	2026-06-11 21:58:45.594577	62	\N	HOS0289
+2789	2	2	HOU-00290	CARTRIDGE EPSON 664 BLACK	68	74	29	34	113	6452.19	\N	Covered	\N	18	Consumable	CARTRIDGE EPSON 664 BLACK	t	f	2026-06-11 21:48:30.715623	2026-06-11 21:58:45.59458	62	\N	HOS0290
+2790	2	2	HOU-00291	CARTRIDGE EPSON 664 COLOUR	68	74	29	5	20	21978.98	\N	Covered	\N	18	Consumable	CARTRIDGE EPSON 664 COLOUR	t	f	2026-06-11 21:48:30.715628	2026-06-11 21:58:45.594583	62	\N	HOS0291
+2791	2	2	HOU-00292	CH TOWEL 36*29	68	70	29	4	11	21656.31	\N	Covered	\N	5	Non-Consumable	CH TOWEL 36*29	t	f	2026-06-11 21:48:30.715634	2026-06-11 21:58:45.594586	62	\N	HOS0292
+2792	2	2	HOU-00293	DIGITAL BP APPARATUS - OMRON 7143T WITH ADAPTER	68	69	29	5	11	38960.02	\N	Covered	\N	12	Non-Consumable	DIGITAL BP APPARATUS - OMRON 7143T WITH ADAPTER	t	f	2026-06-11 21:48:30.71564	2026-06-11 21:58:45.594589	62	\N	HOS0293
+2793	2	2	HOU-00294	DISCHARGE SUMMARY	68	74	38	5	14	44067.66	\N	Covered	\N	12	Consumable	DISCHARGE SUMMARY	t	f	2026-06-11 21:48:30.715646	2026-06-11 21:58:45.594592	62	\N	HOS0294
+2794	2	2	HOU-00295	DISPOSABLE MEAL TRAY WITH LID- WHITE - 4 COMPARTMENT- GOOD QUALITY	68	69	29	3	12	16730.97	\N	Covered	\N	18	Consumable	DISPOSABLE MEAL TRAY WITH LID- WHITE - 4 COMPARTMENT- GOOD QUALITY	t	f	2026-06-11 21:48:30.715652	2026-06-11 21:58:45.594595	62	\N	HOS0295
+2795	2	2	HOU-00296	DOCTORS PROGRESS NOTES	68	74	38	33	78	7564.85	\N	Covered	\N	12	Consumable	DOCTORS PROGRESS NOTES	t	f	2026-06-11 21:48:30.715657	2026-06-11 21:58:45.594597	62	\N	HOS0296
+2796	2	2	HOU-00297	DOCUMENTATION REGISTER	68	74	29	3	10	49645.2	\N	Covered	\N	12	Consumable	DOCUMENTATION REGISTER	t	f	2026-06-11 21:48:30.715665	2026-06-11 21:58:45.5946	62	\N	HOS0297
+2797	2	2	HOU-00298	DOOR MAT (LEATHER)	68	69	29	3	7	48209.25	\N	Covered	\N	12	Consumable	DOOR MAT (LEATHER)	t	f	2026-06-11 21:48:30.715671	2026-06-11 21:58:45.594603	62	\N	HOS0298
+2798	2	2	HOU-00299	DUSTER	68	74	29	46	95	5570.75	\N	Covered	\N	5	Consumable	DUSTER	t	f	2026-06-11 21:48:30.715677	2026-06-11 21:58:45.594606	62	\N	HOS0299
+2799	2	2	HOU-00300	ECG PAPER - 005 - BPL - 9108D	68	74	33	5	19	22543.07	\N	Covered	\N	12	Consumable	ECG PAPER - 005 - BPL - 9108D	t	f	2026-06-11 21:48:30.715682	2026-06-11 21:58:45.594608	62	\N	HOS0300
+2800	2	2	HOU-00301	ECG ROLL PAPER - VESTA 12EC RMS 210MMX20MTR	68	74	33	5	12	43078.65	\N	Covered	\N	12	Consumable	ECG ROLL PAPER - VESTA 12EC RMS 210MMX20MTR	t	f	2026-06-11 21:48:30.715688	2026-06-11 21:58:45.594611	62	\N	HOS0301
+2801	2	2	HOU-00302	FOOT STEP DOUBLE SS	68	69	29	5	14	47702.7	\N	Covered	\N	18	Non-Consumable	FOOT STEP DOUBLE SS	t	f	2026-06-11 21:48:30.715694	2026-06-11 21:58:45.594614	62	\N	HOS0302
+2802	2	2	HOU-00303	GOGGLES - 3M QUALITY	68	69	29	49	186	5185.2	\N	Covered	\N	18	Consumable	GOGGLES - 3M QUALITY	t	f	2026-06-11 21:48:30.715699	2026-06-11 21:58:45.594617	62	\N	HOS0303
+2803	2	2	HOU-00304	GRAPHIC TPR CHART	68	74	38	2	7	49220.41	\N	Covered	\N	12	Consumable	GRAPHIC TPR CHART	t	f	2026-06-11 21:48:30.715705	2026-06-11 21:58:45.594619	62	\N	HOS0304
+2804	2	2	HOU-00305	HISTOPATHOLOGY REQUEST FORM	68	74	38	5	14	38844.37	\N	Covered	\N	12	Consumable	HISTOPATHOLOGY REQUEST FORM	t	f	2026-06-11 21:48:30.715711	2026-06-11 21:58:45.594622	62	\N	HOS0305
+2805	2	2	HOU-00306	HISTORY AND PHYSICAL EXAMINATION	68	74	38	3	8	16938.78	\N	Covered	\N	12	Consumable	HISTORY AND PHYSICAL EXAMINATION	t	f	2026-06-11 21:48:30.715716	2026-06-11 21:58:45.594625	62	\N	HOS0306
+2806	2	2	HOU-00307	ICU HIGH RISK/GRAVE RISK CONSENT FORM	68	74	38	3	9	13437.27	\N	Covered	\N	12	Consumable	ICU HIGH RISK/GRAVE RISK CONSENT FORM	t	f	2026-06-11 21:48:30.715722	2026-06-11 21:58:45.594628	62	\N	HOS0307
+2807	2	2	HOU-00308	ICU OBSERVATION CHART	68	74	38	2	6	49233.46	\N	Covered	\N	12	Consumable	ICU OBSERVATION CHART	t	f	2026-06-11 21:48:30.715727	2026-06-11 21:58:45.59463	62	\N	HOS0308
+2808	2	2	HOU-00309	INCH TAPE	68	69	29	4	16	22518.31	\N	Covered	\N	18	Non-Consumable	INCH TAPE	t	f	2026-06-11 21:48:30.715733	2026-06-11 21:58:45.594633	62	\N	HOS0309
+2809	2	2	HOU-00310	INDUCTION STOVE - PIGEON PRIME	68	69	29	2	6	28615.93	\N	Covered	\N	18	Non-Consumable	INDUCTION STOVE - PIGEON PRIME	t	f	2026-06-11 21:48:30.715739	2026-06-11 21:58:45.594636	62	\N	HOS0310
+2810	2	2	HOU-00311	INFORMED CONSENT FOR ANASTHESIA / SEDATION	68	74	38	2	5	25025.39	\N	Covered	\N	12	Consumable	INFORMED CONSENT FOR ANASTHESIA / SEDATION	t	f	2026-06-11 21:48:30.715745	2026-06-11 21:58:45.594639	62	\N	HOS0311
+2811	2	2	HOU-00312	INFORMED CONSENT FOR SURGERY	68	74	38	3	10	10456.88	\N	Covered	\N	12	Consumable	INFORMED CONSENT FOR SURGERY	t	f	2026-06-11 21:48:30.71575	2026-06-11 21:58:45.594641	62	\N	HOS0312
+2812	2	2	HOU-00313	INITIAL RAPID ASSESSMENT CHART	68	74	38	4	16	42966	\N	Covered	\N	12	Consumable	INITIAL RAPID ASSESSMENT CHART	t	f	2026-06-11 21:48:30.715756	2026-06-11 21:58:45.594644	62	\N	HOS0313
+2813	2	2	HOU-00314	INTAKE AND OUTPUT RECORD	68	74	38	4	16	17429.78	\N	Covered	\N	12	Consumable	INTAKE AND OUTPUT RECORD	t	f	2026-06-11 21:48:30.715762	2026-06-11 21:58:45.594647	62	\N	HOS0314
+2814	2	2	HOU-00315	INVESTIGATION CHART	68	74	38	2	8	47048.89	\N	Covered	\N	12	Consumable	INVESTIGATION CHART	t	f	2026-06-11 21:48:30.715768	2026-06-11 21:58:45.59465	62	\N	HOS0315
+2815	2	2	HOU-00316	IP REGISTER	68	74	29	4	13	38589.18	\N	Covered	\N	12	Consumable	IP REGISTER	t	f	2026-06-11 21:48:30.715773	2026-06-11 21:58:45.594652	62	\N	HOS0316
+2816	2	2	HOU-00317	IRON STOOL	68	69	29	2	6	24460.58	\N	Covered	\N	18	Non-Consumable	IRON STOOL	t	f	2026-06-11 21:48:30.715779	2026-06-11 21:58:45.594655	62	\N	HOS0317
+2817	2	2	HOU-00318	ISSUE AND MASTER REGISTER FOR BLOOD BANK	68	74	29	2	7	27473.18	\N	Covered	\N	12	Consumable	ISSUE AND MASTER REGISTER FOR BLOOD BANK	t	f	2026-06-11 21:48:30.715785	2026-06-11 21:58:45.594658	62	\N	HOS0318
+2818	2	2	HOU-00319	ISSUE REGISTER	68	74	29	2	8	26925.95	\N	Covered	\N	12	Consumable	ISSUE REGISTER	t	f	2026-06-11 21:48:30.715791	2026-06-11 21:58:45.594661	62	\N	HOS0319
+2819	2	2	HOU-00320	KORA CLOTH IN MTRS	68	70	39	4	11	17989.92	\N	Covered	\N	5	Non-Consumable	KORA CLOTH IN MTRS	t	f	2026-06-11 21:48:30.715796	2026-06-11 21:58:45.594664	62	\N	HOS0320
+2820	2	2	HOU-00321	LARYNGOSCOPE BULB	68	61	29	2	5	20534.86	\N	Covered	\N	12	Non-Consumable	LARYNGOSCOPE BULB	t	f	2026-06-11 21:48:30.715802	2026-06-11 21:58:45.594666	62	\N	HOS0321
+2821	2	2	HOU-00322	LARYNGOSCOPE SET WITH MC COY BLADE (SIZE1,2,3 & 4)	68	69	29	3	10	46934.57	\N	Covered	\N	12	Non-Consumable	LARYNGOSCOPE SET WITH MC COY BLADE (SIZE1,2,3 & 4)	t	f	2026-06-11 21:48:30.715808	2026-06-11 21:58:45.594669	62	\N	HOS0322
+2822	2	2	HOU-00323	LAUNDRY BAG WITH STEEL RAILING & WHEELS OVER ALL SIZE 22.5” ROUND X 30” HEIGHT	68	68	29	5	14	17148.26	\N	Covered	\N	18	Non-Consumable	LAUNDRY BAG WITH STEEL RAILING & WHEELS OVER ALL SIZE 22.5” ROUND X 30” HEIGHT	t	f	2026-06-11 21:48:30.715813	2026-06-11 21:58:45.594672	62	\N	HOS0323
+2823	2	2	HOU-00324	CL LEAVE APPLICATION BOOK	68	74	38	22	51	9730.39	\N	Covered	\N	12	Consumable	CL LEAVE APPLICATION BOOK	t	f	2026-06-11 21:48:30.715819	2026-06-11 21:58:45.594675	62	\N	HOS0324
+2824	2	2	HOU-00325	MAKINTOSH SHEETS - IN MTRS	68	69	39	3	7	10235.77	\N	Covered	\N	12	Non-Consumable	MAKINTOSH SHEETS - IN MTRS	t	f	2026-06-11 21:48:30.715825	2026-06-11 21:58:45.594678	62	\N	HOS0325
+2825	2	2	HOU-00326	MATTRESS - 40 DENSITY MAGIC PVC REXINE-SINGLE SECTION MATRESS - SIZE 72X30X4 INCHES	68	69	29	4	16	48249.72	\N	Covered	\N	18	Non-Consumable	MATTRESS - 40 DENSITY MAGIC PVC REXINE-SINGLE SECTION MATRESS - SIZE 72X30X4 INCHES	t	f	2026-06-11 21:48:30.715831	2026-06-11 21:58:45.594685	62	\N	HOS0326
+2826	2	2	HOU-00327	MEDICAL CERTIFICATE	68	74	38	3	10	39458.66	\N	Covered	\N	12	Consumable	MEDICAL CERTIFICATE	t	f	2026-06-11 21:48:30.715837	2026-06-11 21:58:45.594687	62	\N	HOS0327
+2827	2	2	HOU-00328	MEDICATION SHEET	68	74	38	3	11	25564.93	\N	Covered	\N	12	Consumable	MEDICATION SHEET	t	f	2026-06-11 21:48:30.715843	2026-06-11 21:58:45.59469	62	\N	HOS0328
+2828	2	2	HOU-00329	MG CHARITABLE TRUST PAYMENT VOUCHER	68	74	38	2	5	17666.38	\N	Covered	\N	12	Consumable	MG CHARITABLE TRUST PAYMENT VOUCHER	t	f	2026-06-11 21:48:30.715848	2026-06-11 21:58:45.594693	62	\N	HOS0329
+2829	2	2	HOU-00331	MOBILE PHONE SAMSUNG	68	69	29	3	9	34424.32	\N	Covered	\N	18	Non-Consumable	MOBILE PHONE SAMSUNG	t	f	2026-06-11 21:48:30.715854	2026-06-11 21:58:45.594696	62	\N	HOS0331
+2830	2	2	HOU-00332	MYCOLOGY REGISTER	68	74	29	2	5	31597.08	\N	Covered	\N	12	Consumable	MYCOLOGY REGISTER	t	f	2026-06-11 21:48:30.71586	2026-06-11 21:58:45.594699	62	\N	HOS0332
+2831	2	2	HOU-00333	NEONATE AMBU BAG	68	69	29	5	17	21296.51	\N	Covered	\N	12	Non-Consumable	NEONATE AMBU BAG	t	f	2026-06-11 21:48:30.715866	2026-06-11 21:58:45.594701	62	\N	HOS0333
+2832	2	2	HOU-00334	NIGHTIES	68	70	29	2	7	26397.84	\N	Covered	\N	5	Consumable	NIGHTIES	t	f	2026-06-11 21:48:30.715872	2026-06-11 21:58:45.594704	62	\N	HOS0334
+2833	2	2	HOU-00335	NOTE PAD	68	74	29	2	6	35670.68	\N	Covered	\N	12	Consumable	NOTE PAD	t	f	2026-06-11 21:48:30.715877	2026-06-11 21:58:45.594707	62	\N	HOS0335
+2834	2	2	HOU-00336	NURSES DAILY RECORD	68	74	38	3	10	22728.77	\N	Covered	\N	18	Consumable	NURSES DAILY RECORD	t	f	2026-06-11 21:48:30.715883	2026-06-11 21:58:45.59471	62	\N	HOS0336
+2835	2	2	HOU-00337	NURSES ICU MONITORING CHART	68	74	38	3	12	34737.12	\N	Covered	\N	18	Consumable	NURSES ICU MONITORING CHART	t	f	2026-06-11 21:48:30.715889	2026-06-11 21:58:45.594712	62	\N	HOS0337
+2836	2	2	HOU-00338	NURSES TREATMENT CHART	68	74	38	3	11	41501.48	\N	Covered	\N	18	Consumable	NURSES TREATMENT CHART	t	f	2026-06-11 21:48:30.715895	2026-06-11 21:58:45.594715	62	\N	HOS0338
+2837	2	2	HOU-00339	NURSING ASSESMENT	68	74	38	2	5	17119.6	\N	Covered	\N	18	Consumable	NURSING ASSESMENT	t	f	2026-06-11 21:48:30.7159	2026-06-11 21:58:45.594718	62	\N	HOS0339
+2838	2	2	HOU-00340	ODONIL - LAVENDER	68	69	29	5	17	17947.27	\N	Covered	\N	18	Consumable	ODONIL - LAVENDER	t	f	2026-06-11 21:48:30.715906	2026-06-11 21:58:45.594721	62	\N	HOS0340
+2839	2	2	HOU-00341	OPD REGISTER	68	74	29	2	7	40240.52	\N	Covered	\N	18	Consumable	OPD REGISTER	t	f	2026-06-11 21:48:30.715916	2026-06-11 21:58:45.594724	62	\N	HOS0341
+2840	2	2	HOU-00342	OPERATION RECORD 1&2	68	74	38	20	52	8957.14	\N	Covered	\N	18	Consumable	OPERATION RECORD 1&2	t	f	2026-06-11 21:48:30.715922	2026-06-11 21:58:45.594726	62	\N	HOS0342
+2841	2	2	HOU-00343	OT LIST	68	74	38	4	16	32877.85	\N	Covered	\N	18	Consumable	OT LIST	t	f	2026-06-11 21:48:30.715928	2026-06-11 21:58:45.594729	62	\N	HOS0343
+2842	2	2	HOU-00344	OT REGISTER	68	74	29	2	7	38475.64	\N	Covered	\N	18	Consumable	OT REGISTER	t	f	2026-06-11 21:48:30.715934	2026-06-11 21:58:45.594732	62	\N	HOS0344
+2843	2	2	HOU-00345	OUT PATIENT CASE RECORD	68	74	38	4	15	11546.26	\N	Covered	\N	18	Consumable	OUT PATIENT CASE RECORD	t	f	2026-06-11 21:48:30.71594	2026-06-11 21:58:45.594735	62	\N	HOS0345
+2844	2	2	HOU-00346	PACKAGE SERVICES BOOK	68	74	38	4	12	39701.13	\N	Covered	\N	18	Consumable	PACKAGE SERVICES BOOK	t	f	2026-06-11 21:48:30.715949	2026-06-11 21:58:45.594737	62	\N	HOS0346
+2845	2	2	HOU-00347	PAEDIATRICS NEW BORN SHEET	68	74	34	2	6	29440.22	\N	Covered	\N	18	Consumable	PAEDIATRICS NEW BORN SHEET	t	f	2026-06-11 21:48:30.715955	2026-06-11 21:58:45.59474	62	\N	HOS0347
+2846	2	2	HOU-00348	PAPER CLIPS	68	74	37	4	12	11182.73	\N	Covered	\N	18	Consumable	PAPER CLIPS	t	f	2026-06-11 21:48:30.715961	2026-06-11 21:58:45.594743	62	\N	HOS0348
+2847	2	2	HOU-00349	PAPER PLATE 12 INCHES	68	69	37	2	5	15182.76	\N	Covered	\N	12	Consumable	PAPER PLATE 12 INCHES	t	f	2026-06-11 21:48:30.715967	2026-06-11 21:58:45.594746	62	\N	HOS0349
+2848	2	2	HOU-00350	PAPER PLATE 6NO	68	69	37	4	15	16299.26	\N	Covered	\N	12	Consumable	PAPER PLATE 6NO	t	f	2026-06-11 21:48:30.715972	2026-06-11 21:58:45.594749	62	\N	HOS0350
+2849	2	2	HOU-00351	PATIENT INVESTIGATION LOG	68	74	38	4	14	11998.62	\N	Covered	\N	18	Consumable	PATIENT INVESTIGATION LOG	t	f	2026-06-11 21:48:30.715978	2026-06-11 21:58:45.594751	62	\N	HOS0351
+2850	2	2	HOU-00352	PEDIATRIC AMBU BAG	68	69	29	3	7	37608.66	\N	Covered	\N	12	Non-Consumable	PEDIATRIC AMBU BAG	t	f	2026-06-11 21:48:30.715984	2026-06-11 21:58:45.594754	62	\N	HOS0352
+2851	2	2	HOU-00353	PERIPHERAL IV CENTRAL LINE	68	74	38	2	8	44902.73	\N	Covered	\N	18	Consumable	PERIPHERAL IV CENTRAL LINE	t	f	2026-06-11 21:48:30.71599	2026-06-11 21:58:45.594757	62	\N	HOS0353
+2852	2	2	HOU-00354	PHARMACY INDENT BOOK	68	74	38	5	13	44018.45	\N	Covered	\N	18	Consumable	PHARMACY INDENT BOOK	t	f	2026-06-11 21:48:30.715995	2026-06-11 21:58:45.594759	62	\N	HOS0354
+2853	2	2	HOU-00355	PHARMACY RETURN BOOK	68	74	38	5	14	13659.49	\N	Covered	\N	18	Consumable	PHARMACY RETURN BOOK	t	f	2026-06-11 21:48:30.716001	2026-06-11 21:58:45.594762	62	\N	HOS0355
+2854	2	2	HOU-00356	PHYSICAL FITNESS CRTIFICATE	68	74	38	2	8	32654.96	\N	Covered	\N	18	Consumable	PHYSICAL FITNESS CRTIFICATE	t	f	2026-06-11 21:48:30.716007	2026-06-11 21:58:45.594765	62	\N	HOS0356
+2855	2	2	HOU-00357	PILLOW	68	70	29	2	5	35389.67	\N	Covered	\N	12	Non-Consumable	PILLOW	t	f	2026-06-11 21:48:30.716013	2026-06-11 21:58:45.594768	62	\N	HOS0357
+2856	2	2	HOU-00358	PLASTIC SPOON	68	69	37	2	5	25797.52	\N	Covered	\N	18	Consumable	PLASTIC SPOON	t	f	2026-06-11 21:48:30.716018	2026-06-11 21:58:45.594771	62	\N	HOS0358
+2857	2	2	HOU-00359	PLASTIC TRAY	68	69	29	4	10	30679.31	\N	Covered	\N	18	Non-Consumable	PLASTIC TRAY	t	f	2026-06-11 21:48:30.716024	2026-06-11 21:58:45.594773	62	\N	HOS0359
+2858	2	2	HOU-00360	PLATELET SDP ISSUE REGISTER	68	74	29	2	6	34642.99	\N	Covered	\N	18	Consumable	PLATELET SDP ISSUE REGISTER	t	f	2026-06-11 21:48:30.71603	2026-06-11 21:58:45.594776	62	\N	HOS0360
+2859	2	2	HOU-00361	POLICE INTIMATION BOOK	68	74	38	5	11	32810.54	\N	Covered	\N	18	Consumable	POLICE INTIMATION BOOK	t	f	2026-06-11 21:48:30.716036	2026-06-11 21:58:45.594779	62	\N	HOS0361
+2860	2	2	HSK-00046	PHENYLE	69	76	31	18	48	1737.33	\N	Covered	\N	18	Consumable	PHENYLE	t	f	2026-06-11 21:48:30.716042	2026-06-11 21:58:45.594782	62	\N	HSK0046
+2861	2	2	HOU-00362	PP FILE - A4 LARGE FILE (9.5X12.5 INCHES) WITH 9MM SPINE -PP 0.32MM WITH MATT FINISH WITH DELUXE CLIP (SAME AS SANCHETI SAMPLE) OBG	68	74	29	4	14	37317.79	\N	Covered	\N	18	Consumable	PP FILE - A4 LARGE FILE (9.5X12.5 INCHES) WITH 9MM SPINE -PP 0.32MM WITH MATT FINISH WITH DELUXE CLIP (SAME AS SANCHETI SAMPLE) OBG	t	f	2026-06-11 21:48:30.716048	2026-06-11 21:58:45.594784	62	\N	HOS0362
+2862	2	2	HOU-00363	PRE ANASTHETIC CHECKUP FORM	68	74	38	28	62	9946.09	\N	Covered	\N	18	Consumable	PRE ANASTHETIC CHECKUP FORM	t	f	2026-06-11 21:48:30.716054	2026-06-11 21:58:45.594787	62	\N	HOS0363
+2863	2	2	HOU-00364	PRESCRIPTION PAD	68	74	38	3	9	26966.04	\N	Covered	\N	18	Consumable	PRESCRIPTION PAD	t	f	2026-06-11 21:48:30.71606	2026-06-11 21:58:45.59479	62	\N	HOS0364
+2864	2	2	HOU-00365	PRESSURE ULCER CARE	68	74	38	5	17	13396.13	\N	Covered	\N	18	Consumable	PRESSURE ULCER CARE	t	f	2026-06-11 21:48:30.716065	2026-06-11 21:58:45.594793	62	\N	HOS0365
+2865	2	2	HOU-00366	PRESSURE ULCER SURVELLIANCE CARE BUNDLE	68	74	38	2	6	49872.02	\N	Covered	\N	18	Consumable	PRESSURE ULCER SURVELLIANCE CARE BUNDLE	t	f	2026-06-11 21:48:30.716071	2026-06-11 21:58:45.594796	62	\N	HOS0366
+2866	2	2	HOU-00367	PULSE OXIMETER (BUY 1 GET 1 FREE OFFER)	68	69	29	4	13	11790.43	\N	Covered	\N	12	Non-Consumable	PULSE OXIMETER (BUY 1 GET 1 FREE OFFER)	t	f	2026-06-11 21:48:30.716077	2026-06-11 21:58:45.594798	62	\N	HOS0367
+2867	2	2	HOU-00368	RADIOMETER - ABG - SENSOR CASSETTE FOR ABL9 300TEST PACK - SC9 - 2-BGEL	68	67	29	2	7	49317.14	\N	Covered	\N	12	Consumable	RADIOMETER - ABG - SENSOR CASSETTE FOR ABL9 300TEST PACK - SC9 - 2-BGEL	t	f	2026-06-11 21:48:30.716083	2026-06-11 21:58:45.594801	62	\N	HOS0368
+2868	2	2	HOU-00369	RADIOMETER AQT90FLEX REAGENERALT PACK (200TESTS)	68	67	29	3	10	49042.32	\N	Covered	\N	12	Consumable	RADIOMETER AQT90FLEX REAGENERALT PACK (200TESTS)	t	f	2026-06-11 21:48:30.716089	2026-06-11 21:58:45.594804	62	\N	HOS0369
+2869	2	2	HOU-00370	RECHARGEABLE TORCH - EVEREADY	68	69	29	4	15	45240.53	\N	Covered	\N	18	Non-Consumable	RECHARGEABLE TORCH - EVEREADY	t	f	2026-06-11 21:48:30.716095	2026-06-11 21:58:45.594807	62	\N	HOS0370
+2870	2	2	HOU-00371	REQUEST FOR BLOOD AND BLOOD COMPONENTS	68	74	38	30	110	7893.55	\N	Covered	\N	12	Consumable	REQUEST FOR BLOOD AND BLOOD COMPONENTS	t	f	2026-06-11 21:48:30.716101	2026-06-11 21:58:45.594809	62	\N	HOS0371
+2871	2	2	HOU-00372	SAMSUNG-32 INCHES SMART TV HD READY WITH OTT APPS MODEL-T4580	68	66	29	4	10	25272.79	\N	Covered	\N	18	Non-Consumable	SAMSUNG-32 INCHES SMART TV HD READY WITH OTT APPS MODEL-T4580	t	f	2026-06-11 21:48:30.716106	2026-06-11 21:58:45.594812	62	\N	HOS0372
+2872	2	2	HOU-00373	SAMSUNG-43 INCHES SMART TV ULTRA HD 4K WITH OTT APPS MODEL-HG43BU800	68	66	29	2	6	19114.19	\N	Covered	\N	18	Non-Consumable	SAMSUNG-43 INCHES SMART TV ULTRA HD 4K WITH OTT APPS MODEL-HG43BU800	t	f	2026-06-11 21:48:30.716112	2026-06-11 21:58:45.594815	62	\N	HOS0373
+2874	2	2	HOU-00375	SLIPPERS	68	69	41	3	10	19661.93	\N	Covered	\N	5	Consumable	SLIPPERS	t	f	2026-06-11 21:48:30.716124	2026-06-11 21:58:45.59482	62	\N	HOS0375
+2875	2	2	HOU-00376	SMALL NOTE BOOK	68	74	29	35	87	6299.65	\N	Covered	\N	12	Consumable	SMALL NOTE BOOK	t	f	2026-06-11 21:48:30.71613	2026-06-11 21:58:45.594824	62	\N	HOS0376
+2876	2	2	HOU-00377	SONY THERMAL PAPERS - 84S IN BOXES	68	74	29	4	12	21970.9	\N	Covered	\N	18	Consumable	SONY THERMAL PAPERS - 84S IN BOXES	t	f	2026-06-11 21:48:30.716136	2026-06-11 21:58:45.594826	62	\N	HOS0377
+2877	2	2	HOU-00378	SRIPADHA PHARMACY PAYMENT VOUCHER	68	74	38	3	11	10000.59	\N	Covered	\N	12	Consumable	SRIPADHA PHARMACY PAYMENT VOUCHER	t	f	2026-06-11 21:48:30.716142	2026-06-11 21:58:45.594829	62	\N	HOS0378
+2878	2	2	HOU-00379	STEEL PLATE ROUND	68	69	29	4	10	29828.37	\N	Covered	\N	18	Non-Consumable	STEEL PLATE ROUND	t	f	2026-06-11 21:48:30.716147	2026-06-11 21:58:45.594832	62	\N	HOS0379
+2879	2	2	HOU-00380	STEEL TEA CUP	68	69	29	3	8	34638.79	\N	Covered	\N	18	Non-Consumable	STEEL TEA CUP	t	f	2026-06-11 21:48:30.716153	2026-06-11 21:58:45.594835	62	\N	HOS0380
+2880	2	2	HOU-00381	SURGICAL SITE INFECTION PREVENTION CHECKLIST	68	74	38	2	5	41898.03	\N	Covered	\N	12	Consumable	SURGICAL SITE INFECTION PREVENTION CHECKLIST	t	f	2026-06-11 21:48:30.716159	2026-06-11 21:58:45.594837	62	\N	HOS0381
+2881	2	2	HOU-00382	THERMAL PRINTER PAPER ROLL FOR AQT90-RADIOMETER 112MM (20MTRS)	68	74	29	4	13	38080.11	\N	Covered	\N	18	Consumable	THERMAL PRINTER PAPER ROLL FOR AQT90-RADIOMETER 112MM (20MTRS)	t	f	2026-06-11 21:48:30.716167	2026-06-11 21:58:45.59484	62	\N	HOS0382
+2882	2	2	HOU-00383	THERMAL PRINTER ROLLS FOR ABG - 80MM 20 MTRS	68	74	29	4	9	20324.55	\N	Covered	\N	18	Consumable	THERMAL PRINTER ROLLS FOR ABG - 80MM 20 MTRS	t	f	2026-06-11 21:48:30.716173	2026-06-11 21:58:45.594843	62	\N	HOS0383
+2883	2	2	HOU-00384	THERMOSCAN - ROSSMAX	68	69	29	3	12	30771.34	\N	Covered	\N	12	Consumable	THERMOSCAN - ROSSMAX	t	f	2026-06-11 21:48:30.716179	2026-06-11 21:58:45.594846	62	\N	HOS0384
+2884	2	2	HOU-00385	THICK PLASTIC SHEET BIG ROLLS	68	69	30	4	13	43134.08	\N	Covered	\N	18	Consumable	THICK PLASTIC SHEET BIG ROLLS	t	f	2026-06-11 21:48:30.716185	2026-06-11 21:58:45.594849	62	\N	HOS0385
+2885	2	2	HOU-00386	TOURNIQUET LARGE SIZE - TYNOR	68	69	29	3	9	10124.09	\N	Covered	\N	12	Non-Consumable	TOURNIQUET LARGE SIZE - TYNOR	t	f	2026-06-11 21:48:30.716191	2026-06-11 21:58:45.594851	62	\N	HOS0386
+2886	2	2	HOU-00387	TOURNIQUET MEDIUM SIZE - TYNOR	68	69	29	4	10	29620.3	\N	Covered	\N	12	Non-Consumable	TOURNIQUET MEDIUM SIZE - TYNOR	t	f	2026-06-11 21:48:30.716196	2026-06-11 21:58:45.594854	62	\N	HOS0387
+2887	2	2	HOU-00388	TOURNIQUET SMALL SIZE - TYNOR	68	69	29	5	14	35675.08	\N	Covered	\N	12	Non-Consumable	TOURNIQUET SMALL SIZE - TYNOR	t	f	2026-06-11 21:48:30.716202	2026-06-11 21:58:45.594857	62	\N	HOS0388
+2888	2	2	HOU-00389	TYNOR - RESTRAINER I-65 UN-	68	69	29	3	8	33549.49	\N	Covered	\N	12	Non-Consumable	TYNOR - RESTRAINER I-65 UN-	t	f	2026-06-11 21:48:30.716208	2026-06-11 21:58:45.59486	62	\N	HOS0389
+2889	2	2	HOU-00390	URINARY CATHETER CARE	68	74	38	5	17	16270.52	\N	Covered	\N	12	Consumable	URINARY CATHETER CARE	t	f	2026-06-11 21:48:30.716214	2026-06-11 21:58:45.594862	62	\N	HOS0390
+2890	2	2	HOU-00391	VACCINATION CARD (PAEDIATRIC)	68	74	29	28	95	6453.22	\N	Covered	\N	12	Consumable	VACCINATION CARD (PAEDIATRIC)	t	f	2026-06-11 21:48:30.716219	2026-06-11 21:58:45.594865	62	\N	HOS0391
+2891	2	2	HOU-00392	VAP CARE BUNDLE	68	74	38	2	5	33634.67	\N	Covered	\N	12	Consumable	VAP CARE BUNDLE	t	f	2026-06-11 21:48:30.716225	2026-06-11 21:58:45.594868	62	\N	HOS0392
+2892	2	2	HOU-00393	VIM BAR - SMALL	68	69	29	3	8	18525.4	\N	Covered	\N	18	Consumable	VIM BAR - SMALL	t	f	2026-06-11 21:48:30.716231	2026-06-11 21:58:45.594871	62	\N	HOS0393
+2893	2	2	HOU-00394	WALKER FOLDABLE SUPERIOR QUALITY	68	69	29	5	15	30872.71	\N	Covered	\N	12	Non-Consumable	WALKER FOLDABLE SUPERIOR QUALITY	t	f	2026-06-11 21:48:30.716237	2026-06-11 21:58:45.594873	62	\N	HOS0394
+2894	2	2	HOU-00395	WALL CLOCK ROUND - AJANTA	68	69	29	3	7	44917.82	\N	Covered	\N	18	Non-Consumable	WALL CLOCK ROUND - AJANTA	t	f	2026-06-11 21:48:30.716243	2026-06-11 21:58:45.594876	62	\N	HOS0395
+2895	2	2	HOU-00396	WARD CENSUS REGISTER	68	74	29	5	16	42515.36	\N	Covered	\N	12	Consumable	WARD CENSUS REGISTER	t	f	2026-06-11 21:48:30.716248	2026-06-11 21:58:45.594879	62	\N	HOS0396
+2896	2	2	HOU-00397	WELCOME KIT IN ZIPLOCK POUCH WITH LOGO PRINT-20GM SOAP, 20ML KIWI SHAMPOO, 20ML KIWI BODY LOTION, WHITE BRUSH, COLGATE PASTE	68	69	34	5	17	25224.08	\N	Covered	\N	18	Consumable	WELCOME KIT IN ZIPLOCK POUCH WITH LOGO PRINT-20GM SOAP, 20ML KIWI SHAMPOO, 20ML KIWI BODY LOTION, WHITE BRUSH, COLGATE PASTE	t	f	2026-06-11 21:48:30.716255	2026-06-11 21:58:45.594882	62	\N	HOS0397
+2897	2	2	HOU-00398	WHITE BOARD SIZE 4X2	68	69	29	2	5	35445.94	\N	Covered	\N	18	Non-Consumable	WHITE BOARD SIZE 4X2	t	f	2026-06-11 21:48:30.716261	2026-06-11 21:58:45.594884	62	\N	HOS0398
+2898	2	2	HOU-00399	YELLOW PRESCRIPTION PAD	68	74	38	2	8	16201.47	\N	Covered	\N	12	Consumable	YELLOW PRESCRIPTION PAD	t	f	2026-06-11 21:48:30.716268	2026-06-11 21:58:45.594887	62	\N	HOS0399
+2899	2	2	HEQ-00001	65" SAMSUNG INTERACTIVE DISPLAY-WA65C - DESIGNED FOR THE CLASSROOM OF THE FUTURE ANDROID 11 OS* BASED PRODUCT- PROVIDES INTUITIVE USABILITY TO TEACHERS, SIMULTANEOUSLY CAN SHARE UP TO 9 SCRNS FOR MAX PRODUCTIVITY	67	59	29	2	7	12643.71	\N	Covered	\N	18	Non-Consumable	65" SAMSUNG INTERACTIVE DISPLAY-WA65C - DESIGNED FOR THE CLASSROOM OF THE FUTURE ANDROID 11 OS* BASED PRODUCT- PROVIDES INTUITIVE USABILITY TO TEACHERS, SIMULTANEOUSLY CAN SHARE UP TO 9 SCRNS FOR MAX PRODUCTIVITY	t	f	2026-06-11 21:48:30.716274	2026-06-11 21:58:45.59489	62	\N	HEQ0001
+2900	2	2	HEQ-00002	6U 500 RACK	67	60	29	5	11	45620.69	\N	Covered	\N	18	Non-Consumable	6U 500 RACK	t	f	2026-06-11 21:48:30.71628	2026-06-11 21:58:45.594893	62	\N	HEQ0002
+2901	2	2	HEQ-00003	AMBU BAG ADULT - SILICON	67	58	29	2	7	34187.77	\N	Covered	\N	12	Non-Consumable	AMBU BAG ADULT - SILICON	t	f	2026-06-11 21:48:30.716286	2026-06-11 21:58:45.594895	62	\N	HEQ0003
+2902	2	2	HEQ-00004	FINGER PULSE OXIMETER	67	58	29	3	8	47158.81	\N	Covered	\N	12	Non-Consumable	FINGER PULSE OXIMETER	t	f	2026-06-11 21:48:30.716292	2026-06-11 21:58:45.594898	62	\N	HEQ0004
+2903	2	2	HEQ-00005	FLUID WARMER CABINET- CAPACITY 40 BOTTLES - APOLLO MAKE - INNER CHAMBER SS WITH GLASS DOOR, DIGITAL TEMP INDICATOR, REMOVABLE SHELVES	67	58	29	4	13	46260.38	\N	Covered	\N	12	Non-Consumable	FLUID WARMER CABINET- CAPACITY 40 BOTTLES - APOLLO MAKE - INNER CHAMBER SS WITH GLASS DOOR, DIGITAL TEMP INDICATOR, REMOVABLE SHELVES	t	f	2026-06-11 21:48:30.716297	2026-06-11 21:58:45.594901	62	\N	HEQ0005
+2904	2	2	HEQ-00006	FORMALIN CHAMBER WITH ALL STANDARD ACCESSORIES	67	58	29	5	17	29501	\N	Covered	\N	12	Non-Consumable	FORMALIN CHAMBER WITH ALL STANDARD ACCESSORIES	t	f	2026-06-11 21:48:30.716303	2026-06-11 21:58:45.594904	62	\N	HEQ0006
+2905	2	2	HEQ-00007	FREERS ELEVATOR	67	58	29	36	139	7886.86	\N	Covered	\N	12	Non-Consumable	FREERS ELEVATOR	t	f	2026-06-11 21:48:30.716309	2026-06-11 21:58:45.594906	62	\N	HEQ0007
+2906	2	2	HEQ-00008	FULGURATION ACTIVE HANDLE	67	58	29	2	7	45693.72	\N	Covered	\N	12	Non-Consumable	FULGURATION ACTIVE HANDLE	t	f	2026-06-11 21:48:30.716314	2026-06-11 21:58:45.594909	62	\N	HEQ0008
+2907	2	2	HEQ-00009	GASTROINTESTINAL VIDEOSCOPE GIF-H170  SERIAL NO.: 2135184	67	58	29	36	138	5365.81	\N	Covered	\N	12	Non-Consumable	GASTROINTESTINAL VIDEOSCOPE GIF-H170  SERIAL NO.: 2135184	t	f	2026-06-11 21:48:30.71632	2026-06-11 21:58:45.594912	62	\N	HEQ0009
+2908	2	2	HEQ-00010	HAMMER	67	58	29	4	13	19874.88	\N	Covered	\N	18	Non-Consumable	HAMMER	t	f	2026-06-11 21:48:30.716326	2026-06-11 21:58:45.594915	62	\N	HEQ0010
+2909	2	2	HEQ-00011	HDMI CABLE 20 MTR	67	58	29	2	5	29621.14	\N	Covered	\N	18	Consumable	HDMI CABLE 20 MTR	t	f	2026-06-11 21:48:30.716332	2026-06-11 21:58:45.594917	62	\N	HEQ0011
+2910	2	2	HEQ-00012	HITECH CLASS II B2 BIO SAFETY CABINET-CLEANLINESS ISO CLASS 5 AS PER 1SO 14644-1, AIR BALANCE: 100% EXHAUST 0% RE-CIRCULATION, WITH UV LAMP, WORKING TABLE, FRONT SASH, SIDE PANELS, HEPA FILTER, PRE-FILTER , MOC: IS 304 GRADE SS, SIZE: 4'X2'X2'	67	58	29	22	68	5266.35	\N	Covered	\N	18	Non-Consumable	HITECH CLASS II B2 BIO SAFETY CABINET-CLEANLINESS ISO CLASS 5 AS PER 1SO 14644-1, AIR BALANCE: 100% EXHAUST 0% RE-CIRCULATION, WITH UV LAMP, WORKING TABLE, FRONT SASH, SIDE PANELS, HEPA FILTER, PRE-FILTER , MOC: IS 304 GRADE SS, SIZE: 4'X2'X2'	t	f	2026-06-11 21:48:30.716342	2026-06-11 21:58:45.594922	62	\N	HEQ0012
+2911	2	2	HEQ-00013	IFT, TENS, EMS, RUSSIAN, ULTRAREIZ (UNISTIM 5S)	67	58	29	4	16	49023.93	\N	Covered	\N	12	Non-Consumable	IFT, TENS, EMS, RUSSIAN, ULTRAREIZ (UNISTIM 5S)	t	f	2026-06-11 21:48:30.716348	2026-06-11 21:58:45.594925	62	\N	HEQ0013
+2912	2	2	HEQ-00014	INSTRUMENT TROLLEY FULLY SS 304 GRADE AND WITH CASTORS WTHOUT BUCKET BASIN	67	58	29	24	59	6647.01	\N	Covered	\N	12	Non-Consumable	INSTRUMENT TROLLEY FULLY SS 304 GRADE AND WITH CASTORS WTHOUT BUCKET BASIN	t	f	2026-06-11 21:48:30.716354	2026-06-11 21:58:45.594928	62	\N	HEQ0014
+2913	2	2	HEQ-00015	IV STAND FULLY SS 304 GRADE FINISHED WITH CASTORS	67	58	29	4	11	12183.68	\N	Covered	\N	12	Non-Consumable	IV STAND FULLY SS 304 GRADE FINISHED WITH CASTORS	t	f	2026-06-11 21:48:30.71636	2026-06-11 21:58:45.59493	62	\N	HEQ0015
+2914	2	2	HEQ-00016	LEYLA RETRACTOR ACCESSORIES FOR ABOVE SUGITA- 1. LEYLA FLEXIBLE ARMS-2NOS, 2 SUGITA CLAMPS FOR LEYLA ARMS-2NOS, 3. BRAIN SPATULAS SET OF 8NOS (SET)	67	58	29	5	12	24847.88	\N	Covered	\N	12	Non-Consumable	LEYLA RETRACTOR ACCESSORIES FOR ABOVE SUGITA- 1. LEYLA FLEXIBLE ARMS-2NOS, 2 SUGITA CLAMPS FOR LEYLA ARMS-2NOS, 3. BRAIN SPATULAS SET OF 8NOS (SET)	t	f	2026-06-11 21:48:30.716365	2026-06-11 21:58:45.594933	62	\N	HEQ0016
+2915	2	2	HEQ-00017	LIP OUTER 750 (553350578-00)	67	58	29	3	11	39306.03	\N	Covered	\N	12	Non-Consumable	LIP OUTER 750 (553350578-00)	t	f	2026-06-11 21:48:30.716371	2026-06-11 21:58:45.594936	62	\N	HEQ0017
+2916	2	2	HEQ-00018	LIQUID NITROGENERAL CRYO MAXI 500ML - DOUBLE SEAL SYSTEM WITH STANDARD ACCESSORIES	67	58	29	4	12	11583.17	\N	Covered	\N	18	Non-Consumable	LIQUID NITROGENERAL CRYO MAXI 500ML - DOUBLE SEAL SYSTEM WITH STANDARD ACCESSORIES	t	f	2026-06-11 21:48:30.716377	2026-06-11 21:58:45.594939	62	\N	HEQ0018
+2917	2	2	HEQ-00019	MANTRA AADHAR FACE- MODEL: BIONIC M8, PROCESSOR: OCTA CORE 2.4GHZ, RAM:4GB,ROM:128GB, DISPLAY:6.5IN SRN, IPS LCD, OS:ANDROID, WALL MOUNTED	67	58	29	5	18	36719.16	\N	Covered	\N	18	Non-Consumable	MANTRA AADHAR FACE- MODEL: BIONIC M8, PROCESSOR: OCTA CORE 2.4GHZ, RAM:4GB,ROM:128GB, DISPLAY:6.5IN SRN, IPS LCD, OS:ANDROID, WALL MOUNTED	t	f	2026-06-11 21:48:30.716383	2026-06-11 21:58:45.594942	62	\N	HEQ0019
+2918	2	2	HEQ-00020	MEDELA - DOMINANT FLEX HIGH END - HIGER END DELIVERY/OT APPLICABLE SUCTION PUMP WITH 1 LTR JAR-2NOS, SILICON REUSABLE CUP 50MM& 60MM EACH, TROLLEY-1NO	67	58	29	5	12	26224.01	\N	Covered	\N	12	Non-Consumable	MEDELA - DOMINANT FLEX HIGH END - HIGER END DELIVERY/OT APPLICABLE SUCTION PUMP WITH 1 LTR JAR-2NOS, SILICON REUSABLE CUP 50MM& 60MM EACH, TROLLEY-1NO	t	f	2026-06-11 21:48:30.716389	2026-06-11 21:58:45.594944	62	\N	HEQ0020
+2919	2	2	HEQ-00021	MEDITRACK HOSPITAL PATIENT PRIVACY CUBICLE TRACK SYSTEMS AND CURTAINS WITH ALL ACCESSORIES	67	58	29	4	13	11652.68	\N	Covered	\N	18	Non-Consumable	MEDITRACK HOSPITAL PATIENT PRIVACY CUBICLE TRACK SYSTEMS AND CURTAINS WITH ALL ACCESSORIES	t	f	2026-06-11 21:48:30.716395	2026-06-11 21:58:45.594947	62	\N	HEQ0021
+2920	2	2	HEQ-00022	MINDRAY : MODEL: HYLED 600/600 DOUBLE DOME OT LIGHT	67	58	29	4	9	46697.06	\N	Covered	\N	12	Non-Consumable	MINDRAY : MODEL: HYLED 600/600 DOUBLE DOME OT LIGHT	t	f	2026-06-11 21:48:30.7164	2026-06-11 21:58:45.59495	62	\N	HEQ0022
+2921	2	2	LAB-00116	VITROS 4600 - CAL KIT 7	71	78	29	30	62	1650.9	\N	Covered	\N	5	Consumable	VITROS 4600 - CAL KIT 7	t	f	2026-06-11 21:48:30.716406	2026-06-11 21:58:45.594953	62	\N	LAB0116
+2922	2	2	HEQ-00023	MINDRAY : MODEL: HYLED 760/760 DOUBLE DOME OT LIGHT	67	58	29	3	12	22837.8	\N	Covered	\N	12	Non-Consumable	MINDRAY : MODEL: HYLED 760/760 DOUBLE DOME OT LIGHT	t	f	2026-06-11 21:48:30.716412	2026-06-11 21:58:45.594955	62	\N	HEQ0023
+2923	2	2	HEQ-00024	MINDRAY: MODEL BENEHEART D2 BIPHASIC DEFIBRILATORS WITH PACING. MANUAL, ECG  AND PACINGWITH STANDARD ACCESSORIES.	67	58	29	3	9	34953.44	\N	Covered	\N	12	Non-Consumable	MINDRAY: MODEL BENEHEART D2 BIPHASIC DEFIBRILATORS WITH PACING. MANUAL, ECG  AND PACINGWITH STANDARD ACCESSORIES.	t	f	2026-06-11 21:48:30.716417	2026-06-11 21:58:45.594958	62	\N	HEQ0024
+2924	2	2	HEQ-00025	NAK DELUXE CONTAINER 1300 WITHOUT LID	67	58	29	5	17	38380.41	\N	Covered	\N	18	Non-Consumable	NAK DELUXE CONTAINER 1300 WITHOUT LID	t	f	2026-06-11 21:48:30.716425	2026-06-11 21:58:45.594961	62	\N	HEQ0025
+2925	2	2	HEQ-00026	NASAL SUCTION SET OF 4	67	58	29	2	6	27558.45	\N	Covered	\N	12	Non-Consumable	NASAL SUCTION SET OF 4	t	f	2026-06-11 21:48:30.716431	2026-06-11 21:58:45.594964	62	\N	HEQ0026
+2926	2	2	HEQ-00027	OTOSCOPE HEIN GERMANY	67	58	29	23	78	8562.7	\N	Covered	\N	12	Non-Consumable	OTOSCOPE HEIN GERMANY	t	f	2026-06-11 21:48:30.716437	2026-06-11 21:58:45.594966	62	\N	HEQ0027
+2927	2	2	HEQ-00028	OXYGENERAL REGULATOR	67	58	29	5	16	39927.43	\N	Covered	\N	12	Non-Consumable	OXYGENERAL REGULATOR	t	f	2026-06-11 21:48:30.716443	2026-06-11 21:58:45.594969	62	\N	HEQ0028
+2928	2	2	HEQ-00029	OXYMAT DENMARK O430-30 PSA OXYGENERAL GENERALERATOR - 500 LPM	67	58	29	20	48	7267.6	\N	Covered	\N	12	Non-Consumable	OXYMAT DENMARK O430-30 PSA OXYGENERAL GENERALERATOR - 500 LPM	t	f	2026-06-11 21:48:30.716448	2026-06-11 21:58:45.594972	62	\N	HEQ0029
+2929	2	2	HEQ-00030	PADDLE PLATE ASSEMBLY WITH PADDLE PLATES FOR BPL BIPASIC DEFIBRILLATOR MODEL: DF 2617	67	58	29	2	8	20478.39	\N	Covered	\N	12	Non-Consumable	PADDLE PLATE ASSEMBLY WITH PADDLE PLATES FOR BPL BIPASIC DEFIBRILLATOR MODEL: DF 2617	t	f	2026-06-11 21:48:30.716454	2026-06-11 21:58:45.594975	62	\N	HEQ0030
+2930	2	2	HEQ-00031	PHILIPS 3 LEAD ECG CABLE/LEAD SET	67	58	29	3	8	43337.1	\N	Covered	\N	12	Consumable	PHILIPS 3 LEAD ECG CABLE/LEAD SET	t	f	2026-06-11 21:48:30.71646	2026-06-11 21:58:45.594977	62	\N	HEQ0031
+2931	2	2	HEQ-00032	PHILIPS TRILOGY ACTIVE W/PAP EXHALATION CIRCUIT, ADULT	67	58	29	4	10	16498.28	\N	Covered	\N	12	Non-Consumable	PHILIPS TRILOGY ACTIVE W/PAP EXHALATION CIRCUIT, ADULT	t	f	2026-06-11 21:48:30.716465	2026-06-11 21:58:45.59498	62	\N	HEQ0032
+2932	2	2	HEQ-00033	POWERMAX FITNESS BU-201 DUAL ACTION AIR BIKE WITH BACK SUPPOET (GYM CYCLE)	67	58	29	4	14	26314.22	\N	Covered	\N	18	Non-Consumable	POWERMAX FITNESS BU-201 DUAL ACTION AIR BIKE WITH BACK SUPPOET (GYM CYCLE)	t	f	2026-06-11 21:48:30.716471	2026-06-11 21:58:45.594983	62	\N	HEQ0033
+2933	2	2	HEQ-00034	PRESSURE BAG - GE	67	58	29	47	112	8638.21	\N	Covered	\N	12	Non-Consumable	PRESSURE BAG - GE	t	f	2026-06-11 21:48:30.716477	2026-06-11 21:58:45.594986	62	\N	HEQ0034
+2934	2	2	HEQ-00035	PROTECTION CAP-CASTOR- TOP (553350346-00)	67	58	29	5	16	47692.49	\N	Covered	\N	18	Non-Consumable	PROTECTION CAP-CASTOR- TOP (553350346-00)	t	f	2026-06-11 21:48:30.716482	2026-06-11 21:58:45.594989	62	\N	HEQ0035
+2935	2	2	HEQ-00036	PS24: SPARES FOR OPERATION THEATRE TABLE POWER SUPPLY	67	58	29	3	8	49302.85	\N	Covered	\N	18	Consumable	PS24: SPARES FOR OPERATION THEATRE TABLE POWER SUPPLY	t	f	2026-06-11 21:48:30.716488	2026-06-11 21:58:45.594991	62	\N	HEQ0036
+2936	2	2	HEQ-00037	PSI ATLAS ANESTHESIA MECHANICAL DOUBLE ARM PENDANT	67	58	29	5	18	14095.54	\N	Covered	\N	12	Non-Consumable	PSI ATLAS ANESTHESIA MECHANICAL DOUBLE ARM PENDANT	t	f	2026-06-11 21:48:30.716494	2026-06-11 21:58:45.594994	62	\N	HEQ0037
+2937	2	2	HEQ-00038	PSI LEGENERALD G.S TABLES WITH OPTIONAL ACCESSORIES FOR UROLOGY(1 SET)	67	58	29	3	12	41382.38	\N	Covered	\N	12	Non-Consumable	PSI LEGENERALD G.S TABLES WITH OPTIONAL ACCESSORIES FOR UROLOGY(1 SET)	t	f	2026-06-11 21:48:30.7165	2026-06-11 21:58:45.594997	62	\N	HEQ0038
+2938	2	2	HEQ-00039	PSI LEGENERALD ORTHO LEORT-BT: BASE TRACTION SYSTEM(BT) MULTI PURPOSE MOTORISED SURGICAL TABLE - ARM BRD (2) - ARM BRD CLAMP (2) - RADIAL SETTING CLAMP(2) - GEOPEL KNEE CRUTCH, SOCKET TYPE(2) SCREEN ROD	67	58	29	5	17	26966.35	\N	Covered	\N	12	Non-Consumable	PSI LEGENERALD ORTHO LEORT-BT: BASE TRACTION SYSTEM(BT) MULTI PURPOSE MOTORISED SURGICAL TABLE - ARM BRD (2) - ARM BRD CLAMP (2) - RADIAL SETTING CLAMP(2) - GEOPEL KNEE CRUTCH, SOCKET TYPE(2) SCREEN ROD	t	f	2026-06-11 21:48:30.716505	2026-06-11 21:58:45.595	62	\N	HEQ0039
+2939	2	2	HEQ-00040	PULSE OXIMETER	67	58	29	5	18	38325.05	\N	Covered	\N	12	Non-Consumable	PULSE OXIMETER	t	f	2026-06-11 21:48:30.716511	2026-06-11 21:58:45.595003	62	\N	HEQ0040
+2940	2	2	HEQ-00041	RAISED ARM BOARD W/O CLAMP - AC1120	67	58	29	2	7	30636.94	\N	Covered	\N	12	Non-Consumable	RAISED ARM BOARD W/O CLAMP - AC1120	t	f	2026-06-11 21:48:30.716517	2026-06-11 21:58:45.595005	62	\N	HEQ0041
+2941	2	2	HEQ-00042	RESONA I9 - ULTRASOUND	67	58	29	4	15	43493.98	\N	Covered	\N	12	Non-Consumable	RESONA I9 - ULTRASOUND	t	f	2026-06-11 21:48:30.716522	2026-06-11 21:58:45.595008	62	\N	HEQ0042
+2942	2	2	HEQ-00043	RF ACTIVE HANDLE	67	58	29	2	5	19858.57	\N	Covered	\N	12	Non-Consumable	RF ACTIVE HANDLE	t	f	2026-06-11 21:48:30.716528	2026-06-11 21:58:45.595011	62	\N	HEQ0043
+2943	2	2	HEQ-00044	SANDING UNIT (RECIPROCAL EXERCISER) CODE 1462	67	58	29	4	15	24654.89	\N	Covered	\N	12	Non-Consumable	SANDING UNIT (RECIPROCAL EXERCISER) CODE 1462	t	f	2026-06-11 21:48:30.716534	2026-06-11 21:58:45.595014	62	\N	HEQ0044
+2944	2	2	HEQ-00045	SECURAYE SAB 3000 (STQC APPROVED ACCESS FM220U L1 SCANNER) WITH WIFI & LAN AADHAR ENABLED BIOMETRIC MACHINE	67	58	29	37	108	8592.26	\N	Covered	\N	18	Non-Consumable	SECURAYE SAB 3000 (STQC APPROVED ACCESS FM220U L1 SCANNER) WITH WIFI & LAN AADHAR ENABLED BIOMETRIC MACHINE	t	f	2026-06-11 21:48:30.71654	2026-06-11 21:58:45.595017	62	\N	HEQ0045
+2945	2	2	HEQ-00046	SEMI FOWLER COT WITH (SS WITH 304 GRADE) SS BOWL & SS SIDE WITH  IV ROD & POWDER COATED	67	58	29	5	13	14405.2	\N	Covered	\N	12	Non-Consumable	SEMI FOWLER COT WITH (SS WITH 304 GRADE) SS BOWL & SS SIDE WITH  IV ROD & POWDER COATED	t	f	2026-06-11 21:48:30.716546	2026-06-11 21:58:45.595019	62	\N	HEQ0046
+2946	2	2	HEQ-00047	SHALYA LX ELECTRO SURGICAL UNIT - 6 SENSE TECHNOLOGY	67	58	29	5	12	35511.79	\N	Covered	\N	12	Non-Consumable	SHALYA LX ELECTRO SURGICAL UNIT - 6 SENSE TECHNOLOGY	t	f	2026-06-11 21:48:30.716551	2026-06-11 21:58:45.595022	62	\N	HEQ0047
+2947	2	2	HEQ-00048	SINUSCOPE - 0D [SS1-TC00] - DIAMETER 4MM/LENGTH: 175 MM WITH IMPROVISED OPTICS AND ENLARGED VIEW	67	58	29	4	15	13883.58	\N	Covered	\N	12	Non-Consumable	SINUSCOPE - 0D [SS1-TC00] - DIAMETER 4MM/LENGTH: 175 MM WITH IMPROVISED OPTICS AND ENLARGED VIEW	t	f	2026-06-11 21:48:30.716557	2026-06-11 21:58:45.595025	62	\N	HEQ0048
+2948	2	2	HEQ-00049	SINUSCOPE - 30D [SS1-TC30] - DIAMETER 4MM/LENGTH: 175 MM WITH IMPROVISED OPTICS AND ENLARGED VIEW	67	58	29	5	20	37736.02	\N	Covered	\N	12	Non-Consumable	SINUSCOPE - 30D [SS1-TC30] - DIAMETER 4MM/LENGTH: 175 MM WITH IMPROVISED OPTICS AND ENLARGED VIEW	t	f	2026-06-11 21:48:30.716563	2026-06-11 21:58:45.595028	62	\N	HEQ0049
+2949	2	2	HEQ-00050	SINUSCOPE - 45 DEGREE - DIAMETER 4MM/LENGTH: 175 MM WITH IMPROVISED OPTICS AND ENLARGED VIEW	67	58	29	4	10	22484.97	\N	Covered	\N	12	Non-Consumable	SINUSCOPE - 45 DEGREE - DIAMETER 4MM/LENGTH: 175 MM WITH IMPROVISED OPTICS AND ENLARGED VIEW	t	f	2026-06-11 21:48:30.716568	2026-06-11 21:58:45.59503	62	\N	HEQ0050
+2950	2	2	HEQ-00051	SINUSCOPE - 70D [SS1-TC00] - DIAMETER 4MM/LENGTH: 175 MM WITH IMPROVISED OPTICS AND ENLARGED VIEW	67	58	29	46	121	8132.32	\N	Covered	\N	12	Non-Consumable	SINUSCOPE - 70D [SS1-TC00] - DIAMETER 4MM/LENGTH: 175 MM WITH IMPROVISED OPTICS AND ENLARGED VIEW	t	f	2026-06-11 21:48:30.716574	2026-06-11 21:58:45.595033	62	\N	HEQ0051
+2951	2	2	HEQ-00052	SINUSCOPE - PAEDIATIC  0 DEGREE - DIAMETER 2.5MM/LENGTH: 175 MM WITH IMPROVISED OPTICS AND ENLARGED VIEW	67	58	29	5	15	15795.39	\N	Covered	\N	12	Non-Consumable	SINUSCOPE - PAEDIATIC  0 DEGREE - DIAMETER 2.5MM/LENGTH: 175 MM WITH IMPROVISED OPTICS AND ENLARGED VIEW	t	f	2026-06-11 21:48:30.716579	2026-06-11 21:58:45.595036	62	\N	HEQ0052
+2952	2	2	HEQ-00053	SKIN PROBE SENSORS-FANEM	67	58	29	5	18	45399.7	\N	Covered	\N	12	Non-Consumable	SKIN PROBE SENSORS-FANEM	t	f	2026-06-11 21:48:30.716585	2026-06-11 21:58:45.595039	62	\N	HEQ0053
+2953	2	2	HEQ-00054	SLEEP APNEA DEVICE - FOR SLEEP STUDY - RESMED GERMANY	67	58	29	4	14	49455.41	\N	Covered	\N	12	Non-Consumable	SLEEP APNEA DEVICE - FOR SLEEP STUDY - RESMED GERMANY	t	f	2026-06-11 21:48:30.716591	2026-06-11 21:58:45.595041	62	\N	HEQ0054
+2954	2	2	HEQ-00055	SMALL SS TROLLEY FULLY STAINLESS STEEL WITH 2 SHELF WITH 3 SIDE RAILINGS FINISHED WITH CASTORS WITH BRAKE	67	58	29	2	7	15299.93	\N	Covered	\N	12	Non-Consumable	SMALL SS TROLLEY FULLY STAINLESS STEEL WITH 2 SHELF WITH 3 SIDE RAILINGS FINISHED WITH CASTORS WITH BRAKE	t	f	2026-06-11 21:48:30.716597	2026-06-11 21:58:45.595044	62	\N	HEQ0055
+2955	2	2	HEQ-00056	SPO2 EDAN PROBE-RUBBER TYPE - 6 PINS	67	58	29	4	15	29949.79	\N	Covered	\N	12	Non-Consumable	SPO2 EDAN PROBE-RUBBER TYPE - 6 PINS	t	f	2026-06-11 21:48:30.716602	2026-06-11 21:58:45.595047	62	\N	HEQ0056
+2956	2	2	HEQ-00057	SSD 256GB	67	58	29	4	15	44077.48	\N	Covered	\N	18	Non-Consumable	SSD 256GB	t	f	2026-06-11 21:48:30.716608	2026-06-11 21:58:45.59505	62	\N	HEQ0057
+2957	2	2	HEQ-00058	SUGITA HEAD FRAME COMPLETE SET: ROTATABLE HEAD HOLDER, HEAD- PIN, ARM BASE, FRAME UPGRADE KIT, HAND REST, BASAL FRAME, SLIDE ADJUSTER, ADUSTABLE HAND REST WITH DOME SCREW & SLIDE, COTTON PLATE, SPRING HOOK, INSTRUMENT RECEPTACLE	67	58	29	3	10	29439.73	\N	Covered	\N	12	Non-Consumable	SUGITA HEAD FRAME COMPLETE SET: ROTATABLE HEAD HOLDER, HEAD- PIN, ARM BASE, FRAME UPGRADE KIT, HAND REST, BASAL FRAME, SLIDE ADJUSTER, ADUSTABLE HAND REST WITH DOME SCREW & SLIDE, COTTON PLATE, SPRING HOOK, INSTRUMENT RECEPTACLE	t	f	2026-06-11 21:48:30.716614	2026-06-11 21:58:45.595052	62	\N	HEQ0058
+2958	2	2	HEQ-00059	SUPREME CHAIR (BEIGE COLOUR)	67	58	29	17	50	7062.24	\N	Covered	\N	18	Non-Consumable	SUPREME CHAIR (BEIGE COLOUR)	t	f	2026-06-11 21:48:30.716619	2026-06-11 21:58:45.595055	62	\N	HEQ0059
+2959	2	2	HEQ-00060	THULIUM FIBER LASER 60WATTS FROM QUANTA, ITALY MAKE WITH RAYEKKEN MORCELLATOR, FLEXIBLE SCOPES, RESECTOSCOPE & MORCELLOSCOPE	67	58	29	5	17	10214.64	\N	Covered	\N	12	Non-Consumable	THULIUM FIBER LASER 60WATTS FROM QUANTA, ITALY MAKE WITH RAYEKKEN MORCELLATOR, FLEXIBLE SCOPES, RESECTOSCOPE & MORCELLOSCOPE	t	f	2026-06-11 21:48:30.716625	2026-06-11 21:58:45.595058	62	\N	HEQ0060
+2960	2	2	HEQ-00061	TMT PAPERS(A4 SIZE)	67	58	32	5	14	42261.72	\N	Covered	\N	12	Non-Consumable	TMT PAPERS(A4 SIZE)	t	f	2026-06-11 21:48:30.716631	2026-06-11 21:58:45.595061	62	\N	HEQ0061
+2961	2	2	HEQ-00062	TOURNIQUET - ELECTRONIC - AUTO - MANUAL- SINGLE - MEKTRONIC	67	58	29	4	13	37918.36	\N	Covered	\N	12	Non-Consumable	TOURNIQUET - ELECTRONIC - AUTO - MANUAL- SINGLE - MEKTRONIC	t	f	2026-06-11 21:48:30.716637	2026-06-11 21:58:45.595064	62	\N	HEQ0062
+2962	2	2	HEQ-00063	VIDEO SYSTEM CENTRE CV-170(PAL) 200V SERIAL NO.: 7112816	67	58	29	2	5	37892.47	\N	Covered	\N	12	Non-Consumable	VIDEO SYSTEM CENTRE CV-170(PAL) 200V SERIAL NO.: 7112816	t	f	2026-06-11 21:48:30.716642	2026-06-11 21:58:45.595066	62	\N	HEQ0063
+2963	2	2	HEQ-00064	VIDEOSCOPE CABLE FOR CV-150 MAJ-1558 SERIAL NO.: 7120073	67	58	29	4	12	33801.64	\N	Covered	\N	12	Non-Consumable	VIDEOSCOPE CABLE FOR CV-150 MAJ-1558 SERIAL NO.: 7120073	t	f	2026-06-11 21:48:30.716648	2026-06-11 21:58:45.595069	62	\N	HEQ0064
+2964	2	2	HEQ-00065	VISITOR CHAIR WITH MODULED CUSHION SEAT AND BACK	67	58	29	17	38	8471.37	\N	Covered	\N	18	Non-Consumable	VISITOR CHAIR WITH MODULED CUSHION SEAT AND BACK	t	f	2026-06-11 21:48:30.716654	2026-06-11 21:58:45.595072	62	\N	HEQ0065
+2965	2	2	HEQ-00066	VIVID T9 R5 MACHINE WITH PROBES AND PRINTER	67	58	29	15	43	6450.23	\N	Covered	\N	12	Non-Consumable	VIVID T9 R5 MACHINE WITH PROBES AND PRINTER	t	f	2026-06-11 21:48:30.716659	2026-06-11 21:58:45.595075	62	\N	HEQ0066
+2966	2	2	HEQ-00067	VP SHUNT TUNNELER PEDIATRIC	67	58	29	5	12	11137.1	\N	Covered	\N	12	Non-Consumable	VP SHUNT TUNNELER PEDIATRIC	t	f	2026-06-11 21:48:30.716667	2026-06-11 21:58:45.595077	62	\N	HEQ0067
+2967	2	2	HOI-00001	APL VALVE FOR AESPIRE 7900	76	95	29	5	20	44307.7	\N	Covered	\N	12	Consumable	APL VALVE FOR AESPIRE 7900	t	f	2026-06-11 21:48:30.716673	2026-06-11 21:58:45.59508	62	\N	HOI0001
+2968	2	2	HOI-00002	BARIATIC - TROCAR AND CANNULA PLAIN PYRAMIDAL DIA 10MM L EOMED	76	95	29	5	15	35694.25	\N	Covered	\N	12	Consumable	BARIATIC - TROCAR AND CANNULA PLAIN PYRAMIDAL DIA 10MM L EOMED	t	f	2026-06-11 21:48:30.716679	2026-06-11 21:58:45.595083	62	\N	HOI0002
+2969	2	2	HOI-00003	BARIATIC - TROCAR AND CANNULA PLAIN PYRAMIDAL DIA 5MM LEOMED	76	95	29	21	55	6848.4	\N	Covered	\N	12	Consumable	BARIATIC - TROCAR AND CANNULA PLAIN PYRAMIDAL DIA 5MM LEOMED	t	f	2026-06-11 21:48:30.716684	2026-06-11 21:58:45.595085	62	\N	HOI0003
+2970	2	2	HOI-00004	BARIATIC MONOPOLAR L HOOK ELECTRODE (TEFLON) DIA 5MM, L 40CM OM SURGICALS	76	95	29	2	6	47287.7	\N	Covered	\N	12	Consumable	BARIATIC MONOPOLAR L HOOK ELECTRODE (TEFLON) DIA 5MM, L 40CM OM SURGICALS	t	f	2026-06-11 21:48:30.71669	2026-06-11 21:58:45.595088	62	\N	HOI0004
+2971	2	2	HOI-00005	BI-FYNGER HANDLE MARYLAND JAW-K9 - OM SURGICALS	76	95	29	3	7	29690.92	\N	Covered	\N	12	Consumable	BI-FYNGER HANDLE MARYLAND JAW-K9 - OM SURGICALS	t	f	2026-06-11 21:48:30.716696	2026-06-11 21:58:45.595091	62	\N	HOI0005
+2972	2	2	HOI-00006	BONE CHISEL	76	95	29	3	10	43644.7	\N	Covered	\N	12	Non-Consumable	BONE CHISEL	t	f	2026-06-11 21:48:30.716701	2026-06-11 21:58:45.595094	62	\N	HOI0006
+2973	2	2	HOI-00007	BP BLADDER	76	95	29	2	6	45466.78	\N	Covered	\N	12	Non-Consumable	BP BLADDER	t	f	2026-06-11 21:48:30.716707	2026-06-11 21:58:45.595097	62	\N	HOI0007
+2974	2	2	HOI-00008	BP HINGES	76	95	29	3	9	49756.97	\N	Covered	\N	12	Non-Consumable	BP HINGES	t	f	2026-06-11 21:48:30.716713	2026-06-11 21:58:45.595099	62	\N	HOI0008
+2975	2	2	HOI-00009	CO2 LUER LOCK 5MM	76	95	29	34	117	8656.52	\N	Covered	\N	12	Consumable	CO2 LUER LOCK 5MM	t	f	2026-06-11 21:48:30.716718	2026-06-11 21:58:45.595102	62	\N	HOI0009
+2976	2	2	HOI-00010	COMEDONE EXTRACTOR MEDIUM SIZE	76	95	29	5	15	45054.81	\N	Covered	\N	12	Non-Consumable	COMEDONE EXTRACTOR MEDIUM SIZE	t	f	2026-06-11 21:48:30.716724	2026-06-11 21:58:45.595105	62	\N	HOI0010
+2977	2	2	HOI-00011	CRASH CART TROLLY FULLY 304 GRADE SS 6 COLOUR BIN 6 BRAWER	76	95	29	2	6	23128.31	\N	Covered	\N	12	Non-Consumable	CRASH CART TROLLY FULLY 304 GRADE SS 6 COLOUR BIN 6 BRAWER	t	f	2026-06-11 21:48:30.71673	2026-06-11 21:58:45.595108	62	\N	HOI0011
+2978	2	2	HOI-00012	DIAMOND STANDARD ARM CUFF	76	95	29	4	13	21765.97	\N	Covered	\N	12	Non-Consumable	DIAMOND STANDARD ARM CUFF	t	f	2026-06-11 21:48:30.716735	2026-06-11 21:58:45.59511	62	\N	HOI0012
+2979	2	2	LAB-00188	BLUE TIPS-(PACK)	71	80	29	50	163	4357.45	\N	Covered	\N	5	Consumable	BLUE TIPS-(PACK)	t	f	2026-06-11 21:48:30.716741	2026-06-11 21:58:45.595113	62	\N	LAB0188
+2980	2	2	HOI-00013	DIAMOND TOUNIQUET LONG LEG ARM CUFF	76	95	29	5	18	15145.42	\N	Covered	\N	12	Non-Consumable	DIAMOND TOUNIQUET LONG LEG ARM CUFF	t	f	2026-06-11 21:48:30.716747	2026-06-11 21:58:45.595116	62	\N	HOI0013
+2981	2	2	HOI-00014	DIAMOND TOUNIQUET LONG LEG CUFF FOR LEG	76	95	29	48	128	5257.36	\N	Covered	\N	12	Non-Consumable	DIAMOND TOUNIQUET LONG LEG CUFF FOR LEG	t	f	2026-06-11 21:48:30.716752	2026-06-11 21:58:45.595119	62	\N	HOI0014
+2982	2	2	HOI-00015	DIAMOND TOURNIQUET EXTRA LONG -TKR	76	95	29	4	9	48302.14	\N	Covered	\N	12	Non-Consumable	DIAMOND TOURNIQUET EXTRA LONG -TKR	t	f	2026-06-11 21:48:30.716758	2026-06-11 21:58:45.595121	62	\N	HOI0015
+2983	2	2	HOI-00016	DIFIBRILLATOR PRINT ROLL 50MM	76	95	33	5	19	10792.82	\N	Covered	\N	18	Consumable	DIFIBRILLATOR PRINT ROLL 50MM	t	f	2026-06-11 21:48:30.716764	2026-06-11 21:58:45.595124	62	\N	HOI0016
+2984	2	2	HOI-00017	DIGITAL THERMOMETER	76	95	29	5	11	27081.45	\N	Covered	\N	12	Non-Consumable	DIGITAL THERMOMETER	t	f	2026-06-11 21:48:30.716769	2026-06-11 21:58:45.595127	62	\N	HOI0017
+2985	2	2	HOI-00018	DIGITAL WEIGHING SCALE	76	95	29	5	12	33986.93	\N	Covered	\N	18	Non-Consumable	DIGITAL WEIGHING SCALE	t	f	2026-06-11 21:48:30.716775	2026-06-11 21:58:45.59513	62	\N	HOI0018
+2986	2	2	HOI-00019	ECG BULB ELECTRODE PACK OF 6	76	95	29	3	11	34172.66	\N	Covered	\N	12	Non-Consumable	ECG BULB ELECTRODE PACK OF 6	t	f	2026-06-11 21:48:30.716781	2026-06-11 21:58:45.595132	62	\N	HOI0019
+2987	2	2	HOI-00020	EDAN ECG CABLE	76	95	29	3	8	39306.59	\N	Covered	\N	12	Non-Consumable	EDAN ECG CABLE	t	f	2026-06-11 21:48:30.716787	2026-06-11 21:58:45.595135	62	\N	HOI0020
+2988	2	2	HOI-00021	EVISCERATION SPOON (CC-2069)	76	95	29	2	5	39320.32	\N	Covered	\N	12	Non-Consumable	EVISCERATION SPOON (CC-2069)	t	f	2026-06-11 21:48:30.716792	2026-06-11 21:58:45.595138	62	\N	HOI0021
+2989	2	2	HOI-00022	FINGER PULSEOXYMETER	76	95	29	3	9	37710	\N	Covered	\N	12	Non-Consumable	FINGER PULSEOXYMETER	t	f	2026-06-11 21:48:30.716798	2026-06-11 21:58:45.595141	62	\N	HOI0022
+2990	2	2	HOI-00023	FLOW METER	76	95	29	33	130	9658.1	\N	Covered	\N	12	Non-Consumable	FLOW METER	t	f	2026-06-11 21:48:30.716804	2026-06-11 21:58:45.595143	62	\N	HOI0023
+2991	2	2	HOI-00024	GAUGE BAYONET	76	95	29	2	6	47567.59	\N	Covered	\N	12	Non-Consumable	GAUGE BAYONET	t	f	2026-06-11 21:48:30.716809	2026-06-11 21:58:45.595146	62	\N	HOI0024
+2992	2	2	HOI-00025	HOWARTH ELEVATOR	76	95	29	5	19	11907.18	\N	Covered	\N	12	Non-Consumable	HOWARTH ELEVATOR	t	f	2026-06-11 21:48:30.716815	2026-06-11 21:58:45.595149	62	\N	HOI0025
+2993	2	2	HOI-00026	ID BAND ADULT	76	95	29	3	12	11598.95	\N	Covered	\N	12	Consumable	ID BAND ADULT	t	f	2026-06-11 21:48:30.716821	2026-06-11 21:58:45.595152	62	\N	HOI0026
+2994	2	2	HOI-00027	ID BAND PAEDATRICS	76	95	29	3	11	14635.73	\N	Covered	\N	12	Consumable	ID BAND PAEDATRICS	t	f	2026-06-11 21:48:30.716827	2026-06-11 21:58:45.595155	62	\N	HOI0027
+2995	2	2	HOI-00028	KILLAN SPECULUM 1 1/2", 2", 2 1/2", 3", 3 1/2"	76	95	29	5	20	27175.33	\N	Covered	\N	12	Non-Consumable	KILLAN SPECULUM 1 1/2", 2", 2 1/2", 3", 3 1/2"	t	f	2026-06-11 21:48:30.716833	2026-06-11 21:58:45.595159	62	\N	HOI0028
+2996	2	2	HOI-00030	LARYNGOSCOPE SS PAEDIATRIC BLADES 00.0.1	76	95	29	22	49	6958.97	\N	Covered	\N	12	Non-Consumable	LARYNGOSCOPE SS PAEDIATRIC BLADES 00.0.1	t	f	2026-06-11 21:48:30.716838	2026-06-11 21:58:45.595162	62	\N	HOI0030
+2997	2	2	HOI-00031	LIM'S FORCEP - 1X2 TEETH 0.12MM	76	95	29	4	13	25972.42	\N	Covered	\N	12	Non-Consumable	LIM'S FORCEP - 1X2 TEETH 0.12MM	t	f	2026-06-11 21:48:30.716844	2026-06-11 21:58:45.595165	62	\N	HOI0031
+2998	2	2	HOI-00032	LOADER AND PUSHER	76	95	29	3	10	27214.07	\N	Covered	\N	12	Non-Consumable	LOADER AND PUSHER	t	f	2026-06-11 21:48:30.716849	2026-06-11 21:58:45.595168	62	\N	HOI0032
+2999	2	2	HOI-00033	MEDIUM ARTARY	76	95	29	3	9	25614.84	\N	Covered	\N	12	Non-Consumable	MEDIUM ARTARY	t	f	2026-06-11 21:48:30.716855	2026-06-11 21:58:45.595171	62	\N	HOI0033
+3000	2	2	HOI-00034	MOLLUSCUM CURETTE MEDIUM SIZE	76	95	29	5	16	48400	\N	Covered	\N	12	Non-Consumable	MOLLUSCUM CURETTE MEDIUM SIZE	t	f	2026-06-11 21:48:30.716861	2026-06-11 21:58:45.595173	62	\N	HOI0034
+3001	2	2	HOI-00035	NEEDLES 22G BD	76	96	35	5	20	25570.56	\N	Covered	\N	12	Consumable	NEEDLES 22G BD	t	f	2026-06-11 21:48:30.716866	2026-06-11 21:58:45.595176	62	\N	HOI0035
+3002	2	2	HOI-00036	TMT ELECTRODE MEDICO ADULT	76	95	29	14	32	8647.55	\N	Covered	\N	12	Consumable	TMT ELECTRODE MEDICO ADULT	t	f	2026-06-11 21:48:30.716872	2026-06-11 21:58:45.595179	62	\N	HOI0036
+3003	2	2	HSK-00001	BIOHAZARD PEDAL BIN 10 LTRS FIRST VIRGIN 99% PLASTIC MEDICAL-RED	69	75	29	40	118	3274.38	\N	Covered	\N	18	Consumable	BIOHAZARD PEDAL BIN 10 LTRS FIRST VIRGIN 99% PLASTIC MEDICAL-RED	t	f	2026-06-11 21:48:30.716878	2026-06-11 21:58:45.595182	62	\N	HSK0001
+3004	2	2	HSK-00002	BIOHAZARD PEDAL BIN 10 LTRS FIRST VIRGIN 99% PLASTIC MEDICAL-YELLOW	69	75	29	29	91	2349.47	\N	Covered	\N	18	Consumable	BIOHAZARD PEDAL BIN 10 LTRS FIRST VIRGIN 99% PLASTIC MEDICAL-YELLOW	t	f	2026-06-11 21:48:30.716883	2026-06-11 21:58:45.595184	62	\N	HSK0002
+3005	2	2	HSK-00003	BIOHAZARD PEDAL BIN 20 LTRS FIRST VIRGIN 99% PLASTIC MEDICAL - WET & DRY	69	75	29	37	126	4635.13	\N	Covered	\N	18	Consumable	BIOHAZARD PEDAL BIN 20 LTRS FIRST VIRGIN 99% PLASTIC MEDICAL - WET & DRY	t	f	2026-06-11 21:48:30.716889	2026-06-11 21:58:45.595187	62	\N	HSK0003
+3006	2	2	HSK-00004	BIOHAZARD PEDAL BIN 35 LTRS FIRST VIRGIN 99% PLASTIC MEDICAL - BLACK	69	75	29	22	75	1686.18	\N	Covered	\N	18	Consumable	BIOHAZARD PEDAL BIN 35 LTRS FIRST VIRGIN 99% PLASTIC MEDICAL - BLACK	t	f	2026-06-11 21:48:30.716895	2026-06-11 21:58:45.59519	62	\N	HSK0004
+3007	2	2	HSK-00005	BIOHAZARD PEDAL BIN 35 LTRS FIRST VIRGIN 99% PLASTIC MEDICAL - BLUE	69	75	29	30	114	1833.65	\N	Covered	\N	18	Consumable	BIOHAZARD PEDAL BIN 35 LTRS FIRST VIRGIN 99% PLASTIC MEDICAL - BLUE	t	f	2026-06-11 21:48:30.716901	2026-06-11 21:58:45.595193	62	\N	HSK0005
+3008	2	2	HSK-00006	BIOHAZARD PEDAL BIN 35 LTRS FIRST VIRGIN 99% PLASTIC MEDICAL- YELLOW	69	75	29	77	298	455.84	\N	Covered	\N	18	Consumable	BIOHAZARD PEDAL BIN 35 LTRS FIRST VIRGIN 99% PLASTIC MEDICAL- YELLOW	t	f	2026-06-11 21:48:30.716906	2026-06-11 21:58:45.595196	62	\N	HSK0006
+3009	2	2	HSK-00007	BIOHAZARD PEDAL BIN 35 LTRS FIRST VIRGIN 99% PLASTIC MEDICAL-RED	69	75	29	10	27	2444.45	\N	Covered	\N	18	Consumable	BIOHAZARD PEDAL BIN 35 LTRS FIRST VIRGIN 99% PLASTIC MEDICAL-RED	t	f	2026-06-11 21:48:30.716914	2026-06-11 21:58:45.595198	62	\N	HSK0007
+3010	2	2	HSK-00008	BLACK PHENYLE	69	76	31	41	90	4937.64	\N	Covered	\N	18	Consumable	BLACK PHENYLE	t	f	2026-06-11 21:48:30.71692	2026-06-11 21:58:45.595201	62	\N	HSK0008
+3011	2	2	HSK-00009	BLEACHING POWDER	69	76	30	34	83	2321.98	\N	Covered	\N	18	Consumable	BLEACHING POWDER	t	f	2026-06-11 21:48:30.716925	2026-06-11 21:58:45.595204	62	\N	HSK0009
+3012	2	2	HSK-00010	BOMBAY BROOM	69	76	29	37	128	4030.07	\N	Covered	\N	12	Consumable	BOMBAY BROOM	t	f	2026-06-11 21:48:30.716931	2026-06-11 21:58:45.595207	62	\N	HSK0010
+3013	2	2	HSK-00011	BRITIF - B10 - HAND WASH LIQUID	69	76	29	166	464	611.9	\N	Covered	\N	18	Consumable	BRITIF - B10 - HAND WASH LIQUID	t	f	2026-06-11 21:48:30.716937	2026-06-11 21:58:45.595209	62	\N	HSK0011
+3014	2	2	HSK-00012	BRITIF - B6 - TOILET BOWL CLEANER	69	76	29	223	474	353.18	\N	Covered	\N	18	Consumable	BRITIF - B6 - TOILET BOWL CLEANER	t	f	2026-06-11 21:48:30.716942	2026-06-11 21:58:45.595212	62	\N	HSK0012
+3015	2	2	HSK-00013	BRITIF - B7 - FLOOR CLEANER CONCENTRATE	69	76	31	48	118	2025.96	\N	Covered	\N	18	Consumable	BRITIF - B7 - FLOOR CLEANER CONCENTRATE	t	f	2026-06-11 21:48:30.716948	2026-06-11 21:58:45.595215	62	\N	HSK0013
+3016	2	2	HSK-00014	BRITIF B5 - ROOM FRESHNER ALL VARIANTS	69	76	31	36	99	3850.17	\N	Covered	\N	18	Consumable	BRITIF B5 - ROOM FRESHNER ALL VARIANTS	t	f	2026-06-11 21:48:30.716954	2026-06-11 21:58:45.595218	62	\N	HSK0014
+3017	2	2	HSK-00015	BRITISH CLEAN - BRITISH FRAGRANCES - (AIR-FRESHENER) - S5 - 5LTR - BRITISH LAVENDER	69	76	36	35	96	3733.13	\N	Covered	\N	18	Consumable	BRITISH CLEAN - BRITISH FRAGRANCES - (AIR-FRESHENER) - S5 - 5LTR - BRITISH LAVENDER	t	f	2026-06-11 21:48:30.71696	2026-06-11 21:58:45.595221	62	\N	HSK0015
+3018	2	2	HSK-00016	BRITISH CLEAN - BRITISH FRAGRANCES - (AIR-FRESHENER) - S5 - 5LTR - DREAM FLOWER	69	76	36	31	83	2337.18	\N	Covered	\N	18	Consumable	BRITISH CLEAN - BRITISH FRAGRANCES - (AIR-FRESHENER) - S5 - 5LTR - DREAM FLOWER	t	f	2026-06-11 21:48:30.716965	2026-06-11 21:58:45.595223	62	\N	HSK0016
+3019	2	2	HSK-00017	BRITISH CLEAN - BRITISH FRAGRANCES - (AIR-FRESHENER) - S5 - 5LTR - MYSTIC JASMINE	69	76	36	47	151	1767.48	\N	Covered	\N	18	Consumable	BRITISH CLEAN - BRITISH FRAGRANCES - (AIR-FRESHENER) - S5 - 5LTR - MYSTIC JASMINE	t	f	2026-06-11 21:48:30.716971	2026-06-11 21:58:45.595226	62	\N	HSK0017
+3020	2	2	HSK-00018	BRITISH CLEAN - BRITISH FRAGRANCES - (AIR-FRESHENER) - S5 - 5LTR - ROYAL BRUT	69	76	36	172	498	553.58	\N	Covered	\N	18	Consumable	BRITISH CLEAN - BRITISH FRAGRANCES - (AIR-FRESHENER) - S5 - 5LTR - ROYAL BRUT	t	f	2026-06-11 21:48:30.716977	2026-06-11 21:58:45.595229	62	\N	HSK0018
+3021	2	2	HSK-00019	BRITISH CLEAN - BRITISH FRAGRANCES - (AIR-FRESHENER) - S5 - 5LTR -ODOR SANDAL	69	76	36	10	28	4138.36	\N	Covered	\N	18	Consumable	BRITISH CLEAN - BRITISH FRAGRANCES - (AIR-FRESHENER) - S5 - 5LTR -ODOR SANDAL	t	f	2026-06-11 21:48:30.716983	2026-06-11 21:58:45.595232	62	\N	HSK0019
+3022	2	2	HSK-00020	BRITISH CLEAN - BRITISH FRAGRANCES - (AIR-FRESHENER) - S5 - 5LTR -STRAWBERRY CHILL	69	76	36	48	182	3479.01	\N	Covered	\N	18	Consumable	BRITISH CLEAN - BRITISH FRAGRANCES - (AIR-FRESHENER) - S5 - 5LTR -STRAWBERRY CHILL	t	f	2026-06-11 21:48:30.716988	2026-06-11 21:58:45.595234	62	\N	HSK0020
+3023	2	2	HSK-00021	BRITISH CLEAN - S6 - TOILET BOWL CLEANER - 5LTR	69	76	36	19	60	3682.17	\N	Covered	\N	18	Consumable	BRITISH CLEAN - S6 - TOILET BOWL CLEANER - 5LTR	t	f	2026-06-11 21:48:30.716994	2026-06-11 21:58:45.595237	62	\N	HSK0021
+3024	2	2	HSK-00022	BROOM STICK 555 MONKEY BRAND	69	76	29	33	123	4032.07	\N	Covered	\N	12	Consumable	BROOM STICK 555 MONKEY BRAND	t	f	2026-06-11 21:48:30.717	2026-06-11 21:58:45.59524	62	\N	HSK0022
+3025	2	2	HSK-00023	CAUTION BOARD WITH 'RESTROOM OUT OF SERVICE FOR MAINTENANCE'	69	76	29	12	30	3455.5	\N	Covered	\N	18	Non-Consumable	CAUTION BOARD WITH 'RESTROOM OUT OF SERVICE FOR MAINTENANCE'	t	f	2026-06-11 21:48:30.717005	2026-06-11 21:58:45.595243	62	\N	HSK0023
+3026	2	2	HSK-00024	COB WEB STICK	69	76	29	47	96	2869.03	\N	Covered	\N	12	Consumable	COB WEB STICK	t	f	2026-06-11 21:48:30.717011	2026-06-11 21:58:45.595246	62	\N	HSK0024
+3027	2	2	HSK-00025	COCONUT BROOMSTICK	69	76	29	17	44	4165.89	\N	Covered	\N	12	Consumable	COCONUT BROOMSTICK	t	f	2026-06-11 21:48:30.717017	2026-06-11 21:58:45.595248	62	\N	HSK0025
+3028	2	2	HSK-00026	DUST PAN	69	76	29	353	1102	928.93	\N	Covered	\N	18	Non-Consumable	DUST PAN	t	f	2026-06-11 21:48:30.717022	2026-06-11 21:58:45.595251	62	\N	HSK0026
+3029	2	2	HSK-00027	FLASH IN 200 - FLOOR CLEANER FOR HARD SURFACES (1:30) - 5LTR	69	76	36	15	43	1338.23	\N	Covered	\N	18	Consumable	FLASH IN 200 - FLOOR CLEANER FOR HARD SURFACES (1:30) - 5LTR	t	f	2026-06-11 21:48:30.717028	2026-06-11 21:58:45.595254	62	\N	HSK0027
+3030	2	2	HSK-00028	FLASH IN 230 - MULTI-SURFACE & GLASS CLEANER - 5LTR	69	76	36	26	79	2503.5	\N	Covered	\N	18	Consumable	FLASH IN 230 - MULTI-SURFACE & GLASS CLEANER - 5LTR	t	f	2026-06-11 21:48:30.717033	2026-06-11 21:58:45.595257	62	\N	HSK0028
+3031	2	2	HSK-00029	FLASH IN 270 - SANITARY CARE-TOILET FLOOR, TILES&BATHROOM FITTINGS - 5LTR	69	76	36	298	636	790.67	\N	Covered	\N	18	Consumable	FLASH IN 270 - SANITARY CARE-TOILET FLOOR, TILES&BATHROOM FITTINGS - 5LTR	t	f	2026-06-11 21:48:30.717039	2026-06-11 21:58:45.59526	62	\N	HSK0029
+3032	2	2	HSK-00030	FLASH IN 600 - HD FLOOR CARE 1:30 - 5 LTR	69	76	36	30	71	3186.08	\N	Covered	\N	18	Consumable	FLASH IN 600 - HD FLOOR CARE 1:30 - 5 LTR	t	f	2026-06-11 21:48:30.717045	2026-06-11 21:58:45.595262	62	\N	HSK0030
+3033	2	2	HSK-00031	GARBAGE BAGS - 40 MICRONS - LARGE SIZE	69	76	30	35	99	2958.7	\N	Covered	\N	18	Consumable	GARBAGE BAGS - 40 MICRONS - LARGE SIZE	t	f	2026-06-11 21:48:30.71705	2026-06-11 21:58:45.595265	62	\N	HSK0031
+3034	2	2	HSK-00032	GARBAGE COVERS (FOOD WASTE) GREEN COLOUR	69	76	30	279	843	822.72	\N	Covered	\N	18	Consumable	GARBAGE COVERS (FOOD WASTE) GREEN COLOUR	t	f	2026-06-11 21:48:30.717056	2026-06-11 21:58:45.595268	62	\N	HSK0032
+3035	2	2	HSK-00033	GARBAGE COVERS-SMALL	69	76	30	44	129	1295.27	\N	Covered	\N	18	Consumable	GARBAGE COVERS-SMALL	t	f	2026-06-11 21:48:30.717062	2026-06-11 21:58:45.595271	62	\N	HSK0033
+3036	2	2	HSK-00034	GLASS APPLICATOR - 2 IN 1 (FULL SET)	69	76	29	50	151	1935.79	\N	Covered	\N	18	Consumable	GLASS APPLICATOR - 2 IN 1 (FULL SET)	t	f	2026-06-11 21:48:30.717067	2026-06-11 21:58:45.595274	62	\N	HSK0034
+3037	2	2	HSK-00035	GLASS CLEANER - 5L	69	76	36	48	161	4199	\N	Covered	\N	18	Consumable	GLASS CLEANER - 5L	t	f	2026-06-11 21:48:30.717073	2026-06-11 21:58:45.595277	62	\N	HSK0035
+3038	2	2	HSK-00036	GLASS CLEANING CLOTH	69	76	29	49	142	2450.06	\N	Covered	\N	12	Consumable	GLASS CLEANING CLOTH	t	f	2026-06-11 21:48:30.717079	2026-06-11 21:58:45.595279	62	\N	HSK0036
+3039	2	2	HSK-00037	GOOD SENSE ODOUR ELIMINATOR	69	76	29	27	65	3556.14	\N	Covered	\N	18	Consumable	GOOD SENSE ODOUR ELIMINATOR	t	f	2026-06-11 21:48:30.717084	2026-06-11 21:58:45.595282	62	\N	HSK0037
+3040	2	2	HSK-00038	HAND GLOVES (RUBBER) SET	69	76	41	48	115	2793.05	\N	Covered	\N	18	Consumable	HAND GLOVES (RUBBER) SET	t	f	2026-06-11 21:48:30.71709	2026-06-11 21:58:45.595285	62	\N	HSK0038
+3041	2	2	HSK-00039	HAND WASH -5L CAN	69	76	36	15	60	3378.13	\N	Covered	\N	18	Consumable	HAND WASH -5L CAN	t	f	2026-06-11 21:48:30.717095	2026-06-11 21:58:45.595288	62	\N	HSK0039
+3042	2	2	HSK-00040	HAND WASH BOTTLE	69	76	40	50	154	1918.04	\N	Covered	\N	18	Non-Consumable	HAND WASH BOTTLE	t	f	2026-06-11 21:48:30.717101	2026-06-11 21:58:45.59529	62	\N	HSK0040
+3043	2	2	HSK-00041	MOP CLOTH REFILL	69	76	29	48	185	4172.2	\N	Covered	\N	12	Consumable	MOP CLOTH REFILL	t	f	2026-06-11 21:48:30.717107	2026-06-11 21:58:45.595293	62	\N	HSK0041
+3044	2	2	HSK-00042	MOP REFILL WITH CLIP	69	76	29	38	85	2115.37	\N	Covered	\N	12	Consumable	MOP REFILL WITH CLIP	t	f	2026-06-11 21:48:30.717112	2026-06-11 21:58:45.595296	62	\N	HSK0042
+3045	2	2	HSK-00043	MOP STICK FULL SET	69	76	29	26	96	3717.54	\N	Covered	\N	12	Consumable	MOP STICK FULL SET	t	f	2026-06-11 21:48:30.717118	2026-06-11 21:58:45.595299	62	\N	HSK0043
+3046	2	2	HSK-00044	MUG PLASTIC	69	76	29	20	58	2043.37	\N	Covered	\N	18	Non-Consumable	MUG PLASTIC	t	f	2026-06-11 21:48:30.717124	2026-06-11 21:58:45.595302	62	\N	HSK0044
+3047	2	2	HSK-00045	MULTIPURPOSE CLEANER STANDARD QLY - 5L CAN	69	76	36	23	74	2818.01	\N	Covered	\N	18	Consumable	MULTIPURPOSE CLEANER STANDARD QLY - 5L CAN	t	f	2026-06-11 21:48:30.717129	2026-06-11 21:58:45.595304	62	\N	HSK0045
+3048	2	2	HSK-00047	PLASTIC BUCKET SMALL - 5 LITRES	69	75	29	49	152	1613.46	\N	Covered	\N	18	Non-Consumable	PLASTIC BUCKET SMALL - 5 LITRES	t	f	2026-06-11 21:48:30.717135	2026-06-11 21:58:45.595307	62	\N	HSK0047
+3049	2	2	HSK-00048	PLASTIC JUG	69	76	29	17	64	2106.8	\N	Covered	\N	18	Non-Consumable	PLASTIC JUG	t	f	2026-06-11 21:48:30.717141	2026-06-11 21:58:45.59531	62	\N	HSK0048
+3050	2	2	HSK-00049	RED COVER	69	76	29	21	48	4813.9	\N	Covered	\N	18	Consumable	RED COVER	t	f	2026-06-11 21:48:30.717146	2026-06-11 21:58:45.595313	62	\N	HSK0049
+3051	2	2	HSK-00050	ROAD T-BRUSH (WOODEN) FOR OT	69	76	29	11	38	3372.95	\N	Covered	\N	12	Non-Consumable	ROAD T-BRUSH (WOODEN) FOR OT	t	f	2026-06-11 21:48:30.717154	2026-06-11 21:58:45.595315	62	\N	HSK0050
+3052	2	2	HSK-00051	ROOM FRESHNER	69	76	31	22	71	3922.91	\N	Covered	\N	18	Consumable	ROOM FRESHNER	t	f	2026-06-11 21:48:30.717159	2026-06-11 21:58:45.595318	62	\N	HSK0051
+3053	2	2	HSK-00052	SANITIZER BOTTLE-EMPTY	69	76	40	24	91	4817.83	\N	Covered	\N	18	Non-Consumable	SANITIZER BOTTLE-EMPTY	t	f	2026-06-11 21:48:30.717165	2026-06-11 21:58:45.595321	62	\N	HSK0052
+3054	2	2	HSK-00053	SCRUBBING PAD - STEEL	69	76	29	37	87	4368.94	\N	Covered	\N	18	Consumable	SCRUBBING PAD - STEEL	t	f	2026-06-11 21:48:30.717171	2026-06-11 21:58:45.595324	62	\N	HSK0053
+3055	2	2	HSK-00054	SCRUBBING PAD (GREEN)	69	76	29	45	113	4653.8	\N	Covered	\N	18	Consumable	SCRUBBING PAD (GREEN)	t	f	2026-06-11 21:48:30.717176	2026-06-11 21:58:45.595326	62	\N	HSK0054
+3056	2	2	HSK-00055	SOAP OIL	69	76	29	22	64	1690.35	\N	Covered	\N	18	Consumable	SOAP OIL	t	f	2026-06-11 21:48:30.717182	2026-06-11 21:58:45.595329	62	\N	HSK0055
+3057	2	2	HSK-00056	SOFT BROOM	69	76	29	31	93	4990.81	\N	Covered	\N	12	Consumable	SOFT BROOM	t	f	2026-06-11 21:48:30.717188	2026-06-11 21:58:45.595332	62	\N	HSK0056
+3058	2	2	HSK-00057	SPRAY GUN FLAT BEST	69	76	29	37	75	3896.29	\N	Covered	\N	18	Non-Consumable	SPRAY GUN FLAT BEST	t	f	2026-06-11 21:48:30.717193	2026-06-11 21:58:45.595339	62	\N	HSK0057
+3059	2	2	HSK-00058	SUMA DRAIN CLEANER - TASKI	69	76	29	28	108	1753.53	\N	Covered	\N	18	Consumable	SUMA DRAIN CLEANER - TASKI	t	f	2026-06-11 21:48:30.717199	2026-06-11 21:58:45.595341	62	\N	HSK0058
+3060	2	2	HSK-00059	SUMA SCALE 5LTR PCK OF 2	69	76	29	26	97	3689.61	\N	Covered	\N	18	Consumable	SUMA SCALE 5LTR PCK OF 2	t	f	2026-06-11 21:48:30.717205	2026-06-11 21:58:45.595344	62	\N	HSK0059
+3061	2	2	HSK-00061	TILES CLEANING BRUSH WITH HANDLE - WOODEN	69	76	29	38	80	4523.14	\N	Covered	\N	12	Non-Consumable	TILES CLEANING BRUSH WITH HANDLE - WOODEN	t	f	2026-06-11 21:48:30.71721	2026-06-11 21:58:45.595347	62	\N	HSK0061
+3062	2	2	HSK-00062	TOILET CLEANER - 5L CAN	69	76	29	43	116	3501.99	\N	Covered	\N	18	Consumable	TOILET CLEANER - 5L CAN	t	f	2026-06-11 21:48:30.717216	2026-06-11 21:58:45.59535	62	\N	HSK0062
+3063	2	2	HSK-00063	URINAL CAKE 80GMS	69	76	37	15	59	4313.48	\N	Covered	\N	18	Consumable	URINAL CAKE 80GMS	t	f	2026-06-11 21:48:30.717222	2026-06-11 21:58:45.595352	62	\N	HSK0063
+3064	2	2	HSK-00064	VACUUM CLEANER - SOTOP515NX - ROOTS SOLECO TOPPER 515 250NX, WET & DRY WITH SINGLE MOTOR, 33LTRS SS TANK	69	76	29	19	68	1065.67	\N	Covered	\N	18	Non-Consumable	VACUUM CLEANER - SOTOP515NX - ROOTS SOLECO TOPPER 515 250NX, WET & DRY WITH SINGLE MOTOR, 33LTRS SS TANK	t	f	2026-06-11 21:48:30.717227	2026-06-11 21:58:45.595355	62	\N	HSK0064
+3065	2	2	HSK-00065	WIPER INOVA BIG	69	76	29	49	138	4588.42	\N	Covered	\N	12	Consumable	WIPER INOVA BIG	t	f	2026-06-11 21:48:30.717233	2026-06-11 21:58:45.595358	62	\N	HSK0065
+3066	2	2	HSK-00066	YELLOW COVER	69	76	29	40	111	2253.04	\N	Covered	\N	18	Consumable	YELLOW COVER	t	f	2026-06-11 21:48:30.717239	2026-06-11 21:58:45.595361	62	\N	HSK0066
+3067	2	2	HSK-00067	GLOVES - RUBBER HD	69	76	29	234	752	404.67	\N	Covered	\N	18	Consumable	GLOVES - RUBBER HD	t	f	2026-06-11 21:48:30.717244	2026-06-11 21:58:45.595364	62	\N	HSK0067
+3068	2	2	ITI-00001	D-LINK DGS-1210-28MP	70	77	29	229	848	566.53	\N	Covered	\N	18	Non-Consumable	D-LINK DGS-1210-28MP	t	f	2026-06-11 21:48:30.71725	2026-06-11 21:58:45.595366	62	\N	ITI0001
+3069	2	2	ITI-00002	KEY BOARD DELL KB216	70	77	29	16	35	3751.89	\N	Covered	\N	18	Non-Consumable	KEY BOARD DELL KB216	t	f	2026-06-11 21:48:30.717256	2026-06-11 21:58:45.595369	62	\N	ITI0002
+3070	2	2	ITI-00003	MONITOR 20 INCHES DELL	70	77	29	48	137	4062.57	\N	Covered	\N	18	Non-Consumable	MONITOR 20 INCHES DELL	t	f	2026-06-11 21:48:30.717261	2026-06-11 21:58:45.595372	62	\N	ITI0003
+3071	2	2	ITI-00004	D-LINK RJ45 CONNECTOR	70	77	29	25	69	2362.08	\N	Covered	\N	18	Non-Consumable	D-LINK RJ45 CONNECTOR	t	f	2026-06-11 21:48:30.717267	2026-06-11 21:58:45.595375	62	\N	ITI0004
+3072	2	2	ITI-00005	D-Link DGS F1018P	70	77	29	36	113	1785.98	\N	Covered	\N	18	Non-Consumable	D-Link DGS F1018P	t	f	2026-06-11 21:48:30.717273	2026-06-11 21:58:45.595378	62	\N	ITI0005
+3073	2	2	ITI-00006	D-Link DGS F1026P-E	70	77	29	436	972	711.06	\N	Covered	\N	18	Non-Consumable	D-Link DGS F1026P-E	t	f	2026-06-11 21:48:30.717278	2026-06-11 21:58:45.59538	62	\N	ITI0006
+3074	2	2	ITI-00007	Rack Local 2U Unloaded	70	77	29	53	133	956.55	\N	Covered	\N	18	Non-Consumable	Rack Local 2U Unloaded	t	f	2026-06-11 21:48:30.717284	2026-06-11 21:58:45.595383	62	\N	ITI0007
+3075	2	2	ITI-00008	D-Link DGS-1210-28	70	77	29	15	36	1351.8	\N	Covered	\N	18	Non-Consumable	D-Link DGS-1210-28	t	f	2026-06-11 21:48:30.71729	2026-06-11 21:58:45.595386	62	\N	ITI0008
+3076	2	2	ITI-00009	SSD 256GB ZEBRONICS	70	77	29	17	37	2530.73	\N	Covered	\N	18	Non-Consumable	SSD 256GB ZEBRONICS	t	f	2026-06-11 21:48:30.717295	2026-06-11 21:58:45.595389	62	\N	ITI0009
+3077	2	2	ITI-00010	Dell USB Mouse MS116	70	77	29	47	185	1080.6	\N	Covered	\N	18	Non-Consumable	Dell USB Mouse MS116	t	f	2026-06-11 21:48:30.717301	2026-06-11 21:58:45.595391	62	\N	ITI0010
+3078	2	2	ITI-00011	Connector RJ Extender	70	77	29	426	1118	89.47	\N	Covered	\N	18	Non-Consumable	Connector RJ Extender	t	f	2026-06-11 21:48:30.717307	2026-06-11 21:58:45.595394	62	\N	ITI0011
+3079	2	2	ITI-00012	D-Link DGS F1018P	70	77	29	16	48	3582.58	\N	Covered	\N	18	Non-Consumable	D-Link DGS F1018P	t	f	2026-06-11 21:48:30.717312	2026-06-11 21:58:45.595397	62	\N	ITI0012
+3080	2	2	ITI-00013	D-Link DGS F1026P	70	77	29	30	62	3030.62	\N	Covered	\N	18	Non-Consumable	D-Link DGS F1026P	t	f	2026-06-11 21:48:30.717318	2026-06-11 21:58:45.5954	62	\N	ITI0013
+3081	2	2	ITI-00014	Rack Local 2U Unloaded	70	77	29	357	880	916.14	\N	Covered	\N	18	Non-Consumable	Rack Local 2U Unloaded	t	f	2026-06-11 21:48:30.717323	2026-06-11 21:58:45.595405	62	\N	ITI0014
+3082	2	2	ITI-00015	D-Link DGS-1250-28X	70	77	29	34	75	1801.35	\N	Covered	\N	18	Consumable	D-Link DGS-1250-28X	t	f	2026-06-11 21:48:30.717329	2026-06-11 21:58:45.595408	62	\N	ITI0015
+3083	2	2	ITI-00016	Connector DP to HDMI VENTION	70	77	29	31	64	4897.96	\N	Covered	\N	18	Consumable	Connector DP to HDMI VENTION	t	f	2026-06-11 21:48:30.717338	2026-06-11 21:58:45.595411	62	\N	ITI0016
+3084	2	2	ITI-00017	BLACK-I DP TO VGA CONVERTOR	70	77	29	50	176	3294.8	\N	Covered	\N	18	Consumable	BLACK-I DP TO VGA CONVERTOR	t	f	2026-06-11 21:48:30.717344	2026-06-11 21:58:45.595413	62	\N	ITI0017
+3085	2	2	ITI-00018	Power Cable	70	77	29	50	175	4033.35	\N	Covered	\N	18	Consumable	Power Cable	t	f	2026-06-11 21:48:30.71735	2026-06-11 21:58:45.595416	62	\N	ITI0018
+3086	2	2	LAB-00228	FACE SHEILD	71	83	29	29	114	4221.71	\N	Covered	\N	5	Consumable	FACE SHEILD	t	f	2026-06-11 21:48:30.717355	2026-06-11 21:58:45.595419	62	\N	LAB0228
+3087	2	2	ITI-00019	Dell Monitor P2219H Specifications : Model: Dell Monitor P2219H, Display Type: 54.61 cm (22 inch) Full HD LED Backlit IPS Panel Monitor, Response Time: 8 ms, Refresh Rate: 60 Hz	70	77	29	15	45	1097.71	\N	Covered	\N	18	Non-Consumable	Dell Monitor P2219H Specifications : Model: Dell Monitor P2219H, Display Type: 54.61 cm (22 inch) Full HD LED Backlit IPS Panel Monitor, Response Time: 8 ms, Refresh Rate: 60 Hz	t	f	2026-06-11 21:48:30.717361	2026-06-11 21:58:45.595422	62	\N	ITI0019
+3088	2	2	ITI-00020	Lenovo Used Desktop Specifications : Processor: Intel Core i5 9th GENERAL, Memory (RAM): 16GB, Storage: 256GB SSD, Operating System: Windows 10 Pro, Connectivity: Wi-Fi built-in	70	77	29	13	38	3909.85	\N	Covered	\N	18	Non-Consumable	Lenovo Used Desktop Specifications : Processor: Intel Core i5 9th GENERAL, Memory (RAM): 16GB, Storage: 256GB SSD, Operating System: Windows 10 Pro, Connectivity: Wi-Fi built-in	t	f	2026-06-11 21:48:30.717367	2026-06-11 21:58:45.595424	62	\N	ITI0020
+3089	2	2	ITI-00021	Dell Monitor P2219H : Display: 54.61 cm (22 inch) Full HD LED Backlit IPS Panel, Performance: 8 ms Response Time; 60 Hz Refresh Rate, Video Inputs:1 x DisplayPort 1.2, 1 x HDMI 1.4, 1 x VGA, USB Hub: * 1 x USB Type-B (Upstream) : 2 x USB Type-A (USB 	70	77	29	39	132	4442.81	\N	Covered	\N	18	Non-Consumable	Dell Monitor P2219H : Display: 54.61 cm (22 inch) Full HD LED Backlit IPS Panel, Performance: 8 ms Response Time; 60 Hz Refresh Rate, Video Inputs:1 x DisplayPort 1.2, 1 x HDMI 1.4, 1 x VGA, USB Hub: * 1 x USB Type-B (Upstream) : 2 x USB Type-A (USB 3.1 / 3.2 GENERAL 1), 2 x USB Type-A (USB 2.0) Dell Monitor P2219H : Display: 54.61 cm (22 inch) Full HD LED Backlit IPS Panel, Performance: 8 ms Response Time; 60 Hz Refresh Rate, Video Inputs:1 x DisplayPort 1.2, 1 x HDMI 1.4, 1 x VGA, USB Hub: * 1 x USB Type-B (Upstream) : 2 x USB Type-A (USB 3.1 / 3.2 GENERAL 1), 2 x USB Type-A (USB 2.0)	t	f	2026-06-11 21:48:30.717372	2026-06-11 21:58:45.595427	62	\N	ITI0021
+3090	2	2	ITI-00022	AM-DM2069-FMA1 2MP IP Fixed Lens Bullet AVATRON	70	77	29	24	91	3600.9	\N	Covered	\N	18	Consumable	AM-DM2069-FMA1 2MP IP Fixed Lens Bullet AVATRON	t	f	2026-06-11 21:48:30.717378	2026-06-11 21:58:45.59543	62	\N	ITI0022
+3091	2	2	ITI-00023	AM-i880-UHD 80Ch INTELLIGENERALT RAID NVR AVATRON	70	77	29	485	1777	278.91	\N	Covered	\N	18	Consumable	AM-i880-UHD 80Ch INTELLIGENERALT RAID NVR AVATRON	t	f	2026-06-11 21:48:30.717384	2026-06-11 21:58:45.595433	62	\N	ITI0023
+3092	2	2	ITI-00024	Cat 6 Cable 305 Mtrs ANCHOR	70	77	29	24	53	3791.22	\N	Covered	\N	18	Consumable	Cat 6 Cable 305 Mtrs ANCHOR	t	f	2026-06-11 21:48:30.717389	2026-06-11 21:58:45.595435	62	\N	ITI0024
+3093	2	2	ITI-00025	IP Camera AM-DM2009-FMA1 H.265+2MP IR IP AVATRON	70	77	29	187	453	780.87	\N	Covered	\N	18	Non-Consumable	IP Camera AM-DM2009-FMA1 H.265+2MP IR IP AVATRON	t	f	2026-06-11 21:48:30.717395	2026-06-11 21:58:45.595438	62	\N	ITI0025
+3094	2	2	ITI-00026	PHOTOCOPIER MACHINE B/W  KONICA MINOLTA  BIZHUB 367	70	77	29	12	42	1918.81	\N	Covered	\N	18	Non-Consumable	PHOTOCOPIER MACHINE B/W  KONICA MINOLTA  BIZHUB 367	t	f	2026-06-11 21:48:30.717403	2026-06-11 21:58:45.595441	62	\N	ITI0026
+3095	2	2	ITI-00027	PHOTOCOPIER MACHINE B/W  TOSHIBA E-STUDIO 5518A	70	77	29	35	91	4801.01	\N	Covered	\N	18	Non-Consumable	PHOTOCOPIER MACHINE B/W  TOSHIBA E-STUDIO 5518A	t	f	2026-06-11 21:48:30.717409	2026-06-11 21:58:45.595444	62	\N	ITI0027
+3096	2	2	ITI-00028	PHOTOCOPIER MACHINE B/W  KONICA MINOLTA  BIZHUB 551i	70	77	29	50	181	1692.72	\N	Covered	\N	18	Non-Consumable	PHOTOCOPIER MACHINE B/W  KONICA MINOLTA  BIZHUB 551i	t	f	2026-06-11 21:48:30.717415	2026-06-11 21:58:45.595446	62	\N	ITI0028
+3097	2	2	ITI-00029	PHOTOCOPIER MACHINE B/W  KONICA MINOLTA  BIZHUB 225i	70	77	29	48	124	3399.25	\N	Covered	\N	18	Consumable	PHOTOCOPIER MACHINE B/W  KONICA MINOLTA  BIZHUB 225i	t	f	2026-06-11 21:48:30.717421	2026-06-11 21:58:45.595449	62	\N	ITI0029
+3098	2	2	ITI-00030	PRINTER KONICA MINOLTA BIZHUB 165EN	70	77	29	28	83	3344	\N	Covered	\N	18	Consumable	PRINTER KONICA MINOLTA BIZHUB 165EN	t	f	2026-06-11 21:48:30.717426	2026-06-11 21:58:45.595452	62	\N	ITI0030
+3099	2	2	ITI-00031	PRINTER HP LASERJET 1020	70	77	29	453	1788	926	\N	Covered	\N	18	Consumable	PRINTER HP LASERJET 1020	t	f	2026-06-11 21:48:30.717432	2026-06-11 21:58:45.595455	62	\N	ITI0031
+3100	2	2	ITI-00032	PRINTER HP LASERJET 1020PLUS	70	77	29	23	59	3317.44	\N	Covered	\N	18	Consumable	PRINTER HP LASERJET 1020PLUS	t	f	2026-06-11 21:48:30.717438	2026-06-11 21:58:45.595458	62	\N	ITI0032
+3101	2	2	ITI-00033	PRINTER HP LASERJET P1108	70	77	29	254	564	581.73	\N	Covered	\N	18	Consumable	PRINTER HP LASERJET P1108	t	f	2026-06-11 21:48:30.717444	2026-06-11 21:58:45.59546	62	\N	ITI0033
+3102	2	2	ITI-00034	PRINTER HP LASERJET P1008	70	77	29	36	98	2764.6	\N	Covered	\N	18	Consumable	PRINTER HP LASERJET P1008	t	f	2026-06-11 21:48:30.717449	2026-06-11 21:58:45.595463	62	\N	ITI0034
+3103	2	2	ITI-00035	PRINTER HP LASERJET M1206 NW	70	77	29	22	57	1381.3	\N	Covered	\N	18	Consumable	PRINTER HP LASERJET M1206 NW	t	f	2026-06-11 21:48:30.717455	2026-06-11 21:58:45.595466	62	\N	ITI0035
+3104	2	2	ITI-00036	PRINTER HP COLOUR LASERJET 150NW	70	77	29	28	64	4929.39	\N	Covered	\N	18	Consumable	PRINTER HP COLOUR LASERJET 150NW	t	f	2026-06-11 21:48:30.717461	2026-06-11 21:58:45.595469	62	\N	ITI0036
+3105	2	2	ITI-00037	PRINTER HP NEVERSTOP LASERJET 100X	70	77	29	18	49	1230.96	\N	Covered	\N	18	Consumable	PRINTER HP NEVERSTOP LASERJET 100X	t	f	2026-06-11 21:48:30.717466	2026-06-11 21:58:45.595472	62	\N	ITI0037
+3106	2	2	ITI-00038	PRINTER BROTHER DCP B7500D	70	77	29	50	130	4187.62	\N	Covered	\N	18	Consumable	PRINTER BROTHER DCP B7500D	t	f	2026-06-11 21:48:30.717472	2026-06-11 21:58:45.595474	62	\N	ITI0038
+3107	2	2	ITI-00039	PRINTER CANNON LBP 2900B	70	77	29	19	71	4148.05	\N	Covered	\N	18	Consumable	PRINTER CANNON LBP 2900B	t	f	2026-06-11 21:48:30.717478	2026-06-11 21:58:45.595477	62	\N	ITI0039
+3108	2	2	LAB-00001	YELLOW GEL TUBES	71	79	29	35	100	1662.9	\N	Covered	\N	12	Consumable	YELLOW GEL TUBES	t	f	2026-06-11 21:48:30.717483	2026-06-11 21:58:45.59548	62	\N	LAB0001
+3109	2	2	LAB-00002	BD HOLDER	71	80	29	36	144	2348.12	\N	Covered	\N	12	Consumable	BD HOLDER	t	f	2026-06-11 21:48:30.717489	2026-06-11 21:58:45.595483	62	\N	LAB0002
+3110	2	2	LAB-00003	BD VACUTAINER CLOT ACTIVATOR -4ML RED	71	80	29	42	156	3710.9	\N	Covered	\N	12	Consumable	BD VACUTAINER CLOT ACTIVATOR -4ML RED	t	f	2026-06-11 21:48:30.717495	2026-06-11 21:58:45.595486	62	\N	LAB0003
+3111	2	2	LAB-00004	BD VACUTAINER EDTA K2  - 3ML PURPLE	71	80	29	403	1230	689.14	\N	Covered	\N	12	Consumable	BD VACUTAINER EDTA K2  - 3ML PURPLE	t	f	2026-06-11 21:48:30.7175	2026-06-11 21:58:45.595489	62	\N	LAB0004
+3112	2	2	LAB-00005	BD VACUTAINER FLOURIDE -2ML GREY	71	80	29	30	97	3249.12	\N	Covered	\N	12	Consumable	BD VACUTAINER FLOURIDE -2ML GREY	t	f	2026-06-11 21:48:30.717506	2026-06-11 21:58:45.595492	62	\N	LAB0005
+3113	2	2	LAB-00006	FILTER PAPER WHITE (GOOD QUALITY)	71	82	29	34	106	3293.81	\N	Covered	\N	12	Consumable	FILTER PAPER WHITE (GOOD QUALITY)	t	f	2026-06-11 21:48:30.717512	2026-06-11 21:58:45.595494	62	\N	LAB0006
+3114	2	2	LAB-00007	LABEL   50 X 25MM. 2A. 2,500NOS/ROLL FOR BARCODE PRINTER	71	82	29	38	118	2770.96	\N	Covered	\N	18	Consumable	LABEL   50 X 25MM. 2A. 2,500NOS/ROLL FOR BARCODE PRINTER	t	f	2026-06-11 21:48:30.717518	2026-06-11 21:58:45.595497	62	\N	LAB0007
+3115	2	2	LAB-00117	VITROS 4600 - CAL KIT 8	71	78	29	12	32	2597.68	\N	Covered	\N	5	Consumable	VITROS 4600 - CAL KIT 8	t	f	2026-06-11 21:48:30.717523	2026-06-11 21:58:45.5955	62	\N	LAB0117
+3116	2	2	LAB-00008	RIBBON - 105MM X 74METERS FOR BAR CODE PRINTER	71	82	29	33	113	3407.69	\N	Covered	\N	18	Consumable	RIBBON - 105MM X 74METERS FOR BAR CODE PRINTER	t	f	2026-06-11 21:48:30.717529	2026-06-11 21:58:45.595503	62	\N	LAB0008
+3117	2	2	LAB-00009	ACCESS 2 B12 - 33000	71	78	29	24	90	2265.26	\N	Covered	\N	12	Consumable	ACCESS 2 B12 - 33000	t	f	2026-06-11 21:48:30.717535	2026-06-11 21:58:45.595505	62	\N	LAB0009
+3118	2	2	LAB-00010	ACCESS 2 CONTRAD 70 - 1 X 1LTR	71	78	29	28	72	2676.86	\N	Covered	\N	12	Consumable	ACCESS 2 CONTRAD 70 - 1 X 1LTR	t	f	2026-06-11 21:48:30.71754	2026-06-11 21:58:45.595508	62	\N	LAB0010
+3119	2	2	LAB-00011	ACCESS 2 CONTRAD (81911)	71	78	29	45	124	2708.27	\N	Covered	\N	12	Consumable	ACCESS 2 CONTRAD (81911)	t	f	2026-06-11 21:48:30.717546	2026-06-11 21:58:45.595511	62	\N	LAB0011
+3120	2	2	LAB-00012	ACCESS 2 FERRITIN	71	78	29	452	1749	683.13	\N	Covered	\N	12	Consumable	ACCESS 2 FERRITIN	t	f	2026-06-11 21:48:30.717552	2026-06-11 21:58:45.595514	62	\N	LAB0012
+3121	2	2	LAB-00013	ACCESS 2 FERRITIN CALIBRATOR	71	78	29	20	54	3918.08	\N	Covered	\N	12	Consumable	ACCESS 2 FERRITIN CALIBRATOR	t	f	2026-06-11 21:48:30.717558	2026-06-11 21:58:45.595517	62	\N	LAB0013
+3122	2	2	LAB-00014	ACCESS 2 FLUSHABLE VACUUM PUMP	71	78	29	138	395	970.09	\N	Covered	\N	18	Consumable	ACCESS 2 FLUSHABLE VACUUM PUMP	t	f	2026-06-11 21:48:30.717564	2026-06-11 21:58:45.595519	62	\N	LAB0014
+3123	2	2	LAB-00015	ACCESS 2 FOLATE - A98032	71	78	29	50	161	3301.36	\N	Covered	\N	12	Consumable	ACCESS 2 FOLATE - A98032	t	f	2026-06-11 21:48:30.717569	2026-06-11 21:58:45.595522	62	\N	LAB0015
+3124	2	2	LAB-00016	ACCESS 2 FT3 CALIBRATOR A13430	71	78	29	20	61	2426.73	\N	Covered	\N	12	Consumable	ACCESS 2 FT3 CALIBRATOR A13430	t	f	2026-06-11 21:48:30.717575	2026-06-11 21:58:45.595525	62	\N	LAB0016
+3125	2	2	LAB-00017	ACCESS 2 FT3 - A13422	71	78	29	13	36	3868.47	\N	Covered	\N	12	Consumable	ACCESS 2 FT3 - A13422	t	f	2026-06-11 21:48:30.717581	2026-06-11 21:58:45.595528	62	\N	LAB0017
+3126	2	2	LAB-00018	ACCESS 2 FT4 CALIBRATOR 33885	71	78	29	36	75	3358.44	\N	Covered	\N	12	Consumable	ACCESS 2 FT4 CALIBRATOR 33885	t	f	2026-06-11 21:48:30.717587	2026-06-11 21:58:45.59553	62	\N	LAB0018
+3127	2	2	LAB-00019	ACCESS 2 FT4 - 33880	71	78	29	46	140	4511.82	\N	Covered	\N	12	Consumable	ACCESS 2 FT4 - 33880	t	f	2026-06-11 21:48:30.717593	2026-06-11 21:58:45.595533	62	\N	LAB0019
+3128	2	2	LAB-00020	ACCESS 2 HFSH - 33520	71	78	29	11	34	4993.96	\N	Covered	\N	12	Consumable	ACCESS 2 HFSH - 33520	t	f	2026-06-11 21:48:30.717599	2026-06-11 21:58:45.595536	62	\N	LAB0020
+3129	2	2	LAB-00021	ACCESS 2 HLH - 33510	71	78	29	24	61	3768	\N	Covered	\N	12	Consumable	ACCESS 2 HLH - 33510	t	f	2026-06-11 21:48:30.717605	2026-06-11 21:58:45.595539	62	\N	LAB0021
+3130	2	2	LAB-00022	ACCESS 2 OV MONITOR CALIBRATOR	71	78	29	41	139	3364.01	\N	Covered	\N	12	Consumable	ACCESS 2 OV MONITOR CALIBRATOR	t	f	2026-06-11 21:48:30.71761	2026-06-11 21:58:45.595541	62	\N	LAB0022
+3131	2	2	LAB-00023	ACCESS 2 OV MONITOR KIT	71	78	29	47	165	4609.87	\N	Covered	\N	12	Consumable	ACCESS 2 OV MONITOR KIT	t	f	2026-06-11 21:48:30.717616	2026-06-11 21:58:45.595544	62	\N	LAB0023
+3132	2	2	LAB-00024	ACCESS 2 PROLACTIN - 33530	71	78	29	44	123	4128.09	\N	Covered	\N	12	Consumable	ACCESS 2 PROLACTIN - 33530	t	f	2026-06-11 21:48:30.717622	2026-06-11 21:58:45.595547	62	\N	LAB0024
+3133	2	2	LAB-00025	ACCESS 2 PSA CALIBRATOR	71	78	29	39	114	4009.83	\N	Covered	\N	12	Consumable	ACCESS 2 PSA CALIBRATOR	t	f	2026-06-11 21:48:30.717628	2026-06-11 21:58:45.59555	62	\N	LAB0025
+3134	2	2	LAB-00026	ACCESS 2 PSA HYB KIT	71	78	29	34	102	2444.38	\N	Covered	\N	12	Consumable	ACCESS 2 PSA HYB KIT	t	f	2026-06-11 21:48:30.717633	2026-06-11 21:58:45.595552	62	\N	LAB0026
+3135	2	2	LAB-00027	ACCESS 2 REACTION VESSELS (81901) - 16*98	71	78	29	47	118	2010.89	\N	Covered	\N	12	Consumable	ACCESS 2 REACTION VESSELS (81901) - 16*98	t	f	2026-06-11 21:48:30.717639	2026-06-11 21:58:45.595555	62	\N	LAB0027
+3136	2	2	LAB-00028	ACCESS 2 SAMPLE CUPS 0.5ML (844101030) - 1000 CUPS	71	78	29	21	65	3560.72	\N	Covered	\N	12	Consumable	ACCESS 2 SAMPLE CUPS 0.5ML (844101030) - 1000 CUPS	t	f	2026-06-11 21:48:30.717646	2026-06-11 21:58:45.595558	62	\N	LAB0028
+3137	2	2	LAB-00029	ACCESS 2 SAMPLE CUPS 2ML (81902) - 1000 CUPS	71	78	29	19	62	3106.64	\N	Covered	\N	12	Consumable	ACCESS 2 SAMPLE CUPS 2ML (81902) - 1000 CUPS	t	f	2026-06-11 21:48:30.717652	2026-06-11 21:58:45.595561	62	\N	LAB0029
+3138	2	2	LAB-00030	ACCESS 2 SUBSTRATE (81906) - 4*130ML	71	78	29	27	81	2645.23	\N	Covered	\N	12	Consumable	ACCESS 2 SUBSTRATE (81906) - 4*130ML	t	f	2026-06-11 21:48:30.717658	2026-06-11 21:58:45.595563	62	\N	LAB0030
+3139	2	2	LAB-00031	ACCESS 2 SYSTEM CHECK SOLN - 81910	71	78	29	10	38	1511.59	\N	Covered	\N	12	Consumable	ACCESS 2 SYSTEM CHECK SOLN - 81910	t	f	2026-06-11 21:48:30.717663	2026-06-11 21:58:45.595566	62	\N	LAB0031
+3140	2	2	LAB-00032	ACCESS 2 T3 - 33830	71	78	29	38	101	4216.18	\N	Covered	\N	12	Consumable	ACCESS 2 T3 - 33830	t	f	2026-06-11 21:48:30.717669	2026-06-11 21:58:45.595569	62	\N	LAB0032
+3141	2	2	LAB-00033	ACCESS 2 T4 - 33800	71	78	29	19	72	2889.44	\N	Covered	\N	12	Consumable	ACCESS 2 T4 - 33800	t	f	2026-06-11 21:48:30.717675	2026-06-11 21:58:45.595572	62	\N	LAB0033
+3142	2	2	LAB-00034	ACCESS 2 TOTAL B-HCG	71	78	29	34	134	3943.73	\N	Covered	\N	12	Consumable	ACCESS 2 TOTAL B-HCG	t	f	2026-06-11 21:48:30.717681	2026-06-11 21:58:45.595575	62	\N	LAB0034
+3143	2	2	LAB-00035	ACCESS 2 TOTAL B-HCG CALI	71	78	29	26	71	4616.61	\N	Covered	\N	12	Consumable	ACCESS 2 TOTAL B-HCG CALI	t	f	2026-06-11 21:48:30.717686	2026-06-11 21:58:45.595577	62	\N	LAB0035
+3144	2	2	LAB-00036	ACCESS 2 TOTAL T3 CALIBRATOR	71	78	29	198	613	898.66	\N	Covered	\N	12	Consumable	ACCESS 2 TOTAL T3 CALIBRATOR	t	f	2026-06-11 21:48:30.717692	2026-06-11 21:58:45.59558	62	\N	LAB0036
+3145	2	2	LAB-00037	ACCESS 2 TOTAL T4 CALIBRATOR	71	78	29	35	80	4729.45	\N	Covered	\N	12	Consumable	ACCESS 2 TOTAL T4 CALIBRATOR	t	f	2026-06-11 21:48:30.717698	2026-06-11 21:58:45.595583	62	\N	LAB0037
+3146	2	2	LAB-00038	ACCESS 2 TSH CALIBRATOR 33825	71	78	29	30	87	1489.17	\N	Covered	\N	12	Consumable	ACCESS 2 TSH CALIBRATOR 33825	t	f	2026-06-11 21:48:30.717703	2026-06-11 21:58:45.595586	62	\N	LAB0038
+3147	2	2	LAB-00039	ACCESS 2 TSH3 CALIBRATOR - B63285	71	78	29	419	1040	621.82	\N	Covered	\N	12	Consumable	ACCESS 2 TSH3 CALIBRATOR - B63285	t	f	2026-06-11 21:48:30.717709	2026-06-11 21:58:45.595588	62	\N	LAB0039
+3148	2	2	LAB-00040	ACCESS 2 TSH - 33820	71	78	29	24	64	2209.15	\N	Covered	\N	12	Consumable	ACCESS 2 TSH - 33820	t	f	2026-06-11 21:48:30.717715	2026-06-11 21:58:45.595591	62	\N	LAB0040
+3149	2	2	LAB-00041	ACCESS 2 TSH3 - 63284	71	78	29	29	81	3603.04	\N	Covered	\N	12	Consumable	ACCESS 2 TSH3 - 63284	t	f	2026-06-11 21:48:30.71772	2026-06-11 21:58:45.595594	62	\N	LAB0041
+3150	2	2	LAB-00042	ACCESS 2 WASH BUFFER II (A16792) - 4*1950ML	71	78	29	20	45	2311.65	\N	Covered	\N	12	Consumable	ACCESS 2 WASH BUFFER II (A16792) - 4*1950ML	t	f	2026-06-11 21:48:30.717726	2026-06-11 21:58:45.595597	62	\N	LAB0042
+3151	2	2	LAB-00043	ACCESS 2 WASTE BAG (81904) - 20/BOX	71	78	29	15	60	2793.07	\N	Covered	\N	18	Consumable	ACCESS 2 WASTE BAG (81904) - 20/BOX	t	f	2026-06-11 21:48:30.717732	2026-06-11 21:58:45.5956	62	\N	LAB0043
+3152	2	2	LAB-00044	ACCESS 25 OH VIT D - B24838	71	78	29	33	129	1492.31	\N	Covered	\N	12	Consumable	ACCESS 25 OH VIT D - B24838	t	f	2026-06-11 21:48:30.717737	2026-06-11 21:58:45.595602	62	\N	LAB0044
+3153	2	2	LAB-00045	ACCESS 25-OH VIT D CALIBRATOR - B24839	71	78	29	17	36	2499.05	\N	Covered	\N	12	Consumable	ACCESS 25-OH VIT D CALIBRATOR - B24839	t	f	2026-06-11 21:48:30.717743	2026-06-11 21:58:45.595605	62	\N	LAB0045
+3154	2	2	LAB-00046	ACCESS B12 CALS 33005	71	78	29	33	129	2532.7	\N	Covered	\N	12	Consumable	ACCESS B12 CALS 33005	t	f	2026-06-11 21:48:30.717749	2026-06-11 21:58:45.595608	62	\N	LAB0046
+3155	2	2	LAB-00047	ACCESS CONTROL DEVICE-COSEC FOP	71	78	29	18	62	4752.4	\N	Covered	\N	18	Non-Consumable	ACCESS CONTROL DEVICE-COSEC FOP	t	f	2026-06-11 21:48:30.717754	2026-06-11 21:58:45.595611	62	\N	LAB0047
+3156	2	2	LAB-00048	ACCESS CONTROL DEVICE - ELECTRO MAGNETIC DOOR LOCK	71	78	29	28	58	2535.35	\N	Covered	\N	18	Non-Consumable	ACCESS CONTROL DEVICE - ELECTRO MAGNETIC DOOR LOCK	t	f	2026-06-11 21:48:30.71776	2026-06-11 21:58:45.595613	62	\N	LAB0048
+3157	2	2	LAB-00049	ACCESS CONTROL DEVICE - EXIT SWITCH	71	78	29	21	68	2265.87	\N	Covered	\N	18	Non-Consumable	ACCESS CONTROL DEVICE - EXIT SWITCH	t	f	2026-06-11 21:48:30.717766	2026-06-11 21:58:45.595616	62	\N	LAB0049
+3158	2	2	LAB-00050	ACCESS CONTROL DEVICE - L/U ANGLE	71	78	29	38	117	4770.71	\N	Covered	\N	18	Non-Consumable	ACCESS CONTROL DEVICE - L/U ANGLE	t	f	2026-06-11 21:48:30.717771	2026-06-11 21:58:45.595619	62	\N	LAB0050
+3159	2	2	LAB-00051	ACCESS FOLATE CALIBRATOR - A98033	71	78	29	399	1227	626.33	\N	Covered	\N	12	Consumable	ACCESS FOLATE CALIBRATOR - A98033	t	f	2026-06-11 21:48:30.717777	2026-06-11 21:58:45.595622	62	\N	LAB0051
+3160	2	2	LAB-00052	ACCESS FSH CALIBRATOR - 33525	71	78	29	27	62	3881.03	\N	Covered	\N	12	Consumable	ACCESS FSH CALIBRATOR - 33525	t	f	2026-06-11 21:48:30.717783	2026-06-11 21:58:45.595625	62	\N	LAB0052
+3161	2	2	LAB-00053	ACCESS HFSH 33520	71	78	29	33	124	3070.82	\N	Covered	\N	12	Consumable	ACCESS HFSH 33520	t	f	2026-06-11 21:48:30.717788	2026-06-11 21:58:45.595627	62	\N	LAB0053
+3162	2	2	LAB-00054	ACCESS LH CALIBRATOR - 33515	71	78	29	50	126	2624.16	\N	Covered	\N	12	Consumable	ACCESS LH CALIBRATOR - 33515	t	f	2026-06-11 21:48:30.717794	2026-06-11 21:58:45.59563	62	\N	LAB0054
+3163	2	2	LAB-00055	ACCESS PROLACTIN CALIBRATOR - 33535	71	78	29	30	100	3958.76	\N	Covered	\N	5	Non-Consumable	ACCESS PROLACTIN CALIBRATOR - 33535	t	f	2026-06-11 21:48:30.7178	2026-06-11 21:58:45.595633	62	\N	LAB0055
+3164	2	2	LAB-00056	ACCESSORIES FOR PENDANTS - AIR 7  SOCKETS	71	78	29	24	53	3325.98	\N	Covered	\N	5	Non-Consumable	ACCESSORIES FOR PENDANTS - AIR 7  SOCKETS	t	f	2026-06-11 21:48:30.717805	2026-06-11 21:58:45.595636	62	\N	LAB0056
+3165	2	2	LAB-00057	ACCESSORIES FOR PENDANTS - CARBON DIOXIDE COUPLER	71	78	29	23	62	2816.47	\N	Covered	\N	5	Non-Consumable	ACCESSORIES FOR PENDANTS - CARBON DIOXIDE COUPLER	t	f	2026-06-11 21:48:30.717811	2026-06-11 21:58:45.59564	62	\N	LAB0057
+3166	2	2	LAB-00058	ACCESSORIES FOR PENDANTS - NITROUS OXIDE COUPLER	71	78	29	355	1111	554.65	\N	Covered	\N	5	Non-Consumable	ACCESSORIES FOR PENDANTS - NITROUS OXIDE COUPLER	t	f	2026-06-11 21:48:30.717817	2026-06-11 21:58:45.595643	62	\N	LAB0058
+3167	2	2	LAB-00059	ACCESSORIES FOR PENDANTS - TRAY	71	78	29	16	54	2561.95	\N	Covered	\N	5	Non-Consumable	ACCESSORIES FOR PENDANTS - TRAY	t	f	2026-06-11 21:48:30.717822	2026-06-11 21:58:45.595646	62	\N	LAB0059
+3168	2	2	LAB-00060	ACCESSORIES FOR PENDANTS - TRAY WITH SHELF	71	78	29	10	35	1563.11	\N	Covered	\N	5	Non-Consumable	ACCESSORIES FOR PENDANTS - TRAY WITH SHELF	t	f	2026-06-11 21:48:30.717828	2026-06-11 21:58:45.595649	62	\N	LAB0060
+3169	2	2	LAB-00061	ACCESSORIES FOR PENDANTS - VACUUM SOCKET	71	78	29	36	141	1211.86	\N	Covered	\N	5	Non-Consumable	ACCESSORIES FOR PENDANTS - VACUUM SOCKET	t	f	2026-06-11 21:48:30.717834	2026-06-11 21:58:45.595652	62	\N	LAB0061
+3170	2	2	LAB-00062	ACCESSORIES FOR PENDANTS- OXYGENERAL COUPLER	71	78	29	23	86	4756.85	\N	Covered	\N	5	Non-Consumable	ACCESSORIES FOR PENDANTS- OXYGENERAL COUPLER	t	f	2026-06-11 21:48:30.717839	2026-06-11 21:58:45.595654	62	\N	LAB0062
+3171	2	2	LAB-00063	ASSAYED CHEMISTRY CONTROLS - LEVEL-1 (12X5ML)	71	78	29	30	71	2143.12	\N	Covered	\N	5	Consumable	ASSAYED CHEMISTRY CONTROLS - LEVEL-1 (12X5ML)	t	f	2026-06-11 21:48:30.717845	2026-06-11 21:58:45.595657	62	\N	LAB0063
+3172	2	2	LAB-00064	ASSAYED CHEMISTRY CONTROLS -LEVEL 2 (12X5ML)	71	78	29	44	170	1730.8	\N	Covered	\N	5	Consumable	ASSAYED CHEMISTRY CONTROLS -LEVEL 2 (12X5ML)	t	f	2026-06-11 21:48:30.717851	2026-06-11 21:58:45.59566	62	\N	LAB0064
+3173	2	2	LAB-00065	BIO CHEMISTRY REGISTER	71	78	29	262	996	733.5	\N	Covered	\N	5	Consumable	BIO CHEMISTRY REGISTER	t	f	2026-06-11 21:48:30.717856	2026-06-11 21:58:45.595663	62	\N	LAB0065
+3174	2	2	LAB-00066	STANDARD F CRP 20T	71	78	29	41	152	2333.08	\N	Covered	\N	5	Consumable	STANDARD F CRP 20T	t	f	2026-06-11 21:48:30.717862	2026-06-11 21:58:45.595665	62	\N	LAB0066
+3175	2	2	LAB-00067	STANDARD F D. DIMER 20T	71	81	29	22	64	1780.72	\N	Covered	\N	5	Consumable	STANDARD F D. DIMER 20T	t	f	2026-06-11 21:48:30.717868	2026-06-11 21:58:45.595668	62	\N	LAB0067
+3176	2	2	LAB-00068	STANDARD F HBA1C 20T	71	78	29	32	110	3973.15	\N	Covered	\N	5	Consumable	STANDARD F HBA1C 20T	t	f	2026-06-11 21:48:30.717873	2026-06-11 21:58:45.595671	62	\N	LAB0068
+3177	2	2	LAB-00069	STANDARD F NT_PRO BNP 20T	71	78	29	40	89	1643.63	\N	Covered	\N	5	Consumable	STANDARD F NT_PRO BNP 20T	t	f	2026-06-11 21:48:30.717879	2026-06-11 21:58:45.595674	62	\N	LAB0069
+3178	2	2	LAB-00070	TROPININ I 20TEST	71	78	29	359	1131	948.35	\N	Covered	\N	5	Consumable	TROPININ I 20TEST	t	f	2026-06-11 21:48:30.717885	2026-06-11 21:58:45.595676	62	\N	LAB0070
+3179	2	2	LAB-00071	TROPONIN I 10 TEST	71	78	29	35	114	1413.31	\N	Covered	\N	5	Consumable	TROPONIN I 10 TEST	t	f	2026-06-11 21:48:30.717893	2026-06-11 21:58:45.595679	62	\N	LAB0071
+3180	2	2	LAB-00072	TUMOR MRKR CNT LVL 1 6X2 ML	71	78	29	12	38	3703.44	\N	Covered	\N	5	Consumable	TUMOR MRKR CNT LVL 1 6X2 ML	t	f	2026-06-11 21:48:30.717898	2026-06-11 21:58:45.595682	62	\N	LAB0072
+3181	2	2	LAB-00073	TUMOR MRKR CNT LVL 2 6X2 ML	71	78	29	26	94	2147.61	\N	Covered	\N	5	Consumable	TUMOR MRKR CNT LVL 2 6X2 ML	t	f	2026-06-11 21:48:30.717904	2026-06-11 21:58:45.595684	62	\N	LAB0073
+3182	2	2	LAB-00074	TUMOR MRKR CNT LVL 3 6X2 ML	71	78	29	20	52	3382.47	\N	Covered	\N	5	Consumable	TUMOR MRKR CNT LVL 3 6X2 ML	t	f	2026-06-11 21:48:30.71791	2026-06-11 21:58:45.595687	62	\N	LAB0074
+3183	2	2	LAB-00075	VITROS 4600 - CAL KIT 33	71	78	29	40	142	4743.54	\N	Covered	\N	5	Consumable	VITROS 4600 - CAL KIT 33	t	f	2026-06-11 21:48:30.717916	2026-06-11 21:58:45.59569	62	\N	LAB0075
+3184	2	2	LAB-00076	VITROS 4600 - CAL KIT 8	71	78	29	30	108	2781.01	\N	Covered	\N	5	Consumable	VITROS 4600 - CAL KIT 8	t	f	2026-06-11 21:48:30.717921	2026-06-11 21:58:45.595693	62	\N	LAB0076
+3185	2	2	LAB-00077	VITROS 4600 - LIQUID PERFORMANCE VERIFIER 1	71	78	29	31	110	1307.76	\N	Covered	\N	5	Consumable	VITROS 4600 - LIQUID PERFORMANCE VERIFIER 1	t	f	2026-06-11 21:48:30.717927	2026-06-11 21:58:45.595696	62	\N	LAB0077
+3186	2	2	LAB-00078	VITROS 4600 - LIQUID PERFORMANCE VERIFIER 2	71	78	29	43	100	1699.39	\N	Covered	\N	5	Consumable	VITROS 4600 - LIQUID PERFORMANCE VERIFIER 2	t	f	2026-06-11 21:48:30.717933	2026-06-11 21:58:45.595698	62	\N	LAB0078
+3187	2	2	LAB-00079	CALCIUM CHLORIDE (0.025 MOL/L) 15MLX10	71	84	29	31	73	1931.87	\N	Covered	\N	5	Consumable	CALCIUM CHLORIDE (0.025 MOL/L) 15MLX10	t	f	2026-06-11 21:48:30.717939	2026-06-11 21:58:45.595701	62	\N	LAB0079
+3188	2	2	LAB-00080	COBAS 411 - CONTROL TEST M- 1BOX/50STRIPS	71	84	29	43	140	3175.82	\N	Covered	\N	5	Consumable	COBAS 411 - CONTROL TEST M- 1BOX/50STRIPS	t	f	2026-06-11 21:48:30.717944	2026-06-11 21:58:45.595704	62	\N	LAB0080
+3189	2	2	LAB-00081	COBAS COMBUR 10 M URINE TEST (100 NOS)	71	84	29	39	88	3781.11	\N	Covered	\N	5	Consumable	COBAS COMBUR 10 M URINE TEST (100 NOS)	t	f	2026-06-11 21:48:30.71795	2026-06-11 21:58:45.595707	62	\N	LAB0081
+3190	2	2	LAB-00082	CUVETTE FL 100X5	71	84	29	34	121	1189.58	\N	Covered	\N	5	Consumable	CUVETTE FL 100X5	t	f	2026-06-11 21:48:30.717955	2026-06-11 21:58:45.595709	62	\N	LAB0082
+3191	2	2	LAB-00083	COBAS URINE ANALYZER THERMAL PAPER 110MM ROLL	71	84	29	34	82	3992.91	\N	Covered	\N	18	Consumable	COBAS URINE ANALYZER THERMAL PAPER 110MM ROLL	t	f	2026-06-11 21:48:30.717961	2026-06-11 21:58:45.595712	62	\N	LAB0083
+3192	2	2	LAB-00084	ERBA H7 HIGH (1X3ML) CAT NO: HEM00058-195114	71	84	29	34	128	4768.65	\N	Covered	\N	5	Consumable	ERBA H7 HIGH (1X3ML) CAT NO: HEM00058-195114	t	f	2026-06-11 21:48:30.717967	2026-06-11 21:58:45.595715	62	\N	LAB0084
+3193	2	2	LAB-00085	ERBA H7 LOW (1X3ML) CAT NO: HEM00056-195112	71	84	29	24	59	3435.11	\N	Covered	\N	5	Consumable	ERBA H7 LOW (1X3ML) CAT NO: HEM00056-195112	t	f	2026-06-11 21:48:30.717973	2026-06-11 21:58:45.595718	62	\N	LAB0085
+3194	2	2	LAB-00086	ERBA H7 NORM (1X3ML) CAT NO: HEM00057-195113	71	84	29	20	42	3857.03	\N	Covered	\N	5	Consumable	ERBA H7 NORM (1X3ML) CAT NO: HEM00057-195113	t	f	2026-06-11 21:48:30.717978	2026-06-11 21:58:45.59572	62	\N	LAB0086
+3195	2	2	LAB-00087	ESR PIPETTES - HELICO - PACK OF 200	71	84	29	17	68	4091.43	\N	Covered	\N	5	Consumable	ESR PIPETTES - HELICO - PACK OF 200	t	f	2026-06-11 21:48:30.717984	2026-06-11 21:58:45.595723	62	\N	LAB0087
+3196	2	2	LAB-00088	ESR SODIUM CITRATE 3.8% TUBES(VACUTAINERS) WITH BLACK CAP	71	84	29	18	62	3485.09	\N	Covered	\N	5	Consumable	ESR SODIUM CITRATE 3.8% TUBES(VACUTAINERS) WITH BLACK CAP	t	f	2026-06-11 21:48:30.71799	2026-06-11 21:58:45.595726	62	\N	LAB0088
+3197	2	2	LAB-00089	H360 - DILUENT - 121740 - 20LTRS	71	84	29	18	37	4603.24	\N	Covered	\N	5	Consumable	H360 - DILUENT - 121740 - 20LTRS	t	f	2026-06-11 21:48:30.717995	2026-06-11 21:58:45.595729	62	\N	LAB0089
+3198	2	2	LAB-00090	H360 - LYSE  - 121741 - 1500ML	71	84	29	328	1132	717.26	\N	Covered	\N	5	Consumable	H360 - LYSE  - 121741 - 1500ML	t	f	2026-06-11 21:48:30.718001	2026-06-11 21:58:45.595731	62	\N	LAB0090
+3199	2	2	LAB-00091	HEMOSPOT (CANCHECK) - TULIP	71	84	29	23	86	4292.77	\N	Covered	\N	5	Consumable	HEMOSPOT (CANCHECK) - TULIP	t	f	2026-06-11 21:48:30.718007	2026-06-11 21:58:45.595734	62	\N	LAB0091
+3200	2	2	LAB-00092	LEISHMAN STAIN 500ML	71	84	29	38	143	4303.11	\N	Covered	\N	5	Consumable	LEISHMAN STAIN 500ML	t	f	2026-06-11 21:48:30.718012	2026-06-11 21:58:45.595737	62	\N	LAB0092
+3201	2	2	LAB-00093	VITROS - VERSA TIP BOX	71	78	29	49	111	1481.82	\N	Covered	\N	5	Consumable	VITROS - VERSA TIP BOX	t	f	2026-06-11 21:48:30.718018	2026-06-11 21:58:45.59574	62	\N	LAB0093
+3202	2	2	LAB-00094	VITROS 4600 - ALBUMIN PACK SIZE 18	71	78	29	50	149	1988.56	\N	Covered	\N	5	Consumable	VITROS 4600 - ALBUMIN PACK SIZE 18	t	f	2026-06-11 21:48:30.718024	2026-06-11 21:58:45.595743	62	\N	LAB0094
+3203	2	2	LAB-00095	VITROS 4600 - ALBUMIN PACK SIZE 50	71	78	29	28	109	4423.62	\N	Covered	\N	5	Consumable	VITROS 4600 - ALBUMIN PACK SIZE 50	t	f	2026-06-11 21:48:30.718029	2026-06-11 21:58:45.595745	62	\N	LAB0095
+3204	2	2	LAB-00096	VITROS 4600 - ALCOHOL (18 TEST PACK)	71	78	29	28	79	4476.08	\N	Covered	\N	5	Consumable	VITROS 4600 - ALCOHOL (18 TEST PACK)	t	f	2026-06-11 21:48:30.718035	2026-06-11 21:58:45.595748	62	\N	LAB0096
+3205	2	2	LAB-00097	VITROS 4600 - ALKP PACK SIZE 60	71	78	29	30	112	1647.76	\N	Covered	\N	5	Consumable	VITROS 4600 - ALKP PACK SIZE 60	t	f	2026-06-11 21:48:30.718041	2026-06-11 21:58:45.595751	62	\N	LAB0097
+3206	2	2	LAB-00098	VITROS 4600 - ALTV/SGPT PACK SIZE 60	71	78	29	35	107	2882.93	\N	Covered	\N	5	Consumable	VITROS 4600 - ALTV/SGPT PACK SIZE 60	t	f	2026-06-11 21:48:30.718046	2026-06-11 21:58:45.595753	62	\N	LAB0098
+3207	2	2	LAB-00099	VITROS 4600 - AMYLASE PACK SIZE 18	71	78	29	12	28	1499.07	\N	Covered	\N	5	Consumable	VITROS 4600 - AMYLASE PACK SIZE 18	t	f	2026-06-11 21:48:30.718052	2026-06-11 21:58:45.595756	62	\N	LAB0099
+3208	2	2	LAB-00100	VITROS 4600 - AMYLASE PACK SIZE 60	71	78	29	50	160	2913.82	\N	Covered	\N	5	Consumable	VITROS 4600 - AMYLASE PACK SIZE 60	t	f	2026-06-11 21:48:30.718058	2026-06-11 21:58:45.595759	62	\N	LAB0100
+3209	2	2	LAB-00101	VITROS 4600 - AST/SGOT PACK SIZE 60	71	78	29	33	111	1970.46	\N	Covered	\N	5	Consumable	VITROS 4600 - AST/SGOT PACK SIZE 60	t	f	2026-06-11 21:48:30.718063	2026-06-11 21:58:45.595762	62	\N	LAB0101
+3210	2	2	LAB-00102	VITROS 4600 - BUBC PACK SIZE 18	71	78	29	18	50	2329.45	\N	Covered	\N	5	Consumable	VITROS 4600 - BUBC PACK SIZE 18	t	f	2026-06-11 21:48:30.718069	2026-06-11 21:58:45.595764	62	\N	LAB0102
+3211	2	2	LAB-00103	VITROS 4600 - BUBC PACK SIZE 60	71	78	29	44	123	2871.67	\N	Covered	\N	5	Consumable	VITROS 4600 - BUBC PACK SIZE 60	t	f	2026-06-11 21:48:30.718074	2026-06-11 21:58:45.595767	62	\N	LAB0103
+3212	2	2	LAB-00104	VITROS 4600 - CAL KIT 1	71	78	29	32	106	4472.57	\N	Covered	\N	5	Consumable	VITROS 4600 - CAL KIT 1	t	f	2026-06-11 21:48:30.71808	2026-06-11 21:58:45.59577	62	\N	LAB0104
+3213	2	2	LAB-00105	VITROS 4600 - CAL KIT 10	71	78	29	27	102	1755.17	\N	Covered	\N	5	Consumable	VITROS 4600 - CAL KIT 10	t	f	2026-06-11 21:48:30.718086	2026-06-11 21:58:45.595773	62	\N	LAB0105
+3214	2	2	LAB-00106	VITROS 4600 - CAL KIT 19	71	78	29	42	165	4131.25	\N	Covered	\N	5	Consumable	VITROS 4600 - CAL KIT 19	t	f	2026-06-11 21:48:30.718092	2026-06-11 21:58:45.595776	62	\N	LAB0106
+3215	2	2	LAB-00107	VITROS 4600 - CAL KIT 2	71	78	29	25	85	4111.87	\N	Covered	\N	5	Consumable	VITROS 4600 - CAL KIT 2	t	f	2026-06-11 21:48:30.718097	2026-06-11 21:58:45.595778	62	\N	LAB0107
+3216	2	2	LAB-00108	VITROS 4600 - CAL KIT 20	71	78	29	184	723	642.92	\N	Covered	\N	5	Consumable	VITROS 4600 - CAL KIT 20	t	f	2026-06-11 21:48:30.718103	2026-06-11 21:58:45.595781	62	\N	LAB0108
+3217	2	2	LAB-00109	VITROS 4600 - CAL KIT 24	71	78	29	20	47	4824.37	\N	Covered	\N	5	Consumable	VITROS 4600 - CAL KIT 24	t	f	2026-06-11 21:48:30.718109	2026-06-11 21:58:45.595784	62	\N	LAB0109
+3218	2	2	LAB-00110	VITROS 4600 - CAL KIT 25	71	78	29	329	1001	612.6	\N	Covered	\N	5	Consumable	VITROS 4600 - CAL KIT 25	t	f	2026-06-11 21:48:30.718114	2026-06-11 21:58:45.595787	62	\N	LAB0110
+3219	2	2	LAB-00111	VITROS 4600 - CAL KIT 29	71	78	29	11	41	1286.92	\N	Covered	\N	5	Consumable	VITROS 4600 - CAL KIT 29	t	f	2026-06-11 21:48:30.71812	2026-06-11 21:58:45.595789	62	\N	LAB0111
+3220	2	2	LAB-00112	VITROS 4600 - CAL KIT 3	71	78	29	34	110	3975.39	\N	Covered	\N	5	Consumable	VITROS 4600 - CAL KIT 3	t	f	2026-06-11 21:48:30.718125	2026-06-11 21:58:45.595792	62	\N	LAB0112
+3221	2	2	LAB-00113	VITROS 4600 - CAL KIT 33	71	78	29	41	88	3443.43	\N	Covered	\N	5	Consumable	VITROS 4600 - CAL KIT 33	t	f	2026-06-11 21:48:30.718133	2026-06-11 21:58:45.595795	62	\N	LAB0113
+3222	2	2	LAB-00114	VITROS 4600 - CAL KIT 4	71	78	29	32	67	4145.79	\N	Covered	\N	5	Consumable	VITROS 4600 - CAL KIT 4	t	f	2026-06-11 21:48:30.718139	2026-06-11 21:58:45.595798	62	\N	LAB0114
+3223	2	2	LAB-00115	VITROS 4600 - CAL KIT 5	71	78	29	28	62	1474.13	\N	Covered	\N	5	Consumable	VITROS 4600 - CAL KIT 5	t	f	2026-06-11 21:48:30.718145	2026-06-11 21:58:45.595801	62	\N	LAB0115
+3224	2	2	LAB-00118	VITROS 4600 - CALCIUM PACK SIZE 60	71	78	29	28	103	4653.42	\N	Covered	\N	5	Consumable	VITROS 4600 - CALCIUM PACK SIZE 60	t	f	2026-06-11 21:48:30.71815	2026-06-11 21:58:45.595803	62	\N	LAB0118
+3225	2	2	LAB-00119	VITROS 4600 - CHLORIDE PACK SIZE 50	71	78	29	290	964	571.12	\N	Covered	\N	5	Consumable	VITROS 4600 - CHLORIDE PACK SIZE 50	t	f	2026-06-11 21:48:30.718156	2026-06-11 21:58:45.595806	62	\N	LAB0119
+3226	2	2	LAB-00120	VITROS 4600 - CHOLESTEROL PACK SIZE 60	71	78	29	42	110	1076.11	\N	Covered	\N	5	Consumable	VITROS 4600 - CHOLESTEROL PACK SIZE 60	t	f	2026-06-11 21:48:30.718162	2026-06-11 21:58:45.595809	62	\N	LAB0120
+3227	2	2	LAB-00121	VITROS 4600 - CONTROLS - CRP PV1	71	78	29	42	95	4479.33	\N	Covered	\N	5	Consumable	VITROS 4600 - CONTROLS - CRP PV1	t	f	2026-06-11 21:48:30.718167	2026-06-11 21:58:45.595812	62	\N	LAB0121
+3228	2	2	LAB-00122	VITROS 4600 - CONTROLS - CRP PV2	71	78	29	42	93	3406.39	\N	Covered	\N	5	Consumable	VITROS 4600 - CONTROLS - CRP PV2	t	f	2026-06-11 21:48:30.718173	2026-06-11 21:58:45.595814	62	\N	LAB0122
+3229	2	2	LAB-00123	VITROS 4600 - CONTROLS - DIRECT TIBC - PV1	71	78	29	14	39	2491.82	\N	Covered	\N	5	Consumable	VITROS 4600 - CONTROLS - DIRECT TIBC - PV1	t	f	2026-06-11 21:48:30.718179	2026-06-11 21:58:45.595817	62	\N	LAB0123
+3230	2	2	LAB-00124	VITROS 4600 - CONTROLS - DIRECT TIBC - PV2	71	78	29	10	37	1414.21	\N	Covered	\N	5	Consumable	VITROS 4600 - CONTROLS - DIRECT TIBC - PV2	t	f	2026-06-11 21:48:30.718184	2026-06-11 21:58:45.59582	62	\N	LAB0124
+3231	2	2	LAB-00125	VITROS 4600 - CONTROLS - MICRO ALB - PV1	71	78	29	168	628	676.63	\N	Covered	\N	5	Consumable	VITROS 4600 - CONTROLS - MICRO ALB - PV1	t	f	2026-06-11 21:48:30.71819	2026-06-11 21:58:45.595823	62	\N	LAB0125
+3232	2	2	LAB-00126	VITROS 4600 - CONTROLS - MICRO ALB - PV2	71	78	29	19	59	1701.51	\N	Covered	\N	5	Consumable	VITROS 4600 - CONTROLS - MICRO ALB - PV2	t	f	2026-06-11 21:48:30.718196	2026-06-11 21:58:45.595825	62	\N	LAB0126
+3233	2	2	LAB-00127	VITROS 4600 - CONTROLS - PROTEIN - PV1	71	78	29	22	47	1119	\N	Covered	\N	5	Consumable	VITROS 4600 - CONTROLS - PROTEIN - PV1	t	f	2026-06-11 21:48:30.718201	2026-06-11 21:58:45.595828	62	\N	LAB0127
+3234	2	2	LAB-00128	VITROS 4600 - CONTROLS - PROTEIN - PV2	71	78	29	22	88	2688.1	\N	Covered	\N	5	Consumable	VITROS 4600 - CONTROLS - PROTEIN - PV2	t	f	2026-06-11 21:48:30.718207	2026-06-11 21:58:45.595831	62	\N	LAB0128
+3235	2	2	LAB-00129	VITROS 4600 - CONTROLS - PV1	71	78	29	19	40	4339.28	\N	Covered	\N	5	Consumable	VITROS 4600 - CONTROLS - PV1	t	f	2026-06-11 21:48:30.718213	2026-06-11 21:58:45.595834	62	\N	LAB0129
+3236	2	2	LAB-00130	VITROS 4600 - CONTROLS - PV2	71	78	29	22	50	2846.35	\N	Covered	\N	5	Consumable	VITROS 4600 - CONTROLS - PV2	t	f	2026-06-11 21:48:30.718218	2026-06-11 21:58:45.595836	62	\N	LAB0130
+3237	2	2	LAB-00131	VITROS 4600 - CONTROLS - UPRO- PV1	71	78	29	16	43	4239.76	\N	Covered	\N	5	Consumable	VITROS 4600 - CONTROLS - UPRO- PV1	t	f	2026-06-11 21:48:30.718224	2026-06-11 21:58:45.595839	62	\N	LAB0131
+3238	2	2	LAB-00132	VITROS 4600 - CREATININE PACK SIZE 60	71	78	29	44	168	4923.44	\N	Covered	\N	5	Consumable	VITROS 4600 - CREATININE PACK SIZE 60	t	f	2026-06-11 21:48:30.71823	2026-06-11 21:58:45.595842	62	\N	LAB0132
+3239	2	2	LAB-00133	VITROS 4600 - CRP PACK SIZE 18	71	78	29	50	109	2240.35	\N	Covered	\N	5	Consumable	VITROS 4600 - CRP PACK SIZE 18	t	f	2026-06-11 21:48:30.718236	2026-06-11 21:58:45.595845	62	\N	LAB0133
+3240	2	2	LAB-00134	VITROS 4600 - CRP PACK SIZE 50	71	78	29	16	44	2747.05	\N	Covered	\N	5	Consumable	VITROS 4600 - CRP PACK SIZE 50	t	f	2026-06-11 21:48:30.718241	2026-06-11 21:58:45.595847	62	\N	LAB0134
+3241	2	2	LAB-00135	VITROS 4600 - DESSICANT PACK	71	78	29	27	72	2086.9	\N	Covered	\N	18	Consumable	VITROS 4600 - DESSICANT PACK	t	f	2026-06-11 21:48:30.718247	2026-06-11 21:58:45.59585	62	\N	LAB0135
+3242	2	2	LAB-00136	VITROS 4600 - DIRECT HDL PACK SIZE 60	71	78	29	34	120	3949.3	\N	Covered	\N	5	Consumable	VITROS 4600 - DIRECT HDL PACK SIZE 60	t	f	2026-06-11 21:48:30.718253	2026-06-11 21:58:45.595853	62	\N	LAB0136
+3243	2	2	LAB-00137	VITROS 4600 - DIRECT LDL PACK SIZE 100	71	78	29	49	192	1652.95	\N	Covered	\N	5	Consumable	VITROS 4600 - DIRECT LDL PACK SIZE 100	t	f	2026-06-11 21:48:30.718259	2026-06-11 21:58:45.595856	62	\N	LAB0137
+3244	2	2	LAB-00138	VITROS 4600 - DIRECT TIBC PACK SIZE 50	71	78	29	23	48	2950.7	\N	Covered	\N	5	Consumable	VITROS 4600 - DIRECT TIBC PACK SIZE 50	t	f	2026-06-11 21:48:30.718265	2026-06-11 21:58:45.595858	62	\N	LAB0138
+3245	2	2	LAB-00139	VITROS 4600 - DTIBC PERF VER1	71	78	29	37	93	2455.01	\N	Covered	\N	5	Consumable	VITROS 4600 - DTIBC PERF VER1	t	f	2026-06-11 21:48:30.718271	2026-06-11 21:58:45.595861	62	\N	LAB0139
+3246	2	2	LAB-00140	VITROS 4600 - DTIBC PERF VER2	71	78	29	24	70	1058.42	\N	Covered	\N	5	Consumable	VITROS 4600 - DTIBC PERF VER2	t	f	2026-06-11 21:48:30.718277	2026-06-11 21:58:45.595864	62	\N	LAB0140
+3247	2	2	LAB-00141	VITROS 4600 - ERF800	71	78	29	37	127	4356.33	\N	Covered	\N	5	Consumable	VITROS 4600 - ERF800	t	f	2026-06-11 21:48:30.718282	2026-06-11 21:58:45.595867	62	\N	LAB0141
+3248	2	2	LAB-00142	VITROS 4600 - FS CAL 1	71	78	29	35	134	2920.67	\N	Covered	\N	5	Consumable	VITROS 4600 - FS CAL 1	t	f	2026-06-11 21:48:30.718288	2026-06-11 21:58:45.595869	62	\N	LAB0142
+3249	2	2	LAB-00143	VITROS 4600 - FS CUVETTE	71	78	29	42	103	4214.44	\N	Covered	\N	5	Consumable	VITROS 4600 - FS CUVETTE	t	f	2026-06-11 21:48:30.718294	2026-06-11 21:58:45.595872	62	\N	LAB0143
+3250	2	2	LAB-00144	VITROS 4600 - FS DILUENT 1	71	78	29	45	114	2380.12	\N	Covered	\N	5	Consumable	VITROS 4600 - FS DILUENT 1	t	f	2026-06-11 21:48:30.7183	2026-06-11 21:58:45.595877	62	\N	LAB0144
+3251	2	2	LAB-00145	VITROS 4600 - FS DILUENT 2	71	78	29	33	88	4477.12	\N	Covered	\N	5	Consumable	VITROS 4600 - FS DILUENT 2	t	f	2026-06-11 21:48:30.718306	2026-06-11 21:58:45.595879	62	\N	LAB0145
+3252	2	2	LAB-00146	VITROS 4600 - FS DILUENT 3	71	78	29	28	91	2626.99	\N	Covered	\N	5	Consumable	VITROS 4600 - FS DILUENT 3	t	f	2026-06-11 21:48:30.718312	2026-06-11 21:58:45.595882	62	\N	LAB0146
+3253	2	2	LAB-00147	VITROS 4600 - FS HUMIDIFICATION PACK	71	78	29	390	1294	524.33	\N	Covered	\N	5	Consumable	VITROS 4600 - FS HUMIDIFICATION PACK	t	f	2026-06-11 21:48:30.718317	2026-06-11 21:58:45.595885	62	\N	LAB0147
+3254	2	2	LAB-00148	VITROS 4600 - FS RECONSTITUTION DILUENT	71	78	29	20	62	2120.34	\N	Covered	\N	5	Consumable	VITROS 4600 - FS RECONSTITUTION DILUENT	t	f	2026-06-11 21:48:30.718323	2026-06-11 21:58:45.595888	62	\N	LAB0148
+3255	2	2	LAB-00149	VITROS 4600 - FS-MICROTIPS	71	78	29	50	158	4286.82	\N	Covered	\N	18	Consumable	VITROS 4600 - FS-MICROTIPS	t	f	2026-06-11 21:48:30.718329	2026-06-11 21:58:45.595891	62	\N	LAB0149
+3256	2	2	LAB-00150	VITROS 4600 - GLUCOSE PACK SIZE 60	71	78	29	11	30	1000.09	\N	Covered	\N	5	Consumable	VITROS 4600 - GLUCOSE PACK SIZE 60	t	f	2026-06-11 21:48:30.718338	2026-06-11 21:58:45.595893	62	\N	LAB0150
+3257	2	2	LAB-00151	VITROS 4600 - IRON (FE) PACK SIZE 18	71	78	29	48	101	1678.56	\N	Covered	\N	5	Consumable	VITROS 4600 - IRON (FE) PACK SIZE 18	t	f	2026-06-11 21:48:30.718344	2026-06-11 21:58:45.595896	62	\N	LAB0151
+3258	2	2	LAB-00152	VITROS 4600 - IRON PACK SIZE 18	71	78	29	42	140	2235.21	\N	Covered	\N	5	Consumable	VITROS 4600 - IRON PACK SIZE 18	t	f	2026-06-11 21:48:30.718349	2026-06-11 21:58:45.595899	62	\N	LAB0152
+3259	2	2	LAB-00153	VITROS 4600 - IRON PACK SIZE 60	71	78	29	216	689	949.57	\N	Covered	\N	5	Consumable	VITROS 4600 - IRON PACK SIZE 60	t	f	2026-06-11 21:48:30.718355	2026-06-11 21:58:45.595902	62	\N	LAB0153
+3260	2	2	LAB-00154	VITROS 4600 - IWF	71	78	29	47	102	1164.45	\N	Covered	\N	5	Consumable	VITROS 4600 - IWF	t	f	2026-06-11 21:48:30.718361	2026-06-11 21:58:45.595904	62	\N	LAB0154
+3261	2	2	LAB-00155	VITROS 4600 - LAMP ASSEMBLY	71	78	29	123	382	972.59	\N	Covered	\N	18	Consumable	VITROS 4600 - LAMP ASSEMBLY	t	f	2026-06-11 21:48:30.718366	2026-06-11 21:58:45.595907	62	\N	LAB0155
+3262	2	2	LAB-00156	VITROS 4600 - LIPASE PACK SIZE 18	71	78	29	38	131	4616.44	\N	Covered	\N	5	Consumable	VITROS 4600 - LIPASE PACK SIZE 18	t	f	2026-06-11 21:48:30.718372	2026-06-11 21:58:45.59591	62	\N	LAB0156
+3263	2	2	LAB-00157	VITROS 4600 - LIPASE PACK SIZE 50	71	78	29	14	52	1182.39	\N	Covered	\N	5	Consumable	VITROS 4600 - LIPASE PACK SIZE 50	t	f	2026-06-11 21:48:30.718378	2026-06-11 21:58:45.595913	62	\N	LAB0157
+3264	2	2	LAB-00158	VITROS 4600 - LIQUID PERFORMANCE VERIFIER 1	71	78	29	47	137	4529.76	\N	Covered	\N	5	Consumable	VITROS 4600 - LIQUID PERFORMANCE VERIFIER 1	t	f	2026-06-11 21:48:30.718386	2026-06-11 21:58:45.595915	62	\N	LAB0158
+3265	2	2	LAB-00159	VITROS 4600 - LIQUID PERFORMANCE VERIFIER 2	71	78	29	48	150	4194.59	\N	Covered	\N	5	Consumable	VITROS 4600 - LIQUID PERFORMANCE VERIFIER 2	t	f	2026-06-11 21:48:30.718391	2026-06-11 21:58:45.595918	62	\N	LAB0159
+3266	2	2	LAB-00160	VITROS 4600 - LITHIUM PACK SIZE 18	71	78	29	48	139	1981.54	\N	Covered	\N	5	Consumable	VITROS 4600 - LITHIUM PACK SIZE 18	t	f	2026-06-11 21:48:30.718397	2026-06-11 21:58:45.595921	62	\N	LAB0160
+3267	2	2	LAB-00161	VITROS 4600 - MAGNESIUM PACK SIZE 18	71	78	29	24	49	3686.8	\N	Covered	\N	5	Consumable	VITROS 4600 - MAGNESIUM PACK SIZE 18	t	f	2026-06-11 21:48:30.718403	2026-06-11 21:58:45.595927	62	\N	LAB0161
+3268	2	2	LAB-00162	VITROS 4600 - MAGNESIUM PACK SIZE 60	71	78	29	18	54	3815.96	\N	Covered	\N	5	Consumable	VITROS 4600 - MAGNESIUM PACK SIZE 60	t	f	2026-06-11 21:48:30.718408	2026-06-11 21:58:45.59593	62	\N	LAB0162
+3269	2	2	LAB-00163	VITROS 4600 - MAS™ DIABETES CONTROL	71	78	29	48	168	3912.04	\N	Covered	\N	5	Consumable	VITROS 4600 - MAS™ DIABETES CONTROL	t	f	2026-06-11 21:48:30.718414	2026-06-11 21:58:45.595932	62	\N	LAB0163
+3270	2	2	LAB-00164	VITROS 4600 - PHOSPHORUS PACK SIZE 18	71	78	29	40	92	1036.22	\N	Covered	\N	5	Consumable	VITROS 4600 - PHOSPHORUS PACK SIZE 18	t	f	2026-06-11 21:48:30.71842	2026-06-11 21:58:45.595935	62	\N	LAB0164
+3271	2	2	LAB-00165	VITROS 4600 - PHOSPHORUS PACK SIZE 60	71	78	29	206	555	861.63	\N	Covered	\N	5	Consumable	VITROS 4600 - PHOSPHORUS PACK SIZE 60	t	f	2026-06-11 21:48:30.718425	2026-06-11 21:58:45.595938	62	\N	LAB0165
+3272	2	2	LAB-00166	VITROS 4600 - POTASSIUM PACK SIZE 50	71	78	29	32	113	4385.43	\N	Covered	\N	5	Consumable	VITROS 4600 - POTASSIUM PACK SIZE 50	t	f	2026-06-11 21:48:30.718431	2026-06-11 21:58:45.595941	62	\N	LAB0166
+3273	2	2	LAB-00167	VITROS 4600 - PROTEIN PV1	71	78	29	31	88	2966.19	\N	Covered	\N	5	Consumable	VITROS 4600 - PROTEIN PV1	t	f	2026-06-11 21:48:30.718437	2026-06-11 21:58:45.595944	62	\N	LAB0167
+3274	2	2	LAB-00168	VITROS 4600 - PROTEIN PV2	71	78	29	15	57	4315.39	\N	Covered	\N	5	Consumable	VITROS 4600 - PROTEIN PV2	t	f	2026-06-11 21:48:30.718442	2026-06-11 21:58:45.595946	62	\N	LAB0168
+3275	2	2	LAB-00169	VITROS 4600 - PROTEIN PV3	71	78	29	33	124	3656.96	\N	Covered	\N	5	Consumable	VITROS 4600 - PROTEIN PV3	t	f	2026-06-11 21:48:30.718448	2026-06-11 21:58:45.595949	62	\N	LAB0169
+3276	2	2	LAB-00170	VITROS 4600 - SODIUM PACK SIZE 50	71	78	29	21	44	4025.19	\N	Covered	\N	5	Consumable	VITROS 4600 - SODIUM PACK SIZE 50	t	f	2026-06-11 21:48:30.718454	2026-06-11 21:58:45.595952	62	\N	LAB0170
+3277	2	2	LAB-00171	VITROS 4600 - TGL PACK SIZE 60	71	78	29	13	47	1711.85	\N	Covered	\N	5	Consumable	VITROS 4600 - TGL PACK SIZE 60	t	f	2026-06-11 21:48:30.718459	2026-06-11 21:58:45.595955	62	\N	LAB0171
+3278	2	2	LAB-00172	VITROS 4600 - TOTAL BILIRUBIN PACK SIZE 60	71	78	29	29	97	4970.52	\N	Covered	\N	5	Consumable	VITROS 4600 - TOTAL BILIRUBIN PACK SIZE 60	t	f	2026-06-11 21:48:30.718465	2026-06-11 21:58:45.595957	62	\N	LAB0172
+3279	2	2	LAB-00173	VITROS 4600 - TOTAL PROTEIN PACK SIZE 50	71	78	29	22	74	2902.16	\N	Covered	\N	5	Consumable	VITROS 4600 - TOTAL PROTEIN PACK SIZE 50	t	f	2026-06-11 21:48:30.718471	2026-06-11 21:58:45.59596	62	\N	LAB0173
+3280	2	2	LAB-00174	VITROS 4600 - TRANSFERRIN PACK SIZE 50	71	78	29	192	420	505.21	\N	Covered	\N	5	Consumable	VITROS 4600 - TRANSFERRIN PACK SIZE 50	t	f	2026-06-11 21:48:30.718476	2026-06-11 21:58:45.595963	62	\N	LAB0174
+3281	2	2	LAB-00175	VITROS 4600 - UPRO PACK SIZE 18	71	78	29	24	91	4143.58	\N	Covered	\N	5	Consumable	VITROS 4600 - UPRO PACK SIZE 18	t	f	2026-06-11 21:48:30.718482	2026-06-11 21:58:45.595966	62	\N	LAB0175
+3282	2	2	LAB-00176	VITROS 4600 - UPRO PACK SIZE 50	71	78	29	42	98	3044.13	\N	Covered	\N	5	Consumable	VITROS 4600 - UPRO PACK SIZE 50	t	f	2026-06-11 21:48:30.718488	2026-06-11 21:58:45.595969	62	\N	LAB0176
+3283	2	2	LAB-00177	VITROS 4600 - UREA (BUN) PACK SIZE 60	71	78	29	50	103	2480.82	\N	Covered	\N	5	Consumable	VITROS 4600 - UREA (BUN) PACK SIZE 60	t	f	2026-06-11 21:48:30.718494	2026-06-11 21:58:45.595971	62	\N	LAB0177
+3284	2	2	LAB-00178	VITROS 4600 - URIC ACID PACK SIZE 60	71	78	29	19	67	1480.99	\N	Covered	\N	5	Consumable	VITROS 4600 - URIC ACID PACK SIZE 60	t	f	2026-06-11 21:48:30.718499	2026-06-11 21:58:45.595974	62	\N	LAB0178
+3285	2	2	LAB-00179	VITROS 4600 - URINE MICRO ALBUMIN PACK SIZE 50	71	78	29	40	113	1604.65	\N	Covered	\N	5	Consumable	VITROS 4600 - URINE MICRO ALBUMIN PACK SIZE 50	t	f	2026-06-11 21:48:30.718505	2026-06-11 21:58:45.595977	62	\N	LAB0179
+3286	2	2	LAB-00180	VITROS 4600 - URINE PROTEIN PERFORMANCE VERIFIER 1	71	78	29	24	85	3826.58	\N	Covered	\N	5	Consumable	VITROS 4600 - URINE PROTEIN PERFORMANCE VERIFIER 1	t	f	2026-06-11 21:48:30.718511	2026-06-11 21:58:45.59598	62	\N	LAB0180
+3287	2	2	LAB-00181	VITROS 4600 - URINE PROTEIN PERFORMANCE VERIFIER 2	71	78	29	17	42	3719.92	\N	Covered	\N	5	Consumable	VITROS 4600 - URINE PROTEIN PERFORMANCE VERIFIER 2	t	f	2026-06-11 21:48:30.718516	2026-06-11 21:58:45.595982	62	\N	LAB0181
+3288	2	2	LAB-00182	VITROS 4600 - LDH PACK SIZE 50	71	78	29	30	68	2054.5	\N	Covered	\N	5	Consumable	VITROS 4600 - LDH PACK SIZE 50	t	f	2026-06-11 21:48:30.718522	2026-06-11 21:58:45.595985	62	\N	LAB0182
+3289	2	2	LAB-00183	VITROS 4600 - CSF PROTEIN	71	78	29	12	42	3496.72	\N	Covered	\N	5	Consumable	VITROS 4600 - CSF PROTEIN	t	f	2026-06-11 21:48:30.718528	2026-06-11 21:58:45.595988	62	\N	LAB0183
+3290	2	2	LAB-00184	VITROS MICRO SAMPLE CUPS	71	78	29	244	813	641.85	\N	Covered	\N	18	Consumable	VITROS MICRO SAMPLE CUPS	t	f	2026-06-11 21:48:30.718533	2026-06-11 21:58:45.595991	62	\N	LAB0184
+3291	2	2	LAB-00185	VITROS® A1C SLIDES	71	78	29	43	131	4649.85	\N	Covered	\N	5	Consumable	VITROS® A1C SLIDES	t	f	2026-06-11 21:48:30.718539	2026-06-11 21:58:45.595993	62	\N	LAB0185
+3292	2	2	LAB-00186	VITROS® CAL KIT 33	71	78	29	13	37	2201.01	\N	Covered	\N	5	Consumable	VITROS® CAL KIT 33	t	f	2026-06-11 21:48:30.718544	2026-06-11 21:58:45.595996	62	\N	LAB0186
+3293	2	2	LAB-00187	BD - VAC SODIUM CITRATE 2.7ML	71	82	29	40	103	1490.69	\N	Covered	\N	5	Consumable	BD - VAC SODIUM CITRATE 2.7ML	t	f	2026-06-11 21:48:30.71855	2026-06-11 21:58:45.595999	62	\N	LAB0187
+3294	2	2	LAB-00189	FILTER PAPER SHEET-WHITE LONG	71	80	29	48	163	3459.76	\N	Covered	\N	5	Consumable	FILTER PAPER SHEET-WHITE LONG	t	f	2026-06-11 21:48:30.718556	2026-06-11 21:58:45.596002	62	\N	LAB0189
+3295	2	2	LAB-00190	RED TUBE PLAIN-PAED1	71	82	29	43	103	3663.07	\N	Covered	\N	5	Consumable	RED TUBE PLAIN-PAED1	t	f	2026-06-11 21:48:30.718561	2026-06-11 21:58:45.596004	62	\N	LAB0190
+3296	2	2	LAB-00191	URINE CONTAINER STERILE	71	82	29	38	132	3897.13	\N	Covered	\N	5	Consumable	URINE CONTAINER STERILE	t	f	2026-06-11 21:48:30.718567	2026-06-11 21:58:45.596007	62	\N	LAB0191
+3297	2	2	LAB-00192	URINE CONTAINER UNSTERILE-LABLED	71	82	29	48	144	3428.59	\N	Covered	\N	5	Consumable	URINE CONTAINER UNSTERILE-LABLED	t	f	2026-06-11 21:48:30.718573	2026-06-11 21:58:45.59601	62	\N	LAB0192
+3298	2	2	LAB-00193	URINE STRIP 10 PARAMETER-LONG EXPIRY	71	84	29	45	137	2885.05	\N	Covered	\N	5	Consumable	URINE STRIP 10 PARAMETER-LONG EXPIRY	t	f	2026-06-11 21:48:30.718578	2026-06-11 21:58:45.596013	62	\N	LAB0193
+3299	2	2	LAB-00194	VDRL - ARKRAY	71	83	29	11	40	3092.49	\N	Covered	\N	5	Consumable	VDRL - ARKRAY	t	f	2026-06-11 21:48:30.718584	2026-06-11 21:58:45.596015	62	\N	LAB0194
+3300	2	2	LAB-00195	YELLOW TIPS-PACK,	71	82	29	19	66	4428.85	\N	Covered	\N	5	Consumable	YELLOW TIPS-PACK,	t	f	2026-06-11 21:48:30.71859	2026-06-11 21:58:45.596018	62	\N	LAB0195
+3301	2	2	LAB-00196	SLIDES (LABTEX)	71	82	29	42	89	1446.42	\N	Covered	\N	5	Consumable	SLIDES (LABTEX)	t	f	2026-06-11 21:48:30.718595	2026-06-11 21:58:45.596021	62	\N	LAB0196
+3302	2	2	LAB-00197	ERBA H7100 LYSE1	71	81	29	429	1225	818.16	\N	Covered	\N	5	Consumable	ERBA H7100 LYSE1	t	f	2026-06-11 21:48:30.718601	2026-06-11 21:58:45.596024	62	\N	LAB0197
+3303	2	2	LAB-00198	ERBA H7100 LYSE2 (1000ML)	71	81	29	28	80	1004.22	\N	Covered	\N	5	Consumable	ERBA H7100 LYSE2 (1000ML)	t	f	2026-06-11 21:48:30.718607	2026-06-11 21:58:45.596026	62	\N	LAB0198
+3304	2	2	LAB-00199	ERBA H7100DIL RET (1000ML)	71	81	29	496	1927	814.6	\N	Covered	\N	5	Consumable	ERBA H7100DIL RET (1000ML)	t	f	2026-06-11 21:48:30.718612	2026-06-11 21:58:45.596029	62	\N	LAB0199
+3305	2	2	LAB-00200	ERBA H7100 FLURO DIFF (42ML)	71	81	29	14	38	1323.79	\N	Covered	\N	5	Consumable	ERBA H7100 FLURO DIFF (42ML)	t	f	2026-06-11 21:48:30.718618	2026-06-11 21:58:45.596032	62	\N	LAB0200
+3306	2	2	LAB-00201	ERBA H7100 CLEAN 10X4 ML	71	81	29	39	86	4172.58	\N	Covered	\N	5	Consumable	ERBA H7100 CLEAN 10X4 ML	t	f	2026-06-11 21:48:30.718625	2026-06-11 21:58:45.596035	62	\N	LAB0201
+3307	2	2	LAB-00202	ERBA H7100 DIL 20Ltrs	71	81	29	19	58	4509.6	\N	Covered	\N	5	Consumable	ERBA H7100 DIL 20Ltrs	t	f	2026-06-11 21:48:30.718631	2026-06-11 21:58:45.596037	62	\N	LAB0202
+3308	2	2	LAB-00203	ERBA H7100 DIL 20Ltrs	71	81	29	40	89	4089.52	\N	Covered	\N	5	Consumable	ERBA H7100 DIL 20Ltrs	t	f	2026-06-11 21:48:30.718637	2026-06-11 21:58:45.59604	62	\N	LAB0203
+3309	2	2	LAB-00204	ERBA 360 CLEAN	71	81	29	24	95	1640.44	\N	Covered	\N	5	Consumable	ERBA 360 CLEAN	t	f	2026-06-11 21:48:30.718642	2026-06-11 21:58:45.596043	62	\N	LAB0204
+3310	2	2	LAB-00205	ACTIN (APTT)	71	81	29	50	116	1018.55	\N	Covered	\N	5	Consumable	ACTIN (APTT)	t	f	2026-06-11 21:48:30.718648	2026-06-11 21:58:45.596046	62	\N	LAB0205
+3311	2	2	LAB-00206	THROMBOREL-S	71	81	29	22	86	4307.63	\N	Covered	\N	5	Consumable	THROMBOREL-S	t	f	2026-06-11 21:48:30.718654	2026-06-11 21:58:45.596049	62	\N	LAB0206
+3312	2	2	LAB-00207	CITROL 1E	71	81	29	40	153	3330.35	\N	Covered	\N	5	Consumable	CITROL 1E	t	f	2026-06-11 21:48:30.718659	2026-06-11 21:58:45.596051	62	\N	LAB0207
+3313	2	2	LAB-00208	CITROL 2E	71	81	29	39	85	3199.57	\N	Covered	\N	5	Consumable	CITROL 2E	t	f	2026-06-11 21:48:30.718665	2026-06-11 21:58:45.596054	62	\N	LAB0208
+3314	2	2	LAB-00209	PEDAL DUSTBIN 12LTRS	71	80	29	13	34	2785.39	\N	Covered	\N	18	Consumable	PEDAL DUSTBIN 12LTRS	t	f	2026-06-11 21:48:30.718671	2026-06-11 21:58:45.596057	62	\N	LAB0209
+3315	2	2	LAB-00210	ABSOLUTE ALCOHOL 100%	71	83	29	43	98	4776.94	\N	Covered	\N	18	Consumable	ABSOLUTE ALCOHOL 100%	t	f	2026-06-11 21:48:30.718677	2026-06-11 21:58:45.59606	62	\N	LAB0210
+3316	2	2	LAB-00211	ALBERT STAIN A	71	83	29	30	103	2516.68	\N	Covered	\N	5	Consumable	ALBERT STAIN A	t	f	2026-06-11 21:48:30.718682	2026-06-11 21:58:45.596062	62	\N	LAB0211
+3317	2	2	LAB-00212	ALBERT STAIN B	71	83	29	38	77	3073.02	\N	Covered	\N	5	Consumable	ALBERT STAIN B	t	f	2026-06-11 21:48:30.718688	2026-06-11 21:58:45.596065	62	\N	LAB0212
+3318	2	2	LAB-00213	ANAEROBIC GAS PACK	71	83	29	28	63	3227.62	\N	Covered	\N	5	Consumable	ANAEROBIC GAS PACK	t	f	2026-06-11 21:48:30.718694	2026-06-11 21:58:45.596068	62	\N	LAB0213
+3319	2	2	LAB-00214	ASO 35T TULIP	71	83	29	43	101	4857.13	\N	Covered	\N	5	Consumable	ASO 35T TULIP	t	f	2026-06-11 21:48:30.718699	2026-06-11 21:58:45.59607	62	\N	LAB0214
+3320	2	2	LAB-00215	BACTERIOLOGY REGISTER	71	85	29	39	92	4618.21	\N	Covered	\N	5	Consumable	BACTERIOLOGY REGISTER	t	f	2026-06-11 21:48:30.718705	2026-06-11 21:58:45.596073	62	\N	LAB0215
+3321	2	2	LAB-00216	CALCIUM HYDROXIDE POWDER - 500GMS	71	83	29	49	130	4129.59	\N	Covered	\N	5	Consumable	CALCIUM HYDROXIDE POWDER - 500GMS	t	f	2026-06-11 21:48:30.718711	2026-06-11 21:58:45.596076	62	\N	LAB0216
+3322	2	2	LAB-00217	CENTRIFUGE TUBE STAND	71	83	29	50	144	3689.69	\N	Covered	\N	18	Consumable	CENTRIFUGE TUBE STAND	t	f	2026-06-11 21:48:30.718716	2026-06-11 21:58:45.596079	62	\N	LAB0217
+3323	2	2	LAB-00218	CENTRIFUGE TUBES 50ML STERILE TARSONS  - 500NOS	71	83	29	34	87	4736.56	\N	Covered	\N	5	Consumable	CENTRIFUGE TUBES 50ML STERILE TARSONS  - 500NOS	t	f	2026-06-11 21:48:30.718722	2026-06-11 21:58:45.596082	62	\N	LAB0218
+3324	2	2	LAB-00219	COTTON WICK	71	83	29	27	75	2255.87	\N	Covered	\N	5	Consumable	COTTON WICK	t	f	2026-06-11 21:48:30.718728	2026-06-11 21:58:45.596085	62	\N	LAB0219
+3325	2	2	LAB-00220	CRYOBOX - 1.5-2ML, 9X9 ARRAY	71	83	29	45	144	4668.99	\N	Covered	\N	5	Consumable	CRYOBOX - 1.5-2ML, 9X9 ARRAY	t	f	2026-06-11 21:48:30.718734	2026-06-11 21:58:45.596087	62	\N	LAB0220
+3326	2	2	LAB-00221	CRYOVIALS -2ML	71	83	29	42	158	3649.81	\N	Covered	\N	5	Consumable	CRYOVIALS -2ML	t	f	2026-06-11 21:48:30.718739	2026-06-11 21:58:45.59609	62	\N	LAB0221
+3327	2	2	LAB-00222	DENGUE ELISA KIT (J.MITRA) IGG	71	83	29	40	143	3479.33	\N	Covered	\N	5	Consumable	DENGUE ELISA KIT (J.MITRA) IGG	t	f	2026-06-11 21:48:30.718745	2026-06-11 21:58:45.596093	62	\N	LAB0222
+3328	2	2	LAB-00223	DENGUE ELISA KIT (J.MITRA) IGM	71	83	29	60	231	644.54	\N	Covered	\N	5	Consumable	DENGUE ELISA KIT (J.MITRA) IGM	t	f	2026-06-11 21:48:30.718751	2026-06-11 21:58:45.596095	62	\N	LAB0223
+3329	2	2	LAB-00224	DENGUE ELISA KIT (J.MITRA) NS1	71	83	29	40	108	2084.88	\N	Covered	\N	5	Consumable	DENGUE ELISA KIT (J.MITRA) NS1	t	f	2026-06-11 21:48:30.718756	2026-06-11 21:58:45.596098	62	\N	LAB0224
+3330	2	2	LAB-00225	DILUENT FOR DNA EXTRACTION MB228-500ML @HIMEDIA	71	83	29	12	29	2859.56	\N	Covered	\N	5	Consumable	DILUENT FOR DNA EXTRACTION MB228-500ML @HIMEDIA	t	f	2026-06-11 21:48:30.718762	2026-06-11 21:58:45.596101	62	\N	LAB0225
+3331	2	2	LAB-00226	EM020 - COLISTIN - 10ST	71	83	29	35	87	1979.47	\N	Covered	\N	5	Consumable	EM020 - COLISTIN - 10ST	t	f	2026-06-11 21:48:30.718768	2026-06-11 21:58:45.596104	62	\N	LAB0226
+3332	2	2	LAB-00227	EM089 TEGICYCLIN HIMEDIA	71	83	29	34	118	3180.99	\N	Covered	\N	5	Consumable	EM089 TEGICYCLIN HIMEDIA	t	f	2026-06-11 21:48:30.718773	2026-06-11 21:58:45.596107	62	\N	LAB0227
+3333	2	2	LAB-00229	FD003 POLYMIXIN B HIMEDIA	71	83	29	44	140	4326.66	\N	Covered	\N	5	Consumable	FD003 POLYMIXIN B HIMEDIA	t	f	2026-06-11 21:48:30.718779	2026-06-11 21:58:45.596109	62	\N	LAB0229
+3334	2	2	LAB-00230	GW089-CONCAVITY SLIDE	71	83	29	27	58	2639.69	\N	Covered	\N	5	Consumable	GW089-CONCAVITY SLIDE	t	f	2026-06-11 21:48:30.718785	2026-06-11 21:58:45.596112	62	\N	LAB0230
+3335	2	2	LAB-00231	H1N1 RTPCR KIT - HELINI - 25 TESTS	71	83	29	36	139	3088.53	\N	Covered	\N	5	Consumable	H1N1 RTPCR KIT - HELINI - 25 TESTS	t	f	2026-06-11 21:48:30.71879	2026-06-11 21:58:45.596117	62	\N	LAB0231
+3336	2	2	LAB-00232	HCV SDBIOLINE 25 TEST	71	83	29	24	81	2655.58	\N	Covered	\N	5	Consumable	HCV SDBIOLINE 25 TEST	t	f	2026-06-11 21:48:30.718796	2026-06-11 21:58:45.59612	62	\N	LAB0232
+3337	2	2	LAB-00233	L J MEDIA SLANT	71	83	29	163	515	688.41	\N	Covered	\N	5	Consumable	L J MEDIA SLANT	t	f	2026-06-11 21:48:30.718802	2026-06-11 21:58:45.596122	62	\N	LAB0233
+3338	2	2	LAB-00234	LAB SAFETY GOGGLES -BIG SIZE- FULLY COVERED WIDE VISION AREA	71	83	29	47	155	1821.86	\N	Covered	\N	18	Consumable	LAB SAFETY GOGGLES -BIG SIZE- FULLY COVERED WIDE VISION AREA	t	f	2026-06-11 21:48:30.718808	2026-06-11 21:58:45.596125	62	\N	LAB0234
+3339	2	2	LAB-00235	LUGOL IODINE SOLUTION	71	83	29	39	80	1865.21	\N	Covered	\N	5	Consumable	LUGOL IODINE SOLUTION	t	f	2026-06-11 21:48:30.718813	2026-06-11 21:58:45.596128	62	\N	LAB0235
+3340	2	2	LAB-00236	M025S - SELENITE F BROTH - 100GMS	71	83	29	41	163	3702.44	\N	Covered	\N	5	Consumable	M025S - SELENITE F BROTH - 100GMS	t	f	2026-06-11 21:48:30.718819	2026-06-11 21:58:45.596131	62	\N	LAB0236
+3341	2	2	LAB-00237	MARKER PENS	71	85	29	23	76	1475.78	\N	Covered	\N	18	Consumable	MARKER PENS	t	f	2026-06-11 21:48:30.718825	2026-06-11 21:58:45.596134	62	\N	LAB0237
+3342	2	2	LAB-00238	MICROAMP 96-WELL RXN PLATE -, EA NO BARCODE UNIT SIZE: 10 PLATES	71	83	29	40	135	3248.64	\N	Covered	\N	5	Consumable	MICROAMP 96-WELL RXN PLATE -, EA NO BARCODE UNIT SIZE: 10 PLATES	t	f	2026-06-11 21:48:30.71883	2026-06-11 21:58:45.596137	62	\N	LAB0238
+3343	2	2	LAB-00239	MICROBIOLOGY REQUEST FORM	71	85	29	49	145	1899.99	\N	Covered	\N	5	Consumable	MICROBIOLOGY REQUEST FORM	t	f	2026-06-11 21:48:30.718836	2026-06-11 21:58:45.59614	62	\N	LAB0239
+3344	2	2	LAB-00240	MICROCENTRIFUGE TUBE 0.5ML (1X500NO)	71	83	29	12	32	4264.37	\N	Covered	\N	5	Consumable	MICROCENTRIFUGE TUBE 0.5ML (1X500NO)	t	f	2026-06-11 21:48:30.718842	2026-06-11 21:58:45.596142	62	\N	LAB0240
+3345	2	2	LAB-00241	MS2760H-50NO HIVIRALTM TRANSPORT KIT WITH 3ML VTM IN ROUND BOTTOM TUBE, TWO STERILE FLOCKED SWAB W/BREAKPOINT	71	83	29	306	1086	926.6	\N	Covered	\N	5	Consumable	MS2760H-50NO HIVIRALTM TRANSPORT KIT WITH 3ML VTM IN ROUND BOTTOM TUBE, TWO STERILE FLOCKED SWAB W/BREAKPOINT	t	f	2026-06-11 21:48:30.718847	2026-06-11 21:58:45.596145	62	\N	LAB0241
+3346	2	2	LAB-00242	MV001-500G - NUTRIENT AGAR -HIMEDIA	71	83	29	31	69	4734.36	\N	Covered	\N	5	Consumable	MV001-500G - NUTRIENT AGAR -HIMEDIA	t	f	2026-06-11 21:48:30.718853	2026-06-11 21:58:45.596148	62	\N	LAB0242
+3347	2	2	LAB-00243	MV189 TCBS POWDER MEDIA-100G	71	83	29	46	178	1505.55	\N	Covered	\N	5	Consumable	MV189 TCBS POWDER MEDIA-100G	t	f	2026-06-11 21:48:30.718859	2026-06-11 21:58:45.596151	62	\N	LAB0243
+3348	2	2	LAB-00244	NON-ABSORBANT COTTON	71	83	29	13	47	1269.54	\N	Covered	\N	5	Consumable	NON-ABSORBANT COTTON	t	f	2026-06-11 21:48:30.718864	2026-06-11 21:58:45.596154	62	\N	LAB0244
+3349	2	2	LAB-00245	PETRIDISH 90X14 TRIPLE VENT (PKT OF 500NO)	71	83	29	459	1158	750.54	\N	Covered	\N	5	Consumable	PETRIDISH 90X14 TRIPLE VENT (PKT OF 500NO)	t	f	2026-06-11 21:48:30.718872	2026-06-11 21:58:45.596156	62	\N	LAB0245
+3350	2	2	LAB-00246	POTASSIUM HYDROXIDE 40% - NICE - 500ML	71	83	29	318	1003	775.39	\N	Covered	\N	5	Consumable	POTASSIUM HYDROXIDE 40% - NICE - 500ML	t	f	2026-06-11 21:48:30.718878	2026-06-11 21:58:45.596159	62	\N	LAB0246
+3351	2	2	LAB-00247	POVIDINE IODINE SOLUTION 500ML	71	83	29	40	146	3251.76	\N	Covered	\N	5	Consumable	POVIDINE IODINE SOLUTION 500ML	t	f	2026-06-11 21:48:30.718883	2026-06-11 21:58:45.596162	62	\N	LAB0247
+3352	2	2	LAB-00248	PW146-1X500NO MICROCENTRIFUGE TUBE 1.5ML	71	83	29	466	1662	584.5	\N	Covered	\N	5	Consumable	PW146-1X500NO MICROCENTRIFUGE TUBE 1.5ML	t	f	2026-06-11 21:48:30.718889	2026-06-11 21:58:45.596165	62	\N	LAB0248
+3353	2	2	LAB-00249	PW147-1X500NO MICROCENTRIFUGE TUBE @HIMEDIA	71	83	29	308	632	703.81	\N	Covered	\N	5	Consumable	PW147-1X500NO MICROCENTRIFUGE TUBE @HIMEDIA	t	f	2026-06-11 21:48:30.718895	2026-06-11 21:58:45.596168	62	\N	LAB0249
+3354	2	2	LAB-00250	RCM ANAEROBIC MEDIA BOTTLE	71	83	29	39	156	1924.28	\N	Covered	\N	5	Consumable	RCM ANAEROBIC MEDIA BOTTLE	t	f	2026-06-11 21:48:30.7189	2026-06-11 21:58:45.596171	62	\N	LAB0250
+3355	2	2	LAB-00251	S013 GRAMS IODINE	71	83	29	30	111	4447.65	\N	Covered	\N	5	Consumable	S013 GRAMS IODINE	t	f	2026-06-11 21:48:30.718906	2026-06-11 21:58:45.596173	62	\N	LAB0251
+3356	2	2	LAB-00252	SEEGENERALE KIT	71	83	29	41	131	1383.41	\N	Covered	\N	5	Consumable	SEEGENERALE KIT	t	f	2026-06-11 21:48:30.718912	2026-06-11 21:58:45.596176	62	\N	LAB0252
+3357	2	2	LAB-00253	SEMI SKIRTED PLATE 96X0.2ML - MEDOX  (PACK SIZE:25NOS)	71	83	29	272	785	743.95	\N	Covered	\N	5	Consumable	SEMI SKIRTED PLATE 96X0.2ML - MEDOX  (PACK SIZE:25NOS)	t	f	2026-06-11 21:48:30.718918	2026-06-11 21:58:45.596179	62	\N	LAB0253
+3358	2	2	LAB-00254	SEROLOGY REGISTER	71	85	29	99	256	561.1	\N	Covered	\N	5	Consumable	SEROLOGY REGISTER	t	f	2026-06-11 21:48:30.718923	2026-06-11 21:58:45.596182	62	\N	LAB0254
+3359	2	2	LAB-00255	SIMON CITRATE AGAR-500GMS	71	83	29	20	45	2264.03	\N	Covered	\N	5	Consumable	SIMON CITRATE AGAR-500GMS	t	f	2026-06-11 21:48:30.718929	2026-06-11 21:58:45.596184	62	\N	LAB0255
+3360	2	2	LAB-00256	SLIDE TRAY	71	83	29	14	46	1907.68	\N	Covered	\N	18	Consumable	SLIDE TRAY	t	f	2026-06-11 21:48:30.718935	2026-06-11 21:58:45.596187	62	\N	LAB0256
+3361	2	2	LAB-00257	SODIUM HYPOCHLORITE SOLUTION 5L QUALIGENERALS	71	83	29	36	118	3873.11	\N	Covered	\N	18	Consumable	SODIUM HYPOCHLORITE SOLUTION 5L QUALIGENERALS	t	f	2026-06-11 21:48:30.71894	2026-06-11 21:58:45.59619	62	\N	LAB0257
+3362	2	2	LAB-00258	SPATULLA	71	83	29	45	177	3271	\N	Covered	\N	18	Consumable	SPATULLA	t	f	2026-06-11 21:48:30.718946	2026-06-11 21:58:45.596193	62	\N	LAB0258
+3363	2	2	LAB-00259	SPIRIT LAMP METAL	71	83	29	28	90	4982.48	\N	Covered	\N	18	Consumable	SPIRIT LAMP METAL	t	f	2026-06-11 21:48:30.718952	2026-06-11 21:58:45.596195	62	\N	LAB0259
+3364	2	2	LAB-00260	SSR RELAY (INCUBATOR)	71	83	29	36	109	4250.21	\N	Covered	\N	18	Consumable	SSR RELAY (INCUBATOR)	t	f	2026-06-11 21:48:30.718957	2026-06-11 21:58:45.596198	62	\N	LAB0260
+3365	2	2	LAB-00261	SWABS FOR CULTURE WITH TUBE (STERILE)	71	80	29	14	54	1826.63	\N	Covered	\N	5	Consumable	SWABS FOR CULTURE WITH TUBE (STERILE)	t	f	2026-06-11 21:48:30.718963	2026-06-11 21:58:45.596201	62	\N	LAB0261
+3366	2	2	LAB-00262	THIOGLYCOLLATE MEDIUM BOTTLE	71	83	29	33	127	3793.84	\N	Covered	\N	5	Consumable	THIOGLYCOLLATE MEDIUM BOTTLE	t	f	2026-06-11 21:48:30.718969	2026-06-11 21:58:45.596204	62	\N	LAB0262
+3367	2	2	LAB-00263	TUBE RACK (15ML TUBES - CAPACITY-24)	71	83	29	32	72	2071.37	\N	Covered	\N	18	Consumable	TUBE RACK (15ML TUBES - CAPACITY-24)	t	f	2026-06-11 21:48:30.718974	2026-06-11 21:58:45.596206	62	\N	LAB0263
+3368	2	2	LAB-00264	VENUS N95 MASK	71	83	29	21	44	1363.46	\N	Covered	\N	5	Consumable	VENUS N95 MASK	t	f	2026-06-11 21:48:30.71898	2026-06-11 21:58:45.596209	62	\N	LAB0264
+3369	2	2	LAB-00265	VIROLOGY REGISTER	71	85	29	11	44	2315.18	\N	Covered	\N	5	Consumable	VIROLOGY REGISTER	t	f	2026-06-11 21:48:30.718986	2026-06-11 21:58:45.596212	62	\N	LAB0265
+3370	2	2	LAB-00266	VLTM - TULIP	71	83	29	36	112	1835.83	\N	Covered	\N	5	Consumable	VLTM - TULIP	t	f	2026-06-11 21:48:30.718991	2026-06-11 21:58:45.596215	62	\N	LAB0266
+3371	2	2	LAB-00267	ZIPLOCK COVERS SIZE 6X8	71	83	29	14	49	1339.35	\N	Covered	\N	18	Consumable	ZIPLOCK COVERS SIZE 6X8	t	f	2026-06-11 21:48:30.718997	2026-06-11 21:58:45.596217	62	\N	LAB0267
+3372	2	2	LIN-00001	BROWN COLOUR COAT	72	86	29	277	865	332	\N	Covered	\N	5	Non-Consumable	BROWN COLOUR COAT	t	f	2026-06-11 21:48:30.719003	2026-06-11 21:58:45.59622	62	\N	LIN0001
+3373	2	2	LIN-00002	GREY COLOUR COAT	72	86	29	428	1593	540	\N	Covered	\N	5	Non-Consumable	GREY COLOUR COAT	t	f	2026-06-11 21:48:30.719008	2026-06-11 21:58:45.596223	62	\N	LIN0002
+3374	2	2	LIN-00003	BATH TOWEL - 400GMS WHITE DELUXE 27X54	72	86	29	34	77	1432.44	\N	Covered	\N	5	Non-Consumable	BATH TOWEL - 400GMS WHITE DELUXE 27X54	t	f	2026-06-11 21:48:30.719014	2026-06-11 21:58:45.596226	62	\N	LIN0003
+3375	2	2	LIN-00004	BEDSHEET+ PILLOW COVER- PLANE WHITE SET 200 TC 40SX40S COUNT PREMIUM - SIZE: 60X90/18X28	72	86	29	20	60	1407.33	\N	Covered	\N	5	Non-Consumable	BEDSHEET+ PILLOW COVER- PLANE WHITE SET 200 TC 40SX40S COUNT PREMIUM - SIZE: 60X90/18X28	t	f	2026-06-11 21:48:30.71902	2026-06-11 21:58:45.596228	62	\N	LIN0004
+3376	2	2	LIN-00005	BLUE STRIPS PATIENT GOWN	72	86	29	139	541	223.51	\N	Covered	\N	5	Non-Consumable	BLUE STRIPS PATIENT GOWN	t	f	2026-06-11 21:48:30.719026	2026-06-11 21:58:45.596231	62	\N	LIN0005
+3377	2	2	LIN-00006	CH TOWEL 36*36	72	86	29	218	592	221.44	\N	Covered	\N	5	Non-Consumable	CH TOWEL 36*36	t	f	2026-06-11 21:48:30.719031	2026-06-11 21:58:45.596234	62	\N	LIN0006
+3378	2	2	LIN-00007	DARK CHECKS PATIENT GOWN	72	86	29	33	117	1105.15	\N	Covered	\N	5	Non-Consumable	DARK CHECKS PATIENT GOWN	t	f	2026-06-11 21:48:30.719037	2026-06-11 21:58:45.596237	62	\N	LIN0007
+3379	2	2	LIN-00008	DUCK CLOTH FOR CSSD - DARK GREEN	72	86	29	419	1599	768.62	\N	Covered	\N	5	Non-Consumable	DUCK CLOTH FOR CSSD - DARK GREEN	t	f	2026-06-11 21:48:30.719043	2026-06-11 21:58:45.596239	62	\N	LIN0008
+3380	2	2	LIN-00009	FABRIC/ADMIRE/VAT DYED/114TC/60"WIDTH 16'SX16'S YARN COUNT --57 REED X 57 PICK  H-BLUE IN MTRS	72	86	29	380	835	656.17	\N	Covered	\N	5	Non-Consumable	FABRIC/ADMIRE/VAT DYED/114TC/60"WIDTH 16'SX16'S YARN COUNT --57 REED X 57 PICK  H-BLUE IN MTRS	t	f	2026-06-11 21:48:30.719048	2026-06-11 21:58:45.596242	62	\N	LIN0009
+3381	2	2	LIN-00010	FABRIC/ADMIRE/VAT DYED/116TC/58"WIDTH  H-BLUE IN MTRS	72	86	29	361	813	675.24	\N	Covered	\N	5	Non-Consumable	FABRIC/ADMIRE/VAT DYED/116TC/58"WIDTH  H-BLUE IN MTRS	t	f	2026-06-11 21:48:30.719054	2026-06-11 21:58:45.596245	62	\N	LIN0010
+3382	2	2	LIN-00011	FABRIC/BEAUTY/VAT DYED/120TC/60"WIDTH  H-BLUE IN MTRS	72	86	29	444	1719	340.58	\N	Covered	\N	5	Non-Consumable	FABRIC/BEAUTY/VAT DYED/120TC/60"WIDTH  H-BLUE IN MTRS	t	f	2026-06-11 21:48:30.71906	2026-06-11 21:58:45.596248	62	\N	LIN0011
+3383	2	2	LIN-00012	FABRIC/CHARM/VAT DYED/144TC/58"WIDTH  B-GREEN IN MTRS	72	86	29	13	32	1707.21	\N	Covered	\N	5	Non-Consumable	FABRIC/CHARM/VAT DYED/144TC/58"WIDTH  B-GREEN IN MTRS	t	f	2026-06-11 21:48:30.719065	2026-06-11 21:58:45.59625	62	\N	LIN0012
+3384	2	2	LIN-00013	FABRIC/DELIGHT 200 - SPRING-GREEN -60X90 IN MTRS	72	86	29	23	83	1930.18	\N	Covered	\N	5	Non-Consumable	FABRIC/DELIGHT 200 - SPRING-GREEN -60X90 IN MTRS	t	f	2026-06-11 21:48:30.719071	2026-06-11 21:58:45.596253	62	\N	LIN0013
+3385	2	2	LIN-00014	FABRIC/DELIGHT/VAT DYED/210TC/58"WIDTH  B-GREEN IN MTRS	72	86	29	27	88	1754.5	\N	Covered	\N	5	Non-Consumable	FABRIC/DELIGHT/VAT DYED/210TC/58"WIDTH  B-GREEN IN MTRS	t	f	2026-06-11 21:48:30.719077	2026-06-11 21:58:45.596256	62	\N	LIN0014
+3386	2	2	LIN-00015	FABRIC/DELIGHT/VAT DYED/210TC/58"WIDTH  H-BLUE IN MTRS	72	86	29	19	55	1797.23	\N	Covered	\N	5	Non-Consumable	FABRIC/DELIGHT/VAT DYED/210TC/58"WIDTH  H-BLUE IN MTRS	t	f	2026-06-11 21:48:30.719082	2026-06-11 21:58:45.596259	62	\N	LIN0015
+3387	2	2	LIN-00016	FABRIC/DELIGHT/VAT DYED/210TC/58"WIDTH  TEAL IN MTRS	72	86	29	407	1178	510.26	\N	Covered	\N	5	Non-Consumable	FABRIC/DELIGHT/VAT DYED/210TC/58"WIDTH  TEAL IN MTRS	t	f	2026-06-11 21:48:30.719088	2026-06-11 21:58:45.596261	62	\N	LIN0016
+3388	2	2	LIN-00017	GREEN COLOR SCRUB SUITS	72	86	29	49	185	1338.01	\N	Covered	\N	5	Non-Consumable	GREEN COLOR SCRUB SUITS	t	f	2026-06-11 21:48:30.719094	2026-06-11 21:58:45.596264	62	\N	LIN0017
+3389	2	2	LIN-00018	GREEN STRIPS PATIENT GOWN	72	86	29	417	1338	920	\N	Covered	\N	5	Non-Consumable	GREEN STRIPS PATIENT GOWN	t	f	2026-06-11 21:48:30.719099	2026-06-11 21:58:45.596267	62	\N	LIN0018
+3390	2	2	LIN-00019	GREEN SURGICAL GOWN	72	86	29	27	59	1435.22	\N	Covered	\N	5	Non-Consumable	GREEN SURGICAL GOWN	t	f	2026-06-11 21:48:30.719105	2026-06-11 21:58:45.59627	62	\N	LIN0019
+3391	2	2	LIN-00020	LIGHT BLUE SCRUB SUITS	72	86	29	329	849	555.5	\N	Covered	\N	5	Non-Consumable	LIGHT BLUE SCRUB SUITS	t	f	2026-06-11 21:48:30.719113	2026-06-11 21:58:45.596272	62	\N	LIN0020
+3392	2	2	LIN-00021	MEDIUM TOWEL 42*59	72	86	29	90	296	940.28	\N	Covered	\N	5	Non-Consumable	MEDIUM TOWEL 42*59	t	f	2026-06-11 21:48:30.719119	2026-06-11 21:58:45.596275	62	\N	LIN0021
+3393	2	2	LIN-00022	NURSES UNIFORM (STAFF BOYS) PANT	72	86	29	33	120	1147.14	\N	Covered	\N	5	Non-Consumable	NURSES UNIFORM (STAFF BOYS) PANT	t	f	2026-06-11 21:48:30.719124	2026-06-11 21:58:45.596278	62	\N	LIN0022
+3394	2	2	LIN-00023	NURSES UNIFORM (STAFF BOYS) SHIRT	72	86	29	40	112	1666.89	\N	Covered	\N	5	Non-Consumable	NURSES UNIFORM (STAFF BOYS) SHIRT	t	f	2026-06-11 21:48:30.71913	2026-06-11 21:58:45.596281	62	\N	LIN0023
+3395	2	2	LIN-00024	NURSES UNIFORM (STAFF GIRLS) PANT	72	86	29	16	47	1486.97	\N	Covered	\N	5	Non-Consumable	NURSES UNIFORM (STAFF GIRLS) PANT	t	f	2026-06-11 21:48:30.719136	2026-06-11 21:58:45.596284	62	\N	LIN0024
+3396	2	2	LIN-00025	NURSES UNIFORM (STAFF GIRLS) SHIRT	72	86	29	208	601	761.89	\N	Covered	\N	5	Non-Consumable	NURSES UNIFORM (STAFF GIRLS) SHIRT	t	f	2026-06-11 21:48:30.719141	2026-06-11 21:58:45.596287	62	\N	LIN0025
+3397	2	2	LIN-00026	NURSES UNIFORMS (SUPERVISORS) FULL SET	72	86	29	37	126	1345.82	\N	Covered	\N	5	Non-Consumable	NURSES UNIFORMS (SUPERVISORS) FULL SET	t	f	2026-06-11 21:48:30.719147	2026-06-11 21:58:45.59629	62	\N	LIN0026
+3398	2	2	LIN-00027	PACKING CLOTH SPINAL - 36*36	72	86	29	62	154	577.32	\N	Covered	\N	5	Consumable	PACKING CLOTH SPINAL - 36*36	t	f	2026-06-11 21:48:30.719153	2026-06-11 21:58:45.596292	62	\N	LIN0027
+3399	2	2	LIN-00028	PATIENT GOWN BLUE SMALL STRIPS 36INCH WIDTH	72	86	29	28	59	1611.68	\N	Covered	\N	5	Consumable	PATIENT GOWN BLUE SMALL STRIPS 36INCH WIDTH	t	f	2026-06-11 21:48:30.719158	2026-06-11 21:58:45.596295	62	\N	LIN0028
+3400	2	2	LIN-00029	PATIENT GOWN PINK SMALL STRIPS 36INCH WIDTH	72	86	29	36	130	1077.77	\N	Covered	\N	5	Consumable	PATIENT GOWN PINK SMALL STRIPS 36INCH WIDTH	t	f	2026-06-11 21:48:30.719164	2026-06-11 21:58:45.596298	62	\N	LIN0029
+3401	2	2	LIN-00030	PLAIN SHEET 70*73	72	86	29	377	1487	952.03	\N	Covered	\N	5	Consumable	PLAIN SHEET 70*73	t	f	2026-06-11 21:48:30.71917	2026-06-11 21:58:45.596301	62	\N	LIN0030
+3402	2	2	LIN-00031	PLAIN SHEET 80*87	72	86	29	38	152	1814.48	\N	Covered	\N	5	Consumable	PLAIN SHEET 80*87	t	f	2026-06-11 21:48:30.719175	2026-06-11 21:58:45.596304	62	\N	LIN0031
+3403	2	2	LIN-00032	SKIN TOWEL 17*17	72	86	29	229	743	554.59	\N	Covered	\N	5	Consumable	SKIN TOWEL 17*17	t	f	2026-06-11 21:48:30.719181	2026-06-11 21:58:45.596307	62	\N	LIN0032
+3404	2	2	LIN-00033	TEEL (NEW GREEN) BED SHEET	72	86	29	119	448	818.22	\N	Covered	\N	5	Non-Consumable	TEEL (NEW GREEN) BED SHEET	t	f	2026-06-11 21:48:30.719187	2026-06-11 21:58:45.596309	62	\N	LIN0033
+3405	2	2	LIN-00034	TEEL (NEW GREEN) PILLOW COVER	72	86	29	350	844	258.33	\N	Covered	\N	5	Non-Consumable	TEEL (NEW GREEN) PILLOW COVER	t	f	2026-06-11 21:48:30.719192	2026-06-11 21:58:45.596312	62	\N	LIN0034
+3406	2	2	LIN-00035	TOWEL EDGE HOLE 80*87	72	86	29	33	76	1742.33	\N	Covered	\N	5	Non-Consumable	TOWEL EDGE HOLE 80*87	t	f	2026-06-11 21:48:30.719198	2026-06-11 21:58:45.596315	62	\N	LIN0035
+3407	2	2	LIN-00036	APRON	72	86	29	284	702	978.04	\N	Covered	\N	5	Non-Consumable	APRON	t	f	2026-06-11 21:48:30.719204	2026-06-11 21:58:45.596318	62	\N	LIN0036
+3408	2	2	PLB-00001	20mm 45° Bend CPVC	73	87	29	21	55	3586.21	\N	Covered	\N	18	Consumable	20mm 45° Bend CPVC	t	f	2026-06-11 21:48:30.719209	2026-06-11 21:58:45.596321	62	\N	PLB0001
+3409	2	2	PLB-00002	20mm Coupler CPVC	73	87	29	47	101	1286.38	\N	Covered	\N	18	Consumable	20mm Coupler CPVC	t	f	2026-06-11 21:48:30.719215	2026-06-11 21:58:45.596323	62	\N	PLB0002
+3410	2	2	PLB-00003	20mm Elbow CPVC	73	87	29	91	235	67.78	\N	Covered	\N	18	Consumable	20mm Elbow CPVC	t	f	2026-06-11 21:48:30.719221	2026-06-11 21:58:45.596326	62	\N	PLB0003
+3411	2	2	PLB-00004	20mm End Cap CPVC	73	87	29	30	75	3985.75	\N	Covered	\N	18	Consumable	20mm End Cap CPVC	t	f	2026-06-11 21:48:30.719227	2026-06-11 21:58:45.596329	62	\N	PLB0004
+3412	2	2	PLB-00005	20mm 45° Bend CPVC	73	87	29	19	52	2947.6	\N	Covered	\N	18	Consumable	20mm 45° Bend CPVC	t	f	2026-06-11 21:48:30.719233	2026-06-11 21:58:45.596332	62	\N	PLB0005
+3413	2	2	PLB-00006	20mm MTA CPVC	73	87	29	432	1160	949.14	\N	Covered	\N	18	Consumable	20mm MTA CPVC	t	f	2026-06-11 21:48:30.719238	2026-06-11 21:58:45.596338	62	\N	PLB0006
+3414	2	2	PLB-00007	20mm Ball Volve CPVC	73	87	29	15	51	3949.56	\N	Covered	\N	18	Consumable	20mm Ball Volve CPVC	t	f	2026-06-11 21:48:30.719244	2026-06-11 21:58:45.596341	62	\N	PLB0007
+3415	2	2	PLB-00008	20mm Clamp	73	87	29	14	48	3060.85	\N	Covered	\N	18	Consumable	20mm Clamp	t	f	2026-06-11 21:48:30.71925	2026-06-11 21:58:45.596344	62	\N	PLB0008
+3416	2	2	PLB-00009	20mm Brass Elbow CPVC	73	87	29	48	189	2380.55	\N	Covered	\N	18	Consumable	20mm Brass Elbow CPVC	t	f	2026-06-11 21:48:30.719255	2026-06-11 21:58:45.596346	62	\N	PLB0009
+3417	2	2	PLB-00010	20mm Brass FTA (20x15mm) CPVC	73	87	29	11	43	2676	\N	Covered	\N	18	Consumable	20mm Brass FTA (20x15mm) CPVC	t	f	2026-06-11 21:48:30.719261	2026-06-11 21:58:45.596349	62	\N	PLB0010
+3418	2	2	PLB-00011	Sink Mixcer (Jaguar)	73	87	29	16	59	3965.76	\N	Covered	\N	18	Consumable	Sink Mixcer (Jaguar)	t	f	2026-06-11 21:48:30.719267	2026-06-11 21:58:45.596352	62	\N	PLB0011
+3419	2	2	PLB-00012	20mm FTA CPVC	73	87	29	22	57	3029.26	\N	Covered	\N	18	Consumable	20mm FTA CPVC	t	f	2026-06-11 21:48:30.719272	2026-06-11 21:58:45.596355	62	\N	PLB0012
+3420	2	2	PLB-00013	25x20mm Elbow CPVC	73	87	29	29	83	1855.31	\N	Covered	\N	18	Consumable	25x20mm Elbow CPVC	t	f	2026-06-11 21:48:30.719278	2026-06-11 21:58:45.596357	62	\N	PLB0013
+3421	2	2	PLB-00014	15mm Plug	73	87	29	19	68	2724.67	\N	Covered	\N	18	Consumable	15mm Plug	t	f	2026-06-11 21:48:30.719283	2026-06-11 21:58:45.596363	62	\N	PLB0014
+3422	2	2	PLB-00015	25mm End Cape CPVC	73	87	29	12	34	2348.97	\N	Covered	\N	18	Consumable	25mm End Cape CPVC	t	f	2026-06-11 21:48:30.719289	2026-06-11 21:58:45.596365	62	\N	PLB0015
+3423	2	2	PLB-00016	25x20mm Reducer CPVC	73	87	29	41	96	2583.12	\N	Covered	\N	18	Consumable	25x20mm Reducer CPVC	t	f	2026-06-11 21:48:30.719295	2026-06-11 21:58:45.596368	62	\N	PLB0016
+3424	2	2	PLB-00017	25x20mm Bush CPVC	73	87	29	45	139	4715.86	\N	Covered	\N	18	Consumable	25x20mm Bush CPVC	t	f	2026-06-11 21:48:30.7193	2026-06-11 21:58:45.596371	62	\N	PLB0017
+3425	2	2	PLB-00018	25mm 45° Bend CPVC	73	87	29	11	43	4052.12	\N	Covered	\N	18	Consumable	25mm 45° Bend CPVC	t	f	2026-06-11 21:48:30.719306	2026-06-11 21:58:45.596374	62	\N	PLB0018
+3426	2	2	PLB-00019	25mm Ball Valve CPVC	73	87	29	49	175	1164.36	\N	Covered	\N	18	Consumable	25mm Ball Valve CPVC	t	f	2026-06-11 21:48:30.719312	2026-06-11 21:58:45.596377	62	\N	PLB0019
+3427	2	2	PLB-00020	25mm Coupler CPVC	73	87	29	47	180	3648.08	\N	Covered	\N	18	Consumable	25mm Coupler CPVC	t	f	2026-06-11 21:48:30.719318	2026-06-11 21:58:45.596379	62	\N	PLB0020
+3428	2	2	PLB-00021	25mm Tee CPVC	73	87	29	310	1123	302.44	\N	Covered	\N	18	Consumable	25mm Tee CPVC	t	f	2026-06-11 21:48:30.719323	2026-06-11 21:58:45.596382	62	\N	PLB0021
+3429	2	2	PLB-00022	25mm Elbow CPVC	73	87	29	26	84	4466.46	\N	Covered	\N	18	Consumable	25mm Elbow CPVC	t	f	2026-06-11 21:48:30.719329	2026-06-11 21:58:45.596385	62	\N	PLB0022
+3430	2	2	PLB-00023	25x20 Tee CPVC	73	87	29	432	965	100.04	\N	Covered	\N	18	Consumable	25x20 Tee CPVC	t	f	2026-06-11 21:48:30.719338	2026-06-11 21:58:45.596388	62	\N	PLB0023
+3431	2	2	PLB-00024	25mm FTA	73	87	29	202	598	297.73	\N	Covered	\N	18	Consumable	25mm FTA	t	f	2026-06-11 21:48:30.719343	2026-06-11 21:58:45.59639	62	\N	PLB0024
+3432	2	2	PLB-00025	25mm Long Bend	73	87	29	33	91	4270.89	\N	Covered	\N	18	Consumable	25mm Long Bend	t	f	2026-06-11 21:48:30.719349	2026-06-11 21:58:45.596393	62	\N	PLB0025
+3433	2	2	PLB-00026	25mm Clamp	73	87	29	102	279	342.59	\N	Covered	\N	18	Consumable	25mm Clamp	t	f	2026-06-11 21:48:30.719355	2026-06-11 21:58:45.596396	62	\N	PLB0026
+3434	2	2	PLB-00027	25mm MTA	73	87	29	282	1077	518.03	\N	Covered	\N	18	Consumable	25mm MTA	t	f	2026-06-11 21:48:30.719362	2026-06-11 21:58:45.596399	62	\N	PLB0027
+3435	2	2	PLB-00028	20x15mm Brass Tee	73	87	29	347	1193	923.38	\N	Covered	\N	18	Consumable	20x15mm Brass Tee	t	f	2026-06-11 21:48:30.719368	2026-06-11 21:58:45.596401	62	\N	PLB0028
+3436	2	2	PLB-00029	25mm Union	73	87	29	84	259	874.17	\N	Covered	\N	18	Consumable	25mm Union	t	f	2026-06-11 21:48:30.719374	2026-06-11 21:58:45.596404	62	\N	PLB0029
+3437	2	2	PLB-00030	40mm End Cap	73	87	29	24	80	3636.31	\N	Covered	\N	18	Consumable	40mm End Cap	t	f	2026-06-11 21:48:30.71938	2026-06-11 21:58:45.596407	62	\N	PLB0030
+3438	2	2	PLB-00031	40x25mm Tee	73	87	29	32	105	3650.91	\N	Covered	\N	18	Consumable	40x25mm Tee	t	f	2026-06-11 21:48:30.719385	2026-06-11 21:58:45.59641	62	\N	PLB0031
+3439	2	2	PLB-00032	40mm 45° Bend CPVC	73	87	29	50	195	2786.47	\N	Covered	\N	18	Consumable	40mm 45° Bend CPVC	t	f	2026-06-11 21:48:30.719391	2026-06-11 21:58:45.596413	62	\N	PLB0032
+3440	2	2	PLB-00033	40mm Ball Volve CPVC	73	87	29	97	244	943.5	\N	Covered	\N	18	Consumable	40mm Ball Volve CPVC	t	f	2026-06-11 21:48:30.719397	2026-06-11 21:58:45.596415	62	\N	PLB0033
+3441	2	2	PLB-00034	40mm Coupler CPVC	73	87	29	186	430	630.23	\N	Covered	\N	18	Consumable	40mm Coupler CPVC	t	f	2026-06-11 21:48:30.719402	2026-06-11 21:58:45.596418	62	\N	PLB0034
+3442	2	2	PLB-00035	40mm Long Bend	73	87	29	33	71	2576.76	\N	Covered	\N	18	Consumable	40mm Long Bend	t	f	2026-06-11 21:48:30.719408	2026-06-11 21:58:45.596421	62	\N	PLB0035
+3443	2	2	PLB-00036	40mm Tank Nipple	73	87	29	234	823	187.95	\N	Covered	\N	18	Consumable	40mm Tank Nipple	t	f	2026-06-11 21:48:30.719414	2026-06-11 21:58:45.596424	62	\N	PLB0036
+3445	2	2	PLB-00038	40mm MTA	73	87	29	28	66	1695.7	\N	Covered	\N	18	Consumable	40mm MTA	t	f	2026-06-11 21:48:30.719425	2026-06-11 21:58:45.596429	62	\N	PLB0038
+3446	2	2	PLB-00039	40mm Elbow	73	87	29	107	260	675.91	\N	Covered	\N	18	Consumable	40mm Elbow	t	f	2026-06-11 21:48:30.719431	2026-06-11 21:58:45.596432	62	\N	PLB0039
+3447	2	2	PLB-00040	40x32mm Reducer	73	87	29	20	51	2174.17	\N	Covered	\N	18	Consumable	40x32mm Reducer	t	f	2026-06-11 21:48:30.719437	2026-06-11 21:58:45.596434	62	\N	PLB0040
+3448	2	2	PLB-00041	40x25mm Reducer	73	87	29	10	22	4797.46	\N	Covered	\N	18	Consumable	40x25mm Reducer	t	f	2026-06-11 21:48:30.719442	2026-06-11 21:58:45.596437	62	\N	PLB0041
+3449	2	2	PLB-00042	40mm Union	73	87	29	47	142	3502.63	\N	Covered	\N	18	Consumable	40mm Union	t	f	2026-06-11 21:48:30.719448	2026-06-11 21:58:45.59644	62	\N	PLB0042
+3450	2	2	PLB-00043	50x40 Reducer	73	87	29	217	833	460.36	\N	Covered	\N	18	Consumable	50x40 Reducer	t	f	2026-06-11 21:48:30.719454	2026-06-11 21:58:45.596443	62	\N	PLB0043
+3451	2	2	PLB-00044	50mm MTA	73	87	29	164	354	515.4	\N	Covered	\N	18	Consumable	50mm MTA	t	f	2026-06-11 21:48:30.719459	2026-06-11 21:58:45.596446	62	\N	PLB0044
+3452	2	2	PLB-00045	40mm Tee	73	87	29	495	1206	99.66	\N	Covered	\N	18	Consumable	40mm Tee	t	f	2026-06-11 21:48:30.719465	2026-06-11 21:58:45.596448	62	\N	PLB0045
+3453	2	2	PLB-00046	50mm End Cap	73	87	29	275	953	402.63	\N	Covered	\N	18	Consumable	50mm End Cap	t	f	2026-06-11 21:48:30.719471	2026-06-11 21:58:45.596451	62	\N	PLB0046
+3454	2	2	PLB-00047	Solvent 250ml CPVC	73	87	29	57	178	886.81	\N	Covered	\N	18	Consumable	Solvent 250ml CPVC	t	f	2026-06-11 21:48:30.719476	2026-06-11 21:58:45.596454	62	\N	PLB0047
+3455	2	2	PLB-00048	Solvent 1Ltr CPVC	73	87	29	25	96	2744.39	\N	Covered	\N	18	Consumable	Solvent 1Ltr CPVC	t	f	2026-06-11 21:48:30.719482	2026-06-11 21:58:45.596457	62	\N	PLB0048
+3456	2	2	PLB-00049	Solvent 1Ltr PVC	73	87	29	119	423	229.02	\N	Covered	\N	18	Consumable	Solvent 1Ltr PVC	t	f	2026-06-11 21:48:30.719488	2026-06-11 21:58:45.596459	62	\N	PLB0049
+3457	2	2	PLB-00050	50mm FTA	73	87	29	50	158	4605.41	\N	Covered	\N	18	Consumable	50mm FTA	t	f	2026-06-11 21:48:30.719493	2026-06-11 21:58:45.596462	62	\N	PLB0050
+3458	2	2	PLB-00051	25mm Nipple	73	87	29	38	128	4305.65	\N	Covered	\N	18	Consumable	25mm Nipple	t	f	2026-06-11 21:48:30.719499	2026-06-11 21:58:45.596465	62	\N	PLB0051
+3459	2	2	PLB-00052	50mm Long Bend	73	87	29	33	132	1279.19	\N	Covered	\N	18	Consumable	50mm Long Bend	t	f	2026-06-11 21:48:30.719505	2026-06-11 21:58:45.596468	62	\N	PLB0052
+3460	2	2	PLB-00053	50mm Coupler	73	87	29	337	900	176.83	\N	Covered	\N	18	Consumable	50mm Coupler	t	f	2026-06-11 21:48:30.71951	2026-06-11 21:58:45.59647	62	\N	PLB0053
+3461	2	2	PLB-00054	50mm Union	73	87	29	42	122	3345.13	\N	Covered	\N	18	Consumable	50mm Union	t	f	2026-06-11 21:48:30.719516	2026-06-11 21:58:45.596473	62	\N	PLB0054
+3462	2	2	PLB-00055	Health Faucet	73	87	29	33	82	3221.71	\N	Covered	\N	18	Consumable	Health Faucet	t	f	2026-06-11 21:48:30.719522	2026-06-11 21:58:45.596476	62	\N	PLB0055
+3463	2	2	PLB-00056	Filter RO	73	87	29	30	68	2015.07	\N	Covered	\N	18	Consumable	Filter RO	t	f	2026-06-11 21:48:30.719527	2026-06-11 21:58:45.596479	62	\N	PLB0056
+3464	2	2	PLB-00057	Pillar cock loong body	73	87	29	47	120	3470.74	\N	Covered	\N	18	Consumable	Pillar cock loong body	t	f	2026-06-11 21:48:30.719533	2026-06-11 21:58:45.596482	62	\N	PLB0057
+3465	2	2	PLB-00058	32mm Waste Coupling	73	87	29	13	45	4967.59	\N	Covered	\N	18	Consumable	32mm Waste Coupling	t	f	2026-06-11 21:48:30.719538	2026-06-11 21:58:45.596484	62	\N	PLB0058
+3466	2	2	PLB-00059	63mm End Cape PVC	73	87	29	31	115	1316.58	\N	Covered	\N	18	Consumable	63mm End Cape PVC	t	f	2026-06-11 21:48:30.719544	2026-06-11 21:58:45.596487	62	\N	PLB0059
+3467	2	2	PLB-00060	110mm End Cape PVC	73	87	29	273	703	874.87	\N	Covered	\N	18	Consumable	110mm End Cape PVC	t	f	2026-06-11 21:48:30.71955	2026-06-11 21:58:45.59649	62	\N	PLB0060
+3468	2	2	PLB-00061	75mm Tee PVC	73	87	29	17	49	2059.31	\N	Covered	\N	18	Consumable	75mm Tee PVC	t	f	2026-06-11 21:48:30.719555	2026-06-11 21:58:45.596493	62	\N	PLB0061
+3469	2	2	PLB-00062	75mm  45° Bend PVC	73	87	29	50	158	3446.88	\N	Covered	\N	18	Consumable	75mm  45° Bend PVC	t	f	2026-06-11 21:48:30.719561	2026-06-11 21:58:45.596496	62	\N	PLB0062
+3470	2	2	PLB-00063	50mm  45° Bend PVC	73	87	29	50	167	3508.68	\N	Covered	\N	18	Consumable	50mm  45° Bend PVC	t	f	2026-06-11 21:48:30.719567	2026-06-11 21:58:45.596498	62	\N	PLB0063
+3471	2	2	PLB-00064	90mm Coupler PVC	73	87	29	46	161	4353.77	\N	Covered	\N	18	Consumable	90mm Coupler PVC	t	f	2026-06-11 21:48:30.719572	2026-06-11 21:58:45.596501	62	\N	PLB0064
+3472	2	2	PLB-00065	75mm Door Bend PVC	73	87	29	37	90	1357.41	\N	Covered	\N	18	Consumable	75mm Door Bend PVC	t	f	2026-06-11 21:48:30.719578	2026-06-11 21:58:45.596504	62	\N	PLB0065
+3473	2	2	PLB-00066	110mm Elbow PVC	73	87	29	15	49	1416.91	\N	Covered	\N	18	Consumable	110mm Elbow PVC	t	f	2026-06-11 21:48:30.719584	2026-06-11 21:58:45.596506	62	\N	PLB0066
+3474	2	2	PLB-00067	110 Door Bend PVC	73	87	29	24	50	3262.58	\N	Covered	\N	18	Consumable	110 Door Bend PVC	t	f	2026-06-11 21:48:30.719589	2026-06-11 21:58:45.596509	62	\N	PLB0067
+3475	2	2	PLB-00068	110 Door Tee PVC	73	87	29	33	73	4602.71	\N	Covered	\N	18	Consumable	110 Door Tee PVC	t	f	2026-06-11 21:48:30.719595	2026-06-11 21:58:45.596512	62	\N	PLB0068
+3476	2	2	PLB-00069	Connection pipe PVC	73	87	29	41	127	3135.57	\N	Covered	\N	18	Consumable	Connection pipe PVC	t	f	2026-06-11 21:48:30.719604	2026-06-11 21:58:45.596515	62	\N	PLB0069
+3477	2	2	PLB-00070	90x75mm Reducer/40mm Long Bend PVC	73	87	29	12	39	2110.53	\N	Covered	\N	18	Consumable	90x75mm Reducer/40mm Long Bend PVC	t	f	2026-06-11 21:48:30.71961	2026-06-11 21:58:45.596518	62	\N	PLB0070
+3478	2	2	PLB-00071	40mm  45° Bend PVC	73	87	29	28	111	2074.01	\N	Covered	\N	18	Consumable	40mm  45° Bend PVC	t	f	2026-06-11 21:48:30.719616	2026-06-11 21:58:45.59652	62	\N	PLB0071
+3479	2	2	PLB-00072	75mm Elbow PVC	73	87	29	25	88	1454.36	\N	Covered	\N	18	Consumable	75mm Elbow PVC	t	f	2026-06-11 21:48:30.719621	2026-06-11 21:58:45.596523	62	\N	PLB0072
+3480	2	2	PLB-00073	63mm Elbow PVC	73	87	29	16	55	3448.45	\N	Covered	\N	18	Consumable	63mm Elbow PVC	t	f	2026-06-11 21:48:30.719627	2026-06-11 21:58:45.596526	62	\N	PLB0073
+3481	2	2	PLB-00074	50mm Elbow PVC	73	87	29	38	147	3109.68	\N	Covered	\N	18	Consumable	50mm Elbow PVC	t	f	2026-06-11 21:48:30.719633	2026-06-11 21:58:45.596529	62	\N	PLB0074
+3482	2	2	PLB-00075	40mm Elbow PVC	73	87	29	40	103	4655.73	\N	Covered	\N	18	Consumable	40mm Elbow PVC	t	f	2026-06-11 21:48:30.719638	2026-06-11 21:58:45.596531	62	\N	PLB0075
+3483	2	2	PLB-00076	50mm Coller PVC	73	87	29	39	137	1229.46	\N	Covered	\N	18	Consumable	50mm Coller PVC	t	f	2026-06-11 21:48:30.719644	2026-06-11 21:58:45.596534	62	\N	PLB0076
+3484	2	2	PLB-00077	63mm Coller PVC	73	87	29	16	58	1441.97	\N	Covered	\N	18	Consumable	63mm Coller PVC	t	f	2026-06-11 21:48:30.71965	2026-06-11 21:58:45.596537	62	\N	PLB0077
+3485	2	2	PLB-00078	75mm Coller PVC	73	87	29	11	26	1646.08	\N	Covered	\N	18	Consumable	75mm Coller PVC	t	f	2026-06-11 21:48:30.719655	2026-06-11 21:58:45.59654	62	\N	PLB0078
+3486	2	2	PLB-00079	63x50 Reducer PVC	73	87	29	10	35	3528.92	\N	Covered	\N	18	Consumable	63x50 Reducer PVC	t	f	2026-06-11 21:48:30.719661	2026-06-11 21:58:45.596543	62	\N	PLB0079
+3487	2	2	PLB-00080	50mm Ball Valve PVC	73	87	29	49	117	1185.64	\N	Covered	\N	18	Consumable	50mm Ball Valve PVC	t	f	2026-06-11 21:48:30.719667	2026-06-11 21:58:45.596545	62	\N	PLB0080
+3488	2	2	PLB-00081	63mm Ball Valve PVC	73	87	29	30	110	2018.42	\N	Covered	\N	18	Consumable	63mm Ball Valve PVC	t	f	2026-06-11 21:48:30.719673	2026-06-11 21:58:45.596548	62	\N	PLB0081
+3489	2	2	PLB-00082	75mm Ball Valve PVC	73	87	29	458	1662	586.47	\N	Covered	\N	18	Consumable	75mm Ball Valve PVC	t	f	2026-06-11 21:48:30.719678	2026-06-11 21:58:45.596551	62	\N	PLB0082
+3490	2	2	PLB-00083	50mm MTA PVC	73	87	29	27	55	4868.63	\N	Covered	\N	18	Consumable	50mm MTA PVC	t	f	2026-06-11 21:48:30.719684	2026-06-11 21:58:45.596554	62	\N	PLB0083
+3491	2	2	PLB-00084	50mm FTA PVC	73	87	29	411	1644	378.91	\N	Covered	\N	18	Consumable	50mm FTA PVC	t	f	2026-06-11 21:48:30.719689	2026-06-11 21:58:45.596556	62	\N	PLB0084
+3492	2	2	PLB-00085	110mmx75mm Multi trap PVC	73	87	29	42	151	3477.26	\N	Covered	\N	18	Consumable	110mmx75mm Multi trap PVC	t	f	2026-06-11 21:48:30.719695	2026-06-11 21:58:45.596559	62	\N	PLB0085
+3493	2	2	PLB-00086	63mm FTA PVC	73	87	29	11	29	4016.98	\N	Covered	\N	18	Consumable	63mm FTA PVC	t	f	2026-06-11 21:48:30.719701	2026-06-11 21:58:45.596562	62	\N	PLB0086
+3494	2	2	PLB-00087	50mm Tee UPVC	73	87	29	11	30	4554.59	\N	Covered	\N	18	Consumable	50mm Tee UPVC	t	f	2026-06-11 21:48:30.719707	2026-06-11 21:58:45.596565	62	\N	PLB0087
+3495	2	2	PLB-00088	50mm FTA UPVC	73	87	29	17	61	3698.73	\N	Covered	\N	18	Consumable	50mm FTA UPVC	t	f	2026-06-11 21:48:30.719712	2026-06-11 21:58:45.596567	62	\N	PLB0088
+3496	2	2	PLB-00089	50mm MTA UPVC	73	87	29	21	59	3236.67	\N	Covered	\N	18	Consumable	50mm MTA UPVC	t	f	2026-06-11 21:48:30.719718	2026-06-11 21:58:45.59657	62	\N	PLB0089
+3497	2	2	PLB-00090	40mm Tee UPVC	73	87	29	44	152	4819.1	\N	Covered	\N	18	Consumable	40mm Tee UPVC	t	f	2026-06-11 21:48:30.719724	2026-06-11 21:58:45.596573	62	\N	PLB0090
+3498	2	2	PLB-00091	25mm Coller UPVC	73	87	29	88	280	299.05	\N	Covered	\N	18	Consumable	25mm Coller UPVC	t	f	2026-06-11 21:48:30.71973	2026-06-11 21:58:45.596576	62	\N	PLB0091
+3499	2	2	PLB-00092	25mm MTA UPVC	73	87	29	12	36	3321.92	\N	Covered	\N	18	Consumable	25mm MTA UPVC	t	f	2026-06-11 21:48:30.719735	2026-06-11 21:58:45.596578	62	\N	PLB0092
+3500	2	2	PLB-00093	20mm Tank NippleUPVC	73	87	29	22	70	2572.92	\N	Covered	\N	18	Consumable	20mm Tank NippleUPVC	t	f	2026-06-11 21:48:30.719741	2026-06-11 21:58:45.596581	62	\N	PLB0093
+3501	2	2	PLB-00094	110mm Coller PVC	73	87	29	14	55	4379.25	\N	Covered	\N	18	Consumable	110mm Coller PVC	t	f	2026-06-11 21:48:30.719746	2026-06-11 21:58:45.596584	62	\N	PLB0094
+3502	2	2	PLB-00095	75mm Door Tee	73	87	29	23	68	2763.31	\N	Covered	\N	18	Consumable	75mm Door Tee	t	f	2026-06-11 21:48:30.719752	2026-06-11 21:58:45.596587	62	\N	PLB0095
+3503	2	2	PLB-00096	110mm Door Tee	73	87	29	30	81	1051.65	\N	Covered	\N	18	Consumable	110mm Door Tee	t	f	2026-06-11 21:48:30.719758	2026-06-11 21:58:45.596589	62	\N	PLB0096
+3504	2	2	PLB-00097	110mmx75mm Floor trap	73	87	29	31	64	2319.88	\N	Covered	\N	18	Consumable	110mmx75mm Floor trap	t	f	2026-06-11 21:48:30.719763	2026-06-11 21:58:45.596592	62	\N	PLB0097
+3505	2	2	PLB-00098	110mmx75mm Bush	73	87	29	448	1626	761.41	\N	Covered	\N	18	Consumable	110mmx75mm Bush	t	f	2026-06-11 21:48:30.719769	2026-06-11 21:58:45.596597	62	\N	PLB0098
+3506	2	2	PLB-00099	110mmx75mm Nani Trap	73	87	29	42	161	2188.78	\N	Covered	\N	18	Consumable	110mmx75mm Nani Trap	t	f	2026-06-11 21:48:30.719775	2026-06-11 21:58:45.596599	62	\N	PLB0099
+3507	2	2	RAD-00001	10*8 AGFA FILMS	74	88	29	34	118	4349	\N	Covered	\N	12	Consumable	10*8 AGFA FILMS	t	f	2026-06-11 21:48:30.719781	2026-06-11 21:58:45.596602	62	\N	RAD0001
+3508	2	2	RAD-00002	17*14AGFA FILMS	74	88	29	11	23	1685.06	\N	Covered	\N	12	Consumable	17*14AGFA FILMS	t	f	2026-06-11 21:48:30.719786	2026-06-11 21:58:45.596605	62	\N	RAD0002
+3509	2	2	RAD-00003	RADIOLOGY LETTER HEAD	74	88	29	485	1444	167.16	\N	Covered	\N	12	Consumable	RADIOLOGY LETTER HEAD	t	f	2026-06-11 21:48:30.719792	2026-06-11 21:58:45.596608	62	\N	RAD0003
+3510	2	2	RAD-00004	RADIOLOGY REGISTER	74	88	29	14	38	3535.54	\N	Covered	\N	12	Consumable	RADIOLOGY REGISTER	t	f	2026-06-11 21:48:30.719798	2026-06-11 21:58:45.59661	62	\N	RAD0004
+3511	2	2	RAD-00005	SONY THERMOL PAPER TYPE 1--BOX	74	88	29	20	51	2204.32	\N	Covered	\N	12	Consumable	SONY THERMOL PAPER TYPE 1--BOX	t	f	2026-06-11 21:48:30.719803	2026-06-11 21:58:45.596613	62	\N	RAD0005
+3512	2	2	STY-00001	ZIP LOCK COVERS - LARGE SIZE	75	94	29	461	1635	494.89	\N	Covered	\N	18	Consumable	ZIP LOCK COVERS - LARGE SIZE	t	f	2026-06-11 21:48:30.719809	2026-06-11 21:58:45.596616	62	\N	STY0001
+3513	2	2	STY-00002	ZIP LOCK COVERS - MEDIUM SIZE	75	94	29	191	716	154.39	\N	Covered	\N	18	Consumable	ZIP LOCK COVERS - MEDIUM SIZE	t	f	2026-06-11 21:48:30.719814	2026-06-11 21:58:45.596619	62	\N	STY0002
+3514	2	2	STY-00003	ZIP LOCK COVERS - SMALL SIZE	75	94	29	486	1750	79.03	\N	Covered	\N	18	Consumable	ZIP LOCK COVERS - SMALL SIZE	t	f	2026-06-11 21:48:30.71982	2026-06-11 21:58:45.596621	62	\N	STY0003
+3515	2	2	STY-00004	BROWN COVER LARGE	75	93	29	326	1236	350.71	\N	Covered	\N	12	Consumable	BROWN COVER LARGE	t	f	2026-06-11 21:48:30.719826	2026-06-11 21:58:45.596624	62	\N	STY0004
+3516	2	2	STY-00005	BROWN COVER MEDIUM	75	93	29	76	230	170.62	\N	Covered	\N	12	Consumable	BROWN COVER MEDIUM	t	f	2026-06-11 21:48:30.719831	2026-06-11 21:58:45.596627	62	\N	STY0005
+3517	2	2	STY-00006	BROWN COVER SMALL	75	93	29	56	213	495.35	\N	Covered	\N	12	Consumable	BROWN COVER SMALL	t	f	2026-06-11 21:48:30.719837	2026-06-11 21:58:45.59663	62	\N	STY0006
+3635	2	2	STY-00123	PEN BALL POINT RED	75	94	29	211	797	106.61	\N	Covered	\N	5	Consumable	PEN BALL POINT RED	t	f	2026-06-11 21:48:30.720514	2026-06-11 21:58:45.596957	62	\N	STY0123
+3518	2	2	STY-00007	PHARMACY CARRY CLOTH COVER- MEDIUM	75	93	29	361	855	127.69	\N	Covered	\N	12	Consumable	PHARMACY CARRY CLOTH COVER- MEDIUM	t	f	2026-06-11 21:48:30.719843	2026-06-11 21:58:45.596632	62	\N	STY0007
+3519	2	2	STY-00008	PLASTIC TRAY 16X12 GREEN COLOUR	75	91	29	420	1004	316.87	\N	Covered	\N	18	Consumable	PLASTIC TRAY 16X12 GREEN COLOUR	t	f	2026-06-11 21:48:30.71985	2026-06-11 21:58:45.596635	62	\N	STY0008
+3520	2	2	STY-00009	PLASTIC TRAY 16X12 TRANSPARENT	75	91	29	394	949	36.55	\N	Covered	\N	18	Consumable	PLASTIC TRAY 16X12 TRANSPARENT	t	f	2026-06-11 21:48:30.719856	2026-06-11 21:58:45.596638	62	\N	STY0009
+3521	2	2	STY-00010	PLASTIC TRAY 18X14 GREEN COLOUR	75	91	29	356	856	14.02	\N	Covered	\N	18	Consumable	PLASTIC TRAY 18X14 GREEN COLOUR	t	f	2026-06-11 21:48:30.719861	2026-06-11 21:58:45.596641	62	\N	STY0010
+3522	2	2	STY-00011	ACTIVITY CHART	75	94	29	319	836	187.86	\N	Covered	\N	12	Consumable	ACTIVITY CHART	t	f	2026-06-11 21:48:30.719867	2026-06-11 21:58:45.596643	62	\N	STY0011
+3523	2	2	STY-00012	ACTIVITY RECORD FOR BILLING	75	94	29	419	1175	109.13	\N	Covered	\N	12	Consumable	ACTIVITY RECORD FOR BILLING	t	f	2026-06-11 21:48:30.719873	2026-06-11 21:58:45.596646	62	\N	STY0012
+3524	2	2	STY-00013	ADMISSION REGISTRER NURSING COLLEGE	75	94	29	67	168	221.31	\N	Covered	\N	12	Consumable	ADMISSION REGISTRER NURSING COLLEGE	t	f	2026-06-11 21:48:30.719878	2026-06-11 21:58:45.596649	62	\N	STY0013
+3525	2	2	STY-00014	BROWN ENVOLOP SMALL	75	94	29	415	923	369.91	\N	Covered	\N	12	Consumable	BROWN ENVOLOP SMALL	t	f	2026-06-11 21:48:30.719884	2026-06-11 21:58:45.596652	62	\N	STY0014
+3526	2	2	STY-00015	BUTTON FILE	75	94	29	351	1158	323.81	\N	Covered	\N	12	Consumable	BUTTON FILE	t	f	2026-06-11 21:48:30.71989	2026-06-11 21:58:45.596654	62	\N	STY0015
+3527	2	2	STY-00016	CANDLE BIG	75	94	29	388	1056	70.95	\N	Covered	\N	12	Consumable	CANDLE BIG	t	f	2026-06-11 21:48:30.719895	2026-06-11 21:58:45.596657	62	\N	STY0016
+3528	2	2	STY-00017	CATHLAB NURSES REPORT	75	94	29	304	650	263.91	\N	Covered	\N	12	Consumable	CATHLAB NURSES REPORT	t	f	2026-06-11 21:48:30.719901	2026-06-11 21:58:45.59666	62	\N	STY0017
+3529	2	2	STY-00018	CAUTI SURVELLIANCE FORM	75	94	29	376	1157	352.36	\N	Covered	\N	12	Consumable	CAUTI SURVELLIANCE FORM	t	f	2026-06-11 21:48:30.719906	2026-06-11 21:58:45.596663	62	\N	STY0018
+3530	2	2	STY-00019	CENTRAL LAB STOCK REGISTER	75	92	29	342	691	261.17	\N	Covered	\N	12	Consumable	CENTRAL LAB STOCK REGISTER	t	f	2026-06-11 21:48:30.719912	2026-06-11 21:58:45.596665	62	\N	STY0019
+3531	2	2	STY-00020	CENTRAL STORE INDENT BOOK	75	94	29	309	1205	150.88	\N	Covered	\N	12	Consumable	CENTRAL STORE INDENT BOOK	t	f	2026-06-11 21:48:30.719918	2026-06-11 21:58:45.596668	62	\N	STY0020
+3532	2	2	STY-00021	CHECKLIST FOR DIALYSIS (STATION ROUTINE DISINFECTION)	75	94	29	244	692	427.89	\N	Covered	\N	12	Consumable	CHECKLIST FOR DIALYSIS (STATION ROUTINE DISINFECTION)	t	f	2026-06-11 21:48:30.719924	2026-06-11 21:58:45.596671	62	\N	STY0021
+3533	2	2	STY-00022	CMO REPORT BOOK	75	94	29	179	502	377.65	\N	Covered	\N	12	Consumable	CMO REPORT BOOK	t	f	2026-06-11 21:48:30.719929	2026-06-11 21:58:45.596674	62	\N	STY0022
+3534	2	2	STY-00023	CONSENT FOR HIV	75	94	29	229	880	340.08	\N	Covered	\N	12	Consumable	CONSENT FOR HIV	t	f	2026-06-11 21:48:30.719935	2026-06-11 21:58:45.596677	62	\N	STY0023
+3535	2	2	STY-00024	CREDIT SHEET	75	94	29	491	1291	307.6	\N	Covered	\N	12	Consumable	CREDIT SHEET	t	f	2026-06-11 21:48:30.71994	2026-06-11 21:58:45.596679	62	\N	STY0024
+3536	2	2	STY-00025	CROSS MATCHING REGISTER	75	94	29	185	572	28.32	\N	Covered	\N	12	Consumable	CROSS MATCHING REGISTER	t	f	2026-06-11 21:48:30.719946	2026-06-11 21:58:45.596682	62	\N	STY0025
+3537	2	2	STY-00026	CYTOLOGY REQUEST FORM	75	94	29	451	1370	345.44	\N	Covered	\N	12	Consumable	CYTOLOGY REQUEST FORM	t	f	2026-06-11 21:48:30.719952	2026-06-11 21:58:45.596685	62	\N	STY0026
+3538	2	2	STY-00027	DEPARTMENT OF RADIOLOGY AND IMAGING	75	94	29	342	1350	13.35	\N	Covered	\N	12	Consumable	DEPARTMENT OF RADIOLOGY AND IMAGING	t	f	2026-06-11 21:48:30.719957	2026-06-11 21:58:45.596688	62	\N	STY0027
+3539	2	2	STY-00028	DIABETIC CHART	75	94	29	307	644	161.02	\N	Covered	\N	12	Consumable	DIABETIC CHART	t	f	2026-06-11 21:48:30.719963	2026-06-11 21:58:45.59669	62	\N	STY0028
+3540	2	2	STY-00029	DIALYSIS MONTHLY CHECKLIST	75	94	29	151	593	470.13	\N	Covered	\N	12	Consumable	DIALYSIS MONTHLY CHECKLIST	t	f	2026-06-11 21:48:30.719969	2026-06-11 21:58:45.596693	62	\N	STY0029
+3541	2	2	STY-00030	DONOR REGISTER BB	75	94	29	306	698	262.12	\N	Covered	\N	12	Consumable	DONOR REGISTER BB	t	f	2026-06-11 21:48:30.719974	2026-06-11 21:58:45.596696	62	\N	STY0030
+3542	2	2	STY-00031	EDAN ECG PAPER (A4 SIZE) 210MM X 295MM	75	94	29	246	548	431.26	\N	Covered	\N	12	Consumable	EDAN ECG PAPER (A4 SIZE) 210MM X 295MM	t	f	2026-06-11 21:48:30.71998	2026-06-11 21:58:45.596699	62	\N	STY0031
+3543	2	2	STY-00032	EL LEAVE APPLICATION FORM	75	94	29	498	1401	134.95	\N	Covered	\N	12	Consumable	EL LEAVE APPLICATION FORM	t	f	2026-06-11 21:48:30.719986	2026-06-11 21:58:45.596701	62	\N	STY0032
+3544	2	2	STY-00033	ADMISSION FORM EMERGENERALCY MEDICINE DEPARTMENT	75	94	29	115	341	329.65	\N	Covered	\N	12	Consumable	ADMISSION FORM EMERGENERALCY MEDICINE DEPARTMENT	t	f	2026-06-11 21:48:30.719991	2026-06-11 21:58:45.596704	62	\N	STY0033
+3545	2	2	STY-00034	EMERGENERALCY MEDICINE REGISTER	75	94	29	73	264	470.5	\N	Covered	\N	12	Consumable	EMERGENERALCY MEDICINE REGISTER	t	f	2026-06-11 21:48:30.719997	2026-06-11 21:58:45.596707	62	\N	STY0034
+3546	2	2	STY-00035	ENVOLOP COVER 14*17	75	94	29	466	1106	378.15	\N	Covered	\N	12	Consumable	ENVOLOP COVER 14*17	t	f	2026-06-11 21:48:30.720003	2026-06-11 21:58:45.59671	62	\N	STY0035
+3547	2	2	STY-00036	ENVOLOP COVER 4*10	75	94	29	468	1541	325.57	\N	Covered	\N	12	Consumable	ENVOLOP COVER 4*10	t	f	2026-06-11 21:48:30.720008	2026-06-11 21:58:45.596712	62	\N	STY0036
+3548	2	2	STY-00037	ENVOLOP COVER 8*10	75	94	29	384	1065	427.03	\N	Covered	\N	12	Consumable	ENVOLOP COVER 8*10	t	f	2026-06-11 21:48:30.720014	2026-06-11 21:58:45.596715	62	\N	STY0037
+3549	2	2	STY-00038	GLOSSY SHEET	75	94	29	470	1554	212.43	\N	Covered	\N	18	Consumable	GLOSSY SHEET	t	f	2026-06-11 21:48:30.72002	2026-06-11 21:58:45.596718	62	\N	STY0038
+3550	2	2	STY-00039	HAEMODIALYSIS TREATMENT CHART	75	94	29	91	297	312	\N	Covered	\N	12	Consumable	HAEMODIALYSIS TREATMENT CHART	t	f	2026-06-11 21:48:30.720025	2026-06-11 21:58:45.596721	62	\N	STY0039
+3551	2	2	STY-00040	HELIOS CONSTRUCTION LETTERHEAD	75	94	29	198	702	394.82	\N	Covered	\N	12	Consumable	HELIOS CONSTRUCTION LETTERHEAD	t	f	2026-06-11 21:48:30.720031	2026-06-11 21:58:45.596723	62	\N	STY0040
+3552	2	2	STY-00041	MLC REGISTER	75	90	29	255	885	305.91	\N	Covered	\N	12	Consumable	MLC REGISTER	t	f	2026-06-11 21:48:30.720037	2026-06-11 21:58:45.596726	62	\N	STY0041
+3553	2	2	STY-00042	CROSS MATCHING REPORT	75	89	29	315	1064	135.62	\N	Covered	\N	12	Consumable	CROSS MATCHING REPORT	t	f	2026-06-11 21:48:30.720043	2026-06-11 21:58:45.596729	62	\N	STY0042
+3554	2	2	STY-00043	REPORTING OF TRANSFUSION REACTION WORK UP FORM	75	89	29	419	1391	171.24	\N	Covered	\N	12	Consumable	REPORTING OF TRANSFUSION REACTION WORK UP FORM	t	f	2026-06-11 21:48:30.720049	2026-06-11 21:58:45.596732	62	\N	STY0043
+3555	2	2	STY-00044	NST MACHINE - PRINT PAPER (EDAN)	75	94	29	444	1007	399.15	\N	Covered	\N	12	Consumable	NST MACHINE - PRINT PAPER (EDAN)	t	f	2026-06-11 21:48:30.720054	2026-06-11 21:58:45.596734	62	\N	STY0044
+3556	2	2	STY-00045	MY DIALYSIS TRACKER	75	94	29	200	666	364.96	\N	Covered	\N	12	Consumable	MY DIALYSIS TRACKER	t	f	2026-06-11 21:48:30.72006	2026-06-11 21:58:45.596737	62	\N	STY0045
+3557	2	2	STY-00046	PARTURATION REGISTER	75	94	29	168	485	122.73	\N	Covered	\N	12	Consumable	PARTURATION REGISTER	t	f	2026-06-11 21:48:30.720066	2026-06-11 21:58:45.59674	62	\N	STY0046
+3558	2	2	STY-00047	PATHOLOGY REGISTER	75	94	29	411	1007	48.41	\N	Covered	\N	12	Consumable	PATHOLOGY REGISTER	t	f	2026-06-11 21:48:30.720071	2026-06-11 21:58:45.596743	62	\N	STY0047
+3559	2	2	STY-00048	PATHOLOGY REQUEST FORM	75	94	29	280	818	96.42	\N	Covered	\N	12	Consumable	PATHOLOGY REQUEST FORM	t	f	2026-06-11 21:48:30.720077	2026-06-11 21:58:45.596745	62	\N	STY0048
+3560	2	2	STY-00049	PEN STAND	75	94	29	408	1591	363.89	\N	Covered	\N	18	Consumable	PEN STAND	t	f	2026-06-11 21:48:30.720082	2026-06-11 21:58:45.596748	62	\N	STY0049
+3561	2	2	STY-00050	SCISSOR 210MM	75	94	29	382	928	407.39	\N	Covered	\N	12	Consumable	SCISSOR 210MM	t	f	2026-06-11 21:48:30.72009	2026-06-11 21:58:45.596751	62	\N	STY0050
+3562	2	2	STY-00051	VISITORS PASS	75	94	29	169	599	113.79	\N	Covered	\N	12	Consumable	VISITORS PASS	t	f	2026-06-11 21:48:30.720096	2026-06-11 21:58:45.596754	62	\N	STY0051
+3563	2	2	STY-00052	WHITE ENVELOP COVER (10.5 X 4.5)	75	94	29	243	519	413.46	\N	Covered	\N	12	Consumable	WHITE ENVELOP COVER (10.5 X 4.5)	t	f	2026-06-11 21:48:30.720101	2026-06-11 21:58:45.596756	62	\N	STY0052
+3564	2	2	STY-00053	WHITE THREAD	75	94	29	471	1356	56.94	\N	Covered	\N	5	Consumable	WHITE THREAD	t	f	2026-06-11 21:48:30.720107	2026-06-11 21:58:45.596759	62	\N	STY0053
+3565	2	2	STY-00054	XO BLUE PEN	75	94	29	403	875	383.07	\N	Covered	\N	12	Consumable	XO BLUE PEN	t	f	2026-06-11 21:48:30.720113	2026-06-11 21:58:45.596762	62	\N	STY0054
+3566	2	2	STY-00055	BIOCHEMISTRY REQUEST FORM	75	94	29	493	1344	451.57	\N	Covered	\N	12	Consumable	BIOCHEMISTRY REQUEST FORM	t	f	2026-06-11 21:48:30.720118	2026-06-11 21:58:45.596765	62	\N	STY0055
+3567	2	2	STY-00056	400 PAGES NOTE BOOK	75	94	29	104	330	140.64	\N	Covered	\N	12	Consumable	400 PAGES NOTE BOOK	t	f	2026-06-11 21:48:30.720124	2026-06-11 21:58:45.596767	62	\N	STY0056
+3568	2	2	STY-00057	A4 PAPERLINE HI-GRADE PREMIUM PAPER 70GSM - REAM	75	94	29	398	814	323.61	\N	Covered	\N	12	Consumable	A4 PAPERLINE HI-GRADE PREMIUM PAPER 70GSM - REAM	t	f	2026-06-11 21:48:30.72013	2026-06-11 21:58:45.59677	62	\N	STY0057
+3569	2	2	STY-00058	AA CELL - DURACEL	75	94	29	229	910	47.27	\N	Covered	\N	18	Consumable	AA CELL - DURACEL	t	f	2026-06-11 21:48:30.720135	2026-06-11 21:58:45.596773	62	\N	STY0058
+3570	2	2	STY-00059	AAA CELL- DURACEL	75	94	29	357	1263	230.46	\N	Covered	\N	18	Consumable	AAA CELL- DURACEL	t	f	2026-06-11 21:48:30.720141	2026-06-11 21:58:45.596776	62	\N	STY0059
+3571	2	2	STY-00060	ALL PIN	75	94	29	410	1039	146.09	\N	Covered	\N	12	Consumable	ALL PIN	t	f	2026-06-11 21:48:30.720147	2026-06-11 21:58:45.596778	62	\N	STY0060
+3572	2	2	STY-00061	ATTENDANCE REGISTER 1Q	75	94	29	232	531	353.15	\N	Covered	\N	12	Consumable	ATTENDANCE REGISTER 1Q	t	f	2026-06-11 21:48:30.720152	2026-06-11 21:58:45.596781	62	\N	STY0061
+3573	2	2	STY-00062	ATTENDANCE REGISTER 2Q	75	94	29	312	643	158.47	\N	Covered	\N	12	Consumable	ATTENDANCE REGISTER 2Q	t	f	2026-06-11 21:48:30.720158	2026-06-11 21:58:45.596784	62	\N	STY0062
+3574	2	2	STY-00063	ATTENDENCE REGISTER SMALL	75	94	29	438	1320	180.36	\N	Covered	\N	12	Consumable	ATTENDENCE REGISTER SMALL	t	f	2026-06-11 21:48:30.720164	2026-06-11 21:58:45.596787	62	\N	STY0063
+3575	2	2	STY-00064	BATTERIES  9 V	75	94	29	362	1369	106.09	\N	Covered	\N	18	Consumable	BATTERIES  9 V	t	f	2026-06-11 21:48:30.720169	2026-06-11 21:58:45.59679	62	\N	STY0064
+3576	2	2	STY-00065	BATTERIES LARENZSCOPE	75	94	29	146	581	293.61	\N	Covered	\N	18	Consumable	BATTERIES LARENZSCOPE	t	f	2026-06-11 21:48:30.720175	2026-06-11 21:58:45.596792	62	\N	STY0065
+3577	2	2	STY-00066	BLOOD DONOR QUESTIONNAIRE AND CONSENT FORM	75	94	29	396	914	39.22	\N	Covered	\N	12	Consumable	BLOOD DONOR QUESTIONNAIRE AND CONSENT FORM	t	f	2026-06-11 21:48:30.720181	2026-06-11 21:58:45.596795	62	\N	STY0066
+3578	2	2	STY-00067	BOARD PIN COLOUR	75	94	29	414	1652	315.22	\N	Covered	\N	12	Consumable	BOARD PIN COLOUR	t	f	2026-06-11 21:48:30.720186	2026-06-11 21:58:45.596798	62	\N	STY0067
+3579	2	2	STY-00068	BOX FILE BIG	75	94	29	348	1197	356.36	\N	Covered	\N	12	Consumable	BOX FILE BIG	t	f	2026-06-11 21:48:30.720192	2026-06-11 21:58:45.5968	62	\N	STY0068
+3580	2	2	STY-00069	BROWN TAPE 2"	75	94	29	444	892	231.61	\N	Covered	\N	18	Consumable	BROWN TAPE 2"	t	f	2026-06-11 21:48:30.720198	2026-06-11 21:58:45.596803	62	\N	STY0069
+3581	2	2	STY-00070	CALCULATOR	75	94	29	471	1522	349.22	\N	Covered	\N	18	Consumable	CALCULATOR	t	f	2026-06-11 21:48:30.720203	2026-06-11 21:58:45.596806	62	\N	STY0070
+3582	2	2	STY-00071	CALLING BELL	75	94	29	349	850	332.52	\N	Covered	\N	18	Consumable	CALLING BELL	t	f	2026-06-11 21:48:30.720209	2026-06-11 21:58:45.596809	62	\N	STY0071
+3583	2	2	STY-00072	CARBON PAPER	75	94	29	414	1364	272.24	\N	Covered	\N	12	Consumable	CARBON PAPER	t	f	2026-06-11 21:48:30.720215	2026-06-11 21:58:45.596812	62	\N	STY0072
+3584	2	2	STY-00073	CARDIOLOGY CONSENT FORM	75	94	29	437	971	140.82	\N	Covered	\N	5	Consumable	CARDIOLOGY CONSENT FORM	t	f	2026-06-11 21:48:30.72022	2026-06-11 21:58:45.596814	62	\N	STY0073
+3585	2	2	STY-00074	CD MARKER PENS - BLACK	75	94	29	172	403	399.27	\N	Covered	\N	5	Consumable	CD MARKER PENS - BLACK	t	f	2026-06-11 21:48:30.720226	2026-06-11 21:58:45.596817	62	\N	STY0074
+3586	2	2	STY-00075	CD MARKER PENS - BLUE	75	94	29	444	1460	271.39	\N	Covered	\N	5	Consumable	CD MARKER PENS - BLUE	t	f	2026-06-11 21:48:30.720232	2026-06-11 21:58:45.59682	62	\N	STY0075
+3587	2	2	STY-00076	CELLO TAPE 1" 65MTRS	75	94	29	274	794	246.84	\N	Covered	\N	5	Consumable	CELLO TAPE 1" 65MTRS	t	f	2026-06-11 21:48:30.720237	2026-06-11 21:58:45.596823	62	\N	STY0076
+3588	2	2	STY-00077	CELLO TAPE 2" 65MTRS	75	94	29	359	1251	227.18	\N	Covered	\N	5	Consumable	CELLO TAPE 2" 65MTRS	t	f	2026-06-11 21:48:30.720243	2026-06-11 21:58:45.596825	62	\N	STY0077
+3589	2	2	STY-00078	CHALK COLOUR	75	94	29	406	1274	318.94	\N	Covered	\N	5	Consumable	CHALK COLOUR	t	f	2026-06-11 21:48:30.720249	2026-06-11 21:58:45.596828	62	\N	STY0078
+3590	2	2	STY-00079	CLOTH COVER GREEN- A4 SIZE	75	94	29	498	1095	29.56	\N	Covered	\N	5	Consumable	CLOTH COVER GREEN- A4 SIZE	t	f	2026-06-11 21:48:30.720254	2026-06-11 21:58:45.596833	62	\N	STY0079
+3591	2	2	STY-00080	CLOTH COVER GREEN- A3 SIZE	75	94	29	393	1424	228.34	\N	Covered	\N	5	Consumable	CLOTH COVER GREEN- A3 SIZE	t	f	2026-06-11 21:48:30.72026	2026-06-11 21:58:45.596835	62	\N	STY0080
+3592	2	2	STY-00081	CORRECTION PEN	75	94	29	287	1052	476.08	\N	Covered	\N	5	Consumable	CORRECTION PEN	t	f	2026-06-11 21:48:30.720266	2026-06-11 21:58:45.596838	62	\N	STY0081
+3593	2	2	STY-00082	DVD-R	75	94	29	166	360	16.46	\N	Covered	\N	18	Consumable	DVD-R	t	f	2026-06-11 21:48:30.720271	2026-06-11 21:58:45.596841	62	\N	STY0082
+3594	2	2	STY-00083	EAST POINT HOSPITAL LOGO BLUE PEN	75	94	29	75	294	226.91	\N	Covered	\N	5	Consumable	EAST POINT HOSPITAL LOGO BLUE PEN	t	f	2026-06-11 21:48:30.720277	2026-06-11 21:58:45.596844	62	\N	STY0083
+3595	2	2	STY-00084	EMERGENERALCY EXTERNAL TRANSFER	75	94	29	117	444	383.07	\N	Covered	\N	18	Consumable	EMERGENERALCY EXTERNAL TRANSFER	t	f	2026-06-11 21:48:30.720283	2026-06-11 21:58:45.596847	62	\N	STY0084
+3596	2	2	STY-00085	EMERGENERALCY DISCHARGE SUMMAR	75	94	29	480	1846	238.45	\N	Covered	\N	5	Consumable	EMERGENERALCY DISCHARGE SUMMAR	t	f	2026-06-11 21:48:30.720288	2026-06-11 21:58:45.596849	62	\N	STY0085
+3597	2	2	STY-00086	EMERGENERALCY PROCEDURE CONSENT FORM	75	94	29	114	431	338.7	\N	Covered	\N	5	Consumable	EMERGENERALCY PROCEDURE CONSENT FORM	t	f	2026-06-11 21:48:30.720294	2026-06-11 21:58:45.596852	62	\N	STY0086
+3598	2	2	STY-00087	ENVOLOP 13*9 (ENDOSCOPY)	75	94	29	116	398	117.63	\N	Covered	\N	5	Consumable	ENVOLOP 13*9 (ENDOSCOPY)	t	f	2026-06-11 21:48:30.7203	2026-06-11 21:58:45.596855	62	\N	STY0087
+3599	2	2	STY-00088	EP ACTIVITY CHART EMERGENERALCY MEDICINE	75	94	29	251	792	385.78	\N	Covered	\N	5	Consumable	EP ACTIVITY CHART EMERGENERALCY MEDICINE	t	f	2026-06-11 21:48:30.720306	2026-06-11 21:58:45.596858	62	\N	STY0088
+3600	2	2	STY-00089	EP CONSENT FORM PAEDIATRIC NIC DEPT	75	94	29	228	683	213.44	\N	Covered	\N	5	Consumable	EP CONSENT FORM PAEDIATRIC NIC DEPT	t	f	2026-06-11 21:48:30.720311	2026-06-11 21:58:45.59686	62	\N	STY0089
+3601	2	2	STY-00090	EP FAP LOGBOOK COMMUNITY MEDICINE	75	94	29	301	637	348.2	\N	Covered	\N	5	Consumable	EP FAP LOGBOOK COMMUNITY MEDICINE	t	f	2026-06-11 21:48:30.720317	2026-06-11 21:58:45.596863	62	\N	STY0090
+3602	2	2	STY-00091	EP HIGH RISK CONSENT FORM PAEDIATRIC DEPT	75	94	29	305	1127	35.13	\N	Covered	\N	5	Consumable	EP HIGH RISK CONSENT FORM PAEDIATRIC DEPT	t	f	2026-06-11 21:48:30.720323	2026-06-11 21:58:45.596866	62	\N	STY0091
+3603	2	2	STY-00132	REYNOLD BRITE PEN	75	94	29	154	369	290.87	\N	Covered	\N	5	Consumable	REYNOLD BRITE PEN	t	f	2026-06-11 21:48:30.720328	2026-06-11 21:58:45.596869	62	\N	STY0132
+3604	2	2	STY-00092	EP PG DERMATOLOGY VENEREOLOGY AND LEPROSY	75	94	29	285	634	147.67	\N	Covered	\N	5	Consumable	EP PG DERMATOLOGY VENEREOLOGY AND LEPROSY	t	f	2026-06-11 21:48:30.720339	2026-06-11 21:58:45.596871	62	\N	STY0092
+3605	2	2	STY-00093	EP PHYSIOTHERAPY LOG INTERNSHIP	75	94	29	211	705	92.84	\N	Covered	\N	5	Consumable	EP PHYSIOTHERAPY LOG INTERNSHIP	t	f	2026-06-11 21:48:30.720345	2026-06-11 21:58:45.596874	62	\N	STY0093
+3606	2	2	STY-00094	EP STOCK REGISTER	75	94	29	307	1147	26.94	\N	Covered	\N	5	Consumable	EP STOCK REGISTER	t	f	2026-06-11 21:48:30.720351	2026-06-11 21:58:45.596877	62	\N	STY0094
+3607	2	2	STY-00095	ERASER	75	94	29	409	1283	29.13	\N	Covered	\N	5	Consumable	ERASER	t	f	2026-06-11 21:48:30.720356	2026-06-11 21:58:45.59688	62	\N	STY0095
+3608	2	2	STY-00096	EVEREADY BATTERY - BIG	75	94	29	382	1076	272.71	\N	Covered	\N	18	Consumable	EVEREADY BATTERY - BIG	t	f	2026-06-11 21:48:30.720362	2026-06-11 21:58:45.596882	62	\N	STY0096
+3609	2	2	STY-00097	FEVI KWIK	75	94	29	167	431	157.8	\N	Covered	\N	18	Consumable	FEVI KWIK	t	f	2026-06-11 21:48:30.720368	2026-06-11 21:58:45.596885	62	\N	STY0097
+3610	2	2	STY-00098	FEVICOL 100G	75	94	29	277	762	274.11	\N	Covered	\N	18	Consumable	FEVICOL 100G	t	f	2026-06-11 21:48:30.720373	2026-06-11 21:58:45.596888	62	\N	STY0098
+3611	2	2	STY-00099	FEVICOL TUBE	75	94	29	367	829	314.6	\N	Covered	\N	18	Consumable	FEVICOL TUBE	t	f	2026-06-11 21:48:30.720379	2026-06-11 21:58:45.596891	62	\N	STY0099
+3612	2	2	STY-00100	FROM REGISTER	75	94	29	104	243	35.57	\N	Covered	\N	5	Consumable	FROM REGISTER	t	f	2026-06-11 21:48:30.720385	2026-06-11 21:58:45.596893	62	\N	STY0100
+3613	2	2	STY-00101	GLUE STICK BIG	75	94	29	194	536	317.47	\N	Covered	\N	18	Consumable	GLUE STICK BIG	t	f	2026-06-11 21:48:30.72039	2026-06-11 21:58:45.596896	62	\N	STY0101
+3614	2	2	STY-00102	GLUE STICK SMALL	75	94	29	259	851	40.64	\N	Covered	\N	18	Consumable	GLUE STICK SMALL	t	f	2026-06-11 21:48:30.720396	2026-06-11 21:58:45.596899	62	\N	STY0102
+3615	2	2	STY-00103	GREEN PENS	75	94	29	229	566	169.53	\N	Covered	\N	5	Consumable	GREEN PENS	t	f	2026-06-11 21:48:30.720402	2026-06-11 21:58:45.596902	62	\N	STY0103
+3616	2	2	STY-00104	HAEMODIALYSIS RECORD	75	94	29	165	517	313.34	\N	Covered	\N	5	Consumable	HAEMODIALYSIS RECORD	t	f	2026-06-11 21:48:30.720407	2026-06-11 21:58:45.596904	62	\N	STY0104
+3617	2	2	STY-00105	HIGH LIGHTER	75	94	29	284	1136	498.22	\N	Covered	\N	5	Consumable	HIGH LIGHTER	t	f	2026-06-11 21:48:30.720413	2026-06-11 21:58:45.596907	62	\N	STY0105
+3618	2	2	STY-00106	IN PATIENT FEED BACK FORM	75	94	29	490	1732	36.96	\N	Covered	\N	5	Consumable	IN PATIENT FEED BACK FORM	t	f	2026-06-11 21:48:30.720419	2026-06-11 21:58:45.59691	62	\N	STY0106
+3619	2	2	STY-00107	INK PAD	75	94	29	69	245	199.16	\N	Covered	\N	18	Consumable	INK PAD	t	f	2026-06-11 21:48:30.720424	2026-06-11 21:58:45.596913	62	\N	STY0107
+3620	2	2	STY-00108	JUMP CLIP - BOX	75	94	29	309	633	341.1	\N	Covered	\N	18	Consumable	JUMP CLIP - BOX	t	f	2026-06-11 21:48:30.72043	2026-06-11 21:58:45.596915	62	\N	STY0108
+3621	2	2	STY-00109	LONG NOTE BOOK 200PGS HARD BIND - CHANDRA	75	94	29	247	677	394.82	\N	Covered	\N	5	Consumable	LONG NOTE BOOK 200PGS HARD BIND - CHANDRA	t	f	2026-06-11 21:48:30.720436	2026-06-11 21:58:45.596918	62	\N	STY0109
+3622	2	2	STY-00110	LONG NOTE BOOK SOFT (200PGS) CHANDRA	75	94	29	416	1539	168.37	\N	Covered	\N	5	Consumable	LONG NOTE BOOK SOFT (200PGS) CHANDRA	t	f	2026-06-11 21:48:30.720441	2026-06-11 21:58:45.596921	62	\N	STY0110
+3623	2	2	STY-00111	LONG SCALE PLASTIC	75	94	29	330	1318	191.08	\N	Covered	\N	18	Consumable	LONG SCALE PLASTIC	t	f	2026-06-11 21:48:30.720447	2026-06-11 21:58:45.596924	62	\N	STY0111
+3624	2	2	STY-00112	MEDICAL COLLEGE LETTER HEAD	75	94	29	464	1284	77.17	\N	Covered	\N	5	Consumable	MEDICAL COLLEGE LETTER HEAD	t	f	2026-06-11 21:48:30.720453	2026-06-11 21:58:45.596926	62	\N	STY0112
+3625	2	2	STY-00113	NATARAJ BALL PENS - BLUE	75	94	29	135	428	368.63	\N	Covered	\N	5	Consumable	NATARAJ BALL PENS - BLUE	t	f	2026-06-11 21:48:30.720458	2026-06-11 21:58:45.596929	62	\N	STY0113
+3626	2	2	STY-00114	NATARAJ BALL PENS - RED	75	94	29	242	908	355.93	\N	Covered	\N	5	Consumable	NATARAJ BALL PENS - RED	t	f	2026-06-11 21:48:30.720464	2026-06-11 21:58:45.596932	62	\N	STY0114
+3627	2	2	STY-00115	NOTE BOOK 100PG CHANDRA (SMALL)	75	94	29	385	1129	251.77	\N	Covered	\N	5	Consumable	NOTE BOOK 100PG CHANDRA (SMALL)	t	f	2026-06-11 21:48:30.72047	2026-06-11 21:58:45.596935	62	\N	STY0115
+3628	2	2	STY-00116	NOTICE BOARD PIN	75	94	29	379	1448	302.08	\N	Covered	\N	18	Consumable	NOTICE BOARD PIN	t	f	2026-06-11 21:48:30.720475	2026-06-11 21:58:45.596937	62	\N	STY0116
+3629	2	2	STY-00117	OPERATION RECORD NO.3	75	94	29	392	1534	497.84	\N	Covered	\N	5	Consumable	OPERATION RECORD NO.3	t	f	2026-06-11 21:48:30.720481	2026-06-11 21:58:45.59694	62	\N	STY0117
+3630	2	2	STY-00118	OUT PATIENT FEED BACK FORM	75	94	29	297	791	373.76	\N	Covered	\N	5	Consumable	OUT PATIENT FEED BACK FORM	t	f	2026-06-11 21:48:30.720486	2026-06-11 21:58:45.596943	62	\N	STY0118
+3631	2	2	STY-00119	PAPER CUTTING MACHINE	75	94	29	160	551	24.75	\N	Covered	\N	18	Consumable	PAPER CUTTING MACHINE	t	f	2026-06-11 21:48:30.720492	2026-06-11 21:58:45.596946	62	\N	STY0119
+3632	2	2	STY-00120	PAPER PIN BOX	75	94	29	321	1104	337.54	\N	Covered	\N	18	Consumable	PAPER PIN BOX	t	f	2026-06-11 21:48:30.720498	2026-06-11 21:58:45.596949	62	\N	STY0120
+3633	2	2	STY-00121	PEN BALL POINT BLACK	75	94	29	134	353	16.61	\N	Covered	\N	5	Consumable	PEN BALL POINT BLACK	t	f	2026-06-11 21:48:30.720503	2026-06-11 21:58:45.596952	62	\N	STY0121
+3634	2	2	STY-00122	PEN BALL POINT BLUE	75	94	29	247	820	478.2	\N	Covered	\N	5	Consumable	PEN BALL POINT BLUE	t	f	2026-06-11 21:48:30.720509	2026-06-11 21:58:45.596954	62	\N	STY0122
+3636	2	2	STY-00124	PEN WHITE BOARD MARKER	75	94	29	487	1858	218.95	\N	Covered	\N	5	Consumable	PEN WHITE BOARD MARKER	t	f	2026-06-11 21:48:30.72052	2026-06-11 21:58:45.59696	62	\N	STY0124
+3637	2	2	STY-00125	PENCIL	75	94	29	252	574	341.94	\N	Covered	\N	5	Consumable	PENCIL	t	f	2026-06-11 21:48:30.720526	2026-06-11 21:58:45.596963	62	\N	STY0125
+3638	2	2	STY-00126	PERMANENT MARKER - BLACK	75	94	29	102	271	135.44	\N	Covered	\N	5	Consumable	PERMANENT MARKER - BLACK	t	f	2026-06-11 21:48:30.720531	2026-06-11 21:58:45.596965	62	\N	STY0126
+3639	2	2	STY-00127	PERMANENT MARKER - BLUE	75	94	29	163	422	343.78	\N	Covered	\N	5	Consumable	PERMANENT MARKER - BLUE	t	f	2026-06-11 21:48:30.720537	2026-06-11 21:58:45.596968	62	\N	STY0127
+3640	2	2	STY-00128	PHOTO PAPER 180 GSM	75	94	29	319	1101	70.04	\N	Covered	\N	18	Consumable	PHOTO PAPER 180 GSM	t	f	2026-06-11 21:48:30.720543	2026-06-11 21:58:45.596971	62	\N	STY0128
+3641	2	2	STY-00129	PLASTIC FOLDERS	75	94	29	116	367	428.3	\N	Covered	\N	5	Consumable	PLASTIC FOLDERS	t	f	2026-06-11 21:48:30.720548	2026-06-11 21:58:45.596974	62	\N	STY0129
+3642	2	2	STY-00130	PUNCHING MACHINE BIG - DP 500	75	94	29	323	979	378.71	\N	Covered	\N	18	Consumable	PUNCHING MACHINE BIG - DP 500	t	f	2026-06-11 21:48:30.720554	2026-06-11 21:58:45.596976	62	\N	STY0130
+3643	2	2	STY-00131	PUNCHING MACHINE SMALL	75	94	29	243	538	270.88	\N	Covered	\N	18	Consumable	PUNCHING MACHINE SMALL	t	f	2026-06-11 21:48:30.72056	2026-06-11 21:58:45.596979	62	\N	STY0131
+3644	2	2	STY-00133	RUBBER BAND MEDIUM	75	94	29	90	262	265.62	\N	Covered	\N	18	Consumable	RUBBER BAND MEDIUM	t	f	2026-06-11 21:48:30.720565	2026-06-11 21:58:45.596982	62	\N	STY0133
+3645	2	2	STY-00134	SCALE SMALL	75	94	29	338	731	195.9	\N	Covered	\N	18	Consumable	SCALE SMALL	t	f	2026-06-11 21:48:30.720571	2026-06-11 21:58:45.596985	62	\N	STY0134
+3646	2	2	STY-00135	SCISSOR 165MM	75	94	29	430	1054	284.93	\N	Covered	\N	18	Consumable	SCISSOR 165MM	t	f	2026-06-11 21:48:30.720578	2026-06-11 21:58:45.596987	62	\N	STY0135
+3647	2	2	STY-00136	SCISSOR 210MM	75	94	29	409	1323	386.13	\N	Covered	\N	18	Consumable	SCISSOR 210MM	t	f	2026-06-11 21:48:30.720584	2026-06-11 21:58:45.59699	62	\N	STY0136
+3648	2	2	STY-00137	SEALING WAX	75	94	29	62	138	405.69	\N	Covered	\N	18	Consumable	SEALING WAX	t	f	2026-06-11 21:48:30.72059	2026-06-11 21:58:45.596993	62	\N	STY0137
+3649	2	2	STY-00138	BIO MEDICAL SERVICE REQUEST FORM	75	94	29	443	1329	343.64	\N	Covered	\N	5	Consumable	BIO MEDICAL SERVICE REQUEST FORM	t	f	2026-06-11 21:48:30.720595	2026-06-11 21:58:45.596996	62	\N	STY0138
+3650	2	2	STY-00139	SHARPENER	75	94	29	479	1709	248.93	\N	Covered	\N	5	Consumable	SHARPENER	t	f	2026-06-11 21:48:30.720601	2026-06-11 21:58:45.596998	62	\N	STY0139
+3651	2	2	STY-00140	SKETCH PEN - RED	75	94	29	126	408	73.54	\N	Covered	\N	5	Consumable	SKETCH PEN - RED	t	f	2026-06-11 21:48:30.720607	2026-06-11 21:58:45.597001	62	\N	STY0140
+3652	2	2	STY-00141	SKETCH PENS - BLACK	75	94	29	194	697	408.6	\N	Covered	\N	5	Consumable	SKETCH PENS - BLACK	t	f	2026-06-11 21:48:30.720612	2026-06-11 21:58:45.597004	62	\N	STY0141
+3653	2	2	STY-00142	SONY CD WITH COVER	75	94	29	432	1214	63.52	\N	Covered	\N	18	Consumable	SONY CD WITH COVER	t	f	2026-06-11 21:48:30.720618	2026-06-11 21:58:45.597007	62	\N	STY0142
+3654	2	2	STY-00143	SPRING FILE	75	94	29	439	1292	409.52	\N	Covered	\N	5	Consumable	SPRING FILE	t	f	2026-06-11 21:48:30.720624	2026-06-11 21:58:45.597009	62	\N	STY0143
+3655	2	2	STY-00144	STAMP PAD INK BIG	75	94	29	305	875	58.57	\N	Covered	\N	18	Consumable	STAMP PAD INK BIG	t	f	2026-06-11 21:48:30.72063	2026-06-11 21:58:45.597012	62	\N	STY0144
+3656	2	2	STY-00145	STAPLER HP 45	75	94	29	319	849	224.16	\N	Covered	\N	18	Consumable	STAPLER HP 45	t	f	2026-06-11 21:48:30.720635	2026-06-11 21:58:45.597015	62	\N	STY0145
+3657	2	2	STY-00146	STAPLER MACHINE BIG	75	94	29	430	1655	346.2	\N	Covered	\N	18	Consumable	STAPLER MACHINE BIG	t	f	2026-06-11 21:48:30.720641	2026-06-11 21:58:45.597018	62	\N	STY0146
+3658	2	2	STY-00147	STAPLER MACHINE SMALL	75	94	29	286	1063	206.85	\N	Covered	\N	18	Consumable	STAPLER MACHINE SMALL	t	f	2026-06-11 21:48:30.720646	2026-06-11 21:58:45.59702	62	\N	STY0147
+3659	2	2	STY-00148	STAPLER PIN REMOVER	75	94	29	50	130	298.23	\N	Covered	\N	18	Consumable	STAPLER PIN REMOVER	t	f	2026-06-11 21:48:30.720652	2026-06-11 21:58:45.597023	62	\N	STY0148
+3660	2	2	STY-00149	STAPLER PINS BIG	75	94	29	216	712	304.83	\N	Covered	\N	18	Consumable	STAPLER PINS BIG	t	f	2026-06-11 21:48:30.720658	2026-06-11 21:58:45.597026	62	\N	STY0149
+3661	2	2	STY-00150	STAPLER PINS SMALL	75	94	29	347	1024	107.74	\N	Covered	\N	18	Consumable	STAPLER PINS SMALL	t	f	2026-06-11 21:48:30.720663	2026-06-11 21:58:45.597029	62	\N	STY0150
+3662	2	2	STY-00151	STEEL SCALE	75	94	29	67	135	245.6	\N	Covered	\N	18	Consumable	STEEL SCALE	t	f	2026-06-11 21:48:30.720669	2026-06-11 21:58:45.597032	62	\N	STY0151
+3663	2	2	STY-00152	STOCK REGISTER WITH ALFABETIK 2Q	75	94	29	464	1085	53.27	\N	Covered	\N	5	Consumable	STOCK REGISTER WITH ALFABETIK 2Q	t	f	2026-06-11 21:48:30.720675	2026-06-11 21:58:45.597034	62	\N	STY0152
+3664	2	2	STY-00153	SURGICAL SAFETY CHECKLIST	75	94	29	319	915	421.23	\N	Covered	\N	5	Consumable	SURGICAL SAFETY CHECKLIST	t	f	2026-06-11 21:48:30.72068	2026-06-11 21:58:45.597037	62	\N	STY0153
+3665	2	2	STY-00154	SWIPING ROLL 5.5CMS	75	94	29	262	920	211.32	\N	Covered	\N	18	Consumable	SWIPING ROLL 5.5CMS	t	f	2026-06-11 21:48:30.720686	2026-06-11 21:58:45.59704	62	\N	STY0154
+3666	2	2	STY-00155	TEA CUPS	75	94	29	86	300	360.51	\N	Covered	\N	18	Consumable	TEA CUPS	t	f	2026-06-11 21:48:30.720692	2026-06-11 21:58:45.597043	62	\N	STY0155
+3667	2	2	STY-00156	TEXT BOOK	75	94	29	323	677	76.92	\N	Covered	\N	5	Consumable	TEXT BOOK	t	f	2026-06-11 21:48:30.720697	2026-06-11 21:58:45.597045	62	\N	STY0156
+3668	2	2	STY-00157	TISSUE PAPER	75	91	29	437	1245	347.94	\N	Covered	\N	18	Consumable	TISSUE PAPER	t	f	2026-06-11 21:48:30.720703	2026-06-11 21:58:45.597048	62	\N	STY0157
+3669	2	2	STY-00158	TO REGISTER	75	94	29	230	697	472.48	\N	Covered	\N	5	Consumable	TO REGISTER	t	f	2026-06-11 21:48:30.720708	2026-06-11 21:58:45.597051	62	\N	STY0158
+3670	2	2	STY-00159	WATER CUPS	75	94	29	378	778	51.54	\N	Covered	\N	18	Consumable	WATER CUPS	t	f	2026-06-11 21:48:30.720714	2026-06-11 21:58:45.597054	62	\N	STY0159
+3671	2	2	STY-00160	WHITE COVERS - A3	75	94	29	302	1058	198.7	\N	Covered	\N	5	Consumable	WHITE COVERS - A3	t	f	2026-06-11 21:48:30.72072	2026-06-11 21:58:45.597056	62	\N	STY0160
+3672	2	2	STY-00161	WHITE COVERS - A4	75	94	29	248	966	353.89	\N	Covered	\N	5	Consumable	WHITE COVERS - A4	t	f	2026-06-11 21:48:30.720725	2026-06-11 21:58:45.597059	62	\N	STY0161
+3673	2	2	STY-00162	WHITEBOARD MARKER PENS - BLACK	75	94	29	331	739	154.55	\N	Covered	\N	5	Consumable	WHITEBOARD MARKER PENS - BLACK	t	f	2026-06-11 21:48:30.720731	2026-06-11 21:58:45.597062	62	\N	STY0162
+3674	2	2	STY-00163	WHITEBOARD MARKER PENS - BLUE	75	94	29	330	1190	335.58	\N	Covered	\N	5	Consumable	WHITEBOARD MARKER PENS - BLUE	t	f	2026-06-11 21:48:30.720737	2026-06-11 21:58:45.597065	62	\N	STY0163
+3675	2	2	STY-00164	WHITENER	75	94	29	426	1414	38.69	\N	Covered	\N	18	Consumable	WHITENER	t	f	2026-06-11 21:48:30.720743	2026-06-11 21:58:45.597069	62	\N	STY0164
+3676	2	2	STY-00165	WOOD PEN RS.10	75	94	29	383	1300	217.47	\N	Covered	\N	5	Consumable	WOOD PEN RS.10	t	f	2026-06-11 21:48:30.720748	2026-06-11 21:58:45.597072	62	\N	STY0165
+3677	2	2	STY-00166	CONSENT FORM FOR FINE NEEDLE ASPIRATION CYTOLOOGY	75	94	29	242	956	345.54	\N	Covered	\N	5	Consumable	CONSENT FORM FOR FINE NEEDLE ASPIRATION CYTOLOOGY	t	f	2026-06-11 21:48:30.720754	2026-06-11 21:58:45.597075	62	\N	STY0166
+3678	2	2	STY-00167	MEDICATION RECONCILIATION FORM	75	94	29	353	775	205.69	\N	Covered	\N	5	Consumable	MEDICATION RECONCILIATION FORM	t	f	2026-06-11 21:48:30.72076	2026-06-11 21:58:45.597078	62	\N	STY0167
+3679	2	2	STY-00168	NURSES PRE-OPERATIVE & IMMEDIATE POST OPERATIVE CHECK LIST	75	94	29	401	1435	141.01	\N	Covered	\N	5	Consumable	NURSES PRE-OPERATIVE & IMMEDIATE POST OPERATIVE CHECK LIST	t	f	2026-06-11 21:48:30.720765	2026-06-11 21:58:45.59708	62	\N	STY0168
+3680	2	2	STY-00169	NICU INVESTIGATION CHART	75	94	29	169	442	440.35	\N	Covered	\N	5	Consumable	NICU INVESTIGATION CHART	t	f	2026-06-11 21:48:30.720771	2026-06-11 21:58:45.597083	62	\N	STY0169
+3681	2	2	STY-00170	PHYSIOTHERAPHY IP RECORD	75	94	29	127	327	205.38	\N	Covered	\N	5	Consumable	PHYSIOTHERAPHY IP RECORD	t	f	2026-06-11 21:48:30.720777	2026-06-11 21:58:45.597086	62	\N	STY0170
+3682	2	2	STY-00171	PHARMACY MANNUAL BOOK	75	94	29	129	421	341.54	\N	Covered	\N	5	Consumable	PHARMACY MANNUAL BOOK	t	f	2026-06-11 21:48:30.720782	2026-06-11 21:58:45.597089	62	\N	STY0171
+3683	2	2	STY-00172	RADIOLOGY CONSENT FORM	75	94	29	108	292	430.78	\N	Covered	\N	5	Consumable	RADIOLOGY CONSENT FORM	t	f	2026-06-11 21:48:30.720788	2026-06-11 21:58:45.597091	62	\N	STY0172
+3684	2	2	STY-00173	WOUND CERTIFICATE	75	94	29	466	1155	145.28	\N	Covered	\N	5	Consumable	WOUND CERTIFICATE	t	f	2026-06-11 21:48:30.720794	2026-06-11 21:58:45.597094	62	\N	STY0173
+3685	2	2	STY-00174	EXAM PAD	75	94	29	115	267	356.21	\N	Covered	\N	5	Consumable	EXAM PAD	t	f	2026-06-11 21:48:30.720799	2026-06-11 21:58:45.597097	62	\N	STY0174
+3686	2	2	STY-00175	GRAPH SHEET FOR STRESS TEST SYSTEM (TMT PAPER)	75	94	29	63	170	417.2	\N	Covered	\N	5	Consumable	GRAPH SHEET FOR STRESS TEST SYSTEM (TMT PAPER)	t	f	2026-06-11 21:48:30.720805	2026-06-11 21:58:45.5971	62	\N	STY0175
+3687	2	2	STY-00176	ICU ADMISSION CONSENT FORM	75	94	29	267	772	413.88	\N	Covered	\N	5	Consumable	ICU ADMISSION CONSENT FORM	t	f	2026-06-11 21:48:30.720811	2026-06-11 21:58:45.597102	62	\N	STY0176
+3688	2	2	STY-00177	INFORMED CONSENT FOR HIGH RISK SURGICAL PROCEDURES	75	94	29	308	1227	310.52	\N	Covered	\N	5	Consumable	INFORMED CONSENT FOR HIGH RISK SURGICAL PROCEDURES	t	f	2026-06-11 21:48:30.720816	2026-06-11 21:58:45.597105	62	\N	STY0177
+3689	2	2	STY-00178	DISCHARGE AGAINST MEDICAL ADVICE	75	94	29	248	606	416.15	\N	Covered	\N	5	Consumable	DISCHARGE AGAINST MEDICAL ADVICE	t	f	2026-06-11 21:48:30.720824	2026-06-11 21:58:45.597108	62	\N	STY0178
+3690	2	2	STY-00179	DAILY INVESTIGATION MASTER CHART	75	94	29	308	753	332.67	\N	Covered	\N	5	Consumable	DAILY INVESTIGATION MASTER CHART	t	f	2026-06-11 21:48:30.720829	2026-06-11 21:58:45.597111	62	\N	STY0179
+3691	2	2	STY-00180	DAILY QUALITY CONTROL FORM	75	94	29	456	1716	431.33	\N	Covered	\N	5	Consumable	DAILY QUALITY CONTROL FORM	t	f	2026-06-11 21:48:30.720835	2026-06-11 21:58:45.597114	62	\N	STY0180
+3692	2	2	STY-00181	DEATH CERTIFICATE	75	94	29	471	1215	378.48	\N	Covered	\N	5	Consumable	DEATH CERTIFICATE	t	f	2026-06-11 21:48:30.720841	2026-06-11 21:58:45.597116	62	\N	STY0181
+3693	2	2	STY-00182	BLOOD GROUPING REPORT	75	94	29	442	1034	387.96	\N	Covered	\N	5	Consumable	BLOOD GROUPING REPORT	t	f	2026-06-11 21:48:30.720846	2026-06-11 21:58:45.597119	62	\N	STY0182
+3694	2	2	STY-00183	CONSSENT FOR BLOOD AND BLOOD PRODUCT TRANSFUTION	75	94	29	328	1202	27.79	\N	Covered	\N	5	Consumable	CONSSENT FOR BLOOD AND BLOOD PRODUCT TRANSFUTION	t	f	2026-06-11 21:48:30.720852	2026-06-11 21:58:45.597122	62	\N	STY0183
+3695	2	2	STY-00184	PAEDIATRICS CASE SHEET	75	94	29	344	894	439.95	\N	Covered	\N	5	Consumable	PAEDIATRICS CASE SHEET	t	f	2026-06-11 21:48:30.720859	2026-06-11 21:58:45.597125	62	\N	STY0184
+3696	2	2	STY-00185	ADMISSION RECORD	75	94	29	107	402	278.06	\N	Covered	\N	5	Consumable	ADMISSION RECORD	t	f	2026-06-11 21:48:30.720865	2026-06-11 21:58:45.597127	62	\N	STY0185
+3697	2	2	STY-00186	CHILD IMMUNIZATION RECORD DEPT OF PAED	75	94	29	338	1210	103.8	\N	Covered	\N	5	Consumable	CHILD IMMUNIZATION RECORD DEPT OF PAED	t	f	2026-06-11 21:48:30.72087	2026-06-11 21:58:45.59713	62	\N	STY0186
+3698	2	2	STY-00187	ADMISSION & DISCHARGE SUMMARY	75	94	29	384	1307	320.05	\N	Covered	\N	5	Consumable	ADMISSION & DISCHARGE SUMMARY	t	f	2026-06-11 21:48:30.720876	2026-06-11 21:58:45.597133	62	\N	STY0187
+3699	2	2	STY-00188	ANAESTHESIA RECORD	75	94	29	192	433	238.83	\N	Covered	\N	5	Consumable	ANAESTHESIA RECORD	t	f	2026-06-11 21:48:30.720882	2026-06-11 21:58:45.597136	62	\N	STY0188
+3700	2	2	STY-00189	ECG REGISTER	75	94	29	457	1616	475.35	\N	Covered	\N	5	Consumable	ECG REGISTER	t	f	2026-06-11 21:48:30.720888	2026-06-11 21:58:45.597139	62	\N	STY0189
+3701	2	2	STY-00190	DEATH REGISTER	75	94	29	56	117	387.35	\N	Covered	\N	5	Consumable	DEATH REGISTER	t	f	2026-06-11 21:48:30.720893	2026-06-11 21:58:45.597141	62	\N	STY0190
+3702	2	2	STY-00191	BLOOD GROUPING REGISTER	75	94	29	187	692	483.48	\N	Covered	\N	5	Consumable	BLOOD GROUPING REGISTER	t	f	2026-06-11 21:48:30.720899	2026-06-11 21:58:45.597144	62	\N	STY0191
+3703	2	2	STY-00192	LIBRARY GATE REGISTER	75	94	29	63	141	484.46	\N	Covered	\N	5	Consumable	LIBRARY GATE REGISTER	t	f	2026-06-11 21:48:30.720905	2026-06-11 21:58:45.597147	62	\N	STY0192
+3704	2	2	STY-00193	BOX FILE SMALL	75	94	29	105	337	407.82	\N	Covered	\N	5	Consumable	BOX FILE SMALL	t	f	2026-06-11 21:48:30.72091	2026-06-11 21:58:45.59715	62	\N	STY0193
+3705	2	2	STY-00194	CARTRIDGE TK-7120	75	94	29	153	320	105.69	\N	Covered	\N	18	Consumable	CARTRIDGE TK-7120	t	f	2026-06-11 21:48:30.720916	2026-06-11 21:58:45.597152	62	\N	STY0194
+3706	2	2	STY-00195	CARTRIDGE 103A	75	94	29	233	588	34.8	\N	Covered	\N	18	Consumable	CARTRIDGE 103A	t	f	2026-06-11 21:48:30.720922	2026-06-11 21:58:45.597155	62	\N	STY0195
 \.
 
 
@@ -7377,7 +10474,7 @@ COPY public.materials (id, tenant_id, site_id, code, name, category_id, subcateg
 
 COPY public.organizations (id, tenant_id, site_id, name, code, address, phone, email, is_active, is_deleted, created_at) FROM stdin;
 1	3	3	GRINFRA	ORG-00001	Bangalore			t	f	2026-05-15 12:13:00.095695
-2	2	2	EASTPOINT	ORG-00001	13, JNANA PRABHA CAMPUS, BIDARAHALLI, VIRGO NAGAR POST, BANGALORE - 560049			t	f	2026-05-21 16:17:10.278201
+2	2	2	EastPoint	ORG-00001	13, JNANA PRABHA CAMPUS, BIDARAHALLI, VIRGO NAGAR POST, BANGALORE - 560049			t	f	2026-05-21 16:17:10.278201
 \.
 
 
@@ -7388,7 +10485,8 @@ COPY public.organizations (id, tenant_id, site_id, name, code, address, phone, e
 COPY public.projects (id, tenant_id, site_id, name, code, organization_id, location, start_date, end_date, status, budget, is_active, is_deleted, created_at) FROM stdin;
 2	3	3	GRInfraHyderabad	PROJ-00002	1	Hyderabad	\N	\N	Active	0	f	t	2026-05-15 12:13:57.233761
 1	3	3	GRInfraBangalore	PROJ-00001	1	Bangalore	\N	\N	Active	0	t	f	2026-05-15 12:13:29.668195
-3	2	2	EastPoint	PROJ-00001	2	Bangalore	\N	\N	Active	0	t	f	2026-05-21 16:17:32.015449
+3	2	2	EPGI (East Point Group of Institutions)	PROJ-00001	2	Bangalore	\N	\N	Active	0	t	f	2026-05-21 16:17:32.015449
+4	2	2	EPH	PROJ-00002	2	Bangalore	\N	\N	Active	0	f	t	2026-06-11 12:30:04.015544
 \.
 
 
@@ -7415,6 +10513,11 @@ COPY public.purchase_order_approvals (id, po_id, approval_flow_id, approver_id, 
 16	209	9	4	{}	\N	2026-06-09 12:55:54.99894
 17	207	8	4	{}	\N	2026-06-09 13:01:43.299614
 18	207	9	4	{}	\N	2026-06-09 13:01:47.96691
+19	214	14	3	{}	\N	2026-06-12 01:05:55.785302
+20	214	15	3	{"517": {"quantity": 10.0, "remarks": null}}	\N	2026-06-12 01:16:17.565898
+21	214	18	3	{"517": {"quantity": 10.0, "remarks": null}}	\N	2026-06-12 01:16:17.565911
+22	215	14	3	{"518": {"quantity": 2.0, "remarks": null}}	\N	2026-06-12 01:19:17.937457
+23	215	18	11	{"518": {"quantity": 2.0, "remarks": null}}	\N	2026-06-12 01:25:57.001467
 \.
 
 
@@ -7422,85 +10525,87 @@ COPY public.purchase_order_approvals (id, po_id, approval_flow_id, approver_id, 
 -- Data for Name: purchase_order_items; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.purchase_order_items (id, po_id, material_id, quantity, rate, amount, received_quantity, remarks, discount_percent, cgst_percentage, sgst_percentage, igst_percentage, is_gst_inclusive) FROM stdin;
-481	192	222	25	85	2507.5	0	\N	0	9	9	0	f
-482	193	220	54	650	35100	0	\N	0	9	9	0	f
-483	193	224	57	65000	3705000	0	\N	0	9	9	0	f
-484	193	249	141	420	59220	0	\N	0	9	9	0	f
-485	193	236	57	250	14250	0	\N	0	9	9	0	f
-487	195	234	50	65	3250	0	\N	2	6	6	0	f
-489	197	238	50	4500	225000	0	\N	0	9	9	0	f
-429	170	218	58	622.66	36114.41	0	\N	0	0	0	0	f
-430	170	239	91	253.69	23086.15	0	\N	0	0	0	0	f
-431	171	232	65	798.18	51881.83	32.5	\N	0	0	0	0	f
-432	171	240	56	696.88	39025.44	28	\N	0	0	0	0	f
-433	172	246	84	197.82	16616.81	84	\N	0	0	0	0	f
-434	172	238	97	253.34	24574.03	97	\N	0	0	0	0	f
-435	173	230	62	192.3	11922.56	0	\N	0	0	0	0	f
-436	173	243	90	994.43	89498.61	0	\N	0	0	0	0	f
-437	173	238	71	806.76	57279.64	0	\N	0	0	0	0	f
-438	174	224	71	334.92	23779.34	0	\N	0	0	0	0	f
-439	174	246	56	508.97	28502.28	0	\N	0	0	0	0	f
-440	174	242	95	439.57	41759.32	0	\N	0	0	0	0	f
-441	175	232	74	675.81	50009.72	74	\N	0	0	0	0	f
-442	175	246	89	634.26	56448.95	89	\N	0	0	0	0	f
-443	176	232	85	594.08	50496.52	0	\N	0	0	0	0	f
-444	176	247	64	701.45	44892.72	0	\N	0	0	0	0	f
-445	176	228	83	711.34	59041.54	0	\N	0	0	0	0	f
-446	177	218	74	647.16	47890.12	74	\N	0	0	0	0	f
-447	177	225	91	191.78	17452.4	91	\N	0	0	0	0	f
-448	178	233	95	935.31	88854.57	47.5	\N	0	0	0	0	f
-449	178	234	92	432.83	39820.11	46	\N	0	0	0	0	f
-492	200	224	2	100	200	0	\N	2	2	2	2	t
-493	201	246	11	12111	133221	0	\N	2	2	2	0	f
-495	203	246	10	1800	18000	0	\N	0	5	5	0	t
-498	206	1191	10	16500	165000	0	\N	0	5	5	0	f
-502	210	246	10	33	330	0	\N	0	9.9	8.1	0	f
-504	212	246	10	33	330	0	\N	0	9	9	0	f
-450	178	226	68	275.36	18724.56	34	\N	0	0	0	0	f
-451	179	241	78	264.13	20602.24	0	\N	0	0	0	0	f
-452	179	225	69	943.86	65126.52	0	\N	0	0	0	0	f
-453	180	233	53	539.98	28618.86	26.5	\N	0	0	0	0	f
-454	180	239	60	532.04	31922.63	30	\N	0	0	0	0	f
-455	181	230	97	962.72	93383.37	97	\N	0	0	0	0	f
-456	181	223	64	229.87	14711.78	64	\N	0	0	0	0	f
-457	181	249	83	203.57	16896.71	83	\N	0	0	0	0	f
-458	182	224	72	549.16	39539.86	36	\N	0	0	0	0	f
-459	182	220	97	654.04	63441.88	48.5	\N	0	0	0	0	f
-460	182	218	50	950.36	47518.08	25	\N	0	0	0	0	f
-465	185	249	18	420	7560	0	\N	0	0	0	0	f
-466	185	243	40	12000	480000	0	\N	0	0	0	0	f
-467	185	249	43	420	18060	0	\N	0	0	0	0	f
-468	186	234	150	65	9750	0	\N	0	0	0	0	f
-469	186	226	200	950	190000	0	\N	0	0	0	0	f
-470	186	239	200	1450	290000	0	\N	0	0	0	0	f
-471	186	216	200	1200	240000	0	\N	0	0	0	0	f
-472	186	238	100	6500	650000	0	\N	0	0	0	0	f
-473	186	224	100	6500	650000	0	\N	0	0	0	0	f
-474	187	224	100	65000	6500000	0	\N	0	0	0	0	f
-475	188	216	100	70.57	7057	0	\N	0	0	0	0	f
-477	190	236	50	250	12500	0	\N	0	9	9	0	f
-478	190	247	63	250	15750	0	\N	0	9	9	0	f
-479	190	238	105	65000	6825000	0	\N	0	9	9	0	f
-480	191	244	2	550	1298	0	\N	0	9	9	0	f
-486	194	219	120	800	100800	0	\N	0	2.5	2.5	0	f
-488	196	219	300	800	226800	0	\N	10	2.5	2.5	0	f
-490	198	242	100	204.38	20438	0	\N	0	9	9	0	f
-491	199	230	100	20.42	2042	0	\N	0	9	9	0	f
-494	202	244	5	1000	5605	0	\N	5	9	9	0	f
-496	204	246	10	1800	18000	0	\N	0	5	5	0	f
-463	184	246	93	501.93	46679.75	93	\N	0	0	0	0	f
-464	184	232	54	647.48	34963.88	54	\N	0	0	0	0	f
-476	189	224	100	336.29	33629	100	\N	0	0	0	0	f
-497	205	2135	10	4300	43000	0	\N	0	6	6	0	f
-500	208	224	95	111111	12455543.1	0	\N	0	9	9	0	f
-501	209	1062	20	4658	109928.8	0	\N	0	0	0	18	f
-513	211	2134	10	2188.78	21887.8	0	\N	0	9	9	0	f
-514	211	1378	10	10443.43	104434.3	0	\N	0	9	9	0	f
-461	183	225	99	184.01	18217.39	99	\N	0	0	0	0	f
-462	183	216	86	240.24	20660.79	86	\N	0	0	0	0	f
-515	207	1191	12	1000	12000	0	\N	20	5	5	0	f
-516	213	1192	2	26703.28	53406.56	0	\N	0	6	6	0	f
+COPY public.purchase_order_items (id, po_id, material_id, quantity, rate, amount, received_quantity, remarks, discount_percent, cgst_percentage, sgst_percentage, igst_percentage, is_gst_inclusive, approved_quantity) FROM stdin;
+481	192	222	25	85	2507.5	0	\N	0	9	9	0	f	\N
+482	193	220	54	650	35100	0	\N	0	9	9	0	f	\N
+483	193	224	57	65000	3705000	0	\N	0	9	9	0	f	\N
+484	193	249	141	420	59220	0	\N	0	9	9	0	f	\N
+485	193	236	57	250	14250	0	\N	0	9	9	0	f	\N
+487	195	234	50	65	3250	0	\N	2	6	6	0	f	\N
+489	197	238	50	4500	225000	0	\N	0	9	9	0	f	\N
+429	170	218	58	622.66	36114.41	0	\N	0	0	0	0	f	\N
+430	170	239	91	253.69	23086.15	0	\N	0	0	0	0	f	\N
+433	172	246	84	197.82	16616.81	84	\N	0	0	0	0	f	\N
+434	172	238	97	253.34	24574.03	97	\N	0	0	0	0	f	\N
+435	173	230	62	192.3	11922.56	0	\N	0	0	0	0	f	\N
+436	173	243	90	994.43	89498.61	0	\N	0	0	0	0	f	\N
+437	173	238	71	806.76	57279.64	0	\N	0	0	0	0	f	\N
+438	174	224	71	334.92	23779.34	0	\N	0	0	0	0	f	\N
+439	174	246	56	508.97	28502.28	0	\N	0	0	0	0	f	\N
+440	174	242	95	439.57	41759.32	0	\N	0	0	0	0	f	\N
+441	175	232	74	675.81	50009.72	74	\N	0	0	0	0	f	\N
+442	175	246	89	634.26	56448.95	89	\N	0	0	0	0	f	\N
+443	176	232	85	594.08	50496.52	0	\N	0	0	0	0	f	\N
+444	176	247	64	701.45	44892.72	0	\N	0	0	0	0	f	\N
+445	176	228	83	711.34	59041.54	0	\N	0	0	0	0	f	\N
+446	177	218	74	647.16	47890.12	74	\N	0	0	0	0	f	\N
+447	177	225	91	191.78	17452.4	91	\N	0	0	0	0	f	\N
+448	178	233	95	935.31	88854.57	47.5	\N	0	0	0	0	f	\N
+449	178	234	92	432.83	39820.11	46	\N	0	0	0	0	f	\N
+492	200	224	2	100	200	0	\N	2	2	2	2	t	\N
+493	201	246	11	12111	133221	0	\N	2	2	2	0	f	\N
+495	203	246	10	1800	18000	0	\N	0	5	5	0	t	\N
+504	212	246	10	33	330	0	\N	0	9	9	0	f	\N
+450	178	226	68	275.36	18724.56	34	\N	0	0	0	0	f	\N
+451	179	241	78	264.13	20602.24	0	\N	0	0	0	0	f	\N
+452	179	225	69	943.86	65126.52	0	\N	0	0	0	0	f	\N
+453	180	233	53	539.98	28618.86	26.5	\N	0	0	0	0	f	\N
+454	180	239	60	532.04	31922.63	30	\N	0	0	0	0	f	\N
+455	181	230	97	962.72	93383.37	97	\N	0	0	0	0	f	\N
+456	181	223	64	229.87	14711.78	64	\N	0	0	0	0	f	\N
+457	181	249	83	203.57	16896.71	83	\N	0	0	0	0	f	\N
+458	182	224	72	549.16	39539.86	36	\N	0	0	0	0	f	\N
+459	182	220	97	654.04	63441.88	48.5	\N	0	0	0	0	f	\N
+460	182	218	50	950.36	47518.08	25	\N	0	0	0	0	f	\N
+468	186	234	150	65	9750	0	\N	0	0	0	0	f	\N
+469	186	226	200	950	190000	0	\N	0	0	0	0	f	\N
+470	186	239	200	1450	290000	0	\N	0	0	0	0	f	\N
+471	186	216	200	1200	240000	0	\N	0	0	0	0	f	\N
+472	186	238	100	6500	650000	0	\N	0	0	0	0	f	\N
+473	186	224	100	6500	650000	0	\N	0	0	0	0	f	\N
+477	190	236	50	250	12500	0	\N	0	9	9	0	f	\N
+478	190	247	63	250	15750	0	\N	0	9	9	0	f	\N
+479	190	238	105	65000	6825000	0	\N	0	9	9	0	f	\N
+480	191	244	2	550	1298	0	\N	0	9	9	0	f	\N
+486	194	219	120	800	100800	0	\N	0	2.5	2.5	0	f	\N
+488	196	219	300	800	226800	0	\N	10	2.5	2.5	0	f	\N
+494	202	244	5	1000	5605	0	\N	5	9	9	0	f	\N
+431	171	232	65	798.18	51881.83	32.5	\N	0	0	0	0	f	65
+475	188	216	100	70.57	7057	0	\N	0	0	0	0	f	100
+465	185	249	18	420	7560	0	\N	0	0	0	0	f	18
+496	204	246	10	1800	18000	0	\N	0	5	5	0	f	\N
+463	184	246	93	501.93	46679.75	93	\N	0	0	0	0	f	\N
+464	184	232	54	647.48	34963.88	54	\N	0	0	0	0	f	\N
+476	189	224	100	336.29	33629	100	\N	0	0	0	0	f	\N
+497	205	2135	10	4300	43000	0	\N	0	6	6	0	f	\N
+500	208	224	95	111111	12455543.1	0	\N	0	9	9	0	f	\N
+461	183	225	99	184.01	18217.39	99	\N	0	0	0	0	f	\N
+462	183	216	86	240.24	20660.79	86	\N	0	0	0	0	f	\N
+516	213	1192	2	26703.28	53406.56	0	\N	0	6	6	0	f	\N
+498	206	1191	10	16500	165000	10	\N	0	5	5	0	f	\N
+432	171	240	56	696.88	39025.44	28	\N	0	0	0	0	f	56
+518	215	2565	2	26703.28	53406.56	0	\N	0	6	6	0	f	2
+466	185	243	40	12000	480000	0	\N	0	0	0	0	f	40
+467	185	249	43	420	18060	0	\N	0	0	0	0	f	43
+474	187	224	100	65000	6500000	0	\N	0	0	0	0	f	100
+490	198	242	100	204.38	20438	0	\N	0	9	9	0	f	100
+502	210	246	10	33	330	0	\N	0	9.9	8.1	0	f	10
+491	199	230	100	20.42	2042	0	\N	0	9	9	0	f	100
+513	211	2134	10	2188.78	21887.8	0	\N	0	9	9	0	f	10
+514	211	1378	10	10443.43	104434.3	0	\N	0	9	9	0	f	10
+515	207	1191	12	1000	12000	12	\N	20	5	5	0	f	12
+501	209	1062	20	4658	109928.8	20	\N	0	0	0	18	f	20
+517	214	3474	10	3262	32620	0	\N	0	9	9	0	f	10
 \.
 
 
@@ -7527,7 +10632,6 @@ COPY public.purchase_orders (id, tenant_id, site_id, po_number, vendor_id, proje
 180	3	3	PO-00011	58	1	\N	\N	178	Formal	60541.49	\N	Partially Received	\N	4	\N	\N	f	2026-05-01 18:52:30.375564	2026-05-15 18:52:30.696708	\N
 181	3	3	PO-00012	53	1	\N	\N	179	Formal	124991.86	\N	Closed	\N	4	\N	\N	f	2026-05-02 18:52:30.375564	2026-05-15 18:52:30.700679	\N
 182	3	3	PO-00013	55	1	\N	\N	180	Formal	150499.81	\N	Partially Received	\N	4	\N	\N	f	2026-05-03 18:52:30.375564	2026-05-15 18:52:30.703739	\N
-170	3	3	PO-00001	54	1	\N	179	\N	Formal	59200.55	\N	Approved	\N	4	\N	\N	f	2026-04-21 18:52:30.375564	2026-05-15 18:52:30.658953	\N
 171	3	3	PO-00002	53	1	\N	180	\N	Formal	90907.27	\N	Partially Received	\N	4	\N	\N	f	2026-04-22 18:52:30.375564	2026-05-15 18:52:30.664194	\N
 190	3	3	PO-00025	56	1	179	\N	\N	Formal	6853250	2026-06-15	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 15:23:31.597258	2026-06-08 18:55:17.925857	1
 191	3	3	PO-00026	53	1	\N	197	\N	Formal	1298	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 16:03:23.716584	2026-06-08 18:55:17.942199	1
@@ -7543,16 +10647,19 @@ COPY public.purchase_orders (id, tenant_id, site_id, po_number, vendor_id, proje
 203	3	3	PO-00038	53	1	\N	\N	\N	Informal	18000	2026-06-23	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-02 13:25:01.313929	2026-06-02 13:25:01.322517	\N
 200	3	3	PO-00035	53	1	\N	\N	\N	Informal	196	2026-06-22	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-02 06:01:19.439678	f	2026-06-01 19:52:04.979427	2026-06-09 11:23:05.561822	\N
 199	3	3	PO-00034	59	1	\N	\N	175	Formal	2042	\N	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 05:13:04.621484	f	2026-06-01 17:37:01.189809	2026-06-09 11:26:24.208347	2
+170	3	3	PO-00001	54	1	\N	179	\N	Formal	59200.55	\N	Approved	\N	4	\N	\N	f	2026-04-21 18:52:30.375564	2026-05-15 18:52:30.658953	1
 204	3	3	PO-00039	53	1	\N	\N	\N	Informal	19800	2026-06-23	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-02 17:42:31.823143	2026-06-02 17:42:31.82497	\N
 189	3	3	PO-00024	54	1	\N	\N	179	Formal	33629	\N	Closed	\N	4	4	2026-05-25 13:22:18.605025	f	2026-05-25 18:43:27.751179	2026-06-02 18:01:36.986163	\N
 205	3	3	PO-00040	54	1	189	\N	\N	Formal	48160	2026-06-17	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-03 14:31:01.896958	2026-06-08 18:55:18.125425	1
-206	3	3	PO-00041	53	1	\N	\N	\N	Informal	181500	2026-06-24	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-03 09:03:42.850278	f	2026-06-03 14:33:32.175397	2026-06-03 14:33:49.738142	\N
 208	3	3	PO-00043	54	1	\N	194	\N	Formal	12455543.1	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-05 18:10:20.039447	2026-06-08 18:55:18.142376	1
-207	3	3	PO-00042	53	1	\N	\N	\N	Informal	10560	2026-06-25	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 07:31:48.001221	f	2026-06-04 14:19:18.399032	2026-06-09 13:05:42.79919	2
 201	3	3	PO-00036	54	1	\N	\N	\N	Formal	135778.84	2026-06-22	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-02 06:00:37.696127	f	2026-06-01 19:53:47.799287	2026-06-09 11:19:25.214361	\N
-209	3	3	PO-00044	55	1	\N	208	\N	Formal	109928.8	\N	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: 15 Days\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 07:25:55.019454	f	2026-06-08 14:45:41.037419	2026-06-09 12:56:21.865994	2
 212	3	3	PO-00047	59	1	\N	\N	\N	Informal	389.4	2026-06-29	Short Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR\n[Short Closed: short closed \n]	4	4	2026-06-08 12:47:36.231711	f	2026-06-08 17:19:34.563694	2026-06-08 19:19:46.178721	\N
 211	3	3	PO-00046	53	1	\N	\N	\N	Informal	149060.07	2026-06-29	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 04:59:33.248268	f	2026-06-08 17:18:43.689083	2026-06-09 11:16:03.62895	2
+207	3	3	PO-00042	53	1	\N	\N	\N	Informal	10560	2026-06-25	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 07:31:48.001221	f	2026-06-04 14:19:18.399032	2026-06-11 15:05:34.851646	2
+206	3	3	PO-00041	53	1	\N	\N	\N	Informal	181500	2026-06-24	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-03 09:03:42.850278	f	2026-06-03 14:33:32.175397	2026-06-11 16:24:46.272972	\N
+209	3	3	PO-00044	55	1	\N	208	\N	Formal	109928.8	\N	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: 15 Days\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 07:25:55.019454	f	2026-06-08 14:45:41.037419	2026-06-11 15:04:41.081091	2
+214	2	2	PO-00001	62	3	194	\N	\N	Formal	38491.6	2026-06-26	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-06-11 19:46:17.594031	f	2026-06-12 01:00:29.585057	2026-06-12 01:17:08.524505	2
+215	2	2	PO-00002	62	3	\N	\N	\N	Informal	59815.35	2026-07-03	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	11	2026-06-11 19:55:57.036519	f	2026-06-12 01:18:50.982636	2026-06-12 01:27:26.343947	2
 \.
 
 
@@ -7565,6 +10672,18 @@ COPY public.purchase_request_approvals (id, pr_id, approval_flow_id, approver_id
 2	180	6	4	{"538": {"quantity": 101.0, "remarks": "R21"}, "539": {"quantity": 100.0, "remarks": "R22"}}	G2	2026-06-08 15:35:05.237457
 3	180	7	4	{"538": {"quantity": 100.0, "remarks": "R31"}, "539": {"quantity": 110.0, "remarks": "R32"}}	G3	2026-06-08 15:35:58.178751
 4	181	5	4	{"540": {"quantity": 120.0, "remarks": null}, "541": {"quantity": 110.0, "remarks": null}, "542": {"quantity": 170.0, "remarks": null}, "543": {"quantity": 70.0, "remarks": null}}	\N	2026-06-08 15:54:14.206965
+5	194	12	12	{"595": {"quantity": 8.0, "remarks": null}}	\N	2026-06-12 00:28:43.062721
+6	194	19	12	{"595": {"quantity": 8.0, "remarks": null}}	\N	2026-06-12 00:28:43.062749
+7	194	13	3	{"595": {"quantity": 8.0, "remarks": null}}	\N	2026-06-12 00:59:40.518724
+8	194	17	3	{"595": {"quantity": 8.0, "remarks": null}}	\N	2026-06-12 00:59:40.518745
+9	197	12	3	{"598": {"quantity": 15.0, "remarks": null}}	\N	2026-06-12 01:10:01.884886
+10	197	19	3	{"598": {"quantity": 15.0, "remarks": null}}	\N	2026-06-12 01:10:01.884899
+11	197	17	11	{"598": {"quantity": 15.0, "remarks": null}}	\N	2026-06-12 01:10:57.027555
+12	196	19	12	{"597": {"quantity": 6.0, "remarks": null}}	\N	2026-06-12 01:23:17.659059
+13	195	19	12	{"596": {"quantity": 6.0, "remarks": null}}	\N	2026-06-12 01:23:48.840384
+14	197	13	3	{"598": {"quantity": 15.0, "remarks": null}}	\N	2026-06-12 01:28:16.867367
+15	195	13	3	{"596": {"quantity": 6.0, "remarks": null}}	\N	2026-06-12 01:28:30.025948
+16	195	17	3	{"596": {"quantity": 6.0, "remarks": null}}	\N	2026-06-12 01:28:30.025982
 \.
 
 
@@ -7635,6 +10754,10 @@ COPY public.purchase_request_items (id, pr_id, material_id, quantity, approved_q
 581	191	2132	8	\N
 582	191	1192	10	\N
 583	192	1192	12	\N
+595	194	3474	10	8
+598	197	2357	20	15
+597	196	2499	6	6
+596	195	3084	6	6
 \.
 
 
@@ -7667,6 +10790,10 @@ COPY public.purchase_requests (id, tenant_id, site_id, pr_number, requester_id, 
 192	3	3	PR-00027	4	\N	1	ART CENTRE	1	2026-06-22		Submitted	\N	\N	f	2026-06-08 17:55:00.531189	2026-06-08 17:59:01.111296	1
 191	3	3	PR-00026	4	\N	1	ADMIN BLOCK	1	2026-06-22	\n[Short Closed: Not Required]	Short Closed	\N	\N	f	2026-06-08 17:06:00.229077	2026-06-08 18:04:14.067753	1
 193	3	3	PR-00028	4	\N	2	IP GENERIC PHARMACY MAIN STORE	1	2026-06-23		Draft	\N	\N	f	2026-06-08 18:05:29.772886	2026-06-08 18:06:38.06265	1
+197	2	2	PR-00004	10	\N	8	HEALTH 	3	2026-06-26		Approved	3	2026-06-11 19:58:16.903903	f	2026-06-12 00:57:22.512377	2026-06-12 01:28:16.905262	2
+195	2	2	PR-00002	3	\N	\N	Mechanical	3	2026-06-26		Approved	3	2026-06-11 19:58:30.051646	f	2026-06-12 00:40:52.805513	2026-06-12 01:28:30.05202	2
+194	2	2	PR-00001	10	\N	\N	Mechanical	3	2026-06-26		Converted to PO	3	2026-06-11 19:29:40.555686	f	2026-06-12 00:19:47.597691	2026-06-12 01:00:29.667038	2
+196	2	2	PR-00003	10	\N	\N	Mechanical	3	2026-06-26		Submitted	\N	\N	f	2026-06-12 00:56:37.980796	2026-06-12 01:23:17.682457	2
 \.
 
 
@@ -7909,12 +11036,8 @@ COPY public.role_permissions (id, role_id, resource, can_read, can_create, can_u
 594	12	invoice	t	t	t	t	{"can_register": true, "can_approve": true, "can_reject": true}
 595	12	grn	t	t	t	t	{"can_create_grn": true, "can_complete": true}
 596	12	issues	t	t	t	t	{"can_issue": true, "can_print": true}
-465	11	indents	t	t	t	t	{}
-466	11	quotations	t	t	t	t	{}
-467	11	invoice	t	t	t	t	{}
-468	11	acknowledgements	t	t	t	t	{}
-469	11	departments	t	t	t	t	{}
-470	11	terms	t	t	t	t	{}
+678	13	indents	t	f	f	f	{"can_approve": true, "can_reject": true, "can_convert_to_po": false, "can_acknowledge": false}
+679	13	purchase_requests	t	f	f	f	{"can_submit": false, "can_approve": true, "can_reject": true, "can_convert_to_po": false, "can_hold": true, "can_short_close": true}
 598	12	transfers	t	t	t	t	{"can_transfer": true}
 599	12	gate_passes	t	t	t	t	{"can_create": true, "can_print": true}
 600	12	acknowledgements	t	t	t	t	{"can_acknowledge": true}
@@ -7999,10 +11122,10 @@ COPY public.role_permissions (id, role_id, resource, can_read, can_create, can_u
 275	4	organizations	t	t	t	t	{}
 276	4	departments	t	t	t	t	{}
 277	4	terms	t	t	t	t	{}
-417	11	dashboard	t	t	t	t	{}
-418	11	materials	t	t	t	t	{}
-419	11	categories	t	t	t	t	{}
-420	11	vendors	t	t	t	t	{}
+680	13	acknowledgements	t	t	t	t	{"can_acknowledge": true}
+681	14	dashboard	t	f	f	f	{}
+682	14	materials	t	t	t	t	{}
+683	14	categories	t	t	t	t	{}
 494	5	purchase_requests	t	t	t	t	{"can_submit": true, "can_approve": false, "can_reject": false, "can_convert_to_po": false, "can_hold": false, "can_short_close": false}
 495	5	grn	t	t	t	t	{"can_create_grn": true, "can_complete": true}
 496	5	invoice	t	t	t	t	{"can_register": true, "can_approve": true, "can_reject": true}
@@ -8011,25 +11134,110 @@ COPY public.role_permissions (id, role_id, resource, can_read, can_create, can_u
 499	5	report_receipt_summary	t	f	f	f	{}
 533	3	gate_passes	t	t	t	t	{}
 535	4	gate_passes	t	t	t	t	{}
-421	11	organizations	t	t	t	t	{}
-422	11	projects	t	t	t	t	{}
-423	11	buildings	t	t	t	t	{}
-424	11	warehouses	t	t	t	t	{}
-425	11	purchase_requests	t	t	t	t	{}
-426	11	purchase_orders	t	t	t	t	{}
-427	11	gate_entry	t	t	t	t	{}
-428	11	grn	t	t	t	t	{}
-429	11	issues	t	t	t	t	{}
-430	11	returns	t	t	t	t	{}
-431	11	transfers	t	t	t	t	{}
-432	11	inventory	t	t	t	t	{}
-433	11	intelligence	t	t	t	t	{}
-434	11	reports	t	t	t	t	{}
-435	11	admin_users	t	t	t	t	{}
-436	11	admin_roles	t	t	t	t	{}
-437	11	alerts	t	t	t	t	{}
+684	14	vendors	t	t	t	t	{}
+685	14	warehouses	t	t	t	t	{}
+686	14	indents	t	t	t	t	{"can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_acknowledge": true}
+687	14	purchase_requests	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_hold": true, "can_short_close": true}
+688	14	quotations	t	t	t	t	{"can_send_to_vendors": true, "can_receive": true, "can_enter_quotes": true, "can_compare": true, "can_approve": true, "can_convert_to_po": true}
+689	14	purchase_orders	t	t	t	t	{"can_approve": true, "can_reject": true, "can_hold": true, "can_send_to_vendor": true, "can_short_close": true}
+690	14	gate_entry	t	t	t	t	{}
+691	14	invoice	t	t	t	t	{}
+692	14	grn	t	t	t	t	{}
+693	14	issues	t	t	t	t	{}
+694	14	acknowledgements	t	t	t	t	{}
+695	14	inventory	t	t	t	t	{}
+696	14	intelligence	t	f	f	f	{}
+697	14	reports	t	f	f	f	{}
+698	14	admin_users	t	t	t	t	{}
+699	14	admin_roles	t	t	t	t	{}
+700	14	approval_flows	t	t	t	t	{}
 537	5	gate_passes	t	t	t	t	{"can_issue": true, "can_print": true}
-538	11	gate_passes	t	t	t	t	{}
+701	14	projects	t	t	t	t	{}
+644	12	finance_invoices	t	t	t	t	{}
+645	12	report_finance	t	f	f	f	{}
+646	11	dashboard	t	f	f	f	{}
+647	11	materials	t	t	t	t	{}
+648	11	categories	t	t	t	t	{}
+649	11	vendors	t	t	t	t	{}
+650	11	warehouses	t	t	t	t	{}
+651	11	indents	t	t	t	t	{"can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_acknowledge": true}
+652	11	purchase_requests	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_hold": true, "can_short_close": true}
+653	11	quotations	t	t	t	t	{"can_send_to_vendors": true, "can_receive": true, "can_enter_quotes": true, "can_compare": true, "can_approve": true, "can_convert_to_po": true}
+654	11	purchase_orders	t	t	t	t	{"can_approve": true, "can_reject": true, "can_hold": true, "can_send_to_vendor": true, "can_short_close": true}
+655	11	gate_entry	t	t	t	t	{"can_record_entry": true, "can_verify": true}
+656	11	invoice	t	t	t	t	{"can_register": true, "can_approve": true, "can_reject": true}
+657	11	grn	t	t	t	t	{"can_create_grn": true, "can_complete": true}
+658	11	issues	t	t	t	t	{"can_issue": true, "can_print": true}
+659	11	returns	t	t	t	t	{"can_return": true, "receive": true}
+660	11	transfers	t	t	t	t	{"can_transfer": true}
+661	11	gate_passes	t	t	t	t	{"can_create": true, "can_print": true}
+662	11	acknowledgements	t	t	t	t	{"can_acknowledge": true}
+663	11	inventory	t	t	t	t	{}
+664	11	intelligence	t	f	f	f	{}
+665	11	finance_invoices	t	t	t	t	{}
+666	11	report_issue_summary	t	f	f	f	{}
+667	11	report_rate_analysis	t	f	f	f	{}
+668	11	report_receipt_summary	t	f	f	f	{}
+669	11	report_dept_inventory	t	f	f	f	{}
+670	11	report_finance	t	f	f	f	{}
+671	11	admin_users	t	t	t	t	{}
+672	11	admin_roles	t	t	t	t	{}
+673	11	approval_flows	t	t	t	t	{}
+674	11	projects	t	t	t	t	{}
+675	11	organizations	t	t	t	t	{}
+676	11	departments	t	t	t	t	{}
+677	11	terms	t	t	t	t	{}
+702	14	organizations	t	t	t	t	{}
+703	14	departments	t	t	t	t	{}
+704	14	terms	t	t	t	t	{}
+705	14	returns	t	t	t	t	{}
+706	14	transfers	t	t	t	t	{}
+707	14	gate_passes	t	t	t	t	{}
+712	16	gate_entry	t	t	t	t	{"can_record_entry": true, "can_verify": true}
+713	17	returns	t	t	t	t	{"can_issue": true, "can_print": true}
+714	17	transfers	t	t	t	t	{"can_issue": true, "can_print": true}
+715	17	purchase_requests	t	t	t	t	{"can_submit": true, "can_approve": false, "can_reject": false, "can_convert_to_po": false, "can_hold": false, "can_short_close": false}
+716	17	grn	t	t	t	t	{"can_create_grn": true, "can_complete": true}
+717	17	invoice	t	t	t	t	{"can_register": true, "can_approve": true, "can_reject": true}
+718	17	issues	t	t	t	t	{"can_issue": true, "can_print": true}
+719	17	report_issue_summary	t	f	f	f	{}
+720	17	report_receipt_summary	t	f	f	f	{}
+721	17	gate_passes	t	t	t	t	{"can_issue": true, "can_print": true}
+722	18	returns	t	t	t	t	{}
+723	18	transfers	t	t	t	t	{}
+724	18	dashboard	t	f	f	f	{}
+725	18	materials	t	t	t	t	{}
+726	18	categories	t	t	t	t	{}
+727	18	vendors	t	t	t	t	{}
+728	18	warehouses	t	t	t	t	{}
+729	18	indents	t	t	t	t	{"can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_acknowledge": true}
+730	18	purchase_requests	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_hold": true, "can_short_close": true}
+731	18	quotations	t	t	t	t	{"can_send_to_vendors": true, "can_receive": true, "can_enter_quotes": true, "can_compare": true, "can_approve": true, "can_convert_to_po": true}
+732	18	purchase_orders	t	t	t	t	{"can_approve": true, "can_reject": true, "can_hold": true, "can_send_to_vendor": true, "can_short_close": true}
+733	18	gate_entry	t	t	t	t	{}
+734	18	invoice	t	t	t	t	{}
+735	18	grn	t	t	t	t	{}
+736	18	issues	t	t	t	t	{}
+737	18	acknowledgements	t	t	t	t	{}
+738	18	inventory	t	t	t	t	{}
+739	18	intelligence	t	f	f	f	{}
+740	18	reports	t	f	f	f	{}
+741	18	admin_users	t	t	t	t	{}
+742	18	admin_roles	t	t	t	t	{}
+743	18	approval_flows	t	t	t	t	{}
+744	18	projects	t	t	t	t	{}
+745	18	organizations	t	t	t	t	{}
+746	18	departments	t	t	t	t	{}
+747	18	terms	t	t	t	t	{}
+748	18	gate_passes	t	t	t	t	{}
+751	19	indents	t	t	t	t	{"can_acknowledge": false, "can_approve": false, "can_reject": false, "can_convert_to_po": false}
+752	19	acknowledgements	t	t	t	t	{"can_acknowledge": true}
+765	15	dashboard	t	f	f	f	{}
+766	15	quotations	t	f	t	f	{"can_approve": true}
+767	15	purchase_orders	t	f	t	f	{"can_approve": true, "can_reject": true}
+768	15	intelligence	t	f	f	f	{}
+769	15	purchase_requests	t	f	t	f	{"can_submit": false, "can_approve": true, "can_reject": true}
+770	15	indents	t	f	t	f	{"can_approve": true, "can_reject": true}
 \.
 
 
@@ -8044,10 +11252,17 @@ COPY public.roles (id, tenant_id, name, code, description, is_system, created_at
 9	3	Gate Keeper	GATEKEEPER	Incharge of material IN/OUT	f	2026-05-27 15:42:33.453327	Organization
 5	3	Store keeper	STOREKEEPER	the person takes care of material in store	f	2026-05-27 15:34:40.519209	Organization
 4	3	Store Manager	STOREMANAGER	The person responsible for all the store management	f	2026-05-27 15:28:37.187928	Organization
-11	2	Admin	admin	Full tenant access	f	2026-06-01 19:19:41.536244	Full Administrative Access
 12	3	Admin	ADMIN	Full tenant access	f	2026-06-01 19:19:41.545765	Full Administrative Access
 6	3	Indenter	INDENTER	the person request for the materials required	f	2026-05-27 15:35:43.041222	Full Administrative Access
 10	1	Admin	ADMIN	Full tenant access	f	2026-06-01 19:19:41.504549	Full Administrative Access
+11	2	Admin	ADMIN	Full tenant access	f	2026-06-01 19:19:41.536244	Full Administrative Access
+13	2	Department Head	DEPARTMENTHEAD	Look after their department	f	2026-06-11 22:31:29.105279	Department
+14	2	Store Admin	STOREADMIN	Full tenant access	f	2026-06-11 22:31:29.112228	Organization
+15	2	CEO	CEO	Chief Executive Officer	f	2026-06-11 22:31:29.131989	Organization
+16	2	Gate Keeper	GATEKEEPER	Incharge of material IN/OUT	f	2026-06-11 22:31:29.139414	Organization
+17	2	Store keeper	STOREKEEPER	the person takes care of material in store	f	2026-06-11 22:31:29.142898	Organization
+18	2	Store Manager	STOREMANAGER	The person responsible for all the store management	f	2026-06-11 22:31:29.150079	Organization
+19	2	Indenter	INDENTER	the person request for the materials required	f	2026-06-11 22:31:29.169807	Self Only
 \.
 
 
@@ -8290,6 +11505,9 @@ COPY public.rooms (id, tenant_id, site_id, name, code, department_name, floor_id
 232	3	3	Room 610	RM-BLDG-00003-6-10	215 WARD	22	t	f	2026-06-03 13:09:43.070901
 233	3	3	Room 611	RM-BLDG-00003-6-11	208 WARD	22	t	f	2026-06-03 13:09:43.072138
 234	3	3	Room 612	RM-BLDG-00003-6-12	108 WARD	22	t	f	2026-06-03 13:09:43.073259
+236	2	2	ROOM101	RM-00002	HEALTH 	27	f	t	2026-06-11 21:18:20.420978
+237	2	2	ROOM101	RM-00003	HEALTH 	28	t	f	2026-06-11 21:22:29.452807
+235	2	2	1	RM-00001	\N	10	t	f	2026-06-11 15:38:05.351105
 \.
 
 
@@ -9827,6 +13045,1229 @@ COPY public.stock_ledger (id, tenant_id, site_id, material_id, warehouse_id, tra
 3010	3	3	224	55	Transfer In	1	167	Transfer	16	TRF-00005	1	\N	\N	4	2026-06-10 17:49:35.001994
 3011	3	3	224	51	Transfer Out	-2	58	Transfer	17	TRF-00006	1	\N	\N	4	2026-06-10 17:51:14.972787
 3012	3	3	224	55	Transfer In	2	169	Transfer	17	TRF-00006	1	\N	\N	4	2026-06-10 17:51:14.972818
+3013	3	3	1062	59	GRN	20	108	GRN	201	GRN-00020	1	\N	\N	4	2026-06-11 15:04:41.085077
+3014	3	3	1191	59	GRN	12	13	GRN	202	GRN-00021	1	\N	\N	4	2026-06-11 15:05:34.853261
+3015	3	3	1191	59	GRN	10	23	GRN	203	GRN-00022	1	\N	\N	4	2026-06-11 16:24:46.276796
+3016	2	2	2337	62	Adjustment	76	76	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929249
+3017	2	2	2339	62	Adjustment	77	77	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929265
+3018	2	2	2357	62	Adjustment	37	37	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929269
+3019	2	2	2340	62	Adjustment	315	315	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929272
+3020	2	2	2341	62	Adjustment	372	372	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929275
+3021	2	2	2342	62	Adjustment	71	71	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929278
+3022	2	2	2343	62	Adjustment	23	23	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929281
+3023	2	2	2344	62	Adjustment	39	39	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929284
+3024	2	2	2345	62	Adjustment	276	276	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929287
+3025	2	2	2346	62	Adjustment	140	140	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.92929
+3026	2	2	2347	62	Adjustment	142	142	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929293
+3027	2	2	2348	62	Adjustment	34	34	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929296
+3028	2	2	2350	62	Adjustment	16	16	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929299
+3029	2	2	2351	62	Adjustment	89	89	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929302
+3030	2	2	2352	62	Adjustment	232	232	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929305
+3031	2	2	2353	62	Adjustment	539	539	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929308
+3032	2	2	2354	62	Adjustment	107	107	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929311
+3033	2	2	2355	62	Adjustment	84	84	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929314
+3034	2	2	2356	62	Adjustment	66	66	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929317
+3035	2	2	2358	62	Adjustment	118	118	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929319
+3036	2	2	2359	62	Adjustment	22	22	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929322
+3037	2	2	2360	62	Adjustment	142	142	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929325
+3038	2	2	2361	62	Adjustment	118	118	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929328
+3039	2	2	2363	62	Adjustment	193	193	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929331
+3040	2	2	2364	62	Adjustment	346	346	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929339
+3041	2	2	2365	62	Adjustment	100	100	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929342
+3042	2	2	2366	62	Adjustment	72	72	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929345
+3043	2	2	2367	62	Adjustment	27	27	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929348
+3044	2	2	2368	62	Adjustment	70	70	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929351
+3045	2	2	2369	62	Adjustment	92	92	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929353
+3046	2	2	2370	62	Adjustment	118	118	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929356
+3047	2	2	2372	62	Adjustment	112	112	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929359
+3048	2	2	2373	62	Adjustment	160	160	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929362
+3049	2	2	2374	62	Adjustment	60	60	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929365
+3050	2	2	2375	62	Adjustment	397	397	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929368
+3051	2	2	2376	62	Adjustment	9	9	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929372
+3052	2	2	2377	62	Adjustment	5	5	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929374
+3053	2	2	2378	62	Adjustment	16	16	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929377
+3054	2	2	2379	62	Adjustment	103	103	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.92938
+3055	2	2	2382	62	Adjustment	87	87	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929383
+3056	2	2	2383	62	Adjustment	109	109	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929386
+3057	2	2	2384	62	Adjustment	174	174	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929389
+3058	2	2	2385	62	Adjustment	70	70	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929392
+3059	2	2	2387	62	Adjustment	52	52	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929395
+3060	2	2	2388	62	Adjustment	410	410	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929398
+3061	2	2	2389	62	Adjustment	127	127	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929401
+3062	2	2	2390	62	Adjustment	43	43	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929404
+3063	2	2	2392	62	Adjustment	46	46	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929407
+3064	2	2	2393	62	Adjustment	120	120	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.92941
+3065	2	2	2394	62	Adjustment	62	62	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929412
+3066	2	2	2395	62	Adjustment	55	55	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929415
+3067	2	2	2396	62	Adjustment	58	58	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929418
+3068	2	2	2397	62	Adjustment	29	29	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929421
+3069	2	2	2398	62	Adjustment	68	68	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929424
+3070	2	2	2399	62	Adjustment	104	104	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929427
+3071	2	2	2400	62	Adjustment	105	105	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.92943
+3072	2	2	2401	62	Adjustment	119	119	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929433
+3073	2	2	2402	62	Adjustment	84	84	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929436
+3074	2	2	2403	62	Adjustment	45	45	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929439
+3075	2	2	2404	62	Adjustment	285	285	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929441
+3076	2	2	2405	62	Adjustment	65	65	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929444
+3077	2	2	2406	62	Adjustment	275	275	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929447
+3078	2	2	2408	62	Adjustment	64	64	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.92945
+3079	2	2	2410	62	Adjustment	471	471	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929453
+3080	2	2	2411	62	Adjustment	9	9	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929456
+3081	2	2	2412	62	Adjustment	487	487	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929459
+3082	2	2	2413	62	Adjustment	67	67	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929462
+3083	2	2	2415	62	Adjustment	244	244	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929464
+3084	2	2	2418	62	Adjustment	6	6	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929467
+3085	2	2	2419	62	Adjustment	523	523	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.92947
+3086	2	2	2420	62	Adjustment	93	93	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929473
+3087	2	2	2421	62	Adjustment	357	357	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929476
+3088	2	2	2422	62	Adjustment	26	26	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929479
+3089	2	2	2423	62	Adjustment	11	11	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929481
+3090	2	2	2424	62	Adjustment	115	115	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929484
+3091	2	2	2425	62	Adjustment	23	23	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929487
+3092	2	2	2426	62	Adjustment	147	147	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.92949
+3093	2	2	2427	62	Adjustment	86	86	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929492
+3094	2	2	2428	62	Adjustment	23	23	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929495
+3095	2	2	2429	62	Adjustment	51	51	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929498
+3096	2	2	2430	62	Adjustment	104	104	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929501
+3097	2	2	2431	62	Adjustment	143	143	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929504
+3098	2	2	2432	62	Adjustment	75	75	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929507
+3099	2	2	2433	62	Adjustment	87	87	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929509
+3100	2	2	2434	62	Adjustment	98	98	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929512
+3101	2	2	2435	62	Adjustment	120	120	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929515
+3102	2	2	2436	62	Adjustment	133	133	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929518
+3103	2	2	2437	62	Adjustment	139	139	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929521
+3104	2	2	2439	62	Adjustment	102	102	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929523
+3105	2	2	2440	62	Adjustment	111	111	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929526
+3106	2	2	2441	62	Adjustment	117	117	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929529
+3107	2	2	2442	62	Adjustment	108	108	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929533
+3108	2	2	2443	62	Adjustment	18	18	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929535
+3109	2	2	2444	62	Adjustment	50	50	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929538
+3110	2	2	2445	62	Adjustment	112	112	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929541
+3111	2	2	2446	62	Adjustment	62	62	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929544
+3112	2	2	2447	62	Adjustment	61	61	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929547
+3113	2	2	2448	62	Adjustment	30	30	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.92955
+3114	2	2	2449	62	Adjustment	55	55	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929552
+3115	2	2	2450	62	Adjustment	117	117	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929555
+3116	2	2	2451	62	Adjustment	59	59	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929558
+3117	2	2	2452	62	Adjustment	86	86	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929561
+3118	2	2	2453	62	Adjustment	49	49	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929564
+3119	2	2	2454	62	Adjustment	17	17	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929567
+3120	2	2	2456	62	Adjustment	44	44	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.92957
+3121	2	2	2457	62	Adjustment	126	126	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929573
+3122	2	2	2458	62	Adjustment	10	10	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929575
+3123	2	2	2459	62	Adjustment	47	47	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929578
+3124	2	2	2460	62	Adjustment	141	141	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929581
+3125	2	2	2461	62	Adjustment	78	78	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929584
+3126	2	2	2462	62	Adjustment	118	118	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929587
+3127	2	2	2464	62	Adjustment	54	54	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929589
+3128	2	2	2465	62	Adjustment	27	27	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929592
+3129	2	2	2466	62	Adjustment	30	30	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929595
+3130	2	2	2467	62	Adjustment	14	14	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929598
+3131	2	2	2468	62	Adjustment	362	362	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929601
+3132	2	2	2469	62	Adjustment	102	102	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929604
+3133	2	2	2470	62	Adjustment	89	89	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929606
+3134	2	2	2471	62	Adjustment	485	485	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929609
+3135	2	2	2472	62	Adjustment	81	81	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929612
+3136	2	2	2473	62	Adjustment	306	306	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929615
+3137	2	2	2474	62	Adjustment	32	32	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929618
+3138	2	2	2475	62	Adjustment	266	266	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.92962
+3139	2	2	2476	62	Adjustment	132	132	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929623
+3140	2	2	2477	62	Adjustment	35	35	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929626
+3141	2	2	2480	62	Adjustment	89	89	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929629
+3142	2	2	2481	62	Adjustment	28	28	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929632
+3143	2	2	2482	62	Adjustment	61	61	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929634
+3144	2	2	2483	62	Adjustment	34	34	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929637
+3145	2	2	2484	62	Adjustment	140	140	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.92964
+3146	2	2	2485	62	Adjustment	161	161	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929643
+3147	2	2	2487	62	Adjustment	90	90	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929646
+3148	2	2	2488	62	Adjustment	27	27	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929648
+3149	2	2	2489	62	Adjustment	61	61	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929651
+3150	2	2	2490	62	Adjustment	75	75	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929654
+3151	2	2	2491	62	Adjustment	9	9	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929657
+3152	2	2	2492	62	Adjustment	384	384	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.92966
+3153	2	2	2493	62	Adjustment	17	17	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929662
+3154	2	2	2494	62	Adjustment	283	283	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929665
+3155	2	2	2495	62	Adjustment	30	30	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929668
+3156	2	2	2496	62	Adjustment	175	175	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929671
+3157	2	2	2497	62	Adjustment	72	72	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929674
+3158	2	2	2498	62	Adjustment	94	94	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929676
+3159	2	2	2499	62	Adjustment	132	132	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929679
+3160	2	2	2500	62	Adjustment	254	254	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929682
+3161	2	2	2501	62	Adjustment	69	69	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929685
+3162	2	2	2502	62	Adjustment	32	32	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929688
+3163	2	2	2503	62	Adjustment	26	26	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.92969
+3164	2	2	2505	62	Adjustment	89	89	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929693
+3165	2	2	2506	62	Adjustment	92	92	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929696
+3166	2	2	2507	62	Adjustment	81	81	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929699
+3167	2	2	2508	62	Adjustment	42	42	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929702
+3168	2	2	2509	62	Adjustment	19	19	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929704
+3169	2	2	2510	62	Adjustment	45	45	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929707
+3170	2	2	2511	62	Adjustment	88	88	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.92971
+3171	2	2	2512	62	Adjustment	104	104	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929713
+3172	2	2	2513	62	Adjustment	3	3	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929716
+3173	2	2	2514	62	Adjustment	102	102	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929718
+3174	2	2	2515	62	Adjustment	92	92	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929721
+3175	2	2	2516	62	Adjustment	59	59	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929724
+3176	2	2	2517	62	Adjustment	60	60	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929727
+3177	2	2	2518	62	Adjustment	95	95	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.92973
+3178	2	2	2519	62	Adjustment	99	99	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929733
+3179	2	2	2520	62	Adjustment	103	103	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929735
+3180	2	2	2521	62	Adjustment	2	2	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929738
+3181	2	2	2522	62	Adjustment	3	3	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929741
+3182	2	2	2523	62	Adjustment	42	42	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929744
+3183	2	2	2524	62	Adjustment	31	31	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929746
+3184	2	2	2525	62	Adjustment	27	27	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929749
+3185	2	2	2526	62	Adjustment	59	59	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929752
+3186	2	2	2527	62	Adjustment	50	50	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929755
+3187	2	2	2528	62	Adjustment	3	3	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929758
+3188	2	2	2529	62	Adjustment	92	92	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.92976
+3189	2	2	2530	62	Adjustment	63	63	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929763
+3190	2	2	2532	62	Adjustment	91	91	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929766
+3191	2	2	2533	62	Adjustment	85	85	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929769
+3192	2	2	2534	62	Adjustment	73	73	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929772
+3193	2	2	2535	62	Adjustment	24	24	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929775
+3194	2	2	2536	62	Adjustment	82	82	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929777
+3195	2	2	2538	62	Adjustment	51	51	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.92978
+3196	2	2	2539	62	Adjustment	18	18	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929783
+3197	2	2	2540	62	Adjustment	91	91	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929786
+3198	2	2	2541	62	Adjustment	50	50	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929789
+3199	2	2	2542	62	Adjustment	38	38	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929791
+3200	2	2	2543	62	Adjustment	61	61	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929794
+3201	2	2	2544	62	Adjustment	93	93	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929797
+3202	2	2	2545	62	Adjustment	76	76	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.9298
+3203	2	2	2546	62	Adjustment	30	30	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929803
+3204	2	2	2547	62	Adjustment	75	75	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929805
+3205	2	2	2548	62	Adjustment	88	88	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929808
+3206	2	2	2549	62	Adjustment	2	2	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929811
+3207	2	2	2550	62	Adjustment	66	66	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929814
+3208	2	2	2551	62	Adjustment	46	46	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929817
+3209	2	2	2552	62	Adjustment	51	51	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929819
+3210	2	2	2553	62	Adjustment	39	39	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929822
+3211	2	2	2554	62	Adjustment	62	62	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929825
+3212	2	2	2555	62	Adjustment	28	28	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929828
+3213	2	2	2556	62	Adjustment	10	10	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929831
+3214	2	2	2557	62	Adjustment	75	75	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929833
+3215	2	2	2558	62	Adjustment	78	78	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929836
+3216	2	2	2559	62	Adjustment	1	1	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929839
+3217	2	2	2560	62	Adjustment	76	76	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929842
+3218	2	2	2561	62	Adjustment	103	103	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929845
+3219	2	2	2562	62	Adjustment	32	32	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929847
+3220	2	2	2563	62	Adjustment	30	30	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.92985
+3221	2	2	2564	62	Adjustment	43	43	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929853
+3222	2	2	2565	62	Adjustment	46	46	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929856
+3223	2	2	2566	62	Adjustment	34	34	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929859
+3224	2	2	2567	62	Adjustment	31	31	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929862
+3225	2	2	2568	62	Adjustment	21	21	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929864
+3226	2	2	2570	62	Adjustment	68	68	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929867
+3227	2	2	2572	62	Adjustment	90	90	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.92987
+3228	2	2	2573	62	Adjustment	77	77	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929873
+3229	2	2	2574	62	Adjustment	79	79	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929876
+3230	2	2	2575	62	Adjustment	84	84	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929878
+3231	2	2	2576	62	Adjustment	24	24	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929881
+3232	2	2	2577	62	Adjustment	1	1	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929884
+3233	2	2	2578	62	Adjustment	12	12	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929887
+3234	2	2	2579	62	Adjustment	57	57	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.92989
+3235	2	2	2580	62	Adjustment	2	2	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929892
+3236	2	2	2581	62	Adjustment	87	87	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929895
+3237	2	2	2582	62	Adjustment	72	72	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929898
+3238	2	2	2583	62	Adjustment	93	93	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929901
+3239	2	2	2584	62	Adjustment	122	122	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929904
+3240	2	2	2585	62	Adjustment	69	69	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929906
+3241	2	2	2586	62	Adjustment	27	27	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929909
+3242	2	2	2588	62	Adjustment	54	54	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929912
+3243	2	2	2590	62	Adjustment	100	100	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929915
+3244	2	2	2591	62	Adjustment	73	73	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929918
+3245	2	2	2593	62	Adjustment	102	102	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929921
+3246	2	2	2594	62	Adjustment	81	81	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929923
+3247	2	2	2595	62	Adjustment	17	17	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929926
+3248	2	2	2596	62	Adjustment	23	23	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929929
+3249	2	2	2597	62	Adjustment	81	81	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929932
+3250	2	2	2598	62	Adjustment	11	11	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929935
+3251	2	2	2599	62	Adjustment	67	67	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929937
+3252	2	2	2675	62	Adjustment	68	68	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.92994
+3253	2	2	2600	62	Adjustment	23	23	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929943
+3254	2	2	2601	62	Adjustment	47	47	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929946
+3255	2	2	2602	62	Adjustment	81	81	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929949
+3256	2	2	2603	62	Adjustment	59	59	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929952
+3257	2	2	2605	62	Adjustment	70	70	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929955
+3258	2	2	2606	62	Adjustment	103	103	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929957
+3259	2	2	2607	62	Adjustment	112	112	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.92996
+3260	2	2	2608	62	Adjustment	63	63	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929963
+3261	2	2	2609	62	Adjustment	52	52	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929966
+3262	2	2	2610	62	Adjustment	54	54	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929969
+3263	2	2	2611	62	Adjustment	116	116	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929971
+3264	2	2	2613	62	Adjustment	56	56	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929974
+3265	2	2	2614	62	Adjustment	1	1	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929977
+3266	2	2	2615	62	Adjustment	2	2	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.92998
+3267	2	2	2616	62	Adjustment	75	75	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929983
+3268	2	2	2617	62	Adjustment	100	100	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929985
+3269	2	2	2618	62	Adjustment	50	50	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929988
+3270	2	2	2619	62	Adjustment	54	54	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929991
+3271	2	2	2620	62	Adjustment	8	8	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929994
+3272	2	2	2621	62	Adjustment	130	130	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929997
+3273	2	2	2622	62	Adjustment	99	99	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.929999
+3274	2	2	2623	62	Adjustment	90	90	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930002
+3275	2	2	2624	62	Adjustment	82	82	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930005
+3276	2	2	2626	62	Adjustment	123	123	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930008
+3277	2	2	2628	62	Adjustment	1	1	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930011
+3278	2	2	2629	62	Adjustment	44	44	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930014
+3279	2	2	2630	62	Adjustment	13	13	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930016
+3280	2	2	2631	62	Adjustment	10	10	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930019
+3281	2	2	2632	62	Adjustment	52	52	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930022
+3282	2	2	2633	62	Adjustment	47	47	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930025
+3283	2	2	2635	62	Adjustment	1	1	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930028
+3284	2	2	2676	62	Adjustment	97	97	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930031
+3285	2	2	2636	62	Adjustment	70	70	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930033
+3286	2	2	2637	62	Adjustment	93	93	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930036
+3287	2	2	2638	62	Adjustment	80	80	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930039
+3288	2	2	2639	62	Adjustment	65	65	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930042
+3289	2	2	2640	62	Adjustment	23	23	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930045
+3290	2	2	2641	62	Adjustment	12	12	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930048
+3291	2	2	2642	62	Adjustment	33	33	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930051
+3292	2	2	2643	62	Adjustment	55	55	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930054
+3293	2	2	2644	62	Adjustment	1	1	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930056
+3294	2	2	2645	62	Adjustment	95	95	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930059
+3295	2	2	2646	62	Adjustment	28	28	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930062
+3296	2	2	2647	62	Adjustment	53	53	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930065
+3297	2	2	2649	62	Adjustment	102	102	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930068
+3298	2	2	2650	62	Adjustment	101	101	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930071
+3299	2	2	2651	62	Adjustment	39	39	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930074
+3300	2	2	2652	62	Adjustment	51	51	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930076
+3301	2	2	2653	62	Adjustment	12	12	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930079
+3302	2	2	2654	62	Adjustment	58	58	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930082
+3303	2	2	2655	62	Adjustment	101	101	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930085
+3304	2	2	2656	62	Adjustment	33	33	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930088
+3305	2	2	2657	62	Adjustment	83	83	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930091
+3306	2	2	2659	62	Adjustment	56	56	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930093
+3307	2	2	2660	62	Adjustment	26	26	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930096
+3308	2	2	2661	62	Adjustment	101	101	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930099
+3309	2	2	2662	62	Adjustment	2	2	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930102
+3310	2	2	2663	62	Adjustment	30	30	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930105
+3311	2	2	2665	62	Adjustment	126	126	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930108
+3312	2	2	2666	62	Adjustment	60	60	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930111
+3313	2	2	2667	62	Adjustment	61	61	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930113
+3314	2	2	2668	62	Adjustment	87	87	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930116
+3315	2	2	2669	62	Adjustment	3	3	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930119
+3316	2	2	2671	62	Adjustment	37	37	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930122
+3317	2	2	2672	62	Adjustment	58	58	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930125
+3318	2	2	2673	62	Adjustment	44	44	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930128
+3319	2	2	2674	62	Adjustment	93	93	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93013
+3320	2	2	2677	62	Adjustment	78	78	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930133
+3321	2	2	2679	62	Adjustment	50	50	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930136
+3322	2	2	2680	62	Adjustment	56	56	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930139
+3323	2	2	2681	62	Adjustment	86	86	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930142
+3324	2	2	2682	62	Adjustment	116	116	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930145
+3325	2	2	2683	62	Adjustment	16	16	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930147
+3326	2	2	2684	62	Adjustment	3	3	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930151
+3327	2	2	2685	62	Adjustment	3	3	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930154
+3328	2	2	2686	62	Adjustment	100	100	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930157
+3329	2	2	2687	62	Adjustment	33	33	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930159
+3330	2	2	2693	62	Adjustment	97	97	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930162
+3331	2	2	2694	62	Adjustment	92	92	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930165
+3332	2	2	2695	62	Adjustment	65	65	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930168
+3333	2	2	2696	62	Adjustment	65	65	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930171
+3334	2	2	2697	62	Adjustment	35	35	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930174
+3335	2	2	2698	62	Adjustment	11	11	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930177
+3336	2	2	2699	62	Adjustment	43	43	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93018
+3337	2	2	2701	62	Adjustment	100	100	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930183
+3338	2	2	2703	62	Adjustment	2	2	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930185
+3339	2	2	2704	62	Adjustment	2	2	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930188
+3340	2	2	2705	62	Adjustment	23	23	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930191
+3341	2	2	2706	62	Adjustment	102	102	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930194
+3342	2	2	2707	62	Adjustment	63	63	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930197
+3343	2	2	2709	62	Adjustment	60	60	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.9302
+3344	2	2	2710	62	Adjustment	35	35	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930202
+3345	2	2	2711	62	Adjustment	94	94	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930205
+3346	2	2	2712	62	Adjustment	2	2	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930208
+3347	2	2	2713	62	Adjustment	49	49	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930211
+3348	2	2	2714	62	Adjustment	3	3	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930214
+3349	2	2	2715	62	Adjustment	43	43	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930217
+3350	2	2	2716	62	Adjustment	94	94	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93022
+3351	2	2	2717	62	Adjustment	1	1	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930222
+3352	2	2	2718	62	Adjustment	97	97	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930225
+3353	2	2	2719	62	Adjustment	88	88	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930228
+3354	2	2	2720	62	Adjustment	31	31	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930231
+3355	2	2	2721	62	Adjustment	42	42	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930234
+3356	2	2	2722	62	Adjustment	101	101	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930237
+3357	2	2	2723	62	Adjustment	64	64	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93024
+3358	2	2	2725	62	Adjustment	100	100	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930242
+3359	2	2	2726	62	Adjustment	66	66	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930245
+3360	2	2	2727	62	Adjustment	30	30	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930248
+3361	2	2	2728	62	Adjustment	88	88	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930251
+3362	2	2	2729	62	Adjustment	52	52	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930254
+3363	2	2	2730	62	Adjustment	40	40	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930257
+3364	2	2	2731	62	Adjustment	2	2	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93026
+3365	2	2	2733	62	Adjustment	101	101	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930262
+3366	2	2	2734	62	Adjustment	68	68	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930265
+3367	2	2	2735	62	Adjustment	26	26	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930268
+3368	2	2	2737	62	Adjustment	99	99	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930271
+3369	2	2	2738	62	Adjustment	13	13	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930274
+3370	2	2	2739	62	Adjustment	60	60	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930277
+3371	2	2	2740	62	Adjustment	17	17	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93028
+3372	2	2	2742	62	Adjustment	94	94	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930282
+3373	2	2	2743	62	Adjustment	58	58	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930285
+3374	2	2	2744	62	Adjustment	96	96	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930288
+3375	2	2	2745	62	Adjustment	65	65	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930291
+3376	2	2	2747	62	Adjustment	61	61	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930294
+3377	2	2	2748	62	Adjustment	40	40	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930297
+3378	2	2	2749	62	Adjustment	107	107	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930299
+3379	2	2	2750	62	Adjustment	97	97	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930302
+3380	2	2	2751	62	Adjustment	32	32	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930305
+3381	2	2	2752	62	Adjustment	62	62	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930308
+3382	2	2	2754	62	Adjustment	53	53	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930311
+3383	2	2	2832	62	Adjustment	21	21	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930314
+3384	2	2	2755	62	Adjustment	32	32	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930316
+3385	2	2	2756	62	Adjustment	3	3	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930319
+3386	2	2	2757	62	Adjustment	104	104	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930322
+3387	2	2	2758	62	Adjustment	3	3	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930325
+3388	2	2	2759	62	Adjustment	9	9	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930328
+3389	2	2	2760	62	Adjustment	66	66	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930331
+3390	2	2	2761	62	Adjustment	103	103	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930337
+3391	2	2	2762	62	Adjustment	92	92	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93034
+3392	2	2	2763	62	Adjustment	62	62	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930342
+3393	2	2	2764	62	Adjustment	50	50	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930345
+3394	2	2	2766	62	Adjustment	57	57	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930348
+3395	2	2	2767	62	Adjustment	14	14	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930351
+3396	2	2	2768	62	Adjustment	78	78	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930354
+3397	2	2	2769	62	Adjustment	36	36	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930357
+3398	2	2	2770	62	Adjustment	71	71	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93036
+3399	2	2	2772	62	Adjustment	3	3	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930362
+3400	2	2	2773	62	Adjustment	94	94	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930365
+3401	2	2	2774	62	Adjustment	110	110	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930368
+3402	2	2	2775	62	Adjustment	99	99	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930371
+3403	2	2	2776	62	Adjustment	68	68	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930374
+3404	2	2	2777	62	Adjustment	1	1	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930376
+3405	2	2	2778	62	Adjustment	70	70	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930379
+3406	2	2	2779	62	Adjustment	22	22	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930382
+3407	2	2	2780	62	Adjustment	86	86	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930385
+3408	2	2	2781	62	Adjustment	70	70	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930388
+3409	2	2	2782	62	Adjustment	79	79	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930391
+3410	2	2	2783	62	Adjustment	54	54	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930393
+3411	2	2	2784	62	Adjustment	7	7	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930396
+3412	2	2	2785	62	Adjustment	91	91	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930399
+3413	2	2	2787	62	Adjustment	84	84	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930402
+3414	2	2	2788	62	Adjustment	45	45	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930405
+3415	2	2	2790	62	Adjustment	3	3	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930407
+3416	2	2	2791	62	Adjustment	2	2	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93041
+3417	2	2	2792	62	Adjustment	100	100	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930413
+3418	2	2	2793	62	Adjustment	3	3	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930416
+3419	2	2	2794	62	Adjustment	84	84	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930419
+3420	2	2	2795	62	Adjustment	20	20	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930422
+3421	2	2	2796	62	Adjustment	99	99	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930424
+3422	2	2	2797	62	Adjustment	93	93	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930427
+3423	2	2	2798	62	Adjustment	31	31	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93043
+3424	2	2	2799	62	Adjustment	100	100	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930433
+3425	2	2	2800	62	Adjustment	28	28	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930437
+3426	2	2	2801	62	Adjustment	95	95	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930439
+3427	2	2	2802	62	Adjustment	148	148	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930442
+3428	2	2	2804	62	Adjustment	26	26	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930445
+3429	2	2	2806	62	Adjustment	97	97	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930448
+3430	2	2	2807	62	Adjustment	53	53	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930451
+3431	2	2	2808	62	Adjustment	65	65	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930454
+3432	2	2	2809	62	Adjustment	1	1	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930457
+3433	2	2	2810	62	Adjustment	60	60	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93046
+3434	2	2	2811	62	Adjustment	86	86	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930463
+3435	2	2	2812	62	Adjustment	16	16	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930466
+3436	2	2	2813	62	Adjustment	87	87	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930469
+3437	2	2	2815	62	Adjustment	3	3	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930472
+3438	2	2	2816	62	Adjustment	1	1	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930475
+3439	2	2	2817	62	Adjustment	1	1	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930478
+3440	2	2	2818	62	Adjustment	31	31	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930481
+3441	2	2	2819	62	Adjustment	83	83	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930484
+3442	2	2	2820	62	Adjustment	44	44	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930487
+3443	2	2	2821	62	Adjustment	2	2	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930489
+3444	2	2	2822	62	Adjustment	3	3	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930492
+3445	2	2	2823	62	Adjustment	57	57	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930495
+3446	2	2	2824	62	Adjustment	2	2	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930498
+3447	2	2	2825	62	Adjustment	23	23	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930501
+3448	2	2	2827	62	Adjustment	64	64	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930504
+3449	2	2	2828	62	Adjustment	16	16	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930506
+3450	2	2	2829	62	Adjustment	72	72	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930509
+3451	2	2	2830	62	Adjustment	102	102	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930512
+3452	2	2	2831	62	Adjustment	91	91	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930515
+3453	2	2	2833	62	Adjustment	64	64	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930518
+3454	2	2	2834	62	Adjustment	22	22	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930521
+3455	2	2	2835	62	Adjustment	37	37	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930523
+3456	2	2	2837	62	Adjustment	1	1	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930526
+3457	2	2	2838	62	Adjustment	30	30	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930529
+3458	2	2	2839	62	Adjustment	1	1	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930532
+3459	2	2	2840	62	Adjustment	111	111	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930535
+3460	2	2	2843	62	Adjustment	77	77	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930538
+3461	2	2	2844	62	Adjustment	78	78	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93054
+3462	2	2	2845	62	Adjustment	87	87	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930543
+3463	2	2	2846	62	Adjustment	66	66	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930546
+3464	2	2	2847	62	Adjustment	68	68	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930549
+3465	2	2	2848	62	Adjustment	3	3	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930552
+3466	2	2	2849	62	Adjustment	75	75	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930555
+3467	2	2	2850	62	Adjustment	55	55	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930558
+3468	2	2	2851	62	Adjustment	47	47	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93056
+3469	2	2	2853	62	Adjustment	79	79	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930563
+3470	2	2	2854	62	Adjustment	10	10	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930566
+3471	2	2	2855	62	Adjustment	31	31	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930569
+3472	2	2	2856	62	Adjustment	54	54	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930572
+3473	2	2	2857	62	Adjustment	104	104	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930574
+3474	2	2	2858	62	Adjustment	7	7	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930577
+3475	2	2	2859	62	Adjustment	22	22	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93058
+3476	2	2	2860	62	Adjustment	34	34	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930583
+3477	2	2	2861	62	Adjustment	92	92	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930586
+3478	2	2	2862	62	Adjustment	112	112	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930589
+3479	2	2	2863	62	Adjustment	2	2	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930591
+3480	2	2	2864	62	Adjustment	98	98	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930594
+3481	2	2	2865	62	Adjustment	99	99	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930597
+3482	2	2	2866	62	Adjustment	46	46	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.9306
+3483	2	2	2867	62	Adjustment	90	90	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930603
+3484	2	2	2868	62	Adjustment	97	97	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930606
+3485	2	2	2869	62	Adjustment	13	13	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930609
+3486	2	2	2870	62	Adjustment	124	124	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930611
+3487	2	2	2872	62	Adjustment	36	36	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930614
+3488	2	2	2873	62	Adjustment	17	17	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930617
+3489	2	2	2874	62	Adjustment	2	2	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93062
+3490	2	2	2875	62	Adjustment	113	113	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930623
+3491	2	2	2876	62	Adjustment	58	58	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930626
+3492	2	2	2878	62	Adjustment	58	58	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930628
+3493	2	2	2879	62	Adjustment	25	25	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930631
+3494	2	2	2880	62	Adjustment	58	58	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930634
+3495	2	2	2881	62	Adjustment	31	31	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930637
+3496	2	2	2882	62	Adjustment	10	10	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93064
+3497	2	2	2883	62	Adjustment	47	47	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930643
+3498	2	2	2884	62	Adjustment	92	92	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930645
+3499	2	2	2886	62	Adjustment	65	65	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930648
+3500	2	2	2887	62	Adjustment	12	12	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930651
+3501	2	2	2889	62	Adjustment	25	25	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930654
+3502	2	2	2890	62	Adjustment	20	20	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930657
+3503	2	2	2892	62	Adjustment	43	43	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93066
+3504	2	2	2893	62	Adjustment	44	44	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930663
+3505	2	2	2894	62	Adjustment	77	77	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930665
+3506	2	2	2895	62	Adjustment	29	29	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930668
+3507	2	2	2896	62	Adjustment	32	32	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930671
+3508	2	2	2897	62	Adjustment	1	1	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930674
+3509	2	2	2898	62	Adjustment	57	57	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930677
+3510	2	2	2899	62	Adjustment	75	75	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93068
+3511	2	2	2900	62	Adjustment	4	4	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930683
+3512	2	2	2901	62	Adjustment	50	50	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930686
+3513	2	2	2902	62	Adjustment	24	24	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930689
+3514	2	2	2903	62	Adjustment	63	63	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930691
+3515	2	2	2904	62	Adjustment	51	51	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930694
+3516	2	2	2905	62	Adjustment	24	24	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930697
+3517	2	2	2906	62	Adjustment	84	84	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.9307
+3518	2	2	2907	62	Adjustment	109	109	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930703
+3519	2	2	2908	62	Adjustment	22	22	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930706
+3520	2	2	2909	62	Adjustment	1	1	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930708
+3521	2	2	2910	62	Adjustment	11	11	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930711
+3522	2	2	2911	62	Adjustment	84	84	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930714
+3523	2	2	2912	62	Adjustment	79	79	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930717
+3524	2	2	2913	62	Adjustment	2	2	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93072
+3525	2	2	2914	62	Adjustment	72	72	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930723
+3526	2	2	2915	62	Adjustment	88	88	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930726
+3527	2	2	2916	62	Adjustment	24	24	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930728
+3528	2	2	2917	62	Adjustment	68	68	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930731
+3529	2	2	2918	62	Adjustment	4	4	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930734
+3530	2	2	2919	62	Adjustment	82	82	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930737
+3531	2	2	2920	62	Adjustment	56	56	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93074
+3532	2	2	2922	62	Adjustment	101	101	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930743
+3533	2	2	2923	62	Adjustment	72	72	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930746
+3534	2	2	2924	62	Adjustment	68	68	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930748
+3535	2	2	2925	62	Adjustment	47	47	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930751
+3536	2	2	2926	62	Adjustment	40	40	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930754
+3537	2	2	2927	62	Adjustment	69	69	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930757
+3538	2	2	2928	62	Adjustment	16	16	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93076
+3539	2	2	2929	62	Adjustment	36	36	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930762
+3540	2	2	2930	62	Adjustment	45	45	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930765
+3541	2	2	2931	62	Adjustment	13	13	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930768
+3542	2	2	2932	62	Adjustment	78	78	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930771
+3543	2	2	2933	62	Adjustment	94	94	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930774
+3544	2	2	2934	62	Adjustment	75	75	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930776
+3545	2	2	2935	62	Adjustment	56	56	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930779
+3546	2	2	2936	62	Adjustment	4	4	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930782
+3547	2	2	2937	62	Adjustment	2	2	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930785
+3548	2	2	2938	62	Adjustment	4	4	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930788
+3549	2	2	2939	62	Adjustment	63	63	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93079
+3550	2	2	2941	62	Adjustment	87	87	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930793
+3551	2	2	2942	62	Adjustment	25	25	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930796
+3552	2	2	2943	62	Adjustment	31	31	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930799
+3553	2	2	2944	62	Adjustment	77	77	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930802
+3554	2	2	2945	62	Adjustment	98	98	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930805
+3555	2	2	2946	62	Adjustment	32	32	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930807
+3556	2	2	2948	62	Adjustment	91	91	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93081
+3557	2	2	2949	62	Adjustment	57	57	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930813
+3558	2	2	2950	62	Adjustment	75	75	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930816
+3559	2	2	2951	62	Adjustment	29	29	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930819
+3560	2	2	2952	62	Adjustment	39	39	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930821
+3561	2	2	2953	62	Adjustment	2	2	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930824
+3562	2	2	2954	62	Adjustment	7	7	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930828
+3563	2	2	2955	62	Adjustment	87	87	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93083
+3564	2	2	2956	62	Adjustment	87	87	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930833
+3565	2	2	2957	62	Adjustment	101	101	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930836
+3566	2	2	2958	62	Adjustment	110	110	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930839
+3567	2	2	2959	62	Adjustment	43	43	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930842
+3568	2	2	2961	62	Adjustment	73	73	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930845
+3569	2	2	2962	62	Adjustment	102	102	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930847
+3570	2	2	2963	62	Adjustment	50	50	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93085
+3571	2	2	2964	62	Adjustment	86	86	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930853
+3572	2	2	2965	62	Adjustment	69	69	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930856
+3573	2	2	2966	62	Adjustment	91	91	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930858
+3574	2	2	2967	62	Adjustment	16	16	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930861
+3575	2	2	2968	62	Adjustment	96	96	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930864
+3576	2	2	2970	62	Adjustment	56	56	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930867
+3577	2	2	2971	62	Adjustment	86	86	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93087
+3578	2	2	2973	62	Adjustment	24	24	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930872
+3579	2	2	2974	62	Adjustment	2	2	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930875
+3580	2	2	2975	62	Adjustment	92	92	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930878
+3581	2	2	2978	62	Adjustment	19	19	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930881
+3582	2	2	2980	62	Adjustment	17	17	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930884
+3583	2	2	2981	62	Adjustment	94	94	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930886
+3584	2	2	2982	62	Adjustment	2	2	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930889
+3585	2	2	2983	62	Adjustment	33	33	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930892
+3586	2	2	2984	62	Adjustment	20	20	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930895
+3587	2	2	2985	62	Adjustment	41	41	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930898
+3588	2	2	2986	62	Adjustment	21	21	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.9309
+3589	2	2	2987	62	Adjustment	70	70	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930903
+3590	2	2	2988	62	Adjustment	44	44	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930906
+3591	2	2	2989	62	Adjustment	35	35	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930909
+3592	2	2	2990	62	Adjustment	98	98	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930912
+3593	2	2	2991	62	Adjustment	51	51	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930914
+3594	2	2	2992	62	Adjustment	3	3	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930917
+3595	2	2	2993	62	Adjustment	13	13	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93092
+3596	2	2	2994	62	Adjustment	2	2	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930923
+3597	2	2	2995	62	Adjustment	57	57	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930926
+3598	2	2	2996	62	Adjustment	66	66	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930928
+3599	2	2	2998	62	Adjustment	13	13	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930931
+3600	2	2	2999	62	Adjustment	50	50	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930934
+3601	2	2	3000	62	Adjustment	16	16	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930937
+3602	2	2	3001	62	Adjustment	16	16	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93094
+3603	2	2	3002	62	Adjustment	43	43	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930942
+3604	2	2	3003	62	Adjustment	99	99	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930945
+3605	2	2	3004	62	Adjustment	55	55	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930948
+3606	2	2	3005	62	Adjustment	71	71	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930951
+3607	2	2	3006	62	Adjustment	80	80	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930954
+3608	2	2	3007	62	Adjustment	95	95	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930956
+3609	2	2	3008	62	Adjustment	128	128	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930959
+3610	2	2	3010	62	Adjustment	134	134	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930962
+3611	2	2	3011	62	Adjustment	58	58	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930965
+3612	2	2	3012	62	Adjustment	42	42	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930968
+3613	2	2	3013	62	Adjustment	181	181	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93097
+3614	2	2	3014	62	Adjustment	263	263	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930973
+3615	2	2	3015	62	Adjustment	92	92	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930976
+3616	2	2	3016	62	Adjustment	26	26	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930979
+3617	2	2	3017	62	Adjustment	23	23	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930982
+3618	2	2	3018	62	Adjustment	120	120	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930984
+3619	2	2	3019	62	Adjustment	139	139	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930987
+3620	2	2	3020	62	Adjustment	223	223	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93099
+3621	2	2	3021	62	Adjustment	93	93	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930993
+3622	2	2	3022	62	Adjustment	61	61	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930996
+3623	2	2	3023	62	Adjustment	114	114	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.930998
+3624	2	2	3024	62	Adjustment	83	83	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931001
+3625	2	2	3025	62	Adjustment	36	36	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931004
+3626	2	2	3026	62	Adjustment	72	72	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931007
+3627	2	2	3027	62	Adjustment	37	37	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931009
+3628	2	2	3028	62	Adjustment	441	441	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931012
+3629	2	2	3029	62	Adjustment	89	89	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931015
+3630	2	2	3030	62	Adjustment	59	59	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931018
+3631	2	2	3031	62	Adjustment	199	199	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931021
+3632	2	2	3032	62	Adjustment	58	58	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931024
+3633	2	2	3033	62	Adjustment	21	21	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931026
+3634	2	2	3034	62	Adjustment	349	349	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931029
+3635	2	2	3035	62	Adjustment	38	38	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931032
+3636	2	2	3036	62	Adjustment	118	118	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931035
+3637	2	2	3037	62	Adjustment	140	140	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931038
+3638	2	2	3038	62	Adjustment	108	108	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931041
+3639	2	2	3039	62	Adjustment	44	44	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931043
+3640	2	2	3040	62	Adjustment	94	94	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931046
+3641	2	2	3041	62	Adjustment	32	32	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931049
+3642	2	2	3042	62	Adjustment	84	84	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931052
+3643	2	2	3043	62	Adjustment	32	32	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931055
+3644	2	2	3044	62	Adjustment	26	26	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931057
+3645	2	2	3045	62	Adjustment	117	117	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93106
+3646	2	2	3046	62	Adjustment	35	35	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931063
+3647	2	2	3048	62	Adjustment	47	47	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931066
+3648	2	2	3050	62	Adjustment	16	16	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931069
+3649	2	2	3051	62	Adjustment	83	83	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931071
+3650	2	2	3052	62	Adjustment	76	76	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931074
+3651	2	2	3053	62	Adjustment	116	116	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931077
+3652	2	2	3055	62	Adjustment	122	122	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93108
+3653	2	2	3056	62	Adjustment	32	32	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931083
+3654	2	2	3057	62	Adjustment	52	52	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931086
+3655	2	2	3058	62	Adjustment	128	128	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931089
+3656	2	2	3059	62	Adjustment	22	22	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931091
+3657	2	2	3060	62	Adjustment	91	91	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931094
+3658	2	2	3061	62	Adjustment	45	45	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931097
+3659	2	2	3062	62	Adjustment	85	85	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.9311
+3660	2	2	3063	62	Adjustment	9	9	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931103
+3661	2	2	3064	62	Adjustment	10	10	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931106
+3662	2	2	3065	62	Adjustment	59	59	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931109
+3663	2	2	3066	62	Adjustment	74	74	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931112
+3664	2	2	3067	62	Adjustment	315	315	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931114
+3665	2	2	3068	62	Adjustment	303	303	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931117
+3666	2	2	3069	62	Adjustment	9	9	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93112
+3667	2	2	3070	62	Adjustment	122	122	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931123
+3668	2	2	3071	62	Adjustment	55	55	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931126
+3669	2	2	3072	62	Adjustment	31	31	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931129
+3670	2	2	3073	62	Adjustment	530	530	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931132
+3671	2	2	3074	62	Adjustment	74	74	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931134
+3672	2	2	3075	62	Adjustment	104	104	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931137
+3673	2	2	3076	62	Adjustment	45	45	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93114
+3674	2	2	3077	62	Adjustment	138	138	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931143
+3675	2	2	3078	62	Adjustment	522	522	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931146
+3676	2	2	3079	62	Adjustment	50	50	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931148
+3677	2	2	3082	62	Adjustment	89	89	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931151
+3678	2	2	3083	62	Adjustment	44	44	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931154
+3679	2	2	3084	62	Adjustment	111	111	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931157
+3680	2	2	3085	62	Adjustment	25	25	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93116
+3681	2	2	3086	62	Adjustment	81	81	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931163
+3682	2	2	3087	62	Adjustment	35	35	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931165
+3683	2	2	3088	62	Adjustment	93	93	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931168
+3684	2	2	3089	62	Adjustment	89	89	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931171
+3685	2	2	3090	62	Adjustment	16	16	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931174
+3686	2	2	3091	62	Adjustment	497	497	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931177
+3687	2	2	3092	62	Adjustment	60	60	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931179
+3688	2	2	3093	62	Adjustment	198	198	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931182
+3689	2	2	3094	62	Adjustment	7	7	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931185
+3690	2	2	3095	62	Adjustment	111	111	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931188
+3691	2	2	3096	62	Adjustment	104	104	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931191
+3692	2	2	3097	62	Adjustment	98	98	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931193
+3693	2	2	3098	62	Adjustment	112	112	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931196
+3694	2	2	3099	62	Adjustment	524	524	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931199
+3695	2	2	3100	62	Adjustment	17	17	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931202
+3696	2	2	3101	62	Adjustment	159	159	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931205
+3697	2	2	3103	62	Adjustment	48	48	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931207
+3698	2	2	3104	62	Adjustment	49	49	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93121
+3699	2	2	3105	62	Adjustment	44	44	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931213
+3700	2	2	3106	62	Adjustment	143	143	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931216
+3701	2	2	3107	62	Adjustment	30	30	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931219
+3702	2	2	3109	62	Adjustment	107	107	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931222
+3703	2	2	3110	62	Adjustment	96	96	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931224
+3704	2	2	3111	62	Adjustment	425	425	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931227
+3705	2	2	3112	62	Adjustment	116	116	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93123
+3706	2	2	3113	62	Adjustment	96	96	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931233
+3707	2	2	3114	62	Adjustment	23	23	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931236
+3708	2	2	3115	62	Adjustment	35	35	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931239
+3709	2	2	3116	62	Adjustment	88	88	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931242
+3710	2	2	3117	62	Adjustment	122	122	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931244
+3711	2	2	3118	62	Adjustment	26	26	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931247
+3712	2	2	3119	62	Adjustment	141	141	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93125
+3713	2	2	3120	62	Adjustment	533	533	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931253
+3714	2	2	3121	62	Adjustment	25	25	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931255
+3715	2	2	3122	62	Adjustment	177	177	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931258
+3716	2	2	3123	62	Adjustment	143	143	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931261
+3717	2	2	3124	62	Adjustment	116	116	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931264
+3718	2	2	3125	62	Adjustment	49	49	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931267
+3719	2	2	3126	62	Adjustment	132	132	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93127
+3720	2	2	3127	62	Adjustment	129	129	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931272
+3721	2	2	3128	62	Adjustment	92	92	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931275
+3722	2	2	3129	62	Adjustment	20	20	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931278
+3723	2	2	3130	62	Adjustment	130	130	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931281
+3724	2	2	3131	62	Adjustment	28	28	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931284
+3725	2	2	3132	62	Adjustment	41	41	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931287
+3726	2	2	3133	62	Adjustment	34	34	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931289
+3727	2	2	3134	62	Adjustment	24	24	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931292
+3728	2	2	3135	62	Adjustment	36	36	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931295
+3729	2	2	3137	62	Adjustment	119	119	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931298
+3730	2	2	3139	62	Adjustment	28	28	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931301
+3731	2	2	3141	62	Adjustment	37	37	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931304
+3732	2	2	3142	62	Adjustment	91	91	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931306
+3733	2	2	3144	62	Adjustment	262	262	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931309
+3734	2	2	3145	62	Adjustment	132	132	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931312
+3735	2	2	3146	62	Adjustment	97	97	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931315
+3736	2	2	3147	62	Adjustment	477	477	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931317
+3737	2	2	3148	62	Adjustment	52	52	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93132
+3738	2	2	3149	62	Adjustment	51	51	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931323
+3739	2	2	3150	62	Adjustment	90	90	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931326
+3740	2	2	3151	62	Adjustment	96	96	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931329
+3741	2	2	3153	62	Adjustment	37	37	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931331
+3742	2	2	3154	62	Adjustment	43	43	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931338
+3743	2	2	3155	62	Adjustment	89	89	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93134
+3744	2	2	3156	62	Adjustment	20	20	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931343
+3745	2	2	3157	62	Adjustment	76	76	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931346
+3746	2	2	3158	62	Adjustment	24	24	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931349
+3747	2	2	3159	62	Adjustment	492	492	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931352
+3748	2	2	3160	62	Adjustment	99	99	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931355
+3749	2	2	3161	62	Adjustment	85	85	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931357
+3750	2	2	3162	62	Adjustment	117	117	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93136
+3751	2	2	3163	62	Adjustment	43	43	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931363
+3752	2	2	3164	62	Adjustment	57	57	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931366
+3753	2	2	3166	62	Adjustment	440	440	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931369
+3754	2	2	3168	62	Adjustment	60	60	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931371
+3755	2	2	3169	62	Adjustment	32	32	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931374
+3756	2	2	3171	62	Adjustment	27	27	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931377
+3757	2	2	3172	62	Adjustment	137	137	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93138
+3758	2	2	3173	62	Adjustment	284	284	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931383
+3759	2	2	3174	62	Adjustment	103	103	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931386
+3760	2	2	3175	62	Adjustment	102	102	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931388
+3761	2	2	3177	62	Adjustment	118	118	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931391
+3762	2	2	3178	62	Adjustment	299	299	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931394
+3763	2	2	3179	62	Adjustment	106	106	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931397
+3764	2	2	3180	62	Adjustment	49	49	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.9314
+3765	2	2	3181	62	Adjustment	85	85	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931402
+3766	2	2	3182	62	Adjustment	41	41	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931405
+3767	2	2	3183	62	Adjustment	103	103	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931408
+3768	2	2	3184	62	Adjustment	118	118	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931411
+3769	2	2	3185	62	Adjustment	24	24	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931414
+3770	2	2	3186	62	Adjustment	74	74	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931417
+3771	2	2	3187	62	Adjustment	27	27	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931419
+3772	2	2	3188	62	Adjustment	82	82	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931422
+3773	2	2	3189	62	Adjustment	85	85	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931425
+3774	2	2	3190	62	Adjustment	63	63	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931428
+3775	2	2	3191	62	Adjustment	52	52	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931431
+3776	2	2	3192	62	Adjustment	52	52	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931433
+3777	2	2	3193	62	Adjustment	77	77	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931436
+3778	2	2	3194	62	Adjustment	28	28	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931439
+3779	2	2	3195	62	Adjustment	32	32	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931442
+3780	2	2	3196	62	Adjustment	90	90	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931445
+3781	2	2	3197	62	Adjustment	113	113	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931447
+3782	2	2	3198	62	Adjustment	327	327	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93145
+3783	2	2	3199	62	Adjustment	123	123	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931453
+3784	2	2	3201	62	Adjustment	125	125	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931456
+3785	2	2	3202	62	Adjustment	133	133	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931459
+3786	2	2	3203	62	Adjustment	27	27	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931461
+3787	2	2	3204	62	Adjustment	75	75	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931464
+3788	2	2	3205	62	Adjustment	40	40	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931467
+3789	2	2	3206	62	Adjustment	43	43	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93147
+3790	2	2	3207	62	Adjustment	8	8	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931473
+3791	2	2	3208	62	Adjustment	100	100	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931475
+3792	2	2	3209	62	Adjustment	22	22	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931478
+3793	2	2	3210	62	Adjustment	25	25	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931481
+3794	2	2	3211	62	Adjustment	84	84	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931484
+3795	2	2	3212	62	Adjustment	80	80	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931487
+3796	2	2	3214	62	Adjustment	99	99	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931489
+3797	2	2	3215	62	Adjustment	34	34	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931492
+3798	2	2	3216	62	Adjustment	255	255	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931495
+3799	2	2	3217	62	Adjustment	114	114	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931498
+3800	2	2	3218	62	Adjustment	362	362	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931501
+3801	2	2	3219	62	Adjustment	111	111	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931503
+3802	2	2	3221	62	Adjustment	71	71	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931506
+3803	2	2	3222	62	Adjustment	41	41	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931509
+3804	2	2	3223	62	Adjustment	100	100	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931512
+3805	2	2	3224	62	Adjustment	75	75	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931515
+3806	2	2	3226	62	Adjustment	119	119	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931518
+3807	2	2	3227	62	Adjustment	115	115	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93152
+3808	2	2	3228	62	Adjustment	41	41	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931523
+3809	2	2	3229	62	Adjustment	36	36	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931526
+3810	2	2	3231	62	Adjustment	238	238	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931529
+3811	2	2	3232	62	Adjustment	99	99	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931532
+3812	2	2	3233	62	Adjustment	11	11	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931534
+3813	2	2	3234	62	Adjustment	31	31	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931537
+3814	2	2	3235	62	Adjustment	91	91	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93154
+3815	2	2	3236	62	Adjustment	90	90	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931543
+3816	2	2	3238	62	Adjustment	108	108	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931546
+3817	2	2	3239	62	Adjustment	61	61	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931549
+3818	2	2	3241	62	Adjustment	16	16	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931551
+3819	2	2	3242	62	Adjustment	25	25	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931554
+3820	2	2	3243	62	Adjustment	136	136	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931557
+3821	2	2	3245	62	Adjustment	99	99	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93156
+3822	2	2	3246	62	Adjustment	84	84	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931563
+3823	2	2	3247	62	Adjustment	129	129	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931565
+3824	2	2	3248	62	Adjustment	93	93	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931568
+3825	2	2	3249	62	Adjustment	85	85	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931571
+3826	2	2	3250	62	Adjustment	105	105	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931574
+3827	2	2	3251	62	Adjustment	27	27	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931577
+3828	2	2	3252	62	Adjustment	115	115	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931579
+3829	2	2	3253	62	Adjustment	488	488	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931582
+3830	2	2	3254	62	Adjustment	17	17	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931585
+3831	2	2	3255	62	Adjustment	63	63	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931588
+3832	2	2	3257	62	Adjustment	142	142	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931591
+3833	2	2	3258	62	Adjustment	37	37	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931593
+3834	2	2	3259	62	Adjustment	247	247	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931596
+3835	2	2	3260	62	Adjustment	57	57	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931599
+3836	2	2	3261	62	Adjustment	140	140	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931602
+3837	2	2	3262	62	Adjustment	59	59	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931605
+3838	2	2	3263	62	Adjustment	55	55	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931608
+3839	2	2	3264	62	Adjustment	65	65	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93161
+3840	2	2	3265	62	Adjustment	122	122	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931613
+3841	2	2	3266	62	Adjustment	91	91	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931616
+3842	2	2	3267	62	Adjustment	14	14	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931619
+3843	2	2	3268	62	Adjustment	39	39	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931622
+3844	2	2	3269	62	Adjustment	109	109	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931624
+3845	2	2	3270	62	Adjustment	98	98	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931627
+3846	2	2	3271	62	Adjustment	301	301	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93163
+3847	2	2	3272	62	Adjustment	104	104	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931633
+3848	2	2	3273	62	Adjustment	61	61	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931636
+3849	2	2	3274	62	Adjustment	43	43	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931638
+3850	2	2	3275	62	Adjustment	128	128	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931641
+3851	2	2	3277	62	Adjustment	107	107	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931644
+3852	2	2	3278	62	Adjustment	121	121	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931647
+3853	2	2	3279	62	Adjustment	115	115	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93165
+3854	2	2	3280	62	Adjustment	288	288	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931653
+3855	2	2	3281	62	Adjustment	79	79	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931656
+3856	2	2	3282	62	Adjustment	141	141	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931659
+3857	2	2	3283	62	Adjustment	72	72	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931661
+3858	2	2	3284	62	Adjustment	41	41	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931664
+3859	2	2	3285	62	Adjustment	131	131	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931667
+3860	2	2	3286	62	Adjustment	95	95	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93167
+3861	2	2	3287	62	Adjustment	15	15	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931673
+3862	2	2	3289	62	Adjustment	18	18	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931676
+3863	2	2	3290	62	Adjustment	311	311	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931679
+3864	2	2	3291	62	Adjustment	33	33	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931682
+3865	2	2	3292	62	Adjustment	38	38	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931684
+3866	2	2	3294	62	Adjustment	31	31	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931687
+3867	2	2	3295	62	Adjustment	136	136	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93169
+3868	2	2	3296	62	Adjustment	134	134	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931693
+3869	2	2	3297	62	Adjustment	46	46	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931696
+3870	2	2	3298	62	Adjustment	89	89	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931699
+3871	2	2	3299	62	Adjustment	108	108	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931702
+3872	2	2	3300	62	Adjustment	75	75	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931704
+3873	2	2	3301	62	Adjustment	80	80	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931707
+3874	2	2	3302	62	Adjustment	516	516	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93171
+3875	2	2	3303	62	Adjustment	108	108	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931713
+3876	2	2	3304	62	Adjustment	531	531	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931716
+3877	2	2	3305	62	Adjustment	54	54	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931719
+3878	2	2	3307	62	Adjustment	25	25	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931722
+3879	2	2	3308	62	Adjustment	48	48	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931724
+3880	2	2	3309	62	Adjustment	23	23	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931727
+3881	2	2	3311	62	Adjustment	21	21	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93173
+3882	2	2	3312	62	Adjustment	107	107	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931733
+3883	2	2	3313	62	Adjustment	67	67	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931736
+3884	2	2	3315	62	Adjustment	94	94	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931739
+3885	2	2	3316	62	Adjustment	118	118	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931742
+3886	2	2	3318	62	Adjustment	37	37	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931745
+3887	2	2	3319	62	Adjustment	91	91	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931747
+3888	2	2	3320	62	Adjustment	126	126	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93175
+3889	2	2	3321	62	Adjustment	131	131	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931753
+3890	2	2	3322	62	Adjustment	32	32	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931756
+3891	2	2	3324	62	Adjustment	122	122	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931759
+3892	2	2	3325	62	Adjustment	109	109	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931761
+3893	2	2	3326	62	Adjustment	107	107	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931764
+3894	2	2	3327	62	Adjustment	25	25	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931767
+3895	2	2	3328	62	Adjustment	111	111	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93177
+3896	2	2	3330	62	Adjustment	68	68	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931773
+3897	2	2	3331	62	Adjustment	24	24	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931776
+3898	2	2	3332	62	Adjustment	76	76	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931779
+3899	2	2	3334	62	Adjustment	58	58	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931781
+3900	2	2	3335	62	Adjustment	93	93	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931784
+3901	2	2	3336	62	Adjustment	45	45	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931787
+3902	2	2	3337	62	Adjustment	200	200	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93179
+3903	2	2	3338	62	Adjustment	42	42	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931793
+3904	2	2	3339	62	Adjustment	82	82	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931796
+3905	2	2	3340	62	Adjustment	74	74	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931799
+3906	2	2	3341	62	Adjustment	111	111	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931801
+3907	2	2	3342	62	Adjustment	85	85	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931804
+3908	2	2	3343	62	Adjustment	118	118	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931807
+3909	2	2	3344	62	Adjustment	45	45	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93181
+3910	2	2	3345	62	Adjustment	311	311	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931813
+3911	2	2	3346	62	Adjustment	20	20	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931815
+3912	2	2	3347	62	Adjustment	85	85	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931818
+3913	2	2	3349	62	Adjustment	530	530	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931821
+3914	2	2	3350	62	Adjustment	372	372	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931824
+3915	2	2	3351	62	Adjustment	61	61	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931827
+3916	2	2	3352	62	Adjustment	557	557	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931829
+3917	2	2	3353	62	Adjustment	263	263	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931832
+3918	2	2	3354	62	Adjustment	78	78	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931835
+3919	2	2	3355	62	Adjustment	106	106	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931838
+3920	2	2	3356	62	Adjustment	26	26	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931841
+3921	2	2	3357	62	Adjustment	138	138	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931844
+3922	2	2	3358	62	Adjustment	122	122	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931846
+3923	2	2	3359	62	Adjustment	31	31	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931849
+3924	2	2	3360	62	Adjustment	24	24	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931852
+3925	2	2	3361	62	Adjustment	114	114	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931855
+3926	2	2	3362	62	Adjustment	84	84	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931858
+3927	2	2	3363	62	Adjustment	120	120	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93186
+3928	2	2	3364	62	Adjustment	117	117	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931863
+3929	2	2	3365	62	Adjustment	26	26	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931866
+3930	2	2	3366	62	Adjustment	110	110	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931869
+3931	2	2	3367	62	Adjustment	18	18	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931872
+3932	2	2	3368	62	Adjustment	94	94	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931874
+3933	2	2	3369	62	Adjustment	39	39	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931877
+3934	2	2	3372	62	Adjustment	340	340	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93188
+3935	2	2	3373	62	Adjustment	495	495	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931883
+3936	2	2	3374	62	Adjustment	30	30	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931885
+3937	2	2	3375	62	Adjustment	38	38	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931888
+3938	2	2	3376	62	Adjustment	188	188	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931891
+3939	2	2	3378	62	Adjustment	58	58	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931894
+3940	2	2	3379	62	Adjustment	469	469	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931897
+3941	2	2	3380	62	Adjustment	415	415	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931899
+3942	2	2	3381	62	Adjustment	398	398	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931902
+3943	2	2	3382	62	Adjustment	428	428	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931905
+3944	2	2	3383	62	Adjustment	11	11	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931908
+3945	2	2	3384	62	Adjustment	54	54	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931911
+3946	2	2	3385	62	Adjustment	99	99	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931913
+3947	2	2	3386	62	Adjustment	53	53	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931916
+3948	2	2	3387	62	Adjustment	431	431	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931919
+3949	2	2	3388	62	Adjustment	121	121	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931922
+3950	2	2	3389	62	Adjustment	431	431	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931925
+3951	2	2	3390	62	Adjustment	44	44	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931927
+3952	2	2	3391	62	Adjustment	172	172	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93193
+3953	2	2	3392	62	Adjustment	143	143	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931933
+3954	2	2	3393	62	Adjustment	32	32	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931936
+3955	2	2	3395	62	Adjustment	107	107	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931939
+3956	2	2	3396	62	Adjustment	108	108	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931941
+3957	2	2	3397	62	Adjustment	34	34	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931944
+3958	2	2	3398	62	Adjustment	140	140	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931947
+3959	2	2	3399	62	Adjustment	121	121	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93195
+3960	2	2	3401	62	Adjustment	460	460	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931953
+3961	2	2	3402	62	Adjustment	60	60	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931955
+3962	2	2	3403	62	Adjustment	273	273	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931958
+3963	2	2	3405	62	Adjustment	430	430	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931961
+3964	2	2	3406	62	Adjustment	88	88	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931964
+3965	2	2	3407	62	Adjustment	205	205	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931967
+3966	2	2	3408	62	Adjustment	102	102	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93197
+3967	2	2	3409	62	Adjustment	66	66	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931972
+3968	2	2	3410	62	Adjustment	184	184	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931975
+3969	2	2	3411	62	Adjustment	105	105	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931978
+3970	2	2	3412	62	Adjustment	40	40	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931981
+3971	2	2	3413	62	Adjustment	442	442	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931984
+3972	2	2	3414	62	Adjustment	63	63	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931986
+3973	2	2	3415	62	Adjustment	107	107	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931989
+3974	2	2	3416	62	Adjustment	27	27	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931992
+3975	2	2	3417	62	Adjustment	65	65	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931995
+3976	2	2	3418	62	Adjustment	41	41	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.931998
+3977	2	2	3419	62	Adjustment	47	47	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932001
+3978	2	2	3420	62	Adjustment	129	129	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932003
+3979	2	2	3421	62	Adjustment	100	100	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932006
+3980	2	2	3422	62	Adjustment	10	10	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932009
+3981	2	2	3423	62	Adjustment	132	132	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932012
+3982	2	2	3424	62	Adjustment	98	98	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932015
+3983	2	2	3425	62	Adjustment	70	70	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932017
+3984	2	2	3426	62	Adjustment	40	40	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93202
+3985	2	2	3427	62	Adjustment	146	146	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932023
+3986	2	2	3428	62	Adjustment	199	199	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932026
+3987	2	2	3429	62	Adjustment	124	124	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932029
+3988	2	2	3430	62	Adjustment	510	510	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932032
+3989	2	2	3431	62	Adjustment	242	242	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932035
+3990	2	2	3432	62	Adjustment	41	41	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932038
+3991	2	2	3433	62	Adjustment	201	201	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932041
+3992	2	2	3434	62	Adjustment	352	352	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932043
+3993	2	2	3435	62	Adjustment	430	430	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932046
+3994	2	2	3436	62	Adjustment	69	69	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932049
+3995	2	2	3438	62	Adjustment	87	87	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932052
+3996	2	2	3439	62	Adjustment	92	92	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932055
+3997	2	2	3440	62	Adjustment	78	78	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932058
+3998	2	2	3441	62	Adjustment	204	204	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932061
+3999	2	2	3442	62	Adjustment	92	92	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932064
+4000	2	2	3443	62	Adjustment	273	273	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932066
+4001	2	2	3444	62	Adjustment	107	107	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932069
+4002	2	2	3445	62	Adjustment	97	97	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932072
+4003	2	2	3446	62	Adjustment	114	114	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932075
+4004	2	2	3447	62	Adjustment	84	84	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932078
+4005	2	2	3448	62	Adjustment	24	24	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93208
+4006	2	2	3449	62	Adjustment	69	69	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932083
+4007	2	2	3450	62	Adjustment	151	151	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932086
+4008	2	2	3451	62	Adjustment	225	225	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932089
+4009	2	2	3452	62	Adjustment	370	370	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932092
+4010	2	2	3453	62	Adjustment	362	362	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932095
+4011	2	2	3455	62	Adjustment	111	111	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932097
+4012	2	2	3456	62	Adjustment	129	129	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.9321
+4013	2	2	3457	62	Adjustment	29	29	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932103
+4014	2	2	3458	62	Adjustment	37	37	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932106
+4015	2	2	3459	62	Adjustment	95	95	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932108
+4016	2	2	3460	62	Adjustment	226	226	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932111
+4017	2	2	3461	62	Adjustment	74	74	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932114
+4018	2	2	3462	62	Adjustment	52	52	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932117
+4019	2	2	3464	62	Adjustment	95	95	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93212
+4020	2	2	3465	62	Adjustment	10	10	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932123
+4021	2	2	3468	62	Adjustment	71	71	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932125
+4022	2	2	3469	62	Adjustment	77	77	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932128
+4023	2	2	3470	62	Adjustment	123	123	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932131
+4024	2	2	3471	62	Adjustment	138	138	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932134
+4025	2	2	3472	62	Adjustment	96	96	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932137
+4026	2	2	3473	62	Adjustment	14	14	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932139
+4027	2	2	3474	62	Adjustment	68	68	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932142
+4028	2	2	3475	62	Adjustment	87	87	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932145
+4029	2	2	3476	62	Adjustment	65	65	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932148
+4030	2	2	3478	62	Adjustment	85	85	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932151
+4031	2	2	3479	62	Adjustment	21	21	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932154
+4032	2	2	3480	62	Adjustment	41	41	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932156
+4033	2	2	3481	62	Adjustment	138	138	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932159
+4034	2	2	3482	62	Adjustment	36	36	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932162
+4035	2	2	3483	62	Adjustment	30	30	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932165
+4036	2	2	3484	62	Adjustment	46	46	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932168
+4037	2	2	3485	62	Adjustment	84	84	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93217
+4038	2	2	3486	62	Adjustment	50	50	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932173
+4039	2	2	3487	62	Adjustment	106	106	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932176
+4040	2	2	3489	62	Adjustment	487	487	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932179
+4041	2	2	3490	62	Adjustment	36	36	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932182
+4042	2	2	3491	62	Adjustment	503	503	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932184
+4043	2	2	3492	62	Adjustment	28	28	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932187
+4044	2	2	3493	62	Adjustment	74	74	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93219
+4045	2	2	3494	62	Adjustment	91	91	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932193
+4046	2	2	3495	62	Adjustment	31	31	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932195
+4047	2	2	3496	62	Adjustment	48	48	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932198
+4048	2	2	3497	62	Adjustment	65	65	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932201
+4049	2	2	3498	62	Adjustment	100	100	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932204
+4050	2	2	3499	62	Adjustment	80	80	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932207
+4051	2	2	3501	62	Adjustment	9	9	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93221
+4052	2	2	3502	62	Adjustment	44	44	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932212
+4053	2	2	3503	62	Adjustment	35	35	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932215
+4054	2	2	3504	62	Adjustment	18	18	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932218
+4055	2	2	3505	62	Adjustment	498	498	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932221
+4056	2	2	3506	62	Adjustment	137	137	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932223
+4057	2	2	3507	62	Adjustment	77	77	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932226
+4058	2	2	3508	62	Adjustment	19	19	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932229
+4059	2	2	3509	62	Adjustment	565	565	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932232
+4060	2	2	3511	62	Adjustment	18	18	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932235
+4061	2	2	3512	62	Adjustment	550	550	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932237
+4062	2	2	3513	62	Adjustment	236	236	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93224
+4063	2	2	3516	62	Adjustment	137	137	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932243
+4064	2	2	3517	62	Adjustment	136	136	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932246
+4065	2	2	3518	62	Adjustment	228	228	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932249
+4066	2	2	3519	62	Adjustment	249	249	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932251
+4067	2	2	3520	62	Adjustment	415	415	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932254
+4068	2	2	3521	62	Adjustment	397	397	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932257
+4069	2	2	3522	62	Adjustment	377	377	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93226
+4070	2	2	3564	62	Adjustment	482	482	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932263
+4071	2	2	3525	62	Adjustment	420	420	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932266
+4072	2	2	3526	62	Adjustment	446	446	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932268
+4073	2	2	3528	62	Adjustment	391	391	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932271
+4074	2	2	3529	62	Adjustment	434	434	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932274
+4075	2	2	3530	62	Adjustment	432	432	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932277
+4076	2	2	3531	62	Adjustment	352	352	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932279
+4077	2	2	3532	62	Adjustment	259	259	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932282
+4078	2	2	3533	62	Adjustment	225	225	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932285
+4079	2	2	3534	62	Adjustment	302	302	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932288
+4080	2	2	3535	62	Adjustment	584	584	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932291
+4081	2	2	3536	62	Adjustment	201	201	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932293
+4082	2	2	3537	62	Adjustment	307	307	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932296
+4083	2	2	3539	62	Adjustment	304	304	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932299
+4084	2	2	3540	62	Adjustment	176	176	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932302
+4085	2	2	3541	62	Adjustment	396	396	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932305
+4086	2	2	3542	62	Adjustment	242	242	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932307
+4087	2	2	3543	62	Adjustment	512	512	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93231
+4088	2	2	3544	62	Adjustment	79	79	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932313
+4089	2	2	3545	62	Adjustment	96	96	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932316
+4090	2	2	3546	62	Adjustment	553	553	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932319
+4091	2	2	3547	62	Adjustment	394	394	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932322
+4092	2	2	3548	62	Adjustment	336	336	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932324
+4093	2	2	3549	62	Adjustment	535	535	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932327
+4094	2	2	3550	62	Adjustment	140	140	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93233
+4095	2	2	3552	62	Adjustment	305	305	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932336
+4096	2	2	3553	62	Adjustment	369	369	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932339
+4097	2	2	3554	62	Adjustment	455	455	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932342
+4098	2	2	3555	62	Adjustment	271	271	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932345
+4099	2	2	3556	62	Adjustment	218	218	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932347
+4100	2	2	3557	62	Adjustment	174	174	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93235
+4101	2	2	3558	62	Adjustment	460	460	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932353
+4102	2	2	3559	62	Adjustment	326	326	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932356
+4103	2	2	3560	62	Adjustment	427	427	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932359
+4104	2	2	3561	62	Adjustment	418	418	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932361
+4105	2	2	3563	62	Adjustment	313	313	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932364
+4106	2	2	3565	62	Adjustment	235	235	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932367
+4107	2	2	3566	62	Adjustment	566	566	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93237
+4108	2	2	3567	62	Adjustment	169	169	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932373
+4109	2	2	3568	62	Adjustment	432	432	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932376
+4110	2	2	3569	62	Adjustment	252	252	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932379
+4111	2	2	3570	62	Adjustment	380	380	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932382
+4112	2	2	3571	62	Adjustment	464	464	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932385
+4113	2	2	3572	62	Adjustment	306	306	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932388
+4114	2	2	3573	62	Adjustment	375	375	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932391
+4115	2	2	3574	62	Adjustment	346	346	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932393
+4116	2	2	3575	62	Adjustment	382	382	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932396
+4117	2	2	3576	62	Adjustment	174	174	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932399
+4118	2	2	3577	62	Adjustment	418	418	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932402
+4119	2	2	3578	62	Adjustment	225	225	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932405
+4120	2	2	3579	62	Adjustment	444	444	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932408
+4121	2	2	3580	62	Adjustment	462	462	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932411
+4122	2	2	3581	62	Adjustment	502	502	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932414
+4123	2	2	3582	62	Adjustment	395	395	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932417
+4124	2	2	3583	62	Adjustment	458	458	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932419
+4125	2	2	3584	62	Adjustment	476	476	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932422
+4126	2	2	3585	62	Adjustment	255	255	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932425
+4127	2	2	3586	62	Adjustment	505	505	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932428
+4128	2	2	3587	62	Adjustment	296	296	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932431
+4129	2	2	3588	62	Adjustment	392	392	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932434
+4130	2	2	3589	62	Adjustment	475	475	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932437
+4131	2	2	3590	62	Adjustment	569	569	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93244
+4132	2	2	3591	62	Adjustment	472	472	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932442
+4133	2	2	3593	62	Adjustment	191	191	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932445
+4134	2	2	3594	62	Adjustment	56	56	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932448
+4135	2	2	3595	62	Adjustment	152	152	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932451
+4136	2	2	3596	62	Adjustment	493	493	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932454
+4137	2	2	3597	62	Adjustment	179	179	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932456
+4138	2	2	3598	62	Adjustment	151	151	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932459
+4139	2	2	3599	62	Adjustment	320	320	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932462
+4140	2	2	3600	62	Adjustment	297	297	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932465
+4141	2	2	3601	62	Adjustment	323	323	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932468
+4142	2	2	3602	62	Adjustment	356	356	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932471
+4143	2	2	3603	62	Adjustment	218	218	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932473
+4144	2	2	3604	62	Adjustment	380	380	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932476
+4145	2	2	3605	62	Adjustment	255	255	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932479
+4146	2	2	3607	62	Adjustment	453	453	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932482
+4147	2	2	3608	62	Adjustment	339	339	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932485
+4148	2	2	3611	62	Adjustment	442	442	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932488
+4149	2	2	3612	62	Adjustment	170	170	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93249
+4150	2	2	3613	62	Adjustment	271	271	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932493
+4151	2	2	3614	62	Adjustment	305	305	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932496
+4152	2	2	3615	62	Adjustment	307	307	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932499
+4153	2	2	3617	62	Adjustment	301	301	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932501
+4154	2	2	3618	62	Adjustment	534	534	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932504
+4155	2	2	3619	62	Adjustment	92	92	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932507
+4156	2	2	3620	62	Adjustment	322	322	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93251
+4157	2	2	3621	62	Adjustment	212	212	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932513
+4158	2	2	3622	62	Adjustment	432	432	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932515
+4159	2	2	3623	62	Adjustment	335	335	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932518
+4160	2	2	3624	62	Adjustment	520	520	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932521
+4161	2	2	3625	62	Adjustment	167	167	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932524
+4162	2	2	3626	62	Adjustment	210	210	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932527
+4163	2	2	3627	62	Adjustment	393	393	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932529
+4164	2	2	3628	62	Adjustment	412	412	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932532
+4165	2	2	3629	62	Adjustment	468	468	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932535
+4166	2	2	3630	62	Adjustment	324	324	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932538
+4167	2	2	3631	62	Adjustment	121	121	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932541
+4168	2	2	3632	62	Adjustment	396	396	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932543
+4169	2	2	3634	62	Adjustment	324	324	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932546
+4170	2	2	3635	62	Adjustment	283	283	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932549
+4171	2	2	3636	62	Adjustment	510	510	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932552
+4172	2	2	3637	62	Adjustment	206	206	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932555
+4173	2	2	3638	62	Adjustment	134	134	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932557
+4174	2	2	3639	62	Adjustment	139	139	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93256
+4175	2	2	3640	62	Adjustment	409	409	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932563
+4176	2	2	3641	62	Adjustment	176	176	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932566
+4177	2	2	3642	62	Adjustment	407	407	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932569
+4178	2	2	3643	62	Adjustment	253	253	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932571
+4179	2	2	3644	62	Adjustment	170	170	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932574
+4180	2	2	3646	62	Adjustment	459	459	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932577
+4181	2	2	3647	62	Adjustment	481	481	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93258
+4182	2	2	3648	62	Adjustment	146	146	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932583
+4183	2	2	3650	62	Adjustment	415	415	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932585
+4184	2	2	3651	62	Adjustment	186	186	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932588
+4185	2	2	3652	62	Adjustment	229	229	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932591
+4186	2	2	3653	62	Adjustment	439	439	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932594
+4187	2	2	3654	62	Adjustment	445	445	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932597
+4188	2	2	3655	62	Adjustment	325	325	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932599
+4189	2	2	3656	62	Adjustment	298	298	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932602
+4190	2	2	3657	62	Adjustment	474	474	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932605
+4191	2	2	3658	62	Adjustment	384	384	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932608
+4192	2	2	3660	62	Adjustment	205	205	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932611
+4193	2	2	3661	62	Adjustment	429	429	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932613
+4194	2	2	3662	62	Adjustment	106	106	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932616
+4195	2	2	3663	62	Adjustment	328	328	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932619
+4196	2	2	3664	62	Adjustment	296	296	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932622
+4197	2	2	3665	62	Adjustment	323	323	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932625
+4198	2	2	3666	62	Adjustment	94	94	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932627
+4199	2	2	3667	62	Adjustment	226	226	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93263
+4200	2	2	3668	62	Adjustment	486	486	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932633
+4201	2	2	3669	62	Adjustment	140	140	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932636
+4202	2	2	3670	62	Adjustment	399	399	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932639
+4203	2	2	3671	62	Adjustment	368	368	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932641
+4204	2	2	3673	62	Adjustment	355	355	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932644
+4205	2	2	3674	62	Adjustment	337	337	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932647
+4206	2	2	3675	62	Adjustment	519	519	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93265
+4207	2	2	3676	62	Adjustment	338	338	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932653
+4208	2	2	3677	62	Adjustment	301	301	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932655
+4209	2	2	3678	62	Adjustment	376	376	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932658
+4210	2	2	3680	62	Adjustment	235	235	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932661
+4211	2	2	3681	62	Adjustment	188	188	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932664
+4212	2	2	3682	62	Adjustment	72	72	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932667
+4213	2	2	3683	62	Adjustment	118	118	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932669
+4214	2	2	3685	62	Adjustment	212	212	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932672
+4215	2	2	3686	62	Adjustment	125	125	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932675
+4216	2	2	3688	62	Adjustment	368	368	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932678
+4217	2	2	3689	62	Adjustment	346	346	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932681
+4218	2	2	3691	62	Adjustment	509	509	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932683
+4219	2	2	3692	62	Adjustment	526	526	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932686
+4220	2	2	3693	62	Adjustment	540	540	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932689
+4221	2	2	3694	62	Adjustment	358	358	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932692
+4222	2	2	3695	62	Adjustment	360	360	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932695
+4223	2	2	3696	62	Adjustment	202	202	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932697
+4224	2	2	3697	62	Adjustment	403	403	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.9327
+4225	2	2	3698	62	Adjustment	475	475	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932703
+4226	2	2	3699	62	Adjustment	275	275	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932706
+4227	2	2	3700	62	Adjustment	492	492	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932709
+4228	2	2	3701	62	Adjustment	74	74	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932711
+4229	2	2	3702	62	Adjustment	261	261	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932714
+4230	2	2	3703	62	Adjustment	150	150	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932717
+4231	2	2	3704	62	Adjustment	70	70	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.93272
+4232	2	2	3705	62	Adjustment	219	219	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932723
+4233	2	2	3706	62	Adjustment	293	293	Opening Balance	\N	OB-SEED	\N	\N	Initial seed data	1	2026-06-11 21:58:45.932725
+4234	2	2	2338	62	Adjustment	50	50	Opening Balance	\N	OB-SEED	\N	\N	Manual override for first item	1	\N
+4235	2	2	2751	62	Issue	-5	27	Issue	228	ISS-00001	1	\N	\N	3	2026-06-11 22:45:15.199613
 \.
 
 
@@ -9919,6 +14360,47 @@ COPY public.subcategories (id, tenant_id, site_id, name, category_id, is_active,
 53	3	3	STATIONERY	62	t	f
 54	3	3	GEN	63	t	f
 55	3	3	LAB	63	t	f
+56	2	2	PAINTING	65	t	f
+57	2	2	ELECTRICAL	66	t	f
+58	2	2	GEN	67	t	f
+59	2	2	HOSP EQPT	67	t	f
+60	2	2	IT	67	t	f
+61	2	2	BIOMEDICAL	68	t	f
+62	2	2	CathLab	68	t	f
+63	2	2	CSSD	68	t	f
+64	2	2	Dental	68	t	f
+65	2	2	DIALYSIS CENTRE	68	t	f
+66	2	2	ELECTRICAL	68	t	f
+67	2	2	EMD	68	t	f
+68	2	2	EQPT	68	t	f
+69	2	2	GEN	68	t	f
+70	2	2	LINEN	68	t	f
+71	2	2	OT	68	t	f
+72	2	2	PHARMACY	68	t	f
+73	2	2	RADIOLOGY	68	t	f
+74	2	2	STATIONERY	68	t	f
+75	2	2	GEN	69	t	f
+76	2	2	HSK	69	t	f
+77	2	2	IT	70	t	f
+78	2	2	BIOCHEMISTRY	71	t	f
+79	2	2	BLOOD BANK	71	t	f
+80	2	2	GEN	71	t	f
+81	2	2	HAEMATOLOGY	71	t	f
+82	2	2	LAB	71	t	f
+83	2	2	MICRO BIOLOGY	71	t	f
+84	2	2	PATHOLOGY	71	t	f
+85	2	2	STATIONERY	71	t	f
+86	2	2	LINEN	72	t	f
+87	2	2	PLUMBING	73	t	f
+88	2	2	STATIONERY	74	t	f
+89	2	2	BLOOD BANK	75	t	f
+90	2	2	EMD	75	t	f
+91	2	2	GEN	75	t	f
+92	2	2	LAB	75	t	f
+93	2	2	PHARMACY	75	t	f
+94	2	2	STATIONERY	75	t	f
+95	2	2	GEN	76	t	f
+96	2	2	LAB	76	t	f
 \.
 
 
@@ -9928,6 +14410,7 @@ COPY public.subcategories (id, tenant_id, site_id, name, category_id, is_active,
 
 COPY public.tenant_configurations (id, tenant_id, base_state, cgst_share_percent, sgst_share_percent, created_at, updated_at) FROM stdin;
 1	3	29 - Karnataka	50	50	2026-06-08 12:39:42.146831	2026-06-08 17:11:25.816677
+2	2	29 - Karnataka	50	50	2026-06-11 12:21:04.216136	2026-06-11 12:21:04.216148
 \.
 
 
@@ -9947,6 +14430,14 @@ COPY public.tenant_memberships (id, user_id, tenant_id, is_active, joined_at) FR
 9	10	3	t	2026-06-01 10:48:25.010534
 10	11	3	t	2026-06-01 10:50:02.223716
 11	12	3	t	2026-06-01 11:17:37.748417
+12	5	2	t	2026-06-11 22:31:29.188829
+13	6	2	t	2026-06-11 22:31:29.188844
+14	7	2	t	2026-06-11 22:31:29.188848
+15	8	2	t	2026-06-11 22:31:29.188852
+16	9	2	t	2026-06-11 22:31:29.188855
+17	10	2	t	2026-06-11 22:31:29.188859
+18	11	2	t	2026-06-11 22:31:29.188862
+19	12	2	t	2026-06-11 22:31:29.188865
 \.
 
 
@@ -9968,6 +14459,8 @@ COPY public.tenants (id, name, slug, status, subscription_plan, max_sites, creat
 COPY public.terms_and_conditions (id, tenant_id, site_id, name, content, is_default, is_active, created_at) FROM stdin;
 1	3	3	EastPoint	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	t	t	2026-05-20 13:57:40.831501
 2	3	3	Eastpoint1	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: 15 Days\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	f	t	2026-06-04 14:20:11.999692
+3	2	2	EastPoint	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	t	t	2026-06-11 22:24:08.266738
+4	2	2	Eastpoint1	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: 15 Days\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	f	t	2026-06-11 22:24:37.007466
 \.
 
 
@@ -10002,6 +14495,20 @@ COPY public.uom (id, tenant_id, site_id, name, abbreviation, is_active, is_delet
 24	3	3	Meter	MTR	t	f
 25	3	3	Bottle	BTL	t	f
 27	3	3	Prs	PRS	t	f
+28	2	2	Bags	BAG	t	f
+29	2	2	Numbers	NOS	t	f
+30	2	2	Kilograms	KG	t	f
+31	2	2	Liters	LTR	t	f
+32	2	2	Bundles	BDL	t	f
+33	2	2	Rolls	ROL	t	f
+34	2	2	Sets	SET	t	f
+35	2	2	Boxes	BOX	t	f
+36	2	2	Can	CAN	t	f
+37	2	2	Pocket	PKT	t	f
+38	2	2	Pad	PAD	t	f
+39	2	2	Meter	MTR	t	f
+40	2	2	Bottle	BTL	t	f
+41	2	2	Prs	PRS	t	f
 \.
 
 
@@ -10017,10 +14524,18 @@ COPY public.user_role_assignments (id, user_id, tenant_id, role_id, site_id, ass
 25	11	3	8	\N	2026-06-01 11:23:25.931221
 34	10	3	5	\N	2026-06-01 16:11:46.859879
 36	2	1	10	1	2026-06-01 19:19:41.540526
-37	3	2	11	2	2026-06-01 19:19:41.548031
 40	4	3	12	3	2026-06-01 19:22:37.287287
 42	9	3	6	3	2026-06-02 10:24:27.231569
 43	12	3	4	\N	2026-06-02 10:55:26.809897
+44	5	2	18	\N	2026-06-11 22:31:29.191092
+45	6	2	15	\N	2026-06-11 22:31:29.191106
+46	7	2	13	\N	2026-06-11 22:31:29.191109
+47	8	2	16	\N	2026-06-11 22:31:29.191112
+48	9	2	19	2	2026-06-11 22:31:29.191115
+49	10	2	17	\N	2026-06-11 22:31:29.191118
+50	11	2	15	\N	2026-06-11 22:31:29.191121
+51	12	2	18	\N	2026-06-11 22:31:29.191124
+52	3	2	11	2	2026-06-11 22:37:52.57721
 \.
 
 
@@ -10036,11 +14551,11 @@ COPY public.users (id, username, email, full_name, hashed_password, is_active, i
 12	Kumar	kumar@nissigrid.com	Kumar	$2b$12$bejX..ps1x3o4JQKv6g7QuMoEO6pxkwtQ8tbwcWMkBIlJMmYA1x8m	t	f	f	2026-06-01 11:17:37.74726	2026-06-05 11:31:33.223417	\N
 1	superadmin	super@nissigrid.com	Super Admin	$2b$12$fp9H8Wu0e2cQNvrXetPzUeg1n1ATh2rp.Ja3HTK.VLRxp2G7qnH.q	t	t	f	2026-05-15 10:36:51.375798	2026-06-05 11:31:33.223369	\N
 2	admin	ilangkumaran@nissigrid.com	NG Admin	$2b$12$bOAeF9c/gaEKKZYSg.Z5VOZ7Cefq7AOXvbM0t0hZI.aEN2v/AJ9Fe	t	f	f	2026-05-15 10:39:02.648701	2026-06-05 11:31:33.223385	\N
-3	epadmin	ilangkumaran@yahoo.com	EastPoint Admin	$2b$12$nMrhQFD1S9G9aLHfksF5zuIZDF2T12vQ.MSWhNWEy7cDqztQQXMCy	t	f	f	2026-05-15 10:52:51.952583	2026-06-05 11:31:33.223391	\N
 4	gradmin	fredrick.antony@nissigrid.com	Fredrick	$2b$12$9VXAuU4uDZ46q3kz.Ajp2.OvUmw49ua2IZjgXTozTC6nGg1HfbuhW	t	f	f	2026-05-15 12:07:07.024311	2026-06-05 11:31:33.223394	\N
 5	grmanager	samson@grinfra.com	Samson	$2b$12$zsXuU.M1LB1lJ.XM24/ve.KcSZL3oxjOyeqzRzwD/4zwnYMk9wr4u	t	f	f	2026-05-27 16:17:53.070455	2026-06-05 11:31:33.223397	CIVIL
 6	grceo	fred@nissigrid.com	Fred	$2b$12$8Yus/rvrJSwtEbMsAnMooeiy2uQd3.M4RXhfbg2buXmfQqprvRZKu	t	f	f	2026-05-27 16:48:52.327279	2026-06-05 11:31:33.2234	ADMIN
 7	Ram	ramraj@nissigrid.com	Ram Raj	$2b$12$nDAelnG7n4RQECb2RlCG0uIbZhbsM4SUNnKbslx6XK8rjbEMEvirG	t	f	f	2026-06-01 10:43:26.001745	2026-06-05 11:31:33.223403	CIVIL
+3	epadmin	ilangkumaran@nisigrid.com	EastPoint Admin	$2b$12$nMrhQFD1S9G9aLHfksF5zuIZDF2T12vQ.MSWhNWEy7cDqztQQXMCy	t	f	f	2026-05-15 10:52:51.952583	2026-06-11 22:37:52.571983	\N
 \.
 
 
@@ -10059,6 +14574,15 @@ COPY public.vendor_categories (id, vendor_id, category_id) FROM stdin;
 68	51	41
 69	53	41
 70	56	45
+71	62	66
+72	62	65
+73	62	73
+74	63	65
+75	63	66
+76	63	67
+77	63	68
+78	63	73
+79	63	74
 \.
 
 
@@ -10236,6 +14760,9 @@ COPY public.vendors (id, tenant_id, site_id, name, code, contact_person, phone, 
 51	3	3	UltraTech Cement Ltd.	VEN-0001	Rajesh Kumar	9876543210	sc.ultratech@atomicmail.io	29ULTRA1234F1Z5	\N	Bangalore	29 - Karnataka	560116	\N	\N	\N	4.8	t	f	2026-05-15 15:19:36.623721	2026-06-09 11:52:09.365556	Ahura Centre, B-Wing, 2nd Floor, Mahakali Caves Road, 	
 53	3	3	ACC Limited	VEN-0003	Amit Shah	9876543212	sc.acc@atomicmail.io	29ACCCC1234F1Z5	\N	Bangalore	29 - Karnataka	560020	\N	\N	\N	4.7	t	f	2026-05-15 15:19:36.627527	2026-06-09 12:38:58.299555	Cement House, 	121, Maharshi Karve Road,
 56	3	3	Hindware Home Innovation Ltd.	VEN-0006	Suresh Raina	9876543215	sc.hindware@atomicmail.io	29HINDV1234F1Z5	\N	Bangalore	29 - Karnataka	560061	\N	\N	\N	4.4	t	f	2026-05-15 15:19:36.631833	2026-06-09 12:40:31.762475	301-302, 	3rd Floor, Park Centra, Sector-30,
+61	3	3	samsung	VND-00011	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	t	f	2026-06-11 16:11:48.285063	2026-06-11 16:11:48.285095	\N	\N
+62	2	2	Mataji Electricals	VND-00001	Lal	9898989898	Mataji@nissigrid.com	29AFHPC7600L1ZD	\N	Bangalore	29 - Karnataka	560075	\N	\N	\N	4.5	t	f	2026-06-11 22:01:38.68366	2026-06-11 22:01:38.683709	Shop No. 1, Door No.  31, Malleshpalaya Main Road	New Thippasandra PO
+63	2	2	ELCAB ENGINEERS PRIVATE LIMITED	VND-00002	Bala	47347347837	ku699444mar@gmail.com	29AACCE9951H1ZR	\N	Bangalore	29 - Karnataka	560056	\N	\N	\N	4.5	t	f	2026-06-12 01:31:58.140808	2026-06-12 01:31:58.140837	V R Cindem Complex, Sy. No. 1193/34/4, Kengeri Main Road,	Behind Mr Prem Bun, Ramasandra Village,
 \.
 
 
@@ -10260,6 +14787,7 @@ COPY public.warehouses (id, tenant_id, site_id, name, code, project_id, warehous
 59	3	3	Central Warehouse	STO-0014	1	Central	Bangalore	\N	\N	4	t	f	2026-05-15 15:19:36.649411
 60	3	3	Regional Store	STO-0015	1	Regional	Bangalore	\N	\N	4	t	f	2026-05-15 15:19:36.650066
 61	3	3	Scrap Store	SCRAP	1	Scrap	\N	\N	\N	\N	t	f	2026-05-20 12:59:53.29867
+62	2	2	Central Store	WH-CENTRAL	3	Main	\N	\N	\N	\N	t	f	2026-06-11 21:58:45.403171
 \.
 
 
@@ -10267,49 +14795,63 @@ COPY public.warehouses (id, tenant_id, site_id, name, code, project_id, warehous
 -- Name: alerts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.alerts_id_seq', 2, true);
+SELECT pg_catalog.setval('public.alerts_id_seq', 10, true);
 
 
 --
 -- Name: approval_flows_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.approval_flows_id_seq', 9, true);
+SELECT pg_catalog.setval('public.approval_flows_id_seq', 19, true);
 
 
 --
 -- Name: audit_logs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.audit_logs_id_seq', 169, true);
+SELECT pg_catalog.setval('public.audit_logs_id_seq', 239, true);
 
 
 --
 -- Name: buildings_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.buildings_id_seq', 4, true);
+SELECT pg_catalog.setval('public.buildings_id_seq', 8, true);
 
 
 --
 -- Name: categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.categories_id_seq', 64, true);
+SELECT pg_catalog.setval('public.categories_id_seq', 76, true);
 
 
 --
 -- Name: company_addresses_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.company_addresses_id_seq', 3, true);
+SELECT pg_catalog.setval('public.company_addresses_id_seq', 6, true);
+
+
+--
+-- Name: complaint_images_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.complaint_images_id_seq', 3, true);
+
+
+--
+-- Name: complaints_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.complaints_id_seq', 2, true);
 
 
 --
 -- Name: current_stock_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.current_stock_id_seq', 2648, true);
+SELECT pg_catalog.setval('public.current_stock_id_seq', 3867, true);
 
 
 --
@@ -10323,28 +14865,28 @@ SELECT pg_catalog.setval('public.department_material_limits_id_seq', 259, true);
 -- Name: departments_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.departments_id_seq', 259, true);
+SELECT pg_catalog.setval('public.departments_id_seq', 266, true);
 
 
 --
 -- Name: document_sequences_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.document_sequences_id_seq', 61, true);
+SELECT pg_catalog.setval('public.document_sequences_id_seq', 69, true);
 
 
 --
 -- Name: floors_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.floors_id_seq', 22, true);
+SELECT pg_catalog.setval('public.floors_id_seq', 28, true);
 
 
 --
 -- Name: gate_entries_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.gate_entries_id_seq', 191, true);
+SELECT pg_catalog.setval('public.gate_entries_id_seq', 195, true);
 
 
 --
@@ -10365,42 +14907,49 @@ SELECT pg_catalog.setval('public.gate_passes_id_seq', 18, true);
 -- Name: grn_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.grn_id_seq', 199, true);
+SELECT pg_catalog.setval('public.grn_id_seq', 203, true);
 
 
 --
 -- Name: grn_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.grn_items_id_seq', 503, true);
+SELECT pg_catalog.setval('public.grn_items_id_seq', 506, true);
 
 
 --
 -- Name: indent_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.indent_approvals_id_seq', 16, true);
+SELECT pg_catalog.setval('public.indent_approvals_id_seq', 31, true);
 
 
 --
 -- Name: indent_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.indent_items_id_seq', 486, true);
+SELECT pg_catalog.setval('public.indent_items_id_seq', 492, true);
 
 
 --
 -- Name: indents_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.indents_id_seq', 213, true);
+SELECT pg_catalog.setval('public.indents_id_seq', 219, true);
+
+
+--
+-- Name: institutions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.institutions_id_seq', 14, true);
 
 
 --
 -- Name: invoice_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.invoice_items_id_seq', 44, true);
+SELECT pg_catalog.setval('public.invoice_items_id_seq', 46, true);
 
 
 --
@@ -10414,14 +14963,14 @@ SELECT pg_catalog.setval('public.invoices_id_seq', 6, true);
 -- Name: material_issue_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.material_issue_items_id_seq', 205, true);
+SELECT pg_catalog.setval('public.material_issue_items_id_seq', 206, true);
 
 
 --
 -- Name: material_issues_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.material_issues_id_seq', 227, true);
+SELECT pg_catalog.setval('public.material_issues_id_seq', 228, true);
 
 
 --
@@ -10442,7 +14991,7 @@ SELECT pg_catalog.setval('public.material_returns_id_seq', 21, true);
 -- Name: materials_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.materials_id_seq', 2336, true);
+SELECT pg_catalog.setval('public.materials_id_seq', 3706, true);
 
 
 --
@@ -10456,49 +15005,49 @@ SELECT pg_catalog.setval('public.organizations_id_seq', 2, true);
 -- Name: projects_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.projects_id_seq', 3, true);
+SELECT pg_catalog.setval('public.projects_id_seq', 4, true);
 
 
 --
 -- Name: purchase_order_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_order_approvals_id_seq', 18, true);
+SELECT pg_catalog.setval('public.purchase_order_approvals_id_seq', 23, true);
 
 
 --
 -- Name: purchase_order_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_order_items_id_seq', 516, true);
+SELECT pg_catalog.setval('public.purchase_order_items_id_seq', 518, true);
 
 
 --
 -- Name: purchase_orders_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_orders_id_seq', 213, true);
+SELECT pg_catalog.setval('public.purchase_orders_id_seq', 215, true);
 
 
 --
 -- Name: purchase_request_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_request_approvals_id_seq', 4, true);
+SELECT pg_catalog.setval('public.purchase_request_approvals_id_seq', 16, true);
 
 
 --
 -- Name: purchase_request_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_request_items_id_seq', 593, true);
+SELECT pg_catalog.setval('public.purchase_request_items_id_seq', 598, true);
 
 
 --
 -- Name: purchase_requests_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_requests_id_seq', 193, true);
+SELECT pg_catalog.setval('public.purchase_requests_id_seq', 197, true);
 
 
 --
@@ -10547,21 +15096,21 @@ SELECT pg_catalog.setval('public.quotation_requests_id_seq', 185, true);
 -- Name: role_permissions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.role_permissions_id_seq', 643, true);
+SELECT pg_catalog.setval('public.role_permissions_id_seq', 770, true);
 
 
 --
 -- Name: roles_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.roles_id_seq', 12, true);
+SELECT pg_catalog.setval('public.roles_id_seq', 19, true);
 
 
 --
 -- Name: rooms_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.rooms_id_seq', 234, true);
+SELECT pg_catalog.setval('public.rooms_id_seq', 237, true);
 
 
 --
@@ -10575,7 +15124,7 @@ SELECT pg_catalog.setval('public.sites_id_seq', 3, true);
 -- Name: stock_ledger_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.stock_ledger_id_seq', 3012, true);
+SELECT pg_catalog.setval('public.stock_ledger_id_seq', 4235, true);
 
 
 --
@@ -10596,21 +15145,21 @@ SELECT pg_catalog.setval('public.stock_transfers_id_seq', 17, true);
 -- Name: subcategories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.subcategories_id_seq', 55, true);
+SELECT pg_catalog.setval('public.subcategories_id_seq', 96, true);
 
 
 --
 -- Name: tenant_configurations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.tenant_configurations_id_seq', 1, true);
+SELECT pg_catalog.setval('public.tenant_configurations_id_seq', 2, true);
 
 
 --
 -- Name: tenant_memberships_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.tenant_memberships_id_seq', 11, true);
+SELECT pg_catalog.setval('public.tenant_memberships_id_seq', 19, true);
 
 
 --
@@ -10624,21 +15173,21 @@ SELECT pg_catalog.setval('public.tenants_id_seq', 3, true);
 -- Name: terms_and_conditions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.terms_and_conditions_id_seq', 2, true);
+SELECT pg_catalog.setval('public.terms_and_conditions_id_seq', 4, true);
 
 
 --
 -- Name: uom_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.uom_id_seq', 27, true);
+SELECT pg_catalog.setval('public.uom_id_seq', 41, true);
 
 
 --
 -- Name: user_role_assignments_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.user_role_assignments_id_seq', 43, true);
+SELECT pg_catalog.setval('public.user_role_assignments_id_seq', 52, true);
 
 
 --
@@ -10652,7 +15201,7 @@ SELECT pg_catalog.setval('public.users_id_seq', 12, true);
 -- Name: vendor_categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_categories_id_seq', 70, true);
+SELECT pg_catalog.setval('public.vendor_categories_id_seq', 79, true);
 
 
 --
@@ -10673,14 +15222,14 @@ SELECT pg_catalog.setval('public.vendor_quotations_id_seq', 545, true);
 -- Name: vendors_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendors_id_seq', 60, true);
+SELECT pg_catalog.setval('public.vendors_id_seq', 63, true);
 
 
 --
 -- Name: warehouses_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.warehouses_id_seq', 61, true);
+SELECT pg_catalog.setval('public.warehouses_id_seq', 62, true);
 
 
 --
@@ -10737,6 +15286,22 @@ ALTER TABLE ONLY public.categories
 
 ALTER TABLE ONLY public.company_addresses
     ADD CONSTRAINT company_addresses_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: complaint_images complaint_images_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.complaint_images
+    ADD CONSTRAINT complaint_images_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: complaints complaints_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.complaints
+    ADD CONSTRAINT complaints_pkey PRIMARY KEY (id);
 
 
 --
@@ -10841,6 +15406,14 @@ ALTER TABLE ONLY public.indent_items
 
 ALTER TABLE ONLY public.indents
     ADD CONSTRAINT indents_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: institutions institutions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.institutions
+    ADD CONSTRAINT institutions_pkey PRIMARY KEY (id);
 
 
 --
@@ -11156,6 +15729,14 @@ ALTER TABLE ONLY public.quotation_comparisons
 
 
 --
+-- Name: complaints uq_complaint_docket_per_tenant; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.complaints
+    ADD CONSTRAINT uq_complaint_docket_per_tenant UNIQUE (tenant_id, docket_no);
+
+
+--
 -- Name: department_material_limits uq_dept_mat_limit; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -11201,6 +15782,14 @@ ALTER TABLE ONLY public.grn
 
 ALTER TABLE ONLY public.indents
     ADD CONSTRAINT uq_indent_per_tenant UNIQUE (tenant_id, indent_number);
+
+
+--
+-- Name: institutions uq_inst_code_per_tenant; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.institutions
+    ADD CONSTRAINT uq_inst_code_per_tenant UNIQUE (tenant_id, code);
 
 
 --
@@ -11478,6 +16067,27 @@ CREATE INDEX ix_company_addresses_id ON public.company_addresses USING btree (id
 
 
 --
+-- Name: ix_complaint_images_id; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX ix_complaint_images_id ON public.complaint_images USING btree (id);
+
+
+--
+-- Name: ix_complaints_docket_no; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX ix_complaints_docket_no ON public.complaints USING btree (docket_no);
+
+
+--
+-- Name: ix_complaints_id; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX ix_complaints_id ON public.complaints USING btree (id);
+
+
+--
 -- Name: ix_current_stock_id; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -11594,6 +16204,13 @@ CREATE INDEX ix_indents_id ON public.indents USING btree (id);
 --
 
 CREATE INDEX ix_indents_indent_number ON public.indents USING btree (indent_number);
+
+
+--
+-- Name: ix_institutions_id; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX ix_institutions_id ON public.institutions USING btree (id);
 
 
 --
@@ -12040,6 +16657,14 @@ ALTER TABLE ONLY public.audit_logs
 
 
 --
+-- Name: buildings buildings_institution_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.buildings
+    ADD CONSTRAINT buildings_institution_id_fkey FOREIGN KEY (institution_id) REFERENCES public.institutions(id);
+
+
+--
 -- Name: buildings buildings_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -12093,6 +16718,70 @@ ALTER TABLE ONLY public.company_addresses
 
 ALTER TABLE ONLY public.company_addresses
     ADD CONSTRAINT company_addresses_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES public.tenants(id) ON DELETE CASCADE;
+
+
+--
+-- Name: complaint_images complaint_images_complaint_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.complaint_images
+    ADD CONSTRAINT complaint_images_complaint_id_fkey FOREIGN KEY (complaint_id) REFERENCES public.complaints(id) ON DELETE CASCADE;
+
+
+--
+-- Name: complaints complaints_assigned_to_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.complaints
+    ADD CONSTRAINT complaints_assigned_to_id_fkey FOREIGN KEY (assigned_to_id) REFERENCES public.users(id);
+
+
+--
+-- Name: complaints complaints_building_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.complaints
+    ADD CONSTRAINT complaints_building_id_fkey FOREIGN KEY (building_id) REFERENCES public.buildings(id);
+
+
+--
+-- Name: complaints complaints_created_by_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.complaints
+    ADD CONSTRAINT complaints_created_by_id_fkey FOREIGN KEY (created_by_id) REFERENCES public.users(id);
+
+
+--
+-- Name: complaints complaints_resolved_by_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.complaints
+    ADD CONSTRAINT complaints_resolved_by_id_fkey FOREIGN KEY (resolved_by_id) REFERENCES public.users(id);
+
+
+--
+-- Name: complaints complaints_room_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.complaints
+    ADD CONSTRAINT complaints_room_id_fkey FOREIGN KEY (room_id) REFERENCES public.rooms(id);
+
+
+--
+-- Name: complaints complaints_site_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.complaints
+    ADD CONSTRAINT complaints_site_id_fkey FOREIGN KEY (site_id) REFERENCES public.sites(id) ON DELETE CASCADE;
+
+
+--
+-- Name: complaints complaints_tenant_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.complaints
+    ADD CONSTRAINT complaints_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES public.tenants(id) ON DELETE CASCADE;
 
 
 --
@@ -12165,6 +16854,14 @@ ALTER TABLE ONLY public.department_material_limits
 
 ALTER TABLE ONLY public.departments
     ADD CONSTRAINT departments_building_id_fkey FOREIGN KEY (building_id) REFERENCES public.buildings(id);
+
+
+--
+-- Name: departments departments_institution_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.departments
+    ADD CONSTRAINT departments_institution_id_fkey FOREIGN KEY (institution_id) REFERENCES public.institutions(id);
 
 
 --
@@ -12512,6 +17209,14 @@ ALTER TABLE ONLY public.indents
 
 
 --
+-- Name: indents indents_institution_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.indents
+    ADD CONSTRAINT indents_institution_id_fkey FOREIGN KEY (institution_id) REFERENCES public.institutions(id);
+
+
+--
 -- Name: indents indents_requester_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -12541,6 +17246,30 @@ ALTER TABLE ONLY public.indents
 
 ALTER TABLE ONLY public.indents
     ADD CONSTRAINT indents_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES public.tenants(id) ON DELETE CASCADE;
+
+
+--
+-- Name: institutions institutions_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.institutions
+    ADD CONSTRAINT institutions_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id);
+
+
+--
+-- Name: institutions institutions_site_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.institutions
+    ADD CONSTRAINT institutions_site_id_fkey FOREIGN KEY (site_id) REFERENCES public.sites(id) ON DELETE CASCADE;
+
+
+--
+-- Name: institutions institutions_tenant_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.institutions
+    ADD CONSTRAINT institutions_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES public.tenants(id) ON DELETE CASCADE;
 
 
 --
@@ -12592,11 +17321,43 @@ ALTER TABLE ONLY public.invoices
 
 
 --
+-- Name: invoices invoices_hard_copy_received_by_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.invoices
+    ADD CONSTRAINT invoices_hard_copy_received_by_id_fkey FOREIGN KEY (hard_copy_received_by_id) REFERENCES public.users(id);
+
+
+--
+-- Name: invoices invoices_hard_copy_sent_by_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.invoices
+    ADD CONSTRAINT invoices_hard_copy_sent_by_id_fkey FOREIGN KEY (hard_copy_sent_by_id) REFERENCES public.users(id);
+
+
+--
+-- Name: invoices invoices_payment_completed_by_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.invoices
+    ADD CONSTRAINT invoices_payment_completed_by_id_fkey FOREIGN KEY (payment_completed_by_id) REFERENCES public.users(id);
+
+
+--
 -- Name: invoices invoices_po_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.invoices
     ADD CONSTRAINT invoices_po_id_fkey FOREIGN KEY (po_id) REFERENCES public.purchase_orders(id);
+
+
+--
+-- Name: invoices invoices_sent_for_payment_by_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.invoices
+    ADD CONSTRAINT invoices_sent_for_payment_by_id_fkey FOREIGN KEY (sent_for_payment_by_id) REFERENCES public.users(id);
 
 
 --
@@ -12661,6 +17422,14 @@ ALTER TABLE ONLY public.material_issues
 
 ALTER TABLE ONLY public.material_issues
     ADD CONSTRAINT material_issues_building_id_fkey FOREIGN KEY (building_id) REFERENCES public.buildings(id);
+
+
+--
+-- Name: material_issues material_issues_complaint_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.material_issues
+    ADD CONSTRAINT material_issues_complaint_id_fkey FOREIGN KEY (complaint_id) REFERENCES public.complaints(id);
 
 
 --
@@ -13651,5 +18420,5 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict aKmr3IDjsKR414qJVm7VHdnJhvV0p9mFcTi9rwPFeeuwGwHEJEncUp7CiTeJ14P
+\unrestrict MTHjzGytRoGPD0ivi2qMw1XamefEZxEmNTBNgsiZRttyRFqoj8HD9hjnDFmlddV
 

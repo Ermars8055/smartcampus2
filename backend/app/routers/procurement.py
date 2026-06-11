@@ -893,6 +893,7 @@ def update_purchase_order(
     db.commit()
     
     if po.status == "Submitted":
+        po.current_approval_level = 0
         return handle_po_next_level(db, po, tenant_id, site_id, po.total_amount, current_user.id)
 
     return {"message": "PO updated successfully"}

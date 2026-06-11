@@ -128,20 +128,7 @@ export default function IssueSummaryReport() {
     const wb = new ExcelJS.Workbook();
     const ws = wb.addWorksheet('Issue Summary');
 
-    // Filters and Titles
-    ws.addRow(['Report:', 'Issue Summary']);
-    ws.addRow(['Date Range:', `${filters.fromDate.format('DD-MMM-YYYY')} to ${filters.toDate.format('DD-MMM-YYYY')}`]);
-    ws.addRow(['Store:', warehouses.find(w => w.id === filters.warehouseId)?.name || 'All Stores']);
-    ws.addRow(['Category:', categories.find(c => c.id === filters.categoryId)?.name || 'All Categories']);
-    ws.addRow(['Department:', filters.departments.length > 0 ? filters.departments.join(', ') : 'All']);
-    ws.addRow(['Search:', filters.search || 'None']);
-    ws.addRow(['Include Zero:', filters.includeZero ? 'Yes' : 'No']);
-    ws.addRow([]);
-
-    ws.getCell('A1').font = { size: 12, bold: true };
-    ws.getCell('B1').font = { size: 12, bold: true };
-
-    // Header Row
+    // Header Row definitions
     const headerRow = [
       'S.No', 'Material Name', 'UOM', 'Opening Stock', 'Total Received', 'Issue No'
     ];
@@ -149,11 +136,67 @@ export default function IssueSummaryReport() {
       headerRow.push(reportData.departments.length === 1 && d === 'UNKNOWN' ? 'Quantity Issued' : (d === 'UNKNOWN' ? 'Unspecified' : d));
     });
     headerRow.push('Total Issued', 'Other Outward', 'Closing Stock');
-    
-    ws.addRow(headerRow);
-    
-    const headerRowIdx = 9;
     const totalCols = headerRow.length;
+
+    // Filters and Titles
+    ws.addRow(['Issue Summary Report']);
+    ws.mergeCells(1, 1, 1, totalCols);
+    const titleCell = ws.getCell(1, 1);
+    titleCell.font = { size: 14, bold: true };
+    titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+
+    const dateRange = `${filters.fromDate.format('DD-MMM-YYYY')} to ${filters.toDate.format('DD-MMM-YYYY')}`;
+    const storeName = warehouses.find(w => w.id === filters.warehouseId)?.name || 'All Stores';
+    const categoryName = categories.find(c => c.id === filters.categoryId)?.name || 'All Categories';
+    const depts = filters.departments.length > 0 ? filters.departments.join(', ') : 'All';
+    const searchVal = filters.search || 'None';
+    const includeZeroVal = filters.includeZero ? 'Yes' : 'No';
+
+    ws.addRow([]);
+    ws.addRow([]);
+    ws.addRow([]); // Empty row 4
+
+    // Date Range (Left)
+    ws.mergeCells(2, 1, 2, 2);
+    const cellDate = ws.getCell(2, 1);
+    cellDate.value = { richText: [{ font: { bold: true }, text: 'Date Range: ' }, { text: dateRange }] };
+    cellDate.alignment = { horizontal: 'left', vertical: 'middle' };
+
+    // Store (Center)
+    ws.mergeCells(2, 3, 2, 5);
+    const cellStore = ws.getCell(2, 3);
+    cellStore.value = { richText: [{ font: { bold: true }, text: 'Store: ' }, { text: storeName }] };
+    cellStore.alignment = { horizontal: 'center', vertical: 'middle' };
+
+    // Category (Right)
+    ws.mergeCells(2, 6, 2, totalCols);
+    const cellCat = ws.getCell(2, 6);
+    cellCat.value = { richText: [{ font: { bold: true }, text: 'Category: ' }, { text: categoryName }] };
+    cellCat.alignment = { horizontal: 'right', vertical: 'middle' };
+
+    // Department (Left)
+    ws.mergeCells(3, 1, 3, 2);
+    const cellDept = ws.getCell(3, 1);
+    cellDept.value = { richText: [{ font: { bold: true }, text: 'Department: ' }, { text: depts }] };
+    cellDept.alignment = { horizontal: 'left', vertical: 'middle' };
+
+    // Search (Center)
+    ws.mergeCells(3, 3, 3, 5);
+    const cellSearch = ws.getCell(3, 3);
+    cellSearch.value = { richText: [{ font: { bold: true }, text: 'Search: ' }, { text: searchVal }] };
+    cellSearch.alignment = { horizontal: 'center', vertical: 'middle' };
+
+    // Include Zero (Right)
+    ws.mergeCells(3, 6, 3, totalCols);
+    const cellInc = ws.getCell(3, 6);
+    cellInc.value = { richText: [{ font: { bold: true }, text: 'Include Zero: ' }, { text: includeZeroVal }] };
+    cellInc.alignment = { horizontal: 'right', vertical: 'middle' };
+
+    ws.getRow(2).height = 20;
+    ws.getRow(3).height = 20;
+
+    ws.addRow(headerRow);
+    const headerRowIdx = 5;
     
     const border = {
       top: { style: 'thin' }, left: { style: 'thin' },

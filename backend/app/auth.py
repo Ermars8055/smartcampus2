@@ -49,22 +49,26 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     user._is_platform_admin = payload.get("is_platform_admin", False)
     user._active_site_id = payload.get("active_site_id")
     
-    # Dynamically fetch latest data_access_scope to handle role updates without re-login
+    # Dynamically fetch latest data_access_scope and permissions to handle role updates without re-login
     if user._tenant_id and not user._is_platform_admin:
-        from app.models import UserRoleAssignment
+        from app.models import UserRoleAssignment, Role
+        from sqlalchemy.orm import joinedload
         SCOPE_RANKS = {
             "Self Only": 1,
             "Department": 2,
             "Organization": 3,
             "Full Administrative Access": 4
         }
-        assignments = db.query(UserRoleAssignment).filter_by(
+        assignments = db.query(UserRoleAssignment).options(
+            joinedload(UserRoleAssignment.role).joinedload(Role.permissions)
+        ).filter_by(
             user_id=user.id, tenant_id=user._tenant_id
         ).all()
         
         highest_scope_val = 0
         data_access_scope = "Self Only"
         fresh_roles = []
+        fresh_permissions = {}
         for a in assignments:
             if a.role:
                 fresh_roles.append(a.role.code)
@@ -73,8 +77,22 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
                 if SCOPE_RANKS.get(scope, 1) > highest_scope_val:
                     highest_scope_val = SCOPE_RANKS.get(scope, 1)
                     data_access_scope = scope
+                for p in a.role.permissions:
+                    if p.resource not in fresh_permissions:
+                        fresh_permissions[p.resource] = {"can_read": False, "can_create": False, "can_update": False, "can_delete": False, "extended_actions": {}}
+                    if p.can_read: fresh_permissions[p.resource]["can_read"] = True
+                    if p.can_create: fresh_permissions[p.resource]["can_create"] = True
+                    if p.can_update: fresh_permissions[p.resource]["can_update"] = True
+                    if p.can_delete: fresh_permissions[p.resource]["can_delete"] = True
+                    if p.extended_actions:
+                        for action_key, action_val in p.extended_actions.items():
+                            if action_key not in fresh_permissions[p.resource]["extended_actions"]:
+                                fresh_permissions[p.resource]["extended_actions"][action_key] = action_val
+                            else:
+                                fresh_permissions[p.resource]["extended_actions"][action_key] = fresh_permissions[p.resource]["extended_actions"][action_key] or action_val
         user._data_access_scope = data_access_scope
         user._roles = list(set(fresh_roles))
+        user._permissions = fresh_permissions
     else:
         user._data_access_scope = payload.get("data_access_scope", "Self Only")
 

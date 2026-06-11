@@ -191,17 +191,21 @@ def get_alert_count(
 ):
     """Return counts of pending actions for the current user/site."""
     
-    # Outer join to exclude resolved GateEntry alerts, or count them if not tracked/not read
-    unread_ge_count = db.query(GateEntry).outerjoin(
-        Alert, 
-        and_(Alert.reference_id == GateEntry.id, Alert.reference_type == "GateEntry", Alert.tenant_id == tenant_id)
-    ).filter(
-        GateEntry.tenant_id == tenant_id,
-        GateEntry.site_id == site_id,
-        GateEntry.status == "Awaiting GRN",
-        GateEntry.is_deleted == False,
-        (Alert.id == None) | (and_(Alert.is_read == False, Alert.is_resolved == False))
-    ).count()
+    can_create_grn = getattr(current_user, "_is_platform_admin", False) or getattr(current_user, "_permissions", {}).get('grn', {}).get('can_create', False)
+    
+    unread_ge_count = 0
+    if can_create_grn:
+        # Outer join to exclude resolved GateEntry alerts, or count them if not tracked/not read
+        unread_ge_count = db.query(GateEntry).outerjoin(
+            Alert, 
+            and_(Alert.reference_id == GateEntry.id, Alert.reference_type == "GateEntry", Alert.tenant_id == tenant_id)
+        ).filter(
+            GateEntry.tenant_id == tenant_id,
+            GateEntry.site_id == site_id,
+            GateEntry.status == "Awaiting GRN",
+            GateEntry.is_deleted == False,
+            (Alert.id == None) | (and_(Alert.is_read == False, Alert.is_resolved == False))
+        ).count()
 
     db_alerts_count = db.query(Alert).filter(
         Alert.tenant_id == tenant_id,
@@ -266,39 +270,42 @@ def get_alerts(
 ):
     alerts = []
     
-    tracked_ge_alerts = db.query(Alert).filter(
-        Alert.tenant_id == tenant_id,
-        Alert.site_id == site_id,
-        Alert.reference_type == "GateEntry"
-    ).all()
-    tracked_ge_map = {a.reference_id: a for a in tracked_ge_alerts}
+    can_create_grn = getattr(current_user, "_is_platform_admin", False) or getattr(current_user, "_permissions", {}).get('grn', {}).get('can_create', False)
 
-    # 1. Dynamic alerts from pending Gate Entries
-    pending_direct = db.query(GateEntry).filter(
-        GateEntry.tenant_id == tenant_id,
-        GateEntry.site_id == site_id,
-        GateEntry.status == "Awaiting GRN",
-        GateEntry.is_deleted == False
-    ).all()
-    
-    for ge in pending_direct:
-        if ge.id in tracked_ge_map and tracked_ge_map[ge.id].is_resolved:
-            continue
-            
-        is_read = tracked_ge_map[ge.id].is_read if ge.id in tracked_ge_map else False
+    if can_create_grn:
+        tracked_ge_alerts = db.query(Alert).filter(
+            Alert.tenant_id == tenant_id,
+            Alert.site_id == site_id,
+            Alert.reference_type == "GateEntry"
+        ).all()
+        tracked_ge_map = {a.reference_id: a for a in tracked_ge_alerts}
+
+        # 1. Dynamic alerts from pending Gate Entries
+        pending_direct = db.query(GateEntry).filter(
+            GateEntry.tenant_id == tenant_id,
+            GateEntry.site_id == site_id,
+            GateEntry.status == "Awaiting GRN",
+            GateEntry.is_deleted == False
+        ).all()
         
-        alerts.append({
-            "id": f"ge_{ge.id}",
-            "title": f"Action Required: Gate Entry {ge.entry_number}",
-            "severity": "Warning",
-            "alert_type": "Pending Action",
-            "message": f"Direct Invoice Gate Entry {ge.entry_number} from {ge.vendor.name if ge.vendor else 'Unknown Vendor'} is awaiting GRN creation.",
-            "created_at": ge.created_at,
-            "is_read": is_read,
-            "is_resolved": False,
-            "reference_type": "GateEntry",
-            "reference_id": ge.id
-        })
+        for ge in pending_direct:
+            if ge.id in tracked_ge_map and tracked_ge_map[ge.id].is_resolved:
+                continue
+                
+            is_read = tracked_ge_map[ge.id].is_read if ge.id in tracked_ge_map else False
+            
+            alerts.append({
+                "id": f"ge_{ge.id}",
+                "title": f"Action Required: Gate Entry {ge.entry_number}",
+                "severity": "Warning",
+                "alert_type": "Pending Action",
+                "message": f"Gate Entry {ge.entry_number} from {ge.vendor.name} is awaiting GRN." if ge.vendor else f"Gate Entry {ge.entry_number} is awaiting GRN.",
+                "created_at": ge.created_at,
+                "is_read": is_read,
+                "is_resolved": False,
+                "reference_type": "GateEntry",
+                "reference_id": ge.id
+            })
         
     # 2. Dynamic alerts from pending Indents
     tracked_ind_alerts = db.query(Alert).filter(

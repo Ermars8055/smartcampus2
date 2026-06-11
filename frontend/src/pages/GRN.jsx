@@ -348,7 +348,7 @@ export default function GRNPage() {
 
                 {/* Line 2 */}
                 <Grid item xs={12} sm={6}><TextField fullWidth size="small" label="Invoice Date" type="date" value={form.invoice_date || ''} onChange={e => setForm({ ...form, invoice_date: e.target.value })} InputLabelProps={{ shrink: true }} inputProps={{ max: new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0] }} /></Grid>
-                <Grid item xs={12} sm={6}><TextField fullWidth size="small" label="Invoice Amount (₹)" type="number" inputProps={{ step: "0.01" }} value={form.invoice_amount} onChange={e => setForm({ ...form, invoice_amount: parseFloat(e.target.value) || 0 })} /></Grid>
+                <Grid item xs={12} sm={6}><TextField fullWidth size="small" label="Invoice Amount (₹)" type="number" inputProps={{ step: "0.01", min: "0" }} value={form.invoice_amount} onChange={e => setForm({ ...form, invoice_amount: Math.max(0, parseFloat(e.target.value) || 0) })} /></Grid>
 
                 {/* Line 3 */}
                 {form.receipt_type === 'PO-Based' && (
@@ -512,35 +512,35 @@ export default function GRNPage() {
                       </TableCell>
                       {form.receipt_type === 'PO-Based' && <TableCell align="right">{item.ordered_quantity}</TableCell>}
                       <TableCell align="right">
-                        <TextField size="small" type="number" inputProps={{ step: "1" }} value={item.received_quantity ?? ''} sx={{ width: 80 }}
+                        <TextField size="small" type="number" inputProps={{ step: "1", min: "0" }} value={item.received_quantity ?? ''} sx={{ width: 80 }}
                           onChange={e => {
                             const items = [...form.items];
-                            items[i].received_quantity = Math.round(parseFloat(e.target.value) || 0);
+                            items[i].received_quantity = Math.max(0, Math.round(parseFloat(e.target.value) || 0));
                             setForm({ ...form, items });
                           }} />
                       </TableCell>
                       <TableCell align="right">
-                        <TextField size="small" type="number" inputProps={{ step: "1" }} value={item.accepted_quantity ?? ''} sx={{ width: 80 }}
+                        <TextField size="small" type="number" inputProps={{ step: "1", min: "0" }} value={item.accepted_quantity ?? ''} sx={{ width: 80 }}
                           onChange={e => {
                             const items = [...form.items];
-                            items[i].accepted_quantity = Math.round(parseFloat(e.target.value) || 0);
+                            items[i].accepted_quantity = Math.max(0, Math.round(parseFloat(e.target.value) || 0));
                             setForm({ ...form, items });
                           }} />
                       </TableCell>
                       <TableCell align="right">
-                        <TextField size="small" type="number" inputProps={{ step: "1" }} value={item.rejected_quantity ?? ''} sx={{ width: 80 }}
+                        <TextField size="small" type="number" inputProps={{ step: "1", min: "0" }} value={item.rejected_quantity ?? ''} sx={{ width: 80 }}
                           onChange={e => {
                             const items = [...form.items];
-                            items[i].rejected_quantity = Math.round(parseFloat(e.target.value) || 0);
+                            items[i].rejected_quantity = Math.max(0, Math.round(parseFloat(e.target.value) || 0));
                             setForm({ ...form, items });
                           }} />
                       </TableCell>
                       <TableCell align="right">
                         {form.receipt_type === 'Direct Invoice' ? (
-                          <TextField size="small" type="number" inputProps={{ step: "0.01" }} value={item.rate ?? ''} sx={{ width: 80 }}
+                          <TextField size="small" type="number" inputProps={{ step: "0.01", min: "0" }} value={item.rate ?? ''} sx={{ width: 80 }}
                             onChange={e => {
                               const items = [...form.items];
-                              items[i].rate = parseFloat(e.target.value) || 0;
+                              items[i].rate = Math.max(0, parseFloat(e.target.value) || 0);
                               setForm({ ...form, items });
                             }} />
                         ) : (

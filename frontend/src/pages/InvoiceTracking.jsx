@@ -31,6 +31,7 @@ export default function InvoiceTracking() {
   const [singleSendDialog, setSingleSendDialog] = useState(null);
   const [singlePaidDialog, setSinglePaidDialog] = useState(null);
   const [singleTargetAmount, setSingleTargetAmount] = useState('');
+  const [sendHardCopyDialog, setSendHardCopyDialog] = useState(null);
 
   const load = () => {
     // Fetch all Approved invoices (this covers Pending, Sent for Payment, and Paid payment statuses)
@@ -155,6 +156,7 @@ export default function InvoiceTracking() {
       await api.put('/api/finance/send-hard-copy', {
         invoice_id: id
       });
+      setSendHardCopyDialog(null);
       load();
     } catch (err) {
       alert(err.response?.data?.detail || 'Failed to send hard copy');
@@ -335,7 +337,7 @@ export default function InvoiceTracking() {
                       <>
                         <Tooltip title="Send Hard Copy">
                           <span>
-                            <IconButton size="small" color="primary" disabled={!(i.payment_status === 'Pending' && !i.hard_copy_sent)} onClick={() => handleSendHardCopy(i.id)}>
+                            <IconButton size="small" color="primary" disabled={!(i.payment_status === 'Pending' && !i.hard_copy_sent)} onClick={() => setSendHardCopyDialog(i)}>
                               <Outbox fontSize="small" />
                             </IconButton>
                           </span>
@@ -392,6 +394,22 @@ export default function InvoiceTracking() {
         <DialogActions sx={{ p: 2 }}>
           <Button onClick={() => setRemarkDialog(null)}>Cancel</Button>
           <Button variant="contained" color="success" startIcon={<CheckCircle />} onClick={() => handleMarkHardCopyReceived(remarkDialog.id, true)}>Confirm Receipt</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Send Hard Copy Dialog */}
+      <Dialog open={!!sendHardCopyDialog} onClose={() => setSendHardCopyDialog(null)} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ fontWeight: 600 }}>Confirm Send Hard Copy</DialogTitle>
+        <DialogContent dividers>
+          {sendHardCopyDialog && (
+            <Box>
+              <Typography sx={{ mb: 2 }}>Are you sure you want to mark the hard copy as sent for invoice <strong>{sendHardCopyDialog.invoice_number}</strong> from <strong>{sendHardCopyDialog.vendor_name}</strong>?</Typography>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setSendHardCopyDialog(null)}>Cancel</Button>
+          <Button variant="contained" color="primary" startIcon={<Outbox />} onClick={() => handleSendHardCopy(sendHardCopyDialog.id)}>Confirm Send</Button>
         </DialogActions>
       </Dialog>
 

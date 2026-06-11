@@ -36,7 +36,7 @@ def get_issue_summary(
         raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD.")
 
     # Base query for materials
-    material_query = db.query(Material, UOM.name.label("uom_name")).join(UOM, Material.uom_id == UOM.id).filter(
+    material_query = db.query(Material, UOM.abbreviation.label("uom_name")).join(UOM, Material.uom_id == UOM.id).filter(
         Material.tenant_id == tenant_id,
         Material.site_id == site_id,
         Material.is_deleted == False
@@ -819,7 +819,7 @@ def get_department_inventory_report(
     returns_query = db.query(
         MaterialReturnItem.material_id,
         MaterialReturn.returned_from_department,
-        func.sum(MaterialReturnItem.quantity).label("total_returned")
+        func.sum(MaterialReturnItem.returned_qty).label("total_returned")
     ).join(MaterialReturn, MaterialReturnItem.return_id == MaterialReturn.id).filter(
         MaterialReturn.tenant_id == tenant_id,
         MaterialReturn.site_id == site_id,

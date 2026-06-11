@@ -12,7 +12,7 @@ import {
   ExpandLess, ExpandMore, Logout, Person, Store, Assignment,
   SwapHoriz, Undo, Security, ReceiptLong, AccountTree, Category,
   Build, ChevronLeft, RequestQuote, Business, AssignmentTurnedIn, Straighten,
-  AccountBalance
+  AccountBalance, Campaign
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
@@ -101,6 +101,7 @@ export default function Layout() {
   const [anchorEl, setAnchorEl] = useState(null);
   const [alertCount, setAlertCount] = useState(0);
   const [activeAlerts, setActiveAlerts] = useState([]);
+  const [showMarquee, setShowMarquee] = useState(() => localStorage.getItem('hideMarquee') !== 'true');
   const { user, tenant, roles, sites, activeSite, activeSiteId, setActiveSiteId, logout, hasPermission } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -149,6 +150,16 @@ export default function Layout() {
       setOpenMenus(prev => ({ ...prev, ...autoExpandedMenus }));
     }
   }, [visibleMenuItems]);
+
+  const handleToggleMarquee = () => {
+    const newState = !showMarquee;
+    setShowMarquee(newState);
+    if (!newState) {
+      localStorage.setItem('hideMarquee', 'true');
+    } else {
+      localStorage.removeItem('hideMarquee');
+    }
+  };
 
   const handleToggle = (text) => {
     setOpenMenus(prev => ({ ...prev, [text]: !prev[text] }));
@@ -324,6 +335,19 @@ export default function Layout() {
               </Typography>
             </Box>
 
+            {activeAlerts.length > 0 && (
+              <Tooltip title={showMarquee ? "Hide Alerts Banner" : "Show Alerts Banner"}>
+                <IconButton onClick={handleToggleMarquee} sx={{ 
+                  color: showMarquee ? '#EF4444' : '#94A3B8',
+                  bgcolor: showMarquee ? '#FEF2F2' : 'transparent',
+                  '&:hover': { bgcolor: showMarquee ? '#FEE2E2' : '#F1F5F9' },
+                  mr: 1,
+                  transition: 'all 0.2s'
+                }}>
+                  <Campaign />
+                </IconButton>
+              </Tooltip>
+            )}
             <Tooltip title="Notifications">
               <IconButton onClick={() => navigate('/alerts')} sx={{ color: '#64748B' }}>
                 <Badge badgeContent={alertCount} color="error" max={99}>
@@ -354,7 +378,7 @@ export default function Layout() {
         </AppBar>
 
         {/* Marquee Alert Banner */}
-        {activeAlerts.length > 0 && (
+        {activeAlerts.length > 0 && showMarquee && (
           <Box sx={{
             width: '100%',
             bgcolor: '#FEF2F2',
@@ -385,7 +409,7 @@ export default function Layout() {
                     <Box key={`${alert.id}-${copyIdx}`} component="span" sx={{ mx: 4, display: 'inline-flex', alignItems: 'center', gap: 1 }}>
                       <Typography variant="body2" sx={{ fontWeight: 700, whiteSpace: 'nowrap' }}>⚠️ {alert.title}:</Typography>
                       <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>{alert.message}</Typography>
-                      {(alert.reference_type === 'Indent' || alert.reference_type === 'PurchaseOrder' || alert.reference_type === 'PurchaseRequest') && (
+                      {(alert.reference_type === 'Indent' || alert.reference_type === 'PurchaseOrder' || alert.reference_type === 'PurchaseRequest' || alert.reference_type === 'GateEntry') && (
                         <Button 
                           size="small"
                           variant="contained"
@@ -414,6 +438,8 @@ export default function Layout() {
                               navigate('/purchase-orders', { state: { openPOId: alert.reference_id } });
                             } else if (alert.reference_type === 'PurchaseRequest') {
                               navigate('/purchase-requests', { state: { openPRId: alert.reference_id } });
+                            } else if (alert.reference_type === 'GateEntry') {
+                              navigate('/grn');
                             }
                           }}
                         >

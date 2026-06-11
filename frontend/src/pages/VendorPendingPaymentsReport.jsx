@@ -1,24 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
-  TableContainer, Chip, Grid, IconButton, Tooltip,
+  TableContainer, Chip, Grid, IconButton, Tooltip, Button,
   Collapse, TableSortLabel, TextField, InputAdornment
 } from '@mui/material';
-import { ExpandMore, ExpandLess, Search, People, CurrencyRupee, AccountBalanceWallet } from '@mui/icons-material';
+import { ExpandMore, ExpandLess, Search, People, CurrencyRupee, AccountBalanceWallet, Print } from '@mui/icons-material';
 import api from '../services/api';
 import { formatDate } from '../utils/dateUtils';
 
 export default function VendorPendingPaymentsReport() {
   const [report, setReport] = useState({ data: [], summary: {} });
-  const [expandedVendor, setExpandedVendor] = useState(null);
-  const [vendorInvoices, setVendorInvoices] = useState([]);
+  const [vendorInvoices, setVendorInvoices] = useState({});
   const [search, setSearch] = useState('');
   const [sortConfig, setSortConfig] = useState({ key: 'vendor_name', direction: 'asc' });
   const [loadingDetails, setLoadingDetails] = useState(false);
 
   useEffect(() => {
     api.get('/api/finance/reports/vendor-pending-payments')
-      .then(r => setReport(r.data))
+      .then(async r => {
+        setReport(r.data);
+        const map = {};
+        await Promise.all((r.data.data || []).map(async v => {
+          try {
+            const res = await api.get(`/api/finance/reports/vendor-pending-invoices/details?vendor_id=${v.vendor_id}&report_type=pending_payments`);
+            map[v.vendor_id] = res.data;
+          } catch {
+            map[v.vendor_id] = [];
+          }
+        }));
+        setVendorInvoices(map);
+      })
       .catch(() => {});
   }, []);
 
@@ -28,19 +39,7 @@ export default function VendorPendingPaymentsReport() {
     setSortConfig({ key, direction });
   };
 
-  const handleExpand = async (vendorId) => {
-    if (expandedVendor === vendorId) {
-      setExpandedVendor(null);
-      return;
-    }
-    setLoadingDetails(true);
-    try {
-      const r = await api.get(`/api/finance/reports/vendor-pending-invoices/details?vendor_id=${vendorId}&report_type=pending_payments`);
-      setVendorInvoices(r.data);
-      setExpandedVendor(vendorId);
-    } catch { }
-    setLoadingDetails(false);
-  };
+
 
   const filteredData = report.data
     .filter(v => {
@@ -67,9 +66,19 @@ export default function VendorPendingPaymentsReport() {
           <Typography variant="h5" sx={{ fontWeight: 700 }}>Vendor-wise Pending Payments</Typography>
           <Typography variant="body2" sx={{ color: '#64748B' }}>Outstanding payment amounts for each vendor based on invoices sent for payment</Typography>
         </Box>
-        {report.generated_at && (
-          <Typography variant="caption" sx={{ color: '#94A3B8', alignSelf: 'flex-end' }}>Generated: {report.generated_at}</Typography>
-        )}
+        <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 2, flexWrap: 'wrap' }}>
+          {report.generated_at && (
+            <Typography variant="caption" sx={{ color: '#94A3B8' }}>Generated: {report.generated_at}</Typography>
+          )}
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<Print />}
+            onClick={() => window.print()}
+            sx={{ textTransform: 'none', fontWeight: 600, borderRadius: 2 }}
+            className="no-print"
+          >Print / PDF</Button>
+        </Box>
       </Box>
 
       {/* Summary Cards */}
@@ -110,7 +119,7 @@ export default function VendorPendingPaymentsReport() {
       </Grid>
 
       {/* Search */}
-      <Card sx={{ mb: 3, p: 2 }}>
+      <Card sx={{ mb: 3, p: 2 }} className="no-print">
         <TextField
           placeholder="Search vendors..."
           size="small"
@@ -127,7 +136,6 @@ export default function VendorPendingPaymentsReport() {
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell width={40} />
                 <TableCell><TableSortLabel active={sortConfig.key === 'vendor_code'} direction={sortConfig.key === 'vendor_code' ? sortConfig.direction : 'asc'} onClick={() => handleSort('vendor_code')}>Vendor Code</TableSortLabel></TableCell>
                 <TableCell><TableSortLabel active={sortConfig.key === 'vendor_name'} direction={sortConfig.key === 'vendor_name' ? sortConfig.direction : 'asc'} onClick={() => handleSort('vendor_name')}>Vendor Name</TableSortLabel></TableCell>
                 <TableCell align="right"><TableSortLabel active={sortConfig.key === 'invoice_count'} direction={sortConfig.key === 'invoice_count' ? sortConfig.direction : 'asc'} onClick={() => handleSort('invoice_count')}>Unpaid Invoices</TableSortLabel></TableCell>
@@ -137,56 +145,49 @@ export default function VendorPendingPaymentsReport() {
             <TableBody>
               {filteredData.map(v => (
                 <React.Fragment key={v.vendor_id}>
-                  <TableRow hover sx={{ cursor: 'pointer' }} onClick={() => handleExpand(v.vendor_id)}>
-                    <TableCell>
-                      <IconButton size="small">
-                        {expandedVendor === v.vendor_id ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />}
-                      </IconButton>
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 600, fontSize: '0.8rem', color: '#2563EB' }}>{v.vendor_code}</TableCell>
-                    <TableCell sx={{ fontSize: '0.8rem' }}>{v.vendor_name}</TableCell>
+                  <TableRow sx={{ background: '#F1F5F9' }}>
+                    <TableCell sx={{ fontWeight: 600, fontSize: '0.8rem', color: '#2563EB', py: 1.5 }}>{v.vendor_code}</TableCell>
+                    <TableCell sx={{ fontSize: '0.8rem', fontWeight: 600, color: '#1E293B' }}>{v.vendor_name}</TableCell>
                     <TableCell align="right">
                       <Chip label={v.invoice_count} size="small" color="error" sx={{ fontWeight: 600, fontSize: '0.75rem' }} />
                     </TableCell>
                     <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.85rem', color: '#DC2626' }}>₹{v.total_outstanding?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell colSpan={5} sx={{ p: 0, border: expandedVendor === v.vendor_id ? undefined : 'none' }}>
-                      <Collapse in={expandedVendor === v.vendor_id} timeout="auto" unmountOnExit>
-                        <Box sx={{ p: 2, background: '#F8FAFC' }}>
+                    <TableCell colSpan={4} sx={{ p: 0, pb: 2, borderBottom: '2px solid #E2E8F0' }}>
+                        <Box sx={{ p: 2, pt: 1, background: '#FFFFFF' }}>
                           <Table size="small">
                             <TableHead>
                               <TableRow>
-                                <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Ref #</TableCell>
-                                <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Invoice No.</TableCell>
-                                <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Date</TableCell>
-                                <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Payment Status</TableCell>
-                                <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Amount (₹)</TableCell>
+                                <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem', color: '#64748B' }}>Ref #</TableCell>
+                                <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem', color: '#64748B' }}>Invoice No.</TableCell>
+                                <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem', color: '#64748B' }}>Date</TableCell>
+                                <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem', color: '#64748B' }}>Payment Status</TableCell>
+                                <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', color: '#64748B' }}>Amount (₹)</TableCell>
                               </TableRow>
                             </TableHead>
                             <TableBody>
-                              {vendorInvoices.map(inv => (
+                              {(vendorInvoices[v.vendor_id] || []).map(inv => (
                                 <TableRow key={inv.id}>
-                                  <TableCell sx={{ fontSize: '0.75rem', color: '#64748B' }}>{inv.code}</TableCell>
-                                  <TableCell sx={{ fontSize: '0.75rem', fontWeight: 600 }}>{inv.invoice_number}</TableCell>
-                                  <TableCell sx={{ fontSize: '0.75rem' }}>{formatDate(inv.invoice_date)}</TableCell>
-                                  <TableCell><Chip label={inv.payment_status} size="small" color={paymentStatusColor[inv.payment_status] || 'default'} sx={{ fontSize: '0.65rem' }} /></TableCell>
-                                  <TableCell align="right" sx={{ fontSize: '0.75rem', fontWeight: 600 }}>₹{inv.total_amount?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</TableCell>
+                                  <TableCell sx={{ fontSize: '0.75rem', color: '#94A3B8' }}>{inv.code}</TableCell>
+                                  <TableCell sx={{ fontSize: '0.75rem', fontWeight: 600, color: '#334155' }}>{inv.invoice_number}</TableCell>
+                                  <TableCell sx={{ fontSize: '0.75rem', color: '#475569' }}>{formatDate(inv.invoice_date)}</TableCell>
+                                  <TableCell><Chip label={inv.payment_status} size="small" color={paymentStatusColor[inv.payment_status] || 'default'} sx={{ fontSize: '0.65rem', height: 20 }} /></TableCell>
+                                  <TableCell align="right" sx={{ fontSize: '0.75rem', fontWeight: 600, color: '#334155' }}>₹{inv.total_amount?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</TableCell>
                                 </TableRow>
                               ))}
-                              {vendorInvoices.length === 0 && (
+                              {(!vendorInvoices[v.vendor_id] || vendorInvoices[v.vendor_id].length === 0) && (
                                 <TableRow><TableCell colSpan={5} align="center" sx={{ py: 2, color: '#94A3B8', fontSize: '0.75rem' }}>No invoices found</TableCell></TableRow>
                               )}
                             </TableBody>
                           </Table>
                         </Box>
-                      </Collapse>
                     </TableCell>
                   </TableRow>
                 </React.Fragment>
               ))}
               {filteredData.length === 0 && (
-                <TableRow><TableCell colSpan={5} align="center" sx={{ py: 4, color: '#64748B' }}>No pending payments found</TableCell></TableRow>
+                <TableRow><TableCell colSpan={4} align="center" sx={{ py: 4, color: '#64748B' }}>No pending payments found</TableCell></TableRow>
               )}
             </TableBody>
           </Table>

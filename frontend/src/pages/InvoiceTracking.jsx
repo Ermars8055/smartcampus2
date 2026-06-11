@@ -35,7 +35,7 @@ export default function InvoiceTracking() {
 
   const load = () => {
     // Fetch all Approved invoices (this covers Pending, Sent for Payment, and Paid payment statuses)
-    api.get('/api/invoices').then(r => {
+    api.get('/api/finance/invoices').then(r => {
       setInvoices(r.data.filter(i => i.status === 'Approved'));
     }).catch(() => {});
   };
@@ -230,7 +230,7 @@ export default function InvoiceTracking() {
       </Card>
 
       {/* Bulk Action Bars */}
-      {currentTab === 'received_hard_copy' && selected.length > 0 && (
+      {currentTab === 'received_hard_copy' && selected.length > 0 && hasAction('finance_invoices', 'can_send_for_payment') && (
         <Card sx={{ mb: 2, p: 2, background: 'linear-gradient(135deg, #F0FDF4, #DCFCE7)', border: '1px solid #86EFAC' }}>
           <Box sx={{ display: 'flex', gap: 3, alignItems: 'center', flexWrap: 'wrap' }}>
             <TextField
@@ -276,7 +276,7 @@ export default function InvoiceTracking() {
         </Card>
       )}
 
-      {currentTab === 'sent_for_payment' && selected.length > 0 && (
+      {currentTab === 'sent_for_payment' && selected.length > 0 && hasAction('finance_invoices', 'can_mark_paid') && (
         <Card sx={{ mb: 2, p: 2, background: 'linear-gradient(135deg, #EFF6FF, #DBEAFE)', border: '1px solid #93C5FD' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
             <Typography sx={{ fontWeight: 600 }}>
@@ -333,40 +333,44 @@ export default function InvoiceTracking() {
                   {currentTab === 'paid' && <TableCell sx={{ fontSize: '0.8rem', fontWeight: 600 }}>{i.payment_reference || '-'}</TableCell>}
                   {currentTab === 'paid' && <TableCell sx={{ fontSize: '0.8rem' }}>{formatDate(i.payment_completed_at)}</TableCell>}
                   <TableCell align="center" onClick={(e) => e.stopPropagation()} sx={{ whiteSpace: 'nowrap' }}>
-                    {hasAction('finance_invoices', 'update') && (
-                      <>
-                        <Tooltip title="Send Hard Copy">
-                          <span>
-                            <IconButton size="small" color="primary" disabled={!(i.payment_status === 'Pending' && !i.hard_copy_sent)} onClick={() => setSendHardCopyDialog(i)}>
-                              <Outbox fontSize="small" />
-                            </IconButton>
-                          </span>
-                        </Tooltip>
+                    {hasAction('finance_invoices', 'can_send_hard_copy') && (
+                      <Tooltip title="Send Hard Copy">
+                        <span>
+                          <IconButton size="small" color="primary" disabled={!(i.payment_status === 'Pending' && !i.hard_copy_sent)} onClick={() => setSendHardCopyDialog(i)}>
+                            <Outbox fontSize="small" />
+                          </IconButton>
+                        </span>
+                      </Tooltip>
+                    )}
 
-                        <Tooltip title="Mark Hard Copy Received">
-                          <span>
-                            <IconButton size="small" color="success" disabled={!(i.payment_status === 'Pending' && i.hard_copy_sent && !i.hard_copy_received)} onClick={() => { setRemarkDialog(i); setRemarks(''); }}>
-                              <CheckCircle fontSize="small" />
-                            </IconButton>
-                          </span>
-                        </Tooltip>
+                    {hasAction('finance_invoices', 'can_receive_hard_copy') && (
+                      <Tooltip title="Mark Hard Copy Received">
+                        <span>
+                          <IconButton size="small" color="success" disabled={!(i.payment_status === 'Pending' && i.hard_copy_sent && !i.hard_copy_received)} onClick={() => { setRemarkDialog(i); setRemarks(''); }}>
+                            <CheckCircle fontSize="small" />
+                          </IconButton>
+                        </span>
+                      </Tooltip>
+                    )}
 
-                        <Tooltip title="Send for Payment">
-                          <span>
-                            <IconButton size="small" color="primary" disabled={!(i.payment_status === 'Pending' && i.hard_copy_received)} onClick={() => { setSingleSendDialog(i); setSingleTargetAmount(''); }}>
-                              <Send fontSize="small" />
-                            </IconButton>
-                          </span>
-                        </Tooltip>
+                    {hasAction('finance_invoices', 'can_send_for_payment') && (
+                      <Tooltip title="Send for Payment">
+                        <span>
+                          <IconButton size="small" color="primary" disabled={!(i.payment_status === 'Pending' && i.hard_copy_received)} onClick={() => { setSingleSendDialog(i); setSingleTargetAmount(''); }}>
+                            <Send fontSize="small" />
+                          </IconButton>
+                        </span>
+                      </Tooltip>
+                    )}
 
-                        <Tooltip title="Mark as Paid">
-                          <span>
-                            <IconButton size="small" color="success" disabled={i.payment_status !== 'Sent for Payment'} onClick={() => setSinglePaidDialog(i)}>
-                              <Payment fontSize="small" />
-                            </IconButton>
-                          </span>
-                        </Tooltip>
-                      </>
+                    {hasAction('finance_invoices', 'can_mark_paid') && (
+                      <Tooltip title="Mark as Paid">
+                        <span>
+                          <IconButton size="small" color="success" disabled={i.payment_status !== 'Sent for Payment'} onClick={() => setSinglePaidDialog(i)}>
+                            <Payment fontSize="small" />
+                          </IconButton>
+                        </span>
+                      </Tooltip>
                     )}
                   </TableCell>
                 </TableRow>

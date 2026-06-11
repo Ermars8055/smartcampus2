@@ -997,7 +997,7 @@ class IssueItemOut(IssueItemBase):
 
 class IssueBase(BaseModel):
     warehouse_id: Optional[int] = None
-    project_id: int
+    project_id: Optional[int] = None
     indent_id: Optional[int] = None
     issued_to_room_id: Optional[int] = None
     building_id: Optional[int] = None
@@ -1291,6 +1291,7 @@ class IndentItemOut(IndentItemBase):
 
 class IndentBase(BaseModel):
     institution_id: Optional[int] = None
+    complaint_id: Optional[int] = None
     room_id: Optional[int] = None
     building_id: Optional[int] = None
     floor: Optional[str] = None
@@ -1311,6 +1312,7 @@ class IndentOut(BaseModel):
     indent_number: str
     requester_id: int
     institution_id: Optional[int] = None
+    complaint_id: Optional[int] = None
     room_id: Optional[int] = None
     floor: Optional[str] = None
     location: Optional[str] = None
@@ -1702,16 +1704,39 @@ class ComplaintUpdate(BaseModel):
     resolution_remarks: Optional[str] = None
     resolution_image_urls: List[str] = []
 
+# New workflow-specific schemas
+class ComplaintAssign(BaseModel):
+    assigned_to_id: int
+
+class ComplaintInspect(BaseModel):
+    material_required: bool = False
+
+class ComplaintResolve(BaseModel):
+    resolution_remarks: Optional[str] = None
+    resolution_image_urls: List[str] = []
+
+class ComplaintVerify(BaseModel):
+    is_accepted: bool
+    rejection_remarks: Optional[str] = None
+
 class ComplaintOut(ComplaintBase):
     id: int
     created_at: datetime
     updated_at: datetime
     resolved_at: Optional[datetime] = None
+    material_required: bool = False
+    verified_at: Optional[datetime] = None
+    rejection_remarks: Optional[str] = None
     building_name: Optional[str] = None
     room_name: Optional[str] = None
+    floor_id: Optional[int] = None
+    floor_name: Optional[str] = None
+    institution_id: Optional[int] = None
+    institution_name: Optional[str] = None
     assigned_to_name: Optional[str] = None
     created_by_name: Optional[str] = None
     resolved_by_name: Optional[str] = None
+    verified_by_name: Optional[str] = None
     images: List[ComplaintImageOut] = []
     class Config:
         from_attributes = True

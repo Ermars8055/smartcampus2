@@ -245,8 +245,14 @@ export default function MaterialIssue() {
       load();
       showMessage('Material issued successfully!', 'Success', 'success');
     } catch (err) {
-      const detail = err.response?.data?.detail || 'Error';
-      if (detail.includes('limit per month')) {
+      let detail = err.response?.data?.detail || 'Error';
+      if (Array.isArray(detail)) {
+          detail = detail.map(d => d.msg || JSON.stringify(d)).join(', ');
+      } else if (typeof detail === 'object') {
+          detail = detail.msg || JSON.stringify(detail);
+      }
+      
+      if (typeof detail === 'string' && detail.includes('limit per month')) {
         showMessage(detail, "Limit Reached", "warning");
       } else {
         showMessage(detail, "Error", "error");

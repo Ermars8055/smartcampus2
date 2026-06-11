@@ -38,3 +38,19 @@ a, button {
 .MuiTableCell-root {
   border-bottom: 1px solid #F1F5F9 !important;
 }
+
+/* Print Styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  body {
+    background: white !important;
+  }
+  
+  /* Reset margins for printing */
+  @page {
+    margin: 1cm;
+  }
+}

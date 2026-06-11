@@ -12,6 +12,7 @@ export default function ComplaintForm() {
   const fileInputRef = useRef(null);
 
   const [formData, setFormData] = useState({
+    institution_id: '',
     department_name: '',
     building_id: '',
     floor_id: '',
@@ -22,16 +23,27 @@ export default function ComplaintForm() {
     name_and_trade: ''
   });
 
-  const [departmentsList, setDepartmentsList] = useState([]);
+  const [institutions, setInstitutions] = useState([]);
   const [allDepartments, setAllDepartments] = useState([]);
   const [buildings, setBuildings] = useState([]);
   const [floors, setFloors] = useState([]);
   const [rooms, setRooms] = useState([]);
 
   useEffect(() => {
-    api.get('/api/departments/names').then(r => setDepartmentsList(r.data)).catch(() => setDepartmentsList([]));
+    api.get('/api/institutions').then(r => setInstitutions(r.data)).catch(() => setInstitutions([]));
     api.get('/api/departments').then(r => setAllDepartments(r.data)).catch(() => setAllDepartments([]));
   }, []);
+
+  const filteredDepartments = formData.institution_id 
+    ? Array.from(new Set(allDepartments.filter(d => d.institution_id === formData.institution_id).map(d => d.name)))
+    : Array.from(new Set(allDepartments.map(d => d.name)));
+
+  const handleInstitutionChange = (instId) => {
+    setFormData(prev => ({ ...prev, institution_id: instId, department_name: '', building_id: '', floor_id: '', room_id: '' }));
+    setBuildings([]);
+    setFloors([]);
+    setRooms([]);
+  };
 
   const handleDepartmentChange = (newDept) => {
     if (newDept) {
@@ -122,6 +134,8 @@ export default function ComplaintForm() {
         room_id: formData.room_id ? parseInt(formData.room_id) : null,
         image_urls: uploadedUrls
       };
+      delete payload.institution_id;
+      delete payload.floor_id; // floor_id is also not in backend schema, just in case
 
       await api.post('/api/complaints', payload);
       setSnackbar({ open: true, message: 'Complaint Raised Successfully', severity: 'success' });
@@ -148,11 +162,25 @@ export default function ComplaintForm() {
         <form onSubmit={handleSubmit}>
           <Typography variant="h6" sx={{ mb: 2, color: '#1E3A8A' }}>Complaint Slip Details</Typography>
           <Grid container spacing={3}>
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} sm={6} md={3}>
+              <FormControl fullWidth>
+                <InputLabel>Institution</InputLabel>
+                <Select
+                  value={formData.institution_id}
+                  label="Institution"
+                  onChange={e => handleInstitutionChange(e.target.value)}
+                >
+                  <MenuItem value="" disabled><em>Select Institution</em></MenuItem>
+                  {institutions.map(inst => <MenuItem key={inst.id} value={inst.id}>{inst.name}</MenuItem>)}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
               <Autocomplete
-                options={departmentsList}
+                options={filteredDepartments}
                 value={formData.department_name || null}
                 onChange={(e, val) => handleDepartmentChange(val)}
+                disabled={!formData.institution_id}
                 renderInput={(params) => (
                   <TextField {...params} required label="Department" fullWidth />
                 )}

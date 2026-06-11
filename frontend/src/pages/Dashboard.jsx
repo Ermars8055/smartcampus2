@@ -270,7 +270,7 @@ export default function Dashboard() {
           <Card sx={{ p: 2.5, height: '100%' }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#1E293B' }}>
-                Building Spend (₹)
+                Institution Spend (₹)
               </Typography>
               <Typography variant="caption" sx={{ color: '#64748B', fontStyle: 'italic' }}>*Click on any bar to drilldown</Typography>
             </Box>
@@ -505,7 +505,7 @@ export default function Dashboard() {
       {/* Drilldown Modal */}
       <Dialog open={!!drilldownBlock} onClose={() => setDrilldownBlock(null)} maxWidth="md" fullWidth>
         <DialogTitle sx={{ fontWeight: 800, color: '#1E293B', display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
-          Building Spend Details: {drilldownBlock}
+          Institution Spend Details: {drilldownBlock}
           <Chip 
             label={`${formatCurrency(drilldownData.reduce((acc, curr) => acc + curr.total_cost, 0))} Total`}
             color="primary"

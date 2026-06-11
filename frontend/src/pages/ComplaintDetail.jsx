@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Box, Typography, Paper, Grid, Divider, Chip, Button, IconButton, Dialog, DialogTitle,
-  DialogContent, DialogActions, TextField, CircularProgress, Snackbar, Alert, Table, TableBody, TableCell, TableHead, TableRow, Tooltip
+  DialogContent, DialogActions, TextField, CircularProgress, Snackbar, Alert, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Switch, FormControlLabel, Stepper, Step, StepLabel, Select, MenuItem, FormControl, InputLabel
 } from '@mui/material';
-import { ArrowBack, CheckCircle, Assignment, PhotoCamera, Close, AddShoppingCart } from '@mui/icons-material';
+import { ArrowBack, CheckCircle, Assignment, PhotoCamera, Close, AddShoppingCart, Build, Search, VerifiedUser, Cancel } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import dayjs from 'dayjs';
+
+const COMPLAINT_STEPS = ['Registered', 'Assigned', 'Under Inspection', 'In Progress', 'Resolved', 'Closed'];
 
 export default function ComplaintDetail() {
   const { id } = useParams();
@@ -14,17 +16,32 @@ export default function ComplaintDetail() {
   const fileInputRef = useRef(null);
 
   const [complaint, setComplaint] = useState(null);
+  const [materialIndents, setMaterialIndents] = useState([]);
   const [materialIssues, setMaterialIssues] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  // Dialog States
+  const [assignDialogOpen, setAssignDialogOpen] = useState(false);
   const [resolveDialogOpen, setResolveDialogOpen] = useState(false);
+  const [verifyDialogOpen, setVerifyDialogOpen] = useState(false);
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [inspectDialogOpen, setInspectDialogOpen] = useState(false);
+
+  // Form States
+  const [technicians, setTechnicians] = useState([]);
+  const [selectedTech, setSelectedTech] = useState('');
+  const [materialRequired, setMaterialRequired] = useState(false);
   const [resolutionRemarks, setResolutionRemarks] = useState('');
+  const [rejectionRemarks, setRejectionRemarks] = useState('');
   const [resolutionImages, setResolutionImages] = useState([]);
   const [resolutionPreviewUrls, setResolutionPreviewUrls] = useState([]);
-  const [resolving, setResolving] = useState(false);
+  
+  const [actionLoading, setActionLoading] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
 
   useEffect(() => {
     fetchComplaintData();
+    fetchTechnicians();
   }, [id]);
 
   const fetchComplaintData = async () => {
@@ -33,25 +50,29 @@ export default function ComplaintDetail() {
       const res = await api.get(`/api/complaints/${id}`);
       setComplaint(res.data);
       
-      // Fetch material issues linked to this complaint
-      const issuesRes = await api.get('/api/issues', { params: { complaint_id: id } });
-      // In case the API doesn't support complaint_id filter directly yet, we can filter locally or assume it works
-      // We will filter locally if needed, but assuming backend can handle it if we modify issues list endpoint or we just show a placeholder
-      setMaterialIssues(issuesRes.data.filter(i => i.complaint_id === parseInt(id)));
+      const indentsRes = await api.get('/api/indents', { params: { complaint_id: id } });
+      const fetchedIndents = indentsRes.data || [];
+      setMaterialIndents(fetchedIndents);
+
+      const indentIds = fetchedIndents.map(i => i.id);
+      
+      const issuesRes = await api.get('/api/issues');
+      // If MaterialIssue has complaint_id we use it, otherwise match via indent_id
+      setMaterialIssues(issuesRes.data.filter(i => i.complaint_id === parseInt(id) || indentIds.includes(i.indent_id)));
     } catch (error) {
       console.error('Failed to fetch details', error);
+      setSnackbar({ open: true, message: 'Failed to fetch complaint details', severity: 'error' });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleStatusChange = async (newStatus) => {
+  const fetchTechnicians = async () => {
     try {
-      await api.put(`/api/complaints/${id}`, { status: newStatus });
-      fetchComplaintData();
-      setSnackbar({ open: true, message: `Status updated to ${newStatus}`, severity: 'success' });
+      const res = await api.get('/api/admin/users');
+      setTechnicians(res.data); // Assuming all users can be assigned for now
     } catch (error) {
-      setSnackbar({ open: true, message: 'Failed to update status', severity: 'error' });
+      console.error('Failed to fetch technicians', error);
     }
   };
 
@@ -59,7 +80,6 @@ export default function ComplaintDetail() {
     if (e.target.files) {
       const filesArray = Array.from(e.target.files);
       setResolutionImages(prev => [...prev, ...filesArray]);
-
       const urls = filesArray.map(f => URL.createObjectURL(f));
       setResolutionPreviewUrls(prev => [...prev, ...urls]);
     }
@@ -70,8 +90,56 @@ export default function ComplaintDetail() {
     setResolutionPreviewUrls(prev => prev.filter((_, i) => i !== index));
   };
 
+  // ─── Actions ─────────────────────────────────────────────────────────────
+
+  const handleAssign = async () => {
+    setActionLoading(true);
+    try {
+      await api.post(`/api/complaints/${id}/assign`, { assigned_to_id: selectedTech });
+      setSnackbar({ open: true, message: 'Technician assigned successfully', severity: 'success' });
+      setAssignDialogOpen(false);
+      fetchComplaintData();
+    } catch (error) {
+      setSnackbar({ open: true, message: error.response?.data?.detail || 'Failed to assign technician', severity: 'error' });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleInspect = async () => {
+    setActionLoading(true);
+    try {
+      await api.post(`/api/complaints/${id}/inspect`, { material_required: materialRequired });
+      setSnackbar({ open: true, message: 'Inspection completed', severity: 'success' });
+      setInspectDialogOpen(false);
+      
+      if (materialRequired) {
+        navigate(`/indents?new=true&complaint_id=${id}`);
+      } else {
+        fetchComplaintData();
+      }
+    } catch (error) {
+      setSnackbar({ open: true, message: error.response?.data?.detail || 'Failed to complete inspection', severity: 'error' });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleStartRepair = async () => {
+    setActionLoading(true);
+    try {
+      await api.post(`/api/complaints/${id}/start-repair`);
+      setSnackbar({ open: true, message: 'Repair started', severity: 'success' });
+      fetchComplaintData();
+    } catch (error) {
+      setSnackbar({ open: true, message: error.response?.data?.detail || 'Failed to start repair', severity: 'error' });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const handleResolve = async () => {
-    setResolving(true);
+    setActionLoading(true);
     try {
       const uploadedUrls = [];
       for (const file of resolutionImages) {
@@ -92,9 +160,27 @@ export default function ComplaintDetail() {
       setResolveDialogOpen(false);
       fetchComplaintData();
     } catch (error) {
-      setSnackbar({ open: true, message: 'Failed to resolve complaint', severity: 'error' });
+      setSnackbar({ open: true, message: error.response?.data?.detail || 'Failed to resolve complaint', severity: 'error' });
     } finally {
-      setResolving(false);
+      setActionLoading(false);
+    }
+  };
+
+  const handleVerify = async (isAccepted) => {
+    setActionLoading(true);
+    try {
+      await api.post(`/api/complaints/${id}/verify`, {
+        is_accepted: isAccepted,
+        rejection_remarks: isAccepted ? null : rejectionRemarks
+      });
+      setSnackbar({ open: true, message: isAccepted ? 'Complaint Closed' : 'Complaint Reopened', severity: 'success' });
+      setVerifyDialogOpen(false);
+      setRejectDialogOpen(false);
+      fetchComplaintData();
+    } catch (error) {
+      setSnackbar({ open: true, message: error.response?.data?.detail || 'Verification failed', severity: 'error' });
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -103,10 +189,28 @@ export default function ComplaintDetail() {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'Open': return 'error';
+      case 'Registered': case 'Open': return 'primary';
+      case 'Assigned': return 'secondary';
+      case 'Under Inspection': return 'info';
+      case 'Material Pending': return 'warning';
       case 'In Progress': return 'warning';
       case 'Resolved': return 'success';
+      case 'Closed': return 'default';
+      case 'Reopened': return 'error';
+      case 'Rejected': return 'error';
       default: return 'default';
+    }
+  };
+
+  const getActiveStep = () => {
+    switch(complaint.status) {
+      case 'Registered': case 'Open': return 0;
+      case 'Assigned': case 'Reopened': return 1;
+      case 'Under Inspection': return 2;
+      case 'Material Pending': case 'In Progress': return 3;
+      case 'Resolved': return 4;
+      case 'Closed': return 5;
+      default: return 0;
     }
   };
 
@@ -114,27 +218,74 @@ export default function ComplaintDetail() {
   const postRepairImages = complaint.images.filter(img => img.is_resolution_image);
 
   return (
-    <Box sx={{ maxWidth: 1000, mx: 'auto' }}>
+    <Box sx={{ maxWidth: 1000, mx: 'auto', pb: 5 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <IconButton onClick={() => navigate('/complaints')}><ArrowBack /></IconButton>
           <Typography variant="h5" sx={{ fontWeight: 600 }}>Complaint Details</Typography>
         </Box>
-        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-          <Chip label={complaint.status} color={getStatusColor(complaint.status)} sx={{ fontWeight: 'bold' }} />
-          {complaint.status === 'Open' && (
-            <Button variant="outlined" onClick={() => handleStatusChange('In Progress')}>Mark In Progress</Button>
-          )}
-          {complaint.status !== 'Resolved' && (
-            <Button variant="contained" color="success" startIcon={<CheckCircle />} onClick={() => setResolveDialogOpen(true)}>
-              Resolve Complaint
-            </Button>
-          )}
-        </Box>
+        <Chip label={complaint.status} color={getStatusColor(complaint.status)} sx={{ fontWeight: 'bold' }} />
       </Box>
+
+      {/* Progress Stepper */}
+      <Paper sx={{ p: 3, mb: 4, bgcolor: '#F8FAFC' }}>
+        <Stepper activeStep={getActiveStep()} alternativeLabel>
+          {COMPLAINT_STEPS.map((label) => (
+            <Step key={label}>
+              <StepLabel>{label}</StepLabel>
+            </Step>
+          ))}
+        </Stepper>
+      </Paper>
 
       <Grid container spacing={3}>
         <Grid item xs={12} md={8}>
+          {/* Main Action Bar */}
+          <Paper sx={{ p: 2, mb: 3, display: 'flex', gap: 2, alignItems: 'center', bgcolor: '#EFF6FF', border: '1px solid #BFDBFE' }}>
+            <Typography variant="subtitle2" sx={{ color: '#1E3A8A', flexGrow: 1 }}>
+              Next Action:
+            </Typography>
+
+            {(complaint.status === 'Registered' || complaint.status === 'Open' || complaint.status === 'Reopened') && (
+              <Button variant="contained" color="primary" startIcon={<Assignment />} onClick={() => setAssignDialogOpen(true)}>
+                Assign Technician
+              </Button>
+            )}
+
+            {complaint.status === 'Assigned' && (
+              <Button variant="contained" color="info" startIcon={<Search />} onClick={() => setInspectDialogOpen(true)}>
+                Start Inspection
+              </Button>
+            )}
+
+            {complaint.status === 'Material Pending' && (
+              <Button variant="contained" color="warning" startIcon={<Build />} onClick={handleStartRepair}>
+                Material Procured - Start Repair
+              </Button>
+            )}
+
+            {(complaint.status === 'In Progress' || (complaint.status === 'Open' && complaint.assigned_to_id)) && (
+              <Button variant="contained" color="success" startIcon={<CheckCircle />} onClick={() => setResolveDialogOpen(true)}>
+                Resolve Complaint
+              </Button>
+            )}
+
+            {complaint.status === 'Resolved' && (
+              <>
+                <Button variant="contained" color="success" startIcon={<VerifiedUser />} onClick={() => setVerifyDialogOpen(true)}>
+                  Verify & Close
+                </Button>
+                <Button variant="outlined" color="error" startIcon={<Cancel />} onClick={() => setRejectDialogOpen(true)}>
+                  Reject Resolution
+                </Button>
+              </>
+            )}
+            
+            {complaint.status === 'Closed' && (
+              <Typography variant="body2" color="textSecondary">Complaint is closed.</Typography>
+            )}
+          </Paper>
+
           <Paper sx={{ p: 3, mb: 3 }}>
             <Typography variant="h6" sx={{ color: '#1E3A8A', mb: 2 }}>Details</Typography>
             <Grid container spacing={2}>
@@ -151,11 +302,15 @@ export default function ComplaintDetail() {
                 <Typography variant="body1">{complaint.building_name || complaint.location || complaint.department_name || '-'}</Typography>
               </Grid>
               
-              <Grid item xs={12}>
+              <Grid item xs={12} sm={6}>
                 <Typography variant="caption" color="textSecondary">Nature of Complaint</Typography>
                 <Typography variant="body1">{complaint.nature_of_complaint || '-'}</Typography>
               </Grid>
-              
+              <Grid item xs={12} sm={6}>
+                <Typography variant="caption" color="textSecondary">Assigned Technician</Typography>
+                <Typography variant="body1" fontWeight={500}>{complaint.assigned_to_name || 'Unassigned'}</Typography>
+              </Grid>
+
               <Grid item xs={12}>
                 <Typography variant="caption" color="textSecondary">Individual Detailed</Typography>
                 <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>{complaint.individual_detailed || '-'}</Typography>
@@ -178,7 +333,7 @@ export default function ComplaintDetail() {
             </Paper>
           )}
 
-          {complaint.status === 'Resolved' && (
+          {(complaint.status === 'Resolved' || complaint.status === 'Closed' || complaint.status === 'Reopened') && complaint.resolution_remarks && (
             <Paper sx={{ p: 3, mb: 3, bgcolor: '#F0FDF4', border: '1px solid #BBF7D0' }}>
               <Typography variant="h6" sx={{ color: '#166534', mb: 2 }}>Resolution Details</Typography>
               <Typography variant="caption" color="textSecondary">Resolved By: {complaint.resolved_by_name} on {complaint.resolved_at ? dayjs(complaint.resolved_at).format('DD MMM YYYY HH:mm') : '-'}</Typography>
@@ -197,44 +352,129 @@ export default function ComplaintDetail() {
               )}
             </Paper>
           )}
+
+          {complaint.rejection_remarks && (
+            <Paper sx={{ p: 3, mb: 3, bgcolor: '#FEF2F2', border: '1px solid #FECACA' }}>
+              <Typography variant="h6" sx={{ color: '#991B1B', mb: 1 }}>Rejection Remarks</Typography>
+              <Typography variant="body2">{complaint.rejection_remarks}</Typography>
+            </Paper>
+          )}
         </Grid>
 
         <Grid item xs={12} md={4}>
+          {/* Material Indents */}
           <Paper sx={{ p: 3, mb: 3 }}>
              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-               <Typography variant="h6" sx={{ color: '#1E3A8A' }}>Materials Issued</Typography>
-               <Tooltip title="Issue Material">
-                 <IconButton color="primary" onClick={() => navigate(`/issues/new?complaint_id=${id}`)}>
-                    <AddShoppingCart />
+               <Typography variant="h6" sx={{ color: '#1E3A8A' }}>Material Indents</Typography>
+               <Tooltip title="Create Indent">
+                 <IconButton color="primary" onClick={() => navigate(`/indents?new=true&complaint_id=${id}`)}>
+                    <Assignment />
                  </IconButton>
                </Tooltip>
              </Box>
-             {materialIssues.length === 0 ? (
-               <Typography variant="body2" color="textSecondary">No materials issued for this complaint.</Typography>
+             {materialIndents.length === 0 ? (
+               <Typography variant="body2" color="textSecondary">No indents created for this complaint.</Typography>
              ) : (
                <Table size="small">
                  <TableHead>
                    <TableRow>
-                     <TableCell>Issue No</TableCell>
+                     <TableCell>Indent No</TableCell>
                      <TableCell>Status</TableCell>
                    </TableRow>
                  </TableHead>
                  <TableBody>
-                   {materialIssues.map((issue) => (
-                     <TableRow key={issue.id} hover sx={{ cursor: 'pointer' }} onClick={() => navigate(`/issues/${issue.id}`)}>
-                       <TableCell>{issue.issue_number}</TableCell>
-                       <TableCell><Chip size="small" label={issue.status} color={issue.status === 'Issued' ? 'success' : 'default'} /></TableCell>
+                   {materialIndents.map((indent) => (
+                     <TableRow key={indent.id} hover sx={{ cursor: 'pointer' }} onClick={() => navigate('/indents')}>
+                       <TableCell>{indent.indent_number}</TableCell>
+                       <TableCell><Chip size="small" label={indent.status} color={indent.status === 'Approved' ? 'success' : indent.status.includes('Issued') ? 'primary' : 'warning'} /></TableCell>
                      </TableRow>
                    ))}
                  </TableBody>
                </Table>
              )}
           </Paper>
+
+          {/* Materials Issued */}
+          <Paper sx={{ p: 3, mb: 3 }}>
+             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+               <Typography variant="h6" sx={{ color: '#1E3A8A' }}>Materials Issued</Typography>
+             </Box>
+             {materialIssues.length === 0 ? (
+               <Typography variant="body2" color="textSecondary">No materials issued for this complaint.</Typography>
+             ) : (
+               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                 {materialIssues.map((issue) => (
+                   <Paper key={issue.id} variant="outlined" sx={{ p: 2 }}>
+                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                       <Typography variant="subtitle2" fontWeight="bold">{issue.issue_number}</Typography>
+                       <Chip size="small" label={issue.status} color={issue.status === 'Completed' ? 'success' : 'default'} />
+                     </Box>
+                     <Divider sx={{ my: 1 }} />
+                     <Table size="small">
+                       <TableHead>
+                         <TableRow>
+                           <TableCell>Code</TableCell>
+                           <TableCell>Name</TableCell>
+                           <TableCell align="right">Qty</TableCell>
+                         </TableRow>
+                       </TableHead>
+                       <TableBody>
+                         {(issue.items || []).map((item, idx) => (
+                           <TableRow key={idx}>
+                             <TableCell sx={{ fontSize: '0.8rem' }}>{item.material_code}</TableCell>
+                             <TableCell sx={{ fontSize: '0.8rem' }}>{item.material_name}</TableCell>
+                             <TableCell align="right" sx={{ fontSize: '0.8rem', fontWeight: 'bold' }}>{item.quantity} {item.uom_name}</TableCell>
+                           </TableRow>
+                         ))}
+                       </TableBody>
+                     </Table>
+                   </Paper>
+                 ))}
+               </Box>
+             )}
+          </Paper>
         </Grid>
       </Grid>
 
+      {/* Dialogs */}
+      
+      {/* Assign Dialog */}
+      <Dialog open={assignDialogOpen} onClose={() => !actionLoading && setAssignDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Assign Technician</DialogTitle>
+        <DialogContent>
+          <FormControl fullWidth margin="dense" sx={{ mt: 1 }}>
+            <InputLabel>Technician</InputLabel>
+            <Select value={selectedTech} label="Technician" onChange={(e) => setSelectedTech(e.target.value)}>
+              {technicians.map((t) => (
+                <MenuItem key={t.id} value={t.id}>{t.full_name} ({t.username})</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions sx={{ p: 2, pt: 0 }}>
+          <Button onClick={() => setAssignDialogOpen(false)} disabled={actionLoading}>Cancel</Button>
+          <Button onClick={handleAssign} variant="contained" disabled={!selectedTech || actionLoading}>Assign</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Inspect Dialog */}
+      <Dialog open={inspectDialogOpen} onClose={() => !actionLoading && setInspectDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Start Inspection</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ mb: 2 }}>Have you inspected the issue? Is additional material required to fix this?</Typography>
+          <FormControlLabel
+            control={<Switch checked={materialRequired} onChange={(e) => setMaterialRequired(e.target.checked)} />}
+            label="Material Required"
+          />
+        </DialogContent>
+        <DialogActions sx={{ p: 2, pt: 0 }}>
+          <Button onClick={() => setInspectDialogOpen(false)} disabled={actionLoading}>Cancel</Button>
+          <Button onClick={handleInspect} variant="contained" color="primary" disabled={actionLoading}>Confirm Inspection</Button>
+        </DialogActions>
+      </Dialog>
+
       {/* Resolve Dialog */}
-      <Dialog open={resolveDialogOpen} onClose={() => !resolving && setResolveDialogOpen(false)} maxWidth="sm" fullWidth>
+      <Dialog open={resolveDialogOpen} onClose={() => !actionLoading && setResolveDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Resolve Complaint</DialogTitle>
         <DialogContent>
           <TextField
@@ -248,7 +488,6 @@ export default function ComplaintDetail() {
             onChange={(e) => setResolutionRemarks(e.target.value)}
             sx={{ mb: 3, mt: 1 }}
           />
-          
           <Typography variant="subtitle2" sx={{ mb: 1 }}>Upload Post-Repair Photos (Optional)</Typography>
           <Box sx={{ border: '2px dashed #CBD5E1', borderRadius: 2, p: 2, textAlign: 'center', bgcolor: '#F8FAFC', mb: 2 }}>
              <input type="file" multiple accept="image/*" style={{ display: 'none' }} ref={fileInputRef} onChange={handleResolutionImageChange} />
@@ -256,7 +495,6 @@ export default function ComplaintDetail() {
               Capture / Select Photos
             </Button>
           </Box>
-
           {resolutionPreviewUrls.length > 0 && (
             <Grid container spacing={2}>
               {resolutionPreviewUrls.map((url, idx) => (
@@ -273,10 +511,43 @@ export default function ComplaintDetail() {
           )}
         </DialogContent>
         <DialogActions sx={{ p: 2, pt: 0 }}>
-          <Button onClick={() => setResolveDialogOpen(false)} disabled={resolving}>Cancel</Button>
-          <Button onClick={handleResolve} variant="contained" color="success" disabled={resolving} startIcon={resolving ? <CircularProgress size={20} /> : <CheckCircle />}>
+          <Button onClick={() => setResolveDialogOpen(false)} disabled={actionLoading}>Cancel</Button>
+          <Button onClick={handleResolve} variant="contained" color="success" disabled={actionLoading} startIcon={actionLoading ? <CircularProgress size={20} /> : <CheckCircle />}>
             Mark Resolved
           </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Verify Dialog */}
+      <Dialog open={verifyDialogOpen} onClose={() => !actionLoading && setVerifyDialogOpen(false)}>
+        <DialogTitle>Verify Resolution</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to verify and close this complaint?</Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setVerifyDialogOpen(false)} disabled={actionLoading}>Cancel</Button>
+          <Button onClick={() => handleVerify(true)} variant="contained" color="success" disabled={actionLoading}>Verify & Close</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Reject Dialog */}
+      <Dialog open={rejectDialogOpen} onClose={() => !actionLoading && setRejectDialogOpen(false)} fullWidth maxWidth="sm">
+        <DialogTitle>Reject Resolution</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ mb: 2 }}>Please provide a reason for rejecting the resolution. This will reopen the complaint.</Typography>
+          <TextField
+            autoFocus
+            label="Rejection Remarks"
+            fullWidth
+            multiline
+            rows={3}
+            value={rejectionRemarks}
+            onChange={(e) => setRejectionRemarks(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setRejectDialogOpen(false)} disabled={actionLoading}>Cancel</Button>
+          <Button onClick={() => handleVerify(false)} variant="contained" color="error" disabled={!rejectionRemarks || actionLoading}>Reject & Reopen</Button>
         </DialogActions>
       </Dialog>
 

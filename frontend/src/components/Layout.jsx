@@ -54,7 +54,7 @@ const menuItems = [
   { text: 'Inventory', icon: <Warehouse />, path: '/inventory', resource: 'inventory' },
   {
     text: 'Maintenance', icon: <Build />, children: [
-      { text: 'Complaints', icon: <Assignment />, path: '/complaints', resource: 'dashboard' }, // Assuming dashboard permission for now or complaints
+      { text: 'Complaints', icon: <Assignment />, path: '/complaints', resource: 'complaints' },
     ]
   },
   { text: 'Intelligence', icon: <Build />, path: '/intelligence', resource: 'intelligence' },
@@ -67,6 +67,7 @@ const menuItems = [
   },
   {
     text: 'Reports', icon: <Assessment />, children: [
+      { text: 'General Reports', icon: <Assessment />, path: '/reports', resource: 'reports' },
       { text: 'Issue Summary', icon: <Assessment />, path: '/reports/issue-summary', resource: 'report_issue_summary' },
       { text: 'Rate Analysis', icon: <Assessment />, path: '/reports/rate-analysis', resource: 'report_rate_analysis' },
       { text: 'Receipt Summary', icon: <Assessment />, path: '/reports/receipt-summary', resource: 'report_receipt_summary' },
@@ -76,14 +77,14 @@ const menuItems = [
   {
     text: 'Admin', icon: <Settings />, children: [
       { text: 'Users', icon: <People />, path: '/admin/users', resource: 'admin_users' },
-      { text: 'Audit Logs', icon: <Assessment />, path: '/admin/audit-logs', resource: 'admin_users' },
-      { text: 'Approval Flows', icon: <AccountTree />, path: '/admin/approval-flows', resource: 'admin_users' },
-      { text: 'Roles', icon: <Security />, path: '/admin/roles', resource: 'admin_users' },
-      { text: 'Material Allowances', icon: <Inventory2 />, path: '/admin/material-allowances', resource: 'admin_users' },
-      { text: 'Configurations', icon: <Settings />, path: '/admin/configurations', resource: 'admin_users' }, // Using 'admin_users' as a representative for Configs based on RoleConfiguration
+      { text: 'Audit Logs', icon: <Assessment />, path: '/admin/audit-logs', resource: 'audit_logs' },
+      { text: 'Approval Flows', icon: <AccountTree />, path: '/admin/approval-flows', resource: 'approval_flows' },
+      { text: 'Roles', icon: <Security />, path: '/admin/roles', resource: 'admin_roles' },
+      { text: 'Material Allowances', icon: <Inventory2 />, path: '/admin/material-allowances', resource: 'material_allowances' },
+      { text: 'Configurations', icon: <Settings />, path: '/admin/configurations', resource: 'configurations' },
       { text: 'Projects', icon: <AccountTree />, path: '/projects', resource: 'projects' },
       { text: 'Terms & Conditions', icon: <Assignment />, path: '/terms', resource: 'terms' },
-      { text: 'Company Addresses', icon: <Business />, path: '/company-addresses', resource: 'admin_users' },
+      { text: 'Company Addresses', icon: <Business />, path: '/company-addresses', resource: 'company_addresses' },
     ]
   },
   { text: 'SaaS Admin', icon: <Security />, path: '/saas-admin', platformOnly: true },

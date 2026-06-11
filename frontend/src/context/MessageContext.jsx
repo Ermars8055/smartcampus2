@@ -40,9 +40,17 @@ export const MessageProvider = ({ children }) => {
   });
 
   const showMessage = useCallback((message, title = 'Information', severity = 'info') => {
+    let formattedMessage = message;
+    if (typeof message === 'object' && message !== null && !React.isValidElement(message)) {
+      if (Array.isArray(message)) {
+        formattedMessage = message.map(m => m.msg || JSON.stringify(m)).join(', ');
+      } else {
+        formattedMessage = message.msg || JSON.stringify(message);
+      }
+    }
     setConfig({
       title,
-      message,
+      message: formattedMessage,
       severity,
       type: 'alert',
       onConfirm: null,
@@ -52,9 +60,17 @@ export const MessageProvider = ({ children }) => {
   }, []);
 
   const showConfirm = useCallback((message, title = 'Confirmation', onConfirm, severity = 'warning') => {
+    let formattedMessage = message;
+    if (typeof message === 'object' && message !== null && !React.isValidElement(message)) {
+      if (Array.isArray(message)) {
+        formattedMessage = message.map(m => m.msg || JSON.stringify(m)).join(', ');
+      } else {
+        formattedMessage = message.msg || JSON.stringify(message);
+      }
+    }
     setConfig({
       title,
-      message,
+      message: formattedMessage,
       severity,
       type: 'confirm',
       onConfirm,

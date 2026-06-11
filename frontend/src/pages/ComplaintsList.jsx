@@ -36,9 +36,15 @@ export default function ComplaintsList() {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'Open': return 'error';
+      case 'Registered': case 'Open': return 'primary';
+      case 'Assigned': return 'secondary';
+      case 'Under Inspection': return 'info';
+      case 'Material Pending': return 'warning';
       case 'In Progress': return 'warning';
       case 'Resolved': return 'success';
+      case 'Closed': return 'default';
+      case 'Reopened': return 'error';
+      case 'Rejected': return 'error';
       default: return 'default';
     }
   };
@@ -76,9 +82,15 @@ export default function ComplaintsList() {
             onChange={(e) => setStatusFilter(e.target.value)}
           >
             <MenuItem value="">All Statuses</MenuItem>
-            <MenuItem value="Open">Open</MenuItem>
+            <MenuItem value="Registered">Registered</MenuItem>
+            <MenuItem value="Open">Open (Legacy)</MenuItem>
+            <MenuItem value="Assigned">Assigned</MenuItem>
+            <MenuItem value="Under Inspection">Under Inspection</MenuItem>
+            <MenuItem value="Material Pending">Material Pending</MenuItem>
             <MenuItem value="In Progress">In Progress</MenuItem>
             <MenuItem value="Resolved">Resolved</MenuItem>
+            <MenuItem value="Closed">Closed</MenuItem>
+            <MenuItem value="Reopened">Reopened</MenuItem>
           </Select>
         </FormControl>
       </Paper>

@@ -16,7 +16,7 @@ router = APIRouter(prefix="/api/company-addresses", tags=["Company Addresses"])
 def list_company_addresses(
     address_type: Optional[str] = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("company_addresses", "read")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -36,7 +36,7 @@ def list_company_addresses(
 def create_company_address(
     data: CompanyAddressCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("company_addresses", "create")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -60,7 +60,7 @@ def update_company_address(
     id: int,
     data: CompanyAddressCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("company_addresses", "update")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -85,7 +85,7 @@ def update_company_address(
 def delete_company_address(
     id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("company_addresses", "delete")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):

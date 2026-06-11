@@ -1,13 +1,13 @@
 """Dashboard analytics routes."""
 
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, aliased
 from sqlalchemy import func
 from app.database import get_db
 from app.models import (
     Material, CurrentStock, PurchaseRequest, PurchaseOrder,
     GRN, Warehouse, Vendor, MaterialIssue, MaterialIssueItem,
-    Building, StockLedger, User, Alert, Room, Floor
+    Building, StockLedger, User, Alert, Room, Floor, Institution, Indent
 )
 from app.schemas import DashboardStats
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
@@ -114,20 +114,39 @@ def get_consumption_by_building(
 ):
     sd = parse_date(start_date)
     ed = parse_date(end_date)
-    results = db.query(
+    
+    InstFromBuilding = aliased(Institution)
+    InstFromIndent = aliased(Institution)
+    
+    loc_label = func.coalesce(
+        InstFromIndent.name,
+        InstFromBuilding.name,
         Building.name,
+        MaterialIssue.issued_to_department,
+        "Unknown"
+    )
+    
+    query = db.query(
+        loc_label.label("building_name"),
         func.sum(MaterialIssueItem.quantity).label("total_qty"),
         func.sum(MaterialIssueItem.quantity * MaterialIssueItem.rate).label("total_value")
-    ).select_from(Building).join(
-        MaterialIssue, MaterialIssue.building_id == Building.id
-    ).join(
-        MaterialIssueItem, MaterialIssueItem.issue_id == MaterialIssue.id
+    ).select_from(MaterialIssueItem).join(
+        MaterialIssue, MaterialIssueItem.issue_id == MaterialIssue.id
+    ).outerjoin(
+        Building, MaterialIssue.building_id == Building.id
+    ).outerjoin(
+        InstFromBuilding, Building.institution_id == InstFromBuilding.id
+    ).outerjoin(
+        Indent, MaterialIssue.indent_id == Indent.id
+    ).outerjoin(
+        InstFromIndent, Indent.institution_id == InstFromIndent.id
     ).filter(
         MaterialIssue.tenant_id == tenant_id, MaterialIssue.site_id == site_id
     )
-    if sd: results = results.filter(MaterialIssue.created_at >= sd)
-    if ed: results = results.filter(MaterialIssue.created_at < ed)
-    results = results.group_by(Building.name).all()
+    
+    if sd: query = query.filter(MaterialIssue.created_at >= sd)
+    if ed: query = query.filter(MaterialIssue.created_at < ed)
+    results = query.group_by(loc_label).all()
 
     return [
         {"building_name": r[0], "total_quantity": round(r[1] or 0, 2), "total_value": round(r[2] or 0, 2)}
@@ -229,23 +248,41 @@ def get_material_cost_by_building(
 ):
     sd = parse_date(start_date)
     ed = parse_date(end_date)
-    results = db.query(
+    
+    InstFromBuilding = aliased(Institution)
+    InstFromIndent = aliased(Institution)
+    
+    loc_label = func.coalesce(
+        InstFromIndent.name,
+        InstFromBuilding.name,
+        Building.name,
+        MaterialIssue.issued_to_department,
+        "Unknown"
+    )
+    
+    query = db.query(
         Material.name,
-        Building.name.label("building_name"),
+        loc_label.label("building_name"),
         func.sum(MaterialIssueItem.quantity * MaterialIssueItem.rate).label("total_cost"),
         func.sum(MaterialIssueItem.quantity).label("total_qty")
-    ).join(
+    ).select_from(Material).join(
         MaterialIssueItem, MaterialIssueItem.material_id == Material.id
     ).join(
         MaterialIssue, MaterialIssueItem.issue_id == MaterialIssue.id
-    ).join(
+    ).outerjoin(
         Building, MaterialIssue.building_id == Building.id
+    ).outerjoin(
+        InstFromBuilding, Building.institution_id == InstFromBuilding.id
+    ).outerjoin(
+        Indent, MaterialIssue.indent_id == Indent.id
+    ).outerjoin(
+        InstFromIndent, Indent.institution_id == InstFromIndent.id
     ).filter(
         MaterialIssue.tenant_id == tenant_id, MaterialIssue.site_id == site_id
     )
-    if sd: results = results.filter(MaterialIssue.created_at >= sd)
-    if ed: results = results.filter(MaterialIssue.created_at < ed)
-    results = results.group_by(Material.name, Building.name).order_by(
+    if sd: query = query.filter(MaterialIssue.created_at >= sd)
+    if ed: query = query.filter(MaterialIssue.created_at < ed)
+    results = query.group_by(Material.name, loc_label).order_by(
         func.sum(MaterialIssueItem.quantity * MaterialIssueItem.rate).desc()
     ).limit(20).all()
 

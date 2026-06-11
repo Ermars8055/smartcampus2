@@ -279,7 +279,7 @@ def list_audit_logs(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("admin_users", "read")),
+    current_user: User = Depends(require_permission("audit_logs", "read")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):

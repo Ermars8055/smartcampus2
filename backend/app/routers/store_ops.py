@@ -186,10 +186,25 @@ def create_issue(
 
         header_w_id = data.warehouse_id or processed_items[0][2]
         issue_number = get_next_number(db, tenant_id, site_id, "ISSUE", "ISS")
+
+        issue_project_id = data.project_id
+        if not issue_project_id and data.indent_id:
+            ind_data = db.query(Indent).filter(Indent.id == data.indent_id).first()
+            if ind_data and ind_data.institution:
+                issue_project_id = ind_data.institution.project_id
+
+        if not issue_project_id:
+            from app.models import Project
+            first_proj = db.query(Project).filter(Project.tenant_id == tenant_id, Project.site_id == site_id).first()
+            if first_proj:
+                issue_project_id = first_proj.id
+            else:
+                raise HTTPException(400, "project_id is required but could not be resolved")
+
         issue = MaterialIssue(
             issue_number=issue_number,
             warehouse_id=header_w_id,
-            project_id=data.project_id,
+            project_id=issue_project_id,
             indent_id=data.indent_id,
             building_id=building_id,
             issued_to_room_id=room_id,
@@ -241,7 +256,7 @@ def create_issue(
                 reference_number=issue_number,
                 tenant_id=tenant_id,
                 site_id=site_id,
-                project_id=data.project_id,
+                project_id=issue_project_id,
                 room_id=room_id,
                 user_id=current_user.id
             )

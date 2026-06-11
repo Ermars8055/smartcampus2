@@ -147,10 +147,18 @@ class DataAccessScope(str, enum.Enum):
     ADMIN = "Full Administrative Access"
 
 class ComplaintStatus(str, enum.Enum):
+    # Legacy statuses (kept for backward compatibility)
     OPEN = "Open"
     IN_PROGRESS = "In Progress"
     RESOLVED = "Resolved"
     REJECTED = "Rejected"
+    # New lifecycle statuses
+    REGISTERED = "Registered"
+    ASSIGNED = "Assigned"
+    UNDER_INSPECTION = "Under Inspection"
+    MATERIAL_PENDING = "Material Pending"
+    CLOSED = "Closed"
+    REOPENED = "Reopened"
 
 
 # == Multi-Tenant Core ==
@@ -679,9 +687,15 @@ class Complaint(Base):
     individual_detailed = Column(Text, nullable=True)
     name_and_trade = Column(String(255), nullable=True)
     
-    status = Column(String(50), default=ComplaintStatus.OPEN.value)
+    status = Column(String(50), default=ComplaintStatus.REGISTERED.value)
     assigned_to_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     resolution_remarks = Column(Text, nullable=True)
+    
+    # New workflow fields
+    material_required = Column(Boolean, default=False)
+    verified_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    verified_at = Column(DateTime, nullable=True)
+    rejection_remarks = Column(Text, nullable=True)
     
     created_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     resolved_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
@@ -696,6 +710,7 @@ class Complaint(Base):
     assigned_to = relationship("User", foreign_keys=[assigned_to_id])
     created_by = relationship("User", foreign_keys=[created_by_id])
     resolved_by = relationship("User", foreign_keys=[resolved_by_id])
+    verified_by = relationship("User", foreign_keys=[verified_by_id])
     images = relationship("ComplaintImage", back_populates="complaint", cascade="all, delete-orphan")
     material_issues = relationship("MaterialIssue", back_populates="complaint")
     __table_args__ = (UniqueConstraint("tenant_id", "docket_no", name="uq_complaint_docket_per_tenant"),)
@@ -1111,6 +1126,7 @@ class Indent(Base):
     indent_number = Column(String(50), nullable=False, index=True)
     requester_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     institution_id = Column(Integer, ForeignKey("institutions.id"), nullable=True)
+    complaint_id = Column(Integer, ForeignKey("complaints.id"), nullable=True)
     room_id = Column(Integer, ForeignKey("rooms.id"), nullable=True)
     building_id = Column(Integer, ForeignKey("buildings.id"), nullable=True)
     floor = Column(String(50))

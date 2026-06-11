@@ -12,7 +12,7 @@ router = APIRouter(prefix="/api/material-limits", tags=["Material Limits"])
 @router.get("", response_model=List[DepartmentMaterialLimitOut])
 def list_material_limits(
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("admin_users", "read")),
+    current_user: User = Depends(require_permission("material_allowances", "read")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -34,7 +34,7 @@ def list_material_limits(
 def create_material_limit(
     data: DepartmentMaterialLimitCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("admin_users", "create")),
+    current_user: User = Depends(require_permission("material_allowances", "create")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -83,7 +83,7 @@ def update_material_limit(
     limit_id: int,
     data: DepartmentMaterialLimitUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("admin_users", "update")),
+    current_user: User = Depends(require_permission("material_allowances", "update")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -112,7 +112,7 @@ def update_material_limit(
 def delete_material_limit(
     limit_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("admin_users", "delete")),
+    current_user: User = Depends(require_permission("material_allowances", "delete")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):

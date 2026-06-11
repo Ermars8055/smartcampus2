@@ -11,7 +11,7 @@ from app.models import Invoice, InvoiceItem, User, Vendor
 from app.schemas import (
     InvoiceOut, SendForPaymentRequest, HardCopyUpdate, PaymentStatusUpdate, HardCopySentRequest
 )
-from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
+from app.auth import get_current_user, require_permission, require_action, get_tenant_id, get_site_id
 from app.utils.tz import get_now_ist
 
 # Re-use _build_invoice_out from invoices router
@@ -76,7 +76,7 @@ def list_verified_invoices(
 def send_for_payment(
     data: SendForPaymentRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("finance_invoices", "update")),
+    current_user: User = Depends(require_action("finance_invoices", "can_send_for_payment")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -148,7 +148,7 @@ def list_pending_hard_copy(
 def send_hard_copy(
     data: HardCopySentRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("finance_invoices", "update")),
+    current_user: User = Depends(require_action("finance_invoices", "can_send_hard_copy")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -199,7 +199,7 @@ def list_all_hard_copy(
 def update_hard_copy(
     data: HardCopyUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("finance_invoices", "update")),
+    current_user: User = Depends(require_action("finance_invoices", "can_receive_hard_copy")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -229,7 +229,7 @@ def update_hard_copy(
 def update_payment_status(
     data: PaymentStatusUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("finance_invoices", "update")),
+    current_user: User = Depends(require_action("finance_invoices", "can_mark_paid")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):

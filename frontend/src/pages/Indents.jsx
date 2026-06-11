@@ -58,7 +58,65 @@ export default function Indents() {
         navigate(location.pathname, { replace: true, state: {} });
       }
     }
-  }, [location.state, indents]);
+
+    const searchParams = new URLSearchParams(location.search);
+    if (searchParams.get('new') === 'true' && searchParams.get('complaint_id')) {
+      const cId = searchParams.get('complaint_id');
+      setShowForm(true);
+      // Remove query params from URL so it doesn't trigger again on refresh
+      navigate(location.pathname, { replace: true });
+
+      // Fetch complaint details and pre-fill the form
+      api.get(`/api/complaints/${cId}`).then(res => {
+        const c = res.data;
+        const newForm = {
+          institution_id: c.institution_id || '',
+          department: c.department_name || '',
+          building_id: c.building_id || '',
+          floor_id: c.floor_id || '',
+          room_id: c.room_id || '',
+          remarks: `Complaint ${c.docket_no} - ${c.nature_of_complaint || ''}`.trim(),
+          complaint_id: cId,
+          items: [{ material_id: '', requested_quantity: '' }]
+        };
+        setForm(newForm);
+
+        // Trigger cascading dropdown data if we have a department
+        if (c.department_name) {
+          // Filter departments for the institution
+          if (c.institution_id) {
+            api.get('/api/departments').then(dRes => {
+              const depts = (dRes.data || []).filter(d => d.institution_id === c.institution_id).map(d => d.name);
+              setDepartmentsList(Array.from(new Set(depts)));
+            }).catch(() => {});
+          }
+
+          // Load buildings/floors/rooms for this department
+          api.get(`/api/rooms?department_name=${encodeURIComponent(c.department_name)}`).then(r => {
+            const fetchedRooms = r.data || [];
+            const uniqueBuildings = new Map();
+            const uniqueFloors = new Map();
+
+            fetchedRooms.forEach(room => {
+              if (room.building_id && room.building_name) {
+                uniqueBuildings.set(room.building_id, { id: room.building_id, name: room.building_name });
+              }
+              if (room.floor_id && room.floor_name) {
+                uniqueFloors.set(room.floor_id, { id: room.floor_id, name: room.floor_name, building_id: room.building_id });
+              }
+            });
+
+            setBuildings(Array.from(uniqueBuildings.values()));
+            setFloors(Array.from(uniqueFloors.values()));
+            setRooms(fetchedRooms);
+          }).catch(() => {});
+        }
+      }).catch(err => {
+        console.error('Failed to fetch complaint for pre-fill', err);
+        setForm(prev => ({ ...prev, complaint_id: cId }));
+      });
+    }
+  }, [location.state, location.search, indents]);
 
   // Sorting state
   const [order, setOrder] = useState('desc');
@@ -91,7 +149,7 @@ export default function Indents() {
     });
 
   const [form, setForm] = useState({
-    institution_id: '', building_id: '', floor_id: '', room_id: '', department: '', remarks: '', items: [{ material_id: '', requested_quantity: '' }]
+    institution_id: '', building_id: '', floor_id: '', room_id: '', department: '', remarks: '', items: [{ material_id: '', requested_quantity: '' }], complaint_id: ''
   });
 
   const [vendors, setVendors] = useState([]);
@@ -265,6 +323,7 @@ export default function Indents() {
         floor: selectedFloor?.name || '',
         location: selectedRoom?.name || '',
         department: form.department,
+        complaint_id: form.complaint_id ? parseInt(form.complaint_id) : null,
         remarks: form.remarks,
         items: mappedItems
       };
@@ -623,7 +682,7 @@ export default function Indents() {
           <Typography variant="body2" sx={{ color: '#64748B' }}>Raise and manage department material requests</Typography>
         </Box>
         <Button variant="contained" startIcon={<Add />} onClick={() => {
-          setForm({ institution_id: '', building_id: '', floor_id: '', room_id: '', department: '', remarks: '', items: [{ material_id: '', requested_quantity: '' }] });
+          setForm({ institution_id: '', building_id: '', floor_id: '', room_id: '', department: '', remarks: '', items: [{ material_id: '', requested_quantity: '' }], complaint_id: '' });
           setShowForm(true);
         }}
           sx={{ textTransform: 'none', fontWeight: 600, borderRadius: 2, px: 2.5 }}

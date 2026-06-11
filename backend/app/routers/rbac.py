@@ -185,7 +185,7 @@ def update_role(
             ApprovalFlow.tenant_id == tenant_id,
             ApprovalFlow.site_id == site_id,
             ApprovalFlow.role_name == old_name,
-        ).delete()
+        ).update({"is_active": False})
         for rule in data.workflow_rules:
             flow = ApprovalFlow(
                 tenant_id=tenant_id,

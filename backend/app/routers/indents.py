@@ -23,12 +23,15 @@ def generate_indent_number(db: Session, tenant_id: int, site_id: int) -> str:
 @router.get("", response_model=List[IndentOut])
 def list_indents(
     search: str = None,
+    complaint_id: Optional[int] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("indents", "read")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
     query = db.query(Indent).filter(Indent.tenant_id == tenant_id, Indent.site_id == site_id)
+    if complaint_id:
+        query = query.filter(Indent.complaint_id == complaint_id)
     
     # --- ROW-LEVEL SECURITY / DATA SCOPING ---
     is_platform_admin = getattr(current_user, "_is_platform_admin", False)
@@ -143,6 +146,7 @@ def create_indent(
             indent_number=generate_indent_number(db, tenant_id, site_id),
             requester_id=current_user.id,
             institution_id=data.institution_id,
+            complaint_id=data.complaint_id,
             room_id=data.room_id,
             building_id=data.building_id,
             floor=data.floor,

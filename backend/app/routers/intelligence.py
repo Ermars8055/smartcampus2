@@ -31,16 +31,16 @@ def get_consumption_report(
     sd = parse_date(start_date)
     ed = parse_date(end_date)
     
+    loc_label = func.coalesce(Building.name, MaterialIssue.issued_to_department, "Unknown")
+    
     query = db.query(
-        Building.name.label("building_name"),
+        loc_label.label("building_name"),
         Material.name.label("material_name"),
         func.sum(MaterialIssueItem.quantity).label("total_quantity"),
         func.sum(MaterialIssueItem.quantity * MaterialIssueItem.rate).label("total_value")
     ).join(MaterialIssue, MaterialIssueItem.issue_id == MaterialIssue.id)\
      .join(Material, MaterialIssueItem.material_id == Material.id)\
-     .join(Room, MaterialIssue.issued_to_room_id == Room.id)\
-     .join(Floor, Room.floor_id == Floor.id)\
-     .join(Building, Floor.building_id == Building.id)\
+     .outerjoin(Building, MaterialIssue.building_id == Building.id)\
      .filter(MaterialIssue.tenant_id == tenant_id, MaterialIssue.site_id == site_id)
     
     if project_id:
@@ -50,7 +50,7 @@ def get_consumption_report(
     if ed:
         query = query.filter(MaterialIssue.created_at <= ed)
         
-    results = query.group_by(Building.name, Material.name).all()
+    results = query.group_by(loc_label, Material.name).all()
     
     return [
         {

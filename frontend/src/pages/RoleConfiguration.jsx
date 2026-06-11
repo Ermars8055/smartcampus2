@@ -110,6 +110,11 @@ const MODULE_TREE = [
     children: [{ label: 'Inventory', resource: 'inventory' }],
   },
   {
+    module: 'Maintenance',
+    icon: 'build',
+    children: [{ label: 'Complaints', resource: 'complaints' }],
+  },
+  {
     module: 'Intelligence',
     icon: 'build',
     children: [{ label: 'Intelligence', resource: 'intelligence', actions: ['read'] }],
@@ -118,13 +123,19 @@ const MODULE_TREE = [
     module: 'Finance',
     icon: 'account_balance',
     children: [
-      { label: 'Invoices & Payments', resource: 'finance_invoices' }
+      { label: 'Invoices & Payments', resource: 'finance_invoices', extendedActions: [
+        { key: 'can_send_hard_copy', label: 'Send Hard Copy', color: '#3B82F6' },
+        { key: 'can_receive_hard_copy', label: 'Receive Hard Copy', color: '#10B981' },
+        { key: 'can_send_for_payment', label: 'Send for Payment', color: '#F59E0B' },
+        { key: 'can_mark_paid', label: 'Mark as Paid', color: '#8B5CF6' }
+      ]}
     ],
   },
   {
     module: 'Reports',
     icon: 'assessment',
     children: [
+      { label: 'General Reports', resource: 'reports', actions: ['read'] },
       { label: 'Issue Summary', resource: 'report_issue_summary', actions: ['read'] },
       { label: 'Rate Analysis', resource: 'report_rate_analysis', actions: ['read'] },
       { label: 'Receipt Summary', resource: 'report_receipt_summary', actions: ['read'] },
@@ -138,10 +149,14 @@ const MODULE_TREE = [
     children: [
       { label: 'User Management', resource: 'admin_users' },
       { label: 'Role Management', resource: 'admin_roles' },
+      { label: 'Audit Logs', resource: 'audit_logs', actions: ['read'] },
       { label: 'Approval Flows', resource: 'approval_flows' },
+      { label: 'Material Allowances', resource: 'material_allowances' },
+      { label: 'Configurations', resource: 'configurations' },
       { label: 'Projects', resource: 'projects' },
       { label: 'Organizations', resource: 'organizations' },
       { label: 'Departments', resource: 'departments' },
+      { label: 'Company Addresses', resource: 'company_addresses' },
       { label: 'Terms & Conditions', resource: 'terms' },
     ],
   },

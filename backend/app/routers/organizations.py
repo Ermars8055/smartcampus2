@@ -320,6 +320,7 @@ def list_buildings(
             id=b.id, name=b.name, code=b.code,
             project_id=b.project_id,
             institution_id=b.institution_id,
+            department_name=b.department_name,
             is_active=b.is_active, created_at=b.created_at,
             project_name=b.project.name if b.project else None,
             institution_name=b.institution.name if getattr(b, "institution", None) else None

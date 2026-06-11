@@ -259,7 +259,7 @@ def create_issue(
                     if indent_item:
                         indent_item.issued_quantity += item_data.quantity
                 
-                all_fully_issued = all(it.issued_quantity >= it.requested_quantity for it in indent.items)
+                all_fully_issued = all(it.issued_quantity >= (it.approved_quantity or 0) for it in indent.items)
                 indent.status = IndentStatus.ISSUED.value if all_fully_issued else IndentStatus.PARTIALLY_ISSUED.value
 
         db.commit()

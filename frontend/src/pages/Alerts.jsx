@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { formatDateTime } from '../utils/dateUtils';
 import {
   Box, Typography, Card, Chip, IconButton, Tooltip
@@ -8,6 +9,7 @@ import api from '../services/api';
 
 export default function Alerts() {
   const [alerts, setAlerts] = useState([]);
+  const navigate = useNavigate();
 
   const load = () => { api.get('/api/alerts').then(r => setAlerts(r.data)); };
   useEffect(() => { load(); }, []);
@@ -39,7 +41,18 @@ export default function Alerts() {
             border: `1px solid ${a.is_read ? '#E2E8F0' : sevBorder[a.severity]}`,
             opacity: a.is_read ? 0.7 : 1,
             transition: 'all 0.3s',
-          }}>
+            cursor: a.reference_type === 'Indent' ? 'pointer' : 'default',
+            '&:hover': {
+              boxShadow: a.reference_type === 'Indent' ? '0 4px 12px rgba(0,0,0,0.05)' : 'none'
+            }
+          }}
+          onClick={() => {
+            if (a.reference_type === 'Indent') {
+              if (!a.is_read) markRead(a.id);
+              navigate('/indents', { state: { openIndentId: a.reference_id } });
+            }
+          }}
+          >
             <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
               <Circle sx={{ fontSize: 10, mt: 0.8, color: sevColor[a.severity] }} />
               <Box sx={{ flex: 1 }}>

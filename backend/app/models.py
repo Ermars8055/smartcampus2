@@ -1109,6 +1109,7 @@ class Indent(Base):
     site_id = Column(Integer, ForeignKey("sites.id", ondelete="CASCADE"), nullable=False)
     indent_number = Column(String(50), nullable=False, index=True)
     requester_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    institution_id = Column(Integer, ForeignKey("institutions.id"), nullable=True)
     room_id = Column(Integer, ForeignKey("rooms.id"), nullable=True)
     building_id = Column(Integer, ForeignKey("buildings.id"), nullable=True)
     floor = Column(String(50))
@@ -1126,6 +1127,7 @@ class Indent(Base):
 
     requester = relationship("User", foreign_keys=[requester_id])
     approver = relationship("User", foreign_keys=[approved_by_id])
+    institution = relationship("Institution")
     building = relationship("Building")
     room = relationship("Room")
     items = relationship("IndentItem", back_populates="indent", cascade="all, delete-orphan")

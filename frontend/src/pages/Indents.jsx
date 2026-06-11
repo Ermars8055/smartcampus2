@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useMessage } from '../context/MessageContext';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
@@ -26,6 +26,7 @@ export default function Indents() {
   const [buildings, setBuildings] = useState([]);
   const [floors, setFloors] = useState([]);
   const [rooms, setRooms] = useState([]);
+  const [institutions, setInstitutions] = useState([]);
   const [departmentsList, setDepartmentsList] = useState([]);
   const [allDepartments, setAllDepartments] = useState([]);
   const [showForm, setShowForm] = useState(false);
@@ -43,6 +44,21 @@ export default function Indents() {
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state?.openIndentId && indents.length > 0) {
+      const targetId = location.state.openIndentId;
+      const targetIndent = indents.find(i => i.id === targetId);
+      if (targetIndent) {
+        setTabValue('Awaiting Approval');
+        setApprovalDialog({ open: true, indent: targetIndent, items: {} });
+        
+        // Clear the state via React Router so it forgets the openIndentId
+        navigate(location.pathname, { replace: true, state: {} });
+      }
+    }
+  }, [location.state, indents]);
 
   // Sorting state
   const [order, setOrder] = useState('desc');
@@ -75,7 +91,7 @@ export default function Indents() {
     });
 
   const [form, setForm] = useState({
-    building_id: '', floor_id: '', room_id: '', department: '', remarks: '', items: [{ material_id: '', requested_quantity: '' }]
+    institution_id: '', building_id: '', floor_id: '', room_id: '', department: '', remarks: '', items: [{ material_id: '', requested_quantity: '' }]
   });
 
   const [vendors, setVendors] = useState([]);
@@ -105,7 +121,24 @@ export default function Indents() {
     api.get('/api/departments/names').then(r => setDepartmentsList(r.data)).catch(() => setDepartmentsList([]));
     api.get('/api/departments').then(r => setAllDepartments(r.data)).catch(() => setAllDepartments([]));
     api.get('/api/buildings').then(r => setAllBuildings(r.data)).catch(() => setAllBuildings([]));
+    api.get('/api/institutions').then(r => setInstitutions(r.data)).catch(() => setInstitutions([]));
   }, []);
+
+  const handleInstitutionChange = (instId) => {
+    setForm(prev => ({ ...prev, institution_id: instId, department: '', building_id: '', floor_id: '', room_id: '' }));
+    setBuildings([]);
+    setFloors([]);
+    setRooms([]);
+
+    if (instId) {
+      // Filter available departments based on the selected institution
+      const depts = allDepartments.filter(d => d.institution_id === instId).map(d => d.name);
+      // Remove duplicates
+      setDepartmentsList(Array.from(new Set(depts)));
+    } else {
+      setDepartmentsList([]);
+    }
+  };
 
   const handleDepartmentChange = (newDept) => {
     if (newDept) {
@@ -128,6 +161,11 @@ export default function Indents() {
           if (d.building_id && d.building_name) {
             uniqueBuildings.set(d.building_id, { id: d.building_id, name: d.building_name });
           }
+        });
+
+        const masterBldgs = allBuildings.filter(b => b.department_name === newDept);
+        masterBldgs.forEach(b => {
+          uniqueBuildings.set(b.id, { id: b.id, name: b.name });
         });
 
         const bldgs = Array.from(uniqueBuildings.values());
@@ -207,8 +245,8 @@ export default function Indents() {
         showMessage("Quantity must be greater than 0.", "Validation Error", "warning");
         return;
       }
-      if (!form.building_id) {
-        showMessage("Please select a building.", "Selection Required", "warning");
+      if (!form.institution_id) {
+        showMessage("Please select an institution.", "Selection Required", "warning");
         return;
       }
       if (mappedItems.some(it => !it.material_id)) {
@@ -221,6 +259,7 @@ export default function Indents() {
 
       // Map to backend fields
       const payload = {
+        institution_id: form.institution_id || null,
         room_id: form.room_id || null,
         building_id: form.building_id || null,
         floor: selectedFloor?.name || '',
@@ -384,20 +423,36 @@ export default function Indents() {
 
           {/* ── Location Row ── */}
           <Grid container spacing={2.5} sx={{ mb: 3 }}>
-            <Grid item xs={12} sm={3}>
+            <Grid item xs={12} sm={6}>
+              <Typography variant="caption" sx={{ fontWeight: 600, color: '#3b5998', mb: 0.5, display: 'block' }}>Institution <span style={{ color: '#d32f2f' }}>*</span></Typography>
+              <FormControl fullWidth size="small">
+                <Select
+                  value={form.institution_id}
+                  displayEmpty
+                  onChange={e => handleInstitutionChange(e.target.value)}
+                  sx={{ bgcolor: '#fff' }}
+                  startAdornment={<InputAdornment position="start"><Apartment sx={{ color: '#94A3B8' }} /></InputAdornment>}
+                >
+                  <MenuItem value="" disabled><em>Select Institution</em></MenuItem>
+                  {institutions.map(inst => <MenuItem key={inst.id} value={inst.id}>{inst.name}</MenuItem>)}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
               <Typography variant="caption" sx={{ fontWeight: 600, color: '#3b5998', mb: 0.5, display: 'block' }}>Department <span style={{ color: '#d32f2f' }}>*</span></Typography>
               <Autocomplete
                 options={departmentsList}
                 value={form.department || null}
                 onChange={(e, val) => handleDepartmentChange(val)}
+                disabled={!form.institution_id}
                 renderInput={(params) => (
                   <TextField {...params} size="small" placeholder="Select Department" InputProps={{ ...params.InputProps, startAdornment: <><InputAdornment position="start"><AccountTree sx={{ color: '#94A3B8', ml: 1 }} /></InputAdornment>{params.InputProps.startAdornment}</> }} sx={{ bgcolor: '#fff' }} />
                 )}
               />
             </Grid>
-            <Grid item xs={12} sm={3}>
+            <Grid item xs={12} sm={4}>
               <Typography variant="caption" sx={{ fontWeight: 600, color: '#3b5998', mb: 0.5, display: 'block' }}>
-                Building <span style={{ color: '#d32f2f' }}>*</span>
+                Building
               </Typography>
               <FormControl fullWidth size="small">
                 <Select
@@ -413,7 +468,7 @@ export default function Indents() {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} sm={3}>
+            <Grid item xs={12} sm={4}>
               <Typography variant="caption" sx={{ fontWeight: 600, color: '#3b5998', mb: 0.5, display: 'block' }}>Floor</Typography>
               <FormControl fullWidth size="small">
                 <Select
@@ -429,7 +484,7 @@ export default function Indents() {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} sm={3}>
+            <Grid item xs={12} sm={4}>
               <Typography variant="caption" sx={{ fontWeight: 600, color: '#3b5998', mb: 0.5, display: 'block' }}>Room</Typography>
               <FormControl fullWidth size="small">
                 <Select
@@ -568,7 +623,7 @@ export default function Indents() {
           <Typography variant="body2" sx={{ color: '#64748B' }}>Raise and manage department material requests</Typography>
         </Box>
         <Button variant="contained" startIcon={<Add />} onClick={() => {
-          setForm({ building_id: '', floor_id: '', room_id: '', department: '', remarks: '', items: [{ material_id: '', requested_quantity: '' }] });
+          setForm({ institution_id: '', building_id: '', floor_id: '', room_id: '', department: '', remarks: '', items: [{ material_id: '', requested_quantity: '' }] });
           setShowForm(true);
         }}
           sx={{ textTransform: 'none', fontWeight: 600, borderRadius: 2, px: 2.5 }}
@@ -676,13 +731,18 @@ export default function Indents() {
                     </TableSortLabel>
                   </TableCell>
                   <TableCell>
-                    <TableSortLabel active={orderBy === 'building_name'} direction={orderBy === 'building_name' ? order : 'asc'} onClick={() => handleRequestSort('building_name')}>
-                      Bldg.
+                    <TableSortLabel active={orderBy === 'institution_name'} direction={orderBy === 'institution_name' ? order : 'asc'} onClick={() => handleRequestSort('institution_name')}>
+                      Institution
                     </TableSortLabel>
                   </TableCell>
                   <TableCell>
                     <TableSortLabel active={orderBy === 'department'} direction={orderBy === 'department' ? order : 'asc'} onClick={() => handleRequestSort('department')}>
                       Dept
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell>
+                    <TableSortLabel active={orderBy === 'building_name'} direction={orderBy === 'building_name' ? order : 'asc'} onClick={() => handleRequestSort('building_name')}>
+                      Bldg.
                     </TableSortLabel>
                   </TableCell>
                   <TableCell>
@@ -718,7 +778,7 @@ export default function Indents() {
               <TableBody>
                 {indents.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={11} align="center" sx={{ py: 6, color: '#94a3b8' }}>
+                    <TableCell colSpan={12} align="center" sx={{ py: 6, color: '#94a3b8' }}>
                       <Typography variant="body2">No indents raised yet. Click "New Indent" to create one.</Typography>
                     </TableCell>
                   </TableRow>
@@ -726,8 +786,9 @@ export default function Indents() {
                 {sortedIndents.map(ind => (
                   <TableRow key={ind.id} sx={{ cursor: 'pointer', '&:hover': { bgcolor: '#f8fafc' }, '& td': { px: 0.5, py: 0.75 } }} onClick={() => setDetailDialog(ind)}>
                     <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>{ind.indent_number}</TableCell>
-                    <TableCell sx={{ fontSize: '0.78rem' }}>{ind.building_name || '-'}</TableCell>
+                    <TableCell sx={{ fontSize: '0.78rem' }}>{ind.institution_name || '-'}</TableCell>
                     <TableCell sx={{ fontSize: '0.78rem' }}>{ind.department || '-'}</TableCell>
+                    <TableCell sx={{ fontSize: '0.78rem' }}>{ind.building_name || '-'}</TableCell>
                     <TableCell sx={{ fontSize: '0.78rem' }}>{ind.floor || '-'}</TableCell>
                     <TableCell sx={{ fontSize: '0.78rem' }}>{ind.room_name || '-'}</TableCell>
                     <TableCell sx={{ fontSize: '0.78rem' }}>{ind.requester_name}</TableCell>

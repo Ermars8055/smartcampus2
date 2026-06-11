@@ -1,9 +1,10 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import {
   Box, Drawer, AppBar, Toolbar, Typography, IconButton, List, ListItem,
   ListItemButton, ListItemIcon, ListItemText, Avatar, Menu, MenuItem,
-  Badge, Divider, Collapse, useMediaQuery, useTheme, Tooltip, Chip, Select
+  Badge, Divider, Collapse, useMediaQuery, useTheme, Tooltip, Chip, Select,
+  Snackbar, Alert, Slide, Button
 } from '@mui/material';
 import {
   Menu as MenuIcon, Dashboard, Inventory2, ShoppingCart, Warehouse,
@@ -88,6 +89,10 @@ const menuItems = [
   { text: 'SaaS Admin', icon: <Security />, path: '/saas-admin', platformOnly: true },
 ];
 
+function SlideTransition(props) {
+  return <Slide {...props} direction="left" />;
+}
+
 export default function Layout() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -95,6 +100,7 @@ export default function Layout() {
   const [openMenus, setOpenMenus] = useState({});
   const [anchorEl, setAnchorEl] = useState(null);
   const [alertCount, setAlertCount] = useState(0);
+  const [activeAlerts, setActiveAlerts] = useState([]);
   const { user, tenant, roles, sites, activeSite, activeSiteId, setActiveSiteId, logout, hasPermission } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -116,8 +122,21 @@ export default function Layout() {
   }, [user, hasPermission]);
 
   useEffect(() => {
-    api.get('/api/alerts/count').then(r => setAlertCount(r.data.count)).catch(() => { });
-  }, [location.pathname]);
+    let interval;
+    const fetchAlerts = () => {
+      api.get('/api/alerts').then(r => {
+        const data = r.data;
+        const unreadAlerts = data.filter(a => !a.is_read);
+        const unresolvedAlerts = data.filter(a => !a.is_resolved);
+        setAlertCount(unreadAlerts.length);
+        setActiveAlerts(unresolvedAlerts);
+      }).catch(() => { });
+    };
+
+    fetchAlerts();
+    interval = setInterval(fetchAlerts, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (visibleMenuItems && visibleMenuItems.length <= 3) {
@@ -333,6 +352,75 @@ export default function Layout() {
             </Menu>
           </Toolbar>
         </AppBar>
+
+        {/* Marquee Alert Banner */}
+        {activeAlerts.length > 0 && (
+          <Box sx={{
+            width: '100%',
+            bgcolor: '#FEF2F2',
+            borderBottom: '1px solid #FCA5A5',
+            color: '#991B1B',
+            py: 0.8,
+            overflow: 'hidden',
+            display: 'flex',
+            alignItems: 'center',
+            position: 'relative',
+            zIndex: 1000
+          }}>
+            <Box sx={{
+              display: 'flex',
+              width: 'max-content',
+              animation: 'marqueeContinuous 30s linear infinite',
+              '@keyframes marqueeContinuous': {
+                '0%': { transform: 'translateX(0)' },
+                '100%': { transform: 'translateX(-50%)' }
+              },
+              '&:hover': {
+                animationPlayState: 'paused'
+              }
+            }}>
+              {[0, 1].map((copyIdx) => (
+                <Box key={copyIdx} sx={{ display: 'flex', minWidth: '100vw', justifyContent: 'space-around' }}>
+                  {activeAlerts.map((alert, index) => (
+                    <Box key={`${alert.id}-${copyIdx}`} component="span" sx={{ mx: 4, display: 'inline-flex', alignItems: 'center', gap: 1 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 700 }}>⚠️ {alert.title}:</Typography>
+                      <Typography variant="body2">{alert.message}</Typography>
+                      {alert.reference_type === 'Indent' && (
+                        <Button 
+                          size="small"
+                          variant="contained"
+                          sx={{ 
+                            minWidth: 0, 
+                            py: 0.5, 
+                            px: 2, 
+                            ml: 2, 
+                            fontWeight: 800, 
+                            bgcolor: '#EF4444', 
+                            color: '#fff',
+                            borderRadius: 8,
+                            textTransform: 'none',
+                            boxShadow: '0 2px 4px rgba(239,68,68,0.4)',
+                            '&:hover': { 
+                              bgcolor: '#DC2626',
+                              boxShadow: '0 4px 6px rgba(239,68,68,0.5)',
+                            } 
+                          }}
+                          onClick={() => {
+                            api.put(`/api/alerts/${alert.id}/read`).catch(() => {});
+                            navigate('/indents', { state: { openIndentId: alert.reference_id } });
+                          }}
+                        >
+                          Review Now
+                        </Button>
+                      )}
+                      {index < activeAlerts.length - 1 && <Box component="span" sx={{ mx: 2, color: '#FCA5A5' }}>•</Box>}
+                    </Box>
+                  ))}
+                </Box>
+              ))}
+            </Box>
+          </Box>
+        )}
 
         {/* Page Content */}
         <Box sx={{ flex: 1, p: { xs: 2, md: 3 }, overflowY: 'auto' }}>

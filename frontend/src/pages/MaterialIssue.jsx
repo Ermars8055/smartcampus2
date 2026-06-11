@@ -140,7 +140,7 @@ export default function MaterialIssue() {
       ...pendingIndents.map(ind => {
         const loc = [ind.building_name, ind.floor, ind.room_name].filter(Boolean).join('-');
         const personStrValue = (ind.department && loc) ? `${ind.department} (${loc})` : (ind.department || loc || ind.requester_name || 'Not Specified');
-        const pendingItemsCount = ind.items?.filter(it => it.requested_quantity > (it.issued_quantity || 0)).length || 0;
+        const pendingItemsCount = ind.items?.filter(it => (it.approved_quantity || it.requested_quantity) > (it.issued_quantity || 0)).length || 0;
         return {
           type: 'indent', ...ind, sortDate: new Date(ind.created_at).getTime(),
           idStr: ind.indent_number, personStr: personStrValue, itemCount: ind.items?.length || 0,
@@ -193,7 +193,8 @@ export default function MaterialIssue() {
   const openIssueModal = (indent) => {
     const items = indent.items
       .map(it => {
-        const remaining = it.requested_quantity - it.issued_quantity;
+        const approvedQty = it.approved_quantity || it.requested_quantity;
+        const remaining = approvedQty - (it.issued_quantity || 0);
         return {
           material_id: it.material_id,
           material_name: it.material_name,
@@ -201,8 +202,8 @@ export default function MaterialIssue() {
           warehouse_id: it.warehouse_id,
           warehouse_name: it.warehouse_name,
           uom_name: it.uom_name,
-          approved: it.requested_quantity,
-          issued: it.issued_quantity,
+          approved: approvedQty,
+          issued: it.issued_quantity || 0,
           remaining: remaining,
           in_stock: it.current_stock || 0,
           issue_qty: ''
@@ -228,7 +229,7 @@ export default function MaterialIssue() {
 
       const payload = {
         warehouse_id: issueModal.items[0]?.warehouse_id,
-        project_id: issueModal.indent?.project_id || 1,
+        project_id: issueModal.indent?.project_id || undefined,
         indent_id: issueModal.indent?.id,
         issued_to_department: undefined,
         building_id: undefined,
@@ -598,6 +599,7 @@ export default function MaterialIssue() {
                       <TableRow key={idx}>
                         <TableCell>
                           <Typography variant="body2" sx={{ fontWeight: 600, color: '#1E293B' }}>{item.material_name}</Typography>
+                          <Typography variant="caption" sx={{ display: 'block', color: '#64748B', fontFamily: 'monospace' }}>{item.material_code}</Typography>
                         </TableCell>
                         <TableCell>
                           <Typography variant="body2" sx={{ fontWeight: 600, color: '#475569' }}>{item.warehouse_name || 'Central Store'}</Typography>

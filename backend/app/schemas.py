@@ -1287,6 +1287,7 @@ class IndentItemOut(IndentItemBase):
         from_attributes = True
 
 class IndentBase(BaseModel):
+    institution_id: Optional[int] = None
     room_id: Optional[int] = None
     building_id: Optional[int] = None
     floor: Optional[str] = None
@@ -1306,11 +1307,13 @@ class IndentOut(BaseModel):
     id: int
     indent_number: str
     requester_id: int
+    institution_id: Optional[int] = None
     room_id: Optional[int] = None
     floor: Optional[str] = None
     location: Optional[str] = None
     department: Optional[str] = None
     building_name: Optional[str] = None
+    institution_name: Optional[str] = None
     remarks: Optional[str] = None
     status: str
     current_approval_level: int

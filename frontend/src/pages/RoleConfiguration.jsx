@@ -390,7 +390,7 @@ export default function RoleConfiguration() {
       } else {
         await api.post('/api/rbac/roles', payload);
       }
-      navigate('/admin');
+      navigate('/admin/roles');
     } catch (err) {
       setError(err.response?.data?.detail || 'Failed to save role configuration.');
     } finally {
@@ -433,7 +433,7 @@ export default function RoleConfiguration() {
     <Box sx={{ maxWidth: 1200, mx: 'auto' }}>
       {/* ── Header ─────────────────────────────────────────────────────── */}
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, gap: 2 }}>
-        <IconButton onClick={() => navigate('/admin')} sx={{ bgcolor: '#F1F5F9', '&:hover': { bgcolor: '#E2E8F0' } }}>
+        <IconButton onClick={() => navigate('/admin/roles')} sx={{ bgcolor: '#F1F5F9', '&:hover': { bgcolor: '#E2E8F0' } }}>
           <ArrowBack />
         </IconButton>
         <Box sx={{ flex: 1 }}>
@@ -661,7 +661,7 @@ export default function RoleConfiguration() {
 
       {/* ── Footer Actions ─────────────────────────────────────────────── */}
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mb: 4 }}>
-        <Button variant="outlined" onClick={() => navigate('/admin')}
+        <Button variant="outlined" onClick={() => navigate('/admin/roles')}
           sx={{ color: '#64748B', borderColor: '#CBD5E1', fontWeight: 600, textTransform: 'none', borderRadius: 2, px: 4 }}>
           Cancel
         </Button>

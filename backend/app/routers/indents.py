@@ -60,9 +60,10 @@ def list_indents(
         indent.requester_name = indent.requester.full_name if indent.requester else None
         indent.room_name = indent.room.name if indent.room else None
         indent.building_name = indent.building.name if indent.building else (indent.room.floor.building.name if indent.room and indent.room.floor and indent.room.floor.building else None)
+        indent.institution_name = indent.institution.name if indent.institution else None
         indent.floor = indent.floor or (indent.room.floor.name if indent.room and indent.room.floor else None)
         indent.department = indent.department or (indent.room.department_name if indent.room else None)
-        indent.project_id = indent.building.project_id if indent.building else (indent.room.floor.building.project_id if indent.room and indent.room.floor and indent.room.floor.building else None)
+        indent.project_id = indent.building.project_id if indent.building else (indent.room.floor.building.project_id if indent.room and indent.room.floor and indent.room.floor.building else (indent.institution.project_id if indent.institution else None))
         for item in indent.items:
             if item.material:
                 item.material_name = item.material.name
@@ -141,6 +142,7 @@ def create_indent(
             site_id=site_id,
             indent_number=generate_indent_number(db, tenant_id, site_id),
             requester_id=current_user.id,
+            institution_id=data.institution_id,
             room_id=data.room_id,
             building_id=data.building_id,
             floor=data.floor,
@@ -200,9 +202,10 @@ def get_indent(
     indent.requester_name = indent.requester.full_name if indent.requester else None
     indent.room_name = indent.room.name if indent.room else None
     indent.building_name = indent.building.name if indent.building else (indent.room.floor.building.name if indent.room and indent.room.floor and indent.room.floor.building else None)
+    indent.institution_name = indent.institution.name if indent.institution else None
     indent.floor = indent.floor or (indent.room.floor.name if indent.room and indent.room.floor else None)
     indent.department = indent.department or (indent.room.department_name if indent.room else None)
-    indent.project_id = indent.building.project_id if indent.building else (indent.room.floor.building.project_id if indent.room and indent.room.floor and indent.room.floor.building else None)
+    indent.project_id = indent.building.project_id if indent.building else (indent.room.floor.building.project_id if indent.room and indent.room.floor and indent.room.floor.building else (indent.institution.project_id if indent.institution else None))
     for item in indent.items:
         if item.material:
             item.material_name = item.material.name

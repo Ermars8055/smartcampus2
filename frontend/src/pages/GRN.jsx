@@ -3,9 +3,9 @@ import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
   InputLabel, Divider, TableSortLabel, useTheme, useMediaQuery,
-  DialogContent, DialogActions, Grid, MenuItem, Select, FormControl, FormHelperText
+  DialogContent, DialogActions, Grid, MenuItem, Select, FormControl, FormHelperText, IconButton, Autocomplete, RadioGroup, FormControlLabel, Radio
 } from '@mui/material';
-import { Add, Search, AssignmentTurnedIn, AttachFile, OpenInNew } from '@mui/icons-material';
+import { Add, Search, AssignmentTurnedIn, AttachFile, OpenInNew, Delete } from '@mui/icons-material';
 import api, { getFileUrl } from '../services/api';
 import { formatDate } from '../utils/dateUtils';
 import { useAuth } from '../context/AuthContext';
@@ -25,8 +25,9 @@ export default function GRNPage() {
   const [sortConfig, setSortConfig] = useState({ key: 'created_at', direction: 'desc' });
   const initialForm = {
     po_id: '', gate_entry_id: '', warehouse_id: '', project_id: '', vendor_id: '',
-    invoice_number: '', invoice_date: '', invoice_amount: 0, invoice_scan_url: '', items: [],
-    receipt_type: 'PO-Based'
+    invoice_number: '', invoice_date: '', invoice_amount: 0, invoice_scan_url: '', 
+    items: [{ material_id: '', ordered_quantity: 0, received_quantity: 0, accepted_quantity: 0, rejected_quantity: 0, rate: 0 }],
+    receipt_type: 'Direct Invoice'
   };
 
   const [form, setForm] = useState(initialForm);
@@ -112,6 +113,7 @@ export default function GRNPage() {
     try {
       const payload = {
         ...form,
+        project_id: form.project_id || (projects.length > 0 ? projects[0].id : ''),
         invoice_date: form.invoice_date || null,
         invoice_amount: Number(parseFloat(form.invoice_amount).toFixed(2)) || 0
       };
@@ -291,6 +293,30 @@ export default function GRNPage() {
         </DialogTitle>
         <DialogContent sx={{ px: 4, py: 2 }}>
           <Grid container spacing={2} sx={{ mt: 0.5, mb: 2 }}>
+            {/* Mode Toggle */}
+            <Grid item xs={12} sx={{ mb: 1, display: 'flex', justifyContent: 'center' }}>
+              <FormControl component="fieldset">
+                <RadioGroup
+                  row
+                  value={form.receipt_type}
+                  onChange={(e) => {
+                    const newType = e.target.value;
+                    setForm(prev => ({
+                      ...prev,
+                      receipt_type: newType,
+                      po_id: newType === 'Direct Invoice' ? '' : prev.po_id,
+                      items: newType === 'Direct Invoice' 
+                        ? [{ material_id: '', ordered_quantity: 0, received_quantity: 0, accepted_quantity: 0, rejected_quantity: 0, rate: 0 }] 
+                        : (prev.po_id ? prev.items : [])
+                    }));
+                  }}
+                >
+                  <FormControlLabel value="PO-Based" control={<Radio size="small" />} label={<Typography variant="body2" sx={{ fontWeight: 600 }}>Purchase Order</Typography>} sx={{ mr: 4 }} />
+                  <FormControlLabel value="Direct Invoice" control={<Radio size="small" />} label={<Typography variant="body2" sx={{ fontWeight: 600 }}>Direct Invoice</Typography>} />
+                </RadioGroup>
+              </FormControl>
+            </Grid>
+
             {/* Gate Entry Selection (primary link) */}
             <Grid item xs={4}>
               <FormControl fullWidth><InputLabel>Gate Entry (Pending)</InputLabel>
@@ -304,31 +330,24 @@ export default function GRNPage() {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={4}>
-              <FormControl fullWidth><InputLabel>Purchase Order</InputLabel>
-                <Select value={form.po_id} label="Purchase Order" onChange={e => selectPO(e.target.value)}>
-                  <MenuItem value="">None (Direct Invoice)</MenuItem>
-                  {pos.filter(p => p.status !== 'Closed' && p.status !== 'Draft').map(p => <MenuItem key={p.id} value={p.id}>{p.po_number} - {p.vendor_name}</MenuItem>)}
-                </Select>
-              </FormControl>
-            </Grid>
+            {form.receipt_type === 'PO-Based' && (
+              <Grid item xs={8}>
+                <FormControl fullWidth required><InputLabel>Purchase Order</InputLabel>
+                  <Select value={form.po_id} label="Purchase Order" onChange={e => selectPO(e.target.value)}>
+                    <MenuItem value="">None</MenuItem>
+                    {pos.filter(p => p.status !== 'Closed' && p.status !== 'Draft').map(p => <MenuItem key={p.id} value={p.id}>{p.po_number} - {p.vendor_name}</MenuItem>)}
+                  </Select>
+                </FormControl>
+              </Grid>
+            )}
             {form.receipt_type === 'Direct Invoice' && (
-              <>
-                <Grid item xs={4}>
-                  <FormControl fullWidth required><InputLabel>Vendor</InputLabel>
-                    <Select value={form.vendor_id} label="Vendor" onChange={e => setForm({...form, vendor_id: e.target.value})}>
-                      {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.name}</MenuItem>)}
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={4}>
-                  <FormControl fullWidth required><InputLabel>Project</InputLabel>
-                    <Select value={form.project_id} label="Project" onChange={e => setForm({...form, project_id: e.target.value})}>
-                      {projects.map(p => <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>)}
-                    </Select>
-                  </FormControl>
-                </Grid>
-              </>
+              <Grid item xs={8}>
+                <FormControl fullWidth required><InputLabel>Vendor</InputLabel>
+                  <Select value={form.vendor_id} label="Vendor" onChange={e => setForm({...form, vendor_id: e.target.value})}>
+                    {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.name}</MenuItem>)}
+                  </Select>
+                </FormControl>
+              </Grid>
             )}
             <Grid item xs={4}>
               <FormControl fullWidth required><InputLabel>Store</InputLabel>
@@ -403,27 +422,51 @@ export default function GRNPage() {
               </Box>
               <Table size="small">
                 <TableHead><TableRow>
-                  <TableCell>Material</TableCell><TableCell align="right">Ordered</TableCell>
+                  <TableCell>Material</TableCell>
+                  {form.receipt_type === 'PO-Based' && <TableCell align="right">Ordered</TableCell>}
                   <TableCell align="right">Received</TableCell><TableCell align="right">Accepted</TableCell>
                   <TableCell align="right">Rejected</TableCell><TableCell align="right">Rate</TableCell>
+                  {form.receipt_type === 'Direct Invoice' && <TableCell width={40}></TableCell>}
                 </TableRow></TableHead>
                 <TableBody>
                   {form.items.map((item, i) => (
                     <TableRow key={i}>
-                      <TableCell>
+                      <TableCell sx={{ minWidth: 250, position: 'relative', pb: (form.receipt_type === 'Direct Invoice' && item.material_id) ? 3 : 2 }}>
                         {form.receipt_type === 'Direct Invoice' ? (
-                          <Select size="small" fullWidth value={item.material_id || ''} onChange={e => {
-                            const items = [...form.items];
-                            items[i].material_id = e.target.value;
-                            setForm({ ...form, items });
-                          }}>
-                            {materials.map(m => <MenuItem key={m.id} value={m.id}>{m.name}</MenuItem>)}
-                          </Select>
+                          <>
+                            <Autocomplete
+                              size="small"
+                              options={materials}
+                              getOptionLabel={(option) => `${option.code || ''} - ${option.name || ''}`}
+                              value={materials.find(m => m.id === item.material_id) || null}
+                              onChange={(e, newValue) => {
+                                const items = [...form.items];
+                                items[i].material_id = newValue ? newValue.id : '';
+                                setForm({ ...form, items });
+                              }}
+                              renderInput={(params) => (
+                                <TextField {...params} variant="outlined" size="small" placeholder="-- Select Material --" />
+                              )}
+                              componentsProps={{ paper: { sx: { fontSize: '0.85rem' } } }}
+                            />
+                            {item.material_id && materials.find(m => m.id === item.material_id) && (
+                              <Box sx={{ display: 'flex', gap: 1, position: 'absolute', left: 16, bottom: 4, width: '90%', alignItems: 'center' }}>
+                                <Typography sx={{ fontSize: '0.7rem', fontWeight: 700, color: '#475569', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                  {materials.find(m => m.id === item.material_id).name}
+                                </Typography>
+                                {materials.find(m => m.id === item.material_id).uom_name && (
+                                  <Typography sx={{ fontSize: '0.7rem', color: '#64748B' }}>
+                                    ({materials.find(m => m.id === item.material_id).uom_name})
+                                  </Typography>
+                                )}
+                              </Box>
+                            )}
+                          </>
                         ) : (
                           item.material_name || materials.find(m => m.id === item.material_id)?.name
                         )}
                       </TableCell>
-                      <TableCell align="right">{item.ordered_quantity}</TableCell>
+                      {form.receipt_type === 'PO-Based' && <TableCell align="right">{item.ordered_quantity}</TableCell>}
                       <TableCell align="right">
                         <TextField size="small" type="number" inputProps={{ step: "1" }} value={item.received_quantity ?? ''} sx={{ width: 80 }}
                           onChange={e => {
@@ -463,6 +506,17 @@ export default function GRNPage() {
                           `₹${item.rate?.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                         )}
                       </TableCell>
+                      {form.receipt_type === 'Direct Invoice' && (
+                        <TableCell>
+                          <IconButton size="small" color="error" onClick={() => {
+                            const items = form.items.filter((_, idx) => idx !== i);
+                            const total = items.reduce((sum, it) => sum + (it.accepted_quantity * it.rate), 0);
+                            setForm({ ...form, items, invoice_amount: Number(total.toFixed(2)) });
+                          }}>
+                            <Delete fontSize="small" />
+                          </IconButton>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))}
                 </TableBody>

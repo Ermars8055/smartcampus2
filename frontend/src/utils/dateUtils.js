@@ -1,5 +1,5 @@
 /**
- * Date formatting utilities for NissiGrid - IST timezone, dd-MMM-yyyy format.
+ * Date formatting utilities for Eastpoint - IST timezone, dd-MMM-yyyy format.
  */
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];

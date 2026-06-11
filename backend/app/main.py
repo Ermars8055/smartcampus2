@@ -1,4 +1,4 @@
-"""NissiGrid Smart Campus - FastAPI main application."""
+"""Eastpoint Smart Campus - FastAPI main application."""
 
 from contextlib import asynccontextmanager
 from fastapi import FastAPI

@@ -21,7 +21,6 @@ import SubCategories from './pages/SubCategories';
 import UOM from './pages/UOM';
 import Vendors from './pages/Vendors';
 import Projects from './pages/Projects';
-import Departments from './pages/Departments';
 import Warehouses from './pages/Warehouses';
 import Indents from './pages/Indents';
 import PurchaseRequests from './pages/PurchaseRequests';
@@ -116,7 +115,6 @@ function AppRoutes() {
         <Route path="uom" element={<UOM />} />
         <Route path="vendors" element={<Vendors />} />
         <Route path="projects" element={<Projects />} />
-        <Route path="departments" element={<Departments />} />
         <Route path="warehouses" element={<Warehouses />} />
         <Route path="indents" element={<Indents />} />
         <Route path="purchase-requests" element={<PurchaseRequests />} />

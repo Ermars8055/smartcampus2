@@ -1,4 +1,4 @@
-"""SQLAlchemy ORM models for NissiGrid Smart Campus - Multi-Tenant SaaS."""
+"""SQLAlchemy ORM models for Eastpoint Smart Campus - Multi-Tenant SaaS."""
 
 from datetime import datetime, date, timezone
 from sqlalchemy import (
@@ -286,12 +286,13 @@ class Project(Base):
     is_deleted = Column(Boolean, default=False)
     created_at = Column(DateTime, default=_get_now)
     organization = relationship("Organization", back_populates="projects")
+    institutions = relationship("Institution", back_populates="project", cascade="all, delete-orphan")
     buildings = relationship("Building", back_populates="project", cascade="all, delete-orphan")
     warehouses = relationship("Warehouse", back_populates="project", cascade="all, delete-orphan")
     __table_args__ = (UniqueConstraint("tenant_id", "code", name="uq_proj_code_per_tenant"),)
 
-class Building(Base):
-    __tablename__ = "buildings"
+class Institution(Base):
+    __tablename__ = "institutions"
     id = Column(Integer, primary_key=True, index=True)
     tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
     site_id = Column(Integer, ForeignKey("sites.id", ondelete="CASCADE"), nullable=False)
@@ -301,7 +302,25 @@ class Building(Base):
     is_active = Column(Boolean, default=True)
     is_deleted = Column(Boolean, default=False)
     created_at = Column(DateTime, default=_get_now)
+    project = relationship("Project", back_populates="institutions")
+    buildings = relationship("Building", back_populates="institution", cascade="all, delete-orphan")
+    __table_args__ = (UniqueConstraint("tenant_id", "code", name="uq_inst_code_per_tenant"),)
+
+class Building(Base):
+    __tablename__ = "buildings"
+    id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
+    site_id = Column(Integer, ForeignKey("sites.id", ondelete="CASCADE"), nullable=False)
+    name = Column(String(255), nullable=False)
+    code = Column(String(50), nullable=False)
+    project_id = Column(Integer, ForeignKey("projects.id"), nullable=True)
+    institution_id = Column(Integer, ForeignKey("institutions.id"), nullable=True)
+    department_name = Column(String(255), nullable=True)
+    is_active = Column(Boolean, default=True)
+    is_deleted = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=_get_now)
     project = relationship("Project", back_populates="buildings")
+    institution = relationship("Institution", back_populates="buildings")
     floors = relationship("Floor", back_populates="building", cascade="all, delete-orphan")
     departments = relationship("Department", back_populates="building", cascade="all, delete-orphan")
 
@@ -313,7 +332,8 @@ class Department(Base):
     name = Column(String(255), nullable=False)
     code = Column(String(50))
     accounting_code = Column(String(100))  # For Tally / ERP integration
-    building_id = Column(Integer, ForeignKey("buildings.id"), nullable=False)
+    building_id = Column(Integer, ForeignKey("buildings.id"), nullable=True)
+    institution_id = Column(Integer, ForeignKey("institutions.id"), nullable=True)
     is_active = Column(Boolean, default=True)
     is_deleted = Column(Boolean, default=False)
     created_at = Column(DateTime, default=_get_now)
@@ -327,7 +347,8 @@ class Floor(Base):
     site_id = Column(Integer, ForeignKey("sites.id", ondelete="CASCADE"), nullable=False)
     name = Column(String(255), nullable=False) # e.g. "Ground Floor", "1st Floor"
     level = Column(Integer, default=0)
-    building_id = Column(Integer, ForeignKey("buildings.id"), nullable=False)
+    building_id = Column(Integer, ForeignKey("buildings.id"), nullable=True)
+    department_name = Column(String(255), nullable=True)
     is_active = Column(Boolean, default=True)
     is_deleted = Column(Boolean, default=False)
     created_at = Column(DateTime, default=_get_now)

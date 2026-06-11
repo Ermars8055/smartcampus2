@@ -1,4 +1,4 @@
-"""NissiGrid Smart Campus - Pydantic schemas."""
+"""Eastpoint Smart Campus - Pydantic schemas."""
 
 from pydantic import BaseModel, Field, EmailStr, field_validator
 from typing import List, Optional, Dict, Any
@@ -345,10 +345,27 @@ class ProjectOut(ProjectBase):
     class Config:
         from_attributes = True
 
-class BuildingBase(BaseModel):
+class InstitutionBase(BaseModel):
     name: str
     code: Optional[str] = None
     project_id: int
+
+class InstitutionCreate(InstitutionBase):
+    pass
+
+class InstitutionOut(InstitutionBase):
+    id: int
+    project_name: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+class BuildingBase(BaseModel):
+    name: str
+    code: Optional[str] = None
+    project_id: Optional[int] = None
+    institution_id: Optional[int] = None
+    department_name: Optional[str] = None
 
 class BuildingCreate(BuildingBase):
     pass
@@ -356,13 +373,15 @@ class BuildingCreate(BuildingBase):
 class BuildingOut(BuildingBase):
     id: int
     project_name: Optional[str] = None
+    institution_name: Optional[str] = None
     class Config:
         from_attributes = True
 
 class FloorBase(BaseModel):
     name: str
     level: int = 0
-    building_id: int
+    building_id: Optional[int] = None
+    department_name: Optional[str] = None
 
 class FloorCreate(FloorBase):
     pass
@@ -377,7 +396,8 @@ class DepartmentBase(BaseModel):
     name: str
     code: Optional[str] = None
     accounting_code: Optional[str] = None
-    building_id: int
+    building_id: Optional[int] = None
+    institution_id: Optional[int] = None
 
 class DepartmentCreate(DepartmentBase):
     pass

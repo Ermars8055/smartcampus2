@@ -1053,7 +1053,7 @@ def _build_po_email_template(po):
         <p><strong>{ORG_NAME}</strong></p>
         <hr style="border: none; border-top: 1px solid #e2e8f0; margin-top: 24px;"/>
         <p style="font-size: 11px; color: #94a3b8;">
-            This is a system-generated email from NissiGrid Smart Campus.
+            This is a system-generated email from Eastpoint Smart Campus | Powered by NissiGrid Technologies.
             Please do not reply to this email.
         </p>
     </div>

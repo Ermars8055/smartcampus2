@@ -4,9 +4,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from app.database import get_db
-from app.models import Organization, Project, Building, Warehouse, User, Floor, Room, Department
+from app.models import Organization, Project, Institution, Building, Warehouse, User, Floor, Room, Department
 from app.schemas import (
     OrganizationCreate, OrganizationOut, ProjectCreate, ProjectOut,
+    InstitutionCreate, InstitutionOut,
     BuildingCreate, BuildingOut, WarehouseCreate, WarehouseOut,
     FloorCreate, FloorOut, RoomCreate, RoomOut, DepartmentCreate, DepartmentOut
 )
@@ -197,6 +198,93 @@ def delete_project(
     return {"message": "Project deleted successfully"}
 
 
+# ── Institutions ─────────────────────────────────────────────────────────────
+
+@router.get("/institutions", response_model=List[InstitutionOut])
+def list_institutions(
+    project_id: int = None, db: Session = Depends(get_db), 
+    current_user: User = Depends(get_current_user),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    q = db.query(Institution).filter(
+        Institution.tenant_id == tenant_id, Institution.site_id == site_id, Institution.is_active == True
+    )
+    if project_id:
+        q = q.filter(Institution.project_id == project_id)
+    institutions = q.order_by(Institution.name).all()
+    return [
+        InstitutionOut(
+            id=i.id, name=i.name, code=i.code,
+            project_id=i.project_id,
+            is_active=i.is_active, created_at=i.created_at,
+            project_name=i.project.name if i.project else None
+        )
+        for i in institutions
+    ]
+
+@router.post("/institutions", response_model=InstitutionOut)
+def create_institution(
+    data: InstitutionCreate, db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("projects", "create")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    if not data.name or not data.name.strip():
+        raise HTTPException(status_code=400, detail="Institution name is required")
+    inst_data = data.model_dump()
+    if not inst_data.get("code"):
+        inst_data["code"] = get_next_number(db, tenant_id, site_id, "INSTITUTION", "INST")
+    inst = Institution(**inst_data, tenant_id=tenant_id, site_id=site_id)
+    db.add(inst)
+    db.commit()
+    db.refresh(inst)
+    return inst
+
+@router.put("/institutions/{id}", response_model=InstitutionOut)
+def update_institution(
+    id: int, data: InstitutionCreate, db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("projects", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    if not data.name or not data.name.strip():
+        raise HTTPException(status_code=400, detail="Institution name is required")
+        
+    inst = db.query(Institution).filter(
+        Institution.id == id, Institution.tenant_id == tenant_id, Institution.site_id == site_id
+    ).first()
+    if not inst:
+        raise HTTPException(status_code=404, detail="Institution not found")
+    for k, v in data.model_dump().items():
+        setattr(inst, k, v)
+    db.commit()
+    db.refresh(inst)
+    return inst
+
+@router.delete("/institutions/{id}")
+def delete_institution(
+    id: int, db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("projects", "delete")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    inst = db.query(Institution).filter(
+        Institution.id == id, Institution.tenant_id == tenant_id, Institution.site_id == site_id
+    ).first()
+    if not inst:
+        raise HTTPException(status_code=404, detail="Institution not found")
+        
+    has_buildings = db.query(Building).filter(Building.institution_id == id, Building.is_deleted == False).first()
+    if has_buildings:
+        raise HTTPException(status_code=400, detail="Cannot delete institution with existing buildings")
+        
+    inst.is_deleted = True
+    inst.is_active = False
+    db.commit()
+    return {"message": "Institution deleted successfully"}
+
+
 # ── Buildings ───────────────────────────────────────────────────────────────
 
 @router.get("/buildings")
@@ -231,8 +319,10 @@ def list_buildings(
         BuildingOut(
             id=b.id, name=b.name, code=b.code,
             project_id=b.project_id,
+            institution_id=b.institution_id,
             is_active=b.is_active, created_at=b.created_at,
-            project_name=b.project.name if b.project else None
+            project_name=b.project.name if b.project else None,
+            institution_name=b.institution.name if getattr(b, "institution", None) else None
         )
         for b in buildings
     ]
@@ -542,7 +632,7 @@ def list_departments(
     return [
         DepartmentOut(
             id=d.id, name=d.name, code=d.code, accounting_code=d.accounting_code,
-            building_id=d.building_id,
+            building_id=d.building_id, institution_id=d.institution_id,
             building_name=d.building.name if d.building else None
         ) for d in depts
     ]
@@ -566,7 +656,7 @@ def list_departments_by_building(
     return [
         DepartmentOut(
             id=d.id, name=d.name, code=d.code, accounting_code=d.accounting_code,
-            building_id=d.building_id,
+            building_id=d.building_id, institution_id=d.institution_id,
             building_name=d.building.name if d.building else None
         ) for d in depts
     ]
@@ -598,7 +688,7 @@ def create_department(
     db.refresh(dept)
     return DepartmentOut(
         id=dept.id, name=dept.name, code=dept.code, accounting_code=dept.accounting_code,
-        building_id=dept.building_id,
+        building_id=dept.building_id, institution_id=dept.institution_id,
         building_name=dept.building.name if dept.building else None
     )
 
@@ -621,7 +711,7 @@ def update_department(
     db.refresh(dept)
     return DepartmentOut(
         id=dept.id, name=dept.name, code=dept.code, accounting_code=dept.accounting_code,
-        building_id=dept.building_id,
+        building_id=dept.building_id, institution_id=dept.institution_id,
         building_name=dept.building.name if dept.building else None
     )
 

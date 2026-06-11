@@ -6,7 +6,7 @@ import axios from 'axios';
 const API_BASE = import.meta.env.VITE_API_URL ||
   (window.location.hostname === 'localhost'
     ? 'http://localhost:8007'
-    : (window.location.hostname.includes('nissigrid.com')
+    : (window.location.hostname.includes('eastpoint.com')
       ? '' // Leave this empty for production
       : `${window.location.protocol}//${window.location.hostname}:8007`));
 

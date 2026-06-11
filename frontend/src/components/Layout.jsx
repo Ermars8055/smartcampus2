@@ -81,7 +81,6 @@ const menuItems = [
       { text: 'Material Allowances', icon: <Inventory2 />, path: '/admin/material-allowances', resource: 'admin_users' },
       { text: 'Configurations', icon: <Settings />, path: '/admin/configurations', resource: 'admin_users' }, // Using 'admin_users' as a representative for Configs based on RoleConfiguration
       { text: 'Projects', icon: <AccountTree />, path: '/projects', resource: 'projects' },
-      { text: 'Departments', icon: <Business />, path: '/departments', resource: 'departments' },
       { text: 'Terms & Conditions', icon: <Assignment />, path: '/terms', resource: 'terms' },
       { text: 'Company Addresses', icon: <Business />, path: '/company-addresses', resource: 'admin_users' },
     ]
@@ -145,7 +144,7 @@ export default function Layout() {
         <Box
           component="img"
           src={'/src/assets/logo.jpg'}
-          alt="NissiGrid"
+          alt="Eastpoint"
           sx={{
             width: 40, height: 40, objectFit: 'contain',
             filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
@@ -153,7 +152,7 @@ export default function Layout() {
         />
         <Box>
           <Typography variant="subtitle2" sx={{ color: '#fff', fontWeight: 700, fontSize: '0.85rem', lineHeight: 1.2 }}>
-            NissiGrid
+            Eastpoint
           </Typography>
           <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: '0.65rem' }}>
             Smart Campus
@@ -254,6 +253,19 @@ export default function Layout() {
           </Box>
         </Box>
       </Box>
+
+      {/* Attribution */}
+      <Box sx={{ p: 2, borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 1.5 }}>
+        <Box component="img" src="/nissigrid_logo.jpg" sx={{ height: 32, objectFit: 'contain', opacity: 0.9 }} />
+        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+          <Typography variant="body2" sx={{ color: '#CBD5E1', fontSize: '0.75rem', lineHeight: 1.2 }}>
+            Powered by
+          </Typography>
+          <Typography variant="body2" sx={{ color: '#CBD5E1', fontSize: '0.85rem', fontWeight: 700, lineHeight: 1.2 }}>
+            NissiGrid Technologies
+          </Typography>
+        </Box>
+      </Box>
     </Box>
   );
 
@@ -286,7 +298,7 @@ export default function Layout() {
             )}
             <Box sx={{ flex: 1 }}>
               <Typography variant="h6" sx={{ color: '#1E3A8A', fontWeight: 700, fontSize: '1.1rem' }}>
-                NissiGrid Smart Campus
+                Eastpoint Smart Campus
               </Typography>
               <Typography variant="caption" sx={{ color: '#64748B', mt: -0.5, display: 'block' }}>
                 Enterprise Materials Governance Platform

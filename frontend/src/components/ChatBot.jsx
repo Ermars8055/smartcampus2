@@ -12,7 +12,7 @@ import Draggable from 'react-draggable';
 export default function ChatBot() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { text: "Hi! I'm your NissiGrid Intelligence assistant. Ask me about purchase history or LPP (e.g., 'LPP for cement')", isBot: true }
+    { text: "Hi! I'm your Eastpoint Intelligence assistant. Ask me about purchase history or LPP (e.g., 'LPP for cement')", isBot: true }
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -89,7 +89,7 @@ export default function ChatBot() {
               <SmartToy fontSize="small" />
             </Avatar>
             <Box>
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, lineHeight: 1 }}>NissiGrid Bot</Typography>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, lineHeight: 1 }}>Eastpoint Bot</Typography>
               <Typography variant="caption" sx={{ color: '#94A3B8' }}>Always Online</Typography>
             </Box>
             <IconButton size="small" onClick={() => setOpen(false)} sx={{ ml: 'auto', color: '#fff' }}>

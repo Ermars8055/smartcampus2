@@ -70,9 +70,20 @@ export default function Login() {
           mx: -4, mt: -4, p: 3, borderRadius: '16px 16px 0 0',
           textAlign: 'center', mb: 3,
         }}>
-          <Typography variant="h5" sx={{ color: '#fff', fontWeight: 700, letterSpacing: 0.5 }}>
-            🏗️ NissiGrid Smart Campus
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1.5 }}>
+            <Box
+              component="img"
+              src="/src/assets/logo.jpg"
+              alt="Eastpoint"
+              sx={{
+                width: 36, height: 36, objectFit: 'contain',
+                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))'
+              }}
+            />
+            <Typography variant="h5" sx={{ color: '#fff', fontWeight: 700, letterSpacing: 0.5 }}>
+              Eastpoint Smart Campus
+            </Typography>
+          </Box>
           <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)', mt: 0.5 }}>
             Materials Management Platform
           </Typography>
@@ -153,7 +164,7 @@ export default function Login() {
         </Box>
 
         <Typography variant="caption" sx={{ display: 'block', textAlign: 'center', mt: 3, color: '#94A3B8' }}>
-          © 2026 NissiGrid Technologies
+          © 2026 Eastpoint | Powered by NissiGrid Technologies
         </Typography>
       </Card>
     </Box>

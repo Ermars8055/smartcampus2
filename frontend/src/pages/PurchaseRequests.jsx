@@ -324,7 +324,7 @@ export default function PurchaseRequests() {
   }, [prs, filterDepartment, filterBuilding]);
 
   const sortedPRs = useMemo(() => {
-    let list = tab === 0 ? filteredPRsBase : filteredPRsBase.filter(p => p.status === statusFilters[tab]);
+    let list = tab === 6 ? filteredPRsBase : filteredPRsBase.filter(p => p.status === statusFilters[tab]);
 
     return [...list].sort((a, b) => {
       let aVal = a[sortConfig.key];
@@ -399,7 +399,7 @@ export default function PurchaseRequests() {
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   {s}
                   <Chip
-                    label={i === 0 ? filteredPRsBase.length : filteredPRsBase.filter(p => p.status === s).length}
+                    label={s === 'All' ? filteredPRsBase.length : filteredPRsBase.filter(p => p.status === s).length}
                     size="small"
                     sx={{
                       height: 20,

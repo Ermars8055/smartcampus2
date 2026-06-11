@@ -459,7 +459,7 @@ export default function RateAnalysisReport() {
         {reportData && (
           <Box sx={{ p: 1.5, borderTop: '1px solid #E2E8F0', display: 'flex', justifyContent: 'space-between', background: '#FAFAFA' }}>
             <Typography variant="caption" sx={{ color: '#64748B' }}>{reportData.total_materials} material(s) | Tax: {reportData.include_tax ? 'Inclusive' : 'Exclusive'}</Typography>
-            <Typography variant="caption" sx={{ color: '#64748B' }}>Generated: {reportData.generated_at} | NissiGrid Smart Campus</Typography>
+            <Typography variant="caption" sx={{ color: '#64748B' }}>Generated: {reportData.generated_at} | Eastpoint Smart Campus | Powered by NissiGrid Technologies</Typography>
           </Box>
         )}
       </Card>

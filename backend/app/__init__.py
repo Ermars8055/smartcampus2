@@ -1,1 +1,1 @@
-# NissiGrid Smart Campus - Backend Application
+# Eastpoint Smart Campus - Backend Application

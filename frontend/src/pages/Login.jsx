@@ -7,6 +7,7 @@ import {
 import { Visibility, VisibilityOff, Lock, Person, Business, Security } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
+import logoImg from '../assets/logo.jpg';
 
 export default function Login() {
   const [username, setUsername] = useState('');
@@ -73,7 +74,7 @@ export default function Login() {
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1.5 }}>
             <Box
               component="img"
-              src="/src/assets/logo.jpg"
+              src={logoImg}
               alt="Eastpoint"
               sx={{
                 width: 36, height: 36, objectFit: 'contain',

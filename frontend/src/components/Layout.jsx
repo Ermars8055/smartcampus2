@@ -16,6 +16,7 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
+import logoImg from '../assets/logo.jpg';
 
 const DRAWER_WIDTH = 260;
 
@@ -174,7 +175,7 @@ export default function Layout() {
       <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 1.5, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
         <Box
           component="img"
-          src={'/src/assets/logo.jpg'}
+          src={logoImg}
           alt="Eastpoint"
           sx={{
             width: 40, height: 40, objectFit: 'contain',

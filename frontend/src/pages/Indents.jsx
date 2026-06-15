@@ -408,23 +408,35 @@ export default function Indents() {
     if (!indent) return;
 
     let hasLargerQuantity = false;
-    let largerQuantityMessage = "You have entered an approved quantity larger than the requested quantity for the following items:\n";
+    const largerItems = [];
 
     for (const it of indent.items) {
       const val = items[it.id]?.qty;
       const qty = parseFloat(val);
       if (qty > it.requested_quantity) {
         hasLargerQuantity = true;
-        largerQuantityMessage += `\n• ${it.material_name}:\n   Requested: ${it.requested_quantity} ${it.uom_name}\n   Approved: ${qty} ${it.uom_name}\n`;
+        largerItems.push({ name: it.material_name, requested: it.requested_quantity, approved: qty, uom: it.uom_name, rem: items[it.id]?.rem || '' });
       }
     }
 
-    largerQuantityMessage += "\nDo you want to proceed?";
-
     if (hasLargerQuantity) {
+      const msgJsx = (
+        <>
+          <span>You have entered an approved quantity larger than the requested quantity for the following items:</span>
+          {largerItems.map((li, idx) => (
+            <div key={idx} style={{ margin: '12px 0', paddingLeft: 8 }}>
+              <strong>• {li.name}:</strong><br/>
+              &nbsp;&nbsp;&nbsp;Requested: {li.requested} {li.uom}<br/>
+              &nbsp;&nbsp;&nbsp;Approved: {li.approved} {li.uom}<br/>
+              &nbsp;&nbsp;&nbsp;<span style={{ color: '#dc2626', fontWeight: 600 }}>Remarks: {li.rem}</span>
+            </div>
+          ))}
+          <span>Do you want to proceed?</span>
+        </>
+      );
       showConfirm(
         'Confirm Higher Quantity',
-        largerQuantityMessage,
+        msgJsx,
         'Proceed',
         'warning',
         submitApproval
@@ -890,6 +902,10 @@ export default function Indents() {
               <Typography sx={{ fontWeight: 600 }}>{detailDialog?.requester_name}</Typography>
             </Grid>
             <Grid item xs={3}>
+              <Typography variant="caption" color="textSecondary">Institution</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{detailDialog?.institution_name || '—'}</Typography>
+            </Grid>
+            <Grid item xs={3}>
               <Typography variant="caption" color="textSecondary">Department</Typography>
               <Typography sx={{ fontWeight: 600 }}>{detailDialog?.department || '—'}</Typography>
             </Grid>
@@ -993,7 +1009,7 @@ export default function Indents() {
                               {detailHistoryData.entries.map((entry, idx) => (
                                 <TableCell key={idx} align="center">L{entry.level} APPROVED QTY</TableCell>
                               ))}
-                              <TableCell align="right">FINAL APPROVED QTY</TableCell>
+
                             </TableRow>
                           </TableHead>
                           <TableBody>
@@ -1034,9 +1050,7 @@ export default function Indents() {
                                     );
                                   })}
 
-                                  <TableCell align="right" sx={{ fontWeight: 700, color: '#059669' }}>
-                                    {item.approved_quantity !== null && item.approved_quantity !== undefined ? item.approved_quantity : '—'}
-                                  </TableCell>
+
                                 </TableRow>
                               );
                             })}
@@ -1094,6 +1108,10 @@ export default function Indents() {
             <Grid item xs={3}>
               <Typography variant="caption" color="textSecondary">Requester</Typography>
               <Typography sx={{ fontWeight: 600 }}>{approvalDialog.indent?.requester_name}</Typography>
+            </Grid>
+            <Grid item xs={3}>
+              <Typography variant="caption" color="textSecondary">Institution</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{approvalDialog.indent?.institution_name || '—'}</Typography>
             </Grid>
             <Grid item xs={3}>
               <Typography variant="caption" color="textSecondary">Department</Typography>
@@ -1170,13 +1188,20 @@ export default function Indents() {
                       />
                     </TableCell>
                     <TableCell align="left" sx={{ bgcolor: '#eff6ff' }}>
-                      <TextField
-                        size="small"
-                        placeholder=""
-                        value={approvalDialog.items[item.id]?.rem || ''}
-                        onChange={e => setApprovalDialog(prev => ({ ...prev, items: { ...prev.items, [item.id]: { ...(prev.items[item.id] || {}), rem: e.target.value } } }))}
-                        sx={{ width: 130, bgcolor: '#fff', '& .MuiInputBase-input': { fontSize: '0.8rem' } }}
-                      />
+                      {(() => {
+                        const approvedQty = parseFloat(approvalDialog.items[item.id]?.qty);
+                        const isHigher = !isNaN(approvedQty) && approvedQty > item.requested_quantity;
+                        return (
+                          <TextField
+                            size="small"
+                            placeholder={isHigher ? 'Required' : ''}
+                            value={approvalDialog.items[item.id]?.rem || ''}
+                            onChange={e => setApprovalDialog(prev => ({ ...prev, items: { ...prev.items, [item.id]: { ...(prev.items[item.id] || {}), rem: e.target.value } } }))}
+                            error={isHigher && !(approvalDialog.items[item.id]?.rem || '').trim()}
+                            sx={{ width: 130, bgcolor: '#fff', '& .MuiInputBase-input': { fontSize: '0.8rem' } }}
+                          />
+                        );
+                      })()}
                     </TableCell>
                     <TableCell align="center">
                       <Tooltip title="View Approval History">
@@ -1210,7 +1235,15 @@ export default function Indents() {
           <Button onClick={() => { setApprovalDialog({ open: false, indent: null, items: {} }); setApprovalRemarks(''); }}>Cancel</Button>
           <Button
             variant="contained" color="primary" onClick={handleApproveClick} sx={{ fontWeight: 600 }}
-            disabled={!approvalDialog.indent?.items?.every(item => approvalDialog.items[item.id]?.qty !== undefined && approvalDialog.items[item.id]?.qty !== '')}
+            disabled={!approvalDialog.indent?.items?.every(item => {
+              const hasQty = approvalDialog.items[item.id]?.qty !== undefined && approvalDialog.items[item.id]?.qty !== '';
+              if (!hasQty) return false;
+              const approvedQty = parseFloat(approvalDialog.items[item.id]?.qty);
+              if (!isNaN(approvedQty) && approvedQty > item.requested_quantity) {
+                return !!(approvalDialog.items[item.id]?.rem || '').trim();
+              }
+              return true;
+            })}
           >
             Confirm & Approve
           </Button>

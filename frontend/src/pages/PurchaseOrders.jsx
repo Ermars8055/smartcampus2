@@ -52,7 +52,7 @@ export default function PurchaseOrders() {
     }
   };
 
-  const handleApproveClick = async () => {
+  const submitApproval = async () => {
     const { po, items } = approvalDialog;
     if (!po) return;
 
@@ -80,6 +80,49 @@ export default function PurchaseOrders() {
       load();
     } catch (err) {
       showMessage(err.response?.data?.detail || 'Error approving PO', 'Approval Failed', 'error');
+    }
+  };
+
+  const handleApproveClick = () => {
+    const { po, items } = approvalDialog;
+    if (!po) return;
+
+    let hasLargerQuantity = false;
+    const largerItems = [];
+
+    for (const it of po.items) {
+      const val = items[it.id]?.qty;
+      const qty = parseFloat(val !== undefined ? val : it.quantity);
+      if (qty > it.quantity) {
+        hasLargerQuantity = true;
+        largerItems.push({ name: it.material_name, requested: it.quantity, approved: qty, uom: it.uom_name, rem: items[it.id]?.rem || '' });
+      }
+    }
+
+    if (hasLargerQuantity) {
+      const msgJsx = (
+        <>
+          <span>You have entered an approved quantity larger than the requested quantity for the following items:</span>
+          {largerItems.map((li, idx) => (
+            <div key={idx} style={{ margin: '12px 0', paddingLeft: 8 }}>
+              <strong>• {li.name}:</strong><br/>
+              &nbsp;&nbsp;&nbsp;Requested: {li.requested} {li.uom}<br/>
+              &nbsp;&nbsp;&nbsp;Approved: {li.approved} {li.uom}<br/>
+              &nbsp;&nbsp;&nbsp;<span style={{ color: '#dc2626', fontWeight: 600 }}>Remarks: {li.rem}</span>
+            </div>
+          ))}
+          <span>Do you want to proceed?</span>
+        </>
+      );
+      showConfirm(
+        'Confirm Higher Quantity',
+        msgJsx,
+        'Proceed',
+        'warning',
+        submitApproval
+      );
+    } else {
+      submitApproval();
     }
   };
 
@@ -1203,11 +1246,7 @@ export default function PurchaseOrders() {
                                     </Box>
                                   </TableCell>
                                 ))}
-                                <TableCell align="right">
-                                  <Box sx={{ whiteSpace: 'normal', maxWidth: 80, lineHeight: 1.2, ml: 'auto', textTransform: 'uppercase' }}>
-                                    FINAL APPROVED QTY
-                                  </Box>
-                                </TableCell>
+
                               </TableRow>
                             </TableHead>
                             <TableBody>
@@ -1245,9 +1284,7 @@ export default function PurchaseOrders() {
                                       );
                                     })}
 
-                                    <TableCell align="right" sx={{ fontWeight: 700, color: '#059669' }}>
-                                      {item.approved_quantity !== null && item.approved_quantity !== undefined ? item.approved_quantity : '—'}
-                                    </TableCell>
+
                                   </TableRow>
                                 );
                               })}
@@ -1756,7 +1793,7 @@ export default function PurchaseOrders() {
                               {detailHistoryData.entries.map((entry, idx) => (
                                 <TableCell key={idx} align="center">L{entry.level} APPROVED QTY</TableCell>
                               ))}
-                              <TableCell align="right">FINAL APPROVED QTY</TableCell>
+
                             </TableRow>
                           </TableHead>
                           <TableBody>
@@ -1797,9 +1834,7 @@ export default function PurchaseOrders() {
                                     );
                                   })}
 
-                                  <TableCell align="right" sx={{ fontWeight: 700, color: '#059669' }}>
-                                    {item.approved_quantity !== null && item.approved_quantity !== undefined ? item.approved_quantity : '—'}
-                                  </TableCell>
+
                                 </TableRow>
                               );
                             })}
@@ -1944,11 +1979,7 @@ export default function PurchaseOrders() {
                                   </Box>
                                 </TableCell>
                               ))}
-                              <TableCell align="right">
-                                <Box sx={{ whiteSpace: 'normal', maxWidth: 80, lineHeight: 1.2, ml: 'auto', textTransform: 'uppercase' }}>
-                                  FINAL APPROVED QTY
-                                </Box>
-                              </TableCell>
+
                             </TableRow>
                           </TableHead>
                           <TableBody>
@@ -1989,9 +2020,7 @@ export default function PurchaseOrders() {
                                     );
                                   })}
 
-                                  <TableCell align="right" sx={{ fontWeight: 700, color: '#059669' }}>
-                                    {item.approved_quantity !== null && item.approved_quantity !== undefined ? item.approved_quantity : '—'}
-                                  </TableCell>
+
                                 </TableRow>
                               );
                             })}
@@ -2198,13 +2227,20 @@ export default function PurchaseOrders() {
                       />
                     </TableCell>
                     <TableCell align="left" sx={{ bgcolor: '#eff6ff' }}>
-                      <TextField
-                        size="small"
-                        placeholder=""
-                        value={approvalDialog.items[item.id]?.rem || ''}
-                        onChange={e => setApprovalDialog(prev => ({ ...prev, items: { ...prev.items, [item.id]: { ...(prev.items[item.id] || {}), rem: e.target.value } } }))}
-                        sx={{ width: 130, bgcolor: '#fff', '& .MuiInputBase-input': { fontSize: '0.8rem' } }}
-                      />
+                      {(() => {
+                        const approvedQty = parseFloat(approvalDialog.items[item.id]?.qty);
+                        const isHigher = !isNaN(approvedQty) && approvedQty > item.quantity;
+                        return (
+                          <TextField
+                            size="small"
+                            placeholder={isHigher ? 'Required' : ''}
+                            value={approvalDialog.items[item.id]?.rem || ''}
+                            onChange={e => setApprovalDialog(prev => ({ ...prev, items: { ...prev.items, [item.id]: { ...(prev.items[item.id] || {}), rem: e.target.value } } }))}
+                            error={isHigher && !(approvalDialog.items[item.id]?.rem || '').trim()}
+                            sx={{ width: 130, bgcolor: '#fff', '& .MuiInputBase-input': { fontSize: '0.8rem' } }}
+                          />
+                        );
+                      })()}
                     </TableCell>
                     <TableCell align="center">
                       <Tooltip title="View Approval History">
@@ -2237,7 +2273,15 @@ export default function PurchaseOrders() {
           <Button onClick={() => { setApprovalDialog({ open: false, po: null, items: {} }); setApprovalRemarks(''); }}>Cancel</Button>
           <Button
             variant="contained" color="primary" onClick={handleApproveClick} sx={{ fontWeight: 600 }}
-            disabled={!approvalDialog.po?.items?.every(item => approvalDialog.items[item.id]?.qty !== undefined && approvalDialog.items[item.id]?.qty !== '')}
+            disabled={!approvalDialog.po?.items?.every(item => {
+              const hasQty = approvalDialog.items[item.id]?.qty !== undefined && approvalDialog.items[item.id]?.qty !== '';
+              if (!hasQty) return false;
+              const approvedQty = parseFloat(approvalDialog.items[item.id]?.qty);
+              if (!isNaN(approvedQty) && approvedQty > item.quantity) {
+                return !!(approvalDialog.items[item.id]?.rem || '').trim();
+              }
+              return true;
+            })}
           >
             Confirm & Approve
           </Button>

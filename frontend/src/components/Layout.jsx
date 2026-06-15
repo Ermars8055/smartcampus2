@@ -396,7 +396,7 @@ export default function Layout() {
             <Box sx={{
               display: 'flex',
               width: 'max-content',
-              animation: 'marqueeContinuous 30s linear infinite',
+              animation: `marqueeContinuous ${Math.max(30, activeAlerts.length * 20)}s linear infinite`,
               '@keyframes marqueeContinuous': {
                 '0%': { transform: 'translateX(0)' },
                 '100%': { transform: 'translateX(-50%)' }

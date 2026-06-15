@@ -403,11 +403,22 @@ def get_approval_history(
             "items": items
         })
 
+    # Deduplicate entries by level — keep only the latest entry per level
+    deduped = {}
+    for entry in entries:
+        level = entry["level"]
+        if level not in deduped:
+            deduped[level] = entry
+        else:
+            # Keep the later one (entries are ordered by approved_at asc, so last wins)
+            deduped[level] = entry
+    deduped_entries = list(deduped.values())
+
     return {
         "indent_id": indent.id,
         "indent_number": indent.indent_number,
         "current_approval_level": indent.current_approval_level,
-        "entries": entries
+        "entries": deduped_entries
     }
 
 class IndentRejectRequest(BaseModel):

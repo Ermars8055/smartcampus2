@@ -469,11 +469,21 @@ def get_pr_approval_history(
             "items": items
         })
 
+    # Deduplicate entries by level — keep only the latest entry per level
+    deduped = {}
+    for entry in entries:
+        level = entry["level"]
+        if level not in deduped:
+            deduped[level] = entry
+        else:
+            deduped[level] = entry
+    deduped_entries = list(deduped.values())
+
     return {
         "pr_id": pr.id,
         "pr_number": pr.pr_number,
         "current_approval_level": pr.current_approval_level,
-        "entries": entries
+        "entries": deduped_entries
     }
 
 
@@ -1054,11 +1064,21 @@ def get_po_approval_history(
             "items": items
         })
 
+    # Deduplicate entries by level — keep only the latest entry per level
+    deduped = {}
+    for entry in entries:
+        level = entry["level"]
+        if level not in deduped:
+            deduped[level] = entry
+        else:
+            deduped[level] = entry
+    deduped_entries = list(deduped.values())
+
     return {
         "po_id": po.id,
         "po_number": po.po_number,
         "current_approval_level": po.current_approval_level,
-        "entries": entries
+        "entries": deduped_entries
     }
 
 @router.post("/po/{id}/reject")

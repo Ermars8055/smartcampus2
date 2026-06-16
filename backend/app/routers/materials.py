@@ -153,7 +153,7 @@ def list_subcategories(
 def create_subcategory(
     data: SubCategoryCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("categories", "create")),
+    current_user: User = Depends(require_permission("subcategories", "create")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -168,7 +168,7 @@ def update_subcategory(
     subcategory_id: int,
     data: SubCategoryCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("categories", "update")),
+    current_user: User = Depends(require_permission("subcategories", "update")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -207,12 +207,37 @@ def list_uom(
 def create_uom(
     data: UOMCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("materials", "create")),
+    current_user: User = Depends(require_permission("uom", "create")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
     uom = UOM(**data.model_dump(), tenant_id=tenant_id, site_id=site_id)
     db.add(uom)
+    db.commit()
+    db.refresh(uom)
+    return uom
+
+
+@router.put("/uom/{id}", response_model=UOMOut)
+def update_uom(
+    id: int,
+    data: UOMCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("uom", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    uom = db.query(UOM).filter(
+        UOM.id == id,
+        UOM.tenant_id == tenant_id,
+        UOM.site_id == site_id,
+        UOM.is_active == True
+    ).first()
+    if not uom:
+        raise HTTPException(status_code=404, detail="UOM not found")
+        
+    uom.name = data.name
+    uom.abbreviation = data.abbreviation
     db.commit()
     db.refresh(uom)
     return uom

@@ -2,16 +2,16 @@ import { useState, useEffect } from 'react';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow,
   TableCell, TableContainer, Button, TextField, Dialog, DialogTitle,
-  DialogContent, DialogActions, Chip, InputAdornment, TableSortLabel
+  DialogContent, DialogActions, Chip, InputAdornment, TableSortLabel, IconButton
 } from '@mui/material';
-import { Add, Straighten, Abc } from '@mui/icons-material';
+import { Add, Straighten, Abc, Edit } from '@mui/icons-material';
 import api from '../services/api';
 
 export default function UOM() {
   const [uoms, setUoms] = useState([]);
   const [dialog, setDialog] = useState('');
   const [uomSortConfig, setUomSortConfig] = useState({ key: 'name', direction: 'asc' });
-  const [uomForm, setUomForm] = useState({ name: '', abbreviation: '' });
+  const [uomForm, setUomForm] = useState({ id: null, name: '', abbreviation: '' });
 
   const load = () => {
     api.get('/api/uom').then(r => setUoms(r.data));
@@ -41,7 +41,11 @@ export default function UOM() {
     }
     
     try {
-      await api.post('/api/uom', uomForm);
+      if (uomForm.id) {
+        await api.put(`/api/uom/${uomForm.id}`, uomForm);
+      } else {
+        await api.post('/api/uom', uomForm);
+      }
       setDialog(''); load();
     } catch (err) { alert(err.response?.data?.detail || 'Error saving UOM'); }
   };
@@ -71,7 +75,7 @@ export default function UOM() {
           <Button 
             variant="text" 
             startIcon={<Add />} 
-            onClick={() => { setUomForm({ name: '', abbreviation: '' }); setDialog('uom'); }}
+            onClick={() => { setUomForm({ id: null, name: '', abbreviation: '' }); setDialog('uom'); }}
             sx={{ textTransform: 'none', fontWeight: 600, color: '#2563EB' }}
           >
             Add UOM
@@ -100,6 +104,7 @@ export default function UOM() {
                   </TableSortLabel>
                 </TableCell>
                 <TableCell sx={{ fontWeight: 700, color: '#64748B', fontSize: '0.75rem', py: 2, bgcolor: '#F8FAFC' }}>STATUS</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 700, color: '#64748B', fontSize: '0.75rem', py: 2, bgcolor: '#F8FAFC' }}>ACTIONS</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -122,6 +127,11 @@ export default function UOM() {
                       }} 
                     />
                   </TableCell>
+                  <TableCell align="right">
+                    <IconButton size="small" onClick={() => { setUomForm({ id: u.id, name: u.name, abbreviation: u.abbreviation }); setDialog('uom'); }}>
+                      <Edit fontSize="small" sx={{ color: '#64748B' }} />
+                    </IconButton>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -137,10 +147,10 @@ export default function UOM() {
             </Box>
             <Box>
               <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
-                New Unit of Measure
+                {uomForm.id ? 'Edit Unit of Measure' : 'New Unit of Measure'}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Create a standard measurement unit for tracking stock.
+                {uomForm.id ? 'Update standard measurement unit details.' : 'Create a standard measurement unit for tracking stock.'}
               </Typography>
             </Box>
           </Box>

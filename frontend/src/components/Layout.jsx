@@ -16,7 +16,7 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
-import logoImg from '../assets/logo.jpg';
+import logoImg from '../assets/logo.png';
 
 const DRAWER_WIDTH = 260;
 
@@ -26,8 +26,8 @@ const menuItems = [
     text: 'Master Data', icon: <Category />, children: [
       { text: 'Materials', icon: <Inventory2 />, path: '/materials', resource: 'materials' },
       { text: 'Categories', icon: <Category />, path: '/categories', resource: 'categories' },
-      { text: 'Sub Categories', icon: <Category />, path: '/subcategories', resource: 'categories' },
-      { text: 'UOM', icon: <Straighten />, path: '/uom', resource: 'categories' },
+      { text: 'Sub Categories', icon: <Category />, path: '/subcategories', resource: 'subcategories' },
+      { text: 'UOM', icon: <Straighten />, path: '/uom', resource: 'uom' },
       { text: 'Vendors', icon: <People />, path: '/vendors', resource: 'vendors' },
       { text: 'Stores', icon: <Warehouse />, path: '/warehouses', resource: 'warehouses' },
     ]

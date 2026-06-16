@@ -52,12 +52,16 @@ def get_pending_indent_alerts(db, current_user, tenant_id, site_id, tracked_ind_
         
         if applicable_flows:
             is_read = tracked_ind_map[ind.id].is_read if (tracked_ind_map and ind.id in tracked_ind_map) else False
+            
+            inst_name = ind.institution.name if getattr(ind, 'institution', None) else ''
+            from_str = f"{inst_name} - {ind.department}" if inst_name and ind.department else (inst_name or ind.department or 'Unknown Dept')
+            
             alerts.append({
                 "id": f"ind_{ind.id}",
                 "title": f"Action Required: Indent {ind.indent_number} Approval",
                 "severity": "Warning",
                 "alert_type": "Pending Action",
-                "message": f"Indent {ind.indent_number} from {ind.department or 'Unknown Dept'} is awaiting Level {ind.current_approval_level} approval.",
+                "message": f"Indent {ind.indent_number} from {from_str} is awaiting Level {ind.current_approval_level} approval.",
                 "created_at": ind.created_at,
                 "is_read": is_read,
                 "is_resolved": False,
@@ -110,12 +114,16 @@ def get_pending_po_alerts(db, current_user, tenant_id, site_id, tracked_po_map=N
         
         if applicable_flows:
             is_read = tracked_po_map[po.id].is_read if (tracked_po_map and po.id in tracked_po_map) else False
+            
+            inst_name = po.project.institutions[0].name if getattr(po, 'project', None) and getattr(po.project, 'institutions', None) else ''
+            from_str = f" from {inst_name}" if inst_name else ""
+            
             alerts.append({
                 "id": f"po_{po.id}",
                 "title": f"Action Required: PO {po.po_number} Approval",
                 "severity": "Warning",
                 "alert_type": "Pending Action",
-                "message": f"Purchase Order {po.po_number} for Vendor '{po.vendor.name if po.vendor else 'Unknown'}' is awaiting Level {po.current_approval_level} approval.",
+                "message": f"Purchase Order {po.po_number}{from_str} for Vendor '{po.vendor.name if po.vendor else 'Unknown'}' is awaiting Level {po.current_approval_level} approval.",
                 "created_at": po.created_at,
                 "is_read": is_read,
                 "is_resolved": False,
@@ -167,12 +175,16 @@ def get_pending_pr_alerts(db, current_user, tenant_id, site_id, tracked_pr_map=N
         
         if applicable_flows:
             is_read = tracked_pr_map[pr.id].is_read if (tracked_pr_map and pr.id in tracked_pr_map) else False
+            
+            inst_name = pr.project.institutions[0].name if getattr(pr, 'project', None) and getattr(pr.project, 'institutions', None) else ''
+            from_str = f"{inst_name} - {pr.department_name}" if inst_name and pr.department_name else (inst_name or pr.department_name or 'Unknown Dept')
+            
             alerts.append({
                 "id": f"pr_{pr.id}",
                 "title": f"Action Required: PR {pr.pr_number} Approval",
                 "severity": "Warning",
                 "alert_type": "Pending Action",
-                "message": f"Purchase Request {pr.pr_number} from {pr.department_name or 'Unknown'} is awaiting Level {pr.current_approval_level} approval.",
+                "message": f"Purchase Request {pr.pr_number} from {from_str} is awaiting Level {pr.current_approval_level} approval.",
                 "created_at": pr.created_at,
                 "is_read": is_read,
                 "is_resolved": False,
@@ -294,12 +306,16 @@ def get_alerts(
                 
             is_read = tracked_ge_map[ge.id].is_read if ge.id in tracked_ge_map else False
             
+            inst_name = ge.project.institutions[0].name if getattr(ge, 'project', None) and getattr(ge.project, 'institutions', None) else ''
+            from_inst_str = f" for {inst_name}" if inst_name else ""
+            vendor_str = f" from {ge.vendor.name}" if ge.vendor else ""
+            
             alerts.append({
                 "id": f"ge_{ge.id}",
                 "title": f"Action Required: Gate Entry {ge.entry_number}",
                 "severity": "Warning",
                 "alert_type": "Pending Action",
-                "message": f"Gate Entry {ge.entry_number} from {ge.vendor.name} is awaiting GRN." if ge.vendor else f"Gate Entry {ge.entry_number} is awaiting GRN.",
+                "message": f"Gate Entry {ge.entry_number}{vendor_str}{from_inst_str} is awaiting GRN.",
                 "created_at": ge.created_at,
                 "is_read": is_read,
                 "is_resolved": False,

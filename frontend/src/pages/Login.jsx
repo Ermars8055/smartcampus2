@@ -7,7 +7,7 @@ import {
 import { Visibility, VisibilityOff, Lock, Person, Business, Security } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
-import logoImg from '../assets/logo.jpg';
+import logoImg from '../assets/logo.png';
 
 export default function Login() {
   const [username, setUsername] = useState('');

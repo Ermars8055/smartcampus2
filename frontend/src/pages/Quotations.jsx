@@ -9,7 +9,7 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions, FormControl, FormHelperText,
   InputLabel, Select, MenuItem, Chip, OutlinedInput, Checkbox, ListItemText, Autocomplete,
   Alert, CircularProgress, Accordion, AccordionSummary, AccordionDetails, Card,
-  Grid, InputAdornment, Tooltip
+  Grid, InputAdornment, Tooltip, createFilterOptions
 } from '@mui/material';
 import {
   Add as AddIcon, Send as SendIcon, CloudUpload as CloudUploadIcon,
@@ -26,6 +26,11 @@ import dayjs from 'dayjs';
 
 
 import { useAuth } from '../context/AuthContext';
+
+const OPTIONS_LIMIT = 50;
+const filterOptions = createFilterOptions({
+  limit: OPTIONS_LIMIT,
+});
 
 const Quotations = () => {
   const { showMessage } = useMessage();
@@ -1246,70 +1251,97 @@ const Quotations = () => {
                 <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', mb: 0.5, display: 'block', ml: 0.5, textTransform: 'uppercase' }}>
                   Link Approved PRs
                 </Typography>
-                <FormControl fullWidth>
-                  <Select
-                    multiple
-                    value={newQR.pr_ids || []}
-                    onChange={handlePRSelection}
-                    input={<OutlinedInput />}
-                    startAdornment={<InputAdornment position="start"><LinkIcon color="action" sx={{ mr: 1 }} /></InputAdornment>}
-                    renderValue={(selected) => (
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                        {selected.map((id) => (
-                          <Chip
-                            key={id}
-                            label={(approvedPrs || []).find(pr => pr.id === id)?.pr_number}
-                            size="small"
-                            color="primary"
-                            variant="outlined"
-                          />
-                        ))}
-                      </Box>
-                    )}
-                  >
-                    {Array.isArray(approvedPrs) && approvedPrs.map(pr => (
-                      <MenuItem key={pr.id} value={pr.id}>
-                        <Checkbox checked={(newQR.pr_ids || []).indexOf(pr.id) > -1} />
-                        <ListItemText primary={`${pr.pr_number}`} secondary={`${pr.items?.length || 0} ${pr.items?.length === 1 ? 'item' : 'items'}`} />
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                <Autocomplete
+                  multiple
+                  options={approvedPrs || []}
+                  getOptionLabel={(option) => option.pr_number || ''}
+                  value={(approvedPrs || []).filter(pr => (newQR.pr_ids || []).includes(pr.id))}
+                  onChange={(e, newValue) => {
+                    handlePRSelection({ target: { value: newValue.map(pr => pr.id) } });
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      placeholder="Search PRs..."
+                      InputProps={{
+                        ...params.InputProps,
+                        startAdornment: (
+                          <>
+                            <InputAdornment position="start" sx={{ ml: 1 }}><LinkIcon color="action" /></InputAdornment>
+                            {params.InputProps.startAdornment}
+                          </>
+                        ),
+                      }}
+                    />
+                  )}
+                  disableCloseOnSelect
+                  renderOption={(props, option, { selected }) => (
+                    <li {...props}>
+                      <Checkbox checked={selected} />
+                      <ListItemText primary={`${option.pr_number}`} secondary={`${option.items?.length || 0} ${option.items?.length === 1 ? 'item' : 'items'}`} />
+                    </li>
+                  )}
+                  renderTags={(value, getTagProps) =>
+                    value.map((option, index) => (
+                      <Chip
+                        {...getTagProps({ index })}
+                        label={option.pr_number}
+                        size="small"
+                        color="primary"
+                        variant="outlined"
+                      />
+                    ))
+                  }
+                />
               </Box>
 
               <Box>
                 <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', mb: 0.5, display: 'block', ml: 0.5, textTransform: 'uppercase' }}>
                   Manual Material Selection
                 </Typography>
-                <FormControl fullWidth>
-                  <Select
-                    multiple
-                    value={newQR.manual_material_ids || []}
-                    onChange={handleManualMaterialSelection}
-                    input={<OutlinedInput />}
-                    startAdornment={<InputAdornment position="start"><InventoryIcon color="action" sx={{ mr: 1 }} /></InputAdornment>}
-                    renderValue={(selected) => (
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                        {selected.map((id) => (
-                          <Chip
-                            key={id}
-                            label={materials.find(m => m.id === id)?.name}
-                            size="small"
-                            color="secondary"
-                            variant="outlined"
-                          />
-                        ))}
-                      </Box>
-                    )}
-                  >
-                    {Array.isArray(materials) && materials.map(m => (
-                      <MenuItem key={m.id} value={m.id}>
-                        <Checkbox checked={(newQR.manual_material_ids || []).indexOf(m.id) > -1} />
-                        <ListItemText primary={m.name} secondary={m.code} />
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                <Autocomplete
+                  multiple
+                  options={materials || []}
+                  getOptionLabel={(option) => `${option.code} - ${option.name}`}
+                  value={(materials || []).filter(m => (newQR.manual_material_ids || []).includes(m.id))}
+                  onChange={(e, newValue) => {
+                    handleManualMaterialSelection({ target: { value: newValue.map(m => m.id) } });
+                  }}
+                  filterOptions={filterOptions}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      placeholder="Search Materials..."
+                      InputProps={{
+                        ...params.InputProps,
+                        startAdornment: (
+                          <>
+                            <InputAdornment position="start" sx={{ ml: 1 }}><InventoryIcon color="action" /></InputAdornment>
+                            {params.InputProps.startAdornment}
+                          </>
+                        ),
+                      }}
+                    />
+                  )}
+                  disableCloseOnSelect
+                  renderOption={(props, option, { selected }) => (
+                    <li {...props}>
+                      <Checkbox checked={selected} />
+                      <ListItemText primary={option.name} secondary={option.code} />
+                    </li>
+                  )}
+                  renderTags={(value, getTagProps) =>
+                    value.map((option, index) => (
+                      <Chip
+                        {...getTagProps({ index })}
+                        label={option.name}
+                        size="small"
+                        color="secondary"
+                        variant="outlined"
+                      />
+                    ))
+                  }
+                />
               </Box>
 
               {/* Row 3: Invite Vendors */}
@@ -1326,6 +1358,7 @@ const Quotations = () => {
                     onChange={(e, newValue) => {
                       setNewQR(prev => ({ ...prev, vendor_ids: newValue.map(v => v.id) }));
                     }}
+                    filterOptions={filterOptions}
                     renderInput={(params) => (
                       <TextField
                         {...params}

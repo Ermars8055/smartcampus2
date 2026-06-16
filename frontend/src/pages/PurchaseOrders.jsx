@@ -1096,7 +1096,8 @@ export default function PurchaseOrders() {
                     <TableCell sx={{ fontWeight: 700, fontSize: '0.7rem' }}>Sr. No.</TableCell>
                     <TableCell sx={{ fontWeight: 700, fontSize: '0.7rem' }}>Item Description</TableCell>
                     <TableCell sx={{ fontWeight: 700, fontSize: '0.7rem' }}>HSN Code</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.7rem' }}>Qty</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.7rem' }}>REQ QTY</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.7rem' }}>APPROVE QTY</TableCell>
                     <TableCell sx={{ fontWeight: 700, fontSize: '0.7rem' }}>UOM</TableCell>
                     <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.7rem' }}>RATE</TableCell>
                     <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.7rem' }}>Disc. %</TableCell>
@@ -1121,6 +1122,9 @@ export default function PurchaseOrders() {
                         </TableCell>
                         <TableCell sx={{ fontSize: '0.75rem' }}>-</TableCell>
                         <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{qty.toFixed(2)}</TableCell>
+                        <TableCell align="right" sx={{ fontSize: '0.75rem', fontWeight: 600, color: '#1d4ed8' }}>
+                          {item.approved_quantity !== null && item.approved_quantity !== undefined ? parseFloat(item.approved_quantity).toFixed(2) : '-'}
+                        </TableCell>
                         <TableCell sx={{ fontSize: '0.75rem' }}>{item.uom_name || 'NOS'}</TableCell>
                         <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{rate.toFixed(2)}</TableCell>
                         <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{(item.discount_percent || 0).toFixed(2)}</TableCell>
@@ -1242,7 +1246,7 @@ export default function PurchaseOrders() {
                                 {detailHistoryData.entries.map((entry, idx) => (
                                   <TableCell key={idx} align="center">
                                     <Box sx={{ whiteSpace: 'normal', maxWidth: 80, lineHeight: 1.2, margin: '0 auto', textTransform: 'uppercase' }}>
-                                      L{entry.level} APPROVED QTY
+                                      L{idx + 1} APPROVED QTY
                                     </Box>
                                   </TableCell>
                                 ))}
@@ -1294,10 +1298,10 @@ export default function PurchaseOrders() {
                         {detailHistoryData.entries.some(e => e.remarks) && (
                           <Box sx={{ mt: 2 }}>
                             <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748B', mb: 1, display: 'block', textTransform: 'uppercase' }}>General Approval Remarks</Typography>
-                            {detailHistoryData.entries.filter(e => e.remarks).map((e, idx) => (
+                            {detailHistoryData.entries.map((e, i) => ({ e, i })).filter(x => x.e.remarks).map((x, idx) => (
                               <Box key={idx} sx={{ mb: 1, p: 1.5, bgcolor: '#f8fafc', borderRadius: 1, border: '1px solid #e2e8f0' }}>
-                                <Typography variant="caption" sx={{ fontWeight: 700, color: '#1d4ed8', display: 'block', mb: 0.5 }}>L{e.level} Approval - {e.approver_name}</Typography>
-                                <Typography variant="body2" sx={{ color: '#334155' }}>{e.remarks}</Typography>
+                                <Typography variant="caption" sx={{ fontWeight: 700, color: '#1d4ed8', display: 'block', mb: 0.5 }}>L{x.i + 1} Approval - {x.e.approver_name}</Typography>
+                                <Typography variant="body2" sx={{ color: '#334155' }}>{x.e.remarks}</Typography>
                               </Box>
                             ))}
                           </Box>
@@ -1791,7 +1795,7 @@ export default function PurchaseOrders() {
                               <TableCell>UOM</TableCell>
                               <TableCell align="right">REQ QTY</TableCell>
                               {detailHistoryData.entries.map((entry, idx) => (
-                                <TableCell key={idx} align="center">L{entry.level} APPROVED QTY</TableCell>
+                                <TableCell key={idx} align="center">L{idx + 1} APPROVED QTY</TableCell>
                               ))}
 
                             </TableRow>
@@ -1844,10 +1848,10 @@ export default function PurchaseOrders() {
                       {detailHistoryData.entries.some(e => e.remarks) && (
                         <Box sx={{ mt: 2 }}>
                           <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748B', mb: 1, display: 'block', textTransform: 'uppercase' }}>General Approval Remarks</Typography>
-                          {detailHistoryData.entries.filter(e => e.remarks).map((e, idx) => (
+                          {detailHistoryData.entries.map((e, i) => ({ e, i })).filter(x => x.e.remarks).map((x, idx) => (
                             <Box key={idx} sx={{ mb: 1, p: 1.5, bgcolor: '#f8fafc', borderRadius: 1, border: '1px solid #e2e8f0' }}>
-                              <Typography variant="caption" sx={{ fontWeight: 700, color: '#1d4ed8', display: 'block', mb: 0.5 }}>L{e.level} Approval - {e.approver_name}</Typography>
-                              <Typography variant="body2" sx={{ color: '#334155' }}>{e.remarks}</Typography>
+                              <Typography variant="caption" sx={{ fontWeight: 700, color: '#1d4ed8', display: 'block', mb: 0.5 }}>L{x.i + 1} Approval - {x.e.approver_name}</Typography>
+                              <Typography variant="body2" sx={{ color: '#334155' }}>{x.e.remarks}</Typography>
                             </Box>
                           ))}
                         </Box>
@@ -1975,7 +1979,7 @@ export default function PurchaseOrders() {
                               {detailHistoryData.entries.map((entry, idx) => (
                                 <TableCell key={idx} align="center">
                                   <Box sx={{ whiteSpace: 'normal', maxWidth: 80, lineHeight: 1.2, margin: '0 auto', textTransform: 'uppercase' }}>
-                                    L{entry.level} APPROVED QTY
+                                    L{idx + 1} APPROVED QTY
                                   </Box>
                                 </TableCell>
                               ))}
@@ -2030,10 +2034,10 @@ export default function PurchaseOrders() {
                       {detailHistoryData.entries.some(e => e.remarks) && (
                         <Box sx={{ mt: 2 }}>
                           <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748B', mb: 1, display: 'block', textTransform: 'uppercase' }}>General Approval Remarks</Typography>
-                          {detailHistoryData.entries.filter(e => e.remarks).slice().reverse().map((e, idx) => (
+                          {detailHistoryData.entries.map((e, i) => ({ e, i })).filter(x => x.e.remarks).slice().reverse().map((x, idx) => (
                             <Box key={idx} sx={{ mb: 1, p: 1.5, bgcolor: '#f8fafc', borderRadius: 1, border: '1px solid #e2e8f0' }}>
-                              <Typography variant="caption" sx={{ fontWeight: 700, color: '#1d4ed8', display: 'block', mb: 0.5 }}>L{e.level} Approval - {e.approver_name}</Typography>
-                              <Typography variant="body2" sx={{ color: '#334155' }}>{e.remarks}</Typography>
+                              <Typography variant="caption" sx={{ fontWeight: 700, color: '#1d4ed8', display: 'block', mb: 0.5 }}>L{x.i + 1} Approval - {x.e.approver_name}</Typography>
+                              <Typography variant="body2" sx={{ color: '#334155' }}>{x.e.remarks}</Typography>
                             </Box>
                           ))}
                         </Box>

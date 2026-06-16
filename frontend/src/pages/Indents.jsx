@@ -38,6 +38,7 @@ export default function Indents() {
   const [detailHistoryOpen, setDetailHistoryOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [tabValue, setTabValue] = useState('Awaiting Approval');
+  const [filterInstitution, setFilterInstitution] = useState(null);
   const [filterDepartment, setFilterDepartment] = useState(null);
   const [filterBuilding, setFilterBuilding] = useState(null);
   const [allBuildings, setAllBuildings] = useState([]);
@@ -130,6 +131,7 @@ export default function Indents() {
 
   const filteredIndentsBase = indents
     .filter(i => i.status !== 'Converted to PO')
+    .filter(i => !filterInstitution || i.institution_id === filterInstitution.id || i.institution_name === filterInstitution.name)
     .filter(i => !filterDepartment || i.department === filterDepartment)
     .filter(i => !filterBuilding || i.building_id === filterBuilding.id || i.building_name === filterBuilding.name);
 
@@ -706,6 +708,14 @@ export default function Indents() {
           <TextField size="small" placeholder="Search Indent Numbers..." value={search}
             onChange={e => setSearch(e.target.value)} sx={{ minWidth: 300 }}
             InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }} />
+          <Autocomplete
+            size="small"
+            options={institutions}
+            getOptionLabel={(option) => option.name || ''}
+            value={filterInstitution}
+            onChange={(e, val) => setFilterInstitution(val)}
+            renderInput={(params) => <TextField {...params} placeholder="Filter by Institution" sx={{ minWidth: 220 }} />}
+          />
           <Autocomplete
             size="small"
             options={departmentsList}

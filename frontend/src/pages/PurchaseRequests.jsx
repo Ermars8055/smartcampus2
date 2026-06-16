@@ -169,10 +169,14 @@ export default function PurchaseRequests() {
         alert("Please select an institution.");
         return;
       }
+      if (!form.department_name) {
+        alert("Please select a department.");
+        return;
+      }
       const payload = {
         project_id: form.project_id,
         building_id: form.building_id || null,
-        department_name: form.department_name || null,
+        department_name: form.department_name,
         required_date: form.required_date ? dayjs(form.required_date).format('YYYY-MM-DD') : null,
         remarks: form.remarks,
         status: status,

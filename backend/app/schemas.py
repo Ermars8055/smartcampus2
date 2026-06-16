@@ -480,6 +480,7 @@ class PRBase(BaseModel):
 
 class PRCreate(PRBase):
     status: Optional[str] = "Draft"
+    department_name: str = Field(..., min_length=1, description="Department is required")
 
 class PRUpdate(BaseModel):
     required_date: Optional[date] = None
@@ -490,6 +491,7 @@ class PRUpdate(BaseModel):
 
 class PRFullUpdate(PRBase):
     status: Optional[str] = None
+    department_name: str = Field(..., min_length=1, description="Department is required")
 
 class PROut(PRBase):
     id: int

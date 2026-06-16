@@ -28,6 +28,8 @@ const MODULE_TREE = [
     children: [
       { label: 'Materials', resource: 'materials' },
       { label: 'Categories', resource: 'categories' },
+      { label: 'Sub Categories', resource: 'subcategories' },
+      { label: 'UOM', resource: 'uom' },
       { label: 'Vendors', resource: 'vendors' },
       { label: 'Stores', resource: 'warehouses' },
     ],

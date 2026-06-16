@@ -88,6 +88,7 @@ const MODULE_TREE = [
       ]},
       { label: 'Material Issue', resource: 'issues', extendedActions: [
         { key: 'can_issue', label: 'Issue Materials', color: '#3B82F6' },
+        { key: 'can_direct_issue', label: 'Direct Issue', color: '#10B981' },
         { key: 'can_print', label: 'Print', color: '#8B5CF6' },
       ]},
       { label: 'Returns', resource: 'returns', extendedActions: [

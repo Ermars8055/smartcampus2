@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { formatDate } from '../utils/dateUtils';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
@@ -6,7 +6,8 @@ import {
   DialogContent, DialogActions, Grid, Select, FormControl,
   InputLabel, IconButton, Paper, InputAdornment, MenuItem, Tooltip, TableSortLabel, Tabs, Tab, Autocomplete
 } from '@mui/material';
-import { Close, Inventory2, Add, Delete, AccountTree, Warehouse, Comment, InfoOutlined, Outbox, CheckCircle, Apartment, Layers, MeetingRoom, Search } from '@mui/icons-material';
+import { createFilterOptions } from '@mui/material/Autocomplete';
+import { Close, Inventory2, Add, Delete, AccountTree, Warehouse, Comment, InfoOutlined, Outbox, CheckCircle, Apartment, Layers, MeetingRoom, Search, Business } from '@mui/icons-material';
 import api from '../services/api';
 import MaterialSelect from '../components/MaterialSelect';
 import { useAuth } from '../context/AuthContext';
@@ -30,6 +31,91 @@ export default function MaterialIssue() {
   // Modal states: if indent is null, it's a direct issue
   const [issueModal, setIssueModal] = useState({ open: false, isDirect: false, indent: null, items: [], project_id: '', warehouse_id: '', remarks: '', department: '', building_id: '', floor_id: '', room_id: '' });
   const [viewIssueModal, setViewIssueModal] = useState({ open: false, issue: null });
+
+  const barcodeBufferRef = useRef('');
+  const barcodeTimeoutRef = useRef(null);
+  const lastKeyTimeRef = useRef(performance.now());
+
+  const handleBarcodeScan = (code) => {
+    const mat = materials.find(m => m.code === code);
+    if (!mat) {
+      showMessage(`Material with code ${code} not found!`, 'Error', 'error');
+      return;
+    }
+
+    setIssueModal(prev => {
+      const newItems = [...prev.items];
+      const existingIndex = newItems.findIndex(it => it.material_id === mat.id);
+      
+      if (existingIndex >= 0) {
+        newItems[existingIndex] = {
+          ...newItems[existingIndex],
+          issue_qty: (Number(newItems[existingIndex].issue_qty) || 0) + 1
+        };
+      } else {
+        const emptyIndex = newItems.findIndex(it => !it.material_id);
+        if (emptyIndex >= 0) {
+          newItems[emptyIndex] = {
+            ...newItems[emptyIndex],
+            material_id: mat.id,
+            issue_qty: 1
+          };
+        } else {
+          newItems.push({ material_id: mat.id, issue_qty: 1 });
+        }
+      }
+      return { ...prev, items: newItems };
+    });
+  };
+
+  useEffect(() => {
+    if (!issueModal.open || !issueModal.isDirect) return;
+
+    const handleKeyDown = (e) => {
+      if (e.ctrlKey || e.altKey || e.metaKey || (e.key.length > 1 && e.key !== 'Enter')) return;
+
+      const now = e.timeStamp;
+      const timeDiff = now - lastKeyTimeRef.current;
+      lastKeyTimeRef.current = now;
+
+      // Identify fast scanner input or the very first character '{'
+      if (timeDiff <= 50 || e.key === '{') {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+      if (e.key === 'Enter') {
+        if (barcodeBufferRef.current) {
+          try {
+            const parsed = JSON.parse(barcodeBufferRef.current);
+            if (parsed.smartcampus_type === 'material_master' && parsed.code) {
+              handleBarcodeScan(parsed.code);
+            }
+          } catch (err) {
+            // Not valid JSON, discard silently
+          }
+          barcodeBufferRef.current = '';
+        }
+      } else if (e.key.length === 1) {
+        if (timeDiff > 50 && e.key === '{') {
+           barcodeBufferRef.current = e.key;
+        } else if (timeDiff <= 50) {
+           barcodeBufferRef.current += e.key;
+        } else {
+           // Slow human typing, not starting with '{'
+           barcodeBufferRef.current = '';
+        }
+
+        if (barcodeTimeoutRef.current) clearTimeout(barcodeTimeoutRef.current);
+        barcodeTimeoutRef.current = setTimeout(() => {
+          barcodeBufferRef.current = '';
+        }, 300);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [issueModal.open, issueModal.isDirect, materials]);
 
   const load = async () => {
     try {
@@ -213,7 +299,21 @@ export default function MaterialIssue() {
     setIssueModal({ open: true, isDirect: false, indent, items, project_id: indent.project_id || '', warehouse_id: items[0]?.warehouse_id || '', remarks: '' });
   };
 
-
+  const openDirectIssueModal = () => {
+    setBuildings([]);
+    setFloors([]);
+    setRooms([]);
+    setIssueModal({
+      open: true,
+      isDirect: true,
+      indent: null,
+      project_id: '',
+      warehouse_id: warehouses[0]?.id || '',
+      department: '', building_id: '', floor_id: '', room_id: '',
+      remarks: '',
+      items: [{ material_id: '', issue_qty: '' }]
+    });
+  };
 
   const openViewIssueModal = (issue) => {
     setViewIssueModal({ open: true, issue });
@@ -221,6 +321,10 @@ export default function MaterialIssue() {
 
   const handleIssueSubmit = async () => {
     try {
+      if (issueModal.isDirect && (!issueModal.warehouse_id || !issueModal.project_id || !issueModal.department)) {
+        showMessage('Please select a warehouse, institution and department for direct issue.', 'Validation Error', 'warning');
+        return;
+      }
       const validItems = issueModal.items.filter(it => it.material_id && it.issue_qty > 0);
       if (validItems.length === 0) {
         showMessage('Please provide quantity for at least one item.', 'Validation Error', 'warning');
@@ -228,13 +332,13 @@ export default function MaterialIssue() {
       }
 
       const payload = {
-        warehouse_id: issueModal.items[0]?.warehouse_id,
-        project_id: issueModal.indent?.project_id || undefined,
+        warehouse_id: issueModal.isDirect ? issueModal.warehouse_id : issueModal.items[0]?.warehouse_id,
+        project_id: issueModal.isDirect ? issueModal.project_id : (issueModal.indent?.project_id || 1),
         indent_id: issueModal.indent?.id,
-        issued_to_department: undefined,
-        building_id: undefined,
-        issued_to_room_id: issueModal.indent?.room_id,
-        purpose: issueModal.remarks || `Fulfillment for ${issueModal.indent?.indent_number}`,
+        issued_to_department: issueModal.isDirect ? issueModal.department : undefined,
+        building_id: issueModal.isDirect ? issueModal.building_id : undefined,
+        issued_to_room_id: issueModal.isDirect ? (issueModal.room_id || null) : issueModal.indent?.room_id,
+        purpose: issueModal.remarks || (issueModal.isDirect ? 'Direct Issue' : `Fulfillment for ${issueModal.indent?.indent_number}`),
         items: validItems.map(it => ({
           material_id: it.material_id,
           quantity: Math.round(parseFloat(it.issue_qty))
@@ -260,7 +364,24 @@ export default function MaterialIssue() {
     }
   };
 
+  const addDirectItem = () => {
+    setIssueModal({
+      ...issueModal,
+      items: [...issueModal.items, { material_id: '', issue_qty: '' }]
+    });
+  };
 
+  const removeDirectItem = (index) => {
+    const newItems = [...issueModal.items];
+    newItems.splice(index, 1);
+    setIssueModal({ ...issueModal, items: newItems });
+  };
+
+  const updateDirectItem = (index, field, value) => {
+    const newItems = [...issueModal.items];
+    newItems[index][field] = value;
+    setIssueModal({ ...issueModal, items: newItems });
+  };
 
   const handleRowClick = (row) => {
     if (row.type === 'indent') {
@@ -281,6 +402,16 @@ export default function MaterialIssue() {
           </Box>
         </Box>
 
+        {hasAction('issues', 'can_direct_issue') && (
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={openDirectIssueModal}
+            sx={{ textTransform: 'none', borderRadius: 2, fontWeight: 700, px: 3, bgcolor: '#2563EB' }}
+          >
+            New Issue
+          </Button>
+        )}
       </Box>
 
       <Box sx={{ mb: 3 }}>
@@ -439,9 +570,11 @@ export default function MaterialIssue() {
               </Box>
               <Box>
                 <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
-                  Issue Materials for Indent
+                  {issueModal.isDirect ? 'Direct Material Issue' : 'Issue Materials for Indent'}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
+                  {issueModal.isDirect ? 'Issue items directly without an indent' : (
+                    <>
                       {issueModal.indent?.indent_number}
                       {(() => {
                         const ind = issueModal.indent;
@@ -451,6 +584,8 @@ export default function MaterialIssue() {
                         const formattedLoc = (dept && loc) ? `${dept} (${loc})` : (dept || loc);
                         return formattedLoc ? ` • Issued to: ${formattedLoc}` : '';
                       })()}
+                    </>
+                  )}
                 </Typography>
               </Box>
             </Box>
@@ -459,38 +594,152 @@ export default function MaterialIssue() {
         </DialogTitle>
         <DialogContent sx={{ p: 3 }}>
 
+          {issueModal.isDirect && (
+            <Grid container spacing={2} sx={{ mb: 3, mt: 0.5 }}>
+              <Grid item xs={12} sm={4}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Source Store <span style={{ color: '#d32f2f' }}>*</span></InputLabel>
+                  <Select
+                    label="Source Store *"
+                    value={issueModal.warehouse_id}
+                    onChange={e => setIssueModal({ ...issueModal, warehouse_id: e.target.value })}
+                    startAdornment={<InputAdornment position="start"><Warehouse sx={{ color: '#94A3B8', fontSize: 20, mr: 1 }} /></InputAdornment>}
+                  >
+                    {warehouses.map(w => <MenuItem key={w.id} value={w.id}>{w.name} ({w.code})</MenuItem>)}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Institution <span style={{ color: '#d32f2f' }}>*</span></InputLabel>
+                  <Select
+                    label="Institution *"
+                    value={issueModal.project_id || ''}
+                    onChange={e => setIssueModal({ ...issueModal, project_id: e.target.value })}
+                    startAdornment={<InputAdornment position="start"><Business sx={{ color: '#94A3B8', fontSize: 20, mr: 1 }} /></InputAdornment>}
+                  >
+                    {projects.map(p => <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>)}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <Autocomplete
+                  options={departmentsList}
+                  value={issueModal.department || null}
+                  onChange={(e, val) => handleDepartmentChange(val)}
+                  renderInput={(params) => (
+                    <TextField {...params} size="small" label={<>Department <span style={{ color: '#d32f2f' }}>*</span></>} InputProps={{ ...params.InputProps, startAdornment: <><InputAdornment position="start"><AccountTree sx={{ color: '#94A3B8', ml: 1, fontSize: 18 }} /></InputAdornment>{params.InputProps.startAdornment}</> }} sx={{ bgcolor: '#fff' }} />
+                  )}
+                />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Building</InputLabel>
+                  <Select
+                    label="Building"
+                    value={issueModal.building_id || ''}
+                    onChange={e => handleBuildingChange(e.target.value)}
+                    disabled={!issueModal.department || buildings.length === 0}
+                    sx={{ bgcolor: '#fff' }}
+                    startAdornment={<InputAdornment position="start"><Apartment sx={{ color: '#94A3B8', fontSize: 18, mr: 1 }} /></InputAdornment>}
+                  >
+                    <MenuItem value="" disabled><em>Select Building</em></MenuItem>
+                    {buildings.map(b => <MenuItem key={b.id} value={b.id}>{b.name}</MenuItem>)}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Floor</InputLabel>
+                  <Select
+                    label="Floor"
+                    value={issueModal.floor_id || ''}
+                    onChange={e => handleFloorChange(e.target.value)}
+                    disabled={!issueModal.building_id || floors.filter(f => f.building_id === issueModal.building_id).length === 0}
+                    sx={{ bgcolor: '#fff' }}
+                    startAdornment={<InputAdornment position="start"><Layers sx={{ color: '#94A3B8', fontSize: 18, mr: 1 }} /></InputAdornment>}
+                  >
+                    <MenuItem value="" disabled><em>Select Floor</em></MenuItem>
+                    {floors.filter(f => !issueModal.building_id || f.building_id === issueModal.building_id).map(f => <MenuItem key={f.id} value={f.id}>{f.name}</MenuItem>)}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Room</InputLabel>
+                  <Select
+                    label="Room"
+                    value={issueModal.room_id || ''}
+                    onChange={e => setIssueModal({ ...issueModal, room_id: e.target.value })}
+                    disabled={!issueModal.floor_id || rooms.filter(rm => rm.floor_id === issueModal.floor_id).length === 0}
+                    sx={{ bgcolor: '#fff' }}
+                    startAdornment={<InputAdornment position="start"><MeetingRoom sx={{ color: '#94A3B8', fontSize: 18, mr: 1 }} /></InputAdornment>}
+                  >
+                    <MenuItem value="" disabled><em>Select Room</em></MenuItem>
+                    {rooms.filter(rm => !issueModal.floor_id || rm.floor_id === issueModal.floor_id).map(r => <MenuItem key={r.id} value={r.id}>{r.name}</MenuItem>)}
+                  </Select>
+                </FormControl>
+              </Grid>
+            </Grid>
+          )}
+
+          {issueModal.isDirect && (
+            <Box sx={{ mb: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#1E293B' }}>Items to Issue</Typography>
+              <Button size="small" startIcon={<Add />} onClick={addDirectItem} sx={{ textTransform: 'none', fontWeight: 700 }}>Add Item</Button>
+            </Box>
+          )}
+
           <TableContainer component={Paper} variant="outlined" sx={{ mb: 3, borderRadius: 2 }}>
             <Table size="small">
               <TableHead sx={{ bgcolor: '#F8FAFC' }}>
                 <TableRow>
                   <TableCell sx={{ fontWeight: 700 }}>ITEM</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>SOURCE STORE</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 700 }}>APPROVED</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 700 }}>REMAINING</TableCell>
+                  {!issueModal.isDirect && <TableCell sx={{ fontWeight: 700 }}>SOURCE STORE</TableCell>}
+                  {!issueModal.isDirect && <TableCell align="center" sx={{ fontWeight: 700 }}>APPROVED</TableCell>}
+                  {!issueModal.isDirect && <TableCell align="center" sx={{ fontWeight: 700 }}>REMAINING</TableCell>}
                   <TableCell align="center" sx={{ fontWeight: 700 }}>IN STOCK</TableCell>
                   <TableCell align="center" sx={{ fontWeight: 700, width: 120 }}>ISSUE QTY</TableCell>
+                  {issueModal.isDirect && <TableCell align="center" sx={{ width: '5%' }}></TableCell>}
                 </TableRow>
               </TableHead>
               <TableBody>
                 {issueModal.items.map((it, i) => {
-                  let inStock = Math.round(stocks.find(s => s.warehouse_id === it.warehouse_id && s.material_id === it.material_id)?.quantity || 0);
-                  const maxQty = Math.min(it.remaining, inStock);
+                  let inStock = 0;
+                  if (issueModal.isDirect) {
+                    inStock = Math.round(stocks.find(s => s.warehouse_id === issueModal.warehouse_id && s.material_id === it.material_id)?.quantity || 0);
+                  } else {
+                    inStock = Math.round(stocks.find(s => s.warehouse_id === it.warehouse_id && s.material_id === it.material_id)?.quantity || 0);
+                  }
+                  const maxQty = issueModal.isDirect ? inStock : Math.min(it.remaining, inStock);
 
                   return (
                     <TableRow key={i}>
                       <TableCell>
-                        <Typography variant="body2" sx={{ fontWeight: 700 }}>{it.material_name}</Typography>
-                        <Typography variant="caption" sx={{ color: '#64748B', fontFamily: 'monospace' }}>{it.material_code}</Typography>
+                        {issueModal.isDirect ? (
+                          <MaterialSelect
+                            materials={materials}
+                            value={it.material_id}
+                            onChange={(val) => updateDirectItem(i, 'material_id', val)}
+                          />
+                        ) : (
+                          <>
+                            <Typography variant="body2" sx={{ fontWeight: 700 }}>{it.material_name}</Typography>
+                            <Typography variant="caption" sx={{ color: '#64748B', fontFamily: 'monospace' }}>{it.material_code}</Typography>
+                          </>
+                        )}
                       </TableCell>
-                      <TableCell>
-                        <Chip
-                          label={it.warehouse_name || 'Mapped Store'}
-                          size="small"
-                          sx={{ height: 22, fontSize: '0.7rem', bgcolor: '#F1F5F9', color: '#475569', fontWeight: 600, borderRadius: 1.5 }}
-                        />
-                      </TableCell>
-                      <TableCell align="center">{it.approved}</TableCell>
-                      <TableCell align="center" sx={{ color: '#1E40AF', fontWeight: 600 }}>{it.remaining}</TableCell>
+                      {!issueModal.isDirect && (
+                        <TableCell>
+                          <Chip
+                            label={it.warehouse_name || 'Mapped Store'}
+                            size="small"
+                            sx={{ height: 22, fontSize: '0.7rem', bgcolor: '#F1F5F9', color: '#475569', fontWeight: 600, borderRadius: 1.5 }}
+                          />
+                        </TableCell>
+                      )}
+                      {!issueModal.isDirect && <TableCell align="center">{it.approved}</TableCell>}
+                      {!issueModal.isDirect && <TableCell align="center" sx={{ color: '#1E40AF', fontWeight: 600 }}>{it.remaining}</TableCell>}
                       <TableCell align="center" sx={{ fontWeight: 700, color: inStock > 0 ? '#059669' : '#DC2626' }}>
                         {it.material_id ? inStock : '-'}
                       </TableCell>
@@ -516,6 +765,13 @@ export default function MaterialIssue() {
                           sx={{ width: 100 }}
                         />
                       </TableCell>
+                      {issueModal.isDirect && (
+                        <TableCell align="center">
+                          <IconButton size="small" color="error" onClick={() => removeDirectItem(i)} disabled={issueModal.items.length === 1}>
+                            <Delete fontSize="small" />
+                          </IconButton>
+                        </TableCell>
+                      )}
                     </TableRow>
                   )
                 })}

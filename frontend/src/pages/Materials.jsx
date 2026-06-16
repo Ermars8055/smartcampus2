@@ -886,6 +886,7 @@ export default function Materials() {
                 <QRCodeSVG 
                   id="material-qr-svg"
                   value={JSON.stringify({ 
+                    smartcampus_type: 'material_master',
                     code: selectedQrMaterial.code, 
                     name: selectedQrMaterial.name, 
                     uom: selectedQrMaterial.uom_name 

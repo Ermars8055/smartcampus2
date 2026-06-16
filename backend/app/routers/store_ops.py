@@ -143,9 +143,6 @@ def create_issue(
             except: pass
 
     try:
-        if not data.indent_id:
-            raise HTTPException(status_code=400, detail="Material Issues can only be created against an approved Indent.")
-
         processed_items = []
         for item_data in data.items:
             mat = db.query(Material).filter(Material.id == item_data.material_id, Material.tenant_id == tenant_id, Material.site_id == site_id).first()
@@ -182,6 +179,47 @@ def create_issue(
                 if ind_data and ind_data.department:
                     issued_to_dept = ind_data.department
 
+
+        # Direct Issue Limit Enforcement
+        if not data.indent_id and issued_to_dept:
+            first_day_of_month = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            for item_data in data.items:
+                limit_obj = db.query(DepartmentMaterialLimit).filter(
+                    DepartmentMaterialLimit.tenant_id == tenant_id,
+                    DepartmentMaterialLimit.site_id == site_id,
+                    DepartmentMaterialLimit.department == issued_to_dept,
+                    DepartmentMaterialLimit.material_id == item_data.material_id
+                ).first()
+                if limit_obj:
+                    # Sum up requested/issued quantities this month
+                    total_requested = db.query(func.sum(IndentItem.requested_quantity)).join(Indent).filter(
+                        Indent.tenant_id == tenant_id,
+                        Indent.site_id == site_id,
+                        Indent.department == issued_to_dept,
+                        IndentItem.material_id == item_data.material_id,
+                        Indent.created_at >= first_day_of_month,
+                        Indent.status != IndentStatus.REJECTED.value
+                    ).scalar() or 0.0
+
+                    # Also sum up any other direct issues
+                    total_direct_issued = db.query(func.sum(MaterialIssueItem.quantity)).join(MaterialIssue).filter(
+                        MaterialIssue.tenant_id == tenant_id,
+                        MaterialIssue.site_id == site_id,
+                        MaterialIssue.issued_to_department == issued_to_dept,
+                        MaterialIssue.indent_id == None,
+                        MaterialIssueItem.material_id == item_data.material_id,
+                        MaterialIssue.created_at >= first_day_of_month,
+                        MaterialIssue.status != "Cancelled"
+                    ).scalar() or 0.0
+
+                    if total_requested + total_direct_issued + item_data.quantity > limit_obj.monthly_limit:
+                        mat = db.query(Material).filter(Material.id == item_data.material_id, Material.tenant_id == tenant_id, Material.site_id == site_id).first()
+                        mat_name = mat.name if mat else "Unknown Material"
+                        remaining = max(0, limit_obj.monthly_limit - (total_requested + total_direct_issued))
+                        raise HTTPException(
+                            status_code=400,
+                            detail=f"The limit per month for '{mat_name}' is {int(limit_obj.monthly_limit)}. You can issue only {int(remaining)} more."
+                        )
 
 
         header_w_id = data.warehouse_id or processed_items[0][2]

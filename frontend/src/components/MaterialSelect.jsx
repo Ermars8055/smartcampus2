@@ -3,6 +3,7 @@ import { Inventory } from '@mui/icons-material';
 
 const filterOptions = createFilterOptions({
   matchFrom: 'any',
+  limit: 50,
   stringify: (option) => `${option.code || ''} ${option.name || ''} ${option.alias || ''}`
 });
 

@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict VPkmYG8emxJRDitrAgeYV8iYA3FpQplEf7WliLMbZHkZfgKH0D0fHES5hqpGMiN
+\restrict XsTfX5ChGXXFl4BQycEXqNqDiF3h8D9zbYNX9GY5J2wFHwZJ1OMmCPFxCsWuo1T
 
 -- Dumped from database version 17.10 (Ubuntu 17.10-1.pgdg22.04+1)
 -- Dumped by pg_dump version 18.4 (Ubuntu 18.4-1.pgdg22.04+1)
@@ -7268,6 +7268,21 @@ COPY public.departments (id, tenant_id, site_id, name, code, accounting_code, bu
 313	2	2	Mental Health Nursing	DEPT-00054	\N	\N	t	f	2026-06-17 13:15:35.595951	9
 314	2	2	Nursing Foundation	DEPT-00055	\N	\N	t	f	2026-06-17 13:15:51.322141	9
 315	2	2	Obstetrics & Gynaecological Nursing	DEPT-00056	\N	\N	t	f	2026-06-17 13:16:16.300305	9
+316	2	2	Commerce	DEPT-00057	\N	\N	t	f	2026-06-17 19:03:53.316633	6
+317	2	2	Business Administration	DEPT-00058	\N	\N	t	f	2026-06-17 19:04:13.693123	6
+318	2	2	Computer Application	DEPT-00059	\N	\N	t	f	2026-06-17 19:04:27.835415	6
+319	2	2	Physiotherapy Dept	DEPT-00060	\N	\N	t	f	2026-06-17 19:11:48.894804	2
+320	2	2	Emergency Dept	DEPT-00061	\N	\N	t	f	2026-06-17 19:12:07.10347	2
+321	2	2	ICU (Cardiac)	DEPT-00062	\N	\N	t	f	2026-06-17 19:12:23.751038	2
+322	2	2	MICU/EICU	DEPT-00063	\N	\N	t	f	2026-06-17 19:12:41.366117	2
+323	2	2	SICU	DEPT-00064	\N	\N	t	f	2026-06-17 19:12:52.784215	2
+324	2	2	NICU	DEPT-00065	\N	\N	t	f	2026-06-17 19:13:07.925655	2
+325	2	2	Ortho Ward (Male)	DEPT-00066	\N	\N	t	f	2026-06-17 19:13:27.019134	2
+326	2	2	Ortho Ward (Female)	DEPT-00067	\N	\N	t	f	2026-06-17 19:13:39.045611	2
+327	2	2	Labour Room	DEPT-00068	\N	\N	t	f	2026-06-17 19:14:23.091325	2
+328	2	2	Admin	DEPT-00069	\N	\N	t	f	2026-06-17 19:15:18.106985	14
+329	2	2	Admin	DEPT-00070	\N	\N	t	f	2026-06-17 19:15:28.706654	12
+330	2	2	Admin	DEPT-00071	\N	\N	t	f	2026-06-17 19:15:36.988034	13
 \.
 
 
@@ -7334,6 +7349,7 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 72	2	2	WAREHOUSE	WH	11
 66	2	2	INDENT	IND	9
 65	2	2	VENDOR	VND	3
+30	2	2	DEPARTMENT	DEPT	71
 69	2	2	PURCHASE_ORDER	PO	6
 79	3	3	INSTITUTION	INST	1
 6	3	3	DEPARTMENT	DEPT	259
@@ -7343,7 +7359,6 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 16	3	3	QUOTATION_REQUEST	QR	21
 5	3	3	INDENT	IND	42
 77	2	2	GATEPASS	GP	3
-30	2	2	DEPARTMENT	DEPT	56
 \.
 
 
@@ -14890,6 +14905,19 @@ COPY public.tenant_memberships (id, user_id, tenant_id, is_active, joined_at) FR
 23	16	2	t	2026-06-12 04:18:31.355305
 24	17	2	t	2026-06-17 16:32:51.028243
 25	18	2	t	2026-06-17 16:55:34.140709
+26	19	2	t	2026-06-17 18:44:33.287074
+27	20	2	t	2026-06-17 18:46:24.690106
+28	21	2	t	2026-06-17 18:47:43.460532
+29	22	2	t	2026-06-17 18:48:38.750785
+30	23	2	t	2026-06-17 18:49:36.719062
+31	24	2	t	2026-06-17 18:50:32.047713
+32	25	2	t	2026-06-17 18:52:57.504192
+33	26	2	t	2026-06-17 18:54:02.668645
+34	27	2	t	2026-06-17 18:55:14.791626
+35	28	2	t	2026-06-17 18:56:11.375918
+36	29	2	t	2026-06-17 18:56:58.93642
+37	30	2	t	2026-06-17 18:58:32.369135
+38	31	2	t	2026-06-17 18:59:20.698716
 \.
 
 
@@ -14991,6 +15019,19 @@ COPY public.user_role_assignments (id, user_id, tenant_id, role_id, site_id, ass
 56	6	2	15	\N	2026-06-17 12:05:35.250984
 57	17	2	19	\N	2026-06-17 16:32:51.02937
 59	18	2	21	\N	2026-06-17 17:24:41.009271
+60	19	2	19	\N	2026-06-17 18:44:33.288315
+61	20	2	19	\N	2026-06-17 18:46:24.690869
+62	21	2	19	\N	2026-06-17 18:47:43.461994
+63	22	2	19	\N	2026-06-17 18:48:38.751662
+64	23	2	19	\N	2026-06-17 18:49:36.719705
+65	24	2	19	\N	2026-06-17 18:51:11.09633
+66	25	2	19	\N	2026-06-17 18:52:57.504633
+67	26	2	19	\N	2026-06-17 18:54:02.669108
+68	27	2	19	\N	2026-06-17 18:55:14.79214
+69	28	2	19	\N	2026-06-17 18:56:11.376507
+70	29	2	19	\N	2026-06-17 18:56:58.936902
+71	30	2	19	\N	2026-06-17 18:58:32.369614
+72	31	2	19	\N	2026-06-17 18:59:20.699172
 \.
 
 
@@ -15017,6 +15058,19 @@ COPY public.users (id, username, email, full_name, hashed_password, is_active, i
 6	grceo	fred@nissigrid.com	Fred	$2b$12$8Yus/rvrJSwtEbMsAnMooeiy2uQd3.M4RXhfbg2buXmfQqprvRZKu	t	f	f	2026-05-27 16:48:52.327279	2026-06-17 12:05:35.250574	HEALTH 	\N
 17	EPCET	ilangkumaran1@nissigrid.com	East Point College of Engineering & Technology	$2b$12$j.tuqCGfRFKZ6dm5OYPxX.NnSX8ndjR/JdkWasxWh9b0FYXKysTHa	t	f	f	2026-06-17 16:32:51.026776	2026-06-17 16:32:51.02679	\N	EPCET (East Point College of Engineering & Technology)
 18	ragothaman	ragothamankannu@gmail.com	ragothaman	$2b$12$7R3wEQWB/R1PRffOF6ChAum0EdqG.Uaz/Pbnu3OCx8E.U0qNX9v2a	t	f	f	2026-06-17 16:55:34.138989	2026-06-17 16:55:34.139005	\N	\N
+19	EPAHS	EPAHS@nissigrid.com	East Point Allied Health Sciences	$2b$12$fcFEfaIBXqlaCB9s4MVuMO/ucBS.03eXX/QZQqU/9Jon6pQu/aIXS	t	f	f	2026-06-17 18:44:33.285409	2026-06-17 18:44:33.285423	\N	EPAHS (East Point Allied Health Sciences)
+20	EPCHE	EPCHE@nissigrid.com	East Point College of Higher Education	$2b$12$jQKpNrGZsmijs/82cZw3Lu8IqvV7nEHY2Cdlzt3CE9DGJmHM.n406	t	f	f	2026-06-17 18:46:24.689153	2026-06-17 18:46:24.689176	\N	EPCHE (East Point College of Higher Education)
+21	EPCM	EPCM@nissigrid.com	East Point College of Management	$2b$12$TKGDSCUW4grsf3Ox9oNwGuVwHfNz4zsvU3xkOz1wnqj78fzhBaWcu	t	f	f	2026-06-17 18:47:43.458776	2026-06-17 18:47:43.458791	\N	EPCM (East Point College of Management)
+22	EPCMSR	EPCMSR@nissigrid.com	East Point College of Medical Sciences & Research Centre	$2b$12$nL1DYDXx14alP3VXz11q1OS07p5ucJ1klZJS2fs/To16eDdzVr1x2	t	f	f	2026-06-17 18:48:38.749783	2026-06-17 18:48:38.749797	\N	EPCMSR (East Point College of Medical Sciences & Research Centre)
+23	EPCN	EPCN@nissigrid.com	East Point College of Nursing	$2b$12$cWOS8C0bwaEr62LWv7vt6uZXGKoA2EsjJbecnha5wxfLqZonk0SXu	t	f	f	2026-06-17 18:49:36.718014	2026-06-17 18:49:36.718027	\N	EPCN (East Point College of Nursing)
+24	EPCP	EPCP@nissigrid.com	East Point College of Pharmacy	$2b$12$D8rQACpWcaaYIjmVMmIXbeiGDhSUkUPWRAdtGjJZwOd6tgDhWAB/q	t	f	f	2026-06-17 18:50:32.04677	2026-06-17 18:50:32.046786	\N	EPCP (East Point College of Pharmacy)
+25	EPCPT	EPCPT@nissigrid.com	East Point College of Physiotherapy	$2b$12$ByAWxBwY.lthXUIDDegId.PFIU2jIX5po3T/jl6XoXyXLWlql5Pwa	t	f	f	2026-06-17 18:52:57.503374	2026-06-17 18:52:57.503386	\N	EPCPT (East Point College of Physiotherapy)
+26	EPH	EPH@nissigrid.com	East Point Medical College Hospital	$2b$12$aQhSSmgNHX/QaLFOtpjKLewQQ6B1.M0KP6JAcWo5qnamAufZoQeue	t	f	f	2026-06-17 18:54:02.667803	2026-06-17 18:54:02.667816	\N	EPH (East Point Medical College Hospital)
+27	EPPUC - Academy Campus	EPPUC1@nissigrid.com	Academy Campus (East Point Pre-University College)	$2b$12$/HDQA7BHMsGS9AXFqx6ZB.hDP.OSP.7NmLInAEAt/8JO3UMnFDk1e	t	f	f	2026-06-17 18:55:14.790737	2026-06-17 18:55:14.79075	\N	EPPUC - Academy Campus (East Point Pre-University College)
+28	EPPUC - Jnanaprabha Campus	EPPUC2@nissigrid.com	Jnanaprabha Campus (East Point Pre-University College)	$2b$12$uHyf18gP6S4x1dOGAe3b6OFAENxM/TlNJawManRYO5zg8YaUt4Yl6	t	f	f	2026-06-17 18:56:11.375006	2026-06-17 18:56:11.37502	\N	EPPUC - Jnanaprabha Campus (East Point Pre-University College)
+29	EPS	EPS@nissigrid.com	East Point School	$2b$12$eEbgQDy5RIfIh2Az9hpoHereNotbyYXyJxcP/zQ.YA9UnrKuvr4M6	t	f	f	2026-06-17 18:56:58.935508	2026-06-17 18:56:58.935523	\N	EPS (East Point School)
+30	EPSN	EPSN@nissigrid.com	East Point School of Nursing	$2b$12$BD7DxE9O0fEknWEXRXFoWe4sd31pQil4FwArMA4DdrW3qq/Fp6DVq	t	f	f	2026-06-17 18:58:32.368273	2026-06-17 18:58:32.368288	\N	EPSN (East Point School of Nursing)
+31	NRCN	NRCN@nissigrid.com	New Royal College of Nursing	$2b$12$tO68WBRnv8zCb.Ti4piLOuMYuiydAIMntbylqYx9uDed37LS.jWPe	t	f	f	2026-06-17 18:59:20.697882	2026-06-17 18:59:20.697897	\N	NRCN (New Royal College of Nursing)
 \.
 
 
@@ -15355,7 +15409,7 @@ SELECT pg_catalog.setval('public.department_material_limits_id_seq', 262, true);
 -- Name: departments_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.departments_id_seq', 315, true);
+SELECT pg_catalog.setval('public.departments_id_seq', 330, true);
 
 
 --
@@ -15656,7 +15710,7 @@ SELECT pg_catalog.setval('public.tenant_configurations_id_seq', 2, true);
 -- Name: tenant_memberships_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.tenant_memberships_id_seq', 25, true);
+SELECT pg_catalog.setval('public.tenant_memberships_id_seq', 38, true);
 
 
 --
@@ -15684,14 +15738,14 @@ SELECT pg_catalog.setval('public.uom_id_seq', 41, true);
 -- Name: user_role_assignments_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.user_role_assignments_id_seq', 59, true);
+SELECT pg_catalog.setval('public.user_role_assignments_id_seq', 72, true);
 
 
 --
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.users_id_seq', 18, true);
+SELECT pg_catalog.setval('public.users_id_seq', 31, true);
 
 
 --
@@ -18956,5 +19010,5 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict VPkmYG8emxJRDitrAgeYV8iYA3FpQplEf7WliLMbZHkZfgKH0D0fHES5hqpGMiN
+\unrestrict XsTfX5ChGXXFl4BQycEXqNqDiF3h8D9zbYNX9GY5J2wFHwZJ1OMmCPFxCsWuo1T
 

@@ -11,7 +11,8 @@ import {
 } from '@mui/icons-material';
 import { DatePicker } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 import html2pdf from 'html2pdf.js';
 import api from '../services/api';
 
@@ -141,27 +142,143 @@ export default function RateAnalysisReport() {
     return 'inherit';
   };
 
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     if (!reportData?.data?.length) return;
-    const rows = reportData.data.map((r, i) => ({
-      'S.No': i + 1, 'Material Code': r.material_code, 'Material Name': r.material_name,
-      'UOM': r.uom,
-      'Category': r.category_name, 'Min Rate': r.min_rate, 'Max Rate': r.max_rate,
-      'Avg Rate': r.avg_rate,
-      'Variance': filters.varianceType === 'percentage' ? `${r.variance_pct}%` : r.variance_amt,
-      'GRN Txns': r.grn_txn_count
-    }));
-    const ws = XLSX.utils.json_to_sheet([]);
-    XLSX.utils.sheet_add_aoa(ws, [
-      ['MATERIAL RATE ANALYSIS REPORT'],
-      [`Period: ${filters.fromDate.format('DD-MMM-YYYY')} to ${filters.toDate.format('DD-MMM-YYYY')}`],
-      [`Tax: ${filters.includeTax ? 'Inclusive' : 'Exclusive'}`],
-      [`Generated: ${reportData.generated_at}`], []
-    ], { origin: 'A1' });
-    XLSX.utils.sheet_add_json(ws, rows, { origin: 'A6' });
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Rate Analysis');
-    XLSX.writeFile(wb, `Rate_Analysis_${dayjs().format('YYYYMMDD')}.xlsx`);
+    
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('Rate Analysis');
+    const totalCols = 9; // S.No, Code, Name, UOM, Category, Min, Max, Avg, Variance, GRN Txns -> Wait, count: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+    // Let's list headers:
+    // 1: S.No, 2: Material Code, 3: Material Name, 4: UOM, 5: Category, 6: Min Rate, 7: Max Rate, 8: Avg Rate, 9: Variance, 10: GRN Txns
+    const numCols = 10;
+    
+    ws.addRow(['MATERIAL RATE ANALYSIS REPORT']);
+    ws.mergeCells(1, 1, 1, numCols);
+    const titleCell = ws.getCell(1, 1);
+    titleCell.font = { size: 14, bold: true };
+    titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+
+    const dateRange = `${filters.fromDate.format('DD-MMM-YYYY')} to ${filters.toDate.format('DD-MMM-YYYY')}`;
+    const catName = categories.find(c => c.id === filters.categoryId)?.name || 'All Categories';
+    const vendorName = vendors.find(v => v.id === filters.vendorId)?.name || 'All Vendors';
+    const storeName = warehouses.find(w => w.id === filters.warehouseId)?.name || 'All Stores';
+    const searchVal = filters.search || 'None';
+    const taxVal = filters.includeTax ? 'Inclusive' : 'Exclusive';
+    
+    ws.addRow([]);
+    ws.addRow([]);
+    ws.addRow([]); // Empty row 4
+    
+    // Row 2 Left
+    ws.mergeCells(2, 1, 2, 3);
+    const cellDate = ws.getCell(2, 1);
+    cellDate.value = { richText: [{ font: { bold: true }, text: 'Period: ' }, { text: dateRange }] };
+    cellDate.alignment = { horizontal: 'left', vertical: 'middle' };
+
+    // Row 2 Center
+    ws.mergeCells(2, 4, 2, 6);
+    const cellCat = ws.getCell(2, 4);
+    cellCat.value = { richText: [{ font: { bold: true }, text: 'Category: ' }, { text: catName }] };
+    cellCat.alignment = { horizontal: 'center', vertical: 'middle' };
+
+    // Row 2 Right
+    ws.mergeCells(2, 7, 2, numCols);
+    const cellVendor = ws.getCell(2, 7);
+    cellVendor.value = { richText: [{ font: { bold: true }, text: 'Vendor: ' }, { text: vendorName }] };
+    cellVendor.alignment = { horizontal: 'right', vertical: 'middle' };
+
+    // Row 3 Left
+    ws.mergeCells(3, 1, 3, 3);
+    const cellStore = ws.getCell(3, 1);
+    cellStore.value = { richText: [{ font: { bold: true }, text: 'Store: ' }, { text: storeName }] };
+    cellStore.alignment = { horizontal: 'left', vertical: 'middle' };
+
+    // Row 3 Center
+    ws.mergeCells(3, 4, 3, 6);
+    const cellTax = ws.getCell(3, 4);
+    cellTax.value = { richText: [{ font: { bold: true }, text: 'Tax: ' }, { text: taxVal }] };
+    cellTax.alignment = { horizontal: 'center', vertical: 'middle' };
+
+    // Row 3 Right
+    ws.mergeCells(3, 7, 3, numCols);
+    const cellSearch = ws.getCell(3, 7);
+    cellSearch.value = { richText: [{ font: { bold: true }, text: 'Search: ' }, { text: searchVal }] };
+    cellSearch.alignment = { horizontal: 'right', vertical: 'middle' };
+
+    ws.getRow(2).height = 20;
+    ws.getRow(3).height = 20;
+
+    // Row 5: Main Headers
+    const headers = [
+      'S.No', 'Material Code', 'Material Name', 'UOM', 'Category',
+      'Min Rate', 'Max Rate', 'Avg Rate', 'Variance', 'GRN Txns'
+    ];
+    ws.addRow(headers);
+    
+    const headerRowIdx = 5;
+    const headerFill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9E1F2' } };
+    const border = {
+      top: { style: 'thin' }, left: { style: 'thin' },
+      bottom: { style: 'thin' }, right: { style: 'thin' }
+    };
+
+    for (let c = 1; c <= numCols; c++) {
+      const cell = ws.getCell(headerRowIdx, c);
+      cell.fill = headerFill;
+      cell.border = border;
+      cell.font = { bold: true };
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+    }
+
+    // Data rows
+    const sortedExportData = getSortedData();
+    sortedExportData.forEach((row, i) => {
+      ws.addRow([
+        i + 1,
+        row.material_code,
+        row.material_name,
+        row.uom,
+        row.category_name,
+        row.min_rate,
+        row.max_rate,
+        row.avg_rate,
+        filters.varianceType === 'percentage' ? `${row.variance_pct}%` : row.variance_amt,
+        row.grn_txn_count
+      ]);
+    });
+
+    const lastRowIdx = headerRowIdx + sortedExportData.length;
+    for (let r = headerRowIdx + 1; r <= lastRowIdx; r++) {
+      const row = ws.getRow(r);
+      for (let c = 1; c <= numCols; c++) {
+        const cell = row.getCell(c);
+        cell.border = border;
+        
+        if (c === 1 || c === 4 || c === 10) cell.alignment = { horizontal: 'center', vertical: 'middle' };
+        else if (c === 2 || c === 3 || c === 5) cell.alignment = { horizontal: 'left', vertical: 'middle' };
+        else {
+          cell.alignment = { horizontal: 'right', vertical: 'middle' };
+          if (typeof cell.value === 'number') {
+            cell.numFmt = '#,##0.00';
+          }
+        }
+      }
+    }
+
+    ws.getColumn(1).width = 5;
+    ws.getColumn(2).width = 15;
+    ws.getColumn(3).width = 35;
+    ws.getColumn(4).width = 10;
+    ws.getColumn(5).width = 20;
+    ws.getColumn(6).width = 12;
+    ws.getColumn(7).width = 12;
+    ws.getColumn(8).width = 12;
+    ws.getColumn(9).width = 12;
+    ws.getColumn(10).width = 10;
+
+    const buffer = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    saveAs(blob, `Rate_Analysis_${dayjs().format('YYYYMMDD')}.xlsx`);
   };
 
   const handleExportPDF = async () => {

@@ -101,28 +101,99 @@ export default function DepartmentWiseInventoryReport() {
     const wb = new ExcelJS.Workbook();
     const ws = wb.addWorksheet('Dept Inventory');
 
+    // Ordered list of all departments based on institution order
+    const orderedDepts = [];
+    reportData.institutions.forEach(inst => {
+      inst.departments.forEach(d => orderedDepts.push(d));
+    });
+
+    const totalCols = orderedDepts.length + 4; // 3 prefix + orderedDepts + 1 suffix
+
     // Filters and Titles
     ws.addRow(['DEPARTMENT WISE INVENTORY REPORT']);
-    ws.addRow([`INVENTORY AS ON: ${reportData.generated_at}`]);
+    ws.mergeCells(1, 1, 1, totalCols);
+    const titleCell = ws.getCell(1, 1);
+    titleCell.value = 'DEPARTMENT WISE INVENTORY REPORT';
+    titleCell.font = { size: 14, bold: true };
+    titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+
+    const dateRange = `${reportData.generated_at}`;
+    const catName = categories.find(c => c.id === filters.categoryId)?.name || 'All Categories';
+    const depts = filters.departmentIds.length > 0 ? departments.filter(d => filters.departmentIds.includes(d.id)).map(d => d.name).join(', ') : 'All';
+    const searchVal = filters.search || 'None';
+    const stockOnlyVal = filters.onlyWithStock ? 'Yes' : 'No';
+
     ws.addRow([]);
-    ws.addRow(['Category:', categories.find(c => c.id === filters.categoryId)?.name || 'All']);
-    ws.addRow(['Departments:', filters.departmentIds.length > 0 ? departments.filter(d => filters.departmentIds.includes(d.id)).map(d => d.name).join(', ') : 'All']);
-    ws.addRow(['Search:', filters.search || 'None']);
-    ws.addRow(['Stock Only:', filters.onlyWithStock ? 'Yes' : 'No']);
     ws.addRow([]);
+    ws.addRow([]); // Empty row 4
 
-    ws.getCell('A1').font = { size: 14, bold: true };
-    ws.getCell('A2').font = { size: 11, bold: true };
+    // Date/Time (Left)
+    ws.mergeCells(2, 1, 2, 2);
+    const cellDate = ws.getCell(2, 1);
+    cellDate.value = { richText: [{ font: { bold: true }, text: 'Report Time: ' }, { text: dateRange }] };
+    cellDate.alignment = { horizontal: 'left', vertical: 'middle' };
 
-    // Header Row
-    const headerRow = ['S.No', 'Material Name', 'UOM', ...reportData.departments, 'Total Inventory'];
-    ws.addRow(headerRow);
+    // Category (Center)
+    ws.mergeCells(2, 3, 2, 5);
+    const cellCat = ws.getCell(2, 3);
+    cellCat.value = { richText: [{ font: { bold: true }, text: 'Category: ' }, { text: catName }] };
+    cellCat.alignment = { horizontal: 'center', vertical: 'middle' };
 
-    const headerRowIdx = 9;
-    const totalCols = headerRow.length;
+    // Depts (Left)
+    ws.mergeCells(3, 1, 3, 2);
+    const cellDept = ws.getCell(3, 1);
+    cellDept.value = { richText: [{ font: { bold: true }, text: 'Department: ' }, { text: depts }] };
+    cellDept.alignment = { horizontal: 'left', vertical: 'middle' };
 
-    // Set height of header row to fit vertical text (reduced to allow wrapping)
-    ws.getRow(headerRowIdx).height = 140;
+    // Search (Center)
+    ws.mergeCells(3, 3, 3, 5);
+    const cellSearch = ws.getCell(3, 3);
+    cellSearch.value = { richText: [{ font: { bold: true }, text: 'Search: ' }, { text: searchVal }] };
+    cellSearch.alignment = { horizontal: 'center', vertical: 'middle' };
+
+    // Stock Only (Right)
+    ws.mergeCells(3, 6, 3, totalCols);
+    const cellStock = ws.getCell(3, 6);
+    cellStock.value = { richText: [{ font: { bold: true }, text: 'Stock Only: ' }, { text: stockOnlyVal }] };
+    cellStock.alignment = { horizontal: 'right', vertical: 'middle' };
+
+    ws.getRow(2).height = 20;
+    ws.getRow(3).height = 20;
+
+    // First Header Row (Institutions)
+    const instHeaderRow = ['S.No', 'Material Name', 'UOM'];
+    reportData.institutions.forEach(inst => {
+      instHeaderRow.push(inst.name);
+      for(let i=1; i<inst.departments.length; i++) instHeaderRow.push('');
+    });
+    instHeaderRow.push('Total Inventory');
+    ws.addRow(instHeaderRow);
+    const instHeaderIdx = 5;
+
+    // Second Header Row (Depts)
+    const deptHeaderRow = ['', '', ''];
+    reportData.institutions.forEach(inst => {
+      inst.departments.forEach(d => deptHeaderRow.push(d));
+    });
+    deptHeaderRow.push('');
+    ws.addRow(deptHeaderRow);
+    const deptHeaderIdx = 6;
+
+    // Merge Cells for headers
+    ws.mergeCells(instHeaderIdx, 1, deptHeaderIdx, 1); // S.No
+    ws.mergeCells(instHeaderIdx, 2, deptHeaderIdx, 2); // Material
+    ws.mergeCells(instHeaderIdx, 3, deptHeaderIdx, 3); // UOM
+    ws.mergeCells(instHeaderIdx, totalCols, deptHeaderIdx, totalCols); // Total
+
+    let currentCol = 4;
+    reportData.institutions.forEach(inst => {
+      if (inst.departments.length > 1) {
+        ws.mergeCells(instHeaderIdx, currentCol, instHeaderIdx, currentCol + inst.departments.length - 1);
+      }
+      currentCol += inst.departments.length;
+    });
+
+    ws.getRow(deptHeaderIdx).height = 140;
 
     const border = {
       top: { style: 'thin' }, left: { style: 'thin' },
@@ -133,22 +204,24 @@ export default function DepartmentWiseInventoryReport() {
 
     // Formatting Headers
     for (let c = 1; c <= totalCols; c++) {
-      const cell = ws.getCell(headerRowIdx, c);
-      cell.fill = headerFill;
-      cell.border = border;
-      // Removed bold font as requested
+      const cell1 = ws.getCell(instHeaderIdx, c);
+      const cell2 = ws.getCell(deptHeaderIdx, c);
+      cell1.fill = headerFill; cell1.border = border; cell1.font = { bold: true };
+      cell2.fill = headerFill; cell2.border = border; cell2.font = { bold: true };
 
-      if (c <= 3) {
-        cell.alignment = { wrapText: true, vertical: 'bottom', horizontal: 'left' };
+      if (c <= 3 || c === totalCols) {
+        cell1.alignment = { wrapText: true, vertical: 'middle', horizontal: 'center' };
+        cell2.alignment = { wrapText: true, vertical: 'middle', horizontal: 'center' };
       } else {
-        cell.alignment = { textRotation: 90, vertical: 'bottom', horizontal: 'center', wrapText: true };
+        cell1.alignment = { wrapText: true, vertical: 'middle', horizontal: 'center' };
+        cell2.alignment = { textRotation: 90, vertical: 'bottom', horizontal: 'center', wrapText: true };
       }
     }
 
     // Data Rows
     reportData.data.forEach((row, i) => {
       const rowData = [i + 1, `${row.material_code} - ${row.material_name}`, row.uom];
-      reportData.departments.forEach(d => {
+      orderedDepts.forEach(d => {
         rowData.push(row.department_inventory[d] || '');
       });
       rowData.push(row.total_inventory || 0);
@@ -156,15 +229,15 @@ export default function DepartmentWiseInventoryReport() {
     });
 
     // Totals Row
-    const totals = calculateTotals(reportData.data, reportData.departments);
+    const totals = calculateTotals(reportData.data, orderedDepts);
     const totalRow = ['', 'Grand Total', ''];
-    reportData.departments.forEach(d => totalRow.push(totals[d] || ''));
+    orderedDepts.forEach(d => totalRow.push(totals[d] || ''));
     totalRow.push(totals.total_inventory || 0);
     ws.addRow(totalRow);
 
     // Formatting Data Rows
-    const lastRowIdx = headerRowIdx + reportData.data.length + 1;
-    for (let r = headerRowIdx + 1; r <= lastRowIdx; r++) {
+    const lastRowIdx = deptHeaderIdx + reportData.data.length + 1;
+    for (let r = deptHeaderIdx + 1; r <= lastRowIdx; r++) {
       const row = ws.getRow(r);
       for (let c = 1; c <= totalCols; c++) {
         const cell = row.getCell(c);
@@ -218,9 +291,12 @@ export default function DepartmentWiseInventoryReport() {
     doc.setFontSize(10);
     doc.text(`INVENTORY AS ON: ${reportData.generated_at}`, pageWidth / 2, 22, { align: 'center' });
 
+    const orderedDepts = [];
+    reportData.institutions.forEach(inst => inst.departments.forEach(d => orderedDepts.push(d)));
+
     const headers = [
       'S.No', 'Material Name', 'UOM',
-      ...reportData.departments,
+      ...orderedDepts,
       'Total Inventory'
     ];
 
@@ -230,15 +306,15 @@ export default function DepartmentWiseInventoryReport() {
         `${row.material_code} - ${row.material_name}`,
         row.uom
       ];
-      reportData.departments.forEach(d => rowData.push(formatQty(row.department_inventory[d] || 0)));
+      orderedDepts.forEach(d => rowData.push(formatQty(row.department_inventory[d] || 0)));
       rowData.push(formatQty(row.total_inventory));
       return rowData;
     });
 
-    const totals = calculateTotals(reportData.data, reportData.departments);
+    const totals = calculateTotals(reportData.data, orderedDepts);
     const footer = [
       '', 'Grand Total', '',
-      ...reportData.departments.map(d => formatQty(totals[d])),
+      ...orderedDepts.map(d => formatQty(totals[d])),
       formatQty(totals.total_inventory)
     ];
     body.push(footer);
@@ -386,28 +462,35 @@ export default function DepartmentWiseInventoryReport() {
             <TableContainer sx={{ maxHeight: 'calc(100vh - 250px)', overflow: 'auto', '@media print': { maxHeight: 'none', overflow: 'visible' } }}>
               <Table size="small" sx={{ borderCollapse: 'collapse', '& th, & td': { border: '1px solid #CBD5E1', padding: '6px 10px', fontSize: '0.85rem' } }} stickyHeader>
                 <TableHead>
-                  <TableRow sx={{ '& th': { background: '#F8FAFC', fontWeight: 700, color: '#1E293B', py: 1.5 } }}>
-                    <TableCell align="center" sx={stickyStyle(0, true)}>S.No</TableCell>
-                    <TableCell sx={stickyStyle(50, true)}>Material Name</TableCell>
-                    <TableCell align="center" sx={stickyStyle(300, true)}>UOM</TableCell>
+                  <TableRow sx={{ '& th': { background: '#F8FAFC', fontWeight: 700, color: '#1E293B', py: 1.5, borderBottom: 'none' } }}>
+                    <TableCell align="center" rowSpan={2} sx={stickyStyle(0, true)}>S.No</TableCell>
+                    <TableCell sx={{ ...stickyStyle(50, true), minWidth: 250 }} rowSpan={2}>Material Name</TableCell>
+                    <TableCell align="center" rowSpan={2} sx={stickyStyle(300, true)}>UOM</TableCell>
 
-                    {reportData.departments.map((dept, i) => (
-                      <TableCell key={i} align="center" sx={{ minWidth: 100, p: 1 }}>
+                    {reportData.institutions.map((inst, i) => (
+                      <TableCell key={i} align="center" colSpan={inst.departments.length} sx={{ borderBottom: '1px solid #CBD5E1' }}>
+                        {inst.name}
+                      </TableCell>
+                    ))}
+
+                    <TableCell align="center" rowSpan={2} sx={{ background: '#F1F5F9', fontWeight: 800 }}>Total Inventory</TableCell>
+                  </TableRow>
+                  <TableRow sx={{ '& th': { background: '#F8FAFC', fontWeight: 700, color: '#1E293B', py: 1.5, borderTop: 'none' } }}>
+                    {reportData.institutions.map(inst => inst.departments.map((dept, i) => (
+                      <TableCell key={`${inst.name}-${dept}-${i}`} align="center" sx={{ minWidth: 80, p: 1 }}>
                         <Typography sx={{
                           fontSize: '0.75rem',
                           fontWeight: 700,
                           textTransform: 'uppercase',
-                          writingMode: reportData.departments.length > 5 ? 'vertical-rl' : 'horizontal-tb',
-                          transform: reportData.departments.length > 5 ? 'rotate(180deg)' : 'none',
+                          writingMode: 'vertical-rl',
+                          transform: 'rotate(180deg)',
                           maxHeight: 150,
                           mx: 'auto'
                         }}>
                           {dept}
                         </Typography>
                       </TableCell>
-                    ))}
-
-                    <TableCell align="center" sx={{ background: '#F1F5F9', fontWeight: 800 }}>Total Inventory</TableCell>
+                    )))}
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -419,11 +502,11 @@ export default function DepartmentWiseInventoryReport() {
                       </TableCell>
                       <TableCell align="center" sx={stickyStyle(300, false)}>{row.uom}</TableCell>
 
-                      {reportData.departments.map((dept, i) => (
-                        <TableCell key={i} align="center">
+                      {reportData.institutions.map(inst => inst.departments.map((dept, i) => (
+                        <TableCell key={`${inst.name}-${dept}-${i}`} align="center">
                           {formatQty(row.department_inventory[dept] || '')}
                         </TableCell>
-                      ))}
+                      )))}
 
                       <TableCell align="center" sx={{ fontWeight: 700, background: '#F8FAFC' }}>
                         {formatQty(row.total_inventory)}
@@ -433,11 +516,13 @@ export default function DepartmentWiseInventoryReport() {
 
                   {/* Totals Row */}
                   {(() => {
-                    const totals = calculateTotals(reportData.data, reportData.departments);
+                    const orderedDepts = [];
+                    reportData.institutions.forEach(inst => inst.departments.forEach(d => orderedDepts.push(d)));
+                    const totals = calculateTotals(reportData.data, orderedDepts);
                     return (
                       <TableRow sx={{ background: '#F8FAFC', '& td': { fontWeight: 800, color: '#1E293B' } }}>
                         <TableCell colSpan={3} align="right" sx={stickyStyle(0, false)}>DEPARTMENT TOTALS</TableCell>
-                        {reportData.departments.map((d, i) => (
+                        {orderedDepts.map((d, i) => (
                           <TableCell key={i} align="center">{formatQty(totals[d])}</TableCell>
                         ))}
                         <TableCell align="center" sx={{ background: '#E2E8F0' }}>{formatQty(totals.total_inventory)}</TableCell>

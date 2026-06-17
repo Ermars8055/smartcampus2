@@ -672,7 +672,8 @@ def get_receipt_summary(
                 "total": 0.0,
                 "latest_bill_no": row.invoice_number,
                 "latest_bill_date": row.invoice_date,
-                "rate": row.rate # We'll use the latest rate for display, or could avg
+                "rate": row.rate, # We'll use the latest rate for display, or could avg
+                "transactions": []
             }
         
         v_data = pivoted[m_id]["vendor_details"][v_id]
@@ -685,6 +686,15 @@ def get_receipt_summary(
             v_data["latest_bill_no"] = row.invoice_number
             v_data["latest_bill_date"] = row.invoice_date
             v_data["rate"] = row.rate
+
+        v_data["transactions"].append({
+            "bill_no": row.invoice_number,
+            "bill_date": row.invoice_date,
+            "qty": round(float(row.accepted_quantity or 0)),
+            "rate": float(row.rate or 0),
+            "amount": round(float(row.taxable_amount or 0), 2),
+            "total": round(float(row.total_amount or 0), 2)
+        })
 
     # Convert to list and sort
     final_data = list(pivoted.values())
@@ -792,7 +802,7 @@ def get_department_inventory_report(
     Calculated as: Issues to Dept - Returns from Dept.
     """
     # 1. Fetch all active materials
-    mat_query = db.query(Material, UOM.name.label("uom_name")).join(UOM, Material.uom_id == UOM.id).filter(
+    mat_query = db.query(Material, UOM.abbreviation.label("uom_name")).join(UOM, Material.uom_id == UOM.id).filter(
         Material.tenant_id == tenant_id,
         Material.site_id == site_id,
         Material.is_deleted == False
@@ -816,23 +826,38 @@ def get_department_inventory_report(
             project_id = inst.project_id
 
     # 2. Fetch all active departments for dynamic columns
-    dept_query = db.query(Department).filter(
-        Department.tenant_id == tenant_id,
-        Department.site_id == site_id,
-        Department.is_active == True,
-        Department.is_deleted == False
-    )
+    dept_query = db.query(Department, Institution.name.label("institution_name"))\
+        .outerjoin(Institution, Department.institution_id == Institution.id)\
+        .filter(
+            Department.tenant_id == tenant_id,
+            Department.site_id == site_id,
+            Department.is_active == True,
+            Department.is_deleted == False
+        )
     if department_id:
         dept_ids = [int(id.strip()) for id in department_id.split(',')]
         dept_query = dept_query.filter(Department.id.in_(dept_ids))
     if institution_id:
         dept_query = dept_query.filter(Department.institution_id == institution_id)
     
-    all_depts = dept_query.order_by(Department.name).all()
-    dept_names = [d.name for d in all_depts]
+    all_depts = dept_query.order_by(Institution.name, Department.name).all()
     
-    if not dept_names:
-        return {"departments": [], "data": []}
+    institutions_dict = {}
+    dept_names = []
+    
+    for dept, inst_name in all_depts:
+        inst = inst_name or "General"
+        if inst not in institutions_dict:
+            institutions_dict[inst] = {"name": inst, "departments": []}
+            
+        institutions_dict[inst]["departments"].append(dept.name)
+        if dept.name not in dept_names:
+            dept_names.append(dept.name)
+            
+    institutions_list = list(institutions_dict.values())
+    
+    if not institutions_list:
+        return {"institutions": [], "departments": [], "data": []}
 
     # 3. Calculate Issues per material per department
     issues_query = db.query(
@@ -908,6 +933,7 @@ def get_department_inventory_report(
         })
 
     return {
+        "institutions": institutions_list,
         "departments": dept_names,
         "data": final_data,
         "generated_at": get_now_ist().strftime("%d-%b-%Y %H:%M:%S")
@@ -930,6 +956,8 @@ def get_pending_gatepass_returns(
 ):
     """Pending Gatepass Returns Report - Returnable items that are not yet received."""
     query = db.query(
+        GatePassItem.material_id,
+        GatePass.vendor_id,
         GatePass.gate_pass_number,
         GatePass.created_at.label("gate_pass_date"),
         Vendor.name.label("vendor_name"),
@@ -977,21 +1005,37 @@ def get_pending_gatepass_returns(
 
     results = query.order_by(GatePass.created_at.desc()).all()
 
-    data = []
+    pivoted = {}
+    unique_vendors = {} # vendor_id -> name
+
     for row in results:
-        vendor_display = row.vendor_custom_name
-        if row.vendor_name:
-            vendor_display = f"{row.vendor_code} - {row.vendor_name}"
+        m_id = row.material_id
+        # vendor identity
+        v_id = row.vendor_id or f"custom_{row.vendor_custom_name}"
+        vendor_name = f"{row.vendor_code} - {row.vendor_name}" if row.vendor_name else row.vendor_custom_name
+        unique_vendors[v_id] = vendor_name
+
+        if m_id not in pivoted:
+            pivoted[m_id] = {
+                "material_id": m_id,
+                "material_code": row.material_code,
+                "material_name": row.material_name,
+                "uom_name": row.uom_name,
+                "vendor_details": {}
+            }
+        
+        if v_id not in pivoted[m_id]["vendor_details"]:
+            pivoted[m_id]["vendor_details"][v_id] = {
+                "vendor_id": v_id,
+                "vendor_name": vendor_name,
+                "transactions": []
+            }
             
         age_days = (datetime.now().date() - row.gate_pass_date.date()).days if row.gate_pass_date else 0
-
-        data.append({
+        
+        pivoted[m_id]["vendor_details"][v_id]["transactions"].append({
             "gate_pass_number": row.gate_pass_number,
             "gate_pass_date": row.gate_pass_date.strftime("%d-%b-%Y") if row.gate_pass_date else "",
-            "vendor_name": vendor_display or "Unknown",
-            "material_code": row.material_code,
-            "material_name": row.material_name,
-            "uom_name": row.uom_name,
             "quantity": round(row.quantity or 0, 2),
             "status": row.status,
             "from_location": row.from_department or row.from_store or "N/A",
@@ -1000,8 +1044,14 @@ def get_pending_gatepass_returns(
             "age_days": age_days
         })
 
+    final_data = list(pivoted.values())
+    final_data.sort(key=lambda x: x["material_name"])
+    
+    sorted_vendors = [{"id": vid, "name": vname} for vid, vname in sorted(unique_vendors.items(), key=lambda x: x[1])]
+
     return {
-        "data": data,
+        "vendors": sorted_vendors,
+        "data": final_data,
         "generated_at": get_now_ist().strftime("%d-%b-%Y %H:%M:%S"),
         "generated_by": current_user.full_name
     }

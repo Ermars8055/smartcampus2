@@ -126,13 +126,66 @@ export default function ReceiptSummaryReport() {
     
     const wb = new ExcelJS.Workbook();
     const ws = wb.addWorksheet('Receipt Summary');
+    const totalCols = 3 + reportData.vendors.length * 5;
     
     // Row 1 and 2: Titles
     ws.addRow(['MAIN STORE ITEMS - RECEIPT SUMMARY REPORT']);
-    ws.addRow([`Period: ${filters.fromDate.format('DD-MMM-YYYY')} to ${filters.toDate.format('DD-MMM-YYYY')}`]);
+    ws.mergeCells(1, 1, 1, totalCols);
+    const titleCell = ws.getCell(1, 1);
+    titleCell.font = { size: 14, bold: true };
+    titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+
+    const dateRange = `${filters.fromDate.format('DD-MMM-YYYY')} to ${filters.toDate.format('DD-MMM-YYYY')}`;
+    const storeName = warehouses.find(w => w.id === filters.warehouseId)?.name || 'All Stores';
+    const catName = categories.find(c => c.id === filters.categoryId)?.name || 'All Categories';
+    const subcatName = subcategories.find(s => s.id === filters.subcategoryId)?.name || 'All Subcategories';
+    const searchVal = filters.search || 'None';
+    const incCancelled = filters.includeCancelled ? 'Yes' : 'No';
+
     ws.addRow([]);
+    ws.addRow([]);
+    ws.addRow([]); // Empty row 4
+
+    // Date Range (Left)
+    ws.mergeCells(2, 1, 2, 2);
+    const cellDate = ws.getCell(2, 1);
+    cellDate.value = { richText: [{ font: { bold: true }, text: 'Date Range: ' }, { text: dateRange }] };
+    cellDate.alignment = { horizontal: 'left', vertical: 'middle' };
+
+    // Store (Center)
+    ws.mergeCells(2, 3, 2, 5);
+    const cellStore = ws.getCell(2, 3);
+    cellStore.value = { richText: [{ font: { bold: true }, text: 'Store: ' }, { text: storeName }] };
+    cellStore.alignment = { horizontal: 'center', vertical: 'middle' };
+
+    // Category (Right)
+    ws.mergeCells(2, 6, 2, totalCols);
+    const cellCat = ws.getCell(2, 6);
+    cellCat.value = { richText: [{ font: { bold: true }, text: 'Category: ' }, { text: catName }] };
+    cellCat.alignment = { horizontal: 'right', vertical: 'middle' };
+
+    // Subcategory (Left)
+    ws.mergeCells(3, 1, 3, 2);
+    const cellSub = ws.getCell(3, 1);
+    cellSub.value = { richText: [{ font: { bold: true }, text: 'Subcategory: ' }, { text: subcatName }] };
+    cellSub.alignment = { horizontal: 'left', vertical: 'middle' };
+
+    // Search (Center)
+    ws.mergeCells(3, 3, 3, 5);
+    const cellSearch = ws.getCell(3, 3);
+    cellSearch.value = { richText: [{ font: { bold: true }, text: 'Search: ' }, { text: searchVal }] };
+    cellSearch.alignment = { horizontal: 'center', vertical: 'middle' };
+
+    // Include Cancelled (Right)
+    ws.mergeCells(3, 6, 3, totalCols);
+    const cellInc = ws.getCell(3, 6);
+    cellInc.value = { richText: [{ font: { bold: true }, text: 'Inc. Cancelled: ' }, { text: incCancelled }] };
+    cellInc.alignment = { horizontal: 'right', vertical: 'middle' };
+
+    ws.getRow(2).height = 20;
+    ws.getRow(3).height = 20;
     
-    // Row 4: Main Headers
+    // Row 5: Main Headers
     const headerRow1 = ['S.No', 'Material Name', 'UOM'];
     reportData.vendors.forEach(v => {
       headerRow1.push(`${v.code} - ${v.name}`);
@@ -140,7 +193,7 @@ export default function ReceiptSummaryReport() {
     });
     ws.addRow(headerRow1);
     
-    // Row 5: Sub Headers
+    // Row 6: Sub Headers
     const headerRow2 = ['', '', ''];
     reportData.vendors.forEach(() => {
       headerRow2.push('Bill No & Date', 'Qty', 'Rate', 'Amount', 'Total');
@@ -149,44 +202,53 @@ export default function ReceiptSummaryReport() {
     
     // Data Rows
     reportData.data.forEach((row, i) => {
-      const matRow = [i + 1, `${row.material_code} - ${row.material_name}`, row.uom];
-      reportData.vendors.forEach(v => {
-        const vData = row.vendor_details[v.id];
-        if (vData) {
-          const billStr = `${vData.latest_bill_no || ''} dt\n${vData.latest_bill_date ? dayjs(vData.latest_bill_date).format('DD-MMM-YYYY') : ''}`;
-          matRow.push(billStr, vData.qty, vData.rate, vData.amount, vData.total);
-        } else {
-          matRow.push('-', '-', '-', '-', '-');
-        }
-      });
-      ws.addRow(matRow);
+      const maxTxns = Math.max(1, ...reportData.vendors.map(v => row.vendor_details[v.id]?.transactions?.length || 0));
+      for (let txnIdx = 0; txnIdx < maxTxns; txnIdx++) {
+         const matRow = txnIdx === 0 ? [i + 1, `${row.material_code} - ${row.material_name}`, row.uom] : ['', '', ''];
+         reportData.vendors.forEach(v => {
+           const vData = row.vendor_details[v.id];
+           const txn = vData?.transactions?.[txnIdx];
+           if (txn) {
+             const billStr = `${txn.bill_no || ''} dt\n${txn.bill_date ? dayjs(txn.bill_date).format('DD-MMM-YYYY') : ''}`;
+             matRow.push(billStr, txn.qty, txn.rate, txn.amount, txn.total);
+           } else {
+             matRow.push('-', '-', '-', '-', '-');
+           }
+         });
+         ws.addRow(matRow);
+      }
     });
 
     // Grand Total Row
     const totalRow = ['', 'GRAND TOTAL', ''];
     reportData.vendors.forEach(v => {
-      const vTotalQty = reportData.data.reduce((acc, row) => acc + (row.vendor_details[v.id]?.qty || 0), 0);
-      const vTotalAmt = reportData.data.reduce((acc, row) => acc + (row.vendor_details[v.id]?.amount || 0), 0);
-      const vTotalSum = reportData.data.reduce((acc, row) => acc + (row.vendor_details[v.id]?.total || 0), 0);
+      const vTotalQty = reportData.data.reduce((acc, row) => {
+          const txns = row.vendor_details[v.id]?.transactions || [];
+          return acc + txns.reduce((sum, t) => sum + (t.qty || 0), 0);
+      }, 0);
+      const vTotalAmt = reportData.data.reduce((acc, row) => {
+          const txns = row.vendor_details[v.id]?.transactions || [];
+          return acc + txns.reduce((sum, t) => sum + (t.amount || 0), 0);
+      }, 0);
+      const vTotalSum = reportData.data.reduce((acc, row) => {
+          const txns = row.vendor_details[v.id]?.transactions || [];
+          return acc + txns.reduce((sum, t) => sum + (t.total || 0), 0);
+      }, 0);
       totalRow.push('', vTotalQty, '', vTotalAmt, vTotalSum);
     });
     ws.addRow(totalRow);
     
-    const totalCols = 3 + reportData.vendors.length * 5;
-    
     // Merges
-    ws.mergeCells(1, 1, 1, totalCols);
-    ws.mergeCells(2, 1, 2, totalCols);
-    ws.mergeCells(4, 1, 5, 1); // S.No
-    ws.mergeCells(4, 2, 5, 2); // Material Name
-    ws.mergeCells(4, 3, 5, 3); // UOM
+    ws.mergeCells(5, 1, 6, 1); // S.No
+    ws.mergeCells(5, 2, 6, 2); // Material Name
+    ws.mergeCells(5, 3, 6, 3); // UOM
     
     reportData.vendors.forEach((v, i) => {
       const colStart = 4 + i * 5; // D
-      ws.mergeCells(4, colStart, 4, colStart + 4);
+      ws.mergeCells(5, colStart, 5, colStart + 4);
     });
     
-    // Formatting Header row 4 and 5
+    // Formatting Header row 5 and 6
     const headerFill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9E1F2' } }; // Light blue color
     const border = {
       top: { style: 'thin' },
@@ -196,35 +258,36 @@ export default function ReceiptSummaryReport() {
     };
     
     for (let col = 1; col <= totalCols; col++) {
-      const cell4 = ws.getCell(4, col);
       const cell5 = ws.getCell(5, col);
-      cell4.fill = headerFill;
+      const cell6 = ws.getCell(6, col);
       cell5.fill = headerFill;
-      cell4.font = { bold: true };
+      cell6.fill = headerFill;
       cell5.font = { bold: true };
-      cell4.border = border;
+      cell6.font = { bold: true };
       cell5.border = border;
-      cell4.alignment = { horizontal: 'center', vertical: 'middle' };
+      cell6.border = border;
+      cell5.alignment = { horizontal: 'center', vertical: 'middle' };
       
       if (col > 2) {
         // Vertical text for subheaders
-        cell5.alignment = { textRotation: 90, horizontal: 'center', vertical: 'middle' };
+        cell6.alignment = { textRotation: 90, horizontal: 'center', vertical: 'middle' };
       }
     }
     
-    ws.getCell(4, 1).alignment = { horizontal: 'center', vertical: 'middle' };
-    ws.getCell(4, 2).alignment = { horizontal: 'center', vertical: 'middle' };
-    ws.getCell(4, 3).alignment = { horizontal: 'center', vertical: 'middle' };
+    ws.getCell(5, 1).alignment = { horizontal: 'center', vertical: 'middle' };
+    ws.getCell(5, 2).alignment = { horizontal: 'center', vertical: 'middle' };
+    ws.getCell(5, 3).alignment = { horizontal: 'center', vertical: 'middle' };
     
     // Formatting data rows
-    const lastRow = 5 + reportData.data.length + 1;
-    for (let r = 6; r <= lastRow; r++) {
+    const lastRow = 6 + reportData.data.length + 1; // Wait, actually we iterate over txns so lastRow needs to be found later
+    // Let's just iterate over all rows from 7 to ws.rowCount
+    for (let r = 7; r <= ws.rowCount; r++) {
       const row = ws.getRow(r);
       for (let c = 1; c <= totalCols; c++) {
         const cell = row.getCell(c);
         cell.border = border;
         
-        if (r === lastRow) { // Total row
+        if (r === ws.rowCount) { // Total row
           cell.font = { bold: true };
           cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF1F5F9' } };
         }
@@ -268,8 +331,9 @@ export default function ReceiptSummaryReport() {
     }
     
     // Title styling
-    ws.getCell('A1').font = { size: 14, bold: true };
-    ws.getCell('A2').font = { size: 11, bold: true };
+    ws.mergeCells(ws.rowCount, 1, ws.rowCount, 3);
+    const gtCell = ws.getCell(ws.rowCount, 1);
+    gtCell.alignment = { horizontal: 'right', vertical: 'middle' };
     
     const buffer = await wb.xlsx.writeBuffer();
     const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
@@ -305,18 +369,23 @@ export default function ReceiptSummaryReport() {
     });
     head[1] = ['', '', '', ...subHeads]; // Empty for spans
 
-    const body = reportData.data.map((row, i) => {
-      const matRow = [i + 1, `${row.material_code} - ${row.material_name}`, row.uom];
-      reportData.vendors.forEach(v => {
-        const vData = row.vendor_details[v.id];
-        if (vData) {
-          const billStr = `${vData.latest_bill_no || ''}\n${vData.latest_bill_date ? dayjs(vData.latest_bill_date).format('DD-MMM-YYYY') : ''}`;
-          matRow.push(billStr, vData.qty, fmt(vData.rate), fmt(vData.amount), fmt(vData.total));
-        } else {
-          matRow.push('-', '-', '-', '-', '-');
-        }
-      });
-      return matRow;
+    const body = [];
+    reportData.data.forEach((row, i) => {
+      const maxTxns = Math.max(1, ...reportData.vendors.map(v => row.vendor_details[v.id]?.transactions?.length || 0));
+      for (let txnIdx = 0; txnIdx < maxTxns; txnIdx++) {
+         const matRow = txnIdx === 0 ? [i + 1, `${row.material_code} - ${row.material_name}`, row.uom] : ['', '', ''];
+         reportData.vendors.forEach(v => {
+           const vData = row.vendor_details[v.id];
+           const txn = vData?.transactions?.[txnIdx];
+           if (txn) {
+             const billStr = `${txn.bill_no || ''}\n${txn.bill_date ? dayjs(txn.bill_date).format('DD-MMM-YYYY') : ''}`;
+             matRow.push(billStr, txn.qty, fmt(txn.rate), fmt(txn.amount), fmt(txn.total));
+           } else {
+             matRow.push('-', '-', '-', '-', '-');
+           }
+         });
+         body.push(matRow);
+      }
     });
 
     autoTable(doc, {
@@ -353,15 +422,15 @@ export default function ReceiptSummaryReport() {
       {/* Filters Section */}
       <Card sx={{ p: 2, mb: 3, borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
         <Grid container spacing={2}>
-          <Grid item xs={12} sm={6} md={2.4}>
+          <Grid item xs={12} sm={6} md={2}>
             <DatePicker label="From Date" value={filters.fromDate} onChange={d => setFilters({ ...filters, fromDate: d })}
               slotProps={{ textField: { size: "small", fullWidth: true } }} format="DD-MMM-YYYY" />
           </Grid>
-          <Grid item xs={12} sm={6} md={2.4}>
+          <Grid item xs={12} sm={6} md={2}>
             <DatePicker label="To Date" value={filters.toDate} onChange={d => setFilters({ ...filters, toDate: d })}
               slotProps={{ textField: { size: "small", fullWidth: true } }} format="DD-MMM-YYYY" />
           </Grid>
-          <Grid item xs={12} sm={6} md={2.4}>
+          <Grid item xs={12} sm={6} md={3}>
             <FormControl size="small" fullWidth>
               <InputLabel>Store</InputLabel>
               <Select value={filters.warehouseId} label="Store" onChange={e => setFilters({ ...filters, warehouseId: e.target.value })}>
@@ -370,7 +439,7 @@ export default function ReceiptSummaryReport() {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} sm={6} md={2.4}>
+          <Grid item xs={12} sm={6} md={2}>
             <FormControl size="small" fullWidth>
               <InputLabel>Vendor</InputLabel>
               <Select value={filters.vendorId} label="Vendor" onChange={e => setFilters({ ...filters, vendorId: e.target.value })}>
@@ -379,7 +448,7 @@ export default function ReceiptSummaryReport() {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} sm={6} md={2.4}>
+          <Grid item xs={12} sm={6} md={3}>
             <FormControl size="small" fullWidth>
               <InputLabel>Category</InputLabel>
               <Select value={filters.categoryId} label="Category" onChange={e => setFilters({ ...filters, categoryId: e.target.value, subcategoryId: '' })}>
@@ -389,7 +458,7 @@ export default function ReceiptSummaryReport() {
             </FormControl>
           </Grid>
 
-          <Grid item xs={12} sm={6} md={2.4}>
+          <Grid item xs={12} sm={6} md={2}>
             <FormControl size="small" fullWidth disabled={!filters.categoryId}>
               <InputLabel>Subcategory</InputLabel>
               <Select value={filters.subcategoryId} label="Subcategory" onChange={e => setFilters({ ...filters, subcategoryId: e.target.value })}>
@@ -398,20 +467,20 @@ export default function ReceiptSummaryReport() {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} sm={6} md={2.4}>
+          <Grid item xs={12} sm={6} md={2}>
             <TextField size="small" fullWidth label="Search Material" placeholder="Code or Name"
               value={filters.search} onChange={e => setFilters({ ...filters, search: e.target.value })} />
           </Grid>
-          <Grid item xs={12} sm={6} md={2.4}>
+          <Grid item xs={12} sm={6} md={3}>
             <TextField size="small" fullWidth label="GRN Number"
               value={filters.grnNumber} onChange={e => setFilters({ ...filters, grnNumber: e.target.value })} />
           </Grid>
-          <Grid item xs={12} sm={6} md={2.4} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Grid item xs={12} sm={6} md={2} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <FormControlLabel
               control={<Switch size="small" checked={filters.includeCancelled} onChange={e => setFilters({ ...filters, includeCancelled: e.target.checked })} />}
               label={<Typography variant="body2" sx={{ fontWeight: 500 }}>Inc. Cancelled</Typography>} />
           </Grid>
-          <Grid item xs={12} sm={6} md={2.4} sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+          <Grid item xs={12} sm={12} md={3} sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
             <Box sx={{ display: 'flex', gap: 1 }}>
               <Button variant="outlined" startIcon={<Refresh />} onClick={handleReset} size="small">Reset</Button>
               <Button variant="contained" startIcon={<Assessment />} onClick={handleGenerate} disabled={loading} size="small">
@@ -465,38 +534,72 @@ export default function ReceiptSummaryReport() {
             )}
             <TableBody>
               {loading && <TableRow><TableCell colSpan={3 + (reportData?.vendors.length || 0) * 5} align="center" sx={{ py: 5 }}><CircularProgress /></TableCell></TableRow>}
-              {!loading && reportData?.data.map((row, idx) => (
-                <TableRow key={row.material_id} hover>
-                  <TableCell align="center">{idx + 1}</TableCell>
-                  <TableCell sx={{ position: 'sticky', left: 0, background: '#fff', zIndex: 2, fontWeight: 600 }}>
-                    {row.material_code} - {row.material_name}
-                  </TableCell>
-                  <TableCell align="center">{row.uom}</TableCell>
-                  {reportData.vendors.map(v => {
-                    const vData = row.vendor_details[v.id];
-                    if (!vData) return <Fragment key={v.id}><TableCell colSpan={5} align="center" sx={{ color: '#CBD5E1' }}>-</TableCell></Fragment>;
-                    return (
-                      <Fragment key={v.id}>
-                        <TableCell sx={{ cursor: 'pointer', '&:hover': { background: '#F1F5F9' } }} onClick={() => handleCellClick(row.material_id, v.id)}>
-                          <Typography variant="caption" sx={{ display: 'block', fontWeight: 600 }}>{vData.latest_bill_no || '-'}</Typography>
-                          <Typography variant="caption" sx={{ color: '#64748B' }}>dt {vData.latest_bill_date ? dayjs(vData.latest_bill_date).format('DD-MMM-YYYY') : '-'}</Typography>
+              {!loading && reportData?.data.map((row, idx) => {
+                const maxTxns = Math.max(1, ...reportData.vendors.map(v => row.vendor_details[v.id]?.transactions?.length || 0));
+                
+                return Array.from({ length: maxTxns }).map((_, txnIdx) => (
+                  <TableRow key={`${row.material_id}-${txnIdx}`} hover>
+                    {txnIdx === 0 && (
+                      <>
+                        <TableCell align="center" rowSpan={maxTxns}>{idx + 1}</TableCell>
+                        <TableCell sx={{ position: 'sticky', left: 0, background: '#fff', zIndex: 2, fontWeight: 600 }} rowSpan={maxTxns}>
+                          {row.material_code} - {row.material_name}
                         </TableCell>
-                        <TableCell align="right" sx={{ fontWeight: 600, color: '#0F172A' }}>{fmtQty(vData.qty)}</TableCell>
-                        <TableCell align="right">{fmt(vData.rate)}</TableCell>
-                        <TableCell align="right">{fmt(vData.amount)}</TableCell>
-                        <TableCell align="right" sx={{ fontWeight: 700, color: '#1E40AF' }}>{fmt(vData.total)}</TableCell>
-                      </Fragment>
-                    );
-                  })}
-                </TableRow>
-              ))}
+                        <TableCell align="center" rowSpan={maxTxns}>{row.uom}</TableCell>
+                      </>
+                    )}
+                    {reportData.vendors.map(v => {
+                      const vData = row.vendor_details[v.id];
+                      const txn = vData?.transactions?.[txnIdx];
+                      
+                      if (!txn) {
+                         if (!vData) {
+                             if (txnIdx === 0) return <Fragment key={v.id}><TableCell colSpan={5} align="center" sx={{ color: '#CBD5E1' }} rowSpan={maxTxns}>-</TableCell></Fragment>;
+                             return null;
+                         }
+                         return (
+                           <Fragment key={v.id}>
+                             <TableCell />
+                             <TableCell />
+                             <TableCell />
+                             <TableCell />
+                             <TableCell />
+                           </Fragment>
+                         );
+                      }
+                      
+                      return (
+                        <Fragment key={v.id}>
+                          <TableCell sx={{ cursor: 'pointer', '&:hover': { background: '#F1F5F9' } }} onClick={() => handleCellClick(row.material_id, v.id)}>
+                            <Typography variant="caption" sx={{ display: 'block', fontWeight: 600 }}>{txn.bill_no || '-'}</Typography>
+                            <Typography variant="caption" sx={{ color: '#64748B' }}>dt {txn.bill_date ? dayjs(txn.bill_date).format('DD-MMM-YYYY') : '-'}</Typography>
+                          </TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 600, color: '#0F172A' }}>{fmtQty(txn.qty)}</TableCell>
+                          <TableCell align="right">{fmt(txn.rate)}</TableCell>
+                          <TableCell align="right">{fmt(txn.amount)}</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 700, color: '#1E40AF' }}>{fmt(txn.total)}</TableCell>
+                        </Fragment>
+                      );
+                    })}
+                  </TableRow>
+                ));
+              })}
               {!loading && reportData && (
                 <TableRow sx={{ background: '#F8FAFC', '& td': { fontWeight: 800, py: 1.5 } }}>
                   <TableCell colSpan={3} align="right">GRAND TOTAL</TableCell>
                   {reportData.vendors.map(v => {
-                    const vTotalQty = reportData.data.reduce((acc, row) => acc + (row.vendor_details[v.id]?.qty || 0), 0);
-                    const vTotalAmt = reportData.data.reduce((acc, row) => acc + (row.vendor_details[v.id]?.amount || 0), 0);
-                    const vTotalSum = reportData.data.reduce((acc, row) => acc + (row.vendor_details[v.id]?.total || 0), 0);
+                    const vTotalQty = reportData.data.reduce((acc, row) => {
+                        const txns = row.vendor_details[v.id]?.transactions || [];
+                        return acc + txns.reduce((sum, t) => sum + (t.qty || 0), 0);
+                    }, 0);
+                    const vTotalAmt = reportData.data.reduce((acc, row) => {
+                        const txns = row.vendor_details[v.id]?.transactions || [];
+                        return acc + txns.reduce((sum, t) => sum + (t.amount || 0), 0);
+                    }, 0);
+                    const vTotalSum = reportData.data.reduce((acc, row) => {
+                        const txns = row.vendor_details[v.id]?.transactions || [];
+                        return acc + txns.reduce((sum, t) => sum + (t.total || 0), 0);
+                    }, 0);
                     return (
                       <Fragment key={v.id}>
                         <TableCell />

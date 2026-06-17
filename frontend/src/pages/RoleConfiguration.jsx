@@ -512,6 +512,7 @@ export default function RoleConfiguration() {
               >
                 <MenuItem value="Self Only">Self Only</MenuItem>
                 <MenuItem value="Department">Department</MenuItem>
+                <MenuItem value="Institution">Institution</MenuItem>
                 <MenuItem value="Organization">Organization</MenuItem>
                 <MenuItem value="Full Administrative Access">Full Administrative Access</MenuItem>
               </Select>

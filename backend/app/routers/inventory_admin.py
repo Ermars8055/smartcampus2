@@ -140,6 +140,7 @@ def get_stock_ledger(
 
 @router.get("/reports/stock")
 def stock_report(
+    warehouse_id: Optional[int] = None,
     db: Session = Depends(get_db), 
     current_user: User = Depends(require_permission("reports", "read")),
     tenant_id: int = Depends(get_tenant_id),
@@ -159,6 +160,9 @@ def stock_report(
         CurrentStock.tenant_id == tenant_id, CurrentStock.site_id == site_id,
         CurrentStock.quantity > 0
     )
+
+    if warehouse_id:
+        q = q.filter(CurrentStock.warehouse_id == warehouse_id)
 
     results = q.group_by(Material.code, Material.name, UOM.name).all()
     return [

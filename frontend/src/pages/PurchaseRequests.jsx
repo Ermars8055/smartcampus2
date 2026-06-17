@@ -89,12 +89,18 @@ export default function PurchaseRequests() {
     load();
     api.get('/api/materials', { params: { limit: 10000 } }).then(r => setMaterials(r.data.items || []));
     api.get('/api/projects').then(r => setProjects(r.data));
-    api.get('/api/institutions').then(r => setInstitutions(r.data)).catch(() => setInstitutions([]));
+    api.get('/api/institutions').then(r => {
+      setInstitutions(r.data);
+      if (r.data.length === 1) setFilterInstitution(r.data[0]);
+    }).catch(() => setInstitutions([]));
     api.get('/api/buildings').then(r => setAllBuildings(r.data)).catch(() => setAllBuildings([]));
     api.get('/api/departments').then(r => setAllDepartments(r.data)).catch(() => setAllDepartments([]));
     api.get('/api/vendors').then(r => setVendors(r.data));
     api.get('/api/terms').then(r => setTermsTemplates(r.data));
-    api.get('/api/departments/names').then(r => setAllDepartmentsList(r.data)).catch(() => setAllDepartmentsList([]));
+    api.get('/api/departments/names').then(r => {
+      setAllDepartmentsList(r.data);
+      if (r.data.length === 1) setFilterDepartment(r.data[0]);
+    }).catch(() => setAllDepartmentsList([]));
   }, []);
 
   useEffect(() => {
@@ -119,9 +125,9 @@ export default function PurchaseRequests() {
     }
   };
 
-  const handleDepartmentChange = (newDept) => {
+  const handleDepartmentChange = (newDept, instId = form.institution_id) => {
     if (newDept) {
-      const masterDepts = allDepartments.filter(d => d.name === newDept);
+      const masterDepts = allDepartments.filter(d => d.name === newDept && (!instId || d.institution_id === instId));
       const masterBldgs = allBuildings.filter(b => b.department_name === newDept);
       const uniqueBuildings = new Map();
       masterDepts.forEach(d => {
@@ -426,13 +432,29 @@ export default function PurchaseRequests() {
         </Box>
         {hasPermission('purchase_requests', 'can_create') && (
           <Button variant="contained" startIcon={<Add />} onClick={() => {
+            const defaultInst = institutions.length === 1 ? institutions[0].id : '';
+            const defaultDept = allDepartmentsList.length === 1 ? allDepartmentsList[0] : '';
+            const defaultProj = institutions.length === 1 ? institutions[0].project_id : '';
+
             setForm({
-              institution_id: '', project_id: '', building_id: '', department_name: '',
+              institution_id: defaultInst, project_id: defaultProj, building_id: '', department_name: defaultDept,
               required_date: dayjs().add(14, 'day'), remarks: '',
               items: [{ material_id: '', quantity: '' }]
             });
-            setFormDepartmentsList([]);
-            setBuildings([]);
+
+            if (defaultInst) {
+              const depts = allDepartments.filter(d => d.institution_id === defaultInst).map(d => d.name);
+              setFormDepartmentsList(Array.from(new Set(depts)));
+            } else {
+              setFormDepartmentsList([]);
+            }
+
+            if (defaultDept) {
+              handleDepartmentChange(defaultDept, defaultInst);
+            } else {
+              setBuildings([]);
+            }
+
             setDialog(true);
           }}>Create PR</Button>
         )}
@@ -448,12 +470,15 @@ export default function PurchaseRequests() {
             options={institutions}
             getOptionLabel={(option) => option.name || ''}
             value={filterInstitution}
-            onChange={(e, val) => setFilterInstitution(val)}
+            onChange={(e, val) => {
+              setFilterInstitution(val);
+              setFilterDepartment(null);
+            }}
             renderInput={(params) => <TextField {...params} placeholder="Filter by Institution" sx={{ minWidth: 220 }} />}
           />
           <Autocomplete
             size="small"
-            options={allDepartmentsList}
+            options={filterInstitution ? Array.from(new Set(allDepartments.filter(d => d.institution_id === filterInstitution.id).map(d => d.name))) : allDepartmentsList}
             value={filterDepartment}
             onChange={(e, val) => setFilterDepartment(val)}
             renderInput={(params) => <TextField {...params} placeholder="Filter by Department" sx={{ minWidth: 220 }} />}

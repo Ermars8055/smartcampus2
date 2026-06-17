@@ -27,6 +27,7 @@ class AdminUserOut(BaseModel):
     role: Optional[str] = None
     role_id: Optional[int] = None
     department: Optional[str] = None
+    institution: Optional[str] = None
     sites: List[SiteInfo] = []
     
     class Config:
@@ -40,6 +41,7 @@ class AdminUserCreate(BaseModel):
     role_id: Optional[int] = None
     tenant_id: Optional[int] = None
     department: Optional[str] = None
+    institution: Optional[str] = None
     site_ids: List[int] = []
     is_active: bool = True
 
@@ -50,6 +52,7 @@ class AdminUserUpdate(BaseModel):
     role_id: Optional[int] = None
     tenant_id: Optional[int] = None
     department: Optional[str] = None
+    institution: Optional[str] = None
     site_ids: List[int] = []
     is_active: bool = True
 
@@ -124,6 +127,7 @@ def list_users(
             role=role_name,
             role_id=role_id,
             department=u.department,
+            institution=u.institution,
             sites=sites
         ))
     return result
@@ -164,6 +168,7 @@ def create_user(
         email=data.email,
         full_name=data.full_name,
         department=data.department,
+        institution=data.institution,
         hashed_password=get_password_hash(data.password),
         is_active=data.is_active
     )
@@ -190,6 +195,7 @@ def create_user(
         email=user.email,
         full_name=user.full_name,
         department=user.department,
+        institution=user.institution,
         is_active=user.is_active,
         created_at=user.created_at.isoformat() if user.created_at else "",
     )
@@ -222,6 +228,7 @@ def update_user(
     user.full_name = data.full_name
     user.email = data.email
     user.department = data.department
+    user.institution = data.institution
     user.is_active = data.is_active
     
     if data.password:
@@ -261,6 +268,7 @@ def update_user(
         email=user.email,
         full_name=user.full_name,
         department=user.department,
+        institution=user.institution,
         is_active=user.is_active,
         created_at=user.created_at.isoformat() if user.created_at else "",
     )

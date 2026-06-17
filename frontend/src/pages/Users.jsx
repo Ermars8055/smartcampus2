@@ -18,6 +18,7 @@ const emptyForm = {
   password: '',
   role: 'Engineer',
   role_id: '',
+  institution: '',
   department: '',
   tenant_id: '',
   site_ids: [],
@@ -27,6 +28,7 @@ export default function Users() {
   const [users, setUsers] = useState([]);
   const [sites, setSites] = useState([]);
   const [roles, setRoles] = useState([]);
+  const [institutions, setInstitutions] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [dialog, setDialog] = useState(false);
   const [form, setForm] = useState(emptyForm);
@@ -35,13 +37,22 @@ export default function Users() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterRole, setFilterRole] = useState('');
   const [filterDept, setFilterDept] = useState('');
+  const [filterInst, setFilterInst] = useState('');
   const { user: currentUser } = useAuth();
 
   const load = () => {
     api.get('/api/admin/users').then(r => setUsers(r.data));
     api.get('/api/sites').then(r => setSites(r.data || [])).catch(() => setSites([]));
     api.get('/api/rbac/roles').then(r => setRoles(r.data || [])).catch(() => setRoles([]));
-    api.get('/api/departments').then(r => setDepartments(r.data || [])).catch(() => setDepartments([]));
+    api.get('/api/institutions').then(r => {
+      setInstitutions(r.data || []);
+      if (r.data && r.data.length === 1) setFilterInst(r.data[0].name);
+    }).catch(() => setInstitutions([]));
+    api.get('/api/departments').then(r => {
+      setDepartments(r.data || []);
+      const uniqueNames = Array.from(new Set((r.data || []).map(d => d.name)));
+      if (uniqueNames.length === 1) setFilterDept(uniqueNames[0]);
+    }).catch(() => setDepartments([]));
   };
   
   useEffect(() => { load(); }, [currentUser?.tenant_id]);
@@ -58,7 +69,8 @@ export default function Users() {
       (u.role_name || u.role || '').toLowerCase().includes(searchQuery.toLowerCase());
     const matchRole = !filterRole || (u.role_name || u.role) === filterRole;
     const matchDept = !filterDept || (u.department || '') === filterDept;
-    return matchSearch && matchRole && matchDept;
+    const matchInst = !filterInst || (u.institution || '') === filterInst;
+    return matchSearch && matchRole && matchDept && matchInst;
   });
 
   const handleSave = async () => {
@@ -68,6 +80,7 @@ export default function Users() {
         email: form.email,
         role: form.role,
         role_id: form.role_id || null,
+        institution: form.institution || null,
         department: form.department || null,
         tenant_id: currentUser?.tenant_id || form.tenant_id || null,
         site_ids: form.site_ids || [],
@@ -102,18 +115,34 @@ export default function Users() {
             placeholder="Search name, username, or role..." 
             value={searchQuery} 
             onChange={e => setSearchQuery(e.target.value)}
-            sx={{ flex: 3, minWidth: 320 }}
+            sx={{ flex: 2, minWidth: 200, maxWidth: 350 }}
             autoComplete="off"
             inputProps={{ autoComplete: 'off', form: { autocomplete: 'off' } }}
           />
-          <FormControl size="small" sx={{ flex: 1, minWidth: 200, maxWidth: 250 }}>
+          <FormControl size="small" sx={{ flex: 1, minWidth: 160, maxWidth: 220 }}>
+            <InputLabel>Filter by Institute</InputLabel>
+            <Select value={filterInst} label="Filter by Institute" onChange={e => {
+              setFilterInst(e.target.value);
+              setFilterDept(''); // Reset department filter when institute changes
+            }}>
+              <MenuItem value=""><em>All Institutes</em></MenuItem>
+              {institutions.map(i => <MenuItem key={i.id} value={i.name}>{i.name}</MenuItem>)}
+            </Select>
+          </FormControl>
+          <FormControl size="small" sx={{ flex: 1, minWidth: 160, maxWidth: 220 }}>
             <InputLabel>Filter by Department</InputLabel>
             <Select value={filterDept} label="Filter by Department" onChange={e => setFilterDept(e.target.value)}>
               <MenuItem value=""><em>All Departments</em></MenuItem>
-              {departments.map(d => <MenuItem key={d.id} value={d.name}>{d.name}</MenuItem>)}
+              {departments
+                .filter(d => {
+                  if (!filterInst) return true;
+                  const selectedInstId = institutions.find(i => i.name === filterInst)?.id;
+                  return d.institution_id === selectedInstId;
+                })
+                .map(d => <MenuItem key={d.id} value={d.name}>{d.name}</MenuItem>)}
             </Select>
           </FormControl>
-          <FormControl size="small" sx={{ flex: 1, minWidth: 160, maxWidth: 200 }}>
+          <FormControl size="small" sx={{ flex: 1, minWidth: 140, maxWidth: 200 }}>
             <InputLabel>Filter by Role</InputLabel>
             <Select value={filterRole} label="Filter by Role" onChange={e => setFilterRole(e.target.value)}>
               <MenuItem value=""><em>All Roles</em></MenuItem>
@@ -122,7 +151,20 @@ export default function Users() {
           </FormControl>
         </Box>
         <Button variant="contained" startIcon={<PersonAdd />} onClick={() => {
-          setEditing(null); setShowPassword(false); setForm({ ...emptyForm, tenant_id: currentUser?.tenant_id || '' }); setDialog(true);
+          setEditing(null); setShowPassword(false); 
+
+          let defaultInst = institutions.length === 1 ? institutions[0].name : '';
+          let defaultDept = '';
+          const uniqueNames = Array.from(new Set(departments.map(d => d.name)));
+          if (uniqueNames.length === 1) defaultDept = uniqueNames[0];
+
+          setForm({ 
+            ...emptyForm, 
+            tenant_id: currentUser?.tenant_id || '',
+            institution: defaultInst,
+            department: defaultDept
+          }); 
+          setDialog(true);
         }}>Add User</Button>
       </Box>
       <Card>
@@ -130,7 +172,7 @@ export default function Users() {
           <Table size="small">
             <TableHead><TableRow>
               <TableCell>Username</TableCell><TableCell>Full Name</TableCell><TableCell>Email</TableCell>
-              <TableCell>Role</TableCell><TableCell>Department</TableCell>
+              <TableCell>Role</TableCell><TableCell>Institute</TableCell><TableCell>Department</TableCell>
               <TableCell>Status</TableCell><TableCell>Created</TableCell><TableCell>Actions</TableCell>
             </TableRow></TableHead>
             <TableBody>
@@ -141,7 +183,8 @@ export default function Users() {
                   <TableCell sx={{ fontSize: '0.8rem', color: '#64748B' }}>{u.email}</TableCell>
 
                   <TableCell><Chip label={u.role_name || u.role} size="small" color={roleColor[u.role_name || u.role] || 'default'} sx={{ fontWeight: 600, fontSize: '0.7rem' }} /></TableCell>
-                  <TableCell sx={{ fontSize: '0.8rem', color: '#64748B' }}>{u.department || '-'}</TableCell>
+                  <TableCell sx={{ fontSize: '0.8rem', color: '#64748B' }}>{u.institution || 'All Institutions'}</TableCell>
+                  <TableCell sx={{ fontSize: '0.8rem', color: '#64748B' }}>{u.department || 'All Departments'}</TableCell>
                   <TableCell><Chip label={u.is_active ? 'Active' : 'Inactive'} size="small" color={u.is_active ? 'success' : 'default'} variant="outlined" /></TableCell>
                   <TableCell sx={{ fontSize: '0.75rem' }}>{formatDate(u.created_at)}</TableCell>
                   <TableCell>
@@ -152,6 +195,7 @@ export default function Users() {
                         ...emptyForm,
                         ...u,
                         role_id: u.role_id ? Number(u.role_id) : '',
+                        institution: u.institution || '',
                         department: u.department || '',
                         tenant_id: u.tenant_id || '',
                         site_ids: (u.sites || []).map(site => site.site_id),
@@ -228,14 +272,36 @@ export default function Users() {
             )}
             <Grid item xs={6}>
               <FormControl fullWidth>
+                <InputLabel>Institute</InputLabel>
+                <Select
+                  value={form.institution || ''}
+                  label="Institute"
+                  onChange={e => {
+                    const newInst = e.target.value;
+                    setForm({ ...form, institution: newInst, department: '' });
+                  }}
+                >
+                  <MenuItem value=""><em>All Institutions</em></MenuItem>
+                  {institutions.map(i => <MenuItem key={i.id} value={i.name}>{i.name}</MenuItem>)}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={6}>
+              <FormControl fullWidth>
                 <InputLabel>Department</InputLabel>
                 <Select
                   value={form.department || ''}
                   label="Department"
                   onChange={e => setForm({ ...form, department: e.target.value })}
                 >
-                  <MenuItem value=""><em>None</em></MenuItem>
-                  {departments.map(d => <MenuItem key={d.id} value={d.name}>{d.name}</MenuItem>)}
+                  <MenuItem value=""><em>All Departments</em></MenuItem>
+                  {departments
+                    .filter(d => {
+                      if (!form.institution || form.institution === 'All Institutions') return true;
+                      const selectedInstId = institutions.find(i => i.name === form.institution)?.id;
+                      return d.institution_id === selectedInstId;
+                    })
+                    .map(d => <MenuItem key={d.id} value={d.name}>{d.name}</MenuItem>)}
                 </Select>
               </FormControl>
             </Grid>

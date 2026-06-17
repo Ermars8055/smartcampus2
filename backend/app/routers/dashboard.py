@@ -21,13 +21,23 @@ def parse_date(date_str: Optional[str]):
     except Exception:
         return None
 
+
+def get_project_id_from_inst(db: Session, institution_id: Optional[int]) -> Optional[int]:
+    if institution_id:
+        inst = db.query(Institution).filter(Institution.id == institution_id).first()
+        if inst:
+            return inst.project_id
+    return None
+
 router = APIRouter(prefix="/api/dashboard", tags=["Dashboard"])
+
 
 
 @router.get("/stats", response_model=DashboardStats)
 def get_dashboard_stats(
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
+    institution_id: Optional[int] = None,
     db: Session = Depends(get_db), 
     current_user: User = Depends(require_permission("dashboard", "read")),
     tenant_id: int = Depends(get_tenant_id),
@@ -35,24 +45,29 @@ def get_dashboard_stats(
 ):
     sd = parse_date(start_date)
     ed = parse_date(end_date)
+    project_id = get_project_id_from_inst(db, institution_id)
     
     total_materials = db.query(Material).filter(
         Material.tenant_id == tenant_id, Material.site_id == site_id, Material.is_active == True
     ).count()
 
     # Total inventory value
-    stock_data = db.query(
+    stock_q = db.query(
         func.sum(CurrentStock.quantity * Material.standard_cost)
-    ).join(Material, CurrentStock.material_id == Material.id).filter(
+    ).join(Material, CurrentStock.material_id == Material.id).join(Warehouse, CurrentStock.warehouse_id == Warehouse.id).filter(
         CurrentStock.tenant_id == tenant_id, CurrentStock.site_id == site_id
-    ).scalar() or 0
+    )
+    if project_id: stock_q = stock_q.filter(Warehouse.project_id == project_id)
+    stock_data = stock_q.scalar() or 0
 
     # Low stock: materials where stock is below reorder level
-    low_stock = db.query(CurrentStock).join(Material).filter(
+    low_stock_q = db.query(CurrentStock).join(Material).join(Warehouse, CurrentStock.warehouse_id == Warehouse.id).filter(
         CurrentStock.tenant_id == tenant_id, CurrentStock.site_id == site_id,
         CurrentStock.quantity < Material.reorder_level,
         CurrentStock.quantity > 0
-    ).count()
+    )
+    if project_id: low_stock_q = low_stock_q.filter(Warehouse.project_id == project_id)
+    low_stock = low_stock_q.count()
 
     pr_q = db.query(PurchaseRequest).filter(
         PurchaseRequest.tenant_id == tenant_id, PurchaseRequest.site_id == site_id,
@@ -78,12 +93,15 @@ def get_dashboard_stats(
             
             po_q = po_q.filter(PurchaseOrder.created_by_id == current_user.id)
 
+    if project_id: pr_q = pr_q.filter(PurchaseRequest.project_id == project_id)
     pending_pr = pr_q.count()
+    if project_id: po_q = po_q.filter(PurchaseOrder.project_id == project_id)
     pending_po = po_q.count()
 
     grn_query = db.query(GRN).filter(GRN.tenant_id == tenant_id, GRN.site_id == site_id)
     if sd: grn_query = grn_query.filter(GRN.created_at >= sd)
     if ed: grn_query = grn_query.filter(GRN.created_at < ed)
+    if project_id: grn_query = grn_query.filter(GRN.project_id == project_id)
     recent_grn = grn_query.count()
     
     total_vendors = db.query(Vendor).filter(
@@ -109,11 +127,13 @@ def get_dashboard_stats(
 @router.get("/consumption-by-building")
 def get_consumption_by_building(
     start_date: Optional[str] = None, end_date: Optional[str] = None,
+    institution_id: Optional[int] = None,
     db: Session = Depends(get_db), current_user: User = Depends(require_permission("dashboard", "read")),
     tenant_id: int = Depends(get_tenant_id), site_id: int = Depends(get_site_id)
 ):
     sd = parse_date(start_date)
     ed = parse_date(end_date)
+    project_id = get_project_id_from_inst(db, institution_id)
     
     InstFromBuilding = aliased(Institution)
     InstFromIndent = aliased(Institution)
@@ -146,6 +166,7 @@ def get_consumption_by_building(
     
     if sd: query = query.filter(MaterialIssue.created_at >= sd)
     if ed: query = query.filter(MaterialIssue.created_at < ed)
+    if project_id: query = query.filter(MaterialIssue.project_id == project_id)
     results = query.group_by(loc_label).all()
 
     return [
@@ -156,10 +177,12 @@ def get_consumption_by_building(
 
 @router.get("/stock-by-warehouse")
 def get_stock_by_warehouse(
+    institution_id: Optional[int] = None,
     db: Session = Depends(get_db), current_user: User = Depends(require_permission("dashboard", "read")),
     tenant_id: int = Depends(get_tenant_id), site_id: int = Depends(get_site_id)
 ):
-    results = db.query(
+    project_id = get_project_id_from_inst(db, institution_id)
+    query = db.query(
         Warehouse.name,
         func.count(CurrentStock.id).label("total_items"),
         func.sum(CurrentStock.quantity * Material.standard_cost).label("total_value")
@@ -170,7 +193,9 @@ def get_stock_by_warehouse(
     ).filter(
         CurrentStock.tenant_id == tenant_id, CurrentStock.site_id == site_id,
         CurrentStock.quantity > 0
-    ).group_by(Warehouse.name).all()
+    )
+    if project_id: query = query.filter(Warehouse.project_id == project_id)
+    results = query.group_by(Warehouse.name).all()
 
     return [
         {"warehouse_name": r[0], "total_items": r[1], "total_value": round(r[2] or 0, 2)}
@@ -181,11 +206,13 @@ def get_stock_by_warehouse(
 @router.get("/top-consumed-materials")
 def get_top_consumed(
     start_date: Optional[str] = None, end_date: Optional[str] = None,
+    institution_id: Optional[int] = None,
     db: Session = Depends(get_db), current_user: User = Depends(require_permission("dashboard", "read")),
     tenant_id: int = Depends(get_tenant_id), site_id: int = Depends(get_site_id)
 ):
     sd = parse_date(start_date)
     ed = parse_date(end_date)
+    project_id = get_project_id_from_inst(db, institution_id)
     from app.models import UOM
     results = db.query(
         Material.name,
@@ -203,6 +230,7 @@ def get_top_consumed(
     )
     if sd: results = results.filter(MaterialIssue.created_at >= sd)
     if ed: results = results.filter(MaterialIssue.created_at < ed)
+    if project_id: results = results.filter(MaterialIssue.project_id == project_id)
     results = results.group_by(Material.name, UOM.name).order_by(
         func.sum(MaterialIssueItem.quantity * MaterialIssueItem.rate).desc()
     ).limit(10).all()
@@ -216,15 +244,18 @@ def get_top_consumed(
 @router.get("/recent-transactions")
 def get_recent_transactions(
     start_date: Optional[str] = None, end_date: Optional[str] = None,
+    institution_id: Optional[int] = None,
     db: Session = Depends(get_db), current_user: User = Depends(require_permission("dashboard", "read")),
     tenant_id: int = Depends(get_tenant_id), site_id: int = Depends(get_site_id)
 ):
     sd = parse_date(start_date)
     ed = parse_date(end_date)
+    project_id = get_project_id_from_inst(db, institution_id)
     
     q = db.query(StockLedger).filter(StockLedger.tenant_id == tenant_id, StockLedger.site_id == site_id)
     if sd: q = q.filter(StockLedger.created_at >= sd)
     if ed: q = q.filter(StockLedger.created_at < ed)
+    if project_id: q = q.filter(StockLedger.project_id == project_id)
     ledger = q.order_by(StockLedger.created_at.desc()).limit(20).all()
     return [
         {
@@ -243,11 +274,13 @@ def get_recent_transactions(
 @router.get("/material-cost-by-building")
 def get_material_cost_by_building(
     start_date: Optional[str] = None, end_date: Optional[str] = None,
+    institution_id: Optional[int] = None,
     db: Session = Depends(get_db), current_user: User = Depends(require_permission("dashboard", "read")),
     tenant_id: int = Depends(get_tenant_id), site_id: int = Depends(get_site_id)
 ):
     sd = parse_date(start_date)
     ed = parse_date(end_date)
+    project_id = get_project_id_from_inst(db, institution_id)
     
     InstFromBuilding = aliased(Institution)
     InstFromIndent = aliased(Institution)
@@ -282,6 +315,7 @@ def get_material_cost_by_building(
     )
     if sd: query = query.filter(MaterialIssue.created_at >= sd)
     if ed: query = query.filter(MaterialIssue.created_at < ed)
+    if project_id: query = query.filter(MaterialIssue.project_id == project_id)
     results = query.group_by(Material.name, loc_label).order_by(
         func.sum(MaterialIssueItem.quantity * MaterialIssueItem.rate).desc()
     ).limit(20).all()
@@ -300,12 +334,14 @@ def get_material_cost_by_building(
 @router.get("/consumption-trend")
 def get_consumption_trend(
     start_date: Optional[str] = None, end_date: Optional[str] = None,
+    institution_id: Optional[int] = None,
     db: Session = Depends(get_db), current_user: User = Depends(require_permission("dashboard", "read")),
     tenant_id: int = Depends(get_tenant_id), site_id: int = Depends(get_site_id)
 ):
     """Monthly material consumption spend trend."""
     sd = parse_date(start_date)
     ed = parse_date(end_date)
+    project_id = get_project_id_from_inst(db, institution_id)
     
     # Use to_char for PostgreSQL or strftime for SQLite
     if db.bind.dialect.name == 'postgresql':
@@ -324,6 +360,7 @@ def get_consumption_trend(
     
     if sd: query = query.filter(MaterialIssue.created_at >= sd)
     if ed: query = query.filter(MaterialIssue.created_at < ed)
+    if project_id: query = query.filter(MaterialIssue.project_id == project_id)
     
     results = query.group_by(
         month_func
@@ -334,13 +371,17 @@ def get_consumption_trend(
 
 @router.get("/alerts")
 def get_dashboard_alerts(
+    institution_id: Optional[int] = None,
     db: Session = Depends(get_db), current_user: User = Depends(require_permission("dashboard", "read")),
     tenant_id: int = Depends(get_tenant_id), site_id: int = Depends(get_site_id)
 ):
-    alerts = db.query(Alert).filter(
+    alerts_q = db.query(Alert).filter(
         Alert.tenant_id == tenant_id, Alert.site_id == site_id,
         Alert.is_resolved == False
-    ).order_by(Alert.created_at.desc()).limit(10).all()
+    )
+    project_id = get_project_id_from_inst(db, institution_id)
+    if project_id: alerts_q = alerts_q.filter(Alert.project_id == project_id)
+    alerts = alerts_q.order_by(Alert.created_at.desc()).limit(10).all()
 
     return [
         {

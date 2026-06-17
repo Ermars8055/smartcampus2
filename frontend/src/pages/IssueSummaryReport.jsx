@@ -19,6 +19,7 @@ import api from '../services/api';
 export default function IssueSummaryReport() {
   const [warehouses, setWarehouses] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [institutions, setInstitutions] = useState([]);
   const [departmentsList, setDepartmentsList] = useState([]);
   const [deptSearch, setDeptSearch] = useState('');
 
@@ -27,6 +28,7 @@ export default function IssueSummaryReport() {
     toDate: dayjs(),
     warehouseId: '',
     categoryId: '',
+    institutionId: '',
     departments: [],
     search: '',
     includeZero: true
@@ -48,6 +50,7 @@ export default function IssueSummaryReport() {
   useEffect(() => {
     api.get('/api/warehouses').then(r => setWarehouses(r.data)).catch(() => { });
     api.get('/api/categories').then(r => setCategories(r.data)).catch(() => { });
+    api.get('/api/institutions').then(r => setInstitutions(r.data)).catch(() => { });
     api.get('/api/departments').then(r => setDepartmentsList(r.data)).catch(() => { });
   }, []);
 
@@ -77,6 +80,7 @@ export default function IssueSummaryReport() {
       };
       if (filters.warehouseId) params.warehouse_id = filters.warehouseId;
       if (filters.categoryId) params.category_id = filters.categoryId;
+      if (filters.institutionId) params.institution_id = filters.institutionId;
       if (filters.departments.length > 0) params.department = filters.departments.join(',');
       if (filters.search) params.search = filters.search;
 
@@ -97,6 +101,7 @@ export default function IssueSummaryReport() {
       toDate: dayjs(),
       warehouseId: '',
       categoryId: '',
+      institutionId: '',
       departments: [],
       search: '',
       includeZero: true
@@ -444,6 +449,15 @@ export default function IssueSummaryReport() {
               <Select value={filters.categoryId} label="Material Category" onChange={e => setFilters({ ...filters, categoryId: e.target.value })}>
                 <MenuItem value="">All Categories</MenuItem>
                 {categories.map(c => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6} md={4} lg={2}>
+            <FormControl size="small" fullWidth sx={{ minWidth: 150 }}>
+              <InputLabel>Institution</InputLabel>
+              <Select value={filters.institutionId} label="Institution" onChange={e => setFilters({ ...filters, institutionId: e.target.value, departments: [] })}>
+                <MenuItem value="">All Institutions</MenuItem>
+                {institutions.map(inst => <MenuItem key={inst.id} value={inst.id}>{inst.name}</MenuItem>)}
               </Select>
             </FormControl>
           </Grid>

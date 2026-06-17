@@ -145,6 +145,7 @@ export default function RateAnalysisReport() {
     if (!reportData?.data?.length) return;
     const rows = reportData.data.map((r, i) => ({
       'S.No': i + 1, 'Material Code': r.material_code, 'Material Name': r.material_name,
+      'UOM': r.uom,
       'Category': r.category_name, 'Min Rate': r.min_rate, 'Max Rate': r.max_rate,
       'Avg Rate': r.avg_rate,
       'Variance': filters.varianceType === 'percentage' ? `${r.variance_pct}%` : r.variance_amt,
@@ -216,6 +217,7 @@ export default function RateAnalysisReport() {
   const colDefs = [
     { id: 'material_code', label: 'Material Code', align: 'left' },
     { id: 'material_name', label: 'Material Name', align: 'left' },
+    { id: 'uom', label: 'UOM', align: 'center' },
     { id: 'min_rate', label: 'Min Rate', align: 'right' },
     { id: 'max_rate', label: 'Max Rate', align: 'right' },
     { id: 'avg_rate', label: 'Avg Rate', align: 'right' },
@@ -355,7 +357,7 @@ export default function RateAnalysisReport() {
               </TableHead>
             )}
             <TableBody>
-              {loading && <TableRow><TableCell colSpan={8} align="center" sx={{ py: 5 }}><CircularProgress /></TableCell></TableRow>}
+              {loading && <TableRow><TableCell colSpan={9} align="center" sx={{ py: 5 }}><CircularProgress /></TableCell></TableRow>}
               {!loading && sortedData.map(row => (
                 <Fragment key={row.material_id}>
                   <TableRow hover sx={{ cursor: 'pointer', '&:hover td': { background: '#F8FAFC' } }} onClick={() => handleDrillDown(row.material_id)}>
@@ -364,6 +366,7 @@ export default function RateAnalysisReport() {
                     </TableCell>
                     <TableCell sx={{ color: '#2563EB', fontWeight: 600, cursor: 'pointer' }}>{row.material_code}</TableCell>
                     <TableCell>{row.material_name}</TableCell>
+                    <TableCell align="center">{row.uom}</TableCell>
                     <TableCell align="right" sx={{ color: '#059669', fontWeight: 500 }}>{fmt(row.min_rate)}</TableCell>
                     <TableCell align="right" sx={{ color: '#DC2626', fontWeight: 500 }}>{fmt(row.max_rate)}</TableCell>
                     <TableCell align="right" sx={{ fontWeight: 600 }}>{fmt(row.avg_rate)}</TableCell>
@@ -375,7 +378,7 @@ export default function RateAnalysisReport() {
                   </TableRow>
                   {/* Drill-down row */}
                   <TableRow>
-                    <TableCell colSpan={8} sx={{ p: 0, borderBottom: expandedRows[row.material_id] ? '2px solid #2563EB' : 'none' }}>
+                    <TableCell colSpan={9} sx={{ p: 0, borderBottom: expandedRows[row.material_id] ? '2px solid #2563EB' : 'none' }}>
                       <Collapse in={expandedRows[row.material_id]} timeout="auto" unmountOnExit>
                         <Box sx={{ p: 2, background: '#F8FAFC' }}>
                           {drillLoading && !drillDataMap[row.material_id] ? (
@@ -447,11 +450,12 @@ export default function RateAnalysisReport() {
                   </TableRow>
                 </Fragment>
               ))}
+              {/* Drill-down row */}
               {!loading && reportData && sortedData.length === 0 && (
-                <TableRow><TableCell colSpan={8} align="center" sx={{ py: 5, color: '#64748B' }}>No records found for the selected criteria</TableCell></TableRow>
+                <TableRow><TableCell colSpan={9} align="center" sx={{ py: 5, color: '#64748B' }}>No records found for the selected criteria</TableCell></TableRow>
               )}
               {!loading && !reportData && (
-                <TableRow><TableCell colSpan={8} align="center" sx={{ py: 5, color: '#94A3B8' }}>Select filters and click "Generate Report" to view data</TableCell></TableRow>
+                <TableRow><TableCell colSpan={9} align="center" sx={{ py: 5, color: '#94A3B8' }}>Select filters and click "Generate Report" to view data</TableCell></TableRow>
               )}
             </TableBody>
           </Table>

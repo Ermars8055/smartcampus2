@@ -132,7 +132,7 @@ export default function PendingGatepassReturnsReport() {
     doc.text(`Generated On: ${reportData.generated_at}`, doc.internal.pageSize.getWidth() / 2, 60, { align: 'center' });
 
     const head = [[
-      'S.No', 'Date', 'Gate Pass No', 'Vendor', 'Material', 'Qty', 'Location', 'Age (Days)'
+      'S.No', 'Date', 'Gate Pass No', 'Vendor', 'Material', 'UOM', 'Qty', 'Location', 'Age (Days)'
     ]];
     
     const body = reportData.data.map((row, i) => [
@@ -141,6 +141,7 @@ export default function PendingGatepassReturnsReport() {
       row.gate_pass_number,
       row.vendor_name,
       `${row.material_code} - ${row.material_name}`,
+      row.uom_name,
       fmtQty(row.quantity),
       row.from_location,
       row.age_days
@@ -234,6 +235,7 @@ export default function PendingGatepassReturnsReport() {
                 <TableCell>Gate Pass No</TableCell>
                 <TableCell>Vendor Name</TableCell>
                 <TableCell>Material</TableCell>
+                <TableCell align="center">UOM</TableCell>
                 <TableCell align="right">Qty</TableCell>
                 <TableCell>Location</TableCell>
                 <TableCell align="center">Age (Days)</TableCell>
@@ -243,12 +245,12 @@ export default function PendingGatepassReturnsReport() {
             <TableBody>
               {loading && (
                 <TableRow>
-                  <TableCell colSpan={9} align="center" sx={{ py: 5 }}><CircularProgress /></TableCell>
+                  <TableCell colSpan={10} align="center" sx={{ py: 5 }}><CircularProgress /></TableCell>
                 </TableRow>
               )}
               {!loading && reportData?.data.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={9} align="center" sx={{ py: 5, color: '#64748B' }}>No pending gatepass returns found matching the criteria.</TableCell>
+                  <TableCell colSpan={10} align="center" sx={{ py: 5, color: '#64748B' }}>No pending gatepass returns found matching the criteria.</TableCell>
                 </TableRow>
               )}
               {!loading && reportData?.data.map((row, idx) => (
@@ -266,8 +268,8 @@ export default function PendingGatepassReturnsReport() {
                   </TableCell>
                   <TableCell sx={{ minWidth: 250 }}>
                     <Typography variant="body2" sx={{ fontWeight: 600 }}>{row.material_code} - {row.material_name}</Typography>
-                    <Typography variant="caption" color="primary">{row.uom_name}</Typography>
                   </TableCell>
+                  <TableCell align="center">{row.uom_name}</TableCell>
                   <TableCell align="right" sx={{ fontWeight: 700 }}>{fmtQty(row.quantity)}</TableCell>
                   <TableCell>{row.from_location}</TableCell>
                   <TableCell align="center">

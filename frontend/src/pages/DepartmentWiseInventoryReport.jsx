@@ -16,11 +16,13 @@ import api from '../services/api';
 
 export default function DepartmentWiseInventoryReport() {
   const [categories, setCategories] = useState([]);
+  const [institutions, setInstitutions] = useState([]);
   const [departments, setAllDepartments] = useState([]);
   const [deptSearch, setDeptSearch] = useState('');
 
   const [filters, setFilters] = useState({
     categoryId: '',
+    institutionId: '',
     departmentIds: [],
     search: '',
     onlyWithStock: false
@@ -35,6 +37,7 @@ export default function DepartmentWiseInventoryReport() {
 
   useEffect(() => {
     api.get('/api/categories').then(r => setCategories(r.data)).catch(() => { });
+    api.get('/api/institutions').then(r => setInstitutions(r.data)).catch(() => { });
     api.get('/api/departments').then(r => setAllDepartments(r.data)).catch(() => { });
   }, []);
 
@@ -52,6 +55,7 @@ export default function DepartmentWiseInventoryReport() {
         only_with_stock: filters.onlyWithStock
       };
       if (filters.categoryId) params.category_id = filters.categoryId;
+      if (filters.institutionId) params.institution_id = filters.institutionId;
       if (filters.departmentIds.length > 0) params.department_id = filters.departmentIds.join(',');
       if (filters.search) params.search = filters.search;
 
@@ -69,6 +73,7 @@ export default function DepartmentWiseInventoryReport() {
   const handleReset = () => {
     setFilters({
       categoryId: '',
+      institutionId: '',
       departmentIds: [],
       search: '',
       onlyWithStock: false
@@ -290,6 +295,15 @@ export default function DepartmentWiseInventoryReport() {
               </Select>
             </FormControl>
           </Grid>
+          <Grid item xs={12} sm={6} md={2}>
+            <FormControl size="small" fullWidth>
+              <InputLabel>Institution</InputLabel>
+              <Select value={filters.institutionId} label="Institution" onChange={e => setFilters({ ...filters, institutionId: e.target.value, departmentIds: [] })}>
+                <MenuItem value="">All Institutions</MenuItem>
+                {institutions.map(inst => <MenuItem key={inst.id} value={inst.id}>{inst.name}</MenuItem>)}
+              </Select>
+            </FormControl>
+          </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <FormControl size="small" fullWidth>
               <InputLabel>Department</InputLabel>
@@ -336,10 +350,10 @@ export default function DepartmentWiseInventoryReport() {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={12} sm={6} md={2}>
             <TextField size="small" fullWidth label="Material Search" placeholder="Code / Name" value={filters.search} onChange={e => setFilters({ ...filters, search: e.target.value })} />
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={12} sm={6} md={2}>
             <FormControlLabel control={<Switch size="small" checked={filters.onlyWithStock} onChange={e => setFilters({ ...filters, onlyWithStock: e.target.checked })} />} label={<Typography variant="body2">Show only materials with stock</Typography>} />
           </Grid>
           <Grid item xs={12} sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', flexWrap: 'wrap' }}>

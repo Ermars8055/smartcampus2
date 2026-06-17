@@ -113,6 +113,8 @@ export default function Dashboard() {
   const [trend, setTrend] = useState([]);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState('all');
+  const [institution, setInstitution] = useState('all');
+  const [institutionsList, setInstitutionsList] = useState([]);
   
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -124,6 +126,12 @@ export default function Dashboard() {
   
   const navigate = useNavigate();
   const { hasPermission } = useAuth();
+
+  useEffect(() => {
+    if (hasPermission('dashboard', 'can_read')) {
+      api.get('/api/institutions').then(res => setInstitutionsList(res.data)).catch(console.error);
+    }
+  }, [hasPermission]);
 
   useEffect(() => {
     if (!hasPermission('dashboard', 'can_read')) return;
@@ -139,6 +147,9 @@ export default function Dashboard() {
       } else if (period === 'ytd') {
         params.start_date = new Date(now.getFullYear(), 0, 1).toISOString();
       }
+    }
+    if (institution !== 'all') {
+      params.institution_id = institution;
     }
 
     Promise.all([
@@ -158,7 +169,7 @@ export default function Dashboard() {
       setAlerts(al.data);
       setTrend(tr.data);
     }).catch(console.error).finally(() => setLoading(false));
-  }, [period]);
+  }, [period, institution]);
 
   const handleBlockClick = (data) => {
     let blockName = null;
@@ -172,7 +183,24 @@ export default function Dashboard() {
 
     setDrilldownBlock(blockName);
     setDrilldownLoading(true);
-    api.get('/api/dashboard/material-cost-by-building')
+    
+    let drillParams = {};
+    if (period !== 'all') {
+      const now = new Date();
+      if (period === 'this_month') {
+        drillParams.start_date = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      } else if (period === 'last_month') {
+        drillParams.start_date = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
+        drillParams.end_date = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      } else if (period === 'ytd') {
+        drillParams.start_date = new Date(now.getFullYear(), 0, 1).toISOString();
+      }
+    }
+    if (institution !== 'all') {
+      drillParams.institution_id = institution;
+    }
+
+    api.get('/api/dashboard/material-cost-by-building', { params: drillParams })
       .then(res => {
          const specificData = res.data.filter(item => item.building_name === blockName);
          setDrilldownData(specificData);
@@ -226,14 +254,24 @@ export default function Dashboard() {
           <Typography variant="h5" sx={{ fontWeight: 800, color: '#1E293B', mb: 0.5 }}>Dashboard</Typography>
           <Typography variant="body2" sx={{ color: '#64748B' }}>Overview of materials, procurement, and inventory</Typography>
         </Box>
-        <FormControl size="small" sx={{ minWidth: 200, bgcolor: '#fff' }}>
-          <Select value={period} onChange={(e) => setPeriod(e.target.value)} sx={{ fontWeight: 600, fontSize: '0.875rem' }}>
-            <MenuItem value="all">Time Period: All Time</MenuItem>
-            <MenuItem value="this_month">This Month</MenuItem>
-            <MenuItem value="last_month">Last Month</MenuItem>
-            <MenuItem value="ytd">Year to Date (YTD)</MenuItem>
-          </Select>
-        </FormControl>
+        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+          <FormControl size="small" sx={{ minWidth: 200, maxWidth: 300, bgcolor: '#fff' }}>
+            <Select value={institution} onChange={(e) => setInstitution(e.target.value)} sx={{ fontWeight: 600, fontSize: '0.875rem' }}>
+              <MenuItem value="all">Institution: All</MenuItem>
+              {institutionsList.map(inst => (
+                <MenuItem key={inst.id} value={inst.id}>{inst.name}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl size="small" sx={{ minWidth: 200, bgcolor: '#fff' }}>
+            <Select value={period} onChange={(e) => setPeriod(e.target.value)} sx={{ fontWeight: 600, fontSize: '0.875rem' }}>
+              <MenuItem value="all">Time Period: All Time</MenuItem>
+              <MenuItem value="this_month">This Month</MenuItem>
+              <MenuItem value="last_month">Last Month</MenuItem>
+              <MenuItem value="ytd">Year to Date (YTD)</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
       </Box>
 
       {/* --- ROW 1: Stats Cards (6 in a row) --- */}

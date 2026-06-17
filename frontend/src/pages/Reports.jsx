@@ -74,7 +74,12 @@ export default function Reports() {
             <TableHead>
               <TableRow>
                 {headers.map(h => (
-                  <TableCell key={h} sx={{ whiteSpace: 'nowrap' }}>
+                  <TableCell key={h} sx={{ 
+                    whiteSpace: h === 'material_name' || h === 'MATERIAL_NAME' ? 'normal' : 'nowrap',
+                    minWidth: h === 'material_name' || h === 'MATERIAL_NAME' ? 250 : 'auto',
+                    maxWidth: h === 'material_name' || h === 'MATERIAL_NAME' ? 400 : 'none',
+                    textAlign: h.toLowerCase().includes('quantity') || h.toLowerCase().includes('qty') || h.toLowerCase().includes('value') || h.toLowerCase().includes('amount') || h.toLowerCase().includes('cost') ? 'right' : 'left'
+                  }}>
                     {h.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                   </TableCell>
                 ))}
@@ -84,7 +89,13 @@ export default function Reports() {
               {data.map((row, i) => (
                 <TableRow key={i} sx={{ background: row.status === 'Low' ? '#FEF2F2' : 'inherit' }}>
                   {headers.map(h => (
-                    <TableCell key={h} sx={{ fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
+                    <TableCell key={h} sx={{ 
+                      fontSize: '0.8rem', 
+                      whiteSpace: h === 'material_name' || h === 'MATERIAL_NAME' ? 'normal' : 'nowrap',
+                      minWidth: h === 'material_name' || h === 'MATERIAL_NAME' ? 250 : 'auto',
+                      maxWidth: h === 'material_name' || h === 'MATERIAL_NAME' ? 400 : 'none',
+                      textAlign: h.toLowerCase().includes('quantity') || h.toLowerCase().includes('qty') || h.toLowerCase().includes('value') || h.toLowerCase().includes('amount') || h.toLowerCase().includes('cost') ? 'right' : 'left'
+                    }}>
                       {h === 'status' ? (
                         <Chip label={row[h]} size="small" color={row[h] === 'Low' ? 'error' : row[h] === 'OK' ? 'success' :
                           row[h] === 'Approved' ? 'success' : row[h] === 'Closed' ? 'default' : 'warning'} sx={{ fontSize: '0.7rem' }} />

@@ -30,8 +30,41 @@ export default function ComplaintForm() {
   const [rooms, setRooms] = useState([]);
 
   useEffect(() => {
-    api.get('/api/institutions').then(r => setInstitutions(r.data)).catch(() => setInstitutions([]));
-    api.get('/api/departments').then(r => setAllDepartments(r.data)).catch(() => setAllDepartments([]));
+    let fetchedInsts = [];
+    let fetchedDepts = [];
+
+    Promise.all([
+      api.get('/api/institutions').then(r => { fetchedInsts = r.data; setInstitutions(r.data); }).catch(() => setInstitutions([])),
+      api.get('/api/departments').then(r => { fetchedDepts = r.data; setAllDepartments(r.data); }).catch(() => setAllDepartments([]))
+    ]).then(() => {
+      let instId = fetchedInsts.length === 1 ? fetchedInsts[0].id : '';
+      let deptName = '';
+      const uniqueDepts = Array.from(new Set(fetchedDepts.map(d => d.name)));
+      if (uniqueDepts.length === 1) deptName = uniqueDepts[0];
+
+      if (instId || deptName) {
+        setFormData(prev => ({ ...prev, institution_id: instId, department_name: deptName }));
+        if (deptName) {
+          // Trigger the room fetch
+          api.get(`/api/rooms?department_name=${encodeURIComponent(deptName)}`).then(r => {
+            const fetchedRooms = r.data || [];
+            const uniqueBuildings = new Map();
+            const uniqueFloors = new Map();
+            fetchedRooms.forEach(room => {
+              if (room.building_id && room.building_name) uniqueBuildings.set(room.building_id, { id: room.building_id, name: room.building_name });
+              if (room.floor_id && room.floor_name) uniqueFloors.set(room.floor_id, { id: room.floor_id, name: room.floor_name, building_id: room.building_id });
+            });
+            const masterDepts = fetchedDepts.filter(d => d.name === deptName);
+            masterDepts.forEach(d => {
+              if (d.building_id && d.building_name) uniqueBuildings.set(d.building_id, { id: d.building_id, name: d.building_name });
+            });
+            setBuildings(Array.from(uniqueBuildings.values()));
+            setFloors(Array.from(uniqueFloors.values()));
+            setRooms(fetchedRooms);
+          }).catch(() => {});
+        }
+      }
+    });
   }, []);
 
   const filteredDepartments = formData.institution_id 

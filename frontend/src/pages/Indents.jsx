@@ -27,6 +27,7 @@ export default function Indents() {
   const [floors, setFloors] = useState([]);
   const [rooms, setRooms] = useState([]);
   const [institutions, setInstitutions] = useState([]);
+  const [allDepartmentsList, setAllDepartmentsList] = useState([]);
   const [departmentsList, setDepartmentsList] = useState([]);
   const [allDepartments, setAllDepartments] = useState([]);
   const [showForm, setShowForm] = useState(false);
@@ -178,10 +179,20 @@ export default function Indents() {
     api.get('/api/materials', { params: { limit: 10000 } }).then(r => setMaterials(r.data.items || []));
     api.get('/api/vendors').then(r => setVendors(r.data));
     api.get('/api/terms').then(r => setTermsTemplates(r.data));
-    api.get('/api/departments/names').then(r => setDepartmentsList(r.data)).catch(() => setDepartmentsList([]));
+    api.get('/api/departments/names').then(r => {
+      setAllDepartmentsList(r.data);
+      setDepartmentsList(r.data);
+      if (r.data.length === 1) setFilterDepartment(r.data[0]);
+    }).catch(() => {
+      setAllDepartmentsList([]);
+      setDepartmentsList([]);
+    });
     api.get('/api/departments').then(r => setAllDepartments(r.data)).catch(() => setAllDepartments([]));
     api.get('/api/buildings').then(r => setAllBuildings(r.data)).catch(() => setAllBuildings([]));
-    api.get('/api/institutions').then(r => setInstitutions(r.data)).catch(() => setInstitutions([]));
+    api.get('/api/institutions').then(r => {
+      setInstitutions(r.data);
+      if (r.data.length === 1) setFilterInstitution(r.data[0]);
+    }).catch(() => setInstitutions([]));
   }, []);
 
   const handleInstitutionChange = (instId) => {
@@ -200,7 +211,7 @@ export default function Indents() {
     }
   };
 
-  const handleDepartmentChange = (newDept) => {
+  const handleDepartmentChange = (newDept, instId = form.institution_id) => {
     if (newDept) {
       api.get(`/api/rooms?department_name=${encodeURIComponent(newDept)}`).then(r => {
         const fetchedRooms = r.data || [];
@@ -216,7 +227,7 @@ export default function Indents() {
           }
         });
 
-        const masterDepts = allDepartments.filter(d => d.name === newDept);
+        const masterDepts = allDepartments.filter(d => d.name === newDept && (!instId || d.institution_id === instId));
         masterDepts.forEach(d => {
           if (d.building_id && d.building_name) {
             uniqueBuildings.set(d.building_id, { id: d.building_id, name: d.building_name });
@@ -249,10 +260,20 @@ export default function Indents() {
 
         setForm(prev => ({ ...prev, department: newDept, building_id: nextBuildingId, floor_id: nextFloorId, room_id: nextRoomId }));
       }).catch(() => {
-        setBuildings([]);
-        setFloors([]);
-        setRooms([]);
-        setForm(prev => ({ ...prev, department: newDept, building_id: '', floor_id: '', room_id: '' }));
+        const masterDepts = allDepartments.filter(d => d.name === newDept && (!instId || d.institution_id === instId));
+        const masterBldgs = allBuildings.filter(b => b.department_name === newDept);
+        const uniqueBuildings = new Map();
+        masterDepts.forEach(d => {
+          if (d.building_id && d.building_name) uniqueBuildings.set(d.building_id, { id: d.building_id, name: d.building_name });
+        });
+        masterBldgs.forEach(b => {
+          uniqueBuildings.set(b.id, { id: b.id, name: b.name });
+        });
+
+        const bldgs = Array.from(uniqueBuildings.values());
+        setBuildings(bldgs);
+        let nextBuildingId = bldgs.length === 1 ? bldgs[0].id : '';
+        setForm(prev => ({ ...prev, department: newDept, building_id: nextBuildingId, floor_id: '', room_id: '' }));
       });
     } else {
       setBuildings([]);
@@ -696,7 +717,18 @@ export default function Indents() {
           <Typography variant="body2" sx={{ color: '#64748B' }}>Raise and manage department material requests</Typography>
         </Box>
         <Button variant="contained" startIcon={<Add />} onClick={() => {
-          setForm({ institution_id: '', building_id: '', floor_id: '', room_id: '', department: '', remarks: '', items: [{ material_id: '', requested_quantity: '' }], complaint_id: '' });
+          const defaultInst = institutions.length === 1 ? institutions[0].id : '';
+          const defaultDept = departmentsList.length === 1 ? departmentsList[0] : '';
+          
+          setForm({ institution_id: defaultInst, building_id: '', floor_id: '', room_id: '', department: defaultDept, remarks: '', items: [{ material_id: '', requested_quantity: '' }], complaint_id: '' });
+          
+          if (defaultInst) {
+            const depts = allDepartments.filter(d => d.institution_id === defaultInst).map(d => d.name);
+            setDepartmentsList(Array.from(new Set(depts)));
+          }
+          if (defaultDept) {
+            handleDepartmentChange(defaultDept, defaultInst);
+          }
           setShowForm(true);
         }}
           sx={{ textTransform: 'none', fontWeight: 600, borderRadius: 2, px: 2.5 }}
@@ -713,12 +745,15 @@ export default function Indents() {
             options={institutions}
             getOptionLabel={(option) => option.name || ''}
             value={filterInstitution}
-            onChange={(e, val) => setFilterInstitution(val)}
+            onChange={(e, val) => {
+              setFilterInstitution(val);
+              setFilterDepartment(null);
+            }}
             renderInput={(params) => <TextField {...params} placeholder="Filter by Institution" sx={{ minWidth: 220 }} />}
           />
           <Autocomplete
             size="small"
-            options={departmentsList}
+            options={filterInstitution ? Array.from(new Set(allDepartments.filter(d => d.institution_id === filterInstitution.id).map(d => d.name))) : allDepartmentsList}
             value={filterDepartment}
             onChange={(e, val) => setFilterDepartment(val)}
             renderInput={(params) => <TextField {...params} placeholder="Filter by Department" sx={{ minWidth: 220 }} />}

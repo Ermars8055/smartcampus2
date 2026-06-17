@@ -143,6 +143,7 @@ class VendorQuotationStatus(str, enum.Enum):
 class DataAccessScope(str, enum.Enum):
     SELF_ONLY = "Self Only"
     DEPARTMENT = "Department"
+    INSTITUTION = "Institution"
     ORGANIZATION = "Organization"
     ADMIN = "Full Administrative Access"
 
@@ -203,6 +204,7 @@ class User(Base):
     email = Column(String(255), unique=True, nullable=False)
     full_name = Column(String(255), nullable=False)
     department = Column(String(255), nullable=True)
+    institution = Column(String(255), nullable=True)
     hashed_password = Column(String(255), nullable=False)
     is_active = Column(Boolean, default=True)
     is_platform_admin = Column(Boolean, default=False)

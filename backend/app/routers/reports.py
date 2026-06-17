@@ -9,7 +9,8 @@ from app.database import get_db
 from app.models import (
     MaterialIssue, MaterialIssueItem, Material, UOM, StockLedger, User,
     GRN, GRNItem, Vendor, PurchaseOrder, Category, SubCategory, Warehouse,
-    Department, MaterialReturn, MaterialReturnItem, GatePass, GatePassItem
+    Department, MaterialReturn, MaterialReturnItem, GatePass, GatePassItem,
+    Institution
 )
 from app.auth import get_tenant_id, get_site_id, get_current_user, require_permission
 
@@ -23,6 +24,7 @@ def get_issue_summary(
     category_id: Optional[int] = None,
     department: Optional[str] = None,
     search: Optional[str] = None,
+    institution_id: Optional[int] = None,
     include_zero: bool = False,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("report_issue_summary", "read")),
@@ -56,6 +58,12 @@ def get_issue_summary(
     if not material_ids:
         return {"departments": [], "data": []}
 
+    project_id = None
+    if institution_id:
+        inst = db.query(Institution).filter(Institution.id == institution_id).first()
+        if inst:
+            project_id = inst.project_id
+
     # Opening Stocks query (Sum of latest balance per warehouse before from_date)
     sl_op_query = db.query(StockLedger.material_id, StockLedger.warehouse_id, StockLedger.balance).filter(
         StockLedger.tenant_id == tenant_id,
@@ -65,6 +73,8 @@ def get_issue_summary(
     )
     if warehouse_id:
         sl_op_query = sl_op_query.filter(StockLedger.warehouse_id == warehouse_id)
+    if project_id:
+        sl_op_query = sl_op_query.filter(StockLedger.project_id == project_id)
 
     sl_op_entries = sl_op_query.order_by(StockLedger.created_at.desc()).all()
     
@@ -93,6 +103,8 @@ def get_issue_summary(
     )
     if warehouse_id:
         sl_rcpt_query = sl_rcpt_query.filter(StockLedger.warehouse_id == warehouse_id)
+    if project_id:
+        sl_rcpt_query = sl_rcpt_query.filter(StockLedger.project_id == project_id)
     
     sl_rcpt_results = sl_rcpt_query.group_by(StockLedger.material_id).all()
     material_receipts = {row.material_id: row.total_received for row in sl_rcpt_results}
@@ -111,6 +123,8 @@ def get_issue_summary(
     )
     if warehouse_id:
         sl_outward_query = sl_outward_query.filter(StockLedger.warehouse_id == warehouse_id)
+    if project_id:
+        sl_outward_query = sl_outward_query.filter(StockLedger.project_id == project_id)
     
     sl_outward_results = sl_outward_query.group_by(StockLedger.material_id).all()
     material_outward = {row.material_id: abs(row.total_outward) for row in sl_outward_results}
@@ -132,6 +146,8 @@ def get_issue_summary(
 
     if warehouse_id:
         issue_query = issue_query.filter(MaterialIssue.warehouse_id == warehouse_id)
+    if project_id:
+        issue_query = issue_query.filter(MaterialIssue.project_id == project_id)
         
     is_platform_admin = getattr(current_user, "_is_platform_admin", False)
     if not is_platform_admin:
@@ -222,6 +238,7 @@ def get_issue_summary_details(
     from_date: str = Query(..., description="From Date (YYYY-MM-DD)"),
     to_date: str = Query(..., description="To Date (YYYY-MM-DD)"),
     warehouse_id: Optional[int] = None,
+    institution_id: Optional[int] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("report_issue_summary", "read")),
     tenant_id: int = Depends(get_tenant_id),
@@ -253,6 +270,11 @@ def get_issue_summary_details(
 
     if warehouse_id:
         query = query.filter(MaterialIssue.warehouse_id == warehouse_id)
+
+    if institution_id:
+        inst = db.query(Institution).filter(Institution.id == institution_id).first()
+        if inst and inst.project_id:
+            query = query.filter(MaterialIssue.project_id == inst.project_id)
 
     is_platform_admin = getattr(current_user, "_is_platform_admin", False)
     if not is_platform_admin:
@@ -323,6 +345,7 @@ def get_rate_analysis(
         GRNItem.material_id,
         Material.code.label("material_code"),
         Material.name.label("material_name"),
+        UOM.abbreviation.label("uom_name"),
         Category.name.label("category_name"),
         func.min(rate_expr).label("min_rate"),
         func.max(rate_expr).label("max_rate"),
@@ -332,6 +355,8 @@ def get_rate_analysis(
         GRN, GRNItem.grn_id == GRN.id
     ).join(
         Material, GRNItem.material_id == Material.id
+    ).join(
+        UOM, Material.uom_id == UOM.id
     ).join(
         Category, Material.category_id == Category.id
     ).filter(
@@ -362,7 +387,7 @@ def get_rate_analysis(
         )
 
     query = query.group_by(
-        GRNItem.material_id, Material.code, Material.name, Category.name
+        GRNItem.material_id, Material.code, Material.name, UOM.abbreviation, Category.name
     )
 
     results = query.all()
@@ -379,6 +404,7 @@ def get_rate_analysis(
             "material_id": row.material_id,
             "material_code": row.material_code,
             "material_name": row.material_name,
+            "uom": row.uom_name,
             "category_name": row.category_name,
             "min_rate": min_r,
             "max_rate": max_r,
@@ -574,6 +600,7 @@ def get_receipt_summary(
         GRNItem.material_id,
         Material.code.label("material_code"),
         Material.name.label("material_name"),
+        UOM.abbreviation.label("uom"),
         Material.category_id,
         Material.subcategory_id,
         Vendor.id.label("vendor_id"),
@@ -588,6 +615,7 @@ def get_receipt_summary(
         (GRNItem.taxable_amount + GRNItem.cgst_amount + GRNItem.sgst_amount + GRNItem.igst_amount).label("total_amount")
     ).join(GRN, GRNItem.grn_id == GRN.id)\
      .join(Material, GRNItem.material_id == Material.id)\
+     .join(UOM, Material.uom_id == UOM.id)\
      .join(Vendor, GRN.vendor_id == Vendor.id)\
      .filter(
         GRN.tenant_id == tenant_id,
@@ -631,6 +659,7 @@ def get_receipt_summary(
                 "material_id": m_id,
                 "material_code": row.material_code,
                 "material_name": row.material_name,
+                "uom": row.uom,
                 "vendor_details": {}
             }
         
@@ -751,6 +780,7 @@ def get_department_inventory_report(
     category_id: Optional[int] = None,
     search: Optional[str] = None,
     department_id: Optional[str] = None,
+    institution_id: Optional[int] = None,
     only_with_stock: bool = False,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("report_dept_inventory", "read")),
@@ -779,6 +809,12 @@ def get_department_inventory_report(
     if not material_ids:
         return {"departments": [], "data": []}
 
+    project_id = None
+    if institution_id:
+        inst = db.query(Institution).filter(Institution.id == institution_id).first()
+        if inst:
+            project_id = inst.project_id
+
     # 2. Fetch all active departments for dynamic columns
     dept_query = db.query(Department).filter(
         Department.tenant_id == tenant_id,
@@ -789,6 +825,8 @@ def get_department_inventory_report(
     if department_id:
         dept_ids = [int(id.strip()) for id in department_id.split(',')]
         dept_query = dept_query.filter(Department.id.in_(dept_ids))
+    if institution_id:
+        dept_query = dept_query.filter(Department.institution_id == institution_id)
     
     all_depts = dept_query.order_by(Department.name).all()
     dept_names = [d.name for d in all_depts]
@@ -807,7 +845,11 @@ def get_department_inventory_report(
         MaterialIssue.is_deleted == False,
         MaterialIssue.status == "Completed",
         MaterialIssueItem.material_id.in_(material_ids)
-    ).group_by(MaterialIssueItem.material_id, MaterialIssue.issued_to_department).all()
+    )
+    if project_id:
+        issues_query = issues_query.filter(MaterialIssue.project_id == project_id)
+        
+    issues_query = issues_query.group_by(MaterialIssueItem.material_id, MaterialIssue.issued_to_department).all()
 
     issues_map = {} # (material_id, department_name) -> qty
     for row in issues_query:
@@ -825,7 +867,11 @@ def get_department_inventory_report(
         MaterialReturn.site_id == site_id,
         MaterialReturn.is_deleted == False,
         MaterialReturnItem.material_id.in_(material_ids)
-    ).group_by(MaterialReturnItem.material_id, MaterialReturn.returned_from_department).all()
+    )
+    if project_id:
+        returns_query = returns_query.filter(MaterialReturn.project_id == project_id)
+        
+    returns_query = returns_query.group_by(MaterialReturnItem.material_id, MaterialReturn.returned_from_department).all()
 
     returns_map = {} # (material_id, department_name) -> qty
     for row in returns_query:

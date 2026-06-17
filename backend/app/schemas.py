@@ -24,6 +24,7 @@ class UserBase(BaseModel):
     email: EmailStr
     full_name: str
     department: Optional[str] = None
+    institution: Optional[str] = None
     is_active: bool = True
     is_platform_admin: bool = False
 

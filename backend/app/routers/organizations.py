@@ -212,6 +212,15 @@ def list_institutions(
     )
     if project_id:
         q = q.filter(Institution.project_id == project_id)
+        
+    # --- ROW-LEVEL SECURITY ---
+    is_platform_admin = getattr(current_user, "_is_platform_admin", False)
+    if not is_platform_admin:
+        scope = getattr(current_user, "_data_access_scope", "Self Only")
+        if scope in ["Self Only", "Department", "Institution"]:
+            if current_user.institution:
+                q = q.filter(Institution.name == current_user.institution)
+
     institutions = q.order_by(Institution.name).all()
     return [
         InstitutionOut(
@@ -590,20 +599,40 @@ def list_unique_departments(
     """Fetch unique department names from BOTH Room and Department tables."""
     from sqlalchemy import distinct
     # Names from Rooms
-    room_depts = db.query(distinct(Room.department_name)).filter(
+    room_q = db.query(distinct(Room.department_name)).filter(
         Room.tenant_id == tenant_id,
         Room.site_id == site_id,
         Room.department_name.isnot(None),
         Room.department_name != ""
-    ).all()
+    )
     
     # Names from Department master
-    dept_master = db.query(distinct(Department.name)).filter(
+    dept_q = db.query(distinct(Department.name)).filter(
         Department.tenant_id == tenant_id,
         Department.site_id == site_id,
         Department.is_active == True,
         Department.is_deleted == False
-    ).all()
+    )
+
+    # --- ROW-LEVEL SECURITY ---
+    is_platform_admin = getattr(current_user, "_is_platform_admin", False)
+    if not is_platform_admin:
+        scope = getattr(current_user, "_data_access_scope", "Self Only")
+        if scope in ["Self Only", "Department"]:
+            if current_user.department:
+                room_q = room_q.filter(Room.department_name == current_user.department)
+                dept_q = dept_q.filter(Department.name == current_user.department)
+        elif scope == "Institution":
+            if current_user.institution:
+                room_q = room_q.outerjoin(Floor, Floor.id == Room.floor_id)\
+                               .outerjoin(Building, Building.id == Floor.building_id)\
+                               .outerjoin(Institution, Institution.id == Building.institution_id)\
+                               .filter(Institution.name == current_user.institution)
+                dept_q = dept_q.outerjoin(Institution, Institution.id == Department.institution_id)\
+                               .filter(Institution.name == current_user.institution)
+
+    room_depts = room_q.all()
+    dept_master = dept_q.all()
     
     # Combine and sort
     all_names = set([r[0] for r in room_depts if r[0]])
@@ -629,6 +658,19 @@ def list_departments(
     )
     if building_id:
         q = q.filter(Department.building_id == building_id)
+
+    # --- ROW-LEVEL SECURITY ---
+    is_platform_admin = getattr(current_user, "_is_platform_admin", False)
+    if not is_platform_admin:
+        scope = getattr(current_user, "_data_access_scope", "Self Only")
+        if scope in ["Self Only", "Department"]:
+            if current_user.department:
+                q = q.filter(Department.name == current_user.department)
+        elif scope == "Institution":
+            if current_user.institution:
+                q = q.outerjoin(Institution, Institution.id == Department.institution_id)\
+                     .filter(Institution.name == current_user.institution)
+
     depts = q.order_by(Department.name).all()
     return [
         DepartmentOut(
@@ -647,13 +689,27 @@ def list_departments_by_building(
     site_id: int = Depends(get_site_id)
 ):
     """Fetch departments belonging to a specific building."""
-    depts = db.query(Department).filter(
+    q = db.query(Department).filter(
         Department.building_id == building_id,
         Department.tenant_id == tenant_id,
         Department.site_id == site_id,
         Department.is_active == True,
         Department.is_deleted == False
-    ).order_by(Department.name).all()
+    )
+
+    # --- ROW-LEVEL SECURITY ---
+    is_platform_admin = getattr(current_user, "_is_platform_admin", False)
+    if not is_platform_admin:
+        scope = getattr(current_user, "_data_access_scope", "Self Only")
+        if scope in ["Self Only", "Department"]:
+            if current_user.department:
+                q = q.filter(Department.name == current_user.department)
+        elif scope == "Institution":
+            if current_user.institution:
+                q = q.outerjoin(Institution, Institution.id == Department.institution_id)\
+                     .filter(Institution.name == current_user.institution)
+
+    depts = q.order_by(Department.name).all()
     return [
         DepartmentOut(
             id=d.id, name=d.name, code=d.code, accounting_code=d.accounting_code,

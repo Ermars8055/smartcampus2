@@ -133,7 +133,7 @@ export default function ReceiptSummaryReport() {
     ws.addRow([]);
     
     // Row 4: Main Headers
-    const headerRow1 = ['S.No', 'Material Name'];
+    const headerRow1 = ['S.No', 'Material Name', 'UOM'];
     reportData.vendors.forEach(v => {
       headerRow1.push(`${v.code} - ${v.name}`);
       headerRow1.push('', '', '', ''); // Merge spaces
@@ -141,7 +141,7 @@ export default function ReceiptSummaryReport() {
     ws.addRow(headerRow1);
     
     // Row 5: Sub Headers
-    const headerRow2 = ['', ''];
+    const headerRow2 = ['', '', ''];
     reportData.vendors.forEach(() => {
       headerRow2.push('Bill No & Date', 'Qty', 'Rate', 'Amount', 'Total');
     });
@@ -149,7 +149,7 @@ export default function ReceiptSummaryReport() {
     
     // Data Rows
     reportData.data.forEach((row, i) => {
-      const matRow = [i + 1, `${row.material_code} - ${row.material_name}`];
+      const matRow = [i + 1, `${row.material_code} - ${row.material_name}`, row.uom];
       reportData.vendors.forEach(v => {
         const vData = row.vendor_details[v.id];
         if (vData) {
@@ -163,7 +163,7 @@ export default function ReceiptSummaryReport() {
     });
 
     // Grand Total Row
-    const totalRow = ['', 'GRAND TOTAL'];
+    const totalRow = ['', 'GRAND TOTAL', ''];
     reportData.vendors.forEach(v => {
       const vTotalQty = reportData.data.reduce((acc, row) => acc + (row.vendor_details[v.id]?.qty || 0), 0);
       const vTotalAmt = reportData.data.reduce((acc, row) => acc + (row.vendor_details[v.id]?.amount || 0), 0);
@@ -172,16 +172,17 @@ export default function ReceiptSummaryReport() {
     });
     ws.addRow(totalRow);
     
-    const totalCols = 2 + reportData.vendors.length * 5;
+    const totalCols = 3 + reportData.vendors.length * 5;
     
     // Merges
     ws.mergeCells(1, 1, 1, totalCols);
     ws.mergeCells(2, 1, 2, totalCols);
     ws.mergeCells(4, 1, 5, 1); // S.No
     ws.mergeCells(4, 2, 5, 2); // Material Name
+    ws.mergeCells(4, 3, 5, 3); // UOM
     
     reportData.vendors.forEach((v, i) => {
-      const colStart = 3 + i * 5; // C
+      const colStart = 4 + i * 5; // D
       ws.mergeCells(4, colStart, 4, colStart + 4);
     });
     
@@ -213,6 +214,7 @@ export default function ReceiptSummaryReport() {
     
     ws.getCell(4, 1).alignment = { horizontal: 'center', vertical: 'middle' };
     ws.getCell(4, 2).alignment = { horizontal: 'center', vertical: 'middle' };
+    ws.getCell(4, 3).alignment = { horizontal: 'center', vertical: 'middle' };
     
     // Formatting data rows
     const lastRow = 5 + reportData.data.length + 1;
@@ -231,8 +233,10 @@ export default function ReceiptSummaryReport() {
            cell.alignment = { horizontal: 'center', vertical: 'middle' };
         } else if (c === 2) {
            cell.alignment = { vertical: 'middle', wrapText: true };
+        } else if (c === 3) {
+           cell.alignment = { horizontal: 'center', vertical: 'middle' };
         } else {
-           const colType = (c - 3) % 5;
+           const colType = (c - 4) % 5;
            if (colType === 0) { // Bill No & Date
              cell.alignment = { wrapText: true, vertical: 'middle', horizontal: 'center' };
            } else { // Qty, Rate, Amount, Total
@@ -252,9 +256,10 @@ export default function ReceiptSummaryReport() {
     // Column widths
     ws.getColumn(1).width = 5;
     ws.getColumn(2).width = 35;
+    ws.getColumn(3).width = 15;
     
     for (let i = 0; i < reportData.vendors.length; i++) {
-      const start = 3 + i * 5;
+      const start = 4 + i * 5;
       ws.getColumn(start).width = 12; // Bill No & Date
       ws.getColumn(start + 1).width = 6; // Qty
       ws.getColumn(start + 2).width = 8; // Rate
@@ -284,6 +289,7 @@ export default function ReceiptSummaryReport() {
       [
         { content: 'S.No', rowSpan: 2, styles: { halign: 'center', valign: 'middle' } },
         { content: 'Material Name', rowSpan: 2, styles: { halign: 'center', valign: 'middle' } },
+        { content: 'UOM', rowSpan: 2, styles: { halign: 'center', valign: 'middle' } },
         ...reportData.vendors.map(v => ({ content: `${v.code} - ${v.name}`, colSpan: 5, styles: { halign: 'center' } }))
       ],
       [
@@ -297,10 +303,10 @@ export default function ReceiptSummaryReport() {
     reportData.vendors.forEach(() => {
       subHeads.push('Bill No & Date', 'Qty', 'Rate', 'Amount', 'Total');
     });
-    head[1] = ['', '', ...subHeads]; // Empty for spans
+    head[1] = ['', '', '', ...subHeads]; // Empty for spans
 
     const body = reportData.data.map((row, i) => {
-      const matRow = [i + 1, `${row.material_code} - ${row.material_name}`];
+      const matRow = [i + 1, `${row.material_code} - ${row.material_name}`, row.uom];
       reportData.vendors.forEach(v => {
         const vData = row.vendor_details[v.id];
         if (vData) {
@@ -322,7 +328,8 @@ export default function ReceiptSummaryReport() {
       headStyles: { fillColor: [30, 41, 59], textColor: [255, 255, 255], fontStyle: 'bold' },
       columnStyles: {
         0: { cellWidth: 30 },
-        1: { cellWidth: 150 }
+        1: { cellWidth: 150 },
+        2: { cellWidth: 40, halign: 'center' }
       }
     });
 
@@ -436,6 +443,7 @@ export default function ReceiptSummaryReport() {
                 <TableRow>
                   <TableCell rowSpan={2} sx={{ width: 40, background: '#F1F5F9' }}>S.No</TableCell>
                   <TableCell rowSpan={2} sx={{ minWidth: 200, background: '#F1F5F9', position: 'sticky', left: 0, zIndex: 3 }}>Material Name</TableCell>
+                  <TableCell rowSpan={2} sx={{ width: 80, background: '#F1F5F9', textAlign: 'center' }}>UOM</TableCell>
                   {reportData?.vendors.map(v => (
                     <TableCell key={v.id} colSpan={5} sx={{ background: '#EFF6FF', color: '#1E40AF', borderBottom: '2px solid #3B82F6' }}>
                       <Typography variant="caption" sx={{ fontWeight: 800, textTransform: 'uppercase' }}>{v.code} - {v.name}</Typography>
@@ -456,13 +464,14 @@ export default function ReceiptSummaryReport() {
               </TableHead>
             )}
             <TableBody>
-              {loading && <TableRow><TableCell colSpan={2 + (reportData?.vendors.length || 0) * 5} align="center" sx={{ py: 5 }}><CircularProgress /></TableCell></TableRow>}
+              {loading && <TableRow><TableCell colSpan={3 + (reportData?.vendors.length || 0) * 5} align="center" sx={{ py: 5 }}><CircularProgress /></TableCell></TableRow>}
               {!loading && reportData?.data.map((row, idx) => (
                 <TableRow key={row.material_id} hover>
                   <TableCell align="center">{idx + 1}</TableCell>
                   <TableCell sx={{ position: 'sticky', left: 0, background: '#fff', zIndex: 2, fontWeight: 600 }}>
                     {row.material_code} - {row.material_name}
                   </TableCell>
+                  <TableCell align="center">{row.uom}</TableCell>
                   {reportData.vendors.map(v => {
                     const vData = row.vendor_details[v.id];
                     if (!vData) return <Fragment key={v.id}><TableCell colSpan={5} align="center" sx={{ color: '#CBD5E1' }}>-</TableCell></Fragment>;
@@ -483,7 +492,7 @@ export default function ReceiptSummaryReport() {
               ))}
               {!loading && reportData && (
                 <TableRow sx={{ background: '#F8FAFC', '& td': { fontWeight: 800, py: 1.5 } }}>
-                  <TableCell colSpan={2} align="right">GRAND TOTAL</TableCell>
+                  <TableCell colSpan={3} align="right">GRAND TOTAL</TableCell>
                   {reportData.vendors.map(v => {
                     const vTotalQty = reportData.data.reduce((acc, row) => acc + (row.vendor_details[v.id]?.qty || 0), 0);
                     const vTotalAmt = reportData.data.reduce((acc, row) => acc + (row.vendor_details[v.id]?.amount || 0), 0);
@@ -501,7 +510,7 @@ export default function ReceiptSummaryReport() {
                 </TableRow>
               )}
               {!loading && !reportData && (
-                <TableRow><TableCell colSpan={2} align="center" sx={{ py: 10, color: '#94A3B8' }}>Select filters and click Generate to view the report</TableCell></TableRow>
+                <TableRow><TableCell colSpan={3} align="center" sx={{ py: 10, color: '#94A3B8' }}>Select filters and click Generate to view the report</TableCell></TableRow>
               )}
             </TableBody>
           </Table>

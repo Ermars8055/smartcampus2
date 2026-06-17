@@ -96,6 +96,21 @@ function SlideTransition(props) {
   return <Slide {...props} direction="left" />;
 }
 
+const getSubmoduleStyle = (isActivePath) => ({
+  borderRadius: 0,
+  borderLeft: isActivePath ? '3px solid #60A5FA' : '3px solid transparent',
+  py: 0.6,
+  pl: isActivePath ? 4.5 : 5,
+  color: isActivePath ? '#60A5FA' : '#94A3B8',
+  background: isActivePath ? 'rgba(37,99,235,0.15)' : 'transparent',
+  transition: 'all 0.3s ease',
+  '&:hover': { 
+    background: isActivePath ? 'rgba(37,99,235,0.2)' : 'rgba(255,255,255,0.05)', 
+    color: isActivePath ? '#93C5FD' : '#ffffff',
+    transform: isActivePath ? 'none' : 'translateX(4px)'
+  },
+});
+
 export default function Layout() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -169,6 +184,11 @@ export default function Layout() {
   };
 
   const isActive = (path) => location.pathname === path;
+  const isParentActive = (item) => {
+    if (item.path && isActive(item.path)) return true;
+    if (item.children && item.children.some(child => isActive(child.path))) return true;
+    return false;
+  };
 
   const drawer = (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'linear-gradient(180deg, #0F172A 0%, #1E293B 100%)' }}>
@@ -184,7 +204,17 @@ export default function Layout() {
               filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
             }}
           />
-          <Typography variant="subtitle2" sx={{ color: '#fff', fontWeight: 700, fontSize: '0.90rem', lineHeight: 1.2, whiteSpace: 'nowrap', letterSpacing: '-0.02em' }}>
+          <Typography variant="subtitle2" sx={{ 
+            fontWeight: 800, 
+            fontSize: '1rem', 
+            lineHeight: 1.2, 
+            whiteSpace: 'nowrap', 
+            letterSpacing: '0.02em',
+            background: 'linear-gradient(90deg, #60A5FA, #E2E8F0)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.2))'
+          }}>
             Eastpoint Smart Campus
           </Typography>
           {isMobile && (
@@ -193,7 +223,16 @@ export default function Layout() {
             </IconButton>
           )}
         </Box>
-        <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: '0.70rem', display: 'block', lineHeight: 1.2, mt: 1, textAlign: 'left', letterSpacing: '-0.01em' }}>
+        <Typography variant="caption" sx={{ 
+          color: '#CBD5E1', 
+          fontSize: '0.75rem', 
+          fontWeight: 600, 
+          display: 'block', 
+          lineHeight: 1.2, 
+          mt: 1, 
+          textAlign: 'left', 
+          letterSpacing: '0.02em' 
+        }}>
           Enterprise Materials Governance Platform
         </Typography>
       </Box>
@@ -217,9 +256,9 @@ export default function Layout() {
                     borderRadius: 2,
                     py: 0.8,
                     px: 1.5,
-                    color: isActive(item.path) ? '#fff' : '#94A3B8',
-                    background: isActive(item.path) ? 'linear-gradient(90deg, rgba(37,99,235,0.3), rgba(37,99,235,0.1))' : 'transparent',
-                    borderLeft: isActive(item.path) ? '3px solid #2563EB' : '3px solid transparent',
+                    color: isParentActive(item) ? '#fff' : '#94A3B8',
+                    background: isParentActive(item) ? 'linear-gradient(90deg, rgba(37,99,235,0.3), rgba(37,99,235,0.1))' : 'transparent',
+                    borderLeft: isParentActive(item) ? '3px solid #2563EB' : '3px solid transparent',
                     '&:hover': {
                       background: 'rgba(37,99,235,0.1)',
                       color: '#E2E8F0',
@@ -227,10 +266,10 @@ export default function Layout() {
                     transition: 'all 0.2s',
                   }}
                 >
-                  <ListItemIcon sx={{ color: isActive(item.path) ? '#60A5FA' : '#64748B', minWidth: 36, '& svg': { fontSize: '1.2rem' } }}>
+                  <ListItemIcon sx={{ color: isParentActive(item) ? '#60A5FA' : '#64748B', minWidth: 36, '& svg': { fontSize: '1.2rem' } }}>
                     {item.icon}
                   </ListItemIcon>
-                  <ListItemText primary={item.text} primaryTypographyProps={{ sx: { fontSize: '0.82rem', fontWeight: isActive(item.path) ? 600 : 400 } }} />
+                  <ListItemText primary={item.text} primaryTypographyProps={{ sx: { fontSize: '0.82rem', fontWeight: isParentActive(item) ? 600 : 400 } }} />
                   {item.children && (openMenus[item.text] ? <ExpandLess sx={{ fontSize: 18 }} /> : <ExpandMore sx={{ fontSize: 18 }} />)}
                 </ListItemButton>
               </ListItem>
@@ -241,14 +280,7 @@ export default function Layout() {
                       <ListItem key={child.text} disablePadding sx={{ px: 1, mb: 0.2 }}>
                         <ListItemButton
                           onClick={() => { navigate(child.path); if (isMobile) setMobileOpen(false); }}
-                          sx={{
-                            borderRadius: 2,
-                            py: 0.6,
-                            pl: 5,
-                            color: isActive(child.path) ? '#fff' : '#94A3B8',
-                            background: isActive(child.path) ? 'rgba(37,99,235,0.2)' : 'transparent',
-                            '&:hover': { background: 'rgba(37,99,235,0.08)', color: '#E2E8F0' },
-                          }}
+                          sx={getSubmoduleStyle(isActive(child.path))}
                         >
                           <ListItemText primary={child.text} primaryTypographyProps={{ sx: { fontSize: '0.78rem', fontWeight: isActive(child.path) ? 600 : 400 } }} />
                         </ListItemButton>
@@ -305,11 +337,26 @@ export default function Layout() {
                 <MenuIcon />
               </IconButton>
             )}
+
+            {activeAlerts.length > 0 && (
+              <Tooltip title={showMarquee ? "Hide Alerts Banner" : "Show Alerts Banner"}>
+                <IconButton onClick={handleToggleMarquee} sx={{ 
+                  color: showMarquee ? '#EF4444' : '#94A3B8',
+                  bgcolor: 'transparent',
+                  '&:hover': { bgcolor: '#F1F5F9' },
+                  transition: 'all 0.2s',
+                  mr: 1
+                }}>
+                  <Campaign />
+                </IconButton>
+              </Tooltip>
+            )}
+
             <Box sx={{ flex: 1, display: 'flex', overflow: 'hidden', alignSelf: 'stretch' }}>
               {activeAlerts.length > 0 && showMarquee && (
                 <Box sx={{
                   width: '100%',
-                  bgcolor: '#FEF2F2',
+                  bgcolor: 'transparent',
                   color: '#991B1B',
                   overflow: 'hidden',
                   display: 'flex',
@@ -319,82 +366,65 @@ export default function Layout() {
                   <Box sx={{
                     display: 'flex',
                     width: 'max-content',
-                    animation: `marqueeContinuous ${Math.max(30, activeAlerts.length * 20)}s linear infinite`,
-                    '@keyframes marqueeContinuous': {
+                    paddingLeft: '100%',
+                    animation: `marqueeStandard ${Math.max(20, activeAlerts.length * 15)}s linear infinite`,
+                    '@keyframes marqueeStandard': {
                       '0%': { transform: 'translateX(0)' },
-                      '100%': { transform: 'translateX(-50%)' }
+                      '100%': { transform: 'translateX(-100%)' }
                     },
                     '&:hover': {
                       animationPlayState: 'paused'
                     }
                   }}>
-                    {[0, 1].map((copyIdx) => (
-                      <Box key={copyIdx} sx={{ display: 'flex', minWidth: '100%', justifyContent: 'space-around' }}>
-                        {activeAlerts.map((alert, index) => (
-                          <Box key={`${alert.id}-${copyIdx}`} component="span" sx={{ mx: 4, display: 'inline-flex', alignItems: 'center', gap: 1 }}>
-                            <Typography variant="body2" sx={{ fontWeight: 700, whiteSpace: 'nowrap', fontSize: '0.85rem' }}>⚠️ {alert.title}:</Typography>
-                            <Typography variant="body2" sx={{ whiteSpace: 'nowrap', fontSize: '0.85rem' }}>{alert.message}</Typography>
-                            {(alert.reference_type === 'Indent' || alert.reference_type === 'PurchaseOrder' || alert.reference_type === 'PurchaseRequest' || alert.reference_type === 'GateEntry') && (
-                              <Button 
-                                size="small"
-                                variant="contained"
-                                sx={{ 
-                                  minWidth: 0, 
-                                  py: 0.2, 
-                                  px: 1.5, 
-                                  ml: 2, 
-                                  fontWeight: 800, 
-                                  bgcolor: '#EF4444', 
-                                  color: '#fff',
-                                  borderRadius: 8,
-                                  whiteSpace: 'nowrap',
-                                  textTransform: 'none',
-                                  fontSize: '0.65rem',
-                                  boxShadow: '0 2px 4px rgba(239,68,68,0.4)',
-                                  '&:hover': { 
-                                    bgcolor: '#DC2626',
-                                    boxShadow: '0 4px 6px rgba(239,68,68,0.5)',
-                                  } 
-                                }}
-                                onClick={() => {
-                                  api.put(`/api/alerts/${alert.id}/read`).catch(() => {});
-                                  if (alert.reference_type === 'Indent') {
-                                    navigate('/indents', { state: { openIndentId: alert.reference_id } });
-                                  } else if (alert.reference_type === 'PurchaseOrder') {
-                                    navigate('/purchase-orders', { state: { openPOId: alert.reference_id } });
-                                  } else if (alert.reference_type === 'PurchaseRequest') {
-                                    navigate('/purchase-requests', { state: { openPRId: alert.reference_id } });
-                                  } else if (alert.reference_type === 'GateEntry') {
-                                    navigate('/grn');
-                                  }
-                                }}
-                              >
-                                Review Now
-                              </Button>
-                            )}
-                            {index < activeAlerts.length - 1 && <Box component="span" sx={{ mx: 2, color: '#FCA5A5' }}>•</Box>}
-                          </Box>
-                        ))}
+                    {activeAlerts.map((alert, index) => (
+                      <Box key={alert.id} component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 1, pr: 6 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 700, whiteSpace: 'nowrap', fontSize: '0.85rem' }}>⚠️ {alert.title}:</Typography>
+                        <Typography variant="body2" sx={{ whiteSpace: 'nowrap', fontSize: '0.85rem' }}>{alert.message}</Typography>
+                        {(alert.reference_type === 'Indent' || alert.reference_type === 'PurchaseOrder' || alert.reference_type === 'PurchaseRequest' || alert.reference_type === 'GateEntry') && (
+                          <Button 
+                            size="small"
+                            variant="contained"
+                            sx={{ 
+                              minWidth: 0, 
+                              py: 0.2, 
+                              px: 1.5, 
+                              ml: 2, 
+                              fontWeight: 800, 
+                              bgcolor: '#EF4444', 
+                              color: '#fff',
+                              borderRadius: 8,
+                              whiteSpace: 'nowrap',
+                              textTransform: 'none',
+                              fontSize: '0.65rem',
+                              boxShadow: '0 2px 4px rgba(239,68,68,0.4)',
+                              '&:hover': { 
+                                bgcolor: '#DC2626',
+                                boxShadow: '0 4px 6px rgba(239,68,68,0.5)',
+                              } 
+                            }}
+                            onClick={() => {
+                              api.put(`/api/alerts/${alert.id}/read`).catch(() => {});
+                              if (alert.reference_type === 'Indent') {
+                                navigate('/indents', { state: { openIndentId: alert.reference_id } });
+                              } else if (alert.reference_type === 'PurchaseOrder') {
+                                navigate('/purchase-orders', { state: { openPOId: alert.reference_id } });
+                              } else if (alert.reference_type === 'PurchaseRequest') {
+                                navigate('/purchase-requests', { state: { openPRId: alert.reference_id } });
+                              } else if (alert.reference_type === 'GateEntry') {
+                                navigate('/grn');
+                              }
+                            }}
+                          >
+                            Review Now
+                          </Button>
+                        )}
+                        {index < activeAlerts.length - 1 && <Box component="span" sx={{ ml: 4, color: '#FCA5A5' }}>•</Box>}
                       </Box>
                     ))}
                   </Box>
                 </Box>
               )}
             </Box>
-
-            {activeAlerts.length > 0 && (
-              <Tooltip title={showMarquee ? "Hide Alerts Banner" : "Show Alerts Banner"}>
-                <IconButton onClick={handleToggleMarquee} sx={{ 
-                  color: showMarquee ? '#EF4444' : '#94A3B8',
-                  bgcolor: showMarquee ? '#FEF2F2' : 'transparent',
-                  '&:hover': { bgcolor: showMarquee ? '#FEE2E2' : '#F1F5F9' },
-                  mr: 1,
-                  transition: 'all 0.2s'
-                }}>
-                  <Campaign />
-                </IconButton>
-              </Tooltip>
-            )}
             <Tooltip title="Notifications">
               <IconButton onClick={() => navigate('/alerts')} sx={{ color: '#64748B' }}>
                 <Badge badgeContent={alertCount} color="error" max={99}>

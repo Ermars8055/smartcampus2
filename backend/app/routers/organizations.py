@@ -673,15 +673,19 @@ def create_department(
     if not dept_data.get("code"):
         dept_data["code"] = get_next_number(db, tenant_id, site_id, "DEPARTMENT", "DEPT")
     
-    # Bug 14: Check for duplicate department name in the same building
-    existing = db.query(Department).filter(
+    # Check for duplicate department name within the same institution
+    dup_query = db.query(Department).filter(
         Department.tenant_id == tenant_id,
-        Department.building_id == data.building_id,
         Department.name.ilike(data.name),
         Department.is_deleted == False
-    ).first()
+    )
+    if data.institution_id:
+        dup_query = dup_query.filter(Department.institution_id == data.institution_id)
+    if data.building_id:
+        dup_query = dup_query.filter(Department.building_id == data.building_id)
+    existing = dup_query.first()
     if existing:
-        raise HTTPException(status_code=400, detail=f"Department '{data.name}' already exists in this building")
+        raise HTTPException(status_code=400, detail=f"Department '{data.name}' already exists in this institution")
 
     dept = Department(**dept_data, tenant_id=tenant_id, site_id=site_id)
     db.add(dept)

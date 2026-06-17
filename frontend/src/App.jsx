@@ -43,6 +43,7 @@ import IssueSummaryReport from './pages/IssueSummaryReport';
 import RateAnalysisReport from './pages/RateAnalysisReport';
 import ReceiptSummaryReport from './pages/ReceiptSummaryReport';
 import DepartmentWiseInventoryReport from './pages/DepartmentWiseInventoryReport';
+import PendingGatepassReturnsReport from './pages/PendingGatepassReturnsReport';
 import Users from './pages/Users';
 import AuditLogs from './pages/AuditLogs';
 import ApprovalFlows from './pages/ApprovalFlows';
@@ -138,6 +139,7 @@ function AppRoutes() {
         <Route path="reports/rate-analysis" element={<RateAnalysisReport />} />
         <Route path="reports/receipt-summary" element={<ReceiptSummaryReport />} />
         <Route path="reports/department-inventory" element={<DepartmentWiseInventoryReport />} />
+        <Route path="reports/pending-gatepass-returns" element={<PendingGatepassReturnsReport />} />
         <Route path="admin" element={<Navigate to="/admin/configurations" replace />} />
         <Route path="admin/users" element={<Users />} />
         <Route path="admin/audit-logs" element={<AuditLogs />} />

@@ -144,6 +144,7 @@ const MODULE_TREE = [
       { label: 'Receipt Summary', resource: 'report_receipt_summary', actions: ['read'] },
       { label: 'Dept. Inventory', resource: 'report_dept_inventory', actions: ['read'] },
       { label: 'Finance Reports', resource: 'report_finance', actions: ['read'] },
+      { label: 'Pending Gatepass Returns', resource: 'report_pending_gatepass', actions: ['read'] },
     ],
   },
   {

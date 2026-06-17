@@ -73,6 +73,7 @@ const menuItems = [
       { text: 'Rate Analysis', icon: <Assessment />, path: '/reports/rate-analysis', resource: 'report_rate_analysis' },
       { text: 'Receipt Summary', icon: <Assessment />, path: '/reports/receipt-summary', resource: 'report_receipt_summary' },
       { text: 'Department Inventory', icon: <Assessment />, path: '/reports/department-inventory', resource: 'report_dept_inventory' },
+      { text: 'Pending Gatepass Returns', icon: <Assessment />, path: '/reports/pending-gatepass-returns', resource: 'report_pending_gatepass' },
     ]
   },
   {
@@ -304,7 +305,82 @@ export default function Layout() {
                 <MenuIcon />
               </IconButton>
             )}
-            <Box sx={{ flex: 1 }} />
+            <Box sx={{ flex: 1, display: 'flex', overflow: 'hidden', alignSelf: 'stretch' }}>
+              {activeAlerts.length > 0 && showMarquee && (
+                <Box sx={{
+                  width: '100%',
+                  bgcolor: '#FEF2F2',
+                  color: '#991B1B',
+                  overflow: 'hidden',
+                  display: 'flex',
+                  alignItems: 'center',
+                  position: 'relative'
+                }}>
+                  <Box sx={{
+                    display: 'flex',
+                    width: 'max-content',
+                    animation: `marqueeContinuous ${Math.max(30, activeAlerts.length * 20)}s linear infinite`,
+                    '@keyframes marqueeContinuous': {
+                      '0%': { transform: 'translateX(0)' },
+                      '100%': { transform: 'translateX(-50%)' }
+                    },
+                    '&:hover': {
+                      animationPlayState: 'paused'
+                    }
+                  }}>
+                    {[0, 1].map((copyIdx) => (
+                      <Box key={copyIdx} sx={{ display: 'flex', minWidth: '100%', justifyContent: 'space-around' }}>
+                        {activeAlerts.map((alert, index) => (
+                          <Box key={`${alert.id}-${copyIdx}`} component="span" sx={{ mx: 4, display: 'inline-flex', alignItems: 'center', gap: 1 }}>
+                            <Typography variant="body2" sx={{ fontWeight: 700, whiteSpace: 'nowrap', fontSize: '0.85rem' }}>⚠️ {alert.title}:</Typography>
+                            <Typography variant="body2" sx={{ whiteSpace: 'nowrap', fontSize: '0.85rem' }}>{alert.message}</Typography>
+                            {(alert.reference_type === 'Indent' || alert.reference_type === 'PurchaseOrder' || alert.reference_type === 'PurchaseRequest' || alert.reference_type === 'GateEntry') && (
+                              <Button 
+                                size="small"
+                                variant="contained"
+                                sx={{ 
+                                  minWidth: 0, 
+                                  py: 0.2, 
+                                  px: 1.5, 
+                                  ml: 2, 
+                                  fontWeight: 800, 
+                                  bgcolor: '#EF4444', 
+                                  color: '#fff',
+                                  borderRadius: 8,
+                                  whiteSpace: 'nowrap',
+                                  textTransform: 'none',
+                                  fontSize: '0.65rem',
+                                  boxShadow: '0 2px 4px rgba(239,68,68,0.4)',
+                                  '&:hover': { 
+                                    bgcolor: '#DC2626',
+                                    boxShadow: '0 4px 6px rgba(239,68,68,0.5)',
+                                  } 
+                                }}
+                                onClick={() => {
+                                  api.put(`/api/alerts/${alert.id}/read`).catch(() => {});
+                                  if (alert.reference_type === 'Indent') {
+                                    navigate('/indents', { state: { openIndentId: alert.reference_id } });
+                                  } else if (alert.reference_type === 'PurchaseOrder') {
+                                    navigate('/purchase-orders', { state: { openPOId: alert.reference_id } });
+                                  } else if (alert.reference_type === 'PurchaseRequest') {
+                                    navigate('/purchase-requests', { state: { openPRId: alert.reference_id } });
+                                  } else if (alert.reference_type === 'GateEntry') {
+                                    navigate('/grn');
+                                  }
+                                }}
+                              >
+                                Review Now
+                              </Button>
+                            )}
+                            {index < activeAlerts.length - 1 && <Box component="span" sx={{ mx: 2, color: '#FCA5A5' }}>•</Box>}
+                          </Box>
+                        ))}
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
+              )}
+            </Box>
 
             {activeAlerts.length > 0 && (
               <Tooltip title={showMarquee ? "Hide Alerts Banner" : "Show Alerts Banner"}>
@@ -327,19 +403,42 @@ export default function Layout() {
               </IconButton>
             </Tooltip>
 
-            <Chip
-              avatar={<Avatar sx={{ background: 'linear-gradient(135deg, #2563EB, #7C3AED)' }}>{user?.full_name?.charAt(0)}</Avatar>}
-              label={user?.full_name}
-              variant="outlined"
+            <Box
               onClick={(e) => setAnchorEl(e.currentTarget)}
-              sx={{ borderColor: '#E2E8F0', cursor: 'pointer', '&:hover': { borderColor: '#2563EB' } }}
-            />
+              sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 1, 
+                cursor: 'pointer', 
+                p: 0.5, 
+                borderRadius: 1, 
+                '&:hover': { bgcolor: '#F1F5F9' } 
+              }}
+            >
+              <Avatar sx={{ width: 28, height: 28, fontSize: '0.8rem', background: 'linear-gradient(135deg, #2563EB, #7C3AED)' }}>
+                {user?.full_name?.charAt(0)}
+              </Avatar>
+              {!isMobile && (
+                <Typography variant="body2" sx={{ fontWeight: 600, color: '#334155', fontSize: '0.8rem' }}>
+                  {user?.full_name}
+                </Typography>
+              )}
+            </Box>
             <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}
               PaperProps={{ sx: { mt: 1, minWidth: 180 } }}>
-              <MenuItem disabled>
-                <Person sx={{ mr: 1, fontSize: 18 }} /> {user?.role_name || user?.role}
+              <MenuItem disabled sx={{ opacity: '1 !important', color: '#1E293B', pb: 0.5 }}>
+                <Person sx={{ mr: 1, fontSize: 20, color: '#64748B' }} /> 
+                <Box>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: '#1E293B' }}>
+                    {user?.username || user?.full_name}
+                  </Typography>
+                </Box>
               </MenuItem>
-              <MenuItem disabled>{user?.tenant_name || 'Platform Admin'}</MenuItem>
+              <MenuItem disabled sx={{ pt: 0, minHeight: 'auto', opacity: '1 !important' }}>
+                <Typography variant="caption" sx={{ color: '#64748B', pl: 3.5 }}>
+                  {user?.tenant_name || 'Platform Admin'}
+                </Typography>
+              </MenuItem>
               <Divider />
               <MenuItem onClick={() => { logout(); navigate('/login'); setAnchorEl(null); }}>
                 <Logout sx={{ mr: 1, fontSize: 18 }} /> Sign Out
@@ -348,83 +447,7 @@ export default function Layout() {
           </Toolbar>
         </AppBar>
 
-        {/* Marquee Alert Banner */}
-        {activeAlerts.length > 0 && showMarquee && (
-          <Box sx={{
-            width: '100%',
-            bgcolor: '#FEF2F2',
-            borderBottom: '1px solid #FCA5A5',
-            color: '#991B1B',
-            py: 0.8,
-            overflow: 'hidden',
-            display: 'flex',
-            alignItems: 'center',
-            position: 'relative',
-            zIndex: 1000
-          }}>
-            <Box sx={{
-              display: 'flex',
-              width: 'max-content',
-              animation: `marqueeContinuous ${Math.max(30, activeAlerts.length * 20)}s linear infinite`,
-              '@keyframes marqueeContinuous': {
-                '0%': { transform: 'translateX(0)' },
-                '100%': { transform: 'translateX(-50%)' }
-              },
-              '&:hover': {
-                animationPlayState: 'paused'
-              }
-            }}>
-              {[0, 1].map((copyIdx) => (
-                <Box key={copyIdx} sx={{ display: 'flex', minWidth: '100vw', justifyContent: 'space-around' }}>
-                  {activeAlerts.map((alert, index) => (
-                    <Box key={`${alert.id}-${copyIdx}`} component="span" sx={{ mx: 4, display: 'inline-flex', alignItems: 'center', gap: 1 }}>
-                      <Typography variant="body2" sx={{ fontWeight: 700, whiteSpace: 'nowrap' }}>⚠️ {alert.title}:</Typography>
-                      <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>{alert.message}</Typography>
-                      {(alert.reference_type === 'Indent' || alert.reference_type === 'PurchaseOrder' || alert.reference_type === 'PurchaseRequest' || alert.reference_type === 'GateEntry') && (
-                        <Button 
-                          size="small"
-                          variant="contained"
-                          sx={{ 
-                            minWidth: 0, 
-                            py: 0.5, 
-                            px: 2, 
-                            ml: 2, 
-                            fontWeight: 800, 
-                            bgcolor: '#EF4444', 
-                            color: '#fff',
-                            borderRadius: 8,
-                            whiteSpace: 'nowrap',
-                            textTransform: 'none',
-                            boxShadow: '0 2px 4px rgba(239,68,68,0.4)',
-                            '&:hover': { 
-                              bgcolor: '#DC2626',
-                              boxShadow: '0 4px 6px rgba(239,68,68,0.5)',
-                            } 
-                          }}
-                          onClick={() => {
-                            api.put(`/api/alerts/${alert.id}/read`).catch(() => {});
-                            if (alert.reference_type === 'Indent') {
-                              navigate('/indents', { state: { openIndentId: alert.reference_id } });
-                            } else if (alert.reference_type === 'PurchaseOrder') {
-                              navigate('/purchase-orders', { state: { openPOId: alert.reference_id } });
-                            } else if (alert.reference_type === 'PurchaseRequest') {
-                              navigate('/purchase-requests', { state: { openPRId: alert.reference_id } });
-                            } else if (alert.reference_type === 'GateEntry') {
-                              navigate('/grn');
-                            }
-                          }}
-                        >
-                          Review Now
-                        </Button>
-                      )}
-                      {index < activeAlerts.length - 1 && <Box component="span" sx={{ mx: 2, color: '#FCA5A5' }}>•</Box>}
-                    </Box>
-                  ))}
-                </Box>
-              ))}
-            </Box>
-          </Box>
-        )}
+
 
         {/* Page Content */}
         <Box sx={{ flex: 1, p: { xs: 2, md: 3 }, overflowY: 'auto' }}>

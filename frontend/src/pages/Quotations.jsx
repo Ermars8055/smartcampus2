@@ -87,6 +87,9 @@ const Quotations = () => {
   const [convertToPoDialog, setConvertToPoDialog] = useState({ open: false, terms: '', items: [] });
   const [termsTemplates, setTermsTemplates] = useState([]);
 
+  // Send to Vendors dialog
+  const [sendToVendorsDialog, setSendToVendorsDialog] = useState({ open: false, qrId: null, qrNumber: '', vendorNames: [], message: '' });
+
   useEffect(() => {
     api.get('/api/terms').then(r => setTermsTemplates(r.data));
   }, []);
@@ -192,10 +195,32 @@ const Quotations = () => {
     }
   };
 
-  const handleSendToVendors = async (id) => {
+  const openSendToVendorsDialog = (qr) => {
+    const vendorNames = qr.invited_vendors?.map(v => v.vendor_name) || [];
+    
+    // Generate a formatted list of materials to include in the email
+    const materialsList = qr.items?.map((item, index) => 
+      `${index + 1}. ${item.material_name} (${item.material_code}) - Qty: ${item.quantity} ${item.uom_name}`
+    ).join('\n') || 'No materials listed.';
+
+    const defaultMessage = `Dear Vendor,\n\nWe are requesting quotations for the following materials for Quotation Request ${qr.qr_number}:\n\n${materialsList}\n\nPlease submit your best rates along with delivery timelines at your earliest convenience.\n\nRegards,\nProcurement Team`;
+    
+    setSendToVendorsDialog({
+      open: true,
+      qrId: qr.id,
+      qrNumber: qr.qr_number,
+      vendorNames,
+      message: defaultMessage
+    });
+  };
+
+  const handleSendToVendors = async () => {
     try {
-      await api.post(`/api/quotations/requests/${id}/send`);
+      await api.post(`/api/quotations/requests/${sendToVendorsDialog.qrId}/send`, {
+        message: sendToVendorsDialog.message
+      });
       showMessage('Request sent to vendors successfully!', 'Success', 'success');
+      setSendToVendorsDialog({ open: false, qrId: null, qrNumber: '', vendorNames: [], message: '' });
       fetchData();
     } catch (err) {
       showMessage(err.response?.data?.detail || 'Failed to send to vendors', 'Error', 'error');
@@ -712,7 +737,7 @@ const Quotations = () => {
                               <span>
                                 <IconButton
                                   size="small"
-                                  onClick={() => handleSendToVendors(qr.id)}
+                                  onClick={() => openSendToVendorsDialog(qr)}
                                   disabled={qr.status !== 'Draft' || !hasAction('quotations', 'can_send_to_vendors')}
                                   sx={{ color: qr.status === 'Draft' ? '#8b5cf6' : 'text.disabled' }}
                                 >
@@ -1518,8 +1543,8 @@ const Quotations = () => {
                 />
               </Box>
               <Box sx={{ pt: 3.5 }}>
-                <Button variant="outlined" component="label" startIcon={<CloudUploadIcon />} sx={{ height: 56, px: 3 }}>
-                  Upload copy of quotation file
+                <Button variant="outlined" component="label" startIcon={<CloudUploadIcon />} color={newQuote.file ? 'success' : 'primary'} sx={{ height: 56, px: 3 }}>
+                  Upload copy of quotation file <span style={{ color: '#d32f2f', marginLeft: 4 }}>*</span>
                   <input type="file" hidden accept=".pdf,.doc,.docx,image/*" onChange={(e) => setNewQuote({ ...newQuote, file: e.target.files[0] })} />
                 </Button>
               </Box>
@@ -1589,19 +1614,24 @@ const Quotations = () => {
                       />
                     </TableCell>
                     <TableCell align="center">
-                      <Checkbox
-                        size="small"
-                        checked={it.is_excluded}
-                        onChange={(e) => {
-                          const newItems = [...newQuote.items];
-                          newItems[idx].is_excluded = e.target.checked;
-                          if (e.target.checked) {
-                            newItems[idx].quoted_rate = '';
-                            newItems[idx].delivery_days = '';
-                          }
-                          setNewQuote({ ...newQuote, items: newItems });
-                        }}
-                      />
+                      <Tooltip title={selectedQR?.invited_vendors?.length <= 2 ? 'Exclude is only available when more than 2 vendors are invited' : ''}>
+                        <span>
+                          <Checkbox
+                            size="small"
+                            checked={it.is_excluded}
+                            disabled={selectedQR?.invited_vendors?.length <= 2}
+                            onChange={(e) => {
+                              const newItems = [...newQuote.items];
+                              newItems[idx].is_excluded = e.target.checked;
+                              if (e.target.checked) {
+                                newItems[idx].quoted_rate = '';
+                                newItems[idx].delivery_days = '';
+                              }
+                              setNewQuote({ ...newQuote, items: newItems });
+                            }}
+                          />
+                        </span>
+                      </Tooltip>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -1616,6 +1646,7 @@ const Quotations = () => {
               disabled={
                 !newQuote.quotation_number ||
                 !newQuote.quotation_date ||
+                !newQuote.file ||
                 newQuote.items.some(i => !i.is_excluded && (!i.quoted_rate || !i.delivery_days)) ||
                 newQuote.items.every(i => i.is_excluded)
               }
@@ -1905,6 +1936,63 @@ const Quotations = () => {
           <DialogActions sx={{ px: 3, pb: 2 }}>
             <Button onClick={() => setConvertToPoDialog({ open: false, terms: '' })} sx={{ color: '#64748B', fontWeight: 600 }}>Cancel</Button>
             <Button variant="contained" color="success" disabled={!convertToPoDialog.terms?.trim()} onClick={handleConvertToPO} sx={{ fontWeight: 600 }}>Create POs</Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Send to Vendors Confirmation Dialog */}
+        <Dialog
+          open={sendToVendorsDialog.open}
+          onClose={(e, reason) => { if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') setSendToVendorsDialog({ open: false, qrId: null, qrNumber: '', vendorNames: [], message: '' }); }}
+          maxWidth="sm"
+          fullWidth
+          PaperProps={{ sx: { borderRadius: 3, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' } }}
+        >
+          <DialogTitle sx={{ pb: 1, pt: 3, px: 4 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Box sx={{ p: 1, bgcolor: '#EDE9FE', borderRadius: 2, color: '#7C3AED', display: 'flex' }}>
+                <SendIcon fontSize="medium" />
+              </Box>
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>Send Request to Vendors</Typography>
+                <Typography variant="body2" color="text.secondary">{sendToVendorsDialog.qrNumber}</Typography>
+              </Box>
+            </Box>
+          </DialogTitle>
+          <DialogContent sx={{ px: 4, py: 2 }}>
+            <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', mb: 0.5, display: 'block', textTransform: 'uppercase' }}>
+              Recipients ({sendToVendorsDialog.vendorNames.length} Vendors)
+            </Typography>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 3 }}>
+              {sendToVendorsDialog.vendorNames.map((name, i) => (
+                <Chip key={i} label={name} size="small" sx={{ bgcolor: 'secondary.light', color: 'secondary.contrastText', fontSize: '0.75rem' }} />
+              ))}
+            </Box>
+
+            <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', mb: 0.5, display: 'block', textTransform: 'uppercase' }}>
+              Email Message to Vendors <span style={{ color: '#d32f2f' }}>*</span>
+            </Typography>
+            <TextField
+              fullWidth
+              multiline
+              rows={6}
+              value={sendToVendorsDialog.message}
+              onChange={(e) => setSendToVendorsDialog({ ...sendToVendorsDialog, message: e.target.value })}
+              placeholder="Enter the message to be sent to the vendors..."
+              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+            />
+          </DialogContent>
+          <DialogActions sx={{ px: 4, pb: 4, pt: 2, justifyContent: 'flex-end', gap: 2 }}>
+            <Button onClick={() => setSendToVendorsDialog({ open: false, qrId: null, qrNumber: '', vendorNames: [], message: '' })} sx={{ color: '#64748B', fontWeight: 600 }}>Cancel</Button>
+            <Button
+              onClick={handleSendToVendors}
+              variant="contained"
+              size="large"
+              disabled={!sendToVendorsDialog.message?.trim()}
+              startIcon={<SendIcon />}
+              sx={{ px: 4, borderRadius: 2, fontWeight: 700, bgcolor: '#7C3AED', '&:hover': { bgcolor: '#6D28D9' }, textTransform: 'none' }}
+            >
+              Send to Vendors
+            </Button>
           </DialogActions>
         </Dialog>
 

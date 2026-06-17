@@ -9,7 +9,7 @@ from app.database import get_db
 from app.models import (
     MaterialIssue, MaterialIssueItem, Material, UOM, StockLedger, User,
     GRN, GRNItem, Vendor, PurchaseOrder, Category, SubCategory, Warehouse,
-    Department, MaterialReturn, MaterialReturnItem
+    Department, MaterialReturn, MaterialReturnItem, GatePass, GatePassItem
 )
 from app.auth import get_tenant_id, get_site_id, get_current_user, require_permission
 
@@ -864,6 +864,98 @@ def get_department_inventory_report(
     return {
         "departments": dept_names,
         "data": final_data,
-        "generated_at": get_now_ist().strftime("%d-%b-%Y %I:%M %p"),
+        "generated_at": get_now_ist().strftime("%d-%b-%Y %H:%M:%S")
+    }
+
+# ==========================================
+# PENDING GATEPASS RETURNS REPORT
+# ==========================================
+
+@router.get("/pending-gatepass-returns")
+def get_pending_gatepass_returns(
+    from_date: Optional[str] = Query(None, description="From Date (YYYY-MM-DD)"),
+    to_date: Optional[str] = Query(None, description="To Date (YYYY-MM-DD)"),
+    vendor_id: Optional[int] = None,
+    search: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("report_pending_gatepass", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    """Pending Gatepass Returns Report - Returnable items that are not yet received."""
+    query = db.query(
+        GatePass.gate_pass_number,
+        GatePass.created_at.label("gate_pass_date"),
+        Vendor.name.label("vendor_name"),
+        Vendor.code.label("vendor_code"),
+        GatePass.vendor_custom_name,
+        Material.code.label("material_code"),
+        Material.name.label("material_name"),
+        UOM.name.label("uom_name"),
+        GatePassItem.quantity,
+        GatePass.status,
+        GatePass.from_department,
+        GatePass.from_store,
+        GatePass.driver_name,
+        GatePass.vehicle_number
+    ).join(GatePassItem, GatePass.id == GatePassItem.gate_pass_id)\
+     .join(Material, GatePassItem.material_id == Material.id)\
+     .outerjoin(UOM, Material.uom_id == UOM.id)\
+     .outerjoin(Vendor, GatePass.vendor_id == Vendor.id)\
+     .filter(
+        GatePass.tenant_id == tenant_id,
+        GatePass.site_id == site_id,
+        GatePass.gate_pass_type == "Returnable",
+        GatePass.status != "Received"
+    )
+
+    if from_date and to_date:
+        try:
+            dt_from = datetime.strptime(from_date, "%Y-%m-%d").replace(hour=0, minute=0, second=0)
+            dt_to = datetime.strptime(to_date, "%Y-%m-%d").replace(hour=23, minute=59, second=59)
+            query = query.filter(GatePass.created_at >= dt_from, GatePass.created_at <= dt_to)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid date format.")
+
+    if vendor_id:
+        query = query.filter(GatePass.vendor_id == vendor_id)
+        
+    if search:
+        search_term = f"%{search}%"
+        query = query.filter(
+            (GatePass.gate_pass_number.ilike(search_term)) | 
+            (Vendor.name.ilike(search_term)) |
+            (GatePass.vendor_custom_name.ilike(search_term)) |
+            (Material.name.ilike(search_term))
+        )
+
+    results = query.order_by(GatePass.created_at.desc()).all()
+
+    data = []
+    for row in results:
+        vendor_display = row.vendor_custom_name
+        if row.vendor_name:
+            vendor_display = f"{row.vendor_code} - {row.vendor_name}"
+            
+        age_days = (datetime.now().date() - row.gate_pass_date.date()).days if row.gate_pass_date else 0
+
+        data.append({
+            "gate_pass_number": row.gate_pass_number,
+            "gate_pass_date": row.gate_pass_date.strftime("%d-%b-%Y") if row.gate_pass_date else "",
+            "vendor_name": vendor_display or "Unknown",
+            "material_code": row.material_code,
+            "material_name": row.material_name,
+            "uom_name": row.uom_name,
+            "quantity": round(row.quantity or 0, 2),
+            "status": row.status,
+            "from_location": row.from_department or row.from_store or "N/A",
+            "driver_name": row.driver_name,
+            "vehicle_number": row.vehicle_number,
+            "age_days": age_days
+        })
+
+    return {
+        "data": data,
+        "generated_at": get_now_ist().strftime("%d-%b-%Y %H:%M:%S"),
         "generated_by": current_user.full_name
     }

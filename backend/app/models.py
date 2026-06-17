@@ -355,7 +355,7 @@ class Department(Base):
     is_deleted = Column(Boolean, default=False)
     created_at = Column(DateTime, default=_get_now)
     building = relationship("Building", back_populates="departments")
-    __table_args__ = (UniqueConstraint("tenant_id", "building_id", "name", name="uq_dept_per_building"),)
+    __table_args__ = (UniqueConstraint("tenant_id", "institution_id", "name", name="uq_dept_per_institution"),)
 
 class Floor(Base):
     __tablename__ = "floors"

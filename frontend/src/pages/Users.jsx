@@ -48,7 +48,7 @@ export default function Users() {
 
   const selectedTenantId = currentUser?.tenant_id || form.tenant_id;
   const tenantSites = sites.filter(site => !selectedTenantId || site.tenant_id === Number(selectedTenantId));
-  const tenantRoles = roles.filter(role => !selectedTenantId || role.tenant_id === Number(selectedTenantId));
+  const tenantRoles = roles.filter(role => !selectedTenantId || !role.tenant_id || role.tenant_id === Number(selectedTenantId));
   const siteNameById = Object.fromEntries(sites.map(site => [site.id, site.name]));
 
   const filteredUsers = users.filter(u => {
@@ -151,7 +151,7 @@ export default function Users() {
                       setForm({
                         ...emptyForm,
                         ...u,
-                        role_id: u.role_id || '',
+                        role_id: u.role_id ? Number(u.role_id) : '',
                         department: u.department || '',
                         tenant_id: u.tenant_id || '',
                         site_ids: (u.sites || []).map(site => site.site_id),
@@ -193,7 +193,7 @@ export default function Users() {
               <FormControl fullWidth required>
                 <InputLabel>Role</InputLabel>
                 <Select
-                  value={form.role_id || ''}
+                  value={form.role_id !== '' && form.role_id != null ? Number(form.role_id) : ''}
                   label="Role"
                   required
                   onChange={e => {

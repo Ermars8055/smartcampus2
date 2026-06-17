@@ -110,3 +110,51 @@ def send_email_with_attachment(
         error_msg = f"Unexpected error sending email: {e}"
         logger.error(error_msg, exc_info=True)
         return {"success": False, "message": error_msg}
+
+def send_html_email(
+    to_email: str,
+    subject: str,
+    html_body: str,
+) -> dict:
+    """
+    Send an email with HTML body (no attachment).
+    """
+    actual_recipient = TEST_EMAIL_OVERRIDE if TEST_EMAIL_OVERRIDE else to_email
+
+    if not SMTP_USER or not SMTP_PASSWORD:
+        msg = f"SMTP credentials not configured. Email to '{actual_recipient}' was NOT sent."
+        logger.warning(msg)
+        return {"success": False, "message": msg}
+
+    if not actual_recipient:
+        msg = "No recipient email address available."
+        logger.warning(msg)
+        return {"success": False, "message": msg}
+
+    try:
+        msg = MIMEMultipart()
+        msg["From"] = f"{SMTP_FROM_NAME} <{SMTP_FROM_EMAIL}>"
+        msg["To"] = actual_recipient
+        msg["Subject"] = subject
+
+        msg.attach(MIMEText(html_body, "html"))
+
+        logger.info("Sending HTML email to %s", actual_recipient)
+
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=30) as server:
+            server.ehlo()
+            server.starttls()
+            server.ehlo()
+            server.login(SMTP_USER, SMTP_PASSWORD)
+            server.sendmail(SMTP_FROM_EMAIL, [actual_recipient], msg.as_string())
+
+        logger.info("HTML email sent successfully to %s", actual_recipient)
+        return {
+            "success": True,
+            "message": f"Email sent successfully to {actual_recipient}",
+        }
+
+    except Exception as e:
+        error_msg = f"Unexpected error sending HTML email: {e}"
+        logger.error(error_msg, exc_info=True)
+        return {"success": False, "message": error_msg}

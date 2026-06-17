@@ -210,6 +210,15 @@ class User(Base):
     created_at = Column(DateTime, default=_get_now)
     updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)
 
+class PasswordResetToken(Base):
+    __tablename__ = "password_reset_tokens"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    otp = Column(String(10), nullable=False)
+    expires_at = Column(DateTime, nullable=False)
+    created_at = Column(DateTime, default=_get_now)
+    user = relationship("User")
+
 class TenantMembership(Base):
     __tablename__ = "tenant_memberships"
     id = Column(Integer, primary_key=True, index=True)

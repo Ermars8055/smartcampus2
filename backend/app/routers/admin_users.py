@@ -77,8 +77,14 @@ def list_users(
         role_id = None
         sites = []
         
-        # Get the first membership and assignment
-        membership = db.query(TenantMembership).filter(TenantMembership.user_id == u.id).first()
+        # Get the membership for the current tenant context
+        if tenant_id:
+            membership = db.query(TenantMembership).filter(
+                TenantMembership.user_id == u.id,
+                TenantMembership.tenant_id == tenant_id
+            ).first()
+        else:
+            membership = db.query(TenantMembership).filter(TenantMembership.user_id == u.id).first()
         if membership:
             u_tenant_id = membership.tenant_id
             tenant = db.query(Tenant).filter(Tenant.id == membership.tenant_id).first()

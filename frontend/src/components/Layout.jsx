@@ -172,29 +172,29 @@ export default function Layout() {
   const drawer = (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'linear-gradient(180deg, #0F172A 0%, #1E293B 100%)' }}>
       {/* Logo Area */}
-      <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 1.5, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-        <Box
-          component="img"
-          src={logoImg}
-          alt="Eastpoint"
-          sx={{
-            width: 40, height: 40, objectFit: 'contain',
-            filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
-          }}
-        />
-        <Box>
-          <Typography variant="subtitle2" sx={{ color: '#fff', fontWeight: 700, fontSize: '0.85rem', lineHeight: 1.2 }}>
-            Eastpoint
+      <Box sx={{ p: 1.5, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box
+            component="img"
+            src={logoImg}
+            alt="Eastpoint"
+            sx={{
+              width: 36, height: 36, objectFit: 'contain',
+              filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
+            }}
+          />
+          <Typography variant="subtitle2" sx={{ color: '#fff', fontWeight: 700, fontSize: '0.90rem', lineHeight: 1.2, whiteSpace: 'nowrap', letterSpacing: '-0.02em' }}>
+            Eastpoint Smart Campus
           </Typography>
-          <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: '0.65rem' }}>
-            Smart Campus
-          </Typography>
+          {isMobile && (
+            <IconButton onClick={() => setMobileOpen(false)} sx={{ ml: 'auto', color: '#94A3B8', p: 0.5 }}>
+              <ChevronLeft />
+            </IconButton>
+          )}
         </Box>
-        {isMobile && (
-          <IconButton onClick={() => setMobileOpen(false)} sx={{ ml: 'auto', color: '#94A3B8' }}>
-            <ChevronLeft />
-          </IconButton>
-        )}
+        <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: '0.70rem', display: 'block', lineHeight: 1.2, mt: 1, textAlign: 'left', letterSpacing: '-0.01em' }}>
+          Enterprise Materials Governance Platform
+        </Typography>
       </Box>
 
       {/* Navigation */}
@@ -261,30 +261,6 @@ export default function Layout() {
         </List>
       </Box>
 
-      {/* User Info */}
-      <Box sx={{ p: 2, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <Avatar sx={{ width: 32, height: 32, background: 'linear-gradient(135deg, #2563EB, #7C3AED)', fontSize: '0.8rem' }}>
-            {user?.full_name?.charAt(0) || 'U'}
-          </Avatar>
-          <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography variant="caption" sx={{ color: '#E2E8F0', fontWeight: 600, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {user?.full_name}
-            </Typography>
-            <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.65rem' }}>
-              {roles?.join(', ') || 'No Role'}
-            </Typography>
-            <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: '0.65rem', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {tenant?.name || 'Platform Admin'}
-            </Typography>
-            {tenant != null && activeSite && (
-              <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: '0.65rem', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {activeSite.name}
-              </Typography>
-            )}
-          </Box>
-        </Box>
-      </Box>
 
       {/* Attribution */}
       <Box sx={{ p: 2, borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 1.5 }}>
@@ -322,20 +298,13 @@ export default function Layout() {
         {/* Top Bar */}
         <AppBar position="sticky" elevation={0}
           sx={{ '@media print': { display: 'none' }, background: '#fff', borderBottom: '1px solid #E2E8F0', zIndex: 1100 }}>
-          <Toolbar sx={{ gap: 1 }}>
+          <Toolbar variant="dense" sx={{ gap: 1, minHeight: { xs: 48, sm: 48, md: 48 }, '&.MuiToolbar-root': { minHeight: 48 } }}>
             {isMobile && (
-              <IconButton onClick={() => setMobileOpen(true)} sx={{ color: '#334155' }}>
+              <IconButton onClick={() => setMobileOpen(true)} sx={{ color: '#334155', py: 0.5 }}>
                 <MenuIcon />
               </IconButton>
             )}
-            <Box sx={{ flex: 1 }}>
-              <Typography variant="h6" sx={{ color: '#1E3A8A', fontWeight: 700, fontSize: '1.1rem' }}>
-                Eastpoint Smart Campus
-              </Typography>
-              <Typography variant="caption" sx={{ color: '#64748B', mt: -0.5, display: 'block' }}>
-                Enterprise Materials Governance Platform
-              </Typography>
-            </Box>
+            <Box sx={{ flex: 1 }} />
 
             {activeAlerts.length > 0 && (
               <Tooltip title={showMarquee ? "Hide Alerts Banner" : "Show Alerts Banner"}>

@@ -31,6 +31,7 @@ export default function ComplaintDetail() {
   const [technicians, setTechnicians] = useState([]);
   const [selectedTech, setSelectedTech] = useState('');
   const [materialRequired, setMaterialRequired] = useState(false);
+  const [inspectionDetails, setInspectionDetails] = useState('');
   const [resolutionRemarks, setResolutionRemarks] = useState('');
   const [rejectionRemarks, setRejectionRemarks] = useState('');
   const [resolutionImages, setResolutionImages] = useState([]);
@@ -70,7 +71,7 @@ export default function ComplaintDetail() {
   const fetchTechnicians = async () => {
     try {
       const res = await api.get('/api/admin/users');
-      setTechnicians(res.data); // Assuming all users can be assigned for now
+      setTechnicians(res.data.filter(t => t.role_name && t.role_name.toLowerCase().includes('technician')));
     } catch (error) {
       console.error('Failed to fetch technicians', error);
     }
@@ -109,7 +110,10 @@ export default function ComplaintDetail() {
   const handleInspect = async () => {
     setActionLoading(true);
     try {
-      await api.post(`/api/complaints/${id}/inspect`, { material_required: materialRequired });
+      await api.post(`/api/complaints/${id}/inspect`, { 
+        material_required: materialRequired,
+        inspection_details: inspectionDetails 
+      });
       setSnackbar({ open: true, message: 'Inspection completed', severity: 'success' });
       setInspectDialogOpen(false);
       
@@ -315,6 +319,12 @@ export default function ComplaintDetail() {
                 <Typography variant="caption" color="textSecondary">Individual Detailed</Typography>
                 <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>{complaint.individual_detailed || '-'}</Typography>
               </Grid>
+              {complaint.inspection_details && (
+                <Grid item xs={12}>
+                  <Typography variant="caption" color="textSecondary">Inspection Details</Typography>
+                  <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>{complaint.inspection_details}</Typography>
+                </Grid>
+              )}
             </Grid>
           </Paper>
 
@@ -462,6 +472,16 @@ export default function ComplaintDetail() {
         <DialogTitle>Start Inspection</DialogTitle>
         <DialogContent>
           <Typography variant="body2" sx={{ mb: 2 }}>Have you inspected the issue? Is additional material required to fix this?</Typography>
+          <TextField
+            fullWidth
+            label="Inspection Details"
+            placeholder="Type what was inspected and what was found..."
+            multiline
+            rows={3}
+            value={inspectionDetails}
+            onChange={(e) => setInspectionDetails(e.target.value)}
+            sx={{ mb: 2 }}
+          />
           <FormControlLabel
             control={<Switch checked={materialRequired} onChange={(e) => setMaterialRequired(e.target.checked)} />}
             label="Material Required"

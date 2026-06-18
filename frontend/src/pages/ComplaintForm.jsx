@@ -4,10 +4,11 @@ import {
   Autocomplete, FormControl, InputLabel, Select, MenuItem
 } from '@mui/material';
 import { ArrowBack, PhotoCamera, Close, CloudUpload } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 
 export default function ComplaintForm() {
+  const { id } = useParams();
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
 
@@ -42,30 +43,68 @@ export default function ComplaintForm() {
       const uniqueDepts = Array.from(new Set(fetchedDepts.map(d => d.name)));
       if (uniqueDepts.length === 1) deptName = uniqueDepts[0];
 
-      if (instId || deptName) {
-        setFormData(prev => ({ ...prev, institution_id: instId, department_name: deptName }));
-        if (deptName) {
-          // Trigger the room fetch
-          api.get(`/api/rooms?department_name=${encodeURIComponent(deptName)}`).then(r => {
-            const fetchedRooms = r.data || [];
-            const uniqueBuildings = new Map();
-            const uniqueFloors = new Map();
-            fetchedRooms.forEach(room => {
-              if (room.building_id && room.building_name) uniqueBuildings.set(room.building_id, { id: room.building_id, name: room.building_name });
-              if (room.floor_id && room.floor_name) uniqueFloors.set(room.floor_id, { id: room.floor_id, name: room.floor_name, building_id: room.building_id });
-            });
-            const masterDepts = fetchedDepts.filter(d => d.name === deptName);
-            masterDepts.forEach(d => {
-              if (d.building_id && d.building_name) uniqueBuildings.set(d.building_id, { id: d.building_id, name: d.building_name });
-            });
-            setBuildings(Array.from(uniqueBuildings.values()));
-            setFloors(Array.from(uniqueFloors.values()));
-            setRooms(fetchedRooms);
-          }).catch(() => {});
+      if (id) {
+        api.get(`/api/complaints/${id}`).then(res => {
+          const c = res.data;
+          setFormData(prev => ({
+            ...prev,
+            institution_id: c.institution_id || '',
+            department_name: c.department_name || '',
+            building_id: c.building_id || '',
+            floor_id: c.floor_id || '',
+            room_id: c.room_id || '',
+            location: c.location || '',
+            nature_of_complaint: c.nature_of_complaint || '',
+            individual_detailed: c.individual_detailed || '',
+            name_and_trade: c.name_and_trade || ''
+          }));
+          
+          if (c.department_name) {
+            api.get(`/api/rooms?department_name=${encodeURIComponent(c.department_name)}`).then(r => {
+              const fetchedRooms = r.data || [];
+              const uniqueBuildings = new Map();
+              const uniqueFloors = new Map();
+              fetchedRooms.forEach(room => {
+                if (room.building_id && room.building_name) uniqueBuildings.set(room.building_id, { id: room.building_id, name: room.building_name });
+                if (room.floor_id && room.floor_name) uniqueFloors.set(room.floor_id, { id: room.floor_id, name: room.floor_name, building_id: room.building_id });
+              });
+              const masterDepts = fetchedDepts.filter(d => d.name === c.department_name);
+              masterDepts.forEach(d => {
+                if (d.building_id && d.building_name) uniqueBuildings.set(d.building_id, { id: d.building_id, name: d.building_name });
+              });
+              setBuildings(Array.from(uniqueBuildings.values()));
+              setFloors(Array.from(uniqueFloors.values()));
+              setRooms(fetchedRooms);
+            }).catch(() => {});
+          }
+        }).catch(err => {
+          setSnackbar({ open: true, message: 'Failed to fetch complaint details', severity: 'error' });
+        });
+      } else {
+        if (instId || deptName) {
+          setFormData(prev => ({ ...prev, institution_id: instId, department_name: deptName }));
+          if (deptName) {
+            api.get(`/api/rooms?department_name=${encodeURIComponent(deptName)}`).then(r => {
+              const fetchedRooms = r.data || [];
+              const uniqueBuildings = new Map();
+              const uniqueFloors = new Map();
+              fetchedRooms.forEach(room => {
+                if (room.building_id && room.building_name) uniqueBuildings.set(room.building_id, { id: room.building_id, name: room.building_name });
+                if (room.floor_id && room.floor_name) uniqueFloors.set(room.floor_id, { id: room.floor_id, name: room.floor_name, building_id: room.building_id });
+              });
+              const masterDepts = fetchedDepts.filter(d => d.name === deptName);
+              masterDepts.forEach(d => {
+                if (d.building_id && d.building_name) uniqueBuildings.set(d.building_id, { id: d.building_id, name: d.building_name });
+              });
+              setBuildings(Array.from(uniqueBuildings.values()));
+              setFloors(Array.from(uniqueFloors.values()));
+              setRooms(fetchedRooms);
+            }).catch(() => {});
+          }
         }
       }
     });
-  }, []);
+  }, [id]);
 
   const filteredDepartments = formData.institution_id 
     ? Array.from(new Set(allDepartments.filter(d => d.institution_id === formData.institution_id).map(d => d.name)))
@@ -170,8 +209,13 @@ export default function ComplaintForm() {
       delete payload.institution_id;
       delete payload.floor_id; // floor_id is also not in backend schema, just in case
 
-      await api.post('/api/complaints', payload);
-      setSnackbar({ open: true, message: 'Complaint Raised Successfully', severity: 'success' });
+      if (id) {
+        await api.put(`/api/complaints/${id}`, payload);
+        setSnackbar({ open: true, message: 'Complaint Updated Successfully', severity: 'success' });
+      } else {
+        await api.post('/api/complaints', payload);
+        setSnackbar({ open: true, message: 'Complaint Raised Successfully', severity: 'success' });
+      }
       setTimeout(() => navigate('/complaints'), 1500);
 
     } catch (error) {
@@ -188,7 +232,7 @@ export default function ComplaintForm() {
         <IconButton onClick={() => navigate('/complaints')}>
           <ArrowBack />
         </IconButton>
-        <Typography variant="h5" sx={{ fontWeight: 600 }}>Raise New Complaint</Typography>
+        <Typography variant="h5" sx={{ fontWeight: 600 }}>{id ? 'Edit Complaint' : 'Raise New Complaint'}</Typography>
       </Box>
 
       <Paper sx={{ p: { xs: 2, md: 4 } }}>

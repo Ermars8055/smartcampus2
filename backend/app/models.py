@@ -704,6 +704,7 @@ class Complaint(Base):
     
     # New workflow fields
     material_required = Column(Boolean, default=False)
+    inspection_details = Column(Text, nullable=True)
     verified_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     verified_at = Column(DateTime, nullable=True)
     rejection_remarks = Column(Text, nullable=True)

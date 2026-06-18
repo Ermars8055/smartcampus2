@@ -1688,6 +1688,7 @@ class ComplaintBase(BaseModel):
     status: str = "Open"
     assigned_to_id: Optional[int] = None
     resolution_remarks: Optional[str] = None
+    inspection_details: Optional[str] = None
 
 class ComplaintCreate(BaseModel):
     docket_no: Optional[str] = None
@@ -1714,6 +1715,7 @@ class ComplaintAssign(BaseModel):
 
 class ComplaintInspect(BaseModel):
     material_required: bool = False
+    inspection_details: Optional[str] = None
 
 class ComplaintResolve(BaseModel):
     resolution_remarks: Optional[str] = None

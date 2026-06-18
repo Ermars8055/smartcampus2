@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box, Typography, Paper, Table, TableBody, TableCell, TableContainer,
-  TableHead, TableRow, Button, IconButton, Chip, TextField, MenuItem, Select, FormControl, InputLabel, Tooltip
+  TableHead, TableRow, Button, IconButton, Chip, TextField, MenuItem, Select, FormControl, InputLabel, Tooltip,
+  Dialog, DialogTitle, DialogContent, DialogActions
 } from '@mui/material';
-import { Add, Visibility, Edit } from '@mui/icons-material';
+import { Add, Edit, Archive } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -15,6 +16,9 @@ export default function ComplaintsList() {
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
   const { hasPermission } = useAuth();
+
+  const [shortCloseDialog, setShortCloseDialog] = useState({ open: false, complaintId: null });
+  const [shortCloseRemarks, setShortCloseRemarks] = useState('');
 
   useEffect(() => {
     fetchComplaints();
@@ -46,6 +50,20 @@ export default function ComplaintsList() {
       case 'Reopened': return 'error';
       case 'Rejected': return 'error';
       default: return 'default';
+    }
+  };
+
+  const handleShortClose = async () => {
+    try {
+      await api.put(`/api/complaints/${shortCloseDialog.complaintId}`, {
+        status: 'Closed',
+        resolution_remarks: shortCloseRemarks
+      });
+      setShortCloseDialog({ open: false, complaintId: null });
+      setShortCloseRemarks('');
+      fetchComplaints();
+    } catch (error) {
+      console.error('Failed to short close complaint', error);
     }
   };
 
@@ -116,7 +134,12 @@ export default function ComplaintsList() {
               </TableRow>
             ) : (
               filteredComplaints.map((row) => (
-                <TableRow key={row.id} hover>
+                <TableRow 
+                  key={row.id} 
+                  hover 
+                  onClick={() => navigate(`/complaints/${row.id}`)}
+                  sx={{ cursor: 'pointer' }}
+                >
                   <TableCell sx={{ fontWeight: 500 }}>{row.docket_no}</TableCell>
                   <TableCell>
                     {dayjs(row.complaint_date).format('DD MMM YYYY')} {row.complaint_time}
@@ -130,10 +153,22 @@ export default function ComplaintsList() {
                   <TableCell>
                     <Chip label={row.status} size="small" color={getStatusColor(row.status)} />
                   </TableCell>
-                  <TableCell align="right">
-                    <Tooltip title="View Details">
-                      <IconButton size="small" onClick={() => navigate(`/complaints/${row.id}`)} sx={{ color: '#2563EB' }}>
-                        <Visibility fontSize="small" />
+                  <TableCell align="right" onClick={(e) => e.stopPropagation()}>
+                    <Tooltip title="Edit">
+                      <span>
+                        <IconButton 
+                          size="small" 
+                          onClick={() => navigate(`/complaints/edit/${row.id}`)} 
+                          sx={{ color: '#2563EB' }}
+                          disabled={!['Registered', 'Open', 'Reopened'].includes(row.status)}
+                        >
+                          <Edit fontSize="small" />
+                        </IconButton>
+                      </span>
+                    </Tooltip>
+                    <Tooltip title="Short Close">
+                      <IconButton size="small" onClick={() => setShortCloseDialog({ open: true, complaintId: row.id })} sx={{ color: '#d97706' }}>
+                        <Archive fontSize="small" />
                       </IconButton>
                     </Tooltip>
                   </TableCell>
@@ -143,6 +178,27 @@ export default function ComplaintsList() {
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/* Short Close Dialog */}
+      <Dialog open={shortCloseDialog.open} onClose={() => setShortCloseDialog({ open: false, complaintId: null })} maxWidth="sm" fullWidth>
+        <DialogTitle>Short Close Complaint</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ mb: 2 }}>Please provide a reason for short closing this complaint.</Typography>
+          <TextField
+            autoFocus
+            label="Resolution Remarks"
+            fullWidth
+            multiline
+            rows={3}
+            value={shortCloseRemarks}
+            onChange={(e) => setShortCloseRemarks(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions sx={{ p: 2, pt: 0 }}>
+          <Button onClick={() => setShortCloseDialog({ open: false, complaintId: null })}>Cancel</Button>
+          <Button onClick={handleShortClose} variant="contained" color="error" disabled={!shortCloseRemarks}>Short Close</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

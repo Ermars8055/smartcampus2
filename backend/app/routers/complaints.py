@@ -128,8 +128,15 @@ def get_complaints(
         Complaint.is_deleted == False
     )
     
-    if not getattr(current_user, "_is_platform_admin", False):
-        query = query.filter(Complaint.created_by_id == current_user.id)
+    is_platform_admin = getattr(current_user, "_is_platform_admin", False)
+    user_roles = getattr(current_user, "_roles", [])
+    is_technician = any('technician' in r.lower() for r in user_roles)
+
+    if not is_platform_admin:
+        if is_technician:
+            query = query.filter(Complaint.assigned_to_id == current_user.id)
+        else:
+            query = query.filter(Complaint.created_by_id == current_user.id)
     
     if status:
         query = query.filter(Complaint.status == status)
@@ -207,6 +214,23 @@ def assign_complaint(
 
     complaint.assigned_to_id = payload.assigned_to_id
     complaint.status = ComplaintStatus.ASSIGNED.value
+    
+    from app.models import Alert
+    alert = Alert(
+        tenant_id=tenant_id,
+        site_id=site_id,
+        alert_type="Complaint Assigned",
+        severity="Info",
+        title=f"Complaint Assigned: {complaint.docket_no}",
+        message=f"You have been assigned to complaint {complaint.docket_no}. Nature of complaint: {complaint.nature_of_complaint}",
+        reference_type="ComplaintAssigned",
+        reference_id=complaint.id,
+        user_id=payload.assigned_to_id,
+        is_read=False,
+        is_resolved=False
+    )
+    db.add(alert)
+    
     db.commit()
     db.refresh(complaint)
     return _enrich(complaint)
@@ -233,6 +257,9 @@ def inspect_complaint(
         )
 
     complaint.material_required = payload.material_required
+    if payload.inspection_details is not None:
+        complaint.inspection_details = payload.inspection_details
+
     if payload.material_required:
         complaint.status = ComplaintStatus.MATERIAL_PENDING.value
     else:

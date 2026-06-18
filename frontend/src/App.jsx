@@ -155,6 +155,7 @@ function AppRoutes() {
         <Route path="alerts" element={<Alerts />} />
         <Route path="complaints" element={<ComplaintsList />} />
         <Route path="complaints/new" element={<ComplaintForm />} />
+        <Route path="complaints/edit/:id" element={<ComplaintForm />} />
         <Route path="complaints/:id" element={<ComplaintDetail />} />
 
         <Route path="finance/reports/pending-invoices" element={<VendorPendingInvoicesReport />} />

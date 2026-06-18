@@ -368,6 +368,22 @@ def resolve_complaint(
         )
         db.add(new_img)
 
+    from app.models import Alert
+    alert = Alert(
+        tenant_id=tenant_id,
+        site_id=site_id,
+        alert_type="Complaint Resolved",
+        severity="Success",
+        title="Action Required: Verify Complaint Resolution",
+        message=f"Complaint {complaint.docket_no} has been resolved by {current_user.full_name}. Please verify and close.",
+        reference_type="ComplaintResolved",
+        reference_id=complaint.id,
+        user_id=complaint.created_by_id,
+        is_read=False,
+        is_resolved=False
+    )
+    db.add(alert)
+
     db.commit()
     db.refresh(complaint)
     return _enrich(complaint)

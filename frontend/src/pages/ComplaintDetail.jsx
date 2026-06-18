@@ -5,14 +5,16 @@ import {
 } from '@mui/material';
 import { ArrowBack, CheckCircle, Assignment, PhotoCamera, Close, AddShoppingCart, Build, Search, VerifiedUser, Cancel } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
-import api from '../services/api';
+import api, { getFileUrl } from '../services/api';
 import dayjs from 'dayjs';
+import { useAuth } from '../context/AuthContext';
 
 const COMPLAINT_STEPS = ['Registered', 'Assigned', 'Under Inspection', 'In Progress', 'Resolved', 'Closed'];
 
 export default function ComplaintDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const fileInputRef = useRef(null);
 
   const [complaint, setComplaint] = useState(null);
@@ -230,6 +232,9 @@ export default function ComplaintDetail() {
   const preRepairImages = complaint.images.filter(img => !img.is_resolution_image);
   const postRepairImages = complaint.images.filter(img => img.is_resolution_image);
 
+  const canStartRepair = materialIndents.length === 0 || (materialIssues.length > 0 && materialIssues.every(issue => issue.is_acknowledged));
+  const isCreator = user && complaint && user.id === complaint.created_by_id;
+
   return (
     <Box sx={{ maxWidth: 1000, mx: 'auto', pb: 5 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
@@ -272,9 +277,13 @@ export default function ComplaintDetail() {
             )}
 
             {complaint.status === 'Material Pending' && (
-              <Button variant="contained" color="warning" startIcon={<Build />} onClick={handleStartRepair}>
-                Material Procured - Start Repair
-              </Button>
+              <Tooltip title={!canStartRepair ? "Please wait for material to be issued and acknowledge receipt before starting repair." : ""}>
+                <span>
+                  <Button variant="contained" color="warning" startIcon={<Build />} onClick={handleStartRepair} disabled={!canStartRepair}>
+                    Material Procured - Start Repair
+                  </Button>
+                </span>
+              </Tooltip>
             )}
 
             {(complaint.status === 'In Progress' || (complaint.status === 'Open' && complaint.assigned_to_id)) && (
@@ -285,12 +294,20 @@ export default function ComplaintDetail() {
 
             {complaint.status === 'Resolved' && (
               <>
-                <Button variant="contained" color="success" startIcon={<VerifiedUser />} onClick={() => setVerifyDialogOpen(true)}>
-                  Verify & Close
-                </Button>
-                <Button variant="outlined" color="error" startIcon={<Cancel />} onClick={() => setRejectDialogOpen(true)}>
-                  Reject Resolution
-                </Button>
+                <Tooltip title={!isCreator ? "Only the person who raised the complaint can verify or reject its resolution." : ""}>
+                  <span>
+                    <Button variant="contained" color="success" startIcon={<VerifiedUser />} onClick={() => setVerifyDialogOpen(true)} disabled={!isCreator}>
+                      Verify & Close
+                    </Button>
+                  </span>
+                </Tooltip>
+                <Tooltip title={!isCreator ? "Only the person who raised the complaint can verify or reject its resolution." : ""}>
+                  <span>
+                    <Button variant="outlined" color="error" startIcon={<Cancel />} onClick={() => setRejectDialogOpen(true)} disabled={!isCreator} sx={{ ml: 1 }}>
+                      Reject Resolution
+                    </Button>
+                  </span>
+                </Tooltip>
               </>
             )}
             
@@ -344,7 +361,7 @@ export default function ComplaintDetail() {
                 {preRepairImages.map((img) => (
                   <Grid item xs={6} sm={4} key={img.id}>
                     <Box sx={{ position: 'relative', pt: '100%', borderRadius: 1, overflow: 'hidden', border: '1px solid #E2E8F0' }}>
-                      <img src={api.defaults.baseURL + img.image_url} alt="Pre Repair" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <img src={getFileUrl(img.image_url)} alt="Pre Repair" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
                     </Box>
                   </Grid>
                 ))}
@@ -363,7 +380,7 @@ export default function ComplaintDetail() {
                   {postRepairImages.map((img) => (
                     <Grid item xs={6} sm={4} key={img.id}>
                       <Box sx={{ position: 'relative', pt: '100%', borderRadius: 1, overflow: 'hidden', border: '1px solid #BBF7D0' }}>
-                        <img src={api.defaults.baseURL + img.image_url} alt="Post Repair" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <img src={getFileUrl(img.image_url)} alt="Post Repair" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
                       </Box>
                     </Grid>
                   ))}
@@ -381,8 +398,22 @@ export default function ComplaintDetail() {
         </Grid>
 
         <Grid item xs={12} md={4}>
-          {/* Material Indents */}
-          <Paper sx={{ p: 3, mb: 3 }}>
+          {(complaint.status === 'Registered' || complaint.status === 'Open' || complaint.status === 'Assigned') ? (
+            <Paper sx={{ p: 3, mb: 3, bgcolor: '#F8FAFC', textAlign: 'center', border: '1px solid #E2E8F0' }}>
+              <Typography variant="body2" color="textSecondary">
+                Material requirement will be determined during inspection.
+              </Typography>
+            </Paper>
+          ) : !complaint.material_required ? (
+            <Paper sx={{ p: 3, mb: 3, bgcolor: '#F8FAFC', textAlign: 'center', border: '1px solid #E2E8F0' }}>
+              <Typography variant="body2" color="textSecondary">
+                Material is not required for this complaint.
+              </Typography>
+            </Paper>
+          ) : (
+            <>
+              {/* Material Indents */}
+              <Paper sx={{ p: 3, mb: 3 }}>
              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                <Typography variant="h6" sx={{ color: '#1E3A8A' }}>Material Indents</Typography>
                <Tooltip title="Create Indent">
@@ -452,6 +483,8 @@ export default function ComplaintDetail() {
                </Box>
              )}
           </Paper>
+          </>
+          )}
         </Grid>
       </Grid>
 

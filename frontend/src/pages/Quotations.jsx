@@ -19,7 +19,7 @@ import {
   EditNote as ProcessIcon, Balance as CompareIcon, FactCheck as ApproveIcon, ShoppingCart as OrderIcon, Send as BlastIcon,
   ArrowDropUp, ArrowDropDown, Search
 } from '@mui/icons-material';
-import api from '../services/api';
+import api, { getFileUrl } from '../services/api';
 import { formatDate } from '../utils/dateUtils';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
@@ -1802,7 +1802,7 @@ const Quotations = () => {
                     <Box>
                       <Typography variant="caption" color="text.secondary">Attachment</Typography>
                       <Box>
-                        <Button size="small" startIcon={<DownloadIcon />} onClick={() => window.open(`${api.defaults.baseURL}/${selectedSubmittedQuote.attachment_path}`, '_blank')}>
+                        <Button size="small" startIcon={<DownloadIcon />} onClick={() => window.open(getFileUrl(selectedSubmittedQuote.attachment_path), '_blank')}>
                           View Quotation Copy
                         </Button>
                       </Box>

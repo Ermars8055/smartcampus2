@@ -51,15 +51,24 @@ export default function ComplaintDetail() {
       const res = await api.get(`/api/complaints/${id}`);
       setComplaint(res.data);
       
-      const indentsRes = await api.get('/api/indents', { params: { complaint_id: id } });
-      const fetchedIndents = indentsRes.data || [];
-      setMaterialIndents(fetchedIndents);
-
-      const indentIds = fetchedIndents.map(i => i.id);
+      let fetchedIndents = [];
+      let indentIds = [];
+      try {
+        const indentsRes = await api.get('/api/indents', { params: { complaint_id: id } });
+        fetchedIndents = indentsRes.data || [];
+        setMaterialIndents(fetchedIndents);
+        indentIds = fetchedIndents.map(i => i.id);
+      } catch (err) {
+        console.warn('Failed to fetch indents or no permission', err);
+      }
       
-      const issuesRes = await api.get('/api/issues');
-      // If MaterialIssue has complaint_id we use it, otherwise match via indent_id
-      setMaterialIssues(issuesRes.data.filter(i => i.complaint_id === parseInt(id) || indentIds.includes(i.indent_id)));
+      try {
+        const issuesRes = await api.get('/api/issues');
+        // If MaterialIssue has complaint_id we use it, otherwise match via indent_id
+        setMaterialIssues(issuesRes.data.filter(i => i.complaint_id === parseInt(id) || indentIds.includes(i.indent_id)));
+      } catch (err) {
+        console.warn('Failed to fetch issues or no permission', err);
+      }
     } catch (error) {
       console.error('Failed to fetch details', error);
       setSnackbar({ open: true, message: 'Failed to fetch complaint details', severity: 'error' });

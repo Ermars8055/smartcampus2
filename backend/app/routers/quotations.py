@@ -365,7 +365,7 @@ def enter_vendor_quotation(
         file_path = os.path.join(upload_dir, filename)
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
-        attachment_path = f"/{file_path}"
+        attachment_path = f"/api/{file_path}"
         
     q_date = datetime.strptime(quotation_date, "%Y-%m-%d").date() if quotation_date else None
     

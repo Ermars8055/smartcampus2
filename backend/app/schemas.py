@@ -1708,6 +1708,14 @@ class ComplaintUpdate(BaseModel):
     assigned_to_id: Optional[int] = None
     resolution_remarks: Optional[str] = None
     resolution_image_urls: List[str] = []
+    department_name: Optional[str] = None
+    building_id: Optional[int] = None
+    room_id: Optional[int] = None
+    location: Optional[str] = None
+    nature_of_complaint: Optional[str] = None
+    individual_detailed: Optional[str] = None
+    name_and_trade: Optional[str] = None
+    image_urls: List[str] = []
 
 # New workflow-specific schemas
 class ComplaintAssign(BaseModel):

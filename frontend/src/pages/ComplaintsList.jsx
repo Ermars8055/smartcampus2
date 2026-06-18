@@ -119,6 +119,7 @@ export default function ComplaintsList() {
             <TableRow>
               <TableCell>Docket No</TableCell>
               <TableCell>Date & Time</TableCell>
+              <TableCell>Institution</TableCell>
               <TableCell>Location / Dept</TableCell>
               <TableCell>Nature of Complaint</TableCell>
               <TableCell>Status</TableCell>
@@ -128,7 +129,7 @@ export default function ComplaintsList() {
           <TableBody>
             {filteredComplaints.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
+                <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
                   <Typography variant="body2" color="textSecondary">No complaints found</Typography>
                 </TableCell>
               </TableRow>
@@ -143,6 +144,9 @@ export default function ComplaintsList() {
                   <TableCell sx={{ fontWeight: 500 }}>{row.docket_no}</TableCell>
                   <TableCell>
                     {dayjs(row.complaint_date).format('DD MMM YYYY')} {row.complaint_time}
+                  </TableCell>
+                  <TableCell>
+                    {row.institution_name || '-'}
                   </TableCell>
                   <TableCell>
                     {row.building_name ? `${row.building_name} - ${row.room_name || ''}` : row.location || row.department_name}

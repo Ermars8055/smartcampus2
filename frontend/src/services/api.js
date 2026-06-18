@@ -26,7 +26,14 @@ export const getFileUrl = (path) => {
   if (!path) return '';
   if (path.startsWith('http')) return path;
   // Ensure the path starts with /
-  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  let normalizedPath = path.startsWith('/') ? path : `/${path}`;
+
+  // Forward compatibility for Nginx reverse proxy:
+  // Ensure that static upload URLs go through the /api/ route
+  if (normalizedPath.startsWith('/uploads')) {
+     normalizedPath = `/api${normalizedPath}`;
+  }
+
   return `${API_BASE}${normalizedPath}`;
 };
 

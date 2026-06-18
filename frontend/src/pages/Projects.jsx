@@ -20,6 +20,7 @@ export default function Projects() {
   const [rooms, setRooms] = useState([]);
   
   const [dialog, setDialog] = useState('');
+  const [deleteConfirm, setDeleteConfirm] = useState({ open: false, type: '', id: null });
   const [form, setForm] = useState({});
   const [tab, setTab] = useState(0);
 
@@ -83,12 +84,16 @@ export default function Projects() {
     } catch (err) { alert(err.response?.data?.detail || 'Error saving data'); }
   };
 
-  const handleDelete = async (type, id) => {
-    if (!window.confirm(`Are you sure you want to delete this ${type}?`)) return;
+  const handleDelete = (type, id) => {
+    setDeleteConfirm({ open: true, type, id });
+  };
+
+  const executeDelete = async () => {
     try {
-      await api.delete(`/api/${type}s/${id}`);
+      await api.delete(`/api/${deleteConfirm.type}s/${deleteConfirm.id}`);
       load();
     } catch (err) { alert(err.response?.data?.detail || 'Error deleting'); }
+    setDeleteConfirm({ open: false, type: '', id: null });
   };
 
   return (
@@ -561,6 +566,19 @@ export default function Projects() {
           <Button onClick={() => setDialog('')} sx={{ color: '#64748B', fontWeight: 700, textTransform: 'none' }}>Cancel</Button>
           <Button variant="contained" onClick={save} sx={{ borderRadius: '12px', px: 4, fontWeight: 700, textTransform: 'none', bgcolor: '#1E3A8A', '&:hover': { bgcolor: '#172554' } }}>
             {form.id ? 'Save Changes' : `Create`}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={deleteConfirm.open} onClose={() => setDeleteConfirm({ open: false, type: '', id: null })} maxWidth="xs" fullWidth PaperProps={{ sx: { borderRadius: '16px' } }}>
+        <DialogTitle sx={{ fontWeight: 700 }}>Confirm Deletion</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to delete this {deleteConfirm.type}? This action cannot be undone.</Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button onClick={() => setDeleteConfirm({ open: false, type: '', id: null })} sx={{ color: '#64748B', fontWeight: 600 }}>Cancel</Button>
+          <Button onClick={executeDelete} variant="contained" color="error" sx={{ borderRadius: '8px', fontWeight: 600, px: 3 }}>
+            Delete
           </Button>
         </DialogActions>
       </Dialog>

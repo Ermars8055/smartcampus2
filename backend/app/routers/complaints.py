@@ -170,12 +170,45 @@ def update_complaint(
 ):
     complaint = _get_complaint(db, complaint_id, tenant_id, site_id)
 
-    if complaint_in.status:
-        complaint.status = complaint_in.status
-    if complaint_in.assigned_to_id is not None:
-        complaint.assigned_to_id = complaint_in.assigned_to_id
-    if complaint_in.resolution_remarks is not None:
-        complaint.resolution_remarks = complaint_in.resolution_remarks
+    update_data = complaint_in.dict(exclude_unset=True)
+    for field, value in update_data.items():
+        if field not in ['image_urls', 'resolution_image_urls']:
+            setattr(complaint, field, value)
+
+    if 'image_urls' in update_data:
+        provided_urls = update_data['image_urls']
+        existing_images = db.query(ComplaintImage).filter(
+            ComplaintImage.complaint_id == complaint.id,
+            ComplaintImage.is_resolution_image == False
+        ).all()
+        
+        existing_urls = [img.image_url for img in existing_images]
+        
+        # Delete images not in provided_urls
+        for img in existing_images:
+            if not any(p_url.endswith(img.image_url) for p_url in provided_urls):
+                db.delete(img)
+                
+        # Add new images
+        from urllib.parse import urlparse
+        for p_url in provided_urls:
+            if not any(p_url.endswith(e_url) for e_url in existing_urls):
+                path = urlparse(p_url).path
+                new_img = ComplaintImage(
+                    complaint_id=complaint.id,
+                    image_url=path,
+                    is_resolution_image=False
+                )
+                db.add(new_img)
+            
+    if complaint_in.resolution_image_urls:
+        for img_url in complaint_in.resolution_image_urls:
+            new_img = ComplaintImage(
+                complaint_id=complaint.id,
+                image_url=img_url,
+                is_resolution_image=True
+            )
+            db.add(new_img)
 
     db.commit()
     db.refresh(complaint)

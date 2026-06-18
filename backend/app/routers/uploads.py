@@ -53,5 +53,5 @@ async def upload_file(
         f.write(contents)
 
     # Return the URL path (served by StaticFiles mount)
-    url = f"/{file_path}"
+    url = f"/api/{file_path}"
     return {"url": url, "filename": file.filename, "size": len(contents)}

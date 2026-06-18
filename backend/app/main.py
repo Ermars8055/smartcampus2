@@ -64,7 +64,7 @@ app.add_middleware(
 
 # Static files for uploads
 os.makedirs("uploads", exist_ok=True)
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+app.mount("/api/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 # Register routers
 app.include_router(auth.router)

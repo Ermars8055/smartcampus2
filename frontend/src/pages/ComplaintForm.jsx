@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   Box, Typography, Paper, Grid, TextField, Button, IconButton, Divider, Snackbar, Alert, CircularProgress,
-  Autocomplete, FormControl, InputLabel, Select, MenuItem
+  Autocomplete, FormControl, InputLabel, Select, MenuItem, Dialog, DialogTitle, DialogContent
 } from '@mui/material';
 import { ArrowBack, PhotoCamera, Close, CloudUpload } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
-import api from '../services/api';
+import api, { getFileUrl } from '../services/api';
 
 export default function ComplaintForm() {
   const { id } = useParams();
@@ -13,6 +13,7 @@ export default function ComplaintForm() {
   const fileInputRef = useRef(null);
 
   const [formData, setFormData] = useState({
+    docket_no: '',
     institution_id: '',
     department_name: '',
     building_id: '',
@@ -26,6 +27,7 @@ export default function ComplaintForm() {
 
   const [institutions, setInstitutions] = useState([]);
   const [allDepartments, setAllDepartments] = useState([]);
+  const [allBuildings, setAllBuildings] = useState([]);
   const [buildings, setBuildings] = useState([]);
   const [floors, setFloors] = useState([]);
   const [rooms, setRooms] = useState([]);
@@ -33,10 +35,12 @@ export default function ComplaintForm() {
   useEffect(() => {
     let fetchedInsts = [];
     let fetchedDepts = [];
+    let fetchedBldgs = [];
 
     Promise.all([
       api.get('/api/institutions').then(r => { fetchedInsts = r.data; setInstitutions(r.data); }).catch(() => setInstitutions([])),
-      api.get('/api/departments').then(r => { fetchedDepts = r.data; setAllDepartments(r.data); }).catch(() => setAllDepartments([]))
+      api.get('/api/departments').then(r => { fetchedDepts = r.data; setAllDepartments(r.data); }).catch(() => setAllDepartments([])),
+      api.get('/api/buildings').then(r => { fetchedBldgs = r.data; setAllBuildings(r.data); }).catch(() => setAllBuildings([]))
     ]).then(() => {
       let instId = fetchedInsts.length === 1 ? fetchedInsts[0].id : '';
       let deptName = '';
@@ -48,6 +52,7 @@ export default function ComplaintForm() {
           const c = res.data;
           setFormData(prev => ({
             ...prev,
+            docket_no: c.docket_no || '',
             institution_id: c.institution_id || '',
             department_name: c.department_name || '',
             building_id: c.building_id || '',
@@ -58,6 +63,12 @@ export default function ComplaintForm() {
             individual_detailed: c.individual_detailed || '',
             name_and_trade: c.name_and_trade || ''
           }));
+          
+          if (c.images && c.images.length > 0) {
+            const existingUrls = c.images.filter(img => !img.is_resolution_image).map(img => getFileUrl(img.image_url));
+            setImagePreviewUrls(existingUrls);
+            setImages(new Array(existingUrls.length).fill(null));
+          }
           
           if (c.department_name) {
             api.get(`/api/rooms?department_name=${encodeURIComponent(c.department_name)}`).then(r => {
@@ -71,6 +82,11 @@ export default function ComplaintForm() {
               const masterDepts = fetchedDepts.filter(d => d.name === c.department_name);
               masterDepts.forEach(d => {
                 if (d.building_id && d.building_name) uniqueBuildings.set(d.building_id, { id: d.building_id, name: d.building_name });
+              });
+              fetchedBldgs.forEach(b => {
+                if (b.department_name === c.department_name && (!c.institution_id || b.institution_id === c.institution_id)) {
+                  uniqueBuildings.set(b.id, { id: b.id, name: b.name });
+                }
               });
               setBuildings(Array.from(uniqueBuildings.values()));
               setFloors(Array.from(uniqueFloors.values()));
@@ -95,6 +111,11 @@ export default function ComplaintForm() {
               const masterDepts = fetchedDepts.filter(d => d.name === deptName);
               masterDepts.forEach(d => {
                 if (d.building_id && d.building_name) uniqueBuildings.set(d.building_id, { id: d.building_id, name: d.building_name });
+              });
+              fetchedBldgs.forEach(b => {
+                if (b.department_name === deptName && (!instId || b.institution_id === instId)) {
+                  uniqueBuildings.set(b.id, { id: b.id, name: b.name });
+                }
               });
               setBuildings(Array.from(uniqueBuildings.values()));
               setFloors(Array.from(uniqueFloors.values()));
@@ -137,6 +158,11 @@ export default function ComplaintForm() {
             uniqueBuildings.set(d.building_id, { id: d.building_id, name: d.building_name });
           }
         });
+        allBuildings.forEach(b => {
+          if (b.department_name === newDept && (!formData.institution_id || b.institution_id === formData.institution_id)) {
+            uniqueBuildings.set(b.id, { id: b.id, name: b.name });
+          }
+        });
         setBuildings(Array.from(uniqueBuildings.values()));
         setFloors(Array.from(uniqueFloors.values()));
         setRooms(fetchedRooms);
@@ -163,6 +189,7 @@ export default function ComplaintForm() {
   const [imagePreviewUrls, setImagePreviewUrls] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
+  const [previewDialog, setPreviewDialog] = useState({ open: false, url: '' });
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -186,11 +213,17 @@ export default function ComplaintForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (imagePreviewUrls.length === 0) {
+      setSnackbar({ open: true, message: 'Please attach at least one photo.', severity: 'error' });
+      return;
+    }
+
     setUploading(true);
     try {
       // 1. Upload images first
       const uploadedUrls = [];
       for (const file of images) {
+        if (!file) continue; // Skip existing images
         const formDataUpload = new FormData();
         formDataUpload.append('file', file);
         const uploadRes = await api.post('/api/upload?folder=complaints', formDataUpload, {
@@ -200,11 +233,12 @@ export default function ComplaintForm() {
       }
 
       // 2. Create complaint
+      const existingUrlsToKeep = imagePreviewUrls.filter((_, idx) => !images[idx]);
       const payload = {
         ...formData,
         building_id: formData.building_id ? parseInt(formData.building_id) : null,
         room_id: formData.room_id ? parseInt(formData.room_id) : null,
-        image_urls: uploadedUrls
+        image_urls: [...existingUrlsToKeep, ...uploadedUrls]
       };
       delete payload.institution_id;
       delete payload.floor_id; // floor_id is also not in backend schema, just in case
@@ -239,13 +273,19 @@ export default function ComplaintForm() {
         <form onSubmit={handleSubmit}>
           <Typography variant="h6" sx={{ mb: 2, color: '#1E3A8A' }}>Complaint Slip Details</Typography>
           <Grid container spacing={3}>
+            {id && (
+              <Grid item xs={12} sm={6} md={3}>
+                <TextField fullWidth label="Docket No" value={formData.docket_no} InputProps={{ readOnly: true }} disabled />
+              </Grid>
+            )}
             <Grid item xs={12} sm={6} md={3}>
-              <FormControl fullWidth>
+              <FormControl fullWidth required>
                 <InputLabel>Institution</InputLabel>
                 <Select
                   value={formData.institution_id}
-                  label="Institution"
+                  label="Institution *"
                   onChange={e => handleInstitutionChange(e.target.value)}
+                  required
                 >
                   <MenuItem value="" disabled><em>Select Institution</em></MenuItem>
                   {institutions.map(inst => <MenuItem key={inst.id} value={inst.id}>{inst.name}</MenuItem>)}
@@ -311,17 +351,17 @@ export default function ComplaintForm() {
             </Grid>
 
             <Grid item xs={12}>
-              <TextField fullWidth label="Nature of Complaint" name="nature_of_complaint" value={formData.nature_of_complaint} onChange={handleChange} />
+              <TextField fullWidth required label="Nature of Complaint" name="nature_of_complaint" value={formData.nature_of_complaint} onChange={handleChange} />
             </Grid>
             
             <Grid item xs={12}>
-              <TextField fullWidth multiline rows={3} label="Individual Detailed" name="individual_detailed" value={formData.individual_detailed} onChange={handleChange} />
+              <TextField fullWidth required multiline rows={3} label="Individual Detailed" name="individual_detailed" value={formData.individual_detailed} onChange={handleChange} />
             </Grid>
           </Grid>
 
           <Divider sx={{ my: 4 }} />
 
-          <Typography variant="h6" sx={{ mb: 2, color: '#1E3A8A' }}>Photo Attachments</Typography>
+          <Typography variant="h6" sx={{ mb: 2, color: '#1E3A8A' }}>Photo Attachments *</Typography>
           
           <Box sx={{ border: '2px dashed #CBD5E1', borderRadius: 2, p: 3, textAlign: 'center', bgcolor: '#F8FAFC', mb: 3 }}>
              <input
@@ -350,7 +390,12 @@ export default function ComplaintForm() {
               {imagePreviewUrls.map((url, idx) => (
                 <Grid item xs={4} sm={3} md={2} key={idx}>
                   <Box sx={{ position: 'relative', pt: '100%', borderRadius: 1, overflow: 'hidden', border: '1px solid #E2E8F0' }}>
-                    <img src={url} alt={`Preview ${idx}`} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img 
+                      src={url} 
+                      alt={`Preview ${idx}`} 
+                      style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', cursor: 'pointer' }} 
+                      onClick={() => setPreviewDialog({ open: true, url })}
+                    />
                     <IconButton size="small" onClick={() => removeImage(idx)} sx={{ position: 'absolute', top: 2, right: 2, bgcolor: 'rgba(255,255,255,0.8)', '&:hover': { bgcolor: 'white' } }}>
                       <Close fontSize="small" color="error" />
                     </IconButton>
@@ -363,7 +408,7 @@ export default function ComplaintForm() {
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
             <Button onClick={() => navigate('/complaints')} disabled={uploading}>Cancel</Button>
             <Button type="submit" variant="contained" disabled={uploading} startIcon={uploading ? <CircularProgress size={20} /> : <CloudUpload />}>
-              Submit Complaint
+              {id ? 'Update Complaint' : 'Submit Complaint'}
             </Button>
           </Box>
         </form>
@@ -372,6 +417,18 @@ export default function ComplaintForm() {
       <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={() => setSnackbar({ ...snackbar, open: false })}>
         <Alert severity={snackbar.severity} sx={{ width: '100%' }}>{snackbar.message}</Alert>
       </Snackbar>
+
+      <Dialog open={previewDialog.open} onClose={() => setPreviewDialog({ open: false, url: '' })} maxWidth="md" fullWidth>
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          Image Preview
+          <IconButton onClick={() => setPreviewDialog({ open: false, url: '' })} size="small">
+            <Close />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ p: 0, display: 'flex', justifyContent: 'center', bgcolor: '#000' }}>
+          <img src={previewDialog.url} alt="Full Preview" style={{ maxWidth: '100%', maxHeight: '80vh', objectFit: 'contain' }} />
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 }

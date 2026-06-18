@@ -145,6 +145,7 @@ export default function MaterialIssue() {
   const [tabValue, setTabValue] = useState('Pending');
   const [sortConfig, setSortConfig] = useState({ key: 'sortDate', direction: 'desc' });
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterInstitution, setFilterInstitution] = useState(null);
 
   const handleDepartmentChange = (newDept) => {
     if (newDept) {
@@ -230,6 +231,7 @@ export default function MaterialIssue() {
         return {
           type: 'indent', ...ind, sortDate: new Date(ind.created_at).getTime(),
           idStr: ind.indent_number, personStr: personStrValue, itemCount: ind.items?.length || 0,
+          institutionName: ind.institution_name || ind.project_name || 'Not Specified',
           pendingItemCount: pendingItemsCount,
           derivedStatus: ind.status === 'Approved' ? 'Pending' : 'Partial'
         };
@@ -241,6 +243,7 @@ export default function MaterialIssue() {
         return {
           type: 'issue', ...iss, sortDate: new Date(iss.created_at).getTime(),
           idStr: iss.issue_number, personStr: personStrValue, itemCount: iss.items?.length || 0,
+          institutionName: iss.project_name || 'Not Specified',
           derivedStatus: iss.is_acknowledged ? 'Acknowledged' : 'Completed',
           acknowledgedByName: iss.acknowledged_by_name
         };
@@ -268,6 +271,9 @@ export default function MaterialIssue() {
     let list = combinedList;
     if (tabValue !== 'All') {
       list = list.filter(row => row.derivedStatus === tabValue);
+    }
+    if (filterInstitution) {
+      list = list.filter(row => row.institutionName === filterInstitution.name);
     }
     if (searchTerm.trim()) {
       const lowerSearch = searchTerm.toLowerCase();
@@ -414,7 +420,7 @@ export default function MaterialIssue() {
         )}
       </Box>
 
-      <Box sx={{ mb: 3 }}>
+      <Box sx={{ mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
         <TextField
           size="small"
           placeholder="Search by Record No (e.g. IND-0001)..."
@@ -428,6 +434,15 @@ export default function MaterialIssue() {
             ),
           }}
           sx={{ bgcolor: 'white', borderRadius: 1, minWidth: 300, width: '100%', maxWidth: 400 }}
+        />
+        <Autocomplete
+          size="small"
+          options={projects}
+          getOptionLabel={(option) => option.name || ''}
+          value={filterInstitution}
+          onChange={(e, val) => setFilterInstitution(val)}
+          renderInput={(params) => <TextField {...params} placeholder="Filter by Institution" sx={{ minWidth: 250 }} />}
+          sx={{ bgcolor: 'white', borderRadius: 1 }}
         />
       </Box>
 
@@ -482,6 +497,9 @@ export default function MaterialIssue() {
                     <TableSortLabel active={sortConfig.key === 'sortDate'} direction={sortConfig.key === 'sortDate' ? sortConfig.direction : 'asc'} onClick={() => handleRequestSort('sortDate')}>DATE</TableSortLabel>
                   </TableCell>
                   <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>
+                    <TableSortLabel active={sortConfig.key === 'institutionName'} direction={sortConfig.key === 'institutionName' ? sortConfig.direction : 'asc'} onClick={() => handleRequestSort('institutionName')}>INSTITUTION</TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>
                     <TableSortLabel active={sortConfig.key === 'personStr'} direction={sortConfig.key === 'personStr' ? sortConfig.direction : 'asc'} onClick={() => handleRequestSort('personStr')}>ISSUED TO</TableSortLabel>
                   </TableCell>
                   <TableCell align="center" sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>
@@ -519,6 +537,7 @@ export default function MaterialIssue() {
                     >
                       <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.8rem', px: 2 }}>{idStr}</TableCell>
                       <TableCell sx={{ fontSize: '0.8rem', px: 2 }}>{formatDate(row.created_at)}</TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>{row.institutionName}</TableCell>
                       <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>{personStr}</TableCell>
                       <TableCell align="center" sx={{ fontSize: '0.8rem', px: 2 }}>
                         {row.derivedStatus === 'Partial' && row.pendingItemCount > 0 ? (
@@ -581,7 +600,19 @@ export default function MaterialIssue() {
                         if (!ind) return '';
                         const loc = [ind.building_name, ind.floor, ind.room_name].filter(Boolean).join('-');
                         const dept = ind.department;
-                        const formattedLoc = (dept && loc) ? `${dept} (${loc})` : (dept || loc);
+                        const inst = ind.institution_name || ind.project_name;
+                        
+                        let formattedLoc = '';
+                        if (inst && dept) {
+                           formattedLoc = `${inst} - ${dept}`;
+                        } else {
+                           formattedLoc = inst || dept || '';
+                        }
+                        
+                        if (loc) {
+                           formattedLoc += ` (${loc})`;
+                        }
+                        
                         return formattedLoc ? ` • Issued to: ${formattedLoc}` : '';
                       })()}
                     </>

@@ -1333,6 +1333,7 @@ class IndentOut(BaseModel):
     room_name: Optional[str] = None
     total_amount: float
     project_id: Optional[int] = None
+    can_user_approve: Optional[bool] = False
     items: List[IndentItemOut] = []
     class Config:
         from_attributes = True

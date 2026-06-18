@@ -52,7 +52,13 @@ def list_issues(
     is_platform_admin = getattr(current_user, "_is_platform_admin", False)
     if not is_platform_admin:
         scope = getattr(current_user, "_data_access_scope", "Self Only")
-        if scope not in ["Full Administrative Access", "Organization"]:
+        
+        if current_user.institution:
+            from app.models import Institution
+            q = q.outerjoin(Indent, MaterialIssue.indent_id == Indent.id).outerjoin(Institution, Indent.institution_id == Institution.id).filter(
+                Institution.name == current_user.institution
+            )
+        elif scope not in ["Full Administrative Access", "Organization"]:
             q = q.outerjoin(Indent, MaterialIssue.indent_id == Indent.id)
             if scope == "Department":
                 if current_user.department:
@@ -314,6 +320,22 @@ def create_issue(
                 
                 all_fully_issued = all(it.issued_quantity >= (it.approved_quantity or 0) for it in indent.items)
                 indent.status = IndentStatus.ISSUED.value if all_fully_issued else IndentStatus.PARTIALLY_ISSUED.value
+                
+                from app.models import Alert
+                alert = Alert(
+                    tenant_id=tenant_id,
+                    site_id=site_id,
+                    alert_type="Pending Action",
+                    severity="Warning",
+                    title="Action Required: Issue Acknowledgement",
+                    message=f"Materials for your indent ({indent.indent_number}) have been issued. Please review and acknowledge receipt.",
+                    reference_type="IndentIssued",
+                    reference_id=indent.id,
+                    user_id=indent.requester_id,
+                    is_read=False,
+                    is_resolved=False
+                )
+                db.add(alert)
 
         db.commit()
         return {

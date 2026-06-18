@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useMessage } from '../context/MessageContext';
 import {
@@ -53,8 +53,13 @@ export default function Indents() {
       const targetId = location.state.openIndentId;
       const targetIndent = indents.find(i => i.id === targetId);
       if (targetIndent) {
-        setTabValue('Awaiting Approval');
-        setApprovalDialog({ open: true, indent: targetIndent, items: {} });
+        if (targetIndent.status === 'Awaiting Approval') {
+          setTabValue('Awaiting Approval');
+          setApprovalDialog({ open: true, indent: targetIndent, items: {} });
+        } else {
+          setTabValue(targetIndent.status);
+          setDetailDialog(targetIndent);
+        }
         
         // Clear the state via React Router so it forgets the openIndentId
         navigate(location.pathname, { replace: true, state: {} });
@@ -173,6 +178,18 @@ export default function Indents() {
 
   const load = () => { api.get('/api/indents', { params: { search: search || undefined } }).then(r => setIndents(r.data)); };
   useEffect(() => { load(); }, [search]);
+
+  // Auto-refresh polling: silently re-fetch indents every 15 seconds when listing is visible
+  const showFormRef = useRef(showForm);
+  showFormRef.current = showForm;
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!showFormRef.current) {
+        api.get('/api/indents', { params: { search: search || undefined } }).then(r => setIndents(r.data)).catch(() => {});
+      }
+    }, 15000);
+    return () => clearInterval(interval);
+  }, [search]);
 
   useEffect(() => {
     load();
@@ -819,13 +836,13 @@ export default function Indents() {
                   <Chip label={`L${ind.current_approval_level}`} size="small" variant="outlined" sx={{ height: 22, fontSize: '0.7rem' }} />
                   <Box sx={{ display: 'flex', gap: 0.5 }} onClick={e => e.stopPropagation()}>
                     <Tooltip title="Approve">
-                      <span><IconButton size="small" color="success" disabled={ind.status !== 'Awaiting Approval' || !hasAction('indents', 'can_approve')}
+                      <span><IconButton size="small" color="success" disabled={ind.status !== 'Awaiting Approval' || !hasAction('indents', 'can_approve') || !ind.can_user_approve}
                         onClick={() => setApprovalDialog({ open: true, indent: ind, items: {} })}>
                         <CheckCircle fontSize="small" />
                       </IconButton></span>
                     </Tooltip>
                     <Tooltip title="Reject">
-                      <span><IconButton size="small" color="error" disabled={ind.status !== 'Awaiting Approval' || !hasAction('indents', 'can_reject')}
+                      <span><IconButton size="small" color="error" disabled={ind.status !== 'Awaiting Approval' || !hasAction('indents', 'can_reject') || !ind.can_user_approve}
                         onClick={() => showConfirm('Reject Indent?', `Are you sure you want to reject ${ind.indent_number}?`, 'Yes, Reject', 'error', (r) => rejectIndent(ind.id, r), true)}>
                         <Cancel fontSize="small" />
                       </IconButton></span>
@@ -915,13 +932,13 @@ export default function Indents() {
                     <TableCell onClick={e => e.stopPropagation()} sx={{ whiteSpace: 'nowrap' }}>
                       <Box sx={{ display: 'flex', gap: 0.5 }}>
                         <Tooltip title="Approve">
-                          <span><IconButton size="small" color="success" disabled={ind.status !== 'Awaiting Approval' || !hasAction('indents', 'can_approve')}
+                          <span><IconButton size="small" color="success" disabled={ind.status !== 'Awaiting Approval' || !hasAction('indents', 'can_approve') || !ind.can_user_approve}
                             onClick={() => setApprovalDialog({ open: true, indent: ind, items: {} })}>
                             <CheckCircle fontSize="small" />
                           </IconButton></span>
                         </Tooltip>
                         <Tooltip title="Reject">
-                          <span><IconButton size="small" color="error" disabled={ind.status !== 'Awaiting Approval' || !hasAction('indents', 'can_reject')}
+                          <span><IconButton size="small" color="error" disabled={ind.status !== 'Awaiting Approval' || !hasAction('indents', 'can_reject') || !ind.can_user_approve}
                             onClick={() => showConfirm('Reject Indent?', `Are you sure you want to reject ${ind.indent_number}?`, 'Yes, Reject', 'error', (r) => rejectIndent(ind.id, r), true)}>
                             <Cancel fontSize="small" />
                           </IconButton></span>

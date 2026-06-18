@@ -7,7 +7,7 @@ from typing import List
 from app.database import get_db
 from sqlalchemy import func
 from app.models import (
-    Indent, IndentItem, IndentStatus, ApprovalFlow, User, Material, CurrentStock, IndentApproval, PurchaseOrder, PurchaseOrderItem, DepartmentMaterialLimit
+    Indent, IndentItem, IndentStatus, ApprovalFlow, User, Material, CurrentStock, IndentApproval, PurchaseOrder, PurchaseOrderItem, DepartmentMaterialLimit, Institution
 )
 from app.schemas import IndentCreate, IndentOut, IndentAcknowledgeRequest, IndentApproveRequest
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
@@ -38,16 +38,23 @@ def list_indents(
     if not is_platform_admin:
         scope = getattr(current_user, "_data_access_scope", "Self Only")
         
-        if scope in ["Full Administrative Access", "Organization"]:
-            pass # No additional filtering
-        elif scope == "Department":
-            if current_user.department:
-                query = query.filter(Indent.department == current_user.department)
-            else:
-                query = query.filter(Indent.requester_id == current_user.id)
+        # If the user is assigned to an institution, they act as an Institution Head
+        # and should see all indents for their institution, overriding narrower scopes.
+        if current_user.institution:
+            query = query.outerjoin(Institution, Indent.institution_id == Institution.id).filter(
+                Institution.name == current_user.institution
+            )
         else:
-            # Self Only
-            query = query.filter(Indent.requester_id == current_user.id)
+            if scope in ["Full Administrative Access", "Organization"]:
+                pass # No additional filtering
+            elif scope == "Department":
+                if current_user.department:
+                    query = query.filter(Indent.department == current_user.department)
+                else:
+                    query = query.filter(Indent.requester_id == current_user.id)
+            else:
+                # Self Only
+                query = query.filter(Indent.requester_id == current_user.id)
     
     if search:
         search_term = f"%{search}%"
@@ -58,8 +65,29 @@ def list_indents(
         )
     
     indents = query.order_by(Indent.created_at.desc()).all()
+    
+    # Pre-fetch approval flows to calculate can_user_approve
+    flows = db.query(ApprovalFlow).filter(
+        ApprovalFlow.tenant_id == tenant_id,
+        ApprovalFlow.site_id == site_id,
+        ApprovalFlow.document_type == "INDENT",
+        ApprovalFlow.is_active == True
+    ).all()
+    user_roles = getattr(current_user, "_roles", [])
+    can_override = is_platform_admin or getattr(current_user, '_data_access_scope', '') == 'Full Administrative Access'
+
     # Add manual material details to items for Out schema
     for indent in indents:
+        indent.can_user_approve = False
+        if indent.status == IndentStatus.AWAITING_APPROVAL.value:
+            for f in flows:
+                if f.level == indent.current_approval_level and \
+                   f.min_amount <= indent.total_amount and \
+                   (f.max_amount is None or f.max_amount >= indent.total_amount) and \
+                   (can_override or (f.user_id == current_user.id) or (not f.user_id and f.role_name in user_roles)):
+                    indent.can_user_approve = True
+                    break
+                    
         indent.requester_name = indent.requester.full_name if indent.requester else None
         indent.room_name = indent.room.name if indent.room else None
         indent.building_name = indent.building.name if indent.building else (indent.room.floor.building.name if indent.room and indent.room.floor and indent.room.floor.building else None)
@@ -335,6 +363,25 @@ def handle_next_level(db, indent, tenant_id, site_id, user_id=None):
         indent.status = IndentStatus.APPROVED.value
         indent.approved_by_id = user_id
         indent.approved_at = datetime.utcnow()
+        
+        approver = db.query(User).filter(User.id == user_id).first() if user_id else None
+        approver_name = approver.full_name if approver else "Unknown Approver"
+        from app.models import Alert
+        alert = Alert(
+            tenant_id=tenant_id,
+            site_id=site_id,
+            alert_type="Indent Approved",
+            severity="Success",
+            title=f"Indent {indent.indent_number} Approved",
+            message=f"The indent ({indent.indent_number}) has been approved by {approver_name}.",
+            reference_type="IndentApproved",
+            reference_id=indent.id,
+            user_id=indent.requester_id,
+            is_read=False,
+            is_resolved=False
+        )
+        db.add(alert)
+        
         db.commit()
         return {"message": "Fully Approved", "status": indent.status, "current_level": indent.current_approval_level}
 

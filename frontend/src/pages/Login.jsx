@@ -175,11 +175,11 @@ export default function Login() {
               }}
             />
             <Typography variant="h5" sx={{ color: '#fff', fontWeight: 700, letterSpacing: 0.5 }}>
-              Eastpoint Smart Campus
+              Eastpoint SmartCampus
             </Typography>
           </Box>
           <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)', mt: 0.5 }}>
-            Enterprise Materials Governance Platform
+            Material Governance Platform
           </Typography>
         </Box>
 

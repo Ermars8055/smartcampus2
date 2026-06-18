@@ -143,7 +143,7 @@ export default function Layout() {
   useEffect(() => {
     let interval;
     const fetchAlerts = () => {
-      api.get('/api/alerts').then(r => {
+      api.get(`/api/alerts?_t=${new Date().getTime()}`).then(r => {
         const data = r.data;
         const unreadAlerts = data.filter(a => !a.is_read);
         const unresolvedAlerts = data.filter(a => !a.is_resolved);
@@ -193,47 +193,44 @@ export default function Layout() {
   const drawer = (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'linear-gradient(180deg, #0F172A 0%, #1E293B 100%)' }}>
       {/* Logo Area */}
-      <Box sx={{ p: 1.5, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Box
-            component="img"
-            src={logoImg}
-            alt="Eastpoint"
-            sx={{
-              width: 36, height: 36, objectFit: 'contain',
-              filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
-            }}
-          />
-          <Typography variant="subtitle2" sx={{ 
-            fontWeight: 800, 
-            fontSize: '1rem', 
-            lineHeight: 1.2, 
-            whiteSpace: 'nowrap', 
-            letterSpacing: '0.02em',
-            background: 'linear-gradient(90deg, #60A5FA, #E2E8F0)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.2))'
-          }}>
-            Eastpoint Smart Campus
-          </Typography>
-          {isMobile && (
-            <IconButton onClick={() => setMobileOpen(false)} sx={{ ml: 'auto', color: '#94A3B8', p: 0.5 }}>
-              <ChevronLeft />
-            </IconButton>
-          )}
-        </Box>
+      <Box sx={{ p: 1.5, borderBottom: '1px solid rgba(255,255,255,0.08)', textAlign: 'center' }}>
+        {isMobile && (
+          <IconButton onClick={() => setMobileOpen(false)} sx={{ position: 'absolute', right: 8, top: 8, color: '#94A3B8', p: 0.5 }}>
+            <ChevronLeft />
+          </IconButton>
+        )}
+        <Box
+          component="img"
+          src={logoImg}
+          alt="Eastpoint"
+          sx={{
+            width: 44, height: 44, objectFit: 'contain',
+            filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
+            mb: 0.5
+          }}
+        />
+        <Typography variant="subtitle2" sx={{ 
+          fontWeight: 800, 
+          fontSize: '1rem', 
+          lineHeight: 1.2, 
+          letterSpacing: '0.02em',
+          background: 'linear-gradient(90deg, #60A5FA, #E2E8F0)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.2))'
+        }}>
+          Eastpoint SmartCampus
+        </Typography>
         <Typography variant="caption" sx={{ 
           color: '#CBD5E1', 
-          fontSize: '0.75rem', 
+          fontSize: '0.7rem', 
           fontWeight: 600, 
           display: 'block', 
           lineHeight: 1.2, 
-          mt: 1, 
-          textAlign: 'left', 
+          mt: 0.5, 
           letterSpacing: '0.02em' 
         }}>
-          Enterprise Materials Governance Platform
+          Material Governance Platform
         </Typography>
       </Box>
 
@@ -377,10 +374,10 @@ export default function Layout() {
                     }
                   }}>
                     {activeAlerts.map((alert, index) => (
-                      <Box key={alert.id} component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 1, pr: 6 }}>
-                        <Typography variant="body2" sx={{ fontWeight: 700, whiteSpace: 'nowrap', fontSize: '0.85rem' }}>⚠️ {alert.title}:</Typography>
+                      <Box key={alert.id} component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 1, pr: 6, color: alert.severity === 'Success' ? '#15803d' : 'inherit' }}>
+                        <Typography variant="body2" sx={{ fontWeight: 700, whiteSpace: 'nowrap', fontSize: '0.85rem' }}>{alert.severity === 'Success' ? '✅' : '⚠️'} {alert.title}:</Typography>
                         <Typography variant="body2" sx={{ whiteSpace: 'nowrap', fontSize: '0.85rem' }}>{alert.message}</Typography>
-                        {(alert.reference_type === 'Indent' || alert.reference_type === 'PurchaseOrder' || alert.reference_type === 'PurchaseRequest' || alert.reference_type === 'GateEntry') && (
+                        {(alert.reference_type === 'Indent' || alert.reference_type === 'PurchaseOrder' || alert.reference_type === 'PurchaseRequest' || alert.reference_type === 'GateEntry' || alert.reference_type === 'IndentApproved' || alert.reference_type === 'IndentIssued') && (
                           <Button 
                             size="small"
                             variant="contained"
@@ -390,22 +387,33 @@ export default function Layout() {
                               px: 1.5, 
                               ml: 2, 
                               fontWeight: 800, 
-                              bgcolor: '#EF4444', 
+                              bgcolor: alert.severity === 'Success' ? '#22c55e' : '#EF4444', 
                               color: '#fff',
                               borderRadius: 8,
                               whiteSpace: 'nowrap',
                               textTransform: 'none',
                               fontSize: '0.65rem',
-                              boxShadow: '0 2px 4px rgba(239,68,68,0.4)',
+                              boxShadow: alert.severity === 'Success' ? '0 2px 4px rgba(34,197,94,0.4)' : '0 2px 4px rgba(239,68,68,0.4)',
                               '&:hover': { 
-                                bgcolor: '#DC2626',
-                                boxShadow: '0 4px 6px rgba(239,68,68,0.5)',
+                                bgcolor: alert.severity === 'Success' ? '#16a34a' : '#DC2626',
+                                boxShadow: alert.severity === 'Success' ? '0 4px 6px rgba(34,197,94,0.5)' : '0 4px 6px rgba(239,68,68,0.5)',
                               } 
                             }}
                             onClick={() => {
-                              api.put(`/api/alerts/${alert.id}/read`).catch(() => {});
-                              if (alert.reference_type === 'Indent') {
+                              const isIndenterAlert = alert.reference_type === 'IndentApproved' || alert.reference_type === 'IndentIssued';
+                              
+                              if (isIndenterAlert) {
+                                api.put(`/api/alerts/${alert.id}/resolve`).catch(() => {});
+                                setActiveAlerts(prev => prev.filter(a => a.id !== alert.id));
+                                setAlertCount(prev => Math.max(0, prev - 1));
+                              } else {
+                                api.put(`/api/alerts/${alert.id}/read`).catch(() => {});
+                              }
+                              
+                              if (alert.reference_type === 'Indent' || alert.reference_type === 'IndentApproved') {
                                 navigate('/indents', { state: { openIndentId: alert.reference_id } });
+                              } else if (alert.reference_type === 'IndentIssued') {
+                                navigate('/pending-acknowledgments');
                               } else if (alert.reference_type === 'PurchaseOrder') {
                                 navigate('/purchase-orders', { state: { openPOId: alert.reference_id } });
                               } else if (alert.reference_type === 'PurchaseRequest') {
@@ -415,7 +423,7 @@ export default function Layout() {
                               }
                             }}
                           >
-                            Review Now
+                            {(alert.reference_type === 'IndentApproved' || alert.reference_type === 'IndentIssued') ? 'View' : 'Review Now'}
                           </Button>
                         )}
                         {index < activeAlerts.length - 1 && <Box component="span" sx={{ ml: 4, color: '#FCA5A5' }}>•</Box>}

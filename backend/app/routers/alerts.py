@@ -2,9 +2,9 @@
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from sqlalchemy import outerjoin, and_
+from sqlalchemy import outerjoin, and_, or_
 from app.database import get_db
-from app.models import GateEntry, User, Alert, Indent, ApprovalFlow, PurchaseOrder, PurchaseRequest
+from app.models import GateEntry, User, Alert, Indent, ApprovalFlow, PurchaseOrder, PurchaseRequest, Institution
 from app.auth import get_current_user, get_tenant_id, get_site_id
 from app.utils.tz import get_now_ist
 
@@ -41,6 +41,10 @@ def get_pending_indent_alerts(db, current_user, tenant_id, site_id, tracked_ind_
         if tracked_ind_map and ind.id in tracked_ind_map and tracked_ind_map[ind.id].is_resolved:
             continue
             
+        inst_name = ind.institution.name if getattr(ind, 'institution', None) else ''
+        if current_user.institution and inst_name != current_user.institution:
+            continue
+            
         # Check if user can approve this indent
         applicable_flows = [
             f for f in flows
@@ -53,7 +57,6 @@ def get_pending_indent_alerts(db, current_user, tenant_id, site_id, tracked_ind_
         if applicable_flows:
             is_read = tracked_ind_map[ind.id].is_read if (tracked_ind_map and ind.id in tracked_ind_map) else False
             
-            inst_name = ind.institution.name if getattr(ind, 'institution', None) else ''
             from_str = f"{inst_name} - {ind.department}" if inst_name and ind.department else (inst_name or ind.department or 'Unknown Dept')
             
             alerts.append({
@@ -219,7 +222,7 @@ def get_alert_count(
             (Alert.id == None) | (and_(Alert.is_read == False, Alert.is_resolved == False))
         ).count()
 
-    db_alerts_count = db.query(Alert).filter(
+    db_alerts_base = db.query(Alert).filter(
         Alert.tenant_id == tenant_id,
         Alert.site_id == site_id,
         Alert.is_read == False,
@@ -228,7 +231,23 @@ def get_alert_count(
         (Alert.reference_type != "Indent"),
         (Alert.reference_type != "PurchaseOrder"),
         (Alert.reference_type != "PurchaseRequest")
-    ).count()
+    )
+
+    if getattr(current_user, "_is_platform_admin", False) or getattr(current_user, "_data_access_scope", "") in ["Full Administrative Access", "Organization"]:
+        db_alerts_count = db_alerts_base.filter(or_(Alert.user_id == current_user.id, Alert.user_id == None)).count()
+    elif current_user.institution:
+        db_alerts_count = db_alerts_base.outerjoin(
+            Indent, and_(Alert.reference_type == "IndentIssued", Alert.reference_id == Indent.id)
+        ).outerjoin(
+            Institution, Indent.institution_id == Institution.id
+        ).filter(
+            or_(
+                (Alert.user_id == current_user.id) | (Alert.user_id == None),
+                (Alert.reference_type == "IndentIssued") & (Institution.name == current_user.institution)
+            )
+        ).count()
+    else:
+        db_alerts_count = db_alerts_base.filter(or_(Alert.user_id == current_user.id, Alert.user_id == None)).count()
     
     # Indent alerts count
     tracked_ind_alerts = db.query(Alert).filter(
@@ -357,7 +376,7 @@ def get_alerts(
     alerts.extend(pr_alerts)
         
     # 5. Database alerts
-    db_alerts = db.query(Alert).filter(
+    db_alerts_base = db.query(Alert).filter(
         Alert.tenant_id == tenant_id,
         Alert.site_id == site_id,
         Alert.is_resolved == False,
@@ -365,7 +384,23 @@ def get_alerts(
         (Alert.reference_type != "Indent"),
         (Alert.reference_type != "PurchaseOrder"),
         (Alert.reference_type != "PurchaseRequest")
-    ).all()
+    )
+
+    if getattr(current_user, "_is_platform_admin", False) or getattr(current_user, "_data_access_scope", "") in ["Full Administrative Access", "Organization"]:
+        db_alerts = db_alerts_base.filter(or_(Alert.user_id == current_user.id, Alert.user_id == None)).all()
+    elif current_user.institution:
+        db_alerts = db_alerts_base.outerjoin(
+            Indent, and_(Alert.reference_type == "IndentIssued", Alert.reference_id == Indent.id)
+        ).outerjoin(
+            Institution, Indent.institution_id == Institution.id
+        ).filter(
+            or_(
+                (Alert.user_id == current_user.id) | (Alert.user_id == None),
+                (Alert.reference_type == "IndentIssued") & (Institution.name == current_user.institution)
+            )
+        ).all()
+    else:
+        db_alerts = db_alerts_base.filter(or_(Alert.user_id == current_user.id, Alert.user_id == None)).all()
     
     for a in db_alerts:
         alerts.append({

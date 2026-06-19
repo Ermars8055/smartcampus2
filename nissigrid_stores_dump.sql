@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict XkGh7txsYYtSGxWtbzxMGK6EFsMXtRiUiWmeIVFpKT40usWgg2aQt7uOMkKALdX
+\restrict YLvwQdyPigitgaAl6pILuykq3woPW5gxLYUXqI7vXDoOIOPz8XhaZCUMSVa32FJ
 
 -- Dumped from database version 17.10 (Ubuntu 17.10-1.pgdg22.04+1)
 -- Dumped by pg_dump version 18.4 (Ubuntu 18.4-1.pgdg22.04+1)
@@ -382,7 +382,8 @@ CREATE TABLE public.complaints (
     verified_by_id integer,
     verified_at timestamp without time zone,
     rejection_remarks text,
-    inspection_details text
+    inspection_details text,
+    feedback text
 );
 
 
@@ -2024,7 +2025,8 @@ CREATE TABLE public.quotation_requests (
     approved_at timestamp without time zone,
     is_deleted boolean,
     created_at timestamp without time zone,
-    updated_at timestamp without time zone
+    updated_at timestamp without time zone,
+    approval_remarks text
 );
 
 
@@ -3368,7 +3370,11 @@ COPY public.alerts (id, tenant_id, site_id, alert_type, severity, title, message
 22	2	2	Indent Approved	Success	Indent IND-00013 Approved	The indent (IND-00013) has been approved by EastPoint Admin.	IndentApproved	228	\N	f	t	2026-06-18 12:21:24.055534	2026-06-18 12:22:47.237237	19
 23	2	2	Pending Action	Warning	Action Required: Material issued..please acknowledge the receipt for IND-00009	Materials for your indent (IND-00009) have been issued. Please review and acknowledge receipt.	IndentIssued	222	\N	f	t	2026-06-18 12:26:45.19394	2026-06-18 12:38:13.126488	3
 24	2	2	Indent Approved	Success	Indent IND-00014 Approved	The indent (IND-00014) has been approved by EastPoint Admin.	IndentApproved	229	\N	f	f	2026-06-18 12:40:37.151269	\N	19
-25	2	2	Complaint Assigned	Info	Complaint Assigned: CMP-00006	You have been assigned to complaint CMP-00006. Nature of complaint: DOOR IS NOT LOCKING PROPERLY	ComplaintAssigned	8	\N	f	f	2026-06-18 13:27:27.480796	\N	34
+25	2	2	Complaint Assigned	Info	Complaint Assigned: CMP-00006	You have been assigned to complaint CMP-00006. Nature of complaint: DOOR IS NOT LOCKING PROPERLY	ComplaintAssigned	8	\N	f	t	2026-06-18 13:27:27.480796	2026-06-18 13:43:00.630708	34
+26	2	2	Complaint Assigned	Info	Complaint Assigned: CMP-00007	You have been assigned to complaint CMP-00007. Nature of complaint: AC problem	ComplaintAssigned	9	\N	f	f	2026-06-18 18:23:10.157119	\N	34
+27	2	2	Indent Approved	Success	Indent IND-00015 Approved	The indent (IND-00015) has been approved by EastPoint Admin.	IndentApproved	230	\N	f	f	2026-06-19 14:44:37.138246	\N	34
+28	2	2	Pending Action	Warning	Action Required: Issue Acknowledgement	Materials for your indent (IND-00015) have been issued. Please review and acknowledge receipt.	IndentIssued	230	\N	f	f	2026-06-19 14:45:14.684628	\N	34
+29	2	2	Complaint Resolved	Success	Action Required: Verify Complaint Resolution	Complaint CMP-00007 has been resolved by EastPoint Admin. Please verify and close.	ComplaintResolved	9	\N	f	f	2026-06-19 15:14:42.842064	\N	3
 \.
 
 
@@ -3753,6 +3759,15 @@ COPY public.audit_logs (id, tenant_id, site_id, user_id, action, entity_type, en
 322	2	\N	32	LOGIN	User	32	\N	\N	\N	2026-06-18 12:33:41.768917
 323	2	\N	19	LOGIN	User	19	\N	\N	\N	2026-06-18 12:34:19.581905
 324	2	\N	34	LOGIN	User	34	\N	\N	\N	2026-06-18 13:15:23.646154
+325	2	\N	34	LOGIN	User	34	\N	\N	\N	2026-06-18 13:49:31.276655
+326	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-06-18 17:36:48.743067
+327	2	\N	34	LOGIN	User	34	\N	\N	\N	2026-06-18 18:24:32.451483
+328	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-06-18 18:45:12.578175
+329	2	\N	34	LOGIN	User	34	\N	\N	\N	2026-06-18 18:48:26.155944
+330	2	\N	34	LOGIN	User	34	\N	\N	\N	2026-06-18 18:51:43.730571
+331	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-06-19 10:38:06.402179
+332	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-06-19 11:01:41.04837
+333	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-06-19 13:07:08.555886
 \.
 
 
@@ -3844,6 +3859,10 @@ COPY public.complaint_images (id, complaint_id, image_url, is_resolution_image, 
 5	4	/uploads/complaints/2/20260611_220742_867bd26c.jpg	f	2026-06-12 03:37:42.697588
 6	5	/uploads/complaints/2/20260611_221318_cc3b4fd4.jpg	f	2026-06-12 03:43:19.044769
 7	5	/uploads/complaints/2/20260611_224517_8a9ea723.jpg	t	2026-06-12 04:15:17.191601
+9	9	/uploads/complaints/2/20260618_123724_6ef5a4d8.png	f	2026-06-18 18:07:24.314018
+10	9	/uploads/complaints/2/20260618_123842_96dc996d.png	f	2026-06-18 18:08:42.024498
+11	9	/uploads/complaints/2/20260618_124352_594f938b.webp	f	2026-06-18 18:13:52.404016
+12	8	/api/uploads/complaints/2/20260618_134917_e63abc41.jpeg	t	2026-06-18 19:19:17.299061
 \.
 
 
@@ -3851,15 +3870,16 @@ COPY public.complaint_images (id, complaint_id, image_url, is_resolution_image, 
 -- Data for Name: complaints; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.complaints (id, tenant_id, site_id, docket_no, complaint_date, complaint_time, department_name, building_id, room_id, location, nature_of_complaint, individual_detailed, name_and_trade, status, assigned_to_id, resolution_remarks, created_by_id, resolved_by_id, is_deleted, created_at, updated_at, resolved_at, material_required, verified_by_id, verified_at, rejection_remarks, inspection_details) FROM stdin;
-1	3	3	123	2026-06-11	11:33	eng college	\N	\N	1	Broken chair	Chair is broken		In Progress	\N	\N	4	\N	f	2026-06-11 11:33:55.08691	2026-06-11 11:36:53.102193	\N	f	\N	\N	\N	\N
-2	3	3	124	2026-06-11	11:38	eng college	\N	\N	2	Machine is not working	Machine is not working		Open	\N	\N	4	\N	f	2026-06-11 11:39:32.822274	2026-06-11 11:39:32.822295	\N	f	\N	\N	\N	\N
-3	2	2	CMP-00001	2026-06-12	03:30	Civil	\N	\N		Machine is not working	Machine is not working	Hari	In Progress	10	\N	3	\N	f	2026-06-12 03:30:36.68306	2026-06-12 03:34:27.090925	\N	t	\N	\N	\N	\N
-5	2	2	CMP-00003	2026-06-12	03:43	HEALTH 	\N	\N		Fan is not working	Fan is not working		Closed	10	Replaced	3	3	f	2026-06-12 03:43:19.039499	2026-06-12 04:15:21.884638	2026-06-11 22:45:17.188685	t	3	2026-06-11 22:45:21.883987	\N	\N
-4	2	2	CMP-00002	2026-06-12	03:37	Mechanical	\N	\N		Broken chair	broken chair		In Progress	10	\N	3	\N	f	2026-06-12 03:37:42.695272	2026-06-18 13:07:49.102381	\N	t	\N	\N	\N	\N
-6	2	2	CMP-00004	2026-06-18	10:40	HEALTH 	7	237					Material Pending	34	\N	3	\N	f	2026-06-18 10:40:28.426938	2026-06-18 13:09:14.492096	\N	t	\N	\N	\N	\N
-7	2	2	CMP-00005	2026-06-18	13:22	Anatomy	\N	\N		FAN NOT WORKING			Assigned	34	\N	3	\N	f	2026-06-18 13:22:07.124473	2026-06-18 13:22:24.20364	\N	f	\N	\N	\N	\N
-8	2	2	CMP-00006	2026-06-18	13:27	HEALTH 	7	237		DOOR IS NOT LOCKING PROPERLY		SURESH	Assigned	34	\N	3	\N	f	2026-06-18 13:27:19.541485	2026-06-18 13:27:27.481952	\N	f	\N	\N	\N	\N
+COPY public.complaints (id, tenant_id, site_id, docket_no, complaint_date, complaint_time, department_name, building_id, room_id, location, nature_of_complaint, individual_detailed, name_and_trade, status, assigned_to_id, resolution_remarks, created_by_id, resolved_by_id, is_deleted, created_at, updated_at, resolved_at, material_required, verified_by_id, verified_at, rejection_remarks, inspection_details, feedback) FROM stdin;
+1	3	3	123	2026-06-11	11:33	eng college	\N	\N	1	Broken chair	Chair is broken		In Progress	\N	\N	4	\N	f	2026-06-11 11:33:55.08691	2026-06-11 11:36:53.102193	\N	f	\N	\N	\N	\N	\N
+2	3	3	124	2026-06-11	11:38	eng college	\N	\N	2	Machine is not working	Machine is not working		Open	\N	\N	4	\N	f	2026-06-11 11:39:32.822274	2026-06-11 11:39:32.822295	\N	f	\N	\N	\N	\N	\N
+3	2	2	CMP-00001	2026-06-12	03:30	Civil	\N	\N		Machine is not working	Machine is not working	Hari	In Progress	10	\N	3	\N	f	2026-06-12 03:30:36.68306	2026-06-12 03:34:27.090925	\N	t	\N	\N	\N	\N	\N
+5	2	2	CMP-00003	2026-06-12	03:43	HEALTH 	\N	\N		Fan is not working	Fan is not working		Closed	10	Replaced	3	3	f	2026-06-12 03:43:19.039499	2026-06-12 04:15:21.884638	2026-06-11 22:45:17.188685	t	3	2026-06-11 22:45:21.883987	\N	\N	\N
+4	2	2	CMP-00002	2026-06-12	03:37	Mechanical	\N	\N		Broken chair	broken chair		In Progress	10	\N	3	\N	f	2026-06-12 03:37:42.695272	2026-06-18 13:07:49.102381	\N	t	\N	\N	\N	\N	\N
+6	2	2	CMP-00004	2026-06-18	10:40	HEALTH 	7	237					Material Pending	34	\N	3	\N	f	2026-06-18 10:40:28.426938	2026-06-18 13:09:14.492096	\N	t	\N	\N	\N	\N	\N
+7	2	2	CMP-00005	2026-06-18	13:22	Anatomy	\N	\N		FAN NOT WORKING			Assigned	34	\N	3	\N	f	2026-06-18 13:22:07.124473	2026-06-18 13:22:24.20364	\N	f	\N	\N	\N	\N	\N
+8	2	2	CMP-00006	2026-06-18	13:27	HEALTH 	7	237		DOOR IS NOT LOCKING PROPERLY		SURESH	Resolved	34	Fixed	3	34	f	2026-06-18 13:27:19.541485	2026-06-18 19:19:17.297948	2026-06-18 13:49:17.297068	f	\N	\N	\N	Inspection completed.   	\N
+9	2	2	CMP-00007	2026-06-18	17:39	HEALTH 	7	237		AC problem	AC is not working	Hari	Closed	34	Replaced	3	3	f	2026-06-18 17:39:02.3167	2026-06-19 15:35:45.320529	2026-06-19 09:44:42.841679	t	3	2026-06-19 10:05:45.319397	\N	Inspection done. Material need to be ordered	No issues after fix
 \.
 
 
@@ -5573,7 +5593,6 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 2731	2	2	2432	62	75	2026-06-11 21:58:45.849151
 2732	2	2	2433	62	87	2026-06-11 21:58:45.849154
 2733	2	2	2434	62	98	2026-06-11 21:58:45.849156
-2734	2	2	2435	62	120	2026-06-11 21:58:45.849159
 2735	2	2	2436	62	133	2026-06-11 21:58:45.849162
 2736	2	2	2437	62	139	2026-06-11 21:58:45.849165
 2737	2	2	2439	62	102	2026-06-11 21:58:45.849168
@@ -5661,6 +5680,7 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 2822	2	2	2530	62	63	2026-06-11 21:58:45.849412
 2725	2	2	2426	62	142	2026-06-12 02:15:29.61047
 2755	2	2	2458	62	14	2026-06-12 02:19:12.368129
+2734	2	2	2435	62	119	2026-06-19 14:45:14.687387
 2823	2	2	2532	62	91	2026-06-11 21:58:45.849415
 2824	2	2	2533	62	85	2026-06-11 21:58:45.849418
 2825	2	2	2534	62	73	2026-06-11 21:58:45.84942
@@ -7254,9 +7274,7 @@ COPY public.departments (id, tenant_id, site_id, name, code, accounting_code, bu
 263	2	2	Mechanical	DEPT-00005	\N	4	f	t	2026-06-11 15:36:35.049928	\N
 3	2	2	Physiotherapy Dept	DEPT-00001	\N	4	f	t	2026-05-21 16:31:55.999016	\N
 267	3	3	Computer Science	DEPT-00259	1234	\N	t	f	2026-06-16 10:55:04.544805	15
-268	2	2	Management Studies (UG)	DEPT-00009	\N	\N	t	f	2026-06-17 11:07:48.614844	5
 269	2	2	Commerce	DEPT-00010	\N	\N	t	f	2026-06-17 11:08:17.216077	5
-270	2	2	Management Studies (PG)	DEPT-00011	\N	\N	t	f	2026-06-17 11:09:45.317102	5
 271	2	2	Computer Application	DEPT-00012	\N	\N	t	f	2026-06-17 11:10:10.501704	5
 272	2	2	Anatomy	DEPT-00013	\N	\N	t	f	2026-06-17 11:13:32.810376	1
 273	2	2	Physiology	DEPT-00014	\N	\N	t	f	2026-06-17 11:14:06.03096	1
@@ -7319,6 +7337,8 @@ COPY public.departments (id, tenant_id, site_id, name, code, accounting_code, bu
 328	2	2	Admin	DEPT-00069	\N	\N	t	f	2026-06-17 19:15:18.106985	14
 329	2	2	Admin	DEPT-00070	\N	\N	t	f	2026-06-17 19:15:28.706654	12
 330	2	2	Admin	DEPT-00071	\N	\N	t	f	2026-06-17 19:15:36.988034	13
+270	2	2	Management Studies (PG)	DEPT-00011	\N	\N	f	t	2026-06-17 11:09:45.317102	5
+268	2	2	Management Studies (UG)	DEPT-00009	\N	\N	f	t	2026-06-17 11:07:48.614844	5
 \.
 
 
@@ -7362,6 +7382,7 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 59	1	1	CATEGORY		1
 12	3	3	PURCHASE_REQUEST	PR	28
 60	1	1	RETURN	RET	1
+67	2	2	ISSUE	ISS	7
 28	2	2	PROJECT	PROJ	2
 25	3	3	RETURN	RET	12
 26	3	3	GATEPASS	GP	14
@@ -7389,12 +7410,11 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 16	3	3	QUOTATION_REQUEST	QR	21
 5	3	3	INDENT	IND	42
 68	2	2	PURCHASE_REQUEST	PR	7
-70	2	2	QUOTATION_REQUEST	QR	7
-67	2	2	ISSUE	ISS	6
-66	2	2	INDENT	IND	14
-69	2	2	PURCHASE_ORDER	PO	9
-78	2	2	COMPLAINT	CMP	6
+78	2	2	COMPLAINT	CMP	7
+66	2	2	INDENT	IND	15
 77	2	2	GATEPASS	GP	3
+70	2	2	QUOTATION_REQUEST	QR	9
+69	2	2	PURCHASE_ORDER	PO	13
 \.
 
 
@@ -7668,6 +7688,10 @@ COPY public.indent_approvals (id, indent_id, approval_flow_id, approver_id, appr
 48	229	46	32	2026-06-18 12:34:01.425043	{"507": {"quantity": 3.0, "remarks": null}, "508": {"quantity": 6.0, "remarks": null}}	\N
 49	229	16	3	2026-06-18 12:40:37.113244	{"508": {"quantity": 6.0, "remarks": null}, "507": {"quantity": 3.0, "remarks": null}}	\N
 50	229	41	3	2026-06-18 12:40:37.113283	{"508": {"quantity": 6.0, "remarks": null}, "507": {"quantity": 3.0, "remarks": null}}	\N
+51	230	38	3	2026-06-19 14:44:30.2018	{"509": {"quantity": 1.0, "remarks": null}}	\N
+52	230	46	3	2026-06-19 14:44:30.201815	{"509": {"quantity": 1.0, "remarks": null}}	\N
+53	230	16	3	2026-06-19 14:44:37.090045	{"509": {"quantity": 1.0, "remarks": null}}	\N
+54	230	41	3	2026-06-19 14:44:37.090091	{"509": {"quantity": 1.0, "remarks": null}}	\N
 \.
 
 
@@ -7750,6 +7774,7 @@ COPY public.indent_items (id, indent_id, material_id, requested_quantity, issued
 508	229	2870	6	0	0	6
 494	221	3474	8	0	0	\N
 485	212	2040	10	0	0	10
+509	230	2435	1	1	1	1
 498	224	2102	30	0	0	\N
 503	227	3462	6	5	5	5
 493	220	2476	1	1	1	1
@@ -7825,6 +7850,7 @@ COPY public.indents (id, tenant_id, site_id, indent_number, requester_id, room_i
 227	2	2	IND-00012	19	237	\N	FIRST FLOOR	ROOM101	HEALTH 		19330.26	Issued	2	3	2026-06-18 05:28:10.733249	f	2026-06-18 10:55:16.557739	2026-06-18 11:11:57.204961	11	\N
 228	2	2	IND-00013	19	237	7	FIRST FLOOR	ROOM101	HEALTH 		306960.22	Partially Issued	2	3	2026-06-18 06:51:24.051148	f	2026-06-18 10:57:09.781589	2026-06-18 12:23:35.548001	11	\N
 229	2	2	IND-00014	19	\N	8			HEALTH 		51749.7	Approved	2	3	2026-06-18 07:10:37.145969	f	2026-06-18 12:33:13.796141	2026-06-18 12:40:37.156183	11	\N
+230	2	2	IND-00015	34	237	7	FIRST FLOOR	ROOM101	HEALTH 	Complaint CMP-00007 - AC problem	4657.57	Issued	2	3	2026-06-19 09:14:37.130349	f	2026-06-18 19:01:24.165689	2026-06-19 14:45:14.701106	11	9
 \.
 
 
@@ -7838,16 +7864,16 @@ COPY public.institutions (id, tenant_id, site_id, name, code, project_id, is_act
 3	2	2	EPCET (East Point College of Engineering & Technology)	INST-00003	3	t	f	2026-06-11 18:25:40.456786
 4	2	2	EPCP (East Point College of Pharmacy)	INST-00004	3	t	f	2026-06-11 18:26:03.736184
 5	2	2	EPCHE (East Point College of Higher Education)	INST-00005	3	t	f	2026-06-11 18:30:29.453281
-6	2	2	EPCM (East Point College of Management)	INST-00006	3	t	f	2026-06-11 18:30:57.207904
 7	2	2	EPCN (East Point College of Nursing)	INST-00007	3	t	f	2026-06-11 18:36:53.158049
 8	2	2	EPSN (East Point School of Nursing)	INST-00008	3	t	f	2026-06-11 18:37:59.004537
 9	2	2	NRCN (New Royal College of Nursing)	INST-00009	3	t	f	2026-06-11 18:38:44.400161
 10	2	2	EPCPT (East Point College of Physiotherapy)	INST-00010	3	t	f	2026-06-11 18:39:14.085426
 11	2	2	EPAHS (East Point Allied Health Sciences)	INST-00011	3	t	f	2026-06-11 18:39:37.004609
 12	2	2	EPPUC - Jnanaprabha Campus (East Point Pre-University College)	INST-00012	3	t	f	2026-06-11 18:40:08.337282
-13	2	2	EPPUC - Academy Campus (East Point Pre-University College)	INST-00013	3	t	f	2026-06-11 18:40:41.96241
-14	2	2	EPS (East Point School)	INST-00014	3	t	f	2026-06-11 18:41:02.503547
 15	3	3	Pradnesh Institute of Technology	INST-00001	1	t	f	2026-06-16 10:54:22.207039
+13	2	2	EPPUC - Academy Campus (East Point Pre-University College)	INST-00013	3	f	t	2026-06-11 18:40:41.96241
+14	2	2	EPS (East Point School)	INST-00014	3	f	t	2026-06-11 18:41:02.503547
+6	2	2	EPCM (East Point College of Management)	INST-00006	3	f	t	2026-06-11 18:30:57.207904
 \.
 
 
@@ -7951,6 +7977,7 @@ COPY public.material_issue_items (id, issue_id, material_id, quantity, rate, rem
 214	235	2737	6	48314.91	\N	62
 215	236	2751	3	10443.43	\N	62
 216	236	3475	3	4602.71	\N	62
+217	237	2435	1	4657.57	\N	62
 \.
 
 
@@ -8006,6 +8033,7 @@ COPY public.material_issues (id, tenant_id, site_id, issue_number, warehouse_id,
 230	2	2	ISS-00003	62	3	220	7	237	HEALTH 	\N	Fulfillment for IND-00007	Completed	3	\N	t	2026-06-18 05:45:50.03716	3	\N	f	2026-06-12 04:13:27.908132	\N
 235	2	2	ISS-00005	62	1	228	7	237	HEALTH 	\N	Fulfillment for IND-00013	Completed	3	\N	f	\N	\N	\N	f	2026-06-18 12:23:35.498019	\N
 236	2	2	ISS-00006	62	1	222	7	237	HEALTH 	\N	Fulfillment for IND-00009	Completed	3	\N	f	\N	\N	\N	f	2026-06-18 12:26:45.177543	\N
+237	2	2	ISS-00007	62	1	230	7	237	HEALTH 	\N	Fulfillment for IND-00015	Completed	3	\N	t	2026-06-19 09:27:43.176836	3	\N	f	2026-06-19 14:45:14.631379	\N
 \.
 
 
@@ -11043,6 +11071,10 @@ COPY public.purchase_order_items (id, po_id, material_id, quantity, rate, amount
 566	225	2430	1	378289	378289	0	\N	0	9	9	0	f	\N
 567	225	2437	1	178200	178200	0	\N	0	9	9	0	f	\N
 568	225	3104	2	132111	264222	0	\N	0	9	9	0	f	\N
+569	226	3507	6	224	1344	0	\N	0	6	6	0	f	\N
+570	227	2751	3	123	369	0	\N	0	9	9	0	f	\N
+571	228	3507	6	100	600	0	\N	0	6	6	0	f	\N
+572	229	2751	3	100	300	0	\N	0	9	9	0	f	\N
 \.
 
 
@@ -11097,8 +11129,12 @@ COPY public.purchase_orders (id, tenant_id, site_id, po_number, vendor_id, proje
 205	3	3	PO-00040	54	1	189	\N	\N	Formal	48160	2026-06-17	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-03 14:31:01.896958	2026-06-17 10:46:25.147151	2
 202	3	3	PO-00037	54	1	\N	200	\N	Formal	5605	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-02 13:18:45.56214	2026-06-17 10:48:13.245105	2
 225	2	2	PO-00009	63	3	200	\N	193	Formal	5213903	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-18 12:45:51.584007	2026-06-18 12:45:51.600692	1
+226	2	2	PO-00010	63	3	\N	\N	194	Formal	1344	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-19 12:06:49.124341	2026-06-19 12:06:49.190374	1
+227	2	2	PO-00011	62	3	\N	\N	194	Formal	369	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-19 12:06:49.200936	2026-06-19 12:06:49.206863	1
 207	3	3	PO-00042	53	1	\N	\N	\N	Informal	10560	2026-06-25	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 07:31:48.001221	f	2026-06-04 14:19:18.399032	2026-06-11 15:05:34.851646	2
 206	3	3	PO-00041	53	1	\N	\N	\N	Informal	181500	2026-06-24	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-03 09:03:42.850278	f	2026-06-03 14:33:32.175397	2026-06-11 16:24:46.272972	\N
+228	2	2	PO-00012	62	3	\N	\N	195	Formal	600	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-19 13:08:12.417753	2026-06-19 13:08:12.429379	1
+229	2	2	PO-00013	63	3	\N	\N	195	Formal	300	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-19 13:08:12.440185	2026-06-19 13:08:12.449311	1
 209	3	3	PO-00044	55	1	\N	208	\N	Formal	109928.8	\N	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: 15 Days\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 07:25:55.019454	f	2026-06-08 14:45:41.037419	2026-06-11 15:04:41.081091	2
 214	2	2	PO-00001	62	3	194	\N	\N	Formal	38491.6	2026-06-26	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-06-11 19:46:17.594031	f	2026-06-12 01:00:29.585057	2026-06-12 01:17:08.524505	2
 216	2	2	PO-00003	62	3	\N	\N	186	Formal	23600	2026-07-03	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-12 01:40:11.44893	2026-06-12 02:20:17.559248	2
@@ -11328,6 +11364,12 @@ COPY public.quotation_comparisons (id, qr_id, qr_item_id, material_id, selected_
 91	193	432	2431	62	62	f	\N	3	2026-06-18 12:43:41.149553
 92	193	433	2469	62	62	f	\N	3	2026-06-18 12:43:41.149574
 93	193	434	3104	63	63	f	\N	3	2026-06-18 12:43:41.149595
+94	194	435	3507	63	63	f	\N	3	2026-06-19 12:05:59.431204
+95	194	436	2751	62	62	f	\N	3	2026-06-19 12:05:59.431231
+98	190	387	2564	63	63	f	\N	3	2026-06-19 12:53:42.00244
+99	190	388	2565	63	63	f	\N	3	2026-06-19 12:53:42.002506
+96	195	437	3507	62	62	f	\N	3	2026-06-19 13:07:48.103007
+97	195	438	2751	63	63	f	\N	3	2026-06-19 13:07:48.103082
 \.
 
 
@@ -11405,6 +11447,10 @@ COPY public.quotation_request_item_sources (id, qr_item_id, source, source_pr_id
 72	432	Manual	\N	1
 73	433	Manual	\N	1
 74	434	PR	200	2
+75	435	Manual	\N	6
+76	436	Manual	\N	3
+77	437	Manual	\N	6
+78	438	Manual	\N	3
 \.
 
 
@@ -11512,6 +11558,10 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 432	193	2431	1	Manual	\N
 433	193	2469	1	Manual	\N
 434	193	3104	2	PR	200
+435	194	3507	6	Manual	\N
+436	194	2751	3	Manual	\N
+437	195	3507	6	Manual	\N
+438	195	2751	3	Manual	\N
 \.
 
 
@@ -11593,6 +11643,13 @@ COPY public.quotation_request_vendors (id, qr_id, vendor_id, is_sent, sent_at, r
 391	192	63	t	2026-06-18 11:59:58.128662	Received
 392	192	62	t	2026-06-18 12:00:02.652048	Received
 393	192	64	t	2026-06-18 12:00:07.222718	Received
+397	194	62	t	2026-06-19 12:00:02.116739	Received
+398	194	63	t	2026-06-19 12:00:06.44533	Received
+399	195	62	t	2026-06-19 12:12:10.519956	Received
+400	195	63	t	2026-06-19 12:12:14.905068	Received
+385	190	63	t	2026-06-17 14:27:41.825536	Received
+386	190	62	t	2026-06-17 14:27:41.825589	Received
+387	190	64	t	2026-06-17 14:27:41.825617	Received
 377	186	63	t	2026-06-12 01:35:30.709061	Received
 378	186	62	t	2026-06-12 01:35:30.709127	Received
 379	187	62	t	2026-06-15 18:49:23.731824	Received
@@ -11601,9 +11658,6 @@ COPY public.quotation_request_vendors (id, qr_id, vendor_id, is_sent, sent_at, r
 382	188	53	f	\N	Pending
 383	189	63	t	2026-06-17 14:10:49.972234	Received
 384	189	62	t	2026-06-17 14:10:49.972304	Received
-385	190	63	t	2026-06-17 14:27:41.825536	Pending
-386	190	62	t	2026-06-17 14:27:41.825589	Pending
-387	190	64	t	2026-06-17 14:27:41.825617	Pending
 388	191	63	t	2026-06-17 14:33:30.477525	Received
 390	191	64	t	2026-06-17 14:33:39.3221	Received
 389	191	62	t	2026-06-17 14:33:34.757637	Not Required
@@ -11617,33 +11671,35 @@ COPY public.quotation_request_vendors (id, qr_id, vendor_id, is_sent, sent_at, r
 -- Data for Name: quotation_requests; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.quotation_requests (id, tenant_id, site_id, qr_number, project_id, created_by_id, required_date, remarks, status, approved_by_id, approved_at, is_deleted, created_at, updated_at) FROM stdin;
-179	3	3	QR-00012	1	4	\N	\N	Ordered	\N	\N	f	2026-04-29 18:52:30.375564	2026-05-25 18:43:27.75731
-183	3	3	QR-00018	1	4	2026-05-27	\N	Requested	\N	\N	f	2026-05-20 14:07:32.990262	2026-06-01 16:27:13.202065
-185	3	3	QR-00020	1	4	2026-06-17	\N	Ordered	4	2026-06-01 17:27:47.625711	f	2026-06-01 17:21:44.808021	2026-06-01 17:32:30.43677
-175	3	3	QR-00008	1	4	\N	\N	Ordered	\N	\N	f	2026-04-25 18:52:30.375564	2026-06-01 17:37:01.194297
-181	3	3	QR-00014	1	4	\N	\N	Compared	\N	\N	f	2026-05-01 18:52:30.375564	2026-06-01 18:37:36.351866
-180	3	3	QR-00013	1	4	\N	\N	Compared	\N	\N	f	2026-04-30 18:52:30.375564	2026-06-01 18:37:36.554383
-174	3	3	QR-00007	1	4	\N	\N	Compared	\N	\N	f	2026-04-24 18:52:30.375564	2026-06-02 13:30:24.236504
-184	3	3	QR-00019	1	4	2026-06-05	\N	Compared	\N	\N	f	2026-06-01 16:31:47.679361	2026-06-03 14:31:44.607943
-168	3	3	QR-00001	1	4	\N	\N	Received	\N	\N	f	2026-04-18 18:52:30.375564	2026-05-15 18:52:30.473134
-169	3	3	QR-00002	1	4	\N	\N	Approved	\N	\N	f	2026-04-19 18:52:30.375564	2026-05-15 18:52:30.489799
-170	3	3	QR-00003	1	4	\N	\N	Compared	\N	\N	f	2026-04-20 18:52:30.375564	2026-05-15 18:52:30.501487
-171	3	3	QR-00004	1	4	\N	\N	Compared	\N	\N	f	2026-04-21 18:52:30.375564	2026-05-15 18:52:30.512816
-173	3	3	QR-00006	1	4	\N	\N	Approved	\N	\N	f	2026-04-23 18:52:30.375564	2026-05-15 18:52:30.531489
-176	3	3	QR-00009	1	4	\N	\N	Compared	\N	\N	f	2026-04-26 18:52:30.375564	2026-05-15 18:52:30.562053
-177	3	3	QR-00010	1	4	\N	\N	Approved	\N	\N	f	2026-04-27 18:52:30.375564	2026-05-15 18:52:30.571349
-178	3	3	QR-00011	1	4	\N	\N	Compared	\N	\N	f	2026-04-28 18:52:30.375564	2026-05-15 18:52:30.579722
-182	3	3	QR-00015	1	4	\N	\N	Compared	\N	\N	f	2026-05-02 18:52:30.375564	2026-05-15 18:52:30.613049
-191	2	2	QR-00005	3	3	\N	\N	Compared	\N	\N	f	2026-06-17 14:33:15.642511	2026-06-18 11:35:10.802716
-186	2	2	QR-00001	3	3	2026-06-19	\N	Ordered	3	2026-06-12 01:39:36.583917	f	2026-06-12 01:35:19.226084	2026-06-12 01:40:11.475262
-187	2	2	QR-00002	3	3	2026-06-23	\N	Ordered	3	2026-06-15 19:03:29.028408	f	2026-06-15 18:49:02.969294	2026-06-15 19:05:16.096382
-188	3	3	QR-00021	1	4	2026-06-16	Doggo ipsum stop it fren vvv doge fluffer the neighborhood pupper blep shibe waggy wags, shoob thicc very taste wow puggorino ur givin me a spook. Floofs tungg shoob very taste wow sub woofer, the neighborhood pupper long bois much ruin diet. Wow such tempt very hand that feed shibe doggorino h*ck wrinkler, blep clouds heckin, doing me a frighten long woofer boof. Extremely cuuuuuute borkf vvv extremely cuuuuuute you are doing me a frighten long woofer, woofer very jealous pupper shoober. Clouds pats vvv, doge. Smol shoob very good spot heckin ur givin me a spook boofers smol, big ol floofs bork smol borking doggo with a long snoot for pats. Very good spot big ol pupper shibe blop h*ck, waggy wags dat tungg tho long doggo. puggo borking doggo yapper. Length boy pupper vvv I am bekom fat, bork big ol pupper.\n\nClouds aqua doggo puggorino tungg borking doggo, pupperino such treat. Heckin snoot floofs clouds what a nice floof wow very biscit, puggorino pupperino stop it fren. Fat boi maximum borkdrive shooberino lotsa pats, pats. Borkdrive very jealous pupper long doggo doing me a frighten, boofers most angery pupper I have ever seen. Fat boi noodle horse blep, wrinkler. Borkdrive extremely cuuuuuute lotsa pats blep most angery pupper I have ever seen, blop you are doing me a frighten dat tungg tho. Clouds very hand that feed shibe aqua doggo shooberino, waggy wags borking doggo. Shibe long woofer big ol pupper ruff heckin h*ck shibe, heckin good boys heck big ol pupper shoob waggy wags, long bois adorable doggo stop it fren length boy borkf.\n\nDoing me a frighten super chub floofs what a nice floof porgo super chub very good spot thicc shoob vvv, I am bekom fat stop it fren aqua doggo puggorino very good spot shibe dat tungg tho. He made many woofs smol clouds stop it fren heckin fat boi, very hand that feed shibe blep borkf. Wrinkler doge lotsa pats fat boi woofer boof, long bois borking doggo porgo. Most angery pupper I have ever seen tungg long bois ruff blop, wow such tempt he made many woofs h*ck, puggo big ol h*ck. Heck puggorino noodle horse the neighborhood pupper puggo snoot, porgo shoob long doggo sub woofer.\n\n	Draft	\N	\N	f	2026-06-16 12:40:25.512152	2026-06-16 12:40:25.512165
-172	3	3	QR-00005	1	4	\N	\N	Compared	\N	\N	f	2026-04-22 18:52:30.375564	2026-06-17 10:40:47.681868
-189	2	2	QR-00003	3	3	2026-06-11	\N	Compared	\N	\N	f	2026-06-17 14:10:44.102818	2026-06-17 14:12:41.533202
-190	2	2	QR-00004	3	3	\N	\N	Requested	\N	\N	f	2026-06-17 14:18:29.904675	2026-06-17 14:27:41.829449
-193	2	2	QR-00007	3	3	2026-06-18	good quality needed 	Ordered	3	2026-06-18 12:43:41.143444	f	2026-06-18 11:56:26.795567	2026-06-18 12:45:51.599228
-192	2	2	QR-00006	3	3	2026-06-19	\N	Compared	\N	\N	f	2026-06-18 11:30:27.394513	2026-06-18 13:03:51.209646
+COPY public.quotation_requests (id, tenant_id, site_id, qr_number, project_id, created_by_id, required_date, remarks, status, approved_by_id, approved_at, is_deleted, created_at, updated_at, approval_remarks) FROM stdin;
+179	3	3	QR-00012	1	4	\N	\N	Ordered	\N	\N	f	2026-04-29 18:52:30.375564	2026-05-25 18:43:27.75731	\N
+183	3	3	QR-00018	1	4	2026-05-27	\N	Requested	\N	\N	f	2026-05-20 14:07:32.990262	2026-06-01 16:27:13.202065	\N
+185	3	3	QR-00020	1	4	2026-06-17	\N	Ordered	4	2026-06-01 17:27:47.625711	f	2026-06-01 17:21:44.808021	2026-06-01 17:32:30.43677	\N
+175	3	3	QR-00008	1	4	\N	\N	Ordered	\N	\N	f	2026-04-25 18:52:30.375564	2026-06-01 17:37:01.194297	\N
+181	3	3	QR-00014	1	4	\N	\N	Compared	\N	\N	f	2026-05-01 18:52:30.375564	2026-06-01 18:37:36.351866	\N
+180	3	3	QR-00013	1	4	\N	\N	Compared	\N	\N	f	2026-04-30 18:52:30.375564	2026-06-01 18:37:36.554383	\N
+174	3	3	QR-00007	1	4	\N	\N	Compared	\N	\N	f	2026-04-24 18:52:30.375564	2026-06-02 13:30:24.236504	\N
+184	3	3	QR-00019	1	4	2026-06-05	\N	Compared	\N	\N	f	2026-06-01 16:31:47.679361	2026-06-03 14:31:44.607943	\N
+168	3	3	QR-00001	1	4	\N	\N	Received	\N	\N	f	2026-04-18 18:52:30.375564	2026-05-15 18:52:30.473134	\N
+169	3	3	QR-00002	1	4	\N	\N	Approved	\N	\N	f	2026-04-19 18:52:30.375564	2026-05-15 18:52:30.489799	\N
+170	3	3	QR-00003	1	4	\N	\N	Compared	\N	\N	f	2026-04-20 18:52:30.375564	2026-05-15 18:52:30.501487	\N
+171	3	3	QR-00004	1	4	\N	\N	Compared	\N	\N	f	2026-04-21 18:52:30.375564	2026-05-15 18:52:30.512816	\N
+173	3	3	QR-00006	1	4	\N	\N	Approved	\N	\N	f	2026-04-23 18:52:30.375564	2026-05-15 18:52:30.531489	\N
+176	3	3	QR-00009	1	4	\N	\N	Compared	\N	\N	f	2026-04-26 18:52:30.375564	2026-05-15 18:52:30.562053	\N
+177	3	3	QR-00010	1	4	\N	\N	Approved	\N	\N	f	2026-04-27 18:52:30.375564	2026-05-15 18:52:30.571349	\N
+178	3	3	QR-00011	1	4	\N	\N	Compared	\N	\N	f	2026-04-28 18:52:30.375564	2026-05-15 18:52:30.579722	\N
+182	3	3	QR-00015	1	4	\N	\N	Compared	\N	\N	f	2026-05-02 18:52:30.375564	2026-05-15 18:52:30.613049	\N
+191	2	2	QR-00005	3	3	\N	\N	Compared	\N	\N	f	2026-06-17 14:33:15.642511	2026-06-18 11:35:10.802716	\N
+186	2	2	QR-00001	3	3	2026-06-19	\N	Ordered	3	2026-06-12 01:39:36.583917	f	2026-06-12 01:35:19.226084	2026-06-12 01:40:11.475262	\N
+190	2	2	QR-00004	3	3	\N	\N	Approved	3	2026-06-19 12:53:41.998685	f	2026-06-17 14:18:29.904675	2026-06-19 12:53:42.004983	\N
+195	2	2	QR-00009	3	3	2026-06-03	\N	Ordered	3	2026-06-19 13:07:48.097881	f	2026-06-19 12:12:00.033785	2026-06-19 13:08:12.447582	Approved
+187	2	2	QR-00002	3	3	2026-06-23	\N	Ordered	3	2026-06-15 19:03:29.028408	f	2026-06-15 18:49:02.969294	2026-06-15 19:05:16.096382	\N
+188	3	3	QR-00021	1	4	2026-06-16	Doggo ipsum stop it fren vvv doge fluffer the neighborhood pupper blep shibe waggy wags, shoob thicc very taste wow puggorino ur givin me a spook. Floofs tungg shoob very taste wow sub woofer, the neighborhood pupper long bois much ruin diet. Wow such tempt very hand that feed shibe doggorino h*ck wrinkler, blep clouds heckin, doing me a frighten long woofer boof. Extremely cuuuuuute borkf vvv extremely cuuuuuute you are doing me a frighten long woofer, woofer very jealous pupper shoober. Clouds pats vvv, doge. Smol shoob very good spot heckin ur givin me a spook boofers smol, big ol floofs bork smol borking doggo with a long snoot for pats. Very good spot big ol pupper shibe blop h*ck, waggy wags dat tungg tho long doggo. puggo borking doggo yapper. Length boy pupper vvv I am bekom fat, bork big ol pupper.\n\nClouds aqua doggo puggorino tungg borking doggo, pupperino such treat. Heckin snoot floofs clouds what a nice floof wow very biscit, puggorino pupperino stop it fren. Fat boi maximum borkdrive shooberino lotsa pats, pats. Borkdrive very jealous pupper long doggo doing me a frighten, boofers most angery pupper I have ever seen. Fat boi noodle horse blep, wrinkler. Borkdrive extremely cuuuuuute lotsa pats blep most angery pupper I have ever seen, blop you are doing me a frighten dat tungg tho. Clouds very hand that feed shibe aqua doggo shooberino, waggy wags borking doggo. Shibe long woofer big ol pupper ruff heckin h*ck shibe, heckin good boys heck big ol pupper shoob waggy wags, long bois adorable doggo stop it fren length boy borkf.\n\nDoing me a frighten super chub floofs what a nice floof porgo super chub very good spot thicc shoob vvv, I am bekom fat stop it fren aqua doggo puggorino very good spot shibe dat tungg tho. He made many woofs smol clouds stop it fren heckin fat boi, very hand that feed shibe blep borkf. Wrinkler doge lotsa pats fat boi woofer boof, long bois borking doggo porgo. Most angery pupper I have ever seen tungg long bois ruff blop, wow such tempt he made many woofs h*ck, puggo big ol h*ck. Heck puggorino noodle horse the neighborhood pupper puggo snoot, porgo shoob long doggo sub woofer.\n\n	Draft	\N	\N	f	2026-06-16 12:40:25.512152	2026-06-16 12:40:25.512165	\N
+172	3	3	QR-00005	1	4	\N	\N	Compared	\N	\N	f	2026-04-22 18:52:30.375564	2026-06-17 10:40:47.681868	\N
+189	2	2	QR-00003	3	3	2026-06-11	\N	Compared	\N	\N	f	2026-06-17 14:10:44.102818	2026-06-17 14:12:41.533202	\N
+193	2	2	QR-00007	3	3	2026-06-18	good quality needed 	Ordered	3	2026-06-18 12:43:41.143444	f	2026-06-18 11:56:26.795567	2026-06-18 12:45:51.599228	\N
+192	2	2	QR-00006	3	3	2026-06-19	\N	Compared	\N	\N	f	2026-06-18 11:30:27.394513	2026-06-18 13:03:51.209646	\N
+194	2	2	QR-00008	3	3	2026-06-26	\N	Ordered	3	2026-06-19 12:05:59.42952	f	2026-06-19 11:59:03.645342	2026-06-19 12:06:49.205285	\N
 \.
 
 
@@ -11930,7 +11986,6 @@ COPY public.role_permissions (id, role_id, resource, can_read, can_create, can_u
 966	21	report_pending_gatepass	t	f	f	f	{}
 967	21	material_allowances	t	t	t	t	{}
 968	21	terms	t	t	t	t	{}
-978	22	complaints	t	t	t	f	{}
 934	19	indents	t	t	t	t	{"can_acknowledge": false, "can_approve": false, "can_reject": false, "can_convert_to_po": false}
 935	19	acknowledgements	t	t	t	t	{"can_acknowledge": true}
 936	19	complaints	t	t	t	t	{}
@@ -11938,6 +11993,9 @@ COPY public.role_permissions (id, role_id, resource, can_read, can_create, can_u
 976	13	purchase_requests	t	f	f	f	{"can_submit": false, "can_approve": true, "can_reject": true, "can_convert_to_po": false, "can_hold": true, "can_short_close": true}
 977	13	acknowledgements	t	t	t	t	{"can_acknowledge": true}
 812	20	finance_invoices	t	f	t	f	{"can_send_hard_copy": false, "can_send_for_payment": false, "can_receive_hard_copy": true, "can_mark_paid": true}
+985	22	complaints	t	t	t	f	{}
+986	22	indents	t	t	t	t	{"can_approve": false, "can_reject": false}
+987	22	acknowledgements	t	t	t	t	{"can_acknowledge": true}
 \.
 
 
@@ -14991,6 +15049,7 @@ COPY public.stock_ledger (id, tenant_id, site_id, material_id, warehouse_id, tra
 4252	2	2	2737	62	Issue	-6	93	Issue	235	ISS-00005	1	237	\N	3	2026-06-18 12:23:35.556672
 4253	2	2	2751	62	Issue	-3	24	Issue	236	ISS-00006	1	237	\N	3	2026-06-18 12:26:45.202959
 4254	2	2	3475	62	Issue	-3	84	Issue	236	ISS-00006	1	237	\N	3	2026-06-18 12:26:45.202978
+4255	2	2	2435	62	Issue	-1	119	Issue	237	ISS-00007	1	237	\N	3	2026-06-19 14:45:14.706047
 \.
 
 
@@ -15621,6 +15680,20 @@ COPY public.vendor_quotation_items (id, vendor_quotation_id, qr_item_id, materia
 1221	553	432	2431	344900	4	f	
 1222	553	433	2469	644900	2	f	
 1223	553	434	3104	444900	10	f	
+1224	554	435	3507	789	7	f	
+1225	554	436	2751	123	7	f	
+1226	555	435	3507	224	7	f	
+1227	555	436	2751	789	7	f	
+1228	556	437	3507	100	7	f	
+1229	556	438	2751	200	7	f	
+1230	557	437	3507	200	7	f	
+1231	557	438	2751	100	7	f	
+1232	558	387	2564	123	7	f	
+1233	558	388	2565	321	7	f	
+1234	559	387	2564	767	7	f	
+1235	559	388	2565	1234	7	f	
+1236	560	387	2564	1342	7	f	
+1237	560	388	2565	1213	7	f	
 \.
 
 
@@ -15686,6 +15759,13 @@ COPY public.vendor_quotations (id, qr_id, vendor_id, quotation_number, quotation
 551	193	63	c123456782	2026-06-18	2026-06-18	/uploads/quotations/qr_193_v_63_comparative_statement_QR-00007.pdf		Received	3	2026-06-18 12:23:35.473388
 552	193	64	P12345689	2026-06-18	2026-06-18	/uploads/quotations/qr_193_v_64_Screenshot (86).png		Received	3	2026-06-18 12:33:43.015343
 553	193	62	k130704	2026-06-18	2026-06-18	/uploads/quotations/qr_193_v_62_Screenshot (122).png		Received	3	2026-06-18 12:41:40.107901
+554	194	62	In1	2026-06-03	2026-06-19	/api/uploads/quotations/qr_194_v_62_66966cc8a3f643066ec91b1d_word invoice format-p-1600.png		Received	3	2026-06-19 12:03:04.087083
+555	194	63	in23	2026-06-02	2026-06-19	/api/uploads/quotations/qr_194_v_63_66966cc93a2d857e531ed7ba_excel invoice format-p-1600.png		Received	3	2026-06-19 12:03:48.376052
+556	195	62	R3764	2026-06-04	2026-06-19	/api/uploads/quotations/qr_195_v_62_66966cc93a2d857e531ed7ba_excel invoice format-p-1600.png		Received	3	2026-06-19 12:26:02.660897
+557	195	63	F23	2026-06-03	2026-06-19	/api/uploads/quotations/qr_195_v_63_66966cc8a3f643066ec91b1d_word invoice format-p-1600.png		Received	3	2026-06-19 12:26:47.039268
+558	190	63	E343	2026-06-11	2026-06-19	/api/uploads/quotations/qr_190_v_63_66966cc93a2d857e531ed7ba_excel invoice format-p-1600.png		Received	3	2026-06-19 12:29:20.456345
+559	190	62	W12	2026-06-03	2026-06-19	/api/uploads/quotations/qr_190_v_62_66966cc93a2d857e531ed7ba_excel invoice format-p-1600.png		Received	3	2026-06-19 12:35:46.244009
+560	190	64	W4332	2026-06-04	2026-06-19	/api/uploads/quotations/qr_190_v_64_66966cc8a3f643066ec91b1d_word invoice format-p-1600.png		Received	3	2026-06-19 12:36:50.151246
 \.
 
 
@@ -15751,7 +15831,7 @@ COPY public.warehouses (id, tenant_id, site_id, name, code, project_id, warehous
 -- Name: alerts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.alerts_id_seq', 25, true);
+SELECT pg_catalog.setval('public.alerts_id_seq', 29, true);
 
 
 --
@@ -15765,7 +15845,7 @@ SELECT pg_catalog.setval('public.approval_flows_id_seq', 46, true);
 -- Name: audit_logs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.audit_logs_id_seq', 324, true);
+SELECT pg_catalog.setval('public.audit_logs_id_seq', 333, true);
 
 
 --
@@ -15793,14 +15873,14 @@ SELECT pg_catalog.setval('public.company_addresses_id_seq', 6, true);
 -- Name: complaint_images_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.complaint_images_id_seq', 7, true);
+SELECT pg_catalog.setval('public.complaint_images_id_seq', 12, true);
 
 
 --
 -- Name: complaints_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.complaints_id_seq', 8, true);
+SELECT pg_catalog.setval('public.complaints_id_seq', 9, true);
 
 
 --
@@ -15877,21 +15957,21 @@ SELECT pg_catalog.setval('public.grn_items_id_seq', 509, true);
 -- Name: indent_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.indent_approvals_id_seq', 50, true);
+SELECT pg_catalog.setval('public.indent_approvals_id_seq', 54, true);
 
 
 --
 -- Name: indent_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.indent_items_id_seq', 508, true);
+SELECT pg_catalog.setval('public.indent_items_id_seq', 509, true);
 
 
 --
 -- Name: indents_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.indents_id_seq', 229, true);
+SELECT pg_catalog.setval('public.indents_id_seq', 230, true);
 
 
 --
@@ -15919,14 +15999,14 @@ SELECT pg_catalog.setval('public.invoices_id_seq', 11, true);
 -- Name: material_issue_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.material_issue_items_id_seq', 216, true);
+SELECT pg_catalog.setval('public.material_issue_items_id_seq', 217, true);
 
 
 --
 -- Name: material_issues_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.material_issues_id_seq', 236, true);
+SELECT pg_catalog.setval('public.material_issues_id_seq', 237, true);
 
 
 --
@@ -15982,14 +16062,14 @@ SELECT pg_catalog.setval('public.purchase_order_approvals_id_seq', 31, true);
 -- Name: purchase_order_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_order_items_id_seq', 568, true);
+SELECT pg_catalog.setval('public.purchase_order_items_id_seq', 572, true);
 
 
 --
 -- Name: purchase_orders_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_orders_id_seq', 225, true);
+SELECT pg_catalog.setval('public.purchase_orders_id_seq', 229, true);
 
 
 --
@@ -16017,21 +16097,21 @@ SELECT pg_catalog.setval('public.purchase_requests_id_seq', 200, true);
 -- Name: quotation_comparisons_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_comparisons_id_seq', 93, true);
+SELECT pg_catalog.setval('public.quotation_comparisons_id_seq', 99, true);
 
 
 --
 -- Name: quotation_request_item_sources_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_request_item_sources_id_seq', 74, true);
+SELECT pg_catalog.setval('public.quotation_request_item_sources_id_seq', 78, true);
 
 
 --
 -- Name: quotation_request_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_request_items_id_seq', 434, true);
+SELECT pg_catalog.setval('public.quotation_request_items_id_seq', 438, true);
 
 
 --
@@ -16045,21 +16125,21 @@ SELECT pg_catalog.setval('public.quotation_request_prs_id_seq', 11, true);
 -- Name: quotation_request_vendors_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_request_vendors_id_seq', 396, true);
+SELECT pg_catalog.setval('public.quotation_request_vendors_id_seq', 400, true);
 
 
 --
 -- Name: quotation_requests_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_requests_id_seq', 193, true);
+SELECT pg_catalog.setval('public.quotation_requests_id_seq', 195, true);
 
 
 --
 -- Name: role_permissions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.role_permissions_id_seq', 978, true);
+SELECT pg_catalog.setval('public.role_permissions_id_seq', 987, true);
 
 
 --
@@ -16087,7 +16167,7 @@ SELECT pg_catalog.setval('public.sites_id_seq', 3, true);
 -- Name: stock_ledger_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.stock_ledger_id_seq', 4254, true);
+SELECT pg_catalog.setval('public.stock_ledger_id_seq', 4255, true);
 
 
 --
@@ -16171,14 +16251,14 @@ SELECT pg_catalog.setval('public.vendor_categories_id_seq', 91, true);
 -- Name: vendor_quotation_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_quotation_items_id_seq', 1223, true);
+SELECT pg_catalog.setval('public.vendor_quotation_items_id_seq', 1237, true);
 
 
 --
 -- Name: vendor_quotations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_quotations_id_seq', 553, true);
+SELECT pg_catalog.setval('public.vendor_quotations_id_seq', 560, true);
 
 
 --
@@ -19430,5 +19510,5 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict XkGh7txsYYtSGxWtbzxMGK6EFsMXtRiUiWmeIVFpKT40usWgg2aQt7uOMkKALdX
+\unrestrict YLvwQdyPigitgaAl6pILuykq3woPW5gxLYUXqI7vXDoOIOPz8XhaZCUMSVa32FJ
 

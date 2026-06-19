@@ -121,6 +121,7 @@ export default function ComplaintsList() {
               <TableCell>Date & Time</TableCell>
               <TableCell>Institution</TableCell>
               <TableCell>Location / Dept</TableCell>
+              <TableCell>Raised By</TableCell>
               <TableCell>Nature of Complaint</TableCell>
               <TableCell>Status</TableCell>
               <TableCell align="right">Actions</TableCell>
@@ -129,7 +130,7 @@ export default function ComplaintsList() {
           <TableBody>
             {filteredComplaints.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
+                <TableCell colSpan={8} align="center" sx={{ py: 3 }}>
                   <Typography variant="body2" color="textSecondary">No complaints found</Typography>
                 </TableCell>
               </TableRow>
@@ -150,6 +151,9 @@ export default function ComplaintsList() {
                   </TableCell>
                   <TableCell>
                     {row.building_name ? `${row.building_name} - ${row.room_name || ''}` : row.location || row.department_name}
+                  </TableCell>
+                  <TableCell>
+                    {row.created_by_name || '-'}
                   </TableCell>
                   <TableCell sx={{ maxWidth: 250, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {row.nature_of_complaint}

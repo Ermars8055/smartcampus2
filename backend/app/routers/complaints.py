@@ -413,6 +413,8 @@ def verify_complaint(
 
     if payload.is_accepted:
         complaint.status = ComplaintStatus.CLOSED.value
+        if payload.feedback:
+            complaint.feedback = payload.feedback
     else:
         complaint.status = ComplaintStatus.REOPENED.value
         complaint.rejection_remarks = payload.rejection_remarks

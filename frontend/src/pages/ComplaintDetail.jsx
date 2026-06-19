@@ -36,6 +36,7 @@ export default function ComplaintDetail() {
   const [inspectionDetails, setInspectionDetails] = useState('');
   const [resolutionRemarks, setResolutionRemarks] = useState('');
   const [rejectionRemarks, setRejectionRemarks] = useState('');
+  const [feedback, setFeedback] = useState('');
   const [resolutionImages, setResolutionImages] = useState([]);
   const [resolutionPreviewUrls, setResolutionPreviewUrls] = useState([]);
   
@@ -45,11 +46,18 @@ export default function ComplaintDetail() {
   useEffect(() => {
     fetchComplaintData();
     fetchTechnicians();
+
+    // Auto-refresh data every 10 seconds silently
+    const interval = setInterval(() => {
+      fetchComplaintData(true);
+    }, 10000);
+
+    return () => clearInterval(interval);
   }, [id]);
 
-  const fetchComplaintData = async () => {
+  const fetchComplaintData = async (isPolling = false) => {
     try {
-      setLoading(true);
+      if (!isPolling) setLoading(true);
       const res = await api.get(`/api/complaints/${id}`);
       setComplaint(res.data);
       
@@ -73,9 +81,9 @@ export default function ComplaintDetail() {
       }
     } catch (error) {
       console.error('Failed to fetch details', error);
-      setSnackbar({ open: true, message: 'Failed to fetch complaint details', severity: 'error' });
+      if (!isPolling) setSnackbar({ open: true, message: 'Failed to fetch complaint details', severity: 'error' });
     } finally {
-      setLoading(false);
+      if (!isPolling) setLoading(false);
     }
   };
 
@@ -186,7 +194,8 @@ export default function ComplaintDetail() {
     try {
       await api.post(`/api/complaints/${id}/verify`, {
         is_accepted: isAccepted,
-        rejection_remarks: isAccepted ? null : rejectionRemarks
+        rejection_remarks: isAccepted ? null : rejectionRemarks,
+        feedback: isAccepted ? feedback : null
       });
       setSnackbar({ open: true, message: isAccepted ? 'Complaint Closed' : 'Complaint Reopened', severity: 'success' });
       setVerifyDialogOpen(false);
@@ -233,7 +242,8 @@ export default function ComplaintDetail() {
   const postRepairImages = complaint.images.filter(img => img.is_resolution_image);
 
   const canStartRepair = materialIndents.length === 0 || (materialIssues.length > 0 && materialIssues.every(issue => issue.is_acknowledged));
-  const isCreator = user && complaint && user.id === complaint.created_by_id;
+  const isCreator = user && complaint && String(user.id) === String(complaint.created_by_id);
+  const canVerify = isCreator || user?.is_platform_admin;
 
   return (
     <Box sx={{ maxWidth: 1000, mx: 'auto', pb: 5 }}>
@@ -294,16 +304,16 @@ export default function ComplaintDetail() {
 
             {complaint.status === 'Resolved' && (
               <>
-                <Tooltip title={!isCreator ? "Only the person who raised the complaint can verify or reject its resolution." : ""}>
+                <Tooltip title={!canVerify ? "Only the person who raised the complaint or a Platform Admin can verify or reject its resolution." : ""}>
                   <span>
-                    <Button variant="contained" color="success" startIcon={<VerifiedUser />} onClick={() => setVerifyDialogOpen(true)} disabled={!isCreator}>
+                    <Button variant="contained" color="success" startIcon={<VerifiedUser />} onClick={() => setVerifyDialogOpen(true)} disabled={!canVerify}>
                       Verify & Close
                     </Button>
                   </span>
                 </Tooltip>
-                <Tooltip title={!isCreator ? "Only the person who raised the complaint can verify or reject its resolution." : ""}>
+                <Tooltip title={!canVerify ? "Only the person who raised the complaint or a Platform Admin can verify or reject its resolution." : ""}>
                   <span>
-                    <Button variant="outlined" color="error" startIcon={<Cancel />} onClick={() => setRejectDialogOpen(true)} disabled={!isCreator} sx={{ ml: 1 }}>
+                    <Button variant="outlined" color="error" startIcon={<Cancel />} onClick={() => setRejectDialogOpen(true)} disabled={!canVerify} sx={{ ml: 1 }}>
                       Reject Resolution
                     </Button>
                   </span>
@@ -332,13 +342,17 @@ export default function ComplaintDetail() {
                 <Typography variant="body1">{complaint.building_name || complaint.location || complaint.department_name || '-'}</Typography>
               </Grid>
               
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={4}>
                 <Typography variant="caption" color="textSecondary">Nature of Complaint</Typography>
                 <Typography variant="body1">{complaint.nature_of_complaint || '-'}</Typography>
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={4}>
                 <Typography variant="caption" color="textSecondary">Assigned Technician</Typography>
                 <Typography variant="body1" fontWeight={500}>{complaint.assigned_to_name || 'Unassigned'}</Typography>
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <Typography variant="caption" color="textSecondary">Raised By</Typography>
+                <Typography variant="body1" fontWeight={500}>{complaint.created_by_name || '-'}</Typography>
               </Grid>
 
               <Grid item xs={12}>
@@ -374,6 +388,13 @@ export default function ComplaintDetail() {
               <Typography variant="h6" sx={{ color: '#166534', mb: 2 }}>Resolution Details</Typography>
               <Typography variant="caption" color="textSecondary">Resolved By: {complaint.resolved_by_name} on {complaint.resolved_at ? dayjs(complaint.resolved_at).format('DD MMM YYYY HH:mm') : '-'}</Typography>
               <Typography variant="body1" sx={{ mt: 1, mb: 2, whiteSpace: 'pre-wrap' }}>{complaint.resolution_remarks || 'No remarks provided.'}</Typography>
+
+              {complaint.feedback && (
+                <Box sx={{ mt: 2, mb: 2, p: 1.5, bgcolor: '#FFFFFF', borderRadius: 1, border: '1px solid #BBF7D0' }}>
+                  <Typography variant="subtitle2" color="textSecondary" sx={{ mb: 0.5 }}>Verification Feedback:</Typography>
+                  <Typography variant="body2" sx={{ fontStyle: 'italic', color: '#166534' }}>"{complaint.feedback}"</Typography>
+                </Box>
+              )}
               
               {postRepairImages.length > 0 && (
                 <Grid container spacing={2}>
@@ -483,6 +504,30 @@ export default function ComplaintDetail() {
                </Box>
              )}
           </Paper>
+
+          {/* Material Issue Acknowledgement Status */}
+          <Paper sx={{ p: 3, mb: 3 }}>
+            <Typography variant="h6" sx={{ color: '#1E3A8A', mb: 2 }}>Material Issue Acknowledgement Status</Typography>
+            {materialIssues.length === 0 ? (
+              <Typography variant="body2" color="textSecondary">No issues to acknowledge.</Typography>
+            ) : (
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                {materialIssues.map((issue) => (
+                  <Box key={issue.id} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1.5, border: '1px solid #E2E8F0', borderRadius: 1, bgcolor: issue.is_acknowledged ? '#F0FDF4' : '#FFFBEB' }}>
+                    <Box>
+                      <Typography variant="subtitle2" fontWeight="bold">{issue.issue_number}</Typography>
+                      {issue.is_acknowledged ? (
+                        <Typography variant="caption" color="textSecondary">Acknowledged by {issue.acknowledged_by_name || 'Technician'} on {issue.acknowledged_at ? dayjs(issue.acknowledged_at).format('DD MMM YYYY') : ''}</Typography>
+                      ) : (
+                        <Typography variant="caption" color="textSecondary">Awaiting Acknowledgement</Typography>
+                      )}
+                    </Box>
+                    <Chip size="small" label={issue.is_acknowledged ? 'Acknowledged' : 'Pending'} color={issue.is_acknowledged ? 'success' : 'warning'} />
+                  </Box>
+                ))}
+              </Box>
+            )}
+          </Paper>
           </>
           )}
         </Grid>
@@ -550,7 +595,7 @@ export default function ComplaintDetail() {
             onChange={(e) => setResolutionRemarks(e.target.value)}
             sx={{ mb: 3, mt: 1 }}
           />
-          <Typography variant="subtitle2" sx={{ mb: 1 }}>Upload Post-Repair Photos (Optional)</Typography>
+          <Typography variant="subtitle2" sx={{ mb: 1 }}>Upload Post-Repair Photos</Typography>
           <Box sx={{ border: '2px dashed #CBD5E1', borderRadius: 2, p: 2, textAlign: 'center', bgcolor: '#F8FAFC', mb: 2 }}>
              <input type="file" multiple accept="image/*" style={{ display: 'none' }} ref={fileInputRef} onChange={handleResolutionImageChange} />
             <Button variant="outlined" startIcon={<PhotoCamera />} onClick={() => fileInputRef.current.click()} size="small">
@@ -581,10 +626,18 @@ export default function ComplaintDetail() {
       </Dialog>
 
       {/* Verify Dialog */}
-      <Dialog open={verifyDialogOpen} onClose={() => !actionLoading && setVerifyDialogOpen(false)}>
+      <Dialog open={verifyDialogOpen} onClose={() => !actionLoading && setVerifyDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Verify Resolution</DialogTitle>
         <DialogContent>
-          <Typography>Are you sure you want to verify and close this complaint?</Typography>
+          <Typography sx={{ mb: 2 }}>Are you sure you want to verify and close this complaint?</Typography>
+          <TextField
+            fullWidth
+            label="Feedback / Remarks"
+            multiline
+            rows={3}
+            value={feedback}
+            onChange={(e) => setFeedback(e.target.value)}
+          />
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
           <Button onClick={() => setVerifyDialogOpen(false)} disabled={actionLoading}>Cancel</Button>

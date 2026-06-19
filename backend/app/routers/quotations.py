@@ -19,7 +19,7 @@ from app.schemas import (
     QuotationRequestCreate, QuotationRequestOut, VendorQuotationCreate, VendorQuotationOut,
     VendorOverrideRequest, ComparativeStatementOut, MaterialComparisonOut, VendorQuoteDetail,
     QRItemOut, QRLinkedPROut, QRVendorOut, VendorQuotationItemOut, QRItemSourceOut,
-    QRVendorReceiptUpdate
+    QRVendorReceiptUpdate, QuotationApproveRequest
 )
 from pydantic import BaseModel
 
@@ -319,10 +319,25 @@ def transition_to_entered(
         raise HTTPException(status_code=404, detail="Quotation Request not found")
         
     # Validation: No vendor should be in PENDING receipt status
-    pending_vendors = [v for v in qr.invited_vendors if v.receipt_status == "Pending"]
+    pending_vendors = [v for v in qr.invited_vendors if v.receipt_status == "Pending" or not v.receipt_status]
     if pending_vendors:
         vendor_names = ", ".join([f"{v.vendor.code} - {v.vendor.name}" for v in pending_vendors])
         raise HTTPException(status_code=400, detail=f"Cannot proceed. Quotations are pending from: {vendor_names}")
+        
+    received_vendors = [v for v in qr.invited_vendors if v.receipt_status == "Received"]
+    if not received_vendors:
+        raise HTTPException(status_code=400, detail="Cannot proceed. At least one vendor must be marked as Received with a quote.")
+        
+    for rv in received_vendors:
+        has_quote = db.query(VendorQuotation).filter(
+            VendorQuotation.qr_id == id, 
+            VendorQuotation.vendor_id == rv.vendor_id
+        ).first()
+        if not has_quote:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Vendor '{rv.vendor.name}' is marked as 'Received' but no quote has been entered. Please enter the quote or change the status to 'Not Required'."
+            )
         
     qr.status = QuotationRequestStatus.ENTERED.value
     db.commit()
@@ -523,9 +538,7 @@ def generate_comparison(
             override_reason=comp.override_reason if comp else None
         ))
 
-    # If first time comparison, update QR status
-    if qr.status == QuotationRequestStatus.ENTERED.value:
-        qr.status = QuotationRequestStatus.COMPARED.value
+    # We no longer auto-transition the status here. It stays ENTERED until explicitly finalized.
     
     db.commit()
 
@@ -594,7 +607,9 @@ def override_vendor_selection(
 
 @router.post("/{qr_id}/approve")
 def approve_comparison(
-    qr_id: int, db: Session = Depends(get_db),
+    qr_id: int, 
+    data: QuotationApproveRequest = None,
+    db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("purchase_requests", "update")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
@@ -608,6 +623,8 @@ def approve_comparison(
     qr.status = QuotationRequestStatus.APPROVED.value
     qr.approved_by_id = current_user.id
     qr.approved_at = get_now_ist()
+    if data and data.remarks:
+        qr.approval_remarks = data.remarks
     
     comps = db.query(QuotationComparison).filter(QuotationComparison.qr_id == qr_id).all()
     for c in comps:
@@ -630,6 +647,10 @@ def finalize_comparison(
     ).first()
     if not qr:
         raise HTTPException(status_code=404, detail="Quotation Request not found")
+        
+    vendor_quotes_count = db.query(VendorQuotation).filter(VendorQuotation.qr_id == id).count()
+    if vendor_quotes_count == 0:
+        raise HTTPException(status_code=400, detail="Cannot finalize comparison without any vendor quotations entered.")
         
     qr.status = QuotationRequestStatus.COMPARED.value
     db.commit()

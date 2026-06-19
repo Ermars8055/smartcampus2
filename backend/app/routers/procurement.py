@@ -550,6 +550,7 @@ def list_purchase_orders(
     search: Optional[str] = None,
     status: Optional[str] = None,
     project_id: Optional[int] = None,
+    qr_id: Optional[int] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("purchase_orders", "read")),
     tenant_id: int = Depends(get_tenant_id),
@@ -577,6 +578,8 @@ def list_purchase_orders(
         q = q.filter(PurchaseOrder.status == status)
     if project_id:
         q = q.filter(PurchaseOrder.project_id == project_id)
+    if qr_id:
+        q = q.filter(PurchaseOrder.qr_id == qr_id)
     pos = q.order_by(PurchaseOrder.created_at.desc()).all()
     
     # Pre-fetch flows and user permissions for efficient check

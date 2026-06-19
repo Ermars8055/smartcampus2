@@ -1448,6 +1448,9 @@ class QRVendorOut(BaseModel):
 class QRVendorReceiptUpdate(BaseModel):
     receipt_status: str
 
+class QuotationApproveRequest(BaseModel):
+    remarks: Optional[str] = None
+
 class QuotationRequestOut(BaseModel):
     id: int
     qr_number: str
@@ -1460,6 +1463,7 @@ class QuotationRequestOut(BaseModel):
     created_by_name: Optional[str] = None
     approved_by_id: Optional[int] = None
     approved_at: Optional[datetime] = None
+    approval_remarks: Optional[str] = None
     created_at: datetime
     updated_at: datetime
     items: List[QRItemOut] = []
@@ -1689,6 +1693,7 @@ class ComplaintBase(BaseModel):
     assigned_to_id: Optional[int] = None
     resolution_remarks: Optional[str] = None
     inspection_details: Optional[str] = None
+    feedback: Optional[str] = None
 
 class ComplaintCreate(BaseModel):
     docket_no: Optional[str] = None
@@ -1732,6 +1737,7 @@ class ComplaintResolve(BaseModel):
 class ComplaintVerify(BaseModel):
     is_accepted: bool
     rejection_remarks: Optional[str] = None
+    feedback: Optional[str] = None
 
 class ComplaintOut(ComplaintBase):
     id: int
@@ -1741,6 +1747,7 @@ class ComplaintOut(ComplaintBase):
     material_required: bool = False
     verified_at: Optional[datetime] = None
     rejection_remarks: Optional[str] = None
+    feedback: Optional[str] = None
     building_name: Optional[str] = None
     room_name: Optional[str] = None
     floor_id: Optional[int] = None
@@ -1748,6 +1755,7 @@ class ComplaintOut(ComplaintBase):
     institution_id: Optional[int] = None
     institution_name: Optional[str] = None
     assigned_to_name: Optional[str] = None
+    created_by_id: Optional[int] = None
     created_by_name: Optional[str] = None
     resolved_by_name: Optional[str] = None
     verified_by_name: Optional[str] = None

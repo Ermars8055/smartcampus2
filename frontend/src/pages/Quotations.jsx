@@ -87,8 +87,14 @@ const Quotations = () => {
   const [convertToPoDialog, setConvertToPoDialog] = useState({ open: false, terms: '', items: [] });
   const [termsTemplates, setTermsTemplates] = useState([]);
 
-  // Send to Vendors dialog
   const [sendToVendorsDialog, setSendToVendorsDialog] = useState({ open: false, qrId: null, qrNumber: '', vendorNames: [], message: '' });
+
+  // Management Approve dialog
+  const [managementApproveDialogOpen, setManagementApproveDialogOpen] = useState(false);
+  const [managementApproveComment, setManagementApproveComment] = useState('');
+
+  // Generated POs
+  const [generatedPOs, setGeneratedPOs] = useState([]);
 
   useEffect(() => {
     api.get('/api/terms').then(r => setTermsTemplates(r.data));
@@ -109,6 +115,16 @@ const Quotations = () => {
     }
   }, [selectedQR?.id, detailSection]);
 
+  useEffect(() => {
+    if (selectedQR && selectedQR.status === 'Ordered') {
+      api.get(`/api/procurement/po?qr_id=${selectedQR.id}`)
+        .then(r => setGeneratedPOs(r.data))
+        .catch(e => console.error("Failed to load POs:", e));
+    } else {
+      setGeneratedPOs([]);
+    }
+  }, [selectedQR]);
+
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -128,10 +144,12 @@ const Quotations = () => {
         setApprovedPrs(Array.isArray(prRes.data) ? prRes.data : []);
       } else {
         // Detail / Workflow Mode
-        await Promise.all([
+        const [qrRes] = await Promise.all([
+          api.get(`/api/quotations/requests/${selectedQR.id}`),
           fetchVendorQuotes(selectedQR.id),
           fetchComparison(selectedQR.id)
         ]);
+        setSelectedQR(qrRes.data);
       }
     } catch (err) {
       showMessage('Failed to sync data.', 'Error', 'error');
@@ -272,8 +290,9 @@ const Quotations = () => {
 
   const handleApprove = async () => {
     try {
-      await api.post(`/api/quotations/${selectedQR.id}/approve`);
+      await api.post(`/api/quotations/${selectedQR.id}/approve`, { remarks: managementApproveComment });
       showMessage('Comparative statement approved!', 'Success', 'success');
+      setManagementApproveDialogOpen(false);
       fetchComparison(selectedQR.id);
       const res = await api.get(`/api/quotations/requests/${selectedQR.id}`);
       setSelectedQR(res.data);
@@ -338,14 +357,22 @@ const Quotations = () => {
     }
   };
 
-  const handleUpdateVendorReceipt = async (qrId, vendorId, newStatus) => {
+  const handleUpdateVendorReceipt = async (qrId, vendorId, newStatus, silent = false) => {
     try {
       await api.put(`/api/quotations/requests/${qrId}/vendors/${vendorId}/receipt-status`, { receipt_status: newStatus });
-      showMessage('Vendor receipt status updated!', 'Success', 'success');
+      if (!silent) {
+        showMessage('Vendor receipt status updated!', 'Success', 'success');
+      } else {
+        setSnackbar({ open: true, message: 'Vendor receipt status updated', severity: 'success' });
+      }
       const res = await api.get(`/api/quotations/requests/${qrId}`);
       setSelectedQR(res.data);
     } catch (err) {
-      showMessage(err.response?.data?.detail || 'Failed to update status', 'Error', 'error');
+      if (!silent) {
+        showMessage(err.response?.data?.detail || 'Failed to update status', 'Error', 'error');
+      } else {
+        setSnackbar({ open: true, message: err.response?.data?.detail || 'Failed to update status', severity: 'error' });
+      }
     }
   };
 
@@ -810,6 +837,19 @@ const Quotations = () => {
                                 </IconButton>
                               </span>
                             </Tooltip>
+
+                            <Tooltip title="View Details">
+                              <span>
+                                <IconButton
+                                  size="small"
+                                  onClick={() => handleAutoProcess(qr, 'comparison')}
+                                  disabled={qr.status !== 'Ordered'}
+                                  sx={{ color: qr.status === 'Ordered' ? 'success.main' : 'text.disabled' }}
+                                >
+                                  <VisibilityIcon fontSize="small" />
+                                </IconButton>
+                              </span>
+                            </Tooltip>
                           </Stack>
                         </TableCell>
                       </TableRow>
@@ -892,107 +932,51 @@ const Quotations = () => {
               </TableContainer>
             </Box>
 
-            {/* Phase 1: Requested Stage */}
-            {selectedQR.status === 'Requested' && (
+            {/* 1. Vendor Management & Quotations */}
+            {['Requested', 'Received', 'Entered', 'Compared', 'Approved', 'Ordered'].includes(selectedQR.status) && (
               <Box mb={4}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 600 }}>1. Request to Vendors</Typography>
-                  <Button variant="contained" color="primary" onClick={() => handleStartReceiving(selectedQR.id)}>
-                    Start Receiving
-                  </Button>
-                </Box>
-                <TableContainer component={Paper} variant="outlined">
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
-                        <TableCell sx={{ fontWeight: 'bold' }}>Vendor Name</TableCell>
-                        <TableCell sx={{ fontWeight: 'bold' }}>Sent Status</TableCell>
-                        <TableCell align="right" sx={{ fontWeight: 'bold' }}>Sent At</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {selectedQR.invited_vendors.map(v => (
-                        <TableRow key={v.vendor_id}>
-                          <TableCell>{v.vendor_name}</TableCell>
-                          <TableCell><Chip size="small" label={v.is_sent ? "Sent" : "Pending"} color={v.is_sent ? "info" : "default"} /></TableCell>
-                          <TableCell align="right">{v.sent_at ? formatDate(v.sent_at) : '-'}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </Box>
-            )}
-
-            {/* Phase 2: Received Stage (Receipt Tracking) */}
-            {selectedQR.status === 'Received' && (
-              <Box mb={4}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 600 }}>2. Quotation Receipt Tracking</Typography>
-                  <Button variant="contained" color="secondary" onClick={() => handleMoveToEntry(selectedQR.id)}>
-                    Move to Entry
-                  </Button>
-                </Box>
-                <TableContainer component={Paper} variant="outlined">
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
-                        <TableCell sx={{ fontWeight: 'bold' }}>Vendor Name</TableCell>
-                        <TableCell sx={{ fontWeight: 'bold' }}>Receipt Status</TableCell>
-                        <TableCell align="right" sx={{ fontWeight: 'bold' }}>Action</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {selectedQR.invited_vendors.map(v => (
-                        <TableRow key={v.vendor_id}>
-                          <TableCell>{v.vendor_name}</TableCell>
-                          <TableCell>
-                            <Chip
-                              size="small"
-                              label={v.receipt_status || "Pending"}
-                              color={v.receipt_status === 'Received' ? 'success' : (v.receipt_status === 'Not Required' ? 'default' : 'warning')}
-                            />
-                          </TableCell>
-                          <TableCell align="right">
-                            <Stack direction="row" spacing={1} justifyContent="flex-end">
-                              <Button size="small" variant={v.receipt_status === 'Received' ? 'contained' : 'outlined'} color="success" onClick={() => handleUpdateVendorReceipt(selectedQR.id, v.vendor_id, 'Received')}>Received</Button>
-                              <Button size="small" variant={v.receipt_status === 'Pending' ? 'contained' : 'outlined'} color="warning" onClick={() => handleUpdateVendorReceipt(selectedQR.id, v.vendor_id, 'Pending')}>Pending</Button>
-                              <Button size="small" variant={v.receipt_status === 'Not Required' ? 'contained' : 'outlined'} color="inherit" onClick={() => handleUpdateVendorReceipt(selectedQR.id, v.vendor_id, 'Not Required')}>Not Required</Button>
-                            </Stack>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </Box>
-            )}
-
-            {/* Phase 3: Entered Stage (Quotation Entry) */}
-            {['Entered', 'Compared', 'Approved', 'Ordered'].includes(selectedQR.status) && (
-              <Box mb={4}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 600 }}>3. Vendor Quotation Entry</Typography>
-                  {selectedQR.status === 'Entered' && (
-                    <Button
-                      variant="contained"
-                      color="secondary"
-                      onClick={async () => {
-                        await api.post(`/api/quotations/requests/${selectedQR.id}/finalize`);
-                        fetchData();
-                      }}
-                    >
-                      Finalize & Generate Statement
-                    </Button>
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>1. Vendor Management & Quotations</Typography>
+                  {/* Action buttons based on status */}
+                  {selectedQR.status === 'Requested' && (
+                    <Typography variant="body2" color="text.secondary">Waiting for quotations...</Typography>
                   )}
+                  {selectedQR.status === 'Received' && (() => {
+                    const hasAtLeastOneQuote = selectedQR.invited_vendors.some(v => vendorQuotes.some(q => q.vendor_id === v.vendor_id));
+                    const allQuotesEntered = selectedQR.invited_vendors.every(v => {
+                      if (v.receipt_status === 'Not Required') return true;
+                      return vendorQuotes.some(q => q.vendor_id === v.vendor_id);
+                    });
+                    const canLock = hasAtLeastOneQuote && allQuotesEntered;
+
+                    return (
+                      <Button
+                        variant="contained"
+                        color="secondary"
+                        disabled={!canLock}
+                        onClick={async () => {
+                          try {
+                             await api.post(`/api/quotations/requests/${selectedQR.id}/entered`);
+                             showMessage('Entries locked and quotation compared successfully!', 'Success', 'success');
+                             fetchData();
+                          } catch (error) {
+                             setSnackbar({ open: true, message: error.response?.data?.detail || 'Failed to lock entries', severity: 'error' });
+                          }
+                        }}
+                      >
+                        Lock Entries & Compare
+                      </Button>
+                    );
+                  })()}
                 </Box>
                 <TableContainer component={Paper} variant="outlined">
                   <Table size="small">
                     <TableHead>
                       <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
                         <TableCell sx={{ fontWeight: 'bold' }}>Vendor Name</TableCell>
+                        <TableCell sx={{ fontWeight: 'bold' }}>Invitation</TableCell>
                         <TableCell sx={{ fontWeight: 'bold' }}>Receipt Status</TableCell>
-                        <TableCell sx={{ fontWeight: 'bold' }}>Entry Status</TableCell>
+                        <TableCell sx={{ fontWeight: 'bold' }}>Quote Status</TableCell>
                         <TableCell align="right" sx={{ fontWeight: 'bold' }}>Action</TableCell>
                       </TableRow>
                     </TableHead>
@@ -1000,14 +984,61 @@ const Quotations = () => {
                       {selectedQR.invited_vendors.map(v => {
                         const submittedQuote = vendorQuotes.find(q => q.vendor_id === v.vendor_id);
                         const isNotRequired = v.receipt_status === 'Not Required';
+                        const isPending = !v.receipt_status || v.receipt_status === 'Pending';
+                        
                         return (
                           <TableRow key={v.vendor_id} sx={{ opacity: isNotRequired ? 0.6 : 1 }}>
                             <TableCell>{v.vendor_name}</TableCell>
-                            <TableCell><Chip size="small" label={v.receipt_status} color={v.receipt_status === 'Received' ? 'success' : 'default'} /></TableCell>
+                            <TableCell><Chip size="small" label={v.is_sent ? "Sent" : "Pending"} color={v.is_sent ? "info" : "default"} /></TableCell>
+                            <TableCell>
+                              {['Entered', 'Compared', 'Approved', 'Ordered'].includes(selectedQR.status) || submittedQuote || v.receipt_status === 'Received' ? (
+                                <Chip size="small" label={v.receipt_status || 'Pending'} color={isNotRequired ? 'default' : (isPending ? 'warning' : 'success')} />
+                              ) : (
+                                <FormControl size="small" variant="standard">
+                                  <Select
+                                    value={v.receipt_status || 'Pending'}
+                                    onChange={async (e) => {
+                                      const newStatus = e.target.value;
+                                      await handleUpdateVendorReceipt(selectedQR.id, v.vendor_id, newStatus, true);
+                                      
+                                      // Auto transition from Requested to Received if the first vendor is marked Received/Not Required
+                                      if (selectedQR.status === 'Requested' && (newStatus === 'Received' || newStatus === 'Not Required')) {
+                                        try {
+                                          await api.post(`/api/quotations/requests/${selectedQR.id}/receive`);
+                                          fetchData(); // Refresh the whole QR
+                                        } catch (err) {
+                                          console.error('Failed to auto-transition to receive', err);
+                                        }
+                                      }
+                                    }}
+                                    disableUnderline
+                                    sx={{
+                                      fontSize: '0.8rem',
+                                      color: isNotRequired ? 'text.secondary' : (isPending ? '#d97706' : '#16a34a'),
+                                      fontWeight: 500
+                                    }}
+                                  >
+                                    <MenuItem value="Pending">Pending</MenuItem>
+                                    <MenuItem value="Received">Received</MenuItem>
+                                    <MenuItem value="Not Required">Not Required</MenuItem>
+                                  </Select>
+                                </FormControl>
+                              )}
+                            </TableCell>
                             <TableCell><Chip size="small" label={submittedQuote ? "Entered" : (isNotRequired ? "Skipped" : "Pending")} color={submittedQuote ? "success" : "default"} /></TableCell>
                             <TableCell align="right">
-                              {!isNotRequired && (
-                                <Button variant="outlined" size="small" startIcon={<EditIcon />} onClick={() => {
+                              {!isNotRequired && !['Compared', 'Approved', 'Ordered'].includes(selectedQR.status) && (
+                                <Button variant="outlined" size="small" startIcon={<EditIcon />} onClick={async () => {
+                                  // Auto set receipt to Received if they click Enter Quote
+                                  if (v.receipt_status !== 'Received') {
+                                     await handleUpdateVendorReceipt(selectedQR.id, v.vendor_id, 'Received', true);
+                                     if (selectedQR.status === 'Requested') {
+                                        try {
+                                          await api.post(`/api/quotations/requests/${selectedQR.id}/receive`);
+                                          fetchData();
+                                        } catch (err) {}
+                                     }
+                                  }
                                   setSelectedVendorForQuote(v);
                                   if (submittedQuote) {
                                     setNewQuote({
@@ -1103,6 +1134,26 @@ const Quotations = () => {
                     </AccordionDetails>
                   </Accordion>
                 ))}
+
+                {selectedQR.status === 'Entered' && (
+                  <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={async () => {
+                        try {
+                          await api.post(`/api/quotations/requests/${selectedQR.id}/finalize`);
+                          showMessage('Comparison finalized successfully!', 'Success', 'success');
+                          fetchData();
+                        } catch (error) {
+                          setSnackbar({ open: true, message: error.response?.data?.detail || 'Failed to finalize comparison', severity: 'error' });
+                        }
+                      }}
+                    >
+                      Finalize Comparison
+                    </Button>
+                  </Box>
+                )}
               </Box>
             )}
 
@@ -1114,7 +1165,10 @@ const Quotations = () => {
                   <Box>
                     <Button variant="outlined" startIcon={<DownloadIcon />} onClick={handleDownloadPDF} sx={{ mr: 1 }}>Download PDF</Button>
                     {selectedQR.status === 'Compared' && (
-                      <Button variant="contained" color="primary" onClick={handleApprove}>Management Approve</Button>
+                      <Button variant="contained" color="primary" onClick={() => {
+                        setManagementApproveComment('');
+                        setManagementApproveDialogOpen(true);
+                      }}>Management Approve</Button>
                     )}
                     {selectedQR.status === 'Approved' && (
                       <Button variant="contained" color="success" onClick={() => {
@@ -1217,6 +1271,26 @@ const Quotations = () => {
                       </TableBody>
                     </Table>
                   </TableContainer>
+                  
+                  {selectedQR.status === 'Ordered' && generatedPOs && generatedPOs.length > 0 && (
+                    <Box mt={4} p={3} sx={{ backgroundColor: '#f0fdf4', borderRadius: 2, border: '1px solid #bbf7d0' }}>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#166534', mb: 2 }}>
+                        <OrderIcon sx={{ verticalAlign: 'middle', mr: 1, fontSize: 20 }} />
+                        Generated Purchase Orders
+                      </Typography>
+                      <Stack direction="row" spacing={2} flexWrap="wrap">
+                        {generatedPOs.map(po => (
+                          <Chip
+                            key={po.id}
+                            label={`${po.po_number} (${po.status})`}
+                            color="success"
+                            variant="outlined"
+                            sx={{ fontWeight: 600, backgroundColor: 'white' }}
+                          />
+                        ))}
+                      </Stack>
+                    </Box>
+                  )}
                 </Paper>
               </Box>
             )}
@@ -1997,6 +2071,34 @@ const Quotations = () => {
         </Dialog>
 
       </Box>
+      <Dialog open={managementApproveDialogOpen} onClose={() => setManagementApproveDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Management Approval Confirmation</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" paragraph sx={{ mt: 1 }}>
+            You are about to approve this Technical Comparison. Once approved, it can be converted to a Purchase Order. Please provide any approval remarks below.
+          </Typography>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Approval Remarks / Comments"
+            type="text"
+            fullWidth
+            multiline
+            rows={3}
+            variant="outlined"
+            value={managementApproveComment}
+            onChange={(e) => setManagementApproveComment(e.target.value)}
+            placeholder="Optional comments for approval..."
+          />
+        </DialogContent>
+        <DialogActions sx={{ p: 2, pt: 0 }}>
+          <Button onClick={() => setManagementApproveDialogOpen(false)}>Cancel</Button>
+          <Button onClick={handleApprove} variant="contained" color="success" disableElevation>
+            Confirm Approval
+          </Button>
+        </DialogActions>
+      </Dialog>
+
     </Box>
   );
 };

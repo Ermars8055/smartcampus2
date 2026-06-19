@@ -708,6 +708,7 @@ class Complaint(Base):
     verified_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     verified_at = Column(DateTime, nullable=True)
     rejection_remarks = Column(Text, nullable=True)
+    feedback = Column(Text, nullable=True)
     
     created_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     resolved_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
@@ -1255,6 +1256,7 @@ class QuotationRequest(Base):
     status = Column(String(50), default=QuotationRequestStatus.DRAFT.value)
     approved_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     approved_at = Column(DateTime, nullable=True)
+    approval_remarks = Column(Text, nullable=True)
     is_deleted = Column(Boolean, default=False)
     created_at = Column(DateTime, default=_get_now)
     updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)

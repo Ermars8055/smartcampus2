@@ -6,7 +6,7 @@ from datetime import datetime, date
 
 from app.database import get_db
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
-from app.models import User, Complaint, ComplaintImage, ComplaintStatus, Building, Room, MaterialIssue
+from app.models import User, Complaint, ComplaintImage, ComplaintStatus, Building, Room, MaterialIssue, Department, Institution
 from app.schemas import (
     ComplaintCreate, ComplaintUpdate, ComplaintOut, ComplaintImageOut,
     ComplaintAssign, ComplaintInspect, ComplaintResolve, ComplaintVerify
@@ -17,7 +17,7 @@ router = APIRouter(prefix="/api/complaints", tags=["Complaints"])
 
 
 # ── Helper: load virtual fields for response ─────────────────────────────
-def _enrich(complaint: Complaint):
+def _enrich(complaint: Complaint, db: Session = None):
     """Populate virtual fields so the Pydantic model can serialize them."""
     complaint.building_name = complaint.building.name if complaint.building else None
     complaint.room_name = complaint.room.name if complaint.room else None
@@ -45,6 +45,20 @@ def _enrich(complaint: Complaint):
         if complaint.building.institution:
             complaint.institution_id = complaint.building.institution.id
             complaint.institution_name = complaint.building.institution.name
+
+    # Fallback: Derive institution from department if no building is set
+    if not complaint.institution_id and db and complaint.department_name:
+        dept = db.query(Department).filter(
+            Department.name == complaint.department_name,
+            Department.tenant_id == complaint.tenant_id,
+            Department.site_id == complaint.site_id
+        ).first()
+        if dept and dept.institution_id:
+            inst = db.query(Institution).filter(Institution.id == dept.institution_id).first()
+            if inst:
+                complaint.institution_id = inst.id
+                complaint.institution_name = inst.name
+
     return complaint
 
 
@@ -109,7 +123,7 @@ def create_complaint(
 
         db.commit()
         db.refresh(new_complaint)
-        return _enrich(new_complaint)
+        return _enrich(new_complaint, db)
     except IntegrityError:
         db.rollback()
         raise HTTPException(status_code=400, detail="Docket number already exists.")
@@ -144,7 +158,7 @@ def get_complaints(
     complaints = query.order_by(Complaint.created_at.desc()).all()
     
     for c in complaints:
-        _enrich(c)
+        _enrich(c, db)
         
     return complaints
 
@@ -157,7 +171,7 @@ def get_complaint(
     current_user: User = Depends(require_permission("complaints", "read"))
 ):
     complaint = _get_complaint(db, complaint_id, tenant_id, site_id)
-    return _enrich(complaint)
+    return _enrich(complaint, db)
 
 @router.put("/{complaint_id}", response_model=ComplaintOut)
 def update_complaint(
@@ -212,7 +226,7 @@ def update_complaint(
 
     db.commit()
     db.refresh(complaint)
-    return _enrich(complaint)
+    return _enrich(complaint, db)
 
 
 # ── Lifecycle state-transition endpoints ─────────────────────────────────
@@ -266,7 +280,7 @@ def assign_complaint(
     
     db.commit()
     db.refresh(complaint)
-    return _enrich(complaint)
+    return _enrich(complaint, db)
 
 
 @router.post("/{complaint_id}/inspect", response_model=ComplaintOut)
@@ -300,7 +314,7 @@ def inspect_complaint(
 
     db.commit()
     db.refresh(complaint)
-    return _enrich(complaint)
+    return _enrich(complaint, db)
 
 
 @router.post("/{complaint_id}/start-repair", response_model=ComplaintOut)
@@ -327,7 +341,7 @@ def start_repair(
     complaint.status = ComplaintStatus.IN_PROGRESS.value
     db.commit()
     db.refresh(complaint)
-    return _enrich(complaint)
+    return _enrich(complaint, db)
 
 
 @router.post("/{complaint_id}/resolve", response_model=ComplaintOut)
@@ -386,7 +400,7 @@ def resolve_complaint(
 
     db.commit()
     db.refresh(complaint)
-    return _enrich(complaint)
+    return _enrich(complaint, db)
 
 
 @router.post("/{complaint_id}/verify", response_model=ComplaintOut)
@@ -421,4 +435,4 @@ def verify_complaint(
 
     db.commit()
     db.refresh(complaint)
-    return _enrich(complaint)
+    return _enrich(complaint, db)

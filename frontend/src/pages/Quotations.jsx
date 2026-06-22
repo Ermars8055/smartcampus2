@@ -87,7 +87,7 @@ const Quotations = () => {
   const [convertToPoDialog, setConvertToPoDialog] = useState({ open: false, terms: '', items: [] });
   const [termsTemplates, setTermsTemplates] = useState([]);
 
-  const [sendToVendorsDialog, setSendToVendorsDialog] = useState({ open: false, qrId: null, qrNumber: '', vendorNames: [], message: '' });
+  const [sendToVendorsDialog, setSendToVendorsDialog] = useState({ open: false, qrId: null, qrNumber: '', vendorNames: [], message: '', isSending: false });
 
   // Management Approve dialog
   const [managementApproveDialogOpen, setManagementApproveDialogOpen] = useState(false);
@@ -228,20 +228,23 @@ const Quotations = () => {
       qrId: qr.id,
       qrNumber: qr.qr_number,
       vendorNames,
-      message: defaultMessage
+      message: defaultMessage,
+      isSending: false
     });
   };
 
   const handleSendToVendors = async () => {
+    setSendToVendorsDialog(prev => ({ ...prev, isSending: true }));
     try {
       await api.post(`/api/quotations/requests/${sendToVendorsDialog.qrId}/send`, {
         message: sendToVendorsDialog.message
       });
       showMessage('Request sent to vendors successfully!', 'Success', 'success');
-      setSendToVendorsDialog({ open: false, qrId: null, qrNumber: '', vendorNames: [], message: '' });
+      setSendToVendorsDialog({ open: false, qrId: null, qrNumber: '', vendorNames: [], message: '', isSending: false });
       fetchData();
     } catch (err) {
       showMessage(err.response?.data?.detail || 'Failed to send to vendors', 'Error', 'error');
+      setSendToVendorsDialog(prev => ({ ...prev, isSending: false }));
     }
   };
 
@@ -362,16 +365,12 @@ const Quotations = () => {
       await api.put(`/api/quotations/requests/${qrId}/vendors/${vendorId}/receipt-status`, { receipt_status: newStatus });
       if (!silent) {
         showMessage('Vendor receipt status updated!', 'Success', 'success');
-      } else {
-        setSnackbar({ open: true, message: 'Vendor receipt status updated', severity: 'success' });
       }
       const res = await api.get(`/api/quotations/requests/${qrId}`);
       setSelectedQR(res.data);
     } catch (err) {
       if (!silent) {
         showMessage(err.response?.data?.detail || 'Failed to update status', 'Error', 'error');
-      } else {
-        setSnackbar({ open: true, message: err.response?.data?.detail || 'Failed to update status', severity: 'error' });
       }
     }
   };
@@ -960,11 +959,11 @@ const Quotations = () => {
                              showMessage('Entries locked and quotation compared successfully!', 'Success', 'success');
                              fetchData();
                           } catch (error) {
-                             setSnackbar({ open: true, message: error.response?.data?.detail || 'Failed to lock entries', severity: 'error' });
+                             showMessage(error.response?.data?.detail || 'Failed to lock entries', 'Error', 'error');
                           }
                         }}
                       >
-                        Lock Entries & Compare
+                        Proceed to Comparison
                       </Button>
                     );
                   })()}
@@ -1146,7 +1145,7 @@ const Quotations = () => {
                           showMessage('Comparison finalized successfully!', 'Success', 'success');
                           fetchData();
                         } catch (error) {
-                          setSnackbar({ open: true, message: error.response?.data?.detail || 'Failed to finalize comparison', severity: 'error' });
+                          showMessage(error.response?.data?.detail || 'Failed to finalize comparison', 'Error', 'error');
                         }
                       }}
                     >
@@ -2016,7 +2015,7 @@ const Quotations = () => {
         {/* Send to Vendors Confirmation Dialog */}
         <Dialog
           open={sendToVendorsDialog.open}
-          onClose={(e, reason) => { if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') setSendToVendorsDialog({ open: false, qrId: null, qrNumber: '', vendorNames: [], message: '' }); }}
+          onClose={(e, reason) => { if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') setSendToVendorsDialog({ open: false, qrId: null, qrNumber: '', vendorNames: [], message: '', isSending: false }); }}
           maxWidth="sm"
           fullWidth
           PaperProps={{ sx: { borderRadius: 3, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' } }}
@@ -2056,16 +2055,16 @@ const Quotations = () => {
             />
           </DialogContent>
           <DialogActions sx={{ px: 4, pb: 4, pt: 2, justifyContent: 'flex-end', gap: 2 }}>
-            <Button onClick={() => setSendToVendorsDialog({ open: false, qrId: null, qrNumber: '', vendorNames: [], message: '' })} sx={{ color: '#64748B', fontWeight: 600 }}>Cancel</Button>
+            <Button disabled={sendToVendorsDialog.isSending} onClick={() => setSendToVendorsDialog({ open: false, qrId: null, qrNumber: '', vendorNames: [], message: '', isSending: false })} sx={{ color: '#64748B', fontWeight: 600 }}>Cancel</Button>
             <Button
               onClick={handleSendToVendors}
               variant="contained"
               size="large"
-              disabled={!sendToVendorsDialog.message?.trim()}
-              startIcon={<SendIcon />}
+              disabled={!sendToVendorsDialog.message?.trim() || sendToVendorsDialog.isSending}
+              startIcon={sendToVendorsDialog.isSending ? <CircularProgress size={20} color="inherit" /> : <SendIcon />}
               sx={{ px: 4, borderRadius: 2, fontWeight: 700, bgcolor: '#7C3AED', '&:hover': { bgcolor: '#6D28D9' }, textTransform: 'none' }}
             >
-              Send to Vendors
+              {sendToVendorsDialog.isSending ? 'Sending...' : 'Send to Vendors'}
             </Button>
           </DialogActions>
         </Dialog>

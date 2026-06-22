@@ -241,7 +241,7 @@ export default function ComplaintDetail() {
   const preRepairImages = complaint.images.filter(img => !img.is_resolution_image);
   const postRepairImages = complaint.images.filter(img => img.is_resolution_image);
 
-  const canStartRepair = materialIndents.length === 0 || (materialIssues.length > 0 && materialIssues.every(issue => issue.is_acknowledged));
+  const canStartRepair = materialIssues.length > 0 && materialIssues.every(issue => issue.is_acknowledged);
   const isCreator = user && complaint && String(user.id) === String(complaint.created_by_id);
   const canVerify = isCreator || user?.is_platform_admin;
 
@@ -437,11 +437,13 @@ export default function ComplaintDetail() {
               <Paper sx={{ p: 3, mb: 3 }}>
              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                <Typography variant="h6" sx={{ color: '#1E3A8A' }}>Material Indents</Typography>
-               <Tooltip title="Create Indent">
-                 <IconButton color="primary" onClick={() => navigate(`/indents?new=true&complaint_id=${id}`)}>
-                    <Assignment />
-                 </IconButton>
-               </Tooltip>
+               {materialIndents.length === 0 && complaint.status === 'Material Pending' && (
+                 <Tooltip title="Create Indent">
+                   <IconButton color="primary" onClick={() => navigate(`/indents?new=true&complaint_id=${id}`)}>
+                      <Assignment />
+                   </IconButton>
+                 </Tooltip>
+               )}
              </Box>
              {materialIndents.length === 0 ? (
                <Typography variant="body2" color="textSecondary">No indents created for this complaint.</Typography>
@@ -455,7 +457,7 @@ export default function ComplaintDetail() {
                  </TableHead>
                  <TableBody>
                    {materialIndents.map((indent) => (
-                     <TableRow key={indent.id} hover sx={{ cursor: 'pointer' }} onClick={() => navigate('/indents')}>
+                     <TableRow key={indent.id}>
                        <TableCell>{indent.indent_number}</TableCell>
                        <TableCell><Chip size="small" label={indent.status} color={indent.status === 'Approved' ? 'success' : indent.status.includes('Issued') ? 'primary' : 'warning'} /></TableCell>
                      </TableRow>

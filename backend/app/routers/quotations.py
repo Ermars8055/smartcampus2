@@ -286,6 +286,25 @@ def transition_to_receive(
     db.commit()
     return {"message": "Quotation Request transitioned to Receiving stage"}
 
+def check_and_auto_transition_to_entered(db: Session, qr: QuotationRequest):
+    """Helper to automatically transition QR to ENTERED if all quotes are received."""
+    if qr.status == QuotationRequestStatus.RECEIVED.value:
+        pending_vendors = [v for v in qr.invited_vendors if v.receipt_status == "Pending" or not v.receipt_status]
+        if not pending_vendors:
+            received_vendors = [v for v in qr.invited_vendors if v.receipt_status == "Received"]
+            if received_vendors:
+                all_have_quotes = True
+                for rv in received_vendors:
+                    has_quote = db.query(VendorQuotation).filter(
+                        VendorQuotation.qr_id == qr.id,
+                        VendorQuotation.vendor_id == rv.vendor_id
+                    ).first()
+                    if not has_quote:
+                        all_have_quotes = False
+                        break
+                if all_have_quotes:
+                    qr.status = QuotationRequestStatus.ENTERED.value
+                    db.commit()
 
 @router.put("/requests/{qr_id}/vendors/{vendor_id}/receipt-status")
 def update_vendor_receipt_status(
@@ -302,6 +321,11 @@ def update_vendor_receipt_status(
         
     vendor_link.receipt_status = data.receipt_status
     db.commit()
+    
+    # Auto-transition check
+    qr = db.query(QuotationRequest).filter(QuotationRequest.id == qr_id).first()
+    check_and_auto_transition_to_entered(db, qr)
+    
     return {"message": "Vendor receipt status updated"}
 
 
@@ -419,8 +443,11 @@ def enter_vendor_quotation(
         db.rollback()
         raise HTTPException(status_code=400, detail=f"Invalid items data: {str(e)}")
 
-    # Status remains in ENTERED (no auto transition)
     db.commit()
+    
+    # Auto-transition check
+    check_and_auto_transition_to_entered(db, qr)
+    
     return {"message": "Vendor quotation entered successfully"}
 
 

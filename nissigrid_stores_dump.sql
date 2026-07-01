@@ -2,10 +2,10 @@
 -- PostgreSQL database dump
 --
 
-\restrict YuTCaR3gW200QlwwtlOZjL0IeAmfpo70tReyOXc0OcLgOO6rYd7k6MAGQ8xcXE5
+\restrict U7QXI72ghe9B6GtSXtUWdJhShsqYbsMgnLaPYjuk5R7sG68h4UFHjFEuSrMRGgU
 
 -- Dumped from database version 17.10 (Ubuntu 17.10-1.pgdg22.04+1)
--- Dumped by pg_dump version 18.4 (Ubuntu 18.4-1.pgdg22.04+1)
+-- Dumped by pg_dump version 17.10 (Ubuntu 17.10-1.pgdg22.04+1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -1663,7 +1663,9 @@ CREATE TABLE public.purchase_orders (
     is_deleted boolean,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
-    current_approval_level integer
+    current_approval_level integer,
+    annexure text,
+    remarks text
 );
 
 
@@ -2555,7 +2557,8 @@ CREATE TABLE public.uom (
     name character varying(50) NOT NULL,
     abbreviation character varying(10) NOT NULL,
     is_active boolean,
-    is_deleted boolean
+    is_deleted boolean,
+    allow_decimal boolean
 );
 
 
@@ -3337,7 +3340,7 @@ ALTER TABLE ONLY public.warehouses ALTER COLUMN id SET DEFAULT nextval('public.w
 --
 
 COPY public.alembic_version (version_num) FROM stdin;
-115acbf08442
+824ad995a1b2
 \.
 
 
@@ -3381,6 +3384,8 @@ COPY public.alerts (id, tenant_id, site_id, alert_type, severity, title, message
 33	2	2	Complaint Resolved	Success	Action Required: Verify Complaint Resolution	Complaint CMP-00008 has been resolved by EastPoint Admin. Please verify and close.	ComplaintResolved	10	\N	f	f	2026-06-22 11:49:15.588879	\N	3
 34	2	2	Complaint Assigned	Info	Complaint Assigned: CMP-00009	You have been assigned to complaint CMP-00009. Nature of complaint: Water leakage	ComplaintAssigned	11	\N	f	f	2026-06-22 12:07:22.992431	\N	35
 35	2	2	Complaint Assigned	Info	Complaint Assigned: CMP-00010	You have been assigned to complaint CMP-00010. Nature of complaint: DOOR IS NOT LOCKING PROPERLY	ComplaintAssigned	12	\N	f	f	2026-06-22 12:28:41.687634	\N	35
+36	2	2	Indent Approved	Success	Indent IND-00010 Approved	The indent (IND-00010) has been approved by EastPoint Admin.	IndentApproved	225	\N	f	f	2026-06-30 18:15:16.358735	\N	17
+37	2	2	Indent Approved	Success	Indent IND-00018 Approved	The indent (IND-00018) has been approved by EastPoint Admin.	IndentApproved	233	\N	f	t	2026-06-30 18:30:01.164114	2026-07-01 18:25:52.085478	3
 \.
 
 
@@ -3410,6 +3415,9 @@ COPY public.approval_flows (id, tenant_id, site_id, document_type, level, role_n
 21	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
 22	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
 23	2	2	INDENT	2	Admin	0	\N	\N	f
+44	2	2	INDENT	1	Department Head	0	\N	\N	f
+45	2	2	INDENT	1	Department Head	0	\N	\N	f
+46	2	2	INDENT	1	Institution Head	0	\N	\N	t
 24	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
 25	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
 26	2	2	INDENT	1	Admin	0	\N	\N	f
@@ -3424,15 +3432,24 @@ COPY public.approval_flows (id, tenant_id, site_id, document_type, level, role_n
 35	2	2	INDENT	2	Admin	0	\N	\N	f
 36	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
 37	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
-38	2	2	INDENT	1	Admin	0	\N	\N	t
-39	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	t
-40	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	t
-41	2	2	INDENT	2	Admin	0	\N	\N	t
-42	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	t
-43	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	t
-44	2	2	INDENT	1	Department Head	0	\N	\N	f
-45	2	2	INDENT	1	Department Head	0	\N	\N	f
-46	2	2	INDENT	1	Institution Head	0	\N	\N	t
+38	2	2	INDENT	1	Admin	0	\N	\N	f
+39	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
+40	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
+41	2	2	INDENT	2	Admin	0	\N	\N	f
+42	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
+43	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
+47	2	2	INDENT	1	Admin	0	\N	\N	f
+48	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
+49	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
+50	2	2	INDENT	2	Admin	0	\N	\N	f
+51	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
+52	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
+53	2	2	INDENT	1	Admin	0	\N	\N	t
+54	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	t
+55	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	t
+56	2	2	INDENT	2	Admin	0	\N	\N	t
+57	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	t
+58	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	t
 \.
 
 
@@ -3778,6 +3795,32 @@ COPY public.audit_logs (id, tenant_id, site_id, user_id, action, entity_type, en
 335	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-06-22 11:25:33.722419
 336	2	\N	34	LOGIN	User	34	\N	\N	\N	2026-06-22 11:49:54.514863
 337	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-06-22 11:57:41.646744
+338	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-06-29 18:07:11.436728
+339	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-06-30 11:00:01.490262
+340	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-06-30 11:01:03.549289
+341	2	2	3	CREATE	GRN	207	\N	GRN GRN-00004 created (PO-Based)	\N	2026-06-30 18:40:52.113152
+342	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-06-30 19:13:02.126696
+343	2	2	3	CREATE	GRN	208	\N	GRN GRN-00005 created (PO-Based)	\N	2026-06-30 20:00:31.703725
+344	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-07-01 11:22:19.292655
+345	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-07-01 14:37:34.752128
+346	2	2	3	APPROVE	PurchaseRequest	201	\N	\N	\N	2026-07-01 15:27:03.138521
+347	2	2	3	APPROVE	PurchaseRequest	201	\N	\N	\N	2026-07-01 15:27:24.920627
+348	2	2	3	APPROVE	PurchaseOrder	237	\N	\N	\N	2026-07-01 15:37:57.802306
+349	2	2	3	APPROVE	PurchaseOrder	237	\N	\N	\N	2026-07-01 15:38:14.658972
+350	2	2	3	APPROVE	PurchaseOrder	235	\N	\N	\N	2026-07-01 15:41:00.799031
+351	2	2	3	APPROVE	PurchaseOrder	235	\N	\N	\N	2026-07-01 15:41:11.515036
+352	2	2	3	APPROVE	PurchaseOrder	238	\N	\N	\N	2026-07-01 15:44:49.403299
+353	2	2	3	APPROVE	PurchaseOrder	238	\N	\N	\N	2026-07-01 15:44:55.616351
+354	3	3	8	CREATE	Material	3711	\N	Created material: Test Material	\N	2026-07-01 16:31:44.573495
+355	2	2	3	UPDATE	Material	2338	\N	\N	\N	2026-07-01 17:08:13.746576
+356	2	2	3	APPROVE	PurchaseOrder	234	\N	\N	\N	2026-07-01 18:03:52.609676
+357	2	2	3	REJECT	PurchaseOrder	234	\N	Rejection at level 2	\N	2026-07-01 18:04:06.449935
+358	2	2	3	APPROVE	PurchaseOrder	242	\N	\N	\N	2026-07-01 18:11:58.864588
+359	2	2	3	APPROVE	PurchaseOrder	242	\N	\N	\N	2026-07-01 18:12:10.022733
+360	2	2	3	APPROVE	PurchaseOrder	241	\N	\N	\N	2026-07-01 18:15:25.878993
+361	2	2	3	APPROVE	PurchaseOrder	241	\N	\N	\N	2026-07-01 18:15:36.232183
+362	2	2	3	APPROVE	PurchaseOrder	222	\N	\N	\N	2026-07-01 19:05:35.855002
+363	2	2	3	APPROVE	PurchaseOrder	222	\N	\N	\N	2026-07-01 19:05:57.903798
 \.
 
 
@@ -3816,7 +3859,6 @@ COPY public.categories (id, tenant_id, site_id, name, sequence_number, code, des
 51	3	3	CIVIL	\N	CAT-0011	Hospital category: CIVIL	t	f	CIV
 52	3	3	ELECTRICAL	\N	CAT-0012	Hospital category: ELECTRICAL	t	f	ELE
 53	3	3	HOSP EQPT	\N	CAT-0013	Hospital category: HOSP EQPT	t	f	HEQ
-54	3	3	HOSPITAL	\N	CAT-0014	Hospital category: HOSPITAL	t	f	HOU
 63	3	3	HOSPITAL INSTRUMENTS	\N	CAT-EXCEL-0023	Imported Category: HOSPITAL INSTRUMENTS	t	f	HOI
 56	3	3	HOUSE KEEPING	\N	CAT-0016	Hospital category: HOUSE KEEPING	t	f	HSK
 58	3	3	LAB	\N	CAT-0018	Hospital category: LAB	t	f	LAB
@@ -3834,12 +3876,13 @@ COPY public.categories (id, tenant_id, site_id, name, sequence_number, code, des
 72	2	2	LINEN	8	CAT-0008	Hospital category: LINEN	t	f	LIN
 74	2	2	RADIOLOGY	10	CAT-0010	Hospital category: RADIOLOGY	t	f	RAD
 67	2	2	HOSP EQPT	3	CAT-0003	Hospital category: HOSP EQPT	t	f	HEQ
-68	2	2	HOSPITAL	4	CAT-0004	Hospital category: HOSPITAL	t	f	HOU
 69	2	2	HOUSE KEEPING	5	CAT-0005	Hospital category: HOUSE KEEPING	t	f	HSK
 70	2	2	IT	6	CAT-0006	Hospital category: IT	t	f	ITI
 73	2	2	PLUMBING	9	CAT-0009	Hospital category: PLUMBING	t	f	PLB
 75	2	2	STATIONERY	11	CAT-0011	Hospital category: STATIONERY	t	f	STY
 76	2	2	HOSPITAL INSTRUMENTS	12	CAT-0012	Hospital Category: HOSPITAL INSTRUMENTS	t	f	HOI
+54	3	3	HOSPITAL	\N	CAT-0014	Hospital category: HOSPITAL	t	f	HOS
+68	2	2	HOSPITAL	4	CAT-0004	Hospital category: HOSPITAL	t	f	HOS
 \.
 
 
@@ -5729,7 +5772,6 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 2851	2	2	2561	62	103	2026-06-11 21:58:45.849493
 2852	2	2	2562	62	32	2026-06-11 21:58:45.849496
 2853	2	2	2563	62	30	2026-06-11 21:58:45.849498
-2854	2	2	2564	62	43	2026-06-11 21:58:45.849501
 2856	2	2	2566	62	34	2026-06-11 21:58:45.849507
 2857	2	2	2567	62	31	2026-06-11 21:58:45.84951
 2858	2	2	2568	62	21	2026-06-11 21:58:45.849512
@@ -5817,6 +5859,7 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 2940	2	2	2660	62	26	2026-06-11 21:58:45.849742
 2941	2	2	2661	62	101	2026-06-11 21:58:45.849744
 2942	2	2	2662	62	2	2026-06-11 21:58:45.849747
+2854	2	2	2564	62	45	2026-06-30 18:40:52.115178
 2943	2	2	2663	62	30	2026-06-11 21:58:45.84975
 2944	2	2	2665	62	126	2026-06-11 21:58:45.849753
 2945	2	2	2666	62	60	2026-06-11 21:58:45.849755
@@ -6746,9 +6789,9 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 3869	3	3	1191	47	1	2026-06-17 12:21:58.421336
 326	3	3	228	55	3380	2026-06-17 18:12:13.813019
 2412	3	3	2102	59	27	2026-06-17 18:19:11.656207
-2855	2	2	2565	62	45	2026-06-18 11:05:14.792201
 3651	2	2	3462	62	47	2026-06-18 11:11:57.168045
 3013	2	2	2751	62	24	2026-06-18 12:26:45.195793
+2855	2	2	2565	62	46	2026-06-30 20:00:31.706317
 \.
 
 
@@ -7377,7 +7420,6 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 37	3	3	MATERIAL_43	STR	3
 38	3	3	MATERIAL_44	BRK	2
 39	3	3	MATERIAL_45	PLS	3
-40	3	3	MATERIAL_46	EES	2
 41	3	3	MATERIAL_47	PAF	2
 42	3	3	MATERIAL_48	HWT	13
 43	3	3	MATERIAL_49	FLT	2
@@ -7413,24 +7455,25 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 35	3	3	TRANSFER	TRF	8
 64	2	2	COMPANY_ADDRESS	ADDR	3
 70	2	2	QUOTATION_REQUEST	QR	12
-75	2	2	GRN	GRN	3
-69	2	2	PURCHASE_ORDER	PO	16
 78	2	2	COMPLAINT	CMP	10
-71	2	2	GATE_ENTRY	GE	4
 62	2	2	ROOM	RM	3
-66	2	2	INDENT	IND	17
 29	2	2	BUILDING	BLDG	4
-76	2	2	INVOICE_REF	INV	5
+76	2	2	INVOICE_REF	INV	6
+66	2	2	INDENT	IND	18
+68	2	2	PURCHASE_REQUEST	PR	8
+71	2	2	GATE_ENTRY	GE	5
+75	2	2	GRN	GRN	5
 72	2	2	WAREHOUSE	WH	11
 65	2	2	VENDOR	VND	3
 30	2	2	DEPARTMENT	DEPT	71
+69	2	2	PURCHASE_ORDER	PO	26
 79	3	3	INSTITUTION	INST	1
 6	3	3	DEPARTMENT	DEPT	259
 3	3	3	BUILDING	BLDG	6
 4	3	3	ROOM	RM	4
 16	3	3	QUOTATION_REQUEST	QR	21
 5	3	3	INDENT	IND	42
-68	2	2	PURCHASE_REQUEST	PR	7
+40	3	3	MATERIAL_46	EES	3
 77	2	2	GATEPASS	GP	3
 \.
 
@@ -7508,7 +7551,8 @@ COPY public.gate_entries (id, tenant_id, site_id, entry_number, vehicle_number, 
 196	2	2	GE-00001	KA45 DF2222	\N	\N	\N	\N	\N	2026-06-12 01:43:15.035407	Ram	\N	Ram	Standard	\N	/uploads/invoices/2/20260611_201312_3252c654.png		Completed	8	f	2026-06-12 01:43:15.036316	INV123	2026-06-03	1500
 197	2	2	GE-00002		\N	\N	\N	\N	\N	2026-06-12 02:15:30.632616	shyam	\N	shyam	Standard	\N	/uploads/invoices/2/20260611_204513_3b365a57.png		Completed	3	f	2026-06-12 02:15:30.633704	inv01020	2026-06-04	1212121
 198	2	2	GE-00003		\N	\N	\N	\N	\N	2026-06-12 02:21:24.198782	ram	\N	ram	Standard	\N	/uploads/invoices/2/20260611_205122_2e043a7f.png		Awaiting GRN	3	f	2026-06-12 02:21:24.199618	inv123	2026-06-11	10500
-199	2	2	GE-00004		\N	\N	\N	\N	\N	2026-06-12 02:41:55.864898	Vijayan	\N	Vijayan	Standard	\N	/uploads/invoices/2/20260611_211153_feff01fd.jpg		Awaiting GRN	8	f	2026-06-12 02:41:55.869321	IV543	2026-06-04	18000
+200	2	2	GE-00005		\N	\N	\N	\N	\N	2026-06-30 18:39:27.614044	RAMESH	\N	RAMESH	Standard	\N	/api/uploads/invoices/2/20260630_130925_abb74d56.pdf		Completed	3	f	2026-06-30 18:39:27.615165	INV20023	2026-06-30	2000
+199	2	2	GE-00004		\N	\N	\N	\N	\N	2026-06-12 02:41:55.864898	Vijayan	\N	Vijayan	Standard	\N	/uploads/invoices/2/20260611_211153_feff01fd.jpg		Completed	8	f	2026-06-12 02:41:55.869321	IV543	2026-06-04	18000
 \.
 
 
@@ -7592,6 +7636,8 @@ COPY public.grn (id, tenant_id, site_id, grn_number, po_id, gate_entry_id, wareh
 204	2	2	GRN-00001	\N	196	62	3	62	Direct Invoice	INV123	2026-06-03	1500	/uploads/invoices/2/20260611_201312_3252c654.png	\N	0	0	0	0	0	\N	Pending	Completed	\N	3	f	2026-06-12 02:05:11.315627	2026-06-11 20:35:11.3237	\N
 205	2	2	GRN-00002	\N	197	62	3	64	Direct Invoice	inv01020	2026-06-04	1200	/uploads/invoices/2/20260611_204513_3b365a57.png	\N	1200	0	0	0	0	\N	Pending	Completed	\N	3	f	2026-06-12 02:19:12.359224	2026-06-11 20:49:12.363187	\N
 206	2	2	GRN-00003	216	\N	62	3	62	PO-Based	BG34	2026-06-04	20000	/uploads/invoices/2/20260611_205014_d03b0dbd.png	\N	20000	0	0	0	0	\N	Not Applicable	Completed	\N	3	f	2026-06-12 02:20:17.548099	2026-06-11 20:50:17.553752	\N
+207	2	2	GRN-00004	233	200	62	3	63	PO-Based	INV20023	2026-06-30	2000	/api/uploads/invoices/2/20260630_130925_abb74d56.pdf	\N	33052.32	0	0	0	0	\N	Not Applicable	Completed	\N	3	f	2026-06-30 18:40:52.056973	2026-06-30 13:10:52.105003	\N
+208	2	2	GRN-00005	232	199	62	3	64	PO-Based	IV543	2026-06-04	18000	/uploads/invoices/2/20260611_211153_feff01fd.jpg	\N	10	0	0	0	0	\N	Not Applicable	Completed	\N	3	f	2026-06-30 20:00:31.684515	2026-06-30 14:30:31.69365	\N
 \.
 
 
@@ -7647,6 +7693,8 @@ COPY public.grn_items (id, grn_id, material_id, po_item_id, ordered_quantity, re
 507	204	3507	\N	0	5	5	0	0	\N	0	0	0	0	0	0	0	0	\N
 508	205	2458	\N	0	4	4	0	300	\N	0	0	0	0	0	0	1200	0	\N
 509	206	2357	522	20	20	20	0	1000	\N	0	0	0	0	0	0	20000	0	\N
+510	207	2564	576	2	2	2	0	16526.16	\N	0	0	0	0	0	0	33052.32	0	\N
+511	208	2565	577	1	1	1	1	10	\N	0	0	0	0	0	0	10	0	\N
 \.
 
 
@@ -7713,6 +7761,14 @@ COPY public.indent_approvals (id, indent_id, approval_flow_id, approver_id, appr
 56	231	46	3	2026-06-22 11:47:52.861933	{"510": {"quantity": 1.0, "remarks": null}}	\N
 57	231	16	3	2026-06-22 11:47:58.2335	{"510": {"quantity": 1.0, "remarks": null}}	\N
 58	231	41	3	2026-06-22 11:47:58.233542	{"510": {"quantity": 1.0, "remarks": null}}	\N
+59	225	46	3	2026-06-30 18:14:14.883876	{"499": {"quantity": 3.0, "remarks": null}, "500": {"quantity": 2.0, "remarks": null}}	\N
+60	225	47	3	2026-06-30 18:14:14.883891	{"499": {"quantity": 3.0, "remarks": null}, "500": {"quantity": 2.0, "remarks": null}}	\N
+61	225	16	3	2026-06-30 18:15:16.322332	{"499": {"quantity": 3.0, "remarks": null}, "500": {"quantity": 2.0, "remarks": null}}	\N
+62	225	50	3	2026-06-30 18:15:16.322377	{"499": {"quantity": 3.0, "remarks": null}, "500": {"quantity": 2.0, "remarks": null}}	\N
+63	233	46	3	2026-06-30 18:29:36.286908	{"512": {"quantity": 3.0, "remarks": null}, "513": {"quantity": 2.0, "remarks": null}}	\N
+64	233	47	3	2026-06-30 18:29:36.286926	{"512": {"quantity": 3.0, "remarks": null}, "513": {"quantity": 2.0, "remarks": null}}	\N
+65	233	16	3	2026-06-30 18:30:01.14339	{"512": {"quantity": 2.0, "remarks": null}, "513": {"quantity": 1.0, "remarks": null}}	\N
+66	233	50	3	2026-06-30 18:30:01.143412	{"512": {"quantity": 2.0, "remarks": null}, "513": {"quantity": 1.0, "remarks": null}}	\N
 \.
 
 
@@ -7802,8 +7858,6 @@ COPY public.indent_items (id, indent_id, material_id, requested_quantity, issued
 449	191	228	16	15	5	15
 497	223	989	100	7	7	70
 486	213	2102	6	5	0	6
-499	225	2427	4	0	0	\N
-500	225	2431	2	0	0	\N
 501	226	2564	2	0	0	\N
 502	226	2565	2	0	0	\N
 505	228	3348	10	0	0	10
@@ -7814,6 +7868,10 @@ COPY public.indent_items (id, indent_id, material_id, requested_quantity, issued
 507	229	2356	4	0	0	3
 510	231	2435	1	1	1	1
 511	232	2974	2	0	0	\N
+499	225	2427	4	0	0	3
+500	225	2431	2	0	0	2
+512	233	3507	4	0	0	2
+513	233	3475	2	0	0	1
 \.
 
 
@@ -7868,7 +7926,6 @@ COPY public.indents (id, tenant_id, site_id, indent_number, requester_id, room_i
 213	3	3	IND-00040	4	170	3	Floor 2	Room 206	102 WARD		19575.48	Partially Issued	2	4	2026-06-11 13:52:02.724655	f	2026-06-08 16:51:34.292996	2026-06-17 18:19:11.671326	\N	\N
 224	3	3	IND-00042	4	238	10	Second Floor	201	Computer Science		97877.4	Awaiting Approval	1	\N	\N	f	2026-06-17 10:31:53.972662	2026-06-17 10:31:53.972676	15	\N
 223	3	3	IND-00041	4	238	10	Second Floor	201	Computer Science	Doggo ipsum stop it fren vvv doge fluffer the neighborhood pupper blep shibe waggy wags, shoob thicc very taste wow puggorino ur givin me a spook. Floofs tungg shoob very taste wow sub woofer, the neighborhood pupper long bois much ruin diet. Wow such tempt very hand that feed shibe doggorino h*ck wrinkler, blep clouds heckin, doing me a frighten long woofer boof. Extremely cuuuuuute borkf vvv extremely cuuuuuute you are doing me a frighten long woofer, woofer very jealous pupper shoober. Clouds pats vvv, doge. Smol shoob very good spot heckin ur givin me a spook boofers smol, big ol floofs bork smol borking doggo with a long snoot for pats. Very good spot big ol pupper shibe blop h*ck, waggy wags dat tungg tho long doggo. puggo borking doggo yapper. Length boy pupper vvv I am bekom fat, bork big ol pupper.  Clouds aqua doggo puggorino tungg borking doggo, pupperino such treat. Heckin snoot floofs clouds what a nice floof wow very biscit, puggorino pupperino stop it fren. Fat boi maximum borkdrive shooberino lotsa pats, pats. Borkdrive very jealous pupper long doggo doing me a frighten, boofers most angery pupper I have ever seen. Fat boi noodle horse blep, wrinkler. Borkdrive extremely cuuuuuute lotsa pats blep most angery pupper I have ever seen, blop you are doing me a frighten dat tungg tho. Clouds very hand that feed shibe aqua doggo shooberino, waggy wags borking doggo. Shibe long woofer big ol pupper ruff heckin h*ck shibe, heckin good boys heck big ol pupper shoob waggy wags, long bois adorable doggo stop it fren length boy borkf.  Doing me a frighten super chub floofs what a nice floof porgo super chub very good spot thicc shoob vvv, I am bekom fat stop it fren aqua doggo puggorino very good spot shibe dat tungg tho. He made many woofs smol clouds stop it fren heckin fat boi, very hand that feed shibe blep borkf. Wrinkler doge lotsa pats fat boi woofer boof, long bois borking doggo porgo. Most angery pupper I have ever seen tungg long bois ruff blop, wow such tempt he made many woofs h*ck, puggo big ol h*ck. Heck puggorino noodle horse the neighborhood pupper puggo snoot, porgo shoob long doggo sub woofer.Doggo ipsum stop it fren vvv doge fluffer the neighborhood pupper blep shibe waggy wags, shoob thicc very taste wow puggorino ur givin me a spook. Floofs tungg shoob very taste wow sub woofer, the neighborhood pupper long bois much ruin diet. Wow such tempt very hand that feed shibe doggorino h*ck wrinkler, blep clouds heckin, doing me a frighten long woofer boof. Extremely cuuuuuute borkf vvv extremely cuuuuuute you are doing me a frighten long woofer, woofer very jealous pupper shoober. Clouds pats vvv, doge. Smol shoob very good spot heckin ur givin me a spook boofers smol, big ol floofs bork smol borking doggo with a long snoot for pats. Very good spot big ol pupper shibe blop h*ck, waggy wags dat tungg tho long doggo. puggo borking doggo yapper. Length boy pupper vvv I am bekom fat, bork big ol pupper.  Clouds aqua doggo puggorino tungg borking doggo, pupperino such treat. Heckin snoot floofs clouds what a nice floof wow very biscit, puggorino pupperino stop it fren. Fat boi maximum borkdrive shooberino lotsa pats, pats. Borkdrive very jealous pupper long doggo doing me a frighten, boofers most angery pupper I have ever seen. Fat boi noodle horse blep, wrinkler. Borkdrive extremely cuuuuuute lotsa pats blep most angery pupper I have ever seen, blop you are doing me a frighten dat tungg tho. Clouds very hand that feed shibe aqua doggo shooberino, waggy wags borking doggo. Shibe long woofer big ol pupper ruff heckin h*ck shibe, heckin good boys heck big ol pupper shoob waggy wags, long bois adorable doggo stop it fren length boy borkf.  Doing me a frighten super chub floofs what a nice floof porgo super chub very good spot thicc shoob vvv, I am bekom fat stop it fren aqua doggo puggorino very good spot shibe dat tungg tho. He made many woofs smol clouds stop it fren heckin fat boi, very hand that feed shibe blep borkf. Wrinkler doge lotsa pats fat boi woofer boof, long bois borking doggo porgo. Most angery pupper I have ever seen tungg long bois ruff blop, wow such tempt he made many woofs h*ck, puggo big ol h*ck. Heck puggorino noodle horse the neighborhood pupper puggo snoot, porgo shoob long doggo sub woofer.Doggo ipsum stop it fren vvv doge fluffer the neighborhood pupper blep shibe waggy wags, shoob thicc very taste wow puggorino ur givin me a spook. Floofs tungg shoob very taste wow sub woofer, the neighborhood pupper long bois much ruin diet. Wow such tempt very hand that feed shibe doggorino h*ck wrinkler, blep clouds heckin, doing me a frighten long woofer boof. Extremely cuuuuuute borkf vvv extremely cuuuuuute you are doing me a frighten long woofer, woofer very jealous pupper shoober. Clouds pats vvv, doge. Smol shoob very good spot heckin ur givin me a spook boofers smol, big ol floofs bork smol borking doggo with a long snoot for pats. Very good spot big ol pupper shibe blop h*ck, waggy wags dat tungg tho long doggo. puggo borking doggo yapper. Length boy pupper vvv I am bekom fat, bork big ol pupper.  Clouds aqua doggo puggorino tungg borking doggo, pupperino such treat. Heckin snoot floofs clouds what a nice floof wow very biscit, puggorino pupperino stop it fren. Fat boi maximum borkdrive shooberino lotsa pats, pats. Borkdrive very jealous pupper long doggo doing me a frighten, boofers most angery pupper I have ever seen. Fat boi noodle horse blep, wrinkler. Borkdrive extremely cuuuuuute lotsa pats blep most angery pupper I have ever seen, blop you are doing me a frighten dat tungg tho. Clouds very hand that feed shibe aqua doggo shooberino, waggy wags borking doggo. Shibe long woofer big ol pupper ruff heckin h*ck shibe, heckin good boys heck big ol pupper shoob waggy wags, long bois adorable doggo stop it fren length boy borkf.  Doing me a frighten super chub floofs what a nice floof porgo super chub very good spot thicc shoob vvv, I am bekom fat stop it fren aqua doggo puggorino very good spot shibe dat tungg tho. He made many woofs smol clouds stop it fren heckin fat boi, very hand that feed shibe blep borkf. Wrinkler doge lotsa pats fat boi woofer boof, long bois borking doggo porgo. Most angery pupper I have ever seen tungg long bois ruff blop, wow such tempt he made many woofs h*ck, puggo big ol h*ck. Heck puggorino noodle horse the neighborhood pupper puggo snoot, porgo shoob long doggo sub woofer.Doggo ipsum stop it fren vvv doge fluffer the neighborhood pupper blep shibe waggy wags, shoob thicc very taste wow puggorino ur givin me a spook. Floofs tungg shoob very taste wow sub woofer, the neighborhood pupper long bois much ruin diet. Wow such tempt very hand that feed shibe doggorino h*ck wrinkler, blep clouds heckin, doing me a frighten long woofer boof. Extremely cuuuuuute borkf vvv extremely cuuuuuute you are doing me a frighten long woofer, woofer very jealous pupper shoober. Clouds pats vvv, doge. Smol shoob very good spot heckin ur givin me a spook boofers smol, big ol floofs bork smol borking doggo with a long snoot for pats. Very good spot big ol pupper shibe blop h*ck, waggy wags dat tungg tho long doggo. puggo borking doggo yapper. Length boy pupper vvv I am bekom fat, bork big ol pupper.  Clouds aqua doggo puggorino tungg borking doggo, pupperino such treat. Heckin snoot floofs clouds what a nice floof wow very biscit, puggorino pupperino stop it fren. Fat boi maximum borkdrive shooberino lotsa pats, pats. Borkdrive very jealous pupper long doggo doing me a frighten, boofers most angery pupper I have ever seen. Fat boi noodle horse blep, wrinkler. Borkdrive extremely cuuuuuute lotsa pats blep most angery pupper I have ever seen, blop you are doing me a frighten dat tungg tho. Clouds very hand that feed shibe aqua doggo shooberino, waggy wags borking doggo. Shibe long woofer big ol pupper ruff heckin h*ck shibe, heckin good boys heck big ol pupper shoob waggy wags, long bois adorable doggo stop it fren length boy borkf.  Doing me a frighten super chub floofs what a nice floof porgo super chub very good spot thicc shoob vvv, I am bekom fat stop it fren aqua doggo puggorino very good spot shibe dat tungg tho. He made many woofs smol clouds stop it fren heckin fat boi, very hand that feed shibe blep borkf. Wrinkler doge lotsa pats fat boi woofer boof, long bois borking doggo porgo. Most angery pupper I have ever seen tungg long bois ruff blop, wow such tempt he made many woofs h*ck, puggo big ol h*ck. Heck puggorino noodle horse the neighborhood pupper puggo snoot, porgo shoob long doggo sub woofer.Doggo ipsum stop it fren vvv doge fluffer the neighborhood pupper blep shibe waggy wags, shoob thicc very taste wow puggorino ur givin me a spook. Floofs tungg shoob very taste wow sub woofer, the neighborhood pupper long bois much ruin diet. Wow such tempt very hand that feed shibe doggorino h*ck wrinkler, blep clouds heckin, doing me a frighten long woofer boof. Extremely cuuuuuute borkf vvv extremely cuuuuuute you are doing me a frighten long woofer, woofer very jealous pupper shoober. Clouds pats vvv, doge. Smol shoob very good spot heckin ur givin me a spook boofers smol, big ol floofs bork smol borking doggo with a long snoot for pats. Very good spot big ol pupper shibe blop h*ck, waggy wags dat tungg tho long doggo. puggo borking doggo yapper. Length boy pupper vvv I am bekom fat, bork big ol pupper.  Clouds aqua doggo puggorino tungg borking doggo, pupperino such treat. Heckin snoot floofs clouds what a nice floof wow very biscit, puggorino pupperino stop it fren. Fat boi maximum borkdrive shooberino lotsa pats, pats. Borkdrive very jealous pupper long doggo doing me a frighten, boofers most angery pupper I have ever seen. Fat boi noodle horse blep, wrinkler. Borkdrive extremely cuuuuuute lotsa pats blep most angery pupper I have ever seen, blop you are doing me a frighten dat tungg tho. Clouds very hand that feed shibe aqua doggo shooberino, waggy wags borking doggo. Shibe long woofer big ol pupper ruff heckin h*ck shibe, heckin good boys heck big ol pupper shoob waggy wags, long bois adorable doggo stop it fren length boy borkf.  Doing me a frighten super chub floofs what a nice floof porgo super chub very good spot thicc shoob vvv, I am bekom fat stop it fren aqua doggo puggorino very good spot shibe dat tungg tho. He made many woofs smol clouds stop it fren heckin fat boi, very hand that feed shibe blep borkf. Wrinkler doge lotsa pats fat boi woofer boof, long bois borking doggo porgo. Most angery pupper I have ever seen tungg long bois ruff blop, wow such tempt he made many woofs h*ck, puggo big ol h*ck. Heck puggorino noodle horse the neighborhood pupper puggo snoot, porgo shoob long doggo sub woofer.Doggo ipsum stop it fren vvv doge fluffer the neighborhood pupper blep shibe waggy wags, shoob thicc very taste wow puggorino ur givin me a spook. Floofs tungg shoob very taste wow sub woofer, the neighborhood pupper long bois much ruin diet. Wow such tempt very hand that feed shibe doggorino h*ck wrinkler, blep clouds heckin, doing me a frighten long woofer boof. Extremely cuuuuuute borkf vvv extremely cuuuuuute you are doing me a frighten long woofer, woofer very jealous pupper shoober. Clouds pats vvv, doge. Smol shoob very good spot heckin ur givin me a spook boofers smol, big ol floofs bork smol borking doggo with a long snoot for pats. Very good spot big ol pupper shibe blop h*ck, waggy wags dat tungg tho long doggo. puggo borking doggo yapper. Length boy pupper vvv I am bekom fat, bork big ol pupper.  Clouds aqua doggo puggorino tungg borking doggo, pupperino such treat. Heckin snoot floofs clouds what a nice floof wow very biscit, puggorino pupperino stop it fren. Fat boi maximum borkdrive shooberino lotsa pats, pats. Borkdrive very jealous pupper long doggo doing me a frighten, boofers most angery pupper I have ever seen. Fat boi noodle horse blep, wrinkler. Borkdrive extremely cuuuuuute lotsa pats blep most angery pupper I have ever seen, blop you are doing me a frighten dat tungg tho. Clouds very hand that feed shibe aqua doggo shooberino, waggy wags borking doggo. Shibe long woofer big ol pupper ruff heckin h*ck shibe, heckin good boys heck big ol pupper shoob waggy wags, long bois adorable doggo stop it fren length boy borkf.  Doing me a frighten super chub floofs what a nice floof porgo super chub very good spot thicc shoob vvv, I am bekom fat stop it fren aqua doggo puggorino very good spot shibe dat tungg tho. He made many woofs smol clouds stop it fren heckin fat boi, very hand that feed shibe blep borkf. Wrinkler doge lotsa pats fat boi woofer boof, long bois borking doggo porgo. Most angery pupper I have ever seen tungg long bois ruff blop, wow such tempt he made many woofs h*ck, puggo big ol h*ck. Heck puggorino noodle horse the neighborhood pupper puggo snoot, porgo shoob long doggo sub woofer.Doggo ipsum stop it fren vvv doge fluffer the neighborhood pupper blep shibe waggy wags, shoob thicc very taste wow puggorino ur givin me a spook. Floofs tungg shoob very taste wow sub woofer, the neighborhood pupper long bois much ruin diet. Wow such tempt very hand that feed shibe doggorino h*ck wrinkler, blep clouds heckin, doing me a frighten long woofer boof. Extremely cuuuuuute borkf vvv extremely cuuuuuute you are doing me a frighten long woofer, woofer very jealous pupper shoober. Clouds pats vvv, doge. Smol shoob very good spot heckin ur givin me a spook boofers smol, big ol floofs bork smol borking doggo with a long snoot for pats. Very good spot big ol pupper shibe blop h*ck, waggy wags dat tungg tho long doggo. puggo borking doggo yapper. Length boy pupper vvv I am bekom fat, bork big ol pupper.  Clouds aqua doggo puggorino tungg borking doggo, pupperino such treat. Heckin snoot floofs clouds what a nice floof wow very biscit, puggorino pupperino stop it fren. Fat boi maximum borkdrive shooberino lotsa pats, pats. Borkdrive very jealous pupper long doggo doing me a frighten, boofers most angery pupper I have ever seen. Fat boi noodle horse blep, wrinkler. Borkdrive extremely cuuuuuute lotsa pats blep most angery pupper I have ever seen, blop you are doing me a frighten dat tungg tho. Clouds very hand that feed shibe aqua doggo shooberino, waggy wags borking doggo. Shibe long woofer big ol pupper ruff heckin h*ck shibe, heckin good boys heck big ol pupper shoob waggy wags, long bois adorable doggo stop it fren length boy borkf.  Doing me a frighten super chub floofs what a nice floof porgo super chub very good spot thicc shoob vvv, I am bekom fat stop it fren aqua doggo puggorino very good spot shibe dat tungg tho. He made many woofs smol clouds stop it fren heckin fat boi, very hand that feed shibe blep borkf. Wrinkler doge lotsa pats fat boi woofer boof, long bois borking doggo porgo. Most angery pupper I have ever seen tungg long bois ruff blop, wow such tempt he made many woofs h*ck, puggo big ol h*ck. Heck puggorino noodle horse the neighborhood pupper puggo snoot, porgo shoob long doggo sub woofer.Doggo ipsum stop it fren vvv doge fluffer the neighborhood pupper blep shibe waggy wags, shoob thicc very taste wow puggorino ur givin me a spook. Floofs tungg shoob very taste wow sub woofer, the neighborhood pupper long bois much ruin diet. Wow such tempt very hand that feed shibe doggorino h*ck wrinkler, blep clouds heckin, doing me a frighten long woofer boof. Extremely cuuuuuute borkf vvv extremely cuuuuuute you are doing me a frighten long woofer, woofer very jealous pupper shoober. Clouds pats vvv, doge. Smol shoob very good spot heckin ur givin me a spook boofers smol, big ol floofs bork smol borking doggo with a long snoot for pats. Very good spot big ol pupper shibe blop h*ck, waggy wags dat tungg tho long doggo. puggo borking doggo yapper. Length boy pupper vvv I am bekom fat, bork big ol pupper.  Clouds aqua doggo puggorino tungg borking doggo, pupperino such treat. Heckin snoot floofs clouds what a nice floof wow very biscit, puggorino pupperino stop it fren. Fat boi maximum borkdrive shooberino lotsa pats, pats. Borkdrive very jealous pupper long doggo doing me a frighten, boofers most angery pupper I have ever seen. Fat boi noodle horse blep, wrinkler. Borkdrive extremely cuuuuuute lotsa pats blep most angery pupper I have ever seen, blop you are doing me a frighten dat tungg tho. Clouds very hand that feed shibe aqua doggo shooberino, waggy wags borking doggo. Shibe long woofer big ol pupper ruff heckin h*ck shibe, heckin good boys heck big ol pupper shoob waggy wags, long bois adorable doggo stop it fren length boy borkf.  Doing me a frighten super chub floofs what a nice floof porgo super chub very good spot thicc shoob vvv, I am bekom fat stop it fren aqua doggo puggorino very good spot shibe dat tungg tho. He made many woofs smol clouds stop it fren heckin fat boi, very hand that feed shibe blep borkf. Wrinkler doge lotsa pats fat boi woofer boof, long bois borking doggo porgo. Most angery pupper I have ever seen tungg long bois ruff blop, wow such tempt he made many woofs h*ck, puggo big ol h*ck. Heck puggorino noodle horse the neighborhood pupper puggo snoot, porgo shoob long doggo sub woofer.Doggo ipsum stop it fren vvv doge fluffer the neighborhood pupper blep shibe waggy wags, shoob thicc very taste wow puggorino ur givin me a spook. Floofs tungg shoob very taste wow sub woofer, the neighborhood pupper long bois much ruin diet. Wow such tempt very hand that feed shibe doggorino h*ck wrinkler, blep clouds heckin, doing me a frighten long woofer boof. Extremely cuuuuuute borkf vvv extremely cuuuuuute you are doing me a frighten long woofer, woofer very jealous pupper shoober. Clouds pats vvv, doge. Smol shoob very good spot heckin ur givin me a spook boofers smol, big ol floofs bork smol borking doggo with a long snoot for pats. Very good spot big ol pupper shibe blop h*ck, waggy wags dat tungg tho long doggo. puggo borking doggo yapper. Length boy pupper vvv I am bekom fat, bork big ol pupper.  Clouds aqua doggo puggorino tungg borking doggo, pupperino such treat. Heckin snoot floofs clouds what a nice floof wow very biscit, puggorino pupperino stop it fren. Fat boi maximum borkdrive shooberino lotsa pats, pats. Borkdrive very jealous pupper long doggo doing me a frighten, boofers most angery pupper I have ever seen. Fat boi noodle horse blep, wrinkler. Borkdrive extremely cuuuuuute lotsa pats blep most angery pupper I have ever seen, blop you are doing me a frighten dat tungg tho. Clouds very hand that feed shibe aqua doggo shooberino, waggy wags borking doggo. Shibe long woofer big ol pupper ruff heckin h*ck shibe, heckin good boys heck big ol pupper shoob waggy wags, long bois adorable doggo stop it fren length boy borkf.  Doing me a frighten super chub floofs what a nice floof porgo super chub very good spot thicc shoob vvv, I am bekom fat stop it fren aqua doggo puggorino very good spot shibe dat tungg tho. He made many woofs smol clouds stop it fren heckin fat boi, very hand that feed shibe blep borkf. Wrinkler doge lotsa pats fat boi woofer boof, long bois borking doggo porgo. Most angery pupper I have ever seen tungg long bois ruff blop, wow such tempt he made many woofs h*ck, puggo big ol h*ck. Heck puggorino noodle horse the neighborhood pupper puggo snoot, porgo shoob long doggo sub woofer.	132765	Partially Issued	2	4	2026-06-16 05:46:55.983528	f	2026-06-16 11:16:07.641643	2026-06-17 18:07:51.581328	15	\N
-225	2	2	IND-00010	17	\N	\N			Computer Science & Engineering		8260.56	Awaiting Approval	1	\N	\N	f	2026-06-18 10:44:25.957294	2026-06-18 10:44:25.957337	3	\N
 226	2	2	IND-00011	17	\N	\N			Mechanical Engineering		86458.88	Awaiting Approval	1	\N	\N	f	2026-06-18 10:48:16.861751	2026-06-18 10:48:16.861803	3	\N
 227	2	2	IND-00012	19	237	\N	FIRST FLOOR	ROOM101	HEALTH 		19330.26	Issued	2	3	2026-06-18 05:28:10.733249	f	2026-06-18 10:55:16.557739	2026-06-18 11:11:57.204961	11	\N
 228	2	2	IND-00013	19	237	7	FIRST FLOOR	ROOM101	HEALTH 		306960.22	Partially Issued	2	3	2026-06-18 06:51:24.051148	f	2026-06-18 10:57:09.781589	2026-06-18 12:23:35.548001	11	\N
@@ -7876,6 +7933,8 @@ COPY public.indents (id, tenant_id, site_id, indent_number, requester_id, room_i
 230	2	2	IND-00015	34	237	7	FIRST FLOOR	ROOM101	HEALTH 	Complaint CMP-00007 - AC problem	4657.57	Issued	2	3	2026-06-19 09:14:37.130349	f	2026-06-18 19:01:24.165689	2026-06-19 14:45:14.701106	11	9
 231	2	2	IND-00016	3	237	7	FIRST FLOOR	ROOM101	HEALTH 	Complaint CMP-00008 - AC problem	4657.57	Issued	2	3	2026-06-22 06:17:58.262371	f	2026-06-22 11:44:48.408071	2026-06-22 11:48:20.964653	11	10
 232	2	2	IND-00017	3	\N	7			HEALTH 	Complaint CMP-00010 - DOOR IS NOT LOCKING PROPERLY	99513.94	Awaiting Approval	1	\N	\N	f	2026-06-22 12:29:05.009417	2026-06-22 12:29:05.009449	11	12
+225	2	2	IND-00010	17	\N	\N			Computer Science & Engineering		8260.56	Approved	2	3	2026-06-30 12:45:16.350597	f	2026-06-18 10:44:25.957294	2026-06-30 18:15:16.373652	3	\N
+233	2	2	IND-00018	3	237	7	FIRST FLOOR	ROOM101	HEALTH 		26601.42	Approved	2	3	2026-06-30 13:00:01.16276	f	2026-06-30 18:29:09.052074	2026-06-30 18:30:01.165439	11	\N
 \.
 
 
@@ -7926,6 +7985,11 @@ COPY public.invoice_items (id, invoice_id, material_id, description, hsn_sac, qu
 55	11	2443	1" PVC Bend VIP (Black)		4	3952.85	Numbers	0	9	9	0	1423.0259999999998	1423.0259999999998	0	15811.4	18657.451999999997	\N
 56	9	3419	20mm FTA CPVC		3	3029.26	Numbers	0	9	9	0	817.9002	817.9002	0	9087.78	10723.5804	
 57	9	2753	24 POET POE SWITCH (DGS TO 26P)		1	37487.18	Numbers	0	9	9	0	3373.8462	3373.8462	0	37487.18	44234.8724	
+58	12	2565	0.035X150CM TEFLON WIRE J.TIP		21	10	Numbers	0	6	6	0	12.6	12.6	0	210	235.2	\N
+59	12	2564	0.032 X 150 TERUMO GUIDE WIRE		5	16526.16	Numbers	0	6	6	0	4957.848	4957.848	0	82630.8	92546.496	\N
+60	12	3505	110mmx75mm Bush		30	761.41	Numbers	0	9	9	0	2055.807	2055.807	0	22842.3	26953.914	\N
+61	12	2352	1 1/2 Cpvc NRV		20	726.57	Numbers	0	9	9	0	1307.826	1307.826	0	14531.400000000001	17147.052000000003	\N
+62	12	3492	110mmx75mm Multi trap PVC		10	3477.26	Numbers	0	9	9	0	3129.5340000000006	3129.5340000000006	0	34772.600000000006	41031.668000000005	\N
 \.
 
 
@@ -7944,6 +8008,7 @@ COPY public.invoices (id, tenant_id, site_id, invoice_number, invoice_date, gate
 5	3	3	wuq2389482394	2026-06-03	\N	56	\N	607638.11	65458.409999999996	Change Required	/uploads/invoices/3/20260610_135918_d988d4be.png		4	f	2026-06-10 19:30:10.241491	2026-06-17 18:13:44.501525			\N			\N							542179.7	32729.204999999998	32729.204999999998	0	0	\N	\N	INV-00004				\N	500		0	0	0	0	INV-00004	Pending	\N	\N	f	\N	\N	\N	\N	\N	\N	f	\N	\N
 8	2	2	Bill123	2026-06-01	\N	62	216	23600	3600	Approved	/uploads/invoices/2/20260611_204044_3143a815.png		3	f	2026-06-12 02:10:49.116917	2026-06-12 04:01:24.649063			\N	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR		\N							20000	1800	1800	0	0	6	6	INV-00002				\N	0		0	0	0	0	INV-00002	Sent for Payment	2026-06-12 04:01:24.647438	3	t	2026-06-12 04:01:13.455078	3		\N	\N	\N	t	2026-06-12 02:24:34.027603	3
 9	2	2	B45	2026-06-04	\N	63	\N	55308.4528	8383.4928	Approved	/uploads/invoices/2/20260611_204745_c5c1a4cf.png		3	f	2026-06-12 02:17:50.148925	2026-06-18 11:23:09.740162			\N			\N							46924.96	4191.7464	4191.7464	0	0	6	4	INV-00003				\N	350		0	0	0	0	INV-00003	Pending	\N	\N	f	\N	\N	\N	\N	\N	\N	f	\N	\N
+12	2	2	INV2001	2026-06-30	\N	64	232	178414.33000000002	22927.230000000003	Approved	/api/uploads/invoices/2/20260630_090821_292826f8.pdf		3	f	2026-06-30 14:41:01.013675	2026-06-30 14:41:10.532204	231432525	DELIVERED SUCESSFULLY	2026-06-30	UPI		\N					KA 23 AS 2122		155487.1	11463.615000000002	11463.615000000002	0	0	6	4	INV-00006				2026-06-30	500		0	0	0	0	INV-00006	Pending	\N	\N	f	\N	\N	\N	\N	\N	\N	f	\N	\N
 \.
 
 
@@ -8317,404 +8382,9 @@ COPY public.materials (id, tenant_id, site_id, code, name, category_id, subcateg
 1125	3	3	ELE-00086	Cat 6 Cable	52	14	5	59	194	353.27	\N	Covered	\N	18	Consumable	Cat 6 Cable	t	f	2026-06-03 12:31:54.185013	2026-06-05 16:47:46.702504	59	\N	ELE0086
 1126	3	3	ELE-00087	2" LED Battern	52	14	5	35	130	1208.02	\N	Covered	\N	18	Consumable	2" LED Battern	t	f	2026-06-03 12:31:54.187156	2026-06-05 16:47:46.702506	59	\N	ELE0087
 1127	3	3	ELE-00088	4" LED Battern	52	14	5	231	533	96.14	\N	Covered	\N	18	Consumable	4" LED Battern	t	f	2026-06-03 12:31:54.189703	2026-06-05 16:47:46.702509	59	\N	ELE0088
-1128	3	3	HOU-00001	PHARMACY CLOTH COVERS - 13X16	54	29	6	4	16	25218.56	\N	Covered	\N	5	Consumable	PHARMACY CLOTH COVERS - 13X16	t	f	2026-06-03 12:31:54.191811	2026-06-05 16:47:46.702512	59	\N	HOS0001
-1129	3	3	HOU-00002	PHARMACY CLOTH COVERS - 16X20	54	29	6	13	44	9699.42	\N	Covered	\N	5	Consumable	PHARMACY CLOTH COVERS - 16X20	t	f	2026-06-03 12:31:54.193695	2026-06-05 16:47:46.702515	59	\N	HOS0002
-1130	3	3	HOU-00003	PHARMACY CLOTH COVERS - 9X13	54	29	6	4	14	47777.02	\N	Covered	\N	5	Consumable	PHARMACY CLOTH COVERS - 9X13	t	f	2026-06-03 12:31:54.195578	2026-06-05 16:47:46.702517	59	\N	HOS0003
-1131	3	3	HOU-00004	STETHOSCOPE MICROTOME	54	26	5	5	14	15728.29	\N	Covered	\N	12	Non-Consumable	STETHOSCOPE MICROTOME	t	f	2026-06-03 12:31:54.197482	2026-06-05 16:47:46.70252	59	\N	HOS0004
-1132	3	3	HOU-00005	CLENZYME (MULTIENZYME CLEANER)1000ML.	54	26	5	5	11	20144.9	\N	Covered	\N	18	Consumable	CLENZYME (MULTIENZYME CLEANER)1000ML.	t	f	2026-06-03 12:31:54.199386	2026-06-05 16:47:46.702523	59	\N	HOS0005
-1133	3	3	HOU-00006	BUCKET PLASTIC 20Ltrs	54	26	5	5	18	32845.83	\N	Covered	\N	18	Non-Consumable	BUCKET PLASTIC 20Ltrs	t	f	2026-06-03 12:31:54.201418	2026-06-05 16:47:46.702526	59	\N	HOS0006
-1134	3	3	HOU-00007	KIRAN COAT APRON 0.5MM PB 100CM X 60CM	54	28	5	5	17	10818.26	\N	Covered	\N	12	Consumable	KIRAN COAT APRON 0.5MM PB 100CM X 60CM	t	f	2026-06-03 12:31:54.203464	2026-06-05 16:47:46.702528	59	\N	HOS0007
-1135	3	3	HOU-00008	BAYER 190ML HIGH PRESSURE INJECTOR SYRINGE	54	30	5	4	12	39682.9	\N	Covered	\N	12	Consumable	BAYER 190ML HIGH PRESSURE INJECTOR SYRINGE	t	f	2026-06-03 12:31:54.20589	2026-06-05 16:47:46.702531	59	\N	HOS0008
-1136	3	3	HOU-00009	BED PAN STEEL	54	26	5	5	16	30531.96	\N	Covered	\N	18	Non-Consumable	BED PAN STEEL	t	f	2026-06-03 12:31:54.207988	2026-06-05 16:47:46.702534	59	\N	HOS0009
-1137	3	3	HOU-00010	BED PAN PLASTIC	54	26	5	4	16	41874.87	\N	Covered	\N	18	Non-Consumable	BED PAN PLASTIC	t	f	2026-06-03 12:31:54.210232	2026-06-05 16:47:46.702537	59	\N	HOS0010
-1138	3	3	HOU-00011	URINE CANE (MALE)	54	26	5	3	7	25531.88	\N	Covered	\N	12	Non-Consumable	URINE CANE (MALE)	t	f	2026-06-03 12:31:54.212151	2026-06-05 16:47:46.702539	59	\N	HOS0011
-1139	3	3	HOU-00012	STEEL BUCKET 5 LTRS	54	26	5	4	14	30747	\N	Covered	\N	18	Non-Consumable	STEEL BUCKET 5 LTRS	t	f	2026-06-03 12:31:54.214065	2026-06-05 16:47:46.702542	59	\N	HOS0012
-1140	3	3	HOU-00013	DRESSING BIN 6 X 6 SS	54	26	5	5	17	11616.55	\N	Covered	\N	18	Non-Consumable	DRESSING BIN 6 X 6 SS	t	f	2026-06-03 12:31:54.216142	2026-06-05 16:47:46.702545	59	\N	HOS0013
-1141	3	3	HOU-00014	TRAY WITH COVER 10 X8	54	26	13	5	17	32278.21	\N	Covered	\N	18	Non-Consumable	TRAY WITH COVER 10 X8	t	f	2026-06-03 12:31:54.218194	2026-06-05 16:47:46.702548	59	\N	HOS0014
-1142	3	3	HOU-00015	TRAY WITH COVER 12 X 10	54	26	13	3	10	13739.84	\N	Covered	\N	18	Non-Consumable	TRAY WITH COVER 12 X 10	t	f	2026-06-03 12:31:54.220342	2026-06-05 16:47:46.702552	59	\N	HOS0015
-1143	3	3	HOU-00016	TRAY WITH COVER 9 X 6	54	26	13	2	8	16241.02	\N	Covered	\N	18	Non-Consumable	TRAY WITH COVER 9 X 6	t	f	2026-06-03 12:31:54.222862	2026-06-05 16:47:46.702555	59	\N	HOS0016
-1144	3	3	HOU-00017	TRAY WITH COVER SS 12 X 10	54	26	13	4	13	46179.91	\N	Covered	\N	18	Non-Consumable	TRAY WITH COVER SS 12 X 10	t	f	2026-06-03 12:31:54.225351	2026-06-05 16:47:46.702558	59	\N	HOS0017
-1145	3	3	HOU-00018	TRAY WITH COVER SS 18 X 12	54	26	13	5	17	28057.06	\N	Covered	\N	18	Non-Consumable	TRAY WITH COVER SS 18 X 12	t	f	2026-06-03 12:31:54.227462	2026-06-05 16:47:46.702561	59	\N	HOS0018
-1146	3	3	HOU-00019	TRAY WITH COVER SS 8 X 3	54	26	13	3	11	42302.32	\N	Covered	\N	18	Non-Consumable	TRAY WITH COVER SS 8 X 3	t	f	2026-06-03 12:31:54.229687	2026-06-05 16:47:46.702563	59	\N	HOS0019
-1147	3	3	HOU-00020	Mindray SpO2 Adult Probe	54	18	5	4	16	28396.63	\N	Covered	\N	12	Consumable	Mindray SpO2 Adult Probe	t	f	2026-06-03 12:31:54.231932	2026-06-05 16:47:46.702566	59	\N	HOS0020
-1148	3	3	HOU-00021	Mindray SpO2 Pediatric Probe	54	18	5	3	9	14585.87	\N	Covered	\N	12	Consumable	Mindray SpO2 Pediatric Probe	t	f	2026-06-03 12:31:54.234223	2026-06-05 16:47:46.702569	59	\N	HOS0021
-1149	3	3	HOU-00022	Mindray SpO2 Neonatal Probe	54	18	5	5	13	35708.56	\N	Covered	\N	12	Consumable	Mindray SpO2 Neonatal Probe	t	f	2026-06-03 12:31:54.236316	2026-06-05 16:47:46.702572	59	\N	HOS0022
-1150	3	3	HOU-00023	Mindray ECG Cable	54	18	5	3	7	30824.89	\N	Covered	\N	12	Consumable	Mindray ECG Cable	t	f	2026-06-03 12:31:54.238725	2026-06-05 16:47:46.702574	59	\N	HOS0023
-1151	3	3	HOU-00024	Mindray NIBP Hose	54	18	5	2	7	39929.38	\N	Covered	\N	12	Consumable	Mindray NIBP Hose	t	f	2026-06-03 12:31:54.24102	2026-06-05 16:47:46.702577	59	\N	HOS0024
-1152	3	3	HOU-00025	Philips SpO2 Adult Probe	54	18	5	4	12	14907.95	\N	Covered	\N	12	Consumable	Philips SpO2 Adult Probe	t	f	2026-06-03 12:31:54.243362	2026-06-05 16:47:46.70258	59	\N	HOS0025
-1153	3	3	HOU-00026	Philips SpO2 Pediatric Probe	54	18	5	43	146	7679.63	\N	Covered	\N	12	Consumable	Philips SpO2 Pediatric Probe	t	f	2026-06-03 12:31:54.245985	2026-06-05 16:47:46.702583	59	\N	HOS0026
-1154	3	3	HOU-00027	Philips SpO2 Neonatal Probe	54	18	5	4	12	34011.43	\N	Covered	\N	12	Consumable	Philips SpO2 Neonatal Probe	t	f	2026-06-03 12:31:54.248016	2026-06-05 16:47:46.702585	59	\N	HOS0027
-1155	3	3	HOU-00028	Philips ECG Cable	54	18	5	4	13	33761.49	\N	Covered	\N	12	Consumable	Philips ECG Cable	t	f	2026-06-03 12:31:54.250111	2026-06-05 16:47:46.702588	59	\N	HOS0028
-1156	3	3	HOU-00029	Philips NIBP Hose	54	18	5	2	5	28663.04	\N	Covered	\N	12	Consumable	Philips NIBP Hose	t	f	2026-06-03 12:31:54.252151	2026-06-05 16:47:46.702591	59	\N	HOS0029
-1157	3	3	HOU-00030	Comen SpO2 Adult Probe	54	18	5	4	14	27583.36	\N	Covered	\N	12	Consumable	Comen SpO2 Adult Probe	t	f	2026-06-03 12:31:54.254392	2026-06-05 16:47:46.702594	59	\N	HOS0030
-1158	3	3	HOU-00031	Comen SpO2 Pediatric Probe	54	18	5	4	9	26109.32	\N	Covered	\N	12	Consumable	Comen SpO2 Pediatric Probe	t	f	2026-06-03 12:31:54.256748	2026-06-05 16:47:46.702596	59	\N	HOS0031
-1159	3	3	HOU-00032	Comen SpO2 Neonatal Probe	54	18	5	5	12	40196.65	\N	Covered	\N	12	Consumable	Comen SpO2 Neonatal Probe	t	f	2026-06-03 12:31:54.258935	2026-06-05 16:47:46.702599	59	\N	HOS0032
-1160	3	3	HOU-00033	Comen ECG Cable	54	18	5	2	5	22272.98	\N	Covered	\N	12	Consumable	Comen ECG Cable	t	f	2026-06-03 12:31:54.260896	2026-06-05 16:47:46.702602	59	\N	HOS0033
-1161	3	3	HOU-00034	Comen NIBP Hose	54	18	5	2	7	30445.33	\N	Covered	\N	12	Consumable	Comen NIBP Hose	t	f	2026-06-03 12:31:54.262793	2026-06-05 16:47:46.702605	59	\N	HOS0034
-1162	3	3	HOU-00035	Edan SpO2 Adult Probe	54	18	5	2	8	43429.35	\N	Covered	\N	12	Consumable	Edan SpO2 Adult Probe	t	f	2026-06-03 12:31:54.264665	2026-06-05 16:47:46.702607	59	\N	HOS0035
-1163	3	3	HOU-00036	Edan SpO2 Pediatric Probe	54	18	5	2	7	11528.14	\N	Covered	\N	12	Consumable	Edan SpO2 Pediatric Probe	t	f	2026-06-03 12:31:54.267	2026-06-05 16:47:46.70261	59	\N	HOS0036
-1164	3	3	HOU-00037	Edan SpO2 Neonatal Probe	54	18	5	3	11	42685.66	\N	Covered	\N	12	Consumable	Edan SpO2 Neonatal Probe	t	f	2026-06-03 12:31:54.269505	2026-06-05 16:47:46.702613	59	\N	HOS0037
-1165	3	3	HOU-00038	Edan ECG Cable	54	18	5	4	16	15007.85	\N	Covered	\N	12	Consumable	Edan ECG Cable	t	f	2026-06-03 12:31:54.271911	2026-06-05 16:47:46.702616	59	\N	HOS0038
-1166	3	3	HOU-00039	Edan NIBP Hose	54	18	5	3	11	46249.16	\N	Covered	\N	12	Consumable	Edan NIBP Hose	t	f	2026-06-03 12:31:54.274138	2026-06-05 16:47:46.702618	59	\N	HOS0039
-1167	3	3	HOU-00040	GE SpO2 Adult Probe	54	18	5	4	13	49341.02	\N	Covered	\N	12	Consumable	GE SpO2 Adult Probe	t	f	2026-06-03 12:31:54.276103	2026-06-05 16:47:46.702621	59	\N	HOS0040
-1168	3	3	HOU-00041	GE SpO2 Pediatric Probe	54	18	5	5	16	27138.7	\N	Covered	\N	12	Consumable	GE SpO2 Pediatric Probe	t	f	2026-06-03 12:31:54.278006	2026-06-05 16:47:46.702624	59	\N	HOS0041
-1169	3	3	HOU-00042	GE SpO2 Neonatal Probe	54	18	5	2	6	21012.11	\N	Covered	\N	12	Consumable	GE SpO2 Neonatal Probe	t	f	2026-06-03 12:31:54.279917	2026-06-05 16:47:46.702627	59	\N	HOS0042
-1170	3	3	HOU-00043	GE ECG Cable	54	18	5	4	12	30635.68	\N	Covered	\N	12	Consumable	GE ECG Cable	t	f	2026-06-03 12:31:54.281802	2026-06-05 16:47:46.702629	59	\N	HOS0043
-1171	3	3	HOU-00044	GE NIBP Hose	54	18	5	4	16	18506.34	\N	Covered	\N	12	Consumable	GE NIBP Hose	t	f	2026-06-03 12:31:54.283818	2026-06-05 16:47:46.702632	59	\N	HOS0044
-1172	3	3	HOU-00045	NIBP Cuff Adult	54	18	5	5	20	29779.06	\N	Covered	\N	12	Consumable	NIBP Cuff Adult	t	f	2026-06-03 12:31:54.285645	2026-06-05 16:47:46.702635	59	\N	HOS0045
-1173	3	3	HOU-00046	NIBP Cuff Pediatric	54	18	5	3	8	21809.45	\N	Covered	\N	12	Consumable	NIBP Cuff Pediatric	t	f	2026-06-03 12:31:54.28788	2026-06-05 16:47:46.702638	59	\N	HOS0046
-1174	3	3	HOU-00047	NIBP Cuff Neonatal	54	18	5	4	12	16813.02	\N	Covered	\N	12	Consumable	NIBP Cuff Neonatal	t	f	2026-06-03 12:31:54.290243	2026-06-05 16:47:46.70264	59	\N	HOS0047
-1175	3	3	HOU-00048	BP Apparatus Bladder Adult	54	18	5	2	8	48701.77	\N	Covered	\N	12	Non-Consumable	BP Apparatus Bladder Adult	t	f	2026-06-03 12:31:54.292239	2026-06-05 16:47:46.702643	59	\N	HOS0048
-1176	3	3	HOU-00049	BP Apparatus Bladder with Bag Pediatric	54	18	5	3	11	23041.66	\N	Covered	\N	12	Non-Consumable	BP Apparatus Bladder with Bag Pediatric	t	f	2026-06-03 12:31:54.29418	2026-06-05 16:47:46.702646	59	\N	HOS0049
-1177	3	3	HOU-00050	BP Apparatus Bulb	54	18	5	2	7	48366.14	\N	Covered	\N	12	Consumable	BP Apparatus Bulb	t	f	2026-06-03 12:31:54.296027	2026-06-05 16:47:46.702649	59	\N	HOS0050
-1178	3	3	HOU-00051	BP Apparatus Bag	54	18	5	4	14	16005.15	\N	Covered	\N	12	Non-Consumable	BP Apparatus Bag	t	f	2026-06-03 12:31:54.297873	2026-06-05 16:47:46.702652	59	\N	HOS0051
-1179	3	3	HOU-00052	Digital BP Apparatus Cuff	54	18	5	5	12	33083.39	\N	Covered	\N	12	Non-Consumable	Digital BP Apparatus Cuff	t	f	2026-06-03 12:31:54.299905	2026-06-05 16:47:46.702655	59	\N	HOS0052
-1180	3	3	HOU-00053	3-Pin Power Cord	54	18	5	3	12	24958.01	\N	Covered	\N	18	Consumable	3-Pin Power Cord	t	f	2026-06-03 12:31:54.302009	2026-06-05 16:47:46.702657	59	\N	HOS0053
-1181	3	3	HOU-00054	ECG Machine Cable	54	18	5	4	15	33615.39	\N	Covered	\N	12	Consumable	ECG Machine Cable	t	f	2026-06-03 12:31:54.304169	2026-06-05 16:47:46.70266	59	\N	HOS0054
-1182	3	3	HOU-00055	ECG Machine Clamp	54	18	5	5	15	11133.42	\N	Covered	\N	12	Consumable	ECG Machine Clamp	t	f	2026-06-03 12:31:54.306682	2026-06-05 16:47:46.702663	59	\N	HOS0055
-1183	3	3	HOU-00056	ECG Machine Bulb	54	18	5	5	11	23753.77	\N	Covered	\N	12	Consumable	ECG Machine Bulb	t	f	2026-06-03 12:31:54.308605	2026-06-05 16:47:46.702666	59	\N	HOS0056
-1184	3	3	HOU-00057	Ventilator Oxygen Sensor	54	18	5	2	7	43733.61	\N	Covered	\N	12	Non-Consumable	Ventilator Oxygen Sensor	t	f	2026-06-03 12:31:54.310538	2026-06-05 16:47:46.702668	59	\N	HOS0057
-1185	3	3	HOU-00058	Ventilator Battery	54	18	5	2	8	40562.32	\N	Covered	\N	12	Consumable	Ventilator Battery	t	f	2026-06-03 12:31:54.312432	2026-06-05 16:47:46.702671	59	\N	HOS0058
-1186	3	3	HOU-00059	Monitor Battery	54	18	5	2	5	39903.79	\N	Covered	\N	12	Consumable	Monitor Battery	t	f	2026-06-03 12:31:54.314336	2026-06-05 16:47:46.702674	59	\N	HOS0059
-1187	3	3	HOU-00060	Syringe Pump Battery	54	18	5	4	16	33292.48	\N	Covered	\N	12	Consumable	Syringe Pump Battery	t	f	2026-06-03 12:31:54.31629	2026-06-05 16:47:46.702677	59	\N	HOS0060
-1188	3	3	HOU-00061	Infusion Pump Battery	54	18	5	3	10	13782.48	\N	Covered	\N	12	Consumable	Infusion Pump Battery	t	f	2026-06-03 12:31:54.318273	2026-06-05 16:47:46.702679	59	\N	HOS0061
-1189	3	3	HOU-00062	ECG Machine Battery	54	18	5	42	119	8739.31	\N	Covered	\N	12	Consumable	ECG Machine Battery	t	f	2026-06-03 12:31:54.320304	2026-06-05 16:47:46.702682	59	\N	HOS0062
-1190	3	3	HOU-00063	X-Ray View Box 12V DC Adaptor	54	18	5	2	8	41675.63	\N	Covered	\N	18	Non-Consumable	X-Ray View Box 12V DC Adaptor	t	f	2026-06-03 12:31:54.322804	2026-06-05 16:47:46.702685	59	\N	HOS0063
-1191	3	3	HOU-00064	0.032 X 150 TERUMO GUIDE WIRE	54	19	5	3	10	16526.16	\N	Covered	\N	12	Consumable	0.032 X 150 TERUMO GUIDE WIRE	t	f	2026-06-03 12:31:54.324911	2026-06-05 16:47:46.702688	59	\N	HOS0064
-1192	3	3	HOU-00065	0.035X150CM TEFLON WIRE J.TIP	54	19	5	2	8	26703.28	\N	Covered	\N	12	Consumable	0.035X150CM TEFLON WIRE J.TIP	t	f	2026-06-03 12:31:54.326839	2026-06-05 16:47:46.70269	59	\N	HOS0065
-1193	3	3	HOU-00066	ACCURA BMV BALLOON KIT WILL ALL ACCESSORIES	54	19	5	4	14	15813.16	\N	Covered	\N	12	Consumable	ACCURA BMV BALLOON KIT WILL ALL ACCESSORIES	t	f	2026-06-03 12:31:54.328699	2026-06-05 16:47:46.702693	59	\N	HOS0066
-1194	3	3	HOU-00067	ANGI DAIG JR 3.5 6FR CORDIS	54	19	5	5	13	16732.04	\N	Covered	\N	12	Consumable	ANGI DAIG JR 3.5 6FR CORDIS	t	f	2026-06-03 12:31:54.330614	2026-06-05 16:47:46.702696	59	\N	HOS0067
-1195	3	3	HOU-00068	APNEALINK CANNULA- 25 PACK	54	19	5	4	16	12432.24	\N	Covered	\N	12	Consumable	APNEALINK CANNULA- 25 PACK	t	f	2026-06-03 12:31:54.332513	2026-06-05 16:47:46.702699	59	\N	HOS0068
-1196	3	3	HOU-00069	ASAHI GW GAIA THIRD	54	19	5	5	15	48367.03	\N	Covered	\N	12	Consumable	ASAHI GW GAIA THIRD	t	f	2026-06-03 12:31:54.334524	2026-06-05 16:47:46.702701	59	\N	HOS0069
-1197	3	3	HOU-00070	BI-PHASIC DEFIBRILLATOR MODEL: RELIFE 900 - MAKE BPL	54	19	5	3	7	20706.22	\N	Covered	\N	12	Consumable	BI-PHASIC DEFIBRILLATOR MODEL: RELIFE 900 - MAKE BPL	t	f	2026-06-03 12:31:54.336495	2026-06-05 16:47:46.702704	59	\N	HOS0070
-1198	3	3	HOU-00071	BL LIFESCIENCES . 1/2  X 3/32  10 FEET TUBING STERILE	54	19	5	40	107	8529.68	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 1/2  X 3/32  10 FEET TUBING STERILE	t	f	2026-06-03 12:31:54.338895	2026-06-05 16:47:46.702707	59	\N	HOS0071
-1199	3	3	HOU-00072	BL LIFESCIENCES . 1/2 X 1/2 ST	54	19	5	3	8	14243.26	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 1/2 X 1/2 ST	t	f	2026-06-03 12:31:54.341151	2026-06-05 16:47:46.70271	59	\N	HOS0072
-1200	3	3	HOU-00073	BL LIFESCIENCES . 1/4  X 3/32  10 FEET TUBING STERILE	54	19	5	2	8	26824.34	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 1/4  X 3/32  10 FEET TUBING STERILE	t	f	2026-06-03 12:31:54.343086	2026-06-05 16:47:46.702712	59	\N	HOS0073
-1201	3	3	HOU-00074	BL LIFESCIENCES . 1/4 X 1/4 ST	54	19	5	2	8	29261.5	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 1/4 X 1/4 ST	t	f	2026-06-03 12:31:54.344996	2026-06-05 16:47:46.702715	59	\N	HOS0074
-1202	3	3	HOU-00075	BL LIFESCIENCES . 1/4 X 1/4 WITH LEUR	54	19	5	4	12	27006.57	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 1/4 X 1/4 WITH LEUR	t	f	2026-06-03 12:31:54.346927	2026-06-05 16:47:46.702718	59	\N	HOS0075
-1203	3	3	HOU-00076	BL LIFESCIENCES . 1/4 X 1/4 X 1/4  Y	54	19	5	3	11	29504.57	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 1/4 X 1/4 X 1/4  Y	t	f	2026-06-03 12:31:54.34888	2026-06-05 16:47:46.702721	59	\N	HOS0076
-1204	3	3	HOU-00077	BL LIFESCIENCES . 3/8 X 3/32  10 FEET TUBING STERILE	54	19	5	2	5	19791.15	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 3/8 X 3/32  10 FEET TUBING STERILE	t	f	2026-06-03 12:31:54.350934	2026-06-05 16:47:46.702723	59	\N	HOS0077
-1205	3	3	HOU-00078	BL LIFESCIENCES . 3/8 X 3/8 ST	54	19	5	4	14	15621.87	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 3/8 X 3/8 ST	t	f	2026-06-03 12:31:54.352891	2026-06-05 16:47:46.702726	59	\N	HOS0078
-1206	3	3	HOU-00079	BL LIFESCIENCES . 3/8 X 3/8 X 3/8  Y	54	19	5	2	8	20930.03	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 3/8 X 3/8 X 3/8  Y	t	f	2026-06-03 12:31:54.355293	2026-06-05 16:47:46.702729	59	\N	HOS0079
-1207	3	3	HOU-00080	BL LIFESCIENCES BCP 03 WITH HOLDER	54	19	5	3	10	45535.32	\N	Covered	\N	12	Consumable	BL LIFESCIENCES BCP 03 WITH HOLDER	t	f	2026-06-03 12:31:54.357596	2026-06-05 16:47:46.702732	59	\N	HOS0080
-1208	3	3	HOU-00081	BL LIFESCIENCES MISTER BLOWER	54	19	5	15	35	8921.51	\N	Covered	\N	12	Consumable	BL LIFESCIENCES MISTER BLOWER	t	f	2026-06-03 12:31:54.35957	2026-06-05 16:47:46.702734	59	\N	HOS0081
-1209	3	3	HOU-00082	COOK - ONE-PART PERCUTANEOUS ENTRY THINWALL NEEDLE-SDN-20-4.0 20G/4CM	54	19	5	5	12	11522.83	\N	Covered	\N	12	Consumable	COOK - ONE-PART PERCUTANEOUS ENTRY THINWALL NEEDLE-SDN-20-4.0 20G/4CM	t	f	2026-06-03 12:31:54.361463	2026-06-05 16:47:46.702737	59	\N	HOS0082
-1210	3	3	HOU-00083	CORONARY SHUNT - SHT-1210S - 1.0MM	54	19	5	2	7	24375	\N	Covered	\N	12	Consumable	CORONARY SHUNT - SHT-1210S - 1.0MM	t	f	2026-06-03 12:31:54.363367	2026-06-05 16:47:46.70274	59	\N	HOS0083
-1211	3	3	HOU-00084	CORONARY SHUNT - SHT-1213S - 1.25MM	54	19	5	44	159	9191.76	\N	Covered	\N	12	Consumable	CORONARY SHUNT - SHT-1213S - 1.25MM	t	f	2026-06-03 12:31:54.365307	2026-06-05 16:47:46.702743	59	\N	HOS0084
-1212	3	3	HOU-00085	CORONARY SHUNT - SHT-1215S - 1.50MM	54	19	5	44	89	7848.13	\N	Covered	\N	12	Consumable	CORONARY SHUNT - SHT-1215S - 1.50MM	t	f	2026-06-03 12:31:54.367348	2026-06-05 16:47:46.702745	59	\N	HOS0085
-1213	3	3	HOU-00086	CORONARY SHUNT - SHT-1218S - 2.0MM	54	19	5	2	5	49134.49	\N	Covered	\N	12	Consumable	CORONARY SHUNT - SHT-1218S - 2.0MM	t	f	2026-06-03 12:31:54.369267	2026-06-05 16:47:46.702748	59	\N	HOS0086
-1214	3	3	HOU-00087	CORONARY SHUNT - SHT-1220S - 2.25MM	54	19	5	2	8	10137.59	\N	Covered	\N	12	Consumable	CORONARY SHUNT - SHT-1220S - 2.25MM	t	f	2026-06-03 12:31:54.37148	2026-06-05 16:47:46.702751	59	\N	HOS0087
-1215	3	3	HOU-00088	CORONARY SHUNT - SHT-1223S - 2.50MM	54	19	5	3	12	32847.94	\N	Covered	\N	12	Consumable	CORONARY SHUNT - SHT-1223S - 2.50MM	t	f	2026-06-03 12:31:54.373897	2026-06-05 16:47:46.702754	59	\N	HOS0088
-1216	3	3	HOU-00089	CORONARY SHUNT - SHT-1225S - 2.0MM	54	19	5	2	5	15823.34	\N	Covered	\N	12	Consumable	CORONARY SHUNT - SHT-1225S - 2.0MM	t	f	2026-06-03 12:31:54.375898	2026-06-05 16:47:46.702756	59	\N	HOS0089
-1217	3	3	HOU-00090	DOLPHIN-RADIL INTRODUCER SHEATH 5F/7CM	54	19	5	4	15	27079.56	\N	Covered	\N	12	Consumable	DOLPHIN-RADIL INTRODUCER SHEATH 5F/7CM	t	f	2026-06-03 12:31:54.377826	2026-06-05 16:47:46.702759	59	\N	HOS0090
-1218	3	3	HOU-00091	DVI MALE TO HDMI FEMALE CONVERTOR - NT	54	19	5	5	15	36349.97	\N	Covered	\N	18	Consumable	DVI MALE TO HDMI FEMALE CONVERTOR - NT	t	f	2026-06-03 12:31:54.379747	2026-06-05 16:47:46.702762	59	\N	HOS0091
-1219	3	3	HOU-00092	HDMI TO DVI CABLE 20MTR - NT	54	19	5	4	15	12438.79	\N	Covered	\N	18	Consumable	HDMI TO DVI CABLE 20MTR - NT	t	f	2026-06-03 12:31:54.381666	2026-06-05 16:47:46.702765	59	\N	HOS0092
-1220	3	3	HOU-00093	HDMI TO HDMI CABLE 20MTR - NT	54	19	5	4	15	11697.61	\N	Covered	\N	18	Consumable	HDMI TO HDMI CABLE 20MTR - NT	t	f	2026-06-03 12:31:54.383653	2026-06-05 16:47:46.702767	59	\N	HOS0093
-1221	3	3	HOU-00094	HEAD PROTECTION KIRAN MAKE LEADLITE – 0.25MM PB	54	19	5	4	9	22336.14	\N	Covered	\N	12	Consumable	HEAD PROTECTION KIRAN MAKE LEADLITE – 0.25MM PB	t	f	2026-06-03 12:31:54.385709	2026-06-05 16:47:46.70277	59	\N	HOS0094
-1222	3	3	HOU-00095	HIGH PRESSURE LINE (110CMS)	54	19	5	33	101	6342.2	\N	Covered	\N	12	Consumable	HIGH PRESSURE LINE (110CMS)	t	f	2026-06-03 12:31:54.387826	2026-06-05 16:47:46.702773	59	\N	HOS0095
-1223	3	3	HOU-00096	HIGH PRESSURE LINE 150CM 1200 PSI	54	19	5	3	11	45511.21	\N	Covered	\N	12	Consumable	HIGH PRESSURE LINE 150CM 1200 PSI	t	f	2026-06-03 12:31:54.390291	2026-06-05 16:47:46.702776	59	\N	HOS0096
-1224	3	3	HOU-00097	INTRODUCER SHEATH 9F X 11CM	54	19	5	2	6	17512.4	\N	Covered	\N	12	Consumable	INTRODUCER SHEATH 9F X 11CM	t	f	2026-06-03 12:31:54.392249	2026-06-05 16:47:46.702779	59	\N	HOS0097
-1225	3	3	HOU-00098	MANIFOLD 3 PORT	54	19	5	20	60	5485.15	\N	Covered	\N	12	Consumable	MANIFOLD 3 PORT	t	f	2026-06-03 12:31:54.394215	2026-06-05 16:47:46.702781	59	\N	HOS0098
-1226	3	3	HOU-00099	MEDICAL BED ROLLS - 10 ROLLS PACKING	54	26	5	4	16	47181.69	\N	Covered	\N	5	Consumable	MEDICAL BED ROLLS - 10 ROLLS PACKING	t	f	2026-06-03 12:31:54.396119	2026-06-05 16:47:46.702784	59	\N	HOS0099
-1227	3	3	HOU-00100	MERIT MANIFOLDS 200PSI, 3PORT, HALF BODY, RIGHT OFF(25NOS/BOX)- 203HF-R	54	19	5	5	20	40224.69	\N	Covered	\N	12	Consumable	MERIT MANIFOLDS 200PSI, 3PORT, HALF BODY, RIGHT OFF(25NOS/BOX)- 203HF-R	t	f	2026-06-03 12:31:54.397998	2026-06-05 16:47:46.702789	59	\N	HOS0100
-1228	3	3	HOU-00101	OMNIPAQUE 350MG*100ML-LONG	54	19	5	5	19	38349.89	\N	Covered	\N	12	Consumable	OMNIPAQUE 350MG*100ML-LONG	t	f	2026-06-03 12:31:54.399927	2026-06-05 16:47:46.702791	59	\N	HOS0101
-1229	3	3	HOU-00102	PATIENT SAFE SLIDE TRANSFER BOARD	54	19	5	2	5	15566.94	\N	Covered	\N	12	Consumable	PATIENT SAFE SLIDE TRANSFER BOARD	t	f	2026-06-03 12:31:54.402018	2026-06-05 16:47:46.702794	59	\N	HOS0102
-1230	3	3	HOU-00103	PRESSURE MONITORING KIT - DOUBLE LUMEN	54	19	5	2	6	35100.21	\N	Covered	\N	12	Consumable	PRESSURE MONITORING KIT - DOUBLE LUMEN	t	f	2026-06-03 12:31:54.404	2026-06-05 16:47:46.702797	59	\N	HOS0103
-1231	3	3	HOU-00104	SAPPHIRE BALLOON NC 2.0 X  8MM	54	19	5	3	11	40772.13	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.0 X  8MM	t	f	2026-06-03 12:31:54.406552	2026-06-05 16:47:46.7028	59	\N	HOS0104
-1232	3	3	HOU-00105	SAPPHIRE BALLOON NC 2.0 X 10MM	54	19	5	5	17	19046.55	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.0 X 10MM	t	f	2026-06-03 12:31:54.40856	2026-06-05 16:47:46.702802	59	\N	HOS0105
-1233	3	3	HOU-00106	SAPPHIRE BALLOON NC 2.0 X 15MM	54	19	5	5	15	42810.99	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.0 X 15MM	t	f	2026-06-03 12:31:54.410495	2026-06-05 16:47:46.702805	59	\N	HOS0106
-1234	3	3	HOU-00107	SAPPHIRE BALLOON NC 2.5 X 10MM	54	19	5	40	145	9177.82	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.5 X 10MM	t	f	2026-06-03 12:31:54.412428	2026-06-05 16:47:46.702808	59	\N	HOS0107
-1235	3	3	HOU-00108	SAPPHIRE BALLOON NC 2.5 X 12MM	54	19	5	5	14	38376.24	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.5 X 12MM	t	f	2026-06-03 12:31:54.414328	2026-06-05 16:47:46.702811	59	\N	HOS0108
-1236	3	3	HOU-00109	SAPPHIRE BALLOON NC 2.5 X 15MM	54	19	5	5	12	32018.21	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.5 X 15MM	t	f	2026-06-03 12:31:54.416239	2026-06-05 16:47:46.702813	59	\N	HOS0109
-1237	3	3	HOU-00110	SAPPHIRE BALLOON NC 2.5 X 8MM	54	19	5	35	103	5872.24	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.5 X 8MM	t	f	2026-06-03 12:31:54.418335	2026-06-05 16:47:46.702816	59	\N	HOS0110
-1238	3	3	HOU-00111	SAPPHIRE BALLOON NC 2.75 X 10MM	54	19	5	35	121	7045.4	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.75 X 10MM	t	f	2026-06-03 12:31:54.420282	2026-06-05 16:47:46.702819	59	\N	HOS0111
-1239	3	3	HOU-00112	SAPPHIRE BALLOON NC 2.75 X 12MM	54	19	5	3	12	20068.58	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.75 X 12MM	t	f	2026-06-03 12:31:54.422654	2026-06-05 16:47:46.702822	59	\N	HOS0112
-1240	3	3	HOU-00113	SAPPHIRE BALLOON NC 2.75 X 15MM	54	19	5	4	9	30408.41	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.75 X 15MM	t	f	2026-06-03 12:31:54.42483	2026-06-05 16:47:46.702824	59	\N	HOS0113
-1241	3	3	HOU-00114	SAPPHIRE BALLOON NC 2.75 X 8MM	54	19	5	2	7	35600.43	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.75 X 8MM	t	f	2026-06-03 12:31:54.426791	2026-06-05 16:47:46.702827	59	\N	HOS0114
-1242	3	3	HOU-00115	SAPPHIRE BALLOON NC 3.0 X 10MM	54	19	5	3	7	31429.34	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.0 X 10MM	t	f	2026-06-03 12:31:54.428712	2026-06-05 16:47:46.70283	59	\N	HOS0115
-1243	3	3	HOU-00116	SAPPHIRE BALLOON NC 3.0 X 12MM	54	19	5	5	16	19713.24	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.0 X 12MM	t	f	2026-06-03 12:31:54.430659	2026-06-05 16:47:46.702833	59	\N	HOS0116
-1244	3	3	HOU-00117	SAPPHIRE BALLOON NC 3.0 X 15MM	54	19	5	4	9	23819.89	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.0 X 15MM	t	f	2026-06-03 12:31:54.432526	2026-06-05 16:47:46.702836	59	\N	HOS0117
-1245	3	3	HOU-00118	SAPPHIRE BALLOON NC 3.0 X 8MM	54	19	5	22	50	5278.34	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.0 X 8MM	t	f	2026-06-03 12:31:54.434613	2026-06-05 16:47:46.702838	59	\N	HOS0118
-1246	3	3	HOU-00119	SAPPHIRE BALLOON NC 3.5 X 10MM	54	19	5	29	76	5831.78	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.5 X 10MM	t	f	2026-06-03 12:31:54.436576	2026-06-05 16:47:46.702841	59	\N	HOS0119
-1247	3	3	HOU-00120	SAPPHIRE BALLOON NC 3.5 X 12MM	54	19	5	3	9	15726.17	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.5 X 12MM	t	f	2026-06-03 12:31:54.438865	2026-06-05 16:47:46.702844	59	\N	HOS0120
-1248	3	3	HOU-00121	SAPPHIRE BALLOON NC 3.5 X 15MM	54	19	5	49	150	9807.13	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.5 X 15MM	t	f	2026-06-03 12:31:54.441223	2026-06-05 16:47:46.702847	59	\N	HOS0121
-1249	3	3	HOU-00122	SAPPHIRE BALLOON NC 3.5 X 8MM	54	19	5	2	6	11644.53	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.5 X 8MM	t	f	2026-06-03 12:31:54.44321	2026-06-05 16:47:46.702849	59	\N	HOS0122
-1250	3	3	HOU-00123	SAPPHIRE BALLOON NC 4.0 X 10MM	54	19	5	4	11	28227.78	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 4.0 X 10MM	t	f	2026-06-03 12:31:54.445096	2026-06-05 16:47:46.702852	59	\N	HOS0123
-1251	3	3	HOU-00124	SAPPHIRE BALLOON NC 4.0 X 12MM	54	19	5	5	20	29696.2	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 4.0 X 12MM	t	f	2026-06-03 12:31:54.446917	2026-06-05 16:47:46.702855	59	\N	HOS0124
-1252	3	3	HOU-00125	SAPPHIRE BALLOON NC 4.0 X 15MM	54	19	5	37	138	5578.79	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 4.0 X 15MM	t	f	2026-06-03 12:31:54.448824	2026-06-05 16:47:46.702858	59	\N	HOS0125
-1253	3	3	HOU-00126	SAPPHIRE BALLOON NC 4.0 X 8MM	54	19	5	39	87	5694.61	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 4.0 X 8MM	t	f	2026-06-03 12:31:54.45079	2026-06-05 16:47:46.702865	59	\N	HOS0126
-1254	3	3	HOU-00127	SAPPHIRE BALLOON SC 1.25 X 10MM	54	19	5	2	5	28293.36	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 1.25 X 10MM	t	f	2026-06-03 12:31:54.452795	2026-06-05 16:47:46.702868	59	\N	HOS0127
-1255	3	3	HOU-00128	SAPPHIRE BALLOON SC 1.25 X 12MM	54	19	5	2	6	20721.93	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 1.25 X 12MM	t	f	2026-06-03 12:31:54.454877	2026-06-05 16:47:46.702871	59	\N	HOS0128
-1256	3	3	HOU-00129	SAPPHIRE BALLOON SC 1.25 X 15MM	54	19	5	2	8	37570.34	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 1.25 X 15MM	t	f	2026-06-03 12:31:54.457379	2026-06-05 16:47:46.702874	59	\N	HOS0129
-1257	3	3	HOU-00130	SAPPHIRE BALLOON SC 1.5 X 10MM	54	19	5	2	6	31807.89	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 1.5 X 10MM	t	f	2026-06-03 12:31:54.459399	2026-06-05 16:47:46.702877	59	\N	HOS0130
-1258	3	3	HOU-00131	SAPPHIRE BALLOON SC 1.5 X 12MM	54	19	5	12	26	9579.32	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 1.5 X 12MM	t	f	2026-06-03 12:31:54.461377	2026-06-05 16:47:46.702879	59	\N	HOS0131
-1259	3	3	HOU-00132	SAPPHIRE BALLOON SC 1.5 X 15MM	54	19	5	3	11	41669.52	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 1.5 X 15MM	t	f	2026-06-03 12:31:54.46331	2026-06-05 16:47:46.702882	59	\N	HOS0132
-1260	3	3	HOU-00133	SAPPHIRE BALLOON SC 1.5 X 8MM	54	19	5	2	5	15241.99	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 1.5 X 8MM	t	f	2026-06-03 12:31:54.465219	2026-06-05 16:47:46.702885	59	\N	HOS0133
-1261	3	3	HOU-00134	SAPPHIRE BALLOON SC 2.0 X 10MM	54	19	5	2	6	20174.98	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.0 X 10MM	t	f	2026-06-03 12:31:54.467206	2026-06-05 16:47:46.702888	59	\N	HOS0134
-1262	3	3	HOU-00135	SAPPHIRE BALLOON SC 2.0 X 12MM	54	19	5	2	8	49190.09	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.0 X 12MM	t	f	2026-06-03 12:31:54.469205	2026-06-05 16:47:46.70289	59	\N	HOS0135
-1263	3	3	HOU-00136	SAPPHIRE BALLOON SC 2.0 X 15MM	54	19	5	4	10	48065.39	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.0 X 15MM	t	f	2026-06-03 12:31:54.471469	2026-06-05 16:47:46.702893	59	\N	HOS0136
-1264	3	3	HOU-00137	SAPPHIRE BALLOON SC 2.0 X 8MM	54	19	5	2	8	22533.69	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.0 X 8MM	t	f	2026-06-03 12:31:54.473991	2026-06-05 16:47:46.702896	59	\N	HOS0137
-1265	3	3	HOU-00138	SAPPHIRE BALLOON SC 2.5 X 10MM	54	19	5	3	9	38005.95	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.5 X 10MM	t	f	2026-06-03 12:31:54.476011	2026-06-05 16:47:46.702899	59	\N	HOS0138
-1266	3	3	HOU-00139	SAPPHIRE BALLOON SC 2.5 X 12MM	54	19	5	3	8	28522.88	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.5 X 12MM	t	f	2026-06-03 12:31:54.477955	2026-06-05 16:47:46.702901	59	\N	HOS0139
-1267	3	3	HOU-00140	SAPPHIRE BALLOON SC 2.5 X 15MM	54	19	5	3	10	13460.5	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.5 X 15MM	t	f	2026-06-03 12:31:54.479875	2026-06-05 16:47:46.702904	59	\N	HOS0140
-1268	3	3	HOU-00141	SAPPHIRE BALLOON SC 2.5 X 8MM	54	19	5	3	11	23367.64	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.5 X 8MM	t	f	2026-06-03 12:31:54.481762	2026-06-05 16:47:46.702907	59	\N	HOS0141
-1269	3	3	HOU-00142	SAPPHIRE BALLOON SC 2.75 X 10MM	54	19	5	4	15	34558.77	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.75 X 10MM	t	f	2026-06-03 12:31:54.48373	2026-06-05 16:47:46.70291	59	\N	HOS0142
-1270	3	3	HOU-00143	SAPPHIRE BALLOON SC 2.75 X 12MM	54	19	5	5	17	37307.58	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.75 X 12MM	t	f	2026-06-03 12:31:54.485783	2026-06-05 16:47:46.702912	59	\N	HOS0143
-1271	3	3	HOU-00144	SAPPHIRE BALLOON SC 2.75 X 15MM	54	19	5	2	6	43673.19	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.75 X 15MM	t	f	2026-06-03 12:31:54.487936	2026-06-05 16:47:46.702915	59	\N	HOS0144
-1272	3	3	HOU-00145	SAPPHIRE BALLOON SC 2.75 X 8MM	54	19	5	3	10	41474.27	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.75 X 8MM	t	f	2026-06-03 12:31:54.490405	2026-06-05 16:47:46.702918	59	\N	HOS0145
-1273	3	3	HOU-00146	SAPPHIRE BALLOON SC 3.0 X 10 MM	54	19	5	4	12	30601.76	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.0 X 10 MM	t	f	2026-06-03 12:31:54.492435	2026-06-05 16:47:46.702921	59	\N	HOS0146
-1274	3	3	HOU-00147	SAPPHIRE BALLOON SC 3.0 X 12 MM	54	19	5	10	40	9574.71	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.0 X 12 MM	t	f	2026-06-03 12:31:54.494394	2026-06-05 16:47:46.702923	59	\N	HOS0147
-1275	3	3	HOU-00148	SAPPHIRE BALLOON SC 3.0 X 15 MM	54	19	5	3	7	14873.99	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.0 X 15 MM	t	f	2026-06-03 12:31:54.496195	2026-06-05 16:47:46.702926	59	\N	HOS0148
-1276	3	3	HOU-00149	SAPPHIRE BALLOON SC 3.0 X 8 MM	54	19	5	3	8	13931.39	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.0 X 8 MM	t	f	2026-06-03 12:31:54.498119	2026-06-05 16:47:46.702929	59	\N	HOS0149
-1277	3	3	HOU-00150	SAPPHIRE BALLOON SC 3.5 X 10 MM	54	19	5	2	7	19344.59	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.5 X 10 MM	t	f	2026-06-03 12:31:54.500024	2026-06-05 16:47:46.702932	59	\N	HOS0150
-1278	3	3	HOU-00151	SAPPHIRE BALLOON SC 3.5 X 12 MM	54	19	5	2	6	41821.12	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.5 X 12 MM	t	f	2026-06-03 12:31:54.502165	2026-06-05 16:47:46.702934	59	\N	HOS0151
-1279	3	3	HOU-00152	SAPPHIRE BALLOON SC 3.5 X 15 MM	54	19	5	4	12	43020.18	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.5 X 15 MM	t	f	2026-06-03 12:31:54.504287	2026-06-05 16:47:46.702937	59	\N	HOS0152
-1280	3	3	HOU-00153	SAPPHIRE BALLOON SC 3.5 X 8MM	54	19	5	3	8	44607.31	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.5 X 8MM	t	f	2026-06-03 12:31:54.50671	2026-06-05 16:47:46.70294	59	\N	HOS0153
-1281	3	3	HOU-00154	SAPPHIRE BALLOON SC 4.0 X 10 MM	54	19	5	4	14	11280.13	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 4.0 X 10 MM	t	f	2026-06-03 12:31:54.508831	2026-06-05 16:47:46.702943	59	\N	HOS0154
-1282	3	3	HOU-00155	SAPPHIRE BALLOON SC 4.0 X 12 MM	54	19	5	5	16	25264.08	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 4.0 X 12 MM	t	f	2026-06-03 12:31:54.510794	2026-06-05 16:47:46.702945	59	\N	HOS0155
-1283	3	3	HOU-00156	SAPPHIRE BALLOON SC 4.0 X 15 MM	54	19	5	4	12	28093.07	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 4.0 X 15 MM	t	f	2026-06-03 12:31:54.512717	2026-06-05 16:47:46.702948	59	\N	HOS0156
-1284	3	3	HOU-00157	SAPPHIRE BALLOON SC 4.0 X 8 MM	54	19	5	4	16	41898.91	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 4.0 X 8 MM	t	f	2026-06-03 12:31:54.514649	2026-06-05 16:47:46.702951	59	\N	HOS0157
-1285	3	3	HOU-00158	SCANLAN AORTIC PUNCH 2.5MM	54	19	5	5	12	34292.15	\N	Covered	\N	12	Consumable	SCANLAN AORTIC PUNCH 2.5MM	t	f	2026-06-03 12:31:54.51654	2026-06-05 16:47:46.702954	59	\N	HOS0158
-1286	3	3	HOU-00159	SCANLAN AORTIC PUNCH 3.0MM	54	19	5	3	7	45470.55	\N	Covered	\N	12	Consumable	SCANLAN AORTIC PUNCH 3.0MM	t	f	2026-06-03 12:31:54.518609	2026-06-05 16:47:46.702956	59	\N	HOS0159
-1287	3	3	HOU-00160	SCANLAN AORTIC PUNCH 3.5MM	54	19	5	2	6	15175.95	\N	Covered	\N	12	Consumable	SCANLAN AORTIC PUNCH 3.5MM	t	f	2026-06-03 12:31:54.520599	2026-06-05 16:47:46.702959	59	\N	HOS0160
-1288	3	3	HOU-00161	STENT 2.5X32MM	54	19	5	3	7	21265.62	\N	Covered	\N	12	Consumable	STENT 2.5X32MM	t	f	2026-06-03 12:31:54.523033	2026-06-05 16:47:46.702962	59	\N	HOS0161
-1289	3	3	HOU-00162	STENT 2.75 X 28MM	54	19	5	4	15	40111.37	\N	Covered	\N	12	Consumable	STENT 2.75 X 28MM	t	f	2026-06-03 12:31:54.525257	2026-06-05 16:47:46.702965	59	\N	HOS0162
-1290	3	3	HOU-00163	STENT 2.75 X 36 MM	54	19	5	4	9	38848.81	\N	Covered	\N	12	Consumable	STENT 2.75 X 36 MM	t	f	2026-06-03 12:31:54.527208	2026-06-05 16:47:46.702967	59	\N	HOS0163
-1291	3	3	HOU-00164	STENT 2.75 X 44 MM	54	19	5	4	13	37241.53	\N	Covered	\N	12	Consumable	STENT 2.75 X 44 MM	t	f	2026-06-03 12:31:54.529011	2026-06-05 16:47:46.70297	59	\N	HOS0164
-1292	3	3	HOU-00165	STENT 2.75X13MM	54	19	5	45	178	9463.92	\N	Covered	\N	12	Consumable	STENT 2.75X13MM	t	f	2026-06-03 12:31:54.530855	2026-06-05 16:47:46.702973	59	\N	HOS0165
-1293	3	3	HOU-00166	STENT 2.75X16MM	54	19	5	5	19	41195.94	\N	Covered	\N	12	Consumable	STENT 2.75X16MM	t	f	2026-06-03 12:31:54.532662	2026-06-05 16:47:46.702976	59	\N	HOS0166
-1294	3	3	HOU-00167	STENT 2.75X24MM	54	19	5	5	14	38265.57	\N	Covered	\N	12	Consumable	STENT 2.75X24MM	t	f	2026-06-03 12:31:54.534668	2026-06-05 16:47:46.702978	59	\N	HOS0167
-1295	3	3	HOU-00168	STENT 2.75X32MM	54	19	5	28	96	5050.55	\N	Covered	\N	12	Consumable	STENT 2.75X32MM	t	f	2026-06-03 12:31:54.536683	2026-06-05 16:47:46.702981	59	\N	HOS0168
-1296	3	3	HOU-00169	STENT 3.0 X 10 MM	54	19	5	5	19	27948.52	\N	Covered	\N	12	Consumable	STENT 3.0 X 10 MM	t	f	2026-06-03 12:31:54.538878	2026-06-05 16:47:46.702984	59	\N	HOS0169
-1297	3	3	HOU-00170	STENT 3.0 X 44 MM	54	19	5	2	8	23100.77	\N	Covered	\N	12	Consumable	STENT 3.0 X 44 MM	t	f	2026-06-03 12:31:54.5413	2026-06-05 16:47:46.702987	59	\N	HOS0170
-1298	3	3	HOU-00171	STENT 3.0X18MM	54	19	5	3	10	25471.61	\N	Covered	\N	12	Consumable	STENT 3.0X18MM	t	f	2026-06-03 12:31:54.543201	2026-06-05 16:47:46.702989	59	\N	HOS0171
-1299	3	3	HOU-00172	STENT 3.0X24MM	54	19	5	4	15	22018.67	\N	Covered	\N	12	Consumable	STENT 3.0X24MM	t	f	2026-06-03 12:31:54.545104	2026-06-05 16:47:46.702992	59	\N	HOS0172
-1300	3	3	HOU-00173	STENT 3.0X28MM	54	19	5	2	5	48491.89	\N	Covered	\N	12	Consumable	STENT 3.0X28MM	t	f	2026-06-03 12:31:54.546991	2026-06-05 16:47:46.702995	59	\N	HOS0173
-1301	3	3	HOU-00174	STENT 3.0X32MM	54	19	5	4	15	40780.68	\N	Covered	\N	12	Consumable	STENT 3.0X32MM	t	f	2026-06-03 12:31:54.548907	2026-06-05 16:47:46.702998	59	\N	HOS0174
-1302	3	3	HOU-00175	STENT 3.0X40MM	54	19	5	2	6	15985.82	\N	Covered	\N	12	Consumable	STENT 3.0X40MM	t	f	2026-06-03 12:31:54.550896	2026-06-05 16:47:46.703	59	\N	HOS0175
-1303	3	3	HOU-00176	STENT 3.5 X 10 MM	54	19	5	4	13	37041.39	\N	Covered	\N	12	Consumable	STENT 3.5 X 10 MM	t	f	2026-06-03 12:31:54.55295	2026-06-05 16:47:46.703003	59	\N	HOS0176
-1304	3	3	HOU-00177	STENT 3.5 X 15 MM	54	19	5	3	12	16801.56	\N	Covered	\N	12	Consumable	STENT 3.5 X 15 MM	t	f	2026-06-03 12:31:54.555105	2026-06-05 16:47:46.703006	59	\N	HOS0177
-1305	3	3	HOU-00178	STENT 3.5 X 28 MM	54	19	5	5	14	26453.15	\N	Covered	\N	12	Consumable	STENT 3.5 X 28 MM	t	f	2026-06-03 12:31:54.557653	2026-06-05 16:47:46.703009	59	\N	HOS0178
-1306	3	3	HOU-00179	STENT 3.5X14MM	54	19	5	2	5	27590	\N	Covered	\N	12	Consumable	STENT 3.5X14MM	t	f	2026-06-03 12:31:54.559684	2026-06-05 16:47:46.703011	59	\N	HOS0179
-1307	3	3	HOU-00180	STENT 3.5X16MM	54	19	5	4	16	16861.54	\N	Covered	\N	12	Consumable	STENT 3.5X16MM	t	f	2026-06-03 12:31:54.561682	2026-06-05 16:47:46.703014	59	\N	HOS0180
-1308	3	3	HOU-00181	STENT 3.5X18MM	54	19	5	3	10	41863.62	\N	Covered	\N	12	Consumable	STENT 3.5X18MM	t	f	2026-06-03 12:31:54.563614	2026-06-05 16:47:46.703017	59	\N	HOS0181
-1309	3	3	HOU-00182	STENT 3.5X24MM	54	19	5	30	65	7022.44	\N	Covered	\N	12	Consumable	STENT 3.5X24MM	t	f	2026-06-03 12:31:54.565605	2026-06-05 16:47:46.70302	59	\N	HOS0182
-1310	3	3	HOU-00183	STENT 3.5X28MM	54	19	5	3	7	36814.54	\N	Covered	\N	12	Consumable	STENT 3.5X28MM	t	f	2026-06-03 12:31:54.567719	2026-06-05 16:47:46.703022	59	\N	HOS0183
-1311	3	3	HOU-00184	STENT 3.5X32MM	54	19	5	4	13	11109.34	\N	Covered	\N	12	Consumable	STENT 3.5X32MM	t	f	2026-06-03 12:31:54.569842	2026-06-05 16:47:46.703025	59	\N	HOS0184
-1312	3	3	HOU-00185	STENT 4.0 X 16 MM	54	19	5	5	17	43194.14	\N	Covered	\N	12	Consumable	STENT 4.0 X 16 MM	t	f	2026-06-03 12:31:54.572029	2026-06-05 16:47:46.70303	59	\N	HOS0185
-1313	3	3	HOU-00186	TERUMO I KARI IL 3.5 - 5FR	54	19	5	3	8	24850.98	\N	Covered	\N	12	Consumable	TERUMO I KARI IL 3.5 - 5FR	t	f	2026-06-03 12:31:54.574506	2026-06-05 16:47:46.703033	59	\N	HOS0186
-1314	3	3	HOU-00187	TERUMO I KARI IL 3.5 - 6FR	54	19	5	5	12	27882.31	\N	Covered	\N	12	Consumable	TERUMO I KARI IL 3.5 - 6FR	t	f	2026-06-03 12:31:54.576492	2026-06-05 16:47:46.703036	59	\N	HOS0187
-1315	3	3	HOU-00188	TERUMO I KARI IR 1.5 - 5FR	54	19	5	5	17	45006.67	\N	Covered	\N	12	Consumable	TERUMO I KARI IR 1.5 - 5FR	t	f	2026-06-03 12:31:54.57841	2026-06-05 16:47:46.703038	59	\N	HOS0188
-1316	3	3	HOU-00189	TERUMO J.TIP 0.35X150	54	19	5	15	37	5319.92	\N	Covered	\N	12	Consumable	TERUMO J.TIP 0.35X150	t	f	2026-06-03 12:31:54.580351	2026-06-05 16:47:46.703041	59	\N	HOS0189
-1317	3	3	HOU-00190	TOP MANIFOLD 3 PORT	54	19	5	3	9	34938.16	\N	Covered	\N	12	Consumable	TOP MANIFOLD 3 PORT	t	f	2026-06-03 12:31:54.582242	2026-06-05 16:47:46.703044	59	\N	HOS0190
-1318	3	3	HOU-00191	TPI  - PACEL 5F (BALLOON TIP)	54	19	5	5	14	34169.31	\N	Covered	\N	12	Consumable	TPI  - PACEL 5F (BALLOON TIP)	t	f	2026-06-03 12:31:54.584191	2026-06-05 16:47:46.703047	59	\N	HOS0191
-1319	3	3	HOU-00192	TRANSDUCER KIT	54	19	5	5	12	32530.49	\N	Covered	\N	12	Consumable	TRANSDUCER KIT	t	f	2026-06-03 12:31:54.586155	2026-06-05 16:47:46.703049	59	\N	HOS0192
-1320	3	3	HOU-00193	ULTRA FLEX IABP 7.5 X 40 CC - ARROW MAKE	54	19	5	4	16	49380.3	\N	Covered	\N	12	Consumable	ULTRA FLEX IABP 7.5 X 40 CC - ARROW MAKE	t	f	2026-06-03 12:31:54.588152	2026-06-05 16:47:46.703052	59	\N	HOS0193
-1321	3	3	HOU-00194	VISIPAQUE 320MG*100ML-LONG	54	19	5	2	7	15551.72	\N	Covered	\N	12	Consumable	VISIPAQUE 320MG*100ML-LONG	t	f	2026-06-03 12:31:54.590646	2026-06-05 16:47:46.703055	59	\N	HOS0194
-1322	3	3	HOU-00195	VISIPAQUE 50ML	54	19	5	5	19	17174.45	\N	Covered	\N	12	Consumable	VISIPAQUE 50ML	t	f	2026-06-03 12:31:54.592684	2026-06-05 16:47:46.703058	59	\N	HOS0195
-1323	3	3	HOU-00196	2X2 DOOR GASKET FOR BIG MACHINE	54	20	5	4	14	24028.99	\N	Covered	\N	18	Consumable	2X2 DOOR GASKET FOR BIG MACHINE	t	f	2026-06-03 12:31:54.59463	2026-06-05 16:47:46.70306	59	\N	HOS0196
-1324	3	3	HOU-00197	BLADE FOR GUAGE CUTTING MACHINE	54	20	5	5	19	13635.13	\N	Covered	\N	18	Consumable	BLADE FOR GUAGE CUTTING MACHINE	t	f	2026-06-03 12:31:54.596527	2026-06-05 16:47:46.703063	59	\N	HOS0197
-1325	3	3	HOU-00198	BOILER GASKET - SMALL MACHINE	54	20	5	2	7	10767.58	\N	Covered	\N	18	Consumable	BOILER GASKET - SMALL MACHINE	t	f	2026-06-03 12:31:54.598394	2026-06-05 16:47:46.703066	59	\N	HOS0198
-1326	3	3	HOU-00199	BOLT & NUTS	54	20	6	2	6	34882.18	\N	Covered	\N	18	Consumable	BOLT & NUTS	t	f	2026-06-03 12:31:54.600323	2026-06-05 16:47:46.703069	59	\N	HOS0199
-1327	3	3	HOU-00200	BRAIDED TUBE 1/2" X 2 MTRS	54	20	5	4	12	22125.42	\N	Covered	\N	18	Consumable	BRAIDED TUBE 1/2" X 2 MTRS	t	f	2026-06-03 12:31:54.602386	2026-06-05 16:47:46.703071	59	\N	HOS0200
-1328	3	3	HOU-00201	BROWN TEFLON BELT- SEALING MACHINE	54	20	5	2	8	27741.37	\N	Covered	\N	18	Consumable	BROWN TEFLON BELT- SEALING MACHINE	t	f	2026-06-03 12:31:54.604427	2026-06-05 16:47:46.703074	59	\N	HOS0201
-1329	3	3	HOU-00202	LOW WATER CUT OFF - SENSOR TYPE	54	20	5	3	9	42545.35	\N	Covered	\N	18	Consumable	LOW WATER CUT OFF - SENSOR TYPE	t	f	2026-06-03 12:31:54.606879	2026-06-05 16:47:46.703077	59	\N	HOS0202
-1330	3	3	HOU-00203	OPERATING VALVE GASKET - BIG	54	20	5	3	11	40105.74	\N	Covered	\N	18	Consumable	OPERATING VALVE GASKET - BIG	t	f	2026-06-03 12:31:54.609045	2026-06-05 16:47:46.70308	59	\N	HOS0203
-1331	3	3	HOU-00204	PRINTING ROLLS ETO MACHINE	54	20	5	3	10	49267.01	\N	Covered	\N	18	Consumable	PRINTING ROLLS ETO MACHINE	t	f	2026-06-03 12:31:54.61101	2026-06-05 16:47:46.703082	59	\N	HOS0204
-1332	3	3	HOU-00205	SAFETY VALVE	54	20	5	2	5	27360.66	\N	Covered	\N	18	Consumable	SAFETY VALVE	t	f	2026-06-03 12:31:54.612921	2026-06-05 16:47:46.703085	59	\N	HOS0205
-1333	3	3	HOU-00206	SHARPENER BELT FOR GUAGE CUTTING MACHINE	54	20	5	30	89	8664.4	\N	Covered	\N	18	Consumable	SHARPENER BELT FOR GUAGE CUTTING MACHINE	t	f	2026-06-03 12:31:54.614841	2026-06-05 16:47:46.703088	59	\N	HOS0206
-1334	3	3	HOU-00207	SILICON GASKET FOR HEATER	54	20	5	2	8	49305.41	\N	Covered	\N	18	Consumable	SILICON GASKET FOR HEATER	t	f	2026-06-03 12:31:54.61674	2026-06-05 16:47:46.703091	59	\N	HOS0207
-1335	3	3	HOU-00208	SILICON WHEEL FOR SEALING MACHINE	54	20	5	3	7	20126.75	\N	Covered	\N	18	Consumable	SILICON WHEEL FOR SEALING MACHINE	t	f	2026-06-03 12:31:54.618785	2026-06-05 16:47:46.703093	59	\N	HOS0208
-1336	3	3	HOU-00209	TEFLON TAPE ROLL(SMALL MACHINE)	54	20	12	4	13	47865.15	\N	Covered	\N	18	Consumable	TEFLON TAPE ROLL(SMALL MACHINE)	t	f	2026-06-03 12:31:54.620715	2026-06-05 16:47:46.703096	59	\N	HOS0209
-1337	3	3	HOU-00210	ASSEMBLIES ORTHO DIRECT	54	21	5	3	8	13569.44	\N	Covered	\N	12	Consumable	ASSEMBLIES ORTHO DIRECT	t	f	2026-06-03 12:31:54.623003	2026-06-05 16:47:46.703099	59	\N	HOS0210
-1338	3	3	HOU-00211	BAND SEATER GDC	54	21	5	3	11	12025.08	\N	Covered	\N	12	Consumable	BAND SEATER GDC	t	f	2026-06-03 12:31:54.625289	2026-06-05 16:47:46.703102	59	\N	HOS0211
-1339	3	3	HOU-00212	BLUE BITE	54	21	5	3	10	11895.17	\N	Covered	\N	12	Consumable	BLUE BITE	t	f	2026-06-03 12:31:54.627172	2026-06-05 16:47:46.703104	59	\N	HOS0212
-1340	3	3	HOU-00213	BONDABLE 1ST MOLAR TUBES D-TECH	54	21	5	3	9	13847.05	\N	Covered	\N	12	Consumable	BONDABLE 1ST MOLAR TUBES D-TECH	t	f	2026-06-03 12:31:54.62904	2026-06-05 16:47:46.703107	59	\N	HOS0213
-1341	3	3	HOU-00214	BONDABLE BUTTONS PKT OF 10	54	21	5	4	13	10652.57	\N	Covered	\N	12	Consumable	BONDABLE BUTTONS PKT OF 10	t	f	2026-06-03 12:31:54.630878	2026-06-05 16:47:46.70311	59	\N	HOS0214
-1342	3	3	HOU-00215	BRACKET IRIDIUM MBT 022 KIT	54	21	5	2	6	13179.23	\N	Covered	\N	12	Consumable	BRACKET IRIDIUM MBT 022 KIT	t	f	2026-06-03 12:31:54.632736	2026-06-05 16:47:46.703113	59	\N	HOS0215
-1343	3	3	HOU-00216	CERAMIC KIT MBT 022 5-5	54	21	5	22	54	7056.16	\N	Covered	\N	12	Consumable	CERAMIC KIT MBT 022 5-5	t	f	2026-06-03 12:31:54.634763	2026-06-05 16:47:46.703115	59	\N	HOS0216
-1344	3	3	HOU-00217	CHEEK RETRACTOR WITH HANDLE	54	21	5	2	5	28137.67	\N	Covered	\N	12	Consumable	CHEEK RETRACTOR WITH HANDLE	t	f	2026-06-03 12:31:54.636713	2026-06-05 16:47:46.703118	59	\N	HOS0217
-1345	3	3	HOU-00218	CRIMPING PLIER	54	21	5	3	10	43834.48	\N	Covered	\N	12	Consumable	CRIMPING PLIER	t	f	2026-06-03 12:31:54.638756	2026-06-05 16:47:46.703121	59	\N	HOS0218
-1346	3	3	HOU-00219	DEBONDING BUR HORICO	54	21	5	5	14	14390.92	\N	Covered	\N	12	Consumable	DEBONDING BUR HORICO	t	f	2026-06-03 12:31:54.64121	2026-06-05 16:47:46.703124	59	\N	HOS0219
-1347	3	3	HOU-00220	DENTAL PENCIL	54	21	5	2	5	29772.16	\N	Covered	\N	12	Consumable	DENTAL PENCIL	t	f	2026-06-03 12:31:54.643539	2026-06-05 16:47:46.703126	59	\N	HOS0220
-1348	3	3	HOU-00221	D-TECH ROTH KIT 018	54	21	5	3	8	32447.26	\N	Covered	\N	12	Consumable	D-TECH ROTH KIT 018	t	f	2026-06-03 12:31:54.645698	2026-06-05 16:47:46.703129	59	\N	HOS0221
-1349	3	3	HOU-00222	E-CHAIN OO 15FT- CONT. CLEAR & GREY	54	21	5	4	15	20626.7	\N	Covered	\N	12	Consumable	E-CHAIN OO 15FT- CONT. CLEAR & GREY	t	f	2026-06-03 12:31:54.647787	2026-06-05 16:47:46.703132	59	\N	HOS0222
-1350	3	3	HOU-00223	E-CHAIN OO 15FT- SHORT. CLEAR & GREY	54	21	5	2	5	32134.02	\N	Covered	\N	12	Consumable	E-CHAIN OO 15FT- SHORT. CLEAR & GREY	t	f	2026-06-03 12:31:54.650078	2026-06-05 16:47:46.703135	59	\N	HOS0223
-1351	3	3	HOU-00224	ENLIGHT LC COMPOSITE KIT ORMCO WITH ETCHANT	54	21	5	3	9	45420.78	\N	Covered	\N	12	Consumable	ENLIGHT LC COMPOSITE KIT ORMCO WITH ETCHANT	t	f	2026-06-03 12:31:54.652632	2026-06-05 16:47:46.703137	59	\N	HOS0224
-1352	3	3	HOU-00225	HOE PLIER GDC STR/CVD	54	21	5	4	9	32274.05	\N	Covered	\N	12	Consumable	HOE PLIER GDC STR/CVD	t	f	2026-06-03 12:31:54.654737	2026-06-05 16:47:46.70314	59	\N	HOS0225
-1353	3	3	HOU-00226	HORICO FG BU 166 010	54	21	5	30	105	5532.71	\N	Covered	\N	12	Consumable	HORICO FG BU 166 010	t	f	2026-06-03 12:31:54.657306	2026-06-05 16:47:46.703143	59	\N	HOS0226
-1354	3	3	HOU-00227	HP ELASTIC 5000 - PINK, GREEN, BLUE & RED	54	21	5	2	7	42043.95	\N	Covered	\N	12	Consumable	HP ELASTIC 5000 - PINK, GREEN, BLUE & RED	t	f	2026-06-03 12:31:54.659427	2026-06-05 16:47:46.703146	59	\N	HOS0227
-1355	3	3	HOU-00228	HP SPOT WELDER	54	21	5	2	6	17460.99	\N	Covered	\N	12	Consumable	HP SPOT WELDER	t	f	2026-06-03 12:31:54.661366	2026-06-05 16:47:46.703148	59	\N	HOS0228
-1356	3	3	HOU-00229	LIGARINGS (1040) CLEAR & GREY	54	21	5	2	7	24747.81	\N	Covered	\N	12	Consumable	LIGARINGS (1040) CLEAR & GREY	t	f	2026-06-03 12:31:54.663318	2026-06-05 16:47:46.703151	59	\N	HOS0229
-1357	3	3	HOU-00230	LINGUAL SHEATH HP (PKT OF 50)	54	21	5	4	11	11910.81	\N	Covered	\N	12	Consumable	LINGUAL SHEATH HP (PKT OF 50)	t	f	2026-06-03 12:31:54.665147	2026-06-05 16:47:46.703154	59	\N	HOS0230
-1358	3	3	HOU-00231	NITI 014 PKT OF 25 U/L	54	21	5	4	9	19412.86	\N	Covered	\N	12	Consumable	NITI 014 PKT OF 25 U/L	t	f	2026-06-03 12:31:54.667064	2026-06-05 16:47:46.703156	59	\N	HOS0231
-1359	3	3	HOU-00232	NITI 016 PKT OF 25 U/L	54	21	5	4	10	15280.31	\N	Covered	\N	12	Consumable	NITI 016 PKT OF 25 U/L	t	f	2026-06-03 12:31:54.669111	2026-06-05 16:47:46.703159	59	\N	HOS0232
-1360	3	3	HOU-00233	PLIER STAND	54	21	5	4	11	39780.01	\N	Covered	\N	12	Consumable	PLIER STAND	t	f	2026-06-03 12:31:54.670955	2026-06-05 16:47:46.703162	59	\N	HOS0233
-1361	3	3	HOU-00234	RELIEF WAX	54	21	5	5	18	42881.58	\N	Covered	\N	12	Consumable	RELIEF WAX	t	f	2026-06-03 12:31:54.673348	2026-06-05 16:47:46.703165	59	\N	HOS0234
-1362	3	3	HOU-00235	UNIVERSAL PLIER GDC	54	21	5	2	6	36371.84	\N	Covered	\N	12	Consumable	UNIVERSAL PLIER GDC	t	f	2026-06-03 12:31:54.675653	2026-06-05 16:47:46.703167	59	\N	HOS0235
-1363	3	3	HOU-00236	AVF NEEDLE 16G	54	22	5	4	16	43244.64	\N	Covered	\N	12	Consumable	AVF NEEDLE 16G	t	f	2026-06-03 12:31:54.677633	2026-06-05 16:47:46.70317	59	\N	HOS0236
-1364	3	3	HOU-00237	AVF NEEDLE 17G	54	22	5	3	10	48314.91	\N	Covered	\N	12	Consumable	AVF NEEDLE 17G	t	f	2026-06-03 12:31:54.679547	2026-06-05 16:47:46.703173	59	\N	HOS0237
-1365	3	3	HOU-00238	BICARB MIXER MACHINE 100 LITRES	54	22	5	3	12	13344.08	\N	Covered	\N	12	Non-Consumable	BICARB MIXER MACHINE 100 LITRES	t	f	2026-06-03 12:31:54.681421	2026-06-05 16:47:46.703176	59	\N	HOS0238
-1366	3	3	HOU-00239	BICARBONATE PART B- 10LTR PACK	54	22	5	5	18	13515.59	\N	Covered	\N	12	Consumable	BICARBONATE PART B- 10LTR PACK	t	f	2026-06-03 12:31:54.683332	2026-06-05 16:47:46.703179	59	\N	HOS0239
-1367	3	3	HOU-00240	CHLORITEST PAPERS FOR CHLORINE TEST	54	22	5	4	14	21108.67	\N	Covered	\N	18	Consumable	CHLORITEST PAPERS FOR CHLORINE TEST	t	f	2026-06-03 12:31:54.685373	2026-06-05 16:47:46.703181	59	\N	HOS0240
-1368	3	3	HOU-00241	DIALYSATE CONNECTOR BLUE	54	22	5	4	9	49176.54	\N	Covered	\N	12	Consumable	DIALYSATE CONNECTOR BLUE	t	f	2026-06-03 12:31:54.687393	2026-06-05 16:47:46.703184	59	\N	HOS0241
-1369	3	3	HOU-00242	DIALYSATE CONNECTOR RED	54	22	5	16	35	9348.73	\N	Covered	\N	12	Consumable	DIALYSATE CONNECTOR RED	t	f	2026-06-03 12:31:54.689717	2026-06-05 16:47:46.703187	59	\N	HOS0242
-1370	3	3	HOU-00243	DOOR 22MM BUBBLE C.HOLDER 4008SV10 - M561711	54	22	5	4	15	29315.77	\N	Covered	\N	18	Consumable	DOOR 22MM BUBBLE C.HOLDER 4008SV10 - M561711	t	f	2026-06-03 12:31:54.692211	2026-06-05 16:47:46.703189	59	\N	HOS0243
-1371	3	3	HOU-00244	DRY CITRATE PART A-40LTR/PACK	54	22	5	2	6	31257.65	\N	Covered	\N	12	Consumable	DRY CITRATE PART A-40LTR/PACK	t	f	2026-06-03 12:31:54.694202	2026-06-05 16:47:46.703192	59	\N	HOS0244
-1372	3	3	HOU-00245	HIGH POTASSIUM CAN	54	22	5	5	14	45229.74	\N	Covered	\N	12	Consumable	HIGH POTASSIUM CAN	t	f	2026-06-03 12:31:54.696072	2026-06-05 16:47:46.703195	59	\N	HOS0245
-1373	3	3	HOU-00246	INFORMED CONSENT FOR HAEMODIALYSIS	54	31	5	4	14	43761.04	\N	Covered	\N	18	Consumable	INFORMED CONSENT FOR HAEMODIALYSIS	t	f	2026-06-03 12:31:54.698137	2026-06-05 16:47:46.703198	59	\N	HOS0246
-1374	3	3	HOU-00247	ON/OFF KIT	54	22	5	5	11	39494.21	\N	Covered	\N	12	Consumable	ON/OFF KIT	t	f	2026-06-03 12:31:54.700296	2026-06-05 16:47:46.7032	59	\N	HOS0247
-1375	3	3	HOU-00249	STEPPER MOTOR WITH GEAR BOX 4-POLES *4008B/H/S *4008S V10-PART NO: M393211	54	22	5	17	55	5372.14	\N	Covered	\N	18	Non-Consumable	STEPPER MOTOR WITH GEAR BOX 4-POLES *4008B/H/S *4008S V10-PART NO: M393211	t	f	2026-06-03 12:31:54.702428	2026-06-05 16:47:46.703203	59	\N	HOS0249
-1376	3	3	HOU-00250	TUBE FIXING ROLLER PUMP	54	22	5	29	78	5210.01	\N	Covered	\N	18	Non-Consumable	TUBE FIXING ROLLER PUMP	t	f	2026-06-03 12:31:54.704422	2026-06-05 16:47:46.703206	59	\N	HOS0250
-1377	3	3	HOU-00251	ULTRAFILTRATION PUMP 40008B/H/S/S V10 - PART NO:6707061	54	22	5	35	126	6499.34	\N	Covered	\N	18	Non-Consumable	ULTRAFILTRATION PUMP 40008B/H/S/S V10 - PART NO:6707061	t	f	2026-06-03 12:31:54.706779	2026-06-05 16:47:46.703209	59	\N	HOS0251
-1378	3	3	HOU-00252	10A FUSE - 100NOS-BOX	54	23	5	3	11	10443.43	\N	Covered	\N	18	Consumable	10A FUSE - 100NOS-BOX	t	f	2026-06-03 12:31:54.709111	2026-06-05 16:47:46.703212	59	\N	HOS0252
-1379	3	3	HOU-00253	16X24 DOOR GASKET	54	23	5	2	5	31170.49	\N	Covered	\N	18	Consumable	16X24 DOOR GASKET	t	f	2026-06-03 12:31:54.711121	2026-06-05 16:47:46.703214	59	\N	HOS0253
-1380	3	3	HOU-00254	24 POET POE SWITCH (DGS TO 26P)	54	23	5	4	13	37487.18	\N	Covered	\N	18	Consumable	24 POET POE SWITCH (DGS TO 26P)	t	f	2026-06-03 12:31:54.712967	2026-06-05 16:47:46.703217	59	\N	HOS0254
-1381	3	3	HOU-00255	6A FUSE - 100NOS-BOX	54	23	5	5	12	33036.78	\N	Covered	\N	18	Consumable	6A FUSE - 100NOS-BOX	t	f	2026-06-03 12:31:54.714826	2026-06-05 16:47:46.70322	59	\N	HOS0255
-1382	3	3	HOU-00256	ABG RADIOMETER - SBP SOLUTION PACK - 944-506	54	24	5	38	119	7501.07	\N	Covered	\N	12	Consumable	ABG RADIOMETER - SBP SOLUTION PACK - 944-506	t	f	2026-06-03 12:31:54.716739	2026-06-05 16:47:46.703223	59	\N	HOS0256
-1383	3	3	HOU-00257	AEROSEPT 5LTRS - DISINFECTANT	54	28	5	4	10	10054.47	\N	Covered	\N	18	Consumable	AEROSEPT 5LTRS - DISINFECTANT	t	f	2026-06-03 12:31:54.718731	2026-06-05 16:47:46.703225	59	\N	HOS0257
-1384	3	3	HOU-00258	ALL OUT MACHINE WITH REFILL	54	26	5	4	11	36519.29	\N	Covered	\N	18	Consumable	ALL OUT MACHINE WITH REFILL	t	f	2026-06-03 12:31:54.720699	2026-06-05 16:47:46.703228	59	\N	HOS0258
-1385	3	3	HOU-00259	ALL OUT MOSQUITO REPELLENT - REFILL	54	26	5	5	20	34513.15	\N	Covered	\N	18	Consumable	ALL OUT MOSQUITO REPELLENT - REFILL	t	f	2026-06-03 12:31:54.722968	2026-06-05 16:47:46.703231	59	\N	HOS0259
-1386	3	3	HOU-00260	ANASTHESIA BOOKLET	54	31	5	2	8	19712.34	\N	Covered	\N	12	Consumable	ANASTHESIA BOOKLET	t	f	2026-06-03 12:31:54.725409	2026-06-05 16:47:46.703234	59	\N	HOS0260
-1387	3	3	HOU-00261	AUDIOLOGICAL EVALUATION	54	31	5	4	13	33238.36	\N	Covered	\N	12	Consumable	AUDIOLOGICAL EVALUATION	t	f	2026-06-03 12:31:54.727387	2026-06-05 16:47:46.703236	59	\N	HOS0261
-1388	3	3	HOU-00262	BASKET FOR MONITOR STAND	54	26	5	3	8	24369.43	\N	Covered	\N	18	Non-Consumable	BASKET FOR MONITOR STAND	t	f	2026-06-03 12:31:54.729323	2026-06-05 16:47:46.703239	59	\N	HOS0262
-1389	3	3	HOU-00263	BED SIDE LOCKERS	54	26	5	2	7	43336.49	\N	Covered	\N	18	Non-Consumable	BED SIDE LOCKERS	t	f	2026-06-03 12:31:54.731302	2026-06-05 16:47:46.703242	59	\N	HOS0263
-1390	3	3	HOU-00264	BENEFUSION USP_SYRINGE PUMP	54	25	5	2	5	10679.45	\N	Covered	\N	12	Non-Consumable	BENEFUSION USP_SYRINGE PUMP	t	f	2026-06-03 12:31:54.7332	2026-06-05 16:47:46.703245	59	\N	HOS0264
-1391	3	3	HOU-00265	BIOCHEMISTRY REGISTER	54	31	5	5	18	34986.14	\N	Covered	\N	12	Consumable	BIOCHEMISTRY REGISTER	t	f	2026-06-03 12:31:54.735218	2026-06-05 16:47:46.703248	59	\N	HOS0265
-1392	3	3	HOU-00266	BIRTH CERTIFICATE	54	31	5	5	15	42198.21	\N	Covered	\N	12	Consumable	BIRTH CERTIFICATE	t	f	2026-06-03 12:31:54.737172	2026-06-05 16:47:46.70325	59	\N	HOS0266
-1393	3	3	HOU-00267	BLOOD PRESSURE MONITORING CHART	54	31	5	13	29	6877.84	\N	Covered	\N	12	Consumable	BLOOD PRESSURE MONITORING CHART	t	f	2026-06-03 12:31:54.739274	2026-06-05 16:47:46.703253	59	\N	HOS0267
-1394	3	3	HOU-00268	BLUE BED SHEET	54	27	5	3	11	12899.78	\N	Covered	\N	5	Non-Consumable	BLUE BED SHEET	t	f	2026-06-03 12:31:54.741695	2026-06-05 16:47:46.703256	59	\N	HOS0268
-1395	3	3	HOU-00269	BLUE COLOUR COAT	54	27	5	3	9	19537.67	\N	Covered	\N	5	Non-Consumable	BLUE COLOUR COAT	t	f	2026-06-03 12:31:54.743619	2026-06-05 16:47:46.703259	59	\N	HOS0269
-1396	3	3	HOU-00270	BLUE PILLOW COVER	54	27	5	3	12	19603.12	\N	Covered	\N	5	Non-Consumable	BLUE PILLOW COVER	t	f	2026-06-03 12:31:54.745501	2026-06-05 16:47:46.703261	59	\N	HOS0270
-1397	3	3	HOU-00271	BP APPARATUS - DIAMOND LED 141 BP MONITOR	54	26	5	2	8	16600.18	\N	Covered	\N	12	Non-Consumable	BP APPARATUS - DIAMOND LED 141 BP MONITOR	t	f	2026-06-03 12:31:54.747377	2026-06-05 16:47:46.703264	59	\N	HOS0271
-1398	3	3	HOU-00272	BP APPARATUS - DIGITAL  - PAED	54	25	5	2	7	32194.67	\N	Covered	\N	12	Non-Consumable	BP APPARATUS - DIGITAL  - PAED	t	f	2026-06-03 12:31:54.749322	2026-06-05 16:47:46.703271	59	\N	HOS0272
-1399	3	3	HOU-00273	BPL ECG 9108D Z-FOLD PAPERS (150 SHEETS)	54	25	5	4	9	15401.35	\N	Covered	\N	12	Consumable	BPL ECG 9108D Z-FOLD PAPERS (150 SHEETS)	t	f	2026-06-03 12:31:54.751344	2026-06-05 16:47:46.703274	59	\N	HOS0273
-1400	3	3	HOU-00274	BPL ECG PAPERS - 50MM	54	31	5	4	11	43902.38	\N	Covered	\N	12	Consumable	BPL ECG PAPERS - 50MM	t	f	2026-06-03 12:31:54.75339	2026-06-05 16:47:46.703277	59	\N	HOS0274
-1401	3	3	HOU-00275	BPL ECG PAPERS - 80MM	54	31	5	36	122	9133.01	\N	Covered	\N	12	Consumable	BPL ECG PAPERS - 80MM	t	f	2026-06-03 12:31:54.755582	2026-06-05 16:47:46.703279	59	\N	HOS0275
-1402	3	3	HOU-00276	BPL FOETAL DOPPLER PROBE - MODEL: FD 9713	54	25	5	2	7	26524.84	\N	Covered	\N	12	Consumable	BPL FOETAL DOPPLER PROBE - MODEL: FD 9713	t	f	2026-06-03 12:31:54.75812	2026-06-05 16:47:46.703282	59	\N	HOS0276
-1403	3	3	HOU-00277	BPL MONOPHASIC DEFIBRILLATOR MODEL-DF 2509R - PRINTER	54	25	5	4	11	29423.66	\N	Covered	\N	12	Consumable	BPL MONOPHASIC DEFIBRILLATOR MODEL-DF 2509R - PRINTER	t	f	2026-06-03 12:31:54.760195	2026-06-05 16:47:46.703285	59	\N	HOS0277
-1404	3	3	HOU-00278	BREAST PUMP ACCESSORIES FOR MEDELA LACTINA	54	25	5	2	6	25335.95	\N	Covered	\N	12	Consumable	BREAST PUMP ACCESSORIES FOR MEDELA LACTINA	t	f	2026-06-03 12:31:54.762177	2026-06-05 16:47:46.703288	59	\N	HOS0278
-1405	3	3	HOU-00279	BREAST PUMP SYRINGE	54	25	5	2	6	15075.48	\N	Covered	\N	12	Consumable	BREAST PUMP SYRINGE	t	f	2026-06-03 12:31:54.764114	2026-06-05 16:47:46.703291	59	\N	HOS0279
-1406	3	3	HOU-00280	CARDIOLOGY INVESTIGATION FORM	54	31	5	5	11	27954.71	\N	Covered	\N	12	Consumable	CARDIOLOGY INVESTIGATION FORM	t	f	2026-06-03 12:31:54.766029	2026-06-05 16:47:46.703293	59	\N	HOS0280
-1407	3	3	HOU-00281	CARTRIDGE 104 DRUM	54	31	5	5	19	26651.83	\N	Covered	\N	18	Consumable	CARTRIDGE 104 DRUM	t	f	2026-06-03 12:31:54.767949	2026-06-05 16:47:46.703296	59	\N	HOS0281
-1408	3	3	HOU-00282	CARTRIDGE 110A	54	31	5	5	12	28285.67	\N	Covered	\N	18	Consumable	CARTRIDGE 110A	t	f	2026-06-03 12:31:54.769999	2026-06-05 16:47:46.703299	59	\N	HOS0282
-1409	3	3	HOU-00283	CARTRIDGE 119A	54	31	5	5	14	36868.49	\N	Covered	\N	18	Consumable	CARTRIDGE 119A	t	f	2026-06-03 12:31:54.772095	2026-06-05 16:47:46.703301	59	\N	HOS0283
-1410	3	3	HOU-00284	CARTRIDGE 12A	54	31	5	4	13	21745.11	\N	Covered	\N	18	Consumable	CARTRIDGE 12A	t	f	2026-06-03 12:31:54.774613	2026-06-05 16:47:46.703304	59	\N	HOS0284
-1411	3	3	HOU-00285	CARTRIDGE 166A	54	31	5	2	6	16174.55	\N	Covered	\N	18	Consumable	CARTRIDGE 166A	t	f	2026-06-03 12:31:54.776692	2026-06-05 16:47:46.703307	59	\N	HOS0285
-1412	3	3	HOU-00286	CARTRIDGE 673	54	31	5	4	14	13293.03	\N	Covered	\N	18	Consumable	CARTRIDGE 673	t	f	2026-06-03 12:31:54.778664	2026-06-05 16:47:46.70331	59	\N	HOS0286
-1413	3	3	HOU-00287	CARTRIDGE 680A	54	31	5	4	13	44760.69	\N	Covered	\N	18	Consumable	CARTRIDGE 680A	t	f	2026-06-03 12:31:54.780543	2026-06-05 16:47:46.703312	59	\N	HOS0287
-1414	3	3	HOU-00288	CARTRIDGE 88A	54	31	5	2	5	42502.66	\N	Covered	\N	18	Consumable	CARTRIDGE 88A	t	f	2026-06-03 12:31:54.782503	2026-06-05 16:47:46.703315	59	\N	HOS0288
-1415	3	3	HOU-00289	CARTRIDGE B021 BROTHER	54	31	5	4	12	23429.6	\N	Covered	\N	18	Consumable	CARTRIDGE B021 BROTHER	t	f	2026-06-03 12:31:54.78443	2026-06-05 16:47:46.703318	59	\N	HOS0289
-1416	3	3	HOU-00290	CARTRIDGE EPSON 664 BLACK	54	31	5	34	113	6452.19	\N	Covered	\N	18	Consumable	CARTRIDGE EPSON 664 BLACK	t	f	2026-06-03 12:31:54.786565	2026-06-05 16:47:46.703321	59	\N	HOS0290
-1417	3	3	HOU-00291	CARTRIDGE EPSON 664 COLOUR	54	31	5	5	20	21978.98	\N	Covered	\N	18	Consumable	CARTRIDGE EPSON 664 COLOUR	t	f	2026-06-03 12:31:54.788611	2026-06-05 16:47:46.703323	59	\N	HOS0291
-1418	3	3	HOU-00292	CH TOWEL 36*29	54	27	5	4	11	21656.31	\N	Covered	\N	5	Non-Consumable	CH TOWEL 36*29	t	f	2026-06-03 12:31:54.791102	2026-06-05 16:47:46.703326	59	\N	HOS0292
-1419	3	3	HOU-00293	DIGITAL BP APPARATUS - OMRON 7143T WITH ADAPTER	54	26	5	5	11	38960.02	\N	Covered	\N	12	Non-Consumable	DIGITAL BP APPARATUS - OMRON 7143T WITH ADAPTER	t	f	2026-06-03 12:31:54.793213	2026-06-05 16:47:46.703329	59	\N	HOS0293
-1420	3	3	HOU-00294	DISCHARGE SUMMARY	54	31	23	5	14	44067.66	\N	Covered	\N	12	Consumable	DISCHARGE SUMMARY	t	f	2026-06-03 12:31:54.795182	2026-06-05 16:47:46.703332	59	\N	HOS0294
-1421	3	3	HOU-00295	DISPOSABLE MEAL TRAY WITH LID- WHITE - 4 COMPARTMENT- GOOD QUALITY	54	26	5	3	12	16730.97	\N	Covered	\N	18	Consumable	DISPOSABLE MEAL TRAY WITH LID- WHITE - 4 COMPARTMENT- GOOD QUALITY	t	f	2026-06-03 12:31:54.797098	2026-06-05 16:47:46.703334	59	\N	HOS0295
-1422	3	3	HOU-00296	DOCTORS PROGRESS NOTES	54	31	23	33	78	7564.85	\N	Covered	\N	12	Consumable	DOCTORS PROGRESS NOTES	t	f	2026-06-03 12:31:54.798923	2026-06-05 16:47:46.703337	59	\N	HOS0296
-1423	3	3	HOU-00297	DOCUMENTATION REGISTER	54	31	5	3	10	49645.2	\N	Covered	\N	12	Consumable	DOCUMENTATION REGISTER	t	f	2026-06-03 12:31:54.800887	2026-06-05 16:47:46.70334	59	\N	HOS0297
-1424	3	3	HOU-00298	DOOR MAT (LEATHER)	54	26	5	3	7	48209.25	\N	Covered	\N	12	Consumable	DOOR MAT (LEATHER)	t	f	2026-06-03 12:31:54.803033	2026-06-05 16:47:46.703343	59	\N	HOS0298
-1425	3	3	HOU-00299	DUSTER	54	31	5	46	95	5570.75	\N	Covered	\N	5	Consumable	DUSTER	t	f	2026-06-03 12:31:54.804972	2026-06-05 16:47:46.703345	59	\N	HOS0299
-1426	3	3	HOU-00300	ECG PAPER - 005 - BPL - 9108D	54	31	12	5	19	22543.07	\N	Covered	\N	12	Consumable	ECG PAPER - 005 - BPL - 9108D	t	f	2026-06-03 12:31:54.807478	2026-06-05 16:47:46.703348	59	\N	HOS0300
-1427	3	3	HOU-00301	ECG ROLL PAPER - VESTA 12EC RMS 210MMX20MTR	54	31	12	5	12	43078.65	\N	Covered	\N	12	Consumable	ECG ROLL PAPER - VESTA 12EC RMS 210MMX20MTR	t	f	2026-06-03 12:31:54.809594	2026-06-05 16:47:46.703351	59	\N	HOS0301
-1428	3	3	HOU-00302	FOOT STEP DOUBLE SS	54	26	5	5	14	47702.7	\N	Covered	\N	18	Non-Consumable	FOOT STEP DOUBLE SS	t	f	2026-06-03 12:31:54.811517	2026-06-05 16:47:46.703354	59	\N	HOS0302
-1429	3	3	HOU-00303	GOGGLES - 3M QUALITY	54	26	5	49	186	5185.2	\N	Covered	\N	18	Consumable	GOGGLES - 3M QUALITY	t	f	2026-06-03 12:31:54.813467	2026-06-05 16:47:46.703356	59	\N	HOS0303
-1430	3	3	HOU-00304	GRAPHIC TPR CHART	54	31	23	2	7	49220.41	\N	Covered	\N	12	Consumable	GRAPHIC TPR CHART	t	f	2026-06-03 12:31:54.815392	2026-06-05 16:47:46.703359	59	\N	HOS0304
-1431	3	3	HOU-00305	HISTOPATHOLOGY REQUEST FORM	54	31	23	5	14	38844.37	\N	Covered	\N	12	Consumable	HISTOPATHOLOGY REQUEST FORM	t	f	2026-06-03 12:31:54.81736	2026-06-05 16:47:46.703362	59	\N	HOS0305
-1432	3	3	HOU-00306	HISTORY AND PHYSICAL EXAMINATION	54	31	23	3	8	16938.78	\N	Covered	\N	12	Consumable	HISTORY AND PHYSICAL EXAMINATION	t	f	2026-06-03 12:31:54.81937	2026-06-05 16:47:46.703365	59	\N	HOS0306
-1433	3	3	HOU-00307	ICU HIGH RISK/GRAVE RISK CONSENT FORM	54	31	23	3	9	13437.27	\N	Covered	\N	12	Consumable	ICU HIGH RISK/GRAVE RISK CONSENT FORM	t	f	2026-06-03 12:31:54.821333	2026-06-05 16:47:46.703368	59	\N	HOS0307
-1434	3	3	HOU-00308	ICU OBSERVATION CHART	54	31	23	2	6	49233.46	\N	Covered	\N	12	Consumable	ICU OBSERVATION CHART	t	f	2026-06-03 12:31:54.823611	2026-06-05 16:47:46.703371	59	\N	HOS0308
-1435	3	3	HOU-00309	INCH TAPE	54	26	5	4	16	22518.31	\N	Covered	\N	18	Non-Consumable	INCH TAPE	t	f	2026-06-03 12:31:54.82594	2026-06-05 16:47:46.703373	59	\N	HOS0309
-1436	3	3	HOU-00310	INDUCTION STOVE - PIGEON PRIME	54	26	5	2	6	28615.93	\N	Covered	\N	18	Non-Consumable	INDUCTION STOVE - PIGEON PRIME	t	f	2026-06-03 12:31:54.827894	2026-06-05 16:47:46.703376	59	\N	HOS0310
-1437	3	3	HOU-00311	INFORMED CONSENT FOR ANASTHESIA / SEDATION	54	31	23	2	5	25025.39	\N	Covered	\N	12	Consumable	INFORMED CONSENT FOR ANASTHESIA / SEDATION	t	f	2026-06-03 12:31:54.82985	2026-06-05 16:47:46.703379	59	\N	HOS0311
-1438	3	3	HOU-00312	INFORMED CONSENT FOR SURGERY	54	31	23	3	10	10456.88	\N	Covered	\N	12	Consumable	INFORMED CONSENT FOR SURGERY	t	f	2026-06-03 12:31:54.831783	2026-06-05 16:47:46.703382	59	\N	HOS0312
-1439	3	3	HOU-00313	INITIAL RAPID ASSESSMENT CHART	54	31	23	4	16	42966	\N	Covered	\N	12	Consumable	INITIAL RAPID ASSESSMENT CHART	t	f	2026-06-03 12:31:54.833669	2026-06-05 16:47:46.703384	59	\N	HOS0313
-1440	3	3	HOU-00314	INTAKE AND OUTPUT RECORD	54	31	23	4	16	17429.78	\N	Covered	\N	12	Consumable	INTAKE AND OUTPUT RECORD	t	f	2026-06-03 12:31:54.835807	2026-06-05 16:47:46.703387	59	\N	HOS0314
-1441	3	3	HOU-00315	INVESTIGATION CHART	54	31	23	2	8	47048.89	\N	Covered	\N	12	Consumable	INVESTIGATION CHART	t	f	2026-06-03 12:31:54.837725	2026-06-05 16:47:46.70339	59	\N	HOS0315
-1442	3	3	HOU-00316	IP REGISTER	54	31	5	4	13	38589.18	\N	Covered	\N	12	Consumable	IP REGISTER	t	f	2026-06-03 12:31:54.840061	2026-06-05 16:47:46.703393	59	\N	HOS0316
-1443	3	3	HOU-00317	IRON STOOL	54	26	5	2	6	24460.58	\N	Covered	\N	18	Non-Consumable	IRON STOOL	t	f	2026-06-03 12:31:54.84248	2026-06-05 16:47:46.703395	59	\N	HOS0317
-1444	3	3	HOU-00318	ISSUE AND MASTER REGISTER FOR BLOOD BANK	54	31	5	2	7	27473.18	\N	Covered	\N	12	Consumable	ISSUE AND MASTER REGISTER FOR BLOOD BANK	t	f	2026-06-03 12:31:54.844475	2026-06-05 16:47:46.703398	59	\N	HOS0318
-1445	3	3	HOU-00319	ISSUE REGISTER	54	31	5	2	8	26925.95	\N	Covered	\N	12	Consumable	ISSUE REGISTER	t	f	2026-06-03 12:31:54.846455	2026-06-05 16:47:46.703401	59	\N	HOS0319
-1446	3	3	HOU-00320	KORA CLOTH IN MTRS	54	27	24	4	11	17989.92	\N	Covered	\N	5	Non-Consumable	KORA CLOTH IN MTRS	t	f	2026-06-03 12:31:54.848403	2026-06-05 16:47:46.703404	59	\N	HOS0320
-1447	3	3	HOU-00321	LARYNGOSCOPE BULB	54	18	5	2	5	20534.86	\N	Covered	\N	12	Non-Consumable	LARYNGOSCOPE BULB	t	f	2026-06-03 12:31:54.850372	2026-06-05 16:47:46.703406	59	\N	HOS0321
-1448	3	3	HOU-00322	LARYNGOSCOPE SET WITH MC COY BLADE (SIZE1,2,3 & 4)	54	26	5	3	10	46934.57	\N	Covered	\N	12	Non-Consumable	LARYNGOSCOPE SET WITH MC COY BLADE (SIZE1,2,3 & 4)	t	f	2026-06-03 12:31:54.852583	2026-06-05 16:47:46.703409	59	\N	HOS0322
-1449	3	3	HOU-00323	LAUNDRY BAG WITH STEEL RAILING & WHEELS OVER ALL SIZE 22.5” ROUND X 30” HEIGHT	54	25	5	5	14	17148.26	\N	Covered	\N	18	Non-Consumable	LAUNDRY BAG WITH STEEL RAILING & WHEELS OVER ALL SIZE 22.5” ROUND X 30” HEIGHT	t	f	2026-06-03 12:31:54.854574	2026-06-05 16:47:46.703412	59	\N	HOS0323
-1450	3	3	HOU-00324	CL LEAVE APPLICATION BOOK	54	31	23	22	51	9730.39	\N	Covered	\N	12	Consumable	CL LEAVE APPLICATION BOOK	t	f	2026-06-03 12:31:54.856913	2026-06-05 16:47:46.703415	59	\N	HOS0324
-1451	3	3	HOU-00325	MAKINTOSH SHEETS - IN MTRS	54	26	24	3	7	10235.77	\N	Covered	\N	12	Non-Consumable	MAKINTOSH SHEETS - IN MTRS	t	f	2026-06-03 12:31:54.85934	2026-06-05 16:47:46.703417	59	\N	HOS0325
-1452	3	3	HOU-00326	MATTRESS - 40 DENSITY MAGIC PVC REXINE-SINGLE SECTION MATRESS - SIZE 72X30X4 INCHES	54	26	5	4	16	48249.72	\N	Covered	\N	18	Non-Consumable	MATTRESS - 40 DENSITY MAGIC PVC REXINE-SINGLE SECTION MATRESS - SIZE 72X30X4 INCHES	t	f	2026-06-03 12:31:54.861384	2026-06-05 16:47:46.70342	59	\N	HOS0326
-1453	3	3	HOU-00327	MEDICAL CERTIFICATE	54	31	23	3	10	39458.66	\N	Covered	\N	12	Consumable	MEDICAL CERTIFICATE	t	f	2026-06-03 12:31:54.863359	2026-06-05 16:47:46.703423	59	\N	HOS0327
-1454	3	3	HOU-00328	MEDICATION SHEET	54	31	23	3	11	25564.93	\N	Covered	\N	12	Consumable	MEDICATION SHEET	t	f	2026-06-03 12:31:54.865302	2026-06-05 16:47:46.703426	59	\N	HOS0328
-1455	3	3	HOU-00329	MG CHARITABLE TRUST PAYMENT VOUCHER	54	31	23	2	5	17666.38	\N	Covered	\N	12	Consumable	MG CHARITABLE TRUST PAYMENT VOUCHER	t	f	2026-06-03 12:31:54.867242	2026-06-05 16:47:46.703428	59	\N	HOS0329
-1456	3	3	HOU-00331	MOBILE PHONE SAMSUNG	54	26	5	3	9	34424.32	\N	Covered	\N	18	Non-Consumable	MOBILE PHONE SAMSUNG	t	f	2026-06-03 12:31:54.869407	2026-06-05 16:47:46.703431	59	\N	HOS0331
-1457	3	3	HOU-00332	MYCOLOGY REGISTER	54	31	5	2	5	31597.08	\N	Covered	\N	12	Consumable	MYCOLOGY REGISTER	t	f	2026-06-03 12:31:54.871403	2026-06-05 16:47:46.703434	59	\N	HOS0332
-1458	3	3	HOU-00333	NEONATE AMBU BAG	54	26	5	5	17	21296.51	\N	Covered	\N	12	Non-Consumable	NEONATE AMBU BAG	t	f	2026-06-03 12:31:54.873741	2026-06-05 16:47:46.703437	59	\N	HOS0333
-1459	3	3	HOU-00334	NIGHTIES	54	27	5	2	7	26397.84	\N	Covered	\N	5	Consumable	NIGHTIES	t	f	2026-06-03 12:31:54.876087	2026-06-05 16:47:46.703439	59	\N	HOS0334
-1460	3	3	HOU-00335	NOTE PAD	54	31	5	2	6	35670.68	\N	Covered	\N	12	Consumable	NOTE PAD	t	f	2026-06-03 12:31:54.878139	2026-06-05 16:47:46.703442	59	\N	HOS0335
-1461	3	3	HOU-00336	NURSES DAILY RECORD	54	31	23	3	10	22728.77	\N	Covered	\N	18	Consumable	NURSES DAILY RECORD	t	f	2026-06-03 12:31:54.880072	2026-06-05 16:47:46.703445	59	\N	HOS0336
-1462	3	3	HOU-00337	NURSES ICU MONITORING CHART	54	31	23	3	12	34737.12	\N	Covered	\N	18	Consumable	NURSES ICU MONITORING CHART	t	f	2026-06-03 12:31:54.882026	2026-06-05 16:47:46.703448	59	\N	HOS0337
-1463	3	3	HOU-00338	NURSES TREATMENT CHART	54	31	23	3	11	41501.48	\N	Covered	\N	18	Consumable	NURSES TREATMENT CHART	t	f	2026-06-03 12:31:54.883953	2026-06-05 16:47:46.70345	59	\N	HOS0338
-1464	3	3	HOU-00339	NURSING ASSESMENT	54	31	23	2	5	17119.6	\N	Covered	\N	18	Consumable	NURSING ASSESMENT	t	f	2026-06-03 12:31:54.886134	2026-06-05 16:47:46.703453	59	\N	HOS0339
-1465	3	3	HOU-00340	ODONIL - LAVENDER	54	26	5	5	17	17947.27	\N	Covered	\N	18	Consumable	ODONIL - LAVENDER	t	f	2026-06-03 12:31:54.88812	2026-06-05 16:47:46.703456	59	\N	HOS0340
-1466	3	3	HOU-00341	OPD REGISTER	54	31	5	2	7	40240.52	\N	Covered	\N	18	Consumable	OPD REGISTER	t	f	2026-06-03 12:31:54.890439	2026-06-05 16:47:46.703459	59	\N	HOS0341
-1467	3	3	HOU-00342	OPERATION RECORD 1&2	54	31	23	20	52	8957.14	\N	Covered	\N	18	Consumable	OPERATION RECORD 1&2	t	f	2026-06-03 12:31:54.892828	2026-06-05 16:47:46.703461	59	\N	HOS0342
-1468	3	3	HOU-00343	OT LIST	54	31	23	4	16	32877.85	\N	Covered	\N	18	Consumable	OT LIST	t	f	2026-06-03 12:31:54.894844	2026-06-05 16:47:46.703464	59	\N	HOS0343
-1469	3	3	HOU-00344	OT REGISTER	54	31	5	2	7	38475.64	\N	Covered	\N	18	Consumable	OT REGISTER	t	f	2026-06-03 12:31:54.896779	2026-06-05 16:47:46.703467	59	\N	HOS0344
-1470	3	3	HOU-00345	OUT PATIENT CASE RECORD	54	31	23	4	15	11546.26	\N	Covered	\N	18	Consumable	OUT PATIENT CASE RECORD	t	f	2026-06-03 12:31:54.89872	2026-06-05 16:47:46.70347	59	\N	HOS0345
-1471	3	3	HOU-00346	PACKAGE SERVICES BOOK	54	31	23	4	12	39701.13	\N	Covered	\N	18	Consumable	PACKAGE SERVICES BOOK	t	f	2026-06-03 12:31:54.900634	2026-06-05 16:47:46.703473	59	\N	HOS0346
-1472	3	3	HOU-00347	PAEDIATRICS NEW BORN SHEET	54	31	13	2	6	29440.22	\N	Covered	\N	18	Consumable	PAEDIATRICS NEW BORN SHEET	t	f	2026-06-03 12:31:54.90283	2026-06-05 16:47:46.703475	59	\N	HOS0347
-1473	3	3	HOU-00348	PAPER CLIPS	54	31	22	4	12	11182.73	\N	Covered	\N	18	Consumable	PAPER CLIPS	t	f	2026-06-03 12:31:54.904885	2026-06-05 16:47:46.703478	59	\N	HOS0348
-1474	3	3	HOU-00349	PAPER PLATE 12 INCHES	54	26	22	2	5	15182.76	\N	Covered	\N	12	Consumable	PAPER PLATE 12 INCHES	t	f	2026-06-03 12:31:54.907256	2026-06-05 16:47:46.703481	59	\N	HOS0349
-1475	3	3	HOU-00350	PAPER PLATE 6NO	54	26	22	4	15	16299.26	\N	Covered	\N	12	Consumable	PAPER PLATE 6NO	t	f	2026-06-03 12:31:54.909644	2026-06-05 16:47:46.703484	59	\N	HOS0350
-1476	3	3	HOU-00351	PATIENT INVESTIGATION LOG	54	31	23	4	14	11998.62	\N	Covered	\N	18	Consumable	PATIENT INVESTIGATION LOG	t	f	2026-06-03 12:31:54.91166	2026-06-05 16:47:46.703486	59	\N	HOS0351
-1477	3	3	HOU-00352	PEDIATRIC AMBU BAG	54	26	5	3	7	37608.66	\N	Covered	\N	12	Non-Consumable	PEDIATRIC AMBU BAG	t	f	2026-06-03 12:31:54.913628	2026-06-05 16:47:46.703489	59	\N	HOS0352
-1478	3	3	HOU-00353	PERIPHERAL IV CENTRAL LINE	54	31	23	2	8	44902.73	\N	Covered	\N	18	Consumable	PERIPHERAL IV CENTRAL LINE	t	f	2026-06-03 12:31:54.915523	2026-06-05 16:47:46.703492	59	\N	HOS0353
-1479	3	3	HOU-00354	PHARMACY INDENT BOOK	54	31	23	5	13	44018.45	\N	Covered	\N	18	Consumable	PHARMACY INDENT BOOK	t	f	2026-06-03 12:31:54.917406	2026-06-05 16:47:46.703495	59	\N	HOS0354
-1480	3	3	HOU-00355	PHARMACY RETURN BOOK	54	31	23	5	14	13659.49	\N	Covered	\N	18	Consumable	PHARMACY RETURN BOOK	t	f	2026-06-03 12:31:54.91955	2026-06-05 16:47:46.703497	59	\N	HOS0355
-1481	3	3	HOU-00356	PHYSICAL FITNESS CRTIFICATE	54	31	23	2	8	32654.96	\N	Covered	\N	18	Consumable	PHYSICAL FITNESS CRTIFICATE	t	f	2026-06-03 12:31:54.921705	2026-06-05 16:47:46.7035	59	\N	HOS0356
-1482	3	3	HOU-00357	PILLOW	54	27	5	2	5	35389.67	\N	Covered	\N	12	Non-Consumable	PILLOW	t	f	2026-06-03 12:31:54.924176	2026-06-05 16:47:46.703505	59	\N	HOS0357
-1483	3	3	HOU-00358	PLASTIC SPOON	54	26	22	2	5	25797.52	\N	Covered	\N	18	Consumable	PLASTIC SPOON	t	f	2026-06-03 12:31:54.92649	2026-06-05 16:47:46.703507	59	\N	HOS0358
-1484	3	3	HOU-00359	PLASTIC TRAY	54	26	5	4	10	30679.31	\N	Covered	\N	18	Non-Consumable	PLASTIC TRAY	t	f	2026-06-03 12:31:54.92847	2026-06-05 16:47:46.70351	59	\N	HOS0359
-1485	3	3	HOU-00360	PLATELET SDP ISSUE REGISTER	54	31	5	2	6	34642.99	\N	Covered	\N	18	Consumable	PLATELET SDP ISSUE REGISTER	t	f	2026-06-03 12:31:54.930434	2026-06-05 16:47:46.703513	59	\N	HOS0360
-1486	3	3	HOU-00361	POLICE INTIMATION BOOK	54	31	23	5	11	32810.54	\N	Covered	\N	18	Consumable	POLICE INTIMATION BOOK	t	f	2026-06-03 12:31:54.932386	2026-06-05 16:47:46.703516	59	\N	HOS0361
+3711	3	3	EES-00003	Test Material	46	\N	1	0	0	500	\N	General		18	Consumable	\N	t	f	2026-07-01 16:31:44.530421	2026-07-01 16:31:44.530436	\N	\N	\N
 1673	3	3	HSK-00046	PHENYLE	56	35	7	18	48	1737.33	\N	Covered	\N	18	Consumable	PHENYLE	t	f	2026-06-03 12:31:55.376634	2026-06-05 16:47:46.704043	53	\N	HSK0046
-1487	3	3	HOU-00362	PP FILE - A4 LARGE FILE (9.5X12.5 INCHES) WITH 9MM SPINE -PP 0.32MM WITH MATT FINISH WITH DELUXE CLIP (SAME AS SANCHETI SAMPLE) OBG	54	31	5	4	14	37317.79	\N	Covered	\N	18	Consumable	PP FILE - A4 LARGE FILE (9.5X12.5 INCHES) WITH 9MM SPINE -PP 0.32MM WITH MATT FINISH WITH DELUXE CLIP (SAME AS SANCHETI SAMPLE) OBG	t	f	2026-06-03 12:31:54.934339	2026-06-05 16:47:46.703519	59	\N	HOS0362
-1488	3	3	HOU-00363	PRE ANASTHETIC CHECKUP FORM	54	31	23	28	62	9946.09	\N	Covered	\N	18	Consumable	PRE ANASTHETIC CHECKUP FORM	t	f	2026-06-03 12:31:54.936427	2026-06-05 16:47:46.703521	59	\N	HOS0363
-1489	3	3	HOU-00364	PRESCRIPTION PAD	54	31	23	3	9	26966.04	\N	Covered	\N	18	Consumable	PRESCRIPTION PAD	t	f	2026-06-03 12:31:54.938414	2026-06-05 16:47:46.703524	59	\N	HOS0364
-1490	3	3	HOU-00365	PRESSURE ULCER CARE	54	31	23	5	17	13396.13	\N	Covered	\N	18	Consumable	PRESSURE ULCER CARE	t	f	2026-06-03 12:31:54.940813	2026-06-05 16:47:46.703527	59	\N	HOS0365
-1491	3	3	HOU-00366	PRESSURE ULCER SURVELLIANCE CARE BUNDLE	54	31	23	2	6	49872.02	\N	Covered	\N	18	Consumable	PRESSURE ULCER SURVELLIANCE CARE BUNDLE	t	f	2026-06-03 12:31:54.943177	2026-06-05 16:47:46.70353	59	\N	HOS0366
-1492	3	3	HOU-00367	PULSE OXIMETER (BUY 1 GET 1 FREE OFFER)	54	26	5	4	13	11790.43	\N	Covered	\N	12	Non-Consumable	PULSE OXIMETER (BUY 1 GET 1 FREE OFFER)	t	f	2026-06-03 12:31:54.945192	2026-06-05 16:47:46.703532	59	\N	HOS0367
-1493	3	3	HOU-00368	RADIOMETER - ABG - SENSOR CASSETTE FOR ABL9 300TEST PACK - SC9 - 2-BGEL	54	24	5	2	7	49317.14	\N	Covered	\N	12	Consumable	RADIOMETER - ABG - SENSOR CASSETTE FOR ABL9 300TEST PACK - SC9 - 2-BGEL	t	f	2026-06-03 12:31:54.947149	2026-06-05 16:47:46.703535	59	\N	HOS0368
-1494	3	3	HOU-00369	RADIOMETER AQT90FLEX REAGENERALT PACK (200TESTS)	54	24	5	3	10	49042.32	\N	Covered	\N	12	Consumable	RADIOMETER AQT90FLEX REAGENERALT PACK (200TESTS)	t	f	2026-06-03 12:31:54.949047	2026-06-05 16:47:46.703538	59	\N	HOS0369
-1495	3	3	HOU-00370	RECHARGEABLE TORCH - EVEREADY	54	26	5	4	15	45240.53	\N	Covered	\N	18	Non-Consumable	RECHARGEABLE TORCH - EVEREADY	t	f	2026-06-03 12:31:54.950977	2026-06-05 16:47:46.703541	59	\N	HOS0370
-1496	3	3	HOU-00371	REQUEST FOR BLOOD AND BLOOD COMPONENTS	54	31	23	30	110	7893.55	\N	Covered	\N	12	Consumable	REQUEST FOR BLOOD AND BLOOD COMPONENTS	t	f	2026-06-03 12:31:54.953128	2026-06-05 16:47:46.703543	59	\N	HOS0371
-1497	3	3	HOU-00372	SAMSUNG-32 INCHES SMART TV HD READY WITH OTT APPS MODEL-T4580	54	23	5	4	10	25272.79	\N	Covered	\N	18	Non-Consumable	SAMSUNG-32 INCHES SMART TV HD READY WITH OTT APPS MODEL-T4580	t	f	2026-06-03 12:31:54.955148	2026-06-05 16:47:46.703546	59	\N	HOS0372
-1498	3	3	HOU-00373	SAMSUNG-43 INCHES SMART TV ULTRA HD 4K WITH OTT APPS MODEL-HG43BU800	54	23	5	2	6	19114.19	\N	Covered	\N	18	Non-Consumable	SAMSUNG-43 INCHES SMART TV ULTRA HD 4K WITH OTT APPS MODEL-HG43BU800	t	f	2026-06-03 12:31:54.957592	2026-06-05 16:47:46.703549	59	\N	HOS0373
-1499	3	3	HOU-00374	SCISSOR 128MM	54	31	5	4	9	47096.75	\N	Covered	\N	12	Non-Consumable	SCISSOR 128MM	t	f	2026-06-03 12:31:54.95994	2026-06-05 16:47:46.703552	59	\N	HOS0374
-1500	3	3	HOU-00375	SLIPPERS	54	26	27	3	10	19661.93	\N	Covered	\N	5	Consumable	SLIPPERS	t	f	2026-06-03 12:31:54.964044	2026-06-05 16:47:46.703554	59	\N	HOS0375
-1501	3	3	HOU-00376	SMALL NOTE BOOK	54	31	5	35	87	6299.65	\N	Covered	\N	12	Consumable	SMALL NOTE BOOK	t	f	2026-06-03 12:31:54.965128	2026-06-05 16:47:46.703557	59	\N	HOS0376
-1502	3	3	HOU-00377	SONY THERMAL PAPERS - 84S IN BOXES	54	31	5	4	12	21970.9	\N	Covered	\N	18	Consumable	SONY THERMAL PAPERS - 84S IN BOXES	t	f	2026-06-03 12:31:54.967091	2026-06-05 16:47:46.70356	59	\N	HOS0377
-1503	3	3	HOU-00378	SRIPADHA PHARMACY PAYMENT VOUCHER	54	31	23	3	11	10000.59	\N	Covered	\N	12	Consumable	SRIPADHA PHARMACY PAYMENT VOUCHER	t	f	2026-06-03 12:31:54.969184	2026-06-05 16:47:46.703563	59	\N	HOS0378
-1504	3	3	HOU-00379	STEEL PLATE ROUND	54	26	5	4	10	29828.37	\N	Covered	\N	18	Non-Consumable	STEEL PLATE ROUND	t	f	2026-06-03 12:31:54.971274	2026-06-05 16:47:46.703565	59	\N	HOS0379
-1505	3	3	HOU-00380	STEEL TEA CUP	54	26	5	3	8	34638.79	\N	Covered	\N	18	Non-Consumable	STEEL TEA CUP	t	f	2026-06-03 12:31:54.973719	2026-06-05 16:47:46.703568	59	\N	HOS0380
-1506	3	3	HOU-00381	SURGICAL SITE INFECTION PREVENTION CHECKLIST	54	31	23	2	5	41898.03	\N	Covered	\N	12	Consumable	SURGICAL SITE INFECTION PREVENTION CHECKLIST	t	f	2026-06-03 12:31:54.976161	2026-06-05 16:47:46.703571	59	\N	HOS0381
-1507	3	3	HOU-00382	THERMAL PRINTER PAPER ROLL FOR AQT90-RADIOMETER 112MM (20MTRS)	54	31	5	4	13	38080.11	\N	Covered	\N	18	Consumable	THERMAL PRINTER PAPER ROLL FOR AQT90-RADIOMETER 112MM (20MTRS)	t	f	2026-06-03 12:31:54.978192	2026-06-05 16:47:46.703574	59	\N	HOS0382
-1508	3	3	HOU-00383	THERMAL PRINTER ROLLS FOR ABG - 80MM 20 MTRS	54	31	5	4	9	20324.55	\N	Covered	\N	18	Consumable	THERMAL PRINTER ROLLS FOR ABG - 80MM 20 MTRS	t	f	2026-06-03 12:31:54.980351	2026-06-05 16:47:46.703577	59	\N	HOS0383
-1509	3	3	HOU-00384	THERMOSCAN - ROSSMAX	54	26	5	3	12	30771.34	\N	Covered	\N	12	Consumable	THERMOSCAN - ROSSMAX	t	f	2026-06-03 12:31:54.982379	2026-06-05 16:47:46.703579	59	\N	HOS0384
-1510	3	3	HOU-00385	THICK PLASTIC SHEET BIG ROLLS	54	26	6	4	13	43134.08	\N	Covered	\N	18	Consumable	THICK PLASTIC SHEET BIG ROLLS	t	f	2026-06-03 12:31:54.984355	2026-06-05 16:47:46.703582	59	\N	HOS0385
-1511	3	3	HOU-00386	TOURNIQUET LARGE SIZE - TYNOR	54	26	5	3	9	10124.09	\N	Covered	\N	12	Non-Consumable	TOURNIQUET LARGE SIZE - TYNOR	t	f	2026-06-03 12:31:54.986501	2026-06-05 16:47:46.703585	59	\N	HOS0386
-1512	3	3	HOU-00387	TOURNIQUET MEDIUM SIZE - TYNOR	54	26	5	4	10	29620.3	\N	Covered	\N	12	Non-Consumable	TOURNIQUET MEDIUM SIZE - TYNOR	t	f	2026-06-03 12:31:54.988524	2026-06-05 16:47:46.703588	59	\N	HOS0387
-1513	3	3	HOU-00388	TOURNIQUET SMALL SIZE - TYNOR	54	26	5	5	14	35675.08	\N	Covered	\N	12	Non-Consumable	TOURNIQUET SMALL SIZE - TYNOR	t	f	2026-06-03 12:31:54.990826	2026-06-05 16:47:46.70359	59	\N	HOS0388
-1514	3	3	HOU-00389	TYNOR - RESTRAINER I-65 UN-	54	26	5	3	8	33549.49	\N	Covered	\N	12	Non-Consumable	TYNOR - RESTRAINER I-65 UN-	t	f	2026-06-03 12:31:54.993255	2026-06-05 16:47:46.703593	59	\N	HOS0389
-1515	3	3	HOU-00390	URINARY CATHETER CARE	54	31	23	5	17	16270.52	\N	Covered	\N	12	Consumable	URINARY CATHETER CARE	t	f	2026-06-03 12:31:54.995268	2026-06-05 16:47:46.703596	59	\N	HOS0390
-1516	3	3	HOU-00391	VACCINATION CARD (PAEDIATRIC)	54	31	5	28	95	6453.22	\N	Covered	\N	12	Consumable	VACCINATION CARD (PAEDIATRIC)	t	f	2026-06-03 12:31:54.997219	2026-06-05 16:47:46.703599	59	\N	HOS0391
-1517	3	3	HOU-00392	VAP CARE BUNDLE	54	31	23	2	5	33634.67	\N	Covered	\N	12	Consumable	VAP CARE BUNDLE	t	f	2026-06-03 12:31:54.999171	2026-06-05 16:47:46.703602	59	\N	HOS0392
-1518	3	3	HOU-00393	VIM BAR - SMALL	54	26	5	3	8	18525.4	\N	Covered	\N	18	Consumable	VIM BAR - SMALL	t	f	2026-06-03 12:31:55.001066	2026-06-05 16:47:46.703604	59	\N	HOS0393
-1519	3	3	HOU-00394	WALKER FOLDABLE SUPERIOR QUALITY	54	26	5	5	15	30872.71	\N	Covered	\N	12	Non-Consumable	WALKER FOLDABLE SUPERIOR QUALITY	t	f	2026-06-03 12:31:55.003205	2026-06-05 16:47:46.703607	59	\N	HOS0394
-1520	3	3	HOU-00395	WALL CLOCK ROUND - AJANTA	54	26	5	3	7	44917.82	\N	Covered	\N	18	Non-Consumable	WALL CLOCK ROUND - AJANTA	t	f	2026-06-03 12:31:55.005223	2026-06-05 16:47:46.70361	59	\N	HOS0395
-1521	3	3	HOU-00396	WARD CENSUS REGISTER	54	31	5	5	16	42515.36	\N	Covered	\N	12	Consumable	WARD CENSUS REGISTER	t	f	2026-06-03 12:31:55.007456	2026-06-05 16:47:46.703613	59	\N	HOS0396
-1522	3	3	HOU-00397	WELCOME KIT IN ZIPLOCK POUCH WITH LOGO PRINT-20GM SOAP, 20ML KIWI SHAMPOO, 20ML KIWI BODY LOTION, WHITE BRUSH, COLGATE PASTE	54	26	13	5	17	25224.08	\N	Covered	\N	18	Consumable	WELCOME KIT IN ZIPLOCK POUCH WITH LOGO PRINT-20GM SOAP, 20ML KIWI SHAMPOO, 20ML KIWI BODY LOTION, WHITE BRUSH, COLGATE PASTE	t	f	2026-06-03 12:31:55.009733	2026-06-05 16:47:46.703615	59	\N	HOS0397
-1523	3	3	HOU-00398	WHITE BOARD SIZE 4X2	54	26	5	2	5	35445.94	\N	Covered	\N	18	Non-Consumable	WHITE BOARD SIZE 4X2	t	f	2026-06-03 12:31:55.011768	2026-06-05 16:47:46.703618	59	\N	HOS0398
-1524	3	3	HOU-00399	YELLOW PRESCRIPTION PAD	54	31	23	2	8	16201.47	\N	Covered	\N	12	Consumable	YELLOW PRESCRIPTION PAD	t	f	2026-06-03 12:31:55.013819	2026-06-05 16:47:46.703621	59	\N	HOS0399
+1456	3	3	HOS-00331	MOBILE PHONE SAMSUNG	54	26	5	3	9	34424.32	\N	Covered	\N	18	Non-Consumable	MOBILE PHONE SAMSUNG	t	f	2026-06-03 12:31:54.869407	2026-06-30 16:53:53.804573	59	\N	HOS0331
 1525	3	3	HEQ-00001	65" SAMSUNG INTERACTIVE DISPLAY-WA65C - DESIGNED FOR THE CLASSROOM OF THE FUTURE ANDROID 11 OS* BASED PRODUCT- PROVIDES INTUITIVE USABILITY TO TEACHERS, SIMULTANEOUSLY CAN SHARE UP TO 9 SCRNS FOR MAX PRODUCTIVITY	53	16	5	2	7	12643.71	\N	Covered	\N	18	Non-Consumable	65" SAMSUNG INTERACTIVE DISPLAY-WA65C - DESIGNED FOR THE CLASSROOM OF THE FUTURE ANDROID 11 OS* BASED PRODUCT- PROVIDES INTUITIVE USABILITY TO TEACHERS, SIMULTANEOUSLY CAN SHARE UP TO 9 SCRNS FOR MAX PRODUCTIVITY	t	f	2026-06-03 12:31:55.015792	2026-06-05 16:47:46.703624	59	\N	HEQ0001
 1526	3	3	HEQ-00002	6U 500 RACK	53	17	5	5	11	45620.69	\N	Covered	\N	18	Non-Consumable	6U 500 RACK	t	f	2026-06-03 12:31:55.017733	2026-06-05 16:47:46.703626	59	\N	HEQ0002
 1527	3	3	HEQ-00003	AMBU BAG ADULT - SILICON	53	15	5	2	7	34187.77	\N	Covered	\N	12	Non-Consumable	AMBU BAG ADULT - SILICON	t	f	2026-06-03 12:31:55.019896	2026-06-05 16:47:46.703629	59	\N	HEQ0003
@@ -8770,6 +8440,7 @@ COPY public.materials (id, tenant_id, site_id, code, name, category_id, subcateg
 1576	3	3	HEQ-00052	SINUSCOPE - PAEDIATIC  0 DEGREE - DIAMETER 2.5MM/LENGTH: 175 MM WITH IMPROVISED OPTICS AND ENLARGED VIEW	53	15	5	5	15	15795.39	\N	Covered	\N	12	Non-Consumable	SINUSCOPE - PAEDIATIC  0 DEGREE - DIAMETER 2.5MM/LENGTH: 175 MM WITH IMPROVISED OPTICS AND ENLARGED VIEW	t	f	2026-06-03 12:31:55.123752	2026-06-05 16:47:46.703767	59	\N	HEQ0052
 1577	3	3	HEQ-00053	SKIN PROBE SENSORS-FANEM	53	15	5	5	18	45399.7	\N	Covered	\N	12	Non-Consumable	SKIN PROBE SENSORS-FANEM	t	f	2026-06-03 12:31:55.126283	2026-06-05 16:47:46.703769	59	\N	HEQ0053
 1578	3	3	HEQ-00054	SLEEP APNEA DEVICE - FOR SLEEP STUDY - RESMED GERMANY	53	15	5	4	14	49455.41	\N	Covered	\N	12	Non-Consumable	SLEEP APNEA DEVICE - FOR SLEEP STUDY - RESMED GERMANY	t	f	2026-06-03 12:31:55.128347	2026-06-05 16:47:46.703772	59	\N	HEQ0054
+1128	3	3	HOS-00001	PHARMACY CLOTH COVERS - 13X16	54	29	6	4	16	25218.56	\N	Covered	\N	5	Consumable	PHARMACY CLOTH COVERS - 13X16	t	f	2026-06-03 12:31:54.191811	2026-06-30 16:53:53.803625	59	\N	HOS0001
 1579	3	3	HEQ-00055	SMALL SS TROLLEY FULLY STAINLESS STEEL WITH 2 SHELF WITH 3 SIDE RAILINGS FINISHED WITH CASTORS WITH BRAKE	53	15	5	2	7	15299.93	\N	Covered	\N	12	Non-Consumable	SMALL SS TROLLEY FULLY STAINLESS STEEL WITH 2 SHELF WITH 3 SIDE RAILINGS FINISHED WITH CASTORS WITH BRAKE	t	f	2026-06-03 12:31:55.130304	2026-06-05 16:47:46.703775	59	\N	HEQ0055
 1580	3	3	HEQ-00056	SPO2 EDAN PROBE-RUBBER TYPE - 6 PINS	53	15	5	4	15	29949.79	\N	Covered	\N	12	Non-Consumable	SPO2 EDAN PROBE-RUBBER TYPE - 6 PINS	t	f	2026-06-03 12:31:55.132251	2026-06-05 16:47:46.703778	59	\N	HEQ0056
 1581	3	3	HEQ-00057	SSD 256GB	53	15	5	4	15	44077.48	\N	Covered	\N	18	Non-Consumable	SSD 256GB	t	f	2026-06-03 12:31:55.134188	2026-06-05 16:47:46.703781	59	\N	HEQ0057
@@ -8972,6 +8643,7 @@ COPY public.materials (id, tenant_id, site_id, code, name, category_id, subcateg
 1777	3	3	LAB-00045	ACCESS 25-OH VIT D CALIBRATOR - B24839	58	37	5	17	36	2499.05	\N	Covered	\N	12	Consumable	ACCESS 25-OH VIT D CALIBRATOR - B24839	t	f	2026-06-03 12:31:55.606207	2026-06-05 16:47:46.704335	59	\N	LAB0045
 1778	3	3	LAB-00046	ACCESS B12 CALS 33005	58	37	5	33	129	2532.7	\N	Covered	\N	12	Consumable	ACCESS B12 CALS 33005	t	f	2026-06-03 12:31:55.60832	2026-06-05 16:47:46.704338	59	\N	LAB0046
 1779	3	3	LAB-00047	ACCESS CONTROL DEVICE-COSEC FOP	58	37	5	18	62	4752.4	\N	Covered	\N	18	Non-Consumable	ACCESS CONTROL DEVICE-COSEC FOP	t	f	2026-06-03 12:31:55.610947	2026-06-05 16:47:46.704341	59	\N	LAB0047
+1129	3	3	HOS-00002	PHARMACY CLOTH COVERS - 16X20	54	29	6	13	44	9699.42	\N	Covered	\N	5	Consumable	PHARMACY CLOTH COVERS - 16X20	t	f	2026-06-03 12:31:54.193695	2026-06-30 16:53:53.803643	59	\N	HOS0002
 1780	3	3	LAB-00048	ACCESS CONTROL DEVICE - ELECTRO MAGNETIC DOOR LOCK	58	37	5	28	58	2535.35	\N	Covered	\N	18	Non-Consumable	ACCESS CONTROL DEVICE - ELECTRO MAGNETIC DOOR LOCK	t	f	2026-06-03 12:31:55.613051	2026-06-05 16:47:46.704344	59	\N	LAB0048
 1781	3	3	LAB-00049	ACCESS CONTROL DEVICE - EXIT SWITCH	58	37	5	21	68	2265.87	\N	Covered	\N	18	Non-Consumable	ACCESS CONTROL DEVICE - EXIT SWITCH	t	f	2026-06-03 12:31:55.614939	2026-06-05 16:47:46.704346	59	\N	LAB0049
 1782	3	3	LAB-00050	ACCESS CONTROL DEVICE - L/U ANGLE	58	37	5	38	117	4770.71	\N	Covered	\N	18	Non-Consumable	ACCESS CONTROL DEVICE - L/U ANGLE	t	f	2026-06-03 12:31:55.616939	2026-06-05 16:47:46.704349	59	\N	LAB0050
@@ -9523,10 +9195,799 @@ COPY public.materials (id, tenant_id, site_id, code, name, category_id, subcateg
 2332	3	3	STY-00193	BOX FILE SMALL	62	53	5	105	337	407.82	\N	Covered	\N	5	Consumable	BOX FILE SMALL	t	f	2026-06-03 12:31:56.995104	2026-06-05 16:47:46.705923	51	\N	STY0193
 2333	3	3	STY-00194	CARTRIDGE TK-7120	62	53	5	153	320	105.69	\N	Covered	\N	18	Consumable	CARTRIDGE TK-7120	t	f	2026-06-03 12:31:56.997835	2026-06-05 16:47:46.705926	51	\N	STY0194
 2334	3	3	STY-00195	CARTRIDGE 103A	62	53	5	233	588	34.8	\N	Covered	\N	18	Consumable	CARTRIDGE 103A	t	f	2026-06-03 12:31:57.000629	2026-06-05 16:47:46.705929	51	\N	STY0195
-2873	2	2	HOU-00374	SCISSOR 128MM	68	74	29	4	9	47096.75	\N	Covered	\N	12	Non-Consumable	SCISSOR 128MM	t	f	2026-06-11 21:48:30.716119	2026-06-11 21:58:45.594818	62	\N	HOS0374
+1130	3	3	HOS-00003	PHARMACY CLOTH COVERS - 9X13	54	29	6	4	14	47777.02	\N	Covered	\N	5	Consumable	PHARMACY CLOTH COVERS - 9X13	t	f	2026-06-03 12:31:54.195578	2026-06-30 16:53:53.80365	59	\N	HOS0003
+1131	3	3	HOS-00004	STETHOSCOPE MICROTOME	54	26	5	5	14	15728.29	\N	Covered	\N	12	Non-Consumable	STETHOSCOPE MICROTOME	t	f	2026-06-03 12:31:54.197482	2026-06-30 16:53:53.803653	59	\N	HOS0004
+1132	3	3	HOS-00005	CLENZYME (MULTIENZYME CLEANER)1000ML.	54	26	5	5	11	20144.9	\N	Covered	\N	18	Consumable	CLENZYME (MULTIENZYME CLEANER)1000ML.	t	f	2026-06-03 12:31:54.199386	2026-06-30 16:53:53.803657	59	\N	HOS0005
+1133	3	3	HOS-00006	BUCKET PLASTIC 20Ltrs	54	26	5	5	18	32845.83	\N	Covered	\N	18	Non-Consumable	BUCKET PLASTIC 20Ltrs	t	f	2026-06-03 12:31:54.201418	2026-06-30 16:53:53.80366	59	\N	HOS0006
+1134	3	3	HOS-00007	KIRAN COAT APRON 0.5MM PB 100CM X 60CM	54	28	5	5	17	10818.26	\N	Covered	\N	12	Consumable	KIRAN COAT APRON 0.5MM PB 100CM X 60CM	t	f	2026-06-03 12:31:54.203464	2026-06-30 16:53:53.803663	59	\N	HOS0007
+1135	3	3	HOS-00008	BAYER 190ML HIGH PRESSURE INJECTOR SYRINGE	54	30	5	4	12	39682.9	\N	Covered	\N	12	Consumable	BAYER 190ML HIGH PRESSURE INJECTOR SYRINGE	t	f	2026-06-03 12:31:54.20589	2026-06-30 16:53:53.803666	59	\N	HOS0008
+1136	3	3	HOS-00009	BED PAN STEEL	54	26	5	5	16	30531.96	\N	Covered	\N	18	Non-Consumable	BED PAN STEEL	t	f	2026-06-03 12:31:54.207988	2026-06-30 16:53:53.803668	59	\N	HOS0009
+1137	3	3	HOS-00010	BED PAN PLASTIC	54	26	5	4	16	41874.87	\N	Covered	\N	18	Non-Consumable	BED PAN PLASTIC	t	f	2026-06-03 12:31:54.210232	2026-06-30 16:53:53.803671	59	\N	HOS0010
+1138	3	3	HOS-00011	URINE CANE (MALE)	54	26	5	3	7	25531.88	\N	Covered	\N	12	Non-Consumable	URINE CANE (MALE)	t	f	2026-06-03 12:31:54.212151	2026-06-30 16:53:53.803674	59	\N	HOS0011
+1139	3	3	HOS-00012	STEEL BUCKET 5 LTRS	54	26	5	4	14	30747	\N	Covered	\N	18	Non-Consumable	STEEL BUCKET 5 LTRS	t	f	2026-06-03 12:31:54.214065	2026-06-30 16:53:53.803677	59	\N	HOS0012
+1140	3	3	HOS-00013	DRESSING BIN 6 X 6 SS	54	26	5	5	17	11616.55	\N	Covered	\N	18	Non-Consumable	DRESSING BIN 6 X 6 SS	t	f	2026-06-03 12:31:54.216142	2026-06-30 16:53:53.80368	59	\N	HOS0013
+1141	3	3	HOS-00014	TRAY WITH COVER 10 X8	54	26	13	5	17	32278.21	\N	Covered	\N	18	Non-Consumable	TRAY WITH COVER 10 X8	t	f	2026-06-03 12:31:54.218194	2026-06-30 16:53:53.803683	59	\N	HOS0014
+1142	3	3	HOS-00015	TRAY WITH COVER 12 X 10	54	26	13	3	10	13739.84	\N	Covered	\N	18	Non-Consumable	TRAY WITH COVER 12 X 10	t	f	2026-06-03 12:31:54.220342	2026-06-30 16:53:53.803685	59	\N	HOS0015
+1143	3	3	HOS-00016	TRAY WITH COVER 9 X 6	54	26	13	2	8	16241.02	\N	Covered	\N	18	Non-Consumable	TRAY WITH COVER 9 X 6	t	f	2026-06-03 12:31:54.222862	2026-06-30 16:53:53.803688	59	\N	HOS0016
+1144	3	3	HOS-00017	TRAY WITH COVER SS 12 X 10	54	26	13	4	13	46179.91	\N	Covered	\N	18	Non-Consumable	TRAY WITH COVER SS 12 X 10	t	f	2026-06-03 12:31:54.225351	2026-06-30 16:53:53.803691	59	\N	HOS0017
+1145	3	3	HOS-00018	TRAY WITH COVER SS 18 X 12	54	26	13	5	17	28057.06	\N	Covered	\N	18	Non-Consumable	TRAY WITH COVER SS 18 X 12	t	f	2026-06-03 12:31:54.227462	2026-06-30 16:53:53.803694	59	\N	HOS0018
+1146	3	3	HOS-00019	TRAY WITH COVER SS 8 X 3	54	26	13	3	11	42302.32	\N	Covered	\N	18	Non-Consumable	TRAY WITH COVER SS 8 X 3	t	f	2026-06-03 12:31:54.229687	2026-06-30 16:53:53.803696	59	\N	HOS0019
+1147	3	3	HOS-00020	Mindray SpO2 Adult Probe	54	18	5	4	16	28396.63	\N	Covered	\N	12	Consumable	Mindray SpO2 Adult Probe	t	f	2026-06-03 12:31:54.231932	2026-06-30 16:53:53.803699	59	\N	HOS0020
+1148	3	3	HOS-00021	Mindray SpO2 Pediatric Probe	54	18	5	3	9	14585.87	\N	Covered	\N	12	Consumable	Mindray SpO2 Pediatric Probe	t	f	2026-06-03 12:31:54.234223	2026-06-30 16:53:53.803702	59	\N	HOS0021
+1149	3	3	HOS-00022	Mindray SpO2 Neonatal Probe	54	18	5	5	13	35708.56	\N	Covered	\N	12	Consumable	Mindray SpO2 Neonatal Probe	t	f	2026-06-03 12:31:54.236316	2026-06-30 16:53:53.803705	59	\N	HOS0022
+1150	3	3	HOS-00023	Mindray ECG Cable	54	18	5	3	7	30824.89	\N	Covered	\N	12	Consumable	Mindray ECG Cable	t	f	2026-06-03 12:31:54.238725	2026-06-30 16:53:53.803707	59	\N	HOS0023
+1151	3	3	HOS-00024	Mindray NIBP Hose	54	18	5	2	7	39929.38	\N	Covered	\N	12	Consumable	Mindray NIBP Hose	t	f	2026-06-03 12:31:54.24102	2026-06-30 16:53:53.80371	59	\N	HOS0024
+1152	3	3	HOS-00025	Philips SpO2 Adult Probe	54	18	5	4	12	14907.95	\N	Covered	\N	12	Consumable	Philips SpO2 Adult Probe	t	f	2026-06-03 12:31:54.243362	2026-06-30 16:53:53.803713	59	\N	HOS0025
+1153	3	3	HOS-00026	Philips SpO2 Pediatric Probe	54	18	5	43	146	7679.63	\N	Covered	\N	12	Consumable	Philips SpO2 Pediatric Probe	t	f	2026-06-03 12:31:54.245985	2026-06-30 16:53:53.803716	59	\N	HOS0026
+1154	3	3	HOS-00027	Philips SpO2 Neonatal Probe	54	18	5	4	12	34011.43	\N	Covered	\N	12	Consumable	Philips SpO2 Neonatal Probe	t	f	2026-06-03 12:31:54.248016	2026-06-30 16:53:53.803719	59	\N	HOS0027
+1155	3	3	HOS-00028	Philips ECG Cable	54	18	5	4	13	33761.49	\N	Covered	\N	12	Consumable	Philips ECG Cable	t	f	2026-06-03 12:31:54.250111	2026-06-30 16:53:53.803722	59	\N	HOS0028
+1156	3	3	HOS-00029	Philips NIBP Hose	54	18	5	2	5	28663.04	\N	Covered	\N	12	Consumable	Philips NIBP Hose	t	f	2026-06-03 12:31:54.252151	2026-06-30 16:53:53.803724	59	\N	HOS0029
+1157	3	3	HOS-00030	Comen SpO2 Adult Probe	54	18	5	4	14	27583.36	\N	Covered	\N	12	Consumable	Comen SpO2 Adult Probe	t	f	2026-06-03 12:31:54.254392	2026-06-30 16:53:53.803727	59	\N	HOS0030
+1158	3	3	HOS-00031	Comen SpO2 Pediatric Probe	54	18	5	4	9	26109.32	\N	Covered	\N	12	Consumable	Comen SpO2 Pediatric Probe	t	f	2026-06-03 12:31:54.256748	2026-06-30 16:53:53.80373	59	\N	HOS0031
+1159	3	3	HOS-00032	Comen SpO2 Neonatal Probe	54	18	5	5	12	40196.65	\N	Covered	\N	12	Consumable	Comen SpO2 Neonatal Probe	t	f	2026-06-03 12:31:54.258935	2026-06-30 16:53:53.803733	59	\N	HOS0032
+1160	3	3	HOS-00033	Comen ECG Cable	54	18	5	2	5	22272.98	\N	Covered	\N	12	Consumable	Comen ECG Cable	t	f	2026-06-03 12:31:54.260896	2026-06-30 16:53:53.803735	59	\N	HOS0033
+1161	3	3	HOS-00034	Comen NIBP Hose	54	18	5	2	7	30445.33	\N	Covered	\N	12	Consumable	Comen NIBP Hose	t	f	2026-06-03 12:31:54.262793	2026-06-30 16:53:53.803738	59	\N	HOS0034
+1162	3	3	HOS-00035	Edan SpO2 Adult Probe	54	18	5	2	8	43429.35	\N	Covered	\N	12	Consumable	Edan SpO2 Adult Probe	t	f	2026-06-03 12:31:54.264665	2026-06-30 16:53:53.803741	59	\N	HOS0035
+1163	3	3	HOS-00036	Edan SpO2 Pediatric Probe	54	18	5	2	7	11528.14	\N	Covered	\N	12	Consumable	Edan SpO2 Pediatric Probe	t	f	2026-06-03 12:31:54.267	2026-06-30 16:53:53.803744	59	\N	HOS0036
+1164	3	3	HOS-00037	Edan SpO2 Neonatal Probe	54	18	5	3	11	42685.66	\N	Covered	\N	12	Consumable	Edan SpO2 Neonatal Probe	t	f	2026-06-03 12:31:54.269505	2026-06-30 16:53:53.803747	59	\N	HOS0037
+1165	3	3	HOS-00038	Edan ECG Cable	54	18	5	4	16	15007.85	\N	Covered	\N	12	Consumable	Edan ECG Cable	t	f	2026-06-03 12:31:54.271911	2026-06-30 16:53:53.803749	59	\N	HOS0038
+1166	3	3	HOS-00039	Edan NIBP Hose	54	18	5	3	11	46249.16	\N	Covered	\N	12	Consumable	Edan NIBP Hose	t	f	2026-06-03 12:31:54.274138	2026-06-30 16:53:53.803752	59	\N	HOS0039
+1167	3	3	HOS-00040	GE SpO2 Adult Probe	54	18	5	4	13	49341.02	\N	Covered	\N	12	Consumable	GE SpO2 Adult Probe	t	f	2026-06-03 12:31:54.276103	2026-06-30 16:53:53.803755	59	\N	HOS0040
+1168	3	3	HOS-00041	GE SpO2 Pediatric Probe	54	18	5	5	16	27138.7	\N	Covered	\N	12	Consumable	GE SpO2 Pediatric Probe	t	f	2026-06-03 12:31:54.278006	2026-06-30 16:53:53.803758	59	\N	HOS0041
+1169	3	3	HOS-00042	GE SpO2 Neonatal Probe	54	18	5	2	6	21012.11	\N	Covered	\N	12	Consumable	GE SpO2 Neonatal Probe	t	f	2026-06-03 12:31:54.279917	2026-06-30 16:53:53.80376	59	\N	HOS0042
+1170	3	3	HOS-00043	GE ECG Cable	54	18	5	4	12	30635.68	\N	Covered	\N	12	Consumable	GE ECG Cable	t	f	2026-06-03 12:31:54.281802	2026-06-30 16:53:53.803763	59	\N	HOS0043
+1171	3	3	HOS-00044	GE NIBP Hose	54	18	5	4	16	18506.34	\N	Covered	\N	12	Consumable	GE NIBP Hose	t	f	2026-06-03 12:31:54.283818	2026-06-30 16:53:53.803766	59	\N	HOS0044
+1172	3	3	HOS-00045	NIBP Cuff Adult	54	18	5	5	20	29779.06	\N	Covered	\N	12	Consumable	NIBP Cuff Adult	t	f	2026-06-03 12:31:54.285645	2026-06-30 16:53:53.803769	59	\N	HOS0045
+1173	3	3	HOS-00046	NIBP Cuff Pediatric	54	18	5	3	8	21809.45	\N	Covered	\N	12	Consumable	NIBP Cuff Pediatric	t	f	2026-06-03 12:31:54.28788	2026-06-30 16:53:53.803771	59	\N	HOS0046
+1174	3	3	HOS-00047	NIBP Cuff Neonatal	54	18	5	4	12	16813.02	\N	Covered	\N	12	Consumable	NIBP Cuff Neonatal	t	f	2026-06-03 12:31:54.290243	2026-06-30 16:53:53.803774	59	\N	HOS0047
+1175	3	3	HOS-00048	BP Apparatus Bladder Adult	54	18	5	2	8	48701.77	\N	Covered	\N	12	Non-Consumable	BP Apparatus Bladder Adult	t	f	2026-06-03 12:31:54.292239	2026-06-30 16:53:53.803777	59	\N	HOS0048
+1176	3	3	HOS-00049	BP Apparatus Bladder with Bag Pediatric	54	18	5	3	11	23041.66	\N	Covered	\N	12	Non-Consumable	BP Apparatus Bladder with Bag Pediatric	t	f	2026-06-03 12:31:54.29418	2026-06-30 16:53:53.80378	59	\N	HOS0049
+1177	3	3	HOS-00050	BP Apparatus Bulb	54	18	5	2	7	48366.14	\N	Covered	\N	12	Consumable	BP Apparatus Bulb	t	f	2026-06-03 12:31:54.296027	2026-06-30 16:53:53.803783	59	\N	HOS0050
+1178	3	3	HOS-00051	BP Apparatus Bag	54	18	5	4	14	16005.15	\N	Covered	\N	12	Non-Consumable	BP Apparatus Bag	t	f	2026-06-03 12:31:54.297873	2026-06-30 16:53:53.803785	59	\N	HOS0051
+1179	3	3	HOS-00052	Digital BP Apparatus Cuff	54	18	5	5	12	33083.39	\N	Covered	\N	12	Non-Consumable	Digital BP Apparatus Cuff	t	f	2026-06-03 12:31:54.299905	2026-06-30 16:53:53.803788	59	\N	HOS0052
+1180	3	3	HOS-00053	3-Pin Power Cord	54	18	5	3	12	24958.01	\N	Covered	\N	18	Consumable	3-Pin Power Cord	t	f	2026-06-03 12:31:54.302009	2026-06-30 16:53:53.803791	59	\N	HOS0053
+1181	3	3	HOS-00054	ECG Machine Cable	54	18	5	4	15	33615.39	\N	Covered	\N	12	Consumable	ECG Machine Cable	t	f	2026-06-03 12:31:54.304169	2026-06-30 16:53:53.803794	59	\N	HOS0054
+1182	3	3	HOS-00055	ECG Machine Clamp	54	18	5	5	15	11133.42	\N	Covered	\N	12	Consumable	ECG Machine Clamp	t	f	2026-06-03 12:31:54.306682	2026-06-30 16:53:53.803797	59	\N	HOS0055
+1183	3	3	HOS-00056	ECG Machine Bulb	54	18	5	5	11	23753.77	\N	Covered	\N	12	Consumable	ECG Machine Bulb	t	f	2026-06-03 12:31:54.308605	2026-06-30 16:53:53.803799	59	\N	HOS0056
+1184	3	3	HOS-00057	Ventilator Oxygen Sensor	54	18	5	2	7	43733.61	\N	Covered	\N	12	Non-Consumable	Ventilator Oxygen Sensor	t	f	2026-06-03 12:31:54.310538	2026-06-30 16:53:53.803802	59	\N	HOS0057
+1185	3	3	HOS-00058	Ventilator Battery	54	18	5	2	8	40562.32	\N	Covered	\N	12	Consumable	Ventilator Battery	t	f	2026-06-03 12:31:54.312432	2026-06-30 16:53:53.803805	59	\N	HOS0058
+1186	3	3	HOS-00059	Monitor Battery	54	18	5	2	5	39903.79	\N	Covered	\N	12	Consumable	Monitor Battery	t	f	2026-06-03 12:31:54.314336	2026-06-30 16:53:53.803808	59	\N	HOS0059
+1187	3	3	HOS-00060	Syringe Pump Battery	54	18	5	4	16	33292.48	\N	Covered	\N	12	Consumable	Syringe Pump Battery	t	f	2026-06-03 12:31:54.31629	2026-06-30 16:53:53.803811	59	\N	HOS0060
+1188	3	3	HOS-00061	Infusion Pump Battery	54	18	5	3	10	13782.48	\N	Covered	\N	12	Consumable	Infusion Pump Battery	t	f	2026-06-03 12:31:54.318273	2026-06-30 16:53:53.803813	59	\N	HOS0061
+1189	3	3	HOS-00062	ECG Machine Battery	54	18	5	42	119	8739.31	\N	Covered	\N	12	Consumable	ECG Machine Battery	t	f	2026-06-03 12:31:54.320304	2026-06-30 16:53:53.803816	59	\N	HOS0062
+1190	3	3	HOS-00063	X-Ray View Box 12V DC Adaptor	54	18	5	2	8	41675.63	\N	Covered	\N	18	Non-Consumable	X-Ray View Box 12V DC Adaptor	t	f	2026-06-03 12:31:54.322804	2026-06-30 16:53:53.803819	59	\N	HOS0063
+1191	3	3	HOS-00064	0.032 X 150 TERUMO GUIDE WIRE	54	19	5	3	10	16526.16	\N	Covered	\N	12	Consumable	0.032 X 150 TERUMO GUIDE WIRE	t	f	2026-06-03 12:31:54.324911	2026-06-30 16:53:53.803822	59	\N	HOS0064
+1192	3	3	HOS-00065	0.035X150CM TEFLON WIRE J.TIP	54	19	5	2	8	26703.28	\N	Covered	\N	12	Consumable	0.035X150CM TEFLON WIRE J.TIP	t	f	2026-06-03 12:31:54.326839	2026-06-30 16:53:53.803825	59	\N	HOS0065
+1193	3	3	HOS-00066	ACCURA BMV BALLOON KIT WILL ALL ACCESSORIES	54	19	5	4	14	15813.16	\N	Covered	\N	12	Consumable	ACCURA BMV BALLOON KIT WILL ALL ACCESSORIES	t	f	2026-06-03 12:31:54.328699	2026-06-30 16:53:53.803827	59	\N	HOS0066
+1194	3	3	HOS-00067	ANGI DAIG JR 3.5 6FR CORDIS	54	19	5	5	13	16732.04	\N	Covered	\N	12	Consumable	ANGI DAIG JR 3.5 6FR CORDIS	t	f	2026-06-03 12:31:54.330614	2026-06-30 16:53:53.80383	59	\N	HOS0067
+1195	3	3	HOS-00068	APNEALINK CANNULA- 25 PACK	54	19	5	4	16	12432.24	\N	Covered	\N	12	Consumable	APNEALINK CANNULA- 25 PACK	t	f	2026-06-03 12:31:54.332513	2026-06-30 16:53:53.803833	59	\N	HOS0068
+1196	3	3	HOS-00069	ASAHI GW GAIA THIRD	54	19	5	5	15	48367.03	\N	Covered	\N	12	Consumable	ASAHI GW GAIA THIRD	t	f	2026-06-03 12:31:54.334524	2026-06-30 16:53:53.803836	59	\N	HOS0069
+1197	3	3	HOS-00070	BI-PHASIC DEFIBRILLATOR MODEL: RELIFE 900 - MAKE BPL	54	19	5	3	7	20706.22	\N	Covered	\N	12	Consumable	BI-PHASIC DEFIBRILLATOR MODEL: RELIFE 900 - MAKE BPL	t	f	2026-06-03 12:31:54.336495	2026-06-30 16:53:53.803838	59	\N	HOS0070
+1198	3	3	HOS-00071	BL LIFESCIENCES . 1/2  X 3/32  10 FEET TUBING STERILE	54	19	5	40	107	8529.68	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 1/2  X 3/32  10 FEET TUBING STERILE	t	f	2026-06-03 12:31:54.338895	2026-06-30 16:53:53.803841	59	\N	HOS0071
+1199	3	3	HOS-00072	BL LIFESCIENCES . 1/2 X 1/2 ST	54	19	5	3	8	14243.26	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 1/2 X 1/2 ST	t	f	2026-06-03 12:31:54.341151	2026-06-30 16:53:53.803844	59	\N	HOS0072
+1200	3	3	HOS-00073	BL LIFESCIENCES . 1/4  X 3/32  10 FEET TUBING STERILE	54	19	5	2	8	26824.34	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 1/4  X 3/32  10 FEET TUBING STERILE	t	f	2026-06-03 12:31:54.343086	2026-06-30 16:53:53.803847	59	\N	HOS0073
+1201	3	3	HOS-00074	BL LIFESCIENCES . 1/4 X 1/4 ST	54	19	5	2	8	29261.5	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 1/4 X 1/4 ST	t	f	2026-06-03 12:31:54.344996	2026-06-30 16:53:53.803849	59	\N	HOS0074
+1202	3	3	HOS-00075	BL LIFESCIENCES . 1/4 X 1/4 WITH LEUR	54	19	5	4	12	27006.57	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 1/4 X 1/4 WITH LEUR	t	f	2026-06-03 12:31:54.346927	2026-06-30 16:53:53.803852	59	\N	HOS0075
+1203	3	3	HOS-00076	BL LIFESCIENCES . 1/4 X 1/4 X 1/4  Y	54	19	5	3	11	29504.57	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 1/4 X 1/4 X 1/4  Y	t	f	2026-06-03 12:31:54.34888	2026-06-30 16:53:53.803855	59	\N	HOS0076
+1204	3	3	HOS-00077	BL LIFESCIENCES . 3/8 X 3/32  10 FEET TUBING STERILE	54	19	5	2	5	19791.15	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 3/8 X 3/32  10 FEET TUBING STERILE	t	f	2026-06-03 12:31:54.350934	2026-06-30 16:53:53.803858	59	\N	HOS0077
+1205	3	3	HOS-00078	BL LIFESCIENCES . 3/8 X 3/8 ST	54	19	5	4	14	15621.87	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 3/8 X 3/8 ST	t	f	2026-06-03 12:31:54.352891	2026-06-30 16:53:53.80386	59	\N	HOS0078
+1206	3	3	HOS-00079	BL LIFESCIENCES . 3/8 X 3/8 X 3/8  Y	54	19	5	2	8	20930.03	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 3/8 X 3/8 X 3/8  Y	t	f	2026-06-03 12:31:54.355293	2026-06-30 16:53:53.803867	59	\N	HOS0079
+1207	3	3	HOS-00080	BL LIFESCIENCES BCP 03 WITH HOLDER	54	19	5	3	10	45535.32	\N	Covered	\N	12	Consumable	BL LIFESCIENCES BCP 03 WITH HOLDER	t	f	2026-06-03 12:31:54.357596	2026-06-30 16:53:53.80387	59	\N	HOS0080
+1208	3	3	HOS-00081	BL LIFESCIENCES MISTER BLOWER	54	19	5	15	35	8921.51	\N	Covered	\N	12	Consumable	BL LIFESCIENCES MISTER BLOWER	t	f	2026-06-03 12:31:54.35957	2026-06-30 16:53:53.803873	59	\N	HOS0081
+1209	3	3	HOS-00082	COOK - ONE-PART PERCUTANEOUS ENTRY THINWALL NEEDLE-SDN-20-4.0 20G/4CM	54	19	5	5	12	11522.83	\N	Covered	\N	12	Consumable	COOK - ONE-PART PERCUTANEOUS ENTRY THINWALL NEEDLE-SDN-20-4.0 20G/4CM	t	f	2026-06-03 12:31:54.361463	2026-06-30 16:53:53.803876	59	\N	HOS0082
+1210	3	3	HOS-00083	CORONARY SHUNT - SHT-1210S - 1.0MM	54	19	5	2	7	24375	\N	Covered	\N	12	Consumable	CORONARY SHUNT - SHT-1210S - 1.0MM	t	f	2026-06-03 12:31:54.363367	2026-06-30 16:53:53.803878	59	\N	HOS0083
+1211	3	3	HOS-00084	CORONARY SHUNT - SHT-1213S - 1.25MM	54	19	5	44	159	9191.76	\N	Covered	\N	12	Consumable	CORONARY SHUNT - SHT-1213S - 1.25MM	t	f	2026-06-03 12:31:54.365307	2026-06-30 16:53:53.803881	59	\N	HOS0084
+1212	3	3	HOS-00085	CORONARY SHUNT - SHT-1215S - 1.50MM	54	19	5	44	89	7848.13	\N	Covered	\N	12	Consumable	CORONARY SHUNT - SHT-1215S - 1.50MM	t	f	2026-06-03 12:31:54.367348	2026-06-30 16:53:53.803884	59	\N	HOS0085
+1213	3	3	HOS-00086	CORONARY SHUNT - SHT-1218S - 2.0MM	54	19	5	2	5	49134.49	\N	Covered	\N	12	Consumable	CORONARY SHUNT - SHT-1218S - 2.0MM	t	f	2026-06-03 12:31:54.369267	2026-06-30 16:53:53.803887	59	\N	HOS0086
+1214	3	3	HOS-00087	CORONARY SHUNT - SHT-1220S - 2.25MM	54	19	5	2	8	10137.59	\N	Covered	\N	12	Consumable	CORONARY SHUNT - SHT-1220S - 2.25MM	t	f	2026-06-03 12:31:54.37148	2026-06-30 16:53:53.80389	59	\N	HOS0087
+1215	3	3	HOS-00088	CORONARY SHUNT - SHT-1223S - 2.50MM	54	19	5	3	12	32847.94	\N	Covered	\N	12	Consumable	CORONARY SHUNT - SHT-1223S - 2.50MM	t	f	2026-06-03 12:31:54.373897	2026-06-30 16:53:53.803892	59	\N	HOS0088
+1216	3	3	HOS-00089	CORONARY SHUNT - SHT-1225S - 2.0MM	54	19	5	2	5	15823.34	\N	Covered	\N	12	Consumable	CORONARY SHUNT - SHT-1225S - 2.0MM	t	f	2026-06-03 12:31:54.375898	2026-06-30 16:53:53.803895	59	\N	HOS0089
+1217	3	3	HOS-00090	DOLPHIN-RADIL INTRODUCER SHEATH 5F/7CM	54	19	5	4	15	27079.56	\N	Covered	\N	12	Consumable	DOLPHIN-RADIL INTRODUCER SHEATH 5F/7CM	t	f	2026-06-03 12:31:54.377826	2026-06-30 16:53:53.803898	59	\N	HOS0090
+1218	3	3	HOS-00091	DVI MALE TO HDMI FEMALE CONVERTOR - NT	54	19	5	5	15	36349.97	\N	Covered	\N	18	Consumable	DVI MALE TO HDMI FEMALE CONVERTOR - NT	t	f	2026-06-03 12:31:54.379747	2026-06-30 16:53:53.8039	59	\N	HOS0091
+1219	3	3	HOS-00092	HDMI TO DVI CABLE 20MTR - NT	54	19	5	4	15	12438.79	\N	Covered	\N	18	Consumable	HDMI TO DVI CABLE 20MTR - NT	t	f	2026-06-03 12:31:54.381666	2026-06-30 16:53:53.803903	59	\N	HOS0092
+1220	3	3	HOS-00093	HDMI TO HDMI CABLE 20MTR - NT	54	19	5	4	15	11697.61	\N	Covered	\N	18	Consumable	HDMI TO HDMI CABLE 20MTR - NT	t	f	2026-06-03 12:31:54.383653	2026-06-30 16:53:53.803906	59	\N	HOS0093
+1221	3	3	HOS-00094	HEAD PROTECTION KIRAN MAKE LEADLITE – 0.25MM PB	54	19	5	4	9	22336.14	\N	Covered	\N	12	Consumable	HEAD PROTECTION KIRAN MAKE LEADLITE – 0.25MM PB	t	f	2026-06-03 12:31:54.385709	2026-06-30 16:53:53.803909	59	\N	HOS0094
+1222	3	3	HOS-00095	HIGH PRESSURE LINE (110CMS)	54	19	5	33	101	6342.2	\N	Covered	\N	12	Consumable	HIGH PRESSURE LINE (110CMS)	t	f	2026-06-03 12:31:54.387826	2026-06-30 16:53:53.803911	59	\N	HOS0095
+1223	3	3	HOS-00096	HIGH PRESSURE LINE 150CM 1200 PSI	54	19	5	3	11	45511.21	\N	Covered	\N	12	Consumable	HIGH PRESSURE LINE 150CM 1200 PSI	t	f	2026-06-03 12:31:54.390291	2026-06-30 16:53:53.803914	59	\N	HOS0096
+1224	3	3	HOS-00097	INTRODUCER SHEATH 9F X 11CM	54	19	5	2	6	17512.4	\N	Covered	\N	12	Consumable	INTRODUCER SHEATH 9F X 11CM	t	f	2026-06-03 12:31:54.392249	2026-06-30 16:53:53.803917	59	\N	HOS0097
+1225	3	3	HOS-00098	MANIFOLD 3 PORT	54	19	5	20	60	5485.15	\N	Covered	\N	12	Consumable	MANIFOLD 3 PORT	t	f	2026-06-03 12:31:54.394215	2026-06-30 16:53:53.80392	59	\N	HOS0098
+1226	3	3	HOS-00099	MEDICAL BED ROLLS - 10 ROLLS PACKING	54	26	5	4	16	47181.69	\N	Covered	\N	5	Consumable	MEDICAL BED ROLLS - 10 ROLLS PACKING	t	f	2026-06-03 12:31:54.396119	2026-06-30 16:53:53.803923	59	\N	HOS0099
+1227	3	3	HOS-00100	MERIT MANIFOLDS 200PSI, 3PORT, HALF BODY, RIGHT OFF(25NOS/BOX)- 203HF-R	54	19	5	5	20	40224.69	\N	Covered	\N	12	Consumable	MERIT MANIFOLDS 200PSI, 3PORT, HALF BODY, RIGHT OFF(25NOS/BOX)- 203HF-R	t	f	2026-06-03 12:31:54.397998	2026-06-30 16:53:53.803926	59	\N	HOS0100
+1228	3	3	HOS-00101	OMNIPAQUE 350MG*100ML-LONG	54	19	5	5	19	38349.89	\N	Covered	\N	12	Consumable	OMNIPAQUE 350MG*100ML-LONG	t	f	2026-06-03 12:31:54.399927	2026-06-30 16:53:53.803928	59	\N	HOS0101
+1229	3	3	HOS-00102	PATIENT SAFE SLIDE TRANSFER BOARD	54	19	5	2	5	15566.94	\N	Covered	\N	12	Consumable	PATIENT SAFE SLIDE TRANSFER BOARD	t	f	2026-06-03 12:31:54.402018	2026-06-30 16:53:53.803931	59	\N	HOS0102
+1230	3	3	HOS-00103	PRESSURE MONITORING KIT - DOUBLE LUMEN	54	19	5	2	6	35100.21	\N	Covered	\N	12	Consumable	PRESSURE MONITORING KIT - DOUBLE LUMEN	t	f	2026-06-03 12:31:54.404	2026-06-30 16:53:53.803934	59	\N	HOS0103
+1231	3	3	HOS-00104	SAPPHIRE BALLOON NC 2.0 X  8MM	54	19	5	3	11	40772.13	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.0 X  8MM	t	f	2026-06-03 12:31:54.406552	2026-06-30 16:53:53.803937	59	\N	HOS0104
+1232	3	3	HOS-00105	SAPPHIRE BALLOON NC 2.0 X 10MM	54	19	5	5	17	19046.55	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.0 X 10MM	t	f	2026-06-03 12:31:54.40856	2026-06-30 16:53:53.803939	59	\N	HOS0105
+1233	3	3	HOS-00106	SAPPHIRE BALLOON NC 2.0 X 15MM	54	19	5	5	15	42810.99	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.0 X 15MM	t	f	2026-06-03 12:31:54.410495	2026-06-30 16:53:53.803942	59	\N	HOS0106
+1234	3	3	HOS-00107	SAPPHIRE BALLOON NC 2.5 X 10MM	54	19	5	40	145	9177.82	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.5 X 10MM	t	f	2026-06-03 12:31:54.412428	2026-06-30 16:53:53.803945	59	\N	HOS0107
+1235	3	3	HOS-00108	SAPPHIRE BALLOON NC 2.5 X 12MM	54	19	5	5	14	38376.24	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.5 X 12MM	t	f	2026-06-03 12:31:54.414328	2026-06-30 16:53:53.803948	59	\N	HOS0108
+1236	3	3	HOS-00109	SAPPHIRE BALLOON NC 2.5 X 15MM	54	19	5	5	12	32018.21	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.5 X 15MM	t	f	2026-06-03 12:31:54.416239	2026-06-30 16:53:53.80395	59	\N	HOS0109
+1237	3	3	HOS-00110	SAPPHIRE BALLOON NC 2.5 X 8MM	54	19	5	35	103	5872.24	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.5 X 8MM	t	f	2026-06-03 12:31:54.418335	2026-06-30 16:53:53.803953	59	\N	HOS0110
+1238	3	3	HOS-00111	SAPPHIRE BALLOON NC 2.75 X 10MM	54	19	5	35	121	7045.4	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.75 X 10MM	t	f	2026-06-03 12:31:54.420282	2026-06-30 16:53:53.803956	59	\N	HOS0111
+1239	3	3	HOS-00112	SAPPHIRE BALLOON NC 2.75 X 12MM	54	19	5	3	12	20068.58	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.75 X 12MM	t	f	2026-06-03 12:31:54.422654	2026-06-30 16:53:53.803959	59	\N	HOS0112
+1240	3	3	HOS-00113	SAPPHIRE BALLOON NC 2.75 X 15MM	54	19	5	4	9	30408.41	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.75 X 15MM	t	f	2026-06-03 12:31:54.42483	2026-06-30 16:53:53.803962	59	\N	HOS0113
+1241	3	3	HOS-00114	SAPPHIRE BALLOON NC 2.75 X 8MM	54	19	5	2	7	35600.43	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.75 X 8MM	t	f	2026-06-03 12:31:54.426791	2026-06-30 16:53:53.803964	59	\N	HOS0114
+1242	3	3	HOS-00115	SAPPHIRE BALLOON NC 3.0 X 10MM	54	19	5	3	7	31429.34	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.0 X 10MM	t	f	2026-06-03 12:31:54.428712	2026-06-30 16:53:53.803967	59	\N	HOS0115
+1243	3	3	HOS-00116	SAPPHIRE BALLOON NC 3.0 X 12MM	54	19	5	5	16	19713.24	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.0 X 12MM	t	f	2026-06-03 12:31:54.430659	2026-06-30 16:53:53.80397	59	\N	HOS0116
+1244	3	3	HOS-00117	SAPPHIRE BALLOON NC 3.0 X 15MM	54	19	5	4	9	23819.89	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.0 X 15MM	t	f	2026-06-03 12:31:54.432526	2026-06-30 16:53:53.803973	59	\N	HOS0117
+1245	3	3	HOS-00118	SAPPHIRE BALLOON NC 3.0 X 8MM	54	19	5	22	50	5278.34	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.0 X 8MM	t	f	2026-06-03 12:31:54.434613	2026-06-30 16:53:53.803975	59	\N	HOS0118
+1246	3	3	HOS-00119	SAPPHIRE BALLOON NC 3.5 X 10MM	54	19	5	29	76	5831.78	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.5 X 10MM	t	f	2026-06-03 12:31:54.436576	2026-06-30 16:53:53.803978	59	\N	HOS0119
+1247	3	3	HOS-00120	SAPPHIRE BALLOON NC 3.5 X 12MM	54	19	5	3	9	15726.17	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.5 X 12MM	t	f	2026-06-03 12:31:54.438865	2026-06-30 16:53:53.803981	59	\N	HOS0120
+1248	3	3	HOS-00121	SAPPHIRE BALLOON NC 3.5 X 15MM	54	19	5	49	150	9807.13	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.5 X 15MM	t	f	2026-06-03 12:31:54.441223	2026-06-30 16:53:53.803984	59	\N	HOS0121
+1249	3	3	HOS-00122	SAPPHIRE BALLOON NC 3.5 X 8MM	54	19	5	2	6	11644.53	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.5 X 8MM	t	f	2026-06-03 12:31:54.44321	2026-06-30 16:53:53.803987	59	\N	HOS0122
+1250	3	3	HOS-00123	SAPPHIRE BALLOON NC 4.0 X 10MM	54	19	5	4	11	28227.78	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 4.0 X 10MM	t	f	2026-06-03 12:31:54.445096	2026-06-30 16:53:53.80399	59	\N	HOS0123
+1251	3	3	HOS-00124	SAPPHIRE BALLOON NC 4.0 X 12MM	54	19	5	5	20	29696.2	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 4.0 X 12MM	t	f	2026-06-03 12:31:54.446917	2026-06-30 16:53:53.803992	59	\N	HOS0124
+1252	3	3	HOS-00125	SAPPHIRE BALLOON NC 4.0 X 15MM	54	19	5	37	138	5578.79	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 4.0 X 15MM	t	f	2026-06-03 12:31:54.448824	2026-06-30 16:53:53.803995	59	\N	HOS0125
+1253	3	3	HOS-00126	SAPPHIRE BALLOON NC 4.0 X 8MM	54	19	5	39	87	5694.61	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 4.0 X 8MM	t	f	2026-06-03 12:31:54.45079	2026-06-30 16:53:53.803998	59	\N	HOS0126
+1254	3	3	HOS-00127	SAPPHIRE BALLOON SC 1.25 X 10MM	54	19	5	2	5	28293.36	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 1.25 X 10MM	t	f	2026-06-03 12:31:54.452795	2026-06-30 16:53:53.804001	59	\N	HOS0127
+1255	3	3	HOS-00128	SAPPHIRE BALLOON SC 1.25 X 12MM	54	19	5	2	6	20721.93	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 1.25 X 12MM	t	f	2026-06-03 12:31:54.454877	2026-06-30 16:53:53.804004	59	\N	HOS0128
+1256	3	3	HOS-00129	SAPPHIRE BALLOON SC 1.25 X 15MM	54	19	5	2	8	37570.34	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 1.25 X 15MM	t	f	2026-06-03 12:31:54.457379	2026-06-30 16:53:53.804006	59	\N	HOS0129
+1257	3	3	HOS-00130	SAPPHIRE BALLOON SC 1.5 X 10MM	54	19	5	2	6	31807.89	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 1.5 X 10MM	t	f	2026-06-03 12:31:54.459399	2026-06-30 16:53:53.804009	59	\N	HOS0130
+1258	3	3	HOS-00131	SAPPHIRE BALLOON SC 1.5 X 12MM	54	19	5	12	26	9579.32	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 1.5 X 12MM	t	f	2026-06-03 12:31:54.461377	2026-06-30 16:53:53.804012	59	\N	HOS0131
+1259	3	3	HOS-00132	SAPPHIRE BALLOON SC 1.5 X 15MM	54	19	5	3	11	41669.52	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 1.5 X 15MM	t	f	2026-06-03 12:31:54.46331	2026-06-30 16:53:53.804014	59	\N	HOS0132
+1260	3	3	HOS-00133	SAPPHIRE BALLOON SC 1.5 X 8MM	54	19	5	2	5	15241.99	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 1.5 X 8MM	t	f	2026-06-03 12:31:54.465219	2026-06-30 16:53:53.804017	59	\N	HOS0133
+1261	3	3	HOS-00134	SAPPHIRE BALLOON SC 2.0 X 10MM	54	19	5	2	6	20174.98	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.0 X 10MM	t	f	2026-06-03 12:31:54.467206	2026-06-30 16:53:53.80402	59	\N	HOS0134
+1262	3	3	HOS-00135	SAPPHIRE BALLOON SC 2.0 X 12MM	54	19	5	2	8	49190.09	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.0 X 12MM	t	f	2026-06-03 12:31:54.469205	2026-06-30 16:53:53.804023	59	\N	HOS0135
+1263	3	3	HOS-00136	SAPPHIRE BALLOON SC 2.0 X 15MM	54	19	5	4	10	48065.39	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.0 X 15MM	t	f	2026-06-03 12:31:54.471469	2026-06-30 16:53:53.804025	59	\N	HOS0136
+1264	3	3	HOS-00137	SAPPHIRE BALLOON SC 2.0 X 8MM	54	19	5	2	8	22533.69	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.0 X 8MM	t	f	2026-06-03 12:31:54.473991	2026-06-30 16:53:53.804028	59	\N	HOS0137
+1265	3	3	HOS-00138	SAPPHIRE BALLOON SC 2.5 X 10MM	54	19	5	3	9	38005.95	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.5 X 10MM	t	f	2026-06-03 12:31:54.476011	2026-06-30 16:53:53.804031	59	\N	HOS0138
+1266	3	3	HOS-00139	SAPPHIRE BALLOON SC 2.5 X 12MM	54	19	5	3	8	28522.88	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.5 X 12MM	t	f	2026-06-03 12:31:54.477955	2026-06-30 16:53:53.804034	59	\N	HOS0139
+1267	3	3	HOS-00140	SAPPHIRE BALLOON SC 2.5 X 15MM	54	19	5	3	10	13460.5	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.5 X 15MM	t	f	2026-06-03 12:31:54.479875	2026-06-30 16:53:53.804036	59	\N	HOS0140
+1268	3	3	HOS-00141	SAPPHIRE BALLOON SC 2.5 X 8MM	54	19	5	3	11	23367.64	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.5 X 8MM	t	f	2026-06-03 12:31:54.481762	2026-06-30 16:53:53.804039	59	\N	HOS0141
+1269	3	3	HOS-00142	SAPPHIRE BALLOON SC 2.75 X 10MM	54	19	5	4	15	34558.77	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.75 X 10MM	t	f	2026-06-03 12:31:54.48373	2026-06-30 16:53:53.804042	59	\N	HOS0142
+1270	3	3	HOS-00143	SAPPHIRE BALLOON SC 2.75 X 12MM	54	19	5	5	17	37307.58	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.75 X 12MM	t	f	2026-06-03 12:31:54.485783	2026-06-30 16:53:53.804045	59	\N	HOS0143
+1271	3	3	HOS-00144	SAPPHIRE BALLOON SC 2.75 X 15MM	54	19	5	2	6	43673.19	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.75 X 15MM	t	f	2026-06-03 12:31:54.487936	2026-06-30 16:53:53.804047	59	\N	HOS0144
+1272	3	3	HOS-00145	SAPPHIRE BALLOON SC 2.75 X 8MM	54	19	5	3	10	41474.27	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.75 X 8MM	t	f	2026-06-03 12:31:54.490405	2026-06-30 16:53:53.80405	59	\N	HOS0145
+1273	3	3	HOS-00146	SAPPHIRE BALLOON SC 3.0 X 10 MM	54	19	5	4	12	30601.76	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.0 X 10 MM	t	f	2026-06-03 12:31:54.492435	2026-06-30 16:53:53.804053	59	\N	HOS0146
+1274	3	3	HOS-00147	SAPPHIRE BALLOON SC 3.0 X 12 MM	54	19	5	10	40	9574.71	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.0 X 12 MM	t	f	2026-06-03 12:31:54.494394	2026-06-30 16:53:53.804056	59	\N	HOS0147
+1275	3	3	HOS-00148	SAPPHIRE BALLOON SC 3.0 X 15 MM	54	19	5	3	7	14873.99	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.0 X 15 MM	t	f	2026-06-03 12:31:54.496195	2026-06-30 16:53:53.804059	59	\N	HOS0148
+1276	3	3	HOS-00149	SAPPHIRE BALLOON SC 3.0 X 8 MM	54	19	5	3	8	13931.39	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.0 X 8 MM	t	f	2026-06-03 12:31:54.498119	2026-06-30 16:53:53.804061	59	\N	HOS0149
+1277	3	3	HOS-00150	SAPPHIRE BALLOON SC 3.5 X 10 MM	54	19	5	2	7	19344.59	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.5 X 10 MM	t	f	2026-06-03 12:31:54.500024	2026-06-30 16:53:53.804064	59	\N	HOS0150
+1278	3	3	HOS-00151	SAPPHIRE BALLOON SC 3.5 X 12 MM	54	19	5	2	6	41821.12	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.5 X 12 MM	t	f	2026-06-03 12:31:54.502165	2026-06-30 16:53:53.804072	59	\N	HOS0151
+1279	3	3	HOS-00152	SAPPHIRE BALLOON SC 3.5 X 15 MM	54	19	5	4	12	43020.18	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.5 X 15 MM	t	f	2026-06-03 12:31:54.504287	2026-06-30 16:53:53.804075	59	\N	HOS0152
+1280	3	3	HOS-00153	SAPPHIRE BALLOON SC 3.5 X 8MM	54	19	5	3	8	44607.31	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.5 X 8MM	t	f	2026-06-03 12:31:54.50671	2026-06-30 16:53:53.804078	59	\N	HOS0153
+1281	3	3	HOS-00154	SAPPHIRE BALLOON SC 4.0 X 10 MM	54	19	5	4	14	11280.13	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 4.0 X 10 MM	t	f	2026-06-03 12:31:54.508831	2026-06-30 16:53:53.80408	59	\N	HOS0154
+1282	3	3	HOS-00155	SAPPHIRE BALLOON SC 4.0 X 12 MM	54	19	5	5	16	25264.08	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 4.0 X 12 MM	t	f	2026-06-03 12:31:54.510794	2026-06-30 16:53:53.804083	59	\N	HOS0155
+1283	3	3	HOS-00156	SAPPHIRE BALLOON SC 4.0 X 15 MM	54	19	5	4	12	28093.07	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 4.0 X 15 MM	t	f	2026-06-03 12:31:54.512717	2026-06-30 16:53:53.804086	59	\N	HOS0156
+1284	3	3	HOS-00157	SAPPHIRE BALLOON SC 4.0 X 8 MM	54	19	5	4	16	41898.91	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 4.0 X 8 MM	t	f	2026-06-03 12:31:54.514649	2026-06-30 16:53:53.804089	59	\N	HOS0157
+1285	3	3	HOS-00158	SCANLAN AORTIC PUNCH 2.5MM	54	19	5	5	12	34292.15	\N	Covered	\N	12	Consumable	SCANLAN AORTIC PUNCH 2.5MM	t	f	2026-06-03 12:31:54.51654	2026-06-30 16:53:53.804091	59	\N	HOS0158
+1286	3	3	HOS-00159	SCANLAN AORTIC PUNCH 3.0MM	54	19	5	3	7	45470.55	\N	Covered	\N	12	Consumable	SCANLAN AORTIC PUNCH 3.0MM	t	f	2026-06-03 12:31:54.518609	2026-06-30 16:53:53.804094	59	\N	HOS0159
+1287	3	3	HOS-00160	SCANLAN AORTIC PUNCH 3.5MM	54	19	5	2	6	15175.95	\N	Covered	\N	12	Consumable	SCANLAN AORTIC PUNCH 3.5MM	t	f	2026-06-03 12:31:54.520599	2026-06-30 16:53:53.804097	59	\N	HOS0160
+1288	3	3	HOS-00161	STENT 2.5X32MM	54	19	5	3	7	21265.62	\N	Covered	\N	12	Consumable	STENT 2.5X32MM	t	f	2026-06-03 12:31:54.523033	2026-06-30 16:53:53.8041	59	\N	HOS0161
+1289	3	3	HOS-00162	STENT 2.75 X 28MM	54	19	5	4	15	40111.37	\N	Covered	\N	12	Consumable	STENT 2.75 X 28MM	t	f	2026-06-03 12:31:54.525257	2026-06-30 16:53:53.804102	59	\N	HOS0162
+1290	3	3	HOS-00163	STENT 2.75 X 36 MM	54	19	5	4	9	38848.81	\N	Covered	\N	12	Consumable	STENT 2.75 X 36 MM	t	f	2026-06-03 12:31:54.527208	2026-06-30 16:53:53.804105	59	\N	HOS0163
+1291	3	3	HOS-00164	STENT 2.75 X 44 MM	54	19	5	4	13	37241.53	\N	Covered	\N	12	Consumable	STENT 2.75 X 44 MM	t	f	2026-06-03 12:31:54.529011	2026-06-30 16:53:53.804108	59	\N	HOS0164
+1292	3	3	HOS-00165	STENT 2.75X13MM	54	19	5	45	178	9463.92	\N	Covered	\N	12	Consumable	STENT 2.75X13MM	t	f	2026-06-03 12:31:54.530855	2026-06-30 16:53:53.804114	59	\N	HOS0165
+1293	3	3	HOS-00166	STENT 2.75X16MM	54	19	5	5	19	41195.94	\N	Covered	\N	12	Consumable	STENT 2.75X16MM	t	f	2026-06-03 12:31:54.532662	2026-06-30 16:53:53.804117	59	\N	HOS0166
+1294	3	3	HOS-00167	STENT 2.75X24MM	54	19	5	5	14	38265.57	\N	Covered	\N	12	Consumable	STENT 2.75X24MM	t	f	2026-06-03 12:31:54.534668	2026-06-30 16:53:53.80412	59	\N	HOS0167
+1295	3	3	HOS-00168	STENT 2.75X32MM	54	19	5	28	96	5050.55	\N	Covered	\N	12	Consumable	STENT 2.75X32MM	t	f	2026-06-03 12:31:54.536683	2026-06-30 16:53:53.804123	59	\N	HOS0168
+1296	3	3	HOS-00169	STENT 3.0 X 10 MM	54	19	5	5	19	27948.52	\N	Covered	\N	12	Consumable	STENT 3.0 X 10 MM	t	f	2026-06-03 12:31:54.538878	2026-06-30 16:53:53.804125	59	\N	HOS0169
+1297	3	3	HOS-00170	STENT 3.0 X 44 MM	54	19	5	2	8	23100.77	\N	Covered	\N	12	Consumable	STENT 3.0 X 44 MM	t	f	2026-06-03 12:31:54.5413	2026-06-30 16:53:53.804128	59	\N	HOS0170
+1298	3	3	HOS-00171	STENT 3.0X18MM	54	19	5	3	10	25471.61	\N	Covered	\N	12	Consumable	STENT 3.0X18MM	t	f	2026-06-03 12:31:54.543201	2026-06-30 16:53:53.804131	59	\N	HOS0171
+1299	3	3	HOS-00172	STENT 3.0X24MM	54	19	5	4	15	22018.67	\N	Covered	\N	12	Consumable	STENT 3.0X24MM	t	f	2026-06-03 12:31:54.545104	2026-06-30 16:53:53.804134	59	\N	HOS0172
+1300	3	3	HOS-00173	STENT 3.0X28MM	54	19	5	2	5	48491.89	\N	Covered	\N	12	Consumable	STENT 3.0X28MM	t	f	2026-06-03 12:31:54.546991	2026-06-30 16:53:53.804137	59	\N	HOS0173
+1301	3	3	HOS-00174	STENT 3.0X32MM	54	19	5	4	15	40780.68	\N	Covered	\N	12	Consumable	STENT 3.0X32MM	t	f	2026-06-03 12:31:54.548907	2026-06-30 16:53:53.804139	59	\N	HOS0174
+1302	3	3	HOS-00175	STENT 3.0X40MM	54	19	5	2	6	15985.82	\N	Covered	\N	12	Consumable	STENT 3.0X40MM	t	f	2026-06-03 12:31:54.550896	2026-06-30 16:53:53.804142	59	\N	HOS0175
+1303	3	3	HOS-00176	STENT 3.5 X 10 MM	54	19	5	4	13	37041.39	\N	Covered	\N	12	Consumable	STENT 3.5 X 10 MM	t	f	2026-06-03 12:31:54.55295	2026-06-30 16:53:53.804145	59	\N	HOS0176
+1304	3	3	HOS-00177	STENT 3.5 X 15 MM	54	19	5	3	12	16801.56	\N	Covered	\N	12	Consumable	STENT 3.5 X 15 MM	t	f	2026-06-03 12:31:54.555105	2026-06-30 16:53:53.804148	59	\N	HOS0177
+1305	3	3	HOS-00178	STENT 3.5 X 28 MM	54	19	5	5	14	26453.15	\N	Covered	\N	12	Consumable	STENT 3.5 X 28 MM	t	f	2026-06-03 12:31:54.557653	2026-06-30 16:53:53.80415	59	\N	HOS0178
+1306	3	3	HOS-00179	STENT 3.5X14MM	54	19	5	2	5	27590	\N	Covered	\N	12	Consumable	STENT 3.5X14MM	t	f	2026-06-03 12:31:54.559684	2026-06-30 16:53:53.804153	59	\N	HOS0179
+1307	3	3	HOS-00180	STENT 3.5X16MM	54	19	5	4	16	16861.54	\N	Covered	\N	12	Consumable	STENT 3.5X16MM	t	f	2026-06-03 12:31:54.561682	2026-06-30 16:53:53.804156	59	\N	HOS0180
+1308	3	3	HOS-00181	STENT 3.5X18MM	54	19	5	3	10	41863.62	\N	Covered	\N	12	Consumable	STENT 3.5X18MM	t	f	2026-06-03 12:31:54.563614	2026-06-30 16:53:53.804159	59	\N	HOS0181
+1309	3	3	HOS-00182	STENT 3.5X24MM	54	19	5	30	65	7022.44	\N	Covered	\N	12	Consumable	STENT 3.5X24MM	t	f	2026-06-03 12:31:54.565605	2026-06-30 16:53:53.804161	59	\N	HOS0182
+1310	3	3	HOS-00183	STENT 3.5X28MM	54	19	5	3	7	36814.54	\N	Covered	\N	12	Consumable	STENT 3.5X28MM	t	f	2026-06-03 12:31:54.567719	2026-06-30 16:53:53.804164	59	\N	HOS0183
+1311	3	3	HOS-00184	STENT 3.5X32MM	54	19	5	4	13	11109.34	\N	Covered	\N	12	Consumable	STENT 3.5X32MM	t	f	2026-06-03 12:31:54.569842	2026-06-30 16:53:53.804167	59	\N	HOS0184
+1312	3	3	HOS-00185	STENT 4.0 X 16 MM	54	19	5	5	17	43194.14	\N	Covered	\N	12	Consumable	STENT 4.0 X 16 MM	t	f	2026-06-03 12:31:54.572029	2026-06-30 16:53:53.80417	59	\N	HOS0185
+1313	3	3	HOS-00186	TERUMO I KARI IL 3.5 - 5FR	54	19	5	3	8	24850.98	\N	Covered	\N	12	Consumable	TERUMO I KARI IL 3.5 - 5FR	t	f	2026-06-03 12:31:54.574506	2026-06-30 16:53:53.804172	59	\N	HOS0186
+1314	3	3	HOS-00187	TERUMO I KARI IL 3.5 - 6FR	54	19	5	5	12	27882.31	\N	Covered	\N	12	Consumable	TERUMO I KARI IL 3.5 - 6FR	t	f	2026-06-03 12:31:54.576492	2026-06-30 16:53:53.804175	59	\N	HOS0187
+1315	3	3	HOS-00188	TERUMO I KARI IR 1.5 - 5FR	54	19	5	5	17	45006.67	\N	Covered	\N	12	Consumable	TERUMO I KARI IR 1.5 - 5FR	t	f	2026-06-03 12:31:54.57841	2026-06-30 16:53:53.804178	59	\N	HOS0188
+1316	3	3	HOS-00189	TERUMO J.TIP 0.35X150	54	19	5	15	37	5319.92	\N	Covered	\N	12	Consumable	TERUMO J.TIP 0.35X150	t	f	2026-06-03 12:31:54.580351	2026-06-30 16:53:53.804181	59	\N	HOS0189
+1317	3	3	HOS-00190	TOP MANIFOLD 3 PORT	54	19	5	3	9	34938.16	\N	Covered	\N	12	Consumable	TOP MANIFOLD 3 PORT	t	f	2026-06-03 12:31:54.582242	2026-06-30 16:53:53.804184	59	\N	HOS0190
+1318	3	3	HOS-00191	TPI  - PACEL 5F (BALLOON TIP)	54	19	5	5	14	34169.31	\N	Covered	\N	12	Consumable	TPI  - PACEL 5F (BALLOON TIP)	t	f	2026-06-03 12:31:54.584191	2026-06-30 16:53:53.804186	59	\N	HOS0191
+1319	3	3	HOS-00192	TRANSDUCER KIT	54	19	5	5	12	32530.49	\N	Covered	\N	12	Consumable	TRANSDUCER KIT	t	f	2026-06-03 12:31:54.586155	2026-06-30 16:53:53.804189	59	\N	HOS0192
+1320	3	3	HOS-00193	ULTRA FLEX IABP 7.5 X 40 CC - ARROW MAKE	54	19	5	4	16	49380.3	\N	Covered	\N	12	Consumable	ULTRA FLEX IABP 7.5 X 40 CC - ARROW MAKE	t	f	2026-06-03 12:31:54.588152	2026-06-30 16:53:53.804192	59	\N	HOS0193
+1321	3	3	HOS-00194	VISIPAQUE 320MG*100ML-LONG	54	19	5	2	7	15551.72	\N	Covered	\N	12	Consumable	VISIPAQUE 320MG*100ML-LONG	t	f	2026-06-03 12:31:54.590646	2026-06-30 16:53:53.804195	59	\N	HOS0194
+1322	3	3	HOS-00195	VISIPAQUE 50ML	54	19	5	5	19	17174.45	\N	Covered	\N	12	Consumable	VISIPAQUE 50ML	t	f	2026-06-03 12:31:54.592684	2026-06-30 16:53:53.804197	59	\N	HOS0195
+1323	3	3	HOS-00196	2X2 DOOR GASKET FOR BIG MACHINE	54	20	5	4	14	24028.99	\N	Covered	\N	18	Consumable	2X2 DOOR GASKET FOR BIG MACHINE	t	f	2026-06-03 12:31:54.59463	2026-06-30 16:53:53.8042	59	\N	HOS0196
+1324	3	3	HOS-00197	BLADE FOR GUAGE CUTTING MACHINE	54	20	5	5	19	13635.13	\N	Covered	\N	18	Consumable	BLADE FOR GUAGE CUTTING MACHINE	t	f	2026-06-03 12:31:54.596527	2026-06-30 16:53:53.804203	59	\N	HOS0197
+1325	3	3	HOS-00198	BOILER GASKET - SMALL MACHINE	54	20	5	2	7	10767.58	\N	Covered	\N	18	Consumable	BOILER GASKET - SMALL MACHINE	t	f	2026-06-03 12:31:54.598394	2026-06-30 16:53:53.804206	59	\N	HOS0198
+1326	3	3	HOS-00199	BOLT & NUTS	54	20	6	2	6	34882.18	\N	Covered	\N	18	Consumable	BOLT & NUTS	t	f	2026-06-03 12:31:54.600323	2026-06-30 16:53:53.804209	59	\N	HOS0199
+1327	3	3	HOS-00200	BRAIDED TUBE 1/2" X 2 MTRS	54	20	5	4	12	22125.42	\N	Covered	\N	18	Consumable	BRAIDED TUBE 1/2" X 2 MTRS	t	f	2026-06-03 12:31:54.602386	2026-06-30 16:53:53.804212	59	\N	HOS0200
+1328	3	3	HOS-00201	BROWN TEFLON BELT- SEALING MACHINE	54	20	5	2	8	27741.37	\N	Covered	\N	18	Consumable	BROWN TEFLON BELT- SEALING MACHINE	t	f	2026-06-03 12:31:54.604427	2026-06-30 16:53:53.804214	59	\N	HOS0201
+1329	3	3	HOS-00202	LOW WATER CUT OFF - SENSOR TYPE	54	20	5	3	9	42545.35	\N	Covered	\N	18	Consumable	LOW WATER CUT OFF - SENSOR TYPE	t	f	2026-06-03 12:31:54.606879	2026-06-30 16:53:53.804217	59	\N	HOS0202
+1330	3	3	HOS-00203	OPERATING VALVE GASKET - BIG	54	20	5	3	11	40105.74	\N	Covered	\N	18	Consumable	OPERATING VALVE GASKET - BIG	t	f	2026-06-03 12:31:54.609045	2026-06-30 16:53:53.80422	59	\N	HOS0203
+1331	3	3	HOS-00204	PRINTING ROLLS ETO MACHINE	54	20	5	3	10	49267.01	\N	Covered	\N	18	Consumable	PRINTING ROLLS ETO MACHINE	t	f	2026-06-03 12:31:54.61101	2026-06-30 16:53:53.804223	59	\N	HOS0204
+1332	3	3	HOS-00205	SAFETY VALVE	54	20	5	2	5	27360.66	\N	Covered	\N	18	Consumable	SAFETY VALVE	t	f	2026-06-03 12:31:54.612921	2026-06-30 16:53:53.804225	59	\N	HOS0205
+1333	3	3	HOS-00206	SHARPENER BELT FOR GUAGE CUTTING MACHINE	54	20	5	30	89	8664.4	\N	Covered	\N	18	Consumable	SHARPENER BELT FOR GUAGE CUTTING MACHINE	t	f	2026-06-03 12:31:54.614841	2026-06-30 16:53:53.804228	59	\N	HOS0206
+1334	3	3	HOS-00207	SILICON GASKET FOR HEATER	54	20	5	2	8	49305.41	\N	Covered	\N	18	Consumable	SILICON GASKET FOR HEATER	t	f	2026-06-03 12:31:54.61674	2026-06-30 16:53:53.804231	59	\N	HOS0207
+1335	3	3	HOS-00208	SILICON WHEEL FOR SEALING MACHINE	54	20	5	3	7	20126.75	\N	Covered	\N	18	Consumable	SILICON WHEEL FOR SEALING MACHINE	t	f	2026-06-03 12:31:54.618785	2026-06-30 16:53:53.804234	59	\N	HOS0208
+1336	3	3	HOS-00209	TEFLON TAPE ROLL(SMALL MACHINE)	54	20	12	4	13	47865.15	\N	Covered	\N	18	Consumable	TEFLON TAPE ROLL(SMALL MACHINE)	t	f	2026-06-03 12:31:54.620715	2026-06-30 16:53:53.804236	59	\N	HOS0209
+1337	3	3	HOS-00210	ASSEMBLIES ORTHO DIRECT	54	21	5	3	8	13569.44	\N	Covered	\N	12	Consumable	ASSEMBLIES ORTHO DIRECT	t	f	2026-06-03 12:31:54.623003	2026-06-30 16:53:53.804239	59	\N	HOS0210
+1338	3	3	HOS-00211	BAND SEATER GDC	54	21	5	3	11	12025.08	\N	Covered	\N	12	Consumable	BAND SEATER GDC	t	f	2026-06-03 12:31:54.625289	2026-06-30 16:53:53.804242	59	\N	HOS0211
+1339	3	3	HOS-00212	BLUE BITE	54	21	5	3	10	11895.17	\N	Covered	\N	12	Consumable	BLUE BITE	t	f	2026-06-03 12:31:54.627172	2026-06-30 16:53:53.804245	59	\N	HOS0212
+1340	3	3	HOS-00213	BONDABLE 1ST MOLAR TUBES D-TECH	54	21	5	3	9	13847.05	\N	Covered	\N	12	Consumable	BONDABLE 1ST MOLAR TUBES D-TECH	t	f	2026-06-03 12:31:54.62904	2026-06-30 16:53:53.804247	59	\N	HOS0213
+1341	3	3	HOS-00214	BONDABLE BUTTONS PKT OF 10	54	21	5	4	13	10652.57	\N	Covered	\N	12	Consumable	BONDABLE BUTTONS PKT OF 10	t	f	2026-06-03 12:31:54.630878	2026-06-30 16:53:53.80425	59	\N	HOS0214
+1342	3	3	HOS-00215	BRACKET IRIDIUM MBT 022 KIT	54	21	5	2	6	13179.23	\N	Covered	\N	12	Consumable	BRACKET IRIDIUM MBT 022 KIT	t	f	2026-06-03 12:31:54.632736	2026-06-30 16:53:53.804253	59	\N	HOS0215
+1343	3	3	HOS-00216	CERAMIC KIT MBT 022 5-5	54	21	5	22	54	7056.16	\N	Covered	\N	12	Consumable	CERAMIC KIT MBT 022 5-5	t	f	2026-06-03 12:31:54.634763	2026-06-30 16:53:53.804256	59	\N	HOS0216
+1344	3	3	HOS-00217	CHEEK RETRACTOR WITH HANDLE	54	21	5	2	5	28137.67	\N	Covered	\N	12	Consumable	CHEEK RETRACTOR WITH HANDLE	t	f	2026-06-03 12:31:54.636713	2026-06-30 16:53:53.804258	59	\N	HOS0217
+1345	3	3	HOS-00218	CRIMPING PLIER	54	21	5	3	10	43834.48	\N	Covered	\N	12	Consumable	CRIMPING PLIER	t	f	2026-06-03 12:31:54.638756	2026-06-30 16:53:53.804261	59	\N	HOS0218
+1346	3	3	HOS-00219	DEBONDING BUR HORICO	54	21	5	5	14	14390.92	\N	Covered	\N	12	Consumable	DEBONDING BUR HORICO	t	f	2026-06-03 12:31:54.64121	2026-06-30 16:53:53.804264	59	\N	HOS0219
+1347	3	3	HOS-00220	DENTAL PENCIL	54	21	5	2	5	29772.16	\N	Covered	\N	12	Consumable	DENTAL PENCIL	t	f	2026-06-03 12:31:54.643539	2026-06-30 16:53:53.804267	59	\N	HOS0220
+1348	3	3	HOS-00221	D-TECH ROTH KIT 018	54	21	5	3	8	32447.26	\N	Covered	\N	12	Consumable	D-TECH ROTH KIT 018	t	f	2026-06-03 12:31:54.645698	2026-06-30 16:53:53.804269	59	\N	HOS0221
+1349	3	3	HOS-00222	E-CHAIN OO 15FT- CONT. CLEAR & GREY	54	21	5	4	15	20626.7	\N	Covered	\N	12	Consumable	E-CHAIN OO 15FT- CONT. CLEAR & GREY	t	f	2026-06-03 12:31:54.647787	2026-06-30 16:53:53.804272	59	\N	HOS0222
+1350	3	3	HOS-00223	E-CHAIN OO 15FT- SHORT. CLEAR & GREY	54	21	5	2	5	32134.02	\N	Covered	\N	12	Consumable	E-CHAIN OO 15FT- SHORT. CLEAR & GREY	t	f	2026-06-03 12:31:54.650078	2026-06-30 16:53:53.804275	59	\N	HOS0223
+1351	3	3	HOS-00224	ENLIGHT LC COMPOSITE KIT ORMCO WITH ETCHANT	54	21	5	3	9	45420.78	\N	Covered	\N	12	Consumable	ENLIGHT LC COMPOSITE KIT ORMCO WITH ETCHANT	t	f	2026-06-03 12:31:54.652632	2026-06-30 16:53:53.804278	59	\N	HOS0224
+1352	3	3	HOS-00225	HOE PLIER GDC STR/CVD	54	21	5	4	9	32274.05	\N	Covered	\N	12	Consumable	HOE PLIER GDC STR/CVD	t	f	2026-06-03 12:31:54.654737	2026-06-30 16:53:53.80428	59	\N	HOS0225
+1353	3	3	HOS-00226	HORICO FG BU 166 010	54	21	5	30	105	5532.71	\N	Covered	\N	12	Consumable	HORICO FG BU 166 010	t	f	2026-06-03 12:31:54.657306	2026-06-30 16:53:53.804283	59	\N	HOS0226
+1354	3	3	HOS-00227	HP ELASTIC 5000 - PINK, GREEN, BLUE & RED	54	21	5	2	7	42043.95	\N	Covered	\N	12	Consumable	HP ELASTIC 5000 - PINK, GREEN, BLUE & RED	t	f	2026-06-03 12:31:54.659427	2026-06-30 16:53:53.804286	59	\N	HOS0227
+1355	3	3	HOS-00228	HP SPOT WELDER	54	21	5	2	6	17460.99	\N	Covered	\N	12	Consumable	HP SPOT WELDER	t	f	2026-06-03 12:31:54.661366	2026-06-30 16:53:53.804289	59	\N	HOS0228
+1356	3	3	HOS-00229	LIGARINGS (1040) CLEAR & GREY	54	21	5	2	7	24747.81	\N	Covered	\N	12	Consumable	LIGARINGS (1040) CLEAR & GREY	t	f	2026-06-03 12:31:54.663318	2026-06-30 16:53:53.804292	59	\N	HOS0229
+1357	3	3	HOS-00230	LINGUAL SHEATH HP (PKT OF 50)	54	21	5	4	11	11910.81	\N	Covered	\N	12	Consumable	LINGUAL SHEATH HP (PKT OF 50)	t	f	2026-06-03 12:31:54.665147	2026-06-30 16:53:53.804294	59	\N	HOS0230
+1358	3	3	HOS-00231	NITI 014 PKT OF 25 U/L	54	21	5	4	9	19412.86	\N	Covered	\N	12	Consumable	NITI 014 PKT OF 25 U/L	t	f	2026-06-03 12:31:54.667064	2026-06-30 16:53:53.804297	59	\N	HOS0231
+1359	3	3	HOS-00232	NITI 016 PKT OF 25 U/L	54	21	5	4	10	15280.31	\N	Covered	\N	12	Consumable	NITI 016 PKT OF 25 U/L	t	f	2026-06-03 12:31:54.669111	2026-06-30 16:53:53.8043	59	\N	HOS0232
+1360	3	3	HOS-00233	PLIER STAND	54	21	5	4	11	39780.01	\N	Covered	\N	12	Consumable	PLIER STAND	t	f	2026-06-03 12:31:54.670955	2026-06-30 16:53:53.804303	59	\N	HOS0233
+1361	3	3	HOS-00234	RELIEF WAX	54	21	5	5	18	42881.58	\N	Covered	\N	12	Consumable	RELIEF WAX	t	f	2026-06-03 12:31:54.673348	2026-06-30 16:53:53.804305	59	\N	HOS0234
+1362	3	3	HOS-00235	UNIVERSAL PLIER GDC	54	21	5	2	6	36371.84	\N	Covered	\N	12	Consumable	UNIVERSAL PLIER GDC	t	f	2026-06-03 12:31:54.675653	2026-06-30 16:53:53.804308	59	\N	HOS0235
+1363	3	3	HOS-00236	AVF NEEDLE 16G	54	22	5	4	16	43244.64	\N	Covered	\N	12	Consumable	AVF NEEDLE 16G	t	f	2026-06-03 12:31:54.677633	2026-06-30 16:53:53.804311	59	\N	HOS0236
+1364	3	3	HOS-00237	AVF NEEDLE 17G	54	22	5	3	10	48314.91	\N	Covered	\N	12	Consumable	AVF NEEDLE 17G	t	f	2026-06-03 12:31:54.679547	2026-06-30 16:53:53.804314	59	\N	HOS0237
+1365	3	3	HOS-00238	BICARB MIXER MACHINE 100 LITRES	54	22	5	3	12	13344.08	\N	Covered	\N	12	Non-Consumable	BICARB MIXER MACHINE 100 LITRES	t	f	2026-06-03 12:31:54.681421	2026-06-30 16:53:53.804316	59	\N	HOS0238
+1366	3	3	HOS-00239	BICARBONATE PART B- 10LTR PACK	54	22	5	5	18	13515.59	\N	Covered	\N	12	Consumable	BICARBONATE PART B- 10LTR PACK	t	f	2026-06-03 12:31:54.683332	2026-06-30 16:53:53.804319	59	\N	HOS0239
+1367	3	3	HOS-00240	CHLORITEST PAPERS FOR CHLORINE TEST	54	22	5	4	14	21108.67	\N	Covered	\N	18	Consumable	CHLORITEST PAPERS FOR CHLORINE TEST	t	f	2026-06-03 12:31:54.685373	2026-06-30 16:53:53.804322	59	\N	HOS0240
+1368	3	3	HOS-00241	DIALYSATE CONNECTOR BLUE	54	22	5	4	9	49176.54	\N	Covered	\N	12	Consumable	DIALYSATE CONNECTOR BLUE	t	f	2026-06-03 12:31:54.687393	2026-06-30 16:53:53.804325	59	\N	HOS0241
+1369	3	3	HOS-00242	DIALYSATE CONNECTOR RED	54	22	5	16	35	9348.73	\N	Covered	\N	12	Consumable	DIALYSATE CONNECTOR RED	t	f	2026-06-03 12:31:54.689717	2026-06-30 16:53:53.804327	59	\N	HOS0242
+1370	3	3	HOS-00243	DOOR 22MM BUBBLE C.HOLDER 4008SV10 - M561711	54	22	5	4	15	29315.77	\N	Covered	\N	18	Consumable	DOOR 22MM BUBBLE C.HOLDER 4008SV10 - M561711	t	f	2026-06-03 12:31:54.692211	2026-06-30 16:53:53.80433	59	\N	HOS0243
+1371	3	3	HOS-00244	DRY CITRATE PART A-40LTR/PACK	54	22	5	2	6	31257.65	\N	Covered	\N	12	Consumable	DRY CITRATE PART A-40LTR/PACK	t	f	2026-06-03 12:31:54.694202	2026-06-30 16:53:53.804333	59	\N	HOS0244
+1372	3	3	HOS-00245	HIGH POTASSIUM CAN	54	22	5	5	14	45229.74	\N	Covered	\N	12	Consumable	HIGH POTASSIUM CAN	t	f	2026-06-03 12:31:54.696072	2026-06-30 16:53:53.804336	59	\N	HOS0245
+1373	3	3	HOS-00246	INFORMED CONSENT FOR HAEMODIALYSIS	54	31	5	4	14	43761.04	\N	Covered	\N	18	Consumable	INFORMED CONSENT FOR HAEMODIALYSIS	t	f	2026-06-03 12:31:54.698137	2026-06-30 16:53:53.804338	59	\N	HOS0246
+1374	3	3	HOS-00247	ON/OFF KIT	54	22	5	5	11	39494.21	\N	Covered	\N	12	Consumable	ON/OFF KIT	t	f	2026-06-03 12:31:54.700296	2026-06-30 16:53:53.804341	59	\N	HOS0247
+1375	3	3	HOS-00249	STEPPER MOTOR WITH GEAR BOX 4-POLES *4008B/H/S *4008S V10-PART NO: M393211	54	22	5	17	55	5372.14	\N	Covered	\N	18	Non-Consumable	STEPPER MOTOR WITH GEAR BOX 4-POLES *4008B/H/S *4008S V10-PART NO: M393211	t	f	2026-06-03 12:31:54.702428	2026-06-30 16:53:53.804344	59	\N	HOS0249
+1376	3	3	HOS-00250	TUBE FIXING ROLLER PUMP	54	22	5	29	78	5210.01	\N	Covered	\N	18	Non-Consumable	TUBE FIXING ROLLER PUMP	t	f	2026-06-03 12:31:54.704422	2026-06-30 16:53:53.804349	59	\N	HOS0250
+1377	3	3	HOS-00251	ULTRAFILTRATION PUMP 40008B/H/S/S V10 - PART NO:6707061	54	22	5	35	126	6499.34	\N	Covered	\N	18	Non-Consumable	ULTRAFILTRATION PUMP 40008B/H/S/S V10 - PART NO:6707061	t	f	2026-06-03 12:31:54.706779	2026-06-30 16:53:53.804352	59	\N	HOS0251
+1378	3	3	HOS-00252	10A FUSE - 100NOS-BOX	54	23	5	3	11	10443.43	\N	Covered	\N	18	Consumable	10A FUSE - 100NOS-BOX	t	f	2026-06-03 12:31:54.709111	2026-06-30 16:53:53.804355	59	\N	HOS0252
+1379	3	3	HOS-00253	16X24 DOOR GASKET	54	23	5	2	5	31170.49	\N	Covered	\N	18	Consumable	16X24 DOOR GASKET	t	f	2026-06-03 12:31:54.711121	2026-06-30 16:53:53.804358	59	\N	HOS0253
+1380	3	3	HOS-00254	24 POET POE SWITCH (DGS TO 26P)	54	23	5	4	13	37487.18	\N	Covered	\N	18	Consumable	24 POET POE SWITCH (DGS TO 26P)	t	f	2026-06-03 12:31:54.712967	2026-06-30 16:53:53.80436	59	\N	HOS0254
+1381	3	3	HOS-00255	6A FUSE - 100NOS-BOX	54	23	5	5	12	33036.78	\N	Covered	\N	18	Consumable	6A FUSE - 100NOS-BOX	t	f	2026-06-03 12:31:54.714826	2026-06-30 16:53:53.804363	59	\N	HOS0255
+1382	3	3	HOS-00256	ABG RADIOMETER - SBP SOLUTION PACK - 944-506	54	24	5	38	119	7501.07	\N	Covered	\N	12	Consumable	ABG RADIOMETER - SBP SOLUTION PACK - 944-506	t	f	2026-06-03 12:31:54.716739	2026-06-30 16:53:53.804366	59	\N	HOS0256
+1383	3	3	HOS-00257	AEROSEPT 5LTRS - DISINFECTANT	54	28	5	4	10	10054.47	\N	Covered	\N	18	Consumable	AEROSEPT 5LTRS - DISINFECTANT	t	f	2026-06-03 12:31:54.718731	2026-06-30 16:53:53.804369	59	\N	HOS0257
+1384	3	3	HOS-00258	ALL OUT MACHINE WITH REFILL	54	26	5	4	11	36519.29	\N	Covered	\N	18	Consumable	ALL OUT MACHINE WITH REFILL	t	f	2026-06-03 12:31:54.720699	2026-06-30 16:53:53.804371	59	\N	HOS0258
+1385	3	3	HOS-00259	ALL OUT MOSQUITO REPELLENT - REFILL	54	26	5	5	20	34513.15	\N	Covered	\N	18	Consumable	ALL OUT MOSQUITO REPELLENT - REFILL	t	f	2026-06-03 12:31:54.722968	2026-06-30 16:53:53.804374	59	\N	HOS0259
+1386	3	3	HOS-00260	ANASTHESIA BOOKLET	54	31	5	2	8	19712.34	\N	Covered	\N	12	Consumable	ANASTHESIA BOOKLET	t	f	2026-06-03 12:31:54.725409	2026-06-30 16:53:53.804377	59	\N	HOS0260
+1387	3	3	HOS-00261	AUDIOLOGICAL EVALUATION	54	31	5	4	13	33238.36	\N	Covered	\N	12	Consumable	AUDIOLOGICAL EVALUATION	t	f	2026-06-03 12:31:54.727387	2026-06-30 16:53:53.80438	59	\N	HOS0261
+1388	3	3	HOS-00262	BASKET FOR MONITOR STAND	54	26	5	3	8	24369.43	\N	Covered	\N	18	Non-Consumable	BASKET FOR MONITOR STAND	t	f	2026-06-03 12:31:54.729323	2026-06-30 16:53:53.804382	59	\N	HOS0262
+1389	3	3	HOS-00263	BED SIDE LOCKERS	54	26	5	2	7	43336.49	\N	Covered	\N	18	Non-Consumable	BED SIDE LOCKERS	t	f	2026-06-03 12:31:54.731302	2026-06-30 16:53:53.804385	59	\N	HOS0263
+1390	3	3	HOS-00264	BENEFUSION USP_SYRINGE PUMP	54	25	5	2	5	10679.45	\N	Covered	\N	12	Non-Consumable	BENEFUSION USP_SYRINGE PUMP	t	f	2026-06-03 12:31:54.7332	2026-06-30 16:53:53.804388	59	\N	HOS0264
+1391	3	3	HOS-00265	BIOCHEMISTRY REGISTER	54	31	5	5	18	34986.14	\N	Covered	\N	12	Consumable	BIOCHEMISTRY REGISTER	t	f	2026-06-03 12:31:54.735218	2026-06-30 16:53:53.804391	59	\N	HOS0265
+1392	3	3	HOS-00266	BIRTH CERTIFICATE	54	31	5	5	15	42198.21	\N	Covered	\N	12	Consumable	BIRTH CERTIFICATE	t	f	2026-06-03 12:31:54.737172	2026-06-30 16:53:53.804393	59	\N	HOS0266
+1393	3	3	HOS-00267	BLOOD PRESSURE MONITORING CHART	54	31	5	13	29	6877.84	\N	Covered	\N	12	Consumable	BLOOD PRESSURE MONITORING CHART	t	f	2026-06-03 12:31:54.739274	2026-06-30 16:53:53.804396	59	\N	HOS0267
+1394	3	3	HOS-00268	BLUE BED SHEET	54	27	5	3	11	12899.78	\N	Covered	\N	5	Non-Consumable	BLUE BED SHEET	t	f	2026-06-03 12:31:54.741695	2026-06-30 16:53:53.804399	59	\N	HOS0268
+1395	3	3	HOS-00269	BLUE COLOUR COAT	54	27	5	3	9	19537.67	\N	Covered	\N	5	Non-Consumable	BLUE COLOUR COAT	t	f	2026-06-03 12:31:54.743619	2026-06-30 16:53:53.804402	59	\N	HOS0269
+1396	3	3	HOS-00270	BLUE PILLOW COVER	54	27	5	3	12	19603.12	\N	Covered	\N	5	Non-Consumable	BLUE PILLOW COVER	t	f	2026-06-03 12:31:54.745501	2026-06-30 16:53:53.804405	59	\N	HOS0270
+1397	3	3	HOS-00271	BP APPARATUS - DIAMOND LED 141 BP MONITOR	54	26	5	2	8	16600.18	\N	Covered	\N	12	Non-Consumable	BP APPARATUS - DIAMOND LED 141 BP MONITOR	t	f	2026-06-03 12:31:54.747377	2026-06-30 16:53:53.804407	59	\N	HOS0271
+1398	3	3	HOS-00272	BP APPARATUS - DIGITAL  - PAED	54	25	5	2	7	32194.67	\N	Covered	\N	12	Non-Consumable	BP APPARATUS - DIGITAL  - PAED	t	f	2026-06-03 12:31:54.749322	2026-06-30 16:53:53.80441	59	\N	HOS0272
+1399	3	3	HOS-00273	BPL ECG 9108D Z-FOLD PAPERS (150 SHEETS)	54	25	5	4	9	15401.35	\N	Covered	\N	12	Consumable	BPL ECG 9108D Z-FOLD PAPERS (150 SHEETS)	t	f	2026-06-03 12:31:54.751344	2026-06-30 16:53:53.804413	59	\N	HOS0273
+1400	3	3	HOS-00274	BPL ECG PAPERS - 50MM	54	31	5	4	11	43902.38	\N	Covered	\N	12	Consumable	BPL ECG PAPERS - 50MM	t	f	2026-06-03 12:31:54.75339	2026-06-30 16:53:53.804416	59	\N	HOS0274
+1401	3	3	HOS-00275	BPL ECG PAPERS - 80MM	54	31	5	36	122	9133.01	\N	Covered	\N	12	Consumable	BPL ECG PAPERS - 80MM	t	f	2026-06-03 12:31:54.755582	2026-06-30 16:53:53.804418	59	\N	HOS0275
+1402	3	3	HOS-00276	BPL FOETAL DOPPLER PROBE - MODEL: FD 9713	54	25	5	2	7	26524.84	\N	Covered	\N	12	Consumable	BPL FOETAL DOPPLER PROBE - MODEL: FD 9713	t	f	2026-06-03 12:31:54.75812	2026-06-30 16:53:53.804421	59	\N	HOS0276
+1403	3	3	HOS-00277	BPL MONOPHASIC DEFIBRILLATOR MODEL-DF 2509R - PRINTER	54	25	5	4	11	29423.66	\N	Covered	\N	12	Consumable	BPL MONOPHASIC DEFIBRILLATOR MODEL-DF 2509R - PRINTER	t	f	2026-06-03 12:31:54.760195	2026-06-30 16:53:53.804424	59	\N	HOS0277
+1404	3	3	HOS-00278	BREAST PUMP ACCESSORIES FOR MEDELA LACTINA	54	25	5	2	6	25335.95	\N	Covered	\N	12	Consumable	BREAST PUMP ACCESSORIES FOR MEDELA LACTINA	t	f	2026-06-03 12:31:54.762177	2026-06-30 16:53:53.804427	59	\N	HOS0278
+1405	3	3	HOS-00279	BREAST PUMP SYRINGE	54	25	5	2	6	15075.48	\N	Covered	\N	12	Consumable	BREAST PUMP SYRINGE	t	f	2026-06-03 12:31:54.764114	2026-06-30 16:53:53.804431	59	\N	HOS0279
+1406	3	3	HOS-00280	CARDIOLOGY INVESTIGATION FORM	54	31	5	5	11	27954.71	\N	Covered	\N	12	Consumable	CARDIOLOGY INVESTIGATION FORM	t	f	2026-06-03 12:31:54.766029	2026-06-30 16:53:53.804434	59	\N	HOS0280
+1407	3	3	HOS-00281	CARTRIDGE 104 DRUM	54	31	5	5	19	26651.83	\N	Covered	\N	18	Consumable	CARTRIDGE 104 DRUM	t	f	2026-06-03 12:31:54.767949	2026-06-30 16:53:53.804437	59	\N	HOS0281
+1408	3	3	HOS-00282	CARTRIDGE 110A	54	31	5	5	12	28285.67	\N	Covered	\N	18	Consumable	CARTRIDGE 110A	t	f	2026-06-03 12:31:54.769999	2026-06-30 16:53:53.804439	59	\N	HOS0282
+1409	3	3	HOS-00283	CARTRIDGE 119A	54	31	5	5	14	36868.49	\N	Covered	\N	18	Consumable	CARTRIDGE 119A	t	f	2026-06-03 12:31:54.772095	2026-06-30 16:53:53.804442	59	\N	HOS0283
+1410	3	3	HOS-00284	CARTRIDGE 12A	54	31	5	4	13	21745.11	\N	Covered	\N	18	Consumable	CARTRIDGE 12A	t	f	2026-06-03 12:31:54.774613	2026-06-30 16:53:53.804445	59	\N	HOS0284
+1411	3	3	HOS-00285	CARTRIDGE 166A	54	31	5	2	6	16174.55	\N	Covered	\N	18	Consumable	CARTRIDGE 166A	t	f	2026-06-03 12:31:54.776692	2026-06-30 16:53:53.804447	59	\N	HOS0285
+1412	3	3	HOS-00286	CARTRIDGE 673	54	31	5	4	14	13293.03	\N	Covered	\N	18	Consumable	CARTRIDGE 673	t	f	2026-06-03 12:31:54.778664	2026-06-30 16:53:53.80445	59	\N	HOS0286
+1413	3	3	HOS-00287	CARTRIDGE 680A	54	31	5	4	13	44760.69	\N	Covered	\N	18	Consumable	CARTRIDGE 680A	t	f	2026-06-03 12:31:54.780543	2026-06-30 16:53:53.804453	59	\N	HOS0287
+1414	3	3	HOS-00288	CARTRIDGE 88A	54	31	5	2	5	42502.66	\N	Covered	\N	18	Consumable	CARTRIDGE 88A	t	f	2026-06-03 12:31:54.782503	2026-06-30 16:53:53.804456	59	\N	HOS0288
+1415	3	3	HOS-00289	CARTRIDGE B021 BROTHER	54	31	5	4	12	23429.6	\N	Covered	\N	18	Consumable	CARTRIDGE B021 BROTHER	t	f	2026-06-03 12:31:54.78443	2026-06-30 16:53:53.804458	59	\N	HOS0289
+1416	3	3	HOS-00290	CARTRIDGE EPSON 664 BLACK	54	31	5	34	113	6452.19	\N	Covered	\N	18	Consumable	CARTRIDGE EPSON 664 BLACK	t	f	2026-06-03 12:31:54.786565	2026-06-30 16:53:53.804461	59	\N	HOS0290
+1417	3	3	HOS-00291	CARTRIDGE EPSON 664 COLOUR	54	31	5	5	20	21978.98	\N	Covered	\N	18	Consumable	CARTRIDGE EPSON 664 COLOUR	t	f	2026-06-03 12:31:54.788611	2026-06-30 16:53:53.804464	59	\N	HOS0291
+1418	3	3	HOS-00292	CH TOWEL 36*29	54	27	5	4	11	21656.31	\N	Covered	\N	5	Non-Consumable	CH TOWEL 36*29	t	f	2026-06-03 12:31:54.791102	2026-06-30 16:53:53.804467	59	\N	HOS0292
+1419	3	3	HOS-00293	DIGITAL BP APPARATUS - OMRON 7143T WITH ADAPTER	54	26	5	5	11	38960.02	\N	Covered	\N	12	Non-Consumable	DIGITAL BP APPARATUS - OMRON 7143T WITH ADAPTER	t	f	2026-06-03 12:31:54.793213	2026-06-30 16:53:53.80447	59	\N	HOS0293
+1420	3	3	HOS-00294	DISCHARGE SUMMARY	54	31	23	5	14	44067.66	\N	Covered	\N	12	Consumable	DISCHARGE SUMMARY	t	f	2026-06-03 12:31:54.795182	2026-06-30 16:53:53.804472	59	\N	HOS0294
+1421	3	3	HOS-00295	DISPOSABLE MEAL TRAY WITH LID- WHITE - 4 COMPARTMENT- GOOD QUALITY	54	26	5	3	12	16730.97	\N	Covered	\N	18	Consumable	DISPOSABLE MEAL TRAY WITH LID- WHITE - 4 COMPARTMENT- GOOD QUALITY	t	f	2026-06-03 12:31:54.797098	2026-06-30 16:53:53.804475	59	\N	HOS0295
+1422	3	3	HOS-00296	DOCTORS PROGRESS NOTES	54	31	23	33	78	7564.85	\N	Covered	\N	12	Consumable	DOCTORS PROGRESS NOTES	t	f	2026-06-03 12:31:54.798923	2026-06-30 16:53:53.804478	59	\N	HOS0296
+1423	3	3	HOS-00297	DOCUMENTATION REGISTER	54	31	5	3	10	49645.2	\N	Covered	\N	12	Consumable	DOCUMENTATION REGISTER	t	f	2026-06-03 12:31:54.800887	2026-06-30 16:53:53.804481	59	\N	HOS0297
+1424	3	3	HOS-00298	DOOR MAT (LEATHER)	54	26	5	3	7	48209.25	\N	Covered	\N	12	Consumable	DOOR MAT (LEATHER)	t	f	2026-06-03 12:31:54.803033	2026-06-30 16:53:53.804484	59	\N	HOS0298
+1425	3	3	HOS-00299	DUSTER	54	31	5	46	95	5570.75	\N	Covered	\N	5	Consumable	DUSTER	t	f	2026-06-03 12:31:54.804972	2026-06-30 16:53:53.804486	59	\N	HOS0299
+1426	3	3	HOS-00300	ECG PAPER - 005 - BPL - 9108D	54	31	12	5	19	22543.07	\N	Covered	\N	12	Consumable	ECG PAPER - 005 - BPL - 9108D	t	f	2026-06-03 12:31:54.807478	2026-06-30 16:53:53.804489	59	\N	HOS0300
+1427	3	3	HOS-00301	ECG ROLL PAPER - VESTA 12EC RMS 210MMX20MTR	54	31	12	5	12	43078.65	\N	Covered	\N	12	Consumable	ECG ROLL PAPER - VESTA 12EC RMS 210MMX20MTR	t	f	2026-06-03 12:31:54.809594	2026-06-30 16:53:53.804492	59	\N	HOS0301
+1428	3	3	HOS-00302	FOOT STEP DOUBLE SS	54	26	5	5	14	47702.7	\N	Covered	\N	18	Non-Consumable	FOOT STEP DOUBLE SS	t	f	2026-06-03 12:31:54.811517	2026-06-30 16:53:53.804495	59	\N	HOS0302
+1429	3	3	HOS-00303	GOGGLES - 3M QUALITY	54	26	5	49	186	5185.2	\N	Covered	\N	18	Consumable	GOGGLES - 3M QUALITY	t	f	2026-06-03 12:31:54.813467	2026-06-30 16:53:53.804497	59	\N	HOS0303
+1430	3	3	HOS-00304	GRAPHIC TPR CHART	54	31	23	2	7	49220.41	\N	Covered	\N	12	Consumable	GRAPHIC TPR CHART	t	f	2026-06-03 12:31:54.815392	2026-06-30 16:53:53.8045	59	\N	HOS0304
+1431	3	3	HOS-00305	HISTOPATHOLOGY REQUEST FORM	54	31	23	5	14	38844.37	\N	Covered	\N	12	Consumable	HISTOPATHOLOGY REQUEST FORM	t	f	2026-06-03 12:31:54.81736	2026-06-30 16:53:53.804503	59	\N	HOS0305
+1432	3	3	HOS-00306	HISTORY AND PHYSICAL EXAMINATION	54	31	23	3	8	16938.78	\N	Covered	\N	12	Consumable	HISTORY AND PHYSICAL EXAMINATION	t	f	2026-06-03 12:31:54.81937	2026-06-30 16:53:53.804506	59	\N	HOS0306
+1433	3	3	HOS-00307	ICU HIGH RISK/GRAVE RISK CONSENT FORM	54	31	23	3	9	13437.27	\N	Covered	\N	12	Consumable	ICU HIGH RISK/GRAVE RISK CONSENT FORM	t	f	2026-06-03 12:31:54.821333	2026-06-30 16:53:53.804508	59	\N	HOS0307
+1434	3	3	HOS-00308	ICU OBSERVATION CHART	54	31	23	2	6	49233.46	\N	Covered	\N	12	Consumable	ICU OBSERVATION CHART	t	f	2026-06-03 12:31:54.823611	2026-06-30 16:53:53.804511	59	\N	HOS0308
+1435	3	3	HOS-00309	INCH TAPE	54	26	5	4	16	22518.31	\N	Covered	\N	18	Non-Consumable	INCH TAPE	t	f	2026-06-03 12:31:54.82594	2026-06-30 16:53:53.804514	59	\N	HOS0309
+1436	3	3	HOS-00310	INDUCTION STOVE - PIGEON PRIME	54	26	5	2	6	28615.93	\N	Covered	\N	18	Non-Consumable	INDUCTION STOVE - PIGEON PRIME	t	f	2026-06-03 12:31:54.827894	2026-06-30 16:53:53.804517	59	\N	HOS0310
+1437	3	3	HOS-00311	INFORMED CONSENT FOR ANASTHESIA / SEDATION	54	31	23	2	5	25025.39	\N	Covered	\N	12	Consumable	INFORMED CONSENT FOR ANASTHESIA / SEDATION	t	f	2026-06-03 12:31:54.82985	2026-06-30 16:53:53.80452	59	\N	HOS0311
+1438	3	3	HOS-00312	INFORMED CONSENT FOR SURGERY	54	31	23	3	10	10456.88	\N	Covered	\N	12	Consumable	INFORMED CONSENT FOR SURGERY	t	f	2026-06-03 12:31:54.831783	2026-06-30 16:53:53.804523	59	\N	HOS0312
+1439	3	3	HOS-00313	INITIAL RAPID ASSESSMENT CHART	54	31	23	4	16	42966	\N	Covered	\N	12	Consumable	INITIAL RAPID ASSESSMENT CHART	t	f	2026-06-03 12:31:54.833669	2026-06-30 16:53:53.804525	59	\N	HOS0313
+1440	3	3	HOS-00314	INTAKE AND OUTPUT RECORD	54	31	23	4	16	17429.78	\N	Covered	\N	12	Consumable	INTAKE AND OUTPUT RECORD	t	f	2026-06-03 12:31:54.835807	2026-06-30 16:53:53.804528	59	\N	HOS0314
+1441	3	3	HOS-00315	INVESTIGATION CHART	54	31	23	2	8	47048.89	\N	Covered	\N	12	Consumable	INVESTIGATION CHART	t	f	2026-06-03 12:31:54.837725	2026-06-30 16:53:53.804531	59	\N	HOS0315
+1442	3	3	HOS-00316	IP REGISTER	54	31	5	4	13	38589.18	\N	Covered	\N	12	Consumable	IP REGISTER	t	f	2026-06-03 12:31:54.840061	2026-06-30 16:53:53.804534	59	\N	HOS0316
+1443	3	3	HOS-00317	IRON STOOL	54	26	5	2	6	24460.58	\N	Covered	\N	18	Non-Consumable	IRON STOOL	t	f	2026-06-03 12:31:54.84248	2026-06-30 16:53:53.804537	59	\N	HOS0317
+1444	3	3	HOS-00318	ISSUE AND MASTER REGISTER FOR BLOOD BANK	54	31	5	2	7	27473.18	\N	Covered	\N	12	Consumable	ISSUE AND MASTER REGISTER FOR BLOOD BANK	t	f	2026-06-03 12:31:54.844475	2026-06-30 16:53:53.804539	59	\N	HOS0318
+1445	3	3	HOS-00319	ISSUE REGISTER	54	31	5	2	8	26925.95	\N	Covered	\N	12	Consumable	ISSUE REGISTER	t	f	2026-06-03 12:31:54.846455	2026-06-30 16:53:53.804542	59	\N	HOS0319
+1446	3	3	HOS-00320	KORA CLOTH IN MTRS	54	27	24	4	11	17989.92	\N	Covered	\N	5	Non-Consumable	KORA CLOTH IN MTRS	t	f	2026-06-03 12:31:54.848403	2026-06-30 16:53:53.804545	59	\N	HOS0320
+1447	3	3	HOS-00321	LARYNGOSCOPE BULB	54	18	5	2	5	20534.86	\N	Covered	\N	12	Non-Consumable	LARYNGOSCOPE BULB	t	f	2026-06-03 12:31:54.850372	2026-06-30 16:53:53.804548	59	\N	HOS0321
+1448	3	3	HOS-00322	LARYNGOSCOPE SET WITH MC COY BLADE (SIZE1,2,3 & 4)	54	26	5	3	10	46934.57	\N	Covered	\N	12	Non-Consumable	LARYNGOSCOPE SET WITH MC COY BLADE (SIZE1,2,3 & 4)	t	f	2026-06-03 12:31:54.852583	2026-06-30 16:53:53.80455	59	\N	HOS0322
+1449	3	3	HOS-00323	LAUNDRY BAG WITH STEEL RAILING & WHEELS OVER ALL SIZE 22.5” ROUND X 30” HEIGHT	54	25	5	5	14	17148.26	\N	Covered	\N	18	Non-Consumable	LAUNDRY BAG WITH STEEL RAILING & WHEELS OVER ALL SIZE 22.5” ROUND X 30” HEIGHT	t	f	2026-06-03 12:31:54.854574	2026-06-30 16:53:53.804553	59	\N	HOS0323
+1450	3	3	HOS-00324	CL LEAVE APPLICATION BOOK	54	31	23	22	51	9730.39	\N	Covered	\N	12	Consumable	CL LEAVE APPLICATION BOOK	t	f	2026-06-03 12:31:54.856913	2026-06-30 16:53:53.804556	59	\N	HOS0324
+1451	3	3	HOS-00325	MAKINTOSH SHEETS - IN MTRS	54	26	24	3	7	10235.77	\N	Covered	\N	12	Non-Consumable	MAKINTOSH SHEETS - IN MTRS	t	f	2026-06-03 12:31:54.85934	2026-06-30 16:53:53.804559	59	\N	HOS0325
+1452	3	3	HOS-00326	MATTRESS - 40 DENSITY MAGIC PVC REXINE-SINGLE SECTION MATRESS - SIZE 72X30X4 INCHES	54	26	5	4	16	48249.72	\N	Covered	\N	18	Non-Consumable	MATTRESS - 40 DENSITY MAGIC PVC REXINE-SINGLE SECTION MATRESS - SIZE 72X30X4 INCHES	t	f	2026-06-03 12:31:54.861384	2026-06-30 16:53:53.804561	59	\N	HOS0326
+1453	3	3	HOS-00327	MEDICAL CERTIFICATE	54	31	23	3	10	39458.66	\N	Covered	\N	12	Consumable	MEDICAL CERTIFICATE	t	f	2026-06-03 12:31:54.863359	2026-06-30 16:53:53.804564	59	\N	HOS0327
+1454	3	3	HOS-00328	MEDICATION SHEET	54	31	23	3	11	25564.93	\N	Covered	\N	12	Consumable	MEDICATION SHEET	t	f	2026-06-03 12:31:54.865302	2026-06-30 16:53:53.804567	59	\N	HOS0328
+1455	3	3	HOS-00329	MG CHARITABLE TRUST PAYMENT VOUCHER	54	31	23	2	5	17666.38	\N	Covered	\N	12	Consumable	MG CHARITABLE TRUST PAYMENT VOUCHER	t	f	2026-06-03 12:31:54.867242	2026-06-30 16:53:53.80457	59	\N	HOS0329
+1457	3	3	HOS-00332	MYCOLOGY REGISTER	54	31	5	2	5	31597.08	\N	Covered	\N	12	Consumable	MYCOLOGY REGISTER	t	f	2026-06-03 12:31:54.871403	2026-06-30 16:53:53.804575	59	\N	HOS0332
+1458	3	3	HOS-00333	NEONATE AMBU BAG	54	26	5	5	17	21296.51	\N	Covered	\N	12	Non-Consumable	NEONATE AMBU BAG	t	f	2026-06-03 12:31:54.873741	2026-06-30 16:53:53.804578	59	\N	HOS0333
+1459	3	3	HOS-00334	NIGHTIES	54	27	5	2	7	26397.84	\N	Covered	\N	5	Consumable	NIGHTIES	t	f	2026-06-03 12:31:54.876087	2026-06-30 16:53:53.804581	59	\N	HOS0334
+1460	3	3	HOS-00335	NOTE PAD	54	31	5	2	6	35670.68	\N	Covered	\N	12	Consumable	NOTE PAD	t	f	2026-06-03 12:31:54.878139	2026-06-30 16:53:53.804584	59	\N	HOS0335
+1461	3	3	HOS-00336	NURSES DAILY RECORD	54	31	23	3	10	22728.77	\N	Covered	\N	18	Consumable	NURSES DAILY RECORD	t	f	2026-06-03 12:31:54.880072	2026-06-30 16:53:53.804588	59	\N	HOS0336
+1462	3	3	HOS-00337	NURSES ICU MONITORING CHART	54	31	23	3	12	34737.12	\N	Covered	\N	18	Consumable	NURSES ICU MONITORING CHART	t	f	2026-06-03 12:31:54.882026	2026-06-30 16:53:53.804591	59	\N	HOS0337
+1463	3	3	HOS-00338	NURSES TREATMENT CHART	54	31	23	3	11	41501.48	\N	Covered	\N	18	Consumable	NURSES TREATMENT CHART	t	f	2026-06-03 12:31:54.883953	2026-06-30 16:53:53.804594	59	\N	HOS0338
+1464	3	3	HOS-00339	NURSING ASSESMENT	54	31	23	2	5	17119.6	\N	Covered	\N	18	Consumable	NURSING ASSESMENT	t	f	2026-06-03 12:31:54.886134	2026-06-30 16:53:53.804597	59	\N	HOS0339
+1465	3	3	HOS-00340	ODONIL - LAVENDER	54	26	5	5	17	17947.27	\N	Covered	\N	18	Consumable	ODONIL - LAVENDER	t	f	2026-06-03 12:31:54.88812	2026-06-30 16:53:53.8046	59	\N	HOS0340
+1466	3	3	HOS-00341	OPD REGISTER	54	31	5	2	7	40240.52	\N	Covered	\N	18	Consumable	OPD REGISTER	t	f	2026-06-03 12:31:54.890439	2026-06-30 16:53:53.804602	59	\N	HOS0341
+1467	3	3	HOS-00342	OPERATION RECORD 1&2	54	31	23	20	52	8957.14	\N	Covered	\N	18	Consumable	OPERATION RECORD 1&2	t	f	2026-06-03 12:31:54.892828	2026-06-30 16:53:53.804605	59	\N	HOS0342
+1468	3	3	HOS-00343	OT LIST	54	31	23	4	16	32877.85	\N	Covered	\N	18	Consumable	OT LIST	t	f	2026-06-03 12:31:54.894844	2026-06-30 16:53:53.804608	59	\N	HOS0343
+1469	3	3	HOS-00344	OT REGISTER	54	31	5	2	7	38475.64	\N	Covered	\N	18	Consumable	OT REGISTER	t	f	2026-06-03 12:31:54.896779	2026-06-30 16:53:53.804611	59	\N	HOS0344
+1470	3	3	HOS-00345	OUT PATIENT CASE RECORD	54	31	23	4	15	11546.26	\N	Covered	\N	18	Consumable	OUT PATIENT CASE RECORD	t	f	2026-06-03 12:31:54.89872	2026-06-30 16:53:53.804613	59	\N	HOS0345
+1471	3	3	HOS-00346	PACKAGE SERVICES BOOK	54	31	23	4	12	39701.13	\N	Covered	\N	18	Consumable	PACKAGE SERVICES BOOK	t	f	2026-06-03 12:31:54.900634	2026-06-30 16:53:53.804616	59	\N	HOS0346
+1472	3	3	HOS-00347	PAEDIATRICS NEW BORN SHEET	54	31	13	2	6	29440.22	\N	Covered	\N	18	Consumable	PAEDIATRICS NEW BORN SHEET	t	f	2026-06-03 12:31:54.90283	2026-06-30 16:53:53.804619	59	\N	HOS0347
+1473	3	3	HOS-00348	PAPER CLIPS	54	31	22	4	12	11182.73	\N	Covered	\N	18	Consumable	PAPER CLIPS	t	f	2026-06-03 12:31:54.904885	2026-06-30 16:53:53.804622	59	\N	HOS0348
+1474	3	3	HOS-00349	PAPER PLATE 12 INCHES	54	26	22	2	5	15182.76	\N	Covered	\N	12	Consumable	PAPER PLATE 12 INCHES	t	f	2026-06-03 12:31:54.907256	2026-06-30 16:53:53.804625	59	\N	HOS0349
+1475	3	3	HOS-00350	PAPER PLATE 6NO	54	26	22	4	15	16299.26	\N	Covered	\N	12	Consumable	PAPER PLATE 6NO	t	f	2026-06-03 12:31:54.909644	2026-06-30 16:53:53.804627	59	\N	HOS0350
+1476	3	3	HOS-00351	PATIENT INVESTIGATION LOG	54	31	23	4	14	11998.62	\N	Covered	\N	18	Consumable	PATIENT INVESTIGATION LOG	t	f	2026-06-03 12:31:54.91166	2026-06-30 16:53:53.80463	59	\N	HOS0351
+1477	3	3	HOS-00352	PEDIATRIC AMBU BAG	54	26	5	3	7	37608.66	\N	Covered	\N	12	Non-Consumable	PEDIATRIC AMBU BAG	t	f	2026-06-03 12:31:54.913628	2026-06-30 16:53:53.804633	59	\N	HOS0352
+1478	3	3	HOS-00353	PERIPHERAL IV CENTRAL LINE	54	31	23	2	8	44902.73	\N	Covered	\N	18	Consumable	PERIPHERAL IV CENTRAL LINE	t	f	2026-06-03 12:31:54.915523	2026-06-30 16:53:53.804636	59	\N	HOS0353
+1479	3	3	HOS-00354	PHARMACY INDENT BOOK	54	31	23	5	13	44018.45	\N	Covered	\N	18	Consumable	PHARMACY INDENT BOOK	t	f	2026-06-03 12:31:54.917406	2026-06-30 16:53:53.804638	59	\N	HOS0354
+1480	3	3	HOS-00355	PHARMACY RETURN BOOK	54	31	23	5	14	13659.49	\N	Covered	\N	18	Consumable	PHARMACY RETURN BOOK	t	f	2026-06-03 12:31:54.91955	2026-06-30 16:53:53.804641	59	\N	HOS0355
+1481	3	3	HOS-00356	PHYSICAL FITNESS CRTIFICATE	54	31	23	2	8	32654.96	\N	Covered	\N	18	Consumable	PHYSICAL FITNESS CRTIFICATE	t	f	2026-06-03 12:31:54.921705	2026-06-30 16:53:53.804644	59	\N	HOS0356
+1482	3	3	HOS-00357	PILLOW	54	27	5	2	5	35389.67	\N	Covered	\N	12	Non-Consumable	PILLOW	t	f	2026-06-03 12:31:54.924176	2026-06-30 16:53:53.804647	59	\N	HOS0357
+1483	3	3	HOS-00358	PLASTIC SPOON	54	26	22	2	5	25797.52	\N	Covered	\N	18	Consumable	PLASTIC SPOON	t	f	2026-06-03 12:31:54.92649	2026-06-30 16:53:53.804649	59	\N	HOS0358
+1484	3	3	HOS-00359	PLASTIC TRAY	54	26	5	4	10	30679.31	\N	Covered	\N	18	Non-Consumable	PLASTIC TRAY	t	f	2026-06-03 12:31:54.92847	2026-06-30 16:53:53.804652	59	\N	HOS0359
+1485	3	3	HOS-00360	PLATELET SDP ISSUE REGISTER	54	31	5	2	6	34642.99	\N	Covered	\N	18	Consumable	PLATELET SDP ISSUE REGISTER	t	f	2026-06-03 12:31:54.930434	2026-06-30 16:53:53.804655	59	\N	HOS0360
+1486	3	3	HOS-00361	POLICE INTIMATION BOOK	54	31	23	5	11	32810.54	\N	Covered	\N	18	Consumable	POLICE INTIMATION BOOK	t	f	2026-06-03 12:31:54.932386	2026-06-30 16:53:53.804658	59	\N	HOS0361
+1487	3	3	HOS-00362	PP FILE - A4 LARGE FILE (9.5X12.5 INCHES) WITH 9MM SPINE -PP 0.32MM WITH MATT FINISH WITH DELUXE CLIP (SAME AS SANCHETI SAMPLE) OBG	54	31	5	4	14	37317.79	\N	Covered	\N	18	Consumable	PP FILE - A4 LARGE FILE (9.5X12.5 INCHES) WITH 9MM SPINE -PP 0.32MM WITH MATT FINISH WITH DELUXE CLIP (SAME AS SANCHETI SAMPLE) OBG	t	f	2026-06-03 12:31:54.934339	2026-06-30 16:53:53.80466	59	\N	HOS0362
+1488	3	3	HOS-00363	PRE ANASTHETIC CHECKUP FORM	54	31	23	28	62	9946.09	\N	Covered	\N	18	Consumable	PRE ANASTHETIC CHECKUP FORM	t	f	2026-06-03 12:31:54.936427	2026-06-30 16:53:53.804663	59	\N	HOS0363
+1489	3	3	HOS-00364	PRESCRIPTION PAD	54	31	23	3	9	26966.04	\N	Covered	\N	18	Consumable	PRESCRIPTION PAD	t	f	2026-06-03 12:31:54.938414	2026-06-30 16:53:53.804666	59	\N	HOS0364
+1490	3	3	HOS-00365	PRESSURE ULCER CARE	54	31	23	5	17	13396.13	\N	Covered	\N	18	Consumable	PRESSURE ULCER CARE	t	f	2026-06-03 12:31:54.940813	2026-06-30 16:53:53.804668	59	\N	HOS0365
+1491	3	3	HOS-00366	PRESSURE ULCER SURVELLIANCE CARE BUNDLE	54	31	23	2	6	49872.02	\N	Covered	\N	18	Consumable	PRESSURE ULCER SURVELLIANCE CARE BUNDLE	t	f	2026-06-03 12:31:54.943177	2026-06-30 16:53:53.804671	59	\N	HOS0366
+1492	3	3	HOS-00367	PULSE OXIMETER (BUY 1 GET 1 FREE OFFER)	54	26	5	4	13	11790.43	\N	Covered	\N	12	Non-Consumable	PULSE OXIMETER (BUY 1 GET 1 FREE OFFER)	t	f	2026-06-03 12:31:54.945192	2026-06-30 16:53:53.804674	59	\N	HOS0367
+1493	3	3	HOS-00368	RADIOMETER - ABG - SENSOR CASSETTE FOR ABL9 300TEST PACK - SC9 - 2-BGEL	54	24	5	2	7	49317.14	\N	Covered	\N	12	Consumable	RADIOMETER - ABG - SENSOR CASSETTE FOR ABL9 300TEST PACK - SC9 - 2-BGEL	t	f	2026-06-03 12:31:54.947149	2026-06-30 16:53:53.804677	59	\N	HOS0368
+1494	3	3	HOS-00369	RADIOMETER AQT90FLEX REAGENERALT PACK (200TESTS)	54	24	5	3	10	49042.32	\N	Covered	\N	12	Consumable	RADIOMETER AQT90FLEX REAGENERALT PACK (200TESTS)	t	f	2026-06-03 12:31:54.949047	2026-06-30 16:53:53.804679	59	\N	HOS0369
+1495	3	3	HOS-00370	RECHARGEABLE TORCH - EVEREADY	54	26	5	4	15	45240.53	\N	Covered	\N	18	Non-Consumable	RECHARGEABLE TORCH - EVEREADY	t	f	2026-06-03 12:31:54.950977	2026-06-30 16:53:53.804682	59	\N	HOS0370
+1496	3	3	HOS-00371	REQUEST FOR BLOOD AND BLOOD COMPONENTS	54	31	23	30	110	7893.55	\N	Covered	\N	12	Consumable	REQUEST FOR BLOOD AND BLOOD COMPONENTS	t	f	2026-06-03 12:31:54.953128	2026-06-30 16:53:53.804685	59	\N	HOS0371
+1497	3	3	HOS-00372	SAMSUNG-32 INCHES SMART TV HD READY WITH OTT APPS MODEL-T4580	54	23	5	4	10	25272.79	\N	Covered	\N	18	Non-Consumable	SAMSUNG-32 INCHES SMART TV HD READY WITH OTT APPS MODEL-T4580	t	f	2026-06-03 12:31:54.955148	2026-06-30 16:53:53.804688	59	\N	HOS0372
+1498	3	3	HOS-00373	SAMSUNG-43 INCHES SMART TV ULTRA HD 4K WITH OTT APPS MODEL-HG43BU800	54	23	5	2	6	19114.19	\N	Covered	\N	18	Non-Consumable	SAMSUNG-43 INCHES SMART TV ULTRA HD 4K WITH OTT APPS MODEL-HG43BU800	t	f	2026-06-03 12:31:54.957592	2026-06-30 16:53:53.804691	59	\N	HOS0373
+1499	3	3	HOS-00374	SCISSOR 128MM	54	31	5	4	9	47096.75	\N	Covered	\N	12	Non-Consumable	SCISSOR 128MM	t	f	2026-06-03 12:31:54.95994	2026-06-30 16:53:53.804693	59	\N	HOS0374
+1500	3	3	HOS-00375	SLIPPERS	54	26	27	3	10	19661.93	\N	Covered	\N	5	Consumable	SLIPPERS	t	f	2026-06-03 12:31:54.964044	2026-06-30 16:53:53.804696	59	\N	HOS0375
+1501	3	3	HOS-00376	SMALL NOTE BOOK	54	31	5	35	87	6299.65	\N	Covered	\N	12	Consumable	SMALL NOTE BOOK	t	f	2026-06-03 12:31:54.965128	2026-06-30 16:53:53.804699	59	\N	HOS0376
+1502	3	3	HOS-00377	SONY THERMAL PAPERS - 84S IN BOXES	54	31	5	4	12	21970.9	\N	Covered	\N	18	Consumable	SONY THERMAL PAPERS - 84S IN BOXES	t	f	2026-06-03 12:31:54.967091	2026-06-30 16:53:53.804702	59	\N	HOS0377
+1503	3	3	HOS-00378	SRIPADHA PHARMACY PAYMENT VOUCHER	54	31	23	3	11	10000.59	\N	Covered	\N	12	Consumable	SRIPADHA PHARMACY PAYMENT VOUCHER	t	f	2026-06-03 12:31:54.969184	2026-06-30 16:53:53.804705	59	\N	HOS0378
+1504	3	3	HOS-00379	STEEL PLATE ROUND	54	26	5	4	10	29828.37	\N	Covered	\N	18	Non-Consumable	STEEL PLATE ROUND	t	f	2026-06-03 12:31:54.971274	2026-06-30 16:53:53.804707	59	\N	HOS0379
+1505	3	3	HOS-00380	STEEL TEA CUP	54	26	5	3	8	34638.79	\N	Covered	\N	18	Non-Consumable	STEEL TEA CUP	t	f	2026-06-03 12:31:54.973719	2026-06-30 16:53:53.80471	59	\N	HOS0380
+1506	3	3	HOS-00381	SURGICAL SITE INFECTION PREVENTION CHECKLIST	54	31	23	2	5	41898.03	\N	Covered	\N	12	Consumable	SURGICAL SITE INFECTION PREVENTION CHECKLIST	t	f	2026-06-03 12:31:54.976161	2026-06-30 16:53:53.804713	59	\N	HOS0381
+1507	3	3	HOS-00382	THERMAL PRINTER PAPER ROLL FOR AQT90-RADIOMETER 112MM (20MTRS)	54	31	5	4	13	38080.11	\N	Covered	\N	18	Consumable	THERMAL PRINTER PAPER ROLL FOR AQT90-RADIOMETER 112MM (20MTRS)	t	f	2026-06-03 12:31:54.978192	2026-06-30 16:53:53.804716	59	\N	HOS0382
+1508	3	3	HOS-00383	THERMAL PRINTER ROLLS FOR ABG - 80MM 20 MTRS	54	31	5	4	9	20324.55	\N	Covered	\N	18	Consumable	THERMAL PRINTER ROLLS FOR ABG - 80MM 20 MTRS	t	f	2026-06-03 12:31:54.980351	2026-06-30 16:53:53.804719	59	\N	HOS0383
+1509	3	3	HOS-00384	THERMOSCAN - ROSSMAX	54	26	5	3	12	30771.34	\N	Covered	\N	12	Consumable	THERMOSCAN - ROSSMAX	t	f	2026-06-03 12:31:54.982379	2026-06-30 16:53:53.804721	59	\N	HOS0384
+1510	3	3	HOS-00385	THICK PLASTIC SHEET BIG ROLLS	54	26	6	4	13	43134.08	\N	Covered	\N	18	Consumable	THICK PLASTIC SHEET BIG ROLLS	t	f	2026-06-03 12:31:54.984355	2026-06-30 16:53:53.804724	59	\N	HOS0385
+1511	3	3	HOS-00386	TOURNIQUET LARGE SIZE - TYNOR	54	26	5	3	9	10124.09	\N	Covered	\N	12	Non-Consumable	TOURNIQUET LARGE SIZE - TYNOR	t	f	2026-06-03 12:31:54.986501	2026-06-30 16:53:53.804727	59	\N	HOS0386
+1512	3	3	HOS-00387	TOURNIQUET MEDIUM SIZE - TYNOR	54	26	5	4	10	29620.3	\N	Covered	\N	12	Non-Consumable	TOURNIQUET MEDIUM SIZE - TYNOR	t	f	2026-06-03 12:31:54.988524	2026-06-30 16:53:53.80473	59	\N	HOS0387
+1513	3	3	HOS-00388	TOURNIQUET SMALL SIZE - TYNOR	54	26	5	5	14	35675.08	\N	Covered	\N	12	Non-Consumable	TOURNIQUET SMALL SIZE - TYNOR	t	f	2026-06-03 12:31:54.990826	2026-06-30 16:53:53.804732	59	\N	HOS0388
+1514	3	3	HOS-00389	TYNOR - RESTRAINER I-65 UN-	54	26	5	3	8	33549.49	\N	Covered	\N	12	Non-Consumable	TYNOR - RESTRAINER I-65 UN-	t	f	2026-06-03 12:31:54.993255	2026-06-30 16:53:53.804735	59	\N	HOS0389
+1515	3	3	HOS-00390	URINARY CATHETER CARE	54	31	23	5	17	16270.52	\N	Covered	\N	12	Consumable	URINARY CATHETER CARE	t	f	2026-06-03 12:31:54.995268	2026-06-30 16:53:53.804738	59	\N	HOS0390
+1516	3	3	HOS-00391	VACCINATION CARD (PAEDIATRIC)	54	31	5	28	95	6453.22	\N	Covered	\N	12	Consumable	VACCINATION CARD (PAEDIATRIC)	t	f	2026-06-03 12:31:54.997219	2026-06-30 16:53:53.804741	59	\N	HOS0391
+1517	3	3	HOS-00392	VAP CARE BUNDLE	54	31	23	2	5	33634.67	\N	Covered	\N	12	Consumable	VAP CARE BUNDLE	t	f	2026-06-03 12:31:54.999171	2026-06-30 16:53:53.804743	59	\N	HOS0392
+1518	3	3	HOS-00393	VIM BAR - SMALL	54	26	5	3	8	18525.4	\N	Covered	\N	18	Consumable	VIM BAR - SMALL	t	f	2026-06-03 12:31:55.001066	2026-06-30 16:53:53.804746	59	\N	HOS0393
+1519	3	3	HOS-00394	WALKER FOLDABLE SUPERIOR QUALITY	54	26	5	5	15	30872.71	\N	Covered	\N	12	Non-Consumable	WALKER FOLDABLE SUPERIOR QUALITY	t	f	2026-06-03 12:31:55.003205	2026-06-30 16:53:53.804749	59	\N	HOS0394
+1520	3	3	HOS-00395	WALL CLOCK ROUND - AJANTA	54	26	5	3	7	44917.82	\N	Covered	\N	18	Non-Consumable	WALL CLOCK ROUND - AJANTA	t	f	2026-06-03 12:31:55.005223	2026-06-30 16:53:53.804752	59	\N	HOS0395
+1521	3	3	HOS-00396	WARD CENSUS REGISTER	54	31	5	5	16	42515.36	\N	Covered	\N	12	Consumable	WARD CENSUS REGISTER	t	f	2026-06-03 12:31:55.007456	2026-06-30 16:53:53.804754	59	\N	HOS0396
+1522	3	3	HOS-00397	WELCOME KIT IN ZIPLOCK POUCH WITH LOGO PRINT-20GM SOAP, 20ML KIWI SHAMPOO, 20ML KIWI BODY LOTION, WHITE BRUSH, COLGATE PASTE	54	26	13	5	17	25224.08	\N	Covered	\N	18	Consumable	WELCOME KIT IN ZIPLOCK POUCH WITH LOGO PRINT-20GM SOAP, 20ML KIWI SHAMPOO, 20ML KIWI BODY LOTION, WHITE BRUSH, COLGATE PASTE	t	f	2026-06-03 12:31:55.009733	2026-06-30 16:53:53.804757	59	\N	HOS0397
+1523	3	3	HOS-00398	WHITE BOARD SIZE 4X2	54	26	5	2	5	35445.94	\N	Covered	\N	18	Non-Consumable	WHITE BOARD SIZE 4X2	t	f	2026-06-03 12:31:55.011768	2026-06-30 16:53:53.80476	59	\N	HOS0398
+1524	3	3	HOS-00399	YELLOW PRESCRIPTION PAD	54	31	23	2	8	16201.47	\N	Covered	\N	12	Consumable	YELLOW PRESCRIPTION PAD	t	f	2026-06-03 12:31:55.013819	2026-06-30 16:53:53.804763	59	\N	HOS0399
+2501	2	2	HOS-00001	PHARMACY CLOTH COVERS - 13X16	68	72	30	4	16	25218.56	\N	Covered	\N	5	Consumable	PHARMACY CLOTH COVERS - 13X16	t	f	2026-06-11 21:48:30.713884	2026-06-30 16:53:53.804766	62	\N	HOS0001
+2502	2	2	HOS-00002	PHARMACY CLOTH COVERS - 16X20	68	72	30	13	44	9699.42	\N	Covered	\N	5	Consumable	PHARMACY CLOTH COVERS - 16X20	t	f	2026-06-11 21:48:30.713889	2026-06-30 16:53:53.804769	62	\N	HOS0002
+2503	2	2	HOS-00003	PHARMACY CLOTH COVERS - 9X13	68	72	30	4	14	47777.02	\N	Covered	\N	5	Consumable	PHARMACY CLOTH COVERS - 9X13	t	f	2026-06-11 21:48:30.713895	2026-06-30 16:53:53.804771	62	\N	HOS0003
+2504	2	2	HOS-00004	STETHOSCOPE MICROTOME	68	69	29	5	14	15728.29	\N	Covered	\N	12	Non-Consumable	STETHOSCOPE MICROTOME	t	f	2026-06-11 21:48:30.713901	2026-06-30 16:53:53.804774	62	\N	HOS0004
+2505	2	2	HOS-00005	CLENZYME (MULTIENZYME CLEANER)1000ML.	68	69	29	5	11	20144.9	\N	Covered	\N	18	Consumable	CLENZYME (MULTIENZYME CLEANER)1000ML.	t	f	2026-06-11 21:48:30.713906	2026-06-30 16:53:53.804777	62	\N	HOS0005
+2506	2	2	HOS-00006	BUCKET PLASTIC 20Ltrs	68	69	29	5	18	32845.83	\N	Covered	\N	18	Non-Consumable	BUCKET PLASTIC 20Ltrs	t	f	2026-06-11 21:48:30.713912	2026-06-30 16:53:53.80478	62	\N	HOS0006
+2507	2	2	HOS-00007	KIRAN COAT APRON 0.5MM PB 100CM X 60CM	68	71	29	5	17	10818.26	\N	Covered	\N	12	Consumable	KIRAN COAT APRON 0.5MM PB 100CM X 60CM	t	f	2026-06-11 21:48:30.713918	2026-06-30 16:53:53.804782	62	\N	HOS0007
+2508	2	2	HOS-00008	BAYER 190ML HIGH PRESSURE INJECTOR SYRINGE	68	73	29	4	12	39682.9	\N	Covered	\N	12	Consumable	BAYER 190ML HIGH PRESSURE INJECTOR SYRINGE	t	f	2026-06-11 21:48:30.713923	2026-06-30 16:53:53.804785	62	\N	HOS0008
+2509	2	2	HOS-00009	BED PAN STEEL	68	69	29	5	16	30531.96	\N	Covered	\N	18	Non-Consumable	BED PAN STEEL	t	f	2026-06-11 21:48:30.713929	2026-06-30 16:53:53.804788	62	\N	HOS0009
+2510	2	2	HOS-00010	BED PAN PLASTIC	68	69	29	4	16	41874.87	\N	Covered	\N	18	Non-Consumable	BED PAN PLASTIC	t	f	2026-06-11 21:48:30.713935	2026-06-30 16:53:53.804791	62	\N	HOS0010
+2511	2	2	HOS-00011	URINE CANE (MALE)	68	69	29	3	7	25531.88	\N	Covered	\N	12	Non-Consumable	URINE CANE (MALE)	t	f	2026-06-11 21:48:30.713941	2026-06-30 16:53:53.804793	62	\N	HOS0011
+2512	2	2	HOS-00012	STEEL BUCKET 5 LTRS	68	69	29	4	14	30747	\N	Covered	\N	18	Non-Consumable	STEEL BUCKET 5 LTRS	t	f	2026-06-11 21:48:30.713947	2026-06-30 16:53:53.804796	62	\N	HOS0012
+2513	2	2	HOS-00013	DRESSING BIN 6 X 6 SS	68	69	29	5	17	11616.55	\N	Covered	\N	18	Non-Consumable	DRESSING BIN 6 X 6 SS	t	f	2026-06-11 21:48:30.713953	2026-06-30 16:53:53.804799	62	\N	HOS0013
+2514	2	2	HOS-00014	TRAY WITH COVER 10 X8	68	69	34	5	17	32278.21	\N	Covered	\N	18	Non-Consumable	TRAY WITH COVER 10 X8	t	f	2026-06-11 21:48:30.713958	2026-06-30 16:53:53.804802	62	\N	HOS0014
+2515	2	2	HOS-00015	TRAY WITH COVER 12 X 10	68	69	34	3	10	13739.84	\N	Covered	\N	18	Non-Consumable	TRAY WITH COVER 12 X 10	t	f	2026-06-11 21:48:30.713964	2026-06-30 16:53:53.804804	62	\N	HOS0015
+2516	2	2	HOS-00016	TRAY WITH COVER 9 X 6	68	69	34	2	8	16241.02	\N	Covered	\N	18	Non-Consumable	TRAY WITH COVER 9 X 6	t	f	2026-06-11 21:48:30.71397	2026-06-30 16:53:53.804807	62	\N	HOS0016
+2517	2	2	HOS-00017	TRAY WITH COVER SS 12 X 10	68	69	34	4	13	46179.91	\N	Covered	\N	18	Non-Consumable	TRAY WITH COVER SS 12 X 10	t	f	2026-06-11 21:48:30.713976	2026-06-30 16:53:53.80481	62	\N	HOS0017
+2518	2	2	HOS-00018	TRAY WITH COVER SS 18 X 12	68	69	34	5	17	28057.06	\N	Covered	\N	18	Non-Consumable	TRAY WITH COVER SS 18 X 12	t	f	2026-06-11 21:48:30.713982	2026-06-30 16:53:53.804813	62	\N	HOS0018
+2519	2	2	HOS-00019	TRAY WITH COVER SS 8 X 3	68	69	34	3	11	42302.32	\N	Covered	\N	18	Non-Consumable	TRAY WITH COVER SS 8 X 3	t	f	2026-06-11 21:48:30.713987	2026-06-30 16:53:53.804816	62	\N	HOS0019
+2520	2	2	HOS-00020	Mindray SpO2 Adult Probe	68	61	29	4	16	28396.63	\N	Covered	\N	12	Consumable	Mindray SpO2 Adult Probe	t	f	2026-06-11 21:48:30.713993	2026-06-30 16:53:53.804819	62	\N	HOS0020
+2521	2	2	HOS-00021	Mindray SpO2 Pediatric Probe	68	61	29	3	9	14585.87	\N	Covered	\N	12	Consumable	Mindray SpO2 Pediatric Probe	t	f	2026-06-11 21:48:30.713999	2026-06-30 16:53:53.804821	62	\N	HOS0021
+2522	2	2	HOS-00022	Mindray SpO2 Neonatal Probe	68	61	29	5	13	35708.56	\N	Covered	\N	12	Consumable	Mindray SpO2 Neonatal Probe	t	f	2026-06-11 21:48:30.714005	2026-06-30 16:53:53.804826	62	\N	HOS0022
+2523	2	2	HOS-00023	Mindray ECG Cable	68	61	29	3	7	30824.89	\N	Covered	\N	12	Consumable	Mindray ECG Cable	t	f	2026-06-11 21:48:30.714011	2026-06-30 16:53:53.804829	62	\N	HOS0023
+2524	2	2	HOS-00024	Mindray NIBP Hose	68	61	29	2	7	39929.38	\N	Covered	\N	12	Consumable	Mindray NIBP Hose	t	f	2026-06-11 21:48:30.714016	2026-06-30 16:53:53.804832	62	\N	HOS0024
+2525	2	2	HOS-00025	Philips SpO2 Adult Probe	68	61	29	4	12	14907.95	\N	Covered	\N	12	Consumable	Philips SpO2 Adult Probe	t	f	2026-06-11 21:48:30.714022	2026-06-30 16:53:53.804835	62	\N	HOS0025
+2526	2	2	HOS-00026	Philips SpO2 Pediatric Probe	68	61	29	43	146	7679.63	\N	Covered	\N	12	Consumable	Philips SpO2 Pediatric Probe	t	f	2026-06-11 21:48:30.714028	2026-06-30 16:53:53.804837	62	\N	HOS0026
+2527	2	2	HOS-00027	Philips SpO2 Neonatal Probe	68	61	29	4	12	34011.43	\N	Covered	\N	12	Consumable	Philips SpO2 Neonatal Probe	t	f	2026-06-11 21:48:30.714034	2026-06-30 16:53:53.80484	62	\N	HOS0027
+2528	2	2	HOS-00028	Philips ECG Cable	68	61	29	4	13	33761.49	\N	Covered	\N	12	Consumable	Philips ECG Cable	t	f	2026-06-11 21:48:30.714039	2026-06-30 16:53:53.804843	62	\N	HOS0028
+2529	2	2	HOS-00029	Philips NIBP Hose	68	61	29	2	5	28663.04	\N	Covered	\N	12	Consumable	Philips NIBP Hose	t	f	2026-06-11 21:48:30.714045	2026-06-30 16:53:53.804846	62	\N	HOS0029
+2530	2	2	HOS-00030	Comen SpO2 Adult Probe	68	61	29	4	14	27583.36	\N	Covered	\N	12	Consumable	Comen SpO2 Adult Probe	t	f	2026-06-11 21:48:30.714051	2026-06-30 16:53:53.804848	62	\N	HOS0030
+2531	2	2	HOS-00031	Comen SpO2 Pediatric Probe	68	61	29	4	9	26109.32	\N	Covered	\N	12	Consumable	Comen SpO2 Pediatric Probe	t	f	2026-06-11 21:48:30.714057	2026-06-30 16:53:53.804851	62	\N	HOS0031
+2532	2	2	HOS-00032	Comen SpO2 Neonatal Probe	68	61	29	5	12	40196.65	\N	Covered	\N	12	Consumable	Comen SpO2 Neonatal Probe	t	f	2026-06-11 21:48:30.714063	2026-06-30 16:53:53.804854	62	\N	HOS0032
+2533	2	2	HOS-00033	Comen ECG Cable	68	61	29	2	5	22272.98	\N	Covered	\N	12	Consumable	Comen ECG Cable	t	f	2026-06-11 21:48:30.714068	2026-06-30 16:53:53.804857	62	\N	HOS0033
+2534	2	2	HOS-00034	Comen NIBP Hose	68	61	29	2	7	30445.33	\N	Covered	\N	12	Consumable	Comen NIBP Hose	t	f	2026-06-11 21:48:30.714074	2026-06-30 16:53:53.804859	62	\N	HOS0034
+2535	2	2	HOS-00035	Edan SpO2 Adult Probe	68	61	29	2	8	43429.35	\N	Covered	\N	12	Consumable	Edan SpO2 Adult Probe	t	f	2026-06-11 21:48:30.71408	2026-06-30 16:53:53.804862	62	\N	HOS0035
+2536	2	2	HOS-00036	Edan SpO2 Pediatric Probe	68	61	29	2	7	11528.14	\N	Covered	\N	12	Consumable	Edan SpO2 Pediatric Probe	t	f	2026-06-11 21:48:30.714086	2026-06-30 16:53:53.804865	62	\N	HOS0036
+2537	2	2	HOS-00037	Edan SpO2 Neonatal Probe	68	61	29	3	11	42685.66	\N	Covered	\N	12	Consumable	Edan SpO2 Neonatal Probe	t	f	2026-06-11 21:48:30.714091	2026-06-30 16:53:53.804868	62	\N	HOS0037
+2538	2	2	HOS-00038	Edan ECG Cable	68	61	29	4	16	15007.85	\N	Covered	\N	12	Consumable	Edan ECG Cable	t	f	2026-06-11 21:48:30.714097	2026-06-30 16:53:53.804871	62	\N	HOS0038
+2539	2	2	HOS-00039	Edan NIBP Hose	68	61	29	3	11	46249.16	\N	Covered	\N	12	Consumable	Edan NIBP Hose	t	f	2026-06-11 21:48:30.714103	2026-06-30 16:53:53.804873	62	\N	HOS0039
+2540	2	2	HOS-00040	GE SpO2 Adult Probe	68	61	29	4	13	49341.02	\N	Covered	\N	12	Consumable	GE SpO2 Adult Probe	t	f	2026-06-11 21:48:30.714108	2026-06-30 16:53:53.804876	62	\N	HOS0040
+2541	2	2	HOS-00041	GE SpO2 Pediatric Probe	68	61	29	5	16	27138.7	\N	Covered	\N	12	Consumable	GE SpO2 Pediatric Probe	t	f	2026-06-11 21:48:30.714116	2026-06-30 16:53:53.804879	62	\N	HOS0041
+2542	2	2	HOS-00042	GE SpO2 Neonatal Probe	68	61	29	2	6	21012.11	\N	Covered	\N	12	Consumable	GE SpO2 Neonatal Probe	t	f	2026-06-11 21:48:30.714122	2026-06-30 16:53:53.804882	62	\N	HOS0042
+2543	2	2	HOS-00043	GE ECG Cable	68	61	29	4	12	30635.68	\N	Covered	\N	12	Consumable	GE ECG Cable	t	f	2026-06-11 21:48:30.714128	2026-06-30 16:53:53.804885	62	\N	HOS0043
+2544	2	2	HOS-00044	GE NIBP Hose	68	61	29	4	16	18506.34	\N	Covered	\N	12	Consumable	GE NIBP Hose	t	f	2026-06-11 21:48:30.714134	2026-06-30 16:53:53.804887	62	\N	HOS0044
+2545	2	2	HOS-00045	NIBP Cuff Adult	68	61	29	5	20	29779.06	\N	Covered	\N	12	Consumable	NIBP Cuff Adult	t	f	2026-06-11 21:48:30.71414	2026-06-30 16:53:53.80489	62	\N	HOS0045
+2546	2	2	HOS-00046	NIBP Cuff Pediatric	68	61	29	3	8	21809.45	\N	Covered	\N	12	Consumable	NIBP Cuff Pediatric	t	f	2026-06-11 21:48:30.714145	2026-06-30 16:53:53.804893	62	\N	HOS0046
+2547	2	2	HOS-00047	NIBP Cuff Neonatal	68	61	29	4	12	16813.02	\N	Covered	\N	12	Consumable	NIBP Cuff Neonatal	t	f	2026-06-11 21:48:30.714151	2026-06-30 16:53:53.804896	62	\N	HOS0047
+2548	2	2	HOS-00048	BP Apparatus Bladder Adult	68	61	29	2	8	48701.77	\N	Covered	\N	12	Non-Consumable	BP Apparatus Bladder Adult	t	f	2026-06-11 21:48:30.714157	2026-06-30 16:53:53.804899	62	\N	HOS0048
+2549	2	2	HOS-00049	BP Apparatus Bladder with Bag Pediatric	68	61	29	3	11	23041.66	\N	Covered	\N	12	Non-Consumable	BP Apparatus Bladder with Bag Pediatric	t	f	2026-06-11 21:48:30.714162	2026-06-30 16:53:53.804902	62	\N	HOS0049
+2550	2	2	HOS-00050	BP Apparatus Bulb	68	61	29	2	7	48366.14	\N	Covered	\N	12	Consumable	BP Apparatus Bulb	t	f	2026-06-11 21:48:30.714168	2026-06-30 16:53:53.804904	62	\N	HOS0050
+2551	2	2	HOS-00051	BP Apparatus Bag	68	61	29	4	14	16005.15	\N	Covered	\N	12	Non-Consumable	BP Apparatus Bag	t	f	2026-06-11 21:48:30.714174	2026-06-30 16:53:53.804907	62	\N	HOS0051
+2552	2	2	HOS-00052	Digital BP Apparatus Cuff	68	61	29	5	12	33083.39	\N	Covered	\N	12	Non-Consumable	Digital BP Apparatus Cuff	t	f	2026-06-11 21:48:30.71418	2026-06-30 16:53:53.80491	62	\N	HOS0052
+2553	2	2	HOS-00053	3-Pin Power Cord	68	61	29	3	12	24958.01	\N	Covered	\N	18	Consumable	3-Pin Power Cord	t	f	2026-06-11 21:48:30.714186	2026-06-30 16:53:53.804913	62	\N	HOS0053
+2554	2	2	HOS-00054	ECG Machine Cable	68	61	29	4	15	33615.39	\N	Covered	\N	12	Consumable	ECG Machine Cable	t	f	2026-06-11 21:48:30.714191	2026-06-30 16:53:53.804915	62	\N	HOS0054
+2555	2	2	HOS-00055	ECG Machine Clamp	68	61	29	5	15	11133.42	\N	Covered	\N	12	Consumable	ECG Machine Clamp	t	f	2026-06-11 21:48:30.714197	2026-06-30 16:53:53.804918	62	\N	HOS0055
+2556	2	2	HOS-00056	ECG Machine Bulb	68	61	29	5	11	23753.77	\N	Covered	\N	12	Consumable	ECG Machine Bulb	t	f	2026-06-11 21:48:30.714203	2026-06-30 16:53:53.804921	62	\N	HOS0056
+2557	2	2	HOS-00057	Ventilator Oxygen Sensor	68	61	29	2	7	43733.61	\N	Covered	\N	12	Non-Consumable	Ventilator Oxygen Sensor	t	f	2026-06-11 21:48:30.714209	2026-06-30 16:53:53.804924	62	\N	HOS0057
+2558	2	2	HOS-00058	Ventilator Battery	68	61	29	2	8	40562.32	\N	Covered	\N	12	Consumable	Ventilator Battery	t	f	2026-06-11 21:48:30.714215	2026-06-30 16:53:53.804927	62	\N	HOS0058
+2559	2	2	HOS-00059	Monitor Battery	68	61	29	2	5	39903.79	\N	Covered	\N	12	Consumable	Monitor Battery	t	f	2026-06-11 21:48:30.71422	2026-06-30 16:53:53.804929	62	\N	HOS0059
+2560	2	2	HOS-00060	Syringe Pump Battery	68	61	29	4	16	33292.48	\N	Covered	\N	12	Consumable	Syringe Pump Battery	t	f	2026-06-11 21:48:30.714226	2026-06-30 16:53:53.804932	62	\N	HOS0060
+2561	2	2	HOS-00061	Infusion Pump Battery	68	61	29	3	10	13782.48	\N	Covered	\N	12	Consumable	Infusion Pump Battery	t	f	2026-06-11 21:48:30.714232	2026-06-30 16:53:53.804935	62	\N	HOS0061
+2562	2	2	HOS-00062	ECG Machine Battery	68	61	29	42	119	8739.31	\N	Covered	\N	12	Consumable	ECG Machine Battery	t	f	2026-06-11 21:48:30.714238	2026-06-30 16:53:53.804938	62	\N	HOS0062
+2563	2	2	HOS-00063	X-Ray View Box 12V DC Adaptor	68	61	29	2	8	41675.63	\N	Covered	\N	18	Non-Consumable	X-Ray View Box 12V DC Adaptor	t	f	2026-06-11 21:48:30.714243	2026-06-30 16:53:53.80494	62	\N	HOS0063
+2564	2	2	HOS-00064	0.032 X 150 TERUMO GUIDE WIRE	68	62	29	3	10	16526.16	\N	Covered	\N	12	Consumable	0.032 X 150 TERUMO GUIDE WIRE	t	f	2026-06-11 21:48:30.714249	2026-06-30 16:53:53.804943	62	\N	HOS0064
+2565	2	2	HOS-00065	0.035X150CM TEFLON WIRE J.TIP	68	62	29	2	8	26703.28	\N	Covered	\N	12	Consumable	0.035X150CM TEFLON WIRE J.TIP	t	f	2026-06-11 21:48:30.714255	2026-06-30 16:53:53.804946	62	\N	HOS0065
+2566	2	2	HOS-00066	ACCURA BMV BALLOON KIT WILL ALL ACCESSORIES	68	62	29	4	14	15813.16	\N	Covered	\N	12	Consumable	ACCURA BMV BALLOON KIT WILL ALL ACCESSORIES	t	f	2026-06-11 21:48:30.71426	2026-06-30 16:53:53.804949	62	\N	HOS0066
+2567	2	2	HOS-00067	ANGI DAIG JR 3.5 6FR CORDIS	68	62	29	5	13	16732.04	\N	Covered	\N	12	Consumable	ANGI DAIG JR 3.5 6FR CORDIS	t	f	2026-06-11 21:48:30.714266	2026-06-30 16:53:53.804952	62	\N	HOS0067
+2568	2	2	HOS-00068	APNEALINK CANNULA- 25 PACK	68	62	29	4	16	12432.24	\N	Covered	\N	12	Consumable	APNEALINK CANNULA- 25 PACK	t	f	2026-06-11 21:48:30.714272	2026-06-30 16:53:53.804955	62	\N	HOS0068
+2569	2	2	HOS-00069	ASAHI GW GAIA THIRD	68	62	29	5	15	48367.03	\N	Covered	\N	12	Consumable	ASAHI GW GAIA THIRD	t	f	2026-06-11 21:48:30.714278	2026-06-30 16:53:53.804957	62	\N	HOS0069
+2570	2	2	HOS-00070	BI-PHASIC DEFIBRILLATOR MODEL: RELIFE 900 - MAKE BPL	68	62	29	3	7	20706.22	\N	Covered	\N	12	Consumable	BI-PHASIC DEFIBRILLATOR MODEL: RELIFE 900 - MAKE BPL	t	f	2026-06-11 21:48:30.714283	2026-06-30 16:53:53.80496	62	\N	HOS0070
+2571	2	2	HOS-00071	BL LIFESCIENCES . 1/2  X 3/32  10 FEET TUBING STERILE	68	62	29	40	107	8529.68	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 1/2  X 3/32  10 FEET TUBING STERILE	t	f	2026-06-11 21:48:30.714289	2026-06-30 16:53:53.804963	62	\N	HOS0071
+2572	2	2	HOS-00072	BL LIFESCIENCES . 1/2 X 1/2 ST	68	62	29	3	8	14243.26	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 1/2 X 1/2 ST	t	f	2026-06-11 21:48:30.714295	2026-06-30 16:53:53.804966	62	\N	HOS0072
+2573	2	2	HOS-00073	BL LIFESCIENCES . 1/4  X 3/32  10 FEET TUBING STERILE	68	62	29	2	8	26824.34	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 1/4  X 3/32  10 FEET TUBING STERILE	t	f	2026-06-11 21:48:30.714301	2026-06-30 16:53:53.804968	62	\N	HOS0073
+2574	2	2	HOS-00074	BL LIFESCIENCES . 1/4 X 1/4 ST	68	62	29	2	8	29261.5	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 1/4 X 1/4 ST	t	f	2026-06-11 21:48:30.714306	2026-06-30 16:53:53.804971	62	\N	HOS0074
+2575	2	2	HOS-00075	BL LIFESCIENCES . 1/4 X 1/4 WITH LEUR	68	62	29	4	12	27006.57	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 1/4 X 1/4 WITH LEUR	t	f	2026-06-11 21:48:30.714312	2026-06-30 16:53:53.804974	62	\N	HOS0075
+2576	2	2	HOS-00076	BL LIFESCIENCES . 1/4 X 1/4 X 1/4  Y	68	62	29	3	11	29504.57	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 1/4 X 1/4 X 1/4  Y	t	f	2026-06-11 21:48:30.714318	2026-06-30 16:53:53.804977	62	\N	HOS0076
+2577	2	2	HOS-00077	BL LIFESCIENCES . 3/8 X 3/32  10 FEET TUBING STERILE	68	62	29	2	5	19791.15	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 3/8 X 3/32  10 FEET TUBING STERILE	t	f	2026-06-11 21:48:30.714324	2026-06-30 16:53:53.80498	62	\N	HOS0077
+2578	2	2	HOS-00078	BL LIFESCIENCES . 3/8 X 3/8 ST	68	62	29	4	14	15621.87	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 3/8 X 3/8 ST	t	f	2026-06-11 21:48:30.714329	2026-06-30 16:53:53.804982	62	\N	HOS0078
+2579	2	2	HOS-00079	BL LIFESCIENCES . 3/8 X 3/8 X 3/8  Y	68	62	29	2	8	20930.03	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 3/8 X 3/8 X 3/8  Y	t	f	2026-06-11 21:48:30.71434	2026-06-30 16:53:53.804985	62	\N	HOS0079
+2580	2	2	HOS-00080	BL LIFESCIENCES BCP 03 WITH HOLDER	68	62	29	3	10	45535.32	\N	Covered	\N	12	Consumable	BL LIFESCIENCES BCP 03 WITH HOLDER	t	f	2026-06-11 21:48:30.714346	2026-06-30 16:53:53.804988	62	\N	HOS0080
+2581	2	2	HOS-00081	BL LIFESCIENCES MISTER BLOWER	68	62	29	15	35	8921.51	\N	Covered	\N	12	Consumable	BL LIFESCIENCES MISTER BLOWER	t	f	2026-06-11 21:48:30.714352	2026-06-30 16:53:53.804991	62	\N	HOS0081
+2582	2	2	HOS-00082	COOK - ONE-PART PERCUTANEOUS ENTRY THINWALL NEEDLE-SDN-20-4.0 20G/4CM	68	62	29	5	12	11522.83	\N	Covered	\N	12	Consumable	COOK - ONE-PART PERCUTANEOUS ENTRY THINWALL NEEDLE-SDN-20-4.0 20G/4CM	t	f	2026-06-11 21:48:30.714358	2026-06-30 16:53:53.804994	62	\N	HOS0082
+2583	2	2	HOS-00083	CORONARY SHUNT - SHT-1210S - 1.0MM	68	62	29	2	7	24375	\N	Covered	\N	12	Consumable	CORONARY SHUNT - SHT-1210S - 1.0MM	t	f	2026-06-11 21:48:30.714363	2026-06-30 16:53:53.804997	62	\N	HOS0083
+2584	2	2	HOS-00084	CORONARY SHUNT - SHT-1213S - 1.25MM	68	62	29	44	159	9191.76	\N	Covered	\N	12	Consumable	CORONARY SHUNT - SHT-1213S - 1.25MM	t	f	2026-06-11 21:48:30.714372	2026-06-30 16:53:53.805	62	\N	HOS0084
+2585	2	2	HOS-00085	CORONARY SHUNT - SHT-1215S - 1.50MM	68	62	29	44	89	7848.13	\N	Covered	\N	12	Consumable	CORONARY SHUNT - SHT-1215S - 1.50MM	t	f	2026-06-11 21:48:30.714378	2026-06-30 16:53:53.805002	62	\N	HOS0085
+2586	2	2	HOS-00086	CORONARY SHUNT - SHT-1218S - 2.0MM	68	62	29	2	5	49134.49	\N	Covered	\N	12	Consumable	CORONARY SHUNT - SHT-1218S - 2.0MM	t	f	2026-06-11 21:48:30.714384	2026-06-30 16:53:53.805005	62	\N	HOS0086
+2587	2	2	HOS-00087	CORONARY SHUNT - SHT-1220S - 2.25MM	68	62	29	2	8	10137.59	\N	Covered	\N	12	Consumable	CORONARY SHUNT - SHT-1220S - 2.25MM	t	f	2026-06-11 21:48:30.71439	2026-06-30 16:53:53.805008	62	\N	HOS0087
+2588	2	2	HOS-00088	CORONARY SHUNT - SHT-1223S - 2.50MM	68	62	29	3	12	32847.94	\N	Covered	\N	12	Consumable	CORONARY SHUNT - SHT-1223S - 2.50MM	t	f	2026-06-11 21:48:30.714395	2026-06-30 16:53:53.805011	62	\N	HOS0088
+2589	2	2	HOS-00089	CORONARY SHUNT - SHT-1225S - 2.0MM	68	62	29	2	5	15823.34	\N	Covered	\N	12	Consumable	CORONARY SHUNT - SHT-1225S - 2.0MM	t	f	2026-06-11 21:48:30.714402	2026-06-30 16:53:53.805013	62	\N	HOS0089
+2590	2	2	HOS-00090	DOLPHIN-RADIL INTRODUCER SHEATH 5F/7CM	68	62	29	4	15	27079.56	\N	Covered	\N	12	Consumable	DOLPHIN-RADIL INTRODUCER SHEATH 5F/7CM	t	f	2026-06-11 21:48:30.714408	2026-06-30 16:53:53.805016	62	\N	HOS0090
+2591	2	2	HOS-00091	DVI MALE TO HDMI FEMALE CONVERTOR - NT	68	62	29	5	15	36349.97	\N	Covered	\N	18	Consumable	DVI MALE TO HDMI FEMALE CONVERTOR - NT	t	f	2026-06-11 21:48:30.714414	2026-06-30 16:53:53.805019	62	\N	HOS0091
+2592	2	2	HOS-00092	HDMI TO DVI CABLE 20MTR - NT	68	62	29	4	15	12438.79	\N	Covered	\N	18	Consumable	HDMI TO DVI CABLE 20MTR - NT	t	f	2026-06-11 21:48:30.714419	2026-06-30 16:53:53.805022	62	\N	HOS0092
+2593	2	2	HOS-00093	HDMI TO HDMI CABLE 20MTR - NT	68	62	29	4	15	11697.61	\N	Covered	\N	18	Consumable	HDMI TO HDMI CABLE 20MTR - NT	t	f	2026-06-11 21:48:30.714425	2026-06-30 16:53:53.805025	62	\N	HOS0093
+2594	2	2	HOS-00094	HEAD PROTECTION KIRAN MAKE LEADLITE – 0.25MM PB	68	62	29	4	9	22336.14	\N	Covered	\N	12	Consumable	HEAD PROTECTION KIRAN MAKE LEADLITE – 0.25MM PB	t	f	2026-06-11 21:48:30.714431	2026-06-30 16:53:53.805027	62	\N	HOS0094
+2595	2	2	HOS-00095	HIGH PRESSURE LINE (110CMS)	68	62	29	33	101	6342.2	\N	Covered	\N	12	Consumable	HIGH PRESSURE LINE (110CMS)	t	f	2026-06-11 21:48:30.714437	2026-06-30 16:53:53.80503	62	\N	HOS0095
+2596	2	2	HOS-00096	HIGH PRESSURE LINE 150CM 1200 PSI	68	62	29	3	11	45511.21	\N	Covered	\N	12	Consumable	HIGH PRESSURE LINE 150CM 1200 PSI	t	f	2026-06-11 21:48:30.714443	2026-06-30 16:53:53.805033	62	\N	HOS0096
+2597	2	2	HOS-00097	INTRODUCER SHEATH 9F X 11CM	68	62	29	2	6	17512.4	\N	Covered	\N	12	Consumable	INTRODUCER SHEATH 9F X 11CM	t	f	2026-06-11 21:48:30.714449	2026-06-30 16:53:53.805036	62	\N	HOS0097
+2598	2	2	HOS-00098	MANIFOLD 3 PORT	68	62	29	20	60	5485.15	\N	Covered	\N	12	Consumable	MANIFOLD 3 PORT	t	f	2026-06-11 21:48:30.714455	2026-06-30 16:53:53.805039	62	\N	HOS0098
+2599	2	2	HOS-00099	MEDICAL BED ROLLS - 10 ROLLS PACKING	68	69	29	4	16	47181.69	\N	Covered	\N	5	Consumable	MEDICAL BED ROLLS - 10 ROLLS PACKING	t	f	2026-06-11 21:48:30.714461	2026-06-30 16:53:53.805042	62	\N	HOS0099
+2600	2	2	HOS-00100	MERIT MANIFOLDS 200PSI, 3PORT, HALF BODY, RIGHT OFF(25NOS/BOX)- 203HF-R	68	62	29	5	20	40224.69	\N	Covered	\N	12	Consumable	MERIT MANIFOLDS 200PSI, 3PORT, HALF BODY, RIGHT OFF(25NOS/BOX)- 203HF-R	t	f	2026-06-11 21:48:30.714467	2026-06-30 16:53:53.805044	62	\N	HOS0100
+2601	2	2	HOS-00101	OMNIPAQUE 350MG*100ML-LONG	68	62	29	5	19	38349.89	\N	Covered	\N	12	Consumable	OMNIPAQUE 350MG*100ML-LONG	t	f	2026-06-11 21:48:30.714473	2026-06-30 16:53:53.805047	62	\N	HOS0101
+2602	2	2	HOS-00102	PATIENT SAFE SLIDE TRANSFER BOARD	68	62	29	2	5	15566.94	\N	Covered	\N	12	Consumable	PATIENT SAFE SLIDE TRANSFER BOARD	t	f	2026-06-11 21:48:30.714479	2026-06-30 16:53:53.80505	62	\N	HOS0102
+2603	2	2	HOS-00103	PRESSURE MONITORING KIT - DOUBLE LUMEN	68	62	29	2	6	35100.21	\N	Covered	\N	12	Consumable	PRESSURE MONITORING KIT - DOUBLE LUMEN	t	f	2026-06-11 21:48:30.714485	2026-06-30 16:53:53.805053	62	\N	HOS0103
+2604	2	2	HOS-00104	SAPPHIRE BALLOON NC 2.0 X  8MM	68	62	29	3	11	40772.13	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.0 X  8MM	t	f	2026-06-11 21:48:30.714491	2026-06-30 16:53:53.805056	62	\N	HOS0104
+2605	2	2	HOS-00105	SAPPHIRE BALLOON NC 2.0 X 10MM	68	62	29	5	17	19046.55	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.0 X 10MM	t	f	2026-06-11 21:48:30.714497	2026-06-30 16:53:53.805059	62	\N	HOS0105
+2606	2	2	HOS-00106	SAPPHIRE BALLOON NC 2.0 X 15MM	68	62	29	5	15	42810.99	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.0 X 15MM	t	f	2026-06-11 21:48:30.714503	2026-06-30 16:53:53.805062	62	\N	HOS0106
+2607	2	2	HOS-00107	SAPPHIRE BALLOON NC 2.5 X 10MM	68	62	29	40	145	9177.82	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.5 X 10MM	t	f	2026-06-11 21:48:30.714509	2026-06-30 16:53:53.805069	62	\N	HOS0107
+2608	2	2	HOS-00108	SAPPHIRE BALLOON NC 2.5 X 12MM	68	62	29	5	14	38376.24	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.5 X 12MM	t	f	2026-06-11 21:48:30.714516	2026-06-30 16:53:53.805075	62	\N	HOS0108
+2609	2	2	HOS-00109	SAPPHIRE BALLOON NC 2.5 X 15MM	68	62	29	5	12	32018.21	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.5 X 15MM	t	f	2026-06-11 21:48:30.714522	2026-06-30 16:53:53.805077	62	\N	HOS0109
+2610	2	2	HOS-00110	SAPPHIRE BALLOON NC 2.5 X 8MM	68	62	29	35	103	5872.24	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.5 X 8MM	t	f	2026-06-11 21:48:30.714528	2026-06-30 16:53:53.80508	62	\N	HOS0110
+2611	2	2	HOS-00111	SAPPHIRE BALLOON NC 2.75 X 10MM	68	62	29	35	121	7045.4	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.75 X 10MM	t	f	2026-06-11 21:48:30.714534	2026-06-30 16:53:53.805083	62	\N	HOS0111
+2612	2	2	HOS-00112	SAPPHIRE BALLOON NC 2.75 X 12MM	68	62	29	3	12	20068.58	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.75 X 12MM	t	f	2026-06-11 21:48:30.71454	2026-06-30 16:53:53.805086	62	\N	HOS0112
+2613	2	2	HOS-00113	SAPPHIRE BALLOON NC 2.75 X 15MM	68	62	29	4	9	30408.41	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.75 X 15MM	t	f	2026-06-11 21:48:30.714546	2026-06-30 16:53:53.805089	62	\N	HOS0113
+2614	2	2	HOS-00114	SAPPHIRE BALLOON NC 2.75 X 8MM	68	62	29	2	7	35600.43	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.75 X 8MM	t	f	2026-06-11 21:48:30.714552	2026-06-30 16:53:53.805091	62	\N	HOS0114
+2615	2	2	HOS-00115	SAPPHIRE BALLOON NC 3.0 X 10MM	68	62	29	3	7	31429.34	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.0 X 10MM	t	f	2026-06-11 21:48:30.714558	2026-06-30 16:53:53.805094	62	\N	HOS0115
+2616	2	2	HOS-00116	SAPPHIRE BALLOON NC 3.0 X 12MM	68	62	29	5	16	19713.24	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.0 X 12MM	t	f	2026-06-11 21:48:30.714564	2026-06-30 16:53:53.805097	62	\N	HOS0116
+2617	2	2	HOS-00117	SAPPHIRE BALLOON NC 3.0 X 15MM	68	62	29	4	9	23819.89	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.0 X 15MM	t	f	2026-06-11 21:48:30.71457	2026-06-30 16:53:53.8051	62	\N	HOS0117
+2618	2	2	HOS-00118	SAPPHIRE BALLOON NC 3.0 X 8MM	68	62	29	22	50	5278.34	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.0 X 8MM	t	f	2026-06-11 21:48:30.714576	2026-06-30 16:53:53.805103	62	\N	HOS0118
+2619	2	2	HOS-00119	SAPPHIRE BALLOON NC 3.5 X 10MM	68	62	29	29	76	5831.78	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.5 X 10MM	t	f	2026-06-11 21:48:30.714581	2026-06-30 16:53:53.805105	62	\N	HOS0119
+2620	2	2	HOS-00120	SAPPHIRE BALLOON NC 3.5 X 12MM	68	62	29	3	9	15726.17	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.5 X 12MM	t	f	2026-06-11 21:48:30.714588	2026-06-30 16:53:53.805108	62	\N	HOS0120
+2621	2	2	HOS-00121	SAPPHIRE BALLOON NC 3.5 X 15MM	68	62	29	49	150	9807.13	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.5 X 15MM	t	f	2026-06-11 21:48:30.714593	2026-06-30 16:53:53.805111	62	\N	HOS0121
+2622	2	2	HOS-00122	SAPPHIRE BALLOON NC 3.5 X 8MM	68	62	29	2	6	11644.53	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.5 X 8MM	t	f	2026-06-11 21:48:30.7146	2026-06-30 16:53:53.805114	62	\N	HOS0122
+2623	2	2	HOS-00123	SAPPHIRE BALLOON NC 4.0 X 10MM	68	62	29	4	11	28227.78	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 4.0 X 10MM	t	f	2026-06-11 21:48:30.714606	2026-06-30 16:53:53.805117	62	\N	HOS0123
+2624	2	2	HOS-00124	SAPPHIRE BALLOON NC 4.0 X 12MM	68	62	29	5	20	29696.2	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 4.0 X 12MM	t	f	2026-06-11 21:48:30.714612	2026-06-30 16:53:53.80512	62	\N	HOS0124
+2625	2	2	HOS-00125	SAPPHIRE BALLOON NC 4.0 X 15MM	68	62	29	37	138	5578.79	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 4.0 X 15MM	t	f	2026-06-11 21:48:30.714619	2026-06-30 16:53:53.805123	62	\N	HOS0125
+2626	2	2	HOS-00126	SAPPHIRE BALLOON NC 4.0 X 8MM	68	62	29	39	87	5694.61	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 4.0 X 8MM	t	f	2026-06-11 21:48:30.714627	2026-06-30 16:53:53.805125	62	\N	HOS0126
+2627	2	2	HOS-00127	SAPPHIRE BALLOON SC 1.25 X 10MM	68	62	29	2	5	28293.36	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 1.25 X 10MM	t	f	2026-06-11 21:48:30.714634	2026-06-30 16:53:53.805128	62	\N	HOS0127
+2628	2	2	HOS-00128	SAPPHIRE BALLOON SC 1.25 X 12MM	68	62	29	2	6	20721.93	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 1.25 X 12MM	t	f	2026-06-11 21:48:30.714639	2026-06-30 16:53:53.805131	62	\N	HOS0128
+2629	2	2	HOS-00129	SAPPHIRE BALLOON SC 1.25 X 15MM	68	62	29	2	8	37570.34	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 1.25 X 15MM	t	f	2026-06-11 21:48:30.714646	2026-06-30 16:53:53.805134	62	\N	HOS0129
+2630	2	2	HOS-00130	SAPPHIRE BALLOON SC 1.5 X 10MM	68	62	29	2	6	31807.89	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 1.5 X 10MM	t	f	2026-06-11 21:48:30.714652	2026-06-30 16:53:53.805137	62	\N	HOS0130
+2631	2	2	HOS-00131	SAPPHIRE BALLOON SC 1.5 X 12MM	68	62	29	12	26	9579.32	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 1.5 X 12MM	t	f	2026-06-11 21:48:30.714658	2026-06-30 16:53:53.805139	62	\N	HOS0131
+2632	2	2	HOS-00132	SAPPHIRE BALLOON SC 1.5 X 15MM	68	62	29	3	11	41669.52	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 1.5 X 15MM	t	f	2026-06-11 21:48:30.714665	2026-06-30 16:53:53.805142	62	\N	HOS0132
+2633	2	2	HOS-00133	SAPPHIRE BALLOON SC 1.5 X 8MM	68	62	29	2	5	15241.99	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 1.5 X 8MM	t	f	2026-06-11 21:48:30.71467	2026-06-30 16:53:53.805145	62	\N	HOS0133
+2634	2	2	HOS-00134	SAPPHIRE BALLOON SC 2.0 X 10MM	68	62	29	2	6	20174.98	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.0 X 10MM	t	f	2026-06-11 21:48:30.714677	2026-06-30 16:53:53.805147	62	\N	HOS0134
+2635	2	2	HOS-00135	SAPPHIRE BALLOON SC 2.0 X 12MM	68	62	29	2	8	49190.09	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.0 X 12MM	t	f	2026-06-11 21:48:30.714683	2026-06-30 16:53:53.80515	62	\N	HOS0135
+2636	2	2	HOS-00136	SAPPHIRE BALLOON SC 2.0 X 15MM	68	62	29	4	10	48065.39	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.0 X 15MM	t	f	2026-06-11 21:48:30.714689	2026-06-30 16:53:53.805153	62	\N	HOS0136
+2637	2	2	HOS-00137	SAPPHIRE BALLOON SC 2.0 X 8MM	68	62	29	2	8	22533.69	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.0 X 8MM	t	f	2026-06-11 21:48:30.714695	2026-06-30 16:53:53.805156	62	\N	HOS0137
+2638	2	2	HOS-00138	SAPPHIRE BALLOON SC 2.5 X 10MM	68	62	29	3	9	38005.95	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.5 X 10MM	t	f	2026-06-11 21:48:30.714701	2026-06-30 16:53:53.805158	62	\N	HOS0138
+2639	2	2	HOS-00139	SAPPHIRE BALLOON SC 2.5 X 12MM	68	62	29	3	8	28522.88	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.5 X 12MM	t	f	2026-06-11 21:48:30.714707	2026-06-30 16:53:53.805161	62	\N	HOS0139
+2640	2	2	HOS-00140	SAPPHIRE BALLOON SC 2.5 X 15MM	68	62	29	3	10	13460.5	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.5 X 15MM	t	f	2026-06-11 21:48:30.714713	2026-06-30 16:53:53.805164	62	\N	HOS0140
+2641	2	2	HOS-00141	SAPPHIRE BALLOON SC 2.5 X 8MM	68	62	29	3	11	23367.64	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.5 X 8MM	t	f	2026-06-11 21:48:30.714719	2026-06-30 16:53:53.805167	62	\N	HOS0141
+2642	2	2	HOS-00142	SAPPHIRE BALLOON SC 2.75 X 10MM	68	62	29	4	15	34558.77	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.75 X 10MM	t	f	2026-06-11 21:48:30.714725	2026-06-30 16:53:53.80517	62	\N	HOS0142
+2643	2	2	HOS-00143	SAPPHIRE BALLOON SC 2.75 X 12MM	68	62	29	5	17	37307.58	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.75 X 12MM	t	f	2026-06-11 21:48:30.714731	2026-06-30 16:53:53.805172	62	\N	HOS0143
+2644	2	2	HOS-00144	SAPPHIRE BALLOON SC 2.75 X 15MM	68	62	29	2	6	43673.19	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.75 X 15MM	t	f	2026-06-11 21:48:30.714738	2026-06-30 16:53:53.805175	62	\N	HOS0144
+2645	2	2	HOS-00145	SAPPHIRE BALLOON SC 2.75 X 8MM	68	62	29	3	10	41474.27	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.75 X 8MM	t	f	2026-06-11 21:48:30.714744	2026-06-30 16:53:53.805178	62	\N	HOS0145
+2646	2	2	HOS-00146	SAPPHIRE BALLOON SC 3.0 X 10 MM	68	62	29	4	12	30601.76	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.0 X 10 MM	t	f	2026-06-11 21:48:30.71475	2026-06-30 16:53:53.805181	62	\N	HOS0146
+2647	2	2	HOS-00147	SAPPHIRE BALLOON SC 3.0 X 12 MM	68	62	29	10	40	9574.71	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.0 X 12 MM	t	f	2026-06-11 21:48:30.714756	2026-06-30 16:53:53.805184	62	\N	HOS0147
+2648	2	2	HOS-00148	SAPPHIRE BALLOON SC 3.0 X 15 MM	68	62	29	3	7	14873.99	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.0 X 15 MM	t	f	2026-06-11 21:48:30.714763	2026-06-30 16:53:53.805187	62	\N	HOS0148
+2649	2	2	HOS-00149	SAPPHIRE BALLOON SC 3.0 X 8 MM	68	62	29	3	8	13931.39	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.0 X 8 MM	t	f	2026-06-11 21:48:30.714769	2026-06-30 16:53:53.80519	62	\N	HOS0149
+2650	2	2	HOS-00150	SAPPHIRE BALLOON SC 3.5 X 10 MM	68	62	29	2	7	19344.59	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.5 X 10 MM	t	f	2026-06-11 21:48:30.714776	2026-06-30 16:53:53.805192	62	\N	HOS0150
+2651	2	2	HOS-00151	SAPPHIRE BALLOON SC 3.5 X 12 MM	68	62	29	2	6	41821.12	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.5 X 12 MM	t	f	2026-06-11 21:48:30.714782	2026-06-30 16:53:53.805195	62	\N	HOS0151
+2652	2	2	HOS-00152	SAPPHIRE BALLOON SC 3.5 X 15 MM	68	62	29	4	12	43020.18	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.5 X 15 MM	t	f	2026-06-11 21:48:30.714788	2026-06-30 16:53:53.805198	62	\N	HOS0152
+2653	2	2	HOS-00153	SAPPHIRE BALLOON SC 3.5 X 8MM	68	62	29	3	8	44607.31	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.5 X 8MM	t	f	2026-06-11 21:48:30.714795	2026-06-30 16:53:53.805201	62	\N	HOS0153
+2654	2	2	HOS-00154	SAPPHIRE BALLOON SC 4.0 X 10 MM	68	62	29	4	14	11280.13	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 4.0 X 10 MM	t	f	2026-06-11 21:48:30.714802	2026-06-30 16:53:53.805204	62	\N	HOS0154
+2655	2	2	HOS-00155	SAPPHIRE BALLOON SC 4.0 X 12 MM	68	62	29	5	16	25264.08	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 4.0 X 12 MM	t	f	2026-06-11 21:48:30.714808	2026-06-30 16:53:53.805206	62	\N	HOS0155
+2656	2	2	HOS-00156	SAPPHIRE BALLOON SC 4.0 X 15 MM	68	62	29	4	12	28093.07	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 4.0 X 15 MM	t	f	2026-06-11 21:48:30.714815	2026-06-30 16:53:53.805209	62	\N	HOS0156
+2657	2	2	HOS-00157	SAPPHIRE BALLOON SC 4.0 X 8 MM	68	62	29	4	16	41898.91	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 4.0 X 8 MM	t	f	2026-06-11 21:48:30.714821	2026-06-30 16:53:53.805212	62	\N	HOS0157
+2658	2	2	HOS-00158	SCANLAN AORTIC PUNCH 2.5MM	68	62	29	5	12	34292.15	\N	Covered	\N	12	Consumable	SCANLAN AORTIC PUNCH 2.5MM	t	f	2026-06-11 21:48:30.714827	2026-06-30 16:53:53.805215	62	\N	HOS0158
+2659	2	2	HOS-00159	SCANLAN AORTIC PUNCH 3.0MM	68	62	29	3	7	45470.55	\N	Covered	\N	12	Consumable	SCANLAN AORTIC PUNCH 3.0MM	t	f	2026-06-11 21:48:30.714834	2026-06-30 16:53:53.805217	62	\N	HOS0159
+2660	2	2	HOS-00160	SCANLAN AORTIC PUNCH 3.5MM	68	62	29	2	6	15175.95	\N	Covered	\N	12	Consumable	SCANLAN AORTIC PUNCH 3.5MM	t	f	2026-06-11 21:48:30.71484	2026-06-30 16:53:53.80522	62	\N	HOS0160
+2661	2	2	HOS-00161	STENT 2.5X32MM	68	62	29	3	7	21265.62	\N	Covered	\N	12	Consumable	STENT 2.5X32MM	t	f	2026-06-11 21:48:30.714846	2026-06-30 16:53:53.805223	62	\N	HOS0161
+2662	2	2	HOS-00162	STENT 2.75 X 28MM	68	62	29	4	15	40111.37	\N	Covered	\N	12	Consumable	STENT 2.75 X 28MM	t	f	2026-06-11 21:48:30.714853	2026-06-30 16:53:53.805226	62	\N	HOS0162
+2663	2	2	HOS-00163	STENT 2.75 X 36 MM	68	62	29	4	9	38848.81	\N	Covered	\N	12	Consumable	STENT 2.75 X 36 MM	t	f	2026-06-11 21:48:30.71486	2026-06-30 16:53:53.805228	62	\N	HOS0163
+2664	2	2	HOS-00164	STENT 2.75 X 44 MM	68	62	29	4	13	37241.53	\N	Covered	\N	12	Consumable	STENT 2.75 X 44 MM	t	f	2026-06-11 21:48:30.714866	2026-06-30 16:53:53.805231	62	\N	HOS0164
+2665	2	2	HOS-00165	STENT 2.75X13MM	68	62	29	45	178	9463.92	\N	Covered	\N	12	Consumable	STENT 2.75X13MM	t	f	2026-06-11 21:48:30.714872	2026-06-30 16:53:53.805234	62	\N	HOS0165
+2666	2	2	HOS-00166	STENT 2.75X16MM	68	62	29	5	19	41195.94	\N	Covered	\N	12	Consumable	STENT 2.75X16MM	t	f	2026-06-11 21:48:30.714878	2026-06-30 16:53:53.805237	62	\N	HOS0166
+2667	2	2	HOS-00167	STENT 2.75X24MM	68	62	29	5	14	38265.57	\N	Covered	\N	12	Consumable	STENT 2.75X24MM	t	f	2026-06-11 21:48:30.714884	2026-06-30 16:53:53.80524	62	\N	HOS0167
+2668	2	2	HOS-00168	STENT 2.75X32MM	68	62	29	28	96	5050.55	\N	Covered	\N	12	Consumable	STENT 2.75X32MM	t	f	2026-06-11 21:48:30.71489	2026-06-30 16:53:53.805242	62	\N	HOS0168
+2669	2	2	HOS-00169	STENT 3.0 X 10 MM	68	62	29	5	19	27948.52	\N	Covered	\N	12	Consumable	STENT 3.0 X 10 MM	t	f	2026-06-11 21:48:30.7149	2026-06-30 16:53:53.805245	62	\N	HOS0169
+2670	2	2	HOS-00170	STENT 3.0 X 44 MM	68	62	29	2	8	23100.77	\N	Covered	\N	12	Consumable	STENT 3.0 X 44 MM	t	f	2026-06-11 21:48:30.714907	2026-06-30 16:53:53.805248	62	\N	HOS0170
+2671	2	2	HOS-00171	STENT 3.0X18MM	68	62	29	3	10	25471.61	\N	Covered	\N	12	Consumable	STENT 3.0X18MM	t	f	2026-06-11 21:48:30.714914	2026-06-30 16:53:53.805251	62	\N	HOS0171
+2672	2	2	HOS-00172	STENT 3.0X24MM	68	62	29	4	15	22018.67	\N	Covered	\N	12	Consumable	STENT 3.0X24MM	t	f	2026-06-11 21:48:30.71492	2026-06-30 16:53:53.805254	62	\N	HOS0172
+2673	2	2	HOS-00173	STENT 3.0X28MM	68	62	29	2	5	48491.89	\N	Covered	\N	12	Consumable	STENT 3.0X28MM	t	f	2026-06-11 21:48:30.714926	2026-06-30 16:53:53.805256	62	\N	HOS0173
+2674	2	2	HOS-00174	STENT 3.0X32MM	68	62	29	4	15	40780.68	\N	Covered	\N	12	Consumable	STENT 3.0X32MM	t	f	2026-06-11 21:48:30.714932	2026-06-30 16:53:53.805259	62	\N	HOS0174
+2675	2	2	HOS-00175	STENT 3.0X40MM	68	62	29	2	6	15985.82	\N	Covered	\N	12	Consumable	STENT 3.0X40MM	t	f	2026-06-11 21:48:30.714938	2026-06-30 16:53:53.805262	62	\N	HOS0175
+2676	2	2	HOS-00176	STENT 3.5 X 10 MM	68	62	29	4	13	37041.39	\N	Covered	\N	12	Consumable	STENT 3.5 X 10 MM	t	f	2026-06-11 21:48:30.714944	2026-06-30 16:53:53.805265	62	\N	HOS0176
+2677	2	2	HOS-00177	STENT 3.5 X 15 MM	68	62	29	3	12	16801.56	\N	Covered	\N	12	Consumable	STENT 3.5 X 15 MM	t	f	2026-06-11 21:48:30.71495	2026-06-30 16:53:53.805268	62	\N	HOS0177
+2678	2	2	HOS-00178	STENT 3.5 X 28 MM	68	62	29	5	14	26453.15	\N	Covered	\N	12	Consumable	STENT 3.5 X 28 MM	t	f	2026-06-11 21:48:30.714956	2026-06-30 16:53:53.805271	62	\N	HOS0178
+2679	2	2	HOS-00179	STENT 3.5X14MM	68	62	29	2	5	27590	\N	Covered	\N	12	Consumable	STENT 3.5X14MM	t	f	2026-06-11 21:48:30.714962	2026-06-30 16:53:53.805274	62	\N	HOS0179
+2680	2	2	HOS-00180	STENT 3.5X16MM	68	62	29	4	16	16861.54	\N	Covered	\N	12	Consumable	STENT 3.5X16MM	t	f	2026-06-11 21:48:30.714968	2026-06-30 16:53:53.805276	62	\N	HOS0180
+2681	2	2	HOS-00181	STENT 3.5X18MM	68	62	29	3	10	41863.62	\N	Covered	\N	12	Consumable	STENT 3.5X18MM	t	f	2026-06-11 21:48:30.714974	2026-06-30 16:53:53.805279	62	\N	HOS0181
+2682	2	2	HOS-00182	STENT 3.5X24MM	68	62	29	30	65	7022.44	\N	Covered	\N	12	Consumable	STENT 3.5X24MM	t	f	2026-06-11 21:48:30.71498	2026-06-30 16:53:53.805282	62	\N	HOS0182
+2683	2	2	HOS-00183	STENT 3.5X28MM	68	62	29	3	7	36814.54	\N	Covered	\N	12	Consumable	STENT 3.5X28MM	t	f	2026-06-11 21:48:30.714986	2026-06-30 16:53:53.805285	62	\N	HOS0183
+2684	2	2	HOS-00184	STENT 3.5X32MM	68	62	29	4	13	11109.34	\N	Covered	\N	12	Consumable	STENT 3.5X32MM	t	f	2026-06-11 21:48:30.714992	2026-06-30 16:53:53.805287	62	\N	HOS0184
+2685	2	2	HOS-00185	STENT 4.0 X 16 MM	68	62	29	5	17	43194.14	\N	Covered	\N	12	Consumable	STENT 4.0 X 16 MM	t	f	2026-06-11 21:48:30.714998	2026-06-30 16:53:53.80529	62	\N	HOS0185
+2686	2	2	HOS-00186	TERUMO I KARI IL 3.5 - 5FR	68	62	29	3	8	24850.98	\N	Covered	\N	12	Consumable	TERUMO I KARI IL 3.5 - 5FR	t	f	2026-06-11 21:48:30.715004	2026-06-30 16:53:53.805293	62	\N	HOS0186
+2687	2	2	HOS-00187	TERUMO I KARI IL 3.5 - 6FR	68	62	29	5	12	27882.31	\N	Covered	\N	12	Consumable	TERUMO I KARI IL 3.5 - 6FR	t	f	2026-06-11 21:48:30.71501	2026-06-30 16:53:53.805296	62	\N	HOS0187
+2688	2	2	HOS-00188	TERUMO I KARI IR 1.5 - 5FR	68	62	29	5	17	45006.67	\N	Covered	\N	12	Consumable	TERUMO I KARI IR 1.5 - 5FR	t	f	2026-06-11 21:48:30.715015	2026-06-30 16:53:53.805298	62	\N	HOS0188
+2689	2	2	HOS-00189	TERUMO J.TIP 0.35X150	68	62	29	15	37	5319.92	\N	Covered	\N	12	Consumable	TERUMO J.TIP 0.35X150	t	f	2026-06-11 21:48:30.715021	2026-06-30 16:53:53.805301	62	\N	HOS0189
+2690	2	2	HOS-00190	TOP MANIFOLD 3 PORT	68	62	29	3	9	34938.16	\N	Covered	\N	12	Consumable	TOP MANIFOLD 3 PORT	t	f	2026-06-11 21:48:30.715027	2026-06-30 16:53:53.805304	62	\N	HOS0190
+2691	2	2	HOS-00191	TPI  - PACEL 5F (BALLOON TIP)	68	62	29	5	14	34169.31	\N	Covered	\N	12	Consumable	TPI  - PACEL 5F (BALLOON TIP)	t	f	2026-06-11 21:48:30.715033	2026-06-30 16:53:53.805307	62	\N	HOS0191
+2692	2	2	HOS-00192	TRANSDUCER KIT	68	62	29	5	12	32530.49	\N	Covered	\N	12	Consumable	TRANSDUCER KIT	t	f	2026-06-11 21:48:30.715039	2026-06-30 16:53:53.805312	62	\N	HOS0192
+2693	2	2	HOS-00193	ULTRA FLEX IABP 7.5 X 40 CC - ARROW MAKE	68	62	29	4	16	49380.3	\N	Covered	\N	12	Consumable	ULTRA FLEX IABP 7.5 X 40 CC - ARROW MAKE	t	f	2026-06-11 21:48:30.715045	2026-06-30 16:53:53.805315	62	\N	HOS0193
+2694	2	2	HOS-00194	VISIPAQUE 320MG*100ML-LONG	68	62	29	2	7	15551.72	\N	Covered	\N	12	Consumable	VISIPAQUE 320MG*100ML-LONG	t	f	2026-06-11 21:48:30.715051	2026-06-30 16:53:53.805318	62	\N	HOS0194
+2695	2	2	HOS-00195	VISIPAQUE 50ML	68	62	29	5	19	17174.45	\N	Covered	\N	12	Consumable	VISIPAQUE 50ML	t	f	2026-06-11 21:48:30.715057	2026-06-30 16:53:53.80532	62	\N	HOS0195
+2696	2	2	HOS-00196	2X2 DOOR GASKET FOR BIG MACHINE	68	63	29	4	14	24028.99	\N	Covered	\N	18	Consumable	2X2 DOOR GASKET FOR BIG MACHINE	t	f	2026-06-11 21:48:30.715063	2026-06-30 16:53:53.805323	62	\N	HOS0196
+2697	2	2	HOS-00197	BLADE FOR GUAGE CUTTING MACHINE	68	63	29	5	19	13635.13	\N	Covered	\N	18	Consumable	BLADE FOR GUAGE CUTTING MACHINE	t	f	2026-06-11 21:48:30.715069	2026-06-30 16:53:53.805326	62	\N	HOS0197
+2698	2	2	HOS-00198	BOILER GASKET - SMALL MACHINE	68	63	29	2	7	10767.58	\N	Covered	\N	18	Consumable	BOILER GASKET - SMALL MACHINE	t	f	2026-06-11 21:48:30.715075	2026-06-30 16:53:53.805329	62	\N	HOS0198
+2699	2	2	HOS-00199	BOLT & NUTS	68	63	30	2	6	34882.18	\N	Covered	\N	18	Consumable	BOLT & NUTS	t	f	2026-06-11 21:48:30.71508	2026-06-30 16:53:53.805332	62	\N	HOS0199
+2700	2	2	HOS-00200	BRAIDED TUBE 1/2" X 2 MTRS	68	63	29	4	12	22125.42	\N	Covered	\N	18	Consumable	BRAIDED TUBE 1/2" X 2 MTRS	t	f	2026-06-11 21:48:30.715086	2026-06-30 16:53:53.805334	62	\N	HOS0200
+2701	2	2	HOS-00201	BROWN TEFLON BELT- SEALING MACHINE	68	63	29	2	8	27741.37	\N	Covered	\N	18	Consumable	BROWN TEFLON BELT- SEALING MACHINE	t	f	2026-06-11 21:48:30.715092	2026-06-30 16:53:53.805337	62	\N	HOS0201
+2702	2	2	HOS-00202	LOW WATER CUT OFF - SENSOR TYPE	68	63	29	3	9	42545.35	\N	Covered	\N	18	Consumable	LOW WATER CUT OFF - SENSOR TYPE	t	f	2026-06-11 21:48:30.715098	2026-06-30 16:53:53.80534	62	\N	HOS0202
+2703	2	2	HOS-00203	OPERATING VALVE GASKET - BIG	68	63	29	3	11	40105.74	\N	Covered	\N	18	Consumable	OPERATING VALVE GASKET - BIG	t	f	2026-06-11 21:48:30.715104	2026-06-30 16:53:53.805343	62	\N	HOS0203
+2704	2	2	HOS-00204	PRINTING ROLLS ETO MACHINE	68	63	29	3	10	49267.01	\N	Covered	\N	18	Consumable	PRINTING ROLLS ETO MACHINE	t	f	2026-06-11 21:48:30.71511	2026-06-30 16:53:53.805346	62	\N	HOS0204
+2705	2	2	HOS-00205	SAFETY VALVE	68	63	29	2	5	27360.66	\N	Covered	\N	18	Consumable	SAFETY VALVE	t	f	2026-06-11 21:48:30.715116	2026-06-30 16:53:53.805348	62	\N	HOS0205
+2706	2	2	HOS-00206	SHARPENER BELT FOR GUAGE CUTTING MACHINE	68	63	29	30	89	8664.4	\N	Covered	\N	18	Consumable	SHARPENER BELT FOR GUAGE CUTTING MACHINE	t	f	2026-06-11 21:48:30.715122	2026-06-30 16:53:53.805351	62	\N	HOS0206
+2707	2	2	HOS-00207	SILICON GASKET FOR HEATER	68	63	29	2	8	49305.41	\N	Covered	\N	18	Consumable	SILICON GASKET FOR HEATER	t	f	2026-06-11 21:48:30.715128	2026-06-30 16:53:53.805354	62	\N	HOS0207
+2708	2	2	HOS-00208	SILICON WHEEL FOR SEALING MACHINE	68	63	29	3	7	20126.75	\N	Covered	\N	18	Consumable	SILICON WHEEL FOR SEALING MACHINE	t	f	2026-06-11 21:48:30.715133	2026-06-30 16:53:53.805357	62	\N	HOS0208
+2709	2	2	HOS-00209	TEFLON TAPE ROLL(SMALL MACHINE)	68	63	33	4	13	47865.15	\N	Covered	\N	18	Consumable	TEFLON TAPE ROLL(SMALL MACHINE)	t	f	2026-06-11 21:48:30.715139	2026-06-30 16:53:53.80536	62	\N	HOS0209
+2710	2	2	HOS-00210	ASSEMBLIES ORTHO DIRECT	68	64	29	3	8	13569.44	\N	Covered	\N	12	Consumable	ASSEMBLIES ORTHO DIRECT	t	f	2026-06-11 21:48:30.715145	2026-06-30 16:53:53.805363	62	\N	HOS0210
+2711	2	2	HOS-00211	BAND SEATER GDC	68	64	29	3	11	12025.08	\N	Covered	\N	12	Consumable	BAND SEATER GDC	t	f	2026-06-11 21:48:30.715154	2026-06-30 16:53:53.805365	62	\N	HOS0211
+2712	2	2	HOS-00212	BLUE BITE	68	64	29	3	10	11895.17	\N	Covered	\N	12	Consumable	BLUE BITE	t	f	2026-06-11 21:48:30.715161	2026-06-30 16:53:53.805368	62	\N	HOS0212
+2713	2	2	HOS-00213	BONDABLE 1ST MOLAR TUBES D-TECH	68	64	29	3	9	13847.05	\N	Covered	\N	12	Consumable	BONDABLE 1ST MOLAR TUBES D-TECH	t	f	2026-06-11 21:48:30.715167	2026-06-30 16:53:53.805371	62	\N	HOS0213
+2714	2	2	HOS-00214	BONDABLE BUTTONS PKT OF 10	68	64	29	4	13	10652.57	\N	Covered	\N	12	Consumable	BONDABLE BUTTONS PKT OF 10	t	f	2026-06-11 21:48:30.715172	2026-06-30 16:53:53.805374	62	\N	HOS0214
+2715	2	2	HOS-00215	BRACKET IRIDIUM MBT 022 KIT	68	64	29	2	6	13179.23	\N	Covered	\N	12	Consumable	BRACKET IRIDIUM MBT 022 KIT	t	f	2026-06-11 21:48:30.715178	2026-06-30 16:53:53.805377	62	\N	HOS0215
+2716	2	2	HOS-00216	CERAMIC KIT MBT 022 5-5	68	64	29	22	54	7056.16	\N	Covered	\N	12	Consumable	CERAMIC KIT MBT 022 5-5	t	f	2026-06-11 21:48:30.715184	2026-06-30 16:53:53.805379	62	\N	HOS0216
+2717	2	2	HOS-00217	CHEEK RETRACTOR WITH HANDLE	68	64	29	2	5	28137.67	\N	Covered	\N	12	Consumable	CHEEK RETRACTOR WITH HANDLE	t	f	2026-06-11 21:48:30.71519	2026-06-30 16:53:53.805382	62	\N	HOS0217
+2718	2	2	HOS-00218	CRIMPING PLIER	68	64	29	3	10	43834.48	\N	Covered	\N	12	Consumable	CRIMPING PLIER	t	f	2026-06-11 21:48:30.715196	2026-06-30 16:53:53.805385	62	\N	HOS0218
+2719	2	2	HOS-00219	DEBONDING BUR HORICO	68	64	29	5	14	14390.92	\N	Covered	\N	12	Consumable	DEBONDING BUR HORICO	t	f	2026-06-11 21:48:30.715202	2026-06-30 16:53:53.805388	62	\N	HOS0219
+2720	2	2	HOS-00220	DENTAL PENCIL	68	64	29	2	5	29772.16	\N	Covered	\N	12	Consumable	DENTAL PENCIL	t	f	2026-06-11 21:48:30.715208	2026-06-30 16:53:53.80539	62	\N	HOS0220
+2721	2	2	HOS-00221	D-TECH ROTH KIT 018	68	64	29	3	8	32447.26	\N	Covered	\N	12	Consumable	D-TECH ROTH KIT 018	t	f	2026-06-11 21:48:30.715215	2026-06-30 16:53:53.805393	62	\N	HOS0221
+2722	2	2	HOS-00222	E-CHAIN OO 15FT- CONT. CLEAR & GREY	68	64	29	4	15	20626.7	\N	Covered	\N	12	Consumable	E-CHAIN OO 15FT- CONT. CLEAR & GREY	t	f	2026-06-11 21:48:30.71522	2026-06-30 16:53:53.805396	62	\N	HOS0222
+2723	2	2	HOS-00223	E-CHAIN OO 15FT- SHORT. CLEAR & GREY	68	64	29	2	5	32134.02	\N	Covered	\N	12	Consumable	E-CHAIN OO 15FT- SHORT. CLEAR & GREY	t	f	2026-06-11 21:48:30.715227	2026-06-30 16:53:53.805399	62	\N	HOS0223
+2724	2	2	HOS-00224	ENLIGHT LC COMPOSITE KIT ORMCO WITH ETCHANT	68	64	29	3	9	45420.78	\N	Covered	\N	12	Consumable	ENLIGHT LC COMPOSITE KIT ORMCO WITH ETCHANT	t	f	2026-06-11 21:48:30.715233	2026-06-30 16:53:53.805402	62	\N	HOS0224
+2725	2	2	HOS-00225	HOE PLIER GDC STR/CVD	68	64	29	4	9	32274.05	\N	Covered	\N	12	Consumable	HOE PLIER GDC STR/CVD	t	f	2026-06-11 21:48:30.715239	2026-06-30 16:53:53.805404	62	\N	HOS0225
+2726	2	2	HOS-00226	HORICO FG BU 166 010	68	64	29	30	105	5532.71	\N	Covered	\N	12	Consumable	HORICO FG BU 166 010	t	f	2026-06-11 21:48:30.715245	2026-06-30 16:53:53.805407	62	\N	HOS0226
+2727	2	2	HOS-00227	HP ELASTIC 5000 - PINK, GREEN, BLUE & RED	68	64	29	2	7	42043.95	\N	Covered	\N	12	Consumable	HP ELASTIC 5000 - PINK, GREEN, BLUE & RED	t	f	2026-06-11 21:48:30.715251	2026-06-30 16:53:53.80541	62	\N	HOS0227
+2728	2	2	HOS-00228	HP SPOT WELDER	68	64	29	2	6	17460.99	\N	Covered	\N	12	Consumable	HP SPOT WELDER	t	f	2026-06-11 21:48:30.715257	2026-06-30 16:53:53.805413	62	\N	HOS0228
+2729	2	2	HOS-00229	LIGARINGS (1040) CLEAR & GREY	68	64	29	2	7	24747.81	\N	Covered	\N	12	Consumable	LIGARINGS (1040) CLEAR & GREY	t	f	2026-06-11 21:48:30.715263	2026-06-30 16:53:53.805416	62	\N	HOS0229
+2730	2	2	HOS-00230	LINGUAL SHEATH HP (PKT OF 50)	68	64	29	4	11	11910.81	\N	Covered	\N	12	Consumable	LINGUAL SHEATH HP (PKT OF 50)	t	f	2026-06-11 21:48:30.715269	2026-06-30 16:53:53.805418	62	\N	HOS0230
+2731	2	2	HOS-00231	NITI 014 PKT OF 25 U/L	68	64	29	4	9	19412.86	\N	Covered	\N	12	Consumable	NITI 014 PKT OF 25 U/L	t	f	2026-06-11 21:48:30.715275	2026-06-30 16:53:53.805421	62	\N	HOS0231
+2732	2	2	HOS-00232	NITI 016 PKT OF 25 U/L	68	64	29	4	10	15280.31	\N	Covered	\N	12	Consumable	NITI 016 PKT OF 25 U/L	t	f	2026-06-11 21:48:30.715281	2026-06-30 16:53:53.805424	62	\N	HOS0232
+2733	2	2	HOS-00233	PLIER STAND	68	64	29	4	11	39780.01	\N	Covered	\N	12	Consumable	PLIER STAND	t	f	2026-06-11 21:48:30.715288	2026-06-30 16:53:53.805427	62	\N	HOS0233
+2734	2	2	HOS-00234	RELIEF WAX	68	64	29	5	18	42881.58	\N	Covered	\N	12	Consumable	RELIEF WAX	t	f	2026-06-11 21:48:30.715294	2026-06-30 16:53:53.80543	62	\N	HOS0234
+2735	2	2	HOS-00235	UNIVERSAL PLIER GDC	68	64	29	2	6	36371.84	\N	Covered	\N	12	Consumable	UNIVERSAL PLIER GDC	t	f	2026-06-11 21:48:30.715299	2026-06-30 16:53:53.805432	62	\N	HOS0235
+2736	2	2	HOS-00236	AVF NEEDLE 16G	68	65	29	4	16	43244.64	\N	Covered	\N	12	Consumable	AVF NEEDLE 16G	t	f	2026-06-11 21:48:30.715305	2026-06-30 16:53:53.805435	62	\N	HOS0236
+2737	2	2	HOS-00237	AVF NEEDLE 17G	68	65	29	3	10	48314.91	\N	Covered	\N	12	Consumable	AVF NEEDLE 17G	t	f	2026-06-11 21:48:30.715311	2026-06-30 16:53:53.805438	62	\N	HOS0237
+2738	2	2	HOS-00238	BICARB MIXER MACHINE 100 LITRES	68	65	29	3	12	13344.08	\N	Covered	\N	12	Non-Consumable	BICARB MIXER MACHINE 100 LITRES	t	f	2026-06-11 21:48:30.715317	2026-06-30 16:53:53.805441	62	\N	HOS0238
+2739	2	2	HOS-00239	BICARBONATE PART B- 10LTR PACK	68	65	29	5	18	13515.59	\N	Covered	\N	12	Consumable	BICARBONATE PART B- 10LTR PACK	t	f	2026-06-11 21:48:30.715323	2026-06-30 16:53:53.805443	62	\N	HOS0239
+2740	2	2	HOS-00240	CHLORITEST PAPERS FOR CHLORINE TEST	68	65	29	4	14	21108.67	\N	Covered	\N	18	Consumable	CHLORITEST PAPERS FOR CHLORINE TEST	t	f	2026-06-11 21:48:30.715329	2026-06-30 16:53:53.805446	62	\N	HOS0240
+2741	2	2	HOS-00241	DIALYSATE CONNECTOR BLUE	68	65	29	4	9	49176.54	\N	Covered	\N	12	Consumable	DIALYSATE CONNECTOR BLUE	t	f	2026-06-11 21:48:30.71534	2026-06-30 16:53:53.805449	62	\N	HOS0241
+2742	2	2	HOS-00242	DIALYSATE CONNECTOR RED	68	65	29	16	35	9348.73	\N	Covered	\N	12	Consumable	DIALYSATE CONNECTOR RED	t	f	2026-06-11 21:48:30.715347	2026-06-30 16:53:53.805452	62	\N	HOS0242
+2743	2	2	HOS-00243	DOOR 22MM BUBBLE C.HOLDER 4008SV10 - M561711	68	65	29	4	15	29315.77	\N	Covered	\N	18	Consumable	DOOR 22MM BUBBLE C.HOLDER 4008SV10 - M561711	t	f	2026-06-11 21:48:30.715353	2026-06-30 16:53:53.805455	62	\N	HOS0243
+2744	2	2	HOS-00244	DRY CITRATE PART A-40LTR/PACK	68	65	29	2	6	31257.65	\N	Covered	\N	12	Consumable	DRY CITRATE PART A-40LTR/PACK	t	f	2026-06-11 21:48:30.715359	2026-06-30 16:53:53.805457	62	\N	HOS0244
+2745	2	2	HOS-00245	HIGH POTASSIUM CAN	68	65	29	5	14	45229.74	\N	Covered	\N	12	Consumable	HIGH POTASSIUM CAN	t	f	2026-06-11 21:48:30.715364	2026-06-30 16:53:53.80546	62	\N	HOS0245
+2746	2	2	HOS-00246	INFORMED CONSENT FOR HAEMODIALYSIS	68	74	29	4	14	43761.04	\N	Covered	\N	18	Consumable	INFORMED CONSENT FOR HAEMODIALYSIS	t	f	2026-06-11 21:48:30.71537	2026-06-30 16:53:53.805463	62	\N	HOS0246
+2748	2	2	HOS-00249	STEPPER MOTOR WITH GEAR BOX 4-POLES *4008B/H/S *4008S V10-PART NO: M393211	68	65	29	17	55	5372.14	\N	Covered	\N	18	Non-Consumable	STEPPER MOTOR WITH GEAR BOX 4-POLES *4008B/H/S *4008S V10-PART NO: M393211	t	f	2026-06-11 21:48:30.715382	2026-06-30 16:53:53.805468	62	\N	HOS0249
+2749	2	2	HOS-00250	TUBE FIXING ROLLER PUMP	68	65	29	29	78	5210.01	\N	Covered	\N	18	Non-Consumable	TUBE FIXING ROLLER PUMP	t	f	2026-06-11 21:48:30.715388	2026-06-30 16:53:53.805471	62	\N	HOS0250
+2750	2	2	HOS-00251	ULTRAFILTRATION PUMP 40008B/H/S/S V10 - PART NO:6707061	68	65	29	35	126	6499.34	\N	Covered	\N	18	Non-Consumable	ULTRAFILTRATION PUMP 40008B/H/S/S V10 - PART NO:6707061	t	f	2026-06-11 21:48:30.715394	2026-06-30 16:53:53.805474	62	\N	HOS0251
+2751	2	2	HOS-00252	10A FUSE - 100NOS-BOX	68	66	29	3	11	10443.43	\N	Covered	\N	18	Consumable	10A FUSE - 100NOS-BOX	t	f	2026-06-11 21:48:30.7154	2026-06-30 16:53:53.805477	62	\N	HOS0252
+2752	2	2	HOS-00253	16X24 DOOR GASKET	68	66	29	2	5	31170.49	\N	Covered	\N	18	Consumable	16X24 DOOR GASKET	t	f	2026-06-11 21:48:30.715406	2026-06-30 16:53:53.80548	62	\N	HOS0253
+2753	2	2	HOS-00254	24 POET POE SWITCH (DGS TO 26P)	68	66	29	4	13	37487.18	\N	Covered	\N	18	Consumable	24 POET POE SWITCH (DGS TO 26P)	t	f	2026-06-11 21:48:30.715412	2026-06-30 16:53:53.805482	62	\N	HOS0254
+2754	2	2	HOS-00255	6A FUSE - 100NOS-BOX	68	66	29	5	12	33036.78	\N	Covered	\N	18	Consumable	6A FUSE - 100NOS-BOX	t	f	2026-06-11 21:48:30.715421	2026-06-30 16:53:53.805485	62	\N	HOS0255
+2755	2	2	HOS-00256	ABG RADIOMETER - SBP SOLUTION PACK - 944-506	68	67	29	38	119	7501.07	\N	Covered	\N	12	Consumable	ABG RADIOMETER - SBP SOLUTION PACK - 944-506	t	f	2026-06-11 21:48:30.715428	2026-06-30 16:53:53.805488	62	\N	HOS0256
+2756	2	2	HOS-00257	AEROSEPT 5LTRS - DISINFECTANT	68	71	29	4	10	10054.47	\N	Covered	\N	18	Consumable	AEROSEPT 5LTRS - DISINFECTANT	t	f	2026-06-11 21:48:30.715433	2026-06-30 16:53:53.805491	62	\N	HOS0257
+2757	2	2	HOS-00258	ALL OUT MACHINE WITH REFILL	68	69	29	4	11	36519.29	\N	Covered	\N	18	Consumable	ALL OUT MACHINE WITH REFILL	t	f	2026-06-11 21:48:30.715439	2026-06-30 16:53:53.805493	62	\N	HOS0258
+2758	2	2	HOS-00259	ALL OUT MOSQUITO REPELLENT - REFILL	68	69	29	5	20	34513.15	\N	Covered	\N	18	Consumable	ALL OUT MOSQUITO REPELLENT - REFILL	t	f	2026-06-11 21:48:30.715445	2026-06-30 16:53:53.805496	62	\N	HOS0259
+2759	2	2	HOS-00260	ANASTHESIA BOOKLET	68	74	29	2	8	19712.34	\N	Covered	\N	12	Consumable	ANASTHESIA BOOKLET	t	f	2026-06-11 21:48:30.715451	2026-06-30 16:53:53.805499	62	\N	HOS0260
+2760	2	2	HOS-00261	AUDIOLOGICAL EVALUATION	68	74	29	4	13	33238.36	\N	Covered	\N	12	Consumable	AUDIOLOGICAL EVALUATION	t	f	2026-06-11 21:48:30.715457	2026-06-30 16:53:53.805502	62	\N	HOS0261
+2761	2	2	HOS-00262	BASKET FOR MONITOR STAND	68	69	29	3	8	24369.43	\N	Covered	\N	18	Non-Consumable	BASKET FOR MONITOR STAND	t	f	2026-06-11 21:48:30.715462	2026-06-30 16:53:53.805504	62	\N	HOS0262
+2762	2	2	HOS-00263	BED SIDE LOCKERS	68	69	29	2	7	43336.49	\N	Covered	\N	18	Non-Consumable	BED SIDE LOCKERS	t	f	2026-06-11 21:48:30.715468	2026-06-30 16:53:53.805507	62	\N	HOS0263
+2763	2	2	HOS-00264	BENEFUSION USP_SYRINGE PUMP	68	68	29	2	5	10679.45	\N	Covered	\N	12	Non-Consumable	BENEFUSION USP_SYRINGE PUMP	t	f	2026-06-11 21:48:30.715474	2026-06-30 16:53:53.80551	62	\N	HOS0264
+2764	2	2	HOS-00265	BIOCHEMISTRY REGISTER	68	74	29	5	18	34986.14	\N	Covered	\N	12	Consumable	BIOCHEMISTRY REGISTER	t	f	2026-06-11 21:48:30.71548	2026-06-30 16:53:53.805513	62	\N	HOS0265
+2765	2	2	HOS-00266	BIRTH CERTIFICATE	68	74	29	5	15	42198.21	\N	Covered	\N	12	Consumable	BIRTH CERTIFICATE	t	f	2026-06-11 21:48:30.715486	2026-06-30 16:53:53.805516	62	\N	HOS0266
+2766	2	2	HOS-00267	BLOOD PRESSURE MONITORING CHART	68	74	29	13	29	6877.84	\N	Covered	\N	12	Consumable	BLOOD PRESSURE MONITORING CHART	t	f	2026-06-11 21:48:30.715491	2026-06-30 16:53:53.805518	62	\N	HOS0267
+2767	2	2	HOS-00268	BLUE BED SHEET	68	70	29	3	11	12899.78	\N	Covered	\N	5	Non-Consumable	BLUE BED SHEET	t	f	2026-06-11 21:48:30.715497	2026-06-30 16:53:53.805521	62	\N	HOS0268
+2768	2	2	HOS-00269	BLUE COLOUR COAT	68	70	29	3	9	19537.67	\N	Covered	\N	5	Non-Consumable	BLUE COLOUR COAT	t	f	2026-06-11 21:48:30.715503	2026-06-30 16:53:53.805524	62	\N	HOS0269
+2769	2	2	HOS-00270	BLUE PILLOW COVER	68	70	29	3	12	19603.12	\N	Covered	\N	5	Non-Consumable	BLUE PILLOW COVER	t	f	2026-06-11 21:48:30.715509	2026-06-30 16:53:53.805527	62	\N	HOS0270
+2770	2	2	HOS-00271	BP APPARATUS - DIAMOND LED 141 BP MONITOR	68	69	29	2	8	16600.18	\N	Covered	\N	12	Non-Consumable	BP APPARATUS - DIAMOND LED 141 BP MONITOR	t	f	2026-06-11 21:48:30.715514	2026-06-30 16:53:53.80553	62	\N	HOS0271
+2771	2	2	HOS-00272	BP APPARATUS - DIGITAL  - PAED	68	68	29	2	7	32194.67	\N	Covered	\N	12	Non-Consumable	BP APPARATUS - DIGITAL  - PAED	t	f	2026-06-11 21:48:30.71552	2026-06-30 16:53:53.805532	62	\N	HOS0272
+2772	2	2	HOS-00273	BPL ECG 9108D Z-FOLD PAPERS (150 SHEETS)	68	68	29	4	9	15401.35	\N	Covered	\N	12	Consumable	BPL ECG 9108D Z-FOLD PAPERS (150 SHEETS)	t	f	2026-06-11 21:48:30.715526	2026-06-30 16:53:53.805535	62	\N	HOS0273
+2773	2	2	HOS-00274	BPL ECG PAPERS - 50MM	68	74	29	4	11	43902.38	\N	Covered	\N	12	Consumable	BPL ECG PAPERS - 50MM	t	f	2026-06-11 21:48:30.715532	2026-06-30 16:53:53.805538	62	\N	HOS0274
+2774	2	2	HOS-00275	BPL ECG PAPERS - 80MM	68	74	29	36	122	9133.01	\N	Covered	\N	12	Consumable	BPL ECG PAPERS - 80MM	t	f	2026-06-11 21:48:30.715538	2026-06-30 16:53:53.805541	62	\N	HOS0275
+2775	2	2	HOS-00276	BPL FOETAL DOPPLER PROBE - MODEL: FD 9713	68	68	29	2	7	26524.84	\N	Covered	\N	12	Consumable	BPL FOETAL DOPPLER PROBE - MODEL: FD 9713	t	f	2026-06-11 21:48:30.715544	2026-06-30 16:53:53.805543	62	\N	HOS0276
+2776	2	2	HOS-00277	BPL MONOPHASIC DEFIBRILLATOR MODEL-DF 2509R - PRINTER	68	68	29	4	11	29423.66	\N	Covered	\N	12	Consumable	BPL MONOPHASIC DEFIBRILLATOR MODEL-DF 2509R - PRINTER	t	f	2026-06-11 21:48:30.715549	2026-06-30 16:53:53.805546	62	\N	HOS0277
+2777	2	2	HOS-00278	BREAST PUMP ACCESSORIES FOR MEDELA LACTINA	68	68	29	2	6	25335.95	\N	Covered	\N	12	Consumable	BREAST PUMP ACCESSORIES FOR MEDELA LACTINA	t	f	2026-06-11 21:48:30.715555	2026-06-30 16:53:53.805551	62	\N	HOS0278
+2778	2	2	HOS-00279	BREAST PUMP SYRINGE	68	68	29	2	6	15075.48	\N	Covered	\N	12	Consumable	BREAST PUMP SYRINGE	t	f	2026-06-11 21:48:30.71556	2026-06-30 16:53:53.805554	62	\N	HOS0279
+2779	2	2	HOS-00280	CARDIOLOGY INVESTIGATION FORM	68	74	29	5	11	27954.71	\N	Covered	\N	12	Consumable	CARDIOLOGY INVESTIGATION FORM	t	f	2026-06-11 21:48:30.715566	2026-06-30 16:53:53.805557	62	\N	HOS0280
+2780	2	2	HOS-00281	CARTRIDGE 104 DRUM	68	74	29	5	19	26651.83	\N	Covered	\N	18	Consumable	CARTRIDGE 104 DRUM	t	f	2026-06-11 21:48:30.715572	2026-06-30 16:53:53.80556	62	\N	HOS0281
+2781	2	2	HOS-00282	CARTRIDGE 110A	68	74	29	5	12	28285.67	\N	Covered	\N	18	Consumable	CARTRIDGE 110A	t	f	2026-06-11 21:48:30.715578	2026-06-30 16:53:53.805562	62	\N	HOS0282
+2782	2	2	HOS-00283	CARTRIDGE 119A	68	74	29	5	14	36868.49	\N	Covered	\N	18	Consumable	CARTRIDGE 119A	t	f	2026-06-11 21:48:30.715583	2026-06-30 16:53:53.805565	62	\N	HOS0283
+2783	2	2	HOS-00284	CARTRIDGE 12A	68	74	29	4	13	21745.11	\N	Covered	\N	18	Consumable	CARTRIDGE 12A	t	f	2026-06-11 21:48:30.715589	2026-06-30 16:53:53.805568	62	\N	HOS0284
+2784	2	2	HOS-00285	CARTRIDGE 166A	68	74	29	2	6	16174.55	\N	Covered	\N	18	Consumable	CARTRIDGE 166A	t	f	2026-06-11 21:48:30.715594	2026-06-30 16:53:53.805571	62	\N	HOS0285
+2785	2	2	HOS-00286	CARTRIDGE 673	68	74	29	4	14	13293.03	\N	Covered	\N	18	Consumable	CARTRIDGE 673	t	f	2026-06-11 21:48:30.7156	2026-06-30 16:53:53.805574	62	\N	HOS0286
+2786	2	2	HOS-00287	CARTRIDGE 680A	68	74	29	4	13	44760.69	\N	Covered	\N	18	Consumable	CARTRIDGE 680A	t	f	2026-06-11 21:48:30.715606	2026-06-30 16:53:53.805576	62	\N	HOS0287
+2787	2	2	HOS-00288	CARTRIDGE 88A	68	74	29	2	5	42502.66	\N	Covered	\N	18	Consumable	CARTRIDGE 88A	t	f	2026-06-11 21:48:30.715612	2026-06-30 16:53:53.805579	62	\N	HOS0288
+2788	2	2	HOS-00289	CARTRIDGE B021 BROTHER	68	74	29	4	12	23429.6	\N	Covered	\N	18	Consumable	CARTRIDGE B021 BROTHER	t	f	2026-06-11 21:48:30.715617	2026-06-30 16:53:53.805582	62	\N	HOS0289
+2789	2	2	HOS-00290	CARTRIDGE EPSON 664 BLACK	68	74	29	34	113	6452.19	\N	Covered	\N	18	Consumable	CARTRIDGE EPSON 664 BLACK	t	f	2026-06-11 21:48:30.715623	2026-06-30 16:53:53.805585	62	\N	HOS0290
+2790	2	2	HOS-00291	CARTRIDGE EPSON 664 COLOUR	68	74	29	5	20	21978.98	\N	Covered	\N	18	Consumable	CARTRIDGE EPSON 664 COLOUR	t	f	2026-06-11 21:48:30.715628	2026-06-30 16:53:53.805588	62	\N	HOS0291
+2791	2	2	HOS-00292	CH TOWEL 36*29	68	70	29	4	11	21656.31	\N	Covered	\N	5	Non-Consumable	CH TOWEL 36*29	t	f	2026-06-11 21:48:30.715634	2026-06-30 16:53:53.80559	62	\N	HOS0292
+2792	2	2	HOS-00293	DIGITAL BP APPARATUS - OMRON 7143T WITH ADAPTER	68	69	29	5	11	38960.02	\N	Covered	\N	12	Non-Consumable	DIGITAL BP APPARATUS - OMRON 7143T WITH ADAPTER	t	f	2026-06-11 21:48:30.71564	2026-06-30 16:53:53.805593	62	\N	HOS0293
+2793	2	2	HOS-00294	DISCHARGE SUMMARY	68	74	38	5	14	44067.66	\N	Covered	\N	12	Consumable	DISCHARGE SUMMARY	t	f	2026-06-11 21:48:30.715646	2026-06-30 16:53:53.805596	62	\N	HOS0294
+2794	2	2	HOS-00295	DISPOSABLE MEAL TRAY WITH LID- WHITE - 4 COMPARTMENT- GOOD QUALITY	68	69	29	3	12	16730.97	\N	Covered	\N	18	Consumable	DISPOSABLE MEAL TRAY WITH LID- WHITE - 4 COMPARTMENT- GOOD QUALITY	t	f	2026-06-11 21:48:30.715652	2026-06-30 16:53:53.805599	62	\N	HOS0295
+2795	2	2	HOS-00296	DOCTORS PROGRESS NOTES	68	74	38	33	78	7564.85	\N	Covered	\N	12	Consumable	DOCTORS PROGRESS NOTES	t	f	2026-06-11 21:48:30.715657	2026-06-30 16:53:53.805601	62	\N	HOS0296
+2796	2	2	HOS-00297	DOCUMENTATION REGISTER	68	74	29	3	10	49645.2	\N	Covered	\N	12	Consumable	DOCUMENTATION REGISTER	t	f	2026-06-11 21:48:30.715665	2026-06-30 16:53:53.805604	62	\N	HOS0297
+2797	2	2	HOS-00298	DOOR MAT (LEATHER)	68	69	29	3	7	48209.25	\N	Covered	\N	12	Consumable	DOOR MAT (LEATHER)	t	f	2026-06-11 21:48:30.715671	2026-06-30 16:53:53.805607	62	\N	HOS0298
+2798	2	2	HOS-00299	DUSTER	68	74	29	46	95	5570.75	\N	Covered	\N	5	Consumable	DUSTER	t	f	2026-06-11 21:48:30.715677	2026-06-30 16:53:53.80561	62	\N	HOS0299
+2799	2	2	HOS-00300	ECG PAPER - 005 - BPL - 9108D	68	74	33	5	19	22543.07	\N	Covered	\N	12	Consumable	ECG PAPER - 005 - BPL - 9108D	t	f	2026-06-11 21:48:30.715682	2026-06-30 16:53:53.805612	62	\N	HOS0300
+2800	2	2	HOS-00301	ECG ROLL PAPER - VESTA 12EC RMS 210MMX20MTR	68	74	33	5	12	43078.65	\N	Covered	\N	12	Consumable	ECG ROLL PAPER - VESTA 12EC RMS 210MMX20MTR	t	f	2026-06-11 21:48:30.715688	2026-06-30 16:53:53.805615	62	\N	HOS0301
+2801	2	2	HOS-00302	FOOT STEP DOUBLE SS	68	69	29	5	14	47702.7	\N	Covered	\N	18	Non-Consumable	FOOT STEP DOUBLE SS	t	f	2026-06-11 21:48:30.715694	2026-06-30 16:53:53.805618	62	\N	HOS0302
+2802	2	2	HOS-00303	GOGGLES - 3M QUALITY	68	69	29	49	186	5185.2	\N	Covered	\N	18	Consumable	GOGGLES - 3M QUALITY	t	f	2026-06-11 21:48:30.715699	2026-06-30 16:53:53.805621	62	\N	HOS0303
+2803	2	2	HOS-00304	GRAPHIC TPR CHART	68	74	38	2	7	49220.41	\N	Covered	\N	12	Consumable	GRAPHIC TPR CHART	t	f	2026-06-11 21:48:30.715705	2026-06-30 16:53:53.805623	62	\N	HOS0304
+2804	2	2	HOS-00305	HISTOPATHOLOGY REQUEST FORM	68	74	38	5	14	38844.37	\N	Covered	\N	12	Consumable	HISTOPATHOLOGY REQUEST FORM	t	f	2026-06-11 21:48:30.715711	2026-06-30 16:53:53.805626	62	\N	HOS0305
+2805	2	2	HOS-00306	HISTORY AND PHYSICAL EXAMINATION	68	74	38	3	8	16938.78	\N	Covered	\N	12	Consumable	HISTORY AND PHYSICAL EXAMINATION	t	f	2026-06-11 21:48:30.715716	2026-06-30 16:53:53.805629	62	\N	HOS0306
+2806	2	2	HOS-00307	ICU HIGH RISK/GRAVE RISK CONSENT FORM	68	74	38	3	9	13437.27	\N	Covered	\N	12	Consumable	ICU HIGH RISK/GRAVE RISK CONSENT FORM	t	f	2026-06-11 21:48:30.715722	2026-06-30 16:53:53.805632	62	\N	HOS0307
+2807	2	2	HOS-00308	ICU OBSERVATION CHART	68	74	38	2	6	49233.46	\N	Covered	\N	12	Consumable	ICU OBSERVATION CHART	t	f	2026-06-11 21:48:30.715727	2026-06-30 16:53:53.805635	62	\N	HOS0308
+2808	2	2	HOS-00309	INCH TAPE	68	69	29	4	16	22518.31	\N	Covered	\N	18	Non-Consumable	INCH TAPE	t	f	2026-06-11 21:48:30.715733	2026-06-30 16:53:53.805637	62	\N	HOS0309
+2809	2	2	HOS-00310	INDUCTION STOVE - PIGEON PRIME	68	69	29	2	6	28615.93	\N	Covered	\N	18	Non-Consumable	INDUCTION STOVE - PIGEON PRIME	t	f	2026-06-11 21:48:30.715739	2026-06-30 16:53:53.80564	62	\N	HOS0310
+2810	2	2	HOS-00311	INFORMED CONSENT FOR ANASTHESIA / SEDATION	68	74	38	2	5	25025.39	\N	Covered	\N	12	Consumable	INFORMED CONSENT FOR ANASTHESIA / SEDATION	t	f	2026-06-11 21:48:30.715745	2026-06-30 16:53:53.805643	62	\N	HOS0311
+2811	2	2	HOS-00312	INFORMED CONSENT FOR SURGERY	68	74	38	3	10	10456.88	\N	Covered	\N	12	Consumable	INFORMED CONSENT FOR SURGERY	t	f	2026-06-11 21:48:30.71575	2026-06-30 16:53:53.805646	62	\N	HOS0312
+2812	2	2	HOS-00313	INITIAL RAPID ASSESSMENT CHART	68	74	38	4	16	42966	\N	Covered	\N	12	Consumable	INITIAL RAPID ASSESSMENT CHART	t	f	2026-06-11 21:48:30.715756	2026-06-30 16:53:53.805648	62	\N	HOS0313
+2813	2	2	HOS-00314	INTAKE AND OUTPUT RECORD	68	74	38	4	16	17429.78	\N	Covered	\N	12	Consumable	INTAKE AND OUTPUT RECORD	t	f	2026-06-11 21:48:30.715762	2026-06-30 16:53:53.805651	62	\N	HOS0314
+2814	2	2	HOS-00315	INVESTIGATION CHART	68	74	38	2	8	47048.89	\N	Covered	\N	12	Consumable	INVESTIGATION CHART	t	f	2026-06-11 21:48:30.715768	2026-06-30 16:53:53.805654	62	\N	HOS0315
+2815	2	2	HOS-00316	IP REGISTER	68	74	29	4	13	38589.18	\N	Covered	\N	12	Consumable	IP REGISTER	t	f	2026-06-11 21:48:30.715773	2026-06-30 16:53:53.805657	62	\N	HOS0316
+2816	2	2	HOS-00317	IRON STOOL	68	69	29	2	6	24460.58	\N	Covered	\N	18	Non-Consumable	IRON STOOL	t	f	2026-06-11 21:48:30.715779	2026-06-30 16:53:53.80566	62	\N	HOS0317
+2817	2	2	HOS-00318	ISSUE AND MASTER REGISTER FOR BLOOD BANK	68	74	29	2	7	27473.18	\N	Covered	\N	12	Consumable	ISSUE AND MASTER REGISTER FOR BLOOD BANK	t	f	2026-06-11 21:48:30.715785	2026-06-30 16:53:53.805662	62	\N	HOS0318
+2818	2	2	HOS-00319	ISSUE REGISTER	68	74	29	2	8	26925.95	\N	Covered	\N	12	Consumable	ISSUE REGISTER	t	f	2026-06-11 21:48:30.715791	2026-06-30 16:53:53.805665	62	\N	HOS0319
+2819	2	2	HOS-00320	KORA CLOTH IN MTRS	68	70	39	4	11	17989.92	\N	Covered	\N	5	Non-Consumable	KORA CLOTH IN MTRS	t	f	2026-06-11 21:48:30.715796	2026-06-30 16:53:53.805668	62	\N	HOS0320
+2820	2	2	HOS-00321	LARYNGOSCOPE BULB	68	61	29	2	5	20534.86	\N	Covered	\N	12	Non-Consumable	LARYNGOSCOPE BULB	t	f	2026-06-11 21:48:30.715802	2026-06-30 16:53:53.805671	62	\N	HOS0321
+2821	2	2	HOS-00322	LARYNGOSCOPE SET WITH MC COY BLADE (SIZE1,2,3 & 4)	68	69	29	3	10	46934.57	\N	Covered	\N	12	Non-Consumable	LARYNGOSCOPE SET WITH MC COY BLADE (SIZE1,2,3 & 4)	t	f	2026-06-11 21:48:30.715808	2026-06-30 16:53:53.805673	62	\N	HOS0322
+2822	2	2	HOS-00323	LAUNDRY BAG WITH STEEL RAILING & WHEELS OVER ALL SIZE 22.5” ROUND X 30” HEIGHT	68	68	29	5	14	17148.26	\N	Covered	\N	18	Non-Consumable	LAUNDRY BAG WITH STEEL RAILING & WHEELS OVER ALL SIZE 22.5” ROUND X 30” HEIGHT	t	f	2026-06-11 21:48:30.715813	2026-06-30 16:53:53.805676	62	\N	HOS0323
+2823	2	2	HOS-00324	CL LEAVE APPLICATION BOOK	68	74	38	22	51	9730.39	\N	Covered	\N	12	Consumable	CL LEAVE APPLICATION BOOK	t	f	2026-06-11 21:48:30.715819	2026-06-30 16:53:53.805679	62	\N	HOS0324
+2824	2	2	HOS-00325	MAKINTOSH SHEETS - IN MTRS	68	69	39	3	7	10235.77	\N	Covered	\N	12	Non-Consumable	MAKINTOSH SHEETS - IN MTRS	t	f	2026-06-11 21:48:30.715825	2026-06-30 16:53:53.805682	62	\N	HOS0325
+2825	2	2	HOS-00326	MATTRESS - 40 DENSITY MAGIC PVC REXINE-SINGLE SECTION MATRESS - SIZE 72X30X4 INCHES	68	69	29	4	16	48249.72	\N	Covered	\N	18	Non-Consumable	MATTRESS - 40 DENSITY MAGIC PVC REXINE-SINGLE SECTION MATRESS - SIZE 72X30X4 INCHES	t	f	2026-06-11 21:48:30.715831	2026-06-30 16:53:53.805684	62	\N	HOS0326
+2826	2	2	HOS-00327	MEDICAL CERTIFICATE	68	74	38	3	10	39458.66	\N	Covered	\N	12	Consumable	MEDICAL CERTIFICATE	t	f	2026-06-11 21:48:30.715837	2026-06-30 16:53:53.805687	62	\N	HOS0327
+2827	2	2	HOS-00328	MEDICATION SHEET	68	74	38	3	11	25564.93	\N	Covered	\N	12	Consumable	MEDICATION SHEET	t	f	2026-06-11 21:48:30.715843	2026-06-30 16:53:53.80569	62	\N	HOS0328
+2828	2	2	HOS-00329	MG CHARITABLE TRUST PAYMENT VOUCHER	68	74	38	2	5	17666.38	\N	Covered	\N	12	Consumable	MG CHARITABLE TRUST PAYMENT VOUCHER	t	f	2026-06-11 21:48:30.715848	2026-06-30 16:53:53.805693	62	\N	HOS0329
+2829	2	2	HOS-00331	MOBILE PHONE SAMSUNG	68	69	29	3	9	34424.32	\N	Covered	\N	18	Non-Consumable	MOBILE PHONE SAMSUNG	t	f	2026-06-11 21:48:30.715854	2026-06-30 16:53:53.805696	62	\N	HOS0331
+2830	2	2	HOS-00332	MYCOLOGY REGISTER	68	74	29	2	5	31597.08	\N	Covered	\N	12	Consumable	MYCOLOGY REGISTER	t	f	2026-06-11 21:48:30.71586	2026-06-30 16:53:53.805698	62	\N	HOS0332
+2831	2	2	HOS-00333	NEONATE AMBU BAG	68	69	29	5	17	21296.51	\N	Covered	\N	12	Non-Consumable	NEONATE AMBU BAG	t	f	2026-06-11 21:48:30.715866	2026-06-30 16:53:53.805701	62	\N	HOS0333
+2832	2	2	HOS-00334	NIGHTIES	68	70	29	2	7	26397.84	\N	Covered	\N	5	Consumable	NIGHTIES	t	f	2026-06-11 21:48:30.715872	2026-06-30 16:53:53.805704	62	\N	HOS0334
+2833	2	2	HOS-00335	NOTE PAD	68	74	29	2	6	35670.68	\N	Covered	\N	12	Consumable	NOTE PAD	t	f	2026-06-11 21:48:30.715877	2026-06-30 16:53:53.805707	62	\N	HOS0335
+2834	2	2	HOS-00336	NURSES DAILY RECORD	68	74	38	3	10	22728.77	\N	Covered	\N	18	Consumable	NURSES DAILY RECORD	t	f	2026-06-11 21:48:30.715883	2026-06-30 16:53:53.805709	62	\N	HOS0336
+2835	2	2	HOS-00337	NURSES ICU MONITORING CHART	68	74	38	3	12	34737.12	\N	Covered	\N	18	Consumable	NURSES ICU MONITORING CHART	t	f	2026-06-11 21:48:30.715889	2026-06-30 16:53:53.805712	62	\N	HOS0337
+2836	2	2	HOS-00338	NURSES TREATMENT CHART	68	74	38	3	11	41501.48	\N	Covered	\N	18	Consumable	NURSES TREATMENT CHART	t	f	2026-06-11 21:48:30.715895	2026-06-30 16:53:53.805715	62	\N	HOS0338
+2837	2	2	HOS-00339	NURSING ASSESMENT	68	74	38	2	5	17119.6	\N	Covered	\N	18	Consumable	NURSING ASSESMENT	t	f	2026-06-11 21:48:30.7159	2026-06-30 16:53:53.805718	62	\N	HOS0339
+2838	2	2	HOS-00340	ODONIL - LAVENDER	68	69	29	5	17	17947.27	\N	Covered	\N	18	Consumable	ODONIL - LAVENDER	t	f	2026-06-11 21:48:30.715906	2026-06-30 16:53:53.80572	62	\N	HOS0340
+2839	2	2	HOS-00341	OPD REGISTER	68	74	29	2	7	40240.52	\N	Covered	\N	18	Consumable	OPD REGISTER	t	f	2026-06-11 21:48:30.715916	2026-06-30 16:53:53.805723	62	\N	HOS0341
+2840	2	2	HOS-00342	OPERATION RECORD 1&2	68	74	38	20	52	8957.14	\N	Covered	\N	18	Consumable	OPERATION RECORD 1&2	t	f	2026-06-11 21:48:30.715922	2026-06-30 16:53:53.805726	62	\N	HOS0342
+2841	2	2	HOS-00343	OT LIST	68	74	38	4	16	32877.85	\N	Covered	\N	18	Consumable	OT LIST	t	f	2026-06-11 21:48:30.715928	2026-06-30 16:53:53.805729	62	\N	HOS0343
+2842	2	2	HOS-00344	OT REGISTER	68	74	29	2	7	38475.64	\N	Covered	\N	18	Consumable	OT REGISTER	t	f	2026-06-11 21:48:30.715934	2026-06-30 16:53:53.805731	62	\N	HOS0344
+2843	2	2	HOS-00345	OUT PATIENT CASE RECORD	68	74	38	4	15	11546.26	\N	Covered	\N	18	Consumable	OUT PATIENT CASE RECORD	t	f	2026-06-11 21:48:30.71594	2026-06-30 16:53:53.805734	62	\N	HOS0345
+2844	2	2	HOS-00346	PACKAGE SERVICES BOOK	68	74	38	4	12	39701.13	\N	Covered	\N	18	Consumable	PACKAGE SERVICES BOOK	t	f	2026-06-11 21:48:30.715949	2026-06-30 16:53:53.805737	62	\N	HOS0346
+2845	2	2	HOS-00347	PAEDIATRICS NEW BORN SHEET	68	74	34	2	6	29440.22	\N	Covered	\N	18	Consumable	PAEDIATRICS NEW BORN SHEET	t	f	2026-06-11 21:48:30.715955	2026-06-30 16:53:53.80574	62	\N	HOS0347
+2846	2	2	HOS-00348	PAPER CLIPS	68	74	37	4	12	11182.73	\N	Covered	\N	18	Consumable	PAPER CLIPS	t	f	2026-06-11 21:48:30.715961	2026-06-30 16:53:53.805742	62	\N	HOS0348
+2847	2	2	HOS-00349	PAPER PLATE 12 INCHES	68	69	37	2	5	15182.76	\N	Covered	\N	12	Consumable	PAPER PLATE 12 INCHES	t	f	2026-06-11 21:48:30.715967	2026-06-30 16:53:53.805745	62	\N	HOS0349
+2848	2	2	HOS-00350	PAPER PLATE 6NO	68	69	37	4	15	16299.26	\N	Covered	\N	12	Consumable	PAPER PLATE 6NO	t	f	2026-06-11 21:48:30.715972	2026-06-30 16:53:53.805748	62	\N	HOS0350
+2849	2	2	HOS-00351	PATIENT INVESTIGATION LOG	68	74	38	4	14	11998.62	\N	Covered	\N	18	Consumable	PATIENT INVESTIGATION LOG	t	f	2026-06-11 21:48:30.715978	2026-06-30 16:53:53.805751	62	\N	HOS0351
+2850	2	2	HOS-00352	PEDIATRIC AMBU BAG	68	69	29	3	7	37608.66	\N	Covered	\N	12	Non-Consumable	PEDIATRIC AMBU BAG	t	f	2026-06-11 21:48:30.715984	2026-06-30 16:53:53.805753	62	\N	HOS0352
+2851	2	2	HOS-00353	PERIPHERAL IV CENTRAL LINE	68	74	38	2	8	44902.73	\N	Covered	\N	18	Consumable	PERIPHERAL IV CENTRAL LINE	t	f	2026-06-11 21:48:30.71599	2026-06-30 16:53:53.805756	62	\N	HOS0353
+2852	2	2	HOS-00354	PHARMACY INDENT BOOK	68	74	38	5	13	44018.45	\N	Covered	\N	18	Consumable	PHARMACY INDENT BOOK	t	f	2026-06-11 21:48:30.715995	2026-06-30 16:53:53.805759	62	\N	HOS0354
+2853	2	2	HOS-00355	PHARMACY RETURN BOOK	68	74	38	5	14	13659.49	\N	Covered	\N	18	Consumable	PHARMACY RETURN BOOK	t	f	2026-06-11 21:48:30.716001	2026-06-30 16:53:53.805762	62	\N	HOS0355
+2854	2	2	HOS-00356	PHYSICAL FITNESS CRTIFICATE	68	74	38	2	8	32654.96	\N	Covered	\N	18	Consumable	PHYSICAL FITNESS CRTIFICATE	t	f	2026-06-11 21:48:30.716007	2026-06-30 16:53:53.805764	62	\N	HOS0356
+2855	2	2	HOS-00357	PILLOW	68	70	29	2	5	35389.67	\N	Covered	\N	12	Non-Consumable	PILLOW	t	f	2026-06-11 21:48:30.716013	2026-06-30 16:53:53.805767	62	\N	HOS0357
+2856	2	2	HOS-00358	PLASTIC SPOON	68	69	37	2	5	25797.52	\N	Covered	\N	18	Consumable	PLASTIC SPOON	t	f	2026-06-11 21:48:30.716018	2026-06-30 16:53:53.80577	62	\N	HOS0358
+2857	2	2	HOS-00359	PLASTIC TRAY	68	69	29	4	10	30679.31	\N	Covered	\N	18	Non-Consumable	PLASTIC TRAY	t	f	2026-06-11 21:48:30.716024	2026-06-30 16:53:53.805773	62	\N	HOS0359
+2858	2	2	HOS-00360	PLATELET SDP ISSUE REGISTER	68	74	29	2	6	34642.99	\N	Covered	\N	18	Consumable	PLATELET SDP ISSUE REGISTER	t	f	2026-06-11 21:48:30.71603	2026-06-30 16:53:53.805775	62	\N	HOS0360
+2859	2	2	HOS-00361	POLICE INTIMATION BOOK	68	74	38	5	11	32810.54	\N	Covered	\N	18	Consumable	POLICE INTIMATION BOOK	t	f	2026-06-11 21:48:30.716036	2026-06-30 16:53:53.805778	62	\N	HOS0361
+2861	2	2	HOS-00362	PP FILE - A4 LARGE FILE (9.5X12.5 INCHES) WITH 9MM SPINE -PP 0.32MM WITH MATT FINISH WITH DELUXE CLIP (SAME AS SANCHETI SAMPLE) OBG	68	74	29	4	14	37317.79	\N	Covered	\N	18	Consumable	PP FILE - A4 LARGE FILE (9.5X12.5 INCHES) WITH 9MM SPINE -PP 0.32MM WITH MATT FINISH WITH DELUXE CLIP (SAME AS SANCHETI SAMPLE) OBG	t	f	2026-06-11 21:48:30.716048	2026-06-30 16:53:53.805781	62	\N	HOS0362
+2862	2	2	HOS-00363	PRE ANASTHETIC CHECKUP FORM	68	74	38	28	62	9946.09	\N	Covered	\N	18	Consumable	PRE ANASTHETIC CHECKUP FORM	t	f	2026-06-11 21:48:30.716054	2026-06-30 16:53:53.805784	62	\N	HOS0363
+2863	2	2	HOS-00364	PRESCRIPTION PAD	68	74	38	3	9	26966.04	\N	Covered	\N	18	Consumable	PRESCRIPTION PAD	t	f	2026-06-11 21:48:30.71606	2026-06-30 16:53:53.805789	62	\N	HOS0364
+2864	2	2	HOS-00365	PRESSURE ULCER CARE	68	74	38	5	17	13396.13	\N	Covered	\N	18	Consumable	PRESSURE ULCER CARE	t	f	2026-06-11 21:48:30.716065	2026-06-30 16:53:53.805791	62	\N	HOS0365
+2865	2	2	HOS-00366	PRESSURE ULCER SURVELLIANCE CARE BUNDLE	68	74	38	2	6	49872.02	\N	Covered	\N	18	Consumable	PRESSURE ULCER SURVELLIANCE CARE BUNDLE	t	f	2026-06-11 21:48:30.716071	2026-06-30 16:53:53.805794	62	\N	HOS0366
+2866	2	2	HOS-00367	PULSE OXIMETER (BUY 1 GET 1 FREE OFFER)	68	69	29	4	13	11790.43	\N	Covered	\N	12	Non-Consumable	PULSE OXIMETER (BUY 1 GET 1 FREE OFFER)	t	f	2026-06-11 21:48:30.716077	2026-06-30 16:53:53.805797	62	\N	HOS0367
+2867	2	2	HOS-00368	RADIOMETER - ABG - SENSOR CASSETTE FOR ABL9 300TEST PACK - SC9 - 2-BGEL	68	67	29	2	7	49317.14	\N	Covered	\N	12	Consumable	RADIOMETER - ABG - SENSOR CASSETTE FOR ABL9 300TEST PACK - SC9 - 2-BGEL	t	f	2026-06-11 21:48:30.716083	2026-06-30 16:53:53.8058	62	\N	HOS0368
+2868	2	2	HOS-00369	RADIOMETER AQT90FLEX REAGENERALT PACK (200TESTS)	68	67	29	3	10	49042.32	\N	Covered	\N	12	Consumable	RADIOMETER AQT90FLEX REAGENERALT PACK (200TESTS)	t	f	2026-06-11 21:48:30.716089	2026-06-30 16:53:53.805802	62	\N	HOS0369
+2869	2	2	HOS-00370	RECHARGEABLE TORCH - EVEREADY	68	69	29	4	15	45240.53	\N	Covered	\N	18	Non-Consumable	RECHARGEABLE TORCH - EVEREADY	t	f	2026-06-11 21:48:30.716095	2026-06-30 16:53:53.805805	62	\N	HOS0370
+2870	2	2	HOS-00371	REQUEST FOR BLOOD AND BLOOD COMPONENTS	68	74	38	30	110	7893.55	\N	Covered	\N	12	Consumable	REQUEST FOR BLOOD AND BLOOD COMPONENTS	t	f	2026-06-11 21:48:30.716101	2026-06-30 16:53:53.805808	62	\N	HOS0371
+2871	2	2	HOS-00372	SAMSUNG-32 INCHES SMART TV HD READY WITH OTT APPS MODEL-T4580	68	66	29	4	10	25272.79	\N	Covered	\N	18	Non-Consumable	SAMSUNG-32 INCHES SMART TV HD READY WITH OTT APPS MODEL-T4580	t	f	2026-06-11 21:48:30.716106	2026-06-30 16:53:53.805811	62	\N	HOS0372
+2872	2	2	HOS-00373	SAMSUNG-43 INCHES SMART TV ULTRA HD 4K WITH OTT APPS MODEL-HG43BU800	68	66	29	2	6	19114.19	\N	Covered	\N	18	Non-Consumable	SAMSUNG-43 INCHES SMART TV ULTRA HD 4K WITH OTT APPS MODEL-HG43BU800	t	f	2026-06-11 21:48:30.716112	2026-06-30 16:53:53.805813	62	\N	HOS0373
+2873	2	2	HOS-00374	SCISSOR 128MM	68	74	29	4	9	47096.75	\N	Covered	\N	12	Non-Consumable	SCISSOR 128MM	t	f	2026-06-11 21:48:30.716119	2026-06-30 16:53:53.805816	62	\N	HOS0374
+2874	2	2	HOS-00375	SLIPPERS	68	69	41	3	10	19661.93	\N	Covered	\N	5	Consumable	SLIPPERS	t	f	2026-06-11 21:48:30.716124	2026-06-30 16:53:53.805819	62	\N	HOS0375
+2875	2	2	HOS-00376	SMALL NOTE BOOK	68	74	29	35	87	6299.65	\N	Covered	\N	12	Consumable	SMALL NOTE BOOK	t	f	2026-06-11 21:48:30.71613	2026-06-30 16:53:53.805822	62	\N	HOS0376
+2876	2	2	HOS-00377	SONY THERMAL PAPERS - 84S IN BOXES	68	74	29	4	12	21970.9	\N	Covered	\N	18	Consumable	SONY THERMAL PAPERS - 84S IN BOXES	t	f	2026-06-11 21:48:30.716136	2026-06-30 16:53:53.805824	62	\N	HOS0377
+2877	2	2	HOS-00378	SRIPADHA PHARMACY PAYMENT VOUCHER	68	74	38	3	11	10000.59	\N	Covered	\N	12	Consumable	SRIPADHA PHARMACY PAYMENT VOUCHER	t	f	2026-06-11 21:48:30.716142	2026-06-30 16:53:53.805827	62	\N	HOS0378
+2878	2	2	HOS-00379	STEEL PLATE ROUND	68	69	29	4	10	29828.37	\N	Covered	\N	18	Non-Consumable	STEEL PLATE ROUND	t	f	2026-06-11 21:48:30.716147	2026-06-30 16:53:53.80583	62	\N	HOS0379
+2879	2	2	HOS-00380	STEEL TEA CUP	68	69	29	3	8	34638.79	\N	Covered	\N	18	Non-Consumable	STEEL TEA CUP	t	f	2026-06-11 21:48:30.716153	2026-06-30 16:53:53.805833	62	\N	HOS0380
+2880	2	2	HOS-00381	SURGICAL SITE INFECTION PREVENTION CHECKLIST	68	74	38	2	5	41898.03	\N	Covered	\N	12	Consumable	SURGICAL SITE INFECTION PREVENTION CHECKLIST	t	f	2026-06-11 21:48:30.716159	2026-06-30 16:53:53.805835	62	\N	HOS0381
+2881	2	2	HOS-00382	THERMAL PRINTER PAPER ROLL FOR AQT90-RADIOMETER 112MM (20MTRS)	68	74	29	4	13	38080.11	\N	Covered	\N	18	Consumable	THERMAL PRINTER PAPER ROLL FOR AQT90-RADIOMETER 112MM (20MTRS)	t	f	2026-06-11 21:48:30.716167	2026-06-30 16:53:53.805838	62	\N	HOS0382
+2882	2	2	HOS-00383	THERMAL PRINTER ROLLS FOR ABG - 80MM 20 MTRS	68	74	29	4	9	20324.55	\N	Covered	\N	18	Consumable	THERMAL PRINTER ROLLS FOR ABG - 80MM 20 MTRS	t	f	2026-06-11 21:48:30.716173	2026-06-30 16:53:53.805841	62	\N	HOS0383
+2883	2	2	HOS-00384	THERMOSCAN - ROSSMAX	68	69	29	3	12	30771.34	\N	Covered	\N	12	Consumable	THERMOSCAN - ROSSMAX	t	f	2026-06-11 21:48:30.716179	2026-06-30 16:53:53.805844	62	\N	HOS0384
+2884	2	2	HOS-00385	THICK PLASTIC SHEET BIG ROLLS	68	69	30	4	13	43134.08	\N	Covered	\N	18	Consumable	THICK PLASTIC SHEET BIG ROLLS	t	f	2026-06-11 21:48:30.716185	2026-06-30 16:53:53.805847	62	\N	HOS0385
+2885	2	2	HOS-00386	TOURNIQUET LARGE SIZE - TYNOR	68	69	29	3	9	10124.09	\N	Covered	\N	12	Non-Consumable	TOURNIQUET LARGE SIZE - TYNOR	t	f	2026-06-11 21:48:30.716191	2026-06-30 16:53:53.80585	62	\N	HOS0386
+2886	2	2	HOS-00387	TOURNIQUET MEDIUM SIZE - TYNOR	68	69	29	4	10	29620.3	\N	Covered	\N	12	Non-Consumable	TOURNIQUET MEDIUM SIZE - TYNOR	t	f	2026-06-11 21:48:30.716196	2026-06-30 16:53:53.805853	62	\N	HOS0387
+2887	2	2	HOS-00388	TOURNIQUET SMALL SIZE - TYNOR	68	69	29	5	14	35675.08	\N	Covered	\N	12	Non-Consumable	TOURNIQUET SMALL SIZE - TYNOR	t	f	2026-06-11 21:48:30.716202	2026-06-30 16:53:53.805856	62	\N	HOS0388
+2888	2	2	HOS-00389	TYNOR - RESTRAINER I-65 UN-	68	69	29	3	8	33549.49	\N	Covered	\N	12	Non-Consumable	TYNOR - RESTRAINER I-65 UN-	t	f	2026-06-11 21:48:30.716208	2026-06-30 16:53:53.805859	62	\N	HOS0389
+2889	2	2	HOS-00390	URINARY CATHETER CARE	68	74	38	5	17	16270.52	\N	Covered	\N	12	Consumable	URINARY CATHETER CARE	t	f	2026-06-11 21:48:30.716214	2026-06-30 16:53:53.805861	62	\N	HOS0390
+2890	2	2	HOS-00391	VACCINATION CARD (PAEDIATRIC)	68	74	29	28	95	6453.22	\N	Covered	\N	12	Consumable	VACCINATION CARD (PAEDIATRIC)	t	f	2026-06-11 21:48:30.716219	2026-06-30 16:53:53.805864	62	\N	HOS0391
+2891	2	2	HOS-00392	VAP CARE BUNDLE	68	74	38	2	5	33634.67	\N	Covered	\N	12	Consumable	VAP CARE BUNDLE	t	f	2026-06-11 21:48:30.716225	2026-06-30 16:53:53.805867	62	\N	HOS0392
+2892	2	2	HOS-00393	VIM BAR - SMALL	68	69	29	3	8	18525.4	\N	Covered	\N	18	Consumable	VIM BAR - SMALL	t	f	2026-06-11 21:48:30.716231	2026-06-30 16:53:53.80587	62	\N	HOS0393
+2893	2	2	HOS-00394	WALKER FOLDABLE SUPERIOR QUALITY	68	69	29	5	15	30872.71	\N	Covered	\N	12	Non-Consumable	WALKER FOLDABLE SUPERIOR QUALITY	t	f	2026-06-11 21:48:30.716237	2026-06-30 16:53:53.805872	62	\N	HOS0394
+2894	2	2	HOS-00395	WALL CLOCK ROUND - AJANTA	68	69	29	3	7	44917.82	\N	Covered	\N	18	Non-Consumable	WALL CLOCK ROUND - AJANTA	t	f	2026-06-11 21:48:30.716243	2026-06-30 16:53:53.805875	62	\N	HOS0395
+2895	2	2	HOS-00396	WARD CENSUS REGISTER	68	74	29	5	16	42515.36	\N	Covered	\N	12	Consumable	WARD CENSUS REGISTER	t	f	2026-06-11 21:48:30.716248	2026-06-30 16:53:53.805878	62	\N	HOS0396
+2896	2	2	HOS-00397	WELCOME KIT IN ZIPLOCK POUCH WITH LOGO PRINT-20GM SOAP, 20ML KIWI SHAMPOO, 20ML KIWI BODY LOTION, WHITE BRUSH, COLGATE PASTE	68	69	34	5	17	25224.08	\N	Covered	\N	18	Consumable	WELCOME KIT IN ZIPLOCK POUCH WITH LOGO PRINT-20GM SOAP, 20ML KIWI SHAMPOO, 20ML KIWI BODY LOTION, WHITE BRUSH, COLGATE PASTE	t	f	2026-06-11 21:48:30.716255	2026-06-30 16:53:53.805881	62	\N	HOS0397
+2897	2	2	HOS-00398	WHITE BOARD SIZE 4X2	68	69	29	2	5	35445.94	\N	Covered	\N	18	Non-Consumable	WHITE BOARD SIZE 4X2	t	f	2026-06-11 21:48:30.716261	2026-06-30 16:53:53.805883	62	\N	HOS0398
+2898	2	2	HOS-00399	YELLOW PRESCRIPTION PAD	68	74	38	2	8	16201.47	\N	Covered	\N	12	Consumable	YELLOW PRESCRIPTION PAD	t	f	2026-06-11 21:48:30.716268	2026-06-30 16:53:53.805886	62	\N	HOS0399
 3444	2	2	PLB-00037	40mm FTA	73	87	29	38	98	1262.61	\N	Covered	\N	18	Consumable	40mm FTA	t	f	2026-06-11 21:48:30.71942	2026-06-11 21:58:45.596426	62	\N	PLB0037
+2338	2	2	CIV-00001	AB15 APEX 4LTR	65	56	36	37	102	4352.49	\N	Covered		18	Consumable	AB15 APEX 4LTR	t	f	2026-06-11 21:48:30.712865	2026-07-01 17:08:13.721194	62		CIV0001
 2337	2	2	HOI-00029	KNEE HAMMER	76	95	29	3	7	18841.64	\N	Covered	\N	12	Non-Consumable	KNEE HAMMER	t	f	2026-06-11 21:48:30.712841	2026-06-11 21:58:45.593271	62	\N	HOI0029
-2338	2	2	CIV-00001	AB15 APEX 4LTR	65	56	36	37	102	4352.49	\N	Covered	\N	18	Consumable	AB15 APEX 4LTR	t	f	2026-06-11 21:48:30.712865	2026-06-11 21:58:45.59329	62	\N	CIV0001
 2339	2	2	CIV-00002	SE2 SATIN 4 LTR	65	56	36	42	156	3701.64	\N	Covered	\N	18	Consumable	SE2 SATIN 4 LTR	t	f	2026-06-11 21:48:30.712873	2026-06-11 21:58:45.593295	62	\N	CIV0002
 2340	2	2	CIV-00003	SILVER GRAY APCO PREMIUM SATIN	65	56	31	263	539	398.32	\N	Covered	\N	18	Consumable	SILVER GRAY APCO PREMIUM SATIN	t	f	2026-06-11 21:48:30.71288	2026-06-11 21:58:45.593298	62	\N	CIV0003
 2341	2	2	CIV-00004	AB2 Apex 1Ltr	65	56	31	360	1396	352.41	\N	Covered	\N	18	Consumable	AB2 Apex 1Ltr	t	f	2026-06-11 21:48:30.712885	2026-06-11 21:58:45.593302	62	\N	CIV0004
@@ -9689,403 +10150,8 @@ COPY public.materials (id, tenant_id, site_id, code, name, category_id, subcateg
 2498	2	2	ELE-00086	Cat 6 Cable	66	57	29	59	194	353.27	\N	Covered	\N	18	Consumable	Cat 6 Cable	t	f	2026-06-11 21:48:30.713863	2026-06-11 21:58:45.593759	62	\N	ELE0086
 2499	2	2	ELE-00087	2" LED Battern	66	57	29	35	130	1208.02	\N	Covered	\N	18	Consumable	2" LED Battern	t	f	2026-06-11 21:48:30.713872	2026-06-11 21:58:45.593761	62	\N	ELE0087
 2500	2	2	ELE-00088	4" LED Battern	66	57	29	231	533	96.14	\N	Covered	\N	18	Consumable	4" LED Battern	t	f	2026-06-11 21:48:30.713878	2026-06-11 21:58:45.593764	62	\N	ELE0088
-2501	2	2	HOU-00001	PHARMACY CLOTH COVERS - 13X16	68	72	30	4	16	25218.56	\N	Covered	\N	5	Consumable	PHARMACY CLOTH COVERS - 13X16	t	f	2026-06-11 21:48:30.713884	2026-06-11 21:58:45.593767	62	\N	HOS0001
-2502	2	2	HOU-00002	PHARMACY CLOTH COVERS - 16X20	68	72	30	13	44	9699.42	\N	Covered	\N	5	Consumable	PHARMACY CLOTH COVERS - 16X20	t	f	2026-06-11 21:48:30.713889	2026-06-11 21:58:45.59377	62	\N	HOS0002
-2503	2	2	HOU-00003	PHARMACY CLOTH COVERS - 9X13	68	72	30	4	14	47777.02	\N	Covered	\N	5	Consumable	PHARMACY CLOTH COVERS - 9X13	t	f	2026-06-11 21:48:30.713895	2026-06-11 21:58:45.593773	62	\N	HOS0003
-2504	2	2	HOU-00004	STETHOSCOPE MICROTOME	68	69	29	5	14	15728.29	\N	Covered	\N	12	Non-Consumable	STETHOSCOPE MICROTOME	t	f	2026-06-11 21:48:30.713901	2026-06-11 21:58:45.593775	62	\N	HOS0004
-2505	2	2	HOU-00005	CLENZYME (MULTIENZYME CLEANER)1000ML.	68	69	29	5	11	20144.9	\N	Covered	\N	18	Consumable	CLENZYME (MULTIENZYME CLEANER)1000ML.	t	f	2026-06-11 21:48:30.713906	2026-06-11 21:58:45.593778	62	\N	HOS0005
-2506	2	2	HOU-00006	BUCKET PLASTIC 20Ltrs	68	69	29	5	18	32845.83	\N	Covered	\N	18	Non-Consumable	BUCKET PLASTIC 20Ltrs	t	f	2026-06-11 21:48:30.713912	2026-06-11 21:58:45.593781	62	\N	HOS0006
-2507	2	2	HOU-00007	KIRAN COAT APRON 0.5MM PB 100CM X 60CM	68	71	29	5	17	10818.26	\N	Covered	\N	12	Consumable	KIRAN COAT APRON 0.5MM PB 100CM X 60CM	t	f	2026-06-11 21:48:30.713918	2026-06-11 21:58:45.593784	62	\N	HOS0007
-2508	2	2	HOU-00008	BAYER 190ML HIGH PRESSURE INJECTOR SYRINGE	68	73	29	4	12	39682.9	\N	Covered	\N	12	Consumable	BAYER 190ML HIGH PRESSURE INJECTOR SYRINGE	t	f	2026-06-11 21:48:30.713923	2026-06-11 21:58:45.593787	62	\N	HOS0008
-2509	2	2	HOU-00009	BED PAN STEEL	68	69	29	5	16	30531.96	\N	Covered	\N	18	Non-Consumable	BED PAN STEEL	t	f	2026-06-11 21:48:30.713929	2026-06-11 21:58:45.59379	62	\N	HOS0009
-2510	2	2	HOU-00010	BED PAN PLASTIC	68	69	29	4	16	41874.87	\N	Covered	\N	18	Non-Consumable	BED PAN PLASTIC	t	f	2026-06-11 21:48:30.713935	2026-06-11 21:58:45.593792	62	\N	HOS0010
-2511	2	2	HOU-00011	URINE CANE (MALE)	68	69	29	3	7	25531.88	\N	Covered	\N	12	Non-Consumable	URINE CANE (MALE)	t	f	2026-06-11 21:48:30.713941	2026-06-11 21:58:45.593795	62	\N	HOS0011
-2512	2	2	HOU-00012	STEEL BUCKET 5 LTRS	68	69	29	4	14	30747	\N	Covered	\N	18	Non-Consumable	STEEL BUCKET 5 LTRS	t	f	2026-06-11 21:48:30.713947	2026-06-11 21:58:45.593798	62	\N	HOS0012
-2513	2	2	HOU-00013	DRESSING BIN 6 X 6 SS	68	69	29	5	17	11616.55	\N	Covered	\N	18	Non-Consumable	DRESSING BIN 6 X 6 SS	t	f	2026-06-11 21:48:30.713953	2026-06-11 21:58:45.593801	62	\N	HOS0013
-2514	2	2	HOU-00014	TRAY WITH COVER 10 X8	68	69	34	5	17	32278.21	\N	Covered	\N	18	Non-Consumable	TRAY WITH COVER 10 X8	t	f	2026-06-11 21:48:30.713958	2026-06-11 21:58:45.593804	62	\N	HOS0014
-2515	2	2	HOU-00015	TRAY WITH COVER 12 X 10	68	69	34	3	10	13739.84	\N	Covered	\N	18	Non-Consumable	TRAY WITH COVER 12 X 10	t	f	2026-06-11 21:48:30.713964	2026-06-11 21:58:45.593806	62	\N	HOS0015
-2516	2	2	HOU-00016	TRAY WITH COVER 9 X 6	68	69	34	2	8	16241.02	\N	Covered	\N	18	Non-Consumable	TRAY WITH COVER 9 X 6	t	f	2026-06-11 21:48:30.71397	2026-06-11 21:58:45.593809	62	\N	HOS0016
-2517	2	2	HOU-00017	TRAY WITH COVER SS 12 X 10	68	69	34	4	13	46179.91	\N	Covered	\N	18	Non-Consumable	TRAY WITH COVER SS 12 X 10	t	f	2026-06-11 21:48:30.713976	2026-06-11 21:58:45.593812	62	\N	HOS0017
-2518	2	2	HOU-00018	TRAY WITH COVER SS 18 X 12	68	69	34	5	17	28057.06	\N	Covered	\N	18	Non-Consumable	TRAY WITH COVER SS 18 X 12	t	f	2026-06-11 21:48:30.713982	2026-06-11 21:58:45.593815	62	\N	HOS0018
-2519	2	2	HOU-00019	TRAY WITH COVER SS 8 X 3	68	69	34	3	11	42302.32	\N	Covered	\N	18	Non-Consumable	TRAY WITH COVER SS 8 X 3	t	f	2026-06-11 21:48:30.713987	2026-06-11 21:58:45.593818	62	\N	HOS0019
-2520	2	2	HOU-00020	Mindray SpO2 Adult Probe	68	61	29	4	16	28396.63	\N	Covered	\N	12	Consumable	Mindray SpO2 Adult Probe	t	f	2026-06-11 21:48:30.713993	2026-06-11 21:58:45.593821	62	\N	HOS0020
-2521	2	2	HOU-00021	Mindray SpO2 Pediatric Probe	68	61	29	3	9	14585.87	\N	Covered	\N	12	Consumable	Mindray SpO2 Pediatric Probe	t	f	2026-06-11 21:48:30.713999	2026-06-11 21:58:45.593823	62	\N	HOS0021
-2522	2	2	HOU-00022	Mindray SpO2 Neonatal Probe	68	61	29	5	13	35708.56	\N	Covered	\N	12	Consumable	Mindray SpO2 Neonatal Probe	t	f	2026-06-11 21:48:30.714005	2026-06-11 21:58:45.593826	62	\N	HOS0022
-2523	2	2	HOU-00023	Mindray ECG Cable	68	61	29	3	7	30824.89	\N	Covered	\N	12	Consumable	Mindray ECG Cable	t	f	2026-06-11 21:48:30.714011	2026-06-11 21:58:45.593829	62	\N	HOS0023
-2524	2	2	HOU-00024	Mindray NIBP Hose	68	61	29	2	7	39929.38	\N	Covered	\N	12	Consumable	Mindray NIBP Hose	t	f	2026-06-11 21:48:30.714016	2026-06-11 21:58:45.593832	62	\N	HOS0024
-2525	2	2	HOU-00025	Philips SpO2 Adult Probe	68	61	29	4	12	14907.95	\N	Covered	\N	12	Consumable	Philips SpO2 Adult Probe	t	f	2026-06-11 21:48:30.714022	2026-06-11 21:58:45.593835	62	\N	HOS0025
-2526	2	2	HOU-00026	Philips SpO2 Pediatric Probe	68	61	29	43	146	7679.63	\N	Covered	\N	12	Consumable	Philips SpO2 Pediatric Probe	t	f	2026-06-11 21:48:30.714028	2026-06-11 21:58:45.593837	62	\N	HOS0026
-2527	2	2	HOU-00027	Philips SpO2 Neonatal Probe	68	61	29	4	12	34011.43	\N	Covered	\N	12	Consumable	Philips SpO2 Neonatal Probe	t	f	2026-06-11 21:48:30.714034	2026-06-11 21:58:45.59384	62	\N	HOS0027
-2528	2	2	HOU-00028	Philips ECG Cable	68	61	29	4	13	33761.49	\N	Covered	\N	12	Consumable	Philips ECG Cable	t	f	2026-06-11 21:48:30.714039	2026-06-11 21:58:45.593843	62	\N	HOS0028
-2529	2	2	HOU-00029	Philips NIBP Hose	68	61	29	2	5	28663.04	\N	Covered	\N	12	Consumable	Philips NIBP Hose	t	f	2026-06-11 21:48:30.714045	2026-06-11 21:58:45.593846	62	\N	HOS0029
-2530	2	2	HOU-00030	Comen SpO2 Adult Probe	68	61	29	4	14	27583.36	\N	Covered	\N	12	Consumable	Comen SpO2 Adult Probe	t	f	2026-06-11 21:48:30.714051	2026-06-11 21:58:45.593849	62	\N	HOS0030
-2531	2	2	HOU-00031	Comen SpO2 Pediatric Probe	68	61	29	4	9	26109.32	\N	Covered	\N	12	Consumable	Comen SpO2 Pediatric Probe	t	f	2026-06-11 21:48:30.714057	2026-06-11 21:58:45.593852	62	\N	HOS0031
-2532	2	2	HOU-00032	Comen SpO2 Neonatal Probe	68	61	29	5	12	40196.65	\N	Covered	\N	12	Consumable	Comen SpO2 Neonatal Probe	t	f	2026-06-11 21:48:30.714063	2026-06-11 21:58:45.593854	62	\N	HOS0032
-2533	2	2	HOU-00033	Comen ECG Cable	68	61	29	2	5	22272.98	\N	Covered	\N	12	Consumable	Comen ECG Cable	t	f	2026-06-11 21:48:30.714068	2026-06-11 21:58:45.593857	62	\N	HOS0033
-2534	2	2	HOU-00034	Comen NIBP Hose	68	61	29	2	7	30445.33	\N	Covered	\N	12	Consumable	Comen NIBP Hose	t	f	2026-06-11 21:48:30.714074	2026-06-11 21:58:45.59386	62	\N	HOS0034
-2535	2	2	HOU-00035	Edan SpO2 Adult Probe	68	61	29	2	8	43429.35	\N	Covered	\N	12	Consumable	Edan SpO2 Adult Probe	t	f	2026-06-11 21:48:30.71408	2026-06-11 21:58:45.593863	62	\N	HOS0035
-2536	2	2	HOU-00036	Edan SpO2 Pediatric Probe	68	61	29	2	7	11528.14	\N	Covered	\N	12	Consumable	Edan SpO2 Pediatric Probe	t	f	2026-06-11 21:48:30.714086	2026-06-11 21:58:45.593866	62	\N	HOS0036
-2537	2	2	HOU-00037	Edan SpO2 Neonatal Probe	68	61	29	3	11	42685.66	\N	Covered	\N	12	Consumable	Edan SpO2 Neonatal Probe	t	f	2026-06-11 21:48:30.714091	2026-06-11 21:58:45.593869	62	\N	HOS0037
-2538	2	2	HOU-00038	Edan ECG Cable	68	61	29	4	16	15007.85	\N	Covered	\N	12	Consumable	Edan ECG Cable	t	f	2026-06-11 21:48:30.714097	2026-06-11 21:58:45.593871	62	\N	HOS0038
-2539	2	2	HOU-00039	Edan NIBP Hose	68	61	29	3	11	46249.16	\N	Covered	\N	12	Consumable	Edan NIBP Hose	t	f	2026-06-11 21:48:30.714103	2026-06-11 21:58:45.593874	62	\N	HOS0039
-2540	2	2	HOU-00040	GE SpO2 Adult Probe	68	61	29	4	13	49341.02	\N	Covered	\N	12	Consumable	GE SpO2 Adult Probe	t	f	2026-06-11 21:48:30.714108	2026-06-11 21:58:45.593877	62	\N	HOS0040
-2541	2	2	HOU-00041	GE SpO2 Pediatric Probe	68	61	29	5	16	27138.7	\N	Covered	\N	12	Consumable	GE SpO2 Pediatric Probe	t	f	2026-06-11 21:48:30.714116	2026-06-11 21:58:45.59388	62	\N	HOS0041
-2542	2	2	HOU-00042	GE SpO2 Neonatal Probe	68	61	29	2	6	21012.11	\N	Covered	\N	12	Consumable	GE SpO2 Neonatal Probe	t	f	2026-06-11 21:48:30.714122	2026-06-11 21:58:45.593882	62	\N	HOS0042
-2543	2	2	HOU-00043	GE ECG Cable	68	61	29	4	12	30635.68	\N	Covered	\N	12	Consumable	GE ECG Cable	t	f	2026-06-11 21:48:30.714128	2026-06-11 21:58:45.593885	62	\N	HOS0043
-2544	2	2	HOU-00044	GE NIBP Hose	68	61	29	4	16	18506.34	\N	Covered	\N	12	Consumable	GE NIBP Hose	t	f	2026-06-11 21:48:30.714134	2026-06-11 21:58:45.593888	62	\N	HOS0044
-2545	2	2	HOU-00045	NIBP Cuff Adult	68	61	29	5	20	29779.06	\N	Covered	\N	12	Consumable	NIBP Cuff Adult	t	f	2026-06-11 21:48:30.71414	2026-06-11 21:58:45.593891	62	\N	HOS0045
-2546	2	2	HOU-00046	NIBP Cuff Pediatric	68	61	29	3	8	21809.45	\N	Covered	\N	12	Consumable	NIBP Cuff Pediatric	t	f	2026-06-11 21:48:30.714145	2026-06-11 21:58:45.593894	62	\N	HOS0046
-2547	2	2	HOU-00047	NIBP Cuff Neonatal	68	61	29	4	12	16813.02	\N	Covered	\N	12	Consumable	NIBP Cuff Neonatal	t	f	2026-06-11 21:48:30.714151	2026-06-11 21:58:45.593896	62	\N	HOS0047
-2548	2	2	HOU-00048	BP Apparatus Bladder Adult	68	61	29	2	8	48701.77	\N	Covered	\N	12	Non-Consumable	BP Apparatus Bladder Adult	t	f	2026-06-11 21:48:30.714157	2026-06-11 21:58:45.593899	62	\N	HOS0048
-2549	2	2	HOU-00049	BP Apparatus Bladder with Bag Pediatric	68	61	29	3	11	23041.66	\N	Covered	\N	12	Non-Consumable	BP Apparatus Bladder with Bag Pediatric	t	f	2026-06-11 21:48:30.714162	2026-06-11 21:58:45.593902	62	\N	HOS0049
-2550	2	2	HOU-00050	BP Apparatus Bulb	68	61	29	2	7	48366.14	\N	Covered	\N	12	Consumable	BP Apparatus Bulb	t	f	2026-06-11 21:48:30.714168	2026-06-11 21:58:45.593905	62	\N	HOS0050
-2551	2	2	HOU-00051	BP Apparatus Bag	68	61	29	4	14	16005.15	\N	Covered	\N	12	Non-Consumable	BP Apparatus Bag	t	f	2026-06-11 21:48:30.714174	2026-06-11 21:58:45.593907	62	\N	HOS0051
-2552	2	2	HOU-00052	Digital BP Apparatus Cuff	68	61	29	5	12	33083.39	\N	Covered	\N	12	Non-Consumable	Digital BP Apparatus Cuff	t	f	2026-06-11 21:48:30.71418	2026-06-11 21:58:45.59391	62	\N	HOS0052
-2553	2	2	HOU-00053	3-Pin Power Cord	68	61	29	3	12	24958.01	\N	Covered	\N	18	Consumable	3-Pin Power Cord	t	f	2026-06-11 21:48:30.714186	2026-06-11 21:58:45.593913	62	\N	HOS0053
-2554	2	2	HOU-00054	ECG Machine Cable	68	61	29	4	15	33615.39	\N	Covered	\N	12	Consumable	ECG Machine Cable	t	f	2026-06-11 21:48:30.714191	2026-06-11 21:58:45.593916	62	\N	HOS0054
-2555	2	2	HOU-00055	ECG Machine Clamp	68	61	29	5	15	11133.42	\N	Covered	\N	12	Consumable	ECG Machine Clamp	t	f	2026-06-11 21:48:30.714197	2026-06-11 21:58:45.593918	62	\N	HOS0055
-2556	2	2	HOU-00056	ECG Machine Bulb	68	61	29	5	11	23753.77	\N	Covered	\N	12	Consumable	ECG Machine Bulb	t	f	2026-06-11 21:48:30.714203	2026-06-11 21:58:45.593921	62	\N	HOS0056
-2557	2	2	HOU-00057	Ventilator Oxygen Sensor	68	61	29	2	7	43733.61	\N	Covered	\N	12	Non-Consumable	Ventilator Oxygen Sensor	t	f	2026-06-11 21:48:30.714209	2026-06-11 21:58:45.593924	62	\N	HOS0057
-2558	2	2	HOU-00058	Ventilator Battery	68	61	29	2	8	40562.32	\N	Covered	\N	12	Consumable	Ventilator Battery	t	f	2026-06-11 21:48:30.714215	2026-06-11 21:58:45.593927	62	\N	HOS0058
-2559	2	2	HOU-00059	Monitor Battery	68	61	29	2	5	39903.79	\N	Covered	\N	12	Consumable	Monitor Battery	t	f	2026-06-11 21:48:30.71422	2026-06-11 21:58:45.59393	62	\N	HOS0059
-2560	2	2	HOU-00060	Syringe Pump Battery	68	61	29	4	16	33292.48	\N	Covered	\N	12	Consumable	Syringe Pump Battery	t	f	2026-06-11 21:48:30.714226	2026-06-11 21:58:45.593932	62	\N	HOS0060
-2561	2	2	HOU-00061	Infusion Pump Battery	68	61	29	3	10	13782.48	\N	Covered	\N	12	Consumable	Infusion Pump Battery	t	f	2026-06-11 21:48:30.714232	2026-06-11 21:58:45.593935	62	\N	HOS0061
-2562	2	2	HOU-00062	ECG Machine Battery	68	61	29	42	119	8739.31	\N	Covered	\N	12	Consumable	ECG Machine Battery	t	f	2026-06-11 21:48:30.714238	2026-06-11 21:58:45.593938	62	\N	HOS0062
-2563	2	2	HOU-00063	X-Ray View Box 12V DC Adaptor	68	61	29	2	8	41675.63	\N	Covered	\N	18	Non-Consumable	X-Ray View Box 12V DC Adaptor	t	f	2026-06-11 21:48:30.714243	2026-06-11 21:58:45.593941	62	\N	HOS0063
-2564	2	2	HOU-00064	0.032 X 150 TERUMO GUIDE WIRE	68	62	29	3	10	16526.16	\N	Covered	\N	12	Consumable	0.032 X 150 TERUMO GUIDE WIRE	t	f	2026-06-11 21:48:30.714249	2026-06-11 21:58:45.593943	62	\N	HOS0064
-2565	2	2	HOU-00065	0.035X150CM TEFLON WIRE J.TIP	68	62	29	2	8	26703.28	\N	Covered	\N	12	Consumable	0.035X150CM TEFLON WIRE J.TIP	t	f	2026-06-11 21:48:30.714255	2026-06-11 21:58:45.593946	62	\N	HOS0065
-2566	2	2	HOU-00066	ACCURA BMV BALLOON KIT WILL ALL ACCESSORIES	68	62	29	4	14	15813.16	\N	Covered	\N	12	Consumable	ACCURA BMV BALLOON KIT WILL ALL ACCESSORIES	t	f	2026-06-11 21:48:30.71426	2026-06-11 21:58:45.593949	62	\N	HOS0066
-2567	2	2	HOU-00067	ANGI DAIG JR 3.5 6FR CORDIS	68	62	29	5	13	16732.04	\N	Covered	\N	12	Consumable	ANGI DAIG JR 3.5 6FR CORDIS	t	f	2026-06-11 21:48:30.714266	2026-06-11 21:58:45.593952	62	\N	HOS0067
-2568	2	2	HOU-00068	APNEALINK CANNULA- 25 PACK	68	62	29	4	16	12432.24	\N	Covered	\N	12	Consumable	APNEALINK CANNULA- 25 PACK	t	f	2026-06-11 21:48:30.714272	2026-06-11 21:58:45.593955	62	\N	HOS0068
-2569	2	2	HOU-00069	ASAHI GW GAIA THIRD	68	62	29	5	15	48367.03	\N	Covered	\N	12	Consumable	ASAHI GW GAIA THIRD	t	f	2026-06-11 21:48:30.714278	2026-06-11 21:58:45.593957	62	\N	HOS0069
-2570	2	2	HOU-00070	BI-PHASIC DEFIBRILLATOR MODEL: RELIFE 900 - MAKE BPL	68	62	29	3	7	20706.22	\N	Covered	\N	12	Consumable	BI-PHASIC DEFIBRILLATOR MODEL: RELIFE 900 - MAKE BPL	t	f	2026-06-11 21:48:30.714283	2026-06-11 21:58:45.593962	62	\N	HOS0070
-2571	2	2	HOU-00071	BL LIFESCIENCES . 1/2  X 3/32  10 FEET TUBING STERILE	68	62	29	40	107	8529.68	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 1/2  X 3/32  10 FEET TUBING STERILE	t	f	2026-06-11 21:48:30.714289	2026-06-11 21:58:45.593965	62	\N	HOS0071
-2572	2	2	HOU-00072	BL LIFESCIENCES . 1/2 X 1/2 ST	68	62	29	3	8	14243.26	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 1/2 X 1/2 ST	t	f	2026-06-11 21:48:30.714295	2026-06-11 21:58:45.593968	62	\N	HOS0072
-2573	2	2	HOU-00073	BL LIFESCIENCES . 1/4  X 3/32  10 FEET TUBING STERILE	68	62	29	2	8	26824.34	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 1/4  X 3/32  10 FEET TUBING STERILE	t	f	2026-06-11 21:48:30.714301	2026-06-11 21:58:45.59397	62	\N	HOS0073
-2574	2	2	HOU-00074	BL LIFESCIENCES . 1/4 X 1/4 ST	68	62	29	2	8	29261.5	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 1/4 X 1/4 ST	t	f	2026-06-11 21:48:30.714306	2026-06-11 21:58:45.593973	62	\N	HOS0074
-2575	2	2	HOU-00075	BL LIFESCIENCES . 1/4 X 1/4 WITH LEUR	68	62	29	4	12	27006.57	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 1/4 X 1/4 WITH LEUR	t	f	2026-06-11 21:48:30.714312	2026-06-11 21:58:45.593976	62	\N	HOS0075
-2576	2	2	HOU-00076	BL LIFESCIENCES . 1/4 X 1/4 X 1/4  Y	68	62	29	3	11	29504.57	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 1/4 X 1/4 X 1/4  Y	t	f	2026-06-11 21:48:30.714318	2026-06-11 21:58:45.593979	62	\N	HOS0076
-2577	2	2	HOU-00077	BL LIFESCIENCES . 3/8 X 3/32  10 FEET TUBING STERILE	68	62	29	2	5	19791.15	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 3/8 X 3/32  10 FEET TUBING STERILE	t	f	2026-06-11 21:48:30.714324	2026-06-11 21:58:45.593981	62	\N	HOS0077
-2578	2	2	HOU-00078	BL LIFESCIENCES . 3/8 X 3/8 ST	68	62	29	4	14	15621.87	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 3/8 X 3/8 ST	t	f	2026-06-11 21:48:30.714329	2026-06-11 21:58:45.593984	62	\N	HOS0078
-2579	2	2	HOU-00079	BL LIFESCIENCES . 3/8 X 3/8 X 3/8  Y	68	62	29	2	8	20930.03	\N	Covered	\N	12	Consumable	BL LIFESCIENCES . 3/8 X 3/8 X 3/8  Y	t	f	2026-06-11 21:48:30.71434	2026-06-11 21:58:45.593987	62	\N	HOS0079
-2580	2	2	HOU-00080	BL LIFESCIENCES BCP 03 WITH HOLDER	68	62	29	3	10	45535.32	\N	Covered	\N	12	Consumable	BL LIFESCIENCES BCP 03 WITH HOLDER	t	f	2026-06-11 21:48:30.714346	2026-06-11 21:58:45.59399	62	\N	HOS0080
-2581	2	2	HOU-00081	BL LIFESCIENCES MISTER BLOWER	68	62	29	15	35	8921.51	\N	Covered	\N	12	Consumable	BL LIFESCIENCES MISTER BLOWER	t	f	2026-06-11 21:48:30.714352	2026-06-11 21:58:45.593993	62	\N	HOS0081
-2582	2	2	HOU-00082	COOK - ONE-PART PERCUTANEOUS ENTRY THINWALL NEEDLE-SDN-20-4.0 20G/4CM	68	62	29	5	12	11522.83	\N	Covered	\N	12	Consumable	COOK - ONE-PART PERCUTANEOUS ENTRY THINWALL NEEDLE-SDN-20-4.0 20G/4CM	t	f	2026-06-11 21:48:30.714358	2026-06-11 21:58:45.593995	62	\N	HOS0082
-2583	2	2	HOU-00083	CORONARY SHUNT - SHT-1210S - 1.0MM	68	62	29	2	7	24375	\N	Covered	\N	12	Consumable	CORONARY SHUNT - SHT-1210S - 1.0MM	t	f	2026-06-11 21:48:30.714363	2026-06-11 21:58:45.593998	62	\N	HOS0083
-2584	2	2	HOU-00084	CORONARY SHUNT - SHT-1213S - 1.25MM	68	62	29	44	159	9191.76	\N	Covered	\N	12	Consumable	CORONARY SHUNT - SHT-1213S - 1.25MM	t	f	2026-06-11 21:48:30.714372	2026-06-11 21:58:45.594001	62	\N	HOS0084
-2585	2	2	HOU-00085	CORONARY SHUNT - SHT-1215S - 1.50MM	68	62	29	44	89	7848.13	\N	Covered	\N	12	Consumable	CORONARY SHUNT - SHT-1215S - 1.50MM	t	f	2026-06-11 21:48:30.714378	2026-06-11 21:58:45.594004	62	\N	HOS0085
-2586	2	2	HOU-00086	CORONARY SHUNT - SHT-1218S - 2.0MM	68	62	29	2	5	49134.49	\N	Covered	\N	12	Consumable	CORONARY SHUNT - SHT-1218S - 2.0MM	t	f	2026-06-11 21:48:30.714384	2026-06-11 21:58:45.594007	62	\N	HOS0086
-2587	2	2	HOU-00087	CORONARY SHUNT - SHT-1220S - 2.25MM	68	62	29	2	8	10137.59	\N	Covered	\N	12	Consumable	CORONARY SHUNT - SHT-1220S - 2.25MM	t	f	2026-06-11 21:48:30.71439	2026-06-11 21:58:45.59401	62	\N	HOS0087
-2588	2	2	HOU-00088	CORONARY SHUNT - SHT-1223S - 2.50MM	68	62	29	3	12	32847.94	\N	Covered	\N	12	Consumable	CORONARY SHUNT - SHT-1223S - 2.50MM	t	f	2026-06-11 21:48:30.714395	2026-06-11 21:58:45.594012	62	\N	HOS0088
-2589	2	2	HOU-00089	CORONARY SHUNT - SHT-1225S - 2.0MM	68	62	29	2	5	15823.34	\N	Covered	\N	12	Consumable	CORONARY SHUNT - SHT-1225S - 2.0MM	t	f	2026-06-11 21:48:30.714402	2026-06-11 21:58:45.594015	62	\N	HOS0089
-2590	2	2	HOU-00090	DOLPHIN-RADIL INTRODUCER SHEATH 5F/7CM	68	62	29	4	15	27079.56	\N	Covered	\N	12	Consumable	DOLPHIN-RADIL INTRODUCER SHEATH 5F/7CM	t	f	2026-06-11 21:48:30.714408	2026-06-11 21:58:45.594018	62	\N	HOS0090
-2591	2	2	HOU-00091	DVI MALE TO HDMI FEMALE CONVERTOR - NT	68	62	29	5	15	36349.97	\N	Covered	\N	18	Consumable	DVI MALE TO HDMI FEMALE CONVERTOR - NT	t	f	2026-06-11 21:48:30.714414	2026-06-11 21:58:45.594021	62	\N	HOS0091
-2592	2	2	HOU-00092	HDMI TO DVI CABLE 20MTR - NT	68	62	29	4	15	12438.79	\N	Covered	\N	18	Consumable	HDMI TO DVI CABLE 20MTR - NT	t	f	2026-06-11 21:48:30.714419	2026-06-11 21:58:45.594024	62	\N	HOS0092
-2593	2	2	HOU-00093	HDMI TO HDMI CABLE 20MTR - NT	68	62	29	4	15	11697.61	\N	Covered	\N	18	Consumable	HDMI TO HDMI CABLE 20MTR - NT	t	f	2026-06-11 21:48:30.714425	2026-06-11 21:58:45.594026	62	\N	HOS0093
-2594	2	2	HOU-00094	HEAD PROTECTION KIRAN MAKE LEADLITE – 0.25MM PB	68	62	29	4	9	22336.14	\N	Covered	\N	12	Consumable	HEAD PROTECTION KIRAN MAKE LEADLITE – 0.25MM PB	t	f	2026-06-11 21:48:30.714431	2026-06-11 21:58:45.594029	62	\N	HOS0094
-2595	2	2	HOU-00095	HIGH PRESSURE LINE (110CMS)	68	62	29	33	101	6342.2	\N	Covered	\N	12	Consumable	HIGH PRESSURE LINE (110CMS)	t	f	2026-06-11 21:48:30.714437	2026-06-11 21:58:45.594032	62	\N	HOS0095
-2596	2	2	HOU-00096	HIGH PRESSURE LINE 150CM 1200 PSI	68	62	29	3	11	45511.21	\N	Covered	\N	12	Consumable	HIGH PRESSURE LINE 150CM 1200 PSI	t	f	2026-06-11 21:48:30.714443	2026-06-11 21:58:45.594035	62	\N	HOS0096
-2597	2	2	HOU-00097	INTRODUCER SHEATH 9F X 11CM	68	62	29	2	6	17512.4	\N	Covered	\N	12	Consumable	INTRODUCER SHEATH 9F X 11CM	t	f	2026-06-11 21:48:30.714449	2026-06-11 21:58:45.594038	62	\N	HOS0097
-2598	2	2	HOU-00098	MANIFOLD 3 PORT	68	62	29	20	60	5485.15	\N	Covered	\N	12	Consumable	MANIFOLD 3 PORT	t	f	2026-06-11 21:48:30.714455	2026-06-11 21:58:45.59404	62	\N	HOS0098
-2599	2	2	HOU-00099	MEDICAL BED ROLLS - 10 ROLLS PACKING	68	69	29	4	16	47181.69	\N	Covered	\N	5	Consumable	MEDICAL BED ROLLS - 10 ROLLS PACKING	t	f	2026-06-11 21:48:30.714461	2026-06-11 21:58:45.594043	62	\N	HOS0099
-2600	2	2	HOU-00100	MERIT MANIFOLDS 200PSI, 3PORT, HALF BODY, RIGHT OFF(25NOS/BOX)- 203HF-R	68	62	29	5	20	40224.69	\N	Covered	\N	12	Consumable	MERIT MANIFOLDS 200PSI, 3PORT, HALF BODY, RIGHT OFF(25NOS/BOX)- 203HF-R	t	f	2026-06-11 21:48:30.714467	2026-06-11 21:58:45.594046	62	\N	HOS0100
-2601	2	2	HOU-00101	OMNIPAQUE 350MG*100ML-LONG	68	62	29	5	19	38349.89	\N	Covered	\N	12	Consumable	OMNIPAQUE 350MG*100ML-LONG	t	f	2026-06-11 21:48:30.714473	2026-06-11 21:58:45.594049	62	\N	HOS0101
-2602	2	2	HOU-00102	PATIENT SAFE SLIDE TRANSFER BOARD	68	62	29	2	5	15566.94	\N	Covered	\N	12	Consumable	PATIENT SAFE SLIDE TRANSFER BOARD	t	f	2026-06-11 21:48:30.714479	2026-06-11 21:58:45.594051	62	\N	HOS0102
-2603	2	2	HOU-00103	PRESSURE MONITORING KIT - DOUBLE LUMEN	68	62	29	2	6	35100.21	\N	Covered	\N	12	Consumable	PRESSURE MONITORING KIT - DOUBLE LUMEN	t	f	2026-06-11 21:48:30.714485	2026-06-11 21:58:45.594054	62	\N	HOS0103
-2604	2	2	HOU-00104	SAPPHIRE BALLOON NC 2.0 X  8MM	68	62	29	3	11	40772.13	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.0 X  8MM	t	f	2026-06-11 21:48:30.714491	2026-06-11 21:58:45.594057	62	\N	HOS0104
-2605	2	2	HOU-00105	SAPPHIRE BALLOON NC 2.0 X 10MM	68	62	29	5	17	19046.55	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.0 X 10MM	t	f	2026-06-11 21:48:30.714497	2026-06-11 21:58:45.59406	62	\N	HOS0105
-2606	2	2	HOU-00106	SAPPHIRE BALLOON NC 2.0 X 15MM	68	62	29	5	15	42810.99	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.0 X 15MM	t	f	2026-06-11 21:48:30.714503	2026-06-11 21:58:45.594062	62	\N	HOS0106
-2607	2	2	HOU-00107	SAPPHIRE BALLOON NC 2.5 X 10MM	68	62	29	40	145	9177.82	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.5 X 10MM	t	f	2026-06-11 21:48:30.714509	2026-06-11 21:58:45.594065	62	\N	HOS0107
-2608	2	2	HOU-00108	SAPPHIRE BALLOON NC 2.5 X 12MM	68	62	29	5	14	38376.24	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.5 X 12MM	t	f	2026-06-11 21:48:30.714516	2026-06-11 21:58:45.594068	62	\N	HOS0108
-2609	2	2	HOU-00109	SAPPHIRE BALLOON NC 2.5 X 15MM	68	62	29	5	12	32018.21	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.5 X 15MM	t	f	2026-06-11 21:48:30.714522	2026-06-11 21:58:45.594071	62	\N	HOS0109
-2610	2	2	HOU-00110	SAPPHIRE BALLOON NC 2.5 X 8MM	68	62	29	35	103	5872.24	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.5 X 8MM	t	f	2026-06-11 21:48:30.714528	2026-06-11 21:58:45.594074	62	\N	HOS0110
-2611	2	2	HOU-00111	SAPPHIRE BALLOON NC 2.75 X 10MM	68	62	29	35	121	7045.4	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.75 X 10MM	t	f	2026-06-11 21:48:30.714534	2026-06-11 21:58:45.594076	62	\N	HOS0111
-2612	2	2	HOU-00112	SAPPHIRE BALLOON NC 2.75 X 12MM	68	62	29	3	12	20068.58	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.75 X 12MM	t	f	2026-06-11 21:48:30.71454	2026-06-11 21:58:45.594079	62	\N	HOS0112
-2613	2	2	HOU-00113	SAPPHIRE BALLOON NC 2.75 X 15MM	68	62	29	4	9	30408.41	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.75 X 15MM	t	f	2026-06-11 21:48:30.714546	2026-06-11 21:58:45.594082	62	\N	HOS0113
-2614	2	2	HOU-00114	SAPPHIRE BALLOON NC 2.75 X 8MM	68	62	29	2	7	35600.43	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 2.75 X 8MM	t	f	2026-06-11 21:48:30.714552	2026-06-11 21:58:45.594085	62	\N	HOS0114
-2615	2	2	HOU-00115	SAPPHIRE BALLOON NC 3.0 X 10MM	68	62	29	3	7	31429.34	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.0 X 10MM	t	f	2026-06-11 21:48:30.714558	2026-06-11 21:58:45.594087	62	\N	HOS0115
-2616	2	2	HOU-00116	SAPPHIRE BALLOON NC 3.0 X 12MM	68	62	29	5	16	19713.24	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.0 X 12MM	t	f	2026-06-11 21:48:30.714564	2026-06-11 21:58:45.59409	62	\N	HOS0116
-2617	2	2	HOU-00117	SAPPHIRE BALLOON NC 3.0 X 15MM	68	62	29	4	9	23819.89	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.0 X 15MM	t	f	2026-06-11 21:48:30.71457	2026-06-11 21:58:45.594093	62	\N	HOS0117
-2618	2	2	HOU-00118	SAPPHIRE BALLOON NC 3.0 X 8MM	68	62	29	22	50	5278.34	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.0 X 8MM	t	f	2026-06-11 21:48:30.714576	2026-06-11 21:58:45.594096	62	\N	HOS0118
-2619	2	2	HOU-00119	SAPPHIRE BALLOON NC 3.5 X 10MM	68	62	29	29	76	5831.78	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.5 X 10MM	t	f	2026-06-11 21:48:30.714581	2026-06-11 21:58:45.594099	62	\N	HOS0119
-2620	2	2	HOU-00120	SAPPHIRE BALLOON NC 3.5 X 12MM	68	62	29	3	9	15726.17	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.5 X 12MM	t	f	2026-06-11 21:48:30.714588	2026-06-11 21:58:45.594101	62	\N	HOS0120
-2621	2	2	HOU-00121	SAPPHIRE BALLOON NC 3.5 X 15MM	68	62	29	49	150	9807.13	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.5 X 15MM	t	f	2026-06-11 21:48:30.714593	2026-06-11 21:58:45.594104	62	\N	HOS0121
-2622	2	2	HOU-00122	SAPPHIRE BALLOON NC 3.5 X 8MM	68	62	29	2	6	11644.53	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 3.5 X 8MM	t	f	2026-06-11 21:48:30.7146	2026-06-11 21:58:45.594107	62	\N	HOS0122
-2623	2	2	HOU-00123	SAPPHIRE BALLOON NC 4.0 X 10MM	68	62	29	4	11	28227.78	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 4.0 X 10MM	t	f	2026-06-11 21:48:30.714606	2026-06-11 21:58:45.59411	62	\N	HOS0123
-2624	2	2	HOU-00124	SAPPHIRE BALLOON NC 4.0 X 12MM	68	62	29	5	20	29696.2	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 4.0 X 12MM	t	f	2026-06-11 21:48:30.714612	2026-06-11 21:58:45.594112	62	\N	HOS0124
-2625	2	2	HOU-00125	SAPPHIRE BALLOON NC 4.0 X 15MM	68	62	29	37	138	5578.79	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 4.0 X 15MM	t	f	2026-06-11 21:48:30.714619	2026-06-11 21:58:45.594115	62	\N	HOS0125
-2626	2	2	HOU-00126	SAPPHIRE BALLOON NC 4.0 X 8MM	68	62	29	39	87	5694.61	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON NC 4.0 X 8MM	t	f	2026-06-11 21:48:30.714627	2026-06-11 21:58:45.594118	62	\N	HOS0126
-2627	2	2	HOU-00127	SAPPHIRE BALLOON SC 1.25 X 10MM	68	62	29	2	5	28293.36	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 1.25 X 10MM	t	f	2026-06-11 21:48:30.714634	2026-06-11 21:58:45.594121	62	\N	HOS0127
-2628	2	2	HOU-00128	SAPPHIRE BALLOON SC 1.25 X 12MM	68	62	29	2	6	20721.93	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 1.25 X 12MM	t	f	2026-06-11 21:48:30.714639	2026-06-11 21:58:45.594123	62	\N	HOS0128
-2629	2	2	HOU-00129	SAPPHIRE BALLOON SC 1.25 X 15MM	68	62	29	2	8	37570.34	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 1.25 X 15MM	t	f	2026-06-11 21:48:30.714646	2026-06-11 21:58:45.594126	62	\N	HOS0129
-2630	2	2	HOU-00130	SAPPHIRE BALLOON SC 1.5 X 10MM	68	62	29	2	6	31807.89	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 1.5 X 10MM	t	f	2026-06-11 21:48:30.714652	2026-06-11 21:58:45.594129	62	\N	HOS0130
-2631	2	2	HOU-00131	SAPPHIRE BALLOON SC 1.5 X 12MM	68	62	29	12	26	9579.32	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 1.5 X 12MM	t	f	2026-06-11 21:48:30.714658	2026-06-11 21:58:45.594132	62	\N	HOS0131
-2632	2	2	HOU-00132	SAPPHIRE BALLOON SC 1.5 X 15MM	68	62	29	3	11	41669.52	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 1.5 X 15MM	t	f	2026-06-11 21:48:30.714665	2026-06-11 21:58:45.594134	62	\N	HOS0132
-2633	2	2	HOU-00133	SAPPHIRE BALLOON SC 1.5 X 8MM	68	62	29	2	5	15241.99	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 1.5 X 8MM	t	f	2026-06-11 21:48:30.71467	2026-06-11 21:58:45.594137	62	\N	HOS0133
-2634	2	2	HOU-00134	SAPPHIRE BALLOON SC 2.0 X 10MM	68	62	29	2	6	20174.98	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.0 X 10MM	t	f	2026-06-11 21:48:30.714677	2026-06-11 21:58:45.59414	62	\N	HOS0134
-2635	2	2	HOU-00135	SAPPHIRE BALLOON SC 2.0 X 12MM	68	62	29	2	8	49190.09	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.0 X 12MM	t	f	2026-06-11 21:48:30.714683	2026-06-11 21:58:45.594143	62	\N	HOS0135
-2636	2	2	HOU-00136	SAPPHIRE BALLOON SC 2.0 X 15MM	68	62	29	4	10	48065.39	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.0 X 15MM	t	f	2026-06-11 21:48:30.714689	2026-06-11 21:58:45.594146	62	\N	HOS0136
-2637	2	2	HOU-00137	SAPPHIRE BALLOON SC 2.0 X 8MM	68	62	29	2	8	22533.69	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.0 X 8MM	t	f	2026-06-11 21:48:30.714695	2026-06-11 21:58:45.594148	62	\N	HOS0137
-2638	2	2	HOU-00138	SAPPHIRE BALLOON SC 2.5 X 10MM	68	62	29	3	9	38005.95	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.5 X 10MM	t	f	2026-06-11 21:48:30.714701	2026-06-11 21:58:45.594152	62	\N	HOS0138
-2639	2	2	HOU-00139	SAPPHIRE BALLOON SC 2.5 X 12MM	68	62	29	3	8	28522.88	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.5 X 12MM	t	f	2026-06-11 21:48:30.714707	2026-06-11 21:58:45.594154	62	\N	HOS0139
-2640	2	2	HOU-00140	SAPPHIRE BALLOON SC 2.5 X 15MM	68	62	29	3	10	13460.5	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.5 X 15MM	t	f	2026-06-11 21:48:30.714713	2026-06-11 21:58:45.594157	62	\N	HOS0140
-2641	2	2	HOU-00141	SAPPHIRE BALLOON SC 2.5 X 8MM	68	62	29	3	11	23367.64	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.5 X 8MM	t	f	2026-06-11 21:48:30.714719	2026-06-11 21:58:45.59416	62	\N	HOS0141
-2642	2	2	HOU-00142	SAPPHIRE BALLOON SC 2.75 X 10MM	68	62	29	4	15	34558.77	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.75 X 10MM	t	f	2026-06-11 21:48:30.714725	2026-06-11 21:58:45.594163	62	\N	HOS0142
-2643	2	2	HOU-00143	SAPPHIRE BALLOON SC 2.75 X 12MM	68	62	29	5	17	37307.58	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.75 X 12MM	t	f	2026-06-11 21:48:30.714731	2026-06-11 21:58:45.594165	62	\N	HOS0143
-2644	2	2	HOU-00144	SAPPHIRE BALLOON SC 2.75 X 15MM	68	62	29	2	6	43673.19	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.75 X 15MM	t	f	2026-06-11 21:48:30.714738	2026-06-11 21:58:45.594168	62	\N	HOS0144
-2645	2	2	HOU-00145	SAPPHIRE BALLOON SC 2.75 X 8MM	68	62	29	3	10	41474.27	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 2.75 X 8MM	t	f	2026-06-11 21:48:30.714744	2026-06-11 21:58:45.594171	62	\N	HOS0145
-2646	2	2	HOU-00146	SAPPHIRE BALLOON SC 3.0 X 10 MM	68	62	29	4	12	30601.76	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.0 X 10 MM	t	f	2026-06-11 21:48:30.71475	2026-06-11 21:58:45.594174	62	\N	HOS0146
-2647	2	2	HOU-00147	SAPPHIRE BALLOON SC 3.0 X 12 MM	68	62	29	10	40	9574.71	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.0 X 12 MM	t	f	2026-06-11 21:48:30.714756	2026-06-11 21:58:45.594177	62	\N	HOS0147
-2648	2	2	HOU-00148	SAPPHIRE BALLOON SC 3.0 X 15 MM	68	62	29	3	7	14873.99	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.0 X 15 MM	t	f	2026-06-11 21:48:30.714763	2026-06-11 21:58:45.594179	62	\N	HOS0148
-2649	2	2	HOU-00149	SAPPHIRE BALLOON SC 3.0 X 8 MM	68	62	29	3	8	13931.39	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.0 X 8 MM	t	f	2026-06-11 21:48:30.714769	2026-06-11 21:58:45.594182	62	\N	HOS0149
-2650	2	2	HOU-00150	SAPPHIRE BALLOON SC 3.5 X 10 MM	68	62	29	2	7	19344.59	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.5 X 10 MM	t	f	2026-06-11 21:48:30.714776	2026-06-11 21:58:45.594185	62	\N	HOS0150
-2651	2	2	HOU-00151	SAPPHIRE BALLOON SC 3.5 X 12 MM	68	62	29	2	6	41821.12	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.5 X 12 MM	t	f	2026-06-11 21:48:30.714782	2026-06-11 21:58:45.594188	62	\N	HOS0151
-2652	2	2	HOU-00152	SAPPHIRE BALLOON SC 3.5 X 15 MM	68	62	29	4	12	43020.18	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.5 X 15 MM	t	f	2026-06-11 21:48:30.714788	2026-06-11 21:58:45.594191	62	\N	HOS0152
-2653	2	2	HOU-00153	SAPPHIRE BALLOON SC 3.5 X 8MM	68	62	29	3	8	44607.31	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 3.5 X 8MM	t	f	2026-06-11 21:48:30.714795	2026-06-11 21:58:45.594194	62	\N	HOS0153
-2654	2	2	HOU-00154	SAPPHIRE BALLOON SC 4.0 X 10 MM	68	62	29	4	14	11280.13	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 4.0 X 10 MM	t	f	2026-06-11 21:48:30.714802	2026-06-11 21:58:45.594196	62	\N	HOS0154
-2655	2	2	HOU-00155	SAPPHIRE BALLOON SC 4.0 X 12 MM	68	62	29	5	16	25264.08	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 4.0 X 12 MM	t	f	2026-06-11 21:48:30.714808	2026-06-11 21:58:45.594201	62	\N	HOS0155
-2656	2	2	HOU-00156	SAPPHIRE BALLOON SC 4.0 X 15 MM	68	62	29	4	12	28093.07	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 4.0 X 15 MM	t	f	2026-06-11 21:48:30.714815	2026-06-11 21:58:45.594204	62	\N	HOS0156
-2657	2	2	HOU-00157	SAPPHIRE BALLOON SC 4.0 X 8 MM	68	62	29	4	16	41898.91	\N	Covered	\N	12	Consumable	SAPPHIRE BALLOON SC 4.0 X 8 MM	t	f	2026-06-11 21:48:30.714821	2026-06-11 21:58:45.594207	62	\N	HOS0157
-2658	2	2	HOU-00158	SCANLAN AORTIC PUNCH 2.5MM	68	62	29	5	12	34292.15	\N	Covered	\N	12	Consumable	SCANLAN AORTIC PUNCH 2.5MM	t	f	2026-06-11 21:48:30.714827	2026-06-11 21:58:45.59421	62	\N	HOS0158
-2659	2	2	HOU-00159	SCANLAN AORTIC PUNCH 3.0MM	68	62	29	3	7	45470.55	\N	Covered	\N	12	Consumable	SCANLAN AORTIC PUNCH 3.0MM	t	f	2026-06-11 21:48:30.714834	2026-06-11 21:58:45.594213	62	\N	HOS0159
-2660	2	2	HOU-00160	SCANLAN AORTIC PUNCH 3.5MM	68	62	29	2	6	15175.95	\N	Covered	\N	12	Consumable	SCANLAN AORTIC PUNCH 3.5MM	t	f	2026-06-11 21:48:30.71484	2026-06-11 21:58:45.594215	62	\N	HOS0160
-2661	2	2	HOU-00161	STENT 2.5X32MM	68	62	29	3	7	21265.62	\N	Covered	\N	12	Consumable	STENT 2.5X32MM	t	f	2026-06-11 21:48:30.714846	2026-06-11 21:58:45.594218	62	\N	HOS0161
-2662	2	2	HOU-00162	STENT 2.75 X 28MM	68	62	29	4	15	40111.37	\N	Covered	\N	12	Consumable	STENT 2.75 X 28MM	t	f	2026-06-11 21:48:30.714853	2026-06-11 21:58:45.594221	62	\N	HOS0162
-2663	2	2	HOU-00163	STENT 2.75 X 36 MM	68	62	29	4	9	38848.81	\N	Covered	\N	12	Consumable	STENT 2.75 X 36 MM	t	f	2026-06-11 21:48:30.71486	2026-06-11 21:58:45.594224	62	\N	HOS0163
-2664	2	2	HOU-00164	STENT 2.75 X 44 MM	68	62	29	4	13	37241.53	\N	Covered	\N	12	Consumable	STENT 2.75 X 44 MM	t	f	2026-06-11 21:48:30.714866	2026-06-11 21:58:45.594226	62	\N	HOS0164
-2665	2	2	HOU-00165	STENT 2.75X13MM	68	62	29	45	178	9463.92	\N	Covered	\N	12	Consumable	STENT 2.75X13MM	t	f	2026-06-11 21:48:30.714872	2026-06-11 21:58:45.594229	62	\N	HOS0165
-2666	2	2	HOU-00166	STENT 2.75X16MM	68	62	29	5	19	41195.94	\N	Covered	\N	12	Consumable	STENT 2.75X16MM	t	f	2026-06-11 21:48:30.714878	2026-06-11 21:58:45.594232	62	\N	HOS0166
-2667	2	2	HOU-00167	STENT 2.75X24MM	68	62	29	5	14	38265.57	\N	Covered	\N	12	Consumable	STENT 2.75X24MM	t	f	2026-06-11 21:48:30.714884	2026-06-11 21:58:45.594235	62	\N	HOS0167
-2668	2	2	HOU-00168	STENT 2.75X32MM	68	62	29	28	96	5050.55	\N	Covered	\N	12	Consumable	STENT 2.75X32MM	t	f	2026-06-11 21:48:30.71489	2026-06-11 21:58:45.594238	62	\N	HOS0168
-2669	2	2	HOU-00169	STENT 3.0 X 10 MM	68	62	29	5	19	27948.52	\N	Covered	\N	12	Consumable	STENT 3.0 X 10 MM	t	f	2026-06-11 21:48:30.7149	2026-06-11 21:58:45.59424	62	\N	HOS0169
-2670	2	2	HOU-00170	STENT 3.0 X 44 MM	68	62	29	2	8	23100.77	\N	Covered	\N	12	Consumable	STENT 3.0 X 44 MM	t	f	2026-06-11 21:48:30.714907	2026-06-11 21:58:45.594243	62	\N	HOS0170
-2671	2	2	HOU-00171	STENT 3.0X18MM	68	62	29	3	10	25471.61	\N	Covered	\N	12	Consumable	STENT 3.0X18MM	t	f	2026-06-11 21:48:30.714914	2026-06-11 21:58:45.594246	62	\N	HOS0171
-2672	2	2	HOU-00172	STENT 3.0X24MM	68	62	29	4	15	22018.67	\N	Covered	\N	12	Consumable	STENT 3.0X24MM	t	f	2026-06-11 21:48:30.71492	2026-06-11 21:58:45.594249	62	\N	HOS0172
-2673	2	2	HOU-00173	STENT 3.0X28MM	68	62	29	2	5	48491.89	\N	Covered	\N	12	Consumable	STENT 3.0X28MM	t	f	2026-06-11 21:48:30.714926	2026-06-11 21:58:45.594251	62	\N	HOS0173
-2674	2	2	HOU-00174	STENT 3.0X32MM	68	62	29	4	15	40780.68	\N	Covered	\N	12	Consumable	STENT 3.0X32MM	t	f	2026-06-11 21:48:30.714932	2026-06-11 21:58:45.594254	62	\N	HOS0174
-2675	2	2	HOU-00175	STENT 3.0X40MM	68	62	29	2	6	15985.82	\N	Covered	\N	12	Consumable	STENT 3.0X40MM	t	f	2026-06-11 21:48:30.714938	2026-06-11 21:58:45.594257	62	\N	HOS0175
-2676	2	2	HOU-00176	STENT 3.5 X 10 MM	68	62	29	4	13	37041.39	\N	Covered	\N	12	Consumable	STENT 3.5 X 10 MM	t	f	2026-06-11 21:48:30.714944	2026-06-11 21:58:45.59426	62	\N	HOS0176
-2677	2	2	HOU-00177	STENT 3.5 X 15 MM	68	62	29	3	12	16801.56	\N	Covered	\N	12	Consumable	STENT 3.5 X 15 MM	t	f	2026-06-11 21:48:30.71495	2026-06-11 21:58:45.594262	62	\N	HOS0177
-2678	2	2	HOU-00178	STENT 3.5 X 28 MM	68	62	29	5	14	26453.15	\N	Covered	\N	12	Consumable	STENT 3.5 X 28 MM	t	f	2026-06-11 21:48:30.714956	2026-06-11 21:58:45.594265	62	\N	HOS0178
-2679	2	2	HOU-00179	STENT 3.5X14MM	68	62	29	2	5	27590	\N	Covered	\N	12	Consumable	STENT 3.5X14MM	t	f	2026-06-11 21:48:30.714962	2026-06-11 21:58:45.594268	62	\N	HOS0179
-2680	2	2	HOU-00180	STENT 3.5X16MM	68	62	29	4	16	16861.54	\N	Covered	\N	12	Consumable	STENT 3.5X16MM	t	f	2026-06-11 21:48:30.714968	2026-06-11 21:58:45.594271	62	\N	HOS0180
-2681	2	2	HOU-00181	STENT 3.5X18MM	68	62	29	3	10	41863.62	\N	Covered	\N	12	Consumable	STENT 3.5X18MM	t	f	2026-06-11 21:48:30.714974	2026-06-11 21:58:45.594273	62	\N	HOS0181
-2682	2	2	HOU-00182	STENT 3.5X24MM	68	62	29	30	65	7022.44	\N	Covered	\N	12	Consumable	STENT 3.5X24MM	t	f	2026-06-11 21:48:30.71498	2026-06-11 21:58:45.594276	62	\N	HOS0182
-2683	2	2	HOU-00183	STENT 3.5X28MM	68	62	29	3	7	36814.54	\N	Covered	\N	12	Consumable	STENT 3.5X28MM	t	f	2026-06-11 21:48:30.714986	2026-06-11 21:58:45.594279	62	\N	HOS0183
-2684	2	2	HOU-00184	STENT 3.5X32MM	68	62	29	4	13	11109.34	\N	Covered	\N	12	Consumable	STENT 3.5X32MM	t	f	2026-06-11 21:48:30.714992	2026-06-11 21:58:45.594282	62	\N	HOS0184
-2685	2	2	HOU-00185	STENT 4.0 X 16 MM	68	62	29	5	17	43194.14	\N	Covered	\N	12	Consumable	STENT 4.0 X 16 MM	t	f	2026-06-11 21:48:30.714998	2026-06-11 21:58:45.594285	62	\N	HOS0185
-2686	2	2	HOU-00186	TERUMO I KARI IL 3.5 - 5FR	68	62	29	3	8	24850.98	\N	Covered	\N	12	Consumable	TERUMO I KARI IL 3.5 - 5FR	t	f	2026-06-11 21:48:30.715004	2026-06-11 21:58:45.594288	62	\N	HOS0186
-2687	2	2	HOU-00187	TERUMO I KARI IL 3.5 - 6FR	68	62	29	5	12	27882.31	\N	Covered	\N	12	Consumable	TERUMO I KARI IL 3.5 - 6FR	t	f	2026-06-11 21:48:30.71501	2026-06-11 21:58:45.594291	62	\N	HOS0187
-2688	2	2	HOU-00188	TERUMO I KARI IR 1.5 - 5FR	68	62	29	5	17	45006.67	\N	Covered	\N	12	Consumable	TERUMO I KARI IR 1.5 - 5FR	t	f	2026-06-11 21:48:30.715015	2026-06-11 21:58:45.594294	62	\N	HOS0188
-2689	2	2	HOU-00189	TERUMO J.TIP 0.35X150	68	62	29	15	37	5319.92	\N	Covered	\N	12	Consumable	TERUMO J.TIP 0.35X150	t	f	2026-06-11 21:48:30.715021	2026-06-11 21:58:45.594297	62	\N	HOS0189
-2690	2	2	HOU-00190	TOP MANIFOLD 3 PORT	68	62	29	3	9	34938.16	\N	Covered	\N	12	Consumable	TOP MANIFOLD 3 PORT	t	f	2026-06-11 21:48:30.715027	2026-06-11 21:58:45.594299	62	\N	HOS0190
-2691	2	2	HOU-00191	TPI  - PACEL 5F (BALLOON TIP)	68	62	29	5	14	34169.31	\N	Covered	\N	12	Consumable	TPI  - PACEL 5F (BALLOON TIP)	t	f	2026-06-11 21:48:30.715033	2026-06-11 21:58:45.594302	62	\N	HOS0191
-2692	2	2	HOU-00192	TRANSDUCER KIT	68	62	29	5	12	32530.49	\N	Covered	\N	12	Consumable	TRANSDUCER KIT	t	f	2026-06-11 21:48:30.715039	2026-06-11 21:58:45.594305	62	\N	HOS0192
-2693	2	2	HOU-00193	ULTRA FLEX IABP 7.5 X 40 CC - ARROW MAKE	68	62	29	4	16	49380.3	\N	Covered	\N	12	Consumable	ULTRA FLEX IABP 7.5 X 40 CC - ARROW MAKE	t	f	2026-06-11 21:48:30.715045	2026-06-11 21:58:45.594308	62	\N	HOS0193
-2694	2	2	HOU-00194	VISIPAQUE 320MG*100ML-LONG	68	62	29	2	7	15551.72	\N	Covered	\N	12	Consumable	VISIPAQUE 320MG*100ML-LONG	t	f	2026-06-11 21:48:30.715051	2026-06-11 21:58:45.594311	62	\N	HOS0194
-2695	2	2	HOU-00195	VISIPAQUE 50ML	68	62	29	5	19	17174.45	\N	Covered	\N	12	Consumable	VISIPAQUE 50ML	t	f	2026-06-11 21:48:30.715057	2026-06-11 21:58:45.594313	62	\N	HOS0195
-2696	2	2	HOU-00196	2X2 DOOR GASKET FOR BIG MACHINE	68	63	29	4	14	24028.99	\N	Covered	\N	18	Consumable	2X2 DOOR GASKET FOR BIG MACHINE	t	f	2026-06-11 21:48:30.715063	2026-06-11 21:58:45.594316	62	\N	HOS0196
-2697	2	2	HOU-00197	BLADE FOR GUAGE CUTTING MACHINE	68	63	29	5	19	13635.13	\N	Covered	\N	18	Consumable	BLADE FOR GUAGE CUTTING MACHINE	t	f	2026-06-11 21:48:30.715069	2026-06-11 21:58:45.594319	62	\N	HOS0197
-2698	2	2	HOU-00198	BOILER GASKET - SMALL MACHINE	68	63	29	2	7	10767.58	\N	Covered	\N	18	Consumable	BOILER GASKET - SMALL MACHINE	t	f	2026-06-11 21:48:30.715075	2026-06-11 21:58:45.594322	62	\N	HOS0198
-2699	2	2	HOU-00199	BOLT & NUTS	68	63	30	2	6	34882.18	\N	Covered	\N	18	Consumable	BOLT & NUTS	t	f	2026-06-11 21:48:30.71508	2026-06-11 21:58:45.594324	62	\N	HOS0199
-2700	2	2	HOU-00200	BRAIDED TUBE 1/2" X 2 MTRS	68	63	29	4	12	22125.42	\N	Covered	\N	18	Consumable	BRAIDED TUBE 1/2" X 2 MTRS	t	f	2026-06-11 21:48:30.715086	2026-06-11 21:58:45.594327	62	\N	HOS0200
-2701	2	2	HOU-00201	BROWN TEFLON BELT- SEALING MACHINE	68	63	29	2	8	27741.37	\N	Covered	\N	18	Consumable	BROWN TEFLON BELT- SEALING MACHINE	t	f	2026-06-11 21:48:30.715092	2026-06-11 21:58:45.59433	62	\N	HOS0201
-2702	2	2	HOU-00202	LOW WATER CUT OFF - SENSOR TYPE	68	63	29	3	9	42545.35	\N	Covered	\N	18	Consumable	LOW WATER CUT OFF - SENSOR TYPE	t	f	2026-06-11 21:48:30.715098	2026-06-11 21:58:45.594337	62	\N	HOS0202
-2703	2	2	HOU-00203	OPERATING VALVE GASKET - BIG	68	63	29	3	11	40105.74	\N	Covered	\N	18	Consumable	OPERATING VALVE GASKET - BIG	t	f	2026-06-11 21:48:30.715104	2026-06-11 21:58:45.594341	62	\N	HOS0203
-2704	2	2	HOU-00204	PRINTING ROLLS ETO MACHINE	68	63	29	3	10	49267.01	\N	Covered	\N	18	Consumable	PRINTING ROLLS ETO MACHINE	t	f	2026-06-11 21:48:30.71511	2026-06-11 21:58:45.594343	62	\N	HOS0204
-2705	2	2	HOU-00205	SAFETY VALVE	68	63	29	2	5	27360.66	\N	Covered	\N	18	Consumable	SAFETY VALVE	t	f	2026-06-11 21:48:30.715116	2026-06-11 21:58:45.594346	62	\N	HOS0205
-2706	2	2	HOU-00206	SHARPENER BELT FOR GUAGE CUTTING MACHINE	68	63	29	30	89	8664.4	\N	Covered	\N	18	Consumable	SHARPENER BELT FOR GUAGE CUTTING MACHINE	t	f	2026-06-11 21:48:30.715122	2026-06-11 21:58:45.594349	62	\N	HOS0206
-2707	2	2	HOU-00207	SILICON GASKET FOR HEATER	68	63	29	2	8	49305.41	\N	Covered	\N	18	Consumable	SILICON GASKET FOR HEATER	t	f	2026-06-11 21:48:30.715128	2026-06-11 21:58:45.594351	62	\N	HOS0207
-2708	2	2	HOU-00208	SILICON WHEEL FOR SEALING MACHINE	68	63	29	3	7	20126.75	\N	Covered	\N	18	Consumable	SILICON WHEEL FOR SEALING MACHINE	t	f	2026-06-11 21:48:30.715133	2026-06-11 21:58:45.594354	62	\N	HOS0208
-2709	2	2	HOU-00209	TEFLON TAPE ROLL(SMALL MACHINE)	68	63	33	4	13	47865.15	\N	Covered	\N	18	Consumable	TEFLON TAPE ROLL(SMALL MACHINE)	t	f	2026-06-11 21:48:30.715139	2026-06-11 21:58:45.594357	62	\N	HOS0209
-2710	2	2	HOU-00210	ASSEMBLIES ORTHO DIRECT	68	64	29	3	8	13569.44	\N	Covered	\N	12	Consumable	ASSEMBLIES ORTHO DIRECT	t	f	2026-06-11 21:48:30.715145	2026-06-11 21:58:45.59436	62	\N	HOS0210
-2711	2	2	HOU-00211	BAND SEATER GDC	68	64	29	3	11	12025.08	\N	Covered	\N	12	Consumable	BAND SEATER GDC	t	f	2026-06-11 21:48:30.715154	2026-06-11 21:58:45.594362	62	\N	HOS0211
-2712	2	2	HOU-00212	BLUE BITE	68	64	29	3	10	11895.17	\N	Covered	\N	12	Consumable	BLUE BITE	t	f	2026-06-11 21:48:30.715161	2026-06-11 21:58:45.594365	62	\N	HOS0212
-2713	2	2	HOU-00213	BONDABLE 1ST MOLAR TUBES D-TECH	68	64	29	3	9	13847.05	\N	Covered	\N	12	Consumable	BONDABLE 1ST MOLAR TUBES D-TECH	t	f	2026-06-11 21:48:30.715167	2026-06-11 21:58:45.594368	62	\N	HOS0213
-2714	2	2	HOU-00214	BONDABLE BUTTONS PKT OF 10	68	64	29	4	13	10652.57	\N	Covered	\N	12	Consumable	BONDABLE BUTTONS PKT OF 10	t	f	2026-06-11 21:48:30.715172	2026-06-11 21:58:45.594371	62	\N	HOS0214
-2715	2	2	HOU-00215	BRACKET IRIDIUM MBT 022 KIT	68	64	29	2	6	13179.23	\N	Covered	\N	12	Consumable	BRACKET IRIDIUM MBT 022 KIT	t	f	2026-06-11 21:48:30.715178	2026-06-11 21:58:45.594373	62	\N	HOS0215
-2716	2	2	HOU-00216	CERAMIC KIT MBT 022 5-5	68	64	29	22	54	7056.16	\N	Covered	\N	12	Consumable	CERAMIC KIT MBT 022 5-5	t	f	2026-06-11 21:48:30.715184	2026-06-11 21:58:45.594376	62	\N	HOS0216
-2717	2	2	HOU-00217	CHEEK RETRACTOR WITH HANDLE	68	64	29	2	5	28137.67	\N	Covered	\N	12	Consumable	CHEEK RETRACTOR WITH HANDLE	t	f	2026-06-11 21:48:30.71519	2026-06-11 21:58:45.594379	62	\N	HOS0217
-2718	2	2	HOU-00218	CRIMPING PLIER	68	64	29	3	10	43834.48	\N	Covered	\N	12	Consumable	CRIMPING PLIER	t	f	2026-06-11 21:48:30.715196	2026-06-11 21:58:45.594382	62	\N	HOS0218
-2719	2	2	HOU-00219	DEBONDING BUR HORICO	68	64	29	5	14	14390.92	\N	Covered	\N	12	Consumable	DEBONDING BUR HORICO	t	f	2026-06-11 21:48:30.715202	2026-06-11 21:58:45.594384	62	\N	HOS0219
-2720	2	2	HOU-00220	DENTAL PENCIL	68	64	29	2	5	29772.16	\N	Covered	\N	12	Consumable	DENTAL PENCIL	t	f	2026-06-11 21:48:30.715208	2026-06-11 21:58:45.594387	62	\N	HOS0220
-2721	2	2	HOU-00221	D-TECH ROTH KIT 018	68	64	29	3	8	32447.26	\N	Covered	\N	12	Consumable	D-TECH ROTH KIT 018	t	f	2026-06-11 21:48:30.715215	2026-06-11 21:58:45.59439	62	\N	HOS0221
-2722	2	2	HOU-00222	E-CHAIN OO 15FT- CONT. CLEAR & GREY	68	64	29	4	15	20626.7	\N	Covered	\N	12	Consumable	E-CHAIN OO 15FT- CONT. CLEAR & GREY	t	f	2026-06-11 21:48:30.71522	2026-06-11 21:58:45.594393	62	\N	HOS0222
-2723	2	2	HOU-00223	E-CHAIN OO 15FT- SHORT. CLEAR & GREY	68	64	29	2	5	32134.02	\N	Covered	\N	12	Consumable	E-CHAIN OO 15FT- SHORT. CLEAR & GREY	t	f	2026-06-11 21:48:30.715227	2026-06-11 21:58:45.594396	62	\N	HOS0223
-2724	2	2	HOU-00224	ENLIGHT LC COMPOSITE KIT ORMCO WITH ETCHANT	68	64	29	3	9	45420.78	\N	Covered	\N	12	Consumable	ENLIGHT LC COMPOSITE KIT ORMCO WITH ETCHANT	t	f	2026-06-11 21:48:30.715233	2026-06-11 21:58:45.594398	62	\N	HOS0224
-2725	2	2	HOU-00225	HOE PLIER GDC STR/CVD	68	64	29	4	9	32274.05	\N	Covered	\N	12	Consumable	HOE PLIER GDC STR/CVD	t	f	2026-06-11 21:48:30.715239	2026-06-11 21:58:45.594401	62	\N	HOS0225
-2726	2	2	HOU-00226	HORICO FG BU 166 010	68	64	29	30	105	5532.71	\N	Covered	\N	12	Consumable	HORICO FG BU 166 010	t	f	2026-06-11 21:48:30.715245	2026-06-11 21:58:45.594404	62	\N	HOS0226
-2727	2	2	HOU-00227	HP ELASTIC 5000 - PINK, GREEN, BLUE & RED	68	64	29	2	7	42043.95	\N	Covered	\N	12	Consumable	HP ELASTIC 5000 - PINK, GREEN, BLUE & RED	t	f	2026-06-11 21:48:30.715251	2026-06-11 21:58:45.594407	62	\N	HOS0227
-2728	2	2	HOU-00228	HP SPOT WELDER	68	64	29	2	6	17460.99	\N	Covered	\N	12	Consumable	HP SPOT WELDER	t	f	2026-06-11 21:48:30.715257	2026-06-11 21:58:45.594409	62	\N	HOS0228
-2729	2	2	HOU-00229	LIGARINGS (1040) CLEAR & GREY	68	64	29	2	7	24747.81	\N	Covered	\N	12	Consumable	LIGARINGS (1040) CLEAR & GREY	t	f	2026-06-11 21:48:30.715263	2026-06-11 21:58:45.594412	62	\N	HOS0229
-2730	2	2	HOU-00230	LINGUAL SHEATH HP (PKT OF 50)	68	64	29	4	11	11910.81	\N	Covered	\N	12	Consumable	LINGUAL SHEATH HP (PKT OF 50)	t	f	2026-06-11 21:48:30.715269	2026-06-11 21:58:45.594415	62	\N	HOS0230
-2731	2	2	HOU-00231	NITI 014 PKT OF 25 U/L	68	64	29	4	9	19412.86	\N	Covered	\N	12	Consumable	NITI 014 PKT OF 25 U/L	t	f	2026-06-11 21:48:30.715275	2026-06-11 21:58:45.594418	62	\N	HOS0231
-2732	2	2	HOU-00232	NITI 016 PKT OF 25 U/L	68	64	29	4	10	15280.31	\N	Covered	\N	12	Consumable	NITI 016 PKT OF 25 U/L	t	f	2026-06-11 21:48:30.715281	2026-06-11 21:58:45.59442	62	\N	HOS0232
-2733	2	2	HOU-00233	PLIER STAND	68	64	29	4	11	39780.01	\N	Covered	\N	12	Consumable	PLIER STAND	t	f	2026-06-11 21:48:30.715288	2026-06-11 21:58:45.594423	62	\N	HOS0233
-2734	2	2	HOU-00234	RELIEF WAX	68	64	29	5	18	42881.58	\N	Covered	\N	12	Consumable	RELIEF WAX	t	f	2026-06-11 21:48:30.715294	2026-06-11 21:58:45.594426	62	\N	HOS0234
-2735	2	2	HOU-00235	UNIVERSAL PLIER GDC	68	64	29	2	6	36371.84	\N	Covered	\N	12	Consumable	UNIVERSAL PLIER GDC	t	f	2026-06-11 21:48:30.715299	2026-06-11 21:58:45.594429	62	\N	HOS0235
-2736	2	2	HOU-00236	AVF NEEDLE 16G	68	65	29	4	16	43244.64	\N	Covered	\N	12	Consumable	AVF NEEDLE 16G	t	f	2026-06-11 21:48:30.715305	2026-06-11 21:58:45.594431	62	\N	HOS0236
-2737	2	2	HOU-00237	AVF NEEDLE 17G	68	65	29	3	10	48314.91	\N	Covered	\N	12	Consumable	AVF NEEDLE 17G	t	f	2026-06-11 21:48:30.715311	2026-06-11 21:58:45.594434	62	\N	HOS0237
-2738	2	2	HOU-00238	BICARB MIXER MACHINE 100 LITRES	68	65	29	3	12	13344.08	\N	Covered	\N	12	Non-Consumable	BICARB MIXER MACHINE 100 LITRES	t	f	2026-06-11 21:48:30.715317	2026-06-11 21:58:45.594437	62	\N	HOS0238
-2739	2	2	HOU-00239	BICARBONATE PART B- 10LTR PACK	68	65	29	5	18	13515.59	\N	Covered	\N	12	Consumable	BICARBONATE PART B- 10LTR PACK	t	f	2026-06-11 21:48:30.715323	2026-06-11 21:58:45.59444	62	\N	HOS0239
-2740	2	2	HOU-00240	CHLORITEST PAPERS FOR CHLORINE TEST	68	65	29	4	14	21108.67	\N	Covered	\N	18	Consumable	CHLORITEST PAPERS FOR CHLORINE TEST	t	f	2026-06-11 21:48:30.715329	2026-06-11 21:58:45.594443	62	\N	HOS0240
-2741	2	2	HOU-00241	DIALYSATE CONNECTOR BLUE	68	65	29	4	9	49176.54	\N	Covered	\N	12	Consumable	DIALYSATE CONNECTOR BLUE	t	f	2026-06-11 21:48:30.71534	2026-06-11 21:58:45.594448	62	\N	HOS0241
-2742	2	2	HOU-00242	DIALYSATE CONNECTOR RED	68	65	29	16	35	9348.73	\N	Covered	\N	12	Consumable	DIALYSATE CONNECTOR RED	t	f	2026-06-11 21:48:30.715347	2026-06-11 21:58:45.594451	62	\N	HOS0242
-2743	2	2	HOU-00243	DOOR 22MM BUBBLE C.HOLDER 4008SV10 - M561711	68	65	29	4	15	29315.77	\N	Covered	\N	18	Consumable	DOOR 22MM BUBBLE C.HOLDER 4008SV10 - M561711	t	f	2026-06-11 21:48:30.715353	2026-06-11 21:58:45.594453	62	\N	HOS0243
-2744	2	2	HOU-00244	DRY CITRATE PART A-40LTR/PACK	68	65	29	2	6	31257.65	\N	Covered	\N	12	Consumable	DRY CITRATE PART A-40LTR/PACK	t	f	2026-06-11 21:48:30.715359	2026-06-11 21:58:45.594456	62	\N	HOS0244
-2745	2	2	HOU-00245	HIGH POTASSIUM CAN	68	65	29	5	14	45229.74	\N	Covered	\N	12	Consumable	HIGH POTASSIUM CAN	t	f	2026-06-11 21:48:30.715364	2026-06-11 21:58:45.594459	62	\N	HOS0245
-2746	2	2	HOU-00246	INFORMED CONSENT FOR HAEMODIALYSIS	68	74	29	4	14	43761.04	\N	Covered	\N	18	Consumable	INFORMED CONSENT FOR HAEMODIALYSIS	t	f	2026-06-11 21:48:30.71537	2026-06-11 21:58:45.594462	62	\N	HOS0246
-2747	2	2	HOU-00247	ON/OFF KIT	68	65	29	5	11	39494.21	\N	Covered	\N	12	Consumable	ON/OFF KIT	t	f	2026-06-11 21:48:30.715376	2026-06-11 21:58:45.594464	62	\N	HOS0247
-2748	2	2	HOU-00249	STEPPER MOTOR WITH GEAR BOX 4-POLES *4008B/H/S *4008S V10-PART NO: M393211	68	65	29	17	55	5372.14	\N	Covered	\N	18	Non-Consumable	STEPPER MOTOR WITH GEAR BOX 4-POLES *4008B/H/S *4008S V10-PART NO: M393211	t	f	2026-06-11 21:48:30.715382	2026-06-11 21:58:45.594467	62	\N	HOS0249
-2749	2	2	HOU-00250	TUBE FIXING ROLLER PUMP	68	65	29	29	78	5210.01	\N	Covered	\N	18	Non-Consumable	TUBE FIXING ROLLER PUMP	t	f	2026-06-11 21:48:30.715388	2026-06-11 21:58:45.59447	62	\N	HOS0250
-2750	2	2	HOU-00251	ULTRAFILTRATION PUMP 40008B/H/S/S V10 - PART NO:6707061	68	65	29	35	126	6499.34	\N	Covered	\N	18	Non-Consumable	ULTRAFILTRATION PUMP 40008B/H/S/S V10 - PART NO:6707061	t	f	2026-06-11 21:48:30.715394	2026-06-11 21:58:45.594473	62	\N	HOS0251
-2751	2	2	HOU-00252	10A FUSE - 100NOS-BOX	68	66	29	3	11	10443.43	\N	Covered	\N	18	Consumable	10A FUSE - 100NOS-BOX	t	f	2026-06-11 21:48:30.7154	2026-06-11 21:58:45.594475	62	\N	HOS0252
-2752	2	2	HOU-00253	16X24 DOOR GASKET	68	66	29	2	5	31170.49	\N	Covered	\N	18	Consumable	16X24 DOOR GASKET	t	f	2026-06-11 21:48:30.715406	2026-06-11 21:58:45.594478	62	\N	HOS0253
-2753	2	2	HOU-00254	24 POET POE SWITCH (DGS TO 26P)	68	66	29	4	13	37487.18	\N	Covered	\N	18	Consumable	24 POET POE SWITCH (DGS TO 26P)	t	f	2026-06-11 21:48:30.715412	2026-06-11 21:58:45.594481	62	\N	HOS0254
-2754	2	2	HOU-00255	6A FUSE - 100NOS-BOX	68	66	29	5	12	33036.78	\N	Covered	\N	18	Consumable	6A FUSE - 100NOS-BOX	t	f	2026-06-11 21:48:30.715421	2026-06-11 21:58:45.594484	62	\N	HOS0255
-2755	2	2	HOU-00256	ABG RADIOMETER - SBP SOLUTION PACK - 944-506	68	67	29	38	119	7501.07	\N	Covered	\N	12	Consumable	ABG RADIOMETER - SBP SOLUTION PACK - 944-506	t	f	2026-06-11 21:48:30.715428	2026-06-11 21:58:45.594487	62	\N	HOS0256
-2756	2	2	HOU-00257	AEROSEPT 5LTRS - DISINFECTANT	68	71	29	4	10	10054.47	\N	Covered	\N	18	Consumable	AEROSEPT 5LTRS - DISINFECTANT	t	f	2026-06-11 21:48:30.715433	2026-06-11 21:58:45.594489	62	\N	HOS0257
-2757	2	2	HOU-00258	ALL OUT MACHINE WITH REFILL	68	69	29	4	11	36519.29	\N	Covered	\N	18	Consumable	ALL OUT MACHINE WITH REFILL	t	f	2026-06-11 21:48:30.715439	2026-06-11 21:58:45.594492	62	\N	HOS0258
-2758	2	2	HOU-00259	ALL OUT MOSQUITO REPELLENT - REFILL	68	69	29	5	20	34513.15	\N	Covered	\N	18	Consumable	ALL OUT MOSQUITO REPELLENT - REFILL	t	f	2026-06-11 21:48:30.715445	2026-06-11 21:58:45.594495	62	\N	HOS0259
-2759	2	2	HOU-00260	ANASTHESIA BOOKLET	68	74	29	2	8	19712.34	\N	Covered	\N	12	Consumable	ANASTHESIA BOOKLET	t	f	2026-06-11 21:48:30.715451	2026-06-11 21:58:45.594498	62	\N	HOS0260
-2760	2	2	HOU-00261	AUDIOLOGICAL EVALUATION	68	74	29	4	13	33238.36	\N	Covered	\N	12	Consumable	AUDIOLOGICAL EVALUATION	t	f	2026-06-11 21:48:30.715457	2026-06-11 21:58:45.5945	62	\N	HOS0261
-2761	2	2	HOU-00262	BASKET FOR MONITOR STAND	68	69	29	3	8	24369.43	\N	Covered	\N	18	Non-Consumable	BASKET FOR MONITOR STAND	t	f	2026-06-11 21:48:30.715462	2026-06-11 21:58:45.594503	62	\N	HOS0262
-2762	2	2	HOU-00263	BED SIDE LOCKERS	68	69	29	2	7	43336.49	\N	Covered	\N	18	Non-Consumable	BED SIDE LOCKERS	t	f	2026-06-11 21:48:30.715468	2026-06-11 21:58:45.594506	62	\N	HOS0263
-2763	2	2	HOU-00264	BENEFUSION USP_SYRINGE PUMP	68	68	29	2	5	10679.45	\N	Covered	\N	12	Non-Consumable	BENEFUSION USP_SYRINGE PUMP	t	f	2026-06-11 21:48:30.715474	2026-06-11 21:58:45.594509	62	\N	HOS0264
-2764	2	2	HOU-00265	BIOCHEMISTRY REGISTER	68	74	29	5	18	34986.14	\N	Covered	\N	12	Consumable	BIOCHEMISTRY REGISTER	t	f	2026-06-11 21:48:30.71548	2026-06-11 21:58:45.594511	62	\N	HOS0265
-2765	2	2	HOU-00266	BIRTH CERTIFICATE	68	74	29	5	15	42198.21	\N	Covered	\N	12	Consumable	BIRTH CERTIFICATE	t	f	2026-06-11 21:48:30.715486	2026-06-11 21:58:45.594514	62	\N	HOS0266
-2766	2	2	HOU-00267	BLOOD PRESSURE MONITORING CHART	68	74	29	13	29	6877.84	\N	Covered	\N	12	Consumable	BLOOD PRESSURE MONITORING CHART	t	f	2026-06-11 21:48:30.715491	2026-06-11 21:58:45.594517	62	\N	HOS0267
-2767	2	2	HOU-00268	BLUE BED SHEET	68	70	29	3	11	12899.78	\N	Covered	\N	5	Non-Consumable	BLUE BED SHEET	t	f	2026-06-11 21:48:30.715497	2026-06-11 21:58:45.59452	62	\N	HOS0268
-2768	2	2	HOU-00269	BLUE COLOUR COAT	68	70	29	3	9	19537.67	\N	Covered	\N	5	Non-Consumable	BLUE COLOUR COAT	t	f	2026-06-11 21:48:30.715503	2026-06-11 21:58:45.594523	62	\N	HOS0269
-2769	2	2	HOU-00270	BLUE PILLOW COVER	68	70	29	3	12	19603.12	\N	Covered	\N	5	Non-Consumable	BLUE PILLOW COVER	t	f	2026-06-11 21:48:30.715509	2026-06-11 21:58:45.594525	62	\N	HOS0270
-2770	2	2	HOU-00271	BP APPARATUS - DIAMOND LED 141 BP MONITOR	68	69	29	2	8	16600.18	\N	Covered	\N	12	Non-Consumable	BP APPARATUS - DIAMOND LED 141 BP MONITOR	t	f	2026-06-11 21:48:30.715514	2026-06-11 21:58:45.594528	62	\N	HOS0271
-2771	2	2	HOU-00272	BP APPARATUS - DIGITAL  - PAED	68	68	29	2	7	32194.67	\N	Covered	\N	12	Non-Consumable	BP APPARATUS - DIGITAL  - PAED	t	f	2026-06-11 21:48:30.71552	2026-06-11 21:58:45.594531	62	\N	HOS0272
-2772	2	2	HOU-00273	BPL ECG 9108D Z-FOLD PAPERS (150 SHEETS)	68	68	29	4	9	15401.35	\N	Covered	\N	12	Consumable	BPL ECG 9108D Z-FOLD PAPERS (150 SHEETS)	t	f	2026-06-11 21:48:30.715526	2026-06-11 21:58:45.594533	62	\N	HOS0273
-2773	2	2	HOU-00274	BPL ECG PAPERS - 50MM	68	74	29	4	11	43902.38	\N	Covered	\N	12	Consumable	BPL ECG PAPERS - 50MM	t	f	2026-06-11 21:48:30.715532	2026-06-11 21:58:45.594536	62	\N	HOS0274
-2774	2	2	HOU-00275	BPL ECG PAPERS - 80MM	68	74	29	36	122	9133.01	\N	Covered	\N	12	Consumable	BPL ECG PAPERS - 80MM	t	f	2026-06-11 21:48:30.715538	2026-06-11 21:58:45.594539	62	\N	HOS0275
-2775	2	2	HOU-00276	BPL FOETAL DOPPLER PROBE - MODEL: FD 9713	68	68	29	2	7	26524.84	\N	Covered	\N	12	Consumable	BPL FOETAL DOPPLER PROBE - MODEL: FD 9713	t	f	2026-06-11 21:48:30.715544	2026-06-11 21:58:45.594542	62	\N	HOS0276
-2776	2	2	HOU-00277	BPL MONOPHASIC DEFIBRILLATOR MODEL-DF 2509R - PRINTER	68	68	29	4	11	29423.66	\N	Covered	\N	12	Consumable	BPL MONOPHASIC DEFIBRILLATOR MODEL-DF 2509R - PRINTER	t	f	2026-06-11 21:48:30.715549	2026-06-11 21:58:45.594544	62	\N	HOS0277
-2777	2	2	HOU-00278	BREAST PUMP ACCESSORIES FOR MEDELA LACTINA	68	68	29	2	6	25335.95	\N	Covered	\N	12	Consumable	BREAST PUMP ACCESSORIES FOR MEDELA LACTINA	t	f	2026-06-11 21:48:30.715555	2026-06-11 21:58:45.594547	62	\N	HOS0278
-2778	2	2	HOU-00279	BREAST PUMP SYRINGE	68	68	29	2	6	15075.48	\N	Covered	\N	12	Consumable	BREAST PUMP SYRINGE	t	f	2026-06-11 21:48:30.71556	2026-06-11 21:58:45.59455	62	\N	HOS0279
-2779	2	2	HOU-00280	CARDIOLOGY INVESTIGATION FORM	68	74	29	5	11	27954.71	\N	Covered	\N	12	Consumable	CARDIOLOGY INVESTIGATION FORM	t	f	2026-06-11 21:48:30.715566	2026-06-11 21:58:45.594553	62	\N	HOS0280
-2780	2	2	HOU-00281	CARTRIDGE 104 DRUM	68	74	29	5	19	26651.83	\N	Covered	\N	18	Consumable	CARTRIDGE 104 DRUM	t	f	2026-06-11 21:48:30.715572	2026-06-11 21:58:45.594556	62	\N	HOS0281
-2781	2	2	HOU-00282	CARTRIDGE 110A	68	74	29	5	12	28285.67	\N	Covered	\N	18	Consumable	CARTRIDGE 110A	t	f	2026-06-11 21:48:30.715578	2026-06-11 21:58:45.594558	62	\N	HOS0282
-2782	2	2	HOU-00283	CARTRIDGE 119A	68	74	29	5	14	36868.49	\N	Covered	\N	18	Consumable	CARTRIDGE 119A	t	f	2026-06-11 21:48:30.715583	2026-06-11 21:58:45.594561	62	\N	HOS0283
-2783	2	2	HOU-00284	CARTRIDGE 12A	68	74	29	4	13	21745.11	\N	Covered	\N	18	Consumable	CARTRIDGE 12A	t	f	2026-06-11 21:48:30.715589	2026-06-11 21:58:45.594564	62	\N	HOS0284
-2784	2	2	HOU-00285	CARTRIDGE 166A	68	74	29	2	6	16174.55	\N	Covered	\N	18	Consumable	CARTRIDGE 166A	t	f	2026-06-11 21:48:30.715594	2026-06-11 21:58:45.594566	62	\N	HOS0285
-2785	2	2	HOU-00286	CARTRIDGE 673	68	74	29	4	14	13293.03	\N	Covered	\N	18	Consumable	CARTRIDGE 673	t	f	2026-06-11 21:48:30.7156	2026-06-11 21:58:45.594569	62	\N	HOS0286
-2786	2	2	HOU-00287	CARTRIDGE 680A	68	74	29	4	13	44760.69	\N	Covered	\N	18	Consumable	CARTRIDGE 680A	t	f	2026-06-11 21:48:30.715606	2026-06-11 21:58:45.594572	62	\N	HOS0287
-2787	2	2	HOU-00288	CARTRIDGE 88A	68	74	29	2	5	42502.66	\N	Covered	\N	18	Consumable	CARTRIDGE 88A	t	f	2026-06-11 21:48:30.715612	2026-06-11 21:58:45.594575	62	\N	HOS0288
-2788	2	2	HOU-00289	CARTRIDGE B021 BROTHER	68	74	29	4	12	23429.6	\N	Covered	\N	18	Consumable	CARTRIDGE B021 BROTHER	t	f	2026-06-11 21:48:30.715617	2026-06-11 21:58:45.594577	62	\N	HOS0289
-2789	2	2	HOU-00290	CARTRIDGE EPSON 664 BLACK	68	74	29	34	113	6452.19	\N	Covered	\N	18	Consumable	CARTRIDGE EPSON 664 BLACK	t	f	2026-06-11 21:48:30.715623	2026-06-11 21:58:45.59458	62	\N	HOS0290
-2790	2	2	HOU-00291	CARTRIDGE EPSON 664 COLOUR	68	74	29	5	20	21978.98	\N	Covered	\N	18	Consumable	CARTRIDGE EPSON 664 COLOUR	t	f	2026-06-11 21:48:30.715628	2026-06-11 21:58:45.594583	62	\N	HOS0291
-2791	2	2	HOU-00292	CH TOWEL 36*29	68	70	29	4	11	21656.31	\N	Covered	\N	5	Non-Consumable	CH TOWEL 36*29	t	f	2026-06-11 21:48:30.715634	2026-06-11 21:58:45.594586	62	\N	HOS0292
-2792	2	2	HOU-00293	DIGITAL BP APPARATUS - OMRON 7143T WITH ADAPTER	68	69	29	5	11	38960.02	\N	Covered	\N	12	Non-Consumable	DIGITAL BP APPARATUS - OMRON 7143T WITH ADAPTER	t	f	2026-06-11 21:48:30.71564	2026-06-11 21:58:45.594589	62	\N	HOS0293
-2793	2	2	HOU-00294	DISCHARGE SUMMARY	68	74	38	5	14	44067.66	\N	Covered	\N	12	Consumable	DISCHARGE SUMMARY	t	f	2026-06-11 21:48:30.715646	2026-06-11 21:58:45.594592	62	\N	HOS0294
-2794	2	2	HOU-00295	DISPOSABLE MEAL TRAY WITH LID- WHITE - 4 COMPARTMENT- GOOD QUALITY	68	69	29	3	12	16730.97	\N	Covered	\N	18	Consumable	DISPOSABLE MEAL TRAY WITH LID- WHITE - 4 COMPARTMENT- GOOD QUALITY	t	f	2026-06-11 21:48:30.715652	2026-06-11 21:58:45.594595	62	\N	HOS0295
-2795	2	2	HOU-00296	DOCTORS PROGRESS NOTES	68	74	38	33	78	7564.85	\N	Covered	\N	12	Consumable	DOCTORS PROGRESS NOTES	t	f	2026-06-11 21:48:30.715657	2026-06-11 21:58:45.594597	62	\N	HOS0296
-2796	2	2	HOU-00297	DOCUMENTATION REGISTER	68	74	29	3	10	49645.2	\N	Covered	\N	12	Consumable	DOCUMENTATION REGISTER	t	f	2026-06-11 21:48:30.715665	2026-06-11 21:58:45.5946	62	\N	HOS0297
-2797	2	2	HOU-00298	DOOR MAT (LEATHER)	68	69	29	3	7	48209.25	\N	Covered	\N	12	Consumable	DOOR MAT (LEATHER)	t	f	2026-06-11 21:48:30.715671	2026-06-11 21:58:45.594603	62	\N	HOS0298
-2798	2	2	HOU-00299	DUSTER	68	74	29	46	95	5570.75	\N	Covered	\N	5	Consumable	DUSTER	t	f	2026-06-11 21:48:30.715677	2026-06-11 21:58:45.594606	62	\N	HOS0299
-2799	2	2	HOU-00300	ECG PAPER - 005 - BPL - 9108D	68	74	33	5	19	22543.07	\N	Covered	\N	12	Consumable	ECG PAPER - 005 - BPL - 9108D	t	f	2026-06-11 21:48:30.715682	2026-06-11 21:58:45.594608	62	\N	HOS0300
-2800	2	2	HOU-00301	ECG ROLL PAPER - VESTA 12EC RMS 210MMX20MTR	68	74	33	5	12	43078.65	\N	Covered	\N	12	Consumable	ECG ROLL PAPER - VESTA 12EC RMS 210MMX20MTR	t	f	2026-06-11 21:48:30.715688	2026-06-11 21:58:45.594611	62	\N	HOS0301
-2801	2	2	HOU-00302	FOOT STEP DOUBLE SS	68	69	29	5	14	47702.7	\N	Covered	\N	18	Non-Consumable	FOOT STEP DOUBLE SS	t	f	2026-06-11 21:48:30.715694	2026-06-11 21:58:45.594614	62	\N	HOS0302
-2802	2	2	HOU-00303	GOGGLES - 3M QUALITY	68	69	29	49	186	5185.2	\N	Covered	\N	18	Consumable	GOGGLES - 3M QUALITY	t	f	2026-06-11 21:48:30.715699	2026-06-11 21:58:45.594617	62	\N	HOS0303
-2803	2	2	HOU-00304	GRAPHIC TPR CHART	68	74	38	2	7	49220.41	\N	Covered	\N	12	Consumable	GRAPHIC TPR CHART	t	f	2026-06-11 21:48:30.715705	2026-06-11 21:58:45.594619	62	\N	HOS0304
-2804	2	2	HOU-00305	HISTOPATHOLOGY REQUEST FORM	68	74	38	5	14	38844.37	\N	Covered	\N	12	Consumable	HISTOPATHOLOGY REQUEST FORM	t	f	2026-06-11 21:48:30.715711	2026-06-11 21:58:45.594622	62	\N	HOS0305
-2805	2	2	HOU-00306	HISTORY AND PHYSICAL EXAMINATION	68	74	38	3	8	16938.78	\N	Covered	\N	12	Consumable	HISTORY AND PHYSICAL EXAMINATION	t	f	2026-06-11 21:48:30.715716	2026-06-11 21:58:45.594625	62	\N	HOS0306
-2806	2	2	HOU-00307	ICU HIGH RISK/GRAVE RISK CONSENT FORM	68	74	38	3	9	13437.27	\N	Covered	\N	12	Consumable	ICU HIGH RISK/GRAVE RISK CONSENT FORM	t	f	2026-06-11 21:48:30.715722	2026-06-11 21:58:45.594628	62	\N	HOS0307
-2807	2	2	HOU-00308	ICU OBSERVATION CHART	68	74	38	2	6	49233.46	\N	Covered	\N	12	Consumable	ICU OBSERVATION CHART	t	f	2026-06-11 21:48:30.715727	2026-06-11 21:58:45.59463	62	\N	HOS0308
-2808	2	2	HOU-00309	INCH TAPE	68	69	29	4	16	22518.31	\N	Covered	\N	18	Non-Consumable	INCH TAPE	t	f	2026-06-11 21:48:30.715733	2026-06-11 21:58:45.594633	62	\N	HOS0309
-2809	2	2	HOU-00310	INDUCTION STOVE - PIGEON PRIME	68	69	29	2	6	28615.93	\N	Covered	\N	18	Non-Consumable	INDUCTION STOVE - PIGEON PRIME	t	f	2026-06-11 21:48:30.715739	2026-06-11 21:58:45.594636	62	\N	HOS0310
-2810	2	2	HOU-00311	INFORMED CONSENT FOR ANASTHESIA / SEDATION	68	74	38	2	5	25025.39	\N	Covered	\N	12	Consumable	INFORMED CONSENT FOR ANASTHESIA / SEDATION	t	f	2026-06-11 21:48:30.715745	2026-06-11 21:58:45.594639	62	\N	HOS0311
-2811	2	2	HOU-00312	INFORMED CONSENT FOR SURGERY	68	74	38	3	10	10456.88	\N	Covered	\N	12	Consumable	INFORMED CONSENT FOR SURGERY	t	f	2026-06-11 21:48:30.71575	2026-06-11 21:58:45.594641	62	\N	HOS0312
-2812	2	2	HOU-00313	INITIAL RAPID ASSESSMENT CHART	68	74	38	4	16	42966	\N	Covered	\N	12	Consumable	INITIAL RAPID ASSESSMENT CHART	t	f	2026-06-11 21:48:30.715756	2026-06-11 21:58:45.594644	62	\N	HOS0313
-2813	2	2	HOU-00314	INTAKE AND OUTPUT RECORD	68	74	38	4	16	17429.78	\N	Covered	\N	12	Consumable	INTAKE AND OUTPUT RECORD	t	f	2026-06-11 21:48:30.715762	2026-06-11 21:58:45.594647	62	\N	HOS0314
-2814	2	2	HOU-00315	INVESTIGATION CHART	68	74	38	2	8	47048.89	\N	Covered	\N	12	Consumable	INVESTIGATION CHART	t	f	2026-06-11 21:48:30.715768	2026-06-11 21:58:45.59465	62	\N	HOS0315
-2815	2	2	HOU-00316	IP REGISTER	68	74	29	4	13	38589.18	\N	Covered	\N	12	Consumable	IP REGISTER	t	f	2026-06-11 21:48:30.715773	2026-06-11 21:58:45.594652	62	\N	HOS0316
-2816	2	2	HOU-00317	IRON STOOL	68	69	29	2	6	24460.58	\N	Covered	\N	18	Non-Consumable	IRON STOOL	t	f	2026-06-11 21:48:30.715779	2026-06-11 21:58:45.594655	62	\N	HOS0317
-2817	2	2	HOU-00318	ISSUE AND MASTER REGISTER FOR BLOOD BANK	68	74	29	2	7	27473.18	\N	Covered	\N	12	Consumable	ISSUE AND MASTER REGISTER FOR BLOOD BANK	t	f	2026-06-11 21:48:30.715785	2026-06-11 21:58:45.594658	62	\N	HOS0318
-2818	2	2	HOU-00319	ISSUE REGISTER	68	74	29	2	8	26925.95	\N	Covered	\N	12	Consumable	ISSUE REGISTER	t	f	2026-06-11 21:48:30.715791	2026-06-11 21:58:45.594661	62	\N	HOS0319
-2819	2	2	HOU-00320	KORA CLOTH IN MTRS	68	70	39	4	11	17989.92	\N	Covered	\N	5	Non-Consumable	KORA CLOTH IN MTRS	t	f	2026-06-11 21:48:30.715796	2026-06-11 21:58:45.594664	62	\N	HOS0320
-2820	2	2	HOU-00321	LARYNGOSCOPE BULB	68	61	29	2	5	20534.86	\N	Covered	\N	12	Non-Consumable	LARYNGOSCOPE BULB	t	f	2026-06-11 21:48:30.715802	2026-06-11 21:58:45.594666	62	\N	HOS0321
-2821	2	2	HOU-00322	LARYNGOSCOPE SET WITH MC COY BLADE (SIZE1,2,3 & 4)	68	69	29	3	10	46934.57	\N	Covered	\N	12	Non-Consumable	LARYNGOSCOPE SET WITH MC COY BLADE (SIZE1,2,3 & 4)	t	f	2026-06-11 21:48:30.715808	2026-06-11 21:58:45.594669	62	\N	HOS0322
-2822	2	2	HOU-00323	LAUNDRY BAG WITH STEEL RAILING & WHEELS OVER ALL SIZE 22.5” ROUND X 30” HEIGHT	68	68	29	5	14	17148.26	\N	Covered	\N	18	Non-Consumable	LAUNDRY BAG WITH STEEL RAILING & WHEELS OVER ALL SIZE 22.5” ROUND X 30” HEIGHT	t	f	2026-06-11 21:48:30.715813	2026-06-11 21:58:45.594672	62	\N	HOS0323
-2823	2	2	HOU-00324	CL LEAVE APPLICATION BOOK	68	74	38	22	51	9730.39	\N	Covered	\N	12	Consumable	CL LEAVE APPLICATION BOOK	t	f	2026-06-11 21:48:30.715819	2026-06-11 21:58:45.594675	62	\N	HOS0324
-2824	2	2	HOU-00325	MAKINTOSH SHEETS - IN MTRS	68	69	39	3	7	10235.77	\N	Covered	\N	12	Non-Consumable	MAKINTOSH SHEETS - IN MTRS	t	f	2026-06-11 21:48:30.715825	2026-06-11 21:58:45.594678	62	\N	HOS0325
-2825	2	2	HOU-00326	MATTRESS - 40 DENSITY MAGIC PVC REXINE-SINGLE SECTION MATRESS - SIZE 72X30X4 INCHES	68	69	29	4	16	48249.72	\N	Covered	\N	18	Non-Consumable	MATTRESS - 40 DENSITY MAGIC PVC REXINE-SINGLE SECTION MATRESS - SIZE 72X30X4 INCHES	t	f	2026-06-11 21:48:30.715831	2026-06-11 21:58:45.594685	62	\N	HOS0326
-2826	2	2	HOU-00327	MEDICAL CERTIFICATE	68	74	38	3	10	39458.66	\N	Covered	\N	12	Consumable	MEDICAL CERTIFICATE	t	f	2026-06-11 21:48:30.715837	2026-06-11 21:58:45.594687	62	\N	HOS0327
-2827	2	2	HOU-00328	MEDICATION SHEET	68	74	38	3	11	25564.93	\N	Covered	\N	12	Consumable	MEDICATION SHEET	t	f	2026-06-11 21:48:30.715843	2026-06-11 21:58:45.59469	62	\N	HOS0328
-2828	2	2	HOU-00329	MG CHARITABLE TRUST PAYMENT VOUCHER	68	74	38	2	5	17666.38	\N	Covered	\N	12	Consumable	MG CHARITABLE TRUST PAYMENT VOUCHER	t	f	2026-06-11 21:48:30.715848	2026-06-11 21:58:45.594693	62	\N	HOS0329
-2829	2	2	HOU-00331	MOBILE PHONE SAMSUNG	68	69	29	3	9	34424.32	\N	Covered	\N	18	Non-Consumable	MOBILE PHONE SAMSUNG	t	f	2026-06-11 21:48:30.715854	2026-06-11 21:58:45.594696	62	\N	HOS0331
-2830	2	2	HOU-00332	MYCOLOGY REGISTER	68	74	29	2	5	31597.08	\N	Covered	\N	12	Consumable	MYCOLOGY REGISTER	t	f	2026-06-11 21:48:30.71586	2026-06-11 21:58:45.594699	62	\N	HOS0332
-2831	2	2	HOU-00333	NEONATE AMBU BAG	68	69	29	5	17	21296.51	\N	Covered	\N	12	Non-Consumable	NEONATE AMBU BAG	t	f	2026-06-11 21:48:30.715866	2026-06-11 21:58:45.594701	62	\N	HOS0333
-2832	2	2	HOU-00334	NIGHTIES	68	70	29	2	7	26397.84	\N	Covered	\N	5	Consumable	NIGHTIES	t	f	2026-06-11 21:48:30.715872	2026-06-11 21:58:45.594704	62	\N	HOS0334
-2833	2	2	HOU-00335	NOTE PAD	68	74	29	2	6	35670.68	\N	Covered	\N	12	Consumable	NOTE PAD	t	f	2026-06-11 21:48:30.715877	2026-06-11 21:58:45.594707	62	\N	HOS0335
-2834	2	2	HOU-00336	NURSES DAILY RECORD	68	74	38	3	10	22728.77	\N	Covered	\N	18	Consumable	NURSES DAILY RECORD	t	f	2026-06-11 21:48:30.715883	2026-06-11 21:58:45.59471	62	\N	HOS0336
-2835	2	2	HOU-00337	NURSES ICU MONITORING CHART	68	74	38	3	12	34737.12	\N	Covered	\N	18	Consumable	NURSES ICU MONITORING CHART	t	f	2026-06-11 21:48:30.715889	2026-06-11 21:58:45.594712	62	\N	HOS0337
-2836	2	2	HOU-00338	NURSES TREATMENT CHART	68	74	38	3	11	41501.48	\N	Covered	\N	18	Consumable	NURSES TREATMENT CHART	t	f	2026-06-11 21:48:30.715895	2026-06-11 21:58:45.594715	62	\N	HOS0338
-2837	2	2	HOU-00339	NURSING ASSESMENT	68	74	38	2	5	17119.6	\N	Covered	\N	18	Consumable	NURSING ASSESMENT	t	f	2026-06-11 21:48:30.7159	2026-06-11 21:58:45.594718	62	\N	HOS0339
-2838	2	2	HOU-00340	ODONIL - LAVENDER	68	69	29	5	17	17947.27	\N	Covered	\N	18	Consumable	ODONIL - LAVENDER	t	f	2026-06-11 21:48:30.715906	2026-06-11 21:58:45.594721	62	\N	HOS0340
-2839	2	2	HOU-00341	OPD REGISTER	68	74	29	2	7	40240.52	\N	Covered	\N	18	Consumable	OPD REGISTER	t	f	2026-06-11 21:48:30.715916	2026-06-11 21:58:45.594724	62	\N	HOS0341
-2840	2	2	HOU-00342	OPERATION RECORD 1&2	68	74	38	20	52	8957.14	\N	Covered	\N	18	Consumable	OPERATION RECORD 1&2	t	f	2026-06-11 21:48:30.715922	2026-06-11 21:58:45.594726	62	\N	HOS0342
-2841	2	2	HOU-00343	OT LIST	68	74	38	4	16	32877.85	\N	Covered	\N	18	Consumable	OT LIST	t	f	2026-06-11 21:48:30.715928	2026-06-11 21:58:45.594729	62	\N	HOS0343
-2842	2	2	HOU-00344	OT REGISTER	68	74	29	2	7	38475.64	\N	Covered	\N	18	Consumable	OT REGISTER	t	f	2026-06-11 21:48:30.715934	2026-06-11 21:58:45.594732	62	\N	HOS0344
-2843	2	2	HOU-00345	OUT PATIENT CASE RECORD	68	74	38	4	15	11546.26	\N	Covered	\N	18	Consumable	OUT PATIENT CASE RECORD	t	f	2026-06-11 21:48:30.71594	2026-06-11 21:58:45.594735	62	\N	HOS0345
-2844	2	2	HOU-00346	PACKAGE SERVICES BOOK	68	74	38	4	12	39701.13	\N	Covered	\N	18	Consumable	PACKAGE SERVICES BOOK	t	f	2026-06-11 21:48:30.715949	2026-06-11 21:58:45.594737	62	\N	HOS0346
-2845	2	2	HOU-00347	PAEDIATRICS NEW BORN SHEET	68	74	34	2	6	29440.22	\N	Covered	\N	18	Consumable	PAEDIATRICS NEW BORN SHEET	t	f	2026-06-11 21:48:30.715955	2026-06-11 21:58:45.59474	62	\N	HOS0347
-2846	2	2	HOU-00348	PAPER CLIPS	68	74	37	4	12	11182.73	\N	Covered	\N	18	Consumable	PAPER CLIPS	t	f	2026-06-11 21:48:30.715961	2026-06-11 21:58:45.594743	62	\N	HOS0348
-2847	2	2	HOU-00349	PAPER PLATE 12 INCHES	68	69	37	2	5	15182.76	\N	Covered	\N	12	Consumable	PAPER PLATE 12 INCHES	t	f	2026-06-11 21:48:30.715967	2026-06-11 21:58:45.594746	62	\N	HOS0349
-2848	2	2	HOU-00350	PAPER PLATE 6NO	68	69	37	4	15	16299.26	\N	Covered	\N	12	Consumable	PAPER PLATE 6NO	t	f	2026-06-11 21:48:30.715972	2026-06-11 21:58:45.594749	62	\N	HOS0350
-2849	2	2	HOU-00351	PATIENT INVESTIGATION LOG	68	74	38	4	14	11998.62	\N	Covered	\N	18	Consumable	PATIENT INVESTIGATION LOG	t	f	2026-06-11 21:48:30.715978	2026-06-11 21:58:45.594751	62	\N	HOS0351
-2850	2	2	HOU-00352	PEDIATRIC AMBU BAG	68	69	29	3	7	37608.66	\N	Covered	\N	12	Non-Consumable	PEDIATRIC AMBU BAG	t	f	2026-06-11 21:48:30.715984	2026-06-11 21:58:45.594754	62	\N	HOS0352
-2851	2	2	HOU-00353	PERIPHERAL IV CENTRAL LINE	68	74	38	2	8	44902.73	\N	Covered	\N	18	Consumable	PERIPHERAL IV CENTRAL LINE	t	f	2026-06-11 21:48:30.71599	2026-06-11 21:58:45.594757	62	\N	HOS0353
-2852	2	2	HOU-00354	PHARMACY INDENT BOOK	68	74	38	5	13	44018.45	\N	Covered	\N	18	Consumable	PHARMACY INDENT BOOK	t	f	2026-06-11 21:48:30.715995	2026-06-11 21:58:45.594759	62	\N	HOS0354
-2853	2	2	HOU-00355	PHARMACY RETURN BOOK	68	74	38	5	14	13659.49	\N	Covered	\N	18	Consumable	PHARMACY RETURN BOOK	t	f	2026-06-11 21:48:30.716001	2026-06-11 21:58:45.594762	62	\N	HOS0355
-2854	2	2	HOU-00356	PHYSICAL FITNESS CRTIFICATE	68	74	38	2	8	32654.96	\N	Covered	\N	18	Consumable	PHYSICAL FITNESS CRTIFICATE	t	f	2026-06-11 21:48:30.716007	2026-06-11 21:58:45.594765	62	\N	HOS0356
-2855	2	2	HOU-00357	PILLOW	68	70	29	2	5	35389.67	\N	Covered	\N	12	Non-Consumable	PILLOW	t	f	2026-06-11 21:48:30.716013	2026-06-11 21:58:45.594768	62	\N	HOS0357
-2856	2	2	HOU-00358	PLASTIC SPOON	68	69	37	2	5	25797.52	\N	Covered	\N	18	Consumable	PLASTIC SPOON	t	f	2026-06-11 21:48:30.716018	2026-06-11 21:58:45.594771	62	\N	HOS0358
-2857	2	2	HOU-00359	PLASTIC TRAY	68	69	29	4	10	30679.31	\N	Covered	\N	18	Non-Consumable	PLASTIC TRAY	t	f	2026-06-11 21:48:30.716024	2026-06-11 21:58:45.594773	62	\N	HOS0359
-2858	2	2	HOU-00360	PLATELET SDP ISSUE REGISTER	68	74	29	2	6	34642.99	\N	Covered	\N	18	Consumable	PLATELET SDP ISSUE REGISTER	t	f	2026-06-11 21:48:30.71603	2026-06-11 21:58:45.594776	62	\N	HOS0360
-2859	2	2	HOU-00361	POLICE INTIMATION BOOK	68	74	38	5	11	32810.54	\N	Covered	\N	18	Consumable	POLICE INTIMATION BOOK	t	f	2026-06-11 21:48:30.716036	2026-06-11 21:58:45.594779	62	\N	HOS0361
+2747	2	2	HOS-00247	ON/OFF KIT	68	65	29	5	11	39494.21	\N	Covered	\N	12	Consumable	ON/OFF KIT	t	f	2026-06-11 21:48:30.715376	2026-06-30 16:53:53.805466	62	\N	HOS0247
 2860	2	2	HSK-00046	PHENYLE	69	76	31	18	48	1737.33	\N	Covered	\N	18	Consumable	PHENYLE	t	f	2026-06-11 21:48:30.716042	2026-06-11 21:58:45.594782	62	\N	HSK0046
-2861	2	2	HOU-00362	PP FILE - A4 LARGE FILE (9.5X12.5 INCHES) WITH 9MM SPINE -PP 0.32MM WITH MATT FINISH WITH DELUXE CLIP (SAME AS SANCHETI SAMPLE) OBG	68	74	29	4	14	37317.79	\N	Covered	\N	18	Consumable	PP FILE - A4 LARGE FILE (9.5X12.5 INCHES) WITH 9MM SPINE -PP 0.32MM WITH MATT FINISH WITH DELUXE CLIP (SAME AS SANCHETI SAMPLE) OBG	t	f	2026-06-11 21:48:30.716048	2026-06-11 21:58:45.594784	62	\N	HOS0362
-2862	2	2	HOU-00363	PRE ANASTHETIC CHECKUP FORM	68	74	38	28	62	9946.09	\N	Covered	\N	18	Consumable	PRE ANASTHETIC CHECKUP FORM	t	f	2026-06-11 21:48:30.716054	2026-06-11 21:58:45.594787	62	\N	HOS0363
-2863	2	2	HOU-00364	PRESCRIPTION PAD	68	74	38	3	9	26966.04	\N	Covered	\N	18	Consumable	PRESCRIPTION PAD	t	f	2026-06-11 21:48:30.71606	2026-06-11 21:58:45.59479	62	\N	HOS0364
-2864	2	2	HOU-00365	PRESSURE ULCER CARE	68	74	38	5	17	13396.13	\N	Covered	\N	18	Consumable	PRESSURE ULCER CARE	t	f	2026-06-11 21:48:30.716065	2026-06-11 21:58:45.594793	62	\N	HOS0365
-2865	2	2	HOU-00366	PRESSURE ULCER SURVELLIANCE CARE BUNDLE	68	74	38	2	6	49872.02	\N	Covered	\N	18	Consumable	PRESSURE ULCER SURVELLIANCE CARE BUNDLE	t	f	2026-06-11 21:48:30.716071	2026-06-11 21:58:45.594796	62	\N	HOS0366
-2866	2	2	HOU-00367	PULSE OXIMETER (BUY 1 GET 1 FREE OFFER)	68	69	29	4	13	11790.43	\N	Covered	\N	12	Non-Consumable	PULSE OXIMETER (BUY 1 GET 1 FREE OFFER)	t	f	2026-06-11 21:48:30.716077	2026-06-11 21:58:45.594798	62	\N	HOS0367
-2867	2	2	HOU-00368	RADIOMETER - ABG - SENSOR CASSETTE FOR ABL9 300TEST PACK - SC9 - 2-BGEL	68	67	29	2	7	49317.14	\N	Covered	\N	12	Consumable	RADIOMETER - ABG - SENSOR CASSETTE FOR ABL9 300TEST PACK - SC9 - 2-BGEL	t	f	2026-06-11 21:48:30.716083	2026-06-11 21:58:45.594801	62	\N	HOS0368
-2868	2	2	HOU-00369	RADIOMETER AQT90FLEX REAGENERALT PACK (200TESTS)	68	67	29	3	10	49042.32	\N	Covered	\N	12	Consumable	RADIOMETER AQT90FLEX REAGENERALT PACK (200TESTS)	t	f	2026-06-11 21:48:30.716089	2026-06-11 21:58:45.594804	62	\N	HOS0369
-2869	2	2	HOU-00370	RECHARGEABLE TORCH - EVEREADY	68	69	29	4	15	45240.53	\N	Covered	\N	18	Non-Consumable	RECHARGEABLE TORCH - EVEREADY	t	f	2026-06-11 21:48:30.716095	2026-06-11 21:58:45.594807	62	\N	HOS0370
-2870	2	2	HOU-00371	REQUEST FOR BLOOD AND BLOOD COMPONENTS	68	74	38	30	110	7893.55	\N	Covered	\N	12	Consumable	REQUEST FOR BLOOD AND BLOOD COMPONENTS	t	f	2026-06-11 21:48:30.716101	2026-06-11 21:58:45.594809	62	\N	HOS0371
-2871	2	2	HOU-00372	SAMSUNG-32 INCHES SMART TV HD READY WITH OTT APPS MODEL-T4580	68	66	29	4	10	25272.79	\N	Covered	\N	18	Non-Consumable	SAMSUNG-32 INCHES SMART TV HD READY WITH OTT APPS MODEL-T4580	t	f	2026-06-11 21:48:30.716106	2026-06-11 21:58:45.594812	62	\N	HOS0372
-2872	2	2	HOU-00373	SAMSUNG-43 INCHES SMART TV ULTRA HD 4K WITH OTT APPS MODEL-HG43BU800	68	66	29	2	6	19114.19	\N	Covered	\N	18	Non-Consumable	SAMSUNG-43 INCHES SMART TV ULTRA HD 4K WITH OTT APPS MODEL-HG43BU800	t	f	2026-06-11 21:48:30.716112	2026-06-11 21:58:45.594815	62	\N	HOS0373
-2874	2	2	HOU-00375	SLIPPERS	68	69	41	3	10	19661.93	\N	Covered	\N	5	Consumable	SLIPPERS	t	f	2026-06-11 21:48:30.716124	2026-06-11 21:58:45.59482	62	\N	HOS0375
-2875	2	2	HOU-00376	SMALL NOTE BOOK	68	74	29	35	87	6299.65	\N	Covered	\N	12	Consumable	SMALL NOTE BOOK	t	f	2026-06-11 21:48:30.71613	2026-06-11 21:58:45.594824	62	\N	HOS0376
-2876	2	2	HOU-00377	SONY THERMAL PAPERS - 84S IN BOXES	68	74	29	4	12	21970.9	\N	Covered	\N	18	Consumable	SONY THERMAL PAPERS - 84S IN BOXES	t	f	2026-06-11 21:48:30.716136	2026-06-11 21:58:45.594826	62	\N	HOS0377
-2877	2	2	HOU-00378	SRIPADHA PHARMACY PAYMENT VOUCHER	68	74	38	3	11	10000.59	\N	Covered	\N	12	Consumable	SRIPADHA PHARMACY PAYMENT VOUCHER	t	f	2026-06-11 21:48:30.716142	2026-06-11 21:58:45.594829	62	\N	HOS0378
-2878	2	2	HOU-00379	STEEL PLATE ROUND	68	69	29	4	10	29828.37	\N	Covered	\N	18	Non-Consumable	STEEL PLATE ROUND	t	f	2026-06-11 21:48:30.716147	2026-06-11 21:58:45.594832	62	\N	HOS0379
-2879	2	2	HOU-00380	STEEL TEA CUP	68	69	29	3	8	34638.79	\N	Covered	\N	18	Non-Consumable	STEEL TEA CUP	t	f	2026-06-11 21:48:30.716153	2026-06-11 21:58:45.594835	62	\N	HOS0380
-2880	2	2	HOU-00381	SURGICAL SITE INFECTION PREVENTION CHECKLIST	68	74	38	2	5	41898.03	\N	Covered	\N	12	Consumable	SURGICAL SITE INFECTION PREVENTION CHECKLIST	t	f	2026-06-11 21:48:30.716159	2026-06-11 21:58:45.594837	62	\N	HOS0381
-2881	2	2	HOU-00382	THERMAL PRINTER PAPER ROLL FOR AQT90-RADIOMETER 112MM (20MTRS)	68	74	29	4	13	38080.11	\N	Covered	\N	18	Consumable	THERMAL PRINTER PAPER ROLL FOR AQT90-RADIOMETER 112MM (20MTRS)	t	f	2026-06-11 21:48:30.716167	2026-06-11 21:58:45.59484	62	\N	HOS0382
-2882	2	2	HOU-00383	THERMAL PRINTER ROLLS FOR ABG - 80MM 20 MTRS	68	74	29	4	9	20324.55	\N	Covered	\N	18	Consumable	THERMAL PRINTER ROLLS FOR ABG - 80MM 20 MTRS	t	f	2026-06-11 21:48:30.716173	2026-06-11 21:58:45.594843	62	\N	HOS0383
-2883	2	2	HOU-00384	THERMOSCAN - ROSSMAX	68	69	29	3	12	30771.34	\N	Covered	\N	12	Consumable	THERMOSCAN - ROSSMAX	t	f	2026-06-11 21:48:30.716179	2026-06-11 21:58:45.594846	62	\N	HOS0384
-2884	2	2	HOU-00385	THICK PLASTIC SHEET BIG ROLLS	68	69	30	4	13	43134.08	\N	Covered	\N	18	Consumable	THICK PLASTIC SHEET BIG ROLLS	t	f	2026-06-11 21:48:30.716185	2026-06-11 21:58:45.594849	62	\N	HOS0385
-2885	2	2	HOU-00386	TOURNIQUET LARGE SIZE - TYNOR	68	69	29	3	9	10124.09	\N	Covered	\N	12	Non-Consumable	TOURNIQUET LARGE SIZE - TYNOR	t	f	2026-06-11 21:48:30.716191	2026-06-11 21:58:45.594851	62	\N	HOS0386
-2886	2	2	HOU-00387	TOURNIQUET MEDIUM SIZE - TYNOR	68	69	29	4	10	29620.3	\N	Covered	\N	12	Non-Consumable	TOURNIQUET MEDIUM SIZE - TYNOR	t	f	2026-06-11 21:48:30.716196	2026-06-11 21:58:45.594854	62	\N	HOS0387
-2887	2	2	HOU-00388	TOURNIQUET SMALL SIZE - TYNOR	68	69	29	5	14	35675.08	\N	Covered	\N	12	Non-Consumable	TOURNIQUET SMALL SIZE - TYNOR	t	f	2026-06-11 21:48:30.716202	2026-06-11 21:58:45.594857	62	\N	HOS0388
-2888	2	2	HOU-00389	TYNOR - RESTRAINER I-65 UN-	68	69	29	3	8	33549.49	\N	Covered	\N	12	Non-Consumable	TYNOR - RESTRAINER I-65 UN-	t	f	2026-06-11 21:48:30.716208	2026-06-11 21:58:45.59486	62	\N	HOS0389
-2889	2	2	HOU-00390	URINARY CATHETER CARE	68	74	38	5	17	16270.52	\N	Covered	\N	12	Consumable	URINARY CATHETER CARE	t	f	2026-06-11 21:48:30.716214	2026-06-11 21:58:45.594862	62	\N	HOS0390
-2890	2	2	HOU-00391	VACCINATION CARD (PAEDIATRIC)	68	74	29	28	95	6453.22	\N	Covered	\N	12	Consumable	VACCINATION CARD (PAEDIATRIC)	t	f	2026-06-11 21:48:30.716219	2026-06-11 21:58:45.594865	62	\N	HOS0391
-2891	2	2	HOU-00392	VAP CARE BUNDLE	68	74	38	2	5	33634.67	\N	Covered	\N	12	Consumable	VAP CARE BUNDLE	t	f	2026-06-11 21:48:30.716225	2026-06-11 21:58:45.594868	62	\N	HOS0392
-2892	2	2	HOU-00393	VIM BAR - SMALL	68	69	29	3	8	18525.4	\N	Covered	\N	18	Consumable	VIM BAR - SMALL	t	f	2026-06-11 21:48:30.716231	2026-06-11 21:58:45.594871	62	\N	HOS0393
-2893	2	2	HOU-00394	WALKER FOLDABLE SUPERIOR QUALITY	68	69	29	5	15	30872.71	\N	Covered	\N	12	Non-Consumable	WALKER FOLDABLE SUPERIOR QUALITY	t	f	2026-06-11 21:48:30.716237	2026-06-11 21:58:45.594873	62	\N	HOS0394
-2894	2	2	HOU-00395	WALL CLOCK ROUND - AJANTA	68	69	29	3	7	44917.82	\N	Covered	\N	18	Non-Consumable	WALL CLOCK ROUND - AJANTA	t	f	2026-06-11 21:48:30.716243	2026-06-11 21:58:45.594876	62	\N	HOS0395
-2895	2	2	HOU-00396	WARD CENSUS REGISTER	68	74	29	5	16	42515.36	\N	Covered	\N	12	Consumable	WARD CENSUS REGISTER	t	f	2026-06-11 21:48:30.716248	2026-06-11 21:58:45.594879	62	\N	HOS0396
-2896	2	2	HOU-00397	WELCOME KIT IN ZIPLOCK POUCH WITH LOGO PRINT-20GM SOAP, 20ML KIWI SHAMPOO, 20ML KIWI BODY LOTION, WHITE BRUSH, COLGATE PASTE	68	69	34	5	17	25224.08	\N	Covered	\N	18	Consumable	WELCOME KIT IN ZIPLOCK POUCH WITH LOGO PRINT-20GM SOAP, 20ML KIWI SHAMPOO, 20ML KIWI BODY LOTION, WHITE BRUSH, COLGATE PASTE	t	f	2026-06-11 21:48:30.716255	2026-06-11 21:58:45.594882	62	\N	HOS0397
-2897	2	2	HOU-00398	WHITE BOARD SIZE 4X2	68	69	29	2	5	35445.94	\N	Covered	\N	18	Non-Consumable	WHITE BOARD SIZE 4X2	t	f	2026-06-11 21:48:30.716261	2026-06-11 21:58:45.594884	62	\N	HOS0398
-2898	2	2	HOU-00399	YELLOW PRESCRIPTION PAD	68	74	38	2	8	16201.47	\N	Covered	\N	12	Consumable	YELLOW PRESCRIPTION PAD	t	f	2026-06-11 21:48:30.716268	2026-06-11 21:58:45.594887	62	\N	HOS0399
 2899	2	2	HEQ-00001	65" SAMSUNG INTERACTIVE DISPLAY-WA65C - DESIGNED FOR THE CLASSROOM OF THE FUTURE ANDROID 11 OS* BASED PRODUCT- PROVIDES INTUITIVE USABILITY TO TEACHERS, SIMULTANEOUSLY CAN SHARE UP TO 9 SCRNS FOR MAX PRODUCTIVITY	67	59	29	2	7	12643.71	\N	Covered	\N	18	Non-Consumable	65" SAMSUNG INTERACTIVE DISPLAY-WA65C - DESIGNED FOR THE CLASSROOM OF THE FUTURE ANDROID 11 OS* BASED PRODUCT- PROVIDES INTUITIVE USABILITY TO TEACHERS, SIMULTANEOUSLY CAN SHARE UP TO 9 SCRNS FOR MAX PRODUCTIVITY	t	f	2026-06-11 21:48:30.716274	2026-06-11 21:58:45.59489	62	\N	HEQ0001
 2900	2	2	HEQ-00002	6U 500 RACK	67	60	29	5	11	45620.69	\N	Covered	\N	18	Non-Consumable	6U 500 RACK	t	f	2026-06-11 21:48:30.71628	2026-06-11 21:58:45.594893	62	\N	HEQ0002
 2901	2	2	HEQ-00003	AMBU BAG ADULT - SILICON	67	58	29	2	7	34187.77	\N	Covered	\N	12	Non-Consumable	AMBU BAG ADULT - SILICON	t	f	2026-06-11 21:48:30.716286	2026-06-11 21:58:45.594895	62	\N	HEQ0003
@@ -10964,6 +11030,25 @@ COPY public.purchase_order_approvals (id, po_id, approval_flow_id, approver_id, 
 29	208	8	4	{"500": {"quantity": 0.0, "remarks": "nil"}}	\N	2026-06-17 10:43:51.092886
 30	205	8	4	{"497": {"quantity": 0.0, "remarks": null}}	Yo! i'm changing the order quantity to 0	2026-06-17 10:46:25.131612
 31	202	8	4	{"494": {"quantity": 0.0, "remarks": null}}	i'm changing it to 0	2026-06-17 10:48:13.211278
+32	237	55	3	{"589": {"quantity": 1.0, "remarks": null}, "590": {"quantity": 0.0, "remarks": null}}	\N	2026-07-01 15:37:57.809135
+33	237	18	3	{"589": {"quantity": 0.0, "remarks": null}, "590": {"quantity": 1.0, "remarks": null}}	\N	2026-07-01 15:38:14.660537
+34	237	58	3	{"589": {"quantity": 0.0, "remarks": null}, "590": {"quantity": 1.0, "remarks": null}}	\N	2026-07-01 15:38:14.660548
+35	235	55	3	{"594": {"quantity": 1.0, "remarks": null}, "595": {"quantity": 1.0, "remarks": null}}	\N	2026-07-01 15:41:00.800211
+36	235	18	3	{"595": {"quantity": 1.0, "remarks": null}, "594": {"quantity": 1.0, "remarks": null}}	\N	2026-07-01 15:41:11.517369
+37	235	58	3	{"595": {"quantity": 1.0, "remarks": null}, "594": {"quantity": 1.0, "remarks": null}}	\N	2026-07-01 15:41:11.517409
+38	238	55	3	{"588": {"quantity": 1.0, "remarks": null}}	\N	2026-07-01 15:44:49.404105
+39	238	18	3	{"588": {"quantity": 1.0, "remarks": null}}	\N	2026-07-01 15:44:55.617727
+40	238	58	3	{"588": {"quantity": 1.0, "remarks": null}}	\N	2026-07-01 15:44:55.617739
+41	234	55	3	{"599": {"quantity": 15.0, "remarks": null}}	\N	2026-07-01 18:03:52.615606
+42	242	55	3	{"600": {"quantity": 1.0, "remarks": null}, "601": {"quantity": 1.0, "remarks": null}}	\N	2026-07-01 18:11:58.870333
+43	242	18	3	{"600": {"quantity": 1.0, "remarks": null}, "601": {"quantity": 1.0, "remarks": null}}	\N	2026-07-01 18:12:10.026399
+44	242	58	3	{"600": {"quantity": 1.0, "remarks": null}, "601": {"quantity": 1.0, "remarks": null}}	\N	2026-07-01 18:12:10.026421
+45	241	55	3	{"603": {"quantity": 3.0, "remarks": null}, "604": {"quantity": 5.0, "remarks": null}}	\N	2026-07-01 18:15:25.883121
+46	241	18	3	{"603": {"quantity": 3.0, "remarks": null}, "604": {"quantity": 5.0, "remarks": null}}	\N	2026-07-01 18:15:36.236398
+47	241	58	3	{"603": {"quantity": 3.0, "remarks": null}, "604": {"quantity": 5.0, "remarks": null}}	\N	2026-07-01 18:15:36.236438
+48	222	55	3	{"613": {"quantity": 10.0, "remarks": null}}	\N	2026-07-01 19:05:35.861811
+49	222	18	3	{"613": {"quantity": 10.0, "remarks": null}}	\N	2026-07-01 19:05:57.909581
+50	222	58	3	{"613": {"quantity": 10.0, "remarks": null}}	\N	2026-07-01 19:05:57.909618
 \.
 
 
@@ -11051,7 +11136,6 @@ COPY public.purchase_order_items (id, po_id, material_id, quantity, rate, amount
 501	209	1062	20	4658	109928.8	20	\N	0	0	0	18	f	20
 517	214	3474	10	3262	32620	0	\N	0	9	9	0	f	10
 522	216	2357	20	1000	20000	20	\N	0	9	9	0	f	\N
-525	222	3475	10	400	4000	0	\N	0	9	9	0	f	\N
 521	217	3084	6	3294	19764	0	\N	0	9	9	0	f	4
 526	221	3474	5	100	500	0	\N	0	9	9	0	f	3
 527	221	3503	6	300	1800	0	\N	0	9	9	0	f	4
@@ -11100,11 +11184,27 @@ COPY public.purchase_order_items (id, po_id, material_id, quantity, rate, amount
 568	225	3104	2	132111	264222	0	\N	0	9	9	0	f	\N
 569	226	3507	6	224	1344	0	\N	0	6	6	0	f	\N
 570	227	2751	3	123	369	0	\N	0	9	9	0	f	\N
-571	228	3507	6	100	600	0	\N	0	6	6	0	f	\N
-572	229	2751	3	100	300	0	\N	0	9	9	0	f	\N
-573	230	3467	1	132	132	0	\N	0	9	9	0	f	\N
-574	231	3505	1	111	111	0	\N	0	9	9	0	f	\N
-575	232	2565	1	10	10	0	\N	0	6	6	0	f	\N
+576	233	2564	2	16526.16	33052.32	2	\N	0	6	6	0	f	\N
+577	232	2565	1	10	10	1	\N	0	6	6	0	f	\N
+584	236	2564	1	335	335	0	\N	0	6	6	0	f	\N
+585	236	2565	1	26703.28	26703.28	0	\N	0	6	6	0	f	\N
+595	235	2565	1	26703.28	26703.28	0	\N	0	6	6	0	f	1
+588	238	2564	2	16526.16	33052.32	0	\N	0	6	6	0	f	1
+589	237	2564	1	16526.16	16526.16	0	\N	0	6	6	0	f	0
+590	237	2565	1	26703.28	26703.28	0	\N	0	6	6	0	f	1
+594	235	2564	1	16526.16	16526.16	0	\N	0	6	6	0	f	1
+599	234	2564	15	16526.16	247892.4	0	\N	0	6	6	0	f	15
+600	242	2564	1	16526.16	16526.16	0	\N	0	6	6	0	f	1
+601	242	2899	1	12643.71	12643.71	0	\N	0	9	9	0	f	1
+603	241	2564	5	16526.16	82630.8	0	\N	0	6	6	0	f	3
+604	241	2444	10	2183.22	21832.2	0	\N	0	9	9	0	f	5
+605	240	2564	1	16526.16	16526.16	0	\N	0	6	6	0	f	\N
+606	239	2564	1	16526.16	16526.16	0	\N	0	6	6	0	f	\N
+607	231	3505	1	111	111	0	\N	0	9	9	0	f	\N
+608	230	3467	1	132	132	0	\N	0	9	9	0	f	\N
+609	229	2751	3	100	300	0	\N	0	9	9	0	f	\N
+610	228	3507	6	100	600	0	\N	0	6	6	0	f	\N
+613	222	3475	10	400	4000	0	\N	0	9	9	0	f	10
 \.
 
 
@@ -11112,67 +11212,77 @@ COPY public.purchase_order_items (id, po_id, material_id, quantity, rate, amount
 -- Data for Name: purchase_orders; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.purchase_orders (id, tenant_id, site_id, po_number, vendor_id, project_id, pr_id, indent_id, qr_id, po_type, total_amount, delivery_date, status, terms, created_by_id, approved_by_id, approved_at, is_deleted, created_at, updated_at, current_approval_level) FROM stdin;
-184	3	3	PO-00015	52	1	\N	\N	182	Formal	81643.63	\N	Closed	\N	4	\N	\N	f	2026-05-05 18:52:30.375564	2026-06-02 18:01:24.106204	\N
-188	3	3	PO-00023	53	1	\N	\N	179	Formal	7057	\N	Sent to Vendor	\N	4	4	2026-06-09 06:02:25.803756	f	2026-05-25 18:43:27.659778	2026-06-09 11:32:29.137317	2
-185	3	3	PO-00020	56	1	\N	188	\N	Formal	505620	\N	Sent to Vendor	\N	4	4	2026-06-09 06:03:28.427074	f	2026-05-20 11:09:40.396549	2026-06-09 12:03:22.436884	2
-213	3	3	PO-00048	53	1	\N	\N	\N	Informal	59815.35	2026-07-01	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-10 18:09:04.764216	2026-06-10 18:09:04.786544	1
-183	3	3	PO-00014	52	1	\N	\N	181	Formal	38878.18	\N	Closed	\N	4	\N	\N	f	2026-05-04 18:52:30.375564	2026-06-09 11:11:19.17997	\N
-186	3	3	PO-00021	51	1	185	\N	\N	Formal	2029750	2026-06-03	Sent to Vendor		4	4	2026-05-20 07:11:03.64198	f	2026-05-20 12:31:17.847185	2026-06-09 11:28:51.718097	\N
-187	3	3	PO-00022	59	1	\N	195	\N	Formal	6500000	\N	Sent to Vendor	\N	4	4	2026-06-09 06:01:45.255291	f	2026-05-20 12:44:10.329878	2026-06-09 11:31:54.352679	2
-172	3	3	PO-00003	54	1	\N	181	\N	Formal	41190.84	\N	Closed	\N	4	\N	\N	f	2026-04-23 18:52:30.375564	2026-05-15 18:52:30.668781	\N
-173	3	3	PO-00004	51	1	\N	182	\N	Formal	158700.81	\N	Approved	\N	4	\N	\N	f	2026-04-24 18:52:30.375564	2026-05-15 18:52:30.673538	\N
-174	3	3	PO-00005	59	1	\N	183	\N	Formal	94040.94	\N	Approved	\N	4	\N	\N	f	2026-04-25 18:52:30.375564	2026-05-15 18:52:30.677358	\N
-175	3	3	PO-00006	60	1	175	\N	\N	Formal	106458.67	\N	Closed	\N	4	\N	\N	f	2026-04-26 18:52:30.375564	2026-05-15 18:52:30.680082	\N
-176	3	3	PO-00007	56	1	176	\N	\N	Formal	154430.78	\N	Approved	\N	4	\N	\N	f	2026-04-27 18:52:30.375564	2026-05-15 18:52:30.683986	\N
-177	3	3	PO-00008	52	1	177	\N	\N	Formal	65342.52	\N	Closed	\N	4	\N	\N	f	2026-04-28 18:52:30.375564	2026-05-15 18:52:30.687165	\N
-178	3	3	PO-00009	60	1	178	\N	\N	Formal	147399.23	\N	Partially Received	\N	4	\N	\N	f	2026-04-29 18:52:30.375564	2026-05-15 18:52:30.691324	\N
-179	3	3	PO-00010	60	1	179	\N	\N	Formal	85728.76	\N	Sent to Vendor	\N	4	\N	\N	f	2026-04-30 18:52:30.375564	2026-05-15 18:52:30.694624	\N
-180	3	3	PO-00011	58	1	\N	\N	178	Formal	60541.49	\N	Partially Received	\N	4	\N	\N	f	2026-05-01 18:52:30.375564	2026-05-15 18:52:30.696708	\N
-181	3	3	PO-00012	53	1	\N	\N	179	Formal	124991.86	\N	Closed	\N	4	\N	\N	f	2026-05-02 18:52:30.375564	2026-05-15 18:52:30.700679	\N
-182	3	3	PO-00013	55	1	\N	\N	180	Formal	150499.81	\N	Partially Received	\N	4	\N	\N	f	2026-05-03 18:52:30.375564	2026-05-15 18:52:30.703739	\N
-171	3	3	PO-00002	53	1	\N	180	\N	Formal	90907.27	\N	Partially Received	\N	4	\N	\N	f	2026-04-22 18:52:30.375564	2026-05-15 18:52:30.664194	\N
-190	3	3	PO-00025	56	1	179	\N	\N	Formal	6853250	2026-06-15	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 15:23:31.597258	2026-06-08 18:55:17.925857	1
-191	3	3	PO-00026	53	1	\N	197	\N	Formal	1298	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 16:03:23.716584	2026-06-08 18:55:17.942199	1
-192	3	3	PO-00027	54	1	\N	196	\N	Formal	2507.5	\N	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-01 11:07:15.238732	f	2026-06-01 16:36:50.172223	2026-06-01 16:37:32.738439	\N
-193	3	3	PO-00028	57	1	178	\N	\N	Formal	3813570	2026-06-15	Submitted		4	\N	\N	f	2026-06-01 16:39:26.934331	2026-06-08 18:55:17.975319	1
-194	3	3	PO-00029	54	1	\N	201	\N	Formal	100800	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 16:58:23.591671	2026-06-08 18:55:17.992417	1
-195	3	3	PO-00030	59	1	188	\N	\N	Formal	3250	2026-06-15	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 17:03:57.421434	2026-06-08 18:55:18.042481	1
-196	3	3	PO-00031	53	1	\N	202	\N	Formal	226800	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 17:07:08.990299	2026-06-08 18:55:18.059001	1
-197	3	3	PO-00032	53	1	187	\N	185	Formal	225000	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 17:32:30.423259	2026-06-08 18:55:18.075356	1
-198	3	3	PO-00033	53	1	\N	\N	175	Formal	20438	\N	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 07:11:54.780151	f	2026-06-01 17:37:01.162383	2026-06-09 12:41:54.78066	2
-210	3	3	PO-00045	53	1	186	\N	\N	Formal	389.4	2026-06-22	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 06:39:44.953387	f	2026-06-08 16:14:50.262386	2026-06-09 12:09:51.002593	2
-203	3	3	PO-00038	53	1	\N	\N	\N	Informal	18000	2026-06-23	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-02 13:25:01.313929	2026-06-02 13:25:01.322517	\N
-200	3	3	PO-00035	53	1	\N	\N	\N	Informal	196	2026-06-22	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-02 06:01:19.439678	f	2026-06-01 19:52:04.979427	2026-06-09 11:23:05.561822	\N
-199	3	3	PO-00034	59	1	\N	\N	175	Formal	2042	\N	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 05:13:04.621484	f	2026-06-01 17:37:01.189809	2026-06-09 11:26:24.208347	2
-170	3	3	PO-00001	54	1	\N	179	\N	Formal	59200.55	\N	Approved	\N	4	\N	\N	f	2026-04-21 18:52:30.375564	2026-05-15 18:52:30.658953	1
-204	3	3	PO-00039	53	1	\N	\N	\N	Informal	19800	2026-06-23	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-02 17:42:31.823143	2026-06-02 17:42:31.82497	\N
-189	3	3	PO-00024	54	1	\N	\N	179	Formal	33629	\N	Closed	\N	4	4	2026-05-25 13:22:18.605025	f	2026-05-25 18:43:27.751179	2026-06-02 18:01:36.986163	\N
-201	3	3	PO-00036	54	1	\N	\N	\N	Formal	135778.84	2026-06-22	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-02 06:00:37.696127	f	2026-06-01 19:53:47.799287	2026-06-09 11:19:25.214361	\N
-212	3	3	PO-00047	59	1	\N	\N	\N	Informal	389.4	2026-06-29	Short Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR\n[Short Closed: short closed \n]	4	4	2026-06-08 12:47:36.231711	f	2026-06-08 17:19:34.563694	2026-06-08 19:19:46.178721	\N
-211	3	3	PO-00046	53	1	\N	\N	\N	Informal	149060.07	2026-06-29	Short Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR\n[Short Closed: mistaken]	4	4	2026-06-09 04:59:33.248268	f	2026-06-08 17:18:43.689083	2026-06-17 11:21:46.51598	2
-223	2	2	PO-00007	62	3	200	\N	193	Formal	10358927	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-18 12:45:51.479268	2026-06-18 12:45:51.542216	1
-222	2	2	PO-00006	63	3	\N	\N	187	Formal	4000	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-15 19:05:16.095226	2026-06-15 19:05:16.096769	1
-224	2	2	PO-00008	64	3	200	\N	193	Formal	462457	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-18 12:45:51.568488	2026-06-18 12:45:51.577314	1
-221	2	2	PO-00005	62	3	\N	\N	187	Formal	2714	2026-07-07	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-06-16 06:48:21.751249	f	2026-06-15 19:05:16.037647	2026-06-16 12:18:21.752515	2
-208	3	3	PO-00043	54	1	\N	194	\N	Formal	12455543.1	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-05 18:10:20.039447	2026-06-17 10:43:51.159152	2
-205	3	3	PO-00040	54	1	189	\N	\N	Formal	48160	2026-06-17	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-03 14:31:01.896958	2026-06-17 10:46:25.147151	2
-202	3	3	PO-00037	54	1	\N	200	\N	Formal	5605	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-02 13:18:45.56214	2026-06-17 10:48:13.245105	2
-225	2	2	PO-00009	63	3	200	\N	193	Formal	5213903	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-18 12:45:51.584007	2026-06-18 12:45:51.600692	1
-226	2	2	PO-00010	63	3	\N	\N	194	Formal	1344	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-19 12:06:49.124341	2026-06-19 12:06:49.190374	1
-227	2	2	PO-00011	62	3	\N	\N	194	Formal	369	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-19 12:06:49.200936	2026-06-19 12:06:49.206863	1
-230	2	2	PO-00014	63	3	\N	\N	197	Formal	132	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-22 12:15:32.505776	2026-06-22 12:15:32.538321	1
-231	2	2	PO-00015	62	3	\N	\N	197	Formal	111	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-22 12:15:32.547787	2026-06-22 12:15:32.553898	1
-207	3	3	PO-00042	53	1	\N	\N	\N	Informal	10560	2026-06-25	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 07:31:48.001221	f	2026-06-04 14:19:18.399032	2026-06-11 15:05:34.851646	2
-206	3	3	PO-00041	53	1	\N	\N	\N	Informal	181500	2026-06-24	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-03 09:03:42.850278	f	2026-06-03 14:33:32.175397	2026-06-11 16:24:46.272972	\N
-228	2	2	PO-00012	62	3	\N	\N	195	Formal	600	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-19 13:08:12.417753	2026-06-19 13:08:12.429379	1
-229	2	2	PO-00013	63	3	\N	\N	195	Formal	300	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-19 13:08:12.440185	2026-06-19 13:08:12.449311	1
-232	2	2	PO-00016	64	3	\N	\N	198	Formal	10	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-22 12:18:25.580101	2026-06-22 12:18:25.583846	1
-209	3	3	PO-00044	55	1	\N	208	\N	Formal	109928.8	\N	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: 15 Days\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 07:25:55.019454	f	2026-06-08 14:45:41.037419	2026-06-11 15:04:41.081091	2
-214	2	2	PO-00001	62	3	194	\N	\N	Formal	38491.6	2026-06-26	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-06-11 19:46:17.594031	f	2026-06-12 01:00:29.585057	2026-06-12 01:17:08.524505	2
-216	2	2	PO-00003	62	3	\N	\N	186	Formal	23600	2026-07-03	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-12 01:40:11.44893	2026-06-12 02:20:17.559248	2
-217	2	2	PO-00004	63	3	\N	\N	186	Formal	23321.52	2026-07-03	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-06-16 06:09:10.505248	f	2026-06-12 01:40:11.463052	2026-06-16 11:39:10.508746	2
-215	2	2	PO-00002	62	3	\N	\N	\N	Informal	59815.35	2026-07-03	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	11	2026-06-11 19:55:57.036519	f	2026-06-12 01:18:50.982636	2026-06-12 01:27:26.343947	2
+COPY public.purchase_orders (id, tenant_id, site_id, po_number, vendor_id, project_id, pr_id, indent_id, qr_id, po_type, total_amount, delivery_date, status, terms, created_by_id, approved_by_id, approved_at, is_deleted, created_at, updated_at, current_approval_level, annexure, remarks) FROM stdin;
+184	3	3	PO-00015	52	1	\N	\N	182	Formal	81643.63	\N	Closed	\N	4	\N	\N	f	2026-05-05 18:52:30.375564	2026-06-02 18:01:24.106204	\N	\N	\N
+188	3	3	PO-00023	53	1	\N	\N	179	Formal	7057	\N	Sent to Vendor	\N	4	4	2026-06-09 06:02:25.803756	f	2026-05-25 18:43:27.659778	2026-06-09 11:32:29.137317	2	\N	\N
+185	3	3	PO-00020	56	1	\N	188	\N	Formal	505620	\N	Sent to Vendor	\N	4	4	2026-06-09 06:03:28.427074	f	2026-05-20 11:09:40.396549	2026-06-09 12:03:22.436884	2	\N	\N
+213	3	3	PO-00048	53	1	\N	\N	\N	Informal	59815.35	2026-07-01	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-10 18:09:04.764216	2026-06-10 18:09:04.786544	1	\N	\N
+183	3	3	PO-00014	52	1	\N	\N	181	Formal	38878.18	\N	Closed	\N	4	\N	\N	f	2026-05-04 18:52:30.375564	2026-06-09 11:11:19.17997	\N	\N	\N
+186	3	3	PO-00021	51	1	185	\N	\N	Formal	2029750	2026-06-03	Sent to Vendor		4	4	2026-05-20 07:11:03.64198	f	2026-05-20 12:31:17.847185	2026-06-09 11:28:51.718097	\N	\N	\N
+187	3	3	PO-00022	59	1	\N	195	\N	Formal	6500000	\N	Sent to Vendor	\N	4	4	2026-06-09 06:01:45.255291	f	2026-05-20 12:44:10.329878	2026-06-09 11:31:54.352679	2	\N	\N
+172	3	3	PO-00003	54	1	\N	181	\N	Formal	41190.84	\N	Closed	\N	4	\N	\N	f	2026-04-23 18:52:30.375564	2026-05-15 18:52:30.668781	\N	\N	\N
+173	3	3	PO-00004	51	1	\N	182	\N	Formal	158700.81	\N	Approved	\N	4	\N	\N	f	2026-04-24 18:52:30.375564	2026-05-15 18:52:30.673538	\N	\N	\N
+174	3	3	PO-00005	59	1	\N	183	\N	Formal	94040.94	\N	Approved	\N	4	\N	\N	f	2026-04-25 18:52:30.375564	2026-05-15 18:52:30.677358	\N	\N	\N
+175	3	3	PO-00006	60	1	175	\N	\N	Formal	106458.67	\N	Closed	\N	4	\N	\N	f	2026-04-26 18:52:30.375564	2026-05-15 18:52:30.680082	\N	\N	\N
+176	3	3	PO-00007	56	1	176	\N	\N	Formal	154430.78	\N	Approved	\N	4	\N	\N	f	2026-04-27 18:52:30.375564	2026-05-15 18:52:30.683986	\N	\N	\N
+177	3	3	PO-00008	52	1	177	\N	\N	Formal	65342.52	\N	Closed	\N	4	\N	\N	f	2026-04-28 18:52:30.375564	2026-05-15 18:52:30.687165	\N	\N	\N
+178	3	3	PO-00009	60	1	178	\N	\N	Formal	147399.23	\N	Partially Received	\N	4	\N	\N	f	2026-04-29 18:52:30.375564	2026-05-15 18:52:30.691324	\N	\N	\N
+179	3	3	PO-00010	60	1	179	\N	\N	Formal	85728.76	\N	Sent to Vendor	\N	4	\N	\N	f	2026-04-30 18:52:30.375564	2026-05-15 18:52:30.694624	\N	\N	\N
+180	3	3	PO-00011	58	1	\N	\N	178	Formal	60541.49	\N	Partially Received	\N	4	\N	\N	f	2026-05-01 18:52:30.375564	2026-05-15 18:52:30.696708	\N	\N	\N
+181	3	3	PO-00012	53	1	\N	\N	179	Formal	124991.86	\N	Closed	\N	4	\N	\N	f	2026-05-02 18:52:30.375564	2026-05-15 18:52:30.700679	\N	\N	\N
+182	3	3	PO-00013	55	1	\N	\N	180	Formal	150499.81	\N	Partially Received	\N	4	\N	\N	f	2026-05-03 18:52:30.375564	2026-05-15 18:52:30.703739	\N	\N	\N
+171	3	3	PO-00002	53	1	\N	180	\N	Formal	90907.27	\N	Partially Received	\N	4	\N	\N	f	2026-04-22 18:52:30.375564	2026-05-15 18:52:30.664194	\N	\N	\N
+190	3	3	PO-00025	56	1	179	\N	\N	Formal	6853250	2026-06-15	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 15:23:31.597258	2026-06-08 18:55:17.925857	1	\N	\N
+191	3	3	PO-00026	53	1	\N	197	\N	Formal	1298	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 16:03:23.716584	2026-06-08 18:55:17.942199	1	\N	\N
+192	3	3	PO-00027	54	1	\N	196	\N	Formal	2507.5	\N	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-01 11:07:15.238732	f	2026-06-01 16:36:50.172223	2026-06-01 16:37:32.738439	\N	\N	\N
+193	3	3	PO-00028	57	1	178	\N	\N	Formal	3813570	2026-06-15	Submitted		4	\N	\N	f	2026-06-01 16:39:26.934331	2026-06-08 18:55:17.975319	1	\N	\N
+194	3	3	PO-00029	54	1	\N	201	\N	Formal	100800	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 16:58:23.591671	2026-06-08 18:55:17.992417	1	\N	\N
+195	3	3	PO-00030	59	1	188	\N	\N	Formal	3250	2026-06-15	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 17:03:57.421434	2026-06-08 18:55:18.042481	1	\N	\N
+196	3	3	PO-00031	53	1	\N	202	\N	Formal	226800	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 17:07:08.990299	2026-06-08 18:55:18.059001	1	\N	\N
+197	3	3	PO-00032	53	1	187	\N	185	Formal	225000	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 17:32:30.423259	2026-06-08 18:55:18.075356	1	\N	\N
+198	3	3	PO-00033	53	1	\N	\N	175	Formal	20438	\N	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 07:11:54.780151	f	2026-06-01 17:37:01.162383	2026-06-09 12:41:54.78066	2	\N	\N
+210	3	3	PO-00045	53	1	186	\N	\N	Formal	389.4	2026-06-22	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 06:39:44.953387	f	2026-06-08 16:14:50.262386	2026-06-09 12:09:51.002593	2	\N	\N
+203	3	3	PO-00038	53	1	\N	\N	\N	Informal	18000	2026-06-23	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-02 13:25:01.313929	2026-06-02 13:25:01.322517	\N	\N	\N
+200	3	3	PO-00035	53	1	\N	\N	\N	Informal	196	2026-06-22	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-02 06:01:19.439678	f	2026-06-01 19:52:04.979427	2026-06-09 11:23:05.561822	\N	\N	\N
+199	3	3	PO-00034	59	1	\N	\N	175	Formal	2042	\N	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 05:13:04.621484	f	2026-06-01 17:37:01.189809	2026-06-09 11:26:24.208347	2	\N	\N
+170	3	3	PO-00001	54	1	\N	179	\N	Formal	59200.55	\N	Approved	\N	4	\N	\N	f	2026-04-21 18:52:30.375564	2026-05-15 18:52:30.658953	1	\N	\N
+204	3	3	PO-00039	53	1	\N	\N	\N	Informal	19800	2026-06-23	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-02 17:42:31.823143	2026-06-02 17:42:31.82497	\N	\N	\N
+189	3	3	PO-00024	54	1	\N	\N	179	Formal	33629	\N	Closed	\N	4	4	2026-05-25 13:22:18.605025	f	2026-05-25 18:43:27.751179	2026-06-02 18:01:36.986163	\N	\N	\N
+201	3	3	PO-00036	54	1	\N	\N	\N	Formal	135778.84	2026-06-22	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-02 06:00:37.696127	f	2026-06-01 19:53:47.799287	2026-06-09 11:19:25.214361	\N	\N	\N
+234	2	2	PO-00018	63	3	\N	\N	\N	Informal	277639.49	2026-07-01	Rejected	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-01 15:00:00.254964	2026-07-01 18:04:06.457384	2	\N	\n[Rejected: Rejection at level 2]
+223	2	2	PO-00007	62	3	200	\N	193	Formal	10358927	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-18 12:45:51.479268	2026-06-18 12:45:51.542216	1	\N	\N
+222	2	2	PO-00006	63	3	\N	\N	187	Formal	4720	2026-07-08	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 13:35:57.94273	f	2026-06-15 19:05:16.095226	2026-07-01 19:05:57.944684	2	Annexure test for PO-00006	\N
+224	2	2	PO-00008	64	3	200	\N	193	Formal	462457	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-18 12:45:51.568488	2026-06-18 12:45:51.577314	1	\N	\N
+221	2	2	PO-00005	62	3	\N	\N	187	Formal	2714	2026-07-07	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-06-16 06:48:21.751249	f	2026-06-15 19:05:16.037647	2026-06-16 12:18:21.752515	2	\N	\N
+208	3	3	PO-00043	54	1	\N	194	\N	Formal	12455543.1	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-05 18:10:20.039447	2026-06-17 10:43:51.159152	2	\N	\N
+205	3	3	PO-00040	54	1	189	\N	\N	Formal	48160	2026-06-17	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-03 14:31:01.896958	2026-06-17 10:46:25.147151	2	\N	\N
+202	3	3	PO-00037	54	1	\N	200	\N	Formal	5605	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-02 13:18:45.56214	2026-06-17 10:48:13.245105	2	\N	\N
+225	2	2	PO-00009	63	3	200	\N	193	Formal	5213903	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-18 12:45:51.584007	2026-06-18 12:45:51.600692	1	\N	\N
+226	2	2	PO-00010	63	3	\N	\N	194	Formal	1344	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-19 12:06:49.124341	2026-06-19 12:06:49.190374	1	\N	\N
+227	2	2	PO-00011	62	3	\N	\N	194	Formal	369	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-19 12:06:49.200936	2026-06-19 12:06:49.206863	1	\N	\N
+230	2	2	PO-00014	63	3	\N	\N	197	Formal	155.76	2026-07-08	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-22 12:15:32.505776	2026-07-01 18:53:22.407591	1	\N	\N
+207	3	3	PO-00042	53	1	\N	\N	\N	Informal	10560	2026-06-25	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 07:31:48.001221	f	2026-06-04 14:19:18.399032	2026-06-11 15:05:34.851646	2	\N	\N
+206	3	3	PO-00041	53	1	\N	\N	\N	Informal	181500	2026-06-24	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-03 09:03:42.850278	f	2026-06-03 14:33:32.175397	2026-06-11 16:24:46.272972	\N	\N	\N
+233	2	2	PO-00017	63	3	\N	\N	\N	Informal	37018.6	2026-07-21	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: 15 Days\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-30 18:07:22.323788	2026-06-30 18:40:52.129145	1	\N	\N
+231	2	2	PO-00015	62	3	\N	\N	197	Formal	130.98	2026-07-24	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-22 12:15:32.547787	2026-07-01 18:50:47.282773	1	\N	\N
+212	3	3	PO-00047	59	1	\N	\N	\N	Informal	389.4	2026-06-29	Short Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-08 12:47:36.231711	f	2026-06-08 17:19:34.563694	2026-06-08 19:19:46.178721	\N	\N	short closed \n
+235	2	2	PO-00019	63	3	\N	\N	\N	Informal	48416.97	2026-07-22	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 10:11:11.544124	f	2026-07-01 15:07:59.921516	2026-07-01 15:41:11.545183	2	\N	\N
+232	2	2	PO-00016	64	3	\N	\N	198	Formal	11.2	2026-07-21	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-22 12:18:25.580101	2026-06-30 20:00:31.707939	1	\N	\N
+242	2	2	PO-00026	63	3	\N	\N	\N	Informal	33428.88	2026-07-22	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 12:42:10.050112	f	2026-07-01 16:02:34.765014	2026-07-01 18:12:10.051203	2	\N	\N
+237	2	2	PO-00021	62	3	\N	\N	\N	Informal	48416.97	2026-07-22	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 10:08:14.685627	f	2026-07-01 15:30:32.968379	2026-07-01 15:38:14.686254	2	\N	\N
+209	3	3	PO-00044	55	1	\N	208	\N	Formal	109928.8	\N	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: 15 Days\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 07:25:55.019454	f	2026-06-08 14:45:41.037419	2026-06-11 15:04:41.081091	2	\N	\N
+239	2	2	PO-00023	63	3	\N	\N	\N	Informal	18509.3	2026-07-22	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-01 15:38:54.315286	2026-07-01 18:48:18.807606	1	\N	\N
+229	2	2	PO-00013	63	3	\N	\N	195	Formal	354	2026-07-08	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-19 13:08:12.440185	2026-07-01 18:54:50.910476	1	\N	\N
+228	2	2	PO-00012	62	3	\N	\N	195	Formal	672	2026-07-08	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-19 13:08:12.417753	2026-07-01 18:56:48.12993	1	\N	\N
+214	2	2	PO-00001	62	3	194	\N	\N	Formal	38491.6	2026-06-26	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-06-11 19:46:17.594031	f	2026-06-12 01:00:29.585057	2026-06-12 01:17:08.524505	2	\N	\N
+236	2	2	PO-00020	63	3	\N	\N	\N	Informal	30282.87	2026-07-22	Rejected	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-01 15:09:29.245234	2026-07-01 17:40:52.13948	1	\N	Rejected for testing
+216	2	2	PO-00003	62	3	\N	\N	186	Formal	23600	2026-07-03	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-12 01:40:11.44893	2026-06-12 02:20:17.559248	2	\N	\N
+217	2	2	PO-00004	63	3	\N	\N	186	Formal	23321.52	2026-07-03	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-06-16 06:09:10.505248	f	2026-06-12 01:40:11.463052	2026-06-16 11:39:10.508746	2	\N	\N
+215	2	2	PO-00002	62	3	\N	\N	\N	Informal	59815.35	2026-07-03	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	11	2026-06-11 19:55:57.036519	f	2026-06-12 01:18:50.982636	2026-06-12 01:27:26.343947	2	\N	\N
+211	3	3	PO-00046	53	1	\N	\N	\N	Informal	149060.07	2026-06-29	Short Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 04:59:33.248268	f	2026-06-08 17:18:43.689083	2026-06-17 11:21:46.51598	2	\N	mistaken
+241	2	2	PO-00025	63	3	\N	\N	\N	Informal	118308.5	\N	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 12:45:36.264791	f	2026-07-01 15:58:53.716577	2026-07-01 18:15:36.265807	2	\N	\N
+240	2	2	PO-00024	62	3	\N	\N	\N	Informal	18509.3	2026-07-22	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-01 15:54:08.411103	2026-07-01 18:40:54.712499	1	\N	\N
+238	2	2	PO-00022	63	3	\N	\N	\N	Informal	37018.6	2026-07-01	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 10:14:55.636414	f	2026-07-01 15:32:32.73684	2026-07-01 15:44:55.636716	2	\N	\N
 \.
 
 
@@ -11203,6 +11313,10 @@ COPY public.purchase_request_approvals (id, pr_id, approval_flow_id, approver_id
 20	200	39	3	{"601": {"quantity": 2.0, "remarks": null}}	\N	2026-06-18 11:28:17.006081
 21	200	17	3	{"601": {"quantity": 2.0, "remarks": null}}	\N	2026-06-18 11:28:23.830349
 22	200	42	3	{"601": {"quantity": 2.0, "remarks": null}}	\N	2026-06-18 11:28:23.830391
+23	201	19	3	{"602": {"quantity": 2.0, "remarks": null}, "603": {"quantity": 5.0, "remarks": null}}	\N	2026-07-01 15:27:03.145992
+24	201	54	3	{"602": {"quantity": 2.0, "remarks": null}, "603": {"quantity": 5.0, "remarks": null}}	\N	2026-07-01 15:27:03.146038
+25	201	17	3	{"602": {"quantity": 2.0, "remarks": null}, "603": {"quantity": 5.0, "remarks": null}}	\N	2026-07-01 15:27:24.925101
+26	201	57	3	{"602": {"quantity": 2.0, "remarks": null}, "603": {"quantity": 5.0, "remarks": null}}	\N	2026-07-01 15:27:24.925142
 \.
 
 
@@ -11280,6 +11394,8 @@ COPY public.purchase_request_items (id, pr_id, material_id, quantity, approved_q
 599	198	2564	5	\N
 600	199	2564	2	4
 601	200	3104	2	2
+602	201	2564	2	2
+603	201	2431	5	5
 \.
 
 
@@ -11319,6 +11435,7 @@ COPY public.purchase_requests (id, tenant_id, site_id, pr_number, requester_id, 
 198	2	2	PR-00005	3	\N	7	HEALTH 	3	2026-06-30		Submitted	\N	\N	f	2026-06-16 10:57:43.196702	2026-06-16 10:57:43.196716	1
 199	2	2	PR-00006	3	\N	\N	\N	3	2026-06-30		Submitted	\N	\N	f	2026-06-16 11:01:07.031945	2026-06-18 10:36:27.249322	2
 200	2	2	PR-00007	3	\N	\N	CSE - Data Science	3	2026-07-02		Converted to PO	3	2026-06-18 05:58:23.857592	f	2026-06-18 11:28:07.704199	2026-06-18 12:45:51.597369	2
+201	2	2	PR-00008	3	\N	8	HEALTH 	3	2026-07-14		Approved	3	2026-07-01 09:57:24.949598	f	2026-06-30 18:33:51.277817	2026-07-01 15:27:24.951602	2
 \.
 
 
@@ -11921,45 +12038,12 @@ COPY public.role_permissions (id, role_id, resource, can_read, can_create, can_u
 701	14	projects	t	t	t	t	{}
 644	12	finance_invoices	t	t	t	t	{}
 645	12	report_finance	t	f	f	f	{}
-893	11	dashboard	t	f	f	f	{}
-894	11	materials	t	t	t	t	{}
-895	11	categories	t	t	t	t	{}
-896	11	vendors	t	t	t	t	{}
-897	11	warehouses	t	t	t	t	{}
-898	11	indents	t	t	t	t	{"can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_acknowledge": true}
-899	11	purchase_requests	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_hold": true, "can_short_close": true}
-900	11	quotations	t	t	t	t	{"can_send_to_vendors": true, "can_receive": true, "can_enter_quotes": true, "can_compare": true, "can_approve": true, "can_convert_to_po": true}
-901	11	purchase_orders	t	t	t	t	{"can_approve": true, "can_reject": true, "can_hold": true, "can_send_to_vendor": true, "can_short_close": true}
-902	11	gate_entry	t	t	t	t	{"can_record_entry": true, "can_verify": true}
-903	11	invoice	t	t	t	t	{"can_register": true, "can_approve": true, "can_reject": true}
-904	11	grn	t	t	t	t	{"can_create_grn": true, "can_complete": true}
-905	11	issues	t	t	t	t	{"can_issue": true, "can_print": true, "can_direct_issue": true}
-906	11	returns	t	t	t	t	{"can_return": true, "receive": true}
-907	11	transfers	t	t	t	t	{"can_transfer": true}
-908	11	gate_passes	t	t	t	t	{"can_create": true, "can_print": true}
-909	11	acknowledgements	t	t	t	t	{"can_acknowledge": true}
-910	11	inventory	t	t	t	t	{}
-911	11	intelligence	t	f	f	f	{}
-912	11	finance_invoices	t	t	t	t	{"can_send_hard_copy": true, "can_receive_hard_copy": true, "can_send_for_payment": true, "can_mark_paid": true}
-913	11	report_issue_summary	t	f	f	f	{}
-914	11	report_rate_analysis	t	f	f	f	{}
-915	11	report_receipt_summary	t	f	f	f	{}
-916	11	report_dept_inventory	t	f	f	f	{}
-917	11	report_finance	t	f	f	f	{}
-918	11	admin_users	t	t	t	t	{}
-919	11	admin_roles	t	t	t	t	{}
-920	11	approval_flows	t	t	t	t	{}
-921	11	projects	t	t	t	t	{}
 702	14	organizations	t	t	t	t	{}
 703	14	departments	t	t	t	t	{}
 704	14	terms	t	t	t	t	{}
 705	14	returns	t	t	t	t	{}
 706	14	transfers	t	t	t	t	{}
 707	14	gate_passes	t	t	t	t	{}
-922	11	organizations	t	t	t	t	{}
-923	11	departments	t	t	t	t	{}
-924	11	terms	t	t	t	t	{}
-925	11	complaints	t	t	t	t	{}
 712	16	gate_entry	t	t	t	t	{"can_record_entry": true, "can_verify": true}
 713	17	returns	t	t	t	t	{"can_issue": true, "can_print": true}
 714	17	transfers	t	t	t	t	{"can_issue": true, "can_print": true}
@@ -11997,14 +12081,6 @@ COPY public.role_permissions (id, role_id, resource, can_read, can_create, can_u
 746	18	departments	t	t	t	t	{}
 747	18	terms	t	t	t	t	{}
 748	18	gate_passes	t	t	t	t	{}
-926	11	audit_logs	t	f	f	f	{}
-927	11	reports	t	f	f	f	{}
-928	11	material_allowances	t	t	t	t	{}
-929	11	configurations	t	t	t	t	{}
-930	11	company_addresses	t	t	t	t	{}
-931	11	subcategories	t	t	t	t	{}
-932	11	uom	t	t	t	t	{}
-933	11	report_pending_gatepass	t	f	f	f	{}
 937	21	dashboard	t	f	f	f	{}
 938	21	materials	t	t	t	t	{}
 939	21	categories	t	t	t	t	{}
@@ -12043,6 +12119,19 @@ COPY public.role_permissions (id, role_id, resource, can_read, can_create, can_u
 966	21	report_pending_gatepass	t	f	f	f	{}
 967	21	material_allowances	t	t	t	t	{}
 968	21	terms	t	t	t	t	{}
+1029	11	configurations	t	t	t	t	{}
+1030	11	company_addresses	t	t	t	t	{}
+1031	11	subcategories	t	t	t	t	{}
+1032	11	uom	t	t	t	t	{}
+1033	11	report_pending_gatepass	t	f	f	f	{}
+1034	11	dashboard	t	f	f	f	{}
+1035	11	materials	t	t	t	t	{}
+1036	11	categories	t	t	t	t	{}
+1037	11	vendors	t	t	t	t	{}
+1038	11	warehouses	t	t	t	t	{}
+1039	11	indents	t	t	t	t	{"can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_acknowledge": true}
+1040	11	purchase_requests	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_hold": true, "can_short_close": true}
+1041	11	quotations	t	t	t	t	{"can_send_to_vendors": true, "can_receive": true, "can_enter_quotes": true, "can_compare": true, "can_approve": true, "can_convert_to_po": true}
 934	19	indents	t	t	t	t	{"can_acknowledge": false, "can_approve": false, "can_reject": false, "can_convert_to_po": false}
 935	19	acknowledgements	t	t	t	t	{"can_acknowledge": true}
 936	19	complaints	t	t	t	t	{}
@@ -12053,6 +12142,34 @@ COPY public.role_permissions (id, role_id, resource, can_read, can_create, can_u
 985	22	complaints	t	t	t	f	{}
 986	22	indents	t	t	t	t	{"can_approve": false, "can_reject": false}
 987	22	acknowledgements	t	t	t	t	{"can_acknowledge": true}
+1042	11	purchase_orders	t	t	t	t	{"can_approve": true, "can_reject": true, "can_hold": true, "can_send_to_vendor": true, "can_short_close": true}
+1043	11	gate_entry	t	t	t	t	{"can_record_entry": true, "can_verify": true}
+1044	11	invoice	t	t	t	t	{"can_register": true, "can_approve": true, "can_reject": true, "can_print": true}
+1045	11	grn	t	t	t	t	{"can_create_grn": true, "can_complete": true}
+1046	11	issues	t	t	t	t	{"can_issue": true, "can_print": true, "can_direct_issue": true}
+1047	11	returns	t	t	t	t	{"can_return": true, "receive": true}
+1048	11	transfers	t	t	t	t	{"can_transfer": true}
+1049	11	gate_passes	t	t	t	t	{"can_create": true, "can_print": true}
+1050	11	acknowledgements	t	t	t	t	{"can_acknowledge": true}
+1051	11	inventory	t	t	t	t	{}
+1052	11	intelligence	t	f	f	f	{}
+1053	11	finance_invoices	t	t	t	t	{"can_send_hard_copy": true, "can_receive_hard_copy": true, "can_send_for_payment": true, "can_mark_paid": true}
+1054	11	report_issue_summary	t	f	f	f	{}
+1055	11	report_rate_analysis	t	f	f	f	{}
+1056	11	report_receipt_summary	t	f	f	f	{}
+1057	11	report_dept_inventory	t	f	f	f	{}
+1058	11	report_finance	t	f	f	f	{}
+1059	11	admin_users	t	t	t	t	{}
+1060	11	admin_roles	t	t	t	t	{}
+1061	11	approval_flows	t	t	t	t	{}
+1062	11	projects	t	t	t	t	{}
+1063	11	organizations	t	t	t	t	{}
+1064	11	departments	t	t	t	t	{}
+1065	11	terms	t	t	t	t	{}
+1066	11	complaints	t	t	t	t	{}
+1067	11	audit_logs	t	f	f	f	{}
+1068	11	reports	t	f	f	f	{}
+1069	11	material_allowances	t	t	t	t	{}
 \.
 
 
@@ -15108,6 +15225,8 @@ COPY public.stock_ledger (id, tenant_id, site_id, material_id, warehouse_id, tra
 4254	2	2	3475	62	Issue	-3	84	Issue	236	ISS-00006	1	237	\N	3	2026-06-18 12:26:45.202978
 4255	2	2	2435	62	Issue	-1	119	Issue	237	ISS-00007	1	237	\N	3	2026-06-19 14:45:14.706047
 4256	2	2	2435	62	Issue	-1	118	Issue	238	ISS-00008	1	237	\N	3	2026-06-22 11:48:20.969545
+4257	2	2	2564	62	GRN	2	45	GRN	207	GRN-00004	3	\N	\N	3	2026-06-30 18:40:52.130785
+4258	2	2	2565	62	GRN	1	46	GRN	208	GRN-00005	3	\N	\N	3	2026-06-30 20:00:31.710228
 \.
 
 
@@ -15339,47 +15458,47 @@ COPY public.terms_and_conditions (id, tenant_id, site_id, name, content, is_defa
 -- Data for Name: uom; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.uom (id, tenant_id, site_id, name, abbreviation, is_active, is_deleted) FROM stdin;
-1	3	3	Bags	BAG	t	f
-2	3	3	Metric Ton	MT	t	f
-3	3	3	Cubic Meter	CUM	t	f
-4	3	3	Cubic Foot	CFT	t	f
-5	3	3	Numbers	NOS	t	f
-6	3	3	Kilograms	KG	t	f
-7	3	3	Liters	LTR	t	f
-8	3	3	Running Meter	RMT	t	f
-9	3	3	Square Meter	SQM	t	f
-10	3	3	Square Foot	SQFT	t	f
-11	3	3	Bundles	BDL	t	f
-12	3	3	Rolls	ROL	t	f
-13	3	3	Sets	SET	t	f
-14	3	3	Boxes	BOX	t	f
-16	3	3	Kilometers	KM	t	f
-17	3	3	Grams	GM	t	f
-18	3	3	Millimeters	MM	t	f
-19	3	3	Inches	INC	t	f
-20	3	3	Feet	FT	t	f
-15	3	3	Pairs	PRS	t	f
-21	3	3	Can	CAN	t	f
-22	3	3	Pocket	PKT	t	f
-23	3	3	Pad	PAD	t	f
-24	3	3	Meter	MTR	t	f
-25	3	3	Bottle	BTL	t	f
-27	3	3	Prs	PRS	t	f
-28	2	2	Bags	BAG	t	f
-29	2	2	Numbers	NOS	t	f
-30	2	2	Kilograms	KG	t	f
-31	2	2	Liters	LTR	t	f
-32	2	2	Bundles	BDL	t	f
-33	2	2	Rolls	ROL	t	f
-34	2	2	Sets	SET	t	f
-35	2	2	Boxes	BOX	t	f
-36	2	2	Can	CAN	t	f
-37	2	2	Pocket	PKT	t	f
-38	2	2	Pad	PAD	t	f
-39	2	2	Meter	MTR	t	f
-40	2	2	Bottle	BTL	t	f
-41	2	2	Prs	PRS	t	f
+COPY public.uom (id, tenant_id, site_id, name, abbreviation, is_active, is_deleted, allow_decimal) FROM stdin;
+1	3	3	Bags	BAG	t	f	f
+2	3	3	Metric Ton	MT	t	f	f
+3	3	3	Cubic Meter	CUM	t	f	f
+4	3	3	Cubic Foot	CFT	t	f	f
+5	3	3	Numbers	NOS	t	f	f
+6	3	3	Kilograms	KG	t	f	f
+7	3	3	Liters	LTR	t	f	f
+8	3	3	Running Meter	RMT	t	f	f
+9	3	3	Square Meter	SQM	t	f	f
+10	3	3	Square Foot	SQFT	t	f	f
+11	3	3	Bundles	BDL	t	f	f
+12	3	3	Rolls	ROL	t	f	f
+13	3	3	Sets	SET	t	f	f
+14	3	3	Boxes	BOX	t	f	f
+16	3	3	Kilometers	KM	t	f	f
+17	3	3	Grams	GM	t	f	f
+18	3	3	Millimeters	MM	t	f	f
+19	3	3	Inches	INC	t	f	f
+20	3	3	Feet	FT	t	f	f
+15	3	3	Pairs	PRS	t	f	f
+21	3	3	Can	CAN	t	f	f
+22	3	3	Pocket	PKT	t	f	f
+23	3	3	Pad	PAD	t	f	f
+24	3	3	Meter	MTR	t	f	f
+25	3	3	Bottle	BTL	t	f	f
+27	3	3	Prs	PRS	t	f	f
+28	2	2	Bags	BAG	t	f	f
+29	2	2	Numbers	NOS	t	f	f
+32	2	2	Bundles	BDL	t	f	f
+33	2	2	Rolls	ROL	t	f	f
+34	2	2	Sets	SET	t	f	f
+35	2	2	Boxes	BOX	t	f	f
+36	2	2	Can	CAN	t	f	f
+37	2	2	Pocket	PKT	t	f	f
+38	2	2	Pad	PAD	t	f	f
+40	2	2	Bottle	BTL	t	f	f
+41	2	2	Prs	PRS	t	f	f
+30	2	2	Kilograms	KG	t	f	t
+31	2	2	Liters	LTR	t	f	t
+39	2	2	Meter	MTR	t	f	t
 \.
 
 
@@ -15905,21 +16024,21 @@ COPY public.warehouses (id, tenant_id, site_id, name, code, project_id, warehous
 -- Name: alerts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.alerts_id_seq', 35, true);
+SELECT pg_catalog.setval('public.alerts_id_seq', 37, true);
 
 
 --
 -- Name: approval_flows_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.approval_flows_id_seq', 46, true);
+SELECT pg_catalog.setval('public.approval_flows_id_seq', 58, true);
 
 
 --
 -- Name: audit_logs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.audit_logs_id_seq', 337, true);
+SELECT pg_catalog.setval('public.audit_logs_id_seq', 363, true);
 
 
 --
@@ -15982,7 +16101,7 @@ SELECT pg_catalog.setval('public.departments_id_seq', 330, true);
 -- Name: document_sequences_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.document_sequences_id_seq', 79, true);
+SELECT pg_catalog.setval('public.document_sequences_id_seq', 89, true);
 
 
 --
@@ -15996,7 +16115,7 @@ SELECT pg_catalog.setval('public.floors_id_seq', 29, true);
 -- Name: gate_entries_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.gate_entries_id_seq', 199, true);
+SELECT pg_catalog.setval('public.gate_entries_id_seq', 200, true);
 
 
 --
@@ -16017,35 +16136,35 @@ SELECT pg_catalog.setval('public.gate_passes_id_seq', 22, true);
 -- Name: grn_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.grn_id_seq', 206, true);
+SELECT pg_catalog.setval('public.grn_id_seq', 208, true);
 
 
 --
 -- Name: grn_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.grn_items_id_seq', 509, true);
+SELECT pg_catalog.setval('public.grn_items_id_seq', 511, true);
 
 
 --
 -- Name: indent_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.indent_approvals_id_seq', 58, true);
+SELECT pg_catalog.setval('public.indent_approvals_id_seq', 66, true);
 
 
 --
 -- Name: indent_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.indent_items_id_seq', 511, true);
+SELECT pg_catalog.setval('public.indent_items_id_seq', 513, true);
 
 
 --
 -- Name: indents_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.indents_id_seq', 232, true);
+SELECT pg_catalog.setval('public.indents_id_seq', 233, true);
 
 
 --
@@ -16059,14 +16178,14 @@ SELECT pg_catalog.setval('public.institutions_id_seq', 15, true);
 -- Name: invoice_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.invoice_items_id_seq', 57, true);
+SELECT pg_catalog.setval('public.invoice_items_id_seq', 62, true);
 
 
 --
 -- Name: invoices_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.invoices_id_seq', 11, true);
+SELECT pg_catalog.setval('public.invoices_id_seq', 12, true);
 
 
 --
@@ -16101,7 +16220,7 @@ SELECT pg_catalog.setval('public.material_returns_id_seq', 24, true);
 -- Name: materials_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.materials_id_seq', 3706, true);
+SELECT pg_catalog.setval('public.materials_id_seq', 3717, true);
 
 
 --
@@ -16129,42 +16248,42 @@ SELECT pg_catalog.setval('public.projects_id_seq', 4, true);
 -- Name: purchase_order_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_order_approvals_id_seq', 31, true);
+SELECT pg_catalog.setval('public.purchase_order_approvals_id_seq', 50, true);
 
 
 --
 -- Name: purchase_order_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_order_items_id_seq', 575, true);
+SELECT pg_catalog.setval('public.purchase_order_items_id_seq', 613, true);
 
 
 --
 -- Name: purchase_orders_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_orders_id_seq', 232, true);
+SELECT pg_catalog.setval('public.purchase_orders_id_seq', 242, true);
 
 
 --
 -- Name: purchase_request_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_request_approvals_id_seq', 22, true);
+SELECT pg_catalog.setval('public.purchase_request_approvals_id_seq', 26, true);
 
 
 --
 -- Name: purchase_request_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_request_items_id_seq', 601, true);
+SELECT pg_catalog.setval('public.purchase_request_items_id_seq', 603, true);
 
 
 --
 -- Name: purchase_requests_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_requests_id_seq', 200, true);
+SELECT pg_catalog.setval('public.purchase_requests_id_seq', 201, true);
 
 
 --
@@ -16213,7 +16332,7 @@ SELECT pg_catalog.setval('public.quotation_requests_id_seq', 198, true);
 -- Name: role_permissions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.role_permissions_id_seq', 987, true);
+SELECT pg_catalog.setval('public.role_permissions_id_seq', 1069, true);
 
 
 --
@@ -16241,7 +16360,7 @@ SELECT pg_catalog.setval('public.sites_id_seq', 3, true);
 -- Name: stock_ledger_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.stock_ledger_id_seq', 4256, true);
+SELECT pg_catalog.setval('public.stock_ledger_id_seq', 4258, true);
 
 
 --
@@ -19584,5 +19703,5 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict YuTCaR3gW200QlwwtlOZjL0IeAmfpo70tReyOXc0OcLgOO6rYd7k6MAGQ8xcXE5
+\unrestrict U7QXI72ghe9B6GtSXtUWdJhShsqYbsMgnLaPYjuk5R7sG68h4UFHjFEuSrMRGgU
 

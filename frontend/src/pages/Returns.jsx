@@ -103,7 +103,7 @@ export default function Returns() {
         returned_by_name: returnModal.returned_by_name,
         items: validItems.map(it => ({
           material_id: it.material_id,
-          returned_qty: Math.round(parseFloat(it.quantity)),
+          returned_qty: parseFloat(it.quantity),
           remarks: it.remarks
         }))
       };
@@ -129,6 +129,11 @@ export default function Returns() {
   };
 
   const addReturnItem = () => {
+    const emptyCount = returnModal.items.filter(it => !it.material_id).length;
+    if (emptyCount >= 5) {
+      alert("Please select materials for the existing empty rows before adding more. Limit reached (5).");
+      return;
+    }
     setReturnModal({
       ...returnModal,
       items: [...returnModal.items, { material_id: '', quantity: 0, remarks: '' }]
@@ -293,7 +298,7 @@ export default function Returns() {
               />
             </Grid>
             <Grid item xs={12}>
-              <TextField
+              <TextField inputProps={{ maxLength: 255 }}
                 fullWidth size="small" label="General Remarks"
                 value={returnModal.remarks}
                 onChange={e => setReturnModal({ ...returnModal, remarks: e.target.value })}
@@ -324,7 +329,7 @@ export default function Returns() {
                   <TableRow key={idx}>
                     <TableCell>
                       <MaterialSelect
-                        materials={materials}
+                        materials={materials.filter(m => !returnModal.items.some((it, i) => i !== idx && it.material_id === m.id))}
                         value={item.material_id}
                         onChange={(val) => updateReturnItem(idx, 'material_id', val)}
                       />
@@ -333,15 +338,30 @@ export default function Returns() {
                       <TextField
                         size="small"
                         type="number"
-                        inputProps={{ step: "1", min: "0" }}
-                        onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()}
+                        inputProps={{ 
+                          step: (item.material_id && materials.find(m => m.id === item.material_id)?.uom_allow_decimal) ? "any" : "1", 
+                          min: "0" 
+                        }}
+                        onKeyDown={e => {
+                          const mat = item.material_id ? materials.find(m => m.id === item.material_id) : null;
+                          const allowDec = mat ? mat.uom_allow_decimal : false;
+                          const blockList = ['-', '+', 'e', 'E'];
+                          if (!allowDec) blockList.push('.');
+                          if (blockList.includes(e.key)) e.preventDefault();
+                        }}
                         fullWidth
                         value={item.quantity}
-                        onChange={e => updateReturnItem(idx, 'quantity', Math.round(parseFloat(e.target.value.replace(/-/g, '')) || 0))}
+                        onChange={e => {
+                          const mat = item.material_id ? materials.find(m => m.id === item.material_id) : null;
+                          const allowDec = mat ? mat.uom_allow_decimal : false;
+                          let val = e.target.value.replace(/-/g, '');
+                          if (!allowDec) val = val.replace(/\./g, '');
+                          updateReturnItem(idx, 'quantity', val);
+                        }}
                       />
                     </TableCell>
                     <TableCell>
-                      <TextField
+                      <TextField inputProps={{ maxLength: 255 }}
                         size="small" fullWidth value={item.remarks}
                         onChange={e => updateReturnItem(idx, 'remarks', e.target.value)}
                         InputProps={{
@@ -451,7 +471,7 @@ export default function Returns() {
                               />
                             </TableCell>
                             <TableCell>
-                              <TextField
+                              <TextField inputProps={{ maxLength: 255 }}
                                 size="small" fullWidth value={item.receipt_remarks}
                                 placeholder="Variance notes"
                                 onChange={e => {

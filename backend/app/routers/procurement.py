@@ -96,7 +96,7 @@ def list_purchase_requests(
                 "approved_quantity": it.approved_quantity,
                 "material_name": it.material.name if it.material else None,
                 "material_code": it.material.code if it.material else None,
-                "uom_name": it.material.uom.name if it.material and it.material.uom else None,
+                "uom_name": it.material.uom.abbreviation if it.material and it.material.uom else None,
                 "last_purchase_price": get_lpp(db, it.material_id, tenant_id, site_id)
             })
             
@@ -150,7 +150,7 @@ def get_purchase_request(
             "approved_quantity": it.approved_quantity,
             "material_name": it.material.name if it.material else None,
             "material_code": it.material.code if it.material else None,
-            "uom_name": it.material.uom.name if it.material and it.material.uom else None,
+            "uom_name": it.material.uom.abbreviation if it.material and it.material.uom else None,
             "last_purchase_price": get_lpp(db, it.material_id, tenant_id, site_id)
         })
     return PROut(
@@ -444,7 +444,7 @@ def get_pr_approval_history(
                 "material_id": item.material_id,
                 "material_name": item.material.name if item.material else None,
                 "material_code": item.material.code if item.material else None,
-                "uom_name": item.material.uom.name if item.material and item.material.uom else None,
+                "uom_name": item.material.uom.abbreviation if item.material and item.material.uom else None,
                 "requested_quantity": item.quantity,
                 "approved_quantity": qty,
                 "remarks": item_rem
@@ -609,7 +609,8 @@ def list_purchase_orders(
                 is_gst_inclusive=item.is_gst_inclusive,
                 material_name=mat.name if mat else None,
                 material_code=mat.code if mat else None,
-                uom_name=mat.uom.name if mat and mat.uom else None
+                uom_name=mat.uom.abbreviation if mat and mat.uom else None,
+                uom_allow_decimal=mat.uom.allow_decimal if mat and mat.uom else False
             ))
         
         # Populate numbers
@@ -654,7 +655,7 @@ def list_purchase_orders(
             total_amount=po.total_amount,
             delivery_date=po.delivery_date, status=po.status,
             current_approval_level=po.current_approval_level or 1,
-            terms=po.terms, created_at=po.created_at,
+            terms=po.terms, annexure=po.annexure, remarks=po.remarks, created_at=po.created_at,
             vendor_name=f"{po.vendor.code} - {po.vendor.name}" if po.vendor else None,
             vendor_address=f"{po.vendor.address_line_1 or ''}{', ' + po.vendor.address_line_2 if po.vendor.address_line_2 else ''}" if po.vendor else None,
             vendor_city=po.vendor.city if po.vendor else None,
@@ -695,7 +696,8 @@ def get_purchase_order(
             is_gst_inclusive=item.is_gst_inclusive,
             material_name=mat.name if mat else None,
             material_code=mat.code if mat else None,
-            uom_name=mat.uom.name if mat and mat.uom else None
+            uom_name=mat.uom.abbreviation if mat and mat.uom else None,
+            uom_allow_decimal=mat.uom.allow_decimal if mat and mat.uom else False
         ))
     # Populate numbers
     pr_number = None
@@ -741,7 +743,7 @@ def get_purchase_order(
         total_amount=po.total_amount,
         delivery_date=po.delivery_date, status=po.status,
         current_approval_level=po.current_approval_level or 1,
-        terms=po.terms, created_at=po.created_at,
+        terms=po.terms, annexure=po.annexure, remarks=po.remarks, created_at=po.created_at,
         vendor_name=f"{po.vendor.code} - {po.vendor.name}" if po.vendor else None,
         vendor_address=f"{po.vendor.address_line_1 or ''}{', ' + po.vendor.address_line_2 if po.vendor.address_line_2 else ''}" if po.vendor else None,
         vendor_city=po.vendor.city if po.vendor else None,
@@ -762,8 +764,6 @@ def create_purchase_order(
     site_id: int = Depends(get_site_id)
 ):
     actual_status = data.status or "Draft"
-    if data.pr_id or data.indent_id or data.qr_id:
-        actual_status = "Submitted"
 
     po = PurchaseOrder(
         po_number=get_next_number(db, tenant_id, site_id, "PURCHASE_ORDER", "PO"),
@@ -776,6 +776,7 @@ def create_purchase_order(
         delivery_date=data.delivery_date,
         status=actual_status,
         terms=data.terms,
+        annexure=data.annexure,
         created_by_id=current_user.id,
         total_amount=0,
         tenant_id=tenant_id,
@@ -860,12 +861,9 @@ def update_purchase_order(
 
     update_data = data.model_dump(exclude_unset=True)
     if "status" in update_data:
-        if (po.pr_id or po.indent_id or po.qr_id) and update_data["status"] == "Draft":
-            po.status = "Submitted"
-        else:
-            po.status = update_data["status"]
+        po.status = update_data["status"]
     
-    for k in ["vendor_id", "project_id", "delivery_date", "po_type", "terms"]:
+    for k in ["vendor_id", "project_id", "delivery_date", "po_type", "terms", "annexure"]:
         if k in update_data:
             setattr(po, k, update_data[k])
             
@@ -1049,7 +1047,7 @@ def get_po_approval_history(
                 "material_id": item.material_id,
                 "material_name": item.material.name if item.material else None,
                 "material_code": item.material.code if item.material else None,
-                "uom_name": item.material.uom.name if item.material and item.material.uom else None,
+                "uom_name": item.material.uom.abbreviation if item.material and item.material.uom else None,
                 "requested_quantity": item.quantity,
                 "approved_quantity": qty,
                 "remarks": item_rem
@@ -1077,6 +1075,35 @@ def get_po_approval_history(
             deduped[level] = entry
     deduped_entries = list(deduped.values())
 
+    if po.status == "Rejected":
+        rejection_log = db.query(AuditLog).filter(
+            AuditLog.entity_type == "PurchaseOrder",
+            AuditLog.entity_id == id,
+            AuditLog.action == "REJECT"
+        ).order_by(AuditLog.created_at.desc()).first()
+
+        rej_items = []
+        for item in po.items:
+            rej_items.append({
+                "material_id": item.material_id,
+                "material_name": item.material.name if item.material else None,
+                "material_code": item.material.code if item.material else None,
+                "uom_name": item.material.uom.abbreviation if item.material and item.material.uom else None,
+                "requested_quantity": item.quantity,
+                "approved_quantity": None,
+                "remarks": None
+            })
+
+        deduped_entries.append({
+            "level": po.current_approval_level or 0,
+            "approver_name": rejection_log.user.full_name if rejection_log and rejection_log.user else "Unknown",
+            "role_name": "Rejector",
+            "approved_at": rejection_log.created_at if rejection_log else po.updated_at,
+            "remarks": po.remarks,
+            "status": "Rejected",
+            "items": rej_items
+        })
+
     return {
         "po_id": po.id,
         "po_number": po.po_number,
@@ -1098,7 +1125,14 @@ def reject_po(
         raise HTTPException(status_code=404, detail="PO not found")
     po.status = "Rejected"
     if body.remarks:
-        po.terms = (po.terms or '') + f'\n[Rejected: {body.remarks}]'
+        po.remarks = (po.remarks or '') + f'\n[Rejected: {body.remarks}]'
+    
+    db.add(AuditLog(
+        tenant_id=tenant_id, site_id=site_id,
+        user_id=current_user.id, action="REJECT",
+        entity_type="PurchaseOrder", entity_id=id,
+        new_values=body.remarks
+    ))
     db.commit()
     return {"message": "PO rejected successfully"}
 
@@ -1279,6 +1313,6 @@ def short_close_po(
         raise HTTPException(status_code=404, detail="PO not found")
     po.status = "Short Closed"
     if body.remarks:
-        po.terms = (po.terms or '') + f'\n[Short Closed: {body.remarks}]'
+        po.remarks = (po.remarks or '') + f'\n[Short Closed: {body.remarks}]'
     db.commit()
     return {"message": "PO Short Closed"}

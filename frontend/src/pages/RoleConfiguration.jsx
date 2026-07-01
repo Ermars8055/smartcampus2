@@ -81,6 +81,7 @@ const MODULE_TREE = [
         { key: 'can_register', label: 'Register', color: '#3B82F6' },
         { key: 'can_approve', label: 'Approve', color: '#10B981' },
         { key: 'can_reject', label: 'Reject', color: '#EF4444' },
+        { key: 'can_print', label: 'Print', color: '#8B5CF6' },
       ]},
       { label: 'GRN', resource: 'grn', extendedActions: [
         { key: 'can_create_grn', label: 'Create GRN', color: '#3B82F6' },

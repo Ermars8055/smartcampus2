@@ -305,8 +305,26 @@ const Quotations = () => {
   };
 
   const updateConvertToPoItem = (idx, field, value) => {
+    let finalVal = value;
+    if (['discount_percent', 'cgst_percentage', 'sgst_percentage', 'igst_percentage'].includes(field)) {
+      if (finalVal !== '' && parseFloat(finalVal) > 100) {
+        finalVal = '100';
+      }
+    }
     const newItems = [...convertToPoDialog.items];
-    newItems[idx][field] = value;
+    newItems[idx][field] = finalVal;
+    if (field === 'cgst_percentage') {
+      newItems[idx].sgst_percentage = finalVal;
+      newItems[idx].igst_percentage = 0;
+    } else if (field === 'sgst_percentage') {
+      newItems[idx].cgst_percentage = finalVal;
+      newItems[idx].igst_percentage = 0;
+    } else if (field === 'igst_percentage') {
+      if (finalVal !== '' && finalVal !== '0' && parseFloat(finalVal) !== 0) {
+        newItems[idx].cgst_percentage = 0;
+        newItems[idx].sgst_percentage = 0;
+      }
+    }
     setConvertToPoDialog({ ...convertToPoDialog, items: newItems });
   };
 
@@ -1545,7 +1563,7 @@ const Quotations = () => {
 
               {/* Row 5: Remarks (Full Width) */}
               <Box sx={{ gridColumn: 'span 2' }}>
-                <TextField
+                <TextField inputProps={{ maxLength: 255 }}
                   fullWidth
                   label="General Remarks"
                   multiline
@@ -1675,7 +1693,7 @@ const Quotations = () => {
                       />
                     </TableCell>
                     <TableCell>
-                      <TextField
+                      <TextField inputProps={{ maxLength: 255 }}
                         size="small"
                         disabled={it.is_excluded}
                         value={it.remarks}
@@ -2076,7 +2094,7 @@ const Quotations = () => {
           <Typography variant="body2" color="text.secondary" paragraph sx={{ mt: 1 }}>
             You are about to approve this Technical Comparison. Once approved, it can be converted to a Purchase Order. Please provide any approval remarks below.
           </Typography>
-          <TextField
+          <TextField inputProps={{ maxLength: 255 }}
             autoFocus
             margin="dense"
             label="Approval Remarks / Comments"

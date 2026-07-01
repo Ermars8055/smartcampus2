@@ -111,7 +111,7 @@ export default function StockTransfers() {
         remarks: transferModal.remarks,
         items: validItems.map(it => ({
           material_id: it.material_id,
-          quantity: Math.round(parseFloat(it.quantity)),
+          quantity: parseFloat(it.quantity),
           remarks: it.remarks
         }))
       };
@@ -130,6 +130,11 @@ export default function StockTransfers() {
   };
 
   const addTransferItem = () => {
+    const emptyCount = transferModal.items.filter(it => !it.material_id).length;
+    if (emptyCount >= 5) {
+      alert("Please select materials for the existing empty rows before adding more. Limit reached (5).");
+      return;
+    }
     setTransferModal({
       ...transferModal,
       items: [...transferModal.items, { material_id: '', quantity: 0, remarks: '' }]
@@ -281,7 +286,7 @@ export default function StockTransfers() {
               </FormControl>
             </Grid>
             <Grid item xs={12}>
-              <TextField
+              <TextField inputProps={{ maxLength: 255 }}
                 fullWidth size="small" label="Transfer Remarks"
                 value={transferModal.remarks}
                 onChange={e => setTransferModal({ ...transferModal, remarks: e.target.value })}
@@ -312,7 +317,7 @@ export default function StockTransfers() {
                   <TableRow key={idx}>
                     <TableCell>
                       <MaterialSelect
-                        materials={materials}
+                        materials={materials.filter(m => !transferModal.items.some((it, i) => i !== idx && it.material_id === m.id))}
                         value={item.material_id}
                         onChange={(val) => updateTransferItem(idx, 'material_id', val)}
                       />
@@ -321,15 +326,30 @@ export default function StockTransfers() {
                       <TextField
                         size="small"
                         type="number"
-                        inputProps={{ step: "1", min: "0" }}
-                        onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()}
+                        inputProps={{ 
+                          step: (item.material_id && materials.find(m => m.id === item.material_id)?.uom_allow_decimal) ? "any" : "1", 
+                          min: "0" 
+                        }}
+                        onKeyDown={e => {
+                          const mat = item.material_id ? materials.find(m => m.id === item.material_id) : null;
+                          const allowDec = mat ? mat.uom_allow_decimal : false;
+                          const blockList = ['-', '+', 'e', 'E'];
+                          if (!allowDec) blockList.push('.');
+                          if (blockList.includes(e.key)) e.preventDefault();
+                        }}
                         fullWidth
                         value={item.quantity}
-                        onChange={e => updateTransferItem(idx, 'quantity', Math.round(parseFloat(e.target.value.replace(/-/g, '')) || 0))}
+                        onChange={e => {
+                          const mat = item.material_id ? materials.find(m => m.id === item.material_id) : null;
+                          const allowDec = mat ? mat.uom_allow_decimal : false;
+                          let val = e.target.value.replace(/-/g, '');
+                          if (!allowDec) val = val.replace(/\./g, '');
+                          updateTransferItem(idx, 'quantity', val);
+                        }}
                       />
                     </TableCell>
                     <TableCell>
-                      <TextField
+                      <TextField inputProps={{ maxLength: 255 }}
                         size="small" fullWidth value={item.remarks}
                         onChange={e => updateTransferItem(idx, 'remarks', e.target.value)}
                         InputProps={{
@@ -449,7 +469,7 @@ export default function StockTransfers() {
                               />
                             </TableCell>
                             <TableCell>
-                              <TextField
+                              <TextField inputProps={{ maxLength: 255 }}
                                 size="small" fullWidth value={item.receipt_remarks}
                                 placeholder="Variance notes"
                                 onChange={e => {

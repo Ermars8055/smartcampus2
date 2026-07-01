@@ -192,7 +192,7 @@ export default function ComplaintsList() {
         <DialogTitle>Short Close Complaint</DialogTitle>
         <DialogContent>
           <Typography variant="body2" sx={{ mb: 2 }}>Please provide a reason for short closing this complaint.</Typography>
-          <TextField
+          <TextField inputProps={{ maxLength: 255 }}
             autoFocus
             label="Resolution Remarks"
             fullWidth

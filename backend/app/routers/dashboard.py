@@ -7,7 +7,8 @@ from app.database import get_db
 from app.models import (
     Material, CurrentStock, PurchaseRequest, PurchaseOrder,
     GRN, Warehouse, Vendor, MaterialIssue, MaterialIssueItem,
-    Building, StockLedger, User, Alert, Room, Floor, Institution, Indent
+    Building, StockLedger, User, Alert, Room, Floor, Institution, Indent,
+    Category, Complaint, Department
 )
 from app.schemas import DashboardStats
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
@@ -93,15 +94,49 @@ def get_dashboard_stats(
             
             po_q = po_q.filter(PurchaseOrder.created_by_id == current_user.id)
 
-    if project_id: pr_q = pr_q.filter(PurchaseRequest.project_id == project_id)
+    if institution_id:
+        pr_q = pr_q.outerjoin(Department, PurchaseRequest.department_name == Department.name)\
+                   .outerjoin(Building, PurchaseRequest.building_id == Building.id)\
+                   .filter(
+                       (Department.institution_id == institution_id) | 
+                       (Building.institution_id == institution_id)
+                   )
+    elif project_id: 
+        pr_q = pr_q.filter(PurchaseRequest.project_id == project_id)
     pending_pr = pr_q.count()
-    if project_id: po_q = po_q.filter(PurchaseOrder.project_id == project_id)
+    
+    if institution_id:
+        po_q = po_q.outerjoin(PurchaseRequest, PurchaseOrder.pr_id == PurchaseRequest.id)\
+                   .outerjoin(Indent, PurchaseOrder.indent_id == Indent.id)\
+                   .outerjoin(Department, PurchaseRequest.department_name == Department.name)\
+                   .outerjoin(Building, PurchaseRequest.building_id == Building.id)\
+                   .filter(
+                       (Building.institution_id == institution_id) | 
+                       (Department.institution_id == institution_id) | 
+                       (Indent.institution_id == institution_id)
+                   )
+    elif project_id: 
+        po_q = po_q.filter(PurchaseOrder.project_id == project_id)
     pending_po = po_q.count()
 
     grn_query = db.query(GRN).filter(GRN.tenant_id == tenant_id, GRN.site_id == site_id)
     if sd: grn_query = grn_query.filter(GRN.created_at >= sd)
     if ed: grn_query = grn_query.filter(GRN.created_at < ed)
-    if project_id: grn_query = grn_query.filter(GRN.project_id == project_id)
+    
+    if institution_id:
+        grn_query = grn_query.outerjoin(PurchaseOrder, GRN.po_id == PurchaseOrder.id)\
+                             .outerjoin(PurchaseRequest, PurchaseOrder.pr_id == PurchaseRequest.id)\
+                             .outerjoin(Indent, PurchaseOrder.indent_id == Indent.id)\
+                             .outerjoin(Department, PurchaseRequest.department_name == Department.name)\
+                             .outerjoin(Building, PurchaseRequest.building_id == Building.id)\
+                             .filter(
+                                 (Building.institution_id == institution_id) | 
+                                 (Department.institution_id == institution_id) | 
+                                 (Indent.institution_id == institution_id)
+                             )
+    elif project_id:
+        grn_query = grn_query.filter(GRN.project_id == project_id)
+    
     recent_grn = grn_query.count()
     
     total_vendors = db.query(Vendor).filter(
@@ -112,15 +147,73 @@ def get_dashboard_stats(
         Warehouse.tenant_id == tenant_id, Warehouse.site_id == site_id, Warehouse.is_active == True
     ).count()
 
+    BuildingFromRoom = aliased(Building)
+    InstitutionFromDept = aliased(Institution)
+    
+    complaints_q = db.query(Complaint).outerjoin(
+        Building, Complaint.building_id == Building.id
+    ).outerjoin(
+        Room, Complaint.room_id == Room.id
+    ).outerjoin(
+        Floor, Room.floor_id == Floor.id
+    ).outerjoin(
+        BuildingFromRoom, Floor.building_id == BuildingFromRoom.id
+    ).outerjoin(
+        Department, Complaint.department_name == Department.name
+    ).outerjoin(
+        InstitutionFromDept, Department.institution_id == InstitutionFromDept.id
+    ).filter(
+        Complaint.tenant_id == tenant_id, Complaint.site_id == site_id,
+        Complaint.status.notin_(["Resolved", "Closed", "Rejected"])
+    )
+    if institution_id:
+        complaints_q = complaints_q.filter(
+            (Building.institution_id == institution_id) |
+            (BuildingFromRoom.institution_id == institution_id) |
+            (Department.institution_id == institution_id)
+        )
+    elif project_id:
+        complaints_q = complaints_q.filter(
+            (Building.project_id == project_id) |
+            (BuildingFromRoom.project_id == project_id) |
+            (InstitutionFromDept.project_id == project_id)
+        )
+    open_complaints = complaints_q.count()
+
+    issued_val_q = db.query(
+        func.sum(MaterialIssueItem.quantity * MaterialIssueItem.rate).label('total_value'),
+        func.count(MaterialIssueItem.id).label('total_qty')
+    ).select_from(MaterialIssueItem).join(
+        MaterialIssue, MaterialIssueItem.issue_id == MaterialIssue.id
+    ).filter(
+        MaterialIssue.tenant_id == tenant_id, MaterialIssue.site_id == site_id,
+        MaterialIssue.is_acknowledged == True
+    )
+    if sd: issued_val_q = issued_val_q.filter(MaterialIssue.created_at >= sd)
+    if ed: issued_val_q = issued_val_q.filter(MaterialIssue.created_at < ed)
+    if institution_id:
+        issued_val_q = issued_val_q.outerjoin(Building, MaterialIssue.building_id == Building.id)\
+                                   .outerjoin(Indent, MaterialIssue.indent_id == Indent.id)\
+                                   .filter((Building.institution_id == institution_id) | (Indent.institution_id == institution_id))
+    elif project_id:
+        issued_val_q = issued_val_q.filter(MaterialIssue.project_id == project_id)
+        
+    issued_res = issued_val_q.first()
+    total_issued_value = issued_res.total_value or 0
+    total_issued_qty = issued_res.total_qty or 0
+
     return DashboardStats(
         total_materials=total_materials,
         total_inventory_value=round(stock_data, 2),
+        total_issued_value=round(total_issued_value, 2),
+        total_issued_qty=round(total_issued_qty, 2),
         low_stock_items=low_stock,
         pending_pr=pending_pr,
         pending_po=pending_po,
         recent_grn_count=recent_grn,
         total_vendors=total_vendors,
-        total_warehouses=total_warehouses
+        total_warehouses=total_warehouses,
+        open_complaints=open_complaints
     )
 
 
@@ -161,12 +254,16 @@ def get_consumption_by_building(
     ).outerjoin(
         InstFromIndent, Indent.institution_id == InstFromIndent.id
     ).filter(
-        MaterialIssue.tenant_id == tenant_id, MaterialIssue.site_id == site_id
+        MaterialIssue.tenant_id == tenant_id, MaterialIssue.site_id == site_id,
+        MaterialIssue.is_acknowledged == True
     )
     
     if sd: query = query.filter(MaterialIssue.created_at >= sd)
     if ed: query = query.filter(MaterialIssue.created_at < ed)
-    if project_id: query = query.filter(MaterialIssue.project_id == project_id)
+    if institution_id:
+        query = query.filter((Building.institution_id == institution_id) | (Indent.institution_id == institution_id))
+    elif project_id:
+        query = query.filter(MaterialIssue.project_id == project_id)
     results = query.group_by(loc_label).all()
 
     return [
@@ -218,7 +315,7 @@ def get_top_consumed(
         Material.name,
         func.sum(MaterialIssueItem.quantity * MaterialIssueItem.rate).label("total_value"),
         func.sum(MaterialIssueItem.quantity).label("total_qty"),
-        UOM.name.label("uom_name")
+        UOM.abbreviation.label("uom_name")
     ).select_from(Material).join(
         MaterialIssueItem, MaterialIssueItem.material_id == Material.id
     ).join(
@@ -226,12 +323,18 @@ def get_top_consumed(
     ).join(
         MaterialIssue, MaterialIssueItem.issue_id == MaterialIssue.id
     ).filter(
-        MaterialIssue.tenant_id == tenant_id, MaterialIssue.site_id == site_id
+        MaterialIssue.tenant_id == tenant_id, MaterialIssue.site_id == site_id,
+        MaterialIssue.is_acknowledged == True
     )
     if sd: results = results.filter(MaterialIssue.created_at >= sd)
     if ed: results = results.filter(MaterialIssue.created_at < ed)
-    if project_id: results = results.filter(MaterialIssue.project_id == project_id)
-    results = results.group_by(Material.name, UOM.name).order_by(
+    if institution_id:
+        results = results.outerjoin(Building, MaterialIssue.building_id == Building.id)\
+                         .outerjoin(Indent, MaterialIssue.indent_id == Indent.id)\
+                         .filter((Building.institution_id == institution_id) | (Indent.institution_id == institution_id))
+    elif project_id:
+        results = results.filter(MaterialIssue.project_id == project_id)
+    results = results.group_by(Material.name, UOM.abbreviation).order_by(
         func.sum(MaterialIssueItem.quantity * MaterialIssueItem.rate).desc()
     ).limit(10).all()
 
@@ -311,11 +414,15 @@ def get_material_cost_by_building(
     ).outerjoin(
         InstFromIndent, Indent.institution_id == InstFromIndent.id
     ).filter(
-        MaterialIssue.tenant_id == tenant_id, MaterialIssue.site_id == site_id
+        MaterialIssue.tenant_id == tenant_id, MaterialIssue.site_id == site_id,
+        MaterialIssue.is_acknowledged == True
     )
     if sd: query = query.filter(MaterialIssue.created_at >= sd)
     if ed: query = query.filter(MaterialIssue.created_at < ed)
-    if project_id: query = query.filter(MaterialIssue.project_id == project_id)
+    if institution_id:
+        query = query.filter((Building.institution_id == institution_id) | (Indent.institution_id == institution_id))
+    elif project_id:
+        query = query.filter(MaterialIssue.project_id == project_id)
     results = query.group_by(Material.name, loc_label).order_by(
         func.sum(MaterialIssueItem.quantity * MaterialIssueItem.rate).desc()
     ).limit(20).all()
@@ -324,6 +431,56 @@ def get_material_cost_by_building(
         {
             "material_name": r[0],
             "building_name": r[1],
+            "total_cost": round(r[2] or 0, 2),
+            "total_quantity": round(r[3] or 0, 2)
+        }
+        for r in results
+    ]
+
+
+@router.get("/material-cost-by-department")
+def get_material_cost_by_department(
+    start_date: Optional[str] = None, end_date: Optional[str] = None,
+    institution_id: Optional[int] = None,
+    db: Session = Depends(get_db), current_user: User = Depends(require_permission("dashboard", "read")),
+    tenant_id: int = Depends(get_tenant_id), site_id: int = Depends(get_site_id)
+):
+    sd = parse_date(start_date)
+    ed = parse_date(end_date)
+    project_id = get_project_id_from_inst(db, institution_id)
+    
+    dept_label = func.coalesce(MaterialIssue.issued_to_department, "Unknown")
+    
+    query = db.query(
+        Material.name,
+        dept_label.label("department_name"),
+        func.sum(MaterialIssueItem.quantity * MaterialIssueItem.rate).label("total_cost"),
+        func.sum(MaterialIssueItem.quantity).label("total_qty")
+    ).select_from(Material).join(
+        MaterialIssueItem, MaterialIssueItem.material_id == Material.id
+    ).join(
+        MaterialIssue, MaterialIssueItem.issue_id == MaterialIssue.id
+    ).filter(
+        MaterialIssue.tenant_id == tenant_id, MaterialIssue.site_id == site_id,
+        MaterialIssue.is_acknowledged == True
+    )
+    if sd: query = query.filter(MaterialIssue.created_at >= sd)
+    if ed: query = query.filter(MaterialIssue.created_at < ed)
+    if institution_id:
+        query = query.outerjoin(Building, MaterialIssue.building_id == Building.id)\
+                     .outerjoin(Indent, MaterialIssue.indent_id == Indent.id)\
+                     .filter((Building.institution_id == institution_id) | (Indent.institution_id == institution_id))
+    elif project_id:
+        query = query.filter(MaterialIssue.project_id == project_id)
+    
+    results = query.group_by(Material.name, dept_label).order_by(
+        func.sum(MaterialIssueItem.quantity * MaterialIssueItem.rate).desc()
+    ).limit(20).all()
+
+    return [
+        {
+            "material_name": r[0],
+            "department_name": r[1],
             "total_cost": round(r[2] or 0, 2),
             "total_quantity": round(r[3] or 0, 2)
         }
@@ -355,12 +512,18 @@ def get_consumption_trend(
     ).join(
         MaterialIssueItem, MaterialIssueItem.issue_id == MaterialIssue.id
     ).filter(
-        MaterialIssue.tenant_id == tenant_id, MaterialIssue.site_id == site_id
+        MaterialIssue.tenant_id == tenant_id, MaterialIssue.site_id == site_id,
+        MaterialIssue.is_acknowledged == True
     )
     
     if sd: query = query.filter(MaterialIssue.created_at >= sd)
     if ed: query = query.filter(MaterialIssue.created_at < ed)
-    if project_id: query = query.filter(MaterialIssue.project_id == project_id)
+    if institution_id:
+        query = query.outerjoin(Building, MaterialIssue.building_id == Building.id)\
+                     .outerjoin(Indent, MaterialIssue.indent_id == Indent.id)\
+                     .filter((Building.institution_id == institution_id) | (Indent.institution_id == institution_id))
+    elif project_id:
+        query = query.filter(MaterialIssue.project_id == project_id)
     
     results = query.group_by(
         month_func
@@ -394,3 +557,90 @@ def get_dashboard_alerts(
         }
         for a in alerts
     ]
+
+
+@router.get("/consumption-by-department")
+def get_consumption_by_department(
+    start_date: Optional[str] = None, end_date: Optional[str] = None,
+    institution_id: Optional[int] = None,
+    db: Session = Depends(get_db), current_user: User = Depends(require_permission("dashboard", "read")),
+    tenant_id: int = Depends(get_tenant_id), site_id: int = Depends(get_site_id)
+):
+    sd = parse_date(start_date)
+    ed = parse_date(end_date)
+    project_id = get_project_id_from_inst(db, institution_id)
+    
+    dept_label = func.coalesce(MaterialIssue.issued_to_department, "Unknown")
+    
+    query = db.query(
+        dept_label.label("department_name"),
+        func.sum(MaterialIssueItem.quantity).label("total_qty"),
+        func.sum(MaterialIssueItem.quantity * MaterialIssueItem.rate).label("total_value")
+    ).select_from(MaterialIssueItem).join(
+        MaterialIssue, MaterialIssueItem.issue_id == MaterialIssue.id
+    ).filter(
+        MaterialIssue.tenant_id == tenant_id, MaterialIssue.site_id == site_id,
+        MaterialIssue.is_acknowledged == True
+    )
+    
+    if sd: query = query.filter(MaterialIssue.created_at >= sd)
+    if ed: query = query.filter(MaterialIssue.created_at < ed)
+    if institution_id:
+        query = query.outerjoin(Building, MaterialIssue.building_id == Building.id)\
+                     .outerjoin(Indent, MaterialIssue.indent_id == Indent.id)\
+                     .filter((Building.institution_id == institution_id) | (Indent.institution_id == institution_id))
+    elif project_id:
+        query = query.filter(MaterialIssue.project_id == project_id)
+    
+    results = query.group_by(dept_label).order_by(func.sum(MaterialIssueItem.quantity * MaterialIssueItem.rate).desc()).all()
+
+    return [
+        {"department_name": r[0], "total_quantity": round(r[1] or 0, 2), "total_value": round(r[2] or 0, 2)}
+        for r in results
+    ]
+
+
+@router.get("/consumption-by-category")
+def get_consumption_by_category(
+    start_date: Optional[str] = None, end_date: Optional[str] = None,
+    institution_id: Optional[int] = None,
+    db: Session = Depends(get_db), current_user: User = Depends(require_permission("dashboard", "read")),
+    tenant_id: int = Depends(get_tenant_id), site_id: int = Depends(get_site_id)
+):
+    sd = parse_date(start_date)
+    ed = parse_date(end_date)
+    project_id = get_project_id_from_inst(db, institution_id)
+    
+    cat_label = func.coalesce(Category.name, "Unknown")
+    
+    query = db.query(
+        cat_label.label("category_name"),
+        func.sum(MaterialIssueItem.quantity).label("total_qty"),
+        func.sum(MaterialIssueItem.quantity * MaterialIssueItem.rate).label("total_value")
+    ).select_from(MaterialIssueItem).join(
+        MaterialIssue, MaterialIssueItem.issue_id == MaterialIssue.id
+    ).join(
+        Material, MaterialIssueItem.material_id == Material.id
+    ).outerjoin(
+        Category, Material.category_id == Category.id
+    ).filter(
+        MaterialIssue.tenant_id == tenant_id, MaterialIssue.site_id == site_id,
+        MaterialIssue.is_acknowledged == True
+    )
+    
+    if sd: query = query.filter(MaterialIssue.created_at >= sd)
+    if ed: query = query.filter(MaterialIssue.created_at < ed)
+    if institution_id:
+        query = query.outerjoin(Building, MaterialIssue.building_id == Building.id)\
+                     .outerjoin(Indent, MaterialIssue.indent_id == Indent.id)\
+                     .filter((Building.institution_id == institution_id) | (Indent.institution_id == institution_id))
+    elif project_id:
+        query = query.filter(MaterialIssue.project_id == project_id)
+    
+    results = query.group_by(cat_label).order_by(func.sum(MaterialIssueItem.quantity * MaterialIssueItem.rate).desc()).all()
+
+    return [
+        {"category_name": r[0], "total_quantity": round(r[1] or 0, 2), "total_value": round(r[2] or 0, 2)}
+        for r in results
+    ]
+

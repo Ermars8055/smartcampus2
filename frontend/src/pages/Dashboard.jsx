@@ -10,7 +10,7 @@ import {
 import {
   Inventory2, TrendingDown, ShoppingCart, LocalShipping,
   Warning, People, Warehouse, Receipt, ArrowForward,
-  Circle
+  Circle, Outbox, Assessment
 } from '@mui/icons-material';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RTooltip,
@@ -58,8 +58,15 @@ function StatCard({ title, value, icon, color, subtitle, onClick }) {
       overflow: 'hidden',
       '&:hover': onClick ? { transform: 'translateY(-4px)', boxShadow: '0 12px 24px -10px rgba(0,0,0,0.1)' } : {},
     }} onClick={onClick}>
-      <CardContent sx={{ p: '20px 24px', '&:last-child': { pb: '20px' } }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <CardContent sx={{ p: '20px 24px', '&:last-child': { pb: '20px' }, textAlign: 'center' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5 }}>
+          <Avatar sx={{
+            width: 48, height: 48, borderRadius: '14px',
+            bgcolor: `${color}10`,
+            color: color,
+          }}>
+            {React.cloneElement(icon, { sx: { fontSize: 26 } })}
+          </Avatar>
           <Box>
             <Typography variant="caption" sx={{ 
               color: '#64748B', 
@@ -86,13 +93,6 @@ function StatCard({ title, value, icon, color, subtitle, onClick }) {
               </Typography>
             )}
           </Box>
-          <Avatar sx={{
-            width: 48, height: 48, borderRadius: '14px',
-            bgcolor: `${color}10`,
-            color: color,
-          }}>
-            {React.cloneElement(icon, { sx: { fontSize: 26 } })}
-          </Avatar>
         </Box>
       </CardContent>
       <Box sx={{
@@ -115,12 +115,15 @@ export default function Dashboard() {
   const [period, setPeriod] = useState('all');
   const [institution, setInstitution] = useState('all');
   const [institutionsList, setInstitutionsList] = useState([]);
+  const [departmentSpend, setDepartmentSpend] = useState([]);
+  const [categorySpend, setCategorySpend] = useState([]);
   
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   
   // Drilldown state
   const [drilldownBlock, setDrilldownBlock] = useState(null);
+  const [drilldownType, setDrilldownType] = useState('building'); // 'building' or 'department'
   const [drilldownData, setDrilldownData] = useState([]);
   const [drilldownLoading, setDrilldownLoading] = useState(false);
   
@@ -160,7 +163,9 @@ export default function Dashboard() {
       api.get('/api/dashboard/recent-transactions', { params }),
       api.get('/api/dashboard/alerts', { params }),
       api.get('/api/dashboard/consumption-trend', { params }),
-    ]).then(([s, c, sw, tm, tx, al, tr]) => {
+      institution !== 'all' ? api.get('/api/dashboard/consumption-by-department', { params }) : Promise.resolve({ data: [] }),
+      institution !== 'all' ? api.get('/api/dashboard/consumption-by-category', { params }) : Promise.resolve({ data: [] })
+    ]).then(([s, c, sw, tm, tx, al, tr, ds, cs]) => {
       setStats(s.data);
       setConsumption(c.data);
       setStockByWh(sw.data);
@@ -168,6 +173,8 @@ export default function Dashboard() {
       setRecentTx(tx.data);
       setAlerts(al.data);
       setTrend(tr.data);
+      setDepartmentSpend(ds.data);
+      setCategorySpend(cs.data);
     }).catch(console.error).finally(() => setLoading(false));
   }, [period, institution]);
 
@@ -182,6 +189,7 @@ export default function Dashboard() {
     if (!blockName) return;
 
     setDrilldownBlock(blockName);
+    setDrilldownType('building');
     setDrilldownLoading(true);
     
     let drillParams = {};
@@ -203,6 +211,45 @@ export default function Dashboard() {
     api.get('/api/dashboard/material-cost-by-building', { params: drillParams })
       .then(res => {
          const specificData = res.data.filter(item => item.building_name === blockName);
+         setDrilldownData(specificData);
+      })
+      .catch(console.error)
+      .finally(() => setDrilldownLoading(false));
+  };
+
+  const handleDepartmentClick = (data) => {
+    let deptName = null;
+    if (data && data.activePayload && data.activePayload.length) {
+      deptName = data.activePayload[0].payload.department_name;
+    } else if (data && data.department_name) {
+      deptName = data.department_name;
+    }
+
+    if (!deptName) return;
+
+    setDrilldownBlock(deptName);
+    setDrilldownType('department');
+    setDrilldownLoading(true);
+    
+    let drillParams = {};
+    if (period !== 'all') {
+      const now = new Date();
+      if (period === 'this_month') {
+        drillParams.start_date = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      } else if (period === 'last_month') {
+        drillParams.start_date = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
+        drillParams.end_date = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      } else if (period === 'ytd') {
+        drillParams.start_date = new Date(now.getFullYear(), 0, 1).toISOString();
+      }
+    }
+    if (institution !== 'all') {
+      drillParams.institution_id = institution;
+    }
+
+    api.get('/api/dashboard/material-cost-by-department', { params: drillParams })
+      .then(res => {
+         const specificData = res.data.filter(item => item.department_name === deptName);
          setDrilldownData(specificData);
       })
       .catch(console.error)
@@ -251,7 +298,7 @@ export default function Dashboard() {
       {/* Header */}
       <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
         <Box>
-          <Typography variant="h5" sx={{ fontWeight: 800, color: '#1E293B', mb: 0.5 }}>Dashboard</Typography>
+          <Typography variant="h5" sx={{ fontWeight: 800, color: '#1E293B', mb: 0.5 }}>{institution === 'all' ? 'Dashboard' : `${institutionsList.find(i => i.id === institution)?.name || 'Institution'} Dashboard`}</Typography>
           <Typography variant="body2" sx={{ color: '#64748B' }}>Overview of materials, procurement, and inventory</Typography>
         </Box>
         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -277,16 +324,31 @@ export default function Dashboard() {
       {/* --- ROW 1: Stats Cards (6 in a row) --- */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={6} sm={4} lg={2}>
-          <StatCard title="Materials" value={stats?.total_materials || 0}
-            icon={<Inventory2 />} color="#2563EB" subtitle="Active items" onClick={() => navigate('/materials')} />
+          {institution === 'all' ? (
+            <StatCard title="Materials" value={stats?.total_materials || 0}
+              icon={<Inventory2 />} color="#2563EB" subtitle="Active items" onClick={() => navigate('/materials')} />
+          ) : (
+            <StatCard title="Total Issued Value" value={formatCurrency(stats?.total_issued_value || 0)}
+              icon={<Outbox />} color="#2563EB" subtitle="Total value issued" />
+          )}
         </Grid>
         <Grid item xs={6} sm={4} lg={2}>
-          <StatCard title="Inventory Value" value={formatCurrency(stats?.total_inventory_value || 0)}
-            icon={<TrendingDown />} color="#10B981" subtitle="Total stock value" />
+          {institution === 'all' ? (
+            <StatCard title="Inventory Value" value={formatCurrency(stats?.total_inventory_value || 0)}
+              icon={<TrendingDown />} color="#10B981" subtitle="Total stock value" />
+          ) : (
+            <StatCard title="Total Issued Items" value={stats?.total_issued_qty || 0}
+              icon={<Assessment />} color="#10B981" subtitle="Total items issued" />
+          )}
         </Grid>
         <Grid item xs={6} sm={4} lg={2}>
-          <StatCard title="Low Stock" value={stats?.low_stock_items || 0}
-            icon={<Warning />} color="#EF4444" subtitle="Below reorder" onClick={() => navigate('/inventory')} />
+          {institution === 'all' ? (
+            <StatCard title="Low Stock" value={stats?.low_stock_items || 0}
+              icon={<Warning />} color="#EF4444" subtitle="Below reorder" onClick={() => navigate('/inventory')} />
+          ) : (
+            <StatCard title="Open Complaints" value={stats?.open_complaints || 0}
+              icon={<Warning />} color="#EF4444" subtitle="Active issues" onClick={() => navigate('/complaints')} />
+          )}
         </Grid>
         <Grid item xs={6} sm={4} lg={2}>
           <StatCard title="Pending PR" value={stats?.pending_pr || 0}
@@ -304,95 +366,146 @@ export default function Dashboard() {
 
       {/* Charts Row 1 */}
       <Grid container spacing={2.5} sx={{ mb: 3 }}>
-        <Grid item xs={12} lg={8}>
-          <Card sx={{ p: 2.5, height: '100%' }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#1E293B' }}>
-                Institution Spend (₹)
-              </Typography>
-              <Typography variant="caption" sx={{ color: '#64748B', fontStyle: 'italic' }}>*Click on any bar to drilldown</Typography>
-            </Box>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={consumption} margin={{ top: 20, right: isMobile ? 0 : 10, bottom: isMobile ? 60 : 40, left: isMobile ? -20 : 10 }} onClick={handleBlockClick}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
-                <XAxis 
-                  dataKey="building_name" 
-                  tick={<CustomXAxisTick />} 
-                  interval={0}
-                  axisLine={false} 
-                  tickLine={false}
-                />
-                <YAxis tick={{ fontSize: 11, fontWeight: 500, fill: '#475569' }} tickFormatter={(v) => formatCurrency(v)} />
-                <RTooltip contentStyle={{ borderRadius: 8, border: '1px solid #E2E8F0' }}
-                  cursor={{ fill: 'rgba(37, 99, 235, 0.05)' }}
-                  formatter={(v, name) => [formatCurrency(v), 'Total Spend']} />
-                <Bar dataKey="total_value" name="Value (₹)" fill="#2563EB" radius={[6, 6, 0, 0]} onClick={handleBlockClick} style={{ cursor: 'pointer' }}>
-                  <LabelList dataKey="total_value" position="top" formatter={(v) => v > 0 ? formatCurrency(v) : ''} style={{ fontSize: 11, fontWeight: 700, fill: '#1E293B' }} />
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </Card>
-        </Grid>
-        <Grid item xs={12} lg={4}>
-          <Card sx={{ p: 2.5, height: '100%', display: 'flex', flexDirection: 'column' }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, color: '#1E293B' }}>
-              Stock by Store
-            </Typography>
-            <Box sx={{ flex: 1, minHeight: 0 }}>
-              <ResponsiveContainer width="100%" height={350}>
-                <PieChart margin={{ top: 10, right: 0, bottom: 0, left: 0 }}>
-                  <Pie 
-                    data={stockByWh} 
-                    cx="50%" 
-                    cy="42%" 
-                    innerRadius={60} 
-                    outerRadius={85}
-                    dataKey="total_value" 
-                    nameKey="warehouse_name" 
-                    paddingAngle={5}
-                  >
-                    {stockByWh.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                  </Pie>
-                  <RTooltip 
-                    formatter={(v) => [`₹${v.toLocaleString('en-IN')}`, 'Value']}
-                    contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} 
+        {institution === 'all' ? (
+          <Grid item xs={12} lg={8}>
+            <Card sx={{ p: 2.5, height: '100%' }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#1E293B' }}>
+                  Institution Spend (₹)
+                </Typography>
+                <Typography variant="caption" sx={{ color: '#64748B', fontStyle: 'italic' }}>*Click on any bar to drilldown</Typography>
+              </Box>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={consumption} margin={{ top: 20, right: isMobile ? 0 : 10, bottom: isMobile ? 60 : 40, left: isMobile ? -20 : 10 }} onClick={handleBlockClick}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
+                  <XAxis 
+                    dataKey="building_name" 
+                    tick={<CustomXAxisTick />} 
+                    interval={0}
+                    axisLine={false} 
+                    tickLine={false}
                   />
-                  <Legend 
-                    verticalAlign="bottom"
-                    content={(props) => {
-                      const { payload } = props;
-                      return (
-                        <Box sx={{ 
-                          maxHeight: '130px', 
-                          overflowY: 'auto', 
-                          display: 'flex', 
-                          flexWrap: 'wrap', 
-                          gap: 0.5, 
-                          justifyContent: 'center',
-                          mt: -2,
-                          '&::-webkit-scrollbar': { width: '4px' },
-                          '&::-webkit-scrollbar-thumb': { backgroundColor: '#CBD5E1', borderRadius: '4px' }
-                        }}>
-                          {payload.map((entry, index) => (
-                            <Box key={`item-${index}`} sx={{ display: 'flex', alignItems: 'center', fontSize: 10, fontWeight: 600, color: '#64748B', px: 0.5 }}>
-                              <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: entry.color, mr: 0.5 }} />
-                              {entry.value}
-                            </Box>
-                          ))}
-                        </Box>
-                      );
-                    }}
-                  />
-                </PieChart>
+                  <YAxis tick={{ fontSize: 11, fontWeight: 500, fill: '#475569' }} tickFormatter={(v) => formatCurrency(v)} />
+                  <RTooltip contentStyle={{ borderRadius: 8, border: '1px solid #E2E8F0' }}
+                    cursor={{ fill: 'rgba(37, 99, 235, 0.05)' }}
+                    formatter={(v, name) => [formatCurrency(v), 'Total Spend']} />
+                  <Bar dataKey="total_value" name="Value (₹)" fill="#2563EB" radius={[6, 6, 0, 0]} onClick={handleBlockClick} style={{ cursor: 'pointer' }}>
+                    <LabelList dataKey="total_value" position="top" formatter={(v) => v > 0 ? formatCurrency(v) : ''} style={{ fontSize: 11, fontWeight: 700, fill: '#1E293B' }} />
+                  </Bar>
+                </BarChart>
               </ResponsiveContainer>
-            </Box>
-          </Card>
-        </Grid>
+            </Card>
+          </Grid>
+        ) : (
+          <Grid item xs={12} lg={8}>
+            <Card sx={{ p: 2.5, height: '100%' }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#1E293B' }}>
+                  Department-wise Spend (₹)
+                </Typography>
+                <Typography variant="caption" sx={{ color: '#64748B', fontStyle: 'italic' }}>*Click on any bar to drilldown</Typography>
+              </Box>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={departmentSpend} margin={{ top: 20, right: isMobile ? 0 : 10, bottom: isMobile ? 60 : 40, left: isMobile ? -20 : 10 }} onClick={handleDepartmentClick}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
+                  <XAxis 
+                    dataKey="department_name" 
+                    tick={<CustomXAxisTick />} 
+                    interval={0}
+                    axisLine={false} 
+                    tickLine={false}
+                  />
+                  <YAxis tick={{ fontSize: 11, fontWeight: 500, fill: '#475569' }} tickFormatter={(v) => formatCurrency(v)} />
+                  <RTooltip contentStyle={{ borderRadius: 8, border: '1px solid #E2E8F0' }}
+                    cursor={{ fill: 'rgba(139, 92, 246, 0.05)' }}
+                    formatter={(v, name) => [formatCurrency(v), 'Total Spend']} />
+                  <Bar dataKey="total_value" name="Value (₹)" fill="#8B5CF6" radius={[6, 6, 0, 0]} onClick={handleDepartmentClick} style={{ cursor: 'pointer' }}>
+                    <LabelList dataKey="total_value" position="top" formatter={(v) => v > 0 ? formatCurrency(v) : ''} style={{ fontSize: 11, fontWeight: 700, fill: '#1E293B' }} />
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </Card>
+          </Grid>
+        )}
+
+        {institution === 'all' ? (
+          <Grid item xs={12} lg={4}>
+            <Card sx={{ p: 2.5, height: '100%', display: 'flex', flexDirection: 'column' }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, color: '#1E293B' }}>
+                Stock by Store
+              </Typography>
+              <Box sx={{ flex: 1, minHeight: 0 }}>
+                <ResponsiveContainer width="100%" height={350}>
+                  <PieChart margin={{ top: 10, right: 0, bottom: 0, left: 0 }}>
+                    <Pie 
+                      data={stockByWh} 
+                      cx="50%" cy="42%" innerRadius={60} outerRadius={85}
+                      dataKey="total_value" nameKey="warehouse_name" paddingAngle={5}
+                    >
+                      {stockByWh.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                    </Pie>
+                    <RTooltip formatter={(v) => [`₹${v.toLocaleString('en-IN')}`, 'Value']} contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
+                    <Legend verticalAlign="bottom" content={(props) => {
+                        const { payload } = props;
+                        return (
+                          <Box sx={{ maxHeight: '130px', overflowY: 'auto', display: 'flex', flexWrap: 'wrap', gap: 0.5, justifyContent: 'center', mt: -2 }}>
+                            {payload.map((entry, index) => (
+                              <Box key={`item-${index}`} sx={{ display: 'flex', alignItems: 'center', fontSize: 10, fontWeight: 600, color: '#64748B', px: 0.5 }}>
+                                <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: entry.color, mr: 0.5 }} />
+                                {entry.value}
+                              </Box>
+                            ))}
+                          </Box>
+                        );
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </Box>
+            </Card>
+          </Grid>
+        ) : (
+          <Grid item xs={12} lg={4}>
+            <Card sx={{ p: 2.5, height: '100%', display: 'flex', flexDirection: 'column' }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, color: '#1E293B' }}>
+                Category-wise Spend
+              </Typography>
+              <Box sx={{ flex: 1, minHeight: 0 }}>
+                <ResponsiveContainer width="100%" height={350}>
+                  <PieChart margin={{ top: 10, right: 0, bottom: 0, left: 0 }}>
+                    <Pie 
+                      data={categorySpend} 
+                      cx="50%" cy="42%" innerRadius={60} outerRadius={85}
+                      dataKey="total_value" nameKey="category_name" paddingAngle={5}
+                    >
+                      {categorySpend.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                    </Pie>
+                    <RTooltip formatter={(v) => [`₹${v.toLocaleString('en-IN')}`, 'Value']} contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
+                    <Legend verticalAlign="bottom" content={(props) => {
+                        const { payload } = props;
+                        return (
+                          <Box sx={{ maxHeight: '130px', overflowY: 'auto', display: 'flex', flexWrap: 'wrap', gap: 0.5, justifyContent: 'center', mt: -2 }}>
+                            {payload.map((entry, index) => (
+                              <Box key={`item-${index}`} sx={{ display: 'flex', alignItems: 'center', fontSize: 10, fontWeight: 600, color: '#64748B', px: 0.5 }}>
+                                <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: entry.color, mr: 0.5 }} />
+                                {entry.value}
+                              </Box>
+                            ))}
+                          </Box>
+                        );
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </Box>
+            </Card>
+          </Grid>
+        )}
       </Grid>
 
       {/* Charts Row 2 */}
       <Grid container spacing={2.5} sx={{ mb: 3 }}>
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} md={institution === 'all' ? 6 : 4}>
           <Card sx={{ p: 2.5 }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, color: '#1E293B' }}>
               Highest Spend Materials
@@ -410,7 +523,7 @@ export default function Dashboard() {
             </ResponsiveContainer>
           </Card>
         </Grid>
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} md={institution === 'all' ? 6 : 4}>
           <Card sx={{ p: 2.5 }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, color: '#1E293B' }}>
               Monthly Spend Trend
@@ -423,12 +536,48 @@ export default function Dashboard() {
                 <RTooltip contentStyle={{ borderRadius: 8 }} formatter={(v) => [formatCurrency(v), 'Total Spend']} />
                 <Line type="monotone" dataKey="total_value" name="Total Spend" stroke="#2563EB"
                   strokeWidth={3} dot={{ r: 5, fill: '#2563EB', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 7 }}>
-                  <LabelList dataKey="total_value" position="top" offset={12} formatter={(v) => formatCurrency(v)} style={{ fontSize: 12, fontWeight: 700, fill: '#2563EB' }} />
                 </Line>
               </LineChart>
             </ResponsiveContainer>
           </Card>
         </Grid>
+        {institution !== 'all' && (
+          <Grid item xs={12} md={4}>
+            <Card sx={{ p: 2.5, height: '100%', display: 'flex', flexDirection: 'column' }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, color: '#1E293B' }}>
+                Stock by Store
+              </Typography>
+              <Box sx={{ flex: 1, minHeight: 0 }}>
+                <ResponsiveContainer width="100%" height={280}>
+                  <PieChart margin={{ top: 10, right: 0, bottom: 0, left: 0 }}>
+                    <Pie 
+                      data={stockByWh} 
+                      cx="50%" cy="42%" innerRadius={50} outerRadius={70}
+                      dataKey="total_value" nameKey="warehouse_name" paddingAngle={5}
+                    >
+                      {stockByWh.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                    </Pie>
+                    <RTooltip formatter={(v) => [`₹${v.toLocaleString('en-IN')}`, 'Value']} contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
+                    <Legend verticalAlign="bottom" content={(props) => {
+                        const { payload } = props;
+                        return (
+                          <Box sx={{ maxHeight: '90px', overflowY: 'auto', display: 'flex', flexWrap: 'wrap', gap: 0.5, justifyContent: 'center', mt: -2 }}>
+                            {payload.map((entry, index) => (
+                              <Box key={`item-${index}`} sx={{ display: 'flex', alignItems: 'center', fontSize: 10, fontWeight: 600, color: '#64748B', px: 0.5 }}>
+                                <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: entry.color, mr: 0.5 }} />
+                                {entry.value}
+                              </Box>
+                            ))}
+                          </Box>
+                        );
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </Box>
+            </Card>
+          </Grid>
+        )}
       </Grid>
 
       {/* Bottom Row */}
@@ -543,7 +692,7 @@ export default function Dashboard() {
       {/* Drilldown Modal */}
       <Dialog open={!!drilldownBlock} onClose={() => setDrilldownBlock(null)} maxWidth="md" fullWidth>
         <DialogTitle sx={{ fontWeight: 800, color: '#1E293B', display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
-          Institution Spend Details: {drilldownBlock}
+          {drilldownType === 'department' ? 'Department Spend Details:' : 'Institution Spend Details:'} {drilldownBlock}
           <Chip 
             label={`${formatCurrency(drilldownData.reduce((acc, curr) => acc + curr.total_cost, 0))} Total`}
             color="primary"

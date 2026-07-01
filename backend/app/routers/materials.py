@@ -238,6 +238,7 @@ def update_uom(
         
     uom.name = data.name
     uom.abbreviation = data.abbreviation
+    uom.allow_decimal = data.allow_decimal
     db.commit()
     db.refresh(uom)
     return uom
@@ -315,7 +316,8 @@ def list_materials(
             created_at=m.created_at,
             category_name=m.category.name if m.category else None,
             subcategory_name=m.subcategory.name if m.subcategory else None,
-            uom_name=m.uom.name if m.uom else None,
+            uom_name=m.uom.abbreviation if m.uom else None,
+            uom_allow_decimal=m.uom.allow_decimal if m.uom else False,
             vendor_name=f"{m.preferred_vendor.code} - {m.preferred_vendor.name}" if m.preferred_vendor else None,
             warehouse_id=m.warehouse_id,
             warehouse_name=m.warehouse.name if m.warehouse else None,
@@ -352,7 +354,8 @@ def get_material(
         created_at=m.created_at,
         category_name=m.category.name if m.category else None,
         subcategory_name=m.subcategory.name if m.subcategory else None,
-        uom_name=m.uom.name if m.uom else None,
+        uom_name=m.uom.abbreviation if m.uom else None,
+        uom_allow_decimal=m.uom.allow_decimal if m.uom else False,
         vendor_name=f"{m.preferred_vendor.code} - {m.preferred_vendor.name}" if m.preferred_vendor else None,
         warehouse_id=m.warehouse_id,
         warehouse_name=m.warehouse.name if m.warehouse else None,
@@ -374,16 +377,30 @@ def create_material(
         cat = db.query(Category).get(mat_data["category_id"])
         prefix = cat.material_code_prefix if cat and cat.material_code_prefix else "MAT"
         doc_type = f"MATERIAL_{cat.id}" if cat else "MATERIAL"
-        mat_data["code"] = get_next_number(db, tenant_id, site_id, doc_type, prefix)
+        
+        # Robust generation: loop until a unique code is found to auto-heal sequence sync issues
+        max_attempts = 10
+        for _ in range(max_attempts):
+            generated_code = get_next_number(db, tenant_id, site_id, doc_type, prefix)
+            existing = db.query(Material).filter(
+                Material.code == generated_code, Material.tenant_id == tenant_id, Material.site_id == site_id
+            ).first()
+            if not existing:
+                mat_data["code"] = generated_code
+                break
+        else:
+            raise HTTPException(status_code=500, detail="Failed to generate a unique material code. Please try again.")
     else:
         existing = db.query(Material).filter(
             Material.code == mat_data["code"], Material.tenant_id == tenant_id, Material.site_id == site_id
         ).first()
         if existing:
             raise HTTPException(status_code=400, detail="Material code already exists in this site")
+    
     mat = Material(**mat_data, tenant_id=tenant_id, site_id=site_id)
     db.add(mat)
     db.flush()
+    
     db.add(AuditLog(
         tenant_id=tenant_id, site_id=site_id, user_id=current_user.id,
         action="CREATE", entity_type="Material", entity_id=mat.id,

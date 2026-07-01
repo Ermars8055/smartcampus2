@@ -96,7 +96,7 @@ def list_issues(
                 remarks=item.remarks,
                 material_name=mat.name if mat else None,
                 material_code=mat.code if mat else None,
-                uom_name=mat.uom.name if mat and mat.uom else None
+                uom_name=mat.uom.abbreviation if mat and mat.uom else None
             ))
         room_name = iss.room.name if iss.room else None
         floor_name = iss.room.floor.name if iss.room and iss.room.floor else None
@@ -340,6 +340,7 @@ def create_issue(
         db.commit()
         return {
             "created_ids": [iss["id"] for iss in created_issues],
+            "issue_number": created_issues[0]["issue_number"] if created_issues else None,
             "message": f"{len(created_issues)} issue(s) created successfully"
         }
     except HTTPException:
@@ -428,7 +429,7 @@ def list_returns(
                 remarks=item.remarks,
                 material_name=mat.name if mat else None,
                 material_code=mat.code if mat else None,
-                uom_name=mat.uom.name if mat and mat.uom else None
+                uom_name=mat.uom.abbreviation if mat and mat.uom else None
             ))
         result.append(ReturnOut(
             id=ret.id, return_number=ret.return_number,
@@ -612,7 +613,7 @@ def list_transfers(
                 receipt_remarks=item.receipt_remarks,
                 material_name=mat.name if mat else None,
                 material_code=mat.code if mat else None,
-                uom_name=mat.uom.name if mat and mat.uom else None
+                uom_name=mat.uom.abbreviation if mat and mat.uom else None
             ))
         result.append(TransferOut(
             id=t.id, transfer_number=t.transfer_number,
@@ -810,7 +811,7 @@ def format_gate_pass(gp: GatePass) -> GatePassOut:
             remarks=item.remarks,
             material_name=mat.name if mat else None,
             material_code=mat.code if mat else None,
-            uom_name=mat.uom.name if mat and mat.uom else None
+            uom_name=mat.uom.abbreviation if mat and mat.uom else None
         ))
         
     let_vend_addr = None

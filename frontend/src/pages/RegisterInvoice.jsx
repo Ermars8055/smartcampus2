@@ -169,6 +169,11 @@ export default function RegisterInvoice() {
   };
 
   const addItem = () => {
+    const emptyCount = form.items.filter(it => !it.material_id).length;
+    if (emptyCount >= 5) {
+      alert("Please select materials for the existing empty rows before adding more. Limit reached (5).");
+      return;
+    }
     setForm(prev => ({
       ...prev,
       items: [...prev.items, {
@@ -194,15 +199,43 @@ export default function RegisterInvoice() {
   };
 
   const updateItem = (index, field, value) => {
+    let finalVal = value;
+    if (['discount_percent', 'cgst_rate', 'sgst_rate', 'igst_rate'].includes(field)) {
+      if (finalVal !== '' && parseFloat(finalVal) > 100) {
+        finalVal = '100';
+      }
+    }
     const newItems = [...form.items];
-    newItems[index][field] = value;
+    newItems[index][field] = finalVal;
     setForm(prev => ({ ...prev, items: newItems }));
+  };
+
+  const updateTransportPercent = (field, value) => {
+    let finalVal = value.replace(/-/g, '');
+    if (finalVal !== '' && parseFloat(finalVal) > 100) {
+      finalVal = '100';
+    }
+    setForm(prev => ({ ...prev, [field]: finalVal }));
   };
 
   const handleMaterialSelect = (index, materialId) => {
     const material = materials.find(m => m.id === materialId);
     if (!material) {
-      updateItem(index, 'material_id', '');
+      const newItems = [...form.items];
+      newItems[index] = {
+        ...newItems[index],
+        material_id: '',
+        description: '',
+        hsn_sac: '',
+        uom: '',
+        rate: 0,
+        cgst_rate: 0,
+        sgst_rate: 0,
+        igst_rate: 0,
+        discount_percent: 0,
+        discount_amount: 0
+      };
+      setForm(prev => ({ ...prev, items: newItems }));
       return;
     }
     
@@ -355,23 +388,26 @@ export default function RegisterInvoice() {
       }
       navigate('/invoices');
     } catch (err) {
-      alert("Failed to save invoice: " + (err.response?.data?.detail || err.message));
+      const detail = err.response?.data?.detail;
+      const errMsg = Array.isArray(detail) ? detail.map(d => `${d.loc.join('.')}: ${d.msg}`).join(', ') : (detail || err.message);
+      alert("Failed to save invoice: " + errMsg);
     }
   };
 
   const totals = calculateTotals();
 
+  const noSpinSx = {
+    '& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button': {
+      WebkitAppearance: 'none',
+      margin: 0
+    },
+    '& input[type=number]': {
+      MozAppearance: 'textfield'
+    }
+  };
+
   return (
-    <Box sx={{ 
-      pb: 6,
-      '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button': {
-        display: 'none',
-        margin: 0
-      },
-      '& input[type=number]': {
-        '-moz-appearance': 'textfield'
-      }
-    }}>
+    <Box sx={{ pb: 6 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, gap: 2 }}>
         <IconButton onClick={() => navigate('/invoices')}><ArrowBack /></IconButton>
         <Box>
@@ -624,6 +660,7 @@ export default function RegisterInvoice() {
               <Grid container columns={24} spacing={1} key={idx} sx={{ mb: 1, px: 1, alignItems: 'center', borderBottom: '1px solid #F1F5F9', pb: 2 }}>
                 <Grid item xs={4} sx={{ position: 'relative' }}>
                   <Autocomplete
+                    disabled={!form.vendor_id}
                     size="small"
                     options={materials}
                     getOptionLabel={(option) => `${option.code} - ${option.name}`}
@@ -649,6 +686,7 @@ export default function RegisterInvoice() {
                 </Grid>
                 <Grid item xs={2}>
                   <TextField 
+                    disabled={!item.material_id}
                     fullWidth 
                     value={item.hsn_sac} 
                     onChange={e => {
@@ -660,21 +698,21 @@ export default function RegisterInvoice() {
                     inputProps={{ style: { fontSize: '0.8rem' }, maxLength: 8 }} 
                   />
                 </Grid>
-                <Grid item xs={1.5}><TextField fullWidth type="number" value={item.quantity} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(idx, 'quantity', e.target.value.replace(/-/g, ''))} size="small" variant="standard" inputProps={{ style: { textAlign: 'right', fontSize: '0.8rem' }, min: 0 }} /></Grid>
+                <Grid item xs={1.5}><TextField disabled={!item.material_id} fullWidth type="number" value={item.quantity} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(idx, 'quantity', e.target.value.replace(/-/g, ''))} size="small" variant="standard" inputProps={{ style: { textAlign: 'right', fontSize: '0.8rem' }, min: 0, step: "any" }} /></Grid>
                 <Grid item xs={2} sx={{ position: 'relative' }}>
-                  <TextField fullWidth type="number" value={item.rate} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(idx, 'rate', e.target.value.replace(/-/g, ''))} size="small" variant="standard" inputProps={{ style: { textAlign: 'right', fontSize: '0.8rem' }, min: 0 }} />
+                  <TextField disabled={!item.material_id} sx={noSpinSx} fullWidth type="number" value={item.rate} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(idx, 'rate', e.target.value.replace(/-/g, ''))} size="small" variant="standard" inputProps={{ style: { textAlign: 'right', fontSize: '0.8rem' }, min: 0, step: "any" }} />
                   {item.material_id && materials.find(m => m.id === item.material_id)?.standard_cost ? (
                     <Typography sx={{ fontSize: '0.65rem', color: '#2563EB', textAlign: 'right', position: 'absolute', top: '100%', right: 0, width: '100%', pt: 0.5 }}>
                       Base: ₹{materials.find(m => m.id === item.material_id).standard_cost}
                     </Typography>
                   ) : null}
                 </Grid>
-                <Grid item xs={2}><TextField fullWidth type="number" value={item.discount_percent} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(idx, 'discount_percent', e.target.value.replace(/-/g, ''))} size="small" variant="standard" inputProps={{ style: { textAlign: 'right', fontSize: '0.8rem' }, min: 0 }} /></Grid>
-                <Grid item xs={2}><TextField fullWidth type="number" value={item.cgst_rate} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(idx, 'cgst_rate', e.target.value.replace(/-/g, ''))} size="small" variant="standard" inputProps={{ style: { textAlign: 'right', fontSize: '0.8rem' }, min: 0 }} /></Grid>
-                <Grid item xs={2}><TextField fullWidth type="number" value={item.sgst_rate} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(idx, 'sgst_rate', e.target.value.replace(/-/g, ''))} size="small" variant="standard" inputProps={{ style: { textAlign: 'right', fontSize: '0.8rem' }, min: 0 }} /></Grid>
-                <Grid item xs={2}><TextField fullWidth type="number" value={item.igst_rate} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(idx, 'igst_rate', e.target.value.replace(/-/g, ''))} size="small" variant="standard" inputProps={{ style: { textAlign: 'right', fontSize: '0.8rem' }, min: 0 }} /></Grid>
+                <Grid item xs={2}><TextField disabled={!item.material_id} sx={noSpinSx} fullWidth type="number" value={item.discount_percent} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(idx, 'discount_percent', e.target.value.replace(/-/g, ''))} size="small" variant="standard" inputProps={{ style: { textAlign: 'right', fontSize: '0.8rem' }, min: 0, step: "any" }} /></Grid>
+                <Grid item xs={2}><TextField disabled={!item.material_id || parseFloat(item.igst_rate) > 0} sx={noSpinSx} fullWidth type="number" value={item.cgst_rate} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(idx, 'cgst_rate', e.target.value.replace(/-/g, ''))} size="small" variant="standard" inputProps={{ style: { textAlign: 'right', fontSize: '0.8rem' }, min: 0, step: "any" }} InputProps={{ readOnly: true }} /></Grid>
+                <Grid item xs={2}><TextField disabled={!item.material_id || parseFloat(item.igst_rate) > 0} sx={noSpinSx} fullWidth type="number" value={item.sgst_rate} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(idx, 'sgst_rate', e.target.value.replace(/-/g, ''))} size="small" variant="standard" inputProps={{ style: { textAlign: 'right', fontSize: '0.8rem' }, min: 0, step: "any" }} InputProps={{ readOnly: true }} /></Grid>
+                <Grid item xs={2}><TextField disabled={!item.material_id || parseFloat(item.cgst_rate) > 0 || parseFloat(item.sgst_rate) > 0} sx={noSpinSx} fullWidth type="number" value={item.igst_rate} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(idx, 'igst_rate', e.target.value.replace(/-/g, ''))} size="small" variant="standard" inputProps={{ style: { textAlign: 'right', fontSize: '0.8rem' }, min: 0, step: "any" }} InputProps={{ readOnly: true }} /></Grid>
                 <Grid item xs={2.5}>
-                  <TextField fullWidth placeholder="Remarks" value={item.remarks || ''} onChange={e => updateItem(idx, 'remarks', e.target.value)} size="small" variant="standard" inputProps={{ style: { fontSize: '0.8rem' } }} />
+                  <TextField disabled={!item.material_id} fullWidth placeholder="Remarks" value={item.remarks || ''} onChange={e => updateItem(idx, 'remarks', e.target.value)} size="small" variant="standard" inputProps={{ maxLength: 255, style: { fontSize: '0.8rem' } }} />
                 </Grid>
                 <Grid item xs={3} sx={{ textAlign: 'right', fontWeight: 600, fontSize: '0.8rem' }}>₹{totals.items[idx]?.amount.toFixed(2)}</Grid>
                 <Grid item xs={1} sx={{ textAlign: 'center' }}>
@@ -706,16 +744,16 @@ export default function RegisterInvoice() {
                 <TextField fullWidth type="number" value={form.transport_charges} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => setForm({ ...form, transport_charges: e.target.value.replace(/-/g, '') })} size="small" variant="standard" inputProps={{ style: { textAlign: 'right', fontSize: '0.8rem' }, min: 0 }} />
               </Grid>
               <Grid item xs={2}>
-                <TextField fullWidth type="number" value={form.transport_discount_percent} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => setForm({ ...form, transport_discount_percent: e.target.value.replace(/-/g, '') })} size="small" variant="standard" inputProps={{ style: { textAlign: 'right', fontSize: '0.8rem' }, min: 0 }} />
+                <TextField fullWidth type="number" value={form.transport_discount_percent} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateTransportPercent('transport_discount_percent', e.target.value)} size="small" variant="standard" inputProps={{ style: { textAlign: 'right', fontSize: '0.8rem' }, min: 0 }} />
               </Grid>
               <Grid item xs={2}>
-                <TextField fullWidth type="number" value={form.transport_cgst_rate} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => setForm({ ...form, transport_cgst_rate: e.target.value.replace(/-/g, '') })} size="small" variant="standard" inputProps={{ style: { textAlign: 'right', fontSize: '0.8rem' }, min: 0 }} />
+                <TextField fullWidth type="number" value={form.transport_cgst_rate} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateTransportPercent('transport_cgst_rate', e.target.value)} size="small" variant="standard" inputProps={{ style: { textAlign: 'right', fontSize: '0.8rem' }, min: 0 }} />
               </Grid>
               <Grid item xs={2}>
-                <TextField fullWidth type="number" value={form.transport_sgst_rate} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => setForm({ ...form, transport_sgst_rate: e.target.value.replace(/-/g, '') })} size="small" variant="standard" inputProps={{ style: { textAlign: 'right', fontSize: '0.8rem' }, min: 0 }} />
+                <TextField fullWidth type="number" value={form.transport_sgst_rate} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateTransportPercent('transport_sgst_rate', e.target.value)} size="small" variant="standard" inputProps={{ style: { textAlign: 'right', fontSize: '0.8rem' }, min: 0 }} />
               </Grid>
               <Grid item xs={2}>
-                <TextField fullWidth type="number" value={form.transport_igst_rate} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => setForm({ ...form, transport_igst_rate: e.target.value.replace(/-/g, '') })} size="small" variant="standard" inputProps={{ style: { textAlign: 'right', fontSize: '0.8rem' }, min: 0 }} />
+                <TextField fullWidth type="number" value={form.transport_igst_rate} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateTransportPercent('transport_igst_rate', e.target.value)} size="small" variant="standard" inputProps={{ style: { textAlign: 'right', fontSize: '0.8rem' }, min: 0 }} />
               </Grid>
               <Grid item xs={2.5}></Grid>
               <Grid item xs={3} sx={{ textAlign: 'right', fontWeight: 600, fontSize: '0.8rem' }}>

@@ -54,3 +54,15 @@ a, button {
     margin: 1cm;
   }
 }
+
+/* Hide number input spinners for elements with no-spin class */
+.no-spin input[type=number]::-webkit-outer-spin-button,
+.no-spin input[type=number]::-webkit-inner-spin-button {
+  -webkit-appearance: none !important;
+  display: none !important;
+  margin: 0 !important;
+}
+
+.no-spin input[type=number] {
+  -moz-appearance: textfield !important;
+}

@@ -26,7 +26,7 @@ def list_material_limits(
         if limit.material:
             limit.material_name = limit.material.name
             limit.material_code = limit.material.code
-            limit.uom_name = limit.material.uom.name if limit.material.uom else None
+            limit.uom_name = limit.material.uom.abbreviation if limit.material.uom else None
 
     return limits
 
@@ -72,7 +72,7 @@ def create_material_limit(
         if limit.material:
             limit.material_name = limit.material.name
             limit.material_code = limit.material.code
-            limit.uom_name = limit.material.uom.name if limit.material.uom else None
+            limit.uom_name = limit.material.uom.abbreviation if limit.material.uom else None
         
         created_limits.append(limit)
         
@@ -104,7 +104,7 @@ def update_material_limit(
     if limit.material:
         limit.material_name = limit.material.name
         limit.material_code = limit.material.code
-        limit.uom_name = limit.material.uom.name if limit.material.uom else None
+        limit.uom_name = limit.material.uom.abbreviation if limit.material.uom else None
         
     return limit
 

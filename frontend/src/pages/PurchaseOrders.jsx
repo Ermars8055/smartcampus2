@@ -69,6 +69,15 @@ export default function PurchaseOrders() {
       showMessage("Please enter a valid approved quantity for all items.", "Validation Error", "warning");
       return;
     }
+    if (payloadItems.length === 1 && payloadItems[0].approved_quantity === 0) {
+      showMessage("Approved quantity must be greater than 0 for a single-item document. Please use the Reject button.", "Validation Error", "warning");
+      return;
+    }
+    if (payloadItems.length > 1 && payloadItems.every(it => it.approved_quantity === 0)) {
+      showMessage("You cannot approve 0 quantity for all items. Please use the Reject button.", "Validation Error", "warning");
+      return;
+    }
+
 
     try {
       await api.post(`/api/procurement/po/${po.id}/approve`, {
@@ -105,9 +114,9 @@ export default function PurchaseOrders() {
           <span>You have entered an approved quantity larger than the requested quantity for the following items:</span>
           {largerItems.map((li, idx) => (
             <div key={idx} style={{ margin: '12px 0', paddingLeft: 8 }}>
-              <strong>• {li.name}:</strong><br/>
-              &nbsp;&nbsp;&nbsp;Requested: {li.requested} {li.uom}<br/>
-              &nbsp;&nbsp;&nbsp;Approved: {li.approved} {li.uom}<br/>
+              <strong>• {li.name}:</strong><br />
+              &nbsp;&nbsp;&nbsp;Requested: {li.requested} {li.uom}<br />
+              &nbsp;&nbsp;&nbsp;Approved: {li.approved} {li.uom}<br />
               &nbsp;&nbsp;&nbsp;<span style={{ color: '#dc2626', fontWeight: 600 }}>Remarks: {li.rem}</span>
             </div>
           ))}
@@ -129,9 +138,9 @@ export default function PurchaseOrders() {
 
   const fetchDetailHistory = async (id, type) => {
     try {
-      const endpoint = type === 'indent' ? `/api/indents/${id}/approval-history` : 
-                       type === 'po' ? `/api/procurement/po/${id}/approval-history` : 
-                       `/api/procurement/pr/${id}/approval-history`;
+      const endpoint = type === 'indent' ? `/api/indents/${id}/approval-history` :
+        type === 'po' ? `/api/procurement/po/${id}/approval-history` :
+          `/api/procurement/pr/${id}/approval-history`;
       const res = await api.get(endpoint);
       setDetailHistoryData(res.data);
       setDetailHistoryOpen(true);
@@ -177,7 +186,7 @@ export default function PurchaseOrders() {
   const [tabValue, setTabValue] = useState('Draft');
   const [editingPOId, setEditingPOId] = useState(null);
   const [form, setForm] = useState({
-    vendor_id: '', project_id: '', delivery_date: dayjs().add(14, 'day'), terms: '', po_type: 'Informal', items: [{ material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }]
+    po_number: '', vendor_id: '', project_id: '', delivery_date: dayjs().add(14, 'day'), terms: '', annexure: '', po_type: 'Informal', items: [{ material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }]
   });
   const [sortConfig, setSortConfig] = useState({ key: 'created_at', direction: 'desc' });
 
@@ -208,34 +217,12 @@ export default function PurchaseOrders() {
     return list;
   }, [pos, search, filterVendor]);
 
-  const sortedPOs = useMemo(() => {
-    let list = filteredPOsBase.filter(po => tabValue === 'All' || po.status === tabValue);
-
-    if (sortConfig.key) {
-      list.sort((a, b) => {
-        let aVal = a[sortConfig.key];
-        let bVal = b[sortConfig.key];
-
-        if (sortConfig.key === 'vendor') aVal = a.vendor_name;
-        if (sortConfig.key === 'vendor') bVal = b.vendor_name;
-        if (sortConfig.key === 'total_amount') {
-          aVal = calculatePOTotalNet(a);
-          bVal = calculatePOTotalNet(b);
-        }
-
-        if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
-        if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
-        return 0;
-      });
-    }
-    return list;
-  }, [filteredPOsBase, sortConfig, tabValue]);
-
   const calculatePOTotalNet = (po) => {
     if (!po || !po.items) return 0;
     let totalNetAmountSum = 0;
     po.items.forEach(item => {
-      const qty = parseFloat(item.quantity) || 0;
+      const effQty = item.approved_quantity !== null && item.approved_quantity !== undefined ? item.approved_quantity : item.quantity;
+      const qty = parseFloat(effQty) || 0;
       const rate = parseFloat(item.rate) || 0;
       const amount = qty * rate;
       const discAmt = amount * ((item.discount_percent || 0) / 100);
@@ -260,6 +247,31 @@ export default function PurchaseOrders() {
     return Math.round(totalNetAmountSum);
   };
 
+  const sortedPOs = useMemo(() => {
+    let list = filteredPOsBase.filter(po => tabValue === 'All' || po.status === tabValue);
+
+    if (sortConfig.key) {
+      list.sort((a, b) => {
+        let aVal = a[sortConfig.key];
+        let bVal = b[sortConfig.key];
+
+        if (sortConfig.key === 'vendor') aVal = a.vendor_name;
+        if (sortConfig.key === 'vendor') bVal = b.vendor_name;
+        if (sortConfig.key === 'total_amount') {
+          aVal = calculatePOTotalNet(a);
+          bVal = calculatePOTotalNet(b);
+        }
+
+        if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+    return list;
+  }, [filteredPOsBase, sortConfig, tabValue]);
+
+
+
   const formatCurrency = (amount) => {
     return '₹' + new Intl.NumberFormat('en-IN', {
       maximumFractionDigits: 2,
@@ -277,10 +289,12 @@ export default function PurchaseOrders() {
   const handleRowClick = (po) => {
     if (po.status === 'Draft') {
       setForm({
+        po_number: po.po_number || '',
         vendor_id: po.vendor_id || '',
         project_id: po.project_id || (projects.length > 0 ? projects[0].id : ''),
-        delivery_date: po.delivery_date ? dayjs(po.delivery_date) : dayjs().add(21, 'day'),
+        delivery_date: po.delivery_date ? dayjs(po.delivery_date) : null,
         terms: po.terms || '',
+        annexure: po.annexure || '',
         po_type: po.po_type || 'Informal',
         items: po.items && po.items.length > 0 ? po.items.map(it => ({
           material_id: it.material_id,
@@ -292,7 +306,7 @@ export default function PurchaseOrders() {
           igst_percentage: it.igst_percentage || 0,
           is_gst_inclusive: it.is_gst_inclusive || false,
           uom_name: it.uom_name || '',
-          base_rate: 0
+          base_rate: materials.find(m => m.id === it.material_id)?.standard_cost || 0
         })) : [{ material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }]
       });
       setEditingPOId(po.id);
@@ -324,22 +338,26 @@ export default function PurchaseOrders() {
       setForm({
         vendor_id: '',
         project_id: projects[0]?.id || '',
-        delivery_date: dayjs().add(21, 'day'),
-        terms: '',
+        delivery_date: null,
+        terms: '', annexure: '',
         po_type: 'Formal',
         indent_id: ind.id,
-        items: ind.items.filter(it => it.requested_quantity > it.issued_quantity).map(it => ({
-          material_id: it.material_id,
-          quantity: it.requested_quantity - it.issued_quantity,
-          rate: '',
-          discount_percent: 0,
-          cgst_percentage: 0,
-          sgst_percentage: 0,
-          igst_percentage: 0,
-          is_gst_inclusive: false,
-          uom_name: '',
-          base_rate: 0
-        }))
+        items: ind.items.filter(it => it.requested_quantity > it.issued_quantity).map(it => {
+          const mat = materials.find(m => m.id === it.material_id);
+          return {
+            material_id: it.material_id,
+            quantity: it.requested_quantity - it.issued_quantity,
+            rate: '',
+            discount_percent: 0,
+            cgst_percentage: 0,
+            sgst_percentage: 0,
+            igst_percentage: 0,
+            is_gst_inclusive: false,
+            uom_name: mat ? mat.uom_name : '',
+            uom_allow_decimal: mat ? mat.uom_allow_decimal : false,
+            base_rate: 0
+          };
+        })
       });
       setDialog(true);
       // Clean up state so refresh doesn't trigger it again
@@ -361,25 +379,38 @@ export default function PurchaseOrders() {
     }
   }, [location.state, pos, location.pathname, navigate, hasAction]);
 
-  const addItem = () => setForm({ ...form, items: [...form.items, { material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }] });
+  const addItem = () => {
+    const emptyCount = form.items.filter(it => !it.material_id).length;
+    if (emptyCount >= 5) {
+      showMessage("Please select materials for the existing empty rows before adding more. Limit reached (5).", "Limit Reached", "warning");
+      return;
+    }
+    setForm({ ...form, items: [...form.items, { material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }] });
+  };
   const removeItem = (i) => setForm({ ...form, items: form.items.filter((_, idx) => idx !== i) });
   const updateItem = (i, field, val) => {
+    let finalVal = val;
+    if (['discount_percent', 'cgst_percentage', 'sgst_percentage', 'igst_percentage'].includes(field)) {
+      if (finalVal !== '' && parseFloat(finalVal) > 100) {
+        finalVal = '100';
+      }
+    }
     const items = [...form.items];
-    items[i] = { ...items[i], [field]: val };
+    items[i] = { ...items[i], [field]: finalVal };
     if (field === 'cgst_percentage') {
-      items[i].sgst_percentage = val;
+      items[i].sgst_percentage = finalVal;
       items[i].igst_percentage = 0;
     } else if (field === 'sgst_percentage') {
-      items[i].cgst_percentage = val;
+      items[i].cgst_percentage = finalVal;
       items[i].igst_percentage = 0;
     } else if (field === 'igst_percentage') {
-      if (val !== '' && val !== '0' && parseFloat(val) !== 0) {
+      if (finalVal !== '' && finalVal !== '0' && parseFloat(finalVal) !== 0) {
         items[i].cgst_percentage = 0;
         items[i].sgst_percentage = 0;
       }
     }
     if (field === 'material_id') {
-      const mat = materials.find(m => m.id === val);
+      const mat = materials.find(m => m.id === finalVal);
       if (mat) {
         items[i].uom_name = mat.uom_name || '';
         items[i].base_rate = mat.standard_cost || 0;
@@ -389,6 +420,27 @@ export default function PurchaseOrders() {
   };
 
   const handleSave = async (isDraft = false) => {
+    if (!form.vendor_id) {
+      showMessage("Please select a Vendor.", "Validation Error", "warning");
+      return;
+    }
+    if (!form.project_id) {
+      showMessage("Project is required but none is available.", "Validation Error", "warning");
+      return;
+    }
+    if (!form.delivery_date) {
+      showMessage("Delivery Date is required.", "Validation Error", "warning");
+      return;
+    }
+    if (form.items.some(it => !it.material_id)) {
+      showMessage("Please select a Material for all line items.", "Validation Error", "warning");
+      return;
+    }
+    const hasInvalidNumbers = form.items.some(it => (parseFloat(it.quantity) || 0) <= 0 || (parseFloat(it.rate) || 0) <= 0);
+    if (hasInvalidNumbers) {
+      showMessage("Quantity and Rate must be greater than 0 for all items.", "Validation Error", "warning");
+      return;
+    }
     if (!form.terms || !form.terms.trim()) {
       showMessage("Terms and Conditions are mandatory.", "Validation Error", "warning");
       return;
@@ -398,7 +450,7 @@ export default function PurchaseOrders() {
         const inputRate = parseFloat(it.rate) || 0;
         const totalGstPercent = (parseFloat(it.cgst_percentage) || 0) + (parseFloat(it.sgst_percentage) || 0) + (parseFloat(it.igst_percentage) || 0);
         return {
-          material_id: it.material_id,
+          material_id: parseInt(it.material_id, 10),
           quantity: parseFloat(it.quantity) || 0,
           rate: inputRate,
           discount_percent: parseFloat(it.discount_percent) || 0,
@@ -408,13 +460,10 @@ export default function PurchaseOrders() {
           is_gst_inclusive: it.is_gst_inclusive || false
         };
       });
-      const hasInvalidNumbers = mappedItems.some(it => it.quantity <= 0 || it.rate < 0);
-      if (hasInvalidNumbers) {
-        showMessage("Quantity must be greater than 0, and rate cannot be negative.", "Validation Error", "warning");
-        return;
-      }
       const payload = {
         ...form,
+        vendor_id: parseInt(form.vendor_id, 10),
+        project_id: parseInt(form.project_id, 10),
         delivery_date: form.delivery_date ? dayjs(form.delivery_date).format('YYYY-MM-DD') : null,
         status: isDraft ? 'Draft' : 'Submitted',
         items: mappedItems
@@ -506,7 +555,8 @@ export default function PurchaseOrders() {
     let totalNetAmountSum = 0;
 
     po.items.forEach((item, idx) => {
-      const qty = parseFloat(item.quantity) || 0;
+      const effQty = item.approved_quantity !== null && item.approved_quantity !== undefined ? item.approved_quantity : item.quantity;
+      const qty = parseFloat(effQty) || 0;
       const rate = parseFloat(item.rate) || 0;
       const amount = qty * rate;
       const discAmt = amount * ((item.discount_percent || 0) / 100);
@@ -543,9 +593,9 @@ export default function PurchaseOrders() {
       rowsHtml += `
         <tr>
           <td>${idx + 1}</td>
-          <td>${item.material_name}<br/><small>${item.material_code}</small></td>
+          <td>${item.material_name}</td>
           <td>-</td>
-          <td>${qty.toFixed(2)}</td>
+          <td>${item.uom_allow_decimal ? qty.toFixed(2) : Math.round(qty)}</td>
           <td>${item.uom_name || 'NOS'}</td>
           <td style="text-align:right">${rate.toFixed(2)}</td>
           <td style="text-align:right">${(item.discount_percent || 0).toFixed(2)}</td>
@@ -562,6 +612,7 @@ export default function PurchaseOrders() {
     const totalNetAmount = Math.round(grandTotalWithTax).toFixed(2);
     const activeTerms = po.terms || termsTemplates.find(t => t.is_default)?.content || (termsTemplates.length > 0 ? termsTemplates[0].content : '');
     const termsHtml = (activeTerms || '').split('\n').filter(t => t.trim()).map(t => `<li>${t}</li>`).join('');
+    const annexureHtml = (po.annexure || '').replace(/\n/g, '<br/>');
 
     const html = `
       <html>
@@ -660,7 +711,7 @@ export default function PurchaseOrders() {
             </tbody>
           </table>
           
-          <div style="display:flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; border-bottom: 1px dashed #ccc; padding-bottom: 10px;">
+          <div style="display:flex; justify-content: space-between; align-items: flex-end; margin-bottom: 15px; border-bottom: 1px dashed #ccc; padding-bottom: 10px;">
             <div style="width: 60%">
               Total Net Amount in Word : <b>Rupees ${numberToWords(Math.round(grandTotalWithTax))} Only -/</b>
             </div>
@@ -693,9 +744,6 @@ export default function PurchaseOrders() {
             <div class="signatures">
               <div class="sig-box" style="text-align: left;">
                 Managing Trustee
-                <br/><br/>
-                CC: Manager Accounts<br/>
-                Remarks: ${po.remarks || ''}
               </div>
               <div class="sig-box" style="text-align: right;">
                 ${formatDate(new Date())}<br/>
@@ -703,6 +751,13 @@ export default function PurchaseOrders() {
               </div>
             </div>
           </div>
+
+          ${annexureHtml ? `
+          <div class="print-wrapper" style="margin-top: 20px; page-break-before: always; break-before: page;">
+            <h3 style="text-decoration: underline; text-align: center; margin-bottom: 20px;">ANNEXURE FOR ${po.po_number}</h3>
+            <div style="font-size: 11px;">${annexureHtml}</div>
+          </div>
+          ` : ''}
         </body>
       </html>
     `;
@@ -721,7 +776,8 @@ export default function PurchaseOrders() {
     let totalNetAmountSum = 0;
 
     (detailDialog.items || []).forEach(item => {
-      const qty = parseFloat(item.quantity) || 0;
+      const effQty = item.approved_quantity !== null && item.approved_quantity !== undefined ? item.approved_quantity : item.quantity;
+      const qty = parseFloat(effQty) || 0;
       const rate = parseFloat(item.rate) || 0;
       const amount = qty * rate;
       const discAmt = amount * ((item.discount_percent || 0) / 100);
@@ -770,8 +826,25 @@ export default function PurchaseOrders() {
     };
   }, [detailDialog, termsTemplates]);
 
+  const noSpinSx = {
+    '& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button': {
+      WebkitAppearance: 'none',
+      margin: 0
+    },
+    '& input[type=number]': {
+      MozAppearance: 'textfield'
+    }
+  };
+
   return (
-    <Box>
+    <Box sx={{
+      '& .no-spin input[type=number]::-webkit-outer-spin-button, & .no-spin input[type=number]::-webkit-inner-spin-button': {
+        WebkitAppearance: 'none', margin: 0
+      },
+      '& .no-spin input[type=number]': {
+        MozAppearance: 'textfield'
+      }
+    }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
         <Box>
           <Typography variant="h5" sx={{ fontWeight: 700 }}>Purchase Orders</Typography>
@@ -779,7 +852,7 @@ export default function PurchaseOrders() {
         </Box>
         {hasPermission('purchase_orders', 'can_create') && (
           <Button variant="contained" startIcon={<Add />} onClick={() => {
-            setForm({ vendor_id: '', project_id: projects[0]?.id || '', delivery_date: dayjs().add(21, 'day'), terms: '', po_type: 'Informal', items: [{ material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }] });
+            setForm({ po_number: '', vendor_id: '', project_id: projects[0]?.id || '', delivery_date: null, terms: '', annexure: '', po_type: 'Informal', items: [{ material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }] });
             setDialog(true);
           }}>Create PO</Button>
         )}
@@ -787,7 +860,7 @@ export default function PurchaseOrders() {
 
       <Card sx={{ mb: 3 }}>
         <Box sx={{ p: 2, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
-          <TextField size="small" placeholder="Search PO/Indent/PR/Quotation Numbers..." value={search}
+          <TextField size="small" placeholder="Search PO/PR/Quotation Numbers..." value={search}
             onChange={e => setSearch(e.target.value)} sx={{ minWidth: 400 }}
             InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }} />
           <Autocomplete
@@ -1097,7 +1170,7 @@ export default function PurchaseOrders() {
                     <TableCell sx={{ fontWeight: 700, fontSize: '0.7rem' }}>Item Description</TableCell>
                     <TableCell sx={{ fontWeight: 700, fontSize: '0.7rem' }}>HSN Code</TableCell>
                     <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.7rem' }}>REQ QTY</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.7rem' }}>APPROVE QTY</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.7rem' }}>APPROVED QTY</TableCell>
                     <TableCell sx={{ fontWeight: 700, fontSize: '0.7rem' }}>UOM</TableCell>
                     <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.7rem' }}>RATE</TableCell>
                     <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.7rem' }}>Disc. %</TableCell>
@@ -1110,7 +1183,8 @@ export default function PurchaseOrders() {
                 </TableHead>
                 <TableBody>
                   {detailDialog?.items?.map((item, idx) => {
-                    const qty = parseFloat(item.quantity) || 0;
+                    const effQty = item.approved_quantity !== null && item.approved_quantity !== undefined ? item.approved_quantity : item.quantity;
+                    const qty = parseFloat(effQty) || 0;
                     const rate = parseFloat(item.rate) || 0;
                     const amount = qty * rate;
                     return (
@@ -1121,7 +1195,7 @@ export default function PurchaseOrders() {
                           <Typography variant="caption" sx={{ color: '#64748B' }}>{item.material_code}</Typography>
                         </TableCell>
                         <TableCell sx={{ fontSize: '0.75rem' }}>-</TableCell>
-                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{qty.toFixed(2)}</TableCell>
+                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{parseFloat(item.quantity || 0).toFixed(2)}</TableCell>
                         <TableCell align="right" sx={{ fontSize: '0.75rem', fontWeight: 600, color: '#1d4ed8' }}>
                           {item.approved_quantity !== null && item.approved_quantity !== undefined ? parseFloat(item.approved_quantity).toFixed(2) : '-'}
                         </TableCell>
@@ -1213,6 +1287,8 @@ export default function PurchaseOrders() {
               </Box>
             )}
 
+
+
             {/* Collapsible Approval History Section for PO */}
             {detailDialog?.status !== 'Draft' && (
               <Box sx={{ mt: 3 }}>
@@ -1245,8 +1321,8 @@ export default function PurchaseOrders() {
                                 <TableCell align="right">REQ QTY</TableCell>
                                 {detailHistoryData.entries.map((entry, idx) => (
                                   <TableCell key={idx} align="center">
-                                    <Box sx={{ whiteSpace: 'normal', maxWidth: 80, lineHeight: 1.2, margin: '0 auto', textTransform: 'uppercase' }}>
-                                      L{idx + 1} APPROVED QTY
+                                    <Box sx={{ whiteSpace: 'normal', maxWidth: 80, lineHeight: 1.2, margin: '0 auto', textTransform: 'uppercase', color: entry.status === 'Rejected' ? '#dc2626' : 'inherit' }}>
+                                      {entry.status === 'Rejected' ? `L${entry.level} REJECTED` : `L${idx + 1} APPROVED QTY`}
                                     </Box>
                                   </TableCell>
                                 ))}
@@ -1271,7 +1347,9 @@ export default function PurchaseOrders() {
                                           {histItem ? (
                                             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                                <Typography variant="body2" sx={{ fontWeight: 700, color: '#1d4ed8' }}>{histItem.approved_quantity}</Typography>
+                                                <Typography variant="body2" sx={{ fontWeight: 700, color: entry.status === 'Rejected' ? '#dc2626' : '#1d4ed8' }}>
+                                                  {entry.status === 'Rejected' ? 'X' : histItem.approved_quantity}
+                                                </Typography>
                                                 {histItem.remarks && (
                                                   <Tooltip title={histItem.remarks} arrow placement="top">
                                                     <Textsms sx={{ fontSize: 14, color: '#94a3b8', cursor: 'help' }} />
@@ -1299,9 +1377,13 @@ export default function PurchaseOrders() {
                           <Box sx={{ mt: 2 }}>
                             <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748B', mb: 1, display: 'block', textTransform: 'uppercase' }}>General Approval Remarks</Typography>
                             {detailHistoryData.entries.map((e, i) => ({ e, i })).filter(x => x.e.remarks).map((x, idx) => (
-                              <Box key={idx} sx={{ mb: 1, p: 1.5, bgcolor: '#f8fafc', borderRadius: 1, border: '1px solid #e2e8f0' }}>
-                                <Typography variant="caption" sx={{ fontWeight: 700, color: '#1d4ed8', display: 'block', mb: 0.5 }}>L{x.i + 1} Approval - {x.e.approver_name}</Typography>
-                                <Typography variant="body2" sx={{ color: '#334155' }}>{x.e.remarks}</Typography>
+                              <Box key={idx} sx={{ mb: 1, p: 1.5, bgcolor: x.e.status === 'Rejected' ? '#fef2f2' : '#f8fafc', borderRadius: 1, border: x.e.status === 'Rejected' ? '1px solid #fecaca' : '1px solid #e2e8f0' }}>
+                                <Typography variant="caption" sx={{ fontWeight: 700, color: x.e.status === 'Rejected' ? '#dc2626' : '#1d4ed8', display: 'block', mb: 0.5 }}>
+                                  {x.e.status === 'Rejected' ? `L${x.e.level} Rejection - ${x.e.approver_name}` : `L${x.i + 1} Approval - ${x.e.approver_name}`}
+                                </Typography>
+                                <Typography variant="body2" sx={{ color: x.e.status === 'Rejected' ? '#991b1b' : '#334155' }}>
+                                  {x.e.remarks.replace(/\[Rejected: (.*)\]/g, '$1').replace(/\[Short Closed: (.*)\]/g, '$1').trim()}
+                                </Typography>
                               </Box>
                             ))}
                           </Box>
@@ -1316,6 +1398,19 @@ export default function PurchaseOrders() {
                 </Accordion>
               </Box>
             )}
+
+            <Box sx={{ mt: 3, p: 2, bgcolor: '#f8fafc', borderRadius: 2, border: '1px solid #e2e8f0' }}>
+              <Typography variant="caption" sx={{ fontWeight: 700, color: '#1e293b', display: 'block', mb: 1 }}>ANNEXURE FOR {detailDialog?.po_number}:</Typography>
+              {detailDialog?.annexure ? (
+                <Typography variant="body2" sx={{ color: '#334155', whiteSpace: 'pre-wrap', fontSize: '0.8rem' }}>
+                  {detailDialog.annexure}
+                </Typography>
+              ) : (
+                <Typography variant="body2" sx={{ color: '#94a3b8', fontStyle: 'italic', fontSize: '0.8rem' }}>
+                  No annexure provided.
+                </Typography>
+              )}
+            </Box>
           </Box>
         </DialogContent>
         <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid #e2e8f0' }}>
@@ -1334,42 +1429,49 @@ export default function PurchaseOrders() {
               <ShoppingCart fontSize="medium" />
             </Box>
             <Box>
-              <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>{editingPOId ? 'Edit Draft Purchase Order' : 'Create Purchase Order'}</Typography>
+              <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>{editingPOId ? `Edit Draft Purchase Order — ${form.po_number || 'Unknown'}` : 'Create Purchase Order'}</Typography>
               <Typography variant="body2" color="text.secondary">Issue a new purchase order to the vendor.</Typography>
             </Box>
           </Box>
         </DialogTitle>
         <DialogContent sx={{ px: 3, py: 1 }}>
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr 1fr' }, gap: 2, pt: 1, mb: 2 }}>
-            <Autocomplete
-              options={vendors}
-              getOptionLabel={(option) => `${option.code} - ${option.name}`}
-              value={vendors.find(v => v.id === form.vendor_id) || null}
-              onChange={(e, newValue) => {
-                const vId = newValue ? newValue.id : '';
-                const vendor = newValue;
-                const vendorState = vendor?.state || '';
+            <Box>
+              <Autocomplete
+                options={vendors}
+                getOptionLabel={(option) => `${option.code} - ${option.name}`}
+                value={vendors.find(v => v.id === form.vendor_id) || null}
+                onChange={(e, newValue) => {
+                  const vId = newValue ? newValue.id : '';
+                  const vendor = newValue;
+                  const vendorState = vendor?.state || '';
 
-                const updatedItems = form.items.map(it => {
-                  const material = materials.find(m => m.id === it.material_id);
-                  if (!material) return it;
-                  const gstRate = material.gst_rate || 0;
-                  const { cgst_percentage, sgst_percentage, igst_percentage } = computeGstSplit(
-                    gstRate, vendorState, tenantConfig?.base_state,
-                    tenantConfig?.cgst_share_percent, tenantConfig?.sgst_share_percent
-                  );
-                  return { ...it, cgst_percentage, sgst_percentage, igst_percentage };
-                });
+                  const updatedItems = form.items.map(it => {
+                    const material = materials.find(m => m.id === it.material_id);
+                    if (!material) return it;
+                    const gstRate = material.gst_rate || 0;
+                    const { cgst_percentage, sgst_percentage, igst_percentage } = computeGstSplit(
+                      gstRate, vendorState, tenantConfig?.base_state,
+                      tenantConfig?.cgst_share_percent, tenantConfig?.sgst_share_percent
+                    );
+                    return { ...it, cgst_percentage, sgst_percentage, igst_percentage };
+                  });
 
-                setForm({ ...form, vendor_id: vId, items: updatedItems });
-              }}
-              renderInput={(params) => (
-                <TextField {...params} label="Vendor *" size="small" />
-              )}
-              fullWidth
-              size="small"
-              disableClearable
-            />
+                  setForm({ ...form, vendor_id: vId, items: updatedItems });
+                }}
+                renderInput={(params) => (
+                  <TextField {...params} label="Vendor *" size="small" />
+                )}
+                fullWidth
+                size="small"
+                disableClearable
+              />
+              {form.vendor_id && vendors.find(v => v.id === form.vendor_id)?.state ? (
+                <Typography variant="caption" sx={{ color: '#64748B', display: 'block', mt: 0.5 }}>
+                  State: {vendors.find(v => v.id === form.vendor_id)?.state}
+                </Typography>
+              ) : null}
+            </Box>
 
             <FormControl fullWidth size="small">
               <InputLabel>PO Type</InputLabel>
@@ -1385,10 +1487,11 @@ export default function PurchaseOrders() {
             </FormControl>
 
             <DatePicker
-              label="Delivery Date"
-              value={dayjs(form.delivery_date)}
+              label="Delivery Date *"
+              value={form.delivery_date ? dayjs(form.delivery_date) : null}
               onChange={val => setForm({ ...form, delivery_date: val })}
               format="DD-MMM-YYYY"
+              disablePast
               slotProps={{
                 textField: {
                   fullWidth: true,
@@ -1444,7 +1547,8 @@ export default function PurchaseOrders() {
                 }}>
                   <Box>
                     <MaterialSelect
-                      materials={materials}
+                      disabled={!form.vendor_id}
+                      materials={materials.filter(m => !form.items.some((it, idx) => idx !== i && it.material_id === m.id))}
                       value={item.material_id}
                       onChange={val => {
                         const material = materials.find(m => m.id === val);
@@ -1461,6 +1565,7 @@ export default function PurchaseOrders() {
                             ...newItems[i],
                             material_id: val,
                             uom_name: material.uom_name || '',
+                            uom_allow_decimal: material.uom_allow_decimal || false,
                             rate: material.standard_cost || 0,
                             base_rate: material.standard_cost || 0,
                             cgst_percentage,
@@ -1469,21 +1574,43 @@ export default function PurchaseOrders() {
                           };
                           setForm({ ...form, items: newItems });
                         } else {
-                          updateItem(i, 'material_id', val);
+                          const newItems = [...form.items];
+                          newItems[i] = {
+                            ...newItems[i],
+                            material_id: '',
+                            uom_name: '',
+                            uom_allow_decimal: false,
+                            rate: 0,
+                            base_rate: 0,
+                            cgst_percentage: 0,
+                            sgst_percentage: 0,
+                            igst_percentage: 0,
+                            discount_percent: 0,
+                            is_gst_inclusive: false
+                          };
+                          setForm({ ...form, items: newItems });
                         }
                       }}
                       size="small"
                     />
                   </Box>
                   <TextField size="small" label="Unit" value={item.uom_name || '-'} InputProps={{ readOnly: true }} />
-                  <TextField size="small" label="Qty" type="number" value={item.quantity} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'quantity', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0 }} />
+                  <TextField disabled={!item.material_id} size="small" label="Qty" type="number" value={item.quantity} onKeyDown={e => {
+                    const blockList = ['-', '+', 'e', 'E'];
+                    if (!item.uom_allow_decimal) blockList.push('.');
+                    if (blockList.includes(e.key)) e.preventDefault();
+                  }} onChange={e => {
+                    let val = e.target.value.replace(/-/g, '');
+                    if (!item.uom_allow_decimal) val = val.replace(/\./g, '');
+                    updateItem(i, 'quantity', val);
+                  }} inputProps={{ min: 0, step: item.uom_allow_decimal ? "any" : "1" }} />
                   <Box>
-                    <TextField fullWidth size="small" label="Rate (₹)" type="number" value={item.rate} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'rate', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0 }} />
+                    <TextField disabled={!item.material_id} sx={noSpinSx} fullWidth size="small" label="Rate (₹)" type="number" value={item.rate} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'rate', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, step: "any" }} />
                     {item.base_rate > 0 && <Typography variant="caption" sx={{ color: '#64748B', display: 'block', mt: 0.5 }}>Base Rate: ₹{item.base_rate}</Typography>}
                   </Box>
                   <FormControl size="small">
                     <InputLabel>GST</InputLabel>
-                    <Select label="GST" value={item.is_gst_inclusive ? 'inclusive' : 'exclusive'} onChange={e => updateItem(i, 'is_gst_inclusive', e.target.value === 'inclusive')}>
+                    <Select disabled={!item.material_id} label="GST" value={item.is_gst_inclusive ? 'inclusive' : 'exclusive'} onChange={e => updateItem(i, 'is_gst_inclusive', e.target.value === 'inclusive')}>
                       <MenuItem value="exclusive">Exclusive</MenuItem>
                       <MenuItem value="inclusive">Inclusive</MenuItem>
                     </Select>
@@ -1491,19 +1618,19 @@ export default function PurchaseOrders() {
 
                   <Box sx={{ gridColumn: { xs: '1 / -1', md: '1 / -1' }, display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', md: '1fr 1fr 1fr 1fr' }, gap: 1.5 }}>
                     <Box display="flex" gap={1}>
-                      <TextField size="small" label="Disc %" type="number" value={item.discount_percent} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'discount_percent', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100 }} sx={{ flex: 1 }} />
+                      <TextField disabled={!item.material_id} sx={{ ...noSpinSx, flex: 1 }} size="small" label="Disc %" type="number" value={item.discount_percent} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'discount_percent', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100, step: "any" }} />
                       <TextField size="small" label="Disc (₹)" value={discAmt.toFixed(2)} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
                     </Box>
                     <Box display="flex" gap={1}>
-                      <TextField size="small" label="CGST %" type="number" value={item.cgst_percentage} disabled={parseFloat(item.igst_percentage) > 0} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'cgst_percentage', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100 }} sx={{ flex: 1 }} />
+                      <TextField sx={{ ...noSpinSx, flex: 1 }} size="small" label="CGST %" type="number" value={item.cgst_percentage} disabled={parseFloat(item.igst_percentage) > 0} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'cgst_percentage', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100, step: "any" }} InputProps={{ readOnly: true }} />
                       <TextField size="small" label="CGST (₹)" value={cgstAmt.toFixed(2)} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
                     </Box>
                     <Box display="flex" gap={1}>
-                      <TextField size="small" label="SGST %" type="number" value={item.sgst_percentage} disabled={parseFloat(item.igst_percentage) > 0} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'sgst_percentage', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100 }} sx={{ flex: 1 }} />
+                      <TextField sx={{ ...noSpinSx, flex: 1 }} size="small" label="SGST %" type="number" value={item.sgst_percentage} disabled={parseFloat(item.igst_percentage) > 0} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'sgst_percentage', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100, step: "any" }} InputProps={{ readOnly: true }} />
                       <TextField size="small" label="SGST (₹)" value={sgstAmt.toFixed(2)} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
                     </Box>
                     <Box display="flex" gap={1}>
-                      <TextField size="small" label="IGST %" type="number" value={item.igst_percentage} disabled={parseFloat(item.cgst_percentage) > 0 || parseFloat(item.sgst_percentage) > 0} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'igst_percentage', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100 }} sx={{ flex: 1 }} />
+                      <TextField sx={{ ...noSpinSx, flex: 1 }} size="small" label="IGST %" type="number" value={item.igst_percentage} disabled={parseFloat(item.cgst_percentage) > 0 || parseFloat(item.sgst_percentage) > 0} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'igst_percentage', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100, step: "any" }} InputProps={{ readOnly: true }} />
                       <TextField size="small" label="IGST (₹)" value={igstAmt.toFixed(2)} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
                     </Box>
                   </Box>
@@ -1529,11 +1656,12 @@ export default function PurchaseOrders() {
             <InputLabel>Select Template</InputLabel>
             <Select
               label="Select Template"
+              value={termsTemplates.find(t => (t.content || '').replace(/\r\n/g, '\n').trim() === (form.terms || '').replace(/\r\n/g, '\n').trim())?.id || ""}
               onChange={e => {
                 const t = termsTemplates.find(x => x.id === e.target.value);
                 if (t) setForm({ ...form, terms: t.content });
+                else if (e.target.value === "") setForm({ ...form, terms: "" });
               }}
-              defaultValue=""
             >
               <MenuItem value=""><em>Select a Template</em></MenuItem>
               {termsTemplates.map(t => <MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>)}
@@ -1549,13 +1677,24 @@ export default function PurchaseOrders() {
             onChange={e => setForm({ ...form, terms: e.target.value })}
             placeholder="Enter terms and conditions..."
           />
+          <Divider sx={{ my: 2 }} />
+          <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b', mb: 1.5 }}>Annexure</Typography>
+          <TextField
+            fullWidth
+            multiline
+            rows={4}
+            label="Annexure"
+            value={form.annexure || ''}
+            onChange={e => setForm({ ...form, annexure: e.target.value })}
+            placeholder="Enter annexure details..."
+          />
         </DialogContent>
         <DialogActions sx={{ px: 4, pb: 4, pt: 2, justifyContent: 'flex-end', gap: 2 }}>
           <Button onClick={() => { setDialog(false); setEditingPOId(null); }} sx={{ color: '#64748B', fontWeight: 600 }}>Cancel</Button>
           {!(form.pr_id || form.indent_id || form.qr_id) && (
             <Button onClick={() => handleSave(true)} color="secondary" variant="outlined" sx={{ fontWeight: 600 }}>Save Draft</Button>
           )}
-          <Button variant="contained" onClick={() => handleSave(false)} sx={{ borderRadius: 2, px: 4, py: 1, fontWeight: 700, boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)', textTransform: 'none' }}>{editingPOId ? 'Update PO' : 'Create PO'}</Button>
+          <Button variant="contained" onClick={() => handleSave(false)} sx={{ borderRadius: 2, px: 4, py: 1, fontWeight: 700, boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)', textTransform: 'none' }}>{editingPOId ? 'Submit PO' : 'Create PO'}</Button>
         </DialogActions>
       </Dialog>
 
@@ -2264,7 +2403,7 @@ export default function PurchaseOrders() {
             <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748B', mb: 0.5, display: 'block', textTransform: 'uppercase' }}>
               General Approval Remarks
             </Typography>
-            <TextField
+            <TextField inputProps={{ maxLength: 255 }}
               fullWidth size="small" multiline rows={2}
               placeholder="Enter remarks for this approval action..."
               value={approvalRemarks}

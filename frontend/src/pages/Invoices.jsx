@@ -5,7 +5,7 @@ import {
   DialogContent, DialogActions, Grid, MenuItem, Select, FormControl, InputLabel,
   TableSortLabel, Divider, IconButton, Tooltip, Tabs, Tab
 } from '@mui/material';
-import { Add, Search, AttachFile, OpenInNew, ReceiptLong, Edit, CheckCircle, Cancel } from '@mui/icons-material';
+import { Add, Search, AttachFile, OpenInNew, ReceiptLong, Edit, CheckCircle, Cancel, Print } from '@mui/icons-material';
 import api, { getFileUrl } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { formatDate, formatDateTime } from '../utils/dateUtils';
@@ -29,6 +29,137 @@ export default function Invoices() {
 
   const load = () => {
     api.get('/api/invoices').then(r => setInvoices(r.data));
+  };
+
+  const handlePrintInvoice = (invoice = null) => {
+    const inv = invoice || detailDialog;
+    if (!inv) return;
+    
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert("Please allow popups to print invoices");
+      return;
+    }
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Invoice - ${inv.invoice_number}</title>
+          <style>
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; line-height: 1.5; padding: 20px; background: #f9f9f9; }
+            .print-wrapper { max-width: 800px; margin: 0 auto; background: white; padding: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 8px; }
+            @media print {
+              body { background: white; padding: 0; }
+              .print-wrapper { box-shadow: none; padding: 0; max-width: 100%; border-radius: 0; }
+              .no-print { display: none !important; }
+            }
+            .header { text-align: center; border-bottom: 2px solid #2563eb; padding-bottom: 20px; margin-bottom: 20px; }
+            .header h1 { margin: 0; color: #1e293b; font-size: 24px; }
+            .header p { margin: 5px 0 0; color: #64748b; font-size: 14px; }
+            .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+            .info-box { border: 1px solid #e2e8f0; padding: 15px; border-radius: 6px; }
+            .info-box h3 { margin-top: 0; margin-bottom: 10px; font-size: 14px; color: #2563eb; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; }
+            .info-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; }
+            .info-label { color: #64748b; font-weight: 600; }
+            .info-value { font-weight: 500; text-align: right; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 13px; }
+            th { background: #f8fafc; text-align: left; padding: 10px; border: 1px solid #e2e8f0; color: #475569; font-weight: 600; }
+            td { padding: 10px; border: 1px solid #e2e8f0; }
+            .text-right { text-align: right; }
+            .text-center { text-align: center; }
+            .summary-box { float: right; width: 350px; border: 1px solid #e2e8f0; border-radius: 6px; padding: 15px; }
+            .summary-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; }
+            .summary-row.total { font-weight: bold; font-size: 16px; border-top: 2px solid #e2e8f0; padding-top: 10px; margin-top: 5px; color: #059669; }
+            .clear { clear: both; }
+            .footer { margin-top: 50px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 20px; }
+            .action-bar { text-align: right; margin-bottom: 20px; }
+            .btn-print { background: #2563eb; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: 600; }
+            .btn-print:hover { background: #1d4ed8; }
+          </style>
+        </head>
+        <body>
+          <div class="print-wrapper">
+            <div class="action-bar no-print">
+              <button class="btn-print" onclick="window.print()">Print Document</button>
+            </div>
+            <div class="header">
+              <h1>INVOICE</h1>
+              <p>Invoice No: ${inv.invoice_number} | Date: ${formatDate(inv.invoice_date)}</p>
+              <p>Status: ${inv.status}</p>
+            </div>
+            
+            <div class="info-grid">
+              <div class="info-box">
+                <h3>General Details</h3>
+                <div class="info-row"><span class="info-label">Vendor:</span> <span class="info-value">${inv.vendor_name || '-'}</span></div>
+                <div class="info-row"><span class="info-label">PO Ref:</span> <span class="info-value">${inv.po_number || '-'}</span></div>
+                <div class="info-row"><span class="info-label">Gate Entry:</span> <span class="info-value">${inv.gate_entry_number || '-'}</span></div>
+              </div>
+              <div class="info-box">
+                <h3>Dispatch & Transport</h3>
+                <div class="info-row"><span class="info-label">e-Way Bill No:</span> <span class="info-value">${inv.eway_bill_number || '-'}</span></div>
+                <div class="info-row"><span class="info-label">Vehicle No:</span> <span class="info-value">${inv.vehicle_number || '-'}</span></div>
+                <div class="info-row"><span class="info-label">Delivery Note:</span> <span class="info-value">${inv.delivery_note || '-'}</span></div>
+                <div class="info-row"><span class="info-label">Destination:</span> <span class="info-value">${inv.destination || '-'}</span></div>
+              </div>
+            </div>
+
+            <table>
+              <thead>
+                <tr>
+                  <th>Material</th>
+                  <th>HSN</th>
+                  <th class="text-right">Qty</th>
+                  <th class="text-right">Rate</th>
+                  <th class="text-right">Disc%</th>
+                  <th class="text-right">CGST%</th>
+                  <th class="text-right">SGST%</th>
+                  <th class="text-right">IGST%</th>
+                  <th class="text-right">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${(inv.items || []).map(item => `
+                  <tr>
+                    <td>
+                      <strong>${item.material_code}</strong><br/>
+                      <small style="color: #64748b;">${item.material_name}</small>
+                    </td>
+                    <td>${item.hsn_sac || '-'}</td>
+                    <td class="text-right">${item.quantity} ${item.uom}</td>
+                    <td class="text-right">₹${item.rate?.toFixed(2) || '0.00'}</td>
+                    <td class="text-right">${item.discount_percent?.toFixed(2) || '0.00'}%</td>
+                    <td class="text-right">${item.cgst_rate?.toFixed(2) || '0.00'}%</td>
+                    <td class="text-right">${item.sgst_rate?.toFixed(2) || '0.00'}%</td>
+                    <td class="text-right">${item.igst_rate?.toFixed(2) || '0.00'}%</td>
+                    <td class="text-right">₹${item.amount?.toFixed(2) || '0.00'}</td>
+                  </tr>
+                `).join('')}
+                ${(!inv.items || inv.items.length === 0) ? '<tr><td colspan="9" class="text-center">No line items found.</td></tr>' : ''}
+              </tbody>
+            </table>
+
+            <div class="summary-box">
+              <div class="summary-row"><span class="info-label">Total Taxable Value</span> <span>₹${inv.total_taxable_amount?.toFixed(2) || '0.00'}</span></div>
+              <div class="summary-row"><span class="info-label">Total CGST</span> <span>₹${inv.total_cgst?.toFixed(2) || '0.00'}</span></div>
+              <div class="summary-row"><span class="info-label">Total SGST</span> <span>₹${inv.total_sgst?.toFixed(2) || '0.00'}</span></div>
+              <div class="summary-row"><span class="info-label">Total IGST</span> <span>₹${inv.total_igst?.toFixed(2) || '0.00'}</span></div>
+              <div class="summary-row"><span class="info-label">Transport Charges</span> <span>₹${inv.transport_charges?.toFixed(2) || '0.00'}</span></div>
+              <div class="summary-row total"><span class="info-label" style="color: #059669;">Grand Total</span> <span>₹${inv.total_amount?.toFixed(2) || '0.00'}</span></div>
+            </div>
+            
+            <div class="clear"></div>
+            
+            <div class="footer">
+              <p>Generated by SmartCampus on ${formatDateTime(new Date())}</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+    printWindow.document.write(html);
+    printWindow.document.close();
   };
 
   useEffect(() => {
@@ -275,6 +406,9 @@ export default function Invoices() {
         <DialogActions sx={{ p: 2, justifyContent: 'flex-end' }}>
           <Box sx={{ display: 'flex', gap: 1 }}>
             <Button onClick={() => setDetailDialog(null)}>Close</Button>
+            {hasAction('invoice', 'can_print') && (
+              <Button variant="outlined" startIcon={<Print />} onClick={() => handlePrintInvoice()}>Print</Button>
+            )}
             {detailDialog?.status === 'Submitted' && (
               <>
                 <Button variant="contained" color="error" startIcon={<ReceiptLong />} onClick={() => { handleStatusUpdate(detailDialog.id, 'Change Required'); setDetailDialog(null); }}>Change Required</Button>

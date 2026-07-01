@@ -1,6 +1,6 @@
 """Eastpoint Smart Campus - Pydantic schemas."""
 
-from pydantic import BaseModel, Field, EmailStr, field_validator
+from pydantic import BaseModel, Field, EmailStr, field_validator, model_validator
 from typing import List, Optional, Dict, Any
 from datetime import datetime, date
 
@@ -188,6 +188,7 @@ class SubCategoryOut(SubCategoryBase):
 class UOMBase(BaseModel):
     name: str = Field(..., min_length=1)
     abbreviation: str = Field(..., min_length=1)
+    allow_decimal: bool = False
 
 class UOMCreate(UOMBase):
     pass
@@ -263,6 +264,7 @@ class MaterialOut(MaterialBase):
     category_name: Optional[str] = None
     subcategory_name: Optional[str] = None
     uom_name: Optional[str] = None
+    uom_allow_decimal: Optional[bool] = False
     vendor_name: Optional[str] = None
     warehouse_name: Optional[str] = None
     current_stock: Optional[float] = 0
@@ -454,11 +456,21 @@ class PRItemBase(BaseModel):
 class PRApproveItemRequest(BaseModel):
     pr_item_id: int
     approved_quantity: float = Field(..., ge=0)
-    remarks: Optional[str] = None
+    remarks: Optional[str] = Field(None, max_length=255)
 
 class PRApproveRequest(BaseModel):
     items: List[PRApproveItemRequest] = []
-    remarks: Optional[str] = None
+    remarks: Optional[str] = Field(None, max_length=255)
+    @model_validator(mode='after')
+    def check_approval_quantities(self):
+        if not self.items:
+            return self
+        if len(self.items) == 1 and self.items[0].approved_quantity == 0:
+            raise ValueError("Approved quantity must be greater than 0 for a single-item document. Please use the Reject button instead.")
+        if len(self.items) > 1 and sum(item.approved_quantity for item in self.items) == 0:
+            raise ValueError("You cannot approve 0 quantity for all items. Please use the Reject button instead.")
+        return self
+
 
 class PRItemOut(PRItemBase):
     id: int
@@ -473,7 +485,7 @@ class PRBase(BaseModel):
     project_id: int
     required_date: Optional[date] = None
     priority: str = "Normal"
-    remarks: Optional[str] = None
+    remarks: Optional[str] = Field(None, max_length=255)
     required_for_room_id: Optional[int] = None
     building_id: Optional[int] = None
     department_name: Optional[str] = None
@@ -486,7 +498,7 @@ class PRCreate(PRBase):
 class PRUpdate(BaseModel):
     required_date: Optional[date] = None
     priority: Optional[str] = None
-    remarks: Optional[str] = None
+    remarks: Optional[str] = Field(None, max_length=255)
     required_for_room_id: Optional[int] = None
     status: Optional[str] = None
 
@@ -532,6 +544,7 @@ class POItemOut(POItemBase):
     material_name: Optional[str] = None
     material_code: Optional[str] = None
     uom_name: Optional[str] = None
+    uom_allow_decimal: Optional[bool] = False
     class Config:
         from_attributes = True
 
@@ -544,16 +557,27 @@ class POBase(BaseModel):
     po_type: str = "Formal"
     delivery_date: Optional[date] = None
     terms: Optional[str] = None
+    annexure: Optional[str] = None
     items: List[POItemBase] = []
 
 class POApproveItemRequest(BaseModel):
     po_item_id: int
     approved_quantity: float = Field(..., ge=0)
-    remarks: Optional[str] = None
+    remarks: Optional[str] = Field(None, max_length=255)
 
 class POApproveRequest(BaseModel):
     items: List[POApproveItemRequest] = []
-    remarks: Optional[str] = None
+    remarks: Optional[str] = Field(None, max_length=255)
+    @model_validator(mode='after')
+    def check_approval_quantities(self):
+        if not self.items:
+            return self
+        if len(self.items) == 1 and self.items[0].approved_quantity == 0:
+            raise ValueError("Approved quantity must be greater than 0 for a single-item document. Please use the Reject button instead.")
+        if len(self.items) > 1 and sum(item.approved_quantity for item in self.items) == 0:
+            raise ValueError("You cannot approve 0 quantity for all items. Please use the Reject button instead.")
+        return self
+
 
 class POCreate(POBase):
     status: Optional[str] = "Draft"
@@ -583,6 +607,8 @@ class POOut(BaseModel):
     status: str
     current_approval_level: int = 1
     terms: Optional[str] = None
+    annexure: Optional[str] = None
+    remarks: Optional[str] = None
     created_at: datetime
     vendor_name: Optional[str] = None
     vendor_address: Optional[str] = None
@@ -616,7 +642,7 @@ class GateEntryBase(BaseModel):
     invoice_number: Optional[str] = None
     invoice_date: Optional[date] = None
     invoice_amount: Optional[float] = 0
-    remarks: Optional[str] = None
+    remarks: Optional[str] = Field(None, max_length=255)
 
 class GateEntryCreate(GateEntryBase):
     pass
@@ -714,13 +740,13 @@ class InvoiceItemBase(BaseModel):
         return v
     taxable_amount: float = 0
     amount: float = 0
-    remarks: Optional[str] = None
+    remarks: Optional[str] = Field(None, max_length=255)
 
 class InvoiceItemOut(InvoiceItemBase):
     id: int
     material_name: Optional[str] = None
     material_code: Optional[str] = None
-    remarks: Optional[str] = None
+    remarks: Optional[str] = Field(None, max_length=255)
     class Config:
         from_attributes = True
 
@@ -764,7 +790,7 @@ class InvoiceBase(BaseModel):
     transport_igst_rate: float = 0
     transport_discount_percent: float = 0
     scan_url: Optional[str] = None
-    remarks: Optional[str] = None
+    remarks: Optional[str] = Field(None, max_length=255)
     items: List[InvoiceItemBase] = []
 
 class InvoiceCreate(InvoiceBase):
@@ -811,7 +837,7 @@ class InvoiceUpdate(BaseModel):
     transport_discount_percent: Optional[float] = None
     status: Optional[str] = None
     scan_url: Optional[str] = None
-    remarks: Optional[str] = None
+    remarks: Optional[str] = Field(None, max_length=255)
     items: Optional[List[InvoiceItemBase]] = None
 
 class InvoiceOut(InvoiceBase):
@@ -838,7 +864,7 @@ class InvoiceOut(InvoiceBase):
     hard_copy_received: bool = False
     hard_copy_received_at: Optional[datetime] = None
     hard_copy_received_by_name: Optional[str] = None
-    hard_copy_remarks: Optional[str] = None
+    hard_copy_remarks: Optional[str] = Field(None, max_length=255)
     payment_completed_at: Optional[datetime] = None
     payment_completed_by_name: Optional[str] = None
     payment_reference: Optional[str] = None
@@ -859,7 +885,7 @@ class HardCopySentRequest(BaseModel):
 class HardCopyUpdate(BaseModel):
     invoice_id: int
     hard_copy_received: bool = True
-    hard_copy_remarks: Optional[str] = None
+    hard_copy_remarks: Optional[str] = Field(None, max_length=255)
 
 class PaymentStatusUpdate(BaseModel):
     invoice_ids: List[int]
@@ -886,7 +912,7 @@ class GRNItemBase(BaseModel):
     igst_amount: float = 0
     taxable_amount: float = 0
     discount_percent: float = 0
-    remarks: Optional[str] = None
+    remarks: Optional[str] = Field(None, max_length=255)
     ordered_quantity: Optional[float] = 0
 
     @field_validator("hsn_code")
@@ -941,7 +967,7 @@ class GRNBase(BaseModel):
     total_igst: float = 0
     total_tax: float = 0
     eway_bill_number: Optional[str] = None
-    remarks: Optional[str] = None
+    remarks: Optional[str] = Field(None, max_length=255)
     items: List[GRNItemBase] = []
 
 class GRNCreate(GRNBase):
@@ -986,7 +1012,7 @@ class IssueItemBase(BaseModel):
     material_id: int
     quantity: float
     rate: float = 0
-    remarks: Optional[str] = None
+    remarks: Optional[str] = Field(None, max_length=255)
 
 class IssueItemOut(IssueItemBase):
     id: int
@@ -1030,7 +1056,7 @@ class IssueOut(BaseModel):
     acknowledged_at: Optional[datetime] = None
     acknowledged_by_id: Optional[int] = None
     acknowledged_by_name: Optional[str] = None
-    acknowledgement_remarks: Optional[str] = None
+    acknowledgement_remarks: Optional[str] = Field(None, max_length=255)
     created_at: datetime
     warehouse_name: Optional[str] = None
     project_name: Optional[str] = None
@@ -1049,13 +1075,13 @@ class IssueOut(BaseModel):
 class ReturnItemBase(BaseModel):
     material_id: int
     returned_qty: float = Field(..., gt=0)
-    remarks: Optional[str] = None
+    remarks: Optional[str] = Field(None, max_length=255)
 
 class ReturnItemOut(ReturnItemBase):
     id: int
     received_qty: Optional[float] = None
     variance_qty: Optional[float] = None
-    receipt_remarks: Optional[str] = None
+    receipt_remarks: Optional[str] = Field(None, max_length=255)
     material_name: Optional[str] = None
     material_code: Optional[str] = None
     uom_name: Optional[str] = None
@@ -1068,7 +1094,7 @@ class ReturnBase(BaseModel):
     returned_from_room_id: Optional[int] = None
     returned_from_department: Optional[str] = None
     return_type: str = "Unused"
-    remarks: Optional[str] = None
+    remarks: Optional[str] = Field(None, max_length=255)
     returned_by_name: Optional[str] = None
     items: List[ReturnItemBase] = []
 
@@ -1083,7 +1109,7 @@ class ReturnOut(BaseModel):
     returned_from_room_id: Optional[int] = None
     returned_from_department: Optional[str] = None
     return_type: str
-    remarks: Optional[str] = None
+    remarks: Optional[str] = Field(None, max_length=255)
     returned_by_name: Optional[str] = None
     status: str
     received_date: Optional[datetime] = None
@@ -1102,7 +1128,7 @@ class ReturnOut(BaseModel):
 class ReturnReceiptItem(BaseModel):
     return_item_id: int
     received_qty: float = Field(..., ge=0)
-    receipt_remarks: Optional[str] = None
+    receipt_remarks: Optional[str] = Field(None, max_length=255)
 
 class ReturnReceiptRequest(BaseModel):
     items: List[ReturnReceiptItem] = []
@@ -1113,13 +1139,13 @@ class ReturnReceiptRequest(BaseModel):
 class TransferItemBase(BaseModel):
     material_id: int
     quantity: float
-    remarks: Optional[str] = None
+    remarks: Optional[str] = Field(None, max_length=255)
 
 class TransferItemOut(TransferItemBase):
     id: int
     received_qty: Optional[float] = None
     variance_qty: Optional[float] = None
-    receipt_remarks: Optional[str] = None
+    receipt_remarks: Optional[str] = Field(None, max_length=255)
     material_name: Optional[str] = None
     material_code: Optional[str] = None
     uom_name: Optional[str] = None
@@ -1129,7 +1155,7 @@ class TransferItemOut(TransferItemBase):
 class TransferReceiptItem(BaseModel):
     transfer_item_id: int
     received_qty: float = Field(..., ge=0)
-    receipt_remarks: Optional[str] = None
+    receipt_remarks: Optional[str] = Field(None, max_length=255)
 
 class TransferReceiptRequest(BaseModel):
     items: List[TransferReceiptItem] = []
@@ -1138,7 +1164,7 @@ class TransferBase(BaseModel):
     from_warehouse_id: int
     to_warehouse_id: int
     project_id: int
-    remarks: Optional[str] = None
+    remarks: Optional[str] = Field(None, max_length=255)
     items: List[TransferItemBase] = []
 
 class TransferCreate(TransferBase):
@@ -1151,7 +1177,7 @@ class TransferOut(BaseModel):
     to_warehouse_id: int
     project_id: int
     status: str
-    remarks: Optional[str] = None
+    remarks: Optional[str] = Field(None, max_length=255)
     created_at: datetime
     completed_at: Optional[datetime] = None
     received_date: Optional[datetime] = None
@@ -1221,12 +1247,15 @@ class AlertOut(BaseModel):
 class DashboardStats(BaseModel):
     total_materials: int = 0
     total_inventory_value: float = 0
+    total_issued_value: float = 0
+    total_issued_qty: float = 0
     low_stock_items: int = 0
     pending_pr: int = 0
     pending_po: int = 0
     recent_grn_count: int = 0
     total_vendors: int = 0
     total_warehouses: int = 0
+    open_complaints: int = 0
 
 class ConsumptionByBuilding(BaseModel):
     block_name: str
@@ -1299,7 +1328,7 @@ class IndentBase(BaseModel):
     building_id: Optional[int] = None
     floor: Optional[str] = None
     location: Optional[str] = None
-    remarks: Optional[str] = None
+    remarks: Optional[str] = Field(None, max_length=255)
     total_amount: float = 0
     items: List[IndentItemBase] = []
 
@@ -1308,7 +1337,7 @@ class IndentCreate(IndentBase):
 
 class IndentUpdate(BaseModel):
     status: Optional[str] = None
-    remarks: Optional[str] = None
+    remarks: Optional[str] = Field(None, max_length=255)
 
 class IndentOut(BaseModel):
     id: int
@@ -1322,7 +1351,7 @@ class IndentOut(BaseModel):
     department: Optional[str] = None
     building_name: Optional[str] = None
     institution_name: Optional[str] = None
-    remarks: Optional[str] = None
+    remarks: Optional[str] = Field(None, max_length=255)
     status: str
     current_approval_level: int
     approved_by_id: Optional[int] = None
@@ -1348,11 +1377,21 @@ class IndentAcknowledgeRequest(BaseModel):
 class IndentApproveItemRequest(BaseModel):
     indent_item_id: int
     approved_quantity: float = Field(..., ge=0)
-    remarks: Optional[str] = None
+    remarks: Optional[str] = Field(None, max_length=255)
 
 class IndentApproveRequest(BaseModel):
     items: List[IndentApproveItemRequest] = []
-    remarks: Optional[str] = None
+    remarks: Optional[str] = Field(None, max_length=255)
+    @model_validator(mode='after')
+    def check_approval_quantities(self):
+        if not self.items:
+            return self
+        if len(self.items) == 1 and self.items[0].approved_quantity == 0:
+            raise ValueError("Approved quantity must be greater than 0 for a single-item document. Please use the Reject button instead.")
+        if len(self.items) > 1 and sum(item.approved_quantity for item in self.items) == 0:
+            raise ValueError("You cannot approve 0 quantity for all items. Please use the Reject button instead.")
+        return self
+
 
 
 class ApprovalHistoryItemOut(BaseModel):
@@ -1362,14 +1401,14 @@ class ApprovalHistoryItemOut(BaseModel):
     uom_name: Optional[str] = None
     requested_quantity: float = 0
     approved_quantity: Optional[float] = None
-    remarks: Optional[str] = None
+    remarks: Optional[str] = Field(None, max_length=255)
 
 class ApprovalHistoryEntryOut(BaseModel):
     level: int
     approver_name: str
     role_name: str
     approved_at: datetime
-    remarks: Optional[str] = None
+    remarks: Optional[str] = Field(None, max_length=255)
     status: str
     items: List[ApprovalHistoryItemOut] = []
 
@@ -1423,7 +1462,7 @@ class QRItemOut(QRItemBase):
 class QuotationRequestCreate(BaseModel):
     project_id: int
     required_date: Optional[date] = None
-    remarks: Optional[str] = None
+    remarks: Optional[str] = Field(None, max_length=255)
     pr_ids: List[int] = []
     items: List[QRItemBase] = []
     vendor_ids: List[int] = []
@@ -1449,7 +1488,7 @@ class QRVendorReceiptUpdate(BaseModel):
     receipt_status: str
 
 class QuotationApproveRequest(BaseModel):
-    remarks: Optional[str] = None
+    remarks: Optional[str] = Field(None, max_length=255)
 
 class QuotationRequestOut(BaseModel):
     id: int
@@ -1457,13 +1496,13 @@ class QuotationRequestOut(BaseModel):
     project_id: int
     project_name: Optional[str] = None
     required_date: Optional[date] = None
-    remarks: Optional[str] = None
+    remarks: Optional[str] = Field(None, max_length=255)
     status: str
     created_by_id: int
     created_by_name: Optional[str] = None
     approved_by_id: Optional[int] = None
     approved_at: Optional[datetime] = None
-    approval_remarks: Optional[str] = None
+    approval_remarks: Optional[str] = Field(None, max_length=255)
     created_at: datetime
     updated_at: datetime
     items: List[QRItemOut] = []
@@ -1479,7 +1518,7 @@ class VendorQuotationItemBase(BaseModel):
     quoted_rate: float = Field(..., ge=0)
     delivery_days: Optional[int] = None
     is_excluded: bool = False
-    remarks: Optional[str] = None
+    remarks: Optional[str] = Field(None, max_length=255)
 
 class VendorQuotationItemOut(VendorQuotationItemBase):
     id: int
@@ -1494,7 +1533,7 @@ class VendorQuotationCreate(BaseModel):
     vendor_id: int
     quotation_number: Optional[str] = None
     quotation_date: Optional[date] = None
-    remarks: Optional[str] = None
+    remarks: Optional[str] = Field(None, max_length=255)
     items: List[VendorQuotationItemBase] = []
 
 class VendorQuotationOut(BaseModel):
@@ -1506,7 +1545,7 @@ class VendorQuotationOut(BaseModel):
     quotation_date: Optional[date] = None
     received_date: Optional[date] = None
     attachment_path: Optional[str] = None
-    remarks: Optional[str] = None
+    remarks: Optional[str] = Field(None, max_length=255)
     status: str
     entered_by_name: Optional[str] = None
     created_at: datetime
@@ -1581,7 +1620,7 @@ class TermOut(TermBase):
 class GatePassItemBase(BaseModel):
     material_id: int
     quantity: float = Field(..., gt=0)
-    remarks: Optional[str] = None
+    remarks: Optional[str] = Field(None, max_length=255)
 
 class GatePassItemOut(GatePassItemBase):
     id: int
@@ -1602,12 +1641,12 @@ class GatePassCreate(BaseModel):
     from_store: Optional[str] = None
     driver_name: Optional[str] = None
     vehicle_number: Optional[str] = None
-    remarks: Optional[str] = None
+    remarks: Optional[str] = Field(None, max_length=255)
     items: List[GatePassItemBase]
 
 class GatePassUpdate(BaseModel):
     status: str
-    remarks: Optional[str] = None
+    remarks: Optional[str] = Field(None, max_length=255)
     gate_entry_number: Optional[str] = None
     grn_number: Optional[str] = None
     completed_by_name: Optional[str] = None
@@ -1631,7 +1670,7 @@ class GatePassOut(BaseModel):
     status: str
     driver_name: Optional[str] = None
     vehicle_number: Optional[str] = None
-    remarks: Optional[str] = None
+    remarks: Optional[str] = Field(None, max_length=255)
     gate_entry_number: Optional[str] = None
     grn_number: Optional[str] = None
     created_at: datetime
@@ -1691,7 +1730,7 @@ class ComplaintBase(BaseModel):
     name_and_trade: Optional[str] = None
     status: str = "Open"
     assigned_to_id: Optional[int] = None
-    resolution_remarks: Optional[str] = None
+    resolution_remarks: Optional[str] = Field(None, max_length=255)
     inspection_details: Optional[str] = None
     feedback: Optional[str] = None
 
@@ -1711,7 +1750,7 @@ class ComplaintCreate(BaseModel):
 class ComplaintUpdate(BaseModel):
     status: Optional[str] = None
     assigned_to_id: Optional[int] = None
-    resolution_remarks: Optional[str] = None
+    resolution_remarks: Optional[str] = Field(None, max_length=255)
     resolution_image_urls: List[str] = []
     department_name: Optional[str] = None
     building_id: Optional[int] = None
@@ -1731,12 +1770,12 @@ class ComplaintInspect(BaseModel):
     inspection_details: Optional[str] = None
 
 class ComplaintResolve(BaseModel):
-    resolution_remarks: Optional[str] = None
+    resolution_remarks: Optional[str] = Field(None, max_length=255)
     resolution_image_urls: List[str] = []
 
 class ComplaintVerify(BaseModel):
     is_accepted: bool
-    rejection_remarks: Optional[str] = None
+    rejection_remarks: Optional[str] = Field(None, max_length=255)
     feedback: Optional[str] = None
 
 class ComplaintOut(ComplaintBase):
@@ -1746,7 +1785,7 @@ class ComplaintOut(ComplaintBase):
     resolved_at: Optional[datetime] = None
     material_required: bool = False
     verified_at: Optional[datetime] = None
-    rejection_remarks: Optional[str] = None
+    rejection_remarks: Optional[str] = Field(None, max_length=255)
     feedback: Optional[str] = None
     building_name: Optional[str] = None
     room_name: Optional[str] = None

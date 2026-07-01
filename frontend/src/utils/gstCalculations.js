@@ -1,8 +1,16 @@
 export const computeGstSplit = (gstRate, vendorState, baseState, cgstSharePct = 50, sgstSharePct = 50) => {
   const rate = parseFloat(gstRate) || 0;
   
-  if (!vendorState || !baseState || vendorState !== baseState) {
-    // Inter-state or missing state info -> Apply entire GST as IGST
+  if (!vendorState) {
+    return {
+      cgst_percentage: 0,
+      sgst_percentage: 0,
+      igst_percentage: 0
+    };
+  }
+
+  if (!baseState || vendorState !== baseState) {
+    // Inter-state or missing base state info -> Apply entire GST as IGST
     return {
       cgst_percentage: 0,
       sgst_percentage: 0,

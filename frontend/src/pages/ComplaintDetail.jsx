@@ -586,7 +586,7 @@ export default function ComplaintDetail() {
       <Dialog open={resolveDialogOpen} onClose={() => !actionLoading && setResolveDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Resolve Complaint</DialogTitle>
         <DialogContent>
-          <TextField
+          <TextField inputProps={{ maxLength: 255 }}
             autoFocus
             margin="dense"
             label="Resolution Remarks"
@@ -632,7 +632,7 @@ export default function ComplaintDetail() {
         <DialogTitle>Verify Resolution</DialogTitle>
         <DialogContent>
           <Typography sx={{ mb: 2 }}>Are you sure you want to verify and close this complaint?</Typography>
-          <TextField
+          <TextField inputProps={{ maxLength: 255 }}
             fullWidth
             label="Feedback / Remarks"
             multiline
@@ -652,7 +652,7 @@ export default function ComplaintDetail() {
         <DialogTitle>Reject Resolution</DialogTitle>
         <DialogContent>
           <Typography variant="body2" sx={{ mb: 2 }}>Please provide a reason for rejecting the resolution. This will reopen the complaint.</Typography>
-          <TextField
+          <TextField inputProps={{ maxLength: 255 }}
             autoFocus
             label="Rejection Remarks"
             fullWidth

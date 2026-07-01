@@ -391,7 +391,7 @@ export default function InvoiceTracking() {
             <Box>
               <Typography sx={{ mb: 2 }}>Marking hard copy received for invoice <strong>{remarkDialog.invoice_number}</strong> from <strong>{remarkDialog.vendor_name}</strong></Typography>
               <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>Amount: <strong>₹{remarkDialog.total_amount?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</strong></Typography>
-              <TextField label="Remarks (Optional)" fullWidth multiline rows={2} value={remarks} onChange={(e) => setRemarks(e.target.value)} sx={{ mt: 2 }} />
+              <TextField inputProps={{ maxLength: 255 }} label="Remarks (Optional)" fullWidth multiline rows={2} value={remarks} onChange={(e) => setRemarks(e.target.value)} sx={{ mt: 2 }} />
             </Box>
           )}
         </DialogContent>

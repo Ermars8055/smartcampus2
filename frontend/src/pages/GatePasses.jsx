@@ -162,6 +162,11 @@ export default function GatePasses() {
   };
 
   const addGpItem = () => {
+    const emptyCount = gpModal.items.filter(it => !it.material_id).length;
+    if (emptyCount >= 5) {
+      alert("Please select materials for the existing empty rows before adding more. Limit reached (5).");
+      return;
+    }
     setGpModal({
       ...gpModal,
       items: [...gpModal.items, { material_id: '', quantity: '', remarks: '' }]
@@ -704,7 +709,7 @@ export default function GatePasses() {
             </Grid>
 
             <Grid item xs={12}>
-              <TextField
+              <TextField inputProps={{ maxLength: 255 }}
                 fullWidth size="small" label="Remarks / Purpose"
                 value={gpModal.remarks}
                 onChange={e => setGpModal({ ...gpModal, remarks: e.target.value })}
@@ -736,7 +741,7 @@ export default function GatePasses() {
                       <TableRow key={idx}>
                         <TableCell>
                           <MaterialSelect
-                            materials={materials}
+                            materials={materials.filter(m => !gpModal.items.some((it, i) => i !== idx && it.material_id === m.id))}
                             value={item.material_id}
                             onChange={(val) => updateGpItem(idx, 'material_id', val)}
                           />
@@ -745,13 +750,25 @@ export default function GatePasses() {
                           <TextField
                             size="small"
                             type="number"
-                            inputProps={{ step: "1", min: "1" }}
-                            onKeyDown={e => ['-', '+', 'e', 'E', '.'].includes(e.key) && e.preventDefault()}
+                            inputProps={{ 
+                              step: (item.material_id && materials.find(m => m.id === item.material_id)?.uom_allow_decimal) ? "any" : "1", 
+                              min: "0" 
+                            }}
+                            onKeyDown={e => {
+                              const mat = item.material_id ? materials.find(m => m.id === item.material_id) : null;
+                              const allowDec = mat ? mat.uom_allow_decimal : false;
+                              const blockList = ['-', '+', 'e', 'E'];
+                              if (!allowDec) blockList.push('.');
+                              if (blockList.includes(e.key)) e.preventDefault();
+                            }}
                             fullWidth
                             value={item.quantity}
                             onChange={e => {
-                              let val = e.target.value;
-                              if (val.startsWith('0')) {
+                              const mat = item.material_id ? materials.find(m => m.id === item.material_id) : null;
+                              const allowDec = mat ? mat.uom_allow_decimal : false;
+                              let val = e.target.value.replace(/-/g, '');
+                              if (!allowDec) val = val.replace(/\./g, '');
+                              if (val.startsWith('0') && val.length > 1 && !val.startsWith('0.')) {
                                 val = val.replace(/^0+/, '');
                               }
                               updateGpItem(idx, 'quantity', val);
@@ -759,7 +776,7 @@ export default function GatePasses() {
                           />
                         </TableCell>
                         <TableCell>
-                          <TextField
+                          <TextField inputProps={{ maxLength: 255 }}
                             size="small" fullWidth value={item.remarks}
                             onChange={e => updateGpItem(idx, 'remarks', e.target.value)}
                             InputProps={{

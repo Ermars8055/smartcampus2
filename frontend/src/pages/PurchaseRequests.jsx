@@ -148,7 +148,14 @@ export default function PurchaseRequests() {
   };
 
   // Multi-item form helpers
-  const addItem = () => setForm({ ...form, items: [...form.items, { material_id: '', quantity: '' }] });
+  const addItem = () => {
+    const emptyCount = form.items.filter(it => !it.material_id).length;
+    if (emptyCount >= 5) {
+      showMessage("Please select materials for the existing empty rows before adding more. Limit reached (5).", "Limit Reached", "warning");
+      return;
+    }
+    setForm({ ...form, items: [...form.items, { material_id: '', quantity: '' }] });
+  };
   const removeItem = (i) => setForm({ ...form, items: form.items.filter((_, idx) => idx !== i) });
   const updateItem = (i, field, val) => {
     const items = [...form.items];
@@ -253,6 +260,14 @@ export default function PurchaseRequests() {
       alert("Please enter a valid approved quantity for all items.");
       return;
     }
+    if (payloadItems.length === 1 && payloadItems[0].approved_quantity === 0) {
+      alert("Approved quantity must be greater than 0 for a single-item document. Please use the Reject button.");
+      return;
+    }
+    if (payloadItems.length > 1 && payloadItems.every(it => it.approved_quantity === 0)) {
+      alert("You cannot approve 0 quantity for all items. Please use the Reject button.");
+      return;
+    }
 
     try {
       const res = await api.post(`/api/procurement/pr/${pr.id}/approve`, {
@@ -342,8 +357,27 @@ export default function PurchaseRequests() {
   };
 
   const updateConvertItem = (i, field, value) => {
+    let finalVal = value;
+    if (['discount_percent', 'cgst_percentage', 'sgst_percentage', 'igst_percentage'].includes(field)) {
+      if (finalVal !== '' && parseFloat(finalVal) > 100) {
+        finalVal = '100';
+      }
+    }
     const items = [...convertDialog.items];
-    items[i][field] = value;
+    items[i][field] = finalVal;
+    
+    if (field === 'cgst_percentage') {
+      items[i].sgst_percentage = finalVal;
+      items[i].igst_percentage = 0;
+    } else if (field === 'sgst_percentage') {
+      items[i].cgst_percentage = finalVal;
+      items[i].igst_percentage = 0;
+    } else if (field === 'igst_percentage') {
+      if (finalVal !== '' && finalVal !== '0' && parseFloat(finalVal) !== 0) {
+        items[i].cgst_percentage = 0;
+        items[i].sgst_percentage = 0;
+      }
+    }
     setConvertDialog({ ...convertDialog, items });
   };
 
@@ -972,9 +1006,14 @@ export default function PurchaseRequests() {
               }}>
                 <Box>
                   <MaterialSelect
-                    materials={materials}
+                    materials={materials.filter(m => !form.items.some((it, idx) => idx !== i && it.material_id === m.id))}
                     value={item.material_id}
-                    onChange={val => updateItem(i, 'material_id', val)}
+                    onChange={val => {
+                      const mat = materials.find(m => m.id === val);
+                      const items = [...form.items];
+                      items[i] = { ...items[i], material_id: val, uom_allow_decimal: mat?.uom_allow_decimal || false };
+                      setForm({ ...form, items });
+                    }}
                     size="small"
                   />
                 </Box>
@@ -984,9 +1023,17 @@ export default function PurchaseRequests() {
                   label="Quantity"
                   type="number"
                   value={item.quantity}
-                  onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()}
-                  onChange={e => updateItem(i, 'quantity', e.target.value.replace(/-/g, ''))}
-                  inputProps={{ min: 1 }}
+                  onKeyDown={e => {
+                    const blockList = ['-', '+', 'e', 'E'];
+                    if (!item.uom_allow_decimal) blockList.push('.');
+                    if (blockList.includes(e.key)) e.preventDefault();
+                  }}
+                  onChange={e => {
+                    let val = e.target.value.replace(/-/g, '');
+                    if (!item.uom_allow_decimal) val = val.replace(/\./g, '');
+                    updateItem(i, 'quantity', val);
+                  }}
+                  inputProps={{ min: 1, step: item.uom_allow_decimal ? "any" : "1" }}
                   required
                   InputProps={{
                     startAdornment: <InputAdornment position="start"><Numbers sx={{ color: '#94A3B8' }} /></InputAdornment>,
@@ -1014,7 +1061,7 @@ export default function PurchaseRequests() {
 
           <Box sx={{ mt: 2 }}>
             <Typography variant="caption" sx={{ fontWeight: 600, color: '#64748B', mb: 0.5, display: 'block' }}>REMARKS & NOTES</Typography>
-            <TextField
+            <TextField inputProps={{ maxLength: 255 }}
               fullWidth
               placeholder="Enter any additional instructions or remarks..."
               value={form.remarks}
@@ -1397,7 +1444,7 @@ export default function PurchaseRequests() {
             <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748B', mb: 0.5, display: 'block', textTransform: 'uppercase' }}>
               General Approval Remarks
             </Typography>
-            <TextField
+            <TextField inputProps={{ maxLength: 255 }}
               fullWidth size="small" multiline rows={2}
               placeholder="Enter remarks for this approval action..."
               value={approvalRemarks}

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow,
   TableCell, TableContainer, Button, TextField, Dialog, DialogTitle,
-  DialogContent, DialogActions, Chip, InputAdornment, TableSortLabel, IconButton
+  DialogContent, DialogActions, Chip, InputAdornment, TableSortLabel, IconButton, Switch, FormControlLabel
 } from '@mui/material';
 import { Add, Straighten, Abc, Edit } from '@mui/icons-material';
 import api from '../services/api';
@@ -11,7 +11,7 @@ export default function UOM() {
   const [uoms, setUoms] = useState([]);
   const [dialog, setDialog] = useState('');
   const [uomSortConfig, setUomSortConfig] = useState({ key: 'name', direction: 'asc' });
-  const [uomForm, setUomForm] = useState({ id: null, name: '', abbreviation: '' });
+  const [uomForm, setUomForm] = useState({ id: null, name: '', abbreviation: '', allow_decimal: false });
 
   const load = () => {
     api.get('/api/uom').then(r => setUoms(r.data));
@@ -75,7 +75,7 @@ export default function UOM() {
           <Button 
             variant="text" 
             startIcon={<Add />} 
-            onClick={() => { setUomForm({ id: null, name: '', abbreviation: '' }); setDialog('uom'); }}
+            onClick={() => { setUomForm({ id: null, name: '', abbreviation: '', allow_decimal: false }); setDialog('uom'); }}
             sx={{ textTransform: 'none', fontWeight: 600, color: '#2563EB' }}
           >
             Add UOM
@@ -103,6 +103,7 @@ export default function UOM() {
                     ABBREVIATION
                   </TableSortLabel>
                 </TableCell>
+                <TableCell sx={{ fontWeight: 700, color: '#64748B', fontSize: '0.75rem', py: 2, bgcolor: '#F8FAFC' }}>DECIMALS ALLOWED</TableCell>
                 <TableCell sx={{ fontWeight: 700, color: '#64748B', fontSize: '0.75rem', py: 2, bgcolor: '#F8FAFC' }}>STATUS</TableCell>
                 <TableCell align="right" sx={{ fontWeight: 700, color: '#64748B', fontSize: '0.75rem', py: 2, bgcolor: '#F8FAFC' }}>ACTIONS</TableCell>
               </TableRow>
@@ -112,6 +113,21 @@ export default function UOM() {
                 <TableRow key={u.id} sx={{ '&:hover': { bgcolor: '#FBFDFF' } }}>
                   <TableCell sx={{ fontWeight: 500, color: '#1E293B', fontSize: '0.9rem' }}>{u.name}</TableCell>
                   <TableCell sx={{ fontWeight: 700, color: '#64748B', fontSize: '0.85rem' }}>{u.abbreviation}</TableCell>
+                  <TableCell>
+                    <Chip 
+                      label={u.allow_decimal ? "Yes" : "No"} 
+                      size="small" 
+                      sx={{ 
+                        bgcolor: u.allow_decimal ? '#EFF6FF' : '#F1F5F9', 
+                        color: u.allow_decimal ? '#3B82F6' : '#64748B', 
+                        fontWeight: 600, 
+                        fontSize: '0.75rem',
+                        border: `1px solid ${u.allow_decimal ? '#3B82F6' : '#CBD5E1'}`,
+                        borderRadius: '6px',
+                        height: 24
+                      }} 
+                    />
+                  </TableCell>
                   <TableCell>
                     <Chip 
                       label="Active" 
@@ -128,7 +144,7 @@ export default function UOM() {
                     />
                   </TableCell>
                   <TableCell align="right">
-                    <IconButton size="small" onClick={() => { setUomForm({ id: u.id, name: u.name, abbreviation: u.abbreviation }); setDialog('uom'); }}>
+                    <IconButton size="small" onClick={() => { setUomForm({ id: u.id, name: u.name, abbreviation: u.abbreviation, allow_decimal: u.allow_decimal }); setDialog('uom'); }}>
                       <Edit fontSize="small" sx={{ color: '#64748B' }} />
                     </IconButton>
                   </TableCell>
@@ -185,6 +201,18 @@ export default function UOM() {
                 sx: { borderRadius: '12px' }
               }}
             />
+            
+            <Box sx={{ mt: 3, p: 2, bgcolor: '#F8FAFC', borderRadius: '12px', border: '1px solid #E2E8F0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Box>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1E293B' }}>Allow Decimal Values</Typography>
+                <Typography variant="caption" sx={{ color: '#64748B', display: 'block' }}>If disabled, quantities will be restricted to whole numbers.</Typography>
+              </Box>
+              <Switch 
+                checked={uomForm.allow_decimal || false} 
+                onChange={e => setUomForm({ ...uomForm, allow_decimal: e.target.checked })} 
+                color="primary"
+              />
+            </Box>
           </Box>
         </DialogContent>
         <DialogActions sx={{ px: 4, pb: 4, pt: 2, gap: 2 }}>

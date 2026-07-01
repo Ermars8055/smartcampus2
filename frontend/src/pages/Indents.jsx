@@ -319,7 +319,14 @@ export default function Indents() {
     setForm(prev => ({ ...prev, floor_id: floorId, room_id: nextRoomId }));
   };
 
-  const addItem = () => setForm({ ...form, items: [...form.items, { material_id: '', requested_quantity: '' }] });
+  const addItem = () => {
+    const emptyCount = form.items.filter(it => !it.material_id).length;
+    if (emptyCount >= 5) {
+      showMessage("Please select materials for the existing empty rows before adding more. Limit reached (5).", "Limit Reached", "warning");
+      return;
+    }
+    setForm({ ...form, items: [...form.items, { material_id: '', requested_quantity: '' }] });
+  };
   const removeItem = (i) => setForm({ ...form, items: form.items.filter((_, idx) => idx !== i) });
   const updateItem = (i, field, val) => {
     const items = [...form.items];
@@ -368,9 +375,10 @@ export default function Indents() {
         items: mappedItems
       };
 
-      await api.post('/api/indents', payload);
+      const response = await api.post('/api/indents', payload);
+      const indentNo = response.data?.indent_number || '';
       setShowForm(false); load();
-      showMessage("Indent submitted successfully!", "Success", "success");
+      showMessage(`Indent ${indentNo} submitted successfully!`.replace('  ', ' '), "Success", "success");
     } catch (err) {
       console.error(err);
       const detail = err.response?.data?.detail || 'Error';
@@ -422,6 +430,15 @@ export default function Indents() {
       showMessage("Please enter a valid approved quantity for all items.", "Validation Error", "warning");
       return;
     }
+    if (payloadItems.length === 1 && payloadItems[0].approved_quantity === 0) {
+      showMessage("Approved quantity must be greater than 0 for a single-item document. Please use the Reject button.", "Validation Error", "warning");
+      return;
+    }
+    if (payloadItems.length > 1 && payloadItems.every(it => it.approved_quantity === 0)) {
+      showMessage("You cannot approve 0 quantity for all items. Please use the Reject button.", "Validation Error", "warning");
+      return;
+    }
+
 
     try {
       const res = await api.post(`/api/indents/${indent.id}/approve`, {
@@ -616,7 +633,7 @@ export default function Indents() {
           {/* ── Remarks ── */}
           <Box sx={{ mb: 3 }}>
             <Typography variant="caption" sx={{ fontWeight: 600, color: '#3b5998', mb: 0.5, display: 'block' }}>Remarks</Typography>
-            <TextField
+            <TextField inputProps={{ maxLength: 255 }}
               fullWidth size="small"
               placeholder="e.g. Electrical Lab maintenance, Hostel plumbing repair"
               value={form.remarks}
@@ -657,7 +674,7 @@ export default function Indents() {
                   <TableRow key={i} sx={{ '&:last-child td': { borderBottom: 0 } }}>
                     <TableCell sx={{ py: 1.5 }}>
                       <MaterialSelect
-                        materials={materials}
+                        materials={materials.filter(m => !form.items.some((it, idx) => idx !== i && it.material_id === m.id))}
                         value={item.material_id}
                         onChange={val => updateItem(i, 'material_id', val)}
                         label="Select Material"
@@ -674,10 +691,26 @@ export default function Indents() {
                         size="small"
                         type="number"
                         placeholder="0"
-                        onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()}
+                        onKeyDown={e => {
+                          const mat = item.material_id ? materials.find(m => m.id === item.material_id) : null;
+                          const allowDec = mat ? mat.uom_allow_decimal : false;
+                          const blockList = ['-', '+', 'e', 'E'];
+                          if (!allowDec) blockList.push('.');
+                          if (blockList.includes(e.key)) e.preventDefault();
+                        }}
                         value={item.requested_quantity}
-                        onChange={e => updateItem(i, 'requested_quantity', e.target.value.replace(/-/g, ''))}
-                        inputProps={{ min: 0, style: { textAlign: 'center' } }}
+                        onChange={e => {
+                          const mat = item.material_id ? materials.find(m => m.id === item.material_id) : null;
+                          const allowDec = mat ? mat.uom_allow_decimal : false;
+                          let val = e.target.value.replace(/-/g, '');
+                          if (!allowDec) val = val.replace(/\./g, '');
+                          updateItem(i, 'requested_quantity', val);
+                        }}
+                        inputProps={{ 
+                          min: 0, 
+                          style: { textAlign: 'center' }, 
+                          step: (item.material_id && materials.find(m => m.id === item.material_id)?.uom_allow_decimal) ? "any" : "1" 
+                        }}
                         sx={{ width: 120, mx: 'auto', bgcolor: '#fff' }}
                       />
                     </TableCell>
@@ -1284,7 +1317,7 @@ export default function Indents() {
             <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748B', mb: 0.5, display: 'block', textTransform: 'uppercase' }}>
               General Approval Remarks
             </Typography>
-            <TextField
+            <TextField inputProps={{ maxLength: 255 }}
               fullWidth size="small" multiline rows={2}
               placeholder="Enter remarks for this approval action..."
               value={approvalRemarks}

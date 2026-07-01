@@ -149,7 +149,7 @@ def stock_report(
     q = db.query(
         Material.code,
         Material.name,
-        UOM.name.label("uom"),
+        UOM.abbreviation.label("uom"),
         func.sum(CurrentStock.quantity).label("total_quantity"),
         func.sum(CurrentStock.quantity * Material.standard_cost).label("total_value")
     ).select_from(Material).join(

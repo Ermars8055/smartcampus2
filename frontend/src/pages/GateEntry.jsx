@@ -233,7 +233,7 @@ export default function GateEntry() {
                   <TextField fullWidth label="Delivery Person Name *" value={form.delivery_person_name} onChange={e => { setForm({ ...form, delivery_person_name: e.target.value }); setErrors(prev => ({...prev, delivery_person_name: null})); }} error={!!errors.delivery_person_name} helperText={errors.delivery_person_name} />
                 </Grid>
                 <Grid item xs={12}>
-                  <TextField fullWidth label="Remarks" value={form.remarks} onChange={e => setForm({ ...form, remarks: e.target.value })} placeholder="Any additional notes..." />
+                  <TextField inputProps={{ maxLength: 255 }} fullWidth label="Remarks" value={form.remarks} onChange={e => setForm({ ...form, remarks: e.target.value })} placeholder="Any additional notes..." />
                 </Grid>
               </Grid>
             </Grid>

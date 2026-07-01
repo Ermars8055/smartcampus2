@@ -79,7 +79,7 @@ def list_quotation_requests(
             id=it.id, material_id=it.material_id, quantity=it.quantity,
             material_name=it.material.name if it.material else "N/A", 
             material_code=it.material.code if it.material else "N/A",
-            uom_name=it.material.uom.name if it.material and it.material.uom else "Unit",
+            uom_name=it.material.uom.abbreviation if it.material and it.material.uom else "Unit",
             source=it.source or "Manual",
             source_pr_number=it.source_pr.pr_number if it.source_pr else None,
             sources=[QRItemSourceOut(
@@ -124,7 +124,7 @@ def get_quotation_request(
     items = [QRItemOut(
         id=it.id, material_id=it.material_id, quantity=it.quantity,
         material_name=it.material.name, material_code=it.material.code,
-        uom_name=it.material.uom.name if it.material.uom else "Unit",
+        uom_name=it.material.uom.abbreviation if it.material.uom else "Unit",
         source=it.source or "Manual",
         source_pr_number=it.source_pr.pr_number if it.source_pr else None,
         sources=[QRItemSourceOut(
@@ -479,7 +479,7 @@ def list_vendor_quotations(
         items = [VendorQuotationItemOut(
             id=it.id, qr_item_id=it.qr_item_id, material_id=it.material_id,
             quoted_rate=it.quoted_rate, delivery_days=it.delivery_days, remarks=it.remarks,
-            material_name=it.material.name, material_code=it.material.code, uom_name=it.material.uom.name
+            material_name=it.material.name, material_code=it.material.code, uom_name=it.material.uom.abbreviation
         ) for it in vq.items]
         
         result.append(VendorQuotationOut(
@@ -557,7 +557,7 @@ def generate_comparison(
         material_comparisons.append(MaterialComparisonOut(
             qr_item_id=qr_item.id, material_id=qr_item.material_id,
             material_name=qr_item.material.name, material_code=qr_item.material.code,
-            uom_name=qr_item.material.uom.name, quantity=qr_item.quantity,
+            uom_name=qr_item.material.uom.abbreviation, quantity=qr_item.quantity,
             vendor_quotes=vendor_quotes,
             selected_vendor_id=comp.selected_vendor_id if comp else None,
             selected_vendor_name=f"{comp.selected_vendor.code} - {comp.selected_vendor.name}" if comp and comp.selected_vendor else None,

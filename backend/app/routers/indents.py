@@ -99,7 +99,7 @@ def list_indents(
             if item.material:
                 item.material_name = item.material.name
                 item.material_code = item.material.code
-                item.uom_name = item.material.uom.name if item.material.uom else None
+                item.uom_name = item.material.uom.abbreviation if item.material.uom else None
                 item.warehouse_id = item.material.warehouse_id
                 item.warehouse_name = item.material.warehouse.name if item.material.warehouse else None
                 
@@ -214,7 +214,7 @@ def create_indent(
         if item.material:
             item.material_name = item.material.name
             item.material_code = item.material.code
-            item.uom_name = item.material.uom.name if item.material.uom else None
+            item.uom_name = item.material.uom.abbreviation if item.material.uom else None
             item.current_stock = 0
             
     return indent
@@ -242,7 +242,7 @@ def get_indent(
         if item.material:
             item.material_name = item.material.name
             item.material_code = item.material.code
-            item.uom_name = item.material.uom.name if item.material.uom else None
+            item.uom_name = item.material.uom.abbreviation if item.material.uom else None
             item.warehouse_id = item.material.warehouse_id
             item.warehouse_name = item.material.warehouse.name if item.material.warehouse else None
             stock = db.query(CurrentStock).filter(CurrentStock.material_id == item.material_id, CurrentStock.site_id == site_id).first()
@@ -424,7 +424,7 @@ def get_approval_history(
                 "material_id": item.material_id,
                 "material_name": item.material.name if item.material else None,
                 "material_code": item.material.code if item.material else None,
-                "uom_name": item.material.uom.name if item.material and item.material.uom else None,
+                "uom_name": item.material.uom.abbreviation if item.material and item.material.uom else None,
                 "requested_quantity": item.requested_quantity,
                 "approved_quantity": qty,
                 "remarks": item_rem

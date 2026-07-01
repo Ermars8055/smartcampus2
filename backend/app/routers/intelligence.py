@@ -97,7 +97,7 @@ def query_intelligence(
                 
                 if last_po_item:
                     return {
-                        "answer": f"The last purchase price for **{material.name}** was **₹{last_po_item.rate}** per {material.uom.name if material.uom else 'unit'}.",
+                        "answer": f"The last purchase price for **{material.name}** was **₹{last_po_item.rate}** per {material.uom.abbreviation if material.uom else 'unit'}.",
                         "data": {"lpp": last_po_item.rate, "date": last_po_item.purchase_order.created_at}
                     }
                 return {"answer": f"No purchase history found for **{material.name}**."}

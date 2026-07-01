@@ -105,7 +105,7 @@ def list_grn(
                 remarks=item.remarks,
                 material_name=mat.name if mat else None,
                 material_code=mat.code if mat else None,
-                uom_name=mat.uom.name if mat and mat.uom else None
+                uom_name=mat.uom.abbreviation if mat and mat.uom else None
             ))
         result.append(GRNOut(
             id=g.id, grn_number=g.grn_number,

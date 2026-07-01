@@ -347,13 +347,14 @@ export default function MaterialIssue() {
         purpose: issueModal.remarks || (issueModal.isDirect ? 'Direct Issue' : `Fulfillment for ${issueModal.indent?.indent_number}`),
         items: validItems.map(it => ({
           material_id: it.material_id,
-          quantity: Math.round(parseFloat(it.issue_qty))
+          quantity: parseFloat(it.issue_qty)
         }))
       };
-      await api.post('/api/issues', payload);
+      const res = await api.post('/api/issues', payload);
       setIssueModal({ ...issueModal, open: false });
       load();
-      showMessage('Material issued successfully!', 'Success', 'success');
+      const issueNum = res.data?.issue_number;
+      showMessage(issueNum ? `Material ${issueNum} issued successfully!` : 'Material issued successfully!', 'Success', 'success');
     } catch (err) {
       let detail = err.response?.data?.detail || 'Error';
       if (Array.isArray(detail)) {
@@ -371,6 +372,11 @@ export default function MaterialIssue() {
   };
 
   const addDirectItem = () => {
+    const emptyCount = issueModal.items.filter(it => !it.material_id).length;
+    if (emptyCount >= 5) {
+      showMessage("Please select materials for the existing empty rows before adding more. Limit reached (5).", "Limit Reached", "warning");
+      return;
+    }
     setIssueModal({
       ...issueModal,
       items: [...issueModal.items, { material_id: '', issue_qty: '' }]
@@ -749,7 +755,7 @@ export default function MaterialIssue() {
                       <TableCell>
                         {issueModal.isDirect ? (
                           <MaterialSelect
-                            materials={materials}
+                            materials={materials.filter(m => !issueModal.items.some((it, idx) => idx !== i && it.material_id === m.id))}
                             value={it.material_id}
                             onChange={(val) => updateDirectItem(i, 'material_id', val)}
                           />
@@ -778,17 +784,30 @@ export default function MaterialIssue() {
                         <TextField
                           size="small"
                           type="number"
-                          inputProps={{ step: "1", min: "0", max: String(maxQty) }}
-                          onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()}
+                          inputProps={{ 
+                            step: (it.material_id && materials.find(m => m.id === it.material_id)?.uom_allow_decimal) ? "any" : "1", 
+                            min: "0", 
+                            max: String(maxQty) 
+                          }}
+                          onKeyDown={e => {
+                            const mat = it.material_id ? materials.find(m => m.id === it.material_id) : null;
+                            const allowDec = mat ? mat.uom_allow_decimal : false;
+                            const blockList = ['-', '+', 'e', 'E'];
+                            if (!allowDec) blockList.push('.');
+                            if (blockList.includes(e.key)) e.preventDefault();
+                          }}
                           value={it.issue_qty}
                           disabled={inStock <= 0 || !it.material_id}
                           onChange={e => {
+                            const mat = it.material_id ? materials.find(m => m.id === it.material_id) : null;
+                            const allowDec = mat ? mat.uom_allow_decimal : false;
                             const newItems = [...issueModal.items];
                             let valStr = e.target.value.replace(/-/g, '');
+                            if (!allowDec) valStr = valStr.replace(/\./g, '');
                             if (valStr === '') {
                               newItems[i].issue_qty = '';
                             } else {
-                              const val = Math.round(parseFloat(valStr) || 0);
+                              const val = parseFloat(valStr) || 0;
                               newItems[i].issue_qty = Math.max(0, Math.min(val, maxQty));
                             }
                             setIssueModal({ ...issueModal, items: newItems });
@@ -810,7 +829,7 @@ export default function MaterialIssue() {
             </Table>
           </TableContainer>
 
-          <TextField
+          <TextField inputProps={{ maxLength: 255 }}
             fullWidth size="small" label="Remarks"
             value={issueModal.remarks}
             onChange={e => setIssueModal({ ...issueModal, remarks: e.target.value })}

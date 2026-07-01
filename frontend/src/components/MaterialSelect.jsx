@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Autocomplete, TextField, InputAdornment, createFilterOptions } from '@mui/material';
 import { Inventory } from '@mui/icons-material';
 
@@ -9,8 +10,20 @@ const filterOptions = createFilterOptions({
 
 export default function MaterialSelect({ value, onChange, materials, label = "Material", size = "small", disabled = false, error = false, helperText = "" }) {
   // value is the material_id
+  const [isExpanded, setIsExpanded] = useState(false);
   const materialsList = Array.isArray(materials) ? materials : [];
   const selectedMaterial = materialsList.find(m => m.id === value) || null;
+  
+  let materialDisplayText = '';
+  if (selectedMaterial) {
+    if (selectedMaterial.name.length > 32 && !isExpanded) {
+      materialDisplayText = selectedMaterial.name.substring(0, 27) + '.....';
+    } else {
+      materialDisplayText = selectedMaterial.name;
+    }
+  }
+  
+  const displayHelperText = error ? helperText : (selectedMaterial ? materialDisplayText : helperText);
 
   return (
     <Autocomplete
@@ -30,7 +43,22 @@ export default function MaterialSelect({ value, onChange, materials, label = "Ma
           label={label} 
           required 
           error={error}
-          helperText={helperText}
+          helperText={displayHelperText}
+          FormHelperTextProps={{
+            onClick: () => {
+              if (!error && selectedMaterial && selectedMaterial.name.length > 32) {
+                setIsExpanded(!isExpanded);
+              }
+            },
+            sx: {
+              color: (!error && selectedMaterial) ? '#1e293b' : undefined,
+              fontWeight: (!error && selectedMaterial) ? 600 : undefined,
+              whiteSpace: (!error && selectedMaterial) ? 'normal' : undefined,
+              wordWrap: (!error && selectedMaterial) ? 'break-word' : undefined,
+              ml: (!error && selectedMaterial) ? 0 : undefined,
+              cursor: (!error && selectedMaterial && selectedMaterial.name.length > 32) ? 'pointer' : undefined
+            }
+          }}
           InputProps={{
             ...params.InputProps,
             startAdornment: (

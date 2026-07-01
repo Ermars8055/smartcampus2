@@ -34,7 +34,7 @@ export default function Materials() {
   const [labelFormat, setLabelFormat] = useState(32);
   const [form, setForm] = useState({
     code: '', name: '', alias: '', reference_no: '', category_id: '', subcategory_id: '', uom_id: '', warehouse_id: '', reorder_level: 0,
-    maximum_level: 0, standard_cost: 0, gst_rate: 0, storage_type: 'General',
+    maximum_level: 0, standard_cost: 0, gst_rate: 0, storage_type: '',
     material_type: '', hsn_code: '', description: ''
   });
   const [page, setPage] = useState(0);
@@ -93,13 +93,17 @@ export default function Materials() {
     if (!form.category_id) newErrors.category_id = 'Category is required';
     if (!form.uom_id) newErrors.uom_id = 'UOM is required';
 
-    if (form.gst_rate < 0 || form.gst_rate > 100) {
+    if (form.gst_rate === '') {
+      newErrors.gst_rate = 'GST Rate is required';
+    } else if (form.gst_rate < 0 || form.gst_rate > 100) {
       newErrors.gst_rate = 'GST Rate must be between 0 and 100';
     } else if (form.gst_rate.toString().includes('.') && form.gst_rate.toString().split('.')[1].length > 2) {
       newErrors.gst_rate = 'GST Rate allows maximum 2 decimal places';
     }
 
-    if (form.standard_cost < 0) {
+    if (form.standard_cost === '') {
+      newErrors.standard_cost = 'Standard Cost is required';
+    } else if (form.standard_cost < 0) {
       newErrors.standard_cost = 'Standard Cost cannot be negative';
     } else if (form.standard_cost > 1000000000) {
       newErrors.standard_cost = 'Standard Cost cannot exceed 100 Crores';
@@ -107,19 +111,30 @@ export default function Materials() {
       newErrors.standard_cost = 'Standard Cost allows maximum 2 decimal places';
     }
 
-    if (form.reorder_level < 0) {
-      newErrors.reorder_level = 'Reorder Level must be a positive number';
-    } else if (!Number.isInteger(Number(form.reorder_level))) {
-      newErrors.reorder_level = 'Reorder Level must be a whole number';
+    if (form.material_type === 'Consumable' && (form.reorder_level === '' || form.reorder_level === null)) {
+      newErrors.reorder_level = 'Reorder Level is required for Consumables';
+    } else if (form.reorder_level !== '' && form.reorder_level !== null) {
+      if (form.reorder_level < 0) {
+        newErrors.reorder_level = 'Reorder Level must be a positive number';
+      } else if (!Number.isInteger(Number(form.reorder_level))) {
+        newErrors.reorder_level = 'Reorder Level must be a whole number';
+      }
     }
 
-    if (form.maximum_level < 0) {
-      newErrors.maximum_level = 'Maximum Level must be a positive number';
-    } else if (!Number.isInteger(Number(form.maximum_level))) {
-      newErrors.maximum_level = 'Maximum Level must be a whole number';
+    if (form.material_type === 'Consumable' && (form.maximum_level === '' || form.maximum_level === null)) {
+      newErrors.maximum_level = 'Maximum Level is required for Consumables';
+    } else if (form.maximum_level !== '' && form.maximum_level !== null) {
+      if (form.maximum_level < 0) {
+        newErrors.maximum_level = 'Maximum Level must be a positive number';
+      } else if (!Number.isInteger(Number(form.maximum_level))) {
+        newErrors.maximum_level = 'Maximum Level must be a whole number';
+      }
     }
-    if (Number(form.maximum_level) > 0 && Number(form.maximum_level) <= Number(form.reorder_level)) {
-      newErrors.maximum_level = 'Maximum Level must be greater than Reorder Level';
+    
+    if (form.maximum_level !== '' && form.reorder_level !== '' && form.maximum_level !== null && form.reorder_level !== null) {
+      if (Number(form.maximum_level) > 0 && Number(form.maximum_level) <= Number(form.reorder_level)) {
+        newErrors.maximum_level = 'Maximum Level must be greater than Reorder Level';
+      }
     }
     if (!form.material_type) {
       newErrors.material_type = 'Material type is required';
@@ -221,7 +236,7 @@ export default function Materials() {
       maximum_level: m.maximum_level === 0 ? '' : m.maximum_level,
       standard_cost: m.standard_cost === 0 ? '' : m.standard_cost,
       gst_rate: m.gst_rate === 0 ? '' : (m.gst_rate || ''),
-      storage_type: m.storage_type || 'General',
+      storage_type: m.storage_type || '',
       material_type: m.material_type || '',
       hsn_code: m.hsn_code || '',
       warehouse_id: m.warehouse_id || '',
@@ -237,7 +252,7 @@ export default function Materials() {
     setForm({
       code: '', name: '', alias: '', reference_no: '', category_id: '', subcategory_id: '', uom_id: '',
       reorder_level: '', maximum_level: '', standard_cost: '', gst_rate: '',
-      storage_type: 'General', material_type: '', hsn_code: '', warehouse_id: '', description: ''
+      storage_type: '', material_type: '', hsn_code: '', warehouse_id: '', description: ''
     });
     setDialog(true);
   };
@@ -690,7 +705,7 @@ export default function Materials() {
               InputProps={{ startAdornment: <InputAdornment position="start"><Tag sx={{ color: '#94A3B8' }} /></InputAdornment> }}
             />
 
-            <FormControl fullWidth error={!!errors.category_id}>
+            <FormControl fullWidth required error={!!errors.category_id}>
               <InputLabel>Category</InputLabel>
               <Select
                 value={form.category_id}
@@ -701,6 +716,7 @@ export default function Materials() {
               >
                 {categories.map(c => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
               </Select>
+              {errors.category_id && <Typography variant="caption" color="error" sx={{ ml: 2 }}>{errors.category_id}</Typography>}
             </FormControl>
 
             <FormControl fullWidth>
@@ -719,7 +735,7 @@ export default function Materials() {
               </Select>
             </FormControl>
 
-            <FormControl fullWidth error={!!errors.uom_id}>
+            <FormControl fullWidth required error={!!errors.uom_id}>
               <InputLabel>UOM</InputLabel>
               <Select
                 value={form.uom_id}
@@ -730,6 +746,7 @@ export default function Materials() {
               >
                 {uoms.map(u => <MenuItem key={u.id} value={u.id}>{u.name}</MenuItem>)}
               </Select>
+              {errors.uom_id && <Typography variant="caption" color="error" sx={{ ml: 2 }}>{errors.uom_id}</Typography>}
             </FormControl>
 
             <FormControl fullWidth>
@@ -745,7 +762,7 @@ export default function Materials() {
               </Select>
             </FormControl>
 
-            <FormControl fullWidth error={!!errors.material_type}>
+            <FormControl fullWidth required error={!!errors.material_type}>
               <InputLabel>Material Type</InputLabel>
               <Select
                 value={form.material_type}
@@ -760,19 +777,33 @@ export default function Materials() {
               {errors.material_type && <Typography variant="caption" color="error" sx={{ ml: 2 }}>{errors.material_type}</Typography>}
             </FormControl>
 
-            <TextField
-              fullWidth
-              label="Storage Type"
-              value={form.storage_type}
-              onChange={e => setForm({ ...form, storage_type: e.target.value })}
-              disabled={viewOnly}
-              InputProps={{ startAdornment: <InputAdornment position="start"><Warehouse sx={{ color: '#94A3B8' }} /></InputAdornment> }}
-            />
+            <FormControl fullWidth>
+              <InputLabel>Storage Type</InputLabel>
+              <Select
+                value={form.storage_type}
+                onChange={e => setForm({ ...form, storage_type: e.target.value })}
+                disabled={viewOnly}
+                label="Storage Type"
+                startAdornment={<InputAdornment position="start"><Warehouse sx={{ color: '#94A3B8' }} /></InputAdornment>}
+              >
+                <MenuItem value="Rack Storage">Rack Storage (Stored on racks)</MenuItem>
+                <MenuItem value="Shelf Storage">Shelf Storage (Stored on shelves)</MenuItem>
+                <MenuItem value="Bin Storage">Bin Storage (Stored in bins/containers)</MenuItem>
+                <MenuItem value="Pallet Storage">Pallet Storage (Stored on pallets)</MenuItem>
+                <MenuItem value="Bulk Storage">Bulk Storage (Stored in bulk on the floor)</MenuItem>
+                <MenuItem value="Open Yard">Open Yard (Stored outdoors)</MenuItem>
+                <MenuItem value="Cold Storage">Cold Storage (Refrigerated storage)</MenuItem>
+                <MenuItem value="Secure Storage">Secure Storage (Locked room or cage)</MenuItem>
+                <MenuItem value="Hazardous Storage">Hazardous Storage (Special hazardous area)</MenuItem>
+                <MenuItem value="General">General (Unspecified)</MenuItem>
+              </Select>
+            </FormControl>
 
             <TextField
               fullWidth
               label="GST Rate (%)"
               type="number"
+              required
               value={form.gst_rate}
               onChange={e => setForm({ ...form, gst_rate: e.target.value })}
               disabled={viewOnly}
@@ -798,6 +829,7 @@ export default function Materials() {
               fullWidth
               label="Standard Cost (₹)"
               type="number"
+              required
               value={form.standard_cost}
               onChange={e => setForm({ ...form, standard_cost: e.target.value })}
               disabled={viewOnly}
@@ -811,6 +843,7 @@ export default function Materials() {
               fullWidth
               label="Reorder Level"
               type="number"
+              required={form.material_type === 'Consumable'}
               value={form.reorder_level}
               onChange={e => setForm({ ...form, reorder_level: e.target.value })}
               disabled={viewOnly}
@@ -824,6 +857,7 @@ export default function Materials() {
               fullWidth
               label="Maximum Level"
               type="number"
+              required={form.material_type === 'Consumable'}
               value={form.maximum_level}
               onChange={e => setForm({ ...form, maximum_level: e.target.value })}
               disabled={viewOnly}

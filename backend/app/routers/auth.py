@@ -1,6 +1,7 @@
 """Auth router with workspace-based login (like OHC NG)."""
 from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from pydantic import BaseModel
 from typing import Optional, List
 from app.database import get_db
@@ -60,7 +61,7 @@ def list_workspaces(db: Session = Depends(get_db)):
 
 @router.post("/login")
 def login(request: LoginRequest, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.username == request.username, User.is_deleted == False).first()
+    user = db.query(User).filter(func.lower(User.username) == request.username.lower(), User.is_deleted == False).first()
     if not user or not verify_password(request.password, user.hashed_password):
         raise HTTPException(401, "Invalid credentials")
     if not user.is_active:
@@ -264,7 +265,7 @@ def forgot_password(req: ForgotPasswordRequest, background_tasks: BackgroundTask
     if not tenant:
         raise HTTPException(404, "Workspace not found")
         
-    user = db.query(User).filter(User.username == req.username, User.is_deleted == False).first()
+    user = db.query(User).filter(func.lower(User.username) == req.username.lower(), User.is_deleted == False).first()
     if not user:
         raise HTTPException(404, "User not found")
         
@@ -309,7 +310,7 @@ def verify_otp(req: VerifyOTPRequest, db: Session = Depends(get_db)):
     if not tenant:
         raise HTTPException(404, "Workspace not found")
         
-    user = db.query(User).filter(User.username == req.username, User.is_deleted == False).first()
+    user = db.query(User).filter(func.lower(User.username) == req.username.lower(), User.is_deleted == False).first()
     if not user:
         raise HTTPException(404, "User not found")
         
@@ -332,7 +333,7 @@ def reset_password(req: ResetPasswordRequest, background_tasks: BackgroundTasks,
     if not tenant:
         raise HTTPException(404, "Workspace not found")
         
-    user = db.query(User).filter(User.username == req.username, User.is_deleted == False).first()
+    user = db.query(User).filter(func.lower(User.username) == req.username.lower(), User.is_deleted == False).first()
     if not user:
         raise HTTPException(404, "User not found")
         

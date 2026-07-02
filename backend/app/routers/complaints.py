@@ -150,7 +150,16 @@ def get_complaints(
         if is_technician:
             query = query.filter(Complaint.assigned_to_id == current_user.id)
         else:
-            query = query.filter(Complaint.created_by_id == current_user.id)
+            scope = getattr(current_user, "_data_access_scope", "Self Only")
+            if scope in ["Full Administrative Access", "Organization"]:
+                pass
+            elif scope == "Department":
+                if current_user.department:
+                    query = query.filter(Complaint.department_name == current_user.department)
+                else:
+                    query = query.filter(Complaint.created_by_id == current_user.id)
+            else:
+                query = query.filter(Complaint.created_by_id == current_user.id)
     
     if status:
         query = query.filter(Complaint.status == status)

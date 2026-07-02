@@ -4,7 +4,7 @@ import {
   TableHead, TableRow, Button, IconButton, Chip, TextField, MenuItem, Select, FormControl, InputLabel, Tooltip,
   Dialog, DialogTitle, DialogContent, DialogActions
 } from '@mui/material';
-import { Add, Edit, Archive } from '@mui/icons-material';
+import { Add, Edit, Cancel } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -174,9 +174,9 @@ export default function ComplaintsList() {
                         </IconButton>
                       </span>
                     </Tooltip>
-                    <Tooltip title="Short Close">
-                      <IconButton size="small" onClick={() => setShortCloseDialog({ open: true, complaintId: row.id })} sx={{ color: '#d97706' }}>
-                        <Archive fontSize="small" />
+                    <Tooltip title="Cancel Complaint">
+                      <IconButton size="small" onClick={() => setShortCloseDialog({ open: true, complaintId: row.id })} color="error">
+                        <Cancel fontSize="small" />
                       </IconButton>
                     </Tooltip>
                   </TableCell>
@@ -189,9 +189,9 @@ export default function ComplaintsList() {
 
       {/* Short Close Dialog */}
       <Dialog open={shortCloseDialog.open} onClose={() => setShortCloseDialog({ open: false, complaintId: null })} maxWidth="sm" fullWidth>
-        <DialogTitle>Short Close Complaint</DialogTitle>
+        <DialogTitle>Cancel Complaint</DialogTitle>
         <DialogContent>
-          <Typography variant="body2" sx={{ mb: 2 }}>Please provide a reason for short closing this complaint.</Typography>
+          <Typography variant="body2" sx={{ mb: 2 }}>Please provide a reason for cancelling this complaint.</Typography>
           <TextField inputProps={{ maxLength: 255 }}
             autoFocus
             label="Resolution Remarks"
@@ -203,8 +203,8 @@ export default function ComplaintsList() {
           />
         </DialogContent>
         <DialogActions sx={{ p: 2, pt: 0 }}>
-          <Button onClick={() => setShortCloseDialog({ open: false, complaintId: null })}>Cancel</Button>
-          <Button onClick={handleShortClose} variant="contained" color="error" disabled={!shortCloseRemarks}>Short Close</Button>
+          <Button onClick={() => setShortCloseDialog({ open: false, complaintId: null })}>Close</Button>
+          <Button onClick={handleShortClose} variant="contained" color="error" disabled={!shortCloseRemarks}>Cancel Complaint</Button>
         </DialogActions>
       </Dialog>
     </Box>

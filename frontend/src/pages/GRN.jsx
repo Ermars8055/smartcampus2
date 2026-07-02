@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
@@ -12,6 +13,8 @@ import { useAuth } from '../context/AuthContext';
 
 export default function GRNPage() {
   const { hasAction } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [grns, setGrns] = useState([]);
   const [pos, setPos] = useState([]);
   const [gateEntries, setGateEntries] = useState([]);
@@ -40,6 +43,17 @@ export default function GRNPage() {
 
   const load = () => { api.get('/api/grn', { params: { search: search || undefined } }).then(r => setGrns(r.data)); };
   useEffect(() => { load(); }, [search]);
+
+  useEffect(() => {
+    if (location.state?.openGRNId && grns.length > 0) {
+      const grnToOpen = grns.find(g => g.id === location.state.openGRNId);
+      if (grnToOpen) {
+        setDetailDialog(grnToOpen);
+      }
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location.state, grns, location.pathname, navigate]);
+
   useEffect(() => {
     load();
     api.get('/api/procurement/po').then(r => setPos(r.data));

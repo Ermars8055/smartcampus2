@@ -40,6 +40,18 @@ export default function PurchaseOrders() {
   const [approvalDialog, setApprovalDialog] = useState({ open: false, po: null, items: {} });
   const [approvalRemarks, setApprovalRemarks] = useState('');
   const [historyDialog, setHistoryDialog] = useState({ open: false, materialId: null, data: null, loading: false });
+  const [itemErrors, setItemErrors] = useState({});
+
+  const handleRateBlur = (i, rate, baseRate) => {
+    const r = parseFloat(rate);
+    const br = parseFloat(baseRate);
+    if (!isNaN(r) && !isNaN(br) && br > 0) {
+      const deviation = Math.abs(r - br) / br;
+      if (deviation >= 0.5) {
+        showMessage("The entered rate has a deviation of 50% or more from the base rate.", "Rate Deviation Warning", "warning");
+      }
+    }
+  };
 
   const fetchApprovalHistory = async (poId, materialId) => {
     setHistoryDialog({ open: true, materialId, data: null, loading: true });
@@ -310,6 +322,7 @@ export default function PurchaseOrders() {
         })) : [{ material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }]
       });
       setEditingPOId(po.id);
+      setItemErrors({});
       setDialog(true);
     } else {
       setDetailDialog(po);
@@ -359,6 +372,7 @@ export default function PurchaseOrders() {
           };
         })
       });
+      setItemErrors({});
       setDialog(true);
       // Clean up state so refresh doesn't trigger it again
       navigate(location.pathname, { replace: true });
@@ -436,11 +450,26 @@ export default function PurchaseOrders() {
       showMessage("Please select a Material for all line items.", "Validation Error", "warning");
       return;
     }
-    const hasInvalidNumbers = form.items.some(it => (parseFloat(it.quantity) || 0) <= 0 || (parseFloat(it.rate) || 0) <= 0);
-    if (hasInvalidNumbers) {
-      showMessage("Quantity and Rate must be greater than 0 for all items.", "Validation Error", "warning");
+    const newErrors = {};
+    form.items.forEach((it, i) => {
+      const qty = parseFloat(it.quantity) || 0;
+      const rate = parseFloat(it.rate) || 0;
+      if (qty <= 0 || rate <= 0) {
+        newErrors[i] = {};
+        if (qty <= 0) newErrors[i].quantity = 'Quantity must be > 0';
+        if (rate <= 0) newErrors[i].rate = 'Rate must be > 0';
+      }
+    });
+    if (Object.keys(newErrors).length > 0) {
+      setItemErrors(newErrors);
+      const firstErrorIdx = Object.keys(newErrors)[0];
+      const el = document.getElementById(`item-row-${firstErrorIdx}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
       return;
     }
+    setItemErrors({});
     if (!form.terms || !form.terms.trim()) {
       showMessage("Terms and Conditions are mandatory.", "Validation Error", "warning");
       return;
@@ -853,6 +882,7 @@ export default function PurchaseOrders() {
         {hasPermission('purchase_orders', 'can_create') && (
           <Button variant="contained" startIcon={<Add />} onClick={() => {
             setForm({ po_number: '', vendor_id: '', project_id: projects[0]?.id || '', delivery_date: null, terms: '', annexure: '', po_type: 'Informal', items: [{ material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }] });
+            setItemErrors({});
             setDialog(true);
           }}>Create PO</Button>
         )}
@@ -1535,7 +1565,7 @@ export default function PurchaseOrders() {
               const netAmt = item.is_gst_inclusive ? netAmtAfterDisc : (taxableAmt + cgstAmt + sgstAmt + igstAmt);
 
               return (
-                <Box key={i} sx={{
+                <Box key={i} id={`item-row-${i}`} sx={{
                   display: 'grid',
                   gridTemplateColumns: { xs: '1fr', md: '1.5fr 0.5fr 0.8fr 1fr 0.8fr' },
                   gap: 1.5,
@@ -1595,7 +1625,9 @@ export default function PurchaseOrders() {
                     />
                   </Box>
                   <TextField size="small" label="Unit" value={item.uom_name || '-'} InputProps={{ readOnly: true }} />
-                  <TextField disabled={!item.material_id} size="small" label="Qty" type="number" value={item.quantity} onKeyDown={e => {
+                  <TextField disabled={!item.material_id} size="small" label="Qty" type="number" value={item.quantity}
+                    error={!!itemErrors[i]?.quantity} helperText={itemErrors[i]?.quantity}
+                    onKeyDown={e => {
                     const blockList = ['-', '+', 'e', 'E'];
                     if (!item.uom_allow_decimal) blockList.push('.');
                     if (blockList.includes(e.key)) e.preventDefault();
@@ -1605,7 +1637,11 @@ export default function PurchaseOrders() {
                     updateItem(i, 'quantity', val);
                   }} inputProps={{ min: 0, step: item.uom_allow_decimal ? "any" : "1" }} />
                   <Box>
-                    <TextField disabled={!item.material_id} sx={noSpinSx} fullWidth size="small" label="Rate (₹)" type="number" value={item.rate} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'rate', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, step: "any" }} />
+                    <TextField disabled={!item.material_id} sx={noSpinSx} fullWidth size="small" label="Rate (₹)" type="number" value={item.rate}
+                      error={!!itemErrors[i]?.rate} helperText={itemErrors[i]?.rate}
+                      onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'rate', e.target.value.replace(/-/g, ''))}
+                      onBlur={() => handleRateBlur(i, item.rate, item.base_rate)}
+                      inputProps={{ min: 0, step: "any" }} />
                     {item.base_rate > 0 && <Typography variant="caption" sx={{ color: '#64748B', display: 'block', mt: 0.5 }}>Base Rate: ₹{item.base_rate}</Typography>}
                   </Box>
                   <FormControl size="small">

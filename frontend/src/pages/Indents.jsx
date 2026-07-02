@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useMessage } from '../context/MessageContext';
 import {
@@ -155,6 +155,38 @@ export default function Indents() {
       if (valA > valB) return order === 'asc' ? 1 : -1;
       return 0;
     });
+
+  const availableBuildingsForFilter = useMemo(() => {
+    if (!filterInstitution && !filterDepartment) return allBuildings;
+    const validBldgs = new Map();
+    if (filterDepartment) {
+      allBuildings.filter(b => b.department_name === filterDepartment).forEach(b => validBldgs.set(b.id, b));
+      allDepartments.filter(d => d.name === filterDepartment && (!filterInstitution || d.institution_id === filterInstitution.id)).forEach(d => {
+        if (d.building_id) {
+          const b = allBuildings.find(x => x.id === d.building_id);
+          if (b) validBldgs.set(b.id, b);
+        }
+      });
+      return Array.from(validBldgs.values());
+    }
+    if (filterInstitution) {
+      allBuildings.filter(b => b.institution_id === filterInstitution.id).forEach(b => validBldgs.set(b.id, b));
+      allDepartments.filter(d => d.institution_id === filterInstitution.id).forEach(d => {
+        if (d.building_id) {
+          const b = allBuildings.find(x => x.id === d.building_id);
+          if (b) validBldgs.set(b.id, b);
+        }
+      });
+      return Array.from(validBldgs.values());
+    }
+    return allBuildings;
+  }, [filterInstitution, filterDepartment, allBuildings, allDepartments]);
+
+  useEffect(() => {
+    if (filterBuilding && !availableBuildingsForFilter.find(b => b.id === filterBuilding.id)) {
+      setFilterBuilding(null);
+    }
+  }, [availableBuildingsForFilter, filterBuilding]);
 
   const [form, setForm] = useState({
     institution_id: '', building_id: '', floor_id: '', room_id: '', department: '', remarks: '', items: [{ material_id: '', requested_quantity: '' }], complaint_id: ''
@@ -810,7 +842,7 @@ export default function Indents() {
           />
           <Autocomplete
             size="small"
-            options={allBuildings}
+            options={availableBuildingsForFilter}
             getOptionLabel={(option) => option.name || ''}
             value={filterBuilding}
             onChange={(e, val) => setFilterBuilding(val)}

@@ -41,15 +41,24 @@ export default function Alerts() {
             border: `1px solid ${a.is_read ? '#E2E8F0' : sevBorder[a.severity]}`,
             opacity: a.is_read ? 0.7 : 1,
             transition: 'all 0.3s',
-            cursor: a.reference_type === 'Indent' ? 'pointer' : 'default',
+            cursor: ['Indent', 'PurchaseOrder', 'PurchaseRequest', 'GateEntry', 'GRN'].includes(a.reference_type) ? 'pointer' : 'default',
             '&:hover': {
-              boxShadow: a.reference_type === 'Indent' ? '0 4px 12px rgba(0,0,0,0.05)' : 'none'
+              boxShadow: ['Indent', 'PurchaseOrder', 'PurchaseRequest', 'GateEntry', 'GRN'].includes(a.reference_type) ? '0 4px 12px rgba(0,0,0,0.05)' : 'none'
             }
           }}
           onClick={() => {
+            if (!['Indent', 'PurchaseOrder', 'PurchaseRequest', 'GateEntry', 'GRN'].includes(a.reference_type)) return;
+            if (!a.is_read) markRead(a.id);
             if (a.reference_type === 'Indent') {
-              if (!a.is_read) markRead(a.id);
               navigate('/indents', { state: { openIndentId: a.reference_id } });
+            } else if (a.reference_type === 'PurchaseOrder') {
+              navigate('/purchase-orders', { state: { openPOId: a.reference_id } });
+            } else if (a.reference_type === 'PurchaseRequest') {
+              navigate('/purchase-requests', { state: { openPRId: a.reference_id } });
+            } else if (a.reference_type === 'GateEntry') {
+              navigate('/gate-entry', { state: { openGEId: a.reference_id } });
+            } else if (a.reference_type === 'GRN') {
+              navigate('/grn', { state: { openGRNId: a.reference_id } });
             }
           }}
           >

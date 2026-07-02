@@ -213,10 +213,6 @@ export default function ComplaintForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (imagePreviewUrls.length === 0) {
-      setSnackbar({ open: true, message: 'Please attach at least one photo.', severity: 'error' });
-      return;
-    }
 
     setUploading(true);
     try {
@@ -361,7 +357,7 @@ export default function ComplaintForm() {
 
           <Divider sx={{ my: 4 }} />
 
-          <Typography variant="h6" sx={{ mb: 2, color: '#1E3A8A' }}>Photo Attachments *</Typography>
+          <Typography variant="h6" sx={{ mb: 2, color: '#1E3A8A' }}>Photo Attachments</Typography>
           
           <Box sx={{ border: '2px dashed #CBD5E1', borderRadius: 2, p: 3, textAlign: 'center', bgcolor: '#F8FAFC', mb: 3 }}>
              <input

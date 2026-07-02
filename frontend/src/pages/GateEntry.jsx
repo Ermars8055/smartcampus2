@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
@@ -13,6 +14,8 @@ import { useMessage } from '../context/MessageContext';
 export default function GateEntry() {
   const { hasAction } = useAuth();
   const { showMessage } = useMessage();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [entries, setEntries] = useState([]);
   const [errors, setErrors] = useState({});
   const [dialog, setDialog] = useState(false);
@@ -31,6 +34,16 @@ export default function GateEntry() {
 
   const load = () => { api.get('/api/gate-entries', { params: { search: search || undefined } }).then(r => setEntries(r.data)); };
   useEffect(() => { load(); }, [search]);
+
+  useEffect(() => {
+    if (location.state?.openGEId && entries.length > 0) {
+      const entryToOpen = entries.find(e => e.id === location.state.openGEId);
+      if (entryToOpen) {
+        setDetailDialog(entryToOpen);
+      }
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location.state, entries, location.pathname, navigate]);
 
   const handleUpload = async (file) => {
     if (!file) return;

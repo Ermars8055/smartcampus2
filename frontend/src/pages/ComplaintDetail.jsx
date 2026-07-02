@@ -14,7 +14,7 @@ const COMPLAINT_STEPS = ['Registered', 'Assigned', 'Under Inspection', 'In Progr
 export default function ComplaintDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, hasAction } = useAuth();
   const fileInputRef = useRef(null);
 
   const [complaint, setComplaint] = useState(null);
@@ -42,6 +42,7 @@ export default function ComplaintDetail() {
   
   const [actionLoading, setActionLoading] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
+  const [previewDialog, setPreviewDialog] = useState({ open: false, url: '' });
 
   useEffect(() => {
     fetchComplaintData();
@@ -274,7 +275,7 @@ export default function ComplaintDetail() {
               Next Action:
             </Typography>
 
-            {(complaint.status === 'Registered' || complaint.status === 'Open' || complaint.status === 'Reopened') && (
+            {(complaint.status === 'Registered' || complaint.status === 'Open' || complaint.status === 'Reopened') && hasAction('complaints', 'can_assign') && (
               <Button variant="contained" color="primary" startIcon={<Assignment />} onClick={() => setAssignDialogOpen(true)}>
                 Assign Technician
               </Button>
@@ -375,7 +376,7 @@ export default function ComplaintDetail() {
                 {preRepairImages.map((img) => (
                   <Grid item xs={6} sm={4} key={img.id}>
                     <Box sx={{ position: 'relative', pt: '100%', borderRadius: 1, overflow: 'hidden', border: '1px solid #E2E8F0' }}>
-                      <img src={getFileUrl(img.image_url)} alt="Pre Repair" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <img src={getFileUrl(img.image_url)} alt="Pre Repair" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', cursor: 'pointer' }} onClick={() => setPreviewDialog({ open: true, url: getFileUrl(img.image_url) })} />
                     </Box>
                   </Grid>
                 ))}
@@ -401,7 +402,7 @@ export default function ComplaintDetail() {
                   {postRepairImages.map((img) => (
                     <Grid item xs={6} sm={4} key={img.id}>
                       <Box sx={{ position: 'relative', pt: '100%', borderRadius: 1, overflow: 'hidden', border: '1px solid #BBF7D0' }}>
-                        <img src={getFileUrl(img.image_url)} alt="Post Repair" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <img src={getFileUrl(img.image_url)} alt="Post Repair" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', cursor: 'pointer' }} onClick={() => setPreviewDialog({ open: true, url: getFileUrl(img.image_url) })} />
                       </Box>
                     </Grid>
                   ))}
@@ -671,6 +672,18 @@ export default function ComplaintDetail() {
       <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={() => setSnackbar({ ...snackbar, open: false })}>
         <Alert severity={snackbar.severity} sx={{ width: '100%' }}>{snackbar.message}</Alert>
       </Snackbar>
+
+      <Dialog open={previewDialog.open} onClose={() => setPreviewDialog({ open: false, url: '' })} maxWidth="md" fullWidth>
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          Image Preview
+          <IconButton onClick={() => setPreviewDialog({ open: false, url: '' })} size="small">
+            <Close />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ p: 0, display: 'flex', justifyContent: 'center', bgcolor: '#000' }}>
+          <img src={previewDialog.url} alt="Full Preview" style={{ maxWidth: '100%', maxHeight: '80vh', objectFit: 'contain' }} />
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 }

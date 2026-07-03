@@ -536,6 +536,8 @@ def short_close_pr(
     ).first()
     if not pr:
         raise HTTPException(status_code=404, detail="PR not found")
+    if pr.status != "Approved":
+        raise HTTPException(status_code=400, detail="Only Approved PRs can be Short Closed")
     pr.status = "Short Closed"
     if body.remarks:
         pr.remarks = (pr.remarks or '') + f'\n[Short Closed: {body.remarks}]'
@@ -543,7 +545,25 @@ def short_close_pr(
     return {"message": "PR Short Closed"}
 
 
-# ── Purchase Orders ──────────────────────────────────────────────────────
+@router.post("/pr/{id}/cancel")
+def cancel_pr(
+    id: int, body: RejectBody = RejectBody(), db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("purchase_requests", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    pr = db.query(PurchaseRequest).filter(
+        PurchaseRequest.id == id, PurchaseRequest.tenant_id == tenant_id, PurchaseRequest.site_id == site_id
+    ).first()
+    if not pr:
+        raise HTTPException(status_code=404, detail="PR not found")
+    if pr.status not in ["Draft", "Submitted"]:
+        raise HTTPException(status_code=400, detail="Only Draft or Submitted PRs can be Cancelled")
+    pr.status = "Cancelled"
+    if body.remarks:
+        pr.remarks = (pr.remarks or '') + f'\n[Cancelled: {body.remarks}]'
+    db.commit()
+    return {"message": "PR Cancelled"}# ── Purchase Orders ──────────────────────────────────────────────────────
 
 @router.get("/po")
 def list_purchase_orders(
@@ -1311,8 +1331,30 @@ def short_close_po(
     ).first()
     if not po:
         raise HTTPException(status_code=404, detail="PO not found")
+    if po.status not in ["Approved", "Sent to Vendor", "Partially Received"]:
+        raise HTTPException(status_code=400, detail="Only Approved, Sent or Partially Received POs can be Short Closed")
     po.status = "Short Closed"
     if body.remarks:
         po.remarks = (po.remarks or '') + f'\n[Short Closed: {body.remarks}]'
     db.commit()
     return {"message": "PO Short Closed"}
+
+@router.post("/po/{id}/cancel")
+def cancel_po(
+    id: int, body: RejectBody = RejectBody(), db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("purchase_orders", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    po = db.query(PurchaseOrder).filter(
+        PurchaseOrder.id == id, PurchaseOrder.tenant_id == tenant_id, PurchaseOrder.site_id == site_id
+    ).first()
+    if not po:
+        raise HTTPException(status_code=404, detail="PO not found")
+    if po.status not in ["Draft", "Submitted"]:
+        raise HTTPException(status_code=400, detail="Only Draft or Submitted POs can be Cancelled")
+    po.status = "Cancelled"
+    if body.remarks:
+        po.remarks = (po.remarks or '') + f'\n[Cancelled: {body.remarks}]'
+    db.commit()
+    return {"message": "PO Cancelled"}

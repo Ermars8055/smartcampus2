@@ -1,14 +1,15 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, InputAdornment, Chip, Dialog,
-  Tooltip, Select, FormControl, InputLabel, TableSortLabel, useTheme, useMediaQuery, MenuItem, DialogTitle, DialogContent, DialogActions, IconButton, TablePagination
+  Tooltip, Select, FormControl, InputLabel, TableSortLabel, useTheme, useMediaQuery, MenuItem, DialogTitle, DialogContent, DialogActions, IconButton, TablePagination, Snackbar, Alert, Switch, FormControlLabel
 } from '@mui/material';
 import { QRCodeSVG } from 'qrcode.react';
 import {
   Add, Search, Edit, ArrowDropUp, ArrowDropDown,
   Inventory, Description, Category, Straighten, Warehouse,
-  Percent, Speed, CurrencyRupee, Tag, QrCodeScanner, Print
+  Percent, Speed, CurrencyRupee, Tag, QrCodeScanner, Print, ArrowBack
 } from '@mui/icons-material';
 import api from '../services/api';
 
@@ -35,14 +36,17 @@ export default function Materials() {
   const [form, setForm] = useState({
     code: '', name: '', alias: '', reference_no: '', category_id: '', subcategory_id: '', uom_id: '', warehouse_id: '', reorder_level: 0,
     maximum_level: 0, standard_cost: 0, gst_rate: 0, storage_type: '',
-    material_type: '', hsn_code: '', description: ''
+    material_type: '', hsn_code: '', description: '', is_active: true
   });
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(100);
   const [totalCount, setTotalCount] = useState(0);
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const load = () => {
     setLoading(true);
@@ -50,7 +54,8 @@ export default function Materials() {
       skip: page * rowsPerPage,
       limit: rowsPerPage,
       sort_by: sortConfig.key,
-      sort_desc: sortConfig.direction === 'desc'
+      sort_desc: sortConfig.direction === 'desc',
+      include_inactive: true
     };
     if (search) params.search = search;
     if (catFilter) params.category_id = catFilter;
@@ -92,6 +97,7 @@ export default function Materials() {
     if (!form.name) newErrors.name = 'Material name is required';
     if (!form.category_id) newErrors.category_id = 'Category is required';
     if (!form.uom_id) newErrors.uom_id = 'UOM is required';
+    if (!form.warehouse_id) newErrors.warehouse_id = 'Store is required';
 
     if (form.gst_rate === '') {
       newErrors.gst_rate = 'GST Rate is required';
@@ -187,7 +193,8 @@ export default function Materials() {
         storage_type: form.storage_type,
         material_type: form.material_type,
         hsn_code: form.hsn_code,
-        description: form.description
+        description: form.description,
+        is_active: form.is_active
       };
 
       if (!editing && form.code) payload.code = form.code;
@@ -201,6 +208,7 @@ export default function Materials() {
       setEditing(null);
       setErrors({});
       load();
+      setSnackbar({ open: true, message: 'Material saved successfully!', severity: 'success' });
     } catch (err) {
       const detail = err.response?.data?.detail;
       if (Array.isArray(detail)) {
@@ -240,7 +248,8 @@ export default function Materials() {
       material_type: m.material_type || '',
       hsn_code: m.hsn_code || '',
       warehouse_id: m.warehouse_id || '',
-      description: m.description || ''
+      description: m.description || '',
+      is_active: m.is_active !== false
     });
     setDialog(true);
   };
@@ -252,7 +261,7 @@ export default function Materials() {
     setForm({
       code: '', name: '', alias: '', reference_no: '', category_id: '', subcategory_id: '', uom_id: '',
       reorder_level: '', maximum_level: '', standard_cost: '', gst_rate: '',
-      storage_type: '', material_type: '', hsn_code: '', warehouse_id: '', description: ''
+      storage_type: '', material_type: '', hsn_code: '', warehouse_id: '', description: '', is_active: true
     });
     setDialog(true);
   };
@@ -364,7 +373,14 @@ export default function Materials() {
           <Typography variant="h5" sx={{ fontWeight: 700, color: '#1E293B' }}>Material Master</Typography>
           <Typography variant="body2" sx={{ color: '#64748B' }}>{totalCount} materials</Typography>
         </Box>
-        <Button variant="contained" startIcon={<Add />} onClick={openNew}>Add Material</Button>
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          {location.state?.fromDashboard && (
+            <Button size="small" variant="outlined" startIcon={<ArrowBack />} onClick={() => navigate('/')}>
+              Back to Dashboard
+            </Button>
+          )}
+          <Button variant="contained" startIcon={<Add />} onClick={openNew}>Add Material</Button>
+        </Box>
       </Box>
 
       <Card sx={{ mb: 3, p: 2, borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
@@ -749,7 +765,7 @@ export default function Materials() {
               {errors.uom_id && <Typography variant="caption" color="error" sx={{ ml: 2 }}>{errors.uom_id}</Typography>}
             </FormControl>
 
-            <FormControl fullWidth>
+            <FormControl fullWidth required error={!!errors.warehouse_id}>
               <InputLabel>Store</InputLabel>
               <Select
                 value={form.warehouse_id}
@@ -760,6 +776,7 @@ export default function Materials() {
               >
                 {warehouses.map(w => <MenuItem key={w.id} value={w.id}>{w.name}</MenuItem>)}
               </Select>
+              {errors.warehouse_id && <Typography variant="caption" color="error" sx={{ ml: 2 }}>{errors.warehouse_id}</Typography>}
             </FormControl>
 
             <FormControl fullWidth required error={!!errors.material_type}>
@@ -981,6 +998,12 @@ export default function Materials() {
           </Button>
         </DialogActions>
       </Dialog>
+      
+      <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={() => setSnackbar({ ...snackbar, open: false })} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+        <Alert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity} sx={{ width: '100%', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

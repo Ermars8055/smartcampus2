@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
   InputLabel, Divider, TableSortLabel, useTheme, useMediaQuery,
   DialogContent, DialogActions, Grid, MenuItem, Select, FormControl, FormHelperText, IconButton, Autocomplete, RadioGroup, FormControlLabel, Radio
 } from '@mui/material';
-import { Add, Search, AssignmentTurnedIn, AttachFile, OpenInNew, Delete } from '@mui/icons-material';
+import { Add, Search, AssignmentTurnedIn, AttachFile, OpenInNew, Delete, ArrowBack } from '@mui/icons-material';
 import api, { getFileUrl } from '../services/api';
 import { formatDate } from '../utils/dateUtils';
 import { useAuth } from '../context/AuthContext';
@@ -15,6 +15,7 @@ export default function GRNPage() {
   const { hasAction } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [grns, setGrns] = useState([]);
   const [pos, setPos] = useState([]);
   const [gateEntries, setGateEntries] = useState([]);
@@ -163,7 +164,16 @@ export default function GRNPage() {
     setSortConfig({ key, direction });
   };
 
-  const sortedGrns = [...grns].sort((a, b) => {
+  const filteredGrnsBase = useMemo(() => {
+    let list = grns;
+    const projId = searchParams.get('proj');
+    if (projId) {
+      list = list.filter(g => g.project_id === parseInt(projId, 10));
+    }
+    return list;
+  }, [grns, searchParams]);
+
+  const sortedGrns = [...filteredGrnsBase].sort((a, b) => {
     let valA = a[sortConfig.key];
     let valB = b[sortConfig.key];
     if (sortConfig.key === 'items') {
@@ -184,12 +194,19 @@ export default function GRNPage() {
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
         <Box>
           <Typography variant="h5" sx={{ fontWeight: 700 }}>Goods Receipt Notes</Typography>
-          <Typography variant="body2" sx={{ color: '#64748B' }}>Verify and accept received materials</Typography>
+          <Typography variant="body2" sx={{ color: '#64748B' }}>{filteredGrnsBase.length} records</Typography>
         </Box>
-        <Button variant="contained" startIcon={<Add />} disabled={!hasAction('grn', 'can_create_grn')} onClick={() => {
-          setForm({ ...initialForm, warehouse_id: warehouses[0]?.id || '' });
-          setDialog(true);
-        }}>Create GRN</Button>
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+          {location.state?.fromDashboard && (
+            <Button size="small" variant="outlined" startIcon={<ArrowBack />} onClick={() => navigate('/')}>
+              Back to Dashboard
+            </Button>
+          )}
+          <Button variant="contained" startIcon={<Add />} disabled={!hasAction('grn', 'can_create_grn')} onClick={() => {
+            setForm({ ...initialForm, warehouse_id: warehouses[0]?.id || '' });
+            setDialog(true);
+          }}>Create GRN</Button>
+        </Box>
       </Box>
 
       <Card sx={{ mb: 3, p: 2 }}>

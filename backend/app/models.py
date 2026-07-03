@@ -29,6 +29,8 @@ class PRStatus(str, enum.Enum):
     APPROVED = "Approved"
     REJECTED = "Rejected"
     CONVERTED = "Converted to PO"
+    CANCELLED = "Cancelled"
+    SHORT_CLOSED = "Short Closed"
 
 class POStatus(str, enum.Enum):
     DRAFT = "Draft"
@@ -37,6 +39,8 @@ class POStatus(str, enum.Enum):
     SENT = "Sent to Vendor"
     PARTIAL = "Partially Received"
     CLOSED = "Closed"
+    CANCELLED = "Cancelled"
+    SHORT_CLOSED = "Short Closed"
 
 class GateEntryStatus(str, enum.Enum):
     AWAITING_GRN = "Awaiting GRN"

@@ -4,17 +4,19 @@ import {
   TableHead, TableRow, Button, IconButton, Chip, TextField, MenuItem, Select, FormControl, InputLabel, Tooltip,
   Dialog, DialogTitle, DialogContent, DialogActions
 } from '@mui/material';
-import { Add, Edit, Cancel } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import { Add, Edit, Cancel, ArrowBack } from '@mui/icons-material';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import dayjs from 'dayjs';
 
 export default function ComplaintsList() {
   const [complaints, setComplaints] = useState([]);
-  const [statusFilter, setStatusFilter] = useState('');
+  const [searchParams] = useSearchParams();
+  const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || '');
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
   const { hasPermission } = useAuth();
 
   const [shortCloseDialog, setShortCloseDialog] = useState({ open: false, complaintId: null });
@@ -33,10 +35,16 @@ export default function ComplaintsList() {
     }
   };
 
-  const filteredComplaints = complaints.filter(c =>
-    c.docket_no.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (c.nature_of_complaint && c.nature_of_complaint.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const filteredComplaints = complaints.filter(c => {
+    const instId = searchParams.get('inst');
+    if (instId && instId !== 'all') {
+      if (c.institution_id !== parseInt(instId, 10)) {
+        return false;
+      }
+    }
+    return c.docket_no.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (c.nature_of_complaint && c.nature_of_complaint.toLowerCase().includes(searchQuery.toLowerCase()));
+  });
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -73,14 +81,21 @@ export default function ComplaintsList() {
         <Typography variant="h5" sx={{ fontWeight: 600, color: '#1E293B' }}>
           Complaint Management
         </Typography>
-        <Button
-          variant="contained"
-          startIcon={<Add />}
-          onClick={() => navigate('/complaints/new')}
-          sx={{ background: '#2563EB', '&:hover': { background: '#1D4ED8' } }}
-        >
-          Raise Complaint
-        </Button>
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+          {location.state?.fromDashboard && (
+            <Button size="small" variant="outlined" startIcon={<ArrowBack />} onClick={() => navigate('/')}>
+              Back to Dashboard
+            </Button>
+          )}
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={() => navigate('/complaints/new')}
+            sx={{ background: '#2563EB', '&:hover': { background: '#1D4ED8' } }}
+          >
+            Raise Complaint
+          </Button>
+        </Box>
       </Box>
 
       <Paper sx={{ p: 2, mb: 3, display: 'flex', gap: 2, alignItems: 'center' }}>

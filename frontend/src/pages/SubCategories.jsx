@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow,
   TableCell, TableContainer, Button, TextField, Dialog, DialogTitle,
-  DialogContent, DialogActions, IconButton, Chip, Select, MenuItem, FormControl, InputAdornment, TableSortLabel
+  DialogContent, DialogActions, IconButton, Chip, Select, MenuItem, FormControl, InputLabel, InputAdornment, TableSortLabel, Snackbar, Alert, Switch, FormControlLabel
 } from '@mui/material';
-import { Add, Edit, Category, ShortText } from '@mui/icons-material';
+import { Add, Edit, Category, ShortText, Subtitles } from '@mui/icons-material';
 import api from '../services/api';
 
 export default function SubCategories() {
@@ -12,12 +12,14 @@ export default function SubCategories() {
   const [subcategories, setSubcategories] = useState([]);
   const [dialog, setDialog] = useState('');
   const [subCatSortConfig, setSubCatSortConfig] = useState({ key: 'name', direction: 'asc' });
-  const [subCategoryForm, setSubCategoryForm] = useState({ name: '', category_id: '' });
+  const [form, setForm] = useState({ name: '', category_id: '', is_active: true });
   const [editing, setEditing] = useState(null);
+  const [errors, setErrors] = useState({});
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   const load = () => {
     api.get('/api/categories').then(r => setCategories(r.data));
-    api.get('/api/subcategories').then(r => setSubcategories(r.data));
+    api.get('/api/subcategories?include_inactive=true').then(r => setSubcategories(r.data));
   };
   useEffect(() => { load(); }, []);
 
@@ -36,16 +38,20 @@ export default function SubCategories() {
   });
 
   const saveSubCategory = async () => {
-    if (!subCategoryForm.name || subCategoryForm.name.trim().length < 2) {
-      return alert('Sub Category Name must be at least 2 characters');
+    const newErrors = {};
+    if (!form.category_id) newErrors.category_id = 'Parent Category is required';
+    if (!form.name || form.name.trim().length === 0) newErrors.name = 'Sub Category Name is required';
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
     }
-    if (!subCategoryForm.category_id) {
-      return alert('Please select a Parent Category');
-    }
+    
     try {
-      if (editing) await api.put(`/api/subcategories/${editing}`, subCategoryForm);
-      else await api.post('/api/subcategories', subCategoryForm);
-      setDialog(''); setEditing(null); load();
+      if (editing) await api.put(`/api/subcategories/${editing}`, form);
+      else await api.post('/api/subcategories', form);
+      setDialog(''); setEditing(null); setErrors({}); load();
+      setSnackbar({ open: true, message: 'Sub Category saved successfully!', severity: 'success' });
     } catch (err) { alert(err.response?.data?.detail || 'Error saving Sub Category'); }
   };
 
@@ -74,7 +80,7 @@ export default function SubCategories() {
           <Button 
             variant="text" 
             startIcon={<Add />} 
-            onClick={() => { setEditing(null); setSubCategoryForm({ name: '', category_id: '' }); setDialog('subcategory'); }}
+            onClick={() => { setEditing(null); setForm({ name: '', category_id: '', is_active: true }); setErrors({}); setDialog('subcat'); }}
             sx={{ textTransform: 'none', fontWeight: 600, color: '#2563EB' }}
           >
             Add Sub Category
@@ -128,7 +134,7 @@ export default function SubCategories() {
                   </TableCell>
                   <TableCell align="right">
                     <IconButton size="small" onClick={() => {
-                      setEditing(s.id); setSubCategoryForm({ name: s.name, category_id: s.category_id }); setDialog('subcategory');
+                      setEditing(s.id); setForm({ name: s.name, category_id: s.category_id, is_active: s.is_active !== false }); setErrors({}); setDialog('subcat');
                     }} sx={{ color: '#64748B' }}>
                       <Edit fontSize="small" />
                     </IconButton>
@@ -145,7 +151,7 @@ export default function SubCategories() {
         </TableContainer>
       </Card>
 
-      <Dialog open={dialog === 'subcategory'} onClose={(e, reason) => { if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') setDialog(''); }} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: '24px', p: 1 } }}>
+      <Dialog open={dialog === 'subcat'} onClose={(e, reason) => { if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') setDialog(''); }} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: '24px', p: 1 } }}>
         <DialogTitle sx={{ pb: 1, pt: 3, px: 4 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Box sx={{ p: 1, bgcolor: '#FFFBEB', borderRadius: 2, color: '#D97706', display: 'flex' }}>
@@ -161,32 +167,41 @@ export default function SubCategories() {
             </Box>
           </Box>
         </DialogTitle>
-        <DialogContent sx={{ px: 4, py: 2 }}>
-          <Box sx={{ mt: 2 }}>
-            <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748B', textTransform: 'uppercase', mb: 1, display: 'block' }}>Parent Category *</Typography>
-            <FormControl fullWidth size="small" sx={{ mb: 3 }}>
+        <DialogContent sx={{ mt: 1 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: 2 }}>
+            <FormControl fullWidth size="small" required error={!!errors.category_id}>
+              <InputLabel>Parent Category</InputLabel>
               <Select
-                value={subCategoryForm.category_id}
-                onChange={e => setSubCategoryForm({ ...subCategoryForm, category_id: e.target.value })}
-                displayEmpty
+                value={form.category_id}
+                onChange={e => setForm({ ...form, category_id: e.target.value })}
+                label="Parent Category"
+                startAdornment={<InputAdornment position="start"><Category sx={{ color: '#94A3B8', fontSize: 20, ml: 1 }} /></InputAdornment>}
                 sx={{ borderRadius: '12px' }}
               >
-                <MenuItem value="" disabled>Select Parent Category</MenuItem>
                 {categories.map(c => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
               </Select>
+              {errors.category_id && <Typography variant="caption" color="error" sx={{ ml: 2, mt: 0.5 }}>{errors.category_id}</Typography>}
             </FormControl>
-            
-            <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748B', textTransform: 'uppercase', mb: 1, display: 'block' }}>Sub Category Name *</Typography>
+
             <TextField 
               fullWidth 
               size="small"
-              value={subCategoryForm.name} 
-              onChange={e => setSubCategoryForm({ ...subCategoryForm, name: e.target.value })} 
+              label="Sub Category Name" 
+              value={form.name} 
+              onChange={e => setForm({ ...form, name: e.target.value })} 
               required 
+              error={!!errors.name}
+              helperText={errors.name}
               InputProps={{
-                startAdornment: <InputAdornment position="start"><ShortText sx={{ color: '#94A3B8', fontSize: 20 }} /></InputAdornment>,
+                startAdornment: <InputAdornment position="start"><Subtitles sx={{ color: '#94A3B8', fontSize: 20 }} /></InputAdornment>,
                 sx: { borderRadius: '12px' }
               }}
+            />
+            
+            <FormControlLabel 
+              control={<Switch checked={form.is_active !== false} onChange={e => setForm({ ...form, is_active: e.target.checked })} color="success" />} 
+              label="Active Status" 
+              sx={{ ml: 0.5 }}
             />
           </Box>
         </DialogContent>
@@ -208,6 +223,12 @@ export default function SubCategories() {
           </Button>
         </DialogActions>
       </Dialog>
+      
+      <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={() => setSnackbar({ ...snackbar, open: false })} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+        <Alert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity} sx={{ width: '100%', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

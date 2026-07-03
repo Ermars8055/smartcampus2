@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   Box, Typography, Card, Grid, Table, TableHead, TableBody, TableRow,
   TableCell, TableContainer, Button, TextField, Dialog, DialogTitle,
-  DialogContent, DialogActions, IconButton, Chip, InputAdornment
+  DialogContent, DialogActions, IconButton, Chip, InputAdornment, Snackbar, Alert, Switch, FormControlLabel
 } from '@mui/material';
 import { Add, Edit, Category, Description, Abc } from '@mui/icons-material';
 import { TableSortLabel } from '@mui/material';
@@ -12,11 +12,13 @@ export default function Categories() {
   const [categories, setCategories] = useState([]);
   const [dialog, setDialog] = useState('');
   const [sortConfig, setSortConfig] = useState({ key: 'code', direction: 'asc' });
-  const [form, setForm] = useState({ name: '', description: '', material_code_prefix: '', code: '', has_materials: false });
+  const [form, setForm] = useState({ name: '', description: '', material_code_prefix: '', code: '', has_materials: false, is_active: true });
   const [editing, setEditing] = useState(null);
+  const [errors, setErrors] = useState({});
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   const load = () => {
-    api.get('/api/categories').then(r => setCategories(r.data));
+    api.get('/api/categories?include_inactive=true').then(r => setCategories(r.data));
   };
   useEffect(() => { load(); }, []);
 
@@ -35,15 +37,22 @@ export default function Categories() {
   });
 
   const saveCategory = async () => {
+    const newErrors = {};
     if (!form.name || form.name.trim().length === 0) {
-      return alert('Category Name is required');
+      newErrors.name = 'Category Name is required';
     }
     if (!form.material_code_prefix || form.material_code_prefix.trim().length === 0) {
-      return alert('Material Code Prefix is required');
+      newErrors.material_code_prefix = 'Material Code Prefix is required';
+    } else {
+      const prefix = form.material_code_prefix.trim();
+      if (!/^[A-Za-z]{3}$/.test(prefix)) {
+        newErrors.material_code_prefix = 'Prefix must be exactly 3 alphabetical characters (A-Z)';
+      }
     }
-    const prefix = form.material_code_prefix.trim();
-    if (!/^[A-Za-z]{3}$/.test(prefix)) {
-      return alert('Material Code Prefix must be exactly 3 alphabetical characters (A-Z)');
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
     }
     
     const payload = { ...form };
@@ -51,7 +60,8 @@ export default function Categories() {
     try {
       if (editing) await api.put(`/api/categories/${editing}`, payload);
       else await api.post('/api/categories', payload);
-      setDialog(''); setEditing(null); load();
+      setDialog(''); setEditing(null); setErrors({}); load();
+      setSnackbar({ open: true, message: 'Category saved successfully!', severity: 'success' });
     } catch (err) {
       const detail = err.response?.data?.detail;
       if (typeof detail === 'string') alert(detail);
@@ -85,7 +95,7 @@ export default function Categories() {
           <Button 
             variant="text" 
             startIcon={<Add />} 
-            onClick={() => { setEditing(null); setForm({ name: '', description: '', material_code_prefix: '', code: '', has_materials: false }); setDialog('category'); }}
+            onClick={() => { setEditing(null); setForm({ name: '', description: '', material_code_prefix: '', code: '', has_materials: false, is_active: true }); setErrors({}); setDialog('category'); }}
             sx={{ textTransform: 'none', fontWeight: 600, color: '#2563EB' }}
           >
             Add Category
@@ -130,14 +140,14 @@ export default function Categories() {
                   </TableCell>
                   <TableCell>
                     <Chip 
-                      label="Active" 
+                      label={c.is_active ? 'Active' : 'Inactive'} 
                       size="small" 
                       sx={{ 
-                        bgcolor: '#ECFDF5', 
-                        color: '#10B981', 
+                        bgcolor: c.is_active ? '#ECFDF5' : '#F1F5F9', 
+                        color: c.is_active ? '#10B981' : '#64748B', 
                         fontWeight: 600, 
                         fontSize: '0.75rem',
-                        border: '1px solid #10B981',
+                        border: `1px solid ${c.is_active ? '#10B981' : '#CBD5E1'}`,
                         borderRadius: '6px',
                         height: 24
                       }} 
@@ -145,7 +155,7 @@ export default function Categories() {
                   </TableCell>
                   <TableCell align="right">
                     <IconButton size="small" onClick={() => {
-                      setEditing(c.id); setForm({ name: c.name, description: c.description || '', material_code_prefix: c.material_code_prefix || '', code: c.code || '', has_materials: c.has_materials || false }); setDialog('category');
+                      setEditing(c.id); setForm({ name: c.name, description: c.description || '', material_code_prefix: c.material_code_prefix || '', code: c.code || '', has_materials: c.has_materials || false, is_active: c.is_active !== false }); setErrors({}); setDialog('category');
                     }} sx={{ color: '#64748B' }}>
                       <Edit fontSize="small" />
                     </IconButton>
@@ -199,6 +209,8 @@ export default function Categories() {
               onChange={e => setForm({ ...form, name: e.target.value })} 
               sx={{ mb: 3 }} 
               required 
+              error={!!errors.name}
+              helperText={errors.name}
               InputProps={{
                 startAdornment: <InputAdornment position="start"><Category sx={{ color: '#94A3B8', fontSize: 20 }} /></InputAdornment>,
                 sx: { borderRadius: '12px' }
@@ -214,6 +226,8 @@ export default function Categories() {
               sx={{ mb: 3, ...(form.has_materials && {'& .MuiInputBase-input.Mui-disabled': { WebkitTextFillColor: '#64748B', color: '#64748B' }}) }} 
               disabled={form.has_materials}
               required
+              error={!!errors.material_code_prefix}
+              helperText={errors.material_code_prefix}
               inputProps={{ maxLength: 3 }}
               InputProps={{
                 startAdornment: <InputAdornment position="start"><Abc sx={{ color: '#94A3B8', fontSize: 20 }} /></InputAdornment>,
@@ -233,6 +247,12 @@ export default function Categories() {
                 startAdornment: <InputAdornment position="start" sx={{ alignSelf: 'flex-start', mt: 1 }}><Description sx={{ color: '#94A3B8', fontSize: 20 }} /></InputAdornment>,
                 sx: { borderRadius: '12px' }
               }}
+            />
+
+            <FormControlLabel 
+              control={<Switch checked={form.is_active !== false} onChange={e => setForm({ ...form, is_active: e.target.checked })} color="success" />} 
+              label="Active Status" 
+              sx={{ mt: 1 }}
             />
           </Box>
         </DialogContent>
@@ -254,6 +274,12 @@ export default function Categories() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={() => setSnackbar({ ...snackbar, open: false })} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+        <Alert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity} sx={{ width: '100%', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

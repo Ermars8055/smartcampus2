@@ -54,7 +54,7 @@ function StatCard({ title, value, icon, color, subtitle, onClick }) {
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'center',
-      position: 'relative', 
+      position: 'relative',
       overflow: 'hidden',
       '&:hover': onClick ? { transform: 'translateY(-4px)', boxShadow: '0 12px 24px -10px rgba(0,0,0,0.1)' } : {},
     }} onClick={onClick}>
@@ -68,20 +68,20 @@ function StatCard({ title, value, icon, color, subtitle, onClick }) {
             {React.cloneElement(icon, { sx: { fontSize: 26 } })}
           </Avatar>
           <Box>
-            <Typography variant="caption" sx={{ 
-              color: '#64748B', 
-              fontWeight: 700, 
-              textTransform: 'uppercase', 
-              letterSpacing: '0.12em', 
+            <Typography variant="caption" sx={{
+              color: '#64748B',
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.12em',
               fontSize: '0.65rem',
               mb: 0.5,
               display: 'block'
             }}>
               {title}
             </Typography>
-            <Typography variant="h4" sx={{ 
-              fontWeight: 800, 
-              color: '#0F172A', 
+            <Typography variant="h4" sx={{
+              fontWeight: 800,
+              color: '#0F172A',
               fontSize: '1.75rem',
               lineHeight: 1.2
             }}>
@@ -117,18 +117,26 @@ export default function Dashboard() {
   const [institutionsList, setInstitutionsList] = useState([]);
   const [departmentSpend, setDepartmentSpend] = useState([]);
   const [categorySpend, setCategorySpend] = useState([]);
-  
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  
+
   // Drilldown state
   const [drilldownBlock, setDrilldownBlock] = useState(null);
   const [drilldownType, setDrilldownType] = useState('building'); // 'building' or 'department'
   const [drilldownData, setDrilldownData] = useState([]);
   const [drilldownLoading, setDrilldownLoading] = useState(false);
-  
+
   const navigate = useNavigate();
   const { hasPermission } = useAuth();
+
+  const getNavUrl = (base) => {
+    if (institution === 'all') return base;
+    const selectedInstObj = institutionsList.find(i => i.id === institution);
+    const projectId = selectedInstObj ? selectedInstObj.project_id : '';
+    const sep = base.includes('?') ? '&' : '?';
+    return `${base}${sep}inst=${institution}&proj=${projectId}`;
+  };
 
   useEffect(() => {
     if (hasPermission('dashboard', 'can_read')) {
@@ -191,7 +199,7 @@ export default function Dashboard() {
     setDrilldownBlock(blockName);
     setDrilldownType('building');
     setDrilldownLoading(true);
-    
+
     let drillParams = {};
     if (period !== 'all') {
       const now = new Date();
@@ -210,11 +218,73 @@ export default function Dashboard() {
 
     api.get('/api/dashboard/material-cost-by-building', { params: drillParams })
       .then(res => {
-         const specificData = res.data.filter(item => item.building_name === blockName);
-         setDrilldownData(specificData);
+        const specificData = res.data.filter(item => item.building_name === blockName);
+        setDrilldownData(specificData);
       })
       .catch(console.error)
       .finally(() => setDrilldownLoading(false));
+  };
+
+  const handleCategoryClick = (data) => {
+    let categoryName = data?.name || data?.category_name;
+    if (!categoryName) return;
+
+    setDrilldownBlock(categoryName);
+    setDrilldownType('category');
+    setDrilldownLoading(true);
+
+    let drillParams = {};
+    if (period !== 'all') {
+      const now = new Date();
+      if (period === 'this_month') {
+        drillParams.start_date = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      } else if (period === 'last_month') {
+        drillParams.start_date = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
+        drillParams.end_date = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      } else if (period === 'ytd') {
+        drillParams.start_date = new Date(now.getFullYear(), 0, 1).toISOString();
+      }
+    }
+    if (institution !== 'all') {
+      drillParams.institution_id = institution;
+    }
+    drillParams.category_name = categoryName;
+
+    api.get('/api/dashboard/material-cost-by-category', { params: drillParams })
+      .then(res => setDrilldownData(res.data))
+      .catch(console.error)
+      .finally(() => setDrilldownLoading(false));
+  };
+
+  const handleTrendClick = (data) => {
+    let month = null;
+    if (data && data.activePayload && data.activePayload.length) {
+      month = data.activePayload[0].payload.month;
+    } else if (data && data.month) {
+      month = data.month;
+    }
+    if (!month) return;
+
+    setDrilldownBlock(month);
+    setDrilldownType('trend');
+    setDrilldownLoading(true);
+
+    let drillParams = {};
+    if (institution !== 'all') {
+      drillParams.institution_id = institution;
+    }
+    drillParams.month = month;
+
+    api.get('/api/dashboard/material-cost-by-month', { params: drillParams })
+      .then(res => setDrilldownData(res.data))
+      .catch(console.error)
+      .finally(() => setDrilldownLoading(false));
+  };
+
+  const handleWarehouseClick = (data) => {
+    if (data && data.warehouse_id) {
+      navigate(`/inventory?wh=${data.warehouse_id}`, { state: { fromDashboard: true } });
+    }
   };
 
   const handleDepartmentClick = (data) => {
@@ -230,7 +300,7 @@ export default function Dashboard() {
     setDrilldownBlock(deptName);
     setDrilldownType('department');
     setDrilldownLoading(true);
-    
+
     let drillParams = {};
     if (period !== 'all') {
       const now = new Date();
@@ -249,8 +319,8 @@ export default function Dashboard() {
 
     api.get('/api/dashboard/material-cost-by-department', { params: drillParams })
       .then(res => {
-         const specificData = res.data.filter(item => item.department_name === deptName);
-         setDrilldownData(specificData);
+        const specificData = res.data.filter(item => item.department_name === deptName);
+        setDrilldownData(specificData);
       })
       .catch(console.error)
       .finally(() => setDrilldownLoading(false));
@@ -326,7 +396,7 @@ export default function Dashboard() {
         <Grid item xs={6} sm={4} lg={2}>
           {institution === 'all' ? (
             <StatCard title="Materials" value={stats?.total_materials || 0}
-              icon={<Inventory2 />} color="#2563EB" subtitle="Active items" onClick={() => navigate('/materials')} />
+              icon={<Inventory2 />} color="#2563EB" subtitle="Active items" onClick={() => navigate(getNavUrl('/materials'), { state: { fromDashboard: true } })} />
           ) : (
             <StatCard title="Total Issued Value" value={formatCurrency(stats?.total_issued_value || 0)}
               icon={<Outbox />} color="#2563EB" subtitle="Total value issued" />
@@ -338,29 +408,29 @@ export default function Dashboard() {
               icon={<TrendingDown />} color="#10B981" subtitle="Total stock value" />
           ) : (
             <StatCard title="Total Issued Items" value={stats?.total_issued_qty || 0}
-              icon={<Assessment />} color="#10B981" subtitle="Total items issued" />
+              icon={<Assessment />} color="#10B981" subtitle="Total items issued" onClick={() => navigate(getNavUrl('/issues'), { state: { fromDashboard: true } })} />
           )}
         </Grid>
         <Grid item xs={6} sm={4} lg={2}>
           {institution === 'all' ? (
             <StatCard title="Low Stock" value={stats?.low_stock_items || 0}
-              icon={<Warning />} color="#EF4444" subtitle="Below reorder" onClick={() => navigate('/inventory')} />
+              icon={<Warning />} color="#EF4444" subtitle="Below reorder" onClick={() => navigate(getNavUrl('/inventory?low=true'), { state: { fromDashboard: true } })} />
           ) : (
             <StatCard title="Open Complaints" value={stats?.open_complaints || 0}
-              icon={<Warning />} color="#EF4444" subtitle="Active issues" onClick={() => navigate('/complaints')} />
+              icon={<Warning />} color="#EF4444" subtitle="Active issues" onClick={() => navigate(getNavUrl('/complaints?status=Open'), { state: { fromDashboard: true } })} />
           )}
         </Grid>
         <Grid item xs={6} sm={4} lg={2}>
           <StatCard title="Pending PR" value={stats?.pending_pr || 0}
-            icon={<ShoppingCart />} color="#F59E0B" subtitle="Awaiting action" onClick={() => navigate('/purchase-requests')} />
+            icon={<ShoppingCart />} color="#F59E0B" subtitle="Awaiting action" onClick={() => navigate(getNavUrl('/purchase-requests?tab=Submitted'), { state: { fromDashboard: true } })} />
         </Grid>
         <Grid item xs={6} sm={4} lg={2}>
           <StatCard title="Pending PO" value={stats?.pending_po || 0}
-            icon={<Receipt />} color="#7C3AED" subtitle="Open orders" onClick={() => navigate('/purchase-orders')} />
+            icon={<Receipt />} color="#7C3AED" subtitle="Draft, Subm, Apprvd, Sent" onClick={() => navigate(getNavUrl('/purchase-orders?tab=Pending'), { state: { fromDashboard: true } })} />
         </Grid>
         <Grid item xs={6} sm={4} lg={2}>
           <StatCard title="GRN" value={stats?.recent_grn_count || 0}
-            icon={<LocalShipping />} color="#0891B2" subtitle="Total receipts" onClick={() => navigate('/grn')} />
+            icon={<LocalShipping />} color="#0891B2" subtitle="Total receipts" onClick={() => navigate(getNavUrl('/grn'), { state: { fromDashboard: true } })} />
         </Grid>
       </Grid>
 
@@ -378,11 +448,11 @@ export default function Dashboard() {
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={consumption} margin={{ top: 20, right: isMobile ? 0 : 10, bottom: isMobile ? 60 : 40, left: isMobile ? -20 : 10 }} onClick={handleBlockClick}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
-                  <XAxis 
-                    dataKey="building_name" 
-                    tick={<CustomXAxisTick />} 
+                  <XAxis
+                    dataKey="building_name"
+                    tick={<CustomXAxisTick />}
                     interval={0}
-                    axisLine={false} 
+                    axisLine={false}
                     tickLine={false}
                   />
                   <YAxis tick={{ fontSize: 11, fontWeight: 500, fill: '#475569' }} tickFormatter={(v) => formatCurrency(v)} />
@@ -408,11 +478,11 @@ export default function Dashboard() {
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={departmentSpend} margin={{ top: 20, right: isMobile ? 0 : 10, bottom: isMobile ? 60 : 40, left: isMobile ? -20 : 10 }} onClick={handleDepartmentClick}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
-                  <XAxis 
-                    dataKey="department_name" 
-                    tick={<CustomXAxisTick />} 
+                  <XAxis
+                    dataKey="department_name"
+                    tick={<CustomXAxisTick />}
                     interval={0}
-                    axisLine={false} 
+                    axisLine={false}
                     tickLine={false}
                   />
                   <YAxis tick={{ fontSize: 11, fontWeight: 500, fill: '#475569' }} tickFormatter={(v) => formatCurrency(v)} />
@@ -437,27 +507,28 @@ export default function Dashboard() {
               <Box sx={{ flex: 1, minHeight: 0 }}>
                 <ResponsiveContainer width="100%" height={350}>
                   <PieChart margin={{ top: 10, right: 0, bottom: 0, left: 0 }}>
-                    <Pie 
-                      data={stockByWh} 
+                    <Pie
+                      data={stockByWh}
                       cx="50%" cy="42%" innerRadius={60} outerRadius={85}
                       dataKey="total_value" nameKey="warehouse_name" paddingAngle={5}
+                      onClick={handleWarehouseClick} style={{ cursor: 'pointer' }}
                     >
                       {stockByWh.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                     </Pie>
                     <RTooltip formatter={(v) => [`₹${v.toLocaleString('en-IN')}`, 'Value']} contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
                     <Legend verticalAlign="bottom" content={(props) => {
-                        const { payload } = props;
-                        return (
-                          <Box sx={{ maxHeight: '130px', overflowY: 'auto', display: 'flex', flexWrap: 'wrap', gap: 0.5, justifyContent: 'center', mt: -2 }}>
-                            {payload.map((entry, index) => (
-                              <Box key={`item-${index}`} sx={{ display: 'flex', alignItems: 'center', fontSize: 10, fontWeight: 600, color: '#64748B', px: 0.5 }}>
-                                <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: entry.color, mr: 0.5 }} />
-                                {entry.value}
-                              </Box>
-                            ))}
-                          </Box>
-                        );
-                      }}
+                      const { payload } = props;
+                      return (
+                        <Box sx={{ maxHeight: '130px', overflowY: 'auto', display: 'flex', flexWrap: 'wrap', gap: 0.5, justifyContent: 'center', mt: -2 }}>
+                          {payload.map((entry, index) => (
+                            <Box key={`item-${index}`} sx={{ display: 'flex', alignItems: 'center', fontSize: 10, fontWeight: 600, color: '#64748B', px: 0.5 }}>
+                              <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: entry.color, mr: 0.5 }} />
+                              {entry.value}
+                            </Box>
+                          ))}
+                        </Box>
+                      );
+                    }}
                     />
                   </PieChart>
                 </ResponsiveContainer>
@@ -473,27 +544,28 @@ export default function Dashboard() {
               <Box sx={{ flex: 1, minHeight: 0 }}>
                 <ResponsiveContainer width="100%" height={350}>
                   <PieChart margin={{ top: 10, right: 0, bottom: 0, left: 0 }}>
-                    <Pie 
-                      data={categorySpend} 
+                    <Pie
+                      data={categorySpend}
                       cx="50%" cy="42%" innerRadius={60} outerRadius={85}
                       dataKey="total_value" nameKey="category_name" paddingAngle={5}
+                      onClick={handleCategoryClick} style={{ cursor: 'pointer' }}
                     >
                       {categorySpend.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                     </Pie>
                     <RTooltip formatter={(v) => [`₹${v.toLocaleString('en-IN')}`, 'Value']} contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
                     <Legend verticalAlign="bottom" content={(props) => {
-                        const { payload } = props;
-                        return (
-                          <Box sx={{ maxHeight: '130px', overflowY: 'auto', display: 'flex', flexWrap: 'wrap', gap: 0.5, justifyContent: 'center', mt: -2 }}>
-                            {payload.map((entry, index) => (
-                              <Box key={`item-${index}`} sx={{ display: 'flex', alignItems: 'center', fontSize: 10, fontWeight: 600, color: '#64748B', px: 0.5 }}>
-                                <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: entry.color, mr: 0.5 }} />
-                                {entry.value}
-                              </Box>
-                            ))}
-                          </Box>
-                        );
-                      }}
+                      const { payload } = props;
+                      return (
+                        <Box sx={{ maxHeight: '130px', overflowY: 'auto', display: 'flex', flexWrap: 'wrap', gap: 0.5, justifyContent: 'center', mt: -2 }}>
+                          {payload.map((entry, index) => (
+                            <Box key={`item-${index}`} sx={{ display: 'flex', alignItems: 'center', fontSize: 10, fontWeight: 600, color: '#64748B', px: 0.5 }}>
+                              <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: entry.color, mr: 0.5 }} />
+                              {entry.value}
+                            </Box>
+                          ))}
+                        </Box>
+                      );
+                    }}
                     />
                   </PieChart>
                 </ResponsiveContainer>
@@ -529,7 +601,7 @@ export default function Dashboard() {
               Monthly Spend Trend
             </Typography>
             <ResponsiveContainer width="100%" height={280}>
-              <LineChart data={trend} margin={{ top: 25, right: 30, left: 10, bottom: 5 }}>
+              <LineChart data={trend} margin={{ top: 25, right: 30, left: 10, bottom: 5 }} onClick={handleTrendClick}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
                 <XAxis dataKey="month" tick={{ fontSize: 12, fontWeight: 600, fill: '#334155' }} />
                 <YAxis tick={{ fontSize: 11, fontWeight: 500, fill: '#475569' }} tickFormatter={(v) => formatCurrency(v)} />
@@ -550,27 +622,28 @@ export default function Dashboard() {
               <Box sx={{ flex: 1, minHeight: 0 }}>
                 <ResponsiveContainer width="100%" height={280}>
                   <PieChart margin={{ top: 10, right: 0, bottom: 0, left: 0 }}>
-                    <Pie 
-                      data={stockByWh} 
+                    <Pie
+                      data={stockByWh}
                       cx="50%" cy="42%" innerRadius={50} outerRadius={70}
                       dataKey="total_value" nameKey="warehouse_name" paddingAngle={5}
+                      onClick={handleWarehouseClick} style={{ cursor: 'pointer' }}
                     >
                       {stockByWh.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                     </Pie>
                     <RTooltip formatter={(v) => [`₹${v.toLocaleString('en-IN')}`, 'Value']} contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
                     <Legend verticalAlign="bottom" content={(props) => {
-                        const { payload } = props;
-                        return (
-                          <Box sx={{ maxHeight: '90px', overflowY: 'auto', display: 'flex', flexWrap: 'wrap', gap: 0.5, justifyContent: 'center', mt: -2 }}>
-                            {payload.map((entry, index) => (
-                              <Box key={`item-${index}`} sx={{ display: 'flex', alignItems: 'center', fontSize: 10, fontWeight: 600, color: '#64748B', px: 0.5 }}>
-                                <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: entry.color, mr: 0.5 }} />
-                                {entry.value}
-                              </Box>
-                            ))}
-                          </Box>
-                        );
-                      }}
+                      const { payload } = props;
+                      return (
+                        <Box sx={{ maxHeight: '90px', overflowY: 'auto', display: 'flex', flexWrap: 'wrap', gap: 0.5, justifyContent: 'center', mt: -2 }}>
+                          {payload.map((entry, index) => (
+                            <Box key={`item-${index}`} sx={{ display: 'flex', alignItems: 'center', fontSize: 10, fontWeight: 600, color: '#64748B', px: 0.5 }}>
+                              <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: entry.color, mr: 0.5 }} />
+                              {entry.value}
+                            </Box>
+                          ))}
+                        </Box>
+                      );
+                    }}
                     />
                   </PieChart>
                 </ResponsiveContainer>
@@ -588,7 +661,7 @@ export default function Dashboard() {
               <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#1E293B' }}>
                 Recent Transactions
               </Typography>
-              <Chip label="View All" size="small" onClick={() => navigate('/inventory')}
+              <Chip label="View All" size="small" onClick={() => navigate(getNavUrl('/inventory'), { state: { fromDashboard: true } })}
                 sx={{ cursor: 'pointer' }} />
             </Box>
             {isMobile ? (
@@ -693,7 +766,7 @@ export default function Dashboard() {
       <Dialog open={!!drilldownBlock} onClose={() => setDrilldownBlock(null)} maxWidth="md" fullWidth>
         <DialogTitle sx={{ fontWeight: 800, color: '#1E293B', display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
           {drilldownType === 'department' ? 'Department Spend Details:' : 'Institution Spend Details:'} {drilldownBlock}
-          <Chip 
+          <Chip
             label={`${formatCurrency(drilldownData.reduce((acc, curr) => acc + curr.total_cost, 0))} Total`}
             color="primary"
             variant="filled"
@@ -703,7 +776,7 @@ export default function Dashboard() {
         <DialogContent dividers sx={{ p: 0 }}>
           {drilldownLoading ? (
             <Box sx={{ p: 4, textAlign: 'center' }}>
-               <Skeleton variant="rectangular" height={200} />
+              <Skeleton variant="rectangular" height={200} />
             </Box>
           ) : (
             <TableContainer>

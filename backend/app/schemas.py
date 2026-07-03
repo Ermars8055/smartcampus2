@@ -159,6 +159,7 @@ class CategoryBase(BaseModel):
     name: str = Field(..., min_length=1)
     material_code_prefix: str = Field(..., min_length=3, max_length=3, pattern=r"^[A-Za-z]{3}$")
     description: Optional[str] = None
+    is_active: Optional[bool] = None
 
 class CategoryCreate(CategoryBase):
     pass
@@ -174,6 +175,7 @@ class CategoryOut(CategoryBase):
 class SubCategoryBase(BaseModel):
     name: str
     category_id: int
+    is_active: Optional[bool] = None
 
 class SubCategoryCreate(SubCategoryBase):
     pass
@@ -189,6 +191,7 @@ class UOMBase(BaseModel):
     name: str = Field(..., min_length=1)
     abbreviation: str = Field(..., min_length=1)
     allow_decimal: bool = False
+    is_active: Optional[bool] = None
 
 class UOMCreate(UOMBase):
     pass
@@ -436,6 +439,7 @@ class WarehouseBase(BaseModel):
     location: Optional[str] = None
     manager_name: Optional[str] = None
     manager_id: Optional[int] = None
+    is_active: Optional[bool] = None
 
 class WarehouseCreate(WarehouseBase):
     pass

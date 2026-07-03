@@ -819,14 +819,18 @@ def delete_department(
 @router.get("/warehouses")
 def list_warehouses(
     search: Optional[str] = None,
-    project_id: int = None, db: Session = Depends(get_db), 
+    project_id: int = None, 
+    include_inactive: bool = False,
+    db: Session = Depends(get_db), 
     current_user: User = Depends(get_current_user),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
     q = db.query(Warehouse).filter(
-        Warehouse.tenant_id == tenant_id, Warehouse.site_id == site_id, Warehouse.is_active == True
+        Warehouse.tenant_id == tenant_id, Warehouse.site_id == site_id, Warehouse.is_deleted == False
     )
+    if not include_inactive:
+        q = q.filter(Warehouse.is_active == True)
     if search:
         from sqlalchemy import or_
         q = q.filter(or_(Warehouse.name.ilike(f"%{search}%"), Warehouse.code.ilike(f"%{search}%")))

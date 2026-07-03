@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useMessage } from '../context/MessageContext';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
@@ -8,7 +8,7 @@ import {
   DialogContent, DialogActions, Grid, MenuItem, Select, FormControl, Link,
   Accordion, AccordionSummary, AccordionDetails, Tab, Tabs, Autocomplete
 } from '@mui/material';
-import { Add, Delete, CheckCircle, Archive, Send, Cancel, Search, ShoppingCart, Store, Assignment, CalendarMonth, ArrowDropDown, Inventory, History, ExpandMore, Textsms, AttachFile, Email, Visibility } from '@mui/icons-material';
+import { Add, Delete, CheckCircle, Archive, Send, Cancel, Search, ShoppingCart, Store, Assignment, CalendarMonth, ArrowDropDown, Inventory, History, ExpandMore, Textsms, AttachFile, Email, Visibility, ArrowBack, Block } from '@mui/icons-material';
 import api from '../services/api';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { formatDate, formatDateTime } from '../utils/dateUtils';
@@ -195,7 +195,8 @@ export default function PurchaseOrders() {
 
   const [search, setSearch] = useState('');
   const [filterVendor, setFilterVendor] = useState(null);
-  const [tabValue, setTabValue] = useState('Draft');
+  const [searchParams] = useSearchParams();
+  const [tabValue, setTabValue] = useState(searchParams.get('tab') || 'Draft');
   const [editingPOId, setEditingPOId] = useState(null);
   const [form, setForm] = useState({
     po_number: '', vendor_id: '', project_id: '', delivery_date: dayjs().add(14, 'day'), terms: '', annexure: '', po_type: 'Informal', items: [{ material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }]
@@ -214,6 +215,10 @@ export default function PurchaseOrders() {
 
   const filteredPOsBase = useMemo(() => {
     let list = pos;
+    const projId = searchParams.get('proj');
+    if (projId) {
+      list = list.filter(po => po.project_id === parseInt(projId, 10));
+    }
     if (search) {
       const s = search.toLowerCase();
       list = list.filter(po =>
@@ -227,7 +232,7 @@ export default function PurchaseOrders() {
       list = list.filter(po => po.vendor_id === filterVendor.id);
     }
     return list;
-  }, [pos, search, filterVendor]);
+  }, [pos, search, filterVendor, searchParams]);
 
   const calculatePOTotalNet = (po) => {
     if (!po || !po.items) return 0;
@@ -260,7 +265,11 @@ export default function PurchaseOrders() {
   };
 
   const sortedPOs = useMemo(() => {
-    let list = filteredPOsBase.filter(po => tabValue === 'All' || po.status === tabValue);
+    let list = filteredPOsBase.filter(po => {
+      if (tabValue === 'All') return true;
+      if (tabValue === 'Pending') return ['Draft', 'Submitted', 'Approved', 'Sent to Vendor'].includes(po.status);
+      return po.status === tabValue;
+    });
 
     if (sortConfig.key) {
       list.sort((a, b) => {
@@ -543,18 +552,20 @@ export default function PurchaseOrders() {
     }
   };
   const shortClosePO = async (id, remarks) => { await api.post(`/api/procurement/po/${id}/short-close`, { remarks }); load(); };
+  const cancelPO = async (id, remarks) => { await api.post(`/api/procurement/po/${id}/cancel`, { remarks }); load(); };
 
   // Status helpers
   const statusColor = {
     'Draft': 'default', 'Submitted': 'info', 'Approved': 'success', 'Sent to Vendor': 'primary',
     'Partially Received': 'warning', 'Closed': 'default', 'Short Closed': 'warning',
-    'Rejected': 'error'
+    'Rejected': 'error', 'Cancelled': 'default'
   };
 
   const canApprove = (s) => s === 'Submitted';
   const canReject = (s) => s === 'Submitted';
   const canSend = (s) => s === 'Approved';
-  const canShortClose = (s) => s !== 'Short Closed' && s !== 'Closed' && s !== 'Rejected' && s !== 'Draft';
+  const canShortClose = (s) => s === 'Approved' || s === 'Sent to Vendor' || s === 'Partially Received';
+  const canCancel = (s) => s === 'Draft' || s === 'Submitted';
 
   const numberToWords = (num) => {
     const a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
@@ -879,13 +890,20 @@ export default function PurchaseOrders() {
           <Typography variant="h5" sx={{ fontWeight: 700 }}>Purchase Orders</Typography>
           <Typography variant="body2" sx={{ color: '#64748B' }}>{pos.length} orders</Typography>
         </Box>
-        {hasPermission('purchase_orders', 'can_create') && (
-          <Button variant="contained" startIcon={<Add />} onClick={() => {
-            setForm({ po_number: '', vendor_id: '', project_id: projects[0]?.id || '', delivery_date: null, terms: '', annexure: '', po_type: 'Informal', items: [{ material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }] });
-            setItemErrors({});
-            setDialog(true);
-          }}>Create PO</Button>
-        )}
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+          {location.state?.fromDashboard && (
+            <Button size="small" variant="outlined" startIcon={<ArrowBack />} onClick={() => navigate('/')}>
+              Back to Dashboard
+            </Button>
+          )}
+          {hasPermission('purchase_orders', 'can_create') && (
+            <Button variant="contained" startIcon={<Add />} onClick={() => {
+              setForm({ po_number: '', vendor_id: '', project_id: projects[0]?.id || '', delivery_date: null, terms: '', annexure: '', po_type: 'Informal', items: [{ material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }] });
+              setItemErrors({});
+              setDialog(true);
+            }}>Create PO</Button>
+          )}
+        </Box>
       </Box>
 
       <Card sx={{ mb: 3 }}>
@@ -905,19 +923,23 @@ export default function PurchaseOrders() {
         </Box>
         <Tabs
           value={tabValue}
-          onChange={(e, v) => setTabValue(v)}
+          onChange={(_, v) => setTabValue(v)}
           variant="scrollable"
           scrollButtons="auto"
-          sx={{ borderBottom: 1, borderColor: 'divider' }}
+          sx={{ mb: 2, minHeight: 36, '& .MuiTab-root': { minHeight: 36, py: 0.5 } }}
         >
-          {['Draft', 'Submitted', 'Approved', 'Sent to Vendor', 'Partially Received', 'Closed', 'Rejected', 'All'].map(s => (
+          {['Draft', 'Submitted', 'Approved', 'Sent to Vendor', 'Partially Received', 'Closed', 'Short Closed', 'Cancelled', 'Rejected', 'Pending', 'All'].map(s => (
             <Tab
               key={s}
               label={
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   {s}
                   <Chip
-                    label={s === 'All' ? filteredPOsBase.length : filteredPOsBase.filter(po => po.status === s).length}
+                    label={
+                      s === 'All' ? filteredPOsBase.length :
+                        s === 'Pending' ? filteredPOsBase.filter(po => ['Draft', 'Submitted', 'Approved', 'Sent to Vendor'].includes(po.status)).length :
+                          filteredPOsBase.filter(po => po.status === s).length
+                    }
                     size="small"
                     sx={{ height: 20, fontSize: '0.7rem', fontWeight: 600, bgcolor: tabValue === s ? 'primary.main' : 'action.selected', color: tabValue === s ? 'white' : 'text.primary' }}
                   />
@@ -1121,8 +1143,14 @@ export default function PurchaseOrders() {
                         </Tooltip>
                         <Tooltip title="Short Close">
                           <span><IconButton size="small" color="warning" disabled={!canShortClose(po.status) || !hasAction('purchase_orders', 'can_short_close')}
-                            onClick={() => showConfirm('Short Close PO?', `Short close ${po.po_number}?`, 'Yes, Short Close', 'warning', (r) => shortClosePO(po.id, r), true)}>
+                            onClick={() => showConfirm('Short Close PO?', `Short close ${po.po_number}? This cannot be undone.`, 'Yes, Short Close', 'warning', (r) => shortClosePO(po.id, r), true)}>
                             <Archive fontSize="small" />
+                          </IconButton></span>
+                        </Tooltip>
+                        <Tooltip title="Cancel">
+                          <span><IconButton size="small" color="error" disabled={!canCancel(po.status) || !hasPermission('purchase_orders', 'can_update')}
+                            onClick={() => showConfirm('Cancel PO?', `Cancel ${po.po_number}? This cannot be undone.`, 'Yes, Cancel PO', 'error', (r) => cancelPO(po.id, r), true)}>
+                            <Block fontSize="small" />
                           </IconButton></span>
                         </Tooltip>
                       </Box>
@@ -1628,14 +1656,14 @@ export default function PurchaseOrders() {
                   <TextField disabled={!item.material_id} size="small" label="Qty" type="number" value={item.quantity}
                     error={!!itemErrors[i]?.quantity} helperText={itemErrors[i]?.quantity}
                     onKeyDown={e => {
-                    const blockList = ['-', '+', 'e', 'E'];
-                    if (!item.uom_allow_decimal) blockList.push('.');
-                    if (blockList.includes(e.key)) e.preventDefault();
-                  }} onChange={e => {
-                    let val = e.target.value.replace(/-/g, '');
-                    if (!item.uom_allow_decimal) val = val.replace(/\./g, '');
-                    updateItem(i, 'quantity', val);
-                  }} inputProps={{ min: 0, step: item.uom_allow_decimal ? "any" : "1" }} />
+                      const blockList = ['-', '+', 'e', 'E'];
+                      if (!item.uom_allow_decimal) blockList.push('.');
+                      if (blockList.includes(e.key)) e.preventDefault();
+                    }} onChange={e => {
+                      let val = e.target.value.replace(/-/g, '');
+                      if (!item.uom_allow_decimal) val = val.replace(/\./g, '');
+                      updateItem(i, 'quantity', val);
+                    }} inputProps={{ min: 0, step: item.uom_allow_decimal ? "any" : "1" }} />
                   <Box>
                     <TextField disabled={!item.material_id} sx={noSpinSx} fullWidth size="small" label="Rate (₹)" type="number" value={item.rate}
                       error={!!itemErrors[i]?.rate} helperText={itemErrors[i]?.rate}

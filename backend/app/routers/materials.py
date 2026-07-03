@@ -22,16 +22,21 @@ router = APIRouter(prefix="/api", tags=["Master Data"])
 
 @router.get("/categories", response_model=List[CategoryOut])
 def list_categories(
+    include_inactive: bool = False,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
-    categories = db.query(Category).filter(
+    q = db.query(Category).filter(
         Category.tenant_id == tenant_id,
         Category.site_id == site_id,
-        Category.is_active == True
-    ).order_by(Category.name).all()
+        Category.is_deleted == False
+    )
+    if not include_inactive:
+        q = q.filter(Category.is_active == True)
+        
+    categories = q.order_by(Category.name).all()
     
     for c in categories:
         c.has_materials = db.query(Material).filter(Material.category_id == c.id, Material.is_active == True).first() is not None
@@ -125,6 +130,7 @@ def delete_category(
 @router.get("/subcategories", response_model=List[SubCategoryOut])
 def list_subcategories(
     category_id: Optional[int] = None,
+    include_inactive: bool = False,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
     tenant_id: int = Depends(get_tenant_id),
@@ -133,8 +139,10 @@ def list_subcategories(
     q = db.query(SubCategory).filter(
         SubCategory.tenant_id == tenant_id,
         SubCategory.site_id == site_id,
-        SubCategory.is_active == True
+        SubCategory.is_deleted == False
     )
+    if not include_inactive:
+        q = q.filter(SubCategory.is_active == True)
     if category_id:
         q = q.filter(SubCategory.category_id == category_id)
     subs = q.order_by(SubCategory.name).all()
@@ -182,6 +190,8 @@ def update_subcategory(
     
     sub.name = data.name
     sub.category_id = data.category_id
+    if data.is_active is not None:
+        sub.is_active = data.is_active
     db.commit()
     db.refresh(sub)
     return SubCategoryOut(id=sub.id, name=sub.name, category_id=sub.category_id, is_active=sub.is_active)
@@ -191,16 +201,20 @@ def update_subcategory(
 
 @router.get("/uom", response_model=List[UOMOut])
 def list_uom(
+    include_inactive: bool = False,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
-    return db.query(UOM).filter(
+    q = db.query(UOM).filter(
         UOM.tenant_id == tenant_id,
         UOM.site_id == site_id,
-        UOM.is_active == True
-    ).order_by(UOM.name).all()
+        UOM.is_deleted == False
+    )
+    if not include_inactive:
+        q = q.filter(UOM.is_active == True)
+    return q.order_by(UOM.name).all()
 
 
 @router.post("/uom", response_model=UOMOut)
@@ -230,8 +244,7 @@ def update_uom(
     uom = db.query(UOM).filter(
         UOM.id == id,
         UOM.tenant_id == tenant_id,
-        UOM.site_id == site_id,
-        UOM.is_active == True
+        UOM.site_id == site_id
     ).first()
     if not uom:
         raise HTTPException(status_code=404, detail="UOM not found")
@@ -239,6 +252,8 @@ def update_uom(
     uom.name = data.name
     uom.abbreviation = data.abbreviation
     uom.allow_decimal = data.allow_decimal
+    if data.is_active is not None:
+        uom.is_active = data.is_active
     db.commit()
     db.refresh(uom)
     return uom
@@ -251,6 +266,7 @@ def list_materials(
     search: Optional[str] = None,
     category_id: Optional[int] = None,
     warehouse_id: Optional[int] = None,
+    include_inactive: bool = False,
     sort_by: Optional[str] = "name",
     sort_desc: Optional[bool] = False,
     skip: int = 0,
@@ -263,8 +279,10 @@ def list_materials(
     q = db.query(Material).filter(
         Material.tenant_id == tenant_id,
         Material.site_id == site_id,
-        Material.is_active == True
+        Material.is_deleted == False
     )
+    if not include_inactive:
+        q = q.filter(Material.is_active == True)
     if search:
         q = q.filter(or_(
             Material.name.ilike(f"%{search}%"),

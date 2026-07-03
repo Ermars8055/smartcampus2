@@ -16,14 +16,17 @@ router = APIRouter(prefix="/api/vendors", tags=["Vendors"])
 @router.get("")
 def list_vendors(
     search: Optional[str] = None,
+    include_inactive: bool = False,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
     q = db.query(Vendor).filter(
-        Vendor.tenant_id == tenant_id, Vendor.site_id == site_id, Vendor.is_active == True
+        Vendor.tenant_id == tenant_id, Vendor.site_id == site_id, Vendor.is_deleted == False
     )
+    if not include_inactive:
+        q = q.filter(Vendor.is_active == True)
     if search:
         q = q.filter(or_(
             Vendor.name.ilike(f"%{search}%"),

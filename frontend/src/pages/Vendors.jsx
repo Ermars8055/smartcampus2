@@ -4,7 +4,7 @@ import {
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
   DialogContent, DialogActions, Grid, IconButton, Tooltip, Rating,
   InputAdornment, FormControl, InputLabel, Select, MenuItem, OutlinedInput,
-  Checkbox, ListItemText, useTheme, useMediaQuery
+  Checkbox, ListItemText, useTheme, useMediaQuery, Snackbar, Alert, Switch, FormControlLabel
 } from '@mui/material';
 import {
   Add, Edit, Search, Store, Person, Phone, Email,
@@ -63,17 +63,18 @@ export default function Vendors() {
   const [categories, setCategories] = useState([]);
   const [form, setForm] = useState({
     name: '', code: '', contact_person: '', phone: '', email: '',
-    gst_number: '', address_line_1: '', address_line_2: '', city: '', pincode: '', state: '', category_ids: [], rating: 0
+    gst_number: '', address_line_1: '', address_line_2: '', city: '', pincode: '', state: '', category_ids: [], rating: 0, is_active: true
   });
   const [viewOnly, setViewOnly] = useState(false);
   const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'asc' });
   const [errors, setErrors] = useState({});
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const load = () => {
-    api.get('/api/vendors', { params: { search: search || undefined } }).then(r => {
+    api.get('/api/vendors', { params: { search: search || undefined, include_inactive: true } }).then(r => {
       let data = [...r.data];
       if (sortConfig.key) {
         data.sort((a, b) => {
@@ -127,6 +128,7 @@ export default function Vendors() {
 
     if (!form.city) newErrors.city = 'City is required';
     if (!form.state) newErrors.state = 'State is required';
+    if (!form.pincode) newErrors.pincode = 'Pincode is required';
     if (!form.address_line_1) newErrors.address_line_1 = 'Address Line 1 is required';
     if (!form.category_ids || form.category_ids.length === 0) newErrors.category_ids = 'At least one vendor category is required';
 
@@ -151,6 +153,7 @@ export default function Vendors() {
       setEditing(null);
       setErrors({});
       load();
+      setSnackbar({ open: true, message: 'Vendor saved successfully!', severity: 'success' });
     } catch (err) {
       const detail = err.response?.data?.detail;
       if (Array.isArray(detail)) {
@@ -180,7 +183,8 @@ export default function Vendors() {
         city: r.data.city || '',
         pincode: r.data.pincode || '',
         state: r.data.state || '',
-        rating: r.data.rating || 0
+        rating: r.data.rating || 0,
+        is_active: r.data.is_active !== false
       });
       setDialog(true);
     });
@@ -193,16 +197,19 @@ export default function Vendors() {
           <Typography variant="h5" sx={{ fontWeight: 700, color: '#1E293B' }}>Vendor Master</Typography>
           <Typography variant="body2" sx={{ color: '#64748B' }}>{vendors.length} registered vendors</Typography>
         </Box>
-        <Button
-          variant="contained"
-          startIcon={<Add />}
-          onClick={() => {
-            setEditing(null);
-            setViewOnly(false);
-            setForm({ name: '', code: '', contact_person: '', phone: '', email: '', gst_number: '', address_line_1: '', address_line_2: '', city: '', pincode: '', state: '', category_ids: [], rating: 0 });
-            setErrors({});
-            setDialog(true);
-          }}
+        <Button 
+            variant="contained" 
+            startIcon={<Add />} 
+            onClick={() => {
+              setEditing(null);
+              setViewOnly(false);
+              setErrors({});
+              setForm({
+                name: '', code: '', contact_person: '', phone: '', email: '',
+                gst_number: '', address_line_1: '', address_line_2: '', city: '', pincode: '', state: '', category_ids: [], rating: 0, is_active: true
+              });
+              setDialog(true);
+            }}
           sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
         >
           Add Vendor
@@ -320,6 +327,7 @@ export default function Vendors() {
                       RATING
                     </TableSortLabel>
                   </TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2, whiteSpace: 'nowrap' }}>STATUS</TableCell>
                   <TableCell align="right" sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2, whiteSpace: 'nowrap' }}>ACTIONS</TableCell>
                 </TableRow>
               </TableHead>
@@ -342,6 +350,17 @@ export default function Vendors() {
                       </Box>
                     </TableCell>
                     <TableCell><Rating value={v.rating} precision={0.5} size="small" readOnly /></TableCell>
+                    <TableCell>
+                      <Chip 
+                        label={v.is_active ? 'Active' : 'Inactive'} 
+                        size="small" 
+                        sx={{ 
+                          bgcolor: v.is_active ? '#ECFDF5' : '#F1F5F9', 
+                          color: v.is_active ? '#10B981' : '#64748B', 
+                          fontWeight: 600, fontSize: '0.75rem', border: `1px solid ${v.is_active ? '#10B981' : '#CBD5E1'}`, borderRadius: '6px', height: 24
+                        }} 
+                      />
+                    </TableCell>
                     <TableCell align="right">
                       <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5 }} onClick={(e) => e.stopPropagation()}>
                         <Tooltip title="Edit Vendor">
@@ -590,6 +609,11 @@ export default function Vendors() {
                 </MenuItem>
               ))}
             </TextField>
+            <FormControlLabel 
+              control={<Switch checked={form.is_active !== false} onChange={e => setForm({ ...form, is_active: e.target.checked })} disabled={viewOnly} color="success" />} 
+              label="Active Status" 
+              sx={{ gridColumn: { xs: '1fr', sm: 'span 3' }, ml: 1, mt: 1 }}
+            />
           </Box>
         </DialogContent>
         <DialogActions sx={{ px: 4, pb: 4, pt: 2, justifyContent: 'flex-end', gap: 2 }}>
@@ -614,6 +638,12 @@ export default function Vendors() {
           </Button>
         </DialogActions>
       </Dialog>
+      
+      <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={() => setSnackbar({ ...snackbar, open: false })} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+        <Alert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity} sx={{ width: '100%', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

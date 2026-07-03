@@ -77,7 +77,7 @@ def get_dashboard_stats(
 
     po_q = db.query(PurchaseOrder).filter(
         PurchaseOrder.tenant_id == tenant_id, PurchaseOrder.site_id == site_id,
-        PurchaseOrder.status.in_(["Draft", "Approved", "Sent to Vendor"])
+        PurchaseOrder.status.in_(["Draft", "Submitted", "Approved", "Sent to Vendor"])
     )
 
     is_platform_admin = getattr(current_user, "_is_platform_admin", False)
@@ -280,6 +280,7 @@ def get_stock_by_warehouse(
 ):
     project_id = get_project_id_from_inst(db, institution_id)
     query = db.query(
+        Warehouse.id,
         Warehouse.name,
         func.count(CurrentStock.id).label("total_items"),
         func.sum(CurrentStock.quantity * Material.standard_cost).label("total_value")
@@ -292,10 +293,10 @@ def get_stock_by_warehouse(
         CurrentStock.quantity > 0
     )
     if project_id: query = query.filter(Warehouse.project_id == project_id)
-    results = query.group_by(Warehouse.name).all()
+    results = query.group_by(Warehouse.id, Warehouse.name).all()
 
     return [
-        {"warehouse_name": r[0], "total_items": r[1], "total_value": round(r[2] or 0, 2)}
+        {"warehouse_id": r[0], "warehouse_name": r[1], "total_items": r[2], "total_value": round(r[3] or 0, 2)}
         for r in results
     ]
 
@@ -358,7 +359,22 @@ def get_recent_transactions(
     q = db.query(StockLedger).filter(StockLedger.tenant_id == tenant_id, StockLedger.site_id == site_id)
     if sd: q = q.filter(StockLedger.created_at >= sd)
     if ed: q = q.filter(StockLedger.created_at < ed)
-    if project_id: q = q.filter(StockLedger.project_id == project_id)
+    if institution_id:
+        from sqlalchemy import or_, and_
+        grn_ids = [i[0] for i in db.query(GRN.id).join(PurchaseOrder, GRN.po_id == PurchaseOrder.id).join(PurchaseRequest, PurchaseOrder.pr_id == PurchaseRequest.id).outerjoin(Indent, PurchaseOrder.indent_id == Indent.id).outerjoin(Building, PurchaseRequest.building_id == Building.id).filter((Building.institution_id == institution_id) | (Indent.institution_id == institution_id)).all()]
+        issue_ids = [i[0] for i in db.query(MaterialIssue.id).outerjoin(Building, MaterialIssue.building_id == Building.id).outerjoin(Indent, MaterialIssue.indent_id == Indent.id).filter((Building.institution_id == institution_id) | (Indent.institution_id == institution_id)).all()]
+        
+        filters = []
+        if grn_ids: filters.append(and_(StockLedger.reference_type == 'GRN', StockLedger.reference_id.in_(grn_ids)))
+        if issue_ids: filters.append(and_(StockLedger.reference_type == 'Issue', StockLedger.reference_id.in_(issue_ids)))
+        
+        if filters:
+            q = q.filter(or_(*filters))
+        else:
+            return []
+    elif project_id:
+        q = q.filter(StockLedger.project_id == project_id)
+        
     ledger = q.order_by(StockLedger.created_at.desc()).limit(20).all()
     return [
         {
@@ -543,7 +559,24 @@ def get_dashboard_alerts(
         Alert.is_resolved == False
     )
     project_id = get_project_id_from_inst(db, institution_id)
-    if project_id: alerts_q = alerts_q.filter(Alert.project_id == project_id)
+    
+    if institution_id:
+        from sqlalchemy import or_, and_
+        pr_ids = [i[0] for i in db.query(PurchaseRequest.id).outerjoin(Building, PurchaseRequest.building_id == Building.id).filter(Building.institution_id == institution_id).all()]
+        po_ids = [i[0] for i in db.query(PurchaseOrder.id).outerjoin(PurchaseRequest, PurchaseOrder.pr_id == PurchaseRequest.id).outerjoin(Indent, PurchaseOrder.indent_id == Indent.id).outerjoin(Building, PurchaseRequest.building_id == Building.id).filter((Building.institution_id == institution_id) | (Indent.institution_id == institution_id)).all()]
+        
+        filters = []
+        if pr_ids: filters.append(and_(Alert.reference_type == 'PurchaseRequest', Alert.reference_id.in_(pr_ids)))
+        if po_ids: filters.append(and_(Alert.reference_type == 'PurchaseOrder', Alert.reference_id.in_(po_ids)))
+        if project_id: filters.append(and_(Alert.alert_type == 'Low Stock', Alert.project_id == project_id))
+        
+        if filters:
+            alerts_q = alerts_q.filter(or_(*filters))
+        else:
+            return []
+    elif project_id:
+        alerts_q = alerts_q.filter(Alert.project_id == project_id)
+        
     alerts = alerts_q.order_by(Alert.created_at.desc()).limit(10).all()
 
     return [
@@ -641,6 +674,93 @@ def get_consumption_by_category(
 
     return [
         {"category_name": r[0], "total_quantity": round(r[1] or 0, 2), "total_value": round(r[2] or 0, 2)}
+        for r in results
+    ]
+
+
+@router.get("/material-cost-by-category")
+def get_material_cost_by_category(
+    category_name: str,
+    start_date: Optional[str] = None, end_date: Optional[str] = None,
+    institution_id: Optional[int] = None,
+    db: Session = Depends(get_db), current_user: User = Depends(require_permission("dashboard", "read")),
+    tenant_id: int = Depends(get_tenant_id), site_id: int = Depends(get_site_id)
+):
+    sd = parse_date(start_date)
+    ed = parse_date(end_date)
+    project_id = get_project_id_from_inst(db, institution_id)
+    
+    cat_label = func.coalesce(Category.name, "Unknown")
+    
+    query = db.query(
+        Material.name.label("material_name"),
+        func.sum(MaterialIssueItem.quantity).label("total_quantity"),
+        func.sum(MaterialIssueItem.quantity * MaterialIssueItem.rate).label("total_value")
+    ).select_from(MaterialIssueItem).join(
+        MaterialIssue, MaterialIssueItem.issue_id == MaterialIssue.id
+    ).join(
+        Material, MaterialIssueItem.material_id == Material.id
+    ).outerjoin(
+        Category, Material.category_id == Category.id
+    ).filter(
+        MaterialIssue.tenant_id == tenant_id, MaterialIssue.site_id == site_id,
+        MaterialIssue.is_acknowledged == True,
+        cat_label == category_name
+    )
+    
+    if sd: query = query.filter(MaterialIssue.created_at >= sd)
+    if ed: query = query.filter(MaterialIssue.created_at < ed)
+    if institution_id:
+        query = query.outerjoin(Building, MaterialIssue.building_id == Building.id)\
+                     .outerjoin(Indent, MaterialIssue.indent_id == Indent.id)\
+                     .filter((Building.institution_id == institution_id) | (Indent.institution_id == institution_id))
+    elif project_id:
+        query = query.filter(MaterialIssue.project_id == project_id)
+    
+    results = query.group_by(Material.name).order_by(func.sum(MaterialIssueItem.quantity * MaterialIssueItem.rate).desc()).all()
+
+    return [
+        {"material_name": r[0], "total_quantity": round(r[1] or 0, 2), "total_value": round(r[2] or 0, 2)}
+        for r in results
+    ]
+
+
+@router.get("/material-cost-by-month")
+def get_material_cost_by_month(
+    month: str,
+    institution_id: Optional[int] = None,
+    db: Session = Depends(get_db), current_user: User = Depends(require_permission("dashboard", "read")),
+    tenant_id: int = Depends(get_tenant_id), site_id: int = Depends(get_site_id)
+):
+    project_id = get_project_id_from_inst(db, institution_id)
+    
+    month_label = func.to_char(MaterialIssue.created_at, 'Mon YYYY')
+    
+    query = db.query(
+        Material.name.label("material_name"),
+        func.sum(MaterialIssueItem.quantity).label("total_quantity"),
+        func.sum(MaterialIssueItem.quantity * MaterialIssueItem.rate).label("total_value")
+    ).select_from(MaterialIssueItem).join(
+        MaterialIssue, MaterialIssueItem.issue_id == MaterialIssue.id
+    ).join(
+        Material, MaterialIssueItem.material_id == Material.id
+    ).filter(
+        MaterialIssue.tenant_id == tenant_id, MaterialIssue.site_id == site_id,
+        MaterialIssue.is_acknowledged == True,
+        month_label == month
+    )
+    
+    if institution_id:
+        query = query.outerjoin(Building, MaterialIssue.building_id == Building.id)\
+                     .outerjoin(Indent, MaterialIssue.indent_id == Indent.id)\
+                     .filter((Building.institution_id == institution_id) | (Indent.institution_id == institution_id))
+    elif project_id:
+        query = query.filter(MaterialIssue.project_id == project_id)
+    
+    results = query.group_by(Material.name).order_by(func.sum(MaterialIssueItem.quantity * MaterialIssueItem.rate).desc()).all()
+
+    return [
+        {"material_name": r[0], "total_quantity": round(r[1] or 0, 2), "total_value": round(r[2] or 0, 2)}
         for r in results
     ]
 

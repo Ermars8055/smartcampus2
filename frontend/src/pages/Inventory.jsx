@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { formatDateTime } from '../utils/dateUtils';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useLocation, useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, TextField, Chip, FormControl, InputLabel, Select,
   MenuItem, InputAdornment, Grid, Tab, Tabs, ToggleButton, ToggleButtonGroup,
-  TableSortLabel
+  TableSortLabel, Button
 } from '@mui/material';
-import { Search, Warning } from '@mui/icons-material';
+import { Search, Warning, ArrowBack } from '@mui/icons-material';
 import api from '../services/api';
 
 export default function Inventory() {
@@ -21,6 +21,8 @@ export default function Inventory() {
   const [filter, setFilter] = useState(searchParams.get('low') === 'true' ? 'low' : 'all');
   const [orderBy, setOrderBy] = useState('material_name');
   const [order, setOrder] = useState('asc');
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     api.get('/api/warehouses').then(r => setWarehouses(r.data));
@@ -35,8 +37,34 @@ export default function Inventory() {
     api.get('/api/inventory/ledger', { params: { warehouse_id: whFilter || undefined, search: search || undefined } }).then(r => setLedger(r.data.items || []));
   }, [search, whFilter, filter]);
 
-  const totalValue = stock.reduce((s, i) => s + (i.stock_value || 0), 0);
-  const lowItems = stock.filter(s => s.quantity < s.reorder_level);
+  const filteredStockBase = useMemo(() => {
+    let list = stock;
+    const projId = searchParams.get('proj');
+    if (projId && warehouses.length > 0) {
+      const targetProj = parseInt(projId, 10);
+      list = list.filter(item => {
+        const wh = warehouses.find(w => w.id === item.warehouse_id);
+        return wh && wh.project_id === targetProj;
+      });
+    }
+    return list;
+  }, [stock, warehouses, searchParams]);
+
+  const filteredLedgerBase = useMemo(() => {
+    let list = ledger;
+    const projId = searchParams.get('proj');
+    if (projId && warehouses.length > 0) {
+      const targetProj = parseInt(projId, 10);
+      list = list.filter(item => {
+        const wh = warehouses.find(w => w.id === item.warehouse_id);
+        return wh && wh.project_id === targetProj;
+      });
+    }
+    return list;
+  }, [ledger, warehouses, searchParams]);
+
+  const totalValue = filteredStockBase.reduce((s, i) => s + (i.stock_value || 0), 0);
+  const lowItems = filteredStockBase.filter(s => s.quantity < s.reorder_level);
 
   const handleSort = (property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -44,7 +72,7 @@ export default function Inventory() {
     setOrderBy(property);
   };
 
-  const sortedStock = [...stock].sort((a, b) => {
+  const sortedStock = [...filteredStockBase].sort((a, b) => {
     let aVal = a[orderBy];
     let bVal = b[orderBy];
     if (typeof aVal === 'string') {
@@ -56,7 +84,7 @@ export default function Inventory() {
     return 0;
   });
 
-  const sortedLedger = [...ledger].sort((a, b) => {
+  const sortedLedger = [...filteredLedgerBase].sort((a, b) => {
     let aVal = a[orderBy];
     let bVal = b[orderBy];
     if (typeof aVal === 'string') {
@@ -70,11 +98,20 @@ export default function Inventory() {
 
   return (
     <Box>
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h5" sx={{ fontWeight: 700 }}>Inventory Management</Typography>
-        <Typography variant="body2" sx={{ color: '#64748B' }}>
-          {stock.length} {stock.length === 1 ? 'item' : 'items'} • Total Value: ₹{totalValue.toLocaleString('en-IN')} {lowItems.length > 0 && `• ${lowItems.length} below reorder level`}
-        </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
+        <Box>
+          <Typography variant="h5" sx={{ fontWeight: 700 }}>Inventory Management</Typography>
+          <Typography variant="body2" sx={{ color: '#64748B' }}>
+            {filteredStockBase.length} {filteredStockBase.length === 1 ? 'item' : 'items'} • Total Value: ₹{totalValue.toLocaleString('en-IN')} {lowItems.length > 0 && `• ${lowItems.length} below reorder level`}
+          </Typography>
+        </Box>
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+          {location.state?.fromDashboard && (
+            <Button size="small" variant="outlined" startIcon={<ArrowBack />} onClick={() => navigate('/')}>
+              Back to Dashboard
+            </Button>
+          )}
+        </Box>
       </Box>
 
       <Card sx={{ mb: 2 }}>

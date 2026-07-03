@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { formatDate } from '../utils/dateUtils';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
@@ -7,7 +8,7 @@ import {
   InputLabel, IconButton, Paper, InputAdornment, MenuItem, Tooltip, TableSortLabel, Tabs, Tab, Autocomplete
 } from '@mui/material';
 import { createFilterOptions } from '@mui/material/Autocomplete';
-import { Close, Inventory2, Add, Delete, AccountTree, Warehouse, Comment, InfoOutlined, Outbox, CheckCircle, Apartment, Layers, MeetingRoom, Search, Business } from '@mui/icons-material';
+import { Close, Inventory2, Add, Delete, AccountTree, Warehouse, Comment, InfoOutlined, Outbox, CheckCircle, Apartment, Layers, MeetingRoom, Search, Business, ArrowBack } from '@mui/icons-material';
 import api from '../services/api';
 import MaterialSelect from '../components/MaterialSelect';
 import { useAuth } from '../context/AuthContext';
@@ -16,6 +17,9 @@ import { useMessage } from '../context/MessageContext';
 export default function MaterialIssue() {
   const { showMessage } = useMessage();
   const { hasAction } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [indents, setIndents] = useState([]);
   const [issues, setIssues] = useState([]);
   const [stocks, setStocks] = useState([]);
@@ -223,8 +227,10 @@ export default function MaterialIssue() {
   };
 
   const combinedList = useMemo(() => {
+    const projId = searchParams.get('proj');
+    const targetProj = projId ? parseInt(projId, 10) : null;
     let list = [
-      ...pendingIndents.map(ind => {
+      ...pendingIndents.filter(ind => targetProj ? ind.project_id === targetProj : true).map(ind => {
         const loc = [ind.building_name, ind.floor, ind.room_name].filter(Boolean).join('-');
         const personStrValue = (ind.department && loc) ? `${ind.department} (${loc})` : (ind.department || loc || ind.requester_name || 'Not Specified');
         const pendingItemsCount = ind.items?.filter(it => (it.approved_quantity || it.requested_quantity) > (it.issued_quantity || 0)).length || 0;
@@ -236,7 +242,7 @@ export default function MaterialIssue() {
           derivedStatus: ind.status === 'Approved' ? 'Pending' : 'Partial'
         };
       }),
-      ...issues.map(iss => {
+      ...issues.filter(iss => targetProj ? iss.project_id === targetProj : true).map(iss => {
         const dept = iss.issued_to_department || iss.issued_to_contractor || iss.received_by_name;
         const loc = [iss.building_name, iss.floor_name, iss.room_name].filter(Boolean).join('-');
         const personStrValue = (dept && loc) ? `${dept} (${loc})` : (dept || loc || iss.issued_by_name || 'Not Specified');
@@ -265,7 +271,7 @@ export default function MaterialIssue() {
     });
 
     return list;
-  }, [pendingIndents, issues, sortConfig]);
+  }, [pendingIndents, issues, sortConfig, searchParams]);
 
   const filteredList = useMemo(() => {
     let list = combinedList;
@@ -407,23 +413,29 @@ export default function MaterialIssue() {
     <Box>
       <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-
           <Box>
             <Typography variant="h6" sx={{ fontWeight: 800, color: '#1E293B', lineHeight: 1.2 }}>Material Issues</Typography>
             <Typography variant="caption" sx={{ color: '#64748B' }}>Manage central store fulfillment, track pending indents, and log direct issues.</Typography>
           </Box>
         </Box>
 
-        {hasAction('issues', 'can_direct_issue') && (
-          <Button
-            variant="contained"
-            startIcon={<Add />}
-            onClick={openDirectIssueModal}
-            sx={{ textTransform: 'none', borderRadius: 2, fontWeight: 700, px: 3, bgcolor: '#2563EB' }}
-          >
-            New Issue
-          </Button>
-        )}
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+          {location.state?.fromDashboard && (
+            <Button size="small" variant="outlined" startIcon={<ArrowBack />} onClick={() => navigate('/')}>
+              Back to Dashboard
+            </Button>
+          )}
+          {hasAction('issues', 'can_direct_issue') && (
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={openDirectIssueModal}
+              sx={{ textTransform: 'none', borderRadius: 2, fontWeight: 700, px: 3, bgcolor: '#2563EB' }}
+            >
+              New Issue
+            </Button>
+          )}
+        </Box>
       </Box>
 
       <Box sx={{ mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>

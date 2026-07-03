@@ -3,7 +3,7 @@ import {
   Box, Typography, Card, Grid, Table, TableHead, TableBody, TableRow,
   TableCell, TableContainer, Button, TextField, Dialog, DialogTitle,
   DialogContent, DialogActions, MenuItem, Select, FormControl, InputLabel,
-  IconButton, Chip, TableSortLabel, useTheme, useMediaQuery
+  IconButton, Chip, TableSortLabel, useTheme, useMediaQuery, Snackbar, Alert, Switch, FormControlLabel
 } from '@mui/material';
 import { Add, Edit, Delete, Warehouse as WarehouseIcon, Business, VpnKey, LocationOn, Apartment, Search, Person } from '@mui/icons-material';
 import { InputAdornment } from '@mui/material';
@@ -16,12 +16,14 @@ export default function Warehouses() {
   const [search, setSearch] = useState('');
   const [form, setForm] = useState({});
   const [sortConfig, setSortConfig] = useState({ key: 'code', direction: 'asc' });
+  const [errors, setErrors] = useState({});
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const load = () => {
-    api.get('/api/warehouses', { params: { search: search || undefined } }).then(r => setWarehouses(r.data));
+    api.get('/api/warehouses', { params: { search: search || undefined, include_inactive: true } }).then(r => setWarehouses(r.data));
     api.get('/api/projects').then(r => setProjects(r.data));
   };
 
@@ -47,8 +49,12 @@ export default function Warehouses() {
   }, [warehouses, sortConfig]);
 
   const save = async () => {
-    if (!form.name?.trim()) {
-      return alert("Name is required.");
+    const newErrors = {};
+    if (!form.name?.trim()) newErrors.name = 'Store Name is required';
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
     }
     const payload = { ...form };
     if (!form.id && !payload.code) delete payload.code;
@@ -60,7 +66,9 @@ export default function Warehouses() {
         await api.post('/api/warehouses', payload);
       }
       setDialogOpen(false);
+      setErrors({});
       load();
+      setSnackbar({ open: true, message: 'Store saved successfully!', severity: 'success' });
     } catch (err) { alert(err.response?.data?.detail || 'Error saving store'); }
   };
 
@@ -79,7 +87,7 @@ export default function Warehouses() {
         <Button
           variant="contained"
           startIcon={<Add />}
-          onClick={() => { setForm({ name: '', code: '', project_id: projects[0]?.id || '', warehouse_type: 'Central', location: '', manager_name: '' }); setDialogOpen(true); }}
+          onClick={() => { setErrors({}); setForm({ name: '', code: '', project_id: projects[0]?.id || '', warehouse_type: 'Central', location: '', manager_name: '', is_active: true }); setDialogOpen(true); }}
           sx={{ bgcolor: '#1E3A8A' }}
         >
           New Store
@@ -110,9 +118,18 @@ export default function Warehouses() {
                </Box>
                <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#334155' }}><strong>Location:</strong> {w.location || '-'}</Typography>
                <Typography variant="caption" sx={{ display: 'block', mb: 1, color: '#334155' }}><strong>Manager:</strong> {w.manager_name || '-'}</Typography>
-               <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Chip 
+                    label={w.is_active ? 'Active' : 'Inactive'} 
+                    size="small" 
+                    sx={{ 
+                      bgcolor: w.is_active ? '#ECFDF5' : '#F1F5F9', 
+                      color: w.is_active ? '#10B981' : '#64748B', 
+                      fontWeight: 600, fontSize: '0.75rem', border: `1px solid ${w.is_active ? '#10B981' : '#CBD5E1'}`, borderRadius: '6px', height: 24
+                    }} 
+                  />
                   <Box onClick={e => e.stopPropagation()}>
-                    <IconButton size="small" onClick={() => { setForm({ ...w, project_id: w.project_id || projects[0]?.id || '' }); setDialogOpen(true); }}><Edit fontSize="small" /></IconButton>
+                    <IconButton size="small" onClick={() => { setErrors({}); setForm({ ...w, project_id: w.project_id || projects[0]?.id || '', is_active: w.is_active !== false }); setDialogOpen(true); }}><Edit fontSize="small" /></IconButton>
                     <IconButton size="small" onClick={() => handleDelete(w.id)} color="error"><Delete fontSize="small" /></IconButton>
                   </Box>
                </Box>
@@ -136,18 +153,30 @@ export default function Warehouses() {
                 <TableCell sx={{ fontWeight: 600 }}>
                   <TableSortLabel active={sortConfig.key === 'location'} direction={sortConfig.direction} onClick={() => handleSort('location')}>LOCATION</TableSortLabel>
                 </TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>STATUS</TableCell>
                 <TableCell align="right" sx={{ fontWeight: 600 }}>ACTIONS</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {sortedWarehouses.map(w => (
-                <TableRow key={w.id} hover onClick={() => { setForm({ ...w, project_id: w.project_id || projects[0]?.id || '' }); setDialogOpen(true); }} sx={{ cursor: 'pointer' }}>
+                <TableRow key={w.id} hover onClick={() => { setErrors({}); setForm({ ...w, project_id: w.project_id || projects[0]?.id || '', is_active: w.is_active !== false }); setDialogOpen(true); }} sx={{ cursor: 'pointer' }}>
                   <TableCell sx={{ fontWeight: 700, color: '#2563EB', fontSize: '0.85rem' }}>{w.code}</TableCell>
                   <TableCell sx={{ fontWeight: 500 }}>{w.name}</TableCell>
                   <TableCell><Chip label={w.warehouse_type} size="small" color="primary" variant="outlined" /></TableCell>
                   <TableCell>{w.location}</TableCell>
+                  <TableCell>
+                    <Chip 
+                      label={w.is_active ? 'Active' : 'Inactive'} 
+                      size="small" 
+                      sx={{ 
+                        bgcolor: w.is_active ? '#ECFDF5' : '#F1F5F9', 
+                        color: w.is_active ? '#10B981' : '#64748B', 
+                        fontWeight: 600, fontSize: '0.75rem', border: `1px solid ${w.is_active ? '#10B981' : '#CBD5E1'}`, borderRadius: '6px', height: 24
+                      }} 
+                    />
+                  </TableCell>
                   <TableCell align="right" onClick={e => e.stopPropagation()}>
-                    <IconButton size="small" onClick={() => { setForm({ ...w, project_id: w.project_id || projects[0]?.id || '' }); setDialogOpen(true); }}><Edit fontSize="small" /></IconButton>
+                    <IconButton size="small" onClick={() => { setErrors({}); setForm({ ...w, project_id: w.project_id || projects[0]?.id || '', is_active: w.is_active !== false }); setDialogOpen(true); }}><Edit fontSize="small" /></IconButton>
                     <IconButton size="small" onClick={() => handleDelete(w.id)} color="error"><Delete fontSize="small" /></IconButton>
                   </TableCell>
                 </TableRow>
@@ -191,6 +220,8 @@ export default function Warehouses() {
                 fullWidth label="Store Name" value={form.name || ''}
                 onChange={e => setForm({ ...form, name: e.target.value })}
                 required
+                error={!!errors.name}
+                helperText={errors.name}
                 InputLabelProps={{ shrink: true }}
                 InputProps={{ startAdornment: <InputAdornment position="start"><WarehouseIcon sx={{ color: '#94A3B8' }} /></InputAdornment> }}
               />
@@ -220,6 +251,13 @@ export default function Warehouses() {
                 InputProps={{ startAdornment: <InputAdornment position="start"><Person sx={{ color: '#94A3B8' }} /></InputAdornment> }}
               />
             </Grid>
+            <Grid item xs={12}>
+              <FormControlLabel 
+                control={<Switch checked={form.is_active !== false} onChange={e => setForm({ ...form, is_active: e.target.checked })} color="success" />} 
+                label="Active Status" 
+                sx={{ ml: 0 }}
+              />
+            </Grid>
           </Grid>
         </DialogContent>
         <DialogActions sx={{ px: 4, pb: 4, pt: 2, justifyContent: 'flex-end', gap: 2 }}>
@@ -227,6 +265,12 @@ export default function Warehouses() {
           <Button variant="contained" onClick={save} sx={{ borderRadius: 2, px: 4, py: 1, fontWeight: 700, boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)', textTransform: 'none' }}>Save Store</Button>
         </DialogActions>
       </Dialog>
+      
+      <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={() => setSnackbar({ ...snackbar, open: false })} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+        <Alert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity} sx={{ width: '100%', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

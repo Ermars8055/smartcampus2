@@ -10,21 +10,65 @@ from app.auth import get_current_user, require_platform_admin, get_password_hash
 
 router = APIRouter(prefix="/api/admin/saas", tags=["SaaS Admin"])
 
-DEFAULT_RESOURCES = [
-    "dashboard", "materials", "categories", "vendors", "organizations",
-    "projects", "buildings", "warehouses", "purchase_requests",
-    "purchase_orders", "gate_entry", "grn", "issues", "returns",
-    "transfers", "inventory", "intelligence", "reports", "admin_users",
-    "admin_roles", "alerts", "indents", "quotations", "invoice",
-    "acknowledgements", "departments", "terms"
-]
+ADMIN_RESOURCES = {
+    "dashboard": [],
+    "materials": [],
+    "categories": [],
+    "subcategories": [],
+    "uom": [],
+    "vendors": [],
+    "warehouses": [],
+    "indents": ["can_approve", "can_reject", "can_convert_to_po", "can_acknowledge"],
+    "purchase_requests": ["can_submit", "can_approve", "can_reject", "can_convert_to_po", "can_hold", "can_short_close"],
+    "quotations": ["can_send_to_vendors", "can_receive", "can_enter_quotes", "can_compare", "can_approve", "can_convert_to_po"],
+    "purchase_orders": ["can_approve", "can_reject", "can_hold", "can_send_to_vendor", "can_short_close"],
+    "gate_entry": ["can_record_entry", "can_verify"],
+    "invoice": ["can_register", "can_approve", "can_reject", "can_print"],
+    "grn": ["can_create_grn", "can_complete"],
+    "issues": ["can_issue", "can_direct_issue", "can_print"],
+    "returns": ["can_return", "receive"],
+    "transfers": ["can_transfer"],
+    "gate_passes": ["can_create", "can_print"],
+    "acknowledgements": ["can_acknowledge"],
+    "inventory": [],
+    "complaints": [],
+    "intelligence": [],
+    "finance_invoices": ["can_send_hard_copy", "can_receive_hard_copy", "can_send_for_payment", "can_mark_paid"],
+    "reports": [],
+    "report_issue_summary": [],
+    "report_rate_analysis": [],
+    "report_receipt_summary": [],
+    "report_dept_inventory": [],
+    "report_finance": [],
+    "report_pending_gatepass": [],
+    "admin_users": [],
+    "admin_roles": [],
+    "audit_logs": [],
+    "approval_flows": [],
+    "material_allowances": [],
+    "configurations": [],
+    "projects": [],
+    "organizations": [],
+    "departments": [],
+    "company_addresses": [],
+    "terms": [],
+    "buildings": [],
+    "alerts": []
+}
 
 
 def create_admin_role(db: Session, tenant_id: int) -> Role:
-    role = Role(tenant_id=tenant_id, name="Admin", code="admin", description="Full tenant access")
+    role = Role(
+        tenant_id=tenant_id, 
+        name="Admin", 
+        code="admin", 
+        description="Full tenant access",
+        data_access_scope="Full Administrative Access"
+    )
     db.add(role)
     db.flush()
-    for resource in DEFAULT_RESOURCES:
+    for resource, ext_actions in ADMIN_RESOURCES.items():
+        extended_actions_dict = {action: True for action in ext_actions}
         db.add(RolePermission(
             role_id=role.id,
             resource=resource,
@@ -32,6 +76,7 @@ def create_admin_role(db: Session, tenant_id: int) -> Role:
             can_create=True,
             can_update=True,
             can_delete=True,
+            extended_actions=extended_actions_dict
         ))
     return role
 

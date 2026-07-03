@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
@@ -7,7 +7,7 @@ import {
   InputLabel, IconButton, Tooltip, Tab, Tabs, Divider, Paper, InputAdornment,
   TableSortLabel, Accordion, AccordionSummary, AccordionDetails, Autocomplete
 } from '@mui/material';
-import { Add, CheckCircle, Cancel, ShoppingCart, Archive, Delete, Search, Apartment, AccountTree, CalendarMonth, Notes, Store, Numbers, Inventory, ArrowDropDown, Visibility, History, Textsms, ExpandMore } from '@mui/icons-material';
+import { Add, CheckCircle, Cancel, ShoppingCart, Archive, Delete, Search, Apartment, AccountTree, CalendarMonth, Notes, Store, Numbers, Inventory, ArrowDropDown, Visibility, History, Textsms, ExpandMore, ArrowBack, Block } from '@mui/icons-material';
 import api from '../services/api';
 import { formatDate, formatDateTime } from '../utils/dateUtils';
 import MaterialSelect from '../components/MaterialSelect';
@@ -21,7 +21,7 @@ function StatusChip({ status }) {
   const colorMap = {
     'Draft': 'default', 'Submitted': 'info', 'Approved': 'success',
     'Rejected': 'error', 'Converted to PO': 'primary',
-    'Short Closed': 'warning'
+    'Short Closed': 'warning', 'Cancelled': 'default'
   };
   return <Chip label={status} size="small" color={colorMap[status] || 'default'} sx={{ fontWeight: 600, fontSize: '0.7rem' }} />;
 }
@@ -31,6 +31,8 @@ export default function PurchaseRequests() {
   const { tenantConfig } = useConfig();
   const location = useLocation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
   const [prs, setPrs] = useState([]);
   const [materials, setMaterials] = useState([]);
   const [projects, setProjects] = useState([]);
@@ -50,9 +52,16 @@ export default function PurchaseRequests() {
   const [historyDialog, setHistoryDialog] = useState({ open: false, materialId: null, data: null, loading: false });
   const [detailHistoryData, setDetailHistoryData] = useState(null);
   const [detailHistoryOpen, setDetailHistoryOpen] = useState(false);
-  const [tab, setTab] = useState(0);
+  const statusFilters = ['Draft', 'Submitted', 'Approved', 'Rejected', 'Converted to PO', 'Short Closed', 'Cancelled', 'All'];
+  const [tab, setTab] = useState(() => {
+    const initialTabName = searchParams.get('tab');
+    if (initialTabName) {
+      const idx = statusFilters.indexOf(initialTabName);
+      if (idx !== -1) return idx;
+    }
+    return 0;
+  });
   const [search, setSearch] = useState('');
-  const [tabValue, setTabValue] = useState('Draft');
   const [sortConfig, setSortConfig] = useState({ key: 'created_at', direction: 'desc' });
   const [filterDepartment, setFilterDepartment] = useState(null);
   const [filterInstitution, setFilterInstitution] = useState(null);
@@ -312,9 +321,9 @@ export default function PurchaseRequests() {
           <span>You have entered an approved quantity larger than the requested quantity for the following items:</span>
           {largerItems.map((li, idx) => (
             <div key={idx} style={{ margin: '12px 0', paddingLeft: 8 }}>
-              <strong>• {li.name}:</strong><br/>
-              &nbsp;&nbsp;&nbsp;Requested: {li.requested} {li.uom}<br/>
-              &nbsp;&nbsp;&nbsp;Approved: {li.approved} {li.uom}<br/>
+              <strong>• {li.name}:</strong><br />
+              &nbsp;&nbsp;&nbsp;Requested: {li.requested} {li.uom}<br />
+              &nbsp;&nbsp;&nbsp;Approved: {li.approved} {li.uom}<br />
               &nbsp;&nbsp;&nbsp;<span style={{ color: '#dc2626', fontWeight: 600 }}>Remarks: {li.rem}</span>
             </div>
           ))}
@@ -334,6 +343,7 @@ export default function PurchaseRequests() {
   };
   const handleReject = async (id, remarks) => { await api.post(`/api/procurement/pr/${id}/reject`, { remarks }); load(); };
   const handleShortClose = async (id, remarks) => { await api.post(`/api/procurement/pr/${id}/short-close`, { remarks }); load(); };
+  const handleCancelPr = async (id, remarks) => { await api.post(`/api/procurement/pr/${id}/cancel`, { remarks }); load(); };
 
   // Convert ONLY this specific PR to PO (no batch — prevents bypassing approval)
   const openConvertDialog = (pr) => {
@@ -365,7 +375,7 @@ export default function PurchaseRequests() {
     }
     const items = [...convertDialog.items];
     items[i][field] = finalVal;
-    
+
     if (field === 'cgst_percentage') {
       items[i].sgst_percentage = finalVal;
       items[i].igst_percentage = 0;
@@ -424,20 +434,23 @@ export default function PurchaseRequests() {
   const canApprove = (pr) => pr.status === 'Submitted' && pr.can_user_approve;
   const canReject = (s) => s === 'Submitted';
   const canConvert = (s) => s === 'Approved';
-  const canShortClose = (s) => s !== 'Converted to PO' && s !== 'Short Closed' && s !== 'Rejected';
+  const canShortClose = (s) => s === 'Approved';
+  const canCancel = (s) => s === 'Draft' || s === 'Submitted';
   const approveLabel = (s) => s === 'Draft' ? 'Submit for Approval' : 'Approve';
-
-  const statusFilters = ['Draft', 'Submitted', 'Approved', 'Rejected', 'Converted to PO', 'Short Closed', 'All'];
 
   const filteredPRsBase = useMemo(() => {
     let list = prs;
+    const projId = searchParams.get('proj');
+    if (projId) {
+      list = list.filter(p => p.project_id === parseInt(projId, 10));
+    }
     list = list.filter(p => !filterDepartment || p.department_name === filterDepartment);
     list = list.filter(p => !filterInstitution || p.project_id === filterInstitution.project_id);
     return list;
-  }, [prs, filterDepartment, filterInstitution]);
+  }, [prs, filterDepartment, filterInstitution, searchParams]);
 
   const sortedPRs = useMemo(() => {
-    let list = tab === 6 ? filteredPRsBase : filteredPRsBase.filter(p => p.status === statusFilters[tab]);
+    let list = statusFilters[tab] === 'All' ? filteredPRsBase : filteredPRsBase.filter(p => p.status === statusFilters[tab]);
 
     return [...list].sort((a, b) => {
       let aVal = a[sortConfig.key];
@@ -464,34 +477,41 @@ export default function PurchaseRequests() {
           <Typography variant="h5" sx={{ fontWeight: 700 }}>Purchase Requests</Typography>
           <Typography variant="body2" sx={{ color: '#64748B' }}>{prs.length} total requests</Typography>
         </Box>
-        {hasPermission('purchase_requests', 'can_create') && (
-          <Button variant="contained" startIcon={<Add />} onClick={() => {
-            const defaultInst = institutions.length === 1 ? institutions[0].id : '';
-            const defaultDept = allDepartmentsList.length === 1 ? allDepartmentsList[0] : '';
-            const defaultProj = institutions.length === 1 ? institutions[0].project_id : '';
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+          {location.state?.fromDashboard && (
+            <Button size="small" variant="outlined" startIcon={<ArrowBack />} onClick={() => navigate('/')}>
+              Back to Dashboard
+            </Button>
+          )}
+          {hasPermission('purchase_requests', 'can_create') && (
+            <Button variant="contained" startIcon={<Add />} onClick={() => {
+              const defaultInst = institutions.length === 1 ? institutions[0].id : '';
+              const defaultDept = allDepartmentsList.length === 1 ? allDepartmentsList[0] : '';
+              const defaultProj = institutions.length === 1 ? institutions[0].project_id : '';
 
-            setForm({
-              institution_id: defaultInst, project_id: defaultProj, building_id: '', department_name: defaultDept,
-              required_date: dayjs().add(14, 'day'), remarks: '',
-              items: [{ material_id: '', quantity: '' }]
-            });
+              setForm({
+                institution_id: defaultInst, project_id: defaultProj, building_id: '', department_name: defaultDept,
+                required_date: dayjs().add(14, 'day'), remarks: '',
+                items: [{ material_id: '', quantity: '' }]
+              });
 
-            if (defaultInst) {
-              const depts = allDepartments.filter(d => d.institution_id === defaultInst).map(d => d.name);
-              setFormDepartmentsList(Array.from(new Set(depts)));
-            } else {
-              setFormDepartmentsList([]);
-            }
+              if (defaultInst) {
+                const depts = allDepartments.filter(d => d.institution_id === defaultInst).map(d => d.name);
+                setFormDepartmentsList(Array.from(new Set(depts)));
+              } else {
+                setFormDepartmentsList([]);
+              }
 
-            if (defaultDept) {
-              handleDepartmentChange(defaultDept, defaultInst);
-            } else {
-              setBuildings([]);
-            }
+              if (defaultDept) {
+                handleDepartmentChange(defaultDept, defaultInst);
+              } else {
+                setBuildings([]);
+              }
 
-            setDialog(true);
-          }}>Create PR</Button>
-        )}
+              setDialog(true);
+            }}>Create PR</Button>
+          )}
+        </Box>
       </Box>
 
       <Card sx={{ mb: 3 }}>
@@ -719,8 +739,14 @@ export default function PurchaseRequests() {
                       </Tooltip>
                       <Tooltip title="Short Close">
                         <span><IconButton size="small" color="warning" disabled={!canShortClose(pr.status) || !hasAction('purchase_requests', 'can_short_close')}
-                          onClick={() => showConfirm('Short Close PR?', `Short close ${pr.pr_number}?`, 'Yes, Short Close', 'warning', (r) => handleShortClose(pr.id, r), true)}>
+                          onClick={() => showConfirm('Short Close PR?', `Short close ${pr.pr_number}? This cannot be undone.`, 'Yes, Short Close', 'warning', (r) => handleShortClose(pr.id, r), true)}>
                           <Archive fontSize="small" />
+                        </IconButton></span>
+                      </Tooltip>
+                      <Tooltip title="Cancel">
+                        <span><IconButton size="small" color="error" disabled={!canCancel(pr.status) || !hasPermission('purchase_requests', 'can_update')}
+                          onClick={() => showConfirm('Cancel PR?', `Cancel ${pr.pr_number}? This cannot be undone.`, 'Yes, Cancel PR', 'error', (r) => handleCancelPr(pr.id, r), true)}>
+                          <Block fontSize="small" />
                         </IconButton></span>
                       </Tooltip>
                     </Box>
@@ -1326,7 +1352,7 @@ export default function PurchaseRequests() {
           )}
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={handleCancelConfirm}>Cancel</Button>
+          <Button onClick={handleCancelConfirm}>Close</Button>
           <Button variant="contained" color={confirm.confirmColor}
             disabled={confirm.needsReason && !reason.trim()}
             onClick={handleConfirm} sx={{ fontWeight: 600 }}>

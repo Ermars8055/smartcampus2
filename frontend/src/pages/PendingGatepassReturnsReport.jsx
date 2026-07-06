@@ -12,8 +12,10 @@ import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import api from '../services/api';
+import { useMessage } from '../context/MessageContext';
 
 export default function PendingGatepassReturnsReport() {
+  const { showMessage } = useMessage();
   const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(false);
   const [reportData, setReportData] = useState(null);
@@ -43,7 +45,7 @@ export default function PendingGatepassReturnsReport() {
       setReportData(res.data);
     } catch (err) {
       console.error(err);
-      alert('Failed to generate report');
+      showMessage('Failed to generate report', 'Error', 'error');
     } finally {
       setLoading(false);
     }

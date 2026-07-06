@@ -11,7 +11,9 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
 import { useConfig } from '../context/ConfigContext';
 import { computeGstSplit } from '../utils/gstCalculations';
+import { useMessage } from '../context/MessageContext';
 export default function RegisterInvoice() {
+  const { showMessage } = useMessage();
   const navigate = useNavigate();
   const { id } = useParams();
   const { tenantConfig } = useConfig();
@@ -22,6 +24,9 @@ export default function RegisterInvoice() {
   const [companyAddresses, setCompanyAddresses] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [confirmSubmit, setConfirmSubmit] = useState(false);
+  const [errors, setErrors] = useState({});
+
+
 
   const [form, setForm] = useState({
     invoice_number: '',
@@ -58,6 +63,19 @@ export default function RegisterInvoice() {
     transport_discount_percent: '',
     items: []
   });
+
+
+
+
+
+
+  // Auto-clear resolved errors
+  useEffect(() => {
+    setErrors(prev => {
+      if (Object.keys(prev).length === 0) return prev;
+      return {}; // Clear all errors when form changes
+    });
+  }, [form]);
 
   useEffect(() => {
     api.get('/api/vendors').then(r => setVendors(r.data));
@@ -123,6 +141,10 @@ export default function RegisterInvoice() {
     }
   }, [id]);
 
+
+
+
+
   const handlePOChange = async (poId) => {
     setForm(prev => ({ ...prev, po_id: poId }));
     if (!poId) return;
@@ -164,14 +186,14 @@ export default function RegisterInvoice() {
       fd.append('file', file);
       const res = await api.post('/api/upload', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
       setForm(prev => ({ ...prev, scan_url: res.data.url, scan_file_name: file.name }));
-    } catch (err) { alert('Upload failed: ' + (err.response?.data?.detail || err.message)); }
+    } catch (err) { showMessage('Upload failed: ' + (err.response?.data?.detail || err.message), 'Error', 'error'); }
     setUploading(false);
   };
 
   const addItem = () => {
     const emptyCount = form.items.filter(it => !it.material_id).length;
     if (emptyCount >= 5) {
-      alert("Please select materials for the existing empty rows before adding more. Limit reached (5).");
+      showMessage("Please select materials for the existing empty rows before adding more. Limit reached (5).", 'Validation Error', 'warning');
       return;
     }
     setForm(prev => ({
@@ -337,23 +359,38 @@ export default function RegisterInvoice() {
   };
 
   const handleSave = async (submitStatus = null) => {
-    if (!form.invoice_number?.trim?.()) return alert("Invoice Number is required.");
-    if (!form.invoice_date) return alert("Invoice Date is required.");
-    if (dayjs(form.invoice_date).isAfter(dayjs(), 'day')) return alert("Invoice Date cannot be in the future.");
-    if (form.delivery_note_date && dayjs(form.delivery_note_date).isAfter(dayjs(), 'day')) return alert("Delivery Note Date cannot be in the future.");
-    if (form.reference_date && dayjs(form.reference_date).isAfter(dayjs(), 'day')) return alert("Reference Date cannot be in the future.");
-    if (!form.vendor_id) return alert("Vendor is required.");
-    if (form.items.length === 0) return alert("At least one item is required.");
+    const newErrors = {};
+
+    if (!form.invoice_number?.trim?.()) newErrors.invoice_number = "Invoice Number is required.";
+    if (!form.invoice_date) newErrors.invoice_date = "Invoice Date is required.";
+    else if (dayjs(form.invoice_date).isAfter(dayjs(), 'day')) newErrors.invoice_date = "Invoice Date cannot be in the future.";
+
+    if (form.delivery_note_date && dayjs(form.delivery_note_date).isAfter(dayjs(), 'day')) newErrors.delivery_note_date = "Delivery Note Date cannot be in the future.";
+    if (form.reference_date && dayjs(form.reference_date).isAfter(dayjs(), 'day')) newErrors.reference_date = "Reference Date cannot be in the future.";
+    
+    if (!form.vendor_id) newErrors.vendor_id = "Vendor is required.";
+    if (form.items.length === 0) newErrors.items = "At least one item is required.";
 
     for (let i = 0; i < form.items.length; i++) {
       const hsn = form.items[i].hsn_sac;
       if (hsn && !/^\d{2}$|^\d{4}$|^\d{6}$|^\d{8}$/.test(hsn)) {
-        return alert(`Invalid HSN/SAC at item ${i + 1}. It must be exactly 2, 4, 6, or 8 numeric digits.`);
+        newErrors.items = `Invalid HSN/SAC at item ${i + 1}. It must be exactly 2, 4, 6, or 8 numeric digits.`;
+        break;
       }
     }
 
     if (form.transport_hsn && !/^\d{2}$|^\d{4}$|^\d{6}$|^\d{8}$/.test(form.transport_hsn)) {
-      return alert("Invalid HSN/SAC for Transport Charges. It must be exactly 2, 4, 6, or 8 numeric digits.");
+      newErrors.transport_hsn = "Invalid HSN/SAC for Transport Charges.";
+    }
+
+    if (submitStatus === 'Submitted' && !form.scan_url) {
+      newErrors.scan_url = "Invoice Scan is mandatory for submitting the invoice.";
+    }
+
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      setConfirmSubmit(false);
+      return;
     }
 
     const totals = calculateTotals();
@@ -375,11 +412,6 @@ export default function RegisterInvoice() {
     };
     if (submitStatus) payload.status = submitStatus;
 
-    if (submitStatus === 'Submitted' && !payload.scan_url) {
-      alert("Invoice Scan is mandatory for submitting the invoice.");
-      return;
-    }
-
     try {
       if (id) {
         await api.put(`/api/invoices/${id}`, payload);
@@ -390,7 +422,7 @@ export default function RegisterInvoice() {
     } catch (err) {
       const detail = err.response?.data?.detail;
       const errMsg = Array.isArray(detail) ? detail.map(d => `${d.loc.join('.')}: ${d.msg}`).join(', ') : (detail || err.message);
-      alert("Failed to save invoice: " + errMsg);
+      showMessage("Failed to save invoice: " + errMsg, 'Error', 'error');
     }
   };
 
@@ -426,7 +458,7 @@ export default function RegisterInvoice() {
                 <TextField fullWidth label="Invoice Code" value={form.code || 'Auto-generated'} disabled size="small" />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField fullWidth label="Invoice No." value={form.invoice_number} onChange={e => setForm({ ...form, invoice_number: e.target.value })} required size="small" />
+                <TextField fullWidth label="Invoice No." value={form.invoice_number} onChange={e => setForm({ ...form, invoice_number: e.target.value })} required size="small" error={!!errors.invoice_number} helperText={errors.invoice_number} />
               </Grid>
               <Grid item xs={12} sm={6}>
                 <DatePicker 
@@ -436,11 +468,11 @@ export default function RegisterInvoice() {
                   onChange={(newValue) => setForm({ ...form, invoice_date: newValue ? newValue.format('YYYY-MM-DD') : '' })}
                   disableFuture
                   localeText={{ fieldYearPlaceholder: () => 'yyyy', fieldMonthPlaceholder: () => 'mmm', fieldDayPlaceholder: () => 'dd' }}
-                  slotProps={{ textField: { fullWidth: true, size: 'small', required: true, InputProps: { placeholder: 'dd-mmm-yyyy' }, inputProps: { placeholder: 'dd-mmm-yyyy' }, InputLabelProps: { shrink: true } } }}
+                  slotProps={{ textField: { fullWidth: true, size: 'small', required: true, error: !!errors.invoice_date, helperText: errors.invoice_date, InputProps: { placeholder: 'dd-mmm-yyyy' }, inputProps: { placeholder: 'dd-mmm-yyyy' }, InputLabelProps: { shrink: true } } }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <FormControl fullWidth required size="small">
+                <FormControl fullWidth required size="small" error={!!errors.vendor_id}>
                   <InputLabel>Vendor</InputLabel>
                   <Select 
                     value={form.vendor_id} 
@@ -466,6 +498,7 @@ export default function RegisterInvoice() {
                   >
                     {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.code} - {v.name}</MenuItem>)}
                   </Select>
+                  {errors.vendor_id && <Typography color="error" variant="caption" sx={{ ml: 2, mt: 0.5 }}>{errors.vendor_id}</Typography>}
                 </FormControl>
                 {form.vendor_id && vendors.find(v => v.id === form.vendor_id) && (
                   <Typography variant="caption" sx={{ color: '#64748B', display: 'block', mt: 1, ml: 1, lineHeight: 1.2 }}>
@@ -526,7 +559,7 @@ export default function RegisterInvoice() {
                   onChange={(newValue) => setForm({ ...form, delivery_note_date: newValue ? newValue.format('YYYY-MM-DD') : '' })}
                   disableFuture
                   localeText={{ fieldYearPlaceholder: () => 'yyyy', fieldMonthPlaceholder: () => 'mmm', fieldDayPlaceholder: () => 'dd' }}
-                  slotProps={{ textField: { fullWidth: true, size: 'small', InputProps: { placeholder: 'dd-mmm-yyyy' }, inputProps: { placeholder: 'dd-mmm-yyyy' }, InputLabelProps: { shrink: true } } }}
+                  slotProps={{ textField: { fullWidth: true, size: 'small', error: !!errors.delivery_note_date, helperText: errors.delivery_note_date, InputProps: { placeholder: 'dd-mmm-yyyy' }, inputProps: { placeholder: 'dd-mmm-yyyy' }, InputLabelProps: { shrink: true } } }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -569,6 +602,7 @@ export default function RegisterInvoice() {
                 </>
               )}
             </Box>
+            {errors.scan_url && <Typography color="error" variant="caption" sx={{ mt: 1, display: 'block', textAlign: 'center' }}>{errors.scan_url}</Typography>}
           </Card>
           
           <Card sx={{ p: 3, mb: 3 }}>
@@ -611,7 +645,7 @@ export default function RegisterInvoice() {
                   onChange={(newValue) => setForm({ ...form, reference_date: newValue ? newValue.format('YYYY-MM-DD') : '' })}
                   disableFuture
                   localeText={{ fieldYearPlaceholder: () => 'yyyy', fieldMonthPlaceholder: () => 'mmm', fieldDayPlaceholder: () => 'dd' }}
-                  slotProps={{ textField: { fullWidth: true, size: 'small', InputProps: { placeholder: 'dd-mmm-yyyy' }, inputProps: { placeholder: 'dd-mmm-yyyy' }, InputLabelProps: { shrink: true } } }}
+                  slotProps={{ textField: { fullWidth: true, size: 'small', error: !!errors.reference_date, helperText: errors.reference_date, InputProps: { placeholder: 'dd-mmm-yyyy' }, inputProps: { placeholder: 'dd-mmm-yyyy' }, InputLabelProps: { shrink: true } } }}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -636,6 +670,7 @@ export default function RegisterInvoice() {
       <Card sx={{ p: 3, mb: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
           <Typography variant="h6" sx={{ fontWeight: 600 }}>Item Details</Typography>
+          {errors.items && <Typography color="error" variant="body2">{errors.items}</Typography>}
           <Button variant="outlined" startIcon={<Add />} onClick={addItem} size="small">Add Item</Button>
         </Box>
         <Box sx={{ width: '100%' }}>
@@ -737,6 +772,8 @@ export default function RegisterInvoice() {
                   size="small" 
                   variant="standard" 
                   inputProps={{ style: { fontSize: '0.8rem' }, maxLength: 8 }} 
+                  error={!!errors.transport_hsn}
+                  helperText={errors.transport_hsn}
                 />
               </Grid>
               <Grid item xs={1.5}></Grid>

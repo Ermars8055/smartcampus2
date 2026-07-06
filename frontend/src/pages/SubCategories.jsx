@@ -6,8 +6,10 @@ import {
 } from '@mui/material';
 import { Add, Edit, Category, ShortText, Subtitles } from '@mui/icons-material';
 import api from '../services/api';
+import { useMessage } from '../context/MessageContext';
 
 export default function SubCategories() {
+  const { showMessage } = useMessage();
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
   const [dialog, setDialog] = useState('');
@@ -52,7 +54,7 @@ export default function SubCategories() {
       else await api.post('/api/subcategories', form);
       setDialog(''); setEditing(null); setErrors({}); load();
       setSnackbar({ open: true, message: 'Sub Category saved successfully!', severity: 'success' });
-    } catch (err) { alert(err.response?.data?.detail || 'Error saving Sub Category'); }
+    } catch (err) { showMessage(err.response?.data?.detail || 'Error saving Sub Category', 'Error', 'error'); }
   };
 
   return (

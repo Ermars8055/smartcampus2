@@ -7,8 +7,10 @@ import {
 } from '@mui/material';
 import { Add, Edit, Delete, Inventory } from '@mui/icons-material';
 import api from '../services/api';
+import { useMessage } from '../context/MessageContext';
 
 export default function MaterialAllowances() {
+  const { showMessage } = useMessage();
   const [materialLimits, setMaterialLimits] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [materials, setMaterials] = useState([]);
@@ -61,7 +63,7 @@ export default function MaterialAllowances() {
                       <IconButton size="small" color="error" onClick={async () => {
                         if(window.confirm('Delete this limit?')) {
                           try { await api.delete(`/api/material-limits/${m.id}`); load(); }
-                          catch (err) { alert('Error deleting limit'); }
+                          catch (err) { showMessage('Error deleting limit', 'Error', 'error'); }
                         }
                       }}><Delete fontSize="small" /></IconButton>
                     </Tooltip>
@@ -151,7 +153,7 @@ export default function MaterialAllowances() {
           <Button onClick={() => setDialog(false)} sx={{ color: '#64748B', fontWeight: 600 }}>Cancel</Button>
           <Button variant="contained" sx={{ borderRadius: 2, px: 4, py: 1, fontWeight: 700, boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)', textTransform: 'none' }} onClick={async () => {
             try {
-              if (!form.departments || form.departments.length === 0 || !form.material_id || !form.monthly_limit) return alert('Please fill all required fields');
+              if (!form.departments || form.departments.length === 0 || !form.material_id || !form.monthly_limit) return showMessage('Please fill all required fields', 'Validation Error', 'warning');
               
               if (editing) {
                 const payload = { monthly_limit: Number(form.monthly_limit) };
@@ -166,7 +168,7 @@ export default function MaterialAllowances() {
               }
               setDialog(false); setEditing(null); load();
             } catch (err) {
-              alert(err.response?.data?.detail || 'An error occurred while saving.');
+              showMessage(err.response?.data?.detail || 'An error occurred while saving.', 'Error', 'error');
             }
           }}>{editing ? 'Update' : 'Create'}</Button>
         </DialogActions>

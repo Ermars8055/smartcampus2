@@ -12,8 +12,10 @@ import { Close, TaskAlt, Print, LocalShipping, Add, Comment, Person, Numbers, Ac
 import api from '../services/api';
 import MaterialSelect from '../components/MaterialSelect';
 import { useAuth } from '../context/AuthContext';
+import { useMessage } from '../context/MessageContext';
 
 export default function GatePasses() {
+  const { showMessage } = useMessage();
   const { hasAction } = useAuth();
   const [gatePasses, setGatePasses] = useState([]);
   const [previewGatePass, setPreviewGatePass] = useState(null);
@@ -52,6 +54,18 @@ export default function GatePasses() {
   });
 
   const [receiveModal, setReceiveModal] = useState({ open: false, id: null, driver_name: '', gate_entry_number: '', grn_number: '' });
+  const [errors, setErrors] = useState({});
+
+
+
+
+  // Auto-clear resolved errors
+  useEffect(() => {
+    setErrors(prev => {
+      if (Object.keys(prev).length === 0) return prev;
+      return {}; // Clear all errors when form changes
+    });
+  }, [gpModal]);
 
   const returnableReasons = [
     { code: 'TRANSFER', label: 'Transfer to Another Store/Site' },
@@ -117,7 +131,12 @@ export default function GatePasses() {
       remarks: '',
       items: [{ material_id: '', quantity: '', remarks: '' }]
     });
+    setErrors({});
   };
+
+
+
+
 
   const handleVendorChange = (selectedVendor) => {
     if (selectedVendor) {
@@ -164,7 +183,7 @@ export default function GatePasses() {
   const addGpItem = () => {
     const emptyCount = gpModal.items.filter(it => !it.material_id).length;
     if (emptyCount >= 5) {
-      alert("Please select materials for the existing empty rows before adding more. Limit reached (5).");
+      showMessage("Please select materials for the existing empty rows before adding more. Limit reached (5).", 'Validation Error', 'warning');
       return;
     }
     setGpModal({
@@ -187,26 +206,26 @@ export default function GatePasses() {
 
   const handleGpSubmit = async () => {
     try {
+      const newErrors = {};
       const projectId = gpModal.project_id || projects[0]?.id;
-      if (!projectId) {
-        alert("Please select a project.");
-        return;
-      }
+      
+      if (!projectId) newErrors.project_id = "Project is required";
+      
       const validItems = gpModal.items.filter(item => item.material_id && parseFloat(item.quantity) > 0);
-      if (validItems.length === 0) {
-        alert("Please add at least one material item with a valid quantity.");
-        return;
-      }
+      if (validItems.length === 0) newErrors.items = "Please add at least one material item with a valid quantity.";
+      
       if (!gpModal.vendor_id && !gpModal.vendor_custom_name) {
-        alert("Please select a vendor or type a vendor name.");
-        return;
+        newErrors.vendor = "Please select a vendor or type a vendor name.";
       }
+      
       if (!gpModal.reason_code) {
-        alert("Please select a Reason.");
-        return;
+        newErrors.reason_code = "Please select a Reason.";
+      } else if (gpModal.reason_code === 'OTHER' && !gpModal.reason_other.trim()) {
+        newErrors.reason_other = "Please specify the custom reason.";
       }
-      if (gpModal.reason_code === 'OTHER' && !gpModal.reason_other.trim()) {
-        alert("Please specify the custom reason.");
+
+      setErrors(newErrors);
+      if (Object.keys(newErrors).length > 0) {
         return;
       }
 
@@ -232,7 +251,7 @@ export default function GatePasses() {
       setGpModal({ ...gpModal, open: false });
       load();
     } catch (err) {
-      alert(err.response?.data?.detail || 'Error creating Gate Pass');
+      showMessage(err.response?.data?.detail || 'Error creating Gate Pass', 'Error', 'error');
     }
   };
 
@@ -249,10 +268,14 @@ export default function GatePasses() {
 
   const submitReceive = async () => {
     try {
-      if (!receiveModal.driver_name.trim()) {
-        alert("Please enter the name of the person who brought the items.");
+      const newErrors = {};
+      if (!receiveModal.driver_name.trim()) newErrors.driver_name = "Please enter the name of the person who brought the items.";
+      
+      setErrors(newErrors);
+      if (Object.keys(newErrors).length > 0) {
         return;
       }
+
       await api.put(`/api/gate-passes/${receiveModal.id}`, {
         status: 'Received',
         completed_by_name: receiveModal.driver_name,
@@ -261,6 +284,7 @@ export default function GatePasses() {
         completed_at: new Date().toISOString()
       });
       setReceiveModal({ open: false, id: null, driver_name: '', gate_entry_number: '', grn_number: '' });
+      setErrors({});
       load();
     } catch (e) { console.error(e); }
   };
@@ -596,6 +620,8 @@ export default function GatePasses() {
                 fullWidth
                 size="small"
                 label="Reason *"
+                error={!!errors.reason_code}
+                helperText={errors.reason_code}
                 value={gpModal.reason_code || ''}
                 onChange={e => setGpModal({ ...gpModal, reason_code: e.target.value })}
               >
@@ -608,6 +634,8 @@ export default function GatePasses() {
                   fullWidth
                   size="small"
                   label="Please specify reason *"
+                  error={!!errors.reason_other}
+                  helperText={errors.reason_other}
                   value={gpModal.reason_other}
                   onChange={e => setGpModal({ ...gpModal, reason_other: e.target.value })}
                   sx={{ mt: 2 }}
@@ -683,6 +711,8 @@ export default function GatePasses() {
                     {...params}
                     label="To Vendor"
                     placeholder="Search vendor by code or name..."
+                    error={!!errors.vendor}
+                    helperText={errors.vendor}
                   />
                 )}
               />
@@ -691,6 +721,8 @@ export default function GatePasses() {
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth size="small" label="Vendor Name"
+                error={!!errors.vendor}
+                helperText={errors.vendor}
                 value={gpModal.vendor_custom_name}
                 onChange={e => setGpModal({ ...gpModal, vendor_custom_name: e.target.value })}
                 InputProps={{ readOnly: !!gpModal.vendor_id }}
@@ -723,6 +755,7 @@ export default function GatePasses() {
             <Grid item xs={12}>
               <Box sx={{ mb: 1, mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Typography variant="caption" sx={{ fontWeight: 800, color: '#64748B' }}>MATERIAL DETAILS</Typography>
+                {errors.items && <Typography color="error" variant="body2">{errors.items}</Typography>}
                 <Button size="small" startIcon={<Add />} onClick={addGpItem} sx={{ textTransform: 'none', fontWeight: 700 }}>Add Item</Button>
               </Box>
 

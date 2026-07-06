@@ -10,8 +10,10 @@ import api, { getFileUrl } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { formatDate, formatDateTime } from '../utils/dateUtils';
 import { useAuth } from '../context/AuthContext';
+import { useMessage } from '../context/MessageContext';
 
 export default function Invoices() {
+  const { showMessage } = useMessage();
   const navigate = useNavigate();
   const { hasAction } = useAuth();
   const [invoices, setInvoices] = useState([]);
@@ -37,7 +39,7 @@ export default function Invoices() {
     
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
-      alert("Please allow popups to print invoices");
+      showMessage("Please allow popups to print invoices", 'Validation Error', 'warning');
       return;
     }
 
@@ -176,7 +178,7 @@ export default function Invoices() {
       load();
       if (detailDialog) setDetailDialog({ ...detailDialog, status });
     } catch (err) {
-      alert("Failed to update status");
+      showMessage("Failed to update status", 'Error', 'error');
     }
   };
 

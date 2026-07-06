@@ -7,8 +7,10 @@ import {
 import { Add, Edit, Category, Description, Abc } from '@mui/icons-material';
 import { TableSortLabel } from '@mui/material';
 import api from '../services/api';
+import { useMessage } from '../context/MessageContext';
 
 export default function Categories() {
+  const { showMessage } = useMessage();
   const [categories, setCategories] = useState([]);
   const [dialog, setDialog] = useState('');
   const [sortConfig, setSortConfig] = useState({ key: 'code', direction: 'asc' });
@@ -64,9 +66,9 @@ export default function Categories() {
       setSnackbar({ open: true, message: 'Category saved successfully!', severity: 'success' });
     } catch (err) {
       const detail = err.response?.data?.detail;
-      if (typeof detail === 'string') alert(detail);
-      else if (Array.isArray(detail)) alert(detail.map(d => d.msg).join('\n'));
-      else alert('Error saving category');
+      if (typeof detail === 'string') showMessage(detail, 'Validation Error', 'warning');
+      else if (Array.isArray(detail)) showMessage(detail.map(d => d.msg).join('\n'), 'Validation Error', 'warning');
+      else showMessage('Error saving category', 'Error', 'error');
     }
   };
 

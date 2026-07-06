@@ -10,8 +10,10 @@ import { Add, Delete, Close, SwapHoriz, Warehouse, AccountTree, Comment, InfoOut
 import api from '../services/api';
 import MaterialSelect from '../components/MaterialSelect';
 import { useAuth } from '../context/AuthContext';
+import { useMessage } from '../context/MessageContext';
 
 export default function StockTransfers() {
+  const { showMessage } = useMessage();
   const { hasAction } = useAuth();
   const [transfers, setTransfers] = useState([]);
   const [warehouses, setWarehouses] = useState([]);
@@ -28,6 +30,20 @@ export default function StockTransfers() {
     items: [{ material_id: '', quantity: 0, remarks: '' }]
   });
   const [viewTransferModal, setViewTransferModal] = useState({ open: false, transfer: null, items: [] });
+  const [errors, setErrors] = useState({});
+
+
+
+
+
+
+  // Auto-clear resolved errors
+  useEffect(() => {
+    setErrors(prev => {
+      if (Object.keys(prev).length === 0) return prev;
+      return {}; // Clear all errors when form changes
+    });
+  }, [transferModal]);
 
   const openViewTransferModal = (transfer) => {
     setViewTransferModal({ 
@@ -45,6 +61,10 @@ export default function StockTransfers() {
     });
   };
 
+
+
+
+
   const handleReceiveSubmit = async () => {
     try {
       const payload = {
@@ -57,7 +77,7 @@ export default function StockTransfers() {
       await api.post(`/api/transfers/${viewTransferModal.transfer.id}/receive`, payload);
       setViewTransferModal({ open: false, transfer: null, items: [] });
       load();
-    } catch (err) { alert(err.response?.data?.detail || 'Error receiving transfer'); }
+    } catch (err) { showMessage(err.response?.data?.detail || 'Error receiving transfer', 'Error', 'error'); }
   };
 
   const load = async () => {
@@ -82,25 +102,26 @@ export default function StockTransfers() {
       open: true,
       from_warehouse_id: '',
       to_warehouse_id: '',
-      project_id: null,
       remarks: '',
       items: [{ material_id: '', quantity: 0, remarks: '' }]
     });
+    setErrors({});
   };
 
   const handleTransferSubmit = async () => {
     try {
-      if (!transferModal.from_warehouse_id || !transferModal.to_warehouse_id) {
-        alert('Please select both warehouses');
-        return;
+      const newErrors = {};
+      if (!transferModal.from_warehouse_id) newErrors.from_warehouse_id = "From warehouse is required";
+      if (!transferModal.to_warehouse_id) newErrors.to_warehouse_id = "To warehouse is required";
+      if (transferModal.from_warehouse_id && transferModal.from_warehouse_id === transferModal.to_warehouse_id) {
+        newErrors.to_warehouse_id = "Source and destination cannot be the same";
       }
-      if (transferModal.from_warehouse_id === transferModal.to_warehouse_id) {
-        alert('Source and destination cannot be the same');
-        return;
-      }
+
       const validItems = transferModal.items.filter(it => it.material_id && it.quantity > 0);
-      if (validItems.length === 0) {
-        alert('Please add at least one material');
+      if (validItems.length === 0) newErrors.items = "Please add at least one material with quantity > 0";
+
+      setErrors(newErrors);
+      if (Object.keys(newErrors).length > 0) {
         return;
       }
 
@@ -125,14 +146,14 @@ export default function StockTransfers() {
         else if (Array.isArray(err.response.data.detail)) errMsg = err.response.data.detail.map(d => d.msg || JSON.stringify(d)).join(', ');
         else errMsg = JSON.stringify(err.response.data.detail);
       }
-      alert(errMsg); 
+      showMessage(errMsg, 'Error', 'error'); 
     }
   };
 
   const addTransferItem = () => {
     const emptyCount = transferModal.items.filter(it => !it.material_id).length;
     if (emptyCount >= 5) {
-      alert("Please select materials for the existing empty rows before adding more. Limit reached (5).");
+      showMessage("Please select materials for the existing empty rows before adding more. Limit reached (5).", 'Validation Error', 'warning');
       return;
     }
     setTransferModal({
@@ -260,7 +281,7 @@ export default function StockTransfers() {
         <DialogContent sx={{ p: 3 }}>
           <Grid container spacing={2} sx={{ mb: 3, mt: 0.5 }}>
             <Grid item xs={12} sm={6}>
-              <FormControl fullWidth size="small">
+              <FormControl fullWidth size="small" error={!!errors.from_warehouse_id}>
                 <InputLabel>From Store</InputLabel>
                 <Select
                   label="From Store"
@@ -270,10 +291,11 @@ export default function StockTransfers() {
                 >
                   {warehouses.map(w => <MenuItem key={w.id} value={w.id}>{w.name} ({w.code})</MenuItem>)}
                 </Select>
+                {errors.from_warehouse_id && <Typography color="error" variant="caption" sx={{ ml: 2, mt: 0.5 }}>{errors.from_warehouse_id}</Typography>}
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
-              <FormControl fullWidth size="small">
+              <FormControl fullWidth size="small" error={!!errors.to_warehouse_id}>
                 <InputLabel>To Store</InputLabel>
                 <Select
                   label="To Store"
@@ -283,6 +305,7 @@ export default function StockTransfers() {
                 >
                   {warehouses.map(w => <MenuItem key={w.id} value={w.id}>{w.name} ({w.code})</MenuItem>)}
                 </Select>
+                {errors.to_warehouse_id && <Typography color="error" variant="caption" sx={{ ml: 2, mt: 0.5 }}>{errors.to_warehouse_id}</Typography>}
               </FormControl>
             </Grid>
             <Grid item xs={12}>
@@ -299,6 +322,7 @@ export default function StockTransfers() {
 
           <Box sx={{ mb: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#1E293B' }}>Transfer Items</Typography>
+            {errors.items && <Typography color="error" variant="body2">{errors.items}</Typography>}
             <Button size="small" startIcon={<Add />} onClick={addTransferItem} sx={{ textTransform: 'none', fontWeight: 700 }}>Add Item</Button>
           </Box>
 

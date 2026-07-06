@@ -15,6 +15,7 @@ import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import html2pdf from 'html2pdf.js';
 import api from '../services/api';
+import { useMessage } from '../context/MessageContext';
 
 const QUICK_RANGES = [
   { label: 'Last 30 Days', days: 30 },
@@ -25,6 +26,7 @@ const QUICK_RANGES = [
 ];
 
 export default function RateAnalysisReport() {
+  const { showMessage } = useMessage();
   const [categories, setCategories] = useState([]);
 
   const [vendors, setVendors] = useState([]);
@@ -60,8 +62,8 @@ export default function RateAnalysisReport() {
   const fmt = (v) => v != null ? `₹${Number(v).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '₹0.00';
 
   const handleGenerate = async () => {
-    if (!filters.fromDate || !filters.toDate) return alert('Select date range');
-    if (filters.fromDate.isAfter(filters.toDate)) return alert('From Date cannot exceed To Date');
+    if (!filters.fromDate || !filters.toDate) return showMessage('Select date range', 'Validation Error', 'warning');
+    if (filters.fromDate.isAfter(filters.toDate)) return showMessage('From Date cannot exceed To Date', 'Validation Error', 'warning');
     setLoading(true);
     setExpandedRows({});
     setDrillDataMap({});
@@ -81,7 +83,7 @@ export default function RateAnalysisReport() {
       setReportData(res.data);
     } catch (err) {
       console.error(err);
-      alert('Failed to generate report');
+      showMessage('Failed to generate report', 'Error', 'error');
     } finally {
       setLoading(false);
     }

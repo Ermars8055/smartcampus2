@@ -6,6 +6,7 @@ import {
 } from '@mui/material';
 import { Add, Edit, Delete, Close, Business, LocationCity, Map, Numbers, Receipt, LocationOn, Person, Phone, Email, AppRegistration, PinDrop, Description, Store } from '@mui/icons-material';
 import api from '../services/api';
+import { useMessage } from '../context/MessageContext';
 
 const STATES_LIST = [
   "01 - Jammu & Kashmir", "02 - Himachal Pradesh", "03 - Punjab", "04 - Chandigarh",
@@ -20,6 +21,7 @@ const STATES_LIST = [
 ];
 
 export default function CompanyAddresses() {
+  const { showMessage } = useMessage();
   const [addresses, setAddresses] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -117,7 +119,7 @@ export default function CompanyAddresses() {
       setModalOpen(false);
       loadAddresses();
     } catch (e) {
-      alert('Error saving address');
+      showMessage('Error saving address', 'Error', 'error');
     }
   };
 
@@ -127,7 +129,7 @@ export default function CompanyAddresses() {
       await api.delete(`/api/company-addresses/${id}`);
       loadAddresses();
     } catch (e) {
-      alert('Error deleting address');
+      showMessage('Error deleting address', 'Error', 'error');
     }
   };
 

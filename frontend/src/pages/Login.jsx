@@ -4,7 +4,7 @@ import {
   Box, Card, TextField, Button, Typography, Alert, CircularProgress,
   InputAdornment, IconButton, MenuItem, Autocomplete, Divider
 } from '@mui/material';
-import { Visibility, VisibilityOff, Lock, Person, Business, Security, VpnKey } from '@mui/icons-material';
+import { Visibility, VisibilityOff, Lock, Person, Business, Security, VpnKey, Email } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import logoImg from '../assets/logo.png';
@@ -25,6 +25,7 @@ export default function Login() {
   const [otp, setOtp] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [email, setEmail] = useState('');
 
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -63,64 +64,15 @@ export default function Login() {
   const handleForgotPassword = async (e) => {
     e.preventDefault();
     setError(''); setSuccessMsg('');
-    if (!workspace || !username) { setError('Please enter Workspace ID and Username'); return; }
+    if (!email) { setError('Please enter your email address'); return; }
     setLoading(true);
     try {
-      const res = await api.post('/api/auth/forgot-password', { username, workspace });
+      const frontend_url = window.location.origin;
+      const res = await api.post('/api/auth/forgot-password', { email, frontend_url });
       setSuccessMsg(res.data.message);
-      setView('verify_otp');
-      setResendTimer(180);
+      setEmail('');
     } catch (err) {
       setError(err.response?.data?.detail || 'Failed to request password reset.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleResendOTP = async () => {
-    setError(''); setSuccessMsg('');
-    setLoading(true);
-    try {
-      await api.post('/api/auth/forgot-password', { username, workspace });
-      setSuccessMsg("OTP resent successfully.");
-      setResendTimer(180);
-    } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to resend OTP.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleVerifyOTP = async (e) => {
-    e.preventDefault();
-    setError(''); setSuccessMsg('');
-    if (!otp) { setError('Please enter OTP'); return; }
-    setLoading(true);
-    try {
-      await api.post('/api/auth/verify-otp', { username, workspace, otp });
-      setSuccessMsg('OTP verified successfully. Please enter your new password.');
-      setView('reset_password');
-    } catch (err) {
-      setError(err.response?.data?.detail || 'Invalid or expired OTP.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleResetPassword = async (e) => {
-    e.preventDefault();
-    setError(''); setSuccessMsg('');
-    if (newPassword !== confirmPassword) { setError('Passwords do not match'); return; }
-    setLoading(true);
-    try {
-      const res = await api.post('/api/auth/reset-password', { username, workspace, otp, new_password: newPassword });
-      setSuccessMsg(res.data.message);
-      setView('login');
-      setOtp('');
-      setNewPassword('');
-      setConfirmPassword('');
-    } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to reset password.');
     } finally {
       setLoading(false);
     }
@@ -255,21 +207,13 @@ export default function Login() {
         {view === 'forgot_password' && (
           <form onSubmit={handleForgotPassword}>
             <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary', textAlign: 'center' }}>
-              Enter your Workspace ID and Username. We will send an OTP to your registered email address.
+              Enter your registered email address. We will send you a password reset link.
             </Typography>
             <TextField
-              fullWidth label="Workspace ID" value={workspace}
-              onChange={(e) => setWorkspace(e.target.value)} required
+              fullWidth label="Email Address" value={email} type="email"
+              onChange={(e) => setEmail(e.target.value)} required
               InputProps={{
-                startAdornment: <InputAdornment position="start"><Business color="action" /></InputAdornment>
-              }}
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth label="Username" value={username}
-              onChange={(e) => setUsername(e.target.value)} required
-              InputProps={{
-                startAdornment: <InputAdornment position="start"><Person color="action" /></InputAdornment>
+                startAdornment: <InputAdornment position="start"><Email color="action" /></InputAdornment>
               }}
               sx={{ mb: 3 }}
             />
@@ -277,85 +221,11 @@ export default function Login() {
               type="submit" fullWidth variant="contained" disabled={loading}
               sx={{ py: 1.5, fontWeight: 600, fontSize: '1rem', background: 'linear-gradient(135deg, #1E3A8A, #2563EB)' }}
             >
-              {loading ? <CircularProgress size={24} color="inherit" /> : 'Send OTP'}
+              {loading ? <CircularProgress size={24} color="inherit" /> : 'Send Reset Link'}
             </Button>
             <Box sx={{ mt: 2, textAlign: 'center' }}>
               <Button onClick={resetView} sx={{ textTransform: 'none', color: 'text.secondary' }}>Back to Login</Button>
             </Box>
-          </form>
-        )}
-
-        {view === 'verify_otp' && (
-          <form onSubmit={handleVerifyOTP}>
-            <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary', textAlign: 'center' }}>
-              Enter the 6-digit OTP sent to your registered email address.
-            </Typography>
-            <TextField
-              fullWidth label="6-Digit OTP" value={otp}
-              onChange={(e) => setOtp(e.target.value)} required
-              inputProps={{ maxLength: 6 }}
-              InputProps={{
-                startAdornment: <InputAdornment position="start"><VpnKey color="action" /></InputAdornment>
-              }}
-              sx={{ mb: 3, textAlign: 'center' }}
-            />
-            <Button
-              type="submit" fullWidth variant="contained" disabled={loading}
-              sx={{ py: 1.5, fontWeight: 600, fontSize: '1rem', background: 'linear-gradient(135deg, #1E3A8A, #2563EB)' }}
-            >
-              {loading ? <CircularProgress size={24} color="inherit" /> : 'Verify OTP'}
-            </Button>
-            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Button onClick={() => setView('forgot_password')} sx={{ textTransform: 'none', color: 'text.secondary' }}>Back</Button>
-              {resendTimer > 0 ? (
-                <Typography variant="body2" color="text.secondary">
-                  Resend in {Math.floor(resendTimer / 60)}:{(resendTimer % 60).toString().padStart(2, '0')}
-                </Typography>
-              ) : (
-                <Button onClick={handleResendOTP} disabled={loading} sx={{ textTransform: 'none', fontWeight: 600 }}>
-                  Resend OTP
-                </Button>
-              )}
-            </Box>
-          </form>
-        )}
-
-        {view === 'reset_password' && (
-          <form onSubmit={handleResetPassword}>
-            <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary', textAlign: 'center' }}>
-              Enter your new password below.
-            </Typography>
-            <TextField
-              fullWidth label="New Password" value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)} required
-              type={showNewPassword ? 'text' : 'password'}
-              InputProps={{
-                startAdornment: <InputAdornment position="start"><Lock color="action" /></InputAdornment>,
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton onClick={() => setShowNewPassword(!showNewPassword)} edge="end">
-                      {showNewPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth label="Confirm Password" value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)} required
-              type={showNewPassword ? 'text' : 'password'}
-              InputProps={{
-                startAdornment: <InputAdornment position="start"><Lock color="action" /></InputAdornment>
-              }}
-              sx={{ mb: 3 }}
-            />
-            <Button
-              type="submit" fullWidth variant="contained" disabled={loading}
-              sx={{ py: 1.5, fontWeight: 600, fontSize: '1rem', background: 'linear-gradient(135deg, #1E3A8A, #2563EB)' }}
-            >
-              {loading ? <CircularProgress size={24} color="inherit" /> : 'Reset Password'}
-            </Button>
           </form>
         )}
 

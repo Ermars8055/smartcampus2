@@ -10,9 +10,11 @@ import { Add, Delete, Close, Undo, Warehouse, AccountTree, Business, Person, Com
 import api from '../services/api';
 import MaterialSelect from '../components/MaterialSelect';
 import { useAuth } from '../context/AuthContext';
+import { useMessage } from '../context/MessageContext';
 
 
 export default function Returns() {
+  const { showMessage } = useMessage();
   const { hasAction } = useAuth();
   const [returns, setReturns] = useState([]);
   const [warehouses, setWarehouses] = useState([]);
@@ -33,6 +35,20 @@ export default function Returns() {
   });
 
   const [viewModal, setViewModal] = useState({ open: false, ret: null, items: [] });
+  const [errors, setErrors] = useState({});
+
+
+
+
+
+
+  // Auto-clear resolved errors
+  useEffect(() => {
+    setErrors(prev => {
+      if (Object.keys(prev).length === 0) return prev;
+      return {}; // Clear all errors when form changes
+    });
+  }, [returnModal]);
 
   const load = async () => {
     try {
@@ -64,6 +80,7 @@ export default function Returns() {
       returned_by_name: '',
       items: [{ material_id: '', quantity: 0, remarks: '' }]
     });
+    setErrors({});
   };
 
   const openViewModal = (ret) => {
@@ -82,15 +99,21 @@ export default function Returns() {
     });
   };
 
+
+
+
+
   const handleReturnSubmit = async () => {
     try {
-      if (!returnModal.warehouse_id || !returnModal.project_id) {
-        alert('Please select warehouse and project');
-        return;
-      }
+      const newErrors = {};
+      if (!returnModal.warehouse_id) newErrors.warehouse_id = "Target store is required";
+      if (!returnModal.project_id) newErrors.project_id = "Project is required";
+
       const validItems = returnModal.items.filter(it => it.material_id && it.quantity > 0);
-      if (validItems.length === 0) {
-        alert('Please add at least one material with quantity');
+      if (validItems.length === 0) newErrors.items = "Please add at least one material with quantity";
+
+      setErrors(newErrors);
+      if (Object.keys(newErrors).length > 0) {
         return;
       }
 
@@ -110,7 +133,7 @@ export default function Returns() {
       await api.post('/api/returns', payload);
       setReturnModal({ ...returnModal, open: false });
       load();
-    } catch (err) { alert(err.response?.data?.detail || 'Error'); }
+    } catch (err) { showMessage(err.response?.data?.detail || 'Error', 'Error', 'error'); }
   };
 
   const handleReceiveSubmit = async () => {
@@ -125,13 +148,13 @@ export default function Returns() {
       await api.post(`/api/returns/${viewModal.ret.id}/receive`, payload);
       setViewModal({ open: false, ret: null, items: [] });
       load();
-    } catch (err) { alert(err.response?.data?.detail || 'Error receiving return'); }
+    } catch (err) { showMessage(err.response?.data?.detail || 'Error receiving return', 'Error', 'error'); }
   };
 
   const addReturnItem = () => {
     const emptyCount = returnModal.items.filter(it => !it.material_id).length;
     if (emptyCount >= 5) {
-      alert("Please select materials for the existing empty rows before adding more. Limit reached (5).");
+      showMessage("Please select materials for the existing empty rows before adding more. Limit reached (5).", 'Validation Error', 'warning');
       return;
     }
     setReturnModal({
@@ -261,7 +284,7 @@ export default function Returns() {
         <DialogContent sx={{ p: 3 }}>
           <Grid container spacing={2} sx={{ mb: 3, mt: 0.5 }}>
             <Grid item xs={12} sm={4}>
-              <FormControl fullWidth size="small">
+              <FormControl fullWidth size="small" error={!!errors.warehouse_id}>
                 <InputLabel>Target Store</InputLabel>
                 <Select
                   label="Target Store"
@@ -272,6 +295,7 @@ export default function Returns() {
                 >
                   {warehouses.map(w => <MenuItem key={w.id} value={w.id}>{w.name} ({w.code})</MenuItem>)}
                 </Select>
+                {errors.warehouse_id && <Typography color="error" variant="caption" sx={{ ml: 2, mt: 0.5 }}>{errors.warehouse_id}</Typography>}
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={4}>
@@ -311,6 +335,7 @@ export default function Returns() {
 
           <Box sx={{ mb: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#1E293B' }}>Return Items</Typography>
+            {errors.items && <Typography color="error" variant="body2">{errors.items}</Typography>}
             <Button size="small" startIcon={<Add />} onClick={addReturnItem} sx={{ textTransform: 'none', fontWeight: 700 }}>Add Item</Button>
           </Box>
 

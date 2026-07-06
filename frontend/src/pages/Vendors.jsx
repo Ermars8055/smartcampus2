@@ -13,6 +13,7 @@ import {
 } from '@mui/icons-material';
 import { TableSortLabel } from '@mui/material';
 import api from '../services/api';
+import { useMessage } from '../context/MessageContext';
 
 const STATES_LIST = [
   '01 - Jammu And Kashmir',
@@ -56,6 +57,7 @@ const STATES_LIST = [
 ];
 
 export default function Vendors() {
+  const { showMessage } = useMessage();
   const [vendors, setVendors] = useState([]);
   const [search, setSearch] = useState('');
   const [dialog, setDialog] = useState(false);
@@ -165,7 +167,7 @@ export default function Vendors() {
         });
         setErrors(serverErrors);
       } else {
-        alert(detail || 'Error saving vendor');
+        showMessage(detail || 'Error saving vendor', 'Error', 'error');
       }
     }
   };

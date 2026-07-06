@@ -6,8 +6,10 @@ import {
 } from '@mui/material';
 import { Add, Straighten, Abc, Edit, Scale } from '@mui/icons-material';
 import api from '../services/api';
+import { useMessage } from '../context/MessageContext';
 
 export default function UOM() {
+  const { showMessage } = useMessage();
   const [uoms, setUoms] = useState([]);
   const [dialog, setDialog] = useState('');
   const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'asc' });
@@ -50,7 +52,7 @@ export default function UOM() {
       else await api.post('/api/uom', form);
       setDialog(''); setEditing(null); setErrors({}); load();
       setSnackbar({ open: true, message: 'UOM saved successfully!', severity: 'success' });
-    } catch (err) { alert(err.response?.data?.detail || 'Error saving UOM'); }
+    } catch (err) { showMessage(err.response?.data?.detail || 'Error saving UOM', 'Error', 'error'); }
   };
 
   return (

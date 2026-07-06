@@ -15,6 +15,7 @@ import { DatePicker } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
 import { useAuth } from '../context/AuthContext';
 import { useConfig } from '../context/ConfigContext';
+import { useMessage } from '../context/MessageContext';
 import { computeGstSplit } from '../utils/gstCalculations';
 
 function StatusChip({ status }) {
@@ -29,6 +30,7 @@ function StatusChip({ status }) {
 export default function PurchaseRequests() {
   const { hasAction, hasPermission } = useAuth();
   const { tenantConfig } = useConfig();
+  const { showMessage } = useMessage();
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -52,6 +54,9 @@ export default function PurchaseRequests() {
   const [historyDialog, setHistoryDialog] = useState({ open: false, materialId: null, data: null, loading: false });
   const [detailHistoryData, setDetailHistoryData] = useState(null);
   const [detailHistoryOpen, setDetailHistoryOpen] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [itemErrors, setItemErrors] = useState({});
+
   const statusFilters = ['Draft', 'Submitted', 'Approved', 'Rejected', 'Converted to PO', 'Short Closed', 'Cancelled', 'All'];
   const [tab, setTab] = useState(() => {
     const initialTabName = searchParams.get('tab');
@@ -68,6 +73,15 @@ export default function PurchaseRequests() {
   const [allDepartmentsList, setAllDepartmentsList] = useState([]);
   const [formDepartmentsList, setFormDepartmentsList] = useState([]);
 
+
+
+
+
+
+
+
+
+
   const handleSort = (key) => {
     setSortConfig(prev => ({
       key,
@@ -81,6 +95,20 @@ export default function PurchaseRequests() {
     required_date: dayjs().add(14, 'day'), remarks: '',
     items: [{ material_id: '', quantity: '' }]
   });
+
+  // Auto-clear resolved errors
+  useEffect(() => {
+    setErrors(prev => {
+      if (Object.keys(prev).length === 0) return prev;
+      return {}; // Clear all errors when form changes
+    });
+    setItemErrors(prev => {
+      if (Object.keys(prev).length === 0) return prev;
+      return {}; // Clear item errors
+    });
+  }, [form]);
+
+
 
   // Confirmation dialog with optional reason
   const [confirm, setConfirm] = useState({ open: false, title: '', message: '', confirmText: '', confirmColor: 'primary', action: null, needsReason: false });
@@ -181,20 +209,38 @@ export default function PurchaseRequests() {
       }
       setDialog(false);
       setEditingPRId(null);
+      showMessage("Purchase Request saved successfully.", "Success", "success");
       load();
-    } catch (err) { alert(err.response?.data?.detail || 'Error saving PR'); }
+    } catch (err) { showMessage(err.response?.data?.detail || 'Error saving PR', 'Error', 'error'); }
   };
 
   const handleSave = async (status) => {
     try {
-      if (!form.project_id) {
-        alert("Please select an institution.");
+      const newErrors = {};
+      if (!form.project_id) newErrors.project_id = "Institution is required";
+      if (!form.department_name) newErrors.department_name = "Department is required";
+      if (!form.required_date) newErrors.required_date = "Required Date is required";
+
+      if (form.items.length === 0) {
+        newErrors.items = "Please add at least one material item.";
+      }
+
+      const newItemErrors = {};
+      form.items.forEach((it, i) => {
+        if (!it.material_id) {
+          newItemErrors[i] = { ...newItemErrors[i], material_id: "Material is required" };
+        }
+        if (!it.quantity || parseFloat(it.quantity) <= 0) {
+          newItemErrors[i] = { ...newItemErrors[i], quantity: "Quantity is required" };
+        }
+      });
+
+      setErrors(newErrors);
+      setItemErrors(newItemErrors);
+      if (Object.keys(newErrors).length > 0 || Object.keys(newItemErrors).length > 0) {
         return;
       }
-      if (!form.department_name) {
-        alert("Please select a department.");
-        return;
-      }
+
       const payload = {
         project_id: form.project_id,
         building_id: form.building_id || null,
@@ -206,10 +252,6 @@ export default function PurchaseRequests() {
           material_id: it.material_id, quantity: parseFloat(it.quantity)
         }))
       };
-      if (payload.items.length === 0) {
-        alert("Add at least one item");
-        return;
-      }
 
       if (status === 'Submitted') {
         showConfirm(
@@ -224,7 +266,7 @@ export default function PurchaseRequests() {
       } else {
         await executeSave(payload);
       }
-    } catch (err) { alert(err.response?.data?.detail || 'Error preparing PR payload'); }
+    } catch (err) { showMessage(err.response?.data?.detail || 'Error preparing PR payload', 'Error', 'error'); }
   };
 
   // Draft → Submitted (first click)
@@ -236,7 +278,7 @@ export default function PurchaseRequests() {
       const res = await api.get(`/api/procurement/pr/${prId}/approval-history`);
       setHistoryDialog({ open: true, materialId, data: res.data, loading: false });
     } catch (err) {
-      alert('Failed to load approval history');
+      showMessage('Failed to load approval history', 'Error', 'error');
       setHistoryDialog({ open: false, materialId: null, data: null, loading: false });
     }
   };
@@ -248,7 +290,7 @@ export default function PurchaseRequests() {
       setDetailHistoryOpen(true);
     } catch (err) {
       console.error(err);
-      alert('Failed to load detail history');
+      showMessage('Failed to load detail history', 'Error', 'error');
     }
   };
 
@@ -266,15 +308,15 @@ export default function PurchaseRequests() {
     });
 
     if (payloadItems.some(it => isNaN(it.approved_quantity) || it.approved_quantity < 0)) {
-      alert("Please enter a valid approved quantity for all items.");
+      showMessage("Please enter a valid approved quantity for all items.", 'Validation Error', 'warning');
       return;
     }
     if (payloadItems.length === 1 && payloadItems[0].approved_quantity === 0) {
-      alert("Approved quantity must be greater than 0 for a single-item document. Please use the Reject button.");
+      showMessage("Approved quantity must be greater than 0 for a single-item document. Please use the Reject button.", 'Validation Error', 'warning');
       return;
     }
     if (payloadItems.length > 1 && payloadItems.every(it => it.approved_quantity === 0)) {
-      alert("You cannot approve 0 quantity for all items. Please use the Reject button.");
+      showMessage("You cannot approve 0 quantity for all items. Please use the Reject button.", 'Validation Error', 'warning');
       return;
     }
 
@@ -293,9 +335,9 @@ export default function PurchaseRequests() {
         msg = `${pr.pr_number} successfully approved. ${msg}`;
       }
       // You can use a better notification system if implemented, falling back to alert
-      alert(msg);
+      showMessage(msg, 'Validation Error', 'warning');
     } catch (err) {
-      alert(err.response?.data?.detail || "Error approving PR");
+      showMessage(err.response?.data?.detail || "Error approving PR", 'Error', 'error');
     }
   };
 
@@ -403,12 +445,12 @@ export default function PurchaseRequests() {
     }));
 
     if (mappedItems.some(it => isNaN(it.rate) || it.rate < 0 || isNaN(it.quantity) || it.quantity <= 0 || isNaN(it.discount_percent) || it.discount_percent < 0 || isNaN(it.cgst_percentage) || it.cgst_percentage < 0 || isNaN(it.sgst_percentage) || it.sgst_percentage < 0 || isNaN(it.igst_percentage) || it.igst_percentage < 0)) {
-      alert("Rate, Quantity, Discount and Taxes must be valid non-negative numbers.");
+      showMessage("Rate, Quantity, Discount and Taxes must be valid non-negative numbers.", 'Validation Error', 'warning');
       return;
     }
 
     if (!convertDialog.vendor_id || !convertDialog.terms?.trim()) {
-      alert("Please select a vendor and provide terms and conditions.");
+      showMessage("Please select a vendor and provide terms and conditions.", 'Validation Error', 'warning');
       return;
     }
 
@@ -426,7 +468,7 @@ export default function PurchaseRequests() {
       load();
     } catch (err) {
       const msg = err.response?.data?.detail;
-      alert(typeof msg === 'string' ? msg : JSON.stringify(msg) || 'Error converting PR');
+      showMessage(typeof msg === 'string' ? msg : JSON.stringify(msg, 'Validation Error', 'warning') || 'Error converting PR');
     }
   };
 
@@ -938,7 +980,7 @@ export default function PurchaseRequests() {
       {/* Create PR Dialog - Multi-Item */}
       <Dialog
         open={dialog}
-        onClose={(e, reason) => { if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') { setDialog(false); setEditingPRId(null); } }}
+        onClose={(e, reason) => { if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') { setDialog(false); setEditingPRId(null); setErrors({}); } }}
         maxWidth="md"
         fullWidth
         PaperProps={{ sx: { borderRadius: 3, boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' } }}
@@ -956,7 +998,7 @@ export default function PurchaseRequests() {
         </DialogTitle>
         <DialogContent sx={{ px: 3, py: 1 }}>
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr 1fr' }, gap: 2, pt: 1, mb: 2 }}>
-            <FormControl fullWidth required>
+            <FormControl fullWidth required error={!!errors.project_id}>
               <InputLabel>Institution</InputLabel>
               <Select
                 value={form.institution_id}
@@ -967,15 +1009,16 @@ export default function PurchaseRequests() {
                 <MenuItem value="" disabled>Select Institution</MenuItem>
                 {institutions.map(inst => <MenuItem key={inst.id} value={inst.id}>{inst.name}</MenuItem>)}
               </Select>
+              {errors.project_id && <Typography color="error" variant="caption" sx={{ ml: 2, mt: 0.5 }}>{errors.project_id}</Typography>}
             </FormControl>
 
-            <FormControl fullWidth required disabled={!form.institution_id}>
+            <FormControl fullWidth required disabled={!form.institution_id} error={!!errors.department_name}>
               <Autocomplete
                 options={formDepartmentsList}
                 value={form.department_name || null}
                 onChange={(e, val) => handleDepartmentChange(val)}
                 renderInput={(params) => (
-                  <TextField {...params} label="Department" required InputProps={{ ...params.InputProps, startAdornment: <><InputAdornment position="start"><AccountTree sx={{ color: '#94A3B8', ml: 1 }} /></InputAdornment>{params.InputProps.startAdornment}</> }} />
+                  <TextField {...params} label="Department" required error={!!errors.department_name} helperText={errors.department_name} InputProps={{ ...params.InputProps, startAdornment: <><InputAdornment position="start"><AccountTree sx={{ color: '#94A3B8', ml: 1 }} /></InputAdornment>{params.InputProps.startAdornment}</> }} />
                 )}
               />
             </FormControl>
@@ -1003,6 +1046,8 @@ export default function PurchaseRequests() {
                 textField: {
                   fullWidth: true,
                   size: "small",
+                  error: !!errors.required_date,
+                  helperText: errors.required_date,
                   InputProps: {
                     startAdornment: <InputAdornment position="start"><CalendarMonth sx={{ color: '#94A3B8' }} /></InputAdornment>
                   }
@@ -1014,7 +1059,8 @@ export default function PurchaseRequests() {
           <Divider sx={{ mb: 2 }} />
 
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b' }}>Material Items</Typography>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, color: '#475569' }}>Material Items</Typography>
+            {errors.items && <Typography color="error" variant="body2" sx={{ mb: 1 }}>{errors.items}</Typography>}
             <Button size="small" startIcon={<Add />} onClick={addItem} sx={{ fontWeight: 600 }}>Add Item</Button>
           </Box>
 
@@ -1041,6 +1087,8 @@ export default function PurchaseRequests() {
                       setForm({ ...form, items });
                     }}
                     size="small"
+                    error={!!itemErrors[i]?.material_id}
+                    helperText={itemErrors[i]?.material_id}
                   />
                 </Box>
                 <TextField
@@ -1049,6 +1097,8 @@ export default function PurchaseRequests() {
                   label="Quantity"
                   type="number"
                   value={item.quantity}
+                  error={!!itemErrors[i]?.quantity}
+                  helperText={itemErrors[i]?.quantity}
                   onKeyDown={e => {
                     const blockList = ['-', '+', 'e', 'E'];
                     if (!item.uom_allow_decimal) blockList.push('.');

@@ -6,8 +6,10 @@ import {
 } from '@mui/material';
 import { Add, Edit, Delete, Close, Assignment } from '@mui/icons-material';
 import api from '../services/api';
+import { useMessage } from '../context/MessageContext';
 
 export default function TermsAndConditions() {
+  const { showMessage } = useMessage();
   const [terms, setTerms] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -47,7 +49,7 @@ export default function TermsAndConditions() {
       setModalOpen(false);
       loadTerms();
     } catch (e) {
-      alert('Error saving terms and conditions');
+      showMessage('Error saving terms and conditions', 'Error', 'error');
     }
   };
 
@@ -57,7 +59,7 @@ export default function TermsAndConditions() {
       await api.delete(`/api/terms/${id}`);
       loadTerms();
     } catch (e) {
-      alert('Error deleting template');
+      showMessage('Error deleting template', 'Error', 'error');
     }
   };
 

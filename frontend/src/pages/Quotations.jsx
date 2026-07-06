@@ -54,6 +54,9 @@ const Quotations = () => {
     items: [],
     vendor_ids: []
   });
+  const [errors, setErrors] = useState({});
+
+
 
   // Selected QR details
   const [listFilter, setListFilter] = useState('All');
@@ -95,6 +98,17 @@ const Quotations = () => {
 
   // Generated POs
   const [generatedPOs, setGeneratedPOs] = useState([]);
+
+
+
+
+  // Auto-clear resolved errors
+  useEffect(() => {
+    setErrors(prev => {
+      if (Object.keys(prev).length === 0) return prev;
+      return {}; // Clear all errors when form changes
+    });
+  }, [newQR]);
 
   useEffect(() => {
     api.get('/api/terms').then(r => setTermsTemplates(r.data));
@@ -182,12 +196,33 @@ const Quotations = () => {
 
   // --- Actions ---
 
+
+
+
+
   const handleAutoProcess = (qr, section = null) => {
     setSelectedQR(qr);
     setDetailSection(section);
   };
 
   const handleCreateQR = async () => {
+    const newErrors = {};
+
+    if (!newQR.project_id && projects.length > 0) {
+      newErrors.project_id = "Project is required.";
+    }
+    if (!newQR.items || newQR.items.length === 0) {
+      newErrors.items = "Please link at least one PR or add manual materials.";
+    }
+    if (!newQR.vendor_ids || newQR.vendor_ids.length < 2) {
+      newErrors.vendor_ids = "Please invite at least 2 vendors to ensure competitive pricing.";
+    }
+
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      return;
+    }
+
     try {
       const payload = {
         ...newQR,
@@ -200,6 +235,7 @@ const Quotations = () => {
       showMessage('Quotation Request created successfully!', 'Success', 'success');
       setCreateQRDialogOpen(false);
       setNewQR({ project_id: projects[0]?.id || '', required_date: '', remarks: '', pr_ids: [], items: [], vendor_ids: [] });
+      setErrors({});
       fetchData();
     } catch (err) {
       const detail = err.response?.data?.detail;
@@ -1318,7 +1354,12 @@ const Quotations = () => {
 
         <Dialog
           open={createQRDialogOpen}
-          onClose={(e, reason) => { if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') setCreateQRDialogOpen(false); }}
+          onClose={(e, reason) => { 
+            if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') {
+              setCreateQRDialogOpen(false);
+              setErrors({});
+            }
+          }}
           maxWidth="md"
           fullWidth
           PaperProps={{ sx: { borderRadius: 3, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' } }}
@@ -1409,6 +1450,7 @@ const Quotations = () => {
                     ))
                   }
                 />
+                {errors.items && <FormHelperText error>{errors.items}</FormHelperText>}
               </Box>
 
               <Box>
@@ -1479,7 +1521,8 @@ const Quotations = () => {
                       <TextField
                         {...params}
                         placeholder="Search Vendors..."
-                        error={(newQR.vendor_ids?.length || 0) === 1}
+                        error={!!errors.vendor_ids}
+                        helperText={errors.vendor_ids}
                       />
                     )}
                     disableCloseOnSelect
@@ -1500,9 +1543,6 @@ const Quotations = () => {
                       ))
                     }
                   />
-                  {(newQR.vendor_ids?.length || 0) === 1 && (
-                    <FormHelperText sx={{ fontWeight: 600 }}>Please invite at least 2 vendors to ensure competitive pricing.</FormHelperText>
-                  )}
                 </FormControl>
               </Box>
 

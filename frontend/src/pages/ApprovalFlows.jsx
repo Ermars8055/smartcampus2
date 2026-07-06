@@ -7,8 +7,10 @@ import {
 } from '@mui/material';
 import { Add, Edit, AccountTree as FlowIcon } from '@mui/icons-material';
 import api from '../services/api';
+import { useMessage } from '../context/MessageContext';
 
 export default function ApprovalFlows() {
+  const { showMessage } = useMessage();
   const [approvalFlows, setApprovalFlows] = useState([]);
   const [roles, setRoles] = useState([]);
   const [users, setUsers] = useState([]);
@@ -133,10 +135,10 @@ export default function ApprovalFlows() {
           <Button onClick={() => setDialog(false)} sx={{ color: '#64748B', fontWeight: 600 }}>Cancel</Button>
           <Button variant="contained" sx={{ borderRadius: 2, px: 4, py: 1, fontWeight: 700, boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)', textTransform: 'none' }} onClick={async () => {
             try {
-              if (!form.document_type) return alert('Document Type is required');
-              if (!form.role_name) return alert('Role Required is mandatory');
+              if (!form.document_type) return showMessage('Document Type is required', 'Validation Error', 'warning');
+              if (!form.role_name) return showMessage('Role Required is mandatory', 'Validation Error', 'warning');
               if (!Number.isInteger(Number(form.level)) || Number(form.level) < 1) {
-                return alert('Level must be a positive integer (e.g., 1, 2, 3)');
+                return showMessage('Level must be a positive integer (e.g., 1, 2, 3)', 'Validation Error', 'warning');
               }
               const payload = { 
                 ...form, 
@@ -149,7 +151,7 @@ export default function ApprovalFlows() {
               else await api.post('/api/approval-flows', payload);
               setDialog(false); setEditing(null); load();
             } catch (err) {
-              alert(err.response?.data?.detail || 'An error occurred while saving.');
+              showMessage(err.response?.data?.detail || 'An error occurred while saving.', 'Error', 'error');
             }
           }}>{editing ? 'Update' : 'Create'}</Button>
         </DialogActions>

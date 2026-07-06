@@ -39,18 +39,12 @@ class ChangePasswordRequest(BaseModel):
     new_password: str
 
 class ForgotPasswordRequest(BaseModel):
-    username: str
-    workspace: str
-
-class VerifyOTPRequest(BaseModel):
-    username: str
-    workspace: str
-    otp: str
+    email: str
+    frontend_url: str
 
 class ResetPasswordRequest(BaseModel):
-    username: str
-    workspace: str
-    otp: str
+    email: str
+    token: str
     new_password: str
 
 @router.get("/workspaces")
@@ -261,22 +255,12 @@ def change_password(req: ChangePasswordRequest, current_user: User = Depends(get
 
 @router.post("/forgot-password")
 def forgot_password(req: ForgotPasswordRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
-    tenant = db.query(Tenant).filter(Tenant.slug == req.workspace.lower()).first()
-    if not tenant:
-        raise HTTPException(404, "Workspace not found")
-        
-    user = db.query(User).filter(func.lower(User.username) == req.username.lower(), User.is_deleted == False).first()
+    user = db.query(User).filter(func.lower(User.email) == req.email.lower(), User.is_deleted == False).first()
     if not user:
         raise HTTPException(404, "User not found")
         
-    membership = db.query(TenantMembership).filter_by(
-        user_id=user.id, tenant_id=tenant.id, is_active=True
-    ).first()
-    if not membership:
-        raise HTTPException(404, "User not found in this workspace")
-
-    # Generate 6-digit OTP
-    otp = ''.join(random.choices(string.digits, k=6))
+    # Generate 10-char alphanumeric token
+    token = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
     
     # Invalidate previous tokens
     db.query(PasswordResetToken).filter(PasswordResetToken.user_id == user.id).delete()
@@ -284,69 +268,43 @@ def forgot_password(req: ForgotPasswordRequest, background_tasks: BackgroundTask
     # Save new token
     token_entry = PasswordResetToken(
         user_id=user.id,
-        otp=otp,
-        expires_at=get_now_ist().replace(tzinfo=None) + timedelta(minutes=3)
+        otp=token,
+        expires_at=get_now_ist().replace(tzinfo=None) + timedelta(minutes=15)
     )
     db.add(token_entry)
     db.commit()
     
     # Send Email
-    subject = "Password Reset OTP - Eastpoint Smart Campus"
+    reset_link = f"{req.frontend_url}/reset-password?token={token}&email={user.email}"
+    subject = "Password Reset - Eastpoint Smart Campus"
     html_body = f"""
     <p>Dear {user.full_name},</p>
-    <p>You have requested to reset your password. Your One-Time Password (OTP) is:</p>
-    <h2 style="color: #2563EB;">{otp}</h2>
-    <p>This OTP is valid for 3 minutes. If you did not request a password reset, please ignore this email.</p>
+    <p>You have requested to reset your password. Please click the link below to set a new password:</p>
+    <p><a href="{reset_link}" style="color: #2563EB; font-weight: bold;">Reset Password</a></p>
+    <p>This link is valid for 15 minutes. If you did not request a password reset, please ignore this email.</p>
     <br>
     <p>Regards,<br>Eastpoint Smart Campus</p>
     """
     background_tasks.add_task(send_html_email, user.email, subject, html_body)
     
-    return {"message": "OTP sent successfully to your registered email"}
-
-@router.post("/verify-otp")
-def verify_otp(req: VerifyOTPRequest, db: Session = Depends(get_db)):
-    tenant = db.query(Tenant).filter(Tenant.slug == req.workspace.lower()).first()
-    if not tenant:
-        raise HTTPException(404, "Workspace not found")
-        
-    user = db.query(User).filter(func.lower(User.username) == req.username.lower(), User.is_deleted == False).first()
-    if not user:
-        raise HTTPException(404, "User not found")
-        
-    token_entry = db.query(PasswordResetToken).filter(
-        PasswordResetToken.user_id == user.id,
-        PasswordResetToken.otp == req.otp
-    ).first()
-    
-    if not token_entry:
-        raise HTTPException(400, "Invalid OTP")
-        
-    if token_entry.expires_at < get_now_ist().replace(tzinfo=None):
-        raise HTTPException(400, "OTP has expired")
-        
-    return {"valid": True, "message": "OTP verified successfully"}
+    return {"message": "A password reset link has been sent to your email address"}
 
 @router.post("/reset-password")
 def reset_password(req: ResetPasswordRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
-    tenant = db.query(Tenant).filter(Tenant.slug == req.workspace.lower()).first()
-    if not tenant:
-        raise HTTPException(404, "Workspace not found")
-        
-    user = db.query(User).filter(func.lower(User.username) == req.username.lower(), User.is_deleted == False).first()
+    user = db.query(User).filter(func.lower(User.email) == req.email.lower(), User.is_deleted == False).first()
     if not user:
         raise HTTPException(404, "User not found")
         
     token_entry = db.query(PasswordResetToken).filter(
         PasswordResetToken.user_id == user.id,
-        PasswordResetToken.otp == req.otp
+        PasswordResetToken.otp == req.token
     ).first()
     
     if not token_entry:
-        raise HTTPException(400, "Invalid OTP")
+        raise HTTPException(400, "Invalid or expired reset link")
         
     if token_entry.expires_at < get_now_ist().replace(tzinfo=None):
-        raise HTTPException(400, "OTP has expired")
+        raise HTTPException(400, "Reset link has expired")
         
     # Reset password
     user.hashed_password = get_password_hash(req.new_password)

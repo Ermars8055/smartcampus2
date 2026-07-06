@@ -10,6 +10,7 @@ import {
 import { Edit, PersonAdd, AdminPanelSettings, Visibility, VisibilityOff } from '@mui/icons-material';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useMessage } from '../context/MessageContext';
 
 const emptyForm = {
   username: '',
@@ -25,6 +26,7 @@ const emptyForm = {
 };
 
 export default function Users() {
+  const { showMessage } = useMessage();
   const [users, setUsers] = useState([]);
   const [sites, setSites] = useState([]);
   const [roles, setRoles] = useState([]);
@@ -99,7 +101,7 @@ export default function Users() {
         });
       }
       setDialog(false); setEditing(null); load();
-    } catch (err) { alert(err.response?.data?.detail || 'Error'); }
+    } catch (err) { showMessage(err.response?.data?.detail || 'Error', 'Error', 'error'); }
   };
 
   const roleColor = { 'Admin': 'error', 'Purchase Manager': 'primary', 'Store Keeper': 'success', 'Security': 'warning', 'Engineer': 'info', 'Management': 'secondary' };

@@ -40,7 +40,14 @@ export default function PurchaseOrders() {
   const [approvalDialog, setApprovalDialog] = useState({ open: false, po: null, items: {} });
   const [approvalRemarks, setApprovalRemarks] = useState('');
   const [historyDialog, setHistoryDialog] = useState({ open: false, materialId: null, data: null, loading: false });
+  const [errors, setErrors] = useState({});
+
+
   const [itemErrors, setItemErrors] = useState({});
+
+
+
+
 
   const handleRateBlur = (i, rate, baseRate) => {
     const r = parseFloat(rate);
@@ -201,6 +208,25 @@ export default function PurchaseOrders() {
   const [form, setForm] = useState({
     po_number: '', vendor_id: '', project_id: '', delivery_date: dayjs().add(14, 'day'), terms: '', annexure: '', po_type: 'Informal', items: [{ material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }]
   });
+
+
+
+  // Auto-clear resolved errors
+  useEffect(() => {
+    setErrors(prev => Object.keys(prev).length > 0 ? {} : prev);
+    setItemErrors(prev => Object.keys(prev || {}).length > 0 ? {} : prev);
+  }, [form]);
+
+  useEffect(() => {
+    setErrors(prev => Object.keys(prev).length > 0 ? {} : prev);
+    setItemErrors(prev => Object.keys(prev || {}).length > 0 ? {} : prev);
+  }, [form]);
+
+  useEffect(() => {
+    setErrors(prev => Object.keys(prev).length > 0 ? {} : prev);
+    setItemErrors(prev => Object.keys(prev || {}).length > 0 ? {} : prev);
+  }, [form]);
+
   const [sortConfig, setSortConfig] = useState({ key: 'created_at', direction: 'desc' });
 
   const theme = useTheme();
@@ -443,46 +469,45 @@ export default function PurchaseOrders() {
   };
 
   const handleSave = async (isDraft = false) => {
-    if (!form.vendor_id) {
-      showMessage("Please select a Vendor.", "Validation Error", "warning");
-      return;
-    }
-    if (!form.project_id) {
-      showMessage("Project is required but none is available.", "Validation Error", "warning");
-      return;
-    }
-    if (!form.delivery_date) {
-      showMessage("Delivery Date is required.", "Validation Error", "warning");
-      return;
-    }
-    if (form.items.some(it => !it.material_id)) {
-      showMessage("Please select a Material for all line items.", "Validation Error", "warning");
-      return;
-    }
     const newErrors = {};
+    if (!form.vendor_id) newErrors.vendor_id = "Please select a Vendor.";
+    if (!form.project_id) newErrors.project_id = "Project is required.";
+    if (!form.delivery_date) newErrors.delivery_date = "Delivery Date is required.";
+    if (!form.terms || !form.terms.trim()) newErrors.terms = "Terms and Conditions are mandatory.";
+
+    if (form.items.length === 0) {
+      newErrors.items = "Please add at least one line item.";
+    }
+
+    const newItemErrors = {};
     form.items.forEach((it, i) => {
       const qty = parseFloat(it.quantity) || 0;
       const rate = parseFloat(it.rate) || 0;
-      if (qty <= 0 || rate <= 0) {
-        newErrors[i] = {};
-        if (qty <= 0) newErrors[i].quantity = 'Quantity must be > 0';
-        if (rate <= 0) newErrors[i].rate = 'Rate must be > 0';
+      let rowErrors = {};
+      
+      if (!it.material_id) rowErrors.material_id = 'Material is required';
+      if (qty <= 0) rowErrors.quantity = 'Quantity must be > 0';
+      if (rate <= 0) rowErrors.rate = 'Rate must be > 0';
+      
+      if (Object.keys(rowErrors).length > 0) {
+        newItemErrors[i] = rowErrors;
       }
     });
-    if (Object.keys(newErrors).length > 0) {
-      setItemErrors(newErrors);
-      const firstErrorIdx = Object.keys(newErrors)[0];
-      const el = document.getElementById(`item-row-${firstErrorIdx}`);
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    setErrors(newErrors);
+    setItemErrors(newItemErrors);
+
+    if (Object.keys(newErrors).length > 0 || Object.keys(newItemErrors).length > 0) {
+      if (Object.keys(newItemErrors).length > 0) {
+        const firstErrorIdx = Object.keys(newItemErrors)[0];
+        const el = document.getElementById(`item-row-${firstErrorIdx}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
       }
       return;
     }
-    setItemErrors({});
-    if (!form.terms || !form.terms.trim()) {
-      showMessage("Terms and Conditions are mandatory.", "Validation Error", "warning");
-      return;
-    }
+
     try {
       const mappedItems = form.items.map(it => {
         const inputRate = parseFloat(it.rate) || 0;
@@ -1518,7 +1543,13 @@ export default function PurchaseOrders() {
                   setForm({ ...form, vendor_id: vId, items: updatedItems });
                 }}
                 renderInput={(params) => (
-                  <TextField {...params} label="Vendor *" size="small" />
+                  <TextField 
+                    {...params} 
+                    label="Vendor *" 
+                    size="small" 
+                    error={!!errors.vendor_id}
+                    helperText={errors.vendor_id}
+                  />
                 )}
                 fullWidth
                 size="small"
@@ -1554,6 +1585,8 @@ export default function PurchaseOrders() {
                 textField: {
                   fullWidth: true,
                   size: "small",
+                  error: !!errors.delivery_date,
+                  helperText: errors.delivery_date,
                   InputProps: {
                     startAdornment: <InputAdornment position="start"><CalendarMonth sx={{ color: '#94A3B8' }} /></InputAdornment>
                   }
@@ -1563,7 +1596,10 @@ export default function PurchaseOrders() {
           </Box>
           <Divider sx={{ mb: 2 }} />
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b' }}>Line Items</Typography>
+            <Box>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b' }}>Line Items</Typography>
+              {errors.items && <Typography variant="caption" color="error">{errors.items}</Typography>}
+            </Box>
             {!form.indent_id && (
               <Button size="small" startIcon={<Add />} onClick={addItem} sx={{ fontWeight: 600 }}>Add Item</Button>
             )}
@@ -1650,6 +1686,8 @@ export default function PurchaseOrders() {
                         }
                       }}
                       size="small"
+                      error={!!itemErrors[i]?.material_id}
+                      helperText={itemErrors[i]?.material_id}
                     />
                   </Box>
                   <TextField size="small" label="Unit" value={item.uom_name || '-'} InputProps={{ readOnly: true }} />
@@ -1740,6 +1778,8 @@ export default function PurchaseOrders() {
             value={form.terms}
             onChange={e => setForm({ ...form, terms: e.target.value })}
             placeholder="Enter terms and conditions..."
+            error={!!errors.terms}
+            helperText={errors.terms}
           />
           <Divider sx={{ my: 2 }} />
           <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b', mb: 1.5 }}>Annexure</Typography>
@@ -1754,7 +1794,7 @@ export default function PurchaseOrders() {
           />
         </DialogContent>
         <DialogActions sx={{ px: 4, pb: 4, pt: 2, justifyContent: 'flex-end', gap: 2 }}>
-          <Button onClick={() => { setDialog(false); setEditingPOId(null); }} sx={{ color: '#64748B', fontWeight: 600 }}>Cancel</Button>
+          <Button onClick={() => { setDialog(false); setEditingPOId(null); setErrors({}); setItemErrors({}); }} sx={{ color: '#64748B', fontWeight: 600 }}>Cancel</Button>
           {!(form.pr_id || form.indent_id || form.qr_id) && (
             <Button onClick={() => handleSave(true)} color="secondary" variant="outlined" sx={{ fontWeight: 600 }}>Save Draft</Button>
           )}

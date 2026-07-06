@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
@@ -10,8 +10,10 @@ import { Add, Search, AssignmentTurnedIn, AttachFile, OpenInNew, Delete, ArrowBa
 import api, { getFileUrl } from '../services/api';
 import { formatDate } from '../utils/dateUtils';
 import { useAuth } from '../context/AuthContext';
+import { useMessage } from '../context/MessageContext';
 
 export default function GRNPage() {
+  const { showMessage } = useMessage();
   const { hasAction } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -35,12 +37,35 @@ export default function GRNPage() {
   };
 
   const [form, setForm] = useState(initialForm);
+
+  const [errors, setErrors] = useState({});
+  const [itemErrors, setItemErrors] = useState({});
+
+
   const [uploading, setUploading] = useState(false);
+
+
+
+
+  // Auto-clear resolved errors
+  useEffect(() => {
+    setErrors(prev => {
+      if (Object.keys(prev).length === 0) return prev;
+      return {}; // Clear all errors when form changes
+    });
+    setItemErrors(prev => {
+      if (Object.keys(prev).length === 0) return prev;
+      return {}; // Clear item errors
+    });
+  }, [form]);
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  const resetForm = () => setForm(initialForm);
+  const resetForm = () => {
+    setForm(initialForm);
+    setErrors({});
+  };
 
   const load = () => { api.get('/api/grn', { params: { search: search || undefined } }).then(r => setGrns(r.data)); };
   useEffect(() => { load(); }, [search]);
@@ -109,6 +134,10 @@ export default function GRNPage() {
     }
   };
 
+
+
+
+
   const handleUpload = async (file) => {
     if (!file) return;
     setUploading(true);
@@ -118,13 +147,63 @@ export default function GRNPage() {
       const res = await api.post('/api/upload', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
       setForm(prev => ({ ...prev, invoice_scan_url: res.data.url }));
     } catch (err) {
-      alert('Upload failed: ' + (err.response?.data?.detail || err.message));
+      showMessage('Upload failed: ' + (err.response?.data?.detail || err.message), 'Error', 'error');
     }
     setUploading(false);
   };
 
   const handleCreate = async () => {
     try {
+      const newErrors = {};
+
+      if (form.receipt_type === 'PO-Based' && !form.po_id) {
+        newErrors.po_id = "Purchase Order is required";
+      }
+
+      if (form.receipt_type === 'Direct Invoice' && !form.vendor_id && !form.new_vendor_name) {
+        newErrors.vendor = "Vendor is required";
+      }
+
+      if (!form.warehouse_id) {
+        newErrors.warehouse_id = "Target store is required";
+      }
+
+      const newItemErrors = {};
+      form.items.forEach((it, i) => {
+        let rowErrors = {};
+        
+        if (form.receipt_type === 'Direct Invoice' && !it.material_id) {
+          rowErrors.material_id = "Material is required";
+        }
+        if (it.received_quantity <= 0) {
+          rowErrors.received_quantity = "> 0";
+        }
+        if (it.accepted_quantity < 0) {
+          rowErrors.accepted_quantity = ">= 0";
+        }
+        if (it.rejected_quantity < 0) {
+          rowErrors.rejected_quantity = ">= 0";
+        }
+
+        if (form.receipt_type === 'PO-Based' && it.received_quantity > it.ordered_quantity) {
+          rowErrors.received_quantity = "Exceeds ordered";
+        }
+
+        if (it.received_quantity > 0 && (it.accepted_quantity + it.rejected_quantity !== it.received_quantity)) {
+          rowErrors.accepted_quantity = "Accepted + Rejected must equal Received";
+        }
+        
+        if (Object.keys(rowErrors).length > 0) {
+          newItemErrors[i] = rowErrors;
+        }
+      });
+
+      setErrors(newErrors);
+      setItemErrors(newItemErrors);
+      if (Object.keys(newErrors).length > 0 || Object.keys(newItemErrors).length > 0) {
+        return;
+      }
+
       let finalVendorId = form.vendor_id;
       
       // Auto-create vendor if typed in Direct Invoice
@@ -152,7 +231,7 @@ export default function GRNPage() {
       api.get('/api/vendors').then(r => setVendors(r.data));
     } catch (err) {
       const msg = err.response?.data?.detail;
-      alert(typeof msg === 'object' ? JSON.stringify(msg) : (msg || 'Error'));
+      showMessage(typeof msg === 'object' ? JSON.stringify(msg) : (msg || 'Error'), 'Error', 'error');
     }
   };
 
@@ -385,11 +464,12 @@ export default function GRNPage() {
                 {form.receipt_type === 'PO-Based' && (
                   <>
                     <Grid item xs={12} sm={6}>
-                      <FormControl fullWidth required size="small"><InputLabel>Purchase Order</InputLabel>
+                      <FormControl fullWidth required size="small" error={!!errors.po_id}><InputLabel>Purchase Order</InputLabel>
                         <Select value={form.po_id} size="small" label="Purchase Order" onChange={e => selectPO(e.target.value)}>
                           <MenuItem value="">None</MenuItem>
                           {pos.filter(p => p.status !== 'Closed' && p.status !== 'Draft').map(p => <MenuItem key={p.id} value={p.id}>{p.po_number} - {p.vendor_name}</MenuItem>)}
                         </Select>
+                        {errors.po_id && <FormHelperText>{errors.po_id}</FormHelperText>}
                       </FormControl>
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -421,7 +501,7 @@ export default function GRNPage() {
                         }
                       }}
                       renderInput={(params) => (
-                        <TextField {...params} size="small" label="Vendor" required placeholder="Search or type new" />
+                        <TextField {...params} size="small" label="Vendor" required placeholder="Search or type new" error={!!errors.vendor} helperText={errors.vendor} />
                       )}
                     />
                   </Grid>
@@ -429,10 +509,11 @@ export default function GRNPage() {
 
                 {/* Line 4 */}
                 <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth required size="small"><InputLabel>To Store</InputLabel>
+                  <FormControl fullWidth required size="small" error={!!errors.warehouse_id}><InputLabel>To Store</InputLabel>
                     <Select value={form.warehouse_id} size="small" label="To Store" onChange={e => setForm({ ...form, warehouse_id: e.target.value })}>
                       {warehouses.map(w => <MenuItem key={w.id} value={w.id}>{w.name}</MenuItem>)}
                     </Select>
+                    {errors.warehouse_id && <FormHelperText>{errors.warehouse_id}</FormHelperText>}
                   </FormControl>
                 </Grid>
               </Grid>
@@ -510,10 +591,13 @@ export default function GRNPage() {
                   {form.receipt_type === 'Direct Invoice' && <TableCell width={40}></TableCell>}
                 </TableRow></TableHead>
                 <TableBody>
-                  {form.items.map((item, i) => (
-                    <TableRow key={i}>
-                      <TableCell sx={{ minWidth: 250 }}>
-                        {form.receipt_type === 'Direct Invoice' ? (
+                  {form.items.map((item, i) => {
+                    const hasQuantityError = !!itemErrors[i]?.received_quantity || !!itemErrors[i]?.accepted_quantity || !!itemErrors[i]?.rejected_quantity;
+                    return (
+                    <React.Fragment key={i}>
+                      <TableRow sx={{ '& td': { verticalAlign: 'top', pt: 1.5, borderBottom: hasQuantityError ? 'none' : undefined } }}>
+                        <TableCell sx={{ minWidth: 250 }}>
+                          {form.receipt_type === 'Direct Invoice' ? (
                           <Autocomplete
                             size="small"
                             options={materials}
@@ -525,7 +609,7 @@ export default function GRNPage() {
                               setForm({ ...form, items });
                             }}
                             renderInput={(params) => (
-                              <TextField {...params} variant="outlined" size="small" placeholder="-- Select Material --" />
+                              <TextField {...params} variant="outlined" size="small" placeholder="-- Select Material --" error={!!itemErrors[i]?.material_id} helperText={itemErrors[i]?.material_id} />
                             )}
                             componentsProps={{ paper: { sx: { fontSize: '0.85rem' } } }}
                           />
@@ -544,6 +628,7 @@ export default function GRNPage() {
                       {form.receipt_type === 'PO-Based' && <TableCell align="right">{item.ordered_quantity}</TableCell>}
                       <TableCell align="right">
                         <TextField size="small" type="number" inputProps={{ step: "1", min: "0" }} value={item.received_quantity ?? ''} sx={{ width: 80 }}
+                          error={!!itemErrors[i]?.received_quantity}
                           onChange={e => {
                             const items = [...form.items];
                             items[i].received_quantity = Math.max(0, Math.round(parseFloat(e.target.value) || 0));
@@ -552,6 +637,7 @@ export default function GRNPage() {
                       </TableCell>
                       <TableCell align="right">
                         <TextField size="small" type="number" inputProps={{ step: "1", min: "0" }} value={item.accepted_quantity ?? ''} sx={{ width: 80 }}
+                          error={!!itemErrors[i]?.accepted_quantity}
                           onChange={e => {
                             const items = [...form.items];
                             items[i].accepted_quantity = Math.max(0, Math.round(parseFloat(e.target.value) || 0));
@@ -560,6 +646,7 @@ export default function GRNPage() {
                       </TableCell>
                       <TableCell align="right">
                         <TextField size="small" type="number" inputProps={{ step: "1", min: "0" }} value={item.rejected_quantity ?? ''} sx={{ width: 80 }}
+                          error={!!itemErrors[i]?.rejected_quantity}
                           onChange={e => {
                             const items = [...form.items];
                             items[i].rejected_quantity = Math.max(0, Math.round(parseFloat(e.target.value) || 0));
@@ -589,7 +676,19 @@ export default function GRNPage() {
                         </TableCell>
                       )}
                     </TableRow>
-                  ))}
+                    {hasQuantityError && (
+                      <TableRow>
+                        <TableCell colSpan={2} sx={{ py: 0, borderBottom: '1px solid rgba(224, 224, 224, 1)' }} />
+                        <TableCell colSpan={form.receipt_type === 'PO-Based' ? 4 : 3} align="center" sx={{ py: 0, pb: 1, borderBottom: '1px solid rgba(224, 224, 224, 1)' }}>
+                          <Typography variant="caption" color="error" sx={{ fontWeight: 600, display: 'block' }}>
+                            {itemErrors[i]?.accepted_quantity || itemErrors[i]?.received_quantity || itemErrors[i]?.rejected_quantity}
+                          </Typography>
+                        </TableCell>
+                        <TableCell colSpan={form.receipt_type === 'Direct Invoice' ? 2 : 1} sx={{ py: 0, borderBottom: '1px solid rgba(224, 224, 224, 1)' }} />
+                      </TableRow>
+                    )}
+                    </React.Fragment>
+                  )})}
                 </TableBody>
               </Table>
             </>

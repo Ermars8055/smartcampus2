@@ -12,8 +12,10 @@ import {
   Percent, Speed, CurrencyRupee, Tag, QrCodeScanner, Print, ArrowBack
 } from '@mui/icons-material';
 import api from '../services/api';
+import { useMessage } from '../context/MessageContext';
 
 export default function Materials() {
+  const { showMessage } = useMessage();
   const [materials, setMaterials] = useState([]);
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
@@ -219,7 +221,7 @@ export default function Materials() {
         });
         setErrors(serverErrors);
       } else {
-        alert(detail || 'Error saving material');
+        showMessage(detail || 'Error saving material', 'Error', 'error');
       }
     }
   };

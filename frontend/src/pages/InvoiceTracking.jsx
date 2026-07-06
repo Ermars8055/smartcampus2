@@ -9,8 +9,10 @@ import { Search, CheckCircle, Undo, Visibility, Send, Payment, ReceiptLong, Open
 import api, { getFileUrl } from '../services/api';
 import { formatDate } from '../utils/dateUtils';
 import { useAuth } from '../context/AuthContext';
+import { useMessage } from '../context/MessageContext';
 
 export default function InvoiceTracking() {
+  const { showMessage } = useMessage();
   const { hasAction } = useAuth();
   const [invoices, setInvoices] = useState([]);
   const [currentTab, setCurrentTab] = useState('approved');
@@ -113,7 +115,7 @@ export default function InvoiceTracking() {
       setRemarks('');
       load();
     } catch (err) {
-      alert(err.response?.data?.detail || 'Failed to update hard copy status');
+      showMessage(err.response?.data?.detail || 'Failed to update hard copy status', 'Error', 'error');
     }
   };
 
@@ -129,7 +131,7 @@ export default function InvoiceTracking() {
       setSendForPaymentDialog(false);
       load();
     } catch (err) {
-      alert(err.response?.data?.detail || 'Failed to send for payment');
+      showMessage(err.response?.data?.detail || 'Failed to send for payment', 'Error', 'error');
     }
     setLoading(false);
   };
@@ -146,7 +148,7 @@ export default function InvoiceTracking() {
       setMarkPaidDialog(false);
       load();
     } catch (err) {
-      alert(err.response?.data?.detail || 'Failed to update payment status');
+      showMessage(err.response?.data?.detail || 'Failed to update payment status', 'Error', 'error');
     }
     setLoading(false);
   };
@@ -159,7 +161,7 @@ export default function InvoiceTracking() {
       setSendHardCopyDialog(null);
       load();
     } catch (err) {
-      alert(err.response?.data?.detail || 'Failed to send hard copy');
+      showMessage(err.response?.data?.detail || 'Failed to send hard copy', 'Error', 'error');
     }
   };
 
@@ -174,7 +176,7 @@ export default function InvoiceTracking() {
       setSingleTargetAmount('');
       load();
     } catch (err) {
-      alert(err.response?.data?.detail || 'Failed to send for payment');
+      showMessage(err.response?.data?.detail || 'Failed to send for payment', 'Error', 'error');
     }
     setLoading(false);
   };
@@ -190,7 +192,7 @@ export default function InvoiceTracking() {
       setPaymentRef('');
       load();
     } catch (err) {
-      alert(err.response?.data?.detail || 'Failed to update payment status');
+      showMessage(err.response?.data?.detail || 'Failed to update payment status', 'Error', 'error');
     }
     setLoading(false);
   };

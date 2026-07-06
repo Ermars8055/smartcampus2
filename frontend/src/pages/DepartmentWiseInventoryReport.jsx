@@ -13,8 +13,10 @@ import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import api from '../services/api';
+import { useMessage } from '../context/MessageContext';
 
 export default function DepartmentWiseInventoryReport() {
+  const { showMessage } = useMessage();
   const [categories, setCategories] = useState([]);
   const [institutions, setInstitutions] = useState([]);
   const [departments, setAllDepartments] = useState([]);
@@ -64,7 +66,7 @@ export default function DepartmentWiseInventoryReport() {
       setPage(0);
     } catch (err) {
       console.error(err);
-      alert("Failed to fetch report data");
+      showMessage("Failed to fetch report data", 'Error', 'error');
     } finally {
       setLoading(false);
     }

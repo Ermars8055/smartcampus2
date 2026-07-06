@@ -8,8 +8,10 @@ import { CheckCircle, AssignmentTurnedIn } from '@mui/icons-material';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import ConfirmDialog from '../components/ConfirmDialog';
+import { useMessage } from '../context/MessageContext';
 
 export default function PendingAcknowledgments() {
+  const { showMessage } = useMessage();
   const { hasAction } = useAuth();
   const [issues, setIssues] = useState([]);
   const [confirm, setConfirm] = useState({ open: false, issue: null });
@@ -29,7 +31,7 @@ export default function PendingAcknowledgments() {
     try {
       await api.put(`/api/issues/${issueId}/acknowledge`);
       load();
-    } catch (err) { alert(err.response?.data?.detail || 'Error'); }
+    } catch (err) { showMessage(err.response?.data?.detail || 'Error', 'Error', 'error'); }
   };
 
   const pendingAcks = issues.filter(iss => !iss.is_acknowledged && iss.indent_id);

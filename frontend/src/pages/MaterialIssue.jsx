@@ -35,10 +35,26 @@ export default function MaterialIssue() {
   // Modal states: if indent is null, it's a direct issue
   const [issueModal, setIssueModal] = useState({ open: false, isDirect: false, indent: null, items: [], project_id: '', warehouse_id: '', remarks: '', department: '', building_id: '', floor_id: '', room_id: '' });
   const [viewIssueModal, setViewIssueModal] = useState({ open: false, issue: null });
+  const [errors, setErrors] = useState({});
+
+
+
+
+  // Auto-clear resolved errors
+  useEffect(() => {
+    setErrors(prev => {
+      if (Object.keys(prev).length === 0) return prev;
+      return {}; // Clear all errors when form changes
+    });
+  }, [issueModal]);
 
   const barcodeBufferRef = useRef('');
   const barcodeTimeoutRef = useRef(null);
   const lastKeyTimeRef = useRef(performance.now());
+
+
+
+
 
   const handleBarcodeScan = (code) => {
     const mat = materials.find(m => m.code === code);
@@ -309,6 +325,7 @@ export default function MaterialIssue() {
       })
       .filter(it => it.remaining > 0);
     setIssueModal({ open: true, isDirect: false, indent, items, project_id: indent.project_id || '', warehouse_id: items[0]?.warehouse_id || '', remarks: '' });
+    setErrors({});
   };
 
   const openDirectIssueModal = () => {
@@ -325,6 +342,7 @@ export default function MaterialIssue() {
       remarks: '',
       items: [{ material_id: '', issue_qty: '' }]
     });
+    setErrors({});
   };
 
   const openViewIssueModal = (issue) => {
@@ -333,13 +351,19 @@ export default function MaterialIssue() {
 
   const handleIssueSubmit = async () => {
     try {
-      if (issueModal.isDirect && (!issueModal.warehouse_id || !issueModal.project_id || !issueModal.department)) {
-        showMessage('Please select a warehouse, institution and department for direct issue.', 'Validation Error', 'warning');
-        return;
+      const newErrors = {};
+
+      if (issueModal.isDirect) {
+        if (!issueModal.warehouse_id) newErrors.warehouse_id = "Source store is required";
+        if (!issueModal.project_id) newErrors.project_id = "Institution is required";
+        if (!issueModal.department) newErrors.department = "Department is required";
       }
-      const validItems = issueModal.items.filter(it => it.material_id && it.issue_qty > 0);
-      if (validItems.length === 0) {
-        showMessage('Please provide quantity for at least one item.', 'Validation Error', 'warning');
+      
+      const validItems = issueModal.items.filter(it => it.material_id && parseFloat(it.issue_qty) > 0);
+      if (validItems.length === 0) newErrors.items = "Please provide quantity for at least one item.";
+
+      setErrors(newErrors);
+      if (Object.keys(newErrors).length > 0) {
         return;
       }
 
@@ -646,7 +670,7 @@ export default function MaterialIssue() {
           {issueModal.isDirect && (
             <Grid container spacing={2} sx={{ mb: 3, mt: 0.5 }}>
               <Grid item xs={12} sm={4}>
-                <FormControl fullWidth size="small">
+                <FormControl fullWidth size="small" error={!!errors.warehouse_id}>
                   <InputLabel>Source Store <span style={{ color: '#d32f2f' }}>*</span></InputLabel>
                   <Select
                     label="Source Store *"
@@ -656,10 +680,11 @@ export default function MaterialIssue() {
                   >
                     {warehouses.map(w => <MenuItem key={w.id} value={w.id}>{w.name} ({w.code})</MenuItem>)}
                   </Select>
+                  {errors.warehouse_id && <Typography color="error" variant="caption" sx={{ ml: 2, mt: 0.5 }}>{errors.warehouse_id}</Typography>}
                 </FormControl>
               </Grid>
               <Grid item xs={12} sm={4}>
-                <FormControl fullWidth size="small">
+                <FormControl fullWidth size="small" error={!!errors.project_id}>
                   <InputLabel>Institution <span style={{ color: '#d32f2f' }}>*</span></InputLabel>
                   <Select
                     label="Institution *"
@@ -669,6 +694,7 @@ export default function MaterialIssue() {
                   >
                     {projects.map(p => <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>)}
                   </Select>
+                  {errors.project_id && <Typography color="error" variant="caption" sx={{ ml: 2, mt: 0.5 }}>{errors.project_id}</Typography>}
                 </FormControl>
               </Grid>
               <Grid item xs={12} sm={4}>
@@ -677,7 +703,15 @@ export default function MaterialIssue() {
                   value={issueModal.department || null}
                   onChange={(e, val) => handleDepartmentChange(val)}
                   renderInput={(params) => (
-                    <TextField {...params} size="small" label={<>Department <span style={{ color: '#d32f2f' }}>*</span></>} InputProps={{ ...params.InputProps, startAdornment: <><InputAdornment position="start"><AccountTree sx={{ color: '#94A3B8', ml: 1, fontSize: 18 }} /></InputAdornment>{params.InputProps.startAdornment}</> }} sx={{ bgcolor: '#fff' }} />
+                    <TextField 
+                      {...params} 
+                      size="small" 
+                      label={<>Department <span style={{ color: '#d32f2f' }}>*</span></>} 
+                      error={!!errors.department}
+                      helperText={errors.department}
+                      InputProps={{ ...params.InputProps, startAdornment: <><InputAdornment position="start"><AccountTree sx={{ color: '#94A3B8', ml: 1, fontSize: 18 }} /></InputAdornment>{params.InputProps.startAdornment}</> }} 
+                      sx={{ bgcolor: '#fff' }} 
+                    />
                   )}
                 />
               </Grid>
@@ -735,6 +769,7 @@ export default function MaterialIssue() {
           {issueModal.isDirect && (
             <Box sx={{ mb: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#1E293B' }}>Items to Issue</Typography>
+              {errors.items && <Typography color="error" variant="body2">{errors.items}</Typography>}
               <Button size="small" startIcon={<Add />} onClick={addDirectItem} sx={{ textTransform: 'none', fontWeight: 700 }}>Add Item</Button>
             </Box>
           )}

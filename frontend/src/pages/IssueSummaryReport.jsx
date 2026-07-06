@@ -15,8 +15,10 @@ import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import api from '../services/api';
+import { useMessage } from '../context/MessageContext';
 
 export default function IssueSummaryReport() {
+  const { showMessage } = useMessage();
   const [warehouses, setWarehouses] = useState([]);
   const [categories, setCategories] = useState([]);
   const [institutions, setInstitutions] = useState([]);
@@ -63,11 +65,11 @@ export default function IssueSummaryReport() {
 
   const handleGenerate = async () => {
     if (!filters.fromDate || !filters.toDate) {
-      alert("Please select From Date and To Date");
+      showMessage("Please select From Date and To Date", 'Validation Error', 'warning');
       return;
     }
     if (filters.fromDate.isAfter(filters.toDate)) {
-      alert("From Date cannot be greater than To Date");
+      showMessage("From Date cannot be greater than To Date", 'Validation Error', 'warning');
       return;
     }
 
@@ -89,7 +91,7 @@ export default function IssueSummaryReport() {
       setPage(0);
     } catch (err) {
       console.error(err);
-      alert("Failed to fetch report data");
+      showMessage("Failed to fetch report data", 'Error', 'error');
     } finally {
       setLoading(false);
     }
@@ -397,7 +399,7 @@ export default function IssueSummaryReport() {
       setDrillDownData(enrichedData);
     } catch (err) {
       console.error(err);
-      alert("Failed to fetch transaction details");
+      showMessage("Failed to fetch transaction details", 'Error', 'error');
       setDrillDownData([]);
     } finally {
       setDrillDownLoading(false);

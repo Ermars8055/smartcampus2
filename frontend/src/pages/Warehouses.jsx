@@ -8,8 +8,10 @@ import {
 import { Add, Edit, Delete, Warehouse as WarehouseIcon, Business, VpnKey, LocationOn, Apartment, Search, Person } from '@mui/icons-material';
 import { InputAdornment } from '@mui/material';
 import api from '../services/api';
+import { useMessage } from '../context/MessageContext';
 
 export default function Warehouses() {
+  const { showMessage } = useMessage();
   const [warehouses, setWarehouses] = useState([]);
   const [projects, setProjects] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -69,7 +71,7 @@ export default function Warehouses() {
       setErrors({});
       load();
       setSnackbar({ open: true, message: 'Store saved successfully!', severity: 'success' });
-    } catch (err) { alert(err.response?.data?.detail || 'Error saving store'); }
+    } catch (err) { showMessage(err.response?.data?.detail || 'Error saving store', 'Error', 'error'); }
   };
 
   const handleDelete = async (id) => {
@@ -77,7 +79,7 @@ export default function Warehouses() {
     try {
       await api.delete(`/api/warehouses/${id}`);
       load();
-    } catch (err) { alert(err.response?.data?.detail || 'Error deleting warehouse'); }
+    } catch (err) { showMessage(err.response?.data?.detail || 'Error deleting warehouse', 'Error', 'error'); }
   };
 
   return (

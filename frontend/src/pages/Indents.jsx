@@ -129,6 +129,10 @@ export default function Indents() {
   const [order, setOrder] = useState('desc');
   const [orderBy, setOrderBy] = useState('created_at');
 
+
+
+
+
   const handleRequestSort = (property) => {
     const isAsc = orderBy === property && order === 'asc';
     setOrder(isAsc ? 'desc' : 'asc');
@@ -192,8 +196,27 @@ export default function Indents() {
     institution_id: '', building_id: '', floor_id: '', room_id: '', department: '', remarks: '', items: [{ material_id: '', requested_quantity: '' }], complaint_id: ''
   });
 
+  const [errors, setErrors] = useState({});
+  const [itemErrors, setItemErrors] = useState({});
+
+
+
   const [vendors, setVendors] = useState([]);
   const [termsTemplates, setTermsTemplates] = useState([]);
+
+
+
+
+  // Auto-clear resolved errors
+  useEffect(() => {
+    setErrors(prev => Object.keys(prev).length > 0 ? {} : prev);
+    setItemErrors(prev => Object.keys(prev || {}).length > 0 ? {} : prev);
+  }, [form]);
+
+  useEffect(() => {
+    setErrors(prev => Object.keys(prev).length > 0 ? {} : prev);
+    setItemErrors(prev => Object.keys(prev || {}).length > 0 ? {} : prev);
+  }, [form]);
 
   const navigate = useNavigate();
 
@@ -256,7 +279,7 @@ export default function Indents() {
       // Remove duplicates
       setDepartmentsList(Array.from(new Set(depts)));
     } else {
-      setDepartmentsList([]);
+      setDepartmentsList([]); // Clear if no institution
     }
   };
 
@@ -374,20 +397,28 @@ export default function Indents() {
 
   const handleCreate = async () => {
     try {
+      const newErrors = {};
+      if (!form.institution_id) newErrors.institution_id = "Institution is required";
+      if (!form.department) newErrors.department = "Department is required";
+
       const mappedItems = form.items.map(it => ({
         material_id: it.material_id,
         requested_quantity: parseFloat(it.requested_quantity) || 0
       }));
-      if (mappedItems.some(it => it.requested_quantity <= 0)) {
-        showMessage("Quantity must be greater than 0.", "Validation Error", "warning");
-        return;
-      }
-      if (!form.institution_id) {
-        showMessage("Please select an institution.", "Selection Required", "warning");
-        return;
-      }
-      if (mappedItems.some(it => !it.material_id)) {
-        showMessage("Please select a material for every line item.", "Validation Error", "warning");
+
+      const newItemErrors = {};
+      mappedItems.forEach((it, i) => {
+        if (!it.material_id) {
+          newItemErrors[i] = { ...newItemErrors[i], material_id: "Material required" };
+        }
+        if (it.requested_quantity <= 0) {
+          newItemErrors[i] = { ...newItemErrors[i], quantity: "Quantity > 0" };
+        }
+      });
+
+      setErrors(newErrors);
+      setItemErrors(newItemErrors);
+      if (Object.keys(newErrors).length > 0 || Object.keys(newItemErrors).length > 0) {
         return;
       }
 
@@ -585,7 +616,7 @@ export default function Indents() {
           <Grid container spacing={2.5} sx={{ mb: 3 }}>
             <Grid item xs={12} sm={6}>
               <Typography variant="caption" sx={{ fontWeight: 600, color: '#3b5998', mb: 0.5, display: 'block' }}>Institution <span style={{ color: '#d32f2f' }}>*</span></Typography>
-              <FormControl fullWidth size="small">
+              <FormControl fullWidth size="small" error={!!errors.institution_id}>
                 <Select
                   value={form.institution_id}
                   displayEmpty
@@ -596,6 +627,7 @@ export default function Indents() {
                   <MenuItem value="" disabled><em>Select Institution</em></MenuItem>
                   {institutions.map(inst => <MenuItem key={inst.id} value={inst.id}>{inst.name}</MenuItem>)}
                 </Select>
+                {errors.institution_id && <Typography color="error" variant="caption" sx={{ ml: 2, mt: 0.5 }}>{errors.institution_id}</Typography>}
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -606,7 +638,15 @@ export default function Indents() {
                 onChange={(e, val) => handleDepartmentChange(val)}
                 disabled={!form.institution_id}
                 renderInput={(params) => (
-                  <TextField {...params} size="small" placeholder="Select Department" InputProps={{ ...params.InputProps, startAdornment: <><InputAdornment position="start"><AccountTree sx={{ color: '#94A3B8', ml: 1 }} /></InputAdornment>{params.InputProps.startAdornment}</> }} sx={{ bgcolor: '#fff' }} />
+                  <TextField 
+                    {...params} 
+                    size="small" 
+                    placeholder="Select Department" 
+                    error={!!errors.department}
+                    helperText={errors.department}
+                    InputProps={{ ...params.InputProps, startAdornment: <><InputAdornment position="start"><AccountTree sx={{ color: '#94A3B8', ml: 1 }} /></InputAdornment>{params.InputProps.startAdornment}</> }} 
+                    sx={{ bgcolor: '#fff' }} 
+                  />
                 )}
               />
             </Grid>
@@ -704,21 +744,23 @@ export default function Indents() {
               <TableBody>
                 {form.items.map((item, i) => (
                   <TableRow key={i} sx={{ '&:last-child td': { borderBottom: 0 } }}>
-                    <TableCell sx={{ py: 1.5 }}>
+                    <TableCell sx={{ py: 1.5, verticalAlign: 'top' }}>
                       <MaterialSelect
                         materials={materials.filter(m => !form.items.some((it, idx) => idx !== i && it.material_id === m.id))}
                         value={item.material_id}
                         onChange={val => updateItem(i, 'material_id', val)}
                         label="Select Material"
                         size="small"
+                        error={!!itemErrors[i]?.material_id}
+                        helperText={itemErrors[i]?.material_id}
                       />
                     </TableCell>
-                    <TableCell align="center" sx={{ py: 1.5 }}>
+                    <TableCell align="center" sx={{ py: 1.5, verticalAlign: 'top', pt: 3 }}>
                       <Typography variant="body2" sx={{ color: '#64748B', fontWeight: 500 }}>
                         {item.material_id ? getUomForMaterial(item.material_id) : '—'}
                       </Typography>
                     </TableCell>
-                    <TableCell align="center" sx={{ py: 1.5 }}>
+                    <TableCell align="center" sx={{ py: 1.5, verticalAlign: 'top' }}>
                       <TextField
                         size="small"
                         type="number"
@@ -743,10 +785,12 @@ export default function Indents() {
                           style: { textAlign: 'center' }, 
                           step: (item.material_id && materials.find(m => m.id === item.material_id)?.uom_allow_decimal) ? "any" : "1" 
                         }}
+                        error={!!itemErrors[i]?.quantity}
+                        helperText={itemErrors[i]?.quantity}
                         sx={{ width: 120, mx: 'auto', bgcolor: '#fff' }}
                       />
                     </TableCell>
-                    <TableCell align="center" sx={{ py: 1.5 }}>
+                    <TableCell align="center" sx={{ py: 1.5, verticalAlign: 'top', pt: 2.5 }}>
                       {form.items.length > 1 ? (
                         <IconButton
                           size="small"
@@ -800,14 +844,19 @@ export default function Indents() {
         </Box>
         <Button variant="contained" startIcon={<Add />} onClick={() => {
           const defaultInst = institutions.length === 1 ? institutions[0].id : '';
-          const defaultDept = departmentsList.length === 1 ? departmentsList[0] : '';
+          
+          let defaultDept = '';
+          if (defaultInst) {
+            const depts = allDepartments.filter(d => d.institution_id === defaultInst).map(d => d.name);
+            const uniqueDepts = Array.from(new Set(depts));
+            setDepartmentsList(uniqueDepts);
+            if (uniqueDepts.length === 1) defaultDept = uniqueDepts[0];
+          } else {
+            setDepartmentsList([]);
+          }
           
           setForm({ institution_id: defaultInst, building_id: '', floor_id: '', room_id: '', department: defaultDept, remarks: '', items: [{ material_id: '', requested_quantity: '' }], complaint_id: '' });
           
-          if (defaultInst) {
-            const depts = allDepartments.filter(d => d.institution_id === defaultInst).map(d => d.name);
-            setDepartmentsList(Array.from(new Set(depts)));
-          }
           if (defaultDept) {
             handleDepartmentChange(defaultDept, defaultInst);
           }

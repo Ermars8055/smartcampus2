@@ -8,8 +8,10 @@ import {
 import { Add, Edit, Delete, ExpandMore, AccountTree, Apartment, Business, VpnKey, LocationOn, Layers, Work, Domain, Description, School, AccountBalance } from '@mui/icons-material';
 import { InputAdornment } from '@mui/material';
 import api from '../services/api';
+import { useMessage } from '../context/MessageContext';
 
 export default function Projects() {
+  const { showMessage } = useMessage();
   const [orgs, setOrgs] = useState([]);
   const [projects, setProjects] = useState([]);
   const [institutions, setInstitutions] = useState([]);
@@ -39,7 +41,7 @@ export default function Projects() {
 
   const save = async () => {
     if (!form.name?.trim()) {
-      return alert("Name is required.");
+      return showMessage("Name is required.", 'Validation Error', 'warning');
     }
     const payload = { ...form };
     if (dialog === 'room') {
@@ -59,7 +61,7 @@ export default function Projects() {
     if (!form.id && !payload.code) delete payload.code;
     if (dialog === 'floor') {
       if (!Number.isInteger(Number(form.level)) || Number(form.level) < 0) {
-        return alert("Floor Level must be a positive whole number.");
+        return showMessage("Floor Level must be a positive whole number.", 'Validation Error', 'warning');
       }
     }
     try {
@@ -81,7 +83,7 @@ export default function Projects() {
         else if (dialog === 'room') await api.post('/api/rooms', payload);
       }
       setDialog(''); load();
-    } catch (err) { alert(err.response?.data?.detail || 'Error saving data'); }
+    } catch (err) { showMessage(err.response?.data?.detail || 'Error saving data', 'Error', 'error'); }
   };
 
   const handleDelete = (type, id) => {
@@ -92,7 +94,7 @@ export default function Projects() {
     try {
       await api.delete(`/api/${deleteConfirm.type}s/${deleteConfirm.id}`);
       load();
-    } catch (err) { alert(err.response?.data?.detail || 'Error deleting'); }
+    } catch (err) { showMessage(err.response?.data?.detail || 'Error deleting', 'Error', 'error'); }
     setDeleteConfirm({ open: false, type: '', id: null });
   };
 

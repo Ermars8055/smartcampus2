@@ -18,6 +18,8 @@ export default function GateEntry() {
   const navigate = useNavigate();
   const [entries, setEntries] = useState([]);
   const [errors, setErrors] = useState({});
+
+
   const [dialog, setDialog] = useState(false);
   const [detailDialog, setDetailDialog] = useState(null);
   const [search, setSearch] = useState('');
@@ -30,7 +32,20 @@ export default function GateEntry() {
   };
 
   const [form, setForm] = useState(initialForm);
+
+
   const [uploading, setUploading] = useState(false);
+
+
+
+
+  // Auto-clear resolved errors
+  useEffect(() => {
+    setErrors(prev => {
+      if (Object.keys(prev).length === 0) return prev;
+      return {}; // Clear all errors when form changes
+    });
+  }, [form]);
 
   const load = () => { api.get('/api/gate-entries', { params: { search: search || undefined } }).then(r => setEntries(r.data)); };
   useEffect(() => { load(); }, [search]);
@@ -44,6 +59,10 @@ export default function GateEntry() {
       navigate(location.pathname, { replace: true });
     }
   }, [location.state, entries, location.pathname, navigate]);
+
+
+
+
 
   const handleUpload = async (file) => {
     if (!file) return;
@@ -79,7 +98,9 @@ export default function GateEntry() {
     if (!form.delivery_person_name?.trim()) newErrors.delivery_person_name = "Delivery Person Name is required.";
 
     setErrors(newErrors);
-    if (Object.keys(newErrors).length > 0) return;
+    if (Object.keys(newErrors).length > 0) {
+      return;
+    }
     
     try {
       const payload = {

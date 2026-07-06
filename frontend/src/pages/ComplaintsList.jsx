@@ -54,7 +54,7 @@ export default function ComplaintsList() {
       case 'Material Pending': return 'warning';
       case 'In Progress': return 'warning';
       case 'Resolved': return 'success';
-      case 'Closed': return 'default';
+      case 'Closed': return 'success';
       case 'Reopened': return 'error';
       case 'Rejected': return 'error';
       default: return 'default';
@@ -121,7 +121,7 @@ export default function ComplaintsList() {
             <MenuItem value="Under Inspection">Under Inspection</MenuItem>
             <MenuItem value="Material Pending">Material Pending</MenuItem>
             <MenuItem value="In Progress">In Progress</MenuItem>
-            <MenuItem value="Resolved">Resolved</MenuItem>
+
             <MenuItem value="Closed">Closed</MenuItem>
             <MenuItem value="Reopened">Reopened</MenuItem>
           </Select>

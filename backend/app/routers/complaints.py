@@ -376,7 +376,7 @@ def resolve_complaint(
             detail=f"Cannot resolve from status '{complaint.status}'."
         )
 
-    complaint.status = ComplaintStatus.RESOLVED.value
+    complaint.status = ComplaintStatus.CLOSED.value
     complaint.resolved_at = datetime.utcnow()
     complaint.resolved_by_id = current_user.id
     
@@ -397,8 +397,8 @@ def resolve_complaint(
         site_id=site_id,
         alert_type="Complaint Resolved",
         severity="Success",
-        title="Action Required: Verify Complaint Resolution",
-        message=f"Complaint {complaint.docket_no} has been resolved by {current_user.full_name}. Please verify and close.",
+        title="Complaint Resolved & Closed",
+        message=f"Complaint {complaint.docket_no} has been resolved and closed by {current_user.full_name}.",
         reference_type="ComplaintResolved",
         reference_id=complaint.id,
         user_id=complaint.created_by_id,

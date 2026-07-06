@@ -9,7 +9,7 @@ import api, { getFileUrl } from '../services/api';
 import dayjs from 'dayjs';
 import { useAuth } from '../context/AuthContext';
 
-const COMPLAINT_STEPS = ['Registered', 'Assigned', 'Under Inspection', 'In Progress', 'Resolved', 'Closed'];
+const COMPLAINT_STEPS = ['Registered', 'Assigned', 'Under Inspection', 'In Progress', 'Closed'];
 
 export default function ComplaintDetail() {
   const { id } = useParams();
@@ -25,8 +25,6 @@ export default function ComplaintDetail() {
   // Dialog States
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
   const [resolveDialogOpen, setResolveDialogOpen] = useState(false);
-  const [verifyDialogOpen, setVerifyDialogOpen] = useState(false);
-  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [inspectDialogOpen, setInspectDialogOpen] = useState(false);
 
   // Form States
@@ -35,8 +33,6 @@ export default function ComplaintDetail() {
   const [materialRequired, setMaterialRequired] = useState(false);
   const [inspectionDetails, setInspectionDetails] = useState('');
   const [resolutionRemarks, setResolutionRemarks] = useState('');
-  const [rejectionRemarks, setRejectionRemarks] = useState('');
-  const [feedback, setFeedback] = useState('');
   const [resolutionImages, setResolutionImages] = useState([]);
   const [resolutionPreviewUrls, setResolutionPreviewUrls] = useState([]);
   
@@ -180,7 +176,7 @@ export default function ComplaintDetail() {
         resolution_image_urls: uploadedUrls
       });
 
-      setSnackbar({ open: true, message: 'Complaint resolved successfully', severity: 'success' });
+      setSnackbar({ open: true, message: 'Complaint resolved and closed successfully', severity: 'success' });
       setResolveDialogOpen(false);
       fetchComplaintData();
     } catch (error) {
@@ -190,24 +186,7 @@ export default function ComplaintDetail() {
     }
   };
 
-  const handleVerify = async (isAccepted) => {
-    setActionLoading(true);
-    try {
-      await api.post(`/api/complaints/${id}/verify`, {
-        is_accepted: isAccepted,
-        rejection_remarks: isAccepted ? null : rejectionRemarks,
-        feedback: isAccepted ? feedback : null
-      });
-      setSnackbar({ open: true, message: isAccepted ? 'Complaint Closed' : 'Complaint Reopened', severity: 'success' });
-      setVerifyDialogOpen(false);
-      setRejectDialogOpen(false);
-      fetchComplaintData();
-    } catch (error) {
-      setSnackbar({ open: true, message: error.response?.data?.detail || 'Verification failed', severity: 'error' });
-    } finally {
-      setActionLoading(false);
-    }
-  };
+
 
   if (loading) return <Box sx={{ p: 4, textAlign: 'center' }}><CircularProgress /></Box>;
   if (!complaint) return <Typography>Complaint not found.</Typography>;
@@ -220,7 +199,7 @@ export default function ComplaintDetail() {
       case 'Material Pending': return 'warning';
       case 'In Progress': return 'warning';
       case 'Resolved': return 'success';
-      case 'Closed': return 'default';
+      case 'Closed': return 'success';
       case 'Reopened': return 'error';
       case 'Rejected': return 'error';
       default: return 'default';
@@ -233,8 +212,7 @@ export default function ComplaintDetail() {
       case 'Assigned': case 'Reopened': return 1;
       case 'Under Inspection': return 2;
       case 'Material Pending': case 'In Progress': return 3;
-      case 'Resolved': return 4;
-      case 'Closed': return 5;
+      case 'Closed': return 4;
       default: return 0;
     }
   };
@@ -244,7 +222,6 @@ export default function ComplaintDetail() {
 
   const canStartRepair = materialIssues.length > 0 && materialIssues.every(issue => issue.is_acknowledged);
   const isCreator = user && complaint && String(user.id) === String(complaint.created_by_id);
-  const canVerify = isCreator || user?.is_platform_admin;
 
   return (
     <Box sx={{ maxWidth: 1000, mx: 'auto', pb: 5 }}>
@@ -299,27 +276,8 @@ export default function ComplaintDetail() {
 
             {(complaint.status === 'In Progress' || (complaint.status === 'Open' && complaint.assigned_to_id)) && (
               <Button variant="contained" color="success" startIcon={<CheckCircle />} onClick={() => setResolveDialogOpen(true)}>
-                Resolve Complaint
+                Resolve & Close
               </Button>
-            )}
-
-            {complaint.status === 'Resolved' && (
-              <>
-                <Tooltip title={!canVerify ? "Only the person who raised the complaint or a Platform Admin can verify or reject its resolution." : ""}>
-                  <span>
-                    <Button variant="contained" color="success" startIcon={<VerifiedUser />} onClick={() => setVerifyDialogOpen(true)} disabled={!canVerify}>
-                      Verify & Close
-                    </Button>
-                  </span>
-                </Tooltip>
-                <Tooltip title={!canVerify ? "Only the person who raised the complaint or a Platform Admin can verify or reject its resolution." : ""}>
-                  <span>
-                    <Button variant="outlined" color="error" startIcon={<Cancel />} onClick={() => setRejectDialogOpen(true)} disabled={!canVerify} sx={{ ml: 1 }}>
-                      Reject Resolution
-                    </Button>
-                  </span>
-                </Tooltip>
-              </>
             )}
             
             {complaint.status === 'Closed' && (
@@ -623,51 +581,12 @@ export default function ComplaintDetail() {
         <DialogActions sx={{ p: 2, pt: 0 }}>
           <Button onClick={() => setResolveDialogOpen(false)} disabled={actionLoading}>Cancel</Button>
           <Button onClick={handleResolve} variant="contained" color="success" disabled={actionLoading} startIcon={actionLoading ? <CircularProgress size={20} /> : <CheckCircle />}>
-            Mark Resolved
+            Resolve & Close
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Verify Dialog */}
-      <Dialog open={verifyDialogOpen} onClose={() => !actionLoading && setVerifyDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Verify Resolution</DialogTitle>
-        <DialogContent>
-          <Typography sx={{ mb: 2 }}>Are you sure you want to verify and close this complaint?</Typography>
-          <TextField inputProps={{ maxLength: 255 }}
-            fullWidth
-            label="Feedback / Remarks"
-            multiline
-            rows={3}
-            value={feedback}
-            onChange={(e) => setFeedback(e.target.value)}
-          />
-        </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
-          <Button onClick={() => setVerifyDialogOpen(false)} disabled={actionLoading}>Cancel</Button>
-          <Button onClick={() => handleVerify(true)} variant="contained" color="success" disabled={actionLoading}>Verify & Close</Button>
-        </DialogActions>
-      </Dialog>
 
-      {/* Reject Dialog */}
-      <Dialog open={rejectDialogOpen} onClose={() => !actionLoading && setRejectDialogOpen(false)} fullWidth maxWidth="sm">
-        <DialogTitle>Reject Resolution</DialogTitle>
-        <DialogContent>
-          <Typography variant="body2" sx={{ mb: 2 }}>Please provide a reason for rejecting the resolution. This will reopen the complaint.</Typography>
-          <TextField inputProps={{ maxLength: 255 }}
-            autoFocus
-            label="Rejection Remarks"
-            fullWidth
-            multiline
-            rows={3}
-            value={rejectionRemarks}
-            onChange={(e) => setRejectionRemarks(e.target.value)}
-          />
-        </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
-          <Button onClick={() => setRejectDialogOpen(false)} disabled={actionLoading}>Cancel</Button>
-          <Button onClick={() => handleVerify(false)} variant="contained" color="error" disabled={!rejectionRemarks || actionLoading}>Reject & Reopen</Button>
-        </DialogActions>
-      </Dialog>
 
       <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={() => setSnackbar({ ...snackbar, open: false })}>
         <Alert severity={snackbar.severity} sx={{ width: '100%' }}>{snackbar.message}</Alert>

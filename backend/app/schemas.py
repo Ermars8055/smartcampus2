@@ -1222,7 +1222,7 @@ class StockLedgerOut(BaseModel):
     balance: float
     reference_type: Optional[str] = None
     reference_number: Optional[str] = None
-    created_at: datetime
+    created_at: Optional[datetime] = None
     material_name: Optional[str] = None
     warehouse_name: Optional[str] = None
     class Config:

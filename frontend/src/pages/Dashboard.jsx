@@ -405,7 +405,7 @@ export default function Dashboard() {
         <Grid item xs={6} sm={4} lg={2}>
           {institution === 'all' ? (
             <StatCard title="Inventory Value" value={formatCurrency(stats?.total_inventory_value || 0)}
-              icon={<TrendingDown />} color="#10B981" subtitle="Total stock value" />
+              icon={<TrendingDown />} color="#10B981" subtitle="Total stock value" onClick={() => navigate(getNavUrl('/inventory'), { state: { fromDashboard: true } })} />
           ) : (
             <StatCard title="Total Issued Items" value={stats?.total_issued_qty || 0}
               icon={<Assessment />} color="#10B981" subtitle="Total items issued" onClick={() => navigate(getNavUrl('/issues'), { state: { fromDashboard: true } })} />

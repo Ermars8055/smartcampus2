@@ -5,7 +5,7 @@ import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, TextField, Chip, FormControl, InputLabel, Select,
   MenuItem, InputAdornment, Grid, Tab, Tabs, ToggleButton, ToggleButtonGroup,
-  TableSortLabel, Button
+  TableSortLabel, Button, TablePagination
 } from '@mui/material';
 import { Search, Warning, ArrowBack } from '@mui/icons-material';
 import api from '../services/api';
@@ -21,6 +21,10 @@ export default function Inventory() {
   const [filter, setFilter] = useState(searchParams.get('low') === 'true' ? 'low' : 'all');
   const [orderBy, setOrderBy] = useState('material_name');
   const [order, setOrder] = useState('asc');
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(25);
+  const [ledgerPage, setLedgerPage] = useState(0);
+  const [ledgerRowsPerPage, setLedgerRowsPerPage] = useState(25);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -35,6 +39,8 @@ export default function Inventory() {
     if (filter !== 'all') params.stock_status = filter;
     api.get('/api/inventory', { params }).then(r => setStock(r.data));
     api.get('/api/inventory/ledger', { params: { warehouse_id: whFilter || undefined, search: search || undefined } }).then(r => setLedger(r.data.items || []));
+    setPage(0);
+    setLedgerPage(0);
   }, [search, whFilter, filter]);
 
   const filteredStockBase = useMemo(() => {
@@ -198,7 +204,7 @@ export default function Inventory() {
                 <TableCell sx={{ fontWeight: 700, color: '#64748B' }}>STATUS</TableCell>
               </TableRow></TableHead>
               <TableBody>
-                {sortedStock.map(s => (
+                {sortedStock.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(s => (
                   <TableRow key={s.id} sx={{ '&:hover': { bgcolor: '#F8FAFC' }, background: s.quantity < s.reorder_level ? '#FEF2F2' : 'inherit' }}>
                     <TableCell sx={{ fontWeight: 600, color: '#2563EB' }}>{s.material_code}</TableCell>
                     <TableCell sx={{ fontWeight: 500 }}>{s.material_name}</TableCell>
@@ -223,6 +229,18 @@ export default function Inventory() {
               </TableBody>
             </Table>
           </TableContainer>
+          <TablePagination
+            rowsPerPageOptions={[10, 25, 50, 100]}
+            component="div"
+            count={sortedStock.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={(_, newPage) => setPage(newPage)}
+            onRowsPerPageChange={(e) => {
+              setRowsPerPage(parseInt(e.target.value, 10));
+              setPage(0);
+            }}
+          />
         </Card>
       )}
 
@@ -254,7 +272,7 @@ export default function Inventory() {
                 <TableCell sx={{ fontWeight: 700, color: '#64748B' }}>REFERENCE</TableCell>
               </TableRow></TableHead>
               <TableBody>
-                {sortedLedger.map(e => (
+                {sortedLedger.slice(ledgerPage * ledgerRowsPerPage, ledgerPage * ledgerRowsPerPage + ledgerRowsPerPage).map(e => (
                   <TableRow key={e.id} hover>
                     <TableCell sx={{ fontSize: '0.7rem', whiteSpace: 'nowrap' }}>{formatDateTime(e.created_at)}</TableCell>
                     <TableCell sx={{ fontWeight: 500 }}>{e.material_name}</TableCell>
@@ -272,6 +290,18 @@ export default function Inventory() {
               </TableBody>
             </Table>
           </TableContainer>
+          <TablePagination
+            rowsPerPageOptions={[10, 25, 50, 100]}
+            component="div"
+            count={sortedLedger.length}
+            rowsPerPage={ledgerRowsPerPage}
+            page={ledgerPage}
+            onPageChange={(_, newPage) => setLedgerPage(newPage)}
+            onRowsPerPageChange={(e) => {
+              setLedgerRowsPerPage(parseInt(e.target.value, 10));
+              setLedgerPage(0);
+            }}
+          />
         </Card>
       )}
     </Box>

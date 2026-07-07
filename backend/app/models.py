@@ -85,6 +85,12 @@ class TransferStatus(str, enum.Enum):
     PARTIALLY_RECEIVED = "Partially Received"
     COMPLETED = "Completed"
 
+class WriteOffStatus(str, enum.Enum):
+    DRAFT = "Draft"
+    SUBMITTED = "Submitted"
+    APPROVED = "Approved"
+    REJECTED = "Rejected"
+
 class TransactionType(str, enum.Enum):
     GRN = "GRN"
     ISSUE = "Issue"
@@ -92,6 +98,7 @@ class TransactionType(str, enum.Enum):
     TRANSFER_IN = "Transfer In"
     TRANSFER_OUT = "Transfer Out"
     ADJUSTMENT = "Adjustment"
+    WRITE_OFF = "Write Off"
 
 class AlertType(str, enum.Enum):
     LOW_STOCK = "Low Stock"
@@ -123,6 +130,7 @@ class ApprovalDocumentType(str, enum.Enum):
     INDENT = "Indent"
     PURCHASE_REQUEST = "Purchase Request"
     PURCHASE_ORDER = "Purchase Order"
+    WRITE_OFF = "Write Off"
 
 class QuotationRequestStatus(str, enum.Enum):
     DRAFT = "Draft"
@@ -1485,3 +1493,45 @@ class DepartmentMaterialLimit(Base):
     material = relationship("Material")
     created_by = relationship("User")
     __table_args__ = (UniqueConstraint("tenant_id", "site_id", "department", "material_id", name="uq_dept_mat_limit"),)
+
+
+class WriteOff(Base):
+    __tablename__ = "write_offs"
+    id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
+    site_id = Column(Integer, ForeignKey("sites.id", ondelete="CASCADE"), nullable=False)
+    write_off_number = Column(String(50), nullable=False, index=True)
+    date = Column(Date, nullable=False)
+    reason = Column(Text, nullable=False)
+    write_off_type = Column(String(100), nullable=True)
+    attachment_url = Column(String(500), nullable=True)
+    status = Column(String(50), default="Draft")
+    current_approval_level = Column(Integer, default=1)
+    created_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    approved_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    approved_at = Column(DateTime, nullable=True)
+    is_deleted = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=_get_now)
+    updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)
+    
+    tenant = relationship("Tenant")
+    site = relationship("Site")
+    created_by = relationship("User", foreign_keys=[created_by_id])
+    approver = relationship("User", foreign_keys=[approved_by_id])
+    items = relationship("WriteOffItem", back_populates="write_off", cascade="all, delete-orphan")
+    __table_args__ = (UniqueConstraint("tenant_id", "write_off_number", name="uq_write_off_per_tenant"),)
+
+
+class WriteOffItem(Base):
+    __tablename__ = "write_off_items"
+    id = Column(Integer, primary_key=True, index=True)
+    write_off_id = Column(Integer, ForeignKey("write_offs.id", ondelete="CASCADE"), nullable=False)
+    material_id = Column(Integer, ForeignKey("materials.id", ondelete="CASCADE"), nullable=False)
+    warehouse_id = Column(Integer, ForeignKey("warehouses.id"), nullable=True)
+    quantity = Column(Float, nullable=False)
+    rate = Column(Float, default=0)
+    amount = Column(Float, default=0)
+    
+    write_off = relationship("WriteOff", back_populates="items")
+    material = relationship("Material")
+    warehouse = relationship("Warehouse")

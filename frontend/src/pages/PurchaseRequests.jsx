@@ -202,14 +202,16 @@ export default function PurchaseRequests() {
 
   const executeSave = async (payload) => {
     try {
+      let res;
       if (editingPRId) {
-        await api.put(`/api/procurement/pr/${editingPRId}/full`, payload);
+        res = await api.put(`/api/procurement/pr/${editingPRId}/full`, payload);
       } else {
-        await api.post('/api/procurement/pr', payload);
+        res = await api.post('/api/procurement/pr', payload);
       }
       setDialog(false);
       setEditingPRId(null);
-      showMessage("Purchase Request saved successfully.", "Success", "success");
+      const prNumber = res?.data?.pr_number || '';
+      showMessage(`Purchase Request ${prNumber} saved successfully.`.trim(), "Success", "success");
       load();
     } catch (err) { showMessage(err.response?.data?.detail || 'Error saving PR', 'Error', 'error'); }
   };
@@ -335,7 +337,7 @@ export default function PurchaseRequests() {
         msg = `${pr.pr_number} successfully approved. ${msg}`;
       }
       // You can use a better notification system if implemented, falling back to alert
-      showMessage(msg, 'Validation Error', 'warning');
+      showMessage(msg, 'Success', 'success');
     } catch (err) {
       showMessage(err.response?.data?.detail || "Error approving PR", 'Error', 'error');
     }
@@ -468,7 +470,7 @@ export default function PurchaseRequests() {
       load();
     } catch (err) {
       const msg = err.response?.data?.detail;
-      showMessage(typeof msg === 'string' ? msg : JSON.stringify(msg, 'Validation Error', 'warning') || 'Error converting PR');
+      showMessage(typeof msg === 'string' ? msg : (JSON.stringify(msg) || 'Error converting PR'), 'Error', 'error');
     }
   };
 
@@ -775,7 +777,7 @@ export default function PurchaseRequests() {
                       </Tooltip>
                       <Tooltip title="Convert to PO">
                         <span><IconButton size="small" color="primary" disabled={!canConvert(pr.status) || !hasAction('purchase_requests', 'can_convert_to_po')}
-                          onClick={() => openConvertDialog(pr)}>
+                          onClick={() => showConfirm('Convert to PO?', `Are you sure you want to convert ${pr.pr_number} to a Purchase Order?`, 'Okay', 'primary', () => openConvertDialog(pr))}>
                           <ShoppingCart fontSize="small" />
                         </IconButton></span>
                       </Tooltip>

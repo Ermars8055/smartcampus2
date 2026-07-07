@@ -231,8 +231,9 @@ const Quotations = () => {
         required_date: newQR.required_date || null,
         remarks: newQR.remarks || null
       };
-      await api.post('/api/quotations/requests', payload);
-      showMessage('Quotation Request created successfully!', 'Success', 'success');
+      const res = await api.post('/api/quotations/requests', payload);
+      const qrNumber = res?.data?.qr_number || '';
+      showMessage(`Quotation Request ${qrNumber} created successfully!`.trim(), 'Success', 'success');
       setCreateQRDialogOpen(false);
       setNewQR({ project_id: projects[0]?.id || '', required_date: '', remarks: '', pr_ids: [], items: [], vendor_ids: [] });
       setErrors({});

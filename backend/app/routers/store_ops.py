@@ -11,14 +11,15 @@ from app.models import (
     StockTransfer, StockTransferItem, CurrentStock, StockLedger,
     Material, Warehouse, User, AuditLog, Indent, IndentItem, IndentStatus,
     Room, Floor, Building, DocumentSequence, GatePass, GatePassItem,
-    DepartmentMaterialLimit
+    DepartmentMaterialLimit, WriteOff, WriteOffItem, WriteOffStatus
 )
 from app.schemas import (
     IssueCreate, IssueOut, IssueItemOut,
     ReturnCreate, ReturnOut, ReturnItemOut, ReturnReceiptRequest,
     TransferCreate, TransferOut, TransferItemOut, TransferReceiptRequest,
     GatePassCreate, GatePassOut, GatePassUpdate,
-    GatePassItemOut, GatePassItemBase
+    GatePassItemOut, GatePassItemBase,
+    WriteOffCreate, WriteOffOut, WriteOffItemOut
 )
 from app.routers.grn import update_stock
 from app.auth import get_current_user, require_permission, require_action, get_tenant_id, get_site_id
@@ -986,4 +987,229 @@ def update_gate_pass(
             
     db.commit()
     return {"message": f"Gate Pass updated to {data.status}"}
+
+
+# ── Write Offs ───────────────────────────────────────────────────────────
+
+@router.get("/write-offs")
+def list_write_offs(
+    search: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("write_offs", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    q = db.query(WriteOff).filter(WriteOff.tenant_id == tenant_id, WriteOff.site_id == site_id)
+    if search:
+        q = q.filter(WriteOff.write_off_number.ilike(f"%{search}%"))
+    
+    write_offs = q.order_by(WriteOff.created_at.desc()).all()
+    result = []
+    
+    # Pre-fetch approval flows
+    from app.models import ApprovalFlow
+    flows = db.query(ApprovalFlow).filter(
+        ApprovalFlow.tenant_id == tenant_id,
+        ApprovalFlow.site_id == site_id,
+        ApprovalFlow.document_type == "WRITE_OFF",
+        ApprovalFlow.is_active == True
+    ).all()
+    user_roles = getattr(current_user, "_roles", [])
+    is_platform_admin = getattr(current_user, "_is_platform_admin", False)
+    can_override = is_platform_admin or getattr(current_user, '_data_access_scope', '') == 'Full Administrative Access'
+
+    for wo in write_offs:
+        wo.can_user_approve = False
+        if wo.status == "Submitted":
+            for f in flows:
+                if f.level == wo.current_approval_level and \
+                   (can_override or (f.user_id == current_user.id) or (not f.user_id and f.role_name in user_roles)):
+                    wo.can_user_approve = True
+                    break
+            # Fallback for missing flows
+            if not flows and can_override:
+                wo.can_user_approve = True
+                
+        items = []
+        for item in wo.items:
+            mat = item.material
+            wh = item.warehouse
+            items.append(WriteOffItemOut(
+                id=item.id, material_id=item.material_id,
+                warehouse_id=item.warehouse_id,
+                warehouse_name=wh.name if wh else None,
+                quantity=item.quantity, rate=item.rate, amount=item.amount,
+                material_name=mat.name if mat else None,
+                material_code=mat.code if mat else None,
+                uom_name=mat.uom.abbreviation if mat and mat.uom else None
+            ))
+            
+        result.append(WriteOffOut(
+            id=wo.id, write_off_number=wo.write_off_number,
+            date=wo.date, reason=wo.reason, 
+            write_off_type=wo.write_off_type,
+            attachment_url=wo.attachment_url,
+            status=wo.status,
+            current_approval_level=wo.current_approval_level,
+            created_by_id=wo.created_by_id,
+            created_by_name=wo.created_by.full_name if wo.created_by else None,
+            approved_by_id=wo.approved_by_id,
+            approved_by_name=wo.approver.full_name if wo.approver else None,
+            approved_at=wo.approved_at,
+            created_at=wo.created_at,
+            can_user_approve=wo.can_user_approve,
+            items=items
+        ))
+    return result
+
+@router.post("/write-offs")
+def create_write_off(
+    data: WriteOffCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("write_offs", "create")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    write_off_number = get_next_number(db, tenant_id, site_id, "WRITE_OFF", "WO")
+    
+    wo = WriteOff(
+        tenant_id=tenant_id,
+        site_id=site_id,
+        write_off_number=write_off_number,
+        date=data.date,
+        reason=data.reason,
+        write_off_type=data.write_off_type,
+        attachment_url=data.attachment_url,
+        status=WriteOffStatus.DRAFT.value,
+        created_by_id=current_user.id
+    )
+    db.add(wo)
+    db.flush()
+    
+    for item_data in data.items:
+        mat = db.query(Material).filter(Material.id == item_data.material_id).first()
+        rate = mat.standard_cost if mat and mat.standard_cost else 0
+        amount = rate * item_data.quantity
+        wh_id = item_data.warehouse_id or (mat.warehouse_id if mat else None)
+        if not wh_id:
+            raise HTTPException(400, f"No warehouse provided for material ID {item_data.material_id}")
+            
+        # Check if enough stock exists
+        stock = db.query(CurrentStock).filter(
+            CurrentStock.material_id == item_data.material_id,
+            CurrentStock.warehouse_id == wh_id,
+            CurrentStock.tenant_id == tenant_id,
+            CurrentStock.site_id == site_id
+        ).first()
+        
+        if not stock or stock.quantity < item_data.quantity:
+            mat_name = mat.name if mat else "Unknown"
+            raise HTTPException(400, f"Insufficient stock for {mat_name} in warehouse")
+            
+        wo_item = WriteOffItem(
+            write_off_id=wo.id,
+            material_id=item_data.material_id,
+            warehouse_id=wh_id,
+            quantity=item_data.quantity,
+            rate=rate,
+            amount=amount
+        )
+        db.add(wo_item)
+        
+    db.commit()
+    return {"message": "Write Off created successfully", "id": wo.id}
+
+@router.post("/write-offs/{id}/submit")
+def submit_write_off(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_action("write_offs", "can_submit")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    wo = db.query(WriteOff).filter(WriteOff.id == id, WriteOff.tenant_id == tenant_id, WriteOff.site_id == site_id).first()
+    if not wo:
+        raise HTTPException(404, "Write Off not found")
+    if wo.status != WriteOffStatus.DRAFT.value:
+        raise HTTPException(400, "Only Draft Write Offs can be submitted")
+        
+    wo.status = WriteOffStatus.SUBMITTED.value
+    db.commit()
+    return {"message": "Write Off submitted for approval"}
+
+@router.post("/write-offs/{id}/approve")
+def approve_write_off(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_action("write_offs", "can_approve")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    wo = db.query(WriteOff).filter(WriteOff.id == id, WriteOff.tenant_id == tenant_id, WriteOff.site_id == site_id).first()
+    if not wo:
+        raise HTTPException(404, "Write Off not found")
+    if wo.status != WriteOffStatus.SUBMITTED.value:
+        raise HTTPException(400, "Write Off is not submitted for approval")
+        
+    from app.models import ApprovalFlow
+    flows = db.query(ApprovalFlow).filter(
+        ApprovalFlow.tenant_id == tenant_id,
+        ApprovalFlow.site_id == site_id,
+        ApprovalFlow.document_type == "WRITE_OFF",
+        ApprovalFlow.level >= wo.current_approval_level + 1,
+        ApprovalFlow.is_active == True
+    ).first()
+    
+    if flows:
+        wo.current_approval_level += 1
+        db.commit()
+        return {"message": f"Moved to approval level {wo.current_approval_level}"}
+        
+    wo.status = WriteOffStatus.APPROVED.value
+    wo.approved_by_id = current_user.id
+    wo.approved_at = datetime.utcnow()
+    
+    for item in wo.items:
+        stock = db.query(CurrentStock).filter(
+            CurrentStock.material_id == item.material_id,
+            CurrentStock.warehouse_id == item.warehouse_id,
+            CurrentStock.tenant_id == tenant_id,
+            CurrentStock.site_id == site_id
+        ).first()
+        if not stock or stock.quantity < item.quantity:
+            mat = db.query(Material).filter(Material.id == item.material_id).first()
+            raise HTTPException(400, f"Insufficient stock for {mat.name if mat else 'material'} to approve")
+            
+        update_stock(
+            db=db,
+            material_id=item.material_id,
+            warehouse_id=item.warehouse_id,
+            quantity=-item.quantity,
+            transaction_type="Write Off",
+            reference_type="WriteOff",
+            reference_id=wo.id,
+            reference_number=wo.write_off_number,
+            tenant_id=tenant_id,
+            site_id=site_id,
+            user_id=current_user.id
+        )
+        
+    db.commit()
+    return {"message": "Write Off approved and stock updated successfully"}
+
+@router.post("/write-offs/{id}/reject")
+def reject_write_off(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_action("write_offs", "can_reject")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    wo = db.query(WriteOff).filter(WriteOff.id == id, WriteOff.tenant_id == tenant_id, WriteOff.site_id == site_id).first()
+    if not wo:
+        raise HTTPException(404, "Write Off not found")
+        
+    wo.status = WriteOffStatus.REJECTED.value
+    db.commit()
+    return {"message": "Write Off rejected"}
 

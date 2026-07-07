@@ -582,7 +582,8 @@ export default function Indents() {
   const statusColor = {
     'Awaiting Approval': 'warning', 'Approved': 'success', 'Rejected': 'error',
     'Partially Issued': 'info', 'Issued': 'secondary', 'Fully Issued': 'secondary',
-    'PO Created': 'primary', 'Closed': 'default'
+    'PO Created': 'primary', 'Closed': 'default',
+    'Converted to PO': 'primary', 'Cancelled': 'default', 'Draft': 'default'
   };
 
   /* ─── INLINE CREATE FORM (reference-style card) ─── */

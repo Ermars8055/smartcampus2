@@ -2,10 +2,10 @@
 -- PostgreSQL database dump
 --
 
-\restrict yod7eZgmsOTEEeKHdTuqWbbBmX30d66OVL7bJzD0UAtUKhjXmzXhEqXOT2xlPS8
+\restrict DAuNn6sH1sRJ0J6C6MZ1iDe5UfhELLHLuYI3yVjoQ3smffcjwf96G5EVOAFndi4
 
 -- Dumped from database version 17.10 (Ubuntu 17.10-1.pgdg22.04+1)
--- Dumped by pg_dump version 18.4 (Ubuntu 18.4-1.pgdg22.04+1)
+-- Dumped by pg_dump version 17.10 (Ubuntu 17.10-1.pgdg22.04+1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -2888,6 +2888,93 @@ ALTER SEQUENCE public.warehouses_id_seq OWNED BY public.warehouses.id;
 
 
 --
+-- Name: write_off_items; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.write_off_items (
+    id integer NOT NULL,
+    write_off_id integer NOT NULL,
+    material_id integer NOT NULL,
+    warehouse_id integer,
+    quantity double precision NOT NULL,
+    rate double precision,
+    amount double precision
+);
+
+
+ALTER TABLE public.write_off_items OWNER TO postgres;
+
+--
+-- Name: write_off_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.write_off_items_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.write_off_items_id_seq OWNER TO postgres;
+
+--
+-- Name: write_off_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.write_off_items_id_seq OWNED BY public.write_off_items.id;
+
+
+--
+-- Name: write_offs; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.write_offs (
+    id integer NOT NULL,
+    tenant_id integer NOT NULL,
+    site_id integer NOT NULL,
+    write_off_number character varying(50) NOT NULL,
+    date date NOT NULL,
+    reason text NOT NULL,
+    status character varying(50),
+    current_approval_level integer,
+    created_by_id integer NOT NULL,
+    approved_by_id integer,
+    approved_at timestamp without time zone,
+    is_deleted boolean,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    write_off_type character varying(100),
+    attachment_url character varying(500)
+);
+
+
+ALTER TABLE public.write_offs OWNER TO postgres;
+
+--
+-- Name: write_offs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.write_offs_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.write_offs_id_seq OWNER TO postgres;
+
+--
+-- Name: write_offs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.write_offs_id_seq OWNED BY public.write_offs.id;
+
+
+--
 -- Name: alerts id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -3336,11 +3423,25 @@ ALTER TABLE ONLY public.warehouses ALTER COLUMN id SET DEFAULT nextval('public.w
 
 
 --
+-- Name: write_off_items id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.write_off_items ALTER COLUMN id SET DEFAULT nextval('public.write_off_items_id_seq'::regclass);
+
+
+--
+-- Name: write_offs id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.write_offs ALTER COLUMN id SET DEFAULT nextval('public.write_offs_id_seq'::regclass);
+
+
+--
 -- Data for Name: alembic_version; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.alembic_version (version_num) FROM stdin;
-824ad995a1b2
+bb37c772c4b2
 \.
 
 
@@ -3391,6 +3492,8 @@ COPY public.alerts (id, tenant_id, site_id, alert_type, severity, title, message
 41	2	2	Pending Action	Warning	Action Required: Indent IND-00017 Approval	\N	Indent	232	\N	t	f	2026-07-02 18:35:37.599022	\N	\N
 42	2	2	Pending Action	Warning	Action Required: Indent IND-00017 Approval	\N	Indent	232	\N	t	f	2026-07-02 18:35:37.59988	\N	\N
 36	2	2	Indent Approved	Success	Indent IND-00010 Approved	The indent (IND-00010) has been approved by EastPoint Admin.	IndentApproved	225	\N	f	t	2026-06-30 18:15:16.358735	2026-07-02 19:06:21.888171	17
+43	2	2	Pending Action	Warning	Action Required: Indent IND-00019 Approval	\N	Indent	234	\N	t	f	2026-07-07 11:37:40.01274	\N	\N
+44	2	2	Pending Action	Warning	Action Required: PO PO-00015 Approval	\N	PurchaseOrder	231	\N	t	f	2026-07-07 11:38:24.767763	\N	\N
 \.
 
 
@@ -3420,10 +3523,10 @@ COPY public.approval_flows (id, tenant_id, site_id, document_type, level, role_n
 21	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
 22	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
 23	2	2	INDENT	2	Admin	0	\N	\N	f
+24	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
 44	2	2	INDENT	1	Department Head	0	\N	\N	f
 45	2	2	INDENT	1	Department Head	0	\N	\N	f
 46	2	2	INDENT	1	Institution Head	0	\N	\N	t
-24	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
 25	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
 26	2	2	INDENT	1	Admin	0	\N	\N	f
 27	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
@@ -3449,12 +3552,18 @@ COPY public.approval_flows (id, tenant_id, site_id, document_type, level, role_n
 50	2	2	INDENT	2	Admin	0	\N	\N	f
 51	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
 52	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
-53	2	2	INDENT	1	Admin	0	\N	\N	t
-54	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	t
-55	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	t
-56	2	2	INDENT	2	Admin	0	\N	\N	t
-57	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	t
-58	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	t
+53	2	2	INDENT	1	Admin	0	\N	\N	f
+54	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
+55	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
+56	2	2	INDENT	2	Admin	0	\N	\N	f
+57	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
+58	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
+59	2	2	INDENT	1	Admin	0	\N	\N	t
+60	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	t
+61	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	t
+62	2	2	INDENT	2	Admin	0	\N	\N	t
+63	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	t
+64	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	t
 \.
 
 
@@ -3851,6 +3960,23 @@ COPY public.audit_logs (id, tenant_id, site_id, user_id, action, entity_type, en
 386	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-07-03 13:59:10.63584
 387	4	\N	36	LOGIN	User	36	\N	\N	\N	2026-07-03 14:43:31.546964
 388	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-07-03 19:12:20.940118
+389	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-07-06 10:27:18.243313
+390	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-07-06 11:49:40.461761
+391	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-07-06 12:04:56.209035
+392	\N	\N	1	LOGIN	User	1	\N	\N	\N	2026-07-06 12:06:56.487266
+393	1	\N	2	LOGIN	User	2	\N	\N	\N	2026-07-06 12:07:51.858857
+394	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-07-06 12:08:29.646074
+395	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-07-06 13:12:49.83386
+396	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-07-06 15:43:05.727043
+397	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-07-06 16:10:49.285374
+398	2	2	3	CREATE	GRN	209	\N	GRN GRN-00006 created (PO-Based)	\N	2026-07-06 16:37:10.21815
+399	2	2	3	CREATE	GRN	210	\N	GRN GRN-00007 created (PO-Based)	\N	2026-07-06 16:37:47.730967
+400	2	2	3	CREATE	GRN	211	\N	GRN GRN-00008 created (PO-Based)	\N	2026-07-06 16:58:25.71705
+401	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-07-07 11:37:32.292411
+402	2	2	3	APPROVE	PurchaseRequest	203	\N	\N	\N	2026-07-07 19:02:38.40304
+403	2	2	3	APPROVE	PurchaseRequest	203	\N	\N	\N	2026-07-07 19:03:09.791048
+404	2	2	3	APPROVE	PurchaseRequest	199	\N	\N	\N	2026-07-07 19:05:58.580608
+405	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-07-07 19:53:18.135688
 \.
 
 
@@ -5897,7 +6023,6 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 2940	2	2	2660	62	26	2026-06-11 21:58:45.849742
 2941	2	2	2661	62	101	2026-06-11 21:58:45.849744
 2942	2	2	2662	62	2	2026-06-11 21:58:45.849747
-2854	2	2	2564	62	45	2026-06-30 18:40:52.115178
 2943	2	2	2663	62	30	2026-06-11 21:58:45.84975
 2944	2	2	2665	62	126	2026-06-11 21:58:45.849753
 2945	2	2	2666	62	60	2026-06-11 21:58:45.849755
@@ -6829,7 +6954,8 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 2412	3	3	2102	59	27	2026-06-17 18:19:11.656207
 3651	2	2	3462	62	47	2026-06-18 11:11:57.168045
 3013	2	2	2751	62	24	2026-06-18 12:26:45.195793
-2855	2	2	2565	62	46	2026-06-30 20:00:31.706317
+2855	2	2	2565	62	48	2026-07-06 16:58:25.718235
+2854	2	2	2564	62	43	2026-07-07 17:36:54.885741
 \.
 
 
@@ -7479,7 +7605,6 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 59	1	1	CATEGORY		1
 12	3	3	PURCHASE_REQUEST	PR	28
 60	1	1	RETURN	RET	1
-69	2	2	PURCHASE_ORDER	PO	27
 28	2	2	PROJECT	PROJ	2
 25	3	3	RETURN	RET	12
 26	3	3	GATEPASS	GP	14
@@ -7494,7 +7619,6 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 67	2	2	ISSUE	ISS	8
 63	2	2	INSTITUTION	INST	14
 78	2	2	COMPLAINT	CMP	13
-68	2	2	PURCHASE_REQUEST	PR	9
 35	3	3	TRANSFER	TRF	8
 64	2	2	COMPANY_ADDRESS	ADDR	3
 70	2	2	QUOTATION_REQUEST	QR	12
@@ -7502,7 +7626,6 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 76	2	2	INVOICE_REF	INV	6
 90	4	4	ORGANIZATION	ORG	2
 71	2	2	GATE_ENTRY	GE	5
-75	2	2	GRN	GRN	5
 72	2	2	WAREHOUSE	WH	11
 91	4	4	PROJECT	PROJ	5
 65	2	2	VENDOR	VND	3
@@ -7514,7 +7637,11 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 4	3	3	ROOM	RM	4
 16	3	3	QUOTATION_REQUEST	QR	21
 5	3	3	INDENT	IND	42
+75	2	2	GRN	GRN	8
+93	2	2	WRITE_OFF	WO	2
 40	3	3	MATERIAL_46	EES	3
+68	2	2	PURCHASE_REQUEST	PR	10
+69	2	2	PURCHASE_ORDER	PO	28
 77	2	2	GATEPASS	GP	3
 \.
 
@@ -7680,6 +7807,9 @@ COPY public.grn (id, tenant_id, site_id, grn_number, po_id, gate_entry_id, wareh
 206	2	2	GRN-00003	216	\N	62	3	62	PO-Based	BG34	2026-06-04	20000	/uploads/invoices/2/20260611_205014_d03b0dbd.png	\N	20000	0	0	0	0	\N	Not Applicable	Completed	\N	3	f	2026-06-12 02:20:17.548099	2026-06-11 20:50:17.553752	\N
 207	2	2	GRN-00004	233	200	62	3	63	PO-Based	INV20023	2026-06-30	2000	/api/uploads/invoices/2/20260630_130925_abb74d56.pdf	\N	33052.32	0	0	0	0	\N	Not Applicable	Completed	\N	3	f	2026-06-30 18:40:52.056973	2026-06-30 13:10:52.105003	\N
 208	2	2	GRN-00005	232	199	62	3	64	PO-Based	IV543	2026-06-04	18000	/uploads/invoices/2/20260611_211153_feff01fd.jpg	\N	10	0	0	0	0	\N	Not Applicable	Completed	\N	3	f	2026-06-30 20:00:31.684515	2026-06-30 14:30:31.69365	\N
+209	2	2	GRN-00006	239	\N	62	3	63	PO-Based		\N	16526.16	/api/uploads/invoices/2/20260706_110659_d889a21e.pdf	\N	16526.16	0	0	0	0	\N	Not Applicable	Completed	\N	3	f	2026-07-06 16:37:10.175261	2026-07-06 11:07:10.216092	\N
+210	2	2	GRN-00007	235	\N	62	3	63	PO-Based		\N	10500		\N	43229.44	0	0	0	0	\N	Not Applicable	Completed	\N	3	f	2026-07-06 16:37:47.723934	2026-07-06 11:07:47.729021	\N
+211	2	2	GRN-00008	236	\N	62	3	63	PO-Based		\N	27038.28		\N	27038.28	0	0	0	0	\N	Not Applicable	Completed	\N	3	f	2026-07-06 16:58:25.710415	2026-07-06 11:28:25.713942	\N
 \.
 
 
@@ -7737,6 +7867,11 @@ COPY public.grn_items (id, grn_id, material_id, po_item_id, ordered_quantity, re
 509	206	2357	522	20	20	20	0	1000	\N	0	0	0	0	0	0	20000	0	\N
 510	207	2564	576	2	2	2	0	16526.16	\N	0	0	0	0	0	0	33052.32	0	\N
 511	208	2565	577	1	1	1	1	10	\N	0	0	0	0	0	0	10	0	\N
+512	209	2564	606	1	1	1	0	16526.16	\N	0	0	0	0	0	0	16526.16	0	\N
+513	210	2565	595	1	1	1	1	26703.28	\N	0	0	0	0	0	0	26703.28	0	\N
+514	210	2564	594	1	1	1	1	16526.16	\N	0	0	0	0	0	0	16526.16	0	\N
+515	211	2564	584	1	1	1	0	335	\N	0	0	0	0	0	0	335	0	\N
+516	211	2565	585	1	1	1	0	26703.28	\N	0	0	0	0	0	0	26703.28	0	\N
 \.
 
 
@@ -11123,6 +11258,7 @@ COPY public.purchase_order_items (id, po_id, material_id, quantity, rate, amount
 489	197	238	50	4500	225000	0	\N	0	9	9	0	f	\N
 429	170	218	58	622.66	36114.41	0	\N	0	0	0	0	f	\N
 430	170	239	91	253.69	23086.15	0	\N	0	0	0	0	f	\N
+661	244	2564	32	17000	544000	0	\N	0	6	6	0	f	\N
 433	172	246	84	197.82	16616.81	84	\N	0	0	0	0	f	\N
 434	172	238	97	253.34	24574.03	97	\N	0	0	0	0	f	\N
 435	173	230	62	192.3	11922.56	0	\N	0	0	0	0	f	\N
@@ -11143,6 +11279,7 @@ COPY public.purchase_order_items (id, po_id, material_id, quantity, rate, amount
 492	200	224	2	100	200	0	\N	2	2	2	2	t	\N
 493	201	246	11	12111	133221	0	\N	2	2	2	0	f	\N
 495	203	246	10	1800	18000	0	\N	0	5	5	0	t	\N
+662	244	2860	1.5	1800	2700	0	\N	0	9	9	0	f	\N
 504	212	246	10	33	330	0	\N	0	9	9	0	f	\N
 450	178	226	68	275.36	18724.56	34	\N	0	0	0	0	f	\N
 451	179	241	78	264.13	20602.24	0	\N	0	0	0	0	f	\N
@@ -11198,64 +11335,19 @@ COPY public.purchase_order_items (id, po_id, material_id, quantity, rate, amount
 527	221	3503	6	300	1800	0	\N	0	9	9	0	f	4
 500	208	224	95	111111	12455543.1	0	\N	0	9	9	0	f	0
 497	205	2135	10	4300	43000	0	\N	0	6	6	0	f	0
-528	223	3467	1	320002	320002	0	\N	0	9	9	0	f	\N
-529	223	3505	1	454990	454990	0	\N	0	9	9	0	f	\N
-530	223	2564	1	320000	320000	0	\N	0	6	6	0	f	\N
-531	223	2565	1	220000	220000	0	\N	0	6	6	0	f	\N
-532	223	3507	1	240000	240000	0	\N	0	6	6	0	f	\N
-533	223	2751	1	328902	328902	0	\N	0	9	9	0	f	\N
-534	223	2435	1	238923	238923	0	\N	0	9	9	0	f	\N
-535	223	3475	1	670000	670000	0	\N	0	9	9	0	f	\N
-536	223	3473	1	445300	445300	0	\N	0	9	9	0	f	\N
-537	223	3504	1	456989	456989	0	\N	0	9	9	0	f	\N
-538	223	3506	1	459990	459990	0	\N	0	9	9	0	f	\N
-539	223	2352	1	255990	255990	0	\N	0	9	9	0	f	\N
-540	223	2471	1	955991	955991	0	\N	0	9	9	0	f	\N
-541	223	2453	1	478599	478599	0	\N	0	9	9	0	f	\N
-542	223	2353	1	775990	775990	0	\N	0	9	9	0	f	\N
-543	223	2354	1	155978	155978	0	\N	0	9	9	0	f	\N
-544	223	2472	1	435990	435990	0	\N	0	9	9	0	f	\N
-545	223	2458	1	455990	455990	0	\N	0	9	9	0	f	\N
-546	223	2361	1	325902	325902	0	\N	0	9	9	0	f	\N
-547	223	2359	1	125901	125901	0	\N	0	9	9	0	f	\N
-548	223	2360	1	155900	155900	0	\N	0	9	9	0	f	\N
-549	223	2423	1	535900	535900	0	\N	0	9	9	0	f	\N
-550	223	3421	1	555900	555900	0	\N	0	9	9	0	f	\N
-551	223	2431	1	344900	344900	0	\N	0	9	9	0	f	\N
-552	223	2469	1	644900	644900	0	\N	0	9	9	0	f	\N
-553	224	3474	1	230930	230930	0	\N	0	9	9	0	f	\N
-554	224	2362	1	231527	231527	0	\N	0	9	9	0	f	\N
-555	225	3501	1	293000	293000	0	\N	0	9	9	0	f	\N
-556	225	3503	1	202996	202996	0	\N	0	9	9	0	f	\N
-557	225	3492	1	319998	319998	0	\N	0	9	9	0	f	\N
-558	225	2355	1	84000	84000	0	\N	0	9	9	0	f	\N
-559	225	2468	1	782000	782000	0	\N	0	9	9	0	f	\N
-560	225	2450	1	212000	212000	0	\N	0	9	9	0	f	\N
-561	225	2442	1	478200	478200	0	\N	0	9	9	0	f	\N
-562	225	2358	1	277998	277998	0	\N	0	9	9	0	f	\N
-563	225	2481	1	182000	182000	0	\N	0	9	9	0	f	\N
-564	225	2480	1	772000	772000	0	\N	0	9	9	0	f	\N
-565	225	2438	1	789000	789000	0	\N	0	9	9	0	f	\N
-566	225	2430	1	378289	378289	0	\N	0	9	9	0	f	\N
-567	225	2437	1	178200	178200	0	\N	0	9	9	0	f	\N
-568	225	3104	2	132111	264222	0	\N	0	9	9	0	f	\N
-569	226	3507	6	224	1344	0	\N	0	6	6	0	f	\N
+584	236	2564	1	335	335	1	\N	0	6	6	0	f	\N
+585	236	2565	1	26703.28	26703.28	1	\N	0	6	6	0	f	\N
 576	233	2564	2	16526.16	33052.32	2	\N	0	6	6	0	f	\N
 577	232	2565	1	10	10	1	\N	0	6	6	0	f	\N
-584	236	2564	1	335	335	0	\N	0	6	6	0	f	\N
-585	236	2565	1	26703.28	26703.28	0	\N	0	6	6	0	f	\N
-595	235	2565	1	26703.28	26703.28	0	\N	0	6	6	0	f	1
 588	238	2564	2	16526.16	33052.32	0	\N	0	6	6	0	f	1
 589	237	2564	1	16526.16	16526.16	0	\N	0	6	6	0	f	0
 590	237	2565	1	26703.28	26703.28	0	\N	0	6	6	0	f	1
-594	235	2564	1	16526.16	16526.16	0	\N	0	6	6	0	f	1
 599	234	2564	15	16526.16	247892.4	0	\N	0	6	6	0	f	15
 600	242	2564	1	16526.16	16526.16	0	\N	0	6	6	0	f	1
 601	242	2899	1	12643.71	12643.71	0	\N	0	9	9	0	f	1
 603	241	2564	5	16526.16	82630.8	0	\N	0	6	6	0	f	3
 604	241	2444	10	2183.22	21832.2	0	\N	0	9	9	0	f	5
 605	240	2564	1	16526.16	16526.16	0	\N	0	6	6	0	f	\N
-606	239	2564	1	16526.16	16526.16	0	\N	0	6	6	0	f	\N
 607	231	3505	1	111	111	0	\N	0	9	9	0	f	\N
 608	230	3467	1	132	132	0	\N	0	9	9	0	f	\N
 609	229	2751	3	100	300	0	\N	0	9	9	0	f	\N
@@ -11265,6 +11357,51 @@ COPY public.purchase_order_items (id, po_id, material_id, quantity, rate, amount
 615	243	2565	4	26703.28	106813.12	0	\N	0	6	6	0	f	\N
 616	243	3507	1	12	12	0	\N	0	6	6	0	t	\N
 617	227	2751	3	123	369	0	\N	0	9	9	0	f	\N
+619	226	3507	6	224	1344	0	\N	0	6	6	0	f	\N
+620	225	3501	1	293000	293000	0	\N	0	9	9	0	f	\N
+621	225	3503	1	202996	202996	0	\N	0	9	9	0	f	\N
+622	225	3492	1	319998	319998	0	\N	0	9	9	0	f	\N
+623	225	2355	1	84000	84000	0	\N	0	9	9	0	f	\N
+624	225	2468	1	782000	782000	0	\N	0	9	9	0	f	\N
+625	225	2450	1	212000	212000	0	\N	0	9	9	0	f	\N
+626	225	2442	1	478200	478200	0	\N	0	9	9	0	f	\N
+627	225	2358	1	277998	277998	0	\N	0	9	9	0	f	\N
+628	225	2481	1	182000	182000	0	\N	0	9	9	0	f	\N
+629	225	2480	1	772000	772000	0	\N	0	9	9	0	f	\N
+606	239	2564	1	16526.16	16526.16	1	\N	0	6	6	0	f	\N
+594	235	2564	1	16526.16	16526.16	1	\N	0	6	6	0	f	1
+595	235	2565	1	26703.28	26703.28	1	\N	0	6	6	0	f	1
+630	225	2438	1	789000	789000	0	\N	0	9	9	0	f	\N
+631	225	2430	1	378289	378289	0	\N	0	9	9	0	f	\N
+632	225	2437	1	178200	178200	0	\N	0	9	9	0	f	\N
+633	225	3104	2	132111	264222	0	\N	0	9	9	0	f	\N
+634	224	3474	1	230930	230930	0	\N	0	9	9	0	f	\N
+635	224	2362	1	231527	231527	0	\N	0	9	9	0	f	\N
+636	223	3467	1	320002	320002	0	\N	0	9	9	0	f	\N
+637	223	3505	1	454990	454990	0	\N	0	9	9	0	f	\N
+638	223	2564	1	320000	320000	0	\N	0	6	6	0	f	\N
+639	223	2565	1	220000	220000	0	\N	0	6	6	0	f	\N
+640	223	3507	1	240000	240000	0	\N	0	6	6	0	f	\N
+641	223	2751	1	328902	328902	0	\N	0	9	9	0	f	\N
+642	223	2435	1	238923	238923	0	\N	0	9	9	0	f	\N
+643	223	3475	1	670000	670000	0	\N	0	9	9	0	f	\N
+644	223	3473	1	445300	445300	0	\N	0	9	9	0	f	\N
+645	223	3504	1	456989	456989	0	\N	0	9	9	0	f	\N
+646	223	3506	1	459990	459990	0	\N	0	9	9	0	f	\N
+647	223	2352	1	255990	255990	0	\N	0	9	9	0	f	\N
+648	223	2471	1	955991	955991	0	\N	0	9	9	0	f	\N
+649	223	2453	1	478599	478599	0	\N	0	9	9	0	f	\N
+650	223	2353	1	775990	775990	0	\N	0	9	9	0	f	\N
+651	223	2354	1	155978	155978	0	\N	0	9	9	0	f	\N
+652	223	2472	1	435990	435990	0	\N	0	9	9	0	f	\N
+653	223	2458	1	455990	455990	0	\N	0	9	9	0	f	\N
+654	223	2361	1	325902	325902	0	\N	0	9	9	0	f	\N
+655	223	2359	1	125901	125901	0	\N	0	9	9	0	f	\N
+656	223	2360	1	155900	155900	0	\N	0	9	9	0	f	\N
+657	223	2423	1	535900	535900	0	\N	0	9	9	0	f	\N
+658	223	3421	1	555900	555900	0	\N	0	9	9	0	f	\N
+659	223	2431	1	344900	344900	0	\N	0	9	9	0	f	\N
+660	223	2469	1	644900	644900	0	\N	0	9	9	0	f	\N
 \.
 
 
@@ -11310,15 +11447,15 @@ COPY public.purchase_orders (id, tenant_id, site_id, po_number, vendor_id, proje
 189	3	3	PO-00024	54	1	\N	\N	179	Formal	33629	\N	Closed	\N	4	4	2026-05-25 13:22:18.605025	f	2026-05-25 18:43:27.751179	2026-06-02 18:01:36.986163	\N	\N	\N
 201	3	3	PO-00036	54	1	\N	\N	\N	Formal	135778.84	2026-06-22	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-02 06:00:37.696127	f	2026-06-01 19:53:47.799287	2026-06-09 11:19:25.214361	\N	\N	\N
 234	2	2	PO-00018	63	3	\N	\N	\N	Informal	277639.49	2026-07-01	Rejected	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-01 15:00:00.254964	2026-07-01 18:04:06.457384	2	\N	\n[Rejected: Rejection at level 2]
-223	2	2	PO-00007	62	3	200	\N	193	Formal	10358927	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-18 12:45:51.479268	2026-06-18 12:45:51.542216	1	\N	\N
 222	2	2	PO-00006	63	3	\N	\N	187	Formal	4720	2026-07-08	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 13:35:57.94273	f	2026-06-15 19:05:16.095226	2026-07-01 19:05:57.944684	2	Annexure test for PO-00006	\N
-224	2	2	PO-00008	64	3	200	\N	193	Formal	462457	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-18 12:45:51.568488	2026-06-18 12:45:51.577314	1	\N	\N
+223	2	2	PO-00007	62	3	200	\N	193	Formal	12176733.86	2026-07-16	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-18 12:45:51.479268	2026-07-06 12:23:20.866753	1		\N
 221	2	2	PO-00005	62	3	\N	\N	187	Formal	2714	2026-07-07	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-06-16 06:48:21.751249	f	2026-06-15 19:05:16.037647	2026-06-16 12:18:21.752515	2	\N	\N
 208	3	3	PO-00043	54	1	\N	194	\N	Formal	12455543.1	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-05 18:10:20.039447	2026-06-17 10:43:51.159152	2	\N	\N
 205	3	3	PO-00040	54	1	189	\N	\N	Formal	48160	2026-06-17	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-03 14:31:01.896958	2026-06-17 10:46:25.147151	2	\N	\N
 202	3	3	PO-00037	54	1	\N	200	\N	Formal	5605	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-02 13:18:45.56214	2026-06-17 10:48:13.245105	2	\N	\N
-225	2	2	PO-00009	63	3	200	\N	193	Formal	5213903	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-18 12:45:51.584007	2026-06-18 12:45:51.600692	1	\N	\N
-226	2	2	PO-00010	63	3	\N	\N	194	Formal	1344	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-19 12:06:49.124341	2026-06-19 12:06:49.190374	1	\N	\N
+224	2	2	PO-00008	64	3	200	\N	193	Formal	545699.26	2026-07-09	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-18 12:45:51.568488	2026-07-06 12:22:05.675855	1		\N
+225	2	2	PO-00009	63	3	200	\N	193	Formal	6152405.54	2026-07-21	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-18 12:45:51.584007	2026-07-06 12:21:58.113873	1		\N
+226	2	2	PO-00010	63	3	\N	\N	194	Formal	1505.28	2026-07-07	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-19 12:06:49.124341	2026-07-06 12:21:36.203158	1		\N
 227	2	2	PO-00011	62	3	\N	\N	194	Formal	435.42	2026-07-02	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-19 12:06:49.200936	2026-07-02 18:33:01.972288	1		\N
 230	2	2	PO-00014	63	3	\N	\N	197	Formal	155.76	2026-07-08	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-22 12:15:32.505776	2026-07-01 18:53:22.407591	1	\N	\N
 207	3	3	PO-00042	53	1	\N	\N	\N	Informal	10560	2026-06-25	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 07:31:48.001221	f	2026-06-04 14:19:18.399032	2026-06-11 15:05:34.851646	2	\N	\N
@@ -11326,23 +11463,24 @@ COPY public.purchase_orders (id, tenant_id, site_id, po_number, vendor_id, proje
 233	2	2	PO-00017	63	3	\N	\N	\N	Informal	37018.6	2026-07-21	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: 15 Days\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-30 18:07:22.323788	2026-06-30 18:40:52.129145	1	\N	\N
 231	2	2	PO-00015	62	3	\N	\N	197	Formal	130.98	2026-07-24	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-22 12:15:32.547787	2026-07-01 18:50:47.282773	1	\N	\N
 212	3	3	PO-00047	59	1	\N	\N	\N	Informal	389.4	2026-06-29	Short Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-08 12:47:36.231711	f	2026-06-08 17:19:34.563694	2026-06-08 19:19:46.178721	\N	\N	short closed \n
-235	2	2	PO-00019	63	3	\N	\N	\N	Informal	48416.97	2026-07-22	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 10:11:11.544124	f	2026-07-01 15:07:59.921516	2026-07-01 15:41:11.545183	2	\N	\N
+235	2	2	PO-00019	63	3	\N	\N	\N	Informal	48416.97	2026-07-22	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 10:11:11.544124	f	2026-07-01 15:07:59.921516	2026-07-06 16:37:47.788958	2	\N	\N
+244	2	2	PO-00028	62	3	203	\N	\N	Formal	612466	2026-07-21	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-07 19:04:31.282046	2026-07-07 19:04:31.300742	1	\N	\N
 232	2	2	PO-00016	64	3	\N	\N	198	Formal	11.2	2026-07-21	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-22 12:18:25.580101	2026-06-30 20:00:31.707939	1	\N	\N
 242	2	2	PO-00026	63	3	\N	\N	\N	Informal	33428.88	2026-07-22	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 12:42:10.050112	f	2026-07-01 16:02:34.765014	2026-07-01 18:12:10.051203	2	\N	\N
 237	2	2	PO-00021	62	3	\N	\N	\N	Informal	48416.97	2026-07-22	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 10:08:14.685627	f	2026-07-01 15:30:32.968379	2026-07-01 15:38:14.686254	2	\N	\N
 209	3	3	PO-00044	55	1	\N	208	\N	Formal	109928.8	\N	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: 15 Days\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 07:25:55.019454	f	2026-06-08 14:45:41.037419	2026-06-11 15:04:41.081091	2	\N	\N
-239	2	2	PO-00023	63	3	\N	\N	\N	Informal	18509.3	2026-07-22	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-01 15:38:54.315286	2026-07-01 18:48:18.807606	1	\N	\N
 229	2	2	PO-00013	63	3	\N	\N	195	Formal	354	2026-07-08	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-19 13:08:12.440185	2026-07-01 18:54:50.910476	1	\N	\N
 228	2	2	PO-00012	62	3	\N	\N	195	Formal	672	2026-07-08	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-19 13:08:12.417753	2026-07-01 18:56:48.12993	1	\N	\N
 243	2	2	PO-00027	62	3	\N	\N	\N	Informal	138151.99	2026-07-02	Submitted	dfgfdgdgdfg	3	\N	\N	f	2026-07-02 18:30:35.966725	2026-07-02 18:30:35.990967	1		\N
+239	2	2	PO-00023	63	3	\N	\N	\N	Informal	18509.3	2026-07-22	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-01 15:38:54.315286	2026-07-06 16:37:10.220548	1	\N	\N
 214	2	2	PO-00001	62	3	194	\N	\N	Formal	38491.6	2026-06-26	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-06-11 19:46:17.594031	f	2026-06-12 01:00:29.585057	2026-06-12 01:17:08.524505	2	\N	\N
-236	2	2	PO-00020	63	3	\N	\N	\N	Informal	30282.87	2026-07-22	Rejected	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-01 15:09:29.245234	2026-07-01 17:40:52.13948	1	\N	Rejected for testing
 216	2	2	PO-00003	62	3	\N	\N	186	Formal	23600	2026-07-03	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-12 01:40:11.44893	2026-06-12 02:20:17.559248	2	\N	\N
 217	2	2	PO-00004	63	3	\N	\N	186	Formal	23321.52	2026-07-03	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-06-16 06:09:10.505248	f	2026-06-12 01:40:11.463052	2026-06-16 11:39:10.508746	2	\N	\N
 215	2	2	PO-00002	62	3	\N	\N	\N	Informal	59815.35	2026-07-03	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	11	2026-06-11 19:55:57.036519	f	2026-06-12 01:18:50.982636	2026-06-12 01:27:26.343947	2	\N	\N
 211	3	3	PO-00046	53	1	\N	\N	\N	Informal	149060.07	2026-06-29	Short Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 04:59:33.248268	f	2026-06-08 17:18:43.689083	2026-06-17 11:21:46.51598	2	\N	mistaken
 241	2	2	PO-00025	63	3	\N	\N	\N	Informal	118308.5	\N	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 12:45:36.264791	f	2026-07-01 15:58:53.716577	2026-07-01 18:15:36.265807	2	\N	\N
 240	2	2	PO-00024	62	3	\N	\N	\N	Informal	18509.3	2026-07-22	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-01 15:54:08.411103	2026-07-01 18:40:54.712499	1	\N	\N
+236	2	2	PO-00020	63	3	\N	\N	\N	Informal	30282.87	2026-07-22	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-01 15:09:29.245234	2026-07-06 16:58:25.718872	1	\N	Rejected for testing
 238	2	2	PO-00022	63	3	\N	\N	\N	Informal	37018.6	2026-07-01	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 10:14:55.636414	f	2026-07-01 15:32:32.73684	2026-07-01 15:44:55.636716	2	\N	\N
 \.
 
@@ -11378,6 +11516,12 @@ COPY public.purchase_request_approvals (id, pr_id, approval_flow_id, approver_id
 24	201	54	3	{"602": {"quantity": 2.0, "remarks": null}, "603": {"quantity": 5.0, "remarks": null}}	\N	2026-07-01 15:27:03.146038
 25	201	17	3	{"602": {"quantity": 2.0, "remarks": null}, "603": {"quantity": 5.0, "remarks": null}}	\N	2026-07-01 15:27:24.925101
 26	201	57	3	{"602": {"quantity": 2.0, "remarks": null}, "603": {"quantity": 5.0, "remarks": null}}	\N	2026-07-01 15:27:24.925142
+27	203	19	3	{"618": {"quantity": 32.0, "remarks": null}, "619": {"quantity": 1.2, "remarks": null}}	\N	2026-07-07 19:02:38.405109
+28	203	60	3	{"618": {"quantity": 32.0, "remarks": null}, "619": {"quantity": 1.2, "remarks": null}}	\N	2026-07-07 19:02:38.405121
+29	203	17	3	{"618": {"quantity": 32.0, "remarks": null}, "619": {"quantity": 1.2, "remarks": null}}	\N	2026-07-07 19:03:09.792322
+30	203	63	3	{"618": {"quantity": 32.0, "remarks": null}, "619": {"quantity": 1.2, "remarks": null}}	\N	2026-07-07 19:03:09.792334
+31	199	17	3	{"600": {"quantity": 4.0, "remarks": "Packaging Charges"}}	\N	2026-07-07 19:05:58.582046
+32	199	63	3	{"600": {"quantity": 4.0, "remarks": "Packaging Charges"}}	\N	2026-07-07 19:05:58.582062
 \.
 
 
@@ -11457,7 +11601,11 @@ COPY public.purchase_request_items (id, pr_id, material_id, quantity, approved_q
 601	200	3104	2	2
 602	201	2564	2	2
 603	201	2431	5	5
-604	202	2564	1	\N
+615	202	2564	1	\N
+616	202	3507	1	\N
+617	202	3503	2	\N
+618	203	2564	32	32
+619	203	2860	1.5	1.2
 \.
 
 
@@ -11495,10 +11643,11 @@ COPY public.purchase_requests (id, tenant_id, site_id, pr_number, requester_id, 
 195	2	2	PR-00002	3	\N	\N	Mechanical	3	2026-06-26		Converted to PO	3	2026-06-11 19:58:30.051646	f	2026-06-12 00:40:52.805513	2026-06-12 01:40:11.473288	2
 197	2	2	PR-00004	10	\N	8	HEALTH 	3	2026-06-26		Converted to PO	3	2026-06-11 19:58:16.903903	f	2026-06-12 00:57:22.512377	2026-06-12 01:40:11.47332	2
 198	2	2	PR-00005	3	\N	7	HEALTH 	3	2026-06-30		Submitted	\N	\N	f	2026-06-16 10:57:43.196702	2026-06-16 10:57:43.196716	1
-199	2	2	PR-00006	3	\N	\N	\N	3	2026-06-30		Submitted	\N	\N	f	2026-06-16 11:01:07.031945	2026-06-18 10:36:27.249322	2
 200	2	2	PR-00007	3	\N	\N	CSE - Data Science	3	2026-07-02		Converted to PO	3	2026-06-18 05:58:23.857592	f	2026-06-18 11:28:07.704199	2026-06-18 12:45:51.597369	2
 201	2	2	PR-00008	3	\N	8	HEALTH 	3	2026-07-14		Approved	3	2026-07-01 09:57:24.949598	f	2026-06-30 18:33:51.277817	2026-07-01 15:27:24.951602	2
 202	2	2	PR-00009	3	\N	12	Chemistry	3	2026-07-17		Draft	\N	\N	f	2026-07-03 11:46:40.099177	2026-07-03 11:46:40.099226	1
+203	2	2	PR-00010	3	\N	7	HEALTH 	3	2026-07-21		Converted to PO	3	2026-07-07 13:33:09.809097	f	2026-07-07 19:00:03.750122	2026-07-07 19:04:31.298846	2
+199	2	2	PR-00006	3	\N	\N	\N	3	2026-06-30		Approved	3	2026-07-07 13:35:58.620752	f	2026-06-16 11:01:07.031945	2026-07-07 19:05:58.621041	2
 \.
 
 
@@ -12189,19 +12338,6 @@ COPY public.role_permissions (id, role_id, resource, can_read, can_create, can_u
 966	21	report_pending_gatepass	t	f	f	f	{}
 967	21	material_allowances	t	t	t	t	{}
 968	21	terms	t	t	t	t	{}
-1029	11	configurations	t	t	t	t	{}
-1030	11	company_addresses	t	t	t	t	{}
-1031	11	subcategories	t	t	t	t	{}
-1032	11	uom	t	t	t	t	{}
-1033	11	report_pending_gatepass	t	f	f	f	{}
-1034	11	dashboard	t	f	f	f	{}
-1035	11	materials	t	t	t	t	{}
-1036	11	categories	t	t	t	t	{}
-1037	11	vendors	t	t	t	t	{}
-1038	11	warehouses	t	t	t	t	{}
-1039	11	indents	t	t	t	t	{"can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_acknowledge": true}
-1040	11	purchase_requests	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_hold": true, "can_short_close": true}
-1041	11	quotations	t	t	t	t	{"can_send_to_vendors": true, "can_receive": true, "can_enter_quotes": true, "can_compare": true, "can_approve": true, "can_convert_to_po": true}
 934	19	indents	t	t	t	t	{"can_acknowledge": false, "can_approve": false, "can_reject": false, "can_convert_to_po": false}
 935	19	acknowledgements	t	t	t	t	{"can_acknowledge": true}
 936	19	complaints	t	t	t	t	{}
@@ -12246,34 +12382,48 @@ COPY public.role_permissions (id, role_id, resource, can_read, can_create, can_u
 1135	23	departments	t	t	t	t	{}
 1136	23	company_addresses	t	t	t	t	{}
 1137	23	terms	t	t	t	t	{}
-1042	11	purchase_orders	t	t	t	t	{"can_approve": true, "can_reject": true, "can_hold": true, "can_send_to_vendor": true, "can_short_close": true}
-1043	11	gate_entry	t	t	t	t	{"can_record_entry": true, "can_verify": true}
-1044	11	invoice	t	t	t	t	{"can_register": true, "can_approve": true, "can_reject": true, "can_print": true}
-1045	11	grn	t	t	t	t	{"can_create_grn": true, "can_complete": true}
-1046	11	issues	t	t	t	t	{"can_issue": true, "can_print": true, "can_direct_issue": true}
-1047	11	returns	t	t	t	t	{"can_return": true, "receive": true}
-1048	11	transfers	t	t	t	t	{"can_transfer": true}
-1049	11	gate_passes	t	t	t	t	{"can_create": true, "can_print": true}
-1050	11	acknowledgements	t	t	t	t	{"can_acknowledge": true}
-1051	11	inventory	t	t	t	t	{}
-1052	11	intelligence	t	f	f	f	{}
-1053	11	finance_invoices	t	t	t	t	{"can_send_hard_copy": true, "can_receive_hard_copy": true, "can_send_for_payment": true, "can_mark_paid": true}
-1054	11	report_issue_summary	t	f	f	f	{}
-1055	11	report_rate_analysis	t	f	f	f	{}
-1056	11	report_receipt_summary	t	f	f	f	{}
-1057	11	report_dept_inventory	t	f	f	f	{}
-1058	11	report_finance	t	f	f	f	{}
-1059	11	admin_users	t	t	t	t	{}
-1060	11	admin_roles	t	t	t	t	{}
-1061	11	approval_flows	t	t	t	t	{}
-1062	11	projects	t	t	t	t	{}
-1063	11	organizations	t	t	t	t	{}
-1064	11	departments	t	t	t	t	{}
-1065	11	terms	t	t	t	t	{}
-1066	11	complaints	t	t	t	t	{}
-1067	11	audit_logs	t	f	f	f	{}
-1068	11	reports	t	f	f	f	{}
-1069	11	material_allowances	t	t	t	t	{}
+1138	11	configurations	t	t	t	t	{}
+1139	11	company_addresses	t	t	t	t	{}
+1140	11	subcategories	t	t	t	t	{}
+1141	11	uom	t	t	t	t	{}
+1142	11	report_pending_gatepass	t	f	f	f	{}
+1143	11	dashboard	t	f	f	f	{}
+1144	11	materials	t	t	t	t	{}
+1145	11	categories	t	t	t	t	{}
+1146	11	vendors	t	t	t	t	{}
+1147	11	warehouses	t	t	t	t	{}
+1148	11	indents	t	t	t	t	{"can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_acknowledge": true}
+1149	11	purchase_requests	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_hold": true, "can_short_close": true}
+1150	11	quotations	t	t	t	t	{"can_send_to_vendors": true, "can_receive": true, "can_enter_quotes": true, "can_compare": true, "can_approve": true, "can_convert_to_po": true}
+1151	11	purchase_orders	t	t	t	t	{"can_approve": true, "can_reject": true, "can_hold": true, "can_send_to_vendor": true, "can_short_close": true}
+1152	11	gate_entry	t	t	t	t	{"can_record_entry": true, "can_verify": true}
+1153	11	invoice	t	t	t	t	{"can_register": true, "can_approve": true, "can_reject": true, "can_print": true}
+1154	11	grn	t	t	t	t	{"can_create_grn": true, "can_complete": true}
+1155	11	issues	t	t	t	t	{"can_issue": true, "can_print": true, "can_direct_issue": true}
+1156	11	returns	t	t	t	t	{"can_return": true, "receive": true}
+1157	11	transfers	t	t	t	t	{"can_transfer": true}
+1158	11	gate_passes	t	t	t	t	{"can_create": true, "can_print": true}
+1159	11	acknowledgements	t	t	t	t	{"can_acknowledge": true}
+1160	11	inventory	t	t	t	t	{}
+1161	11	intelligence	t	f	f	f	{}
+1162	11	finance_invoices	t	t	t	t	{"can_send_hard_copy": true, "can_receive_hard_copy": true, "can_send_for_payment": true, "can_mark_paid": true}
+1163	11	report_issue_summary	t	f	f	f	{}
+1164	11	report_rate_analysis	t	f	f	f	{}
+1165	11	report_receipt_summary	t	f	f	f	{}
+1166	11	report_dept_inventory	t	f	f	f	{}
+1167	11	report_finance	t	f	f	f	{}
+1168	11	admin_users	t	t	t	t	{}
+1169	11	admin_roles	t	t	t	t	{}
+1170	11	approval_flows	t	t	t	t	{}
+1171	11	projects	t	t	t	t	{}
+1172	11	organizations	t	t	t	t	{}
+1173	11	departments	t	t	t	t	{}
+1174	11	terms	t	t	t	t	{}
+1175	11	complaints	t	t	t	t	{}
+1176	11	audit_logs	t	f	f	f	{}
+1177	11	reports	t	f	f	f	{}
+1178	11	material_allowances	t	t	t	t	{}
+1179	11	write_offs	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true}
 \.
 
 
@@ -15333,6 +15483,12 @@ COPY public.stock_ledger (id, tenant_id, site_id, material_id, warehouse_id, tra
 4256	2	2	2435	62	Issue	-1	118	Issue	238	ISS-00008	1	237	\N	3	2026-06-22 11:48:20.969545
 4257	2	2	2564	62	GRN	2	45	GRN	207	GRN-00004	3	\N	\N	3	2026-06-30 18:40:52.130785
 4258	2	2	2565	62	GRN	1	46	GRN	208	GRN-00005	3	\N	\N	3	2026-06-30 20:00:31.710228
+4259	2	2	2564	62	GRN	1	46	GRN	209	GRN-00006	3	\N	\N	3	2026-07-06 16:37:10.221522
+4260	2	2	2565	62	GRN	1	47	GRN	210	GRN-00007	3	\N	\N	3	2026-07-06 16:37:47.790062
+4261	2	2	2564	62	GRN	1	47	GRN	210	GRN-00007	3	\N	\N	3	2026-07-06 16:37:47.790075
+4262	2	2	2564	62	GRN	1	48	GRN	211	GRN-00008	3	\N	\N	3	2026-07-06 16:58:25.719711
+4263	2	2	2565	62	GRN	1	48	GRN	211	GRN-00008	3	\N	\N	3	2026-07-06 16:58:25.719723
+4264	2	2	2564	62	Write Off	-5	43	WriteOff	1	WO-00001	\N	\N	\N	3	2026-07-07 17:36:54.901052
 \.
 
 
@@ -15349,9 +15505,9 @@ COPY public.stock_transfer_items (id, transfer_id, material_id, quantity, remark
 6	16	224	2		2	0	
 7	17	224	5		2	-3	
 8	18	2565	5		5	0	
-9	20	2565	5		\N	\N	\N
 10	28	1191	1	Candy canes topping liquorice wafer cake shortbread chupa chups sesame snaps carrot cake. Fruitcake candy tiramisu sugar plum jujubes icing marzipan candy. Bonbon marzipan brownie tiramisu sesame snaps cheesecake macaroon gummies cake. Pudding oat cake chocolate tiramisu powder dessert. Lollipop jelly beans gummi bears sugar plum gummi bears bear claw cupcake cake croissant. Bear claw marshmallow candy pudding jujubes tootsie roll. Pie topping apple pie oat cake topping. Tart sesame snaps croissant carrot cake biscuit halvah caramels macaroon danish. Tootsie roll dragée donut cotton candy macaroon ice cream oat cake. Danish soufflé lemon drops danish dessert ice cream muffin. Candy dragée wafer cheesecake lemon drops icing. Candy canes jelly beans cake fruitcake cheesecake. Donut fruitcake gummies cheesecake pastry cake fruitcake. Brownie oat cake bonbon wafer tart tootsie roll. Lemon drops jelly beans wafer cake chocolate cake chocolate donut cake pastry. Sweet roll icing cotton candy carrot cake cookie sugar plum liquorice chupa chups. Jujubes chocolate bar chocolate marshmallow liquorice. Apple pie marzipan muffin oat cake sesame snaps. Jelly-o cookie tart pudding gummi bears tart pastry chocolate cake sugar plum. Ice cream danish tiramisu sweet cookie tiramisu cotton candy liquorice liquorice. Cotton candy apple pie fruitcake pudding gingerbread apple pie. Dessert oat cake caramels dessert carrot cake chupa chups cake chocolate cake. Sesame snaps gummi bears marshmallow candy lollipop marshmallow oat cake marshmallow. Cheesecake lollipop fruitcake halvah jelly caramels biscuit cake. Icing apple pie cake candy tootsie roll donut bonbon. Powder macaroon gummies toffee tart bonbon jelly muffin cheesecake. Brownie liquorice cookie topping macaroon halvah marshmallow. Sesame snaps oat cake lemon drops cupcake cotton candy toffee gummies liquorice. Icing donut sweet roll soufflé candy canes. Pie jelly jelly beans sesame snaps sweet marshmallow caramels. Gummies bear claw topping bear claw muffin. Jelly-o wafer powder cotton candy toffee jelly beans dessert muffin macaroon. Chocolate liquorice apple pie tart fruitcake chocolate cake gingerbread toffee sesame snaps. Soufflé fruitcake cupcake biscuit pastry cheesecake cake jelly-o. Pastry gingerbread sweet biscuit gingerbread sweet roll jujubes. Topping soufflé carrot cake candy canes oat cake tootsie roll. Wafer shortbread liquorice shortbread cotton candy donut. Bonbon liquorice jelly beans jujubes icing. Gummies chocolate cake tiramisu croissant bonbon tart sweet roll sweet brownie. Pudding lemon drops croissant liquorice chocolate jelly beans tiramisu biscuit. Ice cream marshmallow marshmallow cheesecake icing. Tart carrot cake chocolate cake cookie halvah tiramisu sesame snaps. Gummies gummi bears candy canes biscuit marzipan danish liquorice bear claw chocolate cake. Tiramisu chocolate halvah cotton candy pudding fruitcake. Tart sweet shortbread apple pie carrot cake pie cheesecake jelly-o. Lollipop cake gummi bears pastry marshmallow pastry muffin chocolate tootsie roll. Gummies toffee danish donut bear claw. Bear claw wafer cake biscuit lemon drops cookie chocolate cake gummi bears jujubes. Lollipop wafer cotton candy bonbon jelly beans shortbread cotton candy pudding. Croissant cake gingerbread pastry jelly. Tart jujubes bear claw croissant cookie. Macaroon carrot cake dragée powder chocolate cake. Sweet pastry oat cake bear claw lollipop donut croissant tootsie roll cupcake. Tart cookie donut candy canes shortbread dessert lollipop. Jelly-o pudding tootsie roll gingerbread sesame snaps sweet roll tootsie roll. Lollipop sugar plum pudding cake bonbon pastry marshmallow. Cake dessert cupcake jelly-o tiramisu oat cake biscuit marzipan caramels. Cupcake sweet liquorice cookie dragée chocolate bar wafer tootsie roll. Gingerbread gingerbread oat cake marzipan tootsie roll cheesecake lollipop. Sweet muffin candy jelly cake cotton candy brownie pudding. Donut pie cupcake cotton candy donut gummi bears. Marshmallow tiramisu cookie candy cotton candy dragée cheesecake. Cake sweet roll dessert powder dragée macaroon marshmallow. Tootsie roll croissant danish cookie powder. Topping gingerbread chocolate cupcake cotton candy. Cotton candy wafer chocolate bar sweet bear claw jelly beans tootsie roll.	1	0	Candy canes topping liquorice wafer cake shortbread chupa chups sesame snaps carrot cake. Fruitcake candy tiramisu sugar plum jujubes icing marzipan candy. Bonbon marzipan brownie tiramisu sesame snaps cheesecake macaroon gummies cake. Pudding oat cake chocolate tiramisu powder dessert. Lollipop jelly beans gummi bears sugar plum gummi bears bear claw cupcake cake croissant. Bear claw marshmallow candy pudding jujubes tootsie roll. Pie topping apple pie oat cake topping. Tart sesame snaps croissant carrot cake biscuit halvah caramels macaroon danish. Tootsie roll dragée donut cotton candy macaroon ice cream oat cake. Danish soufflé lemon drops danish dessert ice cream muffin. Candy dragée wafer cheesecake lemon drops icing. Candy canes jelly beans cake fruitcake cheesecake. Donut fruitcake gummies cheesecake pastry cake fruitcake. Brownie oat cake bonbon wafer tart tootsie roll. Lemon drops jelly beans wafer cake chocolate cake chocolate donut cake pastry. Sweet roll icing cotton candy carrot cake cookie sugar plum liquorice chupa chups. Jujubes chocolate bar chocolate marshmallow liquorice. Apple pie marzipan muffin oat cake sesame snaps. Jelly-o cookie tart pudding gummi bears tart pastry chocolate cake sugar plum. Ice cream danish tiramisu sweet cookie tiramisu cotton candy liquorice liquorice. Cotton candy apple pie fruitcake pudding gingerbread apple pie. Dessert oat cake caramels dessert carrot cake chupa chups cake chocolate cake. Sesame snaps gummi bears marshmallow candy lollipop marshmallow oat cake marshmallow. Cheesecake lollipop fruitcake halvah jelly caramels biscuit cake. Icing apple pie cake candy tootsie roll donut bonbon. Powder macaroon gummies toffee tart bonbon jelly muffin cheesecake. Brownie liquorice cookie topping macaroon halvah marshmallow. Sesame snaps oat cake lemon drops cupcake cotton candy toffee gummies liquorice. Icing donut sweet roll soufflé candy canes. Pie jelly jelly beans sesame snaps sweet marshmallow caramels. Gummies bear claw topping bear claw muffin. Jelly-o wafer powder cotton candy toffee jelly beans dessert muffin macaroon. Chocolate liquorice apple pie tart fruitcake chocolate cake gingerbread toffee sesame snaps. Soufflé fruitcake cupcake biscuit pastry cheesecake cake jelly-o. Pastry gingerbread sweet biscuit gingerbread sweet roll jujubes. Topping soufflé carrot cake candy canes oat cake tootsie roll. Wafer shortbread liquorice shortbread cotton candy donut. Bonbon liquorice jelly beans jujubes icing. Gummies chocolate cake tiramisu croissant bonbon tart sweet roll sweet brownie. Pudding lemon drops croissant liquorice chocolate jelly beans tiramisu biscuit. Ice cream marshmallow marshmallow cheesecake icing. Tart carrot cake chocolate cake cookie halvah tiramisu sesame snaps. Gummies gummi bears candy canes biscuit marzipan danish liquorice bear claw chocolate cake. Tiramisu chocolate halvah cotton candy pudding fruitcake. Tart sweet shortbread apple pie carrot cake pie cheesecake jelly-o. Lollipop cake gummi bears pastry marshmallow pastry muffin chocolate tootsie roll. Gummies toffee danish donut bear claw. Bear claw wafer cake biscuit lemon drops cookie chocolate cake gummi bears jujubes. Lollipop wafer cotton candy bonbon jelly beans shortbread cotton candy pudding. Croissant cake gingerbread pastry jelly. Tart jujubes bear claw croissant cookie. Macaroon carrot cake dragée powder chocolate cake. Sweet pastry oat cake bear claw lollipop donut croissant tootsie roll cupcake. Tart cookie donut candy canes shortbread dessert lollipop. Jelly-o pudding tootsie roll gingerbread sesame snaps sweet roll tootsie roll. Lollipop sugar plum pudding cake bonbon pastry marshmallow. Cake dessert cupcake jelly-o tiramisu oat cake biscuit marzipan caramels. Cupcake sweet liquorice cookie dragée chocolate bar wafer tootsie roll. Gingerbread gingerbread oat cake marzipan tootsie roll cheesecake lollipop. Sweet muffin candy jelly cake cotton candy brownie pudding. Donut pie cupcake cotton candy donut gummi bears. Marshmallow tiramisu cookie candy cotton candy dragée cheesecake. Cake sweet roll dessert powder dragée macaroon marshmallow. Tootsie roll croissant danish cookie powder. Topping gingerbread chocolate cupcake cotton candy. Cotton candy wafer chocolate bar sweet bear claw jelly beans tootsie roll.
 11	33	1062	7	no	\N	\N	\N
+9	20	2565	5		0	-5	
 \.
 
 
@@ -15366,8 +15522,8 @@ COPY public.stock_transfers (id, tenant_id, site_id, transfer_number, from_wareh
 15	3	3	TRF-00004	51	55	1	Completed		4	f	2026-06-10 17:43:58.454661	2026-06-10 12:15:23.156814	4	2026-06-10 12:15:23.156866
 16	3	3	TRF-00005	51	55	1	Completed		4	f	2026-06-10 17:46:46.628573	2026-06-10 12:19:34.997562	4	2026-06-10 12:19:34.997601
 18	2	2	TRF-00001	62	63	3	Completed		3	f	2026-06-12 02:01:12.858358	2026-06-11 20:31:32.993351	3	2026-06-11 20:31:32.993393
-20	2	2	TRF-00002	63	62	3	Initiated		3	f	2026-06-12 02:02:28.867836	\N	\N	\N
 17	3	3	TRF-00006	51	55	1	Partially Received		4	f	2026-06-10 17:50:40.664258	\N	4	2026-06-17 06:57:15.106721
+20	2	2	TRF-00002	63	62	3	Partially Received		3	f	2026-06-12 02:02:28.867836	\N	3	2026-07-06 07:18:49.362958
 28	3	3	TRF-00007	59	47	1	Completed	Candy canes topping liquorice wafer cake shortbread chupa chups sesame snaps carrot cake. Fruitcake candy tiramisu sugar plum jujubes icing marzipan candy. Bonbon marzipan brownie tiramisu sesame snaps cheesecake macaroon gummies cake. Pudding oat cake chocolate tiramisu powder dessert. Lollipop jelly beans gummi bears sugar plum gummi bears bear claw cupcake cake croissant. Bear claw marshmallow candy pudding jujubes tootsie roll. Pie topping apple pie oat cake topping. Tart sesame snaps croissant carrot cake biscuit halvah caramels macaroon danish. Tootsie roll dragée donut cotton candy macaroon ice cream oat cake. Danish soufflé lemon drops danish dessert ice cream muffin. Candy dragée wafer cheesecake lemon drops icing. Candy canes jelly beans cake fruitcake cheesecake. Donut fruitcake gummies cheesecake pastry cake fruitcake. Brownie oat cake bonbon wafer tart tootsie roll. Lemon drops jelly beans wafer cake chocolate cake chocolate donut cake pastry. Sweet roll icing cotton candy carrot cake cookie sugar plum liquorice chupa chups. Jujubes chocolate bar chocolate marshmallow liquorice. Apple pie marzipan muffin oat cake sesame snaps. Jelly-o cookie tart pudding gummi bears tart pastry chocolate cake sugar plum. Ice cream danish tiramisu sweet cookie tiramisu cotton candy liquorice liquorice. Cotton candy apple pie fruitcake pudding gingerbread apple pie. Dessert oat cake caramels dessert carrot cake chupa chups cake chocolate cake. Sesame snaps gummi bears marshmallow candy lollipop marshmallow oat cake marshmallow. Cheesecake lollipop fruitcake halvah jelly caramels biscuit cake. Icing apple pie cake candy tootsie roll donut bonbon. Powder macaroon gummies toffee tart bonbon jelly muffin cheesecake. Brownie liquorice cookie topping macaroon halvah marshmallow. Sesame snaps oat cake lemon drops cupcake cotton candy toffee gummies liquorice. Icing donut sweet roll soufflé candy canes. Pie jelly jelly beans sesame snaps sweet marshmallow caramels. Gummies bear claw topping bear claw muffin. Jelly-o wafer powder cotton candy toffee jelly beans dessert muffin macaroon. Chocolate liquorice apple pie tart fruitcake chocolate cake gingerbread toffee sesame snaps. Soufflé fruitcake cupcake biscuit pastry cheesecake cake jelly-o. Pastry gingerbread sweet biscuit gingerbread sweet roll jujubes. Topping soufflé carrot cake candy canes oat cake tootsie roll. Wafer shortbread liquorice shortbread cotton candy donut. Bonbon liquorice jelly beans jujubes icing. Gummies chocolate cake tiramisu croissant bonbon tart sweet roll sweet brownie. Pudding lemon drops croissant liquorice chocolate jelly beans tiramisu biscuit. Ice cream marshmallow marshmallow cheesecake icing. Tart carrot cake chocolate cake cookie halvah tiramisu sesame snaps. Gummies gummi bears candy canes biscuit marzipan danish liquorice bear claw chocolate cake. Tiramisu chocolate halvah cotton candy pudding fruitcake. Tart sweet shortbread apple pie carrot cake pie cheesecake jelly-o. Lollipop cake gummi bears pastry marshmallow pastry muffin chocolate tootsie roll. Gummies toffee danish donut bear claw. Bear claw wafer cake biscuit lemon drops cookie chocolate cake gummi bears jujubes. Lollipop wafer cotton candy bonbon jelly beans shortbread cotton candy pudding. Croissant cake gingerbread pastry jelly. Tart jujubes bear claw croissant cookie. Macaroon carrot cake dragée powder chocolate cake. Sweet pastry oat cake bear claw lollipop donut croissant tootsie roll cupcake. Tart cookie donut candy canes shortbread dessert lollipop. Jelly-o pudding tootsie roll gingerbread sesame snaps sweet roll tootsie roll. Lollipop sugar plum pudding cake bonbon pastry marshmallow. Cake dessert cupcake jelly-o tiramisu oat cake biscuit marzipan caramels. Cupcake sweet liquorice cookie dragée chocolate bar wafer tootsie roll. Gingerbread gingerbread oat cake marzipan tootsie roll cheesecake lollipop. Sweet muffin candy jelly cake cotton candy brownie pudding. Donut pie cupcake cotton candy donut gummi bears. Marshmallow tiramisu cookie candy cotton candy dragée cheesecake. Cake sweet roll dessert powder dragée macaroon marshmallow. Tootsie roll croissant danish cookie powder. Topping gingerbread chocolate cupcake cotton candy. Cotton candy wafer chocolate bar sweet bear claw jelly beans tootsie roll.	4	f	2026-06-17 12:19:08.949634	2026-06-17 06:51:58.420032	4	2026-06-17 06:51:58.420105
 33	3	3	TRF-00008	59	48	1	Initiated		4	f	2026-06-17 18:22:24.785236	\N	\N	\N
 \.
@@ -15675,7 +15831,6 @@ COPY public.users (id, username, email, full_name, hashed_password, is_active, i
 14	tech2	tech2@example.com	Amit Sharma (Technician)	$2b$12$Q3pj8PH0t1OHm4EJZqCbCOlleLxm9qREUhFAuya7vu/qdG//4aSmS	t	f	f	2026-06-12 03:34:23.878301	2026-06-12 03:34:23.878314	Civil	\N
 15	tech3	tech3@example.com	Suresh Patel (Electrician)	$2b$12$.OH7R/32TeL/W/BgWc8loerqLt2r77sSmcg1wTKtWdZ8yeP4s2SZG	t	f	f	2026-06-12 03:34:24.121184	2026-06-12 03:34:24.121198	Electrical	\N
 16	Arun	arun@nissigrid.com	Arun	$2b$12$ZOJdL4q8og8q3i.8EjoXF.FVYLtzUtbHAW25RqqSuEEo.6TyAkc/y	t	f	f	2026-06-12 04:18:31.353696	2026-06-12 04:18:31.353711	\N	\N
-2	admin	pradnesh@nissigrid.com	NG Admin	$2b$12$bOAeF9c/gaEKKZYSg.Z5VOZ7Cefq7AOXvbM0t0hZI.aEN2v/AJ9Fe	t	f	f	2026-05-15 10:39:02.648701	2026-06-05 11:31:33.223385	\N	\N
 9	Rajesh	kirubahar@nissigrid.com	Rajesh G	$2b$12$yr02EF791zI/wDtCORcl.Ow6SeO06ZMzyfT2TC6gzWKqlL3S6hXjW	t	f	f	2026-06-01 10:47:27.257166	2026-06-05 11:31:33.223409	CIVIL	\N
 3	epadmin	ilangkumaran@nissigrid.com	EastPoint Admin	$2b$12$S09mQhX7HnOj5dVjQbhpiOES5X9IfCfok3pxHldv8ODyTrOCpVC6G	t	f	f	2026-05-15 10:52:51.952583	2026-06-17 11:45:12.949466	\N	\N
 5	grmanager	samson@grinfra.com	Samson	$2b$12$zsXuU.M1LB1lJ.XM24/ve.KcSZL3oxjOyeqzRzwD/4zwnYMk9wr4u	t	f	f	2026-05-27 16:17:53.070455	2026-06-17 12:05:27.493476	HEALTH 	\N
@@ -15700,6 +15855,7 @@ COPY public.users (id, username, email, full_name, hashed_password, is_active, i
 34	Bala	Bala@nissigrid.com	Bala	$2b$12$HkIhDmNUX81qcbRv4xsK0O20ydG56hzlRc957T2EVG3V5xAiUeLWW	t	f	f	2026-06-18 12:56:37.894131	2026-06-18 12:56:37.894144	\N	\N
 35	Ravi	ravi@nissigrid.com	Ravi	$2b$12$vX3Vfk3pCjoJKYN4ysARVO7XWE8mLqo/zKBKjbOQS1fumt/EBrT1S	t	f	f	2026-06-18 12:58:55.586339	2026-06-18 12:58:55.586352	\N	\N
 36	ntadmin	ku699444mar@gmail.com	Newtest Admin	$2b$12$oXSG73bVsEk7MU4QacpW9O5R54VYO/5W3ism7L9NmjjM7MFhDLxFq	t	f	f	2026-07-03 12:43:37.512671	2026-07-03 12:43:37.512684	\N	\N
+2	admin	pradnesh@nissigrid.com	NG Admin	$2b$12$4ftTuLMHa8t89FRB8q1cXudA/JE8XMZW6TyavLGrjdrefD8S5QEBG	t	f	f	2026-05-15 10:39:02.648701	2026-07-06 12:03:52.456418	\N	\N
 \.
 
 
@@ -16132,24 +16288,44 @@ COPY public.warehouses (id, tenant_id, site_id, name, code, project_id, warehous
 
 
 --
+-- Data for Name: write_off_items; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.write_off_items (id, write_off_id, material_id, warehouse_id, quantity, rate, amount) FROM stdin;
+1	1	2564	62	5	16526.16	82630.8
+2	2	3507	62	2	4349	8698
+\.
+
+
+--
+-- Data for Name: write_offs; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.write_offs (id, tenant_id, site_id, write_off_number, date, reason, status, current_approval_level, created_by_id, approved_by_id, approved_at, is_deleted, created_at, updated_at, write_off_type, attachment_url) FROM stdin;
+1	2	2	WO-00001	2026-07-07	abc	Approved	1	3	3	2026-07-07 12:06:54.88135	f	2026-07-07 17:26:23.808796	2026-07-07 17:36:54.944556	Damaged in Handling	/api/uploads/write_offs/2/20260707_115607_0acc3d0a.png
+2	2	2	WO-00002	2026-07-07	abc	Rejected	1	3	\N	\N	f	2026-07-07 17:39:07.972636	2026-07-07 17:39:36.534369	Damaged in Handling	/api/uploads/write_offs/2/20260707_120855_021953de.png
+\.
+
+
+--
 -- Name: alerts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.alerts_id_seq', 42, true);
+SELECT pg_catalog.setval('public.alerts_id_seq', 44, true);
 
 
 --
 -- Name: approval_flows_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.approval_flows_id_seq', 58, true);
+SELECT pg_catalog.setval('public.approval_flows_id_seq', 64, true);
 
 
 --
 -- Name: audit_logs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.audit_logs_id_seq', 388, true);
+SELECT pg_catalog.setval('public.audit_logs_id_seq', 405, true);
 
 
 --
@@ -16212,7 +16388,7 @@ SELECT pg_catalog.setval('public.departments_id_seq', 330, true);
 -- Name: document_sequences_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.document_sequences_id_seq', 92, true);
+SELECT pg_catalog.setval('public.document_sequences_id_seq', 93, true);
 
 
 --
@@ -16247,14 +16423,14 @@ SELECT pg_catalog.setval('public.gate_passes_id_seq', 22, true);
 -- Name: grn_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.grn_id_seq', 208, true);
+SELECT pg_catalog.setval('public.grn_id_seq', 211, true);
 
 
 --
 -- Name: grn_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.grn_items_id_seq', 511, true);
+SELECT pg_catalog.setval('public.grn_items_id_seq', 516, true);
 
 
 --
@@ -16345,7 +16521,7 @@ SELECT pg_catalog.setval('public.organizations_id_seq', 4, true);
 -- Name: password_reset_tokens_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.password_reset_tokens_id_seq', 7, true);
+SELECT pg_catalog.setval('public.password_reset_tokens_id_seq', 8, true);
 
 
 --
@@ -16366,35 +16542,35 @@ SELECT pg_catalog.setval('public.purchase_order_approvals_id_seq', 50, true);
 -- Name: purchase_order_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_order_items_id_seq', 617, true);
+SELECT pg_catalog.setval('public.purchase_order_items_id_seq', 662, true);
 
 
 --
 -- Name: purchase_orders_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_orders_id_seq', 243, true);
+SELECT pg_catalog.setval('public.purchase_orders_id_seq', 244, true);
 
 
 --
 -- Name: purchase_request_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_request_approvals_id_seq', 26, true);
+SELECT pg_catalog.setval('public.purchase_request_approvals_id_seq', 32, true);
 
 
 --
 -- Name: purchase_request_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_request_items_id_seq', 604, true);
+SELECT pg_catalog.setval('public.purchase_request_items_id_seq', 619, true);
 
 
 --
 -- Name: purchase_requests_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_requests_id_seq', 202, true);
+SELECT pg_catalog.setval('public.purchase_requests_id_seq', 203, true);
 
 
 --
@@ -16443,7 +16619,7 @@ SELECT pg_catalog.setval('public.quotation_requests_id_seq', 198, true);
 -- Name: role_permissions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.role_permissions_id_seq', 1137, true);
+SELECT pg_catalog.setval('public.role_permissions_id_seq', 1179, true);
 
 
 --
@@ -16471,7 +16647,7 @@ SELECT pg_catalog.setval('public.sites_id_seq', 4, true);
 -- Name: stock_ledger_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.stock_ledger_id_seq', 4258, true);
+SELECT pg_catalog.setval('public.stock_ledger_id_seq', 4264, true);
 
 
 --
@@ -16577,6 +16753,20 @@ SELECT pg_catalog.setval('public.vendors_id_seq', 64, true);
 --
 
 SELECT pg_catalog.setval('public.warehouses_id_seq', 73, true);
+
+
+--
+-- Name: write_off_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.write_off_items_id_seq', 2, true);
+
+
+--
+-- Name: write_offs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.write_offs_id_seq', 2, true);
 
 
 --
@@ -17316,6 +17506,14 @@ ALTER TABLE ONLY public.warehouses
 
 
 --
+-- Name: write_offs uq_write_off_per_tenant; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.write_offs
+    ADD CONSTRAINT uq_write_off_per_tenant UNIQUE (tenant_id, write_off_number);
+
+
+--
 -- Name: user_role_assignments user_role_assignments_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -17377,6 +17575,22 @@ ALTER TABLE ONLY public.vendors
 
 ALTER TABLE ONLY public.warehouses
     ADD CONSTRAINT warehouses_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: write_off_items write_off_items_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.write_off_items
+    ADD CONSTRAINT write_off_items_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: write_offs write_offs_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.write_offs
+    ADD CONSTRAINT write_offs_pkey PRIMARY KEY (id);
 
 
 --
@@ -17944,6 +18158,27 @@ CREATE INDEX ix_vendors_id ON public.vendors USING btree (id);
 --
 
 CREATE INDEX ix_warehouses_id ON public.warehouses USING btree (id);
+
+
+--
+-- Name: ix_write_off_items_id; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX ix_write_off_items_id ON public.write_off_items USING btree (id);
+
+
+--
+-- Name: ix_write_offs_id; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX ix_write_offs_id ON public.write_offs USING btree (id);
+
+
+--
+-- Name: ix_write_offs_write_off_number; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX ix_write_offs_write_off_number ON public.write_offs USING btree (write_off_number);
 
 
 --
@@ -19803,6 +20038,62 @@ ALTER TABLE ONLY public.warehouses
 
 
 --
+-- Name: write_off_items write_off_items_material_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.write_off_items
+    ADD CONSTRAINT write_off_items_material_id_fkey FOREIGN KEY (material_id) REFERENCES public.materials(id) ON DELETE CASCADE;
+
+
+--
+-- Name: write_off_items write_off_items_warehouse_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.write_off_items
+    ADD CONSTRAINT write_off_items_warehouse_id_fkey FOREIGN KEY (warehouse_id) REFERENCES public.warehouses(id);
+
+
+--
+-- Name: write_off_items write_off_items_write_off_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.write_off_items
+    ADD CONSTRAINT write_off_items_write_off_id_fkey FOREIGN KEY (write_off_id) REFERENCES public.write_offs(id) ON DELETE CASCADE;
+
+
+--
+-- Name: write_offs write_offs_approved_by_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.write_offs
+    ADD CONSTRAINT write_offs_approved_by_id_fkey FOREIGN KEY (approved_by_id) REFERENCES public.users(id);
+
+
+--
+-- Name: write_offs write_offs_created_by_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.write_offs
+    ADD CONSTRAINT write_offs_created_by_id_fkey FOREIGN KEY (created_by_id) REFERENCES public.users(id);
+
+
+--
+-- Name: write_offs write_offs_site_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.write_offs
+    ADD CONSTRAINT write_offs_site_id_fkey FOREIGN KEY (site_id) REFERENCES public.sites(id) ON DELETE CASCADE;
+
+
+--
+-- Name: write_offs write_offs_tenant_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.write_offs
+    ADD CONSTRAINT write_offs_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES public.tenants(id) ON DELETE CASCADE;
+
+
+--
 -- Name: SCHEMA public; Type: ACL; Schema: -; Owner: postgres
 --
 
@@ -19814,5 +20105,5 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict yod7eZgmsOTEEeKHdTuqWbbBmX30d66OVL7bJzD0UAtUKhjXmzXhEqXOT2xlPS8
+\unrestrict DAuNn6sH1sRJ0J6C6MZ1iDe5UfhELLHLuYI3yVjoQ3smffcjwf96G5EVOAFndi4
 

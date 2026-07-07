@@ -35,6 +35,7 @@ import GRNPage from './pages/GRN';
 import MaterialIssue from './pages/MaterialIssue';
 import Returns from './pages/Returns';
 import StockTransfers from './pages/StockTransfers';
+import WriteOffs from './pages/WriteOffs';
 import GatePasses from './pages/GatePasses';
 import PendingAcknowledgments from './pages/PendingAcknowledgments';
 import Inventory from './pages/Inventory';
@@ -133,6 +134,7 @@ function AppRoutes() {
         <Route path="pending-acknowledgments" element={<PendingAcknowledgments />} />
         <Route path="returns" element={<Returns />} />
         <Route path="transfers" element={<StockTransfers />} />
+        <Route path="write-offs" element={<WriteOffs />} />
         <Route path="gate-passes" element={<GatePasses />} />
         <Route path="inventory" element={<Inventory />} />
         <Route path="intelligence" element={<Intelligence />} />

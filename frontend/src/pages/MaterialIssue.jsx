@@ -566,7 +566,9 @@ export default function MaterialIssue() {
                     if (statusLabel === 'Pending') { statusColor = 'primary'; }
                     if (statusLabel === 'Partial') { statusColor = 'warning'; }
                   } else {
-                    if (statusLabel === 'Acknowledged') { statusColor = 'success'; }
+                    if (statusLabel === 'Draft') { statusColor = 'default'; }
+                    else if (statusLabel === 'Issued') { statusColor = 'success'; }
+                    else if (statusLabel === 'Acknowledged') { statusColor = 'success'; }
                     else { statusColor = 'success'; }
                   }
 

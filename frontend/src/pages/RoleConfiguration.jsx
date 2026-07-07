@@ -99,6 +99,11 @@ const MODULE_TREE = [
       { label: 'Stock Transfer', resource: 'transfers', extendedActions: [
         { key: 'can_transfer', label: 'Transfer Stock', color: '#3B82F6' },
       ]},
+      { label: 'Write Offs', resource: 'write_offs', extendedActions: [
+        { key: 'can_submit', label: 'Submit', color: '#3B82F6' },
+        { key: 'can_approve', label: 'Approve', color: '#10B981' },
+        { key: 'can_reject', label: 'Reject', color: '#EF4444' },
+      ]},
       { label: 'Gate Passes', resource: 'gate_passes', extendedActions: [
         { key: 'can_create', label: 'Create', color: '#3B82F6' },
         { key: 'can_print', label: 'Print', color: '#8B5CF6' },

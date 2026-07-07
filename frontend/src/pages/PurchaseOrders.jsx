@@ -532,12 +532,15 @@ export default function PurchaseOrders() {
         items: mappedItems
       };
 
+      let res;
       if (editingPOId) {
-        await api.put(`/api/procurement/po/${editingPOId}`, payload);
-        showMessage(`Purchase Order ${isDraft ? 'draft updated' : 'updated and submitted'}`, "Success", "success");
+        res = await api.put(`/api/procurement/po/${editingPOId}`, payload);
+        const poNumber = res?.data?.po_number || '';
+        showMessage(`Purchase Order ${poNumber} ${isDraft ? 'draft updated' : 'updated and submitted'}`.trim(), "Success", "success");
       } else {
-        await api.post('/api/procurement/po', payload);
-        showMessage(`Purchase Order ${isDraft ? 'draft saved' : 'created'}`, "Success", "success");
+        res = await api.post('/api/procurement/po', payload);
+        const poNumber = res?.data?.po_number || '';
+        showMessage(`Purchase Order ${poNumber} ${isDraft ? 'draft saved' : 'created'}`.trim(), "Success", "success");
       }
 
       setDialog(false);
@@ -582,7 +585,7 @@ export default function PurchaseOrders() {
   // Status helpers
   const statusColor = {
     'Draft': 'default', 'Submitted': 'info', 'Approved': 'success', 'Sent to Vendor': 'primary',
-    'Partially Received': 'warning', 'Closed': 'default', 'Short Closed': 'warning',
+    'Partially Received': 'warning', 'Closed': 'success', 'Short Closed': 'warning',
     'Rejected': 'error', 'Cancelled': 'default'
   };
 

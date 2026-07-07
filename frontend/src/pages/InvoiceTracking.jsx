@@ -197,7 +197,7 @@ export default function InvoiceTracking() {
     setLoading(false);
   };
 
-  const statusColor = { 'Pending': 'warning', 'Sent for Payment': 'info', 'Paid': 'success' };
+  const statusColor = { 'Draft': 'default', 'Submitted': 'info', 'Approved': 'success', 'Change Required': 'error', 'Pending': 'warning', 'Sent for Payment': 'info', 'Paid': 'success' };
 
   return (
     <Box>

@@ -1685,6 +1685,55 @@ class GatePassOut(BaseModel):
         from_attributes = True
 
 
+# == Write Off ==
+
+class WriteOffItemBase(BaseModel):
+    material_id: int
+    warehouse_id: Optional[int] = None
+    quantity: float = Field(..., gt=0)
+    rate: float = 0
+    amount: float = 0
+
+class WriteOffItemOut(WriteOffItemBase):
+    id: int
+    material_name: Optional[str] = None
+    material_code: Optional[str] = None
+    uom_name: Optional[str] = None
+    warehouse_name: Optional[str] = None
+    class Config:
+        from_attributes = True
+
+class WriteOffBase(BaseModel):
+    date: date
+    reason: str
+    write_off_type: Optional[str] = None
+    attachment_url: Optional[str] = None
+    items: List[WriteOffItemBase] = []
+
+class WriteOffCreate(WriteOffBase):
+    pass
+
+class WriteOffOut(BaseModel):
+    id: int
+    write_off_number: str
+    date: date
+    reason: str
+    write_off_type: Optional[str] = None
+    attachment_url: Optional[str] = None
+    status: str
+    current_approval_level: int
+    created_by_id: int
+    created_by_name: Optional[str] = None
+    approved_by_id: Optional[int] = None
+    approved_by_name: Optional[str] = None
+    approved_at: Optional[datetime] = None
+    created_at: datetime
+    can_user_approve: Optional[bool] = False
+    items: List[WriteOffItemOut] = []
+    class Config:
+        from_attributes = True
+
+
 # == Material Limits ==
 
 class DepartmentMaterialLimitBase(BaseModel):

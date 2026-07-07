@@ -182,7 +182,7 @@ export default function Invoices() {
     }
   };
 
-  const statusColor = { 'Draft': 'default', 'Submitted': 'warning', 'Approved': 'success', 'Change Required': 'error' };
+  const statusColor = { 'Draft': 'default', 'Submitted': 'info', 'Approved': 'success', 'Change Required': 'error', 'Pending': 'warning', 'Sent for Payment': 'info', 'Paid': 'success' };
 
   const handleSort = (key) => {
     let direction = 'asc';

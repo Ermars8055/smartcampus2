@@ -12,7 +12,7 @@ import {
   ExpandLess, ExpandMore, Logout, Person, Store, Assignment,
   SwapHoriz, Undo, Security, ReceiptLong, AccountTree, Category,
   Build, ChevronLeft, RequestQuote, Business, AssignmentTurnedIn, Straighten,
-  AccountBalance, Campaign
+  AccountBalance, Campaign, RemoveCircleOutline
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
@@ -48,6 +48,7 @@ const menuItems = [
       { text: 'Material Issue', icon: <Inventory2 />, path: '/issues', resource: 'issues' },
       { text: 'Returns', icon: <Undo />, path: '/returns', resource: 'returns' },
       { text: 'Stock Transfer', icon: <SwapHoriz />, path: '/transfers', resource: 'transfers' },
+      { text: 'Write Off', icon: <RemoveCircleOutline />, path: '/write-offs', resource: 'write_offs' },
       { text: 'Gate Pass', icon: <LocalShipping />, path: '/gate-passes', resource: 'gate_passes' },
       { text: 'Issue Acknowledgement', icon: <AssignmentTurnedIn />, path: '/pending-acknowledgments', resource: 'acknowledgements' },
     ]

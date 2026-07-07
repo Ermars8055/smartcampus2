@@ -29,6 +29,7 @@ ADMIN_RESOURCES = {
     "returns": ["can_return", "receive"],
     "transfers": ["can_transfer"],
     "gate_passes": ["can_create", "can_print"],
+    "write_offs": ["can_create", "can_submit", "can_approve", "can_reject"],
     "acknowledgements": ["can_acknowledge"],
     "inventory": [],
     "complaints": [],

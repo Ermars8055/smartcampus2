@@ -115,9 +115,10 @@ export default function GateEntry() {
         driver_name: form.delivery_person_name || '', // Keep driver_name synced if needed
       };
 
-      await api.post('/api/gate-entries', payload);
+      const res = await api.post('/api/gate-entries', payload);
       setDialog(false); load();
-      showMessage('Gate Entry recorded successfully!', 'Success', 'success');
+      const entryNum = res?.data?.entry_number || '';
+      showMessage(`Gate Entry ${entryNum} recorded successfully!`.trim(), 'Success', 'success');
     } catch (err) { 
       const detail = err.response?.data?.detail;
       showMessage(typeof detail === 'object' ? JSON.stringify(detail) : (detail || 'Error'), 'Error', 'error'); 

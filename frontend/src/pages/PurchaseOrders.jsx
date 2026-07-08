@@ -206,7 +206,7 @@ export default function PurchaseOrders() {
   const [tabValue, setTabValue] = useState(searchParams.get('tab') || 'Draft');
   const [editingPOId, setEditingPOId] = useState(null);
   const [form, setForm] = useState({
-    po_number: '', vendor_id: '', project_id: '', delivery_date: dayjs().add(14, 'day'), terms: '', annexure: '', po_type: 'Informal', items: [{ material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }]
+    po_number: '', vendor_id: '', project_id: '', delivery_date: null, terms: '', annexure: '', po_type: 'Informal', items: [{ material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }]
   });
 
 
@@ -472,7 +472,11 @@ export default function PurchaseOrders() {
     const newErrors = {};
     if (!form.vendor_id) newErrors.vendor_id = "Please select a Vendor.";
     if (!form.project_id) newErrors.project_id = "Project is required.";
-    if (!form.delivery_date) newErrors.delivery_date = "Delivery Date is required.";
+    if (!form.delivery_date) {
+      newErrors.delivery_date = "Delivery Date is required.";
+    } else if (dayjs(form.delivery_date).isBefore(dayjs(), 'day')) {
+      newErrors.delivery_date = "Delivery Date cannot be in the past.";
+    }
     if (!form.terms || !form.terms.trim()) newErrors.terms = "Terms and Conditions are mandatory.";
 
     if (form.items.length === 0) {
@@ -1583,6 +1587,7 @@ export default function PurchaseOrders() {
               value={form.delivery_date ? dayjs(form.delivery_date) : null}
               onChange={val => setForm({ ...form, delivery_date: val })}
               format="DD-MMM-YYYY"
+              localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
               disablePast
               slotProps={{
                 textField: {

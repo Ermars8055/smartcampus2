@@ -429,12 +429,12 @@ export default function IssueSummaryReport() {
           <Grid item xs={12} sm={6} md={4} lg={2}>
             <DatePicker label="From Date" value={filters.fromDate} onChange={d => setFilters({ ...filters, fromDate: d })} 
               slotProps={{ textField: { size: "small", fullWidth: true } }} 
-              format="DD-MMM-YYYY" />
+              format="DD-MMM-YYYY" localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }} />
           </Grid>
           <Grid item xs={12} sm={6} md={4} lg={2}>
             <DatePicker label="To Date" value={filters.toDate} onChange={d => setFilters({ ...filters, toDate: d })} 
               slotProps={{ textField: { size: "small", fullWidth: true } }} 
-              format="DD-MMM-YYYY" />
+              format="DD-MMM-YYYY" localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }} />
           </Grid>
           <Grid item xs={12} sm={6} md={4} lg={3}>
             <FormControl size="small" fullWidth sx={{ minWidth: 150 }}>

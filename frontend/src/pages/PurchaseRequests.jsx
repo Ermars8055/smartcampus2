@@ -92,7 +92,7 @@ export default function PurchaseRequests() {
   // Multi-item PR form
   const [form, setForm] = useState({
     institution_id: '', project_id: '', building_id: '', department_name: '',
-    required_date: dayjs().add(14, 'day'), remarks: '',
+    required_date: null, remarks: '',
     items: [{ material_id: '', quantity: '' }]
   });
 
@@ -221,7 +221,11 @@ export default function PurchaseRequests() {
       const newErrors = {};
       if (!form.project_id) newErrors.project_id = "Institution is required";
       if (!form.department_name) newErrors.department_name = "Department is required";
-      if (!form.required_date) newErrors.required_date = "Required Date is required";
+      if (!form.required_date) {
+        newErrors.required_date = "Required Date is required";
+      } else if (dayjs(form.required_date).isBefore(dayjs(), 'day')) {
+        newErrors.required_date = "Required Date cannot be in the past";
+      }
 
       if (form.items.length === 0) {
         newErrors.items = "Please add at least one material item.";
@@ -535,7 +539,7 @@ export default function PurchaseRequests() {
 
               setForm({
                 institution_id: defaultInst, project_id: defaultProj, building_id: '', department_name: defaultDept,
-                required_date: dayjs().add(14, 'day'), remarks: '',
+                required_date: null, remarks: '',
                 items: [{ material_id: '', quantity: '' }]
               });
 
@@ -704,7 +708,7 @@ export default function PurchaseRequests() {
                       project_id: pr.project_id || '',
                       building_id: pr.building_id || '',
                       department_name: pr.department_name || '',
-                      required_date: pr.required_date ? dayjs(pr.required_date) : dayjs().add(14, 'day'),
+                      required_date: pr.required_date ? dayjs(pr.required_date) : null,
                       remarks: pr.remarks || '',
                       items: pr.items && pr.items.length > 0 ? pr.items.map(it => ({ material_id: it.material_id, quantity: it.quantity })) : [{ material_id: '', quantity: '' }]
                     });
@@ -1041,9 +1045,11 @@ export default function PurchaseRequests() {
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr 1fr' }, gap: 2, pt: 1, mb: 2 }}>
             <DatePicker
               label="Required Date"
-              value={dayjs(form.required_date)}
+              value={form.required_date ? dayjs(form.required_date) : null}
               onChange={val => setForm({ ...form, required_date: val })}
               format="DD-MMM-YYYY"
+              disablePast
+              localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
               slotProps={{
                 textField: {
                   fullWidth: true,
@@ -1269,6 +1275,7 @@ export default function PurchaseRequests() {
                       value={dayjs(convertDialog.delivery_date)}
                       onChange={val => setConvertDialog({ ...convertDialog, delivery_date: val })}
                       format="DD-MMM-YYYY"
+                      localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
                       slotProps={{
                         textField: {
                           fullWidth: true,

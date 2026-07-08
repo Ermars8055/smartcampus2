@@ -47,7 +47,6 @@ const Quotations = () => {
   // Create QR state
   const [createQRDialogOpen, setCreateQRDialogOpen] = useState(false);
   const [newQR, setNewQR] = useState({
-    project_id: '',
     required_date: '',
     remarks: '',
     pr_ids: [],
@@ -59,7 +58,7 @@ const Quotations = () => {
 
 
   // Selected QR details
-  const [listFilter, setListFilter] = useState('All');
+  const [listFilter, setListFilter] = useState('Draft');
   const [selectedQR, setSelectedQR] = useState(null);
   const [detailSection, setDetailSection] = useState(null); // 'quotations', 'comparison', 'approval'
   const [viewingQR, setViewingQR] = useState(null);
@@ -111,7 +110,11 @@ const Quotations = () => {
   }, [newQR]);
 
   useEffect(() => {
-    api.get('/api/terms').then(r => setTermsTemplates(r.data));
+    api.get('/api/terms').then(r => setTermsTemplates(r.data)).catch(console.error);
+    api.get('/api/projects').then(res => setProjects(Array.isArray(res.data) ? res.data : [])).catch(console.error);
+    api.get('/api/vendors').then(res => setVendors(Array.isArray(res.data) ? res.data : [])).catch(console.error);
+    api.get('/api/materials', { params: { limit: 10000 } }).then(res => setMaterials(res.data?.items || (Array.isArray(res.data) ? res.data : []))).catch(console.error);
+    api.get('/api/procurement/pr?status=Approved').then(res => setApprovedPrs(Array.isArray(res.data) ? res.data : [])).catch(console.error);
   }, []);
 
   useEffect(() => {
@@ -144,18 +147,8 @@ const Quotations = () => {
     try {
       if (!selectedQR) {
         // Master List Mode
-        const [qrsRes, projRes, vendRes, matRes, prRes] = await Promise.all([
-          api.get('/api/quotations/requests'),
-          api.get('/api/projects'),
-          api.get('/api/vendors'),
-          api.get('/api/materials', { params: { limit: 10000 } }),
-          api.get('/api/procurement/pr?status=Approved') // Only approved PRs for link field
-        ]);
+        const qrsRes = await api.get('/api/quotations/requests');
         setQrs(Array.isArray(qrsRes.data) ? qrsRes.data : []);
-        setProjects(Array.isArray(projRes.data) ? projRes.data : []);
-        setVendors(Array.isArray(vendRes.data) ? vendRes.data : []);
-        setMaterials(matRes.data?.items || (Array.isArray(matRes.data) ? matRes.data : []));
-        setApprovedPrs(Array.isArray(prRes.data) ? prRes.data : []);
       } else {
         // Detail / Workflow Mode
         const [qrRes] = await Promise.all([
@@ -208,14 +201,17 @@ const Quotations = () => {
   const handleCreateQR = async () => {
     const newErrors = {};
 
-    if (!newQR.project_id && projects.length > 0) {
-      newErrors.project_id = "Project is required.";
-    }
     if (!newQR.items || newQR.items.length === 0) {
       newErrors.items = "Please link at least one PR or add manual materials.";
     }
     if (!newQR.vendor_ids || newQR.vendor_ids.length < 2) {
       newErrors.vendor_ids = "Please invite at least 2 vendors to ensure competitive pricing.";
+    }
+
+    if (!newQR.required_date) {
+      newErrors.required_date = "Required Date is required.";
+    } else if (dayjs(newQR.required_date).isBefore(dayjs(), 'day')) {
+      newErrors.required_date = "Required Date cannot be in the past.";
     }
 
     setErrors(newErrors);
@@ -226,7 +222,7 @@ const Quotations = () => {
     try {
       const payload = {
         ...newQR,
-        project_id: newQR.project_id || projects[0]?.id,
+        project_id: projects.length > 0 ? projects[0].id : 1,
         items: (newQR.items || []).filter(it => !it.pr_id),
         required_date: newQR.required_date || null,
         remarks: newQR.remarks || null
@@ -235,7 +231,7 @@ const Quotations = () => {
       const qrNumber = res?.data?.qr_number || '';
       showMessage(`Quotation Request ${qrNumber} created successfully!`.trim(), 'Success', 'success');
       setCreateQRDialogOpen(false);
-      setNewQR({ project_id: projects[0]?.id || '', required_date: '', remarks: '', pr_ids: [], items: [], vendor_ids: [] });
+      setNewQR({ required_date: '', remarks: '', pr_ids: [], items: [], vendor_ids: [] });
       setErrors({});
       fetchData();
     } catch (err) {
@@ -655,7 +651,7 @@ const Quotations = () => {
                 scrollButtons="auto"
                 sx={{ borderBottom: 1, borderColor: 'divider' }}
               >
-                {['All', 'Draft', 'Requested', 'Received', 'Entered', 'Compared', 'Approved', 'Ordered'].map(filter => (
+                {['Draft', 'Requested', 'Received', 'Entered', 'Compared', 'Approved', 'Ordered', 'All'].map(filter => (
                   <Tab
                     key={filter}
                     value={filter}
@@ -1385,7 +1381,7 @@ const Quotations = () => {
                 mt: 2
               }}
             >
-              {/* Row 1: Project & Date */}
+              {/* Row 1: Required Date */}
               <Box>
                 <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', mb: 0.5, display: 'block', ml: 0.5, textTransform: 'uppercase' }}>
                   Required Date
@@ -1395,10 +1391,14 @@ const Quotations = () => {
                   value={newQR.required_date ? dayjs(newQR.required_date) : null}
                   onChange={(val) => setNewQR({ ...newQR, required_date: val ? val.format('YYYY-MM-DD') : '' })}
                   format="DD-MMM-YYYY"
+                  disablePast
+                  localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
                   slotProps={{
                     textField: {
                       fullWidth: true,
-                      placeholder: "DD-MMM-YYYY"
+                      placeholder: "DD-MMM-YYYY",
+                      error: !!errors.required_date,
+                      helperText: errors.required_date
                     }
                   }}
                 />
@@ -1665,6 +1665,7 @@ const Quotations = () => {
                   value={newQuote.quotation_date ? dayjs(newQuote.quotation_date) : null}
                   onChange={(val) => setNewQuote({ ...newQuote, quotation_date: val ? val.format('YYYY-MM-DD') : '' })}
                   format="DD-MMM-YYYY"
+                  localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
                   disableFuture
                   slotProps={{
                     textField: {

@@ -467,8 +467,8 @@ export default function RegisterInvoice() {
                   value={form.invoice_date ? dayjs(form.invoice_date) : null}
                   onChange={(newValue) => setForm({ ...form, invoice_date: newValue ? newValue.format('YYYY-MM-DD') : '' })}
                   disableFuture
-                  localeText={{ fieldYearPlaceholder: () => 'yyyy', fieldMonthPlaceholder: () => 'mmm', fieldDayPlaceholder: () => 'dd' }}
-                  slotProps={{ textField: { fullWidth: true, size: 'small', required: true, error: !!errors.invoice_date, helperText: errors.invoice_date, InputProps: { placeholder: 'dd-mmm-yyyy' }, inputProps: { placeholder: 'dd-mmm-yyyy' }, InputLabelProps: { shrink: true } } }}
+                  localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
+                  slotProps={{ textField: { fullWidth: true, size: 'small', required: true, error: !!errors.invoice_date, helperText: errors.invoice_date, InputProps: { placeholder: 'DD-MMM-YYYY' }, inputProps: { placeholder: 'DD-MMM-YYYY' }, InputLabelProps: { shrink: true } } }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -558,8 +558,8 @@ export default function RegisterInvoice() {
                   value={form.delivery_note_date ? dayjs(form.delivery_note_date) : null}
                   onChange={(newValue) => setForm({ ...form, delivery_note_date: newValue ? newValue.format('YYYY-MM-DD') : '' })}
                   disableFuture
-                  localeText={{ fieldYearPlaceholder: () => 'yyyy', fieldMonthPlaceholder: () => 'mmm', fieldDayPlaceholder: () => 'dd' }}
-                  slotProps={{ textField: { fullWidth: true, size: 'small', error: !!errors.delivery_note_date, helperText: errors.delivery_note_date, InputProps: { placeholder: 'dd-mmm-yyyy' }, inputProps: { placeholder: 'dd-mmm-yyyy' }, InputLabelProps: { shrink: true } } }}
+                  localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
+                  slotProps={{ textField: { fullWidth: true, size: 'small', error: !!errors.delivery_note_date, helperText: errors.delivery_note_date, InputProps: { placeholder: 'DD-MMM-YYYY' }, inputProps: { placeholder: 'DD-MMM-YYYY' }, InputLabelProps: { shrink: true } } }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -621,8 +621,8 @@ export default function RegisterInvoice() {
                   value={form.ack_date ? dayjs(form.ack_date) : null}
                   onChange={(newValue) => setForm({ ...form, ack_date: newValue ? newValue.format('YYYY-MM-DD') : '' })}
                   disableFuture
-                  localeText={{ fieldYearPlaceholder: () => 'yyyy', fieldMonthPlaceholder: () => 'mmm', fieldDayPlaceholder: () => 'dd' }}
-                  slotProps={{ textField: { fullWidth: true, size: 'small', InputProps: { placeholder: 'dd-mmm-yyyy' }, inputProps: { placeholder: 'dd-mmm-yyyy' }, InputLabelProps: { shrink: true } } }}
+                  localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
+                  slotProps={{ textField: { fullWidth: true, size: 'small', InputProps: { placeholder: 'DD-MMM-YYYY' }, inputProps: { placeholder: 'DD-MMM-YYYY' }, InputLabelProps: { shrink: true } } }}
                 />
               </Grid>
             </Grid>
@@ -644,8 +644,8 @@ export default function RegisterInvoice() {
                   value={form.reference_date ? dayjs(form.reference_date) : null}
                   onChange={(newValue) => setForm({ ...form, reference_date: newValue ? newValue.format('YYYY-MM-DD') : '' })}
                   disableFuture
-                  localeText={{ fieldYearPlaceholder: () => 'yyyy', fieldMonthPlaceholder: () => 'mmm', fieldDayPlaceholder: () => 'dd' }}
-                  slotProps={{ textField: { fullWidth: true, size: 'small', error: !!errors.reference_date, helperText: errors.reference_date, InputProps: { placeholder: 'dd-mmm-yyyy' }, inputProps: { placeholder: 'dd-mmm-yyyy' }, InputLabelProps: { shrink: true } } }}
+                  localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
+                  slotProps={{ textField: { fullWidth: true, size: 'small', error: !!errors.reference_date, helperText: errors.reference_date, InputProps: { placeholder: 'DD-MMM-YYYY' }, inputProps: { placeholder: 'DD-MMM-YYYY' }, InputLabelProps: { shrink: true } } }}
                 />
               </Grid>
               <Grid item xs={12}>

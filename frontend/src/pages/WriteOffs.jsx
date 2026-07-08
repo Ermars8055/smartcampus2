@@ -6,7 +6,7 @@ import {
   DialogContent, DialogActions, Grid, Select, FormControl,
   InputLabel, IconButton, Paper, InputAdornment, MenuItem, Tooltip
 } from '@mui/material';
-import { Add, Delete, Close, RemoveCircleOutline, Warehouse, Comment, Visibility, CheckCircle, Cancel } from '@mui/icons-material';
+import { Add, Delete, Close, RemoveCircleOutline, Warehouse, Comment, AssignmentTurnedIn, CheckCircle, Cancel } from '@mui/icons-material';
 import api, { getFileUrl } from '../services/api';
 import MaterialSelect from '../components/MaterialSelect';
 import { useAuth } from '../context/AuthContext';
@@ -137,7 +137,24 @@ export default function WriteOffs() {
   const handleAction = async (id, action) => {
     try {
       await api.post(`/api/write-offs/${id}/${action}`);
-      showMessage(`Write Off ${action}d successfully`, 'Success', 'success');
+      
+      let msg = '';
+      let title = 'Success';
+      let severity = 'success';
+
+      if (action === 'reject') {
+        msg = 'Write Off rejected successfully';
+        title = 'Rejected';
+        severity = 'info';
+      } else if (action === 'approve') {
+        msg = 'Write Off approved successfully';
+      } else if (action === 'submit') {
+        msg = 'Write Off submitted successfully';
+      } else {
+        msg = `Write Off ${action}d successfully`;
+      }
+
+      showMessage(msg, title, severity);
       setViewModal({ open: false, writeOff: null });
       load();
     } catch (err) {
@@ -209,9 +226,27 @@ export default function WriteOffs() {
                       <Chip label={wo.status} size="small" color={getStatusColor(wo.status)} variant="outlined" sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} />
                     </TableCell>
                     <TableCell align="right" sx={{ px: 2, whiteSpace: 'nowrap' }}>
-                      <IconButton size="small" onClick={(e) => { e.stopPropagation(); setViewModal({ open: true, writeOff: wo }); }} sx={{ color: '#64748B' }}>
-                        <Visibility fontSize="small" />
-                      </IconButton>
+                      {wo.status === 'Draft' && (
+                        <Tooltip title="Submit">
+                          <IconButton size="small" color="primary" onClick={(e) => { e.stopPropagation(); setViewModal({ open: true, writeOff: wo }); }}>
+                            <AssignmentTurnedIn fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                      {wo.status === 'Submitted' && wo.can_user_approve && hasAction('write_offs', 'can_approve') && (
+                        <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+                          <Tooltip title="Reject">
+                            <IconButton size="small" color="error" onClick={(e) => { e.stopPropagation(); setViewModal({ open: true, writeOff: wo }); }}>
+                              <Cancel fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Approve">
+                            <IconButton size="small" color="success" onClick={(e) => { e.stopPropagation(); setViewModal({ open: true, writeOff: wo }); }}>
+                              <CheckCircle fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </Box>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}

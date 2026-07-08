@@ -426,11 +426,11 @@ export default function ReceiptSummaryReport() {
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6} md={2}>
             <DatePicker label="From Date" value={filters.fromDate} onChange={d => setFilters({ ...filters, fromDate: d })}
-              slotProps={{ textField: { size: "small", fullWidth: true } }} format="DD-MMM-YYYY" />
+              slotProps={{ textField: { size: "small", fullWidth: true } }} format="DD-MMM-YYYY" localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }} />
           </Grid>
           <Grid item xs={12} sm={6} md={2}>
             <DatePicker label="To Date" value={filters.toDate} onChange={d => setFilters({ ...filters, toDate: d })}
-              slotProps={{ textField: { size: "small", fullWidth: true } }} format="DD-MMM-YYYY" />
+              slotProps={{ textField: { size: "small", fullWidth: true } }} format="DD-MMM-YYYY" localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }} />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <FormControl size="small" fullWidth>

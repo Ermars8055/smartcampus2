@@ -389,6 +389,9 @@ export default function RegisterInvoice() {
 
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) {
+      const firstErrorField = Object.keys(newErrors)[0];
+      const el = document.getElementById(`field-${firstErrorField}`);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
       setConfirmSubmit(false);
       return;
     }
@@ -458,9 +461,10 @@ export default function RegisterInvoice() {
                 <TextField fullWidth label="Invoice Code" value={form.code || 'Auto-generated'} disabled size="small" />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField fullWidth label="Invoice No." value={form.invoice_number} onChange={e => setForm({ ...form, invoice_number: e.target.value })} required size="small" error={!!errors.invoice_number} helperText={errors.invoice_number} />
+                <TextField id="field-invoice_number" fullWidth label="Invoice No." value={form.invoice_number} onChange={e => setForm({ ...form, invoice_number: e.target.value })} required size="small" error={!!errors.invoice_number} helperText={errors.invoice_number} />
               </Grid>
               <Grid item xs={12} sm={6}>
+                <Box id="field-invoice_date">
                 <DatePicker 
                   label="Invoice Date" 
                   format="DD-MMM-YYYY"
@@ -470,9 +474,10 @@ export default function RegisterInvoice() {
                   localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
                   slotProps={{ textField: { fullWidth: true, size: 'small', required: true, error: !!errors.invoice_date, helperText: errors.invoice_date, InputProps: { placeholder: 'DD-MMM-YYYY' }, inputProps: { placeholder: 'DD-MMM-YYYY' }, InputLabelProps: { shrink: true } } }}
                 />
+                </Box>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <FormControl fullWidth required size="small" error={!!errors.vendor_id}>
+                <FormControl id="field-vendor_id" fullWidth required size="small" error={!!errors.vendor_id}>
                   <InputLabel>Vendor</InputLabel>
                   <Select 
                     value={form.vendor_id} 
@@ -552,6 +557,7 @@ export default function RegisterInvoice() {
                 <TextField fullWidth label="Delivery Note" value={form.delivery_note} onChange={e => setForm({ ...form, delivery_note: e.target.value })} size="small" />
               </Grid>
               <Grid item xs={12} sm={6}>
+                <Box id="field-delivery_note_date">
                 <DatePicker 
                   label="Delivery Note Date" 
                   format="DD-MMM-YYYY"
@@ -561,6 +567,7 @@ export default function RegisterInvoice() {
                   localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
                   slotProps={{ textField: { fullWidth: true, size: 'small', error: !!errors.delivery_note_date, helperText: errors.delivery_note_date, InputProps: { placeholder: 'DD-MMM-YYYY' }, inputProps: { placeholder: 'DD-MMM-YYYY' }, InputLabelProps: { shrink: true } } }}
                 />
+                </Box>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField fullWidth label="Dispatch Doc No." value={form.dispatch_doc_number} onChange={e => setForm({ ...form, dispatch_doc_number: e.target.value })} size="small" />
@@ -580,7 +587,7 @@ export default function RegisterInvoice() {
 
         {/* Right Column - Upload & References */}
         <Grid item xs={12} md={4}>
-          <Card sx={{ p: 3, mb: 3 }}>
+          <Card id="field-scan_url" sx={{ p: 3, mb: 3 }}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>Invoice Scan</Typography>
             <Box sx={{ p: 2, border: '2px dashed #CBD5E1', borderRadius: 2, bgcolor: '#F8FAFC', textAlign: 'center' }}>
               {form.scan_url ? (
@@ -638,6 +645,7 @@ export default function RegisterInvoice() {
                 <TextField fullWidth label="Reference No." value={form.reference_number} onChange={e => setForm({ ...form, reference_number: e.target.value })} size="small" />
               </Grid>
               <Grid item xs={12}>
+                <Box id="field-reference_date">
                 <DatePicker 
                   label="Reference Date" 
                   format="DD-MMM-YYYY"
@@ -647,6 +655,7 @@ export default function RegisterInvoice() {
                   localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
                   slotProps={{ textField: { fullWidth: true, size: 'small', error: !!errors.reference_date, helperText: errors.reference_date, InputProps: { placeholder: 'DD-MMM-YYYY' }, inputProps: { placeholder: 'DD-MMM-YYYY' }, InputLabelProps: { shrink: true } } }}
                 />
+                </Box>
               </Grid>
               <Grid item xs={12}>
                 <FormControl fullWidth size="small">
@@ -667,7 +676,7 @@ export default function RegisterInvoice() {
       </Grid>
 
       {/* Item Details */}
-      <Card sx={{ p: 3, mb: 3 }}>
+      <Card id="field-items" sx={{ p: 3, mb: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
           <Typography variant="h6" sx={{ fontWeight: 600 }}>Item Details</Typography>
           {errors.items && <Typography color="error" variant="body2">{errors.items}</Typography>}
@@ -763,6 +772,7 @@ export default function RegisterInvoice() {
               </Grid>
               <Grid item xs={2}>
                 <TextField 
+                  id="field-transport_hsn"
                   fullWidth 
                   value={form.transport_hsn} 
                   onChange={e => {
@@ -820,7 +830,8 @@ export default function RegisterInvoice() {
                   fontWeight: 600, 
                   borderStyle: 'dashed', 
                   width: '100%', 
-                  color: '#64748b', 
+                  color: '#2563EB', 
+                  fontSize: '0.95rem',
                   borderColor: '#cbd5e1', 
                   '&:hover': { borderColor: '#94a3b8', bgcolor: '#f8fafc' } 
                 }}

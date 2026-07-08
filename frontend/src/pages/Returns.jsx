@@ -114,6 +114,9 @@ export default function Returns() {
 
       setErrors(newErrors);
       if (Object.keys(newErrors).length > 0) {
+        const firstErrorField = Object.keys(newErrors)[0];
+        const el = document.getElementById(`field-${firstErrorField}`);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
         return;
       }
 
@@ -284,7 +287,7 @@ export default function Returns() {
         <DialogContent sx={{ p: 3 }}>
           <Grid container spacing={2} sx={{ mb: 3, mt: 0.5 }}>
             <Grid item xs={12} sm={4}>
-              <FormControl fullWidth size="small" error={!!errors.warehouse_id}>
+              <FormControl id="field-warehouse_id" fullWidth size="small" error={!!errors.warehouse_id}>
                 <InputLabel>Target Store</InputLabel>
                 <Select
                   label="Target Store"
@@ -339,7 +342,7 @@ export default function Returns() {
 
           </Box>
 
-          <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2, mb: 2 }}>
+          <TableContainer id="field-items" component={Paper} variant="outlined" sx={{ borderRadius: 2, mb: 2 }}>
             <Table size="small">
               <TableHead sx={{ bgcolor: '#F8FAFC' }}>
                 <TableRow>
@@ -413,7 +416,8 @@ export default function Returns() {
                         fontWeight: 600, 
                         borderStyle: 'dashed', 
                         width: '100%', 
-                        color: '#64748b', 
+                        color: '#2563EB', 
+                        fontSize: '0.95rem',
                         borderColor: '#cbd5e1', 
                         '&:hover': { borderColor: '#94a3b8', bgcolor: '#f8fafc' } 
                       }}

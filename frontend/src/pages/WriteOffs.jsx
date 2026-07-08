@@ -86,7 +86,12 @@ export default function WriteOffs() {
       if (validItems.length === 0) newErrors.items = "Please add at least one material with quantity > 0";
 
       setErrors(newErrors);
-      if (Object.keys(newErrors).length > 0) return;
+      if (Object.keys(newErrors).length > 0) {
+        const firstErrorField = Object.keys(newErrors)[0];
+        const el = document.getElementById(`field-${firstErrorField}`);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
 
       const payload = {
         date: createModal.date,
@@ -283,7 +288,7 @@ export default function WriteOffs() {
               />
             </Grid>
             <Grid item xs={12} sm={4}>
-              <FormControl fullWidth size="small" required error={!!errors.warehouse_id}>
+              <FormControl id="field-warehouse_id" fullWidth size="small" required error={!!errors.warehouse_id}>
                 <InputLabel>Store</InputLabel>
                 <Select
                   label="Store"
@@ -297,7 +302,7 @@ export default function WriteOffs() {
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={4}>
-              <FormControl fullWidth size="small" required error={!!errors.write_off_type}>
+              <FormControl id="field-write_off_type" fullWidth size="small" required error={!!errors.write_off_type}>
                 <InputLabel>Type</InputLabel>
                 <Select
                   label="Type"
@@ -315,7 +320,7 @@ export default function WriteOffs() {
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
-                fullWidth size="small" label="Reason" required
+                id="field-reason" fullWidth size="small" label="Reason" required
                 value={createModal.reason}
                 onChange={e => setCreateModal({ ...createModal, reason: e.target.value })}
                 error={!!errors.reason}
@@ -343,7 +348,7 @@ export default function WriteOffs() {
 
           </Box>
 
-          <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2 }}>
+          <TableContainer id="field-items" component={Paper} variant="outlined" sx={{ borderRadius: 2 }}>
             <Table size="small">
               <TableHead sx={{ bgcolor: '#F8FAFC' }}>
                 <TableRow>
@@ -399,7 +404,8 @@ export default function WriteOffs() {
                         fontWeight: 600, 
                         borderStyle: 'dashed', 
                         width: '100%', 
-                        color: '#64748b', 
+                        color: '#2563EB', 
+                        fontSize: '0.95rem',
                         borderColor: '#cbd5e1', 
                         '&:hover': { borderColor: '#94a3b8', bgcolor: '#f8fafc' } 
                       }}

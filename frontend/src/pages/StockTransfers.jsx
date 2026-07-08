@@ -122,6 +122,9 @@ export default function StockTransfers() {
 
       setErrors(newErrors);
       if (Object.keys(newErrors).length > 0) {
+        const firstErrorField = Object.keys(newErrors)[0];
+        const el = document.getElementById(`field-${firstErrorField}`);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
         return;
       }
 
@@ -281,7 +284,7 @@ export default function StockTransfers() {
         <DialogContent sx={{ p: 3 }}>
           <Grid container spacing={2} sx={{ mb: 3, mt: 0.5 }}>
             <Grid item xs={12} sm={6}>
-              <FormControl fullWidth size="small" error={!!errors.from_warehouse_id}>
+              <FormControl id="field-from_warehouse_id" fullWidth size="small" error={!!errors.from_warehouse_id}>
                 <InputLabel>From Store</InputLabel>
                 <Select
                   label="From Store"
@@ -295,7 +298,7 @@ export default function StockTransfers() {
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
-              <FormControl fullWidth size="small" error={!!errors.to_warehouse_id}>
+              <FormControl id="field-to_warehouse_id" fullWidth size="small" error={!!errors.to_warehouse_id}>
                 <InputLabel>To Store</InputLabel>
                 <Select
                   label="To Store"
@@ -326,7 +329,7 @@ export default function StockTransfers() {
 
           </Box>
 
-          <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2, mb: 2 }}>
+          <TableContainer id="field-items" component={Paper} variant="outlined" sx={{ borderRadius: 2, mb: 2 }}>
             <Table size="small">
               <TableHead sx={{ bgcolor: '#F8FAFC' }}>
                 <TableRow>
@@ -400,7 +403,8 @@ export default function StockTransfers() {
                         fontWeight: 600, 
                         borderStyle: 'dashed', 
                         width: '100%', 
-                        color: '#64748b', 
+                        color: '#2563EB', 
+                        fontSize: '0.95rem',
                         borderColor: '#cbd5e1', 
                         '&:hover': { borderColor: '#94a3b8', bgcolor: '#f8fafc' } 
                       }}

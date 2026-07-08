@@ -201,6 +201,15 @@ export default function GRNPage() {
       setErrors(newErrors);
       setItemErrors(newItemErrors);
       if (Object.keys(newErrors).length > 0 || Object.keys(newItemErrors).length > 0) {
+        if (Object.keys(newErrors).length > 0) {
+          const firstErrorField = Object.keys(newErrors)[0];
+          const el = document.getElementById(`field-${firstErrorField}`);
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else if (Object.keys(newItemErrors).length > 0) {
+          const firstErrorIdx = Object.keys(newItemErrors)[0];
+          const el = document.getElementById(`item-row-${firstErrorIdx}`);
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
         return;
       }
 
@@ -464,7 +473,7 @@ export default function GRNPage() {
                 {form.receipt_type === 'PO-Based' && (
                   <>
                     <Grid item xs={12} sm={6}>
-                      <FormControl fullWidth required size="small" error={!!errors.po_id}><InputLabel>Purchase Order</InputLabel>
+                      <FormControl id="field-po_id" fullWidth required size="small" error={!!errors.po_id}><InputLabel>Purchase Order</InputLabel>
                         <Select value={form.po_id} size="small" label="Purchase Order" onChange={e => selectPO(e.target.value)}>
                           <MenuItem value="">None</MenuItem>
                           {pos.filter(p => p.status !== 'Closed' && p.status !== 'Draft').map(p => <MenuItem key={p.id} value={p.id}>{p.po_number} - {p.vendor_name}</MenuItem>)}
@@ -480,6 +489,7 @@ export default function GRNPage() {
                 {form.receipt_type === 'Direct Invoice' && (
                   <Grid item xs={12} sm={6}>
                     <Autocomplete
+                      id="field-vendor"
                       size="small"
                       freeSolo
                       options={vendors.map(v => v.name)}
@@ -509,7 +519,7 @@ export default function GRNPage() {
 
                 {/* Line 4 */}
                 <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth required size="small" error={!!errors.warehouse_id}><InputLabel>To Store</InputLabel>
+                  <FormControl id="field-warehouse_id" fullWidth required size="small" error={!!errors.warehouse_id}><InputLabel>To Store</InputLabel>
                     <Select value={form.warehouse_id} size="small" label="To Store" onChange={e => setForm({ ...form, warehouse_id: e.target.value })}>
                       {warehouses.map(w => <MenuItem key={w.id} value={w.id}>{w.name}</MenuItem>)}
                     </Select>
@@ -593,7 +603,7 @@ export default function GRNPage() {
                     const hasQuantityError = !!itemErrors[i]?.received_quantity || !!itemErrors[i]?.accepted_quantity || !!itemErrors[i]?.rejected_quantity;
                     return (
                     <React.Fragment key={i}>
-                      <TableRow sx={{ '& td': { verticalAlign: 'top', pt: 1.5, borderBottom: hasQuantityError ? 'none' : undefined } }}>
+                      <TableRow id={`item-row-${i}`} sx={{ '& td': { verticalAlign: 'top', pt: 1.5, borderBottom: hasQuantityError ? 'none' : undefined } }}>
                         <TableCell sx={{ minWidth: 250 }}>
                           {form.receipt_type === 'Direct Invoice' ? (
                           <Autocomplete
@@ -700,7 +710,8 @@ export default function GRNPage() {
                             fontWeight: 600, 
                             borderStyle: 'dashed', 
                             width: '100%', 
-                            color: '#64748b', 
+                            color: '#2563EB', 
+                            fontSize: '0.95rem',
                             borderColor: '#cbd5e1', 
                             '&:hover': { borderColor: '#94a3b8', bgcolor: '#f8fafc' } 
                           }}

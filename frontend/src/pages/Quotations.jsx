@@ -216,6 +216,9 @@ const Quotations = () => {
 
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) {
+      const firstErrorField = Object.keys(newErrors)[0];
+      const el = document.getElementById(`field-${firstErrorField}`);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
 
@@ -1382,7 +1385,7 @@ const Quotations = () => {
               }}
             >
               {/* Row 1: Required Date */}
-              <Box>
+              <Box id="field-required_date">
                 <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', mb: 0.5, display: 'block', ml: 0.5, textTransform: 'uppercase' }}>
                   Required Date
                 </Typography>
@@ -1405,7 +1408,7 @@ const Quotations = () => {
               </Box>
 
               {/* Row 2: Link PRs & Manual Materials */}
-              <Box>
+              <Box id="field-items">
                 <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', mb: 0.5, display: 'block', ml: 0.5, textTransform: 'uppercase' }}>
                   Link Approved PRs
                 </Typography>
@@ -1504,7 +1507,7 @@ const Quotations = () => {
               </Box>
 
               {/* Row 3: Invite Vendors */}
-              <Box sx={{ gridColumn: 'span 2' }}>
+              <Box id="field-vendor_ids" sx={{ gridColumn: 'span 2' }}>
                 <Typography variant="caption" sx={{ fontWeight: 700, color: (newQR.vendor_ids?.length || 0) === 1 ? 'error.main' : 'text.secondary', mb: 0.5, display: 'block', ml: 0.5, textTransform: 'uppercase' }}>
                   Invite Vendors {(newQR.vendor_ids?.length || 0) === 1 && "(Minimum 2 Required)"}
                 </Typography>

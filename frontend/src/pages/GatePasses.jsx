@@ -226,6 +226,9 @@ export default function GatePasses() {
 
       setErrors(newErrors);
       if (Object.keys(newErrors).length > 0) {
+        const firstErrorField = Object.keys(newErrors)[0];
+        const el = document.getElementById(`field-${firstErrorField}`);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
         return;
       }
 
@@ -273,6 +276,9 @@ export default function GatePasses() {
       
       setErrors(newErrors);
       if (Object.keys(newErrors).length > 0) {
+        const firstErrorField = Object.keys(newErrors)[0];
+        const el = document.getElementById(`field-${firstErrorField}`);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
         return;
       }
 
@@ -616,6 +622,7 @@ export default function GatePasses() {
 
             <Grid item xs={12} sm={6}>
               <TextField
+                id="field-reason_code"
                 select
                 fullWidth
                 size="small"
@@ -631,6 +638,7 @@ export default function GatePasses() {
               </TextField>
               {gpModal.reason_code === 'OTHER' && (
                 <TextField
+                  id="field-reason_other"
                   fullWidth
                   size="small"
                   label="Please specify reason *"
@@ -695,6 +703,7 @@ export default function GatePasses() {
             {/* VENDOR FIELDS (Searchable Autocomplete) */}
             <Grid item xs={12} sm={6}>
               <Autocomplete
+                id="field-vendor"
                 size="small"
                 options={vendors}
                 getOptionLabel={(option) => `${option.code || ''} - ${option.name || ''}`}
@@ -759,7 +768,7 @@ export default function GatePasses() {
 
               </Box>
 
-              <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2, mb: 2 }}>
+              <TableContainer id="field-items" component={Paper} variant="outlined" sx={{ borderRadius: 2, mb: 2 }}>
                 <Table size="small">
                   <TableHead sx={{ bgcolor: '#F8FAFC' }}>
                     <TableRow>
@@ -836,7 +845,8 @@ export default function GatePasses() {
                             fontWeight: 600, 
                             borderStyle: 'dashed', 
                             width: '100%', 
-                            color: '#64748b', 
+                            color: '#2563EB', 
+                            fontSize: '0.95rem',
                             borderColor: '#cbd5e1', 
                             '&:hover': { borderColor: '#94a3b8', bgcolor: '#f8fafc' } 
                           }}
@@ -955,6 +965,7 @@ export default function GatePasses() {
             </Grid>
           </Grid>
           <TextField
+            id="field-driver_name"
             fullWidth
             label="Received By / Driver Name *"
             variant="outlined"

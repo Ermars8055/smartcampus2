@@ -419,6 +419,15 @@ export default function Indents() {
       setErrors(newErrors);
       setItemErrors(newItemErrors);
       if (Object.keys(newErrors).length > 0 || Object.keys(newItemErrors).length > 0) {
+        if (Object.keys(newErrors).length > 0) {
+          const firstErrorField = Object.keys(newErrors)[0];
+          const el = document.getElementById(`field-${firstErrorField}`);
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else if (Object.keys(newItemErrors).length > 0) {
+          const firstErrorIdx = Object.keys(newItemErrors)[0];
+          const el = document.getElementById(`item-row-${firstErrorIdx}`);
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
         return;
       }
 
@@ -617,7 +626,7 @@ export default function Indents() {
           <Grid container spacing={2.5} sx={{ mb: 3 }}>
             <Grid item xs={12} sm={6}>
               <Typography variant="caption" sx={{ fontWeight: 600, color: '#3b5998', mb: 0.5, display: 'block' }}>Institution <span style={{ color: '#d32f2f' }}>*</span></Typography>
-              <FormControl fullWidth size="small" error={!!errors.institution_id}>
+              <FormControl id="field-institution_id" fullWidth size="small" error={!!errors.institution_id}>
                 <Select
                   value={form.institution_id}
                   displayEmpty
@@ -634,6 +643,7 @@ export default function Indents() {
             <Grid item xs={12} sm={6}>
               <Typography variant="caption" sx={{ fontWeight: 600, color: '#3b5998', mb: 0.5, display: 'block' }}>Department <span style={{ color: '#d32f2f' }}>*</span></Typography>
               <Autocomplete
+                id="field-department"
                 options={departmentsList}
                 value={form.department || null}
                 onChange={(e, val) => handleDepartmentChange(val)}
@@ -737,7 +747,7 @@ export default function Indents() {
               </TableHead>
               <TableBody>
                 {form.items.map((item, i) => (
-                  <TableRow key={i} sx={{ '&:last-child td': { borderBottom: 0 } }}>
+                  <TableRow key={i} id={`item-row-${i}`} sx={{ '&:last-child td': { borderBottom: 0 } }}>
                     <TableCell sx={{ py: 1.5, verticalAlign: 'top' }}>
                       <MaterialSelect
                         materials={materials.filter(m => !form.items.some((it, idx) => idx !== i && it.material_id === m.id))}
@@ -816,7 +826,8 @@ export default function Indents() {
                         fontWeight: 600, 
                         borderStyle: 'dashed', 
                         width: '100%', 
-                        color: '#64748b', 
+                        color: '#2563EB', 
+                        fontSize: '0.95rem',
                         borderColor: '#cbd5e1', 
                         '&:hover': { borderColor: '#94a3b8', bgcolor: '#f8fafc' } 
                       }}

@@ -244,6 +244,15 @@ export default function PurchaseRequests() {
       setErrors(newErrors);
       setItemErrors(newItemErrors);
       if (Object.keys(newErrors).length > 0 || Object.keys(newItemErrors).length > 0) {
+        if (Object.keys(newErrors).length > 0) {
+          const firstErrorField = Object.keys(newErrors)[0];
+          const el = document.getElementById(`field-${firstErrorField}`);
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else if (Object.keys(newItemErrors).length > 0) {
+          const firstErrorIdx = Object.keys(newItemErrors)[0];
+          const el = document.getElementById(`item-row-${firstErrorIdx}`);
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
         return;
       }
 
@@ -1004,7 +1013,7 @@ export default function PurchaseRequests() {
         </DialogTitle>
         <DialogContent sx={{ px: 3, py: 1 }}>
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr 1fr' }, gap: 2, pt: 1, mb: 2 }}>
-            <FormControl fullWidth required error={!!errors.project_id}>
+            <FormControl id="field-project_id" fullWidth required error={!!errors.project_id}>
               <InputLabel>Institution</InputLabel>
               <Select
                 value={form.institution_id}
@@ -1018,7 +1027,7 @@ export default function PurchaseRequests() {
               {errors.project_id && <Typography color="error" variant="caption" sx={{ ml: 2, mt: 0.5 }}>{errors.project_id}</Typography>}
             </FormControl>
 
-            <FormControl fullWidth required disabled={!form.institution_id} error={!!errors.department_name}>
+            <FormControl id="field-department_name" fullWidth required disabled={!form.institution_id} error={!!errors.department_name}>
               <Autocomplete
                 options={formDepartmentsList}
                 value={form.department_name || null}
@@ -1043,7 +1052,8 @@ export default function PurchaseRequests() {
             </FormControl>
           </Box>
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr 1fr' }, gap: 2, pt: 1, mb: 2 }}>
-            <DatePicker
+            <Box id="field-required_date">
+              <DatePicker
               label="Required Date"
               value={form.required_date ? dayjs(form.required_date) : null}
               onChange={val => setForm({ ...form, required_date: val })}
@@ -1063,6 +1073,7 @@ export default function PurchaseRequests() {
               }}
             />
           </Box>
+          </Box>
 
           <Divider sx={{ mb: 2 }} />
 
@@ -1074,7 +1085,7 @@ export default function PurchaseRequests() {
 
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
             {form.items.map((item, i) => (
-              <Box key={i} sx={{
+              <Box key={i} id={`item-row-${i}`} sx={{
                 display: 'grid',
                 gridTemplateColumns: { xs: '1fr', sm: '1.5fr 1fr 40px' },
                 gap: 1.5,
@@ -1152,7 +1163,8 @@ export default function PurchaseRequests() {
                 borderStyle: 'dashed', 
                 width: '100%', 
                 py: 1.5,
-                color: '#64748b', 
+                color: '#2563EB', 
+                fontSize: '0.95rem',
                 borderColor: '#cbd5e1', 
                 '&:hover': { borderColor: '#94a3b8', bgcolor: '#f8fafc' } 
               }}

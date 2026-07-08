@@ -502,7 +502,13 @@ export default function PurchaseOrders() {
     setItemErrors(newItemErrors);
 
     if (Object.keys(newErrors).length > 0 || Object.keys(newItemErrors).length > 0) {
-      if (Object.keys(newItemErrors).length > 0) {
+      if (Object.keys(newErrors).length > 0) {
+        const firstErrorField = Object.keys(newErrors)[0];
+        const el = document.getElementById(`field-${firstErrorField}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      } else if (Object.keys(newItemErrors).length > 0) {
         const firstErrorIdx = Object.keys(newItemErrors)[0];
         const el = document.getElementById(`item-row-${firstErrorIdx}`);
         if (el) {
@@ -539,7 +545,7 @@ export default function PurchaseOrders() {
       let res;
       if (editingPOId) {
         res = await api.put(`/api/procurement/po/${editingPOId}`, payload);
-        const poNumber = res?.data?.po_number || '';
+        const poNumber = res?.data?.po_number || form.po_number || '';
         showMessage(`Purchase Order ${poNumber} ${isDraft ? 'draft updated' : 'updated and submitted'}`.trim(), "Success", "success");
       } else {
         res = await api.post('/api/procurement/po', payload);
@@ -1526,7 +1532,7 @@ export default function PurchaseOrders() {
         </DialogTitle>
         <DialogContent sx={{ px: 3, py: 1 }}>
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr 1fr' }, gap: 2, pt: 1, mb: 2 }}>
-            <Box>
+            <Box id="field-vendor_id">
               <Autocomplete
                 options={vendors}
                 getOptionLabel={(option) => `${option.code} - ${option.name}`}
@@ -1582,8 +1588,9 @@ export default function PurchaseOrders() {
               </Select>
             </FormControl>
 
-            <DatePicker
-              label="Delivery Date *"
+            <Box id="field-delivery_date">
+              <DatePicker
+                label="Delivery Date *"
               value={form.delivery_date ? dayjs(form.delivery_date) : null}
               onChange={val => setForm({ ...form, delivery_date: val })}
               format="DD-MMM-YYYY"
@@ -1601,6 +1608,7 @@ export default function PurchaseOrders() {
                 }
               }}
             />
+          </Box>
           </Box>
           <Divider sx={{ mb: 2 }} />
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
@@ -1768,7 +1776,8 @@ export default function PurchaseOrders() {
                   borderStyle: 'dashed', 
                   width: '100%', 
                   py: 1.5,
-                  color: '#64748b', 
+                  color: '#2563EB', 
+                  fontSize: '0.95rem',
                   borderColor: '#cbd5e1', 
                   '&:hover': { borderColor: '#94a3b8', bgcolor: '#f8fafc' } 
                 }}
@@ -1795,6 +1804,7 @@ export default function PurchaseOrders() {
             </Select>
           </FormControl>
           <TextField
+            id="field-terms"
             fullWidth
             multiline
             required

@@ -721,14 +721,7 @@ export default function Indents() {
           {/* ── Items Section Header ── */}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Items Requested</Typography>
-            <Button
-              variant="contained" size="small"
-              startIcon={<Add />}
-              onClick={addItem}
-              sx={{ textTransform: 'none', fontWeight: 600, borderRadius: 2, px: 2 }}
-            >
-              Add Item
-            </Button>
+
           </Box>
 
           {/* ── Items Table ── */}
@@ -811,6 +804,27 @@ export default function Indents() {
                     </TableCell>
                   </TableRow>
                 ))}
+                <TableRow>
+                  <TableCell colSpan={4} align="center" sx={{ py: 2 }}>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<Add />}
+                      onClick={addItem}
+                      sx={{ 
+                        textTransform: 'none', 
+                        fontWeight: 600, 
+                        borderStyle: 'dashed', 
+                        width: '100%', 
+                        color: '#64748b', 
+                        borderColor: '#cbd5e1', 
+                        '&:hover': { borderColor: '#94a3b8', bgcolor: '#f8fafc' } 
+                      }}
+                    >
+                      Add Another Item
+                    </Button>
+                  </TableCell>
+                </TableRow>
               </TableBody>
             </Table>
           </Card>

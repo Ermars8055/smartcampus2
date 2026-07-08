@@ -336,7 +336,7 @@ export default function Returns() {
           <Box sx={{ mb: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#1E293B' }}>Return Items</Typography>
             {errors.items && <Typography color="error" variant="body2">{errors.items}</Typography>}
-            <Button size="small" startIcon={<Add />} onClick={addReturnItem} sx={{ textTransform: 'none', fontWeight: 700 }}>Add Item</Button>
+
           </Box>
 
           <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2, mb: 2 }}>
@@ -401,6 +401,27 @@ export default function Returns() {
                     </TableCell>
                   </TableRow>
                 ))}
+                <TableRow>
+                  <TableCell colSpan={4} align="center" sx={{ py: 2 }}>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<Add />}
+                      onClick={addReturnItem}
+                      sx={{ 
+                        textTransform: 'none', 
+                        fontWeight: 600, 
+                        borderStyle: 'dashed', 
+                        width: '100%', 
+                        color: '#64748b', 
+                        borderColor: '#cbd5e1', 
+                        '&:hover': { borderColor: '#94a3b8', bgcolor: '#f8fafc' } 
+                      }}
+                    >
+                      Add Another Item
+                    </Button>
+                  </TableCell>
+                </TableRow>
               </TableBody>
             </Table>
           </TableContainer>

@@ -1063,7 +1063,7 @@ export default function PurchaseRequests() {
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
             <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, color: '#475569' }}>Material Items</Typography>
             {errors.items && <Typography color="error" variant="body2" sx={{ mb: 1 }}>{errors.items}</Typography>}
-            <Button size="small" startIcon={<Add />} onClick={addItem} sx={{ fontWeight: 600 }}>Add Item</Button>
+
           </Box>
 
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
@@ -1135,6 +1135,24 @@ export default function PurchaseRequests() {
                 </Box>
               </Box>
             ))}
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<Add />}
+              onClick={addItem}
+              sx={{ 
+                textTransform: 'none', 
+                fontWeight: 600, 
+                borderStyle: 'dashed', 
+                width: '100%', 
+                py: 1.5,
+                color: '#64748b', 
+                borderColor: '#cbd5e1', 
+                '&:hover': { borderColor: '#94a3b8', bgcolor: '#f8fafc' } 
+              }}
+            >
+              Add Another Item
+            </Button>
           </Box>
 
           <Box sx={{ mt: 2 }}>

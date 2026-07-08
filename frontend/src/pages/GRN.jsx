@@ -577,9 +577,7 @@ export default function GRNPage() {
               <Divider sx={{ mb: 2 }} />
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                 <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{form.receipt_type === 'Direct Invoice' ? 'Items' : 'Items from PO'}</Typography>
-                {form.receipt_type === 'Direct Invoice' && (
-                  <Button size="small" startIcon={<Add />} onClick={() => setForm({...form, items: [...form.items, { material_id: '', ordered_quantity: 0, received_quantity: 0, accepted_quantity: 0, rejected_quantity: 0, rate: 0 }]})}>Add Item</Button>
-                )}
+
               </Box>
               <Table size="small">
                 <TableHead><TableRow>
@@ -689,6 +687,29 @@ export default function GRNPage() {
                     )}
                     </React.Fragment>
                   )})}
+                  {form.receipt_type === 'Direct Invoice' && (
+                    <TableRow>
+                      <TableCell colSpan={8} align="center" sx={{ py: 2 }}>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          startIcon={<Add />}
+                          onClick={() => setForm({...form, items: [...form.items, { material_id: '', ordered_quantity: 0, received_quantity: 0, accepted_quantity: 0, rejected_quantity: 0, rate: 0 }]})}
+                          sx={{ 
+                            textTransform: 'none', 
+                            fontWeight: 600, 
+                            borderStyle: 'dashed', 
+                            width: '100%', 
+                            color: '#64748b', 
+                            borderColor: '#cbd5e1', 
+                            '&:hover': { borderColor: '#94a3b8', bgcolor: '#f8fafc' } 
+                          }}
+                        >
+                          Add Another Item
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  )}
                 </TableBody>
               </Table>
             </>

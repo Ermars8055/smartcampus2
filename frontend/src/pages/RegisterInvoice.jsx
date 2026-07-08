@@ -671,7 +671,7 @@ export default function RegisterInvoice() {
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
           <Typography variant="h6" sx={{ fontWeight: 600 }}>Item Details</Typography>
           {errors.items && <Typography color="error" variant="body2">{errors.items}</Typography>}
-          <Button variant="outlined" startIcon={<Add />} onClick={addItem} size="small">Add Item</Button>
+
         </Box>
         <Box sx={{ width: '100%' }}>
           <Box>
@@ -809,6 +809,25 @@ export default function RegisterInvoice() {
             </Grid>
 
             {form.items.length === 0 && <Typography sx={{ py: 3, textAlign: 'center', color: '#94A3B8' }}>No items added. Click 'Add Item' to begin.</Typography>}
+            <Box sx={{ p: 2 }}>
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<Add />}
+                onClick={addItem}
+                sx={{ 
+                  textTransform: 'none', 
+                  fontWeight: 600, 
+                  borderStyle: 'dashed', 
+                  width: '100%', 
+                  color: '#64748b', 
+                  borderColor: '#cbd5e1', 
+                  '&:hover': { borderColor: '#94a3b8', bgcolor: '#f8fafc' } 
+                }}
+              >
+                Add Another Item
+              </Button>
+            </Box>
           </Box>
         </Box>
       </Card>

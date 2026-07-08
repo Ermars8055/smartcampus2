@@ -1603,9 +1603,6 @@ export default function PurchaseOrders() {
               <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b' }}>Line Items</Typography>
               {errors.items && <Typography variant="caption" color="error">{errors.items}</Typography>}
             </Box>
-            {!form.indent_id && (
-              <Button size="small" startIcon={<Add />} onClick={addItem} sx={{ fontWeight: 600 }}>Add Item</Button>
-            )}
           </Box>
 
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
@@ -1754,6 +1751,26 @@ export default function PurchaseOrders() {
                 </Box>
               );
             })}
+            {!form.indent_id && (
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<Add />}
+                onClick={addItem}
+                sx={{ 
+                  textTransform: 'none', 
+                  fontWeight: 600, 
+                  borderStyle: 'dashed', 
+                  width: '100%', 
+                  py: 1.5,
+                  color: '#64748b', 
+                  borderColor: '#cbd5e1', 
+                  '&:hover': { borderColor: '#94a3b8', bgcolor: '#f8fafc' } 
+                }}
+              >
+                Add Another Item
+              </Button>
+            )}
           </Box>
           <Divider sx={{ my: 2 }} />
           <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b', mb: 1.5 }}>Terms & Conditions *</Typography>

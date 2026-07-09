@@ -97,6 +97,7 @@ def list_purchase_requests(
                 "material_name": it.material.name if it.material else None,
                 "material_code": it.material.code if it.material else None,
                 "uom_name": it.material.uom.abbreviation if it.material and it.material.uom else None,
+                "uom_allow_decimal": it.material.uom.allow_decimal if it.material and it.material.uom else False,
                 "last_purchase_price": get_lpp(db, it.material_id, tenant_id, site_id)
             })
             
@@ -151,6 +152,7 @@ def get_purchase_request(
             "material_name": it.material.name if it.material else None,
             "material_code": it.material.code if it.material else None,
             "uom_name": it.material.uom.abbreviation if it.material and it.material.uom else None,
+            "uom_allow_decimal": it.material.uom.allow_decimal if it.material and it.material.uom else False,
             "last_purchase_price": get_lpp(db, it.material_id, tenant_id, site_id)
         })
     return PROut(
@@ -334,6 +336,9 @@ def approve_pr(
             }
             db_item = next((i for i in pr.items if i.id == it.pr_item_id), None)
             if db_item:
+                if db_item.material and db_item.material.uom and not db_item.material.uom.allow_decimal:
+                    if not float(it.approved_quantity).is_integer():
+                        raise HTTPException(400, f"Decimal values are not allowed for material {db_item.material.name}")
                 db_item.approved_quantity = it.approved_quantity
 
     for f in applicable_flows:
@@ -992,6 +997,9 @@ def approve_po(
             }
             db_item = next((i for i in po.items if i.id == it.po_item_id), None)
             if db_item:
+                if db_item.material and db_item.material.uom and not db_item.material.uom.allow_decimal:
+                    if not float(it.approved_quantity).is_integer():
+                        raise HTTPException(400, f"Decimal values are not allowed for material {db_item.material.name}")
                 db_item.approved_quantity = it.approved_quantity
 
     for f in applicable_flows:

@@ -271,7 +271,7 @@ export default function PurchaseRequests() {
       if (status === 'Submitted') {
         showConfirm(
           'Confirm Submission',
-          'Make sure you completed all the details once submitted you cannot edit the purchase order. It will be submitted for approval.',
+          'Make sure you completed all the details once submitted you cannot edit the purchase request. It will be submitted for approval.',
           'Submit PR',
           'primary',
           async () => {
@@ -1033,7 +1033,21 @@ export default function PurchaseRequests() {
                 value={form.department_name || null}
                 onChange={(e, val) => handleDepartmentChange(val)}
                 renderInput={(params) => (
-                  <TextField {...params} label="Department" required error={!!errors.department_name} helperText={errors.department_name} InputProps={{ ...params.InputProps, startAdornment: <><InputAdornment position="start"><AccountTree sx={{ color: '#94A3B8', ml: 1 }} /></InputAdornment>{params.InputProps.startAdornment}</> }} />
+                  <TextField
+                    {...params}
+                    label="Department"
+                    required
+                    error={!!errors.department_name}
+                    helperText={errors.department_name}
+                    InputProps={{ ...params.InputProps, startAdornment: <><InputAdornment position="start"><AccountTree sx={{ color: '#94A3B8', ml: 1 }} /></InputAdornment>{params.InputProps.startAdornment}</> }}
+                    sx={{
+                      ...(errors.department_name && {
+                        '& .MuiOutlinedInput-root.Mui-disabled .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#d32f2f'
+                        }
+                      })
+                    }}
+                  />
                 )}
               />
             </FormControl>
@@ -1054,25 +1068,25 @@ export default function PurchaseRequests() {
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr 1fr' }, gap: 2, pt: 1, mb: 2 }}>
             <Box id="field-required_date">
               <DatePicker
-              label="Required Date"
-              value={form.required_date ? dayjs(form.required_date) : null}
-              onChange={val => setForm({ ...form, required_date: val })}
-              format="DD-MMM-YYYY"
-              disablePast
-              localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
-              slotProps={{
-                textField: {
-                  fullWidth: true,
-                  size: "small",
-                  error: !!errors.required_date,
-                  helperText: errors.required_date,
-                  InputProps: {
-                    startAdornment: <InputAdornment position="start"><CalendarMonth sx={{ color: '#94A3B8' }} /></InputAdornment>
+                label="Required Date"
+                value={form.required_date ? dayjs(form.required_date) : null}
+                onChange={val => setForm({ ...form, required_date: val })}
+                format="DD-MMM-YYYY"
+                disablePast
+                localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                    size: "small",
+                    error: !!errors.required_date,
+                    helperText: errors.required_date,
+                    InputProps: {
+                      startAdornment: <InputAdornment position="start"><CalendarMonth sx={{ color: '#94A3B8' }} /></InputAdornment>
+                    }
                   }
-                }
-              }}
-            />
-          </Box>
+                }}
+              />
+            </Box>
           </Box>
 
           <Divider sx={{ mb: 2 }} />
@@ -1157,16 +1171,16 @@ export default function PurchaseRequests() {
               size="small"
               startIcon={<Add />}
               onClick={addItem}
-              sx={{ 
-                textTransform: 'none', 
-                fontWeight: 600, 
-                borderStyle: 'dashed', 
-                width: '100%', 
+              sx={{
+                textTransform: 'none',
+                fontWeight: 600,
+                borderStyle: 'dashed',
+                width: '100%',
                 py: 1.5,
-                color: '#2563EB', 
+                color: '#2563EB',
                 fontSize: '0.95rem',
-                borderColor: '#cbd5e1', 
-                '&:hover': { borderColor: '#94a3b8', bgcolor: '#f8fafc' } 
+                borderColor: '#cbd5e1',
+                '&:hover': { borderColor: '#94a3b8', bgcolor: '#f8fafc' }
               }}
             >
               Add Another Item
@@ -1519,8 +1533,15 @@ export default function PurchaseRequests() {
                         type="number"
                         placeholder=""
                         value={approvalDialog.items[item.id]?.qty !== undefined ? approvalDialog.items[item.id].qty : ''}
-                        onChange={e => setApprovalDialog(prev => ({ ...prev, items: { ...prev.items, [item.id]: { ...(prev.items[item.id] || {}), qty: e.target.value } } }))}
-                        inputProps={{ min: 0, style: { textAlign: 'center', fontWeight: 'bold', color: '#1d4ed8' } }}
+                        onChange={e => {
+                          const val = e.target.value;
+                          if (item.uom_allow_decimal === false && val.includes('.')) return;
+                          setApprovalDialog(prev => ({ ...prev, items: { ...prev.items, [item.id]: { ...(prev.items[item.id] || {}), qty: val } } }));
+                        }}
+                        onKeyDown={e => {
+                          if (item.uom_allow_decimal === false && e.key === '.') e.preventDefault();
+                        }}
+                        inputProps={{ min: 0, step: item.uom_allow_decimal === false ? "1" : "any", style: { textAlign: 'center', fontWeight: 'bold', color: '#1d4ed8' } }}
                         sx={{ width: 90, bgcolor: '#fff' }}
                       />
                     </TableCell>

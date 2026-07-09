@@ -482,6 +482,7 @@ class PRItemOut(PRItemBase):
     material_name: Optional[str] = None
     material_code: Optional[str] = None
     uom_name: Optional[str] = None
+    uom_allow_decimal: Optional[bool] = False
     class Config:
         from_attributes = True
 
@@ -1314,6 +1315,7 @@ class IndentItemOut(IndentItemBase):
     material_name: Optional[str] = None
     material_code: Optional[str] = None
     uom_name: Optional[str] = None
+    uom_allow_decimal: Optional[bool] = False
     issued_quantity: float = 0
     acknowledged_quantity: float = 0
     approved_quantity: Optional[float] = None

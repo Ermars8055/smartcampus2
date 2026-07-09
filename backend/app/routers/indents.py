@@ -100,6 +100,7 @@ def list_indents(
                 item.material_name = item.material.name
                 item.material_code = item.material.code
                 item.uom_name = item.material.uom.abbreviation if item.material.uom else None
+                item.uom_allow_decimal = item.material.uom.allow_decimal if item.material.uom else False
                 item.warehouse_id = item.material.warehouse_id
                 item.warehouse_name = item.material.warehouse.name if item.material.warehouse else None
                 
@@ -243,6 +244,7 @@ def get_indent(
             item.material_name = item.material.name
             item.material_code = item.material.code
             item.uom_name = item.material.uom.abbreviation if item.material.uom else None
+            item.uom_allow_decimal = item.material.uom.allow_decimal if item.material.uom else False
             item.warehouse_id = item.material.warehouse_id
             item.warehouse_name = item.material.warehouse.name if item.material.warehouse else None
             stock = db.query(CurrentStock).filter(CurrentStock.material_id == item.material_id, CurrentStock.site_id == site_id).first()
@@ -317,6 +319,9 @@ def approve_indent(
             }
             db_item = next((i for i in indent.items if i.id == it.indent_item_id), None)
             if db_item:
+                if db_item.material and db_item.material.uom and not db_item.material.uom.allow_decimal:
+                    if not float(it.approved_quantity).is_integer():
+                        raise HTTPException(400, f"Decimal values are not allowed for material {db_item.material.name}")
                 db_item.approved_quantity = it.approved_quantity
 
     for f in applicable_flows:

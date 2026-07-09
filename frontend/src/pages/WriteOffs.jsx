@@ -6,7 +6,9 @@ import {
   DialogContent, DialogActions, Grid, Select, FormControl,
   InputLabel, IconButton, Paper, InputAdornment, MenuItem, Tooltip
 } from '@mui/material';
-import { Add, Delete, Close, RemoveCircleOutline, Warehouse, Comment, AssignmentTurnedIn, CheckCircle, Cancel } from '@mui/icons-material';
+import { Add, Delete, Close, RemoveCircleOutline, Warehouse, Comment, AssignmentTurnedIn, CheckCircle, Cancel, Edit } from '@mui/icons-material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import dayjs from 'dayjs';
 import api, { getFileUrl } from '../services/api';
 import MaterialSelect from '../components/MaterialSelect';
 import { useAuth } from '../context/AuthContext';
@@ -22,6 +24,7 @@ export default function WriteOffs() {
   // Modal state
   const [createModal, setCreateModal] = useState({
     open: false,
+    editId: null,
     date: new Date().toISOString().split('T')[0],
     warehouse_id: '',
     reason: '',
@@ -65,6 +68,7 @@ export default function WriteOffs() {
   const openCreateModal = () => {
     setCreateModal({
       open: true,
+      editId: null,
       date: new Date().toISOString().split('T')[0],
       warehouse_id: '',
       reason: '',
@@ -104,10 +108,15 @@ export default function WriteOffs() {
           quantity: parseFloat(it.quantity)
         }))
       };
-      const res = await api.post('/api/write-offs', payload);
-      setCreateModal({ ...createModal, open: false });
-      const woNumber = res?.data?.write_off_number || '';
-      showMessage(`Write Off ${woNumber} created successfully`.trim(), 'Success', 'success');
+      let res;
+      if (createModal.editId) {
+        res = await api.put(`/api/write-offs/${createModal.editId}`, payload);
+      } else {
+        res = await api.post('/api/write-offs', payload);
+      }
+      setCreateModal({ ...createModal, open: false, editId: null });
+      const woNumber = res?.data?.write_off_number || (createModal.editId ? 'Write Off' : '');
+      showMessage(`Write Off ${createModal.editId ? 'updated' : 'created'} successfully`.trim(), 'Success', 'success');
       load();
     } catch (err) { 
       let errMsg = 'Error processing request';
@@ -232,22 +241,42 @@ export default function WriteOffs() {
                     </TableCell>
                     <TableCell align="right" sx={{ px: 2, whiteSpace: 'nowrap' }}>
                       {wo.status === 'Draft' && (
-                        <Tooltip title="Submit">
-                          <IconButton size="small" color="primary" onClick={(e) => { e.stopPropagation(); setViewModal({ open: true, writeOff: wo }); }}>
-                            <AssignmentTurnedIn fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
+                        <>
+                          <Tooltip title="Edit">
+                            <IconButton size="small" color="primary" onClick={(e) => { 
+                              e.stopPropagation(); 
+                              setCreateModal({
+                                open: true,
+                                editId: wo.id,
+                                date: wo.date,
+                                warehouse_id: wo.items[0]?.warehouse_id || '',
+                                reason: wo.reason,
+                                write_off_type: wo.write_off_type,
+                                attachment_url: wo.attachment_url,
+                                items: wo.items.map(it => ({ material_id: it.material_id, quantity: it.quantity }))
+                              });
+                              setErrors({});
+                            }}>
+                              <Edit fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Submit">
+                            <IconButton size="small" color="primary" onClick={(e) => { e.stopPropagation(); setViewModal({ open: true, writeOff: wo }); }}>
+                              <AssignmentTurnedIn fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </>
                       )}
                       {wo.status === 'Submitted' && wo.can_user_approve && hasAction('write_offs', 'can_approve') && (
                         <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
-                          <Tooltip title="Reject">
-                            <IconButton size="small" color="error" onClick={(e) => { e.stopPropagation(); setViewModal({ open: true, writeOff: wo }); }}>
-                              <Cancel fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
                           <Tooltip title="Approve">
                             <IconButton size="small" color="success" onClick={(e) => { e.stopPropagation(); setViewModal({ open: true, writeOff: wo }); }}>
                               <CheckCircle fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Reject">
+                            <IconButton size="small" color="error" onClick={(e) => { e.stopPropagation(); setViewModal({ open: true, writeOff: wo }); }}>
+                              <Cancel fontSize="small" />
                             </IconButton>
                           </Tooltip>
                         </Box>
@@ -270,7 +299,9 @@ export default function WriteOffs() {
                 <RemoveCircleOutline fontSize="medium" />
               </Box>
               <Box>
-                <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>New Write Off</Typography>
+                <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
+                  {createModal.editId ? 'Edit Write Off' : 'New Write Off'}
+                </Typography>
                 <Typography variant="body2" color="text.secondary">Reduce inventory without a gate pass</Typography>
               </Box>
             </Box>
@@ -280,11 +311,18 @@ export default function WriteOffs() {
         <DialogContent sx={{ p: 3 }}>
           <Grid container spacing={2} sx={{ mb: 3, mt: 0.5 }}>
             <Grid item xs={12} sm={4}>
-              <TextField
-                fullWidth size="small" type="date" label="Date" required
-                value={createModal.date}
-                onChange={e => setCreateModal({ ...createModal, date: e.target.value })}
-                InputLabelProps={{ shrink: true }}
+              <DatePicker
+                label="Date *"
+                value={createModal.date ? dayjs(createModal.date) : null}
+                onChange={val => setCreateModal({ ...createModal, date: val ? val.format('YYYY-MM-DD') : '' })}
+                format="DD-MMM-YYYY"
+                disablePast
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                    size: "small",
+                  }
+                }}
               />
             </Grid>
             <Grid item xs={12} sm={4}>
@@ -370,10 +408,26 @@ export default function WriteOffs() {
                     <TableCell sx={{ verticalAlign: 'top', pt: 2 }}>
                       <TextField
                         size="small" type="number"
-                        inputProps={{ min: "0" }}
                         fullWidth
                         value={item.quantity}
-                        onChange={e => updateItem(idx, 'quantity', e.target.value)}
+                        onKeyDown={e => {
+                          const mat = item.material_id ? materials.find(m => m.id === item.material_id) : null;
+                          const allowDec = mat ? mat.uom_allow_decimal : false;
+                          const blockList = ['-', '+', 'e', 'E'];
+                          if (!allowDec) blockList.push('.');
+                          if (blockList.includes(e.key)) e.preventDefault();
+                        }}
+                        onChange={e => {
+                          const mat = item.material_id ? materials.find(m => m.id === item.material_id) : null;
+                          const allowDec = mat ? mat.uom_allow_decimal : false;
+                          let val = e.target.value.replace(/-/g, '');
+                          if (!allowDec) val = val.replace(/\./g, '');
+                          updateItem(idx, 'quantity', val);
+                        }}
+                        inputProps={{ 
+                          min: "0",
+                          step: (item.material_id && materials.find(m => m.id === item.material_id)?.uom_allow_decimal) ? "any" : "1"
+                        }}
                         InputProps={{
                           endAdornment: item.material_id ? (
                             <InputAdornment position="end">
@@ -419,9 +473,9 @@ export default function WriteOffs() {
           </TableContainer>
         </DialogContent>
         <DialogActions sx={{ px: 4, pb: 4, pt: 2 }}>
-          <Button onClick={() => setCreateModal({ ...createModal, open: false })} sx={{ color: '#64748B' }}>Cancel</Button>
+          <Button onClick={() => setCreateModal({ ...createModal, open: false, editId: null })} sx={{ color: '#64748B' }}>Cancel</Button>
           <Button onClick={handleCreateSubmit} variant="contained" sx={{ bgcolor: '#2563EB', textTransform: 'none' }}>
-            Create Write Off
+            {createModal.editId ? 'Update Write Off' : 'Create Write Off'}
           </Button>
         </DialogActions>
       </Dialog>
@@ -515,11 +569,11 @@ export default function WriteOffs() {
               )}
               {viewModal.writeOff.status === 'Submitted' && viewModal.writeOff.can_user_approve && hasAction('write_offs', 'can_approve') && (
                 <>
-                  <Button onClick={() => handleAction(viewModal.writeOff.id, 'reject')} variant="contained" color="error" startIcon={<Cancel />}>
-                    Reject
-                  </Button>
                   <Button onClick={() => handleAction(viewModal.writeOff.id, 'approve')} variant="contained" color="success" startIcon={<CheckCircle />}>
                     Approve
+                  </Button>
+                  <Button onClick={() => handleAction(viewModal.writeOff.id, 'reject')} variant="contained" color="error" startIcon={<Cancel />}>
+                    Reject
                   </Button>
                 </>
               )}

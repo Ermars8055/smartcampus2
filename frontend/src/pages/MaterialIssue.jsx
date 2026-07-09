@@ -716,7 +716,14 @@ export default function MaterialIssue() {
                       error={!!errors.department}
                       helperText={errors.department}
                       InputProps={{ ...params.InputProps, startAdornment: <><InputAdornment position="start"><AccountTree sx={{ color: '#94A3B8', ml: 1, fontSize: 18 }} /></InputAdornment>{params.InputProps.startAdornment}</> }} 
-                      sx={{ bgcolor: '#fff' }} 
+                      sx={{ 
+                        bgcolor: '#fff',
+                        ...(errors.department && {
+                          '& .MuiOutlinedInput-root.Mui-disabled .MuiOutlinedInput-notchedOutline': {
+                            borderColor: '#d32f2f'
+                          }
+                        })
+                      }} 
                     />
                   )}
                 />

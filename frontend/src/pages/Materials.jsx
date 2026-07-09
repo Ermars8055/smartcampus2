@@ -608,7 +608,11 @@ export default function Materials() {
                         size="small"
                         variant="outlined"
                         sx={{ fontSize: '0.65rem', height: 20 }}
-                        color={m.material_type === 'Non-Consumable' ? 'secondary' : 'default'}
+                        color={
+                          m.material_type === 'Non-Consumable' ? 'secondary' :
+                          m.material_type === 'Furniture' ? 'info' :
+                          m.material_type === 'Equipment' ? 'warning' : 'default'
+                        }
                       />
                     </TableCell>
                     <TableCell sx={{ px: 1 }}>
@@ -792,6 +796,8 @@ export default function Materials() {
               >
                 <MenuItem value="Consumable">Consumable</MenuItem>
                 <MenuItem value="Non-Consumable">Non-Consumable</MenuItem>
+                <MenuItem value="Furniture">Furniture</MenuItem>
+                <MenuItem value="Equipment">Equipment</MenuItem>
               </Select>
               {errors.material_type && <Typography variant="caption" color="error" sx={{ ml: 2 }}>{errors.material_type}</Typography>}
             </FormControl>

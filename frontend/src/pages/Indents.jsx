@@ -656,7 +656,14 @@ export default function Indents() {
                     error={!!errors.department}
                     helperText={errors.department}
                     InputProps={{ ...params.InputProps, startAdornment: <><InputAdornment position="start"><AccountTree sx={{ color: '#94A3B8', ml: 1 }} /></InputAdornment>{params.InputProps.startAdornment}</> }} 
-                    sx={{ bgcolor: '#fff' }} 
+                    sx={{ 
+                      bgcolor: '#fff',
+                      ...(errors.department && {
+                        '& .MuiOutlinedInput-root.Mui-disabled .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#d32f2f'
+                        }
+                      })
+                    }} 
                   />
                 )}
               />
@@ -1384,8 +1391,15 @@ export default function Indents() {
                         type="number"
                         placeholder=""
                         value={approvalDialog.items[item.id]?.qty !== undefined ? approvalDialog.items[item.id].qty : ''}
-                        onChange={e => setApprovalDialog(prev => ({ ...prev, items: { ...prev.items, [item.id]: { ...(prev.items[item.id] || {}), qty: e.target.value } } }))}
-                        inputProps={{ min: 0, style: { textAlign: 'center', fontWeight: 'bold', color: '#1d4ed8' } }}
+                        onChange={e => {
+                          const val = e.target.value;
+                          if (item.uom_allow_decimal === false && val.includes('.')) return;
+                          setApprovalDialog(prev => ({ ...prev, items: { ...prev.items, [item.id]: { ...(prev.items[item.id] || {}), qty: val } } }));
+                        }}
+                        onKeyDown={e => {
+                          if (item.uom_allow_decimal === false && e.key === '.') e.preventDefault();
+                        }}
+                        inputProps={{ min: 0, step: item.uom_allow_decimal === false ? "1" : "any", style: { textAlign: 'center', fontWeight: 'bold', color: '#1d4ed8' } }}
                         sx={{ width: 90, bgcolor: '#fff' }}
                       />
                     </TableCell>

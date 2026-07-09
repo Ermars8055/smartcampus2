@@ -1,0 +1,820 @@
+Section,Module,Field Name,Field Type,Length / Details,Required,Validation Rules,Error Messages
+1. Platform & Auth,Tenant,id,INTEGER,Primary Key,Yes,-,-
+1. Platform & Auth,Tenant,name,VARCHAR(255),Max 255 chars,Yes,-,-
+1. Platform & Auth,Tenant,slug,VARCHAR(100),Max 100 chars,Yes,-,-
+1. Platform & Auth,Tenant,status,VARCHAR(50),Default: Active; Max 50 chars,No,-,-
+1. Platform & Auth,Tenant,subscription_plan,VARCHAR(50),Default: basic; Max 50 chars,No,-,-
+1. Platform & Auth,Tenant,max_sites,INTEGER,Default: 1,No,-,-
+1. Platform & Auth,Tenant,created_at,DATETIME,Default: auto-generated,No,-,-
+1. Platform & Auth,TenantConfiguration,id,INTEGER,Primary Key,Yes,-,-
+1. Platform & Auth,TenantConfiguration,tenant_id,INTEGER,FK → tenants.id,Yes,-,-
+1. Platform & Auth,TenantConfiguration,base_state,VARCHAR(100),Max 100 chars,Yes,-,Base State is required
+1. Platform & Auth,TenantConfiguration,cgst_share_percent,FLOAT,-,Yes,-,Valid number is required
+1. Platform & Auth,TenantConfiguration,sgst_share_percent,FLOAT,-,Yes,-,Valid number is required
+1. Platform & Auth,TenantConfiguration,created_at,DATETIME,Default: auto-generated,No,-,-
+1. Platform & Auth,TenantConfiguration,updated_at,DATETIME,Default: auto-generated,No,-,-
+1. Platform & Auth,Site,id,INTEGER,Primary Key,Yes,-,-
+1. Platform & Auth,Site,tenant_id,INTEGER,FK → tenants.id,Yes,-,-
+1. Platform & Auth,Site,name,VARCHAR(255),Max 255 chars,Yes,-,-
+1. Platform & Auth,Site,code,VARCHAR(50),Max 50 chars,No,-,-
+1. Platform & Auth,Site,location,VARCHAR(255),Max 255 chars,No,-,-
+1. Platform & Auth,Site,is_active,BOOLEAN,Default: True,No,-,-
+1. Platform & Auth,Site,created_at,DATETIME,Default: auto-generated,No,-,-
+1. Platform & Auth,User,id,INTEGER,Primary Key,Yes,-,-
+1. Platform & Auth,User,username,VARCHAR(100),Max 100 chars,Yes,-,-
+1. Platform & Auth,User,email,VARCHAR(255),Max 255 chars,Yes,-,-
+1. Platform & Auth,User,full_name,VARCHAR(255),Max 255 chars,Yes,-,-
+1. Platform & Auth,User,department,VARCHAR(255),Max 255 chars,No,-,-
+1. Platform & Auth,User,institution,VARCHAR(255),Max 255 chars,No,-,-
+1. Platform & Auth,User,hashed_password,VARCHAR(255),Max 255 chars,Yes,-,-
+1. Platform & Auth,User,is_active,BOOLEAN,Default: True,No,-,-
+1. Platform & Auth,User,is_platform_admin,BOOLEAN,Default: False,No,-,-
+1. Platform & Auth,User,is_deleted,BOOLEAN,Default: False,No,-,-
+1. Platform & Auth,User,created_at,DATETIME,Default: auto-generated,No,-,-
+1. Platform & Auth,User,updated_at,DATETIME,Default: auto-generated,No,-,-
+1. Platform & Auth,PasswordResetToken,id,INTEGER,Primary Key,Yes,-,-
+1. Platform & Auth,PasswordResetToken,user_id,INTEGER,FK → users.id,Yes,-,-
+1. Platform & Auth,PasswordResetToken,otp,VARCHAR(10),Max 10 chars,Yes,-,-
+1. Platform & Auth,PasswordResetToken,expires_at,DATETIME,-,Yes,-,-
+1. Platform & Auth,PasswordResetToken,created_at,DATETIME,Default: auto-generated,No,-,-
+1. Platform & Auth,TenantMembership,id,INTEGER,Primary Key,Yes,-,-
+1. Platform & Auth,TenantMembership,user_id,INTEGER,FK → users.id,Yes,-,-
+1. Platform & Auth,TenantMembership,tenant_id,INTEGER,FK → tenants.id,Yes,-,-
+1. Platform & Auth,TenantMembership,is_active,BOOLEAN,Default: True,No,-,-
+1. Platform & Auth,TenantMembership,joined_at,DATETIME,Default: auto-generated,No,-,-
+1. Platform & Auth,Role,id,INTEGER,Primary Key,Yes,-,-
+1. Platform & Auth,Role,tenant_id,INTEGER,FK → tenants.id,Yes,-,-
+1. Platform & Auth,Role,name,VARCHAR(100),Max 100 chars,Yes,-,-
+1. Platform & Auth,Role,code,VARCHAR(100),Max 100 chars,Yes,-,-
+1. Platform & Auth,Role,description,TEXT,-,No,-,-
+1. Platform & Auth,Role,data_access_scope,VARCHAR(50),Default: Self Only; Max 50 chars,No,-,-
+1. Platform & Auth,Role,is_system,BOOLEAN,Default: False,No,-,-
+1. Platform & Auth,Role,created_at,DATETIME,Default: auto-generated,No,-,-
+1. Platform & Auth,RolePermission,id,INTEGER,Primary Key,Yes,-,-
+1. Platform & Auth,RolePermission,role_id,INTEGER,FK → roles.id,Yes,-,-
+1. Platform & Auth,RolePermission,resource,VARCHAR(100),Max 100 chars,Yes,-,-
+1. Platform & Auth,RolePermission,can_read,BOOLEAN,Default: False,No,-,-
+1. Platform & Auth,RolePermission,can_create,BOOLEAN,Default: False,No,-,-
+1. Platform & Auth,RolePermission,can_update,BOOLEAN,Default: False,No,-,-
+1. Platform & Auth,RolePermission,can_delete,BOOLEAN,Default: False,No,-,-
+1. Platform & Auth,RolePermission,extended_actions,JSON,Default: auto-generated,No,-,-
+1. Platform & Auth,UserRoleAssignment,id,INTEGER,Primary Key,Yes,-,-
+1. Platform & Auth,UserRoleAssignment,user_id,INTEGER,FK → users.id,Yes,-,-
+1. Platform & Auth,UserRoleAssignment,tenant_id,INTEGER,FK → tenants.id,Yes,-,-
+1. Platform & Auth,UserRoleAssignment,role_id,INTEGER,FK → roles.id,Yes,-,-
+1. Platform & Auth,UserRoleAssignment,site_id,INTEGER,FK → sites.id,No,-,-
+1. Platform & Auth,UserRoleAssignment,assigned_at,DATETIME,Default: auto-generated,No,-,-
+2. Organization Structure,Organization,id,INTEGER,Primary Key,Yes,-,-
+2. Organization Structure,Organization,tenant_id,INTEGER,FK → tenants.id,Yes,-,-
+2. Organization Structure,Organization,site_id,INTEGER,FK → sites.id,Yes,-,-
+2. Organization Structure,Organization,name,VARCHAR(255),Max 255 chars,Yes,-,-
+2. Organization Structure,Organization,code,VARCHAR(50),Max 50 chars,Yes,-,-
+2. Organization Structure,Organization,address,TEXT,-,No,-,-
+2. Organization Structure,Organization,phone,VARCHAR(20),Max 20 chars,No,-,-
+2. Organization Structure,Organization,email,VARCHAR(255),Max 255 chars,No,-,-
+2. Organization Structure,Organization,is_active,BOOLEAN,Default: True,No,-,-
+2. Organization Structure,Organization,is_deleted,BOOLEAN,Default: False,No,-,-
+2. Organization Structure,Organization,created_at,DATETIME,Default: auto-generated,No,-,-
+2. Organization Structure,Project,id,INTEGER,Primary Key,Yes,-,-
+2. Organization Structure,Project,tenant_id,INTEGER,FK → tenants.id,Yes,-,-
+2. Organization Structure,Project,site_id,INTEGER,FK → sites.id,Yes,-,-
+2. Organization Structure,Project,name,VARCHAR(255),Max 255 chars,Yes,-,-
+2. Organization Structure,Project,code,VARCHAR(50),Max 50 chars,Yes,-,-
+2. Organization Structure,Project,organization_id,INTEGER,FK → organizations.id,Yes,-,-
+2. Organization Structure,Project,location,VARCHAR(255),Max 255 chars,No,-,-
+2. Organization Structure,Project,start_date,DATE,-,No,-,-
+2. Organization Structure,Project,end_date,DATE,-,No,-,-
+2. Organization Structure,Project,status,VARCHAR(50),Default: Active; Max 50 chars,No,-,-
+2. Organization Structure,Project,budget,FLOAT,Default: 0,No,-,-
+2. Organization Structure,Project,is_active,BOOLEAN,Default: True,No,-,-
+2. Organization Structure,Project,is_deleted,BOOLEAN,Default: False,No,-,-
+2. Organization Structure,Project,created_at,DATETIME,Default: auto-generated,No,-,-
+2. Organization Structure,Institution,id,INTEGER,Primary Key,Yes,-,-
+2. Organization Structure,Institution,tenant_id,INTEGER,FK → tenants.id,Yes,-,-
+2. Organization Structure,Institution,site_id,INTEGER,FK → sites.id,Yes,-,-
+2. Organization Structure,Institution,name,VARCHAR(255),Max 255 chars,Yes,-,-
+2. Organization Structure,Institution,code,VARCHAR(50),Max 50 chars,Yes,-,-
+2. Organization Structure,Institution,project_id,INTEGER,FK → projects.id,Yes,-,-
+2. Organization Structure,Institution,is_active,BOOLEAN,Default: True,No,-,-
+2. Organization Structure,Institution,is_deleted,BOOLEAN,Default: False,No,-,-
+2. Organization Structure,Institution,created_at,DATETIME,Default: auto-generated,No,-,-
+2. Organization Structure,Building,id,INTEGER,Primary Key,Yes,-,-
+2. Organization Structure,Building,tenant_id,INTEGER,FK → tenants.id,Yes,-,-
+2. Organization Structure,Building,site_id,INTEGER,FK → sites.id,Yes,-,-
+2. Organization Structure,Building,name,VARCHAR(255),Max 255 chars,Yes,-,-
+2. Organization Structure,Building,code,VARCHAR(50),Max 50 chars,Yes,-,-
+2. Organization Structure,Building,project_id,INTEGER,FK → projects.id,No,-,-
+2. Organization Structure,Building,institution_id,INTEGER,FK → institutions.id,No,-,-
+2. Organization Structure,Building,department_name,VARCHAR(255),Max 255 chars,No,-,-
+2. Organization Structure,Building,is_active,BOOLEAN,Default: True,No,-,-
+2. Organization Structure,Building,is_deleted,BOOLEAN,Default: False,No,-,-
+2. Organization Structure,Building,created_at,DATETIME,Default: auto-generated,No,-,-
+2. Organization Structure,Department,id,INTEGER,Primary Key,Yes,-,-
+2. Organization Structure,Department,tenant_id,INTEGER,FK → tenants.id,Yes,-,-
+2. Organization Structure,Department,site_id,INTEGER,FK → sites.id,Yes,-,-
+2. Organization Structure,Department,name,VARCHAR(255),Max 255 chars,Yes,-,-
+2. Organization Structure,Department,code,VARCHAR(50),Max 50 chars,No,-,-
+2. Organization Structure,Department,accounting_code,VARCHAR(100),Max 100 chars,No,-,-
+2. Organization Structure,Department,building_id,INTEGER,FK → buildings.id,No,-,-
+2. Organization Structure,Department,institution_id,INTEGER,FK → institutions.id,No,-,-
+2. Organization Structure,Department,is_active,BOOLEAN,Default: True,No,-,-
+2. Organization Structure,Department,is_deleted,BOOLEAN,Default: False,No,-,-
+2. Organization Structure,Department,created_at,DATETIME,Default: auto-generated,No,-,-
+2. Organization Structure,Floor,id,INTEGER,Primary Key,Yes,-,-
+2. Organization Structure,Floor,tenant_id,INTEGER,FK → tenants.id,Yes,-,-
+2. Organization Structure,Floor,site_id,INTEGER,FK → sites.id,Yes,-,-
+2. Organization Structure,Floor,name,VARCHAR(255),Max 255 chars,Yes,-,-
+2. Organization Structure,Floor,level,INTEGER,Default: 0,No,-,-
+2. Organization Structure,Floor,building_id,INTEGER,FK → buildings.id,No,-,-
+2. Organization Structure,Floor,department_name,VARCHAR(255),Max 255 chars,No,-,-
+2. Organization Structure,Floor,is_active,BOOLEAN,Default: True,No,-,-
+2. Organization Structure,Floor,is_deleted,BOOLEAN,Default: False,No,-,-
+2. Organization Structure,Floor,created_at,DATETIME,Default: auto-generated,No,-,-
+2. Organization Structure,Room,id,INTEGER,Primary Key,Yes,-,-
+2. Organization Structure,Room,tenant_id,INTEGER,FK → tenants.id,Yes,-,-
+2. Organization Structure,Room,site_id,INTEGER,FK → sites.id,Yes,-,-
+2. Organization Structure,Room,name,VARCHAR(255),Max 255 chars,Yes,-,-
+2. Organization Structure,Room,code,VARCHAR(50),Max 50 chars,No,-,-
+2. Organization Structure,Room,department_name,VARCHAR(255),Max 255 chars,No,-,-
+2. Organization Structure,Room,floor_id,INTEGER,FK → floors.id,Yes,-,-
+2. Organization Structure,Room,is_active,BOOLEAN,Default: True,No,-,-
+2. Organization Structure,Room,is_deleted,BOOLEAN,Default: False,No,-,-
+2. Organization Structure,Room,created_at,DATETIME,Default: auto-generated,No,-,-
+2. Organization Structure,Warehouse,id,INTEGER,Primary Key,Yes,-,-
+2. Organization Structure,Warehouse,tenant_id,INTEGER,FK → tenants.id,Yes,-,-
+2. Organization Structure,Warehouse,site_id,INTEGER,FK → sites.id,Yes,-,-
+2. Organization Structure,Warehouse,name,VARCHAR(255),Max 255 chars,Yes,-,Store Name is required
+2. Organization Structure,Warehouse,code,VARCHAR(50),Max 50 chars,Yes,-,-
+2. Organization Structure,Warehouse,project_id,INTEGER,FK → projects.id,Yes,-,-
+2. Organization Structure,Warehouse,warehouse_type,VARCHAR(100),Max 100 chars,No,-,-
+2. Organization Structure,Warehouse,location,VARCHAR(255),Max 255 chars,No,-,-
+2. Organization Structure,Warehouse,capacity,VARCHAR(100),Max 100 chars,No,-,-
+2. Organization Structure,Warehouse,manager_name,VARCHAR(255),Max 255 chars,No,-,-
+2. Organization Structure,Warehouse,manager_id,INTEGER,FK → users.id,No,-,-
+2. Organization Structure,Warehouse,is_active,BOOLEAN,Default: True,No,-,-
+2. Organization Structure,Warehouse,is_deleted,BOOLEAN,Default: False,No,-,-
+2. Organization Structure,Warehouse,created_at,DATETIME,Default: auto-generated,No,-,-
+3. Master Data,Category,id,INTEGER,Primary Key,Yes,-,-
+3. Master Data,Category,tenant_id,INTEGER,FK → tenants.id,Yes,-,-
+3. Master Data,Category,site_id,INTEGER,FK → sites.id,Yes,-,-
+3. Master Data,Category,name,VARCHAR(100),Max 100 chars,Yes,min_length=1,Category Name is required
+3. Master Data,Category,sequence_number,INTEGER,-,No,-,-
+3. Master Data,Category,code,VARCHAR(50),Max 50 chars,No,-,-
+3. Master Data,Category,material_code_prefix,VARCHAR(3),Max 3 chars,Yes,min_length=3; max_length=3,Material Code Prefix is required; Prefix must be exactly 3 alphabetical characters (A-Z)
+3. Master Data,Category,description,TEXT,-,No,-,-
+3. Master Data,Category,is_active,BOOLEAN,Default: True,No,-,-
+3. Master Data,Category,is_deleted,BOOLEAN,Default: False,No,-,-
+3. Master Data,SubCategory,id,INTEGER,Primary Key,Yes,-,-
+3. Master Data,SubCategory,tenant_id,INTEGER,FK → tenants.id,Yes,-,-
+3. Master Data,SubCategory,site_id,INTEGER,FK → sites.id,Yes,-,-
+3. Master Data,SubCategory,name,VARCHAR(100),Max 100 chars,Yes,-,Sub Category Name is required
+3. Master Data,SubCategory,category_id,INTEGER,FK → categories.id,Yes,-,Parent Category is required
+3. Master Data,SubCategory,is_active,BOOLEAN,Default: True,No,-,-
+3. Master Data,SubCategory,is_deleted,BOOLEAN,Default: False,No,-,-
+3. Master Data,UOM,id,INTEGER,Primary Key,Yes,-,-
+3. Master Data,UOM,tenant_id,INTEGER,FK → tenants.id,Yes,-,-
+3. Master Data,UOM,site_id,INTEGER,FK → sites.id,Yes,-,-
+3. Master Data,UOM,name,VARCHAR(50),Max 50 chars,Yes,min_length=1,UOM Name is required
+3. Master Data,UOM,abbreviation,VARCHAR(10),Max 10 chars,Yes,min_length=1,Abbreviation is required
+3. Master Data,UOM,allow_decimal,BOOLEAN,Default: False,No,-,-
+3. Master Data,UOM,is_active,BOOLEAN,Default: True,No,-,-
+3. Master Data,UOM,is_deleted,BOOLEAN,Default: False,No,-,-
+3. Master Data,Material,id,INTEGER,Primary Key,Yes,-,-
+3. Master Data,Material,tenant_id,INTEGER,FK → tenants.id,Yes,-,-
+3. Master Data,Material,site_id,INTEGER,FK → sites.id,Yes,-,-
+3. Master Data,Material,code,VARCHAR(50),Max 50 chars,Yes,-,-
+3. Master Data,Material,name,VARCHAR(255),Max 255 chars,Yes,-,Material name is required
+3. Master Data,Material,alias,VARCHAR(500),Max 500 chars,No,-,-
+3. Master Data,Material,reference_no,VARCHAR(50),Max 50 chars,No,-,-
+3. Master Data,Material,category_id,INTEGER,FK → categories.id,Yes,-,Category is required
+3. Master Data,Material,subcategory_id,INTEGER,FK → subcategories.id,No,-,-
+3. Master Data,Material,uom_id,INTEGER,FK → uom.id,Yes,-,UOM is required
+3. Master Data,Material,reorder_level,FLOAT,Default: 0,Yes,-,Reorder Level is required for Consumables; Reorder Level must be a positive number; Reorder Level must be a whole number
+3. Master Data,Material,maximum_level,FLOAT,Default: 0,Yes,-,Maximum Level is required for Consumables; Maximum Level must be a positive number; Maximum Level must be a whole number; Maximum Level must be greater than Reorder Level
+3. Master Data,Material,standard_cost,FLOAT,Default: 0,Yes,-,Standard Cost is required; Standard Cost cannot be negative; Standard Cost cannot exceed 100 Crores; Standard Cost allows maximum 2 decimal places
+3. Master Data,Material,preferred_vendor_id,INTEGER,FK → vendors.id,No,-,-
+3. Master Data,Material,storage_type,VARCHAR(100),Default: General; Max 100 chars,No,-,-
+3. Master Data,Material,hsn_code,VARCHAR(20),Max 20 chars,No,-,"HSN Code must be exactly 2, 4, 6, or 8 numeric digits; HSN Code must be 2, 4, 6, or 8 digits"
+3. Master Data,Material,gst_rate,FLOAT,Default: 0,Yes,-,GST Rate is required; GST Rate must be between 0 and 100; GST Rate allows maximum 2 decimal places
+3. Master Data,Material,material_type,VARCHAR(50),Default: Consumable; Max 50 chars,Yes,-,Material type is required
+3. Master Data,Material,warehouse_id,INTEGER,FK → warehouses.id,Yes,-,Store is required
+3. Master Data,Material,description,TEXT,-,No,-,-
+3. Master Data,Material,is_active,BOOLEAN,Default: True,No,-,-
+3. Master Data,Material,is_deleted,BOOLEAN,Default: False,No,-,-
+3. Master Data,Material,created_at,DATETIME,Default: auto-generated,No,-,-
+3. Master Data,Material,updated_at,DATETIME,Default: auto-generated,No,-,-
+3. Master Data,Vendor,id,INTEGER,Primary Key,Yes,-,-
+3. Master Data,Vendor,tenant_id,INTEGER,FK → tenants.id,Yes,-,-
+3. Master Data,Vendor,site_id,INTEGER,FK → sites.id,Yes,-,-
+3. Master Data,Vendor,name,VARCHAR(255),Max 255 chars,Yes,-,Vendor name is required
+3. Master Data,Vendor,code,VARCHAR(50),Max 50 chars,Yes,-,-
+3. Master Data,Vendor,contact_person,VARCHAR(255),Max 255 chars,Yes,-,Contact person is required; Contact Person cannot contain numbers or special characters
+3. Master Data,Vendor,phone,VARCHAR(20),Max 20 chars,Yes,-,Contact Number is required; Contact Number must be 10 to 11 digits
+3. Master Data,Vendor,email,VARCHAR(255),Max 255 chars,Yes,-,Email is required; Invalid email address
+3. Master Data,Vendor,gst_number,VARCHAR(20),Max 20 chars,Yes,-,GST number is required; Invalid GSTIN format (e.g. 22AAAAA0000A1Z5)
+3. Master Data,Vendor,pan_number,VARCHAR(15),Max 15 chars,No,-,-
+3. Master Data,Vendor,address_line_1,TEXT,-,Yes,-,Address Line 1 is required
+3. Master Data,Vendor,address_line_2,TEXT,-,No,-,-
+3. Master Data,Vendor,city,VARCHAR(100),Max 100 chars,Yes,-,City is required
+3. Master Data,Vendor,state,VARCHAR(100),Max 100 chars,Yes,-,State is required
+3. Master Data,Vendor,pincode,VARCHAR(10),Max 10 chars,Yes,-,Pincode is required
+3. Master Data,Vendor,bank_name,VARCHAR(100),Max 100 chars,No,-,-
+3. Master Data,Vendor,bank_account,VARCHAR(50),Max 50 chars,No,-,-
+3. Master Data,Vendor,ifsc_code,VARCHAR(20),Max 20 chars,No,-,-
+3. Master Data,Vendor,rating,FLOAT,Default: 0,No,-,-
+3. Master Data,Vendor,is_active,BOOLEAN,Default: True,No,-,-
+3. Master Data,Vendor,is_deleted,BOOLEAN,Default: False,No,-,-
+3. Master Data,Vendor,created_at,DATETIME,Default: auto-generated,No,-,-
+3. Master Data,Vendor,updated_at,DATETIME,Default: auto-generated,No,-,-
+3. Master Data,VendorCategory,id,INTEGER,Primary Key,Yes,-,-
+3. Master Data,VendorCategory,vendor_id,INTEGER,FK → vendors.id,Yes,-,-
+3. Master Data,VendorCategory,category_id,INTEGER,FK → categories.id,Yes,-,-
+3. Master Data,CompanyAddress,id,INTEGER,Primary Key,Yes,-,-
+3. Master Data,CompanyAddress,tenant_id,INTEGER,FK → tenants.id,Yes,-,-
+3. Master Data,CompanyAddress,site_id,INTEGER,FK → sites.id,Yes,-,-
+3. Master Data,CompanyAddress,name,VARCHAR(255),Max 255 chars,Yes,-,Company Name is required
+3. Master Data,CompanyAddress,code,VARCHAR(50),Max 50 chars,Yes,-,-
+3. Master Data,CompanyAddress,address_type,VARCHAR(50),Default: Billing; Max 50 chars,No,-,-
+3. Master Data,CompanyAddress,contact_person,VARCHAR(255),Max 255 chars,No,-,Contact Person cannot contain numbers or special characters
+3. Master Data,CompanyAddress,phone,VARCHAR(20),Max 20 chars,No,-,Contact Number must be 10 to 11 digits
+3. Master Data,CompanyAddress,email,VARCHAR(255),Max 255 chars,No,-,Invalid email address
+3. Master Data,CompanyAddress,gst_number,VARCHAR(20),Max 20 chars,Yes,-,GST number is required; Invalid GSTIN format (e.g. 22AAAAA0000A1Z5)
+3. Master Data,CompanyAddress,pan_number,VARCHAR(15),Max 15 chars,No,-,-
+3. Master Data,CompanyAddress,address,TEXT,-,Yes,-,Registered Address is required
+3. Master Data,CompanyAddress,city,VARCHAR(100),Max 100 chars,Yes,-,City is required
+3. Master Data,CompanyAddress,state,VARCHAR(100),Max 100 chars,Yes,-,State is required
+3. Master Data,CompanyAddress,pincode,VARCHAR(10),Max 10 chars,Yes,-,Pincode is required; Pincode must be exactly 6 digits
+3. Master Data,CompanyAddress,bank_name,VARCHAR(100),Max 100 chars,No,-,-
+3. Master Data,CompanyAddress,bank_account,VARCHAR(50),Max 50 chars,No,-,-
+3. Master Data,CompanyAddress,ifsc_code,VARCHAR(20),Max 20 chars,No,-,-
+3. Master Data,CompanyAddress,is_active,BOOLEAN,Default: True,No,-,-
+3. Master Data,CompanyAddress,is_deleted,BOOLEAN,Default: False,No,-,-
+3. Master Data,CompanyAddress,created_at,DATETIME,Default: auto-generated,No,-,-
+3. Master Data,CompanyAddress,updated_at,DATETIME,Default: auto-generated,No,-,-
+4. Procurement — Indents,Indent,id,INTEGER,Primary Key,Yes,-,-
+4. Procurement — Indents,Indent,tenant_id,INTEGER,FK → tenants.id,Yes,-,-
+4. Procurement — Indents,Indent,site_id,INTEGER,FK → sites.id,Yes,-,-
+4. Procurement — Indents,Indent,indent_number,VARCHAR(50),Max 50 chars,Yes,-,-
+4. Procurement — Indents,Indent,requester_id,INTEGER,FK → users.id,Yes,-,-
+4. Procurement — Indents,Indent,institution_id,INTEGER,FK → institutions.id,Yes,-,Institution is required
+4. Procurement — Indents,Indent,complaint_id,INTEGER,FK → complaints.id,No,-,-
+4. Procurement — Indents,Indent,room_id,INTEGER,FK → rooms.id,No,-,-
+4. Procurement — Indents,Indent,building_id,INTEGER,FK → buildings.id,No,-,-
+4. Procurement — Indents,Indent,floor,VARCHAR(50),Max 50 chars,No,-,-
+4. Procurement — Indents,Indent,location,VARCHAR(255),Max 255 chars,No,-,-
+4. Procurement — Indents,Indent,department,VARCHAR(255),Max 255 chars,Yes,-,Department is required
+4. Procurement — Indents,Indent,remarks,TEXT,-,No,-,-
+4. Procurement — Indents,Indent,total_amount,FLOAT,Default: 0,No,-,-
+4. Procurement — Indents,Indent,status,VARCHAR(50),Default: Draft; Max 50 chars,No,-,-
+4. Procurement — Indents,Indent,current_approval_level,INTEGER,Default: 1,No,-,-
+4. Procurement — Indents,Indent,approved_by_id,INTEGER,FK → users.id,No,-,-
+4. Procurement — Indents,Indent,approved_at,DATETIME,-,No,-,-
+4. Procurement — Indents,Indent,is_deleted,BOOLEAN,Default: False,No,-,-
+4. Procurement — Indents,Indent,created_at,DATETIME,Default: auto-generated,No,-,-
+4. Procurement — Indents,Indent,updated_at,DATETIME,Default: auto-generated,No,-,-
+4. Procurement — Indents,IndentItem,id,INTEGER,Primary Key,Yes,-,-
+4. Procurement — Indents,IndentItem,indent_id,INTEGER,FK → indents.id,Yes,-,-
+4. Procurement — Indents,IndentItem,material_id,INTEGER,FK → materials.id,Yes,-,-
+4. Procurement — Indents,IndentItem,requested_quantity,FLOAT,-,Yes,-,-
+4. Procurement — Indents,IndentItem,approved_quantity,FLOAT,-,No,-,-
+4. Procurement — Indents,IndentItem,issued_quantity,FLOAT,Default: 0,No,-,-
+4. Procurement — Indents,IndentItem,acknowledged_quantity,FLOAT,Default: 0,No,-,-
+4. Procurement — Indents,IndentApproval,id,INTEGER,Primary Key,Yes,-,-
+4. Procurement — Indents,IndentApproval,indent_id,INTEGER,FK → indents.id,Yes,-,-
+4. Procurement — Indents,IndentApproval,approval_flow_id,INTEGER,FK → approval_flows.id,Yes,-,-
+4. Procurement — Indents,IndentApproval,approver_id,INTEGER,FK → users.id,Yes,-,-
+4. Procurement — Indents,IndentApproval,approved_quantities,JSON,Default: auto-generated,No,-,-
+4. Procurement — Indents,IndentApproval,remarks,TEXT,-,No,-,-
+4. Procurement — Indents,IndentApproval,approved_at,DATETIME,Default: auto-generated,No,-,-
+5. Procurement — Purchase Requests,PurchaseRequest,id,INTEGER,Primary Key,Yes,-,-
+5. Procurement — Purchase Requests,PurchaseRequest,tenant_id,INTEGER,FK → tenants.id,Yes,-,-
+5. Procurement — Purchase Requests,PurchaseRequest,site_id,INTEGER,FK → sites.id,Yes,-,-
+5. Procurement — Purchase Requests,PurchaseRequest,pr_number,VARCHAR(50),Max 50 chars,Yes,-,-
+5. Procurement — Purchase Requests,PurchaseRequest,requester_id,INTEGER,FK → users.id,Yes,-,-
+5. Procurement — Purchase Requests,PurchaseRequest,required_for_room_id,INTEGER,FK → rooms.id,No,-,-
+5. Procurement — Purchase Requests,PurchaseRequest,building_id,INTEGER,FK → buildings.id,No,-,-
+5. Procurement — Purchase Requests,PurchaseRequest,department_name,VARCHAR(255),Max 255 chars,Yes,-,Department is required
+5. Procurement — Purchase Requests,PurchaseRequest,project_id,INTEGER,FK → projects.id,Yes,max_length=255,Institution is required
+5. Procurement — Purchase Requests,PurchaseRequest,required_date,DATE,-,Yes,-,Required Date is required; Required Date cannot be in the past
+5. Procurement — Purchase Requests,PurchaseRequest,remarks,TEXT,-,No,-,-
+5. Procurement — Purchase Requests,PurchaseRequest,status,VARCHAR(50),Default: Draft; Max 50 chars,No,min_length=1,-
+5. Procurement — Purchase Requests,PurchaseRequest,current_approval_level,INTEGER,Default: 1,No,-,-
+5. Procurement — Purchase Requests,PurchaseRequest,approved_by_id,INTEGER,FK → users.id,No,-,-
+5. Procurement — Purchase Requests,PurchaseRequest,approved_at,DATETIME,-,No,-,-
+5. Procurement — Purchase Requests,PurchaseRequest,is_deleted,BOOLEAN,Default: False,No,-,-
+5. Procurement — Purchase Requests,PurchaseRequest,created_at,DATETIME,Default: auto-generated,No,-,-
+5. Procurement — Purchase Requests,PurchaseRequest,updated_at,DATETIME,Default: auto-generated,No,-,-
+5. Procurement — Purchase Requests,PurchaseRequestItem,id,INTEGER,Primary Key,Yes,-,-
+5. Procurement — Purchase Requests,PurchaseRequestItem,pr_id,INTEGER,FK → purchase_requests.id,Yes,-,-
+5. Procurement — Purchase Requests,PurchaseRequestItem,material_id,INTEGER,FK → materials.id,Yes,gt=0,-
+5. Procurement — Purchase Requests,PurchaseRequestItem,quantity,FLOAT,-,Yes,-,-
+5. Procurement — Purchase Requests,PurchaseRequestItem,approved_quantity,FLOAT,-,No,-,-
+5. Procurement — Purchase Requests,PurchaseRequestApproval,id,INTEGER,Primary Key,Yes,-,-
+5. Procurement — Purchase Requests,PurchaseRequestApproval,pr_id,INTEGER,FK → purchase_requests.id,Yes,-,-
+5. Procurement — Purchase Requests,PurchaseRequestApproval,approval_flow_id,INTEGER,FK → approval_flows.id,Yes,-,-
+5. Procurement — Purchase Requests,PurchaseRequestApproval,approver_id,INTEGER,FK → users.id,Yes,-,-
+5. Procurement — Purchase Requests,PurchaseRequestApproval,approved_quantities,JSON,Default: auto-generated,No,-,-
+5. Procurement — Purchase Requests,PurchaseRequestApproval,remarks,TEXT,-,No,-,-
+5. Procurement — Purchase Requests,PurchaseRequestApproval,approved_at,DATETIME,Default: auto-generated,No,-,-
+6. Procurement — Purchase Orders,PurchaseOrder,id,INTEGER,Primary Key,Yes,-,-
+6. Procurement — Purchase Orders,PurchaseOrder,tenant_id,INTEGER,FK → tenants.id,Yes,-,-
+6. Procurement — Purchase Orders,PurchaseOrder,site_id,INTEGER,FK → sites.id,Yes,-,-
+6. Procurement — Purchase Orders,PurchaseOrder,po_number,VARCHAR(50),Max 50 chars,Yes,-,-
+6. Procurement — Purchase Orders,PurchaseOrder,vendor_id,INTEGER,FK → vendors.id,Yes,-,Please select a Vendor.
+6. Procurement — Purchase Orders,PurchaseOrder,project_id,INTEGER,FK → projects.id,Yes,-,Project is required.
+6. Procurement — Purchase Orders,PurchaseOrder,pr_id,INTEGER,FK → purchase_requests.id,No,-,-
+6. Procurement — Purchase Orders,PurchaseOrder,indent_id,INTEGER,FK → indents.id,No,-,-
+6. Procurement — Purchase Orders,PurchaseOrder,qr_id,INTEGER,FK → quotation_requests.id,No,-,-
+6. Procurement — Purchase Orders,PurchaseOrder,po_type,VARCHAR(50),Default: Formal; Max 50 chars,No,-,-
+6. Procurement — Purchase Orders,PurchaseOrder,total_amount,FLOAT,Default: 0,No,-,-
+6. Procurement — Purchase Orders,PurchaseOrder,delivery_date,DATE,-,Yes,-,Delivery Date is required.; Delivery Date cannot be in the past.
+6. Procurement — Purchase Orders,PurchaseOrder,status,VARCHAR(50),Default: Draft; Max 50 chars,No,-,-
+6. Procurement — Purchase Orders,PurchaseOrder,current_approval_level,INTEGER,Default: 1,No,-,-
+6. Procurement — Purchase Orders,PurchaseOrder,terms,TEXT,-,No,-,Terms and Conditions are mandatory.
+6. Procurement — Purchase Orders,PurchaseOrder,remarks,TEXT,-,No,-,-
+6. Procurement — Purchase Orders,PurchaseOrder,annexure,TEXT,-,No,-,-
+6. Procurement — Purchase Orders,PurchaseOrder,created_by_id,INTEGER,FK → users.id,Yes,-,-
+6. Procurement — Purchase Orders,PurchaseOrder,approved_by_id,INTEGER,FK → users.id,No,-,-
+6. Procurement — Purchase Orders,PurchaseOrder,approved_at,DATETIME,-,No,-,-
+6. Procurement — Purchase Orders,PurchaseOrder,is_deleted,BOOLEAN,Default: False,No,-,-
+6. Procurement — Purchase Orders,PurchaseOrder,created_at,DATETIME,Default: auto-generated,No,-,-
+6. Procurement — Purchase Orders,PurchaseOrder,updated_at,DATETIME,Default: auto-generated,No,-,-
+6. Procurement — Purchase Orders,PurchaseOrderItem,id,INTEGER,Primary Key,Yes,-,-
+6. Procurement — Purchase Orders,PurchaseOrderItem,po_id,INTEGER,FK → purchase_orders.id,Yes,-,-
+6. Procurement — Purchase Orders,PurchaseOrderItem,material_id,INTEGER,FK → materials.id,Yes,gt=0,-
+6. Procurement — Purchase Orders,PurchaseOrderItem,quantity,FLOAT,-,Yes,-,-
+6. Procurement — Purchase Orders,PurchaseOrderItem,rate,FLOAT,-,Yes,ge=0,-
+6. Procurement — Purchase Orders,PurchaseOrderItem,amount,FLOAT,-,Yes,-,-
+6. Procurement — Purchase Orders,PurchaseOrderItem,received_quantity,FLOAT,Default: 0,No,-,-
+6. Procurement — Purchase Orders,PurchaseOrderItem,approved_quantity,FLOAT,-,No,-,-
+6. Procurement — Purchase Orders,PurchaseOrderItem,discount_percent,FLOAT,Default: 0,No,-,-
+6. Procurement — Purchase Orders,PurchaseOrderItem,cgst_percentage,FLOAT,Default: 0,No,-,-
+6. Procurement — Purchase Orders,PurchaseOrderItem,sgst_percentage,FLOAT,Default: 0,No,-,-
+6. Procurement — Purchase Orders,PurchaseOrderItem,igst_percentage,FLOAT,Default: 0,No,-,-
+6. Procurement — Purchase Orders,PurchaseOrderItem,is_gst_inclusive,BOOLEAN,Default: False,No,-,-
+6. Procurement — Purchase Orders,PurchaseOrderItem,remarks,TEXT,-,No,-,-
+6. Procurement — Purchase Orders,PurchaseOrderApproval,id,INTEGER,Primary Key,Yes,-,-
+6. Procurement — Purchase Orders,PurchaseOrderApproval,po_id,INTEGER,FK → purchase_orders.id,Yes,-,-
+6. Procurement — Purchase Orders,PurchaseOrderApproval,approval_flow_id,INTEGER,FK → approval_flows.id,Yes,-,-
+6. Procurement — Purchase Orders,PurchaseOrderApproval,approver_id,INTEGER,FK → users.id,Yes,-,-
+6. Procurement — Purchase Orders,PurchaseOrderApproval,approved_quantities,JSON,Default: auto-generated,No,-,-
+6. Procurement — Purchase Orders,PurchaseOrderApproval,remarks,TEXT,-,No,-,-
+6. Procurement — Purchase Orders,PurchaseOrderApproval,approved_at,DATETIME,Default: auto-generated,No,-,-
+7. Procurement — Quotations,QuotationRequest,id,INTEGER,Primary Key,Yes,-,-
+7. Procurement — Quotations,QuotationRequest,tenant_id,INTEGER,FK → tenants.id,Yes,-,-
+7. Procurement — Quotations,QuotationRequest,site_id,INTEGER,FK → sites.id,Yes,-,-
+7. Procurement — Quotations,QuotationRequest,qr_number,VARCHAR(50),Max 50 chars,Yes,-,-
+7. Procurement — Quotations,QuotationRequest,project_id,INTEGER,FK → projects.id,Yes,-,-
+7. Procurement — Quotations,QuotationRequest,created_by_id,INTEGER,FK → users.id,Yes,-,-
+7. Procurement — Quotations,QuotationRequest,required_date,DATE,-,Yes,-,Required Date is required.; Required Date cannot be in the past.
+7. Procurement — Quotations,QuotationRequest,remarks,TEXT,-,No,-,-
+7. Procurement — Quotations,QuotationRequest,status,VARCHAR(50),Default: Draft; Max 50 chars,No,-,-
+7. Procurement — Quotations,QuotationRequest,approved_by_id,INTEGER,FK → users.id,No,-,-
+7. Procurement — Quotations,QuotationRequest,approved_at,DATETIME,-,No,-,-
+7. Procurement — Quotations,QuotationRequest,approval_remarks,TEXT,-,No,-,-
+7. Procurement — Quotations,QuotationRequest,is_deleted,BOOLEAN,Default: False,No,-,-
+7. Procurement — Quotations,QuotationRequest,created_at,DATETIME,Default: auto-generated,No,-,-
+7. Procurement — Quotations,QuotationRequest,updated_at,DATETIME,Default: auto-generated,No,-,-
+7. Procurement — Quotations,QuotationRequestItem,id,INTEGER,Primary Key,Yes,-,-
+7. Procurement — Quotations,QuotationRequestItem,qr_id,INTEGER,FK → quotation_requests.id,Yes,-,-
+7. Procurement — Quotations,QuotationRequestItem,material_id,INTEGER,FK → materials.id,Yes,-,-
+7. Procurement — Quotations,QuotationRequestItem,quantity,FLOAT,-,Yes,-,-
+7. Procurement — Quotations,QuotationRequestItem,source,VARCHAR(20),Default: Manual; Max 20 chars,No,-,-
+7. Procurement — Quotations,QuotationRequestItem,source_pr_id,INTEGER,FK → purchase_requests.id,No,-,-
+7. Procurement — Quotations,QuotationRequestItemSource,id,INTEGER,Primary Key,Yes,-,-
+7. Procurement — Quotations,QuotationRequestItemSource,qr_item_id,INTEGER,FK → quotation_request_items.id,Yes,-,-
+7. Procurement — Quotations,QuotationRequestItemSource,source,VARCHAR(20),Max 20 chars,Yes,-,-
+7. Procurement — Quotations,QuotationRequestItemSource,source_pr_id,INTEGER,FK → purchase_requests.id,No,-,-
+7. Procurement — Quotations,QuotationRequestItemSource,quantity,FLOAT,-,Yes,-,-
+7. Procurement — Quotations,QuotationRequestPR,id,INTEGER,Primary Key,Yes,-,-
+7. Procurement — Quotations,QuotationRequestPR,qr_id,INTEGER,FK → quotation_requests.id,Yes,-,-
+7. Procurement — Quotations,QuotationRequestPR,pr_id,INTEGER,FK → purchase_requests.id,Yes,-,-
+7. Procurement — Quotations,QuotationRequestVendor,id,INTEGER,Primary Key,Yes,-,-
+7. Procurement — Quotations,QuotationRequestVendor,qr_id,INTEGER,FK → quotation_requests.id,Yes,-,-
+7. Procurement — Quotations,QuotationRequestVendor,vendor_id,INTEGER,FK → vendors.id,Yes,-,-
+7. Procurement — Quotations,QuotationRequestVendor,is_sent,BOOLEAN,Default: False,No,-,-
+7. Procurement — Quotations,QuotationRequestVendor,sent_at,DATETIME,-,No,-,-
+7. Procurement — Quotations,QuotationRequestVendor,receipt_status,VARCHAR(50),Default: Pending; Max 50 chars,No,-,-
+7. Procurement — Quotations,VendorQuotation,id,INTEGER,Primary Key,Yes,-,-
+7. Procurement — Quotations,VendorQuotation,qr_id,INTEGER,FK → quotation_requests.id,Yes,-,-
+7. Procurement — Quotations,VendorQuotation,vendor_id,INTEGER,FK → vendors.id,Yes,-,-
+7. Procurement — Quotations,VendorQuotation,quotation_number,VARCHAR(100),Max 100 chars,No,-,-
+7. Procurement — Quotations,VendorQuotation,quotation_date,DATE,-,No,-,-
+7. Procurement — Quotations,VendorQuotation,received_date,DATE,-,No,-,-
+7. Procurement — Quotations,VendorQuotation,attachment_path,VARCHAR(500),Max 500 chars,No,-,-
+7. Procurement — Quotations,VendorQuotation,remarks,TEXT,-,No,-,-
+7. Procurement — Quotations,VendorQuotation,status,VARCHAR(50),Default: Received; Max 50 chars,No,-,-
+7. Procurement — Quotations,VendorQuotation,entered_by_id,INTEGER,FK → users.id,Yes,-,-
+7. Procurement — Quotations,VendorQuotation,created_at,DATETIME,Default: auto-generated,No,-,-
+7. Procurement — Quotations,VendorQuotationItem,id,INTEGER,Primary Key,Yes,-,-
+7. Procurement — Quotations,VendorQuotationItem,vendor_quotation_id,INTEGER,FK → vendor_quotations.id,Yes,-,-
+7. Procurement — Quotations,VendorQuotationItem,qr_item_id,INTEGER,FK → quotation_request_items.id,Yes,-,-
+7. Procurement — Quotations,VendorQuotationItem,material_id,INTEGER,FK → materials.id,Yes,-,-
+7. Procurement — Quotations,VendorQuotationItem,quoted_rate,FLOAT,-,Yes,-,-
+7. Procurement — Quotations,VendorQuotationItem,delivery_days,INTEGER,-,No,-,-
+7. Procurement — Quotations,VendorQuotationItem,is_excluded,BOOLEAN,Default: False,No,-,-
+7. Procurement — Quotations,VendorQuotationItem,remarks,TEXT,-,No,-,-
+7. Procurement — Quotations,QuotationComparison,id,INTEGER,Primary Key,Yes,-,-
+7. Procurement — Quotations,QuotationComparison,qr_id,INTEGER,FK → quotation_requests.id,Yes,-,-
+7. Procurement — Quotations,QuotationComparison,qr_item_id,INTEGER,FK → quotation_request_items.id,Yes,-,-
+7. Procurement — Quotations,QuotationComparison,material_id,INTEGER,FK → materials.id,Yes,-,-
+7. Procurement — Quotations,QuotationComparison,selected_vendor_id,INTEGER,FK → vendors.id,Yes,-,-
+7. Procurement — Quotations,QuotationComparison,auto_rank_vendor_id,INTEGER,FK → vendors.id,Yes,-,-
+7. Procurement — Quotations,QuotationComparison,is_overridden,BOOLEAN,Default: False,No,-,-
+7. Procurement — Quotations,QuotationComparison,override_reason,TEXT,-,No,-,-
+7. Procurement — Quotations,QuotationComparison,approved_by_id,INTEGER,FK → users.id,No,-,-
+7. Procurement — Quotations,QuotationComparison,approved_at,DATETIME,-,No,-,-
+8. Inward — Gate Entry & GRN,GateEntry,id,INTEGER,Primary Key,Yes,-,-
+8. Inward — Gate Entry & GRN,GateEntry,tenant_id,INTEGER,FK → tenants.id,Yes,-,-
+8. Inward — Gate Entry & GRN,GateEntry,site_id,INTEGER,FK → sites.id,Yes,-,-
+8. Inward — Gate Entry & GRN,GateEntry,entry_number,VARCHAR(50),Max 50 chars,Yes,-,-
+8. Inward — Gate Entry & GRN,GateEntry,vehicle_number,VARCHAR(50),Max 50 chars,No,-,-
+8. Inward — Gate Entry & GRN,GateEntry,vendor_id,INTEGER,FK → vendors.id,No,-,-
+8. Inward — Gate Entry & GRN,GateEntry,po_id,INTEGER,FK → purchase_orders.id,No,-,-
+8. Inward — Gate Entry & GRN,GateEntry,project_id,INTEGER,FK → projects.id,No,-,-
+8. Inward — Gate Entry & GRN,GateEntry,material_id,INTEGER,FK → materials.id,No,-,-
+8. Inward — Gate Entry & GRN,GateEntry,quantity,FLOAT,-,No,-,-
+8. Inward — Gate Entry & GRN,GateEntry,arrival_time,DATETIME,Default: auto-generated,No,-,-
+8. Inward — Gate Entry & GRN,GateEntry,driver_name,VARCHAR(255),Max 255 chars,No,-,-
+8. Inward — Gate Entry & GRN,GateEntry,driver_phone,VARCHAR(20),Max 20 chars,No,-,-
+8. Inward — Gate Entry & GRN,GateEntry,delivery_person_name,VARCHAR(255),Max 255 chars,Yes,-,Delivery Person Name is required.
+8. Inward — Gate Entry & GRN,GateEntry,entry_type,VARCHAR(50),Default: Vehicle; Max 50 chars,No,max_length=255,-
+8. Inward — Gate Entry & GRN,GateEntry,photo_url,VARCHAR(500),Max 500 chars,No,-,-
+8. Inward — Gate Entry & GRN,GateEntry,invoice_scan_url,VARCHAR(500),Max 500 chars,No,-,Please upload the scanned invoice.
+8. Inward — Gate Entry & GRN,GateEntry,invoice_number,VARCHAR(100),Max 100 chars,Yes,-,Invoice Number is required.
+8. Inward — Gate Entry & GRN,GateEntry,invoice_date,DATE,-,Yes,-,Invoice Date is required.; Future dates are not allowed.
+8. Inward — Gate Entry & GRN,GateEntry,invoice_amount,FLOAT,Default: 0,No,-,-
+8. Inward — Gate Entry & GRN,GateEntry,remarks,TEXT,-,No,-,-
+8. Inward — Gate Entry & GRN,GateEntry,status,VARCHAR(50),Default: Awaiting GRN; Max 50 chars,No,-,-
+8. Inward — Gate Entry & GRN,GateEntry,recorded_by_id,INTEGER,FK → users.id,Yes,-,-
+8. Inward — Gate Entry & GRN,GateEntry,is_deleted,BOOLEAN,Default: False,No,-,-
+8. Inward — Gate Entry & GRN,GateEntry,created_at,DATETIME,Default: auto-generated,No,-,-
+8. Inward — Gate Entry & GRN,GRN,id,INTEGER,Primary Key,Yes,-,-
+8. Inward — Gate Entry & GRN,GRN,tenant_id,INTEGER,FK → tenants.id,Yes,-,-
+8. Inward — Gate Entry & GRN,GRN,site_id,INTEGER,FK → sites.id,Yes,-,-
+8. Inward — Gate Entry & GRN,GRN,grn_number,VARCHAR(50),Max 50 chars,Yes,-,-
+8. Inward — Gate Entry & GRN,GRN,po_id,INTEGER,FK → purchase_orders.id,Yes,-,Purchase Order is required
+8. Inward — Gate Entry & GRN,GRN,gate_entry_id,INTEGER,FK → gate_entries.id,No,-,-
+8. Inward — Gate Entry & GRN,GRN,invoice_id,INTEGER,FK → invoices.id,No,-,-
+8. Inward — Gate Entry & GRN,GRN,warehouse_id,INTEGER,FK → warehouses.id,Yes,-,Target store is required
+8. Inward — Gate Entry & GRN,GRN,project_id,INTEGER,FK → projects.id,Yes,-,-
+8. Inward — Gate Entry & GRN,GRN,vendor_id,INTEGER,FK → vendors.id,Yes,-,-
+8. Inward — Gate Entry & GRN,GRN,receipt_type,VARCHAR(50),Default: PO-Based; Max 50 chars,No,-,-
+8. Inward — Gate Entry & GRN,GRN,invoice_number,VARCHAR(100),Max 100 chars,No,-,-
+8. Inward — Gate Entry & GRN,GRN,invoice_date,DATE,-,No,-,-
+8. Inward — Gate Entry & GRN,GRN,invoice_amount,FLOAT,Default: 0,No,-,-
+8. Inward — Gate Entry & GRN,GRN,invoice_scan_url,VARCHAR(500),Max 500 chars,No,-,-
+8. Inward — Gate Entry & GRN,GRN,vendor_gstin,VARCHAR(20),Max 20 chars,No,-,-
+8. Inward — Gate Entry & GRN,GRN,total_taxable_amount,FLOAT,Default: 0,No,-,-
+8. Inward — Gate Entry & GRN,GRN,total_cgst,FLOAT,Default: 0,No,-,-
+8. Inward — Gate Entry & GRN,GRN,total_sgst,FLOAT,Default: 0,No,-,-
+8. Inward — Gate Entry & GRN,GRN,total_igst,FLOAT,Default: 0,No,-,-
+8. Inward — Gate Entry & GRN,GRN,total_tax,FLOAT,Default: 0,No,-,-
+8. Inward — Gate Entry & GRN,GRN,eway_bill_number,VARCHAR(50),Max 50 chars,No,-,-
+8. Inward — Gate Entry & GRN,GRN,payment_status,VARCHAR(50),Default: Not Applicable; Max 50 chars,No,-,-
+8. Inward — Gate Entry & GRN,GRN,status,VARCHAR(50),Default: Draft; Max 50 chars,No,-,-
+8. Inward — Gate Entry & GRN,GRN,remarks,TEXT,-,No,-,-
+8. Inward — Gate Entry & GRN,GRN,received_by_id,INTEGER,FK → users.id,Yes,-,-
+8. Inward — Gate Entry & GRN,GRN,is_deleted,BOOLEAN,Default: False,No,-,-
+8. Inward — Gate Entry & GRN,GRN,created_at,DATETIME,Default: auto-generated,No,-,-
+8. Inward — Gate Entry & GRN,GRN,completed_at,DATETIME,-,No,-,-
+8. Inward — Gate Entry & GRN,GRNItem,id,INTEGER,Primary Key,Yes,-,-
+8. Inward — Gate Entry & GRN,GRNItem,grn_id,INTEGER,FK → grn.id,Yes,-,-
+8. Inward — Gate Entry & GRN,GRNItem,material_id,INTEGER,FK → materials.id,Yes,-,-
+8. Inward — Gate Entry & GRN,GRNItem,po_item_id,INTEGER,FK → purchase_order_items.id,No,-,-
+8. Inward — Gate Entry & GRN,GRNItem,ordered_quantity,FLOAT,Default: 0,No,-,-
+8. Inward — Gate Entry & GRN,GRNItem,received_quantity,FLOAT,-,Yes,-,-
+8. Inward — Gate Entry & GRN,GRNItem,accepted_quantity,FLOAT,-,Yes,-,-
+8. Inward — Gate Entry & GRN,GRNItem,rejected_quantity,FLOAT,Default: 0,No,-,-
+8. Inward — Gate Entry & GRN,GRNItem,rate,FLOAT,Default: 0,No,-,-
+8. Inward — Gate Entry & GRN,GRNItem,hsn_code,VARCHAR(20),Max 20 chars,No,-,-
+8. Inward — Gate Entry & GRN,GRNItem,cgst_rate,FLOAT,Default: 0,No,-,-
+8. Inward — Gate Entry & GRN,GRNItem,sgst_rate,FLOAT,Default: 0,No,-,-
+8. Inward — Gate Entry & GRN,GRNItem,igst_rate,FLOAT,Default: 0,No,-,-
+8. Inward — Gate Entry & GRN,GRNItem,cgst_amount,FLOAT,Default: 0,No,-,-
+8. Inward — Gate Entry & GRN,GRNItem,sgst_amount,FLOAT,Default: 0,No,-,-
+8. Inward — Gate Entry & GRN,GRNItem,igst_amount,FLOAT,Default: 0,No,-,-
+8. Inward — Gate Entry & GRN,GRNItem,taxable_amount,FLOAT,Default: 0,No,-,-
+8. Inward — Gate Entry & GRN,GRNItem,discount_percent,FLOAT,Default: 0,No,-,-
+8. Inward — Gate Entry & GRN,GRNItem,remarks,TEXT,-,No,-,-
+9. Invoices & Finance,Invoice,id,INTEGER,Primary Key,Yes,-,-
+9. Invoices & Finance,Invoice,tenant_id,INTEGER,FK → tenants.id,Yes,-,-
+9. Invoices & Finance,Invoice,site_id,INTEGER,FK → sites.id,Yes,-,-
+9. Invoices & Finance,Invoice,code,VARCHAR(50),Max 50 chars,Yes,-,-
+9. Invoices & Finance,Invoice,invoice_number,VARCHAR(100),Max 100 chars,Yes,max_length=255,Invoice Number is required.
+9. Invoices & Finance,Invoice,invoice_date,DATE,-,Yes,-,Invoice Date is required.; Invoice Date cannot be in the future.
+9. Invoices & Finance,Invoice,gate_entry_id,INTEGER,FK → gate_entries.id,No,-,-
+9. Invoices & Finance,Invoice,vendor_id,INTEGER,FK → vendors.id,Yes,-,Vendor is required.
+9. Invoices & Finance,Invoice,po_id,INTEGER,FK → purchase_orders.id,No,-,-
+9. Invoices & Finance,Invoice,consignee_id,INTEGER,FK → company_addresses.id,No,-,-
+9. Invoices & Finance,Invoice,buyer_id,INTEGER,FK → company_addresses.id,No,-,-
+9. Invoices & Finance,Invoice,internal_reference_number,VARCHAR(100),Max 100 chars,No,-,-
+9. Invoices & Finance,Invoice,srf_number,VARCHAR(100),Max 100 chars,No,-,-
+9. Invoices & Finance,Invoice,irn,TEXT,-,No,-,-
+9. Invoices & Finance,Invoice,ack_number,VARCHAR(100),Max 100 chars,No,-,-
+9. Invoices & Finance,Invoice,ack_date,DATE,-,No,-,-
+9. Invoices & Finance,Invoice,eway_bill_number,VARCHAR(100),Max 100 chars,No,-,-
+9. Invoices & Finance,Invoice,delivery_note,VARCHAR(100),Max 100 chars,No,-,-
+9. Invoices & Finance,Invoice,delivery_note_date,DATE,-,No,-,Delivery Note Date cannot be in the future.
+9. Invoices & Finance,Invoice,payment_terms,VARCHAR(255),Max 255 chars,No,-,-
+9. Invoices & Finance,Invoice,reference_number,VARCHAR(100),Max 100 chars,No,-,-
+9. Invoices & Finance,Invoice,reference_date,DATE,-,No,-,Reference Date cannot be in the future.
+9. Invoices & Finance,Invoice,dispatch_doc_number,VARCHAR(100),Max 100 chars,No,-,-
+9. Invoices & Finance,Invoice,dispatched_through,VARCHAR(100),Max 100 chars,No,-,-
+9. Invoices & Finance,Invoice,destination,VARCHAR(255),Max 255 chars,No,-,-
+9. Invoices & Finance,Invoice,lr_rr_number,VARCHAR(100),Max 100 chars,No,-,-
+9. Invoices & Finance,Invoice,vehicle_number,VARCHAR(50),Max 50 chars,No,-,-
+9. Invoices & Finance,Invoice,terms_of_delivery,TEXT,-,No,-,-
+9. Invoices & Finance,Invoice,total_taxable_amount,FLOAT,Default: 0,No,-,-
+9. Invoices & Finance,Invoice,total_cgst,FLOAT,Default: 0,No,-,-
+9. Invoices & Finance,Invoice,total_sgst,FLOAT,Default: 0,No,-,-
+9. Invoices & Finance,Invoice,total_igst,FLOAT,Default: 0,No,-,-
+9. Invoices & Finance,Invoice,total_discount,FLOAT,Default: 0,No,-,-
+9. Invoices & Finance,Invoice,total_amount,FLOAT,Default: 0,No,-,-
+9. Invoices & Finance,Invoice,tax_amount,FLOAT,Default: 0,No,-,-
+9. Invoices & Finance,Invoice,transport_charges,FLOAT,Default: 0,No,-,-
+9. Invoices & Finance,Invoice,transport_hsn,VARCHAR(50),Max 50 chars,No,-,Invalid HSN/SAC for Transport Charges.
+9. Invoices & Finance,Invoice,transport_cgst_rate,FLOAT,Default: 0,No,-,-
+9. Invoices & Finance,Invoice,transport_sgst_rate,FLOAT,Default: 0,No,-,-
+9. Invoices & Finance,Invoice,transport_igst_rate,FLOAT,Default: 0,No,-,-
+9. Invoices & Finance,Invoice,transport_discount_percent,FLOAT,Default: 0,No,-,-
+9. Invoices & Finance,Invoice,status,VARCHAR(50),Default: Draft; Max 50 chars,No,-,-
+9. Invoices & Finance,Invoice,scan_url,VARCHAR(500),Max 500 chars,No,-,Invoice Scan is mandatory for submitting the invoice.
+9. Invoices & Finance,Invoice,remarks,TEXT,-,No,-,-
+9. Invoices & Finance,Invoice,created_by_id,INTEGER,FK → users.id,Yes,-,-
+9. Invoices & Finance,Invoice,is_deleted,BOOLEAN,Default: False,No,-,-
+9. Invoices & Finance,Invoice,created_at,DATETIME,Default: auto-generated,No,-,-
+9. Invoices & Finance,Invoice,updated_at,DATETIME,Default: auto-generated,No,-,-
+9. Invoices & Finance,Invoice,payment_status,VARCHAR(50),Default: Pending; Max 50 chars,No,-,-
+9. Invoices & Finance,Invoice,sent_for_payment_at,DATETIME,-,No,-,-
+9. Invoices & Finance,Invoice,sent_for_payment_by_id,INTEGER,FK → users.id,No,-,-
+9. Invoices & Finance,Invoice,hard_copy_sent,BOOLEAN,Default: False,No,-,-
+9. Invoices & Finance,Invoice,hard_copy_sent_at,DATETIME,-,No,-,-
+9. Invoices & Finance,Invoice,hard_copy_sent_by_id,INTEGER,FK → users.id,No,-,-
+9. Invoices & Finance,Invoice,hard_copy_received,BOOLEAN,Default: False,No,-,-
+9. Invoices & Finance,Invoice,hard_copy_received_at,DATETIME,-,No,-,-
+9. Invoices & Finance,Invoice,hard_copy_received_by_id,INTEGER,FK → users.id,No,-,-
+9. Invoices & Finance,Invoice,hard_copy_remarks,TEXT,-,No,-,-
+9. Invoices & Finance,Invoice,payment_completed_at,DATETIME,-,No,-,-
+9. Invoices & Finance,Invoice,payment_completed_by_id,INTEGER,FK → users.id,No,-,-
+9. Invoices & Finance,Invoice,payment_reference,VARCHAR(255),Max 255 chars,No,-,-
+9. Invoices & Finance,InvoiceItem,id,INTEGER,Primary Key,Yes,-,-
+9. Invoices & Finance,InvoiceItem,invoice_id,INTEGER,FK → invoices.id,Yes,-,-
+9. Invoices & Finance,InvoiceItem,material_id,INTEGER,FK → materials.id,No,gt=0,-
+9. Invoices & Finance,InvoiceItem,description,VARCHAR(255),Max 255 chars,No,-,-
+9. Invoices & Finance,InvoiceItem,hsn_sac,VARCHAR(50),Max 50 chars,No,-,"HSN/SAC must be exactly 2, 4, 6, or 8 numeric digits"
+9. Invoices & Finance,InvoiceItem,quantity,FLOAT,-,Yes,-,-
+9. Invoices & Finance,InvoiceItem,rate,FLOAT,-,Yes,ge=0,-
+9. Invoices & Finance,InvoiceItem,uom,VARCHAR(50),Max 50 chars,No,max_length=255,-
+9. Invoices & Finance,InvoiceItem,discount_percent,FLOAT,Default: 0,No,-,-
+9. Invoices & Finance,InvoiceItem,cgst_rate,FLOAT,Default: 0,No,-,-
+9. Invoices & Finance,InvoiceItem,sgst_rate,FLOAT,Default: 0,No,-,-
+9. Invoices & Finance,InvoiceItem,igst_rate,FLOAT,Default: 0,No,-,-
+9. Invoices & Finance,InvoiceItem,cgst_amount,FLOAT,Default: 0,No,-,-
+9. Invoices & Finance,InvoiceItem,sgst_amount,FLOAT,Default: 0,No,-,-
+9. Invoices & Finance,InvoiceItem,igst_amount,FLOAT,Default: 0,No,-,-
+9. Invoices & Finance,InvoiceItem,taxable_amount,FLOAT,Default: 0,No,-,-
+9. Invoices & Finance,InvoiceItem,amount,FLOAT,-,Yes,-,-
+9. Invoices & Finance,InvoiceItem,remarks,TEXT,-,No,-,-
+10. Store Operations,MaterialIssue,id,INTEGER,Primary Key,Yes,-,-
+10. Store Operations,MaterialIssue,tenant_id,INTEGER,FK → tenants.id,Yes,-,-
+10. Store Operations,MaterialIssue,site_id,INTEGER,FK → sites.id,Yes,-,-
+10. Store Operations,MaterialIssue,issue_number,VARCHAR(50),Max 50 chars,Yes,-,-
+10. Store Operations,MaterialIssue,warehouse_id,INTEGER,FK → warehouses.id,Yes,-,Source store is required
+10. Store Operations,MaterialIssue,project_id,INTEGER,FK → projects.id,Yes,-,Institution is required
+10. Store Operations,MaterialIssue,indent_id,INTEGER,FK → indents.id,No,-,-
+10. Store Operations,MaterialIssue,complaint_id,INTEGER,FK → complaints.id,No,-,-
+10. Store Operations,MaterialIssue,building_id,INTEGER,FK → buildings.id,No,-,-
+10. Store Operations,MaterialIssue,issued_to_room_id,INTEGER,FK → rooms.id,No,-,-
+10. Store Operations,MaterialIssue,issued_to_department,VARCHAR(255),Max 255 chars,No,-,-
+10. Store Operations,MaterialIssue,issued_to_contractor,VARCHAR(255),Max 255 chars,No,-,-
+10. Store Operations,MaterialIssue,purpose,TEXT,-,No,-,-
+10. Store Operations,MaterialIssue,status,VARCHAR(50),Default: Draft; Max 50 chars,No,-,-
+10. Store Operations,MaterialIssue,issued_by_id,INTEGER,FK → users.id,Yes,-,-
+10. Store Operations,MaterialIssue,received_by_name,VARCHAR(255),Max 255 chars,No,-,-
+10. Store Operations,MaterialIssue,is_acknowledged,BOOLEAN,Default: False,No,-,-
+10. Store Operations,MaterialIssue,acknowledged_at,DATETIME,-,No,-,-
+10. Store Operations,MaterialIssue,acknowledged_by_id,INTEGER,FK → users.id,No,-,-
+10. Store Operations,MaterialIssue,acknowledgement_remarks,TEXT,-,No,-,-
+10. Store Operations,MaterialIssue,is_deleted,BOOLEAN,Default: False,No,-,-
+10. Store Operations,MaterialIssue,created_at,DATETIME,Default: auto-generated,No,-,-
+10. Store Operations,MaterialIssueItem,id,INTEGER,Primary Key,Yes,-,-
+10. Store Operations,MaterialIssueItem,issue_id,INTEGER,FK → material_issues.id,Yes,-,-
+10. Store Operations,MaterialIssueItem,material_id,INTEGER,FK → materials.id,Yes,-,-
+10. Store Operations,MaterialIssueItem,warehouse_id,INTEGER,FK → warehouses.id,No,-,-
+10. Store Operations,MaterialIssueItem,quantity,FLOAT,-,Yes,-,-
+10. Store Operations,MaterialIssueItem,rate,FLOAT,Default: 0,No,-,-
+10. Store Operations,MaterialIssueItem,remarks,TEXT,-,No,-,-
+10. Store Operations,MaterialReturn,id,INTEGER,Primary Key,Yes,-,-
+10. Store Operations,MaterialReturn,tenant_id,INTEGER,FK → tenants.id,Yes,-,-
+10. Store Operations,MaterialReturn,site_id,INTEGER,FK → sites.id,Yes,-,-
+10. Store Operations,MaterialReturn,return_number,VARCHAR(50),Max 50 chars,Yes,-,-
+10. Store Operations,MaterialReturn,warehouse_id,INTEGER,FK → warehouses.id,Yes,-,Target store is required
+10. Store Operations,MaterialReturn,project_id,INTEGER,FK → projects.id,Yes,-,Project is required
+10. Store Operations,MaterialReturn,returned_from_room_id,INTEGER,FK → rooms.id,No,-,-
+10. Store Operations,MaterialReturn,returned_from_department,VARCHAR(255),Max 255 chars,No,-,-
+10. Store Operations,MaterialReturn,return_type,VARCHAR(50),Default: Unused; Max 50 chars,No,-,-
+10. Store Operations,MaterialReturn,remarks,TEXT,-,No,-,-
+10. Store Operations,MaterialReturn,returned_by_name,VARCHAR(255),Max 255 chars,No,-,-
+10. Store Operations,MaterialReturn,status,VARCHAR(50),Default: Pending Receipt; Max 50 chars,No,-,-
+10. Store Operations,MaterialReturn,received_date,DATETIME,-,No,-,-
+10. Store Operations,MaterialReturn,initiated_by_id,INTEGER,FK → users.id,Yes,-,-
+10. Store Operations,MaterialReturn,received_by_id,INTEGER,FK → users.id,No,-,-
+10. Store Operations,MaterialReturn,is_deleted,BOOLEAN,Default: False,No,-,-
+10. Store Operations,MaterialReturn,created_at,DATETIME,Default: auto-generated,No,-,-
+10. Store Operations,MaterialReturnItem,id,INTEGER,Primary Key,Yes,-,-
+10. Store Operations,MaterialReturnItem,return_id,INTEGER,FK → material_returns.id,Yes,-,-
+10. Store Operations,MaterialReturnItem,material_id,INTEGER,FK → materials.id,Yes,-,-
+10. Store Operations,MaterialReturnItem,returned_qty,FLOAT,-,Yes,-,-
+10. Store Operations,MaterialReturnItem,received_qty,FLOAT,-,No,-,-
+10. Store Operations,MaterialReturnItem,variance_qty,FLOAT,-,No,-,-
+10. Store Operations,MaterialReturnItem,receipt_remarks,TEXT,-,No,-,-
+10. Store Operations,MaterialReturnItem,remarks,TEXT,-,No,-,-
+10. Store Operations,StockTransfer,id,INTEGER,Primary Key,Yes,-,-
+10. Store Operations,StockTransfer,tenant_id,INTEGER,FK → tenants.id,Yes,-,-
+10. Store Operations,StockTransfer,site_id,INTEGER,FK → sites.id,Yes,-,-
+10. Store Operations,StockTransfer,transfer_number,VARCHAR(50),Max 50 chars,Yes,-,-
+10. Store Operations,StockTransfer,from_warehouse_id,INTEGER,FK → warehouses.id,Yes,-,From warehouse is required
+10. Store Operations,StockTransfer,to_warehouse_id,INTEGER,FK → warehouses.id,Yes,-,To warehouse is required; Source and destination cannot be the same
+10. Store Operations,StockTransfer,project_id,INTEGER,FK → projects.id,Yes,-,-
+10. Store Operations,StockTransfer,status,VARCHAR(50),Default: Draft; Max 50 chars,No,-,-
+10. Store Operations,StockTransfer,remarks,TEXT,-,No,-,-
+10. Store Operations,StockTransfer,created_by_id,INTEGER,FK → users.id,Yes,-,-
+10. Store Operations,StockTransfer,received_by_id,INTEGER,FK → users.id,No,-,-
+10. Store Operations,StockTransfer,is_deleted,BOOLEAN,Default: False,No,-,-
+10. Store Operations,StockTransfer,created_at,DATETIME,Default: auto-generated,No,-,-
+10. Store Operations,StockTransfer,completed_at,DATETIME,-,No,-,-
+10. Store Operations,StockTransfer,received_date,DATETIME,-,No,-,-
+10. Store Operations,StockTransferItem,id,INTEGER,Primary Key,Yes,-,-
+10. Store Operations,StockTransferItem,transfer_id,INTEGER,FK → stock_transfers.id,Yes,-,-
+10. Store Operations,StockTransferItem,material_id,INTEGER,FK → materials.id,Yes,-,-
+10. Store Operations,StockTransferItem,quantity,FLOAT,-,Yes,-,-
+10. Store Operations,StockTransferItem,received_qty,FLOAT,-,No,-,-
+10. Store Operations,StockTransferItem,variance_qty,FLOAT,-,No,-,-
+10. Store Operations,StockTransferItem,receipt_remarks,TEXT,-,No,-,-
+10. Store Operations,StockTransferItem,remarks,TEXT,-,No,-,-
+11. Outward — Gate Passes,GatePass,id,INTEGER,Primary Key,Yes,-,-
+11. Outward — Gate Passes,GatePass,tenant_id,INTEGER,FK → tenants.id,Yes,-,-
+11. Outward — Gate Passes,GatePass,site_id,INTEGER,FK → sites.id,Yes,-,-
+11. Outward — Gate Passes,GatePass,gate_pass_number,VARCHAR(50),Max 50 chars,Yes,-,-
+11. Outward — Gate Passes,GatePass,return_id,INTEGER,FK → material_returns.id,No,-,-
+11. Outward — Gate Passes,GatePass,project_id,INTEGER,FK → projects.id,Yes,-,Project is required
+11. Outward — Gate Passes,GatePass,vendor_id,INTEGER,FK → vendors.id,No,-,-
+11. Outward — Gate Passes,GatePass,vendor_custom_name,VARCHAR(255),Max 255 chars,No,-,-
+11. Outward — Gate Passes,GatePass,vendor_custom_address,TEXT,-,No,-,-
+11. Outward — Gate Passes,GatePass,from_department,VARCHAR(255),Max 255 chars,No,-,-
+11. Outward — Gate Passes,GatePass,from_store,VARCHAR(255),Max 255 chars,No,-,-
+11. Outward — Gate Passes,GatePass,status,VARCHAR(50),Default: Pending Repair; Max 50 chars,No,-,-
+11. Outward — Gate Passes,GatePass,gate_pass_type,VARCHAR(50),Default: Outward Repair; Max 50 chars,No,-,-
+11. Outward — Gate Passes,GatePass,reason_code,VARCHAR(50),Max 50 chars,No,-,Please select a Reason.
+11. Outward — Gate Passes,GatePass,driver_name,VARCHAR(255),Max 255 chars,No,-,Please enter the name of the person who brought the items.
+11. Outward — Gate Passes,GatePass,vehicle_number,VARCHAR(50),Max 50 chars,No,-,-
+11. Outward — Gate Passes,GatePass,remarks,TEXT,-,No,-,-
+11. Outward — Gate Passes,GatePass,gate_entry_number,VARCHAR(100),Max 100 chars,No,-,-
+11. Outward — Gate Passes,GatePass,grn_number,VARCHAR(100),Max 100 chars,No,-,-
+11. Outward — Gate Passes,GatePass,created_by_id,INTEGER,FK → users.id,Yes,-,-
+11. Outward — Gate Passes,GatePass,created_at,DATETIME,Default: auto-generated,No,-,-
+11. Outward — Gate Passes,GatePass,completed_by_name,VARCHAR(255),Max 255 chars,No,-,-
+11. Outward — Gate Passes,GatePass,completed_at,DATETIME,-,No,-,-
+11. Outward — Gate Passes,GatePassItem,id,INTEGER,Primary Key,Yes,-,-
+11. Outward — Gate Passes,GatePassItem,gate_pass_id,INTEGER,FK → gate_passes.id,Yes,-,-
+11. Outward — Gate Passes,GatePassItem,material_id,INTEGER,FK → materials.id,Yes,-,-
+11. Outward — Gate Passes,GatePassItem,quantity,FLOAT,-,Yes,-,-
+11. Outward — Gate Passes,GatePassItem,remarks,TEXT,-,No,-,-
+12. Inventory,CurrentStock,id,INTEGER,Primary Key,Yes,-,-
+12. Inventory,CurrentStock,tenant_id,INTEGER,FK → tenants.id,Yes,-,-
+12. Inventory,CurrentStock,site_id,INTEGER,FK → sites.id,Yes,-,-
+12. Inventory,CurrentStock,material_id,INTEGER,FK → materials.id,Yes,-,-
+12. Inventory,CurrentStock,warehouse_id,INTEGER,FK → warehouses.id,Yes,-,-
+12. Inventory,CurrentStock,quantity,FLOAT,Default: 0,No,-,-
+12. Inventory,CurrentStock,last_updated,DATETIME,Default: auto-generated,No,-,-
+12. Inventory,StockLedger,id,INTEGER,Primary Key,Yes,-,-
+12. Inventory,StockLedger,tenant_id,INTEGER,FK → tenants.id,Yes,-,-
+12. Inventory,StockLedger,site_id,INTEGER,FK → sites.id,Yes,-,-
+12. Inventory,StockLedger,material_id,INTEGER,FK → materials.id,Yes,-,-
+12. Inventory,StockLedger,warehouse_id,INTEGER,FK → warehouses.id,Yes,-,-
+12. Inventory,StockLedger,transaction_type,VARCHAR(50),Max 50 chars,Yes,-,-
+12. Inventory,StockLedger,quantity,FLOAT,-,Yes,-,-
+12. Inventory,StockLedger,balance,FLOAT,Default: 0,No,-,-
+12. Inventory,StockLedger,reference_type,VARCHAR(50),Max 50 chars,No,-,-
+12. Inventory,StockLedger,reference_id,INTEGER,-,No,-,-
+12. Inventory,StockLedger,reference_number,VARCHAR(50),Max 50 chars,No,-,-
+12. Inventory,StockLedger,project_id,INTEGER,FK → projects.id,No,-,-
+12. Inventory,StockLedger,room_id,INTEGER,FK → rooms.id,No,-,-
+12. Inventory,StockLedger,remarks,TEXT,-,No,-,-
+12. Inventory,StockLedger,created_by_id,INTEGER,FK → users.id,No,-,-
+12. Inventory,StockLedger,created_at,DATETIME,Default: auto-generated,No,-,-
+13. Write-Offs,WriteOff,id,INTEGER,Primary Key,Yes,-,-
+13. Write-Offs,WriteOff,tenant_id,INTEGER,FK → tenants.id,Yes,-,-
+13. Write-Offs,WriteOff,site_id,INTEGER,FK → sites.id,Yes,-,-
+13. Write-Offs,WriteOff,write_off_number,VARCHAR(50),Max 50 chars,Yes,-,-
+13. Write-Offs,WriteOff,date,DATE,-,Yes,-,-
+13. Write-Offs,WriteOff,reason,TEXT,-,Yes,-,Reason is required
+13. Write-Offs,WriteOff,write_off_type,VARCHAR(100),Max 100 chars,Yes,-,Type is required
+13. Write-Offs,WriteOff,attachment_url,VARCHAR(500),Max 500 chars,No,-,-
+13. Write-Offs,WriteOff,status,VARCHAR(50),Default: Draft; Max 50 chars,No,-,-
+13. Write-Offs,WriteOff,current_approval_level,INTEGER,Default: 1,No,-,-
+13. Write-Offs,WriteOff,created_by_id,INTEGER,FK → users.id,Yes,-,-
+13. Write-Offs,WriteOff,approved_by_id,INTEGER,FK → users.id,No,-,-
+13. Write-Offs,WriteOff,approved_at,DATETIME,-,No,-,-
+13. Write-Offs,WriteOff,is_deleted,BOOLEAN,Default: False,No,-,-
+13. Write-Offs,WriteOff,created_at,DATETIME,Default: auto-generated,No,-,-
+13. Write-Offs,WriteOff,updated_at,DATETIME,Default: auto-generated,No,-,-
+13. Write-Offs,WriteOffItem,id,INTEGER,Primary Key,Yes,-,-
+13. Write-Offs,WriteOffItem,write_off_id,INTEGER,FK → write_offs.id,Yes,-,-
+13. Write-Offs,WriteOffItem,material_id,INTEGER,FK → materials.id,Yes,-,-
+13. Write-Offs,WriteOffItem,warehouse_id,INTEGER,FK → warehouses.id,No,-,-
+13. Write-Offs,WriteOffItem,quantity,FLOAT,-,Yes,-,-
+13. Write-Offs,WriteOffItem,rate,FLOAT,Default: 0,No,-,-
+13. Write-Offs,WriteOffItem,amount,FLOAT,Default: 0,No,-,-
+14. Maintenance & Complaints,Complaint,id,INTEGER,Primary Key,Yes,-,-
+14. Maintenance & Complaints,Complaint,tenant_id,INTEGER,FK → tenants.id,Yes,-,-
+14. Maintenance & Complaints,Complaint,site_id,INTEGER,FK → sites.id,Yes,-,-
+14. Maintenance & Complaints,Complaint,docket_no,VARCHAR(50),Max 50 chars,Yes,-,-
+14. Maintenance & Complaints,Complaint,complaint_date,DATE,-,Yes,-,-
+14. Maintenance & Complaints,Complaint,complaint_time,VARCHAR(20),Max 20 chars,No,-,-
+14. Maintenance & Complaints,Complaint,department_name,VARCHAR(255),Max 255 chars,No,-,-
+14. Maintenance & Complaints,Complaint,building_id,INTEGER,FK → buildings.id,No,-,-
+14. Maintenance & Complaints,Complaint,room_id,INTEGER,FK → rooms.id,No,-,-
+14. Maintenance & Complaints,Complaint,location,VARCHAR(255),Max 255 chars,No,-,-
+14. Maintenance & Complaints,Complaint,nature_of_complaint,TEXT,-,No,-,-
+14. Maintenance & Complaints,Complaint,individual_detailed,TEXT,-,No,-,-
+14. Maintenance & Complaints,Complaint,name_and_trade,VARCHAR(255),Max 255 chars,No,-,-
+14. Maintenance & Complaints,Complaint,status,VARCHAR(50),Default: Registered; Max 50 chars,No,-,-
+14. Maintenance & Complaints,Complaint,assigned_to_id,INTEGER,FK → users.id,No,-,-
+14. Maintenance & Complaints,Complaint,resolution_remarks,TEXT,-,No,-,-
+14. Maintenance & Complaints,Complaint,material_required,BOOLEAN,Default: False,No,-,-
+14. Maintenance & Complaints,Complaint,inspection_details,TEXT,-,No,-,-
+14. Maintenance & Complaints,Complaint,verified_by_id,INTEGER,FK → users.id,No,-,-
+14. Maintenance & Complaints,Complaint,verified_at,DATETIME,-,No,-,-
+14. Maintenance & Complaints,Complaint,rejection_remarks,TEXT,-,No,-,-
+14. Maintenance & Complaints,Complaint,feedback,TEXT,-,No,-,-
+14. Maintenance & Complaints,Complaint,created_by_id,INTEGER,FK → users.id,Yes,-,-
+14. Maintenance & Complaints,Complaint,resolved_by_id,INTEGER,FK → users.id,No,-,-
+14. Maintenance & Complaints,Complaint,is_deleted,BOOLEAN,Default: False,No,-,-
+14. Maintenance & Complaints,Complaint,created_at,DATETIME,Default: auto-generated,No,-,-
+14. Maintenance & Complaints,Complaint,updated_at,DATETIME,Default: auto-generated,No,-,-
+14. Maintenance & Complaints,Complaint,resolved_at,DATETIME,-,No,-,-
+14. Maintenance & Complaints,ComplaintImage,id,INTEGER,Primary Key,Yes,-,-
+14. Maintenance & Complaints,ComplaintImage,complaint_id,INTEGER,FK → complaints.id,Yes,-,-
+14. Maintenance & Complaints,ComplaintImage,image_url,VARCHAR(500),Max 500 chars,Yes,-,-
+14. Maintenance & Complaints,ComplaintImage,is_resolution_image,BOOLEAN,Default: False,No,-,-
+14. Maintenance & Complaints,ComplaintImage,uploaded_at,DATETIME,Default: auto-generated,No,-,-
+15. Alerts & Notifications,Alert,id,INTEGER,Primary Key,Yes,-,-
+15. Alerts & Notifications,Alert,tenant_id,INTEGER,FK → tenants.id,Yes,-,-
+15. Alerts & Notifications,Alert,site_id,INTEGER,FK → sites.id,Yes,-,-
+15. Alerts & Notifications,Alert,alert_type,VARCHAR(50),Max 50 chars,Yes,-,-
+15. Alerts & Notifications,Alert,severity,VARCHAR(20),Default: Info; Max 20 chars,No,-,-
+15. Alerts & Notifications,Alert,title,VARCHAR(255),Max 255 chars,Yes,-,-
+15. Alerts & Notifications,Alert,message,TEXT,-,No,-,-
+15. Alerts & Notifications,Alert,reference_type,VARCHAR(50),Max 50 chars,No,-,-
+15. Alerts & Notifications,Alert,reference_id,INTEGER,-,No,-,-
+15. Alerts & Notifications,Alert,project_id,INTEGER,FK → projects.id,No,-,-
+15. Alerts & Notifications,Alert,user_id,INTEGER,FK → users.id,No,-,-
+15. Alerts & Notifications,Alert,is_read,BOOLEAN,Default: False,No,-,-
+15. Alerts & Notifications,Alert,is_resolved,BOOLEAN,Default: False,No,-,-
+15. Alerts & Notifications,Alert,created_at,DATETIME,Default: auto-generated,No,-,-
+15. Alerts & Notifications,Alert,resolved_at,DATETIME,-,No,-,-
+16. Workflows & Approvals,ApprovalFlow,id,INTEGER,Primary Key,Yes,-,-
+16. Workflows & Approvals,ApprovalFlow,tenant_id,INTEGER,FK → tenants.id,Yes,-,-
+16. Workflows & Approvals,ApprovalFlow,site_id,INTEGER,FK → sites.id,Yes,-,-
+16. Workflows & Approvals,ApprovalFlow,document_type,VARCHAR(50),Max 50 chars,Yes,-,-
+16. Workflows & Approvals,ApprovalFlow,level,INTEGER,-,Yes,-,-
+16. Workflows & Approvals,ApprovalFlow,role_name,VARCHAR(100),Max 100 chars,Yes,-,-
+16. Workflows & Approvals,ApprovalFlow,min_amount,FLOAT,Default: 0,No,-,-
+16. Workflows & Approvals,ApprovalFlow,max_amount,FLOAT,-,No,-,-
+16. Workflows & Approvals,ApprovalFlow,user_id,INTEGER,FK → users.id,No,-,-
+16. Workflows & Approvals,ApprovalFlow,is_active,BOOLEAN,Default: True,No,-,-
+17. System / Audit,AuditLog,id,INTEGER,Primary Key,Yes,-,-
+17. System / Audit,AuditLog,tenant_id,INTEGER,FK → tenants.id,No,-,-
+17. System / Audit,AuditLog,site_id,INTEGER,FK → sites.id,No,-,-
+17. System / Audit,AuditLog,user_id,INTEGER,FK → users.id,No,-,-
+17. System / Audit,AuditLog,action,VARCHAR(50),Max 50 chars,Yes,-,-
+17. System / Audit,AuditLog,entity_type,VARCHAR(100),Max 100 chars,Yes,-,-
+17. System / Audit,AuditLog,entity_id,INTEGER,-,No,-,-
+17. System / Audit,AuditLog,old_values,TEXT,-,No,-,-
+17. System / Audit,AuditLog,new_values,TEXT,-,No,-,-
+17. System / Audit,AuditLog,ip_address,VARCHAR(50),Max 50 chars,No,-,-
+17. System / Audit,AuditLog,created_at,DATETIME,Default: auto-generated,No,-,-
+17. System / Audit,DocumentSequence,id,INTEGER,Primary Key,Yes,-,-
+17. System / Audit,DocumentSequence,tenant_id,INTEGER,FK → tenants.id,Yes,-,-
+17. System / Audit,DocumentSequence,site_id,INTEGER,FK → sites.id,Yes,-,-
+17. System / Audit,DocumentSequence,document_type,VARCHAR(50),Max 50 chars,Yes,-,-
+17. System / Audit,DocumentSequence,prefix,VARCHAR(20),Max 20 chars,Yes,-,-
+17. System / Audit,DocumentSequence,current_number,INTEGER,Default: 0,Yes,-,-
+17. System / Audit,TermsAndConditions,id,INTEGER,Primary Key,Yes,-,-
+17. System / Audit,TermsAndConditions,tenant_id,INTEGER,FK → tenants.id,Yes,-,-
+17. System / Audit,TermsAndConditions,site_id,INTEGER,FK → sites.id,Yes,-,-
+17. System / Audit,TermsAndConditions,name,VARCHAR(255),Max 255 chars,Yes,-,-
+17. System / Audit,TermsAndConditions,content,TEXT,-,Yes,-,-
+17. System / Audit,TermsAndConditions,is_default,BOOLEAN,Default: False,No,-,-
+17. System / Audit,TermsAndConditions,is_active,BOOLEAN,Default: True,No,-,-
+17. System / Audit,TermsAndConditions,created_at,DATETIME,Default: auto-generated,No,-,-
+17. System / Audit,DepartmentMaterialLimit,id,INTEGER,Primary Key,Yes,-,-
+17. System / Audit,DepartmentMaterialLimit,tenant_id,INTEGER,FK → tenants.id,Yes,-,-
+17. System / Audit,DepartmentMaterialLimit,site_id,INTEGER,FK → sites.id,Yes,-,-
+17. System / Audit,DepartmentMaterialLimit,department,VARCHAR(255),Max 255 chars,Yes,-,-
+17. System / Audit,DepartmentMaterialLimit,material_id,INTEGER,FK → materials.id,Yes,-,-
+17. System / Audit,DepartmentMaterialLimit,monthly_limit,FLOAT,-,Yes,-,-
+17. System / Audit,DepartmentMaterialLimit,created_at,DATETIME,Default: auto-generated,No,-,-
+17. System / Audit,DepartmentMaterialLimit,created_by_id,INTEGER,FK → users.id,Yes,-,-

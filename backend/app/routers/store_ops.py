@@ -1119,6 +1119,62 @@ def create_write_off(
     db.commit()
     return {"message": "Write Off created successfully", "id": wo.id}
 
+@router.put("/write-offs/{id}")
+def update_write_off(
+    id: int,
+    data: WriteOffCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("write_offs", "create")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    wo = db.query(WriteOff).filter(WriteOff.id == id, WriteOff.tenant_id == tenant_id, WriteOff.site_id == site_id).first()
+    if not wo:
+        raise HTTPException(404, "Write Off not found")
+    if wo.status != WriteOffStatus.DRAFT.value:
+        raise HTTPException(400, "Only Draft Write Offs can be updated")
+        
+    wo.date = data.date
+    wo.reason = data.reason
+    wo.write_off_type = data.write_off_type
+    wo.attachment_url = data.attachment_url
+    
+    # Clear existing items
+    db.query(WriteOffItem).filter(WriteOffItem.write_off_id == wo.id).delete()
+    db.flush()
+    
+    for item_data in data.items:
+        mat = db.query(Material).filter(Material.id == item_data.material_id).first()
+        rate = mat.standard_cost if mat and mat.standard_cost else 0
+        amount = rate * item_data.quantity
+        wh_id = item_data.warehouse_id or (mat.warehouse_id if mat else None)
+        if not wh_id:
+            raise HTTPException(400, f"No warehouse provided for material ID {item_data.material_id}")
+            
+        stock = db.query(CurrentStock).filter(
+            CurrentStock.material_id == item_data.material_id,
+            CurrentStock.warehouse_id == wh_id,
+            CurrentStock.tenant_id == tenant_id,
+            CurrentStock.site_id == site_id
+        ).first()
+        
+        if not stock or stock.quantity < item_data.quantity:
+            mat_name = mat.name if mat else "Unknown"
+            raise HTTPException(400, f"Insufficient stock for {mat_name} in warehouse")
+            
+        wo_item = WriteOffItem(
+            write_off_id=wo.id,
+            material_id=item_data.material_id,
+            warehouse_id=wh_id,
+            quantity=item_data.quantity,
+            rate=rate,
+            amount=amount
+        )
+        db.add(wo_item)
+        
+    db.commit()
+    return {"message": "Write Off updated successfully", "id": wo.id}
+
 @router.post("/write-offs/{id}/submit")
 def submit_write_off(
     id: int,

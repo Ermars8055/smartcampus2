@@ -439,6 +439,12 @@ export default function PurchaseOrders() {
   const removeItem = (i) => setForm({ ...form, items: form.items.filter((_, idx) => idx !== i) });
   const updateItem = (i, field, val) => {
     let finalVal = val;
+    if (field === 'rate' && finalVal !== '') {
+      const parts = String(finalVal).split('.');
+      if (parts[1] && parts[1].length > 2) {
+        finalVal = `${parts[0]}.${parts[1].slice(0, 2)}`;
+      }
+    }
     if (['discount_percent', 'cgst_percentage', 'sgst_percentage', 'igst_percentage'].includes(field)) {
       if (finalVal !== '' && parseFloat(finalVal) > 100) {
         finalVal = '100';
@@ -1720,7 +1726,7 @@ export default function PurchaseOrders() {
                       error={!!itemErrors[i]?.rate} helperText={itemErrors[i]?.rate}
                       onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'rate', e.target.value.replace(/-/g, ''))}
                       onBlur={() => handleRateBlur(i, item.rate, item.base_rate)}
-                      inputProps={{ min: 0, step: "any" }} />
+                      inputProps={{ min: 0, step: "0.01" }} />
                     {item.base_rate > 0 && <Typography variant="caption" sx={{ color: '#64748B', display: 'block', mt: 0.5 }}>Base Rate: ₹{item.base_rate}</Typography>}
                   </Box>
                   <FormControl size="small">
@@ -2503,8 +2509,15 @@ export default function PurchaseOrders() {
                         type="number"
                         placeholder=""
                         value={approvalDialog.items[item.id]?.qty !== undefined ? approvalDialog.items[item.id].qty : ''}
-                        onChange={e => setApprovalDialog(prev => ({ ...prev, items: { ...prev.items, [item.id]: { ...(prev.items[item.id] || {}), qty: e.target.value } } }))}
-                        inputProps={{ min: 0, style: { textAlign: 'center', fontWeight: 'bold', color: '#1d4ed8' } }}
+                        onChange={e => {
+                          const val = e.target.value;
+                          if (item.uom_allow_decimal === false && val.includes('.')) return;
+                          setApprovalDialog(prev => ({ ...prev, items: { ...prev.items, [item.id]: { ...(prev.items[item.id] || {}), qty: val } } }));
+                        }}
+                        onKeyDown={e => {
+                          if (item.uom_allow_decimal === false && e.key === '.') e.preventDefault();
+                        }}
+                        inputProps={{ min: 0, step: item.uom_allow_decimal === false ? "1" : "any", style: { textAlign: 'center', fontWeight: 'bold', color: '#1d4ed8' } }}
                         sx={{ width: 90, bgcolor: '#fff' }}
                       />
                     </TableCell>

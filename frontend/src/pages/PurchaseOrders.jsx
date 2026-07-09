@@ -18,6 +18,8 @@ import dayjs from 'dayjs';
 import { useAuth } from '../context/AuthContext';
 import { useConfig } from '../context/ConfigContext';
 import { computeGstSplit } from '../utils/gstCalculations';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 export default function PurchaseOrders() {
   const { showMessage } = useMessage();
@@ -696,7 +698,7 @@ export default function PurchaseOrders() {
     const totalNetAmount = Math.round(grandTotalWithTax).toFixed(2);
     const activeTerms = po.terms || termsTemplates.find(t => t.is_default)?.content || (termsTemplates.length > 0 ? termsTemplates[0].content : '');
     const termsHtml = (activeTerms || '').split('\n').filter(t => t.trim()).map(t => `<li>${t}</li>`).join('');
-    const annexureHtml = (po.annexure || '').replace(/\n/g, '<br/>');
+    const annexureHtml = po.annexure ? (po.annexure.includes('<') ? po.annexure : po.annexure.replace(/\n/g, '<br/>')) : '';
 
     const html = `
       <html>
@@ -1504,9 +1506,7 @@ export default function PurchaseOrders() {
             <Box sx={{ mt: 3, p: 2, bgcolor: '#f8fafc', borderRadius: 2, border: '1px solid #e2e8f0' }}>
               <Typography variant="caption" sx={{ fontWeight: 700, color: '#1e293b', display: 'block', mb: 1 }}>ANNEXURE FOR {detailDialog?.po_number}:</Typography>
               {detailDialog?.annexure ? (
-                <Typography variant="body2" sx={{ color: '#334155', whiteSpace: 'pre-wrap', fontSize: '0.8rem' }}>
-                  {detailDialog.annexure}
-                </Typography>
+                <Box sx={{ color: '#334155', fontSize: '0.8rem', '& p': { margin: 0, padding: 0 } }} dangerouslySetInnerHTML={{ __html: detailDialog.annexure.includes('<') ? detailDialog.annexure : detailDialog.annexure.replace(/\n/g, '<br/>') }} />
               ) : (
                 <Typography variant="body2" sx={{ color: '#94a3b8', fontStyle: 'italic', fontSize: '0.8rem' }}>
                   No annexure provided.
@@ -1824,15 +1824,14 @@ export default function PurchaseOrders() {
           />
           <Divider sx={{ my: 2 }} />
           <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b', mb: 1.5 }}>Annexure</Typography>
-          <TextField
-            fullWidth
-            multiline
-            rows={4}
-            label="Annexure"
-            value={form.annexure || ''}
-            onChange={e => setForm({ ...form, annexure: e.target.value })}
-            placeholder="Enter annexure details..."
-          />
+          <Box sx={{ '.ql-container': { minHeight: '150px', borderBottomLeftRadius: 4, borderBottomRightRadius: 4, borderColor: '#c4c4c4' }, '.ql-toolbar': { borderTopLeftRadius: 4, borderTopRightRadius: 4, borderColor: '#c4c4c4' }, '&:hover .ql-container, &:hover .ql-toolbar': { borderColor: '#000' }, '&:focus-within .ql-container, &:focus-within .ql-toolbar': { borderColor: '#2563EB', borderWidth: 2 } }}>
+            <ReactQuill
+              theme="snow"
+              value={form.annexure || ''}
+              onChange={val => setForm({ ...form, annexure: val })}
+              placeholder="Enter annexure details..."
+            />
+          </Box>
         </DialogContent>
         <DialogActions sx={{ px: 4, pb: 4, pt: 2, justifyContent: 'flex-end', gap: 2 }}>
           <Button onClick={() => { setDialog(false); setEditingPOId(null); setErrors({}); setItemErrors({}); }} sx={{ color: '#64748B', fontWeight: 600 }}>Cancel</Button>

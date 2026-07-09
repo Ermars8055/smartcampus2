@@ -1387,7 +1387,7 @@ const Quotations = () => {
               {/* Row 1: Required Date */}
               <Box id="field-required_date">
                 <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', mb: 0.5, display: 'block', ml: 0.5, textTransform: 'uppercase' }}>
-                  Required Date
+                  Required Date *
                 </Typography>
                 <DatePicker
                   sx={{ width: '100%' }}
@@ -1410,7 +1410,7 @@ const Quotations = () => {
               {/* Row 2: Link PRs & Manual Materials */}
               <Box id="field-items">
                 <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', mb: 0.5, display: 'block', ml: 0.5, textTransform: 'uppercase' }}>
-                  Link Approved PRs
+                  Link Approved PRs *
                 </Typography>
                 <Autocomplete
                   multiple
@@ -1459,7 +1459,7 @@ const Quotations = () => {
 
               <Box>
                 <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', mb: 0.5, display: 'block', ml: 0.5, textTransform: 'uppercase' }}>
-                  Manual Material Selection
+                  Manual Material Selection *
                 </Typography>
                 <Autocomplete
                   multiple
@@ -1509,7 +1509,7 @@ const Quotations = () => {
               {/* Row 3: Invite Vendors */}
               <Box id="field-vendor_ids" sx={{ gridColumn: 'span 2' }}>
                 <Typography variant="caption" sx={{ fontWeight: 700, color: (newQR.vendor_ids?.length || 0) === 1 ? 'error.main' : 'text.secondary', mb: 0.5, display: 'block', ml: 0.5, textTransform: 'uppercase' }}>
-                  Invite Vendors {(newQR.vendor_ids?.length || 0) === 1 && "(Minimum 2 Required)"}
+                  Invite Vendors * {(newQR.vendor_ids?.length || 0) === 1 && "(Minimum 2 Required)"}
                 </Typography>
                 <FormControl fullWidth error={(newQR.vendor_ids?.length || 0) === 1}>
                   <Autocomplete

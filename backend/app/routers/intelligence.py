@@ -22,6 +22,7 @@ def parse_date(date_str: Optional[str]):
 @router.get("/consumption")
 def get_consumption_report(
     project_id: Optional[int] = None,
+    institution_id: Optional[int] = None,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
     db: Session = Depends(get_db),
@@ -31,30 +32,44 @@ def get_consumption_report(
     sd = parse_date(start_date)
     ed = parse_date(end_date)
     
+    from app.models import Institution, Indent
+    from sqlalchemy.orm import aliased
+    
+    BuildingInst = aliased(Institution)
+    IndentInst = aliased(Institution)
+    
     loc_label = func.coalesce(Building.name, MaterialIssue.issued_to_department, "Unknown")
+    inst_label = func.coalesce(IndentInst.name, BuildingInst.name, "Unknown Institution")
     
     query = db.query(
         loc_label.label("building_name"),
+        inst_label.label("institution_name"),
         Material.name.label("material_name"),
         func.sum(MaterialIssueItem.quantity).label("total_quantity"),
         func.sum(MaterialIssueItem.quantity * MaterialIssueItem.rate).label("total_value")
     ).join(MaterialIssue, MaterialIssueItem.issue_id == MaterialIssue.id)\
      .join(Material, MaterialIssueItem.material_id == Material.id)\
      .outerjoin(Building, MaterialIssue.building_id == Building.id)\
+     .outerjoin(BuildingInst, Building.institution_id == BuildingInst.id)\
+     .outerjoin(Indent, MaterialIssue.indent_id == Indent.id)\
+     .outerjoin(IndentInst, Indent.institution_id == IndentInst.id)\
      .filter(MaterialIssue.tenant_id == tenant_id, MaterialIssue.site_id == site_id)
     
     if project_id:
         query = query.filter(MaterialIssue.project_id == project_id)
+    if institution_id:
+        query = query.filter(func.coalesce(Indent.institution_id, Building.institution_id) == institution_id)
     if sd:
         query = query.filter(MaterialIssue.created_at >= sd)
     if ed:
         query = query.filter(MaterialIssue.created_at <= ed)
         
-    results = query.group_by(loc_label, Material.name).all()
+    results = query.group_by(loc_label, inst_label, Material.name).all()
     
     return [
         {
             "building_name": r.building_name,
+            "institution_name": r.institution_name,
             "material_name": r.material_name,
             "total_quantity": r.total_quantity,
             "total_value": r.total_value

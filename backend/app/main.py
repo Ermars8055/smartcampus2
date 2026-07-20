@@ -17,7 +17,7 @@ from app.routers import (
     saas_admin, rbac, sites, auto_pr, alerts, intelligence,
     indents, approval_flows, quotations, reports, uploads, terms,
     admin_users, invoices, company_addresses, material_limits, configurations,
-    complaints, finance
+    complaints, finance, quotation_extraction
 )
 
 logging.basicConfig(level=logging.INFO)
@@ -86,6 +86,7 @@ app.include_router(intelligence.router)
 app.include_router(indents.router)
 app.include_router(approval_flows.router)
 app.include_router(quotations.router)
+app.include_router(quotation_extraction.router)
 app.include_router(reports.router)
 app.include_router(uploads.router)
 app.include_router(terms.router)

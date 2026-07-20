@@ -25,6 +25,7 @@ export default function MaterialIssue() {
   const [stocks, setStocks] = useState([]);
   const [warehouses, setWarehouses] = useState([]);
   const [projects, setProjects] = useState([]);
+  const [institutions, setInstitutions] = useState([]);
   const [materials, setMaterials] = useState([]);
   const [departmentsList, setDepartmentsList] = useState([]);
   const [allDepartments, setAllDepartments] = useState([]);
@@ -33,7 +34,7 @@ export default function MaterialIssue() {
   const [rooms, setRooms] = useState([]);
 
   // Modal states: if indent is null, it's a direct issue
-  const [issueModal, setIssueModal] = useState({ open: false, isDirect: false, indent: null, items: [], project_id: '', warehouse_id: '', remarks: '', department: '', building_id: '', floor_id: '', room_id: '' });
+  const [issueModal, setIssueModal] = useState({ open: false, isDirect: false, indent: null, items: [], project_id: '', institution_id: '', warehouse_id: '', remarks: '', department: '', building_id: '', floor_id: '', room_id: '' });
   const [viewIssueModal, setViewIssueModal] = useState({ open: false, issue: null });
   const [errors, setErrors] = useState({});
 
@@ -149,6 +150,8 @@ export default function MaterialIssue() {
       setWarehouses(wRes.data);
       const pRes = await api.get('/api/projects');
       setProjects(pRes.data);
+      const instRes = await api.get('/api/institutions');
+      setInstitutions(instRes.data);
       const mRes = await api.get('/api/materials', { params: { limit: 10000 } });
       setMaterials(mRes.data.items || []);
       api.get('/api/departments/names').then(r => setDepartmentsList(r.data)).catch(() => setDepartmentsList([]));
@@ -167,7 +170,28 @@ export default function MaterialIssue() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterInstitution, setFilterInstitution] = useState(null);
 
-  const handleDepartmentChange = (newDept) => {
+  const handleInstitutionChange = (instId) => {
+    setIssueModal(prev => ({
+      ...prev,
+      institution_id: instId,
+      department: '',
+      building_id: '',
+      floor_id: '',
+      room_id: ''
+    }));
+    setBuildings([]);
+    setFloors([]);
+    setRooms([]);
+
+    if (instId) {
+      const depts = allDepartments.filter(d => d.institution_id === instId).map(d => d.name);
+      setDepartmentsList(Array.from(new Set(depts)));
+    } else {
+      setDepartmentsList([]);
+    }
+  };
+
+  const handleDepartmentChange = (newDept, instId = issueModal.institution_id) => {
     if (newDept) {
       api.get(`/api/rooms?department_name=${encodeURIComponent(newDept)}`).then(r => {
         const fetchedRooms = r.data || [];
@@ -183,7 +207,7 @@ export default function MaterialIssue() {
           }
         });
 
-        const masterDepts = allDepartments.filter(d => d.name === newDept);
+        const masterDepts = allDepartments.filter(d => d.name === newDept && (!instId || d.institution_id === instId));
         masterDepts.forEach(d => {
           if (d.building_id && d.building_name) {
             uniqueBuildings.set(d.building_id, { id: d.building_id, name: d.building_name });
@@ -265,7 +289,7 @@ export default function MaterialIssue() {
         return {
           type: 'issue', ...iss, sortDate: new Date(iss.created_at).getTime(),
           idStr: iss.issue_number, personStr: personStrValue, itemCount: iss.items?.length || 0,
-          institutionName: iss.project_name || 'Not Specified',
+          institutionName: iss.institution_name || iss.project_name || 'Not Specified',
           derivedStatus: iss.is_acknowledged ? 'Acknowledged' : 'Completed',
           acknowledgedByName: iss.acknowledged_by_name
         };
@@ -332,11 +356,13 @@ export default function MaterialIssue() {
     setBuildings([]);
     setFloors([]);
     setRooms([]);
+    setDepartmentsList([]);
     setIssueModal({
       open: true,
       isDirect: true,
       indent: null,
       project_id: '',
+      institution_id: '',
       warehouse_id: warehouses[0]?.id || '',
       department: '', building_id: '', floor_id: '', room_id: '',
       remarks: '',
@@ -355,7 +381,7 @@ export default function MaterialIssue() {
 
       if (issueModal.isDirect) {
         if (!issueModal.warehouse_id) newErrors.warehouse_id = "Source store is required";
-        if (!issueModal.project_id) newErrors.project_id = "Institution is required";
+        if (!issueModal.institution_id) newErrors.institution_id = "Institution is required";
         if (!issueModal.department) newErrors.department = "Department is required";
       }
       
@@ -370,9 +396,17 @@ export default function MaterialIssue() {
         return;
       }
 
+      let selectedProjId = 1;
+      if (issueModal.isDirect) {
+        const selectedInst = institutions.find(inst => inst.id === issueModal.institution_id);
+        if (selectedInst) {
+          selectedProjId = selectedInst.project_id;
+        }
+      }
+
       const payload = {
         warehouse_id: issueModal.isDirect ? issueModal.warehouse_id : issueModal.items[0]?.warehouse_id,
-        project_id: issueModal.isDirect ? issueModal.project_id : (issueModal.indent?.project_id || 1),
+        project_id: issueModal.isDirect ? selectedProjId : (issueModal.indent?.project_id || 1),
         indent_id: issueModal.indent?.id,
         issued_to_department: issueModal.isDirect ? issueModal.department : undefined,
         building_id: issueModal.isDirect ? issueModal.building_id : undefined,
@@ -482,7 +516,7 @@ export default function MaterialIssue() {
         />
         <Autocomplete
           size="small"
-          options={projects}
+          options={institutions}
           getOptionLabel={(option) => option.name || ''}
           value={filterInstitution}
           onChange={(e, val) => setFilterInstitution(val)}
@@ -689,17 +723,17 @@ export default function MaterialIssue() {
                 </FormControl>
               </Grid>
               <Grid item xs={12} sm={4}>
-                <FormControl id="field-project_id" fullWidth size="small" error={!!errors.project_id}>
+                <FormControl id="field-institution_id" fullWidth size="small" error={!!errors.institution_id}>
                   <InputLabel>Institution <span style={{ color: '#d32f2f' }}>*</span></InputLabel>
                   <Select
                     label="Institution *"
-                    value={issueModal.project_id || ''}
-                    onChange={e => setIssueModal({ ...issueModal, project_id: e.target.value })}
+                    value={issueModal.institution_id || ''}
+                    onChange={e => handleInstitutionChange(e.target.value)}
                     startAdornment={<InputAdornment position="start"><Business sx={{ color: '#94A3B8', fontSize: 20, mr: 1 }} /></InputAdornment>}
                   >
-                    {projects.map(p => <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>)}
+                    {institutions.map(inst => <MenuItem key={inst.id} value={inst.id}>{inst.name}</MenuItem>)}
                   </Select>
-                  {errors.project_id && <Typography color="error" variant="caption" sx={{ ml: 2, mt: 0.5 }}>{errors.project_id}</Typography>}
+                  {errors.institution_id && <Typography color="error" variant="caption" sx={{ ml: 2, mt: 0.5 }}>{errors.institution_id}</Typography>}
                 </FormControl>
               </Grid>
               <Grid item xs={12} sm={4}>

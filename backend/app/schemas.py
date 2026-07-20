@@ -1065,6 +1065,7 @@ class IssueOut(BaseModel):
     created_at: datetime
     warehouse_name: Optional[str] = None
     project_name: Optional[str] = None
+    institution_name: Optional[str] = None
     room_name: Optional[str] = None
     floor_name: Optional[str] = None
     building_name: Optional[str] = None
@@ -1523,6 +1524,10 @@ class VendorQuotationItemBase(BaseModel):
     material_id: int
     quoted_rate: float = Field(..., ge=0)
     delivery_days: Optional[int] = None
+    brand: Optional[str] = Field(None, max_length=255)
+    vendor_uom_name: Optional[str] = Field(None, max_length=50)
+    uom_conversion_factor: float = 1.0
+    discount_percent: float = 0.0
     is_excluded: bool = False
     remarks: Optional[str] = Field(None, max_length=255)
 
@@ -1596,6 +1601,33 @@ class ComparativeStatementOut(BaseModel):
     created_at: datetime
     materials: List[MaterialComparisonOut] = []
     vendor_totals: List[Dict[str, Any]] = []
+
+
+class NegotiationHistoryBase(BaseModel):
+    discount_percent: float = 0.0
+    remarks: Optional[str] = Field(None, max_length=255)
+
+class NegotiationHistoryOut(NegotiationHistoryBase):
+    id: int
+    qr_id: int
+    vendor_id: int
+    created_by_id: int
+    created_at: datetime
+    created_by_name: Optional[str] = None
+    class Config:
+        from_attributes = True
+
+class ExtractionResultItem(BaseModel):
+    material_id: Optional[int] = None
+    material_name: Optional[str] = None
+    quoted_rate: Optional[float] = None
+    delivery_days: Optional[int] = None
+    brand: Optional[str] = None
+    vendor_uom_name: Optional[str] = None
+    uom_conversion_factor: float = 1.0
+    discount_percent: float = 0.0
+    confidence_score: float = 1.0
+    raw_text: Optional[str] = None
 
 
 # == Terms and Conditions ==

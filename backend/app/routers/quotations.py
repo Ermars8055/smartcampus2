@@ -299,7 +299,7 @@ def check_and_auto_transition_to_entered(db: Session, qr: QuotationRequest):
                         VendorQuotation.qr_id == qr.id,
                         VendorQuotation.vendor_id == rv.vendor_id
                     ).first()
-                    if not has_quote:
+                    if not has_quote or has_quote.status == VendorQuotationStatus.DRAFT.value:
                         all_have_quotes = False
                         break
                 if all_have_quotes:
@@ -381,6 +381,7 @@ def enter_vendor_quotation(
     remarks: str = Form(None),
     items_json: str = Form(...),
     file: UploadFile = File(None),
+    is_draft: bool = Form(False),
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("purchase_requests", "update")),
     tenant_id: int = Depends(get_tenant_id),
@@ -421,6 +422,7 @@ def enter_vendor_quotation(
             qr_id=qr_id, vendor_id=vendor_id, quotation_number=quotation_number,
             quotation_date=q_date, received_date=get_now_ist().date(),
             attachment_path=attachment_path, remarks=remarks,
+            status=VendorQuotationStatus.DRAFT.value if is_draft else VendorQuotationStatus.RECEIVED.value,
             entered_by_id=current_user.id
         )
         db.add(vq)
@@ -430,12 +432,32 @@ def enter_vendor_quotation(
     try:
         items = json.loads(items_json)
         for it in items:
+            
+            # Safely parse rate and delivery days, defaulting to 0/None for drafts
+            quoted_rate = 0
+            if it.get('quoted_rate') and not it.get('is_excluded'):
+                try:
+                    quoted_rate = float(it['quoted_rate'])
+                except ValueError:
+                    quoted_rate = 0
+                    
+            delivery_days = None
+            if it.get('delivery_days') and not it.get('is_excluded'):
+                try:
+                    delivery_days = int(it['delivery_days'])
+                except ValueError:
+                    delivery_days = None
+
             db.add(VendorQuotationItem(
                 vendor_quotation_id=vq.id,
                 qr_item_id=it['qr_item_id'],
                 material_id=it['material_id'],
-                quoted_rate=it['quoted_rate'] if not it.get('is_excluded') else 0,
-                delivery_days=it.get('delivery_days') if not it.get('is_excluded') else None,
+                quoted_rate=quoted_rate,
+                delivery_days=delivery_days,
+                brand=it.get('brand'),
+                vendor_uom_name=it.get('vendor_uom_name') or it.get('uom_name'),
+                uom_conversion_factor=it.get('uom_conversion_factor', 1.0),
+                discount_percent=it.get('discount_percent', 0.0),
                 is_excluded=it.get('is_excluded', False),
                 remarks=it.get('remarks')
             ))
@@ -479,6 +501,8 @@ def list_vendor_quotations(
         items = [VendorQuotationItemOut(
             id=it.id, qr_item_id=it.qr_item_id, material_id=it.material_id,
             quoted_rate=it.quoted_rate, delivery_days=it.delivery_days, remarks=it.remarks,
+            brand=it.brand, vendor_uom_name=it.vendor_uom_name, 
+            uom_conversion_factor=it.uom_conversion_factor, discount_percent=it.discount_percent,
             material_name=it.material.name, material_code=it.material.code, uom_name=it.material.uom.abbreviation
         ) for it in vq.items]
         
@@ -521,6 +545,12 @@ def generate_comparison(
         ).order_by(VendorQuotationItem.quoted_rate.asc()).all()
         
         vendor_quotes = []
+        for idx, q in enumerate(quotes):
+            # Calculate effective normalized rate for ranking
+            effective_rate = (q.quoted_rate / (q.uom_conversion_factor or 1.0)) * (1 - ((q.discount_percent or 0.0) / 100.0))
+            # Sort by effective rate instead of raw quoted rate
+            quotes.sort(key=lambda x: (x.quoted_rate / (x.uom_conversion_factor or 1.0)) * (1 - ((x.discount_percent or 0.0) / 100.0)))
+
         auto_l1_vendor_id = quotes[0].vendor_quotation.vendor_id if quotes else None
         
         for idx, q in enumerate(quotes):
@@ -592,7 +622,8 @@ def generate_comparison(
             if not q.is_excluded:
                 qr_item = next((it for it in qr.items if it.id == q.qr_item_id), None)
                 if qr_item:
-                    vendor_totals[vid]["total_value"] += qr_item.quantity * q.quoted_rate
+                    effective_rate = (q.quoted_rate / (q.uom_conversion_factor or 1.0)) * (1 - ((q.discount_percent or 0.0) / 100.0))
+                    vendor_totals[vid]["total_value"] += qr_item.quantity * effective_rate
 
     # Now update items_won and selection status
     for mc in material_comparisons:
@@ -936,4 +967,399 @@ def download_comparative_statement_pdf(
         'Content-Disposition': f'attachment; filename="comparative_statement_{comp_data.qr_number}.pdf"'
     }
     return StreamingResponse(buffer, media_type="application/pdf", headers=headers)
+
+
+@router.get("/{qr_id}/comparative-statement/excel")
+def download_comparative_statement_excel(
+    qr_id: int, db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("purchase_requests", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    import openpyxl
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from openpyxl.utils import get_column_letter
+    from io import BytesIO
+    from fastapi.responses import StreamingResponse
+
+    comp_data = generate_comparison(qr_id, db, current_user, tenant_id, site_id)
+    sorted_vendors = sorted(comp_data.vendor_totals, key=lambda x: x['total_value'])
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Comparative Statement"
+
+    # Explicitly show grid lines so they remain visible under colored fills
+    ws.views.sheetView[0].showGridLines = True
+
+    # Typography & Styles (Modern Segoe UI theme)
+    title_font = Font(name="Segoe UI", size=16, bold=True, color="1F4E79")
+    meta_label_font = Font(name="Segoe UI", size=10, bold=True, color="475569")
+    meta_val_font = Font(name="Segoe UI", size=10, color="000000")
+    header_font = Font(name="Segoe UI", size=10, bold=True, color="FFFFFF")
+    subheader_font = Font(name="Segoe UI", size=9, bold=True, color="1E293B")
+    data_font = Font(name="Segoe UI", size=10, color="000000")
+    total_font = Font(name="Segoe UI", size=10, bold=True, color="000000")
+    green_font = Font(name="Segoe UI", size=10, bold=True, color="15803D")
+    gray_font = Font(name="Segoe UI", size=10, color="64748B")
+
+    # Colors
+    header_fill = PatternFill(start_color="1E293B", end_color="1E293B", fill_type="solid") # Corporate Slate Navy
+    subheader_fill = PatternFill(start_color="F1F5F9", end_color="F1F5F9", fill_type="solid") # Soft Light Gray
+    zebra_fill = PatternFill(start_color="F8FAFC", end_color="F8FAFC", fill_type="solid") # Very light tint for alternating rows
+    l1_fill = PatternFill(start_color="DCFCE7", end_color="DCFCE7", fill_type="solid") # Soft green for L1 rate / lowest value
+
+    # Alignments
+    align_center = Alignment(horizontal="center", vertical="center")
+    align_left = Alignment(horizontal="left", vertical="center")
+    align_right = Alignment(horizontal="right", vertical="center")
+    align_header = Alignment(horizontal="center", vertical="center", wrap_text=True)
+
+    # Borders
+    thin_border_side = Side(style="thin", color="CBD5E1")
+    double_border_side = Side(style="double", color="000000")
+    thin_top_side = Side(style="thin", color="000000")
+
+    grid_border = Border(left=thin_border_side, right=thin_border_side, top=thin_border_side, bottom=thin_border_side)
+    total_border = Border(left=thin_border_side, right=thin_border_side, top=thin_top_side, bottom=double_border_side)
+
+    # 1. Sheet Title block
+    ws.merge_cells("A1:G1")
+    ws["A1"] = f"COMPARATIVE STATEMENT"
+    ws["A1"].font = title_font
+    ws["A1"].alignment = align_left
+    ws.row_dimensions[1].height = 30
+
+    # 2. Metadata details block
+    ws["A3"] = "QR Number:"
+    ws["A3"].font = meta_label_font
+    ws["B3"] = comp_data.qr_number
+    ws["B3"].font = meta_val_font
+
+    ws["A4"] = "Project:"
+    ws["A4"].font = meta_label_font
+    ws["B4"] = comp_data.project_name or "N/A"
+    ws["B4"].font = meta_val_font
+
+    ws["D3"] = "Statement Date:"
+    ws["D3"].font = meta_label_font
+    ws["E3"] = comp_data.created_at.strftime('%d-%b-%Y')
+    ws["E3"].font = meta_val_font
+
+    ws["D4"] = "Status:"
+    ws["D4"].font = meta_label_font
+    ws["E4"] = comp_data.status
+    ws["E4"].font = meta_val_font
+
+    # 3. Build Column Headers (Row 7 and 8)
+    base_headers = ["Sr. No.", "Material Code", "Material Name", "Qty", "UOM"]
+    for col_idx, text in enumerate(base_headers, start=1):
+        col_letter = get_column_letter(col_idx)
+        ws.merge_cells(f"{col_letter}7:{col_letter}8")
+        cell = ws[f"{col_letter}7"]
+        cell.value = text
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = align_header
+        cell.border = grid_border
+
+    # Vendor Columns Header block
+    for v_idx, vt in enumerate(sorted_vendors):
+        start_col = 6 + v_idx * 7
+        end_col = start_col + 6
+        
+        start_letter = get_column_letter(start_col)
+        end_letter = get_column_letter(end_col)
+        
+        # Merge Row 7 across the 7 columns for vendor code and name
+        ws.merge_cells(f"{start_letter}7:{end_letter}7")
+        cell = ws[f"{start_letter}7"]
+        cell.value = vt['vendor_name']
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = align_header
+        cell.border = grid_border
+        
+        # Row 8 has the sub-headers
+        subheaders = ["Brand", "Vendor UOM", "Conv. Factor", "Quoted Rate", "Disc %", "Effective Rate", "Total Amount"]
+        for sh_idx, sh_text in enumerate(subheaders):
+            c_letter = get_column_letter(start_col + sh_idx)
+            c_cell = ws[f"{c_letter}8"]
+            c_cell.value = sh_text
+            c_cell.font = subheader_font
+            c_cell.fill = subheader_fill
+            c_cell.alignment = align_header
+            c_cell.border = grid_border
+
+    ws.row_dimensions[7].height = 25
+    ws.row_dimensions[8].height = 20
+
+    # 4. Fill Items / Materials
+    start_row = 9
+    for m_idx, mat in enumerate(comp_data.materials):
+        row_idx = start_row + m_idx
+        ws.row_dimensions[row_idx].height = 22
+        is_even = (m_idx % 2 == 0)
+        row_fill = zebra_fill if is_even else PatternFill(fill_type=None)
+
+        # Base material information
+        ws.cell(row=row_idx, column=1, value=m_idx + 1).alignment = align_center
+        ws.cell(row=row_idx, column=2, value=mat.material_code).alignment = align_center
+        ws.cell(row=row_idx, column=3, value=mat.material_name).alignment = align_left
+        ws.cell(row=row_idx, column=4, value=mat.quantity).alignment = align_right
+        ws.cell(row=row_idx, column=5, value=mat.uom_name).alignment = align_center
+
+        for col in range(1, 6):
+            cell = ws.cell(row=row_idx, column=col)
+            cell.font = data_font
+            if row_fill.fill_type:
+                cell.fill = row_fill
+            cell.border = grid_border
+            if col == 4:
+                cell.number_format = "#,##0.00"
+
+        # Vendor specific quotation details
+        for v_idx, vt in enumerate(sorted_vendors):
+            start_col = 6 + v_idx * 7
+            quote = next((q for q in mat.vendor_quotes if q.vendor_id == vt['vendor_id']), None)
+            
+            vqi = db.query(VendorQuotationItem).join(VendorQuotation).filter(
+                VendorQuotationItem.qr_item_id == mat.qr_item_id,
+                VendorQuotation.vendor_id == vt['vendor_id']
+            ).first()
+
+            if quote and vqi:
+                brand = vqi.brand or ""
+                vendor_uom = vqi.vendor_uom_name or mat.uom_name or ""
+                conv_factor = vqi.uom_conversion_factor or 1.0
+                quoted_rate = vqi.quoted_rate
+                discount = vqi.discount_percent or 0.0
+                effective = (quoted_rate / conv_factor) * (1.0 - (discount / 100.0))
+                total_amount = effective * mat.quantity
+                
+                is_l1 = (quote.rank == 1)
+                vals = [brand, vendor_uom, conv_factor, quoted_rate, discount, effective, total_amount]
+                
+                for offset, val in enumerate(vals):
+                    c_col = start_col + offset
+                    cell = ws.cell(row=row_idx, column=c_col, value=val)
+                    cell.font = data_font
+                    cell.border = grid_border
+                    
+                    if offset == 0:
+                        cell.alignment = align_left
+                    elif offset == 1:
+                        cell.alignment = align_center
+                    elif offset == 2:
+                        cell.alignment = align_right
+                        cell.number_format = "#,##0.00"
+                    elif offset == 3:
+                        cell.alignment = align_right
+                        cell.number_format = "#,##0.00"
+                    elif offset == 4:
+                        cell.alignment = align_right
+                        cell.number_format = "0.0\"%\""
+                    elif offset == 5:
+                        cell.alignment = align_right
+                        cell.number_format = "#,##0.00"
+                        if is_l1:
+                            cell.fill = l1_fill
+                            cell.font = green_font
+                    elif offset == 6:
+                        cell.alignment = align_right
+                        cell.number_format = "#,##0.00"
+                        if is_l1:
+                            cell.fill = l1_fill
+                            cell.font = green_font
+                            
+                    if not is_l1 and row_fill.fill_type:
+                        cell.fill = row_fill
+            else:
+                # Format empty or non-quoted items
+                for offset in range(7):
+                    c_col = start_col + offset
+                    cell = ws.cell(row=row_idx, column=c_col, value="-" if offset == 3 else "")
+                    cell.font = data_font
+                    cell.border = grid_border
+                    cell.alignment = align_center
+                    if row_fill.fill_type:
+                        cell.fill = row_fill
+
+    # 5. Summary Row: Total Bid Value
+    tot_row_idx = start_row + len(comp_data.materials)
+    ws.row_dimensions[tot_row_idx].height = 22
+    ws.merge_cells(start_row=tot_row_idx, start_column=1, end_row=tot_row_idx, end_column=5)
+    tot_label_cell = ws.cell(row=tot_row_idx, column=1, value="Total Bid Value")
+    tot_label_cell.font = total_font
+    tot_label_cell.alignment = align_right
+    tot_label_cell.border = total_border
+    
+    for col in range(2, 6):
+        ws.cell(row=tot_row_idx, column=col).border = total_border
+
+    for v_idx, vt in enumerate(sorted_vendors):
+        start_col = 6 + v_idx * 7
+        tot_col_letter = get_column_letter(start_col + 6)
+        tot_formula = f"=SUM({tot_col_letter}9:{tot_col_letter}{tot_row_idx-1})"
+        
+        for offset in range(7):
+            c_col = start_col + offset
+            cell = ws.cell(row=tot_row_idx, column=c_col)
+            cell.border = total_border
+            if offset == 6:
+                cell.value = tot_formula
+                cell.font = total_font
+                cell.alignment = align_right
+                cell.number_format = "#,##0.00"
+
+    # 6. Summary Row: Items Won (L1)
+    won_row_idx = tot_row_idx + 1
+    ws.row_dimensions[won_row_idx].height = 20
+    ws.merge_cells(start_row=won_row_idx, start_column=1, end_row=won_row_idx, end_column=5)
+    won_label_cell = ws.cell(row=won_row_idx, column=1, value="Items Won (L1)")
+    won_label_cell.font = total_font
+    won_label_cell.alignment = align_right
+    
+    for col in range(1, 6):
+        ws.cell(row=won_row_idx, column=col).border = grid_border
+
+    for v_idx, vt in enumerate(sorted_vendors):
+        start_col = 6 + v_idx * 7
+        for offset in range(7):
+            c_col = start_col + offset
+            cell = ws.cell(row=won_row_idx, column=c_col)
+            cell.border = grid_border
+            if offset == 6:
+                cell.value = vt['items_won']
+                cell.font = total_font
+                cell.alignment = align_center
+
+    # 7. Summary Row: Selection Status
+    sel_row_idx = won_row_idx + 1
+    ws.row_dimensions[sel_row_idx].height = 20
+    ws.merge_cells(start_row=sel_row_idx, start_column=1, end_row=sel_row_idx, end_column=5)
+    sel_label_cell = ws.cell(row=sel_row_idx, column=1, value="Selection Status")
+    sel_label_cell.font = total_font
+    sel_label_cell.alignment = align_right
+    
+    for col in range(1, 6):
+        ws.cell(row=sel_row_idx, column=col).border = grid_border
+
+    for v_idx, vt in enumerate(sorted_vendors):
+        start_col = 6 + v_idx * 7
+        is_sel = vt['is_selected_any']
+        for offset in range(7):
+            c_col = start_col + offset
+            cell = ws.cell(row=sel_row_idx, column=c_col)
+            cell.border = grid_border
+            if offset == 6:
+                cell.value = "Selected" if is_sel else "Not Selected"
+                cell.font = green_font if is_sel else gray_font
+                cell.alignment = align_center
+
+    # 8. Dynamic Auto-adjust Column Widths safely
+    for col in ws.columns:
+        col_letter = get_column_letter(col[0].column)
+        max_len = 0
+        for cell in col:
+            # Skip sheet title and metadata when calculating optimal column widths
+            if cell.row < 7:
+                continue
+            val_str = str(cell.value or '')
+            if len(val_str) > max_len:
+                max_len = len(val_str)
+        ws.column_dimensions[col_letter].width = max(max_len + 3, 10)
+        
+    # Explicitly set main base columns for better proportion
+    ws.column_dimensions["A"].width = 8   # Sr. No.
+    ws.column_dimensions["B"].width = 16  # Material Code
+    ws.column_dimensions["C"].width = 30  # Material Name
+    ws.column_dimensions["D"].width = 12  # Qty
+    ws.column_dimensions["E"].width = 10  # UOM
+
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+    
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename=CS_{comp_data.qr_number}.xlsx"}
+    )
+
+
+from app.schemas import NegotiationHistoryBase, NegotiationHistoryOut
+from app.models import QuotationNegotiationHistory
+
+@router.put("/{qr_id}/vendor-quotations/{vendor_id}/discounts")
+def update_vendor_discounts(
+    qr_id: int, vendor_id: int,
+    data: NegotiationHistoryBase,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("purchase_requests", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    qr = db.query(QuotationRequest).filter(
+        QuotationRequest.id == qr_id, QuotationRequest.tenant_id == tenant_id, QuotationRequest.site_id == site_id
+    ).first()
+    if not qr:
+        raise HTTPException(status_code=404, detail="Quotation Request not found")
+
+    vq = db.query(VendorQuotation).filter(
+        VendorQuotation.qr_id == qr_id, VendorQuotation.vendor_id == vendor_id
+    ).first()
+    if not vq:
+        raise HTTPException(status_code=404, detail="Vendor Quotation not found")
+
+    # Add Negotiation History
+    history = QuotationNegotiationHistory(
+        qr_id=qr_id,
+        vendor_id=vendor_id,
+        discount_percent=data.discount_percent,
+        remarks=data.remarks,
+        created_by_id=current_user.id
+    )
+    db.add(history)
+
+    # Update discount on all items for this vendor
+    for item in vq.items:
+        item.discount_percent = data.discount_percent
+        
+    # Revert approval if needed
+    if qr.status == QuotationRequestStatus.APPROVED.value:
+        qr.status = QuotationRequestStatus.COMPARED.value
+        qr.approved_by_id = None
+        qr.approved_at = None
+
+    db.commit()
+    return {"message": "Vendor discounts updated successfully"}
+
+
+@router.get("/{qr_id}/vendor-quotations/{vendor_id}/negotiation-history", response_model=List[NegotiationHistoryOut])
+def get_negotiation_history(
+    qr_id: int, vendor_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("purchase_requests", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    history = db.query(QuotationNegotiationHistory).filter(
+        QuotationNegotiationHistory.qr_id == qr_id,
+        QuotationNegotiationHistory.vendor_id == vendor_id
+    ).order_by(QuotationNegotiationHistory.created_at.desc()).all()
+    
+    result = []
+    for h in history:
+        result.append(NegotiationHistoryOut(
+            id=h.id,
+            qr_id=h.qr_id,
+            vendor_id=h.vendor_id,
+            discount_percent=h.discount_percent,
+            remarks=h.remarks,
+            created_by_id=h.created_by_id,
+            created_by_name=h.created_by.full_name if h.created_by else None,
+            created_at=h.created_at
+        ))
+    return result
 

@@ -148,6 +148,7 @@ class VendorQuotationReceiptStatus(str, enum.Enum):
     NOT_REQUIRED = "Not Required"
 
 class VendorQuotationStatus(str, enum.Enum):
+    DRAFT = "Draft"
     PENDING = "Pending"
     RECEIVED = "Received"
     REJECTED = "Rejected"
@@ -1369,12 +1370,31 @@ class VendorQuotationItem(Base):
     material_id = Column(Integer, ForeignKey("materials.id"), nullable=False)
     quoted_rate = Column(Float, nullable=False)
     delivery_days = Column(Integer, nullable=True)
+    brand = Column(String(255), nullable=True)
+    vendor_uom_name = Column(String(50), nullable=True)
+    uom_conversion_factor = Column(Float, default=1.0)
+    discount_percent = Column(Float, default=0.0)
     is_excluded = Column(Boolean, default=False)
     remarks = Column(Text)
 
     vendor_quotation = relationship("VendorQuotation", back_populates="items")
     qr_item = relationship("QuotationRequestItem")
     material = relationship("Material")
+
+
+class QuotationNegotiationHistory(Base):
+    __tablename__ = "quotation_negotiation_history"
+    id = Column(Integer, primary_key=True, index=True)
+    qr_id = Column(Integer, ForeignKey("quotation_requests.id", ondelete="CASCADE"), nullable=False)
+    vendor_id = Column(Integer, ForeignKey("vendors.id", ondelete="CASCADE"), nullable=False)
+    discount_percent = Column(Float, nullable=False)
+    remarks = Column(Text, nullable=True)
+    created_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime, default=_get_now)
+    
+    quotation_request = relationship("QuotationRequest")
+    vendor = relationship("Vendor")
+    created_by = relationship("User", foreign_keys=[created_by_id])
 
 
 class QuotationComparison(Base):

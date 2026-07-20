@@ -105,6 +105,12 @@ def list_issues(
 
         dept_name = iss.issued_to_department or (iss.room.department_name if iss.room else None) or (iss.indent.department_name if getattr(iss, 'indent', None) else None)
 
+        inst_name = None
+        if iss.indent and iss.indent.institution:
+            inst_name = iss.indent.institution.name
+        elif iss.building and iss.building.institution:
+            inst_name = iss.building.institution.name
+
         result.append(IssueOut(
             id=iss.id, issue_number=iss.issue_number,
             warehouse_id=iss.warehouse_id, project_id=iss.project_id,
@@ -119,6 +125,7 @@ def list_issues(
             created_at=iss.created_at,
             warehouse_name=iss.warehouse.name if iss.warehouse else None,
             project_name=iss.project.name if iss.project else None,
+            institution_name=inst_name,
             room_name=room_name,
             floor_name=floor_name,
             building_name=building_name,

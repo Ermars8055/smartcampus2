@@ -98,6 +98,9 @@ const Quotations = () => {
   // Generated POs
   const [generatedPOs, setGeneratedPOs] = useState([]);
 
+  // Negotiation Modal
+  const [negotiateDialog, setNegotiateDialog] = useState({ open: false, vendorId: null, vendorName: '', discountPercent: '', remarks: '', history: [] });
+
 
 
 
@@ -284,7 +287,7 @@ const Quotations = () => {
     }
   };
 
-  const handleEnterQuote = async () => {
+  const handleEnterQuote = async (isDraft = false) => {
     try {
       const formData = new FormData();
       formData.append('vendor_id', selectedVendorForQuote.vendor_id);
@@ -292,14 +295,15 @@ const Quotations = () => {
       formData.append('quotation_date', newQuote.quotation_date);
       formData.append('remarks', newQuote.remarks);
       formData.append('items_json', JSON.stringify(newQuote.items));
-      if (newQuote.file) {
+      formData.append('is_draft', isDraft);
+      if (newQuote.file instanceof File) {
         formData.append('file', newQuote.file);
       }
 
       await api.post(`/api/quotations/${selectedQR.id}/vendor-quotation`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      showMessage('Quotation entered successfully!', 'Success', 'success');
+      showMessage(`Quotation ${isDraft ? 'saved as draft' : 'entered'} successfully!`, 'Success', 'success');
       setEnterQuoteDialogOpen(false);
       fetchVendorQuotes(selectedQR.id);
 
@@ -308,6 +312,45 @@ const Quotations = () => {
       setSelectedQR(res.data);
     } catch (err) {
       showMessage(err.response?.data?.detail || 'Failed to enter quote', 'Error', 'error');
+    }
+  };
+
+  const handleAutoExtract = async () => {
+    const file = newQuote.file;
+    if (!file) {
+      showMessage('Please upload a quotation file first.', 'No File Selected', 'warning');
+      return;
+    }
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await api.post(`/api/quotations/${selectedQR.id}/vendor-quotation/extract`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
+      const extractedItems = res.data;
+      const updatedItems = newQuote.items.map(item => {
+        const found = extractedItems.find(ex => ex.material_id === item.material_id);
+        if (found) {
+          return {
+            ...item,
+            quoted_rate: (found.quoted_rate !== null && found.quoted_rate !== undefined) ? found.quoted_rate : item.quoted_rate,
+            brand: (found.brand !== null && found.brand !== undefined) ? found.brand : item.brand,
+            vendor_uom_name: (found.vendor_uom_name !== null && found.vendor_uom_name !== undefined) ? found.vendor_uom_name : item.vendor_uom_name,
+            delivery_days: (found.delivery_days !== null && found.delivery_days !== undefined) ? found.delivery_days : item.delivery_days,
+            confidence: found.confidence_score,
+            raw_text: found.raw_text
+          };
+        }
+        return item;
+      });
+      setNewQuote({ ...newQuote, items: updatedItems });
+      showMessage('Data extracted successfully. Please review highlighted items.', 'Success', 'success');
+    } catch (err) {
+      showMessage(err.response?.data?.detail || 'Failed to extract data', 'Error', 'error');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -414,6 +457,21 @@ const Quotations = () => {
     }
   };
 
+  const handleDownloadExcel = async () => {
+    try {
+      const res = await api.get(`/api/quotations/${selectedQR.id}/comparative-statement/excel`, { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `comparative_statement_${selectedQR.qr_number}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      showMessage('Failed to download Excel', 'Error', 'error');
+    }
+  };
+
   const handleUpdateVendorReceipt = async (qrId, vendorId, newStatus, silent = false) => {
     try {
       await api.put(`/api/quotations/requests/${qrId}/vendors/${vendorId}/receipt-status`, { receipt_status: newStatus });
@@ -426,6 +484,42 @@ const Quotations = () => {
       if (!silent) {
         showMessage(err.response?.data?.detail || 'Failed to update status', 'Error', 'error');
       }
+    }
+  };
+
+  const handleOpenNegotiate = async (vendorId, vendorName) => {
+    setLoading(true);
+    try {
+      const res = await api.get(`/api/quotations/${selectedQR.id}/vendor-quotations/${vendorId}/negotiation-history`);
+      setNegotiateDialog({
+        open: true,
+        vendorId,
+        vendorName,
+        discountPercent: '',
+        remarks: '',
+        history: res.data
+      });
+    } catch (err) {
+      showMessage(err.response?.data?.detail || 'Failed to fetch history', 'Error', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleNegotiateSubmit = async () => {
+    try {
+      await api.put(`/api/quotations/${selectedQR.id}/vendor-quotations/${negotiateDialog.vendorId}/discounts`, {
+        discount_percent: parseFloat(negotiateDialog.discountPercent || 0),
+        remarks: negotiateDialog.remarks
+      });
+      showMessage('Vendor discounts updated!', 'Success', 'success');
+      setNegotiateDialog(prev => ({ ...prev, open: false }));
+      fetchComparison(selectedQR.id);
+      
+      const res = await api.get(`/api/quotations/requests/${selectedQR.id}`);
+      setSelectedQR(res.data);
+    } catch (err) {
+      showMessage(err.response?.data?.detail || 'Failed to update discount', 'Error', 'error');
     }
   };
 
@@ -1078,7 +1172,13 @@ const Quotations = () => {
                                 </FormControl>
                               )}
                             </TableCell>
-                            <TableCell><Chip size="small" label={submittedQuote ? "Entered" : (isNotRequired ? "Skipped" : "Pending")} color={submittedQuote ? "success" : "default"} /></TableCell>
+                            <TableCell>
+                              {submittedQuote ? (
+                                <Chip size="small" label={submittedQuote.status === 'Draft' ? "Draft" : "Entered"} color={submittedQuote.status === 'Draft' ? "warning" : "success"} />
+                              ) : (
+                                <Chip size="small" label={isNotRequired ? "Skipped" : "Pending"} color="default" />
+                              )}
+                            </TableCell>
                             <TableCell align="right">
                               {!isNotRequired && !['Compared', 'Approved', 'Ordered'].includes(selectedQR.status) && (
                                 <Button variant="outlined" size="small" startIcon={<EditIcon />} onClick={async () => {
@@ -1104,6 +1204,10 @@ const Quotations = () => {
                                         material_code: i.material_code,
                                         uom_name: i.uom_name, quoted_rate: i.quoted_rate || '',
                                         delivery_days: i.delivery_days || '', remarks: i.remarks || '',
+                                        brand: i.brand || '',
+                                        vendor_uom_name: i.vendor_uom_name || i.uom_name || '',
+                                        uom_conversion_factor: i.uom_conversion_factor || 1.0,
+                                        discount_percent: i.discount_percent || 0,
                                         is_excluded: i.is_excluded || false
                                       }))
                                     });
@@ -1116,6 +1220,7 @@ const Quotations = () => {
                                         qr_item_id: i.id, material_id: i.material_id, material_name: i.material_name,
                                         material_code: i.material_code,
                                         uom_name: i.uom_name, quoted_rate: '', delivery_days: '', remarks: '',
+                                        brand: '', vendor_uom_name: i.uom_name || '', uom_conversion_factor: 1.0, discount_percent: 0,
                                         is_excluded: false
                                       }))
                                     });
@@ -1216,6 +1321,7 @@ const Quotations = () => {
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                   <Typography variant="h6" sx={{ fontWeight: 600 }}>3. Comparative Statement & Approval</Typography>
                   <Box>
+                    <Button variant="outlined" startIcon={<DownloadIcon />} onClick={handleDownloadExcel} sx={{ mr: 1, borderColor: '#107c41', color: '#107c41' }}>Excel Comparison</Button>
                     <Button variant="outlined" startIcon={<DownloadIcon />} onClick={handleDownloadPDF} sx={{ mr: 1 }}>Download PDF</Button>
                     {selectedQR.status === 'Compared' && (
                       <Button variant="contained" color="primary" onClick={() => {
@@ -1273,8 +1379,15 @@ const Quotations = () => {
                           <TableCell sx={{ fontWeight: 700 }}>Material Details</TableCell>
                           <TableCell align="center" sx={{ fontWeight: 700 }}>Qty</TableCell>
                           {comparisonData.vendor_totals.sort((a, b) => a.total_value - b.total_value).map(vt => (
-                            <TableCell key={vt.vendor_id} align="right" sx={{ fontWeight: 700, minWidth: 120 }}>
-                              {vt.vendor_name}
+                            <TableCell key={vt.vendor_id} align="right" sx={{ fontWeight: 700, minWidth: 140 }}>
+                              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                                <Typography variant="body2" sx={{ fontWeight: 700 }}>{vt.vendor_name}</Typography>
+                                {selectedQR.status !== 'Ordered' && (
+                                  <Button size="small" variant="text" sx={{ mt: 0.5, p: 0, fontSize: '0.7rem' }} onClick={() => handleOpenNegotiate(vt.vendor_id, vt.vendor_name)}>
+                                    Negotiate
+                                  </Button>
+                                )}
+                              </Box>
                             </TableCell>
                           ))}
                         </TableRow>
@@ -1681,18 +1794,28 @@ const Quotations = () => {
               <Box sx={{ pt: 3.5 }}>
                 <Button variant="outlined" component="label" startIcon={<CloudUploadIcon />} color={newQuote.file ? 'success' : 'primary'} sx={{ height: 56, px: 3 }}>
                   Upload copy of quotation file <span style={{ color: '#d32f2f', marginLeft: 4 }}>*</span>
-                  <input type="file" hidden accept=".pdf,.doc,.docx,image/*" onChange={(e) => setNewQuote({ ...newQuote, file: e.target.files[0] })} />
+                  <input type="file" hidden accept=".pdf,.doc,.docx,.xlsx,.xls,.csv,image/*" onChange={(e) => setNewQuote({ ...newQuote, file: e.target.files[0] })} />
                 </Button>
               </Box>
               {newQuote.file && <Box sx={{ pt: 6 }}><Typography variant="caption" sx={{ fontWeight: 500 }}>{newQuote.file.name}</Typography></Box>}
             </Stack>
-
+ 
             <Divider sx={{ mb: 4 }} />
+            
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>Quotation Items</Typography>
+              <Button variant="outlined" size="small" startIcon={<CloudUploadIcon />} disabled={loading} onClick={handleAutoExtract}>
+                {loading ? 'Extracting...' : 'Auto-Extract from File'}
+              </Button>
+            </Box>
 
             <Table size="small">
               <TableHead>
                 <TableRow>
                   <TableCell sx={{ fontWeight: 600 }}>Material</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Brand</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Vendor UOM</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Conv. Factor</TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>Quoted Rate (₹)</TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>Delivery Days</TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>Remarks</TableCell>
@@ -1701,12 +1824,30 @@ const Quotations = () => {
               </TableHead>
               <TableBody>
                 {newQuote.items.map((it, idx) => (
-                  <TableRow key={idx} sx={{ opacity: it.is_excluded ? 0.5 : 1 }}>
+                  <TableRow key={idx} sx={{ opacity: it.is_excluded ? 0.5 : 1, bgcolor: it.confidence ? 'warning.light' : 'inherit' }}>
                     <TableCell>{it.material_code} - {it.material_name}</TableCell>
+                    <TableCell>
+                      <TextField size="small" disabled={it.is_excluded} value={it.brand || ''} onChange={(e) => {
+                        const newItems = [...newQuote.items]; newItems[idx].brand = e.target.value; setNewQuote({ ...newQuote, items: newItems });
+                      }} sx={{ width: 100 }} />
+                    </TableCell>
+                    <TableCell>
+                      <TextField size="small" disabled={it.is_excluded} value={it.vendor_uom_name || ''} onChange={(e) => {
+                        const newItems = [...newQuote.items]; newItems[idx].vendor_uom_name = e.target.value; setNewQuote({ ...newQuote, items: newItems });
+                      }} sx={{ width: 80 }} />
+                    </TableCell>
+                    <TableCell>
+                      <Tooltip title="e.g. If Requested UOM is L but Vendor quotes per 500ml, Conversion factor is 0.5">
+                        <TextField size="small" type="number" className="no-spin" disabled={it.is_excluded} value={it.uom_conversion_factor} onChange={(e) => {
+                          const newItems = [...newQuote.items]; newItems[idx].uom_conversion_factor = parseFloat(e.target.value) || 1.0; setNewQuote({ ...newQuote, items: newItems });
+                        }} sx={{ width: 80 }} />
+                      </Tooltip>
+                    </TableCell>
                     <TableCell>
                       <TextField
                         size="small"
                         type="number"
+                        className="no-spin"
                         disabled={it.is_excluded}
                         onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()}
                         value={it.quoted_rate}
@@ -1718,6 +1859,7 @@ const Quotations = () => {
                             setNewQuote({ ...newQuote, items: newItems });
                           }
                         }}
+                        sx={{ width: 120 }}
                       />
                     </TableCell>
                     <TableCell>
@@ -1735,6 +1877,7 @@ const Quotations = () => {
                             setNewQuote({ ...newQuote, items: newItems });
                           }
                         }}
+                        sx={{ width: 80 }}
                       />
                     </TableCell>
                     <TableCell>
@@ -1777,7 +1920,15 @@ const Quotations = () => {
           <DialogActions sx={{ p: 3 }}>
             <Button onClick={() => setEnterQuoteDialogOpen(false)}>Cancel</Button>
             <Button
-              onClick={handleEnterQuote}
+              onClick={() => handleEnterQuote(true)}
+              variant="outlined"
+              color="primary"
+              disabled={!newQuote.quotation_number && !newQuote.quotation_date && !newQuote.file && newQuote.items.every(i => !i.quoted_rate && !i.delivery_days)}
+            >
+              Save as Draft
+            </Button>
+            <Button
+              onClick={() => handleEnterQuote(false)}
               variant="contained"
               disabled={
                 !newQuote.quotation_number ||
@@ -2022,19 +2173,19 @@ const Quotations = () => {
                     </TableCell>
                     <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{it.quantity} {it.uom_name}</TableCell>
                     <TableCell align="right">
-                      <TextField size="small" type="number" value={it.rate} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateConvertToPoItem(i, 'rate', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0 }} required sx={{ width: 110 }} />
+                      <TextField size="small" type="number" className="no-spin" value={it.rate} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateConvertToPoItem(i, 'rate', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0 }} required sx={{ width: 110 }} />
                     </TableCell>
                     <TableCell align="right">
-                      <TextField size="small" type="number" value={it.discount_percent} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateConvertToPoItem(i, 'discount_percent', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0 }} sx={{ width: 70 }} />
+                      <TextField size="small" type="number" className="no-spin" value={it.discount_percent} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateConvertToPoItem(i, 'discount_percent', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0 }} sx={{ width: 70 }} />
                     </TableCell>
                     <TableCell align="right">
-                      <TextField size="small" variant="standard" type="number" value={it.cgst_percentage} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateConvertToPoItem(i, 'cgst_percentage', e.target.value.replace(/-/g, ''))} InputProps={{ disableUnderline: true, readOnly: true }} inputProps={{ min: 0, style: { textAlign: 'right' } }} sx={{ width: 70, '& .MuiInputBase-input.Mui-readOnly': { color: '#64748b' } }} />
+                      <TextField size="small" variant="standard" type="number" className="no-spin" value={it.cgst_percentage} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateConvertToPoItem(i, 'cgst_percentage', e.target.value.replace(/-/g, ''))} InputProps={{ disableUnderline: true, readOnly: true }} inputProps={{ min: 0, style: { textAlign: 'right' } }} sx={{ width: 70, '& .MuiInputBase-input.Mui-readOnly': { color: '#64748b' } }} />
                     </TableCell>
                     <TableCell align="right">
-                      <TextField size="small" variant="standard" type="number" value={it.sgst_percentage} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateConvertToPoItem(i, 'sgst_percentage', e.target.value.replace(/-/g, ''))} InputProps={{ disableUnderline: true, readOnly: true }} inputProps={{ min: 0, style: { textAlign: 'right' } }} sx={{ width: 70, '& .MuiInputBase-input.Mui-readOnly': { color: '#64748b' } }} />
+                      <TextField size="small" variant="standard" type="number" className="no-spin" value={it.sgst_percentage} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateConvertToPoItem(i, 'sgst_percentage', e.target.value.replace(/-/g, ''))} InputProps={{ disableUnderline: true, readOnly: true }} inputProps={{ min: 0, style: { textAlign: 'right' } }} sx={{ width: 70, '& .MuiInputBase-input.Mui-readOnly': { color: '#64748b' } }} />
                     </TableCell>
                     <TableCell align="right">
-                      <TextField size="small" variant="standard" type="number" value={it.igst_percentage} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateConvertToPoItem(i, 'igst_percentage', e.target.value.replace(/-/g, ''))} InputProps={{ disableUnderline: true, readOnly: true }} inputProps={{ min: 0, style: { textAlign: 'right' } }} sx={{ width: 70, '& .MuiInputBase-input.Mui-readOnly': { color: '#64748b' } }} />
+                      <TextField size="small" variant="standard" type="number" className="no-spin" value={it.igst_percentage} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateConvertToPoItem(i, 'igst_percentage', e.target.value.replace(/-/g, ''))} InputProps={{ disableUnderline: true, readOnly: true }} inputProps={{ min: 0, style: { textAlign: 'right' } }} sx={{ width: 70, '& .MuiInputBase-input.Mui-readOnly': { color: '#64748b' } }} />
                     </TableCell>
                   </TableRow>
                 ))}
@@ -2157,6 +2308,70 @@ const Quotations = () => {
           <Button onClick={() => setManagementApproveDialogOpen(false)}>Cancel</Button>
           <Button onClick={handleApprove} variant="contained" color="success" disableElevation>
             Confirm Approval
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Negotiation Dialog */}
+      <Dialog open={negotiateDialog.open} onClose={() => setNegotiateDialog(prev => ({ ...prev, open: false }))} maxWidth="sm" fullWidth>
+        <DialogTitle>Negotiate - {negotiateDialog.vendorName}</DialogTitle>
+        <DialogContent>
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>Apply Common Discount (%)</Typography>
+            <TextField
+              size="small"
+              fullWidth
+              type="number"
+              className="no-spin"
+              value={negotiateDialog.discountPercent}
+              onChange={(e) => setNegotiateDialog(prev => ({ ...prev, discountPercent: e.target.value }))}
+              placeholder="e.g. 5"
+              InputProps={{
+                endAdornment: <InputAdornment position="end">%</InputAdornment>,
+              }}
+            />
+            <TextField
+              fullWidth
+              size="small"
+              sx={{ mt: 2 }}
+              multiline
+              rows={2}
+              label="Remarks / Negotiation Notes"
+              value={negotiateDialog.remarks}
+              onChange={(e) => setNegotiateDialog(prev => ({ ...prev, remarks: e.target.value }))}
+            />
+          </Box>
+          <Divider sx={{ mb: 2 }} />
+          <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>Negotiation History</Typography>
+          {negotiateDialog.history.length === 0 ? (
+            <Typography variant="body2" color="text.secondary">No previous negotiation history.</Typography>
+          ) : (
+            <Table size="small">
+              <TableHead>
+                <TableRow sx={{ bgcolor: '#f5f5f5' }}>
+                  <TableCell>Date</TableCell>
+                  <TableCell>Discount %</TableCell>
+                  <TableCell>Remarks</TableCell>
+                  <TableCell>By</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {negotiateDialog.history.map(h => (
+                  <TableRow key={h.id}>
+                    <TableCell sx={{ fontSize: '0.75rem' }}>{dayjs(h.created_at).format('DD MMM YYYY HH:mm')}</TableCell>
+                    <TableCell>{h.discount_percent}%</TableCell>
+                    <TableCell sx={{ fontSize: '0.75rem' }}>{h.remarks}</TableCell>
+                    <TableCell sx={{ fontSize: '0.75rem' }}>{h.created_by_name}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ p: 2, pt: 0 }}>
+          <Button onClick={() => setNegotiateDialog(prev => ({ ...prev, open: false }))}>Cancel</Button>
+          <Button variant="contained" color="primary" onClick={handleNegotiateSubmit} disabled={!negotiateDialog.discountPercent}>
+            Apply Discount
           </Button>
         </DialogActions>
       </Dialog>

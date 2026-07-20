@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import {
   Box, Typography, Card, Grid, Table, TableHead, TableBody, TableRow,
-  TableCell, TableContainer, FormControl, InputLabel, Select, MenuItem, Chip
+  TableCell, TableContainer, FormControl, InputLabel, Select, MenuItem, Chip,
+  ToggleButton, ToggleButtonGroup
 } from '@mui/material';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -15,6 +16,8 @@ export default function Intelligence() {
   const [consumption, setConsumption] = useState([]);
   const [projects, setProjects] = useState([]);
   const [buildings, setBuildings] = useState([]);
+  const [institutions, setInstitutions] = useState([]);
+  const [selectedInstitution, setSelectedInstitution] = useState('all');
   const [period, setPeriod] = useState('all');
   const [topMaterials, setTopMaterials] = useState([]);
 
@@ -28,6 +31,7 @@ export default function Intelligence() {
 
   useEffect(() => {
     api.get('/api/buildings').then(r => setBuildings(r.data));
+    api.get('/api/institutions').then(r => setInstitutions(r.data)).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -45,14 +49,13 @@ export default function Intelligence() {
       }
     }
 
+    if (selectedInstitution !== 'all') {
+      params.institution_id = selectedInstitution;
+    }
+
     api.get('/api/intelligence/consumption', { params }).then(r => {
       const data = r.data;
       setConsumption(data);
-      const buildingMap = {};
-      data.forEach(d => {
-        if (!buildingMap[d.building_name]) buildingMap[d.building_name] = 0;
-        buildingMap[d.building_name] += d.total_value;
-      });
       // Group by material
       const matMap = {};
       data.forEach(d => {
@@ -62,19 +65,32 @@ export default function Intelligence() {
       });
       setTopMaterials(Object.entries(matMap).map(([name, v]) => ({ material_name: name, quantity: v.qty, value: v.value })).sort((a, b) => b.value - a.value));
     });
-  }, [period]);
+  }, [period, selectedInstitution]);
 
-  // Build building summary
-  const buildingSummary = {};
+  // Build aggregated summary by institution
+  const summary = {};
   consumption.forEach(d => {
-    if (!buildingSummary[d.building_name]) buildingSummary[d.building_name] = { total: 0, materials: [] };
-    buildingSummary[d.building_name].total += d.total_value;
-    buildingSummary[d.building_name].materials.push(d);
+    const key = d.institution_name || "Unknown Institution";
+    if (!summary[key]) summary[key] = { total: 0, materials: [] };
+    summary[key].total += d.total_value;
+    
+    // Group materials within the key
+    const existingMat = summary[key].materials.find(m => m.material_name === d.material_name);
+    if (existingMat) {
+      existingMat.total_quantity += d.total_quantity;
+      existingMat.total_value += d.total_value;
+    } else {
+      summary[key].materials.push({
+        material_name: d.material_name,
+        total_quantity: d.total_quantity,
+        total_value: d.total_value
+      });
+    }
   });
 
   // Aggregate data for the bar chart
-  const aggregatedBuildingData = Object.entries(buildingSummary)
-    .map(([name, data]) => ({ building_name: name, total_cost: data.total }))
+  const aggregatedChartData = Object.entries(summary)
+    .map(([name, data]) => ({ name: name, total_cost: data.total }))
     .sort((a, b) => b.total_cost - a.total_cost);
 
   return (
@@ -82,9 +98,25 @@ export default function Intelligence() {
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
         <Box>
           <Typography variant="h5" sx={{ fontWeight: 700 }}>Material Intelligence</Typography>
-          <Typography variant="body2" sx={{ color: '#64748B' }}>Usage analytics by building and department</Typography>
+          <Typography variant="body2" sx={{ color: '#64748B' }}>Usage analytics by institution</Typography>
         </Box>
-        <Box sx={{ display: 'flex', gap: 2 }}>
+        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+
+          <FormControl size="small" sx={{ minWidth: 180, bgcolor: '#fff' }}>
+            <InputLabel>Institution</InputLabel>
+            <Select
+              value={selectedInstitution}
+              label="Institution"
+              onChange={e => setSelectedInstitution(e.target.value)}
+              sx={{ fontWeight: 600 }}
+            >
+              <MenuItem value="all">All Institutions</MenuItem>
+              {institutions.map(inst => (
+                <MenuItem key={inst.id} value={inst.id}>{inst.name}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
           <FormControl size="small" sx={{ minWidth: 150, bgcolor: '#fff' }}>
             <InputLabel>Time Period</InputLabel>
             <Select value={period} label="Time Period" onChange={e => setPeriod(e.target.value)} sx={{ fontWeight: 600 }}>
@@ -101,11 +133,13 @@ export default function Intelligence() {
       <Grid container spacing={2.5} sx={{ mb: 3 }}>
         <Grid item xs={12} md={8}>
           <Card sx={{ p: 2.5 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>Material Cost by Building</Typography>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
+              Material Cost by Institution
+            </Typography>
             <ResponsiveContainer width="100%" height={320}>
-              <BarChart data={aggregatedBuildingData} margin={{ top: 20, right: 20, bottom: 5, left: 10 }}>
+              <BarChart data={aggregatedChartData} margin={{ top: 20, right: 20, bottom: 5, left: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-                <XAxis dataKey="building_name" tick={{ fontSize: 11, fontWeight: 600, fill: '#475569' }} />
+                <XAxis dataKey="name" tick={{ fontSize: 11, fontWeight: 600, fill: '#475569' }} />
                 <YAxis tick={{ fontSize: 11, fontWeight: 500, fill: '#475569' }} tickFormatter={formatCurrency} />
                 <Tooltip formatter={(v) => [formatCurrency(v), 'Total Cost']} contentStyle={{ borderRadius: 8, border: '1px solid #E2E8F0' }} cursor={{ fill: 'rgba(37, 99, 235, 0.05)' }} />
                 <Bar dataKey="total_cost" name="Cost (₹)" fill="#2563EB" radius={[6, 6, 0, 0]}>
@@ -120,9 +154,9 @@ export default function Intelligence() {
             <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>Cost Distribution</Typography>
             <ResponsiveContainer width="100%" height={320}>
               <PieChart>
-                <Pie data={Object.entries(buildingSummary).map(([name, v]) => ({ name, value: Math.round(v.total) }))}
+                <Pie data={Object.entries(summary).map(([name, v]) => ({ name, value: Math.round(v.total) }))}
                   cx="50%" cy="50%" innerRadius={50} outerRadius={90} dataKey="value" paddingAngle={3}>
-                  {Object.keys(buildingSummary).map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                  {Object.keys(summary).map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                 </Pie>
                 <Legend iconType="circle" wrapperStyle={{ fontSize: 11, fontWeight: 500 }} />
                 <Tooltip formatter={formatCurrency} contentStyle={{ borderRadius: 8 }} />
@@ -132,13 +166,13 @@ export default function Intelligence() {
         </Grid>
       </Grid>
 
-      {/* Building-wise material breakdown */}
+      {/* Building-wise / Institution-wise material breakdown */}
       <Grid container spacing={2.5} sx={{ mb: 3 }}>
-        {Object.entries(buildingSummary).slice(0, 6).map(([buildingName, data]) => (
-          <Grid item xs={12} md={6} lg={4} key={buildingName}>
+        {Object.entries(summary).slice(0, 6).map(([name, data]) => (
+          <Grid item xs={12} md={6} lg={4} key={name}>
             <Card sx={{ p: 2.5 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5 }}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1E293B' }}>{buildingName}</Typography>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1E293B' }}>{name}</Typography>
                 <Chip label={formatCurrency(data.total)} size="small" sx={{ fontWeight: 700, bgcolor: '#EFF6FF', color: '#1D4ED8', border: '1px solid #BFDBFE' }} />
               </Box>
               <Table size="small">

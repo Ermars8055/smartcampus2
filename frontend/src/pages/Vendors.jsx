@@ -4,16 +4,18 @@ import {
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
   DialogContent, DialogActions, Grid, IconButton, Tooltip, Rating,
   InputAdornment, FormControl, InputLabel, Select, MenuItem, OutlinedInput,
-  Checkbox, ListItemText, useTheme, useMediaQuery, Snackbar, Alert, Switch, FormControlLabel
+  Checkbox, ListItemText, useTheme, useMediaQuery, Snackbar, Alert, Switch, FormControlLabel,
+  Tabs, Tab
 } from '@mui/material';
 import {
   Add, Edit, Search, Store, Person, Phone, Email,
   Business, LocationOn, Description, Category, PinDrop,
-  Badge, AppRegistration, ArrowDropDown, Numbers
+  Badge, AppRegistration, ArrowDropDown, Numbers, CheckCircle, Cancel
 } from '@mui/icons-material';
 import { TableSortLabel } from '@mui/material';
 import api from '../services/api';
 import { useMessage } from '../context/MessageContext';
+import { useAuth } from '../context/AuthContext';
 
 const STATES_LIST = [
   '01 - Jammu And Kashmir',
@@ -60,6 +62,7 @@ export default function Vendors() {
   const { showMessage } = useMessage();
   const [vendors, setVendors] = useState([]);
   const [search, setSearch] = useState('');
+  const [tabValue, setTabValue] = useState('All');
   const [dialog, setDialog] = useState(false);
   const [editing, setEditing] = useState(null);
   const [categories, setCategories] = useState([]);
@@ -71,12 +74,16 @@ export default function Vendors() {
   const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'asc' });
   const [errors, setErrors] = useState({});
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [rejectDialog, setRejectDialog] = useState(false);
+  const [rejectRemarks, setRejectRemarks] = useState('');
+  const [rejectingVendor, setRejectingVendor] = useState(null);
 
+  const { user } = useAuth();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const load = () => {
-    api.get('/api/vendors', { params: { search: search || undefined, include_inactive: true } }).then(r => {
+    api.get('/api/vendors', { params: { search: search || undefined, include_inactive: true, all_status: true } }).then(r => {
       let data = [...r.data];
       if (sortConfig.key) {
         data.sort((a, b) => {
@@ -172,6 +179,31 @@ export default function Vendors() {
     }
   };
 
+  const handleApprove = async (id, e) => {
+    e.stopPropagation();
+    try {
+      await api.post(`/api/vendors/${id}/approve`);
+      setSnackbar({ open: true, message: 'Vendor approved successfully!', severity: 'success' });
+      load();
+    } catch (err) {
+      showMessage(err.response?.data?.detail || 'Error approving vendor', 'Error', 'error');
+    }
+  };
+
+  const handleReject = async () => {
+    if (!rejectRemarks.trim()) return;
+    try {
+      await api.post(`/api/vendors/${rejectingVendor}/reject`, { remarks: rejectRemarks });
+      setSnackbar({ open: true, message: 'Vendor rejected', severity: 'warning' });
+      setRejectDialog(false);
+      setRejectRemarks('');
+      setRejectingVendor(null);
+      load();
+    } catch (err) {
+      showMessage(err.response?.data?.detail || 'Error rejecting vendor', 'Error', 'error');
+    }
+  };
+
   const openEdit = (v, view = false) => {
     setEditing(v.id);
     setViewOnly(view);
@@ -192,8 +224,18 @@ export default function Vendors() {
     });
   };
 
+  const pendingApprovals = vendors.filter(v => v.can_user_approve);
+
   return (
     <Box>
+      {pendingApprovals.length > 0 && (
+        <Alert severity="warning" sx={{ mb: 3, borderRadius: 2, boxShadow: '0 2px 4px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center' }}>
+          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+            Action Required: You have {pendingApprovals.length} vendor{pendingApprovals.length > 1 ? 's' : ''} awaiting your approval.
+          </Typography>
+        </Alert>
+      )}
+
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
         <Box>
           <Typography variant="h5" sx={{ fontWeight: 700, color: '#1E293B' }}>Vendor Master</Typography>
@@ -218,36 +260,76 @@ export default function Vendors() {
         </Button>
       </Box>
 
-      <Card sx={{ mb: 3, p: 2, borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+      <Card sx={{ mb: 3, p: 2, pb: 0, borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
         <TextField
           size="small"
           placeholder="Search vendors by Code/Name"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          sx={{ minWidth: 350 }}
+          sx={{ minWidth: 350, mb: 2 }}
           InputProps={{
             startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} />,
             sx: { borderRadius: 2 }
           }}
         />
+        <Tabs
+          value={tabValue}
+          onChange={(e, v) => setTabValue(v)}
+          variant="scrollable"
+          scrollButtons="auto"
+          sx={{ borderTop: 1, borderColor: 'divider' }}
+        >
+          {['Awaiting Approval', 'Approved', 'Rejected', 'All'].map(s => {
+            const count = s === 'All' ? vendors.length : vendors.filter(v => v.status === s).length;
+            if (s !== 'All' && count === 0 && !['Awaiting Approval', 'Approved'].includes(s)) return null;
+            return (
+              <Tab
+                key={s}
+                label={
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    {s}
+                    <Chip
+                      label={count}
+                      size="small"
+                      sx={{ height: 20, fontSize: '0.7rem', fontWeight: 600, bgcolor: tabValue === s ? 'primary.main' : 'action.selected', color: tabValue === s ? 'white' : 'text.primary' }}
+                    />
+                  </Box>
+                }
+                value={s}
+                sx={{ textTransform: 'none', fontWeight: 600, minHeight: 48, minWidth: 'auto', px: 2 }}
+              />
+            )
+          })}
+        </Tabs>
       </Card>
 
-      <Card sx={{ borderRadius: 2, overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
-        {isMobile ? (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, p: 1.5 }}>
-            {vendors.length === 0 && (
-              <Typography variant="body2" align="center" sx={{ py: 4, color: '#94a3b8' }}>
-                No vendors found.
-              </Typography>
-            )}
-            {vendors.map(v => (
+      {(() => {
+        const filteredVendors = vendors.filter(v => tabValue === 'All' || v.status === tabValue);
+        return (
+          <Card sx={{ borderRadius: 2, overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+            {isMobile ? (
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, p: 1.5 }}>
+                {filteredVendors.length === 0 && (
+                  <Typography variant="body2" align="center" sx={{ py: 4, color: '#94a3b8' }}>
+                    No vendors found.
+                  </Typography>
+                )}
+                {filteredVendors.map(v => (
               <Card key={v.id} variant="outlined" sx={{ p: 2, borderRadius: 2, cursor: 'pointer', '&:hover': { borderColor: '#2563EB' } }} onClick={() => openEdit(v, true)}>
                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, gap: 1, alignItems: 'flex-start' }}>
                     <Box>
                       <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1E293B' }}>{v.name}</Typography>
                       <Typography variant="caption" sx={{ fontWeight: 600, color: '#2563EB' }}>{v.code}</Typography>
                     </Box>
-                    <Rating value={v.rating} precision={0.5} size="small" readOnly />
+                    <Chip
+                      label={v.status === 'Awaiting Approval' ? <span style={{ display: 'block', textAlign: 'center', lineHeight: 1.1 }}>Awaiting<br/>Approval</span> : (v.status || (v.is_active ? 'Active' : 'Inactive'))}
+                      size="small"
+                      sx={{
+                        bgcolor: v.status === 'Approved' ? '#ECFDF5' : (v.status === 'Rejected' ? '#FEF2F2' : (v.status === 'Awaiting Approval' ? '#FEF9C3' : '#F1F5F9')),
+                        color: v.status === 'Approved' ? '#10B981' : (v.status === 'Rejected' ? '#EF4444' : (v.status === 'Awaiting Approval' ? '#CA8A04' : '#64748B')),
+                        fontWeight: 600, fontSize: '0.65rem', height: v.status === 'Awaiting Approval' ? 'auto' : 20, py: v.status === 'Awaiting Approval' ? 0.5 : 0
+                      }}
+                    />
                  </Box>
                  <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#334155' }}><strong>Contact:</strong> {v.contact_person} | {v.phone}</Typography>
 
@@ -259,10 +341,24 @@ export default function Vendors() {
                     </Box>
                     <Box onClick={(e) => e.stopPropagation()}>
                       <Tooltip title="Edit Vendor">
-                        <IconButton size="small" onClick={() => openEdit(v, false)} sx={{ color: '#64748B' }}>
+                        <IconButton size="small" onClick={(e) => { e.stopPropagation(); openEdit(v, false); }} sx={{ color: '#64748B' }}>
                           <Edit fontSize="small" />
                         </IconButton>
                       </Tooltip>
+                      {v.can_user_approve && (
+                        <>
+                          <Tooltip title="Approve">
+                            <IconButton size="small" color="success" onClick={(e) => handleApprove(v.id, e)} sx={{ ml: 0.5, bgcolor: 'transparent', '&:hover': { bgcolor: 'rgba(16, 185, 129, 0.1)' } }}>
+                              <CheckCircle fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Reject">
+                            <IconButton size="small" color="error" onClick={(e) => { e.stopPropagation(); setRejectingVendor(v.id); setRejectDialog(true); }} sx={{ ml: 0.5, bgcolor: 'transparent', '&:hover': { bgcolor: 'rgba(239, 68, 68, 0.1)' } }}>
+                              <Cancel fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </>
+                      )}
                     </Box>
                  </Box>
               </Card>
@@ -320,21 +416,19 @@ export default function Vendors() {
                   </TableCell>
 
                   <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2, whiteSpace: 'nowrap' }}>CATEGORIES</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2, whiteSpace: 'nowrap' }}>
-                    <TableSortLabel
-                      active={sortConfig.key === 'rating'}
-                      direction={sortConfig.direction}
-                      onClick={() => requestSort('rating')}
-                    >
-                      RATING
-                    </TableSortLabel>
-                  </TableCell>
                   <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2, whiteSpace: 'nowrap' }}>STATUS</TableCell>
                   <TableCell align="right" sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2, whiteSpace: 'nowrap' }}>ACTIONS</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {vendors.map(v => (
+                {filteredVendors.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={6} align="center" sx={{ py: 6, color: '#94a3b8' }}>
+                      <Typography variant="body2">No vendors found.</Typography>
+                    </TableCell>
+                  </TableRow>
+                )}
+                {filteredVendors.map(v => (
                   <TableRow
                     key={v.id}
                     hover
@@ -351,41 +445,51 @@ export default function Vendors() {
                         {v.categories?.map((c, i) => <Chip key={i} label={c} size="small" variant="outlined" sx={{ fontSize: '0.65rem', height: 20 }} />)}
                       </Box>
                     </TableCell>
-                    <TableCell><Rating value={v.rating} precision={0.5} size="small" readOnly /></TableCell>
+
                     <TableCell>
                       <Chip 
-                        label={v.is_active ? 'Active' : 'Inactive'} 
+                        label={v.status === 'Awaiting Approval' ? <span style={{ display: 'block', textAlign: 'center', lineHeight: 1.1 }}>Awaiting<br/>Approval</span> : (v.status || (v.is_active ? 'Active' : 'Inactive'))} 
                         size="small" 
                         sx={{ 
-                          bgcolor: v.is_active ? '#ECFDF5' : '#F1F5F9', 
-                          color: v.is_active ? '#10B981' : '#64748B', 
-                          fontWeight: 600, fontSize: '0.75rem', border: `1px solid ${v.is_active ? '#10B981' : '#CBD5E1'}`, borderRadius: '6px', height: 24
+                          bgcolor: v.status === 'Approved' ? '#ECFDF5' : (v.status === 'Rejected' ? '#FEF2F2' : (v.status === 'Awaiting Approval' ? '#FEF9C3' : '#F1F5F9')), 
+                          color: v.status === 'Approved' ? '#10B981' : (v.status === 'Rejected' ? '#EF4444' : (v.status === 'Awaiting Approval' ? '#CA8A04' : '#64748B')), 
+                          fontWeight: 600, fontSize: '0.75rem', borderRadius: '6px', height: v.status === 'Awaiting Approval' ? 'auto' : 24, py: v.status === 'Awaiting Approval' ? 0.5 : 0
                         }} 
                       />
                     </TableCell>
                     <TableCell align="right">
                       <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5 }} onClick={(e) => e.stopPropagation()}>
                         <Tooltip title="Edit Vendor">
-                          <IconButton size="small" onClick={() => openEdit(v, false)} sx={{ color: '#64748B' }}>
+                          <IconButton size="small" onClick={(e) => { e.stopPropagation(); openEdit(v, false); }} sx={{ color: '#64748B' }}>
                             <Edit fontSize="small" />
                           </IconButton>
                         </Tooltip>
+                        {v.can_user_approve && (
+                          <>
+                            <Tooltip title="Approve">
+                              <IconButton size="small" color="success" onClick={(e) => handleApprove(v.id, e)} sx={{ ml: 0.5, bgcolor: 'transparent', '&:hover': { bgcolor: 'rgba(16, 185, 129, 0.1)' } }}>
+                                <CheckCircle fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Reject">
+                              <IconButton size="small" color="error" onClick={(e) => { e.stopPropagation(); setRejectingVendor(v.id); setRejectDialog(true); }} sx={{ ml: 0.5, bgcolor: 'transparent', '&:hover': { bgcolor: 'rgba(239, 68, 68, 0.1)' } }}>
+                                <Cancel fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          </>
+                        )}
                       </Box>
                     </TableCell>
                   </TableRow>
                 ))}
-                {vendors.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={9} align="center" sx={{ py: 4, color: '#94A3B8' }}>
-                      No vendors found matching your search.
-                    </TableCell>
-                  </TableRow>
-                )}
+
               </TableBody>
             </Table>
           </TableContainer>
         )}
       </Card>
+    );
+  })()}
 
       <Dialog
         open={dialog}
@@ -616,9 +720,35 @@ export default function Vendors() {
               label="Active Status" 
               sx={{ gridColumn: { xs: '1fr', sm: 'span 3' }, ml: 1, mt: 1 }}
             />
+            {form.status === 'Rejected' && form.rejection_remarks && (
+              <Alert severity="error" sx={{ gridColumn: { xs: '1fr', sm: 'span 3' }, mt: 1 }}>
+                <Typography variant="body2" sx={{ fontWeight: 700 }}>Rejected:</Typography>
+                {form.rejection_remarks}
+              </Alert>
+            )}
           </Box>
         </DialogContent>
         <DialogActions sx={{ px: 4, pb: 4, pt: 2, justifyContent: 'flex-end', gap: 2 }}>
+          {viewOnly && vendors.find(v => v.id === editing)?.can_user_approve && (
+            <>
+              <Button 
+                variant="contained" 
+                color="success" 
+                onClick={(e) => { setDialog(false); handleApprove(editing, e); }}
+                sx={{ borderRadius: 2, px: 3, py: 1, fontWeight: 700, textTransform: 'none', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)' }}
+              >
+                Approve
+              </Button>
+              <Button 
+                variant="contained" 
+                color="error" 
+                onClick={(e) => { setDialog(false); setRejectingVendor(editing); setRejectDialog(true); }}
+                sx={{ borderRadius: 2, px: 3, py: 1, fontWeight: 700, textTransform: 'none', boxShadow: '0 4px 12px rgba(239, 68, 68, 0.25)' }}
+              >
+                Reject
+              </Button>
+            </>
+          )}
           <Button onClick={() => setDialog(false)} sx={{ color: '#64748B', fontWeight: 600 }}>
             Cancel
           </Button>
@@ -646,6 +776,28 @@ export default function Vendors() {
           {snackbar.message}
         </Alert>
       </Snackbar>
+
+      <Dialog open={rejectDialog} onClose={() => setRejectDialog(false)} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700 }}>Reject Vendor</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            fullWidth
+            multiline
+            rows={3}
+            label="Rejection Remarks"
+            value={rejectRemarks}
+            onChange={(e) => setRejectRemarks(e.target.value)}
+            sx={{ mt: 1 }}
+            required
+            placeholder="Please provide a reason for rejecting this vendor..."
+          />
+        </DialogContent>
+        <DialogActions sx={{ p: 2, pt: 0 }}>
+          <Button onClick={() => setRejectDialog(false)} color="inherit">Cancel</Button>
+          <Button variant="contained" color="error" onClick={handleReject} disabled={!rejectRemarks.trim()}>Reject</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

@@ -131,6 +131,7 @@ class ApprovalDocumentType(str, enum.Enum):
     PURCHASE_REQUEST = "Purchase Request"
     PURCHASE_ORDER = "Purchase Order"
     WRITE_OFF = "Write Off"
+    VENDOR = "Vendor"
 
 class QuotationRequestStatus(str, enum.Enum):
     DRAFT = "Draft"
@@ -146,6 +147,12 @@ class VendorQuotationReceiptStatus(str, enum.Enum):
     PENDING = "Pending"
     RECEIVED = "Received"
     NOT_REQUIRED = "Not Required"
+
+class VendorStatus(str, enum.Enum):
+    DRAFT = "Draft"
+    AWAITING_APPROVAL = "Awaiting Approval"
+    APPROVED = "Approved"
+    REJECTED = "Rejected"
 
 class VendorQuotationStatus(str, enum.Enum):
     DRAFT = "Draft"
@@ -518,11 +525,17 @@ class Vendor(Base):
     bank_account = Column(String(50))
     ifsc_code = Column(String(20))
     rating = Column(Float, default=0)
+    status = Column(String(50), default=VendorStatus.AWAITING_APPROVAL.value)
+    current_approval_level = Column(Integer, default=1)
+    approved_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    approved_at = Column(DateTime, nullable=True)
+    rejection_remarks = Column(Text, nullable=True)
     is_active = Column(Boolean, default=True)
     is_deleted = Column(Boolean, default=False)
     created_at = Column(DateTime, default=_get_now)
     updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)
     vendor_categories = relationship("VendorCategory", back_populates="vendor", cascade="all, delete-orphan")
+    approver = relationship("User", foreign_keys=[approved_by_id])
     __table_args__ = (UniqueConstraint("site_id", "code", name="uq_vendor_code_per_site"),)
 
 class VendorCategory(Base):
@@ -586,6 +599,7 @@ class PurchaseOrder(Base):
     pr_id = Column(Integer, ForeignKey("purchase_requests.id"), nullable=True)
     indent_id = Column(Integer, ForeignKey("indents.id"), nullable=True)
     qr_id = Column(Integer, ForeignKey("quotation_requests.id"), nullable=True)
+    institution_id = Column(Integer, ForeignKey("institutions.id"), nullable=True)
     po_type = Column(String(50), default="Formal") # Formal, Informal
     total_amount = Column(Float, default=0)
     delivery_date = Column(Date)
@@ -602,6 +616,7 @@ class PurchaseOrder(Base):
     updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)
     vendor = relationship("Vendor")
     project = relationship("Project")
+    institution = relationship("Institution")
     purchase_request = relationship("PurchaseRequest")
     indent = relationship("Indent")
     quotation_request = relationship("QuotationRequest")
@@ -1223,6 +1238,20 @@ class IndentApproval(Base):
     approved_at = Column(DateTime, default=_get_now)
     
     indent = relationship("Indent")
+    flow = relationship("ApprovalFlow")
+    approver = relationship("User")
+
+
+class VendorApproval(Base):
+    __tablename__ = "vendor_approvals"
+    id = Column(Integer, primary_key=True, index=True)
+    vendor_id = Column(Integer, ForeignKey("vendors.id", ondelete="CASCADE"), nullable=False)
+    approval_flow_id = Column(Integer, ForeignKey("approval_flows.id"), nullable=False)
+    approver_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    remarks = Column(Text, nullable=True)
+    approved_at = Column(DateTime, default=_get_now)
+    
+    vendor = relationship("Vendor")
     flow = relationship("ApprovalFlow")
     approver = relationship("User")
 

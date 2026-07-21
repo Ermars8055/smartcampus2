@@ -306,14 +306,35 @@ class VendorUpdate(BaseModel):
     state: Optional[str] = None
     pincode: Optional[str] = None
     rating: Optional[float] = None
+    status: Optional[str] = None
     is_active: Optional[bool] = None
     category_ids: Optional[List[int]] = None
 
 class VendorOut(VendorBase):
     id: int
+    status: str
+    current_approval_level: int
+    approved_by_id: Optional[int] = None
+    approved_at: Optional[datetime] = None
+    rejection_remarks: Optional[str] = None
     is_active: bool
     created_at: datetime
     categories: List[str] = []
+    can_user_approve: Optional[bool] = False
+    class Config:
+        from_attributes = True
+
+class VendorApprovalCreate(BaseModel):
+    remarks: Optional[str] = None
+
+class VendorApprovalOut(BaseModel):
+    id: int
+    vendor_id: int
+    approval_flow_id: int
+    approver_id: int
+    remarks: Optional[str] = None
+    approved_at: datetime
+    approver_name: Optional[str] = None
     class Config:
         from_attributes = True
 
@@ -556,6 +577,7 @@ class POItemOut(POItemBase):
 class POBase(BaseModel):
     vendor_id: int
     project_id: int
+    institution_id: Optional[int] = None
     pr_id: Optional[int] = None
     indent_id: Optional[int] = None
     qr_id: Optional[int] = None
@@ -600,6 +622,7 @@ class POOut(BaseModel):
     po_number: str
     vendor_id: int
     project_id: int
+    institution_id: Optional[int] = None
     pr_id: Optional[int] = None
     pr_number: Optional[str] = None
     indent_id: Optional[int] = None
@@ -622,6 +645,7 @@ class POOut(BaseModel):
     vendor_pincode: Optional[str] = None
     vendor_gst_number: Optional[str] = None
     project_name: Optional[str] = None
+    institution_name: Optional[str] = None
     can_user_approve: Optional[bool] = False
     items: List[POItemOut] = []
     class Config:

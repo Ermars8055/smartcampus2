@@ -31,6 +31,7 @@ export default function PurchaseOrders() {
   const [vendors, setVendors] = useState([]);
   const [materials, setMaterials] = useState([]);
   const [projects, setProjects] = useState([]);
+  const [institutions, setInstitutions] = useState([]);
   const [termsTemplates, setTermsTemplates] = useState([]);
   const [dialog, setDialog] = useState(false);
   const [detailDialog, setDetailDialog] = useState(null);
@@ -208,7 +209,7 @@ export default function PurchaseOrders() {
   const [tabValue, setTabValue] = useState(searchParams.get('tab') || 'Draft');
   const [editingPOId, setEditingPOId] = useState(null);
   const [form, setForm] = useState({
-    po_number: '', vendor_id: '', project_id: '', delivery_date: null, terms: '', annexure: '', po_type: 'Informal', items: [{ material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }]
+    po_number: '', vendor_id: '', project_id: '', institution_id: '', delivery_date: null, terms: '', annexure: '', po_type: 'Informal', items: [{ material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }]
   });
 
 
@@ -341,6 +342,7 @@ export default function PurchaseOrders() {
         po_number: po.po_number || '',
         vendor_id: po.vendor_id || '',
         project_id: po.project_id || (projects.length > 0 ? projects[0].id : ''),
+        institution_id: po.institution_id || '',
         delivery_date: po.delivery_date ? dayjs(po.delivery_date) : null,
         terms: po.terms || '',
         annexure: po.annexure || '',
@@ -379,6 +381,7 @@ export default function PurchaseOrders() {
     api.get('/api/vendors').then(r => setVendors(r.data));
     api.get('/api/materials', { params: { limit: 10000 } }).then(r => setMaterials(r.data.items || []));
     api.get('/api/projects').then(r => setProjects(r.data));
+    api.get('/api/institutions').then(r => setInstitutions(r.data));
     api.get('/api/terms').then(r => setTermsTemplates(r.data));
   }, []);
 
@@ -388,6 +391,7 @@ export default function PurchaseOrders() {
       setForm({
         vendor_id: '',
         project_id: projects[0]?.id || '',
+        institution_id: '',
         delivery_date: null,
         terms: '', annexure: '',
         po_type: 'Formal',
@@ -480,6 +484,7 @@ export default function PurchaseOrders() {
     const newErrors = {};
     if (!form.vendor_id) newErrors.vendor_id = "Please select a Vendor.";
     if (!form.project_id) newErrors.project_id = "Project is required.";
+    if (!form.institution_id) newErrors.institution_id = "Institution is required.";
     if (!form.delivery_date) {
       newErrors.delivery_date = "Delivery Date is required.";
     } else if (dayjs(form.delivery_date).isBefore(dayjs(), 'day')) {
@@ -545,6 +550,7 @@ export default function PurchaseOrders() {
         ...form,
         vendor_id: parseInt(form.vendor_id, 10),
         project_id: parseInt(form.project_id, 10),
+        institution_id: parseInt(form.institution_id, 10),
         delivery_date: form.delivery_date ? dayjs(form.delivery_date).format('YYYY-MM-DD') : null,
         status: isDraft ? 'Draft' : 'Submitted',
         items: mappedItems
@@ -748,7 +754,7 @@ export default function PurchaseOrders() {
               </button>
             </div>
             <div class="header-container">
-            <h2 class="org-title">EAST POINT COLLEGE OF MEDICAL SCIENCES & RESEARCH CENTER</h2>
+            <h2 class="org-title">${po.institution_name || 'EAST POINT COLLEGE OF MEDICAL SCIENCES & RESEARCH CENTER'}</h2>
             <p class="org-address">113, JNANA PRABHA CAMPUS, BIDARAHALLI, VIRGO NAGAR POST, BANGALORE - 560049</p>
             <div class="doc-title">PURCHASE ORDER</div>
           </div>
@@ -944,7 +950,7 @@ export default function PurchaseOrders() {
           )}
           {hasPermission('purchase_orders', 'can_create') && (
             <Button variant="contained" startIcon={<Add />} onClick={() => {
-              setForm({ po_number: '', vendor_id: '', project_id: projects[0]?.id || '', delivery_date: null, terms: '', annexure: '', po_type: 'Informal', items: [{ material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }] });
+              setForm({ po_number: '', vendor_id: '', project_id: projects[0]?.id || '', institution_id: '', delivery_date: null, terms: '', annexure: '', po_type: 'Informal', items: [{ material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }] });
               setItemErrors({});
               setDialog(true);
             }}>Create PO</Button>
@@ -1592,6 +1598,21 @@ export default function PurchaseOrders() {
                 <MenuItem value="Formal">Formal</MenuItem>
                 <MenuItem value="Informal">Informal</MenuItem>
               </Select>
+            </FormControl>
+            
+            <FormControl fullWidth size="small" error={!!errors.institution_id}>
+              <InputLabel>Institution *</InputLabel>
+              <Select
+                value={form.institution_id || ''}
+                label="Institution *"
+                onChange={e => setForm({ ...form, institution_id: e.target.value })}
+                startAdornment={<InputAdornment position="start"><Store sx={{ color: '#94A3B8' }} /></InputAdornment>}
+              >
+                {institutions.map(inst => (
+                  <MenuItem key={inst.id} value={inst.id}>{inst.code} - {inst.name}</MenuItem>
+                ))}
+              </Select>
+              {errors.institution_id && <Typography variant="caption" color="error" sx={{mt: 0.5, ml: 1}}>{errors.institution_id}</Typography>}
             </FormControl>
 
             <Box id="field-delivery_date">

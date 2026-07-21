@@ -51,7 +51,7 @@ export default function ChatBot() {
           <Zoom in={true}>
           <Fab 
             color="primary" 
-            size="medium"
+            size="small"
             onClick={() => setOpen(!open)}
             sx={{ 
               boxShadow: '0 8px 16px rgba(37, 99, 235, 0.3)',

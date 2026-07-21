@@ -688,6 +688,8 @@ def list_purchase_orders(
             vendor_pincode=po.vendor.pincode if po.vendor else None,
             vendor_gst_number=po.vendor.gst_number if po.vendor else None,
             project_name=po.project.name if po.project else None,
+            institution_id=po.institution_id,
+            institution_name=po.institution.name if po.institution else None,
             can_user_approve=can_user_approve,
             items=items
         ))
@@ -776,6 +778,8 @@ def get_purchase_order(
         vendor_pincode=po.vendor.pincode if po.vendor else None,
         vendor_gst_number=po.vendor.gst_number if po.vendor else None,
         project_name=po.project.name if po.project else None,
+        institution_id=po.institution_id,
+        institution_name=po.institution.name if po.institution else None,
         can_user_approve=can_user_approve,
         items=items
     )
@@ -788,12 +792,25 @@ def create_purchase_order(
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
+    if not data.institution_id:
+        raise HTTPException(status_code=400, detail="Institution is required to create a PO")
+
+    from app.models import Institution
+    inst = db.query(Institution).filter(Institution.id == data.institution_id, Institution.tenant_id == tenant_id, Institution.site_id == site_id).first()
+    if not inst:
+        raise HTTPException(status_code=404, detail="Institution not found")
+        
+    acronym = inst.name.split(' (')[0].strip()
+    prefix = f"{acronym}/PO"
+    doc_type = f"PURCHASE_ORDER_{data.institution_id}"
+
     actual_status = data.status or "Draft"
 
     po = PurchaseOrder(
-        po_number=get_next_number(db, tenant_id, site_id, "PURCHASE_ORDER", "PO"),
+        po_number=get_next_number(db, tenant_id, site_id, doc_type, prefix),
         vendor_id=data.vendor_id,
         project_id=data.project_id,
+        institution_id=data.institution_id,
         pr_id=data.pr_id,
         indent_id=data.indent_id,
         qr_id=data.qr_id,

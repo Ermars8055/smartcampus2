@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict DAuNn6sH1sRJ0J6C6MZ1iDe5UfhELLHLuYI3yVjoQ3smffcjwf96G5EVOAFndi4
+\restrict vCX9Bb5Jmp5Tg9WOqszQkDhMO9pvFRJrRLyNejO5lsJ3rthTdfeKeA9KC5Mfedf
 
 -- Dumped from database version 17.10 (Ubuntu 17.10-1.pgdg22.04+1)
 -- Dumped by pg_dump version 17.10 (Ubuntu 17.10-1.pgdg22.04+1)
@@ -1862,6 +1862,45 @@ ALTER SEQUENCE public.quotation_comparisons_id_seq OWNED BY public.quotation_com
 
 
 --
+-- Name: quotation_negotiation_history; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.quotation_negotiation_history (
+    id integer NOT NULL,
+    qr_id integer NOT NULL,
+    vendor_id integer NOT NULL,
+    discount_percent double precision NOT NULL,
+    remarks text,
+    created_by_id integer NOT NULL,
+    created_at timestamp without time zone
+);
+
+
+ALTER TABLE public.quotation_negotiation_history OWNER TO postgres;
+
+--
+-- Name: quotation_negotiation_history_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.quotation_negotiation_history_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.quotation_negotiation_history_id_seq OWNER TO postgres;
+
+--
+-- Name: quotation_negotiation_history_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.quotation_negotiation_history_id_seq OWNED BY public.quotation_negotiation_history.id;
+
+
+--
 -- Name: quotation_request_item_sources; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -2715,7 +2754,11 @@ CREATE TABLE public.vendor_quotation_items (
     quoted_rate double precision NOT NULL,
     delivery_days integer,
     is_excluded boolean,
-    remarks text
+    remarks text,
+    brand character varying(255),
+    vendor_uom_name character varying(50),
+    uom_conversion_factor double precision,
+    discount_percent double precision
 );
 
 
@@ -3248,6 +3291,13 @@ ALTER TABLE ONLY public.quotation_comparisons ALTER COLUMN id SET DEFAULT nextva
 
 
 --
+-- Name: quotation_negotiation_history id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.quotation_negotiation_history ALTER COLUMN id SET DEFAULT nextval('public.quotation_negotiation_history_id_seq'::regclass);
+
+
+--
 -- Name: quotation_request_item_sources id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -3441,7 +3491,7 @@ ALTER TABLE ONLY public.write_offs ALTER COLUMN id SET DEFAULT nextval('public.w
 --
 
 COPY public.alembic_version (version_num) FROM stdin;
-bb37c772c4b2
+66553f679f16
 \.
 
 
@@ -3977,6 +4027,20 @@ COPY public.audit_logs (id, tenant_id, site_id, user_id, action, entity_type, en
 403	2	2	3	APPROVE	PurchaseRequest	203	\N	\N	\N	2026-07-07 19:03:09.791048
 404	2	2	3	APPROVE	PurchaseRequest	199	\N	\N	\N	2026-07-07 19:05:58.580608
 405	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-07-07 19:53:18.135688
+406	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-07-08 11:09:14.729934
+407	2	2	3	CREATE	GRN	212	\N	GRN GRN-00009 created (PO-Based)	\N	2026-07-08 12:25:10.070902
+408	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-07-08 19:09:28.035648
+409	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-07-09 11:32:26.898738
+410	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-07-09 12:28:00.064366
+411	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-07-10 11:04:37.449024
+412	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-07-10 18:26:39.77684
+413	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-07-13 10:52:48.819139
+414	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-07-13 10:52:57.431118
+415	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-07-14 13:35:55.79587
+416	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-07-14 15:49:28.962098
+417	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-07-20 11:49:25.184314
+418	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-07-21 10:40:22.892292
+419	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-07-21 11:16:46.124533
 \.
 
 
@@ -5904,7 +5968,7 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 2822	2	2	2530	62	63	2026-06-11 21:58:45.849412
 2725	2	2	2426	62	142	2026-06-12 02:15:29.61047
 2755	2	2	2458	62	14	2026-06-12 02:19:12.368129
-2734	2	2	2435	62	118	2026-06-22 11:48:20.962516
+2734	2	2	2435	62	115	2026-07-09 13:21:15.658763
 2823	2	2	2532	62	91	2026-06-11 21:58:45.849415
 2824	2	2	2533	62	85	2026-06-11 21:58:45.849418
 2825	2	2	2534	62	73	2026-06-11 21:58:45.84942
@@ -6740,7 +6804,7 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 3659	2	2	3473	62	14	2026-06-11 21:58:45.851783
 3660	2	2	3474	62	68	2026-06-11 21:58:45.851786
 3662	2	2	3476	62	65	2026-06-11 21:58:45.851792
-3661	2	2	3475	62	84	2026-06-18 12:26:45.19581
+3661	2	2	3475	62	83	2026-07-08 15:49:59.463999
 3663	2	2	3478	62	85	2026-06-11 21:58:45.851795
 3664	2	2	3479	62	21	2026-06-11 21:58:45.851798
 3665	2	2	3480	62	41	2026-06-11 21:58:45.8518
@@ -6947,15 +7011,15 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 3867	2	2	2338	62	50	\N
 3868	2	2	2565	63	5	2026-06-12 02:01:32.994321
 2753	2	2	2456	62	49	2026-06-12 02:04:33.075302
-3690	2	2	3507	62	82	2026-06-12 02:05:11.334718
 2772	2	2	2476	62	131	2026-06-12 04:13:27.917613
 3869	3	3	1191	47	1	2026-06-17 12:21:58.421336
 326	3	3	228	55	3380	2026-06-17 18:12:13.813019
 2412	3	3	2102	59	27	2026-06-17 18:19:11.656207
 3651	2	2	3462	62	47	2026-06-18 11:11:57.168045
 3013	2	2	2751	62	24	2026-06-18 12:26:45.195793
-2855	2	2	2565	62	48	2026-07-06 16:58:25.718235
-2854	2	2	2564	62	43	2026-07-07 17:36:54.885741
+2854	2	2	2564	62	44	2026-07-08 12:25:10.075655
+2855	2	2	2565	62	50	2026-07-08 12:25:10.075698
+3690	2	2	3507	62	83	2026-07-08 12:25:10.075718
 \.
 
 
@@ -7563,6 +7627,9 @@ COPY public.departments (id, tenant_id, site_id, name, code, accounting_code, bu
 330	2	2	Admin	DEPT-00071	\N	\N	t	f	2026-06-17 19:15:36.988034	13
 270	2	2	Management Studies (PG)	DEPT-00011	\N	\N	f	t	2026-06-17 11:09:45.317102	5
 268	2	2	Management Studies (UG)	DEPT-00009	\N	\N	f	t	2026-06-17 11:07:48.614844	5
+331	2	2	Management Studies (UG)	DEPT-00072	\N	\N	f	t	2026-07-14 14:03:27.244074	11
+334	2	2	Management Studies - UG	DEPT-00073	\N	\N	t	f	2026-07-14 14:04:25.124848	5
+335	2	2	Management Studies - PG	DEPT-00074	\N	\N	t	f	2026-07-14 14:04:55.566124	5
 \.
 
 
@@ -7613,6 +7680,7 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 14	3	3	GATE_ENTRY	GE	30
 66	2	2	INDENT	IND	19
 73	2	2	TRANSFER	TRF	2
+69	2	2	PURCHASE_ORDER	PO	34
 74	2	2	RETURN	RET	2
 29	2	2	BUILDING	BLDG	6
 11	3	3	ISSUE	ISS	45
@@ -7621,15 +7689,15 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 78	2	2	COMPLAINT	CMP	13
 35	3	3	TRANSFER	TRF	8
 64	2	2	COMPANY_ADDRESS	ADDR	3
-70	2	2	QUOTATION_REQUEST	QR	12
+30	2	2	DEPARTMENT	DEPT	74
 62	2	2	ROOM	RM	3
 76	2	2	INVOICE_REF	INV	6
+70	2	2	QUOTATION_REQUEST	QR	21
 90	4	4	ORGANIZATION	ORG	2
 71	2	2	GATE_ENTRY	GE	5
 72	2	2	WAREHOUSE	WH	11
 91	4	4	PROJECT	PROJ	5
 65	2	2	VENDOR	VND	3
-30	2	2	DEPARTMENT	DEPT	71
 92	4	4	INSTITUTION	INST	5
 79	3	3	INSTITUTION	INST	1
 6	3	3	DEPARTMENT	DEPT	259
@@ -7637,12 +7705,11 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 4	3	3	ROOM	RM	4
 16	3	3	QUOTATION_REQUEST	QR	21
 5	3	3	INDENT	IND	42
-75	2	2	GRN	GRN	8
-93	2	2	WRITE_OFF	WO	2
 40	3	3	MATERIAL_46	EES	3
 68	2	2	PURCHASE_REQUEST	PR	10
-69	2	2	PURCHASE_ORDER	PO	28
+75	2	2	GRN	GRN	9
 77	2	2	GATEPASS	GP	3
+93	2	2	WRITE_OFF	WO	8
 \.
 
 
@@ -7810,6 +7877,7 @@ COPY public.grn (id, tenant_id, site_id, grn_number, po_id, gate_entry_id, wareh
 209	2	2	GRN-00006	239	\N	62	3	63	PO-Based		\N	16526.16	/api/uploads/invoices/2/20260706_110659_d889a21e.pdf	\N	16526.16	0	0	0	0	\N	Not Applicable	Completed	\N	3	f	2026-07-06 16:37:10.175261	2026-07-06 11:07:10.216092	\N
 210	2	2	GRN-00007	235	\N	62	3	63	PO-Based		\N	10500		\N	43229.44	0	0	0	0	\N	Not Applicable	Completed	\N	3	f	2026-07-06 16:37:47.723934	2026-07-06 11:07:47.729021	\N
 211	2	2	GRN-00008	236	\N	62	3	63	PO-Based		\N	27038.28		\N	27038.28	0	0	0	0	\N	Not Applicable	Completed	\N	3	f	2026-07-06 16:58:25.710415	2026-07-06 11:28:25.713942	\N
+212	2	2	GRN-00009	243	\N	62	3	62	PO-Based		\N	69944.72		\N	69944.72	0	0	0	0	\N	Not Applicable	Completed	\N	3	f	2026-07-08 12:25:09.979025	2026-07-08 06:55:10.06309	\N
 \.
 
 
@@ -7872,6 +7940,9 @@ COPY public.grn_items (id, grn_id, material_id, po_item_id, ordered_quantity, re
 514	210	2564	594	1	1	1	1	16526.16	\N	0	0	0	0	0	0	16526.16	0	\N
 515	211	2564	584	1	1	1	0	335	\N	0	0	0	0	0	0	335	0	\N
 516	211	2565	585	1	1	1	0	26703.28	\N	0	0	0	0	0	0	26703.28	0	\N
+517	212	2564	614	1	1	1	0	16526.16	\N	0	0	0	0	0	0	16526.16	0	\N
+518	212	2565	615	4	4	2	2	26703.28	\N	0	0	0	0	0	0	53406.56	0	\N
+519	212	3507	616	1	1	1	0	12	\N	0	0	0	0	0	0	12	0	\N
 \.
 
 
@@ -11280,6 +11351,7 @@ COPY public.purchase_order_items (id, po_id, material_id, quantity, rate, amount
 493	201	246	11	12111	133221	0	\N	2	2	2	0	f	\N
 495	203	246	10	1800	18000	0	\N	0	5	5	0	t	\N
 662	244	2860	1.5	1800	2700	0	\N	0	9	9	0	f	\N
+663	245	2564	1	123	123	0	\N	0	6	6	0	f	\N
 504	212	246	10	33	330	0	\N	0	9	9	0	f	\N
 450	178	226	68	275.36	18724.56	34	\N	0	0	0	0	f	\N
 451	179	241	78	264.13	20602.24	0	\N	0	0	0	0	f	\N
@@ -11292,18 +11364,23 @@ COPY public.purchase_order_items (id, po_id, material_id, quantity, rate, amount
 458	182	224	72	549.16	39539.86	36	\N	0	0	0	0	f	\N
 459	182	220	97	654.04	63441.88	48.5	\N	0	0	0	0	f	\N
 460	182	218	50	950.36	47518.08	25	\N	0	0	0	0	f	\N
+664	245	2565	1	321	321	0	\N	0	6	6	0	f	\N
+671	247	2565	4	26703.28	106813.12	0	\N	0	6	6	0	f	\N
 468	186	234	150	65	9750	0	\N	0	0	0	0	f	\N
 469	186	226	200	950	190000	0	\N	0	0	0	0	f	\N
 470	186	239	200	1450	290000	0	\N	0	0	0	0	f	\N
 471	186	216	200	1200	240000	0	\N	0	0	0	0	f	\N
 472	186	238	100	6500	650000	0	\N	0	0	0	0	f	\N
 473	186	224	100	6500	650000	0	\N	0	0	0	0	f	\N
+672	248	2565	4	26703.28	106813.12	0	\N	0	6	6	0	f	\N
 477	190	236	50	250	12500	0	\N	0	9	9	0	f	\N
 478	190	247	63	250	15750	0	\N	0	9	9	0	f	\N
 479	190	238	105	65000	6825000	0	\N	0	9	9	0	f	\N
 480	191	244	2	550	1298	0	\N	0	9	9	0	f	\N
 486	194	219	120	800	100800	0	\N	0	2.5	2.5	0	f	\N
 488	196	219	300	800	226800	0	\N	10	2.5	2.5	0	f	\N
+673	249	2352	1	0	0	0	\N	0	9	9	0	f	\N
+674	250	2423	1	142	142	0	\N	0	9	9	0	f	\N
 431	171	232	65	798.18	51881.83	32.5	\N	0	0	0	0	f	65
 475	188	216	100	70.57	7057	0	\N	0	0	0	0	f	100
 465	185	249	18	420	7560	0	\N	0	0	0	0	f	18
@@ -11329,7 +11406,9 @@ COPY public.purchase_order_items (id, po_id, material_id, quantity, rate, amount
 515	207	1191	12	1000	12000	12	\N	20	5	5	0	f	12
 501	209	1062	20	4658	109928.8	20	\N	0	0	0	18	f	20
 517	214	3474	10	3262	32620	0	\N	0	9	9	0	f	10
+675	250	2564	2	299	598	0	\N	0	6	6	0	f	\N
 522	216	2357	20	1000	20000	20	\N	0	9	9	0	f	\N
+676	250	2431	5	400	2000	0	\N	0	9	9	0	f	\N
 521	217	3084	6	3294	19764	0	\N	0	9	9	0	f	4
 526	221	3474	5	100	500	0	\N	0	9	9	0	f	3
 527	221	3503	6	300	1800	0	\N	0	9	9	0	f	4
@@ -11337,6 +11416,12 @@ COPY public.purchase_order_items (id, po_id, material_id, quantity, rate, amount
 497	205	2135	10	4300	43000	0	\N	0	6	6	0	f	0
 584	236	2564	1	335	335	1	\N	0	6	6	0	f	\N
 585	236	2565	1	26703.28	26703.28	1	\N	0	6	6	0	f	\N
+614	243	2564	1	16526.16	16526.16	1	\N	0	6	6	0	f	\N
+615	243	2565	4	26703.28	106813.12	2	\N	0	6	6	0	f	\N
+616	243	3507	1	12	12	1	\N	0	6	6	0	t	\N
+668	246	2564	2	16526.16	33052.32	0	\N	0	6	6	0	f	\N
+669	246	2565	3	26703.28	80109.84	0	\N	0	6	6	0	f	\N
+670	246	3507	3	4349	13047	0	\N	0	6	6	0	f	\N
 576	233	2564	2	16526.16	33052.32	2	\N	0	6	6	0	f	\N
 577	232	2565	1	10	10	1	\N	0	6	6	0	f	\N
 588	238	2564	2	16526.16	33052.32	0	\N	0	6	6	0	f	1
@@ -11353,9 +11438,6 @@ COPY public.purchase_order_items (id, po_id, material_id, quantity, rate, amount
 609	229	2751	3	100	300	0	\N	0	9	9	0	f	\N
 610	228	3507	6	100	600	0	\N	0	6	6	0	f	\N
 613	222	3475	10	400	4000	0	\N	0	9	9	0	f	10
-614	243	2564	1	16526.16	16526.16	0	\N	0	6	6	0	f	\N
-615	243	2565	4	26703.28	106813.12	0	\N	0	6	6	0	f	\N
-616	243	3507	1	12	12	0	\N	0	6	6	0	t	\N
 617	227	2751	3	123	369	0	\N	0	9	9	0	f	\N
 619	226	3507	6	224	1344	0	\N	0	6	6	0	f	\N
 620	225	3501	1	293000	293000	0	\N	0	9	9	0	f	\N
@@ -11466,13 +11548,19 @@ COPY public.purchase_orders (id, tenant_id, site_id, po_number, vendor_id, proje
 235	2	2	PO-00019	63	3	\N	\N	\N	Informal	48416.97	2026-07-22	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 10:11:11.544124	f	2026-07-01 15:07:59.921516	2026-07-06 16:37:47.788958	2	\N	\N
 244	2	2	PO-00028	62	3	203	\N	\N	Formal	612466	2026-07-21	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-07 19:04:31.282046	2026-07-07 19:04:31.300742	1	\N	\N
 232	2	2	PO-00016	64	3	\N	\N	198	Formal	11.2	2026-07-21	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-22 12:18:25.580101	2026-06-30 20:00:31.707939	1	\N	\N
+245	2	2	PO-00029	63	3	\N	\N	190	Formal	444	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-08 11:51:20.874685	2026-07-08 11:51:20.886838	1	\N	\N
+243	2	2	PO-00027	62	3	\N	\N	\N	Informal	138151.99	2026-07-02	Partially Received	dfgfdgdgdfg	3	\N	\N	f	2026-07-02 18:30:35.966725	2026-07-08 12:25:10.086539	1		\N
 242	2	2	PO-00026	63	3	\N	\N	\N	Informal	33428.88	2026-07-22	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 12:42:10.050112	f	2026-07-01 16:02:34.765014	2026-07-01 18:12:10.051203	2	\N	\N
 237	2	2	PO-00021	62	3	\N	\N	\N	Informal	48416.97	2026-07-22	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 10:08:14.685627	f	2026-07-01 15:30:32.968379	2026-07-01 15:38:14.686254	2	\N	\N
+247	2	2	PO-00031	62	3	\N	\N	\N	Formal	119630.69	2026-07-09	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-09 12:36:38.03989	2026-07-09 12:36:38.061011	1	dkflkdflkdlfkdlfk dhfjhdfjhdfjh	\N
 209	3	3	PO-00044	55	1	\N	208	\N	Formal	109928.8	\N	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: 15 Days\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 07:25:55.019454	f	2026-06-08 14:45:41.037419	2026-06-11 15:04:41.081091	2	\N	\N
+250	2	2	PO-00034	62	3	201	\N	202	Formal	2740	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-13 13:23:47.299697	2026-07-13 13:23:47.303365	1	\N	\N
 229	2	2	PO-00013	63	3	\N	\N	195	Formal	354	2026-07-08	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-19 13:08:12.440185	2026-07-01 18:54:50.910476	1	\N	\N
 228	2	2	PO-00012	62	3	\N	\N	195	Formal	672	2026-07-08	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-19 13:08:12.417753	2026-07-01 18:56:48.12993	1	\N	\N
-243	2	2	PO-00027	62	3	\N	\N	\N	Informal	138151.99	2026-07-02	Submitted	dfgfdgdgdfg	3	\N	\N	f	2026-07-02 18:30:35.966725	2026-07-02 18:30:35.990967	1		\N
 239	2	2	PO-00023	63	3	\N	\N	\N	Informal	18509.3	2026-07-22	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-01 15:38:54.315286	2026-07-06 16:37:10.220548	1	\N	\N
+248	2	2	PO-00032	62	3	\N	\N	\N	Formal	119630.69	2026-07-15	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-09 12:40:54.374172	2026-07-09 12:40:54.375548	1		\N
+249	2	2	PO-00033	64	3	201	\N	202	Formal	0	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-13 13:23:47.23686	2026-07-13 13:23:47.236872	1	\N	\N
+246	2	2	PO-00030	63	3	\N	\N	\N	Informal	141354.26	2026-07-23	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-08 18:17:14.016477	2026-07-08 18:46:38.942509	1		\N
 214	2	2	PO-00001	62	3	194	\N	\N	Formal	38491.6	2026-06-26	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-06-11 19:46:17.594031	f	2026-06-12 01:00:29.585057	2026-06-12 01:17:08.524505	2	\N	\N
 216	2	2	PO-00003	62	3	\N	\N	186	Formal	23600	2026-07-03	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-12 01:40:11.44893	2026-06-12 02:20:17.559248	2	\N	\N
 217	2	2	PO-00004	63	3	\N	\N	186	Formal	23321.52	2026-07-03	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-06-16 06:09:10.505248	f	2026-06-12 01:40:11.463052	2026-06-16 11:39:10.508746	2	\N	\N
@@ -11639,15 +11727,15 @@ COPY public.purchase_requests (id, tenant_id, site_id, pr_number, requester_id, 
 191	3	3	PR-00026	4	\N	1	ADMIN BLOCK	1	2026-06-22	\n[Short Closed: Not Required]	Short Closed	\N	\N	f	2026-06-08 17:06:00.229077	2026-06-08 18:04:14.067753	1
 193	3	3	PR-00028	4	\N	2	IP GENERIC PHARMACY MAIN STORE	1	2026-06-23		Draft	\N	\N	f	2026-06-08 18:05:29.772886	2026-06-08 18:06:38.06265	1
 194	2	2	PR-00001	10	\N	\N	Mechanical	3	2026-06-26		Converted to PO	3	2026-06-11 19:29:40.555686	f	2026-06-12 00:19:47.597691	2026-06-12 01:00:29.667038	2
-196	2	2	PR-00003	10	\N	\N	Mechanical	3	2026-06-26		Submitted	\N	\N	f	2026-06-12 00:56:37.980796	2026-06-12 01:23:17.682457	2
 195	2	2	PR-00002	3	\N	\N	Mechanical	3	2026-06-26		Converted to PO	3	2026-06-11 19:58:30.051646	f	2026-06-12 00:40:52.805513	2026-06-12 01:40:11.473288	2
 197	2	2	PR-00004	10	\N	8	HEALTH 	3	2026-06-26		Converted to PO	3	2026-06-11 19:58:16.903903	f	2026-06-12 00:57:22.512377	2026-06-12 01:40:11.47332	2
 198	2	2	PR-00005	3	\N	7	HEALTH 	3	2026-06-30		Submitted	\N	\N	f	2026-06-16 10:57:43.196702	2026-06-16 10:57:43.196716	1
 200	2	2	PR-00007	3	\N	\N	CSE - Data Science	3	2026-07-02		Converted to PO	3	2026-06-18 05:58:23.857592	f	2026-06-18 11:28:07.704199	2026-06-18 12:45:51.597369	2
-201	2	2	PR-00008	3	\N	8	HEALTH 	3	2026-07-14		Approved	3	2026-07-01 09:57:24.949598	f	2026-06-30 18:33:51.277817	2026-07-01 15:27:24.951602	2
 202	2	2	PR-00009	3	\N	12	Chemistry	3	2026-07-17		Draft	\N	\N	f	2026-07-03 11:46:40.099177	2026-07-03 11:46:40.099226	1
 203	2	2	PR-00010	3	\N	7	HEALTH 	3	2026-07-21		Converted to PO	3	2026-07-07 13:33:09.809097	f	2026-07-07 19:00:03.750122	2026-07-07 19:04:31.298846	2
-199	2	2	PR-00006	3	\N	\N	\N	3	2026-06-30		Approved	3	2026-07-07 13:35:58.620752	f	2026-06-16 11:01:07.031945	2026-07-07 19:05:58.621041	2
+196	2	2	PR-00003	10	\N	\N	Mechanical	3	2026-06-26	\n[Rejected: no needed now]	Rejected	\N	\N	f	2026-06-12 00:56:37.980796	2026-07-08 11:21:18.029881	2
+199	2	2	PR-00006	3	\N	\N	\N	3	2026-06-30	\n[Short Closed: already pr raised ]	Short Closed	3	2026-07-07 13:35:58.620752	f	2026-06-16 11:01:07.031945	2026-07-08 11:22:24.991438	2
+201	2	2	PR-00008	3	\N	8	HEALTH 	3	2026-07-14		Converted to PO	3	2026-07-01 09:57:24.949598	f	2026-06-30 18:33:51.277817	2026-07-13 13:23:47.302281	2
 \.
 
 
@@ -11737,6 +11825,29 @@ COPY public.quotation_comparisons (id, qr_id, qr_item_id, material_id, selected_
 102	197	441	3467	63	63	f	\N	3	2026-06-22 12:15:24.066819
 103	197	442	3505	62	62	f	\N	3	2026-06-22 12:15:24.06689
 104	198	443	2565	64	64	f	\N	3	2026-06-22 12:18:20.750782
+105	202	451	2352	64	64	f	\N	3	2026-07-13 13:23:19.421973
+106	202	452	2423	62	62	f	\N	3	2026-07-13 13:23:19.422042
+107	202	453	2564	62	62	f	\N	3	2026-07-13 13:23:19.422075
+108	202	454	2431	62	62	f	\N	3	2026-07-13 13:23:19.422101
+109	205	459	2565	64	64	f	\N	\N	\N
+110	205	460	2435	64	64	f	\N	\N	\N
+111	205	461	2358	64	64	f	\N	\N	\N
+112	205	462	2356	64	64	f	\N	\N	\N
+113	205	463	3082	64	64	f	\N	\N	\N
+114	205	464	3504	64	64	f	\N	\N	\N
+115	207	466	2565	62	62	f	\N	\N	\N
+116	207	467	3507	63	63	f	\N	\N	\N
+117	207	468	2751	63	63	f	\N	\N	\N
+118	206	465	2752	64	64	f	\N	\N	\N
+\.
+
+
+--
+-- Data for Name: quotation_negotiation_history; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.quotation_negotiation_history (id, qr_id, vendor_id, discount_percent, remarks, created_by_id, created_at) FROM stdin;
+1	191	63	10		3	2026-07-21 12:33:03.576446
 \.
 
 
@@ -11823,6 +11934,33 @@ COPY public.quotation_request_item_sources (id, qr_item_id, source, source_pr_id
 81	441	Manual	\N	1
 82	442	Manual	\N	1
 83	443	Manual	\N	1
+84	444	Manual	\N	1
+85	445	Manual	\N	1
+86	444	PR	201	2
+87	446	PR	201	5
+88	447	Manual	\N	1
+89	448	Manual	\N	1
+90	449	Manual	\N	1
+91	450	Manual	\N	1
+92	451	Manual	\N	1
+93	452	Manual	\N	1
+94	453	PR	201	2
+95	454	PR	201	5
+96	455	Manual	\N	1
+97	455	PR	201	2
+98	456	PR	201	5
+99	457	Manual	\N	1
+100	458	Manual	\N	1
+101	459	Manual	\N	1
+102	460	Manual	\N	1
+103	461	Manual	\N	1
+104	462	Manual	\N	1
+105	463	Manual	\N	1
+106	464	Manual	\N	1
+107	465	Manual	\N	1
+108	466	Manual	\N	1
+109	467	Manual	\N	1
+110	468	Manual	\N	1
 \.
 
 
@@ -11939,6 +12077,31 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 441	197	3467	1	Manual	\N
 442	197	3505	1	Manual	\N
 443	198	2565	1	Manual	\N
+444	199	2564	3	Manual	\N
+445	199	2565	1	Manual	\N
+446	199	2431	5	PR	201
+447	200	3504	1	Manual	\N
+448	200	2359	1	Manual	\N
+449	201	2564	1	Manual	\N
+450	201	2565	1	Manual	\N
+451	202	2352	1	Manual	\N
+452	202	2423	1	Manual	\N
+453	202	2564	2	PR	201
+454	202	2431	5	PR	201
+455	203	2564	3	Manual	\N
+456	203	2431	5	PR	201
+457	204	2564	1	Manual	\N
+458	204	2565	1	Manual	\N
+459	205	2565	1	Manual	\N
+460	205	2435	1	Manual	\N
+461	205	2358	1	Manual	\N
+462	205	2356	1	Manual	\N
+463	205	3082	1	Manual	\N
+464	205	3504	1	Manual	\N
+465	206	2752	1	Manual	\N
+466	207	2565	1	Manual	\N
+467	207	3507	1	Manual	\N
+468	207	2751	1	Manual	\N
 \.
 
 
@@ -11955,6 +12118,9 @@ COPY public.quotation_request_prs (id, qr_id, pr_id) FROM stdin;
 9	188	180
 10	192	200
 11	193	200
+12	199	201
+13	202	201
+14	203	201
 \.
 
 
@@ -12024,23 +12190,42 @@ COPY public.quotation_request_vendors (id, qr_id, vendor_id, is_sent, sent_at, r
 405	198	62	t	2026-06-22 12:16:47.203359	Received
 397	194	62	t	2026-06-19 12:00:02.116739	Received
 398	194	63	t	2026-06-19 12:00:06.44533	Received
+423	206	64	t	2026-07-14 17:27:15.49649	Received
 399	195	62	t	2026-06-19 12:12:10.519956	Received
 400	195	63	t	2026-06-19 12:12:14.905068	Received
 385	190	63	t	2026-06-17 14:27:41.825536	Received
 386	190	62	t	2026-06-17 14:27:41.825589	Received
 387	190	64	t	2026-06-17 14:27:41.825617	Received
+422	206	62	t	2026-07-14 17:27:10.678364	Received
+409	200	64	t	2026-07-08 14:51:03.968148	Received
 401	196	63	t	2026-06-22 11:26:36.065139	Received
 402	196	62	t	2026-06-22 11:26:40.768265	Received
+410	200	62	t	2026-07-08 14:51:08.545075	Received
 403	197	63	t	2026-06-22 11:58:06.65425	Received
 404	197	62	t	2026-06-22 11:58:11.0138	Received
+408	199	62	t	2026-07-13 11:03:16.029046	Pending
+415	203	63	t	2026-07-13 11:01:33.190665	Received
+411	201	62	t	2026-07-10 17:30:09.948849	Received
+412	201	64	t	2026-07-10 17:30:14.738581	Received
+407	199	63	t	2026-07-13 11:03:11.327406	Received
+413	202	62	t	2026-07-13 10:54:22.808178	Received
+414	202	64	t	2026-07-13 10:54:27.851341	Received
+416	203	62	t	2026-07-13 11:01:38.046111	Received
+417	204	62	t	2026-07-14 15:48:04.418757	Pending
+419	205	62	t	2026-07-14 15:50:59.74247	Received
+418	204	64	t	2026-07-14 15:48:09.117501	Received
 377	186	63	t	2026-06-12 01:35:30.709061	Received
 378	186	62	t	2026-06-12 01:35:30.709127	Received
+420	205	64	t	2026-07-14 15:51:04.526821	Received
 379	187	62	t	2026-06-15 18:49:23.731824	Received
 380	187	63	t	2026-06-15 18:49:23.73186	Received
 381	188	54	f	\N	Pending
 382	188	53	f	\N	Pending
+421	205	63	t	2026-07-14 15:51:08.966411	Received
 383	189	63	t	2026-06-17 14:10:49.972234	Received
 384	189	62	t	2026-06-17 14:10:49.972304	Received
+425	207	62	t	2026-07-21 11:33:24.672667	Received
+424	207	63	t	2026-07-21 11:33:19.829318	Received
 388	191	63	t	2026-06-17 14:33:30.477525	Received
 390	191	64	t	2026-06-17 14:33:39.3221	Received
 389	191	62	t	2026-06-17 14:33:34.757637	Not Required
@@ -12071,9 +12256,9 @@ COPY public.quotation_requests (id, tenant_id, site_id, qr_number, project_id, c
 176	3	3	QR-00009	1	4	\N	\N	Compared	\N	\N	f	2026-04-26 18:52:30.375564	2026-05-15 18:52:30.562053	\N
 177	3	3	QR-00010	1	4	\N	\N	Approved	\N	\N	f	2026-04-27 18:52:30.375564	2026-05-15 18:52:30.571349	\N
 182	3	3	QR-00015	1	4	\N	\N	Compared	\N	\N	f	2026-05-02 18:52:30.375564	2026-05-15 18:52:30.613049	\N
+201	2	2	QR-00015	3	3	2026-07-23	\N	Received	\N	\N	f	2026-07-10 17:30:04.081256	2026-07-10 17:30:34.909476	\N
 191	2	2	QR-00005	3	3	\N	\N	Compared	\N	\N	f	2026-06-17 14:33:15.642511	2026-06-18 11:35:10.802716	\N
 186	2	2	QR-00001	3	3	2026-06-19	\N	Ordered	3	2026-06-12 01:39:36.583917	f	2026-06-12 01:35:19.226084	2026-06-12 01:40:11.475262	\N
-190	2	2	QR-00004	3	3	\N	\N	Approved	3	2026-06-19 12:53:41.998685	f	2026-06-17 14:18:29.904675	2026-06-19 12:53:42.004983	\N
 195	2	2	QR-00009	3	3	2026-06-03	\N	Ordered	3	2026-06-19 13:07:48.097881	f	2026-06-19 12:12:00.033785	2026-06-19 13:08:12.447582	Approved
 187	2	2	QR-00002	3	3	2026-06-23	\N	Ordered	3	2026-06-15 19:03:29.028408	f	2026-06-15 18:49:02.969294	2026-06-15 19:05:16.096382	\N
 188	3	3	QR-00021	1	4	2026-06-16	Doggo ipsum stop it fren vvv doge fluffer the neighborhood pupper blep shibe waggy wags, shoob thicc very taste wow puggorino ur givin me a spook. Floofs tungg shoob very taste wow sub woofer, the neighborhood pupper long bois much ruin diet. Wow such tempt very hand that feed shibe doggorino h*ck wrinkler, blep clouds heckin, doing me a frighten long woofer boof. Extremely cuuuuuute borkf vvv extremely cuuuuuute you are doing me a frighten long woofer, woofer very jealous pupper shoober. Clouds pats vvv, doge. Smol shoob very good spot heckin ur givin me a spook boofers smol, big ol floofs bork smol borking doggo with a long snoot for pats. Very good spot big ol pupper shibe blop h*ck, waggy wags dat tungg tho long doggo. puggo borking doggo yapper. Length boy pupper vvv I am bekom fat, bork big ol pupper.\n\nClouds aqua doggo puggorino tungg borking doggo, pupperino such treat. Heckin snoot floofs clouds what a nice floof wow very biscit, puggorino pupperino stop it fren. Fat boi maximum borkdrive shooberino lotsa pats, pats. Borkdrive very jealous pupper long doggo doing me a frighten, boofers most angery pupper I have ever seen. Fat boi noodle horse blep, wrinkler. Borkdrive extremely cuuuuuute lotsa pats blep most angery pupper I have ever seen, blop you are doing me a frighten dat tungg tho. Clouds very hand that feed shibe aqua doggo shooberino, waggy wags borking doggo. Shibe long woofer big ol pupper ruff heckin h*ck shibe, heckin good boys heck big ol pupper shoob waggy wags, long bois adorable doggo stop it fren length boy borkf.\n\nDoing me a frighten super chub floofs what a nice floof porgo super chub very good spot thicc shoob vvv, I am bekom fat stop it fren aqua doggo puggorino very good spot shibe dat tungg tho. He made many woofs smol clouds stop it fren heckin fat boi, very hand that feed shibe blep borkf. Wrinkler doge lotsa pats fat boi woofer boof, long bois borking doggo porgo. Most angery pupper I have ever seen tungg long bois ruff blop, wow such tempt he made many woofs h*ck, puggo big ol h*ck. Heck puggorino noodle horse the neighborhood pupper puggo snoot, porgo shoob long doggo sub woofer.\n\n	Draft	\N	\N	f	2026-06-16 12:40:25.512152	2026-06-16 12:40:25.512165	\N
@@ -12081,11 +12266,20 @@ COPY public.quotation_requests (id, tenant_id, site_id, qr_number, project_id, c
 172	3	3	QR-00005	1	4	\N	\N	Compared	\N	\N	f	2026-04-22 18:52:30.375564	2026-06-17 10:40:47.681868	\N
 189	2	2	QR-00003	3	3	2026-06-11	\N	Compared	\N	\N	f	2026-06-17 14:10:44.102818	2026-06-17 14:12:41.533202	\N
 178	3	3	QR-00011	1	4	\N	\N	Entered	\N	\N	f	2026-04-28 18:52:30.375564	2026-06-22 12:08:08.484923	\N
+203	2	2	QR-00017	3	3	2026-07-13	\N	Received	\N	\N	f	2026-07-13 11:01:13.08967	2026-07-13 11:03:41.723718	\N
 193	2	2	QR-00007	3	3	2026-06-18	good quality needed 	Ordered	3	2026-06-18 12:43:41.143444	f	2026-06-18 11:56:26.795567	2026-06-18 12:45:51.599228	\N
 197	2	2	QR-00011	3	3	2026-06-10	\N	Ordered	3	2026-06-22 12:15:24.062635	f	2026-06-22 11:30:36.752408	2026-06-22 12:15:32.552198	im approving it
-192	2	2	QR-00006	3	3	2026-06-19	\N	Compared	\N	\N	f	2026-06-18 11:30:27.394513	2026-06-18 13:03:51.209646	\N
+202	2	2	QR-00016	3	3	2026-07-18	\N	Ordered	3	2026-07-13 13:23:19.416824	f	2026-07-13 10:54:10.901689	2026-07-13 13:23:47.302737	\N
+199	2	2	QR-00013	3	3	2026-07-10	\N	Received	\N	\N	f	2026-07-08 13:28:50.650271	2026-07-14 15:03:17.886454	\N
+204	2	2	QR-00018	3	3	2026-07-31	\N	Received	\N	\N	f	2026-07-14 15:03:04.012225	2026-07-14 15:48:22.583735	\N
 198	2	2	QR-00012	3	3	2026-06-20	\N	Ordered	3	2026-06-22 12:18:20.748677	f	2026-06-22 12:16:42.672721	2026-06-22 12:18:25.583148	good deal
+190	2	2	QR-00004	3	3	\N	\N	Ordered	3	2026-06-19 12:53:41.998685	f	2026-06-17 14:18:29.904675	2026-07-08 11:51:20.885545	\N
 194	2	2	QR-00008	3	3	2026-06-26	\N	Ordered	3	2026-06-19 12:05:59.42952	f	2026-06-19 11:59:03.645342	2026-06-19 12:06:49.205285	\N
+192	2	2	QR-00006	3	3	2026-06-19	\N	Approved	3	2026-07-08 13:30:40.181022	f	2026-06-18 11:30:27.394513	2026-07-08 13:30:40.182464	done
+205	2	2	QR-00019	3	3	2026-07-28	\N	Received	\N	\N	f	2026-07-14 15:50:48.689075	2026-07-14 15:51:28.909975	\N
+200	2	2	QR-00014	3	3	2026-07-15	\N	Received	\N	\N	f	2026-07-08 14:50:39.937075	2026-07-08 14:52:03.907683	\N
+206	2	2	QR-00020	3	3	2026-07-21	\N	Received	\N	\N	f	2026-07-14 17:25:58.264911	2026-07-14 17:27:47.94298	\N
+207	2	2	QR-00021	3	3	2026-07-22	\N	Entered	\N	\N	f	2026-07-21 11:33:07.588869	2026-07-21 12:18:59.282538	\N
 \.
 
 
@@ -15489,6 +15683,12 @@ COPY public.stock_ledger (id, tenant_id, site_id, material_id, warehouse_id, tra
 4262	2	2	2564	62	GRN	1	48	GRN	211	GRN-00008	3	\N	\N	3	2026-07-06 16:58:25.719711
 4263	2	2	2565	62	GRN	1	48	GRN	211	GRN-00008	3	\N	\N	3	2026-07-06 16:58:25.719723
 4264	2	2	2564	62	Write Off	-5	43	WriteOff	1	WO-00001	\N	\N	\N	3	2026-07-07 17:36:54.901052
+4265	2	2	2564	62	GRN	1	44	GRN	212	GRN-00009	3	\N	\N	3	2026-07-08 12:25:10.091494
+4266	2	2	2565	62	GRN	2	50	GRN	212	GRN-00009	3	\N	\N	3	2026-07-08 12:25:10.091537
+4267	2	2	3507	62	GRN	1	83	GRN	212	GRN-00009	3	\N	\N	3	2026-07-08 12:25:10.091554
+4268	2	2	2435	62	Write Off	-1	117	WriteOff	3	WO-00003	\N	\N	\N	3	2026-07-08 15:42:59.691184
+4269	2	2	3475	62	Write Off	-1	83	WriteOff	8	WO-00006	\N	\N	\N	3	2026-07-08 15:49:59.464593
+4270	2	2	2435	62	Write Off	-2	115	WriteOff	10	WO-00008	\N	\N	\N	3	2026-07-09 13:21:15.68285
 \.
 
 
@@ -15893,261 +16093,288 @@ COPY public.vendor_categories (id, vendor_id, category_id) FROM stdin;
 -- Data for Name: vendor_quotation_items; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.vendor_quotation_items (id, vendor_quotation_id, qr_item_id, material_id, quoted_rate, delivery_days, is_excluded, remarks) FROM stdin;
-994	497	336	241	492.74	3	f	\N
-995	497	337	216	383.89	4	f	\N
-996	498	336	241	157.7	14	f	\N
-997	498	337	216	306.28	1	f	\N
-998	499	336	241	405.44	10	f	\N
-999	499	337	216	464.46	6	f	\N
-1000	500	338	221	389.05	12	f	\N
-1001	500	339	218	414.08	8	f	\N
-1002	501	338	221	289.72	2	f	\N
-1003	501	339	218	67.22	14	f	\N
-1004	502	338	221	103.23	5	f	\N
-1005	502	339	218	17.42	1	f	\N
-1006	503	340	229	151.68	6	f	\N
-1007	503	341	249	259.38	7	f	\N
-1008	504	340	229	26.46	14	f	\N
-1009	504	341	249	491.98	14	f	\N
-1010	505	340	229	149.14	13	f	\N
-1011	505	341	249	100.53	9	f	\N
-1012	506	342	222	163.41	7	f	\N
-1013	506	343	250	384.96	3	f	\N
-1014	507	342	222	160.88	2	f	\N
-1015	507	343	250	265.91	6	f	\N
-1016	508	342	222	477.86	8	f	\N
-1017	508	343	250	63.13	10	f	\N
-1018	509	344	225	220.64	8	f	\N
-1019	509	345	227	45.12	4	f	\N
-1020	510	344	225	284.91	9	f	\N
-1021	510	345	227	499.02	15	f	\N
-1022	511	344	225	317.64	1	f	\N
-1023	511	345	227	266.9	11	f	\N
-1024	512	346	237	474.55	7	f	\N
-1025	512	347	231	457.87	8	f	\N
-1026	513	346	237	288.46	9	f	\N
-1027	513	347	231	188.58	5	f	\N
-1028	514	346	237	150.32	13	f	\N
-1029	514	347	231	92.1	1	f	\N
-1030	515	348	235	243.32	9	f	\N
-1031	515	349	216	293.85	12	f	\N
-1032	516	348	235	35.87	6	f	\N
-1033	516	349	216	202.78	12	f	\N
-1034	517	348	235	233.27	8	f	\N
-1035	517	349	216	418.48	11	f	\N
-1036	518	350	242	371.23	9	f	\N
-1037	518	351	230	306.85	6	f	\N
-1038	519	350	242	207.68	8	f	\N
-1039	519	351	230	20.42	6	f	\N
-1040	520	350	242	204.38	12	f	\N
-1041	520	351	230	55	6	f	\N
-1042	521	352	236	75.13	15	f	\N
-1043	521	353	223	334.16	11	f	\N
-1044	522	352	236	151.78	11	f	\N
-1045	522	353	223	424.18	2	f	\N
-1046	523	352	236	395.11	12	f	\N
-1047	523	353	223	133.14	12	f	\N
-1048	524	354	247	64.7	13	f	\N
-1049	524	355	236	175.05	2	f	\N
-1050	525	354	247	103.14	6	f	\N
-1051	525	355	236	84.41	10	f	\N
-1052	526	354	247	54.85	8	f	\N
-1053	526	355	236	89.06	8	f	\N
-1054	527	356	241	405.21	9	f	\N
-1055	527	357	240	117.8	14	f	\N
-1056	528	356	241	271.17	15	f	\N
-1057	528	357	240	180.6	7	f	\N
-1058	529	356	241	457.47	15	f	\N
-1059	529	357	240	385.62	7	f	\N
-1060	530	358	216	347.95	1	f	\N
-1061	530	359	224	340.31	1	f	\N
-1062	531	358	216	70.57	8	f	\N
-1063	531	359	224	474.85	5	f	\N
-1064	532	358	216	155.78	10	f	\N
-1065	532	359	224	336.29	14	f	\N
-1066	533	360	238	462.31	3	f	\N
-1067	533	361	237	26.17	15	f	\N
-1068	534	360	238	36.88	14	f	\N
-1069	534	361	237	85.12	10	f	\N
-1070	535	360	238	398.46	2	f	\N
-1071	535	361	237	74.36	13	f	\N
-1072	536	362	241	465.77	9	f	\N
-1073	536	363	221	256.63	15	f	\N
-1074	537	362	241	78.37	11	f	\N
-1075	537	363	221	319.23	13	f	\N
-1076	538	362	241	38.86	8	f	\N
-1077	538	363	221	304.28	10	f	\N
-1078	539	364	218	372.29	10	f	\N
-1079	539	365	224	305.19	7	f	\N
-1080	540	364	218	159.6	15	f	\N
-1081	540	365	224	389.44	11	f	\N
-1082	541	364	218	472.96	12	f	\N
-1083	541	365	224	268.9	5	f	\N
-1084	542	376	238	4500	15	f	
-1085	543	376	238	40000	16	f	
-1086	544	376	238	35000	7	f	
-1087	545	376	238	35000	7	f	
-1088	546	377	2357	1217	15	f	
-1089	546	378	3084	3294	15	f	
-1090	547	377	2357	1000	7	f	
-1091	547	378	3084	3500	7	f	
-1092	548	379	3474	100	7	f	
-1093	548	380	3475	500	7	f	
-1094	548	381	3503	300	7	f	
-1095	549	379	3474	90	7	f	
-1096	549	380	3475	400	7	f	
-1097	549	381	3503	350	7	f	
-1098	550	389	3507	15000000	15	f	
-1099	550	390	3504	1400000	45	f	
-1100	550	391	2361	999999	30	f	
-1101	551	394	2564	2300000	2	f	
-1102	551	395	2565	4300000	4	f	
-1103	551	396	3507	4230000	12	f	
-1104	551	397	2751	21300000	12	f	
-1105	551	398	2435	10300000	1	f	
-1106	551	399	3474	1999998	43	f	
-1107	551	400	3475	6199998	21	f	
-1108	551	401	3501	293000	14	f	
-1109	551	402	3503	202996	22	f	
-1110	551	403	3473	4019999	12	f	
-1111	551	404	3467	540000	21	f	
-1112	551	405	3505	830000	14	f	
-1113	551	406	3504	7300000	7	f	
-1114	551	407	3492	319998	7	f	
-1115	551	408	3506	919997	12	f	
-1116	551	409	2352	2299997	7	f	
-1117	551	410	2471	2107409	5	f	
-1118	551	411	2453	8299995	14	f	
-1119	551	412	2353	2299998	33	f	
-1120	551	413	2354	5300000	24	f	
-1121	551	414	2355	84000	5	f	
-1122	551	415	2472	1200000	12	f	
-1123	551	416	2458	2100000	7	f	
-1124	551	417	2361	7000000	7	f	
-1125	551	418	2359	2123000	7	f	
-1126	551	419	2360	670000	7	f	
-1127	551	420	2468	782000	12	f	
-1128	551	421	2423	782008	10	f	
-1129	551	422	2450	212000	12	f	
-1130	551	423	2442	478200	4	f	
-1131	551	424	2358	277998	3	f	
-1132	551	425	3421	881998	15	f	
-1133	551	426	2362	982004	15	f	
-1134	551	427	2481	182000	14	f	
-1135	551	428	2480	772000	10	f	
-1136	551	429	2438	789000	22	f	
-1137	551	430	2430	378289	21	f	
-1138	551	431	2437	178200	14	f	
-1139	551	432	2431	478186	13	f	
-1140	551	433	2469	782032	2	f	
-1141	551	434	3104	132111	10	f	
-1142	552	394	2564	1298888	12	f	
-1143	552	395	2565	9298939	12	f	
-1144	552	396	3507	7856322	12	f	
-1145	552	397	2751	890000	10	f	
-1146	552	398	2435	780000	5	f	
-1147	552	399	3474	230930	30	f	
-1148	552	400	3475	3434340	22	f	
-1149	552	401	3501	64838936	45	f	
-1150	552	402	3503	43734731	10	f	
-1151	552	403	3473	53433638	44	f	
-1152	552	404	3467	3232049	30	f	
-1153	552	405	3505	4322429	10	f	
-1154	552	406	3504	7365347	10	f	
-1155	552	407	3492	431000	13	f	
-1156	552	408	3506	4363839	13	f	
-1157	552	409	2352	449980	30	f	
-1158	552	410	2471	5431900	4	f	
-1159	552	411	2453	5378360	10	f	
-1160	552	412	2353	5474889	5	f	
-1161	552	413	2354	7624440	5	f	
-1162	552	414	2355	5464646	7	f	
-1163	552	415	2472	3334123	6	f	
-1164	552	416	2458	2323111	7	f	
-1165	552	417	2361	8934373	4	f	
-1166	552	418	2359	725373828	10	f	
-1167	552	419	2360	735243436	9	f	
-1168	552	420	2468	4332680	7	f	
-1169	552	421	2423	4363737	9	f	
-1170	552	422	2450	1298888	8	f	
-1171	552	423	2442	35363636	5	f	
-1172	552	424	2358	53728367	21	f	
-1173	552	425	3421	6382931	20	f	
-1174	552	426	2362	231527	15	f	
-1175	552	427	2481	53436487	14	f	
-1176	552	428	2480	43537637	7	f	
-1177	552	429	2438	5234365	10	f	
-1178	552	430	2430	52425273	5	f	
-1179	552	431	2437	2325263	4	f	
-1180	552	432	2431	3725372	45	f	
-1181	552	433	2469	4356273	10	f	
-1182	552	434	3104	32176354	14	f	
-1183	553	394	2564	320000	2	f	
-1184	553	395	2565	220000	4	f	
-1185	553	396	3507	240000	10	f	
-1186	553	397	2751	328902	15	f	
-1187	553	398	2435	238923	10	f	
-1188	553	399	3474	7630398	14	f	
-1189	553	400	3475	670000	12	f	
-1190	553	401	3501	5630890	10	f	
-1191	553	402	3503	435280	12	f	
-1192	553	403	3473	445300	14	f	
-1193	553	404	3467	320002	10	f	
-1194	553	405	3505	454990	13	f	
-1195	553	406	3504	456989	9	f	
-1196	553	407	3492	451990	14	f	
-1197	553	408	3506	459990	12	f	
-1198	553	409	2352	255990	10	f	
-1199	553	410	2471	955991	45	f	
-1200	553	411	2453	478599	30	f	
-1201	553	412	2353	775990	21	f	
-1202	553	413	2354	155978	20	f	
-1203	553	414	2355	355992	2	f	
-1204	553	415	2472	435990	30	f	
-1205	553	416	2458	455990	10	f	
-1206	553	417	2361	325902	3	f	
-1207	553	418	2359	125901	12	f	
-1208	553	419	2360	155900	3	f	
-1209	553	420	2468	5095900	5	f	
-1210	553	421	2423	535900	5	f	
-1211	553	422	2450	595908	5	f	
-1212	553	423	2442	555800	7	f	
-1213	553	424	2358	755900	30	f	
-1214	553	425	3421	555900	7	f	
-1215	553	426	2362	467900	9	f	
-1216	553	427	2481	904001	5	f	
-1217	553	428	2480	904900	5	f	
-1218	553	429	2438	884900	5	f	
-1219	553	430	2430	744900	4	f	
-1220	553	431	2437	444600	3	f	
-1221	553	432	2431	344900	4	f	
-1222	553	433	2469	644900	2	f	
-1223	553	434	3104	444900	10	f	
-1224	554	435	3507	789	7	f	
-1225	554	436	2751	123	7	f	
-1226	555	435	3507	224	7	f	
-1227	555	436	2751	789	7	f	
-1228	556	437	3507	100	7	f	
-1229	556	438	2751	200	7	f	
-1230	557	437	3507	200	7	f	
-1231	557	438	2751	100	7	f	
-1232	558	387	2564	123	7	f	
-1233	558	388	2565	321	7	f	
-1234	559	387	2564	767	7	f	
-1235	559	388	2565	1234	7	f	
-1236	560	387	2564	1342	7	f	
-1237	560	388	2565	1213	7	f	
-1238	561	439	2564	222	2	f	
-1239	561	440	2565	333	3	f	
-1240	562	439	2564	250	2	f	
-1241	562	440	2565	300	2	f	
-1242	563	441	3467	132	7	f	
-1243	563	442	3505	134	7	f	
-1244	564	441	3467	145	7	f	
-1245	564	442	3505	111	7	f	
-1246	565	443	2565	10	1	f	
-1247	566	443	2565	129	2	f	
+COPY public.vendor_quotation_items (id, vendor_quotation_id, qr_item_id, material_id, quoted_rate, delivery_days, is_excluded, remarks, brand, vendor_uom_name, uom_conversion_factor, discount_percent) FROM stdin;
+994	497	336	241	492.74	3	f	\N	\N	\N	\N	\N
+995	497	337	216	383.89	4	f	\N	\N	\N	\N	\N
+996	498	336	241	157.7	14	f	\N	\N	\N	\N	\N
+997	498	337	216	306.28	1	f	\N	\N	\N	\N	\N
+998	499	336	241	405.44	10	f	\N	\N	\N	\N	\N
+999	499	337	216	464.46	6	f	\N	\N	\N	\N	\N
+1000	500	338	221	389.05	12	f	\N	\N	\N	\N	\N
+1001	500	339	218	414.08	8	f	\N	\N	\N	\N	\N
+1002	501	338	221	289.72	2	f	\N	\N	\N	\N	\N
+1003	501	339	218	67.22	14	f	\N	\N	\N	\N	\N
+1004	502	338	221	103.23	5	f	\N	\N	\N	\N	\N
+1005	502	339	218	17.42	1	f	\N	\N	\N	\N	\N
+1006	503	340	229	151.68	6	f	\N	\N	\N	\N	\N
+1007	503	341	249	259.38	7	f	\N	\N	\N	\N	\N
+1008	504	340	229	26.46	14	f	\N	\N	\N	\N	\N
+1009	504	341	249	491.98	14	f	\N	\N	\N	\N	\N
+1010	505	340	229	149.14	13	f	\N	\N	\N	\N	\N
+1011	505	341	249	100.53	9	f	\N	\N	\N	\N	\N
+1012	506	342	222	163.41	7	f	\N	\N	\N	\N	\N
+1013	506	343	250	384.96	3	f	\N	\N	\N	\N	\N
+1014	507	342	222	160.88	2	f	\N	\N	\N	\N	\N
+1015	507	343	250	265.91	6	f	\N	\N	\N	\N	\N
+1016	508	342	222	477.86	8	f	\N	\N	\N	\N	\N
+1017	508	343	250	63.13	10	f	\N	\N	\N	\N	\N
+1018	509	344	225	220.64	8	f	\N	\N	\N	\N	\N
+1019	509	345	227	45.12	4	f	\N	\N	\N	\N	\N
+1020	510	344	225	284.91	9	f	\N	\N	\N	\N	\N
+1021	510	345	227	499.02	15	f	\N	\N	\N	\N	\N
+1022	511	344	225	317.64	1	f	\N	\N	\N	\N	\N
+1023	511	345	227	266.9	11	f	\N	\N	\N	\N	\N
+1024	512	346	237	474.55	7	f	\N	\N	\N	\N	\N
+1025	512	347	231	457.87	8	f	\N	\N	\N	\N	\N
+1026	513	346	237	288.46	9	f	\N	\N	\N	\N	\N
+1027	513	347	231	188.58	5	f	\N	\N	\N	\N	\N
+1028	514	346	237	150.32	13	f	\N	\N	\N	\N	\N
+1029	514	347	231	92.1	1	f	\N	\N	\N	\N	\N
+1030	515	348	235	243.32	9	f	\N	\N	\N	\N	\N
+1031	515	349	216	293.85	12	f	\N	\N	\N	\N	\N
+1032	516	348	235	35.87	6	f	\N	\N	\N	\N	\N
+1033	516	349	216	202.78	12	f	\N	\N	\N	\N	\N
+1034	517	348	235	233.27	8	f	\N	\N	\N	\N	\N
+1035	517	349	216	418.48	11	f	\N	\N	\N	\N	\N
+1036	518	350	242	371.23	9	f	\N	\N	\N	\N	\N
+1037	518	351	230	306.85	6	f	\N	\N	\N	\N	\N
+1038	519	350	242	207.68	8	f	\N	\N	\N	\N	\N
+1039	519	351	230	20.42	6	f	\N	\N	\N	\N	\N
+1040	520	350	242	204.38	12	f	\N	\N	\N	\N	\N
+1041	520	351	230	55	6	f	\N	\N	\N	\N	\N
+1042	521	352	236	75.13	15	f	\N	\N	\N	\N	\N
+1043	521	353	223	334.16	11	f	\N	\N	\N	\N	\N
+1044	522	352	236	151.78	11	f	\N	\N	\N	\N	\N
+1045	522	353	223	424.18	2	f	\N	\N	\N	\N	\N
+1046	523	352	236	395.11	12	f	\N	\N	\N	\N	\N
+1047	523	353	223	133.14	12	f	\N	\N	\N	\N	\N
+1048	524	354	247	64.7	13	f	\N	\N	\N	\N	\N
+1049	524	355	236	175.05	2	f	\N	\N	\N	\N	\N
+1050	525	354	247	103.14	6	f	\N	\N	\N	\N	\N
+1051	525	355	236	84.41	10	f	\N	\N	\N	\N	\N
+1052	526	354	247	54.85	8	f	\N	\N	\N	\N	\N
+1053	526	355	236	89.06	8	f	\N	\N	\N	\N	\N
+1054	527	356	241	405.21	9	f	\N	\N	\N	\N	\N
+1055	527	357	240	117.8	14	f	\N	\N	\N	\N	\N
+1056	528	356	241	271.17	15	f	\N	\N	\N	\N	\N
+1057	528	357	240	180.6	7	f	\N	\N	\N	\N	\N
+1058	529	356	241	457.47	15	f	\N	\N	\N	\N	\N
+1059	529	357	240	385.62	7	f	\N	\N	\N	\N	\N
+1060	530	358	216	347.95	1	f	\N	\N	\N	\N	\N
+1061	530	359	224	340.31	1	f	\N	\N	\N	\N	\N
+1062	531	358	216	70.57	8	f	\N	\N	\N	\N	\N
+1063	531	359	224	474.85	5	f	\N	\N	\N	\N	\N
+1064	532	358	216	155.78	10	f	\N	\N	\N	\N	\N
+1065	532	359	224	336.29	14	f	\N	\N	\N	\N	\N
+1066	533	360	238	462.31	3	f	\N	\N	\N	\N	\N
+1067	533	361	237	26.17	15	f	\N	\N	\N	\N	\N
+1068	534	360	238	36.88	14	f	\N	\N	\N	\N	\N
+1069	534	361	237	85.12	10	f	\N	\N	\N	\N	\N
+1070	535	360	238	398.46	2	f	\N	\N	\N	\N	\N
+1071	535	361	237	74.36	13	f	\N	\N	\N	\N	\N
+1072	536	362	241	465.77	9	f	\N	\N	\N	\N	\N
+1073	536	363	221	256.63	15	f	\N	\N	\N	\N	\N
+1074	537	362	241	78.37	11	f	\N	\N	\N	\N	\N
+1075	537	363	221	319.23	13	f	\N	\N	\N	\N	\N
+1076	538	362	241	38.86	8	f	\N	\N	\N	\N	\N
+1077	538	363	221	304.28	10	f	\N	\N	\N	\N	\N
+1078	539	364	218	372.29	10	f	\N	\N	\N	\N	\N
+1079	539	365	224	305.19	7	f	\N	\N	\N	\N	\N
+1080	540	364	218	159.6	15	f	\N	\N	\N	\N	\N
+1081	540	365	224	389.44	11	f	\N	\N	\N	\N	\N
+1082	541	364	218	472.96	12	f	\N	\N	\N	\N	\N
+1083	541	365	224	268.9	5	f	\N	\N	\N	\N	\N
+1084	542	376	238	4500	15	f		\N	\N	\N	\N
+1085	543	376	238	40000	16	f		\N	\N	\N	\N
+1086	544	376	238	35000	7	f		\N	\N	\N	\N
+1087	545	376	238	35000	7	f		\N	\N	\N	\N
+1088	546	377	2357	1217	15	f		\N	\N	\N	\N
+1089	546	378	3084	3294	15	f		\N	\N	\N	\N
+1090	547	377	2357	1000	7	f		\N	\N	\N	\N
+1091	547	378	3084	3500	7	f		\N	\N	\N	\N
+1092	548	379	3474	100	7	f		\N	\N	\N	\N
+1093	548	380	3475	500	7	f		\N	\N	\N	\N
+1094	548	381	3503	300	7	f		\N	\N	\N	\N
+1095	549	379	3474	90	7	f		\N	\N	\N	\N
+1096	549	380	3475	400	7	f		\N	\N	\N	\N
+1097	549	381	3503	350	7	f		\N	\N	\N	\N
+1101	551	394	2564	2300000	2	f		\N	\N	\N	\N
+1102	551	395	2565	4300000	4	f		\N	\N	\N	\N
+1103	551	396	3507	4230000	12	f		\N	\N	\N	\N
+1104	551	397	2751	21300000	12	f		\N	\N	\N	\N
+1105	551	398	2435	10300000	1	f		\N	\N	\N	\N
+1106	551	399	3474	1999998	43	f		\N	\N	\N	\N
+1107	551	400	3475	6199998	21	f		\N	\N	\N	\N
+1108	551	401	3501	293000	14	f		\N	\N	\N	\N
+1109	551	402	3503	202996	22	f		\N	\N	\N	\N
+1110	551	403	3473	4019999	12	f		\N	\N	\N	\N
+1111	551	404	3467	540000	21	f		\N	\N	\N	\N
+1112	551	405	3505	830000	14	f		\N	\N	\N	\N
+1113	551	406	3504	7300000	7	f		\N	\N	\N	\N
+1114	551	407	3492	319998	7	f		\N	\N	\N	\N
+1115	551	408	3506	919997	12	f		\N	\N	\N	\N
+1116	551	409	2352	2299997	7	f		\N	\N	\N	\N
+1117	551	410	2471	2107409	5	f		\N	\N	\N	\N
+1118	551	411	2453	8299995	14	f		\N	\N	\N	\N
+1119	551	412	2353	2299998	33	f		\N	\N	\N	\N
+1120	551	413	2354	5300000	24	f		\N	\N	\N	\N
+1121	551	414	2355	84000	5	f		\N	\N	\N	\N
+1122	551	415	2472	1200000	12	f		\N	\N	\N	\N
+1123	551	416	2458	2100000	7	f		\N	\N	\N	\N
+1124	551	417	2361	7000000	7	f		\N	\N	\N	\N
+1125	551	418	2359	2123000	7	f		\N	\N	\N	\N
+1126	551	419	2360	670000	7	f		\N	\N	\N	\N
+1127	551	420	2468	782000	12	f		\N	\N	\N	\N
+1128	551	421	2423	782008	10	f		\N	\N	\N	\N
+1129	551	422	2450	212000	12	f		\N	\N	\N	\N
+1130	551	423	2442	478200	4	f		\N	\N	\N	\N
+1131	551	424	2358	277998	3	f		\N	\N	\N	\N
+1132	551	425	3421	881998	15	f		\N	\N	\N	\N
+1133	551	426	2362	982004	15	f		\N	\N	\N	\N
+1134	551	427	2481	182000	14	f		\N	\N	\N	\N
+1135	551	428	2480	772000	10	f		\N	\N	\N	\N
+1136	551	429	2438	789000	22	f		\N	\N	\N	\N
+1137	551	430	2430	378289	21	f		\N	\N	\N	\N
+1138	551	431	2437	178200	14	f		\N	\N	\N	\N
+1139	551	432	2431	478186	13	f		\N	\N	\N	\N
+1140	551	433	2469	782032	2	f		\N	\N	\N	\N
+1141	551	434	3104	132111	10	f		\N	\N	\N	\N
+1142	552	394	2564	1298888	12	f		\N	\N	\N	\N
+1143	552	395	2565	9298939	12	f		\N	\N	\N	\N
+1144	552	396	3507	7856322	12	f		\N	\N	\N	\N
+1145	552	397	2751	890000	10	f		\N	\N	\N	\N
+1146	552	398	2435	780000	5	f		\N	\N	\N	\N
+1147	552	399	3474	230930	30	f		\N	\N	\N	\N
+1148	552	400	3475	3434340	22	f		\N	\N	\N	\N
+1149	552	401	3501	64838936	45	f		\N	\N	\N	\N
+1150	552	402	3503	43734731	10	f		\N	\N	\N	\N
+1151	552	403	3473	53433638	44	f		\N	\N	\N	\N
+1152	552	404	3467	3232049	30	f		\N	\N	\N	\N
+1153	552	405	3505	4322429	10	f		\N	\N	\N	\N
+1154	552	406	3504	7365347	10	f		\N	\N	\N	\N
+1155	552	407	3492	431000	13	f		\N	\N	\N	\N
+1156	552	408	3506	4363839	13	f		\N	\N	\N	\N
+1157	552	409	2352	449980	30	f		\N	\N	\N	\N
+1158	552	410	2471	5431900	4	f		\N	\N	\N	\N
+1159	552	411	2453	5378360	10	f		\N	\N	\N	\N
+1160	552	412	2353	5474889	5	f		\N	\N	\N	\N
+1161	552	413	2354	7624440	5	f		\N	\N	\N	\N
+1162	552	414	2355	5464646	7	f		\N	\N	\N	\N
+1163	552	415	2472	3334123	6	f		\N	\N	\N	\N
+1164	552	416	2458	2323111	7	f		\N	\N	\N	\N
+1165	552	417	2361	8934373	4	f		\N	\N	\N	\N
+1166	552	418	2359	725373828	10	f		\N	\N	\N	\N
+1167	552	419	2360	735243436	9	f		\N	\N	\N	\N
+1168	552	420	2468	4332680	7	f		\N	\N	\N	\N
+1169	552	421	2423	4363737	9	f		\N	\N	\N	\N
+1170	552	422	2450	1298888	8	f		\N	\N	\N	\N
+1171	552	423	2442	35363636	5	f		\N	\N	\N	\N
+1172	552	424	2358	53728367	21	f		\N	\N	\N	\N
+1173	552	425	3421	6382931	20	f		\N	\N	\N	\N
+1174	552	426	2362	231527	15	f		\N	\N	\N	\N
+1175	552	427	2481	53436487	14	f		\N	\N	\N	\N
+1176	552	428	2480	43537637	7	f		\N	\N	\N	\N
+1177	552	429	2438	5234365	10	f		\N	\N	\N	\N
+1178	552	430	2430	52425273	5	f		\N	\N	\N	\N
+1179	552	431	2437	2325263	4	f		\N	\N	\N	\N
+1180	552	432	2431	3725372	45	f		\N	\N	\N	\N
+1181	552	433	2469	4356273	10	f		\N	\N	\N	\N
+1182	552	434	3104	32176354	14	f		\N	\N	\N	\N
+1183	553	394	2564	320000	2	f		\N	\N	\N	\N
+1184	553	395	2565	220000	4	f		\N	\N	\N	\N
+1185	553	396	3507	240000	10	f		\N	\N	\N	\N
+1186	553	397	2751	328902	15	f		\N	\N	\N	\N
+1187	553	398	2435	238923	10	f		\N	\N	\N	\N
+1188	553	399	3474	7630398	14	f		\N	\N	\N	\N
+1189	553	400	3475	670000	12	f		\N	\N	\N	\N
+1190	553	401	3501	5630890	10	f		\N	\N	\N	\N
+1191	553	402	3503	435280	12	f		\N	\N	\N	\N
+1192	553	403	3473	445300	14	f		\N	\N	\N	\N
+1193	553	404	3467	320002	10	f		\N	\N	\N	\N
+1194	553	405	3505	454990	13	f		\N	\N	\N	\N
+1195	553	406	3504	456989	9	f		\N	\N	\N	\N
+1196	553	407	3492	451990	14	f		\N	\N	\N	\N
+1197	553	408	3506	459990	12	f		\N	\N	\N	\N
+1198	553	409	2352	255990	10	f		\N	\N	\N	\N
+1199	553	410	2471	955991	45	f		\N	\N	\N	\N
+1200	553	411	2453	478599	30	f		\N	\N	\N	\N
+1201	553	412	2353	775990	21	f		\N	\N	\N	\N
+1202	553	413	2354	155978	20	f		\N	\N	\N	\N
+1203	553	414	2355	355992	2	f		\N	\N	\N	\N
+1204	553	415	2472	435990	30	f		\N	\N	\N	\N
+1205	553	416	2458	455990	10	f		\N	\N	\N	\N
+1206	553	417	2361	325902	3	f		\N	\N	\N	\N
+1207	553	418	2359	125901	12	f		\N	\N	\N	\N
+1208	553	419	2360	155900	3	f		\N	\N	\N	\N
+1209	553	420	2468	5095900	5	f		\N	\N	\N	\N
+1210	553	421	2423	535900	5	f		\N	\N	\N	\N
+1211	553	422	2450	595908	5	f		\N	\N	\N	\N
+1212	553	423	2442	555800	7	f		\N	\N	\N	\N
+1213	553	424	2358	755900	30	f		\N	\N	\N	\N
+1214	553	425	3421	555900	7	f		\N	\N	\N	\N
+1215	553	426	2362	467900	9	f		\N	\N	\N	\N
+1216	553	427	2481	904001	5	f		\N	\N	\N	\N
+1217	553	428	2480	904900	5	f		\N	\N	\N	\N
+1218	553	429	2438	884900	5	f		\N	\N	\N	\N
+1219	553	430	2430	744900	4	f		\N	\N	\N	\N
+1220	553	431	2437	444600	3	f		\N	\N	\N	\N
+1221	553	432	2431	344900	4	f		\N	\N	\N	\N
+1222	553	433	2469	644900	2	f		\N	\N	\N	\N
+1223	553	434	3104	444900	10	f		\N	\N	\N	\N
+1224	554	435	3507	789	7	f		\N	\N	\N	\N
+1225	554	436	2751	123	7	f		\N	\N	\N	\N
+1226	555	435	3507	224	7	f		\N	\N	\N	\N
+1227	555	436	2751	789	7	f		\N	\N	\N	\N
+1228	556	437	3507	100	7	f		\N	\N	\N	\N
+1229	556	438	2751	200	7	f		\N	\N	\N	\N
+1230	557	437	3507	200	7	f		\N	\N	\N	\N
+1231	557	438	2751	100	7	f		\N	\N	\N	\N
+1232	558	387	2564	123	7	f		\N	\N	\N	\N
+1233	558	388	2565	321	7	f		\N	\N	\N	\N
+1234	559	387	2564	767	7	f		\N	\N	\N	\N
+1235	559	388	2565	1234	7	f		\N	\N	\N	\N
+1236	560	387	2564	1342	7	f		\N	\N	\N	\N
+1237	560	388	2565	1213	7	f		\N	\N	\N	\N
+1238	561	439	2564	222	2	f		\N	\N	\N	\N
+1239	561	440	2565	333	3	f		\N	\N	\N	\N
+1240	562	439	2564	250	2	f		\N	\N	\N	\N
+1241	562	440	2565	300	2	f		\N	\N	\N	\N
+1242	563	441	3467	132	7	f		\N	\N	\N	\N
+1243	563	442	3505	134	7	f		\N	\N	\N	\N
+1244	564	441	3467	145	7	f		\N	\N	\N	\N
+1245	564	442	3505	111	7	f		\N	\N	\N	\N
+1246	565	443	2565	10	1	f		\N	\N	\N	\N
+1247	566	443	2565	129	2	f		\N	\N	\N	\N
+1248	567	451	2352	112	3	f			nos	1	0
+1249	567	452	2423	142	2	f			nos	1	0
+1250	567	453	2564	299	3	f			nos	1	0
+1251	567	454	2431	400	3	f			nos	1	0
+1252	568	451	2352	0	2	f			nos	1	0
+1253	568	452	2423	1500	2	f			nos	1	0
+1254	568	453	2564	320	1	f			nos	1	0
+1255	568	454	2431	428	1	f			nos	1	0
+1256	569	459	2565	0.035	\N	f			NOS	1	0
+1257	569	460	2435	0	\N	f			NOS	1	0
+1258	569	461	2358	0	\N	f			NOS	1	0
+1259	569	462	2356	46.88	\N	f			NOS	1	0
+1260	569	463	3082	0	\N	f			NOS	1	0
+1261	569	464	3504	110	\N	f			NOS	1	0
+1262	570	459	2565	500.78	10	f			Numbers	1	0
+1263	570	460	2435	68.71	10	f			Numbers	1	0
+1264	570	461	2358	34.9	10	f			Numbers	1	0
+1265	570	462	2356	46.88	10	f			Numbers	1	0
+1266	570	463	3082	1399.7	15	f			Numbers	1	0
+1267	570	464	3504	890	10	f			Numbers	1	0
+1274	572	466	2565	2345	7	f		BranD1	Nos	1	0
+1275	572	467	3507	225	7	f		BR1	Nos	1	0
+1276	572	468	2751	345	7	f		XC1	Nos	1	0
+1280	571	466	2565	1234	7	f		BranD1	Nos	1	0
+1281	571	467	3507	550	7	f		BR1	Nos	1	0
+1282	571	468	2751	759	7	f		XC1	Nos	1	0
+1284	573	465	2752	852	2	f			NOS	1	0
+1098	550	389	3507	15000000	15	f		\N	\N	\N	10
+1099	550	390	3504	1400000	45	f		\N	\N	\N	10
+1100	550	391	2361	999999	30	f		\N	\N	\N	10
 \.
 
 
@@ -16226,6 +16453,13 @@ COPY public.vendor_quotations (id, qr_id, vendor_id, quotation_number, quotation
 564	197	62	er435	2026-06-02	2026-06-22	/api/uploads/quotations/qr_197_v_62_66966cc93a2d857e531ed7ba_excel invoice format-p-1600.png		Received	3	2026-06-22 11:59:39.375285
 565	198	64	121	2026-06-20	2026-06-22	/api/uploads/quotations/qr_198_v_64_1724589655225_MAHESHWARAN_RESUME_SIGNED.pdf		Received	3	2026-06-22 12:17:19.871192
 566	198	62	122	2026-06-15	2026-06-22	/api/uploads/quotations/qr_198_v_62_1.1 pradeep Resume real.pdf		Received	3	2026-06-22 12:17:44.005618
+567	202	62	inv-2001	2026-07-13	2026-07-13	/api/uploads/quotations/qr_202_v_62_Invoice - INV2001.pdf		Received	3	2026-07-13 10:56:44.755959
+568	202	64	inv2002	2026-07-13	2026-07-13	/api/uploads/quotations/qr_202_v_64_Invoice - INV2001.pdf		Draft	3	2026-07-13 11:00:29.174181
+569	205	64		\N	2026-07-14	/api/uploads/quotations/qr_205_v_64_Screenshot 2026-07-14 160220.png		Draft	3	2026-07-14 16:17:49.164633
+570	205	62		\N	2026-07-14	/api/uploads/quotations/qr_205_v_62_Quotation_Excel Sample.xlsx		Draft	3	2026-07-14 16:25:24.651363
+572	207	63	Quo2	2026-07-14	2026-07-21	/api/uploads/quotations/qr_207_v_63_Quo1.xlsx		Received	3	2026-07-21 12:07:38.871856
+571	207	62	quo1	2026-07-09	2026-07-21	/api/uploads/quotations/qr_207_v_62_Quo1.xlsx		Received	3	2026-07-21 12:04:19.177675
+573	206	64	inv00020	2026-07-15	2026-07-21	/api/uploads/quotations/qr_206_v_64_BRITTO INDUSTRIES.pdf		Received	3	2026-07-21 12:26:25.680799
 \.
 
 
@@ -16294,6 +16528,12 @@ COPY public.warehouses (id, tenant_id, site_id, name, code, project_id, warehous
 COPY public.write_off_items (id, write_off_id, material_id, warehouse_id, quantity, rate, amount) FROM stdin;
 1	1	2564	62	5	16526.16	82630.8
 2	2	3507	62	2	4349	8698
+3	3	2435	62	1	4657.57	4657.57
+4	6	2472	62	1	3782.04	3782.04
+5	7	2450	62	1	4429.23	4429.23
+6	8	3475	62	1	4602.71	4602.71
+7	9	3507	62	1	4349	4349
+10	10	2435	62	2	4657.57	9315.14
 \.
 
 
@@ -16304,6 +16544,12 @@ COPY public.write_off_items (id, write_off_id, material_id, warehouse_id, quanti
 COPY public.write_offs (id, tenant_id, site_id, write_off_number, date, reason, status, current_approval_level, created_by_id, approved_by_id, approved_at, is_deleted, created_at, updated_at, write_off_type, attachment_url) FROM stdin;
 1	2	2	WO-00001	2026-07-07	abc	Approved	1	3	3	2026-07-07 12:06:54.88135	f	2026-07-07 17:26:23.808796	2026-07-07 17:36:54.944556	Damaged in Handling	/api/uploads/write_offs/2/20260707_115607_0acc3d0a.png
 2	2	2	WO-00002	2026-07-07	abc	Rejected	1	3	\N	\N	f	2026-07-07 17:39:07.972636	2026-07-07 17:39:36.534369	Damaged in Handling	/api/uploads/write_offs/2/20260707_120855_021953de.png
+3	2	2	WO-00003	2026-07-08	abcd	Approved	1	3	3	2026-07-08 10:12:59.678726	f	2026-07-08 15:35:55.947779	2026-07-08 15:42:59.696984	Expired / Shelf-life	
+6	2	2	WO-00004	2026-07-08	edwff	Rejected	1	3	\N	\N	f	2026-07-08 15:42:43.515676	2026-07-08 15:45:37.681574	Expired / Shelf-life	
+7	2	2	WO-00005	2026-07-08	abc	Rejected	1	3	\N	\N	f	2026-07-08 15:49:15.861864	2026-07-08 15:49:28.633527	Damaged in Handling	
+8	2	2	WO-00006	2026-07-08	qwert	Approved	1	3	3	2026-07-08 10:19:59.460906	f	2026-07-08 15:49:51.845229	2026-07-08 15:49:59.465678	Damaged in Handling	
+9	2	2	WO-00007	2026-07-10	damaged 	Rejected	1	3	\N	\N	f	2026-07-09 13:09:09.338244	2026-07-09 13:20:58.29659	Damaged in Handling	
+10	2	2	WO-00008	2026-07-09	lost 	Approved	1	3	3	2026-07-09 07:51:15.64808	f	2026-07-09 13:20:30.394309	2026-07-09 13:21:15.743396	Lost / Stolen	
 \.
 
 
@@ -16325,7 +16571,7 @@ SELECT pg_catalog.setval('public.approval_flows_id_seq', 64, true);
 -- Name: audit_logs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.audit_logs_id_seq', 405, true);
+SELECT pg_catalog.setval('public.audit_logs_id_seq', 419, true);
 
 
 --
@@ -16381,7 +16627,7 @@ SELECT pg_catalog.setval('public.department_material_limits_id_seq', 262, true);
 -- Name: departments_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.departments_id_seq', 330, true);
+SELECT pg_catalog.setval('public.departments_id_seq', 335, true);
 
 
 --
@@ -16423,14 +16669,14 @@ SELECT pg_catalog.setval('public.gate_passes_id_seq', 22, true);
 -- Name: grn_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.grn_id_seq', 211, true);
+SELECT pg_catalog.setval('public.grn_id_seq', 212, true);
 
 
 --
 -- Name: grn_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.grn_items_id_seq', 516, true);
+SELECT pg_catalog.setval('public.grn_items_id_seq', 519, true);
 
 
 --
@@ -16542,14 +16788,14 @@ SELECT pg_catalog.setval('public.purchase_order_approvals_id_seq', 50, true);
 -- Name: purchase_order_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_order_items_id_seq', 662, true);
+SELECT pg_catalog.setval('public.purchase_order_items_id_seq', 676, true);
 
 
 --
 -- Name: purchase_orders_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_orders_id_seq', 244, true);
+SELECT pg_catalog.setval('public.purchase_orders_id_seq', 250, true);
 
 
 --
@@ -16577,42 +16823,49 @@ SELECT pg_catalog.setval('public.purchase_requests_id_seq', 203, true);
 -- Name: quotation_comparisons_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_comparisons_id_seq', 104, true);
+SELECT pg_catalog.setval('public.quotation_comparisons_id_seq', 118, true);
+
+
+--
+-- Name: quotation_negotiation_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.quotation_negotiation_history_id_seq', 1, true);
 
 
 --
 -- Name: quotation_request_item_sources_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_request_item_sources_id_seq', 83, true);
+SELECT pg_catalog.setval('public.quotation_request_item_sources_id_seq', 110, true);
 
 
 --
 -- Name: quotation_request_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_request_items_id_seq', 443, true);
+SELECT pg_catalog.setval('public.quotation_request_items_id_seq', 468, true);
 
 
 --
 -- Name: quotation_request_prs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_request_prs_id_seq', 11, true);
+SELECT pg_catalog.setval('public.quotation_request_prs_id_seq', 14, true);
 
 
 --
 -- Name: quotation_request_vendors_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_request_vendors_id_seq', 406, true);
+SELECT pg_catalog.setval('public.quotation_request_vendors_id_seq', 425, true);
 
 
 --
 -- Name: quotation_requests_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_requests_id_seq', 198, true);
+SELECT pg_catalog.setval('public.quotation_requests_id_seq', 207, true);
 
 
 --
@@ -16647,7 +16900,7 @@ SELECT pg_catalog.setval('public.sites_id_seq', 4, true);
 -- Name: stock_ledger_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.stock_ledger_id_seq', 4264, true);
+SELECT pg_catalog.setval('public.stock_ledger_id_seq', 4270, true);
 
 
 --
@@ -16731,14 +16984,14 @@ SELECT pg_catalog.setval('public.vendor_categories_id_seq', 115, true);
 -- Name: vendor_quotation_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_quotation_items_id_seq', 1247, true);
+SELECT pg_catalog.setval('public.vendor_quotation_items_id_seq', 1284, true);
 
 
 --
 -- Name: vendor_quotations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_quotations_id_seq', 566, true);
+SELECT pg_catalog.setval('public.vendor_quotations_id_seq', 573, true);
 
 
 --
@@ -16759,14 +17012,14 @@ SELECT pg_catalog.setval('public.warehouses_id_seq', 73, true);
 -- Name: write_off_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.write_off_items_id_seq', 2, true);
+SELECT pg_catalog.setval('public.write_off_items_id_seq', 10, true);
 
 
 --
 -- Name: write_offs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.write_offs_id_seq', 2, true);
+SELECT pg_catalog.setval('public.write_offs_id_seq', 10, true);
 
 
 --
@@ -17087,6 +17340,14 @@ ALTER TABLE ONLY public.purchase_requests
 
 ALTER TABLE ONLY public.quotation_comparisons
     ADD CONSTRAINT quotation_comparisons_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: quotation_negotiation_history quotation_negotiation_history_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.quotation_negotiation_history
+    ADD CONSTRAINT quotation_negotiation_history_pkey PRIMARY KEY (id);
 
 
 --
@@ -17955,6 +18216,13 @@ CREATE INDEX ix_purchase_requests_pr_number ON public.purchase_requests USING bt
 --
 
 CREATE INDEX ix_quotation_comparisons_id ON public.quotation_comparisons USING btree (id);
+
+
+--
+-- Name: ix_quotation_negotiation_history_id; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX ix_quotation_negotiation_history_id ON public.quotation_negotiation_history USING btree (id);
 
 
 --
@@ -19526,6 +19794,30 @@ ALTER TABLE ONLY public.quotation_comparisons
 
 
 --
+-- Name: quotation_negotiation_history quotation_negotiation_history_created_by_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.quotation_negotiation_history
+    ADD CONSTRAINT quotation_negotiation_history_created_by_id_fkey FOREIGN KEY (created_by_id) REFERENCES public.users(id);
+
+
+--
+-- Name: quotation_negotiation_history quotation_negotiation_history_qr_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.quotation_negotiation_history
+    ADD CONSTRAINT quotation_negotiation_history_qr_id_fkey FOREIGN KEY (qr_id) REFERENCES public.quotation_requests(id) ON DELETE CASCADE;
+
+
+--
+-- Name: quotation_negotiation_history quotation_negotiation_history_vendor_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.quotation_negotiation_history
+    ADD CONSTRAINT quotation_negotiation_history_vendor_id_fkey FOREIGN KEY (vendor_id) REFERENCES public.vendors(id) ON DELETE CASCADE;
+
+
+--
 -- Name: quotation_request_item_sources quotation_request_item_sources_qr_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -20105,5 +20397,5 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict DAuNn6sH1sRJ0J6C6MZ1iDe5UfhELLHLuYI3yVjoQ3smffcjwf96G5EVOAFndi4
+\unrestrict vCX9Bb5Jmp5Tg9WOqszQkDhMO9pvFRJrRLyNejO5lsJ3rthTdfeKeA9KC5Mfedf
 

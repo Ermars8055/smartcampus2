@@ -415,6 +415,7 @@ def enter_vendor_quotation(
         vq.quotation_date = q_date
         vq.remarks = remarks
         vq.attachment_path = attachment_path
+        vq.status = VendorQuotationStatus.DRAFT.value if is_draft else VendorQuotationStatus.RECEIVED.value
         # Delete old items to replace with new ones
         db.query(VendorQuotationItem).filter(VendorQuotationItem.vendor_quotation_id == vq.id).delete()
     else:

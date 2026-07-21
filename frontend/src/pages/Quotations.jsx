@@ -75,6 +75,7 @@ const Quotations = () => {
     quotation_date: '',
     remarks: '',
     file: null,
+    existing_file: null,
     items: []
   });
 
@@ -1199,6 +1200,7 @@ const Quotations = () => {
                                       quotation_date: submittedQuote.quotation_date || '',
                                       remarks: submittedQuote.remarks || '',
                                       file: null,
+                                      existing_file: submittedQuote.attachment_path || null,
                                       items: submittedQuote.items.map(i => ({
                                         qr_item_id: i.qr_item_id, material_id: i.material_id, material_name: i.material_name,
                                         material_code: i.material_code,
@@ -1215,7 +1217,7 @@ const Quotations = () => {
                                     setNewQuote({
                                       quotation_number: '',
                                       quotation_date: '',
-                                      remarks: '', file: null,
+                                      remarks: '', file: null, existing_file: null,
                                       items: selectedQR.items.map(i => ({
                                         qr_item_id: i.id, material_id: i.material_id, material_name: i.material_name,
                                         material_code: i.material_code,
@@ -1245,7 +1247,7 @@ const Quotations = () => {
             )}
 
             {/* Phase 4: Material-Wise Comparison (Visible when Entered or Compared) */}
-            {['Entered', 'Compared', 'Approved', 'Ordered'].includes(selectedQR.status) && comparisonData && (
+            {['Received', 'Entered', 'Compared', 'Approved', 'Ordered'].includes(selectedQR.status) && comparisonData && (
               <Box mb={4} id="comparison-section">
                 <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>2. Technical Comparison (Item-Wise)</Typography>
                 {comparisonData.materials.map(mat => (
@@ -1315,8 +1317,8 @@ const Quotations = () => {
               </Box>
             )}
 
-            {/* Phase 5: Final Comparative Statement (Visible when Compared or beyond) */}
-            {['Compared', 'Approved', 'Ordered'].includes(selectedQR.status) && comparisonData && (
+            {/* Phase 5: Final Comparative Statement (Visible when Received or beyond) */}
+            {['Received', 'Entered', 'Compared', 'Approved', 'Ordered'].includes(selectedQR.status) && comparisonData && (
               <Box id="approval-section">
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                   <Typography variant="h6" sx={{ fontWeight: 600 }}>3. Comparative Statement & Approval</Typography>
@@ -1756,7 +1758,9 @@ const Quotations = () => {
                 <EditIcon fontSize="medium" />
               </Box>
               <Box>
-                <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>{selectedQR?.qr_number} : Enter Quotation</Typography>
+                <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
+                  {selectedQR?.qr_number} : {vendorQuotes.some(q => q.vendor_id === selectedVendorForQuote?.vendor_id) ? 'Edit Quotation' : 'Enter Quotation'}
+                </Typography>
                 <Typography variant="body2" color="text.secondary">{selectedVendorForQuote?.vendor_name}</Typography>
               </Box>
             </Box>
@@ -1792,12 +1796,20 @@ const Quotations = () => {
                 />
               </Box>
               <Box sx={{ pt: 3.5 }}>
-                <Button variant="outlined" component="label" startIcon={<CloudUploadIcon />} color={newQuote.file ? 'success' : 'primary'} sx={{ height: 56, px: 3 }}>
+                <Button variant="outlined" component="label" startIcon={<CloudUploadIcon />} color={newQuote.file || newQuote.existing_file ? 'success' : 'primary'} sx={{ height: 56, px: 3, whiteSpace: 'nowrap' }}>
                   Upload copy of quotation file <span style={{ color: '#d32f2f', marginLeft: 4 }}>*</span>
                   <input type="file" hidden accept=".pdf,.doc,.docx,.xlsx,.xls,.csv,image/*" onChange={(e) => setNewQuote({ ...newQuote, file: e.target.files[0] })} />
                 </Button>
+                {newQuote.file ? (
+                  <Box sx={{ mt: 1 }}><Typography variant="caption" sx={{ fontWeight: 500 }}>{newQuote.file.name}</Typography></Box>
+                ) : newQuote.existing_file ? (
+                  <Box sx={{ mt: 1 }}>
+                    <Typography variant="caption" sx={{ fontWeight: 500 }}>
+                      Existing File: {newQuote.existing_file.split('/').pop()}
+                    </Typography>
+                  </Box>
+                ) : null}
               </Box>
-              {newQuote.file && <Box sx={{ pt: 6 }}><Typography variant="caption" sx={{ fontWeight: 500 }}>{newQuote.file.name}</Typography></Box>}
             </Stack>
  
             <Divider sx={{ mb: 4 }} />
@@ -1919,21 +1931,23 @@ const Quotations = () => {
           </DialogContent>
           <DialogActions sx={{ p: 3 }}>
             <Button onClick={() => setEnterQuoteDialogOpen(false)}>Cancel</Button>
-            <Button
-              onClick={() => handleEnterQuote(true)}
-              variant="outlined"
-              color="primary"
-              disabled={!newQuote.quotation_number && !newQuote.quotation_date && !newQuote.file && newQuote.items.every(i => !i.quoted_rate && !i.delivery_days)}
-            >
-              Save as Draft
-            </Button>
+            {(!vendorQuotes.find(q => q.vendor_id === selectedVendorForQuote?.vendor_id) || vendorQuotes.find(q => q.vendor_id === selectedVendorForQuote?.vendor_id)?.status === 'Draft') && (
+              <Button
+                onClick={() => handleEnterQuote(true)}
+                variant="outlined"
+                color="primary"
+                disabled={!newQuote.quotation_number && !newQuote.quotation_date && !(newQuote.file || newQuote.existing_file) && newQuote.items.every(i => !i.quoted_rate && !i.delivery_days)}
+              >
+                Save as Draft
+              </Button>
+            )}
             <Button
               onClick={() => handleEnterQuote(false)}
               variant="contained"
               disabled={
                 !newQuote.quotation_number ||
                 !newQuote.quotation_date ||
-                !newQuote.file ||
+                !(newQuote.file || newQuote.existing_file) ||
                 newQuote.items.some(i => !i.is_excluded && (!i.quoted_rate || !i.delivery_days)) ||
                 newQuote.items.every(i => i.is_excluded)
               }

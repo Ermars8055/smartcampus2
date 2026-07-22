@@ -84,7 +84,12 @@ def list_gate_entries(
             material_name=e.material.name if e.material else None,
             po_number=e.purchase_order.po_number if e.purchase_order else None,
             material_names=material_names,
-            material_qtys=None # No longer needed separately
+            material_qtys=None, # No longer needed separately
+            reference_document_type=e.reference_document_type or "Invoice",
+            tare_weight=e.tare_weight,
+            gross_weight=e.gross_weight,
+            net_weight=e.net_weight,
+            weight_report_url=e.weight_report_url
         ))
     return result
 
@@ -110,6 +115,11 @@ def create_gate_entry(
         invoice_date=data.invoice_date,
         invoice_amount=data.invoice_amount,
         invoice_scan_url=data.invoice_scan_url,
+        reference_document_type=data.reference_document_type,
+        tare_weight=data.tare_weight,
+        gross_weight=data.gross_weight,
+        net_weight=data.net_weight,
+        weight_report_url=data.weight_report_url,
         remarks=data.remarks,
         tenant_id=tenant_id,
         site_id=site_id

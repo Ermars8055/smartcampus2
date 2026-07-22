@@ -671,6 +671,11 @@ class GateEntryBase(BaseModel):
     invoice_number: Optional[str] = None
     invoice_date: Optional[date] = None
     invoice_amount: Optional[float] = 0
+    reference_document_type: str = "Invoice"
+    tare_weight: Optional[float] = None
+    gross_weight: Optional[float] = None
+    net_weight: Optional[float] = None
+    weight_report_url: Optional[str] = None
     remarks: Optional[str] = Field(None, max_length=255)
 
 class GateEntryCreate(GateEntryBase):
@@ -693,6 +698,11 @@ class GateEntryOut(GateEntryBase):
     project_name: Optional[str] = None
     material_names: Optional[str] = None
     material_qtys: Optional[str] = None
+    reference_document_type: Optional[str] = "Invoice"
+    tare_weight: Optional[float] = None
+    gross_weight: Optional[float] = None
+    net_weight: Optional[float] = None
+    weight_report_url: Optional[str] = None
     class Config:
         from_attributes = True
 

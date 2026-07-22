@@ -321,15 +321,24 @@ export default function Vendors() {
                       <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1E293B' }}>{v.name}</Typography>
                       <Typography variant="caption" sx={{ fontWeight: 600, color: '#2563EB' }}>{v.code}</Typography>
                     </Box>
-                    <Chip
-                      label={v.status === 'Awaiting Approval' ? <span style={{ display: 'block', textAlign: 'center', lineHeight: 1.1 }}>Awaiting<br/>Approval</span> : (v.status || (v.is_active ? 'Active' : 'Inactive'))}
-                      size="small"
-                      sx={{
-                        bgcolor: v.status === 'Approved' ? '#ECFDF5' : (v.status === 'Rejected' ? '#FEF2F2' : (v.status === 'Awaiting Approval' ? '#FEF9C3' : '#F1F5F9')),
-                        color: v.status === 'Approved' ? '#10B981' : (v.status === 'Rejected' ? '#EF4444' : (v.status === 'Awaiting Approval' ? '#CA8A04' : '#64748B')),
-                        fontWeight: 600, fontSize: '0.65rem', height: v.status === 'Awaiting Approval' ? 'auto' : 20, py: v.status === 'Awaiting Approval' ? 0.5 : 0
-                      }}
-                    />
+                    <Box sx={{ display: 'flex', gap: 0.5, flexDirection: 'column', alignItems: 'flex-end' }}>
+                      <Chip
+                        label={v.status === 'Awaiting Approval' ? <span style={{ display: 'block', textAlign: 'center', lineHeight: 1.1 }}>Awaiting<br/>Approval</span> : v.status}
+                        size="small"
+                        sx={{
+                          bgcolor: v.status === 'Approved' ? '#ECFDF5' : (v.status === 'Rejected' ? '#FEF2F2' : (v.status === 'Awaiting Approval' ? '#FEF9C3' : '#F1F5F9')),
+                          color: v.status === 'Approved' ? '#10B981' : (v.status === 'Rejected' ? '#EF4444' : (v.status === 'Awaiting Approval' ? '#CA8A04' : '#64748B')),
+                          fontWeight: 600, fontSize: '0.65rem', height: v.status === 'Awaiting Approval' ? 'auto' : 20, py: v.status === 'Awaiting Approval' ? 0.5 : 0
+                        }}
+                      />
+                      <Chip
+                        label={v.is_active ? 'Active' : 'Inactive'}
+                        size="small"
+                        color={v.is_active ? 'success' : 'default'}
+                        variant="outlined"
+                        sx={{ fontSize: '0.65rem', height: 20 }}
+                      />
+                    </Box>
                  </Box>
                  <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#334155' }}><strong>Contact:</strong> {v.contact_person} | {v.phone}</Typography>
 
@@ -416,6 +425,7 @@ export default function Vendors() {
                   </TableCell>
 
                   <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2, whiteSpace: 'nowrap' }}>CATEGORIES</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2, whiteSpace: 'nowrap' }}>APPROVAL</TableCell>
                   <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2, whiteSpace: 'nowrap' }}>STATUS</TableCell>
                   <TableCell align="right" sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2, whiteSpace: 'nowrap' }}>ACTIONS</TableCell>
                 </TableRow>
@@ -448,13 +458,22 @@ export default function Vendors() {
 
                     <TableCell>
                       <Chip 
-                        label={v.status === 'Awaiting Approval' ? <span style={{ display: 'block', textAlign: 'center', lineHeight: 1.1 }}>Awaiting<br/>Approval</span> : (v.status || (v.is_active ? 'Active' : 'Inactive'))} 
+                        label={v.status === 'Awaiting Approval' ? <span style={{ display: 'block', textAlign: 'center', lineHeight: 1.1 }}>Awaiting<br/>Approval</span> : v.status} 
                         size="small" 
                         sx={{ 
                           bgcolor: v.status === 'Approved' ? '#ECFDF5' : (v.status === 'Rejected' ? '#FEF2F2' : (v.status === 'Awaiting Approval' ? '#FEF9C3' : '#F1F5F9')), 
                           color: v.status === 'Approved' ? '#10B981' : (v.status === 'Rejected' ? '#EF4444' : (v.status === 'Awaiting Approval' ? '#CA8A04' : '#64748B')), 
                           fontWeight: 600, fontSize: '0.75rem', borderRadius: '6px', height: v.status === 'Awaiting Approval' ? 'auto' : 24, py: v.status === 'Awaiting Approval' ? 0.5 : 0
                         }} 
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        label={v.is_active ? 'Active' : 'Inactive'}
+                        size="small"
+                        color={v.is_active ? 'success' : 'default'}
+                        variant="outlined"
+                        sx={{ fontSize: '0.65rem', height: 24, borderRadius: '6px', fontWeight: 600 }}
                       />
                     </TableCell>
                     <TableCell align="right">

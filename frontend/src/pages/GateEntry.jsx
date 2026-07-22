@@ -3,7 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
-  DialogContent, DialogActions, Grid, TableSortLabel, Divider, FormHelperText
+  DialogContent, DialogActions, Grid, TableSortLabel, Divider, FormHelperText,
+  Select, MenuItem, FormControl, InputLabel
 } from '@mui/material';
 import { Add, Search, LocalShipping, AttachFile, OpenInNew } from '@mui/icons-material';
 import api, { getFileUrl } from '../services/api';
@@ -26,9 +27,11 @@ export default function GateEntry() {
   const [sortConfig, setSortConfig] = useState({ key: 'entry_number', direction: 'desc' });
 
   const initialForm = {
+    reference_document_type: 'Invoice',
     invoice_number: '', invoice_date: '', invoice_amount: '',
     vehicle_number: '', delivery_person_name: '', remarks: '',
-    invoice_scan_url: ''
+    invoice_scan_url: '',
+    tare_weight: '', gross_weight: '', net_weight: '', weight_report_url: ''
   };
 
   const [form, setForm] = useState(initialForm);
@@ -64,15 +67,15 @@ export default function GateEntry() {
 
 
 
-  const handleUpload = async (file) => {
+  const handleUpload = async (file, fieldName) => {
     if (!file) return;
     setUploading(true);
     try {
       const fd = new FormData();
       fd.append('file', file);
       const res = await api.post('/api/upload', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-      setForm(prev => ({ ...prev, invoice_scan_url: res.data.url }));
-      setErrors(prev => ({ ...prev, invoice_scan_url: null }));
+      setForm(prev => ({ ...prev, [fieldName]: res.data.url }));
+      setErrors(prev => ({ ...prev, [fieldName]: null }));
     } catch (err) { showMessage('Upload failed: ' + (err.response?.data?.detail || err.message), 'Error', 'error'); }
     setUploading(false);
   };
@@ -80,11 +83,11 @@ export default function GateEntry() {
   const handleCreate = async () => {
     const newErrors = {};
 
-    if (!form.invoice_scan_url) newErrors.invoice_scan_url = "Please upload the scanned invoice.";
-    if (!form.invoice_number?.trim()) newErrors.invoice_number = "Invoice Number is required.";
+    if (!form.invoice_scan_url) newErrors.invoice_scan_url = "Please upload the scanned document.";
+    if (!form.invoice_number?.trim()) newErrors.invoice_number = "Document Number is required.";
     
     if (!form.invoice_date) {
-        newErrors.invoice_date = "Invoice Date is required.";
+        newErrors.invoice_date = "Document Date is required.";
     } else {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -96,6 +99,12 @@ export default function GateEntry() {
     }
 
     if (!form.delivery_person_name?.trim()) newErrors.delivery_person_name = "Delivery Person Name is required.";
+    
+    if (form.gross_weight && form.tare_weight) {
+        if (parseFloat(form.gross_weight) < parseFloat(form.tare_weight)) {
+            newErrors.gross_weight = "Gross weight cannot be less than Tare weight";
+        }
+    }
 
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) {
@@ -107,12 +116,17 @@ export default function GateEntry() {
         entry_type: 'Standard',
         vehicle_number: form.vehicle_number || '',
         delivery_person_name: form.delivery_person_name || '',
+        reference_document_type: form.reference_document_type,
         invoice_number: form.invoice_number || '',
         invoice_date: form.invoice_date || null,
         invoice_amount: parseFloat(form.invoice_amount) || 0,
         remarks: form.remarks,
         invoice_scan_url: form.invoice_scan_url || '',
         driver_name: form.delivery_person_name || '', // Keep driver_name synced if needed
+        tare_weight: form.tare_weight ? parseFloat(form.tare_weight) : null,
+        gross_weight: form.gross_weight ? parseFloat(form.gross_weight) : null,
+        net_weight: form.net_weight ? parseFloat(form.net_weight) : null,
+        weight_report_url: form.weight_report_url || '',
       };
 
       const res = await api.post('/api/gate-entries', payload);
@@ -178,7 +192,7 @@ export default function GateEntry() {
             <TableHead><TableRow>
               <TableCell><TableSortLabel active={sortConfig.key === 'entry_number'} direction={sortConfig.key === 'entry_number' ? sortConfig.direction : 'asc'} onClick={() => handleSort('entry_number')}>Entry No.</TableSortLabel></TableCell>
               <TableCell><TableSortLabel active={sortConfig.key === 'vehicle_person'} direction={sortConfig.key === 'vehicle_person' ? sortConfig.direction : 'asc'} onClick={() => handleSort('vehicle_person')}>Vehicle/Person</TableSortLabel></TableCell>
-              <TableCell><TableSortLabel active={sortConfig.key === 'invoice_number'} direction={sortConfig.key === 'invoice_number' ? sortConfig.direction : 'asc'} onClick={() => handleSort('invoice_number')}>Invoice No.</TableSortLabel></TableCell>
+              <TableCell><TableSortLabel active={sortConfig.key === 'invoice_number'} direction={sortConfig.key === 'invoice_number' ? sortConfig.direction : 'asc'} onClick={() => handleSort('invoice_number')}>Document No.</TableSortLabel></TableCell>
               <TableCell align="right"><TableSortLabel active={sortConfig.key === 'invoice_amount'} direction={sortConfig.key === 'invoice_amount' ? sortConfig.direction : 'asc'} onClick={() => handleSort('invoice_amount')}>Amount</TableSortLabel></TableCell>
               <TableCell><TableSortLabel active={sortConfig.key === 'arrival_time'} direction={sortConfig.key === 'arrival_time' ? sortConfig.direction : 'asc'} onClick={() => handleSort('arrival_time')}>Arrival Time</TableSortLabel></TableCell>
               <TableCell><TableSortLabel active={sortConfig.key === 'status'} direction={sortConfig.key === 'status' ? sortConfig.direction : 'asc'} onClick={() => handleSort('status')}>Status</TableSortLabel></TableCell>
@@ -208,20 +222,46 @@ export default function GateEntry() {
           <Grid container spacing={2}>
             <Grid item xs={6}><Typography variant="caption" color="textSecondary">Vehicle Number</Typography><Typography sx={{ fontWeight: 600 }}>{detailDialog?.vehicle_number || '—'}</Typography></Grid>
             <Grid item xs={6}><Typography variant="caption" color="textSecondary">Delivery Person</Typography><Typography sx={{ fontWeight: 600 }}>{detailDialog?.delivery_person_name || '—'}</Typography></Grid>
-            <Grid item xs={6}><Typography variant="caption" color="textSecondary">Invoice Number</Typography><Typography>{detailDialog?.invoice_number || '—'}</Typography></Grid>
-            <Grid item xs={6}><Typography variant="caption" color="textSecondary">Invoice Date</Typography><Typography>{formatDate(detailDialog?.invoice_date)}</Typography></Grid>
-            <Grid item xs={6}><Typography variant="caption" color="textSecondary">Invoice Amount</Typography><Typography>₹{detailDialog?.invoice_amount?.toFixed(2) || '0.00'}</Typography></Grid>
+            
+            <Grid item xs={6}><Typography variant="caption" color="textSecondary">Document Type</Typography><Typography>{detailDialog?.reference_document_type || 'Invoice'}</Typography></Grid>
+            <Grid item xs={6}><Typography variant="caption" color="textSecondary">Document Number</Typography><Typography>{detailDialog?.invoice_number || '—'}</Typography></Grid>
+            <Grid item xs={6}><Typography variant="caption" color="textSecondary">Document Date</Typography><Typography>{formatDate(detailDialog?.invoice_date)}</Typography></Grid>
+            <Grid item xs={6}><Typography variant="caption" color="textSecondary">Document Amount</Typography><Typography>₹{detailDialog?.invoice_amount?.toFixed(2) || '0.00'}</Typography></Grid>
+            
             <Grid item xs={6}><Typography variant="caption" color="textSecondary">Arrival Time</Typography><Typography>{formatDateTime(detailDialog?.arrival_time)}</Typography></Grid>
-            <Grid item xs={12}><Typography variant="caption" color="textSecondary">Remarks</Typography><Typography>{detailDialog?.remarks || '—'}</Typography></Grid>
             <Grid item xs={6}><Typography variant="caption" color="textSecondary">Status</Typography>
               <Box sx={{ mt: 0.5 }}><Chip label={detailDialog?.status} size="small" color={statusColor[detailDialog?.status] || 'default'} /></Box>
             </Grid>
+
+            {(detailDialog?.tare_weight || detailDialog?.gross_weight) && (
+              <>
+                <Grid item xs={12}><Divider sx={{ my: 1 }} /></Grid>
+                <Grid item xs={4}><Typography variant="caption" color="textSecondary">Tare Weight</Typography><Typography>{detailDialog?.tare_weight ? `${detailDialog.tare_weight} kg` : '—'}</Typography></Grid>
+                <Grid item xs={4}><Typography variant="caption" color="textSecondary">Gross Weight</Typography><Typography>{detailDialog?.gross_weight ? `${detailDialog.gross_weight} kg` : '—'}</Typography></Grid>
+                <Grid item xs={4}><Typography variant="caption" color="textSecondary">Net Weight</Typography><Typography>{detailDialog?.net_weight ? `${detailDialog.net_weight} kg` : '—'}</Typography></Grid>
+              </>
+            )}
+
+            <Grid item xs={12}><Typography variant="caption" color="textSecondary">Remarks</Typography><Typography>{detailDialog?.remarks || '—'}</Typography></Grid>
+            
+            <Grid item xs={12}><Divider sx={{ my: 1 }} /></Grid>
+            
             {detailDialog?.invoice_scan_url && (
-              <Grid item xs={12}>
-                <Typography variant="caption" color="textSecondary">Invoice Scan</Typography>
+              <Grid item xs={6}>
+                <Typography variant="caption" color="textSecondary">Document Scan</Typography>
                 <Box sx={{ mt: 0.5 }}>
                   <Button size="small" variant="outlined" startIcon={<OpenInNew />}
-                    onClick={() => window.open(getFileUrl(detailDialog.invoice_scan_url), '_blank')}>View Invoice Scan</Button>
+                    onClick={() => window.open(getFileUrl(detailDialog.invoice_scan_url), '_blank')}>View Document Scan</Button>
+                </Box>
+              </Grid>
+            )}
+            
+            {detailDialog?.weight_report_url && (
+              <Grid item xs={6}>
+                <Typography variant="caption" color="textSecondary">Weight Report</Typography>
+                <Box sx={{ mt: 0.5 }}>
+                  <Button size="small" variant="outlined" startIcon={<OpenInNew />}
+                    onClick={() => window.open(getFileUrl(detailDialog.weight_report_url), '_blank')}>View Weight Report</Button>
                 </Box>
               </Grid>
             )}
@@ -246,16 +286,29 @@ export default function GateEntry() {
         <DialogContent sx={{ px: 4, py: 2 }}>
           <Grid container spacing={3}>
             <Grid item xs={12} md={7}>
-              <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>Invoice Details</Typography>
+              <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>Reference Document Details</Typography>
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
-                  <TextField fullWidth label="Invoice Number *" value={form.invoice_number} onChange={e => { setForm({ ...form, invoice_number: e.target.value }); setErrors(prev => ({...prev, invoice_number: null})); }} error={!!errors.invoice_number} helperText={errors.invoice_number} />
+                  <FormControl fullWidth size="medium">
+                    <InputLabel>Document Type</InputLabel>
+                    <Select
+                      label="Document Type"
+                      value={form.reference_document_type}
+                      onChange={(e) => setForm({ ...form, reference_document_type: e.target.value })}
+                    >
+                      <MenuItem value="Invoice">Invoice</MenuItem>
+                      <MenuItem value="Delivery Challan">Delivery Challan</MenuItem>
+                    </Select>
+                  </FormControl>
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <TextField fullWidth label="Invoice Date *" type="date" value={form.invoice_date} onChange={e => { setForm({ ...form, invoice_date: e.target.value }); setErrors(prev => ({...prev, invoice_date: null})); }} InputLabelProps={{ shrink: true }} inputProps={{ max: new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0] }} error={!!errors.invoice_date} helperText={errors.invoice_date} />
+                  <TextField fullWidth label="Document Number *" value={form.invoice_number} onChange={e => { setForm({ ...form, invoice_number: e.target.value }); setErrors(prev => ({...prev, invoice_number: null})); }} error={!!errors.invoice_number} helperText={errors.invoice_number} />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <TextField fullWidth label="Invoice Amount" type="number" inputProps={{ step: "0.01" }} value={form.invoice_amount} onChange={e => setForm({ ...form, invoice_amount: e.target.value })} />
+                  <TextField fullWidth label="Document Date *" type="date" value={form.invoice_date} onChange={e => { setForm({ ...form, invoice_date: e.target.value }); setErrors(prev => ({...prev, invoice_date: null})); }} InputLabelProps={{ shrink: true }} inputProps={{ max: new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0] }} error={!!errors.invoice_date} helperText={errors.invoice_date} />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField fullWidth label="Document Amount" type="number" inputProps={{ step: "0.01", min: "0" }} value={form.invoice_amount} onChange={e => setForm({ ...form, invoice_amount: e.target.value })} />
                 </Grid>
               </Grid>
 
@@ -271,55 +324,144 @@ export default function GateEntry() {
                   <TextField inputProps={{ maxLength: 255 }} fullWidth label="Remarks" value={form.remarks} onChange={e => setForm({ ...form, remarks: e.target.value })} placeholder="Any additional notes..." />
                 </Grid>
               </Grid>
+
+              <Typography variant="subtitle2" sx={{ mt: 3, mb: 2, fontWeight: 600 }}>Vehicle Weight Details</Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={4}>
+                  <TextField 
+                    fullWidth 
+                    label="Tare Weight (Empty)" 
+                    type="number" 
+                    inputProps={{ step: "0.01", min: "0" }} 
+                    value={form.tare_weight} 
+                    onChange={e => {
+                        const val = e.target.value;
+                        const net = (form.gross_weight && val) ? (parseFloat(form.gross_weight) - parseFloat(val)).toFixed(2) : '';
+                        setForm({ ...form, tare_weight: val, net_weight: net });
+                        setErrors(prev => ({...prev, gross_weight: null}));
+                    }} 
+                  />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <TextField 
+                    fullWidth 
+                    label="Gross Weight (Loaded)" 
+                    type="number" 
+                    inputProps={{ step: "0.01", min: "0" }} 
+                    value={form.gross_weight} 
+                    onChange={e => {
+                        const val = e.target.value;
+                        const net = (val && form.tare_weight) ? (parseFloat(val) - parseFloat(form.tare_weight)).toFixed(2) : '';
+                        setForm({ ...form, gross_weight: val, net_weight: net });
+                        setErrors(prev => ({...prev, gross_weight: null}));
+                    }} 
+                    error={!!errors.gross_weight}
+                    helperText={errors.gross_weight}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <TextField 
+                    fullWidth 
+                    label="Net Weight" 
+                    type="number" 
+                    value={form.net_weight} 
+                    InputProps={{ readOnly: true }}
+                    disabled
+                  />
+                </Grid>
+              </Grid>
             </Grid>
 
-            <Grid item xs={12} md={5} sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>Invoice Image</Typography>
-              <Box sx={{ 
-                p: 2, 
-                border: errors.invoice_scan_url ? '2px dashed #d32f2f' : '2px dashed #1E3A8A', 
-                borderRadius: 2, 
-                bgcolor: errors.invoice_scan_url ? '#fdeded' : '#F0F4F8', 
-                textAlign: 'center',
-                flexGrow: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'center',
-                minHeight: 200
-              }}>
-                {form.invoice_scan_url ? (
-                  <Box>
-                    <AttachFile sx={{ color: '#1E3A8A', mb: 1, fontSize: 40 }} />
-                    <Typography variant="body2" sx={{ fontWeight: 600, color: '#1E3A8A', mb: 1 }}>Invoice attached ✓</Typography>
-                    <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center', mt: 2 }}>
-                      <Button size="small" variant="outlined" onClick={() => window.open(getFileUrl(form.invoice_scan_url), '_blank')}>Preview</Button>
-                      <Button size="small" color="error" onClick={() => setForm({ ...form, invoice_scan_url: '' })}>Remove</Button>
+            <Grid item xs={12} md={5} sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+              <Box>
+                <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>Document Image</Typography>
+                <Box sx={{ 
+                  p: 2, 
+                  border: errors.invoice_scan_url ? '2px dashed #d32f2f' : '2px dashed #1E3A8A', 
+                  borderRadius: 2, 
+                  bgcolor: errors.invoice_scan_url ? '#fdeded' : '#F0F4F8', 
+                  textAlign: 'center',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  minHeight: 180
+                }}>
+                  {form.invoice_scan_url ? (
+                    <Box>
+                      <AttachFile sx={{ color: '#1E3A8A', mb: 1, fontSize: 40 }} />
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: '#1E3A8A', mb: 1 }}>Document attached ✓</Typography>
+                      <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center', mt: 2 }}>
+                        <Button size="small" variant="outlined" onClick={() => window.open(getFileUrl(form.invoice_scan_url), '_blank')}>Preview</Button>
+                        <Button size="small" color="error" onClick={() => setForm({ ...form, invoice_scan_url: '' })}>Remove</Button>
+                      </Box>
                     </Box>
-                  </Box>
-                ) : (
-                  <>
-                    <Typography sx={{ mb: 0.5, fontWeight: 600, color: errors.invoice_scan_url ? '#d32f2f' : '#1E3A8A', fontSize: '0.9rem' }}>
-                      📎 Capture or Upload Invoice *
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: errors.invoice_scan_url ? '#d32f2f' : '#64748B', display: 'block', mb: 2, maxWidth: 200, mx: 'auto' }}>
-                      Take a photo with your mobile device or upload a scanned copy (PDF, JPG, PNG)
-                    </Typography>
-                    <Button variant="contained" component="label" disabled={uploading}
-                      color={errors.invoice_scan_url ? 'error' : 'primary'}
-                      sx={{ bgcolor: errors.invoice_scan_url ? '#d32f2f' : '#1E3A8A', '&:hover': { bgcolor: errors.invoice_scan_url ? '#b71c1c' : '#1e2a5a' }, textTransform: 'none', px: 3 }}>
-                      {uploading ? 'Uploading...' : 'Upload File / Take Photo'}
-                      <input type="file" hidden accept="image/*,application/pdf" capture="environment"
-                        onChange={e => handleUpload(e.target.files[0])} />
-                    </Button>
-                  </>
+                  ) : (
+                    <>
+                      <Typography sx={{ mb: 0.5, fontWeight: 600, color: errors.invoice_scan_url ? '#d32f2f' : '#1E3A8A', fontSize: '0.9rem' }}>
+                        📎 Capture or Upload Document *
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: errors.invoice_scan_url ? '#d32f2f' : '#64748B', display: 'block', mb: 2, maxWidth: 200, mx: 'auto' }}>
+                        Take a photo with your mobile device or upload a scanned copy (PDF, JPG, PNG)
+                      </Typography>
+                      <Button variant="contained" component="label" disabled={uploading}
+                        color={errors.invoice_scan_url ? 'error' : 'primary'}
+                        sx={{ bgcolor: errors.invoice_scan_url ? '#d32f2f' : '#1E3A8A', '&:hover': { bgcolor: errors.invoice_scan_url ? '#b71c1c' : '#1e2a5a' }, textTransform: 'none', px: 3 }}>
+                        {uploading ? 'Uploading...' : 'Upload File / Take Photo'}
+                        <input type="file" hidden accept="image/*,application/pdf" capture="environment"
+                          onChange={e => handleUpload(e.target.files[0], 'invoice_scan_url')} />
+                      </Button>
+                    </>
+                  )}
+                </Box>
+                {errors.invoice_scan_url && (
+                  <FormHelperText error sx={{ mt: 1, textAlign: 'center', fontWeight: 500 }}>
+                    {errors.invoice_scan_url}
+                  </FormHelperText>
                 )}
               </Box>
-              {errors.invoice_scan_url && (
-                <FormHelperText error sx={{ mt: 1, textAlign: 'center', fontWeight: 500 }}>
-                  {errors.invoice_scan_url}
-                </FormHelperText>
-              )}
+
+              <Box>
+                <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>Weight Report (Optional)</Typography>
+                <Box sx={{ 
+                  p: 2, 
+                  border: '2px dashed #94A3B8', 
+                  borderRadius: 2, 
+                  bgcolor: '#F8FAFC', 
+                  textAlign: 'center',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  minHeight: 140
+                }}>
+                  {form.weight_report_url ? (
+                    <Box>
+                      <AttachFile sx={{ color: '#475569', mb: 1, fontSize: 32 }} />
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: '#475569', mb: 1 }}>Report attached ✓</Typography>
+                      <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center', mt: 2 }}>
+                        <Button size="small" variant="outlined" onClick={() => window.open(getFileUrl(form.weight_report_url), '_blank')}>Preview</Button>
+                        <Button size="small" color="error" onClick={() => setForm({ ...form, weight_report_url: '' })}>Remove</Button>
+                      </Box>
+                    </Box>
+                  ) : (
+                    <>
+                      <Typography sx={{ mb: 0.5, fontWeight: 600, color: '#475569', fontSize: '0.85rem' }}>
+                        📎 Upload Weight Report
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: '#64748B', display: 'block', mb: 2, maxWidth: 200, mx: 'auto' }}>
+                        Optional: Upload weighbridge slip
+                      </Typography>
+                      <Button variant="outlined" component="label" disabled={uploading}
+                        sx={{ color: '#475569', borderColor: '#CBD5E1', textTransform: 'none', px: 3 }}>
+                        {uploading ? 'Uploading...' : 'Upload File / Take Photo'}
+                        <input type="file" hidden accept="image/*,application/pdf" capture="environment"
+                          onChange={e => handleUpload(e.target.files[0], 'weight_report_url')} />
+                      </Button>
+                    </>
+                  )}
+                </Box>
+              </Box>
             </Grid>
           </Grid>
         </DialogContent>

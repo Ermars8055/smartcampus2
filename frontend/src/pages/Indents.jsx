@@ -575,11 +575,11 @@ export default function Indents() {
     }
   };
 
-  const rejectIndent = async (id, remarks) => {
+  const rejectIndent = async (id, indentNo, remarks) => {
     try {
       const res = await api.post(`/api/indents/${id}/reject`, { remarks });
       load();
-      showMessage(res.data.message || "Indent rejected successfully", "Success", "success");
+      showMessage(`${indentNo} has been rejected.`, "Indent Rejected", "info");
     } catch (err) {
       showMessage(err.response?.data?.detail || "Error rejecting indent", "Error", "error");
     }
@@ -940,7 +940,7 @@ export default function Indents() {
         >
           {['Awaiting Approval', 'Approved', 'Rejected', 'Partially Issued', 'Issued', 'Closed', 'All'].map(s => {
             const count = s === 'All' ? filteredIndentsBase.length : filteredIndentsBase.filter(i => i.status === s).length;
-            if (s !== 'All' && count === 0 && !['Awaiting Approval', 'Approved', 'Partially Issued'].includes(s)) return null;
+            if (s !== 'All' && count === 0 && !['Awaiting Approval', 'Approved', 'Rejected', 'Partially Issued'].includes(s)) return null;
             return (
               <Tab
                 key={s}
@@ -990,7 +990,7 @@ export default function Indents() {
                     </Tooltip>
                     <Tooltip title="Reject">
                       <span><IconButton size="small" color="error" disabled={ind.status !== 'Awaiting Approval' || !hasAction('indents', 'can_reject') || !ind.can_user_approve}
-                        onClick={() => showConfirm('Reject Indent?', `Are you sure you want to reject ${ind.indent_number}?`, 'Yes, Reject', 'error', (r) => rejectIndent(ind.id, r), true)}>
+                        onClick={() => showConfirm('Reject Indent?', `Are you sure you want to reject ${ind.indent_number}?`, 'Yes, Reject', 'error', (r) => rejectIndent(ind.id, ind.indent_number, r), true)}>
                         <Cancel fontSize="small" />
                       </IconButton></span>
                     </Tooltip>
@@ -1086,7 +1086,7 @@ export default function Indents() {
                         </Tooltip>
                         <Tooltip title="Reject">
                           <span><IconButton size="small" color="error" disabled={ind.status !== 'Awaiting Approval' || !hasAction('indents', 'can_reject') || !ind.can_user_approve}
-                            onClick={() => showConfirm('Reject Indent?', `Are you sure you want to reject ${ind.indent_number}?`, 'Yes, Reject', 'error', (r) => rejectIndent(ind.id, r), true)}>
+                            onClick={() => showConfirm('Reject Indent?', `Are you sure you want to reject ${ind.indent_number}?`, 'Yes, Reject', 'error', (r) => rejectIndent(ind.id, ind.indent_number, r), true)}>
                             <Cancel fontSize="small" />
                           </IconButton></span>
                         </Tooltip>

@@ -671,7 +671,9 @@ class GateEntryBase(BaseModel):
     invoice_number: Optional[str] = None
     invoice_date: Optional[date] = None
     invoice_amount: Optional[float] = 0
-    reference_document_type: str = "Invoice"
+    dc_number: Optional[str] = None
+    dc_date: Optional[date] = None
+    dc_scan_url: Optional[str] = None
     tare_weight: Optional[float] = None
     gross_weight: Optional[float] = None
     net_weight: Optional[float] = None
@@ -698,7 +700,9 @@ class GateEntryOut(GateEntryBase):
     project_name: Optional[str] = None
     material_names: Optional[str] = None
     material_qtys: Optional[str] = None
-    reference_document_type: Optional[str] = "Invoice"
+    dc_number: Optional[str] = None
+    dc_date: Optional[date] = None
+    dc_scan_url: Optional[str] = None
     tare_weight: Optional[float] = None
     gross_weight: Optional[float] = None
     net_weight: Optional[float] = None

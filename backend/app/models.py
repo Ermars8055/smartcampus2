@@ -665,11 +665,13 @@ class GateEntry(Base):
     delivery_person_name = Column(String(255))
     entry_type = Column(String(50), default=GateEntryType.VEHICLE.value)
     photo_url = Column(String(500))
-    reference_document_type = Column(String(50), default="Invoice")
     invoice_scan_url = Column(String(500))  # Scanned invoice attachment
     invoice_number = Column(String(100))
     invoice_date = Column(Date)
     invoice_amount = Column(Float, default=0)
+    dc_scan_url = Column(String(500))  # Scanned delivery challan attachment
+    dc_number = Column(String(100))
+    dc_date = Column(Date)
     tare_weight = Column(Float, nullable=True)
     gross_weight = Column(Float, nullable=True)
     net_weight = Column(Float, nullable=True)

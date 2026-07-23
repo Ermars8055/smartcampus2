@@ -20,6 +20,7 @@ export default function WriteOffs() {
   const [writeOffs, setWriteOffs] = useState([]);
   const [warehouses, setWarehouses] = useState([]);
   const [materials, setMaterials] = useState([]);
+  const [departments, setDepartments] = useState([]);
 
   // Modal state
   const [createModal, setCreateModal] = useState({
@@ -29,21 +30,27 @@ export default function WriteOffs() {
     warehouse_id: '',
     reason: '',
     write_off_type: '',
+    department_name: '',
     attachment_url: '',
-    items: [{ material_id: '', quantity: 0 }]
+    certification_url: '',
+    items: [{ material_id: '', quantity: 0, has_buyback: false, buyback_amount: 0 }]
   });
   const [viewModal, setViewModal] = useState({ open: false, writeOff: null });
   const [errors, setErrors] = useState({});
   const [uploading, setUploading] = useState(false);
 
-  const handleUpload = async (file) => {
+  const handleUpload = async (file, type = 'attachment') => {
     if (!file) return;
     setUploading(true);
     try {
       const fd = new FormData();
       fd.append('file', file);
       const res = await api.post('/api/upload?folder=write_offs', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-      setCreateModal(prev => ({ ...prev, attachment_url: res.data.url }));
+      if (type === 'attachment') {
+        setCreateModal(prev => ({ ...prev, attachment_url: res.data.url }));
+      } else {
+        setCreateModal(prev => ({ ...prev, certification_url: res.data.url }));
+      }
     } catch (err) {
       showMessage('Upload failed: ' + (err.response?.data?.detail || err.message), 'Error', 'error');
     }
@@ -56,6 +63,8 @@ export default function WriteOffs() {
       setWriteOffs(res.data);
       const wRes = await api.get('/api/warehouses');
       setWarehouses(wRes.data);
+      const dRes = await api.get('/api/departments');
+      setDepartments(dRes.data);
       const mRes = await api.get('/api/materials', { params: { limit: 10000 } });
       setMaterials(mRes.data.items || []);
     } catch (e) { console.error(e); }
@@ -73,8 +82,10 @@ export default function WriteOffs() {
       warehouse_id: '',
       reason: '',
       write_off_type: '',
+      department_name: '',
       attachment_url: '',
-      items: [{ material_id: '', quantity: 0 }]
+      certification_url: '',
+      items: [{ material_id: '', quantity: 0, has_buyback: false, buyback_amount: 0 }]
     });
     setErrors({});
   };
@@ -101,11 +112,15 @@ export default function WriteOffs() {
         date: createModal.date,
         reason: createModal.reason,
         write_off_type: createModal.write_off_type,
+        department_name: createModal.department_name,
         attachment_url: createModal.attachment_url,
+        certification_url: createModal.certification_url,
         items: validItems.map(it => ({
           material_id: it.material_id,
           warehouse_id: createModal.warehouse_id,
-          quantity: parseFloat(it.quantity)
+          quantity: parseFloat(it.quantity),
+          has_buyback: it.has_buyback,
+          buyback_amount: parseFloat(it.buyback_amount || 0)
         }))
       };
       let res;
@@ -132,7 +147,7 @@ export default function WriteOffs() {
   const addItem = () => {
     setCreateModal({
       ...createModal,
-      items: [...createModal.items, { material_id: '', quantity: 0 }]
+      items: [...createModal.items, { material_id: '', quantity: 0, has_buyback: false, buyback_amount: 0 }]
     });
   };
 
@@ -252,8 +267,15 @@ export default function WriteOffs() {
                                 warehouse_id: wo.items[0]?.warehouse_id || '',
                                 reason: wo.reason,
                                 write_off_type: wo.write_off_type,
+                                department_name: wo.department_name || '',
                                 attachment_url: wo.attachment_url,
-                                items: wo.items.map(it => ({ material_id: it.material_id, quantity: it.quantity }))
+                                certification_url: wo.certification_url,
+                                items: wo.items.map(it => ({ 
+                                  material_id: it.material_id, 
+                                  quantity: it.quantity,
+                                  has_buyback: it.has_buyback || false,
+                                  buyback_amount: it.buyback_amount || 0
+                                }))
                               });
                               setErrors({});
                             }}>
@@ -310,7 +332,7 @@ export default function WriteOffs() {
         </DialogTitle>
         <DialogContent sx={{ p: 3 }}>
           <Grid container spacing={2} sx={{ mb: 3, mt: 0.5 }}>
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={12} sm={3}>
               <DatePicker
                 label="Date *"
                 value={createModal.date ? dayjs(createModal.date) : null}
@@ -325,7 +347,7 @@ export default function WriteOffs() {
                 }}
               />
             </Grid>
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={12} sm={3}>
               <FormControl id="field-warehouse_id" fullWidth size="small" required error={!!errors.warehouse_id}>
                 <InputLabel>Store</InputLabel>
                 <Select
@@ -339,7 +361,7 @@ export default function WriteOffs() {
                 {errors.warehouse_id && <Typography color="error" variant="caption" sx={{ ml: 2, mt: 0.5 }}>{errors.warehouse_id}</Typography>}
               </FormControl>
             </Grid>
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={12} sm={3}>
               <FormControl id="field-write_off_type" fullWidth size="small" required error={!!errors.write_off_type}>
                 <InputLabel>Type</InputLabel>
                 <Select
@@ -356,7 +378,20 @@ export default function WriteOffs() {
                 {errors.write_off_type && <Typography color="error" variant="caption" sx={{ ml: 2, mt: 0.5 }}>{errors.write_off_type}</Typography>}
               </FormControl>
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={3}>
+              <FormControl id="field-department_name" fullWidth size="small">
+                <InputLabel>Department</InputLabel>
+                <Select
+                  label="Department"
+                  value={createModal.department_name}
+                  onChange={e => setCreateModal({ ...createModal, department_name: e.target.value })}
+                >
+                  <MenuItem value=""><em>None</em></MenuItem>
+                  {departments.map(d => <MenuItem key={d.id} value={d.name}>{d.name}</MenuItem>)}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={12}>
               <TextField
                 id="field-reason" fullWidth size="small" label="Reason" required
                 value={createModal.reason}
@@ -373,8 +408,21 @@ export default function WriteOffs() {
                   onChange={e => setCreateModal({ ...createModal, attachment_url: e.target.value })}
                 />
                 <Button variant="outlined" component="label" disabled={uploading} sx={{ whiteSpace: 'nowrap' }}>
-                  {uploading ? 'Uploading...' : 'Upload'}
-                  <input type="file" hidden accept=".pdf,.jpg,.jpeg,.png,.webp" onChange={e => handleUpload(e.target.files[0])} />
+                  {uploading ? '...' : 'Upload'}
+                  <input type="file" hidden accept=".pdf,.jpg,.jpeg,.png,.webp" onChange={e => handleUpload(e.target.files[0], 'attachment')} />
+                </Button>
+              </Box>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <TextField
+                  fullWidth size="small" label="Certification Document URL"
+                  value={createModal.certification_url || ''}
+                  onChange={e => setCreateModal({ ...createModal, certification_url: e.target.value })}
+                />
+                <Button variant="outlined" component="label" disabled={uploading} sx={{ whiteSpace: 'nowrap' }}>
+                  {uploading ? '...' : 'Upload'}
+                  <input type="file" hidden accept=".pdf,.jpg,.jpeg,.png,.webp" onChange={e => handleUpload(e.target.files[0], 'certification')} />
                 </Button>
               </Box>
             </Grid>
@@ -390,8 +438,9 @@ export default function WriteOffs() {
             <Table size="small">
               <TableHead sx={{ bgcolor: '#F8FAFC' }}>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 700, width: '55%' }}>MATERIAL</TableCell>
-                  <TableCell sx={{ fontWeight: 700, width: '40%' }}>QTY</TableCell>
+                  <TableCell sx={{ fontWeight: 700, width: '40%' }}>MATERIAL</TableCell>
+                  <TableCell sx={{ fontWeight: 700, width: '30%' }}>QTY</TableCell>
+                  <TableCell sx={{ fontWeight: 700, width: '25%' }}>BUY-BACK</TableCell>
                   <TableCell align="center" sx={{ width: '5%' }}></TableCell>
                 </TableRow>
               </TableHead>
@@ -438,6 +487,23 @@ export default function WriteOffs() {
                           ) : null
                         }}
                       />
+                    </TableCell>
+                    <TableCell sx={{ verticalAlign: 'top', pt: 2 }}>
+                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                         <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.85rem' }}>
+                           <input type="checkbox" checked={item.has_buyback} onChange={e => updateItem(idx, 'has_buyback', e.target.checked)} />
+                           Include Buy-Back
+                         </label>
+                         {item.has_buyback && (
+                           <TextField
+                             size="small"
+                             label="Amount (₹)"
+                             type="number"
+                             value={item.buyback_amount}
+                             onChange={e => updateItem(idx, 'buyback_amount', e.target.value)}
+                           />
+                         )}
+                       </Box>
                     </TableCell>
                     <TableCell align="center" sx={{ verticalAlign: 'top', pt: 2 }}>
                       <IconButton size="small" color="error" onClick={() => removeItem(idx)} disabled={createModal.items.length === 1} sx={{ mt: 0.5 }}>
@@ -507,16 +573,30 @@ export default function WriteOffs() {
                   <Typography variant="caption" color="text.secondary">Approval Level</Typography>
                   <Typography variant="body2" sx={{ fontWeight: 600 }}>Level {viewModal.writeOff.current_approval_level}</Typography>
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12} sm={3}>
+                  <Typography variant="caption" color="text.secondary">Department</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>{viewModal.writeOff.department_name || '-'}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={4}>
                   <Typography variant="caption" color="text.secondary">Reason</Typography>
                   <Typography variant="body2">{viewModal.writeOff.reason}</Typography>
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12} sm={2}>
                   <Typography variant="caption" color="text.secondary">Attachment</Typography>
                   <Typography variant="body2">
                     {viewModal.writeOff.attachment_url ? (
                       <a href={getFileUrl(viewModal.writeOff.attachment_url)} target="_blank" rel="noreferrer" style={{ color: '#2563EB', textDecoration: 'none' }}>
                         View Attachment
+                      </a>
+                    ) : '-'}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} sm={3}>
+                  <Typography variant="caption" color="text.secondary">Certification</Typography>
+                  <Typography variant="body2">
+                    {viewModal.writeOff.certification_url ? (
+                      <a href={getFileUrl(viewModal.writeOff.certification_url)} target="_blank" rel="noreferrer" style={{ color: '#2563EB', textDecoration: 'none' }}>
+                        View Certification
                       </a>
                     ) : '-'}
                   </Typography>
@@ -533,6 +613,7 @@ export default function WriteOffs() {
                       <TableCell align="center" sx={{ fontWeight: 700 }}>UOM</TableCell>
                       <TableCell align="center" sx={{ fontWeight: 700 }}>QTY</TableCell>
                       <TableCell align="right" sx={{ fontWeight: 700 }}>RATE</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 700 }}>BUY-BACK (₹)</TableCell>
                       <TableCell align="right" sx={{ fontWeight: 700 }}>AMOUNT</TableCell>
                     </TableRow>
                   </TableHead>
@@ -547,11 +628,16 @@ export default function WriteOffs() {
                         <TableCell align="center">{item.uom_name || 'unit'}</TableCell>
                         <TableCell align="center"><Typography variant="body2" sx={{ fontWeight: 700 }}>{item.quantity}</Typography></TableCell>
                         <TableCell align="right">₹{item.rate?.toFixed(2) || '0.00'}</TableCell>
+                        <TableCell align="right">
+                          {item.has_buyback ? (
+                            <Typography variant="body2" color="primary.main" sx={{ fontWeight: 700 }}>₹{item.buyback_amount?.toFixed(2) || '0.00'}</Typography>
+                          ) : '-'}
+                        </TableCell>
                         <TableCell align="right">₹{item.amount?.toFixed(2) || '0.00'}</TableCell>
                       </TableRow>
                     ))}
                     <TableRow>
-                      <TableCell colSpan={5} align="right" sx={{ fontWeight: 800 }}>Grand Total:</TableCell>
+                      <TableCell colSpan={6} align="right" sx={{ fontWeight: 800 }}>Grand Total:</TableCell>
                       <TableCell align="right" sx={{ fontWeight: 800, color: '#10B981' }}>
                         ₹{viewModal.writeOff.items.reduce((sum, item) => sum + (item.amount || 0), 0).toFixed(2)}
                       </TableCell>

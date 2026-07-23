@@ -490,7 +490,9 @@ class Material(Base):
     storage_type = Column(String(100), default="General")
     hsn_code = Column(String(20))
     gst_rate = Column(Float, default=0)
-    material_type = Column(String(50), default="Consumable") # Consumable, Non-Consumable
+    material_type = Column(String(50), default="Consumable") # Consumable, Non-Consumable, Furniture, Equipment
+    is_biomedical = Column(Boolean, default=False)
+    requires_installation = Column(Boolean, default=False)
     warehouse_id = Column(Integer, ForeignKey("warehouses.id"), nullable=True)
     description = Column(Text)
     is_active = Column(Boolean, default=True)
@@ -503,6 +505,38 @@ class Material(Base):
     warehouse = relationship("Warehouse")
     preferred_vendor = relationship("Vendor", foreign_keys=[preferred_vendor_id])
     __table_args__ = (UniqueConstraint("site_id", "code", name="uq_mat_code_per_site"),)
+
+
+class EquipmentItem(Base):
+    __tablename__ = "equipment_items"
+    id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
+    site_id = Column(Integer, ForeignKey("sites.id", ondelete="CASCADE"), nullable=False)
+    equipment_code = Column(String(50), nullable=False, index=True)
+    material_id = Column(Integer, ForeignKey("materials.id", ondelete="CASCADE"), nullable=False)
+    grn_id = Column(Integer, ForeignKey("grn.id", ondelete="SET NULL"), nullable=True)
+    grn_item_id = Column(Integer, ForeignKey("grn_items.id", ondelete="SET NULL"), nullable=True)
+    serial_number = Column(String(100), nullable=True, index=True)
+    serial_number_status = Column(String(50), default="Pending Update") # "Captured", "Pending Update"
+    is_biomedical = Column(Boolean, default=False)
+    requires_installation = Column(Boolean, default=False)
+    installation_status = Column(String(50), default="Not Required") # "Not Required", "Pending Installation", "Installed"
+    installation_date = Column(DateTime, nullable=True)
+    installation_report_url = Column(String(500), nullable=True)
+    installation_remarks = Column(Text, nullable=True)
+    warehouse_id = Column(Integer, ForeignKey("warehouses.id"), nullable=True)
+    project_id = Column(Integer, ForeignKey("projects.id"), nullable=True)
+    status = Column(String(50), default="In Store") # "In Store", "Pending Installation", "Operational", "Written Off"
+    created_at = Column(DateTime, default=_get_now)
+    updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)
+
+    material = relationship("Material")
+    grn = relationship("GRN")
+    grn_item = relationship("GRNItem")
+    warehouse = relationship("Warehouse")
+    project = relationship("Project")
+    __table_args__ = (UniqueConstraint("tenant_id", "equipment_code", name="uq_equipment_code_per_tenant"),)
+
 
 class Vendor(Base):
     __tablename__ = "vendors"
@@ -1557,10 +1591,12 @@ class WriteOff(Base):
     tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
     site_id = Column(Integer, ForeignKey("sites.id", ondelete="CASCADE"), nullable=False)
     write_off_number = Column(String(50), nullable=False, index=True)
+    department_name = Column(String(255), nullable=True)
     date = Column(Date, nullable=False)
     reason = Column(Text, nullable=False)
     write_off_type = Column(String(100), nullable=True)
     attachment_url = Column(String(500), nullable=True)
+    certification_url = Column(String(500), nullable=True)
     status = Column(String(50), default="Draft")
     current_approval_level = Column(Integer, default=1)
     created_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
@@ -1587,6 +1623,8 @@ class WriteOffItem(Base):
     quantity = Column(Float, nullable=False)
     rate = Column(Float, default=0)
     amount = Column(Float, default=0)
+    has_buyback = Column(Boolean, default=False)
+    buyback_amount = Column(Float, nullable=True, default=0)
     
     write_off = relationship("WriteOff", back_populates="items")
     material = relationship("Material")

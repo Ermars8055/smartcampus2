@@ -1087,6 +1087,8 @@ def create_write_off(
         reason=data.reason,
         write_off_type=data.write_off_type,
         attachment_url=data.attachment_url,
+        department_name=data.department_name,
+        certification_url=data.certification_url,
         status=WriteOffStatus.DRAFT.value,
         created_by_id=current_user.id
     )
@@ -1119,7 +1121,9 @@ def create_write_off(
             warehouse_id=wh_id,
             quantity=item_data.quantity,
             rate=rate,
-            amount=amount
+            amount=amount,
+            has_buyback=item_data.has_buyback,
+            buyback_amount=item_data.buyback_amount
         )
         db.add(wo_item)
         
@@ -1145,6 +1149,8 @@ def update_write_off(
     wo.reason = data.reason
     wo.write_off_type = data.write_off_type
     wo.attachment_url = data.attachment_url
+    wo.department_name = data.department_name
+    wo.certification_url = data.certification_url
     
     # Clear existing items
     db.query(WriteOffItem).filter(WriteOffItem.write_off_id == wo.id).delete()
@@ -1175,7 +1181,9 @@ def update_write_off(
             warehouse_id=wh_id,
             quantity=item_data.quantity,
             rate=rate,
-            amount=amount
+            amount=amount,
+            has_buyback=item_data.has_buyback,
+            buyback_amount=item_data.buyback_amount
         )
         db.add(wo_item)
         

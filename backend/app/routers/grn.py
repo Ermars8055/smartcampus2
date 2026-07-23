@@ -7,7 +7,7 @@ from typing import Optional
 from app.database import get_db
 from app.models import (
     GRN, GRNItem, PurchaseOrder, PurchaseOrderItem, GateEntry,
-    CurrentStock, StockLedger, Material, Warehouse, User, AuditLog
+    CurrentStock, StockLedger, Material, Warehouse, User, AuditLog, EquipmentItem
 )
 from app.schemas import GRNCreate, GRNOut, GRNItemOut
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
@@ -241,6 +241,7 @@ def create_grn(
                 remarks=item_data.remarks
             )
             db.add(grn_item)
+            db.flush()
 
             if item_data.accepted_quantity > 0:
                 update_stock(
@@ -257,6 +258,39 @@ def create_grn(
                     tenant_id=tenant_id,
                     site_id=site_id
                 )
+
+                # Create EquipmentItem unit records for Equipment materials
+                mat_obj = db.query(Material).filter(Material.id == mat_id).first()
+                if mat_obj and (mat_obj.material_type == "Equipment" or getattr(item_data, "serial_numbers", None)):
+                    serials = getattr(item_data, "serial_numbers", None) or []
+                    qty_int = int(round(item_data.accepted_quantity))
+                    for i in range(qty_int):
+                        sn = serials[i].strip() if i < len(serials) and serials[i] and serials[i].strip() else None
+                        sn_status = "Captured" if sn else "Pending Update"
+                        is_bio = getattr(mat_obj, "is_biomedical", False) or False
+                        req_inst = getattr(mat_obj, "requires_installation", False) or False
+                        inst_status = "Pending Installation" if (is_bio or req_inst) else "Not Required"
+                        eq_status = "Pending Installation" if inst_status == "Pending Installation" else "In Store"
+
+                        eq_code = get_next_number(db, tenant_id, site_id, "EQP", "EQP")
+                        eq_item = EquipmentItem(
+                            tenant_id=tenant_id,
+                            site_id=site_id,
+                            equipment_code=eq_code,
+                            material_id=mat_id,
+                            grn_id=grn.id,
+                            grn_item_id=grn_item.id,
+                            serial_number=sn,
+                            serial_number_status=sn_status,
+                            is_biomedical=is_bio,
+                            requires_installation=req_inst,
+                            installation_status=inst_status,
+                            warehouse_id=data.warehouse_id,
+                            project_id=project_id,
+                            status=eq_status
+                        )
+                        db.add(eq_item)
+
 
         grn.completed_at = datetime.utcnow()
 

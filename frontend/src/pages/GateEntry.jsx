@@ -328,7 +328,44 @@ export default function GateEntry() {
         </DialogTitle>
                 <DialogContent sx={{ px: 4, py: 2 }}>
           <Grid container spacing={3}>
-            {/* Invoice Section (Left Half) */}
+            {/* DC Section (Left Half) */}
+            <Grid item xs={12} md={6}>
+              <Box sx={{ p: 2, border: '1px solid #E2E8F0', borderRadius: 2, bgcolor: '#F8FAFC', height: '100%' }}>
+                <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
+                  Delivery Challan Details {(form.dc_number || form.dc_date || form.dc_scan_url) ? <span style={{color: '#d32f2f'}}>*</span> : ''}
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                    <TextField fullWidth label="DC Number *" value={form.dc_number} onChange={e => { setForm({ ...form, dc_number: e.target.value }); setErrors(prev => ({ ...prev, dc_number: null })); }} error={!!errors.dc_number} helperText={errors.dc_number} sx={{ bgcolor: 'white' }} />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField fullWidth label="DC Date *" type="date" value={form.dc_date} onChange={e => { setForm({ ...form, dc_date: e.target.value }); setErrors(prev => ({ ...prev, dc_date: null })); }} InputLabelProps={{ shrink: true }} inputProps={{ max: new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0] }} error={!!errors.dc_date} helperText={errors.dc_date} sx={{ bgcolor: 'white' }} />
+                  </Grid>
+                  <Grid item xs={12}>
+                    {form.dc_scan_url ? (
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 1, border: '1px solid #E2E8F0', borderRadius: 1, bgcolor: 'white' }}>
+                        <AttachFile sx={{ color: '#1E3A8A' }} />
+                        <Typography variant="body2" sx={{ flexGrow: 1, fontWeight: 600, color: '#1E3A8A' }}>DC attached ✓</Typography>
+                        <Button size="small" variant="outlined" onClick={() => window.open(getFileUrl(form.dc_scan_url), '_blank')}>View</Button>
+                        <Button size="small" color="error" onClick={() => setForm({ ...form, dc_scan_url: '' })}>Remove</Button>
+                      </Box>
+                    ) : (
+                      <Button fullWidth variant="outlined" component="label" disabled={uploading}
+                        color={errors.dc_scan_url ? 'error' : 'primary'}
+                        sx={{ py: 1.5, borderStyle: 'dashed', borderWidth: 2, bgcolor: 'white', display: 'flex', flexDirection: 'column' }}>
+                        <Typography sx={{ fontWeight: 600, fontSize: '0.875rem' }}>{uploading ? 'Uploading...' : '📎 Upload Delivery Challan'}</Typography>
+                        <Typography variant="caption" sx={{ opacity: 0.7, fontSize: '0.7rem', mt: 0.5, textTransform: 'none' }}>(PDF, PNG, JPG allowed)</Typography>
+                        <input type="file" hidden accept="image/*,application/pdf" capture="environment"
+                          onChange={e => handleUpload(e.target.files[0], 'dc_scan_url')} />
+                      </Button>
+                    )}
+                    {errors.dc_scan_url && <FormHelperText error>{errors.dc_scan_url}</FormHelperText>}
+                  </Grid>
+                </Grid>
+              </Box>
+            </Grid>
+
+            {/* Invoice Section (Right Half) */}
             <Grid item xs={12} md={6}>
               <Box sx={{ p: 2, border: '1px solid #E2E8F0', borderRadius: 2, bgcolor: '#F8FAFC', height: '100%' }}>
                 <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
@@ -368,52 +405,15 @@ export default function GateEntry() {
               </Box>
             </Grid>
 
-            {/* DC Section (Right Half) */}
-            <Grid item xs={12} md={6}>
-              <Box sx={{ p: 2, border: '1px solid #E2E8F0', borderRadius: 2, bgcolor: '#F8FAFC', height: '100%' }}>
-                <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
-                  Delivery Challan Details {(form.dc_number || form.dc_date || form.dc_scan_url) ? <span style={{color: '#d32f2f'}}>*</span> : ''}
-                </Typography>
-                <Grid container spacing={2}>
-                  <Grid item xs={12}>
-                    <TextField fullWidth label="DC Number *" value={form.dc_number} onChange={e => { setForm({ ...form, dc_number: e.target.value }); setErrors(prev => ({ ...prev, dc_number: null })); }} error={!!errors.dc_number} helperText={errors.dc_number} sx={{ bgcolor: 'white' }} />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <TextField fullWidth label="DC Date *" type="date" value={form.dc_date} onChange={e => { setForm({ ...form, dc_date: e.target.value }); setErrors(prev => ({ ...prev, dc_date: null })); }} InputLabelProps={{ shrink: true }} inputProps={{ max: new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0] }} error={!!errors.dc_date} helperText={errors.dc_date} sx={{ bgcolor: 'white' }} />
-                  </Grid>
-                  <Grid item xs={12}>
-                    {form.dc_scan_url ? (
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 1, border: '1px solid #E2E8F0', borderRadius: 1, bgcolor: 'white' }}>
-                        <AttachFile sx={{ color: '#1E3A8A' }} />
-                        <Typography variant="body2" sx={{ flexGrow: 1, fontWeight: 600, color: '#1E3A8A' }}>DC attached ✓</Typography>
-                        <Button size="small" variant="outlined" onClick={() => window.open(getFileUrl(form.dc_scan_url), '_blank')}>View</Button>
-                        <Button size="small" color="error" onClick={() => setForm({ ...form, dc_scan_url: '' })}>Remove</Button>
-                      </Box>
-                    ) : (
-                      <Button fullWidth variant="outlined" component="label" disabled={uploading}
-                        color={errors.dc_scan_url ? 'error' : 'primary'}
-                        sx={{ py: 1.5, borderStyle: 'dashed', borderWidth: 2, bgcolor: 'white', display: 'flex', flexDirection: 'column' }}>
-                        <Typography sx={{ fontWeight: 600, fontSize: '0.875rem' }}>{uploading ? 'Uploading...' : '📎 Upload Delivery Challan'}</Typography>
-                        <Typography variant="caption" sx={{ opacity: 0.7, fontSize: '0.7rem', mt: 0.5, textTransform: 'none' }}>(PDF, PNG, JPG allowed)</Typography>
-                        <input type="file" hidden accept="image/*,application/pdf" capture="environment"
-                          onChange={e => handleUpload(e.target.files[0], 'dc_scan_url')} />
-                      </Button>
-                    )}
-                    {errors.dc_scan_url && <FormHelperText error>{errors.dc_scan_url}</FormHelperText>}
-                  </Grid>
-                </Grid>
-              </Box>
-            </Grid>
-
             {/* Delivery Details */}
             <Grid item xs={12}>
               <Typography variant="subtitle2" sx={{ mt: 1, mb: 2, fontWeight: 600 }}>Delivery Details</Typography>
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={4}>
-                  <TextField fullWidth label="Vehicle Number" value={form.vehicle_number} onChange={e => setForm({ ...form, vehicle_number: e.target.value })} />
+                  <TextField fullWidth label="Delivery Person Name *" value={form.delivery_person_name} onChange={e => { setForm({ ...form, delivery_person_name: e.target.value }); setErrors(prev => ({ ...prev, delivery_person_name: null })); }} error={!!errors.delivery_person_name} helperText={errors.delivery_person_name} />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <TextField fullWidth label="Delivery Person Name *" value={form.delivery_person_name} onChange={e => { setForm({ ...form, delivery_person_name: e.target.value }); setErrors(prev => ({ ...prev, delivery_person_name: null })); }} error={!!errors.delivery_person_name} helperText={errors.delivery_person_name} />
+                  <TextField fullWidth label="Vehicle Number" value={form.vehicle_number} onChange={e => setForm({ ...form, vehicle_number: e.target.value })} />
                 </Grid>
                 <Grid item xs={12} sm={4}>
                   <TextField inputProps={{ maxLength: 255 }} fullWidth label="Remarks" value={form.remarks} onChange={e => setForm({ ...form, remarks: e.target.value })} placeholder="Any additional notes..." />

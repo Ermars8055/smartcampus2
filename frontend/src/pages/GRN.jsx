@@ -600,17 +600,19 @@ export default function GRNPage() {
                 </TableRow></TableHead>
                 <TableBody>
                   {form.items.map((item, i) => {
-                    const hasQuantityError = !!itemErrors[i]?.received_quantity || !!itemErrors[i]?.accepted_quantity || !!itemErrors[i]?.rejected_quantity;
+                    const selectedMaterial = materials.find(m => m.id === item.material_id);
+                    const isEquipment = selectedMaterial?.material_type === 'Equipment';
+
                     return (
                     <React.Fragment key={i}>
-                      <TableRow id={`item-row-${i}`} sx={{ '& td': { verticalAlign: 'top', pt: 1.5, borderBottom: hasQuantityError ? 'none' : undefined } }}>
+                      <TableRow id={`item-row-${i}`} sx={{ '& td': { verticalAlign: 'top', pt: 1.5, borderBottom: (hasQuantityError || (isEquipment && item.accepted_quantity > 0)) ? 'none' : undefined } }}>
                         <TableCell sx={{ minWidth: 250 }}>
                           {form.receipt_type === 'Direct Invoice' ? (
                           <Autocomplete
                             size="small"
                             options={materials}
                             getOptionLabel={(option) => `${option.code ? option.code + ' - ' : ''}${option.name || ''}`}
-                            value={materials.find(m => m.id === item.material_id) || null}
+                            value={selectedMaterial || null}
                             onChange={(e, newValue) => {
                               const items = [...form.items];
                               items[i].material_id = newValue ? newValue.id : '';
@@ -623,15 +625,16 @@ export default function GRNPage() {
                           />
                         ) : (
                           <>
-                            <Typography variant="body2">{item.material_name || materials.find(m => m.id === item.material_id)?.name}</Typography>
-                            {(item.material_code || materials.find(m => m.id === item.material_id)?.code) && (
-                              <Typography variant="caption" color="textSecondary">{item.material_code || materials.find(m => m.id === item.material_id)?.code}</Typography>
+                            <Typography variant="body2">{item.material_name || selectedMaterial?.name}</Typography>
+                            {(item.material_code || selectedMaterial?.code) && (
+                              <Typography variant="caption" color="textSecondary">{item.material_code || selectedMaterial?.code}</Typography>
                             )}
+                            {isEquipment && <Chip label="Equipment" size="small" color="warning" sx={{ ml: 1, height: 18, fontSize: '0.65rem' }} />}
                           </>
                         )}
                       </TableCell>
                       <TableCell sx={{ color: '#64748B', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
-                        {item.uom_name || materials.find(m => m.id === item.material_id)?.uom_name || '-'}
+                        {item.uom_name || selectedMaterial?.uom_name || '-'}
                       </TableCell>
                       {form.receipt_type === 'PO-Based' && <TableCell align="right">{item.ordered_quantity}</TableCell>}
                       <TableCell align="right">
@@ -684,6 +687,41 @@ export default function GRNPage() {
                         </TableCell>
                       )}
                     </TableRow>
+                    {isEquipment && item.accepted_quantity > 0 && (
+                      <TableRow>
+                        <TableCell colSpan={form.receipt_type === 'PO-Based' ? 7 : 7} sx={{ bgcolor: '#F8FAFC', py: 1.5, px: 2, borderBottom: '1px solid #E2E8F0' }}>
+                          <Box sx={{ p: 1.5, bgcolor: '#FFFFFF', borderRadius: 1.5, border: '1px solid #CBD5E1' }}>
+                            <Typography variant="caption" sx={{ fontWeight: 700, color: '#334155', display: 'block', mb: 0.5 }}>
+                              📦 Serial Numbers for {selectedMaterial?.name || 'Equipment'} ({item.accepted_quantity} unit{item.accepted_quantity > 1 ? 's' : ''})
+                            </Typography>
+                            <Typography variant="caption" color="textSecondary" sx={{ display: 'block', mb: 1 }}>
+                              Optionally enter serial numbers if visible on outer packaging. If visible only after unboxing, leave blank to update later.
+                            </Typography>
+                            <Grid container spacing={1}>
+                              {Array.from({ length: Math.min(item.accepted_quantity, 50) }).map((_, unitIdx) => (
+                                <Grid item xs={12} sm={6} md={4} key={unitIdx}>
+                                  <TextField
+                                    size="small"
+                                    fullWidth
+                                    label={`Unit ${unitIdx + 1} Serial No.`}
+                                    placeholder="Optional serial number"
+                                    value={(item.serial_numbers && item.serial_numbers[unitIdx]) || ''}
+                                    onChange={e => {
+                                      const items = [...form.items];
+                                      const sns = [...(items[i].serial_numbers || [])];
+                                      sns[unitIdx] = e.target.value;
+                                      items[i].serial_numbers = sns;
+                                      setForm({ ...form, items });
+                                    }}
+                                  />
+                                </Grid>
+                              ))}
+                            </Grid>
+                          </Box>
+                        </TableCell>
+                      </TableRow>
+                    )}
+
                     {hasQuantityError && (
                       <TableRow>
                         <TableCell colSpan={2} sx={{ py: 0, borderBottom: '1px solid rgba(224, 224, 224, 1)' }} />

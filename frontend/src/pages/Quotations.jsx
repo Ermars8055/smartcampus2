@@ -1829,6 +1829,7 @@ const Quotations = () => {
                   <TableCell sx={{ fontWeight: 600 }}>Vendor UOM</TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>Conv. Factor</TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>Quoted Rate (₹)</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Disc %</TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>Delivery Days</TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>Remarks</TableCell>
                   <TableCell align="center" sx={{ fontWeight: 600 }}>Exclude</TableCell>
@@ -1872,6 +1873,25 @@ const Quotations = () => {
                           }
                         }}
                         sx={{ width: 120 }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <TextField
+                        size="small"
+                        type="number"
+                        className="no-spin"
+                        disabled={it.is_excluded}
+                        onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()}
+                        value={it.discount_percent}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/-/g, '');
+                          if (val === '' || (/^\d*\.?\d{0,2}$/.test(val))) {
+                            const newItems = [...newQuote.items];
+                            newItems[idx].discount_percent = val;
+                            setNewQuote({ ...newQuote, items: newItems });
+                          }
+                        }}
+                        sx={{ width: 80 }}
                       />
                     </TableCell>
                     <TableCell>

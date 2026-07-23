@@ -210,6 +210,8 @@ class MaterialBase(BaseModel):
     subcategory_id: Optional[int] = None
     uom_id: int
     material_type: str = "Consumable"
+    is_biomedical: bool = False
+    requires_installation: bool = False
     reorder_level: float = 0
     maximum_level: Optional[float] = None
     standard_cost: float = 0
@@ -240,6 +242,8 @@ class MaterialUpdate(BaseModel):
     subcategory_id: Optional[int] = None
     uom_id: Optional[int] = None
     material_type: Optional[str] = None
+    is_biomedical: Optional[bool] = None
+    requires_installation: Optional[bool] = None
     reorder_level: Optional[float] = None
     maximum_level: Optional[float] = None
     standard_cost: Optional[float] = None
@@ -273,6 +277,7 @@ class MaterialOut(MaterialBase):
     current_stock: Optional[float] = 0
     class Config:
         from_attributes = True
+
 
 class VendorBase(BaseModel):
     name: str
@@ -945,6 +950,7 @@ class GRNItemBase(BaseModel):
     rejected_quantity: float = 0
     rate: float = 0
     rejection_reason: Optional[str] = None
+    serial_numbers: Optional[List[str]] = []
     # GST fields per line
     hsn_code: Optional[str] = None
     cgst_rate: float = 0
@@ -957,6 +963,7 @@ class GRNItemBase(BaseModel):
     discount_percent: float = 0
     remarks: Optional[str] = Field(None, max_length=255)
     ordered_quantity: Optional[float] = 0
+
 
     @field_validator("hsn_code")
     @classmethod
@@ -1765,6 +1772,8 @@ class WriteOffItemBase(BaseModel):
     quantity: float = Field(..., gt=0)
     rate: float = 0
     amount: float = 0
+    has_buyback: bool = False
+    buyback_amount: float = 0
 
 class WriteOffItemOut(WriteOffItemBase):
     id: int
@@ -1780,6 +1789,8 @@ class WriteOffBase(BaseModel):
     reason: str
     write_off_type: Optional[str] = None
     attachment_url: Optional[str] = None
+    department_name: Optional[str] = None
+    certification_url: Optional[str] = None
     items: List[WriteOffItemBase] = []
 
 class WriteOffCreate(WriteOffBase):
@@ -1792,6 +1803,8 @@ class WriteOffOut(BaseModel):
     reason: str
     write_off_type: Optional[str] = None
     attachment_url: Optional[str] = None
+    department_name: Optional[str] = None
+    certification_url: Optional[str] = None
     status: str
     current_approval_level: int
     created_by_id: int
@@ -1926,4 +1939,44 @@ class ComplaintOut(ComplaintBase):
     images: List[ComplaintImageOut] = []
     class Config:
         from_attributes = True
+
+
+# ── Equipment Management ────────────────────────────────────────────────
+
+class EquipmentUpdateSerial(BaseModel):
+    serial_number: str = Field(..., min_length=1)
+
+class EquipmentInstallationUpdate(BaseModel):
+    serial_number: Optional[str] = None
+    installation_date: Optional[datetime] = None
+    installation_report_url: Optional[str] = None
+    installation_remarks: Optional[str] = None
+
+class EquipmentItemOut(BaseModel):
+    id: int
+    equipment_code: str
+    material_id: int
+    grn_id: Optional[int] = None
+    grn_item_id: Optional[int] = None
+    serial_number: Optional[str] = None
+    serial_number_status: str
+    is_biomedical: bool = False
+    requires_installation: bool = False
+    installation_status: str
+    installation_date: Optional[datetime] = None
+    installation_report_url: Optional[str] = None
+    installation_remarks: Optional[str] = None
+    warehouse_id: Optional[int] = None
+    project_id: Optional[int] = None
+    status: str
+    created_at: datetime
+    updated_at: datetime
+    material_name: Optional[str] = None
+    material_code: Optional[str] = None
+    grn_number: Optional[str] = None
+    warehouse_name: Optional[str] = None
+    project_name: Optional[str] = None
+    class Config:
+        from_attributes = True
+
 

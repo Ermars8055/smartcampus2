@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, InputAdornment, Chip, Dialog,
-  Tooltip, Select, FormControl, InputLabel, TableSortLabel, useTheme, useMediaQuery, MenuItem, DialogTitle, DialogContent, DialogActions, IconButton, TablePagination, Snackbar, Alert, Switch, FormControlLabel
+  Tooltip, Select, FormControl, InputLabel, TableSortLabel, useTheme, useMediaQuery, MenuItem, DialogTitle, DialogContent, DialogActions, IconButton, TablePagination, Snackbar, Alert, Switch, FormControlLabel, Checkbox
 } from '@mui/material';
 import { QRCodeSVG } from 'qrcode.react';
 import {
@@ -38,8 +38,9 @@ export default function Materials() {
   const [form, setForm] = useState({
     code: '', name: '', alias: '', reference_no: '', category_id: '', subcategory_id: '', uom_id: '', warehouse_id: '', reorder_level: 0,
     maximum_level: 0, standard_cost: 0, gst_rate: 0, storage_type: '',
-    material_type: '', hsn_code: '', description: '', is_active: true
+    material_type: '', is_biomedical: false, requires_installation: false, hsn_code: '', description: '', is_active: true
   });
+
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(100);
@@ -194,6 +195,8 @@ export default function Materials() {
         gst_rate: Number(form.gst_rate),
         storage_type: form.storage_type,
         material_type: form.material_type,
+        is_biomedical: form.material_type === 'Equipment' ? !!form.is_biomedical : false,
+        requires_installation: form.material_type === 'Equipment' ? !!form.requires_installation : false,
         hsn_code: form.hsn_code,
         description: form.description,
         is_active: form.is_active
@@ -248,6 +251,8 @@ export default function Materials() {
       gst_rate: m.gst_rate === 0 ? '' : (m.gst_rate || ''),
       storage_type: m.storage_type || '',
       material_type: m.material_type || '',
+      is_biomedical: !!m.is_biomedical,
+      requires_installation: !!m.requires_installation,
       hsn_code: m.hsn_code || '',
       warehouse_id: m.warehouse_id || '',
       description: m.description || '',
@@ -263,7 +268,7 @@ export default function Materials() {
     setForm({
       code: '', name: '', alias: '', reference_no: '', category_id: '', subcategory_id: '', uom_id: '',
       reorder_level: '', maximum_level: '', standard_cost: '', gst_rate: '',
-      storage_type: '', material_type: '', hsn_code: '', warehouse_id: '', description: '', is_active: true
+      storage_type: '', material_type: '', is_biomedical: false, requires_installation: false, hsn_code: '', warehouse_id: '', description: '', is_active: true
     });
     setDialog(true);
   };
@@ -801,6 +806,34 @@ export default function Materials() {
               </Select>
               {errors.material_type && <Typography variant="caption" color="error" sx={{ ml: 2 }}>{errors.material_type}</Typography>}
             </FormControl>
+
+            {form.material_type === 'Equipment' && (
+              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', p: 1.5, bgcolor: '#F8FAFC', borderRadius: 2, border: '1px solid #E2E8F0', gridColumn: { sm: 'span 2' } }}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={form.requires_installation}
+                      onChange={e => setForm({ ...form, requires_installation: e.target.checked })}
+                      disabled={viewOnly}
+                      color="primary"
+                    />
+                  }
+                  label={<Typography variant="body2" sx={{ fontWeight: 500, color: '#1E293B' }}>Requires Installation</Typography>}
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={form.is_biomedical}
+                      onChange={e => setForm({ ...form, is_biomedical: e.target.checked })}
+                      disabled={viewOnly}
+                      color="secondary"
+                    />
+                  }
+                  label={<Typography variant="body2" sx={{ fontWeight: 500, color: '#1E293B' }}>Biomedical Equipment</Typography>}
+                />
+              </Box>
+            )}
+
 
             <FormControl fullWidth>
               <InputLabel>Storage Type</InputLabel>

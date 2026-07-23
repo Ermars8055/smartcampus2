@@ -32,6 +32,7 @@ import Invoices from './pages/Invoices';
 import InvoiceTracking from './pages/InvoiceTracking';
 import RegisterInvoice from './pages/RegisterInvoice';
 import GRNPage from './pages/GRN';
+import Equipment from './pages/Equipment';
 import MaterialIssue from './pages/MaterialIssue';
 import Returns from './pages/Returns';
 import StockTransfers from './pages/StockTransfers';
@@ -130,6 +131,7 @@ function AppRoutes() {
         <Route path="invoices/register" element={<RegisterInvoice />} />
         <Route path="invoices/edit/:id" element={<RegisterInvoice />} />
         <Route path="grn" element={<GRNPage />} />
+        <Route path="equipment" element={<Equipment />} />
         <Route path="issues" element={<MaterialIssue />} />
         <Route path="pending-acknowledgments" element={<PendingAcknowledgments />} />
         <Route path="returns" element={<Returns />} />

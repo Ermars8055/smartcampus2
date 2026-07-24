@@ -1,0 +1,223 @@
+import { useState, useEffect } from 'react';
+import {
+  Box, Typography, Card, Grid, Table, TableHead, TableBody, TableRow,
+  TableCell, TableContainer, FormControl, InputLabel, Select, MenuItem, Chip,
+  ToggleButton, ToggleButtonGroup
+} from '@mui/material';
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, PieChart, Pie, Cell, Legend, LabelList
+} from 'recharts';
+import api from '../services/api';
+
+const COLORS = ['#1E3A8A', '#2563EB', '#60A5FA', '#93C5FD', '#3B82F6', '#1D4ED8', '#7C3AED', '#059669'];
+
+export default function Intelligence() {
+  const [consumption, setConsumption] = useState([]);
+  const [projects, setProjects] = useState([]);
+  const [buildings, setBuildings] = useState([]);
+  const [institutions, setInstitutions] = useState([]);
+  const [selectedInstitution, setSelectedInstitution] = useState('all');
+  const [period, setPeriod] = useState('all');
+  const [topMaterials, setTopMaterials] = useState([]);
+
+  // Utility to format currency consistently
+  const formatCurrency = (v) => {
+    if (v >= 10000000) return `₹${(v / 10000000).toLocaleString('en-IN', { maximumFractionDigits: 1 })}Cr`;
+    if (v >= 100000) return `₹${(v / 100000).toLocaleString('en-IN', { maximumFractionDigits: 1 })}L`;
+    if (v >= 1000) return `₹${(v / 1000).toLocaleString('en-IN', { maximumFractionDigits: 1 })}K`;
+    return `₹${v.toLocaleString('en-IN')}`;
+  };
+
+  useEffect(() => {
+    api.get('/api/buildings').then(r => setBuildings(r.data));
+    api.get('/api/institutions').then(r => setInstitutions(r.data)).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    let params = {};
+    
+    if (period !== 'all') {
+      const now = new Date();
+      if (period === 'this_month') {
+        params.start_date = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      } else if (period === 'last_month') {
+        params.start_date = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
+        params.end_date = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      } else if (period === 'ytd') {
+        params.start_date = new Date(now.getFullYear(), 0, 1).toISOString();
+      }
+    }
+
+    if (selectedInstitution !== 'all') {
+      params.institution_id = selectedInstitution;
+    }
+
+    api.get('/api/intelligence/consumption', { params }).then(r => {
+      const data = r.data;
+      setConsumption(data);
+      // Group by material
+      const matMap = {};
+      data.forEach(d => {
+        if (!matMap[d.material_name]) matMap[d.material_name] = { qty: 0, value: 0 };
+        matMap[d.material_name].qty += d.total_quantity;
+        matMap[d.material_name].value += d.total_value;
+      });
+      setTopMaterials(Object.entries(matMap).map(([name, v]) => ({ material_name: name, quantity: v.qty, value: v.value })).sort((a, b) => b.value - a.value));
+    });
+  }, [period, selectedInstitution]);
+
+  // Build aggregated summary by institution
+  const summary = {};
+  consumption.forEach(d => {
+    const key = d.institution_name || "Unknown Institution";
+    if (!summary[key]) summary[key] = { total: 0, materials: [] };
+    summary[key].total += d.total_value;
+    
+    // Group materials within the key
+    const existingMat = summary[key].materials.find(m => m.material_name === d.material_name);
+    if (existingMat) {
+      existingMat.total_quantity += d.total_quantity;
+      existingMat.total_value += d.total_value;
+    } else {
+      summary[key].materials.push({
+        material_name: d.material_name,
+        total_quantity: d.total_quantity,
+        total_value: d.total_value
+      });
+    }
+  });
+
+  // Aggregate data for the bar chart
+  const aggregatedChartData = Object.entries(summary)
+    .map(([name, data]) => ({ name: name, total_cost: data.total }))
+    .sort((a, b) => b.total_cost - a.total_cost);
+
+  return (
+    <Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
+        <Box>
+          <Typography variant="h5" sx={{ fontWeight: 700 }}>Material Intelligence</Typography>
+          <Typography variant="body2" sx={{ color: '#64748B' }}>Usage analytics by institution</Typography>
+        </Box>
+        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+
+          <FormControl size="small" sx={{ minWidth: 180, bgcolor: '#fff' }}>
+            <InputLabel>Institution</InputLabel>
+            <Select
+              value={selectedInstitution}
+              label="Institution"
+              onChange={e => setSelectedInstitution(e.target.value)}
+              sx={{ fontWeight: 600 }}
+            >
+              <MenuItem value="all">All Institutions</MenuItem>
+              {institutions.map(inst => (
+                <MenuItem key={inst.id} value={inst.id}>{inst.name}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl size="small" sx={{ minWidth: 150, bgcolor: '#fff' }}>
+            <InputLabel>Time Period</InputLabel>
+            <Select value={period} label="Time Period" onChange={e => setPeriod(e.target.value)} sx={{ fontWeight: 600 }}>
+              <MenuItem value="all">All Time</MenuItem>
+              <MenuItem value="this_month">This Month</MenuItem>
+              <MenuItem value="last_month">Last Month</MenuItem>
+              <MenuItem value="ytd">Year to Date (YTD)</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
+      </Box>
+
+      {/* Charts */}
+      <Grid container spacing={2.5} sx={{ mb: 3 }}>
+        <Grid item xs={12} md={8}>
+          <Card sx={{ p: 2.5 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
+              Material Cost by Institution
+            </Typography>
+            <ResponsiveContainer width="100%" height={320}>
+              <BarChart data={aggregatedChartData} margin={{ top: 20, right: 20, bottom: 5, left: 10 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
+                <XAxis dataKey="name" tick={{ fontSize: 11, fontWeight: 600, fill: '#475569' }} />
+                <YAxis tick={{ fontSize: 11, fontWeight: 500, fill: '#475569' }} tickFormatter={formatCurrency} />
+                <Tooltip formatter={(v) => [formatCurrency(v), 'Total Cost']} contentStyle={{ borderRadius: 8, border: '1px solid #E2E8F0' }} cursor={{ fill: 'rgba(37, 99, 235, 0.05)' }} />
+                <Bar dataKey="total_cost" name="Cost (₹)" fill="#2563EB" radius={[6, 6, 0, 0]}>
+                   <LabelList dataKey="total_cost" position="top" formatter={formatCurrency} style={{ fontSize: 11, fontWeight: 700, fill: '#1E293B' }} />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <Card sx={{ p: 2.5 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>Cost Distribution</Typography>
+            <ResponsiveContainer width="100%" height={320}>
+              <PieChart>
+                <Pie data={Object.entries(summary).map(([name, v]) => ({ name, value: Math.round(v.total) }))}
+                  cx="50%" cy="50%" innerRadius={50} outerRadius={90} dataKey="value" paddingAngle={3}>
+                  {Object.keys(summary).map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                </Pie>
+                <Legend iconType="circle" wrapperStyle={{ fontSize: 11, fontWeight: 500 }} />
+                <Tooltip formatter={formatCurrency} contentStyle={{ borderRadius: 8 }} />
+              </PieChart>
+            </ResponsiveContainer>
+          </Card>
+        </Grid>
+      </Grid>
+
+      {/* Building-wise / Institution-wise material breakdown */}
+      <Grid container spacing={2.5} sx={{ mb: 3 }}>
+        {Object.entries(summary).slice(0, 6).map(([name, data]) => (
+          <Grid item xs={12} md={6} lg={4} key={name}>
+            <Card sx={{ p: 2.5 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5 }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1E293B' }}>{name}</Typography>
+                <Chip label={formatCurrency(data.total)} size="small" sx={{ fontWeight: 700, bgcolor: '#EFF6FF', color: '#1D4ED8', border: '1px solid #BFDBFE' }} />
+              </Box>
+              <Table size="small">
+                <TableHead><TableRow>
+                  <TableCell sx={{ py: 0.5 }}>Material</TableCell>
+                  <TableCell align="right" sx={{ py: 0.5 }}>Qty</TableCell>
+                  <TableCell align="right" sx={{ py: 0.5 }}>Value</TableCell>
+                </TableRow></TableHead>
+                <TableBody>
+                  {data.materials.sort((a, b) => b.total_value - a.total_value).slice(0, 5).map((m, i) => (
+                    <TableRow key={i}>
+                      <TableCell sx={{ fontSize: '0.78rem', py: 0.5, fontWeight: 500 }}>{m.material_name}</TableCell>
+                      <TableCell align="right" sx={{ fontSize: '0.78rem', py: 0.5 }}>{m.total_quantity?.toLocaleString()}</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.78rem', py: 0.5, color: '#334155' }}>₹{m.total_value.toLocaleString('en-IN')}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+
+      {/* Top consumed materials */}
+      <Card sx={{ p: 2.5 }}>
+        <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>Top Consumed Materials (by Value)</Typography>
+        <TableContainer>
+          <Table size="small">
+            <TableHead><TableRow>
+              <TableCell>#</TableCell><TableCell>Material</TableCell>
+              <TableCell align="right">Total Quantity</TableCell><TableCell align="right">Total Value (₹)</TableCell>
+            </TableRow></TableHead>
+            <TableBody>
+              {topMaterials.slice(0, 15).map((m, i) => (
+                <TableRow key={i}>
+                  <TableCell sx={{ fontWeight: 600, color: '#64748B' }}>{i + 1}</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#1E293B' }}>{m.material_name}</TableCell>
+                  <TableCell align="right">{m.quantity.toLocaleString()}</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700, color: '#2563EB' }}>₹{m.value.toLocaleString('en-IN')}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Card>
+    </Box>
+  );
+}

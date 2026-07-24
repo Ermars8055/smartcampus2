@@ -1,0 +1,66 @@
+Module,Field Name,Field Type,Length/Details,Required,Validation Rules,Error Messages
+Category,id,Integer,Primary Key,Yes,-,-
+Category,name,String,100,Yes,min_length=1,Must be at least 1 character
+Category,code,String,50,No,-,-
+Category,material_code_prefix,String,3,Yes,"Regex: ^[A-Za-z]{3}$",Must be exactly 3 alphabetic characters
+Category,description,Text,Unlimited,No,-,-
+Category,is_active,Boolean,Default: True,No,-,-
+SubCategory,id,Integer,Primary Key,Yes,-,-
+SubCategory,name,String,100,Yes,-,-
+SubCategory,category_id,Integer,Foreign Key (Category),Yes,-,-
+SubCategory,is_active,Boolean,Default: True,No,-,-
+UOM,id,Integer,Primary Key,Yes,-,-
+UOM,name,String,50,Yes,min_length=1,Must be at least 1 character
+UOM,abbreviation,String,10,Yes,min_length=1,Must be at least 1 character
+UOM,allow_decimal,Boolean,Default: False,No,-,-
+UOM,is_active,Boolean,Default: True,No,-,-
+Material,id,Integer,Primary Key,Yes,-,-
+Material,code,String,50,No,-,-
+Material,name,String,255,Yes,-,Material name is required
+Material,alias,String,500,No,-,-
+Material,reference_no,String,50,No,-,-
+Material,category_id,Integer,Foreign Key (Category),Yes,-,Category is required
+Material,subcategory_id,Integer,Foreign Key (SubCategory),No,-,-
+Material,uom_id,Integer,Foreign Key (UOM),Yes,-,UOM is required
+Material,material_type,String,50 (Default: Consumable),Yes,-,Material type is required
+Material,reorder_level,Float,Default: 0,Conditional,"> 0, Integer",Required for Consumables; Must be a positive whole number
+Material,maximum_level,Float,-,Conditional,"> 0, Integer, > Reorder Level",Required for Consumables; Must be a positive whole number and > Reorder Level
+Material,standard_cost,Float,Default: 0,Yes,">= 0, <= 1000000000, Max 2 decimal places","Standard Cost is required; Cannot be negative; Cannot exceed 100 Crores; Max 2 decimal places"
+Material,preferred_vendor_id,Integer,Foreign Key (Vendor),No,-,-
+Material,storage_type,String,100,No,-,-
+Material,hsn_code,String,20,No,"Regex: ^(\d{2}|\d{4}|\d{6}|\d{8})$",HSN Code must be 2, 4, 6, or 8 digits
+Material,gst_rate,Float,Default: 0,Yes,">= 0, <= 100, Max 2 decimal places","GST Rate is required; Must be between 0 and 100; Max 2 decimal places"
+Material,warehouse_id,Integer,Foreign Key (Warehouse),Yes,-,Store is required
+Material,description,Text,Unlimited,No,-,-
+Material,is_active,Boolean,Default: True,No,-,-
+Material,is_deleted,Boolean,Default: False,No,-,-
+Vendor,id,Integer,Primary Key,Yes,-,-
+Vendor,name,String,255,Yes,-,Vendor name is required
+Vendor,code,String,50,Yes,-,-
+Vendor,contact_person,String,255,Yes,"Regex: ^[a-zA-Z\s]+$","Contact Person cannot contain numbers or special characters; Contact person is required"
+Vendor,phone,String,20,Yes,"Regex: ^\d{10,11}$","Contact Number must be 10 to 11 digits; Contact Number is required"
+Vendor,email,String,255,Yes,Standard Email Regex,"Invalid email address; Email is required"
+Vendor,gst_number,String,20,Yes,Standard Indian GSTIN Regex,"Invalid GSTIN format; GST number is required"
+Vendor,pan_number,String,15,No,-,-
+Vendor,address_line_1,Text,-,Yes,-,Address Line 1 is required
+Vendor,address_line_2,Text,-,No,-,-
+Vendor,city,String,100,Yes,-,City is required
+Vendor,state,String,100,Yes,-,State is required
+Vendor,pincode,String,10,Yes,Max 6 digits,Pincode is required
+Vendor,bank_name,String,100,No,-,-
+Vendor,bank_account,String,50,No,-,-
+Vendor,ifsc_code,String,20,No,-,-
+Vendor,rating,Float,Default: 0,No,-,-
+Vendor,is_active,Boolean,Default: True,No,-,-
+Vendor,is_deleted,Boolean,Default: False,No,-,-
+Store,id,Integer,Primary Key,Yes,-,-
+Store,name,String,255,Yes,-,Store Name is required
+Store,code,String,50,Yes,-,-
+Store,project_id,Integer,Foreign Key (Project),Yes,-,-
+Store,warehouse_type,String,100,No,-,-
+Store,location,String,255,No,-,-
+Store,capacity,String,100,No,-,-
+Store,manager_name,String,255,No,-,-
+Store,manager_id,Integer,Foreign Key (User),No,-,-
+Store,is_active,Boolean,Default: True,No,-,-
+Store,is_deleted,Boolean,Default: False,No,-,-

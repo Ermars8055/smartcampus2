@@ -6,7 +6,7 @@ import {
   DialogContent, DialogActions, Grid, Select, FormControl,
   InputLabel, IconButton, Paper, InputAdornment, MenuItem, Tooltip
 } from '@mui/material';
-import { Add, Delete, Close, RemoveCircleOutline, Warehouse, Comment, AssignmentTurnedIn, CheckCircle, Cancel, Edit } from '@mui/icons-material';
+import { Add, Delete, Close, RemoveCircleOutline, Warehouse, Comment, AssignmentTurnedIn, CheckCircle, Cancel, Edit, Download, InfoOutlined } from '@mui/icons-material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
 import api, { getFileUrl } from '../services/api';
@@ -33,7 +33,7 @@ export default function WriteOffs() {
     department_name: '',
     attachment_url: '',
     certification_url: '',
-    items: [{ material_id: '', quantity: 0, has_buyback: false, buyback_amount: 0 }]
+    items: [{ material_id: '', quantity: 1, has_buyback: false, buyback_amount: 0 }]
   });
   const [viewModal, setViewModal] = useState({ open: false, writeOff: null });
   const [errors, setErrors] = useState({});
@@ -85,7 +85,7 @@ export default function WriteOffs() {
       department_name: '',
       attachment_url: '',
       certification_url: '',
-      items: [{ material_id: '', quantity: 0, has_buyback: false, buyback_amount: 0 }]
+      items: [{ material_id: '', quantity: 1, has_buyback: false, buyback_amount: 0 }]
     });
     setErrors({});
   };
@@ -147,7 +147,7 @@ export default function WriteOffs() {
   const addItem = () => {
     setCreateModal({
       ...createModal,
-      items: [...createModal.items, { material_id: '', quantity: 0, has_buyback: false, buyback_amount: 0 }]
+      items: [...createModal.items, { material_id: '', quantity: 1, has_buyback: false, buyback_amount: 0 }]
     });
   };
 
@@ -438,9 +438,9 @@ export default function WriteOffs() {
             <Table size="small">
               <TableHead sx={{ bgcolor: '#F8FAFC' }}>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 700, width: '40%' }}>MATERIAL</TableCell>
-                  <TableCell sx={{ fontWeight: 700, width: '30%' }}>QTY</TableCell>
-                  <TableCell sx={{ fontWeight: 700, width: '25%' }}>BUY-BACK</TableCell>
+                  <TableCell sx={{ fontWeight: 700, width: '45%' }}>MATERIAL</TableCell>
+                  <TableCell sx={{ fontWeight: 700, width: '15%' }}>QTY</TableCell>
+                  <TableCell sx={{ fontWeight: 700, width: '35%' }}>BUY-BACK</TableCell>
                   <TableCell align="center" sx={{ width: '5%' }}></TableCell>
                 </TableRow>
               </TableHead>
@@ -486,21 +486,45 @@ export default function WriteOffs() {
                             </InputAdornment>
                           ) : null
                         }}
+                        sx={{
+                          '& input[type=number]': { '-moz-appearance': 'textfield' },
+                          '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button': {
+                            '-webkit-appearance': 'none',
+                            margin: 0
+                          }
+                        }}
                       />
                     </TableCell>
-                    <TableCell sx={{ verticalAlign: 'top', pt: 2 }}>
-                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                         <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.85rem' }}>
+                    <TableCell sx={{ verticalAlign: 'top', pt: 2, bgcolor: '#EFF6FF', borderRadius: 1 }}>
+                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                         <label style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
                            <input type="checkbox" checked={item.has_buyback} onChange={e => updateItem(idx, 'has_buyback', e.target.checked)} />
-                           Include Buy-Back
+                           Yes
                          </label>
+                         <Tooltip title="Check this if the item is being returned for a buy-back value">
+                           <InfoOutlined sx={{ fontSize: 16, color: '#94A3B8' }} />
+                         </Tooltip>
                          {item.has_buyback && (
                            <TextField
                              size="small"
                              label="Amount (₹)"
                              type="number"
                              value={item.buyback_amount}
-                             onChange={e => updateItem(idx, 'buyback_amount', e.target.value)}
+                             onKeyDown={e => {
+                               if (['-', '+', 'e', 'E'].includes(e.key)) e.preventDefault();
+                             }}
+                             onChange={e => {
+                               let val = e.target.value.replace(/-/g, '');
+                               updateItem(idx, 'buyback_amount', val);
+                             }}
+                             sx={{ 
+                               width: '120px',
+                               '& input[type=number]': { '-moz-appearance': 'textfield' },
+                               '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button': {
+                                 '-webkit-appearance': 'none',
+                                 margin: 0
+                               }
+                             }}
                            />
                          )}
                        </Box>
@@ -583,23 +607,37 @@ export default function WriteOffs() {
                 </Grid>
                 <Grid item xs={12} sm={2}>
                   <Typography variant="caption" color="text.secondary">Attachment</Typography>
-                  <Typography variant="body2">
+                  <Box sx={{ mt: 0.5 }}>
                     {viewModal.writeOff.attachment_url ? (
-                      <a href={getFileUrl(viewModal.writeOff.attachment_url)} target="_blank" rel="noreferrer" style={{ color: '#2563EB', textDecoration: 'none' }}>
-                        View Attachment
-                      </a>
-                    ) : '-'}
-                  </Typography>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        startIcon={<Download />}
+                        href={getFileUrl(viewModal.writeOff.attachment_url)}
+                        target="_blank"
+                        sx={{ textTransform: 'none', py: 0.25 }}
+                      >
+                        Download
+                      </Button>
+                    ) : <Typography variant="body2">-</Typography>}
+                  </Box>
                 </Grid>
                 <Grid item xs={12} sm={3}>
                   <Typography variant="caption" color="text.secondary">Certification</Typography>
-                  <Typography variant="body2">
+                  <Box sx={{ mt: 0.5 }}>
                     {viewModal.writeOff.certification_url ? (
-                      <a href={getFileUrl(viewModal.writeOff.certification_url)} target="_blank" rel="noreferrer" style={{ color: '#2563EB', textDecoration: 'none' }}>
-                        View Certification
-                      </a>
-                    ) : '-'}
-                  </Typography>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        startIcon={<Download />}
+                        href={getFileUrl(viewModal.writeOff.certification_url)}
+                        target="_blank"
+                        sx={{ textTransform: 'none', py: 0.25 }}
+                      >
+                        Download
+                      </Button>
+                    ) : <Typography variant="body2">-</Typography>}
+                  </Box>
                 </Grid>
               </Grid>
 
@@ -628,7 +666,7 @@ export default function WriteOffs() {
                         <TableCell align="center">{item.uom_name || 'unit'}</TableCell>
                         <TableCell align="center"><Typography variant="body2" sx={{ fontWeight: 700 }}>{item.quantity}</Typography></TableCell>
                         <TableCell align="right">₹{item.rate?.toFixed(2) || '0.00'}</TableCell>
-                        <TableCell align="right">
+                        <TableCell align="right" sx={{ bgcolor: '#EFF6FF' }}>
                           {item.has_buyback ? (
                             <Typography variant="body2" color="primary.main" sx={{ fontWeight: 700 }}>₹{item.buyback_amount?.toFixed(2) || '0.00'}</Typography>
                           ) : '-'}

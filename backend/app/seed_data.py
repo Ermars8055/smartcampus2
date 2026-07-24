@@ -5,6 +5,26 @@ from app.auth import get_password_hash
 
 
 def seed_database(db: Session):
+    from app.models import Role, RolePermission
+    # Always sync equipment permissions for existing roles
+    roles = db.query(Role).all()
+    for r in roles:
+        grn_perm = db.query(RolePermission).filter_by(role_id=r.id, resource='grn').first()
+        mat_perm = db.query(RolePermission).filter_by(role_id=r.id, resource='materials').first()
+        eq_perm = db.query(RolePermission).filter_by(role_id=r.id, resource='equipment').first()
+        should_have_eq = (grn_perm and grn_perm.can_read) or (mat_perm and mat_perm.can_read) or any(k in (r.name or '') for k in ['Admin', 'Store', 'Manager', 'CEO', 'Head'])
+        if should_have_eq and not eq_perm:
+            db.add(RolePermission(
+                role_id=r.id,
+                resource='equipment',
+                can_read=True,
+                can_create=True,
+                can_update=True,
+                can_delete=True,
+                extended_actions={'can_update_serial': True, 'can_install': True}
+            ))
+    db.commit()
+
     if db.query(User).count() > 0:
         return  # already bootstrapped
 
@@ -18,3 +38,4 @@ def seed_database(db: Session):
     ))
     db.commit()
     print("Done — log in at /platform/login with superadmin / admin123")
+

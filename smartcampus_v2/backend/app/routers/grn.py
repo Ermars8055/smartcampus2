@@ -1,0 +1,301 @@
+"""Goods Receipt Note routes with automatic stock updates."""
+
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+from datetime import datetime
+from typing import Optional
+from app.database import get_db
+from app.models import (
+    GRN, GRNItem, PurchaseOrder, PurchaseOrderItem, GateEntry,
+    CurrentStock, StockLedger, Material, Warehouse, User, AuditLog
+)
+from app.schemas import GRNCreate, GRNOut, GRNItemOut
+from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
+from app.utils.sequences import get_next_number
+
+router = APIRouter(prefix="/api/grn", tags=["GRN"])
+
+
+
+
+def update_stock(db: Session, material_id: int, warehouse_id: int, quantity: float,
+                 transaction_type: str, reference_type: str, reference_id: int,
+                 reference_number: str, tenant_id: int, site_id: int, project_id: int = None, room_id: int = None,
+                 user_id: int = None):
+    """Update current stock and create ledger entry."""
+    quantity = round(quantity)
+    stock = db.query(CurrentStock).filter(
+        CurrentStock.material_id == material_id,
+        CurrentStock.warehouse_id == warehouse_id,
+        CurrentStock.tenant_id == tenant_id,
+        CurrentStock.site_id == site_id
+    ).first()
+    if not stock:
+        stock = CurrentStock(material_id=material_id, warehouse_id=warehouse_id, quantity=0, tenant_id=tenant_id, site_id=site_id)
+        db.add(stock)
+        db.flush()
+
+    stock.quantity = round(stock.quantity + quantity)
+    new_balance = stock.quantity
+
+    ledger = StockLedger(
+        material_id=material_id,
+        warehouse_id=warehouse_id,
+        transaction_type=transaction_type,
+        quantity=quantity,
+        balance=new_balance,
+        reference_type=reference_type,
+        reference_id=reference_id,
+        reference_number=reference_number,
+        project_id=project_id,
+        room_id=room_id,
+        created_by_id=user_id,
+        tenant_id=tenant_id,
+        site_id=site_id
+    )
+    db.add(ledger)
+
+
+@router.get("")
+def list_grn(
+    search: Optional[str] = None,
+    status: Optional[str] = None,
+    project_id: Optional[int] = None,
+    receipt_type: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("grn", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    q = db.query(GRN).filter(GRN.tenant_id == tenant_id, GRN.site_id == site_id, GRN.is_deleted == False)
+    
+    # --- ROW-LEVEL SECURITY ---
+    is_platform_admin = getattr(current_user, "_is_platform_admin", False)
+    if not is_platform_admin:
+        scope = getattr(current_user, "_data_access_scope", "Self Only")
+        if scope not in ["Full Administrative Access", "Organization"]:
+            q = q.filter(GRN.received_by_id == current_user.id)
+            
+    if search:
+        q = q.filter(GRN.grn_number.ilike(f"%{search}%"))
+    if status:
+        q = q.filter(GRN.status == status)
+    if project_id:
+        q = q.filter(GRN.project_id == project_id)
+    if receipt_type:
+        q = q.filter(GRN.receipt_type == receipt_type)
+    grns = q.order_by(GRN.created_at.desc()).all()
+    result = []
+    for g in grns:
+        items = []
+        for item in g.items:
+            mat = item.material
+            items.append(GRNItemOut(
+                id=item.id, material_id=item.material_id,
+                po_item_id=item.po_item_id,
+                ordered_quantity=item.ordered_quantity,
+                received_quantity=item.received_quantity,
+                accepted_quantity=item.accepted_quantity,
+                rejected_quantity=item.rejected_quantity,
+                rate=item.rate,
+                hsn_code=item.hsn_code,
+                cgst_rate=item.cgst_rate, sgst_rate=item.sgst_rate, igst_rate=item.igst_rate,
+                cgst_amount=item.cgst_amount, sgst_amount=item.sgst_amount, igst_amount=item.igst_amount,
+                taxable_amount=item.taxable_amount, discount_percent=item.discount_percent,
+                remarks=item.remarks,
+                material_name=mat.name if mat else None,
+                material_code=mat.code if mat else None,
+                uom_name=mat.uom.abbreviation if mat and mat.uom else None
+            ))
+        result.append(GRNOut(
+            id=g.id, grn_number=g.grn_number,
+            po_id=g.po_id, warehouse_id=g.warehouse_id,
+            project_id=g.project_id, vendor_id=g.vendor_id,
+            receipt_type=g.receipt_type,
+            invoice_number=g.invoice_number, invoice_date=g.invoice_date,
+            invoice_amount=g.invoice_amount,
+            invoice_scan_url=g.invoice_scan_url,
+            vendor_gstin=g.vendor_gstin,
+            total_taxable_amount=g.total_taxable_amount or 0,
+            total_cgst=g.total_cgst or 0, total_sgst=g.total_sgst or 0,
+            total_igst=g.total_igst or 0, total_tax=g.total_tax or 0,
+            eway_bill_number=g.eway_bill_number,
+            payment_status=g.payment_status or "Not Applicable",
+            status=g.status,
+            created_at=g.created_at, completed_at=g.completed_at,
+            po_number=g.purchase_order.po_number if g.purchase_order else None,
+            warehouse_name=g.warehouse.name if g.warehouse else None,
+            project_name=g.project.name if g.project else None,
+            vendor_name=f"{g.vendor.code} - {g.vendor.name}" if g.vendor else None,
+            received_by_name=g.received_by.full_name if g.received_by else None,
+            items=items
+        ))
+    return result
+
+
+@router.post("")
+def create_grn(
+    data: GRNCreate, db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("grn", "create")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    try:
+        is_direct = data.receipt_type == "Direct Invoice"
+
+        # For Direct Invoice, vendor_id and project_id must come from the payload
+        if is_direct:
+            if not data.vendor_id:
+                raise HTTPException(400, "Vendor is required for Direct Invoice GRN")
+            if not data.project_id:
+                raise HTTPException(400, "Project is required for Direct Invoice GRN")
+            if not data.invoice_number:
+                raise HTTPException(400, "Invoice number is required for Direct Invoice GRN")
+            vendor_id = data.vendor_id
+            project_id = data.project_id
+        else:
+            # PO-based: derive vendor_id and project_id from the PO
+            if not data.po_id:
+                raise HTTPException(400, "PO is required for PO-Based GRN")
+            po = db.query(PurchaseOrder).filter(
+                PurchaseOrder.id == data.po_id, PurchaseOrder.tenant_id == tenant_id, PurchaseOrder.site_id == site_id
+            ).first()
+            if not po:
+                raise HTTPException(404, "Purchase Order not found")
+            vendor_id = po.vendor_id
+            project_id = po.project_id
+
+        # Auto-calculate totals if not provided
+        invoice_amt = data.invoice_amount
+        total_taxable = data.total_taxable_amount
+        if not invoice_amt or invoice_amt == 0:
+            invoice_amt = round(sum((item.accepted_quantity * item.rate) for item in data.items), 2)
+        if not total_taxable or total_taxable == 0:
+            total_taxable = round(sum((item.accepted_quantity * item.rate) for item in data.items), 2)
+
+        grn = GRN(
+            grn_number=get_next_number(db, tenant_id, site_id, "GRN", "GRN"),
+            po_id=data.po_id if data.po_id else None,
+            gate_entry_id=data.gate_entry_id,
+            warehouse_id=data.warehouse_id,
+            project_id=project_id,
+            vendor_id=vendor_id,
+            receipt_type=data.receipt_type,
+            invoice_number=data.invoice_number,
+            invoice_date=data.invoice_date,
+            invoice_amount=invoice_amt,
+            invoice_scan_url=data.invoice_scan_url,
+            vendor_gstin=data.vendor_gstin,
+            total_taxable_amount=total_taxable,
+            total_cgst=data.total_cgst,
+            total_sgst=data.total_sgst,
+            total_igst=data.total_igst,
+            total_tax=data.total_tax,
+            eway_bill_number=data.eway_bill_number,
+            payment_status="Pending" if is_direct else "Not Applicable",
+            remarks=data.remarks,
+            received_by_id=current_user.id,
+            status="Completed",
+            tenant_id=tenant_id,
+            site_id=site_id
+        )
+        db.add(grn)
+        db.flush()
+
+        for item_data in data.items:
+            po_item = None
+            if not is_direct and item_data.po_item_id:
+                po_item = db.query(PurchaseOrderItem).filter(PurchaseOrderItem.id == item_data.po_item_id).first()
+                if po_item:
+                    if (po_item.received_quantity + item_data.accepted_quantity) > po_item.quantity:
+                        db.rollback()
+                        raise HTTPException(
+                            status_code=400, 
+                            detail=f"Cannot receive {item_data.accepted_quantity}. Only {po_item.quantity - po_item.received_quantity} remaining for this PO item."
+                        )
+                    po_item.received_quantity += item_data.accepted_quantity
+
+            # For Direct Invoice, material_id comes from the item payload
+            mat_id = item_data.material_id
+            if po_item:
+                mat_id = po_item.material_id
+
+            grn_item = GRNItem(
+                grn_id=grn.id,
+                material_id=mat_id,
+                po_item_id=item_data.po_item_id if item_data.po_item_id else None,
+                ordered_quantity=item_data.ordered_quantity or 0,
+                received_quantity=item_data.received_quantity,
+                accepted_quantity=item_data.accepted_quantity,
+                rejected_quantity=item_data.rejected_quantity,
+                rate=item_data.rate,
+                hsn_code=item_data.hsn_code,
+                cgst_rate=item_data.cgst_rate,
+                sgst_rate=item_data.sgst_rate,
+                igst_rate=item_data.igst_rate,
+                cgst_amount=item_data.cgst_amount,
+                sgst_amount=item_data.sgst_amount,
+                igst_amount=item_data.igst_amount,
+                taxable_amount=item_data.taxable_amount if item_data.taxable_amount > 0 else round(item_data.accepted_quantity * item_data.rate, 2),
+                discount_percent=item_data.discount_percent,
+                remarks=item_data.remarks
+            )
+            db.add(grn_item)
+
+            if item_data.accepted_quantity > 0:
+                update_stock(
+                    db=db,
+                    material_id=mat_id,
+                    warehouse_id=data.warehouse_id,
+                    quantity=item_data.accepted_quantity,
+                    transaction_type="GRN",
+                    reference_type="GRN",
+                    reference_id=grn.id,
+                    reference_number=grn.grn_number,
+                    project_id=project_id,
+                    user_id=current_user.id,
+                    tenant_id=tenant_id,
+                    site_id=site_id
+                )
+
+        grn.completed_at = datetime.utcnow()
+
+        if data.gate_entry_id:
+            gate = db.query(GateEntry).filter(
+                GateEntry.id == data.gate_entry_id, GateEntry.tenant_id == tenant_id, GateEntry.site_id == site_id
+            ).first()
+            if gate:
+                gate.status = "Completed"
+
+        # Update PO status for PO-based GRNs
+        if not is_direct and data.po_id:
+            po = db.query(PurchaseOrder).filter(
+                PurchaseOrder.id == data.po_id, PurchaseOrder.tenant_id == tenant_id, PurchaseOrder.site_id == site_id
+            ).first()
+            if po:
+                all_received = all(
+                    item.received_quantity >= item.quantity for item in po.items
+                )
+                any_received = any(item.received_quantity > 0 for item in po.items)
+                if all_received:
+                    po.status = "Closed"
+                elif any_received:
+                    po.status = "Partially Received"
+
+        db.add(AuditLog(
+            tenant_id=tenant_id, site_id=site_id,
+            user_id=current_user.id, action="CREATE",
+            entity_type="GRN", entity_id=grn.id,
+            new_values=f"GRN {grn.grn_number} created ({data.receipt_type})"
+        ))
+        db.commit()
+        db.refresh(grn)
+        return {"id": grn.id, "grn_number": grn.grn_number, "message": "GRN created and stock updated"}
+    except Exception as e:
+        db.rollback()
+        import logging
+        logging.getLogger("uvicorn").error(f"GRN Creation Error: {str(e)}")
+        if isinstance(e, HTTPException):
+            raise e
+        raise HTTPException(status_code=500, detail=str(e))
+

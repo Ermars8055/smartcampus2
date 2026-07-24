@@ -1,0 +1,34 @@
+# Python
+backend/venv/
+backend/__pycache__/
+backend/*.pyc
+backend/*.pyo
+backend/*.log
+__pycache__/
+*.pyc
+
+# Environment
+backend/.env
+frontend/.env
+
+# Databases
+backend/*.db
+
+# Uploads
+backend/uploads/
+
+# Node
+frontend/node_modules/
+node_modules/
+
+# Build
+frontend/dist/
+
+# Mac
+.DS_Store
+
+# IDE
+.vscode/
+
+# Logs
+*.log

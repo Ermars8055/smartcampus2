@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "854741229201",
+    "project_id": "smartcampus-b38bf",
+    "storage_bucket": "smartcampus-b38bf.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:854741229201:android:0ab0b0d1a5b9e282f72930",
+        "android_client_info": {
+          "package_name": "com.example.facilityflow"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "854741229201-n2l5ccgj2sbne5cnfeo44ghlm63kimcn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.facilityflow",
+            "certificate_hash": "97b1caa8160f463972ec57042c93ca03d010d654"
+          }
+        },
+        {
+          "client_id": "854741229201-p2cl0tblnnc4uheg51r8d0tmr7vsstff.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD9PgKyDdTRTMBN_Menb9LXYic7W2mTLUY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "854741229201-p2cl0tblnnc4uheg51r8d0tmr7vsstff.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

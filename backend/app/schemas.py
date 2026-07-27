@@ -587,6 +587,8 @@ class POBase(BaseModel):
     indent_id: Optional[int] = None
     qr_id: Optional[int] = None
     po_type: str = "Formal"
+    is_cash_purchase: bool = False
+    advance_percentage: float = Field(default=0, ge=0, le=100)
     delivery_date: Optional[date] = None
     terms: Optional[str] = None
     annexure: Optional[str] = None
@@ -621,6 +623,8 @@ class POUpdate(BaseModel):
     delivery_date: Optional[date] = None
     status: Optional[str] = None
     terms: Optional[str] = None
+    is_cash_purchase: Optional[bool] = None
+    advance_percentage: Optional[float] = Field(None, ge=0, le=100)
 
 class POOut(BaseModel):
     id: int
@@ -635,6 +639,8 @@ class POOut(BaseModel):
     qr_id: Optional[int] = None
     qr_number: Optional[str] = None
     po_type: str = "Formal"
+    is_cash_purchase: bool = False
+    advance_percentage: float = 0
     total_amount: float
     delivery_date: Optional[date] = None
     status: str

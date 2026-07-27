@@ -635,6 +635,8 @@ class PurchaseOrder(Base):
     qr_id = Column(Integer, ForeignKey("quotation_requests.id"), nullable=True)
     institution_id = Column(Integer, ForeignKey("institutions.id"), nullable=True)
     po_type = Column(String(50), default="Formal") # Formal, Informal
+    is_cash_purchase = Column(Boolean, default=False)
+    advance_percentage = Column(Float, default=0)
     total_amount = Column(Float, default=0)
     delivery_date = Column(Date)
     status = Column(String(50), default=POStatus.DRAFT.value)

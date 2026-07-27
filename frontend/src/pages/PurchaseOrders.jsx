@@ -6,7 +6,7 @@ import {
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
   InputLabel, IconButton, Tooltip, Divider, InputAdornment, Paper, TableSortLabel, useTheme, useMediaQuery,
   DialogContent, DialogActions, Grid, MenuItem, Select, FormControl, Link,
-  Accordion, AccordionSummary, AccordionDetails, Tab, Tabs, Autocomplete
+  Accordion, AccordionSummary, AccordionDetails, Tab, Tabs, Autocomplete, FormControlLabel, Checkbox
 } from '@mui/material';
 import { Add, Delete, CheckCircle, Archive, Send, Cancel, Search, ShoppingCart, Store, Assignment, CalendarMonth, ArrowDropDown, Inventory, History, ExpandMore, Textsms, AttachFile, Email, Visibility, ArrowBack, Block } from '@mui/icons-material';
 import api from '../services/api';
@@ -209,7 +209,7 @@ export default function PurchaseOrders() {
   const [tabValue, setTabValue] = useState(searchParams.get('tab') || 'Draft');
   const [editingPOId, setEditingPOId] = useState(null);
   const [form, setForm] = useState({
-    po_number: '', vendor_id: '', project_id: '', institution_id: '', delivery_date: null, terms: '', annexure: '', po_type: 'Informal', items: [{ material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }]
+    po_number: '', vendor_id: '', project_id: '', institution_id: '', delivery_date: null, terms: '', annexure: '', po_type: 'Informal', is_cash_purchase: false, advance_percentage: 0, items: [{ material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }]
   });
 
 
@@ -347,6 +347,8 @@ export default function PurchaseOrders() {
         terms: po.terms || '',
         annexure: po.annexure || '',
         po_type: po.po_type || 'Informal',
+        is_cash_purchase: po.is_cash_purchase || false,
+        advance_percentage: po.advance_percentage || 0,
         items: po.items && po.items.length > 0 ? po.items.map(it => ({
           material_id: it.material_id,
           quantity: it.quantity,
@@ -395,6 +397,8 @@ export default function PurchaseOrders() {
         delivery_date: null,
         terms: '', annexure: '',
         po_type: 'Formal',
+        is_cash_purchase: false,
+        advance_percentage: 0,
         indent_id: ind.id,
         items: ind.items.filter(it => it.requested_quantity > it.issued_quantity).map(it => {
           const mat = materials.find(m => m.id === it.material_id);
@@ -492,6 +496,10 @@ export default function PurchaseOrders() {
     }
     if (!form.terms || !form.terms.trim()) newErrors.terms = "Terms and Conditions are mandatory.";
 
+    if (form.advance_percentage !== '' && (parseFloat(form.advance_percentage) < 0 || parseFloat(form.advance_percentage) > 100)) {
+      newErrors.advance_percentage = "Advance percentage must be between 0 and 100.";
+    }
+
     if (form.items.length === 0) {
       newErrors.items = "Please add at least one line item.";
     }
@@ -551,6 +559,7 @@ export default function PurchaseOrders() {
         vendor_id: parseInt(form.vendor_id, 10),
         project_id: parseInt(form.project_id, 10),
         institution_id: parseInt(form.institution_id, 10),
+        advance_percentage: parseFloat(form.advance_percentage) || 0,
         delivery_date: form.delivery_date ? dayjs(form.delivery_date).format('YYYY-MM-DD') : null,
         status: isDraft ? 'Draft' : 'Submitted',
         items: mappedItems
@@ -772,6 +781,8 @@ export default function PurchaseOrders() {
                 <table style="width: 100%">
                   <tr><td style="width: 40%">PO Number</td><td>: <b>${po.po_number}</b></td></tr>
                   <tr><td>PO Date</td><td>: ${formatDate(po.created_at)}</td></tr>
+                  ${po.is_cash_purchase ? `<tr><td>Type</td><td>: <b>Cash Purchase</b></td></tr>` : ''}
+                  ${po.advance_percentage > 0 ? `<tr><td>Advance</td><td>: <b>${po.advance_percentage}%</b></td></tr>` : ''}
                 </table>
               </td>
             </tr>
@@ -817,6 +828,10 @@ export default function PurchaseOrders() {
                 ${totalIgst > 0 ? `<tr><td style="text-align:right">Add: IGST</td><td style="text-align:right">: ${totalIgst.toFixed(2)}</td></tr>` : ''}
                 <tr><td style="text-align:right">Round Off</td><td style="text-align:right">: ${roundOff}</td></tr>
                 <tr><td style="text-align:right"><b>Total Net Amount</b></td><td style="text-align:right"><b>: ${totalNetAmount}</b></td></tr>
+                ${po.advance_percentage > 0 ? `
+                  <tr><td style="text-align:right; color: #d97706;">Less: Advance (${po.advance_percentage}%)</td><td style="text-align:right; color: #d97706;">: ${Math.round((Math.round(grandTotalWithTax) * po.advance_percentage) / 100).toFixed(2)}</td></tr>
+                  <tr><td style="text-align:right; font-size: 13px;"><b>Balance Amount</b></td><td style="text-align:right; font-size: 13px;"><b>: ${(Math.round(grandTotalWithTax) - Math.round((Math.round(grandTotalWithTax) * po.advance_percentage) / 100)).toFixed(2)}</b></td></tr>
+                ` : ''}
               </table>
             </div>
           </div>
@@ -904,6 +919,10 @@ export default function PurchaseOrders() {
     const totalNetAmount = Math.round(grandTotalWithTax).toFixed(2);
     const activeTerms = detailDialog.terms || termsTemplates.find(t => t.is_default)?.content || (termsTemplates.length > 0 ? termsTemplates[0].content : '');
 
+    const advancePercentage = detailDialog.advance_percentage || 0;
+    const advanceAmount = Math.round((Math.round(grandTotalWithTax) * advancePercentage) / 100).toFixed(2);
+    const balanceAmount = (Math.round(grandTotalWithTax) - parseFloat(advanceAmount)).toFixed(2);
+
     return {
       grandTotal,
       totalDiscount,
@@ -914,6 +933,9 @@ export default function PurchaseOrders() {
       grandTotalWithTax,
       roundOff,
       totalNetAmount,
+      advancePercentage,
+      advanceAmount,
+      balanceAmount,
       activeTerms
     };
   }, [detailDialog, termsTemplates]);
@@ -1255,7 +1277,11 @@ export default function PurchaseOrders() {
 
               <Grid item xs={3}>
                 <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>PO TYPE</Typography>
-                <Box><Chip label={detailDialog?.po_type} size="small" variant="outlined" color={detailDialog?.po_type === 'Formal' ? 'primary' : 'default'} sx={{ fontSize: '0.7rem' }} /></Box>
+                <Box>
+                  <Chip label={detailDialog?.po_type} size="small" variant="outlined" color={detailDialog?.po_type === 'Formal' ? 'primary' : 'default'} sx={{ fontSize: '0.7rem', mr: 1 }} />
+                  {detailDialog?.is_cash_purchase && <Chip label="Cash Purchase" size="small" variant="filled" color="secondary" sx={{ fontSize: '0.7rem', mr: 1 }} />}
+                  {detailDialog?.advance_percentage > 0 && <Chip label={`${detailDialog.advance_percentage}% Advance`} size="small" variant="filled" color="info" sx={{ fontSize: '0.7rem' }} />}
+                </Box>
               </Grid>
               <Grid item xs={2.25}>
                 <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>PO DATE</Typography>
@@ -1380,6 +1406,18 @@ export default function PurchaseOrders() {
                         <TableCell align="right" sx={{ fontWeight: 700, fontSize: '1rem', color: '#1e293b' }}>Total Net Amount</TableCell>
                         <TableCell align="right" sx={{ fontWeight: 700, fontSize: '1rem', color: '#1e293b' }}>: {detailData.totalNetAmount}</TableCell>
                       </TableRow>
+                      {detailData.advancePercentage > 0 && (
+                        <>
+                          <TableRow>
+                            <TableCell align="right" sx={{ color: '#d97706', fontWeight: 600 }}>Less: Advance ({detailData.advancePercentage}%)</TableCell>
+                            <TableCell align="right" sx={{ color: '#d97706', fontWeight: 600 }}>: {detailData.advanceAmount}</TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell align="right" sx={{ fontWeight: 700, fontSize: '1.1rem', color: '#dc2626' }}>Balance Amount</TableCell>
+                            <TableCell align="right" sx={{ fontWeight: 700, fontSize: '1.1rem', color: '#dc2626' }}>: {detailData.balanceAmount}</TableCell>
+                          </TableRow>
+                        </>
+                      )}
                     </TableBody>
                   </Table>
                 </Box>
@@ -1599,6 +1637,30 @@ export default function PurchaseOrders() {
                 <MenuItem value="Informal">Informal</MenuItem>
               </Select>
             </FormControl>
+
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={form.is_cash_purchase || false}
+                  onChange={(e) => setForm({ ...form, is_cash_purchase: e.target.checked })}
+                  color="primary"
+                />
+              }
+              label="Cash Purchase (e.g. Amazon)"
+              sx={{ whiteSpace: 'nowrap' }}
+            />
+            
+            <TextField
+              size="small"
+              fullWidth
+              label="Advance Payment (%)"
+              type="number"
+              value={form.advance_percentage}
+              onChange={(e) => setForm({ ...form, advance_percentage: e.target.value })}
+              inputProps={{ min: 0, max: 100, step: 'any' }}
+              error={!!errors.advance_percentage}
+              helperText={errors.advance_percentage}
+            />
             
             <FormControl fullWidth size="small" error={!!errors.institution_id}>
               <InputLabel>Institution *</InputLabel>

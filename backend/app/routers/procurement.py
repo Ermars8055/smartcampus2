@@ -677,6 +677,8 @@ def list_purchase_orders(
             indent_id=po.indent_id, indent_number=indent_number,
             qr_id=po.qr_id, qr_number=qr_number,
             po_type=po.po_type,
+            is_cash_purchase=po.is_cash_purchase,
+            advance_percentage=po.advance_percentage,
             total_amount=po.total_amount,
             delivery_date=po.delivery_date, status=po.status,
             current_approval_level=po.current_approval_level or 1,
@@ -767,6 +769,8 @@ def get_purchase_order(
         indent_id=po.indent_id, indent_number=indent_number,
         qr_id=po.qr_id, qr_number=qr_number,
         po_type=po.po_type,
+        is_cash_purchase=po.is_cash_purchase,
+        advance_percentage=po.advance_percentage,
         total_amount=po.total_amount,
         delivery_date=po.delivery_date, status=po.status,
         current_approval_level=po.current_approval_level or 1,
@@ -815,6 +819,8 @@ def create_purchase_order(
         indent_id=data.indent_id,
         qr_id=data.qr_id,
         po_type=data.po_type or ("Formal" if (data.pr_id or data.indent_id or data.qr_id) else "Informal"),
+        is_cash_purchase=data.is_cash_purchase,
+        advance_percentage=data.advance_percentage,
         delivery_date=data.delivery_date,
         status=actual_status,
         terms=data.terms,
@@ -905,7 +911,7 @@ def update_purchase_order(
     if "status" in update_data:
         po.status = update_data["status"]
     
-    for k in ["vendor_id", "project_id", "delivery_date", "po_type", "terms", "annexure"]:
+    for k in ["vendor_id", "project_id", "delivery_date", "po_type", "terms", "annexure", "is_cash_purchase", "advance_percentage"]:
         if k in update_data:
             setattr(po, k, update_data[k])
             

@@ -1017,6 +1017,7 @@ def download_comparative_statement_excel(
     align_center = Alignment(horizontal="center", vertical="center", wrap_text=True)
     align_left = Alignment(horizontal="left", vertical="center", wrap_text=True)
     align_right = Alignment(horizontal="right", vertical="center")
+    align_right_wrap = Alignment(horizontal="right", vertical="center", wrap_text=True)
 
     # Borders
     thin_border = Border(
@@ -1118,7 +1119,7 @@ def download_comparative_statement_excel(
     c_cell.border = thin_border
 
     c_cell2 = ws.cell(row=3, column=l1_start_col + 1)
-    c_cell2.value = "Final Amt (₹)"
+    c_cell2.value = "Selected Amount"
     c_cell2.font = header_font
     c_cell2.fill = l1_fill
     c_cell2.alignment = align_center
@@ -1189,6 +1190,15 @@ def download_comparative_statement_excel(
                             cell.number_format = "0.0\"%\""
                         elif offset == 6:
                             cell.number_format = "0.0\"%\""
+                    elif offset == 0:
+                        # Unit Rate column: Check for custom UOM
+                        if conv_factor != 1.0 or (vqi.vendor_uom_name and vqi.vendor_uom_name.strip() != mat.uom_name):
+                            cell.value = f"{val:,.2f}\n(₹{vqi.quoted_rate:,.2f} / {vqi.vendor_uom_name or 'UOM'})"
+                            cell.alignment = align_right_wrap
+                            ws.row_dimensions[row_idx].height = 35
+                        else:
+                            cell.alignment = align_right
+                            cell.number_format = "#,##0.00"
                     else:
                         cell.alignment = align_right
                         cell.number_format = "#,##0.00"
@@ -1229,7 +1239,7 @@ def download_comparative_statement_excel(
 
     for v_idx in range(num_vendors):
         start_col = 4 + v_idx * 8
-        ws.column_dimensions[get_column_letter(start_col)].width = 14     
+        ws.column_dimensions[get_column_letter(start_col)].width = 16 # Increased slightly to fit two lines better
         ws.column_dimensions[get_column_letter(start_col + 1)].width = 10  
         ws.column_dimensions[get_column_letter(start_col + 2)].width = 10  
         ws.column_dimensions[get_column_letter(start_col + 3)].width = 14 

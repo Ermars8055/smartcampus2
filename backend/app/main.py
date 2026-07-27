@@ -17,7 +17,7 @@ from app.routers import (
     saas_admin, rbac, sites, auto_pr, alerts, intelligence,
     indents, approval_flows, quotations, reports, uploads, terms,
     admin_users, invoices, company_addresses, material_limits, configurations,
-    complaints, finance, quotation_extraction, equipment
+    complaints, finance, quotation_extraction, equipment, contracts, repair_work_orders, rentals
 )
 
 logging.basicConfig(level=logging.INFO)
@@ -98,9 +98,9 @@ app.include_router(material_limits.router)
 app.include_router(configurations.router)
 app.include_router(complaints.router)
 app.include_router(finance.router)
-
-
-
+app.include_router(contracts.router)
+app.include_router(repair_work_orders.router)
+app.include_router(rentals.router)
 @app.get("/api/health")
 def health_check():
     return {

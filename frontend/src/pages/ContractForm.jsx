@@ -1,0 +1,416 @@
+import { useState, useEffect } from 'react';
+import {
+  Box, Typography, Card, Grid, TextField, Button, MenuItem,
+  IconButton, Table, TableHead, TableBody, TableRow, TableCell,
+  TableContainer, Autocomplete, FormControlLabel, Switch, Divider,
+  InputAdornment, Tooltip
+} from '@mui/material';
+import { Add, Delete, Save, ArrowBack } from '@mui/icons-material';
+import { useNavigate, useParams } from 'react-router-dom';
+import api from '../services/api';
+import { useMessage } from '../context/MessageContext';
+
+export default function ContractForm() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { showMessage } = useMessage();
+  const isEdit = !!id;
+
+  const [form, setForm] = useState({
+    contract_type: 'RC',
+    vendor_id: '',
+    institution_id: '',
+    department_id: '',
+    start_date: '',
+    end_date: '',
+    contract_value: '',
+    payment_terms: '',
+    renewal_terms: '',
+    sla_details: '',
+    spare_parts_included: false,
+    consumables_included: false,
+    items: []
+  });
+
+  const [vendors, setVendors] = useState([]);
+  const [institutions, setInstitutions] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [materials, setMaterials] = useState([]);
+  const [equipment, setEquipment] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    Promise.all([
+      api.get('/api/vendors'),
+      api.get('/api/institutions'),
+      api.get('/api/materials'),
+      api.get('/api/equipment')
+    ]).then(([vRes, iRes, mRes, eRes]) => {
+      setVendors(vRes.data);
+      setInstitutions(iRes.data);
+      setMaterials(mRes.data.items || mRes.data);
+      setEquipment(eRes.data);
+    }).catch(err => {
+      console.error("Error loading form dependencies", err);
+      showMessage("Failed to load required data. Please refresh.", "Error", "error");
+    });
+  }, []);
+
+  useEffect(() => {
+    if (form.institution_id) {
+      api.get('/api/departments').then(res => {
+        setDepartments(res.data.filter(d => d.institution_id === form.institution_id));
+      }).catch(err => {
+        console.error("Error loading departments", err);
+      });
+    } else {
+      setDepartments([]);
+    }
+  }, [form.institution_id]);
+
+  useEffect(() => {
+    if (isEdit) {
+      api.get(`/api/contracts/${id}`).then(res => {
+        setForm({
+          ...res.data,
+          vendor_id: res.data.vendor_id || '',
+          institution_id: res.data.institution_id || '',
+          department_id: res.data.department_id || '',
+          contract_value: res.data.contract_value || '',
+          items: res.data.items || []
+        });
+      });
+    }
+  }, [id]);
+
+  const validate = () => {
+    const newErrs = {};
+    if (!form.vendor_id) newErrs.vendor_id = 'Required';
+    if (!form.start_date) newErrs.start_date = 'Required';
+    if (!form.end_date) newErrs.end_date = 'Required';
+    if (form.items.length === 0) newErrs.items = 'At least one item is required';
+    setErrors(newErrs);
+    return Object.keys(newErrs).length === 0;
+  };
+
+  const handleSave = async () => {
+    if (!validate()) {
+      showMessage('Please fill all required fields.', 'Validation Error', 'error');
+      return;
+    }
+    setLoading(true);
+    try {
+      const payload = { ...form };
+      if (!payload.institution_id) delete payload.institution_id;
+      if (!payload.department_id) delete payload.department_id;
+      if (!payload.contract_value) delete payload.contract_value;
+
+      if (isEdit) {
+        await api.put(`/api/contracts/${id}`, payload);
+        showMessage('Contract updated successfully', 'Success', 'success');
+      } else {
+        await api.post('/api/contracts', payload);
+        showMessage('Contract created successfully', 'Success', 'success');
+      }
+      navigate('/contracts');
+    } catch (err) {
+      showMessage(err.response?.data?.detail || 'Error saving contract', 'Error', 'error');
+    }
+    setLoading(false);
+  };
+
+  const addItem = () => {
+    setForm(prev => ({
+      ...prev,
+      items: [...prev.items, {
+        material_id: null, equipment_id: null, uom: '', rate: 0, gst: 0,
+        delivery_lead_time: null, contract_quantity: null, covered_components: '', excluded_components: ''
+      }]
+    }));
+  };
+
+  const updateItem = (index, field, value) => {
+    const newItems = [...form.items];
+    newItems[index][field] = value;
+    setForm({ ...form, items: newItems });
+  };
+
+  const removeItem = (index) => {
+    const newItems = form.items.filter((_, i) => i !== index);
+    setForm({ ...form, items: newItems });
+  };
+
+  return (
+    <Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, gap: 2 }}>
+        <IconButton onClick={() => navigate('/contracts')} sx={{ bgcolor: 'white', boxShadow: 1 }}>
+          <ArrowBack />
+        </IconButton>
+        <Typography variant="h5" sx={{ fontWeight: 700, color: '#1E293B' }}>
+          {isEdit ? 'Edit Contract' : 'Create New Contract'}
+        </Typography>
+      </Box>
+
+      <Card sx={{ p: 3, mb: 3, borderRadius: 2 }}>
+        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>Basic Details</Typography>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={4}>
+            <TextField
+              select
+              fullWidth
+              label="Contract Type"
+              value={form.contract_type}
+              onChange={e => setForm({ ...form, contract_type: e.target.value, items: [] })}
+              disabled={isEdit}
+              required
+            >
+              <MenuItem value="RC">Rate Contract (RC)</MenuItem>
+              <MenuItem value="AMC">Annual Maintenance Contract (AMC)</MenuItem>
+              <MenuItem value="CMC">Comprehensive Maintenance Contract (CMC)</MenuItem>
+            </TextField>
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <TextField
+              select
+              fullWidth
+              label="Vendor"
+              value={form.vendor_id}
+              onChange={e => setForm({ ...form, vendor_id: e.target.value })}
+              error={!!errors.vendor_id}
+              helperText={errors.vendor_id}
+              required
+            >
+              {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.code} - {v.name}</MenuItem>)}
+            </TextField>
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <TextField
+              fullWidth
+              label="Total Contract Value (₹)"
+              type="number"
+              value={form.contract_value}
+              onChange={e => setForm({ ...form, contract_value: parseFloat(e.target.value) || '' })}
+            />
+          </Grid>
+
+          <Grid item xs={12} sm={6}>
+            <TextField
+              select
+              fullWidth
+              label="Institution"
+              value={form.institution_id}
+              onChange={e => setForm({ ...form, institution_id: e.target.value, department_id: '' })}
+            >
+              <MenuItem value=""><em>None</em></MenuItem>
+              {institutions.map(i => <MenuItem key={i.id} value={i.id}>{i.name}</MenuItem>)}
+            </TextField>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              select
+              fullWidth
+              label="Department"
+              value={form.department_id}
+              onChange={e => setForm({ ...form, department_id: e.target.value })}
+              disabled={!form.institution_id}
+            >
+              <MenuItem value=""><em>None</em></MenuItem>
+              {departments.map(d => <MenuItem key={d.id} value={d.id}>{d.name}</MenuItem>)}
+            </TextField>
+          </Grid>
+
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              type="date"
+              label="Start Date"
+              InputLabelProps={{ shrink: true }}
+              value={form.start_date}
+              onChange={e => setForm({ ...form, start_date: e.target.value })}
+              error={!!errors.start_date}
+              helperText={errors.start_date}
+              required
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              type="date"
+              label="End Date"
+              InputLabelProps={{ shrink: true }}
+              value={form.end_date}
+              onChange={e => setForm({ ...form, end_date: e.target.value })}
+              error={!!errors.end_date}
+              helperText={errors.end_date}
+              required
+            />
+          </Grid>
+        </Grid>
+
+        <Divider sx={{ my: 3 }} />
+        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>Terms & Conditions</Typography>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <TextField
+              fullWidth
+              multiline
+              rows={2}
+              label="Payment Terms"
+              value={form.payment_terms}
+              onChange={e => setForm({ ...form, payment_terms: e.target.value })}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              multiline
+              rows={2}
+              label="Renewal Terms"
+              value={form.renewal_terms}
+              onChange={e => setForm({ ...form, renewal_terms: e.target.value })}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              multiline
+              rows={2}
+              label="SLA Details"
+              value={form.sla_details}
+              onChange={e => setForm({ ...form, sla_details: e.target.value })}
+            />
+          </Grid>
+          {(form.contract_type === 'AMC' || form.contract_type === 'CMC') && (
+            <Grid item xs={12} sx={{ display: 'flex', gap: 4 }}>
+              <FormControlLabel
+                control={<Switch checked={form.spare_parts_included} onChange={e => setForm({ ...form, spare_parts_included: e.target.checked })} />}
+                label="Spare Parts Included"
+              />
+              <FormControlLabel
+                control={<Switch checked={form.consumables_included} onChange={e => setForm({ ...form, consumables_included: e.target.checked })} />}
+                label="Consumables Included"
+              />
+            </Grid>
+          )}
+        </Grid>
+
+        <Divider sx={{ my: 3 }} />
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            Contract Items ({form.contract_type})
+          </Typography>
+          <Button variant="outlined" startIcon={<Add />} onClick={addItem} size="small">
+            Add Item
+          </Button>
+        </Box>
+        {errors.items && <Typography color="error" variant="caption" sx={{ display: 'block', mb: 1 }}>{errors.items}</Typography>}
+        <TableContainer sx={{ border: '1px solid #E2E8F0', borderRadius: 2 }}>
+          <Table size="small">
+            <TableHead sx={{ bgcolor: '#F8FAFC' }}>
+              <TableRow>
+                {form.contract_type === 'RC' ? (
+                  <>
+                    <TableCell>MATERIAL</TableCell>
+                    <TableCell>RATE (₹)</TableCell>
+                    <TableCell>GST %</TableCell>
+                    <TableCell>MAX QTY</TableCell>
+                    <TableCell>LEAD TIME (Days)</TableCell>
+                  </>
+                ) : (
+                  <>
+                    <TableCell>EQUIPMENT</TableCell>
+                    <TableCell>COVERED</TableCell>
+                    <TableCell>EXCLUDED</TableCell>
+                    <TableCell>COST (₹)</TableCell>
+                  </>
+                )}
+                <TableCell align="center">ACTION</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {form.items.map((item, index) => (
+                <TableRow key={index}>
+                  {form.contract_type === 'RC' ? (
+                    <>
+                      <TableCell sx={{ minWidth: 250 }}>
+                        <Autocomplete
+                          options={materials}
+                          getOptionLabel={(option) => `${option.code} - ${option.name}`}
+                          value={materials.find(m => m.id === item.material_id) || null}
+                          onChange={(e, val) => {
+                            updateItem(index, 'material_id', val?.id || null);
+                            updateItem(index, 'uom', val?.uom?.abbreviation || '');
+                          }}
+                          renderInput={(params) => <TextField {...params} size="small" placeholder="Select Material" />}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <TextField size="small" type="number" value={item.rate} onChange={e => updateItem(index, 'rate', parseFloat(e.target.value) || 0)} sx={{ width: 100 }} />
+                      </TableCell>
+                      <TableCell>
+                        <TextField size="small" type="number" value={item.gst} onChange={e => updateItem(index, 'gst', parseFloat(e.target.value) || 0)} sx={{ width: 80 }} />
+                      </TableCell>
+                      <TableCell>
+                        <TextField size="small" type="number" placeholder="Optional" value={item.contract_quantity || ''} onChange={e => updateItem(index, 'contract_quantity', parseFloat(e.target.value) || null)} sx={{ width: 100 }} />
+                      </TableCell>
+                      <TableCell>
+                        <TextField size="small" type="number" placeholder="Days" value={item.delivery_lead_time || ''} onChange={e => updateItem(index, 'delivery_lead_time', parseInt(e.target.value) || null)} sx={{ width: 100 }} />
+                      </TableCell>
+                    </>
+                  ) : (
+                    <>
+                      <TableCell sx={{ minWidth: 250 }}>
+                        <Autocomplete
+                          options={equipment}
+                          getOptionLabel={(option) => `${option.equipment_code} - ${option.material_name} (${option.serial_number || 'No SN'})`}
+                          value={equipment.find(e => e.id === item.equipment_id) || null}
+                          onChange={(e, val) => updateItem(index, 'equipment_id', val?.id || null)}
+                          renderInput={(params) => <TextField {...params} size="small" placeholder="Select Equipment" />}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <TextField size="small" fullWidth value={item.covered_components || ''} onChange={e => updateItem(index, 'covered_components', e.target.value)} />
+                      </TableCell>
+                      <TableCell>
+                        <TextField size="small" fullWidth value={item.excluded_components || ''} onChange={e => updateItem(index, 'excluded_components', e.target.value)} />
+                      </TableCell>
+                      <TableCell>
+                        <TextField size="small" type="number" value={item.rate} onChange={e => updateItem(index, 'rate', parseFloat(e.target.value) || 0)} sx={{ width: 100 }} />
+                      </TableCell>
+                    </>
+                  )}
+                  <TableCell align="center">
+                    <Tooltip title="Remove">
+                      <IconButton color="error" size="small" onClick={() => removeItem(index)}><Delete fontSize="small" /></IconButton>
+                    </Tooltip>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {form.items.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6} align="center" sx={{ py: 3, color: '#94A3B8' }}>No items added yet</TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Card>
+
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+        <Button onClick={() => navigate('/contracts')} sx={{ fontWeight: 600, color: '#64748B' }}>
+          Cancel
+        </Button>
+        <Button
+          variant="contained"
+          startIcon={<Save />}
+          onClick={handleSave}
+          disabled={loading}
+          sx={{ fontWeight: 700, borderRadius: 2, px: 4 }}
+        >
+          {isEdit ? 'Update Contract' : 'Create Contract'}
+        </Button>
+      </Box>
+    </Box>
+  );
+}

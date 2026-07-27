@@ -59,9 +59,14 @@ import Alerts from './pages/Alerts';
 import PlatformLogin from './pages/PlatformLogin';
 import TermsAndConditions from './pages/TermsAndConditions';
 import CompanyAddresses from './pages/CompanyAddresses';
+import LocationMaster from './pages/LocationMaster';
 import ComplaintsList from './pages/ComplaintsList';
 import ComplaintForm from './pages/ComplaintForm';
 import ComplaintDetail from './pages/ComplaintDetail';
+import Contracts from './pages/Contracts';
+import ContractForm from './pages/ContractForm';
+import RepairWorkOrders from './pages/RepairWorkOrders';
+import RepairWorkOrderDetail from './pages/RepairWorkOrderDetail';
 
 import VendorPendingInvoicesReport from './pages/VendorPendingInvoicesReport';
 import VendorPendingPaymentsReport from './pages/VendorPendingPaymentsReport';
@@ -153,6 +158,7 @@ function AppRoutes() {
         <Route path="admin/roles" element={<RolesList />} />
         <Route path="admin/material-allowances" element={<MaterialAllowances />} />
         <Route path="admin/configurations" element={<Configurations />} />
+        <Route path="admin/locations" element={<LocationMaster />} />
         <Route path="admin/roles/new" element={<RoleConfiguration />} />
         <Route path="admin/roles/:id" element={<RoleConfiguration />} />
         <Route path="terms" element={<TermsAndConditions />} />
@@ -163,6 +169,13 @@ function AppRoutes() {
         <Route path="complaints/new" element={<ComplaintForm />} />
         <Route path="complaints/edit/:id" element={<ComplaintForm />} />
         <Route path="complaints/:id" element={<ComplaintDetail />} />
+        
+        <Route path="contracts" element={<Contracts />} />
+        <Route path="contracts/new" element={<ContractForm />} />
+        <Route path="contracts/edit/:id" element={<ContractForm />} />
+        
+        <Route path="rwos" element={<RepairWorkOrders />} />
+        <Route path="rwos/:id" element={<RepairWorkOrderDetail />} />
 
         <Route path="finance/reports/pending-invoices" element={<VendorPendingInvoicesReport />} />
         <Route path="finance/reports/pending-payments" element={<VendorPendingPaymentsReport />} />

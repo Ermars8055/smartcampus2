@@ -9,7 +9,7 @@ import api, { getFileUrl } from '../services/api';
 import dayjs from 'dayjs';
 import { useAuth } from '../context/AuthContext';
 
-const COMPLAINT_STEPS = ['Registered', 'Assigned', 'Under Inspection', 'In Progress', 'Closed'];
+const COMPLAINT_STEPS = ['Registered', 'Assigned', 'Under Inspection', 'In Progress', 'Pending Admin Approval', 'Closed'];
 
 export default function ComplaintDetail() {
   const { id } = useParams();
@@ -20,6 +20,7 @@ export default function ComplaintDetail() {
   const [complaint, setComplaint] = useState(null);
   const [materialIndents, setMaterialIndents] = useState([]);
   const [materialIssues, setMaterialIssues] = useState([]);
+  const [rwo, setRwo] = useState(null);
   const [loading, setLoading] = useState(true);
   
   // Dialog States
@@ -40,6 +41,10 @@ export default function ComplaintDetail() {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
   const [previewDialog, setPreviewDialog] = useState({ open: false, url: '' });
 
+  // Closure States
+  const [closureReason, setClosureReason] = useState('');
+  const [closureDocs, setClosureDocs] = useState([]);
+
   useEffect(() => {
     fetchComplaintData();
     fetchTechnicians();
@@ -57,6 +62,14 @@ export default function ComplaintDetail() {
       if (!isPolling) setLoading(true);
       const res = await api.get(`/api/complaints/${id}`);
       setComplaint(res.data);
+      
+      try {
+        const rwoRes = await api.get('/api/rwos');
+        const relatedRwo = rwoRes.data.find(r => r.complaint_id === parseInt(id));
+        setRwo(relatedRwo || null);
+      } catch(err) {
+        console.warn('Failed to fetch RWO', err);
+      }
       
       let fetchedIndents = [];
       let indentIds = [];
@@ -171,16 +184,41 @@ export default function ComplaintDetail() {
         uploadedUrls.push(uploadRes.data.url);
       }
 
-      await api.post(`/api/complaints/${id}/resolve`, {
-        resolution_remarks: resolutionRemarks,
-        resolution_image_urls: uploadedUrls
+      for (const file of closureDocs) {
+        const formDataUpload = new FormData();
+        formDataUpload.append('file', file);
+        const uploadRes = await api.post('/api/upload?folder=complaints', formDataUpload, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        uploadedUrls.push(uploadRes.data.url);
+      }
+
+      await api.post(`/api/complaints/${id}/close`, {
+        resolution_entered: resolutionRemarks,
+        closure_reason: closureReason,
+        document_urls: uploadedUrls
       });
 
-      setSnackbar({ open: true, message: 'Complaint resolved and closed successfully', severity: 'success' });
+      setSnackbar({ open: true, message: 'Closure initiated successfully', severity: 'success' });
       setResolveDialogOpen(false);
       fetchComplaintData();
     } catch (error) {
-      setSnackbar({ open: true, message: error.response?.data?.detail || 'Failed to resolve complaint', severity: 'error' });
+      setSnackbar({ open: true, message: error.response?.data?.detail || 'Failed to initiate closure', severity: 'error' });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleApprove = async (approvalType) => {
+    setActionLoading(true);
+    try {
+      await api.post(`/api/complaints/${id}/approve-closure`, {
+        approval_type: approvalType
+      });
+      setSnackbar({ open: true, message: `Approved as ${approvalType}`, severity: 'success' });
+      fetchComplaintData();
+    } catch (error) {
+      setSnackbar({ open: true, message: error.response?.data?.detail || 'Failed to approve', severity: 'error' });
     } finally {
       setActionLoading(false);
     }
@@ -198,6 +236,7 @@ export default function ComplaintDetail() {
       case 'Under Inspection': return 'info';
       case 'Material Pending': return 'warning';
       case 'In Progress': return 'warning';
+      case 'Pending Admin Approval': return 'warning';
       case 'Resolved': return 'success';
       case 'Closed': return 'success';
       case 'Reopened': return 'error';
@@ -212,7 +251,8 @@ export default function ComplaintDetail() {
       case 'Assigned': case 'Reopened': return 1;
       case 'Under Inspection': return 2;
       case 'Material Pending': case 'In Progress': return 3;
-      case 'Closed': return 4;
+      case 'Pending Admin Approval': return 4;
+      case 'Closed': return 5;
       default: return 0;
     }
   };
@@ -274,9 +314,21 @@ export default function ComplaintDetail() {
               </Tooltip>
             )}
 
-            {(complaint.status === 'In Progress' || (complaint.status === 'Open' && complaint.assigned_to_id)) && (
+            {(complaint.status === 'In Progress' || (complaint.status === 'Open' && complaint.assigned_to_id) || complaint.status === 'Resolved') && (
               <Button variant="contained" color="success" startIcon={<CheckCircle />} onClick={() => setResolveDialogOpen(true)}>
-                Resolve & Close
+                Initiate Closure Workflow
+              </Button>
+            )}
+
+            {complaint.status === 'Pending Admin Approval' && !complaint.admin_approved_by_id && (
+              <Button variant="contained" color="primary" startIcon={<VerifiedUser />} onClick={() => handleApprove('admin')}>
+                Admin Approve
+              </Button>
+            )}
+
+            {complaint.status === 'Pending Admin Approval' && complaint.admin_approved_by_id && !complaint.manager_approved_by_id && (
+              <Button variant="contained" color="secondary" startIcon={<VerifiedUser />} onClick={() => handleApprove('manager')}>
+                Manager Approve
               </Button>
             )}
             
@@ -318,6 +370,30 @@ export default function ComplaintDetail() {
                 <Typography variant="caption" color="textSecondary">Individual Detailed</Typography>
                 <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>{complaint.individual_detailed || '-'}</Typography>
               </Grid>
+              {rwo && (
+                <Grid item xs={12}>
+                  <Box sx={{ p: 2, bgcolor: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: 1 }}>
+                    <Typography variant="subtitle2" sx={{ color: '#1E3A8A', mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Build fontSize="small" />
+                      Repair Work Order Generated
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={4}>
+                        <Typography variant="caption" color="textSecondary">RWO Number</Typography>
+                        <Typography variant="body2" fontWeight={600} color="primary" sx={{ cursor: 'pointer', textDecoration: 'underline' }} onClick={() => navigate(`/rwos/${rwo.id}`)}>{rwo.rwo_number}</Typography>
+                      </Grid>
+                      <Grid item xs={12} sm={4}>
+                        <Typography variant="caption" color="textSecondary">Status</Typography>
+                        <Typography variant="body2" fontWeight={500}>{rwo.status}</Typography>
+                      </Grid>
+                      <Grid item xs={12} sm={4}>
+                        <Typography variant="caption" color="textSecondary">Vendor</Typography>
+                        <Typography variant="body2" fontWeight={500}>{rwo.vendor_name}</Typography>
+                      </Grid>
+                    </Grid>
+                  </Box>
+                </Grid>
+              )}
               {complaint.inspection_details && (
                 <Grid item xs={12}>
                   <Typography variant="caption" color="textSecondary">Inspection Details</Typography>
@@ -342,29 +418,57 @@ export default function ComplaintDetail() {
             </Paper>
           )}
 
-          {(complaint.status === 'Resolved' || complaint.status === 'Closed' || complaint.status === 'Reopened') && complaint.resolution_remarks && (
+          {(complaint.status === 'Resolved' || complaint.status === 'Closed' || complaint.status === 'Pending Admin Approval' || complaint.status === 'Reopened') && complaint.resolution_entered && (
             <Paper sx={{ p: 3, mb: 3, bgcolor: '#F0FDF4', border: '1px solid #BBF7D0' }}>
-              <Typography variant="h6" sx={{ color: '#166534', mb: 2 }}>Resolution Details</Typography>
-              <Typography variant="caption" color="textSecondary">Resolved By: {complaint.resolved_by_name} on {complaint.resolved_at ? dayjs(complaint.resolved_at).format('DD MMM YYYY HH:mm') : '-'}</Typography>
-              <Typography variant="body1" sx={{ mt: 1, mb: 2, whiteSpace: 'pre-wrap' }}>{complaint.resolution_remarks || 'No remarks provided.'}</Typography>
-
-              {complaint.feedback && (
-                <Box sx={{ mt: 2, mb: 2, p: 1.5, bgcolor: '#FFFFFF', borderRadius: 1, border: '1px solid #BBF7D0' }}>
-                  <Typography variant="subtitle2" color="textSecondary" sx={{ mb: 0.5 }}>Verification Feedback:</Typography>
-                  <Typography variant="body2" sx={{ fontStyle: 'italic', color: '#166534' }}>"{complaint.feedback}"</Typography>
-                </Box>
-              )}
+              <Typography variant="h6" sx={{ color: '#166534', mb: 2 }}>Closure Details</Typography>
               
-              {postRepairImages.length > 0 && (
-                <Grid container spacing={2}>
-                  {postRepairImages.map((img) => (
-                    <Grid item xs={6} sm={4} key={img.id}>
-                      <Box sx={{ position: 'relative', pt: '100%', borderRadius: 1, overflow: 'hidden', border: '1px solid #BBF7D0' }}>
-                        <img src={getFileUrl(img.image_url)} alt="Post Repair" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', cursor: 'pointer' }} onClick={() => setPreviewDialog({ open: true, url: getFileUrl(img.image_url) })} />
-                      </Box>
-                    </Grid>
-                  ))}
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="caption" color="textSecondary">Resolution Entered</Typography>
+                  <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', fontWeight: 500 }}>{complaint.resolution_entered}</Typography>
                 </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="caption" color="textSecondary">Closure Reason</Typography>
+                  <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', fontWeight: 500 }}>{complaint.closure_reason}</Typography>
+                </Grid>
+              </Grid>
+
+              <Box sx={{ mt: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                <Box sx={{ p: 1.5, border: '1px solid #E2E8F0', borderRadius: 1, flexGrow: 1, minWidth: 200, bgcolor: complaint.admin_approved_by_id ? '#ECFDF5' : '#FFFBEB' }}>
+                  <Typography variant="caption" color="textSecondary" display="block">Admin Approval</Typography>
+                  {complaint.admin_approved_by_id ? (
+                    <Typography variant="body2" fontWeight="bold" color="success.main">
+                      <CheckCircle sx={{ fontSize: 16, verticalAlign: 'middle', mr: 0.5 }} />
+                      Approved by {complaint.admin_approved_by_name}
+                    </Typography>
+                  ) : (
+                    <Typography variant="body2" color="warning.main">Pending</Typography>
+                  )}
+                </Box>
+                <Box sx={{ p: 1.5, border: '1px solid #E2E8F0', borderRadius: 1, flexGrow: 1, minWidth: 200, bgcolor: complaint.manager_approved_by_id ? '#ECFDF5' : '#FFFBEB' }}>
+                  <Typography variant="caption" color="textSecondary" display="block">Manager Approval</Typography>
+                  {complaint.manager_approved_by_id ? (
+                    <Typography variant="body2" fontWeight="bold" color="success.main">
+                      <CheckCircle sx={{ fontSize: 16, verticalAlign: 'middle', mr: 0.5 }} />
+                      Approved by {complaint.manager_approved_by_name}
+                    </Typography>
+                  ) : (
+                    <Typography variant="body2" color="warning.main">Pending</Typography>
+                  )}
+                </Box>
+              </Box>
+
+              {complaint.documents && complaint.documents.length > 0 && (
+                <Box sx={{ mt: 3 }}>
+                  <Typography variant="subtitle2" color="textSecondary" sx={{ mb: 1 }}>Service Documents</Typography>
+                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                    {complaint.documents.map((doc, idx) => (
+                      <Button key={idx} variant="outlined" size="small" onClick={() => window.open(getFileUrl(doc.file_url), '_blank')} startIcon={<Assignment />}>
+                        Document {idx + 1}
+                      </Button>
+                    ))}
+                  </Box>
+                </Box>
               )}
             </Paper>
           )}
@@ -543,45 +647,54 @@ export default function ComplaintDetail() {
 
       {/* Resolve Dialog */}
       <Dialog open={resolveDialogOpen} onClose={() => !actionLoading && setResolveDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Resolve Complaint</DialogTitle>
+        <DialogTitle>Initiate Closure Workflow</DialogTitle>
         <DialogContent>
-          <TextField inputProps={{ maxLength: 255 }}
+          <TextField
             autoFocus
             margin="dense"
-            label="Resolution Remarks"
+            label="Resolution Entered (Action Taken)"
             fullWidth
             multiline
-            rows={3}
+            rows={2}
             value={resolutionRemarks}
             onChange={(e) => setResolutionRemarks(e.target.value)}
-            sx={{ mb: 3, mt: 1 }}
+            sx={{ mb: 2, mt: 1 }}
           />
-          <Typography variant="subtitle2" sx={{ mb: 1 }}>Upload Post-Repair Photos</Typography>
+          <TextField
+            margin="dense"
+            label="Closure Reason"
+            fullWidth
+            multiline
+            rows={2}
+            value={closureReason}
+            onChange={(e) => setClosureReason(e.target.value)}
+            sx={{ mb: 3 }}
+          />
+          
+          <Typography variant="subtitle2" sx={{ mb: 1 }}>Upload Service Documents & Photos</Typography>
           <Box sx={{ border: '2px dashed #CBD5E1', borderRadius: 2, p: 2, textAlign: 'center', bgcolor: '#F8FAFC', mb: 2 }}>
-             <input type="file" multiple accept="image/*" style={{ display: 'none' }} ref={fileInputRef} onChange={handleResolutionImageChange} />
+             <input type="file" multiple accept="*/*" style={{ display: 'none' }} ref={fileInputRef} onChange={(e) => {
+               if (e.target.files) {
+                 const filesArray = Array.from(e.target.files);
+                 setClosureDocs(prev => [...prev, ...filesArray]);
+               }
+             }} />
             <Button variant="outlined" startIcon={<PhotoCamera />} onClick={() => fileInputRef.current.click()} size="small">
-              Capture / Select Photos
+              Select Service Reports / Photos
             </Button>
+            {closureDocs.length > 0 && (
+              <Box sx={{ mt: 2, textAlign: 'left' }}>
+                {closureDocs.map((doc, idx) => (
+                  <Chip key={idx} label={doc.name} onDelete={() => setClosureDocs(prev => prev.filter((_, i) => i !== idx))} sx={{ m: 0.5 }} />
+                ))}
+              </Box>
+            )}
           </Box>
-          {resolutionPreviewUrls.length > 0 && (
-            <Grid container spacing={2}>
-              {resolutionPreviewUrls.map((url, idx) => (
-                <Grid item xs={4} key={idx}>
-                  <Box sx={{ position: 'relative', pt: '100%', borderRadius: 1, overflow: 'hidden', border: '1px solid #E2E8F0' }}>
-                    <img src={url} alt={`Preview ${idx}`} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
-                    <IconButton size="small" onClick={() => removeResolutionImage(idx)} sx={{ position: 'absolute', top: 2, right: 2, bgcolor: 'rgba(255,255,255,0.8)' }}>
-                      <Close fontSize="small" color="error" />
-                    </IconButton>
-                  </Box>
-                </Grid>
-              ))}
-            </Grid>
-          )}
         </DialogContent>
         <DialogActions sx={{ p: 2, pt: 0 }}>
           <Button onClick={() => setResolveDialogOpen(false)} disabled={actionLoading}>Cancel</Button>
           <Button onClick={handleResolve} variant="contained" color="success" disabled={actionLoading} startIcon={actionLoading ? <CircularProgress size={20} /> : <CheckCircle />}>
-            Resolve & Close
+            Submit for Approval
           </Button>
         </DialogActions>
       </Dialog>

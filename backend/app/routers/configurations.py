@@ -3,7 +3,10 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import TenantConfiguration
 from app.schemas import TenantConfigurationOut, TenantConfigurationCreate, TenantConfigurationUpdate
-from app.auth import get_tenant_id
+from app.auth import get_tenant_id, get_site_id
+from app.models import LocationMaster
+from app.schemas import LocationMasterOut, LocationMasterCreate
+from typing import List
 
 router = APIRouter(prefix="/api/configurations", tags=["Configurations"])
 
@@ -57,3 +60,57 @@ def update_tenant_configuration(
     db.commit()
     db.refresh(config)
     return config
+
+@router.get("/locations", response_model=List[LocationMasterOut])
+def get_locations(
+    db: Session = Depends(get_db),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    locations = db.query(LocationMaster).filter(
+        LocationMaster.tenant_id == tenant_id,
+        LocationMaster.site_id == site_id
+    ).all()
+    return locations
+
+@router.post("/locations", response_model=LocationMasterOut)
+def create_location(
+    location_in: LocationMasterCreate,
+    db: Session = Depends(get_db),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    location = LocationMaster(
+        tenant_id=tenant_id,
+        site_id=site_id,
+        location_name=location_in.location_name,
+        location_code=location_in.location_code,
+        is_active=location_in.is_active
+    )
+    db.add(location)
+    db.commit()
+    db.refresh(location)
+    return location
+
+@router.put("/locations/{location_id}", response_model=LocationMasterOut)
+def update_location(
+    location_id: int,
+    location_in: LocationMasterCreate,
+    db: Session = Depends(get_db),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    location = db.query(LocationMaster).filter(
+        LocationMaster.id == location_id,
+        LocationMaster.tenant_id == tenant_id,
+        LocationMaster.site_id == site_id
+    ).first()
+    if not location:
+        raise HTTPException(status_code=404, detail="Location not found")
+        
+    location.location_name = location_in.location_name
+    location.location_code = location_in.location_code
+    location.is_active = location_in.is_active
+    db.commit()
+    db.refresh(location)
+    return location

@@ -520,6 +520,14 @@ class PRBase(BaseModel):
     required_for_room_id: Optional[int] = None
     building_id: Optional[int] = None
     department_name: Optional[str] = None
+    procurement_type: str = "Purchase"
+    rental_type: Optional[str] = None
+    rental_duration: Optional[int] = None
+    rental_duration_unit: Optional[str] = None
+    estimated_rental_cost: Optional[float] = None
+    cost_per_test: Optional[float] = None
+    reagent_rental_required: bool = False
+    justification: Optional[str] = Field(None, max_length=1000)
     items: List[PRItemBase] = []
 
 class PRCreate(PRBase):
@@ -586,12 +594,25 @@ class POBase(BaseModel):
     pr_id: Optional[int] = None
     indent_id: Optional[int] = None
     qr_id: Optional[int] = None
+    contract_id: Optional[int] = None
     po_type: str = "Formal"
     is_cash_purchase: bool = False
     advance_percentage: float = Field(default=0, ge=0, le=100)
     delivery_date: Optional[date] = None
     terms: Optional[str] = None
     annexure: Optional[str] = None
+    procurement_type: str = "Purchase"
+    rental_type: Optional[str] = None
+    rental_agreement_number: Optional[str] = None
+    rental_start_date: Optional[date] = None
+    rental_end_date: Optional[date] = None
+    billing_frequency: Optional[str] = None
+    security_deposit: float = 0
+    cost_per_test: Optional[float] = None
+    linked_reagent_agreement: Optional[str] = None
+    vendor_maintenance_responsibility: bool = False
+    return_conditions: Optional[str] = Field(None, max_length=1000)
+    renewal_terms: Optional[str] = Field(None, max_length=1000)
     items: List[POItemBase] = []
 
 class POApproveItemRequest(BaseModel):
@@ -641,6 +662,18 @@ class POOut(BaseModel):
     po_type: str = "Formal"
     is_cash_purchase: bool = False
     advance_percentage: float = 0
+    procurement_type: str = "Purchase"
+    rental_type: Optional[str] = None
+    rental_agreement_number: Optional[str] = None
+    rental_start_date: Optional[date] = None
+    rental_end_date: Optional[date] = None
+    billing_frequency: Optional[str] = None
+    security_deposit: float = 0
+    cost_per_test: Optional[float] = None
+    linked_reagent_agreement: Optional[str] = None
+    vendor_maintenance_responsibility: bool = False
+    return_conditions: Optional[str] = None
+    renewal_terms: Optional[str] = None
     total_amount: float
     delivery_date: Optional[date] = None
     status: str
@@ -670,6 +703,7 @@ class GateEntryBase(BaseModel):
     vehicle_number: Optional[str] = None
     vendor_id: Optional[int] = None
     po_id: Optional[int] = None
+    contract_id: Optional[int] = None
     project_id: Optional[int] = None  # Optional for Direct Invoice
     material_id: Optional[int] = None  # Optional for Direct Invoice
     quantity: Optional[float] = None  # Optional for Direct Invoice
@@ -810,6 +844,7 @@ class InvoiceBase(BaseModel):
     gate_entry_id: Optional[int] = None
     vendor_id: int
     po_id: Optional[int] = None
+    contract_id: Optional[int] = None
     consignee_id: Optional[int] = None
     buyer_id: Optional[int] = None
     srf_number: Optional[str] = None
@@ -957,6 +992,10 @@ class GRNItemBase(BaseModel):
     rate: float = 0
     rejection_reason: Optional[str] = None
     serial_numbers: Optional[List[str]] = []
+    installation_date: Optional[date] = None
+    rental_start_date: Optional[date] = None
+    expected_return_date: Optional[date] = None
+    warranty_end_date: Optional[date] = None
     # GST fields per line
     hsn_code: Optional[str] = None
     cgst_rate: float = 0
@@ -1008,6 +1047,7 @@ class GRNBase(BaseModel):
     po_id: Optional[int] = None  # Nullable for Direct Invoice
     warehouse_id: int
     gate_entry_id: Optional[int] = None
+    contract_id: Optional[int] = None
     project_id: Optional[int] = None  # Required — passed explicitly for Direct Invoice
     vendor_id: Optional[int] = None  # Required — passed explicitly for Direct Invoice
     receipt_type: str = "PO-Based"
@@ -1382,6 +1422,7 @@ class IndentItemOut(IndentItemBase):
 class IndentBase(BaseModel):
     institution_id: Optional[int] = None
     complaint_id: Optional[int] = None
+    rwo_id: Optional[int] = None
     room_id: Optional[int] = None
     building_id: Optional[int] = None
     floor: Optional[str] = None
@@ -1858,6 +1899,16 @@ class ComplaintImageOut(BaseModel):
     image_url: str
     is_resolution_image: bool
     uploaded_at: datetime
+    uploaded_at: datetime
+    class Config:
+        from_attributes = True
+
+class ComplaintDocumentOut(BaseModel):
+    id: int
+    document_type: Optional[str] = None
+    file_url: str
+    uploaded_at: datetime
+    uploaded_by_name: Optional[str] = None
     class Config:
         from_attributes = True
 
@@ -1868,6 +1919,9 @@ class ComplaintBase(BaseModel):
     department_name: Optional[str] = None
     building_id: Optional[int] = None
     room_id: Optional[int] = None
+    equipment_id: Optional[int] = None
+    contract_id: Optional[int] = None
+    rwo_id: Optional[int] = None
     location: Optional[str] = None
     nature_of_complaint: Optional[str] = None
     individual_detailed: Optional[str] = None
@@ -1877,6 +1931,10 @@ class ComplaintBase(BaseModel):
     resolution_remarks: Optional[str] = Field(None, max_length=255)
     inspection_details: Optional[str] = None
     feedback: Optional[str] = None
+    complaint_type: Optional[str] = None
+    closure_reason: Optional[str] = None
+    resolution_entered: Optional[str] = None
+    is_pm_calibration_call: bool = False
 
 class ComplaintCreate(BaseModel):
     docket_no: Optional[str] = None
@@ -1885,10 +1943,12 @@ class ComplaintCreate(BaseModel):
     department_name: Optional[str] = None
     building_id: Optional[int] = None
     room_id: Optional[int] = None
+    equipment_id: Optional[int] = None
     location: Optional[str] = None
     nature_of_complaint: Optional[str] = None
     individual_detailed: Optional[str] = None
     name_and_trade: Optional[str] = None
+    complaint_type: Optional[str] = None
     image_urls: List[str] = []
 
 class ComplaintUpdate(BaseModel):
@@ -1899,6 +1959,7 @@ class ComplaintUpdate(BaseModel):
     department_name: Optional[str] = None
     building_id: Optional[int] = None
     room_id: Optional[int] = None
+    equipment_id: Optional[int] = None
     location: Optional[str] = None
     nature_of_complaint: Optional[str] = None
     individual_detailed: Optional[str] = None
@@ -1922,6 +1983,14 @@ class ComplaintVerify(BaseModel):
     rejection_remarks: Optional[str] = Field(None, max_length=255)
     feedback: Optional[str] = None
 
+class ComplaintCloseRequest(BaseModel):
+    resolution_entered: str
+    closure_reason: str
+    document_urls: List[str] = [] # For supporting documents
+
+class ComplaintApproveRequest(BaseModel):
+    approval_type: str # 'admin' or 'manager'
+
 class ComplaintOut(ComplaintBase):
     id: int
     created_at: datetime
@@ -1942,12 +2011,16 @@ class ComplaintOut(ComplaintBase):
     created_by_name: Optional[str] = None
     resolved_by_name: Optional[str] = None
     verified_by_name: Optional[str] = None
+    admin_approved_by_name: Optional[str] = None
+    manager_approved_by_name: Optional[str] = None
+    equipment_code: Optional[str] = None
     images: List[ComplaintImageOut] = []
+    documents: List[ComplaintDocumentOut] = []
     class Config:
         from_attributes = True
 
-
 # ── Equipment Management ────────────────────────────────────────────────
+
 
 class EquipmentUpdateSerial(BaseModel):
     serial_number: str = Field(..., min_length=1)
@@ -1972,9 +2045,52 @@ class EquipmentItemOut(BaseModel):
     installation_date: Optional[datetime] = None
     installation_report_url: Optional[str] = None
     installation_remarks: Optional[str] = None
+    installed_by: Optional[str] = None
+    contact_number: Optional[str] = None
     warehouse_id: Optional[int] = None
     project_id: Optional[int] = None
     status: str
+    po_id: Optional[int] = None
+    institution_id: Optional[int] = None
+    location_id: Optional[int] = None
+    make: Optional[str] = None
+    model: Optional[str] = None
+    machine_cost: Optional[float] = None
+    machine_type: Optional[str] = None
+    serial_number_photo_url: Optional[str] = None
+    equipment_photo_url: Optional[str] = None
+    warranty_available: bool = False
+    warranty_expiry_date: Optional[date] = None
+    amc_cmc_end_date: Optional[date] = None
+    amc_po_number: Optional[str] = None
+    amc_cost: Optional[float] = None
+    pm_required: bool = False
+    last_pm_date: Optional[date] = None
+    next_pm_due_date: Optional[date] = None
+    calibration_required: bool = False
+    last_calibration_date: Optional[date] = None
+    next_calibration_due_date: Optional[date] = None
+    battery_details: Optional[str] = None
+    
+    # Rental & Procurement Fields
+    procurement_type: str = "Purchase"
+    rental_type: Optional[str] = None
+    rental_agreement_number: Optional[str] = None
+    rental_vendor_id: Optional[int] = None
+    rental_start_date: Optional[date] = None
+    rental_end_date: Optional[date] = None
+    rental_cost: Optional[float] = None
+    billing_frequency: Optional[str] = None
+    cost_per_test: Optional[float] = None
+    linked_reagents: Optional[List[int]] = None
+    agreement_status: Optional[str] = None
+    renewal_date: Optional[date] = None
+    expected_return_date: Optional[date] = None
+    rental_status: Optional[str] = None
+    warranty_end_date: Optional[date] = None
+    amc_cmc_status: Optional[str] = None
+    rental_vendor_name: Optional[str] = None
+
     created_at: datetime
     updated_at: datetime
     material_name: Optional[str] = None
@@ -1982,7 +2098,170 @@ class EquipmentItemOut(BaseModel):
     grn_number: Optional[str] = None
     warehouse_name: Optional[str] = None
     project_name: Optional[str] = None
+    institution_name: Optional[str] = None
+    location_name: Optional[str] = None
+    class Config:
+        from_attributes = True
+
+class LocationMasterBase(BaseModel):
+    location_name: str
+    location_code: str
+    is_active: bool = True
+
+class LocationMasterCreate(LocationMasterBase):
+    pass
+
+class LocationMasterOut(LocationMasterBase):
+    id: int
+    tenant_id: int
+    site_id: int
+    created_at: datetime
+    class Config:
+        from_attributes = True
+
+class EquipmentHistoryOut(BaseModel):
+    id: int
+    equipment_id: int
+    event_type: str
+    event_date: datetime
+    description: Optional[str] = None
+    reference_id: Optional[str] = None
+    created_by_name: Optional[str] = None
+    class Config:
+        from_attributes = True
+
+class EquipmentWriteOffBase(BaseModel):
+    write_off_date: date
+    reason: str
+    approval_details: Optional[str] = None
+
+class EquipmentWriteOffCreate(EquipmentWriteOffBase):
+    pass
+
+class EquipmentWriteOffOut(EquipmentWriteOffBase):
+    id: int
+    equipment_id: int
+    document_url: Optional[str] = None
+    created_at: datetime
+    created_by_name: Optional[str] = None
     class Config:
         from_attributes = True
 
 
+# == Contracts Management ==
+
+class ContractItemBase(BaseModel):
+    material_id: Optional[int] = None
+    equipment_id: Optional[int] = None
+    uom: Optional[str] = None
+    rate: float = 0
+    gst: float = 0
+    delivery_lead_time: Optional[int] = None
+    contract_quantity: Optional[float] = None
+    covered_components: Optional[str] = None
+    excluded_components: Optional[str] = None
+
+class ContractItemOut(ContractItemBase):
+    id: int
+    contract_id: int
+    consumed_quantity: float = 0
+    remaining_quantity: Optional[float] = None
+    material_name: Optional[str] = None
+    equipment_serial: Optional[str] = None
+    class Config:
+        from_attributes = True
+
+class ContractBase(BaseModel):
+    contract_type: str
+    vendor_id: int
+    institution_id: Optional[int] = None
+    department_id: Optional[int] = None
+    start_date: date
+    end_date: date
+    contract_value: Optional[float] = None
+    payment_terms: Optional[str] = None
+    renewal_terms: Optional[str] = None
+    sla_details: Optional[str] = None
+    spare_parts_included: bool = False
+    consumables_included: bool = False
+    items: List[ContractItemBase] = []
+
+class ContractCreate(ContractBase):
+    pass
+
+class ContractUpdate(BaseModel):
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    contract_value: Optional[float] = None
+    status: Optional[str] = None
+    payment_terms: Optional[str] = None
+    renewal_terms: Optional[str] = None
+    sla_details: Optional[str] = None
+    spare_parts_included: Optional[bool] = None
+    consumables_included: Optional[bool] = None
+
+class ContractOut(ContractBase):
+    id: int
+    contract_number: str
+    status: str
+    created_at: datetime
+    vendor_name: Optional[str] = None
+    institution_name: Optional[str] = None
+    department_name: Optional[str] = None
+    items: List[ContractItemOut] = []
+    class Config:
+        from_attributes = True
+
+# == Repair Work Orders ==
+
+class RepairWorkOrderBase(BaseModel):
+    complaint_id: int
+    equipment_id: int
+    vendor_id: int
+    contract_id: Optional[int] = None
+    technician_name: Optional[str] = None
+    sla_details: Optional[str] = None
+    problem_description: Optional[str] = None
+    target_completion_date: Optional[date] = None
+
+class RepairWorkOrderCreate(RepairWorkOrderBase):
+    pass
+
+class RepairWorkOrderUpdate(BaseModel):
+    technician_name: Optional[str] = None
+    problem_description: Optional[str] = None
+    target_completion_date: Optional[date] = None
+    status: Optional[str] = None
+
+class RepairWorkOrderOut(RepairWorkOrderBase):
+    id: int
+    rwo_number: str
+    status: str
+    created_at: datetime
+    equipment_serial: Optional[str] = None
+    vendor_name: Optional[str] = None
+    contract_number: Optional[str] = None
+    docket_no: Optional[str] = None
+    class Config:
+        from_attributes = True
+
+# ── Rentals ──────────────────────────────────────────────────────────────
+
+class ReagentConsumptionLogCreate(BaseModel):
+    equipment_id: int
+    consumption_date: date
+    tests_performed: int = Field(..., gt=0)
+    remarks: Optional[str] = None
+
+class ReagentConsumptionLogOut(BaseModel):
+    id: int
+    equipment_id: int
+    consumption_date: date
+    tests_performed: int
+    cost_per_test: float
+    total_cost: float
+    remarks: Optional[str] = None
+    logged_by_id: int
+    created_at: datetime
+    class Config:
+        from_attributes = True

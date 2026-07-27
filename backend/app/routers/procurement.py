@@ -188,6 +188,17 @@ def create_purchase_request(
         department_name=data.department_name,
         required_date=data.required_date,
         remarks=data.remarks,
+        
+        # Rental fields
+        procurement_type=data.procurement_type,
+        rental_type=data.rental_type,
+        rental_duration=data.rental_duration,
+        rental_duration_unit=data.rental_duration_unit,
+        estimated_rental_cost=data.estimated_rental_cost,
+        cost_per_test=data.cost_per_test,
+        reagent_rental_required=data.reagent_rental_required,
+        justification=data.justification,
+        
         status=data.status or "Draft",
         tenant_id=tenant_id,
         site_id=site_id
@@ -771,6 +782,18 @@ def get_purchase_order(
         po_type=po.po_type,
         is_cash_purchase=po.is_cash_purchase,
         advance_percentage=po.advance_percentage,
+        procurement_type=po.procurement_type,
+        rental_type=po.rental_type,
+        rental_agreement_number=po.rental_agreement_number,
+        rental_start_date=po.rental_start_date,
+        rental_end_date=po.rental_end_date,
+        billing_frequency=po.billing_frequency,
+        security_deposit=po.security_deposit,
+        cost_per_test=po.cost_per_test,
+        linked_reagent_agreement=po.linked_reagent_agreement,
+        vendor_maintenance_responsibility=po.vendor_maintenance_responsibility,
+        return_conditions=po.return_conditions,
+        renewal_terms=po.renewal_terms,
         total_amount=po.total_amount,
         delivery_date=po.delivery_date, status=po.status,
         current_approval_level=po.current_approval_level or 1,
@@ -818,10 +841,26 @@ def create_purchase_order(
         pr_id=data.pr_id,
         indent_id=data.indent_id,
         qr_id=data.qr_id,
+        contract_id=data.contract_id,
         po_type=data.po_type or ("Formal" if (data.pr_id or data.indent_id or data.qr_id) else "Informal"),
         is_cash_purchase=data.is_cash_purchase,
         advance_percentage=data.advance_percentage,
         delivery_date=data.delivery_date,
+        
+        # Rental fields mapping
+        procurement_type=data.procurement_type,
+        rental_type=data.rental_type,
+        rental_agreement_number=data.rental_agreement_number,
+        rental_start_date=data.rental_start_date,
+        rental_end_date=data.rental_end_date,
+        billing_frequency=data.billing_frequency,
+        security_deposit=data.security_deposit,
+        cost_per_test=data.cost_per_test,
+        linked_reagent_agreement=data.linked_reagent_agreement,
+        vendor_maintenance_responsibility=data.vendor_maintenance_responsibility,
+        return_conditions=data.return_conditions,
+        renewal_terms=data.renewal_terms,
+        
         status=actual_status,
         terms=data.terms,
         annexure=data.annexure,
@@ -834,8 +873,20 @@ def create_purchase_order(
     db.flush()
 
     total = 0
+    contract = None
+    if data.contract_id:
+        from app.models import Contract
+        contract = db.query(Contract).filter(Contract.id == data.contract_id).first()
+
     for item_data in data.items:
-        gross_amt = round(item_data.quantity * item_data.rate, 2)
+        rate = item_data.rate
+        if contract:
+            c_item = next((i for i in contract.items if i.material_id == item_data.material_id), None)
+            if not c_item:
+                raise HTTPException(status_code=400, detail=f"Material {item_data.material_id} not covered in contract")
+            rate = c_item.rate
+            
+        gross_amt = round(item_data.quantity * rate, 2)
         disc_amt = round(gross_amt * (item_data.discount_percent / 100), 2)
         net_amt = gross_amt - disc_amt
         
@@ -852,7 +903,7 @@ def create_purchase_order(
             po_id=po.id,
             material_id=item_data.material_id,
             quantity=item_data.quantity,
-            rate=item_data.rate,
+            rate=rate,
             amount=gross_amt,
             discount_percent=item_data.discount_percent,
             cgst_percentage=item_data.cgst_percentage,
@@ -911,7 +962,14 @@ def update_purchase_order(
     if "status" in update_data:
         po.status = update_data["status"]
     
-    for k in ["vendor_id", "project_id", "delivery_date", "po_type", "terms", "annexure", "is_cash_purchase", "advance_percentage"]:
+    po_update_keys = [
+        "vendor_id", "project_id", "delivery_date", "po_type", "terms", "annexure", 
+        "is_cash_purchase", "advance_percentage", "contract_id",
+        "procurement_type", "rental_type", "rental_agreement_number", "rental_start_date",
+        "rental_end_date", "billing_frequency", "security_deposit", "cost_per_test",
+        "linked_reagent_agreement", "vendor_maintenance_responsibility", "return_conditions", "renewal_terms"
+    ]
+    for k in po_update_keys:
         if k in update_data:
             setattr(po, k, update_data[k])
             
@@ -919,8 +977,20 @@ def update_purchase_order(
         db.query(PurchaseOrderItem).filter(PurchaseOrderItem.po_id == id).delete()
         
         total = 0
+        contract = None
+        if po.contract_id:
+            from app.models import Contract
+            contract = db.query(Contract).filter(Contract.id == po.contract_id).first()
+
         for item_data in data.items:
-            gross_amt = round(item_data.quantity * item_data.rate, 2)
+            rate = item_data.rate
+            if contract:
+                c_item = next((i for i in contract.items if i.material_id == item_data.material_id), None)
+                if not c_item:
+                    raise HTTPException(status_code=400, detail=f"Material {item_data.material_id} not covered in contract")
+                rate = c_item.rate
+                
+            gross_amt = round(item_data.quantity * rate, 2)
             disc_amt = round(gross_amt * (item_data.discount_percent / 100), 2)
             net_amt = gross_amt - disc_amt
             
@@ -937,7 +1007,7 @@ def update_purchase_order(
                 po_id=po.id,
                 material_id=item_data.material_id,
                 quantity=item_data.quantity,
-                rate=item_data.rate,
+                rate=rate,
                 amount=gross_amt,
                 discount_percent=item_data.discount_percent,
                 cgst_percentage=item_data.cgst_percentage,

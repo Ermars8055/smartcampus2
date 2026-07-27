@@ -183,7 +183,12 @@ def complete_installation(
     serial_number: Optional[str] = Form(None),
     installation_date: Optional[str] = Form(None),
     installation_remarks: Optional[str] = Form(None),
+    installed_by: Optional[str] = Form(None),
+    contact_number: Optional[str] = Form(None),
+    location_id: Optional[int] = Form(None),
     file: Optional[UploadFile] = File(None),
+    equipment_photo: Optional[UploadFile] = File(None),
+    serial_number_photo: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("equipment", "update")),
     tenant_id: int = Depends(get_tenant_id),
@@ -211,32 +216,70 @@ def complete_installation(
 
     if installation_remarks:
         item.installation_remarks = installation_remarks
-
-    # Process file upload if provided
-    if file:
-        allowed_types = ["application/pdf", "image/jpeg", "image/png", "image/jpg", "image/webp"]
-        if file.content_type not in allowed_types:
-            raise HTTPException(status_code=400, detail="Only PDF and Image files are allowed for installation reports.")
         
-        contents = file.file.read()
+    if installed_by:
+        item.installed_by = installed_by
+    if contact_number:
+        item.contact_number = contact_number
+        
+    if location_id:
+        item.location_id = location_id
+        # Update Asset Code if location is set
+        from app.models import LocationMaster, Institution
+        from app.utils.sequences import get_next_number
+        
+        loc = db.query(LocationMaster).filter(LocationMaster.id == location_id).first()
+        inst = db.query(Institution).filter(Institution.id == item.institution_id).first() if item.institution_id else None
+        
+        loc_code = loc.location_code if loc else "LOC"
+        inst_code = inst.code if inst else "INST"
+        mat_code = item.material.code if item.material else "EQP"
+        
+        if loc and item.status != "Operational":
+            # Generate new asset code
+            seq_num = get_next_number(db, tenant_id, site_id, f"EQP_{loc_code}", f"EQP_{loc_code}")
+            # Format: {Institution}-{Location Code}-{Equipment Code}-{Running Serial Number}
+            # The get_next_number usually returns something like EQP_WD17-001, we want to format it custom.
+            # We will use a custom sequence generation here or just format the returned string
+            seq = seq_num.split('-')[-1] if '-' in seq_num else seq_num[-3:]
+            new_asset_code = f"{inst_code}-{loc_code}-{mat_code}-{seq}"
+            item.equipment_code = new_asset_code
+
+    def handle_upload(upload_file: UploadFile, folder: str):
+        allowed_types = ["application/pdf", "image/jpeg", "image/png", "image/jpg", "image/webp"]
+        if upload_file.content_type not in allowed_types:
+            raise HTTPException(status_code=400, detail=f"Invalid file type for {folder}")
+        contents = upload_file.file.read()
         if len(contents) > 10 * 1024 * 1024:
-            raise HTTPException(status_code=400, detail="Installation report file size must be less than 10MB.")
-
-        dir_path = os.path.join("uploads/installation_reports", str(tenant_id))
+            raise HTTPException(status_code=400, detail=f"File size for {folder} must be less than 10MB.")
+        dir_path = os.path.join(f"uploads/{folder}", str(tenant_id))
         os.makedirs(dir_path, exist_ok=True)
-        ext = os.path.splitext(file.filename)[1] or ".pdf"
-        timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
-        unique_name = f"{timestamp}_{uuid.uuid4().hex[:8]}{ext}"
+        ext = os.path.splitext(upload_file.filename)[1] or ".pdf"
+        unique_name = f"{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}{ext}"
         file_path = os.path.join(dir_path, unique_name)
-
         with open(file_path, "wb") as f:
             f.write(contents)
+        return f"/api/{file_path}"
 
-        item.installation_report_url = f"/api/{file_path}"
+    if file:
+        item.installation_report_url = handle_upload(file, "installation_reports")
+    if equipment_photo:
+        item.equipment_photo_url = handle_upload(equipment_photo, "equipment_photos")
+    if serial_number_photo:
+        item.serial_number_photo_url = handle_upload(serial_number_photo, "serial_number_photos")
 
     item.installation_status = "Installed"
     item.status = "Operational"
     item.updated_at = datetime.utcnow()
+    
+    # Create History
+    from app.models import EquipmentHistory
+    db.add(EquipmentHistory(
+        equipment_id=item.id,
+        event_type="Installation",
+        description=f"Installed by {installed_by or 'Unknown'} at {item.installation_date}",
+        created_by_id=current_user.id
+    ))
 
     db.add(AuditLog(
         tenant_id=tenant_id, site_id=site_id,
@@ -254,3 +297,125 @@ def complete_installation(
         "status": item.status,
         "installation_report_url": item.installation_report_url
     }
+
+@router.get("/{id}/qr")
+def get_qr_data(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("equipment", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    item = db.query(EquipmentItem).filter(
+        EquipmentItem.id == id,
+        EquipmentItem.tenant_id == tenant_id,
+        EquipmentItem.site_id == site_id
+    ).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Equipment item not found")
+        
+    return {
+        "department": "Biomedical Engineering Department" if item.is_biomedical else "Facilities Department",
+        "asset_id": item.equipment_code,
+        "equipment_name": item.material.name if item.material else "",
+        "department_used": item.location.location_name if item.location else "",
+        "make_model": f"{item.make or ''} / {item.model or ''}".strip(" /"),
+        "serial_number": item.serial_number or "",
+        "machine_type": item.machine_type or "",
+        "grn_number": item.grn.grn_number if item.grn else "",
+        "pm_due_date": item.next_pm_due_date.isoformat() if item.next_pm_due_date else ""
+    }
+
+from pydantic import BaseModel
+class WriteOffRequest(BaseModel):
+    write_off_date: str
+    reason: str
+    approval_details: Optional[str] = None
+    document_url: Optional[str] = None
+
+@router.post("/{id}/writeoff")
+def write_off_equipment(
+    id: int,
+    payload: WriteOffRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("equipment", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    item = db.query(EquipmentItem).filter(
+        EquipmentItem.id == id,
+        EquipmentItem.tenant_id == tenant_id,
+        EquipmentItem.site_id == site_id
+    ).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Equipment item not found")
+        
+    from app.models import EquipmentWriteOff, EquipmentHistory
+    from datetime import date
+    
+    writeoff = EquipmentWriteOff(
+        equipment_id=item.id,
+        write_off_date=date.fromisoformat(payload.write_off_date.replace("Z", "+00:00").split("T")[0]),
+        reason=payload.reason,
+        approval_details=payload.approval_details,
+        document_url=payload.document_url,
+        created_by_id=current_user.id
+    )
+    db.add(writeoff)
+    
+    item.status = "Written Off"
+    item.updated_at = datetime.utcnow()
+    
+    db.add(EquipmentHistory(
+        equipment_id=item.id,
+        event_type="Write-off",
+        description=payload.reason,
+        created_by_id=current_user.id
+    ))
+    
+    db.commit()
+    return {"message": "Equipment written off successfully"}
+
+@router.get("/reports/count")
+def get_equipment_counts(
+    institution_id: Optional[int] = None,
+    category_id: Optional[int] = None,
+    vendor_id: Optional[int] = None,
+    location_id: Optional[int] = None,
+    status: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("equipment", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    from sqlalchemy import func
+    q = db.query(
+        Material.name.label("equipment_name"), 
+        func.count(EquipmentItem.id).label("count")
+    ).join(
+        EquipmentItem, EquipmentItem.material_id == Material.id
+    ).filter(
+        EquipmentItem.tenant_id == tenant_id,
+        EquipmentItem.site_id == site_id
+    )
+    
+    if institution_id:
+        q = q.filter(EquipmentItem.institution_id == institution_id)
+    if location_id:
+        q = q.filter(EquipmentItem.location_id == location_id)
+    if status:
+        q = q.filter(EquipmentItem.status == status)
+    if category_id:
+        q = q.filter(Material.category_id == category_id)
+        
+    # Vendor would be via GRN->PO->Vendor or rental_vendor
+    if vendor_id:
+        from app.models import GRN
+        q = q.outerjoin(GRN, EquipmentItem.grn_id == GRN.id).filter(GRN.vendor_id == vendor_id)
+        
+    results = q.group_by(Material.name).all()
+    
+    return [
+        {"equipment_name": r.equipment_name, "count": r.count}
+        for r in results
+    ]

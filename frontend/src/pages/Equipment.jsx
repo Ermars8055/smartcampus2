@@ -7,7 +7,7 @@ import {
 } from '@mui/material';
 import {
   Search, Build, QrCode, UploadFile, CheckCircle, Warning, OpenInNew,
-  LocalHospital, PrecisionManufacturing, Edit, FilterList, Refresh
+  LocalHospital, PrecisionManufacturing, Edit, FilterList, Refresh, Assignment, DeleteOutline, Print, Science
 } from '@mui/icons-material';
 import api, { getFileUrl } from '../services/api';
 import { formatDate } from '../utils/dateUtils';
@@ -22,6 +22,7 @@ export default function Equipment() {
 
   const [equipmentList, setEquipmentList] = useState([]);
   const [warehouses, setWarehouses] = useState([]);
+  const [locations, setLocations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('all'); // 'all', 'pending_serial', 'pending_installation'
   const [search, setSearch] = useState('');
@@ -37,18 +38,42 @@ export default function Equipment() {
   const [installSerial, setInstallSerial] = useState('');
   const [installDate, setInstallDate] = useState('');
   const [installRemarks, setInstallRemarks] = useState('');
+  const [installLocation, setInstallLocation] = useState('');
+  const [installedBy, setInstalledBy] = useState('');
+  const [contactNumber, setContactNumber] = useState('');
   const [installFile, setInstallFile] = useState(null);
+  const [equipmentPhoto, setEquipmentPhoto] = useState(null);
+  const [serialPhoto, setSerialPhoto] = useState(null);
   const [installSubmitting, setInstallSubmitting] = useState(false);
+
+  // QR Dialog
+  const [qrDialog, setQrDialog] = useState(null);
+  const [qrData, setQrData] = useState(null);
+  
+  // Write Off Dialog
+  const [writeOffDialog, setWriteOffDialog] = useState(null);
+  const [writeOffDate, setWriteOffDate] = useState('');
+  const [writeOffReason, setWriteOffReason] = useState('');
+  const [writeOffSubmitting, setWriteOffSubmitting] = useState(false);
+
+  // Reagent Consumption Dialog
+  const [consumptionDialog, setConsumptionDialog] = useState(null);
+  const [consumptionDate, setConsumptionDate] = useState('');
+  const [testsPerformed, setTestsPerformed] = useState('');
+  const [consumptionRemarks, setConsumptionRemarks] = useState('');
+  const [consumptionSubmitting, setConsumptionSubmitting] = useState(false);
 
   const loadData = async () => {
     setLoading(true);
     try {
-      const [eqRes, whRes] = await Promise.all([
+      const [eqRes, whRes, locRes] = await Promise.all([
         api.get('/api/equipment'),
-        api.get('/api/warehouses')
+        api.get('/api/warehouses'),
+        api.get('/api/configurations/locations')
       ]);
       setEquipmentList(eqRes.data || []);
       setWarehouses(whRes.data || []);
+      setLocations(locRes.data || []);
     } catch (err) {
       showMessage(err.response?.data?.detail || 'Failed to load equipment data', 'Error', 'error');
     }
@@ -133,7 +158,12 @@ export default function Equipment() {
     setInstallSerial(item.serial_number || '');
     setInstallDate(new Date().toISOString().split('T')[0]);
     setInstallRemarks('');
+    setInstallLocation(item.location_id || '');
+    setInstalledBy('');
+    setContactNumber('');
     setInstallFile(null);
+    setEquipmentPhoto(null);
+    setSerialPhoto(null);
   };
 
   // Handle Installation Submit
@@ -150,8 +180,23 @@ export default function Equipment() {
       if (installRemarks.trim()) {
         formData.append('installation_remarks', installRemarks.trim());
       }
+      if (installedBy.trim()) {
+        formData.append('installed_by', installedBy.trim());
+      }
+      if (contactNumber.trim()) {
+        formData.append('contact_number', contactNumber.trim());
+      }
+      if (installLocation) {
+        formData.append('location_id', installLocation);
+      }
       if (installFile) {
         formData.append('file', installFile);
+      }
+      if (equipmentPhoto) {
+        formData.append('equipment_photo', equipmentPhoto);
+      }
+      if (serialPhoto) {
+        formData.append('serial_number_photo', serialPhoto);
       }
 
       await api.post(`/api/equipment/${installDialog.id}/installation`, formData, {
@@ -164,6 +209,57 @@ export default function Equipment() {
       showMessage(err.response?.data?.detail || 'Failed to complete installation', 'Error', 'error');
     }
     setInstallSubmitting(false);
+  };
+
+  const handleOpenQr = async (item) => {
+    try {
+      const res = await api.get(`/api/equipment/${item.id}/qr`);
+      setQrData(res.data);
+      setQrDialog(item);
+    } catch (err) {
+      showMessage('Failed to load QR data', 'Error', 'error');
+    }
+  };
+
+  const handleWriteOffSubmit = async () => {
+    if (!writeOffDate || !writeOffReason) {
+      showMessage('Date and reason are required', 'Warning', 'warning');
+      return;
+    }
+    setWriteOffSubmitting(true);
+    try {
+      await api.post(`/api/equipment/${writeOffDialog.id}/writeoff`, {
+        write_off_date: writeOffDate,
+        reason: writeOffReason
+      });
+      showMessage('Equipment written off successfully', 'Success', 'success');
+      setWriteOffDialog(null);
+      loadData();
+    } catch (err) {
+      showMessage(err.response?.data?.detail || 'Failed to write off', 'Error', 'error');
+    }
+    setWriteOffSubmitting(false);
+  };
+
+  const handleConsumptionSubmit = async () => {
+    if (!consumptionDate || !testsPerformed || parseInt(testsPerformed, 10) <= 0) {
+      showMessage('Please enter a valid date and number of tests.', 'Warning', 'warning');
+      return;
+    }
+    setConsumptionSubmitting(true);
+    try {
+      await api.post('/api/rentals/consumption', {
+        equipment_id: consumptionDialog.id,
+        consumption_date: consumptionDate,
+        tests_performed: parseInt(testsPerformed, 10),
+        remarks: consumptionRemarks
+      });
+      showMessage('Reagent consumption logged successfully!', 'Success', 'success');
+      setConsumptionDialog(null);
+    } catch (err) {
+      showMessage(err.response?.data?.detail || 'Failed to log consumption', 'Error', 'error');
+    }
+    setConsumptionSubmitting(false);
   };
 
   return (
@@ -303,6 +399,18 @@ export default function Equipment() {
                   <Typography variant="caption" sx={{ display: 'block' }}>
                     <strong>Installation:</strong> {item.installation_status}
                   </Typography>
+                  {item.rental_agreement_number && (
+                    <>
+                      <Typography variant="caption" sx={{ display: 'block', mt: 0.5 }}>
+                        <strong>Rental Agreement:</strong> {item.rental_agreement_number}
+                      </Typography>
+                      {item.rental_start_date && (
+                        <Typography variant="caption" sx={{ display: 'block' }}>
+                          <strong>Rental Period:</strong> {formatDate(item.rental_start_date)} - {item.rental_end_date ? formatDate(item.rental_end_date) : 'Ongoing'}
+                        </Typography>
+                      )}
+                    </>
+                  )}
                 </Box>
 
                 <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
@@ -319,6 +427,11 @@ export default function Equipment() {
                   {item.installation_report_url && (
                     <Button size="small" variant="outlined" color="success" startIcon={<OpenInNew />} onClick={() => window.open(getFileUrl(item.installation_report_url), '_blank')}>
                       Report
+                    </Button>
+                  )}
+                  {item.status === 'Operational' && (item.cost_per_test > 0 || item.rental_type === 'Reagent Rental') && (
+                    <Button size="small" variant="outlined" color="secondary" startIcon={<Science />} onClick={() => { setConsumptionDialog(item); setConsumptionDate(new Date().toISOString().split('T')[0]); setTestsPerformed(''); setConsumptionRemarks(''); }}>
+                      Log Usage
                     </Button>
                   )}
                 </Box>
@@ -355,6 +468,11 @@ export default function Equipment() {
                       {item.is_biomedical && (
                         <Tooltip title="Biomedical Equipment">
                           <LocalHospital sx={{ fontSize: 16, color: '#E11D48', ml: 0.5, verticalAlign: 'middle' }} />
+                        </Tooltip>
+                      )}
+                      {item.rental_agreement_number && (
+                        <Tooltip title={`Rental Agreement: ${item.rental_agreement_number} | Period: ${item.rental_start_date ? formatDate(item.rental_start_date) : ''} - ${item.rental_end_date ? formatDate(item.rental_end_date) : 'Ongoing'}`}>
+                          <Assignment sx={{ fontSize: 16, color: '#0EA5E9', ml: 0.5, verticalAlign: 'middle' }} />
                         </Tooltip>
                       )}
                     </TableCell>
@@ -408,6 +526,27 @@ export default function Equipment() {
                           <Tooltip title="View Installation Report">
                             <IconButton size="small" color="success" onClick={() => window.open(getFileUrl(item.installation_report_url), '_blank')}>
                               <OpenInNew fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                        {item.status === 'Operational' && (
+                          <Tooltip title="Print QR Code">
+                            <IconButton size="small" color="primary" onClick={() => handleOpenQr(item)}>
+                              <QrCode fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                        {item.status === 'Operational' && (item.cost_per_test > 0 || item.rental_type === 'Reagent Rental') && (
+                          <Tooltip title="Log Reagent Usage">
+                            <IconButton size="small" color="secondary" onClick={() => { setConsumptionDialog(item); setConsumptionDate(new Date().toISOString().split('T')[0]); setTestsPerformed(''); setConsumptionRemarks(''); }}>
+                              <Science fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                        {item.status === 'Operational' && (
+                          <Tooltip title="Write-off Equipment">
+                            <IconButton size="small" color="error" onClick={() => { setWriteOffDialog(item); setWriteOffDate(new Date().toISOString().split('T')[0]); setWriteOffReason(''); }}>
+                              <DeleteOutline fontSize="small" />
                             </IconButton>
                           </Tooltip>
                         )}
@@ -493,26 +632,90 @@ export default function Equipment() {
                 />
               </Grid>
 
-              <Grid item xs={12}>
-                <Box sx={{ p: 2, border: '2px dashed #CBD5E1', borderRadius: 2, textAlign: 'center', bgcolor: '#F8FAFC' }}>
-                  <Typography variant="body2" sx={{ fontWeight: 600, color: '#334155', mb: 0.5 }}>
-                    📎 Upload Installation Compliance Report
-                  </Typography>
-                  <Typography variant="caption" color="textSecondary" sx={{ display: 'block', mb: 1 }}>
-                    Upload signed installation certificate / report (PDF or Image, max 10MB)
-                  </Typography>
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="Installed By (Engineer Name)"
+                  value={installedBy}
+                  onChange={e => setInstalledBy(e.target.value)}
+                />
+              </Grid>
+              
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="Contact Number"
+                  value={contactNumber}
+                  onChange={e => setContactNumber(e.target.value)}
+                />
+              </Grid>
+              
+              <Grid item xs={12} sm={4}>
+                <FormControl size="small" fullWidth>
+                  <InputLabel>Location (Department/Ward)</InputLabel>
+                  <Select value={installLocation} onChange={e => setInstallLocation(e.target.value)} label="Location (Department/Ward)">
+                    <MenuItem value="">Select Location...</MenuItem>
+                    {locations.filter(l => l.is_active).map(l => (
+                      <MenuItem key={l.id} value={l.id}>{l.location_name} ({l.location_code})</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
 
+              <Grid item xs={12} sm={4}>
+                <Box sx={{ p: 2, border: '1px dashed #CBD5E1', borderRadius: 2, textAlign: 'center', bgcolor: '#F8FAFC', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: '#334155', mb: 0.5 }}>
+                    📎 Installation Report
+                  </Typography>
                   {installFile ? (
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                      <Typography variant="caption" sx={{ fontWeight: 700, color: '#059669' }}>
-                        Selected: {installFile.name}
-                      </Typography>
-                      <Button size="small" color="error" onClick={() => setInstallFile(null)}>Remove</Button>
+                      <Typography variant="caption" sx={{ fontWeight: 700, color: '#059669' }}>Selected: {installFile.name}</Typography>
+                      <IconButton size="small" color="error" onClick={() => setInstallFile(null)}><DeleteOutline fontSize="small" /></IconButton>
                     </Box>
                   ) : (
                     <Button variant="outlined" component="label" size="small" startIcon={<UploadFile />}>
-                      Select File
+                      Upload PDF/Img
                       <input type="file" hidden accept=".pdf,.jpg,.jpeg,.png,.webp" onChange={e => setInstallFile(e.target.files[0])} />
+                    </Button>
+                  )}
+                </Box>
+              </Grid>
+              
+              <Grid item xs={12} sm={4}>
+                <Box sx={{ p: 2, border: '1px dashed #CBD5E1', borderRadius: 2, textAlign: 'center', bgcolor: '#F8FAFC', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: '#334155', mb: 0.5 }}>
+                    📸 Equipment Photo
+                  </Typography>
+                  {equipmentPhoto ? (
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                      <Typography variant="caption" sx={{ fontWeight: 700, color: '#059669' }}>Selected: {equipmentPhoto.name}</Typography>
+                      <IconButton size="small" color="error" onClick={() => setEquipmentPhoto(null)}><DeleteOutline fontSize="small" /></IconButton>
+                    </Box>
+                  ) : (
+                    <Button variant="outlined" component="label" size="small" startIcon={<UploadFile />}>
+                      Upload Image
+                      <input type="file" hidden accept=".jpg,.jpeg,.png,.webp" onChange={e => setEquipmentPhoto(e.target.files[0])} />
+                    </Button>
+                  )}
+                </Box>
+              </Grid>
+              
+              <Grid item xs={12} sm={4}>
+                <Box sx={{ p: 2, border: '1px dashed #CBD5E1', borderRadius: 2, textAlign: 'center', bgcolor: '#F8FAFC', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: '#334155', mb: 0.5 }}>
+                    🔢 Serial No. Photo
+                  </Typography>
+                  {serialPhoto ? (
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                      <Typography variant="caption" sx={{ fontWeight: 700, color: '#059669' }}>Selected: {serialPhoto.name}</Typography>
+                      <IconButton size="small" color="error" onClick={() => setSerialPhoto(null)}><DeleteOutline fontSize="small" /></IconButton>
+                    </Box>
+                  ) : (
+                    <Button variant="outlined" component="label" size="small" startIcon={<UploadFile />}>
+                      Upload Image
+                      <input type="file" hidden accept=".jpg,.jpeg,.png,.webp" onChange={e => setSerialPhoto(e.target.files[0])} />
                     </Button>
                   )}
                 </Box>
@@ -537,6 +740,137 @@ export default function Equipment() {
           <Button onClick={() => setInstallDialog(null)} color="inherit">Cancel</Button>
           <Button variant="contained" color="primary" disabled={installSubmitting} onClick={handleInstallSubmit}>
             {installSubmitting ? 'Submitting...' : 'Complete Installation'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* QR Code Dialog */}
+      <Dialog open={!!qrDialog} onClose={() => setQrDialog(null)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700, borderBottom: '1px solid #eee' }}>Print QR Label</DialogTitle>
+        <DialogContent sx={{ p: 4, display: 'flex', justifyContent: 'center' }}>
+          {qrData ? (
+            <Card variant="outlined" sx={{ p: 2, width: '300px', border: '2px solid #000' }}>
+              <Typography align="center" variant="subtitle2" sx={{ fontWeight: 800, mb: 1 }}>{qrData.department}</Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                <Typography variant="caption" sx={{ fontWeight: 700 }}>Asset ID:</Typography>
+                <Typography variant="caption" sx={{ fontWeight: 700 }}>{qrData.asset_id}</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                <Typography variant="caption" sx={{ fontWeight: 700 }}>Eq. Name:</Typography>
+                <Typography variant="caption">{qrData.equipment_name}</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
+                {/* Placeholder for actual QR code rendering, e.g. using react-qr-code */}
+                <Box sx={{ width: 120, height: 120, bgcolor: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #ccc' }}>
+                  <QrCode sx={{ fontSize: 60, color: '#888' }} />
+                </Box>
+              </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Typography variant="caption" sx={{ fontSize: '0.6rem' }}>Dept: {qrData.department_used}</Typography>
+                <Typography variant="caption" sx={{ fontSize: '0.6rem' }}>PM Due: {qrData.pm_due_date || 'N/A'}</Typography>
+              </Box>
+            </Card>
+          ) : (
+            <Typography>Loading QR Data...</Typography>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setQrDialog(null)} color="inherit">Close</Button>
+          <Button variant="contained" color="primary" startIcon={<Print />} onClick={() => window.print()}>Print</Button>
+        </DialogActions>
+      </Dialog>
+      
+      {/* Write Off Dialog */}
+      <Dialog open={!!writeOffDialog} onClose={() => setWriteOffDialog(null)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700, color: '#E11D48' }}>Equipment Write-Off</DialogTitle>
+        <DialogContent>
+          <Box sx={{ pt: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Alert severity="warning">
+              This action will mark the equipment <strong>{writeOffDialog?.equipment_code}</strong> as written off and remove it from operational status permanently.
+            </Alert>
+            <TextField
+              type="date"
+              size="small"
+              label="Write-Off Date"
+              InputLabelProps={{ shrink: true }}
+              value={writeOffDate}
+              onChange={e => setWriteOffDate(e.target.value)}
+              fullWidth
+              required
+            />
+            <TextField
+              size="small"
+              label="Reason for Write-off"
+              multiline rows={3}
+              value={writeOffReason}
+              onChange={e => setWriteOffReason(e.target.value)}
+              fullWidth
+              required
+              placeholder="Provide detailed reason (e.g. beyond economical repair)"
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setWriteOffDialog(null)} color="inherit">Cancel</Button>
+          <Button onClick={handleWriteOffSubmit} variant="contained" color="error" disabled={writeOffSubmitting}>
+            {writeOffSubmitting ? 'Processing...' : 'Confirm Write-Off'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Reagent Consumption Dialog */}
+      <Dialog open={!!consumptionDialog} onClose={() => setConsumptionDialog(null)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700, color: '#2563EB' }}>Log Reagent Usage</DialogTitle>
+        <DialogContent>
+          <Box sx={{ pt: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Alert severity="info" sx={{ mb: 1 }}>
+              Logging consumption for <strong>{consumptionDialog?.equipment_code}</strong> 
+              (Cost per test: ₹{consumptionDialog?.cost_per_test || 0}).
+            </Alert>
+            <TextField
+              type="date"
+              size="small"
+              label="Date of Consumption"
+              InputLabelProps={{ shrink: true }}
+              value={consumptionDate}
+              onChange={e => setConsumptionDate(e.target.value)}
+              fullWidth
+              required
+            />
+            <TextField
+              type="number"
+              size="small"
+              label="Tests Performed"
+              value={testsPerformed}
+              onChange={e => setTestsPerformed(e.target.value)}
+              fullWidth
+              required
+              inputProps={{ min: 1 }}
+              placeholder="Number of tests run"
+            />
+            <TextField
+              size="small"
+              label="Remarks (Optional)"
+              multiline rows={2}
+              value={consumptionRemarks}
+              onChange={e => setConsumptionRemarks(e.target.value)}
+              fullWidth
+              placeholder="Any notes for this logging period"
+            />
+            {testsPerformed && consumptionDialog?.cost_per_test > 0 && (
+              <Box sx={{ bgcolor: '#F8FAFC', p: 1.5, borderRadius: 1, border: '1px solid #E2E8F0', display: 'flex', justifyContent: 'space-between' }}>
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>Estimated Cost:</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 700, color: '#059669' }}>
+                  ₹{(parseInt(testsPerformed, 10) * consumptionDialog.cost_per_test).toLocaleString('en-IN', { maximumFractionDigits: 2 })}
+                </Typography>
+              </Box>
+            )}
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setConsumptionDialog(null)} color="inherit">Cancel</Button>
+          <Button onClick={handleConsumptionSubmit} variant="contained" color="primary" disabled={consumptionSubmitting}>
+            {consumptionSubmitting ? 'Logging...' : 'Log Usage'}
           </Button>
         </DialogActions>
       </Dialog>

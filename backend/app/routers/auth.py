@@ -17,8 +17,9 @@ from app.utils.email_utils import send_html_email
 SCOPE_RANKS = {
     "Self Only": 1,
     "Department": 2,
-    "Organization": 3,
-    "Full Administrative Access": 4
+    "Institution": 3,
+    "Organization": 4,
+    "Full Administrative Access": 5
 }
 
 router = APIRouter(prefix="/api/auth", tags=["Auth"])

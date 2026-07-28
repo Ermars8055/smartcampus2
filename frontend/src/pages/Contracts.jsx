@@ -179,7 +179,7 @@ export default function Contracts() {
                     {c.start_date} to {c.end_date}
                   </TableCell>
                   <TableCell sx={{ fontSize: '0.8rem', fontWeight: 600 }}>
-                    ₹{c.total_value?.toLocaleString() || 0}
+                    ₹{c.contract_value?.toLocaleString() || 0}
                   </TableCell>
                   <TableCell>
                     <Chip 

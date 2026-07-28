@@ -22,7 +22,8 @@ export default function ComplaintForm() {
     location: '',
     nature_of_complaint: '',
     individual_detailed: '',
-    name_and_trade: ''
+    name_and_trade: '',
+    complaint_type: ''
   });
 
   const [institutions, setInstitutions] = useState([]);
@@ -61,7 +62,8 @@ export default function ComplaintForm() {
             location: c.location || '',
             nature_of_complaint: c.nature_of_complaint || '',
             individual_detailed: c.individual_detailed || '',
-            name_and_trade: c.name_and_trade || ''
+            name_and_trade: c.name_and_trade || '',
+            complaint_type: c.complaint_type || ''
           }));
           
           if (c.images && c.images.length > 0) {
@@ -344,6 +346,25 @@ export default function ComplaintForm() {
             </Grid>
             <Grid item xs={12} md={6}>
               <TextField fullWidth label="Name (Occupant / Trade)" name="name_and_trade" value={formData.name_and_trade} onChange={handleChange} />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth required>
+                <InputLabel>Call Type / Complaint Type</InputLabel>
+                <Select
+                  name="complaint_type"
+                  value={formData.complaint_type}
+                  label="Call Type / Complaint Type *"
+                  onChange={handleChange}
+                  required
+                >
+                  <MenuItem value="General Repair">General Repair</MenuItem>
+                  <MenuItem value="Preventive Maintenance Call">Preventive Maintenance Call</MenuItem>
+                  <MenuItem value="Calibration Call">Calibration Call</MenuItem>
+                  <MenuItem value="Breakdown">Breakdown</MenuItem>
+                  <MenuItem value="Installation">Installation</MenuItem>
+                  <MenuItem value="Other">Other</MenuItem>
+                </Select>
+              </FormControl>
             </Grid>
 
             <Grid item xs={12}>

@@ -540,6 +540,29 @@ class LocationMaster(Base):
     __table_args__ = (UniqueConstraint("tenant_id", "location_code", name="uq_location_code_per_tenant"),)
 
 
+class PMSchedule(Base):
+    __tablename__ = "pm_schedules"
+    id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
+    department_name = Column(String(255), nullable=False)
+    jan = Column(Boolean, default=False)
+    feb = Column(Boolean, default=False)
+    mar = Column(Boolean, default=False)
+    apr = Column(Boolean, default=False)
+    may = Column(Boolean, default=False)
+    jun = Column(Boolean, default=False)
+    jul = Column(Boolean, default=False)
+    aug = Column(Boolean, default=False)
+    sep = Column(Boolean, default=False)
+    oct = Column(Boolean, default=False)
+    nov = Column(Boolean, default=False)
+    dec = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=_get_now)
+    updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)
+    __table_args__ = (UniqueConstraint("tenant_id", "department_name", name="uq_pm_dept_per_tenant"),)
+
+
+
 class EquipmentItem(Base):
     __tablename__ = "equipment_items"
     id = Column(Integer, primary_key=True, index=True)

@@ -12,6 +12,8 @@ from app.schemas import (
     ComplaintAssign, ComplaintInspect, ComplaintResolve, ComplaintVerify
 )
 from app.utils.sequences import get_next_number
+from app.utils.email_utils import send_html_email
+import threading
 
 router = APIRouter(prefix="/api/complaints", tags=["Complaints"])
 
@@ -25,8 +27,8 @@ def _enrich(complaint: Complaint, db: Session = None):
     complaint.created_by_name = complaint.created_by.full_name if complaint.created_by else None
     complaint.resolved_by_name = complaint.resolved_by.full_name if complaint.resolved_by else None
     complaint.verified_by_name = complaint.verified_by.full_name if complaint.verified_by else None
-    complaint.admin_approved_by_name = complaint.admin_approved_by.full_name if complaint.admin_approved_by else None
-    complaint.manager_approved_by_name = complaint.manager_approved_by.full_name if complaint.manager_approved_by else None
+    complaint.admin_approved_by_name = complaint.admin_approver.full_name if complaint.admin_approver else None
+    complaint.manager_approved_by_name = complaint.manager_approver.full_name if complaint.manager_approver else None
     complaint.equipment_code = complaint.equipment.equipment_code if complaint.equipment else None
 
     # Derive institution_id and floor_id from room -> floor -> building -> institution
@@ -157,6 +159,23 @@ def create_complaint(
 
         db.commit()
         db.refresh(new_complaint)
+        
+        # Trigger email asynchronously
+        if current_user.email:
+            subject = f"New Complaint Logged: {new_complaint.docket_no}"
+            html_body = f"""
+            <h2>New Complaint Logged</h2>
+            <p><strong>Docket No:</strong> {new_complaint.docket_no}</p>
+            <p><strong>Department:</strong> {new_complaint.department_name}</p>
+            <p><strong>Nature of Complaint:</strong> {new_complaint.nature_of_complaint}</p>
+            <p><strong>Logged By:</strong> {current_user.full_name}</p>
+            <p><strong>Type:</strong> {new_complaint.complaint_type}</p>
+            """
+            threading.Thread(
+                target=send_html_email,
+                args=(current_user.email, subject, html_body)
+            ).start()
+            
         return _enrich(new_complaint, db)
     except IntegrityError:
         db.rollback()
@@ -192,18 +211,30 @@ def get_complaints(
                     query = query.filter(Complaint.department_name == current_user.department)
                 else:
                     query = query.filter(Complaint.created_by_id == current_user.id)
+            elif scope == "Institution":
+                if not current_user.institution:
+                    query = query.filter(Complaint.created_by_id == current_user.id)
             else:
                 query = query.filter(Complaint.created_by_id == current_user.id)
-    
     if status:
         query = query.filter(Complaint.status == status)
         
     complaints = query.order_by(Complaint.created_at.desc()).all()
     
+    result_complaints = []
     for c in complaints:
         _enrich(c, db)
         
-    return complaints
+        # Post-enrichment filtering for Institution scope
+        if not getattr(current_user, "_is_platform_admin", False) and not any('technician' in r.lower() for r in getattr(current_user, "_roles", [])):
+            scope = getattr(current_user, "_data_access_scope", "Self Only")
+            if scope == "Institution" and current_user.institution:
+                if c.institution_name != current_user.institution and c.created_by_id != current_user.id:
+                    continue
+                    
+        result_complaints.append(c)
+        
+    return result_complaints
 
 @router.get("/{complaint_id}", response_model=ComplaintOut)
 def get_complaint(

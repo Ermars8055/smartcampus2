@@ -59,6 +59,7 @@ const menuItems = [
   {
     text: 'Maintenance', icon: <Build />, children: [
       { text: 'Complaints', icon: <Assignment />, path: '/complaints', resource: 'complaints' },
+      { text: 'PM Schedule', icon: <AssignmentTurnedIn />, path: '/equipment/pm-schedule', resource: 'equipment' },
       { text: 'Repair Work Orders', icon: <Build />, path: '/rwos' },
     ]
   },
@@ -75,6 +76,7 @@ const menuItems = [
       { text: 'General Reports', icon: <Assessment />, path: '/reports', resource: 'reports' },
       { text: 'Issue Summary', icon: <Assessment />, path: '/reports/issue-summary', resource: 'report_issue_summary' },
       { text: 'Rate Analysis', icon: <Assessment />, path: '/reports/rate-analysis', resource: 'report_rate_analysis' },
+      { text: 'Equipment Count', icon: <Assessment />, path: '/reports/equipment-count', resource: 'report_equipment_count' },
       { text: 'Receipt Summary', icon: <Assessment />, path: '/reports/receipt-summary', resource: 'report_receipt_summary' },
       { text: 'Department Inventory', icon: <Assessment />, path: '/reports/department-inventory', resource: 'report_dept_inventory' },
       { text: 'Pending Gatepass Returns', icon: <Assessment />, path: '/reports/pending-gatepass-returns', resource: 'report_pending_gatepass' },

@@ -2119,6 +2119,31 @@ class LocationMasterOut(LocationMasterBase):
     class Config:
         from_attributes = True
 
+class PMScheduleBase(BaseModel):
+    department_name: str
+    jan: bool = False
+    feb: bool = False
+    mar: bool = False
+    apr: bool = False
+    may: bool = False
+    jun: bool = False
+    jul: bool = False
+    aug: bool = False
+    sep: bool = False
+    oct: bool = False
+    nov: bool = False
+    dec: bool = False
+
+class PMScheduleUpdate(PMScheduleBase):
+    pass
+
+class PMScheduleOut(PMScheduleBase):
+    id: int
+    tenant_id: int
+    created_at: datetime
+    class Config:
+        from_attributes = True
+
 class EquipmentHistoryOut(BaseModel):
     id: int
     equipment_id: int
@@ -2265,3 +2290,8 @@ class ReagentConsumptionLogOut(BaseModel):
     created_at: datetime
     class Config:
         from_attributes = True
+
+class EquipmentRelocate(BaseModel):
+    new_location_id: int
+    relocation_date: date
+    remarks: Optional[str] = None

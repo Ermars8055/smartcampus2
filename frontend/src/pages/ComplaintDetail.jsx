@@ -693,10 +693,21 @@ export default function ComplaintDetail() {
         </DialogContent>
         <DialogActions sx={{ p: 2, pt: 0 }}>
           <Button onClick={() => setResolveDialogOpen(false)} disabled={actionLoading}>Cancel</Button>
-          <Button onClick={handleResolve} variant="contained" color="success" disabled={actionLoading} startIcon={actionLoading ? <CircularProgress size={20} /> : <CheckCircle />}>
+          <Button 
+            onClick={handleResolve} 
+            variant="contained" 
+            color="success" 
+            disabled={actionLoading || !resolutionRemarks || !closureReason || closureDocs.length === 0} 
+            startIcon={actionLoading ? <CircularProgress size={20} /> : <CheckCircle />}
+          >
             Submit for Approval
           </Button>
         </DialogActions>
+        {closureDocs.length === 0 && (
+            <Alert severity="warning" sx={{ m: 2, mt: 0 }}>
+              A service document or report must be uploaded to close the complaint.
+            </Alert>
+        )}
       </Dialog>
 
 

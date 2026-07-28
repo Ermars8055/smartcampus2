@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ThemeProvider, CssBaseline, Typography, Button } from '@mui/material';
 import '@fontsource/inter/300.css';
 import '@fontsource/inter/400.css';
@@ -46,6 +46,7 @@ import IssueSummaryReport from './pages/IssueSummaryReport';
 import RateAnalysisReport from './pages/RateAnalysisReport';
 import ReceiptSummaryReport from './pages/ReceiptSummaryReport';
 import DepartmentWiseInventoryReport from './pages/DepartmentWiseInventoryReport';
+import EquipmentCountReport from './pages/EquipmentCountReport';
 import PendingGatepassReturnsReport from './pages/PendingGatepassReturnsReport';
 import Users from './pages/Users';
 import AuditLogs from './pages/AuditLogs';
@@ -70,6 +71,9 @@ import RepairWorkOrderDetail from './pages/RepairWorkOrderDetail';
 
 import VendorPendingInvoicesReport from './pages/VendorPendingInvoicesReport';
 import VendorPendingPaymentsReport from './pages/VendorPendingPaymentsReport';
+import QREquipmentView from './pages/QREquipmentView';
+import QRMaterialView from './pages/QRMaterialView';
+import PMSchedule from './pages/PMSchedule';
 import ChatBot from './components/ChatBot';
 import { Box, CircularProgress } from '@mui/material';
 
@@ -100,6 +104,7 @@ class ErrorBoundary extends React.Component {
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
+  const location = useLocation();
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
@@ -107,7 +112,7 @@ function ProtectedRoute({ children }) {
       </Box>
     );
   }
-  return user ? <ErrorBoundary>{children}</ErrorBoundary> : <Navigate to="/login" />;
+  return user ? <ErrorBoundary>{children}</ErrorBoundary> : <Navigate to="/login" state={{ from: location }} replace />;
 }
 
 function AppRoutes() {
@@ -117,6 +122,11 @@ function AppRoutes() {
       <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
       <Route path="/reset-password" element={user ? <Navigate to="/" /> : <ResetPassword />} />
       <Route path="/platform/login" element={user ? <Navigate to="/saas-admin" /> : <PlatformLogin />} />
+      
+      {/* QR Routes (Protected) */}
+      <Route path="/equipment/:id" element={<ProtectedRoute><QREquipmentView /></ProtectedRoute>} />
+      <Route path="/materials/:code" element={<ProtectedRoute><QRMaterialView /></ProtectedRoute>} />
+
       <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
         <Route index element={<Dashboard />} />
         <Route path="materials" element={<Materials />} />
@@ -137,6 +147,7 @@ function AppRoutes() {
         <Route path="invoices/edit/:id" element={<RegisterInvoice />} />
         <Route path="grn" element={<GRNPage />} />
         <Route path="equipment" element={<Equipment />} />
+        <Route path="equipment/pm-schedule" element={<PMSchedule />} />
         <Route path="issues" element={<MaterialIssue />} />
         <Route path="pending-acknowledgments" element={<PendingAcknowledgments />} />
         <Route path="returns" element={<Returns />} />
@@ -148,6 +159,7 @@ function AppRoutes() {
         <Route path="reports" element={<Reports />} />
         <Route path="reports/issue-summary" element={<IssueSummaryReport />} />
         <Route path="reports/rate-analysis" element={<RateAnalysisReport />} />
+        <Route path="reports/equipment-count" element={<EquipmentCountReport />} />
         <Route path="reports/receipt-summary" element={<ReceiptSummaryReport />} />
         <Route path="reports/department-inventory" element={<DepartmentWiseInventoryReport />} />
         <Route path="reports/pending-gatepass-returns" element={<PendingGatepassReturnsReport />} />

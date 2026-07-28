@@ -977,12 +977,7 @@ export default function Materials() {
               <Box sx={{ p: 2, bgcolor: '#fff', borderRadius: 2, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
                 <QRCodeSVG 
                   id="material-qr-svg"
-                  value={JSON.stringify({ 
-                    smartcampus_type: 'material_master',
-                    code: selectedQrMaterial.code, 
-                    name: selectedQrMaterial.name, 
-                    uom: selectedQrMaterial.uom_name 
-                  })}
+                  value={`${window.location.origin}/materials/${selectedQrMaterial.code}`}
                   size={200}
                   level="M"
                 />

@@ -3,16 +3,18 @@ import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, InputAdornment, Chip, Dialog, DialogTitle,
   DialogContent, DialogActions, Grid, MenuItem, Select, FormControl, InputLabel,
-  Tabs, Tab, IconButton, Tooltip, useTheme, useMediaQuery, Alert
+  Tabs, Tab, IconButton, Tooltip, useTheme, useMediaQuery, Alert,
+  Autocomplete, createFilterOptions
 } from '@mui/material';
 import {
   Search, Build, QrCode, UploadFile, CheckCircle, Warning, OpenInNew,
-  LocalHospital, PrecisionManufacturing, Edit, FilterList, Refresh, Assignment, DeleteOutline, Print, Science
+  LocalHospital, PrecisionManufacturing, Edit, FilterList, Refresh, Assignment, DeleteOutline, Print, Science, CompareArrows
 } from '@mui/icons-material';
 import api, { getFileUrl } from '../services/api';
 import { formatDate } from '../utils/dateUtils';
 import { useAuth } from '../context/AuthContext';
 import { useMessage } from '../context/MessageContext';
+import { QRCodeSVG } from 'qrcode.react';
 
 export default function Equipment() {
   const { showMessage } = useMessage();
@@ -28,6 +30,7 @@ export default function Equipment() {
   const [search, setSearch] = useState('');
   const [selectedWarehouse, setSelectedWarehouse] = useState('');
   const [selectedBiomedical, setSelectedBiomedical] = useState('');
+  const [selectedInstitution, setSelectedInstitution] = useState('');
 
   // Dialog states
   const [serialDialog, setSerialDialog] = useState(null); // Equipment object
@@ -49,12 +52,21 @@ export default function Equipment() {
   // QR Dialog
   const [qrDialog, setQrDialog] = useState(null);
   const [qrData, setQrData] = useState(null);
+  const [printLabelCount, setPrintLabelCount] = useState(12);
+  const [labelFormat, setLabelFormat] = useState(32);
   
   // Write Off Dialog
   const [writeOffDialog, setWriteOffDialog] = useState(null);
   const [writeOffDate, setWriteOffDate] = useState('');
   const [writeOffReason, setWriteOffReason] = useState('');
   const [writeOffSubmitting, setWriteOffSubmitting] = useState(false);
+
+  // Relocate Dialog
+  const [relocateDialog, setRelocateDialog] = useState(null);
+  const [relocateDate, setRelocateDate] = useState('');
+  const [relocateLocation, setRelocateLocation] = useState('');
+  const [relocateRemarks, setRelocateRemarks] = useState('');
+  const [relocateSubmitting, setRelocateSubmitting] = useState(false);
 
   // Reagent Consumption Dialog
   const [consumptionDialog, setConsumptionDialog] = useState(null);
@@ -114,6 +126,17 @@ export default function Equipment() {
       if (selectedBiomedical === 'biomedical' && !item.is_biomedical) return false;
       if (selectedBiomedical === 'standard' && item.is_biomedical) return false;
 
+      // Institution filter
+      if (selectedInstitution && item.institution_code !== selectedInstitution && item.institution_name !== selectedInstitution) {
+         // Also handle cases where code might be used or name is used.
+         // Let's assume the API returns institution_name or institution_code or institution_id.
+         // Actually, if we filter by string "Hospital" vs "Medical College", we can check if it matches.
+         if (!item.institution_name?.toLowerCase().includes(selectedInstitution.toLowerCase()) && 
+             !item.institution_code?.toLowerCase().includes(selectedInstitution.toLowerCase())) {
+            return false;
+         }
+      }
+
       // Search
       if (search.trim()) {
         const q = search.toLowerCase();
@@ -129,7 +152,7 @@ export default function Equipment() {
 
       return true;
     });
-  }, [equipmentList, activeTab, selectedWarehouse, selectedBiomedical, search]);
+  }, [equipmentList, activeTab, selectedWarehouse, selectedBiomedical, selectedInstitution, search]);
 
   // Handle Serial Number Update Submit
   const handleSerialSubmit = async () => {
@@ -168,8 +191,26 @@ export default function Equipment() {
 
   // Handle Installation Submit
   const handleInstallSubmit = async () => {
+    if (!installSerial.trim() || !installDate || !installedBy.trim() || !contactNumber.trim() || !installLocation || !installFile || !equipmentPhoto || !serialPhoto) {
+      showMessage('Please fill all required details and upload all photos/reports.', 'Validation Error', 'warning');
+      return;
+    }
     setInstallSubmitting(true);
     try {
+      let finalLocationId = installLocation;
+      
+      // If installLocation is a string, it means we need to create a new location first
+      if (typeof installLocation === 'string') {
+        const newLocRes = await api.post('/api/configurations/locations', {
+          location_name: installLocation.trim(),
+          location_code: installLocation.trim().substring(0, 10).toUpperCase().replace(/\s+/g, '_'),
+          is_active: true
+        });
+        finalLocationId = newLocRes.data.id;
+        // Optionally update local locations list
+        setLocations(prev => [...prev, newLocRes.data]);
+      }
+
       const formData = new FormData();
       if (installSerial.trim()) {
         formData.append('serial_number', installSerial.trim());
@@ -186,8 +227,8 @@ export default function Equipment() {
       if (contactNumber.trim()) {
         formData.append('contact_number', contactNumber.trim());
       }
-      if (installLocation) {
-        formData.append('location_id', installLocation);
+      if (finalLocationId) {
+        formData.append('location_id', finalLocationId);
       }
       if (installFile) {
         formData.append('file', installFile);
@@ -215,10 +256,177 @@ export default function Equipment() {
     try {
       const res = await api.get(`/api/equipment/${item.id}/qr`);
       setQrData(res.data);
+      setPrintLabelCount(12);
       setQrDialog(item);
     } catch (err) {
       showMessage('Failed to load QR data', 'Error', 'error');
     }
+  };
+
+  const handlePrintQr = () => {
+    if (!qrData || !qrDialog) return;
+    const printWindow = window.open('', '', 'width=800,height=800');
+    
+    const svgElement = document.getElementById('equipment-qr-svg');
+    const svgHtml = svgElement ? svgElement.outerHTML : '';
+    
+    const formatConfigs = {
+      1: { columns: 1, height: '95vh', svgSize: 250, titleSize: '1.8rem', nameSize: '1.4rem', textSize: '1.2rem', padding: '40px', gap: '20px' },
+      2: { columns: 1, height: '46vh', svgSize: 180, titleSize: '1.4rem', nameSize: '1.1rem', textSize: '0.9rem', padding: '30px', gap: '20px' },
+      4: { columns: 2, height: '46vh', svgSize: 150, titleSize: '1.2rem', nameSize: '1rem', textSize: '0.85rem', padding: '20px', gap: '20px' },
+      8: { columns: 2, height: '23vh', svgSize: 120, titleSize: '1rem', nameSize: '0.85rem', textSize: '0.75rem', padding: '15px', gap: '15px' },
+      12: { columns: 3, height: '23vh', svgSize: 100, titleSize: '0.9rem', nameSize: '0.8rem', textSize: '0.65rem', padding: '12px', gap: '15px' },
+      16: { columns: 4, height: '23vh', svgSize: 85, titleSize: '0.8rem', nameSize: '0.7rem', textSize: '0.6rem', padding: '10px', gap: '10px' },
+      32: { columns: 4, height: '11.5vh', svgSize: 60, titleSize: '0.6rem', nameSize: '0.55rem', textSize: '0.45rem', padding: '5px', gap: '5px' }
+    };
+    
+    const config = formatConfigs[labelFormat] || formatConfigs[32];
+
+    let labelsHtml = '';
+    for (let i = 0; i < printLabelCount; i++) {
+      labelsHtml += `
+        <div class="label-container">
+          <div class="department-header">BIOMEDICAL ENGINEERING DEPARTMENT</div>
+          <div class="info-row"><strong>SELECT ASSET ID:</strong> <span>${qrData.asset_id}</span></div>
+          <div class="qr-code-container">${svgHtml}</div>
+          <div class="info-grid">
+            <div class="info-item" title="${qrData.asset_id}"><strong>ASSET ID:</strong> ${qrData.asset_id}</div>
+            <div class="info-item" title="${qrData.equipment_name}"><strong>EQUIPMENT NAME:</strong> ${qrData.equipment_name}</div>
+            <div class="info-item" title="${qrData.department_used}"><strong>DEPARTMENT:</strong> ${qrData.department_used}</div>
+            <div class="info-item" title="${qrData.make_model || '-'}"><strong>MAKE & MODEL:</strong> ${qrData.make_model || '-'}</div>
+            <div class="info-item" title="${qrData.serial_number || '-'}"><strong>SERIAL NUMBER:</strong> ${qrData.serial_number || '-'}</div>
+            <div class="info-item" title="${qrData.pm_due_date ? formatDate(qrData.pm_due_date) : 'N/A'}"><strong>PM DUE DATE:</strong> ${qrData.pm_due_date ? formatDate(qrData.pm_due_date) : 'N/A'}</div>
+            <div class="info-item" title="${qrData.machine_type || '-'}"><strong>MACHINE TYPE:</strong> ${qrData.machine_type || '-'}</div>
+            <div class="info-item" title="${qrData.grn_number || '-'}"><strong>GRN NO.:</strong> ${qrData.grn_number || '-'}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Print Equipment QR Label</title>
+          <style>
+            @page { margin: 0; size: auto; }
+            body { 
+              font-family: sans-serif; 
+              margin: 0; 
+              padding: 15px; 
+              box-sizing: border-box;
+            }
+            .grid-container {
+              display: grid;
+              grid-template-columns: repeat(${config.columns}, 1fr);
+              gap: ${config.gap};
+              justify-content: start;
+              align-content: start;
+            }
+            .label-container { 
+              text-align: center; 
+              border: 1px dashed #999; 
+              padding: ${config.padding}; 
+              border-radius: 4px; 
+              page-break-inside: avoid; 
+              background: #fff;
+              overflow: hidden;
+              height: ${config.height};
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              align-items: center;
+              box-sizing: border-box;
+            }
+            .department-header { 
+              font-weight: 800; 
+              font-size: ${config.titleSize}; 
+              margin-bottom: 4px; 
+            }
+            .info-row {
+              font-size: ${config.textSize};
+              margin-bottom: 6px;
+              width: 100%;
+              display: flex;
+              justify-content: center;
+              gap: 8px;
+            }
+            .qr-code-container { margin: 4px 0; }
+            .qr-code-container svg { width: ${config.svgSize}px; height: ${config.svgSize}px; }
+            .equipment-name {
+              font-weight: bold;
+              font-size: ${config.nameSize};
+              margin-top: 4px;
+              margin-bottom: 6px;
+              white-space: nowrap; 
+              overflow: hidden; 
+              text-overflow: ellipsis;
+              width: 100%;
+            }
+            .info-grid {
+              display: grid;
+              grid-template-columns: 1fr;
+              gap: 4px 0;
+              width: 100%;
+              text-align: left;
+              font-size: ${config.textSize};
+            }
+            .info-item {
+              white-space: nowrap; 
+              overflow: hidden; 
+              text-overflow: ellipsis;
+            }
+            .info-item strong {
+              display: inline-block;
+              width: 110px; /* Aligns the colons roughly */
+            }
+          </style>
+        </head>
+        <body>
+          <div class="grid-container">
+            ${labelsHtml}
+          </div>
+        </body>
+      </html>
+    `);
+    
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 250);
+  };
+
+  const handleRelocateSubmit = async () => {
+    if (!relocateLocation || !relocateDate) {
+      showMessage('Please select a new location and date.', 'Warning', 'warning');
+      return;
+    }
+    setRelocateSubmitting(true);
+    try {
+      let finalLocationId = relocateLocation;
+      if (typeof relocateLocation === 'string') {
+        const newLocRes = await api.post('/api/configurations/locations', {
+          location_name: relocateLocation.trim(),
+          location_code: relocateLocation.trim().substring(0, 10).toUpperCase().replace(/\s+/g, '_'),
+          is_active: true
+        });
+        finalLocationId = newLocRes.data.id;
+        setLocations(prev => [...prev, newLocRes.data]);
+      }
+      
+      await api.post(`/api/equipment/${relocateDialog.id}/relocate`, {
+        new_location_id: finalLocationId,
+        relocation_date: relocateDate,
+        remarks: relocateRemarks
+      });
+      showMessage('Equipment relocated successfully!', 'Success', 'success');
+      setRelocateDialog(null);
+      loadData();
+    } catch (err) {
+      showMessage(err.response?.data?.detail || 'Failed to relocate equipment', 'Error', 'error');
+    }
+    setRelocateSubmitting(false);
   };
 
   const handleWriteOffSubmit = async () => {
@@ -361,6 +569,15 @@ export default function Equipment() {
               <MenuItem value="standard">Standard Equipment</MenuItem>
             </Select>
           </FormControl>
+
+          <FormControl size="small" sx={{ minWidth: 180 }}>
+            <InputLabel>Institution</InputLabel>
+            <Select value={selectedInstitution} onChange={e => setSelectedInstitution(e.target.value)} label="Institution">
+              <MenuItem value="">All Institutions</MenuItem>
+              <MenuItem value="Hospital">Hospital</MenuItem>
+              <MenuItem value="Medical College">Medical College</MenuItem>
+            </Select>
+          </FormControl>
         </Box>
       </Card>
 
@@ -395,6 +612,9 @@ export default function Equipment() {
                   </Typography>
                   <Typography variant="caption" sx={{ display: 'block', mb: 0.5 }}>
                     <strong>Store:</strong> {item.warehouse_name || '-'}
+                  </Typography>
+                  <Typography variant="caption" sx={{ display: 'block', mb: 0.5 }}>
+                    <strong>Institution:</strong> {item.institution_name || item.institution_code || '-'}
                   </Typography>
                   <Typography variant="caption" sx={{ display: 'block' }}>
                     <strong>Installation:</strong> {item.installation_status}
@@ -434,6 +654,16 @@ export default function Equipment() {
                       Log Usage
                     </Button>
                   )}
+                  {item.status === 'Operational' && (
+                    <Button size="small" variant="outlined" color="primary" startIcon={<CompareArrows />} onClick={() => { setRelocateDialog(item); setRelocateDate(new Date().toISOString().split('T')[0]); setRelocateLocation(item.location_id || ''); setRelocateRemarks(''); }}>
+                      Relocate
+                    </Button>
+                  )}
+                  {item.status !== 'Written Off' && (
+                    <Button size="small" variant="outlined" color="error" startIcon={<DeleteOutline />} onClick={() => { setWriteOffDialog(item); setWriteOffDate(new Date().toISOString().split('T')[0]); setWriteOffReason(''); }}>
+                      Write-Off
+                    </Button>
+                  )}
                 </Box>
               </Card>
             ))}
@@ -447,6 +677,7 @@ export default function Equipment() {
                   <TableCell sx={{ fontWeight: 700 }}>Material Name</TableCell>
                   <TableCell sx={{ fontWeight: 700 }}>Serial Number</TableCell>
                   <TableCell sx={{ fontWeight: 700 }}>Store</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>Institution</TableCell>
                   <TableCell sx={{ fontWeight: 700 }}>GRN Ref</TableCell>
                   <TableCell sx={{ fontWeight: 700 }}>Installation Status</TableCell>
                   <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
@@ -488,6 +719,7 @@ export default function Equipment() {
                       )}
                     </TableCell>
                     <TableCell sx={{ fontSize: '0.85rem' }}>{item.warehouse_name || '-'}</TableCell>
+                    <TableCell sx={{ fontSize: '0.85rem' }}>{item.institution_name || item.institution_code || '-'}</TableCell>
                     <TableCell sx={{ fontSize: '0.85rem', color: '#64748B' }}>{item.grn_number || '-'}</TableCell>
                     <TableCell>
                       {item.installation_status === 'Installed' ? (
@@ -540,6 +772,13 @@ export default function Equipment() {
                           <Tooltip title="Log Reagent Usage">
                             <IconButton size="small" color="secondary" onClick={() => { setConsumptionDialog(item); setConsumptionDate(new Date().toISOString().split('T')[0]); setTestsPerformed(''); setConsumptionRemarks(''); }}>
                               <Science fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                        {item.status === 'Operational' && (
+                          <Tooltip title="Relocate Equipment">
+                            <IconButton size="small" color="primary" onClick={() => { setRelocateDialog(item); setRelocateDate(new Date().toISOString().split('T')[0]); setRelocateLocation(item.location_id || ''); setRelocateRemarks(''); }}>
+                              <CompareArrows fontSize="small" />
                             </IconButton>
                           </Tooltip>
                         )}
@@ -613,7 +852,7 @@ export default function Equipment() {
                 <TextField
                   fullWidth
                   size="small"
-                  label="Serial Number"
+                  label="Serial Number *"
                   placeholder="Enter or confirm serial number"
                   value={installSerial}
                   onChange={e => setInstallSerial(e.target.value)}
@@ -625,49 +864,79 @@ export default function Equipment() {
                   fullWidth
                   size="small"
                   type="date"
-                  label="Installation Date"
+                  label="Installation Date *"
                   value={installDate}
                   onChange={e => setInstallDate(e.target.value)}
                   InputLabelProps={{ shrink: true }}
                 />
               </Grid>
 
-              <Grid item xs={12} sm={4}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   size="small"
-                  label="Installed By (Engineer Name)"
+                  label="Installed By (Engineer Name) *"
                   value={installedBy}
                   onChange={e => setInstalledBy(e.target.value)}
                 />
               </Grid>
               
-              <Grid item xs={12} sm={4}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   size="small"
-                  label="Contact Number"
+                  label="Contact Number *"
                   value={contactNumber}
                   onChange={e => setContactNumber(e.target.value)}
                 />
               </Grid>
               
-              <Grid item xs={12} sm={4}>
-                <FormControl size="small" fullWidth>
-                  <InputLabel>Location (Department/Ward)</InputLabel>
-                  <Select value={installLocation} onChange={e => setInstallLocation(e.target.value)} label="Location (Department/Ward)">
-                    <MenuItem value="">Select Location...</MenuItem>
-                    {locations.filter(l => l.is_active).map(l => (
-                      <MenuItem key={l.id} value={l.id}>{l.location_name} ({l.location_code})</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+              <Grid item xs={12} sm={6}>
+                <Autocomplete
+                  freeSolo
+                  size="small"
+                  options={locations.filter(l => l.is_active)}
+                  value={
+                    typeof installLocation === 'string'
+                      ? installLocation
+                      : locations.find(l => l.id === installLocation) || null
+                  }
+                  getOptionLabel={(option) => {
+                    if (typeof option === 'string') return option;
+                    if (option.inputValue) return option.inputValue;
+                    return `${option.location_name} (${option.location_code})`;
+                  }}
+                  onChange={(event, newValue) => {
+                    if (typeof newValue === 'string') {
+                      setInstallLocation(newValue);
+                    } else if (newValue && newValue.inputValue) {
+                      setInstallLocation(newValue.inputValue);
+                    } else {
+                      setInstallLocation(newValue ? newValue.id : '');
+                    }
+                  }}
+                  filterOptions={(options, params) => {
+                    const filter = createFilterOptions();
+                    const filtered = filter(options, params);
+                    if (params.inputValue !== '') {
+                      filtered.push({
+                        inputValue: params.inputValue,
+                        location_name: `Add "${params.inputValue}"`,
+                        location_code: 'NEW'
+                      });
+                    }
+                    return filtered;
+                  }}
+                  renderInput={(params) => (
+                    <TextField {...params} label="Location (Department/Ward) *" placeholder="Select or type new location" />
+                  )}
+                />
               </Grid>
 
               <Grid item xs={12} sm={4}>
                 <Box sx={{ p: 2, border: '1px dashed #CBD5E1', borderRadius: 2, textAlign: 'center', bgcolor: '#F8FAFC', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                   <Typography variant="body2" sx={{ fontWeight: 600, color: '#334155', mb: 0.5 }}>
-                    📎 Installation Report
+                    📎 Installation Report *
                   </Typography>
                   {installFile ? (
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
@@ -686,7 +955,7 @@ export default function Equipment() {
               <Grid item xs={12} sm={4}>
                 <Box sx={{ p: 2, border: '1px dashed #CBD5E1', borderRadius: 2, textAlign: 'center', bgcolor: '#F8FAFC', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                   <Typography variant="body2" sx={{ fontWeight: 600, color: '#334155', mb: 0.5 }}>
-                    📸 Equipment Photo
+                    📸 Equipment Photo *
                   </Typography>
                   {equipmentPhoto ? (
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
@@ -705,7 +974,7 @@ export default function Equipment() {
               <Grid item xs={12} sm={4}>
                 <Box sx={{ p: 2, border: '1px dashed #CBD5E1', borderRadius: 2, textAlign: 'center', bgcolor: '#F8FAFC', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                   <Typography variant="body2" sx={{ fontWeight: 600, color: '#334155', mb: 0.5 }}>
-                    🔢 Serial No. Photo
+                    🔢 Serial No. Photo *
                   </Typography>
                   {serialPhoto ? (
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
@@ -746,37 +1015,137 @@ export default function Equipment() {
 
       {/* QR Code Dialog */}
       <Dialog open={!!qrDialog} onClose={() => setQrDialog(null)} maxWidth="xs" fullWidth>
-        <DialogTitle sx={{ fontWeight: 700, borderBottom: '1px solid #eee' }}>Print QR Label</DialogTitle>
-        <DialogContent sx={{ p: 4, display: 'flex', justifyContent: 'center' }}>
+        <DialogTitle sx={{ fontWeight: 700, textAlign: 'center' }}>
+          Equipment QR Code
+        </DialogTitle>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 3 }}>
           {qrData ? (
-            <Card variant="outlined" sx={{ p: 2, width: '300px', border: '2px solid #000' }}>
-              <Typography align="center" variant="subtitle2" sx={{ fontWeight: 800, mb: 1 }}>{qrData.department}</Typography>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="caption" sx={{ fontWeight: 700 }}>Asset ID:</Typography>
-                <Typography variant="caption" sx={{ fontWeight: 700 }}>{qrData.asset_id}</Typography>
+            <>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 0.5, textAlign: 'center' }}>
+                {qrData.department}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                Asset ID: {qrData.asset_id}
+              </Typography>
+              <Box sx={{ p: 2, bgcolor: '#fff', borderRadius: 2, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+                <QRCodeSVG 
+                  id="equipment-qr-svg"
+                  value={`${window.location.origin}/equipment/${qrData.asset_id}`}
+                  size={200}
+                  level="M"
+                />
               </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="caption" sx={{ fontWeight: 700 }}>Eq. Name:</Typography>
-                <Typography variant="caption">{qrData.equipment_name}</Typography>
+              <Typography variant="caption" sx={{ mt: 3, color: '#64748B', textAlign: 'center', fontWeight: 'bold' }}>
+                {qrData.equipment_name}
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 2, mt: 3, flexWrap: 'wrap', justifyContent: 'center' }}>
+                <FormControl size="small" sx={{ minWidth: 180 }}>
+                  <InputLabel>Format (Labels/Page)</InputLabel>
+                  <Select
+                    value={labelFormat}
+                    label="Format (Labels/Page)"
+                    onChange={e => setLabelFormat(e.target.value)}
+                  >
+                    <MenuItem value={1}>1 Label (Full Page)</MenuItem>
+                    <MenuItem value={2}>2 Labels per page</MenuItem>
+                    <MenuItem value={4}>4 Labels per page</MenuItem>
+                    <MenuItem value={8}>8 Labels per page</MenuItem>
+                    <MenuItem value={12}>12 Labels per page</MenuItem>
+                    <MenuItem value={16}>16 Labels per page</MenuItem>
+                    <MenuItem value={32}>32 Labels per page</MenuItem>
+                  </Select>
+                </FormControl>
+                <TextField
+                  type="number"
+                  label="Total to Print"
+                  size="small"
+                  value={printLabelCount}
+                  onChange={e => {
+                    let val = parseInt(e.target.value);
+                    if (isNaN(val) || val < 1) val = 1;
+                    if (val > 180) val = 180;
+                    setPrintLabelCount(val);
+                  }}
+                  inputProps={{ min: 1, max: 180 }}
+                  sx={{ width: 140 }}
+                />
               </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
-                {/* Placeholder for actual QR code rendering, e.g. using react-qr-code */}
-                <Box sx={{ width: 120, height: 120, bgcolor: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #ccc' }}>
-                  <QrCode sx={{ fontSize: 60, color: '#888' }} />
-                </Box>
-              </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography variant="caption" sx={{ fontSize: '0.6rem' }}>Dept: {qrData.department_used}</Typography>
-                <Typography variant="caption" sx={{ fontSize: '0.6rem' }}>PM Due: {qrData.pm_due_date || 'N/A'}</Typography>
-              </Box>
-            </Card>
+            </>
           ) : (
             <Typography>Loading QR Data...</Typography>
           )}
         </DialogContent>
+        <DialogActions sx={{ justifyContent: 'center', pb: 3 }}>
+          <Button variant="outlined" onClick={() => setQrDialog(null)} sx={{ borderRadius: 2, fontWeight: 600 }}>
+            Close
+          </Button>
+          <Button 
+            variant="contained" 
+            startIcon={<Print />} 
+            onClick={handlePrintQr}
+            sx={{ borderRadius: 2, fontWeight: 700, boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)' }}
+          >
+            Print Label
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Relocate Equipment Dialog */}
+      <Dialog open={!!relocateDialog} onClose={() => setRelocateDialog(null)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700, color: '#2563EB' }}>Relocate Equipment</DialogTitle>
+        <DialogContent>
+          <Box sx={{ pt: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Alert severity="info">
+              Relocating <strong>{relocateDialog?.equipment_code}</strong>. Its asset ID will remain unchanged.
+            </Alert>
+            <TextField
+              type="date"
+              size="small"
+              label="Relocation Date"
+              InputLabelProps={{ shrink: true }}
+              value={relocateDate}
+              onChange={e => setRelocateDate(e.target.value)}
+              fullWidth
+              required
+            />
+            <Autocomplete
+              freeSolo
+              size="small"
+              options={locations.map(l => l.location_name)}
+              value={
+                locations.find(l => l.id === relocateLocation)?.location_name ||
+                (typeof relocateLocation === 'string' ? relocateLocation : '')
+              }
+              onChange={(e, newValue) => {
+                if (newValue) {
+                  const loc = locations.find(l => l.location_name === newValue);
+                  setRelocateLocation(loc ? loc.id : newValue);
+                } else {
+                  setRelocateLocation('');
+                }
+              }}
+              onInputChange={(e, newInputValue) => {
+                const loc = locations.find(l => l.location_name === newInputValue);
+                setRelocateLocation(loc ? loc.id : newInputValue);
+              }}
+              renderInput={(params) => <TextField {...params} label="New Department/Location *" required />}
+            />
+            <TextField
+              size="small"
+              label="Remarks / Authorized By"
+              multiline rows={2}
+              value={relocateRemarks}
+              onChange={e => setRelocateRemarks(e.target.value)}
+              fullWidth
+              placeholder="e.g. Moved to ICU per Dr. Smith"
+            />
+          </Box>
+        </DialogContent>
         <DialogActions sx={{ p: 2 }}>
-          <Button onClick={() => setQrDialog(null)} color="inherit">Close</Button>
-          <Button variant="contained" color="primary" startIcon={<Print />} onClick={() => window.print()}>Print</Button>
+          <Button onClick={() => setRelocateDialog(null)} color="inherit">Cancel</Button>
+          <Button onClick={handleRelocateSubmit} variant="contained" color="primary" disabled={relocateSubmitting}>
+            {relocateSubmitting ? 'Relocating...' : 'Confirm Relocation'}
+          </Button>
         </DialogActions>
       </Dialog>
       

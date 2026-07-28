@@ -128,7 +128,7 @@ export default function GRNPage() {
         rate: it.rate, material_name: it.material_name, material_code: it.material_code, uom_name: it.uom_name
       })) || [];
       setForm({
-        ...form, po_id: poId, vendor_id: po.vendor_id, project_id: po.project_id, receipt_type: 'PO-Based',
+        ...form, po_id: poId, vendor_id: po.vendor_id, project_id: po.project_id, receipt_type: 'PO-Based', po_procurement_type: po.procurement_type,
         items
       });
     }
@@ -602,6 +602,7 @@ export default function GRNPage() {
                   {form.items.map((item, i) => {
                     const selectedMaterial = materials.find(m => m.id === item.material_id);
                     const isEquipment = selectedMaterial?.material_type === 'Equipment';
+                    const hasQuantityError = !!(itemErrors[i]?.accepted_quantity || itemErrors[i]?.received_quantity || itemErrors[i]?.rejected_quantity);
 
                     return (
                     <React.Fragment key={i}>
@@ -691,20 +692,57 @@ export default function GRNPage() {
                       <TableRow>
                         <TableCell colSpan={form.receipt_type === 'PO-Based' ? 7 : 7} sx={{ bgcolor: '#F8FAFC', py: 1.5, px: 2, borderBottom: '1px solid #E2E8F0' }}>
                           <Box sx={{ p: 1.5, bgcolor: '#FFFFFF', borderRadius: 1.5, border: '1px solid #CBD5E1' }}>
-                            <Typography variant="caption" sx={{ fontWeight: 700, color: '#334155', display: 'block', mb: 0.5 }}>
-                              📦 Serial Numbers for {selectedMaterial?.name || 'Equipment'} ({item.accepted_quantity} unit{item.accepted_quantity > 1 ? 's' : ''})
-                            </Typography>
-                            <Typography variant="caption" color="textSecondary" sx={{ display: 'block', mb: 1 }}>
-                              Optionally enter serial numbers if visible on outer packaging. If visible only after unboxing, leave blank to update later.
-                            </Typography>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                              <Box>
+                                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#334155', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                  📦 Equipment Details for {selectedMaterial?.name || 'Equipment'} ({item.accepted_quantity} unit{item.accepted_quantity > 1 ? 's' : ''})
+                                </Typography>
+                                <Typography variant="caption" color="textSecondary" sx={{ display: 'block', mb: 1 }}>
+                                  Optionally enter serial numbers, installation date, and rental details (if applicable).
+                                </Typography>
+                              </Box>
+                              {form.po_procurement_type === 'Rental' && (
+                                <Chip label="Rental Equipment" size="small" color="info" sx={{ fontWeight: 600 }} />
+                              )}
+                            </Box>
+
+                            <Grid container spacing={2} sx={{ mb: 2 }}>
+                              <Grid item xs={12} sm={4}>
+                                <TextField
+                                  fullWidth size="small" type="date" label="Installation Date" InputLabelProps={{ shrink: true }}
+                                  value={item.installation_date || ''}
+                                  onChange={e => {
+                                    const items = [...form.items];
+                                    items[i].installation_date = e.target.value;
+                                    setForm({ ...form, items });
+                                  }}
+                                />
+                              </Grid>
+                              {form.po_procurement_type === 'Rental' && (
+                                <Grid item xs={12} sm={4}>
+                                  <TextField
+                                    fullWidth size="small" type="date" label="Override Rental Start" InputLabelProps={{ shrink: true }}
+                                    value={item.rental_start_date || ''}
+                                    onChange={e => {
+                                      const items = [...form.items];
+                                      items[i].rental_start_date = e.target.value;
+                                      setForm({ ...form, items });
+                                    }}
+                                  />
+                                </Grid>
+                              )}
+                            </Grid>
+
+                            <Divider sx={{ mb: 1.5, opacity: 0.6 }} />
+
+                            <Typography variant="caption" sx={{ fontWeight: 600, color: '#334155', display: 'block', mb: 1 }}>Serial Numbers</Typography>
                             <Grid container spacing={1}>
                               {Array.from({ length: Math.min(item.accepted_quantity, 50) }).map((_, unitIdx) => (
                                 <Grid item xs={12} sm={6} md={4} key={unitIdx}>
                                   <TextField
                                     size="small"
                                     fullWidth
-                                    label={`Unit ${unitIdx + 1} Serial No.`}
-                                    placeholder="Optional serial number"
+                                    placeholder={`Unit ${unitIdx + 1} Serial No.`}
                                     value={(item.serial_numbers && item.serial_numbers[unitIdx]) || ''}
                                     onChange={e => {
                                       const items = [...form.items];

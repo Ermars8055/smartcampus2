@@ -16,7 +16,7 @@ export default function Reports() {
   useEffect(() => { api.get('/api/warehouses').then(r => setWarehouses(r.data)); }, []);
 
   useEffect(() => {
-    const endpoints = ['/api/reports/stock', '/api/reports/consumption', '/api/reports/pr-status', '/api/reports/po-status', '/api/reports/movement'];
+    const endpoints = ['/api/reports/stock', '/api/reports/consumption', '/api/reports/pr-status', '/api/reports/po-status', '/api/reports/movement', '/api/equipment/reports/count'];
     const params = tab === 0 && whFilter ? { warehouse_id: whFilter } : {};
     api.get(endpoints[tab], { params }).then(r => setData(r.data));
   }, [tab, whFilter]);
@@ -29,11 +29,11 @@ export default function Reports() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `report_${['stock', 'consumption', 'pr_status', 'po_status', 'movement'][tab]}.csv`;
+    a.download = `report_${['stock', 'consumption', 'pr_status', 'po_status', 'movement', 'equipment_count'][tab]}.csv`;
     a.click();
   };
 
-  const tabLabels = ['Stock Report', 'Consumption Report', 'PR Status', 'PO Status', 'Material Movement'];
+  const tabLabels = ['Stock Report', 'Consumption Report', 'PR Status', 'PO Status', 'Material Movement', 'Equipment Count'];
   const headers = data.length > 0 ? Object.keys(data[0]) : [];
 
   return (

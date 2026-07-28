@@ -18,6 +18,27 @@ def _get_now():
 
 
 # == Enums ==
+class ProcurementType(str, enum.Enum):
+    PURCHASE = "Purchase"
+    RENTAL = "Rental"
+
+class RentalType(str, enum.Enum):
+    STANDARD = "Standard Rental"
+    COST_PER_TEST = "Cost Per Test"
+    REAGENT = "Reagent Rental"
+
+class BillingFrequency(str, enum.Enum):
+    PER_DAY = "Per Day"
+    PER_WEEK = "Per Week"
+    PER_MONTH = "Per Month"
+    PER_YEAR = "Per Year"
+
+class EquipmentRentalStatus(str, enum.Enum):
+    ACTIVE = "Active"
+    EXPIRING = "Expiring"
+    RETURNED = "Returned"
+    RENEWED = "Renewed"
+
 class TenantStatus(str, enum.Enum):
     ACTIVE = "Active"
     SUSPENDED = "Suspended"
@@ -507,6 +528,41 @@ class Material(Base):
     __table_args__ = (UniqueConstraint("site_id", "code", name="uq_mat_code_per_site"),)
 
 
+class LocationMaster(Base):
+    __tablename__ = "location_master"
+    id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
+    site_id = Column(Integer, ForeignKey("sites.id", ondelete="CASCADE"), nullable=False)
+    location_name = Column(String(255), nullable=False)
+    location_code = Column(String(50), nullable=False)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=_get_now)
+    __table_args__ = (UniqueConstraint("tenant_id", "location_code", name="uq_location_code_per_tenant"),)
+
+
+class PMSchedule(Base):
+    __tablename__ = "pm_schedules"
+    id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
+    department_name = Column(String(255), nullable=False)
+    jan = Column(Boolean, default=False)
+    feb = Column(Boolean, default=False)
+    mar = Column(Boolean, default=False)
+    apr = Column(Boolean, default=False)
+    may = Column(Boolean, default=False)
+    jun = Column(Boolean, default=False)
+    jul = Column(Boolean, default=False)
+    aug = Column(Boolean, default=False)
+    sep = Column(Boolean, default=False)
+    oct = Column(Boolean, default=False)
+    nov = Column(Boolean, default=False)
+    dec = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=_get_now)
+    updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)
+    __table_args__ = (UniqueConstraint("tenant_id", "department_name", name="uq_pm_dept_per_tenant"),)
+
+
+
 class EquipmentItem(Base):
     __tablename__ = "equipment_items"
     id = Column(Integer, primary_key=True, index=True)
@@ -516,17 +572,61 @@ class EquipmentItem(Base):
     material_id = Column(Integer, ForeignKey("materials.id", ondelete="CASCADE"), nullable=False)
     grn_id = Column(Integer, ForeignKey("grn.id", ondelete="SET NULL"), nullable=True)
     grn_item_id = Column(Integer, ForeignKey("grn_items.id", ondelete="SET NULL"), nullable=True)
+    po_id = Column(Integer, ForeignKey("purchase_orders.id"), nullable=True)
+    institution_id = Column(Integer, ForeignKey("institutions.id"), nullable=True)
+    location_id = Column(Integer, ForeignKey("location_master.id"), nullable=True)
+    make = Column(String(100), nullable=True)
+    model = Column(String(100), nullable=True)
+    machine_cost = Column(Float, nullable=True)
+    machine_type = Column(String(100), nullable=True)
     serial_number = Column(String(100), nullable=True, index=True)
     serial_number_status = Column(String(50), default="Pending Update") # "Captured", "Pending Update"
+    serial_number_photo_url = Column(String(500), nullable=True)
+    equipment_photo_url = Column(String(500), nullable=True)
     is_biomedical = Column(Boolean, default=False)
     requires_installation = Column(Boolean, default=False)
     installation_status = Column(String(50), default="Not Required") # "Not Required", "Pending Installation", "Installed"
     installation_date = Column(DateTime, nullable=True)
+    installed_by = Column(String(255), nullable=True)
+    contact_number = Column(String(50), nullable=True)
     installation_report_url = Column(String(500), nullable=True)
     installation_remarks = Column(Text, nullable=True)
     warehouse_id = Column(Integer, ForeignKey("warehouses.id"), nullable=True)
     project_id = Column(Integer, ForeignKey("projects.id"), nullable=True)
     status = Column(String(50), default="In Store") # "In Store", "Pending Installation", "Operational", "Written Off"
+    
+    # Maintenance & Warranty
+    warranty_available = Column(Boolean, default=False)
+    warranty_expiry_date = Column(Date, nullable=True)
+    amc_cmc_status = Column(String(50), nullable=True)
+    amc_cmc_end_date = Column(Date, nullable=True)
+    amc_po_number = Column(String(50), nullable=True)
+    amc_cost = Column(Float, nullable=True)
+    pm_required = Column(Boolean, default=False)
+    last_pm_date = Column(Date, nullable=True)
+    next_pm_due_date = Column(Date, nullable=True)
+    calibration_required = Column(Boolean, default=False)
+    last_calibration_date = Column(Date, nullable=True)
+    next_calibration_due_date = Column(Date, nullable=True)
+    battery_details = Column(Text, nullable=True)
+    
+    # Rental & Procurement Fields
+    procurement_type = Column(String(50), default=ProcurementType.PURCHASE.value)
+    rental_type = Column(String(50), nullable=True)
+    rental_agreement_number = Column(String(100), nullable=True)
+    rental_vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=True)
+    rental_start_date = Column(Date, nullable=True)
+    rental_end_date = Column(Date, nullable=True)
+    rental_cost = Column(Float, nullable=True)
+    billing_frequency = Column(String(50), nullable=True)
+    cost_per_test = Column(Float, nullable=True)
+    linked_reagents = Column(JSON, nullable=True)
+    agreement_status = Column(String(50), nullable=True)
+    renewal_date = Column(Date, nullable=True)
+    expected_return_date = Column(Date, nullable=True)
+    rental_status = Column(String(50), nullable=True)
+    warranty_end_date = Column(Date, nullable=True)
+
     created_at = Column(DateTime, default=_get_now)
     updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)
 
@@ -535,7 +635,40 @@ class EquipmentItem(Base):
     grn_item = relationship("GRNItem")
     warehouse = relationship("Warehouse")
     project = relationship("Project")
+    location = relationship("LocationMaster")
+    institution = relationship("Institution")
+    purchase_order = relationship("PurchaseOrder")
+    rental_vendor = relationship("Vendor", foreign_keys=[rental_vendor_id])
     __table_args__ = (UniqueConstraint("tenant_id", "equipment_code", name="uq_equipment_code_per_tenant"),)
+
+
+class EquipmentHistory(Base):
+    __tablename__ = "equipment_history"
+    id = Column(Integer, primary_key=True, index=True)
+    equipment_id = Column(Integer, ForeignKey("equipment_items.id", ondelete="CASCADE"), nullable=False)
+    event_type = Column(String(100), nullable=False) # PO, GRN, Installation, PM, Calibration, Complaint, Repair, Write-off
+    event_date = Column(DateTime, default=_get_now)
+    description = Column(Text, nullable=True)
+    reference_id = Column(String(100), nullable=True) # ID of the related record (PO No, GRN No, Complaint Docket)
+    created_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+
+    equipment = relationship("EquipmentItem")
+    created_by = relationship("User")
+
+
+class EquipmentWriteOff(Base):
+    __tablename__ = "equipment_writeoffs"
+    id = Column(Integer, primary_key=True, index=True)
+    equipment_id = Column(Integer, ForeignKey("equipment_items.id", ondelete="CASCADE"), nullable=False)
+    write_off_date = Column(Date, nullable=False)
+    reason = Column(Text, nullable=False)
+    approval_details = Column(Text, nullable=True)
+    document_url = Column(String(500), nullable=True)
+    created_at = Column(DateTime, default=_get_now)
+    created_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    
+    equipment = relationship("EquipmentItem")
+    created_by = relationship("User")
 
 
 class Vendor(Base):
@@ -597,6 +730,17 @@ class PurchaseRequest(Base):
     project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
     required_date = Column(Date, nullable=False)
     remarks = Column(Text)
+    
+    # Rental & Procurement Fields
+    procurement_type = Column(String(50), default=ProcurementType.PURCHASE.value)
+    rental_type = Column(String(50), nullable=True)
+    rental_duration = Column(Integer, nullable=True)
+    rental_duration_unit = Column(String(50), nullable=True)
+    estimated_rental_cost = Column(Float, nullable=True)
+    cost_per_test = Column(Float, nullable=True)
+    reagent_rental_required = Column(Boolean, default=False)
+    justification = Column(Text, nullable=True)
+    
     status = Column(String(50), default=PRStatus.DRAFT.value)
     current_approval_level = Column(Integer, default=1)
     approved_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
@@ -634,11 +778,27 @@ class PurchaseOrder(Base):
     indent_id = Column(Integer, ForeignKey("indents.id"), nullable=True)
     qr_id = Column(Integer, ForeignKey("quotation_requests.id"), nullable=True)
     institution_id = Column(Integer, ForeignKey("institutions.id"), nullable=True)
+    contract_id = Column(Integer, ForeignKey("contracts.id"), nullable=True)
     po_type = Column(String(50), default="Formal") # Formal, Informal
     is_cash_purchase = Column(Boolean, default=False)
     advance_percentage = Column(Float, default=0)
     total_amount = Column(Float, default=0)
     delivery_date = Column(Date)
+    
+    # Rental & Procurement Fields
+    procurement_type = Column(String(50), default="Purchase")
+    rental_type = Column(String(50), nullable=True)
+    rental_agreement_number = Column(String(100), nullable=True)
+    rental_start_date = Column(Date, nullable=True)
+    rental_end_date = Column(Date, nullable=True)
+    billing_frequency = Column(String(50), nullable=True)
+    security_deposit = Column(Float, default=0)
+    cost_per_test = Column(Float, nullable=True)
+    linked_reagent_agreement = Column(String(100), nullable=True)
+    vendor_maintenance_responsibility = Column(Boolean, default=False)
+    return_conditions = Column(Text, nullable=True)
+    renewal_terms = Column(Text, nullable=True)
+    
     status = Column(String(50), default=POStatus.DRAFT.value)
     current_approval_level = Column(Integer, default=1)
     terms = Column(Text)
@@ -692,6 +852,7 @@ class GateEntry(Base):
     vehicle_number = Column(String(50))
     vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=True)
     po_id = Column(Integer, ForeignKey("purchase_orders.id"), nullable=True)
+    contract_id = Column(Integer, ForeignKey("contracts.id"), nullable=True)
     project_id = Column(Integer, ForeignKey("projects.id"), nullable=True)
     material_id = Column(Integer, ForeignKey("materials.id"), nullable=True)
     quantity = Column(Float, nullable=True)
@@ -767,6 +928,9 @@ class Complaint(Base):
     department_name = Column(String(255), nullable=True) # Name of Ward/Dept I/C or Occupant
     building_id = Column(Integer, ForeignKey("buildings.id"), nullable=True)
     room_id = Column(Integer, ForeignKey("rooms.id"), nullable=True)
+    equipment_id = Column(Integer, ForeignKey("equipment_items.id"), nullable=True)
+    contract_id = Column(Integer, ForeignKey("contracts.id"), nullable=True)
+    rwo_id = Column(Integer, ForeignKey("repair_work_orders.id"), nullable=True)
     location = Column(String(255), nullable=True) # General location text if not building/room
     nature_of_complaint = Column(Text, nullable=True)
     individual_detailed = Column(Text, nullable=True)
@@ -784,6 +948,16 @@ class Complaint(Base):
     rejection_remarks = Column(Text, nullable=True)
     feedback = Column(Text, nullable=True)
     
+    # New equipment module fields
+    complaint_type = Column(String(100), nullable=True)
+    closure_reason = Column(String(255), nullable=True)
+    resolution_entered = Column(Text, nullable=True)
+    admin_approved_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    admin_approved_at = Column(DateTime, nullable=True)
+    manager_approved_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    manager_approved_at = Column(DateTime, nullable=True)
+    is_pm_calibration_call = Column(Boolean, default=False)
+
     created_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     resolved_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     
@@ -794,11 +968,15 @@ class Complaint(Base):
     
     building = relationship("Building")
     room = relationship("Room")
+    equipment = relationship("EquipmentItem")
     assigned_to = relationship("User", foreign_keys=[assigned_to_id])
     created_by = relationship("User", foreign_keys=[created_by_id])
     resolved_by = relationship("User", foreign_keys=[resolved_by_id])
     verified_by = relationship("User", foreign_keys=[verified_by_id])
+    admin_approver = relationship("User", foreign_keys=[admin_approved_by_id])
+    manager_approver = relationship("User", foreign_keys=[manager_approved_by_id])
     images = relationship("ComplaintImage", back_populates="complaint", cascade="all, delete-orphan")
+    documents = relationship("ComplaintDocument", back_populates="complaint", cascade="all, delete-orphan")
     material_issues = relationship("MaterialIssue", back_populates="complaint")
     __table_args__ = (UniqueConstraint("tenant_id", "docket_no", name="uq_complaint_docket_per_tenant"),)
 
@@ -814,6 +992,19 @@ class ComplaintImage(Base):
     complaint = relationship("Complaint", back_populates="images")
 
 
+class ComplaintDocument(Base):
+    __tablename__ = "complaint_documents"
+    id = Column(Integer, primary_key=True, index=True)
+    complaint_id = Column(Integer, ForeignKey("complaints.id", ondelete="CASCADE"), nullable=False)
+    document_type = Column(String(100), nullable=True) # Service Report, Vendor Note, etc.
+    file_url = Column(String(500), nullable=False)
+    uploaded_at = Column(DateTime, default=_get_now)
+    uploaded_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+
+    complaint = relationship("Complaint", back_populates="documents")
+    uploaded_by = relationship("User")
+
+
 # == Invoices ==
 
 class Invoice(Base):
@@ -827,6 +1018,7 @@ class Invoice(Base):
     gate_entry_id = Column(Integer, ForeignKey("gate_entries.id"), nullable=True)
     vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=False)
     po_id = Column(Integer, ForeignKey("purchase_orders.id"), nullable=True)
+    contract_id = Column(Integer, ForeignKey("contracts.id"), nullable=True)
     consignee_id = Column(Integer, ForeignKey("company_addresses.id"), nullable=True)
     buyer_id = Column(Integer, ForeignKey("company_addresses.id"), nullable=True)
     internal_reference_number = Column(String(100), nullable=True)
@@ -935,6 +1127,7 @@ class GRN(Base):
     grn_number = Column(String(50), nullable=False, index=True)
     po_id = Column(Integer, ForeignKey("purchase_orders.id"), nullable=True)  # Nullable for Direct Invoice
     gate_entry_id = Column(Integer, ForeignKey("gate_entries.id"), nullable=True)
+    contract_id = Column(Integer, ForeignKey("contracts.id"), nullable=True)
     invoice_id = Column(Integer, ForeignKey("invoices.id"), nullable=True)
     warehouse_id = Column(Integer, ForeignKey("warehouses.id"), nullable=False)
     project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
@@ -1216,6 +1409,7 @@ class Indent(Base):
     requester_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     institution_id = Column(Integer, ForeignKey("institutions.id"), nullable=True)
     complaint_id = Column(Integer, ForeignKey("complaints.id"), nullable=True)
+    rwo_id = Column(Integer, ForeignKey("repair_work_orders.id"), nullable=True)
     room_id = Column(Integer, ForeignKey("rooms.id"), nullable=True)
     building_id = Column(Integer, ForeignKey("buildings.id"), nullable=True)
     floor = Column(String(50))
@@ -1631,3 +1825,111 @@ class WriteOffItem(Base):
     write_off = relationship("WriteOff", back_populates="items")
     material = relationship("Material")
     warehouse = relationship("Warehouse")
+
+
+# == Contracts ==
+
+class Contract(Base):
+    __tablename__ = "contracts"
+    id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
+    site_id = Column(Integer, ForeignKey("sites.id", ondelete="CASCADE"), nullable=False)
+    contract_number = Column(String(50), nullable=False, index=True)
+    contract_type = Column(String(50), nullable=False) # RC, AMC, CMC
+    vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=False)
+    institution_id = Column(Integer, ForeignKey("institutions.id"), nullable=True)
+    department_id = Column(Integer, ForeignKey("departments.id"), nullable=True)
+    start_date = Column(Date, nullable=False)
+    end_date = Column(Date, nullable=False)
+    contract_value = Column(Float, nullable=True)
+    payment_terms = Column(Text, nullable=True)
+    renewal_terms = Column(Text, nullable=True)
+    sla_details = Column(Text, nullable=True)
+    spare_parts_included = Column(Boolean, default=False)
+    consumables_included = Column(Boolean, default=False)
+    status = Column(String(50), default="Draft") # Draft, Pending Approval, Approved, Active, Suspended, Expired, Renewed, Closed, Cancelled
+    created_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    approved_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    approved_at = Column(DateTime, nullable=True)
+    is_deleted = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=_get_now)
+    updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)
+    
+    vendor = relationship("Vendor")
+    institution = relationship("Institution")
+    department = relationship("Department")
+    created_by = relationship("User", foreign_keys=[created_by_id])
+    approver = relationship("User", foreign_keys=[approved_by_id])
+    items = relationship("ContractItem", back_populates="contract", cascade="all, delete-orphan")
+    __table_args__ = (UniqueConstraint("tenant_id", "contract_number", name="uq_contract_per_tenant"),)
+
+
+class ContractItem(Base):
+    __tablename__ = "contract_items"
+    id = Column(Integer, primary_key=True, index=True)
+    contract_id = Column(Integer, ForeignKey("contracts.id", ondelete="CASCADE"), nullable=False)
+    material_id = Column(Integer, ForeignKey("materials.id"), nullable=True) # For RC
+    equipment_id = Column(Integer, ForeignKey("equipment_items.id"), nullable=True) # For AMC/CMC
+    uom = Column(String(50), nullable=True)
+    rate = Column(Float, nullable=False, default=0)
+    gst = Column(Float, nullable=True, default=0)
+    delivery_lead_time = Column(Integer, nullable=True) # in days
+    contract_quantity = Column(Float, nullable=True)
+    consumed_quantity = Column(Float, nullable=True, default=0)
+    remaining_quantity = Column(Float, nullable=True)
+    covered_components = Column(Text, nullable=True)
+    excluded_components = Column(Text, nullable=True)
+    
+    contract = relationship("Contract", back_populates="items")
+    material = relationship("Material")
+    equipment = relationship("EquipmentItem")
+
+
+# == Repair Work Orders ==
+
+class RepairWorkOrder(Base):
+    __tablename__ = "repair_work_orders"
+    id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
+    site_id = Column(Integer, ForeignKey("sites.id", ondelete="CASCADE"), nullable=False)
+    rwo_number = Column(String(50), nullable=False, index=True)
+    complaint_id = Column(Integer, ForeignKey("complaints.id"), nullable=False)
+    equipment_id = Column(Integer, ForeignKey("equipment_items.id"), nullable=False)
+    vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=False)
+    contract_id = Column(Integer, ForeignKey("contracts.id"), nullable=True) # Nullable if not under AMC/CMC? Requirements say generated for AMC/CMC
+    technician_name = Column(String(255), nullable=True)
+    sla_details = Column(Text, nullable=True)
+    problem_description = Column(Text, nullable=True)
+    target_completion_date = Column(Date, nullable=True)
+    status = Column(String(50), default="Assigned") # Assigned, In Progress, Awaiting Spare Parts, Completed, Closed
+    created_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    is_deleted = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=_get_now)
+    updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)
+    
+    complaint = relationship("Complaint", foreign_keys=[complaint_id])
+    equipment = relationship("EquipmentItem")
+    vendor = relationship("Vendor")
+    contract = relationship("Contract")
+    created_by = relationship("User", foreign_keys=[created_by_id])
+    __table_args__ = (UniqueConstraint("tenant_id", "rwo_number", name="uq_rwo_per_tenant"),)
+
+
+# == Rentals ==
+
+class ReagentConsumptionLog(Base):
+    __tablename__ = "reagent_consumption_logs"
+    id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
+    site_id = Column(Integer, ForeignKey("sites.id", ondelete="CASCADE"), nullable=False)
+    equipment_id = Column(Integer, ForeignKey("equipment_items.id", ondelete="CASCADE"), nullable=False)
+    consumption_date = Column(Date, nullable=False)
+    tests_performed = Column(Integer, nullable=False)
+    cost_per_test = Column(Float, nullable=False)
+    total_cost = Column(Float, nullable=False)
+    remarks = Column(Text, nullable=True)
+    logged_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime, default=_get_now)
+
+    equipment = relationship("EquipmentItem")
+    logged_by = relationship("User", foreign_keys=[logged_by_id])

@@ -92,6 +92,8 @@ export default function PurchaseRequests() {
   // Multi-item PR form
   const [form, setForm] = useState({
     institution_id: '', project_id: '', building_id: '', department_name: '',
+    procurement_type: 'Purchase', rental_type: '', rental_duration: '', rental_duration_unit: 'Months',
+    estimated_rental_cost: '', cost_per_test: '', reagent_rental_required: false, justification: '',
     required_date: null, remarks: '',
     items: [{ material_id: '', quantity: '' }]
   });
@@ -260,6 +262,14 @@ export default function PurchaseRequests() {
         project_id: form.project_id,
         building_id: form.building_id || null,
         department_name: form.department_name,
+        procurement_type: form.procurement_type || 'Purchase',
+        rental_type: form.procurement_type === 'Rental' ? form.rental_type || null : null,
+        rental_duration: form.procurement_type === 'Rental' ? (form.rental_duration ? parseInt(form.rental_duration) : null) : null,
+        rental_duration_unit: form.procurement_type === 'Rental' ? form.rental_duration_unit || null : null,
+        estimated_rental_cost: form.procurement_type === 'Rental' ? (form.estimated_rental_cost ? parseFloat(form.estimated_rental_cost) : null) : null,
+        cost_per_test: form.procurement_type === 'Cost Per Test' ? (form.cost_per_test ? parseFloat(form.cost_per_test) : null) : null,
+        reagent_rental_required: form.reagent_rental_required,
+        justification: form.justification || null,
         required_date: form.required_date ? dayjs(form.required_date).format('YYYY-MM-DD') : null,
         remarks: form.remarks,
         status: status,
@@ -548,6 +558,8 @@ export default function PurchaseRequests() {
 
               setForm({
                 institution_id: defaultInst, project_id: defaultProj, building_id: '', department_name: defaultDept,
+                procurement_type: 'Purchase', rental_type: '', rental_duration: '', rental_duration_unit: 'Months',
+                estimated_rental_cost: '', cost_per_test: '', reagent_rental_required: false, justification: '',
                 required_date: null, remarks: '',
                 items: [{ material_id: '', quantity: '' }]
               });
@@ -717,6 +729,14 @@ export default function PurchaseRequests() {
                       project_id: pr.project_id || '',
                       building_id: pr.building_id || '',
                       department_name: pr.department_name || '',
+                      procurement_type: pr.procurement_type || 'Purchase',
+                      rental_type: pr.rental_type || '',
+                      rental_duration: pr.rental_duration || '',
+                      rental_duration_unit: pr.rental_duration_unit || 'Months',
+                      estimated_rental_cost: pr.estimated_rental_cost || '',
+                      cost_per_test: pr.cost_per_test || '',
+                      reagent_rental_required: pr.reagent_rental_required || false,
+                      justification: pr.justification || '',
                       required_date: pr.required_date ? dayjs(pr.required_date) : null,
                       remarks: pr.remarks || '',
                       items: pr.items && pr.items.length > 0 ? pr.items.map(it => ({ material_id: it.material_id, quantity: it.quantity })) : [{ material_id: '', quantity: '' }]
@@ -1065,7 +1085,22 @@ export default function PurchaseRequests() {
               </Select>
             </FormControl>
           </Box>
+          
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr 1fr' }, gap: 2, pt: 1, mb: 2 }}>
+            <FormControl fullWidth>
+              <InputLabel>Procurement Type</InputLabel>
+              <Select
+                value={form.procurement_type || 'Purchase'}
+                label="Procurement Type"
+                onChange={e => setForm({ ...form, procurement_type: e.target.value })}
+                size="small"
+              >
+                <MenuItem value="Purchase">Purchase</MenuItem>
+                <MenuItem value="Rental">Rental</MenuItem>
+                <MenuItem value="Cost Per Test">Cost Per Test</MenuItem>
+              </Select>
+            </FormControl>
+
             <Box id="field-required_date">
               <DatePicker
                 label="Required Date"
@@ -1088,6 +1123,85 @@ export default function PurchaseRequests() {
               />
             </Box>
           </Box>
+
+          {form.procurement_type === 'Rental' && (
+            <Box sx={{ p: 2, mb: 2, bgcolor: '#F8FAFC', borderRadius: 2, border: '1px solid #E2E8F0' }}>
+              <Typography variant="subtitle2" sx={{ mb: 2, color: '#334155', fontWeight: 600 }}>Rental Agreement Details</Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={4}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Rental Type</InputLabel>
+                    <Select
+                      value={form.rental_type || ''}
+                      label="Rental Type"
+                      onChange={e => setForm({ ...form, rental_type: e.target.value })}
+                    >
+                      <MenuItem value="Standard Rental">Standard Rental</MenuItem>
+                      <MenuItem value="Reagent Rental">Reagent Rental</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <TextField
+                    fullWidth size="small" label="Rental Duration" type="number"
+                    value={form.rental_duration || ''}
+                    onChange={e => setForm({ ...form, rental_duration: e.target.value })}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Duration Unit</InputLabel>
+                    <Select
+                      value={form.rental_duration_unit || 'Months'}
+                      label="Duration Unit"
+                      onChange={e => setForm({ ...form, rental_duration_unit: e.target.value })}
+                    >
+                      <MenuItem value="Days">Days</MenuItem>
+                      <MenuItem value="Weeks">Weeks</MenuItem>
+                      <MenuItem value="Months">Months</MenuItem>
+                      <MenuItem value="Years">Years</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth size="small" label="Estimated Rental Cost" type="number"
+                    value={form.estimated_rental_cost || ''}
+                    onChange={e => setForm({ ...form, estimated_rental_cost: e.target.value })}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth size="small" label="Justification"
+                    value={form.justification || ''}
+                    onChange={e => setForm({ ...form, justification: e.target.value })}
+                  />
+                </Grid>
+              </Grid>
+            </Box>
+          )}
+
+          {form.procurement_type === 'Cost Per Test' && (
+            <Box sx={{ p: 2, mb: 2, bgcolor: '#F8FAFC', borderRadius: 2, border: '1px solid #E2E8F0' }}>
+              <Typography variant="subtitle2" sx={{ mb: 2, color: '#334155', fontWeight: 600 }}>Cost Per Test Details</Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth size="small" label="Cost Per Test" type="number"
+                    value={form.cost_per_test || ''}
+                    onChange={e => setForm({ ...form, cost_per_test: e.target.value })}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth size="small" label="Justification"
+                    value={form.justification || ''}
+                    onChange={e => setForm({ ...form, justification: e.target.value })}
+                  />
+                </Grid>
+              </Grid>
+            </Box>
+          )}
 
           <Divider sx={{ mb: 2 }} />
 

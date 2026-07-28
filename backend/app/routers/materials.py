@@ -380,6 +380,33 @@ def get_material(
         current_stock=total_stock
     )
 
+@router.get("/materials/by-code/{material_code}")
+def get_material_by_code(
+    material_code: str, 
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    m = db.query(Material).filter(
+        Material.code == material_code,
+        Material.tenant_id == tenant_id,
+        Material.site_id == site_id
+    ).first()
+    if not m:
+        raise HTTPException(status_code=404, detail="Material not found")
+        
+    return {
+        "code": m.code,
+        "name": m.name,
+        "category_name": m.category.name if m.category else "N/A",
+        "subcategory_name": m.subcategory.name if m.subcategory else "N/A",
+        "uom_name": m.uom.abbreviation if m.uom else "N/A",
+        "material_type": m.material_type,
+        "storage_type": m.storage_type or "N/A",
+        "is_active": m.is_active
+    }
+
 
 @router.post("/materials")
 def create_material(

@@ -37,6 +37,7 @@ const menuItems = [
       { text: 'Indents', icon: <Assignment />, path: '/indents', resource: 'indents' },
       { text: 'Purchase Requests', icon: <Assignment />, path: '/purchase-requests', resource: 'purchase_requests' },
       { text: 'Quotations', icon: <RequestQuote />, path: '/quotations', resource: 'quotations' },
+      { text: 'Contracts', icon: <AssignmentTurnedIn />, path: '/contracts' },
       { text: 'Purchase Orders', icon: <ReceiptLong />, path: '/purchase-orders', resource: 'purchase_orders' },
     ]
   },
@@ -58,6 +59,8 @@ const menuItems = [
   {
     text: 'Maintenance', icon: <Build />, children: [
       { text: 'Complaints', icon: <Assignment />, path: '/complaints', resource: 'complaints' },
+      { text: 'PM Schedule', icon: <AssignmentTurnedIn />, path: '/equipment/pm-schedule', resource: 'equipment' },
+      { text: 'Repair Work Orders', icon: <Build />, path: '/rwos' },
     ]
   },
   { text: 'Intelligence', icon: <Build />, path: '/intelligence', resource: 'intelligence' },
@@ -73,6 +76,7 @@ const menuItems = [
       { text: 'General Reports', icon: <Assessment />, path: '/reports', resource: 'reports' },
       { text: 'Issue Summary', icon: <Assessment />, path: '/reports/issue-summary', resource: 'report_issue_summary' },
       { text: 'Rate Analysis', icon: <Assessment />, path: '/reports/rate-analysis', resource: 'report_rate_analysis' },
+      { text: 'Equipment Count', icon: <Assessment />, path: '/reports/equipment-count', resource: 'report_equipment_count' },
       { text: 'Receipt Summary', icon: <Assessment />, path: '/reports/receipt-summary', resource: 'report_receipt_summary' },
       { text: 'Department Inventory', icon: <Assessment />, path: '/reports/department-inventory', resource: 'report_dept_inventory' },
       { text: 'Pending Gatepass Returns', icon: <Assessment />, path: '/reports/pending-gatepass-returns', resource: 'report_pending_gatepass' },
@@ -86,6 +90,7 @@ const menuItems = [
       { text: 'Roles', icon: <Security />, path: '/admin/roles', resource: 'admin_roles' },
       { text: 'Material Allowances', icon: <Inventory2 />, path: '/admin/material-allowances', resource: 'material_allowances' },
       { text: 'Configurations', icon: <Settings />, path: '/admin/configurations', resource: 'configurations' },
+      { text: 'Locations', icon: <Business />, path: '/admin/locations', resource: 'configurations' },
       { text: 'Projects', icon: <AccountTree />, path: '/projects', resource: 'projects' },
       { text: 'Terms & Conditions', icon: <Assignment />, path: '/terms', resource: 'terms' },
       { text: 'Company Addresses', icon: <Business />, path: '/company-addresses', resource: 'company_addresses' },
@@ -132,7 +137,7 @@ export default function Layout() {
       if (item.text === 'SaaS Admin') return item;
 
       if (item.children) {
-        const visibleChildren = item.children.filter(child => hasPermission(child.resource, 'can_read'));
+        const visibleChildren = item.children.filter(child => !child.resource || hasPermission(child.resource, 'can_read'));
         if (visibleChildren.length === 0) return null;
         return { ...item, children: visibleChildren };
       } else {

@@ -12,6 +12,8 @@ from app.schemas import (
     ComplaintAssign, ComplaintInspect, ComplaintResolve, ComplaintVerify
 )
 from app.utils.sequences import get_next_number
+from app.utils.email_utils import send_html_email
+import threading
 
 router = APIRouter(prefix="/api/complaints", tags=["Complaints"])
 
@@ -25,6 +27,9 @@ def _enrich(complaint: Complaint, db: Session = None):
     complaint.created_by_name = complaint.created_by.full_name if complaint.created_by else None
     complaint.resolved_by_name = complaint.resolved_by.full_name if complaint.resolved_by else None
     complaint.verified_by_name = complaint.verified_by.full_name if complaint.verified_by else None
+    complaint.admin_approved_by_name = complaint.admin_approver.full_name if complaint.admin_approver else None
+    complaint.manager_approved_by_name = complaint.manager_approver.full_name if complaint.manager_approver else None
+    complaint.equipment_code = complaint.equipment.equipment_code if complaint.equipment else None
 
     # Derive institution_id and floor_id from room -> floor -> building -> institution
     complaint.floor_id = None
@@ -103,15 +108,46 @@ def create_complaint(
             department_name=complaint_in.department_name,
             building_id=complaint_in.building_id,
             room_id=complaint_in.room_id,
+            equipment_id=complaint_in.equipment_id,
             location=complaint_in.location,
             nature_of_complaint=complaint_in.nature_of_complaint,
             individual_detailed=complaint_in.individual_detailed,
             name_and_trade=complaint_in.name_and_trade,
+            complaint_type=complaint_in.complaint_type or "Breakdown",
             status=ComplaintStatus.REGISTERED.value,
             created_by_id=current_user.id
         )
         db.add(new_complaint)
         db.flush() # To get the ID for images
+
+        if complaint_in.equipment_id:
+            from app.models import ContractItem, Contract, RepairWorkOrder
+            c_item = db.query(ContractItem).join(Contract).filter(
+                ContractItem.equipment_id == complaint_in.equipment_id,
+                Contract.status == "Active",
+                Contract.contract_type.in_(["AMC", "CMC"])
+            ).first()
+
+            if c_item:
+                new_complaint.contract_id = c_item.contract_id
+                rwo_number = get_next_number(db, tenant_id, site_id, "REPAIR_WORK_ORDER", "RWO")
+                rwo = RepairWorkOrder(
+                    rwo_number=rwo_number,
+                    complaint_id=new_complaint.id,
+                    equipment_id=complaint_in.equipment_id,
+                    vendor_id=c_item.contract.vendor_id,
+                    contract_id=c_item.contract_id,
+                    status="Assigned",
+                    problem_description=complaint_in.nature_of_complaint,
+                    created_by_id=current_user.id,
+                    tenant_id=tenant_id,
+                    site_id=site_id
+                )
+                db.add(rwo)
+                db.flush()
+                
+                new_complaint.rwo_id = rwo.id
+                new_complaint.status = ComplaintStatus.ASSIGNED.value
 
         for img_url in complaint_in.image_urls:
             new_img = ComplaintImage(
@@ -123,6 +159,23 @@ def create_complaint(
 
         db.commit()
         db.refresh(new_complaint)
+        
+        # Trigger email asynchronously
+        if current_user.email:
+            subject = f"New Complaint Logged: {new_complaint.docket_no}"
+            html_body = f"""
+            <h2>New Complaint Logged</h2>
+            <p><strong>Docket No:</strong> {new_complaint.docket_no}</p>
+            <p><strong>Department:</strong> {new_complaint.department_name}</p>
+            <p><strong>Nature of Complaint:</strong> {new_complaint.nature_of_complaint}</p>
+            <p><strong>Logged By:</strong> {current_user.full_name}</p>
+            <p><strong>Type:</strong> {new_complaint.complaint_type}</p>
+            """
+            threading.Thread(
+                target=send_html_email,
+                args=(current_user.email, subject, html_body)
+            ).start()
+            
         return _enrich(new_complaint, db)
     except IntegrityError:
         db.rollback()
@@ -158,18 +211,30 @@ def get_complaints(
                     query = query.filter(Complaint.department_name == current_user.department)
                 else:
                     query = query.filter(Complaint.created_by_id == current_user.id)
+            elif scope == "Institution":
+                if not current_user.institution:
+                    query = query.filter(Complaint.created_by_id == current_user.id)
             else:
                 query = query.filter(Complaint.created_by_id == current_user.id)
-    
     if status:
         query = query.filter(Complaint.status == status)
         
     complaints = query.order_by(Complaint.created_at.desc()).all()
     
+    result_complaints = []
     for c in complaints:
         _enrich(c, db)
         
-    return complaints
+        # Post-enrichment filtering for Institution scope
+        if not getattr(current_user, "_is_platform_admin", False) and not any('technician' in r.lower() for r in getattr(current_user, "_roles", [])):
+            scope = getattr(current_user, "_data_access_scope", "Self Only")
+            if scope == "Institution" and current_user.institution:
+                if c.institution_name != current_user.institution and c.created_by_id != current_user.id:
+                    continue
+                    
+        result_complaints.append(c)
+        
+    return result_complaints
 
 @router.get("/{complaint_id}", response_model=ComplaintOut)
 def get_complaint(
@@ -441,6 +506,91 @@ def verify_complaint(
     else:
         complaint.status = ComplaintStatus.REOPENED.value
         complaint.rejection_remarks = payload.rejection_remarks
+
+    db.commit()
+    db.refresh(complaint)
+    return _enrich(complaint, db)
+
+from app.schemas import ComplaintCloseRequest, ComplaintApproveRequest
+from app.models import ComplaintDocument
+
+@router.post("/{complaint_id}/close", response_model=ComplaintOut)
+def close_complaint(
+    complaint_id: int,
+    payload: ComplaintCloseRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("complaints", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    """Initiate dual-approval closure process."""
+    complaint = _get_complaint(db, complaint_id, tenant_id, site_id)
+    
+    allowed = [
+        ComplaintStatus.RESOLVED.value,
+        ComplaintStatus.IN_PROGRESS.value,
+        ComplaintStatus.OPEN.value,
+        ComplaintStatus.CLOSED.value # Allow updating closure details
+    ]
+    if complaint.status not in allowed:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Cannot initiate closure from status '{complaint.status}'."
+        )
+
+    complaint.resolution_entered = payload.resolution_entered
+    complaint.closure_reason = payload.closure_reason
+    complaint.status = "Pending Admin Approval"
+    
+    # Add documents
+    for url in payload.document_urls:
+        doc = ComplaintDocument(
+            complaint_id=complaint.id,
+            file_url=url,
+            uploaded_by_id=current_user.id
+        )
+        db.add(doc)
+
+    db.commit()
+    db.refresh(complaint)
+    return _enrich(complaint, db)
+
+
+@router.post("/{complaint_id}/approve-closure", response_model=ComplaintOut)
+def approve_closure(
+    complaint_id: int,
+    payload: ComplaintApproveRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("complaints", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    """Approve closure. Requires both admin and manager approval."""
+    complaint = _get_complaint(db, complaint_id, tenant_id, site_id)
+    
+    if payload.approval_type == 'admin':
+        complaint.admin_approved_by_id = current_user.id
+        complaint.admin_approved_at = datetime.utcnow()
+    elif payload.approval_type == 'manager':
+        complaint.manager_approved_by_id = current_user.id
+        complaint.manager_approved_at = datetime.utcnow()
+    else:
+        raise HTTPException(status_code=400, detail="Invalid approval type")
+        
+    # If both approved, move to closed and update equipment
+    if complaint.admin_approved_by_id and complaint.manager_approved_by_id:
+        complaint.status = ComplaintStatus.CLOSED.value
+        
+        # Auto-update PM/Calibration if applicable
+        if complaint.is_pm_calibration_call and complaint.equipment:
+            eq = complaint.equipment
+            from datetime import timedelta
+            if complaint.complaint_type == "PM":
+                eq.last_pm_date = datetime.utcnow().date()
+                eq.next_pm_due_date = eq.last_pm_date + timedelta(days=90) # Default to 90 days or fetch from contract
+            elif complaint.complaint_type == "Calibration":
+                eq.last_calibration_date = datetime.utcnow().date()
+                eq.next_calibration_due_date = eq.last_calibration_date + timedelta(days=365) # Default to 1 year
 
     db.commit()
     db.refresh(complaint)

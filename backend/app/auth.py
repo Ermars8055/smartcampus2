@@ -56,8 +56,9 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
         SCOPE_RANKS = {
             "Self Only": 1,
             "Department": 2,
-            "Organization": 3,
-            "Full Administrative Access": 4
+            "Institution": 3,
+            "Organization": 4,
+            "Full Administrative Access": 5
         }
         assignments = db.query(UserRoleAssignment).options(
             joinedload(UserRoleAssignment.role).joinedload(Role.permissions)

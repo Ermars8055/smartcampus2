@@ -122,9 +122,10 @@ export default function Equipment() {
         return false;
       }
 
-      // Biomedical filter
+      // Biomedical & Medical College filter
       if (selectedBiomedical === 'biomedical' && !item.is_biomedical) return false;
       if (selectedBiomedical === 'standard' && item.is_biomedical) return false;
+      if (selectedBiomedical === 'medical_college' && !item.institution_name?.toLowerCase().includes('medical college') && !item.institution_code?.toLowerCase().includes('medical college')) return false;
 
       // Institution filter
       if (selectedInstitution && item.institution_code !== selectedInstitution && item.institution_name !== selectedInstitution) {
@@ -287,18 +288,8 @@ export default function Equipment() {
       labelsHtml += `
         <div class="label-container">
           <div class="department-header">BIOMEDICAL ENGINEERING DEPARTMENT</div>
-          <div class="info-row"><strong>SELECT ASSET ID:</strong> <span>${qrData.asset_id}</span></div>
+          <div class="equipment-name">${qrData.equipment_name}</div>
           <div class="qr-code-container">${svgHtml}</div>
-          <div class="info-grid">
-            <div class="info-item" title="${qrData.asset_id}"><strong>ASSET ID:</strong> ${qrData.asset_id}</div>
-            <div class="info-item" title="${qrData.equipment_name}"><strong>EQUIPMENT NAME:</strong> ${qrData.equipment_name}</div>
-            <div class="info-item" title="${qrData.department_used}"><strong>DEPARTMENT:</strong> ${qrData.department_used}</div>
-            <div class="info-item" title="${qrData.make_model || '-'}"><strong>MAKE & MODEL:</strong> ${qrData.make_model || '-'}</div>
-            <div class="info-item" title="${qrData.serial_number || '-'}"><strong>SERIAL NUMBER:</strong> ${qrData.serial_number || '-'}</div>
-            <div class="info-item" title="${qrData.pm_due_date ? formatDate(qrData.pm_due_date) : 'N/A'}"><strong>PM DUE DATE:</strong> ${qrData.pm_due_date ? formatDate(qrData.pm_due_date) : 'N/A'}</div>
-            <div class="info-item" title="${qrData.machine_type || '-'}"><strong>MACHINE TYPE:</strong> ${qrData.machine_type || '-'}</div>
-            <div class="info-item" title="${qrData.grn_number || '-'}"><strong>GRN NO.:</strong> ${qrData.grn_number || '-'}</div>
-          </div>
         </div>
       `;
     }
@@ -342,14 +333,6 @@ export default function Equipment() {
               font-size: ${config.titleSize}; 
               margin-bottom: 4px; 
             }
-            .info-row {
-              font-size: ${config.textSize};
-              margin-bottom: 6px;
-              width: 100%;
-              display: flex;
-              justify-content: center;
-              gap: 8px;
-            }
             .qr-code-container { margin: 4px 0; }
             .qr-code-container svg { width: ${config.svgSize}px; height: ${config.svgSize}px; }
             .equipment-name {
@@ -361,23 +344,6 @@ export default function Equipment() {
               overflow: hidden; 
               text-overflow: ellipsis;
               width: 100%;
-            }
-            .info-grid {
-              display: grid;
-              grid-template-columns: 1fr;
-              gap: 4px 0;
-              width: 100%;
-              text-align: left;
-              font-size: ${config.textSize};
-            }
-            .info-item {
-              white-space: nowrap; 
-              overflow: hidden; 
-              text-overflow: ellipsis;
-            }
-            .info-item strong {
-              display: inline-block;
-              width: 110px; /* Aligns the colons roughly */
             }
           </style>
         </head>
@@ -567,6 +533,7 @@ export default function Equipment() {
               <MenuItem value="">All Types</MenuItem>
               <MenuItem value="biomedical">Biomedical Equipment</MenuItem>
               <MenuItem value="standard">Standard Equipment</MenuItem>
+              <MenuItem value="medical_college">Medical College Equipment</MenuItem>
             </Select>
           </FormControl>
 

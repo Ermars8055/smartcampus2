@@ -357,10 +357,15 @@ export default function ComplaintForm() {
                   onChange={handleChange}
                   required
                 >
+                  <MenuItem value="Warranty Call/Complaint">Warranty Call/Complaint</MenuItem>
+                  <MenuItem value="AMC call/Complaint">AMC call/Complaint</MenuItem>
+                  <MenuItem value="CMC call/Complaint">CMC call/Complaint</MenuItem>
+                  <MenuItem value="Out of warranty call/complaint">Out of warranty call/complaint</MenuItem>
+                  <MenuItem value="Not working Call/Complaint">Not working Call/Complaint</MenuItem>
+                  <MenuItem value="User Training Call/Complaint">User Training Call/Complaint</MenuItem>
+                  <MenuItem value="Preventive Maintenance Call">Preventive Maintenance Call/Complaint</MenuItem>
+                  <MenuItem value="Calibration Call">Calibration Call/Complaint</MenuItem>
                   <MenuItem value="General Repair">General Repair</MenuItem>
-                  <MenuItem value="Preventive Maintenance Call">Preventive Maintenance Call</MenuItem>
-                  <MenuItem value="Calibration Call">Calibration Call</MenuItem>
-                  <MenuItem value="Breakdown">Breakdown</MenuItem>
                   <MenuItem value="Installation">Installation</MenuItem>
                   <MenuItem value="Other">Other</MenuItem>
                 </Select>

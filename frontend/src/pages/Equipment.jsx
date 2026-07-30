@@ -122,9 +122,10 @@ export default function Equipment() {
         return false;
       }
 
-      // Biomedical filter
+      // Biomedical & Medical College filter
       if (selectedBiomedical === 'biomedical' && !item.is_biomedical) return false;
       if (selectedBiomedical === 'standard' && item.is_biomedical) return false;
+      if (selectedBiomedical === 'medical_college' && !item.institution_name?.toLowerCase().includes('medical college') && !item.institution_code?.toLowerCase().includes('medical college')) return false;
 
       // Institution filter
       if (selectedInstitution && item.institution_code !== selectedInstitution && item.institution_name !== selectedInstitution) {
@@ -532,6 +533,7 @@ export default function Equipment() {
               <MenuItem value="">All Types</MenuItem>
               <MenuItem value="biomedical">Biomedical Equipment</MenuItem>
               <MenuItem value="standard">Standard Equipment</MenuItem>
+              <MenuItem value="medical_college">Medical College Equipment</MenuItem>
             </Select>
           </FormControl>
 

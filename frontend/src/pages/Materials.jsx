@@ -43,56 +43,81 @@ export default function Materials() {
 
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(100);
+  const [rowsPerPage, setRowsPerPage] = useState(25);
   const [totalCount, setTotalCount] = useState(0);
+  const [initialLoad, setInitialLoad] = useState(true);
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const location = useLocation();
   const navigate = useNavigate();
 
-  const load = () => {
+  const load = async (currentPage, currentRows, currentSort, currentSearch, currentCat, currentStore) => {
     setLoading(true);
     const params = {
-      skip: page * rowsPerPage,
-      limit: rowsPerPage,
-      sort_by: sortConfig.key,
-      sort_desc: sortConfig.direction === 'desc',
+      skip: currentPage * currentRows,
+      limit: currentRows,
+      sort_by: currentSort.key,
+      sort_desc: currentSort.direction === 'desc',
       include_inactive: true
     };
-    if (search) params.search = search;
-    if (catFilter) params.category_id = catFilter;
-    if (storeFilter) params.warehouse_id = storeFilter;
-    api.get('/api/materials', { params }).then(r => {
+    if (currentSearch) params.search = currentSearch;
+    if (currentCat) params.category_id = currentCat;
+    if (currentStore) params.warehouse_id = currentStore;
+    
+    try {
+      const r = await api.get('/api/materials', { params });
       setMaterials(r.data.items || []);
       setTotalCount(r.data.total || 0);
-    }).finally(() => setLoading(false));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    Promise.all([
-      api.get('/api/categories'),
-      api.get('/api/uom'),
-      api.get('/api/vendors'),
-      api.get('/api/subcategories'),
-      api.get('/api/warehouses'),
-    ]).then(([c, u, v, s, w]) => {
-      setCategories(c.data);
-      setUoms(u.data);
-      setVendors(v.data);
-      setSubcategories(s.data);
-      setWarehouses(w.data);
-    });
+    const init = async () => {
+      setLoading(true);
+      try {
+        const [c, u, v, s, w] = await Promise.all([
+          api.get('/api/categories'),
+          api.get('/api/uom'),
+          api.get('/api/vendors'),
+          api.get('/api/subcategories'),
+          api.get('/api/warehouses'),
+        ]);
+        setCategories(c.data);
+        setUoms(u.data);
+        setVendors(v.data);
+        setSubcategories(s.data);
+        setWarehouses(w.data);
+      } catch (err) {
+        console.error(err);
+      }
+      setInitialLoad(false);
+    };
+    init();
   }, []);
 
-  useEffect(() => { setPage(0); }, [search, catFilter, storeFilter, sortConfig]);
-  useEffect(() => { load(); }, [search, catFilter, storeFilter, page, rowsPerPage, sortConfig]);
+  // Fetch materials whenever filters/page changes, but only after initial load of dropdowns
+  useEffect(() => {
+    if (!initialLoad) {
+      load(page, rowsPerPage, sortConfig, search, catFilter, storeFilter);
+    }
+  }, [search, catFilter, storeFilter, page, rowsPerPage, sortConfig, initialLoad]);
+
+  const handleFilterChange = (setter, value) => {
+    setter(value);
+    setPage(0); // Reset page on filter change
+  };
 
   const handleSort = (key) => {
     setSortConfig(prev => ({
       key,
       direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
     }));
+    setPage(0);
   };
 
   const validateForm = () => {
@@ -396,7 +421,7 @@ export default function Materials() {
             size="small"
             placeholder="Search materials by name, code or alias..."
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={e => handleFilterChange(setSearch, e.target.value)}
             sx={{ minWidth: 400 }}
             InputProps={{
               startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} />,
@@ -408,7 +433,7 @@ export default function Materials() {
             <Select
               value={storeFilter}
               label="Filter by Store"
-              onChange={e => setStoreFilter(e.target.value)}
+              onChange={e => handleFilterChange(setStoreFilter, e.target.value)}
               sx={{ borderRadius: 2 }}
             >
               <MenuItem value="">All Stores</MenuItem>
@@ -420,7 +445,7 @@ export default function Materials() {
             <Select
               value={catFilter}
               label="Filter by Category"
-              onChange={e => setCatFilter(e.target.value)}
+              onChange={e => handleFilterChange(setCatFilter, e.target.value)}
               sx={{ borderRadius: 2 }}
             >
               <MenuItem value="">All Categories</MenuItem>

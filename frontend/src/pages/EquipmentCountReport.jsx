@@ -70,6 +70,7 @@ export default function EquipmentCountReport() {
           <Table>
             <TableHead sx={{ bgcolor: '#F1F5F9' }}>
               <TableRow>
+                <TableCell sx={{ fontWeight: 700, color: '#334155', width: 80 }}>Sl. No</TableCell>
                 <TableCell sx={{ fontWeight: 700, color: '#334155' }}>Equipment Name (Material)</TableCell>
                 <TableCell align="right" sx={{ fontWeight: 700, color: '#334155' }}>Count</TableCell>
               </TableRow>
@@ -77,6 +78,9 @@ export default function EquipmentCountReport() {
             <TableBody>
               {data.map((row, index) => (
                 <TableRow key={index} hover>
+                  <TableCell sx={{ fontWeight: 600, color: '#64748B' }}>
+                    {index + 1}
+                  </TableCell>
                   <TableCell sx={{ fontWeight: 600, color: '#475569' }}>
                     {row.equipment_name}
                   </TableCell>
@@ -87,7 +91,7 @@ export default function EquipmentCountReport() {
               ))}
               {data.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={2} align="center" sx={{ py: 3, color: '#94A3B8' }}>
+                  <TableCell colSpan={3} align="center" sx={{ py: 3, color: '#94A3B8' }}>
                     No equipment data found.
                   </TableCell>
                 </TableRow>

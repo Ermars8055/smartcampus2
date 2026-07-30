@@ -160,6 +160,8 @@ def update_vendor(
         update_data["status"] = VendorStatus.AWAITING_APPROVAL.value
         update_data["current_approval_level"] = 1
         update_data["rejection_remarks"] = None
+        update_data["is_active"] = True
+
         
     for k, v in update_data.items():
         setattr(vendor, k, v)
@@ -283,6 +285,7 @@ def reject_vendor(
         raise HTTPException(404, "Vendor not found")
         
     vendor.status = VendorStatus.REJECTED.value
+    vendor.is_active = False
     if data and data.remarks:
         vendor.rejection_remarks = data.remarks
     db.commit()

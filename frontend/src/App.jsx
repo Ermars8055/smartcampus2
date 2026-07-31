@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ThemeProvider, CssBaseline, Typography, Button } from '@mui/material';
 import '@fontsource/inter/300.css';
@@ -197,6 +197,33 @@ function AppRoutes() {
 }
 
 export default function App() {
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.target.tagName === 'INPUT' && e.target.type === 'number') {
+        if (['-', '+', 'e', 'E'].includes(e.key)) {
+          e.preventDefault();
+        }
+      }
+    };
+
+    const handlePaste = (e) => {
+      if (e.target.tagName === 'INPUT' && e.target.type === 'number') {
+        const pastedData = e.clipboardData?.getData('text') || '';
+        if (pastedData.includes('-') || pastedData.includes('+') || pastedData.includes('e') || pastedData.includes('E')) {
+          e.preventDefault();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('paste', handlePaste);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('paste', handlePaste);
+    };
+  }, []);
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />

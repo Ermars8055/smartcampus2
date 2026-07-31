@@ -237,7 +237,7 @@ export default function Materials() {
       setDialog(false);
       setEditing(null);
       setErrors({});
-      load();
+      load(page, rowsPerPage, sortConfig, search, catFilter, storeFilter);
       setSnackbar({ open: true, message: 'Material saved successfully!', severity: 'success' });
     } catch (err) {
       const detail = err.response?.data?.detail;
@@ -747,6 +747,50 @@ export default function Materials() {
               sx={{ gridColumn: { sm: 'span 2' } }}
               InputProps={{ startAdornment: <InputAdornment position="start"><Description sx={{ color: '#94A3B8' }} /></InputAdornment> }}
             />
+            <FormControl fullWidth required error={!!errors.material_type}>
+              <InputLabel>Material Type</InputLabel>
+              <Select
+                value={form.material_type}
+                onChange={e => setForm({ ...form, material_type: e.target.value })}
+                disabled={viewOnly}
+                label="Material Type"
+                startAdornment={<InputAdornment position="start"><Category sx={{ color: '#94A3B8' }} /></InputAdornment>}
+              >
+                <MenuItem value="Consumable">Consumable</MenuItem>
+                <MenuItem value="Non-Consumable">Non-Consumable</MenuItem>
+                <MenuItem value="Furniture">Furniture</MenuItem>
+                <MenuItem value="Equipment">Equipment</MenuItem>
+              </Select>
+              {errors.material_type && <Typography variant="caption" color="error" sx={{ ml: 2 }}>{errors.material_type}</Typography>}
+            </FormControl>
+
+            {form.material_type === 'Equipment' && (
+              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', p: 1.5, bgcolor: '#F8FAFC', borderRadius: 2, border: '1px solid #E2E8F0', gridColumn: { sm: 'span 2' } }}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={form.requires_installation}
+                      onChange={e => setForm({ ...form, requires_installation: e.target.checked })}
+                      disabled={viewOnly}
+                      color="primary"
+                    />
+                  }
+                  label={<Typography variant="body2" sx={{ fontWeight: 500, color: '#1E293B' }}>Requires Installation</Typography>}
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={form.is_biomedical}
+                      onChange={e => setForm({ ...form, is_biomedical: e.target.checked })}
+                      disabled={viewOnly}
+                      color="secondary"
+                    />
+                  }
+                  label={<Typography variant="body2" sx={{ fontWeight: 500, color: '#1E293B' }}>Biomedical Equipment</Typography>}
+                />
+              </Box>
+            )}
+
             <TextField
               fullWidth
               label="Material Reference No."
@@ -814,50 +858,6 @@ export default function Materials() {
               </Select>
               {errors.warehouse_id && <Typography variant="caption" color="error" sx={{ ml: 2 }}>{errors.warehouse_id}</Typography>}
             </FormControl>
-
-            <FormControl fullWidth required error={!!errors.material_type}>
-              <InputLabel>Material Type</InputLabel>
-              <Select
-                value={form.material_type}
-                onChange={e => setForm({ ...form, material_type: e.target.value })}
-                disabled={viewOnly}
-                label="Material Type"
-                startAdornment={<InputAdornment position="start"><Category sx={{ color: '#94A3B8' }} /></InputAdornment>}
-              >
-                <MenuItem value="Consumable">Consumable</MenuItem>
-                <MenuItem value="Non-Consumable">Non-Consumable</MenuItem>
-                <MenuItem value="Furniture">Furniture</MenuItem>
-                <MenuItem value="Equipment">Equipment</MenuItem>
-              </Select>
-              {errors.material_type && <Typography variant="caption" color="error" sx={{ ml: 2 }}>{errors.material_type}</Typography>}
-            </FormControl>
-
-            {form.material_type === 'Equipment' && (
-              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', p: 1.5, bgcolor: '#F8FAFC', borderRadius: 2, border: '1px solid #E2E8F0', gridColumn: { sm: 'span 2' } }}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={form.requires_installation}
-                      onChange={e => setForm({ ...form, requires_installation: e.target.checked })}
-                      disabled={viewOnly}
-                      color="primary"
-                    />
-                  }
-                  label={<Typography variant="body2" sx={{ fontWeight: 500, color: '#1E293B' }}>Requires Installation</Typography>}
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={form.is_biomedical}
-                      onChange={e => setForm({ ...form, is_biomedical: e.target.checked })}
-                      disabled={viewOnly}
-                      color="secondary"
-                    />
-                  }
-                  label={<Typography variant="body2" sx={{ fontWeight: 500, color: '#1E293B' }}>Biomedical Equipment</Typography>}
-                />
-              </Box>
-            )}
 
 
             <FormControl fullWidth>

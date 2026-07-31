@@ -721,7 +721,7 @@ def list_departments_by_building(
 @router.post("/departments", response_model=DepartmentOut)
 def create_department(
     data: DepartmentCreate, db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("projects", "create")),
+    current_user: User = Depends(require_permission("departments", "create")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -756,7 +756,7 @@ def create_department(
 @router.put("/departments/{id}", response_model=DepartmentOut)
 def update_department(
     id: int, data: DepartmentCreate, db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("projects", "update")),
+    current_user: User = Depends(require_permission("departments", "update")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -779,7 +779,7 @@ def update_department(
 @router.delete("/departments/{id}")
 def delete_department(
     id: int, db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("projects", "delete")),
+    current_user: User = Depends(require_permission("departments", "delete")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):

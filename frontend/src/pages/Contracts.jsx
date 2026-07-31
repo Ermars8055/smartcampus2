@@ -117,9 +117,9 @@ export default function Contracts() {
           scrollButtons="auto"
           sx={{ borderTop: 1, borderColor: 'divider' }}
         >
-          {['Pending Approval', 'Active', 'Expired', 'Closed', 'Rejected', 'All'].map(s => {
+          {['Draft', 'Pending Approval', 'Active', 'Expired', 'Closed', 'Rejected', 'All'].map(s => {
             const count = s === 'All' ? contracts.length : contracts.filter(c => c.status === s).length;
-            if (s !== 'All' && count === 0 && !['Pending Approval', 'Active'].includes(s)) return null;
+            if (s !== 'All' && count === 0 && !['Draft', 'Pending Approval', 'Active'].includes(s)) return null;
             return (
               <Tab
                 key={s}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ThemeProvider, CssBaseline, Typography, Button } from '@mui/material';
 import '@fontsource/inter/300.css';
 import '@fontsource/inter/400.css';
@@ -32,6 +32,7 @@ import Invoices from './pages/Invoices';
 import InvoiceTracking from './pages/InvoiceTracking';
 import RegisterInvoice from './pages/RegisterInvoice';
 import GRNPage from './pages/GRN';
+import Equipment from './pages/Equipment';
 import MaterialIssue from './pages/MaterialIssue';
 import Returns from './pages/Returns';
 import StockTransfers from './pages/StockTransfers';
@@ -45,6 +46,7 @@ import IssueSummaryReport from './pages/IssueSummaryReport';
 import RateAnalysisReport from './pages/RateAnalysisReport';
 import ReceiptSummaryReport from './pages/ReceiptSummaryReport';
 import DepartmentWiseInventoryReport from './pages/DepartmentWiseInventoryReport';
+import EquipmentCountReport from './pages/EquipmentCountReport';
 import PendingGatepassReturnsReport from './pages/PendingGatepassReturnsReport';
 import Users from './pages/Users';
 import AuditLogs from './pages/AuditLogs';
@@ -58,12 +60,20 @@ import Alerts from './pages/Alerts';
 import PlatformLogin from './pages/PlatformLogin';
 import TermsAndConditions from './pages/TermsAndConditions';
 import CompanyAddresses from './pages/CompanyAddresses';
+import LocationMaster from './pages/LocationMaster';
 import ComplaintsList from './pages/ComplaintsList';
 import ComplaintForm from './pages/ComplaintForm';
 import ComplaintDetail from './pages/ComplaintDetail';
+import Contracts from './pages/Contracts';
+import ContractForm from './pages/ContractForm';
+import RepairWorkOrders from './pages/RepairWorkOrders';
+import RepairWorkOrderDetail from './pages/RepairWorkOrderDetail';
 
 import VendorPendingInvoicesReport from './pages/VendorPendingInvoicesReport';
 import VendorPendingPaymentsReport from './pages/VendorPendingPaymentsReport';
+import QREquipmentView from './pages/QREquipmentView';
+import QRMaterialView from './pages/QRMaterialView';
+import PMSchedule from './pages/PMSchedule';
 import ChatBot from './components/ChatBot';
 import { Box, CircularProgress } from '@mui/material';
 
@@ -94,6 +104,7 @@ class ErrorBoundary extends React.Component {
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
+  const location = useLocation();
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
@@ -101,7 +112,7 @@ function ProtectedRoute({ children }) {
       </Box>
     );
   }
-  return user ? <ErrorBoundary>{children}</ErrorBoundary> : <Navigate to="/login" />;
+  return user ? <ErrorBoundary>{children}</ErrorBoundary> : <Navigate to="/login" state={{ from: location }} replace />;
 }
 
 function AppRoutes() {
@@ -111,6 +122,11 @@ function AppRoutes() {
       <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
       <Route path="/reset-password" element={user ? <Navigate to="/" /> : <ResetPassword />} />
       <Route path="/platform/login" element={user ? <Navigate to="/saas-admin" /> : <PlatformLogin />} />
+      
+      {/* QR Routes (Protected) */}
+      <Route path="/equipment/:id" element={<ProtectedRoute><QREquipmentView /></ProtectedRoute>} />
+      <Route path="/materials/:code" element={<ProtectedRoute><QRMaterialView /></ProtectedRoute>} />
+
       <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
         <Route index element={<Dashboard />} />
         <Route path="materials" element={<Materials />} />
@@ -130,6 +146,8 @@ function AppRoutes() {
         <Route path="invoices/register" element={<RegisterInvoice />} />
         <Route path="invoices/edit/:id" element={<RegisterInvoice />} />
         <Route path="grn" element={<GRNPage />} />
+        <Route path="equipment" element={<Equipment />} />
+        <Route path="equipment/pm-schedule" element={<PMSchedule />} />
         <Route path="issues" element={<MaterialIssue />} />
         <Route path="pending-acknowledgments" element={<PendingAcknowledgments />} />
         <Route path="returns" element={<Returns />} />
@@ -141,6 +159,7 @@ function AppRoutes() {
         <Route path="reports" element={<Reports />} />
         <Route path="reports/issue-summary" element={<IssueSummaryReport />} />
         <Route path="reports/rate-analysis" element={<RateAnalysisReport />} />
+        <Route path="reports/equipment-count" element={<EquipmentCountReport />} />
         <Route path="reports/receipt-summary" element={<ReceiptSummaryReport />} />
         <Route path="reports/department-inventory" element={<DepartmentWiseInventoryReport />} />
         <Route path="reports/pending-gatepass-returns" element={<PendingGatepassReturnsReport />} />
@@ -151,6 +170,7 @@ function AppRoutes() {
         <Route path="admin/roles" element={<RolesList />} />
         <Route path="admin/material-allowances" element={<MaterialAllowances />} />
         <Route path="admin/configurations" element={<Configurations />} />
+        <Route path="admin/locations" element={<LocationMaster />} />
         <Route path="admin/roles/new" element={<RoleConfiguration />} />
         <Route path="admin/roles/:id" element={<RoleConfiguration />} />
         <Route path="terms" element={<TermsAndConditions />} />
@@ -161,6 +181,13 @@ function AppRoutes() {
         <Route path="complaints/new" element={<ComplaintForm />} />
         <Route path="complaints/edit/:id" element={<ComplaintForm />} />
         <Route path="complaints/:id" element={<ComplaintDetail />} />
+        
+        <Route path="contracts" element={<Contracts />} />
+        <Route path="contracts/new" element={<ContractForm />} />
+        <Route path="contracts/edit/:id" element={<ContractForm />} />
+        
+        <Route path="rwos" element={<RepairWorkOrders />} />
+        <Route path="rwos/:id" element={<RepairWorkOrderDetail />} />
 
         <Route path="finance/reports/pending-invoices" element={<VendorPendingInvoicesReport />} />
         <Route path="finance/reports/pending-payments" element={<VendorPendingPaymentsReport />} />

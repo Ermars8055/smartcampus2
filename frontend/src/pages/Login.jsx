@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import {
   Box, Card, TextField, Button, Typography, Alert, CircularProgress,
   InputAdornment, IconButton, MenuItem, Autocomplete, Divider
@@ -29,6 +29,8 @@ export default function Login() {
 
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname ? `${location.state.from.pathname}${location.state.from.search || ''}` : '/';
 
   useEffect(() => {
     let interval = null;
@@ -52,8 +54,8 @@ export default function Login() {
     if (!workspace) { setError('Please select a workspace'); return; }
     setLoading(true);
     try {
-      await login(username, password, workspace);
-      navigate('/');
+      await login(username.trim(), password.trim(), workspace.trim());
+      navigate(from, { replace: true });
     } catch (err) {
       setError(err.response?.data?.detail || 'Login failed. Please check your credentials.');
     } finally {

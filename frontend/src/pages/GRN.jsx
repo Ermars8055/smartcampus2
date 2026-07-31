@@ -128,7 +128,7 @@ export default function GRNPage() {
         rate: it.rate, material_name: it.material_name, material_code: it.material_code, uom_name: it.uom_name
       })) || [];
       setForm({
-        ...form, po_id: poId, vendor_id: po.vendor_id, project_id: po.project_id, receipt_type: 'PO-Based',
+        ...form, po_id: poId, vendor_id: po.vendor_id, project_id: po.project_id, receipt_type: 'PO-Based', po_procurement_type: po.procurement_type,
         items
       });
     }
@@ -600,17 +600,20 @@ export default function GRNPage() {
                 </TableRow></TableHead>
                 <TableBody>
                   {form.items.map((item, i) => {
-                    const hasQuantityError = !!itemErrors[i]?.received_quantity || !!itemErrors[i]?.accepted_quantity || !!itemErrors[i]?.rejected_quantity;
+                    const selectedMaterial = materials.find(m => m.id === item.material_id);
+                    const isEquipment = selectedMaterial?.material_type === 'Equipment';
+                    const hasQuantityError = !!(itemErrors[i]?.accepted_quantity || itemErrors[i]?.received_quantity || itemErrors[i]?.rejected_quantity);
+
                     return (
                     <React.Fragment key={i}>
-                      <TableRow id={`item-row-${i}`} sx={{ '& td': { verticalAlign: 'top', pt: 1.5, borderBottom: hasQuantityError ? 'none' : undefined } }}>
+                      <TableRow id={`item-row-${i}`} sx={{ '& td': { verticalAlign: 'top', pt: 1.5, borderBottom: (hasQuantityError || (isEquipment && item.accepted_quantity > 0)) ? 'none' : undefined } }}>
                         <TableCell sx={{ minWidth: 250 }}>
                           {form.receipt_type === 'Direct Invoice' ? (
                           <Autocomplete
                             size="small"
                             options={materials}
                             getOptionLabel={(option) => `${option.code ? option.code + ' - ' : ''}${option.name || ''}`}
-                            value={materials.find(m => m.id === item.material_id) || null}
+                            value={selectedMaterial || null}
                             onChange={(e, newValue) => {
                               const items = [...form.items];
                               items[i].material_id = newValue ? newValue.id : '';
@@ -623,15 +626,16 @@ export default function GRNPage() {
                           />
                         ) : (
                           <>
-                            <Typography variant="body2">{item.material_name || materials.find(m => m.id === item.material_id)?.name}</Typography>
-                            {(item.material_code || materials.find(m => m.id === item.material_id)?.code) && (
-                              <Typography variant="caption" color="textSecondary">{item.material_code || materials.find(m => m.id === item.material_id)?.code}</Typography>
+                            <Typography variant="body2">{item.material_name || selectedMaterial?.name}</Typography>
+                            {(item.material_code || selectedMaterial?.code) && (
+                              <Typography variant="caption" color="textSecondary">{item.material_code || selectedMaterial?.code}</Typography>
                             )}
+                            {isEquipment && <Chip label="Equipment" size="small" color="warning" sx={{ ml: 1, height: 18, fontSize: '0.65rem' }} />}
                           </>
                         )}
                       </TableCell>
                       <TableCell sx={{ color: '#64748B', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
-                        {item.uom_name || materials.find(m => m.id === item.material_id)?.uom_name || '-'}
+                        {item.uom_name || selectedMaterial?.uom_name || '-'}
                       </TableCell>
                       {form.receipt_type === 'PO-Based' && <TableCell align="right">{item.ordered_quantity}</TableCell>}
                       <TableCell align="right">
@@ -684,6 +688,78 @@ export default function GRNPage() {
                         </TableCell>
                       )}
                     </TableRow>
+                    {isEquipment && item.accepted_quantity > 0 && (
+                      <TableRow>
+                        <TableCell colSpan={form.receipt_type === 'PO-Based' ? 7 : 7} sx={{ bgcolor: '#F8FAFC', py: 1.5, px: 2, borderBottom: '1px solid #E2E8F0' }}>
+                          <Box sx={{ p: 1.5, bgcolor: '#FFFFFF', borderRadius: 1.5, border: '1px solid #CBD5E1' }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                              <Box>
+                                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#334155', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                  📦 Equipment Details for {selectedMaterial?.name || 'Equipment'} ({item.accepted_quantity} unit{item.accepted_quantity > 1 ? 's' : ''})
+                                </Typography>
+                                <Typography variant="caption" color="textSecondary" sx={{ display: 'block', mb: 1 }}>
+                                  Optionally enter serial numbers, installation date, and rental details (if applicable).
+                                </Typography>
+                              </Box>
+                              {form.po_procurement_type === 'Rental' && (
+                                <Chip label="Rental Equipment" size="small" color="info" sx={{ fontWeight: 600 }} />
+                              )}
+                            </Box>
+
+                            <Grid container spacing={2} sx={{ mb: 2 }}>
+                              <Grid item xs={12} sm={4}>
+                                <TextField
+                                  fullWidth size="small" type="date" label="Installation Date" InputLabelProps={{ shrink: true }}
+                                  value={item.installation_date || ''}
+                                  onChange={e => {
+                                    const items = [...form.items];
+                                    items[i].installation_date = e.target.value;
+                                    setForm({ ...form, items });
+                                  }}
+                                />
+                              </Grid>
+                              {form.po_procurement_type === 'Rental' && (
+                                <Grid item xs={12} sm={4}>
+                                  <TextField
+                                    fullWidth size="small" type="date" label="Override Rental Start" InputLabelProps={{ shrink: true }}
+                                    value={item.rental_start_date || ''}
+                                    onChange={e => {
+                                      const items = [...form.items];
+                                      items[i].rental_start_date = e.target.value;
+                                      setForm({ ...form, items });
+                                    }}
+                                  />
+                                </Grid>
+                              )}
+                            </Grid>
+
+                            <Divider sx={{ mb: 1.5, opacity: 0.6 }} />
+
+                            <Typography variant="caption" sx={{ fontWeight: 600, color: '#334155', display: 'block', mb: 1 }}>Serial Numbers</Typography>
+                            <Grid container spacing={1}>
+                              {Array.from({ length: Math.min(item.accepted_quantity, 50) }).map((_, unitIdx) => (
+                                <Grid item xs={12} sm={6} md={4} key={unitIdx}>
+                                  <TextField
+                                    size="small"
+                                    fullWidth
+                                    placeholder={`Unit ${unitIdx + 1} Serial No.`}
+                                    value={(item.serial_numbers && item.serial_numbers[unitIdx]) || ''}
+                                    onChange={e => {
+                                      const items = [...form.items];
+                                      const sns = [...(items[i].serial_numbers || [])];
+                                      sns[unitIdx] = e.target.value;
+                                      items[i].serial_numbers = sns;
+                                      setForm({ ...form, items });
+                                    }}
+                                  />
+                                </Grid>
+                              ))}
+                            </Grid>
+                          </Box>
+                        </TableCell>
+                      </TableRow>
+                    )}
+
                     {hasQuantityError && (
                       <TableRow>
                         <TableCell colSpan={2} sx={{ py: 0, borderBottom: '1px solid rgba(224, 224, 224, 1)' }} />

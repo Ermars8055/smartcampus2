@@ -25,6 +25,7 @@ ADMIN_RESOURCES = {
     "gate_entry": ["can_record_entry", "can_verify"],
     "invoice": ["can_register", "can_approve", "can_reject", "can_print"],
     "grn": ["can_create_grn", "can_complete"],
+    "equipment": ["can_update_serial", "can_install"],
     "issues": ["can_issue", "can_direct_issue", "can_print"],
     "returns": ["can_return", "receive"],
     "transfers": ["can_transfer"],

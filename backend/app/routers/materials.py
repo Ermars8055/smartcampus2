@@ -296,6 +296,14 @@ def list_materials(
 
     total = q.count()
     
+    q = q.options(
+        joinedload(Material.category),
+        joinedload(Material.subcategory),
+        joinedload(Material.uom),
+        joinedload(Material.preferred_vendor),
+        joinedload(Material.warehouse)
+    )
+
     if sort_by == "code":
         q = q.order_by(Material.code.desc() if sort_desc else Material.code.asc())
     elif sort_by == "category":
@@ -317,10 +325,19 @@ def list_materials(
 
     materials = q.offset(skip).limit(limit).all()
 
+    material_ids = [m.id for m in materials]
+    stock_map = {}
+    if material_ids:
+        stocks = db.query(CurrentStock).filter(
+            CurrentStock.material_id.in_(material_ids),
+            CurrentStock.site_id == site_id
+        ).all()
+        for s in stocks:
+            stock_map[s.material_id] = stock_map.get(s.material_id, 0) + s.quantity
+
     result = []
     for m in materials:
-        stock = db.query(CurrentStock).filter(CurrentStock.material_id == m.id, CurrentStock.site_id == site_id).all()
-        total_stock = round(sum(s.quantity for s in stock))
+        total_stock = round(stock_map.get(m.id, 0))
         result.append(MaterialOut(
             id=m.id, code=m.code, name=m.name,
             alias=m.alias, reference_no=m.reference_no,
@@ -379,6 +396,33 @@ def get_material(
         warehouse_name=m.warehouse.name if m.warehouse else None,
         current_stock=total_stock
     )
+
+@router.get("/materials/by-code/{material_code}")
+def get_material_by_code(
+    material_code: str, 
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    m = db.query(Material).filter(
+        Material.code == material_code,
+        Material.tenant_id == tenant_id,
+        Material.site_id == site_id
+    ).first()
+    if not m:
+        raise HTTPException(status_code=404, detail="Material not found")
+        
+    return {
+        "code": m.code,
+        "name": m.name,
+        "category_name": m.category.name if m.category else "N/A",
+        "subcategory_name": m.subcategory.name if m.subcategory else "N/A",
+        "uom_name": m.uom.abbreviation if m.uom else "N/A",
+        "material_type": m.material_type,
+        "storage_type": m.storage_type or "N/A",
+        "is_active": m.is_active
+    }
 
 
 @router.post("/materials")

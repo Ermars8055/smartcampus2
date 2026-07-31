@@ -982,6 +982,7 @@ def download_comparative_statement_excel(
     from openpyxl.utils import get_column_letter
     from io import BytesIO
     from fastapi.responses import StreamingResponse
+    from app.models import Material, VendorQuotationItem, VendorQuotation
 
     comp_data = generate_comparison(qr_id, db, current_user, tenant_id, site_id)
     sorted_vendors = sorted(comp_data.vendor_totals, key=lambda x: x['total_value'])
@@ -990,138 +991,165 @@ def download_comparative_statement_excel(
     ws = wb.active
     ws.title = "Comparative Statement"
 
-    # Explicitly show grid lines so they remain visible under colored fills
     ws.views.sheetView[0].showGridLines = True
 
-    # Typography & Styles (Modern Segoe UI theme)
-    title_font = Font(name="Segoe UI", size=16, bold=True, color="1F4E79")
-    meta_label_font = Font(name="Segoe UI", size=10, bold=True, color="475569")
-    meta_val_font = Font(name="Segoe UI", size=10, color="000000")
-    header_font = Font(name="Segoe UI", size=10, bold=True, color="FFFFFF")
-    subheader_font = Font(name="Segoe UI", size=9, bold=True, color="1E293B")
-    data_font = Font(name="Segoe UI", size=10, color="000000")
-    total_font = Font(name="Segoe UI", size=10, bold=True, color="000000")
-    green_font = Font(name="Segoe UI", size=10, bold=True, color="15803D")
-    gray_font = Font(name="Segoe UI", size=10, color="64748B")
+    # Typography & Styles
+    title_font = Font(name="Segoe UI", size=16, bold=True, color="FFFFFF")
+    header_font = Font(name="Segoe UI", size=11, bold=True, color="000000")
+    data_font = Font(name="Segoe UI", size=11, color="000000")
 
     # Colors
-    header_fill = PatternFill(start_color="1E293B", end_color="1E293B", fill_type="solid") # Corporate Slate Navy
-    subheader_fill = PatternFill(start_color="F1F5F9", end_color="F1F5F9", fill_type="solid") # Soft Light Gray
-    zebra_fill = PatternFill(start_color="F8FAFC", end_color="F8FAFC", fill_type="solid") # Very light tint for alternating rows
-    l1_fill = PatternFill(start_color="DCFCE7", end_color="DCFCE7", fill_type="solid") # Soft green for L1 rate / lowest value
+    title_fill = PatternFill(start_color="5B5B5B", end_color="5B5B5B", fill_type="solid") # Dark gray for "comparison" title
+    base_header_fill = PatternFill(start_color="F2F2F2", end_color="F2F2F2", fill_type="solid") # Light gray for base items
+
+    # Pastel colors for vendors
+    vendor_colors = [
+        "E2EFDA", # Pastel Green
+        "F4CCCC", # Pastel Red/Pink
+        "DDEBF7", # Pastel Blue
+        "E4DFEC", # Pastel Purple
+        "FFF2CC", # Pastel Yellow
+        "D9EAD3", # Light Green
+        "C9DAF8"  # Light Blue
+    ]
 
     # Alignments
-    align_center = Alignment(horizontal="center", vertical="center")
-    align_left = Alignment(horizontal="left", vertical="center")
+    align_center = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    align_left = Alignment(horizontal="left", vertical="center", wrap_text=True)
     align_right = Alignment(horizontal="right", vertical="center")
-    align_header = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    align_right_wrap = Alignment(horizontal="right", vertical="center", wrap_text=True)
 
     # Borders
-    thin_border_side = Side(style="thin", color="CBD5E1")
-    double_border_side = Side(style="double", color="000000")
-    thin_top_side = Side(style="thin", color="000000")
-
-    grid_border = Border(left=thin_border_side, right=thin_border_side, top=thin_border_side, bottom=thin_border_side)
-    total_border = Border(left=thin_border_side, right=thin_border_side, top=thin_top_side, bottom=double_border_side)
+    thin_border = Border(
+        left=Side(style="thin", color="000000"),
+        right=Side(style="thin", color="000000"),
+        top=Side(style="thin", color="000000"),
+        bottom=Side(style="thin", color="000000")
+    )
 
     # 1. Sheet Title block
-    ws.merge_cells("A1:G1")
-    ws["A1"] = f"COMPARATIVE STATEMENT"
+    num_vendors = len(sorted_vendors)
+    l1_start_col = 4 + num_vendors * 8
+    total_cols = 3 + (num_vendors * 8) + 2
+    last_col_letter = get_column_letter(total_cols) if total_cols > 0 else "G"
+    
+    ws.merge_cells(f"A1:{last_col_letter}1")
+    ws["A1"] = f"QUOTATION COMPARATIVE STATEMENT - {comp_data.qr_number}"
     ws["A1"].font = title_font
-    ws["A1"].alignment = align_left
+    ws["A1"].fill = title_fill
+    ws["A1"].alignment = align_center
     ws.row_dimensions[1].height = 30
 
-    # 2. Metadata details block
-    ws["A3"] = "QR Number:"
-    ws["A3"].font = meta_label_font
-    ws["B3"] = comp_data.qr_number
-    ws["B3"].font = meta_val_font
+    # 2. Build Column Headers (Row 2 and Row 3)
+    ws.merge_cells("A2:A3")
+    ws["A2"] = "Sl No"
+    ws["A2"].font = header_font
+    ws["A2"].fill = base_header_fill
+    ws["A2"].alignment = align_center
+    ws["A2"].border = thin_border
+    ws["A3"].border = thin_border
 
-    ws["A4"] = "Project:"
-    ws["A4"].font = meta_label_font
-    ws["B4"] = comp_data.project_name or "N/A"
-    ws["B4"].font = meta_val_font
+    ws.merge_cells("B2:B3")
+    ws["B2"] = "Item Description"
+    ws["B2"].font = header_font
+    ws["B2"].fill = base_header_fill
+    ws["B2"].alignment = align_center
+    ws["B2"].border = thin_border
+    ws["B3"].border = thin_border
 
-    ws["D3"] = "Statement Date:"
-    ws["D3"].font = meta_label_font
-    ws["E3"] = comp_data.created_at.strftime('%d-%b-%Y')
-    ws["E3"].font = meta_val_font
+    ws.merge_cells("C2:C3")
+    ws["C2"] = "Per"
+    ws["C2"].font = header_font
+    ws["C2"].fill = base_header_fill
+    ws["C2"].alignment = align_center
+    ws["C2"].border = thin_border
+    ws["C3"].border = thin_border
 
-    ws["D4"] = "Status:"
-    ws["D4"].font = meta_label_font
-    ws["E4"] = comp_data.status
-    ws["E4"].font = meta_val_font
-
-    # 3. Build Column Headers (Row 7 and 8)
-    base_headers = ["Sr. No.", "Material Code", "Material Name", "Qty", "UOM"]
-    for col_idx, text in enumerate(base_headers, start=1):
-        col_letter = get_column_letter(col_idx)
-        ws.merge_cells(f"{col_letter}7:{col_letter}8")
-        cell = ws[f"{col_letter}7"]
-        cell.value = text
-        cell.font = header_font
-        cell.fill = header_fill
-        cell.alignment = align_header
-        cell.border = grid_border
-
-    # Vendor Columns Header block
+    # Build Vendor Columns Header block
     for v_idx, vt in enumerate(sorted_vendors):
-        start_col = 6 + v_idx * 7
-        end_col = start_col + 6
+        start_col = 4 + v_idx * 8
+        end_col = start_col + 7
         
         start_letter = get_column_letter(start_col)
         end_letter = get_column_letter(end_col)
         
-        # Merge Row 7 across the 7 columns for vendor code and name
-        ws.merge_cells(f"{start_letter}7:{end_letter}7")
-        cell = ws[f"{start_letter}7"]
+        v_color = vendor_colors[v_idx % len(vendor_colors)]
+        v_fill = PatternFill(start_color=v_color, end_color=v_color, fill_type="solid")
+        
+        ws.merge_cells(f"{start_letter}2:{end_letter}2")
+        cell = ws[f"{start_letter}2"]
         cell.value = vt['vendor_name']
         cell.font = header_font
-        cell.fill = header_fill
-        cell.alignment = align_header
-        cell.border = grid_border
+        cell.fill = v_fill
+        cell.alignment = align_center
         
-        # Row 8 has the sub-headers
-        subheaders = ["Brand", "Vendor UOM", "Conv. Factor", "Quoted Rate", "Disc %", "Effective Rate", "Total Amount"]
+        for col_i in range(start_col, end_col + 1):
+            ws.cell(row=2, column=col_i).border = thin_border
+            ws.cell(row=2, column=col_i).fill = v_fill
+        
+        subheaders = ["Unit Rate (₹)", "Qty", "Disc %", "Disc Amt", "Net Rate", "Taxable Amt", "GST %", "Final Amt (₹)"]
         for sh_idx, sh_text in enumerate(subheaders):
-            c_letter = get_column_letter(start_col + sh_idx)
-            c_cell = ws[f"{c_letter}8"]
+            c_col = start_col + sh_idx
+            c_cell = ws.cell(row=3, column=c_col)
             c_cell.value = sh_text
-            c_cell.font = subheader_font
-            c_cell.fill = subheader_fill
-            c_cell.alignment = align_header
-            c_cell.border = grid_border
+            c_cell.font = header_font
+            c_cell.fill = v_fill
+            c_cell.alignment = align_center
+            c_cell.border = thin_border
+            
+    # Build L1 Selection Header block
+    l1_fill = PatternFill(start_color="FFE699", end_color="FFE699", fill_type="solid") # Gold/Yellowish for L1
+    l1_start_letter = get_column_letter(l1_start_col)
+    l1_end_letter = get_column_letter(l1_start_col + 1)
+    
+    ws.merge_cells(f"{l1_start_letter}2:{l1_end_letter}2")
+    ws[f"{l1_start_letter}2"] = "L1 Selection"
+    ws[f"{l1_start_letter}2"].font = header_font
+    ws[f"{l1_start_letter}2"].fill = l1_fill
+    ws[f"{l1_start_letter}2"].alignment = align_center
+    ws[f"{l1_start_letter}2"].border = thin_border
+    ws[f"{l1_end_letter}2"].border = thin_border
+    ws[f"{l1_end_letter}2"].fill = l1_fill
 
-    ws.row_dimensions[7].height = 25
-    ws.row_dimensions[8].height = 20
+    c_cell = ws.cell(row=3, column=l1_start_col)
+    c_cell.value = "Vendor"
+    c_cell.font = header_font
+    c_cell.fill = l1_fill
+    c_cell.alignment = align_center
+    c_cell.border = thin_border
 
-    # 4. Fill Items / Materials
-    start_row = 9
+    c_cell2 = ws.cell(row=3, column=l1_start_col + 1)
+    c_cell2.value = "Selected Amount"
+    c_cell2.font = header_font
+    c_cell2.fill = l1_fill
+    c_cell2.alignment = align_center
+    c_cell2.border = thin_border
+
+    ws.row_dimensions[2].height = 25
+    ws.row_dimensions[3].height = 25
+
+    # 3. Fill Items / Materials
+    start_row = 4
     for m_idx, mat in enumerate(comp_data.materials):
         row_idx = start_row + m_idx
-        ws.row_dimensions[row_idx].height = 22
-        is_even = (m_idx % 2 == 0)
-        row_fill = zebra_fill if is_even else PatternFill(fill_type=None)
+        ws.row_dimensions[row_idx].height = 20
 
-        # Base material information
         ws.cell(row=row_idx, column=1, value=m_idx + 1).alignment = align_center
-        ws.cell(row=row_idx, column=2, value=mat.material_code).alignment = align_center
-        ws.cell(row=row_idx, column=3, value=mat.material_name).alignment = align_left
-        ws.cell(row=row_idx, column=4, value=mat.quantity).alignment = align_right
-        ws.cell(row=row_idx, column=5, value=mat.uom_name).alignment = align_center
+        ws.cell(row=row_idx, column=2, value=mat.material_name).alignment = align_left
+        ws.cell(row=row_idx, column=3, value=mat.uom_name).alignment = align_center
 
-        for col in range(1, 6):
-            cell = ws.cell(row=row_idx, column=col)
-            cell.font = data_font
-            if row_fill.fill_type:
-                cell.fill = row_fill
-            cell.border = grid_border
-            if col == 4:
-                cell.number_format = "#,##0.00"
+        for col in range(1, 4):
+            ws.cell(row=row_idx, column=col).font = data_font
+            ws.cell(row=row_idx, column=col).border = thin_border
 
-        # Vendor specific quotation details
+        db_material = db.query(Material).filter(Material.id == mat.material_id).first()
+        gst_rate = db_material.gst_rate if db_material else 0.0
+
+        selected_l1_vendor = "-"
+        selected_l1_amt = "-"
+
         for v_idx, vt in enumerate(sorted_vendors):
-            start_col = 6 + v_idx * 7
+            start_col = 4 + v_idx * 8
             quote = next((q for q in mat.vendor_quotes if q.vendor_id == vt['vendor_id']), None)
             
             vqi = db.query(VendorQuotationItem).join(VendorQuotation).filter(
@@ -1129,154 +1157,101 @@ def download_comparative_statement_excel(
                 VendorQuotation.vendor_id == vt['vendor_id']
             ).first()
 
+            v_color = vendor_colors[v_idx % len(vendor_colors)]
+            v_fill = PatternFill(start_color=v_color, end_color=v_color, fill_type="solid")
+
             if quote and vqi:
-                brand = vqi.brand or ""
-                vendor_uom = vqi.vendor_uom_name or mat.uom_name or ""
                 conv_factor = vqi.uom_conversion_factor or 1.0
-                quoted_rate = vqi.quoted_rate
-                discount = vqi.discount_percent or 0.0
-                effective = (quoted_rate / conv_factor) * (1.0 - (discount / 100.0))
-                total_amount = effective * mat.quantity
+                quoted_rate = vqi.quoted_rate / conv_factor
+                qty = mat.quantity
+                discount_pct = vqi.discount_percent or 0.0
                 
-                is_l1 = (quote.rank == 1)
-                vals = [brand, vendor_uom, conv_factor, quoted_rate, discount, effective, total_amount]
+                disc_amt = quoted_rate * (discount_pct / 100.0)
+                rate_after_disc = quoted_rate - disc_amt
+                total_taxable = rate_after_disc * qty
+                final_amt = total_taxable * (1 + (gst_rate / 100.0))
+                
+                if vt['vendor_id'] == mat.selected_vendor_id:
+                    selected_l1_vendor = vt['vendor_name']
+                    selected_l1_amt = final_amt
+                
+                vals = [quoted_rate, qty, discount_pct, disc_amt, rate_after_disc, total_taxable, gst_rate, final_amt]
                 
                 for offset, val in enumerate(vals):
                     c_col = start_col + offset
                     cell = ws.cell(row=row_idx, column=c_col, value=val)
                     cell.font = data_font
-                    cell.border = grid_border
+                    cell.border = thin_border
+                    cell.fill = v_fill
                     
-                    if offset == 0:
-                        cell.alignment = align_left
-                    elif offset == 1:
+                    if offset in [1, 2, 6]:
                         cell.alignment = align_center
-                    elif offset == 2:
+                        if offset == 2:
+                            cell.number_format = "0.0\"%\""
+                        elif offset == 6:
+                            cell.number_format = "0.0\"%\""
+                    elif offset == 0:
+                        # Unit Rate column: Check for custom UOM
+                        if conv_factor != 1.0 or (vqi.vendor_uom_name and vqi.vendor_uom_name.strip() != mat.uom_name):
+                            cell.value = f"{val:,.2f}\n(₹{vqi.quoted_rate:,.2f} / {vqi.vendor_uom_name or 'UOM'})"
+                            cell.alignment = align_right_wrap
+                            ws.row_dimensions[row_idx].height = 35
+                        else:
+                            cell.alignment = align_right
+                            cell.number_format = "#,##0.00"
+                    else:
                         cell.alignment = align_right
                         cell.number_format = "#,##0.00"
-                    elif offset == 3:
-                        cell.alignment = align_right
-                        cell.number_format = "#,##0.00"
-                    elif offset == 4:
-                        cell.alignment = align_right
-                        cell.number_format = "0.0\"%\""
-                    elif offset == 5:
-                        cell.alignment = align_right
-                        cell.number_format = "#,##0.00"
-                        if is_l1:
-                            cell.fill = l1_fill
-                            cell.font = green_font
-                    elif offset == 6:
-                        cell.alignment = align_right
-                        cell.number_format = "#,##0.00"
-                        if is_l1:
-                            cell.fill = l1_fill
-                            cell.font = green_font
-                            
-                    if not is_l1 and row_fill.fill_type:
-                        cell.fill = row_fill
             else:
-                # Format empty or non-quoted items
-                for offset in range(7):
+                for offset in range(8):
                     c_col = start_col + offset
-                    cell = ws.cell(row=row_idx, column=c_col, value="-" if offset == 3 else "")
+                    cell = ws.cell(row=row_idx, column=c_col, value="")
+                    if offset == 0:
+                        cell.value = "-"
                     cell.font = data_font
-                    cell.border = grid_border
+                    cell.border = thin_border
                     cell.alignment = align_center
-                    if row_fill.fill_type:
-                        cell.fill = row_fill
+                    cell.fill = v_fill
 
-    # 5. Summary Row: Total Bid Value
-    tot_row_idx = start_row + len(comp_data.materials)
-    ws.row_dimensions[tot_row_idx].height = 22
-    ws.merge_cells(start_row=tot_row_idx, start_column=1, end_row=tot_row_idx, end_column=5)
-    tot_label_cell = ws.cell(row=tot_row_idx, column=1, value="Total Bid Value")
-    tot_label_cell.font = total_font
-    tot_label_cell.alignment = align_right
-    tot_label_cell.border = total_border
-    
-    for col in range(2, 6):
-        ws.cell(row=tot_row_idx, column=col).border = total_border
-
-    for v_idx, vt in enumerate(sorted_vendors):
-        start_col = 6 + v_idx * 7
-        tot_col_letter = get_column_letter(start_col + 6)
-        tot_formula = f"=SUM({tot_col_letter}9:{tot_col_letter}{tot_row_idx-1})"
+        # write L1 block
+        l1_fill_data = PatternFill(start_color="FFF2CC", end_color="FFF2CC", fill_type="solid")
         
-        for offset in range(7):
-            c_col = start_col + offset
-            cell = ws.cell(row=tot_row_idx, column=c_col)
-            cell.border = total_border
-            if offset == 6:
-                cell.value = tot_formula
-                cell.font = total_font
-                cell.alignment = align_right
-                cell.number_format = "#,##0.00"
-
-    # 6. Summary Row: Items Won (L1)
-    won_row_idx = tot_row_idx + 1
-    ws.row_dimensions[won_row_idx].height = 20
-    ws.merge_cells(start_row=won_row_idx, start_column=1, end_row=won_row_idx, end_column=5)
-    won_label_cell = ws.cell(row=won_row_idx, column=1, value="Items Won (L1)")
-    won_label_cell.font = total_font
-    won_label_cell.alignment = align_right
-    
-    for col in range(1, 6):
-        ws.cell(row=won_row_idx, column=col).border = grid_border
-
-    for v_idx, vt in enumerate(sorted_vendors):
-        start_col = 6 + v_idx * 7
-        for offset in range(7):
-            c_col = start_col + offset
-            cell = ws.cell(row=won_row_idx, column=c_col)
-            cell.border = grid_border
-            if offset == 6:
-                cell.value = vt['items_won']
-                cell.font = total_font
-                cell.alignment = align_center
-
-    # 7. Summary Row: Selection Status
-    sel_row_idx = won_row_idx + 1
-    ws.row_dimensions[sel_row_idx].height = 20
-    ws.merge_cells(start_row=sel_row_idx, start_column=1, end_row=sel_row_idx, end_column=5)
-    sel_label_cell = ws.cell(row=sel_row_idx, column=1, value="Selection Status")
-    sel_label_cell.font = total_font
-    sel_label_cell.alignment = align_right
-    
-    for col in range(1, 6):
-        ws.cell(row=sel_row_idx, column=col).border = grid_border
-
-    for v_idx, vt in enumerate(sorted_vendors):
-        start_col = 6 + v_idx * 7
-        is_sel = vt['is_selected_any']
-        for offset in range(7):
-            c_col = start_col + offset
-            cell = ws.cell(row=sel_row_idx, column=c_col)
-            cell.border = grid_border
-            if offset == 6:
-                cell.value = "Selected" if is_sel else "Not Selected"
-                cell.font = green_font if is_sel else gray_font
-                cell.alignment = align_center
-
-    # 8. Dynamic Auto-adjust Column Widths safely
-    for col in ws.columns:
-        col_letter = get_column_letter(col[0].column)
-        max_len = 0
-        for cell in col:
-            # Skip sheet title and metadata when calculating optimal column widths
-            if cell.row < 7:
-                continue
-            val_str = str(cell.value or '')
-            if len(val_str) > max_len:
-                max_len = len(val_str)
-        ws.column_dimensions[col_letter].width = max(max_len + 3, 10)
+        c1 = ws.cell(row=row_idx, column=l1_start_col, value=selected_l1_vendor)
+        c1.font = data_font
+        c1.border = thin_border
+        c1.fill = l1_fill_data
+        c1.alignment = align_center
         
-    # Explicitly set main base columns for better proportion
-    ws.column_dimensions["A"].width = 8   # Sr. No.
-    ws.column_dimensions["B"].width = 16  # Material Code
-    ws.column_dimensions["C"].width = 30  # Material Name
-    ws.column_dimensions["D"].width = 12  # Qty
-    ws.column_dimensions["E"].width = 10  # UOM
+        c2 = ws.cell(row=row_idx, column=l1_start_col + 1, value=selected_l1_amt)
+        c2.font = data_font
+        c2.border = thin_border
+        c2.fill = l1_fill_data
+        if selected_l1_amt != "-":
+            c2.alignment = align_right
+            c2.number_format = "#,##0.00"
+        else:
+            c2.alignment = align_center
+
+    # 4. Auto-adjust Column Widths
+    ws.column_dimensions["A"].width = 8   
+    ws.column_dimensions["B"].width = 30  
+    ws.column_dimensions["C"].width = 12  
+
+    for v_idx in range(num_vendors):
+        start_col = 4 + v_idx * 8
+        ws.column_dimensions[get_column_letter(start_col)].width = 16 # Increased slightly to fit two lines better
+        ws.column_dimensions[get_column_letter(start_col + 1)].width = 10  
+        ws.column_dimensions[get_column_letter(start_col + 2)].width = 10  
+        ws.column_dimensions[get_column_letter(start_col + 3)].width = 14 
+        ws.column_dimensions[get_column_letter(start_col + 4)].width = 14 
+        ws.column_dimensions[get_column_letter(start_col + 5)].width = 14 
+        ws.column_dimensions[get_column_letter(start_col + 6)].width = 10  
+        ws.column_dimensions[get_column_letter(start_col + 7)].width = 16 
+
+    ws.column_dimensions[get_column_letter(l1_start_col)].width = 35
+    ws.column_dimensions[get_column_letter(l1_start_col + 1)].width = 16
+
+    ws.freeze_panes = "D4"
 
     output = BytesIO()
     wb.save(output)

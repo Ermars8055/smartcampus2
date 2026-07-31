@@ -1,14 +1,6 @@
 import axios from 'axios';
 
-// Prefer the explicit environment variable when set.
-// When running the frontend from localhost on a different machine,
-// use the backend host IP instead of localhost:8007.
-const API_BASE = import.meta.env.VITE_API_URL ||
-  (window.location.hostname === 'localhost'
-    ? 'http://localhost:8007'
-    : (window.location.hostname.includes('eastpoint.com')
-      ? '' // Leave this empty for production
-      : `${window.location.protocol}//${window.location.hostname}:8007`));
+const API_BASE = import.meta.env.VITE_API_URL || '';
 
 
 const api = axios.create({

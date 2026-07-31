@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, InputAdornment, Chip, Dialog,
-  Tooltip, Select, FormControl, InputLabel, TableSortLabel, useTheme, useMediaQuery, MenuItem, DialogTitle, DialogContent, DialogActions, IconButton, TablePagination, Snackbar, Alert, Switch, FormControlLabel
+  Tooltip, Select, FormControl, InputLabel, TableSortLabel, useTheme, useMediaQuery, MenuItem, DialogTitle, DialogContent, DialogActions, IconButton, TablePagination, Snackbar, Alert, Switch, FormControlLabel, Checkbox
 } from '@mui/material';
 import { QRCodeSVG } from 'qrcode.react';
 import {
@@ -38,60 +38,86 @@ export default function Materials() {
   const [form, setForm] = useState({
     code: '', name: '', alias: '', reference_no: '', category_id: '', subcategory_id: '', uom_id: '', warehouse_id: '', reorder_level: 0,
     maximum_level: 0, standard_cost: 0, gst_rate: 0, storage_type: '',
-    material_type: '', hsn_code: '', description: '', is_active: true
+    material_type: '', is_biomedical: false, requires_installation: false, hsn_code: '', description: '', is_active: true
   });
+
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(100);
+  const [rowsPerPage, setRowsPerPage] = useState(25);
   const [totalCount, setTotalCount] = useState(0);
+  const [initialLoad, setInitialLoad] = useState(true);
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const location = useLocation();
   const navigate = useNavigate();
 
-  const load = () => {
+  const load = async (currentPage, currentRows, currentSort, currentSearch, currentCat, currentStore) => {
     setLoading(true);
     const params = {
-      skip: page * rowsPerPage,
-      limit: rowsPerPage,
-      sort_by: sortConfig.key,
-      sort_desc: sortConfig.direction === 'desc',
+      skip: currentPage * currentRows,
+      limit: currentRows,
+      sort_by: currentSort.key,
+      sort_desc: currentSort.direction === 'desc',
       include_inactive: true
     };
-    if (search) params.search = search;
-    if (catFilter) params.category_id = catFilter;
-    if (storeFilter) params.warehouse_id = storeFilter;
-    api.get('/api/materials', { params }).then(r => {
+    if (currentSearch) params.search = currentSearch;
+    if (currentCat) params.category_id = currentCat;
+    if (currentStore) params.warehouse_id = currentStore;
+    
+    try {
+      const r = await api.get('/api/materials', { params });
       setMaterials(r.data.items || []);
       setTotalCount(r.data.total || 0);
-    }).finally(() => setLoading(false));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    Promise.all([
-      api.get('/api/categories'),
-      api.get('/api/uom'),
-      api.get('/api/vendors'),
-      api.get('/api/subcategories'),
-      api.get('/api/warehouses'),
-    ]).then(([c, u, v, s, w]) => {
-      setCategories(c.data);
-      setUoms(u.data);
-      setVendors(v.data);
-      setSubcategories(s.data);
-      setWarehouses(w.data);
-    });
+    const init = async () => {
+      setLoading(true);
+      try {
+        const [c, u, v, s, w] = await Promise.all([
+          api.get('/api/categories'),
+          api.get('/api/uom'),
+          api.get('/api/vendors'),
+          api.get('/api/subcategories'),
+          api.get('/api/warehouses'),
+        ]);
+        setCategories(c.data);
+        setUoms(u.data);
+        setVendors(v.data);
+        setSubcategories(s.data);
+        setWarehouses(w.data);
+      } catch (err) {
+        console.error(err);
+      }
+      setInitialLoad(false);
+    };
+    init();
   }, []);
 
-  useEffect(() => { setPage(0); }, [search, catFilter, storeFilter, sortConfig]);
-  useEffect(() => { load(); }, [search, catFilter, storeFilter, page, rowsPerPage, sortConfig]);
+  // Fetch materials whenever filters/page changes, but only after initial load of dropdowns
+  useEffect(() => {
+    if (!initialLoad) {
+      load(page, rowsPerPage, sortConfig, search, catFilter, storeFilter);
+    }
+  }, [search, catFilter, storeFilter, page, rowsPerPage, sortConfig, initialLoad]);
+
+  const handleFilterChange = (setter, value) => {
+    setter(value);
+    setPage(0); // Reset page on filter change
+  };
 
   const handleSort = (key) => {
     setSortConfig(prev => ({
       key,
       direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
     }));
+    setPage(0);
   };
 
   const validateForm = () => {
@@ -194,6 +220,8 @@ export default function Materials() {
         gst_rate: Number(form.gst_rate),
         storage_type: form.storage_type,
         material_type: form.material_type,
+        is_biomedical: form.material_type === 'Equipment' ? !!form.is_biomedical : false,
+        requires_installation: form.material_type === 'Equipment' ? !!form.requires_installation : false,
         hsn_code: form.hsn_code,
         description: form.description,
         is_active: form.is_active
@@ -248,6 +276,8 @@ export default function Materials() {
       gst_rate: m.gst_rate === 0 ? '' : (m.gst_rate || ''),
       storage_type: m.storage_type || '',
       material_type: m.material_type || '',
+      is_biomedical: !!m.is_biomedical,
+      requires_installation: !!m.requires_installation,
       hsn_code: m.hsn_code || '',
       warehouse_id: m.warehouse_id || '',
       description: m.description || '',
@@ -263,7 +293,7 @@ export default function Materials() {
     setForm({
       code: '', name: '', alias: '', reference_no: '', category_id: '', subcategory_id: '', uom_id: '',
       reorder_level: '', maximum_level: '', standard_cost: '', gst_rate: '',
-      storage_type: '', material_type: '', hsn_code: '', warehouse_id: '', description: '', is_active: true
+      storage_type: '', material_type: '', is_biomedical: false, requires_installation: false, hsn_code: '', warehouse_id: '', description: '', is_active: true
     });
     setDialog(true);
   };
@@ -391,7 +421,7 @@ export default function Materials() {
             size="small"
             placeholder="Search materials by name, code or alias..."
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={e => handleFilterChange(setSearch, e.target.value)}
             sx={{ minWidth: 400 }}
             InputProps={{
               startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} />,
@@ -403,7 +433,7 @@ export default function Materials() {
             <Select
               value={storeFilter}
               label="Filter by Store"
-              onChange={e => setStoreFilter(e.target.value)}
+              onChange={e => handleFilterChange(setStoreFilter, e.target.value)}
               sx={{ borderRadius: 2 }}
             >
               <MenuItem value="">All Stores</MenuItem>
@@ -415,7 +445,7 @@ export default function Materials() {
             <Select
               value={catFilter}
               label="Filter by Category"
-              onChange={e => setCatFilter(e.target.value)}
+              onChange={e => handleFilterChange(setCatFilter, e.target.value)}
               sx={{ borderRadius: 2 }}
             >
               <MenuItem value="">All Categories</MenuItem>
@@ -802,6 +832,34 @@ export default function Materials() {
               {errors.material_type && <Typography variant="caption" color="error" sx={{ ml: 2 }}>{errors.material_type}</Typography>}
             </FormControl>
 
+            {form.material_type === 'Equipment' && (
+              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', p: 1.5, bgcolor: '#F8FAFC', borderRadius: 2, border: '1px solid #E2E8F0', gridColumn: { sm: 'span 2' } }}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={form.requires_installation}
+                      onChange={e => setForm({ ...form, requires_installation: e.target.checked })}
+                      disabled={viewOnly}
+                      color="primary"
+                    />
+                  }
+                  label={<Typography variant="body2" sx={{ fontWeight: 500, color: '#1E293B' }}>Requires Installation</Typography>}
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={form.is_biomedical}
+                      onChange={e => setForm({ ...form, is_biomedical: e.target.checked })}
+                      disabled={viewOnly}
+                      color="secondary"
+                    />
+                  }
+                  label={<Typography variant="body2" sx={{ fontWeight: 500, color: '#1E293B' }}>Biomedical Equipment</Typography>}
+                />
+              </Box>
+            )}
+
+
             <FormControl fullWidth>
               <InputLabel>Storage Type</InputLabel>
               <Select
@@ -944,12 +1002,7 @@ export default function Materials() {
               <Box sx={{ p: 2, bgcolor: '#fff', borderRadius: 2, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
                 <QRCodeSVG 
                   id="material-qr-svg"
-                  value={JSON.stringify({ 
-                    smartcampus_type: 'material_master',
-                    code: selectedQrMaterial.code, 
-                    name: selectedQrMaterial.name, 
-                    uom: selectedQrMaterial.uom_name 
-                  })}
+                  value={`${window.location.origin}/materials/${selectedQrMaterial.code}`}
                   size={200}
                   level="M"
                 />

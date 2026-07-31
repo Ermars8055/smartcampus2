@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import Optional, List
 from app.database import get_db
 from app.models import EquipmentItem, Material, GRN, Warehouse, Project, User, AuditLog
-from app.schemas import EquipmentItemOut, EquipmentUpdateSerial, EquipmentInstallationUpdate, PMScheduleOut, PMScheduleUpdate
+from app.schemas import EquipmentItemOut, EquipmentUpdateSerial, EquipmentInstallationUpdate, PMScheduleOut, PMScheduleUpdate, EquipmentUpdate
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
 import os
 import uuid
@@ -313,6 +313,82 @@ def get_equipment_item(
         grn_number=grn.grn_number if grn else None,
         warehouse_name=wh.name if wh else None,
         project_name=proj.name if proj else None
+    )
+
+@router.put("/{id}", response_model=EquipmentItemOut)
+def update_equipment_item(
+    id: int,
+    payload: EquipmentUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("equipment", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    item = db.query(EquipmentItem).filter(
+        EquipmentItem.id == id,
+        EquipmentItem.tenant_id == tenant_id,
+        EquipmentItem.site_id == site_id
+    ).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Equipment item not found")
+
+    update_data = payload.model_dump(exclude_unset=True)
+    
+    for key, value in update_data.items():
+        setattr(item, key, value)
+        
+    item.updated_at = datetime.utcnow()
+    
+    db.add(AuditLog(
+        tenant_id=tenant_id, site_id=site_id,
+        user_id=current_user.id, action="UPDATE",
+        entity_type="EquipmentItem", entity_id=item.id,
+        new_values=f"Equipment properties updated for {item.equipment_code}"
+    ))
+    db.commit()
+    db.refresh(item)
+    
+    mat = item.material
+    grn = item.grn
+    wh = item.warehouse
+    proj = item.project
+    return EquipmentItemOut(
+        id=item.id,
+        equipment_code=item.equipment_code,
+        material_id=item.material_id,
+        grn_id=item.grn_id,
+        grn_item_id=item.grn_item_id,
+        serial_number=item.serial_number,
+        serial_number_status=item.serial_number_status or "Pending Update",
+        is_biomedical=item.is_biomedical or False,
+        requires_installation=item.requires_installation or False,
+        installation_status=item.installation_status or "Not Required",
+        installation_date=item.installation_date,
+        installation_report_url=item.installation_report_url,
+        installation_remarks=item.installation_remarks,
+        warehouse_id=item.warehouse_id,
+        project_id=item.project_id,
+        status=item.status or "In Store",
+        created_at=item.created_at,
+        updated_at=item.updated_at,
+        material_name=mat.name if mat else None,
+        material_code=mat.code if mat else None,
+        grn_number=grn.grn_number if grn else None,
+        warehouse_name=wh.name if wh else None,
+        project_name=proj.name if proj else None,
+        # Other fields to support full return
+        make=item.make,
+        model=item.model,
+        machine_cost=item.machine_cost,
+        machine_type=item.machine_type,
+        warranty_available=item.warranty_available,
+        warranty_expiry_date=item.warranty_expiry_date,
+        amc_cmc_end_date=item.amc_cmc_end_date,
+        amc_po_number=item.amc_po_number,
+        amc_cost=item.amc_cost,
+        pm_required=item.pm_required,
+        calibration_required=item.calibration_required,
+        battery_details=item.battery_details
     )
 
 

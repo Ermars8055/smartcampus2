@@ -2064,6 +2064,21 @@ class ComplaintOut(ComplaintBase):
 class EquipmentUpdateSerial(BaseModel):
     serial_number: str = Field(..., min_length=1)
 
+class EquipmentUpdate(BaseModel):
+    make: Optional[str] = None
+    model: Optional[str] = None
+    machine_cost: Optional[float] = None
+    machine_type: Optional[str] = None
+    warranty_available: Optional[bool] = None
+    warranty_expiry_date: Optional[date] = None
+    amc_cmc_status: Optional[str] = None
+    amc_cmc_end_date: Optional[date] = None
+    amc_po_number: Optional[str] = None
+    amc_cost: Optional[float] = None
+    pm_required: Optional[bool] = None
+    calibration_required: Optional[bool] = None
+    battery_details: Optional[str] = None
+
 class EquipmentInstallationUpdate(BaseModel):
     serial_number: Optional[str] = None
     installation_date: Optional[datetime] = None
@@ -2274,6 +2289,8 @@ class ContractOut(ContractBase):
     vendor_name: Optional[str] = None
     institution_name: Optional[str] = None
     department_name: Optional[str] = None
+    current_approval_level: Optional[int] = 1
+    can_user_approve: bool = False
     items: List[ContractItemOut] = []
     class Config:
         from_attributes = True

@@ -1874,7 +1874,8 @@ class Contract(Base):
     sla_details = Column(Text, nullable=True)
     spare_parts_included = Column(Boolean, default=False)
     consumables_included = Column(Boolean, default=False)
-    status = Column(String(50), default="Draft") # Draft, Pending Approval, Approved, Active, Suspended, Expired, Renewed, Closed, Cancelled
+    status = Column(String(50), default="Draft") # Draft, Submitted, Approved, Active, Suspended, Expired, Renewed, Closed, Cancelled
+    current_approval_level = Column(Integer, default=1)
     created_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     approved_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     approved_at = Column(DateTime, nullable=True)
@@ -1889,6 +1890,20 @@ class Contract(Base):
     approver = relationship("User", foreign_keys=[approved_by_id])
     items = relationship("ContractItem", back_populates="contract", cascade="all, delete-orphan")
     __table_args__ = (UniqueConstraint("tenant_id", "contract_number", name="uq_contract_per_tenant"),)
+
+
+class ContractApproval(Base):
+    __tablename__ = "contract_approvals"
+    id = Column(Integer, primary_key=True, index=True)
+    contract_id = Column(Integer, ForeignKey("contracts.id", ondelete="CASCADE"), nullable=False)
+    approval_flow_id = Column(Integer, ForeignKey("approval_flows.id"), nullable=False)
+    approver_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    remarks = Column(Text, nullable=True)
+    approved_at = Column(DateTime, default=_get_now)
+    
+    contract = relationship("Contract")
+    flow = relationship("ApprovalFlow")
+    approver = relationship("User")
 
 
 class ContractItem(Base):

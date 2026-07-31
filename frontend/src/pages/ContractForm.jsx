@@ -104,7 +104,7 @@ export default function ContractForm() {
     }
     setLoading(true);
     try {
-      const payload = { ...form, status: isDraft ? 'Draft' : 'Pending Approval' };
+      const payload = { ...form, status: isDraft ? 'Draft' : 'Submitted' };
       if (!payload.institution_id) delete payload.institution_id;
       if (!payload.department_id) delete payload.department_id;
       if (!payload.contract_value) delete payload.contract_value;

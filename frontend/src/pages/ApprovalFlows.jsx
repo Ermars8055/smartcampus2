@@ -97,6 +97,7 @@ export default function ApprovalFlows() {
                   <MenuItem value="PURCHASE_REQUEST">Purchase Request</MenuItem>
                   <MenuItem value="PURCHASE_ORDER">Purchase Order</MenuItem>
                   <MenuItem value="VENDOR">Vendor Registration</MenuItem>
+                  <MenuItem value="CONTRACT">Contract</MenuItem>
                 </Select>
               </FormControl>
             </Grid>

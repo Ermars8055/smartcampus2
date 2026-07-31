@@ -197,6 +197,7 @@ const DOCUMENT_TYPES = [
   { value: 'INDENT', label: 'Indent' },
   { value: 'PURCHASE_REQUEST', label: 'Purchase Request' },
   { value: 'PURCHASE_ORDER', label: 'Purchase Order' },
+  { value: 'CONTRACT', label: 'Contract' },
 ];
 
 // ── Helper: Build a flat map of resource → { can_read, can_create, ... } ──

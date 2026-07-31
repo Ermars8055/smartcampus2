@@ -11,14 +11,16 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _emailController = TextEditingController();
+  final _workspaceController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
   String? _errorMessage;
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _workspaceController.dispose();
+    _usernameController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -31,7 +33,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       final response = await ApiService().login(
-        _emailController.text.trim(),
+        _workspaceController.text.trim(),
+        _usernameController.text.trim(),
         _passwordController.text,
       );
 
@@ -49,7 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
         if (mounted) context.go('/HomePage');
       } else {
-        setState(() => _errorMessage = 'Invalid email or password.');
+        setState(() => _errorMessage = 'Invalid credentials.');
       }
     } catch (e) {
       setState(() => _errorMessage = 'Login failed. Please check your credentials.');
@@ -98,9 +101,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 30),
                 TextField(
-                  controller: _emailController,
+                  controller: _workspaceController,
                   decoration: InputDecoration(
-                    hintText: 'Email',
+                    hintText: 'Workspace ID',
                     contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20),
@@ -111,7 +114,22 @@ class _LoginScreenState extends State<LoginScreen> {
                       borderSide: const BorderSide(color: Color(0xFFC0C0C0)),
                     ),
                   ),
-                  keyboardType: TextInputType.emailAddress,
+                ),
+                const SizedBox(height: 18),
+                TextField(
+                  controller: _usernameController,
+                  decoration: InputDecoration(
+                    hintText: 'Username',
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      borderSide: const BorderSide(color: Color(0xFFC0C0C0)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      borderSide: const BorderSide(color: Color(0xFFC0C0C0)),
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 18),
                 TextField(

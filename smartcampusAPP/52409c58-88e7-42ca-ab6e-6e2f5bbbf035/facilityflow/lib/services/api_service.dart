@@ -12,7 +12,7 @@ class ApiService {
   ApiService._internal() {
     // Depending on the platform, localhost varies for the emulator
     String baseUrl = const String.fromEnvironment('API_URL', 
-      defaultValue: 'https://major-showers-grin.loca.lt');
+      defaultValue: 'https://hot-lamps-stay.loca.lt');
 
     dio = Dio(
       BaseOptions(
@@ -47,10 +47,35 @@ class ApiService {
   }
 
   // Native authentication login call
-  Future<Response> login(String email, String password) async {
+  Future<Response> login(String workspace, String username, String password) async {
     return await dio.post('/api/auth/login', data: {
-      'email': email,
+      'workspace': workspace,
+      'username': username,
       'password': password
     });
+  }
+
+  // Lookups
+  Future<Response> getInstitutions() async {
+    return await dio.get('/api/institutions');
+  }
+
+  Future<Response> getDepartments() async {
+    return await dio.get('/api/departments');
+  }
+
+  Future<Response> getBuildings() async {
+    return await dio.get('/api/buildings');
+  }
+
+  Future<Response> getRooms(String? departmentName) async {
+    if (departmentName != null && departmentName.isNotEmpty) {
+      return await dio.get('/api/rooms', queryParameters: {'department_name': departmentName});
+    }
+    return await dio.get('/api/rooms');
+  }
+
+  Future<Response> getMaterials() async {
+    return await dio.get('/api/materials', queryParameters: {'limit': 10000});
   }
 }

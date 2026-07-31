@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:nowa_runtime/nowa_runtime.dart';
 import 'package:facilityflow/globals/app_state.dart';
+import 'package:facilityflow/services/api_service.dart';
 
 @NowaGenerated()
 class LogComplaintScreen extends StatefulWidget {
@@ -8,9 +9,7 @@ class LogComplaintScreen extends StatefulWidget {
   const LogComplaintScreen({super.key});
 
   @override
-  State<LogComplaintScreen> createState() {
-    return _LogComplaintScreenState();
-  }
+  State<LogComplaintScreen> createState() => _LogComplaintScreenState();
 }
 
 @NowaGenerated()
@@ -18,31 +17,24 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
   final _formKey = GlobalKey<FormState>();
 
   final _descriptionController = TextEditingController();
+  final _natureController = TextEditingController();
+  final _nameTradeController = TextEditingController();
 
-  String? _selectedLocation;
+  List<dynamic> _institutions = [];
+  List<dynamic> _allDepartments = [];
+  List<dynamic> _allBuildings = [];
+  List<dynamic> _departmentsList = [];
+  List<dynamic> _buildingsList = [];
+  List<dynamic> _floorsList = [];
+  List<dynamic> _roomsList = [];
 
-  String? _selectedNature;
+  String? _selectedInstitutionId;
+  String? _selectedDepartmentName;
+  String? _selectedBuildingId;
+  String? _selectedFloorId;
+  String? _selectedRoomId;
 
   final List<String> _attachedImages = [];
-
-  final List<String> _locations = const [
-    'Block A - Main Lobby',
-    'Block B - Room 402',
-    'Block C - Cafeteria',
-    'Server Room A - 5th Floor',
-    'Ground Floor Lobby Toilet',
-    'Main Auditorium',
-  ];
-
-  final List<String> _natures = const [
-    'Electrical / Audio-Visual',
-    'Plumbing Leakage',
-    'HVAC / Air Conditioning',
-    'Carpentry / Furniture',
-    'Civil / Masonry Work',
-    'IT Network Outlet',
-  ];
-
   final List<String> _mockMaintImages = const [
     'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=500',
     'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=500',
@@ -50,102 +42,156 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
     'https://images.unsplash.com/photo-1542013936693-8848e574047a?w=500',
   ];
 
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchLookups();
+  }
+
+  Future<void> _fetchLookups() async {
+    try {
+      final api = ApiService();
+      final instRes = await api.getInstitutions();
+      final deptRes = await api.getDepartments();
+      final bldgRes = await api.getBuildings();
+
+      if (mounted) {
+        setState(() {
+          _institutions = instRes.data ?? [];
+          _allDepartments = deptRes.data ?? [];
+          _allBuildings = bldgRes.data ?? [];
+          
+          if (_institutions.length == 1) {
+            _selectedInstitutionId = _institutions[0]['id'].toString();
+            _handleInstitutionChange(_selectedInstitutionId!);
+          } else {
+            _departmentsList = _allDepartments.map((d) => d['name']).toSet().toList();
+          }
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to load form data')),
+        );
+      }
+    }
+  }
+
+  void _handleInstitutionChange(String instId) {
+    setState(() {
+      _selectedInstitutionId = instId;
+      _selectedDepartmentName = null;
+      _selectedBuildingId = null;
+      _selectedFloorId = null;
+      _selectedRoomId = null;
+      _buildingsList = [];
+      _floorsList = [];
+      _roomsList = [];
+
+      final depts = _allDepartments
+          .where((d) => d['institution_id'].toString() == instId)
+          .map((d) => d['name'])
+          .toSet()
+          .toList();
+      _departmentsList = depts;
+    });
+  }
+
+  Future<void> _handleDepartmentChange(String deptName) async {
+    setState(() {
+      _selectedDepartmentName = deptName;
+      _selectedBuildingId = null;
+      _selectedFloorId = null;
+      _selectedRoomId = null;
+    });
+
+    try {
+      final api = ApiService();
+      final roomsRes = await api.getRooms(deptName);
+      final fetchedRooms = roomsRes.data ?? [];
+      
+      final uniqueBuildings = <String, dynamic>{};
+      final uniqueFloors = <String, dynamic>{};
+
+      for (var room in fetchedRooms) {
+        if (room['building_id'] != null) {
+          uniqueBuildings[room['building_id'].toString()] = {
+            'id': room['building_id'],
+            'name': room['building_name']
+          };
+        }
+        if (room['floor_id'] != null) {
+          uniqueFloors[room['floor_id'].toString()] = {
+            'id': room['floor_id'],
+            'name': room['floor_name'],
+            'building_id': room['building_id']
+          };
+        }
+      }
+
+      final masterDepts = _allDepartments.where((d) => d['name'] == deptName);
+      for (var d in masterDepts) {
+        if (d['building_id'] != null) {
+          uniqueBuildings[d['building_id'].toString()] = {
+            'id': d['building_id'],
+            'name': d['building_name']
+          };
+        }
+      }
+
+      for (var b in _allBuildings) {
+        if (b['department_name'] == deptName) {
+          uniqueBuildings[b['id'].toString()] = {
+            'id': b['id'],
+            'name': b['name']
+          };
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          _buildingsList = uniqueBuildings.values.toList();
+          _floorsList = uniqueFloors.values.toList();
+          _roomsList = fetchedRooms;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _buildingsList = [];
+          _floorsList = [];
+          _roomsList = [];
+        });
+      }
+    }
+  }
+
+  void _handleBuildingChange(String buildingId) {
+    setState(() {
+      _selectedBuildingId = buildingId;
+      _selectedFloorId = null;
+      _selectedRoomId = null;
+    });
+  }
+
+  void _handleFloorChange(String floorId) {
+    setState(() {
+      _selectedFloorId = floorId;
+      _selectedRoomId = null;
+    });
+  }
+
   @override
   void dispose() {
     _descriptionController.dispose();
+    _natureController.dispose();
+    _nameTradeController.dispose();
     super.dispose();
-  }
-
-  void _showLocationPicker() {
-    final theme = Theme.of(context);
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(
-                'Select Issue Location',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            const Divider(height: 1),
-            Expanded(
-              child: ListView(
-                children: _locations.map((loc) {
-                  final isSelected = _selectedLocation == loc;
-                  return ListTile(
-                    title: Text(loc),
-                    trailing: isSelected
-                        ? Icon(Icons.check, color: theme.colorScheme.primary)
-                        : null,
-                    onTap: () {
-                      setState(() {
-                        _selectedLocation = loc;
-                      });
-                      Navigator.pop(context);
-                    },
-                  );
-                }).toList(),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showNaturePicker() {
-    final theme = Theme.of(context);
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(
-                'Select Nature of Complaint',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            const Divider(height: 1),
-            Expanded(
-              child: ListView(
-                children: _natures.map((nature) {
-                  final isSelected = _selectedNature == nature;
-                  return ListTile(
-                    title: Text(nature),
-                    trailing: isSelected
-                        ? Icon(Icons.check, color: theme.colorScheme.primary)
-                        : null,
-                    onTap: () {
-                      setState(() {
-                        _selectedNature = nature;
-                      });
-                      Navigator.pop(context);
-                    },
-                  );
-                }).toList(),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   void _attachMockPhoto() {
@@ -173,22 +219,84 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
     });
   }
 
+  void _showBottomPicker({
+    required String title,
+    required List<dynamic> items,
+    required String? selectedValue,
+    required String idField,
+    required String nameField,
+    required Function(String) onSelect,
+  }) {
+    final theme = Theme.of(context);
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                title,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const Divider(height: 1),
+            Expanded(
+              child: ListView(
+                children: items.map((item) {
+                  final id = item[idField]?.toString();
+                  final name = item[nameField]?.toString();
+                  final isSelected = selectedValue == id;
+                  return ListTile(
+                    title: Text(name ?? ''),
+                    trailing: isSelected
+                        ? Icon(Icons.check, color: theme.colorScheme.primary)
+                        : null,
+                    onTap: () {
+                      if (id != null) onSelect(id);
+                      Navigator.pop(context);
+                    },
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _submitComplaint() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    if (_selectedLocation == null) {
+    if (_selectedInstitutionId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select issue location')),
+        const SnackBar(content: Text('Please select an institution')),
       );
       return;
     }
-    if (_selectedNature == null) {
+    if (_selectedDepartmentName == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select nature of complaint')),
+        const SnackBar(content: Text('Please select a department')),
       );
       return;
     }
+    
+    final nature = _natureController.text.trim();
+    if (nature.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter nature of complaint')),
+      );
+      return;
+    }
+
     final description = _descriptionController.text.trim();
     if (description.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -196,7 +304,23 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
       );
       return;
     }
-    final appState = AppState.of(context, listen: false);
+    
+    final selectedFloor = _floorsList.firstWhere((f) => f['id'].toString() == _selectedFloorId, orElse: () => null);
+    final selectedRoom = _roomsList.firstWhere((r) => r['id'].toString() == _selectedRoomId, orElse: () => null);
+
+    final payload = {
+      'institution_id': int.tryParse(_selectedInstitutionId!) ?? null,
+      'department_name': _selectedDepartmentName,
+      'building_id': _selectedBuildingId != null ? int.tryParse(_selectedBuildingId!) : null,
+      'floor_id': _selectedFloorId != null ? int.tryParse(_selectedFloorId!) : null,
+      'room_id': _selectedRoomId != null ? int.tryParse(_selectedRoomId!) : null,
+      'location': selectedRoom != null ? selectedRoom['name'] : (selectedFloor != null ? selectedFloor['name'] : ''),
+      'nature_of_complaint': nature,
+      'individual_detailed': description,
+      'name_and_trade': _nameTradeController.text.trim(),
+      'image_urls': _attachedImages,
+    };
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -206,7 +330,7 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
             padding: EdgeInsets.all(24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              children: const [
+              children: [
                 CircularProgressIndicator(),
                 SizedBox(height: 16),
                 Text('Registering Complaint...'),
@@ -216,15 +340,16 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
         ),
       ),
     );
-    final success = await appState.logComplaint(
-      location: _selectedLocation!,
-      natureOfComplaint: _selectedNature!,
-      individualDetailed: description,
-      imageUrls: _attachedImages,
-    );
-    if (mounted) {
-      Navigator.pop(context);
-      if (success) {
+
+    try {
+      final api = ApiService();
+      await api.dio.post('/api/complaints', data: payload);
+      
+      final appState = AppState.of(context, listen: false);
+      await appState.fetchComplaints();
+
+      if (mounted) {
+        Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Complaint registered successfully!'),
@@ -232,7 +357,10 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
           ),
         );
         Navigator.pop(context);
-      } else {
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Failed to log issue. Please try again.'),
@@ -243,9 +371,57 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
     }
   }
 
+  Widget _buildDropdownField({
+    required String label,
+    required String? selectedName,
+    required VoidCallback onTap,
+    required IconData icon,
+    bool disabled = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: InkWell(
+        onTap: disabled ? null : onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: disabled ? const Color(0xFFF8FAFC) : const Color(0xFFF1F5F9),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+          ),
+          child: Row(
+            children: [
+              Icon(icon, color: Colors.grey),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  selectedName ?? 'Select $label',
+                  style: TextStyle(
+                    color: selectedName == null ? Colors.grey[600] : Colors.black,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+              const Icon(Icons.arrow_drop_down, color: Colors.grey),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    
+    if (_isLoading) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Log Complaint')),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -269,76 +445,99 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                InkWell(
-                  onTap: _showLocationPicker,
-                  borderRadius: BorderRadius.circular(8),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF1F5F9),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.location_on_outlined,
-                          color: Colors.grey,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            _selectedLocation ?? 'Select Location / Room',
-                            style: TextStyle(
-                              color: _selectedLocation == null
-                                  ? Colors.grey[600]
-                                  : Colors.black,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                        const Icon(Icons.arrow_drop_down, color: Colors.grey),
-                      ],
-                    ),
+                
+                _buildDropdownField(
+                  label: 'Institution *',
+                  icon: Icons.business,
+                  selectedName: _institutions.firstWhere((i) => i['id'].toString() == _selectedInstitutionId, orElse: () => null)?['name'],
+                  onTap: () => _showBottomPicker(
+                    title: 'Select Institution',
+                    items: _institutions,
+                    selectedValue: _selectedInstitutionId,
+                    idField: 'id',
+                    nameField: 'name',
+                    onSelect: _handleInstitutionChange,
                   ),
                 ),
-                const SizedBox(height: 16),
-                InkWell(
-                  onTap: _showNaturePicker,
-                  borderRadius: BorderRadius.circular(8),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF1F5F9),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.category_outlined, color: Colors.grey),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            _selectedNature ?? 'Select Nature of Complaint',
-                            style: TextStyle(
-                              color: _selectedNature == null
-                                  ? Colors.grey[600]
-                                  : Colors.black,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                        const Icon(Icons.arrow_drop_down, color: Colors.grey),
-                      ],
-                    ),
+                
+                _buildDropdownField(
+                  label: 'Department *',
+                  icon: Icons.account_tree,
+                  selectedName: _selectedDepartmentName,
+                  disabled: _selectedInstitutionId == null,
+                  onTap: () => _showBottomPicker(
+                    title: 'Select Department',
+                    items: _departmentsList.map((d) => {'id': d, 'name': d}).toList(),
+                    selectedValue: _selectedDepartmentName,
+                    idField: 'id',
+                    nameField: 'name',
+                    onSelect: _handleDepartmentChange,
                   ),
                 ),
+
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildDropdownField(
+                        label: 'Building',
+                        icon: Icons.apartment,
+                        selectedName: _buildingsList.firstWhere((b) => b['id'].toString() == _selectedBuildingId, orElse: () => null)?['name'],
+                        disabled: _selectedDepartmentName == null || _buildingsList.isEmpty,
+                        onTap: () => _showBottomPicker(
+                          title: 'Select Building',
+                          items: _buildingsList,
+                          selectedValue: _selectedBuildingId,
+                          idField: 'id',
+                          nameField: 'name',
+                          onSelect: _handleBuildingChange,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildDropdownField(
+                        label: 'Floor',
+                        icon: Icons.layers,
+                        selectedName: _floorsList.firstWhere((f) => f['id'].toString() == _selectedFloorId, orElse: () => null)?['name'],
+                        disabled: _selectedBuildingId == null || _floorsList.isEmpty,
+                        onTap: () => _showBottomPicker(
+                          title: 'Select Floor',
+                          items: _floorsList.where((f) => f['building_id'].toString() == _selectedBuildingId).toList(),
+                          selectedValue: _selectedFloorId,
+                          idField: 'id',
+                          nameField: 'name',
+                          onSelect: _handleFloorChange,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                
+                _buildDropdownField(
+                  label: 'Room',
+                  icon: Icons.meeting_room,
+                  selectedName: _roomsList.firstWhere((r) => r['id'].toString() == _selectedRoomId, orElse: () => null)?['name'],
+                  disabled: _selectedFloorId == null || _roomsList.isEmpty,
+                  onTap: () => _showBottomPicker(
+                    title: 'Select Room',
+                    items: _roomsList.where((r) => r['floor_id'].toString() == _selectedFloorId).toList(),
+                    selectedValue: _selectedRoomId,
+                    idField: 'id',
+                    nameField: 'name',
+                    onSelect: (val) => setState(() => _selectedRoomId = val),
+                  ),
+                ),
+                
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: _nameTradeController,
+                  decoration: const InputDecoration(
+                    labelText: 'Name (Occupant / Trade)',
+                    prefixIcon: Icon(Icons.person_outline),
+                    alignLabelWithHint: true,
+                  ),
+                ),
+
                 const SizedBox(height: 24),
                 Text(
                   'Issue Details',
@@ -348,11 +547,23 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
                   ),
                 ),
                 const SizedBox(height: 12),
+                
+                TextFormField(
+                  controller: _natureController,
+                  decoration: const InputDecoration(
+                    labelText: 'Nature of Complaint *',
+                    prefixIcon: Icon(Icons.category_outlined),
+                    alignLabelWithHint: true,
+                  ),
+                ),
+                
+                const SizedBox(height: 16),
+                
                 TextFormField(
                   controller: _descriptionController,
                   maxLines: 4,
                   decoration: const InputDecoration(
-                    labelText: 'Describe the issue in detail...',
+                    labelText: 'Individual Detailed *',
                     alignLabelWithHint: true,
                     prefixIcon: Padding(
                       padding: EdgeInsets.only(bottom: 54),
@@ -360,6 +571,7 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
                     ),
                   ),
                 ),
+                
                 const SizedBox(height: 24),
                 Text(
                   'Attachment Photo (Optional)',

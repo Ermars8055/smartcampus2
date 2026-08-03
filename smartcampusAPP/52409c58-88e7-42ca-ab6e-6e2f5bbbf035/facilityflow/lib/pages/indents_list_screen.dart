@@ -20,13 +20,10 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
 
   final List<String> _statusOptions = [
     'All',
-    'Draft',
     'Awaiting Approval',
     'Approved',
     'Rejected',
-    'Partially Issued',
-    'Converted to PO',
-    'Cancelled'
+    'Partially Issued'
   ];
 
   Color _getStatusColor(String status) {
@@ -54,13 +51,16 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
   Widget build(BuildContext context) {
     final appState = AppState.of(context, listen: true);
     final theme = Theme.of(context);
-    
+
     // Filter logic
     final filteredIndents = appState.indents.where((indent) {
-      final matchesSearch = _searchQuery.isEmpty || 
-          indent.indentNumber.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+      final matchesSearch = _searchQuery.isEmpty ||
+          indent.indentNumber
+              .toLowerCase()
+              .contains(_searchQuery.toLowerCase()) ||
           indent.department.toLowerCase().contains(_searchQuery.toLowerCase());
-      final matchesStatus = _selectedStatus == 'All' || indent.status == _selectedStatus;
+      final matchesStatus =
+          _selectedStatus == 'All' || indent.status == _selectedStatus;
       return matchesSearch && matchesStatus;
     }).toList();
 
@@ -97,8 +97,10 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
                     borderSide: BorderSide.none,
                   ),
                   filled: true,
-                  fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                  fillColor: theme.colorScheme.surfaceContainerHighest
+                      .withValues(alpha: 0.5),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
                 ),
                 onChanged: (value) {
                   setState(() {
@@ -145,10 +147,12 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
                           Icon(
                             Icons.search_off,
                             size: 64,
-                            color: theme.colorScheme.secondary.withValues(alpha: 0.5),
+                            color: theme.colorScheme.secondary
+                                .withValues(alpha: 0.5),
                           ),
                           const SizedBox(height: 16),
-                          Text('No Indents Found', style: theme.textTheme.titleLarge),
+                          Text('No Indents Found',
+                              style: theme.textTheme.titleLarge),
                         ],
                       ),
                     )
@@ -180,11 +184,13 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         indent.indentNumber,
-                                        style: theme.textTheme.titleMedium?.copyWith(
+                                        style: theme.textTheme.titleMedium
+                                            ?.copyWith(
                                           color: theme.colorScheme.primary,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -195,8 +201,10 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
                                           vertical: 4,
                                         ),
                                         decoration: BoxDecoration(
-                                          color: statusColor.withValues(alpha: 0.1),
-                                          borderRadius: BorderRadius.circular(100),
+                                          color: statusColor.withValues(
+                                              alpha: 0.1),
+                                          borderRadius:
+                                              BorderRadius.circular(100),
                                           border: Border.all(
                                             color: statusColor,
                                             width: 1,
@@ -225,7 +233,8 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
                                       Expanded(
                                         child: Text(
                                           indent.department,
-                                          style: theme.textTheme.bodyLarge?.copyWith(
+                                          style: theme.textTheme.bodyLarge
+                                              ?.copyWith(
                                             fontWeight: FontWeight.w600,
                                           ),
                                         ),
@@ -255,11 +264,13 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
                                     color: Color(0xFFF1F5F9),
                                   ),
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         '${indent.items.length} ${indent.items.length == 1 ? 'item' : 'items'} requested',
-                                        style: theme.textTheme.bodySmall?.copyWith(
+                                        style:
+                                            theme.textTheme.bodySmall?.copyWith(
                                           fontWeight: FontWeight.w500,
                                         ),
                                       ),

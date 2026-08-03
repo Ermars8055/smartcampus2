@@ -22,8 +22,7 @@ class Indent {
       location: json['location'] as String? ?? '',
       remarks: json['remarks'] as String? ?? '',
       status: json['status'] as String? ?? 'Draft',
-      items:
-          (json['items'] as List<dynamic>?)
+      items: (json['items'] as List<dynamic>?)
               ?.map((item) => IndentItem.fromJson(item as Map<String, dynamic>))
               .toList() ??
           [],

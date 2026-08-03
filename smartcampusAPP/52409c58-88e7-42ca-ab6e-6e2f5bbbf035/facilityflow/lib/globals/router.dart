@@ -6,7 +6,8 @@ import 'package:facilityflow/main.dart'; // Access global sharedPrefs
 
 @NowaGenerated()
 final GoRouter appRouter = GoRouter(
-  initialLocation: sharedPrefs.getString('jwt_token') == null ? '/login' : '/HomePage',
+  initialLocation:
+      sharedPrefs.getString('jwt_token') == null ? '/login' : '/HomePage',
   routes: [
     GoRoute(path: '/HomePage', builder: (context, state) => const HomePage()),
     GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),

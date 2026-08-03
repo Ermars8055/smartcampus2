@@ -34,6 +34,7 @@ public class IndentsController : ControllerBase
                 status = i.Status,
                 date = i.CreatedAt,
                 items = i.Items.Select(item => new {
+                    material_id = item.MaterialId,
                     materialName = item.Material != null ? item.Material.Name : "Unknown Material",
                     requestedQuantity = item.RequestedQuantity,
                     approvedQuantity = item.ApprovedQuantity ?? 0,
@@ -62,6 +63,7 @@ public class IndentsController : ControllerBase
                 status = i.Status,
                 date = i.CreatedAt,
                 items = i.Items.Select(item => new {
+                    material_id = item.MaterialId,
                     materialName = item.Material != null ? item.Material.Name : "Unknown Material",
                     requestedQuantity = item.RequestedQuantity,
                     approvedQuantity = item.ApprovedQuantity ?? 0,
@@ -105,13 +107,25 @@ public class IndentsController : ControllerBase
     }
 
     [HttpPost("{id}/approve")]
-    public async Task<IActionResult> ApproveIndent(int id)
+    public async Task<IActionResult> ApproveIndent(int id, [FromBody] ApproveIndentRequest request)
     {
-        var indent = await _context.Indents.FindAsync(id);
+        var indent = await _context.Indents.Include(i => i.Items).FirstOrDefaultAsync(i => i.Id == id);
         if (indent == null) return NotFound();
 
         if (indent.Status != "Awaiting Approval")
             return BadRequest("Indent is not awaiting approval");
+
+        if (request != null && request.Items != null)
+        {
+            foreach (var reqItem in request.Items)
+            {
+                var item = indent.Items.FirstOrDefault(i => i.MaterialId == reqItem.MaterialId);
+                if (item != null)
+                {
+                    item.ApprovedQuantity = reqItem.ApprovedQuantity;
+                }
+            }
+        }
 
         indent.Status = "Approved";
         indent.ApprovedAt = DateTime.UtcNow;
@@ -119,7 +133,31 @@ public class IndentsController : ControllerBase
         await _context.SaveChangesAsync();
         return Ok(new { message = "Fully Approved", status = indent.Status });
     }
+
+    [HttpPost("{id}/reject")]
+    public async Task<IActionResult> RejectIndent(int id)
+    {
+        var indent = await _context.Indents.FindAsync(id);
+        if (indent == null) return NotFound();
+
+        indent.Status = "Rejected";
+        await _context.SaveChangesAsync();
+        return Ok(new { message = "Rejected", status = indent.Status });
+    }
+
+    [HttpPost("{id}/cancel")]
+    public async Task<IActionResult> CancelIndent(int id)
+    {
+        var indent = await _context.Indents.FindAsync(id);
+        if (indent == null) return NotFound();
+
+        indent.Status = "Cancelled";
+        await _context.SaveChangesAsync();
+        return Ok(new { message = "Cancelled", status = indent.Status });
+    }
 }
 
 public record CreateIndentRequest(string Department, string Remarks, List<IndentItemRequest> Items);
 public record IndentItemRequest(int MaterialId, double RequestedQuantity);
+public record ApproveIndentRequest(List<ApproveIndentItemRequest> Items);
+public record ApproveIndentItemRequest(int MaterialId, double ApprovedQuantity);

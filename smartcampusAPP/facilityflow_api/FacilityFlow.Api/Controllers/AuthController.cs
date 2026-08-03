@@ -11,7 +11,8 @@ namespace FacilityFlow.Api.Controllers;
 
 public class LoginRequest
 {
-    public string Email { get; set; } = string.Empty;
+    public string Workspace { get; set; } = string.Empty;
+    public string Username { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
 }
 
@@ -38,19 +39,32 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email && (u.IsDeleted == null || u.IsDeleted == false));
+        // 1. Validate Workspace
+        var tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.Slug == request.Workspace);
+        if (tenant == null)
+            return Unauthorized("Invalid workspace.");
 
+        // 2. Validate User
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Username.ToLower() == request.Username.ToLower() && (u.IsDeleted == null || u.IsDeleted == false) && (u.IsActive == null || u.IsActive == true));
+        
         if (user == null)
-            return Unauthorized("Invalid email or password.");
+            return Unauthorized("Invalid username or password.");
 
-        // Verify Bcrypt Password
+        // 3. Verify Membership (unless platform admin)
+        if (user.IsPlatformAdmin != true)
+        {
+            var membership = await _context.TenantMemberships.FirstOrDefaultAsync(m => m.UserId == user.Id && m.TenantId == tenant.Id);
+            if (membership == null)
+                return Unauthorized("User does not have access to this workspace.");
+        }
+
+        // 4. Verify Bcrypt Password
         bool isPasswordValid = BCrypt.Net.BCrypt.Verify(request.Password, user.HashedPassword);
 
         if (!isPasswordValid)
-            return Unauthorized("Invalid email or password.");
+            return Unauthorized("Invalid username or password.");
 
         var tokenHandler = new JwtSecurityTokenHandler();
-        // Fallback to a hardcoded string if configuration is missing, just for migration safety
         var secretKey = _config["Jwt:Key"] ?? "nissigrid-production-secret-change-this-now";
         var key = Encoding.UTF8.GetBytes(secretKey);
 
@@ -60,7 +74,8 @@ public class AuthController : ControllerBase
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Name, user.FullName)
+                new Claim(ClaimTypes.Name, user.FullName),
+                new Claim("tenant_id", tenant.Id.ToString())
             }),
             Expires = DateTime.UtcNow.AddDays(7),
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)

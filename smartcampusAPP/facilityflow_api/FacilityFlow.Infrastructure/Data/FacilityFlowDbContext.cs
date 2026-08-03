@@ -16,6 +16,14 @@ public class FacilityFlowDbContext : DbContext
     public DbSet<ComplaintImage> ComplaintImages { get; set; }
     public DbSet<MaterialIssue> MaterialIssues { get; set; }
     public DbSet<Material> Materials { get; set; }
+    public DbSet<Tenant> Tenants { get; set; }
+    public DbSet<TenantMembership> TenantMemberships { get; set; }
+    public DbSet<Institution> Institutions { get; set; }
+    public DbSet<Department> Departments { get; set; }
+    public DbSet<Building> Buildings { get; set; }
+    public DbSet<Floor> Floors { get; set; }
+    public DbSet<Room> Rooms { get; set; }
+    public DbSet<GateEntry> GateEntries { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

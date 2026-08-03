@@ -11,7 +11,7 @@ late final SharedPreferences sharedPrefs;
 @NowaGenerated()
 main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Firebase is completely removed
   // await Firebase.initializeApp(...);
 

@@ -3,6 +3,7 @@ import 'package:facilityflow/pages/indents_list_screen.dart';
 import 'package:facilityflow/pages/complaints_list_screen.dart';
 import 'package:facilityflow/pages/acknowledgements_screen.dart';
 import 'package:facilityflow/pages/profile_screen.dart';
+import 'package:facilityflow/pages/gate_entries_list_screen.dart';
 import 'package:nowa_runtime/nowa_runtime.dart';
 
 @NowaGenerated()
@@ -21,10 +22,11 @@ class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
 
   final List<Widget> _screens = const [
-    IndentsListScreen(),
-    ComplaintsListScreen(),
-    AcknowledgementsScreen(),
-    ProfileScreen(),
+    const IndentsListScreen(),
+    const ComplaintsListScreen(),
+    const AcknowledgementsScreen(),
+    const GateEntriesListScreen(),
+    const ProfileScreen(),
   ];
 
   @override
@@ -70,6 +72,11 @@ class _HomePageState extends State<HomePage> {
               icon: Icon(Icons.assignment_turned_in_outlined),
               activeIcon: Icon(Icons.assignment_turned_in),
               label: 'Receipts', // Shortened to prevent wrapping
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.local_shipping_outlined),
+              activeIcon: Icon(Icons.local_shipping),
+              label: 'Gate',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person_outline),

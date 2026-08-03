@@ -5,6 +5,7 @@ import 'package:facilityflow/models/indent.dart';
 import 'package:facilityflow/models/complaint.dart';
 import 'package:facilityflow/models/material_issue.dart';
 import 'package:facilityflow/models/indent_item.dart';
+import 'package:facilityflow/models/gate_entry.dart';
 import 'package:provider/provider.dart';
 
 import 'package:facilityflow/services/api_service.dart';
@@ -12,14 +13,15 @@ import 'package:facilityflow/services/api_service.dart';
 @NowaGenerated()
 class AppState extends ChangeNotifier {
   AppState() {
-    _fetchInitialData();
+    fetchAllData();
   }
 
-  Future<void> _fetchInitialData() async {
+  Future<void> fetchAllData() async {
     await Future.wait([
       fetchIndents(),
       fetchComplaints(),
       fetchIssues(),
+      fetchGateEntries(),
     ]);
   }
 
@@ -31,7 +33,8 @@ class AppState extends ChangeNotifier {
       final response = await ApiService().dio.get('/api/issues');
       final List data = response.data;
       _materialIssues.clear();
-      _materialIssues.addAll(data.map((json) => MaterialIssue.fromJson(json)).toList());
+      _materialIssues
+          .addAll(data.map((json) => MaterialIssue.fromJson(json)).toList());
     } catch (e) {
       debugPrint('Error fetching issues: $e');
     } finally {
@@ -118,6 +121,35 @@ class AppState extends ChangeNotifier {
     return _isLoadingIssues;
   }
 
+  final List<GateEntry> _gateEntries = [];
+
+  bool _isLoadingGateEntries = false;
+
+  List<GateEntry> get gateEntries {
+    return List.unmodifiable(_gateEntries);
+  }
+
+  bool get isLoadingGateEntries {
+    return _isLoadingGateEntries;
+  }
+
+  Future<void> fetchGateEntries() async {
+    _isLoadingGateEntries = true;
+    notifyListeners();
+    try {
+      final response = await ApiService().getGateEntries();
+      final List data = response.data;
+      _gateEntries.clear();
+      _gateEntries
+          .addAll(data.map((json) => GateEntry.fromJson(json)).toList());
+    } catch (e) {
+      debugPrint('Error fetching gate entries: $e');
+    } finally {
+      _isLoadingGateEntries = false;
+      notifyListeners();
+    }
+  }
+
   void changeTheme(ThemeData theme) {
     _theme = theme;
     notifyListeners();
@@ -140,10 +172,12 @@ class AppState extends ChangeNotifier {
         'department': department,
         'location': location,
         'remarks': remarks,
-        'items': items.map((i) => {
-          'materialName': i.materialName,
-          'requestedQuantity': i.requestedQuantity,
-        }).toList(),
+        'items': items
+            .map((i) => {
+                  'materialName': i.materialName,
+                  'requestedQuantity': i.requestedQuantity,
+                })
+            .toList(),
       };
       await ApiService().dio.post('/api/indents', data: payload);
       await fetchIndents(); // Refresh list from server
@@ -192,9 +226,12 @@ class AppState extends ChangeNotifier {
     try {
       if (newStatus == 'Closed' || newStatus == 'Resolved') {
         final payload = {'resolutionRemarks': remarks};
-        await ApiService().dio.post('/api/complaints/$complaintId/resolve', data: payload);
+        await ApiService()
+            .dio
+            .post('/api/complaints/$complaintId/resolve', data: payload);
       } else {
-        debugPrint('Warning: Generic status update endpoint might not exist, skipping API call for $newStatus');
+        debugPrint(
+            'Warning: Generic status update endpoint might not exist, skipping API call for $newStatus');
       }
       await fetchComplaints();
       return true;

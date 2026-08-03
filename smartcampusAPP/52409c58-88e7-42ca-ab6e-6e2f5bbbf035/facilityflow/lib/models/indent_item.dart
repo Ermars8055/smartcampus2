@@ -3,6 +3,7 @@ import 'package:nowa_runtime/nowa_runtime.dart';
 @NowaGenerated()
 class IndentItem {
   const IndentItem({
+    required this.id,
     required this.materialId,
     required this.materialName,
     required this.requestedQuantity,
@@ -15,6 +16,7 @@ class IndentItem {
 
   factory IndentItem.fromJson(Map<String, dynamic> json) {
     return IndentItem(
+      id: json['id'] as int? ?? 0,
       materialId:
           json['material_id'] as int? ?? 0,
       materialName: json['material_name'] as String? ?? '',
@@ -28,6 +30,7 @@ class IndentItem {
     );
   }
 
+  final int id;
   final int materialId;
   final String materialName;
   final double requestedQuantity;
@@ -39,6 +42,7 @@ class IndentItem {
 
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'material_id': materialId,
       'material_name': materialName,
       'requested_quantity': requestedQuantity,

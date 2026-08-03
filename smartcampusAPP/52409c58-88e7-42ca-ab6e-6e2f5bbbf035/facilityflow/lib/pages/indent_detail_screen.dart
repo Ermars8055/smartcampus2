@@ -97,12 +97,19 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
     }
   }
 
+  String _formatQty(double qty, String uom) {
+    if (uom.toUpperCase() == 'NOS' || qty == qty.toInt()) {
+      return qty.toInt().toString();
+    }
+    return qty.toString();
+  }
+
   void _showApprovalDialog() {
     // We map requested items to controllers
     final Map<int, TextEditingController> controllers = {};
     for (int i = 0; i < widget.indent.items.length; i++) {
       controllers[i] = TextEditingController(
-          text: widget.indent.items[i].requestedQuantity.toString());
+          text: _formatQty(widget.indent.items[i].requestedQuantity, widget.indent.items[i].uomName));
     }
 
     showDialog(
@@ -128,26 +135,30 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
                         final item = widget.indent.items[idx];
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 12.0),
-                          child: Row(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Expanded(
-                                flex: 2,
-                                child: Text(item.materialName,
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold)),
-                              ),
-                              Expanded(
-                                child: Text('Req: ${item.requestedQuantity}'),
-                              ),
-                              Expanded(
-                                child: TextField(
-                                  controller: controllers[idx],
-                                  keyboardType: TextInputType.number,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Approve',
-                                    isDense: true,
+                              Text(item.materialName,
+                                  style: const TextStyle(fontWeight: FontWeight.bold)),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text('Req: ${_formatQty(item.requestedQuantity, item.uomName)} ${item.uomName}'),
                                   ),
-                                ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: TextField(
+                                      controller: controllers[idx],
+                                      keyboardType: TextInputType.number,
+                                      decoration: const InputDecoration(
+                                        labelText: 'Approve Qty',
+                                        isDense: true,
+                                        border: OutlineInputBorder(),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -188,8 +199,8 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
                             // To avoid breaking, I will just send `material_id` based on whatever is available, but actually `IndentItem` doesn't have ID either in Flutter!
                             // Oh! Let's check IndentItem.dart later. For now, I'll pass a dummy field `index` and fix it.
                             approvalPayload.add({
-                              'material_id':
-                                  widget.indent.items[i].materialId ?? 0,
+                              'indent_item_id':
+                                  widget.indent.items[i].id,
                               'approved_quantity': approvedQty
                             });
                           }
@@ -377,18 +388,18 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
                                 Row(
                                   children: [
                                     _buildQtyColumn(context, 'Req',
-                                        item.requestedQuantity, Colors.blue),
+                                        _formatQty(item.requestedQuantity, item.uomName), Colors.blue),
                                     _buildDivider(),
                                     _buildQtyColumn(context, 'Appr',
-                                        item.approvedQuantity, Colors.amber),
+                                        _formatQty(item.approvedQuantity, item.uomName), Colors.amber),
                                     _buildDivider(),
                                     _buildQtyColumn(context, 'Issued',
-                                        item.issuedQuantity, Colors.purple),
+                                        _formatQty(item.issuedQuantity, item.uomName), Colors.purple),
                                     _buildDivider(),
                                     _buildQtyColumn(
                                         context,
                                         'Recd',
-                                        item.acknowledgedQuantity,
+                                        _formatQty(item.acknowledgedQuantity, item.uomName),
                                         item.acknowledgedQuantity ==
                                                     item.issuedQuantity &&
                                                 item.issuedQuantity > 0
@@ -482,7 +493,7 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
   }
 
   Widget _buildQtyColumn(
-      BuildContext context, String label, double qty, Color color) {
+      BuildContext context, String label, String formattedQty, Color color) {
     final theme = Theme.of(context);
     return Expanded(
       child: Column(
@@ -492,7 +503,7 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
               style: theme.textTheme.bodySmall
                   ?.copyWith(fontWeight: FontWeight.w600)),
           const SizedBox(height: 4),
-          Text(qty.toStringAsFixed(0),
+          Text(formattedQty,
               style: theme.textTheme.titleMedium
                   ?.copyWith(color: color, fontWeight: FontWeight.bold)),
         ],

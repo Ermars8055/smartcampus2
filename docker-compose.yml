@@ -4,15 +4,15 @@ services:
   db:
     build: ./database
     environment:
-      POSTGRES_DB: nissigrid_stores
-      POSTGRES_USER: nissigrid
-      POSTGRES_PASSWORD: nissigrid_secure_pwd
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
       - "5433:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U nissigrid"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -20,9 +20,9 @@ services:
   backend:
     build: ./backend
     environment:
-      DATABASE_URL: postgresql://nissigrid:nissigrid_secure_pwd@db:5432/nissigrid_stores
-      SECRET_KEY: nissigrid-production-secret-change-this
-      CORS_ORIGINS: http://localhost,http://localhost:80,http://localhost:3000
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      SECRET_KEY: ${SECRET_KEY}
+      CORS_ORIGINS: ${CORS_ORIGINS}
     ports:
       - "8007:8000"
     depends_on:
@@ -34,7 +34,7 @@ services:
     build:
       context: ./frontend
       args:
-        VITE_API_URL: ""
+        VITE_API_URL: ${VITE_API_URL:-""}
     ports:
       - "8080:80"
     depends_on:

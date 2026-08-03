@@ -258,65 +258,61 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
                     Card(
                       child: Padding(
                         padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        child: GridView.count(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                          shrinkWrap: true,
+                          childAspectRatio: 2.5,
+                          physics: const NeverScrollableScrollPhysics(),
                           children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            _buildDetailItem('Requester', widget.indent.requesterName, theme.textTheme),
+                            _buildDetailItem('Institution', widget.indent.institutionName, theme.textTheme),
+                            _buildDetailItem('Department', widget.indent.department, theme.textTheme),
+                            _buildDetailItem('Building', widget.indent.buildingName, theme.textTheme),
+                            _buildDetailItem('Floor', widget.indent.floor, theme.textTheme),
+                            _buildDetailItem('Room', widget.indent.roomName, theme.textTheme),
+                            _buildDetailItem('Indent Date', formattedDate, theme.textTheme),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                Text('Status', style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey[600], fontWeight: FontWeight.bold)),
+                                const SizedBox(height: 4),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 4),
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                   decoration: BoxDecoration(
-                                    color: statusColor.withValues(alpha: 0.1),
-                                    borderRadius: BorderRadius.circular(100),
-                                    border: Border.all(
-                                        color: statusColor, width: 1),
+                                    color: statusColor,
+                                    borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
                                     widget.indent.status,
-                                    style: TextStyle(
-                                        color: statusColor,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold),
+                                    style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
                                   ),
                                 ),
-                                Text(formattedDate,
-                                    style: theme.textTheme.bodySmall),
                               ],
                             ),
-                            const SizedBox(height: 16),
-                            Text('DEPARTMENT',
-                                style: theme.textTheme.bodySmall
-                                    ?.copyWith(fontWeight: FontWeight.bold)),
-                            const SizedBox(height: 4),
-                            Text(widget.indent.department,
-                                style: theme.textTheme.titleMedium
-                                    ?.copyWith(fontWeight: FontWeight.bold)),
-                            const SizedBox(height: 12),
-                            Text('DELIVERY LOCATION',
-                                style: theme.textTheme.bodySmall
-                                    ?.copyWith(fontWeight: FontWeight.bold)),
-                            const SizedBox(height: 4),
-                            Text(widget.indent.location,
-                                style: theme.textTheme.bodyLarge),
                           ],
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
                     if (widget.indent.remarks.isNotEmpty) ...[
-                      Text('Remarks / Purpose',
-                          style: theme.textTheme.titleSmall
-                              ?.copyWith(color: theme.colorScheme.primary)),
-                      const SizedBox(height: 8),
-                      Card(
-                        child: Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(16),
-                          child: Text(widget.indent.remarks,
-                              style: theme.textTheme.bodyMedium
-                                  ?.copyWith(height: 1.4)),
+                      const SizedBox(height: 16),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[50],
+                          border: Border.all(color: Colors.grey[300]!),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text.rich(
+                          TextSpan(
+                            children: [
+                              const TextSpan(text: 'Remarks: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                              TextSpan(text: widget.indent.remarks),
+                            ]
+                          ),
+                          style: theme.textTheme.bodyMedium,
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -346,10 +342,37 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(item.materialName,
-                                    style: theme.textTheme.titleMedium
-                                        ?.copyWith(
-                                            fontWeight: FontWeight.bold)),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(item.materialName,
+                                              style: theme.textTheme.titleMedium
+                                                  ?.copyWith(fontWeight: FontWeight.bold)),
+                                          if (item.materialCode.isNotEmpty) ...[
+                                            const SizedBox(height: 4),
+                                            Text(item.materialCode,
+                                                style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey)),
+                                          ],
+                                        ],
+                                      ),
+                                    ),
+                                    if (item.uomName.isNotEmpty) ...[
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: Colors.blue[50],
+                                          borderRadius: BorderRadius.circular(4),
+                                        ),
+                                        child: Text(item.uomName,
+                                            style: TextStyle(color: Colors.blue[900], fontSize: 12, fontWeight: FontWeight.bold)),
+                                      ),
+                                    ],
+                                  ],
+                                ),
                                 const SizedBox(height: 16),
                                 Row(
                                   children: [
@@ -474,6 +497,17 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
                   ?.copyWith(color: color, fontWeight: FontWeight.bold)),
         ],
       ),
+    );
+  }
+
+  Widget _buildDetailItem(String label, String value, TextTheme textTheme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: textTheme.bodySmall?.copyWith(color: Colors.grey[600], fontWeight: FontWeight.bold)),
+        const SizedBox(height: 4),
+        Text(value.isEmpty ? '—' : value, style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
+      ],
     );
   }
 }

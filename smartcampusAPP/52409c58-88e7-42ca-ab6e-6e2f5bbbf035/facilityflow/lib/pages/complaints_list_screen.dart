@@ -53,8 +53,10 @@ class _ComplaintsListScreenState extends State<ComplaintsListScreen> {
         .where(
           (c) =>
               c.status == 'Registered' ||
+              c.status == 'Open' ||
               c.status == 'Assigned' ||
-              c.status == 'Under Inspection',
+              c.status == 'Under Inspection' ||
+              c.status == 'Reopened',
         )
         .toList();
     final inProgressComplaints = complaints
@@ -63,7 +65,7 @@ class _ComplaintsListScreenState extends State<ComplaintsListScreen> {
         )
         .toList();
     final closedComplaints =
-        complaints.where((c) => c.status == 'Closed').toList();
+        complaints.where((c) => c.status == 'Closed' || c.status == 'Resolved' || c.status == 'Rejected').toList();
 
     return DefaultTabController(
       length: 3,

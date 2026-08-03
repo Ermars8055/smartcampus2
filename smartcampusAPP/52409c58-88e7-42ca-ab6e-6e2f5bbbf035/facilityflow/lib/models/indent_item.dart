@@ -9,45 +9,44 @@ class IndentItem {
     required this.approvedQuantity,
     required this.issuedQuantity,
     required this.acknowledgedQuantity,
+    this.uomName = '',
+    this.materialCode = '',
   });
 
   factory IndentItem.fromJson(Map<String, dynamic> json) {
     return IndentItem(
       materialId:
-          json['material_id'] as int? ?? json['materialId'] as int? ?? 0,
-      materialName: json['material_name'] as String? ??
-          json['materialName'] as String? ??
-          '',
-      requestedQuantity: (json['requestedQuantity'] as num?)?.toDouble() ?? 0,
-      approvedQuantity: (json['approvedQuantity'] as num?)?.toDouble() ?? 0,
-      issuedQuantity: (json['quantity'] as num?)?.toDouble() ??
-          (json['issuedQuantity'] as num?)?.toDouble() ??
-          0,
+          json['material_id'] as int? ?? 0,
+      materialName: json['material_name'] as String? ?? '',
+      requestedQuantity: (json['requested_quantity'] as num?)?.toDouble() ?? 0,
+      approvedQuantity: (json['approved_quantity'] as num?)?.toDouble() ?? 0,
+      issuedQuantity: (json['issued_quantity'] as num?)?.toDouble() ?? 0,
       acknowledgedQuantity:
-          (json['acknowledgedQuantity'] as num?)?.toDouble() ?? 0,
+          (json['acknowledged_quantity'] as num?)?.toDouble() ?? 0,
+      uomName: json['uom_name'] as String? ?? '',
+      materialCode: json['material_code'] as String? ?? '',
     );
   }
 
   final int materialId;
-
   final String materialName;
-
   final double requestedQuantity;
-
   final double approvedQuantity;
-
   final double issuedQuantity;
-
   final double acknowledgedQuantity;
+  final String uomName;
+  final String materialCode;
 
   Map<String, dynamic> toJson() {
     return {
-      'materialId': materialId,
-      'materialName': materialName,
-      'requestedQuantity': requestedQuantity,
-      'approvedQuantity': approvedQuantity,
-      'issuedQuantity': issuedQuantity,
-      'acknowledgedQuantity': acknowledgedQuantity,
+      'material_id': materialId,
+      'material_name': materialName,
+      'requested_quantity': requestedQuantity,
+      'approved_quantity': approvedQuantity,
+      'issued_quantity': issuedQuantity,
+      'acknowledged_quantity': acknowledgedQuantity,
+      'uom_name': uomName,
+      'material_code': materialCode,
     };
   }
 }

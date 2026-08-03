@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict ttTg9GDttXKpV6q8pKZFWOznxUuarA168UGZiu517LvI6CKWCSbNwgVySisG5dB
+\restrict 9iuJfEW5oM6ybQ2wDseboBXkqKeEqvdnCwqmqyt6ZZ9QPPIkaAZZcG9o6f6lXNh
 
 -- Dumped from database version 17.10 (Ubuntu 17.10-1.pgdg22.04+1)
 -- Dumped by pg_dump version 18.4 (Ubuntu 18.4-1.pgdg22.04+1)
@@ -4858,6 +4858,7 @@ COPY public.audit_logs (id, tenant_id, site_id, user_id, action, entity_type, en
 453	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-07-31 16:30:46.631453
 454	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-07-31 16:31:08.971386
 455	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-07-31 16:31:15.018161
+456	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-03 10:30:02.168862
 \.
 
 
@@ -17574,7 +17575,7 @@ SELECT pg_catalog.setval('public.approval_flows_id_seq', 85, true);
 -- Name: audit_logs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.audit_logs_id_seq', 455, true);
+SELECT pg_catalog.setval('public.audit_logs_id_seq', 456, true);
 
 
 --
@@ -22258,5 +22259,5 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict ttTg9GDttXKpV6q8pKZFWOznxUuarA168UGZiu517LvI6CKWCSbNwgVySisG5dB
+\unrestrict 9iuJfEW5oM6ybQ2wDseboBXkqKeEqvdnCwqmqyt6ZZ9QPPIkaAZZcG9o6f6lXNh
 

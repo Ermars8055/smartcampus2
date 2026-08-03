@@ -44,6 +44,9 @@ const Quotations = () => {
   const [materials, setMaterials] = useState([]);
   const [approvedPrs, setApprovedPrs] = useState([]);
   const [search, setSearch] = useState('');
+  const [filterVendor, setFilterVendor] = useState(null);
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
 
   // Create QR state
   const [createQRDialogOpen, setCreateQRDialogOpen] = useState(false);
@@ -693,8 +696,19 @@ const Quotations = () => {
         return matchQR || matchPR;
       });
     }
+    if (filterVendor) {
+      list = list.filter(qr => qr.invited_vendors?.some(v => v.vendor_id === filterVendor.id));
+    }
+    if (startDate) {
+      const startMs = startDate.startOf('day').valueOf();
+      list = list.filter(qr => dayjs(qr.created_at).valueOf() >= startMs);
+    }
+    if (endDate) {
+      const endMs = endDate.endOf('day').valueOf();
+      list = list.filter(qr => dayjs(qr.created_at).valueOf() <= endMs);
+    }
     return list;
-  }, [qrs, search]);
+  }, [qrs, search, filterVendor, startDate, endDate]);
 
   const sortedQRs = useMemo(() => {
     let filtered = listFilter === 'All' ? filteredQRsBase : filteredQRsBase.filter(qr => {
@@ -867,10 +881,33 @@ const Quotations = () => {
           <Box>
             {/* Status Filter Tabs */}
             <Card sx={{ mb: 3 }}>
-              <Box sx={{ p: 2 }}>
-                <TextField size="small" placeholder="Search QR Numbers..." value={search}
+              <Box sx={{ p: 2, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+                <TextField size="small" placeholder="Search QR/PR Numbers..." value={search}
                   onChange={e => setSearch(e.target.value)} sx={{ minWidth: 300 }}
                   InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }} />
+                <Autocomplete
+                  size="small"
+                  options={vendors}
+                  getOptionLabel={(option) => `${option.code} - ${option.name}`}
+                  value={filterVendor}
+                  onChange={(e, val) => setFilterVendor(val)}
+                  renderInput={(params) => <TextField {...params} placeholder="Filter by Vendor" sx={{ minWidth: 250 }} />}
+                  isOptionEqualToValue={(option, value) => option.id === value.id}
+                />
+                <DatePicker
+                  label="Start Date"
+                  value={startDate}
+                  onChange={(val) => setStartDate(val)}
+                  format="DD-MMM-YYYY"
+                  slotProps={{ textField: { size: 'small', sx: { minWidth: 150 } } }}
+                />
+                <DatePicker
+                  label="End Date"
+                  value={endDate}
+                  onChange={(val) => setEndDate(val)}
+                  format="DD-MMM-YYYY"
+                  slotProps={{ textField: { size: 'small', sx: { minWidth: 150 } } }}
+                />
               </Box>
               <Tabs
                 value={listFilter}

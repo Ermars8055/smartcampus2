@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import * as XLSX from 'xlsx';
 import { useMessage } from '../context/MessageContext';
 import { useConfig } from '../context/ConfigContext';
 import { computeGstSplit } from '../utils/gstCalculations';
@@ -43,6 +44,9 @@ const Quotations = () => {
   const [materials, setMaterials] = useState([]);
   const [approvedPrs, setApprovedPrs] = useState([]);
   const [search, setSearch] = useState('');
+  const [filterVendor, setFilterVendor] = useState(null);
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
 
   // Create QR state
   const [createQRDialogOpen, setCreateQRDialogOpen] = useState(false);
@@ -100,7 +104,7 @@ const Quotations = () => {
   const [generatedPOs, setGeneratedPOs] = useState([]);
 
   // Negotiation Modal
-  const [negotiateDialog, setNegotiateDialog] = useState({ open: false, vendorId: null, vendorName: '', discountPercent: '', remarks: '', history: [] });
+  const [negotiateDialog, setNegotiateDialog] = useState({ open: false, vendorId: null, vendorName: '', discountPercent: '', itemDiscounts: {}, items: [], remarks: '', history: [] });
 
 
 
@@ -202,20 +206,47 @@ const Quotations = () => {
     setDetailSection(section);
   };
 
-  const handleCreateQR = async () => {
+  const handleEditDraft = (qr) => {
+    const items = (qr.items || []).map(it => {
+      // Find source if exists. In draft mode it's usually 1-to-1. 
+      // The backend returns source in QRItemOut for backward compat
+      return {
+        material_id: it.material_id,
+        quantity: it.quantity,
+        pr_id: it.source === 'PR' ? it.source_pr_id : null,
+      };
+    });
+    
+    const manual_material_ids = items.filter(it => !it.pr_id).map(it => it.material_id);
+    
+    setNewQR({
+      id: qr.id,
+      required_date: qr.required_date ? dayjs(qr.required_date).format('YYYY-MM-DD') : '',
+      remarks: qr.remarks || '',
+      pr_ids: qr.linked_prs?.map(p => p.pr_id) || [],
+      vendor_ids: qr.invited_vendors?.map(v => v.vendor_id) || [],
+      items: items,
+      manual_material_ids: manual_material_ids
+    });
+    setCreateQRDialogOpen(true);
+  };
+
+  const handleCreateQR = async (isDraft = false) => {
     const newErrors = {};
 
-    if (!newQR.items || newQR.items.length === 0) {
-      newErrors.items = "Please link at least one PR or add manual materials.";
-    }
-    if (!newQR.vendor_ids || newQR.vendor_ids.length < 2) {
-      newErrors.vendor_ids = "Please invite at least 2 vendors to ensure competitive pricing.";
-    }
+    if (!isDraft) {
+      if (!newQR.items || newQR.items.length === 0) {
+        newErrors.items = "Please link at least one PR or add manual materials.";
+      }
+      if (!newQR.vendor_ids || newQR.vendor_ids.length < 2) {
+        newErrors.vendor_ids = "Please invite at least 2 vendors to ensure competitive pricing.";
+      }
 
-    if (!newQR.required_date) {
-      newErrors.required_date = "Required Date is required.";
-    } else if (dayjs(newQR.required_date).isBefore(dayjs(), 'day')) {
-      newErrors.required_date = "Required Date cannot be in the past.";
+      if (!newQR.required_date) {
+        newErrors.required_date = "Required Date is required.";
+      } else if (dayjs(newQR.required_date).isBefore(dayjs(), 'day')) {
+        newErrors.required_date = "Required Date cannot be in the past.";
+      }
     }
 
     setErrors(newErrors);
@@ -232,11 +263,19 @@ const Quotations = () => {
         project_id: projects.length > 0 ? projects[0].id : 1,
         items: (newQR.items || []).filter(it => !it.pr_id),
         required_date: newQR.required_date || null,
-        remarks: newQR.remarks || null
+        remarks: newQR.remarks || null,
+        is_draft: isDraft
       };
-      const res = await api.post('/api/quotations/requests', payload);
-      const qrNumber = res?.data?.qr_number || '';
-      showMessage(`Quotation Request ${qrNumber} created successfully!`.trim(), 'Success', 'success');
+      let qrNumber = '';
+      if (newQR.id) {
+        const res = await api.put(`/api/quotations/requests/${newQR.id}`, payload);
+        qrNumber = res?.data?.qr_number || '';
+      } else {
+        const res = await api.post('/api/quotations/requests', payload);
+        qrNumber = res?.data?.qr_number || '';
+      }
+      const msgAction = isDraft ? (newQR.id ? 'updated as Draft' : 'saved as Draft') : (newQR.id ? 'updated and created' : 'created');
+      showMessage(`Quotation Request ${qrNumber} ${msgAction} successfully!`.trim(), 'Success', 'success');
       setCreateQRDialogOpen(false);
       setNewQR({ required_date: '', remarks: '', pr_ids: [], items: [], vendor_ids: [] });
       setErrors({});
@@ -251,6 +290,84 @@ const Quotations = () => {
       }
       showMessage(msg, 'Validation Error', 'error');
     }
+  };
+
+  const handleImportMaterials = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const res = await api.post('/api/quotations/requests/import-materials', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
+      const importedItems = res.data;
+      if (importedItems.length === 0) {
+        showMessage('No valid materials found in the Excel file.', 'Warning', 'warning');
+      } else {
+        setNewQR(prev => {
+          const manualItems = (prev.items || []).filter(it => !it.pr_id);
+          const prItems = (prev.items || []).filter(it => it.pr_id);
+          
+          // Merge imported items, avoiding duplicates
+          const newManualItems = [...manualItems];
+          importedItems.forEach(imported => {
+            const existingIdx = newManualItems.findIndex(it => it.material_id === imported.material_id);
+            if (existingIdx >= 0) {
+              newManualItems[existingIdx].quantity += imported.quantity;
+            } else {
+              newManualItems.push({
+                material_id: imported.material_id,
+                quantity: imported.quantity,
+                pr_id: null
+              });
+            }
+          });
+          
+          return {
+            ...prev,
+            items: [...prItems, ...newManualItems]
+          };
+        });
+        showMessage(`Successfully imported ${importedItems.length} materials.`, 'Success', 'success');
+      }
+    } catch (err) {
+      showMessage(err.response?.data?.detail || 'Failed to import materials from Excel', 'Error', 'error');
+    } finally {
+      setLoading(false);
+      // Reset input so the same file can be uploaded again if needed
+      e.target.value = null;
+    }
+  };
+
+  const handleDownloadTemplate = () => {
+    const ws = XLSX.utils.json_to_sheet([{ "Material Name": "", "Quantity": "", "UOM": "" }]);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Template");
+    XLSX.writeFile(wb, "Material_Import_Template.xlsx");
+  };
+
+  const handleExportMaterials = () => {
+    if (!newQR.items || newQR.items.length === 0) {
+      showMessage("No materials to export.", "Warning", "warning");
+      return;
+    }
+    const exportData = newQR.items.map(it => {
+      const m = Array.isArray(materials) ? materials.find(x => x.id === it.material_id) : null;
+      return {
+        "Material Name": m ? m.name : '',
+        "Quantity": it.quantity,
+        "UOM": m ? (m.uom_name || '') : ''
+      };
+    });
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Materials");
+    XLSX.writeFile(wb, "Current_Materials_List.xlsx");
   };
 
   const openSendToVendorsDialog = (qr) => {
@@ -492,11 +609,18 @@ const Quotations = () => {
     setLoading(true);
     try {
       const res = await api.get(`/api/quotations/${selectedQR.id}/vendor-quotations/${vendorId}/negotiation-history`);
+      const vq = vendorQuotes.find(q => q.vendor_id === vendorId);
+      const items = vq?.items?.filter(it => !it.is_excluded) || [];
+      const itemDiscounts = {};
+      items.forEach(it => { itemDiscounts[it.qr_item_id] = it.discount_percent || 0; });
+      
       setNegotiateDialog({
         open: true,
         vendorId,
         vendorName,
         discountPercent: '',
+        itemDiscounts,
+        items,
         remarks: '',
         history: res.data
       });
@@ -509,8 +633,13 @@ const Quotations = () => {
 
   const handleNegotiateSubmit = async () => {
     try {
+      const payloadItemDiscounts = {};
+      Object.keys(negotiateDialog.itemDiscounts).forEach(k => {
+        payloadItemDiscounts[k] = parseFloat(negotiateDialog.itemDiscounts[k] || 0);
+      });
       await api.put(`/api/quotations/${selectedQR.id}/vendor-quotations/${negotiateDialog.vendorId}/discounts`, {
         discount_percent: parseFloat(negotiateDialog.discountPercent || 0),
+        item_discounts: payloadItemDiscounts,
         remarks: negotiateDialog.remarks
       });
       showMessage('Vendor discounts updated!', 'Success', 'success');
@@ -567,13 +696,25 @@ const Quotations = () => {
         return matchQR || matchPR;
       });
     }
+    if (filterVendor) {
+      list = list.filter(qr => qr.invited_vendors?.some(v => v.vendor_id === filterVendor.id));
+    }
+    if (startDate) {
+      const startMs = startDate.startOf('day').valueOf();
+      list = list.filter(qr => dayjs(qr.created_at).valueOf() >= startMs);
+    }
+    if (endDate) {
+      const endMs = endDate.endOf('day').valueOf();
+      list = list.filter(qr => dayjs(qr.created_at).valueOf() <= endMs);
+    }
     return list;
-  }, [qrs, search]);
+  }, [qrs, search, filterVendor, startDate, endDate]);
 
   const sortedQRs = useMemo(() => {
     let filtered = listFilter === 'All' ? filteredQRsBase : filteredQRsBase.filter(qr => {
       const filterMap = {
         'Draft': 'Draft',
+        'Submitted': 'Submitted',
         'Requested': 'Requested',
         'Received': 'Received',
         'Entered': 'Entered',
@@ -610,6 +751,7 @@ const Quotations = () => {
     if (filter === 'All') return filteredQRsBase.length;
     const filterMap = {
       'Draft': 'Draft',
+      'Submitted': 'Submitted',
       'Requested': 'Requested',
       'Received': 'Received',
       'Entered': 'Entered',
@@ -665,16 +807,17 @@ const Quotations = () => {
 
   // --- UI Renderers ---
 
-  const steps = ['Draft', 'Requested', 'Received', 'Entered', 'Compared', 'Approved', 'Ordered'];
+  const steps = ['Draft', 'Submitted', 'Requested', 'Received', 'Entered', 'Compared', 'Approved', 'Ordered'];
   const getStepIndex = (status) => {
     switch (status) {
       case 'Draft': return 0;
-      case 'Requested': return 1;
-      case 'Received': return 2;
-      case 'Entered': return 3;
-      case 'Compared': return 4;
-      case 'Approved': return 5;
-      case 'Ordered': return 6;
+      case 'Submitted': return 1;
+      case 'Requested': return 2;
+      case 'Received': return 3;
+      case 'Entered': return 4;
+      case 'Compared': return 5;
+      case 'Approved': return 6;
+      case 'Ordered': return 7;
       default: return 0;
     }
   };
@@ -682,6 +825,7 @@ const Quotations = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'Draft': return 'default';
+      case 'Submitted': return 'info';
       case 'Requested': return 'info';
       case 'Received': return 'secondary';
       case 'Entered': return 'secondary';
@@ -737,10 +881,33 @@ const Quotations = () => {
           <Box>
             {/* Status Filter Tabs */}
             <Card sx={{ mb: 3 }}>
-              <Box sx={{ p: 2 }}>
-                <TextField size="small" placeholder="Search QR Numbers..." value={search}
+              <Box sx={{ p: 2, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+                <TextField size="small" placeholder="Search QR/PR Numbers..." value={search}
                   onChange={e => setSearch(e.target.value)} sx={{ minWidth: 300 }}
                   InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }} />
+                <Autocomplete
+                  size="small"
+                  options={vendors}
+                  getOptionLabel={(option) => `${option.code} - ${option.name}`}
+                  value={filterVendor}
+                  onChange={(e, val) => setFilterVendor(val)}
+                  renderInput={(params) => <TextField {...params} placeholder="Filter by Vendor" sx={{ minWidth: 250 }} />}
+                  isOptionEqualToValue={(option, value) => option.id === value.id}
+                />
+                <DatePicker
+                  label="Start Date"
+                  value={startDate}
+                  onChange={(val) => setStartDate(val)}
+                  format="DD-MMM-YYYY"
+                  slotProps={{ textField: { size: 'small', sx: { minWidth: 150 } } }}
+                />
+                <DatePicker
+                  label="End Date"
+                  value={endDate}
+                  onChange={(val) => setEndDate(val)}
+                  format="DD-MMM-YYYY"
+                  slotProps={{ textField: { size: 'small', sx: { minWidth: 150 } } }}
+                />
               </Box>
               <Tabs
                 value={listFilter}
@@ -749,7 +916,7 @@ const Quotations = () => {
                 scrollButtons="auto"
                 sx={{ borderBottom: 1, borderColor: 'divider' }}
               >
-                {['Draft', 'Requested', 'Received', 'Entered', 'Compared', 'Approved', 'Ordered', 'All'].map(filter => (
+                {['Draft', 'Submitted', 'Requested', 'Received', 'Entered', 'Compared', 'Approved', 'Ordered', 'All'].map(filter => (
                   <Tab
                     key={filter}
                     value={filter}
@@ -908,13 +1075,26 @@ const Quotations = () => {
                         <TableCell sx={{ py: 1, px: 2, fontSize: '0.75rem', whiteSpace: 'nowrap' }}>{formatDate(qr.created_at)}</TableCell>
                         <TableCell align="right" onClick={(e) => e.stopPropagation()}>
                           <Stack direction="row" spacing={0.5} sx={{ justifyContent: 'flex-end' }}>
+                            {qr.status === 'Draft' && (
+                              <Tooltip title="Edit Draft">
+                                <span>
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => handleEditDraft(qr)}
+                                    sx={{ color: 'primary.main' }}
+                                  >
+                                    <EditIcon fontSize="small" />
+                                  </IconButton>
+                                </span>
+                              </Tooltip>
+                            )}
                             <Tooltip title="Request to Vendors">
                               <span>
                                 <IconButton
                                   size="small"
                                   onClick={() => openSendToVendorsDialog(qr)}
-                                  disabled={qr.status !== 'Draft' || !hasAction('quotations', 'can_send_to_vendors')}
-                                  sx={{ color: qr.status === 'Draft' ? '#8b5cf6' : 'text.disabled' }}
+                                  disabled={qr.status !== 'Submitted' || !hasAction('quotations', 'can_send_to_vendors')}
+                                  sx={{ color: qr.status === 'Submitted' ? '#8b5cf6' : 'text.disabled' }}
                                 >
                                   <BlastIcon fontSize="small" />
                                 </IconButton>
@@ -1572,53 +1752,69 @@ const Quotations = () => {
                 {errors.items && <FormHelperText error>{errors.items}</FormHelperText>}
               </Box>
 
-              <Box>
-                <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', mb: 0.5, display: 'block', ml: 0.5, textTransform: 'uppercase' }}>
+              <Box sx={{ gridColumn: 'span 2' }}>
+                <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', display: 'block', ml: 0.5, mb: 0.5, textTransform: 'uppercase' }}>
                   Manual Material Selection *
                 </Typography>
-                <Autocomplete
-                  multiple
-                  options={materials || []}
-                  getOptionLabel={(option) => `${option.code} - ${option.name}`}
-                  value={(materials || []).filter(m => (newQR.manual_material_ids || []).includes(m.id))}
-                  onChange={(e, newValue) => {
-                    handleManualMaterialSelection({ target: { value: newValue.map(m => m.id) } });
-                  }}
-                  filterOptions={filterOptions}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      placeholder="Search Materials..."
-                      InputProps={{
-                        ...params.InputProps,
-                        startAdornment: (
-                          <>
-                            <InputAdornment position="start" sx={{ ml: 1 }}><InventoryIcon color="action" /></InputAdornment>
-                            {params.InputProps.startAdornment}
-                          </>
-                        ),
+                <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+                  <Box sx={{ flexGrow: 1 }}>
+                    <Autocomplete
+                      multiple
+                      options={materials || []}
+                      getOptionLabel={(option) => `${option.code} - ${option.name}`}
+                      value={(materials || []).filter(m => (newQR.manual_material_ids || []).includes(m.id))}
+                      onChange={(e, newValue) => {
+                        handleManualMaterialSelection({ target: { value: newValue.map(m => m.id) } });
                       }}
+                      filterOptions={filterOptions}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          placeholder="Search Materials..."
+                          InputProps={{
+                            ...params.InputProps,
+                            startAdornment: (
+                              <>
+                                <InputAdornment position="start" sx={{ ml: 1 }}><InventoryIcon color="action" /></InputAdornment>
+                                {params.InputProps.startAdornment}
+                              </>
+                            ),
+                          }}
+                        />
+                      )}
+                      disableCloseOnSelect
+                      renderOption={(props, option, { selected }) => (
+                        <li {...props}>
+                          <Checkbox checked={selected} />
+                          <ListItemText primary={option.name} secondary={option.code} />
+                        </li>
+                      )}
+                      renderTags={(value, getTagProps) =>
+                        value.map((option, index) => (
+                          <Chip
+                            {...getTagProps({ index })}
+                            label={option.name}
+                            size="small"
+                            color="secondary"
+                            variant="outlined"
+                          />
+                        ))
+                      }
                     />
-                  )}
-                  disableCloseOnSelect
-                  renderOption={(props, option, { selected }) => (
-                    <li {...props}>
-                      <Checkbox checked={selected} />
-                      <ListItemText primary={option.name} secondary={option.code} />
-                    </li>
-                  )}
-                  renderTags={(value, getTagProps) =>
-                    value.map((option, index) => (
-                      <Chip
-                        {...getTagProps({ index })}
-                        label={option.name}
-                        size="small"
-                        color="secondary"
-                        variant="outlined"
-                      />
-                    ))
-                  }
-                />
+                  </Box>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Button size="medium" variant="outlined" color="secondary" onClick={handleDownloadTemplate} sx={{ textTransform: 'none', borderRadius: 2, height: '40px', '&:hover': { backgroundColor: 'secondary.main', color: 'white' } }}>
+                      Template
+                    </Button>
+                    <Button size="medium" variant="outlined" color="success" onClick={handleExportMaterials} sx={{ textTransform: 'none', borderRadius: 2, height: '40px', '&:hover': { backgroundColor: 'success.main', color: 'white' } }} disabled={!newQR.items || newQR.items.length === 0}>
+                      Export
+                    </Button>
+                    <Button component="label" size="medium" variant="outlined" color="primary" sx={{ textTransform: 'none', borderRadius: 2, height: '40px', '&:hover': { backgroundColor: 'primary.main', color: 'white' } }}>
+                      Import
+                      <input type="file" hidden accept=".xlsx, .xls" onChange={handleImportMaterials} />
+                    </Button>
+                  </Box>
+                </Box>
               </Box>
 
               {/* Row 3: Invite Vendors */}
@@ -1676,8 +1872,10 @@ const Quotations = () => {
                     <Table size="small">
                       <TableHead>
                         <TableRow>
-                          <TableCell sx={{ fontWeight: 600 }}>Material</TableCell>
-                          <TableCell align="right" sx={{ fontWeight: 600 }}>Quantity</TableCell>
+                          <TableCell sx={{ fontWeight: 600 }}>Material Code</TableCell>
+                          <TableCell sx={{ fontWeight: 600 }}>Material Name</TableCell>
+                          <TableCell align="center" sx={{ fontWeight: 600 }}>Quantity</TableCell>
+                          <TableCell align="left" sx={{ fontWeight: 600 }}>UOM</TableCell>
                           <TableCell align="center" sx={{ fontWeight: 600 }}>Source</TableCell>
                         </TableRow>
                       </TableHead>
@@ -1687,21 +1885,22 @@ const Quotations = () => {
                           const pr = approvedPrs.find(p => p.id === it.pr_id);
                           return (
                             <TableRow key={idx}>
-                              <TableCell sx={{ py: 0.5 }}>{m ? `${m.code} - ${m.name}` : 'Loading...'}</TableCell>
-                              <TableCell align="right" sx={{ py: 0.5 }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1 }}>
-                                  <TextField
-                                    type="number"
-                                    size="small"
-                                    value={it.quantity}
-                                    onChange={(e) => updateItemQuantity(idx, e.target.value)}
-                                    sx={{ width: 100, '& .MuiInputBase-input': { py: 0.5, textAlign: 'right', fontWeight: 600 } }}
-                                    inputProps={{ min: 1 }}
-                                  />
-                                  <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600, minWidth: '60px' }}>
-                                    {m?.uom_name || ''}
-                                  </Typography>
-                                </Box>
+                              <TableCell sx={{ py: 0.5 }}>{m ? m.code : 'Loading...'}</TableCell>
+                              <TableCell sx={{ py: 0.5 }}>{m ? m.name : 'Loading...'}</TableCell>
+                              <TableCell align="center" sx={{ py: 0.5 }}>
+                                <TextField
+                                  type="number"
+                                  size="small"
+                                  value={it.quantity}
+                                  onChange={(e) => updateItemQuantity(idx, e.target.value)}
+                                  sx={{ width: 100, '& .MuiInputBase-input': { py: 0.5, textAlign: 'center', fontWeight: 600 } }}
+                                  inputProps={{ min: 1 }}
+                                />
+                              </TableCell>
+                              <TableCell align="left" sx={{ py: 0.5 }}>
+                                <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+                                  {m?.uom_name || ''}
+                                </Typography>
                               </TableCell>
                               <TableCell align="center" sx={{ py: 0.5 }}>
                                 <Chip
@@ -1738,8 +1937,18 @@ const Quotations = () => {
           </DialogContent>
           <DialogActions sx={{ px: 4, pb: 4, pt: 2, justifyContent: 'flex-end', gap: 2 }}>
             <Button onClick={() => setCreateQRDialogOpen(false)} sx={{ color: '#64748B', fontWeight: 600 }}>Cancel</Button>
+            <Box sx={{ flexGrow: 1 }} />
             <Button
-              onClick={handleCreateQR}
+              onClick={() => handleCreateQR(true)}
+              variant="outlined"
+              size="large"
+              disabled={(newQR.items?.length || 0) === 0}
+              sx={{ px: 3, borderRadius: 2, fontWeight: 700, textTransform: 'none' }}
+            >
+              Save as Draft
+            </Button>
+            <Button
+              onClick={() => handleCreateQR(false)}
               variant="contained"
               size="large"
               disabled={(newQR.items?.length || 0) === 0 || (newQR.vendor_ids?.length || 0) < 2}
@@ -2347,7 +2556,7 @@ const Quotations = () => {
       </Dialog>
 
       {/* Negotiation Dialog */}
-      <Dialog open={negotiateDialog.open} onClose={() => setNegotiateDialog(prev => ({ ...prev, open: false }))} maxWidth="sm" fullWidth>
+      <Dialog open={negotiateDialog.open} onClose={() => setNegotiateDialog(prev => ({ ...prev, open: false }))} maxWidth="md" fullWidth>
         <DialogTitle>Negotiate - {negotiateDialog.vendorName}</DialogTitle>
         <DialogContent>
           <Box sx={{ mb: 3 }}>
@@ -2364,6 +2573,49 @@ const Quotations = () => {
                 endAdornment: <InputAdornment position="end">%</InputAdornment>,
               }}
             />
+            
+            {negotiateDialog.items && negotiateDialog.items.length > 0 && (
+              <Box sx={{ mt: 3, mb: 2, maxHeight: '300px', overflowY: 'auto', border: '1px solid #eee', borderRadius: 1 }}>
+                <Table size="small" stickyHeader>
+                  <TableHead>
+                    <TableRow sx={{ '& th': { bgcolor: '#f8fafc', fontWeight: 600 } }}>
+                      <TableCell>Material</TableCell>
+                      <TableCell align="right">Qty</TableCell>
+                      <TableCell align="right">Quoted Rate</TableCell>
+                      <TableCell width={120}>Discount (%)</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {negotiateDialog.items.map(item => (
+                      <TableRow key={item.qr_item_id} hover>
+                        <TableCell sx={{ fontSize: '0.8rem' }}>{item.material_name}</TableCell>
+                        <TableCell align="right" sx={{ fontSize: '0.8rem' }}>{/* Need QTY here? Actually not easily available in item, just skip or show UOM */}
+                          {item.uom_name || '-'}
+                        </TableCell>
+                        <TableCell align="right" sx={{ fontSize: '0.8rem' }}>
+                          ₹{item.quoted_rate?.toLocaleString()}
+                        </TableCell>
+                        <TableCell>
+                          <TextField
+                            size="small"
+                            type="number"
+                            className="no-spin"
+                            value={negotiateDialog.itemDiscounts[item.qr_item_id] !== undefined ? negotiateDialog.itemDiscounts[item.qr_item_id] : ''}
+                            onChange={(e) => setNegotiateDialog(prev => ({
+                              ...prev,
+                              itemDiscounts: { ...prev.itemDiscounts, [item.qr_item_id]: e.target.value }
+                            }))}
+                            placeholder="Common"
+                            inputProps={{ step: "0.1", min: "0", max: "100" }}
+                            sx={{ '& .MuiInputBase-input': { p: 1, fontSize: '0.8rem' } }}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Box>
+            )}
             <TextField
               fullWidth
               size="small"

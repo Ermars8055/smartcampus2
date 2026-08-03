@@ -321,6 +321,13 @@ class VendorOut(VendorBase):
     current_approval_level: int
     approved_by_id: Optional[int] = None
     approved_at: Optional[datetime] = None
+    rejected_by_id: Optional[int] = None
+    rejected_at: Optional[datetime] = None
+    previous_status: Optional[str] = None
+    previous_status_by_id: Optional[int] = None
+    previous_status_at: Optional[datetime] = None
+    previous_status_by_name: Optional[str] = None
+    last_changes: Optional[Dict[str, Any]] = None
     rejection_remarks: Optional[str] = None
     is_active: bool
     created_at: datetime
@@ -328,6 +335,19 @@ class VendorOut(VendorBase):
     can_user_approve: Optional[bool] = False
     class Config:
         from_attributes = True
+
+class VendorHistoryOut(BaseModel):
+    id: int
+    vendor_id: int
+    action: str
+    changes: Optional[Dict[str, Any]] = None
+    remarks: Optional[str] = None
+    action_by_id: int
+    action_at: datetime
+    action_by_name: Optional[str] = None
+    class Config:
+        from_attributes = True
+
 
 class VendorApprovalCreate(BaseModel):
     remarks: Optional[str] = None
@@ -1565,6 +1585,16 @@ class QuotationRequestCreate(BaseModel):
     pr_ids: List[int] = []
     items: List[QRItemBase] = []
     vendor_ids: List[int] = []
+    is_draft: bool = False
+
+class QuotationRequestUpdate(BaseModel):
+    project_id: int
+    required_date: Optional[date] = None
+    remarks: Optional[str] = Field(None, max_length=255)
+    pr_ids: List[int] = []
+    items: List[QRItemBase] = []
+    vendor_ids: List[int] = []
+    is_draft: bool = False
 
 class QRLinkedPROut(BaseModel):
     id: int
@@ -1697,6 +1727,7 @@ class ComparativeStatementOut(BaseModel):
 
 class NegotiationHistoryBase(BaseModel):
     discount_percent: float = 0.0
+    item_discounts: Optional[Dict[str, float]] = None
     remarks: Optional[str] = Field(None, max_length=255)
 
 class NegotiationHistoryOut(NegotiationHistoryBase):
@@ -1720,6 +1751,14 @@ class ExtractionResultItem(BaseModel):
     discount_percent: float = 0.0
     confidence_score: float = 1.0
     raw_text: Optional[str] = None
+
+class ExcelImportResultItem(BaseModel):
+    material_id: int
+    material_name: str
+    material_code: str
+    quantity: float
+    uom_name: str
+
 
 
 # == Terms and Conditions ==
@@ -2025,6 +2064,21 @@ class ComplaintOut(ComplaintBase):
 class EquipmentUpdateSerial(BaseModel):
     serial_number: str = Field(..., min_length=1)
 
+class EquipmentUpdate(BaseModel):
+    make: Optional[str] = None
+    model: Optional[str] = None
+    machine_cost: Optional[float] = None
+    machine_type: Optional[str] = None
+    warranty_available: Optional[bool] = None
+    warranty_expiry_date: Optional[date] = None
+    amc_cmc_status: Optional[str] = None
+    amc_cmc_end_date: Optional[date] = None
+    amc_po_number: Optional[str] = None
+    amc_cost: Optional[float] = None
+    pm_required: Optional[bool] = None
+    calibration_required: Optional[bool] = None
+    battery_details: Optional[str] = None
+
 class EquipmentInstallationUpdate(BaseModel):
     serial_number: Optional[str] = None
     installation_date: Optional[datetime] = None
@@ -2205,6 +2259,7 @@ class ContractBase(BaseModel):
     end_date: date
     contract_value: Optional[float] = None
     payment_terms: Optional[str] = None
+    exclusions: Optional[str] = None
     renewal_terms: Optional[str] = None
     sla_details: Optional[str] = None
     spare_parts_included: bool = False
@@ -2220,6 +2275,7 @@ class ContractUpdate(BaseModel):
     contract_value: Optional[float] = None
     status: Optional[str] = None
     payment_terms: Optional[str] = None
+    exclusions: Optional[str] = None
     renewal_terms: Optional[str] = None
     sla_details: Optional[str] = None
     spare_parts_included: Optional[bool] = None
@@ -2233,6 +2289,8 @@ class ContractOut(ContractBase):
     vendor_name: Optional[str] = None
     institution_name: Optional[str] = None
     department_name: Optional[str] = None
+    current_approval_level: Optional[int] = 1
+    can_user_approve: bool = False
     items: List[ContractItemOut] = []
     class Config:
         from_attributes = True

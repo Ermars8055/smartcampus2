@@ -4,7 +4,7 @@ import {
   TableContainer, Button, TextField, InputAdornment, Chip, Dialog, DialogTitle,
   DialogContent, DialogActions, Grid, MenuItem, Select, FormControl, InputLabel,
   Tabs, Tab, IconButton, Tooltip, useTheme, useMediaQuery, Alert,
-  Autocomplete, createFilterOptions
+  Autocomplete, createFilterOptions, Switch, FormControlLabel
 } from '@mui/material';
 import {
   Search, Build, QrCode, UploadFile, CheckCircle, Warning, OpenInNew,
@@ -74,6 +74,12 @@ export default function Equipment() {
   const [testsPerformed, setTestsPerformed] = useState('');
   const [consumptionRemarks, setConsumptionRemarks] = useState('');
   const [consumptionSubmitting, setConsumptionSubmitting] = useState(false);
+
+  // View/Edit Dialogs
+  const [viewDialog, setViewDialog] = useState(null);
+  const [editDialog, setEditDialog] = useState(null);
+  const [editForm, setEditForm] = useState({});
+  const [editSubmitting, setEditSubmitting] = useState(false);
 
   const loadData = async () => {
     setLoading(true);
@@ -436,6 +442,19 @@ export default function Equipment() {
     setConsumptionSubmitting(false);
   };
 
+  const handleEditSubmit = async () => {
+    setEditSubmitting(true);
+    try {
+      await api.put(`/api/equipment/${editDialog.id}`, editForm);
+      showMessage('Equipment updated successfully', 'Success', 'success');
+      setEditDialog(null);
+      loadData();
+    } catch (err) {
+      showMessage(err.response?.data?.detail || 'Failed to update equipment', 'Error', 'error');
+    }
+    setEditSubmitting(false);
+  };
+
   return (
     <Box>
       {/* Header */}
@@ -556,7 +575,7 @@ export default function Equipment() {
               <Typography align="center" color="textSecondary" sx={{ py: 4 }}>No equipment records found.</Typography>
             )}
             {filteredEquipment.map(item => (
-              <Card key={item.id} variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+              <Card key={item.id} variant="outlined" sx={{ p: 2, borderRadius: 2, cursor: 'pointer' }} onClick={() => setViewDialog(item)}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#2563EB' }}>{item.equipment_code}</Typography>
                   <Chip
@@ -601,33 +620,36 @@ export default function Equipment() {
                 </Box>
 
                 <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                  <Button size="small" variant="outlined" color="primary" startIcon={<Edit />} onClick={(e) => { e.stopPropagation(); setEditForm(item); setEditDialog(item); }}>
+                    Edit
+                  </Button>
                   {item.serial_number_status === 'Pending Update' && (
-                    <Button size="small" variant="outlined" color="warning" startIcon={<Edit />} onClick={() => { setSerialDialog(item); setSerialInput(''); }}>
+                    <Button size="small" variant="outlined" color="warning" startIcon={<Edit />} onClick={(e) => { e.stopPropagation(); setSerialDialog(item); setSerialInput(''); }}>
                       Update Serial
                     </Button>
                   )}
                   {item.installation_status === 'Pending Installation' && (
-                    <Button size="small" variant="contained" color="primary" startIcon={<Build />} onClick={() => openInstallationDialog(item)}>
+                    <Button size="small" variant="contained" color="primary" startIcon={<Build />} onClick={(e) => { e.stopPropagation(); openInstallationDialog(item); }}>
                       Install Equipment
                     </Button>
                   )}
                   {item.installation_report_url && (
-                    <Button size="small" variant="outlined" color="success" startIcon={<OpenInNew />} onClick={() => window.open(getFileUrl(item.installation_report_url), '_blank')}>
+                    <Button size="small" variant="outlined" color="success" startIcon={<OpenInNew />} onClick={(e) => { e.stopPropagation(); window.open(getFileUrl(item.installation_report_url), '_blank'); }}>
                       Report
                     </Button>
                   )}
                   {item.status === 'Operational' && (item.cost_per_test > 0 || item.rental_type === 'Reagent Rental') && (
-                    <Button size="small" variant="outlined" color="secondary" startIcon={<Science />} onClick={() => { setConsumptionDialog(item); setConsumptionDate(new Date().toISOString().split('T')[0]); setTestsPerformed(''); setConsumptionRemarks(''); }}>
+                    <Button size="small" variant="outlined" color="secondary" startIcon={<Science />} onClick={(e) => { e.stopPropagation(); setConsumptionDialog(item); setConsumptionDate(new Date().toISOString().split('T')[0]); setTestsPerformed(''); setConsumptionRemarks(''); }}>
                       Log Usage
                     </Button>
                   )}
                   {item.status === 'Operational' && (
-                    <Button size="small" variant="outlined" color="primary" startIcon={<CompareArrows />} onClick={() => { setRelocateDialog(item); setRelocateDate(new Date().toISOString().split('T')[0]); setRelocateLocation(item.location_id || ''); setRelocateRemarks(''); }}>
+                    <Button size="small" variant="outlined" color="primary" startIcon={<CompareArrows />} onClick={(e) => { e.stopPropagation(); setRelocateDialog(item); setRelocateDate(new Date().toISOString().split('T')[0]); setRelocateLocation(item.location_id || ''); setRelocateRemarks(''); }}>
                       Relocate
                     </Button>
                   )}
                   {item.status !== 'Written Off' && (
-                    <Button size="small" variant="outlined" color="error" startIcon={<DeleteOutline />} onClick={() => { setWriteOffDialog(item); setWriteOffDate(new Date().toISOString().split('T')[0]); setWriteOffReason(''); }}>
+                    <Button size="small" variant="outlined" color="error" startIcon={<DeleteOutline />} onClick={(e) => { e.stopPropagation(); setWriteOffDialog(item); setWriteOffDate(new Date().toISOString().split('T')[0]); setWriteOffReason(''); }}>
                       Write-Off
                     </Button>
                   )}
@@ -660,7 +682,7 @@ export default function Equipment() {
                   </TableRow>
                 )}
                 {filteredEquipment.map(item => (
-                  <TableRow key={item.id} hover>
+                  <TableRow key={item.id} hover onClick={() => setViewDialog(item)} sx={{ cursor: 'pointer' }}>
                     <TableCell sx={{ fontWeight: 700, color: '#2563EB', fontSize: '0.85rem' }}>
                       {item.equipment_code}
                       {item.is_biomedical && (
@@ -707,51 +729,56 @@ export default function Equipment() {
                     </TableCell>
                     <TableCell align="center">
                       <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
+                        <Tooltip title="Edit Equipment">
+                          <IconButton size="small" color="primary" onClick={(e) => { e.stopPropagation(); setEditForm(item); setEditDialog(item); }}>
+                            <Edit fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
                         {item.serial_number_status === 'Pending Update' && (
                           <Tooltip title="Update Serial Number">
-                            <Button size="small" variant="outlined" color="warning" sx={{ textTransform: 'none', py: 0.5 }} onClick={() => { setSerialDialog(item); setSerialInput(''); }}>
+                            <Button size="small" variant="outlined" color="warning" sx={{ textTransform: 'none', py: 0.5 }} onClick={(e) => { e.stopPropagation(); setSerialDialog(item); setSerialInput(''); }}>
                               Serial No.
                             </Button>
                           </Tooltip>
                         )}
                         {item.installation_status === 'Pending Installation' && (
                           <Tooltip title="Record Installation & Upload Report">
-                            <Button size="small" variant="contained" color="primary" sx={{ textTransform: 'none', py: 0.5 }} onClick={() => openInstallationDialog(item)}>
+                            <Button size="small" variant="contained" color="primary" sx={{ textTransform: 'none', py: 0.5 }} onClick={(e) => { e.stopPropagation(); openInstallationDialog(item); }}>
                               Install
                             </Button>
                           </Tooltip>
                         )}
                         {item.installation_report_url && (
                           <Tooltip title="View Installation Report">
-                            <IconButton size="small" color="success" onClick={() => window.open(getFileUrl(item.installation_report_url), '_blank')}>
+                            <IconButton size="small" color="success" onClick={(e) => { e.stopPropagation(); window.open(getFileUrl(item.installation_report_url), '_blank'); }}>
                               <OpenInNew fontSize="small" />
                             </IconButton>
                           </Tooltip>
                         )}
                         {item.status === 'Operational' && (
                           <Tooltip title="Print QR Code">
-                            <IconButton size="small" color="primary" onClick={() => handleOpenQr(item)}>
+                            <IconButton size="small" color="primary" onClick={(e) => { e.stopPropagation(); handleOpenQr(item); }}>
                               <QrCode fontSize="small" />
                             </IconButton>
                           </Tooltip>
                         )}
                         {item.status === 'Operational' && (item.cost_per_test > 0 || item.rental_type === 'Reagent Rental') && (
                           <Tooltip title="Log Reagent Usage">
-                            <IconButton size="small" color="secondary" onClick={() => { setConsumptionDialog(item); setConsumptionDate(new Date().toISOString().split('T')[0]); setTestsPerformed(''); setConsumptionRemarks(''); }}>
+                            <IconButton size="small" color="secondary" onClick={(e) => { e.stopPropagation(); setConsumptionDialog(item); setConsumptionDate(new Date().toISOString().split('T')[0]); setTestsPerformed(''); setConsumptionRemarks(''); }}>
                               <Science fontSize="small" />
                             </IconButton>
                           </Tooltip>
                         )}
                         {item.status === 'Operational' && (
                           <Tooltip title="Relocate Equipment">
-                            <IconButton size="small" color="primary" onClick={() => { setRelocateDialog(item); setRelocateDate(new Date().toISOString().split('T')[0]); setRelocateLocation(item.location_id || ''); setRelocateRemarks(''); }}>
+                            <IconButton size="small" color="primary" onClick={(e) => { e.stopPropagation(); setRelocateDialog(item); setRelocateDate(new Date().toISOString().split('T')[0]); setRelocateLocation(item.location_id || ''); setRelocateRemarks(''); }}>
                               <CompareArrows fontSize="small" />
                             </IconButton>
                           </Tooltip>
                         )}
                         {item.status === 'Operational' && (
                           <Tooltip title="Write-off Equipment">
-                            <IconButton size="small" color="error" onClick={() => { setWriteOffDialog(item); setWriteOffDate(new Date().toISOString().split('T')[0]); setWriteOffReason(''); }}>
+                            <IconButton size="small" color="error" onClick={(e) => { e.stopPropagation(); setWriteOffDialog(item); setWriteOffDate(new Date().toISOString().split('T')[0]); setWriteOffReason(''); }}>
                               <DeleteOutline fontSize="small" />
                             </IconButton>
                           </Tooltip>
@@ -1207,6 +1234,137 @@ export default function Equipment() {
           <Button onClick={() => setConsumptionDialog(null)} color="inherit">Cancel</Button>
           <Button onClick={handleConsumptionSubmit} variant="contained" color="primary" disabled={consumptionSubmitting}>
             {consumptionSubmitting ? 'Logging...' : 'Log Usage'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+    {/* View Equipment Dialog */}
+      <Dialog open={!!viewDialog} onClose={() => setViewDialog(null)} maxWidth="md" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700, color: '#1E293B' }}>Equipment Details: {viewDialog?.equipment_code}</DialogTitle>
+        <DialogContent dividers>
+          {viewDialog && (
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={6}>
+                <Typography variant="subtitle2" color="primary" sx={{ mb: 1 }}>General Information</Typography>
+                <Table size="small">
+                  <TableBody>
+                    <TableRow><TableCell sx={{ fontWeight: 600 }}>Material</TableCell><TableCell>{viewDialog.material_name}</TableCell></TableRow>
+                    <TableRow><TableCell sx={{ fontWeight: 600 }}>Serial Number</TableCell><TableCell>{viewDialog.serial_number || 'N/A'}</TableCell></TableRow>
+                    <TableRow><TableCell sx={{ fontWeight: 600 }}>Status</TableCell><TableCell>{viewDialog.status}</TableCell></TableRow>
+                    <TableRow><TableCell sx={{ fontWeight: 600 }}>Location</TableCell><TableCell>{viewDialog.location_name || '-'}</TableCell></TableRow>
+                    <TableRow><TableCell sx={{ fontWeight: 600 }}>Make / Model</TableCell><TableCell>{viewDialog.make || '-'} / {viewDialog.model || '-'}</TableCell></TableRow>
+                  </TableBody>
+                </Table>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <Typography variant="subtitle2" color="primary" sx={{ mb: 1 }}>Procurement & Warranty</Typography>
+                <Table size="small">
+                  <TableBody>
+                    <TableRow><TableCell sx={{ fontWeight: 600 }}>Procurement Type</TableCell><TableCell>{viewDialog.procurement_type}</TableCell></TableRow>
+                    <TableRow><TableCell sx={{ fontWeight: 600 }}>Warranty Available</TableCell><TableCell>{viewDialog.warranty_available ? 'Yes' : 'No'}</TableCell></TableRow>
+                    {viewDialog.warranty_available && (
+                      <TableRow><TableCell sx={{ fontWeight: 600 }}>Warranty Expiry</TableCell><TableCell>{viewDialog.warranty_expiry_date ? formatDate(viewDialog.warranty_expiry_date) : '-'}</TableCell></TableRow>
+                    )}
+                    <TableRow><TableCell sx={{ fontWeight: 600 }}>AMC/CMC Status</TableCell><TableCell>{viewDialog.amc_cmc_status || 'None'}</TableCell></TableRow>
+                    {viewDialog.amc_cmc_status && viewDialog.amc_cmc_status !== 'None' && (
+                      <TableRow><TableCell sx={{ fontWeight: 600 }}>AMC/CMC End Date</TableCell><TableCell>{viewDialog.amc_cmc_end_date ? formatDate(viewDialog.amc_cmc_end_date) : '-'}</TableCell></TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography variant="subtitle2" color="primary" sx={{ mb: 1 }}>Maintenance</Typography>
+                <Table size="small">
+                  <TableBody>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: 600 }}>PM Required</TableCell><TableCell>{viewDialog.pm_required ? 'Yes' : 'No'}</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>Calibration Required</TableCell><TableCell>{viewDialog.calibration_required ? 'Yes' : 'No'}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: 600 }}>Battery Details</TableCell><TableCell colSpan={3}>{viewDialog.battery_details || '-'}</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </Grid>
+            </Grid>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setViewDialog(null)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Edit Equipment Dialog */}
+      <Dialog open={!!editDialog} onClose={() => setEditDialog(null)} maxWidth="md" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700, color: '#1E293B' }}>Edit Equipment: {editDialog?.equipment_code}</DialogTitle>
+        <DialogContent dividers>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <TextField fullWidth size="small" label="Make" value={editForm.make || ''} onChange={e => setEditForm({ ...editForm, make: e.target.value })} />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField fullWidth size="small" label="Model" value={editForm.model || ''} onChange={e => setEditForm({ ...editForm, model: e.target.value })} />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField fullWidth size="small" label="Machine Type" value={editForm.machine_type || ''} onChange={e => setEditForm({ ...editForm, machine_type: e.target.value })} />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField fullWidth size="small" label="Machine Cost" type="number" inputProps={{ min: "0", step: "0.01" }} value={editForm.machine_cost || ''} onChange={e => setEditForm({ ...editForm, machine_cost: e.target.value === '' ? null : parseFloat(e.target.value) })} />
+              </Grid>
+              
+              <Grid item xs={12} sm={6}>
+                <FormControlLabel
+                  control={<Switch size="small" checked={!!editForm.warranty_available} onChange={e => setEditForm({ ...editForm, warranty_available: e.target.checked })} />}
+                  label="Warranty Available"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField fullWidth size="small" type="date" label="Warranty Expiry Date" InputLabelProps={{ shrink: true }} value={editForm.warranty_expiry_date ? editForm.warranty_expiry_date.substring(0, 10) : ''} onChange={e => setEditForm({ ...editForm, warranty_expiry_date: e.target.value || null })} disabled={!editForm.warranty_available} />
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>AMC/CMC Status</InputLabel>
+                  <Select value={editForm.amc_cmc_status || 'None'} label="AMC/CMC Status" onChange={e => setEditForm({ ...editForm, amc_cmc_status: e.target.value })}>
+                    <MenuItem value="None">None</MenuItem>
+                    <MenuItem value="Under AMC">Under AMC</MenuItem>
+                    <MenuItem value="Under CMC">Under CMC</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField fullWidth size="small" type="date" label="AMC/CMC End Date" InputLabelProps={{ shrink: true }} value={editForm.amc_cmc_end_date ? editForm.amc_cmc_end_date.substring(0, 10) : ''} onChange={e => setEditForm({ ...editForm, amc_cmc_end_date: e.target.value || null })} disabled={!editForm.amc_cmc_status || editForm.amc_cmc_status === 'None'} />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField fullWidth size="small" label="AMC PO Number" value={editForm.amc_po_number || ''} onChange={e => setEditForm({ ...editForm, amc_po_number: e.target.value })} disabled={!editForm.amc_cmc_status || editForm.amc_cmc_status === 'None'} />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField fullWidth size="small" label="AMC Cost" type="number" inputProps={{ min: "0", step: "0.01" }} value={editForm.amc_cost || ''} onChange={e => setEditForm({ ...editForm, amc_cost: e.target.value === '' ? null : parseFloat(e.target.value) })} disabled={!editForm.amc_cmc_status || editForm.amc_cmc_status === 'None'} />
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <FormControlLabel
+                  control={<Switch size="small" checked={!!editForm.pm_required} onChange={e => setEditForm({ ...editForm, pm_required: e.target.checked })} />}
+                  label="PM Required"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControlLabel
+                  control={<Switch size="small" checked={!!editForm.calibration_required} onChange={e => setEditForm({ ...editForm, calibration_required: e.target.checked })} />}
+                  label="Calibration Required"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField fullWidth size="small" label="Battery Details" value={editForm.battery_details || ''} onChange={e => setEditForm({ ...editForm, battery_details: e.target.value })} placeholder="e.g. 12V 7Ah Lead Acid" />
+              </Grid>
+            </Grid>
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setEditDialog(null)} color="inherit">Cancel</Button>
+          <Button onClick={handleEditSubmit} variant="contained" color="primary" disabled={editSubmitting}>
+            {editSubmitting ? 'Saving...' : 'Save Changes'}
           </Button>
         </DialogActions>
       </Dialog>

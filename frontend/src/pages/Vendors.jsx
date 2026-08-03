@@ -77,6 +77,8 @@ export default function Vendors() {
   const [rejectDialog, setRejectDialog] = useState(false);
   const [rejectRemarks, setRejectRemarks] = useState('');
   const [rejectingVendor, setRejectingVendor] = useState(null);
+  const [vendorHistory, setVendorHistory] = useState([]);
+  const [dialogTab, setDialogTab] = useState(0);
 
   const { user } = useAuth();
   const theme = useTheme();
@@ -221,6 +223,8 @@ export default function Vendors() {
         is_active: r.data.is_active !== false
       });
       setDialog(true);
+      setDialogTab(0);
+      api.get(`/api/vendors/${v.id}/history`).then(res => setVendorHistory(res.data)).catch(() => setVendorHistory([]));
     });
   };
 
@@ -248,6 +252,8 @@ export default function Vendors() {
               setEditing(null);
               setViewOnly(false);
               setErrors({});
+              setVendorHistory([]);
+              setDialogTab(0);
               setForm({
                 name: '', code: '', contact_person: '', phone: '', email: '',
                 gst_number: '', address_line_1: '', address_line_2: '', city: '', pincode: '', state: '', category_ids: [], rating: 0, is_active: true
@@ -323,7 +329,7 @@ export default function Vendors() {
                     </Box>
                     <Box sx={{ display: 'flex', gap: 0.5, flexDirection: 'column', alignItems: 'flex-end' }}>
                       <Chip
-                        label={v.status === 'Awaiting Approval' ? <span style={{ display: 'block', textAlign: 'center', lineHeight: 1.1 }}>Awaiting<br/>Approval</span> : v.status}
+                        label={v.status === 'Awaiting Approval' ? (v.previous_status ? <span style={{ display: 'block', textAlign: 'center', lineHeight: 1.1 }}>Awaiting<br/>Approval<br/><span style={{fontSize: '0.55rem', fontWeight: 400}}>(was {v.previous_status})</span></span> : <span style={{ display: 'block', textAlign: 'center', lineHeight: 1.1 }}>Awaiting<br/>Approval</span>) : v.status}
                         size="small"
                         sx={{
                           bgcolor: v.status === 'Approved' ? '#ECFDF5' : (v.status === 'Rejected' ? '#FEF2F2' : (v.status === 'Awaiting Approval' ? '#FEF9C3' : '#F1F5F9')),
@@ -458,7 +464,7 @@ export default function Vendors() {
 
                     <TableCell>
                       <Chip 
-                        label={v.status === 'Awaiting Approval' ? <span style={{ display: 'block', textAlign: 'center', lineHeight: 1.1 }}>Awaiting<br/>Approval</span> : v.status} 
+                        label={v.status === 'Awaiting Approval' ? (v.previous_status ? <span style={{ display: 'block', textAlign: 'center', lineHeight: 1.1 }}>Awaiting<br/>Approval<br/><span style={{fontSize: '0.55rem', fontWeight: 400}}>(was {v.previous_status})</span></span> : <span style={{ display: 'block', textAlign: 'center', lineHeight: 1.1 }}>Awaiting<br/>Approval</span>) : v.status} 
                         size="small" 
                         sx={{ 
                           bgcolor: v.status === 'Approved' ? '#ECFDF5' : (v.status === 'Rejected' ? '#FEF2F2' : (v.status === 'Awaiting Approval' ? '#FEF9C3' : '#F1F5F9')), 
@@ -534,8 +540,15 @@ export default function Vendors() {
               </Typography>
             </Box>
           </Box>
+          {viewOnly && (
+            <Tabs value={dialogTab} onChange={(e, v) => setDialogTab(v)} sx={{ mt: 2, borderBottom: 1, borderColor: 'divider' }}>
+              <Tab label="Vendor Details" />
+              <Tab label="Approval History" />
+            </Tabs>
+          )}
         </DialogTitle>
         <DialogContent sx={{ mt: 1 }}>
+          {dialogTab === 0 && (
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr 1fr' }, gap: 2.5, pt: 2 }}>
             <TextField
               fullWidth
@@ -553,7 +566,7 @@ export default function Vendors() {
               value={form.name}
               onChange={e => setForm({ ...form, name: e.target.value })}
               required
-              disabled={viewOnly}
+              disabled={viewOnly || !!editing}
               error={!!errors.name}
               helperText={errors.name}
               sx={{ gridColumn: { sm: 'span 2' } }}
@@ -746,9 +759,48 @@ export default function Vendors() {
               </Alert>
             )}
           </Box>
+          )}
+          {dialogTab === 1 && (
+          <Box sx={{ pt: 2 }}>
+            {vendorHistory.map((h, i) => (
+              <Box key={h.id} sx={{ display: 'flex', gap: 2, mb: 3 }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: h.action.includes('Reject') ? 'error.main' : (h.action.includes('Approve') ? 'success.main' : 'primary.main'), mt: 0.5 }} />
+                  {i < vendorHistory.length - 1 && <Box sx={{ width: 2, flex: 1, bgcolor: 'divider', my: 0.5 }} />}
+                </Box>
+                <Box sx={{ flex: 1, pb: i < vendorHistory.length - 1 ? 2 : 0 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{h.action}</Typography>
+                  <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 1 }}>
+                    by {h.action_by_name} on {new Date(h.action_at).toLocaleString()}
+                  </Typography>
+                  {h.remarks && <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'text.secondary', mb: 1 }}>"{h.remarks}"</Typography>}
+                  {h.changes && Object.keys(h.changes).length > 0 && (
+                    <Box sx={{ mt: 1, p: 1.5, bgcolor: '#F8FAFC', borderRadius: 1, border: '1px solid #E2E8F0' }}>
+                      <Typography variant="caption" sx={{ fontWeight: 700, mb: 1, display: 'block' }}>Changes Made:</Typography>
+                      {Object.keys(h.changes).map(k => (
+                        <Box key={k} sx={{ display: 'flex', alignItems: 'flex-start', mb: 0.5, gap: 1 }}>
+                          <Typography variant="caption" sx={{ fontWeight: 600, minWidth: 80, textTransform: 'capitalize' }}>{k.replace(/_/g, ' ')}:</Typography>
+                          <Box>
+                            <Typography variant="caption" sx={{ color: 'error.main', textDecoration: 'line-through', mr: 1 }}>
+                              {JSON.stringify(h.changes[k].old)}
+                            </Typography>
+                            <Typography variant="caption" sx={{ color: 'success.main', fontWeight: 600 }}>
+                              {JSON.stringify(h.changes[k].new)}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      ))}
+                    </Box>
+                  )}
+                </Box>
+              </Box>
+            ))}
+            {vendorHistory.length === 0 && <Typography variant="body2" color="text.secondary">No history available.</Typography>}
+          </Box>
+          )}
         </DialogContent>
         <DialogActions sx={{ px: 4, pb: 4, pt: 2, justifyContent: 'flex-end', gap: 2 }}>
-          {viewOnly && vendors.find(v => v.id === editing)?.can_user_approve && (
+          {viewOnly && form.can_user_approve && (
             <>
               <Button 
                 variant="contained" 

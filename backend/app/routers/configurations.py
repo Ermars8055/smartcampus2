@@ -3,8 +3,8 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import TenantConfiguration
 from app.schemas import TenantConfigurationOut, TenantConfigurationCreate, TenantConfigurationUpdate
-from app.auth import get_tenant_id, get_site_id
-from app.models import LocationMaster
+from app.auth import get_tenant_id, get_site_id, require_permission, get_current_user
+from app.models import LocationMaster, User
 from app.schemas import LocationMasterOut, LocationMasterCreate
 from typing import List
 
@@ -13,7 +13,8 @@ router = APIRouter(prefix="/api/configurations", tags=["Configurations"])
 @router.get("", response_model=TenantConfigurationOut)
 def get_tenant_configuration(
     db: Session = Depends(get_db),
-    tenant_id: int = Depends(get_tenant_id)
+    tenant_id: int = Depends(get_tenant_id),
+    current_user: User = Depends(require_permission("configurations", "read"))
 ):
     if not tenant_id:
         raise HTTPException(status_code=400, detail="User does not belong to a tenant")
@@ -31,7 +32,8 @@ def get_tenant_configuration(
 def update_tenant_configuration(
     config_in: TenantConfigurationUpdate,
     db: Session = Depends(get_db),
-    tenant_id: int = Depends(get_tenant_id)
+    tenant_id: int = Depends(get_tenant_id),
+    current_user: User = Depends(require_permission("configurations", "update"))
 ):
     if not tenant_id:
         raise HTTPException(status_code=400, detail="User does not belong to a tenant")
@@ -65,7 +67,8 @@ def update_tenant_configuration(
 def get_locations(
     db: Session = Depends(get_db),
     tenant_id: int = Depends(get_tenant_id),
-    site_id: int = Depends(get_site_id)
+    site_id: int = Depends(get_site_id),
+    current_user: User = Depends(get_current_user)
 ):
     locations = db.query(LocationMaster).filter(
         LocationMaster.tenant_id == tenant_id,
@@ -78,7 +81,8 @@ def create_location(
     location_in: LocationMasterCreate,
     db: Session = Depends(get_db),
     tenant_id: int = Depends(get_tenant_id),
-    site_id: int = Depends(get_site_id)
+    site_id: int = Depends(get_site_id),
+    current_user: User = Depends(require_permission("locations", "create"))
 ):
     location = LocationMaster(
         tenant_id=tenant_id,
@@ -98,7 +102,8 @@ def update_location(
     location_in: LocationMasterCreate,
     db: Session = Depends(get_db),
     tenant_id: int = Depends(get_tenant_id),
-    site_id: int = Depends(get_site_id)
+    site_id: int = Depends(get_site_id),
+    current_user: User = Depends(require_permission("locations", "update"))
 ):
     location = db.query(LocationMaster).filter(
         LocationMaster.id == location_id,

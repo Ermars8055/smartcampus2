@@ -9,6 +9,8 @@ import { Add, Delete, Save, ArrowBack } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '../services/api';
 import { useMessage } from '../context/MessageContext';
+import { DatePicker } from '@mui/x-date-pickers';
+import dayjs from 'dayjs';
 
 export default function ContractForm() {
   const { id } = useParams();
@@ -25,6 +27,7 @@ export default function ContractForm() {
     end_date: '',
     contract_value: '',
     payment_terms: '',
+    exclusions: '',
     renewal_terms: '',
     sla_details: '',
     spare_parts_included: false,
@@ -94,17 +97,19 @@ export default function ContractForm() {
     return Object.keys(newErrs).length === 0;
   };
 
-  const handleSave = async () => {
+  const handleSave = async (isDraft = false) => {
     if (!validate()) {
       showMessage('Please fill all required fields.', 'Validation Error', 'error');
       return;
     }
     setLoading(true);
     try {
-      const payload = { ...form };
+      const payload = { ...form, status: isDraft ? 'Draft' : 'Submitted' };
       if (!payload.institution_id) delete payload.institution_id;
       if (!payload.department_id) delete payload.department_id;
       if (!payload.contract_value) delete payload.contract_value;
+      if (payload.start_date) payload.start_date = dayjs(payload.start_date).format('YYYY-MM-DD');
+      if (payload.end_date) payload.end_date = dayjs(payload.end_date).format('YYYY-MM-DD');
 
       if (isEdit) {
         await api.put(`/api/contracts/${id}`, payload);
@@ -155,6 +160,32 @@ export default function ContractForm() {
       <Card sx={{ p: 3, mb: 3, borderRadius: 2 }}>
         <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>Basic Details</Typography>
         <Grid container spacing={2}>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              select
+              fullWidth
+              label="Institution"
+              value={form.institution_id}
+              onChange={e => setForm({ ...form, institution_id: e.target.value, department_id: '' })}
+            >
+              <MenuItem value=""><em>None</em></MenuItem>
+              {institutions.map(i => <MenuItem key={i.id} value={i.id}>{i.name}</MenuItem>)}
+            </TextField>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              select
+              fullWidth
+              label="Department"
+              value={form.department_id}
+              onChange={e => setForm({ ...form, department_id: e.target.value })}
+              disabled={!form.institution_id}
+            >
+              <MenuItem value=""><em>None</em></MenuItem>
+              {departments.map(d => <MenuItem key={d.id} value={d.id}>{d.name}</MenuItem>)}
+            </TextField>
+          </Grid>
+
           <Grid item xs={12} sm={4}>
             <TextField
               select
@@ -195,100 +226,47 @@ export default function ContractForm() {
           </Grid>
 
           <Grid item xs={12} sm={6}>
-            <TextField
-              select
-              fullWidth
-              label="Institution"
-              value={form.institution_id}
-              onChange={e => setForm({ ...form, institution_id: e.target.value, department_id: '' })}
-            >
-              <MenuItem value=""><em>None</em></MenuItem>
-              {institutions.map(i => <MenuItem key={i.id} value={i.id}>{i.name}</MenuItem>)}
-            </TextField>
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              select
-              fullWidth
-              label="Department"
-              value={form.department_id}
-              onChange={e => setForm({ ...form, department_id: e.target.value })}
-              disabled={!form.institution_id}
-            >
-              <MenuItem value=""><em>None</em></MenuItem>
-              {departments.map(d => <MenuItem key={d.id} value={d.id}>{d.name}</MenuItem>)}
-            </TextField>
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              type="date"
-              label="Start Date"
-              InputLabelProps={{ shrink: true }}
-              value={form.start_date}
-              onChange={e => setForm({ ...form, start_date: e.target.value })}
-              error={!!errors.start_date}
-              helperText={errors.start_date}
-              required
+            <DatePicker
+              label="Start Date *"
+              value={form.start_date ? dayjs(form.start_date) : null}
+              onChange={val => setForm({ ...form, start_date: val })}
+              format="DD-MMM-YYYY"
+              localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
+              slotProps={{
+                textField: {
+                  fullWidth: true,
+                  placeholder: "DD-MMM-YYYY",
+                  error: !!errors.start_date,
+                  helperText: errors.start_date
+                }
+              }}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              type="date"
-              label="End Date"
-              InputLabelProps={{ shrink: true }}
-              value={form.end_date}
-              onChange={e => setForm({ ...form, end_date: e.target.value })}
-              error={!!errors.end_date}
-              helperText={errors.end_date}
-              required
-            />
-          </Grid>
-        </Grid>
-
-        <Divider sx={{ my: 3 }} />
-        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>Terms & Conditions</Typography>
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              multiline
-              rows={2}
-              label="Payment Terms"
-              value={form.payment_terms}
-              onChange={e => setForm({ ...form, payment_terms: e.target.value })}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              multiline
-              rows={2}
-              label="Renewal Terms"
-              value={form.renewal_terms}
-              onChange={e => setForm({ ...form, renewal_terms: e.target.value })}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              multiline
-              rows={2}
-              label="SLA Details"
-              value={form.sla_details}
-              onChange={e => setForm({ ...form, sla_details: e.target.value })}
+            <DatePicker
+              label="End Date *"
+              value={form.end_date ? dayjs(form.end_date) : null}
+              onChange={val => setForm({ ...form, end_date: val })}
+              format="DD-MMM-YYYY"
+              localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
+              slotProps={{
+                textField: {
+                  fullWidth: true,
+                  placeholder: "DD-MMM-YYYY",
+                  error: !!errors.end_date,
+                  helperText: errors.end_date
+                }
+              }}
             />
           </Grid>
           {(form.contract_type === 'AMC' || form.contract_type === 'CMC') && (
             <Grid item xs={12} sx={{ display: 'flex', gap: 4 }}>
               <FormControlLabel
-                control={<Switch checked={form.spare_parts_included} onChange={e => setForm({ ...form, spare_parts_included: e.target.checked })} />}
+                control={<Switch disabled={form.contract_type === 'AMC'} checked={form.contract_type === 'AMC' ? false : form.spare_parts_included} onChange={e => setForm({ ...form, spare_parts_included: e.target.checked })} />}
                 label="Spare Parts Included"
               />
               <FormControlLabel
-                control={<Switch checked={form.consumables_included} onChange={e => setForm({ ...form, consumables_included: e.target.checked })} />}
+                control={<Switch disabled={form.contract_type === 'AMC'} checked={form.contract_type === 'AMC' ? false : form.consumables_included} onChange={e => setForm({ ...form, consumables_included: e.target.checked })} />}
                 label="Consumables Included"
               />
             </Grid>
@@ -300,9 +278,6 @@ export default function ContractForm() {
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
             Contract Items ({form.contract_type})
           </Typography>
-          <Button variant="outlined" startIcon={<Add />} onClick={addItem} size="small">
-            Add Item
-          </Button>
         </Box>
         {errors.items && <Typography color="error" variant="caption" sx={{ display: 'block', mb: 1 }}>{errors.items}</Typography>}
         <TableContainer sx={{ border: '1px solid #E2E8F0', borderRadius: 2 }}>
@@ -389,12 +364,79 @@ export default function ContractForm() {
               ))}
               {form.items.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} align="center" sx={{ py: 3, color: '#94A3B8' }}>No items added yet</TableCell>
+                  <TableCell colSpan={form.contract_type === 'RC' ? 6 : 5} align="center" sx={{ py: 3, color: '#94A3B8' }}>No items added yet</TableCell>
                 </TableRow>
               )}
+              <TableRow>
+                <TableCell colSpan={form.contract_type === 'RC' ? 6 : 5} align="center" sx={{ py: 2 }}>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<Add />}
+                    onClick={addItem}
+                    sx={{ 
+                      textTransform: 'none', 
+                      fontWeight: 600, 
+                      borderStyle: 'dashed', 
+                      width: '100%', 
+                      color: '#2563EB', 
+                      fontSize: '0.95rem',
+                      borderColor: '#cbd5e1', 
+                      '&:hover': { borderColor: '#94a3b8', bgcolor: '#f8fafc' } 
+                    }}
+                  >
+                    Add Another Item
+                  </Button>
+                </TableCell>
+              </TableRow>
             </TableBody>
           </Table>
         </TableContainer>
+
+        <Divider sx={{ my: 3 }} />
+        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>Terms & Conditions</Typography>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              multiline
+              rows={2}
+              label="Payment Terms"
+              value={form.payment_terms}
+              onChange={e => setForm({ ...form, payment_terms: e.target.value })}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              multiline
+              rows={2}
+              label="Exclusions"
+              value={form.exclusions}
+              onChange={e => setForm({ ...form, exclusions: e.target.value })}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              multiline
+              rows={2}
+              label="SLA Details"
+              value={form.sla_details}
+              onChange={e => setForm({ ...form, sla_details: e.target.value })}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              multiline
+              rows={2}
+              label="Renewal Terms"
+              value={form.renewal_terms}
+              onChange={e => setForm({ ...form, renewal_terms: e.target.value })}
+            />
+          </Grid>
+        </Grid>
       </Card>
 
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
@@ -402,9 +444,17 @@ export default function ContractForm() {
           Cancel
         </Button>
         <Button
+          variant="outlined"
+          onClick={() => handleSave(true)}
+          disabled={loading}
+          sx={{ fontWeight: 700, borderRadius: 2, px: 4 }}
+        >
+          Save as Draft
+        </Button>
+        <Button
           variant="contained"
           startIcon={<Save />}
-          onClick={handleSave}
+          onClick={() => handleSave(false)}
           disabled={loading}
           sx={{ fontWeight: 700, borderRadius: 2, px: 4 }}
         >

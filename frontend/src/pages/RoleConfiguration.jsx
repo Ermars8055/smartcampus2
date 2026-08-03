@@ -123,6 +123,13 @@ const MODULE_TREE = [
     children: [{ label: 'Inventory', resource: 'inventory' }],
   },
   {
+    module: 'Equipment',
+    icon: 'build',
+    children: [
+      { label: 'Equipment Master', resource: 'equipment' },
+    ],
+  },
+  {
     module: 'Maintenance',
     icon: 'build',
     children: [
@@ -172,6 +179,7 @@ const MODULE_TREE = [
       { label: 'Approval Flows', resource: 'approval_flows' },
       { label: 'Material Allowances', resource: 'material_allowances' },
       { label: 'Configurations', resource: 'configurations' },
+      { label: 'Locations', resource: 'locations' },
       { label: 'Projects', resource: 'projects' },
       { label: 'Organizations', resource: 'organizations' },
       { label: 'Departments', resource: 'departments' },
@@ -189,6 +197,7 @@ const DOCUMENT_TYPES = [
   { value: 'INDENT', label: 'Indent' },
   { value: 'PURCHASE_REQUEST', label: 'Purchase Request' },
   { value: 'PURCHASE_ORDER', label: 'Purchase Order' },
+  { value: 'CONTRACT', label: 'Contract' },
 ];
 
 // ── Helper: Build a flat map of resource → { can_read, can_create, ... } ──

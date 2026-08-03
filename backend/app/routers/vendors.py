@@ -5,8 +5,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from typing import Optional, List
 from app.database import get_db
-from app.models import Vendor, VendorCategory, Category, User, VendorStatus, ApprovalFlow, VendorApproval
-from app.schemas import VendorCreate, VendorUpdate, VendorOut, VendorApprovalCreate
+from app.models import Vendor, VendorCategory, Category, User, VendorStatus, ApprovalFlow, VendorApproval, VendorHistory
+from app.schemas import VendorCreate, VendorUpdate, VendorOut, VendorApprovalCreate, VendorHistoryOut
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
 from app.utils.sequences import get_next_number
 from datetime import datetime
@@ -74,6 +74,13 @@ def list_vendors(
             rating=v.rating, status=v.status, current_approval_level=v.current_approval_level,
             approved_by_id=v.approved_by_id, approved_at=v.approved_at, rejection_remarks=v.rejection_remarks,
             is_active=v.is_active,
+            previous_status=v.previous_status,
+            previous_status_by_id=v.previous_status_by_id,
+            previous_status_at=v.previous_status_at,
+            previous_status_by_name=v.previous_approver.full_name if v.previous_approver else None,
+            last_changes=v.last_changes,
+            rejected_by_id=v.rejected_by_id,
+            rejected_at=v.rejected_at,
             created_at=v.created_at,
             categories=[c[0] for c in cats],
             can_user_approve=v.can_user_approve
@@ -93,6 +100,27 @@ def get_vendor(
     ).first()
     if not v:
         raise HTTPException(status_code=404, detail="Vendor not found")
+    can_user_approve = False
+    if v.status == VendorStatus.AWAITING_APPROVAL.value:
+        flows = db.query(ApprovalFlow).filter(
+            ApprovalFlow.tenant_id == tenant_id,
+            ApprovalFlow.site_id == site_id,
+            ApprovalFlow.document_type == "VENDOR",
+            ApprovalFlow.level == v.current_approval_level,
+            ApprovalFlow.is_active == True
+        ).all()
+        user_roles = getattr(current_user, "_roles", [])
+        is_platform_admin = getattr(current_user, "_is_platform_admin", False)
+        can_override = is_platform_admin or getattr(current_user, '_data_access_scope', '') == 'Full Administrative Access'
+        
+        if not flows and can_override:
+            can_user_approve = True
+        else:
+            for f in flows:
+                if can_override or (f.user_id == current_user.id) or (not f.user_id and f.role_name in user_roles):
+                    can_user_approve = True
+                    break
+
     cats = db.query(Category.name).join(
         VendorCategory, VendorCategory.category_id == Category.id
     ).filter(VendorCategory.vendor_id == v.id).all()
@@ -107,9 +135,16 @@ def get_vendor(
             rating=v.rating, status=v.status, current_approval_level=v.current_approval_level,
             approved_by_id=v.approved_by_id, approved_at=v.approved_at, rejection_remarks=v.rejection_remarks,
             is_active=v.is_active,
+            previous_status=v.previous_status,
+            previous_status_by_id=v.previous_status_by_id,
+            previous_status_at=v.previous_status_at,
+            previous_status_by_name=v.previous_approver.full_name if v.previous_approver else None,
+            last_changes=v.last_changes,
+            rejected_by_id=v.rejected_by_id,
+            rejected_at=v.rejected_at,
             created_at=v.created_at,
             categories=[c[0] for c in cats],
-            can_user_approve=False
+            can_user_approve=can_user_approve
         ).model_dump(),
         "category_ids": [c[0] for c in cat_ids]
     }
@@ -137,6 +172,7 @@ def create_vendor(
     db.flush()
     for cat_id in data.category_ids:
         db.add(VendorCategory(vendor_id=vendor.id, category_id=cat_id))
+    db.add(VendorHistory(vendor_id=vendor.id, action="Created", action_by_id=current_user.id))
     db.commit()
     return {"id": vendor.id, "code": vendor.code, "message": "Vendor created successfully"}
 
@@ -155,14 +191,48 @@ def update_vendor(
         raise HTTPException(status_code=404, detail="Vendor not found")
     update_data = data.model_dump(exclude_unset=True, exclude={"category_ids"})
     
-    # If the vendor was rejected and is being updated, resubmit it for approval
-    if vendor.status == VendorStatus.REJECTED.value and "status" not in update_data:
+    if "name" in update_data:
+        del update_data["name"]
+        
+    if "status" in update_data and update_data["status"] == vendor.status:
+        del update_data["status"]
+
+    changes = {}
+    for k, v in update_data.items():
+        if k != "status":
+            old_val = getattr(vendor, k, None)
+            if old_val != v:
+                changes[k] = {"old": old_val, "new": v}
+                
+    if data.category_ids is not None:
+        old_cat_ids = [c.category_id for c in db.query(VendorCategory).filter(VendorCategory.vendor_id == vendor.id).all()]
+        if set(old_cat_ids) != set(data.category_ids):
+            old_cat_names = [c.name for c in db.query(Category).filter(Category.id.in_(old_cat_ids)).all()]
+            new_cat_names = [c.name for c in db.query(Category).filter(Category.id.in_(data.category_ids)).all()]
+            changes["categories"] = {"old": old_cat_names, "new": new_cat_names}
+
+    if changes and vendor.status in [VendorStatus.APPROVED.value, VendorStatus.REJECTED.value] and "status" not in update_data:
+        vendor.previous_status = vendor.status
+        if vendor.status == VendorStatus.APPROVED.value:
+            vendor.previous_status_by_id = vendor.approved_by_id
+            vendor.previous_status_at = vendor.approved_at
+        else:
+            vendor.previous_status_by_id = vendor.rejected_by_id
+            vendor.previous_status_at = vendor.rejected_at
+        vendor.last_changes = changes
+        
         update_data["status"] = VendorStatus.AWAITING_APPROVAL.value
         update_data["current_approval_level"] = 1
         update_data["rejection_remarks"] = None
-        update_data["is_active"] = True
-
+        if vendor.status == VendorStatus.REJECTED.value and "is_active" not in changes:
+            update_data["is_active"] = True
         
+        db.query(VendorApproval).filter(VendorApproval.vendor_id == vendor.id).delete()
+        
+        db.add(VendorHistory(vendor_id=vendor.id, action="Edited and Resubmitted", changes=changes, action_by_id=current_user.id))
+    elif changes:
+        db.add(VendorHistory(vendor_id=vendor.id, action="Edited", changes=changes, action_by_id=current_user.id))
+
     for k, v in update_data.items():
         setattr(vendor, k, v)
     if data.category_ids is not None:
@@ -262,12 +332,14 @@ def handle_vendor_next_level(db, vendor, tenant_id, site_id, user_id=None):
 
     if has_more:
         vendor.current_approval_level = next_level
+        db.add(VendorHistory(vendor_id=vendor.id, action=f"Approved at Level {vendor.current_approval_level-1}", action_by_id=user_id))
         db.commit()
         return {"message": f"Moved to level {next_level}", "status": vendor.status, "current_level": vendor.current_approval_level}
     else:
         vendor.status = VendorStatus.APPROVED.value
         vendor.approved_by_id = user_id
         vendor.approved_at = datetime.utcnow()
+        db.add(VendorHistory(vendor_id=vendor.id, action="Fully Approved", action_by_id=user_id))
         db.commit()
         return {"message": "Fully Approved", "status": vendor.status, "current_level": vendor.current_approval_level}
 
@@ -286,7 +358,22 @@ def reject_vendor(
         
     vendor.status = VendorStatus.REJECTED.value
     vendor.is_active = False
+    vendor.rejected_by_id = current_user.id
+    vendor.rejected_at = datetime.utcnow()
     if data and data.remarks:
         vendor.rejection_remarks = data.remarks
+    db.add(VendorHistory(vendor_id=vendor.id, action="Rejected", remarks=data.remarks if data else None, action_by_id=current_user.id))
     db.commit()
     return {"message": "Rejected", "status": vendor.status}
+
+@router.get("/{id}/history", response_model=List[VendorHistoryOut])
+def get_vendor_history(
+    id: int, db: Session = Depends(get_db), 
+    current_user: User = Depends(get_current_user),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    history = db.query(VendorHistory).filter(VendorHistory.vendor_id == id).order_by(VendorHistory.action_at.desc()).all()
+    for h in history:
+        h.action_by_name = h.action_by.full_name if h.action_by else None
+    return history

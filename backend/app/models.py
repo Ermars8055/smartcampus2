@@ -156,6 +156,7 @@ class ApprovalDocumentType(str, enum.Enum):
 
 class QuotationRequestStatus(str, enum.Enum):
     DRAFT = "Draft"
+    SUBMITTED = "Submitted"
     REQUESTED = "Requested"
     RECEIVED = "Received"
     ENTERED = "Entered"
@@ -701,8 +702,19 @@ class Vendor(Base):
     is_deleted = Column(Boolean, default=False)
     created_at = Column(DateTime, default=_get_now)
     updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)
+    
+    rejected_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    rejected_at = Column(DateTime, nullable=True)
+    previous_status = Column(String(50), nullable=True)
+    previous_status_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    previous_status_at = Column(DateTime, nullable=True)
+    last_changes = Column(JSON, nullable=True)
+
     vendor_categories = relationship("VendorCategory", back_populates="vendor", cascade="all, delete-orphan")
     approver = relationship("User", foreign_keys=[approved_by_id])
+    rejecter = relationship("User", foreign_keys=[rejected_by_id])
+    previous_approver = relationship("User", foreign_keys=[previous_status_by_id])
+
     __table_args__ = (UniqueConstraint("site_id", "code", name="uq_vendor_code_per_site"),)
 
 class VendorCategory(Base):
@@ -713,6 +725,19 @@ class VendorCategory(Base):
     vendor = relationship("Vendor", back_populates="vendor_categories")
     category = relationship("Category")
     __table_args__ = (UniqueConstraint("vendor_id", "category_id", name="uq_vendor_category"),)
+
+class VendorHistory(Base):
+    __tablename__ = "vendor_history"
+    id = Column(Integer, primary_key=True, index=True)
+    vendor_id = Column(Integer, ForeignKey("vendors.id", ondelete="CASCADE"), nullable=False)
+    action = Column(String(100), nullable=False)
+    changes = Column(JSON, nullable=True)
+    remarks = Column(Text, nullable=True)
+    action_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    action_at = Column(DateTime, default=_get_now)
+    
+    vendor = relationship("Vendor")
+    action_by = relationship("User")
 
 
 # == Procurement ==
@@ -1654,6 +1679,7 @@ class QuotationNegotiationHistory(Base):
     qr_id = Column(Integer, ForeignKey("quotation_requests.id", ondelete="CASCADE"), nullable=False)
     vendor_id = Column(Integer, ForeignKey("vendors.id", ondelete="CASCADE"), nullable=False)
     discount_percent = Column(Float, nullable=False)
+    item_discounts = Column(JSON, default=dict)
     remarks = Column(Text, nullable=True)
     created_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime, default=_get_now)
@@ -1843,11 +1869,13 @@ class Contract(Base):
     end_date = Column(Date, nullable=False)
     contract_value = Column(Float, nullable=True)
     payment_terms = Column(Text, nullable=True)
+    exclusions = Column(Text, nullable=True)
     renewal_terms = Column(Text, nullable=True)
     sla_details = Column(Text, nullable=True)
     spare_parts_included = Column(Boolean, default=False)
     consumables_included = Column(Boolean, default=False)
-    status = Column(String(50), default="Draft") # Draft, Pending Approval, Approved, Active, Suspended, Expired, Renewed, Closed, Cancelled
+    status = Column(String(50), default="Draft") # Draft, Submitted, Approved, Active, Suspended, Expired, Renewed, Closed, Cancelled
+    current_approval_level = Column(Integer, default=1)
     created_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     approved_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     approved_at = Column(DateTime, nullable=True)
@@ -1862,6 +1890,20 @@ class Contract(Base):
     approver = relationship("User", foreign_keys=[approved_by_id])
     items = relationship("ContractItem", back_populates="contract", cascade="all, delete-orphan")
     __table_args__ = (UniqueConstraint("tenant_id", "contract_number", name="uq_contract_per_tenant"),)
+
+
+class ContractApproval(Base):
+    __tablename__ = "contract_approvals"
+    id = Column(Integer, primary_key=True, index=True)
+    contract_id = Column(Integer, ForeignKey("contracts.id", ondelete="CASCADE"), nullable=False)
+    approval_flow_id = Column(Integer, ForeignKey("approval_flows.id"), nullable=False)
+    approver_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    remarks = Column(Text, nullable=True)
+    approved_at = Column(DateTime, default=_get_now)
+    
+    contract = relationship("Contract")
+    flow = relationship("ApprovalFlow")
+    approver = relationship("User")
 
 
 class ContractItem(Base):

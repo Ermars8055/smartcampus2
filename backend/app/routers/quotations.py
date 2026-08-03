@@ -16,7 +16,7 @@ from app.models import (
     PurchaseRequest, PurchaseOrder, PurchaseOrderItem, User, Vendor, Material
 )
 from app.schemas import (
-    QuotationRequestCreate, QuotationRequestOut, VendorQuotationCreate, VendorQuotationOut,
+    QuotationRequestCreate, QuotationRequestUpdate, QuotationRequestOut, VendorQuotationCreate, VendorQuotationOut,
     VendorOverrideRequest, ComparativeStatementOut, MaterialComparisonOut, VendorQuoteDetail,
     QRItemOut, QRLinkedPROut, QRVendorOut, VendorQuotationItemOut, QRItemSourceOut,
     QRVendorReceiptUpdate, QuotationApproveRequest
@@ -158,7 +158,7 @@ def create_quotation_request(
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
-    if len(data.vendor_ids) < 2:
+    if not data.is_draft and len(data.vendor_ids) < 2:
         raise HTTPException(status_code=400, detail="Minimum two vendors must be invited for a quotation request")
 
     qr = QuotationRequest(
@@ -168,7 +168,7 @@ def create_quotation_request(
         created_by_id=current_user.id,
         required_date=data.required_date,
         remarks=data.remarks,
-        status=QuotationRequestStatus.DRAFT.value
+        status=QuotationRequestStatus.DRAFT.value if data.is_draft else QuotationRequestStatus.SUBMITTED.value
     )
     db.add(qr)
     db.flush()
@@ -231,6 +231,155 @@ def create_quotation_request(
     db.commit()
     db.refresh(qr)
     return {"id": qr.id, "qr_number": qr.qr_number, "message": "Quotation Request created successfully"}
+
+@router.put("/requests/{qr_id}")
+def update_quotation_request(
+    qr_id: int,
+    data: QuotationRequestUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("quotations", "create")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    qr = db.query(QuotationRequest).filter(
+        QuotationRequest.id == qr_id,
+        QuotationRequest.tenant_id == tenant_id,
+        QuotationRequest.site_id == site_id
+    ).first()
+    
+    if not qr:
+        raise HTTPException(status_code=404, detail="Quotation Request not found")
+        
+    if qr.status != "Draft":
+        raise HTTPException(status_code=400, detail="Only draft quotation requests can be edited")
+
+    qr.project_id = data.project_id
+    qr.required_date = data.required_date
+    qr.remarks = data.remarks
+    qr.status = QuotationRequestStatus.DRAFT.value if data.is_draft else QuotationRequestStatus.SUBMITTED.value
+
+    if not data.is_draft and len(data.vendor_ids) < 2:
+        raise HTTPException(status_code=400, detail="At least 2 vendors must be selected to create a request.")
+
+    # Clear old dependencies
+    db.query(QuotationRequestPR).filter(QuotationRequestPR.qr_id == qr_id).delete()
+    db.query(QuotationRequestVendor).filter(QuotationRequestVendor.qr_id == qr_id).delete()
+    db.query(QuotationRequestItem).filter(QuotationRequestItem.qr_id == qr_id).delete()
+    # The source dependencies should cascade delete, but if not we can manually delete:
+    # Actually SQLAlchemy's delete on QuotationRequestItem doesn't auto-cascade in this query unless configured. 
+    # Better to fetch and delete items to trigger cascades or delete sources first.
+    db.query(QuotationRequestItemSource).filter(QuotationRequestItemSource.qr_item_id.in_(
+        db.query(QuotationRequestItem.id).filter(QuotationRequestItem.qr_id == qr_id)
+    )).delete(synchronize_session=False)
+    db.query(QuotationRequestItem).filter(QuotationRequestItem.qr_id == qr_id).delete(synchronize_session=False)
+
+    material_map = {}
+    
+    # 1. Process Manual Items
+    for manual_item in data.items:
+        qr_item = QuotationRequestItem(
+            qr_id=qr.id,
+            material_id=manual_item.material_id,
+            quantity=manual_item.quantity,
+            source="Manual",
+            source_pr_id=None
+        )
+        db.add(qr_item)
+        db.flush()
+        material_map[manual_item.material_id] = qr_item
+        db.add(QuotationRequestItemSource(
+            qr_item_id=qr_item.id,
+            source="Manual",
+            source_pr_id=None,
+            quantity=manual_item.quantity
+        ))
+    
+    # 2. Process PR Items and link sources
+    for pr_id in data.pr_ids:
+        db.add(QuotationRequestPR(qr_id=qr.id, pr_id=pr_id))
+        pr = db.query(PurchaseRequest).filter(PurchaseRequest.id == pr_id).first()
+        if pr:
+            for pr_item in pr.items:
+                if pr_item.material_id not in material_map:
+                    qr_item = QuotationRequestItem(
+                        qr_id=qr.id, 
+                        material_id=pr_item.material_id, 
+                        quantity=0,
+                        source="PR", 
+                        source_pr_id=pr_id
+                    )
+                    db.add(qr_item)
+                    db.flush()
+                    material_map[pr_item.material_id] = qr_item
+                
+                target_item = material_map[pr_item.material_id]
+                target_item.quantity += pr_item.quantity
+                db.add(QuotationRequestItemSource(
+                    qr_item_id=target_item.id,
+                    source="PR",
+                    source_pr_id=pr_id,
+                    quantity=pr_item.quantity
+                ))
+        
+    for vendor_id in data.vendor_ids:
+        db.add(QuotationRequestVendor(qr_id=qr.id, vendor_id=vendor_id))
+
+    db.commit()
+    db.refresh(qr)
+    return {"id": qr.id, "qr_number": qr.qr_number, "message": "Quotation Request updated successfully"}
+
+import pandas as pd
+from app.schemas import ExcelImportResultItem
+from sqlalchemy import func
+
+@router.post("/requests/import-materials", response_model=List[ExcelImportResultItem])
+def import_materials_excel(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("purchase_requests", "create")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    try:
+        df = pd.read_excel(file.file)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail="Invalid Excel file format.")
+    
+    name_col = next((c for c in df.columns if "name" in str(c).lower() or "material" in str(c).lower() or "item" in str(c).lower()), None)
+    qty_col = next((c for c in df.columns if "qty" in str(c).lower() or "quantity" in str(c).lower()), None)
+    
+    if not name_col or not qty_col:
+        raise HTTPException(status_code=400, detail="Could not identify Material Name or Quantity columns in the Excel file.")
+        
+    results = []
+    
+    for idx, row in df.iterrows():
+        name_val = str(row[name_col]).strip() if pd.notna(row[name_col]) else ""
+        qty_val = row[qty_col]
+        
+        if not name_val:
+            continue
+            
+        try:
+            qty_val = float(qty_val)
+        except (ValueError, TypeError):
+            continue
+            
+        mat = db.query(Material).filter(
+            Material.tenant_id == tenant_id,
+            func.lower(Material.name) == name_val.lower()
+        ).first()
+        
+        if mat:
+            results.append(ExcelImportResultItem(
+                material_id=mat.id,
+                material_name=mat.name,
+                material_code=mat.code,
+                quantity=qty_val,
+                uom_name=mat.uom.name if mat.uom else ""
+            ))
+            
+    return results
 
 
 @router.post("/requests/{id}/send")
@@ -1293,14 +1442,20 @@ def update_vendor_discounts(
         qr_id=qr_id,
         vendor_id=vendor_id,
         discount_percent=data.discount_percent,
+        item_discounts=data.item_discounts or {},
         remarks=data.remarks,
         created_by_id=current_user.id
     )
     db.add(history)
 
     # Update discount on all items for this vendor
+    # Check if specific discount exists in item_discounts (keyed by qr_item_id as string), otherwise fallback to common discount_percent
     for item in vq.items:
-        item.discount_percent = data.discount_percent
+        str_item_id = str(item.qr_item_id)
+        if data.item_discounts and str_item_id in data.item_discounts:
+            item.discount_percent = data.item_discounts[str_item_id]
+        else:
+            item.discount_percent = data.discount_percent
         
     # Revert approval if needed
     if qr.status == QuotationRequestStatus.APPROVED.value:

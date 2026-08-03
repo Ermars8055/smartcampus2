@@ -1690,6 +1690,8 @@ class VendorQuoteDetail(BaseModel):
     vendor_id: int
     vendor_name: str
     quoted_rate: float
+    effective_rate: float
+    discount_percent: float = 0.0
     delivery_days: Optional[int] = None
     rank: int
     rank_label: str
@@ -1855,6 +1857,8 @@ class GatePassOut(BaseModel):
 class WriteOffItemBase(BaseModel):
     material_id: int
     warehouse_id: Optional[int] = None
+    equipment_id: Optional[int] = None
+    location_id: Optional[int] = None
     quantity: float = Field(..., gt=0)
     rate: float = 0
     amount: float = 0
@@ -1867,6 +1871,7 @@ class WriteOffItemOut(WriteOffItemBase):
     material_code: Optional[str] = None
     uom_name: Optional[str] = None
     warehouse_name: Optional[str] = None
+    location_name: Optional[str] = None
     class Config:
         from_attributes = True
 

@@ -704,10 +704,13 @@ def generate_comparison(
         auto_l1_vendor_id = quotes[0].vendor_quotation.vendor_id if quotes else None
         
         for idx, q in enumerate(quotes):
+            effective_rate = (q.quoted_rate / (q.uom_conversion_factor or 1.0)) * (1 - ((q.discount_percent or 0.0) / 100.0))
             vendor_quotes.append(VendorQuoteDetail(
                 vendor_id=q.vendor_quotation.vendor_id,
                 vendor_name=f"{q.vendor_quotation.vendor.code} - {q.vendor_quotation.vendor.name}" if q.vendor_quotation and q.vendor_quotation.vendor else "N/A",
                 quoted_rate=q.quoted_rate,
+                effective_rate=effective_rate,
+                discount_percent=q.discount_percent or 0.0,
                 delivery_days=q.delivery_days,
                 rank=idx + 1,
                 rank_label=f"L{idx + 1}"
@@ -1487,6 +1490,7 @@ def get_negotiation_history(
             qr_id=h.qr_id,
             vendor_id=h.vendor_id,
             discount_percent=h.discount_percent,
+            item_discounts=h.item_discounts,
             remarks=h.remarks,
             created_by_id=h.created_by_id,
             created_by_name=h.created_by.full_name if h.created_by else None,

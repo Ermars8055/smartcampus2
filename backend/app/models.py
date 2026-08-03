@@ -1842,6 +1842,8 @@ class WriteOffItem(Base):
     write_off_id = Column(Integer, ForeignKey("write_offs.id", ondelete="CASCADE"), nullable=False)
     material_id = Column(Integer, ForeignKey("materials.id", ondelete="CASCADE"), nullable=False)
     warehouse_id = Column(Integer, ForeignKey("warehouses.id"), nullable=True)
+    equipment_id = Column(Integer, ForeignKey("equipment_items.id"), nullable=True)
+    location_id = Column(Integer, ForeignKey("location_master.id"), nullable=True)
     quantity = Column(Float, nullable=False)
     rate = Column(Float, default=0)
     amount = Column(Float, default=0)
@@ -1851,6 +1853,8 @@ class WriteOffItem(Base):
     write_off = relationship("WriteOff", back_populates="items")
     material = relationship("Material")
     warehouse = relationship("Warehouse")
+    equipment = relationship("EquipmentItem")
+    location = relationship("LocationMaster")
 
 
 # == Contracts ==

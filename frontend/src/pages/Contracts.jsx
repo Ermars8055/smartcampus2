@@ -23,6 +23,17 @@ export default function Contracts() {
   const [rejectRemarks, setRejectRemarks] = useState('');
   const [rejectingContract, setRejectingContract] = useState(null);
 
+  const statusColor = {
+    'Draft': 'default', 
+    'Submitted': 'info', 
+    'Approved': 'success', 
+    'Active': 'success', 
+    'Inactive': 'default', 
+    'Closed': 'success', 
+    'Rejected': 'error', 
+    'Expired': 'default'
+  };
+
   const [sortConfig, setSortConfig] = useState({ key: 'contract_number', direction: 'desc' });
 
   const handleSort = (key) => {
@@ -256,13 +267,14 @@ export default function Contracts() {
                     STATUS
                   </TableSortLabel>
                 </TableCell>
+                <TableCell align="center" sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2 }}>LVL</TableCell>
                 <TableCell align="right" sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2 }}>ACTIONS</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {filteredContracts.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={8} align="center" sx={{ py: 6, color: '#94a3b8' }}>
+                  <TableCell colSpan={9} align="center" sx={{ py: 6, color: '#94a3b8' }}>
                     <Typography variant="body2">No contracts found.</Typography>
                   </TableCell>
                 </TableRow>
@@ -299,14 +311,14 @@ export default function Contracts() {
                   </TableCell>
                   <TableCell>
                     <Chip 
-                      label={c.status === 'Submitted' ? `Submitted (L${c.current_approval_level || 1})` : c.status}
+                      label={c.status}
                       size="small"
-                      sx={{
-                        bgcolor: c.status === 'Active' ? '#ECFDF5' : (c.status === 'Rejected' ? '#FEF2F2' : (c.status === 'Submitted' ? '#FEF9C3' : (c.status === 'Approved' ? '#EFF6FF' : ((c.status === 'Expired' || c.status === 'Inactive') ? '#F3F4F6' : '#F1F5F9')))),
-                        color: c.status === 'Active' ? '#10B981' : (c.status === 'Rejected' ? '#EF4444' : (c.status === 'Submitted' ? '#CA8A04' : (c.status === 'Approved' ? '#3B82F6' : ((c.status === 'Expired' || c.status === 'Inactive') ? '#6B7280' : '#64748B')))),
-                        fontWeight: 600, fontSize: '0.7rem'
-                      }}
+                      color={statusColor[c.status] || 'default'}
+                      sx={{ fontWeight: 600, fontSize: '0.7rem', height: 20 }}
                     />
+                  </TableCell>
+                  <TableCell align="center" sx={{ whiteSpace: 'nowrap' }}>
+                    <Chip label={`L${c.current_approval_level || 1}`} size="small" variant="outlined" sx={{ height: 18, fontSize: '0.65rem' }} />
                   </TableCell>
                   <TableCell align="right">
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5 }} onClick={(e) => e.stopPropagation()}>

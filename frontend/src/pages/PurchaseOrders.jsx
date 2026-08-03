@@ -588,7 +588,7 @@ export default function PurchaseOrders() {
         rental_agreement_number: form.procurement_type === 'Rental' ? form.rental_agreement_number || null : null,
         billing_frequency: form.procurement_type === 'Rental' ? form.billing_frequency || null : null,
         security_deposit: form.procurement_type === 'Rental' ? parseFloat(form.security_deposit) || 0 : 0,
-        cost_per_test: form.procurement_type === 'Cost Per Test' ? (form.cost_per_test ? parseFloat(form.cost_per_test) : null) : null,
+        cost_per_test: (form.procurement_type === 'Rental' && form.rental_type === 'Cost Per Test') ? (form.cost_per_test ? parseFloat(form.cost_per_test) : null) : null,
         linked_reagent_agreement: form.procurement_type === 'Rental' ? form.linked_reagent_agreement || null : null,
         vendor_maintenance_responsibility: form.procurement_type === 'Rental' ? form.vendor_maintenance_responsibility : false,
         return_conditions: form.procurement_type === 'Rental' ? form.return_conditions || null : null,
@@ -1071,10 +1071,10 @@ export default function PurchaseOrders() {
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, gap: 1 }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#2563EB' }}>
                     {po.po_number}
-                    {po.procurement_type === 'Rental' && (
+                    {po.procurement_type === 'Rental' && po.rental_type !== 'Cost Per Test' && (
                       <Assignment sx={{ fontSize: 14, color: '#0EA5E9', ml: 0.5, verticalAlign: 'middle' }} />
                     )}
-                    {po.procurement_type === 'Cost Per Test' && (
+                    {po.procurement_type === 'Rental' && po.rental_type === 'Cost Per Test' && (
                       <Science sx={{ fontSize: 14, color: '#8B5CF6', ml: 0.5, verticalAlign: 'middle' }} />
                     )}
                   </Typography>
@@ -1208,12 +1208,12 @@ export default function PurchaseOrders() {
                   <TableRow key={po.id} sx={{ cursor: 'pointer', '&:hover': { backgroundColor: '#f1f5f9' } }} onClick={() => handleRowClick(po)}>
                     <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.7rem', whiteSpace: 'nowrap' }}>
                       {po.po_number}
-                      {po.procurement_type === 'Rental' && (
+                      {po.procurement_type === 'Rental' && po.rental_type !== 'Cost Per Test' && (
                         <Tooltip title="Rental Agreement">
                           <Assignment sx={{ fontSize: 14, color: '#0EA5E9', ml: 0.5, verticalAlign: 'middle' }} />
                         </Tooltip>
                       )}
-                      {po.procurement_type === 'Cost Per Test' && (
+                      {po.procurement_type === 'Rental' && po.rental_type === 'Cost Per Test' && (
                         <Tooltip title={`Cost Per Test: ₹${po.cost_per_test || 0}`}>
                           <Science sx={{ fontSize: 14, color: '#8B5CF6', ml: 0.5, verticalAlign: 'middle' }} />
                         </Tooltip>
@@ -1331,8 +1331,8 @@ export default function PurchaseOrders() {
                 <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>PO TYPE</Typography>
                 <Box>
                   <Chip label={detailDialog?.po_type} size="small" variant="outlined" color={detailDialog?.po_type === 'Formal' ? 'primary' : 'default'} sx={{ fontSize: '0.7rem', mr: 1, mb: 1 }} />
-                  {detailDialog?.procurement_type === 'Rental' && <Chip label="Rental" size="small" color="info" sx={{ fontSize: '0.7rem', mr: 1, mb: 1 }} />}
-                  {detailDialog?.procurement_type === 'Cost Per Test' && <Chip label="Cost Per Test" size="small" sx={{ bgcolor: '#8B5CF6', color: 'white', fontSize: '0.7rem', mr: 1, mb: 1 }} />}
+                  {detailDialog?.procurement_type === 'Rental' && detailDialog?.rental_type !== 'Cost Per Test' && <Chip label="Rental" size="small" color="info" sx={{ fontSize: '0.7rem', mr: 1, mb: 1 }} />}
+                  {detailDialog?.procurement_type === 'Rental' && detailDialog?.rental_type === 'Cost Per Test' && <Chip label="Cost Per Test" size="small" sx={{ bgcolor: '#8B5CF6', color: 'white', fontSize: '0.7rem', mr: 1, mb: 1 }} />}
                   {detailDialog?.is_cash_purchase && <Chip label="Cash Purchase" size="small" variant="filled" color="secondary" sx={{ fontSize: '0.7rem', mr: 1, mb: 1 }} />}
                   {detailDialog?.advance_percentage > 0 && <Chip label={`${detailDialog.advance_percentage}% Advance`} size="small" variant="filled" color="info" sx={{ fontSize: '0.7rem', mb: 1 }} />}
                   {detailDialog?.billing_frequency && (
@@ -1784,32 +1784,36 @@ export default function PurchaseOrders() {
               <Select
                 value={form.procurement_type || 'Purchase'}
                 label="Procurement Type"
-                onChange={e => setForm({ ...form, procurement_type: e.target.value })}
+                onChange={e => setForm({ ...form, procurement_type: e.target.value, rental_type: e.target.value === 'Rental' ? 'Standard Rental' : '' })}
               >
-                <MenuItem value="Purchase">Purchase</MenuItem>
+                <MenuItem value="Purchase">Standard Purchase</MenuItem>
                 <MenuItem value="Rental">Rental</MenuItem>
                 <MenuItem value="Cost Per Test">Cost Per Test</MenuItem>
               </Select>
             </FormControl>
+
+            {form.procurement_type === 'Rental' && (
+              <FormControl fullWidth size="small">
+                <InputLabel>Rental Model</InputLabel>
+                <Select
+                  value={form.rental_type || 'Standard Rental'}
+                  label="Rental Model"
+                  onChange={e => setForm({ ...form, rental_type: e.target.value })}
+                >
+                  <MenuItem value="Standard Rental">Equipment Rental</MenuItem>
+                  <MenuItem value="Cost Per Test">Cost Per Test</MenuItem>
+                  <MenuItem value="Reagent Rental">Reagent Rental</MenuItem>
+                </Select>
+              </FormControl>
+            )}
           </Box>
 
-          {form.procurement_type === 'Rental' && (
+
+
+          {form.procurement_type === 'Rental' && form.rental_type !== 'Cost Per Test' && (
             <Box sx={{ p: 2, mb: 2, bgcolor: '#F8FAFC', borderRadius: 2, border: '1px solid #E2E8F0' }}>
               <Typography variant="subtitle2" sx={{ mb: 2, color: '#334155', fontWeight: 600 }}>Rental Agreement Details</Typography>
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={4}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>Rental Type</InputLabel>
-                    <Select
-                      value={form.rental_type || ''}
-                      label="Rental Type"
-                      onChange={e => setForm({ ...form, rental_type: e.target.value })}
-                    >
-                      <MenuItem value="Standard Rental">Standard Rental</MenuItem>
-                      <MenuItem value="Reagent Rental">Reagent Rental</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
                 <Grid item xs={12} sm={4}>
                   <TextField
                     fullWidth size="small" label="Rental Agreement No."
@@ -1894,7 +1898,7 @@ export default function PurchaseOrders() {
             </Box>
           )}
 
-          {form.procurement_type === 'Cost Per Test' && (
+          {form.procurement_type === 'Rental' && form.rental_type === 'Cost Per Test' && (
             <Box sx={{ p: 2, mb: 2, bgcolor: '#F8FAFC', borderRadius: 2, border: '1px solid #E2E8F0' }}>
               <Typography variant="subtitle2" sx={{ mb: 2, color: '#334155', fontWeight: 600 }}>Cost Per Test Details</Typography>
               <Grid container spacing={2}>

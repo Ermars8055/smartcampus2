@@ -612,7 +612,7 @@ const Quotations = () => {
       const vq = vendorQuotes.find(q => q.vendor_id === vendorId);
       const items = vq?.items?.filter(it => !it.is_excluded) || [];
       const itemDiscounts = {};
-      items.forEach(it => { itemDiscounts[it.qr_item_id] = it.discount_percent || 0; });
+      items.forEach(it => { itemDiscounts[it.qr_item_id] = it.discount_percent || ''; });
       
       setNegotiateDialog({
         open: true,
@@ -635,7 +635,10 @@ const Quotations = () => {
     try {
       const payloadItemDiscounts = {};
       Object.keys(negotiateDialog.itemDiscounts).forEach(k => {
-        payloadItemDiscounts[k] = parseFloat(negotiateDialog.itemDiscounts[k] || 0);
+        const val = negotiateDialog.itemDiscounts[k];
+        if (val !== '' && val !== null && val !== undefined) {
+          payloadItemDiscounts[k] = parseFloat(val);
+        }
       });
       await api.put(`/api/quotations/${selectedQR.id}/vendor-quotations/${negotiateDialog.vendorId}/discounts`, {
         discount_percent: parseFloat(negotiateDialog.discountPercent || 0),
@@ -881,33 +884,39 @@ const Quotations = () => {
           <Box>
             {/* Status Filter Tabs */}
             <Card sx={{ mb: 3 }}>
-              <Box sx={{ p: 2, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
-                <TextField size="small" placeholder="Search QR/PR Numbers..." value={search}
-                  onChange={e => setSearch(e.target.value)} sx={{ minWidth: 300 }}
-                  InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }} />
-                <Autocomplete
-                  size="small"
-                  options={vendors}
-                  getOptionLabel={(option) => `${option.code} - ${option.name}`}
-                  value={filterVendor}
-                  onChange={(e, val) => setFilterVendor(val)}
-                  renderInput={(params) => <TextField {...params} placeholder="Filter by Vendor" sx={{ minWidth: 250 }} />}
-                  isOptionEqualToValue={(option, value) => option.id === value.id}
-                />
-                <DatePicker
-                  label="Start Date"
-                  value={startDate}
-                  onChange={(val) => setStartDate(val)}
-                  format="DD-MMM-YYYY"
-                  slotProps={{ textField: { size: 'small', sx: { minWidth: 150 } } }}
-                />
-                <DatePicker
-                  label="End Date"
-                  value={endDate}
-                  onChange={(val) => setEndDate(val)}
-                  format="DD-MMM-YYYY"
-                  slotProps={{ textField: { size: 'small', sx: { minWidth: 150 } } }}
-                />
+              <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+                  <TextField size="small" placeholder="Search QR/PR Numbers..." value={search}
+                    onChange={e => setSearch(e.target.value)} sx={{ minWidth: 300 }}
+                    InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }} />
+                  <DatePicker
+                    label="Start Date"
+                    value={startDate}
+                    onChange={(val) => setStartDate(val)}
+                    format="DD-MMM-YYYY"
+                    localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
+                    slotProps={{ textField: { size: 'small', sx: { minWidth: 150 }, placeholder: "DD-MMM-YYYY" } }}
+                  />
+                  <DatePicker
+                    label="End Date"
+                    value={endDate}
+                    onChange={(val) => setEndDate(val)}
+                    format="DD-MMM-YYYY"
+                    localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
+                    slotProps={{ textField: { size: 'small', sx: { minWidth: 150 }, placeholder: "DD-MMM-YYYY" } }}
+                  />
+                </Box>
+                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+                  <Autocomplete
+                    size="small"
+                    options={vendors}
+                    getOptionLabel={(option) => `${option.code} - ${option.name}`}
+                    value={filterVendor}
+                    onChange={(e, val) => setFilterVendor(val)}
+                    renderInput={(params) => <TextField {...params} placeholder="Filter by Vendor" sx={{ minWidth: 250 }} />}
+                    isOptionEqualToValue={(option, value) => option.id === value.id}
+                  />
+                </Box>
               </Box>
               <Tabs
                 value={listFilter}
@@ -1601,8 +1610,13 @@ const Quotations = () => {
                                   {quote ? (
                                     <>
                                       <Typography variant="body2">
-                                        ₹{Number(quote.quoted_rate).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        ₹{Number(quote.effective_rate).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                       </Typography>
+                                      {quote.discount_percent > 0 && (
+                                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontSize: '0.65rem' }}>
+                                          ({quote.discount_percent}% off ₹{Number(quote.quoted_rate).toLocaleString('en-IN')})
+                                        </Typography>
+                                      )}
                                       <Chip
                                         label={isSelected ? `${quote.rank_label} Selected` : quote.rank_label}
                                         size="small"
@@ -2567,7 +2581,14 @@ const Quotations = () => {
               type="number"
               className="no-spin"
               value={negotiateDialog.discountPercent}
-              onChange={(e) => setNegotiateDialog(prev => ({ ...prev, discountPercent: e.target.value }))}
+              onChange={(e) => {
+                let val = e.target.value;
+                if (val !== '') {
+                  if (parseFloat(val) > 100) val = '100';
+                  if (parseFloat(val) < 0) val = '0';
+                }
+                setNegotiateDialog(prev => ({ ...prev, discountPercent: val }));
+              }}
               placeholder="e.g. 5"
               InputProps={{
                 endAdornment: <InputAdornment position="end">%</InputAdornment>,
@@ -2601,10 +2622,17 @@ const Quotations = () => {
                             type="number"
                             className="no-spin"
                             value={negotiateDialog.itemDiscounts[item.qr_item_id] !== undefined ? negotiateDialog.itemDiscounts[item.qr_item_id] : ''}
-                            onChange={(e) => setNegotiateDialog(prev => ({
-                              ...prev,
-                              itemDiscounts: { ...prev.itemDiscounts, [item.qr_item_id]: e.target.value }
-                            }))}
+                            onChange={(e) => {
+                              let val = e.target.value;
+                              if (val !== '') {
+                                if (parseFloat(val) > 100) val = '100';
+                                if (parseFloat(val) < 0) val = '0';
+                              }
+                              setNegotiateDialog(prev => ({
+                                ...prev,
+                                itemDiscounts: { ...prev.itemDiscounts, [item.qr_item_id]: val }
+                              }));
+                            }}
                             placeholder="Common"
                             inputProps={{ step: "0.1", min: "0", max: "100" }}
                             sx={{ '& .MuiInputBase-input': { p: 1, fontSize: '0.8rem' } }}
@@ -2645,7 +2673,26 @@ const Quotations = () => {
                 {negotiateDialog.history.map(h => (
                   <TableRow key={h.id}>
                     <TableCell sx={{ fontSize: '0.75rem' }}>{dayjs(h.created_at).format('DD MMM YYYY HH:mm')}</TableCell>
-                    <TableCell>{h.discount_percent}%</TableCell>
+                    <TableCell>
+                      {h.discount_percent > 0 && <span style={{ fontSize: '0.75rem' }}>Common: {h.discount_percent}%<br/></span>}
+                      {h.item_discounts && Object.keys(h.item_discounts).length > 0 && (
+                        <Tooltip title={
+                          <Box sx={{ p: 0.5 }}>
+                            {Object.entries(h.item_discounts).map(([itemId, disc]) => {
+                              const matName = negotiateDialog.items?.find(it => it.qr_item_id.toString() === itemId)?.material_name || `Item ${itemId}`;
+                              return <Typography key={itemId} variant="caption" sx={{ display: 'block' }}>• {matName}: {disc}%</Typography>;
+                            })}
+                          </Box>
+                        }>
+                          <span style={{ fontSize: '0.7rem', color: '#1976d2', fontWeight: 500, cursor: 'help', textDecoration: 'underline dotted' }}>
+                            {h.discount_percent === 0 ? 'Item-specific' : '+ Item-specific'} ({Object.keys(h.item_discounts).length})
+                          </span>
+                        </Tooltip>
+                      )}
+                      {h.discount_percent === 0 && (!h.item_discounts || Object.keys(h.item_discounts).length === 0) && (
+                        <span style={{ fontSize: '0.75rem' }}>0%</span>
+                      )}
+                    </TableCell>
                     <TableCell sx={{ fontSize: '0.75rem' }}>{h.remarks}</TableCell>
                     <TableCell sx={{ fontSize: '0.75rem' }}>{h.created_by_name}</TableCell>
                   </TableRow>
@@ -2656,7 +2703,10 @@ const Quotations = () => {
         </DialogContent>
         <DialogActions sx={{ p: 2, pt: 0 }}>
           <Button onClick={() => setNegotiateDialog(prev => ({ ...prev, open: false }))}>Cancel</Button>
-          <Button variant="contained" color="primary" onClick={handleNegotiateSubmit} disabled={!negotiateDialog.discountPercent}>
+          <Button variant="contained" color="primary" onClick={handleNegotiateSubmit} disabled={
+            (negotiateDialog.discountPercent === '' || negotiateDialog.discountPercent === null) &&
+            Object.values(negotiateDialog.itemDiscounts).every(val => val === '' || val === null || val === undefined)
+          }>
             Apply Discount
           </Button>
         </DialogActions>

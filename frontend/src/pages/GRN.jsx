@@ -128,7 +128,7 @@ export default function GRNPage() {
         rate: it.rate, material_name: it.material_name, material_code: it.material_code, uom_name: it.uom_name
       })) || [];
       setForm({
-        ...form, po_id: poId, vendor_id: po.vendor_id, project_id: po.project_id, receipt_type: 'PO-Based', po_procurement_type: po.procurement_type,
+        ...form, po_id: poId, vendor_id: po.vendor_id, project_id: po.project_id, receipt_type: 'PO-Based', po_procurement_type: po.procurement_type, po_rental_type: po.rental_type,
         items
       });
     }
@@ -701,7 +701,7 @@ export default function GRNPage() {
                                   Optionally enter serial numbers, installation date, and rental details (if applicable).
                                 </Typography>
                               </Box>
-                              {form.po_procurement_type === 'Rental' && (
+                              {form.po_procurement_type === 'Rental' && form.po_rental_type !== 'Cost Per Test' && (
                                 <Chip label="Rental Equipment" size="small" color="info" sx={{ fontWeight: 600 }} />
                               )}
                             </Box>
@@ -718,7 +718,7 @@ export default function GRNPage() {
                                   }}
                                 />
                               </Grid>
-                              {form.po_procurement_type === 'Rental' && (
+                              {form.po_procurement_type === 'Rental' && form.po_rental_type !== 'Cost Per Test' && (
                                 <Grid item xs={12} sm={4}>
                                   <TextField
                                     fullWidth size="small" type="date" label="Override Rental Start" InputLabelProps={{ shrink: true }}

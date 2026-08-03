@@ -31,7 +31,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const Center(child: CircularProgressIndicator(color: Colors.white)),
+      builder: (context) =>
+          const Center(child: CircularProgressIndicator(color: Colors.white)),
     );
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -43,7 +44,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } catch (e) {
       if (context.mounted) {
         Navigator.pop(context); // close dialog
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error logging out: $e')));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Error logging out: $e')));
       }
     }
   }
@@ -53,7 +55,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF3F4F6),
       appBar: AppBar(
-        title: const Text('Profile', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text('Profile',
+            style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
         elevation: 0,
@@ -80,13 +83,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Text(
                 _fullName,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, fontFamily: 'Lucida Sans'),
+                style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Lucida Sans'),
               ),
             ),
             const SizedBox(height: 8),
             Text(
               _email,
-              style: const TextStyle(fontSize: 16, color: Colors.grey, fontFamily: 'Lucida Sans'),
+              style: const TextStyle(
+                  fontSize: 16, color: Colors.grey, fontFamily: 'Lucida Sans'),
             ),
             const SizedBox(height: 40),
             SizedBox(
@@ -94,12 +101,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: ElevatedButton.icon(
                 onPressed: () => _logout(context),
                 icon: const Icon(Icons.logout),
-                label: const Text('Log out', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                label: const Text('Log out',
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.black,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20)),
                   elevation: 5,
                 ),
               ),

@@ -1,5 +1,0 @@
-<Solution>
-  <Project Path="FacilityFlow.Api/FacilityFlow.Api.csproj" />
-  <Project Path="FacilityFlow.Core/FacilityFlow.Core.csproj" />
-  <Project Path="FacilityFlow.Infrastructure/FacilityFlow.Infrastructure.csproj" />
-</Solution>

@@ -3,41 +3,54 @@ import 'package:nowa_runtime/nowa_runtime.dart';
 @NowaGenerated()
 class IndentItem {
   const IndentItem({
+    required this.id,
+    required this.materialId,
     required this.materialName,
     required this.requestedQuantity,
     required this.approvedQuantity,
     required this.issuedQuantity,
     required this.acknowledgedQuantity,
+    this.uomName = '',
+    this.materialCode = '',
   });
 
   factory IndentItem.fromJson(Map<String, dynamic> json) {
     return IndentItem(
-      materialName: json['materialName'] as String? ?? '',
-      requestedQuantity: (json['requestedQuantity'] as num?)?.toDouble() ?? 0,
-      approvedQuantity: (json['approvedQuantity'] as num?)?.toDouble() ?? 0,
-      issuedQuantity: (json['issuedQuantity'] as num?)?.toDouble() ?? 0,
+      id: json['id'] as int? ?? 0,
+      materialId:
+          json['material_id'] as int? ?? 0,
+      materialName: json['material_name'] as String? ?? '',
+      requestedQuantity: (json['requested_quantity'] as num?)?.toDouble() ?? 0,
+      approvedQuantity: (json['approved_quantity'] as num?)?.toDouble() ?? 0,
+      issuedQuantity: (json['issued_quantity'] as num?)?.toDouble() ?? 0,
       acknowledgedQuantity:
-          (json['acknowledgedQuantity'] as num?)?.toDouble() ?? 0,
+          (json['acknowledged_quantity'] as num?)?.toDouble() ?? 0,
+      uomName: json['uom_name'] as String? ?? '',
+      materialCode: json['material_code'] as String? ?? '',
     );
   }
 
+  final int id;
+  final int materialId;
   final String materialName;
-
   final double requestedQuantity;
-
   final double approvedQuantity;
-
   final double issuedQuantity;
-
   final double acknowledgedQuantity;
+  final String uomName;
+  final String materialCode;
 
   Map<String, dynamic> toJson() {
     return {
-      'materialName': materialName,
-      'requestedQuantity': requestedQuantity,
-      'approvedQuantity': approvedQuantity,
-      'issuedQuantity': issuedQuantity,
-      'acknowledgedQuantity': acknowledgedQuantity,
+      'id': id,
+      'material_id': materialId,
+      'material_name': materialName,
+      'requested_quantity': requestedQuantity,
+      'approved_quantity': approvedQuantity,
+      'issued_quantity': issuedQuantity,
+      'acknowledged_quantity': acknowledgedQuantity,
+      'uom_name': uomName,
+      'material_code': materialCode,
     };
   }
 }

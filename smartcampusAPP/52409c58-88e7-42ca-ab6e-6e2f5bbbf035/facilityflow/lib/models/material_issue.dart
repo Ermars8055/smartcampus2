@@ -15,12 +15,11 @@ class MaterialIssue {
   factory MaterialIssue.fromJson(Map<String, dynamic> json) {
     return MaterialIssue(
       id: json['id'] as int? ?? 0,
-      issueNumber: json['issueNumber'] as String? ?? '',
-      relatedIndentId: json['relatedIndentId'] as int?,
-      relatedComplaintId: json['relatedComplaintId'] as int?,
-      isAcknowledged: json['isAcknowledged'] as bool? ?? false,
-      items:
-          (json['items'] as List<dynamic>?)
+      issueNumber: json['issue_number'] as String? ?? '',
+      relatedIndentId: json['indent_id'] as int?,
+      relatedComplaintId: json['complaint_id'] as int?,
+      isAcknowledged: json['is_acknowledged'] as bool? ?? false,
+      items: (json['items'] as List<dynamic>?)
               ?.map((item) => IndentItem.fromJson(item as Map<String, dynamic>))
               .toList() ??
           [],
@@ -42,10 +41,10 @@ class MaterialIssue {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'issueNumber': issueNumber,
-      'relatedIndentId': relatedIndentId,
-      'relatedComplaintId': relatedComplaintId,
-      'isAcknowledged': isAcknowledged,
+      'issue_number': issueNumber,
+      'indent_id': relatedIndentId,
+      'complaint_id': relatedComplaintId,
+      'is_acknowledged': isAcknowledged,
       'items': items.map((item) => item.toJson()).toList(),
     };
   }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:facilityflow/globals/app_state.dart';
 import 'package:facilityflow/globals/router.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 @NowaGenerated()
 late final SharedPreferences sharedPrefs;
@@ -11,7 +12,8 @@ late final SharedPreferences sharedPrefs;
 @NowaGenerated()
 main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+  await dotenv.load(fileName: ".env");
+
   // Firebase is completely removed
   // await Firebase.initializeApp(...);
 

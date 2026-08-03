@@ -18,19 +18,18 @@ class Complaint {
   factory Complaint.fromJson(Map<String, dynamic> json) {
     return Complaint(
       id: json['id'] as int? ?? 0,
-      docketNo: json['docketNo'] as String? ?? '',
-      complaintDate: json['complaintDate'] != null
-          ? DateTime.parse(json['complaintDate'] as String)
+      docketNo: json['docket_no'] as String? ?? '',
+      complaintDate: json['complaint_date'] != null
+          ? DateTime.parse(json['complaint_date'] as String)
           : DateTime.now(),
       location: json['location'] as String? ?? '',
-      natureOfComplaint: json['natureOfComplaint'] as String? ?? '',
-      individualDetailed: json['individualDetailed'] as String? ?? '',
+      natureOfComplaint: json['nature_of_complaint'] as String? ?? '',
+      individualDetailed: json['individual_detailed'] as String? ?? '',
       status: json['status'] as String? ?? 'Registered',
-      materialRequired: json['materialRequired'] as bool? ?? false,
-      resolutionRemarks: json['resolutionRemarks'] as String? ?? '',
-      images:
-          (json['images'] as List<dynamic>?)
-              ?.map((e) => e as String)
+      materialRequired: json['material_required'] as bool? ?? false,
+      resolutionRemarks: json['resolution_remarks'] as String? ?? '',
+      images: (json['images'] as List<dynamic>?)
+              ?.map((e) => (e is Map<String, dynamic>) ? (e['image_url'] as String? ?? '') : e as String)
               .toList() ??
           [],
     );
@@ -59,14 +58,14 @@ class Complaint {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'docketNo': docketNo,
-      'complaintDate': complaintDate.toIso8601String(),
+      'docket_no': docketNo,
+      'complaint_date': complaintDate.toIso8601String(),
       'location': location,
-      'natureOfComplaint': natureOfComplaint,
-      'individualDetailed': individualDetailed,
+      'nature_of_complaint': natureOfComplaint,
+      'individual_detailed': individualDetailed,
       'status': status,
-      'materialRequired': materialRequired,
-      'resolutionRemarks': resolutionRemarks,
+      'material_required': materialRequired,
+      'resolution_remarks': resolutionRemarks,
       'images': images,
     };
   }

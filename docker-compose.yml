@@ -24,7 +24,7 @@ services:
       SECRET_KEY: nissigrid-production-secret-change-this
       CORS_ORIGINS: http://localhost,http://localhost:80,http://localhost:3000
     ports:
-      - "8000:8000"
+      - "8007:8000"
     depends_on:
       db:
         condition: service_healthy

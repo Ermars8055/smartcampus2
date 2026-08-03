@@ -23,6 +23,7 @@ public class FacilityFlowDbContext : DbContext
     public DbSet<Building> Buildings { get; set; }
     public DbSet<Floor> Floors { get; set; }
     public DbSet<Room> Rooms { get; set; }
+    public DbSet<GateEntry> GateEntries { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

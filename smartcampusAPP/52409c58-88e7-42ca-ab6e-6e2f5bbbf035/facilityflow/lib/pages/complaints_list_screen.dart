@@ -62,9 +62,8 @@ class _ComplaintsListScreenState extends State<ComplaintsListScreen> {
           (c) => c.status == 'In Progress' || c.status == 'Material Pending',
         )
         .toList();
-    final closedComplaints = complaints
-        .where((c) => c.status == 'Closed')
-        .toList();
+    final closedComplaints =
+        complaints.where((c) => c.status == 'Closed').toList();
 
     return DefaultTabController(
       length: 3,
@@ -111,8 +110,10 @@ class _ComplaintsListScreenState extends State<ComplaintsListScreen> {
                       borderSide: BorderSide.none,
                     ),
                     filled: true,
-                    fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                    fillColor: theme.colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.5),
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
                   ),
                   onChanged: (value) {
                     setState(() {

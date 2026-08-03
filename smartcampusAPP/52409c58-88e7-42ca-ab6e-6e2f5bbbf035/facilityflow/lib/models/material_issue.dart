@@ -15,12 +15,17 @@ class MaterialIssue {
   factory MaterialIssue.fromJson(Map<String, dynamic> json) {
     return MaterialIssue(
       id: json['id'] as int? ?? 0,
-      issueNumber: json['issueNumber'] as String? ?? '',
-      relatedIndentId: json['relatedIndentId'] as int?,
-      relatedComplaintId: json['relatedComplaintId'] as int?,
-      isAcknowledged: json['isAcknowledged'] as bool? ?? false,
-      items:
-          (json['items'] as List<dynamic>?)
+      issueNumber: json['issue_number'] as String? ??
+          json['issueNumber'] as String? ??
+          '',
+      relatedIndentId:
+          json['indent_id'] as int? ?? json['relatedIndentId'] as int?,
+      relatedComplaintId:
+          json['complaint_id'] as int? ?? json['relatedComplaintId'] as int?,
+      isAcknowledged: json['is_acknowledged'] as bool? ??
+          json['isAcknowledged'] as bool? ??
+          false,
+      items: (json['items'] as List<dynamic>?)
               ?.map((item) => IndentItem.fromJson(item as Map<String, dynamic>))
               .toList() ??
           [],

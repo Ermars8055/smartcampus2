@@ -28,8 +28,7 @@ class Complaint {
       status: json['status'] as String? ?? 'Registered',
       materialRequired: json['materialRequired'] as bool? ?? false,
       resolutionRemarks: json['resolutionRemarks'] as String? ?? '',
-      images:
-          (json['images'] as List<dynamic>?)
+      images: (json['images'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           [],

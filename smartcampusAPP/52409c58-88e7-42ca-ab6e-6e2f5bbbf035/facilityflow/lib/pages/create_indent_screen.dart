@@ -18,7 +18,6 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
   final _formKey = GlobalKey<FormState>();
 
   final _remarksController = TextEditingController();
-  final _qtyController = TextEditingController(text: '1');
 
   List<dynamic> _institutions = [];
   List<dynamic> _allDepartments = [];
@@ -34,9 +33,16 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
   String? _selectedBuildingId;
   String? _selectedFloorId;
   String? _selectedRoomId;
-  String? _selectedMaterialId;
 
-  final List<Map<String, dynamic>> _addedItems = [];
+  final List<Map<String, dynamic>> _addedItems = [
+    {
+      'material_id': null,
+      'requestedQuantity': 1.0,
+      'materialName': null,
+      'materialCode': null,
+      'uom': null
+    }
+  ];
 
   bool _isLoading = true;
 
@@ -60,12 +66,13 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
           _allDepartments = deptRes.data ?? [];
           _allBuildings = bldgRes.data ?? [];
           _materialsList = (matRes.data['items'] ?? []) as List<dynamic>;
-          
+
           if (_institutions.length == 1) {
             _selectedInstitutionId = _institutions[0]['id'].toString();
             _handleInstitutionChange(_selectedInstitutionId!);
           } else {
-            _departmentsList = _allDepartments.map((d) => d['name']).toSet().toList();
+            _departmentsList =
+                _allDepartments.map((d) => d['name']).toSet().toList();
           }
           _isLoading = false;
         });
@@ -112,7 +119,7 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
       final api = ApiService();
       final roomsRes = await api.getRooms(deptName);
       final fetchedRooms = roomsRes.data ?? [];
-      
+
       final uniqueBuildings = <String, dynamic>{};
       final uniqueFloors = <String, dynamic>{};
 
@@ -187,43 +194,27 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
   @override
   void dispose() {
     _remarksController.dispose();
-    _qtyController.dispose();
     super.dispose();
   }
 
-  void _addMaterialItem() {
-    if (_selectedMaterialId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a material')),
-      );
-      return;
-    }
-    
-    final qty = double.tryParse(_qtyController.text) ?? 0;
-    if (qty <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a quantity greater than 0')),
-      );
-      return;
-    }
-    
-    final material = _materialsList.firstWhere((m) => m['id'].toString() == _selectedMaterialId);
-    
+  void _addNewItemRow() {
     setState(() {
       _addedItems.add({
-        'material_id': material['id'],
-        'materialName': material['name'],
-        'requestedQuantity': qty,
-        'uom': material['uom_name'] ?? material['uom'] ?? ''
+        'material_id': null,
+        'requestedQuantity': 1.0,
+        'materialName': null,
+        'materialCode': null,
+        'uom': null
       });
-      _selectedMaterialId = null;
-      _qtyController.text = '1';
     });
   }
 
   void _removeMaterialItem(int index) {
     setState(() {
       _addedItems.removeAt(index);
+      if (_addedItems.isEmpty) {
+        _addNewItemRow();
+      }
     });
   }
 
@@ -296,28 +287,43 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
       );
       return;
     }
-    if (_addedItems.isEmpty) {
+    final validItems = _addedItems
+        .where((item) =>
+            item['material_id'] != null &&
+            (item['requestedQuantity'] as double) > 0)
+        .toList();
+    if (validItems.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please add at least one material item')),
+        const SnackBar(
+            content: Text('Please add at least one valid material item')),
       );
       return;
     }
-    
-    final selectedFloor = _floorsList.firstWhere((f) => f['id'].toString() == _selectedFloorId, orElse: () => null);
-    final selectedRoom = _roomsList.firstWhere((r) => r['id'].toString() == _selectedRoomId, orElse: () => null);
+
+    final selectedFloor = _floorsList.firstWhere(
+        (f) => f['id'].toString() == _selectedFloorId,
+        orElse: () => null);
+    final selectedRoom = _roomsList.firstWhere(
+        (r) => r['id'].toString() == _selectedRoomId,
+        orElse: () => null);
 
     final payload = {
       'institution_id': int.tryParse(_selectedInstitutionId!) ?? null,
       'department': _selectedDepartmentName,
-      'building_id': _selectedBuildingId != null ? int.tryParse(_selectedBuildingId!) : null,
+      'building_id': _selectedBuildingId != null
+          ? int.tryParse(_selectedBuildingId!)
+          : null,
       'floor': selectedFloor != null ? selectedFloor['name'] : '',
       'location': selectedRoom != null ? selectedRoom['name'] : '',
-      'room_id': _selectedRoomId != null ? int.tryParse(_selectedRoomId!) : null,
+      'room_id':
+          _selectedRoomId != null ? int.tryParse(_selectedRoomId!) : null,
       'remarks': _remarksController.text.trim(),
-      'items': _addedItems.map((item) => {
-        'material_id': item['material_id'],
-        'requested_quantity': item['requestedQuantity']
-      }).toList(),
+      'items': validItems
+          .map((item) => {
+                'material_id': item['material_id'],
+                'requested_quantity': item['requestedQuantity']
+              })
+          .toList(),
     };
 
     showDialog(
@@ -343,7 +349,7 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
     try {
       final api = ApiService();
       await api.dio.post('/api/indents', data: payload);
-      
+
       final appState = AppState.of(context, listen: false);
       await appState.fetchIndents(); // Refresh list
 
@@ -397,7 +403,8 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
                 child: Text(
                   selectedName ?? 'Select $label',
                   style: TextStyle(
-                    color: selectedName == null ? Colors.grey[600] : Colors.black,
+                    color:
+                        selectedName == null ? Colors.grey[600] : Colors.black,
                     fontSize: 16,
                   ),
                 ),
@@ -413,7 +420,7 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     if (_isLoading) {
       return Scaffold(
         appBar: AppBar(title: const Text('Create Indent')),
@@ -444,11 +451,12 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                
                 _buildDropdownField(
                   label: 'Institution *',
                   icon: Icons.business,
-                  selectedName: _institutions.firstWhere((i) => i['id'].toString() == _selectedInstitutionId, orElse: () => null)?['name'],
+                  selectedName: _institutions.firstWhere(
+                      (i) => i['id'].toString() == _selectedInstitutionId,
+                      orElse: () => null)?['name'],
                   onTap: () => _showBottomPicker(
                     title: 'Select Institution',
                     items: _institutions,
@@ -458,7 +466,6 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
                     onSelect: _handleInstitutionChange,
                   ),
                 ),
-                
                 _buildDropdownField(
                   label: 'Department *',
                   icon: Icons.account_tree,
@@ -466,22 +473,26 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
                   disabled: _selectedInstitutionId == null,
                   onTap: () => _showBottomPicker(
                     title: 'Select Department',
-                    items: _departmentsList.map((d) => {'id': d, 'name': d}).toList(),
+                    items: _departmentsList
+                        .map((d) => {'id': d, 'name': d})
+                        .toList(),
                     selectedValue: _selectedDepartmentName,
                     idField: 'id',
                     nameField: 'name',
                     onSelect: _handleDepartmentChange,
                   ),
                 ),
-
                 Row(
                   children: [
                     Expanded(
                       child: _buildDropdownField(
                         label: 'Building',
                         icon: Icons.apartment,
-                        selectedName: _buildingsList.firstWhere((b) => b['id'].toString() == _selectedBuildingId, orElse: () => null)?['name'],
-                        disabled: _selectedDepartmentName == null || _buildingsList.isEmpty,
+                        selectedName: _buildingsList.firstWhere(
+                            (b) => b['id'].toString() == _selectedBuildingId,
+                            orElse: () => null)?['name'],
+                        disabled: _selectedDepartmentName == null ||
+                            _buildingsList.isEmpty,
                         onTap: () => _showBottomPicker(
                           title: 'Select Building',
                           items: _buildingsList,
@@ -497,11 +508,18 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
                       child: _buildDropdownField(
                         label: 'Floor',
                         icon: Icons.layers,
-                        selectedName: _floorsList.firstWhere((f) => f['id'].toString() == _selectedFloorId, orElse: () => null)?['name'],
-                        disabled: _selectedBuildingId == null || _floorsList.isEmpty,
+                        selectedName: _floorsList.firstWhere(
+                            (f) => f['id'].toString() == _selectedFloorId,
+                            orElse: () => null)?['name'],
+                        disabled:
+                            _selectedBuildingId == null || _floorsList.isEmpty,
                         onTap: () => _showBottomPicker(
                           title: 'Select Floor',
-                          items: _floorsList.where((f) => f['building_id'].toString() == _selectedBuildingId).toList(),
+                          items: _floorsList
+                              .where((f) =>
+                                  f['building_id'].toString() ==
+                                  _selectedBuildingId)
+                              .toList(),
                           selectedValue: _selectedFloorId,
                           idField: 'id',
                           nameField: 'name',
@@ -511,22 +529,25 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
                     ),
                   ],
                 ),
-                
                 _buildDropdownField(
                   label: 'Room',
                   icon: Icons.meeting_room,
-                  selectedName: _roomsList.firstWhere((r) => r['id'].toString() == _selectedRoomId, orElse: () => null)?['name'],
+                  selectedName: _roomsList.firstWhere(
+                      (r) => r['id'].toString() == _selectedRoomId,
+                      orElse: () => null)?['name'],
                   disabled: _selectedFloorId == null || _roomsList.isEmpty,
                   onTap: () => _showBottomPicker(
                     title: 'Select Room',
-                    items: _roomsList.where((r) => r['floor_id'].toString() == _selectedFloorId).toList(),
+                    items: _roomsList
+                        .where(
+                            (r) => r['floor_id'].toString() == _selectedFloorId)
+                        .toList(),
                     selectedValue: _selectedRoomId,
                     idField: 'id',
                     nameField: 'name',
                     onSelect: (val) => setState(() => _selectedRoomId = val),
                   ),
                 ),
-
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _remarksController,
@@ -537,129 +558,136 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
                     alignLabelWithHint: true,
                   ),
                 ),
-                
                 const SizedBox(height: 24),
-                Text(
-                  'Materials & Quantities',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: theme.colorScheme.primary,
-                    fontWeight: FontWeight.bold,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Materials & Quantities',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 12),
-                
-                Card(
-                  color: theme.colorScheme.surface,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildDropdownField(
-                          label: 'Material Name',
-                          icon: Icons.inventory_2_outlined,
-                          selectedName: _materialsList.firstWhere((m) => m['id'].toString() == _selectedMaterialId, orElse: () => null)?['name'],
-                          onTap: () => _showBottomPicker(
-                            title: 'Select Material',
-                            items: _materialsList.where((m) => !_addedItems.any((a) => a['material_id'] == m['id'])).toList(),
-                            selectedValue: _selectedMaterialId,
-                            idField: 'id',
-                            nameField: 'name',
-                            onSelect: (val) => setState(() => _selectedMaterialId = val),
-                          ),
-                        ),
-                        TextFormField(
-                          controller: _qtyController,
-                          keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(
-                            labelText: 'Qty',
-                            filled: true,
-                            fillColor: Color(0xFFF8FAFC),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton.icon(
-                            onPressed: _addMaterialItem,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: theme.colorScheme.secondary,
-                            ),
-                            icon: const Icon(Icons.add_shopping_cart),
-                            label: const Text('Add to Indent List'),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                
-                const SizedBox(height: 16),
-                if (_addedItems.isNotEmpty) ...[
-                  Text(
-                    'Added Materials (${_addedItems.length})',
-                    style: theme.textTheme.titleSmall,
-                  ),
-                  const SizedBox(height: 8),
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: _addedItems.length,
-                    itemBuilder: (context, index) {
-                      final item = _addedItems[index];
-                      return ListTile(
-                        dense: true,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          side: const BorderSide(color: Color(0xFFE2E8F0)),
-                        ),
-                        title: Text(
-                          item['materialName'] as String,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: _addedItems.length,
+                  itemBuilder: (context, index) {
+                    final item = _addedItems[index];
+                    return Card(
+                      color: theme.colorScheme.surface,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: const BorderSide(color: Color(0xFFE2E8F0)),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'Qty: ${(item['requestedQuantity'] as double).toStringAsFixed(0)} ${item['uom']}',
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                color: theme.colorScheme.primary,
-                                fontWeight: FontWeight.bold,
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('Item ${index + 1}',
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.grey)),
+                                IconButton(
+                                  icon: const Icon(Icons.delete_outline,
+                                      color: Colors.red),
+                                  onPressed: () => _removeMaterialItem(index),
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            _buildDropdownField(
+                              label: 'Select Material',
+                              icon: Icons.inventory_2_outlined,
+                              selectedName: item['material_id'] != null
+                                  ? '[${item['materialCode'] ?? ''}] ${item['materialName']}'
+                                  : null,
+                              onTap: () {
+                                final displayItems = _materialsList
+                                    .map((m) => {
+                                          'id': m['id'],
+                                          'display_name':
+                                              '[${m['code'] ?? ''}] ${m['name']} (${m['uom_name'] ?? m['uom'] ?? ''})'
+                                        })
+                                    .toList();
+
+                                _showBottomPicker(
+                                  title: 'Select Material',
+                                  items: displayItems,
+                                  selectedValue:
+                                      item['material_id']?.toString(),
+                                  idField: 'id',
+                                  nameField: 'display_name',
+                                  onSelect: (val) {
+                                    final m = _materialsList.firstWhere(
+                                        (mat) => mat['id'].toString() == val);
+                                    setState(() {
+                                      _addedItems[index]['material_id'] =
+                                          m['id'];
+                                      _addedItems[index]['materialName'] =
+                                          m['name'];
+                                      _addedItems[index]['materialCode'] =
+                                          m['code'] ?? '';
+                                      _addedItems[index]['uom'] =
+                                          m['uom_name'] ?? m['uom'] ?? '';
+                                    });
+                                  },
+                                );
+                              },
+                            ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.only(bottom: 12, left: 4),
+                              child: Text(
+                                'Unit: ${(item['uom'] != null && item['uom'].toString().isNotEmpty) ? item['uom'] : '—'}',
+                                style: TextStyle(
+                                    color: Colors.grey[700],
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500),
                               ),
                             ),
-                            const SizedBox(width: 12),
-                            IconButton(
-                              icon: const Icon(Icons.delete_outline, color: Colors.red),
-                              onPressed: () => _removeMaterialItem(index),
+                            TextFormField(
+                              initialValue:
+                                  item['requestedQuantity'].toString(),
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(
+                                labelText: 'Quantity',
+                                filled: true,
+                                fillColor: Color(0xFFF8FAFC),
+                                prefixIcon: Icon(Icons.numbers),
+                              ),
+                              onChanged: (val) {
+                                setState(() {
+                                  _addedItems[index]['requestedQuantity'] =
+                                      double.tryParse(val) ?? 0.0;
+                                });
+                              },
                             ),
                           ],
                         ),
-                      );
-                    },
+                      ),
+                    );
+                  },
+                ),
+                TextButton.icon(
+                  onPressed: _addNewItemRow,
+                  icon: const Icon(Icons.add),
+                  label: const Text('Add Another Item'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: theme.colorScheme.secondary,
                   ),
-                ] else ...[
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF1F5F9),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
-                    ),
-                    child: Column(
-                      children: [
-                        Icon(Icons.shopping_basket_outlined, size: 40, color: Colors.grey[400]),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'No materials added yet. Select a material and quantity above and click Add.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.grey, fontSize: 13),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                ),
                 const SizedBox(height: 32),
                 SizedBox(
                   width: double.infinity,
@@ -668,7 +696,8 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
                     onPressed: _submitIndent,
                     child: const Text(
                       'Submit Indent Request',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),

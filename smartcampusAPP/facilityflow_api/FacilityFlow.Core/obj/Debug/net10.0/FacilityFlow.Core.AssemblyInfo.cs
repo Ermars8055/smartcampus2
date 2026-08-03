@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("FacilityFlow.Core")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3177fb8954bd20e495fab1ab14c64f0a8508bb98")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+091df3bc751ae150aec1fe35ea7db5190f17a071")]
 [assembly: System.Reflection.AssemblyProductAttribute("FacilityFlow.Core")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FacilityFlow.Core")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -1,7 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:nowa_runtime/nowa_runtime.dart';
 import 'package:facilityflow/globals/app_state.dart';
 import 'package:facilityflow/services/api_service.dart';
+import 'package:image_picker/image_picker.dart';
 
 @NowaGenerated()
 class LogComplaintScreen extends StatefulWidget {
@@ -34,13 +36,8 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
   String? _selectedFloorId;
   String? _selectedRoomId;
 
-  final List<String> _attachedImages = [];
-  final List<String> _mockMaintImages = const [
-    'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=500',
-    'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=500',
-    'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500',
-    'https://images.unsplash.com/photo-1542013936693-8848e574047a?w=500',
-  ];
+  final List<File> _attachedImages = [];
+  final ImagePicker _picker = ImagePicker();
 
   bool _isLoading = true;
 
@@ -62,12 +59,13 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
           _institutions = instRes.data ?? [];
           _allDepartments = deptRes.data ?? [];
           _allBuildings = bldgRes.data ?? [];
-          
+
           if (_institutions.length == 1) {
             _selectedInstitutionId = _institutions[0]['id'].toString();
             _handleInstitutionChange(_selectedInstitutionId!);
           } else {
-            _departmentsList = _allDepartments.map((d) => d['name']).toSet().toList();
+            _departmentsList =
+                _allDepartments.map((d) => d['name']).toSet().toList();
           }
           _isLoading = false;
         });
@@ -114,7 +112,7 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
       final api = ApiService();
       final roomsRes = await api.getRooms(deptName);
       final fetchedRooms = roomsRes.data ?? [];
-      
+
       final uniqueBuildings = <String, dynamic>{};
       final uniqueFloors = <String, dynamic>{};
 
@@ -194,23 +192,19 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
     super.dispose();
   }
 
-  void _attachMockPhoto() {
-    if (_attachedImages.length >= _mockMaintImages.length) {
+  Future<void> _pickImage() async {
+    try {
+      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+      if (image != null) {
+        setState(() {
+          _attachedImages.add(File(image.path));
+        });
+      }
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Maximum images attached for mock')),
+        const SnackBar(content: Text('Failed to pick image')),
       );
-      return;
     }
-    final nextImg = _mockMaintImages[_attachedImages.length];
-    setState(() {
-      _attachedImages.add(nextImg);
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Mock photo attached successfully!'),
-        duration: Duration(seconds: 1),
-      ),
-    );
   }
 
   void _removeAttachedPhoto(int index) {
@@ -288,7 +282,7 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
       );
       return;
     }
-    
+
     final nature = _natureController.text.trim();
     if (nature.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -304,21 +298,30 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
       );
       return;
     }
-    
-    final selectedFloor = _floorsList.firstWhere((f) => f['id'].toString() == _selectedFloorId, orElse: () => null);
-    final selectedRoom = _roomsList.firstWhere((r) => r['id'].toString() == _selectedRoomId, orElse: () => null);
 
-    final payload = {
+    final selectedFloor = _floorsList.firstWhere(
+        (f) => f['id'].toString() == _selectedFloorId,
+        orElse: () => null);
+    final selectedRoom = _roomsList.firstWhere(
+        (r) => r['id'].toString() == _selectedRoomId,
+        orElse: () => null);
+
+    final payload = <String, dynamic>{
       'institution_id': int.tryParse(_selectedInstitutionId!) ?? null,
       'department_name': _selectedDepartmentName,
-      'building_id': _selectedBuildingId != null ? int.tryParse(_selectedBuildingId!) : null,
-      'floor_id': _selectedFloorId != null ? int.tryParse(_selectedFloorId!) : null,
-      'room_id': _selectedRoomId != null ? int.tryParse(_selectedRoomId!) : null,
-      'location': selectedRoom != null ? selectedRoom['name'] : (selectedFloor != null ? selectedFloor['name'] : ''),
+      'building_id': _selectedBuildingId != null
+          ? int.tryParse(_selectedBuildingId!)
+          : null,
+      'floor_id':
+          _selectedFloorId != null ? int.tryParse(_selectedFloorId!) : null,
+      'room_id':
+          _selectedRoomId != null ? int.tryParse(_selectedRoomId!) : null,
+      'location': selectedRoom != null
+          ? selectedRoom['name']
+          : (selectedFloor != null ? selectedFloor['name'] : ''),
       'nature_of_complaint': nature,
       'individual_detailed': description,
       'name_and_trade': _nameTradeController.text.trim(),
-      'image_urls': _attachedImages,
     };
 
     showDialog(
@@ -343,8 +346,16 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
 
     try {
       final api = ApiService();
+
+      List<String> uploadedUrls = [];
+      for (var file in _attachedImages) {
+        final uploadRes = await api.uploadComplaintImage(file);
+        uploadedUrls.add(uploadRes.data['url']);
+      }
+      payload['image_urls'] = uploadedUrls;
+
       await api.dio.post('/api/complaints', data: payload);
-      
+
       final appState = AppState.of(context, listen: false);
       await appState.fetchComplaints();
 
@@ -398,7 +409,8 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
                 child: Text(
                   selectedName ?? 'Select $label',
                   style: TextStyle(
-                    color: selectedName == null ? Colors.grey[600] : Colors.black,
+                    color:
+                        selectedName == null ? Colors.grey[600] : Colors.black,
                     fontSize: 16,
                   ),
                 ),
@@ -414,7 +426,7 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     if (_isLoading) {
       return Scaffold(
         appBar: AppBar(title: const Text('Log Complaint')),
@@ -445,11 +457,12 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                
                 _buildDropdownField(
                   label: 'Institution *',
                   icon: Icons.business,
-                  selectedName: _institutions.firstWhere((i) => i['id'].toString() == _selectedInstitutionId, orElse: () => null)?['name'],
+                  selectedName: _institutions.firstWhere(
+                      (i) => i['id'].toString() == _selectedInstitutionId,
+                      orElse: () => null)?['name'],
                   onTap: () => _showBottomPicker(
                     title: 'Select Institution',
                     items: _institutions,
@@ -459,7 +472,6 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
                     onSelect: _handleInstitutionChange,
                   ),
                 ),
-                
                 _buildDropdownField(
                   label: 'Department *',
                   icon: Icons.account_tree,
@@ -467,22 +479,26 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
                   disabled: _selectedInstitutionId == null,
                   onTap: () => _showBottomPicker(
                     title: 'Select Department',
-                    items: _departmentsList.map((d) => {'id': d, 'name': d}).toList(),
+                    items: _departmentsList
+                        .map((d) => {'id': d, 'name': d})
+                        .toList(),
                     selectedValue: _selectedDepartmentName,
                     idField: 'id',
                     nameField: 'name',
                     onSelect: _handleDepartmentChange,
                   ),
                 ),
-
                 Row(
                   children: [
                     Expanded(
                       child: _buildDropdownField(
                         label: 'Building',
                         icon: Icons.apartment,
-                        selectedName: _buildingsList.firstWhere((b) => b['id'].toString() == _selectedBuildingId, orElse: () => null)?['name'],
-                        disabled: _selectedDepartmentName == null || _buildingsList.isEmpty,
+                        selectedName: _buildingsList.firstWhere(
+                            (b) => b['id'].toString() == _selectedBuildingId,
+                            orElse: () => null)?['name'],
+                        disabled: _selectedDepartmentName == null ||
+                            _buildingsList.isEmpty,
                         onTap: () => _showBottomPicker(
                           title: 'Select Building',
                           items: _buildingsList,
@@ -498,11 +514,18 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
                       child: _buildDropdownField(
                         label: 'Floor',
                         icon: Icons.layers,
-                        selectedName: _floorsList.firstWhere((f) => f['id'].toString() == _selectedFloorId, orElse: () => null)?['name'],
-                        disabled: _selectedBuildingId == null || _floorsList.isEmpty,
+                        selectedName: _floorsList.firstWhere(
+                            (f) => f['id'].toString() == _selectedFloorId,
+                            orElse: () => null)?['name'],
+                        disabled:
+                            _selectedBuildingId == null || _floorsList.isEmpty,
                         onTap: () => _showBottomPicker(
                           title: 'Select Floor',
-                          items: _floorsList.where((f) => f['building_id'].toString() == _selectedBuildingId).toList(),
+                          items: _floorsList
+                              .where((f) =>
+                                  f['building_id'].toString() ==
+                                  _selectedBuildingId)
+                              .toList(),
                           selectedValue: _selectedFloorId,
                           idField: 'id',
                           nameField: 'name',
@@ -512,22 +535,25 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
                     ),
                   ],
                 ),
-                
                 _buildDropdownField(
                   label: 'Room',
                   icon: Icons.meeting_room,
-                  selectedName: _roomsList.firstWhere((r) => r['id'].toString() == _selectedRoomId, orElse: () => null)?['name'],
+                  selectedName: _roomsList.firstWhere(
+                      (r) => r['id'].toString() == _selectedRoomId,
+                      orElse: () => null)?['name'],
                   disabled: _selectedFloorId == null || _roomsList.isEmpty,
                   onTap: () => _showBottomPicker(
                     title: 'Select Room',
-                    items: _roomsList.where((r) => r['floor_id'].toString() == _selectedFloorId).toList(),
+                    items: _roomsList
+                        .where(
+                            (r) => r['floor_id'].toString() == _selectedFloorId)
+                        .toList(),
                     selectedValue: _selectedRoomId,
                     idField: 'id',
                     nameField: 'name',
                     onSelect: (val) => setState(() => _selectedRoomId = val),
                   ),
                 ),
-                
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _nameTradeController,
@@ -537,7 +563,6 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
                     alignLabelWithHint: true,
                   ),
                 ),
-
                 const SizedBox(height: 24),
                 Text(
                   'Issue Details',
@@ -547,7 +572,6 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                
                 TextFormField(
                   controller: _natureController,
                   decoration: const InputDecoration(
@@ -556,9 +580,7 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
                     alignLabelWithHint: true,
                   ),
                 ),
-                
                 const SizedBox(height: 16),
-                
                 TextFormField(
                   controller: _descriptionController,
                   maxLines: 4,
@@ -571,7 +593,6 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
                     ),
                   ),
                 ),
-                
                 const SizedBox(height: 24),
                 Text(
                   'Attachment Photo (Optional)',
@@ -584,7 +605,7 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
                 Row(
                   children: [
                     ElevatedButton.icon(
-                      onPressed: _attachMockPhoto,
+                      onPressed: _pickImage,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: theme.colorScheme.secondary,
                         foregroundColor: Colors.white,
@@ -602,7 +623,7 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
                       scrollDirection: Axis.horizontal,
                       itemCount: _attachedImages.length,
                       itemBuilder: (context, index) {
-                        final imgUrl = _attachedImages[index];
+                        final imgFile = _attachedImages[index];
                         return Stack(
                           children: [
                             Container(
@@ -612,7 +633,7 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(8),
                                 image: DecorationImage(
-                                  image: NetworkImage(imgUrl),
+                                  image: FileImage(imgFile),
                                   fit: BoxFit.cover,
                                 ),
                               ),

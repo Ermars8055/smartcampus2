@@ -15,7 +15,7 @@ class AcknowledgementsScreen extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text(
-          'Confirm Receipt',
+          'Confirm Acknowledgment',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         content: Column(
@@ -23,7 +23,7 @@ class AcknowledgementsScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Are you sure you have received all the listed items for issue ${issue.issueNumber}?',
+              'Are you sure you want to acknowledge receipt for issue ${issue.issueNumber}? This issue contains ${issue.items.length} item(s).',
               style: theme.textTheme.bodyMedium,
             ),
             const SizedBox(height: 16),
@@ -113,12 +113,10 @@ class AcknowledgementsScreen extends StatelessWidget {
     final appState = AppState.of(context, listen: true);
     final theme = Theme.of(context);
     final issues = appState.materialIssues;
-    final pendingIssues = issues
-        .where((issue) => !issue.isAcknowledged)
-        .toList();
-    final acknowledgedIssues = issues
-        .where((issue) => issue.isAcknowledged)
-        .toList();
+    final pendingIssues =
+        issues.where((issue) => !issue.isAcknowledged).toList();
+    final acknowledgedIssues =
+        issues.where((issue) => issue.isAcknowledged).toList();
     return DefaultTabController(
       length: 2,
       child: Scaffold(

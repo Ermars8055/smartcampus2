@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -10,21 +11,21 @@ class ApiService {
   }
 
   ApiService._internal() {
-    // Depending on the platform, localhost varies for the emulator
-    String baseUrl = const String.fromEnvironment('API_URL', 
-      defaultValue: 'https://hot-lamps-stay.loca.lt');
+    // Use local IP address so it works on both physical devices and emulators
+    String baseUrl = const String.fromEnvironment('API_URL',
+        defaultValue: 'http://192.168.0.5:8007');
 
     dio = Dio(
       BaseOptions(
-        baseUrl: baseUrl,
-        connectTimeout: const Duration(seconds: 10),
-        receiveTimeout: const Duration(seconds: 10),
-        headers: {
-          'Bypass-Tunnel-Reminder': 'true', // Bypasses localtunnel's anti-abuse warning page
-          'User-Agent': 'FacilityFlowApp',
-          'Content-Type': 'application/json',
-        }
-      ),
+          baseUrl: baseUrl,
+          connectTimeout: const Duration(seconds: 10),
+          receiveTimeout: const Duration(seconds: 10),
+          headers: {
+            'Bypass-Tunnel-Reminder':
+                'true', // Bypasses localtunnel's anti-abuse warning page
+            'User-Agent': 'FacilityFlowApp',
+            'Content-Type': 'application/json',
+          }),
     );
 
     dio.interceptors.add(
@@ -47,7 +48,8 @@ class ApiService {
   }
 
   // Native authentication login call
-  Future<Response> login(String workspace, String username, String password) async {
+  Future<Response> login(
+      String workspace, String username, String password) async {
     return await dio.post('/api/auth/login', data: {
       'workspace': workspace,
       'username': username,
@@ -68,14 +70,93 @@ class ApiService {
     return await dio.get('/api/buildings');
   }
 
+  Future<Response> getIssues() async {
+    return await dio.get('/api/issues');
+  }
+
+  Future<Response> acknowledgeIssue(int id) async {
+    return await dio.put('/api/issues/$id/acknowledge');
+  }
+
   Future<Response> getRooms(String? departmentName) async {
     if (departmentName != null && departmentName.isNotEmpty) {
-      return await dio.get('/api/rooms', queryParameters: {'department_name': departmentName});
+      return await dio.get('/api/rooms',
+          queryParameters: {'department_name': departmentName});
     }
     return await dio.get('/api/rooms');
   }
 
-  Future<Response> getMaterials() async {
-    return await dio.get('/api/materials', queryParameters: {'limit': 10000});
+  Future<Response> getMaterials({int limit = 10000}) async {
+    return await dio.get('/api/materials', queryParameters: {'limit': limit});
+  }
+
+  // --- Gate Entry endpoints ---
+  Future<Response> uploadInvoice(File file) async {
+    String fileName = file.path.split('/').last;
+    FormData formData = FormData.fromMap({
+      "file": await MultipartFile.fromFile(file.path, filename: fileName),
+    });
+    return await dio.post('/api/upload', data: formData);
+  }
+
+  Future<Response> uploadComplaintImage(File file) async {
+    String fileName = file.path.split('/').last;
+    FormData formData = FormData.fromMap({
+      "file": await MultipartFile.fromFile(file.path, filename: fileName),
+    });
+    return await dio.post('/api/upload',
+        queryParameters: {'folder': 'complaints'}, data: formData);
+  }
+
+  Future<Response> createGateEntry(Map<String, dynamic> data) async {
+    return await dio.post('/api/gate-entries', data: data);
+  }
+
+  Future<Response> getGateEntries() async {
+    return await dio.get('/api/gate-entries');
+  }
+
+  // --- Indent endpoints ---
+  Future<Response> approveIndent(
+      int id, List<Map<String, dynamic>> items) async {
+    return await dio.post('/api/indents/$id/approve', data: {'items': items});
+  }
+
+  Future<Response> rejectIndent(int id) async {
+    return await dio.post('/api/indents/$id/reject');
+  }
+
+  Future<Response> cancelIndent(int id) async {
+    return await dio.post('/api/indents/$id/cancel');
+  }
+
+  // --- Complaint endpoints ---
+  Future<Response> getTechnicians() async {
+    return await dio.get('/api/admin/users');
+  }
+
+  Future<Response> assignTechnician(int id, int techId) async {
+    return await dio
+        .post('/api/complaints/$id/assign', data: {'assigned_to_id': techId});
+  }
+
+  Future<Response> inspectComplaint(
+      int id, bool materialRequired, String inspectionDetails) async {
+    return await dio.post('/api/complaints/$id/inspect', data: {
+      'material_required': materialRequired,
+      'inspection_details': inspectionDetails
+    });
+  }
+
+  Future<Response> startRepair(int id) async {
+    return await dio.post('/api/complaints/$id/start-repair');
+  }
+
+  Future<Response> resolveComplaint(
+      int id, String remarks, List<String> imageUrls) async {
+    return await dio.post('/api/complaints/$id/resolve', data: {
+      'resolution_remarks': remarks,
+      'resolution_image_urls': imageUrls
+    });
   }
 }

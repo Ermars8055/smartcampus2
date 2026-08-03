@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:facilityflow/services/api_service.dart';
+import 'package:facilityflow/globals/app_state.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -40,9 +41,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (response.statusCode == 200) {
         final data = response.data;
-        final token = data['token'];
-        final email = data['email'];
-        final fullName = data['fullName'];
+        final token = data['access_token'];
+        final email = data['user']['email'];
+        final fullName = data['user']['full_name'];
 
         // Securely store the Native JWT Token
         final prefs = await SharedPreferences.getInstance();
@@ -50,12 +51,17 @@ class _LoginScreenState extends State<LoginScreen> {
         await prefs.setString('user_email', email);
         await prefs.setString('user_fullname', fullName);
 
-        if (mounted) context.go('/HomePage');
+        // Fetch data now that we have a valid token
+        if (mounted) {
+          AppState.of(context, listen: false).fetchAllData();
+          context.go('/HomePage');
+        }
       } else {
         setState(() => _errorMessage = 'Invalid credentials.');
       }
     } catch (e) {
-      setState(() => _errorMessage = 'Login failed. Please check your credentials.');
+      setState(
+          () => _errorMessage = 'Login failed. Please check your credentials.');
       debugPrint('Login Error: $e');
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -88,7 +94,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 Image.asset(
                   'assets/images/logo.png',
                   height: 60,
-                  errorBuilder: (context, error, stackTrace) => const SizedBox(height: 60),
+                  errorBuilder: (context, error, stackTrace) =>
+                      const SizedBox(height: 60),
                 ),
                 const SizedBox(height: 10),
                 const Text(
@@ -104,7 +111,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   controller: _workspaceController,
                   decoration: InputDecoration(
                     hintText: 'Workspace ID',
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 15, vertical: 12),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20),
                       borderSide: const BorderSide(color: Color(0xFFC0C0C0)),
@@ -120,7 +128,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   controller: _usernameController,
                   decoration: InputDecoration(
                     hintText: 'Username',
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 15, vertical: 12),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20),
                       borderSide: const BorderSide(color: Color(0xFFC0C0C0)),
@@ -136,7 +145,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   controller: _passwordController,
                   decoration: InputDecoration(
                     hintText: 'Password',
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 15, vertical: 12),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20),
                       borderSide: const BorderSide(color: Color(0xFFC0C0C0)),

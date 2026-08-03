@@ -1,0 +1,2 @@
+-- This file is currently empty, but you can add SQL queries here.
+-- Any SQL added here can be automatically executed when the database container starts for the very first time.

@@ -623,11 +623,11 @@ export default function Equipment() {
                 </Box>
 
                 <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
-                  <Button size="small" variant="outlined" color="primary" startIcon={<Edit />} onClick={(e) => { e.stopPropagation(); setEditForm(item); setEditDialog(item); }}>
+                  <Button size="small" variant="outlined" color="primary" startIcon={<Edit color="primary" />} onClick={(e) => { e.stopPropagation(); setEditForm(item); setEditDialog(item); }}>
                     Edit
                   </Button>
                   {item.serial_number_status === 'Pending Update' && (
-                    <Button size="small" variant="outlined" color="warning" startIcon={<Edit />} onClick={(e) => { e.stopPropagation(); setSerialDialog(item); setSerialInput(''); }}>
+                    <Button size="small" variant="outlined" color="warning" startIcon={<Edit color="primary" />} onClick={(e) => { e.stopPropagation(); setSerialDialog(item); setSerialInput(''); }}>
                       Update Serial
                     </Button>
                   )}
@@ -747,7 +747,7 @@ export default function Equipment() {
                       <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
                         <Tooltip title="Edit Equipment">
                           <IconButton size="small" color="primary" onClick={(e) => { e.stopPropagation(); setEditForm(item); setEditDialog(item); }}>
-                            <Edit fontSize="small" />
+                            <Edit color="primary" fontSize="small" />
                           </IconButton>
                         </Tooltip>
                         {item.serial_number_status === 'Pending Update' && (

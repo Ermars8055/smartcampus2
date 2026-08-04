@@ -61,7 +61,7 @@ export default function RepairWorkOrders() {
           value={tabValue}
           onChange={(e, v) => setTabValue(v)}
           variant="scrollable"
-          scrollButtons="auto"
+          scrollButtons={false}
           sx={{ borderTop: 1, borderColor: 'divider' }}
         >
           {['Assigned', 'In Progress', 'Completed', 'Closed', 'All'].map(s => {

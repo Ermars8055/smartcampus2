@@ -185,7 +185,7 @@ export default function ComplaintsList() {
                           sx={{ color: '#2563EB' }}
                           disabled={!['Registered', 'Open', 'Reopened'].includes(row.status)}
                         >
-                          <Edit fontSize="small" />
+                          <Edit color="primary" fontSize="small" />
                         </IconButton>
                       </span>
                     </Tooltip>

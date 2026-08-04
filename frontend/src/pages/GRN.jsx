@@ -4,7 +4,7 @@ import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
   InputLabel, Divider, TableSortLabel, useTheme, useMediaQuery,
-  DialogContent, DialogActions, Grid, MenuItem, Select, FormControl, FormHelperText, IconButton, Autocomplete, RadioGroup, FormControlLabel, Radio
+  DialogContent, DialogActions, Grid, MenuItem, Select, FormControl, FormHelperText, IconButton, Autocomplete, RadioGroup, FormControlLabel, Radio, Tab, Tabs
 } from '@mui/material';
 import { Add, Search, AssignmentTurnedIn, AttachFile, OpenInNew, Delete, ArrowBack } from '@mui/icons-material';
 import api, { getFileUrl } from '../services/api';
@@ -28,6 +28,8 @@ export default function GRNPage() {
   const [dialog, setDialog] = useState(false);
   const [detailDialog, setDetailDialog] = useState(null);
   const [search, setSearch] = useState('');
+  const [tab, setTab] = useState(2);
+  const statusFilters = useMemo(() => ['Draft', 'Completed', 'All'], []);
   const [sortConfig, setSortConfig] = useState({ key: 'created_at', direction: 'desc' });
   const initialForm = {
     po_id: '', gate_entry_id: '', warehouse_id: '', project_id: '', vendor_id: '', new_vendor_name: '',
@@ -258,8 +260,21 @@ export default function GRNPage() {
     if (projId) {
       list = list.filter(g => g.project_id === parseInt(projId, 10));
     }
+    if (search) {
+      const q = search.toLowerCase();
+      list = list.filter(g => 
+        g.grn_number?.toLowerCase().includes(q) ||
+        g.po_number?.toLowerCase().includes(q) ||
+        g.vendor_name?.toLowerCase().includes(q) ||
+        g.warehouse_name?.toLowerCase().includes(q) ||
+        g.invoice_number?.toLowerCase().includes(q)
+      );
+    }
+    if (statusFilters[tab] !== 'All') {
+      list = list.filter(g => g.status === statusFilters[tab]);
+    }
     return list;
-  }, [grns, searchParams]);
+  }, [grns, searchParams, search, tab, statusFilters]);
 
   const sortedGrns = [...filteredGrnsBase].sort((a, b) => {
     let valA = a[sortConfig.key];
@@ -297,10 +312,48 @@ export default function GRNPage() {
         </Box>
       </Box>
 
-      <Card sx={{ mb: 3, p: 2 }}>
-        <TextField size="small" placeholder="Search GRN number..." value={search}
-          onChange={e => setSearch(e.target.value)} sx={{ minWidth: 300 }}
-          InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }} />
+      <Card sx={{ mb: 3 }}>
+        <Box sx={{ p: 2, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+          <TextField
+            size="small"
+            placeholder="Search GRN, PO, Vendor, or Invoice..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            sx={{ width: 380 }}
+            InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }}
+          />
+        </Box>
+        <Tabs
+          value={tab}
+          onChange={(_, v) => setTab(v)}
+          variant="scrollable"
+          scrollButtons={false}
+          sx={{ borderBottom: 1, borderColor: 'divider' }}
+        >
+          {statusFilters.map((s, i) => (
+            <Tab
+              key={i}
+              label={
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  {s}
+                  <Chip
+                    label={s === 'All' ? grns.length : grns.filter(g => g.status === s).length}
+                    size="small"
+                    sx={{
+                      height: 20,
+                      fontSize: '0.7rem',
+                      fontWeight: 700,
+                      bgcolor: tab === i ? 'primary.main' : 'action.selected',
+                      color: tab === i ? 'white' : 'text.primary',
+                      cursor: 'pointer'
+                    }}
+                  />
+                </Box>
+              }
+              sx={{ textTransform: 'none', fontWeight: 600, minHeight: 48, minWidth: 'auto', px: 2 }}
+            />
+          ))}
+        </Tabs>
       </Card>
 
       <Card>
@@ -492,10 +545,18 @@ export default function GRNPage() {
                       id="field-vendor"
                       size="small"
                       freeSolo
-                      options={vendors.map(v => v.name)}
-                      value={form.vendor_id ? vendors.find(v => v.id === form.vendor_id)?.name || '' : form.new_vendor_name || ''}
+                      options={vendors.map(v => v.code ? `${v.code} - ${v.name}` : v.name)}
+                      value={
+                        form.vendor_id 
+                          ? (() => {
+                              const v = vendors.find(v => v.id === form.vendor_id);
+                              if (!v) return '';
+                              return v.code ? `${v.code} - ${v.name}` : v.name;
+                            })()
+                          : form.new_vendor_name || ''
+                      }
                       onChange={(e, newValue) => {
-                        const existing = vendors.find(v => v.name === newValue);
+                        const existing = vendors.find(v => (v.code ? `${v.code} - ${v.name}` : v.name) === newValue || v.name === newValue);
                         if (existing) {
                           setForm({ ...form, vendor_id: existing.id, new_vendor_name: '' });
                         } else {
@@ -503,7 +564,7 @@ export default function GRNPage() {
                         }
                       }}
                       onInputChange={(e, newInputValue) => {
-                        const existing = vendors.find(v => v.name === newInputValue);
+                        const existing = vendors.find(v => (v.code ? `${v.code} - ${v.name}` : v.name) === newInputValue || v.name === newInputValue);
                         if (existing) {
                           setForm({ ...form, vendor_id: existing.id, new_vendor_name: '' });
                         } else {

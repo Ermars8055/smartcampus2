@@ -130,7 +130,7 @@ export default function UOM() {
                   </TableCell>
                   <TableCell align="right">
                     <IconButton size="small" onClick={() => { setEditing(u.id); setForm({ name: u.name, abbreviation: u.abbreviation, allow_decimal: u.allow_decimal, is_active: u.is_active !== false }); setErrors({}); setDialog('uom'); }}>
-                      <Edit fontSize="small" sx={{ color: '#64748B' }} />
+                      <Edit color="primary" fontSize="small"  />
                     </IconButton>
                   </TableCell>
                 </TableRow>

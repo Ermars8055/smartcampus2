@@ -62,7 +62,7 @@ export default function ApprovalFlows() {
                       setEditing(f.id);
                       setForm({ ...f });
                       setDialog(true);
-                    }}><Edit fontSize="small" /></IconButton></Tooltip>
+                    }}><Edit color="primary" fontSize="small" /></IconButton></Tooltip>
                   </TableCell>
                 </TableRow>
               ))}

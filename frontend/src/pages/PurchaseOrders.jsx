@@ -210,8 +210,8 @@ export default function PurchaseOrders() {
   const [tabValue, setTabValue] = useState(searchParams.get('tab') || 'Draft');
   const [editingPOId, setEditingPOId] = useState(null);
   const [form, setForm] = useState({
-    po_number: '', vendor_id: '', project_id: '', institution_id: '', contract_id: '', delivery_date: null, terms: '', annexure: '', po_type: 'Informal', is_cash_purchase: false, advance_percentage: 0,
-    procurement_type: 'Purchase', rental_type: '', rental_agreement_number: '', rental_start_date: null, rental_end_date: null, billing_frequency: '', security_deposit: 0, cost_per_test: '', linked_reagent_agreement: '', vendor_maintenance_responsibility: false, return_conditions: '', renewal_terms: '',
+    po_number: '', vendor_id: '', project_id: '', institution_id: '', contract_id: '', delivery_date: null, terms: '', annexure: '', po_type: 'Informal', purchase_mode: '', marketplace_name: '', advance_percentage: 0,
+    procurement_type: '', rental_type: '', rental_agreement_number: '', rental_start_date: null, rental_end_date: null, billing_frequency: '', security_deposit: 0, cost_per_test: '', linked_reagent_agreement: '', vendor_maintenance_responsibility: false, return_conditions: '', renewal_terms: '',
     items: [{ material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }]
   });
 
@@ -351,9 +351,10 @@ export default function PurchaseOrders() {
         terms: po.terms || '',
         annexure: po.annexure || '',
         po_type: po.po_type || 'Informal',
-        is_cash_purchase: po.is_cash_purchase || false,
+        purchase_mode: po.purchase_mode || '',
+        marketplace_name: po.marketplace_name || '',
         advance_percentage: po.advance_percentage || 0,
-        procurement_type: po.procurement_type || 'Purchase',
+        procurement_type: po.procurement_type || '',
         rental_type: po.rental_type || '',
         rental_agreement_number: po.rental_agreement_number || '',
         rental_start_date: po.rental_start_date ? dayjs(po.rental_start_date) : null,
@@ -415,9 +416,10 @@ export default function PurchaseOrders() {
         delivery_date: null,
         terms: '', annexure: '',
         po_type: 'Formal',
-        is_cash_purchase: false,
+        purchase_mode: '',
+        marketplace_name: '',
         advance_percentage: 0,
-        procurement_type: 'Purchase', rental_type: '', rental_agreement_number: '', rental_start_date: null, rental_end_date: null, billing_frequency: '', security_deposit: 0, cost_per_test: '', linked_reagent_agreement: '', vendor_maintenance_responsibility: false, return_conditions: '', renewal_terms: '',
+        procurement_type: '', rental_type: '', rental_agreement_number: '', rental_start_date: null, rental_end_date: null, billing_frequency: '', security_deposit: 0, cost_per_test: '', linked_reagent_agreement: '', vendor_maintenance_responsibility: false, return_conditions: '', renewal_terms: '',
         indent_id: ind.id,
         items: ind.items.filter(it => it.requested_quantity > it.issued_quantity).map(it => {
           const mat = materials.find(m => m.id === it.material_id);
@@ -506,6 +508,8 @@ export default function PurchaseOrders() {
   const handleSave = async (isDraft = false) => {
     const newErrors = {};
     if (!form.vendor_id) newErrors.vendor_id = "Please select a Vendor.";
+    if (!form.purchase_mode) newErrors.purchase_mode = "Purchase Mode is required.";
+    if (!form.procurement_type) newErrors.procurement_type = "Procurement Type is required.";
     if (!form.project_id) newErrors.project_id = "Project is required.";
     if (!form.institution_id) newErrors.institution_id = "Institution is required.";
     if (!form.delivery_date) {
@@ -581,7 +585,7 @@ export default function PurchaseOrders() {
         contract_id: form.contract_id ? parseInt(form.contract_id, 10) : null,
         advance_percentage: parseFloat(form.advance_percentage) || 0,
         delivery_date: form.delivery_date ? dayjs(form.delivery_date).format('YYYY-MM-DD') : null,
-        procurement_type: form.procurement_type || 'Purchase',
+        procurement_type: form.procurement_type || '',
         rental_type: form.procurement_type === 'Rental' ? form.rental_type || null : null,
         rental_start_date: (form.procurement_type === 'Rental' && form.rental_start_date) ? dayjs(form.rental_start_date).format('YYYY-MM-DD') : null,
         rental_end_date: (form.procurement_type === 'Rental' && form.rental_end_date) ? dayjs(form.rental_end_date).format('YYYY-MM-DD') : null,
@@ -813,7 +817,7 @@ export default function PurchaseOrders() {
                 <table style="width: 100%">
                   <tr><td style="width: 40%">PO Number</td><td>: <b>${po.po_number}</b></td></tr>
                   <tr><td>PO Date</td><td>: ${formatDate(po.created_at)}</td></tr>
-                  ${po.is_cash_purchase ? `<tr><td>Type</td><td>: <b>Cash Purchase</b></td></tr>` : ''}
+                  ${po.purchase_mode && po.purchase_mode !== 'Credit Purchase' ? `<tr><td>Mode</td><td>: <b>${po.purchase_mode}</b></td></tr>` : ''}
                   ${po.advance_percentage > 0 ? `<tr><td>Advance</td><td>: <b>${po.advance_percentage}%</b></td></tr>` : ''}
                 </table>
               </td>
@@ -1031,7 +1035,7 @@ export default function PurchaseOrders() {
           value={tabValue}
           onChange={(_, v) => setTabValue(v)}
           variant="scrollable"
-          scrollButtons="auto"
+          scrollButtons={false}
           sx={{ mb: 2, minHeight: 36, '& .MuiTab-root': { minHeight: 36, py: 0.5 } }}
         >
           {['Draft', 'Submitted', 'Approved', 'Sent to Vendor', 'Partially Received', 'Closed', 'Short Closed', 'Cancelled', 'Rejected', 'Pending', 'All'].map(s => (
@@ -1123,8 +1127,6 @@ export default function PurchaseOrders() {
                       active={sortConfig.key === 'po_number'}
                       direction={sortConfig.direction}
                       onClick={() => handleSort('po_number')}
-                      IconComponent={ArrowDropDown}
-                      sx={{ '& .MuiTableSortLabel-icon': { fontSize: '1rem' } }}
                     >
                       PO No
                     </TableSortLabel>
@@ -1135,8 +1137,6 @@ export default function PurchaseOrders() {
                       active={sortConfig.key === 'pr_number'}
                       direction={sortConfig.direction}
                       onClick={() => handleSort('pr_number')}
-                      IconComponent={ArrowDropDown}
-                      sx={{ '& .MuiTableSortLabel-icon': { fontSize: '1rem' } }}
                     >
                       PR
                     </TableSortLabel>
@@ -1146,8 +1146,6 @@ export default function PurchaseOrders() {
                       active={sortConfig.key === 'qr_number'}
                       direction={sortConfig.direction}
                       onClick={() => handleSort('qr_number')}
-                      IconComponent={ArrowDropDown}
-                      sx={{ '& .MuiTableSortLabel-icon': { fontSize: '1rem' } }}
                     >
                       QUOTATION
                     </TableSortLabel>
@@ -1157,8 +1155,6 @@ export default function PurchaseOrders() {
                       active={sortConfig.key === 'vendor'}
                       direction={sortConfig.direction}
                       onClick={() => handleSort('vendor')}
-                      IconComponent={ArrowDropDown}
-                      sx={{ '& .MuiTableSortLabel-icon': { fontSize: '1rem' } }}
                     >
                       VENDOR
                     </TableSortLabel>
@@ -1169,8 +1165,6 @@ export default function PurchaseOrders() {
                       active={sortConfig.key === 'total_amount'}
                       direction={sortConfig.direction}
                       onClick={() => handleSort('total_amount')}
-                      IconComponent={ArrowDropDown}
-                      sx={{ '& .MuiTableSortLabel-icon': { fontSize: '1rem' } }}
                     >
                       AMOUNT
                     </TableSortLabel>
@@ -1181,8 +1175,6 @@ export default function PurchaseOrders() {
                       active={sortConfig.key === 'created_at'}
                       direction={sortConfig.direction}
                       onClick={() => handleSort('created_at')}
-                      IconComponent={ArrowDropDown}
-                      sx={{ '& .MuiTableSortLabel-icon': { fontSize: '1rem' } }}
                     >
                       DATE
                     </TableSortLabel>
@@ -1193,8 +1185,6 @@ export default function PurchaseOrders() {
                       active={sortConfig.key === 'status'}
                       direction={sortConfig.direction}
                       onClick={() => handleSort('status')}
-                      IconComponent={ArrowDropDown}
-                      sx={{ '& .MuiTableSortLabel-icon': { fontSize: '1rem' } }}
                     >
                       STATUS
                     </TableSortLabel>
@@ -1333,7 +1323,8 @@ export default function PurchaseOrders() {
                   <Chip label={detailDialog?.po_type} size="small" variant="outlined" color={detailDialog?.po_type === 'Formal' ? 'primary' : 'default'} sx={{ fontSize: '0.7rem', mr: 1, mb: 1 }} />
                   {detailDialog?.procurement_type === 'Rental' && detailDialog?.rental_type !== 'Cost Per Test' && <Chip label="Rental" size="small" color="info" sx={{ fontSize: '0.7rem', mr: 1, mb: 1 }} />}
                   {detailDialog?.procurement_type === 'Rental' && detailDialog?.rental_type === 'Cost Per Test' && <Chip label="Cost Per Test" size="small" sx={{ bgcolor: '#8B5CF6', color: 'white', fontSize: '0.7rem', mr: 1, mb: 1 }} />}
-                  {detailDialog?.is_cash_purchase && <Chip label="Cash Purchase" size="small" variant="filled" color="secondary" sx={{ fontSize: '0.7rem', mr: 1, mb: 1 }} />}
+                  {detailDialog?.purchase_mode && detailDialog?.purchase_mode !== 'Credit Purchase' && <Chip label={detailDialog.purchase_mode} size="small" variant="filled" color={detailDialog.purchase_mode === 'Advance Payment' ? 'warning' : 'secondary'} sx={{ fontSize: '0.7rem', mr: 1, mb: 1 }} />}
+                  {detailDialog?.marketplace_name && <Chip label={`Marketplace: ${detailDialog.marketplace_name}`} size="small" variant="outlined" sx={{ fontSize: '0.7rem', mr: 1, mb: 1 }} />}
                   {detailDialog?.advance_percentage > 0 && <Chip label={`${detailDialog.advance_percentage}% Advance`} size="small" variant="filled" color="info" sx={{ fontSize: '0.7rem', mb: 1 }} />}
                   {detailDialog?.billing_frequency && (
                     <Typography variant="caption" sx={{ display: 'block', mt: 0.5, color: '#475569' }}>
@@ -1646,6 +1637,20 @@ export default function PurchaseOrders() {
         </DialogTitle>
         <DialogContent sx={{ px: 3, py: 1 }}>
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr 1fr' }, gap: 2, pt: 1, mb: 2 }}>
+            <FormControl fullWidth size="small" error={!!errors.institution_id}>
+              <InputLabel>Institution *</InputLabel>
+              <Select
+                value={form.institution_id || ''}
+                label="Institution *"
+                onChange={e => setForm({ ...form, institution_id: e.target.value })}
+                startAdornment={<InputAdornment position="start"><Store sx={{ color: '#94A3B8' }} /></InputAdornment>}
+              >
+                {institutions.map(inst => (
+                  <MenuItem key={inst.id} value={inst.id}>{inst.code} - {inst.name}</MenuItem>
+                ))}
+              </Select>
+              {errors.institution_id && <Typography variant="caption" color="error" sx={{mt: 0.5, ml: 1}}>{errors.institution_id}</Typography>}
+            </FormControl>
             <Box id="field-vendor_id">
               <Autocomplete
                 options={vendors}
@@ -1689,57 +1694,84 @@ export default function PurchaseOrders() {
               ) : null}
             </Box>
 
-            <FormControl fullWidth size="small">
-              <InputLabel>PO Type</InputLabel>
+            <FormControl fullWidth size="small" error={!!errors.purchase_mode}>
+              <InputLabel>Purchase Mode *</InputLabel>
               <Select
-                value={form.po_type || 'Informal'}
-                label="PO Type"
-                onChange={e => setForm({ ...form, po_type: e.target.value })}
-                startAdornment={<InputAdornment position="start"><Assignment sx={{ color: '#94A3B8' }} /></InputAdornment>}
+                value={form.purchase_mode || ''}
+                label="Purchase Mode *"
+                onChange={e => {
+                  const val = e.target.value;
+                  setForm({ 
+                    ...form, 
+                    purchase_mode: val, 
+                    advance_percentage: val === 'Advance Payment' ? form.advance_percentage : 0,
+                    marketplace_name: val === 'Online Marketplace' ? form.marketplace_name : '' 
+                  });
+                }}
               >
-                <MenuItem value="Formal">Formal</MenuItem>
-                <MenuItem value="Informal">Informal</MenuItem>
+                <MenuItem value="" disabled><em>Select Mode</em></MenuItem>
+                <MenuItem value="Credit Purchase">Credit Purchase</MenuItem>
+                <MenuItem value="Cash Purchase">Cash Purchase</MenuItem>
+                <MenuItem value="Petty Cash">Petty Cash</MenuItem>
+                <MenuItem value="Online Marketplace">Online Marketplace</MenuItem>
+                <MenuItem value="Emergency Purchase">Emergency Purchase</MenuItem>
+                <MenuItem value="Advance Payment">Advance Payment</MenuItem>
               </Select>
+              {errors.purchase_mode && <FormHelperText>{errors.purchase_mode}</FormHelperText>}
             </FormControl>
 
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={form.is_cash_purchase || false}
-                  onChange={(e) => setForm({ ...form, is_cash_purchase: e.target.checked })}
-                  color="primary"
-                />
-              }
-              label="Cash Purchase (e.g. Amazon)"
-              sx={{ whiteSpace: 'nowrap' }}
-            />
-            
-            <TextField
-              size="small"
-              fullWidth
-              label="Advance Payment (%)"
-              type="number"
-              value={form.advance_percentage}
-              onChange={(e) => setForm({ ...form, advance_percentage: e.target.value })}
-              inputProps={{ min: 0, max: 100, step: 'any' }}
-              error={!!errors.advance_percentage}
-              helperText={errors.advance_percentage}
-            />
-            
-            <FormControl fullWidth size="small" error={!!errors.institution_id}>
-              <InputLabel>Institution *</InputLabel>
+            {form.purchase_mode === 'Online Marketplace' && (
+              <TextField
+                size="small"
+                fullWidth
+                label="Marketplace Name (e.g. Amazon, Flipkart)"
+                value={form.marketplace_name || ''}
+                onChange={(e) => setForm({ ...form, marketplace_name: e.target.value })}
+              />
+            )}
+
+            {form.purchase_mode === 'Advance Payment' && (
+              <TextField
+                size="small"
+                fullWidth
+                label="Advance Payment (%)"
+                type="number"
+                value={form.advance_percentage}
+                onChange={(e) => setForm({ ...form, advance_percentage: e.target.value })}
+                inputProps={{ min: 0, max: 100, step: 'any' }}
+                error={!!errors.advance_percentage}
+                helperText={errors.advance_percentage}
+              />
+            )}
+
+            <FormControl fullWidth size="small" error={!!errors.procurement_type}>
+              <InputLabel>Procurement Type *</InputLabel>
               <Select
-                value={form.institution_id || ''}
-                label="Institution *"
-                onChange={e => setForm({ ...form, institution_id: e.target.value })}
-                startAdornment={<InputAdornment position="start"><Store sx={{ color: '#94A3B8' }} /></InputAdornment>}
+                value={form.procurement_type || ''}
+                label="Procurement Type *"
+                onChange={e => setForm({ ...form, procurement_type: e.target.value, rental_type: e.target.value === 'Rental' ? 'Standard Rental' : '' })}
               >
-                {institutions.map(inst => (
-                  <MenuItem key={inst.id} value={inst.id}>{inst.code} - {inst.name}</MenuItem>
-                ))}
+                <MenuItem value="" disabled><em>Select Type</em></MenuItem>
+                <MenuItem value="Purchase">Standard Purchase</MenuItem>
+                <MenuItem value="Rental">Rental</MenuItem>
               </Select>
-              {errors.institution_id && <Typography variant="caption" color="error" sx={{mt: 0.5, ml: 1}}>{errors.institution_id}</Typography>}
+              {errors.procurement_type && <FormHelperText>{errors.procurement_type}</FormHelperText>}
             </FormControl>
+
+            {form.procurement_type === 'Rental' && (
+              <FormControl fullWidth size="small">
+                <InputLabel>Rental Model</InputLabel>
+                <Select
+                  value={form.rental_type || 'Standard Rental'}
+                  label="Rental Model"
+                  onChange={e => setForm({ ...form, rental_type: e.target.value })}
+                >
+                  <MenuItem value="Standard Rental">Equipment Rental</MenuItem>
+                  <MenuItem value="Cost Per Test">Cost Per Test</MenuItem>
+                  <MenuItem value="Reagent Rental">Reagent Rental</MenuItem>
+                </Select>
+              </FormControl>
+            )}
 
             <FormControl fullWidth size="small">
               <InputLabel>Linked Contract (RC)</InputLabel>
@@ -1777,35 +1809,6 @@ export default function PurchaseOrders() {
               }}
             />
           </Box>
-          </Box>
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr 1fr' }, gap: 2, pt: 1, mb: 2 }}>
-            <FormControl fullWidth size="small">
-              <InputLabel>Procurement Type</InputLabel>
-              <Select
-                value={form.procurement_type || 'Purchase'}
-                label="Procurement Type"
-                onChange={e => setForm({ ...form, procurement_type: e.target.value, rental_type: e.target.value === 'Rental' ? 'Standard Rental' : '' })}
-              >
-                <MenuItem value="Purchase">Standard Purchase</MenuItem>
-                <MenuItem value="Rental">Rental</MenuItem>
-                <MenuItem value="Cost Per Test">Cost Per Test</MenuItem>
-              </Select>
-            </FormControl>
-
-            {form.procurement_type === 'Rental' && (
-              <FormControl fullWidth size="small">
-                <InputLabel>Rental Model</InputLabel>
-                <Select
-                  value={form.rental_type || 'Standard Rental'}
-                  label="Rental Model"
-                  onChange={e => setForm({ ...form, rental_type: e.target.value })}
-                >
-                  <MenuItem value="Standard Rental">Equipment Rental</MenuItem>
-                  <MenuItem value="Cost Per Test">Cost Per Test</MenuItem>
-                  <MenuItem value="Reagent Rental">Reagent Rental</MenuItem>
-                </Select>
-              </FormControl>
-            )}
           </Box>
 
 
@@ -2292,7 +2295,7 @@ export default function PurchaseOrders() {
                   size="small"
                   color={{
                     'Awaiting Approval': 'warning', 'Approved': 'success', 'Rejected': 'error',
-                    'Partially Issued': 'info', 'Fully Issued': 'primary', 'PO Created': 'secondary', 'Closed': 'default'
+                    'Partially Issued': 'warning', 'Fully Issued': 'primary', 'PO Created': 'secondary', 'Closed': 'default'
                   }[linkedIndent?.status] || 'default'}
                 />
               </Box>

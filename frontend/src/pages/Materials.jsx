@@ -501,7 +501,7 @@ export default function Materials() {
                     </Tooltip>
                     <Tooltip title="Edit Material">
                       <IconButton size="small" onClick={() => openEdit(m, false)} sx={{ color: '#64748B' }}>
-                        <Edit fontSize="small" />
+                        <Edit color="primary" fontSize="small" />
                       </IconButton>
                     </Tooltip>
                   </Box>
@@ -663,7 +663,7 @@ export default function Materials() {
                         </Tooltip>
                         <Tooltip title="Edit Material">
                           <IconButton size="small" onClick={() => openEdit(m, false)} sx={{ color: '#64748B' }}>
-                            <Edit fontSize="small" />
+                            <Edit color="primary" fontSize="small" />
                           </IconButton>
                         </Tooltip>
                       </Box>

@@ -120,7 +120,7 @@ export default function TermsAndConditions() {
                     </TableCell>
                     <TableCell align="right">
                       <IconButton size="small" color="primary" onClick={() => openModal(term)}>
-                        <Edit fontSize="small" />
+                        <Edit color="primary" fontSize="small" />
                       </IconButton>
                       <IconButton size="small" color="error" onClick={() => handleDelete(term.id)}>
                         <Delete fontSize="small" />

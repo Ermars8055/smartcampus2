@@ -360,7 +360,7 @@ export default function WriteOffs() {
             value={tab}
             onChange={(_, v) => setTab(v)}
             variant="scrollable"
-            scrollButtons="auto"
+            scrollButtons={false}
             sx={{ borderBottom: 1, borderColor: 'divider' }}
           >
             {statusFilters.map((s, i) => (
@@ -376,8 +376,8 @@ export default function WriteOffs() {
                         height: 20,
                         fontSize: '0.7rem',
                         fontWeight: 700,
-                        backgroundColor: tab === i ? 'primary.light' : '#f0f0f0',
-                        color: tab === i ? 'primary.contrastText' : 'text.secondary',
+                        bgcolor: tab === i ? 'primary.main' : 'action.selected',
+                        color: tab === i ? 'white' : 'text.primary',
                         cursor: 'pointer'
                       }}
                     />
@@ -407,7 +407,6 @@ export default function WriteOffs() {
                       active={sortConfig.key === 'write_off_number'}
                       direction={sortConfig.direction}
                       onClick={() => handleSort('write_off_number')}
-                      IconComponent={ArrowDropDown}
                     >
                       WRITE OFF
                     </TableSortLabel>
@@ -417,7 +416,6 @@ export default function WriteOffs() {
                       active={sortConfig.key === 'date'}
                       direction={sortConfig.direction}
                       onClick={() => handleSort('date')}
-                      IconComponent={ArrowDropDown}
                     >
                       DATE
                     </TableSortLabel>
@@ -427,7 +425,6 @@ export default function WriteOffs() {
                       active={sortConfig.key === 'reason'}
                       direction={sortConfig.direction}
                       onClick={() => handleSort('reason')}
-                      IconComponent={ArrowDropDown}
                     >
                       REASON
                     </TableSortLabel>
@@ -437,7 +434,6 @@ export default function WriteOffs() {
                       active={sortConfig.key === 'items'}
                       direction={sortConfig.direction}
                       onClick={() => handleSort('items')}
-                      IconComponent={ArrowDropDown}
                     >
                       ITEMS
                     </TableSortLabel>
@@ -447,7 +443,6 @@ export default function WriteOffs() {
                       active={sortConfig.key === 'status'}
                       direction={sortConfig.direction}
                       onClick={() => handleSort('status')}
-                      IconComponent={ArrowDropDown}
                     >
                       STATUS
                     </TableSortLabel>
@@ -499,7 +494,7 @@ export default function WriteOffs() {
                               });
                               setErrors({});
                             }}>
-                              <Edit fontSize="small" />
+                              <Edit color="primary" fontSize="small" />
                             </IconButton>
                           </span>
                         </Tooltip>

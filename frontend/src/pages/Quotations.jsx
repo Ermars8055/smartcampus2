@@ -829,11 +829,11 @@ const Quotations = () => {
     switch (status) {
       case 'Draft': return 'default';
       case 'Submitted': return 'info';
-      case 'Requested': return 'info';
+      case 'Requested': return 'primary';
       case 'Received': return 'secondary';
-      case 'Entered': return 'secondary';
-      case 'Compared': return 'warning';
-      case 'Approved': return 'primary';
+      case 'Entered': return 'warning';
+      case 'Compared': return 'info';
+      case 'Approved': return 'success';
       case 'Ordered': return 'success';
       default: return 'default';
     }
@@ -884,45 +884,42 @@ const Quotations = () => {
           <Box>
             {/* Status Filter Tabs */}
             <Card sx={{ mb: 3 }}>
-              <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
-                  <TextField size="small" placeholder="Search QR/PR Numbers..." value={search}
-                    onChange={e => setSearch(e.target.value)} sx={{ minWidth: 300 }}
-                    InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }} />
-                  <DatePicker
-                    label="Start Date"
-                    value={startDate}
-                    onChange={(val) => setStartDate(val)}
-                    format="DD-MMM-YYYY"
-                    localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
-                    slotProps={{ textField: { size: 'small', sx: { minWidth: 150 }, placeholder: "DD-MMM-YYYY" } }}
-                  />
-                  <DatePicker
-                    label="End Date"
-                    value={endDate}
-                    onChange={(val) => setEndDate(val)}
-                    format="DD-MMM-YYYY"
-                    localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
-                    slotProps={{ textField: { size: 'small', sx: { minWidth: 150 }, placeholder: "DD-MMM-YYYY" } }}
-                  />
-                </Box>
-                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
-                  <Autocomplete
-                    size="small"
-                    options={vendors}
-                    getOptionLabel={(option) => `${option.code} - ${option.name}`}
-                    value={filterVendor}
-                    onChange={(e, val) => setFilterVendor(val)}
-                    renderInput={(params) => <TextField {...params} placeholder="Filter by Vendor" sx={{ minWidth: 250 }} />}
-                    isOptionEqualToValue={(option, value) => option.id === value.id}
-                  />
-                </Box>
+              <Box sx={{ p: 2, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+                <TextField size="small" placeholder="Search QR/PR Numbers..." value={search}
+                  onChange={e => setSearch(e.target.value)} sx={{ width: 250 }}
+                  InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }} />
+                <Autocomplete
+                  size="small"
+                  options={vendors}
+                  getOptionLabel={(option) => `${option.code} - ${option.name}`}
+                  value={filterVendor}
+                  onChange={(e, val) => setFilterVendor(val)}
+                  renderInput={(params) => <TextField {...params} placeholder="Filter by Vendor" />}
+                  isOptionEqualToValue={(option, value) => option.id === value.id}
+                  sx={{ width: 220 }}
+                />
+                <DatePicker
+                  label="Start Date"
+                  value={startDate}
+                  onChange={(val) => setStartDate(val)}
+                  format="DD-MMM-YYYY"
+                  localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
+                  slotProps={{ textField: { size: 'small', sx: { width: 200 }, placeholder: "DD-MMM-YYYY" } }}
+                />
+                <DatePicker
+                  label="End Date"
+                  value={endDate}
+                  onChange={(val) => setEndDate(val)}
+                  format="DD-MMM-YYYY"
+                  localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
+                  slotProps={{ textField: { size: 'small', sx: { width: 200 }, placeholder: "DD-MMM-YYYY" } }}
+                />
               </Box>
               <Tabs
                 value={listFilter}
                 onChange={(e, newVal) => setListFilter(newVal)}
                 variant="scrollable"
-                scrollButtons="auto"
+                scrollButtons={false}
                 sx={{ borderBottom: 1, borderColor: 'divider' }}
               >
                 {['Draft', 'Submitted', 'Requested', 'Received', 'Entered', 'Compared', 'Approved', 'Ordered', 'All'].map(filter => (
@@ -939,14 +936,14 @@ const Quotations = () => {
                             height: 20,
                             fontSize: '0.7rem',
                             fontWeight: 700,
-                            backgroundColor: listFilter === filter ? 'primary.light' : '#f0f0f0',
-                            color: listFilter === filter ? 'primary.contrastText' : 'text.secondary',
+                            bgcolor: listFilter === filter ? 'primary.main' : 'action.selected',
+                            color: listFilter === filter ? 'white' : 'text.primary',
                             cursor: 'pointer'
                           }}
                         />
                       </Box>
                     }
-                    sx={{ textTransform: 'none', fontWeight: 600, minHeight: 48, minWidth: 'auto', px: 2 }}
+                    sx={{ textTransform: 'none', fontWeight: 600, minHeight: 48, minWidth: 'auto', px: 1.5 }}
                   />
                 ))}
               </Tabs>
@@ -961,13 +958,6 @@ const Quotations = () => {
                         active={sortConfig.key === 'qr_number'}
                         direction={sortConfig.direction}
                         onClick={() => handleSort('qr_number')}
-                        IconComponent={ArrowDropDown}
-                        sx={{
-                          '& .MuiTableSortLabel-icon': {
-                            fontSize: '1.2rem !important',
-                            opacity: sortConfig.key === 'qr_number' ? 1 : 0
-                          }
-                        }}
                       >
                         QUOTATION NUMBER
                       </TableSortLabel>
@@ -977,13 +967,6 @@ const Quotations = () => {
                         active={sortConfig.key === 'prs'}
                         direction={sortConfig.direction}
                         onClick={() => handleSort('prs')}
-                        IconComponent={ArrowDropDown}
-                        sx={{
-                          '& .MuiTableSortLabel-icon': {
-                            fontSize: '1.2rem !important',
-                            opacity: sortConfig.key === 'prs' ? 1 : 0
-                          }
-                        }}
                       >
                         PURCHASE REQUESTS
                       </TableSortLabel>
@@ -993,13 +976,6 @@ const Quotations = () => {
                         active={sortConfig.key === 'vendors'}
                         direction={sortConfig.direction}
                         onClick={() => handleSort('vendors')}
-                        IconComponent={ArrowDropDown}
-                        sx={{
-                          '& .MuiTableSortLabel-icon': {
-                            fontSize: '1.2rem !important',
-                            opacity: sortConfig.key === 'vendors' ? 1 : 0
-                          }
-                        }}
                       >
                         VENDORS
                       </TableSortLabel>
@@ -1009,13 +985,6 @@ const Quotations = () => {
                         active={sortConfig.key === 'status'}
                         direction={sortConfig.direction}
                         onClick={() => handleSort('status')}
-                        IconComponent={ArrowDropDown}
-                        sx={{
-                          '& .MuiTableSortLabel-icon': {
-                            fontSize: '1.2rem !important',
-                            opacity: sortConfig.key === 'status' ? 1 : 0
-                          }
-                        }}
                       >
                         STATUS
                       </TableSortLabel>
@@ -1025,13 +994,6 @@ const Quotations = () => {
                         active={sortConfig.key === 'date'}
                         direction={sortConfig.direction}
                         onClick={() => handleSort('date')}
-                        IconComponent={ArrowDropDown}
-                        sx={{
-                          '& .MuiTableSortLabel-icon': {
-                            fontSize: '1.2rem !important',
-                            opacity: sortConfig.key === 'date' ? 1 : 0
-                          }
-                        }}
                       >
                         QUOTATION DATE
                       </TableSortLabel>
@@ -1092,7 +1054,7 @@ const Quotations = () => {
                                     onClick={() => handleEditDraft(qr)}
                                     sx={{ color: 'primary.main' }}
                                   >
-                                    <EditIcon fontSize="small" />
+                                    <EditIcon color="primary" fontSize="small" />
                                   </IconButton>
                                 </span>
                               </Tooltip>
@@ -1371,7 +1333,7 @@ const Quotations = () => {
                             </TableCell>
                             <TableCell align="right">
                               {!isNotRequired && !['Compared', 'Approved', 'Ordered'].includes(selectedQR.status) && (
-                                <Button variant="outlined" size="small" startIcon={<EditIcon />} onClick={async () => {
+                                <Button variant="outlined" size="small" startIcon={<EditIcon color="primary" />} onClick={async () => {
                                   // Auto set receipt to Received if they click Enter Quote
                                   if (v.receipt_status !== 'Received') {
                                      await handleUpdateVendorReceipt(selectedQR.id, v.vendor_id, 'Received', true);
@@ -1978,7 +1940,7 @@ const Quotations = () => {
           <DialogTitle sx={{ pb: 1, pt: 3, px: 4 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
               <Box sx={{ p: 1, bgcolor: '#EFF6FF', borderRadius: 2, color: '#2563EB', display: 'flex' }}>
-                <EditIcon fontSize="medium" />
+                <EditIcon color="primary" fontSize="medium" />
               </Box>
               <Box>
                 <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>

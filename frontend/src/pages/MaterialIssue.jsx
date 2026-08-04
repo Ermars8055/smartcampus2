@@ -499,38 +499,37 @@ export default function MaterialIssue() {
         </Box>
       </Box>
 
-      <Box sx={{ mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-        <TextField
-          size="small"
-          placeholder="Search by Record No (e.g. IND-0001)..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Search sx={{ color: 'text.secondary', fontSize: 20 }} />
-              </InputAdornment>
-            ),
-          }}
-          sx={{ bgcolor: 'white', borderRadius: 1, minWidth: 300, width: '100%', maxWidth: 400 }}
-        />
-        <Autocomplete
-          size="small"
-          options={institutions}
-          getOptionLabel={(option) => option.name || ''}
-          value={filterInstitution}
-          onChange={(e, val) => setFilterInstitution(val)}
-          renderInput={(params) => <TextField {...params} placeholder="Filter by Institution" sx={{ minWidth: 250 }} />}
-          sx={{ bgcolor: 'white', borderRadius: 1 }}
-        />
-      </Box>
-
       <Card sx={{ mb: 3 }}>
+        <Box sx={{ p: 2, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+          <TextField
+            size="small"
+            placeholder="Search by Record No (e.g. IND-0001)..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search sx={{ color: 'text.secondary', fontSize: 20 }} />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ bgcolor: 'white', borderRadius: 1, minWidth: 300, width: '100%', maxWidth: 400 }}
+          />
+          <Autocomplete
+            size="small"
+            options={institutions}
+            getOptionLabel={(option) => option.name || ''}
+            value={filterInstitution}
+            onChange={(e, val) => setFilterInstitution(val)}
+            renderInput={(params) => <TextField {...params} placeholder="Filter by Institution" sx={{ minWidth: 250 }} />}
+            sx={{ bgcolor: 'white', borderRadius: 1 }}
+          />
+        </Box>
         <Tabs
           value={tabValue}
           onChange={(e, v) => setTabValue(v)}
           variant="scrollable"
-          scrollButtons="auto"
+          scrollButtons={false}
           sx={{ borderBottom: 1, borderColor: 'divider' }}
         >
           {['Pending', 'Partial', 'Completed', 'Acknowledged', 'All'].map(s => {

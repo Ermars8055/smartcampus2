@@ -131,7 +131,7 @@ export default function Warehouses() {
                     }} 
                   />
                   <Box onClick={e => e.stopPropagation()}>
-                    <IconButton size="small" onClick={() => { setErrors({}); setForm({ ...w, project_id: w.project_id || projects[0]?.id || '', is_active: w.is_active !== false }); setDialogOpen(true); }}><Edit fontSize="small" /></IconButton>
+                    <IconButton size="small" onClick={() => { setErrors({}); setForm({ ...w, project_id: w.project_id || projects[0]?.id || '', is_active: w.is_active !== false }); setDialogOpen(true); }}><Edit color="primary" fontSize="small" /></IconButton>
                     <IconButton size="small" onClick={() => handleDelete(w.id)} color="error"><Delete fontSize="small" /></IconButton>
                   </Box>
                </Box>
@@ -178,7 +178,7 @@ export default function Warehouses() {
                     />
                   </TableCell>
                   <TableCell align="right" onClick={e => e.stopPropagation()}>
-                    <IconButton size="small" onClick={() => { setErrors({}); setForm({ ...w, project_id: w.project_id || projects[0]?.id || '', is_active: w.is_active !== false }); setDialogOpen(true); }}><Edit fontSize="small" /></IconButton>
+                    <IconButton size="small" onClick={() => { setErrors({}); setForm({ ...w, project_id: w.project_id || projects[0]?.id || '', is_active: w.is_active !== false }); setDialogOpen(true); }}><Edit color="primary" fontSize="small" /></IconButton>
                     <IconButton size="small" onClick={() => handleDelete(w.id)} color="error"><Delete fontSize="small" /></IconButton>
                   </TableCell>
                 </TableRow>

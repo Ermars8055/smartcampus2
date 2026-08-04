@@ -139,7 +139,7 @@ class GateEntryType(str, enum.Enum):
 
 class IndentStatus(str, enum.Enum):
     DRAFT = "Draft"
-    AWAITING_APPROVAL = "Awaiting Approval"
+    SUBMITTED = "Submitted"
     APPROVED = "Approved"
     PARTIALLY_ISSUED = "Partially Issued"
     ISSUED = "Issued"
@@ -172,7 +172,7 @@ class VendorQuotationReceiptStatus(str, enum.Enum):
 
 class VendorStatus(str, enum.Enum):
     DRAFT = "Draft"
-    AWAITING_APPROVAL = "Awaiting Approval"
+    SUBMITTED = "Submitted"
     APPROVED = "Approved"
     REJECTED = "Rejected"
 
@@ -693,7 +693,7 @@ class Vendor(Base):
     bank_account = Column(String(50))
     ifsc_code = Column(String(20))
     rating = Column(Float, default=0)
-    status = Column(String(50), default=VendorStatus.AWAITING_APPROVAL.value)
+    status = Column(String(50), default=VendorStatus.SUBMITTED.value)
     current_approval_level = Column(Integer, default=1)
     approved_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     approved_at = Column(DateTime, nullable=True)
@@ -805,7 +805,8 @@ class PurchaseOrder(Base):
     institution_id = Column(Integer, ForeignKey("institutions.id"), nullable=True)
     contract_id = Column(Integer, ForeignKey("contracts.id"), nullable=True)
     po_type = Column(String(50), default="Formal") # Formal, Informal
-    is_cash_purchase = Column(Boolean, default=False)
+    purchase_mode = Column(String(50), default="Credit Purchase")
+    marketplace_name = Column(String(100), nullable=True)
     advance_percentage = Column(Float, default=0)
     total_amount = Column(Float, default=0)
     delivery_date = Column(Date)

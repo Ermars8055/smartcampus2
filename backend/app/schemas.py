@@ -616,7 +616,8 @@ class POBase(BaseModel):
     qr_id: Optional[int] = None
     contract_id: Optional[int] = None
     po_type: str = "Formal"
-    is_cash_purchase: bool = False
+    purchase_mode: str = "Credit Purchase"
+    marketplace_name: Optional[str] = None
     advance_percentage: float = Field(default=0, ge=0, le=100)
     delivery_date: Optional[date] = None
     terms: Optional[str] = None
@@ -664,7 +665,8 @@ class POUpdate(BaseModel):
     delivery_date: Optional[date] = None
     status: Optional[str] = None
     terms: Optional[str] = None
-    is_cash_purchase: Optional[bool] = None
+    purchase_mode: Optional[str] = None
+    marketplace_name: Optional[str] = None
     advance_percentage: Optional[float] = Field(None, ge=0, le=100)
 
 class POOut(BaseModel):
@@ -680,7 +682,8 @@ class POOut(BaseModel):
     qr_id: Optional[int] = None
     qr_number: Optional[str] = None
     po_type: str = "Formal"
-    is_cash_purchase: bool = False
+    purchase_mode: str = "Credit Purchase"
+    marketplace_name: Optional[str] = None
     advance_percentage: float = 0
     procurement_type: str = "Purchase"
     rental_type: Optional[str] = None
@@ -1453,6 +1456,7 @@ class IndentBase(BaseModel):
 
 class IndentCreate(IndentBase):
     department: Optional[str] = None
+    is_draft: bool = False
 
 class IndentUpdate(BaseModel):
     status: Optional[str] = None

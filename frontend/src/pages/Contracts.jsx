@@ -197,7 +197,7 @@ export default function Contracts() {
           value={tabValue}
           onChange={(e, v) => setTabValue(v)}
           variant="scrollable"
-          scrollButtons="auto"
+          scrollButtons={false}
           sx={{ borderTop: 1, borderColor: 'divider' }}
         >
           {['Draft', 'Submitted', 'Approved', 'Active', 'Inactive', 'Closed', 'Rejected', 'All'].map(s => {
@@ -338,7 +338,7 @@ export default function Contracts() {
                       </Tooltip>
                       <Tooltip title={c.status === 'Active' || c.status === 'Closed' ? "View Details" : "Edit Contract"}>
                         <IconButton size="small" onClick={(e) => { e.stopPropagation(); navigate(`/contracts/edit/${c.id}`); }} sx={{ color: '#64748B' }}>
-                          {c.status === 'Active' || c.status === 'Closed' ? <RemoveRedEye fontSize="small" /> : <Edit fontSize="small" />}
+                          {c.status === 'Active' || c.status === 'Closed' ? <RemoveRedEye fontSize="small" /> : <Edit color="primary" fontSize="small" />}
                         </IconButton>
                       </Tooltip>
                     </Box>

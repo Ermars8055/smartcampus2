@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict 9iuJfEW5oM6ybQ2wDseboBXkqKeEqvdnCwqmqyt6ZZ9QPPIkaAZZcG9o6f6lXNh
+\restrict gGa8R29H29rIU5qKYwRwwolqvp46aPS8rnGLzvVytArGipQiWAoFcluQnccf5Es
 
 -- Dumped from database version 17.10 (Ubuntu 17.10-1.pgdg22.04+1)
 -- Dumped by pg_dump version 18.4 (Ubuntu 18.4-1.pgdg22.04+1)
@@ -26,7 +26,7 @@ SET row_security = off;
 -- *not* creating schema, since initdb creates it
 
 
-ALTER SCHEMA public OWNER TO nissigrid;
+ALTER SCHEMA public OWNER TO postgres;
 
 SET default_tablespace = '';
 
@@ -41,7 +41,7 @@ CREATE TABLE public.alembic_version (
 );
 
 
-ALTER TABLE public.alembic_version OWNER TO nissigrid;
+ALTER TABLE public.alembic_version OWNER TO postgres;
 
 --
 -- Name: alerts; Type: TABLE; Schema: public; Owner: postgres
@@ -66,7 +66,7 @@ CREATE TABLE public.alerts (
 );
 
 
-ALTER TABLE public.alerts OWNER TO nissigrid;
+ALTER TABLE public.alerts OWNER TO postgres;
 
 --
 -- Name: alerts_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -81,7 +81,7 @@ CREATE SEQUENCE public.alerts_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.alerts_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.alerts_id_seq OWNER TO postgres;
 
 --
 -- Name: alerts_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -108,7 +108,7 @@ CREATE TABLE public.approval_flows (
 );
 
 
-ALTER TABLE public.approval_flows OWNER TO nissigrid;
+ALTER TABLE public.approval_flows OWNER TO postgres;
 
 --
 -- Name: approval_flows_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -123,7 +123,7 @@ CREATE SEQUENCE public.approval_flows_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.approval_flows_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.approval_flows_id_seq OWNER TO postgres;
 
 --
 -- Name: approval_flows_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -151,7 +151,7 @@ CREATE TABLE public.audit_logs (
 );
 
 
-ALTER TABLE public.audit_logs OWNER TO nissigrid;
+ALTER TABLE public.audit_logs OWNER TO postgres;
 
 --
 -- Name: audit_logs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -166,7 +166,7 @@ CREATE SEQUENCE public.audit_logs_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.audit_logs_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.audit_logs_id_seq OWNER TO postgres;
 
 --
 -- Name: audit_logs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -194,7 +194,7 @@ CREATE TABLE public.buildings (
 );
 
 
-ALTER TABLE public.buildings OWNER TO nissigrid;
+ALTER TABLE public.buildings OWNER TO postgres;
 
 --
 -- Name: buildings_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -209,7 +209,7 @@ CREATE SEQUENCE public.buildings_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.buildings_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.buildings_id_seq OWNER TO postgres;
 
 --
 -- Name: buildings_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -236,7 +236,7 @@ CREATE TABLE public.categories (
 );
 
 
-ALTER TABLE public.categories OWNER TO nissigrid;
+ALTER TABLE public.categories OWNER TO postgres;
 
 --
 -- Name: categories_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -251,7 +251,7 @@ CREATE SEQUENCE public.categories_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.categories_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.categories_id_seq OWNER TO postgres;
 
 --
 -- Name: categories_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -290,7 +290,7 @@ CREATE TABLE public.company_addresses (
 );
 
 
-ALTER TABLE public.company_addresses OWNER TO nissigrid;
+ALTER TABLE public.company_addresses OWNER TO postgres;
 
 --
 -- Name: company_addresses_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -305,7 +305,7 @@ CREATE SEQUENCE public.company_addresses_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.company_addresses_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.company_addresses_id_seq OWNER TO postgres;
 
 --
 -- Name: company_addresses_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -328,7 +328,7 @@ CREATE TABLE public.complaint_documents (
 );
 
 
-ALTER TABLE public.complaint_documents OWNER TO nissigrid;
+ALTER TABLE public.complaint_documents OWNER TO postgres;
 
 --
 -- Name: complaint_documents_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -343,7 +343,7 @@ CREATE SEQUENCE public.complaint_documents_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.complaint_documents_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.complaint_documents_id_seq OWNER TO postgres;
 
 --
 -- Name: complaint_documents_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -365,7 +365,7 @@ CREATE TABLE public.complaint_images (
 );
 
 
-ALTER TABLE public.complaint_images OWNER TO nissigrid;
+ALTER TABLE public.complaint_images OWNER TO postgres;
 
 --
 -- Name: complaint_images_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -380,7 +380,7 @@ CREATE SEQUENCE public.complaint_images_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.complaint_images_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.complaint_images_id_seq OWNER TO postgres;
 
 --
 -- Name: complaint_images_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -436,7 +436,7 @@ CREATE TABLE public.complaints (
 );
 
 
-ALTER TABLE public.complaints OWNER TO nissigrid;
+ALTER TABLE public.complaints OWNER TO postgres;
 
 --
 -- Name: complaints_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -451,7 +451,7 @@ CREATE SEQUENCE public.complaints_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.complaints_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.complaints_id_seq OWNER TO postgres;
 
 --
 -- Name: complaints_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -474,7 +474,7 @@ CREATE TABLE public.contract_approvals (
 );
 
 
-ALTER TABLE public.contract_approvals OWNER TO nissigrid;
+ALTER TABLE public.contract_approvals OWNER TO postgres;
 
 --
 -- Name: contract_approvals_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -489,7 +489,7 @@ CREATE SEQUENCE public.contract_approvals_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.contract_approvals_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.contract_approvals_id_seq OWNER TO postgres;
 
 --
 -- Name: contract_approvals_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -519,7 +519,7 @@ CREATE TABLE public.contract_items (
 );
 
 
-ALTER TABLE public.contract_items OWNER TO nissigrid;
+ALTER TABLE public.contract_items OWNER TO postgres;
 
 --
 -- Name: contract_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -534,7 +534,7 @@ CREATE SEQUENCE public.contract_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.contract_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.contract_items_id_seq OWNER TO postgres;
 
 --
 -- Name: contract_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -576,7 +576,7 @@ CREATE TABLE public.contracts (
 );
 
 
-ALTER TABLE public.contracts OWNER TO nissigrid;
+ALTER TABLE public.contracts OWNER TO postgres;
 
 --
 -- Name: contracts_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -591,7 +591,7 @@ CREATE SEQUENCE public.contracts_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.contracts_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.contracts_id_seq OWNER TO postgres;
 
 --
 -- Name: contracts_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -615,7 +615,7 @@ CREATE TABLE public.current_stock (
 );
 
 
-ALTER TABLE public.current_stock OWNER TO nissigrid;
+ALTER TABLE public.current_stock OWNER TO postgres;
 
 --
 -- Name: current_stock_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -630,7 +630,7 @@ CREATE SEQUENCE public.current_stock_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.current_stock_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.current_stock_id_seq OWNER TO postgres;
 
 --
 -- Name: current_stock_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -655,7 +655,7 @@ CREATE TABLE public.department_material_limits (
 );
 
 
-ALTER TABLE public.department_material_limits OWNER TO nissigrid;
+ALTER TABLE public.department_material_limits OWNER TO postgres;
 
 --
 -- Name: department_material_limits_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -670,7 +670,7 @@ CREATE SEQUENCE public.department_material_limits_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.department_material_limits_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.department_material_limits_id_seq OWNER TO postgres;
 
 --
 -- Name: department_material_limits_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -698,7 +698,7 @@ CREATE TABLE public.departments (
 );
 
 
-ALTER TABLE public.departments OWNER TO nissigrid;
+ALTER TABLE public.departments OWNER TO postgres;
 
 --
 -- Name: departments_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -713,7 +713,7 @@ CREATE SEQUENCE public.departments_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.departments_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.departments_id_seq OWNER TO postgres;
 
 --
 -- Name: departments_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -736,7 +736,7 @@ CREATE TABLE public.document_sequences (
 );
 
 
-ALTER TABLE public.document_sequences OWNER TO nissigrid;
+ALTER TABLE public.document_sequences OWNER TO postgres;
 
 --
 -- Name: document_sequences_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -751,7 +751,7 @@ CREATE SEQUENCE public.document_sequences_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.document_sequences_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.document_sequences_id_seq OWNER TO postgres;
 
 --
 -- Name: document_sequences_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -775,7 +775,7 @@ CREATE TABLE public.equipment_history (
 );
 
 
-ALTER TABLE public.equipment_history OWNER TO nissigrid;
+ALTER TABLE public.equipment_history OWNER TO postgres;
 
 --
 -- Name: equipment_history_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -790,7 +790,7 @@ CREATE SEQUENCE public.equipment_history_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.equipment_history_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.equipment_history_id_seq OWNER TO postgres;
 
 --
 -- Name: equipment_history_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -866,7 +866,7 @@ CREATE TABLE public.equipment_items (
 );
 
 
-ALTER TABLE public.equipment_items OWNER TO nissigrid;
+ALTER TABLE public.equipment_items OWNER TO postgres;
 
 --
 -- Name: equipment_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -881,7 +881,7 @@ CREATE SEQUENCE public.equipment_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.equipment_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.equipment_items_id_seq OWNER TO postgres;
 
 --
 -- Name: equipment_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -906,7 +906,7 @@ CREATE TABLE public.equipment_writeoffs (
 );
 
 
-ALTER TABLE public.equipment_writeoffs OWNER TO nissigrid;
+ALTER TABLE public.equipment_writeoffs OWNER TO postgres;
 
 --
 -- Name: equipment_writeoffs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -921,7 +921,7 @@ CREATE SEQUENCE public.equipment_writeoffs_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.equipment_writeoffs_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.equipment_writeoffs_id_seq OWNER TO postgres;
 
 --
 -- Name: equipment_writeoffs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -948,7 +948,7 @@ CREATE TABLE public.floors (
 );
 
 
-ALTER TABLE public.floors OWNER TO nissigrid;
+ALTER TABLE public.floors OWNER TO postgres;
 
 --
 -- Name: floors_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -963,7 +963,7 @@ CREATE SEQUENCE public.floors_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.floors_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.floors_id_seq OWNER TO postgres;
 
 --
 -- Name: floors_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1013,7 +1013,7 @@ CREATE TABLE public.gate_entries (
 );
 
 
-ALTER TABLE public.gate_entries OWNER TO nissigrid;
+ALTER TABLE public.gate_entries OWNER TO postgres;
 
 --
 -- Name: gate_entries_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1028,7 +1028,7 @@ CREATE SEQUENCE public.gate_entries_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.gate_entries_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.gate_entries_id_seq OWNER TO postgres;
 
 --
 -- Name: gate_entries_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1050,7 +1050,7 @@ CREATE TABLE public.gate_pass_items (
 );
 
 
-ALTER TABLE public.gate_pass_items OWNER TO nissigrid;
+ALTER TABLE public.gate_pass_items OWNER TO postgres;
 
 --
 -- Name: gate_pass_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1065,7 +1065,7 @@ CREATE SEQUENCE public.gate_pass_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.gate_pass_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.gate_pass_items_id_seq OWNER TO postgres;
 
 --
 -- Name: gate_pass_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1105,7 +1105,7 @@ CREATE TABLE public.gate_passes (
 );
 
 
-ALTER TABLE public.gate_passes OWNER TO nissigrid;
+ALTER TABLE public.gate_passes OWNER TO postgres;
 
 --
 -- Name: gate_passes_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1120,7 +1120,7 @@ CREATE SEQUENCE public.gate_passes_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.gate_passes_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.gate_passes_id_seq OWNER TO postgres;
 
 --
 -- Name: gate_passes_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1167,7 +1167,7 @@ CREATE TABLE public.grn (
 );
 
 
-ALTER TABLE public.grn OWNER TO nissigrid;
+ALTER TABLE public.grn OWNER TO postgres;
 
 --
 -- Name: grn_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1182,7 +1182,7 @@ CREATE SEQUENCE public.grn_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.grn_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.grn_id_seq OWNER TO postgres;
 
 --
 -- Name: grn_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1218,7 +1218,7 @@ CREATE TABLE public.grn_items (
 );
 
 
-ALTER TABLE public.grn_items OWNER TO nissigrid;
+ALTER TABLE public.grn_items OWNER TO postgres;
 
 --
 -- Name: grn_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1233,7 +1233,7 @@ CREATE SEQUENCE public.grn_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.grn_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.grn_items_id_seq OWNER TO postgres;
 
 --
 -- Name: grn_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1257,7 +1257,7 @@ CREATE TABLE public.indent_approvals (
 );
 
 
-ALTER TABLE public.indent_approvals OWNER TO nissigrid;
+ALTER TABLE public.indent_approvals OWNER TO postgres;
 
 --
 -- Name: indent_approvals_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1272,7 +1272,7 @@ CREATE SEQUENCE public.indent_approvals_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.indent_approvals_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.indent_approvals_id_seq OWNER TO postgres;
 
 --
 -- Name: indent_approvals_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1296,7 +1296,7 @@ CREATE TABLE public.indent_items (
 );
 
 
-ALTER TABLE public.indent_items OWNER TO nissigrid;
+ALTER TABLE public.indent_items OWNER TO postgres;
 
 --
 -- Name: indent_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1311,7 +1311,7 @@ CREATE SEQUENCE public.indent_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.indent_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.indent_items_id_seq OWNER TO postgres;
 
 --
 -- Name: indent_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1350,7 +1350,7 @@ CREATE TABLE public.indents (
 );
 
 
-ALTER TABLE public.indents OWNER TO nissigrid;
+ALTER TABLE public.indents OWNER TO postgres;
 
 --
 -- Name: indents_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1365,7 +1365,7 @@ CREATE SEQUENCE public.indents_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.indents_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.indents_id_seq OWNER TO postgres;
 
 --
 -- Name: indents_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1391,7 +1391,7 @@ CREATE TABLE public.institutions (
 );
 
 
-ALTER TABLE public.institutions OWNER TO nissigrid;
+ALTER TABLE public.institutions OWNER TO postgres;
 
 --
 -- Name: institutions_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1406,7 +1406,7 @@ CREATE SEQUENCE public.institutions_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.institutions_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.institutions_id_seq OWNER TO postgres;
 
 --
 -- Name: institutions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1441,7 +1441,7 @@ CREATE TABLE public.invoice_items (
 );
 
 
-ALTER TABLE public.invoice_items OWNER TO nissigrid;
+ALTER TABLE public.invoice_items OWNER TO postgres;
 
 --
 -- Name: invoice_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1456,7 +1456,7 @@ CREATE SEQUENCE public.invoice_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.invoice_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.invoice_items_id_seq OWNER TO postgres;
 
 --
 -- Name: invoice_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1535,7 +1535,7 @@ CREATE TABLE public.invoices (
 );
 
 
-ALTER TABLE public.invoices OWNER TO nissigrid;
+ALTER TABLE public.invoices OWNER TO postgres;
 
 --
 -- Name: invoices_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1550,7 +1550,7 @@ CREATE SEQUENCE public.invoices_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.invoices_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.invoices_id_seq OWNER TO postgres;
 
 --
 -- Name: invoices_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1574,7 +1574,7 @@ CREATE TABLE public.location_master (
 );
 
 
-ALTER TABLE public.location_master OWNER TO nissigrid;
+ALTER TABLE public.location_master OWNER TO postgres;
 
 --
 -- Name: location_master_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1589,7 +1589,7 @@ CREATE SEQUENCE public.location_master_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.location_master_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.location_master_id_seq OWNER TO postgres;
 
 --
 -- Name: location_master_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1613,7 +1613,7 @@ CREATE TABLE public.material_issue_items (
 );
 
 
-ALTER TABLE public.material_issue_items OWNER TO nissigrid;
+ALTER TABLE public.material_issue_items OWNER TO postgres;
 
 --
 -- Name: material_issue_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1628,7 +1628,7 @@ CREATE SEQUENCE public.material_issue_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.material_issue_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.material_issue_items_id_seq OWNER TO postgres;
 
 --
 -- Name: material_issue_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1667,7 +1667,7 @@ CREATE TABLE public.material_issues (
 );
 
 
-ALTER TABLE public.material_issues OWNER TO nissigrid;
+ALTER TABLE public.material_issues OWNER TO postgres;
 
 --
 -- Name: material_issues_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1682,7 +1682,7 @@ CREATE SEQUENCE public.material_issues_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.material_issues_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.material_issues_id_seq OWNER TO postgres;
 
 --
 -- Name: material_issues_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1707,7 +1707,7 @@ CREATE TABLE public.material_return_items (
 );
 
 
-ALTER TABLE public.material_return_items OWNER TO nissigrid;
+ALTER TABLE public.material_return_items OWNER TO postgres;
 
 --
 -- Name: material_return_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1722,7 +1722,7 @@ CREATE SEQUENCE public.material_return_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.material_return_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.material_return_items_id_seq OWNER TO postgres;
 
 --
 -- Name: material_return_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1756,7 +1756,7 @@ CREATE TABLE public.material_returns (
 );
 
 
-ALTER TABLE public.material_returns OWNER TO nissigrid;
+ALTER TABLE public.material_returns OWNER TO postgres;
 
 --
 -- Name: material_returns_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1771,7 +1771,7 @@ CREATE SEQUENCE public.material_returns_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.material_returns_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.material_returns_id_seq OWNER TO postgres;
 
 --
 -- Name: material_returns_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1814,7 +1814,7 @@ CREATE TABLE public.materials (
 );
 
 
-ALTER TABLE public.materials OWNER TO nissigrid;
+ALTER TABLE public.materials OWNER TO postgres;
 
 --
 -- Name: materials_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1829,7 +1829,7 @@ CREATE SEQUENCE public.materials_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.materials_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.materials_id_seq OWNER TO postgres;
 
 --
 -- Name: materials_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1857,7 +1857,7 @@ CREATE TABLE public.organizations (
 );
 
 
-ALTER TABLE public.organizations OWNER TO nissigrid;
+ALTER TABLE public.organizations OWNER TO postgres;
 
 --
 -- Name: organizations_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1872,7 +1872,7 @@ CREATE SEQUENCE public.organizations_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.organizations_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.organizations_id_seq OWNER TO postgres;
 
 --
 -- Name: organizations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1894,7 +1894,7 @@ CREATE TABLE public.password_reset_tokens (
 );
 
 
-ALTER TABLE public.password_reset_tokens OWNER TO nissigrid;
+ALTER TABLE public.password_reset_tokens OWNER TO postgres;
 
 --
 -- Name: password_reset_tokens_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1909,7 +1909,7 @@ CREATE SEQUENCE public.password_reset_tokens_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.password_reset_tokens_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.password_reset_tokens_id_seq OWNER TO postgres;
 
 --
 -- Name: password_reset_tokens_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1943,7 +1943,7 @@ CREATE TABLE public.pm_schedules (
 );
 
 
-ALTER TABLE public.pm_schedules OWNER TO nissigrid;
+ALTER TABLE public.pm_schedules OWNER TO postgres;
 
 --
 -- Name: pm_schedules_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1958,7 +1958,7 @@ CREATE SEQUENCE public.pm_schedules_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.pm_schedules_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.pm_schedules_id_seq OWNER TO postgres;
 
 --
 -- Name: pm_schedules_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1989,7 +1989,7 @@ CREATE TABLE public.projects (
 );
 
 
-ALTER TABLE public.projects OWNER TO nissigrid;
+ALTER TABLE public.projects OWNER TO postgres;
 
 --
 -- Name: projects_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2004,7 +2004,7 @@ CREATE SEQUENCE public.projects_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.projects_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.projects_id_seq OWNER TO postgres;
 
 --
 -- Name: projects_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2028,7 +2028,7 @@ CREATE TABLE public.purchase_order_approvals (
 );
 
 
-ALTER TABLE public.purchase_order_approvals OWNER TO nissigrid;
+ALTER TABLE public.purchase_order_approvals OWNER TO postgres;
 
 --
 -- Name: purchase_order_approvals_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2043,7 +2043,7 @@ CREATE SEQUENCE public.purchase_order_approvals_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.purchase_order_approvals_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.purchase_order_approvals_id_seq OWNER TO postgres;
 
 --
 -- Name: purchase_order_approvals_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2074,7 +2074,7 @@ CREATE TABLE public.purchase_order_items (
 );
 
 
-ALTER TABLE public.purchase_order_items OWNER TO nissigrid;
+ALTER TABLE public.purchase_order_items OWNER TO postgres;
 
 --
 -- Name: purchase_order_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2089,7 +2089,7 @@ CREATE SEQUENCE public.purchase_order_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.purchase_order_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.purchase_order_items_id_seq OWNER TO postgres;
 
 --
 -- Name: purchase_order_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2127,7 +2127,6 @@ CREATE TABLE public.purchase_orders (
     annexure text,
     remarks text,
     institution_id integer,
-    is_cash_purchase boolean DEFAULT false,
     advance_percentage double precision DEFAULT 0,
     contract_id integer,
     rental_agreement_number character varying(100),
@@ -2141,11 +2140,13 @@ CREATE TABLE public.purchase_orders (
     return_conditions text,
     renewal_terms text,
     procurement_type character varying(50),
-    rental_type character varying(50)
+    rental_type character varying(50),
+    purchase_mode character varying(50),
+    marketplace_name character varying(100)
 );
 
 
-ALTER TABLE public.purchase_orders OWNER TO nissigrid;
+ALTER TABLE public.purchase_orders OWNER TO postgres;
 
 --
 -- Name: purchase_orders_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2160,7 +2161,7 @@ CREATE SEQUENCE public.purchase_orders_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.purchase_orders_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.purchase_orders_id_seq OWNER TO postgres;
 
 --
 -- Name: purchase_orders_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2184,7 +2185,7 @@ CREATE TABLE public.purchase_request_approvals (
 );
 
 
-ALTER TABLE public.purchase_request_approvals OWNER TO nissigrid;
+ALTER TABLE public.purchase_request_approvals OWNER TO postgres;
 
 --
 -- Name: purchase_request_approvals_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2199,7 +2200,7 @@ CREATE SEQUENCE public.purchase_request_approvals_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.purchase_request_approvals_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.purchase_request_approvals_id_seq OWNER TO postgres;
 
 --
 -- Name: purchase_request_approvals_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2221,7 +2222,7 @@ CREATE TABLE public.purchase_request_items (
 );
 
 
-ALTER TABLE public.purchase_request_items OWNER TO nissigrid;
+ALTER TABLE public.purchase_request_items OWNER TO postgres;
 
 --
 -- Name: purchase_request_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2236,7 +2237,7 @@ CREATE SEQUENCE public.purchase_request_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.purchase_request_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.purchase_request_items_id_seq OWNER TO postgres;
 
 --
 -- Name: purchase_request_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2279,7 +2280,7 @@ CREATE TABLE public.purchase_requests (
 );
 
 
-ALTER TABLE public.purchase_requests OWNER TO nissigrid;
+ALTER TABLE public.purchase_requests OWNER TO postgres;
 
 --
 -- Name: purchase_requests_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2294,7 +2295,7 @@ CREATE SEQUENCE public.purchase_requests_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.purchase_requests_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.purchase_requests_id_seq OWNER TO postgres;
 
 --
 -- Name: purchase_requests_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2321,7 +2322,7 @@ CREATE TABLE public.quotation_comparisons (
 );
 
 
-ALTER TABLE public.quotation_comparisons OWNER TO nissigrid;
+ALTER TABLE public.quotation_comparisons OWNER TO postgres;
 
 --
 -- Name: quotation_comparisons_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2336,7 +2337,7 @@ CREATE SEQUENCE public.quotation_comparisons_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.quotation_comparisons_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.quotation_comparisons_id_seq OWNER TO postgres;
 
 --
 -- Name: quotation_comparisons_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2361,7 +2362,7 @@ CREATE TABLE public.quotation_negotiation_history (
 );
 
 
-ALTER TABLE public.quotation_negotiation_history OWNER TO nissigrid;
+ALTER TABLE public.quotation_negotiation_history OWNER TO postgres;
 
 --
 -- Name: quotation_negotiation_history_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2376,7 +2377,7 @@ CREATE SEQUENCE public.quotation_negotiation_history_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.quotation_negotiation_history_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.quotation_negotiation_history_id_seq OWNER TO postgres;
 
 --
 -- Name: quotation_negotiation_history_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2398,7 +2399,7 @@ CREATE TABLE public.quotation_request_item_sources (
 );
 
 
-ALTER TABLE public.quotation_request_item_sources OWNER TO nissigrid;
+ALTER TABLE public.quotation_request_item_sources OWNER TO postgres;
 
 --
 -- Name: quotation_request_item_sources_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2413,7 +2414,7 @@ CREATE SEQUENCE public.quotation_request_item_sources_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.quotation_request_item_sources_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.quotation_request_item_sources_id_seq OWNER TO postgres;
 
 --
 -- Name: quotation_request_item_sources_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2436,7 +2437,7 @@ CREATE TABLE public.quotation_request_items (
 );
 
 
-ALTER TABLE public.quotation_request_items OWNER TO nissigrid;
+ALTER TABLE public.quotation_request_items OWNER TO postgres;
 
 --
 -- Name: quotation_request_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2451,7 +2452,7 @@ CREATE SEQUENCE public.quotation_request_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.quotation_request_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.quotation_request_items_id_seq OWNER TO postgres;
 
 --
 -- Name: quotation_request_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2471,7 +2472,7 @@ CREATE TABLE public.quotation_request_prs (
 );
 
 
-ALTER TABLE public.quotation_request_prs OWNER TO nissigrid;
+ALTER TABLE public.quotation_request_prs OWNER TO postgres;
 
 --
 -- Name: quotation_request_prs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2486,7 +2487,7 @@ CREATE SEQUENCE public.quotation_request_prs_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.quotation_request_prs_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.quotation_request_prs_id_seq OWNER TO postgres;
 
 --
 -- Name: quotation_request_prs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2509,7 +2510,7 @@ CREATE TABLE public.quotation_request_vendors (
 );
 
 
-ALTER TABLE public.quotation_request_vendors OWNER TO nissigrid;
+ALTER TABLE public.quotation_request_vendors OWNER TO postgres;
 
 --
 -- Name: quotation_request_vendors_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2524,7 +2525,7 @@ CREATE SEQUENCE public.quotation_request_vendors_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.quotation_request_vendors_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.quotation_request_vendors_id_seq OWNER TO postgres;
 
 --
 -- Name: quotation_request_vendors_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2556,7 +2557,7 @@ CREATE TABLE public.quotation_requests (
 );
 
 
-ALTER TABLE public.quotation_requests OWNER TO nissigrid;
+ALTER TABLE public.quotation_requests OWNER TO postgres;
 
 --
 -- Name: quotation_requests_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2571,7 +2572,7 @@ CREATE SEQUENCE public.quotation_requests_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.quotation_requests_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.quotation_requests_id_seq OWNER TO postgres;
 
 --
 -- Name: quotation_requests_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2599,7 +2600,7 @@ CREATE TABLE public.reagent_consumption_logs (
 );
 
 
-ALTER TABLE public.reagent_consumption_logs OWNER TO nissigrid;
+ALTER TABLE public.reagent_consumption_logs OWNER TO postgres;
 
 --
 -- Name: reagent_consumption_logs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2614,7 +2615,7 @@ CREATE SEQUENCE public.reagent_consumption_logs_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.reagent_consumption_logs_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.reagent_consumption_logs_id_seq OWNER TO postgres;
 
 --
 -- Name: reagent_consumption_logs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2648,7 +2649,7 @@ CREATE TABLE public.repair_work_orders (
 );
 
 
-ALTER TABLE public.repair_work_orders OWNER TO nissigrid;
+ALTER TABLE public.repair_work_orders OWNER TO postgres;
 
 --
 -- Name: repair_work_orders_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2663,7 +2664,7 @@ CREATE SEQUENCE public.repair_work_orders_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.repair_work_orders_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.repair_work_orders_id_seq OWNER TO postgres;
 
 --
 -- Name: repair_work_orders_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2688,7 +2689,7 @@ CREATE TABLE public.role_permissions (
 );
 
 
-ALTER TABLE public.role_permissions OWNER TO nissigrid;
+ALTER TABLE public.role_permissions OWNER TO postgres;
 
 --
 -- Name: role_permissions_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2703,7 +2704,7 @@ CREATE SEQUENCE public.role_permissions_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.role_permissions_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.role_permissions_id_seq OWNER TO postgres;
 
 --
 -- Name: role_permissions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2728,7 +2729,7 @@ CREATE TABLE public.roles (
 );
 
 
-ALTER TABLE public.roles OWNER TO nissigrid;
+ALTER TABLE public.roles OWNER TO postgres;
 
 --
 -- Name: roles_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2743,7 +2744,7 @@ CREATE SEQUENCE public.roles_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.roles_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.roles_id_seq OWNER TO postgres;
 
 --
 -- Name: roles_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2770,7 +2771,7 @@ CREATE TABLE public.rooms (
 );
 
 
-ALTER TABLE public.rooms OWNER TO nissigrid;
+ALTER TABLE public.rooms OWNER TO postgres;
 
 --
 -- Name: rooms_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2785,7 +2786,7 @@ CREATE SEQUENCE public.rooms_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.rooms_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.rooms_id_seq OWNER TO postgres;
 
 --
 -- Name: rooms_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2809,7 +2810,7 @@ CREATE TABLE public.sites (
 );
 
 
-ALTER TABLE public.sites OWNER TO nissigrid;
+ALTER TABLE public.sites OWNER TO postgres;
 
 --
 -- Name: sites_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2824,7 +2825,7 @@ CREATE SEQUENCE public.sites_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.sites_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.sites_id_seq OWNER TO postgres;
 
 --
 -- Name: sites_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2857,7 +2858,7 @@ CREATE TABLE public.stock_ledger (
 );
 
 
-ALTER TABLE public.stock_ledger OWNER TO nissigrid;
+ALTER TABLE public.stock_ledger OWNER TO postgres;
 
 --
 -- Name: stock_ledger_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2872,7 +2873,7 @@ CREATE SEQUENCE public.stock_ledger_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.stock_ledger_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.stock_ledger_id_seq OWNER TO postgres;
 
 --
 -- Name: stock_ledger_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2897,7 +2898,7 @@ CREATE TABLE public.stock_transfer_items (
 );
 
 
-ALTER TABLE public.stock_transfer_items OWNER TO nissigrid;
+ALTER TABLE public.stock_transfer_items OWNER TO postgres;
 
 --
 -- Name: stock_transfer_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2912,7 +2913,7 @@ CREATE SEQUENCE public.stock_transfer_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.stock_transfer_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.stock_transfer_items_id_seq OWNER TO postgres;
 
 --
 -- Name: stock_transfer_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2944,7 +2945,7 @@ CREATE TABLE public.stock_transfers (
 );
 
 
-ALTER TABLE public.stock_transfers OWNER TO nissigrid;
+ALTER TABLE public.stock_transfers OWNER TO postgres;
 
 --
 -- Name: stock_transfers_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2959,7 +2960,7 @@ CREATE SEQUENCE public.stock_transfers_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.stock_transfers_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.stock_transfers_id_seq OWNER TO postgres;
 
 --
 -- Name: stock_transfers_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2983,7 +2984,7 @@ CREATE TABLE public.subcategories (
 );
 
 
-ALTER TABLE public.subcategories OWNER TO nissigrid;
+ALTER TABLE public.subcategories OWNER TO postgres;
 
 --
 -- Name: subcategories_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2998,7 +2999,7 @@ CREATE SEQUENCE public.subcategories_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.subcategories_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.subcategories_id_seq OWNER TO postgres;
 
 --
 -- Name: subcategories_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3022,7 +3023,7 @@ CREATE TABLE public.tenant_configurations (
 );
 
 
-ALTER TABLE public.tenant_configurations OWNER TO nissigrid;
+ALTER TABLE public.tenant_configurations OWNER TO postgres;
 
 --
 -- Name: tenant_configurations_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3037,7 +3038,7 @@ CREATE SEQUENCE public.tenant_configurations_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.tenant_configurations_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.tenant_configurations_id_seq OWNER TO postgres;
 
 --
 -- Name: tenant_configurations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3059,7 +3060,7 @@ CREATE TABLE public.tenant_memberships (
 );
 
 
-ALTER TABLE public.tenant_memberships OWNER TO nissigrid;
+ALTER TABLE public.tenant_memberships OWNER TO postgres;
 
 --
 -- Name: tenant_memberships_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3074,7 +3075,7 @@ CREATE SEQUENCE public.tenant_memberships_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.tenant_memberships_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.tenant_memberships_id_seq OWNER TO postgres;
 
 --
 -- Name: tenant_memberships_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3098,7 +3099,7 @@ CREATE TABLE public.tenants (
 );
 
 
-ALTER TABLE public.tenants OWNER TO nissigrid;
+ALTER TABLE public.tenants OWNER TO postgres;
 
 --
 -- Name: tenants_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3113,7 +3114,7 @@ CREATE SEQUENCE public.tenants_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.tenants_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.tenants_id_seq OWNER TO postgres;
 
 --
 -- Name: tenants_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3138,7 +3139,7 @@ CREATE TABLE public.terms_and_conditions (
 );
 
 
-ALTER TABLE public.terms_and_conditions OWNER TO nissigrid;
+ALTER TABLE public.terms_and_conditions OWNER TO postgres;
 
 --
 -- Name: terms_and_conditions_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3153,7 +3154,7 @@ CREATE SEQUENCE public.terms_and_conditions_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.terms_and_conditions_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.terms_and_conditions_id_seq OWNER TO postgres;
 
 --
 -- Name: terms_and_conditions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3178,7 +3179,7 @@ CREATE TABLE public.uom (
 );
 
 
-ALTER TABLE public.uom OWNER TO nissigrid;
+ALTER TABLE public.uom OWNER TO postgres;
 
 --
 -- Name: uom_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3193,7 +3194,7 @@ CREATE SEQUENCE public.uom_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.uom_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.uom_id_seq OWNER TO postgres;
 
 --
 -- Name: uom_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3216,7 +3217,7 @@ CREATE TABLE public.user_role_assignments (
 );
 
 
-ALTER TABLE public.user_role_assignments OWNER TO nissigrid;
+ALTER TABLE public.user_role_assignments OWNER TO postgres;
 
 --
 -- Name: user_role_assignments_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3231,7 +3232,7 @@ CREATE SEQUENCE public.user_role_assignments_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.user_role_assignments_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.user_role_assignments_id_seq OWNER TO postgres;
 
 --
 -- Name: user_role_assignments_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3260,7 +3261,7 @@ CREATE TABLE public.users (
 );
 
 
-ALTER TABLE public.users OWNER TO nissigrid;
+ALTER TABLE public.users OWNER TO postgres;
 
 --
 -- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3275,7 +3276,7 @@ CREATE SEQUENCE public.users_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.users_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.users_id_seq OWNER TO postgres;
 
 --
 -- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3298,7 +3299,7 @@ CREATE TABLE public.vendor_approvals (
 );
 
 
-ALTER TABLE public.vendor_approvals OWNER TO nissigrid;
+ALTER TABLE public.vendor_approvals OWNER TO postgres;
 
 --
 -- Name: vendor_approvals_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3313,7 +3314,7 @@ CREATE SEQUENCE public.vendor_approvals_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.vendor_approvals_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.vendor_approvals_id_seq OWNER TO postgres;
 
 --
 -- Name: vendor_approvals_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3333,7 +3334,7 @@ CREATE TABLE public.vendor_categories (
 );
 
 
-ALTER TABLE public.vendor_categories OWNER TO nissigrid;
+ALTER TABLE public.vendor_categories OWNER TO postgres;
 
 --
 -- Name: vendor_categories_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3348,7 +3349,7 @@ CREATE SEQUENCE public.vendor_categories_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.vendor_categories_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.vendor_categories_id_seq OWNER TO postgres;
 
 --
 -- Name: vendor_categories_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3372,7 +3373,7 @@ CREATE TABLE public.vendor_history (
 );
 
 
-ALTER TABLE public.vendor_history OWNER TO nissigrid;
+ALTER TABLE public.vendor_history OWNER TO postgres;
 
 --
 -- Name: vendor_history_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3387,7 +3388,7 @@ CREATE SEQUENCE public.vendor_history_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.vendor_history_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.vendor_history_id_seq OWNER TO postgres;
 
 --
 -- Name: vendor_history_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3416,7 +3417,7 @@ CREATE TABLE public.vendor_quotation_items (
 );
 
 
-ALTER TABLE public.vendor_quotation_items OWNER TO nissigrid;
+ALTER TABLE public.vendor_quotation_items OWNER TO postgres;
 
 --
 -- Name: vendor_quotation_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3431,7 +3432,7 @@ CREATE SEQUENCE public.vendor_quotation_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.vendor_quotation_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.vendor_quotation_items_id_seq OWNER TO postgres;
 
 --
 -- Name: vendor_quotation_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3459,7 +3460,7 @@ CREATE TABLE public.vendor_quotations (
 );
 
 
-ALTER TABLE public.vendor_quotations OWNER TO nissigrid;
+ALTER TABLE public.vendor_quotations OWNER TO postgres;
 
 --
 -- Name: vendor_quotations_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3474,7 +3475,7 @@ CREATE SEQUENCE public.vendor_quotations_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.vendor_quotations_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.vendor_quotations_id_seq OWNER TO postgres;
 
 --
 -- Name: vendor_quotations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3525,7 +3526,7 @@ CREATE TABLE public.vendors (
 );
 
 
-ALTER TABLE public.vendors OWNER TO nissigrid;
+ALTER TABLE public.vendors OWNER TO postgres;
 
 --
 -- Name: vendors_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3540,7 +3541,7 @@ CREATE SEQUENCE public.vendors_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.vendors_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.vendors_id_seq OWNER TO postgres;
 
 --
 -- Name: vendors_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3571,7 +3572,7 @@ CREATE TABLE public.warehouses (
 );
 
 
-ALTER TABLE public.warehouses OWNER TO nissigrid;
+ALTER TABLE public.warehouses OWNER TO postgres;
 
 --
 -- Name: warehouses_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3586,7 +3587,7 @@ CREATE SEQUENCE public.warehouses_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.warehouses_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.warehouses_id_seq OWNER TO postgres;
 
 --
 -- Name: warehouses_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3608,11 +3609,13 @@ CREATE TABLE public.write_off_items (
     rate double precision,
     amount double precision,
     has_buyback boolean,
-    buyback_amount double precision
+    buyback_amount double precision,
+    equipment_id integer,
+    location_id integer
 );
 
 
-ALTER TABLE public.write_off_items OWNER TO nissigrid;
+ALTER TABLE public.write_off_items OWNER TO postgres;
 
 --
 -- Name: write_off_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3627,7 +3630,7 @@ CREATE SEQUENCE public.write_off_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.write_off_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.write_off_items_id_seq OWNER TO postgres;
 
 --
 -- Name: write_off_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3662,7 +3665,7 @@ CREATE TABLE public.write_offs (
 );
 
 
-ALTER TABLE public.write_offs OWNER TO nissigrid;
+ALTER TABLE public.write_offs OWNER TO postgres;
 
 --
 -- Name: write_offs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3677,7 +3680,7 @@ CREATE SEQUENCE public.write_offs_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.write_offs_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.write_offs_id_seq OWNER TO postgres;
 
 --
 -- Name: write_offs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -4251,7 +4254,7 @@ ALTER TABLE ONLY public.write_offs ALTER COLUMN id SET DEFAULT nextval('public.w
 --
 
 COPY public.alembic_version (version_num) FROM stdin;
-fed2870f67b4
+af45eaa71520
 \.
 
 
@@ -4304,6 +4307,13 @@ COPY public.alerts (id, tenant_id, site_id, alert_type, severity, title, message
 36	2	2	Indent Approved	Success	Indent IND-00010 Approved	The indent (IND-00010) has been approved by EastPoint Admin.	IndentApproved	225	\N	f	t	2026-06-30 18:15:16.358735	2026-07-02 19:06:21.888171	17
 43	2	2	Pending Action	Warning	Action Required: Indent IND-00019 Approval	\N	Indent	234	\N	t	f	2026-07-07 11:37:40.01274	\N	\N
 44	2	2	Pending Action	Warning	Action Required: PO PO-00015 Approval	\N	PurchaseOrder	231	\N	t	f	2026-07-07 11:38:24.767763	\N	\N
+46	2	2	Complaint Assigned	Info	Complaint Assigned: CMP-00013	You have been assigned to complaint CMP-00013. Nature of complaint: fdgdfg	ComplaintAssigned	15	\N	f	f	2026-08-03 15:58:20.997552	\N	34
+45	2	2	Indent Approved	Success	Indent IND-00020 Approved	The indent (IND-00020) has been approved by EastPoint Admin.	IndentApproved	235	\N	f	t	2026-08-03 15:49:09.687137	2026-08-03 16:12:45.101745	3
+47	2	2	Pending Action	Warning	Action Required: PO PO-00032 Approval	\N	PurchaseOrder	248	\N	t	f	2026-08-03 16:13:06.78215	\N	\N
+48	2	2	Pending Action	Warning	Action Required: PO PO-00030 Approval	\N	PurchaseOrder	246	\N	t	f	2026-08-03 16:13:28.304131	\N	\N
+49	2	2	Pending Action	Warning	Action Required: Gate Entry GE-00006	\N	GateEntry	201	\N	t	f	2026-08-03 16:13:37.347219	\N	\N
+50	2	2	Indent Approved	Success	Indent IND-00021 Approved	The indent (IND-00021) has been approved by EastPoint Admin.	IndentApproved	236	\N	f	f	2026-08-03 16:55:53.778359	\N	3
+51	2	2	Contract Approved	Success	Contract CNT-00003 Approved	The contract (CNT-00003) has been approved by EastPoint Admin.	ContractApproved	3	\N	f	f	2026-08-03 17:11:44.871055	\N	3
 \.
 
 
@@ -4358,6 +4368,7 @@ COPY public.approval_flows (id, tenant_id, site_id, document_type, level, role_n
 83	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	t
 84	2	2	CONTRACT	2	Store Admin	0	\N	\N	t
 81	2	2	CONTRACT	1	Admin	0	\N	\N	t
+86	2	2	VENDOR	2	Admin	0	\N	\N	t
 39	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
 40	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
 41	2	2	INDENT	2	Admin	0	\N	\N	f
@@ -4859,6 +4870,23 @@ COPY public.audit_logs (id, tenant_id, site_id, user_id, action, entity_type, en
 454	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-07-31 16:31:08.971386
 455	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-07-31 16:31:15.018161
 456	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-03 10:30:02.168862
+457	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-03 12:54:07.183635
+458	2	\N	8	LOGIN	User	8	\N	\N	\N	2026-08-03 13:58:14.054322
+459	2	2	3	APPROVE	PurchaseRequest	204	\N	\N	\N	2026-08-03 15:51:48.398197
+460	2	2	3	APPROVE	PurchaseRequest	204	\N	\N	\N	2026-08-03 15:51:59.302664
+461	2	2	3	APPROVE	PurchaseOrder	254	\N	\N	\N	2026-08-03 15:54:53.777178
+462	2	2	3	APPROVE	PurchaseOrder	254	\N	\N	\N	2026-08-03 15:55:11.74341
+463	2	2	3	APPROVE	PurchaseRequest	205	\N	\N	\N	2026-08-03 17:03:43.550904
+464	2	2	3	APPROVE	PurchaseRequest	205	\N	\N	\N	2026-08-03 17:03:53.732014
+465	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-03 17:12:25.107519
+466	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-03 17:13:32.99217
+467	2	2	3	APPROVE	PurchaseOrder	255	\N	\N	\N	2026-08-03 17:18:47.677805
+468	2	2	3	APPROVE	PurchaseOrder	255	\N	\N	\N	2026-08-03 17:18:55.170069
+469	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-03 18:30:13.82988
+470	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-04 10:16:43.451068
+471	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-04 10:16:50.80872
+472	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-04 10:59:10.075876
+473	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-04 11:59:59.308755
 \.
 
 
@@ -4989,11 +5017,11 @@ COPY public.complaints (id, tenant_id, site_id, docket_no, complaint_date, compl
 7	2	2	CMP-00005	2026-06-18	13:22	Anatomy	\N	\N		FAN NOT WORKING			Material Pending	34	\N	3	\N	f	2026-06-18 13:22:07.124473	2026-07-02 18:39:51.104738	\N	t	\N	\N	\N		\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N
 6	2	2	CMP-00004	2026-06-18	10:40	HEALTH 	7	237					Material Pending	34	\N	3	\N	f	2026-06-18 10:40:28.426938	2026-06-18 13:09:14.492096	\N	t	\N	\N	\N	\N	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N
 14	2	2	CMP-00012	2026-07-02	19:01	Chemistry	12	\N		Fault in Tap 	WATER NOT COMING		Registered	\N	\N	3	\N	f	2026-07-02 19:01:17.170755	2026-07-02 19:01:17.170768	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N
-15	2	2	CMP-00013	2026-07-02	19:02	Chemistry	\N	\N		fdgdfg	dfgdfgdg		Registered	\N	\N	17	\N	f	2026-07-02 19:02:12.361688	2026-07-02 19:02:12.36173	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N
 13	2	2	CMP-00011	2026-07-02	18:55	Chemistry	12	\N		AC problem	.	Hari	Closed	\N	dfgdfg	17	\N	f	2026-07-02 18:55:44.946756	2026-07-02 19:02:37.864302	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N
 8	2	2	CMP-00006	2026-06-18	13:27	HEALTH 	7	237		DOOR IS NOT LOCKING PROPERLY		SURESH	Resolved	34	Fixed	3	34	f	2026-06-18 13:27:19.541485	2026-06-18 19:19:17.297948	2026-06-18 13:49:17.297068	f	\N	\N	\N	Inspection completed.   	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N
 9	2	2	CMP-00007	2026-06-18	17:39	HEALTH 	7	237		AC problem	AC is not working	Hari	Closed	34	Replaced	3	3	f	2026-06-18 17:39:02.3167	2026-06-19 15:35:45.320529	2026-06-19 09:44:42.841679	t	3	2026-06-19 10:05:45.319397	\N	Inspection done. Material need to be ordered	No issues after fix	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N
 10	2	2	CMP-00008	2026-06-22	11:42	HEALTH 	7	237		AC problem	AC IS NOT WORKING FROM YESTERDAY HEAVY RAIN 	SURESH	Closed	34	the new inverter is installed to the ac 	3	3	f	2026-06-22 11:42:25.966144	2026-06-22 11:53:11.669587	2026-06-22 06:19:15.588397	t	3	2026-06-22 06:23:11.668873	\N	found that the ac inverter got damaged and the current is not evenly supplied 	yes the technician worked good ac is working fine	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N
+15	2	2	CMP-00013	2026-07-02	19:02	Chemistry	\N	\N		fdgdfg	dfgdfgdg		Assigned	34	\N	17	\N	f	2026-07-02 19:02:12.361688	2026-08-03 15:58:20.999169	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N
 \.
 
 
@@ -5003,6 +5031,8 @@ COPY public.complaints (id, tenant_id, site_id, docket_no, complaint_date, compl
 
 COPY public.contract_approvals (id, contract_id, approval_flow_id, approver_id, remarks, approved_at) FROM stdin;
 1	2	81	3	\N	2026-07-31 16:55:48.473324
+2	3	81	3	\N	2026-08-03 17:11:36.288765
+3	3	84	3	\N	2026-08-03 17:11:44.837734
 \.
 
 
@@ -5013,6 +5043,7 @@ COPY public.contract_approvals (id, contract_id, approval_flow_id, approver_id, 
 COPY public.contract_items (id, contract_id, material_id, equipment_id, uom, rate, gst, delivery_lead_time, contract_quantity, consumed_quantity, remaining_quantity, covered_components, excluded_components) FROM stdin;
 1	1	3507	\N		4500	19	5	2	0	2		
 2	2	\N	1		1545454	0	\N	\N	0	\N	HEALTH 	
+3	3	2564	\N		23	5	10	5	0	5		
 \.
 
 
@@ -5023,6 +5054,7 @@ COPY public.contract_items (id, contract_id, material_id, equipment_id, uom, rat
 COPY public.contracts (id, tenant_id, site_id, contract_number, contract_type, vendor_id, institution_id, department_id, start_date, end_date, contract_value, payment_terms, renewal_terms, sla_details, spare_parts_included, consumables_included, status, created_by_id, approved_by_id, approved_at, is_deleted, created_at, updated_at, exclusions, current_approval_level) FROM stdin;
 1	2	2	CNT-00001	RC	62	3	\N	2026-07-15	2026-07-30	2000000				f	f	Submitted	3	\N	\N	f	2026-07-27 18:05:33.916597	2026-07-31 15:43:03.683262	\N	\N
 2	2	2	CNT-00002	AMC	63	5	335	2026-07-22	2039-01-30	2502112				f	f	Submitted	3	\N	\N	f	2026-07-30 17:20:20.838762	2026-07-31 16:55:48.517737	\N	2
+3	2	2	CNT-00003	RC	66	5	271	2026-08-10	2026-08-20	15000				f	f	Approved	3	3	2026-08-03 11:41:44.867868	f	2026-08-03 17:10:25.921051	2026-08-03 17:11:44.875693		2
 \.
 
 
@@ -8533,9 +8565,7 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 19	3	3	VENDOR	VND	11
 15	3	3	GRN	GRN	22
 14	3	3	GATE_ENTRY	GE	30
-66	2	2	INDENT	IND	19
 73	2	2	TRANSFER	TRF	2
-69	2	2	PURCHASE_ORDER	PO	34
 74	2	2	RETURN	RET	2
 29	2	2	BUILDING	BLDG	6
 11	3	3	ISSUE	ISS	45
@@ -8558,18 +8588,22 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 16	3	3	QUOTATION_REQUEST	QR	21
 5	3	3	INDENT	IND	42
 40	3	3	MATERIAL_46	EES	3
-68	2	2	PURCHASE_REQUEST	PR	10
 77	2	2	GATEPASS	GP	3
-93	2	2	WRITE_OFF	WO	8
-65	2	2	VENDOR	VND	5
 71	2	2	GATE_ENTRY	GE	6
 94	2	2	PURCHASE_ORDER_11	EPAHS/PO	1
-95	2	2	PURCHASE_ORDER_3	EPCET/PO	1
 75	2	2	GRN	GRN	10
 97	2	2	EQP	EQP	1
 98	2	2	EQP_RADIOLOGY_	EQP_RADIOLOGY_	1
-96	2	2	CONTRACT	CNT	2
-70	2	2	QUOTATION_REQUEST	QR	23
+69	2	2	PURCHASE_ORDER	PO	35
+99	2	2	PURCHASE_ORDER_2	EPH/PO	1
+68	2	2	PURCHASE_REQUEST	PR	12
+70	2	2	QUOTATION_REQUEST	QR	30
+96	2	2	CONTRACT	CNT	3
+95	2	2	PURCHASE_ORDER_3	EPCET/PO	2
+66	2	2	INDENT	IND	22
+93	2	2	WRITE_OFF	WO	9
+100	2	2	EQUIPMENT_WRITE_OFF	EWO	1
+65	2	2	VENDOR	VND	6
 \.
 
 
@@ -8907,6 +8941,14 @@ COPY public.indent_approvals (id, indent_id, approval_flow_id, approver_id, appr
 64	233	47	3	2026-06-30 18:29:36.286926	{"512": {"quantity": 3.0, "remarks": null}, "513": {"quantity": 2.0, "remarks": null}}	\N
 65	233	16	3	2026-06-30 18:30:01.14339	{"512": {"quantity": 2.0, "remarks": null}, "513": {"quantity": 1.0, "remarks": null}}	\N
 66	233	50	3	2026-06-30 18:30:01.143412	{"512": {"quantity": 2.0, "remarks": null}, "513": {"quantity": 1.0, "remarks": null}}	\N
+67	235	46	3	2026-08-03 15:48:53.573668	{"516": {"quantity": 3.0, "remarks": "none"}}	\N
+68	235	80	3	2026-08-03 15:48:53.573712	{"516": {"quantity": 3.0, "remarks": "none"}}	\N
+69	235	16	3	2026-08-03 15:49:09.633194	{"516": {"quantity": 3.0, "remarks": null}}	\N
+70	235	85	3	2026-08-03 15:49:09.633237	{"516": {"quantity": 3.0, "remarks": null}}	\N
+71	236	46	3	2026-08-03 16:55:43.328345	{"517": {"quantity": 5.0, "remarks": null}}	\N
+72	236	80	3	2026-08-03 16:55:43.328389	{"517": {"quantity": 5.0, "remarks": null}}	\N
+73	236	16	3	2026-08-03 16:55:53.743552	{"517": {"quantity": 5.0, "remarks": null}}	\N
+74	236	85	3	2026-08-03 16:55:53.743595	{"517": {"quantity": 5.0, "remarks": null}}	\N
 \.
 
 
@@ -9012,6 +9054,9 @@ COPY public.indent_items (id, indent_id, material_id, requested_quantity, issued
 513	233	3475	2	0	0	1
 514	234	3501	1	0	0	\N
 515	234	3475	560061	0	0	\N
+516	235	3421	3	0	0	3
+517	236	3474	5	0	0	5
+518	237	3474	5	0	0	\N
 \.
 
 
@@ -9041,7 +9086,6 @@ COPY public.indents (id, tenant_id, site_id, indent_number, requester_id, room_i
 189	3	3	IND-00011	4	1	2	Floor 1	\N	Civil	\N	0	Issued	1	\N	\N	f	2026-04-21 06:52:30.375564	2026-05-15 18:52:30.395849	\N	\N	\N
 193	3	3	IND-00015	4	1	2	Floor 1	\N	Civil	\N	0	Partially Issued	1	\N	2026-06-01 11:32:27.323138	f	2026-04-23 06:52:30.375564	2026-06-09 17:58:53.379211	\N	\N	\N
 192	3	3	IND-00014	4	2	1	Floor 1	\N	Civil	\N	0	Partially Issued	2	4	2026-06-08 05:37:36.683826	f	2026-04-22 18:52:30.375564	2026-06-09 18:22:36.843183	\N	\N	\N
-190	3	3	IND-00012	4	1	2	Floor 1	\N	Civil	\N	0	Awaiting Approval	2	\N	\N	f	2026-04-21 18:52:30.375564	2026-06-08 11:57:40.208249	\N	\N	\N
 208	3	3	IND-00035	4	170	3	Floor 2	Room 206	102 WARD		139727.1	Converted to PO	2	4	2026-06-08 05:34:52.991266	f	2026-06-08 10:58:08.257706	2026-06-08 14:45:41.0709	\N	\N	\N
 209	3	3	IND-00036	4	\N	3	Floor 2		102 WARD		3847.95	Approved	2	4	2026-06-08 09:48:45.531409	f	2026-06-08 15:16:28.123647	2026-06-08 15:18:45.533288	\N	\N	\N
 202	3	3	IND-00029	4	1	1	Ground Floor	Room1	CIVIL		240000	Converted to PO	1	4	2026-06-01 11:32:07.268603	f	2026-06-01 17:02:01.395733	2026-06-01 17:07:09.000518	\N	\N	\N
@@ -9052,7 +9096,6 @@ COPY public.indents (id, tenant_id, site_id, indent_number, requester_id, room_i
 207	3	3	IND-00034	4	223	3	Floor 6	Room 601	103 WARD		23287.85	Approved	1	\N	2026-06-05 12:54:59.043078	f	2026-06-05 18:14:47.419437	2026-06-05 18:24:59.044127	\N	\N	\N
 210	3	3	IND-00037	4	223	3	Floor 6	Room 601	103 WARD		104434.3	Approved	2	4	2026-06-08 10:42:23.32504	f	2026-06-08 16:11:43.866856	2026-06-08 16:12:23.326921	\N	\N	\N
 203	3	3	IND-00030	9	2	1	Floor 2	Room1	CIVIL	Ggggh\n[Rejected: no required]	1569000	Rejected	1	\N	\N	f	2026-06-02 13:46:47.613015	2026-06-08 16:19:35.587119	\N	\N	\N
-212	3	3	IND-00039	4	170	3	Floor 2	Room 206	102 WARD		29476	Awaiting Approval	2	\N	\N	f	2026-06-08 16:29:10.943772	2026-06-16 11:14:36.390354	\N	\N	\N
 191	3	3	IND-00013	4	2	2	Floor 1	\N	Civil	\N	0	Issued	2	4	2026-06-08 06:25:38.754012	f	2026-04-22 06:52:30.375564	2026-06-17 18:12:13.846962	\N	\N	\N
 222	2	2	IND-00009	3	237	7	FIRST FLOOR	ROOM101	HEALTH 		75230.7	Partially Issued	2	3	2026-06-18 05:21:30.600998	f	2026-06-15 18:30:05.703012	2026-06-18 12:26:45.197379	11	\N	\N
 214	2	2	IND-00001	3	237	7	FIRST FLOOR	ROOM101	HEALTH 		165261.6	Approved	1	\N	2026-06-11 16:32:44.703679	f	2026-06-11 22:02:08.325471	2026-06-11 22:02:44.704866	11	\N	\N
@@ -9063,10 +9106,11 @@ COPY public.indents (id, tenant_id, site_id, indent_number, requester_id, room_i
 218	2	2	IND-00005	9	\N	\N			Civil		16275.55	Issued	2	11	2026-06-11 18:18:47.211047	f	2026-06-11 23:38:00.003556	2026-06-12 02:15:29.611445	3	\N	\N
 220	2	2	IND-00007	3	237	7	FIRST FLOOR	ROOM101	HEALTH 	Complaint CMP-00003 - Fan is not working	1271.16	Issued	2	3	2026-06-11 22:38:22.354584	f	2026-06-12 04:08:09.960528	2026-06-12 04:13:27.922572	11	5	\N
 213	3	3	IND-00040	4	170	3	Floor 2	Room 206	102 WARD		19575.48	Partially Issued	2	4	2026-06-11 13:52:02.724655	f	2026-06-08 16:51:34.292996	2026-06-17 18:19:11.671326	\N	\N	\N
-224	3	3	IND-00042	4	238	10	Second Floor	201	Computer Science		97877.4	Awaiting Approval	1	\N	\N	f	2026-06-17 10:31:53.972662	2026-06-17 10:31:53.972676	15	\N	\N
 221	2	2	IND-00008	3	237	7	FIRST FLOOR	ROOM101	HEALTH 	\n[Rejected: again testing]	26100.64	Rejected	1	\N	\N	f	2026-06-15 18:02:29.923283	2026-07-22 15:03:01.671041	11	\N	\N
+190	3	3	IND-00012	4	1	2	Floor 1	\N	Civil	\N	0	Submitted	2	\N	\N	f	2026-04-21 18:52:30.375564	2026-06-08 11:57:40.208249	\N	\N	\N
+212	3	3	IND-00039	4	170	3	Floor 2	Room 206	102 WARD		29476	Submitted	2	\N	\N	f	2026-06-08 16:29:10.943772	2026-06-16 11:14:36.390354	\N	\N	\N
+224	3	3	IND-00042	4	238	10	Second Floor	201	Computer Science		97877.4	Submitted	1	\N	\N	f	2026-06-17 10:31:53.972662	2026-06-17 10:31:53.972676	15	\N	\N
 223	3	3	IND-00041	4	238	10	Second Floor	201	Computer Science	Doggo ipsum stop it fren vvv doge fluffer the neighborhood pupper blep shibe waggy wags, shoob thicc very taste wow puggorino ur givin me a spook. Floofs tungg shoob very taste wow sub woofer, the neighborhood pupper long bois much ruin diet. Wow such tempt very hand that feed shibe doggorino h*ck wrinkler, blep clouds heckin, doing me a frighten long woofer boof. Extremely cuuuuuute borkf vvv extremely cuuuuuute you are doing me a frighten long woofer, woofer very jealous pupper shoober. Clouds pats vvv, doge. Smol shoob very good spot heckin ur givin me a spook boofers smol, big ol floofs bork smol borking doggo with a long snoot for pats. Very good spot big ol pupper shibe blop h*ck, waggy wags dat tungg tho long doggo. puggo borking doggo yapper. Length boy pupper vvv I am bekom fat, bork big ol pupper.  Clouds aqua doggo puggorino tungg borking doggo, pupperino such treat. Heckin snoot floofs clouds what a nice floof wow very biscit, puggorino pupperino stop it fren. Fat boi maximum borkdrive shooberino lotsa pats, pats. Borkdrive very jealous pupper long doggo doing me a frighten, boofers most angery pupper I have ever seen. Fat boi noodle horse blep, wrinkler. Borkdrive extremely cuuuuuute lotsa pats blep most angery pupper I have ever seen, blop you are doing me a frighten dat tungg tho. Clouds very hand that feed shibe aqua doggo shooberino, waggy wags borking doggo. Shibe long woofer big ol pupper ruff heckin h*ck shibe, heckin good boys heck big ol pupper shoob waggy wags, long bois adorable doggo stop it fren length boy borkf.  Doing me a frighten super chub floofs what a nice floof porgo super chub very good spot thicc shoob vvv, I am bekom fat stop it fren aqua doggo puggorino very good spot shibe dat tungg tho. He made many woofs smol clouds stop it fren heckin fat boi, very hand that feed shibe blep borkf. Wrinkler doge lotsa pats fat boi woofer boof, long bois borking doggo porgo. Most angery pupper I have ever seen tungg long bois ruff blop, wow such tempt he made many woofs h*ck, puggo big ol h*ck. Heck puggorino noodle horse the neighborhood pupper puggo snoot, porgo shoob long doggo sub woofer.Doggo ipsum stop it fren vvv doge fluffer the neighborhood pupper blep shibe waggy wags, shoob thicc very taste wow puggorino ur givin me a spook. Floofs tungg shoob very taste wow sub woofer, the neighborhood pupper long bois much ruin diet. Wow such tempt very hand that feed shibe doggorino h*ck wrinkler, blep clouds heckin, doing me a frighten long woofer boof. Extremely cuuuuuute borkf vvv extremely cuuuuuute you are doing me a frighten long woofer, woofer very jealous pupper shoober. Clouds pats vvv, doge. Smol shoob very good spot heckin ur givin me a spook boofers smol, big ol floofs bork smol borking doggo with a long snoot for pats. Very good spot big ol pupper shibe blop h*ck, waggy wags dat tungg tho long doggo. puggo borking doggo yapper. Length boy pupper vvv I am bekom fat, bork big ol pupper.  Clouds aqua doggo puggorino tungg borking doggo, pupperino such treat. Heckin snoot floofs clouds what a nice floof wow very biscit, puggorino pupperino stop it fren. Fat boi maximum borkdrive shooberino lotsa pats, pats. Borkdrive very jealous pupper long doggo doing me a frighten, boofers most angery pupper I have ever seen. Fat boi noodle horse blep, wrinkler. Borkdrive extremely cuuuuuute lotsa pats blep most angery pupper I have ever seen, blop you are doing me a frighten dat tungg tho. Clouds very hand that feed shibe aqua doggo shooberino, waggy wags borking doggo. Shibe long woofer big ol pupper ruff heckin h*ck shibe, heckin good boys heck big ol pupper shoob waggy wags, long bois adorable doggo stop it fren length boy borkf.  Doing me a frighten super chub floofs what a nice floof porgo super chub very good spot thicc shoob vvv, I am bekom fat stop it fren aqua doggo puggorino very good spot shibe dat tungg tho. He made many woofs smol clouds stop it fren heckin fat boi, very hand that feed shibe blep borkf. Wrinkler doge lotsa pats fat boi woofer boof, long bois borking doggo porgo. Most angery pupper I have ever seen tungg long bois ruff blop, wow such tempt he made many woofs h*ck, puggo big ol h*ck. Heck puggorino noodle horse the neighborhood pupper puggo snoot, porgo shoob long doggo sub woofer.Doggo ipsum stop it fren vvv doge fluffer the neighborhood pupper blep shibe waggy wags, shoob thicc very taste wow puggorino ur givin me a spook. Floofs tungg shoob very taste wow sub woofer, the neighborhood pupper long bois much ruin diet. Wow such tempt very hand that feed shibe doggorino h*ck wrinkler, blep clouds heckin, doing me a frighten long woofer boof. Extremely cuuuuuute borkf vvv extremely cuuuuuute you are doing me a frighten long woofer, woofer very jealous pupper shoober. Clouds pats vvv, doge. Smol shoob very good spot heckin ur givin me a spook boofers smol, big ol floofs bork smol borking doggo with a long snoot for pats. Very good spot big ol pupper shibe blop h*ck, waggy wags dat tungg tho long doggo. puggo borking doggo yapper. Length boy pupper vvv I am bekom fat, bork big ol pupper.  Clouds aqua doggo puggorino tungg borking doggo, pupperino such treat. Heckin snoot floofs clouds what a nice floof wow very biscit, puggorino pupperino stop it fren. Fat boi maximum borkdrive shooberino lotsa pats, pats. Borkdrive very jealous pupper long doggo doing me a frighten, boofers most angery pupper I have ever seen. Fat boi noodle horse blep, wrinkler. Borkdrive extremely cuuuuuute lotsa pats blep most angery pupper I have ever seen, blop you are doing me a frighten dat tungg tho. Clouds very hand that feed shibe aqua doggo shooberino, waggy wags borking doggo. Shibe long woofer big ol pupper ruff heckin h*ck shibe, heckin good boys heck big ol pupper shoob waggy wags, long bois adorable doggo stop it fren length boy borkf.  Doing me a frighten super chub floofs what a nice floof porgo super chub very good spot thicc shoob vvv, I am bekom fat stop it fren aqua doggo puggorino very good spot shibe dat tungg tho. He made many woofs smol clouds stop it fren heckin fat boi, very hand that feed shibe blep borkf. Wrinkler doge lotsa pats fat boi woofer boof, long bois borking doggo porgo. Most angery pupper I have ever seen tungg long bois ruff blop, wow such tempt he made many woofs h*ck, puggo big ol h*ck. Heck puggorino noodle horse the neighborhood pupper puggo snoot, porgo shoob long doggo sub woofer.Doggo ipsum stop it fren vvv doge fluffer the neighborhood pupper blep shibe waggy wags, shoob thicc very taste wow puggorino ur givin me a spook. Floofs tungg shoob very taste wow sub woofer, the neighborhood pupper long bois much ruin diet. Wow such tempt very hand that feed shibe doggorino h*ck wrinkler, blep clouds heckin, doing me a frighten long woofer boof. Extremely cuuuuuute borkf vvv extremely cuuuuuute you are doing me a frighten long woofer, woofer very jealous pupper shoober. Clouds pats vvv, doge. Smol shoob very good spot heckin ur givin me a spook boofers smol, big ol floofs bork smol borking doggo with a long snoot for pats. Very good spot big ol pupper shibe blop h*ck, waggy wags dat tungg tho long doggo. puggo borking doggo yapper. Length boy pupper vvv I am bekom fat, bork big ol pupper.  Clouds aqua doggo puggorino tungg borking doggo, pupperino such treat. Heckin snoot floofs clouds what a nice floof wow very biscit, puggorino pupperino stop it fren. Fat boi maximum borkdrive shooberino lotsa pats, pats. Borkdrive very jealous pupper long doggo doing me a frighten, boofers most angery pupper I have ever seen. Fat boi noodle horse blep, wrinkler. Borkdrive extremely cuuuuuute lotsa pats blep most angery pupper I have ever seen, blop you are doing me a frighten dat tungg tho. Clouds very hand that feed shibe aqua doggo shooberino, waggy wags borking doggo. Shibe long woofer big ol pupper ruff heckin h*ck shibe, heckin good boys heck big ol pupper shoob waggy wags, long bois adorable doggo stop it fren length boy borkf.  Doing me a frighten super chub floofs what a nice floof porgo super chub very good spot thicc shoob vvv, I am bekom fat stop it fren aqua doggo puggorino very good spot shibe dat tungg tho. He made many woofs smol clouds stop it fren heckin fat boi, very hand that feed shibe blep borkf. Wrinkler doge lotsa pats fat boi woofer boof, long bois borking doggo porgo. Most angery pupper I have ever seen tungg long bois ruff blop, wow such tempt he made many woofs h*ck, puggo big ol h*ck. Heck puggorino noodle horse the neighborhood pupper puggo snoot, porgo shoob long doggo sub woofer.Doggo ipsum stop it fren vvv doge fluffer the neighborhood pupper blep shibe waggy wags, shoob thicc very taste wow puggorino ur givin me a spook. Floofs tungg shoob very taste wow sub woofer, the neighborhood pupper long bois much ruin diet. Wow such tempt very hand that feed shibe doggorino h*ck wrinkler, blep clouds heckin, doing me a frighten long woofer boof. Extremely cuuuuuute borkf vvv extremely cuuuuuute you are doing me a frighten long woofer, woofer very jealous pupper shoober. Clouds pats vvv, doge. Smol shoob very good spot heckin ur givin me a spook boofers smol, big ol floofs bork smol borking doggo with a long snoot for pats. Very good spot big ol pupper shibe blop h*ck, waggy wags dat tungg tho long doggo. puggo borking doggo yapper. Length boy pupper vvv I am bekom fat, bork big ol pupper.  Clouds aqua doggo puggorino tungg borking doggo, pupperino such treat. Heckin snoot floofs clouds what a nice floof wow very biscit, puggorino pupperino stop it fren. Fat boi maximum borkdrive shooberino lotsa pats, pats. Borkdrive very jealous pupper long doggo doing me a frighten, boofers most angery pupper I have ever seen. Fat boi noodle horse blep, wrinkler. Borkdrive extremely cuuuuuute lotsa pats blep most angery pupper I have ever seen, blop you are doing me a frighten dat tungg tho. Clouds very hand that feed shibe aqua doggo shooberino, waggy wags borking doggo. Shibe long woofer big ol pupper ruff heckin h*ck shibe, heckin good boys heck big ol pupper shoob waggy wags, long bois adorable doggo stop it fren length boy borkf.  Doing me a frighten super chub floofs what a nice floof porgo super chub very good spot thicc shoob vvv, I am bekom fat stop it fren aqua doggo puggorino very good spot shibe dat tungg tho. He made many woofs smol clouds stop it fren heckin fat boi, very hand that feed shibe blep borkf. Wrinkler doge lotsa pats fat boi woofer boof, long bois borking doggo porgo. Most angery pupper I have ever seen tungg long bois ruff blop, wow such tempt he made many woofs h*ck, puggo big ol h*ck. Heck puggorino noodle horse the neighborhood pupper puggo snoot, porgo shoob long doggo sub woofer.Doggo ipsum stop it fren vvv doge fluffer the neighborhood pupper blep shibe waggy wags, shoob thicc very taste wow puggorino ur givin me a spook. Floofs tungg shoob very taste wow sub woofer, the neighborhood pupper long bois much ruin diet. Wow such tempt very hand that feed shibe doggorino h*ck wrinkler, blep clouds heckin, doing me a frighten long woofer boof. Extremely cuuuuuute borkf vvv extremely cuuuuuute you are doing me a frighten long woofer, woofer very jealous pupper shoober. Clouds pats vvv, doge. Smol shoob very good spot heckin ur givin me a spook boofers smol, big ol floofs bork smol borking doggo with a long snoot for pats. Very good spot big ol pupper shibe blop h*ck, waggy wags dat tungg tho long doggo. puggo borking doggo yapper. Length boy pupper vvv I am bekom fat, bork big ol pupper.  Clouds aqua doggo puggorino tungg borking doggo, pupperino such treat. Heckin snoot floofs clouds what a nice floof wow very biscit, puggorino pupperino stop it fren. Fat boi maximum borkdrive shooberino lotsa pats, pats. Borkdrive very jealous pupper long doggo doing me a frighten, boofers most angery pupper I have ever seen. Fat boi noodle horse blep, wrinkler. Borkdrive extremely cuuuuuute lotsa pats blep most angery pupper I have ever seen, blop you are doing me a frighten dat tungg tho. Clouds very hand that feed shibe aqua doggo shooberino, waggy wags borking doggo. Shibe long woofer big ol pupper ruff heckin h*ck shibe, heckin good boys heck big ol pupper shoob waggy wags, long bois adorable doggo stop it fren length boy borkf.  Doing me a frighten super chub floofs what a nice floof porgo super chub very good spot thicc shoob vvv, I am bekom fat stop it fren aqua doggo puggorino very good spot shibe dat tungg tho. He made many woofs smol clouds stop it fren heckin fat boi, very hand that feed shibe blep borkf. Wrinkler doge lotsa pats fat boi woofer boof, long bois borking doggo porgo. Most angery pupper I have ever seen tungg long bois ruff blop, wow such tempt he made many woofs h*ck, puggo big ol h*ck. Heck puggorino noodle horse the neighborhood pupper puggo snoot, porgo shoob long doggo sub woofer.Doggo ipsum stop it fren vvv doge fluffer the neighborhood pupper blep shibe waggy wags, shoob thicc very taste wow puggorino ur givin me a spook. Floofs tungg shoob very taste wow sub woofer, the neighborhood pupper long bois much ruin diet. Wow such tempt very hand that feed shibe doggorino h*ck wrinkler, blep clouds heckin, doing me a frighten long woofer boof. Extremely cuuuuuute borkf vvv extremely cuuuuuute you are doing me a frighten long woofer, woofer very jealous pupper shoober. Clouds pats vvv, doge. Smol shoob very good spot heckin ur givin me a spook boofers smol, big ol floofs bork smol borking doggo with a long snoot for pats. Very good spot big ol pupper shibe blop h*ck, waggy wags dat tungg tho long doggo. puggo borking doggo yapper. Length boy pupper vvv I am bekom fat, bork big ol pupper.  Clouds aqua doggo puggorino tungg borking doggo, pupperino such treat. Heckin snoot floofs clouds what a nice floof wow very biscit, puggorino pupperino stop it fren. Fat boi maximum borkdrive shooberino lotsa pats, pats. Borkdrive very jealous pupper long doggo doing me a frighten, boofers most angery pupper I have ever seen. Fat boi noodle horse blep, wrinkler. Borkdrive extremely cuuuuuute lotsa pats blep most angery pupper I have ever seen, blop you are doing me a frighten dat tungg tho. Clouds very hand that feed shibe aqua doggo shooberino, waggy wags borking doggo. Shibe long woofer big ol pupper ruff heckin h*ck shibe, heckin good boys heck big ol pupper shoob waggy wags, long bois adorable doggo stop it fren length boy borkf.  Doing me a frighten super chub floofs what a nice floof porgo super chub very good spot thicc shoob vvv, I am bekom fat stop it fren aqua doggo puggorino very good spot shibe dat tungg tho. He made many woofs smol clouds stop it fren heckin fat boi, very hand that feed shibe blep borkf. Wrinkler doge lotsa pats fat boi woofer boof, long bois borking doggo porgo. Most angery pupper I have ever seen tungg long bois ruff blop, wow such tempt he made many woofs h*ck, puggo big ol h*ck. Heck puggorino noodle horse the neighborhood pupper puggo snoot, porgo shoob long doggo sub woofer.Doggo ipsum stop it fren vvv doge fluffer the neighborhood pupper blep shibe waggy wags, shoob thicc very taste wow puggorino ur givin me a spook. Floofs tungg shoob very taste wow sub woofer, the neighborhood pupper long bois much ruin diet. Wow such tempt very hand that feed shibe doggorino h*ck wrinkler, blep clouds heckin, doing me a frighten long woofer boof. Extremely cuuuuuute borkf vvv extremely cuuuuuute you are doing me a frighten long woofer, woofer very jealous pupper shoober. Clouds pats vvv, doge. Smol shoob very good spot heckin ur givin me a spook boofers smol, big ol floofs bork smol borking doggo with a long snoot for pats. Very good spot big ol pupper shibe blop h*ck, waggy wags dat tungg tho long doggo. puggo borking doggo yapper. Length boy pupper vvv I am bekom fat, bork big ol pupper.  Clouds aqua doggo puggorino tungg borking doggo, pupperino such treat. Heckin snoot floofs clouds what a nice floof wow very biscit, puggorino pupperino stop it fren. Fat boi maximum borkdrive shooberino lotsa pats, pats. Borkdrive very jealous pupper long doggo doing me a frighten, boofers most angery pupper I have ever seen. Fat boi noodle horse blep, wrinkler. Borkdrive extremely cuuuuuute lotsa pats blep most angery pupper I have ever seen, blop you are doing me a frighten dat tungg tho. Clouds very hand that feed shibe aqua doggo shooberino, waggy wags borking doggo. Shibe long woofer big ol pupper ruff heckin h*ck shibe, heckin good boys heck big ol pupper shoob waggy wags, long bois adorable doggo stop it fren length boy borkf.  Doing me a frighten super chub floofs what a nice floof porgo super chub very good spot thicc shoob vvv, I am bekom fat stop it fren aqua doggo puggorino very good spot shibe dat tungg tho. He made many woofs smol clouds stop it fren heckin fat boi, very hand that feed shibe blep borkf. Wrinkler doge lotsa pats fat boi woofer boof, long bois borking doggo porgo. Most angery pupper I have ever seen tungg long bois ruff blop, wow such tempt he made many woofs h*ck, puggo big ol h*ck. Heck puggorino noodle horse the neighborhood pupper puggo snoot, porgo shoob long doggo sub woofer.Doggo ipsum stop it fren vvv doge fluffer the neighborhood pupper blep shibe waggy wags, shoob thicc very taste wow puggorino ur givin me a spook. Floofs tungg shoob very taste wow sub woofer, the neighborhood pupper long bois much ruin diet. Wow such tempt very hand that feed shibe doggorino h*ck wrinkler, blep clouds heckin, doing me a frighten long woofer boof. Extremely cuuuuuute borkf vvv extremely cuuuuuute you are doing me a frighten long woofer, woofer very jealous pupper shoober. Clouds pats vvv, doge. Smol shoob very good spot heckin ur givin me a spook boofers smol, big ol floofs bork smol borking doggo with a long snoot for pats. Very good spot big ol pupper shibe blop h*ck, waggy wags dat tungg tho long doggo. puggo borking doggo yapper. Length boy pupper vvv I am bekom fat, bork big ol pupper.  Clouds aqua doggo puggorino tungg borking doggo, pupperino such treat. Heckin snoot floofs clouds what a nice floof wow very biscit, puggorino pupperino stop it fren. Fat boi maximum borkdrive shooberino lotsa pats, pats. Borkdrive very jealous pupper long doggo doing me a frighten, boofers most angery pupper I have ever seen. Fat boi noodle horse blep, wrinkler. Borkdrive extremely cuuuuuute lotsa pats blep most angery pupper I have ever seen, blop you are doing me a frighten dat tungg tho. Clouds very hand that feed shibe aqua doggo shooberino, waggy wags borking doggo. Shibe long woofer big ol pupper ruff heckin h*ck shibe, heckin good boys heck big ol pupper shoob waggy wags, long bois adorable doggo stop it fren length boy borkf.  Doing me a frighten super chub floofs what a nice floof porgo super chub very good spot thicc shoob vvv, I am bekom fat stop it fren aqua doggo puggorino very good spot shibe dat tungg tho. He made many woofs smol clouds stop it fren heckin fat boi, very hand that feed shibe blep borkf. Wrinkler doge lotsa pats fat boi woofer boof, long bois borking doggo porgo. Most angery pupper I have ever seen tungg long bois ruff blop, wow such tempt he made many woofs h*ck, puggo big ol h*ck. Heck puggorino noodle horse the neighborhood pupper puggo snoot, porgo shoob long doggo sub woofer.	132765	Partially Issued	2	4	2026-06-16 05:46:55.983528	f	2026-06-16 11:16:07.641643	2026-06-17 18:07:51.581328	15	\N	\N
-226	2	2	IND-00011	17	\N	\N			Mechanical Engineering		86458.88	Awaiting Approval	1	\N	\N	f	2026-06-18 10:48:16.861751	2026-06-18 10:48:16.861803	3	\N	\N
 227	2	2	IND-00012	19	237	\N	FIRST FLOOR	ROOM101	HEALTH 		19330.26	Issued	2	3	2026-06-18 05:28:10.733249	f	2026-06-18 10:55:16.557739	2026-06-18 11:11:57.204961	11	\N	\N
 228	2	2	IND-00013	19	237	7	FIRST FLOOR	ROOM101	HEALTH 		306960.22	Partially Issued	2	3	2026-06-18 06:51:24.051148	f	2026-06-18 10:57:09.781589	2026-06-18 12:23:35.548001	11	\N	\N
 229	2	2	IND-00014	19	\N	8			HEALTH 		51749.7	Approved	2	3	2026-06-18 07:10:37.145969	f	2026-06-18 12:33:13.796141	2026-06-18 12:40:37.156183	11	\N	\N
@@ -9074,8 +9118,12 @@ COPY public.indents (id, tenant_id, site_id, indent_number, requester_id, room_i
 231	2	2	IND-00016	3	237	7	FIRST FLOOR	ROOM101	HEALTH 	Complaint CMP-00008 - AC problem	4657.57	Issued	2	3	2026-06-22 06:17:58.262371	f	2026-06-22 11:44:48.408071	2026-06-22 11:48:20.964653	11	10	\N
 225	2	2	IND-00010	17	\N	\N			Computer Science & Engineering		8260.56	Approved	2	3	2026-06-30 12:45:16.350597	f	2026-06-18 10:44:25.957294	2026-06-30 18:15:16.373652	3	\N	\N
 233	2	2	IND-00018	3	237	7	FIRST FLOOR	ROOM101	HEALTH 		26601.42	Approved	2	3	2026-06-30 13:00:01.16276	f	2026-06-30 18:29:09.052074	2026-06-30 18:30:01.165439	11	\N	\N
-234	2	2	IND-00019	3	\N	\N			Anatomy	Complaint CMP-00005 - FAN NOT WORKING	2577802744.56	Awaiting Approval	1	\N	\N	f	2026-07-02 18:40:42.679828	2026-07-02 18:40:42.67987	1	7	\N
 232	2	2	IND-00017	3	\N	7			HEALTH 	Complaint CMP-00010 - DOOR IS NOT LOCKING PROPERLY\n[Rejected: test rejection]	99513.94	Rejected	1	\N	\N	f	2026-06-22 12:29:05.009417	2026-07-22 14:55:42.208401	11	12	\N
+235	2	2	IND-00020	3	\N	\N			Community Health Nursing		8174.01	Approved	2	3	2026-08-03 10:19:09.679963	f	2026-08-03 15:48:12.849868	2026-08-03 15:49:09.691051	9	\N	\N
+236	2	2	IND-00021	3	\N	\N			Commerce		16312.9	Approved	2	3	2026-08-03 11:25:53.773212	f	2026-08-03 16:52:50.609615	2026-08-03 16:55:53.782488	5	\N	\N
+226	2	2	IND-00011	17	\N	\N			Mechanical Engineering		86458.88	Submitted	1	\N	\N	f	2026-06-18 10:48:16.861751	2026-06-18 10:48:16.861803	3	\N	\N
+234	2	2	IND-00019	3	\N	\N			Anatomy	Complaint CMP-00005 - FAN NOT WORKING	2577802744.56	Submitted	1	\N	\N	f	2026-07-02 18:40:42.679828	2026-07-02 18:40:42.67987	1	7	\N
+237	2	2	IND-00022	3	237	7	FIRST FLOOR	ROOM101	HEALTH 		16312.9	Submitted	1	\N	\N	f	2026-08-03 17:54:01.502805	2026-08-03 17:54:01.502847	11	\N	\N
 \.
 
 
@@ -12237,6 +12285,12 @@ COPY public.purchase_order_approvals (id, po_id, approval_flow_id, approver_id, 
 54	252	67	3	{"678": {"quantity": 5.0, "remarks": null}}	\N	2026-07-27 12:29:44.723062
 55	252	18	3	{"678": {"quantity": 5.0, "remarks": null}}	\N	2026-07-27 12:29:51.435668
 56	252	71	3	{"678": {"quantity": 5.0, "remarks": null}}	\N	2026-07-27 12:29:51.435697
+57	254	79	3	{"680": {"quantity": 5.0, "remarks": null}}	\N	2026-08-03 15:54:53.781664
+58	254	18	3	{"680": {"quantity": 5.0, "remarks": null}}	\N	2026-08-03 15:55:11.74769
+59	254	83	3	{"680": {"quantity": 5.0, "remarks": null}}	\N	2026-08-03 15:55:11.747729
+60	255	79	3	{"681": {"quantity": 10.0, "remarks": null}}	\N	2026-08-03 17:18:47.682443
+61	255	18	3	{"681": {"quantity": 10.0, "remarks": null}}	\N	2026-08-03 17:18:55.173677
+62	255	83	3	{"681": {"quantity": 10.0, "remarks": null}}	\N	2026-08-03 17:18:55.173716
 \.
 
 
@@ -12411,6 +12465,9 @@ COPY public.purchase_order_items (id, po_id, material_id, quantity, rate, amount
 660	223	2469	1	644900	644900	0	\N	0	9	9	0	f	\N
 677	251	2564	2	16526.16	33052.32	0	\N	0	6	6	0	f	2
 678	252	3507	5	4349	21745	0	\N	0	6	6	0	f	5
+680	254	2564	5	16526.16	82630.8	0	\N	10	6	6	0	t	5
+681	255	2751	10	10443.43	104434.3	0	\N	10	9	9	0	f	10
+684	253	2564	100	45	4500	0	\N	0	9	9	0	f	\N
 \.
 
 
@@ -12418,87 +12475,90 @@ COPY public.purchase_order_items (id, po_id, material_id, quantity, rate, amount
 -- Data for Name: purchase_orders; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.purchase_orders (id, tenant_id, site_id, po_number, vendor_id, project_id, pr_id, indent_id, qr_id, po_type, total_amount, delivery_date, status, terms, created_by_id, approved_by_id, approved_at, is_deleted, created_at, updated_at, current_approval_level, annexure, remarks, institution_id, is_cash_purchase, advance_percentage, contract_id, rental_agreement_number, rental_start_date, rental_end_date, billing_frequency, security_deposit, cost_per_test, linked_reagent_agreement, vendor_maintenance_responsibility, return_conditions, renewal_terms, procurement_type, rental_type) FROM stdin;
-184	3	3	PO-00015	52	1	\N	\N	182	Formal	81643.63	\N	Closed	\N	4	\N	\N	f	2026-05-05 18:52:30.375564	2026-06-02 18:01:24.106204	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-188	3	3	PO-00023	53	1	\N	\N	179	Formal	7057	\N	Sent to Vendor	\N	4	4	2026-06-09 06:02:25.803756	f	2026-05-25 18:43:27.659778	2026-06-09 11:32:29.137317	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-185	3	3	PO-00020	56	1	\N	188	\N	Formal	505620	\N	Sent to Vendor	\N	4	4	2026-06-09 06:03:28.427074	f	2026-05-20 11:09:40.396549	2026-06-09 12:03:22.436884	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-213	3	3	PO-00048	53	1	\N	\N	\N	Informal	59815.35	2026-07-01	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-10 18:09:04.764216	2026-06-10 18:09:04.786544	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-183	3	3	PO-00014	52	1	\N	\N	181	Formal	38878.18	\N	Closed	\N	4	\N	\N	f	2026-05-04 18:52:30.375564	2026-06-09 11:11:19.17997	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-186	3	3	PO-00021	51	1	185	\N	\N	Formal	2029750	2026-06-03	Sent to Vendor		4	4	2026-05-20 07:11:03.64198	f	2026-05-20 12:31:17.847185	2026-06-09 11:28:51.718097	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-187	3	3	PO-00022	59	1	\N	195	\N	Formal	6500000	\N	Sent to Vendor	\N	4	4	2026-06-09 06:01:45.255291	f	2026-05-20 12:44:10.329878	2026-06-09 11:31:54.352679	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-172	3	3	PO-00003	54	1	\N	181	\N	Formal	41190.84	\N	Closed	\N	4	\N	\N	f	2026-04-23 18:52:30.375564	2026-05-15 18:52:30.668781	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-173	3	3	PO-00004	51	1	\N	182	\N	Formal	158700.81	\N	Approved	\N	4	\N	\N	f	2026-04-24 18:52:30.375564	2026-05-15 18:52:30.673538	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-174	3	3	PO-00005	59	1	\N	183	\N	Formal	94040.94	\N	Approved	\N	4	\N	\N	f	2026-04-25 18:52:30.375564	2026-05-15 18:52:30.677358	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-175	3	3	PO-00006	60	1	175	\N	\N	Formal	106458.67	\N	Closed	\N	4	\N	\N	f	2026-04-26 18:52:30.375564	2026-05-15 18:52:30.680082	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-176	3	3	PO-00007	56	1	176	\N	\N	Formal	154430.78	\N	Approved	\N	4	\N	\N	f	2026-04-27 18:52:30.375564	2026-05-15 18:52:30.683986	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-177	3	3	PO-00008	52	1	177	\N	\N	Formal	65342.52	\N	Closed	\N	4	\N	\N	f	2026-04-28 18:52:30.375564	2026-05-15 18:52:30.687165	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-178	3	3	PO-00009	60	1	178	\N	\N	Formal	147399.23	\N	Partially Received	\N	4	\N	\N	f	2026-04-29 18:52:30.375564	2026-05-15 18:52:30.691324	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-179	3	3	PO-00010	60	1	179	\N	\N	Formal	85728.76	\N	Sent to Vendor	\N	4	\N	\N	f	2026-04-30 18:52:30.375564	2026-05-15 18:52:30.694624	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-180	3	3	PO-00011	58	1	\N	\N	178	Formal	60541.49	\N	Partially Received	\N	4	\N	\N	f	2026-05-01 18:52:30.375564	2026-05-15 18:52:30.696708	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-181	3	3	PO-00012	53	1	\N	\N	179	Formal	124991.86	\N	Closed	\N	4	\N	\N	f	2026-05-02 18:52:30.375564	2026-05-15 18:52:30.700679	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-182	3	3	PO-00013	55	1	\N	\N	180	Formal	150499.81	\N	Partially Received	\N	4	\N	\N	f	2026-05-03 18:52:30.375564	2026-05-15 18:52:30.703739	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-171	3	3	PO-00002	53	1	\N	180	\N	Formal	90907.27	\N	Partially Received	\N	4	\N	\N	f	2026-04-22 18:52:30.375564	2026-05-15 18:52:30.664194	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-190	3	3	PO-00025	56	1	179	\N	\N	Formal	6853250	2026-06-15	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 15:23:31.597258	2026-06-08 18:55:17.925857	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-191	3	3	PO-00026	53	1	\N	197	\N	Formal	1298	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 16:03:23.716584	2026-06-08 18:55:17.942199	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-192	3	3	PO-00027	54	1	\N	196	\N	Formal	2507.5	\N	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-01 11:07:15.238732	f	2026-06-01 16:36:50.172223	2026-06-01 16:37:32.738439	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-193	3	3	PO-00028	57	1	178	\N	\N	Formal	3813570	2026-06-15	Submitted		4	\N	\N	f	2026-06-01 16:39:26.934331	2026-06-08 18:55:17.975319	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-194	3	3	PO-00029	54	1	\N	201	\N	Formal	100800	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 16:58:23.591671	2026-06-08 18:55:17.992417	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-195	3	3	PO-00030	59	1	188	\N	\N	Formal	3250	2026-06-15	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 17:03:57.421434	2026-06-08 18:55:18.042481	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-196	3	3	PO-00031	53	1	\N	202	\N	Formal	226800	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 17:07:08.990299	2026-06-08 18:55:18.059001	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-197	3	3	PO-00032	53	1	187	\N	185	Formal	225000	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 17:32:30.423259	2026-06-08 18:55:18.075356	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-198	3	3	PO-00033	53	1	\N	\N	175	Formal	20438	\N	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 07:11:54.780151	f	2026-06-01 17:37:01.162383	2026-06-09 12:41:54.78066	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-210	3	3	PO-00045	53	1	186	\N	\N	Formal	389.4	2026-06-22	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 06:39:44.953387	f	2026-06-08 16:14:50.262386	2026-06-09 12:09:51.002593	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-203	3	3	PO-00038	53	1	\N	\N	\N	Informal	18000	2026-06-23	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-02 13:25:01.313929	2026-06-02 13:25:01.322517	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-200	3	3	PO-00035	53	1	\N	\N	\N	Informal	196	2026-06-22	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-02 06:01:19.439678	f	2026-06-01 19:52:04.979427	2026-06-09 11:23:05.561822	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-199	3	3	PO-00034	59	1	\N	\N	175	Formal	2042	\N	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 05:13:04.621484	f	2026-06-01 17:37:01.189809	2026-06-09 11:26:24.208347	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-170	3	3	PO-00001	54	1	\N	179	\N	Formal	59200.55	\N	Approved	\N	4	\N	\N	f	2026-04-21 18:52:30.375564	2026-05-15 18:52:30.658953	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-204	3	3	PO-00039	53	1	\N	\N	\N	Informal	19800	2026-06-23	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-02 17:42:31.823143	2026-06-02 17:42:31.82497	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-189	3	3	PO-00024	54	1	\N	\N	179	Formal	33629	\N	Closed	\N	4	4	2026-05-25 13:22:18.605025	f	2026-05-25 18:43:27.751179	2026-06-02 18:01:36.986163	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-201	3	3	PO-00036	54	1	\N	\N	\N	Formal	135778.84	2026-06-22	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-02 06:00:37.696127	f	2026-06-01 19:53:47.799287	2026-06-09 11:19:25.214361	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-234	2	2	PO-00018	63	3	\N	\N	\N	Informal	277639.49	2026-07-01	Rejected	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-01 15:00:00.254964	2026-07-01 18:04:06.457384	2	\N	\n[Rejected: Rejection at level 2]	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-222	2	2	PO-00006	63	3	\N	\N	187	Formal	4720	2026-07-08	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 13:35:57.94273	f	2026-06-15 19:05:16.095226	2026-07-01 19:05:57.944684	2	Annexure test for PO-00006	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-223	2	2	PO-00007	62	3	200	\N	193	Formal	12176733.86	2026-07-16	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-18 12:45:51.479268	2026-07-06 12:23:20.866753	1		\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-221	2	2	PO-00005	62	3	\N	\N	187	Formal	2714	2026-07-07	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-06-16 06:48:21.751249	f	2026-06-15 19:05:16.037647	2026-06-16 12:18:21.752515	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-208	3	3	PO-00043	54	1	\N	194	\N	Formal	12455543.1	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-05 18:10:20.039447	2026-06-17 10:43:51.159152	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-205	3	3	PO-00040	54	1	189	\N	\N	Formal	48160	2026-06-17	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-03 14:31:01.896958	2026-06-17 10:46:25.147151	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-202	3	3	PO-00037	54	1	\N	200	\N	Formal	5605	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-02 13:18:45.56214	2026-06-17 10:48:13.245105	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-224	2	2	PO-00008	64	3	200	\N	193	Formal	545699.26	2026-07-09	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-18 12:45:51.568488	2026-07-06 12:22:05.675855	1		\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-225	2	2	PO-00009	63	3	200	\N	193	Formal	6152405.54	2026-07-21	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-18 12:45:51.584007	2026-07-06 12:21:58.113873	1		\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-226	2	2	PO-00010	63	3	\N	\N	194	Formal	1505.28	2026-07-07	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-19 12:06:49.124341	2026-07-06 12:21:36.203158	1		\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-227	2	2	PO-00011	62	3	\N	\N	194	Formal	435.42	2026-07-02	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-19 12:06:49.200936	2026-07-02 18:33:01.972288	1		\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-230	2	2	PO-00014	63	3	\N	\N	197	Formal	155.76	2026-07-08	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-22 12:15:32.505776	2026-07-01 18:53:22.407591	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-207	3	3	PO-00042	53	1	\N	\N	\N	Informal	10560	2026-06-25	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 07:31:48.001221	f	2026-06-04 14:19:18.399032	2026-06-11 15:05:34.851646	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-206	3	3	PO-00041	53	1	\N	\N	\N	Informal	181500	2026-06-24	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-03 09:03:42.850278	f	2026-06-03 14:33:32.175397	2026-06-11 16:24:46.272972	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-233	2	2	PO-00017	63	3	\N	\N	\N	Informal	37018.6	2026-07-21	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: 15 Days\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-30 18:07:22.323788	2026-06-30 18:40:52.129145	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-231	2	2	PO-00015	62	3	\N	\N	197	Formal	130.98	2026-07-24	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-22 12:15:32.547787	2026-07-01 18:50:47.282773	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-212	3	3	PO-00047	59	1	\N	\N	\N	Informal	389.4	2026-06-29	Short Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-08 12:47:36.231711	f	2026-06-08 17:19:34.563694	2026-06-08 19:19:46.178721	\N	\N	short closed \n	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-235	2	2	PO-00019	63	3	\N	\N	\N	Informal	48416.97	2026-07-22	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 10:11:11.544124	f	2026-07-01 15:07:59.921516	2026-07-06 16:37:47.788958	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-244	2	2	PO-00028	62	3	203	\N	\N	Formal	612466	2026-07-21	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-07 19:04:31.282046	2026-07-07 19:04:31.300742	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-232	2	2	PO-00016	64	3	\N	\N	198	Formal	11.2	2026-07-21	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-22 12:18:25.580101	2026-06-30 20:00:31.707939	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-245	2	2	PO-00029	63	3	\N	\N	190	Formal	444	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-08 11:51:20.874685	2026-07-08 11:51:20.886838	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-243	2	2	PO-00027	62	3	\N	\N	\N	Informal	138151.99	2026-07-02	Partially Received	dfgfdgdgdfg	3	\N	\N	f	2026-07-02 18:30:35.966725	2026-07-08 12:25:10.086539	1		\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-242	2	2	PO-00026	63	3	\N	\N	\N	Informal	33428.88	2026-07-22	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 12:42:10.050112	f	2026-07-01 16:02:34.765014	2026-07-01 18:12:10.051203	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-237	2	2	PO-00021	62	3	\N	\N	\N	Informal	48416.97	2026-07-22	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 10:08:14.685627	f	2026-07-01 15:30:32.968379	2026-07-01 15:38:14.686254	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-247	2	2	PO-00031	62	3	\N	\N	\N	Formal	119630.69	2026-07-09	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-09 12:36:38.03989	2026-07-09 12:36:38.061011	1	dkflkdflkdlfkdlfk dhfjhdfjhdfjh	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-209	3	3	PO-00044	55	1	\N	208	\N	Formal	109928.8	\N	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: 15 Days\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 07:25:55.019454	f	2026-06-08 14:45:41.037419	2026-06-11 15:04:41.081091	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-250	2	2	PO-00034	62	3	201	\N	202	Formal	2740	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-13 13:23:47.299697	2026-07-13 13:23:47.303365	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-229	2	2	PO-00013	63	3	\N	\N	195	Formal	354	2026-07-08	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-19 13:08:12.440185	2026-07-01 18:54:50.910476	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-228	2	2	PO-00012	62	3	\N	\N	195	Formal	672	2026-07-08	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-19 13:08:12.417753	2026-07-01 18:56:48.12993	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-239	2	2	PO-00023	63	3	\N	\N	\N	Informal	18509.3	2026-07-22	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-01 15:38:54.315286	2026-07-06 16:37:10.220548	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-248	2	2	PO-00032	62	3	\N	\N	\N	Formal	119630.69	2026-07-15	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-09 12:40:54.374172	2026-07-09 12:40:54.375548	1		\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-249	2	2	PO-00033	64	3	201	\N	202	Formal	0	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-13 13:23:47.23686	2026-07-13 13:23:47.236872	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-246	2	2	PO-00030	63	3	\N	\N	\N	Informal	141354.26	2026-07-23	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-08 18:17:14.016477	2026-07-08 18:46:38.942509	1		\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-214	2	2	PO-00001	62	3	194	\N	\N	Formal	38491.6	2026-06-26	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-06-11 19:46:17.594031	f	2026-06-12 01:00:29.585057	2026-06-12 01:17:08.524505	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-216	2	2	PO-00003	62	3	\N	\N	186	Formal	23600	2026-07-03	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-12 01:40:11.44893	2026-06-12 02:20:17.559248	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-217	2	2	PO-00004	63	3	\N	\N	186	Formal	23321.52	2026-07-03	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-06-16 06:09:10.505248	f	2026-06-12 01:40:11.463052	2026-06-16 11:39:10.508746	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-215	2	2	PO-00002	62	3	\N	\N	\N	Informal	59815.35	2026-07-03	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	11	2026-06-11 19:55:57.036519	f	2026-06-12 01:18:50.982636	2026-06-12 01:27:26.343947	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-211	3	3	PO-00046	53	1	\N	\N	\N	Informal	149060.07	2026-06-29	Short Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 04:59:33.248268	f	2026-06-08 17:18:43.689083	2026-06-17 11:21:46.51598	2	\N	mistaken	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-241	2	2	PO-00025	63	3	\N	\N	\N	Informal	118308.5	\N	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 12:45:36.264791	f	2026-07-01 15:58:53.716577	2026-07-01 18:15:36.265807	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-240	2	2	PO-00024	62	3	\N	\N	\N	Informal	18509.3	2026-07-22	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-01 15:54:08.411103	2026-07-01 18:40:54.712499	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-236	2	2	PO-00020	63	3	\N	\N	\N	Informal	30282.87	2026-07-22	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-01 15:09:29.245234	2026-07-06 16:58:25.718872	1	\N	Rejected for testing	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-238	2	2	PO-00022	63	3	\N	\N	\N	Informal	37018.6	2026-07-01	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 10:14:55.636414	f	2026-07-01 15:32:32.73684	2026-07-01 15:44:55.636716	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-251	2	2	EPAHS/PO-00001	63	3	\N	\N	\N	Informal	37018.6	2026-07-29	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-27 06:36:54.952309	f	2026-07-27 12:06:20.027605	2026-07-27 12:06:54.953664	2		\N	11	f	50	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-252	2	2	EPCET/PO-00001	62	3	\N	\N	\N	Informal	24354.4	2026-07-31	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-27 06:59:51.469033	f	2026-07-27 12:28:49.264211	2026-07-27 12:29:51.470607	2		\N	3	f	25	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+COPY public.purchase_orders (id, tenant_id, site_id, po_number, vendor_id, project_id, pr_id, indent_id, qr_id, po_type, total_amount, delivery_date, status, terms, created_by_id, approved_by_id, approved_at, is_deleted, created_at, updated_at, current_approval_level, annexure, remarks, institution_id, advance_percentage, contract_id, rental_agreement_number, rental_start_date, rental_end_date, billing_frequency, security_deposit, cost_per_test, linked_reagent_agreement, vendor_maintenance_responsibility, return_conditions, renewal_terms, procurement_type, rental_type, purchase_mode, marketplace_name) FROM stdin;
+253	2	2	PO-00035	63	3	\N	\N	214	Formal	5310	2026-08-20	Draft	Test PO Terms	1	\N	\N	f	2026-08-03 14:11:21.328412	2026-08-04 12:14:26.091505	1		\N	3	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Credit Purchase	\N
+255	2	2	EPCET/PO-00002	63	3	\N	\N	\N	Informal	110909.23	2026-08-15	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-03 11:48:55.203196	f	2026-08-03 17:15:40.231582	2026-08-03 17:18:55.20532	2		\N	3	12	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Cash Purchase	\N
+184	3	3	PO-00015	52	1	\N	\N	182	Formal	81643.63	\N	Closed	\N	4	\N	\N	f	2026-05-05 18:52:30.375564	2026-06-02 18:01:24.106204	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+188	3	3	PO-00023	53	1	\N	\N	179	Formal	7057	\N	Sent to Vendor	\N	4	4	2026-06-09 06:02:25.803756	f	2026-05-25 18:43:27.659778	2026-06-09 11:32:29.137317	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+185	3	3	PO-00020	56	1	\N	188	\N	Formal	505620	\N	Sent to Vendor	\N	4	4	2026-06-09 06:03:28.427074	f	2026-05-20 11:09:40.396549	2026-06-09 12:03:22.436884	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+251	2	2	EPAHS/PO-00001	63	3	\N	\N	\N	Informal	37018.6	2026-07-29	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-27 06:36:54.952309	f	2026-07-27 12:06:20.027605	2026-07-27 12:06:54.953664	2		\N	11	50	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+213	3	3	PO-00048	53	1	\N	\N	\N	Informal	59815.35	2026-07-01	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-10 18:09:04.764216	2026-06-10 18:09:04.786544	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+183	3	3	PO-00014	52	1	\N	\N	181	Formal	38878.18	\N	Closed	\N	4	\N	\N	f	2026-05-04 18:52:30.375564	2026-06-09 11:11:19.17997	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+186	3	3	PO-00021	51	1	185	\N	\N	Formal	2029750	2026-06-03	Sent to Vendor		4	4	2026-05-20 07:11:03.64198	f	2026-05-20 12:31:17.847185	2026-06-09 11:28:51.718097	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+187	3	3	PO-00022	59	1	\N	195	\N	Formal	6500000	\N	Sent to Vendor	\N	4	4	2026-06-09 06:01:45.255291	f	2026-05-20 12:44:10.329878	2026-06-09 11:31:54.352679	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+172	3	3	PO-00003	54	1	\N	181	\N	Formal	41190.84	\N	Closed	\N	4	\N	\N	f	2026-04-23 18:52:30.375564	2026-05-15 18:52:30.668781	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+173	3	3	PO-00004	51	1	\N	182	\N	Formal	158700.81	\N	Approved	\N	4	\N	\N	f	2026-04-24 18:52:30.375564	2026-05-15 18:52:30.673538	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+174	3	3	PO-00005	59	1	\N	183	\N	Formal	94040.94	\N	Approved	\N	4	\N	\N	f	2026-04-25 18:52:30.375564	2026-05-15 18:52:30.677358	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+175	3	3	PO-00006	60	1	175	\N	\N	Formal	106458.67	\N	Closed	\N	4	\N	\N	f	2026-04-26 18:52:30.375564	2026-05-15 18:52:30.680082	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+176	3	3	PO-00007	56	1	176	\N	\N	Formal	154430.78	\N	Approved	\N	4	\N	\N	f	2026-04-27 18:52:30.375564	2026-05-15 18:52:30.683986	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+177	3	3	PO-00008	52	1	177	\N	\N	Formal	65342.52	\N	Closed	\N	4	\N	\N	f	2026-04-28 18:52:30.375564	2026-05-15 18:52:30.687165	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+178	3	3	PO-00009	60	1	178	\N	\N	Formal	147399.23	\N	Partially Received	\N	4	\N	\N	f	2026-04-29 18:52:30.375564	2026-05-15 18:52:30.691324	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+179	3	3	PO-00010	60	1	179	\N	\N	Formal	85728.76	\N	Sent to Vendor	\N	4	\N	\N	f	2026-04-30 18:52:30.375564	2026-05-15 18:52:30.694624	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+180	3	3	PO-00011	58	1	\N	\N	178	Formal	60541.49	\N	Partially Received	\N	4	\N	\N	f	2026-05-01 18:52:30.375564	2026-05-15 18:52:30.696708	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+181	3	3	PO-00012	53	1	\N	\N	179	Formal	124991.86	\N	Closed	\N	4	\N	\N	f	2026-05-02 18:52:30.375564	2026-05-15 18:52:30.700679	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+182	3	3	PO-00013	55	1	\N	\N	180	Formal	150499.81	\N	Partially Received	\N	4	\N	\N	f	2026-05-03 18:52:30.375564	2026-05-15 18:52:30.703739	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+171	3	3	PO-00002	53	1	\N	180	\N	Formal	90907.27	\N	Partially Received	\N	4	\N	\N	f	2026-04-22 18:52:30.375564	2026-05-15 18:52:30.664194	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+190	3	3	PO-00025	56	1	179	\N	\N	Formal	6853250	2026-06-15	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 15:23:31.597258	2026-06-08 18:55:17.925857	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+191	3	3	PO-00026	53	1	\N	197	\N	Formal	1298	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 16:03:23.716584	2026-06-08 18:55:17.942199	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+192	3	3	PO-00027	54	1	\N	196	\N	Formal	2507.5	\N	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-01 11:07:15.238732	f	2026-06-01 16:36:50.172223	2026-06-01 16:37:32.738439	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+193	3	3	PO-00028	57	1	178	\N	\N	Formal	3813570	2026-06-15	Submitted		4	\N	\N	f	2026-06-01 16:39:26.934331	2026-06-08 18:55:17.975319	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+194	3	3	PO-00029	54	1	\N	201	\N	Formal	100800	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 16:58:23.591671	2026-06-08 18:55:17.992417	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+195	3	3	PO-00030	59	1	188	\N	\N	Formal	3250	2026-06-15	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 17:03:57.421434	2026-06-08 18:55:18.042481	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+196	3	3	PO-00031	53	1	\N	202	\N	Formal	226800	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 17:07:08.990299	2026-06-08 18:55:18.059001	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+197	3	3	PO-00032	53	1	187	\N	185	Formal	225000	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 17:32:30.423259	2026-06-08 18:55:18.075356	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+198	3	3	PO-00033	53	1	\N	\N	175	Formal	20438	\N	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 07:11:54.780151	f	2026-06-01 17:37:01.162383	2026-06-09 12:41:54.78066	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+210	3	3	PO-00045	53	1	186	\N	\N	Formal	389.4	2026-06-22	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 06:39:44.953387	f	2026-06-08 16:14:50.262386	2026-06-09 12:09:51.002593	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+203	3	3	PO-00038	53	1	\N	\N	\N	Informal	18000	2026-06-23	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-02 13:25:01.313929	2026-06-02 13:25:01.322517	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+200	3	3	PO-00035	53	1	\N	\N	\N	Informal	196	2026-06-22	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-02 06:01:19.439678	f	2026-06-01 19:52:04.979427	2026-06-09 11:23:05.561822	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+199	3	3	PO-00034	59	1	\N	\N	175	Formal	2042	\N	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 05:13:04.621484	f	2026-06-01 17:37:01.189809	2026-06-09 11:26:24.208347	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+170	3	3	PO-00001	54	1	\N	179	\N	Formal	59200.55	\N	Approved	\N	4	\N	\N	f	2026-04-21 18:52:30.375564	2026-05-15 18:52:30.658953	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+204	3	3	PO-00039	53	1	\N	\N	\N	Informal	19800	2026-06-23	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-02 17:42:31.823143	2026-06-02 17:42:31.82497	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+189	3	3	PO-00024	54	1	\N	\N	179	Formal	33629	\N	Closed	\N	4	4	2026-05-25 13:22:18.605025	f	2026-05-25 18:43:27.751179	2026-06-02 18:01:36.986163	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+201	3	3	PO-00036	54	1	\N	\N	\N	Formal	135778.84	2026-06-22	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-02 06:00:37.696127	f	2026-06-01 19:53:47.799287	2026-06-09 11:19:25.214361	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+234	2	2	PO-00018	63	3	\N	\N	\N	Informal	277639.49	2026-07-01	Rejected	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-01 15:00:00.254964	2026-07-01 18:04:06.457384	2	\N	\n[Rejected: Rejection at level 2]	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+222	2	2	PO-00006	63	3	\N	\N	187	Formal	4720	2026-07-08	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 13:35:57.94273	f	2026-06-15 19:05:16.095226	2026-07-01 19:05:57.944684	2	Annexure test for PO-00006	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+223	2	2	PO-00007	62	3	200	\N	193	Formal	12176733.86	2026-07-16	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-18 12:45:51.479268	2026-07-06 12:23:20.866753	1		\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+221	2	2	PO-00005	62	3	\N	\N	187	Formal	2714	2026-07-07	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-06-16 06:48:21.751249	f	2026-06-15 19:05:16.037647	2026-06-16 12:18:21.752515	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+208	3	3	PO-00043	54	1	\N	194	\N	Formal	12455543.1	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-05 18:10:20.039447	2026-06-17 10:43:51.159152	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+205	3	3	PO-00040	54	1	189	\N	\N	Formal	48160	2026-06-17	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-03 14:31:01.896958	2026-06-17 10:46:25.147151	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+202	3	3	PO-00037	54	1	\N	200	\N	Formal	5605	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-02 13:18:45.56214	2026-06-17 10:48:13.245105	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+224	2	2	PO-00008	64	3	200	\N	193	Formal	545699.26	2026-07-09	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-18 12:45:51.568488	2026-07-06 12:22:05.675855	1		\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+225	2	2	PO-00009	63	3	200	\N	193	Formal	6152405.54	2026-07-21	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-18 12:45:51.584007	2026-07-06 12:21:58.113873	1		\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+226	2	2	PO-00010	63	3	\N	\N	194	Formal	1505.28	2026-07-07	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-19 12:06:49.124341	2026-07-06 12:21:36.203158	1		\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+227	2	2	PO-00011	62	3	\N	\N	194	Formal	435.42	2026-07-02	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-19 12:06:49.200936	2026-07-02 18:33:01.972288	1		\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+230	2	2	PO-00014	63	3	\N	\N	197	Formal	155.76	2026-07-08	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-22 12:15:32.505776	2026-07-01 18:53:22.407591	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+207	3	3	PO-00042	53	1	\N	\N	\N	Informal	10560	2026-06-25	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 07:31:48.001221	f	2026-06-04 14:19:18.399032	2026-06-11 15:05:34.851646	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+206	3	3	PO-00041	53	1	\N	\N	\N	Informal	181500	2026-06-24	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-03 09:03:42.850278	f	2026-06-03 14:33:32.175397	2026-06-11 16:24:46.272972	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+233	2	2	PO-00017	63	3	\N	\N	\N	Informal	37018.6	2026-07-21	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: 15 Days\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-30 18:07:22.323788	2026-06-30 18:40:52.129145	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+231	2	2	PO-00015	62	3	\N	\N	197	Formal	130.98	2026-07-24	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-22 12:15:32.547787	2026-07-01 18:50:47.282773	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+212	3	3	PO-00047	59	1	\N	\N	\N	Informal	389.4	2026-06-29	Short Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-08 12:47:36.231711	f	2026-06-08 17:19:34.563694	2026-06-08 19:19:46.178721	\N	\N	short closed \n	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+235	2	2	PO-00019	63	3	\N	\N	\N	Informal	48416.97	2026-07-22	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 10:11:11.544124	f	2026-07-01 15:07:59.921516	2026-07-06 16:37:47.788958	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+244	2	2	PO-00028	62	3	203	\N	\N	Formal	612466	2026-07-21	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-07 19:04:31.282046	2026-07-07 19:04:31.300742	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+232	2	2	PO-00016	64	3	\N	\N	198	Formal	11.2	2026-07-21	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-22 12:18:25.580101	2026-06-30 20:00:31.707939	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+245	2	2	PO-00029	63	3	\N	\N	190	Formal	444	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-08 11:51:20.874685	2026-07-08 11:51:20.886838	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+243	2	2	PO-00027	62	3	\N	\N	\N	Informal	138151.99	2026-07-02	Partially Received	dfgfdgdgdfg	3	\N	\N	f	2026-07-02 18:30:35.966725	2026-07-08 12:25:10.086539	1		\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+242	2	2	PO-00026	63	3	\N	\N	\N	Informal	33428.88	2026-07-22	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 12:42:10.050112	f	2026-07-01 16:02:34.765014	2026-07-01 18:12:10.051203	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+237	2	2	PO-00021	62	3	\N	\N	\N	Informal	48416.97	2026-07-22	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 10:08:14.685627	f	2026-07-01 15:30:32.968379	2026-07-01 15:38:14.686254	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+247	2	2	PO-00031	62	3	\N	\N	\N	Formal	119630.69	2026-07-09	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-09 12:36:38.03989	2026-07-09 12:36:38.061011	1	dkflkdflkdlfkdlfk dhfjhdfjhdfjh	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+209	3	3	PO-00044	55	1	\N	208	\N	Formal	109928.8	\N	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: 15 Days\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 07:25:55.019454	f	2026-06-08 14:45:41.037419	2026-06-11 15:04:41.081091	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+250	2	2	PO-00034	62	3	201	\N	202	Formal	2740	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-13 13:23:47.299697	2026-07-13 13:23:47.303365	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+229	2	2	PO-00013	63	3	\N	\N	195	Formal	354	2026-07-08	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-19 13:08:12.440185	2026-07-01 18:54:50.910476	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+228	2	2	PO-00012	62	3	\N	\N	195	Formal	672	2026-07-08	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-19 13:08:12.417753	2026-07-01 18:56:48.12993	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+239	2	2	PO-00023	63	3	\N	\N	\N	Informal	18509.3	2026-07-22	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-01 15:38:54.315286	2026-07-06 16:37:10.220548	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+248	2	2	PO-00032	62	3	\N	\N	\N	Formal	119630.69	2026-07-15	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-09 12:40:54.374172	2026-07-09 12:40:54.375548	1		\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+249	2	2	PO-00033	64	3	201	\N	202	Formal	0	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-13 13:23:47.23686	2026-07-13 13:23:47.236872	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+246	2	2	PO-00030	63	3	\N	\N	\N	Informal	141354.26	2026-07-23	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-08 18:17:14.016477	2026-07-08 18:46:38.942509	1		\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+214	2	2	PO-00001	62	3	194	\N	\N	Formal	38491.6	2026-06-26	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-06-11 19:46:17.594031	f	2026-06-12 01:00:29.585057	2026-06-12 01:17:08.524505	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+216	2	2	PO-00003	62	3	\N	\N	186	Formal	23600	2026-07-03	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-12 01:40:11.44893	2026-06-12 02:20:17.559248	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+217	2	2	PO-00004	63	3	\N	\N	186	Formal	23321.52	2026-07-03	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-06-16 06:09:10.505248	f	2026-06-12 01:40:11.463052	2026-06-16 11:39:10.508746	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+215	2	2	PO-00002	62	3	\N	\N	\N	Informal	59815.35	2026-07-03	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	11	2026-06-11 19:55:57.036519	f	2026-06-12 01:18:50.982636	2026-06-12 01:27:26.343947	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+211	3	3	PO-00046	53	1	\N	\N	\N	Informal	149060.07	2026-06-29	Short Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 04:59:33.248268	f	2026-06-08 17:18:43.689083	2026-06-17 11:21:46.51598	2	\N	mistaken	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+241	2	2	PO-00025	63	3	\N	\N	\N	Informal	118308.5	\N	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 12:45:36.264791	f	2026-07-01 15:58:53.716577	2026-07-01 18:15:36.265807	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+240	2	2	PO-00024	62	3	\N	\N	\N	Informal	18509.3	2026-07-22	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-01 15:54:08.411103	2026-07-01 18:40:54.712499	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+236	2	2	PO-00020	63	3	\N	\N	\N	Informal	30282.87	2026-07-22	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-01 15:09:29.245234	2026-07-06 16:58:25.718872	1	\N	Rejected for testing	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+238	2	2	PO-00022	63	3	\N	\N	\N	Informal	37018.6	2026-07-01	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 10:14:55.636414	f	2026-07-01 15:32:32.73684	2026-07-01 15:44:55.636716	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+252	2	2	EPCET/PO-00001	62	3	\N	\N	\N	Informal	24354.4	2026-07-31	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-27 06:59:51.469033	f	2026-07-27 12:28:49.264211	2026-07-27 12:29:51.470607	2		\N	3	25	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+254	2	2	EPH/PO-00001	66	3	\N	\N	\N	Formal	74367.72	2026-08-10	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-03 10:25:11.779205	f	2026-08-03 15:54:06.373976	2026-08-03 15:55:11.781203	2		\N	2	4	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Credit Purchase	\N
 \.
 
 
@@ -12539,6 +12599,14 @@ COPY public.purchase_request_approvals (id, pr_id, approval_flow_id, approver_id
 30	203	63	3	{"618": {"quantity": 32.0, "remarks": null}, "619": {"quantity": 1.2, "remarks": null}}	\N	2026-07-07 19:03:09.792334
 31	199	17	3	{"600": {"quantity": 4.0, "remarks": "Packaging Charges"}}	\N	2026-07-07 19:05:58.582046
 32	199	63	3	{"600": {"quantity": 4.0, "remarks": "Packaging Charges"}}	\N	2026-07-07 19:05:58.582062
+33	204	19	3	{"620": {"quantity": 5.0, "remarks": null}}	\N	2026-08-03 15:51:48.404829
+34	204	78	3	{"620": {"quantity": 5.0, "remarks": null}}	\N	2026-08-03 15:51:48.404869
+35	204	17	3	{"620": {"quantity": 5.0, "remarks": null}}	\N	2026-08-03 15:51:59.305839
+36	204	82	3	{"620": {"quantity": 5.0, "remarks": null}}	\N	2026-08-03 15:51:59.30588
+37	205	19	3	{"621": {"quantity": 5.0, "remarks": null}}	\N	2026-08-03 17:03:43.552754
+38	205	78	3	{"621": {"quantity": 5.0, "remarks": null}}	\N	2026-08-03 17:03:43.552764
+39	205	17	3	{"621": {"quantity": 5.0, "remarks": null}}	\N	2026-08-03 17:03:53.735047
+40	205	82	3	{"621": {"quantity": 5.0, "remarks": null}}	\N	2026-08-03 17:03:53.735086
 \.
 
 
@@ -12623,6 +12691,8 @@ COPY public.purchase_request_items (id, pr_id, material_id, quantity, approved_q
 617	202	3503	2	\N
 618	203	2564	32	32
 619	203	2860	1.5	1.2
+620	204	2469	5	5
+621	205	2435	5	5
 \.
 
 
@@ -12665,6 +12735,8 @@ COPY public.purchase_requests (id, tenant_id, site_id, pr_number, requester_id, 
 196	2	2	PR-00003	10	\N	\N	Mechanical	3	2026-06-26	\n[Rejected: no needed now]	Rejected	\N	\N	f	2026-06-12 00:56:37.980796	2026-07-08 11:21:18.029881	2	\N	\N	\N	\N	\N	\N	\N	\N
 199	2	2	PR-00006	3	\N	\N	\N	3	2026-06-30	\n[Short Closed: already pr raised ]	Short Closed	3	2026-07-07 13:35:58.620752	f	2026-06-16 11:01:07.031945	2026-07-08 11:22:24.991438	2	\N	\N	\N	\N	\N	\N	\N	\N
 201	2	2	PR-00008	3	\N	8	HEALTH 	3	2026-07-14		Converted to PO	3	2026-07-01 09:57:24.949598	f	2026-06-30 18:33:51.277817	2026-07-13 13:23:47.302281	2	\N	\N	\N	\N	\N	\N	\N	\N
+204	2	2	PR-00011	3	\N	\N	Biochemistry	3	2026-08-10		Approved	3	2026-08-03 10:21:59.342786	f	2026-08-03 15:51:29.219193	2026-08-03 15:51:59.34475	2	Purchase	\N	\N	\N	\N	\N	f	\N
+205	2	2	PR-00012	3	\N	8	HEALTH 	3	2026-08-15		Approved	3	2026-08-03 11:33:53.755286	f	2026-08-03 16:57:20.120584	2026-08-03 17:03:53.757181	2	Purchase	\N	\N	\N	\N	\N	f	\N
 \.
 
 
@@ -12768,6 +12840,8 @@ COPY public.quotation_comparisons (id, qr_id, qr_item_id, material_id, selected_
 116	207	467	3507	63	63	f	\N	\N	\N
 117	207	468	2751	63	63	f	\N	\N	\N
 118	206	465	2752	64	64	f	\N	\N	\N
+120	214	482	2564	63	63	f	\N	\N	\N
+119	213	480	2564	66	66	f	\N	\N	\N
 \.
 
 
@@ -12777,6 +12851,20 @@ COPY public.quotation_comparisons (id, qr_id, qr_item_id, material_id, selected_
 
 COPY public.quotation_negotiation_history (id, qr_id, vendor_id, discount_percent, remarks, created_by_id, created_at, item_discounts) FROM stdin;
 1	191	63	10		3	2026-07-21 12:33:03.576446	\N
+2	207	62	10		3	2026-08-03 15:19:59.817234	{"466": 0.0, "467": 0.0, "468": 0.0}
+3	207	63	10		3	2026-08-03 15:20:36.223371	{"466": 0.0, "467": 0.0, "468": 0.0}
+4	207	62	10		3	2026-08-03 15:31:21.592623	{}
+5	207	62	2		3	2026-08-03 15:32:45.035981	{"466": 10.0, "467": 10.0, "468": 10.0}
+6	207	63	5		3	2026-08-03 15:42:51.863719	{}
+7	213	66	0		3	2026-08-03 15:45:27.084938	{"480": 12.0}
+8	213	63	0		3	2026-08-03 15:47:39.432356	{"480": 5.0}
+9	213	63	0		3	2026-08-03 15:50:50.512592	{"480": 10.0}
+10	213	63	0		3	2026-08-03 15:51:40.759121	{"480": 25.0}
+11	213	63	0		3	2026-08-03 15:52:00.623442	{"480": 2.0}
+12	213	66	0		3	2026-08-03 15:59:23.702202	{"480": 12.0}
+13	213	66	0		3	2026-08-03 15:59:37.681951	{"480": 13.0}
+14	191	63	3		3	2026-08-03 16:19:47.791098	{}
+15	191	63	11		3	2026-08-03 16:19:59.324099	{}
 \.
 
 
@@ -12893,6 +12981,15 @@ COPY public.quotation_request_item_sources (id, qr_item_id, source, source_pr_id
 113	471	Manual	\N	10
 114	472	Manual	\N	1
 115	473	Manual	\N	1
+116	474	Manual	\N	100
+118	476	Manual	\N	100
+120	478	Manual	\N	100
+122	480	Manual	\N	100
+124	482	Manual	\N	100
+125	483	Manual	\N	1
+126	484	PR	204	5
+127	485	Manual	\N	1
+128	486	PR	205	5
 \.
 
 
@@ -13037,6 +13134,15 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 471	209	2357	10	Manual	\N
 472	208	2564	1	Manual	\N
 473	208	2565	1	Manual	\N
+474	210	2564	100	Manual	\N
+476	211	2564	100	Manual	\N
+478	212	2564	100	Manual	\N
+480	213	2564	100	Manual	\N
+482	214	2564	100	Manual	\N
+483	215	2564	1	Manual	\N
+484	215	2469	5	PR	204
+485	216	3474	1	Manual	\N
+486	216	2435	5	PR	205
 \.
 
 
@@ -13056,6 +13162,8 @@ COPY public.quotation_request_prs (id, qr_id, pr_id) FROM stdin;
 12	199	201
 13	202	201
 14	203	201
+15	215	204
+16	216	205
 \.
 
 
@@ -13169,6 +13277,23 @@ COPY public.quotation_request_vendors (id, qr_id, vendor_id, is_sent, sent_at, r
 395	193	62	t	2026-06-18 11:59:46.363836	Received
 428	208	62	f	\N	Pending
 429	208	63	f	\N	Pending
+430	210	66	f	\N	Pending
+431	210	63	f	\N	Pending
+434	211	66	f	\N	Pending
+435	211	63	f	\N	Pending
+438	212	66	t	2026-08-03 14:07:21.927254	Pending
+439	212	63	t	2026-08-03 14:07:26.715145	Pending
+443	213	63	t	2026-08-03 14:10:09.18917	Received
+442	213	66	t	2026-08-03 14:10:04.437937	Received
+447	214	63	t	2026-08-03 14:11:16.21223	Received
+448	215	66	f	\N	Pending
+446	214	66	t	2026-08-03 14:11:11.352251	Received
+449	215	63	f	\N	Pending
+450	215	62	f	\N	Pending
+451	215	64	f	\N	Pending
+452	216	66	t	2026-08-03 17:30:29.220412	Pending
+453	216	63	t	2026-08-03 17:30:35.028194	Pending
+454	216	62	t	2026-08-03 17:30:39.766265	Pending
 \.
 
 
@@ -13219,6 +13344,13 @@ COPY public.quotation_requests (id, tenant_id, site_id, qr_number, project_id, c
 207	2	2	QR-00021	3	3	2026-07-22	\N	Entered	\N	\N	f	2026-07-21 11:33:07.588869	2026-07-21 12:18:59.282538	\N
 209	2	2	QR-00023	3	3	\N	\N	Draft	\N	\N	f	2026-07-31 12:58:40.692541	2026-07-31 12:58:40.692554	\N
 208	2	2	QR-00022	3	3	2026-08-28	\N	Submitted	\N	\N	f	2026-07-31 12:40:56.760103	2026-07-31 15:27:58.233349	\N
+210	2	2	QR-00024	3	1	2027-01-01	Test Workflow Automated	Draft	\N	\N	f	2026-08-03 14:04:43.415291	2026-08-03 14:04:43.41531	\N
+211	2	2	QR-00025	3	1	2027-01-01	Test Workflow Automated	Submitted	\N	\N	f	2026-08-03 14:05:47.764882	2026-08-03 14:05:47.875313	\N
+212	2	2	QR-00026	3	1	2027-01-01	Test Workflow Automated	Requested	\N	\N	f	2026-08-03 14:07:21.84323	2026-08-03 14:07:31.480751	\N
+214	2	2	QR-00028	3	1	2027-01-01	Test Workflow Automated	Ordered	1	2026-08-03 14:11:21.266147	f	2026-08-03 14:11:11.276594	2026-08-03 14:11:21.347406	Looks good, test passed
+213	2	2	QR-00027	3	1	2027-01-01	Test Workflow Automated	Compared	\N	\N	f	2026-08-03 14:10:04.35094	2026-08-03 15:45:27.080029	Looks good, test passed
+215	2	2	QR-00029	3	3	2026-08-15	\N	Submitted	\N	\N	f	2026-08-03 15:56:39.62116	2026-08-03 15:56:39.621201	\N
+216	2	2	QR-00030	3	3	2026-08-10	\N	Requested	\N	\N	f	2026-08-03 17:06:10.944789	2026-08-03 17:30:44.766182	\N
 \.
 
 
@@ -17071,6 +17203,11 @@ COPY public.vendor_categories (id, vendor_id, category_id) FROM stdin;
 149	66	70
 152	65	66
 153	65	67
+154	67	66
+155	67	67
+156	67	76
+157	67	69
+158	67	70
 \.
 
 
@@ -17088,6 +17225,7 @@ COPY public.vendor_history (id, vendor_id, action, changes, remarks, action_by_i
 7	65	Fully Approved	\N	\N	3	2026-07-31 10:52:38.315485
 8	65	Edited and Resubmitted	{"is_active": {"old": true, "new": false}}	\N	3	2026-07-31 10:57:53.754384
 9	65	Fully Approved	\N	\N	3	2026-07-31 10:57:58.153601
+10	67	Created	\N	\N	3	2026-08-04 13:01:06.076598
 \.
 
 
@@ -17367,16 +17505,22 @@ COPY public.vendor_quotation_items (id, vendor_quotation_id, qr_item_id, materia
 1265	570	462	2356	46.88	10	f			Numbers	1	0
 1266	570	463	3082	1399.7	15	f			Numbers	1	0
 1267	570	464	3504	890	10	f			Numbers	1	0
-1274	572	466	2565	2345	7	f		BranD1	Nos	1	0
-1275	572	467	3507	225	7	f		BR1	Nos	1	0
-1276	572	468	2751	345	7	f		XC1	Nos	1	0
-1280	571	466	2565	1234	7	f		BranD1	Nos	1	0
-1281	571	467	3507	550	7	f		BR1	Nos	1	0
-1282	571	468	2751	759	7	f		XC1	Nos	1	0
 1284	573	465	2752	852	2	f			NOS	1	0
-1098	550	389	3507	15000000	15	f		\N	\N	\N	10
-1099	550	390	3504	1400000	45	f		\N	\N	\N	10
-1100	550	391	2361	999999	30	f		\N	\N	\N	10
+1285	574	478	2564	50	10	f	\N	\N	\N	1	0
+1286	575	478	2564	45	12	f	\N	\N	\N	1	0
+1289	578	482	2564	50	10	f	\N	\N	\N	1	0
+1290	579	482	2564	45	12	f	\N	\N	\N	1	0
+1291	571	466	2565	1234	7	f		BranD1	Nos	1	10
+1292	571	467	3507	550	7	f		BR1	Nos	1	10
+1293	571	468	2751	759	7	f		XC1	Nos	1	10
+1274	572	466	2565	2345	7	f		BranD1	Nos	1	5
+1275	572	467	3507	225	7	f		BR1	Nos	1	5
+1276	572	468	2751	345	7	f		XC1	Nos	1	5
+1288	577	480	2564	45	12	f	\N	\N	\N	1	2
+1287	576	480	2564	50	10	f	\N	\N	\N	1	13
+1098	550	389	3507	15000000	15	f		\N	\N	\N	11
+1099	550	390	3504	1400000	45	f		\N	\N	\N	11
+1100	550	391	2361	999999	30	f		\N	\N	\N	11
 \.
 
 
@@ -17462,6 +17606,12 @@ COPY public.vendor_quotations (id, qr_id, vendor_id, quotation_number, quotation
 572	207	63	Quo2	2026-07-14	2026-07-21	/api/uploads/quotations/qr_207_v_63_Quo1.xlsx		Received	3	2026-07-21 12:07:38.871856
 571	207	62	quo1	2026-07-09	2026-07-21	/api/uploads/quotations/qr_207_v_62_Quo1.xlsx		Received	3	2026-07-21 12:04:19.177675
 573	206	64	inv00020	2026-07-15	2026-07-21	/api/uploads/quotations/qr_206_v_64_BRITTO INDUSTRIES.pdf		Received	3	2026-07-21 12:26:25.680799
+574	212	66	VQ-TEST-001	2026-08-01	2026-08-03	\N	Automated VQ 1	Received	1	2026-08-03 14:07:31.567925
+575	212	63	VQ-TEST-002	2026-08-01	2026-08-03	\N	Automated VQ 2	Received	1	2026-08-03 14:07:31.607342
+576	213	66	VQ-TEST-001	2026-08-01	2026-08-03	\N	Automated VQ 1	Received	1	2026-08-03 14:10:13.966678
+577	213	63	VQ-TEST-002	2026-08-01	2026-08-03	\N	Automated VQ 2	Received	1	2026-08-03 14:10:13.986425
+578	214	66	VQ-TEST-001	2026-08-01	2026-08-03	\N	Automated VQ 1	Received	1	2026-08-03 14:11:21.215844
+579	214	63	VQ-TEST-002	2026-08-01	2026-08-03	\N	Automated VQ 2	Received	1	2026-08-03 14:11:21.234216
 \.
 
 
@@ -17484,6 +17634,7 @@ COPY public.vendors (id, tenant_id, site_id, name, code, contact_person, phone, 
 64	2	2	Royal Hardware & Electricals	VND-00003	Kumar	37878738723	ilangkumaran@yahoo.com	29AACCE9951B1ZR	\N	Bangalore	29 - Karnataka	560049	\N	\N	\N	4.5	t	f	2026-06-12 01:34:04.150106	2026-06-12 01:34:04.150149	Ground Floor, Sri Lakshminivasareswara Nilaya,	Avalahalli, Ittamadu Main Road, Virgonagar Post,	Approved	1	\N	\N	\N	\N	\N	\N	\N	\N	\N
 62	2	2	Mataji Electricals	VND-00001	Lal	9898989898	pradnesh@nissigrid.com	29AFHPC7600L1ZD	\N	Bangalore	29 - Karnataka	560075	\N	\N	\N	4.5	t	f	2026-06-11 22:01:38.68366	2026-06-17 14:24:10.031865	Shop No. 1, Door No.  31, Malleshpalaya Main Road	New Thippasandra PO	Approved	1	\N	\N	\N	\N	\N	\N	\N	\N	\N
 65	2	2	havells pvt limited	VND-00004	Pradnesh A	56954664565	pradnesha1234@gmail.com	29AACCE9951H1ZR	\N	bangalore	29 - Karnataka	560016	\N	\N	\N	4.5	f	f	2026-07-21 15:30:53.78455	2026-07-31 10:57:58.151211	old madras road,pai layout		Approved	1	3	2026-07-31 05:27:58.148619	\N	\N	\N	Approved	3	2026-07-31 05:22:38.310385	{"is_active": {"old": true, "new": false}}
+67	2	2	Test	VND-00006	Sam	81928198291	sam@nissigrid.com	22AAAAA0000A1Z9	\N	Bengaluru	29 - Karnataka	560016	\N	\N	\N	3.5	t	f	2026-08-04 13:01:06.060685	2026-08-04 13:01:06.060709	Addr1		Submitted	1	\N	\N	\N	\N	\N	\N	\N	\N	\N
 63	2	2	ELCAB ENGINEERS PRIVATE LIMITED	VND-00002	Bala	47347347837	pradnesha12345@gmail.com	29AACCE9951H1ZR	\N	Bangalore	29 - Karnataka	560060	\N	\N	\N	4.5	t	f	2026-06-12 01:31:58.140808	2026-07-22 12:37:44.763392	V R Cindem Complex, Sy. No. 1193/34/4, Kengeri Main Road,	Behind Mr Prem Bun, Ramasandra Village,	Approved	1	\N	\N	\N	\N	\N	\N	\N	\N	\N
 66	2	2	dell laptops 	VND-00005	Pradnesh A	25484656448	pradnesha1234@gmail.com	29AACCE9951H1ZY	\N	bangalore 	29 - Karnataka	560016	\N	\N	\N	4.5	t	f	2026-07-21 16:45:27.700736	2026-07-31 10:51:31.498809	new madras road , pai layout		Approved	1	3	2026-07-31 05:21:31.496168	\N	\N	\N	Rejected	\N	\N	{"categories": {"old": ["LAB", "HOUSE KEEPING", "IT"], "new": ["LAB", "IT"]}}
 \.
@@ -17529,15 +17680,17 @@ COPY public.warehouses (id, tenant_id, site_id, name, code, project_id, warehous
 -- Data for Name: write_off_items; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.write_off_items (id, write_off_id, material_id, warehouse_id, quantity, rate, amount, has_buyback, buyback_amount) FROM stdin;
-1	1	2564	62	5	16526.16	82630.8	\N	\N
-2	2	3507	62	2	4349	8698	\N	\N
-3	3	2435	62	1	4657.57	4657.57	\N	\N
-4	6	2472	62	1	3782.04	3782.04	\N	\N
-5	7	2450	62	1	4429.23	4429.23	\N	\N
-6	8	3475	62	1	4602.71	4602.71	\N	\N
-7	9	3507	62	1	4349	4349	\N	\N
-10	10	2435	62	2	4657.57	9315.14	\N	\N
+COPY public.write_off_items (id, write_off_id, material_id, warehouse_id, quantity, rate, amount, has_buyback, buyback_amount, equipment_id, location_id) FROM stdin;
+1	1	2564	62	5	16526.16	82630.8	\N	\N	\N	\N
+2	2	3507	62	2	4349	8698	\N	\N	\N	\N
+3	3	2435	62	1	4657.57	4657.57	\N	\N	\N	\N
+4	6	2472	62	1	3782.04	3782.04	\N	\N	\N	\N
+5	7	2450	62	1	4429.23	4429.23	\N	\N	\N	\N
+6	8	3475	62	1	4602.71	4602.71	\N	\N	\N	\N
+7	9	3507	62	1	4349	4349	\N	\N	\N	\N
+10	10	2435	62	2	4657.57	9315.14	\N	\N	\N	\N
+11	11	2338	62	1	4352.49	4352.49	f	0	1	1
+12	12	2338	62	1	4352.49	4352.49	f	0	1	1
 \.
 
 
@@ -17554,6 +17707,8 @@ COPY public.write_offs (id, tenant_id, site_id, write_off_number, date, reason, 
 8	2	2	WO-00006	2026-07-08	qwert	Approved	1	3	3	2026-07-08 10:19:59.460906	f	2026-07-08 15:49:51.845229	2026-07-08 15:49:59.465678	Damaged in Handling		\N	\N
 9	2	2	WO-00007	2026-07-10	damaged 	Rejected	1	3	\N	\N	f	2026-07-09 13:09:09.338244	2026-07-09 13:20:58.29659	Damaged in Handling		\N	\N
 10	2	2	WO-00008	2026-07-09	lost 	Approved	1	3	3	2026-07-09 07:51:15.64808	f	2026-07-09 13:20:30.394309	2026-07-09 13:21:15.743396	Lost / Stolen		\N	\N
+11	2	2	WO-00009	2026-08-03	Equipment Write Off	Rejected	1	3	\N	\N	f	2026-08-03 18:55:32.87775	2026-08-03 19:15:50.964498	Damaged in Handling			
+12	2	2	EWO-00001	2026-08-03	Equipment Write Off	Submitted	1	3	\N	\N	f	2026-08-03 19:15:13.906801	2026-08-03 19:32:48.593828	Damaged in Handling			
 \.
 
 
@@ -17561,21 +17716,21 @@ COPY public.write_offs (id, tenant_id, site_id, write_off_number, date, reason, 
 -- Name: alerts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.alerts_id_seq', 44, true);
+SELECT pg_catalog.setval('public.alerts_id_seq', 51, true);
 
 
 --
 -- Name: approval_flows_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.approval_flows_id_seq', 85, true);
+SELECT pg_catalog.setval('public.approval_flows_id_seq', 86, true);
 
 
 --
 -- Name: audit_logs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.audit_logs_id_seq', 456, true);
+SELECT pg_catalog.setval('public.audit_logs_id_seq', 473, true);
 
 
 --
@@ -17624,21 +17779,21 @@ SELECT pg_catalog.setval('public.complaints_id_seq', 15, true);
 -- Name: contract_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.contract_approvals_id_seq', 1, true);
+SELECT pg_catalog.setval('public.contract_approvals_id_seq', 3, true);
 
 
 --
 -- Name: contract_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.contract_items_id_seq', 2, true);
+SELECT pg_catalog.setval('public.contract_items_id_seq', 3, true);
 
 
 --
 -- Name: contracts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.contracts_id_seq', 2, true);
+SELECT pg_catalog.setval('public.contracts_id_seq', 3, true);
 
 
 --
@@ -17666,7 +17821,7 @@ SELECT pg_catalog.setval('public.departments_id_seq', 335, true);
 -- Name: document_sequences_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.document_sequences_id_seq', 98, true);
+SELECT pg_catalog.setval('public.document_sequences_id_seq', 100, true);
 
 
 --
@@ -17736,21 +17891,21 @@ SELECT pg_catalog.setval('public.grn_items_id_seq', 520, true);
 -- Name: indent_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.indent_approvals_id_seq', 66, true);
+SELECT pg_catalog.setval('public.indent_approvals_id_seq', 74, true);
 
 
 --
 -- Name: indent_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.indent_items_id_seq', 515, true);
+SELECT pg_catalog.setval('public.indent_items_id_seq', 518, true);
 
 
 --
 -- Name: indents_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.indents_id_seq', 234, true);
+SELECT pg_catalog.setval('public.indents_id_seq', 237, true);
 
 
 --
@@ -17848,91 +18003,91 @@ SELECT pg_catalog.setval('public.projects_id_seq', 9, true);
 -- Name: purchase_order_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_order_approvals_id_seq', 56, true);
+SELECT pg_catalog.setval('public.purchase_order_approvals_id_seq', 62, true);
 
 
 --
 -- Name: purchase_order_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_order_items_id_seq', 678, true);
+SELECT pg_catalog.setval('public.purchase_order_items_id_seq', 684, true);
 
 
 --
 -- Name: purchase_orders_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_orders_id_seq', 252, true);
+SELECT pg_catalog.setval('public.purchase_orders_id_seq', 255, true);
 
 
 --
 -- Name: purchase_request_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_request_approvals_id_seq', 32, true);
+SELECT pg_catalog.setval('public.purchase_request_approvals_id_seq', 40, true);
 
 
 --
 -- Name: purchase_request_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_request_items_id_seq', 619, true);
+SELECT pg_catalog.setval('public.purchase_request_items_id_seq', 621, true);
 
 
 --
 -- Name: purchase_requests_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_requests_id_seq', 203, true);
+SELECT pg_catalog.setval('public.purchase_requests_id_seq', 205, true);
 
 
 --
 -- Name: quotation_comparisons_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_comparisons_id_seq', 118, true);
+SELECT pg_catalog.setval('public.quotation_comparisons_id_seq', 120, true);
 
 
 --
 -- Name: quotation_negotiation_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_negotiation_history_id_seq', 1, true);
+SELECT pg_catalog.setval('public.quotation_negotiation_history_id_seq', 15, true);
 
 
 --
 -- Name: quotation_request_item_sources_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_request_item_sources_id_seq', 115, true);
+SELECT pg_catalog.setval('public.quotation_request_item_sources_id_seq', 128, true);
 
 
 --
 -- Name: quotation_request_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_request_items_id_seq', 473, true);
+SELECT pg_catalog.setval('public.quotation_request_items_id_seq', 486, true);
 
 
 --
 -- Name: quotation_request_prs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_request_prs_id_seq', 14, true);
+SELECT pg_catalog.setval('public.quotation_request_prs_id_seq', 16, true);
 
 
 --
 -- Name: quotation_request_vendors_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_request_vendors_id_seq', 429, true);
+SELECT pg_catalog.setval('public.quotation_request_vendors_id_seq', 454, true);
 
 
 --
 -- Name: quotation_requests_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_requests_id_seq', 209, true);
+SELECT pg_catalog.setval('public.quotation_requests_id_seq', 216, true);
 
 
 --
@@ -18065,35 +18220,35 @@ SELECT pg_catalog.setval('public.vendor_approvals_id_seq', 1, true);
 -- Name: vendor_categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_categories_id_seq', 153, true);
+SELECT pg_catalog.setval('public.vendor_categories_id_seq', 158, true);
 
 
 --
 -- Name: vendor_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_history_id_seq', 9, true);
+SELECT pg_catalog.setval('public.vendor_history_id_seq', 10, true);
 
 
 --
 -- Name: vendor_quotation_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_quotation_items_id_seq', 1284, true);
+SELECT pg_catalog.setval('public.vendor_quotation_items_id_seq', 1293, true);
 
 
 --
 -- Name: vendor_quotations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_quotations_id_seq', 573, true);
+SELECT pg_catalog.setval('public.vendor_quotations_id_seq', 579, true);
 
 
 --
 -- Name: vendors_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendors_id_seq', 66, true);
+SELECT pg_catalog.setval('public.vendors_id_seq', 67, true);
 
 
 --
@@ -18107,14 +18262,14 @@ SELECT pg_catalog.setval('public.warehouses_id_seq', 73, true);
 -- Name: write_off_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.write_off_items_id_seq', 10, true);
+SELECT pg_catalog.setval('public.write_off_items_id_seq', 12, true);
 
 
 --
 -- Name: write_offs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.write_offs_id_seq', 10, true);
+SELECT pg_catalog.setval('public.write_offs_id_seq', 12, true);
 
 
 --
@@ -22192,6 +22347,22 @@ ALTER TABLE ONLY public.warehouses
 
 
 --
+-- Name: write_off_items write_off_items_equipment_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.write_off_items
+    ADD CONSTRAINT write_off_items_equipment_id_fkey FOREIGN KEY (equipment_id) REFERENCES public.equipment_items(id);
+
+
+--
+-- Name: write_off_items write_off_items_location_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.write_off_items
+    ADD CONSTRAINT write_off_items_location_id_fkey FOREIGN KEY (location_id) REFERENCES public.location_master(id);
+
+
+--
 -- Name: write_off_items write_off_items_material_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -22259,5 +22430,5 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 9iuJfEW5oM6ybQ2wDseboBXkqKeEqvdnCwqmqyt6ZZ9QPPIkaAZZcG9o6f6lXNh
+\unrestrict gGa8R29H29rIU5qKYwRwwolqvp46aPS8rnGLzvVytArGipQiWAoFcluQnccf5Es
 

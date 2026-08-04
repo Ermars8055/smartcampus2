@@ -688,7 +688,8 @@ def list_purchase_orders(
             indent_id=po.indent_id, indent_number=indent_number,
             qr_id=po.qr_id, qr_number=qr_number,
             po_type=po.po_type,
-            is_cash_purchase=po.is_cash_purchase,
+            purchase_mode=po.purchase_mode,
+            marketplace_name=po.marketplace_name,
             advance_percentage=po.advance_percentage,
             total_amount=po.total_amount,
             delivery_date=po.delivery_date, status=po.status,
@@ -780,7 +781,8 @@ def get_purchase_order(
         indent_id=po.indent_id, indent_number=indent_number,
         qr_id=po.qr_id, qr_number=qr_number,
         po_type=po.po_type,
-        is_cash_purchase=po.is_cash_purchase,
+        purchase_mode=po.purchase_mode,
+        marketplace_name=po.marketplace_name,
         advance_percentage=po.advance_percentage,
         procurement_type=po.procurement_type,
         rental_type=po.rental_type,
@@ -843,7 +845,8 @@ def create_purchase_order(
         qr_id=data.qr_id,
         contract_id=data.contract_id,
         po_type=data.po_type or ("Formal" if (data.pr_id or data.indent_id or data.qr_id) else "Informal"),
-        is_cash_purchase=data.is_cash_purchase,
+        purchase_mode=data.purchase_mode,
+        marketplace_name=data.marketplace_name,
         advance_percentage=data.advance_percentage,
         delivery_date=data.delivery_date,
         
@@ -963,8 +966,8 @@ def update_purchase_order(
         po.status = update_data["status"]
     
     po_update_keys = [
-        "vendor_id", "project_id", "delivery_date", "po_type", "terms", "annexure", 
-        "is_cash_purchase", "advance_percentage", "contract_id",
+        "vendor_id", "project_id", "institution_id", "delivery_date", "po_type", "terms", "annexure", 
+        "purchase_mode", "marketplace_name", "advance_percentage", "contract_id",
         "procurement_type", "rental_type", "rental_agreement_number", "rental_start_date",
         "rental_end_date", "billing_frequency", "security_deposit", "cost_per_test",
         "linked_reagent_agreement", "vendor_maintenance_responsibility", "return_conditions", "renewal_terms"

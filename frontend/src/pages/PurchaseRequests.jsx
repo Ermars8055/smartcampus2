@@ -611,7 +611,7 @@ export default function PurchaseRequests() {
           value={tab}
           onChange={(_, v) => setTab(v)}
           variant="scrollable"
-          scrollButtons="auto"
+          scrollButtons={false}
           sx={{ borderBottom: 1, borderColor: 'divider' }}
         >
           {statusFilters.map((s, i) => (
@@ -627,8 +627,8 @@ export default function PurchaseRequests() {
                       height: 20,
                       fontSize: '0.7rem',
                       fontWeight: 700,
-                      backgroundColor: tab === i ? 'primary.light' : '#f0f0f0',
-                      color: tab === i ? 'primary.contrastText' : 'text.secondary',
+                      bgcolor: tab === i ? 'primary.main' : 'action.selected',
+                      color: tab === i ? 'white' : 'text.primary',
                       cursor: 'pointer'
                     }}
                   />
@@ -650,7 +650,6 @@ export default function PurchaseRequests() {
                     active={sortConfig.key === 'pr_number'}
                     direction={sortConfig.direction}
                     onClick={() => handleSort('pr_number')}
-                    IconComponent={ArrowDropDown}
                   >
                     PR NUMBER
                   </TableSortLabel>
@@ -660,7 +659,6 @@ export default function PurchaseRequests() {
                     active={sortConfig.key === 'project_name'}
                     direction={sortConfig.direction}
                     onClick={() => handleSort('project_name')}
-                    IconComponent={ArrowDropDown}
                   >
                     INSTITUTION
                   </TableSortLabel>
@@ -670,7 +668,6 @@ export default function PurchaseRequests() {
                     active={sortConfig.key === 'department_name'}
                     direction={sortConfig.direction}
                     onClick={() => handleSort('department_name')}
-                    IconComponent={ArrowDropDown}
                   >
                     DEPARTMENT
                   </TableSortLabel>
@@ -680,7 +677,6 @@ export default function PurchaseRequests() {
                     active={sortConfig.key === 'created_at'}
                     direction={sortConfig.direction}
                     onClick={() => handleSort('created_at')}
-                    IconComponent={ArrowDropDown}
                   >
                     PR DATE
                   </TableSortLabel>
@@ -690,7 +686,6 @@ export default function PurchaseRequests() {
                     active={sortConfig.key === 'required_date'}
                     direction={sortConfig.direction}
                     onClick={() => handleSort('required_date')}
-                    IconComponent={ArrowDropDown}
                   >
                     REQ. DATE
                   </TableSortLabel>
@@ -700,7 +695,6 @@ export default function PurchaseRequests() {
                     active={sortConfig.key === 'items'}
                     direction={sortConfig.direction}
                     onClick={() => handleSort('items')}
-                    IconComponent={ArrowDropDown}
                   >
                     ITEMS
                   </TableSortLabel>
@@ -710,7 +704,6 @@ export default function PurchaseRequests() {
                     active={sortConfig.key === 'status'}
                     direction={sortConfig.direction}
                     onClick={() => handleSort('status')}
-                    IconComponent={ArrowDropDown}
                   >
                     STATUS
                   </TableSortLabel>

@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
   DialogContent, DialogActions, Grid, TableSortLabel, Divider, FormHelperText,
-  Select, MenuItem, FormControl, InputLabel
+  Select, MenuItem, FormControl, InputLabel, Tab, Tabs
 } from '@mui/material';
 import { Add, Search, LocalShipping, AttachFile, OpenInNew } from '@mui/icons-material';
 import api, { getFileUrl } from '../services/api';
@@ -24,6 +24,8 @@ export default function GateEntry() {
   const [dialog, setDialog] = useState(false);
   const [detailDialog, setDetailDialog] = useState(null);
   const [search, setSearch] = useState('');
+  const [tab, setTab] = useState(2);
+  const statusFilters = useMemo(() => ['Awaiting GRN', 'Completed', 'All'], []);
   const [sortConfig, setSortConfig] = useState({ key: 'entry_number', direction: 'desc' });
 
   const initialForm = {
@@ -171,22 +173,39 @@ export default function GateEntry() {
     setSortConfig({ key, direction });
   };
 
-  const sortedEntries = [...entries].sort((a, b) => {
-    let valA = a[sortConfig.key];
-    let valB = b[sortConfig.key];
-
-    if (sortConfig.key === 'vehicle_person') {
-      valA = a.vehicle_number || a.delivery_person_name;
-      valB = b.vehicle_number || b.delivery_person_name;
+  const filteredAndSortedEntries = useMemo(() => {
+    let list = entries;
+    if (search) {
+      const q = search.toLowerCase();
+      list = list.filter(e => 
+        e.entry_number?.toLowerCase().includes(q) ||
+        e.vehicle_number?.toLowerCase().includes(q) ||
+        e.delivery_person_name?.toLowerCase().includes(q) ||
+        e.invoice_number?.toLowerCase().includes(q) ||
+        e.dc_number?.toLowerCase().includes(q)
+      );
+    }
+    if (statusFilters[tab] !== 'All') {
+      list = list.filter(e => e.status === statusFilters[tab]);
     }
 
-    if (valA == null) valA = '';
-    if (valB == null) valB = '';
-
-    if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
-    if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
-    return 0;
-  });
+    return [...list].sort((a, b) => {
+      let valA = a[sortConfig.key];
+      let valB = b[sortConfig.key];
+  
+      if (sortConfig.key === 'vehicle_person') {
+        valA = a.vehicle_number || a.delivery_person_name;
+        valB = b.vehicle_number || b.delivery_person_name;
+      }
+  
+      if (valA == null) valA = '';
+      if (valB == null) valB = '';
+  
+      if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
+      if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [entries, search, tab, statusFilters, sortConfig]);
 
   return (
     <Box>
@@ -202,10 +221,48 @@ export default function GateEntry() {
         }}>New Gate Entry</Button>
       </Box>
 
-      <Card sx={{ mb: 3, p: 2 }}>
-        <TextField size="small" placeholder="Search entry number..." value={search}
-          onChange={e => setSearch(e.target.value)} sx={{ minWidth: 300 }}
-          InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }} />
+      <Card sx={{ mb: 3 }}>
+        <Box sx={{ p: 2, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+          <TextField
+            size="small"
+            placeholder="Search entry number, vehicle, or document..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            sx={{ width: 380 }}
+            InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }}
+          />
+        </Box>
+        <Tabs
+          value={tab}
+          onChange={(_, v) => setTab(v)}
+          variant="scrollable"
+          scrollButtons={false}
+          sx={{ borderBottom: 1, borderColor: 'divider' }}
+        >
+          {statusFilters.map((s, i) => (
+            <Tab
+              key={i}
+              label={
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  {s}
+                  <Chip
+                    label={s === 'All' ? entries.length : entries.filter(e => e.status === s).length}
+                    size="small"
+                    sx={{
+                      height: 20,
+                      fontSize: '0.7rem',
+                      fontWeight: 700,
+                      bgcolor: tab === i ? 'primary.main' : 'action.selected',
+                      color: tab === i ? 'white' : 'text.primary',
+                      cursor: 'pointer'
+                    }}
+                  />
+                </Box>
+              }
+              sx={{ textTransform: 'none', fontWeight: 600, minHeight: 48, minWidth: 'auto', px: 2 }}
+            />
+          ))}
+        </Tabs>
       </Card>
 
       <Card>
@@ -220,7 +277,7 @@ export default function GateEntry() {
               <TableCell><TableSortLabel active={sortConfig.key === 'status'} direction={sortConfig.key === 'status' ? sortConfig.direction : 'asc'} onClick={() => handleSort('status')}>Status</TableSortLabel></TableCell>
             </TableRow></TableHead>
             <TableBody>
-              {sortedEntries.map(e => (
+              {filteredAndSortedEntries.map(e => (
                 <TableRow key={e.id} sx={{ cursor: 'pointer' }} onClick={() => setDetailDialog(e)}>
                   <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.8rem' }}>{e.entry_number}</TableCell>
                   <TableCell sx={{ fontWeight: 600, fontSize: '0.85rem' }}>

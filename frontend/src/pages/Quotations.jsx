@@ -825,17 +825,17 @@ const Quotations = () => {
     }
   };
 
-  const getStatusColor = (status) => {
+  const getStatusProps = (status) => {
     switch (status) {
-      case 'Draft': return 'default';
-      case 'Submitted': return 'info';
-      case 'Requested': return 'primary';
-      case 'Received': return 'secondary';
-      case 'Entered': return 'warning';
-      case 'Compared': return 'info';
-      case 'Approved': return 'success';
-      case 'Ordered': return 'success';
-      default: return 'default';
+      case 'Draft': return { color: 'default' };
+      case 'Submitted': return { color: 'info' };
+      case 'Requested': return { color: 'primary' };
+      case 'Received': return { sx: { bgcolor: '#8B5CF6', color: '#fff' } };
+      case 'Entered': return { color: 'warning' };
+      case 'Compared': return { sx: { bgcolor: '#0D9488', color: '#fff' } };
+      case 'Approved': return { color: 'success' };
+      case 'Ordered': return { sx: { bgcolor: '#4338CA', color: '#fff' } };
+      default: return { color: 'default' };
     }
   };
 
@@ -1018,7 +1018,7 @@ const Quotations = () => {
                         sx={{ cursor: 'pointer' }}
                         onClick={() => { setViewingQR(qr); setViewQRDialogOpen(true); }}
                       >
-                        <TableCell sx={{ py: 1, px: 2, fontSize: '0.75rem', fontWeight: 600, color: 'primary.main', whiteSpace: 'nowrap' }}>{qr.qr_number}</TableCell>
+                        <TableCell sx={{ py: 1, px: 2, fontSize: '0.8rem', fontWeight: 600, color: '#2563EB', whiteSpace: 'nowrap' }}>{qr.qr_number}</TableCell>
                         <TableCell sx={{ py: 1, px: 2 }}>
                           {qr.linked_prs?.length > 0 ? (
                             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, maxWidth: '180px' }}>
@@ -1038,9 +1038,9 @@ const Quotations = () => {
                         <TableCell sx={{ py: 1, px: 2 }}>
                           <Chip
                             label={qr.status === 'Sent to Vendors' ? 'Request to Vendors' : (qr.status === 'Invited' ? 'Requested' : qr.status)}
-                            color={getStatusColor(qr.status)}
+                            {...getStatusProps(qr.status)}
                             size="small"
-                            sx={{ height: 18, fontWeight: 500, fontSize: '0.65rem' }}
+                            sx={{ height: 18, fontWeight: 500, fontSize: '0.65rem', ...(getStatusProps(qr.status).sx || {}) }}
                           />
                         </TableCell>
                         <TableCell sx={{ py: 1, px: 2, fontSize: '0.75rem', whiteSpace: 'nowrap' }}>{formatDate(qr.created_at)}</TableCell>
@@ -1413,6 +1413,7 @@ const Quotations = () => {
                         <TableHead>
                           <TableRow sx={{ backgroundColor: '#fdfdfd' }}>
                             <TableCell>Vendor</TableCell>
+                            <TableCell>Brand</TableCell>
                             <TableCell>Rate (₹)</TableCell>
                             <TableCell>Delivery</TableCell>
                             <TableCell>Rank</TableCell>
@@ -1425,6 +1426,7 @@ const Quotations = () => {
                             return (
                               <TableRow key={q.vendor_id} sx={{ backgroundColor: isSelected ? '#f1f8e9' : 'inherit' }}>
                                 <TableCell>{q.vendor_name}</TableCell>
+                                <TableCell>{q.brand || '-'}</TableCell>
                                 <TableCell>₹{Number(q.quoted_rate).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                                 <TableCell>{q.delivery_days || '-'} days</TableCell>
                                 <TableCell><Chip size="small" label={isSelected ? `${q.rank_label} Selected` : q.rank_label} color={isSelected ? "success" : "default"} /></TableCell>

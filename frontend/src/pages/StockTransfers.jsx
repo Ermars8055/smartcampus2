@@ -330,7 +330,7 @@ export default function StockTransfers() {
                       <Chip label={trf.items?.length || 0} size="small" sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem', bgcolor: '#F1F5F9', color: '#475569' }} />
                     </TableCell>
                     <TableCell sx={{ px: 2 }}>
-                      <Chip label={trf.status} size="small" color={trf.status === 'Completed' ? 'error' : (trf.status === 'Partially Received' ? 'info' : (trf.status === 'Initiated' ? 'success' : 'default'))} variant="outlined" sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} />
+                      <Chip label={trf.status} size="small" color={trf.status === 'Completed' ? 'success' : (trf.status === 'Partially Received' ? 'warning' : (trf.status === 'Initiated' ? 'primary' : 'default'))} sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} />
                     </TableCell>
                     <TableCell align="right" sx={{ px: 2, whiteSpace: 'nowrap' }}>
                       <IconButton
@@ -558,8 +558,7 @@ export default function StockTransfers() {
                     <Chip
                       label={viewTransferModal.transfer.status}
                       size="small"
-                      color="success"
-                      variant="outlined"
+                      color={viewTransferModal.transfer.status === 'Completed' ? 'success' : (viewTransferModal.transfer.status === 'Partially Received' ? 'warning' : (viewTransferModal.transfer.status === 'Initiated' ? 'primary' : 'default'))}
                       sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }}
                     />
                   </Box>

@@ -68,6 +68,32 @@ def list_contracts(
         result.append(out)
     return result
 
+@router.get("/active-rates/{vendor_id}")
+def get_vendor_active_rates(
+    vendor_id: int, 
+    db: Session = Depends(get_db), 
+    current_user: User = Depends(get_current_user),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    contracts = db.query(Contract).filter(
+        Contract.tenant_id == tenant_id,
+        Contract.site_id == site_id,
+        Contract.vendor_id == vendor_id,
+        Contract.contract_type == "RC",
+        Contract.status == "Active",
+        Contract.is_deleted == False
+    ).all()
+
+    rates = {}
+    for c in contracts:
+        for item in c.items:
+            if item.material_id:
+                # If there are multiple active RCs for the same material (unlikely but possible), this takes the latest processed one
+                rates[item.material_id] = item.rate
+                
+    return rates
+
 @router.get("/{id}")
 def get_contract(
     id: int, db: Session = Depends(get_db), 
@@ -226,11 +252,10 @@ def approve_contract(
     if new_approvals == 0:
         raise HTTPException(400, "You have already approved this contract at the current level")
 
-    db.commit()
-
     if new_approvals > 0:
         return handle_contract_next_level(db, contract, tenant_id, site_id, current_user.id)
 
+    db.commit()
     return {"message": f"Approval recorded for Contract {contract.contract_number} by {current_user.full_name}", "status": contract.status, "current_level": contract.current_approval_level or 1}
 
 def handle_contract_next_level(db, contract, tenant_id, site_id, user_id=None):

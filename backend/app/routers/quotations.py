@@ -712,6 +712,7 @@ def generate_comparison(
                 effective_rate=effective_rate,
                 discount_percent=q.discount_percent or 0.0,
                 delivery_days=q.delivery_days,
+                brand=q.brand,
                 rank=idx + 1,
                 rank_label=f"L{idx + 1}"
             ))
@@ -1048,6 +1049,9 @@ def download_comparative_statement_pdf(
                 if label:
                     cell_text = f"<b>{cell_text}</b><br/><font size='7' color='green'>{label}</font>"
                 
+                if quote.brand:
+                    cell_text += f"<br/><font size='7' color='#555555'><i>Brand: {quote.brand}</i></font>"
+                
                 row.append(Paragraph(cell_text, styles['Normal']))
             else:
                 row.append("-")
@@ -1181,8 +1185,8 @@ def download_comparative_statement_excel(
 
     # 1. Sheet Title block
     num_vendors = len(sorted_vendors)
-    l1_start_col = 4 + num_vendors * 8
-    total_cols = 3 + (num_vendors * 8) + 2
+    l1_start_col = 4 + num_vendors * 9
+    total_cols = 3 + (num_vendors * 9) + 2
     last_col_letter = get_column_letter(total_cols) if total_cols > 0 else "G"
     
     ws.merge_cells(f"A1:{last_col_letter}1")
@@ -1219,8 +1223,8 @@ def download_comparative_statement_excel(
 
     # Build Vendor Columns Header block
     for v_idx, vt in enumerate(sorted_vendors):
-        start_col = 4 + v_idx * 8
-        end_col = start_col + 7
+        start_col = 4 + v_idx * 9
+        end_col = start_col + 8
         
         start_letter = get_column_letter(start_col)
         end_letter = get_column_letter(end_col)
@@ -1239,7 +1243,7 @@ def download_comparative_statement_excel(
             ws.cell(row=2, column=col_i).border = thin_border
             ws.cell(row=2, column=col_i).fill = v_fill
         
-        subheaders = ["Unit Rate (₹)", "Qty", "Disc %", "Disc Amt", "Net Rate", "Taxable Amt", "GST %", "Final Amt (₹)"]
+        subheaders = ["Brand", "Unit Rate (₹)", "Qty", "Disc %", "Disc Amt", "Net Rate", "Taxable Amt", "GST %", "Final Amt (₹)"]
         for sh_idx, sh_text in enumerate(subheaders):
             c_col = start_col + sh_idx
             c_cell = ws.cell(row=3, column=c_col)
@@ -1301,7 +1305,7 @@ def download_comparative_statement_excel(
         selected_l1_amt = "-"
 
         for v_idx, vt in enumerate(sorted_vendors):
-            start_col = 4 + v_idx * 8
+            start_col = 4 + v_idx * 9
             quote = next((q for q in mat.vendor_quotes if q.vendor_id == vt['vendor_id']), None)
             
             vqi = db.query(VendorQuotationItem).join(VendorQuotation).filter(
@@ -1327,7 +1331,7 @@ def download_comparative_statement_excel(
                     selected_l1_vendor = vt['vendor_name']
                     selected_l1_amt = final_amt
                 
-                vals = [quoted_rate, qty, discount_pct, disc_amt, rate_after_disc, total_taxable, gst_rate, final_amt]
+                vals = [vqi.brand or "-", quoted_rate, qty, discount_pct, disc_amt, rate_after_disc, total_taxable, gst_rate, final_amt]
                 
                 for offset, val in enumerate(vals):
                     c_col = start_col + offset
@@ -1336,13 +1340,13 @@ def download_comparative_statement_excel(
                     cell.border = thin_border
                     cell.fill = v_fill
                     
-                    if offset in [1, 2, 6]:
+                    if offset in [2, 3, 7]:
                         cell.alignment = align_center
-                        if offset == 2:
+                        if offset == 3:
                             cell.number_format = "0.0\"%\""
-                        elif offset == 6:
+                        elif offset == 7:
                             cell.number_format = "0.0\"%\""
-                    elif offset == 0:
+                    elif offset == 1:
                         # Unit Rate column: Check for custom UOM
                         if conv_factor != 1.0 or (vqi.vendor_uom_name and vqi.vendor_uom_name.strip() != mat.uom_name):
                             cell.value = f"{val:,.2f}\n(₹{vqi.quoted_rate:,.2f} / {vqi.vendor_uom_name or 'UOM'})"
@@ -1351,14 +1355,18 @@ def download_comparative_statement_excel(
                         else:
                             cell.alignment = align_right
                             cell.number_format = "#,##0.00"
+                    elif offset == 0:
+                        cell.alignment = align_center
+                        brand_font = Font(name="Segoe UI", size=10, bold=True, color="0B5394") # Bold and dark blue
+                        cell.font = brand_font
                     else:
                         cell.alignment = align_right
                         cell.number_format = "#,##0.00"
             else:
-                for offset in range(8):
+                for offset in range(9):
                     c_col = start_col + offset
                     cell = ws.cell(row=row_idx, column=c_col, value="")
-                    if offset == 0:
+                    if offset == 1:
                         cell.value = "-"
                     cell.font = data_font
                     cell.border = thin_border
@@ -1390,15 +1398,16 @@ def download_comparative_statement_excel(
     ws.column_dimensions["C"].width = 12  
 
     for v_idx in range(num_vendors):
-        start_col = 4 + v_idx * 8
-        ws.column_dimensions[get_column_letter(start_col)].width = 16 # Increased slightly to fit two lines better
-        ws.column_dimensions[get_column_letter(start_col + 1)].width = 10  
+        start_col = 4 + v_idx * 9
+        ws.column_dimensions[get_column_letter(start_col)].width = 14 # Brand
+        ws.column_dimensions[get_column_letter(start_col + 1)].width = 16 # Unit Rate
         ws.column_dimensions[get_column_letter(start_col + 2)].width = 10  
-        ws.column_dimensions[get_column_letter(start_col + 3)].width = 14 
+        ws.column_dimensions[get_column_letter(start_col + 3)].width = 10  
         ws.column_dimensions[get_column_letter(start_col + 4)].width = 14 
         ws.column_dimensions[get_column_letter(start_col + 5)].width = 14 
-        ws.column_dimensions[get_column_letter(start_col + 6)].width = 10  
-        ws.column_dimensions[get_column_letter(start_col + 7)].width = 16 
+        ws.column_dimensions[get_column_letter(start_col + 6)].width = 14 
+        ws.column_dimensions[get_column_letter(start_col + 7)].width = 10  
+        ws.column_dimensions[get_column_letter(start_col + 8)].width = 16 
 
     ws.column_dimensions[get_column_letter(l1_start_col)].width = 35
     ws.column_dimensions[get_column_letter(l1_start_col + 1)].width = 16

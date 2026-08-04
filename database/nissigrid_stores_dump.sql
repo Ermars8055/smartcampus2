@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict gGa8R29H29rIU5qKYwRwwolqvp46aPS8rnGLzvVytArGipQiWAoFcluQnccf5Es
+\restrict d8Qc7Cbeqcvijw68zUfWqFQg2IWtEtFt3GiIHledIcrGjWEG0OhcE2JPqjtx6VQ
 
 -- Dumped from database version 17.10 (Ubuntu 17.10-1.pgdg22.04+1)
 -- Dumped by pg_dump version 18.4 (Ubuntu 18.4-1.pgdg22.04+1)
@@ -4314,6 +4314,7 @@ COPY public.alerts (id, tenant_id, site_id, alert_type, severity, title, message
 49	2	2	Pending Action	Warning	Action Required: Gate Entry GE-00006	\N	GateEntry	201	\N	t	f	2026-08-03 16:13:37.347219	\N	\N
 50	2	2	Indent Approved	Success	Indent IND-00021 Approved	The indent (IND-00021) has been approved by EastPoint Admin.	IndentApproved	236	\N	f	f	2026-08-03 16:55:53.778359	\N	3
 51	2	2	Contract Approved	Success	Contract CNT-00003 Approved	The contract (CNT-00003) has been approved by EastPoint Admin.	ContractApproved	3	\N	f	f	2026-08-03 17:11:44.871055	\N	3
+52	2	2	Contract Approved	Success	Contract CNT-00003 Approved	The contract (CNT-00003) has been approved by EastPoint Admin.	ContractApproved	3	\N	f	f	2026-08-04 18:46:34.386557	\N	3
 \.
 
 
@@ -4887,6 +4888,14 @@ COPY public.audit_logs (id, tenant_id, site_id, user_id, action, entity_type, en
 471	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-04 10:16:50.80872
 472	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-04 10:59:10.075876
 473	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-04 11:59:59.308755
+474	2	2	3	APPROVE	PurchaseOrder	257	\N	\N	\N	2026-08-04 17:41:46.442704
+475	2	2	3	APPROVE	PurchaseOrder	257	\N	\N	\N	2026-08-04 17:42:18.99703
+476	2	2	3	APPROVE	PurchaseOrder	256	\N	\N	\N	2026-08-04 17:42:44.327855
+477	2	2	3	APPROVE	PurchaseOrder	256	\N	\N	\N	2026-08-04 17:42:50.776308
+478	2	2	3	APPROVE	PurchaseOrder	253	\N	\N	\N	2026-08-04 17:43:07.24701
+479	2	2	3	APPROVE	PurchaseOrder	253	\N	\N	\N	2026-08-04 17:43:22.254046
+480	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-04 18:29:44.783605
+481	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-04 18:34:59.646632
 \.
 
 
@@ -5054,7 +5063,7 @@ COPY public.contract_items (id, contract_id, material_id, equipment_id, uom, rat
 COPY public.contracts (id, tenant_id, site_id, contract_number, contract_type, vendor_id, institution_id, department_id, start_date, end_date, contract_value, payment_terms, renewal_terms, sla_details, spare_parts_included, consumables_included, status, created_by_id, approved_by_id, approved_at, is_deleted, created_at, updated_at, exclusions, current_approval_level) FROM stdin;
 1	2	2	CNT-00001	RC	62	3	\N	2026-07-15	2026-07-30	2000000				f	f	Submitted	3	\N	\N	f	2026-07-27 18:05:33.916597	2026-07-31 15:43:03.683262	\N	\N
 2	2	2	CNT-00002	AMC	63	5	335	2026-07-22	2039-01-30	2502112				f	f	Submitted	3	\N	\N	f	2026-07-30 17:20:20.838762	2026-07-31 16:55:48.517737	\N	2
-3	2	2	CNT-00003	RC	66	5	271	2026-08-10	2026-08-20	15000				f	f	Approved	3	3	2026-08-03 11:41:44.867868	f	2026-08-03 17:10:25.921051	2026-08-03 17:11:44.875693		2
+3	2	2	CNT-00003	RC	66	5	271	2026-08-10	2026-08-20	15000				f	f	Active	3	3	2026-08-04 13:16:34.38435	f	2026-08-03 17:10:25.921051	2026-08-04 18:46:34.407981		2
 \.
 
 
@@ -8599,11 +8608,11 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 68	2	2	PURCHASE_REQUEST	PR	12
 70	2	2	QUOTATION_REQUEST	QR	30
 96	2	2	CONTRACT	CNT	3
-95	2	2	PURCHASE_ORDER_3	EPCET/PO	2
 66	2	2	INDENT	IND	22
 93	2	2	WRITE_OFF	WO	9
 100	2	2	EQUIPMENT_WRITE_OFF	EWO	1
 65	2	2	VENDOR	VND	6
+95	2	2	PURCHASE_ORDER_3	EPCET/PO	4
 \.
 
 
@@ -8622,7 +8631,7 @@ COPY public.equipment_history (id, equipment_id, event_type, event_date, descrip
 --
 
 COPY public.equipment_items (id, tenant_id, site_id, equipment_code, material_id, grn_id, grn_item_id, serial_number, serial_number_status, is_biomedical, requires_installation, installation_status, installation_date, installation_report_url, installation_remarks, warehouse_id, project_id, status, created_at, updated_at, warranty_available, warranty_expiry_date, amc_cmc_status, amc_cmc_end_date, amc_po_number, last_pm_date, next_pm_due_date, last_calibration_date, next_calibration_due_date, rental_agreement_number, rental_start_date, rental_end_date, rental_vendor_id, location_id, contact_number, institution_id, po_id, make, model, machine_cost, machine_type, serial_number_photo_url, equipment_photo_url, installed_by, amc_cost, pm_required, calibration_required, battery_details, procurement_type, rental_type, rental_cost, billing_frequency, cost_per_test, linked_reagents, agreement_status, renewal_date, expected_return_date, rental_status, warranty_end_date) FROM stdin;
-1	2	2	INST-RADIOLOGY-CIV-00001	2338	213	520	787379492	Captured	t	t	Installed	2026-07-28 00:00:00	/api/uploads/installation_reports/2/20260728_064246_8c2a2ea0.jpg	\N	62	3	Operational	2026-07-27 18:24:17.688288	2026-07-28 06:42:46.650147	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	7557805798	\N	\N	\N	\N	\N	\N	/api/uploads/serial_number_photos/2/20260728_064246_5039ec73.jpg	/api/uploads/equipment_photos/2/20260728_064246_3cf27324.png	Pradnesh A	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1	2	2	INST-RADIOLOGY-CIV-00001	2338	213	520	787379492	Captured	t	t	Installed	2026-07-28 00:00:00	/api/uploads/installation_reports/2/Invoice_INV2001.pdf	\N	62	3	Operational	2026-07-27 18:24:17.688288	2026-07-28 06:42:46.650147	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	7557805798	\N	\N	\N	\N	\N	\N	/api/uploads/serial_number_photos/2/20260728_064246_5039ec73.jpg	/api/uploads/equipment_photos/2/20260728_064246_3cf27324.png	Pradnesh A	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 \.
 
 
@@ -12291,6 +12300,15 @@ COPY public.purchase_order_approvals (id, po_id, approval_flow_id, approver_id, 
 60	255	79	3	{"681": {"quantity": 10.0, "remarks": null}}	\N	2026-08-03 17:18:47.682443
 61	255	18	3	{"681": {"quantity": 10.0, "remarks": null}}	\N	2026-08-03 17:18:55.173677
 62	255	83	3	{"681": {"quantity": 10.0, "remarks": null}}	\N	2026-08-03 17:18:55.173716
+63	257	79	3	{"688": {"quantity": 4.0, "remarks": null}}	\N	2026-08-04 17:41:46.444999
+64	257	18	3	{"688": {"quantity": 3.0, "remarks": null}}	\N	2026-08-04 17:42:19.001637
+65	257	83	3	{"688": {"quantity": 3.0, "remarks": null}}	\N	2026-08-04 17:42:19.001677
+66	256	79	3	{"685": {"quantity": 5.0, "remarks": null}}	\N	2026-08-04 17:42:44.331761
+67	256	18	3	{"685": {"quantity": 5.0, "remarks": null}}	\N	2026-08-04 17:42:50.778794
+68	256	83	3	{"685": {"quantity": 5.0, "remarks": null}}	\N	2026-08-04 17:42:50.778863
+69	253	79	3	{"687": {"quantity": 10.0, "remarks": null}}	\N	2026-08-04 17:43:07.249054
+70	253	18	3	{"687": {"quantity": 10.0, "remarks": null}}	\N	2026-08-04 17:43:22.256575
+71	253	83	3	{"687": {"quantity": 10.0, "remarks": null}}	\N	2026-08-04 17:43:22.256615
 \.
 
 
@@ -12467,7 +12485,9 @@ COPY public.purchase_order_items (id, po_id, material_id, quantity, rate, amount
 678	252	3507	5	4349	21745	0	\N	0	6	6	0	f	5
 680	254	2564	5	16526.16	82630.8	0	\N	10	6	6	0	t	5
 681	255	2751	10	10443.43	104434.3	0	\N	10	9	9	0	f	10
-684	253	2564	100	45	4500	0	\N	0	9	9	0	f	\N
+688	257	2564	5	16526.16	82630.8	0	\N	10	6	6	0	f	3
+685	256	3507	5	4349	21745	0	\N	0	6	6	0	f	5
+687	253	2564	100	45	4500	0	\N	0	9	9	0	f	10
 \.
 
 
@@ -12476,11 +12496,13 @@ COPY public.purchase_order_items (id, po_id, material_id, quantity, rate, amount
 --
 
 COPY public.purchase_orders (id, tenant_id, site_id, po_number, vendor_id, project_id, pr_id, indent_id, qr_id, po_type, total_amount, delivery_date, status, terms, created_by_id, approved_by_id, approved_at, is_deleted, created_at, updated_at, current_approval_level, annexure, remarks, institution_id, advance_percentage, contract_id, rental_agreement_number, rental_start_date, rental_end_date, billing_frequency, security_deposit, cost_per_test, linked_reagent_agreement, vendor_maintenance_responsibility, return_conditions, renewal_terms, procurement_type, rental_type, purchase_mode, marketplace_name) FROM stdin;
-253	2	2	PO-00035	63	3	\N	\N	214	Formal	5310	2026-08-20	Draft	Test PO Terms	1	\N	\N	f	2026-08-03 14:11:21.328412	2026-08-04 12:14:26.091505	1		\N	3	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Credit Purchase	\N
+256	2	2	EPCET/PO-00003	63	3	\N	\N	\N	Informal	24354.4	2026-08-12	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-04 12:12:50.812176	f	2026-08-04 17:33:44.578465	2026-08-04 17:42:50.813296	2		\N	3	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Cash Purchase	
+257	2	2	EPCET/PO-00004	63	3	\N	\N	\N	Informal	83291.85	2026-08-10	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-04 12:12:19.037993	f	2026-08-04 17:41:23.513139	2026-08-04 17:42:19.040393	2		\N	3	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Cash Purchase	
 255	2	2	EPCET/PO-00002	63	3	\N	\N	\N	Informal	110909.23	2026-08-15	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-03 11:48:55.203196	f	2026-08-03 17:15:40.231582	2026-08-03 17:18:55.20532	2		\N	3	12	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Cash Purchase	\N
 184	3	3	PO-00015	52	1	\N	\N	182	Formal	81643.63	\N	Closed	\N	4	\N	\N	f	2026-05-05 18:52:30.375564	2026-06-02 18:01:24.106204	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
 188	3	3	PO-00023	53	1	\N	\N	179	Formal	7057	\N	Sent to Vendor	\N	4	4	2026-06-09 06:02:25.803756	f	2026-05-25 18:43:27.659778	2026-06-09 11:32:29.137317	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
 185	3	3	PO-00020	56	1	\N	188	\N	Formal	505620	\N	Sent to Vendor	\N	4	4	2026-06-09 06:03:28.427074	f	2026-05-20 11:09:40.396549	2026-06-09 12:03:22.436884	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
+253	2	2	PO-00035	63	3	\N	\N	214	Formal	5310	2026-08-20	Approved	Test PO Terms	1	3	2026-08-04 12:13:22.286017	f	2026-08-03 14:11:21.328412	2026-08-04 17:43:22.287146	2		\N	3	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Cash Purchase	
 251	2	2	EPAHS/PO-00001	63	3	\N	\N	\N	Informal	37018.6	2026-07-29	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-27 06:36:54.952309	f	2026-07-27 12:06:20.027605	2026-07-27 12:06:54.953664	2		\N	11	50	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
 213	3	3	PO-00048	53	1	\N	\N	\N	Informal	59815.35	2026-07-01	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-10 18:09:04.764216	2026-06-10 18:09:04.786544	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
 183	3	3	PO-00014	52	1	\N	\N	181	Formal	38878.18	\N	Closed	\N	4	\N	\N	f	2026-05-04 18:52:30.375564	2026-06-09 11:11:19.17997	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N
@@ -17057,7 +17079,6 @@ COPY public.uom (id, tenant_id, site_id, name, abbreviation, is_active, is_delet
 27	3	3	Prs	PRS	t	f	f
 28	2	2	Bags	BAG	t	f	f
 29	2	2	Numbers	NOS	t	f	f
-32	2	2	Bundles	BDL	t	f	f
 33	2	2	Rolls	ROL	t	f	f
 34	2	2	Sets	SET	t	f	f
 35	2	2	Boxes	BOX	t	f	f
@@ -17069,6 +17090,7 @@ COPY public.uom (id, tenant_id, site_id, name, abbreviation, is_active, is_delet
 39	2	2	Meter	MTR	t	f	t
 41	2	2	Prs	PRS	t	f	f
 30	2	2	Kilograms	KG	t	f	t
+32	2	2	Bundles	BDL	f	f	f
 \.
 
 
@@ -17199,8 +17221,6 @@ COPY public.vendor_categories (id, vendor_id, category_id) FROM stdin;
 129	63	68
 130	63	73
 131	63	74
-148	66	71
-149	66	70
 152	65	66
 153	65	67
 154	67	66
@@ -17208,6 +17228,8 @@ COPY public.vendor_categories (id, vendor_id, category_id) FROM stdin;
 156	67	76
 157	67	69
 158	67	70
+159	66	71
+160	66	70
 \.
 
 
@@ -17716,7 +17738,7 @@ COPY public.write_offs (id, tenant_id, site_id, write_off_number, date, reason, 
 -- Name: alerts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.alerts_id_seq', 51, true);
+SELECT pg_catalog.setval('public.alerts_id_seq', 52, true);
 
 
 --
@@ -17730,7 +17752,7 @@ SELECT pg_catalog.setval('public.approval_flows_id_seq', 86, true);
 -- Name: audit_logs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.audit_logs_id_seq', 473, true);
+SELECT pg_catalog.setval('public.audit_logs_id_seq', 481, true);
 
 
 --
@@ -18003,21 +18025,21 @@ SELECT pg_catalog.setval('public.projects_id_seq', 9, true);
 -- Name: purchase_order_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_order_approvals_id_seq', 62, true);
+SELECT pg_catalog.setval('public.purchase_order_approvals_id_seq', 71, true);
 
 
 --
 -- Name: purchase_order_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_order_items_id_seq', 684, true);
+SELECT pg_catalog.setval('public.purchase_order_items_id_seq', 688, true);
 
 
 --
 -- Name: purchase_orders_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_orders_id_seq', 255, true);
+SELECT pg_catalog.setval('public.purchase_orders_id_seq', 257, true);
 
 
 --
@@ -18220,7 +18242,7 @@ SELECT pg_catalog.setval('public.vendor_approvals_id_seq', 1, true);
 -- Name: vendor_categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_categories_id_seq', 158, true);
+SELECT pg_catalog.setval('public.vendor_categories_id_seq', 160, true);
 
 
 --
@@ -22430,5 +22452,5 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict gGa8R29H29rIU5qKYwRwwolqvp46aPS8rnGLzvVytArGipQiWAoFcluQnccf5Es
+\unrestrict d8Qc7Cbeqcvijw68zUfWqFQg2IWtEtFt3GiIHledIcrGjWEG0OhcE2JPqjtx6VQ
 

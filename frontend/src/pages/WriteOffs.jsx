@@ -47,7 +47,7 @@ export default function WriteOffs() {
     if (filterDate) {
       filtered = filtered.filter(wo => dayjs(wo.date).isSame(filterDate, 'day'));
     }
-    
+
     if (filterType !== 'All') {
       filtered = filtered.filter(wo => {
         const isEquipment = wo.items?.some(it => !!it.equipment_id);
@@ -61,8 +61,8 @@ export default function WriteOffs() {
       const lowerSearch = search.toLowerCase();
       filtered = filtered.filter(wo => {
         const matchesWoNumber = wo.write_off_number?.toLowerCase().includes(lowerSearch);
-        const matchesItems = wo.items?.some(it => 
-          it.material_name?.toLowerCase().includes(lowerSearch) || 
+        const matchesItems = wo.items?.some(it =>
+          it.material_name?.toLowerCase().includes(lowerSearch) ||
           it.equipment_name?.toLowerCase().includes(lowerSearch) ||
           it.equipment_serial_number?.toLowerCase().includes(lowerSearch)
         );
@@ -143,7 +143,7 @@ export default function WriteOffs() {
       try {
         const locRes = await api.get('/api/configurations/locations');
         setLocations(locRes.data);
-      } catch(e){}
+      } catch (e) { }
     } catch (e) { console.error(e); }
   };
 
@@ -237,14 +237,14 @@ export default function WriteOffs() {
       const woNumber = res?.data?.write_off_number || 'Write Off';
       showMessage(`${woNumber} ${createModal.editId ? 'updated' : 'created'} successfully`.trim(), 'Success', 'success');
       load();
-    } catch (err) { 
+    } catch (err) {
       let errMsg = 'Error processing request';
       if (err.response?.data?.detail) {
         if (typeof err.response.data.detail === 'string') errMsg = err.response.data.detail;
         else if (Array.isArray(err.response.data.detail)) errMsg = err.response.data.detail.map(d => d.msg || JSON.stringify(d)).join(', ');
         else errMsg = JSON.stringify(err.response.data.detail);
       }
-      showMessage(errMsg, 'Error', 'error'); 
+      showMessage(errMsg, 'Error', 'error');
     }
   };
 
@@ -270,7 +270,7 @@ export default function WriteOffs() {
   const handleAction = async (id, action) => {
     try {
       await api.post(`/api/write-offs/${id}/${action}`);
-      
+
       const woNumber = viewModal.writeOff?.write_off_number || 'Write Off';
       let msg = '';
       let title = 'Success';
@@ -330,7 +330,7 @@ export default function WriteOffs() {
             <TextField size="small" placeholder="Search Write Off or Material/Equipment..." value={search}
               onChange={e => setSearch(e.target.value)} sx={{ width: 380 }}
               InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }} />
-            
+
             <Autocomplete
               size="small"
               options={['All', 'Material', 'Equipment']}
@@ -339,7 +339,7 @@ export default function WriteOffs() {
               disableClearable
               renderInput={(params) => <TextField {...params} placeholder="Type" sx={{ minWidth: 200 }} />}
             />
-            
+
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <DatePicker
                 label="Filter by Date"
@@ -463,14 +463,14 @@ export default function WriteOffs() {
                       <Chip label={wo.items?.length || 0} size="small" sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} />
                     </TableCell>
                     <TableCell sx={{ px: 2 }}>
-                      <Chip label={wo.status} size="small" color={getStatusColor(wo.status)} variant="outlined" sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} />
+                      <Chip label={wo.status} size="small" color={getStatusColor(wo.status)} sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} />
                     </TableCell>
                     <TableCell sx={{ px: 2, whiteSpace: 'nowrap' }} onClick={(e) => e.stopPropagation()}>
                       <Box sx={{ display: 'flex', gap: 0.5 }}>
                         <Tooltip title="Edit">
                           <span>
-                            <IconButton size="small" color="primary" disabled={wo.status !== 'Draft'} onClick={(e) => { 
-                              e.stopPropagation(); 
+                            <IconButton size="small" color="primary" disabled={wo.status !== 'Draft'} onClick={(e) => {
+                              e.stopPropagation();
                               const isEquipment = wo.items.length > 0 && !!wo.items[0].equipment_id;
                               setCreateModal({
                                 open: true,
@@ -483,8 +483,8 @@ export default function WriteOffs() {
                                 department_name: wo.department_name || '',
                                 attachment_url: wo.attachment_url,
                                 certification_url: wo.certification_url,
-                                items: wo.items.map(it => ({ 
-                                  material_id: it.material_id, 
+                                items: wo.items.map(it => ({
+                                  material_id: it.material_id,
                                   quantity: it.quantity,
                                   equipment_id: it.equipment_id || '',
                                   location_id: it.location_id || '',
@@ -636,7 +636,7 @@ export default function WriteOffs() {
             <Grid item xs={12} sm={6}>
               <Box sx={{ display: 'flex', gap: 1 }}>
                 <TextField
-                  fullWidth size="small" label="Attachment URL (Optional)"
+                  fullWidth size="small" label="Writeoff Document"
                   value={createModal.attachment_url || ''}
                   onChange={e => setCreateModal({ ...createModal, attachment_url: e.target.value })}
                 />
@@ -649,7 +649,7 @@ export default function WriteOffs() {
             <Grid item xs={12} sm={6}>
               <Box sx={{ display: 'flex', gap: 1 }}>
                 <TextField
-                  fullWidth size="small" label="Certification Document URL"
+                  fullWidth size="small" label="Writeoff Certification"
                   value={createModal.certification_url || ''}
                   onChange={e => setCreateModal({ ...createModal, certification_url: e.target.value })}
                 />
@@ -708,7 +708,7 @@ export default function WriteOffs() {
                           if (!allowDec) val = val.replace(/\./g, '');
                           updateItem(idx, 'quantity', val);
                         }}
-                        inputProps={{ 
+                        inputProps={{
                           min: "0",
                           step: (item.material_id && materials.find(m => m.id === item.material_id)?.uom_allow_decimal) ? "any" : "1"
                         }}
@@ -731,38 +731,38 @@ export default function WriteOffs() {
                       />
                     </TableCell>
                     <TableCell sx={{ verticalAlign: 'top', pt: 2, bgcolor: '#EFF6FF', borderRadius: 1 }}>
-                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                         <label style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
-                           <input type="checkbox" checked={item.has_buyback} onChange={e => updateItem(idx, 'has_buyback', e.target.checked)} />
-                           Yes
-                         </label>
-                         <Tooltip title="Check this if the item is being returned for a buy-back value">
-                           <InfoOutlined sx={{ fontSize: 16, color: '#94A3B8' }} />
-                         </Tooltip>
-                         {item.has_buyback && (
-                           <TextField
-                             size="small"
-                             label="Amount (₹)"
-                             type="number"
-                             value={item.buyback_amount}
-                             onKeyDown={e => {
-                               if (['-', '+', 'e', 'E'].includes(e.key)) e.preventDefault();
-                             }}
-                             onChange={e => {
-                               let val = e.target.value.replace(/-/g, '');
-                               updateItem(idx, 'buyback_amount', val);
-                             }}
-                             sx={{ 
-                               width: '120px',
-                               '& input[type=number]': { '-moz-appearance': 'textfield' },
-                               '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button': {
-                                 '-webkit-appearance': 'none',
-                                 margin: 0
-                               }
-                             }}
-                           />
-                         )}
-                       </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
+                          <input type="checkbox" checked={item.has_buyback} onChange={e => updateItem(idx, 'has_buyback', e.target.checked)} />
+                          Yes
+                        </label>
+                        <Tooltip title="Check this if the item is being returned for a buy-back value">
+                          <InfoOutlined sx={{ fontSize: 16, color: '#94A3B8' }} />
+                        </Tooltip>
+                        {item.has_buyback && (
+                          <TextField
+                            size="small"
+                            label="Amount (₹)"
+                            type="number"
+                            value={item.buyback_amount}
+                            onKeyDown={e => {
+                              if (['-', '+', 'e', 'E'].includes(e.key)) e.preventDefault();
+                            }}
+                            onChange={e => {
+                              let val = e.target.value.replace(/-/g, '');
+                              updateItem(idx, 'buyback_amount', val);
+                            }}
+                            sx={{
+                              width: '120px',
+                              '& input[type=number]': { '-moz-appearance': 'textfield' },
+                              '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button': {
+                                '-webkit-appearance': 'none',
+                                margin: 0
+                              }
+                            }}
+                          />
+                        )}
+                      </Box>
                     </TableCell>
                     <TableCell align="center" sx={{ verticalAlign: 'top', pt: 2 }}>
                       {!createModal.isEquipmentMode && (
@@ -774,28 +774,28 @@ export default function WriteOffs() {
                   </TableRow>
                 ))}
                 {!createModal.isEquipmentMode && (
-                <TableRow>
-                  <TableCell colSpan={3} align="center" sx={{ py: 2 }}>
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      startIcon={<Add />}
-                      onClick={addItem}
-                      sx={{ 
-                        textTransform: 'none', 
-                        fontWeight: 600, 
-                        borderStyle: 'dashed', 
-                        width: '100%', 
-                        color: '#2563EB', 
-                        fontSize: '0.95rem',
-                        borderColor: '#cbd5e1', 
-                        '&:hover': { borderColor: '#94a3b8', bgcolor: '#f8fafc' } 
-                      }}
-                    >
-                      Add Another Item
-                    </Button>
-                  </TableCell>
-                </TableRow>
+                  <TableRow>
+                    <TableCell colSpan={3} align="center" sx={{ py: 2 }}>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        startIcon={<Add />}
+                        onClick={addItem}
+                        sx={{
+                          textTransform: 'none',
+                          fontWeight: 600,
+                          borderStyle: 'dashed',
+                          width: '100%',
+                          color: '#2563EB',
+                          fontSize: '0.95rem',
+                          borderColor: '#cbd5e1',
+                          '&:hover': { borderColor: '#94a3b8', bgcolor: '#f8fafc' }
+                        }}
+                      >
+                        Add Another Item
+                      </Button>
+                    </TableCell>
+                  </TableRow>
                 )}
               </TableBody>
             </Table>
@@ -831,7 +831,7 @@ export default function WriteOffs() {
                 <Grid item xs={12} sm={3}>
                   <Typography variant="caption" color="text.secondary">Status</Typography>
                   <Box sx={{ mt: 0.5 }}>
-                    <Chip label={viewModal.writeOff.status} size="small" color={getStatusColor(viewModal.writeOff.status)} variant="outlined" sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} />
+                    <Chip label={viewModal.writeOff.status} size="small" color={getStatusColor(viewModal.writeOff.status)} sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} />
                   </Box>
                 </Grid>
                 <Grid item xs={12} sm={3}>
@@ -856,7 +856,7 @@ export default function WriteOffs() {
                   <Typography variant="body2">{viewModal.writeOff.reason}</Typography>
                 </Grid>
                 <Grid item xs={12} sm={2}>
-                  <Typography variant="caption" color="text.secondary">Attachment</Typography>
+                  <Typography variant="caption" color="text.secondary">Writeoff Document</Typography>
                   <Box sx={{ mt: 0.5 }}>
                     {viewModal.writeOff.attachment_url ? (
                       <Button
@@ -873,7 +873,7 @@ export default function WriteOffs() {
                   </Box>
                 </Grid>
                 <Grid item xs={12} sm={3}>
-                  <Typography variant="caption" color="text.secondary">Certification</Typography>
+                  <Typography variant="caption" color="text.secondary">Writeoff Certification</Typography>
                   <Box sx={{ mt: 0.5 }}>
                     {viewModal.writeOff.certification_url ? (
                       <Button

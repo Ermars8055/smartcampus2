@@ -336,9 +336,8 @@ export default function Vendors() {
                           <Chip
                             label={v.status === 'Submitted' ? (v.previous_status ? <span style={{ display: 'block', textAlign: 'center', lineHeight: 1.1 }}>Submitted<br /><span style={{ fontSize: '0.55rem', fontWeight: 400 }}>(was {v.previous_status})</span></span> : <span>Submitted</span>) : v.status}
                             size="small"
+                            color={v.status === 'Approved' ? 'success' : (v.status === 'Rejected' ? 'error' : (v.status === 'Submitted' ? 'info' : 'default'))}
                             sx={{
-                              bgcolor: v.status === 'Approved' ? '#ECFDF5' : (v.status === 'Rejected' ? '#FEF2F2' : (v.status === 'Submitted' ? '#FEF9C3' : '#F1F5F9')),
-                              color: v.status === 'Approved' ? '#10B981' : (v.status === 'Rejected' ? '#EF4444' : (v.status === 'Submitted' ? '#CA8A04' : '#64748B')),
                               fontWeight: 600, fontSize: '0.65rem', height: v.status === 'Submitted' ? 'auto' : 20, py: v.status === 'Submitted' ? 0.5 : 0
                             }}
                           />
@@ -466,9 +465,8 @@ export default function Vendors() {
                           <Chip
                             label={v.status === 'Submitted' ? (v.previous_status ? <span style={{ display: 'block', textAlign: 'center', lineHeight: 1.1 }}>Submitted<br /><span style={{ fontSize: '0.55rem', fontWeight: 400 }}>(was {v.previous_status})</span></span> : <span>Submitted</span>) : v.status}
                             size="small"
+                            color={v.status === 'Approved' ? 'success' : (v.status === 'Rejected' ? 'error' : (v.status === 'Submitted' ? 'info' : 'default'))}
                             sx={{
-                              bgcolor: v.status === 'Approved' ? '#ECFDF5' : (v.status === 'Rejected' ? '#FEF2F2' : (v.status === 'Submitted' ? '#FEF9C3' : '#F1F5F9')),
-                              color: v.status === 'Approved' ? '#10B981' : (v.status === 'Rejected' ? '#EF4444' : (v.status === 'Submitted' ? '#CA8A04' : '#64748B')),
                               fontWeight: 600, fontSize: '0.75rem', borderRadius: '6px', height: v.status === 'Submitted' ? 'auto' : 24, py: v.status === 'Submitted' ? 0.5 : 0
                             }}
                           />

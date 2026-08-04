@@ -604,7 +604,7 @@ export default function MaterialIssue() {
                   } else {
                     if (statusLabel === 'Draft') { statusColor = 'default'; }
                     else if (statusLabel === 'Issued') { statusColor = 'success'; }
-                    else if (statusLabel === 'Acknowledged') { statusColor = 'success'; }
+                    else if (statusLabel === 'Acknowledged') { statusColor = 'info'; }
                     else { statusColor = 'success'; }
                   }
 
@@ -630,7 +630,7 @@ export default function MaterialIssue() {
                         )}
                       </TableCell>
                       <TableCell sx={{ px: 2 }}>
-                        <Chip label={statusLabel} size="small" color={statusColor} variant="outlined" sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} />
+                        <Chip label={statusLabel} size="small" color={statusColor} sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} />
                         {row.derivedStatus === 'Acknowledged' && row.acknowledgedByName && (
                           <Typography variant="caption" sx={{ display: 'block', mt: 0.5, fontSize: '0.6rem', color: '#64748B' }}>By {row.acknowledgedByName}</Typography>
                         )}
@@ -996,8 +996,7 @@ export default function MaterialIssue() {
                     <Chip
                       label={viewIssueModal.issue.is_acknowledged ? 'Acknowledged' : 'Completed'}
                       size="small"
-                      color="success"
-                      variant="outlined"
+                      color={viewIssueModal.issue.is_acknowledged ? 'info' : 'success'}
                       sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }}
                     />
                     {viewIssueModal.issue.is_acknowledged && viewIssueModal.issue.acknowledged_by_name && (

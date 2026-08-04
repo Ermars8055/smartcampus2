@@ -333,7 +333,7 @@ export default function Returns() {
                       <Chip label={ret.items?.length || 0} size="small" sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem', bgcolor: '#F1F5F9', color: '#475569' }} />
                     </TableCell>
                     <TableCell sx={{ px: 2 }}>
-                      <Chip label={ret.status} size="small" color={ret.status === 'Completed' ? 'error' : (ret.status === 'Partially Received' ? 'info' : (ret.status === 'Initiated' ? 'success' : 'default'))} variant="outlined" sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} />
+                      <Chip label={ret.status} size="small" color={ret.status === 'Completed' ? 'success' : (ret.status === 'Partially Received' ? 'warning' : (ret.status === 'Initiated' ? 'primary' : 'default'))} sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} />
                     </TableCell>
                     <TableCell align="right" sx={{ px: 2, whiteSpace: 'nowrap' }}>
                       <IconButton
@@ -572,7 +572,7 @@ export default function Returns() {
                 <Grid item xs={12} sm={4}>
                   <Typography variant="caption" color="text.secondary">Status</Typography>
                   <Box sx={{ mt: 0.5 }}>
-                    <Chip label={viewModal.ret.status} size="small" color={viewModal.ret.status === 'Completed' ? 'error' : (viewModal.ret.status === 'Partially Received' ? 'info' : (viewModal.ret.status === 'Initiated' ? 'success' : 'default'))} sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} />
+                    <Chip label={viewModal.ret.status} size="small" color={viewModal.ret.status === 'Completed' ? 'success' : (viewModal.ret.status === 'Partially Received' ? 'warning' : (viewModal.ret.status === 'Initiated' ? 'primary' : 'default'))} sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} />
                   </Box>
                 </Grid>
               </Grid>

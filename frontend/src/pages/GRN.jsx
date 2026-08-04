@@ -7,6 +7,8 @@ import {
   DialogContent, DialogActions, Grid, MenuItem, Select, FormControl, FormHelperText, IconButton, Autocomplete, RadioGroup, FormControlLabel, Radio, Tab, Tabs
 } from '@mui/material';
 import { Add, Search, AssignmentTurnedIn, AttachFile, OpenInNew, Delete, ArrowBack } from '@mui/icons-material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import dayjs from 'dayjs';
 import api, { getFileUrl } from '../services/api';
 import { formatDate } from '../utils/dateUtils';
 import { useAuth } from '../context/AuthContext';
@@ -519,7 +521,22 @@ export default function GRNPage() {
                 <Grid item xs={12} sm={6}><TextField fullWidth size="small" label="Invoice Number" value={form.invoice_number || ''} onChange={e => setForm({ ...form, invoice_number: e.target.value })} /></Grid>
 
                 {/* Line 2 */}
-                <Grid item xs={12} sm={6}><TextField fullWidth size="small" label="Invoice Date" type="date" value={form.invoice_date || ''} onChange={e => setForm({ ...form, invoice_date: e.target.value })} InputLabelProps={{ shrink: true }} inputProps={{ max: new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0] }} /></Grid>
+                <Grid item xs={12} sm={6}>
+                  <DatePicker
+                    label="Invoice Date"
+                    value={form.invoice_date ? dayjs(form.invoice_date) : null}
+                    onChange={val => setForm({ ...form, invoice_date: val ? val.format('YYYY-MM-DD') : '' })}
+                    format="DD/MMM/YYYY"
+                    disableFuture
+                    localeText={{ fieldMonthPlaceholder: () => 'MMM' }}
+                    slotProps={{
+                      textField: {
+                        fullWidth: true,
+                        size: 'small'
+                      }
+                    }}
+                  />
+                </Grid>
                 <Grid item xs={12} sm={6}><TextField fullWidth size="small" label="Invoice Amount (₹)" type="number" inputProps={{ step: "0.01", min: "0" }} value={form.invoice_amount} onChange={e => setForm({ ...form, invoice_amount: Math.max(0, parseFloat(e.target.value) || 0) })} /></Grid>
 
                 {/* Line 3 */}
@@ -769,25 +786,35 @@ export default function GRNPage() {
 
                             <Grid container spacing={2} sx={{ mb: 2 }}>
                               <Grid item xs={12} sm={4}>
-                                <TextField
-                                  fullWidth size="small" type="date" label="Installation Date" InputLabelProps={{ shrink: true }}
-                                  value={item.installation_date || ''}
-                                  onChange={e => {
+                                <DatePicker
+                                  label="Installation Date"
+                                  value={item.installation_date ? dayjs(item.installation_date) : null}
+                                  onChange={val => {
                                     const items = [...form.items];
-                                    items[i].installation_date = e.target.value;
+                                    items[i].installation_date = val ? val.format('YYYY-MM-DD') : '';
                                     setForm({ ...form, items });
+                                  }}
+                                  format="DD/MMM/YYYY"
+                                  localeText={{ fieldMonthPlaceholder: () => 'MMM' }}
+                                  slotProps={{
+                                    textField: { fullWidth: true, size: 'small' }
                                   }}
                                 />
                               </Grid>
                               {form.po_procurement_type === 'Rental' && form.po_rental_type !== 'Cost Per Test' && (
                                 <Grid item xs={12} sm={4}>
-                                  <TextField
-                                    fullWidth size="small" type="date" label="Override Rental Start" InputLabelProps={{ shrink: true }}
-                                    value={item.rental_start_date || ''}
-                                    onChange={e => {
+                                  <DatePicker
+                                    label="Override Rental Start"
+                                    value={item.rental_start_date ? dayjs(item.rental_start_date) : null}
+                                    onChange={val => {
                                       const items = [...form.items];
-                                      items[i].rental_start_date = e.target.value;
+                                      items[i].rental_start_date = val ? val.format('YYYY-MM-DD') : '';
                                       setForm({ ...form, items });
+                                    }}
+                                    format="DD/MMM/YYYY"
+                                    localeText={{ fieldMonthPlaceholder: () => 'MMM' }}
+                                    slotProps={{
+                                      textField: { fullWidth: true, size: 'small' }
                                     }}
                                   />
                                 </Grid>

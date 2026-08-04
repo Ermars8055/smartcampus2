@@ -7,6 +7,8 @@ import {
   Select, MenuItem, FormControl, InputLabel, Tab, Tabs
 } from '@mui/material';
 import { Add, Search, LocalShipping, AttachFile, OpenInNew } from '@mui/icons-material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import dayjs from 'dayjs';
 import api, { getFileUrl } from '../services/api';
 import { formatDateTime, formatDate } from '../utils/dateUtils';
 import { useAuth } from '../context/AuthContext';
@@ -396,7 +398,25 @@ export default function GateEntry() {
                     <TextField fullWidth label="DC Number *" value={form.dc_number} onChange={e => { setForm({ ...form, dc_number: e.target.value }); setErrors(prev => ({ ...prev, dc_number: null })); }} error={!!errors.dc_number} helperText={errors.dc_number} sx={{ bgcolor: 'white' }} />
                   </Grid>
                   <Grid item xs={12}>
-                    <TextField fullWidth label="DC Date *" type="date" value={form.dc_date} onChange={e => { setForm({ ...form, dc_date: e.target.value }); setErrors(prev => ({ ...prev, dc_date: null })); }} InputLabelProps={{ shrink: true }} inputProps={{ max: new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0] }} error={!!errors.dc_date} helperText={errors.dc_date} sx={{ bgcolor: 'white' }} />
+                    <DatePicker
+                      label="DC Date *"
+                      value={form.dc_date ? dayjs(form.dc_date) : null}
+                      onChange={val => {
+                        setForm({ ...form, dc_date: val ? val.format('YYYY-MM-DD') : '' });
+                        setErrors(prev => ({ ...prev, dc_date: null }));
+                      }}
+                      format="DD/MMM/YYYY"
+                      disableFuture
+                      localeText={{ fieldMonthPlaceholder: () => 'MMM' }}
+                      slotProps={{
+                        textField: {
+                          fullWidth: true,
+                          error: !!errors.dc_date,
+                          helperText: errors.dc_date,
+                          sx: { bgcolor: 'white' }
+                        }
+                      }}
+                    />
                   </Grid>
                   <Grid item xs={12}>
                     {form.dc_scan_url ? (
@@ -433,7 +453,25 @@ export default function GateEntry() {
                     <TextField fullWidth label="Invoice Number *" value={form.invoice_number} onChange={e => { setForm({ ...form, invoice_number: e.target.value }); setErrors(prev => ({ ...prev, invoice_number: null })); }} error={!!errors.invoice_number} helperText={errors.invoice_number} sx={{ bgcolor: 'white' }} />
                   </Grid>
                   <Grid item xs={12}>
-                    <TextField fullWidth label="Invoice Date *" type="date" value={form.invoice_date} onChange={e => { setForm({ ...form, invoice_date: e.target.value }); setErrors(prev => ({ ...prev, invoice_date: null })); }} InputLabelProps={{ shrink: true }} inputProps={{ max: new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0] }} error={!!errors.invoice_date} helperText={errors.invoice_date} sx={{ bgcolor: 'white' }} />
+                    <DatePicker
+                      label="Invoice Date *"
+                      value={form.invoice_date ? dayjs(form.invoice_date) : null}
+                      onChange={val => {
+                        setForm({ ...form, invoice_date: val ? val.format('YYYY-MM-DD') : '' });
+                        setErrors(prev => ({ ...prev, invoice_date: null }));
+                      }}
+                      format="DD/MMM/YYYY"
+                      disableFuture
+                      localeText={{ fieldMonthPlaceholder: () => 'MMM' }}
+                      slotProps={{
+                        textField: {
+                          fullWidth: true,
+                          error: !!errors.invoice_date,
+                          helperText: errors.invoice_date,
+                          sx: { bgcolor: 'white' }
+                        }
+                      }}
+                    />
                   </Grid>
                   <Grid item xs={12}>
                     <TextField fullWidth className="no-spin" label="Amount" type="number" inputProps={{ step: "0.01", min: "0" }} value={form.invoice_amount} onChange={e => setForm({ ...form, invoice_amount: e.target.value })} sx={{ bgcolor: 'white' }} />

@@ -1697,6 +1697,7 @@ class VendorQuoteDetail(BaseModel):
     effective_rate: float
     discount_percent: float = 0.0
     delivery_days: Optional[int] = None
+    brand: Optional[str] = None
     rank: int
     rank_label: str
 

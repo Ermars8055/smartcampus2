@@ -5,11 +5,11 @@ import {
   TableContainer, Button, TextField, InputAdornment, Chip, Dialog, DialogTitle,
   DialogContent, DialogActions, Grid, MenuItem, Select, FormControl, InputLabel,
   Tabs, Tab, IconButton, Tooltip, useTheme, useMediaQuery, Alert,
-  Autocomplete, createFilterOptions, Switch, FormControlLabel
+  Autocomplete, createFilterOptions, Switch, FormControlLabel, Divider, TablePagination, TableSortLabel
 } from '@mui/material';
 import {
   Search, Build, QrCode, UploadFile, CheckCircle, Warning, OpenInNew,
-  LocalHospital, PrecisionManufacturing, Edit, FilterList, Refresh, Assignment, DeleteOutline, Print, Science, CompareArrows
+  LocalHospital, PrecisionManufacturing, Edit, FilterList, Refresh, Assignment, DeleteOutline, Print, Science, CompareArrows, Add
 } from '@mui/icons-material';
 import api, { getFileUrl } from '../services/api';
 import { formatDate } from '../utils/dateUtils';
@@ -27,12 +27,17 @@ export default function Equipment() {
   const [equipmentList, setEquipmentList] = useState([]);
   const [warehouses, setWarehouses] = useState([]);
   const [locations, setLocations] = useState([]);
+  const [materials, setMaterials] = useState([]);
+  const [institutions, setInstitutions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('all'); // 'all', 'pending_serial', 'pending_installation'
   const [search, setSearch] = useState('');
-  const [selectedWarehouse, setSelectedWarehouse] = useState('');
-  const [selectedBiomedical, setSelectedBiomedical] = useState('');
-  const [selectedInstitution, setSelectedInstitution] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState('');
+
+  // Pagination states
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [sortConfig, setSortConfig] = useState({ key: 'equipment_code', direction: 'asc' });
 
   // Dialog states
   const [serialDialog, setSerialDialog] = useState(null); // Equipment object
@@ -54,8 +59,8 @@ export default function Equipment() {
   // QR Dialog
   const [qrDialog, setQrDialog] = useState(null);
   const [qrData, setQrData] = useState(null);
-  const [printLabelCount, setPrintLabelCount] = useState(12);
-  const [labelFormat, setLabelFormat] = useState(32);
+  const [printLabelCount, setPrintLabelCount] = useState(1);
+  const [labelFormat, setLabelFormat] = useState(1);
   
   // Write Off Dialog
   const [writeOffDialog, setWriteOffDialog] = useState(null);
@@ -83,17 +88,25 @@ export default function Equipment() {
   const [editForm, setEditForm] = useState({});
   const [editSubmitting, setEditSubmitting] = useState(false);
 
+  const [addDialog, setAddDialog] = useState(false);
+  const [addForm, setAddForm] = useState({});
+  const [addSubmitting, setAddSubmitting] = useState(false);
+
   const loadData = async () => {
     setLoading(true);
     try {
-      const [eqRes, whRes, locRes] = await Promise.all([
+      const [eqRes, whRes, locRes, matRes, instRes] = await Promise.all([
         api.get('/api/equipment'),
         api.get('/api/warehouses'),
-        api.get('/api/configurations/locations')
+        api.get('/api/configurations/locations'),
+        api.get('/api/materials', { params: { limit: 10000 } }),
+        api.get('/api/institutions')
       ]);
       setEquipmentList(eqRes.data || []);
       setWarehouses(whRes.data || []);
       setLocations(locRes.data || []);
+      setMaterials(matRes.data?.items || matRes.data || []);
+      setInstitutions(instRes.data || []);
     } catch (err) {
       showMessage(err.response?.data?.detail || 'Failed to load equipment data', 'Error', 'error');
     }
@@ -125,25 +138,9 @@ export default function Equipment() {
         if (item.installation_status !== 'Pending Installation') return false;
       }
 
-      // Warehouse filter
-      if (selectedWarehouse && item.warehouse_id !== parseInt(selectedWarehouse, 10)) {
-        return false;
-      }
-
-      // Biomedical & Medical College filter
-      if (selectedBiomedical === 'biomedical' && !item.is_biomedical) return false;
-      if (selectedBiomedical === 'standard' && item.is_biomedical) return false;
-      if (selectedBiomedical === 'medical_college' && !item.institution_name?.toLowerCase().includes('medical college') && !item.institution_code?.toLowerCase().includes('medical college')) return false;
-
-      // Institution filter
-      if (selectedInstitution && item.institution_code !== selectedInstitution && item.institution_name !== selectedInstitution) {
-         // Also handle cases where code might be used or name is used.
-         // Let's assume the API returns institution_name or institution_code or institution_id.
-         // Actually, if we filter by string "Hospital" vs "Medical College", we can check if it matches.
-         if (!item.institution_name?.toLowerCase().includes(selectedInstitution.toLowerCase()) && 
-             !item.institution_code?.toLowerCase().includes(selectedInstitution.toLowerCase())) {
-            return false;
-         }
+      // Status filter
+      if (selectedStatus && item.status !== selectedStatus) {
+         return false;
       }
 
       // Search
@@ -161,7 +158,60 @@ export default function Equipment() {
 
       return true;
     });
-  }, [equipmentList, activeTab, selectedWarehouse, selectedBiomedical, selectedInstitution, search]);
+    
+    // Apply sorting
+    if (sortConfig.key) {
+      filtered.sort((a, b) => {
+        let valA = a[sortConfig.key];
+        let valB = b[sortConfig.key];
+        
+        // Handle nulls
+        if (valA === null || valA === undefined) valA = '';
+        if (valB === null || valB === undefined) valB = '';
+        
+        // String comparison
+        if (typeof valA === 'string' && typeof valB === 'string') {
+          return sortConfig.direction === 'asc' 
+            ? valA.localeCompare(valB)
+            : valB.localeCompare(valA);
+        }
+        
+        // Number comparison
+        if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+    
+    return filtered;
+  }, [equipmentList, activeTab, selectedStatus, search, sortConfig]);
+
+  const handleSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  // Handle Pagination
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  // Reset page to 0 when filters change
+  useEffect(() => {
+    setPage(0);
+  }, [activeTab, selectedStatus, search]);
+
+  const paginatedEquipment = useMemo(() => {
+    return filteredEquipment.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  }, [filteredEquipment, page, rowsPerPage]);
 
   // Handle Serial Number Update Submit
   const handleSerialSubmit = async () => {
@@ -265,7 +315,8 @@ export default function Equipment() {
     try {
       const res = await api.get(`/api/equipment/${item.id}/qr`);
       setQrData(res.data);
-      setPrintLabelCount(12);
+      setPrintLabelCount(1);
+      setLabelFormat(1);
       setQrDialog(item);
     } catch (err) {
       showMessage('Failed to load QR data', 'Error', 'error');
@@ -457,24 +508,73 @@ export default function Equipment() {
     setEditSubmitting(false);
   };
 
+  const openAddDialog = () => {
+    setAddForm({
+      equipment_code: '',
+      material_id: '',
+      warehouse_id: '',
+      location_id: '',
+      institution_id: '',
+      serial_number: '',
+      make: '',
+      model: '',
+      machine_cost: '',
+      machine_type: '',
+      warranty_available: false,
+      warranty_expiry_date: '',
+      amc_cmc_status: 'None',
+      amc_cmc_end_date: '',
+      pm_required: false,
+      calibration_required: false,
+      status: 'Operational',
+      is_biomedical: false,
+      requires_installation: false
+    });
+    setAddDialog(true);
+  };
+
+  const handleAddSubmit = async () => {
+    if (!addForm.equipment_code || !addForm.material_id) {
+      showMessage('Equipment Code and Material are required', 'Validation Error', 'warning');
+      return;
+    }
+    setAddSubmitting(true);
+    try {
+      // Clean up empty strings to null for integers/dates
+      const payload = { ...addForm };
+      Object.keys(payload).forEach(key => {
+        if (payload[key] === '') payload[key] = null;
+      });
+      await api.post('/api/equipment', payload);
+      showMessage('Equipment added successfully', 'Success', 'success');
+      setAddDialog(false);
+      loadData();
+    } catch (err) {
+      showMessage(err.response?.data?.detail || 'Failed to add equipment', 'Error', 'error');
+    }
+    setAddSubmitting(false);
+  };
+
   return (
     <Box>
       {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
         <Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Box sx={{ p: 1, bgcolor: '#EFF6FF', borderRadius: 2, color: '#2563EB', display: 'flex' }}>
-              <Build fontSize="medium" />
-            </Box>
             <Box>
               <Typography variant="h5" sx={{ fontWeight: 700, color: '#0F172A' }}>Equipment Management</Typography>
               <Typography variant="body2" sx={{ color: '#64748B' }}>Track individual equipment assets, serial numbers, and installation workflows.</Typography>
             </Box>
           </Box>
         </Box>
-        <Button variant="outlined" startIcon={<Refresh />} onClick={loadData} size="small" sx={{ height: 38 }}>
-          Refresh
-        </Button>
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <Button variant="outlined" startIcon={<Refresh />} onClick={loadData} size="small" sx={{ height: 38 }}>
+            Refresh
+          </Button>
+          <Button variant="contained" color="primary" startIcon={<Add />} onClick={openAddDialog} size="small" sx={{ height: 38 }}>
+            Add Equipment
+          </Button>
+        </Box>
       </Box>
 
       {/* Search, Filters & Tabs */}
@@ -486,34 +586,21 @@ export default function Equipment() {
             placeholder="Search code, serial, material..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            sx={{ minWidth: 280, flexGrow: 1 }}
+            sx={{ 
+              width: 320, 
+              '& input:focus::placeholder': { color: 'transparent' } 
+            }}
             InputProps={{ startAdornment: <InputAdornment position="start"><Search sx={{ color: '#94A3B8' }} /></InputAdornment> }}
           />
 
           <FormControl size="small" sx={{ minWidth: 180 }}>
-            <InputLabel>Store</InputLabel>
-            <Select value={selectedWarehouse} onChange={e => setSelectedWarehouse(e.target.value)} label="Store">
-              <MenuItem value="">All Stores</MenuItem>
-              {warehouses.map(w => <MenuItem key={w.id} value={w.id}>{w.name}</MenuItem>)}
-            </Select>
-          </FormControl>
-
-          <FormControl size="small" sx={{ minWidth: 180 }}>
-            <InputLabel>Category Type</InputLabel>
-            <Select value={selectedBiomedical} onChange={e => setSelectedBiomedical(e.target.value)} label="Category Type">
-              <MenuItem value="">All Types</MenuItem>
-              <MenuItem value="biomedical">Biomedical Equipment</MenuItem>
-              <MenuItem value="standard">Standard Equipment</MenuItem>
-              <MenuItem value="medical_college">Medical College Equipment</MenuItem>
-            </Select>
-          </FormControl>
-
-          <FormControl size="small" sx={{ minWidth: 180 }}>
-            <InputLabel>Institution</InputLabel>
-            <Select value={selectedInstitution} onChange={e => setSelectedInstitution(e.target.value)} label="Institution">
-              <MenuItem value="">All Institutions</MenuItem>
-              <MenuItem value="Hospital">Hospital</MenuItem>
-              <MenuItem value="Medical College">Medical College</MenuItem>
+            <InputLabel>Equipment Status</InputLabel>
+            <Select value={selectedStatus} onChange={e => setSelectedStatus(e.target.value)} label="Equipment Status">
+              <MenuItem value="">All Statuses</MenuItem>
+              <MenuItem value="Operational">Operational</MenuItem>
+              <MenuItem value="Pending Installation">Pending Installation</MenuItem>
+              <MenuItem value="Under Repair">Under Repair</MenuItem>
+              <MenuItem value="Written Off">Written Off</MenuItem>
             </Select>
           </FormControl>
         </Box>
@@ -577,7 +664,7 @@ export default function Equipment() {
             {filteredEquipment.length === 0 && (
               <Typography align="center" color="textSecondary" sx={{ py: 4 }}>No equipment records found.</Typography>
             )}
-            {filteredEquipment.map(item => (
+            {paginatedEquipment.map(item => (
               <Card key={item.id} variant="outlined" sx={{ p: 2, borderRadius: 2, cursor: 'pointer' }} onClick={() => setViewDialog(item)}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#2563EB' }}>{item.equipment_code}</Typography>
@@ -623,14 +710,14 @@ export default function Equipment() {
                 </Box>
 
                 <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
-                  <Button size="small" variant="outlined" color="primary" startIcon={<Edit color="primary" />} onClick={(e) => { e.stopPropagation(); setEditForm(item); setEditDialog(item); }}>
-                    Edit
-                  </Button>
                   {item.serial_number_status === 'Pending Update' && (
-                    <Button size="small" variant="outlined" color="warning" startIcon={<Edit color="primary" />} onClick={(e) => { e.stopPropagation(); setSerialDialog(item); setSerialInput(''); }}>
+                    <Button size="small" variant="outlined" color="warning" startIcon={<Edit color="warning" />} onClick={(e) => { e.stopPropagation(); setSerialDialog(item); setSerialInput(''); }}>
                       Update Serial
                     </Button>
                   )}
+                  <Button size="small" variant="outlined" color="primary" startIcon={<Edit color="primary" />} onClick={(e) => { e.stopPropagation(); setEditForm(item); setEditDialog(item); }}>
+                    Edit
+                  </Button>
                   {item.installation_status === 'Pending Installation' && (
                     <Button size="small" variant="contained" color="primary" startIcon={<Build />} onClick={(e) => { e.stopPropagation(); openInstallationDialog(item); }}>
                       Install Equipment
@@ -672,21 +759,59 @@ export default function Equipment() {
                 </Box>
               </Card>
             ))}
+            <TablePagination
+              component="div"
+              count={filteredEquipment.length}
+              page={page}
+              onPageChange={handleChangePage}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+              rowsPerPageOptions={[5, 10, 25, 50]}
+              showFirstButton
+              showLastButton
+            />
           </Box>
         ) : (
-          <TableContainer>
-            <Table size="small">
-              <TableHead sx={{ bgcolor: '#F8FAFC' }}>
+          <TableContainer sx={{ overflowX: 'hidden' }}>
+            <Table size="small" sx={{ tableLayout: 'fixed', minWidth: '100%', '& .MuiTableCell-root': { px: 0.5, py: 0.75, fontSize: '0.75rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }}>
+              <TableHead sx={{ bgcolor: '#F8FAFC', '& .MuiTableCell-root': { lineHeight: 1.2, whiteSpace: 'normal' } }}>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 700 }}>Equipment Code</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Material Name</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Serial Number</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Store</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Institution</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>GRN Ref</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Installation Status</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 700 }}>Actions</TableCell>
+                  <TableCell sx={{ fontWeight: 700, width: '15%' }}>
+                    <TableSortLabel active={sortConfig.key === 'equipment_code'} direction={sortConfig.key === 'equipment_code' ? sortConfig.direction : 'asc'} onClick={() => handleSort('equipment_code')}>
+                      Equipment Code
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 700, width: '15%' }}>
+                    <TableSortLabel active={sortConfig.key === 'material_name'} direction={sortConfig.key === 'material_name' ? sortConfig.direction : 'asc'} onClick={() => handleSort('material_name')}>
+                      Material Name
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 700, width: '16%' }}>
+                    <TableSortLabel active={sortConfig.key === 'serial_number'} direction={sortConfig.key === 'serial_number' ? sortConfig.direction : 'asc'} onClick={() => handleSort('serial_number')}>
+                      Serial Number
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 700, width: '10%' }}>
+                    <TableSortLabel active={sortConfig.key === 'institution_name'} direction={sortConfig.key === 'institution_name' ? sortConfig.direction : 'asc'} onClick={() => handleSort('institution_name')}>
+                      Institution
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 700, width: '8%' }}>
+                    <TableSortLabel active={sortConfig.key === 'grn_number'} direction={sortConfig.key === 'grn_number' ? sortConfig.direction : 'asc'} onClick={() => handleSort('grn_number')}>
+                      GRN Ref
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 700, width: '10%' }}>
+                    <TableSortLabel active={sortConfig.key === 'installation_status'} direction={sortConfig.key === 'installation_status' ? sortConfig.direction : 'asc'} onClick={() => handleSort('installation_status')}>
+                      Install Status
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 700, width: '10%' }}>
+                    <TableSortLabel active={sortConfig.key === 'status'} direction={sortConfig.key === 'status' ? sortConfig.direction : 'asc'} onClick={() => handleSort('status')}>
+                      Status
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700, width: '16%' }}>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -697,15 +822,10 @@ export default function Equipment() {
                     </TableCell>
                   </TableRow>
                 )}
-                {filteredEquipment.map(item => (
+                {paginatedEquipment.map(item => (
                   <TableRow key={item.id} hover onClick={() => setViewDialog(item)} sx={{ cursor: 'pointer' }}>
                     <TableCell sx={{ fontWeight: 700, color: '#2563EB', fontSize: '0.85rem' }}>
                       {item.equipment_code}
-                      {item.is_biomedical && (
-                        <Tooltip title="Biomedical Equipment">
-                          <LocalHospital sx={{ fontSize: 16, color: '#E11D48', ml: 0.5, verticalAlign: 'middle' }} />
-                        </Tooltip>
-                      )}
                       {item.rental_agreement_number && (
                         <Tooltip title={`Rental Agreement: ${item.rental_agreement_number} | Period: ${item.rental_start_date ? formatDate(item.rental_start_date) : ''} - ${item.rental_end_date ? formatDate(item.rental_end_date) : 'Ongoing'}`}>
                           <Assignment sx={{ fontSize: 16, color: '#0EA5E9', ml: 0.5, verticalAlign: 'middle' }} />
@@ -720,10 +840,18 @@ export default function Equipment() {
                       {item.serial_number ? (
                         <Chip label={item.serial_number} size="small" color="success" variant="outlined" sx={{ fontWeight: 600 }} />
                       ) : (
-                        <Chip label="Pending Update" size="small" color="warning" sx={{ fontWeight: 600, fontSize: '0.7rem' }} />
+                        <Tooltip title="Update Serial Number">
+                          <Chip 
+                            label="Pending Update" 
+                            size="small" 
+                            color="warning" 
+                            clickable
+                            onClick={(e) => { e.stopPropagation(); setSerialDialog(item); setSerialInput(''); }}
+                            sx={{ fontWeight: 600, fontSize: '0.7rem' }} 
+                          />
+                        </Tooltip>
                       )}
                     </TableCell>
-                    <TableCell sx={{ fontSize: '0.85rem' }}>{item.warehouse_name || '-'}</TableCell>
                     <TableCell sx={{ fontSize: '0.85rem' }}>{item.institution_name || item.institution_code || '-'}</TableCell>
                     <TableCell sx={{ fontSize: '0.85rem', color: '#64748B' }}>{item.grn_number || '-'}</TableCell>
                     <TableCell>
@@ -743,20 +871,13 @@ export default function Equipment() {
                         sx={{ fontSize: '0.75rem' }}
                       />
                     </TableCell>
-                    <TableCell align="center">
-                      <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
+                    <TableCell align="right">
+                      <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'flex-end', alignItems: 'center' }}>
                         <Tooltip title="Edit Equipment">
                           <IconButton size="small" color="primary" onClick={(e) => { e.stopPropagation(); setEditForm(item); setEditDialog(item); }}>
                             <Edit color="primary" fontSize="small" />
                           </IconButton>
                         </Tooltip>
-                        {item.serial_number_status === 'Pending Update' && (
-                          <Tooltip title="Update Serial Number">
-                            <Button size="small" variant="outlined" color="warning" sx={{ textTransform: 'none', py: 0.5 }} onClick={(e) => { e.stopPropagation(); setSerialDialog(item); setSerialInput(''); }}>
-                              Serial No.
-                            </Button>
-                          </Tooltip>
-                        )}
                         {item.installation_status === 'Pending Installation' && (
                           <Tooltip title="Record Installation & Upload Report">
                             <Button size="small" variant="contained" color="primary" sx={{ textTransform: 'none', py: 0.5 }} onClick={(e) => { e.stopPropagation(); openInstallationDialog(item); }}>
@@ -818,6 +939,17 @@ export default function Equipment() {
                 ))}
               </TableBody>
             </Table>
+            <TablePagination
+              component="div"
+              count={filteredEquipment.length}
+              page={page}
+              onPageChange={handleChangePage}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+              rowsPerPageOptions={[5, 10, 25, 50]}
+              showFirstButton
+              showLastButton
+            />
           </TableContainer>
         )}
       </Card>
@@ -1282,6 +1414,10 @@ export default function Equipment() {
                     <TableRow><TableCell sx={{ fontWeight: 600 }}>Status</TableCell><TableCell>{viewDialog.status}</TableCell></TableRow>
                     <TableRow><TableCell sx={{ fontWeight: 600 }}>Location</TableCell><TableCell>{viewDialog.location_name || '-'}</TableCell></TableRow>
                     <TableRow><TableCell sx={{ fontWeight: 600 }}>Make / Model</TableCell><TableCell>{viewDialog.make || '-'} / {viewDialog.model || '-'}</TableCell></TableRow>
+                    <TableRow><TableCell sx={{ fontWeight: 600 }}>Machine Type</TableCell><TableCell>{viewDialog.machine_type || '-'}</TableCell></TableRow>
+                    <TableRow><TableCell sx={{ fontWeight: 600 }}>Machine Cost</TableCell><TableCell>{viewDialog.machine_cost ? `₹${viewDialog.machine_cost}` : '-'}</TableCell></TableRow>
+                    <TableRow><TableCell sx={{ fontWeight: 600 }}>GRN Number</TableCell><TableCell>{viewDialog.grn_number || '-'}</TableCell></TableRow>
+                    <TableRow><TableCell sx={{ fontWeight: 600 }}>Installation Date</TableCell><TableCell>{viewDialog.installation_date ? formatDate(viewDialog.installation_date) : '-'}</TableCell></TableRow>
                   </TableBody>
                 </Table>
               </Grid>
@@ -1296,7 +1432,11 @@ export default function Equipment() {
                     )}
                     <TableRow><TableCell sx={{ fontWeight: 600 }}>AMC/CMC Status</TableCell><TableCell>{viewDialog.amc_cmc_status || 'None'}</TableCell></TableRow>
                     {viewDialog.amc_cmc_status && viewDialog.amc_cmc_status !== 'None' && (
-                      <TableRow><TableCell sx={{ fontWeight: 600 }}>AMC/CMC End Date</TableCell><TableCell>{viewDialog.amc_cmc_end_date ? formatDate(viewDialog.amc_cmc_end_date) : '-'}</TableCell></TableRow>
+                      <>
+                        <TableRow><TableCell sx={{ fontWeight: 600 }}>AMC/CMC End Date</TableCell><TableCell>{viewDialog.amc_cmc_end_date ? formatDate(viewDialog.amc_cmc_end_date) : '-'}</TableCell></TableRow>
+                        <TableRow><TableCell sx={{ fontWeight: 600 }}>AMC PO Number</TableCell><TableCell>{viewDialog.amc_po_number || '-'}</TableCell></TableRow>
+                        <TableRow><TableCell sx={{ fontWeight: 600 }}>AMC Cost</TableCell><TableCell>{viewDialog.amc_cost ? `₹${viewDialog.amc_cost}` : '-'}</TableCell></TableRow>
+                      </>
                     )}
                   </TableBody>
                 </Table>
@@ -1307,7 +1447,11 @@ export default function Equipment() {
                   <TableBody>
                     <TableRow>
                       <TableCell sx={{ fontWeight: 600 }}>PM Required</TableCell><TableCell>{viewDialog.pm_required ? 'Yes' : 'No'}</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>PM Due Date</TableCell><TableCell>{viewDialog.next_pm_due_date ? formatDate(viewDialog.next_pm_due_date) : '-'}</TableCell>
+                    </TableRow>
+                    <TableRow>
                       <TableCell sx={{ fontWeight: 600 }}>Calibration Required</TableCell><TableCell>{viewDialog.calibration_required ? 'Yes' : 'No'}</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>Calibration Due Date</TableCell><TableCell>{viewDialog.next_calibration_due_date ? formatDate(viewDialog.next_calibration_due_date) : '-'}</TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell sx={{ fontWeight: 600 }}>Battery Details</TableCell><TableCell colSpan={3}>{viewDialog.battery_details || '-'}</TableCell>
@@ -1323,12 +1467,191 @@ export default function Equipment() {
         </DialogActions>
       </Dialog>
 
+      {/* Add Equipment Dialog */}
+      <Dialog open={addDialog} onClose={() => setAddDialog(false)} maxWidth="md" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700, color: '#1E293B' }}>Add New Equipment</DialogTitle>
+        <DialogContent dividers>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <Typography variant="subtitle2" color="primary" sx={{ mb: -1 }}>Core Details</Typography>
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField 
+                  fullWidth size="small" label="Equipment Code *" 
+                  value={addForm.equipment_code || ''} 
+                  onChange={e => setAddForm({ ...addForm, equipment_code: e.target.value })} 
+                />
+              </Grid>
+              <Grid item xs={12} sm={8}>
+                <Autocomplete
+                  size="small"
+                  options={materials.filter(m => m.is_active)}
+                  getOptionLabel={option => `${option.name} (${option.code})`}
+                  value={materials.find(m => m.id === addForm.material_id) || null}
+                  onChange={(e, val) => setAddForm({ ...addForm, material_id: val ? val.id : '' })}
+                  renderInput={params => <TextField {...params} label="Material *" />}
+                />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Store (Warehouse)</InputLabel>
+                  <Select
+                    value={addForm.warehouse_id || ''}
+                    label="Store (Warehouse)"
+                    onChange={e => setAddForm({ ...addForm, warehouse_id: e.target.value })}
+                  >
+                    <MenuItem value=""><em>None</em></MenuItem>
+                    {warehouses.map(w => <MenuItem key={w.id} value={w.id}>{w.name}</MenuItem>)}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Institution</InputLabel>
+                  <Select
+                    value={addForm.institution_id || ''}
+                    label="Institution"
+                    onChange={e => setAddForm({ ...addForm, institution_id: e.target.value })}
+                  >
+                    <MenuItem value=""><em>None</em></MenuItem>
+                    {institutions.map(i => <MenuItem key={i.id} value={i.id}>{i.name}</MenuItem>)}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Location</InputLabel>
+                  <Select
+                    value={addForm.location_id || ''}
+                    label="Location"
+                    onChange={e => setAddForm({ ...addForm, location_id: e.target.value })}
+                  >
+                    <MenuItem value=""><em>None</em></MenuItem>
+                    {locations.map(l => <MenuItem key={l.id} value={l.id}>{l.location_name}</MenuItem>)}
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12}>
+                <Divider sx={{ my: 1 }} />
+                <Typography variant="subtitle2" color="primary" sx={{ mb: -1 }}>Editable Details</Typography>
+              </Grid>
+              
+              <Grid item xs={12} sm={6}>
+                <TextField fullWidth size="small" label="Serial Number" value={addForm.serial_number || ''} onChange={e => setAddForm({ ...addForm, serial_number: e.target.value })} />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField fullWidth size="small" label="Make" value={addForm.make || ''} onChange={e => setAddForm({ ...addForm, make: e.target.value })} />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField fullWidth size="small" label="Model" value={addForm.model || ''} onChange={e => setAddForm({ ...addForm, model: e.target.value })} />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField fullWidth size="small" label="Machine Type" value={addForm.machine_type || ''} onChange={e => setAddForm({ ...addForm, machine_type: e.target.value })} />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField fullWidth size="small" label="Machine Cost" type="number" inputProps={{ min: "0", step: "0.01" }} value={addForm.machine_cost || ''} onChange={e => setAddForm({ ...addForm, machine_cost: e.target.value === '' ? '' : parseFloat(e.target.value) })} />
+              </Grid>
+
+              <Grid item xs={12}>
+                <Divider sx={{ my: 1 }} />
+                <Typography variant="subtitle2" color="primary" sx={{ mb: -1 }}>Maintenance & Warranty</Typography>
+              </Grid>
+              
+              <Grid item xs={12} sm={6}>
+                <FormControlLabel
+                  control={<Switch size="small" checked={!!addForm.warranty_available} onChange={e => setAddForm({ ...addForm, warranty_available: e.target.checked })} />}
+                  label="Warranty Available"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField fullWidth size="small" type="date" label="Warranty Expiry Date" InputLabelProps={{ shrink: true }} value={addForm.warranty_expiry_date ? addForm.warranty_expiry_date.substring(0, 10) : ''} onChange={e => setAddForm({ ...addForm, warranty_expiry_date: e.target.value })} disabled={!addForm.warranty_available} />
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>AMC/CMC Status</InputLabel>
+                  <Select value={addForm.amc_cmc_status || 'None'} label="AMC/CMC Status" onChange={e => setAddForm({ ...addForm, amc_cmc_status: e.target.value })}>
+                    <MenuItem value="None">None</MenuItem>
+                    <MenuItem value="AMC">AMC</MenuItem>
+                    <MenuItem value="CMC">CMC</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField fullWidth size="small" type="date" label="AMC/CMC End Date" InputLabelProps={{ shrink: true }} value={addForm.amc_cmc_end_date ? addForm.amc_cmc_end_date.substring(0, 10) : ''} onChange={e => setAddForm({ ...addForm, amc_cmc_end_date: e.target.value })} disabled={addForm.amc_cmc_status === 'None'} />
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <FormControlLabel
+                  control={<Switch size="small" checked={!!addForm.pm_required} onChange={e => setAddForm({ ...addForm, pm_required: e.target.checked })} />}
+                  label="PM Required"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControlLabel
+                  control={<Switch size="small" checked={!!addForm.calibration_required} onChange={e => setAddForm({ ...addForm, calibration_required: e.target.checked })} />}
+                  label="Calibration Required"
+                />
+              </Grid>
+            </Grid>
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ p: 3, pt: 2 }}>
+          <Button onClick={() => setAddDialog(false)} color="inherit" sx={{ fontWeight: 600 }}>Cancel</Button>
+          <Button onClick={handleAddSubmit} variant="contained" color="primary" disabled={addSubmitting}>
+            {addSubmitting ? 'Saving...' : 'Save Equipment'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       {/* Edit Equipment Dialog */}
       <Dialog open={!!editDialog} onClose={() => setEditDialog(null)} maxWidth="md" fullWidth>
         <DialogTitle sx={{ fontWeight: 700, color: '#1E293B' }}>Edit Equipment: {editDialog?.equipment_code}</DialogTitle>
         <DialogContent dividers>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
             <Grid container spacing={2}>
+              {/* Read-Only System Fields */}
+              <Grid item xs={12}>
+                <Typography variant="subtitle2" color="primary" sx={{ mb: -1, mt: 1 }}>System Information (Read-Only)</Typography>
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField fullWidth size="small" label="Equipment Name" value={editForm.material_name || ''} InputProps={{ readOnly: true }} variant="filled" />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField fullWidth size="small" label="Asset Code" value={editForm.equipment_code || ''} InputProps={{ readOnly: true }} variant="filled" />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField fullWidth size="small" label="Serial Number" value={editForm.serial_number || 'Pending'} InputProps={{ readOnly: true }} variant="filled" />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField fullWidth size="small" label="Location" value={editForm.location_name || '-'} InputProps={{ readOnly: true }} variant="filled" />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField fullWidth size="small" label="Status" value={editForm.status || ''} InputProps={{ readOnly: true }} variant="filled" />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField fullWidth size="small" label="Procurement Type" value={editForm.procurement_type || '-'} InputProps={{ readOnly: true }} variant="filled" />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField fullWidth size="small" label="GRN Number" value={editForm.grn_number || '-'} InputProps={{ readOnly: true }} variant="filled" />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField fullWidth size="small" label="Installation Date" value={editForm.installation_date ? editForm.installation_date.substring(0, 10) : '-'} InputProps={{ readOnly: true }} variant="filled" />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField fullWidth size="small" label="PM Due Date" value={editForm.next_pm_due_date ? editForm.next_pm_due_date.substring(0, 10) : '-'} InputProps={{ readOnly: true }} variant="filled" />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField fullWidth size="small" label="Calibration Due Date" value={editForm.next_calibration_due_date ? editForm.next_calibration_due_date.substring(0, 10) : '-'} InputProps={{ readOnly: true }} variant="filled" />
+              </Grid>
+              
+              <Grid item xs={12}>
+                <Divider sx={{ my: 1 }} />
+                <Typography variant="subtitle2" color="primary" sx={{ mb: -1 }}>Editable Details</Typography>
+              </Grid>
+              
               <Grid item xs={12} sm={6}>
                 <TextField fullWidth size="small" label="Make" value={editForm.make || ''} onChange={e => setEditForm({ ...editForm, make: e.target.value })} />
               </Grid>

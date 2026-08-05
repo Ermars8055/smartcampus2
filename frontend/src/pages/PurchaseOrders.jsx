@@ -912,8 +912,7 @@ export default function PurchaseOrders() {
                 <tr><td style="text-align:right">Round Off</td><td style="text-align:right">: ${roundOff}</td></tr>
                 <tr><td style="text-align:right"><b>Total Net Amount</b></td><td style="text-align:right"><b>: ${totalNetAmount}</b></td></tr>
                 ${po.advance_percentage > 0 ? `
-                  <tr><td style="text-align:right; color: #d97706;">Less: Advance (${po.advance_percentage}%)</td><td style="text-align:right; color: #d97706;">: ${Math.round((Math.round(grandTotalWithTax) * po.advance_percentage) / 100).toFixed(2)}</td></tr>
-                  <tr><td style="text-align:right; font-size: 13px;"><b>Balance Amount</b></td><td style="text-align:right; font-size: 13px;"><b>: ${(Math.round(grandTotalWithTax) - Math.round((Math.round(grandTotalWithTax) * po.advance_percentage) / 100)).toFixed(2)}</b></td></tr>
+                  <tr><td style="text-align:right; color: #d97706;">Advance Amount (${po.advance_percentage}%)</td><td style="text-align:right; color: #d97706;">: ${Math.round((Math.round(grandTotalWithTax) * po.advance_percentage) / 100).toFixed(2)}</td></tr>
                 ` : ''}
               </table>
             </div>
@@ -1523,16 +1522,10 @@ export default function PurchaseOrders() {
                         <TableCell align="right" sx={{ fontWeight: 700, fontSize: '1rem', color: '#1e293b' }}>: {detailData.totalNetAmount}</TableCell>
                       </TableRow>
                       {detailData.advancePercentage > 0 && (
-                        <>
-                          <TableRow>
-                            <TableCell align="right" sx={{ color: '#d97706', fontWeight: 600 }}>Less: Advance ({detailData.advancePercentage}%)</TableCell>
-                            <TableCell align="right" sx={{ color: '#d97706', fontWeight: 600 }}>: {detailData.advanceAmount}</TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell align="right" sx={{ fontWeight: 700, fontSize: '1.1rem', color: '#dc2626' }}>Balance Amount</TableCell>
-                            <TableCell align="right" sx={{ fontWeight: 700, fontSize: '1.1rem', color: '#dc2626' }}>: {detailData.balanceAmount}</TableCell>
-                          </TableRow>
-                        </>
+                        <TableRow>
+                          <TableCell align="right" sx={{ color: '#d97706', fontWeight: 600 }}>Advance Amount ({detailData.advancePercentage}%)</TableCell>
+                          <TableCell align="right" sx={{ color: '#d97706', fontWeight: 600 }}>: {detailData.advanceAmount}</TableCell>
+                        </TableRow>
                       )}
                     </TableBody>
                   </Table>

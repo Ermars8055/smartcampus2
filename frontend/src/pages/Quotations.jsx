@@ -18,7 +18,7 @@ import {
   Download as DownloadIcon, ExpandMore as ExpandMoreIcon, ArrowBack as ArrowBackIcon,
   AccountTree as ProjectIcon, Event as DateIcon, Group as VendorIcon, Description as RemarkIcon, Link as LinkIcon, Inventory as InventoryIcon,
   EditNote as ProcessIcon, Balance as CompareIcon, FactCheck as ApproveIcon, ShoppingCart as OrderIcon, Send as BlastIcon,
-  ArrowDropUp, ArrowDropDown, Search
+  ArrowDropUp, ArrowDropDown, Search, Delete as DeleteIcon
 } from '@mui/icons-material';
 import api, { getFileUrl } from '../services/api';
 import { formatDate } from '../utils/dateUtils';
@@ -58,6 +58,7 @@ const Quotations = () => {
     vendor_ids: []
   });
   const [errors, setErrors] = useState({});
+  const [activeRCs, setActiveRCs] = useState({});
 
 
 
@@ -116,6 +117,17 @@ const Quotations = () => {
       return {}; // Clear all errors when form changes
     });
   }, [newQR]);
+
+  useEffect(() => {
+    const matIds = (newQR.items || []).map(it => it.material_id);
+    if (matIds.length > 0) {
+      api.post('/api/contracts/active-rates/check', { material_ids: matIds })
+        .then(res => setActiveRCs(res.data))
+        .catch(console.error);
+    } else {
+      setActiveRCs({});
+    }
+  }, [newQR.items]);
 
   useEffect(() => {
     api.get('/api/terms').then(r => setTermsTemplates(r.data)).catch(console.error);
@@ -328,8 +340,11 @@ const Quotations = () => {
             }
           });
           
+          const newManualMaterialIds = newManualItems.map(it => it.material_id);
+          
           return {
             ...prev,
+            manual_material_ids: newManualMaterialIds,
             items: [...prItems, ...newManualItems]
           };
         });
@@ -345,7 +360,13 @@ const Quotations = () => {
   };
 
   const handleDownloadTemplate = () => {
-    const ws = XLSX.utils.json_to_sheet([{ "Material Name": "", "Quantity": "", "UOM": "" }]);
+    const ws = XLSX.utils.json_to_sheet([{ "Material Code": "", "Material Name": "", "Quantity": "", "UOM": "" }]);
+    ws['!cols'] = [
+      { wch: 20 }, // Material Code
+      { wch: 40 }, // Material Name
+      { wch: 15 }, // Quantity
+      { wch: 15 }  // UOM
+    ];
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Template");
     XLSX.writeFile(wb, "Material_Import_Template.xlsx");
@@ -359,12 +380,19 @@ const Quotations = () => {
     const exportData = newQR.items.map(it => {
       const m = Array.isArray(materials) ? materials.find(x => x.id === it.material_id) : null;
       return {
+        "Material Code": m ? m.code : '',
         "Material Name": m ? m.name : '',
         "Quantity": it.quantity,
         "UOM": m ? (m.uom_name || '') : ''
       };
     });
     const ws = XLSX.utils.json_to_sheet(exportData);
+    ws['!cols'] = [
+      { wch: 20 }, // Material Code
+      { wch: 40 }, // Material Name
+      { wch: 15 }, // Quantity
+      { wch: 15 }  // UOM
+    ];
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Materials");
     XLSX.writeFile(wb, "Current_Materials_List.xlsx");
@@ -805,6 +833,18 @@ const Quotations = () => {
       const newItems = [...prev.items];
       newItems[index] = { ...newItems[index], quantity: parseFloat(val) || 0 };
       return { ...prev, items: newItems };
+    });
+  };
+
+  const removeQRItem = (index) => {
+    setNewQR(prev => {
+      const itemToRemove = prev.items[index];
+      let newManualIds = prev.manual_material_ids || [];
+      if (!itemToRemove.pr_id) {
+        newManualIds = newManualIds.filter(id => id !== itemToRemove.material_id);
+      }
+      const newItems = prev.items.filter((_, i) => i !== index);
+      return { ...prev, items: newItems, manual_material_ids: newManualIds };
     });
   };
 
@@ -1855,40 +1895,60 @@ const Quotations = () => {
                           <TableCell align="center" sx={{ fontWeight: 600 }}>Quantity</TableCell>
                           <TableCell align="left" sx={{ fontWeight: 600 }}>UOM</TableCell>
                           <TableCell align="center" sx={{ fontWeight: 600 }}>Source</TableCell>
+                          <TableCell align="center" sx={{ fontWeight: 600 }}>Action</TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
                         {newQR.items.map((it, idx) => {
                           const m = Array.isArray(materials) ? materials.find(x => x.id === it.material_id) : null;
                           const pr = approvedPrs.find(p => p.id === it.pr_id);
+                          const hasRC = !!activeRCs[it.material_id];
                           return (
-                            <TableRow key={idx}>
-                              <TableCell sx={{ py: 0.5 }}>{m ? m.code : 'Loading...'}</TableCell>
-                              <TableCell sx={{ py: 0.5 }}>{m ? m.name : 'Loading...'}</TableCell>
-                              <TableCell align="center" sx={{ py: 0.5 }}>
-                                <TextField
-                                  type="number"
-                                  size="small"
-                                  value={it.quantity}
-                                  onChange={(e) => updateItemQuantity(idx, e.target.value)}
-                                  sx={{ width: 100, '& .MuiInputBase-input': { py: 0.5, textAlign: 'center', fontWeight: 600 } }}
-                                  inputProps={{ min: 1 }}
-                                />
-                              </TableCell>
-                              <TableCell align="left" sx={{ py: 0.5 }}>
-                                <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                                  {m?.uom_name || ''}
-                                </Typography>
-                              </TableCell>
-                              <TableCell align="center" sx={{ py: 0.5 }}>
-                                <Chip
-                                  size="small"
-                                  label={it.pr_id ? (pr?.pr_number || 'PR') : 'Manual'}
-                                  color={it.pr_id ? "primary" : "default"}
-                                  variant="outlined"
-                                />
-                              </TableCell>
-                            </TableRow>
+                            <React.Fragment key={idx}>
+                              <TableRow sx={{ bgcolor: hasRC ? '#fff0f0' : 'inherit', '& > td': { borderBottom: hasRC ? 'none' : undefined } }}>
+                                <TableCell sx={{ py: 0.5 }}>{m ? m.code : 'Loading...'}</TableCell>
+                                <TableCell sx={{ py: 0.5 }}>
+                                  {m ? m.name : 'Loading...'}
+                                </TableCell>
+                                <TableCell align="center" sx={{ py: 0.5 }}>
+                                  <TextField
+                                    type="number"
+                                    size="small"
+                                    value={it.quantity}
+                                    onChange={(e) => updateItemQuantity(idx, e.target.value)}
+                                    sx={{ width: 100, '& .MuiInputBase-input': { py: 0.5, textAlign: 'center', fontWeight: 600 } }}
+                                    inputProps={{ min: 1 }}
+                                  />
+                                </TableCell>
+                                <TableCell align="left" sx={{ py: 0.5 }}>
+                                  <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+                                    {m?.uom_name || ''}
+                                  </Typography>
+                                </TableCell>
+                                <TableCell align="center" sx={{ py: 0.5 }}>
+                                  <Chip
+                                    size="small"
+                                    label={it.pr_id ? (pr?.pr_number || 'PR') : 'Manual'}
+                                    color={it.pr_id ? "primary" : "default"}
+                                    variant="outlined"
+                                  />
+                                </TableCell>
+                                <TableCell align="center" sx={{ py: 0.5 }}>
+                                  <IconButton size="small" color="error" onClick={() => removeQRItem(idx)}>
+                                    <DeleteIcon fontSize="small" />
+                                  </IconButton>
+                                </TableCell>
+                              </TableRow>
+                              {hasRC && (
+                                <TableRow sx={{ bgcolor: '#fff0f0' }}>
+                                  <TableCell colSpan={6} sx={{ py: 0.5, pt: 0, borderTop: 'none' }}>
+                                    <Typography variant="caption" color="error" display="block" sx={{ fontWeight: 500 }}>
+                                      This material has a rate contract with {activeRCs[it.material_id].vendor_name} valid up to {formatDate(activeRCs[it.material_id].valid_to)}.
+                                    </Typography>
+                                  </TableCell>
+                                </TableRow>
+                              )}
+                            </React.Fragment>
                           );
                         })}
                       </TableBody>

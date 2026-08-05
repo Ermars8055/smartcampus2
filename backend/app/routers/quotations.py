@@ -345,19 +345,25 @@ def import_materials_excel(
     except Exception as e:
         raise HTTPException(status_code=400, detail="Invalid Excel file format.")
     
-    name_col = next((c for c in df.columns if "name" in str(c).lower() or "material" in str(c).lower() or "item" in str(c).lower()), None)
+    code_col = next((c for c in df.columns if "code" in str(c).lower()), None)
+    name_col = next((c for c in df.columns if "name" in str(c).lower()), None)
+    if not name_col:
+        name_col = next((c for c in df.columns if ("material" in str(c).lower() or "item" in str(c).lower()) and "code" not in str(c).lower()), None)
     qty_col = next((c for c in df.columns if "qty" in str(c).lower() or "quantity" in str(c).lower()), None)
     
-    if not name_col or not qty_col:
-        raise HTTPException(status_code=400, detail="Could not identify Material Name or Quantity columns in the Excel file.")
+    if not name_col and not code_col:
+        raise HTTPException(status_code=400, detail="Could not identify Material Name or Material Code column in the Excel file.")
+    if not qty_col:
+        raise HTTPException(status_code=400, detail="Could not identify Quantity column in the Excel file.")
         
     results = []
     
     for idx, row in df.iterrows():
-        name_val = str(row[name_col]).strip() if pd.notna(row[name_col]) else ""
+        name_val = str(row[name_col]).strip() if name_col and pd.notna(row[name_col]) else ""
+        code_val = str(row[code_col]).strip() if code_col and pd.notna(row[code_col]) else ""
         qty_val = row[qty_col]
         
-        if not name_val:
+        if not name_val and not code_val:
             continue
             
         try:
@@ -365,10 +371,13 @@ def import_materials_excel(
         except (ValueError, TypeError):
             continue
             
-        mat = db.query(Material).filter(
-            Material.tenant_id == tenant_id,
-            func.lower(Material.name) == name_val.lower()
-        ).first()
+        query = db.query(Material).filter(Material.tenant_id == tenant_id)
+        if code_val:
+            query = query.filter(func.lower(Material.code) == code_val.lower())
+        else:
+            query = query.filter(func.lower(Material.name) == name_val.lower())
+            
+        mat = query.first()
         
         if mat:
             results.append(ExcelImportResultItem(

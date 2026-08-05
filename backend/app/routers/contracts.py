@@ -6,7 +6,7 @@ from sqlalchemy import or_
 from typing import Optional, List
 from app.database import get_db
 from app.models import Contract, ContractItem, User, ApprovalFlow, Vendor, Institution, Department, ContractApproval, Alert
-from app.schemas import ContractCreate, ContractUpdate, ContractOut
+from app.schemas import ContractCreate, ContractUpdate, ContractOut, MaterialIdsRequest
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id, require_action
 from app.utils.sequences import get_next_number
 from pydantic import BaseModel
@@ -93,6 +93,34 @@ def get_vendor_active_rates(
                 rates[item.material_id] = item.rate
                 
     return rates
+
+@router.post("/active-rates/check")
+def check_materials_active_rates(
+    data: MaterialIdsRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    contracts = db.query(Contract).join(ContractItem).filter(
+        Contract.tenant_id == tenant_id,
+        Contract.site_id == site_id,
+        Contract.contract_type == "RC",
+        Contract.status == "Active",
+        Contract.is_deleted == False,
+        ContractItem.material_id.in_(data.material_ids)
+    ).all()
+    
+    rc_info = {}
+    for c in contracts:
+        for item in c.items:
+            if item.material_id in data.material_ids:
+                rc_info[item.material_id] = {
+                    "vendor_name": c.vendor.name if c.vendor else "Unknown",
+                    "valid_to": c.end_date.isoformat() if c.end_date else None,
+                    "rate": item.rate
+                }
+    return rc_info
 
 @router.get("/{id}")
 def get_contract(

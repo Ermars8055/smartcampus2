@@ -625,6 +625,7 @@ class POBase(BaseModel):
     procurement_type: str = "Purchase"
     rental_type: Optional[str] = None
     rental_agreement_number: Optional[str] = None
+    rental_agreement_document: Optional[str] = None
     rental_start_date: Optional[date] = None
     rental_end_date: Optional[date] = None
     billing_frequency: Optional[str] = None
@@ -688,6 +689,7 @@ class POOut(BaseModel):
     procurement_type: str = "Purchase"
     rental_type: Optional[str] = None
     rental_agreement_number: Optional[str] = None
+    rental_agreement_document: Optional[str] = None
     rental_start_date: Optional[date] = None
     rental_end_date: Optional[date] = None
     billing_frequency: Optional[str] = None
@@ -2140,6 +2142,7 @@ class EquipmentItemOut(BaseModel):
     procurement_type: str = "Purchase"
     rental_type: Optional[str] = None
     rental_agreement_number: Optional[str] = None
+    rental_agreement_document: Optional[str] = None
     rental_vendor_id: Optional[int] = None
     rental_start_date: Optional[date] = None
     rental_end_date: Optional[date] = None
@@ -2238,6 +2241,9 @@ class EquipmentWriteOffOut(EquipmentWriteOffBase):
 
 
 # == Contracts Management ==
+
+class MaterialIdsRequest(BaseModel):
+    material_ids: List[int]
 
 class ContractItemBase(BaseModel):
     material_id: Optional[int] = None

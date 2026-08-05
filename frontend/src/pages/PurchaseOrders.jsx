@@ -864,7 +864,7 @@ export default function PurchaseOrders() {
                   <tr><td style="width: 45%">PO Number</td><td>: <b>${po.po_number}</b></td></tr>
                   <tr><td>PO Date</td><td>: ${formatDate(po.created_at)}</td></tr>
                   <tr><td>Procurement Type</td><td>: <b>${po.procurement_type === 'Purchase' ? 'Standard Purchase' : (po.procurement_type === 'Rental' ? 'Rental' + (po.rental_type ? ' (' + po.rental_type + ')' : '') : (po.procurement_type || '—'))}</b></td></tr>
-                  ${po.purchase_mode && po.purchase_mode !== 'Credit Purchase' ? `<tr><td>Purchase Mode</td><td>: <b>${po.purchase_mode}</b></td></tr>` : ''}
+                  ${po.purchase_mode ? `<tr><td>Purchase Mode</td><td>: <b>${po.purchase_mode}</b></td></tr>` : ''}
                   ${po.advance_percentage > 0 ? `<tr><td>Advance</td><td>: <b>${po.advance_percentage}%</b></td></tr>` : ''}
                 </table>
               </td>

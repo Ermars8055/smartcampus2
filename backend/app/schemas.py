@@ -868,6 +868,7 @@ class InvoiceBase(BaseModel):
     invoice_date: date
     gate_entry_id: Optional[int] = None
     vendor_id: int
+    institution_id: Optional[int] = None
     po_id: Optional[int] = None
     contract_id: Optional[int] = None
     consignee_id: Optional[int] = None
@@ -915,6 +916,7 @@ class InvoiceUpdate(BaseModel):
     invoice_date: Optional[date] = None
     gate_entry_id: Optional[int] = None
     vendor_id: Optional[int] = None
+    institution_id: Optional[int] = None
     po_id: Optional[int] = None
     consignee_id: Optional[int] = None
     buyer_id: Optional[int] = None

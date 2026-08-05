@@ -10,6 +10,19 @@ import {
 import { Search, Warning, ArrowBack } from '@mui/icons-material';
 import api from '../services/api';
 
+const getTransactionColor = (type) => {
+  switch (type) {
+    case 'GRN': return 'success';
+    case 'Issue': return 'primary';
+    case 'Return': return 'secondary';
+    case 'Transfer In': return 'info';
+    case 'Transfer Out': return 'warning';
+    case 'Repair Received': return 'info';
+    case 'Write Off': return 'error';
+    default: return 'default';
+  }
+};
+
 export default function Inventory() {
   const [searchParams] = useSearchParams();
   const [stock, setStock] = useState([]);
@@ -278,7 +291,7 @@ export default function Inventory() {
                     <TableCell sx={{ fontWeight: 500 }}>{e.material_name}</TableCell>
                     <TableCell>{e.warehouse_name}</TableCell>
                     <TableCell>
-                      <Chip label={e.transaction_type} size="small" color={e.quantity > 0 ? 'success' : 'error'} variant="outlined" sx={{ fontSize: '0.65rem', height: 20 }} />
+                      <Chip label={e.transaction_type} size="small" color={getTransactionColor(e.transaction_type)} sx={{ fontSize: '0.65rem', height: 20 }} />
                     </TableCell>
                     <TableCell align="right" sx={{ fontWeight: 600, color: e.quantity > 0 ? '#059669' : '#DC2626' }}>
                       {e.quantity > 0 ? '+' : ''}{Math.round(e.quantity)}

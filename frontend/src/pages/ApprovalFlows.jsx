@@ -9,6 +9,18 @@ import { Add, Edit, AccountTree as FlowIcon } from '@mui/icons-material';
 import api from '../services/api';
 import { useMessage } from '../context/MessageContext';
 
+const getRoleStyle = (role) => {
+  const base = { borderRadius: '6px', fontWeight: 600, fontSize: '0.75rem', height: 24, px: 1 };
+  const r = role?.toLowerCase() || '';
+  if (r.includes('admin')) return { ...base, bgcolor: '#1E3A8A', color: '#fff' };
+  if (r.includes('store')) return { ...base, bgcolor: '#059669', color: '#fff' };
+  if (r.includes('hod') || r.includes('head')) return { ...base, bgcolor: '#7C3AED', color: '#fff' };
+  if (r.includes('principal')) return { ...base, bgcolor: '#0D9488', color: '#fff' };
+  if (r.includes('director')) return { ...base, bgcolor: '#4338CA', color: '#fff' };
+  if (r.includes('finance') || r.includes('account')) return { ...base, bgcolor: '#D97706', color: '#fff' };
+  return { ...base, bgcolor: '#475569', color: '#fff' };
+};
+
 export default function ApprovalFlows() {
   const { showMessage } = useMessage();
   const [approvalFlows, setApprovalFlows] = useState([]);
@@ -52,7 +64,7 @@ export default function ApprovalFlows() {
                 <TableRow key={f.id}>
                   <TableCell sx={{ fontWeight: 600 }}>{f.document_type}</TableCell>
                   <TableCell>{f.level}</TableCell>
-                  <TableCell><Chip label={f.role_name} size="small" color="primary" variant="outlined" /></TableCell>
+                  <TableCell><Chip label={f.role_name} size="small" sx={getRoleStyle(f.role_name)} /></TableCell>
                   <TableCell sx={{ fontSize: '0.85rem' }}>{f.user_full_name || '-'}</TableCell>
                   <TableCell>₹{f.min_amount}</TableCell>
                   <TableCell>{f.max_amount ? `₹${f.max_amount}` : 'No Limit'}</TableCell>

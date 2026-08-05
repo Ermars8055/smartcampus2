@@ -1918,6 +1918,7 @@ export default function PurchaseOrders() {
                     value={form.rental_start_date ? dayjs(form.rental_start_date) : null}
                     onChange={val => setForm({ ...form, rental_start_date: val })}
                     format="DD-MMM-YYYY"
+                    localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
                     slotProps={{ textField: { fullWidth: true, size: "small" } }}
                   />
                 </Grid>
@@ -1927,12 +1928,13 @@ export default function PurchaseOrders() {
                     value={form.rental_end_date ? dayjs(form.rental_end_date) : null}
                     onChange={val => setForm({ ...form, rental_end_date: val })}
                     format="DD-MMM-YYYY"
+                    localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
                     slotProps={{ textField: { fullWidth: true, size: "small" } }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={4}>
                   <TextField
-                    fullWidth size="small" label="Security Deposit" type="number"
+                    fullWidth size="small" label="Security Deposit Amount" type="number"
                     value={form.security_deposit || ''}
                     onChange={e => setForm({ ...form, security_deposit: e.target.value })}
                   />

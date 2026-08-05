@@ -259,7 +259,7 @@ export default function Invoices() {
                     <Tooltip title="Edit">
                       <span>
                         <IconButton size="small" color={(i.status === 'Draft' || i.status === 'Change Required') ? "warning" : "default"} disabled={i.status !== 'Draft' && i.status !== 'Change Required'} onClick={(e) => { e.stopPropagation(); navigate(`/invoices/edit/${i.id}`); }}>
-                          <Edit fontSize="small" />
+                          <Edit color="primary" fontSize="small" />
                         </IconButton>
                       </span>
                     </Tooltip>

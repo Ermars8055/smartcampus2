@@ -6,6 +6,7 @@ import {
 } from '@mui/material';
 import { AddBusiness, Refresh, Business, AccountBox, Email, VpnKey, Apartment, Subscriptions } from '@mui/icons-material';
 import api from '../services/api';
+import { formatDate } from '../utils/dateUtils';
 
 const initialForm = {
   tenantName: '',
@@ -373,7 +374,7 @@ export default function SaasAdmin() {
                         </Box>
                       </TableCell>
                       <TableCell>
-                        <Typography variant="body2" sx={{ color: '#64748B' }}>{new Date(tenant.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</Typography>
+                        <Typography variant="body2" sx={{ color: '#64748B' }}>{formatDate(tenant.created_at)}</Typography>
                       </TableCell>
                     </TableRow>
                   ))}

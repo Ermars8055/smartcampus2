@@ -57,7 +57,7 @@ export default function MaterialAllowances() {
                         setEditing(m.id);
                         setForm({ departments: [m.department], material_id: m.material_id, material_name: m.material_name, monthly_limit: m.monthly_limit });
                         setDialog(true);
-                      }}><Edit fontSize="small" /></IconButton>
+                      }}><Edit color="primary" fontSize="small" /></IconButton>
                     </Tooltip>
                     <Tooltip title="Delete">
                       <IconButton size="small" color="error" onClick={async () => {

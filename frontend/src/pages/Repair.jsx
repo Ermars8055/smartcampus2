@@ -64,7 +64,7 @@ export default function Repair() {
             <TableHead sx={{ bgcolor: '#F8FAFC' }}>
               <TableRow>
                 <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.8rem' }}>DATE</TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.8rem' }}>RETURN #</TableCell>
+                <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.8rem' }}>RETURN NO.</TableCell>
                 <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.8rem' }}>MATERIAL</TableCell>
                 <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.8rem' }}>QTY</TableCell>
                 <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.8rem' }}>FROM PROJECT</TableCell>

@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, InputAdornment, Chip, Dialog, DialogTitle,
@@ -21,6 +22,7 @@ export default function Equipment() {
   const { hasAction } = useAuth();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const navigate = useNavigate();
 
   const [equipmentList, setEquipmentList] = useState([]);
   const [warehouses, setWarehouses] = useState([]);
@@ -475,8 +477,48 @@ export default function Equipment() {
         </Button>
       </Box>
 
-      {/* Tabs */}
+      {/* Search, Filters & Tabs */}
       <Card sx={{ mb: 3, borderRadius: 3, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+        {/* Filters & Search */}
+        <Box sx={{ p: 2, display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+          <TextField
+            size="small"
+            placeholder="Search code, serial, material..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            sx={{ minWidth: 280, flexGrow: 1 }}
+            InputProps={{ startAdornment: <InputAdornment position="start"><Search sx={{ color: '#94A3B8' }} /></InputAdornment> }}
+          />
+
+          <FormControl size="small" sx={{ minWidth: 180 }}>
+            <InputLabel>Store</InputLabel>
+            <Select value={selectedWarehouse} onChange={e => setSelectedWarehouse(e.target.value)} label="Store">
+              <MenuItem value="">All Stores</MenuItem>
+              {warehouses.map(w => <MenuItem key={w.id} value={w.id}>{w.name}</MenuItem>)}
+            </Select>
+          </FormControl>
+
+          <FormControl size="small" sx={{ minWidth: 180 }}>
+            <InputLabel>Category Type</InputLabel>
+            <Select value={selectedBiomedical} onChange={e => setSelectedBiomedical(e.target.value)} label="Category Type">
+              <MenuItem value="">All Types</MenuItem>
+              <MenuItem value="biomedical">Biomedical Equipment</MenuItem>
+              <MenuItem value="standard">Standard Equipment</MenuItem>
+              <MenuItem value="medical_college">Medical College Equipment</MenuItem>
+            </Select>
+          </FormControl>
+
+          <FormControl size="small" sx={{ minWidth: 180 }}>
+            <InputLabel>Institution</InputLabel>
+            <Select value={selectedInstitution} onChange={e => setSelectedInstitution(e.target.value)} label="Institution">
+              <MenuItem value="">All Institutions</MenuItem>
+              <MenuItem value="Hospital">Hospital</MenuItem>
+              <MenuItem value="Medical College">Medical College</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
+
+        {/* Tabs */}
         <Tabs
           value={activeTab}
           onChange={(e, v) => setActiveTab(v)}
@@ -484,7 +526,7 @@ export default function Equipment() {
           textColor="primary"
           sx={{
             px: 2,
-            borderBottom: '1px solid #E2E8F0',
+            borderTop: '1px solid #E2E8F0',
             '& .MuiTab-root': { textTransform: 'none', fontWeight: 600, py: 2, fontSize: '0.9rem' }
           }}
         >
@@ -526,45 +568,6 @@ export default function Equipment() {
             }
           />
         </Tabs>
-
-        {/* Filters & Search */}
-        <Box sx={{ p: 2, display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
-          <TextField
-            size="small"
-            placeholder="Search code, serial, material..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            sx={{ minWidth: 280, flexGrow: 1 }}
-            InputProps={{ startAdornment: <InputAdornment position="start"><Search sx={{ color: '#94A3B8' }} /></InputAdornment> }}
-          />
-
-          <FormControl size="small" sx={{ minWidth: 180 }}>
-            <InputLabel>Store</InputLabel>
-            <Select value={selectedWarehouse} onChange={e => setSelectedWarehouse(e.target.value)} label="Store">
-              <MenuItem value="">All Stores</MenuItem>
-              {warehouses.map(w => <MenuItem key={w.id} value={w.id}>{w.name}</MenuItem>)}
-            </Select>
-          </FormControl>
-
-          <FormControl size="small" sx={{ minWidth: 180 }}>
-            <InputLabel>Category Type</InputLabel>
-            <Select value={selectedBiomedical} onChange={e => setSelectedBiomedical(e.target.value)} label="Category Type">
-              <MenuItem value="">All Types</MenuItem>
-              <MenuItem value="biomedical">Biomedical Equipment</MenuItem>
-              <MenuItem value="standard">Standard Equipment</MenuItem>
-              <MenuItem value="medical_college">Medical College Equipment</MenuItem>
-            </Select>
-          </FormControl>
-
-          <FormControl size="small" sx={{ minWidth: 180 }}>
-            <InputLabel>Institution</InputLabel>
-            <Select value={selectedInstitution} onChange={e => setSelectedInstitution(e.target.value)} label="Institution">
-              <MenuItem value="">All Institutions</MenuItem>
-              <MenuItem value="Hospital">Hospital</MenuItem>
-              <MenuItem value="Medical College">Medical College</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
       </Card>
 
       {/* Equipment Table */}
@@ -620,11 +623,11 @@ export default function Equipment() {
                 </Box>
 
                 <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
-                  <Button size="small" variant="outlined" color="primary" startIcon={<Edit />} onClick={(e) => { e.stopPropagation(); setEditForm(item); setEditDialog(item); }}>
+                  <Button size="small" variant="outlined" color="primary" startIcon={<Edit color="primary" />} onClick={(e) => { e.stopPropagation(); setEditForm(item); setEditDialog(item); }}>
                     Edit
                   </Button>
                   {item.serial_number_status === 'Pending Update' && (
-                    <Button size="small" variant="outlined" color="warning" startIcon={<Edit />} onClick={(e) => { e.stopPropagation(); setSerialDialog(item); setSerialInput(''); }}>
+                    <Button size="small" variant="outlined" color="warning" startIcon={<Edit color="primary" />} onClick={(e) => { e.stopPropagation(); setSerialDialog(item); setSerialInput(''); }}>
                       Update Serial
                     </Button>
                   )}
@@ -649,8 +652,21 @@ export default function Equipment() {
                     </Button>
                   )}
                   {item.status !== 'Written Off' && (
-                    <Button size="small" variant="outlined" color="error" startIcon={<DeleteOutline />} onClick={(e) => { e.stopPropagation(); setWriteOffDialog(item); setWriteOffDate(new Date().toISOString().split('T')[0]); setWriteOffReason(''); }}>
-                      Write-Off
+                    <Button size="small" variant="outlined" color="error" startIcon={<DeleteOutline />} onClick={(e) => { 
+                      e.stopPropagation(); 
+                      navigate('/write-offs', {
+                        state: {
+                          isEquipmentMode: true,
+                          prefillData: {
+                            equipment_id: item.id,
+                            material_id: item.material_id,
+                            warehouse_id: item.warehouse_id,
+                            location_id: item.location_id
+                          }
+                        }
+                      });
+                    }}>
+                      Write-off
                     </Button>
                   )}
                 </Box>
@@ -731,7 +747,7 @@ export default function Equipment() {
                       <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
                         <Tooltip title="Edit Equipment">
                           <IconButton size="small" color="primary" onClick={(e) => { e.stopPropagation(); setEditForm(item); setEditDialog(item); }}>
-                            <Edit fontSize="small" />
+                            <Edit color="primary" fontSize="small" />
                           </IconButton>
                         </Tooltip>
                         {item.serial_number_status === 'Pending Update' && (
@@ -778,7 +794,20 @@ export default function Equipment() {
                         )}
                         {item.status === 'Operational' && (
                           <Tooltip title="Write-off Equipment">
-                            <IconButton size="small" color="error" onClick={(e) => { e.stopPropagation(); setWriteOffDialog(item); setWriteOffDate(new Date().toISOString().split('T')[0]); setWriteOffReason(''); }}>
+                            <IconButton size="small" color="error" onClick={(e) => { 
+                              e.stopPropagation(); 
+                              navigate('/write-offs', {
+                                state: {
+                                  isEquipmentMode: true,
+                                  prefillData: {
+                                    equipment_id: item.id,
+                                    material_id: item.material_id,
+                                    warehouse_id: item.warehouse_id,
+                                    location_id: item.location_id
+                                  }
+                                }
+                              });
+                            }}>
                               <DeleteOutline fontSize="small" />
                             </IconButton>
                           </Tooltip>

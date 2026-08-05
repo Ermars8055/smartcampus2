@@ -116,7 +116,7 @@ export default function Warehouses() {
                     <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1E293B' }}>{w.name}</Typography>
                     <Typography variant="caption" sx={{ fontWeight: 600, color: '#2563EB' }}>{w.code}</Typography>
                   </Box>
-                  <Chip label={w.warehouse_type} size="small" color="primary" variant="outlined" sx={{ height: 20, fontSize: '0.65rem' }} />
+                  <Chip label={w.warehouse_type} size="small" color={w.warehouse_type === 'Central' ? 'secondary' : 'primary'} sx={{ height: 20, fontSize: '0.65rem', fontWeight: 600 }} />
                </Box>
                <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#334155' }}><strong>Location:</strong> {w.location || '-'}</Typography>
                <Typography variant="caption" sx={{ display: 'block', mb: 1, color: '#334155' }}><strong>Manager:</strong> {w.manager_name || '-'}</Typography>
@@ -131,7 +131,7 @@ export default function Warehouses() {
                     }} 
                   />
                   <Box onClick={e => e.stopPropagation()}>
-                    <IconButton size="small" onClick={() => { setErrors({}); setForm({ ...w, project_id: w.project_id || projects[0]?.id || '', is_active: w.is_active !== false }); setDialogOpen(true); }}><Edit fontSize="small" /></IconButton>
+                    <IconButton size="small" onClick={() => { setErrors({}); setForm({ ...w, project_id: w.project_id || projects[0]?.id || '', is_active: w.is_active !== false }); setDialogOpen(true); }}><Edit color="primary" fontSize="small" /></IconButton>
                     <IconButton size="small" onClick={() => handleDelete(w.id)} color="error"><Delete fontSize="small" /></IconButton>
                   </Box>
                </Box>
@@ -164,7 +164,7 @@ export default function Warehouses() {
                 <TableRow key={w.id} hover onClick={() => { setErrors({}); setForm({ ...w, project_id: w.project_id || projects[0]?.id || '', is_active: w.is_active !== false }); setDialogOpen(true); }} sx={{ cursor: 'pointer' }}>
                   <TableCell sx={{ fontWeight: 700, color: '#2563EB', fontSize: '0.85rem' }}>{w.code}</TableCell>
                   <TableCell sx={{ fontWeight: 500 }}>{w.name}</TableCell>
-                  <TableCell><Chip label={w.warehouse_type} size="small" color="primary" variant="outlined" /></TableCell>
+                  <TableCell><Chip label={w.warehouse_type} size="small" color={w.warehouse_type === 'Central' ? 'secondary' : 'primary'} sx={{ height: 20, fontSize: '0.65rem', fontWeight: 600 }} /></TableCell>
                   <TableCell>{w.location}</TableCell>
                   <TableCell>
                     <Chip 
@@ -178,7 +178,7 @@ export default function Warehouses() {
                     />
                   </TableCell>
                   <TableCell align="right" onClick={e => e.stopPropagation()}>
-                    <IconButton size="small" onClick={() => { setErrors({}); setForm({ ...w, project_id: w.project_id || projects[0]?.id || '', is_active: w.is_active !== false }); setDialogOpen(true); }}><Edit fontSize="small" /></IconButton>
+                    <IconButton size="small" onClick={() => { setErrors({}); setForm({ ...w, project_id: w.project_id || projects[0]?.id || '', is_active: w.is_active !== false }); setDialogOpen(true); }}><Edit color="primary" fontSize="small" /></IconButton>
                     <IconButton size="small" onClick={() => handleDelete(w.id)} color="error"><Delete fontSize="small" /></IconButton>
                   </TableCell>
                 </TableRow>

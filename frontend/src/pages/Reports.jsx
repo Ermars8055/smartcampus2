@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { formatDate, formatDateTime } from '../utils/dateUtils';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, Grid, Tab, Tabs, FormControl, InputLabel,
@@ -24,7 +25,14 @@ export default function Reports() {
   const downloadCSV = () => {
     if (!data.length) return;
     const headers = Object.keys(data[0]);
-    const csv = [headers.join(','), ...data.map(r => headers.map(h => `"${r[h] || ''}"`).join(','))].join('\n');
+    const csv = [headers.join(','), ...data.map(r => headers.map(h => {
+      let val = r[h] ?? '';
+      if (val) {
+        if (h.toLowerCase() === 'created_at' || h.toLowerCase() === 'updated_at') val = formatDateTime(val);
+        else if (h.toLowerCase().includes('date')) val = formatDate(val);
+      }
+      return `"${val}"`;
+    }).join(','))].join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -99,8 +107,12 @@ export default function Reports() {
                       {h === 'status' ? (
                         <Chip label={row[h]} size="small" color={row[h] === 'Low' ? 'error' : row[h] === 'OK' ? 'success' :
                           row[h] === 'Approved' ? 'success' : row[h] === 'Closed' ? 'default' : 'warning'} sx={{ fontSize: '0.7rem' }} />
-                      ) : typeof row[h] === 'number' && h.includes('amount') || h.includes('cost') || h.includes('value') ? (
+                      ) : typeof row[h] === 'number' && (h.includes('amount') || h.includes('cost') || h.includes('value')) ? (
                         `₹${row[h]?.toLocaleString('en-IN')}`
+                      ) : (h.toLowerCase() === 'created_at' || h.toLowerCase() === 'updated_at') && row[h] ? (
+                        formatDateTime(row[h])
+                      ) : h.toLowerCase().includes('date') && row[h] ? (
+                        formatDate(row[h])
                       ) : (
                         String(row[h] ?? '')
                       )}

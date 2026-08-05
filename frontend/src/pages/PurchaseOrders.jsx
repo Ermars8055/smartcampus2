@@ -32,7 +32,6 @@ export default function PurchaseOrders() {
   const [materials, setMaterials] = useState([]);
   const [projects, setProjects] = useState([]);
   const [institutions, setInstitutions] = useState([]);
-  const [contracts, setContracts] = useState([]);
   const [termsTemplates, setTermsTemplates] = useState([]);
   const [dialog, setDialog] = useState(false);
   const [detailDialog, setDetailDialog] = useState(null);
@@ -45,12 +44,23 @@ export default function PurchaseOrders() {
   const [approvalRemarks, setApprovalRemarks] = useState('');
   const [historyDialog, setHistoryDialog] = useState({ open: false, materialId: null, data: null, loading: false });
   const [errors, setErrors] = useState({});
-
-
   const [itemErrors, setItemErrors] = useState({});
+  const [vendorRates, setVendorRates] = useState({});
+  const [uploading, setUploading] = useState(false);
 
-
-
+  const handleUpload = async (file) => {
+    if (!file) return;
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await api.post('/api/upload?folder=pos', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      setForm(prev => ({ ...prev, rental_agreement_document: res.data.url }));
+    } catch (err) {
+      showMessage('Upload failed: ' + (err.response?.data?.detail || err.message), 'Error', 'error');
+    }
+    setUploading(false);
+  };
 
 
   const handleRateBlur = (i, rate, baseRate) => {
@@ -206,14 +216,47 @@ export default function PurchaseOrders() {
 
   const [search, setSearch] = useState('');
   const [filterVendor, setFilterVendor] = useState(null);
+  const [filterProcurementType, setFilterProcurementType] = useState('');
   const [searchParams] = useSearchParams();
   const [tabValue, setTabValue] = useState(searchParams.get('tab') || 'Draft');
   const [editingPOId, setEditingPOId] = useState(null);
   const [form, setForm] = useState({
-    po_number: '', vendor_id: '', project_id: '', institution_id: '', contract_id: '', delivery_date: null, terms: '', annexure: '', po_type: 'Informal', is_cash_purchase: false, advance_percentage: 0,
-    procurement_type: 'Purchase', rental_type: '', rental_agreement_number: '', rental_start_date: null, rental_end_date: null, billing_frequency: '', security_deposit: 0, cost_per_test: '', linked_reagent_agreement: '', vendor_maintenance_responsibility: false, return_conditions: '', renewal_terms: '',
-    items: [{ material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }]
+    po_number: '', vendor_id: '', project_id: '', institution_id: '', delivery_date: null, terms: '', annexure: '', purchase_mode: '', marketplace_name: '', advance_percentage: 0,
+    procurement_type: '', rental_type: '', rental_agreement_number: '', rental_agreement_document: '', rental_start_date: null, rental_end_date: null, billing_frequency: '', security_deposit: 0, cost_per_test: '', linked_reagent_agreement: '', vendor_maintenance_responsibility: false, return_conditions: '', renewal_terms: '',
+    items: [{ material_id: '', quantity: '', rate: '', discount_percent: '', cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }]
   });
+
+  useEffect(() => {
+    if (form.vendor_id) {
+      api.get(`/api/contracts/active-rates/${form.vendor_id}`)
+        .then(res => {
+          setVendorRates(res.data);
+          setForm(prevForm => {
+            const newItems = prevForm.items.map(it => {
+              if (it.material_id) {
+                const contractRate = res.data[it.material_id];
+                const mat = materials.find(m => m.id === it.material_id);
+                const baseRate = contractRate !== undefined ? contractRate : (mat?.standard_cost || 0);
+                const newRate = contractRate !== undefined ? contractRate : (mat?.standard_cost || 0);
+                return { 
+                  ...it, 
+                  base_rate: baseRate, 
+                  rate: newRate 
+                };
+              }
+              return it;
+            });
+            return { ...prevForm, items: newItems };
+          });
+        })
+        .catch(err => {
+          console.error("Error fetching vendor active rates", err);
+          setVendorRates({});
+        });
+    } else {
+      setVendorRates({});
+    }
+  }, [form.vendor_id, materials]);
 
 
 
@@ -263,8 +306,11 @@ export default function PurchaseOrders() {
     if (filterVendor) {
       list = list.filter(po => po.vendor_id === filterVendor.id);
     }
+    if (filterProcurementType) {
+      list = list.filter(po => po.procurement_type === filterProcurementType);
+    }
     return list;
-  }, [pos, search, filterVendor, searchParams]);
+  }, [pos, search, filterVendor, filterProcurementType, searchParams]);
 
   const calculatePOTotalNet = (po) => {
     if (!po || !po.items) return 0;
@@ -346,16 +392,16 @@ export default function PurchaseOrders() {
         vendor_id: po.vendor_id || '',
         project_id: po.project_id || (projects.length > 0 ? projects[0].id : ''),
         institution_id: po.institution_id || '',
-        contract_id: po.contract_id || '',
         delivery_date: po.delivery_date ? dayjs(po.delivery_date) : null,
         terms: po.terms || '',
         annexure: po.annexure || '',
-        po_type: po.po_type || 'Informal',
-        is_cash_purchase: po.is_cash_purchase || false,
+        purchase_mode: po.purchase_mode || '',
+        marketplace_name: po.marketplace_name || '',
         advance_percentage: po.advance_percentage || 0,
-        procurement_type: po.procurement_type || 'Purchase',
+        procurement_type: po.procurement_type || '',
         rental_type: po.rental_type || '',
         rental_agreement_number: po.rental_agreement_number || '',
+        rental_agreement_document: po.rental_agreement_document || '',
         rental_start_date: po.rental_start_date ? dayjs(po.rental_start_date) : null,
         rental_end_date: po.rental_end_date ? dayjs(po.rental_end_date) : null,
         billing_frequency: po.billing_frequency || '',
@@ -376,7 +422,7 @@ export default function PurchaseOrders() {
           is_gst_inclusive: it.is_gst_inclusive || false,
           uom_name: it.uom_name || '',
           base_rate: materials.find(m => m.id === it.material_id)?.standard_cost || 0
-        })) : [{ material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }]
+        })) : [{ material_id: '', quantity: '', rate: '', discount_percent: '', cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }]
       });
       setEditingPOId(po.id);
       setItemErrors({});
@@ -400,7 +446,6 @@ export default function PurchaseOrders() {
     api.get('/api/materials', { params: { limit: 10000 } }).then(r => setMaterials(r.data.items || []));
     api.get('/api/projects').then(r => setProjects(r.data));
     api.get('/api/institutions').then(r => setInstitutions(r.data));
-    api.get('/api/contracts').then(r => setContracts(r.data.filter(c => c.status === 'Active' && c.contract_type === 'RC')));
     api.get('/api/terms').then(r => setTermsTemplates(r.data));
   }, []);
 
@@ -411,13 +456,12 @@ export default function PurchaseOrders() {
         vendor_id: '',
         project_id: projects[0]?.id || '',
         institution_id: '',
-        contract_id: '',
         delivery_date: null,
         terms: '', annexure: '',
-        po_type: 'Formal',
-        is_cash_purchase: false,
+        purchase_mode: '',
+        marketplace_name: '',
         advance_percentage: 0,
-        procurement_type: 'Purchase', rental_type: '', rental_agreement_number: '', rental_start_date: null, rental_end_date: null, billing_frequency: '', security_deposit: 0, cost_per_test: '', linked_reagent_agreement: '', vendor_maintenance_responsibility: false, return_conditions: '', renewal_terms: '',
+        procurement_type: '', rental_type: '', rental_agreement_number: '', rental_start_date: null, rental_end_date: null, billing_frequency: '', security_deposit: 0, cost_per_test: '', linked_reagent_agreement: '', vendor_maintenance_responsibility: false, return_conditions: '', renewal_terms: '',
         indent_id: ind.id,
         items: ind.items.filter(it => it.requested_quantity > it.issued_quantity).map(it => {
           const mat = materials.find(m => m.id === it.material_id);
@@ -425,7 +469,7 @@ export default function PurchaseOrders() {
             material_id: it.material_id,
             quantity: it.requested_quantity - it.issued_quantity,
             rate: '',
-            discount_percent: 0,
+            discount_percent: '',
             cgst_percentage: 0,
             sgst_percentage: 0,
             igst_percentage: 0,
@@ -463,7 +507,7 @@ export default function PurchaseOrders() {
       showMessage("Please select materials for the existing empty rows before adding more. Limit reached (5).", "Limit Reached", "warning");
       return;
     }
-    setForm({ ...form, items: [...form.items, { material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }] });
+    setForm({ ...form, items: [...form.items, { material_id: '', quantity: '', rate: '', discount_percent: '', cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }] });
   };
   const removeItem = (i) => setForm({ ...form, items: form.items.filter((_, idx) => idx !== i) });
   const updateItem = (i, field, val) => {
@@ -497,7 +541,11 @@ export default function PurchaseOrders() {
       const mat = materials.find(m => m.id === finalVal);
       if (mat) {
         items[i].uom_name = mat.uom_name || '';
-        items[i].base_rate = mat.standard_cost || 0;
+        const contractRate = vendorRates[finalVal];
+        items[i].base_rate = contractRate !== undefined ? contractRate : (mat.standard_cost || 0);
+        if (contractRate !== undefined) {
+          items[i].rate = contractRate;
+        }
       }
     }
     setForm({ ...form, items });
@@ -506,6 +554,8 @@ export default function PurchaseOrders() {
   const handleSave = async (isDraft = false) => {
     const newErrors = {};
     if (!form.vendor_id) newErrors.vendor_id = "Please select a Vendor.";
+    if (!form.purchase_mode) newErrors.purchase_mode = "Purchase Mode is required.";
+    if (!form.procurement_type) newErrors.procurement_type = "Procurement Type is required.";
     if (!form.project_id) newErrors.project_id = "Project is required.";
     if (!form.institution_id) newErrors.institution_id = "Institution is required.";
     if (!form.delivery_date) {
@@ -578,17 +628,17 @@ export default function PurchaseOrders() {
         vendor_id: parseInt(form.vendor_id, 10),
         project_id: parseInt(form.project_id, 10),
         institution_id: parseInt(form.institution_id, 10),
-        contract_id: form.contract_id ? parseInt(form.contract_id, 10) : null,
         advance_percentage: parseFloat(form.advance_percentage) || 0,
         delivery_date: form.delivery_date ? dayjs(form.delivery_date).format('YYYY-MM-DD') : null,
-        procurement_type: form.procurement_type || 'Purchase',
+        procurement_type: form.procurement_type || '',
         rental_type: form.procurement_type === 'Rental' ? form.rental_type || null : null,
         rental_start_date: (form.procurement_type === 'Rental' && form.rental_start_date) ? dayjs(form.rental_start_date).format('YYYY-MM-DD') : null,
         rental_end_date: (form.procurement_type === 'Rental' && form.rental_end_date) ? dayjs(form.rental_end_date).format('YYYY-MM-DD') : null,
         rental_agreement_number: form.procurement_type === 'Rental' ? form.rental_agreement_number || null : null,
+        rental_agreement_document: form.procurement_type === 'Rental' ? form.rental_agreement_document || null : null,
         billing_frequency: form.procurement_type === 'Rental' ? form.billing_frequency || null : null,
         security_deposit: form.procurement_type === 'Rental' ? parseFloat(form.security_deposit) || 0 : 0,
-        cost_per_test: form.procurement_type === 'Cost Per Test' ? (form.cost_per_test ? parseFloat(form.cost_per_test) : null) : null,
+        cost_per_test: (form.procurement_type === 'Rental' && form.rental_type === 'Cost Per Test') ? (form.cost_per_test ? parseFloat(form.cost_per_test) : null) : null,
         linked_reagent_agreement: form.procurement_type === 'Rental' ? form.linked_reagent_agreement || null : null,
         vendor_maintenance_responsibility: form.procurement_type === 'Rental' ? form.vendor_maintenance_responsibility : false,
         return_conditions: form.procurement_type === 'Rental' ? form.return_conditions || null : null,
@@ -802,18 +852,19 @@ export default function PurchaseOrders() {
           
           <table class="info-table">
             <tr>
-              <td style="width: 60%;">
+              <td style="width: 50%;">
                 <b>To,</b><br/>
                 <b>M/S. ${po.vendor_name ? (po.vendor_name.includes(' - ') ? po.vendor_name.split(' - ').slice(1).join(' - ') : po.vendor_name) : 'VENDOR'}</b><br/>
                 ${po.vendor_address ? `<span style="font-size: 10px; color: #333;">${po.vendor_address}</span><br/>` : ''}
                 ${(po.vendor_city || po.vendor_state || po.vendor_pincode) ? `<span style="font-size: 10px; color: #333;">${[po.vendor_city, po.vendor_state ? po.vendor_state.replace(/^\\d{2}\\s*-\\s*/, '').trim() : '', po.vendor_pincode ? '- ' + po.vendor_pincode : ''].filter(Boolean).join(' ')}</span><br/>` : ''}
                 ${po.vendor_gst_number ? `<span style="font-size: 10px; color: #333;">GSTIN: ${po.vendor_gst_number}</span><br/>` : ''}
               </td>
-              <td style="width: 40%;">
+              <td style="width: 50%;">
                 <table style="width: 100%">
-                  <tr><td style="width: 40%">PO Number</td><td>: <b>${po.po_number}</b></td></tr>
+                  <tr><td style="width: 45%">PO Number</td><td>: <b>${po.po_number}</b></td></tr>
                   <tr><td>PO Date</td><td>: ${formatDate(po.created_at)}</td></tr>
-                  ${po.is_cash_purchase ? `<tr><td>Type</td><td>: <b>Cash Purchase</b></td></tr>` : ''}
+                  <tr><td>Procurement Type</td><td>: <b>${po.procurement_type === 'Purchase' ? 'Standard Purchase' : (po.procurement_type === 'Rental' ? 'Rental' + (po.rental_type ? ' (' + po.rental_type + ')' : '') : (po.procurement_type || '—'))}</b></td></tr>
+                  ${po.purchase_mode ? `<tr><td>Purchase Mode</td><td>: <b>${po.purchase_mode}</b></td></tr>` : ''}
                   ${po.advance_percentage > 0 ? `<tr><td>Advance</td><td>: <b>${po.advance_percentage}%</b></td></tr>` : ''}
                 </table>
               </td>
@@ -1004,7 +1055,7 @@ export default function PurchaseOrders() {
           )}
           {hasPermission('purchase_orders', 'can_create') && (
             <Button variant="contained" startIcon={<Add />} onClick={() => {
-              setForm({ po_number: '', vendor_id: '', project_id: projects[0]?.id || '', institution_id: '', delivery_date: null, terms: '', annexure: '', po_type: 'Informal', items: [{ material_id: '', quantity: '', rate: '', discount_percent: 0, cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }] });
+              setForm({ po_number: '', vendor_id: '', project_id: projects[0]?.id || '', institution_id: '', delivery_date: null, terms: '', annexure: '', rental_agreement_document: null, items: [{ material_id: '', quantity: '', rate: '', discount_percent: '', cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }] });
               setItemErrors({});
               setDialog(true);
             }}>Create PO</Button>
@@ -1026,12 +1077,29 @@ export default function PurchaseOrders() {
             renderInput={(params) => <TextField {...params} placeholder="Filter by Vendor" sx={{ minWidth: 250 }} />}
             isOptionEqualToValue={(option, value) => option.id === value.id}
           />
+          <FormControl size="small" sx={{ minWidth: 200 }}>
+            <Select
+              displayEmpty
+              value={filterProcurementType}
+              onChange={e => setFilterProcurementType(e.target.value)}
+              renderValue={(selected) => {
+                if (!selected) {
+                  return <span style={{ color: '#9ca3af' }}>All Procurement Types</span>;
+                }
+                return selected === 'Purchase' ? 'Standard Purchase' : 'Rental';
+              }}
+            >
+              <MenuItem value="">All Procurement Types</MenuItem>
+              <MenuItem value="Purchase">Standard Purchase</MenuItem>
+              <MenuItem value="Rental">Rental</MenuItem>
+            </Select>
+          </FormControl>
         </Box>
         <Tabs
           value={tabValue}
           onChange={(_, v) => setTabValue(v)}
           variant="scrollable"
-          scrollButtons="auto"
+          scrollButtons={false}
           sx={{ mb: 2, minHeight: 36, '& .MuiTab-root': { minHeight: 36, py: 0.5 } }}
         >
           {['Draft', 'Submitted', 'Approved', 'Sent to Vendor', 'Partially Received', 'Closed', 'Short Closed', 'Cancelled', 'Rejected', 'Pending', 'All'].map(s => (
@@ -1071,10 +1139,10 @@ export default function PurchaseOrders() {
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, gap: 1 }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#2563EB' }}>
                     {po.po_number}
-                    {po.procurement_type === 'Rental' && (
+                    {po.procurement_type === 'Rental' && po.rental_type !== 'Cost Per Test' && (
                       <Assignment sx={{ fontSize: 14, color: '#0EA5E9', ml: 0.5, verticalAlign: 'middle' }} />
                     )}
-                    {po.procurement_type === 'Cost Per Test' && (
+                    {po.procurement_type === 'Rental' && po.rental_type === 'Cost Per Test' && (
                       <Science sx={{ fontSize: 14, color: '#8B5CF6', ml: 0.5, verticalAlign: 'middle' }} />
                     )}
                   </Typography>
@@ -1086,8 +1154,7 @@ export default function PurchaseOrders() {
                 <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#334155' }}><strong>Vendor:</strong> {po.vendor_name}</Typography>
                 <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#334155' }}><strong>Amount:</strong> <span style={{ color: '#059669', fontWeight: 600 }}>{formatCurrency(calculatePOTotalNet(po))}</span></Typography>
                 <Typography variant="caption" sx={{ display: 'block', mb: 1.5, color: '#64748B' }}>{formatDate(po.created_at)} • {po.items?.length || 0} items</Typography>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Chip label={po.po_type} size="small" variant="outlined" color={po.po_type === 'Formal' ? 'primary' : 'default'} sx={{ height: 22, fontSize: '0.7rem' }} />
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
                   <Box sx={{ display: 'flex', gap: 0.5 }} onClick={e => e.stopPropagation()}>
                     <Tooltip title="Approve">
                       <span><IconButton size="small" color="success" disabled={!po.can_user_approve || !hasAction('purchase_orders', 'can_approve')}
@@ -1123,8 +1190,6 @@ export default function PurchaseOrders() {
                       active={sortConfig.key === 'po_number'}
                       direction={sortConfig.direction}
                       onClick={() => handleSort('po_number')}
-                      IconComponent={ArrowDropDown}
-                      sx={{ '& .MuiTableSortLabel-icon': { fontSize: '1rem' } }}
                     >
                       PO No
                     </TableSortLabel>
@@ -1135,8 +1200,6 @@ export default function PurchaseOrders() {
                       active={sortConfig.key === 'pr_number'}
                       direction={sortConfig.direction}
                       onClick={() => handleSort('pr_number')}
-                      IconComponent={ArrowDropDown}
-                      sx={{ '& .MuiTableSortLabel-icon': { fontSize: '1rem' } }}
                     >
                       PR
                     </TableSortLabel>
@@ -1146,8 +1209,6 @@ export default function PurchaseOrders() {
                       active={sortConfig.key === 'qr_number'}
                       direction={sortConfig.direction}
                       onClick={() => handleSort('qr_number')}
-                      IconComponent={ArrowDropDown}
-                      sx={{ '& .MuiTableSortLabel-icon': { fontSize: '1rem' } }}
                     >
                       QUOTATION
                     </TableSortLabel>
@@ -1157,8 +1218,6 @@ export default function PurchaseOrders() {
                       active={sortConfig.key === 'vendor'}
                       direction={sortConfig.direction}
                       onClick={() => handleSort('vendor')}
-                      IconComponent={ArrowDropDown}
-                      sx={{ '& .MuiTableSortLabel-icon': { fontSize: '1rem' } }}
                     >
                       VENDOR
                     </TableSortLabel>
@@ -1169,20 +1228,15 @@ export default function PurchaseOrders() {
                       active={sortConfig.key === 'total_amount'}
                       direction={sortConfig.direction}
                       onClick={() => handleSort('total_amount')}
-                      IconComponent={ArrowDropDown}
-                      sx={{ '& .MuiTableSortLabel-icon': { fontSize: '1rem' } }}
                     >
                       AMOUNT
                     </TableSortLabel>
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.65rem' }}>TYPE</TableCell>
                   <TableCell sx={{ fontWeight: 700, color: '#64748b', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
                     <TableSortLabel
                       active={sortConfig.key === 'created_at'}
                       direction={sortConfig.direction}
                       onClick={() => handleSort('created_at')}
-                      IconComponent={ArrowDropDown}
-                      sx={{ '& .MuiTableSortLabel-icon': { fontSize: '1rem' } }}
                     >
                       DATE
                     </TableSortLabel>
@@ -1193,8 +1247,6 @@ export default function PurchaseOrders() {
                       active={sortConfig.key === 'status'}
                       direction={sortConfig.direction}
                       onClick={() => handleSort('status')}
-                      IconComponent={ArrowDropDown}
-                      sx={{ '& .MuiTableSortLabel-icon': { fontSize: '1rem' } }}
                     >
                       STATUS
                     </TableSortLabel>
@@ -1208,12 +1260,12 @@ export default function PurchaseOrders() {
                   <TableRow key={po.id} sx={{ cursor: 'pointer', '&:hover': { backgroundColor: '#f1f5f9' } }} onClick={() => handleRowClick(po)}>
                     <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.7rem', whiteSpace: 'nowrap' }}>
                       {po.po_number}
-                      {po.procurement_type === 'Rental' && (
+                      {po.procurement_type === 'Rental' && po.rental_type !== 'Cost Per Test' && (
                         <Tooltip title="Rental Agreement">
                           <Assignment sx={{ fontSize: 14, color: '#0EA5E9', ml: 0.5, verticalAlign: 'middle' }} />
                         </Tooltip>
                       )}
-                      {po.procurement_type === 'Cost Per Test' && (
+                      {po.procurement_type === 'Rental' && po.rental_type === 'Cost Per Test' && (
                         <Tooltip title={`Cost Per Test: ₹${po.cost_per_test || 0}`}>
                           <Science sx={{ fontSize: 14, color: '#8B5CF6', ml: 0.5, verticalAlign: 'middle' }} />
                         </Tooltip>
@@ -1237,9 +1289,6 @@ export default function PurchaseOrders() {
                     <TableCell sx={{ fontSize: '0.7rem' }}>{po.vendor_name}</TableCell>
                     <TableCell align="right" sx={{ fontSize: '0.7rem' }}>{po.items?.length || 0}</TableCell>
                     <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.7rem' }}>{formatCurrency(calculatePOTotalNet(po))}</TableCell>
-                    <TableCell sx={{ fontSize: '0.7rem' }}>
-                      <Chip label={po.po_type} size="small" variant="outlined" color={po.po_type === 'Formal' ? 'primary' : 'default'} sx={{ fontSize: '0.6rem', height: 18 }} />
-                    </TableCell>
                     <TableCell sx={{ fontSize: '0.7rem', whiteSpace: 'nowrap' }}>{formatDate(po.created_at)}</TableCell>
                     <TableCell sx={{ fontSize: '0.7rem', whiteSpace: 'nowrap' }}>{formatDate(po.delivery_date)}</TableCell>
                     <TableCell sx={{ whiteSpace: 'nowrap' }}><Chip label={po.status} size="small" color={statusColor[po.status] || 'default'} sx={{ fontWeight: 600, fontSize: '0.6rem', height: 18 }} /></TableCell>
@@ -1328,34 +1377,37 @@ export default function PurchaseOrders() {
               </Grid>
 
               <Grid item xs={3}>
-                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>PO TYPE</Typography>
-                <Box>
-                  <Chip label={detailDialog?.po_type} size="small" variant="outlined" color={detailDialog?.po_type === 'Formal' ? 'primary' : 'default'} sx={{ fontSize: '0.7rem', mr: 1, mb: 1 }} />
-                  {detailDialog?.procurement_type === 'Rental' && <Chip label="Rental" size="small" color="info" sx={{ fontSize: '0.7rem', mr: 1, mb: 1 }} />}
-                  {detailDialog?.procurement_type === 'Cost Per Test' && <Chip label="Cost Per Test" size="small" sx={{ bgcolor: '#8B5CF6', color: 'white', fontSize: '0.7rem', mr: 1, mb: 1 }} />}
-                  {detailDialog?.is_cash_purchase && <Chip label="Cash Purchase" size="small" variant="filled" color="secondary" sx={{ fontSize: '0.7rem', mr: 1, mb: 1 }} />}
-                  {detailDialog?.advance_percentage > 0 && <Chip label={`${detailDialog.advance_percentage}% Advance`} size="small" variant="filled" color="info" sx={{ fontSize: '0.7rem', mb: 1 }} />}
-                  {detailDialog?.billing_frequency && (
-                    <Typography variant="caption" sx={{ display: 'block', mt: 0.5, color: '#475569' }}>
-                      <strong>Billing:</strong> {detailDialog.billing_frequency}
-                    </Typography>
-                  )}
-                  {detailDialog?.cost_per_test > 0 && (
-                    <Typography variant="caption" sx={{ display: 'block', mt: 0.5, color: '#475569' }}>
-                      <strong>Cost/Test:</strong> ₹{detailDialog.cost_per_test}
-                    </Typography>
-                  )}
-                </Box>
+                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>INSTITUTION</Typography>
+                <Typography sx={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>{detailDialog?.institution_name || '—'}</Typography>
               </Grid>
-              <Grid item xs={2.25}>
+              <Grid item xs={3}>
+                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>PROCUREMENT TYPE</Typography>
+                <Typography sx={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>
+                   {detailDialog?.procurement_type === 'Purchase' ? 'Standard Purchase' : (detailDialog?.procurement_type || '—')}
+                   {detailDialog?.procurement_type === 'Rental' && detailDialog?.rental_type ? ` (${detailDialog.rental_type})` : ''}
+                </Typography>
+                {detailDialog?.billing_frequency && (
+                  <Typography variant="caption" sx={{ color: '#64748B', display: 'block' }}>Billing: {detailDialog.billing_frequency}</Typography>
+                )}
+                {detailDialog?.cost_per_test > 0 && (
+                  <Typography variant="caption" sx={{ color: '#64748B', display: 'block' }}>Cost/Test: ₹{detailDialog.cost_per_test}</Typography>
+                )}
+              </Grid>
+              <Grid item xs={3}>
+                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>PURCHASE MODE</Typography>
+                <Typography sx={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>{detailDialog?.purchase_mode || '—'}</Typography>
+                {detailDialog?.marketplace_name && <Typography variant="caption" sx={{ color: '#64748B', display: 'block' }}>Marketplace: {detailDialog.marketplace_name}</Typography>}
+                {detailDialog?.advance_percentage > 0 && <Typography variant="caption" sx={{ color: '#64748B', display: 'block' }}>Advance: {detailDialog.advance_percentage}%</Typography>}
+              </Grid>
+              <Grid item xs={3}>
                 <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>PO DATE</Typography>
                 <Typography sx={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>{formatDate(detailDialog?.created_at)}</Typography>
               </Grid>
-              <Grid item xs={2.25}>
+              <Grid item xs={3}>
                 <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>DELIVERY</Typography>
                 <Typography sx={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>{formatDate(detailDialog?.delivery_date) || '-'}</Typography>
               </Grid>
-              <Grid item xs={4.5}>
+              <Grid item xs={6}>
                 <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>TOTAL NET AMOUNT</Typography>
                 <Typography sx={{ fontWeight: 700, color: '#059669', fontSize: '1.2rem' }}>{formatCurrency(calculatePOTotalNet(detailDialog))}</Typography>
               </Grid>
@@ -1646,6 +1698,20 @@ export default function PurchaseOrders() {
         </DialogTitle>
         <DialogContent sx={{ px: 3, py: 1 }}>
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr 1fr' }, gap: 2, pt: 1, mb: 2 }}>
+            <FormControl fullWidth size="small" error={!!errors.institution_id}>
+              <InputLabel>Institution *</InputLabel>
+              <Select
+                value={form.institution_id || ''}
+                label="Institution *"
+                onChange={e => setForm({ ...form, institution_id: e.target.value })}
+                startAdornment={<InputAdornment position="start"><Store sx={{ color: '#94A3B8' }} /></InputAdornment>}
+              >
+                {institutions.map(inst => (
+                  <MenuItem key={inst.id} value={inst.id}>{inst.code} - {inst.name}</MenuItem>
+                ))}
+              </Select>
+              {errors.institution_id && <Typography variant="caption" color="error" sx={{mt: 0.5, ml: 1}}>{errors.institution_id}</Typography>}
+            </FormControl>
             <Box id="field-vendor_id">
               <Autocomplete
                 options={vendors}
@@ -1689,72 +1755,98 @@ export default function PurchaseOrders() {
               ) : null}
             </Box>
 
-            <FormControl fullWidth size="small">
-              <InputLabel>PO Type</InputLabel>
+            <FormControl fullWidth size="small" error={!!errors.procurement_type}>
+              <InputLabel>Procurement Type *</InputLabel>
               <Select
-                value={form.po_type || 'Informal'}
-                label="PO Type"
-                onChange={e => setForm({ ...form, po_type: e.target.value })}
-                startAdornment={<InputAdornment position="start"><Assignment sx={{ color: '#94A3B8' }} /></InputAdornment>}
+                value={form.procurement_type || ''}
+                label="Procurement Type *"
+                onChange={e => {
+                  const val = e.target.value;
+                  setForm(prev => {
+                    let newMode = prev.purchase_mode;
+                    if (val === 'Rental' && newMode !== 'Credit Purchase' && newMode !== 'Advance Payment') {
+                      newMode = '';
+                    }
+                    return { 
+                      ...prev, 
+                      procurement_type: val, 
+                      rental_type: val === 'Rental' ? 'Equipment Rental' : '',
+                      purchase_mode: newMode
+                    };
+                  });
+                }}
               >
-                <MenuItem value="Formal">Formal</MenuItem>
-                <MenuItem value="Informal">Informal</MenuItem>
+                <MenuItem value="" disabled><em>Select Type</em></MenuItem>
+                <MenuItem value="Purchase">Standard Purchase</MenuItem>
+                <MenuItem value="Rental">Rental</MenuItem>
               </Select>
+              {errors.procurement_type && <FormHelperText>{errors.procurement_type}</FormHelperText>}
             </FormControl>
 
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={form.is_cash_purchase || false}
-                  onChange={(e) => setForm({ ...form, is_cash_purchase: e.target.checked })}
-                  color="primary"
-                />
-              }
-              label="Cash Purchase (e.g. Amazon)"
-              sx={{ whiteSpace: 'nowrap' }}
-            />
-            
-            <TextField
-              size="small"
-              fullWidth
-              label="Advance Payment (%)"
-              type="number"
-              value={form.advance_percentage}
-              onChange={(e) => setForm({ ...form, advance_percentage: e.target.value })}
-              inputProps={{ min: 0, max: 100, step: 'any' }}
-              error={!!errors.advance_percentage}
-              helperText={errors.advance_percentage}
-            />
-            
-            <FormControl fullWidth size="small" error={!!errors.institution_id}>
-              <InputLabel>Institution *</InputLabel>
+            {form.procurement_type === 'Rental' && (
+              <FormControl fullWidth size="small">
+                <InputLabel>Rental Model</InputLabel>
+                <Select
+                  value={form.rental_type || 'Equipment Rental'}
+                  label="Rental Model"
+                  onChange={e => setForm({ ...form, rental_type: e.target.value })}
+                >
+                  <MenuItem value="Equipment Rental">Equipment Rental</MenuItem>
+                  <MenuItem value="Cost Per Test">Cost Per Test</MenuItem>
+                  <MenuItem value="Reagent Rental">Reagent Rental</MenuItem>
+                </Select>
+              </FormControl>
+            )}
+
+            <FormControl fullWidth size="small" error={!!errors.purchase_mode}>
+              <InputLabel>Purchase Mode *</InputLabel>
               <Select
-                value={form.institution_id || ''}
-                label="Institution *"
-                onChange={e => setForm({ ...form, institution_id: e.target.value })}
-                startAdornment={<InputAdornment position="start"><Store sx={{ color: '#94A3B8' }} /></InputAdornment>}
+                value={form.purchase_mode || ''}
+                label="Purchase Mode *"
+                onChange={e => {
+                  const val = e.target.value;
+                  setForm({ 
+                    ...form, 
+                    purchase_mode: val, 
+                    advance_percentage: val === 'Advance Payment' ? form.advance_percentage : 0,
+                    marketplace_name: val === 'Online Marketplace' ? form.marketplace_name : '' 
+                  });
+                }}
               >
-                {institutions.map(inst => (
-                  <MenuItem key={inst.id} value={inst.id}>{inst.code} - {inst.name}</MenuItem>
-                ))}
+                <MenuItem value="" disabled><em>Select Mode</em></MenuItem>
+                <MenuItem value="Credit Purchase">Credit Purchase</MenuItem>
+                {form.procurement_type !== 'Rental' && <MenuItem value="Cash Purchase">Cash Purchase</MenuItem>}
+                {form.procurement_type !== 'Rental' && <MenuItem value="Petty Cash">Petty Cash</MenuItem>}
+                {form.procurement_type !== 'Rental' && <MenuItem value="Online Marketplace">Online Marketplace</MenuItem>}
+                {form.procurement_type !== 'Rental' && <MenuItem value="Emergency Purchase">Emergency Purchase</MenuItem>}
+                <MenuItem value="Advance Payment">Advance Payment</MenuItem>
               </Select>
-              {errors.institution_id && <Typography variant="caption" color="error" sx={{mt: 0.5, ml: 1}}>{errors.institution_id}</Typography>}
+              {errors.purchase_mode && <FormHelperText>{errors.purchase_mode}</FormHelperText>}
             </FormControl>
 
-            <FormControl fullWidth size="small">
-              <InputLabel>Linked Contract (RC)</InputLabel>
-              <Select
-                value={form.contract_id || ''}
-                label="Linked Contract (RC)"
-                onChange={e => setForm({ ...form, contract_id: e.target.value })}
-                startAdornment={<InputAdornment position="start"><Assignment sx={{ color: '#94A3B8' }} /></InputAdornment>}
-              >
-                <MenuItem value=""><em>None</em></MenuItem>
-                {contracts.map(c => (
-                  <MenuItem key={c.id} value={c.id}>{c.contract_number} ({c.vendor_name})</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            {form.purchase_mode === 'Online Marketplace' && (
+              <TextField
+                size="small"
+                fullWidth
+                label="Marketplace Name (e.g. Amazon, Flipkart)"
+                value={form.marketplace_name || ''}
+                onChange={(e) => setForm({ ...form, marketplace_name: e.target.value })}
+              />
+            )}
+
+            {form.purchase_mode === 'Advance Payment' && (
+              <TextField
+                size="small"
+                fullWidth
+                label="Advance Payment (%)"
+                type="number"
+                value={form.advance_percentage}
+                onChange={(e) => setForm({ ...form, advance_percentage: e.target.value })}
+                inputProps={{ min: 0, max: 100, step: 'any' }}
+                error={!!errors.advance_percentage}
+                helperText={errors.advance_percentage}
+              />
+            )}
 
             <Box id="field-delivery_date">
               <DatePicker
@@ -1778,38 +1870,13 @@ export default function PurchaseOrders() {
             />
           </Box>
           </Box>
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr 1fr' }, gap: 2, pt: 1, mb: 2 }}>
-            <FormControl fullWidth size="small">
-              <InputLabel>Procurement Type</InputLabel>
-              <Select
-                value={form.procurement_type || 'Purchase'}
-                label="Procurement Type"
-                onChange={e => setForm({ ...form, procurement_type: e.target.value })}
-              >
-                <MenuItem value="Purchase">Purchase</MenuItem>
-                <MenuItem value="Rental">Rental</MenuItem>
-                <MenuItem value="Cost Per Test">Cost Per Test</MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
+
+
 
           {form.procurement_type === 'Rental' && (
             <Box sx={{ p: 2, mb: 2, bgcolor: '#F8FAFC', borderRadius: 2, border: '1px solid #E2E8F0' }}>
               <Typography variant="subtitle2" sx={{ mb: 2, color: '#334155', fontWeight: 600 }}>Rental Agreement Details</Typography>
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={4}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>Rental Type</InputLabel>
-                    <Select
-                      value={form.rental_type || ''}
-                      label="Rental Type"
-                      onChange={e => setForm({ ...form, rental_type: e.target.value })}
-                    >
-                      <MenuItem value="Standard Rental">Standard Rental</MenuItem>
-                      <MenuItem value="Reagent Rental">Reagent Rental</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
                 <Grid item xs={12} sm={4}>
                   <TextField
                     fullWidth size="small" label="Rental Agreement No."
@@ -1827,9 +1894,23 @@ export default function PurchaseOrders() {
                     >
                       <MenuItem value="Monthly">Monthly</MenuItem>
                       <MenuItem value="Quarterly">Quarterly</MenuItem>
+                      <MenuItem value="Half Yearly">Half Yearly</MenuItem>
                       <MenuItem value="Annually">Annually</MenuItem>
                     </Select>
                   </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                    <TextField
+                      fullWidth size="small" label="Rental Document URL"
+                      value={form.rental_agreement_document || ''}
+                      InputProps={{ readOnly: true }}
+                    />
+                    <Button variant="outlined" component="label" disabled={uploading} sx={{ whiteSpace: 'nowrap', height: '40px' }}>
+                      {uploading ? '...' : 'Upload'}
+                      <input type="file" hidden accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp" onChange={e => handleUpload(e.target.files[0])} />
+                    </Button>
+                  </Box>
                 </Grid>
                 <Grid item xs={12} sm={4}>
                   <DatePicker
@@ -1837,6 +1918,7 @@ export default function PurchaseOrders() {
                     value={form.rental_start_date ? dayjs(form.rental_start_date) : null}
                     onChange={val => setForm({ ...form, rental_start_date: val })}
                     format="DD-MMM-YYYY"
+                    localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
                     slotProps={{ textField: { fullWidth: true, size: "small" } }}
                   />
                 </Grid>
@@ -1846,12 +1928,13 @@ export default function PurchaseOrders() {
                     value={form.rental_end_date ? dayjs(form.rental_end_date) : null}
                     onChange={val => setForm({ ...form, rental_end_date: val })}
                     format="DD-MMM-YYYY"
+                    localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
                     slotProps={{ textField: { fullWidth: true, size: "small" } }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={4}>
                   <TextField
-                    fullWidth size="small" label="Security Deposit" type="number"
+                    fullWidth size="small" label="Security Deposit Amount" type="number"
                     value={form.security_deposit || ''}
                     onChange={e => setForm({ ...form, security_deposit: e.target.value })}
                   />
@@ -1894,7 +1977,7 @@ export default function PurchaseOrders() {
             </Box>
           )}
 
-          {form.procurement_type === 'Cost Per Test' && (
+          {form.procurement_type === 'Rental' && form.rental_type === 'Cost Per Test' && (
             <Box sx={{ p: 2, mb: 2, bgcolor: '#F8FAFC', borderRadius: 2, border: '1px solid #E2E8F0' }}>
               <Typography variant="subtitle2" sx={{ mb: 2, color: '#334155', fontWeight: 600 }}>Cost Per Test Details</Typography>
               <Grid container spacing={2}>
@@ -1966,14 +2049,18 @@ export default function PurchaseOrders() {
                             gstRate, vendorState, tenantConfig?.base_state,
                             tenantConfig?.cgst_share_percent, tenantConfig?.sgst_share_percent
                           );
+                          const contractRate = vendorRates[val];
+                          const baseRate = contractRate !== undefined ? contractRate : (material.standard_cost || 0);
+                          const newRate = contractRate !== undefined ? contractRate : (material.standard_cost || 0);
+
                           const newItems = [...form.items];
                           newItems[i] = {
                             ...newItems[i],
                             material_id: val,
                             uom_name: material.uom_name || '',
                             uom_allow_decimal: material.uom_allow_decimal || false,
-                            rate: material.standard_cost || 0,
-                            base_rate: material.standard_cost || 0,
+                            rate: newRate,
+                            base_rate: baseRate,
                             cgst_percentage,
                             sgst_percentage,
                             igst_percentage
@@ -2032,7 +2119,7 @@ export default function PurchaseOrders() {
 
                   <Box sx={{ gridColumn: { xs: '1 / -1', md: '1 / -1' }, display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', md: '1fr 1fr 1fr 1fr' }, gap: 1.5 }}>
                     <Box display="flex" gap={1}>
-                      <TextField disabled={!item.material_id} sx={{ ...noSpinSx, flex: 1 }} size="small" label="Disc %" type="number" value={item.discount_percent} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'discount_percent', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100, step: "any" }} />
+                      <TextField disabled={!item.material_id} sx={{ ...noSpinSx, flex: 1 }} size="small" label="Disc %" type="number" value={item.discount_percent} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onFocus={(e) => { if (item.discount_percent === 0 || item.discount_percent === '0') updateItem(i, 'discount_percent', ''); }} onBlur={(e) => { if (item.discount_percent === '') updateItem(i, 'discount_percent', 0); }} onChange={e => updateItem(i, 'discount_percent', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100, step: "any" }} />
                       <TextField size="small" label="Disc (₹)" value={discAmt.toFixed(2)} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
                     </Box>
                     <Box display="flex" gap={1}>
@@ -2288,7 +2375,7 @@ export default function PurchaseOrders() {
                   size="small"
                   color={{
                     'Awaiting Approval': 'warning', 'Approved': 'success', 'Rejected': 'error',
-                    'Partially Issued': 'info', 'Fully Issued': 'primary', 'PO Created': 'secondary', 'Closed': 'default'
+                    'Partially Issued': 'warning', 'Fully Issued': 'primary', 'PO Created': 'secondary', 'Closed': 'default'
                   }[linkedIndent?.status] || 'default'}
                 />
               </Box>

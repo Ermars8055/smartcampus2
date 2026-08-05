@@ -48,13 +48,14 @@ export default function ComplaintsList() {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'Registered': case 'Open': return 'primary';
-      case 'Assigned': return 'secondary';
+      case 'Registered': case 'Open': return 'info';
+      case 'Assigned': return 'primary';
       case 'Under Inspection': return 'info';
-      case 'Material Pending': return 'warning';
+      case 'Material Pending': return 'error';
       case 'In Progress': return 'warning';
+      case 'Pending Admin Approval': return 'info';
       case 'Resolved': return 'success';
-      case 'Closed': return 'success';
+      case 'Closed': return 'default';
       case 'Reopened': return 'error';
       case 'Rejected': return 'error';
       default: return 'default';
@@ -185,7 +186,7 @@ export default function ComplaintsList() {
                           sx={{ color: '#2563EB' }}
                           disabled={!['Registered', 'Open', 'Reopened'].includes(row.status)}
                         >
-                          <Edit fontSize="small" />
+                          <Edit color="primary" fontSize="small" />
                         </IconButton>
                       </span>
                     </Tooltip>

@@ -38,7 +38,7 @@ export default function Indents() {
   const [detailHistoryData, setDetailHistoryData] = useState(null);
   const [detailHistoryOpen, setDetailHistoryOpen] = useState(false);
   const [search, setSearch] = useState('');
-  const [tabValue, setTabValue] = useState('Awaiting Approval');
+  const [tabValue, setTabValue] = useState('Submitted');
   const [filterInstitution, setFilterInstitution] = useState(null);
   const [filterDepartment, setFilterDepartment] = useState(null);
   const [filterBuilding, setFilterBuilding] = useState(null);
@@ -53,8 +53,8 @@ export default function Indents() {
       const targetId = location.state.openIndentId;
       const targetIndent = indents.find(i => i.id === targetId);
       if (targetIndent) {
-        if (targetIndent.status === 'Awaiting Approval') {
-          setTabValue('Awaiting Approval');
+        if (targetIndent.status === 'Submitted') {
+          setTabValue('Submitted');
           setApprovalDialog({ open: true, indent: targetIndent, items: {} });
         } else {
           setTabValue(targetIndent.status);
@@ -395,7 +395,36 @@ export default function Indents() {
     return mat?.uom_name || mat?.uom || '—';
   };
 
-  const handleCreate = async () => {
+  const handleRowClick = (ind) => {
+    if (ind.status === 'Draft') {
+      let floor_id = '';
+      if (ind.floor && ind.building_id) {
+        // Find floor_id if possible, though floors might not be loaded yet
+        // If not loaded, handleDepartmentChange will load them, but we might lose the floor selection
+        const f = floors.find(fl => fl.name === ind.floor && fl.building_id === ind.building_id);
+        if (f) floor_id = f.id;
+      }
+      setForm({
+        id: ind.id,
+        institution_id: ind.institution_id || '',
+        department: ind.department || '',
+        building_id: ind.building_id || '',
+        floor_id: floor_id,
+        room_id: ind.room_id || '',
+        remarks: ind.remarks || '',
+        complaint_id: ind.complaint_id || '',
+        items: ind.items.length > 0 ? ind.items.map(i => ({ material_id: i.material_id, requested_quantity: i.requested_quantity })) : [{ material_id: '', requested_quantity: '' }]
+      });
+      if (ind.department) {
+        handleDepartmentChange(ind.department, ind.institution_id);
+      }
+      setShowForm(true);
+    } else {
+      setDetailDialog(ind);
+    }
+  };
+
+  const handleCreate = async (isDraft = false) => {
     try {
       const newErrors = {};
       if (!form.institution_id) newErrors.institution_id = "Institution is required";
@@ -444,13 +473,19 @@ export default function Indents() {
         department: form.department,
         complaint_id: form.complaint_id ? parseInt(form.complaint_id) : null,
         remarks: form.remarks,
+        is_draft: isDraft,
         items: mappedItems
       };
 
-      const response = await api.post('/api/indents', payload);
+      let response;
+      if (form.id) {
+        response = await api.put(`/api/indents/${form.id}`, payload);
+      } else {
+        response = await api.post('/api/indents', payload);
+      }
       const indentNo = response.data?.indent_number || '';
       setShowForm(false); load();
-      showMessage(`Indent ${indentNo} submitted successfully!`.replace('  ', ' '), "Success", "success");
+      showMessage(`Indent ${indentNo} ${isDraft ? 'saved as draft' : 'submitted successfully'}!`.replace('  ', ' '), "Success", "success");
     } catch (err) {
       console.error(err);
       const detail = err.response?.data?.detail || 'Error';
@@ -589,8 +624,8 @@ export default function Indents() {
 
   // Status helpers
   const statusColor = {
-    'Awaiting Approval': 'warning', 'Approved': 'success', 'Rejected': 'error',
-    'Partially Issued': 'info', 'Issued': 'secondary', 'Fully Issued': 'secondary',
+    'Awaiting Approval': 'warning', 'Submitted': 'info', 'Approved': 'success', 'Rejected': 'error',
+    'Partially Issued': 'warning', 'Issued': 'primary', 'Fully Issued': 'primary',
     'PO Created': 'primary', 'Closed': 'default',
     'Converted to PO': 'primary', 'Cancelled': 'default', 'Draft': 'default'
   };
@@ -617,7 +652,7 @@ export default function Indents() {
               <ReceiptLong fontSize="medium" />
             </Box>
             <Box>
-              <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>Create New Indent</Typography>
+              <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>{form.id ? 'Edit Draft Indent' : 'Create New Indent'}</Typography>
               <Typography variant="body2" color="text.secondary">Raise a department material request with location details.</Typography>
             </Box>
           </Box>
@@ -856,7 +891,13 @@ export default function Indents() {
               Cancel
             </Button>
             <Button
-              variant="contained" onClick={handleCreate}
+              variant="outlined" onClick={() => handleCreate(true)}
+              sx={{ textTransform: 'none', fontWeight: 600, px: 3, py: 1, borderRadius: 2 }}
+            >
+              Save as Draft
+            </Button>
+            <Button
+              variant="contained" onClick={() => handleCreate(false)}
               sx={{ textTransform: 'none', fontWeight: 700, px: 4, py: 1, borderRadius: 2, boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)' }}
             >
               Submit Indent
@@ -935,12 +976,12 @@ export default function Indents() {
           value={tabValue}
           onChange={(e, v) => setTabValue(v)}
           variant="scrollable"
-          scrollButtons="auto"
+          scrollButtons={false}
           sx={{ borderBottom: 1, borderColor: 'divider' }}
         >
-          {['Awaiting Approval', 'Approved', 'Rejected', 'Partially Issued', 'Issued', 'Closed', 'All'].map(s => {
+          {['Draft', 'Submitted', 'Approved', 'Rejected', 'Partially Issued', 'Issued', 'Closed', 'All'].map(s => {
             const count = s === 'All' ? filteredIndentsBase.length : filteredIndentsBase.filter(i => i.status === s).length;
-            if (s !== 'All' && count === 0 && !['Awaiting Approval', 'Approved', 'Rejected', 'Partially Issued'].includes(s)) return null;
+            if (s !== 'All' && count === 0 && !['Draft', 'Submitted', 'Approved', 'Rejected', 'Partially Issued'].includes(s)) return null;
             return (
               <Tab
                 key={s}
@@ -971,7 +1012,7 @@ export default function Indents() {
               </Typography>
             )}
             {sortedIndents.map(ind => (
-              <Card key={ind.id} variant="outlined" sx={{ p: 2, borderRadius: 2, cursor: 'pointer', '&:hover': { borderColor: '#2563EB' } }} onClick={() => setDetailDialog(ind)}>
+              <Card key={ind.id} variant="outlined" sx={{ p: 2, borderRadius: 2, cursor: 'pointer', '&:hover': { borderColor: '#2563EB' } }} onClick={() => handleRowClick(ind)}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, gap: 1 }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#2563EB' }}>{ind.indent_number}</Typography>
                   <Chip label={ind.status} size="small" color={statusColor[ind.status] || 'default'} sx={{ fontWeight: 600, fontSize: '0.65rem', height: 20 }} />
@@ -983,13 +1024,13 @@ export default function Indents() {
                   <Chip label={`L${ind.current_approval_level}`} size="small" variant="outlined" sx={{ height: 22, fontSize: '0.7rem' }} />
                   <Box sx={{ display: 'flex', gap: 0.5 }} onClick={e => e.stopPropagation()}>
                     <Tooltip title="Approve">
-                      <span><IconButton size="small" color="success" disabled={ind.status !== 'Awaiting Approval' || !hasAction('indents', 'can_approve') || !ind.can_user_approve}
+                      <span><IconButton size="small" color="success" disabled={ind.status !== 'Submitted' || !hasAction('indents', 'can_approve') || !ind.can_user_approve}
                         onClick={() => setApprovalDialog({ open: true, indent: ind, items: {} })}>
                         <CheckCircle fontSize="small" />
                       </IconButton></span>
                     </Tooltip>
                     <Tooltip title="Reject">
-                      <span><IconButton size="small" color="error" disabled={ind.status !== 'Awaiting Approval' || !hasAction('indents', 'can_reject') || !ind.can_user_approve}
+                      <span><IconButton size="small" color="error" disabled={ind.status !== 'Submitted' || !hasAction('indents', 'can_reject') || !ind.can_user_approve}
                         onClick={() => showConfirm('Reject Indent?', `Are you sure you want to reject ${ind.indent_number}?`, 'Yes, Reject', 'error', (r) => rejectIndent(ind.id, ind.indent_number, r), true)}>
                         <Cancel fontSize="small" />
                       </IconButton></span>
@@ -1064,7 +1105,7 @@ export default function Indents() {
                   </TableRow>
                 )}
                 {sortedIndents.map(ind => (
-                  <TableRow key={ind.id} sx={{ cursor: 'pointer', '&:hover': { bgcolor: '#f8fafc' }, '& td': { px: 0.5, py: 0.75 } }} onClick={() => setDetailDialog(ind)}>
+                  <TableRow key={ind.id} sx={{ cursor: 'pointer', '&:hover': { bgcolor: '#f8fafc' }, '& td': { px: 0.5, py: 0.75 } }} onClick={() => handleRowClick(ind)}>
                     <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>{ind.indent_number}</TableCell>
                     <TableCell sx={{ fontSize: '0.78rem' }}>{ind.institution_name || '-'}</TableCell>
                     <TableCell sx={{ fontSize: '0.78rem' }}>{ind.department || '-'}</TableCell>
@@ -1079,13 +1120,13 @@ export default function Indents() {
                     <TableCell onClick={e => e.stopPropagation()} sx={{ whiteSpace: 'nowrap' }}>
                       <Box sx={{ display: 'flex', gap: 0.5 }}>
                         <Tooltip title="Approve">
-                          <span><IconButton size="small" color="success" disabled={ind.status !== 'Awaiting Approval' || !hasAction('indents', 'can_approve') || !ind.can_user_approve}
+                          <span><IconButton size="small" color="success" disabled={ind.status !== 'Submitted' || !hasAction('indents', 'can_approve') || !ind.can_user_approve}
                             onClick={() => setApprovalDialog({ open: true, indent: ind, items: {} })}>
                             <CheckCircle fontSize="small" />
                           </IconButton></span>
                         </Tooltip>
                         <Tooltip title="Reject">
-                          <span><IconButton size="small" color="error" disabled={ind.status !== 'Awaiting Approval' || !hasAction('indents', 'can_reject') || !ind.can_user_approve}
+                          <span><IconButton size="small" color="error" disabled={ind.status !== 'Submitted' || !hasAction('indents', 'can_reject') || !ind.can_user_approve}
                             onClick={() => showConfirm('Reject Indent?', `Are you sure you want to reject ${ind.indent_number}?`, 'Yes, Reject', 'error', (r) => rejectIndent(ind.id, ind.indent_number, r), true)}>
                             <Cancel fontSize="small" />
                           </IconButton></span>
@@ -1152,7 +1193,7 @@ export default function Indents() {
                 <TableCell align="left" sx={{ fontWeight: 600 }}>UOM</TableCell>
                 <TableCell align="right" sx={{ fontWeight: 600 }}>REQUESTED QTY</TableCell>
                 <TableCell align="right" sx={{ fontWeight: 600 }}>APPROVED QTY</TableCell>
-                {detailDialog?.status !== 'Awaiting Approval' && (
+                {detailDialog?.status !== 'Submitted' && detailDialog?.status !== 'Draft' && (
                   <>
                     <TableCell align="right" sx={{ fontWeight: 600 }}>ISSUED QTY</TableCell>
                     <TableCell align="right" sx={{ fontWeight: 600 }}>PENDING QTY</TableCell>
@@ -1172,7 +1213,7 @@ export default function Indents() {
                   <TableCell align="right" sx={{ fontWeight: 700, color: '#1d4ed8' }}>
                     {item.approved_quantity !== null && item.approved_quantity !== undefined ? item.approved_quantity : '—'}
                   </TableCell>
-                  {detailDialog?.status !== 'Awaiting Approval' && (
+                  {detailDialog?.status !== 'Submitted' && detailDialog?.status !== 'Draft' && (
                     <>
                       <TableCell align="right">{item.issued_quantity}</TableCell>
                       <TableCell align="right" sx={{ fontWeight: 600, color: item.pending_quantity > 0 ? '#ef4444' : '#10b981' }}>

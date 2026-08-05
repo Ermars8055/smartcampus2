@@ -18,7 +18,7 @@ import {
   Download as DownloadIcon, ExpandMore as ExpandMoreIcon, ArrowBack as ArrowBackIcon,
   AccountTree as ProjectIcon, Event as DateIcon, Group as VendorIcon, Description as RemarkIcon, Link as LinkIcon, Inventory as InventoryIcon,
   EditNote as ProcessIcon, Balance as CompareIcon, FactCheck as ApproveIcon, ShoppingCart as OrderIcon, Send as BlastIcon,
-  ArrowDropUp, ArrowDropDown, Search
+  ArrowDropUp, ArrowDropDown, Search, Delete as DeleteIcon
 } from '@mui/icons-material';
 import api, { getFileUrl } from '../services/api';
 import { formatDate } from '../utils/dateUtils';
@@ -58,6 +58,7 @@ const Quotations = () => {
     vendor_ids: []
   });
   const [errors, setErrors] = useState({});
+  const [activeRCs, setActiveRCs] = useState({});
 
 
 
@@ -116,6 +117,17 @@ const Quotations = () => {
       return {}; // Clear all errors when form changes
     });
   }, [newQR]);
+
+  useEffect(() => {
+    const matIds = (newQR.items || []).map(it => it.material_id);
+    if (matIds.length > 0) {
+      api.post('/api/contracts/active-rates/check', { material_ids: matIds })
+        .then(res => setActiveRCs(res.data))
+        .catch(console.error);
+    } else {
+      setActiveRCs({});
+    }
+  }, [newQR.items]);
 
   useEffect(() => {
     api.get('/api/terms').then(r => setTermsTemplates(r.data)).catch(console.error);
@@ -328,8 +340,11 @@ const Quotations = () => {
             }
           });
           
+          const newManualMaterialIds = newManualItems.map(it => it.material_id);
+          
           return {
             ...prev,
+            manual_material_ids: newManualMaterialIds,
             items: [...prItems, ...newManualItems]
           };
         });
@@ -345,7 +360,13 @@ const Quotations = () => {
   };
 
   const handleDownloadTemplate = () => {
-    const ws = XLSX.utils.json_to_sheet([{ "Material Name": "", "Quantity": "", "UOM": "" }]);
+    const ws = XLSX.utils.json_to_sheet([{ "Material Code": "", "Material Name": "", "Quantity": "", "UOM": "" }]);
+    ws['!cols'] = [
+      { wch: 20 }, // Material Code
+      { wch: 40 }, // Material Name
+      { wch: 15 }, // Quantity
+      { wch: 15 }  // UOM
+    ];
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Template");
     XLSX.writeFile(wb, "Material_Import_Template.xlsx");
@@ -359,12 +380,19 @@ const Quotations = () => {
     const exportData = newQR.items.map(it => {
       const m = Array.isArray(materials) ? materials.find(x => x.id === it.material_id) : null;
       return {
+        "Material Code": m ? m.code : '',
         "Material Name": m ? m.name : '',
         "Quantity": it.quantity,
         "UOM": m ? (m.uom_name || '') : ''
       };
     });
     const ws = XLSX.utils.json_to_sheet(exportData);
+    ws['!cols'] = [
+      { wch: 20 }, // Material Code
+      { wch: 40 }, // Material Name
+      { wch: 15 }, // Quantity
+      { wch: 15 }  // UOM
+    ];
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Materials");
     XLSX.writeFile(wb, "Current_Materials_List.xlsx");
@@ -612,7 +640,7 @@ const Quotations = () => {
       const vq = vendorQuotes.find(q => q.vendor_id === vendorId);
       const items = vq?.items?.filter(it => !it.is_excluded) || [];
       const itemDiscounts = {};
-      items.forEach(it => { itemDiscounts[it.qr_item_id] = it.discount_percent || 0; });
+      items.forEach(it => { itemDiscounts[it.qr_item_id] = it.discount_percent || ''; });
       
       setNegotiateDialog({
         open: true,
@@ -635,7 +663,10 @@ const Quotations = () => {
     try {
       const payloadItemDiscounts = {};
       Object.keys(negotiateDialog.itemDiscounts).forEach(k => {
-        payloadItemDiscounts[k] = parseFloat(negotiateDialog.itemDiscounts[k] || 0);
+        const val = negotiateDialog.itemDiscounts[k];
+        if (val !== '' && val !== null && val !== undefined) {
+          payloadItemDiscounts[k] = parseFloat(val);
+        }
       });
       await api.put(`/api/quotations/${selectedQR.id}/vendor-quotations/${negotiateDialog.vendorId}/discounts`, {
         discount_percent: parseFloat(negotiateDialog.discountPercent || 0),
@@ -805,6 +836,18 @@ const Quotations = () => {
     });
   };
 
+  const removeQRItem = (index) => {
+    setNewQR(prev => {
+      const itemToRemove = prev.items[index];
+      let newManualIds = prev.manual_material_ids || [];
+      if (!itemToRemove.pr_id) {
+        newManualIds = newManualIds.filter(id => id !== itemToRemove.material_id);
+      }
+      const newItems = prev.items.filter((_, i) => i !== index);
+      return { ...prev, items: newItems, manual_material_ids: newManualIds };
+    });
+  };
+
   // --- UI Renderers ---
 
   const steps = ['Draft', 'Submitted', 'Requested', 'Received', 'Entered', 'Compared', 'Approved', 'Ordered'];
@@ -822,17 +865,17 @@ const Quotations = () => {
     }
   };
 
-  const getStatusColor = (status) => {
+  const getStatusProps = (status) => {
     switch (status) {
-      case 'Draft': return 'default';
-      case 'Submitted': return 'info';
-      case 'Requested': return 'info';
-      case 'Received': return 'secondary';
-      case 'Entered': return 'secondary';
-      case 'Compared': return 'warning';
-      case 'Approved': return 'primary';
-      case 'Ordered': return 'success';
-      default: return 'default';
+      case 'Draft': return { color: 'default' };
+      case 'Submitted': return { color: 'info' };
+      case 'Requested': return { color: 'primary' };
+      case 'Received': return { sx: { bgcolor: '#8B5CF6', color: '#fff' } };
+      case 'Entered': return { color: 'warning' };
+      case 'Compared': return { sx: { bgcolor: '#0D9488', color: '#fff' } };
+      case 'Approved': return { color: 'success' };
+      case 'Ordered': return { sx: { bgcolor: '#4338CA', color: '#fff' } };
+      default: return { color: 'default' };
     }
   };
 
@@ -883,7 +926,7 @@ const Quotations = () => {
             <Card sx={{ mb: 3 }}>
               <Box sx={{ p: 2, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
                 <TextField size="small" placeholder="Search QR/PR Numbers..." value={search}
-                  onChange={e => setSearch(e.target.value)} sx={{ minWidth: 300 }}
+                  onChange={e => setSearch(e.target.value)} sx={{ width: 250 }}
                   InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }} />
                 <Autocomplete
                   size="small"
@@ -891,29 +934,32 @@ const Quotations = () => {
                   getOptionLabel={(option) => `${option.code} - ${option.name}`}
                   value={filterVendor}
                   onChange={(e, val) => setFilterVendor(val)}
-                  renderInput={(params) => <TextField {...params} placeholder="Filter by Vendor" sx={{ minWidth: 250 }} />}
+                  renderInput={(params) => <TextField {...params} placeholder="Filter by Vendor" />}
                   isOptionEqualToValue={(option, value) => option.id === value.id}
+                  sx={{ width: 220 }}
                 />
                 <DatePicker
                   label="Start Date"
                   value={startDate}
                   onChange={(val) => setStartDate(val)}
                   format="DD-MMM-YYYY"
-                  slotProps={{ textField: { size: 'small', sx: { minWidth: 150 } } }}
+                  localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
+                  slotProps={{ textField: { size: 'small', sx: { width: 200 }, placeholder: "DD-MMM-YYYY" } }}
                 />
                 <DatePicker
                   label="End Date"
                   value={endDate}
                   onChange={(val) => setEndDate(val)}
                   format="DD-MMM-YYYY"
-                  slotProps={{ textField: { size: 'small', sx: { minWidth: 150 } } }}
+                  localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
+                  slotProps={{ textField: { size: 'small', sx: { width: 200 }, placeholder: "DD-MMM-YYYY" } }}
                 />
               </Box>
               <Tabs
                 value={listFilter}
                 onChange={(e, newVal) => setListFilter(newVal)}
                 variant="scrollable"
-                scrollButtons="auto"
+                scrollButtons={false}
                 sx={{ borderBottom: 1, borderColor: 'divider' }}
               >
                 {['Draft', 'Submitted', 'Requested', 'Received', 'Entered', 'Compared', 'Approved', 'Ordered', 'All'].map(filter => (
@@ -930,14 +976,14 @@ const Quotations = () => {
                             height: 20,
                             fontSize: '0.7rem',
                             fontWeight: 700,
-                            backgroundColor: listFilter === filter ? 'primary.light' : '#f0f0f0',
-                            color: listFilter === filter ? 'primary.contrastText' : 'text.secondary',
+                            bgcolor: listFilter === filter ? 'primary.main' : 'action.selected',
+                            color: listFilter === filter ? 'white' : 'text.primary',
                             cursor: 'pointer'
                           }}
                         />
                       </Box>
                     }
-                    sx={{ textTransform: 'none', fontWeight: 600, minHeight: 48, minWidth: 'auto', px: 2 }}
+                    sx={{ textTransform: 'none', fontWeight: 600, minHeight: 48, minWidth: 'auto', px: 1.5 }}
                   />
                 ))}
               </Tabs>
@@ -952,13 +998,6 @@ const Quotations = () => {
                         active={sortConfig.key === 'qr_number'}
                         direction={sortConfig.direction}
                         onClick={() => handleSort('qr_number')}
-                        IconComponent={ArrowDropDown}
-                        sx={{
-                          '& .MuiTableSortLabel-icon': {
-                            fontSize: '1.2rem !important',
-                            opacity: sortConfig.key === 'qr_number' ? 1 : 0
-                          }
-                        }}
                       >
                         QUOTATION NUMBER
                       </TableSortLabel>
@@ -968,13 +1007,6 @@ const Quotations = () => {
                         active={sortConfig.key === 'prs'}
                         direction={sortConfig.direction}
                         onClick={() => handleSort('prs')}
-                        IconComponent={ArrowDropDown}
-                        sx={{
-                          '& .MuiTableSortLabel-icon': {
-                            fontSize: '1.2rem !important',
-                            opacity: sortConfig.key === 'prs' ? 1 : 0
-                          }
-                        }}
                       >
                         PURCHASE REQUESTS
                       </TableSortLabel>
@@ -984,13 +1016,6 @@ const Quotations = () => {
                         active={sortConfig.key === 'vendors'}
                         direction={sortConfig.direction}
                         onClick={() => handleSort('vendors')}
-                        IconComponent={ArrowDropDown}
-                        sx={{
-                          '& .MuiTableSortLabel-icon': {
-                            fontSize: '1.2rem !important',
-                            opacity: sortConfig.key === 'vendors' ? 1 : 0
-                          }
-                        }}
                       >
                         VENDORS
                       </TableSortLabel>
@@ -1000,13 +1025,6 @@ const Quotations = () => {
                         active={sortConfig.key === 'status'}
                         direction={sortConfig.direction}
                         onClick={() => handleSort('status')}
-                        IconComponent={ArrowDropDown}
-                        sx={{
-                          '& .MuiTableSortLabel-icon': {
-                            fontSize: '1.2rem !important',
-                            opacity: sortConfig.key === 'status' ? 1 : 0
-                          }
-                        }}
                       >
                         STATUS
                       </TableSortLabel>
@@ -1016,13 +1034,6 @@ const Quotations = () => {
                         active={sortConfig.key === 'date'}
                         direction={sortConfig.direction}
                         onClick={() => handleSort('date')}
-                        IconComponent={ArrowDropDown}
-                        sx={{
-                          '& .MuiTableSortLabel-icon': {
-                            fontSize: '1.2rem !important',
-                            opacity: sortConfig.key === 'date' ? 1 : 0
-                          }
-                        }}
                       >
                         QUOTATION DATE
                       </TableSortLabel>
@@ -1047,7 +1058,7 @@ const Quotations = () => {
                         sx={{ cursor: 'pointer' }}
                         onClick={() => { setViewingQR(qr); setViewQRDialogOpen(true); }}
                       >
-                        <TableCell sx={{ py: 1, px: 2, fontSize: '0.75rem', fontWeight: 600, color: 'primary.main', whiteSpace: 'nowrap' }}>{qr.qr_number}</TableCell>
+                        <TableCell sx={{ py: 1, px: 2, fontSize: '0.8rem', fontWeight: 600, color: '#2563EB', whiteSpace: 'nowrap' }}>{qr.qr_number}</TableCell>
                         <TableCell sx={{ py: 1, px: 2 }}>
                           {qr.linked_prs?.length > 0 ? (
                             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, maxWidth: '180px' }}>
@@ -1067,9 +1078,9 @@ const Quotations = () => {
                         <TableCell sx={{ py: 1, px: 2 }}>
                           <Chip
                             label={qr.status === 'Sent to Vendors' ? 'Request to Vendors' : (qr.status === 'Invited' ? 'Requested' : qr.status)}
-                            color={getStatusColor(qr.status)}
+                            {...getStatusProps(qr.status)}
                             size="small"
-                            sx={{ height: 18, fontWeight: 500, fontSize: '0.65rem' }}
+                            sx={{ height: 18, fontWeight: 500, fontSize: '0.65rem', ...(getStatusProps(qr.status).sx || {}) }}
                           />
                         </TableCell>
                         <TableCell sx={{ py: 1, px: 2, fontSize: '0.75rem', whiteSpace: 'nowrap' }}>{formatDate(qr.created_at)}</TableCell>
@@ -1083,7 +1094,7 @@ const Quotations = () => {
                                     onClick={() => handleEditDraft(qr)}
                                     sx={{ color: 'primary.main' }}
                                   >
-                                    <EditIcon fontSize="small" />
+                                    <EditIcon color="primary" fontSize="small" />
                                   </IconButton>
                                 </span>
                               </Tooltip>
@@ -1362,7 +1373,7 @@ const Quotations = () => {
                             </TableCell>
                             <TableCell align="right">
                               {!isNotRequired && !['Compared', 'Approved', 'Ordered'].includes(selectedQR.status) && (
-                                <Button variant="outlined" size="small" startIcon={<EditIcon />} onClick={async () => {
+                                <Button variant="outlined" size="small" startIcon={<EditIcon color="primary" />} onClick={async () => {
                                   // Auto set receipt to Received if they click Enter Quote
                                   if (v.receipt_status !== 'Received') {
                                      await handleUpdateVendorReceipt(selectedQR.id, v.vendor_id, 'Received', true);
@@ -1442,6 +1453,7 @@ const Quotations = () => {
                         <TableHead>
                           <TableRow sx={{ backgroundColor: '#fdfdfd' }}>
                             <TableCell>Vendor</TableCell>
+                            <TableCell>Brand</TableCell>
                             <TableCell>Rate (₹)</TableCell>
                             <TableCell>Delivery</TableCell>
                             <TableCell>Rank</TableCell>
@@ -1454,6 +1466,7 @@ const Quotations = () => {
                             return (
                               <TableRow key={q.vendor_id} sx={{ backgroundColor: isSelected ? '#f1f8e9' : 'inherit' }}>
                                 <TableCell>{q.vendor_name}</TableCell>
+                                <TableCell>{q.brand || '-'}</TableCell>
                                 <TableCell>₹{Number(q.quoted_rate).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                                 <TableCell>{q.delivery_days || '-'} days</TableCell>
                                 <TableCell><Chip size="small" label={isSelected ? `${q.rank_label} Selected` : q.rank_label} color={isSelected ? "success" : "default"} /></TableCell>
@@ -1601,8 +1614,13 @@ const Quotations = () => {
                                   {quote ? (
                                     <>
                                       <Typography variant="body2">
-                                        ₹{Number(quote.quoted_rate).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        ₹{Number(quote.effective_rate).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                       </Typography>
+                                      {quote.discount_percent > 0 && (
+                                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontSize: '0.65rem' }}>
+                                          ({quote.discount_percent}% off ₹{Number(quote.quoted_rate).toLocaleString('en-IN')})
+                                        </Typography>
+                                      )}
                                       <Chip
                                         label={isSelected ? `${quote.rank_label} Selected` : quote.rank_label}
                                         size="small"
@@ -1877,40 +1895,60 @@ const Quotations = () => {
                           <TableCell align="center" sx={{ fontWeight: 600 }}>Quantity</TableCell>
                           <TableCell align="left" sx={{ fontWeight: 600 }}>UOM</TableCell>
                           <TableCell align="center" sx={{ fontWeight: 600 }}>Source</TableCell>
+                          <TableCell align="center" sx={{ fontWeight: 600 }}>Action</TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
                         {newQR.items.map((it, idx) => {
                           const m = Array.isArray(materials) ? materials.find(x => x.id === it.material_id) : null;
                           const pr = approvedPrs.find(p => p.id === it.pr_id);
+                          const hasRC = !!activeRCs[it.material_id];
                           return (
-                            <TableRow key={idx}>
-                              <TableCell sx={{ py: 0.5 }}>{m ? m.code : 'Loading...'}</TableCell>
-                              <TableCell sx={{ py: 0.5 }}>{m ? m.name : 'Loading...'}</TableCell>
-                              <TableCell align="center" sx={{ py: 0.5 }}>
-                                <TextField
-                                  type="number"
-                                  size="small"
-                                  value={it.quantity}
-                                  onChange={(e) => updateItemQuantity(idx, e.target.value)}
-                                  sx={{ width: 100, '& .MuiInputBase-input': { py: 0.5, textAlign: 'center', fontWeight: 600 } }}
-                                  inputProps={{ min: 1 }}
-                                />
-                              </TableCell>
-                              <TableCell align="left" sx={{ py: 0.5 }}>
-                                <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                                  {m?.uom_name || ''}
-                                </Typography>
-                              </TableCell>
-                              <TableCell align="center" sx={{ py: 0.5 }}>
-                                <Chip
-                                  size="small"
-                                  label={it.pr_id ? (pr?.pr_number || 'PR') : 'Manual'}
-                                  color={it.pr_id ? "primary" : "default"}
-                                  variant="outlined"
-                                />
-                              </TableCell>
-                            </TableRow>
+                            <React.Fragment key={idx}>
+                              <TableRow sx={{ bgcolor: hasRC ? '#fff0f0' : 'inherit', '& > td': { borderBottom: hasRC ? 'none' : undefined } }}>
+                                <TableCell sx={{ py: 0.5 }}>{m ? m.code : 'Loading...'}</TableCell>
+                                <TableCell sx={{ py: 0.5 }}>
+                                  {m ? m.name : 'Loading...'}
+                                </TableCell>
+                                <TableCell align="center" sx={{ py: 0.5 }}>
+                                  <TextField
+                                    type="number"
+                                    size="small"
+                                    value={it.quantity}
+                                    onChange={(e) => updateItemQuantity(idx, e.target.value)}
+                                    sx={{ width: 100, '& .MuiInputBase-input': { py: 0.5, textAlign: 'center', fontWeight: 600 } }}
+                                    inputProps={{ min: 1 }}
+                                  />
+                                </TableCell>
+                                <TableCell align="left" sx={{ py: 0.5 }}>
+                                  <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+                                    {m?.uom_name || ''}
+                                  </Typography>
+                                </TableCell>
+                                <TableCell align="center" sx={{ py: 0.5 }}>
+                                  <Chip
+                                    size="small"
+                                    label={it.pr_id ? (pr?.pr_number || 'PR') : 'Manual'}
+                                    color={it.pr_id ? "primary" : "default"}
+                                    variant="outlined"
+                                  />
+                                </TableCell>
+                                <TableCell align="center" sx={{ py: 0.5 }}>
+                                  <IconButton size="small" color="error" onClick={() => removeQRItem(idx)}>
+                                    <DeleteIcon fontSize="small" />
+                                  </IconButton>
+                                </TableCell>
+                              </TableRow>
+                              {hasRC && (
+                                <TableRow sx={{ bgcolor: '#fff0f0' }}>
+                                  <TableCell colSpan={6} sx={{ py: 0.5, pt: 0, borderTop: 'none' }}>
+                                    <Typography variant="caption" color="error" display="block" sx={{ fontWeight: 500 }}>
+                                      This material has a rate contract with {activeRCs[it.material_id].vendor_name} valid up to {formatDate(activeRCs[it.material_id].valid_to)}.
+                                    </Typography>
+                                  </TableCell>
+                                </TableRow>
+                              )}
+                            </React.Fragment>
                           );
                         })}
                       </TableBody>
@@ -1964,7 +2002,7 @@ const Quotations = () => {
           <DialogTitle sx={{ pb: 1, pt: 3, px: 4 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
               <Box sx={{ p: 1, bgcolor: '#EFF6FF', borderRadius: 2, color: '#2563EB', display: 'flex' }}>
-                <EditIcon fontSize="medium" />
+                <EditIcon color="primary" fontSize="medium" />
               </Box>
               <Box>
                 <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
@@ -2567,7 +2605,14 @@ const Quotations = () => {
               type="number"
               className="no-spin"
               value={negotiateDialog.discountPercent}
-              onChange={(e) => setNegotiateDialog(prev => ({ ...prev, discountPercent: e.target.value }))}
+              onChange={(e) => {
+                let val = e.target.value;
+                if (val !== '') {
+                  if (parseFloat(val) > 100) val = '100';
+                  if (parseFloat(val) < 0) val = '0';
+                }
+                setNegotiateDialog(prev => ({ ...prev, discountPercent: val }));
+              }}
               placeholder="e.g. 5"
               InputProps={{
                 endAdornment: <InputAdornment position="end">%</InputAdornment>,
@@ -2601,10 +2646,17 @@ const Quotations = () => {
                             type="number"
                             className="no-spin"
                             value={negotiateDialog.itemDiscounts[item.qr_item_id] !== undefined ? negotiateDialog.itemDiscounts[item.qr_item_id] : ''}
-                            onChange={(e) => setNegotiateDialog(prev => ({
-                              ...prev,
-                              itemDiscounts: { ...prev.itemDiscounts, [item.qr_item_id]: e.target.value }
-                            }))}
+                            onChange={(e) => {
+                              let val = e.target.value;
+                              if (val !== '') {
+                                if (parseFloat(val) > 100) val = '100';
+                                if (parseFloat(val) < 0) val = '0';
+                              }
+                              setNegotiateDialog(prev => ({
+                                ...prev,
+                                itemDiscounts: { ...prev.itemDiscounts, [item.qr_item_id]: val }
+                              }));
+                            }}
                             placeholder="Common"
                             inputProps={{ step: "0.1", min: "0", max: "100" }}
                             sx={{ '& .MuiInputBase-input': { p: 1, fontSize: '0.8rem' } }}
@@ -2645,7 +2697,26 @@ const Quotations = () => {
                 {negotiateDialog.history.map(h => (
                   <TableRow key={h.id}>
                     <TableCell sx={{ fontSize: '0.75rem' }}>{dayjs(h.created_at).format('DD MMM YYYY HH:mm')}</TableCell>
-                    <TableCell>{h.discount_percent}%</TableCell>
+                    <TableCell>
+                      {h.discount_percent > 0 && <span style={{ fontSize: '0.75rem' }}>Common: {h.discount_percent}%<br/></span>}
+                      {h.item_discounts && Object.keys(h.item_discounts).length > 0 && (
+                        <Tooltip title={
+                          <Box sx={{ p: 0.5 }}>
+                            {Object.entries(h.item_discounts).map(([itemId, disc]) => {
+                              const matName = negotiateDialog.items?.find(it => it.qr_item_id.toString() === itemId)?.material_name || `Item ${itemId}`;
+                              return <Typography key={itemId} variant="caption" sx={{ display: 'block' }}>• {matName}: {disc}%</Typography>;
+                            })}
+                          </Box>
+                        }>
+                          <span style={{ fontSize: '0.7rem', color: '#1976d2', fontWeight: 500, cursor: 'help', textDecoration: 'underline dotted' }}>
+                            {h.discount_percent === 0 ? 'Item-specific' : '+ Item-specific'} ({Object.keys(h.item_discounts).length})
+                          </span>
+                        </Tooltip>
+                      )}
+                      {h.discount_percent === 0 && (!h.item_discounts || Object.keys(h.item_discounts).length === 0) && (
+                        <span style={{ fontSize: '0.75rem' }}>0%</span>
+                      )}
+                    </TableCell>
                     <TableCell sx={{ fontSize: '0.75rem' }}>{h.remarks}</TableCell>
                     <TableCell sx={{ fontSize: '0.75rem' }}>{h.created_by_name}</TableCell>
                   </TableRow>
@@ -2656,7 +2727,10 @@ const Quotations = () => {
         </DialogContent>
         <DialogActions sx={{ p: 2, pt: 0 }}>
           <Button onClick={() => setNegotiateDialog(prev => ({ ...prev, open: false }))}>Cancel</Button>
-          <Button variant="contained" color="primary" onClick={handleNegotiateSubmit} disabled={!negotiateDialog.discountPercent}>
+          <Button variant="contained" color="primary" onClick={handleNegotiateSubmit} disabled={
+            (negotiateDialog.discountPercent === '' || negotiateDialog.discountPercent === null) &&
+            Object.values(negotiateDialog.itemDiscounts).every(val => val === '' || val === null || val === undefined)
+          }>
             Apply Discount
           </Button>
         </DialogActions>

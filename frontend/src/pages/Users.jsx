@@ -204,7 +204,7 @@ export default function Users() {
                         password: '********', // Dummy password to show field is populated
                       });
                       setDialog(true);
-                    }}><Edit fontSize="small" /></IconButton></Tooltip>
+                    }}><Edit color="primary" fontSize="small" /></IconButton></Tooltip>
                   </TableCell>
                 </TableRow>
               ))}

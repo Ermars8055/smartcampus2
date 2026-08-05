@@ -384,7 +384,7 @@ export default function Layout() {
                       <Box key={alert.id} component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 1, pr: 6, color: alert.severity === 'Success' ? '#15803d' : 'inherit' }}>
                         <Typography variant="body2" sx={{ fontWeight: 700, whiteSpace: 'nowrap', fontSize: '0.85rem' }}>{alert.severity === 'Success' ? '✅' : '⚠️'} {alert.title}:</Typography>
                         <Typography variant="body2" sx={{ whiteSpace: 'nowrap', fontSize: '0.85rem' }}>{alert.message}</Typography>
-                        {(alert.reference_type === 'Indent' || alert.reference_type === 'PurchaseOrder' || alert.reference_type === 'PurchaseRequest' || alert.reference_type === 'GateEntry' || alert.reference_type === 'IndentApproved' || alert.reference_type === 'IndentIssued') && (
+                        {(alert.reference_type === 'Indent' || alert.reference_type === 'PurchaseOrder' || alert.reference_type === 'PurchaseRequest' || alert.reference_type === 'GateEntry' || alert.reference_type === 'IndentApproved' || alert.reference_type === 'IndentIssued' || alert.reference_type === 'Vendor') && (
                           <Button 
                             size="small"
                             variant="contained"
@@ -427,6 +427,8 @@ export default function Layout() {
                                 navigate('/purchase-requests', { state: { openPRId: alert.reference_id } });
                               } else if (alert.reference_type === 'GateEntry') {
                                 navigate('/grn');
+                              } else if (alert.reference_type === 'Vendor') {
+                                navigate('/vendors');
                               }
                             }}
                           >

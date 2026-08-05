@@ -311,7 +311,7 @@ export default function IssueSummaryReport() {
     const whName = warehouses.find(w => w.id === filters.warehouseId)?.name || 'ALL STORES';
     doc.text(`${whName} - Material Issue Summary`, doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
     doc.setFontSize(10);
-    doc.text(`ISSUE SUMMARY FROM ${filters.fromDate.format('DD/MM/YYYY')} TO ${filters.toDate.format('DD/MM/YYYY')}`, doc.internal.pageSize.getWidth() / 2, 22, { align: 'center' });
+    doc.text(`ISSUE SUMMARY FROM ${filters.fromDate.format('DD-MMM-YYYY')} TO ${filters.toDate.format('DD-MMM-YYYY')}`, doc.internal.pageSize.getWidth() / 2, 22, { align: 'center' });
 
     const headers = [
       'S.No', 'Material Name', 'UOM', 'Opening\nStock', 'Total\nReceived', 'Issue No',
@@ -532,7 +532,7 @@ export default function IssueSummaryReport() {
         <Typography variant="h5" sx={{ fontWeight: 'bold', textDecoration: 'underline', mb: 1 }}>
           {warehouses.find(w => w.id === filters.warehouseId)?.name || 'MAIN STORE ITEMS'}
         </Typography>
-        <Typography variant="subtitle1">ISSUE SUMMARY FROM {filters.fromDate?.format('DD/MM/YYYY')} TO {filters.toDate?.format('DD/MM/YYYY')}</Typography>
+        <Typography variant="subtitle1">ISSUE SUMMARY FROM {filters.fromDate?.format('DD-MMM-YYYY')} TO {filters.toDate?.format('DD-MMM-YYYY')}</Typography>
       </Box>
 
       {/* Report Table */}

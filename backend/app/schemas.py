@@ -616,7 +616,8 @@ class POBase(BaseModel):
     qr_id: Optional[int] = None
     contract_id: Optional[int] = None
     po_type: str = "Formal"
-    is_cash_purchase: bool = False
+    purchase_mode: str = "Credit Purchase"
+    marketplace_name: Optional[str] = None
     advance_percentage: float = Field(default=0, ge=0, le=100)
     delivery_date: Optional[date] = None
     terms: Optional[str] = None
@@ -624,6 +625,7 @@ class POBase(BaseModel):
     procurement_type: str = "Purchase"
     rental_type: Optional[str] = None
     rental_agreement_number: Optional[str] = None
+    rental_agreement_document: Optional[str] = None
     rental_start_date: Optional[date] = None
     rental_end_date: Optional[date] = None
     billing_frequency: Optional[str] = None
@@ -664,7 +666,8 @@ class POUpdate(BaseModel):
     delivery_date: Optional[date] = None
     status: Optional[str] = None
     terms: Optional[str] = None
-    is_cash_purchase: Optional[bool] = None
+    purchase_mode: Optional[str] = None
+    marketplace_name: Optional[str] = None
     advance_percentage: Optional[float] = Field(None, ge=0, le=100)
 
 class POOut(BaseModel):
@@ -680,11 +683,13 @@ class POOut(BaseModel):
     qr_id: Optional[int] = None
     qr_number: Optional[str] = None
     po_type: str = "Formal"
-    is_cash_purchase: bool = False
+    purchase_mode: str = "Credit Purchase"
+    marketplace_name: Optional[str] = None
     advance_percentage: float = 0
     procurement_type: str = "Purchase"
     rental_type: Optional[str] = None
     rental_agreement_number: Optional[str] = None
+    rental_agreement_document: Optional[str] = None
     rental_start_date: Optional[date] = None
     rental_end_date: Optional[date] = None
     billing_frequency: Optional[str] = None
@@ -863,6 +868,7 @@ class InvoiceBase(BaseModel):
     invoice_date: date
     gate_entry_id: Optional[int] = None
     vendor_id: int
+    institution_id: Optional[int] = None
     po_id: Optional[int] = None
     contract_id: Optional[int] = None
     consignee_id: Optional[int] = None
@@ -910,6 +916,7 @@ class InvoiceUpdate(BaseModel):
     invoice_date: Optional[date] = None
     gate_entry_id: Optional[int] = None
     vendor_id: Optional[int] = None
+    institution_id: Optional[int] = None
     po_id: Optional[int] = None
     consignee_id: Optional[int] = None
     buyer_id: Optional[int] = None
@@ -1453,6 +1460,7 @@ class IndentBase(BaseModel):
 
 class IndentCreate(IndentBase):
     department: Optional[str] = None
+    is_draft: bool = False
 
 class IndentUpdate(BaseModel):
     status: Optional[str] = None
@@ -1690,7 +1698,10 @@ class VendorQuoteDetail(BaseModel):
     vendor_id: int
     vendor_name: str
     quoted_rate: float
+    effective_rate: float
+    discount_percent: float = 0.0
     delivery_days: Optional[int] = None
+    brand: Optional[str] = None
     rank: int
     rank_label: str
 
@@ -1855,6 +1866,8 @@ class GatePassOut(BaseModel):
 class WriteOffItemBase(BaseModel):
     material_id: int
     warehouse_id: Optional[int] = None
+    equipment_id: Optional[int] = None
+    location_id: Optional[int] = None
     quantity: float = Field(..., gt=0)
     rate: float = 0
     amount: float = 0
@@ -1867,6 +1880,7 @@ class WriteOffItemOut(WriteOffItemBase):
     material_code: Optional[str] = None
     uom_name: Optional[str] = None
     warehouse_name: Optional[str] = None
+    location_name: Optional[str] = None
     class Config:
         from_attributes = True
 
@@ -2130,6 +2144,7 @@ class EquipmentItemOut(BaseModel):
     procurement_type: str = "Purchase"
     rental_type: Optional[str] = None
     rental_agreement_number: Optional[str] = None
+    rental_agreement_document: Optional[str] = None
     rental_vendor_id: Optional[int] = None
     rental_start_date: Optional[date] = None
     rental_end_date: Optional[date] = None
@@ -2228,6 +2243,9 @@ class EquipmentWriteOffOut(EquipmentWriteOffBase):
 
 
 # == Contracts Management ==
+
+class MaterialIdsRequest(BaseModel):
+    material_ids: List[int]
 
 class ContractItemBase(BaseModel):
     material_id: Optional[int] = None

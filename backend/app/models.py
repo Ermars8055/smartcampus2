@@ -139,7 +139,7 @@ class GateEntryType(str, enum.Enum):
 
 class IndentStatus(str, enum.Enum):
     DRAFT = "Draft"
-    AWAITING_APPROVAL = "Awaiting Approval"
+    SUBMITTED = "Submitted"
     APPROVED = "Approved"
     PARTIALLY_ISSUED = "Partially Issued"
     ISSUED = "Issued"
@@ -172,7 +172,7 @@ class VendorQuotationReceiptStatus(str, enum.Enum):
 
 class VendorStatus(str, enum.Enum):
     DRAFT = "Draft"
-    AWAITING_APPROVAL = "Awaiting Approval"
+    SUBMITTED = "Submitted"
     APPROVED = "Approved"
     REJECTED = "Rejected"
 
@@ -615,6 +615,7 @@ class EquipmentItem(Base):
     procurement_type = Column(String(50), default=ProcurementType.PURCHASE.value)
     rental_type = Column(String(50), nullable=True)
     rental_agreement_number = Column(String(100), nullable=True)
+    rental_agreement_document = Column(String(500), nullable=True)
     rental_vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=True)
     rental_start_date = Column(Date, nullable=True)
     rental_end_date = Column(Date, nullable=True)
@@ -693,7 +694,7 @@ class Vendor(Base):
     bank_account = Column(String(50))
     ifsc_code = Column(String(20))
     rating = Column(Float, default=0)
-    status = Column(String(50), default=VendorStatus.AWAITING_APPROVAL.value)
+    status = Column(String(50), default=VendorStatus.SUBMITTED.value)
     current_approval_level = Column(Integer, default=1)
     approved_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     approved_at = Column(DateTime, nullable=True)
@@ -805,7 +806,8 @@ class PurchaseOrder(Base):
     institution_id = Column(Integer, ForeignKey("institutions.id"), nullable=True)
     contract_id = Column(Integer, ForeignKey("contracts.id"), nullable=True)
     po_type = Column(String(50), default="Formal") # Formal, Informal
-    is_cash_purchase = Column(Boolean, default=False)
+    purchase_mode = Column(String(50), default="Credit Purchase")
+    marketplace_name = Column(String(100), nullable=True)
     advance_percentage = Column(Float, default=0)
     total_amount = Column(Float, default=0)
     delivery_date = Column(Date)
@@ -814,6 +816,7 @@ class PurchaseOrder(Base):
     procurement_type = Column(String(50), default="Purchase")
     rental_type = Column(String(50), nullable=True)
     rental_agreement_number = Column(String(100), nullable=True)
+    rental_agreement_document = Column(String(500), nullable=True)
     rental_start_date = Column(Date, nullable=True)
     rental_end_date = Column(Date, nullable=True)
     billing_frequency = Column(String(50), nullable=True)
@@ -1042,6 +1045,7 @@ class Invoice(Base):
     invoice_date = Column(Date, nullable=False)
     gate_entry_id = Column(Integer, ForeignKey("gate_entries.id"), nullable=True)
     vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=False)
+    institution_id = Column(Integer, ForeignKey("institutions.id"), nullable=True)
     po_id = Column(Integer, ForeignKey("purchase_orders.id"), nullable=True)
     contract_id = Column(Integer, ForeignKey("contracts.id"), nullable=True)
     consignee_id = Column(Integer, ForeignKey("company_addresses.id"), nullable=True)
@@ -1107,6 +1111,7 @@ class Invoice(Base):
     gate_entry = relationship("GateEntry")
     vendor = relationship("Vendor")
     purchase_order = relationship("PurchaseOrder")
+    institution = relationship("Institution")
     consignee = relationship("CompanyAddress", foreign_keys=[consignee_id])
     buyer = relationship("CompanyAddress", foreign_keys=[buyer_id])
     created_by = relationship("User", foreign_keys=[created_by_id])
@@ -1842,6 +1847,8 @@ class WriteOffItem(Base):
     write_off_id = Column(Integer, ForeignKey("write_offs.id", ondelete="CASCADE"), nullable=False)
     material_id = Column(Integer, ForeignKey("materials.id", ondelete="CASCADE"), nullable=False)
     warehouse_id = Column(Integer, ForeignKey("warehouses.id"), nullable=True)
+    equipment_id = Column(Integer, ForeignKey("equipment_items.id"), nullable=True)
+    location_id = Column(Integer, ForeignKey("location_master.id"), nullable=True)
     quantity = Column(Float, nullable=False)
     rate = Column(Float, default=0)
     amount = Column(Float, default=0)
@@ -1851,6 +1858,8 @@ class WriteOffItem(Base):
     write_off = relationship("WriteOff", back_populates="items")
     material = relationship("Material")
     warehouse = relationship("Warehouse")
+    equipment = relationship("EquipmentItem")
+    location = relationship("LocationMaster")
 
 
 # == Contracts ==

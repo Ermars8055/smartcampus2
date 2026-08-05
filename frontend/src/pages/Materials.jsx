@@ -473,9 +473,11 @@ export default function Materials() {
                   <Chip
                     label={m.is_active ? 'Active' : 'Inactive'}
                     size="small"
-                    color={m.is_active ? 'success' : 'default'}
-                    variant="outlined"
-                    sx={{ fontSize: '0.65rem', height: 20 }}
+                    sx={{
+                      bgcolor: m.is_active ? '#ECFDF5' : '#F1F5F9',
+                      color: m.is_active ? '#10B981' : '#64748B',
+                      fontWeight: 600, fontSize: '0.65rem', border: `1px solid ${m.is_active ? '#10B981' : '#CBD5E1'}`, borderRadius: '6px', height: 20
+                    }}
                   />
                 </Box>
                 <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#334155' }}><strong>Category:</strong> {m.category_name} | <strong>UOM:</strong> {m.uom_name}</Typography>
@@ -501,7 +503,7 @@ export default function Materials() {
                     </Tooltip>
                     <Tooltip title="Edit Material">
                       <IconButton size="small" onClick={() => openEdit(m, false)} sx={{ color: '#64748B' }}>
-                        <Edit fontSize="small" />
+                        <Edit color="primary" fontSize="small" />
                       </IconButton>
                     </Tooltip>
                   </Box>
@@ -649,9 +651,11 @@ export default function Materials() {
                       <Chip
                         label={m.is_active ? 'Active' : 'Inactive'}
                         size="small"
-                        color={m.is_active ? 'success' : 'default'}
-                        variant="outlined"
-                        sx={{ fontSize: '0.65rem', height: 20 }}
+                        sx={{
+                          bgcolor: m.is_active ? '#ECFDF5' : '#F1F5F9',
+                          color: m.is_active ? '#10B981' : '#64748B',
+                          fontWeight: 600, fontSize: '0.65rem', border: `1px solid ${m.is_active ? '#10B981' : '#CBD5E1'}`, borderRadius: '6px', height: 20
+                        }}
                       />
                     </TableCell>
                     <TableCell align="right" sx={{ px: 1 }}>
@@ -663,7 +667,7 @@ export default function Materials() {
                         </Tooltip>
                         <Tooltip title="Edit Material">
                           <IconButton size="small" onClick={() => openEdit(m, false)} sx={{ color: '#64748B' }}>
-                            <Edit fontSize="small" />
+                            <Edit color="primary" fontSize="small" />
                           </IconButton>
                         </Tooltip>
                       </Box>

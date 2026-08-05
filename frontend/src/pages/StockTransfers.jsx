@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { formatDate } from '../utils/dateUtils';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
   DialogContent, DialogActions, Grid, Select, FormControl,
-  InputLabel, IconButton, Paper, InputAdornment, MenuItem, Collapse, Tooltip
+  InputLabel, IconButton, Paper, InputAdornment, MenuItem, Collapse, Tooltip,
+  Tab, Tabs, TableSortLabel
 } from '@mui/material';
-import { Add, Delete, Close, SwapHoriz, Warehouse, AccountTree, Comment, InfoOutlined, CheckCircle, Lock } from '@mui/icons-material';
+import { Add, Delete, Close, SwapHoriz, Warehouse, AccountTree, Comment, InfoOutlined, CheckCircle, Lock, Search } from '@mui/icons-material';
 import api from '../services/api';
 import MaterialSelect from '../components/MaterialSelect';
 import { useAuth } from '../context/AuthContext';
@@ -32,10 +33,46 @@ export default function StockTransfers() {
   const [viewTransferModal, setViewTransferModal] = useState({ open: false, transfer: null, items: [] });
   const [errors, setErrors] = useState({});
 
+  const [search, setSearch] = useState('');
+  const [tab, setTab] = useState(3);
+  const statusFilters = useMemo(() => ['Initiated', 'Partially Received', 'Completed', 'All'], []);
+  const [sortConfig, setSortConfig] = useState({ key: 'created_at', direction: 'desc' });
 
+  const handleSort = (key) => {
+    setSortConfig(prev => ({
+      key,
+      direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
+    }));
+  };
 
-
-
+  const filteredAndSortedTransfers = useMemo(() => {
+    let list = transfers;
+    if (search) {
+      const q = search.toLowerCase();
+      list = list.filter(t => 
+        t.transfer_number?.toLowerCase().includes(q) ||
+        t.from_warehouse_name?.toLowerCase().includes(q) ||
+        t.to_warehouse_name?.toLowerCase().includes(q)
+      );
+    }
+    if (statusFilters[tab] !== 'All') {
+      list = list.filter(t => t.status === statusFilters[tab]);
+    }
+    
+    return [...list].sort((a, b) => {
+      let aVal = a[sortConfig.key];
+      let bVal = b[sortConfig.key];
+      
+      if (sortConfig.key === 'items') {
+        aVal = a.items?.length || 0;
+        bVal = b.items?.length || 0;
+      }
+      
+      if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
+      if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [transfers, search, tab, statusFilters, sortConfig]);
 
   // Auto-clear resolved errors
   useEffect(() => {
@@ -198,7 +235,53 @@ export default function StockTransfers() {
         </Button>
       </Box>
 
-      {transfers.length === 0 ? (
+      {(transfers.length > 0 || search) && (
+        <Card sx={{ mb: 3 }}>
+          <Box sx={{ p: 2, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+            <TextField
+              size="small"
+              placeholder="Search Transfer No., From or To Store..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              sx={{ width: 380 }}
+              InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }}
+            />
+          </Box>
+          <Tabs
+            value={tab}
+            onChange={(_, v) => setTab(v)}
+            variant="scrollable"
+            scrollButtons={false}
+            sx={{ borderBottom: 1, borderColor: 'divider' }}
+          >
+            {statusFilters.map((s, i) => (
+              <Tab
+                key={i}
+                label={
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    {s}
+                    <Chip
+                      label={s === 'All' ? transfers.length : transfers.filter(t => t.status === s).length}
+                      size="small"
+                      sx={{
+                        height: 20,
+                        fontSize: '0.7rem',
+                        fontWeight: 700,
+                        bgcolor: tab === i ? 'primary.main' : 'action.selected',
+                        color: tab === i ? 'white' : 'text.primary',
+                        cursor: 'pointer'
+                      }}
+                    />
+                  </Box>
+                }
+                sx={{ textTransform: 'none', fontWeight: 600, minHeight: 48, minWidth: 'auto', px: 2 }}
+              />
+            ))}
+          </Tabs>
+        </Card>
+      )}
+
+      {filteredAndSortedTransfers.length === 0 ? (
         <Card sx={{ p: 8, textAlign: 'center', border: '1px dashed #CBD5E1', bgcolor: '#F8FAFC', borderRadius: 3 }}>
           <SwapHoriz sx={{ fontSize: 48, color: '#94A3B8', mb: 2 }} />
           <Typography variant="h6" color="textSecondary" sx={{ fontWeight: 600 }}>No Stock Transfer Records Found</Typography>
@@ -210,17 +293,29 @@ export default function StockTransfers() {
             <Table size="small" aria-label="transfers table">
               <TableHead sx={{ bgcolor: '#F8FAFC' }}>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2, py: 1.5 }}>TRANSFER #</TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>DATE</TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>FROM WAREHOUSE</TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>TO WAREHOUSE</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>ITEMS</TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>STATUS</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2, py: 1.5 }}>
+                    <TableSortLabel active={sortConfig.key === 'transfer_number'} direction={sortConfig.key === 'transfer_number' ? sortConfig.direction : 'asc'} onClick={() => handleSort('transfer_number')}>TRANSFER NO.</TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>
+                    <TableSortLabel active={sortConfig.key === 'created_at'} direction={sortConfig.key === 'created_at' ? sortConfig.direction : 'asc'} onClick={() => handleSort('created_at')}>DATE</TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>
+                    <TableSortLabel active={sortConfig.key === 'from_warehouse_name'} direction={sortConfig.key === 'from_warehouse_name' ? sortConfig.direction : 'asc'} onClick={() => handleSort('from_warehouse_name')}>FROM WAREHOUSE</TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>
+                    <TableSortLabel active={sortConfig.key === 'to_warehouse_name'} direction={sortConfig.key === 'to_warehouse_name' ? sortConfig.direction : 'asc'} onClick={() => handleSort('to_warehouse_name')}>TO WAREHOUSE</TableSortLabel>
+                  </TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>
+                    <TableSortLabel active={sortConfig.key === 'items'} direction={sortConfig.key === 'items' ? sortConfig.direction : 'asc'} onClick={() => handleSort('items')}>ITEMS</TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>
+                    <TableSortLabel active={sortConfig.key === 'status'} direction={sortConfig.key === 'status' ? sortConfig.direction : 'asc'} onClick={() => handleSort('status')}>STATUS</TableSortLabel>
+                  </TableCell>
                   <TableCell align="right" sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>ACTIONS</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {transfers.map(trf => (
+                {filteredAndSortedTransfers.map(trf => (
                   <TableRow
                     key={trf.id}
                     hover
@@ -235,7 +330,7 @@ export default function StockTransfers() {
                       <Chip label={trf.items?.length || 0} size="small" sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem', bgcolor: '#F1F5F9', color: '#475569' }} />
                     </TableCell>
                     <TableCell sx={{ px: 2 }}>
-                      <Chip label={trf.status} size="small" color={trf.status === 'Completed' ? 'error' : (trf.status === 'Partially Received' ? 'info' : (trf.status === 'Initiated' ? 'success' : 'default'))} variant="outlined" sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} />
+                      <Chip label={trf.status} size="small" color={trf.status === 'Completed' ? 'success' : (trf.status === 'Partially Received' ? 'warning' : (trf.status === 'Initiated' ? 'primary' : 'default'))} sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} />
                     </TableCell>
                     <TableCell align="right" sx={{ px: 2, whiteSpace: 'nowrap' }}>
                       <IconButton
@@ -463,8 +558,7 @@ export default function StockTransfers() {
                     <Chip
                       label={viewTransferModal.transfer.status}
                       size="small"
-                      color="success"
-                      variant="outlined"
+                      color={viewTransferModal.transfer.status === 'Completed' ? 'success' : (viewTransferModal.transfer.status === 'Partially Received' ? 'warning' : (viewTransferModal.transfer.status === 'Initiated' ? 'primary' : 'default'))}
                       sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }}
                     />
                   </Box>

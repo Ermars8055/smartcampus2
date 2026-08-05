@@ -79,7 +79,7 @@ def list_indents(
     # Add manual material details to items for Out schema
     for indent in indents:
         indent.can_user_approve = False
-        if indent.status == IndentStatus.AWAITING_APPROVAL.value:
+        if indent.status == IndentStatus.SUBMITTED.value:
             for f in flows:
                 if f.level == indent.current_approval_level and \
                    f.min_amount <= indent.total_amount and \
@@ -183,7 +183,7 @@ def create_indent(
             department=data.department,
             remarks=data.remarks,
             total_amount=round(total, 2),
-            status=IndentStatus.AWAITING_APPROVAL.value,
+            status=IndentStatus.DRAFT.value if data.is_draft else IndentStatus.SUBMITTED.value,
             current_approval_level=1
         )
         db.add(indent)
@@ -274,7 +274,7 @@ def approve_indent(
     indent = db.query(Indent).filter(Indent.id == id, Indent.tenant_id == tenant_id, Indent.site_id == site_id).first()
     if not indent:
         raise HTTPException(404, "Indent not found")
-    if indent.status != IndentStatus.AWAITING_APPROVAL.value:
+    if indent.status != IndentStatus.SUBMITTED.value:
         raise HTTPException(400, "Indent is not awaiting approval")
 
     # 1. Get all flows for the current level that apply to this amount
@@ -528,3 +528,93 @@ def acknowledge_indent(
     db.commit()
     return {"message": "Acknowledged successfully"}
 
+@router.put("/{id}", response_model=IndentOut)
+def update_draft_indent(
+    id: int,
+    data: IndentCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("indents", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    indent = db.query(Indent).filter(Indent.id == id, Indent.tenant_id == tenant_id, Indent.site_id == site_id).first()
+    if not indent:
+        raise HTTPException(404, "Indent not found")
+        
+    if indent.status != IndentStatus.DRAFT.value:
+        raise HTTPException(400, "Only draft indents can be edited")
+        
+    # Check material limits first
+    department = data.department or (current_user.department if current_user else None)
+    if department:
+        first_day_of_month = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        for item_data in data.items:
+            limit_obj = db.query(DepartmentMaterialLimit).filter(
+                DepartmentMaterialLimit.tenant_id == tenant_id,
+                DepartmentMaterialLimit.site_id == site_id,
+                DepartmentMaterialLimit.department == department,
+                DepartmentMaterialLimit.material_id == item_data.material_id
+            ).first()
+
+            if limit_obj:
+                # Calculate total requested this month excluding current indent's items
+                total_requested = db.query(func.sum(IndentItem.requested_quantity)).join(Indent).filter(
+                    Indent.tenant_id == tenant_id,
+                    Indent.site_id == site_id,
+                    Indent.department == department,
+                    IndentItem.material_id == item_data.material_id,
+                    Indent.created_at >= first_day_of_month,
+                    Indent.status != IndentStatus.REJECTED.value,
+                    Indent.id != id
+                ).scalar() or 0.0
+
+                if total_requested + item_data.requested_quantity > limit_obj.monthly_limit:
+                    mat = db.query(Material).filter(Material.id == item_data.material_id).first()
+                    mat_name = mat.name if mat else "Unknown Material"
+                    remaining = max(0, limit_obj.monthly_limit - total_requested)
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"The limit per month for '{mat_name}' is {int(limit_obj.monthly_limit)}. You can request only {int(remaining)} more."
+                    )
+
+    # Update basic fields
+    indent.institution_id = data.institution_id
+    indent.department = data.department
+    indent.building_id = data.building_id
+    indent.floor = data.floor
+    indent.room_id = data.room_id
+    indent.location = data.location
+    indent.remarks = data.remarks
+    indent.status = IndentStatus.DRAFT.value if data.is_draft else IndentStatus.SUBMITTED.value
+
+    # Update items
+    # Remove old items
+    db.query(IndentItem).filter(IndentItem.indent_id == id).delete()
+    
+    total = 0
+    for item_data in data.items:
+        mat = db.query(Material).filter(Material.id == item_data.material_id).first()
+        if mat:
+            total += round((mat.standard_cost or 0) * item_data.requested_quantity, 2)
+        
+        item = IndentItem(
+            indent_id=indent.id,
+            material_id=item_data.material_id,
+            requested_quantity=item_data.requested_quantity
+        )
+        db.add(item)
+
+    indent.total_amount = round(total, 2)
+    db.commit()
+    db.refresh(indent)
+    
+    indent.requester_name = current_user.full_name
+    indent.room_name = indent.room.name if indent.room else None
+    for item in indent.items:
+        if item.material:
+            item.material_name = item.material.name
+            item.material_code = item.material.code
+            item.uom_name = item.material.uom.abbreviation if item.material.uom else None
+            item.current_stock = 0
+            
+    return indent

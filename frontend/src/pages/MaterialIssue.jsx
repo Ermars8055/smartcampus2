@@ -499,38 +499,37 @@ export default function MaterialIssue() {
         </Box>
       </Box>
 
-      <Box sx={{ mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-        <TextField
-          size="small"
-          placeholder="Search by Record No (e.g. IND-0001)..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Search sx={{ color: 'text.secondary', fontSize: 20 }} />
-              </InputAdornment>
-            ),
-          }}
-          sx={{ bgcolor: 'white', borderRadius: 1, minWidth: 300, width: '100%', maxWidth: 400 }}
-        />
-        <Autocomplete
-          size="small"
-          options={institutions}
-          getOptionLabel={(option) => option.name || ''}
-          value={filterInstitution}
-          onChange={(e, val) => setFilterInstitution(val)}
-          renderInput={(params) => <TextField {...params} placeholder="Filter by Institution" sx={{ minWidth: 250 }} />}
-          sx={{ bgcolor: 'white', borderRadius: 1 }}
-        />
-      </Box>
-
       <Card sx={{ mb: 3 }}>
+        <Box sx={{ p: 2, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+          <TextField
+            size="small"
+            placeholder="Search by Record No (e.g. IND-0001)..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search sx={{ color: 'text.secondary', fontSize: 20 }} />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ bgcolor: 'white', borderRadius: 1, minWidth: 300, width: '100%', maxWidth: 400 }}
+          />
+          <Autocomplete
+            size="small"
+            options={institutions}
+            getOptionLabel={(option) => option.name || ''}
+            value={filterInstitution}
+            onChange={(e, val) => setFilterInstitution(val)}
+            renderInput={(params) => <TextField {...params} placeholder="Filter by Institution" sx={{ minWidth: 250 }} />}
+            sx={{ bgcolor: 'white', borderRadius: 1 }}
+          />
+        </Box>
         <Tabs
           value={tabValue}
           onChange={(e, v) => setTabValue(v)}
           variant="scrollable"
-          scrollButtons="auto"
+          scrollButtons={false}
           sx={{ borderBottom: 1, borderColor: 'divider' }}
         >
           {['Pending', 'Partial', 'Completed', 'Acknowledged', 'All'].map(s => {
@@ -605,7 +604,7 @@ export default function MaterialIssue() {
                   } else {
                     if (statusLabel === 'Draft') { statusColor = 'default'; }
                     else if (statusLabel === 'Issued') { statusColor = 'success'; }
-                    else if (statusLabel === 'Acknowledged') { statusColor = 'success'; }
+                    else if (statusLabel === 'Acknowledged') { statusColor = 'info'; }
                     else { statusColor = 'success'; }
                   }
 
@@ -631,7 +630,7 @@ export default function MaterialIssue() {
                         )}
                       </TableCell>
                       <TableCell sx={{ px: 2 }}>
-                        <Chip label={statusLabel} size="small" color={statusColor} variant="outlined" sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} />
+                        <Chip label={statusLabel} size="small" color={statusColor} sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} />
                         {row.derivedStatus === 'Acknowledged' && row.acknowledgedByName && (
                           <Typography variant="caption" sx={{ display: 'block', mt: 0.5, fontSize: '0.6rem', color: '#64748B' }}>By {row.acknowledgedByName}</Typography>
                         )}
@@ -997,8 +996,7 @@ export default function MaterialIssue() {
                     <Chip
                       label={viewIssueModal.issue.is_acknowledged ? 'Acknowledged' : 'Completed'}
                       size="small"
-                      color="success"
-                      variant="outlined"
+                      color={viewIssueModal.issue.is_acknowledged ? 'info' : 'success'}
                       sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }}
                     />
                     {viewIssueModal.issue.is_acknowledged && viewIssueModal.issue.acknowledged_by_name && (

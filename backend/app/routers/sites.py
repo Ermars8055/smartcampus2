@@ -16,7 +16,7 @@ def list_sites(
     current_user: User = Depends(get_current_user)
 ):
     # If Super Admin, return all
-    if current_user.tenant_id is None:
+    if getattr(current_user, '_tenant_id', None) is None:
         return db.query(Site).all()
         
     # Standard user: return sites they have access to
@@ -31,14 +31,14 @@ def create_site(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("admin_users", "create")) # Or separate admin_sites permission
 ):
-    if current_user.tenant_id is None:
+    if getattr(current_user, '_tenant_id', None) is None:
         raise HTTPException(status_code=400, detail="Super Admins cannot create tenant sites this way.")
         
     site = Site(
         name=data.name,
         location=data.location,
         is_active=data.is_active,
-        tenant_id=current_user.tenant_id
+        tenant_id=getattr(current_user, '_tenant_id', None)
     )
     db.add(site)
     db.flush()
@@ -61,7 +61,7 @@ def update_site(
 ):
     site = db.query(Site).filter(
         Site.id == id,
-        Site.tenant_id == current_user.tenant_id
+        Site.tenant_id == getattr(current_user, '_tenant_id', None)
     ).first()
     if not site:
         raise HTTPException(status_code=404, detail="Site not found")

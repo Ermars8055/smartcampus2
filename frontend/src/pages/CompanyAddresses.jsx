@@ -213,7 +213,7 @@ export default function CompanyAddresses() {
                     </TableCell>
                     <TableCell align="right">
                       <IconButton size="small" color="primary" onClick={() => openModal(addr)}>
-                        <Edit fontSize="small" />
+                        <Edit color="primary" fontSize="small" />
                       </IconButton>
                       <IconButton size="small" color="error" onClick={() => handleDelete(addr.id)}>
                         <Delete fontSize="small" />

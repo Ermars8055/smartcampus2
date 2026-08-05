@@ -7,6 +7,7 @@ import { Search, RemoveRedEye } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useMessage } from '../context/MessageContext';
+import { formatDate } from '../utils/dateUtils';
 
 export default function RepairWorkOrders() {
   const { showMessage } = useMessage();
@@ -61,7 +62,7 @@ export default function RepairWorkOrders() {
           value={tabValue}
           onChange={(e, v) => setTabValue(v)}
           variant="scrollable"
-          scrollButtons="auto"
+          scrollButtons={false}
           sx={{ borderTop: 1, borderColor: 'divider' }}
         >
           {['Assigned', 'In Progress', 'Completed', 'Closed', 'All'].map(s => {
@@ -125,7 +126,7 @@ export default function RepairWorkOrders() {
                   </TableCell>
                   <TableCell sx={{ fontSize: '0.8rem' }}>{rwo.vendor_name}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem' }}>
-                    {new Date(rwo.created_at).toLocaleDateString()}
+                    {formatDate(rwo.created_at)}
                   </TableCell>
                   <TableCell>
                     <Chip 

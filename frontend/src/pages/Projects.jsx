@@ -156,7 +156,7 @@ export default function Projects() {
                         <Typography variant="caption" sx={{ color: '#64748B' }}>{org.code} • {org.address}</Typography>
                       </Box>
                       <Box>
-                        <IconButton size="small" onClick={(e) => { e.stopPropagation(); setForm(org); setDialog('org'); }}><Edit fontSize="small" /></IconButton>
+                        <IconButton size="small" onClick={(e) => { e.stopPropagation(); setForm(org); setDialog('org'); }}><Edit color="primary" fontSize="small" /></IconButton>
                         <IconButton size="small" onClick={(e) => { e.stopPropagation(); handleDelete('organization', org.id); }} color="error"><Delete fontSize="small" /></IconButton>
                       </Box>
                     </Box>
@@ -171,7 +171,7 @@ export default function Projects() {
                             <Typography variant="caption" sx={{ color: '#64748B' }}>{proj.code} • {proj.location}</Typography>
                           </Box>
                           <Chip label={proj.status} size="small" color="success" variant="outlined" sx={{ borderRadius: '6px', fontWeight: 600 }} />
-                          <IconButton size="small" onClick={() => { setForm(proj); setDialog('project'); }}><Edit fontSize="small" /></IconButton>
+                          <IconButton size="small" onClick={() => { setForm(proj); setDialog('project'); }}><Edit color="primary" fontSize="small" /></IconButton>
                           <IconButton size="small" onClick={() => handleDelete('project', proj.id)} color="error"><Delete fontSize="small" /></IconButton>
                         </Box>
                         <Box sx={{ ml: 4, mt: 1 }}>
@@ -184,7 +184,7 @@ export default function Projects() {
                                   <Typography variant="body2" sx={{ fontWeight: 600 }}>{inst.name}</Typography>
                                   <Typography variant="caption" sx={{ color: '#64748B' }}>{inst.code}</Typography>
                                 </Box>
-                                <IconButton size="small" onClick={() => { setForm(inst); setDialog('institution'); }}><Edit sx={{ fontSize: 16 }} /></IconButton>
+                                <IconButton size="small" onClick={() => { setForm(inst); setDialog('institution'); }}><Edit color="primary" sx={{ fontSize: 16 }} /></IconButton>
                                 <IconButton size="small" color="error" onClick={() => handleDelete('institution', inst.id)}><Delete sx={{ fontSize: 16 }} /></IconButton>
                               </Box>
                               <Box sx={{ ml: 4, mt: 0.5 }}>
@@ -200,7 +200,7 @@ export default function Projects() {
                                         <Chip label={dept.accounting_code} size="small" variant="outlined" color="default" sx={{ height: 18, fontSize: '0.6rem', fontWeight: 500 }} />
                                       )}
                                     </Box>
-                                    <IconButton size="small" onClick={() => { setForm({ ...dept, building_id: dept.building_id || '', accounting_code: dept.accounting_code || '' }); setDialog('department'); }}><Edit sx={{ fontSize: 14 }} /></IconButton>
+                                    <IconButton size="small" onClick={() => { setForm({ ...dept, building_id: dept.building_id || '', accounting_code: dept.accounting_code || '' }); setDialog('department'); }}><Edit color="primary" sx={{ fontSize: 14 }} /></IconButton>
                                     <IconButton size="small" color="error" onClick={() => handleDelete('department', dept.id)}><Delete sx={{ fontSize: 14 }} /></IconButton>
                                   </Box>
                                 ))}
@@ -245,7 +245,7 @@ export default function Projects() {
                             <Chip label={b.department_name} size="small" variant="outlined" color="primary" sx={{ height: 20, fontSize: '0.65rem', fontWeight: 600, ml: 1 }} />
                           )}
                           <Box sx={{ ml: 'auto' }}>
-                            <IconButton size="small" onClick={(e) => { e.stopPropagation(); setForm(b); setDialog('building'); }}><Edit sx={{ fontSize: 16 }} /></IconButton>
+                            <IconButton size="small" onClick={(e) => { e.stopPropagation(); setForm(b); setDialog('building'); }}><Edit color="primary" sx={{ fontSize: 16 }} /></IconButton>
                             <IconButton size="small" color="error" onClick={(e) => { e.stopPropagation(); handleDelete('building', b.id); }}><Delete sx={{ fontSize: 16 }} /></IconButton>
                           </Box>
                         </Box>
@@ -260,7 +260,7 @@ export default function Projects() {
                                 <Chip label={f.department_name} size="small" variant="outlined" color="primary" sx={{ height: 18, fontSize: '0.6rem', fontWeight: 500, ml: 1 }} />
                               )}
                               <Box sx={{ ml: 'auto' }}>
-                                <IconButton size="small" onClick={() => { setForm({...f, _institution_id: b.institution_id}); setDialog('floor'); }}><Edit sx={{ fontSize: 14 }} /></IconButton>
+                                <IconButton size="small" onClick={() => { setForm({...f, _institution_id: b.institution_id}); setDialog('floor'); }}><Edit color="primary" sx={{ fontSize: 14 }} /></IconButton>
                                 <IconButton size="small" color="error" onClick={() => handleDelete('floor', f.id)}><Delete sx={{ fontSize: 14 }} /></IconButton>
                               </Box>
                             </Box>
@@ -279,7 +279,7 @@ export default function Projects() {
                                     const bldg = buildings.find(bl => bl.id === floor?.building_id);
                                     setForm({ ...r, _building_id: bldg?.id || '', _institution_id: bldg?.institution_id || '', department_name: r.department_name || '' });
                                     setDialog('room');
-                                  }}><Edit sx={{ fontSize: 14 }} /></IconButton>
+                                  }}><Edit color="primary" sx={{ fontSize: 14 }} /></IconButton>
                                   <IconButton size="small" color="error" onClick={() => handleDelete('room', r.id)}><Delete sx={{ fontSize: 14 }} /></IconButton>
                                 </Box>
                               ))}

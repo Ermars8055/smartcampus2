@@ -4,9 +4,11 @@ import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
   InputLabel, Divider, TableSortLabel, useTheme, useMediaQuery,
-  DialogContent, DialogActions, Grid, MenuItem, Select, FormControl, FormHelperText, IconButton, Autocomplete, RadioGroup, FormControlLabel, Radio
+  DialogContent, DialogActions, Grid, MenuItem, Select, FormControl, FormHelperText, IconButton, Autocomplete, RadioGroup, FormControlLabel, Radio, Tab, Tabs
 } from '@mui/material';
 import { Add, Search, AssignmentTurnedIn, AttachFile, OpenInNew, Delete, ArrowBack } from '@mui/icons-material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import dayjs from 'dayjs';
 import api, { getFileUrl } from '../services/api';
 import { formatDate } from '../utils/dateUtils';
 import { useAuth } from '../context/AuthContext';
@@ -28,6 +30,8 @@ export default function GRNPage() {
   const [dialog, setDialog] = useState(false);
   const [detailDialog, setDetailDialog] = useState(null);
   const [search, setSearch] = useState('');
+  const [tab, setTab] = useState(2);
+  const statusFilters = useMemo(() => ['Draft', 'Completed', 'All'], []);
   const [sortConfig, setSortConfig] = useState({ key: 'created_at', direction: 'desc' });
   const initialForm = {
     po_id: '', gate_entry_id: '', warehouse_id: '', project_id: '', vendor_id: '', new_vendor_name: '',
@@ -128,7 +132,7 @@ export default function GRNPage() {
         rate: it.rate, material_name: it.material_name, material_code: it.material_code, uom_name: it.uom_name
       })) || [];
       setForm({
-        ...form, po_id: poId, vendor_id: po.vendor_id, project_id: po.project_id, receipt_type: 'PO-Based', po_procurement_type: po.procurement_type,
+        ...form, po_id: poId, vendor_id: po.vendor_id, project_id: po.project_id, receipt_type: 'PO-Based', po_procurement_type: po.procurement_type, po_rental_type: po.rental_type,
         items
       });
     }
@@ -258,8 +262,21 @@ export default function GRNPage() {
     if (projId) {
       list = list.filter(g => g.project_id === parseInt(projId, 10));
     }
+    if (search) {
+      const q = search.toLowerCase();
+      list = list.filter(g => 
+        g.grn_number?.toLowerCase().includes(q) ||
+        g.po_number?.toLowerCase().includes(q) ||
+        g.vendor_name?.toLowerCase().includes(q) ||
+        g.warehouse_name?.toLowerCase().includes(q) ||
+        g.invoice_number?.toLowerCase().includes(q)
+      );
+    }
+    if (statusFilters[tab] !== 'All') {
+      list = list.filter(g => g.status === statusFilters[tab]);
+    }
     return list;
-  }, [grns, searchParams]);
+  }, [grns, searchParams, search, tab, statusFilters]);
 
   const sortedGrns = [...filteredGrnsBase].sort((a, b) => {
     let valA = a[sortConfig.key];
@@ -297,10 +314,48 @@ export default function GRNPage() {
         </Box>
       </Box>
 
-      <Card sx={{ mb: 3, p: 2 }}>
-        <TextField size="small" placeholder="Search GRN number..." value={search}
-          onChange={e => setSearch(e.target.value)} sx={{ minWidth: 300 }}
-          InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }} />
+      <Card sx={{ mb: 3 }}>
+        <Box sx={{ p: 2, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+          <TextField
+            size="small"
+            placeholder="Search GRN, PO, Vendor, or Invoice..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            sx={{ width: 380 }}
+            InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }}
+          />
+        </Box>
+        <Tabs
+          value={tab}
+          onChange={(_, v) => setTab(v)}
+          variant="scrollable"
+          scrollButtons={false}
+          sx={{ borderBottom: 1, borderColor: 'divider' }}
+        >
+          {statusFilters.map((s, i) => (
+            <Tab
+              key={i}
+              label={
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  {s}
+                  <Chip
+                    label={s === 'All' ? grns.length : grns.filter(g => g.status === s).length}
+                    size="small"
+                    sx={{
+                      height: 20,
+                      fontSize: '0.7rem',
+                      fontWeight: 700,
+                      bgcolor: tab === i ? 'primary.main' : 'action.selected',
+                      color: tab === i ? 'white' : 'text.primary',
+                      cursor: 'pointer'
+                    }}
+                  />
+                </Box>
+              }
+              sx={{ textTransform: 'none', fontWeight: 600, minHeight: 48, minWidth: 'auto', px: 2 }}
+            />
+          ))}
+        </Tabs>
       </Card>
 
       <Card>
@@ -466,7 +521,22 @@ export default function GRNPage() {
                 <Grid item xs={12} sm={6}><TextField fullWidth size="small" label="Invoice Number" value={form.invoice_number || ''} onChange={e => setForm({ ...form, invoice_number: e.target.value })} /></Grid>
 
                 {/* Line 2 */}
-                <Grid item xs={12} sm={6}><TextField fullWidth size="small" label="Invoice Date" type="date" value={form.invoice_date || ''} onChange={e => setForm({ ...form, invoice_date: e.target.value })} InputLabelProps={{ shrink: true }} inputProps={{ max: new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0] }} /></Grid>
+                <Grid item xs={12} sm={6}>
+                  <DatePicker
+                    label="Invoice Date"
+                    value={form.invoice_date ? dayjs(form.invoice_date) : null}
+                    onChange={val => setForm({ ...form, invoice_date: val ? val.format('YYYY-MM-DD') : '' })}
+                    format="DD/MMM/YYYY"
+                    disableFuture
+                    localeText={{ fieldMonthPlaceholder: () => 'MMM' }}
+                    slotProps={{
+                      textField: {
+                        fullWidth: true,
+                        size: 'small'
+                      }
+                    }}
+                  />
+                </Grid>
                 <Grid item xs={12} sm={6}><TextField fullWidth size="small" label="Invoice Amount (₹)" type="number" inputProps={{ step: "0.01", min: "0" }} value={form.invoice_amount} onChange={e => setForm({ ...form, invoice_amount: Math.max(0, parseFloat(e.target.value) || 0) })} /></Grid>
 
                 {/* Line 3 */}
@@ -492,10 +562,18 @@ export default function GRNPage() {
                       id="field-vendor"
                       size="small"
                       freeSolo
-                      options={vendors.map(v => v.name)}
-                      value={form.vendor_id ? vendors.find(v => v.id === form.vendor_id)?.name || '' : form.new_vendor_name || ''}
+                      options={vendors.map(v => v.code ? `${v.code} - ${v.name}` : v.name)}
+                      value={
+                        form.vendor_id 
+                          ? (() => {
+                              const v = vendors.find(v => v.id === form.vendor_id);
+                              if (!v) return '';
+                              return v.code ? `${v.code} - ${v.name}` : v.name;
+                            })()
+                          : form.new_vendor_name || ''
+                      }
                       onChange={(e, newValue) => {
-                        const existing = vendors.find(v => v.name === newValue);
+                        const existing = vendors.find(v => (v.code ? `${v.code} - ${v.name}` : v.name) === newValue || v.name === newValue);
                         if (existing) {
                           setForm({ ...form, vendor_id: existing.id, new_vendor_name: '' });
                         } else {
@@ -503,7 +581,7 @@ export default function GRNPage() {
                         }
                       }}
                       onInputChange={(e, newInputValue) => {
-                        const existing = vendors.find(v => v.name === newInputValue);
+                        const existing = vendors.find(v => (v.code ? `${v.code} - ${v.name}` : v.name) === newInputValue || v.name === newInputValue);
                         if (existing) {
                           setForm({ ...form, vendor_id: existing.id, new_vendor_name: '' });
                         } else {
@@ -701,32 +779,42 @@ export default function GRNPage() {
                                   Optionally enter serial numbers, installation date, and rental details (if applicable).
                                 </Typography>
                               </Box>
-                              {form.po_procurement_type === 'Rental' && (
+                              {form.po_procurement_type === 'Rental' && form.po_rental_type !== 'Cost Per Test' && (
                                 <Chip label="Rental Equipment" size="small" color="info" sx={{ fontWeight: 600 }} />
                               )}
                             </Box>
 
                             <Grid container spacing={2} sx={{ mb: 2 }}>
                               <Grid item xs={12} sm={4}>
-                                <TextField
-                                  fullWidth size="small" type="date" label="Installation Date" InputLabelProps={{ shrink: true }}
-                                  value={item.installation_date || ''}
-                                  onChange={e => {
+                                <DatePicker
+                                  label="Installation Date"
+                                  value={item.installation_date ? dayjs(item.installation_date) : null}
+                                  onChange={val => {
                                     const items = [...form.items];
-                                    items[i].installation_date = e.target.value;
+                                    items[i].installation_date = val ? val.format('YYYY-MM-DD') : '';
                                     setForm({ ...form, items });
+                                  }}
+                                  format="DD/MMM/YYYY"
+                                  localeText={{ fieldMonthPlaceholder: () => 'MMM' }}
+                                  slotProps={{
+                                    textField: { fullWidth: true, size: 'small' }
                                   }}
                                 />
                               </Grid>
-                              {form.po_procurement_type === 'Rental' && (
+                              {form.po_procurement_type === 'Rental' && form.po_rental_type !== 'Cost Per Test' && (
                                 <Grid item xs={12} sm={4}>
-                                  <TextField
-                                    fullWidth size="small" type="date" label="Override Rental Start" InputLabelProps={{ shrink: true }}
-                                    value={item.rental_start_date || ''}
-                                    onChange={e => {
+                                  <DatePicker
+                                    label="Override Rental Start"
+                                    value={item.rental_start_date ? dayjs(item.rental_start_date) : null}
+                                    onChange={val => {
                                       const items = [...form.items];
-                                      items[i].rental_start_date = e.target.value;
+                                      items[i].rental_start_date = val ? val.format('YYYY-MM-DD') : '';
                                       setForm({ ...form, items });
+                                    }}
+                                    format="DD/MMM/YYYY"
+                                    localeText={{ fieldMonthPlaceholder: () => 'MMM' }}
+                                    slotProps={{
+                                      textField: { fullWidth: true, size: 'small' }
                                     }}
                                   />
                                 </Grid>

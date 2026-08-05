@@ -1167,6 +1167,9 @@ class GRN(Base):
     invoice_date = Column(Date)
     invoice_amount = Column(Float, default=0)
     invoice_scan_url = Column(String(500))  # Scanned invoice file
+    dc_number = Column(String(100))
+    dc_date = Column(Date)
+    dc_scan_url = Column(String(500))  # Scanned delivery challan file
     # GST fields
     vendor_gstin = Column(String(20))
     total_taxable_amount = Column(Float, default=0)

@@ -36,6 +36,7 @@ export default function GRNPage() {
   const initialForm = {
     po_id: '', gate_entry_id: '', warehouse_id: '', project_id: '', vendor_id: '', new_vendor_name: '',
     invoice_number: '', invoice_date: '', invoice_amount: 0, invoice_scan_url: '', 
+    dc_number: '', dc_date: '', dc_scan_url: '',
     items: [{ material_id: '', ordered_quantity: 0, received_quantity: 0, accepted_quantity: 0, rejected_quantity: 0, rate: 0 }],
     receipt_type: 'Direct Invoice'
   };
@@ -109,10 +110,13 @@ export default function GRNPage() {
         invoice_scan_url: ge.invoice_scan_url || '',
         invoice_number: ge.invoice_number || '',
         invoice_date: ge.invoice_date || '',
-        invoice_amount: ge.invoice_amount || prev.invoice_amount || 0
+        invoice_amount: ge.invoice_amount || prev.invoice_amount || 0,
+        dc_scan_url: ge.dc_scan_url || '',
+        dc_number: ge.dc_number || '',
+        dc_date: ge.dc_date || ''
       }));
     } else {
-      setForm(prev => ({ ...prev, gate_entry_id: '', invoice_scan_url: '', invoice_number: '', invoice_date: '', invoice_amount: prev.invoice_amount || 0 }));
+      setForm(prev => ({ ...prev, gate_entry_id: '', invoice_scan_url: '', invoice_number: '', invoice_date: '', invoice_amount: prev.invoice_amount || 0, dc_scan_url: '', dc_number: '', dc_date: '' }));
     }
   };
 
@@ -142,14 +146,14 @@ export default function GRNPage() {
 
 
 
-  const handleUpload = async (file) => {
+  const handleUpload = async (file, fieldName = 'invoice_scan_url') => {
     if (!file) return;
     setUploading(true);
     try {
       const fd = new FormData();
       fd.append('file', file);
       const res = await api.post('/api/upload', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-      setForm(prev => ({ ...prev, invoice_scan_url: res.data.url }));
+      setForm(prev => ({ ...prev, [fieldName]: res.data.url }));
     } catch (err) {
       showMessage('Upload failed: ' + (err.response?.data?.detail || err.message), 'Error', 'error');
     }
@@ -232,7 +236,10 @@ export default function GRNPage() {
         gate_entry_id: form.gate_entry_id || null,
         project_id: form.project_id || (projects.length > 0 ? projects[0].id : null),
         invoice_date: form.invoice_date || null,
-        invoice_amount: Number(parseFloat(form.invoice_amount).toFixed(2)) || 0
+        invoice_amount: Number(parseFloat(form.invoice_amount).toFixed(2)) || 0,
+        dc_number: form.dc_number || '',
+        dc_date: form.dc_date || null,
+        dc_scan_url: form.dc_scan_url || ''
       };
       await api.post('/api/grn', payload);
       setDialog(false);
@@ -428,17 +435,31 @@ export default function GRNPage() {
           <Grid container spacing={2} sx={{ mb: 2 }}>
             <Grid item xs={3}><Typography variant="caption" color="textSecondary">Vendor</Typography><Typography sx={{ fontWeight: 600, fontSize: '0.9rem' }}>{detailDialog?.vendor_name}</Typography></Grid>
             <Grid item xs={3}><Typography variant="caption" color="textSecondary">Store</Typography><Typography sx={{ fontWeight: 600, fontSize: '0.9rem' }}>{detailDialog?.warehouse_name}</Typography></Grid>
-            <Grid item xs={3}><Typography variant="caption" color="textSecondary">Invoice</Typography><Typography sx={{ fontSize: '0.9rem' }}>{detailDialog?.invoice_number}</Typography></Grid>
+            <Grid item xs={3}><Typography variant="caption" color="textSecondary">Invoice / DC</Typography><Typography sx={{ fontSize: '0.9rem' }}>{[detailDialog?.invoice_number ? 'INV: ' + detailDialog.invoice_number : '', detailDialog?.dc_number ? 'DC: ' + detailDialog.dc_number : ''].filter(Boolean).join(' | ') || '—'}</Typography></Grid>
             <Grid item xs={3}><Typography variant="caption" color="textSecondary">Received By</Typography><Typography sx={{ fontSize: '0.9rem' }}>{detailDialog?.received_by_name}</Typography></Grid>
-            {detailDialog?.invoice_scan_url && (
-              <Grid item xs={12}>
-                <Typography variant="caption" color="textSecondary">Invoice Scan</Typography>
-                <Box sx={{ mt: 0.5 }}>
-                  <Button size="small" variant="outlined" startIcon={<OpenInNew />}
-                    onClick={() => window.open(getFileUrl(detailDialog.invoice_scan_url), '_blank')}>View Invoice Scan</Button>
-                </Box>
+            
+            <Grid item xs={12}>
+              <Grid container spacing={2}>
+                {detailDialog?.invoice_scan_url && (
+                  <Grid item xs={6} sm={4}>
+                    <Typography variant="caption" color="textSecondary">Invoice Scan</Typography>
+                    <Box sx={{ mt: 0.5 }}>
+                      <Button size="small" variant="outlined" startIcon={<OpenInNew />}
+                        onClick={() => window.open(getFileUrl(detailDialog.invoice_scan_url), '_blank')}>View Invoice Scan</Button>
+                    </Box>
+                  </Grid>
+                )}
+                {detailDialog?.dc_scan_url && (
+                  <Grid item xs={6} sm={4}>
+                    <Typography variant="caption" color="textSecondary">DC Scan</Typography>
+                    <Box sx={{ mt: 0.5 }}>
+                      <Button size="small" variant="outlined" startIcon={<OpenInNew />} sx={{ color: '#0F766E', borderColor: '#0F766E' }}
+                        onClick={() => window.open(getFileUrl(detailDialog.dc_scan_url), '_blank')}>View DC Scan</Button>
+                    </Box>
+                  </Grid>
+                )}
               </Grid>
-            )}
+            </Grid>
           </Grid>
           <Table size="small">
             <TableHead><TableRow>
@@ -537,7 +558,40 @@ export default function GRNPage() {
                     }}
                   />
                 </Grid>
-                <Grid item xs={12} sm={6}><TextField fullWidth size="small" label="Invoice Amount (₹)" type="number" inputProps={{ step: "0.01", min: "0" }} value={form.invoice_amount} onChange={e => setForm({ ...form, invoice_amount: Math.max(0, parseFloat(e.target.value) || 0) })} /></Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField fullWidth size="small" label="Invoice Amount (₹)" type="number" inputProps={{ step: "0.01", min: "0" }} value={form.invoice_amount} 
+                    onChange={e => setForm({ ...form, invoice_amount: Math.max(0, parseFloat(e.target.value) || 0) })} 
+                    color={(() => {
+                      const expected = form.items.reduce((s, i) => s + (i.accepted_quantity || 0) * (i.rate || 0), 0);
+                      return form.invoice_amount > 0 && Math.abs(form.invoice_amount - expected) > 2 ? "warning" : "primary";
+                    })()}
+                    focused={(() => {
+                      const expected = form.items.reduce((s, i) => s + (i.accepted_quantity || 0) * (i.rate || 0), 0);
+                      return form.invoice_amount > 0 && Math.abs(form.invoice_amount - expected) > 2;
+                    })()}
+                    helperText={(() => {
+                      const expected = form.items.reduce((s, i) => s + (i.accepted_quantity || 0) * (i.rate || 0), 0);
+                      if (form.invoice_amount > 0 && expected > 0 && Math.abs(form.invoice_amount - expected) > 2) {
+                        return `Note: Items sum is ₹${expected.toFixed(2)}`;
+                      }
+                      return "";
+                    })()}
+                  />
+                </Grid>
+
+                {/* Line 2.5 - DC */}
+                <Grid item xs={12} sm={6}><TextField fullWidth size="small" label="DC Number" value={form.dc_number || ''} onChange={e => setForm({ ...form, dc_number: e.target.value })} /></Grid>
+                <Grid item xs={12} sm={6}>
+                  <DatePicker
+                    label="DC Date"
+                    value={form.dc_date ? dayjs(form.dc_date) : null}
+                    onChange={val => setForm({ ...form, dc_date: val ? val.format('YYYY-MM-DD') : '' })}
+                    format="DD/MMM/YYYY"
+                    disableFuture
+                    localeText={{ fieldMonthPlaceholder: () => 'MMM' }}
+                    slotProps={{ textField: { fullWidth: true, size: 'small' } }}
+                  />
+                </Grid>
 
                 {/* Line 3 */}
                 {form.receipt_type === 'PO-Based' && (
@@ -607,20 +661,12 @@ export default function GRNPage() {
               </Grid>
             </Grid>
 
-            {/* Invoice Upload Section */}
-            <Grid item xs={12} md={4} sx={{ display: 'flex', flexDirection: 'column' }}>
+            {/* Upload Section */}
+            <Grid item xs={12} md={4} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              {/* Invoice Upload */}
               <Box sx={{
-                p: 1.5,
-                border: '2px dashed #1E3A8A',
-                borderRadius: 2,
-                bgcolor: '#F0F4F8',
-                textAlign: 'center',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'center',
-                flexGrow: 1,
-                minHeight: 100
+                p: 1.5, border: '2px dashed #1E3A8A', borderRadius: 2, bgcolor: '#F0F4F8',
+                textAlign: 'center', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', flexGrow: 1, minHeight: 100
               }}>
                 {form.invoice_scan_url ? (
                   <Box>
@@ -633,18 +679,35 @@ export default function GRNPage() {
                   </Box>
                 ) : (
                   <>
-                    <Typography sx={{ mb: 0.5, fontWeight: 600, color: '#1E3A8A', fontSize: '0.9rem' }}>
-                      📎 Upload / Update Invoice
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: '#64748B', display: 'block', mb: 1.5 }}>
-                      PDF, JPG, or PNG
-                    </Typography>
-                    <Button variant="contained" component="label" disabled={uploading} size="small"
-                      color="primary"
-                      sx={{ bgcolor: '#1E3A8A', '&:hover': { bgcolor: '#1e2a5a' }, textTransform: 'none' }}>
+                    <Typography sx={{ mb: 0.5, fontWeight: 600, color: '#1E3A8A', fontSize: '0.9rem' }}>📎 Upload Invoice</Typography>
+                    <Button variant="contained" component="label" disabled={uploading} size="small" color="primary" sx={{ bgcolor: '#1E3A8A', '&:hover': { bgcolor: '#1e2a5a' }, textTransform: 'none', mt: 1 }}>
                       {uploading ? 'Uploading...' : 'Choose File'}
-                      <input type="file" hidden accept=".pdf,.jpg,.jpeg,.png,.webp"
-                        onChange={e => handleUpload(e.target.files[0])} />
+                      <input type="file" hidden accept=".pdf,.jpg,.jpeg,.png,.webp" onChange={e => handleUpload(e.target.files[0], 'invoice_scan_url')} />
+                    </Button>
+                  </>
+                )}
+              </Box>
+              
+              {/* DC Upload */}
+              <Box sx={{
+                p: 1.5, border: '2px dashed #0F766E', borderRadius: 2, bgcolor: '#F0FDF4',
+                textAlign: 'center', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', flexGrow: 1, minHeight: 100
+              }}>
+                {form.dc_scan_url ? (
+                  <Box>
+                    <AttachFile sx={{ color: '#0F766E', mb: 1 }} />
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: '#0F766E', mb: 1 }}>Challan attached ✓</Typography>
+                    <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
+                      <Button size="small" variant="outlined" sx={{ color: '#0F766E', borderColor: '#0F766E' }} onClick={() => window.open(getFileUrl(form.dc_scan_url), '_blank')}>View DC</Button>
+                      <Button size="small" color="error" onClick={() => setForm({ ...form, dc_scan_url: '' })}>Update</Button>
+                    </Box>
+                  </Box>
+                ) : (
+                  <>
+                    <Typography sx={{ mb: 0.5, fontWeight: 600, color: '#0F766E', fontSize: '0.9rem' }}>📎 Upload DC</Typography>
+                    <Button variant="contained" component="label" disabled={uploading} size="small" color="primary" sx={{ bgcolor: '#0F766E', '&:hover': { bgcolor: '#0b5c56' }, textTransform: 'none', mt: 1 }}>
+                      {uploading ? 'Uploading...' : 'Choose File'}
+                      <input type="file" hidden accept=".pdf,.jpg,.jpeg,.png,.webp" onChange={e => handleUpload(e.target.files[0], 'dc_scan_url')} />
                     </Button>
                   </>
                 )}
@@ -722,6 +785,7 @@ export default function GRNPage() {
                           onChange={e => {
                             const items = [...form.items];
                             items[i].received_quantity = Math.max(0, Math.round(parseFloat(e.target.value) || 0));
+                            items[i].rejected_quantity = Math.max(0, items[i].received_quantity - (items[i].accepted_quantity || 0));
                             setForm({ ...form, items });
                           }} />
                       </TableCell>
@@ -731,17 +795,13 @@ export default function GRNPage() {
                           onChange={e => {
                             const items = [...form.items];
                             items[i].accepted_quantity = Math.max(0, Math.round(parseFloat(e.target.value) || 0));
+                            items[i].rejected_quantity = Math.max(0, (items[i].received_quantity || 0) - items[i].accepted_quantity);
                             setForm({ ...form, items });
                           }} />
                       </TableCell>
                       <TableCell align="right">
-                        <TextField size="small" type="number" inputProps={{ step: "1", min: "0" }} value={item.rejected_quantity ?? ''} sx={{ width: 80 }}
-                          error={!!itemErrors[i]?.rejected_quantity}
-                          onChange={e => {
-                            const items = [...form.items];
-                            items[i].rejected_quantity = Math.max(0, Math.round(parseFloat(e.target.value) || 0));
-                            setForm({ ...form, items });
-                          }} />
+                        <TextField size="small" type="number" InputProps={{ readOnly: true, sx: { bgcolor: '#f8fafc', color: '#64748b' } }} value={item.rejected_quantity ?? ''} sx={{ width: 80 }}
+                          error={!!itemErrors[i]?.rejected_quantity} />
                       </TableCell>
                       <TableCell align="right">
                         {form.receipt_type === 'Direct Invoice' ? (

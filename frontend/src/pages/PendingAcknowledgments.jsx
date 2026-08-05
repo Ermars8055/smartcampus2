@@ -39,9 +39,6 @@ export default function PendingAcknowledgments() {
   return (
     <Box>
       <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Box sx={{ p: 1.5, bgcolor: '#FEF3C7', borderRadius: 2, color: '#D97706', display: 'flex' }}>
-          <AssignmentTurnedIn fontSize="large" />
-        </Box>
         <Box>
           <Typography variant="h5" sx={{ fontWeight: 800, color: '#1E293B', lineHeight: 1.2 }}>My Pending Acknowledgments</Typography>
           <Typography variant="body2" sx={{ color: '#64748B', mt: 0.5 }}>Materials issued to you by the store. Please verify and acknowledge receipt.</Typography>

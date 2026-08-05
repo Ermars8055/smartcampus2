@@ -1045,6 +1045,12 @@ class GRNItemBase(BaseModel):
             if not re.match(r'^(\d{2}|\d{4}|\d{6}|\d{8})$', v):
                 raise ValueError("HSN Code must be exactly 2, 4, 6, or 8 numeric digits")
         return v
+        
+    @model_validator(mode="after")
+    def validate_quantities(self) -> "GRNItemBase":
+        if round(self.accepted_quantity + self.rejected_quantity, 3) != round(self.received_quantity, 3):
+            raise ValueError(f"Accepted ({self.accepted_quantity}) and Rejected ({self.rejected_quantity}) quantities must sum to Received quantity ({self.received_quantity}).")
+        return self
 
 class GRNItemOut(BaseModel):
     id: int
@@ -1082,6 +1088,9 @@ class GRNBase(BaseModel):
     invoice_date: Optional[date] = None
     invoice_amount: float = 0
     invoice_scan_url: Optional[str] = None
+    dc_number: Optional[str] = None
+    dc_date: Optional[date] = None
+    dc_scan_url: Optional[str] = None
     # GST totals
     vendor_gstin: Optional[str] = None
     total_taxable_amount: float = 0
@@ -2098,6 +2107,29 @@ class EquipmentInstallationUpdate(BaseModel):
     installation_date: Optional[datetime] = None
     installation_report_url: Optional[str] = None
     installation_remarks: Optional[str] = None
+
+class EquipmentItemCreate(BaseModel):
+    equipment_code: str
+    material_id: int
+    warehouse_id: Optional[int] = None
+    location_id: Optional[int] = None
+    institution_id: Optional[int] = None
+    project_id: Optional[int] = None
+    serial_number: Optional[str] = None
+    make: Optional[str] = None
+    model: Optional[str] = None
+    machine_cost: Optional[float] = None
+    machine_type: Optional[str] = None
+    warranty_available: bool = False
+    warranty_expiry_date: Optional[date] = None
+    amc_cmc_status: Optional[str] = None
+    amc_cmc_end_date: Optional[date] = None
+    amc_cost: Optional[float] = None
+    pm_required: bool = False
+    calibration_required: bool = False
+    status: str = "Operational"
+    is_biomedical: bool = False
+    requires_installation: bool = False
 
 class EquipmentItemOut(BaseModel):
     id: int

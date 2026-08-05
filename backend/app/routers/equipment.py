@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import Optional, List
 from app.database import get_db
 from app.models import EquipmentItem, Material, GRN, Warehouse, Project, User, AuditLog
-from app.schemas import EquipmentItemOut, EquipmentUpdateSerial, EquipmentInstallationUpdate, PMScheduleOut, PMScheduleUpdate, EquipmentUpdate
+from app.schemas import EquipmentItemOut, EquipmentItemCreate, EquipmentUpdateSerial, EquipmentInstallationUpdate, PMScheduleOut, PMScheduleUpdate, EquipmentUpdate
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
 import os
 import uuid
@@ -70,32 +70,69 @@ def list_equipment(
         grn = item.grn
         wh = item.warehouse
         proj = item.project
-        result.append(EquipmentItemOut(
-            id=item.id,
-            equipment_code=item.equipment_code,
-            material_id=item.material_id,
-            grn_id=item.grn_id,
-            grn_item_id=item.grn_item_id,
-            serial_number=item.serial_number,
-            serial_number_status=item.serial_number_status or "Pending Update",
-            is_biomedical=item.is_biomedical or False,
-            requires_installation=item.requires_installation or False,
-            installation_status=item.installation_status or "Not Required",
-            installation_date=item.installation_date,
-            installation_report_url=item.installation_report_url,
-            installation_remarks=item.installation_remarks,
-            warehouse_id=item.warehouse_id,
-            project_id=item.project_id,
-            status=item.status or "In Store",
-            created_at=item.created_at,
-            updated_at=item.updated_at,
-            material_name=mat.name if mat else None,
-            material_code=mat.code if mat else None,
-            grn_number=grn.grn_number if grn else None,
-            warehouse_name=wh.name if wh else None,
-            project_name=proj.name if proj else None
-        ))
+        out = EquipmentItemOut.model_validate(item)
+        out.material_name = mat.name if mat else None
+        out.material_code = mat.code if mat else None
+        out.grn_number = grn.grn_number if grn else None
+        out.warehouse_name = wh.name if wh else None
+        out.project_name = proj.name if proj else None
+        out.location_name = item.location.location_name if item.location else None
+        out.institution_name = item.institution.name if item.institution else None
+        result.append(out)
     return result
+
+
+@router.post("", response_model=EquipmentItemOut)
+def create_equipment(
+    item_in: EquipmentItemCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("equipment", "create")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    from app.models import EquipmentHistory
+
+    # Check if equipment code already exists
+    existing = db.query(EquipmentItem).filter(
+        EquipmentItem.tenant_id == tenant_id,
+        EquipmentItem.equipment_code == item_in.equipment_code
+    ).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Equipment Code already exists in this tenant.")
+
+    new_item = EquipmentItem(
+        tenant_id=tenant_id,
+        site_id=site_id,
+        **item_in.dict()
+    )
+    db.add(new_item)
+    db.commit()
+    db.refresh(new_item)
+
+    # Record History
+    history = EquipmentHistory(
+        equipment_id=new_item.id,
+        event_type="Manual Registration",
+        description="Equipment added manually",
+        created_by_id=current_user.id
+    )
+    db.add(history)
+    db.commit()
+
+    # Load extra fields for response
+    mat = new_item.material
+    wh = new_item.warehouse
+    proj = new_item.project
+
+    out = EquipmentItemOut.model_validate(new_item)
+    out.material_name = mat.name if mat else None
+    out.material_code = mat.code if mat else None
+    out.warehouse_name = wh.name if wh else None
+    out.project_name = proj.name if proj else None
+    out.location_name = new_item.location.location_name if new_item.location else None
+    out.institution_name = new_item.institution.name if new_item.institution else None
+
+    return out
 
 
 @router.get("/pm-schedule", response_model=List[PMScheduleOut])

@@ -167,13 +167,23 @@ def create_grn(
             project_id = po.project_id
             contract_id = po.contract_id
 
-        # Auto-calculate totals if not provided
+        # Auto-calculate and validate totals
+        calculated_taxable = round(sum((item.accepted_quantity * item.rate) for item in data.items), 2)
         invoice_amt = data.invoice_amount
         total_taxable = data.total_taxable_amount
+
         if not invoice_amt or invoice_amt == 0:
-            invoice_amt = round(sum((item.accepted_quantity * item.rate) for item in data.items), 2)
+            invoice_amt = calculated_taxable
         if not total_taxable or total_taxable == 0:
-            total_taxable = round(sum((item.accepted_quantity * item.rate) for item in data.items), 2)
+            total_taxable = calculated_taxable
+            
+        # Tolerance checks (₹2.00 for rounding differences)
+        if total_taxable > 0 and abs(total_taxable - calculated_taxable) > 2.0:
+            raise HTTPException(400, f"Taxable amount mismatch. Expected: {calculated_taxable}, Provided: {total_taxable}")
+            
+        expected_invoice_amount = round(total_taxable + data.total_tax, 2)
+        if invoice_amt > 0 and expected_invoice_amount > 0 and abs(invoice_amt - expected_invoice_amount) > 2.0:
+            raise HTTPException(400, f"Invoice amount mismatch. Expected (Taxable + Tax): {expected_invoice_amount}, Provided: {invoice_amt}")
 
         grn = GRN(
             grn_number=get_next_number(db, tenant_id, site_id, "GRN", "GRN"),
@@ -188,6 +198,9 @@ def create_grn(
             invoice_date=data.invoice_date,
             invoice_amount=invoice_amt,
             invoice_scan_url=data.invoice_scan_url,
+            dc_number=data.dc_number,
+            dc_date=data.dc_date,
+            dc_scan_url=data.dc_scan_url,
             vendor_gstin=data.vendor_gstin,
             total_taxable_amount=total_taxable,
             total_cgst=data.total_cgst,

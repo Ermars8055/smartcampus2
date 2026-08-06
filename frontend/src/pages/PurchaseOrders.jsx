@@ -6,7 +6,7 @@ import {
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
   InputLabel, IconButton, Tooltip, Divider, InputAdornment, Paper, TableSortLabel, useTheme, useMediaQuery,
   DialogContent, DialogActions, Grid, MenuItem, Select, FormControl, Link,
-  Accordion, AccordionSummary, AccordionDetails, Tab, Tabs, Autocomplete, FormControlLabel, Checkbox
+  Accordion, AccordionSummary, AccordionDetails, Tab, Tabs, Autocomplete, FormControlLabel, Checkbox, TablePagination
 } from '@mui/material';
 import { Add, Delete, CheckCircle, Archive, Send, Cancel, Search, ShoppingCart, Store, Assignment, CalendarMonth, ArrowDropDown, Inventory, History, ExpandMore, Textsms, AttachFile, Email, Visibility, ArrowBack, Block, Science } from '@mui/icons-material';
 import api from '../services/api';
@@ -35,6 +35,8 @@ export default function PurchaseOrders() {
   const [termsTemplates, setTermsTemplates] = useState([]);
   const [dialog, setDialog] = useState(false);
   const [detailDialog, setDetailDialog] = useState(null);
+  const [detailPage, setDetailPage] = useState(0);
+  const [detailRowsPerPage, setDetailRowsPerPage] = useState(10);
   const [linkedIndent, setLinkedIndent] = useState(null);
   const [linkedPR, setLinkedPR] = useState(null);
   const [linkedQR, setLinkedQR] = useState(null);
@@ -225,6 +227,8 @@ export default function PurchaseOrders() {
     procurement_type: '', rental_type: '', rental_agreement_number: '', rental_agreement_document: '', rental_start_date: null, rental_end_date: null, billing_frequency: '', security_deposit: 0, cost_per_test: '', linked_reagent_agreement: '', vendor_maintenance_responsibility: false, return_conditions: '', renewal_terms: '',
     items: [{ material_id: '', quantity: '', rate: '', discount_percent: '', cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }]
   });
+  const [formPage, setFormPage] = useState(0);
+  const [formRowsPerPage, setFormRowsPerPage] = useState(10);
 
   useEffect(() => {
     if (form.vendor_id) {
@@ -426,8 +430,10 @@ export default function PurchaseOrders() {
       });
       setEditingPOId(po.id);
       setItemErrors({});
+      setFormPage(0);
       setDialog(true);
     } else {
+      setDetailPage(0);
       setDetailDialog(po);
     }
   };
@@ -1054,8 +1060,14 @@ export default function PurchaseOrders() {
           )}
           {hasPermission('purchase_orders', 'can_create') && (
             <Button variant="contained" startIcon={<Add />} onClick={() => {
-              setForm({ po_number: '', vendor_id: '', project_id: projects[0]?.id || '', institution_id: '', delivery_date: null, terms: '', annexure: '', rental_agreement_document: null, items: [{ material_id: '', quantity: '', rate: '', discount_percent: '', cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }] });
+              setEditingPOId(null);
+              setForm({
+                po_number: '', vendor_id: '', project_id: projects.length > 0 ? projects[0].id : '', institution_id: '', delivery_date: null, terms: '', annexure: '', purchase_mode: '', marketplace_name: '', advance_percentage: 0,
+                procurement_type: '', rental_type: '', rental_agreement_number: '', rental_agreement_document: null, rental_start_date: null, rental_end_date: null, billing_frequency: '', security_deposit: 0, cost_per_test: '', linked_reagent_agreement: '', vendor_maintenance_responsibility: false, return_conditions: '', renewal_terms: '',
+                items: [{ material_id: '', quantity: '', rate: '', discount_percent: '', cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }]
+              });
               setItemErrors({});
+              setFormPage(0);
               setDialog(true);
             }}>Create PO</Button>
           )}
@@ -1433,7 +1445,8 @@ export default function PurchaseOrders() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {detailDialog?.items?.map((item, idx) => {
+                  {detailDialog?.items?.slice(detailPage * detailRowsPerPage, detailPage * detailRowsPerPage + detailRowsPerPage).map((item, localIdx) => {
+                    const idx = detailPage * detailRowsPerPage + localIdx;
                     const effQty = item.approved_quantity !== null && item.approved_quantity !== undefined ? item.approved_quantity : item.quantity;
                     const qty = parseFloat(effQty) || 0;
                     const rate = parseFloat(item.rate) || 0;
@@ -1481,6 +1494,21 @@ export default function PurchaseOrders() {
                 </TableBody>
               </Table>
             </TableContainer>
+
+            {detailDialog?.items && detailDialog.items.length > 0 && (
+              <TablePagination
+                component="div"
+                count={detailDialog.items.length}
+                page={detailPage}
+                onPageChange={(e, newPage) => setDetailPage(newPage)}
+                rowsPerPage={detailRowsPerPage}
+                onRowsPerPageChange={(e) => {
+                  setDetailRowsPerPage(parseInt(e.target.value, 10));
+                  setDetailPage(0);
+                }}
+                rowsPerPageOptions={[5, 10, 25, 50]}
+              />
+            )}
 
             {detailData && (
               <Box sx={{ mt: 3, display: 'flex', flexDirection: { xs: 'column', md: 'row' }, justifyContent: 'flex-end', alignItems: 'flex-start', borderBottom: '1px dashed #cbd5e1', pb: 2, gap: 3 }}>
@@ -1994,7 +2022,8 @@ export default function PurchaseOrders() {
           </Box>
 
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-            {form.items.map((item, i) => {
+            {form.items.slice(formPage * formRowsPerPage, formPage * formRowsPerPage + formRowsPerPage).map((item, localIdx) => {
+              const i = formPage * formRowsPerPage + localIdx;
               const qty = parseFloat(item.quantity) || 0;
               const inputRate = parseFloat(item.rate) || 0;
               const discPercent = parseFloat(item.discount_percent) || 0;
@@ -2143,6 +2172,22 @@ export default function PurchaseOrders() {
                 </Box>
               );
             })}
+            
+            {form.items && form.items.length > 0 && (
+              <TablePagination
+                component="div"
+                count={form.items.length}
+                page={formPage}
+                onPageChange={(e, newPage) => setFormPage(newPage)}
+                rowsPerPage={formRowsPerPage}
+                onRowsPerPageChange={(e) => {
+                  setFormRowsPerPage(parseInt(e.target.value, 10));
+                  setFormPage(0);
+                }}
+                rowsPerPageOptions={[5, 10, 25, 50, 100]}
+              />
+            )}
+
             {!form.indent_id && (
               <Button
                 variant="outlined"

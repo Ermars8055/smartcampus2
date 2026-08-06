@@ -6,7 +6,7 @@ import { computeGstSplit } from '../utils/gstCalculations';
 import {
   Box, Typography, Paper, Tabs, Tab, Button, IconButton, TextField, Stack, Divider,
   Stepper, Step, StepLabel,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, TableFooter,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, TableFooter, TablePagination,
   Dialog, DialogTitle, DialogContent, DialogActions, FormControl, FormHelperText,
   InputLabel, Select, MenuItem, Chip, OutlinedInput, Checkbox, ListItemText, Autocomplete,
   Alert, CircularProgress, Accordion, AccordionSummary, AccordionDetails, Card,
@@ -18,7 +18,7 @@ import {
   Download as DownloadIcon, ExpandMore as ExpandMoreIcon, ArrowBack as ArrowBackIcon,
   AccountTree as ProjectIcon, Event as DateIcon, Group as VendorIcon, Description as RemarkIcon, Link as LinkIcon, Inventory as InventoryIcon,
   EditNote as ProcessIcon, Balance as CompareIcon, FactCheck as ApproveIcon, ShoppingCart as OrderIcon, Send as BlastIcon,
-  ArrowDropUp, ArrowDropDown, Search, Delete as DeleteIcon
+  ArrowDropUp, ArrowDropDown, Search, Delete as DeleteIcon, AutoFixHigh as AutoFixHighIcon
 } from '@mui/icons-material';
 import api, { getFileUrl } from '../services/api';
 import { formatDate } from '../utils/dateUtils';
@@ -83,9 +83,13 @@ const Quotations = () => {
     existing_file: null,
     items: []
   });
+  const [quotePage, setQuotePage] = useState(0);
+  const [quoteRowsPerPage, setQuoteRowsPerPage] = useState(10);
 
   // Tab 3: Comparison
   const [comparisonData, setComparisonData] = useState(null);
+  const [compPage, setCompPage] = useState(0);
+  const [compRowsPerPage, setCompRowsPerPage] = useState(5);
   const [overrideDialogOpen, setOverrideDialogOpen] = useState(false);
   const [selectedMaterialForOverride, setSelectedMaterialForOverride] = useState(null);
   const [overrideData, setOverrideData] = useState({
@@ -93,6 +97,8 @@ const Quotations = () => {
     override_reason: ''
   });
   const [convertToPoDialog, setConvertToPoDialog] = useState({ open: false, terms: '', items: [] });
+  const [convertPage, setConvertPage] = useState(0);
+  const [convertRowsPerPage, setConvertRowsPerPage] = useState(5);
   const [termsTemplates, setTermsTemplates] = useState([]);
 
   const [sendToVendorsDialog, setSendToVendorsDialog] = useState({ open: false, qrId: null, qrNumber: '', vendorNames: [], message: '', isSending: false });
@@ -106,6 +112,8 @@ const Quotations = () => {
 
   // Negotiation Modal
   const [negotiateDialog, setNegotiateDialog] = useState({ open: false, vendorId: null, vendorName: '', discountPercent: '', itemDiscounts: {}, items: [], remarks: '', history: [] });
+  const [negPage, setNegPage] = useState(0);
+  const [negRowsPerPage, setNegRowsPerPage] = useState(10);
 
 
 
@@ -437,12 +445,7 @@ const Quotations = () => {
   const openSendToVendorsDialog = (qr) => {
     const vendorNames = qr.invited_vendors?.map(v => v.vendor_name) || [];
     
-    // Generate a formatted list of materials to include in the email
-    const materialsList = qr.items?.map((item, index) => 
-      `${index + 1}. ${item.material_name} (${item.material_code}) - Qty: ${item.quantity} ${item.uom_name}`
-    ).join('\n') || 'No materials listed.';
-
-    const defaultMessage = `Dear Vendor,\n\nWe are requesting quotations for the following materials for Quotation Request ${qr.qr_number}:\n\n${materialsList}\n\nPlease submit your best rates along with delivery timelines at your earliest convenience.\n\nRegards,\nProcurement Team`;
+    const defaultMessage = `Dear Vendor,\n\nWe are requesting quotations for Quotation Request ${qr.qr_number}.\n\nPlease refer to the attached PDF for the complete list of materials and quantities required.\n\nPlease submit your best rates along with delivery timelines at your earliest convenience.\n\nRegards,\nProcurement Team`;
     
     setSendToVendorsDialog({
       open: true,
@@ -678,6 +681,7 @@ const Quotations = () => {
       const itemDiscounts = {};
       items.forEach(it => { itemDiscounts[it.qr_item_id] = it.discount_percent || ''; });
       
+      setNegPage(0);
       setNegotiateDialog({
         open: true,
         vendorId,
@@ -1249,7 +1253,7 @@ const Quotations = () => {
             {/* Materials Summary — Consolidated list of all items */}
             <Box mb={4}>
               <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>Materials Summary</Typography>
-              <TableContainer component={Paper} variant="outlined">
+              <TableContainer component={Paper} variant="outlined" sx={{ maxHeight: 600, overflowY: 'auto' }}>
                 <Table size="small">
                   <TableHead>
                     <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
@@ -1482,38 +1486,38 @@ const Quotations = () => {
             {['Received', 'Entered', 'Compared', 'Approved', 'Ordered'].includes(selectedQR.status) && comparisonData && (
               <Box mb={4} id="comparison-section">
                 <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>2. Technical Comparison (Item-Wise)</Typography>
-                {comparisonData.materials.map(mat => (
-                  <Accordion key={mat.qr_item_id} variant="outlined" sx={{ mb: 1 }} defaultExpanded>
-                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                      <Typography fontWeight="bold">[{mat.material_code}] {mat.material_name}</Typography>
-                      <Typography sx={{ ml: 2, color: 'text.secondary' }}>Qty: {mat.quantity} {mat.uom_name}</Typography>
+                {comparisonData.materials.slice(compPage * compRowsPerPage, compPage * compRowsPerPage + compRowsPerPage).map(mat => (
+                  <Accordion key={mat.qr_item_id} variant="outlined" sx={{ mb: 1.5, borderRadius: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.04)', '&:before': { display: 'none' } }} defaultExpanded>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', minHeight: 48, '& .MuiAccordionSummary-content': { my: 1.5 } }}>
+                      <Typography fontWeight="bold" sx={{ color: '#1e293b' }}>[{mat.material_code}] {mat.material_name}</Typography>
+                      <Typography sx={{ ml: 2, color: 'text.secondary', fontWeight: 500 }}>Qty: {mat.quantity} {mat.uom_name}</Typography>
                       {mat.is_overridden && <Chip size="small" label="Overridden" color="warning" sx={{ ml: 2 }} />}
                     </AccordionSummary>
-                    <AccordionDetails>
+                    <AccordionDetails sx={{ p: 0 }}>
                       <Table size="small">
                         <TableHead>
-                          <TableRow sx={{ backgroundColor: '#fdfdfd' }}>
-                            <TableCell>Vendor</TableCell>
-                            <TableCell>Brand</TableCell>
-                            <TableCell>Rate (₹)</TableCell>
-                            <TableCell>Delivery</TableCell>
-                            <TableCell>Rank</TableCell>
-                            <TableCell align="right">Action</TableCell>
+                          <TableRow sx={{ backgroundColor: '#ffffff' }}>
+                            <TableCell sx={{ fontWeight: 600, color: '#475569', py: 1.5 }}>Vendor</TableCell>
+                            <TableCell sx={{ fontWeight: 600, color: '#475569', py: 1.5 }}>Brand</TableCell>
+                            <TableCell sx={{ fontWeight: 600, color: '#475569', py: 1.5 }}>Rate (₹)</TableCell>
+                            <TableCell sx={{ fontWeight: 600, color: '#475569', py: 1.5 }}>Delivery</TableCell>
+                            <TableCell sx={{ fontWeight: 600, color: '#475569', py: 1.5 }}>Rank</TableCell>
+                            <TableCell align="right" sx={{ fontWeight: 600, color: '#475569', py: 1.5 }}>Action</TableCell>
                           </TableRow>
                         </TableHead>
                         <TableBody>
                           {mat.vendor_quotes.map(q => {
                             const isSelected = mat.selected_vendor_id === q.vendor_id;
                             return (
-                              <TableRow key={q.vendor_id} sx={{ backgroundColor: isSelected ? '#f1f8e9' : 'inherit' }}>
-                                <TableCell>{q.vendor_name}</TableCell>
-                                <TableCell>{q.brand || '-'}</TableCell>
-                                <TableCell>₹{Number(q.quoted_rate).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
-                                <TableCell>{q.delivery_days || '-'} days</TableCell>
-                                <TableCell><Chip size="small" label={isSelected ? `${q.rank_label} Selected` : q.rank_label} color={isSelected ? "success" : "default"} /></TableCell>
-                                <TableCell align="right">
+                              <TableRow key={q.vendor_id} sx={{ backgroundColor: isSelected ? '#f0fdf4' : 'inherit', outline: isSelected ? '1px solid #4ade80' : 'none', outlineOffset: '-1px', '&:last-child td, &:last-child th': { border: 0 } }}>
+                                <TableCell sx={{ py: 1.5, fontWeight: isSelected ? 600 : 400 }}>{q.vendor_name}</TableCell>
+                                <TableCell sx={{ py: 1.5 }}>{q.brand || '-'}</TableCell>
+                                <TableCell sx={{ py: 1.5, fontWeight: 500 }}>₹{Number(q.quoted_rate).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                                <TableCell sx={{ py: 1.5 }}>{q.delivery_days || '-'} days</TableCell>
+                                <TableCell sx={{ py: 1.5 }}><Chip size="small" label={isSelected ? `${q.rank_label} Selected` : q.rank_label} color={isSelected ? "success" : "default"} variant={isSelected ? "filled" : "outlined"} sx={{ fontWeight: isSelected ? 600 : 400 }} /></TableCell>
+                                <TableCell align="right" sx={{ py: 1.5 }}>
                                   {!isSelected && !['Approved', 'Ordered'].includes(selectedQR.status) && (
-                                    <Button size="small" onClick={() => {
+                                    <Button size="small" variant="outlined" color="primary" sx={{ textTransform: 'none', borderRadius: 2 }} onClick={() => {
                                       setSelectedMaterialForOverride(mat);
                                       setOverrideData({ selected_vendor_id: q.vendor_id, override_reason: '' });
                                       setOverrideDialogOpen(true);
@@ -1528,6 +1532,22 @@ const Quotations = () => {
                     </AccordionDetails>
                   </Accordion>
                 ))}
+                
+                {comparisonData.materials.length > 0 && (
+                  <TablePagination
+                    component="div"
+                    count={comparisonData.materials.length}
+                    page={compPage}
+                    onPageChange={(e, newPage) => setCompPage(newPage)}
+                    rowsPerPage={compRowsPerPage}
+                    onRowsPerPageChange={(e) => {
+                      setCompRowsPerPage(parseInt(e.target.value, 10));
+                      setCompPage(0);
+                    }}
+                    rowsPerPageOptions={[5, 10, 25, 50]}
+                    sx={{ borderTop: '1px solid #e2e8f0', mt: 1 }}
+                  />
+                )}
 
                 {selectedQR.status === 'Entered' && (
                   <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
@@ -1597,6 +1617,7 @@ const Quotations = () => {
                               igst_percentage
                             };
                           });
+                        setConvertPage(0);
                         setConvertToPoDialog({ open: true, terms: '', items: itemsToConvert });
                       }}>Convert to POs</Button>
                     )}
@@ -1608,14 +1629,14 @@ const Quotations = () => {
                   <Typography variant="subtitle2" align="center" color="text.secondary" sx={{ mb: 4 }}>QR NO: {comparisonData.qr_number}</Typography>
                   <Divider sx={{ mb: 4 }} />
 
-                  <TableContainer component={Paper} sx={{ mb: 4, boxShadow: 'none', border: '1px solid #e0e0e0' }}>
-                    <Table size="small">
+                  <TableContainer component={Paper} sx={{ mb: 4, boxShadow: 'none', border: '1px solid #e0e0e0', maxHeight: 600, overflow: 'auto' }}>
+                    <Table size="small" stickyHeader>
                       <TableHead>
-                        <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                          <TableCell sx={{ fontWeight: 700 }}>Material Details</TableCell>
-                          <TableCell align="center" sx={{ fontWeight: 700 }}>Qty</TableCell>
+                        <TableRow>
+                          <TableCell sx={{ fontWeight: 700, backgroundColor: '#f5f5f5' }}>Material Details</TableCell>
+                          <TableCell align="center" sx={{ fontWeight: 700, backgroundColor: '#f5f5f5' }}>Qty</TableCell>
                           {comparisonData.vendor_totals.sort((a, b) => a.total_value - b.total_value).map(vt => (
-                            <TableCell key={vt.vendor_id} align="right" sx={{ fontWeight: 700, minWidth: 140 }}>
+                            <TableCell key={vt.vendor_id} align="right" sx={{ fontWeight: 700, minWidth: 140, backgroundColor: '#f5f5f5' }}>
                               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                                 <Typography variant="body2" sx={{ fontWeight: 700 }}>{vt.vendor_name}</Typography>
                                 {selectedQR.status !== 'Ordered' && (
@@ -1629,7 +1650,7 @@ const Quotations = () => {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {comparisonData.materials.map((mat, mIdx) => (
+                        {comparisonData.materials.slice(compPage * compRowsPerPage, compPage * compRowsPerPage + compRowsPerPage).map((mat, mIdx) => (
                           <TableRow key={mat.material_id} hover>
                             <TableCell>
                               <Typography variant="body2" sx={{ fontWeight: 600 }}>{mat.material_name}</Typography>
@@ -1678,6 +1699,18 @@ const Quotations = () => {
                       </TableBody>
                     </Table>
                   </TableContainer>
+                  <TablePagination
+                    component="div"
+                    count={comparisonData.materials.length}
+                    page={compPage}
+                    onPageChange={(e, newPage) => setCompPage(newPage)}
+                    rowsPerPage={compRowsPerPage}
+                    onRowsPerPageChange={(e) => {
+                      setCompRowsPerPage(parseInt(e.target.value, 10));
+                      setCompPage(0);
+                    }}
+                    rowsPerPageOptions={[5, 10, 25, 50, 100]}
+                  />
                   
                   {selectedQR.status === 'Ordered' && generatedPOs && generatedPOs.length > 0 && (
                     <Box mt={4} p={3} sx={{ backgroundColor: '#f0fdf4', borderRadius: 2, border: '1px solid #bbf7d0' }}>
@@ -2103,29 +2136,55 @@ const Quotations = () => {
             
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>Quotation Items</Typography>
-              <Button variant="outlined" size="small" startIcon={<CloudUploadIcon />} disabled={loading} onClick={handleAutoExtract}>
+              <Button 
+                variant="contained" 
+                size="small" 
+                startIcon={<AutoFixHighIcon />} 
+                disabled={loading} 
+                onClick={handleAutoExtract}
+                sx={{ 
+                  background: 'linear-gradient(45deg, #7b1fa2 30%, #4a148c 90%)',
+                  boxShadow: '0 3px 5px 2px rgba(123, 31, 162, .3)',
+                  color: 'white',
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 6px 10px 4px rgba(123, 31, 162, .3)',
+                    background: 'linear-gradient(45deg, #8e24aa 30%, #6a1b9a 90%)'
+                  },
+                  '&.Mui-disabled': {
+                    color: 'rgba(255, 255, 255, 0.9)',
+                    opacity: 0.8
+                  }
+                }}
+              >
                 {loading ? 'Extracting...' : 'Auto-Extract from File'}
               </Button>
             </Box>
 
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 600 }}>Material</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Brand</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Vendor UOM</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Conv. Factor</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Quoted Rate (₹)</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Disc %</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Delivery Days</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Remarks</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 600 }}>Exclude</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {newQuote.items.map((it, idx) => (
-                  <TableRow key={idx} sx={{ opacity: it.is_excluded ? 0.5 : 1, bgcolor: it.confidence ? 'warning.light' : 'inherit' }}>
-                    <TableCell>{it.material_code} - {it.material_name}</TableCell>
+            <TableContainer sx={{ overflowX: 'auto', mt: 2, mb: 1 }}>
+              <Table size="small" sx={{ minWidth: 1000 }}>
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 600 }}>Material</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Brand</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Vendor UOM</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Conv. Factor</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Quoted Rate (₹)</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Disc %</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Delivery Days</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Remarks</TableCell>
+                    <TableCell align="center" sx={{ fontWeight: 600 }}>Exclude</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {newQuote.items.slice(quotePage * quoteRowsPerPage, quotePage * quoteRowsPerPage + quoteRowsPerPage).map((it, localIdx) => {
+                    const idx = quotePage * quoteRowsPerPage + localIdx;
+                    return (
+                      <TableRow key={idx} sx={{ opacity: it.is_excluded ? 0.5 : 1, bgcolor: it.confidence ? '#fff7ed' : 'inherit', outline: it.confidence ? '1px solid #f97316' : 'none', outlineOffset: '-1px' }}>
+                        <TableCell>{it.material_code} - {it.material_name}</TableCell>
                     <TableCell>
                       <TextField size="small" disabled={it.is_excluded} value={it.brand || ''} onChange={(e) => {
                         const newItems = [...newQuote.items]; newItems[idx].brand = e.target.value; setNewQuote({ ...newQuote, items: newItems });
@@ -2145,9 +2204,11 @@ const Quotations = () => {
                     </TableCell>
                     <TableCell>
                       <TextField
+                        id={`quoted-rate-${idx}`}
                         size="small"
                         type="number"
                         className="no-spin"
+                        error={!it.is_excluded && !it.quoted_rate}
                         disabled={it.is_excluded}
                         onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()}
                         value={it.quoted_rate}
@@ -2183,8 +2244,10 @@ const Quotations = () => {
                     </TableCell>
                     <TableCell>
                       <TextField
+                        id={`delivery-days-${idx}`}
                         size="small"
                         type="number"
+                        error={!it.is_excluded && !it.delivery_days}
                         disabled={it.is_excluded}
                         onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()}
                         value={it.delivery_days}
@@ -2231,10 +2294,24 @@ const Quotations = () => {
                         </span>
                       </Tooltip>
                     </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <TablePagination
+              component="div"
+              count={newQuote.items.length}
+              page={quotePage}
+              onPageChange={(e, newPage) => setQuotePage(newPage)}
+              rowsPerPage={quoteRowsPerPage}
+              onRowsPerPageChange={(e) => {
+                setQuoteRowsPerPage(parseInt(e.target.value, 10));
+                setQuotePage(0);
+              }}
+              rowsPerPageOptions={[10, 25, 50, 100]}
+            />
           </DialogContent>
           <DialogActions sx={{ p: 3 }}>
             <Button onClick={() => setEnterQuoteDialogOpen(false)}>Cancel</Button>
@@ -2248,6 +2325,55 @@ const Quotations = () => {
                 Save as Draft
               </Button>
             )}
+            <Box sx={{ flexGrow: 1 }} />
+            {(() => {
+              const missingNumber = !newQuote.quotation_number;
+              const missingDate = !newQuote.quotation_date;
+              const missingFile = !(newQuote.file || newQuote.existing_file);
+              const allExcluded = newQuote.items.every(i => i.is_excluded);
+              const incompleteItemsCount = newQuote.items.filter(i => !i.is_excluded && (!i.quoted_rate || !i.delivery_days)).length;
+              
+              const errors = [];
+              if (missingNumber) errors.push("Quot. No.");
+              if (missingDate) errors.push("Date");
+              if (missingFile) errors.push("File");
+              if (allExcluded) errors.push("All items excluded");
+              if (incompleteItemsCount > 0) errors.push(`${incompleteItemsCount} items missing rate/delivery`);
+
+              if (errors.length > 0) {
+                return (
+                  <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
+                    <Typography variant="caption" color="error.main" sx={{ fontWeight: 500 }}>
+                      Required: {errors.join(', ')}
+                    </Typography>
+                    {incompleteItemsCount > 0 && (
+                      <Button
+                        size="small"
+                        sx={{ ml: 1, textTransform: 'none', py: 0, minHeight: 0 }}
+                        onClick={() => {
+                          const firstMissingIdx = newQuote.items.findIndex(i => !i.is_excluded && (!i.quoted_rate || !i.delivery_days));
+                          if (firstMissingIdx !== -1) {
+                            setQuotePage(Math.floor(firstMissingIdx / quoteRowsPerPage));
+                            setTimeout(() => {
+                              const item = newQuote.items[firstMissingIdx];
+                              const elId = !item.quoted_rate ? `quoted-rate-${firstMissingIdx}` : `delivery-days-${firstMissingIdx}`;
+                              const el = document.getElementById(elId);
+                              if (el) {
+                                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                el.focus();
+                              }
+                            }, 100);
+                          }
+                        }}
+                      >
+                        Find Next
+                      </Button>
+                    )}
+                  </Box>
+                );
+              }
+              return null;
+            })()}
             <Button
               onClick={() => handleEnterQuote(false)}
               variant="contained"
@@ -2301,7 +2427,7 @@ const Quotations = () => {
                 <Typography><strong>Status:</strong> {viewingQR.status === 'Sent to Vendors' ? 'Request to Vendors' : viewingQR.status}</Typography>
 
                 <Typography variant="h6" sx={{ fontWeight: 600, mt: 3, mb: 1.5 }}>Materials Summary</Typography>
-                <TableContainer component={Paper} variant="outlined" sx={{ mb: 2 }}>
+                <TableContainer component={Paper} variant="outlined" sx={{ mb: 2, maxHeight: 600, overflowY: 'auto' }}>
                   <Table size="small">
                     <TableHead>
                       <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
@@ -2482,7 +2608,9 @@ const Quotations = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {convertToPoDialog.items?.map((it, i) => (
+                {convertToPoDialog.items?.slice(convertPage * convertRowsPerPage, convertPage * convertRowsPerPage + convertRowsPerPage).map((it, localIdx) => {
+                  const i = convertPage * convertRowsPerPage + localIdx;
+                  return (
                   <TableRow key={i} sx={{ '& td': { py: 0.5, px: 1 } }}>
                     <TableCell>
                       <Typography variant="body2" sx={{ fontWeight: 700 }}>{it.material_name}</Typography>
@@ -2508,9 +2636,26 @@ const Quotations = () => {
                       <TextField size="small" variant="standard" type="number" className="no-spin" value={it.igst_percentage} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateConvertToPoItem(i, 'igst_percentage', e.target.value.replace(/-/g, ''))} InputProps={{ disableUnderline: true, readOnly: true }} inputProps={{ min: 0, style: { textAlign: 'right' } }} sx={{ width: 70, '& .MuiInputBase-input.Mui-readOnly': { color: '#64748b' } }} />
                     </TableCell>
                   </TableRow>
-                ))}
+                  );
+                })}
               </TableBody>
             </Table>
+
+            {convertToPoDialog.items && convertToPoDialog.items.length > 0 && (
+              <TablePagination
+                component="div"
+                count={convertToPoDialog.items.length}
+                page={convertPage}
+                onPageChange={(e, newPage) => setConvertPage(newPage)}
+                rowsPerPage={convertRowsPerPage}
+                onRowsPerPageChange={(e) => {
+                  setConvertRowsPerPage(parseInt(e.target.value, 10));
+                  setConvertPage(0);
+                }}
+                rowsPerPageOptions={[5, 10, 25, 50]}
+                sx={{ mb: 3 }}
+              />
+            )}
 
             <Typography variant="caption" sx={{ fontWeight: 600, color: '#64748B', mb: 0.5, display: 'block', textTransform: 'uppercase' }}>
               Terms and Conditions
@@ -2587,6 +2732,25 @@ const Quotations = () => {
               placeholder="Enter the message to be sent to the vendors..."
               sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
             />
+            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+              <Button
+                variant="outlined"
+                color="primary"
+                startIcon={<VisibilityIcon />}
+                onClick={async () => {
+                  try {
+                    const res = await api.get(`/api/quotations/requests/${sendToVendorsDialog.qrId}/pdf`, { responseType: 'blob' });
+                    const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
+                    window.open(url, '_blank');
+                  } catch (err) {
+                    showMessage("Failed to load PDF preview", "error");
+                  }
+                }}
+                sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
+              >
+                Preview PDF Attachment
+              </Button>
+            </Box>
           </DialogContent>
           <DialogActions sx={{ px: 4, pb: 4, pt: 2, justifyContent: 'flex-end', gap: 2 }}>
             <Button disabled={sendToVendorsDialog.isSending} onClick={() => setSendToVendorsDialog({ open: false, qrId: null, qrNumber: '', vendorNames: [], message: '', isSending: false })} sx={{ color: '#64748B', fontWeight: 600 }}>Cancel</Button>
@@ -2670,7 +2834,7 @@ const Quotations = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {negotiateDialog.items.map(item => (
+                    {negotiateDialog.items.slice(negPage * negRowsPerPage, negPage * negRowsPerPage + negRowsPerPage).map(item => (
                       <TableRow key={item.qr_item_id} hover>
                         <TableCell sx={{ fontSize: '0.8rem' }}>{item.material_name}</TableCell>
                         <TableCell align="right" sx={{ fontSize: '0.8rem' }}>{/* Need QTY here? Actually not easily available in item, just skip or show UOM */}
@@ -2706,6 +2870,20 @@ const Quotations = () => {
                   </TableBody>
                 </Table>
               </Box>
+            )}
+            {negotiateDialog.items && negotiateDialog.items.length > 0 && (
+              <TablePagination
+                component="div"
+                count={negotiateDialog.items.length}
+                page={negPage}
+                onPageChange={(e, newPage) => setNegPage(newPage)}
+                rowsPerPage={negRowsPerPage}
+                onRowsPerPageChange={(e) => {
+                  setNegRowsPerPage(parseInt(e.target.value, 10));
+                  setNegPage(0);
+                }}
+                rowsPerPageOptions={[5, 10, 25, 50]}
+              />
             )}
             <TextField
               fullWidth

@@ -18,8 +18,8 @@ from reportlab.pdfbase.ttfonts import TTFont
 logger = logging.getLogger(__name__)
 
 # ── Organisation details ────────────────────────────────────────────────
-ORG_NAME = "EAST POINT COLLEGE OF MEDICAL SCIENCES & RESEARCH CENTER"
-ORG_ADDRESS = "113, JNANA PRABHA CAMPUS, BIDARAHALLI, VIRGO NAGAR POST, BANGALORE - 560049"
+ORG_NAME = "EASTPOINT GROUP OF INSTITUTIONS"
+ORG_ADDRESS = "Virgo nagar post, East Point Campus, Jnana Prabha, Aavalahalli, Hirandahalli, Karnataka 560049"
 
 
 def _fmt_date(dt) -> str:
@@ -130,7 +130,8 @@ def generate_po_pdf(po, db=None) -> bytes:
 
     # ── Header ──────────────────────────────────────────────────────────
     elements.append(Paragraph(f"<b>{ORG_NAME}</b>", _org_title))
-    elements.append(Paragraph(ORG_ADDRESS, _org_addr))
+    if ORG_ADDRESS:
+        elements.append(Paragraph(ORG_ADDRESS, _org_addr))
     elements.append(Paragraph("<u><b>PURCHASE ORDER</b></u>", _doc_title))
 
     # ── Vendor + PO Info ────────────────────────────────────────────────
@@ -400,4 +401,81 @@ def generate_po_pdf(po, db=None) -> bytes:
     pdf_bytes = buf.getvalue()
     buf.close()
     logger.info("Generated PO PDF for %s (%d bytes)", po.po_number, len(pdf_bytes))
+    return pdf_bytes
+
+
+def generate_qr_pdf(qr) -> bytes:
+    """
+    Generate a PDF for a Quotation Request containing only Material Name, Qty, and UOM.
+    """
+    buf = BytesIO()
+    doc = SimpleDocTemplate(
+        buf, pagesize=A4,
+        leftMargin=15 * mm, rightMargin=15 * mm,
+        topMargin=12 * mm, bottomMargin=12 * mm,
+    )
+    W = doc.width
+    elements = []
+
+    # ── Header ──────────────────────────────────────────────────────────
+    elements.append(Paragraph(f"<b>{ORG_NAME}</b>", _org_title))
+    if ORG_ADDRESS:
+        elements.append(Paragraph(ORG_ADDRESS, _org_addr))
+    elements.append(Paragraph("<u><b>QUOTATION REQUEST</b></u>", _doc_title))
+
+    # ── QR Info ─────────────────────────────────────────────────────────
+    left_lines = f"<b>QR Number:</b> {qr.qr_number}<br/>"
+    left_lines += f"<b>Date:</b> {_fmt_date(qr.created_at)}<br/>"
+        
+    info_table = Table(
+        [[Paragraph(left_lines, _normal_small), ""]],
+        colWidths=[W * 0.6, W * 0.4],
+    )
+    info_table.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP")]))
+    elements.append(info_table)
+    elements.append(Spacer(1, 15))
+
+    # ── Items Table ─────────────────────────────────────────────────────
+    header_row = [
+        Paragraph("<b>Sr.<br/>No.</b>", _cell_bold),
+        Paragraph("<b>Material Description</b>", _cell_bold),
+        Paragraph("<b>Qty</b>", _cell_bold),
+        Paragraph("<b>UOM</b>", _cell_bold),
+    ]
+
+    table_data = [header_row]
+
+    for idx, item in enumerate(qr.items, 1):
+        mat = item.material
+        mat_name = mat.name if mat else "—"
+        mat_code = mat.code if mat else ""
+        uom_name = mat.uom.name if mat and mat.uom else "NOS"
+        
+        qty = float(item.quantity or 0)
+
+        table_data.append([
+            Paragraph(str(idx), _cell),
+            Paragraph(mat_name, _cell_left),
+            Paragraph(f"{qty:g}", _cell),
+            Paragraph(uom_name, _cell),
+        ])
+
+    col_widths = [W * 0.08, W * 0.62, W * 0.15, W * 0.15]
+
+    items_table = Table(table_data, colWidths=col_widths, repeatRows=1)
+    items_table.setStyle(TableStyle([
+        ("GRID", (0, 0), (-1, -1), 0.5, colors.black),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("BACKGROUND", (0, 0), (-1, 0), colors.white),
+        ("FONTSIZE", (0, 0), (-1, -1), 9),
+    ]))
+    elements.append(items_table)
+    elements.append(Spacer(1, 15))
+
+    # ── Build ───────────────────────────────────────────────────────────
+    doc.build(elements)
+    pdf_bytes = buf.getvalue()
+    buf.close()
+    
+    logger.info("Generated QR PDF for %s (%d bytes)", qr.qr_number, len(pdf_bytes))
     return pdf_bytes

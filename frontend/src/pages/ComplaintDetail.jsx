@@ -44,6 +44,11 @@ export default function ComplaintDetail() {
   // Closure States
   const [closureReason, setClosureReason] = useState('');
   const [closureDocs, setClosureDocs] = useState([]);
+  
+  // Installation Specific States
+  const [equipmentPhoto, setEquipmentPhoto] = useState(null);
+  const [serialNumberPhoto, setSerialNumberPhoto] = useState(null);
+  const [installationReport, setInstallationReport] = useState(null);
 
   useEffect(() => {
     fetchComplaintData();
@@ -193,11 +198,44 @@ export default function ComplaintDetail() {
         uploadedUrls.push(uploadRes.data.url);
       }
 
-      await api.post(`/api/complaints/${id}/close`, {
+      let equipmentPhotoUrl = null;
+      let serialNumberPhotoUrl = null;
+      let installationReportUrl = null;
+
+      if (complaint?.complaint_type === 'Installation') {
+        if (equipmentPhoto) {
+          const fd = new FormData();
+          fd.append('file', equipmentPhoto);
+          const uploadRes = await api.post('/api/upload?folder=complaints', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+          equipmentPhotoUrl = uploadRes.data.url;
+        }
+        if (serialNumberPhoto) {
+          const fd = new FormData();
+          fd.append('file', serialNumberPhoto);
+          const uploadRes = await api.post('/api/upload?folder=complaints', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+          serialNumberPhotoUrl = uploadRes.data.url;
+        }
+        if (installationReport) {
+          const fd = new FormData();
+          fd.append('file', installationReport);
+          const uploadRes = await api.post('/api/upload?folder=complaints', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+          installationReportUrl = uploadRes.data.url;
+        }
+      }
+
+      const payload = {
         resolution_entered: resolutionRemarks,
         closure_reason: closureReason,
         document_urls: uploadedUrls
-      });
+      };
+
+      if (complaint?.complaint_type === 'Installation') {
+        payload.equipment_photo_url = equipmentPhotoUrl;
+        payload.serial_number_photo_url = serialNumberPhotoUrl;
+        payload.installation_report_url = installationReportUrl;
+      }
+
+      await api.post(`/api/complaints/${id}/close`, payload);
 
       setSnackbar({ open: true, message: 'Closure initiated successfully', severity: 'success' });
       setResolveDialogOpen(false);
@@ -671,25 +709,48 @@ export default function ComplaintDetail() {
             sx={{ mb: 3 }}
           />
           
-          <Typography variant="subtitle2" sx={{ mb: 1 }}>Upload Service Documents & Photos</Typography>
-          <Box sx={{ border: '2px dashed #CBD5E1', borderRadius: 2, p: 2, textAlign: 'center', bgcolor: '#F8FAFC', mb: 2 }}>
-             <input type="file" multiple accept="*/*" style={{ display: 'none' }} ref={fileInputRef} onChange={(e) => {
-               if (e.target.files) {
-                 const filesArray = Array.from(e.target.files);
-                 setClosureDocs(prev => [...prev, ...filesArray]);
-               }
-             }} />
-            <Button variant="outlined" startIcon={<PhotoCamera />} onClick={() => fileInputRef.current.click()} size="small">
-              Select Service Reports / Photos
-            </Button>
-            {closureDocs.length > 0 && (
-              <Box sx={{ mt: 2, textAlign: 'left' }}>
-                {closureDocs.map((doc, idx) => (
-                  <Chip key={idx} label={doc.name} onDelete={() => setClosureDocs(prev => prev.filter((_, i) => i !== idx))} sx={{ m: 0.5 }} />
-                ))}
+          {complaint?.complaint_type === 'Installation' ? (
+            <Box sx={{ border: '2px dashed #CBD5E1', borderRadius: 2, p: 2, bgcolor: '#F8FAFC', mb: 2 }}>
+              <Typography variant="subtitle2" sx={{ mb: 2, textAlign: 'center' }}>Mandatory Installation Documentation</Typography>
+              
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Box>
+                  <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>1. Equipment Photo</Typography>
+                  <input type="file" accept="image/*" onChange={(e) => setEquipmentPhoto(e.target.files[0])} />
+                </Box>
+                <Box>
+                  <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>2. Serial Number Photo</Typography>
+                  <input type="file" accept="image/*" onChange={(e) => setSerialNumberPhoto(e.target.files[0])} />
+                </Box>
+                <Box>
+                  <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>3. Installation Report</Typography>
+                  <input type="file" accept="*/*" onChange={(e) => setInstallationReport(e.target.files[0])} />
+                </Box>
               </Box>
-            )}
-          </Box>
+            </Box>
+          ) : (
+            <>
+              <Typography variant="subtitle2" sx={{ mb: 1 }}>Upload Service Documents & Photos</Typography>
+              <Box sx={{ border: '2px dashed #CBD5E1', borderRadius: 2, p: 2, textAlign: 'center', bgcolor: '#F8FAFC', mb: 2 }}>
+                 <input type="file" multiple accept="*/*" style={{ display: 'none' }} ref={fileInputRef} onChange={(e) => {
+                   if (e.target.files) {
+                     const filesArray = Array.from(e.target.files);
+                     setClosureDocs(prev => [...prev, ...filesArray]);
+                   }
+                 }} />
+                <Button variant="outlined" startIcon={<PhotoCamera />} onClick={() => fileInputRef.current.click()} size="small">
+                  Select Service Reports / Photos
+                </Button>
+                {closureDocs.length > 0 && (
+                  <Box sx={{ mt: 2, textAlign: 'left' }}>
+                    {closureDocs.map((doc, idx) => (
+                      <Chip key={idx} label={doc.name} onDelete={() => setClosureDocs(prev => prev.filter((_, i) => i !== idx))} sx={{ m: 0.5 }} />
+                    ))}
+                  </Box>
+                )}
+              </Box>
+            </>
+          )}
         </DialogContent>
         <DialogActions sx={{ p: 2, pt: 0 }}>
           <Button onClick={() => setResolveDialogOpen(false)} disabled={actionLoading}>Cancel</Button>
@@ -697,15 +758,17 @@ export default function ComplaintDetail() {
             onClick={handleResolve} 
             variant="contained" 
             color="success" 
-            disabled={actionLoading || !resolutionRemarks || !closureReason || closureDocs.length === 0} 
+            disabled={actionLoading || !resolutionRemarks || !closureReason || (complaint?.complaint_type === 'Installation' ? (!equipmentPhoto || !serialNumberPhoto || !installationReport) : closureDocs.length === 0)} 
             startIcon={actionLoading ? <CircularProgress size={20} /> : <CheckCircle />}
           >
             Submit for Approval
           </Button>
         </DialogActions>
-        {closureDocs.length === 0 && (
+        {(complaint?.complaint_type === 'Installation' ? (!equipmentPhoto || !serialNumberPhoto || !installationReport) : closureDocs.length === 0) && (
             <Alert severity="warning" sx={{ m: 2, mt: 0 }}>
-              A service document or report must be uploaded to close the complaint.
+              {complaint?.complaint_type === 'Installation' 
+                ? "Equipment Photo, Serial Number Photo, and Installation Report are mandatory."
+                : "A service document or report must be uploaded to close the complaint."}
             </Alert>
         )}
       </Dialog>

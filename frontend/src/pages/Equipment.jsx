@@ -47,18 +47,6 @@ export default function Equipment() {
   const [serialInput, setSerialInput] = useState('');
   const [serialSubmitting, setSerialSubmitting] = useState(false);
 
-  const [installDialog, setInstallDialog] = useState(null); // Equipment object
-  const [installSerial, setInstallSerial] = useState('');
-  const [installDate, setInstallDate] = useState('');
-  const [installRemarks, setInstallRemarks] = useState('');
-  const [installLocation, setInstallLocation] = useState('');
-  const [installedBy, setInstalledBy] = useState('');
-  const [contactNumber, setContactNumber] = useState('');
-  const [installFile, setInstallFile] = useState(null);
-  const [equipmentPhoto, setEquipmentPhoto] = useState(null);
-  const [serialPhoto, setSerialPhoto] = useState(null);
-  const [installSubmitting, setInstallSubmitting] = useState(false);
-
   // QR Dialog
   const [qrDialog, setQrDialog] = useState(null);
   const [qrData, setQrData] = useState(null);
@@ -139,7 +127,7 @@ export default function Equipment() {
   // Counts for tabs
   const counts = useMemo(() => {
     const pendingSerial = equipmentList.filter(e => e.serial_number_status === 'Pending Update' || !e.serial_number).length;
-    const pendingInstall = equipmentList.filter(e => e.installation_status === 'Pending Installation').length;
+    const pendingInstall = equipmentList.filter(e => e.installation_status === 'Pending Installation' || e.installation_status === 'Installation Requested').length;
     return {
       all: equipmentList.length,
       pending_serial: pendingSerial,
@@ -154,7 +142,7 @@ export default function Equipment() {
       if (activeTab === 'pending_serial') {
         if (item.serial_number_status !== 'Pending Update' && item.serial_number) return false;
       } else if (activeTab === 'pending_installation') {
-        if (item.installation_status !== 'Pending Installation') return false;
+        if (item.installation_status !== 'Pending Installation' && item.installation_status !== 'Installation Requested') return false;
       }
 
       // Status filter
@@ -253,81 +241,17 @@ export default function Equipment() {
     setSerialSubmitting(false);
   };
 
-  // Open Installation Dialog
-  const openInstallationDialog = (item) => {
-    setInstallDialog(item);
-    setInstallSerial(item.serial_number || '');
-    setInstallDate(new Date().toISOString().split('T')[0]);
-    setInstallRemarks('');
-    setInstallLocation(item.location_id || '');
-    setInstalledBy('');
-    setContactNumber('');
-    setInstallFile(null);
-    setEquipmentPhoto(null);
-    setSerialPhoto(null);
-  };
-
-  // Handle Installation Submit
-  const handleInstallSubmit = async () => {
-    if (!installSerial.trim() || !installDate || !installedBy.trim() || !contactNumber.trim() || !installLocation || !installFile || !equipmentPhoto || !serialPhoto) {
-      showMessage('Please fill all required details and upload all photos/reports.', 'Validation Error', 'warning');
-      return;
+  // Handle Request Installation
+  const handleRequestInstallation = async (item) => {
+    if (window.confirm(`Are you sure you want to generate an Installation ticket for ${item.equipment_code}?`)) {
+      try {
+        await api.post(`/api/equipment/${item.id}/request-installation`);
+        showMessage('Installation ticket generated successfully!', 'Success', 'success');
+        loadData();
+      } catch (err) {
+        showMessage(err.response?.data?.detail || 'Failed to request installation', 'Error', 'error');
+      }
     }
-    setInstallSubmitting(true);
-    try {
-      let finalLocationId = installLocation;
-      
-      // If installLocation is a string, it means we need to create a new location first
-      if (typeof installLocation === 'string') {
-        const newLocRes = await api.post('/api/configurations/locations', {
-          location_name: installLocation.trim(),
-          location_code: installLocation.trim().substring(0, 10).toUpperCase().replace(/\s+/g, '_'),
-          is_active: true
-        });
-        finalLocationId = newLocRes.data.id;
-        // Optionally update local locations list
-        setLocations(prev => [...prev, newLocRes.data]);
-      }
-
-      const formData = new FormData();
-      if (installSerial.trim()) {
-        formData.append('serial_number', installSerial.trim());
-      }
-      if (installDate) {
-        formData.append('installation_date', installDate);
-      }
-      if (installRemarks.trim()) {
-        formData.append('installation_remarks', installRemarks.trim());
-      }
-      if (installedBy.trim()) {
-        formData.append('installed_by', installedBy.trim());
-      }
-      if (contactNumber.trim()) {
-        formData.append('contact_number', contactNumber.trim());
-      }
-      if (finalLocationId) {
-        formData.append('location_id', finalLocationId);
-      }
-      if (installFile) {
-        formData.append('file', installFile);
-      }
-      if (equipmentPhoto) {
-        formData.append('equipment_photo', equipmentPhoto);
-      }
-      if (serialPhoto) {
-        formData.append('serial_number_photo', serialPhoto);
-      }
-
-      await api.post(`/api/equipment/${installDialog.id}/installation`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      showMessage('Equipment installation recorded successfully!', 'Success', 'success');
-      setInstallDialog(null);
-      loadData();
-    } catch (err) {
-      showMessage(err.response?.data?.detail || 'Failed to complete installation', 'Error', 'error');
-    }
-    setInstallSubmitting(false);
   };
 
   const handleOpenQr = async (item) => {
@@ -738,8 +662,13 @@ export default function Equipment() {
                     Edit
                   </Button>
                   {item.installation_status === 'Pending Installation' && (
-                    <Button size="small" variant="contained" color="primary" startIcon={<Build />} onClick={(e) => { e.stopPropagation(); openInstallationDialog(item); }}>
-                      Install Equipment
+                    <Button size="small" variant="contained" color="primary" startIcon={<Assignment />} onClick={(e) => { e.stopPropagation(); handleRequestInstallation(item); }}>
+                      Request Installation Call
+                    </Button>
+                  )}
+                  {item.installation_status === 'Installation Requested' && (
+                    <Button size="small" variant="contained" color="inherit" disabled startIcon={<Assignment />}>
+                      Ticket Raised
                     </Button>
                   )}
                   {item.installation_report_url && (
@@ -878,6 +807,8 @@ export default function Equipment() {
                         <Chip label="Installed" size="small" color="success" icon={<CheckCircle sx={{ fontSize: '14px !important' }} />} sx={{ fontSize: '0.75rem' }} />
                       ) : item.installation_status === 'Pending Installation' ? (
                         <Chip label="Pending Installation" size="small" color="info" icon={<Warning sx={{ fontSize: '14px !important' }} />} sx={{ fontSize: '0.75rem' }} />
+                      ) : item.installation_status === 'Installation Requested' ? (
+                        <Chip label="Ticket Raised" size="small" color="secondary" icon={<Assignment sx={{ fontSize: '14px !important' }} />} sx={{ fontSize: '0.75rem' }} />
                       ) : (
                         <Chip label="Not Required" size="small" sx={{ bgcolor: '#F1F5F9', color: '#64748B', fontSize: '0.75rem' }} />
                       )}
@@ -886,7 +817,7 @@ export default function Equipment() {
                       <Chip
                         label={item.status}
                         size="small"
-                        color={item.status === 'Operational' ? 'success' : item.status === 'Pending Installation' ? 'info' : 'default'}
+                        color={item.status === 'Operational' ? 'success' : (item.status === 'Pending Installation' || item.installation_status === 'Installation Requested') ? 'info' : 'default'}
                         sx={{ fontSize: '0.75rem' }}
                       />
                     </TableCell>
@@ -898,9 +829,16 @@ export default function Equipment() {
                           </IconButton>
                         </Tooltip>
                         {item.installation_status === 'Pending Installation' && (
-                          <Tooltip title="Record Installation & Upload Report">
-                            <Button size="small" variant="contained" color="primary" sx={{ textTransform: 'none', py: 0.5 }} onClick={(e) => { e.stopPropagation(); openInstallationDialog(item); }}>
-                              Install
+                          <Tooltip title="Request Installation Call">
+                            <Button size="small" variant="contained" color="primary" sx={{ textTransform: 'none', py: 0.5 }} onClick={(e) => { e.stopPropagation(); handleRequestInstallation(item); }}>
+                              Request Install
+                            </Button>
+                          </Tooltip>
+                        )}
+                        {item.installation_status === 'Installation Requested' && (
+                          <Tooltip title="Ticket Raised">
+                            <Button size="small" variant="contained" color="inherit" disabled sx={{ textTransform: 'none', py: 0.5 }}>
+                              Ticket Raised
                             </Button>
                           </Tooltip>
                         )}
@@ -1003,189 +941,6 @@ export default function Equipment() {
         </DialogActions>
       </Dialog>
 
-      {/* Dialog 2: Installation Workflow */}
-      <Dialog open={!!installDialog} onClose={() => setInstallDialog(null)} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ fontWeight: 700 }}>Record Equipment Installation</DialogTitle>
-        <DialogContent>
-          <Box sx={{ pt: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <Alert severity="info">
-              Update equipment serial number and upload signed installation compliance report.
-            </Alert>
-
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="caption" color="textSecondary">Equipment Code</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 700 }}>{installDialog?.equipment_code}</Typography>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="caption" color="textSecondary">Material</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 700 }}>{installDialog?.material_name}</Typography>
-              </Grid>
-
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Serial Number *"
-                  placeholder="Enter or confirm serial number"
-                  value={installSerial}
-                  onChange={e => setInstallSerial(e.target.value)}
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  type="date"
-                  label="Installation Date *"
-                  value={installDate}
-                  onChange={e => setInstallDate(e.target.value)}
-                  InputLabelProps={{ shrink: true }}
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Installed By (Engineer Name) *"
-                  value={installedBy}
-                  onChange={e => setInstalledBy(e.target.value)}
-                />
-              </Grid>
-              
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Contact Number *"
-                  value={contactNumber}
-                  onChange={e => setContactNumber(e.target.value)}
-                />
-              </Grid>
-              
-              <Grid item xs={12} sm={6}>
-                <Autocomplete
-                  freeSolo
-                  size="small"
-                  options={locations.filter(l => l.is_active)}
-                  value={
-                    typeof installLocation === 'string'
-                      ? installLocation
-                      : locations.find(l => l.id === installLocation) || null
-                  }
-                  getOptionLabel={(option) => {
-                    if (typeof option === 'string') return option;
-                    if (option.inputValue) return option.inputValue;
-                    return `${option.location_name} (${option.location_code})`;
-                  }}
-                  onChange={(event, newValue) => {
-                    if (typeof newValue === 'string') {
-                      setInstallLocation(newValue);
-                    } else if (newValue && newValue.inputValue) {
-                      setInstallLocation(newValue.inputValue);
-                    } else {
-                      setInstallLocation(newValue ? newValue.id : '');
-                    }
-                  }}
-                  filterOptions={(options, params) => {
-                    const filter = createFilterOptions();
-                    const filtered = filter(options, params);
-                    if (params.inputValue !== '') {
-                      filtered.push({
-                        inputValue: params.inputValue,
-                        location_name: `Add "${params.inputValue}"`,
-                        location_code: 'NEW'
-                      });
-                    }
-                    return filtered;
-                  }}
-                  renderInput={(params) => (
-                    <TextField {...params} label="Location (Department/Ward) *" placeholder="Select or type new location" />
-                  )}
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={4}>
-                <Box sx={{ p: 2, border: '1px dashed #CBD5E1', borderRadius: 2, textAlign: 'center', bgcolor: '#F8FAFC', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                  <Typography variant="body2" sx={{ fontWeight: 600, color: '#334155', mb: 0.5 }}>
-                    📎 Installation Report *
-                  </Typography>
-                  {installFile ? (
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                      <Typography variant="caption" sx={{ fontWeight: 700, color: '#059669' }}>Selected: {installFile.name}</Typography>
-                      <IconButton size="small" color="error" onClick={() => setInstallFile(null)}><DeleteOutline fontSize="small" /></IconButton>
-                    </Box>
-                  ) : (
-                    <Button variant="outlined" component="label" size="small" startIcon={<UploadFile />}>
-                      Upload PDF/Img
-                      <input type="file" hidden accept=".pdf,.jpg,.jpeg,.png,.webp" onChange={e => setInstallFile(e.target.files[0])} />
-                    </Button>
-                  )}
-                </Box>
-              </Grid>
-              
-              <Grid item xs={12} sm={4}>
-                <Box sx={{ p: 2, border: '1px dashed #CBD5E1', borderRadius: 2, textAlign: 'center', bgcolor: '#F8FAFC', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                  <Typography variant="body2" sx={{ fontWeight: 600, color: '#334155', mb: 0.5 }}>
-                    📸 Equipment Photo *
-                  </Typography>
-                  {equipmentPhoto ? (
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                      <Typography variant="caption" sx={{ fontWeight: 700, color: '#059669' }}>Selected: {equipmentPhoto.name}</Typography>
-                      <IconButton size="small" color="error" onClick={() => setEquipmentPhoto(null)}><DeleteOutline fontSize="small" /></IconButton>
-                    </Box>
-                  ) : (
-                    <Button variant="outlined" component="label" size="small" startIcon={<UploadFile />}>
-                      Upload Image
-                      <input type="file" hidden accept=".jpg,.jpeg,.png,.webp" onChange={e => setEquipmentPhoto(e.target.files[0])} />
-                    </Button>
-                  )}
-                </Box>
-              </Grid>
-              
-              <Grid item xs={12} sm={4}>
-                <Box sx={{ p: 2, border: '1px dashed #CBD5E1', borderRadius: 2, textAlign: 'center', bgcolor: '#F8FAFC', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                  <Typography variant="body2" sx={{ fontWeight: 600, color: '#334155', mb: 0.5 }}>
-                    🔢 Serial No. Photo *
-                  </Typography>
-                  {serialPhoto ? (
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                      <Typography variant="caption" sx={{ fontWeight: 700, color: '#059669' }}>Selected: {serialPhoto.name}</Typography>
-                      <IconButton size="small" color="error" onClick={() => setSerialPhoto(null)}><DeleteOutline fontSize="small" /></IconButton>
-                    </Box>
-                  ) : (
-                    <Button variant="outlined" component="label" size="small" startIcon={<UploadFile />}>
-                      Upload Image
-                      <input type="file" hidden accept=".jpg,.jpeg,.png,.webp" onChange={e => setSerialPhoto(e.target.files[0])} />
-                    </Button>
-                  )}
-                </Box>
-              </Grid>
-
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={3}
-                  size="small"
-                  label="Installation Remarks / Engineer Notes"
-                  placeholder="e.g. Installed in Room 102 by Service Engineer John Doe. Operational test passed."
-                  value={installRemarks}
-                  onChange={e => setInstallRemarks(e.target.value)}
-                />
-              </Grid>
-            </Grid>
-          </Box>
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 3 }}>
-          <Button onClick={() => setInstallDialog(null)} color="inherit">Cancel</Button>
-          <Button variant="contained" color="primary" disabled={installSubmitting} onClick={handleInstallSubmit}>
-            {installSubmitting ? 'Submitting...' : 'Complete Installation'}
-          </Button>
-        </DialogActions>
-      </Dialog>
 
       {/* QR Code Dialog */}
       <Dialog open={!!qrDialog} onClose={() => setQrDialog(null)} maxWidth="xs" fullWidth>
@@ -1609,6 +1364,12 @@ export default function Equipment() {
                   </Select>
                 </FormControl>
               </Grid>
+              <Grid item xs={12} sm={4}>
+                <FormControlLabel
+                  control={<Switch size="small" checked={!!addForm.requires_installation} onChange={e => setAddForm({ ...addForm, requires_installation: e.target.checked })} />}
+                  label="Requires Installation"
+                />
+              </Grid>
 
               <Grid item xs={12}>
                 <Divider sx={{ my: 1 }} />
@@ -1782,6 +1543,12 @@ export default function Equipment() {
                 <FormControlLabel
                   control={<Switch size="small" checked={!!editForm.calibration_required} onChange={e => setEditForm({ ...editForm, calibration_required: e.target.checked })} />}
                   label="Calibration Required"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControlLabel
+                  control={<Switch size="small" checked={!!editForm.requires_installation} onChange={e => setEditForm({ ...editForm, requires_installation: e.target.checked })} />}
+                  label="Requires Installation"
                 />
               </Grid>
               <Grid item xs={12}>

@@ -2049,6 +2049,9 @@ class ComplaintCloseRequest(BaseModel):
     resolution_entered: str
     closure_reason: str
     document_urls: List[str] = [] # For supporting documents
+    equipment_photo_url: Optional[str] = None
+    serial_number_photo_url: Optional[str] = None
+    installation_report_url: Optional[str] = None
 
 class ComplaintApproveRequest(BaseModel):
     approval_type: str # 'admin' or 'manager'

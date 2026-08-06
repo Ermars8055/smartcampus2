@@ -39,7 +39,7 @@ def list_equipment(
             (EquipmentItem.serial_number == "")
         )
     elif tab == "pending_installation":
-        q = q.filter(EquipmentItem.installation_status == "Pending Installation")
+        q = q.filter(EquipmentItem.installation_status.in_(["Pending Installation", "Installation Requested"]))
 
     if warehouse_id:
         q = q.filter(EquipmentItem.warehouse_id == warehouse_id)
@@ -597,6 +597,64 @@ def complete_installation(
         "installation_status": item.installation_status,
         "status": item.status,
         "installation_report_url": item.installation_report_url
+    }
+
+@router.post("/{id}/request-installation")
+def request_installation(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("equipment", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    from app.models import Complaint, LocationMaster
+    from app.utils.sequences import get_next_number
+
+    item = db.query(EquipmentItem).filter(
+        EquipmentItem.id == id,
+        EquipmentItem.tenant_id == tenant_id,
+        EquipmentItem.site_id == site_id
+    ).first()
+    
+    if not item:
+        raise HTTPException(status_code=404, detail="Equipment item not found")
+
+    if item.installation_status != "Pending Installation":
+        raise HTTPException(status_code=400, detail=f"Cannot request installation from status {item.installation_status}")
+
+    # Create an installation complaint
+    docket_no = get_next_number(db, tenant_id, site_id, "COMPLAINT", "CMP")
+    loc = db.query(LocationMaster).filter(LocationMaster.id == item.location_id).first() if item.location_id else None
+
+    new_complaint = Complaint(
+        tenant_id=tenant_id,
+        site_id=site_id,
+        docket_no=docket_no,
+        complaint_date=datetime.utcnow().date(),
+        complaint_time=datetime.utcnow().strftime("%H:%M"),
+        department_name=loc.location_name if loc else "Biomedical",
+        equipment_id=item.id,
+        nature_of_complaint=f"Request for Equipment Installation: {item.equipment_code}",
+        complaint_type="Installation",
+        status="Registered",
+        created_by_id=current_user.id
+    )
+    db.add(new_complaint)
+    
+    item.installation_status = "Installation Requested"
+    
+    db.add(AuditLog(
+        tenant_id=tenant_id, site_id=site_id,
+        user_id=current_user.id, action="UPDATE",
+        entity_type="EquipmentItem", entity_id=item.id,
+        new_values=f"Installation requested for {item.equipment_code}, Docket No: {docket_no}"
+    ))
+    db.commit()
+
+    return {
+        "message": "Installation ticket generated successfully",
+        "docket_no": docket_no,
+        "installation_status": item.installation_status
     }
 
 @router.get("/{id}/qr")

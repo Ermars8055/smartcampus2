@@ -67,13 +67,16 @@ export default function Indents() {
     }
 
     const searchParams = new URLSearchParams(location.search);
-    if (searchParams.get('new') === 'true' && searchParams.get('complaint_id')) {
+    if (searchParams.get('new') === 'true') {
       const cId = searchParams.get('complaint_id');
-      setShowForm(true);
-      // Remove query params from URL so it doesn't trigger again on refresh
-      navigate(location.pathname, { replace: true });
-
-      // Fetch complaint details and pre-fill the form
+      const rwoId = searchParams.get('rwo_id');
+      if (cId || rwoId) {
+        setShowForm(true);
+        // Remove query params from URL so it doesn't trigger again on refresh
+        navigate(location.pathname, { replace: true });
+        
+        if (cId) {
+          // Fetch complaint details and pre-fill the form
       api.get(`/api/complaints/${cId}`).then(res => {
         const c = res.data;
         const newForm = {
@@ -122,6 +125,10 @@ export default function Indents() {
         console.error('Failed to fetch complaint for pre-fill', err);
         setForm(prev => ({ ...prev, complaint_id: cId }));
       });
+        } else if (rwoId) {
+          setForm(prev => ({ ...prev, rwo_id: rwoId }));
+        }
+      }
     }
   }, [location.state, location.search, indents]);
 
@@ -193,7 +200,7 @@ export default function Indents() {
   }, [availableBuildingsForFilter, filterBuilding]);
 
   const [form, setForm] = useState({
-    institution_id: '', building_id: '', floor_id: '', room_id: '', department: '', remarks: '', items: [{ material_id: '', requested_quantity: '' }], complaint_id: ''
+    institution_id: '', building_id: '', floor_id: '', room_id: '', department: '', remarks: '', items: [{ material_id: '', requested_quantity: '' }], complaint_id: '', rwo_id: ''
   });
 
   const [errors, setErrors] = useState({});
@@ -472,6 +479,7 @@ export default function Indents() {
         location: selectedRoom?.name || '',
         department: form.department,
         complaint_id: form.complaint_id ? parseInt(form.complaint_id) : null,
+        rwo_id: form.rwo_id ? parseInt(form.rwo_id) : null,
         remarks: form.remarks,
         is_draft: isDraft,
         items: mappedItems

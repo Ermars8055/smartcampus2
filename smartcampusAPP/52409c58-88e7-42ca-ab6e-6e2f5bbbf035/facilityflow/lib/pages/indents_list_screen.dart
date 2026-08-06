@@ -20,7 +20,7 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
 
   final List<String> _statusOptions = [
     'All',
-    'Awaiting Approval',
+    'Submitted',
     'Approved',
     'Rejected',
     'Partially Issued'
@@ -30,7 +30,7 @@ class _IndentsListScreenState extends State<IndentsListScreen> {
     switch (status) {
       case 'Draft':
         return const Color(0xFF64748B);
-      case 'Awaiting Approval':
+      case 'Submitted':
         return const Color(0xFFD97706);
       case 'Approved':
         return const Color(0xFF059669);

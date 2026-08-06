@@ -6,6 +6,7 @@ import 'package:facilityflow/models/complaint.dart';
 import 'package:facilityflow/models/material_issue.dart';
 import 'package:facilityflow/models/indent_item.dart';
 import 'package:facilityflow/models/gate_entry.dart';
+import 'package:facilityflow/models/repair_work_order.dart';
 import 'package:provider/provider.dart';
 
 import 'package:facilityflow/services/api_service.dart';
@@ -22,6 +23,7 @@ class AppState extends ChangeNotifier {
       fetchComplaints(),
       fetchIssues(),
       fetchGateEntries(),
+      fetchRwos(),
     ]);
   }
 
@@ -75,6 +77,22 @@ class AppState extends ChangeNotifier {
     }
   }
 
+  Future<void> fetchRwos() async {
+    _isLoadingRwos = true;
+    notifyListeners();
+    try {
+      final response = await ApiService().getRwos();
+      final List data = response.data;
+      _rwos.clear();
+      _rwos.addAll(data.map((json) => RepairWorkOrder.fromJson(json)).toList());
+    } catch (e) {
+      debugPrint('Error fetching RWOs: $e');
+    } finally {
+      _isLoadingRwos = false;
+      notifyListeners();
+    }
+  }
+
   factory AppState.of(BuildContext context, {bool listen = true}) {
     return Provider.of<AppState>(context, listen: listen);
   }
@@ -107,6 +125,18 @@ class AppState extends ChangeNotifier {
 
   bool get isLoadingComplaints {
     return _isLoadingComplaints;
+  }
+
+  final List<RepairWorkOrder> _rwos = [];
+
+  bool _isLoadingRwos = false;
+
+  List<RepairWorkOrder> get rwos {
+    return List.unmodifiable(_rwos);
+  }
+
+  bool get isLoadingRwos {
+    return _isLoadingRwos;
   }
 
   final List<MaterialIssue> _materialIssues = [];

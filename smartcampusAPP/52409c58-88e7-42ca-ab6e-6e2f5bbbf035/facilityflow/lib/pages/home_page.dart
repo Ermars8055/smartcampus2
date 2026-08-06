@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:facilityflow/pages/indents_list_screen.dart';
-import 'package:facilityflow/pages/complaints_list_screen.dart';
+import 'package:facilityflow/pages/maintenance_home_screen.dart';
 import 'package:facilityflow/pages/acknowledgements_screen.dart';
 import 'package:facilityflow/pages/profile_screen.dart';
 import 'package:facilityflow/pages/gate_entries_list_screen.dart';
@@ -23,7 +23,7 @@ class _HomePageState extends State<HomePage> {
 
   final List<Widget> _screens = const [
     const IndentsListScreen(),
-    const ComplaintsListScreen(),
+    const MaintenanceHomeScreen(),
     const AcknowledgementsScreen(),
     const GateEntriesListScreen(),
     const ProfileScreen(),
@@ -66,7 +66,7 @@ class _HomePageState extends State<HomePage> {
             BottomNavigationBarItem(
               icon: Icon(Icons.handyman_outlined),
               activeIcon: Icon(Icons.handyman),
-              label: 'Complaints',
+              label: 'Maintain',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.assignment_turned_in_outlined),

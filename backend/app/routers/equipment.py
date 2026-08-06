@@ -189,6 +189,28 @@ def update_pm_schedule(
     db.commit()
     return {"message": "PM Schedule updated successfully"}
 
+def _matches_department(dept_name: str, loc_name: str) -> bool:
+    d = dept_name.lower().strip()
+    l = loc_name.lower().strip()
+    if d == l:
+        return True
+    d_clean = d.replace("'s", "").replace("’s", "")
+    tokens = [t.strip() for t in d_clean.split('/')]
+    for t in tokens:
+        if len(t) >= 2 and t in l:
+            return True
+    if d_clean == "emergency" and ("emd" in l or "emergency" in l):
+        return True
+    if d_clean == "icu" and ("icu" in l or l == "ccu"):
+        return True
+    if d_clean == "ot" and ("ot" in l):
+        return True
+    if "opd" in d_clean and "opd" in l:
+        return True
+    if "ward" in d_clean and "ward" in l:
+        return True
+    return False
+
 @router.post("/generate-maintenance-calls")
 def generate_maintenance_calls(
     db: Session = Depends(get_db),
@@ -198,6 +220,7 @@ def generate_maintenance_calls(
 ):
     from app.models import Complaint, LocationMaster, PMSchedule
     from datetime import date
+    from sqlalchemy import func
     
     current_month_index = date.today().month
     month_names = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
@@ -208,96 +231,96 @@ def generate_maintenance_calls(
         PMSchedule.tenant_id == tenant_id,
         getattr(PMSchedule, current_month_col) == True
     ).all()
-    scheduled_depts = [s.department_name.lower() for s in schedules]
+    scheduled_depts = [s.department_name for s in schedules]
     
-    # Find all equipment needing PM
-    equipments = db.query(EquipmentItem).join(
-        LocationMaster, EquipmentItem.location_id == LocationMaster.id
-    ).filter(
+    # Find all operational/working equipment needing PM in scheduled departments
+    equipments = db.query(EquipmentItem).filter(
         EquipmentItem.tenant_id == tenant_id,
         EquipmentItem.site_id == site_id,
-        EquipmentItem.status == "Operational",
-        EquipmentItem.pm_required == True
+        EquipmentItem.status.in_(["Operational", "Working"])
     ).all()
     
     generated_count = 0
     for eq in equipments:
         if eq.location_id:
-            loc = db.query(LocationMaster).get(eq.location_id)
-            if loc and loc.location_name.lower() in scheduled_depts:
-                # Check if a PM complaint already exists for this equipment that is open
-                existing = db.query(Complaint).filter(
-                    Complaint.equipment_id == eq.id,
-                    Complaint.complaint_type == "Preventive Maintenance Call",
-                    Complaint.status != "Closed"
-                ).first()
-                
-                if not existing:
-                    # Check if one was closed recently in this same month
-                    recent_pm = db.query(Complaint).filter(
+            loc = db.query(LocationMaster).filter(LocationMaster.id == eq.location_id).first()
+            if loc:
+                matched = any(_matches_department(dept, loc.location_name) for dept in scheduled_depts)
+                if matched:
+                    # Check if an open PM complaint already exists for this equipment
+                    existing = db.query(Complaint).filter(
                         Complaint.equipment_id == eq.id,
                         Complaint.complaint_type == "Preventive Maintenance Call",
-                        db.func.extract('month', Complaint.complaint_date) == current_month_index,
-                        db.func.extract('year', Complaint.complaint_date) == date.today().year
+                        Complaint.status != "Closed"
                     ).first()
                     
-                    if not recent_pm:
-                        new_complaint = Complaint(
-                            tenant_id=tenant_id,
-                            site_id=site_id,
-                            docket_no=f"PM-{date.today().strftime('%Y%m')}-{eq.equipment_code}",
-                            complaint_date=date.today(),
-                            department_name=loc.location_name,
-                            equipment_id=eq.id,
-                            nature_of_complaint="Scheduled Preventive Maintenance",
-                            complaint_type="Preventive Maintenance Call",
-                            status="Open",
-                            is_pm_calibration_call=True,
-                            created_by_id=current_user.id
-                        )
-                        db.add(new_complaint)
-                        generated_count += 1
+                    if not existing:
+                        # Check if a PM complaint was created or closed in this same month
+                        recent_pm = db.query(Complaint).filter(
+                            Complaint.equipment_id == eq.id,
+                            Complaint.complaint_type == "Preventive Maintenance Call",
+                            func.extract('month', Complaint.complaint_date) == current_month_index,
+                            func.extract('year', Complaint.complaint_date) == date.today().year
+                        ).first()
+                        
+                        if not recent_pm:
+                            new_complaint = Complaint(
+                                tenant_id=tenant_id,
+                                site_id=site_id,
+                                docket_no=f"PM-{date.today().strftime('%Y%m')}-{eq.equipment_code}",
+                                complaint_date=date.today(),
+                                department_name=loc.location_name,
+                                equipment_id=eq.id,
+                                nature_of_complaint="Scheduled Preventive Maintenance",
+                                complaint_type="Preventive Maintenance Call",
+                                status="Open",
+                                is_pm_calibration_call=True,
+                                created_by_id=current_user.id
+                            )
+                            db.add(new_complaint)
+                            eq.pm_required = True
+                            generated_count += 1
                         
     # Handle Calibration Generation
     cal_equipments = db.query(EquipmentItem).filter(
         EquipmentItem.tenant_id == tenant_id,
         EquipmentItem.site_id == site_id,
-        EquipmentItem.status == "Operational",
+        EquipmentItem.status.in_(["Operational", "Working"]),
         EquipmentItem.calibration_required == True
     ).all()
     
     cal_generated_count = 0
     for eq in cal_equipments:
-        if eq.next_calibration_due_date:
-            if eq.next_calibration_due_date <= date.today():
-                existing = db.query(Complaint).filter(
+        if not eq.next_calibration_due_date or eq.next_calibration_due_date <= date.today():
+            existing = db.query(Complaint).filter(
+                Complaint.equipment_id == eq.id,
+                Complaint.complaint_type == "Calibration Call",
+                Complaint.status != "Closed"
+            ).first()
+            if not existing:
+                recent_cal = db.query(Complaint).filter(
                     Complaint.equipment_id == eq.id,
                     Complaint.complaint_type == "Calibration Call",
-                    Complaint.status != "Closed"
+                    func.extract('month', Complaint.complaint_date) == current_month_index,
+                    func.extract('year', Complaint.complaint_date) == date.today().year
                 ).first()
-                if not existing:
-                    recent_cal = db.query(Complaint).filter(
-                        Complaint.equipment_id == eq.id,
-                        Complaint.complaint_type == "Calibration Call",
-                        db.func.extract('month', Complaint.complaint_date) == current_month_index,
-                        db.func.extract('year', Complaint.complaint_date) == date.today().year
-                    ).first()
-                    if not recent_cal:
-                        new_complaint = Complaint(
-                            tenant_id=tenant_id,
-                            site_id=site_id,
-                            docket_no=f"CAL-{date.today().strftime('%Y%m')}-{eq.equipment_code}",
-                            complaint_date=date.today(),
-                            department_name="Biomedical",
-                            equipment_id=eq.id,
-                            nature_of_complaint="Scheduled Calibration",
-                            complaint_type="Calibration Call",
-                            status="Open",
-                            is_pm_calibration_call=True,
-                            created_by_id=current_user.id
-                        )
-                        db.add(new_complaint)
-                        cal_generated_count += 1
+                if not recent_cal:
+                    loc = db.query(LocationMaster).filter(LocationMaster.id == eq.location_id).first() if eq.location_id else None
+                    new_complaint = Complaint(
+                        tenant_id=tenant_id,
+                        site_id=site_id,
+                        docket_no=f"CAL-{date.today().strftime('%Y%m')}-{eq.equipment_code}",
+                        complaint_date=date.today(),
+                        department_name=loc.location_name if loc else "Biomedical",
+                        equipment_id=eq.id,
+                        nature_of_complaint="Scheduled Calibration",
+                        complaint_type="Calibration Call",
+                        status="Open",
+                        is_pm_calibration_call=True,
+                        created_by_id=current_user.id
+                    )
+                    db.add(new_complaint)
+                    cal_generated_count += 1
                     
     db.commit()
     return {
@@ -648,9 +671,10 @@ class WriteOffRequest(BaseModel):
     approval_details: Optional[str] = None
     document_url: Optional[str] = None
 
-from app.schemas import EquipmentRelocate
+from app.schemas import EquipmentRelocate, EquipmentCalibration
 from app.models import EquipmentHistory, LocationMaster
 from datetime import datetime
+
 
 @router.post("/{id}/relocate", response_model=EquipmentItemOut)
 def relocate_equipment(
@@ -746,40 +770,147 @@ def get_equipment_counts(
     vendor_id: Optional[int] = None,
     location_id: Optional[int] = None,
     status: Optional[str] = None,
+    search: Optional[str] = None,
+    include_zero: bool = False,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("equipment", "read")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
-    from sqlalchemy import func
-    q = db.query(
-        Material.name.label("equipment_name"), 
-        func.count(EquipmentItem.id).label("count")
-    ).join(
-        EquipmentItem, EquipmentItem.material_id == Material.id
-    ).filter(
-        EquipmentItem.tenant_id == tenant_id,
-        EquipmentItem.site_id == site_id
-    )
+    from sqlalchemy import func, or_
     
-    if institution_id:
-        q = q.filter(EquipmentItem.institution_id == institution_id)
-    if location_id:
-        q = q.filter(EquipmentItem.location_id == location_id)
-    if status:
-        q = q.filter(EquipmentItem.status == status)
-    if category_id:
-        q = q.filter(Material.category_id == category_id)
-        
-    # Vendor would be via GRN->PO->Vendor or rental_vendor
-    if vendor_id:
-        from app.models import GRN
-        q = q.outerjoin(GRN, EquipmentItem.grn_id == GRN.id).filter(GRN.vendor_id == vendor_id)
-        
-    results = q.group_by(Material.name).all()
+    if include_zero:
+        q = db.query(
+            Material.name.label("equipment_name"),
+            func.count(EquipmentItem.id).label("count")
+        ).select_from(Material).outerjoin(
+            EquipmentItem, 
+            (EquipmentItem.material_id == Material.id) & 
+            (EquipmentItem.tenant_id == tenant_id) & 
+            (EquipmentItem.site_id == site_id)
+        ).filter(
+            Material.tenant_id == tenant_id,
+            Material.is_deleted == False
+        )
+        if institution_id:
+            q = q.filter(or_(EquipmentItem.institution_id == institution_id, EquipmentItem.id == None))
+        if location_id:
+            q = q.filter(or_(EquipmentItem.location_id == location_id, EquipmentItem.id == None))
+        if status:
+            q = q.filter(or_(EquipmentItem.status == status, EquipmentItem.id == None))
+        if category_id:
+            q = q.filter(Material.category_id == category_id)
+        if vendor_id:
+            from app.models import GRN
+            q = q.outerjoin(GRN, EquipmentItem.grn_id == GRN.id).filter(or_(GRN.vendor_id == vendor_id, EquipmentItem.id == None))
+    else:
+        q = db.query(
+            Material.name.label("equipment_name"), 
+            func.count(EquipmentItem.id).label("count")
+        ).join(
+            EquipmentItem, EquipmentItem.material_id == Material.id
+        ).filter(
+            EquipmentItem.tenant_id == tenant_id,
+            EquipmentItem.site_id == site_id
+        )
+        if institution_id:
+            q = q.filter(EquipmentItem.institution_id == institution_id)
+        if location_id:
+            q = q.filter(EquipmentItem.location_id == location_id)
+        if status:
+            q = q.filter(EquipmentItem.status == status)
+        if category_id:
+            q = q.filter(Material.category_id == category_id)
+        if vendor_id:
+            from app.models import GRN
+            q = q.outerjoin(GRN, EquipmentItem.grn_id == GRN.id).filter(GRN.vendor_id == vendor_id)
+
+    if search:
+        q = q.filter(Material.name.ilike(f"%{search}%"))
+
+    results = q.group_by(Material.name).order_by(Material.name.asc()).all()
     
     return [
         {"equipment_name": r.equipment_name, "count": r.count}
         for r in results
     ]
+
+
+@router.post("/{id}/calibration")
+def record_calibration(
+    id: int,
+    payload: EquipmentCalibration,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("equipment", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    item = db.query(EquipmentItem).filter(
+        EquipmentItem.id == id,
+        EquipmentItem.tenant_id == tenant_id,
+        EquipmentItem.site_id == site_id
+    ).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Equipment item not found")
+
+    item.last_calibration_date = payload.calibration_date
+    if payload.next_due_date:
+        item.next_calibration_due_date = payload.next_due_date
+    item.updated_at = datetime.utcnow()
+
+    # Record History
+    from app.models import EquipmentHistory
+    history = EquipmentHistory(
+        equipment_id=item.id,
+        event_type="Calibration",
+        event_date=datetime.combine(payload.calibration_date, datetime.min.time()),
+        description=f"Calibration recorded. Agency: {payload.agency_name or 'Authorized Agency'}. Cert #: {payload.certificate_number or 'N/A'}. Remarks: {payload.remarks or 'None'}",
+        reference_id=payload.certificate_number,
+        created_by_id=current_user.id
+    )
+    db.add(history)
+    db.commit()
+
+    return {
+        "message": "Equipment calibration recorded successfully",
+        "last_calibration_date": item.last_calibration_date,
+        "next_calibration_due_date": item.next_calibration_due_date
+    }
+
+
+@router.get("/{id}/history")
+def get_equipment_history(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("equipment", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    item = db.query(EquipmentItem).filter(
+        EquipmentItem.id == id,
+        EquipmentItem.tenant_id == tenant_id,
+        EquipmentItem.site_id == site_id
+    ).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Equipment item not found")
+
+    from app.models import EquipmentHistory
+    histories = db.query(EquipmentHistory).filter(
+        EquipmentHistory.equipment_id == id
+    ).order_by(EquipmentHistory.event_date.desc()).all()
+
+    return [
+        {
+            "id": h.id,
+            "equipment_id": h.equipment_id,
+            "event_type": h.event_type,
+            "event_date": h.event_date,
+            "description": h.description,
+            "reference_id": h.reference_id,
+            "created_by_name": h.created_by.full_name if h.created_by else "System"
+        }
+        for h in histories
+    ]
+
+
 

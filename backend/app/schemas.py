@@ -2371,10 +2371,13 @@ class RepairWorkOrderOut(RepairWorkOrderBase):
     rwo_number: str
     status: str
     created_at: datetime
+    equipment_name: Optional[str] = None
+    equipment_code: Optional[str] = None
     equipment_serial: Optional[str] = None
     vendor_name: Optional[str] = None
     contract_number: Optional[str] = None
     docket_no: Optional[str] = None
+    complaint_docket: Optional[str] = None
     class Config:
         from_attributes = True
 
@@ -2403,3 +2406,11 @@ class EquipmentRelocate(BaseModel):
     new_location_id: int
     relocation_date: date
     remarks: Optional[str] = None
+
+class EquipmentCalibration(BaseModel):
+    calibration_date: date
+    next_due_date: Optional[date] = None
+    agency_name: Optional[str] = None
+    certificate_number: Optional[str] = None
+    remarks: Optional[str] = None
+

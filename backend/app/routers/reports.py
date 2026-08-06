@@ -1055,3 +1055,76 @@ def get_pending_gatepass_returns(
         "generated_at": get_now_ist().strftime("%d-%b-%Y %H:%M:%S"),
         "generated_by": current_user.full_name
     }
+
+
+@router.get("/equipment-count")
+def get_equipment_count_report(
+    institution_id: Optional[int] = None,
+    category_id: Optional[int] = None,
+    vendor_id: Optional[int] = None,
+    location_id: Optional[int] = None,
+    status: Optional[str] = None,
+    search: Optional[str] = None,
+    include_zero: bool = False,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("reports", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    from app.models import EquipmentItem, Material, GRN
+    from sqlalchemy import func, or_
+
+    if include_zero:
+        q = db.query(
+            Material.name.label("equipment_name"),
+            func.count(EquipmentItem.id).label("count")
+        ).select_from(Material).outerjoin(
+            EquipmentItem, 
+            (EquipmentItem.material_id == Material.id) & 
+            (EquipmentItem.tenant_id == tenant_id) & 
+            (EquipmentItem.site_id == site_id)
+        ).filter(
+            Material.tenant_id == tenant_id,
+            Material.is_deleted == False
+        )
+        if institution_id:
+            q = q.filter(or_(EquipmentItem.institution_id == institution_id, EquipmentItem.id == None))
+        if location_id:
+            q = q.filter(or_(EquipmentItem.location_id == location_id, EquipmentItem.id == None))
+        if status:
+            q = q.filter(or_(EquipmentItem.status == status, EquipmentItem.id == None))
+        if category_id:
+            q = q.filter(Material.category_id == category_id)
+        if vendor_id:
+            q = q.outerjoin(GRN, EquipmentItem.grn_id == GRN.id).filter(or_(GRN.vendor_id == vendor_id, EquipmentItem.id == None))
+    else:
+        q = db.query(
+            Material.name.label("equipment_name"), 
+            func.count(EquipmentItem.id).label("count")
+        ).join(
+            EquipmentItem, EquipmentItem.material_id == Material.id
+        ).filter(
+            EquipmentItem.tenant_id == tenant_id,
+            EquipmentItem.site_id == site_id
+        )
+        if institution_id:
+            q = q.filter(EquipmentItem.institution_id == institution_id)
+        if location_id:
+            q = q.filter(EquipmentItem.location_id == location_id)
+        if status:
+            q = q.filter(EquipmentItem.status == status)
+        if category_id:
+            q = q.filter(Material.category_id == category_id)
+        if vendor_id:
+            q = q.outerjoin(GRN, EquipmentItem.grn_id == GRN.id).filter(GRN.vendor_id == vendor_id)
+
+    if search:
+        q = q.filter(Material.name.ilike(f"%{search}%"))
+
+    results = q.group_by(Material.name).order_by(Material.name.asc()).all()
+
+    return [
+        {"equipment_name": r.equipment_name, "count": r.count}
+        for r in results
+    ]
+

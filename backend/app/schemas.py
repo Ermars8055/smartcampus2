@@ -2359,6 +2359,7 @@ class RepairWorkOrderBase(BaseModel):
     sla_details: Optional[str] = None
     problem_description: Optional[str] = None
     target_completion_date: Optional[date] = None
+    material_required: bool = False
 
 class RepairWorkOrderCreate(RepairWorkOrderBase):
     pass
@@ -2368,6 +2369,7 @@ class RepairWorkOrderUpdate(BaseModel):
     problem_description: Optional[str] = None
     target_completion_date: Optional[date] = None
     status: Optional[str] = None
+    material_required: Optional[bool] = None
 
 class RepairWorkOrderOut(RepairWorkOrderBase):
     id: int
@@ -2378,6 +2380,7 @@ class RepairWorkOrderOut(RepairWorkOrderBase):
     equipment_code: Optional[str] = None
     equipment_serial: Optional[str] = None
     vendor_name: Optional[str] = None
+    material_required: bool = False
     contract_number: Optional[str] = None
     docket_no: Optional[str] = None
     complaint_docket: Optional[str] = None

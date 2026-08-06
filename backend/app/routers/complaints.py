@@ -540,7 +540,7 @@ def close_complaint(
 
     complaint.resolution_entered = payload.resolution_entered
     complaint.closure_reason = payload.closure_reason
-    complaint.status = "Pending Admin Approval"
+    complaint.status = "Pending Approval"
     
     # Add documents
     for url in payload.document_urls:

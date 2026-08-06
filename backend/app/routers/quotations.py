@@ -1,7 +1,7 @@
 """Quotation Management routes."""
 
 from fastapi import APIRouter, Depends, HTTPException, File, UploadFile, Form
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from sqlalchemy import or_
 from datetime import datetime
 from app.utils.tz import get_now_ist
@@ -71,7 +71,15 @@ def list_quotation_requests(
     if project_id:
         q = q.filter(QuotationRequest.project_id == project_id)
     
-    qrs = q.order_by(QuotationRequest.created_at.desc()).all()
+    qrs = q.options(
+        selectinload(QuotationRequest.project),
+        selectinload(QuotationRequest.created_by),
+        selectinload(QuotationRequest.items).selectinload(QuotationRequestItem.material).selectinload(Material.uom),
+        selectinload(QuotationRequest.items).selectinload(QuotationRequestItem.source_pr),
+        selectinload(QuotationRequest.items).selectinload(QuotationRequestItem.sources).selectinload(QuotationRequestItemSource.source_pr),
+        selectinload(QuotationRequest.linked_prs).selectinload(QuotationRequestPR.purchase_request),
+        selectinload(QuotationRequest.invited_vendors).selectinload(QuotationRequestVendor.vendor),
+    ).order_by(QuotationRequest.created_at.desc()).all()
     
     result = []
     for qr in qrs:
@@ -81,9 +89,11 @@ def list_quotation_requests(
             material_code=it.material.code if it.material else "N/A",
             uom_name=it.material.uom.abbreviation if it.material and it.material.uom else "Unit",
             source=it.source or "Manual",
+            source_pr_id=it.source_pr_id,
             source_pr_number=it.source_pr.pr_number if it.source_pr else None,
             sources=[QRItemSourceOut(
                 source=s.source,
+                source_pr_id=s.source_pr_id,
                 source_pr_number=s.source_pr.pr_number if s.source_pr else None,
                 quantity=s.quantity
             ) for s in it.sources]
@@ -114,7 +124,15 @@ def get_quotation_request(
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
-    qr = db.query(QuotationRequest).filter(
+    qr = db.query(QuotationRequest).options(
+        selectinload(QuotationRequest.project),
+        selectinload(QuotationRequest.created_by),
+        selectinload(QuotationRequest.items).selectinload(QuotationRequestItem.material).selectinload(Material.uom),
+        selectinload(QuotationRequest.items).selectinload(QuotationRequestItem.source_pr),
+        selectinload(QuotationRequest.items).selectinload(QuotationRequestItem.sources).selectinload(QuotationRequestItemSource.source_pr),
+        selectinload(QuotationRequest.linked_prs).selectinload(QuotationRequestPR.purchase_request),
+        selectinload(QuotationRequest.invited_vendors).selectinload(QuotationRequestVendor.vendor),
+    ).filter(
         QuotationRequest.id == id, QuotationRequest.tenant_id == tenant_id,
         QuotationRequest.site_id == site_id, QuotationRequest.is_deleted == False
     ).first()
@@ -126,9 +144,11 @@ def get_quotation_request(
         material_name=it.material.name, material_code=it.material.code,
         uom_name=it.material.uom.abbreviation if it.material.uom else "Unit",
         source=it.source or "Manual",
+        source_pr_id=it.source_pr_id,
         source_pr_number=it.source_pr.pr_number if it.source_pr else None,
         sources=[QRItemSourceOut(
             source=s.source,
+            source_pr_id=s.source_pr_id,
             source_pr_number=s.source_pr.pr_number if s.source_pr else None,
             quantity=s.quantity
         ) for s in it.sources]
@@ -183,7 +203,7 @@ def create_quotation_request(
                 qr_id=qr.id, 
                 material_id=item.material_id, 
                 quantity=0,
-                source="Manual" # Legacy field
+                source=item.source or "Manual" # Legacy field
             )
             db.add(qr_item)
             db.flush()
@@ -193,7 +213,7 @@ def create_quotation_request(
         target_item.quantity += item.quantity
         db.add(QuotationRequestItemSource(
             qr_item_id=target_item.id,
-            source="Manual",
+            source=item.source or "Manual",
             source_pr_id=None,
             quantity=item.quantity
         ))
@@ -277,19 +297,23 @@ def update_quotation_request(
     
     # 1. Process Manual Items
     for manual_item in data.items:
-        qr_item = QuotationRequestItem(
-            qr_id=qr.id,
-            material_id=manual_item.material_id,
-            quantity=manual_item.quantity,
-            source="Manual",
-            source_pr_id=None
-        )
-        db.add(qr_item)
-        db.flush()
-        material_map[manual_item.material_id] = qr_item
+        if manual_item.material_id not in material_map:
+            qr_item = QuotationRequestItem(
+                qr_id=qr.id,
+                material_id=manual_item.material_id,
+                quantity=0,
+                source=manual_item.source or "Manual",
+                source_pr_id=None
+            )
+            db.add(qr_item)
+            db.flush()
+            material_map[manual_item.material_id] = qr_item
+            
+        target_item = material_map[manual_item.material_id]
+        target_item.quantity += manual_item.quantity
         db.add(QuotationRequestItemSource(
-            qr_item_id=qr_item.id,
-            source="Manual",
+            qr_item_id=target_item.id,
+            source=manual_item.source or "Manual",
             source_pr_id=None,
             quantity=manual_item.quantity
         ))
@@ -358,6 +382,12 @@ def import_materials_excel(
         
     results = []
     
+    # Pre-fetch all materials for the tenant to avoid N+1 queries
+    all_materials = db.query(Material).filter(Material.tenant_id == tenant_id).all()
+    # Create lookup dictionaries (lowercase for case-insensitive matching)
+    mat_by_code = {m.code.lower(): m for m in all_materials if m.code}
+    mat_by_name = {m.name.lower(): m for m in all_materials if m.name}
+    
     for idx, row in df.iterrows():
         name_val = str(row[name_col]).strip() if name_col and pd.notna(row[name_col]) else ""
         code_val = str(row[code_col]).strip() if code_col and pd.notna(row[code_col]) else ""
@@ -371,13 +401,11 @@ def import_materials_excel(
         except (ValueError, TypeError):
             continue
             
-        query = db.query(Material).filter(Material.tenant_id == tenant_id)
+        mat = None
         if code_val:
-            query = query.filter(func.lower(Material.code) == code_val.lower())
-        else:
-            query = query.filter(func.lower(Material.name) == name_val.lower())
-            
-        mat = query.first()
+            mat = mat_by_code.get(code_val.lower())
+        if not mat and name_val:
+            mat = mat_by_name.get(name_val.lower())
         
         if mat:
             results.append(ExcelImportResultItem(

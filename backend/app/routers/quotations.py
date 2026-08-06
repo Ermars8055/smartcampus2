@@ -28,7 +28,9 @@ class SendQuotationRequest(BaseModel):
     message: str = ""
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
 from app.models import QuotationRequestStatus, VendorQuotationStatus
-from app.utils.email_utils import send_html_email
+from app.utils.email_utils import send_html_email, send_email_with_attachment
+from app.utils.pdf_utils import generate_qr_pdf
+from fastapi.responses import Response
 
 router = APIRouter(prefix="/api/quotations", tags=["Quotations"])
 
@@ -419,11 +421,10 @@ def import_materials_excel(
     return results
 
 
-@router.post("/requests/{id}/send")
-def send_quotation_request(
-    id: int, data: SendQuotationRequest = SendQuotationRequest(),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("purchase_requests", "update")),
+@router.get("/requests/{id}/pdf")
+def preview_quotation_request_pdf(
+    id: int, db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("purchase_requests", "read")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -433,23 +434,54 @@ def send_quotation_request(
     if not qr:
         raise HTTPException(status_code=404, detail="Quotation Request not found")
         
-    qr.status = QuotationRequestStatus.REQUESTED.value
-    for v in qr.invited_vendors:
-        v.is_sent = True
-        v.sent_at = get_now_ist()
+    pdf_bytes = generate_qr_pdf(qr)
+    return Response(content=pdf_bytes, media_type="application/pdf")
+
+
+@router.post("/requests/{id}/send")
+def send_quotation_request(
+    id: int, data: SendQuotationRequest = SendQuotationRequest(),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("purchase_requests", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    try:
+        qr = db.query(QuotationRequest).filter(
+            QuotationRequest.id == id, QuotationRequest.tenant_id == tenant_id, QuotationRequest.site_id == site_id
+        ).first()
+        if not qr:
+            raise HTTPException(status_code=404, detail="Quotation Request not found")
+            
+        qr.status = QuotationRequestStatus.REQUESTED.value
         
-        # Send actual email to the vendor
-        if v.vendor and v.vendor.email:
-            # Convert newlines to HTML breaks for basic formatting
-            html_message = data.message.replace('\n', '<br>')
-            send_html_email(
-                to_email=v.vendor.email,
-                subject=f"Request for Quotation: {qr.qr_number}",
-                html_body=html_message
-            )
+        # Generate PDF once to attach for all vendors
+        pdf_bytes = generate_qr_pdf(qr)
+        pdf_filename = f"Quotation_Request_{qr.qr_number}.pdf"
         
-    db.commit()
-    return {"message": "Quotation Request sent to vendors"}
+        for v in qr.invited_vendors:
+            v.is_sent = True
+            v.sent_at = get_now_ist()
+            
+            # Send actual email to the vendor
+            if v.vendor and v.vendor.email:
+                # Convert newlines to HTML breaks for basic formatting
+                html_message = data.message.replace('\n', '<br>')
+                send_email_with_attachment(
+                    to_email=v.vendor.email,
+                    subject=f"Request for Quotation: {qr.qr_number}",
+                    html_body=html_message,
+                    attachment_bytes=pdf_bytes,
+                    attachment_filename=pdf_filename,
+                    vendor_name=v.vendor.name
+                )
+            
+        db.commit()
+        return {"message": "Quotation Request sent to vendors"}
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/requests/{id}/receive")

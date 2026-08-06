@@ -209,9 +209,28 @@ const Quotations = () => {
 
   // --- Actions ---
 
+  // Helper function to sort QR items explicitly: PR first, then Manual, then Imported.
+  const sortQRItems = (items) => {
+    if (!items) return [];
+    
+    const getPriority = (item) => {
+      // For details view (uses item.sources array)
+      if (item.sources && item.sources.length > 0) {
+        if (item.sources.some(s => s.source === 'PR' && s.source_pr_number)) return 1;
+        if (item.sources.some(s => s.source === 'Manual')) return 2;
+        if (item.sources.some(s => s.source === 'Imported')) return 3;
+      }
+      
+      // For create/edit view (uses item.pr_id or item.source)
+      if (item.pr_id || item.source === 'PR') return 1;
+      if (!item.pr_id && !item.is_imported && item.source !== 'Imported') return 2; // Manual
+      return 3; // Imported
+    };
 
-
-
+    return [...items].sort((a, b) => {
+      return getPriority(a) - getPriority(b);
+    });
+  };
 
   const handleAutoProcess = (qr, section = null) => {
     setSelectedQR(qr);
@@ -219,28 +238,38 @@ const Quotations = () => {
   };
 
   const handleEditDraft = (qr) => {
-    const items = (qr.items || []).map(it => {
-      // Find source if exists. In draft mode it's usually 1-to-1. 
-      // The backend returns source in QRItemOut for backward compat
-      return {
-        material_id: it.material_id,
-        quantity: it.quantity,
-        pr_id: it.source === 'PR' ? it.source_pr_id : null,
-      };
-    });
+    setLoading(true);
     
-    const manual_material_ids = items.filter(it => !it.pr_id).map(it => it.material_id);
-    
-    setNewQR({
-      id: qr.id,
-      required_date: qr.required_date ? dayjs(qr.required_date).format('YYYY-MM-DD') : '',
-      remarks: qr.remarks || '',
-      pr_ids: qr.linked_prs?.map(p => p.pr_id) || [],
-      vendor_ids: qr.invited_vendors?.map(v => v.vendor_id) || [],
-      items: items,
-      manual_material_ids: manual_material_ids
-    });
-    setCreateQRDialogOpen(true);
+    setTimeout(() => {
+      const items = (qr.items || []).map(it => {
+        // The backend returns source in QRItemOut for backward compat, but sources array is more accurate
+        const prSource = it.sources?.find(s => s.source === 'PR');
+        const isImportedSource = it.sources?.some(s => s.source === 'Imported');
+        
+        return {
+          material_id: it.material_id,
+          quantity: it.quantity,
+          pr_id: prSource ? prSource.source_pr_id : (it.source === 'PR' ? it.source_pr_id : null),
+          is_imported: isImportedSource ? true : (it.source === 'Imported')
+        };
+      });
+      
+      const sortedItems = sortQRItems(items);
+      
+      const manual_material_ids = sortedItems.filter(it => !it.pr_id && !it.is_imported).map(it => it.material_id);
+      
+      setNewQR({
+        id: qr.id,
+        required_date: qr.required_date ? dayjs(qr.required_date).format('YYYY-MM-DD') : '',
+        remarks: qr.remarks || '',
+        pr_ids: qr.linked_prs?.map(p => p.pr_id) || [],
+        vendor_ids: qr.invited_vendors?.map(v => v.vendor_id) || [],
+        items: sortedItems,
+        manual_material_ids: manual_material_ids
+      });
+      setCreateQRDialogOpen(true);
+      setLoading(false);
+    }, 50);
   };
 
   const handleCreateQR = async (isDraft = false) => {
@@ -273,7 +302,11 @@ const Quotations = () => {
       const payload = {
         ...newQR,
         project_id: projects.length > 0 ? projects[0].id : 1,
-        items: (newQR.items || []).filter(it => !it.pr_id),
+        items: (newQR.items || []).filter(it => !it.pr_id).map(it => ({
+          material_id: it.material_id,
+          quantity: it.quantity,
+          source: it.is_imported ? 'Imported' : 'Manual'
+        })),
         required_date: newQR.required_date || null,
         remarks: newQR.remarks || null,
         is_draft: isDraft
@@ -331,21 +364,24 @@ const Quotations = () => {
             const existingIdx = newManualItems.findIndex(it => it.material_id === imported.material_id);
             if (existingIdx >= 0) {
               newManualItems[existingIdx].quantity += imported.quantity;
+              newManualItems[existingIdx].is_imported = true;
             } else {
               newManualItems.push({
                 material_id: imported.material_id,
                 quantity: imported.quantity,
-                pr_id: null
+                pr_id: null,
+                is_imported: true
               });
             }
           });
           
-          const newManualMaterialIds = newManualItems.map(it => it.material_id);
+          // Only true manual items should be in the autocomplete
+          const newManualMaterialIds = newManualItems.filter(it => !it.is_imported).map(it => it.material_id);
           
           return {
             ...prev,
             manual_material_ids: newManualMaterialIds,
-            items: [...prItems, ...newManualItems]
+            items: sortQRItems([...prItems, ...newManualItems])
           };
         });
         showMessage(`Successfully imported ${importedItems.length} materials.`, 'Success', 'success');
@@ -808,7 +844,7 @@ const Quotations = () => {
 
     setNewQR(prev => {
       const manualItems = (prev.items || []).filter(it => !it.pr_id);
-      return { ...prev, pr_ids: selectedPrIds, items: [...prItems, ...manualItems] };
+      return { ...prev, pr_ids: selectedPrIds, items: sortQRItems([...prItems, ...manualItems]) };
     });
   };
 
@@ -816,14 +852,16 @@ const Quotations = () => {
     const selectedMatIds = e.target.value;
     setNewQR(prev => {
       const prItems = (prev.items || []).filter(it => it.pr_id);
+      const importedItems = (prev.items || []).filter(it => !it.pr_id && it.is_imported);
+      
       const manualItems = selectedMatIds.map(id => {
-        const existing = (prev.items || []).find(it => !it.pr_id && it.material_id === id);
-        return existing || { material_id: id, quantity: 1, pr_id: null };
+        const existing = (prev.items || []).find(it => !it.pr_id && !it.is_imported && it.material_id === id);
+        return existing || { material_id: id, quantity: 1, pr_id: null, is_imported: false };
       });
       return {
         ...prev,
         manual_material_ids: selectedMatIds,
-        items: [...prItems, ...manualItems]
+        items: sortQRItems([...prItems, ...importedItems, ...manualItems])
       };
     });
   };
@@ -840,7 +878,7 @@ const Quotations = () => {
     setNewQR(prev => {
       const itemToRemove = prev.items[index];
       let newManualIds = prev.manual_material_ids || [];
-      if (!itemToRemove.pr_id) {
+      if (!itemToRemove.pr_id && !itemToRemove.is_imported) {
         newManualIds = newManualIds.filter(id => id !== itemToRemove.material_id);
       }
       const newItems = prev.items.filter((_, i) => i !== index);
@@ -884,7 +922,11 @@ const Quotations = () => {
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
         <Typography variant="h5" fontWeight="600">Quotation Management</Typography>
         {!selectedQR && hasPermission('quotations', 'can_create') && (
-          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreateQRDialogOpen(true)}>
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => {
+            setNewQR({ required_date: '', remarks: '', pr_ids: [], items: [], vendor_ids: [], manual_material_ids: [] });
+            setErrors({});
+            setCreateQRDialogOpen(true);
+          }}>
             Create Quotation Request
           </Button>
         )}
@@ -1220,7 +1262,7 @@ const Quotations = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {selectedQR.items.map((item, idx) => (
+                    {sortQRItems(selectedQR.items).map((item, idx) => (
                       <TableRow key={item.id} hover>
                         <TableCell sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>{idx + 1}</TableCell>
                         <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{item.material_code}</TableCell>
@@ -1233,22 +1275,22 @@ const Quotations = () => {
                               // Force Filter: If any PR source exists, ignore Manual entirely
                               const hasPR = item.sources.some(s => s.source === 'PR' && s.source_pr_number);
                               const displaySources = item.sources.filter(s => {
-                                if (s.source === 'Manual' && hasPR) return false;
-                                return (s.source === 'PR' && s.source_pr_number) || s.source === 'Manual';
+                                if ((s.source === 'Manual' || s.source === 'Imported') && hasPR) return false;
+                                return (s.source === 'PR' && s.source_pr_number) || s.source === 'Manual' || s.source === 'Imported';
                               });
 
                               return Array.from(new Set(displaySources.map(s =>
-                                s.source === 'PR' ? `PR:${s.source_pr_number}` : 'Manual'
+                                s.source === 'PR' ? `PR:${s.source_pr_number}` : s.source
                               ))).map((srcKey, sIdx) => {
                                 const isPR = srcKey.startsWith('PR:');
-                                const label = isPR ? srcKey.replace('PR:', '') : 'Manual';
+                                const label = isPR ? srcKey.replace('PR:', '') : srcKey;
+                                const color = isPR ? "primary" : (label === 'Imported' ? "info" : "default");
                                 return (
                                   <Chip
                                     key={sIdx}
                                     size="small"
                                     label={label}
-                                    color={isPR ? "primary" : "default"}
-                                    variant="outlined"
+                                    color={color}
                                     sx={{ fontSize: '0.7rem', height: 20 }}
                                   />
                                 );
@@ -1256,9 +1298,8 @@ const Quotations = () => {
                             })() : (
                               <Chip
                                 size="small"
-                                label={item.source === 'PR' && item.source_pr_number ? item.source_pr_number : "Manual"}
-                                color={item.source === 'PR' ? "primary" : "default"}
-                                variant="outlined"
+                                label={item.source === 'PR' && item.source_pr_number ? item.source_pr_number : (item.source === 'Imported' ? 'Imported' : 'Manual')}
+                                color={item.source === 'PR' ? "primary" : (item.source === 'Imported' ? "info" : "default")}
                                 sx={{ fontSize: '0.7rem', height: 20 }}
                               />
                             )}
@@ -1928,9 +1969,8 @@ const Quotations = () => {
                                 <TableCell align="center" sx={{ py: 0.5 }}>
                                   <Chip
                                     size="small"
-                                    label={it.pr_id ? (pr?.pr_number || 'PR') : 'Manual'}
-                                    color={it.pr_id ? "primary" : "default"}
-                                    variant="outlined"
+                                    label={it.pr_id ? (pr?.pr_number || 'PR') : (it.is_imported ? 'Imported' : 'Manual')}
+                                    color={it.pr_id ? "primary" : (it.is_imported ? "info" : "default")}
                                   />
                                 </TableCell>
                                 <TableCell align="center" sx={{ py: 0.5 }}>
@@ -2273,7 +2313,7 @@ const Quotations = () => {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {viewingQR.items.map(it => (
+                      {sortQRItems(viewingQR.items).map(it => (
                         <TableRow key={it.id}>
                           <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{it.material_code}</TableCell>
                           <TableCell sx={{ fontWeight: 500 }}>{it.material_name}</TableCell>
@@ -2285,22 +2325,22 @@ const Quotations = () => {
                                 // Force Filter: If any PR source exists, ignore Manual entirely
                                 const hasPR = it.sources.some(s => s.source === 'PR' && s.source_pr_number);
                                 const displaySources = it.sources.filter(s => {
-                                  if (s.source === 'Manual' && hasPR) return false;
-                                  return (s.source === 'PR' && s.source_pr_number) || s.source === 'Manual';
+                                  if ((s.source === 'Manual' || s.source === 'Imported') && hasPR) return false;
+                                  return (s.source === 'PR' && s.source_pr_number) || s.source === 'Manual' || s.source === 'Imported';
                                 });
 
                                 return Array.from(new Set(displaySources.map(s =>
-                                  s.source === 'PR' ? `PR:${s.source_pr_number}` : 'Manual'
+                                  s.source === 'PR' ? `PR:${s.source_pr_number}` : s.source
                                 ))).map((srcKey, sIdx) => {
                                   const isPR = srcKey.startsWith('PR:');
-                                  const label = isPR ? srcKey.replace('PR:', '') : 'Manual';
+                                  const label = isPR ? srcKey.replace('PR:', '') : srcKey;
+                                  const color = isPR ? "primary" : (label === 'Imported' ? "info" : "default");
                                   return (
                                     <Chip
                                       key={sIdx}
                                       size="small"
                                       label={label}
-                                      color={isPR ? "primary" : "default"}
-                                      variant="outlined"
+                                      color={color}
                                       sx={{ fontSize: '0.65rem', height: 18 }}
                                     />
                                   );
@@ -2308,9 +2348,8 @@ const Quotations = () => {
                               })() : (
                                 <Chip
                                   size="small"
-                                  label={it.source === 'PR' && it.source_pr_number ? it.source_pr_number : "Manual"}
-                                  color={it.source === 'PR' ? "primary" : "default"}
-                                  variant="outlined"
+                                  label={it.source === 'PR' && it.source_pr_number ? it.source_pr_number : (it.source === 'Imported' ? 'Imported' : 'Manual')}
+                                  color={it.source === 'PR' ? "primary" : (it.source === 'Imported' ? "info" : "default")}
                                   sx={{ fontSize: '0.65rem', height: 18 }}
                                 />
                               )}

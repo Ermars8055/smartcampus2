@@ -1576,9 +1576,11 @@ class AuditLogOut(BaseModel):
 class QRItemBase(BaseModel):
     material_id: int
     quantity: float = Field(..., gt=0)
+    source: Optional[str] = "Manual"
 
 class QRItemSourceOut(BaseModel):
     source: str                              # "PR" or "Manual"
+    source_pr_id: Optional[int] = None
     source_pr_number: Optional[str] = None  # e.g. "PR-2026-0001"
     quantity: float
     class Config:
@@ -1590,6 +1592,7 @@ class QRItemOut(QRItemBase):
     material_code: Optional[str] = None
     uom_name: Optional[str] = None
     source: Optional[str] = "Manual"          # Legacy: kept for backward compat
+    source_pr_id: Optional[int] = None
     source_pr_number: Optional[str] = None    # Legacy: kept for backward compat
     sources: List[QRItemSourceOut] = []       # NEW: all contributing sources
     class Config:
@@ -2073,6 +2076,10 @@ class ComplaintOut(ComplaintBase):
     created_by_name: Optional[str] = None
     resolved_by_name: Optional[str] = None
     verified_by_name: Optional[str] = None
+    admin_approved_by_id: Optional[int] = None
+    manager_approved_by_id: Optional[int] = None
+    admin_approved_at: Optional[datetime] = None
+    manager_approved_at: Optional[datetime] = None
     admin_approved_by_name: Optional[str] = None
     manager_approved_by_name: Optional[str] = None
     equipment_code: Optional[str] = None

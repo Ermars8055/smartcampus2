@@ -53,7 +53,7 @@ export default function ComplaintsList() {
       case 'Under Inspection': return 'info';
       case 'Material Pending': return 'error';
       case 'In Progress': return 'warning';
-      case 'Pending Admin Approval': return 'info';
+      case 'Pending Approval': case 'Pending Admin Approval': return 'info';
       case 'Resolved': return 'success';
       case 'Closed': return 'default';
       case 'Reopened': return 'error';

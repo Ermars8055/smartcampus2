@@ -9,7 +9,7 @@ import api, { getFileUrl } from '../services/api';
 import dayjs from 'dayjs';
 import { useAuth } from '../context/AuthContext';
 
-const COMPLAINT_STEPS = ['Registered', 'Assigned', 'Under Inspection', 'In Progress', 'Pending Admin Approval', 'Closed'];
+const COMPLAINT_STEPS = ['Registered', 'Assigned', 'Under Inspection', 'In Progress', 'Pending Approval', 'Closed'];
 
 export default function ComplaintDetail() {
   const { id } = useParams();
@@ -215,7 +215,7 @@ export default function ComplaintDetail() {
       await api.post(`/api/complaints/${id}/approve-closure`, {
         approval_type: approvalType
       });
-      setSnackbar({ open: true, message: `Approved as ${approvalType}`, severity: 'success' });
+      setSnackbar({ open: true, message: `${approvalType === 'admin' ? 'Level 1' : 'Level 2'} Approved Successfully`, severity: 'success' });
       fetchComplaintData();
     } catch (error) {
       setSnackbar({ open: true, message: error.response?.data?.detail || 'Failed to approve', severity: 'error' });
@@ -236,7 +236,7 @@ export default function ComplaintDetail() {
       case 'Under Inspection': return 'info';
       case 'Material Pending': return 'error';
       case 'In Progress': return 'warning';
-      case 'Pending Admin Approval': return 'info';
+      case 'Pending Approval': case 'Pending Admin Approval': return 'info';
       case 'Resolved': return 'success';
       case 'Closed': return 'default';
       case 'Reopened': return 'error';
@@ -251,7 +251,7 @@ export default function ComplaintDetail() {
       case 'Assigned': case 'Reopened': return 1;
       case 'Under Inspection': return 2;
       case 'Material Pending': case 'In Progress': return 3;
-      case 'Pending Admin Approval': return 4;
+      case 'Pending Approval': case 'Pending Admin Approval': return 4;
       case 'Closed': return 5;
       default: return 0;
     }
@@ -320,15 +320,15 @@ export default function ComplaintDetail() {
               </Button>
             )}
 
-            {complaint.status === 'Pending Admin Approval' && !complaint.admin_approved_by_id && (
+            {(complaint.status === 'Pending Approval' || complaint.status === 'Pending Admin Approval') && !complaint.admin_approved_by_id && (
               <Button variant="contained" color="primary" startIcon={<VerifiedUser />} onClick={() => handleApprove('admin')}>
-                Admin Approve
+                Level 1 Approve
               </Button>
             )}
 
-            {complaint.status === 'Pending Admin Approval' && complaint.admin_approved_by_id && !complaint.manager_approved_by_id && (
+            {(complaint.status === 'Pending Approval' || complaint.status === 'Pending Admin Approval') && complaint.admin_approved_by_id && !complaint.manager_approved_by_id && (
               <Button variant="contained" color="secondary" startIcon={<VerifiedUser />} onClick={() => handleApprove('manager')}>
-                Manager Approve
+                Level 2 Approve
               </Button>
             )}
             
@@ -418,7 +418,7 @@ export default function ComplaintDetail() {
             </Paper>
           )}
 
-          {(complaint.status === 'Resolved' || complaint.status === 'Closed' || complaint.status === 'Pending Admin Approval' || complaint.status === 'Reopened') && complaint.resolution_entered && (
+          {(complaint.status === 'Resolved' || complaint.status === 'Closed' || complaint.status === 'Pending Approval' || complaint.status === 'Pending Admin Approval' || complaint.status === 'Reopened') && complaint.resolution_entered && (
             <Paper sx={{ p: 3, mb: 3, bgcolor: '#F0FDF4', border: '1px solid #BBF7D0' }}>
               <Typography variant="h6" sx={{ color: '#166534', mb: 2 }}>Closure Details</Typography>
               
@@ -435,7 +435,7 @@ export default function ComplaintDetail() {
 
               <Box sx={{ mt: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                 <Box sx={{ p: 1.5, border: '1px solid #E2E8F0', borderRadius: 1, flexGrow: 1, minWidth: 200, bgcolor: complaint.admin_approved_by_id ? '#ECFDF5' : '#FFFBEB' }}>
-                  <Typography variant="caption" color="textSecondary" display="block">Admin Approval</Typography>
+                  <Typography variant="caption" color="textSecondary" display="block">Level 1 Approval</Typography>
                   {complaint.admin_approved_by_id ? (
                     <Typography variant="body2" fontWeight="bold" color="success.main">
                       <CheckCircle sx={{ fontSize: 16, verticalAlign: 'middle', mr: 0.5 }} />
@@ -446,7 +446,7 @@ export default function ComplaintDetail() {
                   )}
                 </Box>
                 <Box sx={{ p: 1.5, border: '1px solid #E2E8F0', borderRadius: 1, flexGrow: 1, minWidth: 200, bgcolor: complaint.manager_approved_by_id ? '#ECFDF5' : '#FFFBEB' }}>
-                  <Typography variant="caption" color="textSecondary" display="block">Manager Approval</Typography>
+                  <Typography variant="caption" color="textSecondary" display="block">Level 2 Approval</Typography>
                   {complaint.manager_approved_by_id ? (
                     <Typography variant="body2" fontWeight="bold" color="success.main">
                       <CheckCircle sx={{ fontSize: 16, verticalAlign: 'middle', mr: 0.5 }} />

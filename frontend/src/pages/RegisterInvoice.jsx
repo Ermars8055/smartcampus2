@@ -22,6 +22,7 @@ export default function RegisterInvoice() {
   const [pos, setPos] = useState([]);
   const [uoms, setUoms] = useState([]);
   const [companyAddresses, setCompanyAddresses] = useState([]);
+  const [institutions, setInstitutions] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [confirmSubmit, setConfirmSubmit] = useState(false);
   const [errors, setErrors] = useState({});
@@ -32,6 +33,7 @@ export default function RegisterInvoice() {
     invoice_number: '',
     invoice_date: '',
     vendor_id: '',
+    institution_id: '',
     po_id: '',
     eway_bill_number: '',
     delivery_note: '',
@@ -83,6 +85,7 @@ export default function RegisterInvoice() {
     api.get('/api/procurement/po').then(r => setPos(r.data));
     api.get('/api/uom').then(r => setUoms(r.data));
     api.get('/api/company-addresses').then(r => setCompanyAddresses(r.data));
+    api.get('/api/institutions').then(r => setInstitutions(r.data));
     
     if (id) {
       api.get(`/api/invoices`).then(r => {
@@ -92,6 +95,7 @@ export default function RegisterInvoice() {
             invoice_number: inv.invoice_number || '',
             invoice_date: inv.invoice_date || '',
             vendor_id: inv.vendor_id || '',
+            institution_id: inv.institution_id || '',
             po_id: inv.po_id || '',
             eway_bill_number: inv.eway_bill_number || '',
             delivery_note: inv.delivery_note || '',
@@ -169,6 +173,7 @@ export default function RegisterInvoice() {
       setForm(prev => ({
         ...prev,
         vendor_id: po.vendor_id || prev.vendor_id,
+        institution_id: po.institution_id || prev.institution_id,
         po_date: po.created_at || prev.po_date,
         payment_terms: po.terms || prev.payment_terms,
         items: poItems.length > 0 ? poItems : prev.items
@@ -369,6 +374,7 @@ export default function RegisterInvoice() {
     if (form.reference_date && dayjs(form.reference_date).isAfter(dayjs(), 'day')) newErrors.reference_date = "Reference Date cannot be in the future.";
     
     if (!form.vendor_id) newErrors.vendor_id = "Vendor is required.";
+    if (!form.institution_id) newErrors.institution_id = "Institution is required.";
     if (form.items.length === 0) newErrors.items = "At least one item is required.";
 
     for (let i = 0; i < form.items.length; i++) {
@@ -403,6 +409,7 @@ export default function RegisterInvoice() {
       transport_charges: totals.transport_charges,
       gate_entry_id: null,
       po_id: form.po_id || null,
+      institution_id: form.institution_id || null,
       consignee_id: form.consignee_id || null,
       buyer_id: form.buyer_id || null,
       delivery_note_date: form.delivery_note_date || null,
@@ -457,13 +464,13 @@ export default function RegisterInvoice() {
           <Card sx={{ p: 3, mb: 3 }}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>Invoice Details</Typography>
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={4}>
                 <TextField fullWidth label="Invoice Code" value={form.code || 'Auto-generated'} disabled size="small" />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={4}>
                 <TextField id="field-invoice_number" fullWidth label="Invoice No." value={form.invoice_number} onChange={e => setForm({ ...form, invoice_number: e.target.value })} required size="small" error={!!errors.invoice_number} helperText={errors.invoice_number} />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={4}>
                 <Box id="field-invoice_date">
                 <DatePicker 
                   label="Invoice Date" 
@@ -475,6 +482,16 @@ export default function RegisterInvoice() {
                   slotProps={{ textField: { fullWidth: true, size: 'small', required: true, error: !!errors.invoice_date, helperText: errors.invoice_date, InputProps: { placeholder: 'DD-MMM-YYYY' }, inputProps: { placeholder: 'DD-MMM-YYYY' }, InputLabelProps: { shrink: true } } }}
                 />
                 </Box>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControl id="field-institution_id" fullWidth required size="small" error={!!errors.institution_id}>
+                  <InputLabel>Institution</InputLabel>
+                  <Select value={form.institution_id} label="Institution" onChange={e => setForm({ ...form, institution_id: e.target.value })}>
+                    <MenuItem value="">None</MenuItem>
+                    {institutions.map(inst => <MenuItem key={inst.id} value={inst.id}>{inst.name}</MenuItem>)}
+                  </Select>
+                  {errors.institution_id && <Typography color="error" variant="caption" sx={{ ml: 2, mt: 0.5 }}>{errors.institution_id}</Typography>}
+                </FormControl>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <FormControl id="field-vendor_id" fullWidth required size="small" error={!!errors.vendor_id}>

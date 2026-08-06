@@ -119,7 +119,7 @@ export default function LocationMaster() {
                   </TableCell>
                   <TableCell align="right">
                     <IconButton size="small" onClick={() => handleOpen(loc)} color="primary">
-                      <Edit fontSize="small" />
+                      <Edit color="primary" fontSize="small" />
                     </IconButton>
                   </TableCell>
                 </TableRow>

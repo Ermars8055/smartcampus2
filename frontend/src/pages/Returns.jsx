@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { formatDate } from '../utils/dateUtils';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
   DialogContent, DialogActions, Grid, Select, FormControl,
-  InputLabel, IconButton, Paper, InputAdornment, MenuItem, Collapse, Tooltip
+  InputLabel, IconButton, Paper, InputAdornment, MenuItem, Collapse, Tooltip,
+  Tab, Tabs, TableSortLabel
 } from '@mui/material';
-import { Add, Delete, Close, Undo, Warehouse, AccountTree, Business, Person, Comment, InfoOutlined, KeyboardArrowDown, KeyboardArrowUp, CheckCircle, Lock } from '@mui/icons-material';
+import { Add, Delete, Close, Undo, Warehouse, AccountTree, Business, Person, Comment, InfoOutlined, KeyboardArrowDown, KeyboardArrowUp, CheckCircle, Lock, Search } from '@mui/icons-material';
 import api from '../services/api';
 import MaterialSelect from '../components/MaterialSelect';
 import { useAuth } from '../context/AuthContext';
@@ -37,12 +38,46 @@ export default function Returns() {
   const [viewModal, setViewModal] = useState({ open: false, ret: null, items: [] });
   const [errors, setErrors] = useState({});
 
+  const [search, setSearch] = useState('');
+  const [tab, setTab] = useState(3);
+  const statusFilters = useMemo(() => ['Initiated', 'Partially Received', 'Completed', 'All'], []);
+  const [sortConfig, setSortConfig] = useState({ key: 'created_at', direction: 'desc' });
 
+  const handleSort = (key) => {
+    setSortConfig(prev => ({
+      key,
+      direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
+    }));
+  };
 
-
-
-
-  // Auto-clear resolved errors
+  const filteredAndSortedReturns = useMemo(() => {
+    let list = returns;
+    if (search) {
+      const q = search.toLowerCase();
+      list = list.filter(r => 
+        r.return_number?.toLowerCase().includes(q) ||
+        r.returned_from_department?.toLowerCase().includes(q) ||
+        r.warehouse_name?.toLowerCase().includes(q)
+      );
+    }
+    if (statusFilters[tab] !== 'All') {
+      list = list.filter(r => r.status === statusFilters[tab]);
+    }
+    
+    return [...list].sort((a, b) => {
+      let aVal = a[sortConfig.key];
+      let bVal = b[sortConfig.key];
+      
+      if (sortConfig.key === 'items') {
+        aVal = a.items?.length || 0;
+        bVal = b.items?.length || 0;
+      }
+      
+      if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
+      if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [returns, search, tab, statusFilters, sortConfig]);  // Auto-clear resolved errors
   useEffect(() => {
     setErrors(prev => {
       if (Object.keys(prev).length === 0) return prev;
@@ -199,7 +234,53 @@ export default function Returns() {
         </Button>
       </Box>
 
-      {returns.length === 0 ? (
+      {(returns.length > 0 || search) && (
+        <Card sx={{ mb: 3 }}>
+          <Box sx={{ p: 2, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+            <TextField
+              size="small"
+              placeholder="Search Return No., Dept or Store..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              sx={{ width: 380 }}
+              InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }}
+            />
+          </Box>
+          <Tabs
+            value={tab}
+            onChange={(_, v) => setTab(v)}
+            variant="scrollable"
+            scrollButtons={false}
+            sx={{ borderBottom: 1, borderColor: 'divider' }}
+          >
+            {statusFilters.map((s, i) => (
+              <Tab
+                key={i}
+                label={
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    {s}
+                    <Chip
+                      label={s === 'All' ? returns.length : returns.filter(r => r.status === s).length}
+                      size="small"
+                      sx={{
+                        height: 20,
+                        fontSize: '0.7rem',
+                        fontWeight: 700,
+                        bgcolor: tab === i ? 'primary.main' : 'action.selected',
+                        color: tab === i ? 'white' : 'text.primary',
+                        cursor: 'pointer'
+                      }}
+                    />
+                  </Box>
+                }
+                sx={{ textTransform: 'none', fontWeight: 600, minHeight: 48, minWidth: 'auto', px: 2 }}
+              />
+            ))}
+          </Tabs>
+        </Card>
+      )}
+
+      {filteredAndSortedReturns.length === 0 ? (
         <Card sx={{ p: 8, textAlign: 'center', border: '1px dashed #CBD5E1', bgcolor: '#F8FAFC', borderRadius: 3 }}>
           <Undo sx={{ fontSize: 48, color: '#94A3B8', mb: 2 }} />
           <Typography variant="h6" color="textSecondary" sx={{ fontWeight: 600 }}>No Return Records Found</Typography>
@@ -211,18 +292,32 @@ export default function Returns() {
             <Table size="small" aria-label="returns table">
               <TableHead sx={{ bgcolor: '#F8FAFC' }}>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2, py: 1.5 }}>RETURN #</TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>DATE</TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>FROM</TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>TO STORE</TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>RETURNED BY</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>ITEMS</TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>STATUS</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2, py: 1.5 }}>
+                    <TableSortLabel active={sortConfig.key === 'return_number'} direction={sortConfig.key === 'return_number' ? sortConfig.direction : 'asc'} onClick={() => handleSort('return_number')}>RETURN NO.</TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>
+                    <TableSortLabel active={sortConfig.key === 'created_at'} direction={sortConfig.key === 'created_at' ? sortConfig.direction : 'asc'} onClick={() => handleSort('created_at')}>DATE</TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>
+                    <TableSortLabel active={sortConfig.key === 'returned_from_department'} direction={sortConfig.key === 'returned_from_department' ? sortConfig.direction : 'asc'} onClick={() => handleSort('returned_from_department')}>FROM</TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>
+                    <TableSortLabel active={sortConfig.key === 'warehouse_name'} direction={sortConfig.key === 'warehouse_name' ? sortConfig.direction : 'asc'} onClick={() => handleSort('warehouse_name')}>TO STORE</TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>
+                    <TableSortLabel active={sortConfig.key === 'returned_by_name'} direction={sortConfig.key === 'returned_by_name' ? sortConfig.direction : 'asc'} onClick={() => handleSort('returned_by_name')}>RETURNED BY</TableSortLabel>
+                  </TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>
+                    <TableSortLabel active={sortConfig.key === 'items'} direction={sortConfig.key === 'items' ? sortConfig.direction : 'asc'} onClick={() => handleSort('items')}>ITEMS</TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>
+                    <TableSortLabel active={sortConfig.key === 'status'} direction={sortConfig.key === 'status' ? sortConfig.direction : 'asc'} onClick={() => handleSort('status')}>STATUS</TableSortLabel>
+                  </TableCell>
                   <TableCell align="right" sx={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem', px: 2 }}>ACTIONS</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {returns.map(ret => (
+                {filteredAndSortedReturns.map(ret => (
                   <TableRow
                     key={ret.id}
                     hover
@@ -238,7 +333,7 @@ export default function Returns() {
                       <Chip label={ret.items?.length || 0} size="small" sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem', bgcolor: '#F1F5F9', color: '#475569' }} />
                     </TableCell>
                     <TableCell sx={{ px: 2 }}>
-                      <Chip label={ret.status} size="small" color={ret.status === 'Completed' ? 'error' : (ret.status === 'Partially Received' ? 'info' : (ret.status === 'Initiated' ? 'success' : 'default'))} variant="outlined" sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} />
+                      <Chip label={ret.status} size="small" color={ret.status === 'Completed' ? 'success' : (ret.status === 'Partially Received' ? 'warning' : (ret.status === 'Initiated' ? 'primary' : 'default'))} sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} />
                     </TableCell>
                     <TableCell align="right" sx={{ px: 2, whiteSpace: 'nowrap' }}>
                       <IconButton
@@ -477,7 +572,7 @@ export default function Returns() {
                 <Grid item xs={12} sm={4}>
                   <Typography variant="caption" color="text.secondary">Status</Typography>
                   <Box sx={{ mt: 0.5 }}>
-                    <Chip label={viewModal.ret.status} size="small" color={viewModal.ret.status === 'Completed' ? 'error' : (viewModal.ret.status === 'Partially Received' ? 'info' : (viewModal.ret.status === 'Initiated' ? 'success' : 'default'))} sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} />
+                    <Chip label={viewModal.ret.status} size="small" color={viewModal.ret.status === 'Completed' ? 'success' : (viewModal.ret.status === 'Partially Received' ? 'warning' : (viewModal.ret.status === 'Initiated' ? 'primary' : 'default'))} sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} />
                   </Box>
                 </Grid>
               </Grid>

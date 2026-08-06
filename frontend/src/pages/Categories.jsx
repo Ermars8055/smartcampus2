@@ -159,7 +159,7 @@ export default function Categories() {
                     <IconButton size="small" onClick={() => {
                       setEditing(c.id); setForm({ name: c.name, description: c.description || '', material_code_prefix: c.material_code_prefix || '', code: c.code || '', has_materials: c.has_materials || false, is_active: c.is_active !== false }); setErrors({}); setDialog('category');
                     }} sx={{ color: '#64748B' }}>
-                      <Edit fontSize="small" />
+                      <Edit color="primary" fontSize="small" />
                     </IconButton>
                   </TableCell>
                 </TableRow>

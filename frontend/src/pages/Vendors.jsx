@@ -232,34 +232,27 @@ export default function Vendors() {
 
   return (
     <Box>
-      {pendingApprovals.length > 0 && (
-        <Alert severity="warning" sx={{ mb: 3, borderRadius: 2, boxShadow: '0 2px 4px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center' }}>
-          <Typography variant="body2" sx={{ fontWeight: 600 }}>
-            Action Required: You have {pendingApprovals.length} vendor{pendingApprovals.length > 1 ? 's' : ''} awaiting your approval.
-          </Typography>
-        </Alert>
-      )}
 
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
         <Box>
           <Typography variant="h5" sx={{ fontWeight: 700, color: '#1E293B' }}>Vendor Master</Typography>
           <Typography variant="body2" sx={{ color: '#64748B' }}>{vendors.length} registered vendors</Typography>
         </Box>
-        <Button 
-            variant="contained" 
-            startIcon={<Add />} 
-            onClick={() => {
-              setEditing(null);
-              setViewOnly(false);
-              setErrors({});
-              setVendorHistory([]);
-              setDialogTab(0);
-              setForm({
-                name: '', code: '', contact_person: '', phone: '', email: '',
-                gst_number: '', address_line_1: '', address_line_2: '', city: '', pincode: '', state: '', category_ids: [], rating: 0, is_active: true
-              });
-              setDialog(true);
-            }}
+        <Button
+          variant="contained"
+          startIcon={<Add />}
+          onClick={() => {
+            setEditing(null);
+            setViewOnly(false);
+            setErrors({});
+            setVendorHistory([]);
+            setDialogTab(0);
+            setForm({
+              name: '', code: '', contact_person: '', phone: '', email: '',
+              gst_number: '', address_line_1: '', address_line_2: '', city: '', pincode: '', state: '', category_ids: [], rating: 0, is_active: true
+            });
+            setDialog(true);
+          }}
           sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
         >
           Add Vendor
@@ -282,12 +275,17 @@ export default function Vendors() {
           value={tabValue}
           onChange={(e, v) => setTabValue(v)}
           variant="scrollable"
-          scrollButtons="auto"
+          scrollButtons={false}
           sx={{ borderTop: 1, borderColor: 'divider' }}
         >
-          {['Awaiting Approval', 'Approved', 'Rejected', 'All'].map(s => {
-            const count = s === 'All' ? vendors.length : vendors.filter(v => v.status === s).length;
-            if (s !== 'All' && count === 0 && !['Awaiting Approval', 'Approved'].includes(s)) return null;
+          {['Submitted', 'Approved', 'Rejected', 'Active', 'Inactive', 'All'].map(s => {
+            let count = 0;
+            if (s === 'All') count = vendors.length;
+            else if (s === 'Active') count = vendors.filter(v => v.is_active).length;
+            else if (s === 'Inactive') count = vendors.filter(v => !v.is_active).length;
+            else count = vendors.filter(v => v.status === s).length;
+            
+            if (s !== 'All' && count === 0 && !['Submitted', 'Approved'].includes(s)) return null;
             return (
               <Tab
                 key={s}
@@ -310,7 +308,12 @@ export default function Vendors() {
       </Card>
 
       {(() => {
-        const filteredVendors = vendors.filter(v => tabValue === 'All' || v.status === tabValue);
+        const filteredVendors = vendors.filter(v => {
+          if (tabValue === 'All') return true;
+          if (tabValue === 'Active') return v.is_active;
+          if (tabValue === 'Inactive') return !v.is_active;
+          return v.status === tabValue;
+        });
         return (
           <Card sx={{ borderRadius: 2, overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
             {isMobile ? (
@@ -321,172 +324,38 @@ export default function Vendors() {
                   </Typography>
                 )}
                 {filteredVendors.map(v => (
-              <Card key={v.id} variant="outlined" sx={{ p: 2, borderRadius: 2, cursor: 'pointer', '&:hover': { borderColor: '#2563EB' } }} onClick={() => openEdit(v, true)}>
-                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, gap: 1, alignItems: 'flex-start' }}>
-                    <Box>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1E293B' }}>{v.name}</Typography>
-                      <Typography variant="caption" sx={{ fontWeight: 600, color: '#2563EB' }}>{v.code}</Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', gap: 0.5, flexDirection: 'column', alignItems: 'flex-end' }}>
-                      <Chip
-                        label={v.status === 'Awaiting Approval' ? (v.previous_status ? <span style={{ display: 'block', textAlign: 'center', lineHeight: 1.1 }}>Awaiting<br/>Approval<br/><span style={{fontSize: '0.55rem', fontWeight: 400}}>(was {v.previous_status})</span></span> : <span style={{ display: 'block', textAlign: 'center', lineHeight: 1.1 }}>Awaiting<br/>Approval</span>) : v.status}
-                        size="small"
-                        sx={{
-                          bgcolor: v.status === 'Approved' ? '#ECFDF5' : (v.status === 'Rejected' ? '#FEF2F2' : (v.status === 'Awaiting Approval' ? '#FEF9C3' : '#F1F5F9')),
-                          color: v.status === 'Approved' ? '#10B981' : (v.status === 'Rejected' ? '#EF4444' : (v.status === 'Awaiting Approval' ? '#CA8A04' : '#64748B')),
-                          fontWeight: 600, fontSize: '0.65rem', height: v.status === 'Awaiting Approval' ? 'auto' : 20, py: v.status === 'Awaiting Approval' ? 0.5 : 0
-                        }}
-                      />
-                      <Chip
-                        label={v.is_active ? 'Active' : 'Inactive'}
-                        size="small"
-                        color={v.is_active ? 'success' : 'default'}
-                        variant="outlined"
-                        sx={{ fontSize: '0.65rem', height: 20 }}
-                      />
-                    </Box>
-                 </Box>
-                 <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#334155' }}><strong>Contact:</strong> {v.contact_person} | {v.phone}</Typography>
-
-                 <Typography variant="caption" sx={{ display: 'block', mb: 1.5, color: '#64748B' }}>Email: {v.email || '-'}</Typography>
-                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', flex: 1 }}>
-                      {v.categories?.slice(0, 2).map((c, i) => <Chip key={i} label={c} size="small" variant="outlined" sx={{ fontSize: '0.65rem', height: 20 }} />)}
-                      {v.categories?.length > 2 && <Typography variant="caption" sx={{ color: '#64748B', ml: 0.5 }}>+{v.categories.length - 2}</Typography>}
-                    </Box>
-                    <Box onClick={(e) => e.stopPropagation()}>
-                      <Tooltip title="Edit Vendor">
-                        <IconButton size="small" onClick={(e) => { e.stopPropagation(); openEdit(v, false); }} sx={{ color: '#64748B' }}>
-                          <Edit fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      {v.can_user_approve && (
-                        <>
-                          <Tooltip title="Approve">
-                            <IconButton size="small" color="success" onClick={(e) => handleApprove(v.id, e)} sx={{ ml: 0.5, bgcolor: 'transparent', '&:hover': { bgcolor: 'rgba(16, 185, 129, 0.1)' } }}>
-                              <CheckCircle fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title="Reject">
-                            <IconButton size="small" color="error" onClick={(e) => { e.stopPropagation(); setRejectingVendor(v.id); setRejectDialog(true); }} sx={{ ml: 0.5, bgcolor: 'transparent', '&:hover': { bgcolor: 'rgba(239, 68, 68, 0.1)' } }}>
-                              <Cancel fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                        </>
-                      )}
-                    </Box>
-                 </Box>
-              </Card>
-            ))}
-          </Box>
-        ) : (
-          <TableContainer>
-            <Table size="small">
-              <TableHead sx={{ bgcolor: '#F8FAFC' }}>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2, whiteSpace: 'nowrap' }}>
-                    <TableSortLabel
-                      active={sortConfig.key === 'code'}
-                      direction={sortConfig.direction}
-                      onClick={() => requestSort('code')}
-                    >
-                      CODE
-                    </TableSortLabel>
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2, whiteSpace: 'nowrap' }}>
-                    <TableSortLabel
-                      active={sortConfig.key === 'name'}
-                      direction={sortConfig.direction}
-                      onClick={() => requestSort('name')}
-                    >
-                      VENDOR NAME
-                    </TableSortLabel>
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2, whiteSpace: 'nowrap' }}>
-                    <TableSortLabel
-                      active={sortConfig.key === 'contact_person'}
-                      direction={sortConfig.direction}
-                      onClick={() => requestSort('contact_person')}
-                    >
-                      CONTACT
-                    </TableSortLabel>
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2, whiteSpace: 'nowrap' }}>
-                    <TableSortLabel
-                      active={sortConfig.key === 'phone'}
-                      direction={sortConfig.direction}
-                      onClick={() => requestSort('phone')}
-                    >
-                      PHONE
-                    </TableSortLabel>
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2, whiteSpace: 'nowrap' }}>
-                    <TableSortLabel
-                      active={sortConfig.key === 'email'}
-                      direction={sortConfig.direction}
-                      onClick={() => requestSort('email')}
-                    >
-                      MAIL ID
-                    </TableSortLabel>
-                  </TableCell>
-
-                  <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2, whiteSpace: 'nowrap' }}>CATEGORIES</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2, whiteSpace: 'nowrap' }}>APPROVAL</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2, whiteSpace: 'nowrap' }}>STATUS</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2, whiteSpace: 'nowrap' }}>ACTIONS</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {filteredVendors.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={6} align="center" sx={{ py: 6, color: '#94a3b8' }}>
-                      <Typography variant="body2">No vendors found.</Typography>
-                    </TableCell>
-                  </TableRow>
-                )}
-                {filteredVendors.map(v => (
-                  <TableRow
-                    key={v.id}
-                    hover
-                    onClick={() => openEdit(v, true)}
-                    sx={{ cursor: 'pointer', '&:last-child td, &:last-child th': { border: 0 } }}
-                  >
-                    <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>{v.code}</TableCell>
-                    <TableCell sx={{ fontSize: '0.85rem', fontWeight: 500, whiteSpace: 'normal', wordBreak: 'break-word', minWidth: '120px' }}>{v.name}</TableCell>
-                    <TableCell sx={{ fontSize: '0.8rem', whiteSpace: 'nowrap' }}>{v.contact_person}</TableCell>
-                    <TableCell sx={{ fontSize: '0.8rem', whiteSpace: 'nowrap' }}>{v.phone}</TableCell>
-                    <TableCell sx={{ fontSize: '0.75rem', color: '#64748B', whiteSpace: 'nowrap' }}>{v.email}</TableCell>
-                    <TableCell>
-                      <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-                        {v.categories?.map((c, i) => <Chip key={i} label={c} size="small" variant="outlined" sx={{ fontSize: '0.65rem', height: 20 }} />)}
+                  <Card key={v.id} variant="outlined" sx={{ p: 2, borderRadius: 2, cursor: 'pointer', '&:hover': { borderColor: '#2563EB' } }} onClick={() => openEdit(v, true)}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, gap: 1, alignItems: 'flex-start' }}>
+                      <Box>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1E293B' }}>{v.name}</Typography>
+                        <Typography variant="caption" sx={{ fontWeight: 600, color: '#2563EB' }}>{v.code}</Typography>
                       </Box>
-                    </TableCell>
+                      <Box sx={{ display: 'flex', gap: 0.5, flexDirection: 'column', alignItems: 'flex-end' }}>
+                        <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+                          <Chip label={`L${v.current_approval_level || 1}`} size="small" variant="outlined" sx={{ fontSize: '0.65rem', height: 20, fontWeight: 600 }} />
+                          <Chip
+                            label={v.status === 'Submitted' ? (v.previous_status ? <span style={{ display: 'block', textAlign: 'center', lineHeight: 1.1 }}>Submitted<br /><span style={{ fontSize: '0.55rem', fontWeight: 400 }}>(was {v.previous_status})</span></span> : <span>Submitted</span>) : v.status}
+                            size="small"
+                            color={v.status === 'Approved' ? 'success' : (v.status === 'Rejected' ? 'error' : (v.status === 'Submitted' ? 'info' : 'default'))}
+                            sx={{
+                              fontWeight: 600, fontSize: '0.65rem', height: v.status === 'Submitted' ? 'auto' : 20, py: v.status === 'Submitted' ? 0.5 : 0
+                            }}
+                          />
+                        </Box>
+                      </Box>
+                    </Box>
+                    <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#334155' }}><strong>Contact:</strong> {v.contact_person} | {v.phone}</Typography>
 
-                    <TableCell>
-                      <Chip 
-                        label={v.status === 'Awaiting Approval' ? (v.previous_status ? <span style={{ display: 'block', textAlign: 'center', lineHeight: 1.1 }}>Awaiting<br/>Approval<br/><span style={{fontSize: '0.55rem', fontWeight: 400}}>(was {v.previous_status})</span></span> : <span style={{ display: 'block', textAlign: 'center', lineHeight: 1.1 }}>Awaiting<br/>Approval</span>) : v.status} 
-                        size="small" 
-                        sx={{ 
-                          bgcolor: v.status === 'Approved' ? '#ECFDF5' : (v.status === 'Rejected' ? '#FEF2F2' : (v.status === 'Awaiting Approval' ? '#FEF9C3' : '#F1F5F9')), 
-                          color: v.status === 'Approved' ? '#10B981' : (v.status === 'Rejected' ? '#EF4444' : (v.status === 'Awaiting Approval' ? '#CA8A04' : '#64748B')), 
-                          fontWeight: 600, fontSize: '0.75rem', borderRadius: '6px', height: v.status === 'Awaiting Approval' ? 'auto' : 24, py: v.status === 'Awaiting Approval' ? 0.5 : 0
-                        }} 
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={v.is_active ? 'Active' : 'Inactive'}
-                        size="small"
-                        color={v.is_active ? 'success' : 'default'}
-                        variant="outlined"
-                        sx={{ fontSize: '0.65rem', height: 24, borderRadius: '6px', fontWeight: 600 }}
-                      />
-                    </TableCell>
-                    <TableCell align="right">
-                      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5 }} onClick={(e) => e.stopPropagation()}>
+                    <Typography variant="caption" sx={{ display: 'block', mb: 1.5, color: '#64748B' }}>Email: {v.email || '-'}</Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', flex: 1 }}>
+                        {v.categories?.slice(0, 2).map((c, i) => <Chip key={i} label={c} size="small" variant="outlined" sx={{ fontSize: '0.65rem', height: 20 }} />)}
+                        {v.categories?.length > 2 && <Typography variant="caption" sx={{ color: '#64748B', ml: 0.5 }}>+{v.categories.length - 2}</Typography>}
+                      </Box>
+                      <Box onClick={(e) => e.stopPropagation()}>
                         <Tooltip title="Edit Vendor">
                           <IconButton size="small" onClick={(e) => { e.stopPropagation(); openEdit(v, false); }} sx={{ color: '#64748B' }}>
-                            <Edit fontSize="small" />
+                            <Edit color="primary" fontSize="small" />
                           </IconButton>
                         </Tooltip>
                         {v.can_user_approve && (
@@ -504,17 +373,141 @@ export default function Vendors() {
                           </>
                         )}
                       </Box>
-                    </TableCell>
-                  </TableRow>
+                    </Box>
+                  </Card>
                 ))}
+              </Box>
+            ) : (
+              <TableContainer>
+                <Table size="small">
+                  <TableHead sx={{ bgcolor: '#F8FAFC' }}>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2 }}>
+                        <TableSortLabel
+                          active={sortConfig.key === 'code'}
+                          direction={sortConfig.direction}
+                          onClick={() => requestSort('code')}
+                        >
+                          CODE
+                        </TableSortLabel>
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2 }}>
+                        <TableSortLabel
+                          active={sortConfig.key === 'name'}
+                          direction={sortConfig.direction}
+                          onClick={() => requestSort('name')}
+                        >
+                          VENDOR NAME
+                        </TableSortLabel>
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2 }}>
+                        <TableSortLabel
+                          active={sortConfig.key === 'contact_person'}
+                          direction={sortConfig.direction}
+                          onClick={() => requestSort('contact_person')}
+                        >
+                          CONTACT
+                        </TableSortLabel>
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2 }}>
+                        <TableSortLabel
+                          active={sortConfig.key === 'phone'}
+                          direction={sortConfig.direction}
+                          onClick={() => requestSort('phone')}
+                        >
+                          PHONE
+                        </TableSortLabel>
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2 }}>
+                        <TableSortLabel
+                          active={sortConfig.key === 'email'}
+                          direction={sortConfig.direction}
+                          onClick={() => requestSort('email')}
+                        >
+                          MAIL ID
+                        </TableSortLabel>
+                      </TableCell>
 
-              </TableBody>
-            </Table>
-          </TableContainer>
-        )}
-      </Card>
-    );
-  })()}
+                      <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2 }}>CATEGORIES</TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2 }}>APPROVAL</TableCell>
+                      <TableCell align="center" sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2 }}>LVL</TableCell>
+
+                      <TableCell align="right" sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2 }}>ACTIONS</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {filteredVendors.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={9} align="center" sx={{ py: 6, color: '#94a3b8' }}>
+                          <Typography variant="body2">No vendors found.</Typography>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                    {filteredVendors.map(v => (
+                      <TableRow
+                        key={v.id}
+                        hover
+                        onClick={() => openEdit(v, true)}
+                        sx={{ cursor: 'pointer', '&:last-child td, &:last-child th': { border: 0 } }}
+                      >
+                        <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.8rem', whiteSpace: 'normal', wordBreak: 'break-word', minWidth: '80px' }}>{v.code}</TableCell>
+                        <TableCell sx={{ fontSize: '0.85rem', fontWeight: 500, whiteSpace: 'normal', wordBreak: 'break-word', minWidth: '120px' }}>{v.name}</TableCell>
+                        <TableCell sx={{ fontSize: '0.8rem', whiteSpace: 'normal', wordBreak: 'break-word' }}>{v.contact_person}</TableCell>
+                        <TableCell sx={{ fontSize: '0.8rem', whiteSpace: 'normal', wordBreak: 'break-word' }}>{v.phone}</TableCell>
+                        <TableCell sx={{ fontSize: '0.75rem', color: '#64748B', whiteSpace: 'normal', wordBreak: 'break-all', minWidth: '100px' }}>{v.email}</TableCell>
+                        <TableCell>
+                          <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                            {v.categories?.map((c, i) => <Chip key={i} label={c} size="small" variant="outlined" sx={{ fontSize: '0.65rem', height: 20 }} />)}
+                          </Box>
+                        </TableCell>
+
+                        <TableCell>
+                          <Chip
+                            label={v.status === 'Submitted' ? (v.previous_status ? <span style={{ display: 'block', textAlign: 'center', lineHeight: 1.1 }}>Submitted<br /><span style={{ fontSize: '0.55rem', fontWeight: 400 }}>(was {v.previous_status})</span></span> : <span>Submitted</span>) : v.status}
+                            size="small"
+                            color={v.status === 'Approved' ? 'success' : (v.status === 'Rejected' ? 'error' : (v.status === 'Submitted' ? 'info' : 'default'))}
+                            sx={{
+                              fontWeight: 600, fontSize: '0.75rem', borderRadius: '6px', height: v.status === 'Submitted' ? 'auto' : 24, py: v.status === 'Submitted' ? 0.5 : 0
+                            }}
+                          />
+                        </TableCell>
+                        <TableCell align="center">
+                          <Chip label={`L${v.current_approval_level || 1}`} size="small" variant="outlined" sx={{ height: 24, fontSize: '0.65rem', borderRadius: '6px', fontWeight: 600 }} />
+                        </TableCell>
+
+                        <TableCell align="right">
+                          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5 }} onClick={(e) => e.stopPropagation()}>
+                            <Tooltip title="Edit Vendor">
+                              <IconButton size="small" onClick={(e) => { e.stopPropagation(); openEdit(v, false); }} sx={{ color: '#64748B' }}>
+                                <Edit color="primary" fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                            {v.can_user_approve && (
+                              <>
+                                <Tooltip title="Approve">
+                                  <IconButton size="small" color="success" onClick={(e) => handleApprove(v.id, e)} sx={{ ml: 0.5, bgcolor: 'transparent', '&:hover': { bgcolor: 'rgba(16, 185, 129, 0.1)' } }}>
+                                    <CheckCircle fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Reject">
+                                  <IconButton size="small" color="error" onClick={(e) => { e.stopPropagation(); setRejectingVendor(v.id); setRejectDialog(true); }} sx={{ ml: 0.5, bgcolor: 'transparent', '&:hover': { bgcolor: 'rgba(239, 68, 68, 0.1)' } }}>
+                                    <Cancel fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                              </>
+                            )}
+                          </Box>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )}
+          </Card>
+        );
+      })()}
 
       <Dialog
         open={dialog}
@@ -549,270 +542,270 @@ export default function Vendors() {
         </DialogTitle>
         <DialogContent sx={{ mt: 1 }}>
           {dialogTab === 0 && (
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr 1fr' }, gap: 2.5, pt: 2 }}>
-            <TextField
-              fullWidth
-              label="Vendor Code"
-              value={form.code || ''}
-              placeholder="Auto-generated"
-              disabled
-              InputProps={{
-                startAdornment: <InputAdornment position="start"><Badge sx={{ color: '#94A3B8' }} /></InputAdornment>,
-              }}
-            />
-            <TextField
-              fullWidth
-              label="Vendor Name"
-              value={form.name}
-              onChange={e => setForm({ ...form, name: e.target.value })}
-              required
-              disabled={viewOnly || !!editing}
-              error={!!errors.name}
-              helperText={errors.name}
-              sx={{ gridColumn: { sm: 'span 2' } }}
-              InputProps={{
-                startAdornment: <InputAdornment position="start"><Business sx={{ color: '#94A3B8' }} /></InputAdornment>,
-              }}
-            />
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr 1fr' }, gap: 2.5, pt: 2 }}>
+              <TextField
+                fullWidth
+                label="Vendor Code"
+                value={form.code || ''}
+                placeholder="Auto-generated"
+                disabled
+                InputProps={{
+                  startAdornment: <InputAdornment position="start"><Badge sx={{ color: '#94A3B8' }} /></InputAdornment>,
+                }}
+              />
+              <TextField
+                fullWidth
+                label="Vendor Name"
+                value={form.name}
+                onChange={e => setForm({ ...form, name: e.target.value })}
+                required
+                disabled={viewOnly || !!editing}
+                error={!!errors.name}
+                helperText={errors.name}
+                sx={{ gridColumn: { sm: 'span 2' } }}
+                InputProps={{
+                  startAdornment: <InputAdornment position="start"><Business sx={{ color: '#94A3B8' }} /></InputAdornment>,
+                }}
+              />
 
-            <FormControl fullWidth sx={{ gridColumn: { sm: 'span 2' } }} required error={!!errors.category_ids}>
-              <InputLabel>Vendor Categories</InputLabel>
-              <Select
-                multiple
-                value={form.category_ids}
-                onChange={e => setForm({ ...form, category_ids: e.target.value })}
-                disabled={viewOnly}
-                input={<OutlinedInput label="Vendor Categories" startAdornment={<Category sx={{ mr: 1, color: '#94A3B8' }} />} />}
-                renderValue={(selected) => (
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                    {selected.map((id) => (
-                      <Chip key={id} label={categories.find(c => c.id === id)?.name} size="small" />
-                    ))}
-                  </Box>
-                )}
-              >
-                {categories.map((cat) => (
-                  <MenuItem key={cat.id} value={cat.id}>
-                    <Checkbox checked={form.category_ids.indexOf(cat.id) > -1} />
-                    <ListItemText primary={cat.name} />
-                  </MenuItem>
-                ))}
-              </Select>
-              {errors.category_ids && <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 1.5, mb: -1 }}>{errors.category_ids}</Typography>}
-            </FormControl>
-
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-              <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, ml: 1.5 }}>Vendor Rating</Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 1.5 }}>
-                <Rating
-                  value={form.rating}
-                  onChange={(e, newVal) => setForm({ ...form, rating: newVal })}
-                  precision={0.5}
-                  readOnly={viewOnly}
-                />
-                <Typography variant="body2" sx={{ color: '#64748B', fontWeight: 700 }}>{form.rating || 0}</Typography>
-              </Box>
-            </Box>
-
-            <TextField
-              fullWidth
-              label="Contact Person"
-              value={form.contact_person}
-              onChange={e => setForm({ ...form, contact_person: e.target.value })}
-              required
-              disabled={viewOnly}
-              error={!!errors.contact_person}
-              helperText={errors.contact_person}
-              InputProps={{
-                startAdornment: <InputAdornment position="start"><Person sx={{ color: '#94A3B8' }} /></InputAdornment>,
-              }}
-            />
-            <TextField
-              fullWidth
-              label="Contact Number"
-              value={form.phone}
-              onChange={e => setForm({ ...form, phone: e.target.value.replace(/\D/g, '').slice(0, 11) })}
-              required
-              disabled={viewOnly}
-              error={!!errors.phone}
-              helperText={errors.phone}
-              inputProps={{ maxLength: 11 }}
-              InputProps={{
-                startAdornment: <InputAdornment position="start"><Phone sx={{ color: '#94A3B8' }} /></InputAdornment>,
-              }}
-            />
-            <TextField
-              fullWidth
-              label="Email Address"
-              value={form.email}
-              onChange={e => setForm({ ...form, email: e.target.value })}
-              required
-              disabled={viewOnly}
-              error={!!errors.email}
-              helperText={errors.email}
-              InputProps={{
-                startAdornment: <InputAdornment position="start"><Email sx={{ color: '#94A3B8' }} /></InputAdornment>,
-              }}
-            />
-
-            <TextField
-              fullWidth
-              label="GST Number"
-              value={form.gst_number}
-              onChange={e => setForm({ ...form, gst_number: e.target.value.toUpperCase().slice(0, 15) })}
-              required
-              disabled={viewOnly}
-              error={!!errors.gst_number}
-              helperText={errors.gst_number}
-              inputProps={{ maxLength: 15 }}
-              sx={{ gridColumn: { sm: 'span 3' } }}
-              InputProps={{
-                startAdornment: <InputAdornment position="start"><AppRegistration sx={{ color: '#94A3B8' }} /></InputAdornment>,
-              }}
-            />
-
-            <TextField
-              fullWidth
-              label="Address Line 1"
-              value={form.address_line_1}
-              onChange={e => setForm({ ...form, address_line_1: e.target.value })}
-              required
-              disabled={viewOnly}
-              error={!!errors.address_line_1}
-              helperText={errors.address_line_1}
-              sx={{ gridColumn: { sm: 'span 3' } }}
-              InputProps={{
-                startAdornment: <InputAdornment position="start"><Description sx={{ color: '#94A3B8' }} /></InputAdornment>,
-              }}
-            />
-
-            <TextField
-              fullWidth
-              label="Address Line 2"
-              value={form.address_line_2}
-              onChange={e => setForm({ ...form, address_line_2: e.target.value })}
-              disabled={viewOnly}
-              error={!!errors.address_line_2}
-              helperText={errors.address_line_2}
-              sx={{ gridColumn: { sm: 'span 3' } }}
-              InputProps={{
-                startAdornment: <InputAdornment position="start"><Description sx={{ color: '#94A3B8' }} /></InputAdornment>,
-              }}
-            />
-
-            <TextField
-              fullWidth
-              label="City"
-              value={form.city}
-              onChange={e => setForm({ ...form, city: e.target.value })}
-              required
-              disabled={viewOnly}
-              error={!!errors.city}
-              helperText={errors.city}
-              InputProps={{
-                startAdornment: <InputAdornment position="start"><LocationOn sx={{ color: '#94A3B8' }} /></InputAdornment>,
-              }}
-            />
-            <TextField
-              fullWidth
-              label="Pincode"
-              value={form.pincode}
-              onChange={e => setForm({ ...form, pincode: e.target.value.replace(/\D/g, '').slice(0, 6) })}
-              inputProps={{ maxLength: 6 }}
-              required
-              disabled={viewOnly}
-              error={!!errors.pincode}
-              helperText={errors.pincode}
-              InputProps={{
-                startAdornment: <InputAdornment position="start"><Numbers sx={{ color: '#94A3B8' }} /></InputAdornment>,
-              }}
-            />
-            <TextField
-              select
-              fullWidth
-              label="State"
-              value={form.state}
-              onChange={e => setForm({ ...form, state: e.target.value })}
-              required
-              disabled={viewOnly}
-              error={!!errors.state}
-              helperText={errors.state}
-              InputProps={{
-                startAdornment: <InputAdornment position="start"><PinDrop sx={{ color: '#94A3B8' }} /></InputAdornment>,
-              }}
-            >
-              {STATES_LIST.map((stateOption) => (
-                <MenuItem key={stateOption} value={stateOption}>
-                  {stateOption}
-                </MenuItem>
-              ))}
-            </TextField>
-            <FormControlLabel 
-              control={<Switch checked={form.is_active !== false} onChange={e => setForm({ ...form, is_active: e.target.checked })} disabled={viewOnly} color="success" />} 
-              label="Active Status" 
-              sx={{ gridColumn: { xs: '1fr', sm: 'span 3' }, ml: 1, mt: 1 }}
-            />
-            {form.status === 'Rejected' && form.rejection_remarks && (
-              <Alert severity="error" sx={{ gridColumn: { xs: '1fr', sm: 'span 3' }, mt: 1 }}>
-                <Typography variant="body2" sx={{ fontWeight: 700 }}>Rejected:</Typography>
-                {form.rejection_remarks}
-              </Alert>
-            )}
-          </Box>
-          )}
-          {dialogTab === 1 && (
-          <Box sx={{ pt: 2 }}>
-            {vendorHistory.map((h, i) => (
-              <Box key={h.id} sx={{ display: 'flex', gap: 2, mb: 3 }}>
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: h.action.includes('Reject') ? 'error.main' : (h.action.includes('Approve') ? 'success.main' : 'primary.main'), mt: 0.5 }} />
-                  {i < vendorHistory.length - 1 && <Box sx={{ width: 2, flex: 1, bgcolor: 'divider', my: 0.5 }} />}
-                </Box>
-                <Box sx={{ flex: 1, pb: i < vendorHistory.length - 1 ? 2 : 0 }}>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{h.action}</Typography>
-                  <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 1 }}>
-                    by {h.action_by_name} on {new Date(h.action_at).toLocaleString()}
-                  </Typography>
-                  {h.remarks && <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'text.secondary', mb: 1 }}>"{h.remarks}"</Typography>}
-                  {h.changes && Object.keys(h.changes).length > 0 && (
-                    <Box sx={{ mt: 1, p: 1.5, bgcolor: '#F8FAFC', borderRadius: 1, border: '1px solid #E2E8F0' }}>
-                      <Typography variant="caption" sx={{ fontWeight: 700, mb: 1, display: 'block' }}>Changes Made:</Typography>
-                      {Object.keys(h.changes).map(k => (
-                        <Box key={k} sx={{ display: 'flex', alignItems: 'flex-start', mb: 0.5, gap: 1 }}>
-                          <Typography variant="caption" sx={{ fontWeight: 600, minWidth: 80, textTransform: 'capitalize' }}>{k.replace(/_/g, ' ')}:</Typography>
-                          <Box>
-                            <Typography variant="caption" sx={{ color: 'error.main', textDecoration: 'line-through', mr: 1 }}>
-                              {JSON.stringify(h.changes[k].old)}
-                            </Typography>
-                            <Typography variant="caption" sx={{ color: 'success.main', fontWeight: 600 }}>
-                              {JSON.stringify(h.changes[k].new)}
-                            </Typography>
-                          </Box>
-                        </Box>
+              <FormControl fullWidth sx={{ gridColumn: { sm: 'span 2' } }} required error={!!errors.category_ids}>
+                <InputLabel>Vendor Categories</InputLabel>
+                <Select
+                  multiple
+                  value={form.category_ids}
+                  onChange={e => setForm({ ...form, category_ids: e.target.value })}
+                  disabled={viewOnly}
+                  input={<OutlinedInput label="Vendor Categories" startAdornment={<Category sx={{ mr: 1, color: '#94A3B8' }} />} />}
+                  renderValue={(selected) => (
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                      {selected.map((id) => (
+                        <Chip key={id} label={categories.find(c => c.id === id)?.name} size="small" />
                       ))}
                     </Box>
                   )}
+                >
+                  {categories.map((cat) => (
+                    <MenuItem key={cat.id} value={cat.id}>
+                      <Checkbox checked={form.category_ids.indexOf(cat.id) > -1} />
+                      <ListItemText primary={cat.name} />
+                    </MenuItem>
+                  ))}
+                </Select>
+                {errors.category_ids && <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 1.5, mb: -1 }}>{errors.category_ids}</Typography>}
+              </FormControl>
+
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, ml: 1.5 }}>Vendor Rating</Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 1.5 }}>
+                  <Rating
+                    value={form.rating}
+                    onChange={(e, newVal) => setForm({ ...form, rating: newVal })}
+                    precision={0.5}
+                    readOnly={viewOnly}
+                  />
+                  <Typography variant="body2" sx={{ color: '#64748B', fontWeight: 700 }}>{form.rating || 0}</Typography>
                 </Box>
               </Box>
-            ))}
-            {vendorHistory.length === 0 && <Typography variant="body2" color="text.secondary">No history available.</Typography>}
-          </Box>
+
+              <TextField
+                fullWidth
+                label="Contact Person"
+                value={form.contact_person}
+                onChange={e => setForm({ ...form, contact_person: e.target.value })}
+                required
+                disabled={viewOnly}
+                error={!!errors.contact_person}
+                helperText={errors.contact_person}
+                InputProps={{
+                  startAdornment: <InputAdornment position="start"><Person sx={{ color: '#94A3B8' }} /></InputAdornment>,
+                }}
+              />
+              <TextField
+                fullWidth
+                label="Contact Number"
+                value={form.phone}
+                onChange={e => setForm({ ...form, phone: e.target.value.replace(/\D/g, '').slice(0, 11) })}
+                required
+                disabled={viewOnly}
+                error={!!errors.phone}
+                helperText={errors.phone}
+                inputProps={{ maxLength: 11 }}
+                InputProps={{
+                  startAdornment: <InputAdornment position="start"><Phone sx={{ color: '#94A3B8' }} /></InputAdornment>,
+                }}
+              />
+              <TextField
+                fullWidth
+                label="Email Address"
+                value={form.email}
+                onChange={e => setForm({ ...form, email: e.target.value })}
+                required
+                disabled={viewOnly}
+                error={!!errors.email}
+                helperText={errors.email}
+                InputProps={{
+                  startAdornment: <InputAdornment position="start"><Email sx={{ color: '#94A3B8' }} /></InputAdornment>,
+                }}
+              />
+
+              <TextField
+                fullWidth
+                label="GST Number"
+                value={form.gst_number}
+                onChange={e => setForm({ ...form, gst_number: e.target.value.toUpperCase().slice(0, 15) })}
+                required
+                disabled={viewOnly}
+                error={!!errors.gst_number}
+                helperText={errors.gst_number}
+                inputProps={{ maxLength: 15 }}
+                sx={{ gridColumn: { sm: 'span 3' } }}
+                InputProps={{
+                  startAdornment: <InputAdornment position="start"><AppRegistration sx={{ color: '#94A3B8' }} /></InputAdornment>,
+                }}
+              />
+
+              <TextField
+                fullWidth
+                label="Address Line 1"
+                value={form.address_line_1}
+                onChange={e => setForm({ ...form, address_line_1: e.target.value })}
+                required
+                disabled={viewOnly}
+                error={!!errors.address_line_1}
+                helperText={errors.address_line_1}
+                sx={{ gridColumn: { sm: 'span 3' } }}
+                InputProps={{
+                  startAdornment: <InputAdornment position="start"><Description sx={{ color: '#94A3B8' }} /></InputAdornment>,
+                }}
+              />
+
+              <TextField
+                fullWidth
+                label="Address Line 2"
+                value={form.address_line_2}
+                onChange={e => setForm({ ...form, address_line_2: e.target.value })}
+                disabled={viewOnly}
+                error={!!errors.address_line_2}
+                helperText={errors.address_line_2}
+                sx={{ gridColumn: { sm: 'span 3' } }}
+                InputProps={{
+                  startAdornment: <InputAdornment position="start"><Description sx={{ color: '#94A3B8' }} /></InputAdornment>,
+                }}
+              />
+
+              <TextField
+                fullWidth
+                label="City"
+                value={form.city}
+                onChange={e => setForm({ ...form, city: e.target.value })}
+                required
+                disabled={viewOnly}
+                error={!!errors.city}
+                helperText={errors.city}
+                InputProps={{
+                  startAdornment: <InputAdornment position="start"><LocationOn sx={{ color: '#94A3B8' }} /></InputAdornment>,
+                }}
+              />
+              <TextField
+                fullWidth
+                label="Pincode"
+                value={form.pincode}
+                onChange={e => setForm({ ...form, pincode: e.target.value.replace(/\D/g, '').slice(0, 6) })}
+                inputProps={{ maxLength: 6 }}
+                required
+                disabled={viewOnly}
+                error={!!errors.pincode}
+                helperText={errors.pincode}
+                InputProps={{
+                  startAdornment: <InputAdornment position="start"><Numbers sx={{ color: '#94A3B8' }} /></InputAdornment>,
+                }}
+              />
+              <TextField
+                select
+                fullWidth
+                label="State"
+                value={form.state}
+                onChange={e => setForm({ ...form, state: e.target.value })}
+                required
+                disabled={viewOnly}
+                error={!!errors.state}
+                helperText={errors.state}
+                InputProps={{
+                  startAdornment: <InputAdornment position="start"><PinDrop sx={{ color: '#94A3B8' }} /></InputAdornment>,
+                }}
+              >
+                {STATES_LIST.map((stateOption) => (
+                  <MenuItem key={stateOption} value={stateOption}>
+                    {stateOption}
+                  </MenuItem>
+                ))}
+              </TextField>
+              <FormControlLabel
+                control={<Switch checked={form.is_active !== false} onChange={e => setForm({ ...form, is_active: e.target.checked })} disabled={viewOnly} color="success" />}
+                label="Active Status"
+                sx={{ gridColumn: { xs: '1fr', sm: 'span 3' }, ml: 1, mt: 1 }}
+              />
+              {form.status === 'Rejected' && form.rejection_remarks && (
+                <Alert severity="error" sx={{ gridColumn: { xs: '1fr', sm: 'span 3' }, mt: 1 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 700 }}>Rejected:</Typography>
+                  {form.rejection_remarks}
+                </Alert>
+              )}
+            </Box>
+          )}
+          {dialogTab === 1 && (
+            <Box sx={{ pt: 2 }}>
+              {vendorHistory.map((h, i) => (
+                <Box key={h.id} sx={{ display: 'flex', gap: 2, mb: 3 }}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: h.action.includes('Reject') ? 'error.main' : (h.action.includes('Approve') ? 'success.main' : 'primary.main'), mt: 0.5 }} />
+                    {i < vendorHistory.length - 1 && <Box sx={{ width: 2, flex: 1, bgcolor: 'divider', my: 0.5 }} />}
+                  </Box>
+                  <Box sx={{ flex: 1, pb: i < vendorHistory.length - 1 ? 2 : 0 }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{h.action}</Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 1 }}>
+                      by {h.action_by_name} on {new Date(h.action_at).toLocaleString()}
+                    </Typography>
+                    {h.remarks && <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'text.secondary', mb: 1 }}>"{h.remarks}"</Typography>}
+                    {h.changes && Object.keys(h.changes).length > 0 && (
+                      <Box sx={{ mt: 1, p: 1.5, bgcolor: '#F8FAFC', borderRadius: 1, border: '1px solid #E2E8F0' }}>
+                        <Typography variant="caption" sx={{ fontWeight: 700, mb: 1, display: 'block' }}>Changes Made:</Typography>
+                        {Object.keys(h.changes).map(k => (
+                          <Box key={k} sx={{ display: 'flex', alignItems: 'flex-start', mb: 0.5, gap: 1 }}>
+                            <Typography variant="caption" sx={{ fontWeight: 600, minWidth: 80, textTransform: 'capitalize' }}>{k.replace(/_/g, ' ')}:</Typography>
+                            <Box>
+                              <Typography variant="caption" sx={{ color: 'error.main', textDecoration: 'line-through', mr: 1 }}>
+                                {JSON.stringify(h.changes[k].old)}
+                              </Typography>
+                              <Typography variant="caption" sx={{ color: 'success.main', fontWeight: 600 }}>
+                                {JSON.stringify(h.changes[k].new)}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        ))}
+                      </Box>
+                    )}
+                  </Box>
+                </Box>
+              ))}
+              {vendorHistory.length === 0 && <Typography variant="body2" color="text.secondary">No history available.</Typography>}
+            </Box>
           )}
         </DialogContent>
         <DialogActions sx={{ px: 4, pb: 4, pt: 2, justifyContent: 'flex-end', gap: 2 }}>
           {viewOnly && form.can_user_approve && (
             <>
-              <Button 
-                variant="contained" 
-                color="success" 
+              <Button
+                variant="contained"
+                color="success"
                 onClick={(e) => { setDialog(false); handleApprove(editing, e); }}
                 sx={{ borderRadius: 2, px: 3, py: 1, fontWeight: 700, textTransform: 'none', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)' }}
               >
                 Approve
               </Button>
-              <Button 
-                variant="contained" 
-                color="error" 
+              <Button
+                variant="contained"
+                color="error"
                 onClick={(e) => { setDialog(false); setRejectingVendor(editing); setRejectDialog(true); }}
                 sx={{ borderRadius: 2, px: 3, py: 1, fontWeight: 700, textTransform: 'none', boxShadow: '0 4px 12px rgba(239, 68, 68, 0.25)' }}
               >
@@ -837,11 +830,11 @@ export default function Vendors() {
               display: viewOnly ? 'none' : 'inline-flex'
             }}
           >
-            {editing ? 'Update Vendor' : 'Create Vendor'}
+            {editing ? 'Update Vendor' : 'Save Vendor'}
           </Button>
         </DialogActions>
       </Dialog>
-      
+
       <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={() => setSnackbar({ ...snackbar, open: false })} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
         <Alert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity} sx={{ width: '100%', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
           {snackbar.message}

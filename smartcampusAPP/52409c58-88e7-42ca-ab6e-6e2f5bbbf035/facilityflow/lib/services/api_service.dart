@@ -159,4 +159,16 @@ class ApiService {
       'resolution_image_urls': imageUrls
     });
   }
+
+  // --- RWO endpoints ---
+  Future<Response> getRwos({String? status}) async {
+    if (status != null && status != 'All') {
+      return await dio.get('/api/rwos', queryParameters: {'status': status});
+    }
+    return await dio.get('/api/rwos');
+  }
+
+  Future<Response> getRwoDetail(int id) async {
+    return await dio.get('/api/rwos/$id');
+  }
 }

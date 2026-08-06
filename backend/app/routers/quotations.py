@@ -1,7 +1,7 @@
 """Quotation Management routes."""
 
 from fastapi import APIRouter, Depends, HTTPException, File, UploadFile, Form
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from sqlalchemy import or_
 from datetime import datetime
 from app.utils.tz import get_now_ist
@@ -28,7 +28,9 @@ class SendQuotationRequest(BaseModel):
     message: str = ""
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
 from app.models import QuotationRequestStatus, VendorQuotationStatus
-from app.utils.email_utils import send_html_email
+from app.utils.email_utils import send_html_email, send_email_with_attachment
+from app.utils.pdf_utils import generate_qr_pdf
+from fastapi.responses import Response
 
 router = APIRouter(prefix="/api/quotations", tags=["Quotations"])
 
@@ -71,7 +73,15 @@ def list_quotation_requests(
     if project_id:
         q = q.filter(QuotationRequest.project_id == project_id)
     
-    qrs = q.order_by(QuotationRequest.created_at.desc()).all()
+    qrs = q.options(
+        selectinload(QuotationRequest.project),
+        selectinload(QuotationRequest.created_by),
+        selectinload(QuotationRequest.items).selectinload(QuotationRequestItem.material).selectinload(Material.uom),
+        selectinload(QuotationRequest.items).selectinload(QuotationRequestItem.source_pr),
+        selectinload(QuotationRequest.items).selectinload(QuotationRequestItem.sources).selectinload(QuotationRequestItemSource.source_pr),
+        selectinload(QuotationRequest.linked_prs).selectinload(QuotationRequestPR.purchase_request),
+        selectinload(QuotationRequest.invited_vendors).selectinload(QuotationRequestVendor.vendor),
+    ).order_by(QuotationRequest.created_at.desc()).all()
     
     result = []
     for qr in qrs:
@@ -81,9 +91,11 @@ def list_quotation_requests(
             material_code=it.material.code if it.material else "N/A",
             uom_name=it.material.uom.abbreviation if it.material and it.material.uom else "Unit",
             source=it.source or "Manual",
+            source_pr_id=it.source_pr_id,
             source_pr_number=it.source_pr.pr_number if it.source_pr else None,
             sources=[QRItemSourceOut(
                 source=s.source,
+                source_pr_id=s.source_pr_id,
                 source_pr_number=s.source_pr.pr_number if s.source_pr else None,
                 quantity=s.quantity
             ) for s in it.sources]
@@ -114,7 +126,15 @@ def get_quotation_request(
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
-    qr = db.query(QuotationRequest).filter(
+    qr = db.query(QuotationRequest).options(
+        selectinload(QuotationRequest.project),
+        selectinload(QuotationRequest.created_by),
+        selectinload(QuotationRequest.items).selectinload(QuotationRequestItem.material).selectinload(Material.uom),
+        selectinload(QuotationRequest.items).selectinload(QuotationRequestItem.source_pr),
+        selectinload(QuotationRequest.items).selectinload(QuotationRequestItem.sources).selectinload(QuotationRequestItemSource.source_pr),
+        selectinload(QuotationRequest.linked_prs).selectinload(QuotationRequestPR.purchase_request),
+        selectinload(QuotationRequest.invited_vendors).selectinload(QuotationRequestVendor.vendor),
+    ).filter(
         QuotationRequest.id == id, QuotationRequest.tenant_id == tenant_id,
         QuotationRequest.site_id == site_id, QuotationRequest.is_deleted == False
     ).first()
@@ -126,9 +146,11 @@ def get_quotation_request(
         material_name=it.material.name, material_code=it.material.code,
         uom_name=it.material.uom.abbreviation if it.material.uom else "Unit",
         source=it.source or "Manual",
+        source_pr_id=it.source_pr_id,
         source_pr_number=it.source_pr.pr_number if it.source_pr else None,
         sources=[QRItemSourceOut(
             source=s.source,
+            source_pr_id=s.source_pr_id,
             source_pr_number=s.source_pr.pr_number if s.source_pr else None,
             quantity=s.quantity
         ) for s in it.sources]
@@ -183,7 +205,7 @@ def create_quotation_request(
                 qr_id=qr.id, 
                 material_id=item.material_id, 
                 quantity=0,
-                source="Manual" # Legacy field
+                source=item.source or "Manual" # Legacy field
             )
             db.add(qr_item)
             db.flush()
@@ -193,7 +215,7 @@ def create_quotation_request(
         target_item.quantity += item.quantity
         db.add(QuotationRequestItemSource(
             qr_item_id=target_item.id,
-            source="Manual",
+            source=item.source or "Manual",
             source_pr_id=None,
             quantity=item.quantity
         ))
@@ -277,19 +299,23 @@ def update_quotation_request(
     
     # 1. Process Manual Items
     for manual_item in data.items:
-        qr_item = QuotationRequestItem(
-            qr_id=qr.id,
-            material_id=manual_item.material_id,
-            quantity=manual_item.quantity,
-            source="Manual",
-            source_pr_id=None
-        )
-        db.add(qr_item)
-        db.flush()
-        material_map[manual_item.material_id] = qr_item
+        if manual_item.material_id not in material_map:
+            qr_item = QuotationRequestItem(
+                qr_id=qr.id,
+                material_id=manual_item.material_id,
+                quantity=0,
+                source=manual_item.source or "Manual",
+                source_pr_id=None
+            )
+            db.add(qr_item)
+            db.flush()
+            material_map[manual_item.material_id] = qr_item
+            
+        target_item = material_map[manual_item.material_id]
+        target_item.quantity += manual_item.quantity
         db.add(QuotationRequestItemSource(
-            qr_item_id=qr_item.id,
-            source="Manual",
+            qr_item_id=target_item.id,
+            source=manual_item.source or "Manual",
             source_pr_id=None,
             quantity=manual_item.quantity
         ))
@@ -345,19 +371,31 @@ def import_materials_excel(
     except Exception as e:
         raise HTTPException(status_code=400, detail="Invalid Excel file format.")
     
-    name_col = next((c for c in df.columns if "name" in str(c).lower() or "material" in str(c).lower() or "item" in str(c).lower()), None)
+    code_col = next((c for c in df.columns if "code" in str(c).lower()), None)
+    name_col = next((c for c in df.columns if "name" in str(c).lower()), None)
+    if not name_col:
+        name_col = next((c for c in df.columns if ("material" in str(c).lower() or "item" in str(c).lower()) and "code" not in str(c).lower()), None)
     qty_col = next((c for c in df.columns if "qty" in str(c).lower() or "quantity" in str(c).lower()), None)
     
-    if not name_col or not qty_col:
-        raise HTTPException(status_code=400, detail="Could not identify Material Name or Quantity columns in the Excel file.")
+    if not name_col and not code_col:
+        raise HTTPException(status_code=400, detail="Could not identify Material Name or Material Code column in the Excel file.")
+    if not qty_col:
+        raise HTTPException(status_code=400, detail="Could not identify Quantity column in the Excel file.")
         
     results = []
     
+    # Pre-fetch all materials for the tenant to avoid N+1 queries
+    all_materials = db.query(Material).filter(Material.tenant_id == tenant_id).all()
+    # Create lookup dictionaries (lowercase for case-insensitive matching)
+    mat_by_code = {m.code.lower(): m for m in all_materials if m.code}
+    mat_by_name = {m.name.lower(): m for m in all_materials if m.name}
+    
     for idx, row in df.iterrows():
-        name_val = str(row[name_col]).strip() if pd.notna(row[name_col]) else ""
+        name_val = str(row[name_col]).strip() if name_col and pd.notna(row[name_col]) else ""
+        code_val = str(row[code_col]).strip() if code_col and pd.notna(row[code_col]) else ""
         qty_val = row[qty_col]
         
-        if not name_val:
+        if not name_val and not code_val:
             continue
             
         try:
@@ -365,10 +403,11 @@ def import_materials_excel(
         except (ValueError, TypeError):
             continue
             
-        mat = db.query(Material).filter(
-            Material.tenant_id == tenant_id,
-            func.lower(Material.name) == name_val.lower()
-        ).first()
+        mat = None
+        if code_val:
+            mat = mat_by_code.get(code_val.lower())
+        if not mat and name_val:
+            mat = mat_by_name.get(name_val.lower())
         
         if mat:
             results.append(ExcelImportResultItem(
@@ -382,11 +421,10 @@ def import_materials_excel(
     return results
 
 
-@router.post("/requests/{id}/send")
-def send_quotation_request(
-    id: int, data: SendQuotationRequest = SendQuotationRequest(),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("purchase_requests", "update")),
+@router.get("/requests/{id}/pdf")
+def preview_quotation_request_pdf(
+    id: int, db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("purchase_requests", "read")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
@@ -396,23 +434,54 @@ def send_quotation_request(
     if not qr:
         raise HTTPException(status_code=404, detail="Quotation Request not found")
         
-    qr.status = QuotationRequestStatus.REQUESTED.value
-    for v in qr.invited_vendors:
-        v.is_sent = True
-        v.sent_at = get_now_ist()
+    pdf_bytes = generate_qr_pdf(qr)
+    return Response(content=pdf_bytes, media_type="application/pdf")
+
+
+@router.post("/requests/{id}/send")
+def send_quotation_request(
+    id: int, data: SendQuotationRequest = SendQuotationRequest(),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("purchase_requests", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    try:
+        qr = db.query(QuotationRequest).filter(
+            QuotationRequest.id == id, QuotationRequest.tenant_id == tenant_id, QuotationRequest.site_id == site_id
+        ).first()
+        if not qr:
+            raise HTTPException(status_code=404, detail="Quotation Request not found")
+            
+        qr.status = QuotationRequestStatus.REQUESTED.value
         
-        # Send actual email to the vendor
-        if v.vendor and v.vendor.email:
-            # Convert newlines to HTML breaks for basic formatting
-            html_message = data.message.replace('\n', '<br>')
-            send_html_email(
-                to_email=v.vendor.email,
-                subject=f"Request for Quotation: {qr.qr_number}",
-                html_body=html_message
-            )
+        # Generate PDF once to attach for all vendors
+        pdf_bytes = generate_qr_pdf(qr)
+        pdf_filename = f"Quotation_Request_{qr.qr_number}.pdf"
         
-    db.commit()
-    return {"message": "Quotation Request sent to vendors"}
+        for v in qr.invited_vendors:
+            v.is_sent = True
+            v.sent_at = get_now_ist()
+            
+            # Send actual email to the vendor
+            if v.vendor and v.vendor.email:
+                # Convert newlines to HTML breaks for basic formatting
+                html_message = data.message.replace('\n', '<br>')
+                send_email_with_attachment(
+                    to_email=v.vendor.email,
+                    subject=f"Request for Quotation: {qr.qr_number}",
+                    html_body=html_message,
+                    attachment_bytes=pdf_bytes,
+                    attachment_filename=pdf_filename,
+                    vendor_name=v.vendor.name
+                )
+            
+        db.commit()
+        return {"message": "Quotation Request sent to vendors"}
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/requests/{id}/receive")
@@ -704,11 +773,15 @@ def generate_comparison(
         auto_l1_vendor_id = quotes[0].vendor_quotation.vendor_id if quotes else None
         
         for idx, q in enumerate(quotes):
+            effective_rate = (q.quoted_rate / (q.uom_conversion_factor or 1.0)) * (1 - ((q.discount_percent or 0.0) / 100.0))
             vendor_quotes.append(VendorQuoteDetail(
                 vendor_id=q.vendor_quotation.vendor_id,
                 vendor_name=f"{q.vendor_quotation.vendor.code} - {q.vendor_quotation.vendor.name}" if q.vendor_quotation and q.vendor_quotation.vendor else "N/A",
                 quoted_rate=q.quoted_rate,
+                effective_rate=effective_rate,
+                discount_percent=q.discount_percent or 0.0,
                 delivery_days=q.delivery_days,
+                brand=q.brand,
                 rank=idx + 1,
                 rank_label=f"L{idx + 1}"
             ))
@@ -1045,6 +1118,9 @@ def download_comparative_statement_pdf(
                 if label:
                     cell_text = f"<b>{cell_text}</b><br/><font size='7' color='green'>{label}</font>"
                 
+                if quote.brand:
+                    cell_text += f"<br/><font size='7' color='#555555'><i>Brand: {quote.brand}</i></font>"
+                
                 row.append(Paragraph(cell_text, styles['Normal']))
             else:
                 row.append("-")
@@ -1178,8 +1254,8 @@ def download_comparative_statement_excel(
 
     # 1. Sheet Title block
     num_vendors = len(sorted_vendors)
-    l1_start_col = 4 + num_vendors * 8
-    total_cols = 3 + (num_vendors * 8) + 2
+    l1_start_col = 4 + num_vendors * 9
+    total_cols = 3 + (num_vendors * 9) + 2
     last_col_letter = get_column_letter(total_cols) if total_cols > 0 else "G"
     
     ws.merge_cells(f"A1:{last_col_letter}1")
@@ -1216,8 +1292,8 @@ def download_comparative_statement_excel(
 
     # Build Vendor Columns Header block
     for v_idx, vt in enumerate(sorted_vendors):
-        start_col = 4 + v_idx * 8
-        end_col = start_col + 7
+        start_col = 4 + v_idx * 9
+        end_col = start_col + 8
         
         start_letter = get_column_letter(start_col)
         end_letter = get_column_letter(end_col)
@@ -1236,7 +1312,7 @@ def download_comparative_statement_excel(
             ws.cell(row=2, column=col_i).border = thin_border
             ws.cell(row=2, column=col_i).fill = v_fill
         
-        subheaders = ["Unit Rate (₹)", "Qty", "Disc %", "Disc Amt", "Net Rate", "Taxable Amt", "GST %", "Final Amt (₹)"]
+        subheaders = ["Brand", "Unit Rate (₹)", "Qty", "Disc %", "Disc Amt", "Net Rate", "Taxable Amt", "GST %", "Final Amt (₹)"]
         for sh_idx, sh_text in enumerate(subheaders):
             c_col = start_col + sh_idx
             c_cell = ws.cell(row=3, column=c_col)
@@ -1298,7 +1374,7 @@ def download_comparative_statement_excel(
         selected_l1_amt = "-"
 
         for v_idx, vt in enumerate(sorted_vendors):
-            start_col = 4 + v_idx * 8
+            start_col = 4 + v_idx * 9
             quote = next((q for q in mat.vendor_quotes if q.vendor_id == vt['vendor_id']), None)
             
             vqi = db.query(VendorQuotationItem).join(VendorQuotation).filter(
@@ -1324,7 +1400,7 @@ def download_comparative_statement_excel(
                     selected_l1_vendor = vt['vendor_name']
                     selected_l1_amt = final_amt
                 
-                vals = [quoted_rate, qty, discount_pct, disc_amt, rate_after_disc, total_taxable, gst_rate, final_amt]
+                vals = [vqi.brand or "-", quoted_rate, qty, discount_pct, disc_amt, rate_after_disc, total_taxable, gst_rate, final_amt]
                 
                 for offset, val in enumerate(vals):
                     c_col = start_col + offset
@@ -1333,13 +1409,13 @@ def download_comparative_statement_excel(
                     cell.border = thin_border
                     cell.fill = v_fill
                     
-                    if offset in [1, 2, 6]:
+                    if offset in [2, 3, 7]:
                         cell.alignment = align_center
-                        if offset == 2:
+                        if offset == 3:
                             cell.number_format = "0.0\"%\""
-                        elif offset == 6:
+                        elif offset == 7:
                             cell.number_format = "0.0\"%\""
-                    elif offset == 0:
+                    elif offset == 1:
                         # Unit Rate column: Check for custom UOM
                         if conv_factor != 1.0 or (vqi.vendor_uom_name and vqi.vendor_uom_name.strip() != mat.uom_name):
                             cell.value = f"{val:,.2f}\n(₹{vqi.quoted_rate:,.2f} / {vqi.vendor_uom_name or 'UOM'})"
@@ -1348,14 +1424,18 @@ def download_comparative_statement_excel(
                         else:
                             cell.alignment = align_right
                             cell.number_format = "#,##0.00"
+                    elif offset == 0:
+                        cell.alignment = align_center
+                        brand_font = Font(name="Segoe UI", size=10, bold=True, color="0B5394") # Bold and dark blue
+                        cell.font = brand_font
                     else:
                         cell.alignment = align_right
                         cell.number_format = "#,##0.00"
             else:
-                for offset in range(8):
+                for offset in range(9):
                     c_col = start_col + offset
                     cell = ws.cell(row=row_idx, column=c_col, value="")
-                    if offset == 0:
+                    if offset == 1:
                         cell.value = "-"
                     cell.font = data_font
                     cell.border = thin_border
@@ -1387,15 +1467,16 @@ def download_comparative_statement_excel(
     ws.column_dimensions["C"].width = 12  
 
     for v_idx in range(num_vendors):
-        start_col = 4 + v_idx * 8
-        ws.column_dimensions[get_column_letter(start_col)].width = 16 # Increased slightly to fit two lines better
-        ws.column_dimensions[get_column_letter(start_col + 1)].width = 10  
+        start_col = 4 + v_idx * 9
+        ws.column_dimensions[get_column_letter(start_col)].width = 14 # Brand
+        ws.column_dimensions[get_column_letter(start_col + 1)].width = 16 # Unit Rate
         ws.column_dimensions[get_column_letter(start_col + 2)].width = 10  
-        ws.column_dimensions[get_column_letter(start_col + 3)].width = 14 
+        ws.column_dimensions[get_column_letter(start_col + 3)].width = 10  
         ws.column_dimensions[get_column_letter(start_col + 4)].width = 14 
         ws.column_dimensions[get_column_letter(start_col + 5)].width = 14 
-        ws.column_dimensions[get_column_letter(start_col + 6)].width = 10  
-        ws.column_dimensions[get_column_letter(start_col + 7)].width = 16 
+        ws.column_dimensions[get_column_letter(start_col + 6)].width = 14 
+        ws.column_dimensions[get_column_letter(start_col + 7)].width = 10  
+        ws.column_dimensions[get_column_letter(start_col + 8)].width = 16 
 
     ws.column_dimensions[get_column_letter(l1_start_col)].width = 35
     ws.column_dimensions[get_column_letter(l1_start_col + 1)].width = 16
@@ -1487,6 +1568,7 @@ def get_negotiation_history(
             qr_id=h.qr_id,
             vendor_id=h.vendor_id,
             discount_percent=h.discount_percent,
+            item_discounts=h.item_discounts,
             remarks=h.remarks,
             created_by_id=h.created_by_id,
             created_by_name=h.created_by.full_name if h.created_by else None,

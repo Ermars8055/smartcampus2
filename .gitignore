@@ -36,3 +36,10 @@ frontend/dist/
 
 # Backups and Scratch Scripts
 Eastpoint.backup
+EQUIPMENT LIST master.xlsx
+*.xlsx
+.~lock.*
+
+# Test files and samples
+backend/test_pdf.py
+sample_quotation_full.pdf

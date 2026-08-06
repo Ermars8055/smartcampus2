@@ -52,7 +52,7 @@ def list_vendors(
     result = []
     for v in vendors:
         v.can_user_approve = False
-        if v.status == VendorStatus.AWAITING_APPROVAL.value:
+        if v.status == VendorStatus.SUBMITTED.value:
             level_flows = [f for f in flows if f.level == v.current_approval_level]
             if not level_flows and can_override:
                 v.can_user_approve = True
@@ -101,7 +101,7 @@ def get_vendor(
     if not v:
         raise HTTPException(status_code=404, detail="Vendor not found")
     can_user_approve = False
-    if v.status == VendorStatus.AWAITING_APPROVAL.value:
+    if v.status == VendorStatus.SUBMITTED.value:
         flows = db.query(ApprovalFlow).filter(
             ApprovalFlow.tenant_id == tenant_id,
             ApprovalFlow.site_id == site_id,
@@ -167,7 +167,7 @@ def create_vendor(
         ).first()
         if existing:
             raise HTTPException(status_code=400, detail="Vendor code already exists")
-    vendor = Vendor(**vendor_data, status=VendorStatus.AWAITING_APPROVAL.value, current_approval_level=1, tenant_id=tenant_id, site_id=site_id)
+    vendor = Vendor(**vendor_data, status=VendorStatus.SUBMITTED.value, current_approval_level=1, tenant_id=tenant_id, site_id=site_id)
     db.add(vendor)
     db.flush()
     for cat_id in data.category_ids:
@@ -221,7 +221,7 @@ def update_vendor(
             vendor.previous_status_at = vendor.rejected_at
         vendor.last_changes = changes
         
-        update_data["status"] = VendorStatus.AWAITING_APPROVAL.value
+        update_data["status"] = VendorStatus.SUBMITTED.value
         update_data["current_approval_level"] = 1
         update_data["rejection_remarks"] = None
         if vendor.status == VendorStatus.REJECTED.value and "is_active" not in changes:
@@ -271,7 +271,7 @@ def approve_vendor(
     vendor = db.query(Vendor).filter(Vendor.id == id, Vendor.tenant_id == tenant_id, Vendor.site_id == site_id).first()
     if not vendor:
         raise HTTPException(404, "Vendor not found")
-    if vendor.status != VendorStatus.AWAITING_APPROVAL.value:
+    if vendor.status != VendorStatus.SUBMITTED.value:
         raise HTTPException(400, "Vendor is not awaiting approval")
 
     flows = db.query(ApprovalFlow).filter(

@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import Optional, List
 from app.database import get_db
 from app.models import EquipmentItem, Material, GRN, Warehouse, Project, User, AuditLog
-from app.schemas import EquipmentItemOut, EquipmentUpdateSerial, EquipmentInstallationUpdate, PMScheduleOut, PMScheduleUpdate, EquipmentUpdate
+from app.schemas import EquipmentItemOut, EquipmentItemCreate, EquipmentUpdateSerial, EquipmentInstallationUpdate, PMScheduleOut, PMScheduleUpdate, EquipmentUpdate
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
 import os
 import uuid
@@ -39,7 +39,7 @@ def list_equipment(
             (EquipmentItem.serial_number == "")
         )
     elif tab == "pending_installation":
-        q = q.filter(EquipmentItem.installation_status == "Pending Installation")
+        q = q.filter(EquipmentItem.installation_status.in_(["Pending Installation", "Installation Requested"]))
 
     if warehouse_id:
         q = q.filter(EquipmentItem.warehouse_id == warehouse_id)
@@ -70,32 +70,69 @@ def list_equipment(
         grn = item.grn
         wh = item.warehouse
         proj = item.project
-        result.append(EquipmentItemOut(
-            id=item.id,
-            equipment_code=item.equipment_code,
-            material_id=item.material_id,
-            grn_id=item.grn_id,
-            grn_item_id=item.grn_item_id,
-            serial_number=item.serial_number,
-            serial_number_status=item.serial_number_status or "Pending Update",
-            is_biomedical=item.is_biomedical or False,
-            requires_installation=item.requires_installation or False,
-            installation_status=item.installation_status or "Not Required",
-            installation_date=item.installation_date,
-            installation_report_url=item.installation_report_url,
-            installation_remarks=item.installation_remarks,
-            warehouse_id=item.warehouse_id,
-            project_id=item.project_id,
-            status=item.status or "In Store",
-            created_at=item.created_at,
-            updated_at=item.updated_at,
-            material_name=mat.name if mat else None,
-            material_code=mat.code if mat else None,
-            grn_number=grn.grn_number if grn else None,
-            warehouse_name=wh.name if wh else None,
-            project_name=proj.name if proj else None
-        ))
+        out = EquipmentItemOut.model_validate(item)
+        out.material_name = mat.name if mat else None
+        out.material_code = mat.code if mat else None
+        out.grn_number = grn.grn_number if grn else None
+        out.warehouse_name = wh.name if wh else None
+        out.project_name = proj.name if proj else None
+        out.location_name = item.location.location_name if item.location else None
+        out.institution_name = item.institution.name if item.institution else None
+        result.append(out)
     return result
+
+
+@router.post("", response_model=EquipmentItemOut)
+def create_equipment(
+    item_in: EquipmentItemCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("equipment", "create")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    from app.models import EquipmentHistory
+
+    # Check if equipment code already exists
+    existing = db.query(EquipmentItem).filter(
+        EquipmentItem.tenant_id == tenant_id,
+        EquipmentItem.equipment_code == item_in.equipment_code
+    ).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Equipment Code already exists in this tenant.")
+
+    new_item = EquipmentItem(
+        tenant_id=tenant_id,
+        site_id=site_id,
+        **item_in.dict()
+    )
+    db.add(new_item)
+    db.commit()
+    db.refresh(new_item)
+
+    # Record History
+    history = EquipmentHistory(
+        equipment_id=new_item.id,
+        event_type="Manual Registration",
+        description="Equipment added manually",
+        created_by_id=current_user.id
+    )
+    db.add(history)
+    db.commit()
+
+    # Load extra fields for response
+    mat = new_item.material
+    wh = new_item.warehouse
+    proj = new_item.project
+
+    out = EquipmentItemOut.model_validate(new_item)
+    out.material_name = mat.name if mat else None
+    out.material_code = mat.code if mat else None
+    out.warehouse_name = wh.name if wh else None
+    out.project_name = proj.name if proj else None
+    out.location_name = new_item.location.location_name if new_item.location else None
+    out.institution_name = new_item.institution.name if new_item.institution else None
+
+    return out
 
 
 @router.get("/pm-schedule", response_model=List[PMScheduleOut])
@@ -152,6 +189,28 @@ def update_pm_schedule(
     db.commit()
     return {"message": "PM Schedule updated successfully"}
 
+def _matches_department(dept_name: str, loc_name: str) -> bool:
+    d = dept_name.lower().strip()
+    l = loc_name.lower().strip()
+    if d == l:
+        return True
+    d_clean = d.replace("'s", "").replace("’s", "")
+    tokens = [t.strip() for t in d_clean.split('/')]
+    for t in tokens:
+        if len(t) >= 2 and t in l:
+            return True
+    if d_clean == "emergency" and ("emd" in l or "emergency" in l):
+        return True
+    if d_clean == "icu" and ("icu" in l or l == "ccu"):
+        return True
+    if d_clean == "ot" and ("ot" in l):
+        return True
+    if "opd" in d_clean and "opd" in l:
+        return True
+    if "ward" in d_clean and "ward" in l:
+        return True
+    return False
+
 @router.post("/generate-maintenance-calls")
 def generate_maintenance_calls(
     db: Session = Depends(get_db),
@@ -161,6 +220,7 @@ def generate_maintenance_calls(
 ):
     from app.models import Complaint, LocationMaster, PMSchedule
     from datetime import date
+    from sqlalchemy import func
     
     current_month_index = date.today().month
     month_names = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
@@ -171,96 +231,96 @@ def generate_maintenance_calls(
         PMSchedule.tenant_id == tenant_id,
         getattr(PMSchedule, current_month_col) == True
     ).all()
-    scheduled_depts = [s.department_name.lower() for s in schedules]
+    scheduled_depts = [s.department_name for s in schedules]
     
-    # Find all equipment needing PM
-    equipments = db.query(EquipmentItem).join(
-        LocationMaster, EquipmentItem.location_id == LocationMaster.id
-    ).filter(
+    # Find all operational/working equipment needing PM in scheduled departments
+    equipments = db.query(EquipmentItem).filter(
         EquipmentItem.tenant_id == tenant_id,
         EquipmentItem.site_id == site_id,
-        EquipmentItem.status == "Operational",
-        EquipmentItem.pm_required == True
+        EquipmentItem.status.in_(["Operational", "Working"])
     ).all()
     
     generated_count = 0
     for eq in equipments:
         if eq.location_id:
-            loc = db.query(LocationMaster).get(eq.location_id)
-            if loc and loc.location_name.lower() in scheduled_depts:
-                # Check if a PM complaint already exists for this equipment that is open
-                existing = db.query(Complaint).filter(
-                    Complaint.equipment_id == eq.id,
-                    Complaint.complaint_type == "Preventive Maintenance Call",
-                    Complaint.status != "Closed"
-                ).first()
-                
-                if not existing:
-                    # Check if one was closed recently in this same month
-                    recent_pm = db.query(Complaint).filter(
+            loc = db.query(LocationMaster).filter(LocationMaster.id == eq.location_id).first()
+            if loc:
+                matched = any(_matches_department(dept, loc.location_name) for dept in scheduled_depts)
+                if matched:
+                    # Check if an open PM complaint already exists for this equipment
+                    existing = db.query(Complaint).filter(
                         Complaint.equipment_id == eq.id,
                         Complaint.complaint_type == "Preventive Maintenance Call",
-                        db.func.extract('month', Complaint.complaint_date) == current_month_index,
-                        db.func.extract('year', Complaint.complaint_date) == date.today().year
+                        Complaint.status != "Closed"
                     ).first()
                     
-                    if not recent_pm:
-                        new_complaint = Complaint(
-                            tenant_id=tenant_id,
-                            site_id=site_id,
-                            docket_no=f"PM-{date.today().strftime('%Y%m')}-{eq.equipment_code}",
-                            complaint_date=date.today(),
-                            department_name=loc.location_name,
-                            equipment_id=eq.id,
-                            nature_of_complaint="Scheduled Preventive Maintenance",
-                            complaint_type="Preventive Maintenance Call",
-                            status="Open",
-                            is_pm_calibration_call=True,
-                            created_by_id=current_user.id
-                        )
-                        db.add(new_complaint)
-                        generated_count += 1
+                    if not existing:
+                        # Check if a PM complaint was created or closed in this same month
+                        recent_pm = db.query(Complaint).filter(
+                            Complaint.equipment_id == eq.id,
+                            Complaint.complaint_type == "Preventive Maintenance Call",
+                            func.extract('month', Complaint.complaint_date) == current_month_index,
+                            func.extract('year', Complaint.complaint_date) == date.today().year
+                        ).first()
+                        
+                        if not recent_pm:
+                            new_complaint = Complaint(
+                                tenant_id=tenant_id,
+                                site_id=site_id,
+                                docket_no=f"PM-{date.today().strftime('%Y%m')}-{eq.equipment_code}",
+                                complaint_date=date.today(),
+                                department_name=loc.location_name,
+                                equipment_id=eq.id,
+                                nature_of_complaint="Scheduled Preventive Maintenance",
+                                complaint_type="Preventive Maintenance Call",
+                                status="Open",
+                                is_pm_calibration_call=True,
+                                created_by_id=current_user.id
+                            )
+                            db.add(new_complaint)
+                            eq.pm_required = True
+                            generated_count += 1
                         
     # Handle Calibration Generation
     cal_equipments = db.query(EquipmentItem).filter(
         EquipmentItem.tenant_id == tenant_id,
         EquipmentItem.site_id == site_id,
-        EquipmentItem.status == "Operational",
+        EquipmentItem.status.in_(["Operational", "Working"]),
         EquipmentItem.calibration_required == True
     ).all()
     
     cal_generated_count = 0
     for eq in cal_equipments:
-        if eq.next_calibration_due_date:
-            if eq.next_calibration_due_date <= date.today():
-                existing = db.query(Complaint).filter(
+        if not eq.next_calibration_due_date or eq.next_calibration_due_date <= date.today():
+            existing = db.query(Complaint).filter(
+                Complaint.equipment_id == eq.id,
+                Complaint.complaint_type == "Calibration Call",
+                Complaint.status != "Closed"
+            ).first()
+            if not existing:
+                recent_cal = db.query(Complaint).filter(
                     Complaint.equipment_id == eq.id,
                     Complaint.complaint_type == "Calibration Call",
-                    Complaint.status != "Closed"
+                    func.extract('month', Complaint.complaint_date) == current_month_index,
+                    func.extract('year', Complaint.complaint_date) == date.today().year
                 ).first()
-                if not existing:
-                    recent_cal = db.query(Complaint).filter(
-                        Complaint.equipment_id == eq.id,
-                        Complaint.complaint_type == "Calibration Call",
-                        db.func.extract('month', Complaint.complaint_date) == current_month_index,
-                        db.func.extract('year', Complaint.complaint_date) == date.today().year
-                    ).first()
-                    if not recent_cal:
-                        new_complaint = Complaint(
-                            tenant_id=tenant_id,
-                            site_id=site_id,
-                            docket_no=f"CAL-{date.today().strftime('%Y%m')}-{eq.equipment_code}",
-                            complaint_date=date.today(),
-                            department_name="Biomedical",
-                            equipment_id=eq.id,
-                            nature_of_complaint="Scheduled Calibration",
-                            complaint_type="Calibration Call",
-                            status="Open",
-                            is_pm_calibration_call=True,
-                            created_by_id=current_user.id
-                        )
-                        db.add(new_complaint)
-                        cal_generated_count += 1
+                if not recent_cal:
+                    loc = db.query(LocationMaster).filter(LocationMaster.id == eq.location_id).first() if eq.location_id else None
+                    new_complaint = Complaint(
+                        tenant_id=tenant_id,
+                        site_id=site_id,
+                        docket_no=f"CAL-{date.today().strftime('%Y%m')}-{eq.equipment_code}",
+                        complaint_date=date.today(),
+                        department_name=loc.location_name if loc else "Biomedical",
+                        equipment_id=eq.id,
+                        nature_of_complaint="Scheduled Calibration",
+                        complaint_type="Calibration Call",
+                        status="Open",
+                        is_pm_calibration_call=True,
+                        created_by_id=current_user.id
+                    )
+                    db.add(new_complaint)
+                    cal_generated_count += 1
                     
     db.commit()
     return {
@@ -539,6 +599,64 @@ def complete_installation(
         "installation_report_url": item.installation_report_url
     }
 
+@router.post("/{id}/request-installation")
+def request_installation(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("equipment", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    from app.models import Complaint, LocationMaster
+    from app.utils.sequences import get_next_number
+
+    item = db.query(EquipmentItem).filter(
+        EquipmentItem.id == id,
+        EquipmentItem.tenant_id == tenant_id,
+        EquipmentItem.site_id == site_id
+    ).first()
+    
+    if not item:
+        raise HTTPException(status_code=404, detail="Equipment item not found")
+
+    if item.installation_status != "Pending Installation":
+        raise HTTPException(status_code=400, detail=f"Cannot request installation from status {item.installation_status}")
+
+    # Create an installation complaint
+    docket_no = get_next_number(db, tenant_id, site_id, "COMPLAINT", "CMP")
+    loc = db.query(LocationMaster).filter(LocationMaster.id == item.location_id).first() if item.location_id else None
+
+    new_complaint = Complaint(
+        tenant_id=tenant_id,
+        site_id=site_id,
+        docket_no=docket_no,
+        complaint_date=datetime.utcnow().date(),
+        complaint_time=datetime.utcnow().strftime("%H:%M"),
+        department_name=loc.location_name if loc else "Biomedical",
+        equipment_id=item.id,
+        nature_of_complaint=f"Request for Equipment Installation: {item.equipment_code}",
+        complaint_type="Installation",
+        status="Registered",
+        created_by_id=current_user.id
+    )
+    db.add(new_complaint)
+    
+    item.installation_status = "Installation Requested"
+    
+    db.add(AuditLog(
+        tenant_id=tenant_id, site_id=site_id,
+        user_id=current_user.id, action="UPDATE",
+        entity_type="EquipmentItem", entity_id=item.id,
+        new_values=f"Installation requested for {item.equipment_code}, Docket No: {docket_no}"
+    ))
+    db.commit()
+
+    return {
+        "message": "Installation ticket generated successfully",
+        "docket_no": docket_no,
+        "installation_status": item.installation_status
+    }
+
 @router.get("/{id}/qr")
 def get_qr_data(
     id: int,
@@ -611,9 +729,10 @@ class WriteOffRequest(BaseModel):
     approval_details: Optional[str] = None
     document_url: Optional[str] = None
 
-from app.schemas import EquipmentRelocate
+from app.schemas import EquipmentRelocate, EquipmentCalibration
 from app.models import EquipmentHistory, LocationMaster
 from datetime import datetime
+
 
 @router.post("/{id}/relocate", response_model=EquipmentItemOut)
 def relocate_equipment(
@@ -709,40 +828,147 @@ def get_equipment_counts(
     vendor_id: Optional[int] = None,
     location_id: Optional[int] = None,
     status: Optional[str] = None,
+    search: Optional[str] = None,
+    include_zero: bool = False,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("equipment", "read")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
-    from sqlalchemy import func
-    q = db.query(
-        Material.name.label("equipment_name"), 
-        func.count(EquipmentItem.id).label("count")
-    ).join(
-        EquipmentItem, EquipmentItem.material_id == Material.id
-    ).filter(
-        EquipmentItem.tenant_id == tenant_id,
-        EquipmentItem.site_id == site_id
-    )
+    from sqlalchemy import func, or_
     
-    if institution_id:
-        q = q.filter(EquipmentItem.institution_id == institution_id)
-    if location_id:
-        q = q.filter(EquipmentItem.location_id == location_id)
-    if status:
-        q = q.filter(EquipmentItem.status == status)
-    if category_id:
-        q = q.filter(Material.category_id == category_id)
-        
-    # Vendor would be via GRN->PO->Vendor or rental_vendor
-    if vendor_id:
-        from app.models import GRN
-        q = q.outerjoin(GRN, EquipmentItem.grn_id == GRN.id).filter(GRN.vendor_id == vendor_id)
-        
-    results = q.group_by(Material.name).all()
+    if include_zero:
+        q = db.query(
+            Material.name.label("equipment_name"),
+            func.count(EquipmentItem.id).label("count")
+        ).select_from(Material).outerjoin(
+            EquipmentItem, 
+            (EquipmentItem.material_id == Material.id) & 
+            (EquipmentItem.tenant_id == tenant_id) & 
+            (EquipmentItem.site_id == site_id)
+        ).filter(
+            Material.tenant_id == tenant_id,
+            Material.is_deleted == False
+        )
+        if institution_id:
+            q = q.filter(or_(EquipmentItem.institution_id == institution_id, EquipmentItem.id == None))
+        if location_id:
+            q = q.filter(or_(EquipmentItem.location_id == location_id, EquipmentItem.id == None))
+        if status:
+            q = q.filter(or_(EquipmentItem.status == status, EquipmentItem.id == None))
+        if category_id:
+            q = q.filter(Material.category_id == category_id)
+        if vendor_id:
+            from app.models import GRN
+            q = q.outerjoin(GRN, EquipmentItem.grn_id == GRN.id).filter(or_(GRN.vendor_id == vendor_id, EquipmentItem.id == None))
+    else:
+        q = db.query(
+            Material.name.label("equipment_name"), 
+            func.count(EquipmentItem.id).label("count")
+        ).join(
+            EquipmentItem, EquipmentItem.material_id == Material.id
+        ).filter(
+            EquipmentItem.tenant_id == tenant_id,
+            EquipmentItem.site_id == site_id
+        )
+        if institution_id:
+            q = q.filter(EquipmentItem.institution_id == institution_id)
+        if location_id:
+            q = q.filter(EquipmentItem.location_id == location_id)
+        if status:
+            q = q.filter(EquipmentItem.status == status)
+        if category_id:
+            q = q.filter(Material.category_id == category_id)
+        if vendor_id:
+            from app.models import GRN
+            q = q.outerjoin(GRN, EquipmentItem.grn_id == GRN.id).filter(GRN.vendor_id == vendor_id)
+
+    if search:
+        q = q.filter(Material.name.ilike(f"%{search}%"))
+
+    results = q.group_by(Material.name).order_by(Material.name.asc()).all()
     
     return [
         {"equipment_name": r.equipment_name, "count": r.count}
         for r in results
     ]
+
+
+@router.post("/{id}/calibration")
+def record_calibration(
+    id: int,
+    payload: EquipmentCalibration,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("equipment", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    item = db.query(EquipmentItem).filter(
+        EquipmentItem.id == id,
+        EquipmentItem.tenant_id == tenant_id,
+        EquipmentItem.site_id == site_id
+    ).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Equipment item not found")
+
+    item.last_calibration_date = payload.calibration_date
+    if payload.next_due_date:
+        item.next_calibration_due_date = payload.next_due_date
+    item.updated_at = datetime.utcnow()
+
+    # Record History
+    from app.models import EquipmentHistory
+    history = EquipmentHistory(
+        equipment_id=item.id,
+        event_type="Calibration",
+        event_date=datetime.combine(payload.calibration_date, datetime.min.time()),
+        description=f"Calibration recorded. Agency: {payload.agency_name or 'Authorized Agency'}. Cert #: {payload.certificate_number or 'N/A'}. Remarks: {payload.remarks or 'None'}",
+        reference_id=payload.certificate_number,
+        created_by_id=current_user.id
+    )
+    db.add(history)
+    db.commit()
+
+    return {
+        "message": "Equipment calibration recorded successfully",
+        "last_calibration_date": item.last_calibration_date,
+        "next_calibration_due_date": item.next_calibration_due_date
+    }
+
+
+@router.get("/{id}/history")
+def get_equipment_history(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("equipment", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    item = db.query(EquipmentItem).filter(
+        EquipmentItem.id == id,
+        EquipmentItem.tenant_id == tenant_id,
+        EquipmentItem.site_id == site_id
+    ).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Equipment item not found")
+
+    from app.models import EquipmentHistory
+    histories = db.query(EquipmentHistory).filter(
+        EquipmentHistory.equipment_id == id
+    ).order_by(EquipmentHistory.event_date.desc()).all()
+
+    return [
+        {
+            "id": h.id,
+            "equipment_id": h.equipment_id,
+            "event_type": h.event_type,
+            "event_date": h.event_date,
+            "description": h.description,
+            "reference_id": h.reference_id,
+            "created_by_name": h.created_by.full_name if h.created_by else "System"
+        }
+        for h in histories
+    ]
+
+
 

@@ -326,7 +326,7 @@ export default function InvoiceTracking() {
                   <TableCell sx={{ fontSize: '0.8rem' }}>{i.vendor_name}</TableCell>
                   <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.8rem' }}>₹{i.total_amount?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</TableCell>
                   <TableCell>
-                    <Chip label={i.hard_copy_received ? 'Received' : 'Pending'} size="small" color={i.hard_copy_received ? 'success' : 'warning'} sx={{ fontSize: '0.7rem' }} />
+                    <Chip label={i.hard_copy_received ? 'Received' : 'Pending'} size="small" color={i.hard_copy_received ? 'primary' : 'default'} sx={{ fontSize: '0.7rem' }} />
                   </TableCell>
                   <TableCell>
                     <Chip label={i.payment_status} size="small" color={statusColor[i.payment_status] || 'default'} sx={{ fontSize: '0.7rem' }} />
@@ -523,7 +523,7 @@ export default function InvoiceTracking() {
               <Card sx={{ p: 3, mb: 3 }}>
                 <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>Hard Copy Tracking</Typography>
                 <Grid container spacing={2}>
-                  <Grid item xs={6} sm={3}><Typography variant="caption" color="textSecondary">Received Status</Typography><Box><Chip label={detailDialog?.hard_copy_received ? 'Received' : 'Pending'} size="small" color={detailDialog?.hard_copy_received ? 'success' : 'warning'} /></Box></Grid>
+                  <Grid item xs={6} sm={3}><Typography variant="caption" color="textSecondary">Received Status</Typography><Box><Chip label={detailDialog?.hard_copy_received ? 'Received' : 'Pending'} size="small" color={detailDialog?.hard_copy_received ? 'primary' : 'default'} /></Box></Grid>
                   {detailDialog?.hard_copy_sent && <Grid item xs={6} sm={3}><Typography variant="caption" color="textSecondary">Sent By</Typography><Typography>{detailDialog?.hard_copy_sent_by_name || '-'}</Typography></Grid>}
                   {detailDialog?.hard_copy_sent && <Grid item xs={6} sm={3}><Typography variant="caption" color="textSecondary">Sent Date</Typography><Typography>{formatDate(detailDialog?.hard_copy_sent_at)}</Typography></Grid>}
                   {detailDialog?.hard_copy_received && <Grid item xs={6} sm={3}><Typography variant="caption" color="textSecondary">Received By</Typography><Typography>{detailDialog?.hard_copy_received_by_name || '-'}</Typography></Grid>}

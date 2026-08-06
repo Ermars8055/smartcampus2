@@ -47,7 +47,7 @@ export default function RolesList() {
                     />
                   </TableCell>
                   <TableCell>
-                    <Tooltip title="Configure"><IconButton size="small" onClick={() => navigate(`/admin/roles/${r.id}`)}><Edit fontSize="small" /></IconButton></Tooltip>
+                    <Tooltip title="Configure"><IconButton size="small" onClick={() => navigate(`/admin/roles/${r.id}`)}><Edit color="primary" fontSize="small" /></IconButton></Tooltip>
                   </TableCell>
                 </TableRow>
               ))}

@@ -6,7 +6,7 @@ import {
   DialogContent, DialogActions, Grid, Select, FormControl, TextField,
   InputLabel, IconButton, InputAdornment, MenuItem, Paper,
   Autocomplete, ListSubheader, createFilterOptions,
-  RadioGroup, FormControlLabel, Radio
+  RadioGroup, FormControlLabel, Radio, Tabs, Tab
 } from '@mui/material';
 import { Close, TaskAlt, Print, LocalShipping, Add, Comment, Person, Numbers, AccountTree, Delete, Search } from '@mui/icons-material';
 import api from '../services/api';
@@ -441,25 +441,25 @@ export default function GatePasses() {
 
   return (
     <Box>
-      <Box sx={{ mb: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
-          <Box>
-            <Typography variant="h6" sx={{ fontWeight: 800, color: '#1E293B', lineHeight: 1.2 }}>Outward Gate Passes</Typography>
-            <Typography variant="caption" sx={{ color: '#64748B', display: 'block', mt: 0.5 }}>
-              Track items sent out for repair and manage their return or scrap.
-            </Typography>
-          </Box>
-          <Button
-            variant="contained"
-            startIcon={<Add />}
-            onClick={openGpModal}
-            disabled={!hasAction('gate_passes', 'can_create') && !hasAction('issues', 'can_issue')} // Fallback
-            sx={{ textTransform: 'none', borderRadius: 2, fontWeight: 700, px: 3, bgcolor: '#2563EB', height: 40 }}
-          >
-            Create Gate Pass
-          </Button>
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
+        <Box>
+          <Typography variant="h6" sx={{ fontWeight: 800, color: '#1E293B', lineHeight: 1.2 }}>Outward Gate Passes</Typography>
+          <Typography variant="caption" sx={{ color: '#64748B', display: 'block', mt: 0.5 }}>
+            Track items sent out for repair and manage their return or scrap.
+          </Typography>
         </Box>
-        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+        <Button
+          variant="contained"
+          startIcon={<Add />}
+          onClick={openGpModal}
+          disabled={!hasAction('gate_passes', 'can_create') && !hasAction('issues', 'can_issue')} // Fallback
+          sx={{ textTransform: 'none', borderRadius: 2, fontWeight: 700, px: 3, bgcolor: '#2563EB', height: 40 }}
+        >
+          Create Gate Pass
+        </Button>
+      </Box>
+      <Card sx={{ mb: 3 }}>
+        <Box sx={{ p: 2, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
           <TextField
             size="small"
             placeholder="Search GP No. or Vendor..."
@@ -481,19 +481,42 @@ export default function GatePasses() {
               <MenuItem key={t} value={t}>{t}</MenuItem>
             ))}
           </TextField>
-          <TextField
-            select
-            size="small"
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            sx={{ width: 160, bgcolor: '#fff', borderRadius: 1 }}
-          >
-            {['All', 'Yet to Receive', 'Received', 'Sent Out'].map(s => (
-              <MenuItem key={s} value={s}>{s}</MenuItem>
-            ))}
-          </TextField>
         </Box>
-      </Box>
+        <Tabs
+          value={['Yet to Receive', 'Received', 'Sent Out', 'All'].indexOf(filterStatus) !== -1 ? ['Yet to Receive', 'Received', 'Sent Out', 'All'].indexOf(filterStatus) : 0}
+          onChange={(_, v) => setFilterStatus(['Yet to Receive', 'Received', 'Sent Out', 'All'][v])}
+          variant="scrollable"
+          scrollButtons={false}
+          sx={{ borderBottom: 1, borderColor: 'divider' }}
+        >
+          {['Yet to Receive', 'Received', 'Sent Out', 'All'].map((s, i) => (
+            <Tab
+              key={i}
+              label={
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  {s}
+                  <Chip
+                    label={s === 'All' ? gatePasses.length : gatePasses.filter(gp => {
+                        const displayStatus = ['Issued', 'Pending Repair', 'Yet to Receive'].includes(gp.status) ? 'Yet to Receive' : ['Received', 'Repaired & Received', 'Repaired & Returned'].includes(gp.status) ? 'Received' : gp.status;
+                        return displayStatus === s;
+                    }).length}
+                    size="small"
+                    sx={{
+                      height: 20,
+                      fontSize: '0.7rem',
+                      fontWeight: 700,
+                      bgcolor: filterStatus === s ? 'primary.main' : 'action.selected',
+                      color: filterStatus === s ? 'white' : 'text.primary',
+                      cursor: 'pointer'
+                    }}
+                  />
+                </Box>
+              }
+              sx={{ textTransform: 'none', fontWeight: 600, minHeight: 48, minWidth: 'auto', px: 2 }}
+            />
+          ))}
+        </Tabs>
+      </Card>
 
       {gatePasses.length === 0 && !searchTerm && filterStatus === 'All' && filterType === 'All' ? (
         <Box sx={{ textAlign: 'center', py: 8, bgcolor: '#F8FAFC', borderRadius: 3, border: '2px dashed #E2E8F0' }}>

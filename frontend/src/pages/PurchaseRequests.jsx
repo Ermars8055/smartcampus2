@@ -267,7 +267,7 @@ export default function PurchaseRequests() {
         rental_duration: form.procurement_type === 'Rental' ? (form.rental_duration ? parseInt(form.rental_duration) : null) : null,
         rental_duration_unit: form.procurement_type === 'Rental' ? form.rental_duration_unit || null : null,
         estimated_rental_cost: form.procurement_type === 'Rental' ? (form.estimated_rental_cost ? parseFloat(form.estimated_rental_cost) : null) : null,
-        cost_per_test: form.procurement_type === 'Cost Per Test' ? (form.cost_per_test ? parseFloat(form.cost_per_test) : null) : null,
+        cost_per_test: (form.procurement_type === 'Rental' && form.rental_type === 'Cost Per Test') ? (form.cost_per_test ? parseFloat(form.cost_per_test) : null) : null,
         reagent_rental_required: form.reagent_rental_required,
         justification: form.justification || null,
         required_date: form.required_date ? dayjs(form.required_date).format('YYYY-MM-DD') : null,
@@ -611,7 +611,7 @@ export default function PurchaseRequests() {
           value={tab}
           onChange={(_, v) => setTab(v)}
           variant="scrollable"
-          scrollButtons="auto"
+          scrollButtons={false}
           sx={{ borderBottom: 1, borderColor: 'divider' }}
         >
           {statusFilters.map((s, i) => (
@@ -627,8 +627,8 @@ export default function PurchaseRequests() {
                       height: 20,
                       fontSize: '0.7rem',
                       fontWeight: 700,
-                      backgroundColor: tab === i ? 'primary.light' : '#f0f0f0',
-                      color: tab === i ? 'primary.contrastText' : 'text.secondary',
+                      bgcolor: tab === i ? 'primary.main' : 'action.selected',
+                      color: tab === i ? 'white' : 'text.primary',
                       cursor: 'pointer'
                     }}
                   />
@@ -650,7 +650,6 @@ export default function PurchaseRequests() {
                     active={sortConfig.key === 'pr_number'}
                     direction={sortConfig.direction}
                     onClick={() => handleSort('pr_number')}
-                    IconComponent={ArrowDropDown}
                   >
                     PR NUMBER
                   </TableSortLabel>
@@ -660,7 +659,6 @@ export default function PurchaseRequests() {
                     active={sortConfig.key === 'project_name'}
                     direction={sortConfig.direction}
                     onClick={() => handleSort('project_name')}
-                    IconComponent={ArrowDropDown}
                   >
                     INSTITUTION
                   </TableSortLabel>
@@ -670,7 +668,6 @@ export default function PurchaseRequests() {
                     active={sortConfig.key === 'department_name'}
                     direction={sortConfig.direction}
                     onClick={() => handleSort('department_name')}
-                    IconComponent={ArrowDropDown}
                   >
                     DEPARTMENT
                   </TableSortLabel>
@@ -680,7 +677,6 @@ export default function PurchaseRequests() {
                     active={sortConfig.key === 'created_at'}
                     direction={sortConfig.direction}
                     onClick={() => handleSort('created_at')}
-                    IconComponent={ArrowDropDown}
                   >
                     PR DATE
                   </TableSortLabel>
@@ -690,7 +686,6 @@ export default function PurchaseRequests() {
                     active={sortConfig.key === 'required_date'}
                     direction={sortConfig.direction}
                     onClick={() => handleSort('required_date')}
-                    IconComponent={ArrowDropDown}
                   >
                     REQ. DATE
                   </TableSortLabel>
@@ -700,7 +695,6 @@ export default function PurchaseRequests() {
                     active={sortConfig.key === 'items'}
                     direction={sortConfig.direction}
                     onClick={() => handleSort('items')}
-                    IconComponent={ArrowDropDown}
                   >
                     ITEMS
                   </TableSortLabel>
@@ -710,7 +704,6 @@ export default function PurchaseRequests() {
                     active={sortConfig.key === 'status'}
                     direction={sortConfig.direction}
                     onClick={() => handleSort('status')}
-                    IconComponent={ArrowDropDown}
                   >
                     STATUS
                   </TableSortLabel>
@@ -1085,21 +1078,35 @@ export default function PurchaseRequests() {
               </Select>
             </FormControl>
           </Box>
-          
+
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr 1fr' }, gap: 2, pt: 1, mb: 2 }}>
             <FormControl fullWidth>
               <InputLabel>Procurement Type</InputLabel>
               <Select
                 value={form.procurement_type || 'Purchase'}
                 label="Procurement Type"
-                onChange={e => setForm({ ...form, procurement_type: e.target.value })}
+                onChange={e => setForm({ ...form, procurement_type: e.target.value, rental_type: e.target.value === 'Rental' ? 'Standard Rental' : '' })}
                 size="small"
               >
-                <MenuItem value="Purchase">Purchase</MenuItem>
+                <MenuItem value="Purchase">Standard Purchase</MenuItem>
                 <MenuItem value="Rental">Rental</MenuItem>
-                <MenuItem value="Cost Per Test">Cost Per Test</MenuItem>
               </Select>
             </FormControl>
+
+            {form.procurement_type === 'Rental' && (
+              <FormControl fullWidth size="small">
+                <InputLabel>Rental Model</InputLabel>
+                <Select
+                  value={form.rental_type || 'Standard Rental'}
+                  label="Rental Model"
+                  onChange={e => setForm({ ...form, rental_type: e.target.value })}
+                >
+                  <MenuItem value="Standard Rental">Equipment Rental</MenuItem>
+                  <MenuItem value="Cost Per Test">Cost Per Test</MenuItem>
+                  <MenuItem value="Reagent Rental">Reagent Rental</MenuItem>
+                </Select>
+              </FormControl>
+            )}
 
             <Box id="field-required_date">
               <DatePicker
@@ -1124,23 +1131,12 @@ export default function PurchaseRequests() {
             </Box>
           </Box>
 
-          {form.procurement_type === 'Rental' && (
+
+
+          {form.procurement_type === 'Rental' && form.rental_type !== 'Cost Per Test' && (
             <Box sx={{ p: 2, mb: 2, bgcolor: '#F8FAFC', borderRadius: 2, border: '1px solid #E2E8F0' }}>
               <Typography variant="subtitle2" sx={{ mb: 2, color: '#334155', fontWeight: 600 }}>Rental Agreement Details</Typography>
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={4}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>Rental Type</InputLabel>
-                    <Select
-                      value={form.rental_type || ''}
-                      label="Rental Type"
-                      onChange={e => setForm({ ...form, rental_type: e.target.value })}
-                    >
-                      <MenuItem value="Standard Rental">Standard Rental</MenuItem>
-                      <MenuItem value="Reagent Rental">Reagent Rental</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
                 <Grid item xs={12} sm={4}>
                   <TextField
                     fullWidth size="small" label="Rental Duration" type="number"
@@ -1181,7 +1177,7 @@ export default function PurchaseRequests() {
             </Box>
           )}
 
-          {form.procurement_type === 'Cost Per Test' && (
+          {form.procurement_type === 'Rental' && form.rental_type === 'Cost Per Test' && (
             <Box sx={{ p: 2, mb: 2, bgcolor: '#F8FAFC', borderRadius: 2, border: '1px solid #E2E8F0' }}>
               <Typography variant="subtitle2" sx={{ mb: 2, color: '#334155', fontWeight: 600 }}>Cost Per Test Details</Typography>
               <Grid container spacing={2}>

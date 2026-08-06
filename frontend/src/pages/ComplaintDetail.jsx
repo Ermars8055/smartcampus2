@@ -9,7 +9,7 @@ import api, { getFileUrl } from '../services/api';
 import dayjs from 'dayjs';
 import { useAuth } from '../context/AuthContext';
 
-const COMPLAINT_STEPS = ['Registered', 'Assigned', 'Under Inspection', 'In Progress', 'Pending Admin Approval', 'Closed'];
+const COMPLAINT_STEPS = ['Registered', 'Assigned', 'Under Inspection', 'In Progress', 'Pending Approval', 'Closed'];
 
 export default function ComplaintDetail() {
   const { id } = useParams();
@@ -44,6 +44,11 @@ export default function ComplaintDetail() {
   // Closure States
   const [closureReason, setClosureReason] = useState('');
   const [closureDocs, setClosureDocs] = useState([]);
+  
+  // Installation Specific States
+  const [equipmentPhoto, setEquipmentPhoto] = useState(null);
+  const [serialNumberPhoto, setSerialNumberPhoto] = useState(null);
+  const [installationReport, setInstallationReport] = useState(null);
 
   useEffect(() => {
     fetchComplaintData();
@@ -193,11 +198,44 @@ export default function ComplaintDetail() {
         uploadedUrls.push(uploadRes.data.url);
       }
 
-      await api.post(`/api/complaints/${id}/close`, {
+      let equipmentPhotoUrl = null;
+      let serialNumberPhotoUrl = null;
+      let installationReportUrl = null;
+
+      if (complaint?.complaint_type === 'Installation') {
+        if (equipmentPhoto) {
+          const fd = new FormData();
+          fd.append('file', equipmentPhoto);
+          const uploadRes = await api.post('/api/upload?folder=complaints', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+          equipmentPhotoUrl = uploadRes.data.url;
+        }
+        if (serialNumberPhoto) {
+          const fd = new FormData();
+          fd.append('file', serialNumberPhoto);
+          const uploadRes = await api.post('/api/upload?folder=complaints', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+          serialNumberPhotoUrl = uploadRes.data.url;
+        }
+        if (installationReport) {
+          const fd = new FormData();
+          fd.append('file', installationReport);
+          const uploadRes = await api.post('/api/upload?folder=complaints', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+          installationReportUrl = uploadRes.data.url;
+        }
+      }
+
+      const payload = {
         resolution_entered: resolutionRemarks,
         closure_reason: closureReason,
         document_urls: uploadedUrls
-      });
+      };
+
+      if (complaint?.complaint_type === 'Installation') {
+        payload.equipment_photo_url = equipmentPhotoUrl;
+        payload.serial_number_photo_url = serialNumberPhotoUrl;
+        payload.installation_report_url = installationReportUrl;
+      }
+
+      await api.post(`/api/complaints/${id}/close`, payload);
 
       setSnackbar({ open: true, message: 'Closure initiated successfully', severity: 'success' });
       setResolveDialogOpen(false);
@@ -215,7 +253,7 @@ export default function ComplaintDetail() {
       await api.post(`/api/complaints/${id}/approve-closure`, {
         approval_type: approvalType
       });
-      setSnackbar({ open: true, message: `Approved as ${approvalType}`, severity: 'success' });
+      setSnackbar({ open: true, message: `${approvalType === 'admin' ? 'Level 1' : 'Level 2'} Approved Successfully`, severity: 'success' });
       fetchComplaintData();
     } catch (error) {
       setSnackbar({ open: true, message: error.response?.data?.detail || 'Failed to approve', severity: 'error' });
@@ -231,14 +269,14 @@ export default function ComplaintDetail() {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'Registered': case 'Open': return 'primary';
-      case 'Assigned': return 'secondary';
+      case 'Registered': case 'Open': return 'info';
+      case 'Assigned': return 'primary';
       case 'Under Inspection': return 'info';
-      case 'Material Pending': return 'warning';
+      case 'Material Pending': return 'error';
       case 'In Progress': return 'warning';
-      case 'Pending Admin Approval': return 'warning';
+      case 'Pending Approval': case 'Pending Admin Approval': return 'info';
       case 'Resolved': return 'success';
-      case 'Closed': return 'success';
+      case 'Closed': return 'default';
       case 'Reopened': return 'error';
       case 'Rejected': return 'error';
       default: return 'default';
@@ -251,7 +289,7 @@ export default function ComplaintDetail() {
       case 'Assigned': case 'Reopened': return 1;
       case 'Under Inspection': return 2;
       case 'Material Pending': case 'In Progress': return 3;
-      case 'Pending Admin Approval': return 4;
+      case 'Pending Approval': case 'Pending Admin Approval': return 4;
       case 'Closed': return 5;
       default: return 0;
     }
@@ -320,15 +358,15 @@ export default function ComplaintDetail() {
               </Button>
             )}
 
-            {complaint.status === 'Pending Admin Approval' && !complaint.admin_approved_by_id && (
+            {(complaint.status === 'Pending Approval' || complaint.status === 'Pending Admin Approval') && !complaint.admin_approved_by_id && (
               <Button variant="contained" color="primary" startIcon={<VerifiedUser />} onClick={() => handleApprove('admin')}>
-                Admin Approve
+                Level 1 Approve
               </Button>
             )}
 
-            {complaint.status === 'Pending Admin Approval' && complaint.admin_approved_by_id && !complaint.manager_approved_by_id && (
+            {(complaint.status === 'Pending Approval' || complaint.status === 'Pending Admin Approval') && complaint.admin_approved_by_id && !complaint.manager_approved_by_id && (
               <Button variant="contained" color="secondary" startIcon={<VerifiedUser />} onClick={() => handleApprove('manager')}>
-                Manager Approve
+                Level 2 Approve
               </Button>
             )}
             
@@ -418,7 +456,7 @@ export default function ComplaintDetail() {
             </Paper>
           )}
 
-          {(complaint.status === 'Resolved' || complaint.status === 'Closed' || complaint.status === 'Pending Admin Approval' || complaint.status === 'Reopened') && complaint.resolution_entered && (
+          {(complaint.status === 'Resolved' || complaint.status === 'Closed' || complaint.status === 'Pending Approval' || complaint.status === 'Pending Admin Approval' || complaint.status === 'Reopened') && complaint.resolution_entered && (
             <Paper sx={{ p: 3, mb: 3, bgcolor: '#F0FDF4', border: '1px solid #BBF7D0' }}>
               <Typography variant="h6" sx={{ color: '#166534', mb: 2 }}>Closure Details</Typography>
               
@@ -435,7 +473,7 @@ export default function ComplaintDetail() {
 
               <Box sx={{ mt: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                 <Box sx={{ p: 1.5, border: '1px solid #E2E8F0', borderRadius: 1, flexGrow: 1, minWidth: 200, bgcolor: complaint.admin_approved_by_id ? '#ECFDF5' : '#FFFBEB' }}>
-                  <Typography variant="caption" color="textSecondary" display="block">Admin Approval</Typography>
+                  <Typography variant="caption" color="textSecondary" display="block">Level 1 Approval</Typography>
                   {complaint.admin_approved_by_id ? (
                     <Typography variant="body2" fontWeight="bold" color="success.main">
                       <CheckCircle sx={{ fontSize: 16, verticalAlign: 'middle', mr: 0.5 }} />
@@ -446,7 +484,7 @@ export default function ComplaintDetail() {
                   )}
                 </Box>
                 <Box sx={{ p: 1.5, border: '1px solid #E2E8F0', borderRadius: 1, flexGrow: 1, minWidth: 200, bgcolor: complaint.manager_approved_by_id ? '#ECFDF5' : '#FFFBEB' }}>
-                  <Typography variant="caption" color="textSecondary" display="block">Manager Approval</Typography>
+                  <Typography variant="caption" color="textSecondary" display="block">Level 2 Approval</Typography>
                   {complaint.manager_approved_by_id ? (
                     <Typography variant="body2" fontWeight="bold" color="success.main">
                       <CheckCircle sx={{ fontSize: 16, verticalAlign: 'middle', mr: 0.5 }} />
@@ -671,25 +709,48 @@ export default function ComplaintDetail() {
             sx={{ mb: 3 }}
           />
           
-          <Typography variant="subtitle2" sx={{ mb: 1 }}>Upload Service Documents & Photos</Typography>
-          <Box sx={{ border: '2px dashed #CBD5E1', borderRadius: 2, p: 2, textAlign: 'center', bgcolor: '#F8FAFC', mb: 2 }}>
-             <input type="file" multiple accept="*/*" style={{ display: 'none' }} ref={fileInputRef} onChange={(e) => {
-               if (e.target.files) {
-                 const filesArray = Array.from(e.target.files);
-                 setClosureDocs(prev => [...prev, ...filesArray]);
-               }
-             }} />
-            <Button variant="outlined" startIcon={<PhotoCamera />} onClick={() => fileInputRef.current.click()} size="small">
-              Select Service Reports / Photos
-            </Button>
-            {closureDocs.length > 0 && (
-              <Box sx={{ mt: 2, textAlign: 'left' }}>
-                {closureDocs.map((doc, idx) => (
-                  <Chip key={idx} label={doc.name} onDelete={() => setClosureDocs(prev => prev.filter((_, i) => i !== idx))} sx={{ m: 0.5 }} />
-                ))}
+          {complaint?.complaint_type === 'Installation' ? (
+            <Box sx={{ border: '2px dashed #CBD5E1', borderRadius: 2, p: 2, bgcolor: '#F8FAFC', mb: 2 }}>
+              <Typography variant="subtitle2" sx={{ mb: 2, textAlign: 'center' }}>Mandatory Installation Documentation</Typography>
+              
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Box>
+                  <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>1. Equipment Photo</Typography>
+                  <input type="file" accept="image/*" onChange={(e) => setEquipmentPhoto(e.target.files[0])} />
+                </Box>
+                <Box>
+                  <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>2. Serial Number Photo</Typography>
+                  <input type="file" accept="image/*" onChange={(e) => setSerialNumberPhoto(e.target.files[0])} />
+                </Box>
+                <Box>
+                  <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>3. Installation Report</Typography>
+                  <input type="file" accept="*/*" onChange={(e) => setInstallationReport(e.target.files[0])} />
+                </Box>
               </Box>
-            )}
-          </Box>
+            </Box>
+          ) : (
+            <>
+              <Typography variant="subtitle2" sx={{ mb: 1 }}>Upload Service Documents & Photos</Typography>
+              <Box sx={{ border: '2px dashed #CBD5E1', borderRadius: 2, p: 2, textAlign: 'center', bgcolor: '#F8FAFC', mb: 2 }}>
+                 <input type="file" multiple accept="*/*" style={{ display: 'none' }} ref={fileInputRef} onChange={(e) => {
+                   if (e.target.files) {
+                     const filesArray = Array.from(e.target.files);
+                     setClosureDocs(prev => [...prev, ...filesArray]);
+                   }
+                 }} />
+                <Button variant="outlined" startIcon={<PhotoCamera />} onClick={() => fileInputRef.current.click()} size="small">
+                  Select Service Reports / Photos
+                </Button>
+                {closureDocs.length > 0 && (
+                  <Box sx={{ mt: 2, textAlign: 'left' }}>
+                    {closureDocs.map((doc, idx) => (
+                      <Chip key={idx} label={doc.name} onDelete={() => setClosureDocs(prev => prev.filter((_, i) => i !== idx))} sx={{ m: 0.5 }} />
+                    ))}
+                  </Box>
+                )}
+              </Box>
+            </>
+          )}
         </DialogContent>
         <DialogActions sx={{ p: 2, pt: 0 }}>
           <Button onClick={() => setResolveDialogOpen(false)} disabled={actionLoading}>Cancel</Button>
@@ -697,15 +758,17 @@ export default function ComplaintDetail() {
             onClick={handleResolve} 
             variant="contained" 
             color="success" 
-            disabled={actionLoading || !resolutionRemarks || !closureReason || closureDocs.length === 0} 
+            disabled={actionLoading || !resolutionRemarks || !closureReason || (complaint?.complaint_type === 'Installation' ? (!equipmentPhoto || !serialNumberPhoto || !installationReport) : closureDocs.length === 0)} 
             startIcon={actionLoading ? <CircularProgress size={20} /> : <CheckCircle />}
           >
             Submit for Approval
           </Button>
         </DialogActions>
-        {closureDocs.length === 0 && (
+        {(complaint?.complaint_type === 'Installation' ? (!equipmentPhoto || !serialNumberPhoto || !installationReport) : closureDocs.length === 0) && (
             <Alert severity="warning" sx={{ m: 2, mt: 0 }}>
-              A service document or report must be uploaded to close the complaint.
+              {complaint?.complaint_type === 'Installation' 
+                ? "Equipment Photo, Serial Number Photo, and Installation Report are mandatory."
+                : "A service document or report must be uploaded to close the complaint."}
             </Alert>
         )}
       </Dialog>

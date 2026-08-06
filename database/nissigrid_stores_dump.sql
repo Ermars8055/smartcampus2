@@ -2,10 +2,10 @@
 -- PostgreSQL database dump
 --
 
-\restrict 9iuJfEW5oM6ybQ2wDseboBXkqKeEqvdnCwqmqyt6ZZ9QPPIkaAZZcG9o6f6lXNh
+\restrict QKV6L1lAyfkzhPL2cC2RjBohFGldJxjsmiaSl3sIWEmaKukLaJuScaeTRffRXWj
 
 -- Dumped from database version 17.10 (Ubuntu 17.10-1.pgdg22.04+1)
--- Dumped by pg_dump version 18.4 (Ubuntu 18.4-1.pgdg22.04+1)
+-- Dumped by pg_dump version 17.10 (Ubuntu 17.10-1.pgdg22.04+1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -26,7 +26,14 @@ SET row_security = off;
 -- *not* creating schema, since initdb creates it
 
 
-ALTER SCHEMA public OWNER TO nissigrid;
+ALTER SCHEMA public OWNER TO postgres;
+
+--
+-- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: postgres
+--
+
+COMMENT ON SCHEMA public IS '';
+
 
 SET default_tablespace = '';
 
@@ -41,7 +48,7 @@ CREATE TABLE public.alembic_version (
 );
 
 
-ALTER TABLE public.alembic_version OWNER TO nissigrid;
+ALTER TABLE public.alembic_version OWNER TO postgres;
 
 --
 -- Name: alerts; Type: TABLE; Schema: public; Owner: postgres
@@ -66,7 +73,7 @@ CREATE TABLE public.alerts (
 );
 
 
-ALTER TABLE public.alerts OWNER TO nissigrid;
+ALTER TABLE public.alerts OWNER TO postgres;
 
 --
 -- Name: alerts_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -81,7 +88,7 @@ CREATE SEQUENCE public.alerts_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.alerts_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.alerts_id_seq OWNER TO postgres;
 
 --
 -- Name: alerts_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -108,7 +115,7 @@ CREATE TABLE public.approval_flows (
 );
 
 
-ALTER TABLE public.approval_flows OWNER TO nissigrid;
+ALTER TABLE public.approval_flows OWNER TO postgres;
 
 --
 -- Name: approval_flows_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -123,7 +130,7 @@ CREATE SEQUENCE public.approval_flows_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.approval_flows_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.approval_flows_id_seq OWNER TO postgres;
 
 --
 -- Name: approval_flows_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -151,7 +158,7 @@ CREATE TABLE public.audit_logs (
 );
 
 
-ALTER TABLE public.audit_logs OWNER TO nissigrid;
+ALTER TABLE public.audit_logs OWNER TO postgres;
 
 --
 -- Name: audit_logs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -166,7 +173,7 @@ CREATE SEQUENCE public.audit_logs_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.audit_logs_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.audit_logs_id_seq OWNER TO postgres;
 
 --
 -- Name: audit_logs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -194,7 +201,7 @@ CREATE TABLE public.buildings (
 );
 
 
-ALTER TABLE public.buildings OWNER TO nissigrid;
+ALTER TABLE public.buildings OWNER TO postgres;
 
 --
 -- Name: buildings_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -209,7 +216,7 @@ CREATE SEQUENCE public.buildings_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.buildings_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.buildings_id_seq OWNER TO postgres;
 
 --
 -- Name: buildings_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -236,7 +243,7 @@ CREATE TABLE public.categories (
 );
 
 
-ALTER TABLE public.categories OWNER TO nissigrid;
+ALTER TABLE public.categories OWNER TO postgres;
 
 --
 -- Name: categories_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -251,7 +258,7 @@ CREATE SEQUENCE public.categories_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.categories_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.categories_id_seq OWNER TO postgres;
 
 --
 -- Name: categories_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -290,7 +297,7 @@ CREATE TABLE public.company_addresses (
 );
 
 
-ALTER TABLE public.company_addresses OWNER TO nissigrid;
+ALTER TABLE public.company_addresses OWNER TO postgres;
 
 --
 -- Name: company_addresses_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -305,7 +312,7 @@ CREATE SEQUENCE public.company_addresses_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.company_addresses_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.company_addresses_id_seq OWNER TO postgres;
 
 --
 -- Name: company_addresses_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -328,7 +335,7 @@ CREATE TABLE public.complaint_documents (
 );
 
 
-ALTER TABLE public.complaint_documents OWNER TO nissigrid;
+ALTER TABLE public.complaint_documents OWNER TO postgres;
 
 --
 -- Name: complaint_documents_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -343,7 +350,7 @@ CREATE SEQUENCE public.complaint_documents_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.complaint_documents_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.complaint_documents_id_seq OWNER TO postgres;
 
 --
 -- Name: complaint_documents_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -365,7 +372,7 @@ CREATE TABLE public.complaint_images (
 );
 
 
-ALTER TABLE public.complaint_images OWNER TO nissigrid;
+ALTER TABLE public.complaint_images OWNER TO postgres;
 
 --
 -- Name: complaint_images_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -380,7 +387,7 @@ CREATE SEQUENCE public.complaint_images_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.complaint_images_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.complaint_images_id_seq OWNER TO postgres;
 
 --
 -- Name: complaint_images_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -436,7 +443,7 @@ CREATE TABLE public.complaints (
 );
 
 
-ALTER TABLE public.complaints OWNER TO nissigrid;
+ALTER TABLE public.complaints OWNER TO postgres;
 
 --
 -- Name: complaints_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -451,7 +458,7 @@ CREATE SEQUENCE public.complaints_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.complaints_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.complaints_id_seq OWNER TO postgres;
 
 --
 -- Name: complaints_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -474,7 +481,7 @@ CREATE TABLE public.contract_approvals (
 );
 
 
-ALTER TABLE public.contract_approvals OWNER TO nissigrid;
+ALTER TABLE public.contract_approvals OWNER TO postgres;
 
 --
 -- Name: contract_approvals_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -489,7 +496,7 @@ CREATE SEQUENCE public.contract_approvals_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.contract_approvals_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.contract_approvals_id_seq OWNER TO postgres;
 
 --
 -- Name: contract_approvals_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -519,7 +526,7 @@ CREATE TABLE public.contract_items (
 );
 
 
-ALTER TABLE public.contract_items OWNER TO nissigrid;
+ALTER TABLE public.contract_items OWNER TO postgres;
 
 --
 -- Name: contract_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -534,7 +541,7 @@ CREATE SEQUENCE public.contract_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.contract_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.contract_items_id_seq OWNER TO postgres;
 
 --
 -- Name: contract_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -576,7 +583,7 @@ CREATE TABLE public.contracts (
 );
 
 
-ALTER TABLE public.contracts OWNER TO nissigrid;
+ALTER TABLE public.contracts OWNER TO postgres;
 
 --
 -- Name: contracts_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -591,7 +598,7 @@ CREATE SEQUENCE public.contracts_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.contracts_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.contracts_id_seq OWNER TO postgres;
 
 --
 -- Name: contracts_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -615,7 +622,7 @@ CREATE TABLE public.current_stock (
 );
 
 
-ALTER TABLE public.current_stock OWNER TO nissigrid;
+ALTER TABLE public.current_stock OWNER TO postgres;
 
 --
 -- Name: current_stock_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -630,7 +637,7 @@ CREATE SEQUENCE public.current_stock_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.current_stock_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.current_stock_id_seq OWNER TO postgres;
 
 --
 -- Name: current_stock_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -655,7 +662,7 @@ CREATE TABLE public.department_material_limits (
 );
 
 
-ALTER TABLE public.department_material_limits OWNER TO nissigrid;
+ALTER TABLE public.department_material_limits OWNER TO postgres;
 
 --
 -- Name: department_material_limits_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -670,7 +677,7 @@ CREATE SEQUENCE public.department_material_limits_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.department_material_limits_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.department_material_limits_id_seq OWNER TO postgres;
 
 --
 -- Name: department_material_limits_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -698,7 +705,7 @@ CREATE TABLE public.departments (
 );
 
 
-ALTER TABLE public.departments OWNER TO nissigrid;
+ALTER TABLE public.departments OWNER TO postgres;
 
 --
 -- Name: departments_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -713,7 +720,7 @@ CREATE SEQUENCE public.departments_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.departments_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.departments_id_seq OWNER TO postgres;
 
 --
 -- Name: departments_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -736,7 +743,7 @@ CREATE TABLE public.document_sequences (
 );
 
 
-ALTER TABLE public.document_sequences OWNER TO nissigrid;
+ALTER TABLE public.document_sequences OWNER TO postgres;
 
 --
 -- Name: document_sequences_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -751,7 +758,7 @@ CREATE SEQUENCE public.document_sequences_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.document_sequences_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.document_sequences_id_seq OWNER TO postgres;
 
 --
 -- Name: document_sequences_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -775,7 +782,7 @@ CREATE TABLE public.equipment_history (
 );
 
 
-ALTER TABLE public.equipment_history OWNER TO nissigrid;
+ALTER TABLE public.equipment_history OWNER TO postgres;
 
 --
 -- Name: equipment_history_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -790,7 +797,7 @@ CREATE SEQUENCE public.equipment_history_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.equipment_history_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.equipment_history_id_seq OWNER TO postgres;
 
 --
 -- Name: equipment_history_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -862,11 +869,12 @@ CREATE TABLE public.equipment_items (
     renewal_date date,
     expected_return_date date,
     rental_status character varying(50),
-    warranty_end_date date
+    warranty_end_date date,
+    rental_agreement_document character varying(500)
 );
 
 
-ALTER TABLE public.equipment_items OWNER TO nissigrid;
+ALTER TABLE public.equipment_items OWNER TO postgres;
 
 --
 -- Name: equipment_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -881,7 +889,7 @@ CREATE SEQUENCE public.equipment_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.equipment_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.equipment_items_id_seq OWNER TO postgres;
 
 --
 -- Name: equipment_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -906,7 +914,7 @@ CREATE TABLE public.equipment_writeoffs (
 );
 
 
-ALTER TABLE public.equipment_writeoffs OWNER TO nissigrid;
+ALTER TABLE public.equipment_writeoffs OWNER TO postgres;
 
 --
 -- Name: equipment_writeoffs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -921,7 +929,7 @@ CREATE SEQUENCE public.equipment_writeoffs_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.equipment_writeoffs_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.equipment_writeoffs_id_seq OWNER TO postgres;
 
 --
 -- Name: equipment_writeoffs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -948,7 +956,7 @@ CREATE TABLE public.floors (
 );
 
 
-ALTER TABLE public.floors OWNER TO nissigrid;
+ALTER TABLE public.floors OWNER TO postgres;
 
 --
 -- Name: floors_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -963,7 +971,7 @@ CREATE SEQUENCE public.floors_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.floors_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.floors_id_seq OWNER TO postgres;
 
 --
 -- Name: floors_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1013,7 +1021,7 @@ CREATE TABLE public.gate_entries (
 );
 
 
-ALTER TABLE public.gate_entries OWNER TO nissigrid;
+ALTER TABLE public.gate_entries OWNER TO postgres;
 
 --
 -- Name: gate_entries_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1028,7 +1036,7 @@ CREATE SEQUENCE public.gate_entries_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.gate_entries_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.gate_entries_id_seq OWNER TO postgres;
 
 --
 -- Name: gate_entries_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1050,7 +1058,7 @@ CREATE TABLE public.gate_pass_items (
 );
 
 
-ALTER TABLE public.gate_pass_items OWNER TO nissigrid;
+ALTER TABLE public.gate_pass_items OWNER TO postgres;
 
 --
 -- Name: gate_pass_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1065,7 +1073,7 @@ CREATE SEQUENCE public.gate_pass_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.gate_pass_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.gate_pass_items_id_seq OWNER TO postgres;
 
 --
 -- Name: gate_pass_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1105,7 +1113,7 @@ CREATE TABLE public.gate_passes (
 );
 
 
-ALTER TABLE public.gate_passes OWNER TO nissigrid;
+ALTER TABLE public.gate_passes OWNER TO postgres;
 
 --
 -- Name: gate_passes_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1120,7 +1128,7 @@ CREATE SEQUENCE public.gate_passes_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.gate_passes_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.gate_passes_id_seq OWNER TO postgres;
 
 --
 -- Name: gate_passes_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1163,11 +1171,14 @@ CREATE TABLE public.grn (
     created_at timestamp without time zone,
     completed_at timestamp without time zone,
     invoice_id integer,
-    contract_id integer
+    contract_id integer,
+    dc_number character varying(100),
+    dc_date date,
+    dc_scan_url character varying(500)
 );
 
 
-ALTER TABLE public.grn OWNER TO nissigrid;
+ALTER TABLE public.grn OWNER TO postgres;
 
 --
 -- Name: grn_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1182,7 +1193,7 @@ CREATE SEQUENCE public.grn_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.grn_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.grn_id_seq OWNER TO postgres;
 
 --
 -- Name: grn_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1218,7 +1229,7 @@ CREATE TABLE public.grn_items (
 );
 
 
-ALTER TABLE public.grn_items OWNER TO nissigrid;
+ALTER TABLE public.grn_items OWNER TO postgres;
 
 --
 -- Name: grn_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1233,7 +1244,7 @@ CREATE SEQUENCE public.grn_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.grn_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.grn_items_id_seq OWNER TO postgres;
 
 --
 -- Name: grn_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1257,7 +1268,7 @@ CREATE TABLE public.indent_approvals (
 );
 
 
-ALTER TABLE public.indent_approvals OWNER TO nissigrid;
+ALTER TABLE public.indent_approvals OWNER TO postgres;
 
 --
 -- Name: indent_approvals_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1272,7 +1283,7 @@ CREATE SEQUENCE public.indent_approvals_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.indent_approvals_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.indent_approvals_id_seq OWNER TO postgres;
 
 --
 -- Name: indent_approvals_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1296,7 +1307,7 @@ CREATE TABLE public.indent_items (
 );
 
 
-ALTER TABLE public.indent_items OWNER TO nissigrid;
+ALTER TABLE public.indent_items OWNER TO postgres;
 
 --
 -- Name: indent_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1311,7 +1322,7 @@ CREATE SEQUENCE public.indent_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.indent_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.indent_items_id_seq OWNER TO postgres;
 
 --
 -- Name: indent_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1350,7 +1361,7 @@ CREATE TABLE public.indents (
 );
 
 
-ALTER TABLE public.indents OWNER TO nissigrid;
+ALTER TABLE public.indents OWNER TO postgres;
 
 --
 -- Name: indents_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1365,7 +1376,7 @@ CREATE SEQUENCE public.indents_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.indents_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.indents_id_seq OWNER TO postgres;
 
 --
 -- Name: indents_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1391,7 +1402,7 @@ CREATE TABLE public.institutions (
 );
 
 
-ALTER TABLE public.institutions OWNER TO nissigrid;
+ALTER TABLE public.institutions OWNER TO postgres;
 
 --
 -- Name: institutions_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1406,7 +1417,7 @@ CREATE SEQUENCE public.institutions_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.institutions_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.institutions_id_seq OWNER TO postgres;
 
 --
 -- Name: institutions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1441,7 +1452,7 @@ CREATE TABLE public.invoice_items (
 );
 
 
-ALTER TABLE public.invoice_items OWNER TO nissigrid;
+ALTER TABLE public.invoice_items OWNER TO postgres;
 
 --
 -- Name: invoice_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1456,7 +1467,7 @@ CREATE SEQUENCE public.invoice_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.invoice_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.invoice_items_id_seq OWNER TO postgres;
 
 --
 -- Name: invoice_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1531,11 +1542,12 @@ CREATE TABLE public.invoices (
     hard_copy_sent boolean DEFAULT false,
     hard_copy_sent_at timestamp without time zone,
     hard_copy_sent_by_id integer,
-    contract_id integer
+    contract_id integer,
+    institution_id integer
 );
 
 
-ALTER TABLE public.invoices OWNER TO nissigrid;
+ALTER TABLE public.invoices OWNER TO postgres;
 
 --
 -- Name: invoices_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1550,7 +1562,7 @@ CREATE SEQUENCE public.invoices_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.invoices_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.invoices_id_seq OWNER TO postgres;
 
 --
 -- Name: invoices_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1574,7 +1586,7 @@ CREATE TABLE public.location_master (
 );
 
 
-ALTER TABLE public.location_master OWNER TO nissigrid;
+ALTER TABLE public.location_master OWNER TO postgres;
 
 --
 -- Name: location_master_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1589,7 +1601,7 @@ CREATE SEQUENCE public.location_master_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.location_master_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.location_master_id_seq OWNER TO postgres;
 
 --
 -- Name: location_master_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1613,7 +1625,7 @@ CREATE TABLE public.material_issue_items (
 );
 
 
-ALTER TABLE public.material_issue_items OWNER TO nissigrid;
+ALTER TABLE public.material_issue_items OWNER TO postgres;
 
 --
 -- Name: material_issue_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1628,7 +1640,7 @@ CREATE SEQUENCE public.material_issue_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.material_issue_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.material_issue_items_id_seq OWNER TO postgres;
 
 --
 -- Name: material_issue_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1667,7 +1679,7 @@ CREATE TABLE public.material_issues (
 );
 
 
-ALTER TABLE public.material_issues OWNER TO nissigrid;
+ALTER TABLE public.material_issues OWNER TO postgres;
 
 --
 -- Name: material_issues_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1682,7 +1694,7 @@ CREATE SEQUENCE public.material_issues_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.material_issues_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.material_issues_id_seq OWNER TO postgres;
 
 --
 -- Name: material_issues_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1707,7 +1719,7 @@ CREATE TABLE public.material_return_items (
 );
 
 
-ALTER TABLE public.material_return_items OWNER TO nissigrid;
+ALTER TABLE public.material_return_items OWNER TO postgres;
 
 --
 -- Name: material_return_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1722,7 +1734,7 @@ CREATE SEQUENCE public.material_return_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.material_return_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.material_return_items_id_seq OWNER TO postgres;
 
 --
 -- Name: material_return_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1756,7 +1768,7 @@ CREATE TABLE public.material_returns (
 );
 
 
-ALTER TABLE public.material_returns OWNER TO nissigrid;
+ALTER TABLE public.material_returns OWNER TO postgres;
 
 --
 -- Name: material_returns_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1771,7 +1783,7 @@ CREATE SEQUENCE public.material_returns_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.material_returns_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.material_returns_id_seq OWNER TO postgres;
 
 --
 -- Name: material_returns_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1814,7 +1826,7 @@ CREATE TABLE public.materials (
 );
 
 
-ALTER TABLE public.materials OWNER TO nissigrid;
+ALTER TABLE public.materials OWNER TO postgres;
 
 --
 -- Name: materials_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1829,7 +1841,7 @@ CREATE SEQUENCE public.materials_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.materials_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.materials_id_seq OWNER TO postgres;
 
 --
 -- Name: materials_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1857,7 +1869,7 @@ CREATE TABLE public.organizations (
 );
 
 
-ALTER TABLE public.organizations OWNER TO nissigrid;
+ALTER TABLE public.organizations OWNER TO postgres;
 
 --
 -- Name: organizations_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1872,7 +1884,7 @@ CREATE SEQUENCE public.organizations_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.organizations_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.organizations_id_seq OWNER TO postgres;
 
 --
 -- Name: organizations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1894,7 +1906,7 @@ CREATE TABLE public.password_reset_tokens (
 );
 
 
-ALTER TABLE public.password_reset_tokens OWNER TO nissigrid;
+ALTER TABLE public.password_reset_tokens OWNER TO postgres;
 
 --
 -- Name: password_reset_tokens_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1909,7 +1921,7 @@ CREATE SEQUENCE public.password_reset_tokens_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.password_reset_tokens_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.password_reset_tokens_id_seq OWNER TO postgres;
 
 --
 -- Name: password_reset_tokens_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1943,7 +1955,7 @@ CREATE TABLE public.pm_schedules (
 );
 
 
-ALTER TABLE public.pm_schedules OWNER TO nissigrid;
+ALTER TABLE public.pm_schedules OWNER TO postgres;
 
 --
 -- Name: pm_schedules_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1958,7 +1970,7 @@ CREATE SEQUENCE public.pm_schedules_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.pm_schedules_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.pm_schedules_id_seq OWNER TO postgres;
 
 --
 -- Name: pm_schedules_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1989,7 +2001,7 @@ CREATE TABLE public.projects (
 );
 
 
-ALTER TABLE public.projects OWNER TO nissigrid;
+ALTER TABLE public.projects OWNER TO postgres;
 
 --
 -- Name: projects_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2004,7 +2016,7 @@ CREATE SEQUENCE public.projects_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.projects_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.projects_id_seq OWNER TO postgres;
 
 --
 -- Name: projects_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2028,7 +2040,7 @@ CREATE TABLE public.purchase_order_approvals (
 );
 
 
-ALTER TABLE public.purchase_order_approvals OWNER TO nissigrid;
+ALTER TABLE public.purchase_order_approvals OWNER TO postgres;
 
 --
 -- Name: purchase_order_approvals_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2043,7 +2055,7 @@ CREATE SEQUENCE public.purchase_order_approvals_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.purchase_order_approvals_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.purchase_order_approvals_id_seq OWNER TO postgres;
 
 --
 -- Name: purchase_order_approvals_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2074,7 +2086,7 @@ CREATE TABLE public.purchase_order_items (
 );
 
 
-ALTER TABLE public.purchase_order_items OWNER TO nissigrid;
+ALTER TABLE public.purchase_order_items OWNER TO postgres;
 
 --
 -- Name: purchase_order_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2089,7 +2101,7 @@ CREATE SEQUENCE public.purchase_order_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.purchase_order_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.purchase_order_items_id_seq OWNER TO postgres;
 
 --
 -- Name: purchase_order_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2127,7 +2139,6 @@ CREATE TABLE public.purchase_orders (
     annexure text,
     remarks text,
     institution_id integer,
-    is_cash_purchase boolean DEFAULT false,
     advance_percentage double precision DEFAULT 0,
     contract_id integer,
     rental_agreement_number character varying(100),
@@ -2141,11 +2152,14 @@ CREATE TABLE public.purchase_orders (
     return_conditions text,
     renewal_terms text,
     procurement_type character varying(50),
-    rental_type character varying(50)
+    rental_type character varying(50),
+    purchase_mode character varying(50),
+    marketplace_name character varying(100),
+    rental_agreement_document character varying(500)
 );
 
 
-ALTER TABLE public.purchase_orders OWNER TO nissigrid;
+ALTER TABLE public.purchase_orders OWNER TO postgres;
 
 --
 -- Name: purchase_orders_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2160,7 +2174,7 @@ CREATE SEQUENCE public.purchase_orders_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.purchase_orders_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.purchase_orders_id_seq OWNER TO postgres;
 
 --
 -- Name: purchase_orders_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2184,7 +2198,7 @@ CREATE TABLE public.purchase_request_approvals (
 );
 
 
-ALTER TABLE public.purchase_request_approvals OWNER TO nissigrid;
+ALTER TABLE public.purchase_request_approvals OWNER TO postgres;
 
 --
 -- Name: purchase_request_approvals_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2199,7 +2213,7 @@ CREATE SEQUENCE public.purchase_request_approvals_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.purchase_request_approvals_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.purchase_request_approvals_id_seq OWNER TO postgres;
 
 --
 -- Name: purchase_request_approvals_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2221,7 +2235,7 @@ CREATE TABLE public.purchase_request_items (
 );
 
 
-ALTER TABLE public.purchase_request_items OWNER TO nissigrid;
+ALTER TABLE public.purchase_request_items OWNER TO postgres;
 
 --
 -- Name: purchase_request_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2236,7 +2250,7 @@ CREATE SEQUENCE public.purchase_request_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.purchase_request_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.purchase_request_items_id_seq OWNER TO postgres;
 
 --
 -- Name: purchase_request_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2279,7 +2293,7 @@ CREATE TABLE public.purchase_requests (
 );
 
 
-ALTER TABLE public.purchase_requests OWNER TO nissigrid;
+ALTER TABLE public.purchase_requests OWNER TO postgres;
 
 --
 -- Name: purchase_requests_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2294,7 +2308,7 @@ CREATE SEQUENCE public.purchase_requests_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.purchase_requests_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.purchase_requests_id_seq OWNER TO postgres;
 
 --
 -- Name: purchase_requests_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2321,7 +2335,7 @@ CREATE TABLE public.quotation_comparisons (
 );
 
 
-ALTER TABLE public.quotation_comparisons OWNER TO nissigrid;
+ALTER TABLE public.quotation_comparisons OWNER TO postgres;
 
 --
 -- Name: quotation_comparisons_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2336,7 +2350,7 @@ CREATE SEQUENCE public.quotation_comparisons_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.quotation_comparisons_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.quotation_comparisons_id_seq OWNER TO postgres;
 
 --
 -- Name: quotation_comparisons_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2361,7 +2375,7 @@ CREATE TABLE public.quotation_negotiation_history (
 );
 
 
-ALTER TABLE public.quotation_negotiation_history OWNER TO nissigrid;
+ALTER TABLE public.quotation_negotiation_history OWNER TO postgres;
 
 --
 -- Name: quotation_negotiation_history_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2376,7 +2390,7 @@ CREATE SEQUENCE public.quotation_negotiation_history_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.quotation_negotiation_history_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.quotation_negotiation_history_id_seq OWNER TO postgres;
 
 --
 -- Name: quotation_negotiation_history_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2398,7 +2412,7 @@ CREATE TABLE public.quotation_request_item_sources (
 );
 
 
-ALTER TABLE public.quotation_request_item_sources OWNER TO nissigrid;
+ALTER TABLE public.quotation_request_item_sources OWNER TO postgres;
 
 --
 -- Name: quotation_request_item_sources_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2413,7 +2427,7 @@ CREATE SEQUENCE public.quotation_request_item_sources_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.quotation_request_item_sources_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.quotation_request_item_sources_id_seq OWNER TO postgres;
 
 --
 -- Name: quotation_request_item_sources_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2436,7 +2450,7 @@ CREATE TABLE public.quotation_request_items (
 );
 
 
-ALTER TABLE public.quotation_request_items OWNER TO nissigrid;
+ALTER TABLE public.quotation_request_items OWNER TO postgres;
 
 --
 -- Name: quotation_request_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2451,7 +2465,7 @@ CREATE SEQUENCE public.quotation_request_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.quotation_request_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.quotation_request_items_id_seq OWNER TO postgres;
 
 --
 -- Name: quotation_request_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2471,7 +2485,7 @@ CREATE TABLE public.quotation_request_prs (
 );
 
 
-ALTER TABLE public.quotation_request_prs OWNER TO nissigrid;
+ALTER TABLE public.quotation_request_prs OWNER TO postgres;
 
 --
 -- Name: quotation_request_prs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2486,7 +2500,7 @@ CREATE SEQUENCE public.quotation_request_prs_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.quotation_request_prs_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.quotation_request_prs_id_seq OWNER TO postgres;
 
 --
 -- Name: quotation_request_prs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2509,7 +2523,7 @@ CREATE TABLE public.quotation_request_vendors (
 );
 
 
-ALTER TABLE public.quotation_request_vendors OWNER TO nissigrid;
+ALTER TABLE public.quotation_request_vendors OWNER TO postgres;
 
 --
 -- Name: quotation_request_vendors_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2524,7 +2538,7 @@ CREATE SEQUENCE public.quotation_request_vendors_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.quotation_request_vendors_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.quotation_request_vendors_id_seq OWNER TO postgres;
 
 --
 -- Name: quotation_request_vendors_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2556,7 +2570,7 @@ CREATE TABLE public.quotation_requests (
 );
 
 
-ALTER TABLE public.quotation_requests OWNER TO nissigrid;
+ALTER TABLE public.quotation_requests OWNER TO postgres;
 
 --
 -- Name: quotation_requests_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2571,7 +2585,7 @@ CREATE SEQUENCE public.quotation_requests_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.quotation_requests_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.quotation_requests_id_seq OWNER TO postgres;
 
 --
 -- Name: quotation_requests_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2599,7 +2613,7 @@ CREATE TABLE public.reagent_consumption_logs (
 );
 
 
-ALTER TABLE public.reagent_consumption_logs OWNER TO nissigrid;
+ALTER TABLE public.reagent_consumption_logs OWNER TO postgres;
 
 --
 -- Name: reagent_consumption_logs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2614,7 +2628,7 @@ CREATE SEQUENCE public.reagent_consumption_logs_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.reagent_consumption_logs_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.reagent_consumption_logs_id_seq OWNER TO postgres;
 
 --
 -- Name: reagent_consumption_logs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2644,11 +2658,12 @@ CREATE TABLE public.repair_work_orders (
     created_by_id integer NOT NULL,
     is_deleted boolean,
     created_at timestamp without time zone,
-    updated_at timestamp without time zone
+    updated_at timestamp without time zone,
+    material_required boolean
 );
 
 
-ALTER TABLE public.repair_work_orders OWNER TO nissigrid;
+ALTER TABLE public.repair_work_orders OWNER TO postgres;
 
 --
 -- Name: repair_work_orders_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2663,7 +2678,7 @@ CREATE SEQUENCE public.repair_work_orders_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.repair_work_orders_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.repair_work_orders_id_seq OWNER TO postgres;
 
 --
 -- Name: repair_work_orders_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2688,7 +2703,7 @@ CREATE TABLE public.role_permissions (
 );
 
 
-ALTER TABLE public.role_permissions OWNER TO nissigrid;
+ALTER TABLE public.role_permissions OWNER TO postgres;
 
 --
 -- Name: role_permissions_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2703,7 +2718,7 @@ CREATE SEQUENCE public.role_permissions_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.role_permissions_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.role_permissions_id_seq OWNER TO postgres;
 
 --
 -- Name: role_permissions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2728,7 +2743,7 @@ CREATE TABLE public.roles (
 );
 
 
-ALTER TABLE public.roles OWNER TO nissigrid;
+ALTER TABLE public.roles OWNER TO postgres;
 
 --
 -- Name: roles_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2743,7 +2758,7 @@ CREATE SEQUENCE public.roles_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.roles_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.roles_id_seq OWNER TO postgres;
 
 --
 -- Name: roles_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2770,7 +2785,7 @@ CREATE TABLE public.rooms (
 );
 
 
-ALTER TABLE public.rooms OWNER TO nissigrid;
+ALTER TABLE public.rooms OWNER TO postgres;
 
 --
 -- Name: rooms_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2785,7 +2800,7 @@ CREATE SEQUENCE public.rooms_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.rooms_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.rooms_id_seq OWNER TO postgres;
 
 --
 -- Name: rooms_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2809,7 +2824,7 @@ CREATE TABLE public.sites (
 );
 
 
-ALTER TABLE public.sites OWNER TO nissigrid;
+ALTER TABLE public.sites OWNER TO postgres;
 
 --
 -- Name: sites_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2824,7 +2839,7 @@ CREATE SEQUENCE public.sites_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.sites_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.sites_id_seq OWNER TO postgres;
 
 --
 -- Name: sites_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2857,7 +2872,7 @@ CREATE TABLE public.stock_ledger (
 );
 
 
-ALTER TABLE public.stock_ledger OWNER TO nissigrid;
+ALTER TABLE public.stock_ledger OWNER TO postgres;
 
 --
 -- Name: stock_ledger_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2872,7 +2887,7 @@ CREATE SEQUENCE public.stock_ledger_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.stock_ledger_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.stock_ledger_id_seq OWNER TO postgres;
 
 --
 -- Name: stock_ledger_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2897,7 +2912,7 @@ CREATE TABLE public.stock_transfer_items (
 );
 
 
-ALTER TABLE public.stock_transfer_items OWNER TO nissigrid;
+ALTER TABLE public.stock_transfer_items OWNER TO postgres;
 
 --
 -- Name: stock_transfer_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2912,7 +2927,7 @@ CREATE SEQUENCE public.stock_transfer_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.stock_transfer_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.stock_transfer_items_id_seq OWNER TO postgres;
 
 --
 -- Name: stock_transfer_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2944,7 +2959,7 @@ CREATE TABLE public.stock_transfers (
 );
 
 
-ALTER TABLE public.stock_transfers OWNER TO nissigrid;
+ALTER TABLE public.stock_transfers OWNER TO postgres;
 
 --
 -- Name: stock_transfers_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2959,7 +2974,7 @@ CREATE SEQUENCE public.stock_transfers_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.stock_transfers_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.stock_transfers_id_seq OWNER TO postgres;
 
 --
 -- Name: stock_transfers_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2983,7 +2998,7 @@ CREATE TABLE public.subcategories (
 );
 
 
-ALTER TABLE public.subcategories OWNER TO nissigrid;
+ALTER TABLE public.subcategories OWNER TO postgres;
 
 --
 -- Name: subcategories_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2998,7 +3013,7 @@ CREATE SEQUENCE public.subcategories_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.subcategories_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.subcategories_id_seq OWNER TO postgres;
 
 --
 -- Name: subcategories_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3022,7 +3037,7 @@ CREATE TABLE public.tenant_configurations (
 );
 
 
-ALTER TABLE public.tenant_configurations OWNER TO nissigrid;
+ALTER TABLE public.tenant_configurations OWNER TO postgres;
 
 --
 -- Name: tenant_configurations_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3037,7 +3052,7 @@ CREATE SEQUENCE public.tenant_configurations_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.tenant_configurations_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.tenant_configurations_id_seq OWNER TO postgres;
 
 --
 -- Name: tenant_configurations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3059,7 +3074,7 @@ CREATE TABLE public.tenant_memberships (
 );
 
 
-ALTER TABLE public.tenant_memberships OWNER TO nissigrid;
+ALTER TABLE public.tenant_memberships OWNER TO postgres;
 
 --
 -- Name: tenant_memberships_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3074,7 +3089,7 @@ CREATE SEQUENCE public.tenant_memberships_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.tenant_memberships_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.tenant_memberships_id_seq OWNER TO postgres;
 
 --
 -- Name: tenant_memberships_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3098,7 +3113,7 @@ CREATE TABLE public.tenants (
 );
 
 
-ALTER TABLE public.tenants OWNER TO nissigrid;
+ALTER TABLE public.tenants OWNER TO postgres;
 
 --
 -- Name: tenants_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3113,7 +3128,7 @@ CREATE SEQUENCE public.tenants_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.tenants_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.tenants_id_seq OWNER TO postgres;
 
 --
 -- Name: tenants_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3138,7 +3153,7 @@ CREATE TABLE public.terms_and_conditions (
 );
 
 
-ALTER TABLE public.terms_and_conditions OWNER TO nissigrid;
+ALTER TABLE public.terms_and_conditions OWNER TO postgres;
 
 --
 -- Name: terms_and_conditions_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3153,7 +3168,7 @@ CREATE SEQUENCE public.terms_and_conditions_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.terms_and_conditions_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.terms_and_conditions_id_seq OWNER TO postgres;
 
 --
 -- Name: terms_and_conditions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3178,7 +3193,7 @@ CREATE TABLE public.uom (
 );
 
 
-ALTER TABLE public.uom OWNER TO nissigrid;
+ALTER TABLE public.uom OWNER TO postgres;
 
 --
 -- Name: uom_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3193,7 +3208,7 @@ CREATE SEQUENCE public.uom_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.uom_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.uom_id_seq OWNER TO postgres;
 
 --
 -- Name: uom_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3216,7 +3231,7 @@ CREATE TABLE public.user_role_assignments (
 );
 
 
-ALTER TABLE public.user_role_assignments OWNER TO nissigrid;
+ALTER TABLE public.user_role_assignments OWNER TO postgres;
 
 --
 -- Name: user_role_assignments_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3231,7 +3246,7 @@ CREATE SEQUENCE public.user_role_assignments_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.user_role_assignments_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.user_role_assignments_id_seq OWNER TO postgres;
 
 --
 -- Name: user_role_assignments_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3260,7 +3275,7 @@ CREATE TABLE public.users (
 );
 
 
-ALTER TABLE public.users OWNER TO nissigrid;
+ALTER TABLE public.users OWNER TO postgres;
 
 --
 -- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3275,7 +3290,7 @@ CREATE SEQUENCE public.users_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.users_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.users_id_seq OWNER TO postgres;
 
 --
 -- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3298,7 +3313,7 @@ CREATE TABLE public.vendor_approvals (
 );
 
 
-ALTER TABLE public.vendor_approvals OWNER TO nissigrid;
+ALTER TABLE public.vendor_approvals OWNER TO postgres;
 
 --
 -- Name: vendor_approvals_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3313,7 +3328,7 @@ CREATE SEQUENCE public.vendor_approvals_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.vendor_approvals_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.vendor_approvals_id_seq OWNER TO postgres;
 
 --
 -- Name: vendor_approvals_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3333,7 +3348,7 @@ CREATE TABLE public.vendor_categories (
 );
 
 
-ALTER TABLE public.vendor_categories OWNER TO nissigrid;
+ALTER TABLE public.vendor_categories OWNER TO postgres;
 
 --
 -- Name: vendor_categories_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3348,7 +3363,7 @@ CREATE SEQUENCE public.vendor_categories_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.vendor_categories_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.vendor_categories_id_seq OWNER TO postgres;
 
 --
 -- Name: vendor_categories_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3372,7 +3387,7 @@ CREATE TABLE public.vendor_history (
 );
 
 
-ALTER TABLE public.vendor_history OWNER TO nissigrid;
+ALTER TABLE public.vendor_history OWNER TO postgres;
 
 --
 -- Name: vendor_history_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3387,7 +3402,7 @@ CREATE SEQUENCE public.vendor_history_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.vendor_history_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.vendor_history_id_seq OWNER TO postgres;
 
 --
 -- Name: vendor_history_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3416,7 +3431,7 @@ CREATE TABLE public.vendor_quotation_items (
 );
 
 
-ALTER TABLE public.vendor_quotation_items OWNER TO nissigrid;
+ALTER TABLE public.vendor_quotation_items OWNER TO postgres;
 
 --
 -- Name: vendor_quotation_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3431,7 +3446,7 @@ CREATE SEQUENCE public.vendor_quotation_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.vendor_quotation_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.vendor_quotation_items_id_seq OWNER TO postgres;
 
 --
 -- Name: vendor_quotation_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3459,7 +3474,7 @@ CREATE TABLE public.vendor_quotations (
 );
 
 
-ALTER TABLE public.vendor_quotations OWNER TO nissigrid;
+ALTER TABLE public.vendor_quotations OWNER TO postgres;
 
 --
 -- Name: vendor_quotations_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3474,7 +3489,7 @@ CREATE SEQUENCE public.vendor_quotations_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.vendor_quotations_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.vendor_quotations_id_seq OWNER TO postgres;
 
 --
 -- Name: vendor_quotations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3525,7 +3540,7 @@ CREATE TABLE public.vendors (
 );
 
 
-ALTER TABLE public.vendors OWNER TO nissigrid;
+ALTER TABLE public.vendors OWNER TO postgres;
 
 --
 -- Name: vendors_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3540,7 +3555,7 @@ CREATE SEQUENCE public.vendors_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.vendors_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.vendors_id_seq OWNER TO postgres;
 
 --
 -- Name: vendors_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3571,7 +3586,7 @@ CREATE TABLE public.warehouses (
 );
 
 
-ALTER TABLE public.warehouses OWNER TO nissigrid;
+ALTER TABLE public.warehouses OWNER TO postgres;
 
 --
 -- Name: warehouses_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3586,7 +3601,7 @@ CREATE SEQUENCE public.warehouses_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.warehouses_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.warehouses_id_seq OWNER TO postgres;
 
 --
 -- Name: warehouses_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3608,11 +3623,13 @@ CREATE TABLE public.write_off_items (
     rate double precision,
     amount double precision,
     has_buyback boolean,
-    buyback_amount double precision
+    buyback_amount double precision,
+    equipment_id integer,
+    location_id integer
 );
 
 
-ALTER TABLE public.write_off_items OWNER TO nissigrid;
+ALTER TABLE public.write_off_items OWNER TO postgres;
 
 --
 -- Name: write_off_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3627,7 +3644,7 @@ CREATE SEQUENCE public.write_off_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.write_off_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.write_off_items_id_seq OWNER TO postgres;
 
 --
 -- Name: write_off_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3662,7 +3679,7 @@ CREATE TABLE public.write_offs (
 );
 
 
-ALTER TABLE public.write_offs OWNER TO nissigrid;
+ALTER TABLE public.write_offs OWNER TO postgres;
 
 --
 -- Name: write_offs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3677,7 +3694,7 @@ CREATE SEQUENCE public.write_offs_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.write_offs_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.write_offs_id_seq OWNER TO postgres;
 
 --
 -- Name: write_offs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -4251,7 +4268,7 @@ ALTER TABLE ONLY public.write_offs ALTER COLUMN id SET DEFAULT nextval('public.w
 --
 
 COPY public.alembic_version (version_num) FROM stdin;
-fed2870f67b4
+59bd7bab6d53
 \.
 
 
@@ -4304,6 +4321,27 @@ COPY public.alerts (id, tenant_id, site_id, alert_type, severity, title, message
 36	2	2	Indent Approved	Success	Indent IND-00010 Approved	The indent (IND-00010) has been approved by EastPoint Admin.	IndentApproved	225	\N	f	t	2026-06-30 18:15:16.358735	2026-07-02 19:06:21.888171	17
 43	2	2	Pending Action	Warning	Action Required: Indent IND-00019 Approval	\N	Indent	234	\N	t	f	2026-07-07 11:37:40.01274	\N	\N
 44	2	2	Pending Action	Warning	Action Required: PO PO-00015 Approval	\N	PurchaseOrder	231	\N	t	f	2026-07-07 11:38:24.767763	\N	\N
+46	2	2	Complaint Assigned	Info	Complaint Assigned: CMP-00013	You have been assigned to complaint CMP-00013. Nature of complaint: fdgdfg	ComplaintAssigned	15	\N	f	f	2026-08-03 15:58:20.997552	\N	34
+45	2	2	Indent Approved	Success	Indent IND-00020 Approved	The indent (IND-00020) has been approved by EastPoint Admin.	IndentApproved	235	\N	f	t	2026-08-03 15:49:09.687137	2026-08-03 16:12:45.101745	3
+47	2	2	Pending Action	Warning	Action Required: PO PO-00032 Approval	\N	PurchaseOrder	248	\N	t	f	2026-08-03 16:13:06.78215	\N	\N
+48	2	2	Pending Action	Warning	Action Required: PO PO-00030 Approval	\N	PurchaseOrder	246	\N	t	f	2026-08-03 16:13:28.304131	\N	\N
+49	2	2	Pending Action	Warning	Action Required: Gate Entry GE-00006	\N	GateEntry	201	\N	t	f	2026-08-03 16:13:37.347219	\N	\N
+50	2	2	Indent Approved	Success	Indent IND-00021 Approved	The indent (IND-00021) has been approved by EastPoint Admin.	IndentApproved	236	\N	f	f	2026-08-03 16:55:53.778359	\N	3
+51	2	2	Contract Approved	Success	Contract CNT-00003 Approved	The contract (CNT-00003) has been approved by EastPoint Admin.	ContractApproved	3	\N	f	f	2026-08-03 17:11:44.871055	\N	3
+52	2	2	Contract Approved	Success	Contract CNT-00003 Approved	The contract (CNT-00003) has been approved by EastPoint Admin.	ContractApproved	3	\N	f	f	2026-08-04 18:46:34.386557	\N	3
+53	2	2	Complaint Assigned	Info	Complaint Assigned: CMP-00014	You have been assigned to complaint CMP-00014. Nature of complaint: install the product	ComplaintAssigned	16	\N	f	f	2026-08-05 18:01:24.751339	\N	35
+54	2	2	Indent Approved	Success	Indent IND-00022 Approved	The indent (IND-00022) has been approved by EastPoint Admin.	IndentApproved	237	\N	f	t	2026-08-06 11:28:43.479888	2026-08-06 11:43:08.371676	3
+56	2	2	Pending Action	Warning	Action Required: Gate Entry GE-00007	\N	GateEntry	202	\N	t	f	2026-08-06 11:43:09.113806	\N	\N
+55	2	2	Pending Action	Warning	Action Required: Gate Entry GE-00007	\N	GateEntry	202	\N	t	t	2026-08-06 11:43:09.108814	2026-08-06 11:43:15.802636	\N
+57	2	2	Pending Action	Warning	Action Required: Issue Acknowledgement	Materials for your indent (IND-00022) have been issued. Please review and acknowledge receipt.	IndentIssued	237	\N	t	t	2026-08-06 11:44:09.969801	2026-08-06 11:46:15.673764	3
+58	2	2	Pending Action	Warning	Action Required: PO NRCN/PO-00002 Approval	\N	PurchaseOrder	269	\N	t	f	2026-08-06 11:46:16.729881	\N	\N
+59	2	2	Pending Action	Warning	Action Required: PO NRCN/PO-00002 Approval	\N	PurchaseOrder	269	\N	t	t	2026-08-06 11:46:16.733868	2026-08-06 11:46:16.733616	\N
+60	2	2	Pending Action	Warning	Action Required: PO PO-00011 Approval	\N	PurchaseOrder	227	\N	t	f	2026-08-06 12:34:20.517968	\N	\N
+61	2	2	Pending Action	Warning	Action Required: PO EPAHS/PO-00003 Approval	\N	PurchaseOrder	267	\N	t	f	2026-08-06 12:37:08.927267	\N	\N
+62	2	2	Complaint Assigned	Info	Complaint Assigned: CMP-00015	You have been assigned to complaint CMP-00015. Nature of complaint: not working properly	ComplaintAssigned	17	\N	f	f	2026-08-06 12:43:22.097682	\N	35
+63	2	2	Complaint Assigned	Info	Complaint Assigned: CMP-00016	You have been assigned to complaint CMP-00016. Nature of complaint: not working properly	ComplaintAssigned	18	\N	f	f	2026-08-06 12:44:33.186305	\N	34
+64	2	2	Complaint Assigned	Info	Complaint Assigned: CMP-00012	You have been assigned to complaint CMP-00012. Nature of complaint: Fault in Tap 	ComplaintAssigned	14	\N	f	f	2026-08-06 12:45:26.326799	\N	35
+65	2	2	Pending Action	Warning	Action Required: PO PO-00013 Approval	\N	PurchaseOrder	229	\N	t	f	2026-08-06 12:47:24.922999	\N	\N
 \.
 
 
@@ -4323,9 +4361,7 @@ COPY public.approval_flows (id, tenant_id, site_id, document_type, level, role_n
 17	2	2	PURCHASE_REQUEST	2	CEO	0	\N	\N	t
 18	2	2	PURCHASE_ORDER	2	CEO	0	\N	\N	t
 19	2	2	PURCHASE_REQUEST	1	Store Manager	0	\N	\N	t
-44	2	2	INDENT	1	Department Head	0	\N	\N	f
 45	2	2	INDENT	1	Department Head	0	\N	\N	f
-46	2	2	INDENT	1	Institution Head	0	\N	\N	t
 10	2	2	INDENT	1	Admin	0	\N	\N	f
 11	2	2	INDENT	2	Admin	0	\N	\N	f
 12	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
@@ -4358,6 +4394,7 @@ COPY public.approval_flows (id, tenant_id, site_id, document_type, level, role_n
 83	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	t
 84	2	2	CONTRACT	2	Store Admin	0	\N	\N	t
 81	2	2	CONTRACT	1	Admin	0	\N	\N	t
+86	2	2	VENDOR	2	Admin	0	\N	\N	t
 39	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
 40	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
 41	2	2	INDENT	2	Admin	0	\N	\N	f
@@ -4395,6 +4432,9 @@ COPY public.approval_flows (id, tenant_id, site_id, document_type, level, role_n
 76	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
 77	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
 85	2	2	INDENT	2	Admin	0	\N	\N	t
+44	2	2	INDENT	1	CEO	0	\N	19	t
+46	2	2	INDENT	1	Institution Head	0	\N	\N	f
+87	2	2	PURCHASE_ORDER	1	Technician	5000	123456789	\N	f
 \.
 
 
@@ -4859,6 +4899,98 @@ COPY public.audit_logs (id, tenant_id, site_id, user_id, action, entity_type, en
 454	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-07-31 16:31:08.971386
 455	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-07-31 16:31:15.018161
 456	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-03 10:30:02.168862
+457	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-03 12:54:07.183635
+458	2	\N	8	LOGIN	User	8	\N	\N	\N	2026-08-03 13:58:14.054322
+459	2	2	3	APPROVE	PurchaseRequest	204	\N	\N	\N	2026-08-03 15:51:48.398197
+460	2	2	3	APPROVE	PurchaseRequest	204	\N	\N	\N	2026-08-03 15:51:59.302664
+461	2	2	3	APPROVE	PurchaseOrder	254	\N	\N	\N	2026-08-03 15:54:53.777178
+462	2	2	3	APPROVE	PurchaseOrder	254	\N	\N	\N	2026-08-03 15:55:11.74341
+463	2	2	3	APPROVE	PurchaseRequest	205	\N	\N	\N	2026-08-03 17:03:43.550904
+464	2	2	3	APPROVE	PurchaseRequest	205	\N	\N	\N	2026-08-03 17:03:53.732014
+465	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-03 17:12:25.107519
+466	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-03 17:13:32.99217
+467	2	2	3	APPROVE	PurchaseOrder	255	\N	\N	\N	2026-08-03 17:18:47.677805
+468	2	2	3	APPROVE	PurchaseOrder	255	\N	\N	\N	2026-08-03 17:18:55.170069
+469	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-03 18:30:13.82988
+470	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-04 10:16:43.451068
+471	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-04 10:16:50.80872
+472	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-04 10:59:10.075876
+473	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-04 11:59:59.308755
+474	2	2	3	APPROVE	PurchaseOrder	257	\N	\N	\N	2026-08-04 17:41:46.442704
+475	2	2	3	APPROVE	PurchaseOrder	257	\N	\N	\N	2026-08-04 17:42:18.99703
+476	2	2	3	APPROVE	PurchaseOrder	256	\N	\N	\N	2026-08-04 17:42:44.327855
+477	2	2	3	APPROVE	PurchaseOrder	256	\N	\N	\N	2026-08-04 17:42:50.776308
+478	2	2	3	APPROVE	PurchaseOrder	253	\N	\N	\N	2026-08-04 17:43:07.24701
+479	2	2	3	APPROVE	PurchaseOrder	253	\N	\N	\N	2026-08-04 17:43:22.254046
+480	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-04 18:29:44.783605
+481	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-04 18:34:59.646632
+482	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-05 09:59:54.104065
+483	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-05 10:09:08.450649
+484	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-05 10:21:59.094574
+485	2	2	3	APPROVE	PurchaseOrder	258	\N	\N	\N	2026-08-05 10:27:00.005967
+486	2	2	3	APPROVE	PurchaseOrder	258	\N	\N	\N	2026-08-05 10:27:17.963603
+487	2	2	3	APPROVE	PurchaseOrder	259	\N	\N	\N	2026-08-05 10:32:21.017927
+488	2	2	3	APPROVE	PurchaseOrder	259	\N	\N	\N	2026-08-05 10:32:31.492082
+489	2	2	3	APPROVE	PurchaseOrder	260	\N	\N	\N	2026-08-05 10:40:46.919936
+490	2	2	3	APPROVE	PurchaseOrder	260	\N	\N	\N	2026-08-05 10:40:54.645478
+491	2	2	3	APPROVE	PurchaseOrder	261	\N	\N	\N	2026-08-05 10:45:34.833352
+492	2	2	3	APPROVE	PurchaseOrder	261	\N	\N	\N	2026-08-05 10:45:40.895004
+493	2	2	3	APPROVE	PurchaseOrder	262	\N	\N	\N	2026-08-05 10:48:20.866321
+494	2	2	3	APPROVE	PurchaseOrder	262	\N	\N	\N	2026-08-05 10:48:27.896543
+495	2	2	3	APPROVE	PurchaseOrder	263	\N	\N	\N	2026-08-05 10:51:32.703008
+496	2	2	3	APPROVE	PurchaseOrder	263	\N	\N	\N	2026-08-05 10:51:39.141446
+497	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-05 10:51:53.613601
+498	2	2	3	APPROVE	PurchaseOrder	264	\N	\N	\N	2026-08-05 10:59:26.17422
+499	2	2	3	APPROVE	PurchaseOrder	264	\N	\N	\N	2026-08-05 10:59:30.43672
+500	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-05 11:22:32.890427
+501	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-05 11:22:32.890992
+502	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-05 11:23:02.932821
+503	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-05 11:23:02.963241
+504	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-05 11:23:03.03432
+505	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-05 11:23:33.267858
+506	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-05 11:23:33.300745
+507	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-05 11:23:33.320801
+508	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-05 11:23:33.337675
+509	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-05 11:23:33.405041
+510	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-05 11:23:33.476267
+511	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-05 11:23:33.488237
+512	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-05 11:23:49.493592
+513	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-05 11:24:53.02844
+514	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-05 11:26:01.956957
+515	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-05 11:27:09.797789
+516	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-05 11:34:08.846389
+517	2	2	3	APPROVE	PurchaseOrder	266	\N	\N	\N	2026-08-05 11:36:21.251211
+518	2	2	3	APPROVE	PurchaseOrder	266	\N	\N	\N	2026-08-05 11:36:28.262455
+519	2	2	3	APPROVE	PurchaseOrder	268	\N	\N	\N	2026-08-05 11:42:34.244496
+520	2	2	3	APPROVE	PurchaseOrder	268	\N	\N	\N	2026-08-05 11:42:43.237016
+521	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-05 18:00:26.72935
+522	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-05 18:00:38.959023
+523	2	2	3	APPROVE	PurchaseOrder	270	\N	\N	\N	2026-08-05 18:28:35.530529
+524	2	2	3	APPROVE	PurchaseOrder	270	\N	\N	\N	2026-08-05 18:28:42.014653
+525	2	2	3	APPROVE	PurchaseOrder	271	\N	\N	\N	2026-08-05 18:40:49.034467
+526	2	2	3	APPROVE	PurchaseOrder	271	\N	\N	\N	2026-08-05 18:40:54.92703
+527	2	2	3	APPROVE	PurchaseOrder	272	\N	\N	\N	2026-08-05 18:43:12.052809
+528	2	2	3	APPROVE	PurchaseOrder	272	\N	\N	\N	2026-08-05 18:43:19.010305
+529	2	2	3	APPROVE	PurchaseOrder	273	\N	\N	\N	2026-08-05 18:45:52.845694
+530	2	2	3	APPROVE	PurchaseOrder	273	\N	\N	\N	2026-08-05 18:45:59.56718
+531	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-05 19:26:17.685695
+532	2	2	3	UPDATE	EquipmentItem	1605	\N	Equipment properties updated for EPCMS-EMDR-DFEB-015	\N	2026-08-05 20:19:46.52064
+533	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-06 10:45:40.259993
+534	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-06 10:54:12.704179
+535	2	2	3	APPROVE	PurchaseOrder	269	\N	\N	\N	2026-08-06 11:46:24.192123
+536	2	2	3	APPROVE	PurchaseOrder	227	\N	\N	\N	2026-08-06 12:34:37.835258
+537	2	2	3	APPROVE	PurchaseOrder	267	\N	\N	\N	2026-08-06 12:37:33.270143
+538	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-06 12:42:26.590628
+539	2	2	3	UPDATE	EquipmentItem	1605	\N	Equipment properties updated for EPCMS-EMDR-DFEB-015	\N	2026-08-06 12:49:20.097509
+540	2	2	3	APPROVE	PurchaseOrder	269	\N	\N	\N	2026-08-06 13:30:16.570768
+541	2	2	3	CREATE	GRN	214	\N	GRN GRN-00011 created (Direct Invoice)	\N	2026-08-06 14:54:13.601767
+542	2	2	3	CREATE	GRN	215	\N	GRN GRN-00012 created (Direct Invoice)	\N	2026-08-06 14:57:09.615301
+543	2	2	3	CREATE	GRN	216	\N	GRN GRN-00013 created (PO-Based)	\N	2026-08-06 15:02:28.571525
+544	2	2	3	CREATE	GRN	217	\N	GRN GRN-00014 created (Direct Invoice)	\N	2026-08-06 15:58:41.323434
+545	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-06 18:47:06.96458
+546	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-06 18:47:11.026043
+547	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-06 19:14:49.643764
+548	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-06 19:53:25.796767
 \.
 
 
@@ -4923,6 +5055,7 @@ COPY public.categories (id, tenant_id, site_id, name, sequence_number, code, des
 68	2	2	HOSPITAL	4	CAT-0004	Hospital category: HOSPITAL	t	f	HOS
 66	2	2	ELECTRICAL	2	CAT-0002	Hospital category: ELECTRICAL	t	f	ELE
 73	2	2	PLUMBING	9	CAT-0009	Hospital category: PLUMBING	t	f	PLB
+80	2	2	CHEMICALS	\N	CHEM	Chemical Materials	t	f	CHE
 \.
 
 
@@ -4945,6 +5078,10 @@ COPY public.company_addresses (id, tenant_id, site_id, address_type, address, gs
 --
 
 COPY public.complaint_documents (id, complaint_id, document_type, file_url, uploaded_at, uploaded_by_id) FROM stdin;
+1	16	\N	/api/uploads/complaints/2/20260805_123147_0fbc5788.jpeg	2026-08-05 18:01:47.834092	3
+2	17	\N	/api/uploads/complaints/2/20260806_071342_0cc1dc23.jpeg	2026-08-06 12:43:42.569334	3
+3	18	\N	/api/uploads/complaints/2/20260806_071451_7ebc33e5.jpeg	2026-08-06 12:44:51.072629	3
+4	14	\N	/api/uploads/complaints/2/20260806_071543_0e8b603f.jpeg	2026-08-06 12:45:43.437025	3
 \.
 
 
@@ -4971,6 +5108,9 @@ COPY public.complaint_images (id, complaint_id, image_url, is_resolution_image, 
 17	13	/api/uploads/complaints/2/20260702_132544_ad73479d.png	f	2026-07-02 18:55:44.973257
 18	14	/api/uploads/complaints/2/20260702_133117_d3aad5e8.png	f	2026-07-02 19:01:17.172061
 19	15	/api/uploads/complaints/2/20260702_133212_77966a8e.png	f	2026-07-02 19:02:12.36585
+20	16	/api/uploads/complaints/2/20260805_123115_68f82b56.jpeg	f	2026-08-05 18:01:15.203336
+21	17	/api/uploads/complaints/2/20260806_071310_cf26feef.jpeg	f	2026-08-06 12:43:10.873784
+22	18	/api/uploads/complaints/2/20260806_071425_cbb6d498.jpeg	f	2026-08-06 12:44:25.653768
 \.
 
 
@@ -4988,12 +5128,15 @@ COPY public.complaints (id, tenant_id, site_id, docket_no, complaint_date, compl
 4	2	2	CMP-00002	2026-06-12	03:37	Mechanical	\N	\N		Broken chair	broken chair		In Progress	10	\N	3	\N	f	2026-06-12 03:37:42.695272	2026-06-18 13:07:49.102381	\N	t	\N	\N	\N	\N	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N
 7	2	2	CMP-00005	2026-06-18	13:22	Anatomy	\N	\N		FAN NOT WORKING			Material Pending	34	\N	3	\N	f	2026-06-18 13:22:07.124473	2026-07-02 18:39:51.104738	\N	t	\N	\N	\N		\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N
 6	2	2	CMP-00004	2026-06-18	10:40	HEALTH 	7	237					Material Pending	34	\N	3	\N	f	2026-06-18 10:40:28.426938	2026-06-18 13:09:14.492096	\N	t	\N	\N	\N	\N	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N
-14	2	2	CMP-00012	2026-07-02	19:01	Chemistry	12	\N		Fault in Tap 	WATER NOT COMING		Registered	\N	\N	3	\N	f	2026-07-02 19:01:17.170755	2026-07-02 19:01:17.170768	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N
-15	2	2	CMP-00013	2026-07-02	19:02	Chemistry	\N	\N		fdgdfg	dfgdfgdg		Registered	\N	\N	17	\N	f	2026-07-02 19:02:12.361688	2026-07-02 19:02:12.36173	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N
 13	2	2	CMP-00011	2026-07-02	18:55	Chemistry	12	\N		AC problem	.	Hari	Closed	\N	dfgdfg	17	\N	f	2026-07-02 18:55:44.946756	2026-07-02 19:02:37.864302	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N
 8	2	2	CMP-00006	2026-06-18	13:27	HEALTH 	7	237		DOOR IS NOT LOCKING PROPERLY		SURESH	Resolved	34	Fixed	3	34	f	2026-06-18 13:27:19.541485	2026-06-18 19:19:17.297948	2026-06-18 13:49:17.297068	f	\N	\N	\N	Inspection completed.   	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N
 9	2	2	CMP-00007	2026-06-18	17:39	HEALTH 	7	237		AC problem	AC is not working	Hari	Closed	34	Replaced	3	3	f	2026-06-18 17:39:02.3167	2026-06-19 15:35:45.320529	2026-06-19 09:44:42.841679	t	3	2026-06-19 10:05:45.319397	\N	Inspection done. Material need to be ordered	No issues after fix	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N
 10	2	2	CMP-00008	2026-06-22	11:42	HEALTH 	7	237		AC problem	AC IS NOT WORKING FROM YESTERDAY HEAVY RAIN 	SURESH	Closed	34	the new inverter is installed to the ac 	3	3	f	2026-06-22 11:42:25.966144	2026-06-22 11:53:11.669587	2026-06-22 06:19:15.588397	t	3	2026-06-22 06:23:11.668873	\N	found that the ac inverter got damaged and the current is not evenly supplied 	yes the technician worked good ac is working fine	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N
+15	2	2	CMP-00013	2026-07-02	19:02	Chemistry	\N	\N		fdgdfg	dfgdfgdg		Assigned	34	\N	17	\N	f	2026-07-02 19:02:12.361688	2026-08-03 15:58:20.999169	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N
+17	2	2	CMP-00015	2026-08-06	12:43	Management Studies - UG	\N	\N		not working properly	not working\n	vik	Closed	35	\N	3	\N	f	2026-08-06 12:43:10.85631	2026-08-06 12:43:45.858629	\N	f	\N	\N	\N	done	\N	\N	\N	\N	Calibration Call	f	3	2026-08-06 07:13:44.141331	3	2026-08-06 07:13:45.857491	yes	done
+18	2	2	CMP-00016	2026-08-06	12:44	Electrotherapy Lab	\N	\N		not working properly	none	vv	Closed	34	\N	3	\N	f	2026-08-06 12:44:25.652609	2026-08-06 12:45:15.149731	\N	f	\N	\N	\N		\N	\N	\N	\N	Preventive Maintenance Call	f	3	2026-08-06 07:15:06.700342	3	2026-08-06 07:15:15.148572	yes	done
+14	2	2	CMP-00012	2026-07-02	19:01	Chemistry	12	\N		Fault in Tap 	WATER NOT COMING		Pending Approval	35	\N	3	\N	f	2026-07-02 19:01:17.170755	2026-08-06 12:45:43.436516	\N	f	\N	\N	\N		\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	yes	done
+16	2	2	CMP-00014	2026-08-05	18:01	Electrotherapy Lab	\N	\N		install the product	fdgdf	vik	Closed	35	\N	3	\N	f	2026-08-05 18:01:15.200114	2026-08-06 12:39:13.995766	\N	f	\N	\N	\N	dfgdfhf	\N	\N	\N	\N	User Training Call/Complaint	f	3	2026-08-06 07:01:06.640766	3	2026-08-06 07:09:13.994849	yes	done
 \.
 
 
@@ -5003,6 +5146,8 @@ COPY public.complaints (id, tenant_id, site_id, docket_no, complaint_date, compl
 
 COPY public.contract_approvals (id, contract_id, approval_flow_id, approver_id, remarks, approved_at) FROM stdin;
 1	2	81	3	\N	2026-07-31 16:55:48.473324
+2	3	81	3	\N	2026-08-03 17:11:36.288765
+3	3	84	3	\N	2026-08-03 17:11:44.837734
 \.
 
 
@@ -5013,6 +5158,7 @@ COPY public.contract_approvals (id, contract_id, approval_flow_id, approver_id, 
 COPY public.contract_items (id, contract_id, material_id, equipment_id, uom, rate, gst, delivery_lead_time, contract_quantity, consumed_quantity, remaining_quantity, covered_components, excluded_components) FROM stdin;
 1	1	3507	\N		4500	19	5	2	0	2		
 2	2	\N	1		1545454	0	\N	\N	0	\N	HEALTH 	
+3	3	2564	\N		23	5	10	5	0	5		
 \.
 
 
@@ -5023,6 +5169,7 @@ COPY public.contract_items (id, contract_id, material_id, equipment_id, uom, rat
 COPY public.contracts (id, tenant_id, site_id, contract_number, contract_type, vendor_id, institution_id, department_id, start_date, end_date, contract_value, payment_terms, renewal_terms, sla_details, spare_parts_included, consumables_included, status, created_by_id, approved_by_id, approved_at, is_deleted, created_at, updated_at, exclusions, current_approval_level) FROM stdin;
 1	2	2	CNT-00001	RC	62	3	\N	2026-07-15	2026-07-30	2000000				f	f	Submitted	3	\N	\N	f	2026-07-27 18:05:33.916597	2026-07-31 15:43:03.683262	\N	\N
 2	2	2	CNT-00002	AMC	63	5	335	2026-07-22	2039-01-30	2502112				f	f	Submitted	3	\N	\N	f	2026-07-30 17:20:20.838762	2026-07-31 16:55:48.517737	\N	2
+3	2	2	CNT-00003	RC	66	5	271	2026-08-10	2026-08-20	15000				f	f	Submitted	3	3	2026-08-04 13:16:34.38435	f	2026-08-03 17:10:25.921051	2026-08-06 11:36:35.45186		2
 \.
 
 
@@ -7657,7 +7804,6 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 3657	2	2	3471	62	138	2026-06-11 21:58:45.851778
 3658	2	2	3472	62	96	2026-06-11 21:58:45.851781
 3659	2	2	3473	62	14	2026-06-11 21:58:45.851783
-3660	2	2	3474	62	68	2026-06-11 21:58:45.851786
 3662	2	2	3476	62	65	2026-06-11 21:58:45.851792
 3661	2	2	3475	62	83	2026-07-08 15:49:59.463999
 3663	2	2	3478	62	85	2026-06-11 21:58:45.851795
@@ -7681,7 +7827,6 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 3681	2	2	3497	62	65	2026-06-11 21:58:45.851845
 3682	2	2	3498	62	100	2026-06-11 21:58:45.851848
 3683	2	2	3499	62	80	2026-06-11 21:58:45.85185
-3684	2	2	3501	62	9	2026-06-11 21:58:45.851853
 3685	2	2	3502	62	44	2026-06-11 21:58:45.851856
 3686	2	2	3503	62	35	2026-06-11 21:58:45.851859
 3687	2	2	3504	62	18	2026-06-11 21:58:45.851862
@@ -7863,18 +8008,286 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 3864	2	2	3704	62	70	2026-06-11 21:58:45.852369
 3865	2	2	3705	62	219	2026-06-11 21:58:45.852373
 3866	2	2	3706	62	293	2026-06-11 21:58:45.852376
-3868	2	2	2565	63	5	2026-06-12 02:01:32.994321
 2753	2	2	2456	62	49	2026-06-12 02:04:33.075302
 2772	2	2	2476	62	131	2026-06-12 04:13:27.917613
 3869	3	3	1191	47	1	2026-06-17 12:21:58.421336
 326	3	3	228	55	3380	2026-06-17 18:12:13.813019
 2412	3	3	2102	59	27	2026-06-17 18:19:11.656207
 3651	2	2	3462	62	47	2026-06-18 11:11:57.168045
-3013	2	2	2751	62	24	2026-06-18 12:26:45.195793
 2854	2	2	2564	62	44	2026-07-08 12:25:10.075655
-2855	2	2	2565	62	50	2026-07-08 12:25:10.075698
 3690	2	2	3507	62	83	2026-07-08 12:25:10.075718
 3867	2	2	2338	62	51	2026-07-27 18:24:17.598513
+3660	2	2	3474	62	64	2026-08-06 11:44:09.973896
+3013	2	2	2751	62	25	2026-08-06 14:48:11.141832
+2855	2	2	2565	62	54	2026-08-06 14:53:32.831495
+3868	2	2	2565	63	1	2026-08-06 14:53:32.831506
+4136	2	2	4604	62	522	2026-08-06 13:36:11.191772
+4137	2	2	4605	62	655	2026-08-06 13:36:11.191784
+4138	2	2	4606	62	192	2026-08-06 13:36:11.191787
+4139	2	2	4607	62	289	2026-08-06 13:36:11.19179
+4140	2	2	4608	62	298	2026-08-06 13:36:11.191793
+4141	2	2	4609	62	409	2026-08-06 13:36:11.191796
+4142	2	2	4610	62	160	2026-08-06 13:36:11.191799
+4143	2	2	4611	62	545	2026-08-06 13:36:11.191802
+4144	2	2	4612	62	348	2026-08-06 13:36:11.191805
+4145	2	2	4613	62	74	2026-08-06 13:36:11.191807
+4146	2	2	4614	62	92	2026-08-06 13:36:11.19181
+4147	2	2	4615	62	571	2026-08-06 13:36:11.191813
+4148	2	2	4616	62	363	2026-08-06 13:36:11.191816
+4149	2	2	4617	62	56	2026-08-06 13:36:11.191819
+4150	2	2	4618	62	725	2026-08-06 13:36:11.191821
+4151	2	2	4619	62	108	2026-08-06 13:36:11.191824
+4152	2	2	4620	62	727	2026-08-06 13:36:11.191827
+4153	2	2	4621	62	408	2026-08-06 13:36:11.19183
+4154	2	2	4622	62	786	2026-08-06 13:36:11.191833
+4155	2	2	4623	62	484	2026-08-06 13:36:11.191835
+4156	2	2	4624	62	545	2026-08-06 13:36:11.191838
+4157	2	2	4625	62	571	2026-08-06 13:36:11.191841
+4158	2	2	4626	62	622	2026-08-06 13:36:11.191844
+4159	2	2	4627	62	641	2026-08-06 13:36:11.191847
+4160	2	2	4628	62	839	2026-08-06 13:36:11.19185
+4161	2	2	4629	62	301	2026-08-06 13:36:11.191852
+4162	2	2	4630	62	765	2026-08-06 13:36:11.191855
+4163	2	2	4631	62	561	2026-08-06 13:36:11.191858
+4164	2	2	4632	62	20	2026-08-06 13:36:11.191861
+4165	2	2	4633	62	693	2026-08-06 13:36:11.191864
+4166	2	2	4634	62	64	2026-08-06 13:36:11.191866
+4167	2	2	4635	62	907	2026-08-06 13:36:11.191869
+4168	2	2	4636	62	549	2026-08-06 13:36:11.191872
+4169	2	2	4637	62	962	2026-08-06 13:36:11.191875
+4170	2	2	4638	62	813	2026-08-06 13:36:11.191878
+4171	2	2	4639	62	670	2026-08-06 13:36:11.19188
+4172	2	2	4640	62	246	2026-08-06 13:36:11.191883
+4173	2	2	4641	62	797	2026-08-06 13:36:11.191886
+4174	2	2	4642	62	688	2026-08-06 13:36:11.191889
+4175	2	2	4643	62	552	2026-08-06 13:36:11.191892
+4176	2	2	4644	62	111	2026-08-06 13:36:11.191894
+4177	2	2	4645	62	134	2026-08-06 13:36:11.191897
+4178	2	2	4646	62	591	2026-08-06 13:36:11.1919
+4179	2	2	4647	62	745	2026-08-06 13:36:11.191903
+4180	2	2	4648	62	675	2026-08-06 13:36:11.191906
+4181	2	2	4649	62	489	2026-08-06 13:36:11.191909
+4182	2	2	4650	62	779	2026-08-06 13:36:11.191911
+4183	2	2	4651	62	320	2026-08-06 13:36:11.191914
+4184	2	2	4652	62	975	2026-08-06 13:36:11.191917
+4185	2	2	4653	62	137	2026-08-06 13:36:11.19192
+4186	2	2	4654	62	458	2026-08-06 13:36:11.191923
+4187	2	2	4655	62	677	2026-08-06 13:36:11.191925
+4188	2	2	4656	62	150	2026-08-06 13:36:11.191929
+4189	2	2	4657	62	12	2026-08-06 13:36:11.191932
+4190	2	2	4658	62	40	2026-08-06 13:36:11.191934
+4191	2	2	4659	62	45	2026-08-06 13:36:11.191937
+4192	2	2	4660	62	11	2026-08-06 13:36:11.19194
+4193	2	2	4661	62	41	2026-08-06 13:36:11.191943
+4194	2	2	4662	62	516	2026-08-06 13:36:11.191945
+4195	2	2	4663	62	535	2026-08-06 13:36:11.191948
+4196	2	2	4664	62	23	2026-08-06 13:36:11.191951
+4197	2	2	4665	62	357	2026-08-06 13:36:11.191954
+4198	2	2	4666	62	258	2026-08-06 13:36:11.191956
+4199	2	2	4667	62	695	2026-08-06 13:36:11.191959
+4200	2	2	4668	62	513	2026-08-06 13:36:11.191962
+4201	2	2	4669	62	475	2026-08-06 13:36:11.191965
+4202	2	2	4670	62	205	2026-08-06 13:36:11.191967
+4203	2	2	4671	62	708	2026-08-06 13:36:11.19197
+4204	2	2	4672	62	345	2026-08-06 13:36:11.191973
+4205	2	2	4673	62	637	2026-08-06 13:36:11.191976
+4206	2	2	4674	62	536	2026-08-06 13:36:11.191978
+4207	2	2	4675	62	525	2026-08-06 13:36:11.191981
+4208	2	2	4676	62	746	2026-08-06 13:36:11.191984
+4209	2	2	4677	62	96	2026-08-06 13:36:11.191987
+4210	2	2	4678	62	119	2026-08-06 13:36:11.191989
+4211	2	2	4679	62	511	2026-08-06 13:36:11.191992
+4212	2	2	4680	62	41	2026-08-06 13:36:11.191995
+4213	2	2	4681	62	39	2026-08-06 13:36:11.191998
+4214	2	2	4682	62	594	2026-08-06 13:36:11.192
+4215	2	2	4683	62	204	2026-08-06 13:36:11.192003
+4216	2	2	4684	62	193	2026-08-06 13:36:11.192006
+4217	2	2	4685	62	100	2026-08-06 13:36:11.192009
+4218	2	2	4686	62	568	2026-08-06 13:36:11.192012
+4219	2	2	4687	62	736	2026-08-06 13:36:11.192014
+4220	2	2	4688	62	536	2026-08-06 13:36:11.192017
+4221	2	2	4689	62	329	2026-08-06 13:36:11.19202
+4222	2	2	4690	62	572	2026-08-06 13:36:11.192022
+4223	2	2	4691	62	365	2026-08-06 13:36:11.192025
+4224	2	2	4692	62	247	2026-08-06 13:36:11.192028
+4225	2	2	4693	62	947	2026-08-06 13:36:11.192031
+4226	2	2	4694	62	184	2026-08-06 13:36:11.192033
+4227	2	2	4695	62	628	2026-08-06 13:36:11.192036
+4228	2	2	4696	62	427	2026-08-06 13:36:11.192039
+4229	2	2	4697	62	460	2026-08-06 13:36:11.192042
+4230	2	2	4698	62	583	2026-08-06 13:36:11.192045
+4231	2	2	4699	62	355	2026-08-06 13:36:11.192047
+4232	2	2	4700	62	0	2026-08-06 13:36:11.19205
+4233	2	2	4701	62	377	2026-08-06 13:36:11.192053
+4234	2	2	4702	62	53	2026-08-06 13:36:11.192056
+4235	2	2	4703	62	823	2026-08-06 13:36:11.192058
+4236	2	2	4704	62	480	2026-08-06 13:36:11.192061
+4237	2	2	4705	62	333	2026-08-06 13:36:11.192064
+4238	2	2	4706	62	421	2026-08-06 13:36:11.192067
+4239	2	2	4707	62	171	2026-08-06 13:36:11.192069
+4240	2	2	4708	62	140	2026-08-06 13:36:11.192072
+4241	2	2	4709	62	590	2026-08-06 13:36:11.19208
+4242	2	2	4710	62	216	2026-08-06 13:36:11.192083
+4243	2	2	4711	62	534	2026-08-06 13:36:11.192086
+4244	2	2	4712	62	460	2026-08-06 13:36:11.192089
+4245	2	2	4713	62	476	2026-08-06 13:36:11.192091
+4246	2	2	4714	62	38	2026-08-06 13:36:11.192094
+4247	2	2	4715	62	182	2026-08-06 13:36:11.192097
+4248	2	2	4716	62	797	2026-08-06 13:36:11.1921
+4249	2	2	4717	62	537	2026-08-06 13:36:11.192102
+4250	2	2	4718	62	179	2026-08-06 13:36:11.192105
+4251	2	2	4719	62	477	2026-08-06 13:36:11.192108
+4252	2	2	4720	62	769	2026-08-06 13:36:11.19211
+4253	2	2	4721	62	769	2026-08-06 13:36:11.192113
+4254	2	2	4722	62	692	2026-08-06 13:36:11.192116
+4255	2	2	4723	62	51	2026-08-06 13:36:11.192119
+4256	2	2	4724	62	40	2026-08-06 13:36:11.192122
+4257	2	2	4725	62	635	2026-08-06 13:36:11.192124
+4258	2	2	4726	62	569	2026-08-06 13:36:11.192127
+4259	2	2	4727	62	44	2026-08-06 13:36:11.19213
+4260	2	2	4728	62	10	2026-08-06 13:36:11.192133
+4261	2	2	4729	62	651	2026-08-06 13:36:11.192135
+4262	2	2	4730	62	663	2026-08-06 13:36:11.192138
+4263	2	2	4731	62	718	2026-08-06 13:36:11.192141
+4264	2	2	4732	62	706	2026-08-06 13:36:11.192144
+4265	2	2	4733	62	589	2026-08-06 13:36:11.192146
+4266	2	2	4734	62	467	2026-08-06 13:36:11.192149
+4267	2	2	4735	62	805	2026-08-06 13:36:11.192152
+4268	2	2	4736	62	471	2026-08-06 13:36:11.192155
+4269	2	2	4737	62	772	2026-08-06 13:36:11.192157
+4270	2	2	4738	62	314	2026-08-06 13:36:11.19216
+4271	2	2	4739	62	153	2026-08-06 13:36:11.192163
+4272	2	2	4740	62	628	2026-08-06 13:36:11.192166
+4273	2	2	4741	62	293	2026-08-06 13:36:11.192168
+4274	2	2	4742	62	503	2026-08-06 13:36:11.192171
+4275	2	2	4743	62	241	2026-08-06 13:36:11.192174
+4276	2	2	4744	62	90	2026-08-06 13:36:11.192177
+4277	2	2	4745	62	715	2026-08-06 13:36:11.192179
+4278	2	2	4746	62	577	2026-08-06 13:36:11.192182
+4279	2	2	4747	62	275	2026-08-06 13:36:11.192185
+4280	2	2	4748	62	373	2026-08-06 13:36:11.192188
+4281	2	2	4749	62	166	2026-08-06 13:36:11.19219
+4282	2	2	4750	62	323	2026-08-06 13:36:11.192193
+4283	2	2	4751	62	291	2026-08-06 13:36:11.192196
+4284	2	2	4752	62	451	2026-08-06 13:36:11.192199
+4285	2	2	4753	62	480	2026-08-06 13:36:11.192201
+4286	2	2	4754	62	409	2026-08-06 13:36:11.192204
+4287	2	2	4755	62	131	2026-08-06 13:36:11.192207
+4288	2	2	4756	62	134	2026-08-06 13:36:11.19221
+4289	2	2	4757	62	663	2026-08-06 13:36:11.192212
+4290	2	2	4758	62	556	2026-08-06 13:36:11.192215
+4291	2	2	4759	62	662	2026-08-06 13:36:11.192218
+4292	2	2	4760	62	30	2026-08-06 13:36:11.192221
+4293	2	2	4761	62	258	2026-08-06 13:36:11.192223
+4294	2	2	4762	62	868	2026-08-06 13:36:11.192226
+4295	2	2	4763	62	114	2026-08-06 13:36:11.192229
+4296	2	2	4764	62	270	2026-08-06 13:36:11.192232
+4297	2	2	4765	62	38	2026-08-06 13:36:11.192235
+4298	2	2	4766	62	360	2026-08-06 13:36:11.192237
+4299	2	2	4767	62	591	2026-08-06 13:36:11.19224
+4300	2	2	4768	62	852	2026-08-06 13:36:11.192243
+4301	2	2	4769	62	252	2026-08-06 13:36:11.192246
+4302	2	2	4770	62	502	2026-08-06 13:36:11.192248
+4303	2	2	4771	62	467	2026-08-06 13:36:11.192251
+4304	2	2	4772	62	284	2026-08-06 13:36:11.192254
+4305	2	2	4773	62	55	2026-08-06 13:36:11.192257
+4306	2	2	4774	62	443	2026-08-06 13:36:11.192259
+4307	2	2	4775	62	439	2026-08-06 13:36:11.192262
+4308	2	2	4776	62	132	2026-08-06 13:36:11.192265
+4309	2	2	4777	62	206	2026-08-06 13:36:11.192268
+4310	2	2	4778	62	588	2026-08-06 13:36:11.19227
+4311	2	2	4779	62	369	2026-08-06 13:36:11.192273
+4312	2	2	4780	62	515	2026-08-06 13:36:11.192276
+4313	2	2	4781	62	73	2026-08-06 13:36:11.192279
+4314	2	2	4782	62	698	2026-08-06 13:36:11.192281
+4315	2	2	4783	62	534	2026-08-06 13:36:11.192284
+4316	2	2	4784	62	95	2026-08-06 13:36:11.192287
+4317	2	2	4785	62	241	2026-08-06 13:36:11.19229
+4318	2	2	4786	62	653	2026-08-06 13:36:11.192292
+4319	2	2	4787	62	133	2026-08-06 13:36:11.192295
+4320	2	2	4788	62	550	2026-08-06 13:36:11.192298
+4321	2	2	4789	62	8	2026-08-06 13:36:11.192301
+4322	2	2	4790	62	723	2026-08-06 13:36:11.192303
+4323	2	2	4791	62	22	2026-08-06 13:36:11.192306
+4324	2	2	4792	62	355	2026-08-06 13:36:11.192309
+4325	2	2	4793	62	551	2026-08-06 13:36:11.192312
+4326	2	2	4794	62	60	2026-08-06 13:36:11.192314
+4327	2	2	4795	62	541	2026-08-06 13:36:11.192317
+4328	2	2	4796	62	104	2026-08-06 13:36:11.19232
+4329	2	2	4797	62	408	2026-08-06 13:36:11.192323
+4330	2	2	4798	62	20	2026-08-06 13:36:11.192325
+4331	2	2	4799	62	237	2026-08-06 13:36:11.192328
+4332	2	2	4800	62	67	2026-08-06 13:36:11.192331
+4333	2	2	4801	62	603	2026-08-06 13:36:11.192334
+4334	2	2	4802	62	791	2026-08-06 13:36:11.192336
+4335	2	2	4803	62	460	2026-08-06 13:36:11.192339
+4336	2	2	4804	62	203	2026-08-06 13:36:11.192342
+4337	2	2	4805	62	375	2026-08-06 13:36:11.192345
+4338	2	2	4806	62	625	2026-08-06 13:36:11.192347
+4339	2	2	4807	62	591	2026-08-06 13:36:11.19235
+4340	2	2	4808	62	735	2026-08-06 13:36:11.192353
+4341	2	2	4809	62	339	2026-08-06 13:36:11.192356
+4342	2	2	4810	62	652	2026-08-06 13:36:11.192358
+4343	2	2	4811	62	72	2026-08-06 13:36:11.192361
+4344	2	2	4812	62	875	2026-08-06 13:36:11.192364
+4345	2	2	4813	62	107	2026-08-06 13:36:11.192367
+4346	2	2	4814	62	750	2026-08-06 13:36:11.19237
+4347	2	2	4815	62	729	2026-08-06 13:36:11.192372
+4348	2	2	4816	62	866	2026-08-06 13:36:11.192375
+4349	2	2	4817	62	170	2026-08-06 13:36:11.192378
+4350	2	2	4818	62	136	2026-08-06 13:36:11.192381
+4351	2	2	4819	62	152	2026-08-06 13:36:11.192383
+4352	2	2	4820	62	624	2026-08-06 13:36:11.192386
+4353	2	2	4821	62	647	2026-08-06 13:36:11.192389
+4354	2	2	4822	62	392	2026-08-06 13:36:11.192392
+4355	2	2	4823	62	704	2026-08-06 13:36:11.192394
+4356	2	2	4824	62	285	2026-08-06 13:36:11.192397
+4357	2	2	4825	62	455	2026-08-06 13:36:11.1924
+4358	2	2	4826	62	366	2026-08-06 13:36:11.192403
+4359	2	2	4827	62	173	2026-08-06 13:36:11.192405
+4360	2	2	4828	62	71	2026-08-06 13:36:11.192408
+4361	2	2	4829	62	194	2026-08-06 13:36:11.192411
+4362	2	2	4830	62	328	2026-08-06 13:36:11.192414
+4363	2	2	4831	62	146	2026-08-06 13:36:11.192417
+4364	2	2	4832	62	27	2026-08-06 13:36:11.192419
+4365	2	2	4833	62	166	2026-08-06 13:36:11.192422
+4366	2	2	4834	62	410	2026-08-06 13:36:11.192425
+4367	2	2	4835	62	576	2026-08-06 13:36:11.192427
+4368	2	2	4836	62	258	2026-08-06 13:36:11.19243
+4369	2	2	4837	62	397	2026-08-06 13:36:11.192433
+4370	2	2	4838	62	8	2026-08-06 13:36:11.192436
+4371	2	2	4839	62	9	2026-08-06 13:36:11.192439
+4372	2	2	4840	62	136	2026-08-06 13:36:11.192442
+4373	2	2	4841	62	755	2026-08-06 13:36:11.192446
+4374	2	2	4842	62	737	2026-08-06 13:36:11.192449
+4375	2	2	4843	62	891	2026-08-06 13:36:11.192452
+4376	2	2	4844	62	789	2026-08-06 13:36:11.192454
+4377	2	2	4845	62	578	2026-08-06 13:36:11.192457
+4378	2	2	4846	62	166	2026-08-06 13:36:11.19246
+4379	2	2	4847	62	226	2026-08-06 13:36:11.192463
+4380	2	2	4848	62	544	2026-08-06 13:36:11.192466
+4381	2	2	4849	62	685	2026-08-06 13:36:11.192468
+4382	2	2	4850	62	30	2026-08-06 13:36:11.192471
+4383	2	2	4851	62	734	2026-08-06 13:36:11.192474
+4384	2	2	4852	62	80	2026-08-06 13:36:11.192477
+4385	2	2	4853	62	637	2026-08-06 13:36:11.192479
+4386	2	2	4854	62	341	2026-08-06 13:36:11.192482
+4387	2	2	4855	62	102	2026-08-06 13:36:11.192485
+4388	2	2	4856	62	763	2026-08-06 13:36:11.192488
+4389	2	2	4857	62	287	2026-08-06 13:36:11.19249
+4390	2	2	4858	62	531	2026-08-06 13:36:11.192493
+4391	2	2	4859	62	545	2026-08-06 13:36:11.192496
+4392	2	2	4860	62	79	2026-08-06 13:36:11.192499
+4393	2	2	4861	62	787	2026-08-06 13:36:11.192501
+4394	2	2	4862	62	662	2026-08-06 13:36:11.192504
+4395	2	2	4863	62	769	2026-08-06 13:36:11.192507
+4396	2	2	4864	62	855	2026-08-06 13:36:11.192511
+4397	2	2	4865	62	497	2026-08-06 13:36:11.192513
+4398	2	2	4866	62	126	2026-08-06 13:36:11.192516
+4399	2	2	4867	62	158	2026-08-06 13:36:11.192519
+4400	2	2	4868	62	828	2026-08-06 13:36:11.192522
+4401	2	2	4869	62	85	2026-08-06 13:36:11.192524
+3684	2	2	3501	62	44	2026-08-06 15:02:28.57246
 \.
 
 
@@ -8533,15 +8946,10 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 19	3	3	VENDOR	VND	11
 15	3	3	GRN	GRN	22
 14	3	3	GATE_ENTRY	GE	30
-66	2	2	INDENT	IND	19
 73	2	2	TRANSFER	TRF	2
-69	2	2	PURCHASE_ORDER	PO	34
-74	2	2	RETURN	RET	2
 29	2	2	BUILDING	BLDG	6
 11	3	3	ISSUE	ISS	45
-67	2	2	ISSUE	ISS	8
 63	2	2	INSTITUTION	INST	14
-78	2	2	COMPLAINT	CMP	13
 35	3	3	TRANSFER	TRF	8
 64	2	2	COMPANY_ADDRESS	ADDR	3
 30	2	2	DEPARTMENT	DEPT	74
@@ -8558,18 +8966,30 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 16	3	3	QUOTATION_REQUEST	QR	21
 5	3	3	INDENT	IND	42
 40	3	3	MATERIAL_46	EES	3
-68	2	2	PURCHASE_REQUEST	PR	10
 77	2	2	GATEPASS	GP	3
-93	2	2	WRITE_OFF	WO	8
-65	2	2	VENDOR	VND	5
-71	2	2	GATE_ENTRY	GE	6
-94	2	2	PURCHASE_ORDER_11	EPAHS/PO	1
-95	2	2	PURCHASE_ORDER_3	EPCET/PO	1
-75	2	2	GRN	GRN	10
+95	2	2	PURCHASE_ORDER_3	EPCET/PO	6
 97	2	2	EQP	EQP	1
 98	2	2	EQP_RADIOLOGY_	EQP_RADIOLOGY_	1
-96	2	2	CONTRACT	CNT	2
-70	2	2	QUOTATION_REQUEST	QR	23
+99	2	2	PURCHASE_ORDER_2	EPH/PO	2
+68	2	2	PURCHASE_REQUEST	PR	12
+96	2	2	CONTRACT	CNT	3
+101	2	2	PURCHASE_ORDER_4	EPCP/PO	2
+93	2	2	WRITE_OFF	WO	9
+100	2	2	EQUIPMENT_WRITE_OFF	EWO	1
+94	2	2	PURCHASE_ORDER_11	EPAHS/PO	3
+103	2	2	PURCHASE_ORDER_10	EPCPT/PO	3
+102	2	2	PURCHASE_ORDER_9	NRCN/PO	3
+105	2	2	PURCHASE_ORDER_5	EPCHE/PO	1
+104	2	2	PURCHASE_ORDER_8	EPSN/PO	2
+66	2	2	INDENT	IND	23
+67	2	2	ISSUE	ISS	9
+74	2	2	RETURN	RET	3
+78	2	2	COMPLAINT	CMP	16
+71	2	2	GATE_ENTRY	GE	11
+75	2	2	GRN	GRN	14
+65	2	2	VENDOR	VND	12
+70	2	2	QUOTATION_REQUEST	QR	37
+69	2	2	PURCHASE_ORDER	PO	36
 \.
 
 
@@ -8587,8 +9007,810 @@ COPY public.equipment_history (id, equipment_id, event_type, event_date, descrip
 -- Data for Name: equipment_items; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.equipment_items (id, tenant_id, site_id, equipment_code, material_id, grn_id, grn_item_id, serial_number, serial_number_status, is_biomedical, requires_installation, installation_status, installation_date, installation_report_url, installation_remarks, warehouse_id, project_id, status, created_at, updated_at, warranty_available, warranty_expiry_date, amc_cmc_status, amc_cmc_end_date, amc_po_number, last_pm_date, next_pm_due_date, last_calibration_date, next_calibration_due_date, rental_agreement_number, rental_start_date, rental_end_date, rental_vendor_id, location_id, contact_number, institution_id, po_id, make, model, machine_cost, machine_type, serial_number_photo_url, equipment_photo_url, installed_by, amc_cost, pm_required, calibration_required, battery_details, procurement_type, rental_type, rental_cost, billing_frequency, cost_per_test, linked_reagents, agreement_status, renewal_date, expected_return_date, rental_status, warranty_end_date) FROM stdin;
-1	2	2	INST-RADIOLOGY-CIV-00001	2338	213	520	787379492	Captured	t	t	Installed	2026-07-28 00:00:00	/api/uploads/installation_reports/2/20260728_064246_8c2a2ea0.jpg	\N	62	3	Operational	2026-07-27 18:24:17.688288	2026-07-28 06:42:46.650147	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	7557805798	\N	\N	\N	\N	\N	\N	/api/uploads/serial_number_photos/2/20260728_064246_5039ec73.jpg	/api/uploads/equipment_photos/2/20260728_064246_3cf27324.png	Pradnesh A	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+COPY public.equipment_items (id, tenant_id, site_id, equipment_code, material_id, grn_id, grn_item_id, serial_number, serial_number_status, is_biomedical, requires_installation, installation_status, installation_date, installation_report_url, installation_remarks, warehouse_id, project_id, status, created_at, updated_at, warranty_available, warranty_expiry_date, amc_cmc_status, amc_cmc_end_date, amc_po_number, last_pm_date, next_pm_due_date, last_calibration_date, next_calibration_due_date, rental_agreement_number, rental_start_date, rental_end_date, rental_vendor_id, location_id, contact_number, institution_id, po_id, make, model, machine_cost, machine_type, serial_number_photo_url, equipment_photo_url, installed_by, amc_cost, pm_required, calibration_required, battery_details, procurement_type, rental_type, rental_cost, billing_frequency, cost_per_test, linked_reagents, agreement_status, renewal_date, expected_return_date, rental_status, warranty_end_date, rental_agreement_document) FROM stdin;
+1	2	2	INST-RADIOLOGY-CIV-00001	2338	213	520	787379492	Captured	t	t	Installed	2026-07-28 00:00:00	/api/uploads/installation_reports/2/Invoice_INV2001.pdf	\N	62	3	Operational	2026-07-27 18:24:17.688288	2026-07-28 06:42:46.650147	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	7557805798	\N	\N	\N	\N	\N	\N	/api/uploads/serial_number_photos/2/20260728_064246_5039ec73.jpg	/api/uploads/equipment_photos/2/20260728_064246_3cf27324.png	Pradnesh A	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1605	2	2	EPCMS-EMDR-DFEB-015	3907	\N	\N	\N	Pending Update	t	f	Installed	2026-03-13 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:46.084289	2026-08-06 07:19:20.096991	t	2028-03-12	Under AMC	2026-08-22	\N	\N	\N	\N	\N	\N	\N	\N	\N	108	\N	\N	\N	BPL	RE LIFE 900	\N	\N	\N	\N	\N	\N	t	t	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1599	2	2	EPCMS-BME-BPA-049	3895	\N	\N	RS0102058	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:46.084254	2026-08-05 19:04:46.084257	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	DISHA	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1600	2	2	EPCMS-BME-BPA-050	3903	\N	\N	202101_001468	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:46.08426	2026-08-05 19:04:46.084264	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	CARE TOUCH	CT8712	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1601	2	2	EPCMS-BME-BPA-051	3903	\N	\N	202309133P4VGI	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:46.084266	2026-08-05 19:04:46.084269	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	OMRON	HEM7124	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1602	2	2	EPCMS-BME-PM-126	3899	\N	\N	FG-11070437	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:46.084272	2026-08-05 19:04:46.084275	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	MINDRAY	IPM 10	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1603	2	2	EPCMS-BME-PM-127	3899	\N	\N	CN12007158	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:46.084278	2026-08-05 19:04:46.084281	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	PHILIPS (GOLDWAY)	UT 6000A	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1604	2	2	EPCMS-BME-PM-128	3899	\N	\N	301410M1370340002	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:46.084283	2026-08-05 19:04:46.084286	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	EDAN	IM8	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+804	2	2	EPCMS-102-BPA-001	3895	\N	\N	13660	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.195829	2026-08-05 19:04:39.195839	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	76	\N	\N	\N	DIAMOND	DELUXE	\N	\N	\N	\N	\N	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+805	2	2	EPCMS-102-ESA-001	3896	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.217136	2026-08-05 19:04:39.217145	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	76	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+806	2	2	EPCMS-102-GEN-001	3897	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.223687	2026-08-05 19:04:39.223696	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	76	\N	\N	\N	MURPHY	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+807	2	2	EPCMS-104-BPA-002	3895	\N	\N	62551	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.241769	2026-08-05 19:04:39.241777	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	77	\N	\N	\N	DIAMOND	DELUXE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+808	2	2	EPCMS-104-INP-001	3898	\N	\N	160110574	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.265772	2026-08-05 19:04:39.265781	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	77	\N	\N	\N	FRESINIOUS KABI	INFUSIA VP7	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+809	2	2	EPCMS-104-INP-002	3898	\N	\N	160510422	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.265785	2026-08-05 19:04:39.265788	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	77	\N	\N	\N	FRESINIOUS KABI	INFUSIA VP7	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+810	2	2	EPCMS-104-PM-001	3899	\N	\N	CN12807151	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.290379	2026-08-05 19:04:39.290388	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	77	\N	\N	\N	PHILIPS (GOLDWAY)	UT 6000A	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+811	2	2	EPCMS-104-PM-002	3899	\N	\N	CN12807159	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.290392	2026-08-05 19:04:39.290395	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	77	\N	\N	\N	PHILIPS (GOLDWAY)	UT 6000A	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+812	2	2	EPCMS-104-SYP-001	3900	\N	\N	160560513	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.313444	2026-08-05 19:04:39.313453	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	77	\N	\N	\N	FRESINIOUS KABI	INFUSIA SP7	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+813	2	2	EPCMS-104-SYP-002	3900	\N	\N	160560575	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.313457	2026-08-05 19:04:39.31346	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	77	\N	\N	\N	FRESINIOUS KABI	INFUSIA SP7	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+814	2	2	EPCMS-104-VBOX-001	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.322929	2026-08-05 19:04:39.322938	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	77	\N	\N	\N	\N	SINGLE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+815	2	2	EPCMS-104-VBOX-002	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.322941	2026-08-05 19:04:39.322944	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	77	\N	\N	\N	\N	SINGLE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+816	2	2	EPCMS-108-BPA-003	3895	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.327502	2026-08-05 19:04:39.32751	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	78	\N	\N	\N	DIAMOND	DELUXE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+817	2	2	EPCMS-109-BPA-004	3895	\N	\N	RH0702597	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.348287	2026-08-05 19:04:39.348296	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	79	\N	\N	\N	DIAMOND	DELUXE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+818	2	2	EPCMS-109-BPA-005	3895	\N	\N	36124	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.3483	2026-08-05 19:04:39.348303	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	79	\N	\N	\N	DIAMOND	DELUXE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+819	2	2	EPCMS-109-ECG-001	3902	\N	\N	KKTA0H2524	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.357832	2026-08-05 19:04:39.357841	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	79	\N	\N	\N	BPL	CARDIO HEART 9108-D	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+820	2	2	EPCMS-109-VBOX-003	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.357845	2026-08-05 19:04:39.357848	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	79	\N	\N	\N	\N	SINGLE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+821	2	2	EPCMS-110-BPA-006	3895	\N	\N	36126	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.367084	2026-08-05 19:04:39.367093	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	80	\N	\N	\N	DIAMOND	DELUXE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+822	2	2	EPCMS-110-PM-003	3899	\N	\N	112613-M 13804950007	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.367098	2026-08-05 19:04:39.367101	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	80	\N	\N	\N	EDAN	M3	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+823	2	2	EPCMS-110-VBOX-004	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.367104	2026-08-05 19:04:39.367107	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	80	\N	\N	\N	\N	SINGLE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+824	2	2	EPCMS-111-BPA-007	3895	\N	\N	EM0700173	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.374786	2026-08-05 19:04:39.374795	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	81	\N	\N	\N	DIAMOND	DELUXE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+825	2	2	EPCMS-111-VBOX-005	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.374799	2026-08-05 19:04:39.374802	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	81	\N	\N	\N	\N	SINGLE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+826	2	2	EPCMS-112-BPA-008	3895	\N	\N	62556	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.44754	2026-08-05 19:04:39.447549	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	82	\N	\N	\N	DIAMOND	DELUXE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+827	2	2	EPCMS-112-VBOX-006	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.447553	2026-08-05 19:04:39.447556	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	82	\N	\N	\N	\N	SINGLE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+828	2	2	EPCMS-201-BPA-009	3903	\N	\N	202405016069V1	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.455842	2026-08-05 19:04:39.45585	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	83	\N	\N	\N	HEM-7121J	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+829	2	2	EPCMS-205-BPA-010	3895	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.459801	2026-08-05 19:04:39.45981	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	84	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+830	2	2	EPCMS-208-BPA-011	3895	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.463829	2026-08-05 19:04:39.463838	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	85	\N	\N	\N	mievida	MI HEART 101	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+831	2	2	EPCMS-209-BPA-012	3895	\N	\N	62553	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.475003	2026-08-05 19:04:39.475012	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	86	\N	\N	\N	DIAMOND	DELUXE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+832	2	2	EPCMS-209-BPA-013	3895	\N	\N	BPM2021053102865	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.475016	2026-08-05 19:04:39.475019	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	86	\N	\N	\N	MIEVIDA	MI HEART 101	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+833	2	2	EPCMS-209-ESA-002	3896	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.475022	2026-08-05 19:04:39.475024	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	86	\N	\N	\N	TRUE VAC	GOLEY	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+834	2	2	EPCMS-209-ECG-002	3902	\N	\N	DUTBIM12514	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.475027	2026-08-05 19:04:39.47503	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	86	\N	\N	\N	BPL	CARDIO HEART 9108	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+835	2	2	EPCMS-210-BPA-014	3903	\N	\N	BPM 2021 053102865	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.480118	2026-08-05 19:04:39.480126	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	87	\N	\N	\N	\N	MI HEART 101	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+836	2	2	EPCMS-211-BPA-015	3895	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.484247	2026-08-05 19:04:39.484255	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	88	\N	\N	\N	DIAMOND	DELUXE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+837	2	2	EPCMS-213-BPA-016	3903	\N	\N	BPM 202105 3102878	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.491005	2026-08-05 19:04:39.491014	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	89	\N	\N	\N	MI EVIDA	MI HEART 101	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+838	2	2	EPCMS-213-VBOX-007	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.491018	2026-08-05 19:04:39.491021	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	89	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+839	2	2	EPCMS-214-ECG-003	3902	\N	\N	DETE3A26885	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.495765	2026-08-05 19:04:39.495774	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	90	\N	\N	\N	BPL	CARIDO HEART 6208	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+840	2	2	EPCMS-216-BPA-017	3895	\N	\N	RH014060	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.502132	2026-08-05 19:04:39.50214	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	91	\N	\N	\N	DIAMOND	DELUXE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+841	2	2	EPCMS-216-ECG-004	3902	\N	\N	106759-M13804740003	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.502144	2026-08-05 19:04:39.502147	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	91	\N	\N	\N	EDAN	SE1200	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+842	2	2	EPCMS-217-BPA-018	3895	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.511834	2026-08-05 19:04:39.511844	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	92	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+843	2	2	EPCMS-217-PM-004	3899	\N	\N	FG-11071428	Captured	t	f	Installed	2021-12-14 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:39.511847	2026-08-05 19:04:39.51185	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	92	\N	\N	\N	MINDRAY	IPM 10	\N	\N	\N	\N	SUDHAKAR B	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+844	2	2	EPCMS-217-PM-005	3899	\N	\N	FG-11071433	Captured	t	f	Installed	2021-12-14 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:39.511853	2026-08-05 19:04:39.511856	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	92	\N	\N	\N	MINDRAY	IPM 10	\N	\N	\N	\N	SUDHAKAR B	\N	f	f	No	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+845	2	2	EPCMS-220-BPA-019	3895	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.528539	2026-08-05 19:04:39.528549	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	93	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+846	2	2	EPCMS-220-BPA-020	3895	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.528554	2026-08-05 19:04:39.528557	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	93	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+847	2	2	EPCMS-220-BPA-021	3903	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.52856	2026-08-05 19:04:39.528562	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	93	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+848	2	2	EPCMS-220-BPA-022	3903	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.528565	2026-08-05 19:04:39.528568	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	93	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+849	2	2	EPCMS-220-ECG-005	3902	\N	\N	SFD 14443820PA	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.528571	2026-08-05 19:04:39.528573	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	93	\N	\N	\N	GE	MAC I	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+850	2	2	EPCMS-220-VBOX-008	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.528577	2026-08-05 19:04:39.52858	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	93	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+851	2	2	EPCMS-WD-17-BPA-023	3903	\N	\N	202405016066V1	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.548065	2026-08-05 19:04:39.548074	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	94	\N	\N	\N	OMRON	HEM_7121J	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+852	2	2	EPCMS-WD-17-PM-006	3899	\N	\N	31410M13804910001	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.548077	2026-08-05 19:04:39.54808	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	94	\N	\N	\N	EDAN	IM8	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+853	2	2	EPCMS-WD-17-PM-007	3899	\N	\N	CN12807157	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.548083	2026-08-05 19:04:39.548086	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	94	\N	\N	\N	PHILIPS (GOLDWAY)	UT 6000A	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+854	2	2	EPCMS-WD-17-PM-008	3899	\N	\N	CN12807149	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.548089	2026-08-05 19:04:39.548092	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	94	\N	\N	\N	PHILIPS (GOLDWAY)	UT 6000A	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+855	2	2	EPCMS-WD-17-BPA-024	3895	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.548095	2026-08-05 19:04:39.548098	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	94	\N	\N	\N	DIAMOND	BPDL437	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+856	2	2	EPCMS-WD-17-SYP-003	3900	\N	\N	SM3-4B034891	Captured	t	f	Installed	2025-11-02 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:39.548101	2026-08-05 19:04:39.548103	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	94	\N	\N	\N	MINDRAY	BENEVISION uSP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+857	2	2	EPCMS-WD-17-SYP-004	3900	\N	\N	SM3-4B034881	Captured	t	f	Installed	2025-11-02 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:39.548106	2026-08-05 19:04:39.548109	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	94	\N	\N	\N	MINDRAY	BENEVISION uSP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+858	2	2	EPCMS-WD-18-BPA-025	3895	\N	\N	CM696043	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.599501	2026-08-05 19:04:39.59951	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	95	\N	\N	\N	DIAMOND	DELUXE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+859	2	2	EPCMS-WD-18-PM-009	3899	\N	\N	FT4-45002877	Captured	t	f	Installed	2024-10-16 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:39.599514	2026-08-05 19:04:39.599517	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	95	\N	\N	\N	MINDRAY	UMEC 100	\N	\N	\N	\N	ADARSH	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+860	2	2	EPCMS-WD-18-PM-010	3899	\N	\N	FT4-45002878	Captured	t	f	Installed	2024-10-16 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:39.59952	2026-08-05 19:04:39.599523	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	95	\N	\N	\N	MINDRAY	UMEC 100	\N	\N	\N	\N	ADARSH	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+861	2	2	EPCMS-WD-18-PM-011	3899	\N	\N	FT4-45002891	Captured	t	f	Installed	2024-10-16 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:39.599526	2026-08-05 19:04:39.599529	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	95	\N	\N	\N	MINDRAY	UMEC 100	\N	\N	\N	\N	ADARSH	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+862	2	2	EPCMS-WD-18-PM-012	3899	\N	\N	112613M13804950010	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.599532	2026-08-05 19:04:39.599534	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	95	\N	\N	\N	EDAN	M3	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+863	2	2	EPCMS-WD-18-PM-013	3899	\N	\N	CN12807152	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.599537	2026-08-05 19:04:39.59954	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	95	\N	\N	\N	PHILIPS (GOLDWAY)	UT 6000A	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+864	2	2	EPCMS-WD-18-BPA-026	3895	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.599543	2026-08-05 19:04:39.599545	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	95	\N	\N	\N	DIAMOND	BPDL437	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+865	2	2	EPCMS-WD-18-SYP-005	3900	\N	\N	SM3-4B034945	Captured	t	f	Installed	2025-11-02 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:39.599548	2026-08-05 19:04:39.599551	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	95	\N	\N	\N	MINDRAY	BENEVISION uSP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+866	2	2	EPCMS-WD-18-SYP-006	3900	\N	\N	SM3-4B034864	Captured	t	f	Installed	2025-11-02 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:39.599554	2026-08-05 19:04:39.599557	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	95	\N	\N	\N	MINDRAY	BENEVISION uSP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+867	2	2	EPCMS-WD-18-VBOX-009	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.599559	2026-08-05 19:04:39.599562	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	95	\N	\N	\N	\N	SINGLE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+868	2	2	EPCMS-WD-18-VBOX-010	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.599565	2026-08-05 19:04:39.599567	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	95	\N	\N	\N	\N	SINGLE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+869	2	2	EPCMS-WD-18-PM-014	3899	\N	\N	B10W4A024	Captured	t	f	Installed	2025-12-31 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:39.59957	2026-08-05 19:04:39.599573	t	2028-12-30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	95	\N	\N	\N	NiDEK	Bravo 10 G3M	\N	\N	\N	\N	Narayanan	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+870	2	2	EPCMS-WD-18-PM-015	3899	\N	\N	B10W4A020	Captured	t	f	Installed	2026-03-23 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:39.599576	2026-08-05 19:04:39.599578	t	2029-03-22	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	95	\N	\N	\N	NiDEK	Bravo 10 G3M	\N	\N	\N	\N	Narayanan	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+871	2	2	EPCMS-WD-18-PM-016	3899	\N	\N	B10W4A019	Captured	t	f	Installed	2026-03-23 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:39.599581	2026-08-05 19:04:39.599584	t	2029-03-22	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	95	\N	\N	\N	NiDEK	Bravo 10 G3M	\N	\N	\N	\N	Narayanan	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+872	2	2	EPCMS-BME-BCM-001	3904	\N	\N	DHCM-811	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.647761	2026-08-05 19:04:39.647771	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	96	\N	\N	\N	REMI	BCM10ULTRA	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+873	2	2	EPCMS-BME-ECG-006	3902	\N	\N	106759-M13804740001	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.647775	2026-08-05 19:04:39.647778	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	96	\N	\N	\N	EDAN	SE1200	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+874	2	2	EPCMS-BME-INP-003	3898	\N	\N	160110557	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.647781	2026-08-05 19:04:39.647784	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	96	\N	\N	\N	FRESINIOUS KABI	INFUSIA VP7	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+875	2	2	EPCMS-BME-PM-017	3899	\N	\N	112613M13804950002	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.647786	2026-08-05 19:04:39.647789	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	96	\N	\N	\N	EDAN	M3	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+876	2	2	EPCMS-BME-PM-018	3899	\N	\N	112613M13804400001	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.647792	2026-08-05 19:04:39.647795	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	96	\N	\N	\N	EDAN	M3	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+877	2	2	EPCMS-BME-PM-019	3899	\N	\N	112613M13804400006	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.647797	2026-08-05 19:04:39.6478	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	96	\N	\N	\N	EDAN	M3	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+878	2	2	EPCMS-BME-PM-020	3899	\N	\N	112613M13804950007	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.647803	2026-08-05 19:04:39.647806	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	96	\N	\N	\N	EDAN	M3	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+879	2	2	EPCMS-BME-PM-021	3899	\N	\N	112613M13804950005	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.647808	2026-08-05 19:04:39.647811	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	96	\N	\N	\N	EDAN	M3	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+880	2	2	EPCMS-BME-PM-022	3899	\N	\N	80003130 803218	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.647814	2026-08-05 19:04:39.647816	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	96	\N	\N	\N	SUN MONITOR	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+881	2	2	EPCMS-BME-PM-023	3899	\N	\N	80003130 703182	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.647819	2026-08-05 19:04:39.647822	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	96	\N	\N	\N	SUN MONITOR	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+882	2	2	EPCMS-BME-SYP-007	3900	\N	\N	0010312624A01768	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.647825	2026-08-05 19:04:39.647827	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	96	\N	\N	\N	BMS	SN50C6T	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+883	2	2	EPCMS-BME-VENT-001	3905	\N	\N	1108-02-0203	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.658688	2026-08-05 19:04:39.658697	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	96	\N	\N	\N	PRICOL	INVENTA	\N	\N	\N	\N	\N	\N	f	f	Down	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+884	2	2	EPCMS-BME-VENT-002	3905	\N	\N	BVACV 24080	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.658701	2026-08-05 19:04:39.658704	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	96	\N	\N	\N	BEL	CV200	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+885	2	2	EPCMS-BME-INP-004	3898	\N	\N	160510574	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.677893	2026-08-05 19:04:39.677901	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	97	\N	\N	\N	FRESINIOUS KABI	INFUSIA VP7	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+886	2	2	EPCMS-RAD-USG-001	3906	\N	\N	6142372WXD/83038820771423	Captured	t	f	Installed	2023-07-01 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:39.700122	2026-08-05 19:04:39.70013	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	98	\N	\N	\N	GE	VIVID T9	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+887	2	2	EPCMS-CRD OPD-DFEB-001	3907	\N	\N	GSMG2L3575	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.721365	2026-08-05 19:04:39.721374	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	98	\N	\N	\N	BPL	RE LIFE 900	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+888	2	2	EPCMS-CRD OPD-TMT-001	3908	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.74691	2026-08-05 19:04:39.746919	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	98	\N	\N	\N	RMS	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+889	2	2	EPCMS-CRD OPD-TMT-002	3908	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.746923	2026-08-05 19:04:39.746927	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	98	\N	\N	\N	GE	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+890	2	2	EPCMS-CRD OPD-ECG-007	3902	\N	\N	23040700043	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.74693	2026-08-05 19:04:39.746932	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	98	\N	\N	\N	RMS	VESTA 12 EC	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+891	2	2	EPCMS-RAD-USTD-001	3909	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.758767	2026-08-05 19:04:39.758776	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	98	\N	\N	\N	GE	T9_	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+892	2	2	EPCMS-RAD-USTD-002	3909	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.75878	2026-08-05 19:04:39.758783	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	98	\N	\N	\N	GE	T9_	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+893	2	2	EPCMS-RAD-USTD-003	3909	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.758786	2026-08-05 19:04:39.758788	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	98	\N	\N	\N	GE	T9_	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+894	2	2	EPCMS-CRD WD-ECG-008	3902	\N	\N	FN-04020982	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.778474	2026-08-05 19:04:39.778483	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	99	\N	\N	\N	MINDRAY	BENEHEART R12	\N	\N	\N	\N	SHARANYA	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+895	2	2	EPCMS-CATH LAB-FUM-001	3910	\N	\N	ACT2005951	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.804912	2026-08-05 19:04:39.804921	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	100	\N	\N	\N	MEDTRONIC	ACT PLUS	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+896	2	2	EPCMS-CATH LAB-BPA-027	3895	\N	\N	54077	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.804925	2026-08-05 19:04:39.804928	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	100	\N	\N	\N	DIAMOND	DELUXE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+897	2	2	EPCMS-CATH LAB-DFEB-002	3907	\N	\N	US00468865	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.804931	2026-08-05 19:04:39.804933	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	100	\N	\N	\N	PHILIPS	HEART START  XL	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+898	2	2	EPCMS-CATH LAB-IABP-001	3911	\N	\N	CE-5099	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.835244	2026-08-05 19:04:39.835253	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	100	\N	\N	\N	DATASCOPE	CS100	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+899	2	2	EPCMS-CATH LAB-PM-024	3899	\N	\N	FG-11071420	Captured	t	f	Installed	2021-05-22 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:39.835257	2026-08-05 19:04:39.83526	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	100	\N	\N	\N	MINDRAY	IPM 10	\N	\N	\N	\N	SUDHAKAR B	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+900	2	2	EPCMS-CATH LAB-PM-025	3899	\N	\N	FG-11071430	Captured	t	f	Installed	2021-05-22 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:39.835263	2026-08-05 19:04:39.835265	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	100	\N	\N	\N	MINDRAY	IPM 10	\N	\N	\N	\N	SUDHAKAR B	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+901	2	2	EPCMS-CATH LAB-PM-026	3899	\N	\N	J9MC9282G	Captured	t	f	Not Required	\N	\N	\N	62	\N	BUY BACK	2026-08-05 19:04:39.835268	2026-08-05 19:04:39.835271	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	100	\N	\N	\N	MARQIETTE HELLIGE	SOLAR 8000	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+902	2	2	EPCMS-CATH LAB-PM-027	3899	\N	\N	SR723211025PA	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.835274	2026-08-05 19:04:39.835277	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	100	\N	\N	\N	GE	B125M	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+903	2	2	EPCMS-CATH LAB-INJ-001	3912	\N	\N	10509C103	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.907621	2026-08-05 19:04:39.907634	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	100	\N	\N	\N	LIEBEL FLARSHEIM	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+904	2	2	EPCMS-CATH LAB-SEAL-001	3913	\N	\N	11111_22014161	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.928727	2026-08-05 19:04:39.928737	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	100	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+905	2	2	EPCMS-CATH LAB-SPLT-001	3914	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.955588	2026-08-05 19:04:39.955597	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	100	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+906	2	2	EPCMS-CATH LAB-SYP-008	3900	\N	\N	160560545	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.955601	2026-08-05 19:04:39.955604	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	100	\N	\N	\N	FRESINIOUS KABI	INFUSIA SP7	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+907	2	2	EPCMS-CATH LAB-SYP-009	3900	\N	\N	160560631	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.955607	2026-08-05 19:04:39.95561	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	100	\N	\N	\N	FRESINIOUS KABI	INFUSIA SP7	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+908	2	2	EPCMS-RAD-CATH-001	3915	\N	\N	IMDYS32B00014227917HL2	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.978166	2026-08-05 19:04:39.978175	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	100	\N	\N	\N	GE	OPTIMAL IGS 320	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+909	2	2	EPCMS-RAD-USG-002	3916	\N	\N	9U-38005298	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.015034	2026-08-05 19:04:40.015044	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	101	\N	\N	\N	MINDRAY	M6	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+910	2	2	EPCMS-CCU-DFEB-003	3907	\N	\N	DMMR3G5411	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.015048	2026-08-05 19:04:40.015051	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	101	\N	\N	\N	BPL	DF2617	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+911	2	2	EPCMS-CCU-ECG-009	3902	\N	\N	FN-38044216	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.015054	2026-08-05 19:04:40.015057	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	101	\N	\N	\N	MINDRAY	BENEHEART R12	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+912	2	2	EPCMS-CCU-PM-028	3899	\N	\N	F8-11027370	Captured	t	f	Installed	2021-12-14 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:40.015059	2026-08-05 19:04:40.015062	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	101	\N	\N	\N	MINDRAY	BENEVISION N12	\N	\N	\N	\N	SUDHAKAR B	\N	f	f	Display	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+913	2	2	EPCMS-CCU-PM-029	3899	\N	\N	KQ-36110870	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.015065	2026-08-05 19:04:40.015068	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	101	\N	\N	\N	MINDRAY	UMEC 12	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+914	2	2	EPCMS-CCU-PM-030	3899	\N	\N	KN-36198085	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.01507	2026-08-05 19:04:40.015073	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	101	\N	\N	\N	MINDRAY	UMEC 10	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+915	2	2	EPCMS-CCU-PM-031	3899	\N	\N	KN-36198086	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.015076	2026-08-05 19:04:40.015079	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	101	\N	\N	\N	MINDRAY	UMEC 10	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+916	2	2	EPCMS-CCU-PM-032	3899	\N	\N	KN-36198087	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.015081	2026-08-05 19:04:40.015084	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	101	\N	\N	\N	MINDRAY	UMEC 10	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+917	2	2	EPCMS-CCU-PM-033	3899	\N	\N	KN-36198098	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.015087	2026-08-05 19:04:40.01509	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	101	\N	\N	\N	MINDRAY	UMEC 10	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+918	2	2	EPCMS-CCU-SYP-010	3900	\N	\N	SM3-36004776	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.015092	2026-08-05 19:04:40.015095	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	101	\N	\N	\N	MINDRAY	BENEVISION uSP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+919	2	2	EPCMS-CCU-SYP-011	3900	\N	\N	SM3-36004777	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.015098	2026-08-05 19:04:40.0151	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	101	\N	\N	\N	MINDRAY	BENEVISION uSP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+920	2	2	EPCMS-CCU-SYP-012	3900	\N	\N	SM3-36004779	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.015103	2026-08-05 19:04:40.015106	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	101	\N	\N	\N	MINDRAY	BENEVISION uSP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+921	2	2	EPCMS-CCU-SYP-013	3900	\N	\N	SM3-36004780	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.015109	2026-08-05 19:04:40.015111	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	101	\N	\N	\N	MINDRAY	BENEVISION uSP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+922	2	2	EPCMS-CCU-SYP-014	3900	\N	\N	SM3-36004782	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.015114	2026-08-05 19:04:40.015117	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	101	\N	\N	\N	MINDRAY	BENEVISION uSP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+923	2	2	EPCMS-CTVS ICU-VENT-003	3905	\N	\N	GB-04017335	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.053464	2026-08-05 19:04:40.053475	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	102	\N	\N	\N	MINDRAY	SV 300	\N	\N	\N	\N	SUNIL	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+924	2	2	EPCMS-CCU-VENT-004	3905	\N	\N	GB-15043419	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.05348	2026-08-05 19:04:40.053483	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	101	\N	\N	\N	MINDRAY	SV 300	\N	\N	\N	\N	SUNIL	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+925	2	2	EPCMS-CCU-VENT-005	3905	\N	\N	BVACV 13599	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.053487	2026-08-05 19:04:40.053491	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	101	\N	\N	\N	BEL	CV200	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+926	2	2	EPCMS-CCU-VENT-006	3905	\N	\N	BVACV 14788	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.053494	2026-08-05 19:04:40.053498	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	101	\N	\N	\N	BEL	CV200	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+927	2	2	EPCMS-CCU-INP-005	3898	\N	\N	SM1-36001196	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.053501	2026-08-05 19:04:40.053505	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	101	\N	\N	\N	MINDRAY	BENEFUSION uVP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+928	2	2	EPCMS-CCU-INP-006	3898	\N	\N	SM1-36001194	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.053508	2026-08-05 19:04:40.053512	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	101	\N	\N	\N	MINDRAY	BENEFUSION uVP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+929	2	2	EPCMS-CSSD-ACVE-001	3917	\N	\N	1353	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.085674	2026-08-05 19:04:40.085685	f	\N	AMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	103	\N	\N	\N	MODIS	MER 16	\N	\N	\N	\N	RADHAKRISHNA	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+930	2	2	EPCMS-CSSD-ACVE-002	3917	\N	\N	391	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.085689	2026-08-05 19:04:40.085691	f	\N	AMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	103	\N	\N	\N	MODIS	MECR 24	\N	\N	\N	\N	RADHAKRISHNA	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+931	2	2	EPCMS-CSSD-ETO-001	3918	\N	\N	CEO077/16-17	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.110521	2026-08-05 19:04:40.110536	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	103	\N	\N	\N	ETHLENE OXIDE STERLIZER	CEO 127	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+932	2	2	EPCMS-CSSD-FUM-002	3919	\N	\N	23935	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.139549	2026-08-05 19:04:40.139561	f	\N	AMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	103	\N	\N	\N	AUROJET	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+933	2	2	EPCMS-CSSD-GEN-002	3920	\N	\N	21123006	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.169144	2026-08-05 19:04:40.169156	f	\N	AMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	103	\N	\N	\N	GOLDEN TIGER	CZD-3	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+934	2	2	EPCMS-CSSD-SEAL-002	3913	\N	\N	11111 5080736 (FC)	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.16916	2026-08-05 19:04:40.169163	f	\N	AMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	103	\N	\N	\N	CONTINUES BEAMED SAELER	FRB 7701	\N	\N	\N	\N	RADHAKRISHNA	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+935	2	2	EPCMS-CSSD-GEN-003	3921	\N	\N	M0500W/H	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.253201	2026-08-05 19:04:40.253211	f	\N	AMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	103	\N	\N	\N	HONALTIJET	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+936	2	2	EPCMS-CTVS ICU-BC-001	3922	\N	\N	H008587	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.279787	2026-08-05 19:04:40.279797	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	102	\N	\N	\N	INTRAGARDIO LIFESCIENCE	BATTERY HOLESTER	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+937	2	2	EPCMS-CTVS ICU-DFEB-004	3907	\N	\N	AR3-34003461	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.2798	2026-08-05 19:04:40.279803	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	102	\N	\N	\N	MINDRAY	UMED 20	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+938	2	2	EPCMS-CTVS ICU-ESA-003	3896	\N	\N	2069744	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.279806	2026-08-05 19:04:40.279809	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	102	\N	\N	\N	MEDELA	DOMIZA FLEX	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+939	2	2	EPCMS-CTVS ICU-FWM-001	3923	\N	\N	20230100	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.304027	2026-08-05 19:04:40.304035	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	102	\N	\N	\N	PLUTUS ENTERPRISES	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+940	2	2	EPCMS-CTVS ICU-FWM-002	3923	\N	\N	202300096	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.304039	2026-08-05 19:04:40.304042	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	102	\N	\N	\N	PLUTUS ENTERPRISES	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+941	2	2	EPCMS-CTVS ICU-HTM-001	3924	\N	\N	400886478	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.325816	2026-08-05 19:04:40.325829	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	102	\N	\N	\N	STOCKET	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+942	2	2	EPCMS-CTVS ICU-HLM-001	3925	\N	\N	17707	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.371873	2026-08-05 19:04:40.371882	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	102	\N	\N	\N	TAURUMO	ADVANCED PERFUSION S/M	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+943	2	2	EPCMS-CTVS ICU-INP-007	3898	\N	\N	SM1-38001772	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.371885	2026-08-05 19:04:40.371888	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	102	\N	\N	\N	MINDRAY	BENEFUSION uVP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+944	2	2	EPCMS-CTVS ICU-INP-008	3898	\N	\N	SM1-38001775	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.371891	2026-08-05 19:04:40.371894	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	102	\N	\N	\N	MINDRAY	BENEFUSION uVP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+945	2	2	EPCMS-CTVS ICU-INP-009	3898	\N	\N	SM1-38001770	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.371896	2026-08-05 19:04:40.371899	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	102	\N	\N	\N	MINDRAY	BENEFUSION uVP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+946	2	2	EPCMS-CTVS ICU-INP-010	3898	\N	\N	SM1-38001766	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.371902	2026-08-05 19:04:40.371904	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	102	\N	\N	\N	MINDRAY	BENEFUSION uVP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+947	2	2	EPCMS-CTVS ICU-INP-011	3898	\N	\N	SM1-38001761	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.371907	2026-08-05 19:04:40.37191	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	102	\N	\N	\N	MINDRAY	BENEFUSION uVP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+948	2	2	EPCMS-CTVS ICU-PM-034	3899	\N	\N	KN-36198099	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.371913	2026-08-05 19:04:40.371915	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	102	\N	\N	\N	MINDRAY	UMEC 10	\N	\N	\N	\N	\N	\N	f	f	No	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+949	2	2	EPCMS-CTVS ICU-PM-035	3899	\N	\N	KQ-35199099	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.371918	2026-08-05 19:04:40.371921	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	102	\N	\N	\N	MINDRAY	UMEC 10	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+950	2	2	EPCMS-CTVS ICU-PM-036	3899	\N	\N	KQ-36110871	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.371923	2026-08-05 19:04:40.371926	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	102	\N	\N	\N	MINDRAY	UMEC 12	\N	\N	\N	\N	\N	\N	f	f	No	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+951	2	2	EPCMS-CTVS ICU-PM-037	3899	\N	\N	KQ-36110869	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.371929	2026-08-05 19:04:40.371932	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	102	\N	\N	\N	MINDRAY	UMEC 12	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+952	2	2	EPCMS-CTVS ICU-PM-038	3899	\N	\N	KQ-36105104	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.371935	2026-08-05 19:04:40.371937	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	102	\N	\N	\N	MINDRAY	UMEC 12	\N	\N	\N	\N	\N	\N	f	f	No	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+953	2	2	EPCMS-CTVS ICU-PM-039	3899	\N	\N	AC6-35049748	Captured	t	f	Not Required	\N	\N	\N	62	\N	Low battery backup	2026-08-05 19:04:40.37194	2026-08-05 19:04:40.371943	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	102	\N	\N	\N	MINDRAY	ePM12	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+954	2	2	EPCMS-CTVS ICU-PTWM-001	3926	\N	\N	223254	Captured	t	f	Installed	2024-01-22 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:40.398115	2026-08-05 19:04:40.398124	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	102	\N	\N	\N	3M	775	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+955	2	2	EPCMS-CTVS ICU-BPA-028	3895	\N	\N	BPDL437	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.398127	2026-08-05 19:04:40.39813	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	102	\N	\N	\N	DIAMOND	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+956	2	2	EPCMS-CTVS ICU-SHL-001	3927	\N	\N	L007599	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.42413	2026-08-05 19:04:40.424139	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	102	\N	\N	\N	INTRAGARDIO LIFESCIENCE	HEAD LIGHT	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+957	2	2	EPCMS-CTVS ICU-SYP-015	3900	\N	\N	SM3-36004784	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.424142	2026-08-05 19:04:40.424145	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	102	\N	\N	\N	MINDRAY	BENEVISION uSP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+958	2	2	EPCMS-CTVS ICU-SYP-016	3900	\N	\N	SM3-39007416	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.424148	2026-08-05 19:04:40.424151	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	102	\N	\N	\N	MINDRAY	BENEVISION uSP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+959	2	2	EPCMS-CTVS ICU-DOP-001	3928	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.442599	2026-08-05 19:04:40.44261	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	102	\N	\N	\N	HADECO	ES-100VX	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+960	2	2	EPCMS-CTVS ICU-DOP-002	3928	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.442614	2026-08-05 19:04:40.442617	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	102	\N	\N	\N	MINI DOP	BT8M05	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+961	2	2	EPCMS-CTVS ICU-DOP-003	3928	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.442619	2026-08-05 19:04:40.442622	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	102	\N	\N	\N	MINI DOP	BT4M05	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+962	2	2	EPCMS-CTVS ICU-SYP-017	3900	\N	\N	SM3-39007340	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.442625	2026-08-05 19:04:40.442628	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	102	\N	\N	\N	MINDRAY	BENEVISION uSP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+963	2	2	EPCMS-CTVS ICU-SYP-018	3900	\N	\N	SM3-39007415	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.442631	2026-08-05 19:04:40.442633	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	102	\N	\N	\N	MINDRAY	BENEVISION uSP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+964	2	2	EPCMS-CTVS ICU-VBOX-011	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.442636	2026-08-05 19:04:40.442639	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	102	\N	\N	\N	LOCAL	DOUBLE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+965	2	2	EPCMS-DERM OPD-BPA-029	3895	\N	\N	196043	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.463745	2026-08-05 19:04:40.463755	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	104	\N	\N	\N	DIAMOND	DELUXE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+966	2	2	EPCMS-DERM OPD-DABR-001	3929	\N	\N	217	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.487271	2026-08-05 19:04:40.48728	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	104	\N	\N	\N	DEMAPEEL GOLD	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+967	2	2	EPCMS-DERM OPD-DABR-002	3929	\N	\N	1003	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.487284	2026-08-05 19:04:40.487287	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	104	\N	\N	\N	DERMAINDIA	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+968	2	2	EPCMS-DERM OPD-DHL-001	3930	\N	\N	SLS10C1 SL10CN0GI	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.508578	2026-08-05 19:04:40.508587	f	\N	AMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	104	\N	\N	\N	SELRIALS	SLSIONOGI	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+969	2	2	EPCMS-DERM OPD-FCO2-001	3931	\N	\N	XLSON2F7	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.581533	2026-08-05 19:04:40.581541	f	\N	AMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	104	\N	\N	\N	FINEXEL	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+970	2	2	EPCMS-DERM OPD-HFM-001	3932	\N	\N	UVA8 0821775	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.603304	2026-08-05 19:04:40.603312	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	104	\N	\N	\N	DERMAINDIA	NBUVB8	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+971	2	2	EPCMS-DERM OPD-MSCP-001	3933	\N	\N	1600073	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.624566	2026-08-05 19:04:40.624574	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	104	\N	\N	\N	LAWRENCE	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+972	2	2	EPCMS-DERM OPD-NYL-001	3934	\N	\N	BMSQONOH5	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.647345	2026-08-05 19:04:40.647353	f	\N	AMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	104	\N	\N	\N	FINEBEAM	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+973	2	2	EPCMS-DERM OPD-PT-001	3935	\N	\N	VA112NBUUB12	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.670173	2026-08-05 19:04:40.670183	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	104	\N	\N	\N	DERMAINDIA	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+974	2	2	EPCMS-DERM OPD-RFC-001	3936	\N	\N	3968	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.692324	2026-08-05 19:04:40.692333	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	104	\N	\N	\N	DERMAINDIA	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+975	2	2	EPCMS-DERM OPD-SES-001	3937	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.714702	2026-08-05 19:04:40.714711	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	104	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+976	2	2	EPCMS-DERM OPD-SKA-001	3938	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.72334	2026-08-05 19:04:40.723349	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	104	\N	\N	\N	DERMAINDIA	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+977	2	2	EPCMS-DERM OPD-VBOX-012	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.723353	2026-08-05 19:04:40.723356	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	104	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+978	2	2	EPCMS-DIALYSIS-BPA-030	3895	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.743247	2026-08-05 19:04:40.743256	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	105	\N	\N	\N	MIEVIDA	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+979	2	2	EPCMS-DIALYSIS-HD-001	3939	\N	\N	5SXAFL19	Captured	t	f	Installed	2015-01-01 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:40.831805	2026-08-05 19:04:40.831813	f	\N	AMC	2026-03-18	2024-25/887	\N	\N	\N	\N	\N	\N	\N	\N	105	\N	\N	\N	FRESENIOUS	4008 S	\N	\N	\N	\N	\N	\N	f	f	Working	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+980	2	2	EPCMS-DIALYSIS-HD-002	3939	\N	\N	3SXA4SGF	Captured	t	f	Installed	2023-02-20 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:40.831817	2026-08-05 19:04:40.83182	f	\N	AMC	2026-11-18	\N	\N	\N	\N	\N	\N	\N	\N	\N	105	\N	\N	\N	FRESENIOUS	4008 S	\N	\N	\N	\N	\N	\N	f	f	Working	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+981	2	2	EPCMS-DIALYSIS-HD-003	3939	\N	\N	3SXA4KJJ	Captured	t	f	Installed	2023-08-18 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:40.831823	2026-08-05 19:04:40.831825	f	\N	AMC	2026-11-18	\N	\N	\N	\N	\N	\N	\N	\N	\N	105	\N	\N	\N	FRESENIOUS	4008 S	\N	\N	\N	\N	\N	\N	f	f	Working	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+982	2	2	EPCMS-DIALYSIS-HD-004	3939	\N	\N	3SXA4KJH	Captured	t	f	Installed	2023-08-18 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:40.831828	2026-08-05 19:04:40.831831	f	\N	AMC	2026-11-18	\N	\N	\N	\N	\N	\N	\N	\N	\N	105	\N	\N	\N	FRESENIOUS	4008 S	\N	\N	\N	\N	\N	\N	f	f	Working	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+983	2	2	EPCMS-DIALYSIS-HD-005	3939	\N	\N	3SXA4QWD	Captured	t	f	Installed	2023-02-06 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:40.831834	2026-08-05 19:04:40.831837	f	\N	AMC	2026-11-18	\N	\N	\N	\N	\N	\N	\N	\N	\N	105	\N	\N	\N	FRESENIOUS	4008 S	\N	\N	\N	\N	\N	\N	f	f	Working	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+984	2	2	EPCMS-DIALYSIS-HD-006	3939	\N	\N	3SXA4Q0Q	Captured	t	f	Installed	2023-02-06 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:40.831839	2026-08-05 19:04:40.831842	f	\N	AMC	2026-11-18	\N	\N	\N	\N	\N	\N	\N	\N	\N	105	\N	\N	\N	FRESENIOUS	4008 S	\N	\N	\N	\N	\N	\N	f	f	Working	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+985	2	2	EPCMS-DIALYSIS-HD-007	3939	\N	\N	5SXAGZ54	Captured	t	f	Installed	2015-01-01 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:40.831845	2026-08-05 19:04:40.831848	f	\N	AMC	2026-03-18	2024-25/887	\N	\N	\N	\N	\N	\N	\N	\N	105	\N	\N	\N	FRESENIOUS	4008 S	\N	\N	\N	\N	\N	\N	f	f	Working	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+986	2	2	EPCMS-DIALYSIS-PM-040	3899	\N	\N	CN12807160	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.83185	2026-08-05 19:04:40.831853	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	105	\N	\N	\N	PHILIPS (GOLDWAY)	UT 6000A	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+987	2	2	EPCMS-DIALYSIS-DRU-001	3940	\N	\N	2015A470	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.844385	2026-08-05 19:04:40.844395	f	\N	AMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	105	\N	\N	\N	RENACLEAN	RENACLEAN PLUSE	\N	\N	\N	\N	Elango G	\N	f	f	BUYBACK	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+988	2	2	EPCMS-DIALYSIS-DRU-002	3940	\N	\N	2025A1197	Captured	f	f	Installed	2025-05-21 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:40.844399	2026-08-05 19:04:40.844402	t	2026-11-20	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	105	\N	\N	\N	RENACLEAN	RENACLEAN PLUSE	\N	\N	\N	\N	Elango G	\N	f	f	Working	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+989	2	2	EPCMS-DIALYSIS-PM-041	3899	\N	\N	B10W4A013	Captured	t	f	Installed	2026-03-23 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:40.844405	2026-08-05 19:04:40.844408	t	2029-03-22	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	105	\N	\N	\N	NiDEK	Bravo 10 G3M	\N	\N	\N	\N	Narayanan	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+990	2	2	EPCMS-EICU-ECG-010	3902	\N	\N	DETE3A26884	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.88795	2026-08-05 19:04:40.887959	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	106	\N	\N	\N	BPL	CARIDO HEART 6208	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+991	2	2	EPCMS-EICU-PM-042	3899	\N	\N	FT4-45002892	Captured	t	f	Installed	2024-10-16 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:40.887962	2026-08-05 19:04:40.887965	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	106	\N	\N	\N	MINDRAY	UMEC 100	\N	\N	\N	\N	ADARSH	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+992	2	2	EPCMS-EICU-PM-043	3899	\N	\N	FT4-45002880	Captured	t	f	Installed	2024-10-16 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:40.887968	2026-08-05 19:04:40.887971	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	106	\N	\N	\N	MINDRAY	UMEC 100	\N	\N	\N	\N	ADARSH	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+993	2	2	EPCMS-EICU-PM-044	3899	\N	\N	FT4-45002875	Captured	t	f	Installed	2024-10-16 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:40.887975	2026-08-05 19:04:40.887978	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	106	\N	\N	\N	MINDRAY	UMEC 100	\N	\N	\N	\N	ADARSH	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+994	2	2	EPCMS-EICU-PM-045	3899	\N	\N	FG-11071426	Captured	t	f	Installed	2021-05-22 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:40.887981	2026-08-05 19:04:40.887983	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	106	\N	\N	\N	MINDRAY	IPM 10	\N	\N	\N	\N	SUDHAKAR B	\N	f	f	No	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+995	2	2	EPCMS-EICU-PM-046	3899	\N	\N	FG-11071424	Captured	t	f	Installed	2021-12-14 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:40.887986	2026-08-05 19:04:40.887989	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	106	\N	\N	\N	MINDRAY	IPM 10	\N	\N	\N	\N	SUDHAKAR B	\N	f	f	No	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+996	2	2	EPCMS-EICU-PM-047	3899	\N	\N	CN42787554	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.887992	2026-08-05 19:04:40.887994	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	106	\N	\N	\N	PHILIPS	SURESIGN VM8	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+997	2	2	EPCMS-EICU-SYP-019	3900	\N	\N	SM3-39007414	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.887997	2026-08-05 19:04:40.888	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	106	\N	\N	\N	MINDRAY	BENEVISION uSP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+998	2	2	EPCMS-EICU-SYP-020	3900	\N	\N	SM3-39007341	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.888003	2026-08-05 19:04:40.888005	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	106	\N	\N	\N	MINDRAY	BENEVISION uSP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+999	2	2	EPCMS-EICU-SYP-021	3900	\N	\N	SM3-4B034910	Captured	t	f	Installed	2025-11-02 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:40.888008	2026-08-05 19:04:40.888011	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	106	\N	\N	\N	MINDRAY	BENEVISION uSP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1000	2	2	EPCMS-EICU-SYP-022	3900	\N	\N	SM3-4B034943	Captured	t	f	Installed	2025-11-02 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:40.888013	2026-08-05 19:04:40.888016	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	106	\N	\N	\N	MINDRAY	BENEVISION uSP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1001	2	2	EPCMS-RAD-MXR-001	3941	\N	\N	2K20110373SR-DX/HF	Captured	t	f	Installed	2019-09-24 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:40.903713	2026-08-05 19:04:40.903722	f	\N	AMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	106	\N	\N	\N	ALLENGERS	MARS 4.2 SR	\N	\N	\N	\N	MR.ANKUR SHARMA	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1002	2	2	EPCMS-EICU-INP-012	3898	\N	\N	SMI -38001771	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.903726	2026-08-05 19:04:40.903728	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	106	\N	\N	\N	MINDRAY	BENEFUSION uVP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1003	2	2	EPCMS-EICU-PM-048	3899	\N	\N	FT4-56023346	Captured	t	f	Installed	2025-10-15 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:40.903731	2026-08-05 19:04:40.903734	t	2028-10-14	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	106	\N	\N	\N	MINDRAY	UMEC 100	\N	\N	\N	\N	Devaraj K	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1004	2	2	EPCMS-EICU-PM-049	3899	\N	\N	FT4-56023378	Captured	t	f	Installed	2025-10-15 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:40.903737	2026-08-05 19:04:40.90374	t	2028-10-14	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	106	\N	\N	\N	MINDRAY	UMEC 100	\N	\N	\N	\N	Devaraj K	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1005	2	2	EPCMS-EMD -PM-050	3899	\N	\N	112613 M13804950010	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.926797	2026-08-05 19:04:40.926807	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	107	\N	\N	\N	EDAN	M3	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1006	2	2	EPCMS-EMD_G-PM-051	3899	\N	\N	301410M13804910003	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.92681	2026-08-05 19:04:40.926813	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	107	\N	\N	\N	EDAN	IM8	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1007	2	2	EPCMS-EMD_G-PM-052	3899	\N	\N	E7181214048B	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.926816	2026-08-05 19:04:40.926819	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	107	\N	\N	\N	COMEN	STAR8000	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1008	2	2	EPCMS-EMD_G-PM-053	3899	\N	\N	E7181214061B	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.926821	2026-08-05 19:04:40.926824	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	107	\N	\N	\N	COMEN	STAR8000	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1009	2	2	EPCMS-EMD_G-PM-054	3899	\N	\N	CN12807161	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.926827	2026-08-05 19:04:40.92683	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	107	\N	\N	\N	PHILIPS (GOLDWAY)	UT 6000A	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1010	2	2	EPCMS-EMD_G-PM-055	3899	\N	\N	E7181214065B	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.926832	2026-08-05 19:04:40.926835	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	107	\N	\N	\N	COMEN	STAR8000	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1011	2	2	EPCMS-EMD_G-PM-056	3899	\N	\N	112613M13804950003	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.926838	2026-08-05 19:04:40.926841	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	107	\N	\N	\N	EDAN	M3	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1012	2	2	EPCMS-EMD_G-SYP-023	3900	\N	\N	SM3-4B034895	Captured	t	f	Installed	2025-11-02 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:40.926843	2026-08-05 19:04:40.926846	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	107	\N	\N	\N	MINDRAY	BENEVISION uSP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1013	2	2	EPCMS-EMD_G-PM-057	3899	\N	\N	B10W4A016	Captured	t	f	Installed	2025-12-31 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:40.926849	2026-08-05 19:04:40.926851	t	2028-12-30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	107	\N	\N	\N	NiDEK	Bravo 10 G3M	\N	\N	\N	\N	Narayanan	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1014	2	2	EPCMS-EM WARD-SYP-024	3900	\N	\N	160560546	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.969805	2026-08-05 19:04:40.969815	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	108	\N	\N	\N	FRESINIOUS KABI	INFUSIA SP7	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1015	2	2	EPCMS-EMD -ESA-004	3896	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.96982	2026-08-05 19:04:40.969823	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	108	\N	\N	\N	VENKY TROLLY	NTS-DLX	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1016	2	2	EPCMS-EMD -VBOX-013	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.969826	2026-08-05 19:04:40.969829	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	108	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1017	2	2	EPCMS-EMD -VBOX-014	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.969833	2026-08-05 19:04:40.969836	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	108	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1018	2	2	EPCMS-EMD_R-BPA-031	3895	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.96984	2026-08-05 19:04:40.969843	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	108	\N	\N	\N	DIAMOND	DELUXE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1019	2	2	EPCMS-EMD_R-BPA-032	3895	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.969847	2026-08-05 19:04:40.96985	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	108	\N	\N	\N	DIAMOND	DELUXE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1020	2	2	EPCMS-EMD_R-DFEB-005	3907	\N	\N	EI-24017074	Captured	t	f	Installed	2022-08-24 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:40.969853	2026-08-05 19:04:40.969857	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	108	\N	\N	\N	MINDRAY	BENEHEART D2	\N	\N	\N	\N	SHARANYA	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1021	2	2	EPCMS-EMD_R-FWM-003	3923	\N	\N	2110014	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.96986	2026-08-05 19:04:40.969863	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	108	\N	\N	\N	PLUTUS	IFW100	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1022	2	2	EPCMS-EMD_R-FWM-004	3923	\N	\N	2110019	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.969867	2026-08-05 19:04:40.96987	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	108	\N	\N	\N	PLUTUS	IFW100	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1023	2	2	EPCMS-EMD_R-HFNC-001	3942	\N	\N	20101_6186562	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.035418	2026-08-05 19:04:41.035429	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	108	\N	\N	\N	FISHER& PAYKAL	AIRVO2	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1024	2	2	EPCMS-EMD_R-INP-013	3898	\N	\N	SM1-36001197	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.035433	2026-08-05 19:04:41.035437	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	108	\N	\N	\N	MINDRAY	BENEFUSION uVP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1025	2	2	EPCMS-EMD_R-PM-058	3899	\N	\N	CN42787553	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.03544	2026-08-05 19:04:41.035444	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	108	\N	\N	\N	PHILIPS	SURESIGN VM8	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1026	2	2	EPCMS-EMD_R-PM-059	3899	\N	\N	KN-36198095	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.035447	2026-08-05 19:04:41.03545	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	108	\N	\N	\N	MINDRAY	UMEC 10	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1027	2	2	EPCMS-EMD_R-PM-060	3899	\N	\N	KN-36198096	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.035453	2026-08-05 19:04:41.035457	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	108	\N	\N	\N	MINDRAY	UMEC 10	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1028	2	2	EPCMS-EMD_R-PM-061	3899	\N	\N	KN-36198094	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.03546	2026-08-05 19:04:41.035463	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	108	\N	\N	\N	MINDRAY	UMEC 10	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1029	2	2	EPCMS-EMD_R-PM-062	3899	\N	\N	KN-36198097	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.035467	2026-08-05 19:04:41.03547	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	108	\N	\N	\N	MINDRAY	UMEC 10	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1030	2	2	EPCMS-EMD_R-PM-063	3899	\N	\N	KN-36198093	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.035473	2026-08-05 19:04:41.035476	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	108	\N	\N	\N	MINDRAY	UMEC 10	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1031	2	2	EPCMS-EMD_R-BPA-033	3895	\N	\N	437	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.03548	2026-08-05 19:04:41.035483	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	108	\N	\N	\N	DIAMOND	BPDL	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1032	2	2	EPCMS-EMD_R-SYP-025	3900	\N	\N	SM3-36004778	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.035486	2026-08-05 19:04:41.035489	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	108	\N	\N	\N	MINDRAY	BENEVISION uSP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1033	2	2	EPCMS-EMD_R-SYP-026	3900	\N	\N	SM3-36004783	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.035493	2026-08-05 19:04:41.035496	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	108	\N	\N	\N	MINDRAY	BENEVISION uSP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1034	2	2	EPCMS-EMD_R-SYP-027	3900	\N	\N	SM3-36004781	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.035499	2026-08-05 19:04:41.035502	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	108	\N	\N	\N	MINDRAY	BENEVISION uSP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1035	2	2	EPCMS-EMD_R-SYP-028	3900	\N	\N	160560485	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.035506	2026-08-05 19:04:41.035509	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	108	\N	\N	\N	FRESINIOUS KABI	INFUSIA SP7	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1036	2	2	EPCMS-EMD_R-VENT-007	3905	\N	\N	1108-02-0324	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.035512	2026-08-05 19:04:41.035515	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	108	\N	\N	\N	PRICOL	INVENTA	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1037	2	2	EPCMS-EMD_R-VENT-008	3905	\N	\N	GB-OC036544	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.035518	2026-08-05 19:04:41.035522	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	108	\N	\N	\N	MINDRAY	SV 300	\N	\N	\N	\N	SUNIL	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1038	2	2	EPCMS-EMD_R-ECG-011	3902	\N	\N	FN-04020979	Captured	t	f	Not Required	\N	\N	\N	62	\N	Keypad	2026-08-05 19:04:41.035525	2026-08-05 19:04:41.035528	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	108	\N	\N	\N	MINDRAY	BENEHEART R12	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1039	2	2	EPCMS-EMD_R-MXR-002	3941	\N	\N	35468	Captured	t	f	Installed	2015-01-14 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:41.035532	2026-08-05 19:04:41.035535	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	108	\N	\N	\N	SIEMENS	MM2.5	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1040	2	2	EPCMS-RAD-USG-003	3906	\N	\N	521437	Captured	t	f	Installed	2019-11-02 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:41.035538	2026-08-05 19:04:41.035541	f	\N	AMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	108	\N	\N	\N	SIEMENS	ACUSON NX2	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1041	2	2	EPCMS-RAD-USTD-004	3909	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.035545	2026-08-05 19:04:41.035548	f	\N	AMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	108	\N	\N	\N	SIEMENS	NX2_	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1042	2	2	EPCMS-RAD-USTD-005	3909	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.035551	2026-08-05 19:04:41.035554	f	\N	AMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	108	\N	\N	\N	SIEMENS	NX2_	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1043	2	2	EPCMS-RAD-USTD-006	3909	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.035558	2026-08-05 19:04:41.035561	f	\N	AMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	108	\N	\N	\N	SIEMENS	NX2_	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1044	2	2	EPCMS-EMD_R-PM-064	3899	\N	\N	FT4-56023369	Captured	t	f	Installed	2025-10-15 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:41.035564	2026-08-05 19:04:41.035567	t	2028-10-14	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	108	\N	\N	\N	MINDRAY	UMEC 100	\N	\N	\N	\N	Devaraj K	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1045	2	2	EPCMS-EMD_Y-ECG-012	3902	\N	\N	DUTB1M12572	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.058818	2026-08-05 19:04:41.058829	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	109	\N	\N	\N	BPL	CARDIO HEART 9108	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1046	2	2	EPCMS-EMD_Y-PM-065	3899	\N	\N	KN-36198088	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.058833	2026-08-05 19:04:41.058836	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	109	\N	\N	\N	MINDRAY	UMEC 10	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1047	2	2	EPCMS-EMD_Y-PM-066	3899	\N	\N	KN-36198089	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.05884	2026-08-05 19:04:41.058843	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	109	\N	\N	\N	MINDRAY	UMEC 10	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1048	2	2	EPCMS-EMD_Y-PM-067	3899	\N	\N	KN-36198090	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.058846	2026-08-05 19:04:41.058849	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	109	\N	\N	\N	MINDRAY	UMEC 10	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1049	2	2	EPCMS-EMD_Y-PM-068	3899	\N	\N	KN-36198091	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.058853	2026-08-05 19:04:41.058856	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	109	\N	\N	\N	MINDRAY	UMEC 10	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1050	2	2	EPCMS-EMD_Y-PM-069	3899	\N	\N	KN-36198092	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.058859	2026-08-05 19:04:41.058862	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	109	\N	\N	\N	MINDRAY	UMEC 10	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1051	2	2	EPCMS-ENDO RM-PM-070	3899	\N	\N	FG-11071436	Captured	t	f	Installed	2021-05-22 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:41.082985	2026-08-05 19:04:41.082995	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	110	\N	\N	\N	MINDRAY	IPM 10	\N	\N	\N	\N	SUDHAKAR B	\N	f	f	No	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1052	2	2	EPCMS-ENDO RM-COLS-001	3943	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.105848	2026-08-05 19:04:41.105857	f	\N	AMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	110	\N	\N	\N	OLYMPUS	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1053	2	2	EPCMS-ENDO RM-DUOS-001	3944	\N	\N	SN236117	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.127085	2026-08-05 19:04:41.127095	f	\N	AMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	110	\N	\N	\N	OLYMPUS	TJF-Q170V	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1054	2	2	EPCMS-ENDO RM-ENVS-001	3945	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.149999	2026-08-05 19:04:41.150008	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	110	\N	\N	\N	OLYMPUS	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1055	2	2	EPCMS-ENDO RM-ENMO-001	3946	\N	\N	7112816	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.171811	2026-08-05 19:04:41.17182	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	110	\N	\N	\N	OLYMPUS	\N	\N	\N	\N	\N	MR.MANJUNATHA V	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1056	2	2	EPCMS-ENDO RM-ENVP-001	3947	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.19376	2026-08-05 19:04:41.193769	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	110	\N	\N	\N	OLYMPUS	CV-170(PAL)200V	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1057	2	2	EPCMS-ENDO RM-LEKT-001	3948	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.266153	2026-08-05 19:04:41.266161	f	\N	AMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	110	\N	\N	\N	OLYMPUS	20210906	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1058	2	2	EPCMS-ENDO RM-LITH-001	3949	\N	\N	M00550620	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.290146	2026-08-05 19:04:41.290154	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	110	\N	\N	\N	BOSTON SCIENTIFIC	50304029-01	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1059	2	2	EPCMS-ENDO RM-PM-071	3899	\N	\N	CN12807154	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.290158	2026-08-05 19:04:41.290161	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	110	\N	\N	\N	PHILIPS (GOLDWAY)	UT 6000A	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1060	2	2	EPCMS-ENDO RM-VSCB-001	3950	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.314841	2026-08-05 19:04:41.31485	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	110	\N	\N	\N	OLYMPUS	20211019	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1061	2	2	EPCMS-ENDO RM-VBOX-015	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.314854	2026-08-05 19:04:41.314857	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	110	\N	\N	\N	\N	SINGLE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1062	2	2	EPCMS-ENDO RM-OTT-001	3951	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.337454	2026-08-05 19:04:41.337463	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	110	\N	\N	\N	PALAKKAD SURGICALS	MANUAL	\N	\N	\N	\N	Sathish	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1063	2	2	EPCMS-ENDO RM-ESU-001	3952	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.359022	2026-08-05 19:04:41.359031	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	110	\N	\N	\N	ERBE	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1064	2	2	EPCMS-ENT AUDIO-BERA-001	3953	\N	\N	IHS 7722	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.381481	2026-08-05 19:04:41.381491	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	111	\N	\N	\N	I H S	IHS DUET	\N	\N	\N	\N	ANAND BIRADAR	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1065	2	2	EPCMS-ENT AUDIO-OAAB-001	3954	\N	\N	SN1020526	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.403617	2026-08-05 19:04:41.403629	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	111	\N	\N	\N	INTER ACOUSTIC	SERA	\N	\N	\N	\N	ANAND BIRADAR	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1066	2	2	EPCMS-ENT OPD-AUDM-001	3955	\N	\N	133881	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.42618	2026-08-05 19:04:41.426202	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	112	\N	\N	\N	OTOMETRICS	MADSEN 1TERA II	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1067	2	2	EPCMS-ENT OPD-ENTD-001	3956	\N	\N	1049	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.498349	2026-08-05 19:04:41.49836	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	112	\N	\N	\N	HIS	DUET	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1068	2	2	EPCMS-ENT OPD-ENTU-001	3957	\N	\N	117	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.530126	2026-08-05 19:04:41.530136	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	112	\N	\N	\N	VANSARI	STA	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1069	2	2	EPCMS-ENT OPD-ENTU-002	3957	\N	\N	198	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.53014	2026-08-05 19:04:41.530143	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	112	\N	\N	\N	VANSARI	COMPACT II	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1070	2	2	EPCMS-ENT OPD-ENTU-003	3957	\N	\N	187	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.530147	2026-08-05 19:04:41.530149	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	112	\N	\N	\N	VANSARI	COMPACT II	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1071	2	2	EPCMS-ENT OPD-ENTU-004	3957	\N	\N	199	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.530152	2026-08-05 19:04:41.530155	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	112	\N	\N	\N	VANSARI	COMPACT II	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1072	2	2	EPCMS-ENT OPD-ENTU-005	3957	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.530162	2026-08-05 19:04:41.530165	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	112	\N	\N	\N	VANSARI	COMPACT OPTIMO	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1073	2	2	EPCMS-ENT OPD-GEN-004	3958	\N	\N	1020526	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.553666	2026-08-05 19:04:41.553675	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	112	\N	\N	\N	SERAA	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1074	2	2	EPCMS-ENT OPD-OPMC-001	3959	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.577301	2026-08-05 19:04:41.57731	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	112	\N	\N	\N	LAMBOMED	PRIMA	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1075	2	2	EPCMS-ENT OPD-OPMC-002	3959	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.577314	2026-08-05 19:04:41.577317	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	112	\N	\N	\N	LAMBOMED	PRIMA	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1076	2	2	EPCMS-LR-BWRM-001	3960	\N	\N	1410CHN000033	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.600837	2026-08-05 19:04:41.600845	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	113	\N	\N	\N	PHILIPS	EFFICIA WM300	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1077	2	2	EPCMS-LR-BRBD-001	3961	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.639136	2026-08-05 19:04:41.639145	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	113	\N	\N	\N	HUNTLEIGH	17000E/L	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1078	2	2	EPCMS-LR-BRBD-002	3961	\N	\N	441587	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.639149	2026-08-05 19:04:41.639152	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	113	\N	\N	\N	HUNTLEIGH	17000E/L	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1079	2	2	EPCMS-LR-BRBD-003	3961	\N	\N	739722	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.639155	2026-08-05 19:04:41.639158	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	113	\N	\N	\N	HUNTLEIGH	17000E/L	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1080	2	2	EPCMS-LR-BRBD-004	3961	\N	\N	771819	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.639161	2026-08-05 19:04:41.639164	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	113	\N	\N	\N	HUNTLEIGH	17000E/L	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1081	2	2	EPCMS-LR-BPA-034	3895	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.639166	2026-08-05 19:04:41.639169	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	113	\N	\N	\N	DIAMOND	DELUXE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1082	2	2	EPCMS-LR-BPA-035	3895	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.639172	2026-08-05 19:04:41.639175	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	113	\N	\N	\N	DIAMOND	DELUXE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1083	2	2	EPCMS-LR-BPA-036	3895	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.639178	2026-08-05 19:04:41.63918	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	113	\N	\N	\N	DISHA	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1084	2	2	EPCMS-LR-BPA-037	3895	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.639183	2026-08-05 19:04:41.639194	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	113	\N	\N	\N	NETWINK	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1085	2	2	EPCMS-LR-FTDP-001	3962	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Not working	2026-08-05 19:04:41.66302	2026-08-05 19:04:41.663029	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	113	\N	\N	\N	MEDIANA	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1086	2	2	EPCMS-LR-NST-001	3963	\N	\N	560034-M22305660001	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.750294	2026-08-05 19:04:41.750307	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	113	\N	\N	\N	EDAN	F3	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1087	2	2	EPCMS-LR-NST-002	3963	\N	\N	314079-M13703130001	Captured	t	f	Not Required	\N	\N	\N	62	\N	Not working	2026-08-05 19:04:41.750311	2026-08-05 19:04:41.750314	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	113	\N	\N	\N	EDAN	F6	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1088	2	2	EPCMS-LR-FUM-003	3919	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.750317	2026-08-05 19:04:41.750319	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	113	\N	\N	\N	AEROJET	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1089	2	2	EPCMS-LR-INP-014	3898	\N	\N	SMI -38001763	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.750322	2026-08-05 19:04:41.750325	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	113	\N	\N	\N	MINDRAY	BENEFUSION uVP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1090	2	2	EPCMS-LR-INP-015	3898	\N	\N	160510538	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.750328	2026-08-05 19:04:41.750331	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	113	\N	\N	\N	FRESINIOUS KABI	INFUSIA VP7	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1091	2	2	EPCMS-LR-INP-016	3898	\N	\N	160510546	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.750333	2026-08-05 19:04:41.750336	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	113	\N	\N	\N	FRESINIOUS KABI	INFUSIA VP7	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1092	2	2	EPCMS-LR-OTLT-001	3964	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.782935	2026-08-05 19:04:41.782946	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	113	\N	\N	\N	LUMIX	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1093	2	2	EPCMS-LR-OTLT-002	3964	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.78295	2026-08-05 19:04:41.782953	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	113	\N	\N	\N	LUMIX	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1094	2	2	EPCMS-LR-PM-072	3899	\N	\N	CN12807153	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.782956	2026-08-05 19:04:41.782958	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	113	\N	\N	\N	PHILIPS (GOLDWAY)	UT 6000A	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1095	2	2	EPCMS-LR-PM-073	3899	\N	\N	CN12807155	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.782961	2026-08-05 19:04:41.782964	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	113	\N	\N	\N	PHILIPS (GOLDWAY)	UT 6000A	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1096	2	2	EPCMS-LR-SPLT-002	3914	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.782967	2026-08-05 19:04:41.78297	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	113	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1097	2	2	EPCMS-CATH-SYP-029	3900	\N	\N	160560492	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.782972	2026-08-05 19:04:41.782975	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	100	\N	\N	\N	FRESINIOUS KABI	INFUSIA SP7	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1098	2	2	EPCMS-LR-SYP-030	3900	\N	\N	160560572	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.782978	2026-08-05 19:04:41.782981	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	113	\N	\N	\N	FRESINIOUS KABI	INFUSIA SP7	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1099	2	2	EPCMS-LR-VBOX-016	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.782984	2026-08-05 19:04:41.782986	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	113	\N	\N	\N	\N	SINGLE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1100	2	2	EPCMS-LR-NST-003	3963	\N	\N	EATB452553	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.782989	2026-08-05 19:04:41.782992	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	113	\N	\N	\N	BPL	DIVA FM 9854	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1101	2	2	EPCMS-LR-FD-001	3962	\N	\N	LMMA5C10940	Captured	t	f	Installed	2026-01-06 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:41.782995	2026-08-05 19:04:41.782997	t	2029-01-05	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	113	\N	\N	\N	BPL	FD9714	\N	\N	\N	\N	Jithesh	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1102	2	2	EPCMS-LR-FD-002	3962	\N	\N	LMMA5C10957	Captured	t	f	Installed	2026-01-06 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:41.783	2026-08-05 19:04:41.783003	t	2029-01-05	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	113	\N	\N	\N	BPL	FD9714	\N	\N	\N	\N	Jithesh	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1103	2	2	EPCMS-MKTG-ECG-013	3902	\N	\N	DUTB1M12503	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.792454	2026-08-05 19:04:41.792463	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	114	\N	\N	\N	BPL	CARDIO HEART 9108	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1104	2	2	EPCMS-MKTG-ECG-014	3902	\N	\N	V301N2310611	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.792467	2026-08-05 19:04:41.792471	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	114	\N	\N	\N	RMS	VESTA 301 i	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1105	2	2	EPCMS-MED OPD-BPA-038	3895	\N	\N	RM0701692	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.807167	2026-08-05 19:04:41.807176	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	115	\N	\N	\N	DISHA	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1106	2	2	EPCMS-MED OPD-BPA-039	3895	\N	\N	RU0400432	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.80718	2026-08-05 19:04:41.807183	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	115	\N	\N	\N	DISHA	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1107	2	2	EPCMS-MED OPD-BPA-040	3895	\N	\N	RU0400431	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.807186	2026-08-05 19:04:41.807193	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	115	\N	\N	\N	DISHA	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1108	2	2	EPCMS-MED OPD-BPA-041	3895	\N	\N	RM0701689	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.807196	2026-08-05 19:04:41.807199	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	115	\N	\N	\N	DISHA	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1109	2	2	EPCMS-MED OPD-ECG-015	3902	\N	\N	FN-04020981	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.807202	2026-08-05 19:04:41.807204	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	115	\N	\N	\N	MINDRAY	BENEHEART R12	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1110	2	2	EPCMS-MICU-HD-008	3939	\N	\N	6SXAKE41	Captured	t	f	Installed	2016-01-01 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906164	2026-08-05 19:04:41.906177	f	\N	AMC	2026-03-18	2024-25/887	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	FRESENIOUS	4008 S	\N	\N	\N	\N	\N	\N	f	f	Working	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1111	2	2	EPCMS-RAD-USTD-007	3909	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906181	2026-08-05 19:04:41.906184	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	SIEMENS	X300_	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1112	2	2	EPCMS-RAD-USTD-008	3909	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906193	2026-08-05 19:04:41.906195	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	SIEMENS	X300_	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1113	2	2	EPCMS-RAD-USTD-009	3909	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906198	2026-08-05 19:04:41.906201	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	SIEMENS	X300_	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1114	2	2	EPCMS-MICU-INP-017	3898	\N	\N	SMI -38001765	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906204	2026-08-05 19:04:41.906207	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	BENEFUSION uVP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1115	2	2	EPCMS-MICU-INP-018	3898	\N	\N	SMI -38001762	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906209	2026-08-05 19:04:41.906212	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	BENEFUSION uVP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1116	2	2	EPCMS-MICU-INP-019	3898	\N	\N	SMI -38001767	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906215	2026-08-05 19:04:41.906218	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	BENEFUSION uVP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1117	2	2	EPCMS-MICU-DFEB-006	3907	\N	\N	CXMG3F1372	Captured	t	f	Not Required	\N	\N	\N	62	\N	Not working	2026-08-05 19:04:41.906221	2026-08-05 19:04:41.906223	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	BPL	DF2617	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1118	2	2	EPCMS-MICU-ECG-016	3902	\N	\N	FN-04020980	Captured	t	f	Not Required	\N	\N	\N	62	\N	Keypad	2026-08-05 19:04:41.906226	2026-08-05 19:04:41.906229	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	BENEHEART R12	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1119	2	2	EPCMS-MICU-PM-074	3899	\N	\N	FG-03067713	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906232	2026-08-05 19:04:41.906234	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	IPM 10	\N	\N	\N	\N	SUDHAKAR B	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1120	2	2	EPCMS-MICU-PM-075	3899	\N	\N	FG-03067351	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906237	2026-08-05 19:04:41.90624	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	IPM 10	\N	\N	\N	\N	SUDHAKAR B	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1121	2	2	EPCMS-MICU-PM-076	3899	\N	\N	FG-03067352	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906243	2026-08-05 19:04:41.906246	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	IPM 10	\N	\N	\N	\N	SUDHAKAR B	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1122	2	2	EPCMS-MICU-PM-077	3899	\N	\N	FG-11071422	Captured	t	f	Installed	2021-05-22 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906248	2026-08-05 19:04:41.906251	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	IPM 10	\N	\N	\N	\N	SUDHAKAR B	\N	f	f	No	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1123	2	2	EPCMS-MICU-PM-078	3899	\N	\N	FG-11071429	Captured	t	f	Installed	2021-05-22 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906254	2026-08-05 19:04:41.906257	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	IPM 10	\N	\N	\N	\N	SUDHAKAR B	\N	f	f	No	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1124	2	2	EPCMS-MICU-PM-079	3899	\N	\N	FG-11071435	Captured	t	f	Installed	2021-05-22 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:41.90626	2026-08-05 19:04:41.906263	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	IPM 10	\N	\N	\N	\N	SUDHAKAR B	\N	f	f	No	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1125	2	2	EPCMS-MICU-PM-080	3899	\N	\N	FG-11071427	Captured	t	f	Installed	2021-12-14 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906266	2026-08-05 19:04:41.906268	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	IPM 10	\N	\N	\N	\N	SUDHAKAR B	\N	f	f	No	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1126	2	2	EPCMS-MICU-PM-081	3899	\N	\N	FG-11071418	Captured	t	f	Installed	2021-12-14 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906271	2026-08-05 19:04:41.906274	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	IPM 10	\N	\N	\N	\N	SUDHAKAR B	\N	f	f	No	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1127	2	2	EPCMS-MICU-PM-082	3899	\N	\N	FG-11071423	Captured	t	f	Installed	2021-12-14 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906277	2026-08-05 19:04:41.906279	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	IPM 10	\N	\N	\N	\N	SUDHAKAR B	\N	f	f	No	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1128	2	2	EPCMS-MICU-PM-083	3899	\N	\N	FG-11071419	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906282	2026-08-05 19:04:41.906285	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	IPM 10	\N	\N	\N	\N	\N	\N	f	f	No	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1129	2	2	EPCMS-MICU-SYP-031	3900	\N	\N	0010312624A01761	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906288	2026-08-05 19:04:41.906291	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	BMS	SN50C6T	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1130	2	2	EPCMS-MICU-SYP-032	3900	\N	\N	0010312624A01760	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906293	2026-08-05 19:04:41.906296	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	BMS	SN50C6T	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1131	2	2	EPCMS-MICU-SYP-033	3900	\N	\N	0010312624A01765	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906299	2026-08-05 19:04:41.906302	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	BMS	SN50C6T	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1132	2	2	EPCMS-MICU-SYP-034	3900	\N	\N	0010312624A01759	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906305	2026-08-05 19:04:41.906307	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	BMS	SN50C6T	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1133	2	2	EPCMS-MICU-SYP-035	3900	\N	\N	0010312624A01700	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.90631	2026-08-05 19:04:41.906313	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	BMS	SN50C6T	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1134	2	2	EPCMS-MICU-SYP-036	3900	\N	\N	0010312624A01751	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906316	2026-08-05 19:04:41.906319	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	BMS	SN50C6T	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1135	2	2	EPCMS-MICU-SYP-037	3900	\N	\N	0010312624A01752	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906323	2026-08-05 19:04:41.906325	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	BMS	SN50C6T	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1136	2	2	EPCMS-MICU-SYP-038	3900	\N	\N	0010312624A01767	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906328	2026-08-05 19:04:41.906331	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	BMS	SN50C6T	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1137	2	2	EPCMS-MICU-SYP-039	3900	\N	\N	SM3-4B034946	Captured	t	f	Installed	2025-11-02 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906334	2026-08-05 19:04:41.906337	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	BENEVISION uSP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1138	2	2	EPCMS-MICU-SYP-040	3900	\N	\N	SM3-4B034935	Captured	t	f	Installed	2025-11-02 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906339	2026-08-05 19:04:41.906342	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	BENEVISION uSP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1139	2	2	EPCMS-MICU-SYP-041	3900	\N	\N	SM3-4B034906	Captured	t	f	Installed	2025-11-02 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906345	2026-08-05 19:04:41.906348	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	BENEVISION uSP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1140	2	2	EPCMS-MICU-SYP-042	3900	\N	\N	SM3-4B034873	Captured	t	f	Installed	2025-11-02 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906351	2026-08-05 19:04:41.906353	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	BENEVISION uSP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1141	2	2	EPCMS-MICU-SYP-043	3900	\N	\N	SM3-4B034860	Captured	t	f	Installed	2025-11-02 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906356	2026-08-05 19:04:41.906359	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	BENEVISION uSP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1142	2	2	EPCMS-MICU-SYP-044	3900	\N	\N	SM3-4B034866	Captured	t	f	Installed	2025-11-02 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906362	2026-08-05 19:04:41.906364	f	\N	\N	\N	Plunger Broken	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	BENEVISION uSP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1143	2	2	EPCMS-MICU-SYP-045	3900	\N	\N	SM3-4B034893	Captured	t	f	Installed	2025-11-02 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906367	2026-08-05 19:04:41.90637	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	BENEVISION uSP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1144	2	2	EPCMS-MICU-SYP-046	3900	\N	\N	SM3-4B034919	Captured	t	f	Installed	2025-11-02 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906373	2026-08-05 19:04:41.906376	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	BENEVISION uSP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1145	2	2	EPCMS-MICU-SYP-047	3900	\N	\N	160560780	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906378	2026-08-05 19:04:41.906381	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	FRESINIOUS KABI	INFUSIA SP7	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1146	2	2	EPCMS-RAD-USG-004	3906	\N	\N	34917	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906384	2026-08-05 19:04:41.906387	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	SIEMENS	ACUSON X300	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1147	2	2	EPCMS-MICU-VENT-009	3905	\N	\N	GB-04017333	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906389	2026-08-05 19:04:41.906392	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	SV 300	\N	\N	\N	\N	SUNIL	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1148	2	2	EPCMS-MICU-VENT-010	3905	\N	\N	GB-04017336	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906395	2026-08-05 19:04:41.906398	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	SV 300	\N	\N	\N	\N	SUNIL	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1149	2	2	EPCMS-MICU-VENT-011	3905	\N	\N	GB-OC036541	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.906401	2026-08-05 19:04:41.906404	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	SV 300	\N	\N	\N	\N	SUNIL	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1150	2	2	EPCMS-PICU-VENT-012	3905	\N	\N	GB-OC036543	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.984486	2026-08-05 19:04:41.984499	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	117	\N	\N	\N	MINDRAY	SV 300	\N	\N	\N	\N	SUNIL	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1151	2	2	EPCMS-MICU-VENT-013	3905	\N	\N	GB-OC036545	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.984503	2026-08-05 19:04:41.984507	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	SV 300	\N	\N	\N	\N	SUNIL	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1152	2	2	EPCMS-MICU-VENT-014	3905	\N	\N	GB-4A085466	Captured	t	f	Installed	2025-11-02 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:41.984509	2026-08-05 19:04:41.984512	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	SV 300	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1153	2	2	EPCMS-MICU-VENT-015	3905	\N	\N	GB-4A085467	Captured	t	f	Installed	2025-11-02 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:41.984515	2026-08-05 19:04:41.984518	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	SV 300	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1154	2	2	EPCMS-MICU-VENT-016	3905	\N	\N	TV01409050E	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.984521	2026-08-05 19:04:41.984523	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	PHILIPS	TRILOGY 202	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1155	2	2	EPCMS-MICU-VENT-017	3905	\N	\N	TV01409240E	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.984526	2026-08-05 19:04:41.984529	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	PHILIPS	TRILOGY 202	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1156	2	2	EPCMS-MICU-VENT-018	3905	\N	\N	TV0140918AF	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.984532	2026-08-05 19:04:41.984534	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	PHILIPS	TRILOGY 202	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1157	2	2	EPCMS-MICU-VENT-019	3905	\N	\N	TV01409Q409	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.984537	2026-08-05 19:04:41.98454	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	PHILIPS	TRILOGY 202	\N	\N	\N	\N	\N	\N	f	f	Down	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1158	2	2	EPCMS-MICU-VENT-020	3905	\N	\N	100137446	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.984543	2026-08-05 19:04:41.984545	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	PHILIPS	RESPIRONICS V680	\N	\N	\N	\N	\N	\N	f	f	Down	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1159	2	2	EPCMS-MICU-VENT-021	3905	\N	\N	BVACV 14933	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.984548	2026-08-05 19:04:41.984551	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	BEL	CV200	\N	\N	\N	\N	\N	\N	f	f	Down	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1160	2	2	EPCMS-MICU-VENT-022	3905	\N	\N	GB-45082649	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.984554	2026-08-05 19:04:41.984556	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	SV 300	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1161	2	2	EPCMS-RAD-MXR-003	3941	\N	\N	2K19100298SR-DX/HF	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.984559	2026-08-05 19:04:41.984562	f	\N	AMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	ALLENGERS	MARS 4.2 SR	\N	\N	\N	\N	MR.ANKUR SHARMA	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1162	2	2	EPCMS-MICU-VENT-023	3905	\N	\N	GB-51087015	Captured	t	f	Installed	2025-03-06 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:41.984565	2026-08-05 19:04:41.984567	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	SV 300	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1163	2	2	EPCMS-MICU-VENT-024	3905	\N	\N	GB-51087016	Captured	t	f	Installed	2025-03-06 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:41.98457	2026-08-05 19:04:41.984573	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	SV 300	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1164	2	2	EPCMS-MICU-VENT-025	3905	\N	\N	GB-51087018	Captured	t	f	Installed	2025-03-06 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:41.984576	2026-08-05 19:04:41.984579	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	SV 300	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1165	2	2	EPCMS-MICU-PTWM-002	3926	\N	\N	247504	Captured	t	f	Installed	2025-04-25 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:41.984582	2026-08-05 19:04:41.984584	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	3M	775	\N	\N	\N	\N	Mulari Gowda	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1166	2	2	EPCMS-MICU-VENT-026	3905	\N	\N	GB-57090707	Captured	t	f	Installed	2025-10-15 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:41.984587	2026-08-05 19:04:41.98459	t	2028-10-14	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	SV 300	\N	\N	\N	\N	Devaraj K	\N	f	f	Working	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1167	2	2	EPCMS-MICU-VENT-027	3905	\N	\N	GB-57090708	Captured	t	f	Installed	2025-10-15 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:41.984592	2026-08-05 19:04:41.984595	t	2028-10-14	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	SV 300	\N	\N	\N	\N	Devaraj K	\N	f	f	Working	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1168	2	2	EPCMS-MICU-VENT-028	3905	\N	\N	GB-57092132	Captured	t	f	Not Required	\N	\N	\N	62	\N	Working	2026-08-05 19:04:41.984598	2026-08-05 19:04:41.984601	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	SV 300	\N	\N	\N	\N	Devaraj K	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1169	2	2	EPCMS-MICU-VENT-029	3905	\N	\N	GB-57092136	Captured	t	f	Not Required	\N	\N	\N	62	\N	Working	2026-08-05 19:04:41.984603	2026-08-05 19:04:41.984606	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	SV 300	\N	\N	\N	\N	Devaraj K	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1170	2	2	EPCMS-MICU-VENT-030	3905	\N	\N	GB-57092129	Captured	t	f	Not Required	\N	\N	\N	62	\N	Working	2026-08-05 19:04:41.984609	2026-08-05 19:04:41.984612	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	SV 300	\N	\N	\N	\N	Devaraj K	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1171	2	2	EPCMS-MICU-DFEB-007	3907	\N	\N	GSJJ6A2418	Captured	t	f	Installed	2026-03-13 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:41.984615	2026-08-05 19:04:41.984617	t	2028-03-12	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	BPL	RE LIFE 900	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1172	2	2	EPCMS-MINOR OT-ANES-001	3965	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.011049	2026-08-05 19:04:42.011059	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	118	\N	\N	\N	RATAMETER	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1173	2	2	EPCMS-MINOR OT-ANES-002	3965	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.011062	2026-08-05 19:04:42.011065	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	118	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1174	2	2	EPCMS-MINOR OT-OTLT-003	3964	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.011068	2026-08-05 19:04:42.011071	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	118	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1175	2	2	EPCMS-MINOR OT-OTLT-004	3964	\N	\N	6536	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.011074	2026-08-05 19:04:42.011076	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	118	\N	\N	\N	MPI SURGICALS	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1176	2	2	EPCMS-MINOR OT-OTLT-005	3964	\N	\N	6537	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.011079	2026-08-05 19:04:42.011082	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	118	\N	\N	\N	MPI SURGICALS	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1177	2	2	EPCMS-MINOR OT-SPLT-003	3914	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.011085	2026-08-05 19:04:42.011087	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	118	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1178	2	2	EPCMS-MINOR OT-SPLT-004	3914	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.01109	2026-08-05 19:04:42.011093	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	118	\N	\N	\N	BASCO	HL 2000	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1179	2	2	EPCMS-RAD-MXR-004	3941	\N	\N	2K19100250SR-DX/LF	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.043155	2026-08-05 19:04:42.043166	f	\N	AMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	ALLENGERS	100SR	\N	\N	\N	\N	MR.ANKUR SHARMA	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1180	2	2	EPCMS-NICU-BWRM-002	3960	\N	\N	40602	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.043169	2026-08-05 19:04:42.043172	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	AMPLA	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1181	2	2	EPCMS-NICU-BWRM-003	3960	\N	\N	40601	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.043175	2026-08-05 19:04:42.043178	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	AMPLA	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1182	2	2	EPCMS-NICU-BWRM-004	3960	\N	\N	40603	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.043181	2026-08-05 19:04:42.043183	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	AMPLA	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1183	2	2	EPCMS-NICU-VENT-031	3905	\N	\N	ARUA0022	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.043195	2026-08-05 19:04:42.043198	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	DRAGER	BABYLOG 8000 +	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1184	2	2	EPCMS-NICU-INRS-001	3966	\N	\N	I-1JAK-550082	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.067801	2026-08-05 19:04:42.067813	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	BABYPAP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1185	2	2	EPCMS-NICU-BCPAP-001	3967	\N	\N	2310060043	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.105345	2026-08-05 19:04:42.105354	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	BABYPAP 1150S	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1186	2	2	EPCMS-NICU-BCPAP-002	3967	\N	\N	1101916	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.105358	2026-08-05 19:04:42.105361	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	BABYPAP 1150S	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1187	2	2	EPCMS-NICU-BCPAP-003	3967	\N	\N	231006008	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.105364	2026-08-05 19:04:42.105366	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	BABYPAP 1150S	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1188	2	2	EPCMS-NICU-BCPAP-004	3967	\N	\N	110135	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.105369	2026-08-05 19:04:42.105372	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	BABYPAP 1150S	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1189	2	2	EPCMS-NICU-SYP-048	3900	\N	\N	SM3-4B034917	Captured	t	f	Installed	2025-11-02 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:42.105375	2026-08-05 19:04:42.105377	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	MINDRAY	BENEVISION uSP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1190	2	2	EPCMS-NICU-SYP-049	3900	\N	\N	SM3-4B034862	Captured	t	f	Installed	2025-11-02 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:42.10538	2026-08-05 19:04:42.105383	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	MINDRAY	BENEVISION uSP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1191	2	2	EPCMS-NICU-SYP-050	3900	\N	\N	SM3-4B034890	Captured	t	f	Installed	2025-11-02 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:42.105386	2026-08-05 19:04:42.105389	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	MINDRAY	BENEVISION uSP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1192	2	2	EPCMS-NICU-PHTH-001	3968	\N	\N	IDAR891022	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.15169	2026-08-05 19:04:42.151702	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	BILITRON 2006	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1193	2	2	EPCMS-NICU-PHTH-002	3968	\N	\N	IJAL890144	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.151706	2026-08-05 19:04:42.151709	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	BILITRON 2006	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1194	2	2	EPCMS-NICU-PHTH-003	3968	\N	\N	IJAL550082	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.151711	2026-08-05 19:04:42.151714	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	BILITRON 2006	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1195	2	2	EPCMS-NICU-PHTH-004	3968	\N	\N	IDAR-891021	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.151717	2026-08-05 19:04:42.15172	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	BILITRON SKY 2006	\N	\N	\N	\N	PRAMOD	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1196	2	2	EPCMS-NICU-PHTH-005	3968	\N	\N	IDAR-891022	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.151723	2026-08-05 19:04:42.151726	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	BILITRON SKY 2006	\N	\N	\N	\N	PRAMOD	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1197	2	2	EPCMS-NICU-PHTH-006	3968	\N	\N	IJAL890162	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.151728	2026-08-05 19:04:42.151731	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	BILTRON	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1198	2	2	EPCMS-NICU-PHTH-007	3968	\N	\N	IJAL890149	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.151734	2026-08-05 19:04:42.151737	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	BILTRON	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1199	2	2	EPCMS-NICU-PHTH-008	3968	\N	\N	IJAL890159	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.151739	2026-08-05 19:04:42.151742	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	BILTRON	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1200	2	2	EPCMS-NICU-PHTH-009	3968	\N	\N	IJAL890163	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.151745	2026-08-05 19:04:42.151748	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	BILTRON	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1201	2	2	EPCMS-NICU-PHTH-010	3968	\N	\N	IJAL890161	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.151751	2026-08-05 19:04:42.151753	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	BILTRON	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1202	2	2	EPCMS-NICU-INCU-001	3969	\N	\N	CN-4513	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.2064	2026-08-05 19:04:42.206411	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	CN	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1203	2	2	EPCMS-NICU-BWRM-005	3960	\N	\N	ICAR-180229	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.206415	2026-08-05 19:04:42.206418	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	KANGAROO 1085	\N	\N	\N	\N	PRAMOD	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1204	2	2	EPCMS-NICU-BWRM-006	3960	\N	\N	ICAR-180230	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.206421	2026-08-05 19:04:42.206424	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	KANGAROO 1085	\N	\N	\N	\N	PRAMOD	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1205	2	2	EPCMS-NICU-BWRM-007	3960	\N	\N	ICAR-180231	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.206427	2026-08-05 19:04:42.20643	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	KANGAROO 1085	\N	\N	\N	\N	PRAMOD	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1206	2	2	EPCMS-NICU-BWRM-008	3960	\N	\N	ICAR-180232	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.206432	2026-08-05 19:04:42.206435	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	KANGAROO 1085	\N	\N	\N	\N	PRAMOD	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1207	2	2	EPCMS-NICU-BWRM-009	3960	\N	\N	SKG14160140PA	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.206438	2026-08-05 19:04:42.206441	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	GE	LULLABY	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1208	2	2	EPCMS-NICU-BWRM-010	3960	\N	\N	SKG141200248A	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.206444	2026-08-05 19:04:42.206447	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	GE	LULLABY	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1209	2	2	EPCMS-NICU-PHTH-011	3968	\N	\N	SGT14456815PA	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.206449	2026-08-05 19:04:42.206452	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	GE	LULLABY	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1210	2	2	EPCMS-NICU-PHTH-012	3968	\N	\N	SGT14456820PA	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.206455	2026-08-05 19:04:42.206457	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	GE	LULLABY	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1211	2	2	EPCMS-NICU-PHTH-013	3968	\N	\N	SGT14456816PA	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.20646	2026-08-05 19:04:42.206463	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	GE	LULLABY	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1212	2	2	EPCMS-NICU-INRS-002	3966	\N	\N	151606000_334	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.206466	2026-08-05 19:04:42.206469	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	NEOTECH	NICE 5020	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1213	2	2	EPCMS-NICU-INRS-003	3966	\N	\N	151606 000334	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.206472	2026-08-05 19:04:42.206475	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	NEOTECH	NICE 5020	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1214	2	2	EPCMS-NICU-INRS-004	3966	\N	\N	151606 000333	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.206478	2026-08-05 19:04:42.206481	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	NEOTECH	NICE 5020	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1215	2	2	EPCMS-NICU-PINC-001	3970	\N	\N	15160200_2000	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.251293	2026-08-05 19:04:42.251305	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	NEOTECH	ORCHID 3000	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1216	2	2	EPCMS-NICU-SYP-051	3900	\N	\N	0010312320A01602	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.251309	2026-08-05 19:04:42.251311	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	BMS	SN50C6T	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1217	2	2	EPCMS-NICU-SYP-052	3900	\N	\N	0010312624A01762	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.251314	2026-08-05 19:04:42.251317	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	BMS	SN50C6T	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1218	2	2	EPCMS-NICU-SYP-053	3900	\N	\N	0010312624A01769	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.25132	2026-08-05 19:04:42.251322	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	BMS	SN50C6T	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1219	2	2	EPCMS-NICU-SYP-054	3900	\N	\N	0010312624A01753	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.251325	2026-08-05 19:04:42.251328	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	BMS	SN50C6T	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1220	2	2	EPCMS-NICU-PM-084	3899	\N	\N	CN12807150	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.251331	2026-08-05 19:04:42.251333	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	PHILIPS (GOLDWAY)	UT 6000A	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1221	2	2	EPCMS-NICU-PM-085	3899	\N	\N	CN12807156	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.251336	2026-08-05 19:04:42.251339	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	PHILIPS (GOLDWAY)	UT 6000A	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1222	2	2	EPCMS-NICU-PM-086	3899	\N	\N	CN12807148	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.251342	2026-08-05 19:04:42.251344	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	PHILIPS (GOLDWAY)	UT 6000A	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1223	2	2	EPCMS-NICU-PM-087	3899	\N	\N	CN12801767	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.251347	2026-08-05 19:04:42.25135	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	PHILIPS (GOLDWAY)	UT 6000A	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1224	2	2	EPCMS-NICU-NWS-001	3971	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Working	2026-08-05 19:04:42.288852	2026-08-05 19:04:42.288861	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	Essae	BS 250	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1225	2	2	EPCMS-NICU-VENT-032	3905	\N	\N	ASPN - 0006	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.288865	2026-08-05 19:04:42.288867	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	DRAGER	BABYLOG VN600	\N	\N	\N	\N	JOEL /NANDHA	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1226	2	2	EPCMS-NICU-PM-088	3899	\N	\N	FT4-45002874	Captured	t	f	Installed	2024-10-16 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:42.28887	2026-08-05 19:04:42.288873	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	MINDRAY	UMEC 100	\N	\N	\N	\N	ADARSH	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1227	2	2	EPCMS-NICU-PM-089	3899	\N	\N	FT4-45002881	Captured	t	f	Installed	2024-10-16 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:42.288876	2026-08-05 19:04:42.288878	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	MINDRAY	UMEC 100	\N	\N	\N	\N	ADARSH	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1228	2	2	EPCMS-NICU-PHTH-014	3968	\N	\N	IBAS-891705	Captured	t	f	Installed	2025-12-09 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:42.288881	2026-08-05 19:04:42.288884	t	2028-12-08	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	BILITRON 2006	\N	\N	\N	\N	PRAMOD	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1229	2	2	EPCMS-NICU-PHTH-015	3968	\N	\N	IBAS-891695	Captured	t	f	Installed	2025-12-09 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:42.288887	2026-08-05 19:04:42.288889	t	2028-12-08	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	BILITRON 2006	\N	\N	\N	\N	PRAMOD	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1230	2	2	EPCMS-NICU-PHTH-016	3968	\N	\N	IBAS-891704	Captured	t	f	Installed	2025-12-09 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:42.288892	2026-08-05 19:04:42.288895	t	2028-12-08	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	BILITRON 2006	\N	\N	\N	\N	PRAMOD	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1231	2	2	EPCMS-NICU-PHTH-017	3968	\N	\N	IBAS-891703	Captured	t	f	Installed	2025-12-09 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:42.288898	2026-08-05 19:04:42.2889	t	2028-12-08	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	BILITRON 2006	\N	\N	\N	\N	PRAMOD	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1232	2	2	EPCMS-NICU-BWRM-011	3960	\N	\N	IDAR-180305	Captured	t	f	Installed	2025-12-09 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:42.288903	2026-08-05 19:04:42.288906	t	2028-12-08	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	KANGAROO 1085	\N	\N	\N	\N	PRAMOD	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1233	2	2	EPCMS-NICU-BWRM-012	3960	\N	\N	IDAR-180306	Captured	t	f	Installed	2025-12-09 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:42.288908	2026-08-05 19:04:42.288911	t	2028-12-08	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	KANGAROO 1085	\N	\N	\N	\N	PRAMOD	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1234	2	2	EPCMS-NICU-BCPAP-005	3967	\N	\N	IBAV-111616	Captured	t	f	Installed	2025-12-09 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:42.288914	2026-08-05 19:04:42.288917	t	2028-12-08	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	BABYPAP 1150S	\N	\N	\N	\N	PRAMOD	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1235	2	2	EPCMS-NICU-BCPAP-006	3967	\N	\N	IBAV-111617	Captured	t	f	Installed	2025-12-09 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:42.288919	2026-08-05 19:04:42.288922	t	2028-12-08	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	BABYPAP 1150S	\N	\N	\N	\N	PRAMOD	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1236	2	2	EPCMS-NICU-VENT-033	3905	\N	\N	\N	Pending Update	t	f	Installed	2026-01-03 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:42.288925	2026-08-05 19:04:42.288928	t	2027-01-02	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	DRAGER	BABYLOG VN600	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1237	2	2	EPCMS-OBG OPD-NST-004	3963	\N	\N	560034-M22305660002	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.366514	2026-08-05 19:04:42.366523	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	120	\N	\N	\N	EDAN	F3	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1238	2	2	EPCMS-OBG OPD-FD-003	3962	\N	\N	LMMA5C10939	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.366527	2026-08-05 19:04:42.366531	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	120	\N	\N	\N	BPL	FD9714	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1239	2	2	EPCMS-OPH-OPD-ASCN-001	3972	\N	\N	950605	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.393948	2026-08-05 19:04:42.393957	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	121	\N	\N	\N	TOMEY	BIO/PACHY METER(AL-4000)	\N	\N	\N	\N	MR. AHAMED BADHUSHA	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1240	2	2	EPCMS-OPH-OPD-ASCN-002	3972	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.393961	2026-08-05 19:04:42.393964	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	121	\N	\N	\N	APPASAMY	APPA SCAN	\N	\N	\N	\N	\N	\N	f	f	RBER	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1241	2	2	EPCMS-OPH-OPD-BSCN-001	3973	\N	\N	9341	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.41657	2026-08-05 19:04:42.416579	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	121	\N	\N	\N	APPASAMY	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1242	2	2	EPCMS-OPH-OPD-ANCC-001	3974	\N	\N	4001220014	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.438967	2026-08-05 19:04:42.438976	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	121	\N	\N	\N	APPASAMY	SLCAMI-CM-7	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1243	2	2	EPCMS-OPH-OPD-YAGL-001	3975	\N	\N	43178220072	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.461255	2026-08-05 19:04:42.461263	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	121	\N	\N	\N	APPASAMY	307	\N	\N	\N	\N	THILAK	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1244	2	2	EPCMS-OPH-OPD-AKRF-001	3976	\N	\N	4493345	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.486292	2026-08-05 19:04:42.486305	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	121	\N	\N	\N	TOPCON	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1245	2	2	EPCMS-OPHTH OPD-BPA-042	3895	\N	\N	RM0700176	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.486309	2026-08-05 19:04:42.486312	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	121	\N	\N	\N	DISHA	N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1246	2	2	EPCMS-OPH-OPD-HESS-001	3977	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.510003	2026-08-05 19:04:42.510012	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	121	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1247	2	2	EPCMS-OPH-OPD-HFA-001	3978	\N	\N	840-21491	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.532551	2026-08-05 19:04:42.53256	f	\N	AMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	121	\N	\N	\N	CARL ZEISS	HFA3 840	\N	\N	\N	\N	VENKATESH	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1248	2	2	EPCMS-OPH-OPD-ECHR-001	3979	\N	\N	3937285	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.555256	2026-08-05 19:04:42.555265	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	121	\N	\N	\N	APPASAMY	HD SMART	\N	\N	\N	\N	THILAK	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1249	2	2	EPCMS-OPH-OPD-INOP-001	3980	\N	\N	1802212311	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.583288	2026-08-05 19:04:42.583297	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	121	\N	\N	\N	APPASAMY	AAIO WIRELESS	\N	\N	\N	\N	THILAK	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1250	2	2	EPCMS-OPH-OPD-INOP-002	3980	\N	\N	1802212260	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.583301	2026-08-05 19:04:42.583304	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	121	\N	\N	\N	APPASAMY	AAIO WIRELESS	\N	\N	\N	\N	THILAK	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1251	2	2	EPCMS-OPH-OPD-INOP-003	3980	\N	\N	1802150541	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.583307	2026-08-05 19:04:42.58331	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	121	\N	\N	\N	APPASAMY	AAIO WIRELESS	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1252	2	2	EPCMS-OPH-OPD-KERA-001	3981	\N	\N	1401150245	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.659589	2026-08-05 19:04:42.659597	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	121	\N	\N	\N	APPASAMY	KMS6	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1253	2	2	EPCMS-OPH-OPD-LENM-001	3982	\N	\N	957625-D	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.681908	2026-08-05 19:04:42.681917	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	121	\N	\N	\N	GRAND SEIKO	GL-7000	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1254	2	2	EPCMS-OPH-OPD-PHAC-001	3983	\N	\N	1462501088	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.705467	2026-08-05 19:04:42.705477	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	121	\N	\N	\N	APPASAMY	AAOM BRILIONT	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1255	2	2	EPCMS-OPH-OPD-NCT-001	3984	\N	\N	10789-0317	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.728382	2026-08-05 19:04:42.728391	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	121	\N	\N	\N	REICHENT	16049	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1256	2	2	EPCMS-OPH-OPD-NMFC-001	3985	\N	\N	AR8000012	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.751061	2026-08-05 19:04:42.751071	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	121	\N	\N	\N	TOPCON	TRC-NW8F	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1257	2	2	EPCMS-OPH-OPD-OPRU-001	3986	\N	\N	2901220270	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.773409	2026-08-05 19:04:42.773417	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	121	\N	\N	\N	APPASAMY	REGULAR 2000	\N	\N	\N	\N	THILAK	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1258	2	2	EPCMS-OPH-OPD-OPH-001	3987	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.795888	2026-08-05 19:04:42.795897	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	121	\N	\N	\N	HEINE	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1259	2	2	EPCMS-OPH-OPD-GRNL-001	3988	\N	\N	ILS2112718	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.817874	2026-08-05 19:04:42.817882	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	121	\N	\N	\N	APPASAMY	AMOGH SMART	\N	\N	\N	\N	THILAK	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1260	2	2	EPCMS-OPH-OPD-ATON-001	3989	\N	\N	08602-0122	Captured	t	f	Installed	2022-03-29 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:42.891148	2026-08-05 19:04:42.891158	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	121	\N	\N	\N	APPASAMY	\N	\N	\N	\N	\N	THILAK	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1261	2	2	EPCMS-OPH-OPD-RETN-001	3990	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.913923	2026-08-05 19:04:42.913932	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	121	\N	\N	\N	HEINE	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1262	2	2	EPCMS-OPH-OPD-SLMP-001	3991	\N	\N	1513220238	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.941232	2026-08-05 19:04:42.941241	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	121	\N	\N	\N	APPASAMY	AIA-11 3 STEP LED	\N	\N	\N	\N	THILAK	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1263	2	2	EPCMS-OPH-OPD-SLMP-002	3991	\N	\N	1503160022	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.941245	2026-08-05 19:04:42.941248	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	121	\N	\N	\N	APPASAMY	AIA115S	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1264	2	2	EPCMS-OPH-OPD-SLMP-003	3991	\N	\N	1511170451	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.941251	2026-08-05 19:04:42.941254	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	121	\N	\N	\N	APPASAMY	AIA115S	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1265	2	2	EPCMS-OPH-OPD-SPMC-001	3992	\N	\N	567804	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.968565	2026-08-05 19:04:42.968574	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	121	\N	\N	\N	TOMEY	EM-4000	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1266	2	2	EPCMS-OPH-OPD-SLMP-004	3991	\N	\N	1513250557	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.968577	2026-08-05 19:04:42.96858	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	121	\N	\N	\N	APPASAMY	AIA-11 3S-L	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1267	2	2	EPCMS-OPH-OPD-SLMP-005	3991	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.968583	2026-08-05 19:04:42.968586	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	121	\N	\N	\N	APPASAMY	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1268	2	2	EPCMS-OPH-OPD-OCT-001	3993	\N	\N	AV3142546	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.994796	2026-08-05 19:04:42.994805	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	121	\N	\N	\N	TOPCON	3D OCT	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1269	2	2	EPCMS-OPHTH OPD-SPLT-005	3914	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.994809	2026-08-05 19:04:42.994812	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	121	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1270	2	2	EPCMS-OPH-OPD-SYNP-001	3994	\N	\N	2210924	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.001747	2026-08-05 19:04:43.001756	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	121	\N	\N	\N	APPASAMY	ASP902	\N	\N	\N	\N	VIMAL	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1271	2	2	EPCMS-OPHTH WARD-ECG-017	3902	\N	\N	JWMC7M1401	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.006347	2026-08-05 19:04:43.006356	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	122	\N	\N	\N	BPL	CARDIART GENX 3	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1272	2	2	EPCMS-ORTHO OPD-BPA-043	3895	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.026426	2026-08-05 19:04:43.026435	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	123	\N	\N	\N	DIAMOND	DELUXE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1273	2	2	EPCMS-ORTHO OPD-POPC-001	3995	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.050964	2026-08-05 19:04:43.050974	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	123	\N	\N	\N	MANMAN	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1274	2	2	EPCMS-ORTHO OPD-SPLT-006	3914	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.050978	2026-08-05 19:04:43.050981	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	123	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1275	2	2	EPCMS-ORTHO OPD-VBOX-017	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.050983	2026-08-05 19:04:43.050986	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	123	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1276	2	2	EPCMS-ORTHO OPD-VBOX-018	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.050989	2026-08-05 19:04:43.050992	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	123	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1277	2	2	EPCMS-ORTHO OPD-VBOX-019	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.050995	2026-08-05 19:04:43.050998	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	123	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1278	2	2	EPCMS-ORTHO OPD-VBOX-020	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.051	2026-08-05 19:04:43.051003	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	123	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1279	2	2	EPCMS-ORTHO OPD-VBOX-021	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.051006	2026-08-05 19:04:43.051009	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	123	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1280	2	2	EPCMS-ORTHO OPD-VBOX-022	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.051012	2026-08-05 19:04:43.051014	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	123	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1281	2	2	EPCMS-ORTHO OPD-VBOX-023	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.051017	2026-08-05 19:04:43.05102	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	123	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1282	2	2	EPCMS-OT ANES-PM-090	3899	\N	\N	112613-M13804950001	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.068527	2026-08-05 19:04:43.068536	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	124	\N	\N	\N	EDAN	M3	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1283	2	2	EPCMS-RAD-USTD-010	3909	\N	\N	826L3029	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.06854	2026-08-05 19:04:43.068543	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	124	\N	\N	\N	SIEMENS	NX3-CH5-2	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1284	2	2	EPCMS-RAD-USTD-011	3909	\N	\N	20150257	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.068546	2026-08-05 19:04:43.068548	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	124	\N	\N	\N	SIEMENS	NX3-VF10-10	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1285	2	2	EPCMS-RAD-USTD-012	3909	\N	\N	43528009	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.068551	2026-08-05 19:04:43.068554	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	124	\N	\N	\N	SIEMENS	NX3-CEV9-4	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1286	2	2	EPCMS-RAD-USTD-013	3909	\N	\N	44238029	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.068557	2026-08-05 19:04:43.06856	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	124	\N	\N	\N	SIEMENS	NX3-P4-2	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1287	2	2	EPCMS-RAD-USG-005	3906	\N	\N	510320	Captured	t	f	Installed	2016-08-11 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:43.068562	2026-08-05 19:04:43.068565	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	124	\N	\N	\N	SIEMENS	ACUSON NX3	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1288	2	2	EPCMS-CTVS OT-ESU-002	3952	\N	\N	8CA-FSD37622A	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.093037	2026-08-05 19:04:43.093047	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	125	\N	\N	\N	COVIDIEN	FORCE FX	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1289	2	2	EPCMS-CTVS OT-DFEB-008	3907	\N	\N	AR3-34003460	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.093051	2026-08-05 19:04:43.093054	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	125	\N	\N	\N	MINDRAY	UMED 20	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1290	2	2	EPCMS-OT_EMER-AWS-001	3996	\N	\N	MA13040122	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.175641	2026-08-05 19:04:43.17565	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	126	\N	\N	\N	GE	DATEX-OHMEDA M904E	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1291	2	2	EPCMS-OT_EMER-DFEB-009	3907	\N	\N	CYM3F1372	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.175654	2026-08-05 19:04:43.175657	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	126	\N	\N	\N	BPL	DF2617	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1292	2	2	EPCMS-OT_ENT-AWS-002	3996	\N	\N	ME14110783	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.17566	2026-08-05 19:04:43.175663	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	126	\N	\N	\N	GE	DATEX-OHMEDA 9100C	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1293	2	2	EPCMS-OT_SEPTIC 2-ESU-003	3952	\N	\N	L213G05B	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.175665	2026-08-05 19:04:43.175668	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	126	\N	\N	\N	SHALYA	BPI	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1294	2	2	EPCMS-OT_SEPTIC 2-OTCPL-001	3997	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.206021	2026-08-05 19:04:43.206034	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	126	\N	\N	\N	YESDI BIOMED	PRO TOUCH CONTROL PANEL	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1295	2	2	EPCMS-OT_SEPTIC 2-OTLT-006	3964	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.206038	2026-08-05 19:04:43.206041	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	126	\N	\N	\N	COGNATE	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1296	2	2	EPCMS-OT_SEPTIC 2-OTT-002	3951	\N	\N	2253-2016	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.206044	2026-08-05 19:04:43.206046	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	126	\N	\N	\N	PALAKKAD SURGICALS	LEGEND	\N	\N	\N	\N	Sathish	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1297	2	2	EPCMS-OT_EMER-DFEB-010	3907	\N	\N	GSJJ6A2419	Captured	t	f	Installed	2026-03-13 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:43.206049	2026-08-05 19:04:43.206052	t	2028-03-12	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	126	\N	\N	\N	BPL	RE LIFE 900	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1298	2	2	EPCMS-OT_ENT-GEN-005	3998	\N	\N	V13111RX120120093	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.235003	2026-08-05 19:04:43.235012	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	127	\N	\N	\N	\N	PAC	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1299	2	2	EPCMS-OT_ENT-ESU-004	3952	\N	\N	L214A02G	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.235016	2026-08-05 19:04:43.235019	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	127	\N	\N	\N	SHALYA	LX	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1300	2	2	EPCMS-OT_ENT-ESA-005	3896	\N	\N	230125530	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.235021	2026-08-05 19:04:43.235024	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	127	\N	\N	\N	VENKY	VTS-DLX	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1301	2	2	EPCMS-OT_ENT-GEN-006	3999	\N	\N	M006-16	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.259759	2026-08-05 19:04:43.259769	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	127	\N	\N	\N	NIVIQURE MEDITECH	ECT SYSTEM	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1302	2	2	EPCMS-OT_ENT-FHDC-001	4000	\N	\N	01D024	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.282137	2026-08-05 19:04:43.282145	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	127	\N	\N	\N	SERWELL	HDC 3500	\N	\N	\N	\N	MR.G SATHISH	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1303	2	2	EPCMS-OT_ENT-LS-001	4001	\N	\N	EFG43A01	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.304342	2026-08-05 19:04:43.304357	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	127	\N	\N	\N	SERWELL	HDC-3500	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1304	2	2	EPCMS-OT_ENT-GEN-007	4002	\N	\N	12C785	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.336086	2026-08-05 19:04:43.336096	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	127	\N	\N	\N	SERWELL	OMD 6022	\N	\N	\N	\N	MR.G SATHISH	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1305	2	2	EPCMS-OT_ENT-OPMC-003	3959	\N	\N	15105415	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.3361	2026-08-05 19:04:43.336103	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	127	\N	\N	\N	PRIMA	LAMBOMED	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1306	2	2	EPCMS-OT_ENT-OTLT-007	3964	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.336106	2026-08-05 19:04:43.336108	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	127	\N	\N	\N	LUMIX	L600	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1307	2	2	EPCMS-OT_ENT-PM-091	3899	\N	\N	CN42787560	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.336111	2026-08-05 19:04:43.336114	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	127	\N	\N	\N	PHILIPS	SURESIGN VM8	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1308	2	2	EPCMS-OT_ENT-OTT-003	3951	\N	\N	3260-2016	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.336117	2026-08-05 19:04:43.336119	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	127	\N	\N	\N	PALAKKAD SURGICALS	LEGEND	\N	\N	\N	\N	Sathish	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1309	2	2	EPCMS-OT-GEN-008	4003	\N	\N	HC112G21RX20150068	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.363425	2026-08-05 19:04:43.363434	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	128	\N	\N	\N	ECLERIS	PROCAM	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1310	2	2	EPCMS-OT-ESU-005	3952	\N	\N	L222B04Q	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.363438	2026-08-05 19:04:43.363441	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	128	\N	\N	\N	SHALYA	LX	\N	\N	\N	\N	ADITHYA	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1311	2	2	EPCMS-OT-LAP-001	4004	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.439736	2026-08-05 19:04:43.43975	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	128	\N	\N	\N	STRYKER	1188	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1312	2	2	EPCMS-OT-CO2INF-001	4005	\N	\N	9804CE400	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.465304	2026-08-05 19:04:43.465313	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	128	\N	\N	\N	STRYKER	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1313	2	2	EPCMS-OT-CO2INF-002	4005	\N	\N	2K1605204	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.465317	2026-08-05 19:04:43.46532	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	128	\N	\N	\N	ENTER TECH	ENCO2-20L	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1314	2	2	EPCMS-OT-GEN-009	4006	\N	\N	KD202A	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.488319	2026-08-05 19:04:43.488335	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	128	\N	\N	\N	SINUSCOPY	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1315	2	2	EPCMS-OT-GEN-010	4007	\N	\N	307PMYH29418	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.520574	2026-08-05 19:04:43.520584	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	128	\N	\N	\N	LG	27QL650F	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1316	2	2	EPCMS-OT_GEN-PTWM-003	3926	\N	\N	247502	Captured	t	f	Installed	2025-04-25 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:43.520588	2026-08-05 19:04:43.520591	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	128	\N	\N	\N	3M	775	\N	\N	\N	\N	Mulari Gowda	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1317	2	2	EPCMS-OT_GEN-PTWM-004	3926	\N	\N	207505	Captured	t	f	Installed	2025-04-25 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:43.520594	2026-08-05 19:04:43.520597	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	128	\N	\N	\N	3M	775	\N	\N	\N	\N	Mulari Gowda	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1318	2	2	EPCMS-OT-OTT-004	3951	\N	\N	5103 2021	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.520599	2026-08-05 19:04:43.520602	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	128	\N	\N	\N	PALAKKAD SURGICALS	LEGEND	\N	\N	\N	\N	Sathish	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1319	2	2	EPCMS-OT EXTRA-OTT-005	3951	\N	\N	3121-04 2016	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.520605	2026-08-05 19:04:43.520608	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	128	\N	\N	\N	PALAKKAD SURGICALS	LEGEND	\N	\N	\N	\N	Sathish	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1320	2	2	EPCMS-OT_GEN-GEN-011	4008	\N	\N	0604A6001	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.553757	2026-08-05 19:04:43.553768	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	128	\N	\N	\N	\N	BASPA 24	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1321	2	2	EPCMS-OT_GEN-FWM-005	3923	\N	\N	20230099	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.553772	2026-08-05 19:04:43.553775	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	128	\N	\N	\N	PLUTUS	1FW010	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1322	2	2	EPCMS-OT_GEN-FUM-004	3919	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.553778	2026-08-05 19:04:43.55378	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	128	\N	\N	\N	AEROJET	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1323	2	2	EPCMS-OT_GEN-FUM-005	3919	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.553783	2026-08-05 19:04:43.553786	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	128	\N	\N	\N	AEROJET	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1324	2	2	EPCMS-OT_GEN-PTWM-005	3926	\N	\N	OEH1280	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.553789	2026-08-05 19:04:43.553791	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	128	\N	\N	\N	\N	ORPET	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1325	2	2	EPCMS-OT_GEN-GEN-012	4009	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.581393	2026-08-05 19:04:43.581401	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	128	\N	\N	\N	KING SYSTEM	KING VISION	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1326	2	2	EPCMS-OT_GEN-PM-092	3899	\N	\N	FT4-56023374	Captured	t	f	Installed	2025-10-15 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:43.581405	2026-08-05 19:04:43.581408	t	2028-10-14	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	128	\N	\N	\N	MINDRAY	UMEC 100	\N	\N	\N	\N	Devaraj K	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1327	2	2	EPCMS-OT_LAP-GEN-013	4010	\N	\N	240601009	Captured	t	f	Installed	2025-02-12 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:43.622171	2026-08-05 19:04:43.622183	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	129	\N	\N	\N	Lotus Endoscurgery	LUGEN	\N	\N	\N	\N	SHIVANARAYANA	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1328	2	2	EPCMS-OT_LAP-AWS-003	3996	\N	\N	SPC2152137WA	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.622198	2026-08-05 19:04:43.622202	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	129	\N	\N	\N	GE	DATEX-OHMEDA 9100C NXT	\N	\N	\N	\N	MR. SHYLENDER	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1329	2	2	EPCMS-OT_LAP-ESU-006	3952	\N	\N	1222B042	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.622204	2026-08-05 19:04:43.622207	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	129	\N	\N	\N	SHALYA	LX	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1330	2	2	EPCMS-OT_LAP-CO2INF-003	4005	\N	\N	2102CE0231	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.62221	2026-08-05 19:04:43.622213	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	129	\N	\N	\N	STRYKER	PNEUMO SULL	\N	\N	\N	\N	MR.LINTO	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1331	2	2	EPCMS-OT_LAP-ESA-006	3896	\N	\N	270125532	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.622216	2026-08-05 19:04:43.622218	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	129	\N	\N	\N	VENKY	VTS-DLX	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1332	2	2	EPCMS-OT_LAP-LAP-002	4004	\N	\N	20J558074	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.622221	2026-08-05 19:04:43.622224	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	129	\N	\N	\N	STRYKER	1588 AIM	\N	\N	\N	\N	MR.LINTO	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1333	2	2	EPCMS-OT_LAP-ESU-007	3952	\N	\N	MBXVP220500029	Captured	t	f	Installed	2022-06-08 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:43.622227	2026-08-05 19:04:43.62223	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	129	\N	\N	\N	ALAN	COMBI-MAX	\N	\N	\N	\N	MR. SK SIVA	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1334	2	2	EPCMS-OT_LAP-CO2INF-004	4011	\N	\N	0620-040-610	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.649673	2026-08-05 19:04:43.649683	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	129	\N	\N	\N	PNEUMO	2102CE023	\N	\N	\N	\N	MR.LINTO	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1335	2	2	EPCMS-OT_LAP-LS-002	4012	\N	\N	20ES13454	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.686203	2026-08-05 19:04:43.686213	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	129	\N	\N	\N	STRYKER	LIGHT SOURCE LI0	\N	\N	\N	\N	MR.LINTO	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1336	2	2	EPCMS-OT_LAP-OTCPL-002	3997	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.686217	2026-08-05 19:04:43.68622	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	129	\N	\N	\N	\N	PRO TOUCH CONTROL PANEL	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1337	2	2	EPCMS-OT_LAP-OTCPL-003	3997	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.686223	2026-08-05 19:04:43.686226	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	129	\N	\N	\N	YESDI BIOMED	PRO TOUCH CONTROL PANEL	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1338	2	2	EPCMS-OT_LAP-OTLT-008	3964	\N	\N	5413000955	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.686229	2026-08-05 19:04:43.686232	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	129	\N	\N	\N	MINDRAY	HYLED 600	\N	\N	\N	\N	MR.PRASAD	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1339	2	2	EPCMS-OT_LAP-PM-093	3899	\N	\N	CN42787561	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.686234	2026-08-05 19:04:43.686237	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	129	\N	\N	\N	PHILIPS	SURESIGN VM8	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1340	2	2	EPCMS-OT_LAP-GEN-014	4013	\N	\N	8310121	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.695022	2026-08-05 19:04:43.695031	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	129	\N	\N	\N	SONY	KDL_32W6100	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1341	2	2	EPCMS-OT_NEURO-AWS-004	3996	\N	\N	ANC702629	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.716514	2026-08-05 19:04:43.716524	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	130	\N	\N	\N	GE	DATEX-OHMEDA ASPIRE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1342	2	2	EPCMS-RAD-CARM-001	4014	\N	\N	2K22020354-DC	Captured	f	f	Installed	2022-08-10 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:43.798867	2026-08-05 19:04:43.798876	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	130	\N	\N	\N	ALLENGERS	DIGISCAN S20	\N	\N	\N	\N	MR.ANKUR SHARMA	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1343	2	2	EPCMS-OT_NEURO-ESU-008	3952	\N	\N	L222G05X	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.79888	2026-08-05 19:04:43.798883	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	130	\N	\N	\N	SHALYA	LX	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1344	2	2	EPCMS-OT_NEURO-ESU-009	3952	\N	\N	L222405X	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.798886	2026-08-05 19:04:43.798889	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	130	\N	\N	\N	SHALYA	LX	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1345	2	2	EPCMS-OT_NEURO-ESA-007	3896	\N	\N	230125531	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.798892	2026-08-05 19:04:43.798895	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	130	\N	\N	\N	VENKY	VTS-DLX	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1346	2	2	EPCMS-OT_NEURO-MMD-001	4015	\N	\N	U907	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.825603	2026-08-05 19:04:43.825616	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	130	\N	\N	\N	MANMAN	MANMAN	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1347	2	2	EPCMS-OT_NEURO-MMD-002	4015	\N	\N	M357	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.825621	2026-08-05 19:04:43.825624	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	130	\N	\N	\N	MANMAN	MANMAN	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1348	2	2	EPCMS-OT_NEURO-GEN-015	4016	\N	\N	314-495	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.853328	2026-08-05 19:04:43.853338	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	130	\N	\N	\N	VSML 100	NSMCTM 100	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1349	2	2	EPCMS-OT_NEURO-LAP-003	4003	\N	\N	11E019924	Captured	f	f	Installed	2023-10-18 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:43.853341	2026-08-05 19:04:43.853344	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	130	\N	\N	\N	STRYKER	1288 CAMERA	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1350	2	2	EPCMS-OT_NEURO-CO2INF-005	4005	\N	\N	0809CE221	Captured	f	f	Installed	2019-11-21 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:43.853347	2026-08-05 19:04:43.85335	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	130	\N	\N	\N	STRYKER	PNEUMO SURE	\N	\N	\N	\N	MR.LINTO	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1351	2	2	EPCMS-OT_NEURO-GEN-016	4017	\N	\N	NTC71168	Captured	f	f	Installed	2021-09-08 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:43.895382	2026-08-05 19:04:43.895394	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	130	\N	\N	\N	MEDTRONICS	MR 8	\N	\N	\N	\N	RAJATH	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1352	2	2	EPCMS-OT_NEURO-LS-003	4001	\N	\N	8800160_13000860	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.895397	2026-08-05 19:04:43.8954	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	130	\N	\N	\N	STRYKER	CMTLUXIA120	\N	\N	\N	\N	MR.LINTO	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1353	2	2	EPCMS-OT_NEURO-OPMC-004	3959	\N	\N	6643143274	Captured	f	f	Installed	2022-01-22 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:43.895403	2026-08-05 19:04:43.895406	f	\N	AMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	130	\N	\N	\N	CARL ZEISS	TIVATO 700	\N	\N	\N	\N	VENKATESH	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1354	2	2	EPCMS-OT_NEURO-OTCPL-004	3997	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.895409	2026-08-05 19:04:43.895411	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	130	\N	\N	\N	YESDI BIOMED	PRO TOUCH CONTROL PANEL	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1355	2	2	EPCMS-OT_NEURO-OTLT-009	3964	\N	\N	MF1-52001338	Captured	f	f	Installed	2025-07-04 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:43.895414	2026-08-05 19:04:43.895417	t	2028-07-03	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	130	\N	\N	\N	MINDRAY	HYLED C5	\N	\N	\N	\N	AKHIL	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1356	2	2	EPCMS-OT_NEURO-OTLT-010	3964	\N	\N	1513001066	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.89542	2026-08-05 19:04:43.895423	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	130	\N	\N	\N	MINDRAY	HYLED 760	\N	\N	\N	\N	MR.PRASAD	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1357	2	2	EPCMS-OT_LAP-OTT-006	3951	\N	\N	5120-2021	Captured	f	f	Installed	2022-01-06 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:43.895426	2026-08-05 19:04:43.895428	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	130	\N	\N	\N	PALAKKAD SURGICALS	LEGEND	\N	\N	\N	\N	Sathish	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1358	2	2	EPCMS-OT_NEURO-PM-094	3899	\N	\N	CN42787559	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.895431	2026-08-05 19:04:43.895434	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	130	\N	\N	\N	PHILIPS	SURESIGN VM8	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1359	2	2	EPCMS-OT_NEURO-GEN-017	4018	\N	\N	2L10400674	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.919809	2026-08-05 19:04:43.919817	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	130	\N	\N	\N	STRYKER	UST-2001	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1360	2	2	EPCMS-OT_NEURO-GEN-018	4019	\N	\N	SN 21D463	Captured	f	f	Installed	2021-09-08 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:43.944927	2026-08-05 19:04:43.944937	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	130	\N	\N	\N	MEDTRONICS	EM 800	\N	\N	\N	\N	THIPPESH	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1361	2	2	EPCMS-OT_NEURO-SYP-055	3900	\N	\N	0010312624A01770	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.944941	2026-08-05 19:04:43.944944	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	130	\N	\N	\N	BMS	SN50C6T	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1362	2	2	EPCMS-OT_NEURO-SRC-001	4020	\N	\N	1053-2025	Captured	f	f	Installed	2025-06-21 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:43.970278	2026-08-05 19:04:43.970287	t	2028-06-20	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	130	\N	\N	\N	PALAKKAD SURGICALS	LEVITATE	\N	\N	\N	\N	Kishan kumar	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1363	2	2	EPCMS-OT_NEURO-OTT-007	3951	\N	\N	5103-2021	Captured	f	f	Installed	2022-01-06 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:43.970291	2026-08-05 19:04:43.970294	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	130	\N	\N	\N	PALAKKAD SURGICALS	LEGEND	\N	\N	\N	\N	Sathish	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1364	2	2	EPCMS-OT_NEURO-NAVI-001	4021	\N	\N	NAV-092	Captured	f	f	Installed	2025-01-21 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:43.988769	2026-08-05 19:04:43.988778	t	2026-01-05	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	130	\N	\N	\N	Happy Reliable Surgical Pvt ltd	EASYNAV 102	\N	\N	\N	\N	Hari Menon	\N	f	f	Working	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1365	2	2	EPCMS-OT_NEURO-OTT-008	3951	\N	\N	6741-2025	Captured	f	f	Installed	2025-06-21 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:43.988782	2026-08-05 19:04:43.988785	t	2028-06-20	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	130	\N	\N	\N	PALAKKAD SURGICALS	LEGEND	\N	\N	\N	\N	Kishan kumar	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1366	2	2	EPCMS-OT_ORTHO-MMD-003	4015	\N	\N	U716	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.988787	2026-08-05 19:04:43.98879	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	130	\N	\N	\N	MANMAN	MANMAN	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1367	2	2	EPCMS-OT_ORTHO-MMD-004	4015	\N	\N	L657	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.988793	2026-08-05 19:04:43.988795	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	130	\N	\N	\N	MANMAN	MANMAN	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1368	2	2	EPCMS-OT_ORTHO-MMD-005	4015	\N	\N	L84	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.988798	2026-08-05 19:04:43.988801	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	130	\N	\N	\N	MANMAN	MANMAN	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1369	2	2	EPCMS-OT_ORTHO-MMD-006	4015	\N	\N	V980	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.988804	2026-08-05 19:04:43.988806	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	130	\N	\N	\N	MANMAN	MANMAN	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1370	2	2	EPCMS-OT_OBG-AWS-005	3996	\N	\N	MA13100233	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.080267	2026-08-05 19:04:44.080278	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	131	\N	\N	\N	GE	DATEX-OHMEDA  M904E	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1371	2	2	EPCMS-OT_OBG-BWER-001	3960	\N	\N	14606HN0032	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.080282	2026-08-05 19:04:44.080285	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	131	\N	\N	\N	PHILIPS	EFFICIA WMR 300	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1372	2	2	EPCMS-OT_OBG-ESU-010	3952	\N	\N	L219B01J	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.080288	2026-08-05 19:04:44.08029	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	131	\N	\N	\N	SHALYA	LX	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1373	2	2	EPCMS-OT_OBG-DFEB-011	3907	\N	\N	US00101613	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.080293	2026-08-05 19:04:44.080296	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	131	\N	\N	\N	PHILIPS	HEART STREAM XL	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1374	2	2	EPCMS-OT_OBG-ESA-008	3896	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.080299	2026-08-05 19:04:44.080301	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	131	\N	\N	\N	VENKY	VTS-DLX	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1375	2	2	EPCMS-OT_OBG-OTLT-011	3964	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.080304	2026-08-05 19:04:44.080307	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	131	\N	\N	\N	LUMIX	L600	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1376	2	2	EPCMS-OT_OBG-PM-095	3899	\N	\N	30410M13804910002	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.08031	2026-08-05 19:04:44.080313	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	131	\N	\N	\N	EDAN	IM8	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1377	2	2	EPCMS-OT_OBG-OTT-009	3951	\N	\N	2808-08-2015	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.080315	2026-08-05 19:04:44.080318	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	131	\N	\N	\N	PALAKKAD SURGICALS	LEGEND	\N	\N	\N	\N	Sathish	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1378	2	2	EPCMS-OT_OBG-NWS-002	3971	\N	\N	H2600153913	Captured	t	f	Installed	2026-04-07 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:44.080321	2026-08-05 19:04:44.080324	t	2027-04-06	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	131	\N	\N	\N	Essae	BS 250	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1379	2	2	EPCMS-OT_OPTHAL-GEN-019	4022	\N	\N	21093085	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.105669	2026-08-05 19:04:44.105679	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	132	\N	\N	\N	APPASAMY	AA3	\N	\N	\N	\N	THILAK	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1380	2	2	EPCMS-OT_OPTHAL-ESU-011	4023	\N	\N	2701220066	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.13369	2026-08-05 19:04:44.1337	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	132	\N	\N	\N	MICRO SURGICALS	ACCO01	\N	\N	\N	\N	THILAK	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1381	2	2	EPCMS-OT_OPTHAL-ESU-012	4023	\N	\N	2701160287	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.133704	2026-08-05 19:04:44.133706	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	132	\N	\N	\N	MICRO SURGICALS	ACCO01	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1382	2	2	EPCMS-OT_OPTHAL-AWS-006	3965	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.133709	2026-08-05 19:04:44.133712	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	132	\N	\N	\N	ANESTHESIA APPARATUS	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1383	2	2	EPCMS-OT_OPTHAL-GEN-020	4024	\N	\N	_0409197	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.157362	2026-08-05 19:04:44.157371	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	132	\N	\N	\N	BIOMEDIX	QUANTUM CES	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1384	2	2	EPCMS-OT_OPTHAL-GEN-021	4025	\N	\N	CSD01	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.194381	2026-08-05 19:04:44.194391	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	132	\N	\N	\N	CRYO SUPER DEULEX	AA3	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1385	2	2	EPCMS-OT_OPTHAL-ESA-009	3896	\N	\N	230125533	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.194395	2026-08-05 19:04:44.194398	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	132	\N	\N	\N	VENKY	VTS-DLX	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1386	2	2	EPCMS-OT_OPTHAL-OPMC-005	3959	\N	\N	6137100128	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.1944	2026-08-05 19:04:44.194403	f	\N	AMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	132	\N	\N	\N	CARL ZEISS	OPMI LUMERA 300	\N	\N	\N	\N	VENKATESH	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1387	2	2	EPCMS-OT_OPTHAL-OPMC-006	3959	\N	\N	6137103711	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.194406	2026-08-05 19:04:44.194409	f	\N	AMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	132	\N	\N	\N	CARL ZEISS	OPMI LUMERA 300	\N	\N	\N	\N	VENKATESH	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1388	2	2	EPCMS-OT_OPTHAL-OTCPL-005	3997	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.194412	2026-08-05 19:04:44.194414	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	132	\N	\N	\N	YESDI BIOMED	PRO TOUCH CONTROL PANEL	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1389	2	2	EPCMS-OT_OPTHAL-OTT-010	3951	\N	\N	3101210028	Captured	f	f	Installed	2022-03-15 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:44.194417	2026-08-05 19:04:44.19442	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	132	\N	\N	\N	APPASAMY	AAOT	\N	\N	\N	\N	THILAK	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1390	2	2	EPCMS-OT_OPTHAL-PM-096	3899	\N	\N	CN42787552	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.194422	2026-08-05 19:04:44.194425	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	132	\N	\N	\N	PHILIPS	SURESIGN VM8	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1391	2	2	EPCMS-OT_OPTHAL-GEN-022	4026	\N	\N	201991138	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.204898	2026-08-05 19:04:44.204907	f	\N	CAMC	\N	46151	\N	\N	\N	\N	\N	\N	\N	\N	132	\N	\N	\N	Johnson & Johnson	INTUTIVE LITE	\N	\N	\N	\N	MOHAN RAJ	\N	f	f	25-26/102	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1392	2	2	EPCMS-OT_OPTHAL-OTT-011	3951	\N	\N	3101150027	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.20491	2026-08-05 19:04:44.204913	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	132	\N	\N	\N	APPASAMY	AAOT	\N	\N	\N	\N	Sathish	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1393	2	2	EPCMS-OT_ORTHO-OTT-012	3951	\N	\N	226003-2014	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.244451	2026-08-05 19:04:44.24446	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	133	\N	\N	\N	PALAKKAD SURGICALS	LEGEND	\N	\N	\N	\N	Sathish	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1394	2	2	EPCMS-OT_ORTHO-AWS-007	3996	\N	\N	MF14100419	Captured	t	f	Installed	2016-05-10 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:44.244464	2026-08-05 19:04:44.244467	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	133	\N	\N	\N	GE	CARESTATION 30	\N	\N	\N	\N	MR. SHYLENDER	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1395	2	2	EPCMS-RAD-CARM-002	4014	\N	\N	32420	Captured	f	f	Installed	2015-05-31 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:44.24447	2026-08-05 19:04:44.244472	f	\N	AMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	133	\N	\N	\N	SIEMENS	MM 5C	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1396	2	2	EPCMS-OT_ORTHO-ESU-013	3952	\N	\N	L22303A1	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.244475	2026-08-05 19:04:44.244478	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	133	\N	\N	\N	SHALYA	LX	\N	\N	\N	\N	ADITHYA	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1397	2	2	EPCMS-OT_ORTHO-ESA-010	3896	\N	\N	230125535	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.244481	2026-08-05 19:04:44.244484	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	133	\N	\N	\N	VENKY	VTS-DLX	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1398	2	2	EPCMS-OT_ORTHO-OTCPL-006	3997	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.244486	2026-08-05 19:04:44.244489	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	133	\N	\N	\N	YESDI BIOMED	PRO TOUCH CONTROL PANEL	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1399	2	2	EPCMS-OT_ORTHO-OTLT-012	3964	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.244492	2026-08-05 19:04:44.244495	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	133	\N	\N	\N	PHILIPS	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1400	2	2	EPCMS-OT_ORTHO-PM-097	3899	\N	\N	FG-03067353	Captured	t	f	Not Required	\N	\N	\N	62	\N	ETCo2 Side stream	2026-08-05 19:04:44.244497	2026-08-05 19:04:44.2445	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	133	\N	\N	\N	MINDRAY	IPM 10	\N	\N	\N	\N	SUDHAKAR B	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1401	2	2	EPCMS-OT_ORTHO-GEN-023	4027	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.270149	2026-08-05 19:04:44.270157	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	133	\N	\N	\N	CLAZ MEDICO	LITHOCLAZ	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1402	2	2	EPCMS-OT_ORTHO-GEN-024	4028	\N	\N	2127400029	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.346903	2026-08-05 19:04:44.346914	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	133	\N	\N	\N	STRYKER	CORE 2	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1403	2	2	EPCMS-OT_ORTHO-SYP-056	3900	\N	\N	0010312624A01754	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.346917	2026-08-05 19:04:44.34692	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	133	\N	\N	\N	BMS	SN50C6T	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1404	2	2	EPCMS-OT_ORTHO-STQ-001	4029	\N	\N	TRDG501	Captured	f	f	Not Required	\N	\N	\N	62	\N	Working	2026-08-05 19:04:44.361029	2026-08-05 19:04:44.361038	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	133	\N	\N	\N	DIAMOND	DIAMOND	\N	\N	\N	\N	Manjunath	\N	f	f	Available	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1405	2	2	EPCMS-OT_ORTHO-STQ-002	4029	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Working	2026-08-05 19:04:44.361041	2026-08-05 19:04:44.361044	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	133	\N	\N	\N	MEKTRONIC	\N	\N	\N	\N	\N	Jitheesh	\N	f	f	Available	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1406	2	2	EPCMS-OT_ORTHO-STQ-003	4029	\N	\N	000-66	Captured	f	f	Not Required	\N	\N	\N	62	\N	Not Working	2026-08-05 19:04:44.361047	2026-08-05 19:04:44.36105	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	133	\N	\N	\N	DIAMOND	DIAMOND	\N	\N	\N	\N	Manjunath	\N	f	f	Not available	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1407	2	2	EPCMS-OT_ORTHO-VBOX-024	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.361053	2026-08-05 19:04:44.361055	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	133	\N	\N	\N	LOCAL	DOUBLE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1408	2	2	EPCMS-OT PRE OP-PM-098	3899	\N	\N	8000313 0803221	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.366491	2026-08-05 19:04:44.366501	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	134	\N	\N	\N	SUN MONITOR	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1409	2	2	EPCMS-OT_SEPTIC 1-AWS-008	3996	\N	\N	ME14110781	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.388904	2026-08-05 19:04:44.388913	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	135	\N	\N	\N	GE	DATEX-OHMEDA 9100C	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1410	2	2	EPCMS-OT_SEPTIC 1-ESU-014	3952	\N	\N	L2167F01J	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.388917	2026-08-05 19:04:44.38892	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	135	\N	\N	\N	SHALYA	LX	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1411	2	2	EPCMS-OT_SEPTIC 1-DFEB-012	3907	\N	\N	3YML3F5970	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.388922	2026-08-05 19:04:44.388925	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	135	\N	\N	\N	BPL	BF 2509	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1412	2	2	EPCMS-OT_SEPTIC 1-ESA-011	3896	\N	\N	230125529	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.388928	2026-08-05 19:04:44.388931	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	135	\N	\N	\N	VENKY	VTS-DLX	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1413	2	2	EPCMS-OT_SEPTIC 1-ESA-012	3896	\N	\N	230125534	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.388933	2026-08-05 19:04:44.388936	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	135	\N	\N	\N	VENKY	VTS-DLX	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1414	2	2	EPCMS-OT_SEPTIC 1-OTCPL-007	3997	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.388939	2026-08-05 19:04:44.388941	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	135	\N	\N	\N	YESDI BIOMED	PRO TOUCH CONTROL PANEL	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1415	2	2	EPCMS-OT_SEPTIC 1-OTLT-013	3964	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.388944	2026-08-05 19:04:44.388947	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	135	\N	\N	\N	COGNATE	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1416	2	2	EPCMS-OT_SEPTIC 1-OTT-013	3951	\N	\N	312804-2016	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.38895	2026-08-05 19:04:44.388952	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	135	\N	\N	\N	PALAKKAD SURGICALS	LEGEND	\N	\N	\N	\N	Sathish	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1417	2	2	EPCMS-OT_SEPTIC 1-PM-099	3899	\N	\N	FG-11071425	Captured	t	f	Installed	2021-12-14 00:00:00	\N	\N	62	\N	ETCo2 Main stream	2026-08-05 19:04:44.388955	2026-08-05 19:04:44.388958	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	135	\N	\N	\N	MINDRAY	IPM 10	\N	\N	\N	\N	SUDHAKAR B	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1418	2	2	EPCMS-OT SUR-AWS-009	3996	\N	\N	MF14100418	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.416004	2026-08-05 19:04:44.416013	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	136	\N	\N	\N	GE	CARESTATION 30	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1419	2	2	EPCMS-OT_SUR-ESU-015	3952	\N	\N	A02BPAQ0042	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.416017	2026-08-05 19:04:44.41602	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	136	\N	\N	\N	DOCTANZ	DOC TANZ	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1420	2	2	EPCMS-OT_SUR-DFEB-013	3907	\N	\N	CXMH3F1373	Captured	t	f	Not Required	\N	\N	\N	62	\N	Not Working	2026-08-05 19:04:44.416022	2026-08-05 19:04:44.416025	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	136	\N	\N	\N	BPL	DF-2617	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1421	2	2	EPCMS-OT_SUR-ESA-013	3896	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.416028	2026-08-05 19:04:44.416031	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	136	\N	\N	\N	VENKY	VTX-DLX	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1422	2	2	EPCMS-OT_SUR-OTCPL-008	3997	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.416034	2026-08-05 19:04:44.416036	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	136	\N	\N	\N	YESDI BIOMED	PRO TOUCH CONTROL PANEL	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1423	2	2	EPCMS-OT_SUR-OTLT-014	3964	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.416039	2026-08-05 19:04:44.416042	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	136	\N	\N	\N	PHILIPS	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1424	2	2	EPCMS-OT_SUR-OTLT-015	3964	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.416045	2026-08-05 19:04:44.416047	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	136	\N	\N	\N	HOSPEDIA	LED 50	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1425	2	2	EPCMS-OT_SUR-OTT-014	3951	\N	\N	5871-2023	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.41605	2026-08-05 19:04:44.416053	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	136	\N	\N	\N	PALAKKAD SURGICALS	LEGEND	\N	\N	\N	\N	Sathish	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1426	2	2	EPCMS-OT_SUR-PM-100	3899	\N	\N	FG-03067534	Captured	t	f	Installed	2021-05-22 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:44.416056	2026-08-05 19:04:44.416058	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	136	\N	\N	\N	MINDRAY	IPM 10	\N	\N	\N	\N	SUDHAKAR B	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1427	2	2	EPCMS-OT_SUR-PM-101	3899	\N	\N	CN42787557	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.416061	2026-08-05 19:04:44.416064	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	136	\N	\N	\N	PHILIPS	SURESIGN VM8	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1428	2	2	EPCMS-OT_URO-OTLT-016	3964	\N	\N	MF1-52001337	Captured	f	f	Installed	2025-07-04 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:44.448351	2026-08-05 19:04:44.448363	t	2028-07-03	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	137	\N	\N	\N	MINDRAY	HYLED C5	\N	\N	\N	\N	AKHIL	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1429	2	2	EPCMS-OT_URO-AWS-010	3996	\N	\N	SPC21521375WA	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.448368	2026-08-05 19:04:44.448372	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	137	\N	\N	\N	GE	DATEX-OHMEDA 9100C NXT	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1430	2	2	EPCMS-OT_URO-SRC-002	4020	\N	\N	1025-2025	Captured	f	f	Installed	2025-06-21 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:44.448376	2026-08-05 19:04:44.448379	t	2028-06-20	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	137	\N	\N	\N	PALAKKAD SURGICALS	LEVITATE	\N	\N	\N	\N	Kishan kumar	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1431	2	2	EPCMS-OT_URO-OTT-015	3951	\N	\N	6740-2025	Captured	f	f	Installed	2025-06-21 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:44.448382	2026-08-05 19:04:44.448385	t	2028-06-20	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	137	\N	\N	\N	PALAKKAD SURGICALS	LEGEND	\N	\N	\N	\N	Kishan kumar	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1432	2	2	EPCMS-OT_URO-HARM-001	4010	\N	\N	B012306	Captured	t	f	Installed	2024-11-27 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:44.448389	2026-08-05 19:04:44.448392	t	2025-11-26	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	137	\N	\N	\N	OLYMPUS	ESG-400	\N	\N	\N	\N	MR.UTKARSH VETE	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1433	2	2	EPCMS-OT_URO-IST-001	4030	\N	\N	0924-1246	Captured	f	f	Installed	2024-11-24 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:44.475306	2026-08-05 19:04:44.475316	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	137	\N	\N	\N	OLYMPUS	ITX	\N	\N	\N	\N	MR.UTKARSH VETE	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1434	2	2	EPCMS-OT_URO-LITHO-001	4031	\N	\N	HAE-0034414	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.501027	2026-08-05 19:04:44.501039	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	137	\N	\N	\N	KCN	396LAG_B324H	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1435	2	2	EPCMS-OT_URO-LITHO-002	4032	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.508245	2026-08-05 19:04:44.508254	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	137	\N	\N	\N	ORILITHO CAL	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1436	2	2	EPCMS-OT_SEPTIC 2-PM-102	3899	\N	\N	FG-03067354	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.530499	2026-08-05 19:04:44.530509	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	138	\N	\N	\N	MINDRAY	IPM 10	\N	\N	\N	\N	SUDHAKAR B	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1437	2	2	EPCMS-OT_URO-LITHO-003	4033	\N	\N	CG 9075	Captured	t	f	Installed	2025-01-15 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:44.555946	2026-08-05 19:04:44.555955	t	2025-01-14	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	137	\N	\N	\N	OLYMPUS	SPL-SR	\N	\N	\N	\N	MR.UTKARSH VETE	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1438	2	2	EPCMS-OT_URO-TB-001	4034	\N	\N	7512441	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.563179	2026-08-05 19:04:44.563389	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	137	\N	\N	\N	OLYMPUS	USG 410	\N	\N	\N	\N	MR.UTKARSH VETE	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1439	2	2	EPCMS-PAED OPD-BPA-044	3903	\N	\N	203076_000677	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.584941	2026-08-05 19:04:44.58495	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	139	\N	\N	\N	RASMAX	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1440	2	2	EPCMS-PAED OPD-GEN-025	4035	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.609834	2026-08-05 19:04:44.609844	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	139	\N	\N	\N	COLD CHAIN	COLD CHAIN CONTROLLER	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1441	2	2	EPCMS-PAED OPD-GEN-026	4036	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.647128	2026-08-05 19:04:44.647138	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	139	\N	\N	\N	BAJA	1707 MT	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1442	2	2	EPCMS-PAED OPD-VBOX-025	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.647142	2026-08-05 19:04:44.647145	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	139	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1443	2	2	EPCMS-PAED OPD-VBOX-026	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.647148	2026-08-05 19:04:44.647151	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	139	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1444	2	2	EPCMS-PAED OPD-VBOX-027	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.647153	2026-08-05 19:04:44.647156	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	139	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1445	2	2	EPCMS-PAED OPD-VBOX-028	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.647159	2026-08-05 19:04:44.647162	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	139	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1446	2	2	EPCMS-PAED OPD-VBOX-029	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.647165	2026-08-05 19:04:44.647168	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	139	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1447	2	2	EPCMS-PATH MC-FLMS-001	4037	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.725622	2026-08-05 19:04:44.72563	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	140	\N	\N	\N	LAWRENSE & MAYO	FLURESCENCE MICROSCOPE	\N	\N	\N	\N	CHANDRASHEKAR	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1448	2	2	EPCMS-PHYSIO-FTMS-001	4038	\N	\N	518	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.74994	2026-08-05 19:04:44.749949	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	141	\N	\N	\N	PARAFFIN	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1449	2	2	EPCMS-PHYSIO-ITTR-001	4039	\N	\N	5250	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.772609	2026-08-05 19:04:44.772618	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	141	\N	\N	\N	TECHNOMED	AUTOTRAC 100	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1450	2	2	EPCMS-PHYSIO-MSTI-001	4040	\N	\N	1999	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.797776	2026-08-05 19:04:44.797785	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	141	\N	\N	\N	TECHNOMED	VECTRSTIM 100	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1451	2	2	EPCMS-PHYSIO-PM-103	3899	\N	\N	80003130 803223	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.797789	2026-08-05 19:04:44.797792	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	141	\N	\N	\N	SUN MONITOR	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1452	2	2	EPCMS-PHYSIO-QDCH-001	4041	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.821846	2026-08-05 19:04:44.821854	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	141	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1453	2	2	EPCMS-PHYSIO-SWD-001	4042	\N	\N	231	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.844942	2026-08-05 19:04:44.844954	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	141	\N	\N	\N	TECHNOMED	WAVE STAR 300	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1454	2	2	EPCMS-PHYSIO-SHWL-001	4043	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.869476	2026-08-05 19:04:44.869484	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	141	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1455	2	2	EPCMS-PHYSIO-SUSP-001	4044	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.947376	2026-08-05 19:04:44.947385	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	141	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1456	2	2	EPCMS-PHYSIO-USTH-001	4045	\N	\N	10658	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.9713	2026-08-05 19:04:44.971309	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	141	\N	\N	\N	TECHNOMED	ELECTRON 608	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1457	2	2	EPCMS-PHYSIO-WAXB-001	4046	\N	\N	583	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.993951	2026-08-05 19:04:44.99396	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	141	\N	\N	\N	PARAFFIN	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1458	2	2	EPCMS-PHYSIO-TENS-001	4047	\N	\N	1515640124	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.029325	2026-08-05 19:04:45.029337	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	141	\N	\N	\N	HMS MEDICAL SYSTEM	DIGIMED 301	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1459	2	2	EPCMS-PHYSIO-TENS-002	4047	\N	\N	11614130120	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.02934	2026-08-05 19:04:45.029343	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	141	\N	\N	\N	HMS MEDICAL SYSTEM	DIGIMED	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1460	2	2	EPCMS-PHYSIO-TENS-003	4047	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.029346	2026-08-05 19:04:45.029349	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	141	\N	\N	\N	TECHNOMED	VECRTOSTIM-100	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1461	2	2	EPCMS-PHYSIO-TENS-004	4047	\N	\N	DT4CH-1916	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.029352	2026-08-05 19:04:45.029355	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	141	\N	\N	\N	BMS	DIGITANS 4CH PRO	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1462	2	2	EPCMS-PHYSIO-TENS-005	4047	\N	\N	11416220522	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.029358	2026-08-05 19:04:45.029361	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	141	\N	\N	\N	HMS MEDICAL SYSTEM	DIGISTIM	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1463	2	2	EPCMS-PHYSIO-TENS-006	4047	\N	\N	DT4CH-1920	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.029364	2026-08-05 19:04:45.029367	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	141	\N	\N	\N	BMS	DIGITANS PRO	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1464	2	2	EPCMS-PHYSIO-USTH-002	4048	\N	\N	1372591219	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.056993	2026-08-05 19:04:45.057002	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	141	\N	\N	\N	HMS MEDICAL SYSTEM	DIGISONIC 3S	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1465	2	2	EPCMS-PHYSIO-TMT-003	3908	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.057006	2026-08-05 19:04:45.057009	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	141	\N	\N	\N	CARDI WORLD	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1466	2	2	EPCMS-PHYSIO-CPM-001	4049	\N	\N	T-1437	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.080913	2026-08-05 19:04:45.080922	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	141	\N	\N	\N	TECHNOMED	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1467	2	2	EPCMS-PHYSIO-MHTH-001	4050	\N	\N	383	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.105791	2026-08-05 19:04:45.1058	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	141	\N	\N	\N	RATNA ENTERPRISES	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1468	2	2	EPCMS-PHYSIO-TRAC-001	4051	\N	\N	2560	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.129183	2026-08-05 19:04:45.129201	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	141	\N	\N	\N	TECHNOMED	AUTOTRAC 100	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1469	2	2	EPCMS-PHYSIO-SIMU-001	4052	\N	\N	PSD-1824	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.211283	2026-08-05 19:04:45.211292	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	141	\N	\N	\N	BMS	PHYSIOSTM 1	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1470	2	2	EPCMS-PHYSIO-SIMU-002	4052	\N	\N	PSD-1881	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.211296	2026-08-05 19:04:45.211299	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	141	\N	\N	\N	BMS	PHYSIOSTM 1	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1471	2	2	EPCMS-PHYSIO-CMT-001	4053	\N	\N	14340506823	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.23648	2026-08-05 19:04:45.236489	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	141	\N	\N	\N	HMS MEDICAL SYSTEM	UNITS-55	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1472	2	2	EPCMS-PHYSIO-LASR-001	4054	\N	\N	DLB-1720	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.261414	2026-08-05 19:04:45.261424	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	141	\N	\N	\N	BMS	DIGILAZER PRO	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1473	2	2	EPCMS-PHYSIO-RRGV-001	4055	\N	\N	RB357PCA1M1D4826	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.314498	2026-08-05 19:04:45.314509	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	141	\N	\N	\N	SHENZHER	RRG-100	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1474	2	2	EPCMS-PHYSIO-PM-104	3899	\N	\N	FT4-56023355	Captured	t	f	Installed	2025-10-15 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:45.314513	2026-08-05 19:04:45.314516	t	2028-10-14	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	141	\N	\N	\N	MINDRAY	UMEC 100	\N	\N	\N	\N	Devaraj K	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1475	2	2	EPCMS-PICU-HFNC-002	3942	\N	\N	20072_7153219	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.314519	2026-08-05 19:04:45.314522	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	117	\N	\N	\N	FISCHER& PAYKAL	AIRVO2	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1476	2	2	EPCMS-PICU-HFNC-003	3942	\N	\N	20072_7153066	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.314525	2026-08-05 19:04:45.314528	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	117	\N	\N	\N	FISCHER& PAYKAL	AIRVO2	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1477	2	2	EPCMS-PICU-HFNC-004	3942	\N	\N	21050_4265346	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.314531	2026-08-05 19:04:45.314534	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	117	\N	\N	\N	FISCHER& PAYKAL	AIRVO2	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1478	2	2	EPCMS-PICU-HFNC-005	3942	\N	\N	20072_1151471	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.314537	2026-08-05 19:04:45.31454	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	117	\N	\N	\N	FISCHER& PAYKAL	AIRVO2	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1479	2	2	EPCMS-PICU-HFNC-006	3942	\N	\N	20072_153300	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.314543	2026-08-05 19:04:45.314546	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	117	\N	\N	\N	FISCHER& PAYKAL	AIRVO2	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1480	2	2	EPCMS-PICU-HFNC-007	3942	\N	\N	21051_2270723	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.314549	2026-08-05 19:04:45.314552	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	117	\N	\N	\N	FISCHER& PAYKAL	AIRVO2	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1481	2	2	EPCMS-PICU-INP-020	3898	\N	\N	0320943C	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.314554	2026-08-05 19:04:45.314557	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	117	\N	\N	\N	BBRAUN	INFUSOMATE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1482	2	2	EPCMS-PICU-PM-105	3899	\N	\N	FT4-45002876	Captured	t	f	Installed	2024-10-16 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:45.31456	2026-08-05 19:04:45.314563	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	117	\N	\N	\N	MINDRAY	UMEC 100	\N	\N	\N	\N	ADARSH	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1483	2	2	EPCMS-PICU-PM-106	3899	\N	\N	FT4-45002872	Captured	t	f	Installed	2024-10-16 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:45.314566	2026-08-05 19:04:45.314568	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	117	\N	\N	\N	MINDRAY	UMEC 100	\N	\N	\N	\N	ADARSH	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1484	2	2	EPCMS-PICU-PM-107	3899	\N	\N	FG-11071437	Captured	t	f	Installed	2021-12-14 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:45.314571	2026-08-05 19:04:45.314574	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	117	\N	\N	\N	MINDRAY	IPM 10	\N	\N	\N	\N	SUDHAKAR B	\N	f	f	No	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1485	2	2	EPCMS-PICU-SYP-057	3900	\N	\N	0010312624A01766	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.314577	2026-08-05 19:04:45.31458	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	117	\N	\N	\N	BMS	SN50C6T	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1486	2	2	EPCMS-PICU-SYP-058	3900	\N	\N	160560581	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.314583	2026-08-05 19:04:45.314585	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	117	\N	\N	\N	FRESINIOUS KABI	INFUSIA SP7	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1487	2	2	EPCMS-PICU-SYP-059	3900	\N	\N	160560785	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.314588	2026-08-05 19:04:45.314591	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	117	\N	\N	\N	FRESINIOUS KABI	INFUSIA SP7	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1488	2	2	EPCMS-MICU-VENT-034	3905	\N	\N	GB-OC036546	Captured	t	f	Installed	2021-04-19 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:45.314594	2026-08-05 19:04:45.314597	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	SV 300	\N	\N	\N	\N	SUNIL	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1489	2	2	EPCMS-MICU-VENT-035	3905	\N	\N	GB-OC036542	Captured	t	f	Installed	2021-04-19 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:45.314599	2026-08-05 19:04:45.314602	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	SV 300	\N	\N	\N	\N	SUNIL	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1490	2	2	EPCMS-PICU-VENT-036	3905	\N	\N	DRPM-0045	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.314605	2026-08-05 19:04:45.314608	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	117	\N	\N	\N	DRAGER	EVITA 2 DURA	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1491	2	2	EPCMS-PICU-VENT-037	3905	\N	\N	BVACV 17977	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.314611	2026-08-05 19:04:45.314613	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	117	\N	\N	\N	BEL	CV200	\N	\N	\N	\N	\N	\N	f	f	Down	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1492	2	2	EPCMS-PICU-VBOX-030	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.314616	2026-08-05 19:04:45.314619	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	117	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1493	2	2	EPCMS-RAD-MXR-005	3941	\N	\N	2K16090455-BX/HF	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.381637	2026-08-05 19:04:45.381647	f	\N	AMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	ALLENGERS	MARS 4.2	\N	\N	\N	\N	MR.ANKUR SHARMA	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1494	2	2	EPCMS-POST OT -PM-108	3899	\N	\N	B10W4A014	Captured	t	f	Installed	2026-03-23 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:45.381651	2026-08-05 19:04:45.381654	t	2029-03-22	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	NiDEK	Bravo 10 G3M	\N	\N	\N	\N	Narayanan	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1495	2	2	EPCMS-POST OT -PM-109	3899	\N	\N	B10W4A015	Captured	t	f	Installed	2026-03-23 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:45.381657	2026-08-05 19:04:45.38166	t	2029-03-22	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	NiDEK	Bravo 10 G3M	\N	\N	\N	\N	Narayanan	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1496	2	2	EPCMS-POST OT -BPA-045	3895	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.381662	2026-08-05 19:04:45.381665	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	DIAMOND	DELUXE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1497	2	2	EPCMS-POST OT -DFEB-014	3907	\N	\N	BYMLAC6372	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.381668	2026-08-05 19:04:45.381671	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	BPL	DF 2509	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1498	2	2	EPCMS-POST OT -ECG-018	3902	\N	\N	DETE3A26883	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.381674	2026-08-05 19:04:45.381677	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	BPL	CARIDO HEART 6208	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1499	2	2	EPCMS-POST OT -PM-110	3899	\N	\N	8000313 0803222	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.38168	2026-08-05 19:04:45.381683	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	SUN MONITOR	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1500	2	2	EPCMS-POST OT -PM-111	3899	\N	\N	CN42787555	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.381686	2026-08-05 19:04:45.381689	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	PHILIPS	SURESIGN VM8	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1501	2	2	EPCMS-POST OT -PM-112	3899	\N	\N	CN 12007147	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.381691	2026-08-05 19:04:45.381694	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	PHILIPS (GOLDWAY)	UT 6000A	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1502	2	2	EPCMS-POST OT -PM-113	3899	\N	\N	301410M1370340001	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.381697	2026-08-05 19:04:45.3817	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	EDAN	IM8	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1503	2	2	EPCMS-POST OT -PM-114	3899	\N	\N	E7181214066B	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.381702	2026-08-05 19:04:45.381705	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	COMEN	STAR8000	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1504	2	2	EPCMS-POST OT -PM-115	3899	\N	\N	112613M13804950009	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.381708	2026-08-05 19:04:45.381711	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	EDAN	M3	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1505	2	2	EPCMS-POST OT -SYP-060	3900	\N	\N	160560460	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.381714	2026-08-05 19:04:45.381716	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	FRESINIOUS KABI	INFUSIA SP7	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1506	2	2	EPCMS-POST OT -SYP-061	3900	\N	\N	160560501	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.381719	2026-08-05 19:04:45.381722	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	FRESINIOUS KABI	INFUSIA SP7	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1507	2	2	EPCMS-POST OT -PM-116	3899	\N	\N	301410M1380490002	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.381725	2026-08-05 19:04:45.381727	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	EDAN	IM8	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1508	2	2	EPCMS-POST OT -PM-117	3899	\N	\N	301410M1380490004	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.38173	2026-08-05 19:04:45.381733	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	EDAN	IM8	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1509	2	2	EPCMS-PSY OPD-BIOF-001	4056	\N	\N	RELAX2203013	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.410308	2026-08-05 19:04:45.410318	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	143	\N	\N	\N	RMS	RELAX 701	\N	\N	\N	\N	DANNY	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1510	2	2	EPCMS-PSY OPD-EEG-001	4057	\N	\N	mx242202060	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.433912	2026-08-05 19:04:45.433922	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	143	\N	\N	\N	RMS	maximus 24	\N	\N	\N	\N	DANNY	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1511	2	2	EPCMS-PSY OPD-ECT-001	4058	\N	\N	ECTON220200G	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.441235	2026-08-05 19:04:45.441244	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	143	\N	\N	\N	RMS	ECTON	\N	\N	\N	\N	DANNY	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1512	2	2	EPCMS-PSY WD-ECG-019	3902	\N	\N	DUTB1M12514	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.445342	2026-08-05 19:04:45.44535	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	144	\N	\N	\N	BPL	CARDIO HEART 9108	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1513	2	2	EPCMS-RAD-USTD-014	3909	\N	\N	1499962WX7	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.514789	2026-08-05 19:04:45.514801	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	GE	P9_L3-12-RS	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1514	2	2	EPCMS-RAD-USTD-015	3909	\N	\N	1427602WX6	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.514805	2026-08-05 19:04:45.514808	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	GE	P9_C1-5-RS	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1515	2	2	EPCMS-RAD-USTD-016	3909	\N	\N	1068553WX5	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.514811	2026-08-05 19:04:45.514813	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	GE	P9_E8CS-RS	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1516	2	2	EPCMS-RAD-USTD-017	3909	\N	\N	230580KR3	Captured	t	f	Not Required	\N	\N	\N	62	\N	Not working	2026-08-05 19:04:45.514816	2026-08-05 19:04:45.514819	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	GE	E6_R1C5-9-D	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1517	2	2	EPCMS-RAD-USTD-018	3909	\N	\N	666608WX5	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.514822	2026-08-05 19:04:45.514825	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	GE	E6_C1-5-D	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1518	2	2	EPCMS-RAD-USTD-019	3909	\N	\N	1275565WX8	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.514827	2026-08-05 19:04:45.51483	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	GE	E6_RAB6-D	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1519	2	2	EPCMS-RAD-USTD-020	3909	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.514833	2026-08-05 19:04:45.514836	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	GE	E6	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1520	2	2	EPCMS-RAD-USTD-021	3909	\N	\N	1276843WX8	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.514838	2026-08-05 19:04:45.514841	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	GE	S8_C1-5-RS	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1521	2	2	EPCMS-RAD-USTD-022	3909	\N	\N	1304380WX7	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.514844	2026-08-05 19:04:45.514847	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	GE	S8_RAB6-RS	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1522	2	2	EPCMS-RAD-USTD-023	3909	\N	\N	311307KR3	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.514849	2026-08-05 19:04:45.514852	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	GE	S8_R1C5-9A-RS	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1523	2	2	EPCMS-RAD-USTD-024	3909	\N	\N	329436WP0	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.514855	2026-08-05 19:04:45.514857	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	GE	S8_9L-RS	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1524	2	2	EPCMS-RAD-USTD-025	3909	\N	\N	311311KR5	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.51486	2026-08-05 19:04:45.514863	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	GE	P8_R1C5-9A-RS	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1525	2	2	EPCMS-RAD-USTD-026	3909	\N	\N	1313952WX2	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.514866	2026-08-05 19:04:45.514868	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	GE	P8_4C-RS	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1526	2	2	EPCMS-RAD-USTD-027	3909	\N	\N	1322064WX5	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.514871	2026-08-05 19:04:45.514874	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	GE	P8_9L-RS	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1527	2	2	EPCMS-RAD-USTD-028	3909	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.514877	2026-08-05 19:04:45.514879	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	GE	LOGIQ E_12L-RS	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1528	2	2	EPCMS-RAD-USTD-029	3909	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.514882	2026-08-05 19:04:45.514885	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	GE	LOGIQ E_4L-RS	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1529	2	2	EPCMS-RAD-USTD-030	3909	\N	\N	HX5S21015860	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.514888	2026-08-05 19:04:45.51489	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	MINDRAY	I9_L9-3S	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1530	2	2	EPCMS-RAD-USTD-031	3909	\N	\N	JK9U44110611	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.514893	2026-08-05 19:04:45.514896	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	MINDRAY	I9_SC6-1S	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1531	2	2	EPCMS-RAD-USTD-032	3909	\N	\N	HX5H22007342	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.514898	2026-08-05 19:04:45.514901	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	MINDRAY	I9_SD8-1S	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1532	2	2	EPCMS-RAD-USTD-033	3909	\N	\N	JK9X21035605T	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.514904	2026-08-05 19:04:45.514906	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	MINDRAY	I9_V11-3HS	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1533	2	2	EPCMS-RAD-USTD-034	3909	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.514909	2026-08-05 19:04:45.514912	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	MINDRAY	M6_	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1534	2	2	EPCMS-RAD-USTD-035	3909	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.514915	2026-08-05 19:04:45.514917	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	MINDRAY	M6_	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1535	2	2	EPCMS-RAD-CR-001	4059	\N	\N	3438	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.544704	2026-08-05 19:04:45.544714	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	AGFA	CR-30XM	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1536	2	2	EPCMS-RAD-CR-002	4059	\N	\N	2950	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.544717	2026-08-05 19:04:45.54472	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	AGFA	CR-30XM	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1537	2	2	EPCMS-RAD-FP-001	4060	\N	\N	9873	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.624195	2026-08-05 19:04:45.624205	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	AGFA	DS5302 AXYS	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1538	2	2	EPCMS-RAD-FP-002	4060	\N	\N	10342	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.624209	2026-08-05 19:04:45.624211	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	AGFA	DS5302 AXYS	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1539	2	2	EPCMS-RAD-CT-001	4061	\N	\N	1-10359799408/083021826819722	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.648123	2026-08-05 19:04:45.648134	f	\N	AMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	GE	REVOLUTION ASPIRE	\N	\N	\N	\N	MR VINAY	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1540	2	2	EPCMS-RAD-FXR-001	4062	\N	\N	2K21020856-DX/HF	Captured	t	f	Installed	2021-09-27 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:45.683908	2026-08-05 19:04:45.683917	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	ALLENGERS	MARS 50	\N	\N	\N	\N	MR.ANKUR SHARMA	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1541	2	2	EPCMS-RAD-FXR-002	4062	\N	\N	2K21030985-DX/HF	Captured	t	f	Installed	2021-08-26 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:45.683921	2026-08-05 19:04:45.683923	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	ALLENGERS	MARS 50+	\N	\N	\N	\N	MR.ANKUR SHARMA	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1542	2	2	EPCMS-RAD-FXR-003	4062	\N	\N	2K141030461-X/HF	Captured	t	f	Installed	2015-03-25 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:45.683926	2026-08-05 19:04:45.683929	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	ALLENGERS	MARS 30	\N	\N	\N	\N	MR.ANKUR SHARMA	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1543	2	2	EPCMS-RAD-FXR-004	4062	\N	\N	15504	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.683932	2026-08-05 19:04:45.683935	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	SIEMENS	HELIPOSE	\N	\N	\N	\N	\N	\N	f	f	Down	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1544	2	2	EPCMS-RAD-FXR-005	4062	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.683938	2026-08-05 19:04:45.683941	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	SIEMENS	POLYDOROS LX	\N	\N	\N	\N	\N	\N	f	f	Down	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1545	2	2	EPCMS-RAD-FXR-006	4062	\N	\N	2K1401040463-X/HF	Captured	t	f	Installed	2015-03-25 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:45.683944	2026-08-05 19:04:45.683947	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	ALLENGERS	MARS 40	\N	\N	\N	\N	MR.ANKUR SHARMA	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1546	2	2	EPCMS-RAD-MAM-001	4063	\N	\N	2K21090054-DM	Captured	t	f	Installed	2022-05-15 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:45.709314	2026-08-05 19:04:45.709323	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	ALLENGERS	MAM VENUS	\N	\N	\N	\N	MR.ANKUR SHARMA	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1547	2	2	EPCMS-RAD-MRI-001	4064	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.777252	2026-08-05 19:04:45.777262	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	PHILIPS	ACHIEVA 3T	\N	\N	\N	\N	MR.THOMAS	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1548	2	2	EPCMS-RAD-USG-006	3916	\N	\N	97494WX9	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.777266	2026-08-05 19:04:45.777268	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	GE	LOGIQ-E	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1549	2	2	EPCMS-RAD-INJ-002	3912	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.777271	2026-08-05 19:04:45.777274	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1550	2	2	EPCMS-RAD-INJ-003	3912	\N	\N	901376/S86225	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.777277	2026-08-05 19:04:45.777279	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	BAYER	MED RAD / SALIENT SW	\N	\N	\N	\N	ATHUL	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1551	2	2	EPCMS-RAD-USG-007	3906	\N	\N	E6(0803037829640518)	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.777282	2026-08-05 19:04:45.777285	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	GE	VOLUSION E6	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1552	2	2	EPCMS-RAD-USG-008	3906	\N	\N	KF8-23000662	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.777288	2026-08-05 19:04:45.77729	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	MINDRAY	RESONA i9	\N	\N	\N	\N	AVANAKUMAR	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1553	2	2	EPCMS-RAD-VBOX-031	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.777293	2026-08-05 19:04:45.777296	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	\N	4 MODEL	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1554	2	2	EPCMS-RAD-VBOX-032	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.777299	2026-08-05 19:04:45.777301	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	\N	4 MODEL	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1555	2	2	EPCMS-RAD-VBOX-033	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.777304	2026-08-05 19:04:45.777307	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	\N	4 MODEL	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1556	2	2	EPCMS-RAD-VBOX-034	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.77731	2026-08-05 19:04:45.777312	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	\N	4 MODEL	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1557	2	2	EPCMS-RAD-VBOX-035	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.777315	2026-08-05 19:04:45.777318	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	\N	4 MODEL	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1558	2	2	EPCMS-RAD-VBOX-036	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.777321	2026-08-05 19:04:45.777324	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	\N	4 MODEL	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1559	2	2	EPCMS-RAD-VBOX-037	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.777326	2026-08-05 19:04:45.777329	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	\N	4 MODEL	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1560	2	2	EPCMS-RAD-VBOX-038	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.777332	2026-08-05 19:04:45.777335	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	\N	4 MODEL	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1561	2	2	EPCMS-RAD-MRI-002	4064	\N	\N	R300/SID83027824636124	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.777338	2026-08-05 19:04:45.77734	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	GE	MRI SIGMA EXPLORER 1.5T	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1562	2	2	EPCMS-RAD-USG-009	3906	\N	\N	LP9355067/83037820997824	Captured	t	f	Installed	2024-05-10 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:45.777343	2026-08-05 19:04:45.777346	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	GE	VOLUSON P9 BT22	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1563	2	2	EPCMS-RAD-USG-010	3906	\N	\N	VS8205166	Captured	t	f	Installed	2024-05-10 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:45.777349	2026-08-05 19:04:45.777351	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	GE	VOLUSON S8	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1564	2	2	EPCMS-RAD-USG-011	3906	\N	\N	170315	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.777354	2026-08-05 19:04:45.777357	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	GE	VOLUSON-P8	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1565	2	2	EPCMS-RAD-ESA-014	3896	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.77736	2026-08-05 19:04:45.777362	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1566	2	2	EPCMS-RAD-PACS-001	4065	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.805091	2026-08-05 19:04:45.8051	f	\N	AMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	145	\N	\N	\N	MEDSYNAPSE	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1567	2	2	EPCMS-RESP OPD-BIPAP-001	4066	\N	\N	F12016	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.835753	2026-08-05 19:04:45.835771	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	146	\N	\N	\N	BRESA VIVO2	BRESA MEDLICALS	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1568	2	2	EPCMS-RESP OPD-BPA-046	3895	\N	\N	88246	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.835775	2026-08-05 19:04:45.835778	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	146	\N	\N	\N	DIAMOND	DELUXE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1569	2	2	EPCMS-RESP OPD-BPA-047	3895	\N	\N	3390	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.835781	2026-08-05 19:04:45.835784	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	146	\N	\N	\N	DIAMOND	DELUXE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1570	2	2	EPCMS-RESP OPD-BRSC-001	4067	\N	\N	2152086	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.860758	2026-08-05 19:04:45.860767	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	146	\N	\N	\N	OLYMPUS	BFIT150	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1571	2	2	EPCMS-RESP OPD-CPAP-001	4068	\N	\N	F120161	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.884924	2026-08-05 19:04:45.884933	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	146	\N	\N	\N	BREAS MEDKALS	VIVO 2	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1572	2	2	EPCMS-RESP OPD-DLCO-001	4069	\N	\N	560409	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.910154	2026-08-05 19:04:45.910163	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	146	\N	\N	\N	EASY ONE PRO	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1573	2	2	EPCMS-RESP OPD-PFT-001	4070	\N	\N	228631	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.930164	2026-08-05 19:04:45.930173	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	146	\N	\N	\N	ESY ONE	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1574	2	2	EPCMS-RESP OPD-VBOX-039	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.930177	2026-08-05 19:04:45.93018	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	146	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1575	2	2	EPCMS-RESP OPD-VBOX-040	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.930183	2026-08-05 19:04:45.930186	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	146	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1576	2	2	EPCMS-RESP OPD-VBOX-041	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.930194	2026-08-05 19:04:45.930197	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	146	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1577	2	2	EPCMS-RESP OPD-VBOX-042	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.9302	2026-08-05 19:04:45.930202	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	146	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1578	2	2	EPCMS-RESP OPD-VBOX-043	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.930205	2026-08-05 19:04:45.930208	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	146	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1579	2	2	EPCMS-SICU-PM-118	3899	\N	\N	FG-11071417	Captured	t	f	Installed	2021-05-22 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:45.96432	2026-08-05 19:04:45.964331	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	147	\N	\N	\N	MINDRAY	IPM 10	\N	\N	\N	\N	SUDHAKAR B	\N	f	f	No	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1580	2	2	EPCMS-SICU-PM-119	3899	\N	\N	FG-11071431	Captured	t	f	Installed	2021-05-22 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:45.964335	2026-08-05 19:04:45.964338	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	147	\N	\N	\N	MINDRAY	IPM 10	\N	\N	\N	\N	SUDHAKAR B	\N	f	f	No	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1581	2	2	EPCMS-SICU-PM-120	3899	\N	\N	FG-11071421	Captured	t	f	Installed	2021-12-14 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:45.964341	2026-08-05 19:04:45.964344	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	147	\N	\N	\N	MINDRAY	IPM 10	\N	\N	\N	\N	SUDHAKAR B	\N	f	f	No	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1582	2	2	EPCMS-SICU-PM-121	3899	\N	\N	FG-11071432	Captured	t	f	Installed	2021-12-14 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:45.964346	2026-08-05 19:04:45.964349	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	147	\N	\N	\N	MINDRAY	IPM 10	\N	\N	\N	\N	SUDHAKAR B	\N	f	f	No	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1583	2	2	EPCMS-SICU-PM-122	3899	\N	\N	FG-11071434	Captured	t	f	Installed	2021-12-14 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:45.964352	2026-08-05 19:04:45.964355	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	147	\N	\N	\N	MINDRAY	IPM 10	\N	\N	\N	\N	SUDHAKAR B	\N	f	f	No	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1584	2	2	EPCMS-SICU-SYP-062	3900	\N	\N	160560592	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.964358	2026-08-05 19:04:45.96436	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	147	\N	\N	\N	FRESINIOUS KABI	INFUSIA SP7	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1585	2	2	EPCMS-SICU-SYP-063	3900	\N	\N	160560407	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.964363	2026-08-05 19:04:45.964366	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	147	\N	\N	\N	FRESINIOUS KABI	INFUSIA SP7	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1586	2	2	EPCMS-SICU-SYP-064	3900	\N	\N	160560532	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.964369	2026-08-05 19:04:45.964372	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	147	\N	\N	\N	FRESINIOUS KABI	INFUSIA SP7	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1587	2	2	EPCMS-SICU-SYP-065	3900	\N	\N	160560672	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.964374	2026-08-05 19:04:45.964377	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	147	\N	\N	\N	FRESINIOUS KABI	INFUSIA SP7	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1588	2	2	EPCMS-SICU-VENT-038	3905	\N	\N	GB-04017334	Captured	t	f	Installed	2020-07-29 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:45.96438	2026-08-05 19:04:45.964383	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	147	\N	\N	\N	MINDRAY	SV 300	\N	\N	\N	\N	SUNIL	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1589	2	2	EPCMS-SICU-VENT-039	3905	\N	\N	GB-45082648	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.964386	2026-08-05 19:04:45.964388	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	147	\N	\N	\N	MINDRAY	SV 300	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1590	2	2	EPCMS-SICU-VBOX-044	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.964391	2026-08-05 19:04:45.964394	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	147	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1591	2	2	EPCMS-SPL WD-BPA-048	3895	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:46.049963	2026-08-05 19:04:46.049975	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	148	\N	\N	\N	DIAMOND	DELUXE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1592	2	2	EPCMS-SPL WD-SYP-066	3900	\N	\N	SM3-36004785	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:46.049979	2026-08-05 19:04:46.049983	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	148	\N	\N	\N	MINDRAY	BENEVISION uSP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1593	2	2	EPCMS-SPL WD-NCS-001	4071	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:46.06779	2026-08-05 19:04:46.067799	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	148	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1594	2	2	EPCMS-SPL WD-VBOX-045	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:46.067803	2026-08-05 19:04:46.067806	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	148	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1595	2	2	EPCMS-SPL WD-PM-123	3899	\N	\N	B10W4A009	Captured	t	f	Installed	2026-03-23 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:46.06781	2026-08-05 19:04:46.067813	t	2029-03-22	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	148	\N	\N	\N	NiDEK	Bravo 10 G3M	\N	\N	\N	\N	Narayanan	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1596	2	2	EPCMS-SPL WD-PM-124	3899	\N	\N	B10W4A010	Captured	t	f	Installed	2026-03-23 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:46.067815	2026-08-05 19:04:46.067818	t	2029-03-22	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	148	\N	\N	\N	NiDEK	Bravo 10 G3M	\N	\N	\N	\N	Narayanan	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1597	2	2	EPCMS-SPL WD-PM-125	3899	\N	\N	B10W4A008	Captured	t	f	Installed	2026-03-23 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:46.067821	2026-08-05 19:04:46.067824	t	2029-03-22	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	148	\N	\N	\N	NiDEK	Bravo 10 G3M	\N	\N	\N	\N	Narayanan	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1598	2	2	EPCMS-RAD-MXR-006	3941	\N	\N	2K21030625SR-DX/LF	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:46.084239	2026-08-05 19:04:46.084251	f	\N	AMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	149	\N	\N	\N	ALLENGERS	100 SR	\N	\N	\N	\N	MR.ANKUR SHARMA	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 \.
 
 
@@ -8677,6 +9899,11 @@ COPY public.gate_entries (id, tenant_id, site_id, entry_number, vehicle_number, 
 199	2	2	GE-00004		\N	\N	\N	\N	\N	2026-06-12 02:41:55.864898	Vijayan	\N	Vijayan	Standard	\N	/uploads/invoices/2/20260611_211153_feff01fd.jpg		Completed	8	f	2026-06-12 02:41:55.869321	IV543	2026-06-04	18000	\N	\N	\N	\N	\N	\N	\N	\N
 201	2	2	GE-00006		\N	\N	\N	\N	\N	2026-07-22 17:35:16.068379	Fredrick	\N	Fredrick	Standard	\N	/api/uploads/invoices/2/20260722_120501_36d4ec51.jpg		Awaiting GRN	3	f	2026-07-22 17:35:16.070259	inv0002	2026-07-16	20000	\N	\N	\N				\N	\N
 198	2	2	GE-00003		\N	\N	\N	\N	\N	2026-06-12 02:21:24.198782	ram	\N	ram	Standard	\N	/uploads/invoices/2/20260611_205122_2e043a7f.png		Completed	3	f	2026-06-12 02:21:24.199618	inv123	2026-06-11	10500	\N	\N	\N	\N	\N	\N	\N	\N
+202	2	2	GE-00007		\N	\N	\N	\N	\N	2026-08-05 20:33:59.079737	General	\N	General	Standard	\N			Awaiting GRN	3	f	2026-08-05 20:33:59.08112		\N	0	\N	\N	\N		/api/uploads/invoices/2/20260805_150345_8ce00da4.pdf	33333	2026-08-04	\N
+203	2	2	GE-00008	KA 05 H 1234	\N	\N	\N	\N	\N	2026-08-06 13:34:04.704551	vikkk	\N	vikkk	Standard	\N	/api/uploads/invoices/2/20260806_080322_994710f4.png	none	Completed	3	f	2026-08-06 13:34:04.706791	A2456Y	2026-08-04	10000	\N	\N	\N		/api/uploads/invoices/2/20260806_080207_3c61f7e0.png	5555555	2026-08-03	\N
+204	2	2	GE-00009	TN 08 N 4567	\N	\N	\N	\N	\N	2026-08-06 14:56:45.52839	NOS	\N	NOS	Standard	\N	/api/uploads/invoices/2/20260806_092619_1796e5e4.png		Completed	3	f	2026-08-06 14:56:45.529696	A566S54	2026-08-03	60606	\N	\N	\N		/api/uploads/invoices/2/20260806_092552_24c3c8d0.png	88888	2026-08-02	\N
+205	2	2	GE-00010	TN 09 M 8901	\N	\N	\N	\N	\N	2026-08-06 15:01:27.215344	done	\N	done	Standard	\N	/api/uploads/invoices/2/20260806_093046_c67c0c7d.png		Completed	3	f	2026-08-06 15:01:27.215882	C67G98VV	2026-08-05	90990	\N	\N	\N		/api/uploads/invoices/2/20260806_093010_ac01d917.png	56565656	2026-08-01	\N
+206	2	2	GE-00011	TN 09 K 3455	\N	\N	\N	\N	\N	2026-08-06 15:58:17.736877	aaa	\N	aaa	Standard	\N	/api/uploads/invoices/2/20260806_102745_cdade1c9.png		Completed	3	f	2026-08-06 15:58:17.738267	L78I876	2026-08-04	655660	\N	\N	\N		/api/uploads/invoices/2/20260806_102710_c7dc314a.png	789045	2026-07-27	\N
 \.
 
 
@@ -8735,38 +9962,42 @@ COPY public.gate_passes (id, tenant_id, site_id, gate_pass_number, return_id, pr
 -- Data for Name: grn; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.grn (id, tenant_id, site_id, grn_number, po_id, gate_entry_id, warehouse_id, project_id, vendor_id, receipt_type, invoice_number, invoice_date, invoice_amount, invoice_scan_url, vendor_gstin, total_taxable_amount, total_cgst, total_sgst, total_igst, total_tax, eway_bill_number, payment_status, status, remarks, received_by_id, is_deleted, created_at, completed_at, invoice_id, contract_id) FROM stdin;
-182	3	3	GRN-00017	184	185	48	1	52	PO-Based		\N	81643.41	\N	\N	81643.41	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-06-02 18:01:24.056047	2026-06-02 12:31:24.097066	\N	\N
-183	3	3	GRN-00018	189	184	59	1	54	PO-Based		\N	33629	\N	\N	33629	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-06-02 18:01:36.945004	2026-06-02 12:31:36.974354	\N	\N
-184	3	3	GRN-00001	170	168	58	1	54	PO-Based	INV-123	2026-05-15	59200.07	\N	\N	59200.07	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-05-15 18:52:30.7739	2026-05-15 18:52:30.7739	\N	\N
-185	3	3	GRN-00002	171	169	54	1	53	PO-Based	INV-246	2026-05-15	90906.98	\N	\N	90906.98	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-05-15 18:52:30.783608	2026-05-15 18:52:30.783608	\N	\N
-186	3	3	GRN-00003	172	170	59	1	54	PO-Based	INV-369	2026-05-15	41190.86	\N	\N	41190.86	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-05-15 18:52:30.792942	2026-05-15 18:52:30.792942	\N	\N
-187	3	3	GRN-00004	173	171	53	1	51	PO-Based	INV-492	2026-05-15	158701.26	\N	\N	158701.26	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-05-15 18:52:30.801702	2026-05-15 18:52:30.801702	\N	\N
-188	3	3	GRN-00005	174	172	51	1	59	PO-Based	INV-615	2026-05-15	94040.79	\N	\N	94040.79	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-05-15 18:52:30.813547	2026-05-15 18:52:30.813547	\N	\N
-189	3	3	GRN-00006	175	173	48	1	60	PO-Based	INV-738	2026-05-15	106459.08	\N	\N	106459.08	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-05-15 18:52:30.824516	2026-05-15 18:52:30.824516	\N	\N
-190	3	3	GRN-00007	176	174	54	1	56	PO-Based	INV-861	2026-05-15	154430.82	\N	\N	154430.82	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-05-15 18:52:30.831705	2026-05-15 18:52:30.831705	\N	\N
-191	3	3	GRN-00008	177	175	59	1	52	PO-Based	INV-984	2026-05-15	65341.82	\N	\N	65341.82	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-05-15 18:52:30.841674	2026-05-15 18:52:30.841674	\N	\N
-192	3	3	GRN-00009	178	176	60	1	60	PO-Based	INV-1107	2026-05-15	147399.29	\N	\N	147399.29	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-05-15 18:52:30.849446	2026-05-15 18:52:30.849446	\N	\N
-193	3	3	GRN-00010	179	177	54	1	60	PO-Based	INV-1230	2026-05-15	85728.48	\N	\N	85728.48	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-05-15 18:52:30.859075	2026-05-15 18:52:30.859075	\N	\N
-194	3	3	GRN-00011	180	178	55	1	58	PO-Based	INV-1353	2026-05-15	30270.67	\N	\N	30270.67	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-05-15 18:52:30.866763	2026-05-15 18:52:30.866763	\N	\N
-195	3	3	GRN-00012	181	179	58	1	53	PO-Based	INV-1476	2026-05-15	62495.91	\N	\N	62495.91	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-05-15 18:52:30.874545	2026-05-15 18:52:30.874545	\N	\N
-196	3	3	GRN-00013	182	180	48	1	55	PO-Based	INV-1599	2026-05-15	75249.7	\N	\N	75249.7	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-05-15 18:52:30.883845	2026-05-15 18:52:30.883845	\N	\N
-197	3	3	GRN-00014	183	181	47	1	52	PO-Based	INV-1722	2026-05-15	19438.81	\N	\N	19438.81	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-05-15 18:52:30.894827	2026-05-15 18:52:30.894827	\N	\N
-198	3	3	GRN-00015	184	182	46	1	52	PO-Based	INV-1845	2026-05-15	40821.7	\N	\N	40821.7	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-05-15 18:52:30.902895	2026-05-15 18:52:30.902895	\N	\N
-199	3	3	GRN-00019	183	186	59	1	52	PO-Based	Inv5	2026-06-01	38877.63	\N	\N	38877.63	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-06-09 11:11:18.972663	2026-06-09 05:41:19.159588	\N	\N
-201	3	3	GRN-00020	209	193	59	1	55	PO-Based	INV31	2026-06-02	93160	/uploads/invoices/3/20260611_053538_b269ebd6.png	\N	93160	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-06-11 15:04:41.051409	2026-06-11 09:34:41.062897	\N	\N
-202	3	3	GRN-00021	207	192	59	1	53	PO-Based	Vi/26-27/273	2026-04-25	2360	/uploads/invoices/3/20260611_053215_64b67715.jpg	\N	12000	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-06-11 15:05:34.824889	2026-06-11 09:35:34.836038	\N	\N
-203	3	3	GRN-00022	206	194	59	1	53	PO-Based	IBILL897	2026-06-01	165000	/uploads/invoices/3/20260611_102351_1310c34c.png	\N	165000	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-06-11 16:24:46.227164	2026-06-11 10:54:46.247199	\N	\N
-204	2	2	GRN-00001	\N	196	62	3	62	Direct Invoice	INV123	2026-06-03	1500	/uploads/invoices/2/20260611_201312_3252c654.png	\N	0	0	0	0	0	\N	Pending	Completed	\N	3	f	2026-06-12 02:05:11.315627	2026-06-11 20:35:11.3237	\N	\N
-205	2	2	GRN-00002	\N	197	62	3	64	Direct Invoice	inv01020	2026-06-04	1200	/uploads/invoices/2/20260611_204513_3b365a57.png	\N	1200	0	0	0	0	\N	Pending	Completed	\N	3	f	2026-06-12 02:19:12.359224	2026-06-11 20:49:12.363187	\N	\N
-206	2	2	GRN-00003	216	\N	62	3	62	PO-Based	BG34	2026-06-04	20000	/uploads/invoices/2/20260611_205014_d03b0dbd.png	\N	20000	0	0	0	0	\N	Not Applicable	Completed	\N	3	f	2026-06-12 02:20:17.548099	2026-06-11 20:50:17.553752	\N	\N
-207	2	2	GRN-00004	233	200	62	3	63	PO-Based	INV20023	2026-06-30	2000	/api/uploads/invoices/2/20260630_130925_abb74d56.pdf	\N	33052.32	0	0	0	0	\N	Not Applicable	Completed	\N	3	f	2026-06-30 18:40:52.056973	2026-06-30 13:10:52.105003	\N	\N
-208	2	2	GRN-00005	232	199	62	3	64	PO-Based	IV543	2026-06-04	18000	/uploads/invoices/2/20260611_211153_feff01fd.jpg	\N	10	0	0	0	0	\N	Not Applicable	Completed	\N	3	f	2026-06-30 20:00:31.684515	2026-06-30 14:30:31.69365	\N	\N
-209	2	2	GRN-00006	239	\N	62	3	63	PO-Based		\N	16526.16	/api/uploads/invoices/2/20260706_110659_d889a21e.pdf	\N	16526.16	0	0	0	0	\N	Not Applicable	Completed	\N	3	f	2026-07-06 16:37:10.175261	2026-07-06 11:07:10.216092	\N	\N
-210	2	2	GRN-00007	235	\N	62	3	63	PO-Based		\N	10500		\N	43229.44	0	0	0	0	\N	Not Applicable	Completed	\N	3	f	2026-07-06 16:37:47.723934	2026-07-06 11:07:47.729021	\N	\N
-211	2	2	GRN-00008	236	\N	62	3	63	PO-Based		\N	27038.28		\N	27038.28	0	0	0	0	\N	Not Applicable	Completed	\N	3	f	2026-07-06 16:58:25.710415	2026-07-06 11:28:25.713942	\N	\N
-212	2	2	GRN-00009	243	\N	62	3	62	PO-Based		\N	69944.72		\N	69944.72	0	0	0	0	\N	Not Applicable	Completed	\N	3	f	2026-07-08 12:25:09.979025	2026-07-08 06:55:10.06309	\N	\N
-213	2	2	GRN-00010	\N	198	62	3	63	Direct Invoice	inv123	2026-06-11	10500	/uploads/invoices/2/20260611_205122_2e043a7f.png	\N	1500	0	0	0	0	\N	Pending	Completed	\N	3	f	2026-07-27 18:24:17.541486	2026-07-27 12:54:17.665721	\N	\N
+COPY public.grn (id, tenant_id, site_id, grn_number, po_id, gate_entry_id, warehouse_id, project_id, vendor_id, receipt_type, invoice_number, invoice_date, invoice_amount, invoice_scan_url, vendor_gstin, total_taxable_amount, total_cgst, total_sgst, total_igst, total_tax, eway_bill_number, payment_status, status, remarks, received_by_id, is_deleted, created_at, completed_at, invoice_id, contract_id, dc_number, dc_date, dc_scan_url) FROM stdin;
+182	3	3	GRN-00017	184	185	48	1	52	PO-Based		\N	81643.41	\N	\N	81643.41	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-06-02 18:01:24.056047	2026-06-02 12:31:24.097066	\N	\N	\N	\N	\N
+183	3	3	GRN-00018	189	184	59	1	54	PO-Based		\N	33629	\N	\N	33629	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-06-02 18:01:36.945004	2026-06-02 12:31:36.974354	\N	\N	\N	\N	\N
+184	3	3	GRN-00001	170	168	58	1	54	PO-Based	INV-123	2026-05-15	59200.07	\N	\N	59200.07	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-05-15 18:52:30.7739	2026-05-15 18:52:30.7739	\N	\N	\N	\N	\N
+185	3	3	GRN-00002	171	169	54	1	53	PO-Based	INV-246	2026-05-15	90906.98	\N	\N	90906.98	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-05-15 18:52:30.783608	2026-05-15 18:52:30.783608	\N	\N	\N	\N	\N
+186	3	3	GRN-00003	172	170	59	1	54	PO-Based	INV-369	2026-05-15	41190.86	\N	\N	41190.86	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-05-15 18:52:30.792942	2026-05-15 18:52:30.792942	\N	\N	\N	\N	\N
+187	3	3	GRN-00004	173	171	53	1	51	PO-Based	INV-492	2026-05-15	158701.26	\N	\N	158701.26	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-05-15 18:52:30.801702	2026-05-15 18:52:30.801702	\N	\N	\N	\N	\N
+188	3	3	GRN-00005	174	172	51	1	59	PO-Based	INV-615	2026-05-15	94040.79	\N	\N	94040.79	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-05-15 18:52:30.813547	2026-05-15 18:52:30.813547	\N	\N	\N	\N	\N
+189	3	3	GRN-00006	175	173	48	1	60	PO-Based	INV-738	2026-05-15	106459.08	\N	\N	106459.08	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-05-15 18:52:30.824516	2026-05-15 18:52:30.824516	\N	\N	\N	\N	\N
+190	3	3	GRN-00007	176	174	54	1	56	PO-Based	INV-861	2026-05-15	154430.82	\N	\N	154430.82	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-05-15 18:52:30.831705	2026-05-15 18:52:30.831705	\N	\N	\N	\N	\N
+191	3	3	GRN-00008	177	175	59	1	52	PO-Based	INV-984	2026-05-15	65341.82	\N	\N	65341.82	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-05-15 18:52:30.841674	2026-05-15 18:52:30.841674	\N	\N	\N	\N	\N
+192	3	3	GRN-00009	178	176	60	1	60	PO-Based	INV-1107	2026-05-15	147399.29	\N	\N	147399.29	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-05-15 18:52:30.849446	2026-05-15 18:52:30.849446	\N	\N	\N	\N	\N
+193	3	3	GRN-00010	179	177	54	1	60	PO-Based	INV-1230	2026-05-15	85728.48	\N	\N	85728.48	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-05-15 18:52:30.859075	2026-05-15 18:52:30.859075	\N	\N	\N	\N	\N
+194	3	3	GRN-00011	180	178	55	1	58	PO-Based	INV-1353	2026-05-15	30270.67	\N	\N	30270.67	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-05-15 18:52:30.866763	2026-05-15 18:52:30.866763	\N	\N	\N	\N	\N
+195	3	3	GRN-00012	181	179	58	1	53	PO-Based	INV-1476	2026-05-15	62495.91	\N	\N	62495.91	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-05-15 18:52:30.874545	2026-05-15 18:52:30.874545	\N	\N	\N	\N	\N
+196	3	3	GRN-00013	182	180	48	1	55	PO-Based	INV-1599	2026-05-15	75249.7	\N	\N	75249.7	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-05-15 18:52:30.883845	2026-05-15 18:52:30.883845	\N	\N	\N	\N	\N
+197	3	3	GRN-00014	183	181	47	1	52	PO-Based	INV-1722	2026-05-15	19438.81	\N	\N	19438.81	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-05-15 18:52:30.894827	2026-05-15 18:52:30.894827	\N	\N	\N	\N	\N
+198	3	3	GRN-00015	184	182	46	1	52	PO-Based	INV-1845	2026-05-15	40821.7	\N	\N	40821.7	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-05-15 18:52:30.902895	2026-05-15 18:52:30.902895	\N	\N	\N	\N	\N
+199	3	3	GRN-00019	183	186	59	1	52	PO-Based	Inv5	2026-06-01	38877.63	\N	\N	38877.63	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-06-09 11:11:18.972663	2026-06-09 05:41:19.159588	\N	\N	\N	\N	\N
+201	3	3	GRN-00020	209	193	59	1	55	PO-Based	INV31	2026-06-02	93160	/uploads/invoices/3/20260611_053538_b269ebd6.png	\N	93160	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-06-11 15:04:41.051409	2026-06-11 09:34:41.062897	\N	\N	\N	\N	\N
+202	3	3	GRN-00021	207	192	59	1	53	PO-Based	Vi/26-27/273	2026-04-25	2360	/uploads/invoices/3/20260611_053215_64b67715.jpg	\N	12000	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-06-11 15:05:34.824889	2026-06-11 09:35:34.836038	\N	\N	\N	\N	\N
+203	3	3	GRN-00022	206	194	59	1	53	PO-Based	IBILL897	2026-06-01	165000	/uploads/invoices/3/20260611_102351_1310c34c.png	\N	165000	0	0	0	0	\N	Not Applicable	Completed	\N	4	f	2026-06-11 16:24:46.227164	2026-06-11 10:54:46.247199	\N	\N	\N	\N	\N
+204	2	2	GRN-00001	\N	196	62	3	62	Direct Invoice	INV123	2026-06-03	1500	/uploads/invoices/2/20260611_201312_3252c654.png	\N	0	0	0	0	0	\N	Pending	Completed	\N	3	f	2026-06-12 02:05:11.315627	2026-06-11 20:35:11.3237	\N	\N	\N	\N	\N
+205	2	2	GRN-00002	\N	197	62	3	64	Direct Invoice	inv01020	2026-06-04	1200	/uploads/invoices/2/20260611_204513_3b365a57.png	\N	1200	0	0	0	0	\N	Pending	Completed	\N	3	f	2026-06-12 02:19:12.359224	2026-06-11 20:49:12.363187	\N	\N	\N	\N	\N
+206	2	2	GRN-00003	216	\N	62	3	62	PO-Based	BG34	2026-06-04	20000	/uploads/invoices/2/20260611_205014_d03b0dbd.png	\N	20000	0	0	0	0	\N	Not Applicable	Completed	\N	3	f	2026-06-12 02:20:17.548099	2026-06-11 20:50:17.553752	\N	\N	\N	\N	\N
+207	2	2	GRN-00004	233	200	62	3	63	PO-Based	INV20023	2026-06-30	2000	/api/uploads/invoices/2/20260630_130925_abb74d56.pdf	\N	33052.32	0	0	0	0	\N	Not Applicable	Completed	\N	3	f	2026-06-30 18:40:52.056973	2026-06-30 13:10:52.105003	\N	\N	\N	\N	\N
+208	2	2	GRN-00005	232	199	62	3	64	PO-Based	IV543	2026-06-04	18000	/uploads/invoices/2/20260611_211153_feff01fd.jpg	\N	10	0	0	0	0	\N	Not Applicable	Completed	\N	3	f	2026-06-30 20:00:31.684515	2026-06-30 14:30:31.69365	\N	\N	\N	\N	\N
+209	2	2	GRN-00006	239	\N	62	3	63	PO-Based		\N	16526.16	/api/uploads/invoices/2/20260706_110659_d889a21e.pdf	\N	16526.16	0	0	0	0	\N	Not Applicable	Completed	\N	3	f	2026-07-06 16:37:10.175261	2026-07-06 11:07:10.216092	\N	\N	\N	\N	\N
+210	2	2	GRN-00007	235	\N	62	3	63	PO-Based		\N	10500		\N	43229.44	0	0	0	0	\N	Not Applicable	Completed	\N	3	f	2026-07-06 16:37:47.723934	2026-07-06 11:07:47.729021	\N	\N	\N	\N	\N
+211	2	2	GRN-00008	236	\N	62	3	63	PO-Based		\N	27038.28		\N	27038.28	0	0	0	0	\N	Not Applicable	Completed	\N	3	f	2026-07-06 16:58:25.710415	2026-07-06 11:28:25.713942	\N	\N	\N	\N	\N
+212	2	2	GRN-00009	243	\N	62	3	62	PO-Based		\N	69944.72		\N	69944.72	0	0	0	0	\N	Not Applicable	Completed	\N	3	f	2026-07-08 12:25:09.979025	2026-07-08 06:55:10.06309	\N	\N	\N	\N	\N
+213	2	2	GRN-00010	\N	198	62	3	63	Direct Invoice	inv123	2026-06-11	10500	/uploads/invoices/2/20260611_205122_2e043a7f.png	\N	1500	0	0	0	0	\N	Pending	Completed	\N	3	f	2026-07-27 18:24:17.541486	2026-07-27 12:54:17.665721	\N	\N	\N	\N	\N
+214	2	2	GRN-00011	\N	203	62	3	66	Direct Invoice	A2456Y	2026-08-04	10000	/api/uploads/invoices/2/20260806_080322_994710f4.png	\N	0	0	0	0	0	\N	Pending	Completed	\N	3	f	2026-08-06 14:54:13.584989	2026-08-06 09:24:13.598885	\N	\N	5555555	2026-08-03	/api/uploads/invoices/2/20260806_080207_3c61f7e0.png
+215	2	2	GRN-00012	\N	204	62	3	64	Direct Invoice	A566S54	2026-08-03	60606	/api/uploads/invoices/2/20260806_092619_1796e5e4.png	\N	0	0	0	0	0	\N	Pending	Completed	\N	3	f	2026-08-06 14:57:09.61217	2026-08-06 09:27:09.613865	\N	\N	88888	2026-08-02	/api/uploads/invoices/2/20260806_092552_24c3c8d0.png
+216	2	2	GRN-00013	268	205	62	3	64	PO-Based	C67G98VV	2026-08-05	153273	/api/uploads/invoices/2/20260806_093046_c67c0c7d.png	\N	153273.75	0	0	0	0	\N	Not Applicable	Completed	\N	3	f	2026-08-06 15:02:28.544141	2026-08-06 09:32:28.568138	\N	\N	56565656	2026-08-01	/api/uploads/invoices/2/20260806_093010_ac01d917.png
+217	2	2	GRN-00014	\N	206	62	3	67	Direct Invoice	L78I876	2026-08-04	655660	/api/uploads/invoices/2/20260806_102745_cdade1c9.png	\N	0	0	0	0	0	\N	Pending	Completed	\N	3	f	2026-08-06 15:58:41.318646	2026-08-06 10:28:41.32044	\N	\N	789045	2026-07-27	/api/uploads/invoices/2/20260806_102710_c7dc314a.png
 \.
 
 
@@ -8833,6 +10064,7 @@ COPY public.grn_items (id, grn_id, material_id, po_item_id, ordered_quantity, re
 518	212	2565	615	4	4	2	2	26703.28	\N	0	0	0	0	0	0	53406.56	0	\N
 519	212	3507	616	1	1	1	0	12	\N	0	0	0	0	0	0	12	0	\N
 520	213	2338	\N	0	1	1	0	1500	\N	0	0	0	0	0	0	1500	0	\N
+521	216	3501	702	35	35	35	0	4379.25	\N	0	0	0	0	0	0	153273.75	0	\N
 \.
 
 
@@ -8907,6 +10139,18 @@ COPY public.indent_approvals (id, indent_id, approval_flow_id, approver_id, appr
 64	233	47	3	2026-06-30 18:29:36.286926	{"512": {"quantity": 3.0, "remarks": null}, "513": {"quantity": 2.0, "remarks": null}}	\N
 65	233	16	3	2026-06-30 18:30:01.14339	{"512": {"quantity": 2.0, "remarks": null}, "513": {"quantity": 1.0, "remarks": null}}	\N
 66	233	50	3	2026-06-30 18:30:01.143412	{"512": {"quantity": 2.0, "remarks": null}, "513": {"quantity": 1.0, "remarks": null}}	\N
+67	235	46	3	2026-08-03 15:48:53.573668	{"516": {"quantity": 3.0, "remarks": "none"}}	\N
+68	235	80	3	2026-08-03 15:48:53.573712	{"516": {"quantity": 3.0, "remarks": "none"}}	\N
+69	235	16	3	2026-08-03 15:49:09.633194	{"516": {"quantity": 3.0, "remarks": null}}	\N
+70	235	85	3	2026-08-03 15:49:09.633237	{"516": {"quantity": 3.0, "remarks": null}}	\N
+71	236	46	3	2026-08-03 16:55:43.328345	{"517": {"quantity": 5.0, "remarks": null}}	\N
+72	236	80	3	2026-08-03 16:55:43.328389	{"517": {"quantity": 5.0, "remarks": null}}	\N
+73	236	16	3	2026-08-03 16:55:53.743552	{"517": {"quantity": 5.0, "remarks": null}}	\N
+74	236	85	3	2026-08-03 16:55:53.743595	{"517": {"quantity": 5.0, "remarks": null}}	\N
+75	237	46	3	2026-08-06 11:28:32.742911	{"518": {"quantity": 4.0, "remarks": null}}	\N
+76	237	80	3	2026-08-06 11:28:32.742954	{"518": {"quantity": 4.0, "remarks": null}}	\N
+77	237	16	3	2026-08-06 11:28:43.442343	{"518": {"quantity": 4.0, "remarks": null}}	\N
+78	237	85	3	2026-08-06 11:28:43.442385	{"518": {"quantity": 4.0, "remarks": null}}	\N
 \.
 
 
@@ -8999,10 +10243,6 @@ COPY public.indent_items (id, indent_id, material_id, requested_quantity, issued
 501	226	2564	2	0	0	\N
 502	226	2565	2	0	0	\N
 505	228	3348	10	0	0	10
-504	228	2387	4	4	0	4
-506	228	2737	6	6	0	6
-495	222	2751	5	3	0	7
-496	222	3475	5	3	0	10
 507	229	2356	4	0	0	3
 510	231	2435	1	1	1	1
 511	232	2974	2	0	0	\N
@@ -9012,6 +10252,15 @@ COPY public.indent_items (id, indent_id, material_id, requested_quantity, issued
 513	233	3475	2	0	0	1
 514	234	3501	1	0	0	\N
 515	234	3475	560061	0	0	\N
+516	235	3421	3	0	0	3
+517	236	3474	5	0	0	5
+519	238	2469	10	0	0	\N
+520	238	3503	5	0	0	\N
+495	222	2751	5	3	3	7
+518	237	3474	5	4	0	4
+496	222	3475	5	3	3	10
+504	228	2387	4	4	4	4
+506	228	2737	6	6	6	6
 \.
 
 
@@ -9041,7 +10290,6 @@ COPY public.indents (id, tenant_id, site_id, indent_number, requester_id, room_i
 189	3	3	IND-00011	4	1	2	Floor 1	\N	Civil	\N	0	Issued	1	\N	\N	f	2026-04-21 06:52:30.375564	2026-05-15 18:52:30.395849	\N	\N	\N
 193	3	3	IND-00015	4	1	2	Floor 1	\N	Civil	\N	0	Partially Issued	1	\N	2026-06-01 11:32:27.323138	f	2026-04-23 06:52:30.375564	2026-06-09 17:58:53.379211	\N	\N	\N
 192	3	3	IND-00014	4	2	1	Floor 1	\N	Civil	\N	0	Partially Issued	2	4	2026-06-08 05:37:36.683826	f	2026-04-22 18:52:30.375564	2026-06-09 18:22:36.843183	\N	\N	\N
-190	3	3	IND-00012	4	1	2	Floor 1	\N	Civil	\N	0	Awaiting Approval	2	\N	\N	f	2026-04-21 18:52:30.375564	2026-06-08 11:57:40.208249	\N	\N	\N
 208	3	3	IND-00035	4	170	3	Floor 2	Room 206	102 WARD		139727.1	Converted to PO	2	4	2026-06-08 05:34:52.991266	f	2026-06-08 10:58:08.257706	2026-06-08 14:45:41.0709	\N	\N	\N
 209	3	3	IND-00036	4	\N	3	Floor 2		102 WARD		3847.95	Approved	2	4	2026-06-08 09:48:45.531409	f	2026-06-08 15:16:28.123647	2026-06-08 15:18:45.533288	\N	\N	\N
 202	3	3	IND-00029	4	1	1	Ground Floor	Room1	CIVIL		240000	Converted to PO	1	4	2026-06-01 11:32:07.268603	f	2026-06-01 17:02:01.395733	2026-06-01 17:07:09.000518	\N	\N	\N
@@ -9052,7 +10300,6 @@ COPY public.indents (id, tenant_id, site_id, indent_number, requester_id, room_i
 207	3	3	IND-00034	4	223	3	Floor 6	Room 601	103 WARD		23287.85	Approved	1	\N	2026-06-05 12:54:59.043078	f	2026-06-05 18:14:47.419437	2026-06-05 18:24:59.044127	\N	\N	\N
 210	3	3	IND-00037	4	223	3	Floor 6	Room 601	103 WARD		104434.3	Approved	2	4	2026-06-08 10:42:23.32504	f	2026-06-08 16:11:43.866856	2026-06-08 16:12:23.326921	\N	\N	\N
 203	3	3	IND-00030	9	2	1	Floor 2	Room1	CIVIL	Ggggh\n[Rejected: no required]	1569000	Rejected	1	\N	\N	f	2026-06-02 13:46:47.613015	2026-06-08 16:19:35.587119	\N	\N	\N
-212	3	3	IND-00039	4	170	3	Floor 2	Room 206	102 WARD		29476	Awaiting Approval	2	\N	\N	f	2026-06-08 16:29:10.943772	2026-06-16 11:14:36.390354	\N	\N	\N
 191	3	3	IND-00013	4	2	2	Floor 1	\N	Civil	\N	0	Issued	2	4	2026-06-08 06:25:38.754012	f	2026-04-22 06:52:30.375564	2026-06-17 18:12:13.846962	\N	\N	\N
 222	2	2	IND-00009	3	237	7	FIRST FLOOR	ROOM101	HEALTH 		75230.7	Partially Issued	2	3	2026-06-18 05:21:30.600998	f	2026-06-15 18:30:05.703012	2026-06-18 12:26:45.197379	11	\N	\N
 214	2	2	IND-00001	3	237	7	FIRST FLOOR	ROOM101	HEALTH 		165261.6	Approved	1	\N	2026-06-11 16:32:44.703679	f	2026-06-11 22:02:08.325471	2026-06-11 22:02:44.704866	11	\N	\N
@@ -9063,10 +10310,11 @@ COPY public.indents (id, tenant_id, site_id, indent_number, requester_id, room_i
 218	2	2	IND-00005	9	\N	\N			Civil		16275.55	Issued	2	11	2026-06-11 18:18:47.211047	f	2026-06-11 23:38:00.003556	2026-06-12 02:15:29.611445	3	\N	\N
 220	2	2	IND-00007	3	237	7	FIRST FLOOR	ROOM101	HEALTH 	Complaint CMP-00003 - Fan is not working	1271.16	Issued	2	3	2026-06-11 22:38:22.354584	f	2026-06-12 04:08:09.960528	2026-06-12 04:13:27.922572	11	5	\N
 213	3	3	IND-00040	4	170	3	Floor 2	Room 206	102 WARD		19575.48	Partially Issued	2	4	2026-06-11 13:52:02.724655	f	2026-06-08 16:51:34.292996	2026-06-17 18:19:11.671326	\N	\N	\N
-224	3	3	IND-00042	4	238	10	Second Floor	201	Computer Science		97877.4	Awaiting Approval	1	\N	\N	f	2026-06-17 10:31:53.972662	2026-06-17 10:31:53.972676	15	\N	\N
 221	2	2	IND-00008	3	237	7	FIRST FLOOR	ROOM101	HEALTH 	\n[Rejected: again testing]	26100.64	Rejected	1	\N	\N	f	2026-06-15 18:02:29.923283	2026-07-22 15:03:01.671041	11	\N	\N
+190	3	3	IND-00012	4	1	2	Floor 1	\N	Civil	\N	0	Submitted	2	\N	\N	f	2026-04-21 18:52:30.375564	2026-06-08 11:57:40.208249	\N	\N	\N
+212	3	3	IND-00039	4	170	3	Floor 2	Room 206	102 WARD		29476	Submitted	2	\N	\N	f	2026-06-08 16:29:10.943772	2026-06-16 11:14:36.390354	\N	\N	\N
+224	3	3	IND-00042	4	238	10	Second Floor	201	Computer Science		97877.4	Submitted	1	\N	\N	f	2026-06-17 10:31:53.972662	2026-06-17 10:31:53.972676	15	\N	\N
 223	3	3	IND-00041	4	238	10	Second Floor	201	Computer Science	Doggo ipsum stop it fren vvv doge fluffer the neighborhood pupper blep shibe waggy wags, shoob thicc very taste wow puggorino ur givin me a spook. Floofs tungg shoob very taste wow sub woofer, the neighborhood pupper long bois much ruin diet. Wow such tempt very hand that feed shibe doggorino h*ck wrinkler, blep clouds heckin, doing me a frighten long woofer boof. Extremely cuuuuuute borkf vvv extremely cuuuuuute you are doing me a frighten long woofer, woofer very jealous pupper shoober. Clouds pats vvv, doge. Smol shoob very good spot heckin ur givin me a spook boofers smol, big ol floofs bork smol borking doggo with a long snoot for pats. Very good spot big ol pupper shibe blop h*ck, waggy wags dat tungg tho long doggo. puggo borking doggo yapper. Length boy pupper vvv I am bekom fat, bork big ol pupper.  Clouds aqua doggo puggorino tungg borking doggo, pupperino such treat. Heckin snoot floofs clouds what a nice floof wow very biscit, puggorino pupperino stop it fren. Fat boi maximum borkdrive shooberino lotsa pats, pats. Borkdrive very jealous pupper long doggo doing me a frighten, boofers most angery pupper I have ever seen. Fat boi noodle horse blep, wrinkler. Borkdrive extremely cuuuuuute lotsa pats blep most angery pupper I have ever seen, blop you are doing me a frighten dat tungg tho. Clouds very hand that feed shibe aqua doggo shooberino, waggy wags borking doggo. Shibe long woofer big ol pupper ruff heckin h*ck shibe, heckin good boys heck big ol pupper shoob waggy wags, long bois adorable doggo stop it fren length boy borkf.  Doing me a frighten super chub floofs what a nice floof porgo super chub very good spot thicc shoob vvv, I am bekom fat stop it fren aqua doggo puggorino very good spot shibe dat tungg tho. He made many woofs smol clouds stop it fren heckin fat boi, very hand that feed shibe blep borkf. Wrinkler doge lotsa pats fat boi woofer boof, long bois borking doggo porgo. Most angery pupper I have ever seen tungg long bois ruff blop, wow such tempt he made many woofs h*ck, puggo big ol h*ck. Heck puggorino noodle horse the neighborhood pupper puggo snoot, porgo shoob long doggo sub woofer.Doggo ipsum stop it fren vvv doge fluffer the neighborhood pupper blep shibe waggy wags, shoob thicc very taste wow puggorino ur givin me a spook. Floofs tungg shoob very taste wow sub woofer, the neighborhood pupper long bois much ruin diet. Wow such tempt very hand that feed shibe doggorino h*ck wrinkler, blep clouds heckin, doing me a frighten long woofer boof. Extremely cuuuuuute borkf vvv extremely cuuuuuute you are doing me a frighten long woofer, woofer very jealous pupper shoober. Clouds pats vvv, doge. Smol shoob very good spot heckin ur givin me a spook boofers smol, big ol floofs bork smol borking doggo with a long snoot for pats. Very good spot big ol pupper shibe blop h*ck, waggy wags dat tungg tho long doggo. puggo borking doggo yapper. Length boy pupper vvv I am bekom fat, bork big ol pupper.  Clouds aqua doggo puggorino tungg borking doggo, pupperino such treat. Heckin snoot floofs clouds what a nice floof wow very biscit, puggorino pupperino stop it fren. Fat boi maximum borkdrive shooberino lotsa pats, pats. Borkdrive very jealous pupper long doggo doing me a frighten, boofers most angery pupper I have ever seen. Fat boi noodle horse blep, wrinkler. Borkdrive extremely cuuuuuute lotsa pats blep most angery pupper I have ever seen, blop you are doing me a frighten dat tungg tho. Clouds very hand that feed shibe aqua doggo shooberino, waggy wags borking doggo. Shibe long woofer big ol pupper ruff heckin h*ck shibe, heckin good boys heck big ol pupper shoob waggy wags, long bois adorable doggo stop it fren length boy borkf.  Doing me a frighten super chub floofs what a nice floof porgo super chub very good spot thicc shoob vvv, I am bekom fat stop it fren aqua doggo puggorino very good spot shibe dat tungg tho. He made many woofs smol clouds stop it fren heckin fat boi, very hand that feed shibe blep borkf. Wrinkler doge lotsa pats fat boi woofer boof, long bois borking doggo porgo. Most angery pupper I have ever seen tungg long bois ruff blop, wow such tempt he made many woofs h*ck, puggo big ol h*ck. Heck puggorino noodle horse the neighborhood pupper puggo snoot, porgo shoob long doggo sub woofer.Doggo ipsum stop it fren vvv doge fluffer the neighborhood pupper blep shibe waggy wags, shoob thicc very taste wow puggorino ur givin me a spook. Floofs tungg shoob very taste wow sub woofer, the neighborhood pupper long bois much ruin diet. Wow such tempt very hand that feed shibe doggorino h*ck wrinkler, blep clouds heckin, doing me a frighten long woofer boof. Extremely cuuuuuute borkf vvv extremely cuuuuuute you are doing me a frighten long woofer, woofer very jealous pupper shoober. Clouds pats vvv, doge. Smol shoob very good spot heckin ur givin me a spook boofers smol, big ol floofs bork smol borking doggo with a long snoot for pats. Very good spot big ol pupper shibe blop h*ck, waggy wags dat tungg tho long doggo. puggo borking doggo yapper. Length boy pupper vvv I am bekom fat, bork big ol pupper.  Clouds aqua doggo puggorino tungg borking doggo, pupperino such treat. Heckin snoot floofs clouds what a nice floof wow very biscit, puggorino pupperino stop it fren. Fat boi maximum borkdrive shooberino lotsa pats, pats. Borkdrive very jealous pupper long doggo doing me a frighten, boofers most angery pupper I have ever seen. Fat boi noodle horse blep, wrinkler. Borkdrive extremely cuuuuuute lotsa pats blep most angery pupper I have ever seen, blop you are doing me a frighten dat tungg tho. Clouds very hand that feed shibe aqua doggo shooberino, waggy wags borking doggo. Shibe long woofer big ol pupper ruff heckin h*ck shibe, heckin good boys heck big ol pupper shoob waggy wags, long bois adorable doggo stop it fren length boy borkf.  Doing me a frighten super chub floofs what a nice floof porgo super chub very good spot thicc shoob vvv, I am bekom fat stop it fren aqua doggo puggorino very good spot shibe dat tungg tho. He made many woofs smol clouds stop it fren heckin fat boi, very hand that feed shibe blep borkf. Wrinkler doge lotsa pats fat boi woofer boof, long bois borking doggo porgo. Most angery pupper I have ever seen tungg long bois ruff blop, wow such tempt he made many woofs h*ck, puggo big ol h*ck. Heck puggorino noodle horse the neighborhood pupper puggo snoot, porgo shoob long doggo sub woofer.Doggo ipsum stop it fren vvv doge fluffer the neighborhood pupper blep shibe waggy wags, shoob thicc very taste wow puggorino ur givin me a spook. Floofs tungg shoob very taste wow sub woofer, the neighborhood pupper long bois much ruin diet. Wow such tempt very hand that feed shibe doggorino h*ck wrinkler, blep clouds heckin, doing me a frighten long woofer boof. Extremely cuuuuuute borkf vvv extremely cuuuuuute you are doing me a frighten long woofer, woofer very jealous pupper shoober. Clouds pats vvv, doge. Smol shoob very good spot heckin ur givin me a spook boofers smol, big ol floofs bork smol borking doggo with a long snoot for pats. Very good spot big ol pupper shibe blop h*ck, waggy wags dat tungg tho long doggo. puggo borking doggo yapper. Length boy pupper vvv I am bekom fat, bork big ol pupper.  Clouds aqua doggo puggorino tungg borking doggo, pupperino such treat. Heckin snoot floofs clouds what a nice floof wow very biscit, puggorino pupperino stop it fren. Fat boi maximum borkdrive shooberino lotsa pats, pats. Borkdrive very jealous pupper long doggo doing me a frighten, boofers most angery pupper I have ever seen. Fat boi noodle horse blep, wrinkler. Borkdrive extremely cuuuuuute lotsa pats blep most angery pupper I have ever seen, blop you are doing me a frighten dat tungg tho. Clouds very hand that feed shibe aqua doggo shooberino, waggy wags borking doggo. Shibe long woofer big ol pupper ruff heckin h*ck shibe, heckin good boys heck big ol pupper shoob waggy wags, long bois adorable doggo stop it fren length boy borkf.  Doing me a frighten super chub floofs what a nice floof porgo super chub very good spot thicc shoob vvv, I am bekom fat stop it fren aqua doggo puggorino very good spot shibe dat tungg tho. He made many woofs smol clouds stop it fren heckin fat boi, very hand that feed shibe blep borkf. Wrinkler doge lotsa pats fat boi woofer boof, long bois borking doggo porgo. Most angery pupper I have ever seen tungg long bois ruff blop, wow such tempt he made many woofs h*ck, puggo big ol h*ck. Heck puggorino noodle horse the neighborhood pupper puggo snoot, porgo shoob long doggo sub woofer.Doggo ipsum stop it fren vvv doge fluffer the neighborhood pupper blep shibe waggy wags, shoob thicc very taste wow puggorino ur givin me a spook. Floofs tungg shoob very taste wow sub woofer, the neighborhood pupper long bois much ruin diet. Wow such tempt very hand that feed shibe doggorino h*ck wrinkler, blep clouds heckin, doing me a frighten long woofer boof. Extremely cuuuuuute borkf vvv extremely cuuuuuute you are doing me a frighten long woofer, woofer very jealous pupper shoober. Clouds pats vvv, doge. Smol shoob very good spot heckin ur givin me a spook boofers smol, big ol floofs bork smol borking doggo with a long snoot for pats. Very good spot big ol pupper shibe blop h*ck, waggy wags dat tungg tho long doggo. puggo borking doggo yapper. Length boy pupper vvv I am bekom fat, bork big ol pupper.  Clouds aqua doggo puggorino tungg borking doggo, pupperino such treat. Heckin snoot floofs clouds what a nice floof wow very biscit, puggorino pupperino stop it fren. Fat boi maximum borkdrive shooberino lotsa pats, pats. Borkdrive very jealous pupper long doggo doing me a frighten, boofers most angery pupper I have ever seen. Fat boi noodle horse blep, wrinkler. Borkdrive extremely cuuuuuute lotsa pats blep most angery pupper I have ever seen, blop you are doing me a frighten dat tungg tho. Clouds very hand that feed shibe aqua doggo shooberino, waggy wags borking doggo. Shibe long woofer big ol pupper ruff heckin h*ck shibe, heckin good boys heck big ol pupper shoob waggy wags, long bois adorable doggo stop it fren length boy borkf.  Doing me a frighten super chub floofs what a nice floof porgo super chub very good spot thicc shoob vvv, I am bekom fat stop it fren aqua doggo puggorino very good spot shibe dat tungg tho. He made many woofs smol clouds stop it fren heckin fat boi, very hand that feed shibe blep borkf. Wrinkler doge lotsa pats fat boi woofer boof, long bois borking doggo porgo. Most angery pupper I have ever seen tungg long bois ruff blop, wow such tempt he made many woofs h*ck, puggo big ol h*ck. Heck puggorino noodle horse the neighborhood pupper puggo snoot, porgo shoob long doggo sub woofer.Doggo ipsum stop it fren vvv doge fluffer the neighborhood pupper blep shibe waggy wags, shoob thicc very taste wow puggorino ur givin me a spook. Floofs tungg shoob very taste wow sub woofer, the neighborhood pupper long bois much ruin diet. Wow such tempt very hand that feed shibe doggorino h*ck wrinkler, blep clouds heckin, doing me a frighten long woofer boof. Extremely cuuuuuute borkf vvv extremely cuuuuuute you are doing me a frighten long woofer, woofer very jealous pupper shoober. Clouds pats vvv, doge. Smol shoob very good spot heckin ur givin me a spook boofers smol, big ol floofs bork smol borking doggo with a long snoot for pats. Very good spot big ol pupper shibe blop h*ck, waggy wags dat tungg tho long doggo. puggo borking doggo yapper. Length boy pupper vvv I am bekom fat, bork big ol pupper.  Clouds aqua doggo puggorino tungg borking doggo, pupperino such treat. Heckin snoot floofs clouds what a nice floof wow very biscit, puggorino pupperino stop it fren. Fat boi maximum borkdrive shooberino lotsa pats, pats. Borkdrive very jealous pupper long doggo doing me a frighten, boofers most angery pupper I have ever seen. Fat boi noodle horse blep, wrinkler. Borkdrive extremely cuuuuuute lotsa pats blep most angery pupper I have ever seen, blop you are doing me a frighten dat tungg tho. Clouds very hand that feed shibe aqua doggo shooberino, waggy wags borking doggo. Shibe long woofer big ol pupper ruff heckin h*ck shibe, heckin good boys heck big ol pupper shoob waggy wags, long bois adorable doggo stop it fren length boy borkf.  Doing me a frighten super chub floofs what a nice floof porgo super chub very good spot thicc shoob vvv, I am bekom fat stop it fren aqua doggo puggorino very good spot shibe dat tungg tho. He made many woofs smol clouds stop it fren heckin fat boi, very hand that feed shibe blep borkf. Wrinkler doge lotsa pats fat boi woofer boof, long bois borking doggo porgo. Most angery pupper I have ever seen tungg long bois ruff blop, wow such tempt he made many woofs h*ck, puggo big ol h*ck. Heck puggorino noodle horse the neighborhood pupper puggo snoot, porgo shoob long doggo sub woofer.Doggo ipsum stop it fren vvv doge fluffer the neighborhood pupper blep shibe waggy wags, shoob thicc very taste wow puggorino ur givin me a spook. Floofs tungg shoob very taste wow sub woofer, the neighborhood pupper long bois much ruin diet. Wow such tempt very hand that feed shibe doggorino h*ck wrinkler, blep clouds heckin, doing me a frighten long woofer boof. Extremely cuuuuuute borkf vvv extremely cuuuuuute you are doing me a frighten long woofer, woofer very jealous pupper shoober. Clouds pats vvv, doge. Smol shoob very good spot heckin ur givin me a spook boofers smol, big ol floofs bork smol borking doggo with a long snoot for pats. Very good spot big ol pupper shibe blop h*ck, waggy wags dat tungg tho long doggo. puggo borking doggo yapper. Length boy pupper vvv I am bekom fat, bork big ol pupper.  Clouds aqua doggo puggorino tungg borking doggo, pupperino such treat. Heckin snoot floofs clouds what a nice floof wow very biscit, puggorino pupperino stop it fren. Fat boi maximum borkdrive shooberino lotsa pats, pats. Borkdrive very jealous pupper long doggo doing me a frighten, boofers most angery pupper I have ever seen. Fat boi noodle horse blep, wrinkler. Borkdrive extremely cuuuuuute lotsa pats blep most angery pupper I have ever seen, blop you are doing me a frighten dat tungg tho. Clouds very hand that feed shibe aqua doggo shooberino, waggy wags borking doggo. Shibe long woofer big ol pupper ruff heckin h*ck shibe, heckin good boys heck big ol pupper shoob waggy wags, long bois adorable doggo stop it fren length boy borkf.  Doing me a frighten super chub floofs what a nice floof porgo super chub very good spot thicc shoob vvv, I am bekom fat stop it fren aqua doggo puggorino very good spot shibe dat tungg tho. He made many woofs smol clouds stop it fren heckin fat boi, very hand that feed shibe blep borkf. Wrinkler doge lotsa pats fat boi woofer boof, long bois borking doggo porgo. Most angery pupper I have ever seen tungg long bois ruff blop, wow such tempt he made many woofs h*ck, puggo big ol h*ck. Heck puggorino noodle horse the neighborhood pupper puggo snoot, porgo shoob long doggo sub woofer.Doggo ipsum stop it fren vvv doge fluffer the neighborhood pupper blep shibe waggy wags, shoob thicc very taste wow puggorino ur givin me a spook. Floofs tungg shoob very taste wow sub woofer, the neighborhood pupper long bois much ruin diet. Wow such tempt very hand that feed shibe doggorino h*ck wrinkler, blep clouds heckin, doing me a frighten long woofer boof. Extremely cuuuuuute borkf vvv extremely cuuuuuute you are doing me a frighten long woofer, woofer very jealous pupper shoober. Clouds pats vvv, doge. Smol shoob very good spot heckin ur givin me a spook boofers smol, big ol floofs bork smol borking doggo with a long snoot for pats. Very good spot big ol pupper shibe blop h*ck, waggy wags dat tungg tho long doggo. puggo borking doggo yapper. Length boy pupper vvv I am bekom fat, bork big ol pupper.  Clouds aqua doggo puggorino tungg borking doggo, pupperino such treat. Heckin snoot floofs clouds what a nice floof wow very biscit, puggorino pupperino stop it fren. Fat boi maximum borkdrive shooberino lotsa pats, pats. Borkdrive very jealous pupper long doggo doing me a frighten, boofers most angery pupper I have ever seen. Fat boi noodle horse blep, wrinkler. Borkdrive extremely cuuuuuute lotsa pats blep most angery pupper I have ever seen, blop you are doing me a frighten dat tungg tho. Clouds very hand that feed shibe aqua doggo shooberino, waggy wags borking doggo. Shibe long woofer big ol pupper ruff heckin h*ck shibe, heckin good boys heck big ol pupper shoob waggy wags, long bois adorable doggo stop it fren length boy borkf.  Doing me a frighten super chub floofs what a nice floof porgo super chub very good spot thicc shoob vvv, I am bekom fat stop it fren aqua doggo puggorino very good spot shibe dat tungg tho. He made many woofs smol clouds stop it fren heckin fat boi, very hand that feed shibe blep borkf. Wrinkler doge lotsa pats fat boi woofer boof, long bois borking doggo porgo. Most angery pupper I have ever seen tungg long bois ruff blop, wow such tempt he made many woofs h*ck, puggo big ol h*ck. Heck puggorino noodle horse the neighborhood pupper puggo snoot, porgo shoob long doggo sub woofer.Doggo ipsum stop it fren vvv doge fluffer the neighborhood pupper blep shibe waggy wags, shoob thicc very taste wow puggorino ur givin me a spook. Floofs tungg shoob very taste wow sub woofer, the neighborhood pupper long bois much ruin diet. Wow such tempt very hand that feed shibe doggorino h*ck wrinkler, blep clouds heckin, doing me a frighten long woofer boof. Extremely cuuuuuute borkf vvv extremely cuuuuuute you are doing me a frighten long woofer, woofer very jealous pupper shoober. Clouds pats vvv, doge. Smol shoob very good spot heckin ur givin me a spook boofers smol, big ol floofs bork smol borking doggo with a long snoot for pats. Very good spot big ol pupper shibe blop h*ck, waggy wags dat tungg tho long doggo. puggo borking doggo yapper. Length boy pupper vvv I am bekom fat, bork big ol pupper.  Clouds aqua doggo puggorino tungg borking doggo, pupperino such treat. Heckin snoot floofs clouds what a nice floof wow very biscit, puggorino pupperino stop it fren. Fat boi maximum borkdrive shooberino lotsa pats, pats. Borkdrive very jealous pupper long doggo doing me a frighten, boofers most angery pupper I have ever seen. Fat boi noodle horse blep, wrinkler. Borkdrive extremely cuuuuuute lotsa pats blep most angery pupper I have ever seen, blop you are doing me a frighten dat tungg tho. Clouds very hand that feed shibe aqua doggo shooberino, waggy wags borking doggo. Shibe long woofer big ol pupper ruff heckin h*ck shibe, heckin good boys heck big ol pupper shoob waggy wags, long bois adorable doggo stop it fren length boy borkf.  Doing me a frighten super chub floofs what a nice floof porgo super chub very good spot thicc shoob vvv, I am bekom fat stop it fren aqua doggo puggorino very good spot shibe dat tungg tho. He made many woofs smol clouds stop it fren heckin fat boi, very hand that feed shibe blep borkf. Wrinkler doge lotsa pats fat boi woofer boof, long bois borking doggo porgo. Most angery pupper I have ever seen tungg long bois ruff blop, wow such tempt he made many woofs h*ck, puggo big ol h*ck. Heck puggorino noodle horse the neighborhood pupper puggo snoot, porgo shoob long doggo sub woofer.	132765	Partially Issued	2	4	2026-06-16 05:46:55.983528	f	2026-06-16 11:16:07.641643	2026-06-17 18:07:51.581328	15	\N	\N
-226	2	2	IND-00011	17	\N	\N			Mechanical Engineering		86458.88	Awaiting Approval	1	\N	\N	f	2026-06-18 10:48:16.861751	2026-06-18 10:48:16.861803	3	\N	\N
 227	2	2	IND-00012	19	237	\N	FIRST FLOOR	ROOM101	HEALTH 		19330.26	Issued	2	3	2026-06-18 05:28:10.733249	f	2026-06-18 10:55:16.557739	2026-06-18 11:11:57.204961	11	\N	\N
 228	2	2	IND-00013	19	237	7	FIRST FLOOR	ROOM101	HEALTH 		306960.22	Partially Issued	2	3	2026-06-18 06:51:24.051148	f	2026-06-18 10:57:09.781589	2026-06-18 12:23:35.548001	11	\N	\N
 229	2	2	IND-00014	19	\N	8			HEALTH 		51749.7	Approved	2	3	2026-06-18 07:10:37.145969	f	2026-06-18 12:33:13.796141	2026-06-18 12:40:37.156183	11	\N	\N
@@ -9074,8 +10322,13 @@ COPY public.indents (id, tenant_id, site_id, indent_number, requester_id, room_i
 231	2	2	IND-00016	3	237	7	FIRST FLOOR	ROOM101	HEALTH 	Complaint CMP-00008 - AC problem	4657.57	Issued	2	3	2026-06-22 06:17:58.262371	f	2026-06-22 11:44:48.408071	2026-06-22 11:48:20.964653	11	10	\N
 225	2	2	IND-00010	17	\N	\N			Computer Science & Engineering		8260.56	Approved	2	3	2026-06-30 12:45:16.350597	f	2026-06-18 10:44:25.957294	2026-06-30 18:15:16.373652	3	\N	\N
 233	2	2	IND-00018	3	237	7	FIRST FLOOR	ROOM101	HEALTH 		26601.42	Approved	2	3	2026-06-30 13:00:01.16276	f	2026-06-30 18:29:09.052074	2026-06-30 18:30:01.165439	11	\N	\N
-234	2	2	IND-00019	3	\N	\N			Anatomy	Complaint CMP-00005 - FAN NOT WORKING	2577802744.56	Awaiting Approval	1	\N	\N	f	2026-07-02 18:40:42.679828	2026-07-02 18:40:42.67987	1	7	\N
 232	2	2	IND-00017	3	\N	7			HEALTH 	Complaint CMP-00010 - DOOR IS NOT LOCKING PROPERLY\n[Rejected: test rejection]	99513.94	Rejected	1	\N	\N	f	2026-06-22 12:29:05.009417	2026-07-22 14:55:42.208401	11	12	\N
+235	2	2	IND-00020	3	\N	\N			Community Health Nursing		8174.01	Approved	2	3	2026-08-03 10:19:09.679963	f	2026-08-03 15:48:12.849868	2026-08-03 15:49:09.691051	9	\N	\N
+236	2	2	IND-00021	3	\N	\N			Commerce		16312.9	Approved	2	3	2026-08-03 11:25:53.773212	f	2026-08-03 16:52:50.609615	2026-08-03 16:55:53.782488	5	\N	\N
+226	2	2	IND-00011	17	\N	\N			Mechanical Engineering		86458.88	Submitted	1	\N	\N	f	2026-06-18 10:48:16.861751	2026-06-18 10:48:16.861803	3	\N	\N
+234	2	2	IND-00019	3	\N	\N			Anatomy	Complaint CMP-00005 - FAN NOT WORKING	2577802744.56	Submitted	1	\N	\N	f	2026-07-02 18:40:42.679828	2026-07-02 18:40:42.67987	1	7	\N
+238	2	2	IND-00023	3	\N	\N			CSE - Data Science	maintenence	22238.85	Draft	1	\N	\N	f	2026-08-06 10:56:24.284791	2026-08-06 10:56:24.284834	3	\N	\N
+237	2	2	IND-00022	3	237	7	FIRST FLOOR	ROOM101	HEALTH 		16312.9	Issued	2	3	2026-08-06 05:58:43.472805	f	2026-08-03 17:54:01.502805	2026-08-06 11:44:09.997714	11	\N	\N
 \.
 
 
@@ -9143,18 +10396,18 @@ COPY public.invoice_items (id, invoice_id, material_id, description, hsn_sac, qu
 -- Data for Name: invoices; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.invoices (id, tenant_id, site_id, invoice_number, invoice_date, gate_entry_id, vendor_id, po_id, total_amount, tax_amount, status, scan_url, remarks, created_by_id, is_deleted, created_at, updated_at, eway_bill_number, delivery_note, delivery_note_date, payment_terms, reference_number, reference_date, dispatch_doc_number, dispatched_through, destination, lr_rr_number, vehicle_number, terms_of_delivery, total_taxable_amount, total_cgst, total_sgst, total_igst, total_discount, consignee_id, buyer_id, internal_reference_number, srf_number, irn, ack_number, ack_date, transport_charges, transport_hsn, transport_cgst_rate, transport_sgst_rate, transport_igst_rate, transport_discount_percent, code, payment_status, sent_for_payment_at, sent_for_payment_by_id, hard_copy_received, hard_copy_received_at, hard_copy_received_by_id, hard_copy_remarks, payment_completed_at, payment_completed_by_id, payment_reference, hard_copy_sent, hard_copy_sent_at, hard_copy_sent_by_id, contract_id) FROM stdin;
-2	3	3	560049	2026-06-04	\N	53	204	46654.4	4409.4	Approved	/uploads/invoices/3/20260610_130825_30b8e727.png		4	f	2026-06-10 11:49:14.494865	2026-06-10 18:39:45.341677			\N	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR		\N							42245	2204.7	2204.7	0	0	1	2	INV-00001				2026-06-10	2500	425411	0	0	0	0	INV-00001	Pending	\N	\N	f	\N	\N	\N	\N	\N	\N	f	\N	\N	\N
-10	2	2	BH565	2026-06-04	\N	64	\N	19824.708	3024.1079999999997	Approved	/uploads/invoices/2/20260611_223240_2b902a7f.png		3	f	2026-06-12 04:02:47.052948	2026-06-12 04:05:44.545167			\N			\N							16800.6	1512.0539999999999	1512.0539999999999	0	0	\N	\N	INV-00004				\N	0		0	0	0	0	INV-00004	Pending	\N	\N	f	\N	\N	\N	\N	\N	\N	f	\N	\N	\N
-4	3	3	aisax19238918239183	2026-06-03	\N	53	206	181500	16500	Approved	/uploads/invoices/3/20260610_134321_9103f01f.png		4	f	2026-06-10 19:13:38.480074	2026-06-11 15:06:06.519046			\N	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR		\N							165000	8250	8250	0	0	\N	\N	INV-00003				\N	0		0	0	0	0	INV-00003	Pending	\N	\N	t	2026-06-11 15:06:06.516154	4		\N	\N	\N	t	2026-06-11 13:09:32.208184	4	\N
-6	3	3	Bill23562	2026-06-01	\N	58	\N	9084.637999999999	1370.5379999999998	Approved	/uploads/invoices/3/20260610_140125_0ed94965.png		4	f	2026-06-10 19:31:10.596268	2026-06-11 13:56:48.777113			\N			\N							7714.099999999999	685.2689999999999	685.2689999999999	0	0	\N	\N	INV-00005				\N	100		0	0	0	0	INV-00005	Sent for Payment	2026-06-11 13:56:48.775835	4	t	2026-06-11 13:09:44.449712	4		\N	\N	\N	t	2026-06-11 13:04:52.835469	4	\N
-3	3	3	in4324	2026-06-02	\N	57	193	4500112.6	686442.6	Approved	/uploads/invoices/3/20260610_133541_e49271d3.png		4	f	2026-06-10 19:03:01.323243	2026-06-11 13:57:09.017903			\N	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR		\N							3813670	343221.3	343221.3	0	0	\N	\N	INV-00002				\N	100		0	0	0	0	INV-00002	Pending	\N	\N	t	2026-06-11 13:57:09.01705	4		\N	\N	\N	t	2026-06-11 13:08:50.988039	4	\N
-11	2	2	JK78	2026-06-01	\N	63	\N	36716.467000000004	5600.816999999999	Approved	/uploads/invoices/2/20260611_223421_8d3f5c41.png		3	f	2026-06-12 04:04:55.885776	2026-06-12 04:31:48.257247			\N			\N							31115.65	2800.4084999999995	2800.4084999999995	0	0	6	6	INV-00005				\N	0		0	0	0	0	INV-00005	Pending	\N	\N	f	\N	\N	\N	\N	\N	\N	t	2026-06-12 04:31:48.254311	3	\N
-7	2	2	In4576	2026-06-05	\N	64	\N	17356.084000000003	2632.2840000000006	Approved	/uploads/invoices/2/20260611_203554_530219c4.png		3	f	2026-06-12 02:07:03.464238	2026-06-12 02:24:45.194078			\N			\N							14723.800000000001	1316.1420000000003	1316.1420000000003	0	0	6	6	INV-00001				\N	100		0	0	0	0	INV-00001	Paid	2026-06-12 02:08:23.943898	3	t	2026-06-12 02:08:15.631662	3		2026-06-12 02:24:45.191254	3	\N	t	2026-06-12 02:07:54.878713	3	\N
-5	3	3	wuq2389482394	2026-06-03	\N	56	\N	607638.11	65458.409999999996	Change Required	/uploads/invoices/3/20260610_135918_d988d4be.png		4	f	2026-06-10 19:30:10.241491	2026-06-17 18:13:44.501525			\N			\N							542179.7	32729.204999999998	32729.204999999998	0	0	\N	\N	INV-00004				\N	500		0	0	0	0	INV-00004	Pending	\N	\N	f	\N	\N	\N	\N	\N	\N	f	\N	\N	\N
-8	2	2	Bill123	2026-06-01	\N	62	216	23600	3600	Approved	/uploads/invoices/2/20260611_204044_3143a815.png		3	f	2026-06-12 02:10:49.116917	2026-06-12 04:01:24.649063			\N	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR		\N							20000	1800	1800	0	0	6	6	INV-00002				\N	0		0	0	0	0	INV-00002	Sent for Payment	2026-06-12 04:01:24.647438	3	t	2026-06-12 04:01:13.455078	3		\N	\N	\N	t	2026-06-12 02:24:34.027603	3	\N
-9	2	2	B45	2026-06-04	\N	63	\N	55308.4528	8383.4928	Approved	/uploads/invoices/2/20260611_204745_c5c1a4cf.png		3	f	2026-06-12 02:17:50.148925	2026-06-18 11:23:09.740162			\N			\N							46924.96	4191.7464	4191.7464	0	0	6	4	INV-00003				\N	350		0	0	0	0	INV-00003	Pending	\N	\N	f	\N	\N	\N	\N	\N	\N	f	\N	\N	\N
-12	2	2	INV2001	2026-06-30	\N	64	232	178414.33000000002	22927.230000000003	Approved	/api/uploads/invoices/2/20260630_090821_292826f8.pdf		3	f	2026-06-30 14:41:01.013675	2026-06-30 14:41:10.532204	231432525	DELIVERED SUCESSFULLY	2026-06-30	UPI		\N					KA 23 AS 2122		155487.1	11463.615000000002	11463.615000000002	0	0	6	4	INV-00006				2026-06-30	500		0	0	0	0	INV-00006	Pending	\N	\N	f	\N	\N	\N	\N	\N	\N	f	\N	\N	\N
+COPY public.invoices (id, tenant_id, site_id, invoice_number, invoice_date, gate_entry_id, vendor_id, po_id, total_amount, tax_amount, status, scan_url, remarks, created_by_id, is_deleted, created_at, updated_at, eway_bill_number, delivery_note, delivery_note_date, payment_terms, reference_number, reference_date, dispatch_doc_number, dispatched_through, destination, lr_rr_number, vehicle_number, terms_of_delivery, total_taxable_amount, total_cgst, total_sgst, total_igst, total_discount, consignee_id, buyer_id, internal_reference_number, srf_number, irn, ack_number, ack_date, transport_charges, transport_hsn, transport_cgst_rate, transport_sgst_rate, transport_igst_rate, transport_discount_percent, code, payment_status, sent_for_payment_at, sent_for_payment_by_id, hard_copy_received, hard_copy_received_at, hard_copy_received_by_id, hard_copy_remarks, payment_completed_at, payment_completed_by_id, payment_reference, hard_copy_sent, hard_copy_sent_at, hard_copy_sent_by_id, contract_id, institution_id) FROM stdin;
+2	3	3	560049	2026-06-04	\N	53	204	46654.4	4409.4	Approved	/uploads/invoices/3/20260610_130825_30b8e727.png		4	f	2026-06-10 11:49:14.494865	2026-06-10 18:39:45.341677			\N	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR		\N							42245	2204.7	2204.7	0	0	1	2	INV-00001				2026-06-10	2500	425411	0	0	0	0	INV-00001	Pending	\N	\N	f	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N
+4	3	3	aisax19238918239183	2026-06-03	\N	53	206	181500	16500	Approved	/uploads/invoices/3/20260610_134321_9103f01f.png		4	f	2026-06-10 19:13:38.480074	2026-06-11 15:06:06.519046			\N	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR		\N							165000	8250	8250	0	0	\N	\N	INV-00003				\N	0		0	0	0	0	INV-00003	Pending	\N	\N	t	2026-06-11 15:06:06.516154	4		\N	\N	\N	t	2026-06-11 13:09:32.208184	4	\N	\N
+6	3	3	Bill23562	2026-06-01	\N	58	\N	9084.637999999999	1370.5379999999998	Approved	/uploads/invoices/3/20260610_140125_0ed94965.png		4	f	2026-06-10 19:31:10.596268	2026-06-11 13:56:48.777113			\N			\N							7714.099999999999	685.2689999999999	685.2689999999999	0	0	\N	\N	INV-00005				\N	100		0	0	0	0	INV-00005	Sent for Payment	2026-06-11 13:56:48.775835	4	t	2026-06-11 13:09:44.449712	4		\N	\N	\N	t	2026-06-11 13:04:52.835469	4	\N	\N
+3	3	3	in4324	2026-06-02	\N	57	193	4500112.6	686442.6	Approved	/uploads/invoices/3/20260610_133541_e49271d3.png		4	f	2026-06-10 19:03:01.323243	2026-06-11 13:57:09.017903			\N	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR		\N							3813670	343221.3	343221.3	0	0	\N	\N	INV-00002				\N	100		0	0	0	0	INV-00002	Pending	\N	\N	t	2026-06-11 13:57:09.01705	4		\N	\N	\N	t	2026-06-11 13:08:50.988039	4	\N	\N
+11	2	2	JK78	2026-06-01	\N	63	\N	36716.467000000004	5600.816999999999	Approved	/uploads/invoices/2/20260611_223421_8d3f5c41.png		3	f	2026-06-12 04:04:55.885776	2026-06-12 04:31:48.257247			\N			\N							31115.65	2800.4084999999995	2800.4084999999995	0	0	6	6	INV-00005				\N	0		0	0	0	0	INV-00005	Pending	\N	\N	f	\N	\N	\N	\N	\N	\N	t	2026-06-12 04:31:48.254311	3	\N	\N
+7	2	2	In4576	2026-06-05	\N	64	\N	17356.084000000003	2632.2840000000006	Approved	/uploads/invoices/2/20260611_203554_530219c4.png		3	f	2026-06-12 02:07:03.464238	2026-06-12 02:24:45.194078			\N			\N							14723.800000000001	1316.1420000000003	1316.1420000000003	0	0	6	6	INV-00001				\N	100		0	0	0	0	INV-00001	Paid	2026-06-12 02:08:23.943898	3	t	2026-06-12 02:08:15.631662	3		2026-06-12 02:24:45.191254	3	\N	t	2026-06-12 02:07:54.878713	3	\N	\N
+5	3	3	wuq2389482394	2026-06-03	\N	56	\N	607638.11	65458.409999999996	Change Required	/uploads/invoices/3/20260610_135918_d988d4be.png		4	f	2026-06-10 19:30:10.241491	2026-06-17 18:13:44.501525			\N			\N							542179.7	32729.204999999998	32729.204999999998	0	0	\N	\N	INV-00004				\N	500		0	0	0	0	INV-00004	Pending	\N	\N	f	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N
+8	2	2	Bill123	2026-06-01	\N	62	216	23600	3600	Approved	/uploads/invoices/2/20260611_204044_3143a815.png		3	f	2026-06-12 02:10:49.116917	2026-06-12 04:01:24.649063			\N	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR		\N							20000	1800	1800	0	0	6	6	INV-00002				\N	0		0	0	0	0	INV-00002	Sent for Payment	2026-06-12 04:01:24.647438	3	t	2026-06-12 04:01:13.455078	3		\N	\N	\N	t	2026-06-12 02:24:34.027603	3	\N	\N
+9	2	2	B45	2026-06-04	\N	63	\N	55308.4528	8383.4928	Approved	/uploads/invoices/2/20260611_204745_c5c1a4cf.png		3	f	2026-06-12 02:17:50.148925	2026-06-18 11:23:09.740162			\N			\N							46924.96	4191.7464	4191.7464	0	0	6	4	INV-00003				\N	350		0	0	0	0	INV-00003	Pending	\N	\N	f	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N
+12	2	2	INV2001	2026-06-30	\N	64	232	178414.33000000002	22927.230000000003	Approved	/api/uploads/invoices/2/20260630_090821_292826f8.pdf		3	f	2026-06-30 14:41:01.013675	2026-06-30 14:41:10.532204	231432525	DELIVERED SUCESSFULLY	2026-06-30	UPI		\N					KA 23 AS 2122		155487.1	11463.615000000002	11463.615000000002	0	0	6	4	INV-00006				2026-06-30	500		0	0	0	0	INV-00006	Pending	\N	\N	f	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N
+10	2	2	BH565	2026-06-04	\N	64	\N	19824.708	3024.1079999999997	Approved	/uploads/invoices/2/20260611_223240_2b902a7f.png		3	f	2026-06-12 04:02:47.052948	2026-08-06 11:09:04.788422			\N			\N							16800.6	1512.0539999999999	1512.0539999999999	0	0	\N	\N	INV-00004				\N	0		0	0	0	0	INV-00004	Pending	\N	\N	f	\N	\N	\N	\N	\N	\N	t	2026-08-06 11:09:04.785362	3	\N	\N
 \.
 
 
@@ -9164,6 +10417,154 @@ COPY public.invoices (id, tenant_id, site_id, invoice_number, invoice_date, gate
 
 COPY public.location_master (id, tenant_id, site_id, location_name, location_code, is_active, created_at) FROM stdin;
 1	2	2	radiology room	RADIOLOGY_	t	2026-07-28 12:12:46.359729
+2	3	3	102	102	t	2026-08-05 19:00:21.994701
+3	3	3	104	104	t	2026-08-05 19:00:22.043387
+4	3	3	108	108	t	2026-08-05 19:00:22.147683
+5	3	3	109	109	t	2026-08-05 19:00:22.152515
+6	3	3	110	110	t	2026-08-05 19:00:22.234952
+7	3	3	111	111	t	2026-08-05 19:00:22.244867
+8	3	3	112	112	t	2026-08-05 19:00:22.252535
+9	3	3	201	201	t	2026-08-05 19:00:22.279949
+10	3	3	205	205	t	2026-08-05 19:00:22.283603
+11	3	3	208	208	t	2026-08-05 19:00:22.287748
+12	3	3	209	209	t	2026-08-05 19:00:22.292142
+13	3	3	210	210	t	2026-08-05 19:00:22.302754
+14	3	3	211	211	t	2026-08-05 19:00:22.308449
+15	3	3	213	213	t	2026-08-05 19:00:22.312764
+16	3	3	214	214	t	2026-08-05 19:00:22.319264
+17	3	3	216	216	t	2026-08-05 19:00:22.324467
+18	3	3	217	217	t	2026-08-05 19:00:22.330909
+19	3	3	220	220	t	2026-08-05 19:00:22.340396
+20	3	3	17th WARD	17TH_WARD	t	2026-08-05 19:00:22.357101
+21	3	3	18th WARD	18TH_WARD	t	2026-08-05 19:00:22.376816
+22	3	3	Biomedical Engineering	BIOMEDICAL_ENGINEERING	t	2026-08-05 19:00:22.435636
+23	3	3	BME	BME	t	2026-08-05 19:00:22.488393
+24	3	3	Cardiac OPD	CARDIAC_OPD	t	2026-08-05 19:00:22.512748
+25	3	3	Cardiac WARD	CARDIAC_WARD	t	2026-08-05 19:00:22.591427
+26	3	3	CATH LAB	CATH_LAB	t	2026-08-05 19:00:22.666777
+27	3	3	CCU	CCU	t	2026-08-05 19:00:22.823893
+28	3	3	CTVS ICU	CTVS_ICU	t	2026-08-05 19:00:22.857202
+29	3	3	CSSD	CSSD	t	2026-08-05 19:00:22.901638
+30	3	3	Dermatology OPD	DERMATOLOGY_OPD	t	2026-08-05 19:00:23.321523
+31	3	3	Dialysis	DIALYSIS	t	2026-08-05 19:00:23.606058
+32	3	3	EICU	EICU	t	2026-08-05 19:00:23.678339
+33	3	3	EMD Green Zone	EMD_GREEN_ZONE	t	2026-08-05 19:00:23.737639
+34	3	3	EMD Red Zone	EMD_RED_ZONE	t	2026-08-05 19:00:23.760935
+35	3	3	EMD Yellow Zone	EMD_YELLOW_ZONE	t	2026-08-05 19:00:23.908919
+36	3	3	ENDOSCOPY ROOM	ENDOSCOPY_ROOM	t	2026-08-05 19:00:23.930147
+37	3	3	ENT AUDIOLOGY	ENT_AUDIOLOGY	t	2026-08-05 19:00:24.244086
+38	3	3	ENT OPD	ENT_OPD	t	2026-08-05 19:00:24.291245
+39	3	3	LABOUR ROOM	LABOUR_ROOM	t	2026-08-05 19:00:24.477211
+40	3	3	MARKETING	MARKETING	t	2026-08-05 19:00:24.629244
+41	3	3	MEDICINE OPD	MEDICINE_OPD	t	2026-08-05 19:00:24.639106
+42	3	3	MICU	MICU	t	2026-08-05 19:00:24.653515
+43	3	3	PICU	PICU	t	2026-08-05 19:00:24.752743
+44	3	3	MINOR OT	MINOR_OT	t	2026-08-05 19:00:24.893648
+45	3	3	NICU	NICU	t	2026-08-05 19:00:24.911059
+46	3	3	OBG OPD	OBG_OPD	t	2026-08-05 19:00:25.18428
+47	3	3	Ophthalmology OPD	OPHTHALMOLOGY_OPD	t	2026-08-05 19:00:25.217132
+48	3	3	Ophthalmology WARD	OPHTHALMOLOGY_WARD	t	2026-08-05 19:00:25.925116
+49	3	3	ORTHOPAEDICS OPD	ORTHOPAEDICS_OPD	t	2026-08-05 19:00:25.929461
+50	3	3	OT Anaesthesia	OT_ANAESTHESIA	t	2026-08-05 19:00:25.975744
+51	3	3	OT CTVS	OT_CTVS	t	2026-08-05 19:00:25.993992
+52	3	3	OT Emergency	OT_EMERGENCY	t	2026-08-05 19:00:26.024401
+53	3	3	OT ENT	OT_ENT	t	2026-08-05 19:00:26.144826
+54	3	3	OT General	OT_GENERAL	t	2026-08-05 19:00:26.279659
+55	3	3	OT LAP	OT_LAP	t	2026-08-05 19:00:26.530543
+56	3	3	OT NEURO	OT_NEURO	t	2026-08-05 19:00:26.684323
+57	3	3	OT OBG	OT_OBG	t	2026-08-05 19:00:26.986275
+58	3	3	OT Ophthal	OT_OPHTHAL	t	2026-08-05 19:00:27.033924
+59	3	3	OT ORTHO	OT_ORTHO	t	2026-08-05 19:00:27.154313
+60	3	3	OT PRE OP	OT_PRE_OP	t	2026-08-05 19:00:27.3111
+61	3	3	OT SEPTIC 1	OT_SEPTIC_1	t	2026-08-05 19:00:27.316664
+62	3	3	OT SURGERY	OT_SURGERY	t	2026-08-05 19:00:27.338246
+63	3	3	OT URO	OT_URO	t	2026-08-05 19:00:27.365042
+64	3	3	OT_SEPTIC 2	OT_SEPTIC_2	t	2026-08-05 19:00:27.452414
+65	3	3	PAEDIATRICS OPD	PAEDIATRICS_OPD	t	2026-08-05 19:00:27.505031
+66	3	3	PATHOLOGY /MED COLLEGE	PATHOLOGY_/MED_COLLEGE	t	2026-08-05 19:00:27.591285
+67	3	3	PHYSIOTHERAPY	PHYSIOTHERAPY	t	2026-08-05 19:00:27.667558
+68	3	3	Post OT	POST_OT	t	2026-08-05 19:00:28.244217
+69	3	3	PSYCHIATRY	PSYCHIATRY	t	2026-08-05 19:00:28.318383
+70	3	3	PSYCHIATRY WARD	PSYCHIATRY_WARD	t	2026-08-05 19:00:28.369057
+71	3	3	RADIOLOGY	RADIOLOGY	t	2026-08-05 19:00:28.373088
+72	3	3	RESPIRATORY MEDICINE OPD	RESPIRATORY_MEDICINE_OPD	t	2026-08-05 19:00:28.735544
+73	3	3	SICU	SICU	t	2026-08-05 19:00:28.913447
+74	3	3	SPECIAL WARD	SPECIAL_WARD	t	2026-08-05 19:00:28.951107
+75	3	3	Ward (General)	WARD_(GENERAL)	t	2026-08-05 19:00:29.002442
+76	2	2	102	102	t	2026-08-05 19:04:39.175949
+77	2	2	104	104	t	2026-08-05 19:04:39.223181
+78	2	2	108	108	t	2026-08-05 19:04:39.322374
+79	2	2	109	109	t	2026-08-05 19:04:39.327028
+80	2	2	110	110	t	2026-08-05 19:04:39.357233
+81	2	2	111	111	t	2026-08-05 19:04:39.366473
+82	2	2	112	112	t	2026-08-05 19:04:39.374241
+83	2	2	201	201	t	2026-08-05 19:04:39.451368
+84	2	2	205	205	t	2026-08-05 19:04:39.455386
+85	2	2	208	208	t	2026-08-05 19:04:39.459385
+86	2	2	209	209	t	2026-08-05 19:04:39.463366
+87	2	2	210	210	t	2026-08-05 19:04:39.47438
+88	2	2	211	211	t	2026-08-05 19:04:39.479656
+89	2	2	213	213	t	2026-08-05 19:04:39.483815
+90	2	2	214	214	t	2026-08-05 19:04:39.490399
+91	2	2	216	216	t	2026-08-05 19:04:39.495335
+92	2	2	217	217	t	2026-08-05 19:04:39.501589
+93	2	2	220	220	t	2026-08-05 19:04:39.511247
+94	2	2	17th WARD	17TH_WARD	t	2026-08-05 19:04:39.527837
+95	2	2	18th WARD	18TH_WARD	t	2026-08-05 19:04:39.547342
+96	2	2	Biomedical Engineering	BIOMEDICAL_ENGINEERING	t	2026-08-05 19:04:39.60559
+97	2	2	BME	BME	t	2026-08-05 19:04:39.658135
+98	2	2	Cardiac OPD	CARDIAC_OPD	t	2026-08-05 19:04:39.681163
+99	2	2	Cardiac WARD	CARDIAC_WARD	t	2026-08-05 19:04:39.758125
+100	2	2	CATH LAB	CATH_LAB	t	2026-08-05 19:04:39.781639
+101	2	2	CCU	CCU	t	2026-08-05 19:04:39.981521
+102	2	2	CTVS ICU	CTVS_ICU	t	2026-08-05 19:04:40.014111
+103	2	2	CSSD	CSSD	t	2026-08-05 19:04:40.059717
+104	2	2	Dermatology OPD	DERMATOLOGY_OPD	t	2026-08-05 19:04:40.441878
+105	2	2	Dialysis	DIALYSIS	t	2026-08-05 19:04:40.722792
+106	2	2	EICU	EICU	t	2026-08-05 19:04:40.843775
+107	2	2	EMD Green Zone	EMD_GREEN_ZONE	t	2026-08-05 19:04:40.903091
+108	2	2	EMD Red Zone	EMD_RED_ZONE	t	2026-08-05 19:04:40.926033
+109	2	2	EMD Yellow Zone	EMD_YELLOW_ZONE	t	2026-08-05 19:04:41.034145
+110	2	2	ENDOSCOPY ROOM	ENDOSCOPY_ROOM	t	2026-08-05 19:04:41.058035
+111	2	2	ENT AUDIOLOGY	ENT_AUDIOLOGY	t	2026-08-05 19:04:41.362321
+112	2	2	ENT OPD	ENT_OPD	t	2026-08-05 19:04:41.407162
+113	2	2	LABOUR ROOM	LABOUR_ROOM	t	2026-08-05 19:04:41.581167
+114	2	2	MARKETING	MARKETING	t	2026-08-05 19:04:41.78206
+115	2	2	MEDICINE OPD	MEDICINE_OPD	t	2026-08-05 19:04:41.791878
+116	2	2	MICU	MICU	t	2026-08-05 19:04:41.806497
+117	2	2	PICU	PICU	t	2026-08-05 19:04:41.904196
+118	2	2	MINOR OT	MINOR_OT	t	2026-08-05 19:04:41.992522
+119	2	2	NICU	NICU	t	2026-08-05 19:04:42.010298
+120	2	2	OBG OPD	OBG_OPD	t	2026-08-05 19:04:42.287956
+121	2	2	Ophthalmology OPD	OPHTHALMOLOGY_OPD	t	2026-08-05 19:04:42.371129
+122	2	2	Ophthalmology WARD	OPHTHALMOLOGY_WARD	t	2026-08-05 19:04:43.001292
+123	2	2	ORTHOPAEDICS OPD	ORTHOPAEDICS_OPD	t	2026-08-05 19:04:43.005833
+124	2	2	OT Anaesthesia	OT_ANAESTHESIA	t	2026-08-05 19:04:43.050222
+125	2	2	OT CTVS	OT_CTVS	t	2026-08-05 19:04:43.067858
+126	2	2	OT Emergency	OT_EMERGENCY	t	2026-08-05 19:04:43.097159
+127	2	2	OT ENT	OT_ENT	t	2026-08-05 19:04:43.21095
+128	2	2	OT General	OT_GENERAL	t	2026-08-05 19:04:43.341127
+129	2	2	OT LAP	OT_LAP	t	2026-08-05 19:04:43.585711
+130	2	2	OT NEURO	OT_NEURO	t	2026-08-05 19:04:43.694466
+131	2	2	OT OBG	OT_OBG	t	2026-08-05 19:04:43.988096
+132	2	2	OT Ophthal	OT_OPHTHAL	t	2026-08-05 19:04:44.085681
+133	2	2	OT ORTHO	OT_ORTHO	t	2026-08-05 19:04:44.204354
+134	2	2	OT PRE OP	OT_PRE_OP	t	2026-08-05 19:04:44.360365
+135	2	2	OT SEPTIC 1	OT_SEPTIC_1	t	2026-08-05 19:04:44.366021
+136	2	2	OT SURGERY	OT_SURGERY	t	2026-08-05 19:04:44.388162
+137	2	2	OT URO	OT_URO	t	2026-08-05 19:04:44.41521
+138	2	2	OT_SEPTIC 2	OT_SEPTIC_2	t	2026-08-05 19:04:44.50774
+139	2	2	PAEDIATRICS OPD	PAEDIATRICS_OPD	t	2026-08-05 19:04:44.562756
+140	2	2	PATHOLOGY /MED COLLEGE	PATHOLOGY_/MED_COLLEGE	t	2026-08-05 19:04:44.65261
+141	2	2	PHYSIOTHERAPY	PHYSIOTHERAPY	t	2026-08-05 19:04:44.729418
+142	2	2	Post OT	POST_OT	t	2026-08-05 19:04:45.313288
+143	2	2	PSYCHIATRY	PSYCHIATRY	t	2026-08-05 19:04:45.388968
+144	2	2	PSYCHIATRY WARD	PSYCHIATRY_WARD	t	2026-08-05 19:04:45.440738
+145	2	2	RADIOLOGY	RADIOLOGY	t	2026-08-05 19:04:45.444929
+146	2	2	RESPIRATORY MEDICINE OPD	RESPIRATORY_MEDICINE_OPD	t	2026-08-05 19:04:45.808809
+147	2	2	SICU	SICU	t	2026-08-05 19:04:45.9295
+148	2	2	SPECIAL WARD	SPECIAL_WARD	t	2026-08-05 19:04:45.963339
+149	2	2	Ward (General)	WARD_(GENERAL)	t	2026-08-05 19:04:46.067095
 \.
 
 
@@ -9224,6 +10625,7 @@ COPY public.material_issue_items (id, issue_id, material_id, quantity, rate, rem
 216	236	3475	3	4602.71	\N	62
 217	237	2435	1	4657.57	\N	62
 218	238	2435	1	4657.57	\N	62
+219	239	3474	4	3262.58	\N	62
 \.
 
 
@@ -9277,10 +10679,11 @@ COPY public.material_issues (id, tenant_id, site_id, issue_number, warehouse_id,
 233	3	3	ISS-00045	59	1	213	3	170	102 WARD	\N	Fulfillment for IND-00040	Completed	4	\N	f	\N	\N	\N	f	2026-06-17 18:19:11.646961	\N
 234	2	2	ISS-00004	62	1	227	7	237	HEALTH 	\N	Fulfillment for IND-00012	Completed	3	\N	t	2026-06-18 05:45:40.931539	3	\N	f	2026-06-18 11:11:57.10648	\N
 230	2	2	ISS-00003	62	3	220	7	237	HEALTH 	\N	Fulfillment for IND-00007	Completed	3	\N	t	2026-06-18 05:45:50.03716	3	\N	f	2026-06-12 04:13:27.908132	\N
-235	2	2	ISS-00005	62	1	228	7	237	HEALTH 	\N	Fulfillment for IND-00013	Completed	3	\N	f	\N	\N	\N	f	2026-06-18 12:23:35.498019	\N
-236	2	2	ISS-00006	62	1	222	7	237	HEALTH 	\N	Fulfillment for IND-00009	Completed	3	\N	f	\N	\N	\N	f	2026-06-18 12:26:45.177543	\N
 237	2	2	ISS-00007	62	1	230	7	237	HEALTH 	\N	Fulfillment for IND-00015	Completed	3	\N	t	2026-06-19 09:27:43.176836	3	\N	f	2026-06-19 14:45:14.631379	\N
 238	2	2	ISS-00008	62	1	231	7	237	HEALTH 	\N	Fulfillment for IND-00016	Completed	3	\N	t	2026-06-22 06:18:37.647314	3	\N	f	2026-06-22 11:48:20.924548	\N
+239	2	2	ISS-00009	62	1	237	7	237	HEALTH 	\N	Fulfillment for IND-00022	Completed	3	\N	f	\N	\N	\N	f	2026-08-06 11:44:09.925961	\N
+236	2	2	ISS-00006	62	1	222	7	237	HEALTH 	\N	Fulfillment for IND-00009	Completed	3	\N	t	2026-08-06 06:16:07.894689	3	\N	f	2026-06-18 12:26:45.177543	\N
+235	2	2	ISS-00005	62	1	228	7	237	HEALTH 	\N	Fulfillment for IND-00013	Completed	3	\N	t	2026-08-06 06:16:11.434167	3	\N	f	2026-06-18 12:23:35.498019	\N
 \.
 
 
@@ -9303,7 +10706,8 @@ COPY public.material_return_items (id, return_id, material_id, returned_qty, rem
 12	21	1095	5	ELE00056 Remark	3	-2	
 13	22	2456	5		5	0	
 15	24	1192	40	Candy canes topping liquorice wafer cake shortbread chupa chups sesame snaps carrot cake. Fruitcake candy tiramisu sugar plum jujubes icing marzipan candy. Bonbon marzipan brownie tiramisu sesame snaps cheesecake macaroon gummies cake. Pudding oat cake chocolate tiramisu powder dessert. Lollipop jelly beans gummi bears sugar plum gummi bears bear claw cupcake cake croissant. Bear claw marshmallow candy pudding jujubes tootsie roll. Pie topping apple pie oat cake topping. Tart sesame snaps croissant carrot cake biscuit halvah caramels macaroon danish. Tootsie roll dragée donut cotton candy macaroon ice cream oat cake. Danish soufflé lemon drops danish dessert ice cream muffin. Candy dragée wafer cheesecake lemon drops icing. Candy canes jelly beans cake fruitcake cheesecake. Donut fruitcake gummies cheesecake pastry cake fruitcake. Brownie oat cake bonbon wafer tart tootsie roll. Lemon drops jelly beans wafer cake chocolate cake chocolate donut cake pastry. Sweet roll icing cotton candy carrot cake cookie sugar plum liquorice chupa chups. Jujubes chocolate bar chocolate marshmallow liquorice. Apple pie marzipan muffin oat cake sesame snaps. Jelly-o cookie tart pudding gummi bears tart pastry chocolate cake sugar plum. Ice cream danish tiramisu sweet cookie tiramisu cotton candy liquorice liquorice. Cotton candy apple pie fruitcake pudding gingerbread apple pie. Dessert oat cake caramels dessert carrot cake chupa chups cake chocolate cake. Sesame snaps gummi bears marshmallow candy lollipop marshmallow oat cake marshmallow. Cheesecake lollipop fruitcake halvah jelly caramels biscuit cake. Icing apple pie cake candy tootsie roll donut bonbon. Powder macaroon gummies toffee tart bonbon jelly muffin cheesecake. Brownie liquorice cookie topping macaroon halvah marshmallow. Sesame snaps oat cake lemon drops cupcake cotton candy toffee gummies liquorice. Icing donut sweet roll soufflé candy canes. Pie jelly jelly beans sesame snaps sweet marshmallow caramels. Gummies bear claw topping bear claw muffin. Jelly-o wafer powder cotton candy toffee jelly beans dessert muffin macaroon. Chocolate liquorice apple pie tart fruitcake chocolate cake gingerbread toffee sesame snaps. Soufflé fruitcake cupcake biscuit pastry cheesecake cake jelly-o. Pastry gingerbread sweet biscuit gingerbread sweet roll jujubes. Topping soufflé carrot cake candy canes oat cake tootsie roll. Wafer shortbread liquorice shortbread cotton candy donut. Bonbon liquorice jelly beans jujubes icing. Gummies chocolate cake tiramisu croissant bonbon tart sweet roll sweet brownie. Pudding lemon drops croissant liquorice chocolate jelly beans tiramisu biscuit. Ice cream marshmallow marshmallow cheesecake icing. Tart carrot cake chocolate cake cookie halvah tiramisu sesame snaps. Gummies gummi bears candy canes biscuit marzipan danish liquorice bear claw chocolate cake. Tiramisu chocolate halvah cotton candy pudding fruitcake. Tart sweet shortbread apple pie carrot cake pie cheesecake jelly-o. Lollipop cake gummi bears pastry marshmallow pastry muffin chocolate tootsie roll. Gummies toffee danish donut bear claw. Bear claw wafer cake biscuit lemon drops cookie chocolate cake gummi bears jujubes. Lollipop wafer cotton candy bonbon jelly beans shortbread cotton candy pudding. Croissant cake gingerbread pastry jelly. Tart jujubes bear claw croissant cookie. Macaroon carrot cake dragée powder chocolate cake. Sweet pastry oat cake bear claw lollipop donut croissant tootsie roll cupcake. Tart cookie donut candy canes shortbread dessert lollipop. Jelly-o pudding tootsie roll gingerbread sesame snaps sweet roll tootsie roll. Lollipop sugar plum pudding cake bonbon pastry marshmallow. Cake dessert cupcake jelly-o tiramisu oat cake biscuit marzipan caramels. Cupcake sweet liquorice cookie dragée chocolate bar wafer tootsie roll. Gingerbread gingerbread oat cake marzipan tootsie roll cheesecake lollipop. Sweet muffin candy jelly cake cotton candy brownie pudding. Donut pie cupcake cotton candy donut gummi bears. Marshmallow tiramisu cookie candy cotton candy dragée cheesecake. Cake sweet roll dessert powder dragée macaroon marshmallow. Tootsie roll croissant danish cookie powder. Topping gingerbread chocolate cupcake cotton candy. Cotton candy wafer chocolate bar sweet bear claw jelly beans tootsie roll.	0	-40	
-14	23	2565	5		4	-1	
+14	23	2565	5		4	-1	none
+16	25	2751	1	no need	1	0	
 \.
 
 
@@ -9326,7 +10730,8 @@ COPY public.material_returns (id, tenant_id, site_id, return_number, warehouse_i
 21	3	3	RET-00011	59	1	\N	203 WARD	Unused	General Remark1	Suresh	4	f	2026-06-09 16:54:33.084703	Partially Received	2026-06-10 12:22:39.346884	4
 22	2	2	RET-00001	62	3	\N	HEALTH 	Unused			3	f	2026-06-12 02:03:45.953947	Completed	2026-06-11 20:34:33.074148	3
 24	3	3	RET-00012	59	1	\N	202 WARD	Unused		Pradnesh	4	f	2026-06-17 12:02:37.001097	Partially Received	2026-06-17 06:35:45.076371	4
-23	2	2	RET-00002	62	3	\N	HEALTH 	Unused			3	f	2026-06-12 02:04:24.390151	Partially Received	2026-06-18 05:35:14.789015	3
+23	2	2	RET-00002	62	3	\N	HEALTH 	Unused			3	f	2026-06-12 02:04:24.390151	Partially Received	2026-08-06 06:14:34.591748	3
+25	2	2	RET-00003	62	3	\N	Cardiothoracic Lab	Unused		vik	3	f	2026-08-06 14:48:02.906889	Completed	2026-08-06 09:18:11.140767	3
 \.
 
 
@@ -11378,6 +12783,7 @@ COPY public.materials (id, tenant_id, site_id, code, name, category_id, subcateg
 2967	2	2	HOI-00001	APL VALVE FOR AESPIRE 7900	76	95	29	5	20	44307.7	\N	Covered	\N	12	Consumable	APL VALVE FOR AESPIRE 7900	t	f	2026-06-11 21:48:30.716673	2026-06-11 21:58:45.59508	62	\N	HOI0001	f	f
 2968	2	2	HOI-00002	BARIATIC - TROCAR AND CANNULA PLAIN PYRAMIDAL DIA 10MM L EOMED	76	95	29	5	15	35694.25	\N	Covered	\N	12	Consumable	BARIATIC - TROCAR AND CANNULA PLAIN PYRAMIDAL DIA 10MM L EOMED	t	f	2026-06-11 21:48:30.716679	2026-06-11 21:58:45.595083	62	\N	HOI0002	f	f
 3551	2	2	STY-00040	HELIOS CONSTRUCTION LETTERHEAD	75	94	29	198	702	394.82	\N	Covered	\N	12	Consumable	HELIOS CONSTRUCTION LETTERHEAD	t	f	2026-06-11 21:48:30.720031	2026-06-11 21:58:45.596723	62	\N	STY0040	f	f
+3553	2	2	STY-00042	CROSS MATCHING REPORT	75	89	29	315	1064	135.62	\N	Covered	\N	12	Consumable	CROSS MATCHING REPORT	t	f	2026-06-11 21:48:30.720043	2026-06-11 21:58:45.596729	62	\N	STY0042	f	f
 2969	2	2	HOI-00003	BARIATIC - TROCAR AND CANNULA PLAIN PYRAMIDAL DIA 5MM LEOMED	76	95	29	21	55	6848.4	\N	Covered	\N	12	Consumable	BARIATIC - TROCAR AND CANNULA PLAIN PYRAMIDAL DIA 5MM LEOMED	t	f	2026-06-11 21:48:30.716684	2026-06-11 21:58:45.595085	62	\N	HOI0003	f	f
 2970	2	2	HOI-00004	BARIATIC MONOPOLAR L HOOK ELECTRODE (TEFLON) DIA 5MM, L 40CM OM SURGICALS	76	95	29	2	6	47287.7	\N	Covered	\N	12	Consumable	BARIATIC MONOPOLAR L HOOK ELECTRODE (TEFLON) DIA 5MM, L 40CM OM SURGICALS	t	f	2026-06-11 21:48:30.71669	2026-06-11 21:58:45.595088	62	\N	HOI0004	f	f
 2971	2	2	HOI-00005	BI-FYNGER HANDLE MARYLAND JAW-K9 - OM SURGICALS	76	95	29	3	7	29690.92	\N	Covered	\N	12	Consumable	BI-FYNGER HANDLE MARYLAND JAW-K9 - OM SURGICALS	t	f	2026-06-11 21:48:30.716696	2026-06-11 21:58:45.595091	62	\N	HOI0005	f	f
@@ -11960,7 +13366,6 @@ COPY public.materials (id, tenant_id, site_id, code, name, category_id, subcateg
 3547	2	2	STY-00036	ENVOLOP COVER 4*10	75	94	29	468	1541	325.57	\N	Covered	\N	12	Consumable	ENVOLOP COVER 4*10	t	f	2026-06-11 21:48:30.720008	2026-06-11 21:58:45.596712	62	\N	STY0036	f	f
 3548	2	2	STY-00037	ENVOLOP COVER 8*10	75	94	29	384	1065	427.03	\N	Covered	\N	12	Consumable	ENVOLOP COVER 8*10	t	f	2026-06-11 21:48:30.720014	2026-06-11 21:58:45.596715	62	\N	STY0037	f	f
 3549	2	2	STY-00038	GLOSSY SHEET	75	94	29	470	1554	212.43	\N	Covered	\N	18	Consumable	GLOSSY SHEET	t	f	2026-06-11 21:48:30.72002	2026-06-11 21:58:45.596718	62	\N	STY0038	f	f
-3553	2	2	STY-00042	CROSS MATCHING REPORT	75	89	29	315	1064	135.62	\N	Covered	\N	12	Consumable	CROSS MATCHING REPORT	t	f	2026-06-11 21:48:30.720043	2026-06-11 21:58:45.596729	62	\N	STY0042	f	f
 3554	2	2	STY-00043	REPORTING OF TRANSFUSION REACTION WORK UP FORM	75	89	29	419	1391	171.24	\N	Covered	\N	12	Consumable	REPORTING OF TRANSFUSION REACTION WORK UP FORM	t	f	2026-06-11 21:48:30.720049	2026-06-11 21:58:45.596732	62	\N	STY0043	f	f
 3555	2	2	STY-00044	NST MACHINE - PRINT PAPER (EDAN)	75	94	29	444	1007	399.15	\N	Covered	\N	12	Consumable	NST MACHINE - PRINT PAPER (EDAN)	t	f	2026-06-11 21:48:30.720054	2026-06-11 21:58:45.596734	62	\N	STY0044	f	f
 3556	2	2	STY-00045	MY DIALYSIS TRACKER	75	94	29	200	666	364.96	\N	Covered	\N	12	Consumable	MY DIALYSIS TRACKER	t	f	2026-06-11 21:48:30.72006	2026-06-11 21:58:45.596737	62	\N	STY0045	f	f
@@ -12114,6 +13519,626 @@ COPY public.materials (id, tenant_id, site_id, code, name, category_id, subcateg
 3705	2	2	STY-00194	CARTRIDGE TK-7120	75	94	29	153	320	105.69	\N	Covered	\N	18	Consumable	CARTRIDGE TK-7120	t	f	2026-06-11 21:48:30.720916	2026-06-11 21:58:45.597152	62	\N	STY0194	f	f
 3706	2	2	STY-00195	CARTRIDGE 103A	75	94	29	233	588	34.8	\N	Covered	\N	18	Consumable	CARTRIDGE 103A	t	f	2026-06-11 21:48:30.720922	2026-06-11 21:58:45.597155	62	\N	STY0195	f	f
 2338	2	2	CIV-00001	AB15 APEX 4LTR	65	56	36	37	102	4352.49	\N	Rack Storage		18	Consumable	AB15 APEX 4LTR	t	f	2026-06-11 21:48:30.712865	2026-07-31 14:47:29.25578	62		CIV0001	f	f
+3718	3	3	MAT-00001	BP APPARATUS	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:21.988202	2026-08-05 19:00:21.988216	46	\N	\N	f	f
+3719	3	3	MAT-00002	E_SUCTION APPARATUS	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Life Support Equipment	t	f	2026-08-05 19:00:22.013427	2026-08-05 19:00:22.01344	46	\N	\N	f	f
+3720	3	3	MAT-00003	IR LIGHT	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:22.036666	2026-08-05 19:00:22.036679	46	\N	\N	f	f
+3721	3	3	MAT-00004	INFUSION PUMP	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Life Support Equipment	t	f	2026-08-05 19:00:22.062273	2026-08-05 19:00:22.062286	46	\N	\N	f	f
+3722	3	3	MAT-00005	Patient Monitor	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Life Support Equipment	t	f	2026-08-05 19:00:22.085304	2026-08-05 19:00:22.085317	46	\N	\N	f	f
+3723	3	3	MAT-00006	SYRINGE PUMP	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:22.112297	2026-08-05 19:00:22.11231	46	\N	\N	f	f
+3724	3	3	MAT-00007	X-RAY VIEW BOX	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:22.137512	2026-08-05 19:00:22.137525	46	\N	\N	f	f
+3725	3	3	MAT-00008	ECG MACHINE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:22.225024	2026-08-05 19:00:22.22505	46	\N	\N	f	f
+3726	3	3	MAT-00009	DIGITAL BP APPARATUS	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:22.274627	2026-08-05 19:00:22.274639	46	\N	\N	f	f
+3727	3	3	MAT-00010	BLOOD COLLECTION MONITOR	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:22.428137	2026-08-05 19:00:22.428155	46	\N	\N	f	f
+3728	3	3	MAT-00011	VENTILATOR	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Life Support Equipment	t	f	2026-08-05 19:00:22.476888	2026-08-05 19:00:22.4769	46	\N	\N	f	f
+3729	3	3	MAT-00012	ULTRASOUND MACHINE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:22.508402	2026-08-05 19:00:22.508414	46	\N	\N	f	f
+3730	3	3	MAT-00013	DEFIBRILATOR	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Life Support Equipment	t	f	2026-08-05 19:00:22.532028	2026-08-05 19:00:22.53204	46	\N	\N	f	f
+3731	3	3	MAT-00014	TMT Machine	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:22.553219	2026-08-05 19:00:22.553232	46	\N	\N	f	f
+3732	3	3	MAT-00015	ULTRASOUND PROBE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:22.579582	2026-08-05 19:00:22.579594	46	\N	\N	f	f
+3733	3	3	MAT-00016	ACT MACHINE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:22.662537	2026-08-05 19:00:22.662551	46	\N	\N	f	f
+3734	3	3	MAT-00017	IABP MACHINE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Life Support Equipment	t	f	2026-08-05 19:00:22.690377	2026-08-05 19:00:22.690392	46	\N	\N	f	f
+3735	3	3	MAT-00018	PRESSURE INJECTOR	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:22.722942	2026-08-05 19:00:22.722955	46	\N	\N	f	f
+3736	3	3	MAT-00019	SEALING MACHINE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Sterilization Equipment	t	f	2026-08-05 19:00:22.747355	2026-08-05 19:00:22.747368	46	\N	\N	f	f
+3737	3	3	MAT-00020	SPOT LIGHT	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:00:22.769314	2026-08-05 19:00:22.769326	46	\N	\N	f	f
+3738	3	3	MAT-00021	CATH LAB MACHINE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:22.796598	2026-08-05 19:00:22.79661	46	\N	\N	f	f
+3739	3	3	MAT-00022	PORTABLE ULTRASOUND	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:22.819879	2026-08-05 19:00:22.819892	46	\N	\N	f	f
+3740	3	3	MAT-00023	AUTOCLAVE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Sterilization Equipment	t	f	2026-08-05 19:00:22.894664	2026-08-05 19:00:22.894679	46	\N	\N	f	f
+3741	3	3	MAT-00024	ETO MACHINE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Sterilization Equipment	t	f	2026-08-05 19:00:22.974926	2026-08-05 19:00:22.97494	46	\N	\N	f	f
+3742	3	3	MAT-00025	FUMIGATION MACHINE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Sterilization Equipment	t	f	2026-08-05 19:00:22.998009	2026-08-05 19:00:22.998021	46	\N	\N	f	f
+3743	3	3	MAT-00026	GAUSE CUTTING MACHINE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:00:23.019827	2026-08-05 19:00:23.019839	46	\N	\N	f	f
+3744	3	3	MAT-00027	ULTRASONIC CLEANER	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Sterilization Equipment	t	f	2026-08-05 19:00:23.044586	2026-08-05 19:00:23.044598	46	\N	\N	f	f
+3745	3	3	MAT-00028	BATTERY CHARGER	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:00:23.068513	2026-08-05 19:00:23.068525	46	\N	\N	f	f
+3746	3	3	MAT-00029	FLUID WARMER	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:23.096644	2026-08-05 19:00:23.096656	46	\N	\N	f	f
+3747	3	3	MAT-00030	HEAMOTHERM	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:23.123341	2026-08-05 19:00:23.123353	46	\N	\N	f	f
+3748	3	3	MAT-00031	HEART LUNG MACHINE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Life Support Equipment	t	f	2026-08-05 19:00:23.201403	2026-08-05 19:00:23.201415	46	\N	\N	f	f
+3749	3	3	MAT-00032	PATIENT WARMER	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:23.247912	2026-08-05 19:00:23.247926	46	\N	\N	f	f
+3750	3	3	MAT-00033	SURGEON HEADLIGHT	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:00:23.274808	2026-08-05 19:00:23.27482	46	\N	\N	f	f
+3751	3	3	MAT-00034	DOPLER	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:23.302577	2026-08-05 19:00:23.30259	46	\N	\N	f	f
+3752	3	3	MAT-00035	DERMA Abration	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:23.343067	2026-08-05 19:00:23.34308	46	\N	\N	f	f
+3753	3	3	MAT-00036	DIOD HAIR REMOAL LAZER	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:23.367273	2026-08-05 19:00:23.367285	46	\N	\N	f	f
+3754	3	3	MAT-00037	FRACTIONALC2O	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:23.389893	2026-08-05 19:00:23.389905	46	\N	\N	f	f
+3755	3	3	MAT-00038	HAND & FOOT	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:23.411746	2026-08-05 19:00:23.411758	46	\N	\N	f	f
+3756	3	3	MAT-00039	MICRO SCOPE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:23.434417	2026-08-05 19:00:23.43443	46	\N	\N	f	f
+3757	3	3	MAT-00040	NDYAG PIGMENT LAZER	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:23.50704	2026-08-05 19:00:23.507052	46	\N	\N	f	f
+3758	3	3	MAT-00041	PHOTOTHERAPHY FULL BODY	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:23.530034	2026-08-05 19:00:23.530047	46	\N	\N	f	f
+3759	3	3	MAT-00042	RF RADIO CAUTRY	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:23.552429	2026-08-05 19:00:23.55244	46	\N	\N	f	f
+3760	3	3	MAT-00043	SMOKE EVACUTION SYSTEM	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:00:23.574549	2026-08-05 19:00:23.574561	46	\N	\N	f	f
+3761	3	3	MAT-00044	SPIEGER SERIES	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:23.597019	2026-08-05 19:00:23.597031	46	\N	\N	f	f
+3762	3	3	MAT-00045	DIALYSIS MACHINE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:23.626143	2026-08-05 19:00:23.626155	46	\N	\N	f	f
+3763	3	3	MAT-00046	RENACLEAN MACHINE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:00:23.664761	2026-08-05 19:00:23.664774	46	\N	\N	f	f
+3764	3	3	MAT-00047	MOBILE X RAY	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:23.72129	2026-08-05 19:00:23.721302	46	\N	\N	f	f
+3765	3	3	MAT-00048	HFNC	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Life Support Equipment	t	f	2026-08-05 19:00:23.851868	2026-08-05 19:00:23.851881	46	\N	\N	f	f
+3766	3	3	MAT-00049	SCOPE_COLONOSCOPY 1M/6CM	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:23.951945	2026-08-05 19:00:23.951958	46	\N	\N	f	f
+3767	3	3	MAT-00050	SCOPE_DUO DENO VIDEOSCOPE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:23.974091	2026-08-05 19:00:23.974103	46	\N	\N	f	f
+3768	3	3	MAT-00051	SCOPE_ENDOSCOPY 60M	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:23.996138	2026-08-05 19:00:23.99615	46	\N	\N	f	f
+3769	3	3	MAT-00052	ENDOSCOPY MONITOR	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:24.019431	2026-08-05 19:00:24.019444	46	\N	\N	f	f
+3770	3	3	MAT-00053	ENDOSCOPY VIDEO PROCESSOR	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:24.043078	2026-08-05 19:00:24.04309	46	\N	\N	f	f
+3771	3	3	MAT-00054	LEAKAGE TESTOR	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:24.066437	2026-08-05 19:00:24.066449	46	\N	\N	f	f
+3772	3	3	MAT-00055	LITHO DEVICE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:24.141983	2026-08-05 19:00:24.141995	46	\N	\N	f	f
+3773	3	3	MAT-00056	VIDEOSCOPE CABLE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:00:24.166938	2026-08-05 19:00:24.16695	46	\N	\N	f	f
+3774	3	3	MAT-00057	OT TABLE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:00:24.19305	2026-08-05 19:00:24.193062	46	\N	\N	f	f
+3775	3	3	MAT-00058	Electrosurgical Unit	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:24.216992	2026-08-05 19:00:24.217006	46	\N	\N	f	f
+3776	3	3	MAT-00059	BERA	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:24.240085	2026-08-05 19:00:24.240097	46	\N	\N	f	f
+3777	3	3	MAT-00060	SREENING OAE+AABR	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:24.263387	2026-08-05 19:00:24.263399	46	\N	\N	f	f
+3778	3	3	MAT-00061	AUDIOMETER	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:24.286938	2026-08-05 19:00:24.286951	46	\N	\N	f	f
+3779	3	3	MAT-00062	DUET MACHNE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:24.310704	2026-08-05 19:00:24.310716	46	\N	\N	f	f
+3780	3	3	MAT-00063	ENT TREATMENT UNIT	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:24.388682	2026-08-05 19:00:24.388695	46	\N	\N	f	f
+3781	3	3	MAT-00064	OAE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:24.421195	2026-08-05 19:00:24.421208	46	\N	\N	f	f
+3782	3	3	MAT-00065	OPERATING MICROSCOPE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Surgical Equipment	t	f	2026-08-05 19:00:24.445481	2026-08-05 19:00:24.445493	46	\N	\N	f	f
+3783	3	3	MAT-00066	BABY WARMER	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Life Support Equipment	t	f	2026-08-05 19:00:24.472177	2026-08-05 19:00:24.472197	46	\N	\N	f	f
+3784	3	3	MAT-00067	BIRTHING BED	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:00:24.496287	2026-08-05 19:00:24.4963	46	\N	\N	f	f
+3785	3	3	MAT-00068	FETAL DOPPLER	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:24.53675	2026-08-05 19:00:24.536779	46	\N	\N	f	f
+3786	3	3	MAT-00069	FETAL MONITOR	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:24.561615	2026-08-05 19:00:24.561627	46	\N	\N	f	f
+3787	3	3	MAT-00070	OT LIGHT	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Surgical Equipment	t	f	2026-08-05 19:00:24.596286	2026-08-05 19:00:24.596298	46	\N	\N	f	f
+3788	3	3	MAT-00071	BOYEL'S APPARATUS	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Life Support Equipment	t	f	2026-08-05 19:00:24.883947	2026-08-05 19:00:24.883959	46	\N	\N	f	f
+3789	3	3	MAT-00072	INFANT RESUSCITATOR	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Life Support Equipment	t	f	2026-08-05 19:00:24.943835	2026-08-05 19:00:24.943848	46	\N	\N	f	f
+3790	3	3	MAT-00073	BUBBLE CPAP	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Life Support Equipment	t	f	2026-08-05 19:00:24.968235	2026-08-05 19:00:24.968248	46	\N	\N	f	f
+3791	3	3	MAT-00074	PHOTOTHERAPHY	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:25.004826	2026-08-05 19:00:25.004839	46	\N	\N	f	f
+3792	3	3	MAT-00075	INFANT INCUBATOR	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Life Support Equipment	t	f	2026-08-05 19:00:25.050568	2026-08-05 19:00:25.050581	46	\N	\N	f	f
+3793	3	3	MAT-00076	PORTABLE INFANT INCUBATOR	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Life Support Equipment	t	f	2026-08-05 19:00:25.103122	2026-08-05 19:00:25.103135	46	\N	\N	f	f
+3794	3	3	MAT-00077	Neonatal Weight Scale	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:25.14688	2026-08-05 19:00:25.146893	46	\N	\N	f	f
+3795	3	3	MAT-00078	A SCAN	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:25.211421	2026-08-05 19:00:25.211435	46	\N	\N	f	f
+3796	3	3	MAT-00079	AB-SCAN	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:25.294347	2026-08-05 19:00:25.294362	46	\N	\N	f	f
+3797	3	3	MAT-00080	ANTERIOR CHAMBER Camera	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:25.319104	2026-08-05 19:00:25.319117	46	\N	\N	f	f
+3798	3	3	MAT-00081	APPA YAG LASER	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:25.342651	2026-08-05 19:00:25.342663	46	\N	\N	f	f
+3799	3	3	MAT-00082	AUTOKERALO REFRACTOR	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:25.365992	2026-08-05 19:00:25.366004	46	\N	\N	f	f
+3800	3	3	MAT-00083	HESS SCREEN CONTROL	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:25.39254	2026-08-05 19:00:25.392553	46	\N	\N	f	f
+3801	3	3	MAT-00084	HUMPHREY FIELD ANALYSER	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:25.416077	2026-08-05 19:00:25.416089	46	\N	\N	f	f
+3802	3	3	MAT-00085	I CHART	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:25.439266	2026-08-05 19:00:25.439279	46	\N	\N	f	f
+3803	3	3	MAT-00086	INDIRECT OPTHALMOSCOPE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:25.462452	2026-08-05 19:00:25.462466	46	\N	\N	f	f
+3804	3	3	MAT-00087	KERATOMETER	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:25.491628	2026-08-05 19:00:25.491641	46	\N	\N	f	f
+3805	3	3	MAT-00088	LENSMETER	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:25.569274	2026-08-05 19:00:25.569287	46	\N	\N	f	f
+3806	3	3	MAT-00089	MICROSCUGERY MADINE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Surgical Equipment	t	f	2026-08-05 19:00:25.592433	2026-08-05 19:00:25.592445	46	\N	\N	f	f
+3807	3	3	MAT-00090	NON CONDUCTIVE TONOMETER	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:25.615764	2026-08-05 19:00:25.615776	46	\N	\N	f	f
+3808	3	3	MAT-00091	NON MYDRIIATIC CAMERA	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:25.639402	2026-08-05 19:00:25.639417	46	\N	\N	f	f
+3809	3	3	MAT-00092	OPTHALMIC REFRACTION UNIT	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:25.664928	2026-08-05 19:00:25.664941	46	\N	\N	f	f
+3810	3	3	MAT-00093	OPTHALOMOSCOPE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:25.688137	2026-08-05 19:00:25.688149	46	\N	\N	f	f
+3811	3	3	MAT-00094	GREEN LASER	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:25.71123	2026-08-05 19:00:25.711243	46	\N	\N	f	f
+3812	3	3	MAT-00095	REICHART AUTO TONOMETER	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:25.733683	2026-08-05 19:00:25.733694	46	\N	\N	f	f
+3813	3	3	MAT-00096	RETENOSCOPE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:25.757169	2026-08-05 19:00:25.757181	46	\N	\N	f	f
+3814	3	3	MAT-00097	SLIT LAMP	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:25.832966	2026-08-05 19:00:25.832978	46	\N	\N	f	f
+3815	3	3	MAT-00098	SPECULAR MICROSCOPE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:25.861152	2026-08-05 19:00:25.861164	46	\N	\N	f	f
+3816	3	3	MAT-00099	3D OPTICAL TOMO GRAM	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:25.889995	2026-08-05 19:00:25.890008	46	\N	\N	f	f
+3817	3	3	MAT-00100	SYNOPTOPHORE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:25.916932	2026-08-05 19:00:25.916944	46	\N	\N	f	f
+3818	3	3	MAT-00101	POP CUTING	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:25.950039	2026-08-05 19:00:25.950052	46	\N	\N	f	f
+3819	3	3	MAT-00102	Anesthesia Workstation	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Life Support Equipment	t	f	2026-08-05 19:00:26.018861	2026-08-05 19:00:26.018874	46	\N	\N	f	f
+3820	3	3	MAT-00103	OT CONTROL PANEL	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:00:26.051503	2026-08-05 19:00:26.051515	46	\N	\N	f	f
+3821	3	3	MAT-00104	CAMERA ENT	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:26.138708	2026-08-05 19:00:26.138721	46	\N	\N	f	f
+3822	3	3	MAT-00105	ECT SYSTEM	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:26.169401	2026-08-05 19:00:26.169414	46	\N	\N	f	f
+3823	3	3	MAT-00106	FHD ENDOSCOPY CAMERA	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:26.194638	2026-08-05 19:00:26.19465	46	\N	\N	f	f
+3824	3	3	MAT-00107	LIGHT SOURCE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:26.21803	2026-08-05 19:00:26.218042	46	\N	\N	f	f
+3825	3	3	MAT-00108	MICRO DEBRIDER SET	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:00:26.24102	2026-08-05 19:00:26.241032	46	\N	\N	f	f
+3826	3	3	MAT-00109	CAMERA CONSOLE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:00:26.273485	2026-08-05 19:00:26.273497	46	\N	\N	f	f
+3827	3	3	MAT-00110	LAP CAMERA CONTROLLER	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:00:26.301776	2026-08-05 19:00:26.301788	46	\N	\N	f	f
+3828	3	3	MAT-00111	CO2 INSUFFULATOR	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:00:26.326076	2026-08-05 19:00:26.326089	46	\N	\N	f	f
+3829	3	3	MAT-00112	HEAD LIGHT	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:00:26.40465	2026-08-05 19:00:26.404663	46	\N	\N	f	f
+3830	3	3	MAT-00113	MONITOR	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:00:26.429607	2026-08-05 19:00:26.42962	46	\N	\N	f	f
+3831	3	3	MAT-00114	FLASH AUTOCLAVE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:00:26.462517	2026-08-05 19:00:26.46253	46	\N	\N	f	f
+3832	3	3	MAT-00115	VIDEOLARYNANGOSCOPE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:00:26.497219	2026-08-05 19:00:26.497231	46	\N	\N	f	f
+3833	3	3	MAT-00116	Harmonic	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:26.525074	2026-08-05 19:00:26.525086	46	\N	\N	f	f
+3834	3	3	MAT-00117	LAP CO2 INSUFFLATOR	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:00:26.564203	2026-08-05 19:00:26.564216	46	\N	\N	f	f
+3835	3	3	MAT-00118	LAP LIGHT SOURCE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:00:26.589046	2026-08-05 19:00:26.58906	46	\N	\N	f	f
+3836	3	3	MAT-00119	SLAVE MONITOR	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:00:26.675749	2026-08-05 19:00:26.675761	46	\N	\N	f	f
+3837	3	3	MAT-00120	C ARM	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:00:26.704481	2026-08-05 19:00:26.704493	46	\N	\N	f	f
+3838	3	3	MAT-00121	MANMAN DRILL	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:26.736765	2026-08-05 19:00:26.736777	46	\N	\N	f	f
+3839	3	3	MAT-00122	NERVE SIMULATOR	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:00:26.766171	2026-08-05 19:00:26.766183	46	\N	\N	f	f
+3840	3	3	MAT-00123	NEURO DRILL_EC 300	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:00:26.795129	2026-08-05 19:00:26.795142	46	\N	\N	f	f
+3841	3	3	MAT-00124	SONOPET	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:00:26.837631	2026-08-05 19:00:26.837643	46	\N	\N	f	f
+3842	3	3	MAT-00125	NEURO DRILL_EM_800 MOTOR	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:00:26.864221	2026-08-05 19:00:26.864234	46	\N	\N	f	f
+3843	3	3	MAT-00126	Surgen Chair	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:00:26.941419	2026-08-05 19:00:26.941432	46	\N	\N	f	f
+3844	3	3	MAT-00127	Neuro Navigation system	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:00:26.967505	2026-08-05 19:00:26.967518	46	\N	\N	f	f
+3845	3	3	MAT-00128	AA3 SUPER DELUX CRYO	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:00:27.02713	2026-08-05 19:00:27.027142	46	\N	\N	f	f
+3846	3	3	MAT-00129	BIPOLAR COAGULATOR	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:27.053512	2026-08-05 19:00:27.053524	46	\N	\N	f	f
+3847	3	3	MAT-00130	CATERACT EXTRACTION S/M	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:00:27.082148	2026-08-05 19:00:27.08216	46	\N	\N	f	f
+3848	3	3	MAT-00131	CRYO MACHINE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:27.105828	2026-08-05 19:00:27.10584	46	\N	\N	f	f
+3849	3	3	MAT-00132	PHACO MACHINE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:00:27.143363	2026-08-05 19:00:27.143376	46	\N	\N	f	f
+3850	3	3	MAT-00133	PNEUMATIC LITHOTRIPTER	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:00:27.192606	2026-08-05 19:00:27.192619	46	\N	\N	f	f
+3851	3	3	MAT-00134	SHAVER	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:00:27.270719	2026-08-05 19:00:27.270732	46	\N	\N	f	f
+3852	3	3	MAT-00135	Surgical Tourniquet	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Surgical Equipment	t	f	2026-08-05 19:00:27.296661	2026-08-05 19:00:27.296674	46	\N	\N	f	f
+3853	3	3	MAT-00136	ISOLATION TRANSFORMER	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:00:27.397211	2026-08-05 19:00:27.397224	46	\N	\N	f	f
+3854	3	3	MAT-00137	LIPTOTRIPSY	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:27.421537	2026-08-05 19:00:27.421549	46	\N	\N	f	f
+3855	3	3	MAT-00138	LITHODAST MACHINE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:27.445387	2026-08-05 19:00:27.445399	46	\N	\N	f	f
+3856	3	3	MAT-00139	Lithotripsy System	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:27.472911	2026-08-05 19:00:27.472923	46	\N	\N	f	f
+3857	3	3	MAT-00140	Thunder Beat	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:27.497779	2026-08-05 19:00:27.497792	46	\N	\N	f	f
+3858	3	3	MAT-00141	ILR	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:00:27.526236	2026-08-05 19:00:27.526249	46	\N	\N	f	f
+3859	3	3	MAT-00142	MICRO OVEN	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:00:27.550478	2026-08-05 19:00:27.550491	46	\N	\N	f	f
+3860	3	3	MAT-00143	FLURESCENCE MICROSCOPE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:27.585478	2026-08-05 19:00:27.585489	46	\N	\N	f	f
+3861	3	3	MAT-00144	FITNESS MACHINE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:00:27.662884	2026-08-05 19:00:27.662897	46	\N	\N	f	f
+3862	3	3	MAT-00145	INTERMIT TR TRACTION	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:27.687644	2026-08-05 19:00:27.687657	46	\N	\N	f	f
+3863	3	3	MAT-00146	MUSCLE STIMULATOR	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:27.710682	2026-08-05 19:00:27.710695	46	\N	\N	f	f
+3864	3	3	MAT-00147	QUADRICEP CHAIR	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:00:27.736681	2026-08-05 19:00:27.736693	46	\N	\N	f	f
+3865	3	3	MAT-00148	SHORT WAVE DIATHERMY	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:27.760464	2026-08-05 19:00:27.760477	46	\N	\N	f	f
+3866	3	3	MAT-00149	SHOULDER WHEEL	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:00:27.784555	2026-08-05 19:00:27.784568	46	\N	\N	f	f
+3867	3	3	MAT-00150	SUSPENSION THERAPY	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:27.807361	2026-08-05 19:00:27.807373	46	\N	\N	f	f
+3868	3	3	MAT-00151	ULTRASOUND THERAPY	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:27.884116	2026-08-05 19:00:27.884129	46	\N	\N	f	f
+3869	3	3	MAT-00152	WAX BATH TUB	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:27.907157	2026-08-05 19:00:27.907169	46	\N	\N	f	f
+3870	3	3	MAT-00153	TENS	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:27.930866	2026-08-05 19:00:27.930879	46	\N	\N	f	f
+3871	3	3	MAT-00154	ULTRASOUND PHY	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:27.965518	2026-08-05 19:00:27.96553	46	\N	\N	f	f
+3872	3	3	MAT-00155	CPMA	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:27.992547	2026-08-05 19:00:27.992559	46	\N	\N	f	f
+3873	3	3	MAT-00156	MOIST HEAT THERAPY	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:28.017859	2026-08-05 19:00:28.017871	46	\N	\N	f	f
+3874	3	3	MAT-00157	TRACTION	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:28.041777	2026-08-05 19:00:28.041789	46	\N	\N	f	f
+3875	3	3	MAT-00158	SIMULATOR	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:00:28.065436	2026-08-05 19:00:28.065449	46	\N	\N	f	f
+3876	3	3	MAT-00159	CMT	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:00:28.145928	2026-08-05 19:00:28.145941	46	\N	\N	f	f
+3877	3	3	MAT-00160	LAZER MSCHINE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:28.171232	2026-08-05 19:00:28.171245	46	\N	\N	f	f
+3878	3	3	MAT-00161	REHAB ROBOT GLOVE	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:28.194446	2026-08-05 19:00:28.194458	46	\N	\N	f	f
+3879	3	3	MAT-00162	BIOFEEDBACK	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:28.309624	2026-08-05 19:00:28.309636	46	\N	\N	f	f
+3880	3	3	MAT-00163	EEG	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:28.338802	2026-08-05 19:00:28.338814	46	\N	\N	f	f
+3881	3	3	MAT-00164	ECT	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:28.361764	2026-08-05 19:00:28.361777	46	\N	\N	f	f
+3882	3	3	MAT-00165	CASSETE READER	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:28.440942	2026-08-05 19:00:28.440954	46	\N	\N	f	f
+3883	3	3	MAT-00166	FILM PRINTER	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:28.472695	2026-08-05 19:00:28.472707	46	\N	\N	f	f
+3884	3	3	MAT-00167	CT	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:28.499789	2026-08-05 19:00:28.499803	46	\N	\N	f	f
+3885	3	3	MAT-00168	FIXED X RAY	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:28.577634	2026-08-05 19:00:28.577646	46	\N	\N	f	f
+3886	3	3	MAT-00169	MAMMOGRAPHY	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:28.612399	2026-08-05 19:00:28.612415	46	\N	\N	f	f
+3887	3	3	MAT-00170	MRI	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:28.638556	2026-08-05 19:00:28.638568	46	\N	\N	f	f
+3888	3	3	MAT-00171	PACS	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:00:28.702539	2026-08-05 19:00:28.702551	46	\N	\N	f	f
+3889	3	3	MAT-00172	BIPAP	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Life Support Equipment	t	f	2026-08-05 19:00:28.730529	2026-08-05 19:00:28.730542	46	\N	\N	f	f
+3890	3	3	MAT-00173	SCOPE_ BRONCO	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:28.759964	2026-08-05 19:00:28.759976	46	\N	\N	f	f
+3891	3	3	MAT-00174	CPAP	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Life Support Equipment	t	f	2026-08-05 19:00:28.785652	2026-08-05 19:00:28.785664	46	\N	\N	f	f
+3892	3	3	MAT-00175	DLCO	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:28.862866	2026-08-05 19:00:28.862882	46	\N	\N	f	f
+3893	3	3	MAT-00176	PFT	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:28.892058	2026-08-05 19:00:28.892072	46	\N	\N	f	f
+3894	3	3	MAT-00177	NURSING CALLING SYSTEM	42	\N	1	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:00:28.983499	2026-08-05 19:00:28.983513	46	\N	\N	f	f
+3895	2	2	MAT-00001	BP APPARATUS	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:39.169886	2026-08-05 19:04:39.169907	62	\N	\N	f	f
+3896	2	2	MAT-00002	E_SUCTION APPARATUS	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Life Support Equipment	t	f	2026-08-05 19:04:39.193904	2026-08-05 19:04:39.193916	62	\N	\N	f	f
+3897	2	2	MAT-00003	IR LIGHT	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:39.21634	2026-08-05 19:04:39.216353	62	\N	\N	f	f
+3898	2	2	MAT-00004	INFUSION PUMP	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Life Support Equipment	t	f	2026-08-05 19:04:39.240965	2026-08-05 19:04:39.240978	62	\N	\N	f	f
+3899	2	2	MAT-00005	Patient Monitor	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Life Support Equipment	t	f	2026-08-05 19:04:39.263654	2026-08-05 19:04:39.263667	62	\N	\N	f	f
+3900	2	2	MAT-00006	SYRINGE PUMP	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:39.289452	2026-08-05 19:04:39.289465	62	\N	\N	f	f
+3901	2	2	MAT-00007	X-RAY VIEW BOX	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:39.312635	2026-08-05 19:04:39.312648	62	\N	\N	f	f
+3902	2	2	MAT-00008	ECG MACHINE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:39.347518	2026-08-05 19:04:39.347531	62	\N	\N	f	f
+3903	2	2	MAT-00009	DIGITAL BP APPARATUS	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:39.446702	2026-08-05 19:04:39.446716	62	\N	\N	f	f
+3904	2	2	MAT-00010	BLOOD COLLECTION MONITOR	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:39.598382	2026-08-05 19:04:39.598395	62	\N	\N	f	f
+3905	2	2	MAT-00011	VENTILATOR	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Life Support Equipment	t	f	2026-08-05 19:04:39.646644	2026-08-05 19:04:39.646657	62	\N	\N	f	f
+3906	2	2	MAT-00012	ULTRASOUND MACHINE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:39.677218	2026-08-05 19:04:39.677232	62	\N	\N	f	f
+3907	2	2	MAT-00013	DEFIBRILATOR	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Life Support Equipment	t	f	2026-08-05 19:04:39.699435	2026-08-05 19:04:39.699448	62	\N	\N	f	f
+3908	2	2	MAT-00014	TMT Machine	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:39.720509	2026-08-05 19:04:39.720522	62	\N	\N	f	f
+3909	2	2	MAT-00015	ULTRASOUND PROBE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:39.746088	2026-08-05 19:04:39.746102	62	\N	\N	f	f
+3910	2	2	MAT-00016	ACT MACHINE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:39.777794	2026-08-05 19:04:39.777807	62	\N	\N	f	f
+3911	2	2	MAT-00017	IABP MACHINE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Life Support Equipment	t	f	2026-08-05 19:04:39.804083	2026-08-05 19:04:39.804095	62	\N	\N	f	f
+3912	2	2	MAT-00018	PRESSURE INJECTOR	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:39.834374	2026-08-05 19:04:39.834387	62	\N	\N	f	f
+3913	2	2	MAT-00019	SEALING MACHINE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Sterilization Equipment	t	f	2026-08-05 19:04:39.906803	2026-08-05 19:04:39.906816	62	\N	\N	f	f
+3914	2	2	MAT-00020	SPOT LIGHT	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:04:39.927998	2026-08-05 19:04:39.928011	62	\N	\N	f	f
+3915	2	2	MAT-00021	CATH LAB MACHINE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:39.954761	2026-08-05 19:04:39.954774	62	\N	\N	f	f
+3916	2	2	MAT-00022	PORTABLE ULTRASOUND	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:39.977456	2026-08-05 19:04:39.977468	62	\N	\N	f	f
+3917	2	2	MAT-00023	AUTOCLAVE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Sterilization Equipment	t	f	2026-08-05 19:04:40.052365	2026-08-05 19:04:40.052381	62	\N	\N	f	f
+3918	2	2	MAT-00024	ETO MACHINE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Sterilization Equipment	t	f	2026-08-05 19:04:40.084764	2026-08-05 19:04:40.084779	62	\N	\N	f	f
+3919	2	2	MAT-00025	FUMIGATION MACHINE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Sterilization Equipment	t	f	2026-08-05 19:04:40.109461	2026-08-05 19:04:40.109477	62	\N	\N	f	f
+3920	2	2	MAT-00026	GAUSE CUTTING MACHINE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:04:40.138767	2026-08-05 19:04:40.138781	62	\N	\N	f	f
+3921	2	2	MAT-00027	ULTRASONIC CLEANER	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Sterilization Equipment	t	f	2026-08-05 19:04:40.168205	2026-08-05 19:04:40.16822	62	\N	\N	f	f
+3922	2	2	MAT-00028	BATTERY CHARGER	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:04:40.252474	2026-08-05 19:04:40.252487	62	\N	\N	f	f
+3923	2	2	MAT-00029	FLUID WARMER	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:40.278944	2026-08-05 19:04:40.278958	62	\N	\N	f	f
+3924	2	2	MAT-00030	HEAMOTHERM	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:40.303155	2026-08-05 19:04:40.303168	62	\N	\N	f	f
+3925	2	2	MAT-00031	HEART LUNG MACHINE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Life Support Equipment	t	f	2026-08-05 19:04:40.324974	2026-08-05 19:04:40.324987	62	\N	\N	f	f
+3926	2	2	MAT-00032	PATIENT WARMER	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:40.370816	2026-08-05 19:04:40.370829	62	\N	\N	f	f
+3927	2	2	MAT-00033	SURGEON HEADLIGHT	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:04:40.397329	2026-08-05 19:04:40.397342	62	\N	\N	f	f
+3928	2	2	MAT-00034	DOPLER	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:40.42335	2026-08-05 19:04:40.423363	62	\N	\N	f	f
+3929	2	2	MAT-00035	DERMA Abration	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:40.463062	2026-08-05 19:04:40.463075	62	\N	\N	f	f
+3930	2	2	MAT-00036	DIOD HAIR REMOAL LAZER	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:40.486478	2026-08-05 19:04:40.48649	62	\N	\N	f	f
+3931	2	2	MAT-00037	FRACTIONALC2O	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:40.50789	2026-08-05 19:04:40.507902	62	\N	\N	f	f
+3932	2	2	MAT-00038	HAND & FOOT	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:40.580836	2026-08-05 19:04:40.580848	62	\N	\N	f	f
+3933	2	2	MAT-00039	MICRO SCOPE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:40.602609	2026-08-05 19:04:40.602622	62	\N	\N	f	f
+3934	2	2	MAT-00040	NDYAG PIGMENT LAZER	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:40.623901	2026-08-05 19:04:40.623914	62	\N	\N	f	f
+3935	2	2	MAT-00041	PHOTOTHERAPHY FULL BODY	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:40.646663	2026-08-05 19:04:40.646675	62	\N	\N	f	f
+3936	2	2	MAT-00042	RF RADIO CAUTRY	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:40.669421	2026-08-05 19:04:40.669434	62	\N	\N	f	f
+3937	2	2	MAT-00043	SMOKE EVACUTION SYSTEM	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:04:40.691602	2026-08-05 19:04:40.691616	62	\N	\N	f	f
+3938	2	2	MAT-00044	SPIEGER SERIES	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:40.714025	2026-08-05 19:04:40.714038	62	\N	\N	f	f
+3939	2	2	MAT-00045	DIALYSIS MACHINE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:40.742532	2026-08-05 19:04:40.742544	62	\N	\N	f	f
+3940	2	2	MAT-00046	RENACLEAN MACHINE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:04:40.83085	2026-08-05 19:04:40.830863	62	\N	\N	f	f
+3941	2	2	MAT-00047	MOBILE X RAY	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:40.886917	2026-08-05 19:04:40.88693	62	\N	\N	f	f
+3942	2	2	MAT-00048	HFNC	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Life Support Equipment	t	f	2026-08-05 19:04:40.968669	2026-08-05 19:04:40.968684	62	\N	\N	f	f
+3943	2	2	MAT-00049	SCOPE_COLONOSCOPY 1M/6CM	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:41.08223	2026-08-05 19:04:41.082245	62	\N	\N	f	f
+3944	2	2	MAT-00050	SCOPE_DUO DENO VIDEOSCOPE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:41.105161	2026-08-05 19:04:41.105175	62	\N	\N	f	f
+3945	2	2	MAT-00051	SCOPE_ENDOSCOPY 60M	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:41.126395	2026-08-05 19:04:41.126408	62	\N	\N	f	f
+3946	2	2	MAT-00052	ENDOSCOPY MONITOR	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:41.149318	2026-08-05 19:04:41.149332	62	\N	\N	f	f
+3947	2	2	MAT-00053	ENDOSCOPY VIDEO PROCESSOR	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:41.171131	2026-08-05 19:04:41.171145	62	\N	\N	f	f
+3948	2	2	MAT-00054	LEAKAGE TESTOR	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:41.193085	2026-08-05 19:04:41.193097	62	\N	\N	f	f
+3949	2	2	MAT-00055	LITHO DEVICE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:41.265457	2026-08-05 19:04:41.265469	62	\N	\N	f	f
+3950	2	2	MAT-00056	VIDEOSCOPE CABLE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:04:41.289371	2026-08-05 19:04:41.289383	62	\N	\N	f	f
+3951	2	2	MAT-00057	OT TABLE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:04:41.31406	2026-08-05 19:04:41.314074	62	\N	\N	f	f
+3952	2	2	MAT-00058	Electrosurgical Unit	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:41.33677	2026-08-05 19:04:41.336782	62	\N	\N	f	f
+3953	2	2	MAT-00059	BERA	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:41.358343	2026-08-05 19:04:41.358356	62	\N	\N	f	f
+3954	2	2	MAT-00060	SREENING OAE+AABR	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:41.380724	2026-08-05 19:04:41.380738	62	\N	\N	f	f
+3955	2	2	MAT-00061	AUDIOMETER	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:41.40283	2026-08-05 19:04:41.402844	62	\N	\N	f	f
+3956	2	2	MAT-00062	DUET MACHNE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:41.425506	2026-08-05 19:04:41.425519	62	\N	\N	f	f
+3957	2	2	MAT-00063	ENT TREATMENT UNIT	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:41.497498	2026-08-05 19:04:41.497511	62	\N	\N	f	f
+3958	2	2	MAT-00064	OAE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:41.529226	2026-08-05 19:04:41.529238	62	\N	\N	f	f
+3959	2	2	MAT-00065	OPERATING MICROSCOPE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Surgical Equipment	t	f	2026-08-05 19:04:41.553004	2026-08-05 19:04:41.553017	62	\N	\N	f	f
+3960	2	2	MAT-00066	BABY WARMER	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Life Support Equipment	t	f	2026-08-05 19:04:41.576482	2026-08-05 19:04:41.576495	62	\N	\N	f	f
+3961	2	2	MAT-00067	BIRTHING BED	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:04:41.600151	2026-08-05 19:04:41.600165	62	\N	\N	f	f
+3962	2	2	MAT-00068	FETAL DOPPLER	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:41.63816	2026-08-05 19:04:41.638172	62	\N	\N	f	f
+3963	2	2	MAT-00069	FETAL MONITOR	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:41.66233	2026-08-05 19:04:41.662342	62	\N	\N	f	f
+3964	2	2	MAT-00070	OT LIGHT	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Surgical Equipment	t	f	2026-08-05 19:04:41.749177	2026-08-05 19:04:41.7492	62	\N	\N	f	f
+3965	2	2	MAT-00071	BOYEL'S APPARATUS	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Life Support Equipment	t	f	2026-08-05 19:04:41.9828	2026-08-05 19:04:41.982814	62	\N	\N	f	f
+3966	2	2	MAT-00072	INFANT RESUSCITATOR	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Life Support Equipment	t	f	2026-08-05 19:04:42.042233	2026-08-05 19:04:42.042246	62	\N	\N	f	f
+3967	2	2	MAT-00073	BUBBLE CPAP	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Life Support Equipment	t	f	2026-08-05 19:04:42.066966	2026-08-05 19:04:42.06698	62	\N	\N	f	f
+3968	2	2	MAT-00074	PHOTOTHERAPHY	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:42.104399	2026-08-05 19:04:42.104412	62	\N	\N	f	f
+3969	2	2	MAT-00075	INFANT INCUBATOR	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Life Support Equipment	t	f	2026-08-05 19:04:42.150463	2026-08-05 19:04:42.150479	62	\N	\N	f	f
+3970	2	2	MAT-00076	PORTABLE INFANT INCUBATOR	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Life Support Equipment	t	f	2026-08-05 19:04:42.205285	2026-08-05 19:04:42.205299	62	\N	\N	f	f
+3971	2	2	MAT-00077	Neonatal Weight Scale	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:42.250241	2026-08-05 19:04:42.250254	62	\N	\N	f	f
+3972	2	2	MAT-00078	A SCAN	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:42.365705	2026-08-05 19:04:42.365718	62	\N	\N	f	f
+3973	2	2	MAT-00079	AB-SCAN	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:42.393173	2026-08-05 19:04:42.393185	62	\N	\N	f	f
+3974	2	2	MAT-00080	ANTERIOR CHAMBER Camera	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:42.415874	2026-08-05 19:04:42.415886	62	\N	\N	f	f
+3975	2	2	MAT-00081	APPA YAG LASER	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:42.438237	2026-08-05 19:04:42.43825	62	\N	\N	f	f
+3976	2	2	MAT-00082	AUTOKERALO REFRACTOR	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:42.460573	2026-08-05 19:04:42.460586	62	\N	\N	f	f
+3977	2	2	MAT-00083	HESS SCREEN CONTROL	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:42.48534	2026-08-05 19:04:42.485352	62	\N	\N	f	f
+3978	2	2	MAT-00084	HUMPHREY FIELD ANALYSER	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:42.509331	2026-08-05 19:04:42.509345	62	\N	\N	f	f
+3979	2	2	MAT-00085	I CHART	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:42.531861	2026-08-05 19:04:42.531874	62	\N	\N	f	f
+3980	2	2	MAT-00086	INDIRECT OPTHALMOSCOPE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:42.554511	2026-08-05 19:04:42.554525	62	\N	\N	f	f
+3981	2	2	MAT-00087	KERATOMETER	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:42.582421	2026-08-05 19:04:42.582434	62	\N	\N	f	f
+3982	2	2	MAT-00088	LENSMETER	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:42.658827	2026-08-05 19:04:42.65884	62	\N	\N	f	f
+3983	2	2	MAT-00089	MICROSCUGERY MADINE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Surgical Equipment	t	f	2026-08-05 19:04:42.681223	2026-08-05 19:04:42.681236	62	\N	\N	f	f
+3984	2	2	MAT-00090	NON CONDUCTIVE TONOMETER	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:42.704754	2026-08-05 19:04:42.704767	62	\N	\N	f	f
+3985	2	2	MAT-00091	NON MYDRIIATIC CAMERA	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:42.727696	2026-08-05 19:04:42.727709	62	\N	\N	f	f
+3986	2	2	MAT-00092	OPTHALMIC REFRACTION UNIT	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:42.750322	2026-08-05 19:04:42.750335	62	\N	\N	f	f
+3987	2	2	MAT-00093	OPTHALOMOSCOPE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:42.77273	2026-08-05 19:04:42.772743	62	\N	\N	f	f
+3988	2	2	MAT-00094	GREEN LASER	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:42.795215	2026-08-05 19:04:42.795228	62	\N	\N	f	f
+3989	2	2	MAT-00095	REICHART AUTO TONOMETER	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:42.817167	2026-08-05 19:04:42.81718	62	\N	\N	f	f
+3990	2	2	MAT-00096	RETENOSCOPE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:42.890391	2026-08-05 19:04:42.890404	62	\N	\N	f	f
+3991	2	2	MAT-00097	SLIT LAMP	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:42.913247	2026-08-05 19:04:42.91326	62	\N	\N	f	f
+3992	2	2	MAT-00098	SPECULAR MICROSCOPE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:42.940427	2026-08-05 19:04:42.94044	62	\N	\N	f	f
+3993	2	2	MAT-00099	3D OPTICAL TOMO GRAM	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:42.96774	2026-08-05 19:04:42.967752	62	\N	\N	f	f
+3994	2	2	MAT-00100	SYNOPTOPHORE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:42.994005	2026-08-05 19:04:42.994018	62	\N	\N	f	f
+3995	2	2	MAT-00101	POP CUTING	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:43.025725	2026-08-05 19:04:43.025738	62	\N	\N	f	f
+3996	2	2	MAT-00102	Anesthesia Workstation	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Life Support Equipment	t	f	2026-08-05 19:04:43.092238	2026-08-05 19:04:43.092251	62	\N	\N	f	f
+3997	2	2	MAT-00103	OT CONTROL PANEL	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:04:43.174798	2026-08-05 19:04:43.174811	62	\N	\N	f	f
+3998	2	2	MAT-00104	CAMERA ENT	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:43.204889	2026-08-05 19:04:43.204904	62	\N	\N	f	f
+3999	2	2	MAT-00105	ECT SYSTEM	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:43.234196	2026-08-05 19:04:43.23421	62	\N	\N	f	f
+4000	2	2	MAT-00106	FHD ENDOSCOPY CAMERA	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:43.259013	2026-08-05 19:04:43.259027	62	\N	\N	f	f
+4001	2	2	MAT-00107	LIGHT SOURCE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:43.281467	2026-08-05 19:04:43.281479	62	\N	\N	f	f
+4002	2	2	MAT-00108	MICRO DEBRIDER SET	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:04:43.303647	2026-08-05 19:04:43.30366	62	\N	\N	f	f
+4003	2	2	MAT-00109	CAMERA CONSOLE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:04:43.335206	2026-08-05 19:04:43.335219	62	\N	\N	f	f
+4004	2	2	MAT-00110	LAP CAMERA CONTROLLER	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:04:43.362621	2026-08-05 19:04:43.362634	62	\N	\N	f	f
+4005	2	2	MAT-00111	CO2 INSUFFULATOR	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:04:43.438961	2026-08-05 19:04:43.438977	62	\N	\N	f	f
+4006	2	2	MAT-00112	HEAD LIGHT	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:04:43.464476	2026-08-05 19:04:43.464489	62	\N	\N	f	f
+4007	2	2	MAT-00113	MONITOR	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:04:43.487636	2026-08-05 19:04:43.487649	62	\N	\N	f	f
+4008	2	2	MAT-00114	FLASH AUTOCLAVE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:04:43.519674	2026-08-05 19:04:43.519687	62	\N	\N	f	f
+4009	2	2	MAT-00115	VIDEOLARYNANGOSCOPE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:04:43.552823	2026-08-05 19:04:43.552836	62	\N	\N	f	f
+4010	2	2	MAT-00116	Harmonic	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:43.580645	2026-08-05 19:04:43.580658	62	\N	\N	f	f
+4011	2	2	MAT-00117	LAP CO2 INSUFFLATOR	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:04:43.621131	2026-08-05 19:04:43.621144	62	\N	\N	f	f
+4012	2	2	MAT-00118	LAP LIGHT SOURCE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:04:43.648845	2026-08-05 19:04:43.648858	62	\N	\N	f	f
+4013	2	2	MAT-00119	SLAVE MONITOR	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:04:43.685145	2026-08-05 19:04:43.685163	62	\N	\N	f	f
+4014	2	2	MAT-00120	C ARM	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:04:43.715822	2026-08-05 19:04:43.715835	62	\N	\N	f	f
+4015	2	2	MAT-00121	MANMAN DRILL	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:43.798023	2026-08-05 19:04:43.798035	62	\N	\N	f	f
+4016	2	2	MAT-00122	NERVE SIMULATOR	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:04:43.824579	2026-08-05 19:04:43.824595	62	\N	\N	f	f
+4017	2	2	MAT-00123	NEURO DRILL_EC 300	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:04:43.852488	2026-08-05 19:04:43.852501	62	\N	\N	f	f
+4018	2	2	MAT-00124	SONOPET	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:04:43.894332	2026-08-05 19:04:43.894346	62	\N	\N	f	f
+4019	2	2	MAT-00125	NEURO DRILL_EM_800 MOTOR	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:04:43.919116	2026-08-05 19:04:43.919129	62	\N	\N	f	f
+4020	2	2	MAT-00126	Surgen Chair	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:04:43.944096	2026-08-05 19:04:43.944108	62	\N	\N	f	f
+4021	2	2	MAT-00127	Neuro Navigation system	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:04:43.969478	2026-08-05 19:04:43.96949	62	\N	\N	f	f
+4022	2	2	MAT-00128	AA3 SUPER DELUX CRYO	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:04:44.079231	2026-08-05 19:04:44.079245	62	\N	\N	f	f
+4023	2	2	MAT-00129	BIPOLAR COAGULATOR	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:44.104917	2026-08-05 19:04:44.10493	62	\N	\N	f	f
+4024	2	2	MAT-00130	CATERACT EXTRACTION S/M	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:04:44.132839	2026-08-05 19:04:44.132853	62	\N	\N	f	f
+4025	2	2	MAT-00131	CRYO MACHINE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:44.156667	2026-08-05 19:04:44.156679	62	\N	\N	f	f
+4026	2	2	MAT-00132	PHACO MACHINE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:04:44.193412	2026-08-05 19:04:44.193425	62	\N	\N	f	f
+4027	2	2	MAT-00133	PNEUMATIC LITHOTRIPTER	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:04:44.243421	2026-08-05 19:04:44.243434	62	\N	\N	f	f
+4028	2	2	MAT-00134	SHAVER	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:04:44.269525	2026-08-05 19:04:44.269538	62	\N	\N	f	f
+4029	2	2	MAT-00135	Surgical Tourniquet	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Surgical Equipment	t	f	2026-08-05 19:04:44.346061	2026-08-05 19:04:44.346074	62	\N	\N	f	f
+4030	2	2	MAT-00136	ISOLATION TRANSFORMER	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:04:44.447316	2026-08-05 19:04:44.447332	62	\N	\N	f	f
+4031	2	2	MAT-00137	LIPTOTRIPSY	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:44.474616	2026-08-05 19:04:44.474628	62	\N	\N	f	f
+4032	2	2	MAT-00138	LITHODAST MACHINE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:44.500284	2026-08-05 19:04:44.500297	62	\N	\N	f	f
+4033	2	2	MAT-00139	Lithotripsy System	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:44.529817	2026-08-05 19:04:44.52983	62	\N	\N	f	f
+4034	2	2	MAT-00140	Thunder Beat	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:44.555252	2026-08-05 19:04:44.555265	62	\N	\N	f	f
+4035	2	2	MAT-00141	ILR	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:04:44.584236	2026-08-05 19:04:44.58425	62	\N	\N	f	f
+4036	2	2	MAT-00142	MICRO OVEN	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Equipment	t	f	2026-08-05 19:04:44.609145	2026-08-05 19:04:44.609158	62	\N	\N	f	f
+4037	2	2	MAT-00143	FLURESCENCE MICROSCOPE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:44.646152	2026-08-05 19:04:44.646165	62	\N	\N	f	f
+4038	2	2	MAT-00144	FITNESS MACHINE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:04:44.724938	2026-08-05 19:04:44.724951	62	\N	\N	f	f
+4039	2	2	MAT-00145	INTERMIT TR TRACTION	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:44.749249	2026-08-05 19:04:44.749262	62	\N	\N	f	f
+4040	2	2	MAT-00146	MUSCLE STIMULATOR	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:44.771926	2026-08-05 19:04:44.771939	62	\N	\N	f	f
+4041	2	2	MAT-00147	QUADRICEP CHAIR	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:04:44.796991	2026-08-05 19:04:44.797004	62	\N	\N	f	f
+4042	2	2	MAT-00148	SHORT WAVE DIATHERMY	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:44.821152	2026-08-05 19:04:44.821165	62	\N	\N	f	f
+4043	2	2	MAT-00149	SHOULDER WHEEL	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:04:44.844101	2026-08-05 19:04:44.844115	62	\N	\N	f	f
+4044	2	2	MAT-00150	SUSPENSION THERAPY	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:44.868776	2026-08-05 19:04:44.868789	62	\N	\N	f	f
+4045	2	2	MAT-00151	ULTRASOUND THERAPY	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:44.946621	2026-08-05 19:04:44.946635	62	\N	\N	f	f
+4046	2	2	MAT-00152	WAX BATH TUB	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:44.970612	2026-08-05 19:04:44.970625	62	\N	\N	f	f
+4047	2	2	MAT-00153	TENS	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:44.993235	2026-08-05 19:04:44.993249	62	\N	\N	f	f
+4048	2	2	MAT-00154	ULTRASOUND PHY	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:45.028264	2026-08-05 19:04:45.028278	62	\N	\N	f	f
+4049	2	2	MAT-00155	CPMA	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:45.056165	2026-08-05 19:04:45.056178	62	\N	\N	f	f
+4050	2	2	MAT-00156	MOIST HEAT THERAPY	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:45.080216	2026-08-05 19:04:45.08023	62	\N	\N	f	f
+4051	2	2	MAT-00157	TRACTION	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:45.105057	2026-08-05 19:04:45.10507	62	\N	\N	f	f
+4052	2	2	MAT-00158	SIMULATOR	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:04:45.128352	2026-08-05 19:04:45.128366	62	\N	\N	f	f
+4053	2	2	MAT-00159	CMT	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:04:45.210475	2026-08-05 19:04:45.210488	62	\N	\N	f	f
+4054	2	2	MAT-00160	LAZER MSCHINE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:45.235768	2026-08-05 19:04:45.235781	62	\N	\N	f	f
+4055	2	2	MAT-00161	REHAB ROBOT GLOVE	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:45.260698	2026-08-05 19:04:45.260711	62	\N	\N	f	f
+4056	2	2	MAT-00162	BIOFEEDBACK	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:45.380371	2026-08-05 19:04:45.380384	62	\N	\N	f	f
+4057	2	2	MAT-00163	EEG	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:45.409552	2026-08-05 19:04:45.409566	62	\N	\N	f	f
+4058	2	2	MAT-00164	ECT	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:04:45.433221	2026-08-05 19:04:45.433234	62	\N	\N	f	f
+4059	2	2	MAT-00165	CASSETE READER	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:45.513156	2026-08-05 19:04:45.51317	62	\N	\N	f	f
+4060	2	2	MAT-00166	FILM PRINTER	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:45.543921	2026-08-05 19:04:45.543934	62	\N	\N	f	f
+4061	2	2	MAT-00167	CT	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:45.623413	2026-08-05 19:04:45.623426	62	\N	\N	f	f
+4062	2	2	MAT-00168	FIXED X RAY	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:45.647305	2026-08-05 19:04:45.647319	62	\N	\N	f	f
+4063	2	2	MAT-00169	MAMMOGRAPHY	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:45.682986	2026-08-05 19:04:45.683	62	\N	\N	f	f
+4064	2	2	MAT-00170	MRI	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:45.708624	2026-08-05 19:04:45.708637	62	\N	\N	f	f
+4065	2	2	MAT-00171	PACS	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:04:45.775971	2026-08-05 19:04:45.775983	62	\N	\N	f	f
+4066	2	2	MAT-00172	BIPAP	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Life Support Equipment	t	f	2026-08-05 19:04:45.804392	2026-08-05 19:04:45.804406	62	\N	\N	f	f
+4067	2	2	MAT-00173	SCOPE_ BRONCO	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:45.834648	2026-08-05 19:04:45.834662	62	\N	\N	f	f
+4068	2	2	MAT-00174	CPAP	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Life Support Equipment	t	f	2026-08-05 19:04:45.860034	2026-08-05 19:04:45.860054	62	\N	\N	f	f
+4069	2	2	MAT-00175	DLCO	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:45.884222	2026-08-05 19:04:45.884235	62	\N	\N	f	f
+4070	2	2	MAT-00176	PFT	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:45.909455	2026-08-05 19:04:45.909468	62	\N	\N	f	f
+4071	2	2	MAT-00177	NURSING CALLING SYSTEM	65	\N	28	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:04:46.048891	2026-08-05 19:04:46.048909	62	\N	\N	f	f
+4817	2	2	CHEM-00214	Sodium Oxalate	80	\N	47	335	0	749	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306715	2026-08-06 13:39:15.643957	62	\N	\N	f	f
+4818	2	2	CHEM-00215	Sodium Potassium Tartarate	80	\N	47	308	0	850	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306721	2026-08-06 13:39:15.64396	62	\N	\N	f	f
+4869	2	2	CHEM-00266	quinoline	80	\N	29	476	0	0	\N	General	\N	18	Consumable	\N	t	f	2026-08-06 13:27:00.30704	2026-08-06 13:39:15.644109	62	\N	\N	f	f
+4616	2	2	CHEM-00013	Amaranth solution	80	\N	48	259	0	212	\N	General	\N	18	Consumable	Packaging: 125ml	t	f	2026-08-06 13:27:00.305431	2026-08-06 13:39:15.643391	62	\N	\N	f	f
+4617	2	2	CHEM-00014	Ammonium Acetate	80	\N	47	95	0	480	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.305438	2026-08-06 13:39:15.643394	62	\N	\N	f	f
+4618	2	2	CHEM-00015	Ammonium chloride	80	\N	47	482	0	380	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.305444	2026-08-06 13:39:15.643397	62	\N	\N	f	f
+4619	2	2	CHEM-00016	Ammonium Citrate	80	\N	47	327	0	1630	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.305451	2026-08-06 13:39:15.643399	62	\N	\N	f	f
+4620	2	2	CHEM-00017	Ammonium Cyanide	80	\N	29	437	0	0	\N	General	\N	18	Consumable	Packaging: regret	t	f	2026-08-06 13:27:00.305457	2026-08-06 13:39:15.643402	62	\N	\N	f	f
+4621	2	2	CHEM-00018	Ammonium diydrogen phosphate	80	\N	47	484	0	840	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.305463	2026-08-06 13:39:15.643405	62	\N	\N	f	f
+4622	2	2	CHEM-00019	Ammonium molybdate	80	\N	47	384	0	6600	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.30547	2026-08-06 13:39:15.643408	62	\N	\N	f	f
+4623	2	2	CHEM-00020	Ammonium Solution	80	\N	48	162	0	320	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.305476	2026-08-06 13:39:15.643411	62	\N	\N	f	f
+4624	2	2	CHEM-00021	iso amyl alcohol	80	\N	48	373	0	640	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.305482	2026-08-06 13:39:15.643413	62	\N	\N	f	f
+4625	2	2	CHEM-00022	Aniline	80	\N	48	315	0	785	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.305489	2026-08-06 13:39:15.643416	62	\N	\N	f	f
+4626	2	2	CHEM-00023	Anise oil	80	\N	48	222	0	1040	\N	General	\N	18	Consumable	Packaging: 100ml	t	f	2026-08-06 13:27:00.305495	2026-08-06 13:39:15.643419	62	\N	\N	f	f
+4627	2	2	CHEM-00024	Ascorbic Acid	80	\N	47	340	0	2678	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.305501	2026-08-06 13:39:15.643422	62	\N	\N	f	f
+4628	2	2	CHEM-00025	Aspirin	80	\N	47	423	0	2100	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.305508	2026-08-06 13:39:15.643425	62	\N	\N	f	f
+4629	2	2	CHEM-00026	Atropine Sulphate	80	\N	47	291	0	35760	\N	General	\N	18	Consumable	Packaging: 100gm	t	f	2026-08-06 13:27:00.305515	2026-08-06 13:39:15.643427	62	\N	\N	f	f
+4630	2	2	CHEM-00027	Barium chloride	80	\N	47	495	0	485	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.305521	2026-08-06 13:39:15.64343	62	\N	\N	f	f
+4631	2	2	CHEM-00028	Barium Nitrate	80	\N	47	370	0	660	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.305527	2026-08-06 13:39:15.643433	62	\N	\N	f	f
+4632	2	2	CHEM-00029	Barium sulphate	80	\N	47	182	0	380	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.305534	2026-08-06 13:39:15.643436	62	\N	\N	f	f
+4633	2	2	CHEM-00030	Bayers Reagent	80	\N	48	365	0	1420	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.30554	2026-08-06 13:39:15.643439	62	\N	\N	f	f
+4634	2	2	CHEM-00031	Benedicts reagent (Qualitative)	80	\N	48	370	0	330	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.305547	2026-08-06 13:39:15.643442	62	\N	\N	f	f
+4635	2	2	CHEM-00032	Benedicts reagent (Quantitative)	80	\N	48	409	0	460	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.305554	2026-08-06 13:39:15.643444	62	\N	\N	f	f
+4636	2	2	CHEM-00033	Benzaldehyde	80	\N	48	184	0	830	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.30556	2026-08-06 13:39:15.643447	62	\N	\N	f	f
+4637	2	2	CHEM-00034	Benzaldehyde	80	\N	48	480	0	830	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.305566	2026-08-06 13:39:15.64345	62	\N	\N	f	f
+4638	2	2	CHEM-00035	Benzalkonium chloride	80	\N	47	384	0	3857	\N	General	\N	18	Consumable	Packaging: 250gm	t	f	2026-08-06 13:27:00.305573	2026-08-06 13:39:15.643453	62	\N	\N	f	f
+4639	2	2	CHEM-00036	Benzoic acid	80	\N	47	423	0	580	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.305579	2026-08-06 13:39:15.643456	62	\N	\N	f	f
+4640	2	2	CHEM-00037	Benzyl Alcohol	80	\N	48	137	0	780	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.305586	2026-08-06 13:39:15.643459	62	\N	\N	f	f
+4641	2	2	CHEM-00038	Bile salt	80	\N	47	340	0	1430	\N	General	\N	18	Consumable	Packaging: 100gm	t	f	2026-08-06 13:27:00.305592	2026-08-06 13:39:15.643461	62	\N	\N	f	f
+4642	2	2	CHEM-00039	Biuret reagent	80	\N	48	288	0	220	\N	General	\N	18	Consumable	Packaging: 125ml	t	f	2026-08-06 13:27:00.305598	2026-08-06 13:39:15.643464	62	\N	\N	f	f
+4643	2	2	CHEM-00040	Borax	80	\N	47	358	0	460	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.305604	2026-08-06 13:39:15.643467	62	\N	\N	f	f
+4644	2	2	CHEM-00041	Brillianta Green	80	\N	48	455	0	170	\N	General	\N	18	Consumable	Packaging: 125ml	t	f	2026-08-06 13:27:00.305611	2026-08-06 13:39:15.64347	62	\N	\N	f	f
+4645	2	2	CHEM-00042	Bromo phenol Blue	80	\N	48	153	0	230	\N	General	\N	18	Consumable	Packaging: 125ml	t	f	2026-08-06 13:27:00.305617	2026-08-06 13:39:15.643472	62	\N	\N	f	f
+4646	2	2	CHEM-00043	bromo cresol purple	80	\N	48	108	0	260	\N	General	\N	18	Consumable	Packaging: 125ml	t	f	2026-08-06 13:27:00.305623	2026-08-06 13:39:15.643475	62	\N	\N	f	f
+4647	2	2	CHEM-00044	Bromocresol Green	80	\N	48	375	0	320	\N	General	\N	18	Consumable	Packaging: 125ml	t	f	2026-08-06 13:27:00.30563	2026-08-06 13:39:15.643478	62	\N	\N	f	f
+4648	2	2	CHEM-00045	Bromothymol blue solution	80	\N	48	309	0	200	\N	General	\N	18	Consumable	Packaging: 125ml	t	f	2026-08-06 13:27:00.305636	2026-08-06 13:39:15.643481	62	\N	\N	f	f
+4649	2	2	CHEM-00046	Bromothymol blue solution	80	\N	48	264	0	200	\N	General	\N	18	Consumable	Packaging: 125ml	t	f	2026-08-06 13:27:00.305642	2026-08-06 13:39:15.643484	62	\N	\N	f	f
+4650	2	2	CHEM-00047	caesin	80	\N	47	378	0	1865	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.305649	2026-08-06 13:39:15.643486	62	\N	\N	f	f
+4651	2	2	CHEM-00048	Calcium D-saccarate	80	\N	47	265	0	5940	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.305655	2026-08-06 13:39:15.643489	62	\N	\N	f	f
+4652	2	2	CHEM-00049	Camphor	80	\N	47	481	0	3300	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.305662	2026-08-06 13:39:15.643492	62	\N	\N	f	f
+4653	2	2	CHEM-00050	Carbon Tetrachloride	80	\N	48	320	0	2430	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.305669	2026-08-06 13:39:15.643495	62	\N	\N	f	f
+4654	2	2	CHEM-00051	Carbopol 934	80	\N	47	221	0	974	\N	General	\N	18	Consumable	Packaging: 100gm	t	f	2026-08-06 13:27:00.305675	2026-08-06 13:39:15.643497	62	\N	\N	f	f
+4655	2	2	CHEM-00052	Carbopol-974P	80	\N	29	360	0	0	\N	General	\N	18	Consumable	\N	t	f	2026-08-06 13:27:00.305682	2026-08-06 13:39:15.6435	62	\N	\N	f	f
+4656	2	2	CHEM-00053	Carboxylic Acid	80	\N	31	103	0	0	\N	General	\N	18	Consumable	Packaging: will qut ltr	t	f	2026-08-06 13:27:00.305689	2026-08-06 13:39:15.643503	62	\N	\N	f	f
+4657	2	2	CHEM-00054	Castor oil	80	\N	48	323	0	768	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.305695	2026-08-06 13:39:15.643506	62	\N	\N	f	f
+4658	2	2	CHEM-00055	Cedar wood oil	80	\N	48	244	0	1607	\N	General	\N	18	Consumable	Packaging: 100ml	t	f	2026-08-06 13:27:00.305702	2026-08-06 13:39:15.643509	62	\N	\N	f	f
+4659	2	2	CHEM-00056	Chitosan	80	\N	47	260	0	4870	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.305708	2026-08-06 13:39:15.643511	62	\N	\N	f	f
+4660	2	2	CHEM-00057	Chlorophenol Red	80	\N	48	381	0	678	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.305715	2026-08-06 13:39:15.643514	62	\N	\N	f	f
+4661	2	2	CHEM-00058	Chloropromazine  Hydrochloride	80	\N	31	48	0	0	\N	General	\N	18	Consumable	Packaging: qut.lrt	t	f	2026-08-06 13:27:00.305722	2026-08-06 13:39:15.643517	62	\N	\N	f	f
+4662	2	2	CHEM-00059	Chloroquine  di Phosphate	80	\N	47	409	0	25954	\N	General	\N	18	Consumable	Packaging: 100gm	t	f	2026-08-06 13:27:00.305728	2026-08-06 13:39:15.64352	62	\N	\N	f	f
+4663	2	2	CHEM-00060	Cod liver oil	80	\N	29	389	0	0	\N	General	\N	18	Consumable	\N	t	f	2026-08-06 13:27:00.305734	2026-08-06 13:39:15.643523	62	\N	\N	f	f
+4664	2	2	CHEM-00061	M-Cresol	80	\N	48	90	0	2230	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.305741	2026-08-06 13:39:15.643526	62	\N	\N	f	f
+4665	2	2	CHEM-00062	Crystal Violet	80	\N	48	421	0	240	\N	General	\N	18	Consumable	Packaging: 125ml	t	f	2026-08-06 13:27:00.305747	2026-08-06 13:39:15.643528	62	\N	\N	f	f
+4666	2	2	CHEM-00063	Crystal violet solution	80	\N	48	209	0	240	\N	General	\N	18	Consumable	Packaging: 125ml	t	f	2026-08-06 13:27:00.305754	2026-08-06 13:39:15.643531	62	\N	\N	f	f
+4667	2	2	CHEM-00064	Dapson	80	\N	47	440	0	8555	\N	General	\N	18	Consumable	Packaging: 100gm	t	f	2026-08-06 13:27:00.30576	2026-08-06 13:39:15.643534	62	\N	\N	f	f
+4668	2	2	CHEM-00065	DCM	80	\N	48	487	0	580	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.305766	2026-08-06 13:39:15.643537	62	\N	\N	f	f
+4669	2	2	CHEM-00066	Dextrose	80	\N	47	44	0	460	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.305773	2026-08-06 13:39:15.64354	62	\N	\N	f	f
+4670	2	2	CHEM-00067	Di Acetyle Monoxime	80	\N	47	291	0	2266	\N	General	\N	18	Consumable	Packaging: 100gm	t	f	2026-08-06 13:27:00.305779	2026-08-06 13:39:15.643542	62	\N	\N	f	f
+4671	2	2	CHEM-00068	Di Methyl Formide	80	\N	48	352	0	658	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.305786	2026-08-06 13:39:15.643545	62	\N	\N	f	f
+4672	2	2	CHEM-00069	Di sodium hydrogen phosphate	80	\N	47	331	0	850	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.305792	2026-08-06 13:39:15.643548	62	\N	\N	f	f
+4673	2	2	CHEM-00070	Dibutyl Phthalate	80	\N	48	177	0	680	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.305799	2026-08-06 13:39:15.643551	62	\N	\N	f	f
+4674	2	2	CHEM-00071	Dimethyl Aniline	80	\N	48	210	0	890	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.305805	2026-08-06 13:39:15.643554	62	\N	\N	f	f
+4675	2	2	CHEM-00072	Dinitro phenyl hydrazine	80	\N	47	149	0	4235	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.305811	2026-08-06 13:39:15.643556	62	\N	\N	f	f
+4676	2	2	CHEM-00073	Dipotassium hydrogen  phosphate	80	\N	47	326	0	1031	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.305818	2026-08-06 13:39:15.643559	62	\N	\N	f	f
+4677	2	2	CHEM-00074	Disodium Hydrogen Orthophosphate	80	\N	47	73	0	850	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.305825	2026-08-06 13:39:15.643562	62	\N	\N	f	f
+4678	2	2	CHEM-00075	Disodium hydrogen phosphate	80	\N	47	191	0	850	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.305831	2026-08-06 13:39:15.643565	62	\N	\N	f	f
+4679	2	2	CHEM-00076	Disodium phosphate	80	\N	47	333	0	850	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.305837	2026-08-06 13:39:15.643567	62	\N	\N	f	f
+4680	2	2	CHEM-00077	DL- Alanine	80	\N	47	173	0	800	\N	General	\N	18	Consumable	Packaging: 100gm	t	f	2026-08-06 13:27:00.305844	2026-08-06 13:39:15.64357	62	\N	\N	f	f
+4681	2	2	CHEM-00078	DPPH	80	\N	47	126	0	92306	\N	General	\N	18	Consumable	Packaging: 10gm	t	f	2026-08-06 13:27:00.305851	2026-08-06 13:39:15.643573	62	\N	\N	f	f
+4682	2	2	CHEM-00079	Dragendroff's reagent	80	\N	48	326	0	4800	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.305857	2026-08-06 13:39:15.643576	62	\N	\N	f	f
+4683	2	2	CHEM-00080	Egg albumin powder	80	\N	47	226	0	2650	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.305864	2026-08-06 13:39:15.643579	62	\N	\N	f	f
+4684	2	2	CHEM-00081	Ephedrine hydrochloride	80	\N	31	299	0	0	\N	General	\N	18	Consumable	Packaging: qut.lrt	t	f	2026-08-06 13:27:00.305871	2026-08-06 13:39:15.643581	62	\N	\N	f	f
+4685	2	2	CHEM-00082	Ether	80	\N	48	423	0	640	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.305878	2026-08-06 13:39:15.643584	62	\N	\N	f	f
+4686	2	2	CHEM-00083	Ethyl acetate	80	\N	31	449	0	570	\N	General	\N	18	Consumable	Packaging: 2.5ltr	t	f	2026-08-06 13:27:00.305884	2026-08-06 13:39:15.643587	62	\N	\N	f	f
+4687	2	2	CHEM-00084	Ethyl acetate	80	\N	48	399	0	570	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.30589	2026-08-06 13:39:15.64359	62	\N	\N	f	f
+4688	2	2	CHEM-00085	Ethyl acetate	80	\N	48	270	0	570	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.305897	2026-08-06 13:39:15.643593	62	\N	\N	f	f
+4689	2	2	CHEM-00086	Ethyl Aceto Acetate	80	\N	48	182	0	1240	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.305903	2026-08-06 13:39:15.643595	62	\N	\N	f	f
+4690	2	2	CHEM-00087	Ethyl Iodide	80	\N	48	140	0	18540	\N	General	\N	18	Consumable	Packaging: 250ml	t	f	2026-08-06 13:27:00.30591	2026-08-06 13:39:15.643598	62	\N	\N	f	f
+4691	2	2	CHEM-00088	Ethylene Glycol	80	\N	48	143	0	640	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.305916	2026-08-06 13:39:15.643601	62	\N	\N	f	f
+4692	2	2	CHEM-00089	Eudragit S 100	80	\N	47	217	0	8710	\N	General	\N	18	Consumable	Packaging: 250gm	t	f	2026-08-06 13:27:00.305923	2026-08-06 13:39:15.643604	62	\N	\N	f	f
+4693	2	2	CHEM-00090	Fehlings solution A	80	\N	48	491	0	320	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.305929	2026-08-06 13:39:15.643607	62	\N	\N	f	f
+4694	2	2	CHEM-00091	Fehlings solution B	80	\N	48	203	0	580	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.305935	2026-08-06 13:39:15.643609	62	\N	\N	f	f
+4695	2	2	CHEM-00092	Ferric Chloride	80	\N	47	130	0	380	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.305942	2026-08-06 13:39:15.643612	62	\N	\N	f	f
+4696	2	2	CHEM-00093	Ferroin Indicator	80	\N	48	346	0	2750	\N	General	\N	18	Consumable	Packaging: 250ml	t	f	2026-08-06 13:27:00.305948	2026-08-06 13:39:15.643618	62	\N	\N	f	f
+4697	2	2	CHEM-00094	Ferrous ammonium sulphate	80	\N	47	324	0	380	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.305954	2026-08-06 13:39:15.643621	62	\N	\N	f	f
+4698	2	2	CHEM-00095	Ferrous sulphate	80	\N	47	328	0	385	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.30596	2026-08-06 13:39:15.643623	62	\N	\N	f	f
+4699	2	2	CHEM-00096	Fluid thioglycolate medium	80	\N	31	299	0	0	\N	General	\N	18	Consumable	Packaging: qut.lrt	t	f	2026-08-06 13:27:00.305967	2026-08-06 13:39:15.643626	62	\N	\N	f	f
+4700	2	2	CHEM-00097	Fluoride oxalate solution	80	\N	31	179	0	0	\N	General	\N	18	Consumable	Packaging: qut.lrt	t	f	2026-08-06 13:27:00.305973	2026-08-06 13:39:15.643629	62	\N	\N	f	f
+4701	2	2	CHEM-00098	Folin Ciocalteu  reagent	80	\N	31	448	0	0	\N	General	\N	18	Consumable	Packaging: qut.lrt	t	f	2026-08-06 13:27:00.30598	2026-08-06 13:39:15.643632	62	\N	\N	f	f
+4702	2	2	CHEM-00099	Folin-coicalteu reagent	80	\N	48	152	0	615	\N	General	\N	18	Consumable	Packaging: 100ml	t	f	2026-08-06 13:27:00.305987	2026-08-06 13:39:15.643634	62	\N	\N	f	f
+4703	2	2	CHEM-00100	Formaldehyde	80	\N	48	357	0	2410	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.305993	2026-08-06 13:39:15.643637	62	\N	\N	f	f
+4704	2	2	CHEM-00101	Formic Acid	80	\N	48	427	0	1080	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.306	2026-08-06 13:39:15.64364	62	\N	\N	f	f
+4705	2	2	CHEM-00102	Foulgers Reagent	80	\N	31	156	0	0	\N	General	\N	18	Consumable	Packaging: qut.lrt	t	f	2026-08-06 13:27:00.306006	2026-08-06 13:39:15.643643	62	\N	\N	f	f
+4706	2	2	CHEM-00103	Fructose	80	\N	47	302	0	830	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306012	2026-08-06 13:39:15.643646	62	\N	\N	f	f
+4707	2	2	CHEM-00104	Gelatin	80	\N	47	43	0	1780	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306019	2026-08-06 13:39:15.643648	62	\N	\N	f	f
+4708	2	2	CHEM-00105	Gelatin	80	\N	47	81	0	1780	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306025	2026-08-06 13:39:15.643651	62	\N	\N	f	f
+4709	2	2	CHEM-00106	Glucose	80	\N	47	117	0	455	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306031	2026-08-06 13:39:15.643654	62	\N	\N	f	f
+4710	2	2	CHEM-00107	Glyceryl monooleate	80	\N	48	184	0	1280	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.306038	2026-08-06 13:39:15.643657	62	\N	\N	f	f
+4711	2	2	CHEM-00108	Gram's Iodine solution	80	\N	48	391	0	360	\N	General	\N	18	Consumable	Packaging: 125ml	t	f	2026-08-06 13:27:00.306044	2026-08-06 13:39:15.64366	62	\N	\N	f	f
+4712	2	2	CHEM-00109	Granulated Tin	80	\N	47	202	0	2777	\N	General	\N	18	Consumable	Packaging: 100gm	t	f	2026-08-06 13:27:00.30605	2026-08-06 13:39:15.643662	62	\N	\N	f	f
+4713	2	2	CHEM-00110	Gum Acacia	80	\N	47	374	0	655	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306056	2026-08-06 13:39:15.643665	62	\N	\N	f	f
+4714	2	2	CHEM-00111	Hard Paraffin	80	\N	47	132	0	820	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306063	2026-08-06 13:39:15.643668	62	\N	\N	f	f
+4715	2	2	CHEM-00112	Hayems fluid	80	\N	48	116	0	210	\N	General	\N	18	Consumable	Packaging: 125ml	t	f	2026-08-06 13:27:00.306069	2026-08-06 13:39:15.643671	62	\N	\N	f	f
+4716	2	2	CHEM-00113	Hexane	80	\N	48	407	0	555	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.306081	2026-08-06 13:39:15.643674	62	\N	\N	f	f
+4717	2	2	CHEM-00114	Honey	80	\N	47	251	0	1300	\N	General	\N	18	Consumable	Packaging: 1000gm	t	f	2026-08-06 13:27:00.306088	2026-08-06 13:39:15.643676	62	\N	\N	f	f
+4718	2	2	CHEM-00115	HPMC E 15	80	\N	47	455	0	2210	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306094	2026-08-06 13:39:15.643679	62	\N	\N	f	f
+4719	2	2	CHEM-00116	HPMC K15	80	\N	31	277	0	0	\N	General	\N	18	Consumable	Packaging: qut.lrt	t	f	2026-08-06 13:27:00.306101	2026-08-06 13:39:15.643682	62	\N	\N	f	f
+4720	2	2	CHEM-00117	Hyaluronic acid	80	\N	47	462	0	6432	\N	General	\N	18	Consumable	Packaging: 5gm	t	f	2026-08-06 13:27:00.306107	2026-08-06 13:39:15.643685	62	\N	\N	f	f
+4721	2	2	CHEM-00118	Hydrogen peroxide	80	\N	48	396	0	430	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.306114	2026-08-06 13:39:15.643687	62	\N	\N	f	f
+4722	2	2	CHEM-00119	Ibuprofin	80	\N	47	276	0	18700	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.30612	2026-08-06 13:39:15.64369	62	\N	\N	f	f
+4723	2	2	CHEM-00120	Iron powder	80	\N	47	276	0	710	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306126	2026-08-06 13:39:15.643693	62	\N	\N	f	f
+4724	2	2	CHEM-00121	Iso-amyl alcohol	80	\N	48	284	0	766	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.306132	2026-08-06 13:39:15.643696	62	\N	\N	f	f
+4725	2	2	CHEM-00122	Kaolin	80	\N	47	430	0	300	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306139	2026-08-06 13:39:15.643699	62	\N	\N	f	f
+4726	2	2	CHEM-00123	lactose	80	\N	47	85	0	750	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306145	2026-08-06 13:39:15.643702	62	\N	\N	f	f
+4727	2	2	CHEM-00124	Lead acetate	80	\N	47	127	0	810	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306151	2026-08-06 13:39:15.643704	62	\N	\N	f	f
+4728	2	2	CHEM-00125	Lead Oxide	80	\N	47	308	0	1265	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306158	2026-08-06 13:39:15.643707	62	\N	\N	f	f
+4729	2	2	CHEM-00126	Lead Sulphate	80	\N	47	366	0	980	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306164	2026-08-06 13:39:15.64371	62	\N	\N	f	f
+4730	2	2	CHEM-00127	Lemon oil	80	\N	48	366	0	2430	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.30617	2026-08-06 13:39:15.643713	62	\N	\N	f	f
+4731	2	2	CHEM-00128	Light Magnesium carbonate	80	\N	47	366	0	1003	\N	General	\N	18	Consumable	Packaging: 250gm	t	f	2026-08-06 13:27:00.306176	2026-08-06 13:39:15.643716	62	\N	\N	f	f
+4732	2	2	CHEM-00129	light petroleum 40-60	80	\N	47	492	0	655	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306183	2026-08-06 13:39:15.643718	62	\N	\N	f	f
+4733	2	2	CHEM-00130	Liquid paraffin light	80	\N	48	469	0	655	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.306189	2026-08-06 13:39:15.643721	62	\N	\N	f	f
+4734	2	2	CHEM-00131	Liquis paraffin	80	\N	31	288	0	0	\N	General	\N	18	Consumable	Packaging: qut.lrt	t	f	2026-08-06 13:27:00.306195	2026-08-06 13:39:15.643724	62	\N	\N	f	f
+4735	2	2	CHEM-00132	Magnesium stearate	80	\N	47	490	0	780	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306201	2026-08-06 13:39:15.643727	62	\N	\N	f	f
+4736	2	2	CHEM-00133	Magnesium Sulphate	80	\N	47	88	0	260	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306207	2026-08-06 13:39:15.643729	62	\N	\N	f	f
+4737	2	2	CHEM-00134	magnesium sulphate	80	\N	47	379	0	260	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306214	2026-08-06 13:39:15.643732	62	\N	\N	f	f
+4738	2	2	CHEM-00135	Magnnium Carbonate	80	\N	47	347	0	1278	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.30622	2026-08-06 13:39:15.643735	62	\N	\N	f	f
+4739	2	2	CHEM-00136	Mannitol	80	\N	47	233	0	1630	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306226	2026-08-06 13:39:15.643738	62	\N	\N	f	f
+4740	2	2	CHEM-00137	Mayer's reagent	80	\N	48	324	0	980	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.306232	2026-08-06 13:39:15.643741	62	\N	\N	f	f
+4741	2	2	CHEM-00138	Mayers solution	80	\N	48	134	0	370	\N	General	\N	18	Consumable	Packaging: 125ml	t	f	2026-08-06 13:27:00.306238	2026-08-06 13:39:15.643743	62	\N	\N	f	f
+4742	2	2	CHEM-00139	Menthol	80	\N	47	435	0	1285	\N	General	\N	18	Consumable	Packaging: 100gm	t	f	2026-08-06 13:27:00.306245	2026-08-06 13:39:15.643746	62	\N	\N	f	f
+4743	2	2	CHEM-00140	Mercuric Chloride	80	\N	47	339	0	68700	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306251	2026-08-06 13:39:15.643749	62	\N	\N	f	f
+4744	2	2	CHEM-00141	Metallic mercury	80	\N	47	53	0	50069	\N	General	\N	18	Consumable	Packaging: 250gm	t	f	2026-08-06 13:27:00.306257	2026-08-06 13:39:15.643752	62	\N	\N	f	f
+4745	2	2	CHEM-00142	Methanol	80	\N	48	438	0	385	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.306263	2026-08-06 13:39:15.643754	62	\N	\N	f	f
+4746	2	2	CHEM-00143	Methanol	80	\N	48	322	0	385	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.30627	2026-08-06 13:39:15.643757	62	\N	\N	f	f
+4747	2	2	CHEM-00144	Methanol	80	\N	48	348	0	385	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.306276	2026-08-06 13:39:15.64376	62	\N	\N	f	f
+4748	2	2	CHEM-00145	Methyl acetate	80	\N	48	222	0	745	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.306282	2026-08-06 13:39:15.643763	62	\N	\N	f	f
+4749	2	2	CHEM-00146	Methyl Benzoate	80	\N	47	469	0	1230	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306288	2026-08-06 13:39:15.643766	62	\N	\N	f	f
+4750	2	2	CHEM-00147	Metronidazole	80	\N	47	45	0	29273	\N	General	\N	18	Consumable	Packaging: 100gm	t	f	2026-08-06 13:27:00.306294	2026-08-06 13:39:15.643768	62	\N	\N	f	f
+4751	2	2	CHEM-00148	Mg turnings	80	\N	47	157	0	1717	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306301	2026-08-06 13:39:15.643771	62	\N	\N	f	f
+4752	2	2	CHEM-00149	Mineral oil( paraffin liq.light)	80	\N	48	331	0	655	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.306307	2026-08-06 13:39:15.643774	62	\N	\N	f	f
+4753	2	2	CHEM-00150	Molish;s reagent	80	\N	48	338	0	1137	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.306313	2026-08-06 13:39:15.643777	62	\N	\N	f	f
+4754	2	2	CHEM-00151	Monosodim Phosphate	80	\N	47	165	0	850	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306319	2026-08-06 13:39:15.643779	62	\N	\N	f	f
+4755	2	2	CHEM-00152	Mordant Black 2 T	80	\N	47	269	0	1062	\N	General	\N	18	Consumable	Packaging: 100gm	t	f	2026-08-06 13:27:00.306325	2026-08-06 13:39:15.643782	62	\N	\N	f	f
+4756	2	2	CHEM-00153	N Butyl Isocyanide	80	\N	31	173	0	0	\N	General	\N	18	Consumable	Packaging: qut.lrt	t	f	2026-08-06 13:27:00.306332	2026-08-06 13:39:15.643785	62	\N	\N	f	f
+4757	2	2	CHEM-00154	Nickel Carbonate	80	\N	47	437	0	4606	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306338	2026-08-06 13:39:15.643788	62	\N	\N	f	f
+4758	2	2	CHEM-00155	Orange flavor water	80	\N	31	417	0	0	\N	General	\N	18	Consumable	Packaging: qut.lrt	t	f	2026-08-06 13:27:00.306344	2026-08-06 13:39:15.643791	62	\N	\N	f	f
+4759	2	2	CHEM-00156	Orange oil	80	\N	48	279	0	2983	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.30635	2026-08-06 13:39:15.643793	62	\N	\N	f	f
+4760	2	2	CHEM-00157	P Amino Phenol	80	\N	47	83	0	3651	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306356	2026-08-06 13:39:15.643796	62	\N	\N	f	f
+4761	2	2	CHEM-00158	p- dimethyl amino benzaldehyde	80	\N	47	418	0	1430	\N	General	\N	18	Consumable	Packaging: 100gm	t	f	2026-08-06 13:27:00.306362	2026-08-06 13:39:15.643799	62	\N	\N	f	f
+4762	2	2	CHEM-00159	P Nitro Benzoic acid	80	\N	47	413	0	2800	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306369	2026-08-06 13:39:15.643802	62	\N	\N	f	f
+4763	2	2	CHEM-00160	PABA	80	\N	47	262	0	3780	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306375	2026-08-06 13:39:15.643805	62	\N	\N	f	f
+4764	2	2	CHEM-00161	PEG 400	80	\N	48	354	0	775	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.306381	2026-08-06 13:39:15.643807	62	\N	\N	f	f
+4765	2	2	CHEM-00162	Petrolleum ether 60-80	80	\N	48	70	0	680	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.306388	2026-08-06 13:39:15.64381	62	\N	\N	f	f
+4766	2	2	CHEM-00163	1,10 Phenanthroline  mono	80	\N	47	210	0	4976	\N	General	\N	18	Consumable	Packaging: 25gm	t	f	2026-08-06 13:27:00.306394	2026-08-06 13:39:15.643813	62	\N	\N	f	f
+4767	2	2	CHEM-00164	Phenobarbitone	80	\N	31	215	0	0	\N	General	\N	18	Consumable	Packaging: qut.lrt	t	f	2026-08-06 13:27:00.3064	2026-08-06 13:39:15.643816	62	\N	\N	f	f
+4768	2	2	CHEM-00165	Phenol red	80	\N	47	410	0	767	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306407	2026-08-06 13:39:15.643819	62	\N	\N	f	f
+4769	2	2	CHEM-00166	Phenolphthalein indicators	80	\N	48	245	0	255	\N	General	\N	18	Consumable	Packaging: 125ml	t	f	2026-08-06 13:27:00.306413	2026-08-06 13:39:15.643821	62	\N	\N	f	f
+4770	2	2	CHEM-00167	Phosphate buffer salane 10x	80	\N	48	236	0	4650	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.306419	2026-08-06 13:39:15.643824	62	\N	\N	f	f
+4771	2	2	CHEM-00168	Phosphate dihydrogen phosphate	80	\N	47	308	0	1031	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306426	2026-08-06 13:39:15.643827	62	\N	\N	f	f
+4772	2	2	CHEM-00169	Phosphorylic Acid	80	\N	31	187	0	0	\N	General	\N	18	Consumable	Packaging: qut.lrt	t	f	2026-08-06 13:27:00.306432	2026-08-06 13:39:15.64383	62	\N	\N	f	f
+4773	2	2	CHEM-00170	Phospshomolybic acid	80	\N	47	64	0	23122	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306438	2026-08-06 13:39:15.643832	62	\N	\N	f	f
+4774	2	2	CHEM-00171	Phthalic Anhydride	80	\N	47	363	0	670	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306444	2026-08-06 13:39:15.643835	62	\N	\N	f	f
+4775	2	2	CHEM-00172	Piatonic Chloride	80	\N	31	479	0	0	\N	General	\N	18	Consumable	Packaging: qut.lrt	t	f	2026-08-06 13:27:00.30645	2026-08-06 13:39:15.643838	62	\N	\N	f	f
+4776	2	2	CHEM-00173	Picric acid	80	\N	47	212	0	1860	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306457	2026-08-06 13:39:15.643841	62	\N	\N	f	f
+4777	2	2	CHEM-00174	Piperizine citrate	80	\N	47	118	0	10800	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306463	2026-08-06 13:39:15.643844	62	\N	\N	f	f
+4778	2	2	CHEM-00175	Poloamer 407	80	\N	47	142	0	8600	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306469	2026-08-06 13:39:15.643846	62	\N	\N	f	f
+4779	2	2	CHEM-00176	Polyvinyl Alcohol	80	\N	47	183	0	1100	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306475	2026-08-06 13:39:15.643849	62	\N	\N	f	f
+4780	2	2	CHEM-00177	Potassium acetate	80	\N	47	400	0	760	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306481	2026-08-06 13:39:15.643852	62	\N	\N	f	f
+4781	2	2	CHEM-00178	Potassium Bromate	80	\N	47	242	0	1290	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306488	2026-08-06 13:39:15.643857	62	\N	\N	f	f
+4782	2	2	CHEM-00179	Potassium Bromite	80	\N	31	459	0	0	\N	General	\N	18	Consumable	Packaging: qut.lrt	t	f	2026-08-06 13:27:00.306494	2026-08-06 13:39:15.643859	62	\N	\N	f	f
+4783	2	2	CHEM-00180	Potassium Carbonate	80	\N	47	457	0	589	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.3065	2026-08-06 13:39:15.643862	62	\N	\N	f	f
+4784	2	2	CHEM-00181	Potassium chlorate	80	\N	47	59	0	21500	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306507	2026-08-06 13:39:15.643865	62	\N	\N	f	f
+4785	2	2	CHEM-00182	Potassium Chloride	80	\N	47	185	0	460	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306513	2026-08-06 13:39:15.643868	62	\N	\N	f	f
+4786	2	2	CHEM-00183	Potassium Chromate	80	\N	47	329	0	1240	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306519	2026-08-06 13:39:15.643871	62	\N	\N	f	f
+4787	2	2	CHEM-00184	Potassium dihydrogen phosphate	80	\N	47	109	0	1031	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306525	2026-08-06 13:39:15.643873	62	\N	\N	f	f
+4788	2	2	CHEM-00185	Potassium Hypobromide	80	\N	31	488	0	0	\N	General	\N	18	Consumable	Packaging: qut.lrt	t	f	2026-08-06 13:27:00.306532	2026-08-06 13:39:15.643876	62	\N	\N	f	f
+4789	2	2	CHEM-00186	Potassium Iodate	80	\N	47	83	0	8532	\N	General	\N	18	Consumable	Packaging: 100gm	t	f	2026-08-06 13:27:00.306538	2026-08-06 13:39:15.643879	62	\N	\N	f	f
+4790	2	2	CHEM-00187	Potassium iodide	80	\N	47	381	0	14950	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306545	2026-08-06 13:39:15.643882	62	\N	\N	f	f
+4791	2	2	CHEM-00188	Potassium phosphate dibasic	80	\N	47	48	0	1031	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306551	2026-08-06 13:39:15.643885	62	\N	\N	f	f
+4792	2	2	CHEM-00189	Potassium sulphate	80	\N	47	122	0	680	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306557	2026-08-06 13:39:15.643887	62	\N	\N	f	f
+4793	2	2	CHEM-00190	Potassium Thio Sulphate	80	\N	47	231	0	34614	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306564	2026-08-06 13:39:15.64389	62	\N	\N	f	f
+4794	2	2	CHEM-00191	Pottasium dihydrigen ortho phosphate	80	\N	47	182	0	1031	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.30657	2026-08-06 13:39:15.643893	62	\N	\N	f	f
+4795	2	2	CHEM-00192	probenecid	80	\N	31	100	0	0	\N	General	\N	18	Consumable	Packaging: qut.lrt	t	f	2026-08-06 13:27:00.306576	2026-08-06 13:39:15.643896	62	\N	\N	f	f
+4796	2	2	CHEM-00193	Propylene glycol	80	\N	48	120	0	830	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.306583	2026-08-06 13:39:15.643898	62	\N	\N	f	f
+4797	2	2	CHEM-00194	Pyridine	80	\N	48	419	0	1132	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.306589	2026-08-06 13:39:15.643901	62	\N	\N	f	f
+4798	2	2	CHEM-00195	Quinine Sulphate	80	\N	47	143	0	29145	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306595	2026-08-06 13:39:15.643904	62	\N	\N	f	f
+4799	2	2	CHEM-00196	Raspberry oil	80	\N	48	141	0	640	\N	General	\N	18	Consumable	Packaging: 100ml	t	f	2026-08-06 13:27:00.306601	2026-08-06 13:39:15.643907	62	\N	\N	f	f
+4800	2	2	CHEM-00197	Ruthenium Red	80	\N	47	65	0	12890	\N	General	\N	18	Consumable	Packaging: 1gm	t	f	2026-08-06 13:27:00.306608	2026-08-06 13:39:15.64391	62	\N	\N	f	f
+4801	2	2	CHEM-00198	Saffranine solution	80	\N	48	284	0	216	\N	General	\N	18	Consumable	Packaging: 125ml	t	f	2026-08-06 13:27:00.306614	2026-08-06 13:39:15.643912	62	\N	\N	f	f
+4802	2	2	CHEM-00199	Safrenine	80	\N	47	360	0	870	\N	General	\N	18	Consumable	Packaging: 25gm	t	f	2026-08-06 13:27:00.30662	2026-08-06 13:39:15.643915	62	\N	\N	f	f
+4803	2	2	CHEM-00200	Silica gel 60 -120	80	\N	47	90	0	770	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306627	2026-08-06 13:39:15.643918	62	\N	\N	f	f
+4804	2	2	CHEM-00201	Silver Nitrate Pyridine Reagent	80	\N	31	187	0	0	\N	General	\N	18	Consumable	Packaging: qut.lrt	t	f	2026-08-06 13:27:00.306633	2026-08-06 13:39:15.643921	62	\N	\N	f	f
+4805	2	2	CHEM-00202	Sodium  Nitroprusside	80	\N	47	57	0	5750	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306639	2026-08-06 13:39:15.643923	62	\N	\N	f	f
+4806	2	2	CHEM-00203	Sodium acetate	80	\N	47	336	0	586	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306645	2026-08-06 13:39:15.643926	62	\N	\N	f	f
+4807	2	2	CHEM-00204	Sodium benzoate	80	\N	47	290	0	740	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306651	2026-08-06 13:39:15.643929	62	\N	\N	f	f
+4808	2	2	CHEM-00205	Sodium carbonate	80	\N	47	398	0	369	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306658	2026-08-06 13:39:15.643932	62	\N	\N	f	f
+4809	2	2	CHEM-00206	sodium chloride	80	\N	47	113	0	288	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306664	2026-08-06 13:39:15.643935	62	\N	\N	f	f
+4810	2	2	CHEM-00207	Sodium citrate	80	\N	47	407	0	755	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.30667	2026-08-06 13:39:15.643937	62	\N	\N	f	f
+4811	2	2	CHEM-00208	sodium citrate	80	\N	47	192	0	755	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306677	2026-08-06 13:39:15.64394	62	\N	\N	f	f
+4812	2	2	CHEM-00209	Sodium cmc	80	\N	47	396	0	1100	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306683	2026-08-06 13:39:15.643943	62	\N	\N	f	f
+4813	2	2	CHEM-00210	Sodium Hydroxide	80	\N	47	101	0	433	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.30669	2026-08-06 13:39:15.643946	62	\N	\N	f	f
+4814	2	2	CHEM-00211	Sodium Hypochlorite	80	\N	48	349	0	280	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.306696	2026-08-06 13:39:15.643949	62	\N	\N	f	f
+4815	2	2	CHEM-00212	Sodium Nitrite	80	\N	47	239	0	560	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306702	2026-08-06 13:39:15.643951	62	\N	\N	f	f
+4816	2	2	CHEM-00213	Sodium nitro pruside	80	\N	47	374	0	5749	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306708	2026-08-06 13:39:15.643954	62	\N	\N	f	f
+4819	2	2	CHEM-00216	Sodium saccharin	80	\N	47	189	0	2940	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306727	2026-08-06 13:39:15.643963	62	\N	\N	f	f
+4820	2	2	CHEM-00217	Soft Soap	80	\N	47	340	0	620	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306734	2026-08-06 13:39:15.643965	62	\N	\N	f	f
+4821	2	2	CHEM-00218	Soya lecithin 8002-43-5	80	\N	47	389	0	2508	\N	General	\N	18	Consumable	Packaging: 100gm	t	f	2026-08-06 13:27:00.30674	2026-08-06 13:39:15.643968	62	\N	\N	f	f
+4822	2	2	CHEM-00219	Soya Phosphatidylcholine	80	\N	31	92	0	0	\N	General	\N	18	Consumable	Packaging: qut.lrt	t	f	2026-08-06 13:27:00.306746	2026-08-06 13:39:15.643971	62	\N	\N	f	f
+4823	2	2	CHEM-00220	Soyabean casein digest medium	80	\N	47	418	0	800	\N	General	\N	18	Consumable	Packaging: 100gm	t	f	2026-08-06 13:27:00.306752	2026-08-06 13:39:15.643974	62	\N	\N	f	f
+4824	2	2	CHEM-00221	Stannous chloride	80	\N	47	99	0	2825	\N	General	\N	18	Consumable	Packaging: 250gm	t	f	2026-08-06 13:27:00.306758	2026-08-06 13:39:15.643977	62	\N	\N	f	f
+4825	2	2	CHEM-00222	starch	80	\N	47	217	0	1320	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306765	2026-08-06 13:39:15.643979	62	\N	\N	f	f
+4826	2	2	CHEM-00223	Starch powder	80	\N	47	490	0	1320	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306771	2026-08-06 13:39:15.643982	62	\N	\N	f	f
+4827	2	2	CHEM-00224	Stearic acid	80	\N	47	385	0	890	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306778	2026-08-06 13:39:15.643985	62	\N	\N	f	f
+4828	2	2	CHEM-00225	Sucrose	80	\N	47	289	0	360	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306785	2026-08-06 13:39:15.643988	62	\N	\N	f	f
+4829	2	2	CHEM-00226	sucrose	80	\N	47	62	0	360	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306791	2026-08-06 13:39:15.64399	62	\N	\N	f	f
+4830	2	2	CHEM-00227	Sulphonilic Acid	80	\N	47	267	0	900	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306797	2026-08-06 13:39:15.643993	62	\N	\N	f	f
+4831	2	2	CHEM-00228	Sulphosalicylic acid	80	\N	47	55	0	1465	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306803	2026-08-06 13:39:15.643996	62	\N	\N	f	f
+4832	2	2	CHEM-00229	Talc	80	\N	47	50	0	270	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306809	2026-08-06 13:39:15.643999	62	\N	\N	f	f
+4833	2	2	CHEM-00230	Tartaric acid	80	\N	47	191	0	1496	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306816	2026-08-06 13:39:15.644002	62	\N	\N	f	f
+4834	2	2	CHEM-00231	Tetra ethyl orthosilicate	80	\N	29	460	0	3877	\N	General	\N	18	Consumable	Packaging: 500l	t	f	2026-08-06 13:27:00.306822	2026-08-06 13:39:15.644004	62	\N	\N	f	f
+4835	2	2	CHEM-00232	Tetra Hydro furan	80	\N	48	102	0	1149	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.306828	2026-08-06 13:39:15.644007	62	\N	\N	f	f
+4847	2	2	CHEM-00244	wagners reagent	80	\N	48	55	0	356	\N	General	\N	18	Consumable	Packaging: 125ml	t	f	2026-08-06 13:27:00.306903	2026-08-06 13:39:15.644041	62	\N	\N	f	f
+4848	2	2	CHEM-00245	White bees wax	80	\N	47	89	0	1193	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306909	2026-08-06 13:39:15.644043	62	\N	\N	f	f
+4849	2	2	CHEM-00246	White Beeswax	80	\N	47	288	0	1193	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306915	2026-08-06 13:39:15.644046	62	\N	\N	f	f
+4850	2	2	CHEM-00247	White Soft Paraffin	80	\N	47	64	0	630	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306921	2026-08-06 13:39:15.644049	62	\N	\N	f	f
+4851	2	2	CHEM-00248	Wool Fat	80	\N	47	459	0	1923	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306928	2026-08-06 13:39:15.644052	62	\N	\N	f	f
+4852	2	2	CHEM-00249	Xantham gum	80	\N	47	309	0	1430	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306934	2026-08-06 13:39:15.644055	62	\N	\N	f	f
+4853	2	2	CHEM-00250	Yeast extract( water soluble)	80	\N	47	346	0	1318	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.30694	2026-08-06 13:39:15.644058	62	\N	\N	f	f
+4854	2	2	CHEM-00251	Nitric acid	80	\N	31	272	0	1808	\N	General	\N	18	Consumable	Packaging: 2.5ltr	t	f	2026-08-06 13:27:00.306946	2026-08-06 13:39:15.64406	62	\N	\N	f	f
+4855	2	2	CHEM-00252	Glacial Acetic Acid	80	\N	31	218	0	1678	\N	General	\N	18	Consumable	Packaging: 2.5ltr	t	f	2026-08-06 13:27:00.306953	2026-08-06 13:39:15.644063	62	\N	\N	f	f
+4856	2	2	CHEM-00253	Perchloric Acid	80	\N	48	419	0	2655	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.306959	2026-08-06 13:39:15.644066	62	\N	\N	f	f
+4857	2	2	CHEM-00254	Sulphuric acid	80	\N	48	140	0	430	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.306965	2026-08-06 13:39:15.644069	62	\N	\N	f	f
+4858	2	2	CHEM-00255	Ethanol 99.9%	80	\N	48	320	0	420	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.306972	2026-08-06 13:39:15.644072	62	\N	\N	f	f
+4859	2	2	CHEM-00256	Acetone	80	\N	48	144	0	460	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.306978	2026-08-06 13:39:15.644078	62	\N	\N	f	f
+4860	2	2	CHEM-00257	Isopropanol	80	\N	48	232	0	610	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.306984	2026-08-06 13:39:15.644081	62	\N	\N	f	f
+4861	2	2	CHEM-00258	Ethyl alcohol	80	\N	48	344	0	420	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.30699	2026-08-06 13:39:15.644084	62	\N	\N	f	f
+4862	2	2	CHEM-00259	Ethyl ether	80	\N	48	175	0	666	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.306997	2026-08-06 13:39:15.644087	62	\N	\N	f	f
+4863	2	2	CHEM-00260	Chloroform	80	\N	48	318	0	480	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.307003	2026-08-06 13:39:15.64409	62	\N	\N	f	f
+4864	2	2	CHEM-00261	Petroleum ether 40 -60	80	\N	48	416	0	655	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.307009	2026-08-06 13:39:15.644092	62	\N	\N	f	f
+4865	2	2	CHEM-00262	Acetonitrile	80	\N	48	45	0	900	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.307015	2026-08-06 13:39:15.644095	62	\N	\N	f	f
+4866	2	2	CHEM-00263	Diethyl Ether L.R,	80	\N	29	108	0	0	\N	General	\N	18	Consumable	Packaging: 0	t	f	2026-08-06 13:27:00.307021	2026-08-06 13:39:15.644098	62	\N	\N	f	f
+4867	2	2	CHEM-00264	PEG 200	80	\N	29	249	0	0	\N	General	\N	18	Consumable	Packaging: 0	t	f	2026-08-06 13:27:00.307028	2026-08-06 13:39:15.644104	62	\N	\N	f	f
+4868	2	2	CHEM-00265	Gum Tragacanth	80	\N	29	328	0	0	\N	General	\N	18	Consumable	Packaging: 0	t	f	2026-08-06 13:27:00.307034	2026-08-06 13:39:15.644107	62	\N	\N	f	f
+4604	2	2	CHEM-00001	2,4 Di Nitro Phenyl Hydrazine	80	\N	47	400	0	3280	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.305323	2026-08-06 13:39:15.643341	62	\N	\N	f	f
+4605	2	2	CHEM-00002	ABO Antigen antiserum	80	\N	31	309	0	0	\N	General	\N	18	Consumable	Packaging: qut.lrt	t	f	2026-08-06 13:27:00.305355	2026-08-06 13:39:15.643355	62	\N	\N	f	f
+4606	2	2	CHEM-00003	Acetic anhydride	80	\N	48	127	0	2450	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.305363	2026-08-06 13:39:15.643361	62	\N	\N	f	f
+4607	2	2	CHEM-00004	Acetone	80	\N	48	314	0	460	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.305371	2026-08-06 13:39:15.643364	62	\N	\N	f	f
+4608	2	2	CHEM-00005	Acetone	80	\N	48	140	0	460	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.305378	2026-08-06 13:39:15.643368	62	\N	\N	f	f
+4609	2	2	CHEM-00006	Acriflavine	80	\N	47	309	0	12300	\N	General	\N	18	Consumable	Packaging: 250gm	t	f	2026-08-06 13:27:00.305385	2026-08-06 13:39:15.643371	62	\N	\N	f	f
+4610	2	2	CHEM-00007	Agar	80	\N	47	472	0	5200	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.305392	2026-08-06 13:39:15.643374	62	\N	\N	f	f
+4611	2	2	CHEM-00008	Alamine substrate( Aluminium oxide)	80	\N	47	119	0	775	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.305398	2026-08-06 13:39:15.643377	62	\N	\N	f	f
+4612	2	2	CHEM-00009	Albumin egg powder	80	\N	47	343	0	3200	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.305405	2026-08-06 13:39:15.643379	62	\N	\N	f	f
+4613	2	2	CHEM-00010	Almond oil	80	\N	48	301	0	3180	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.305411	2026-08-06 13:39:15.643382	62	\N	\N	f	f
+4614	2	2	CHEM-00011	Aluminium chloride	80	\N	47	179	0	530	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.305418	2026-08-06 13:39:15.643385	62	\N	\N	f	f
+4615	2	2	CHEM-00012	Aluminium hydroxide	80	\N	48	407	0	560	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.305424	2026-08-06 13:39:15.643388	62	\N	\N	f	f
+4836	2	2	CHEM-00233	Thio Urea	80	\N	47	132	0	1024	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306834	2026-08-06 13:39:15.64401	62	\N	\N	f	f
+4837	2	2	CHEM-00234	Thymolphthalein	80	\N	48	303	0	296	\N	General	\N	18	Consumable	Packaging: 125ml	t	f	2026-08-06 13:27:00.30684	2026-08-06 13:39:15.644013	62	\N	\N	f	f
+4838	2	2	CHEM-00235	Tincture benzoin	80	\N	31	378	0	0	\N	General	\N	18	Consumable	Packaging: qut.lrt	t	f	2026-08-06 13:27:00.306847	2026-08-06 13:39:15.644016	62	\N	\N	f	f
+4839	2	2	CHEM-00236	Toulene	80	\N	48	212	0	640	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.306853	2026-08-06 13:39:15.644018	62	\N	\N	f	f
+4840	2	2	CHEM-00237	Tragacanth	80	\N	47	472	0	980	\N	General	\N	18	Consumable	Packaging: 500gm	t	f	2026-08-06 13:27:00.306859	2026-08-06 13:39:15.644021	62	\N	\N	f	f
+4841	2	2	CHEM-00238	Trichloro acetic acid	80	\N	47	429	0	380	\N	General	\N	18	Consumable	Packaging: 100gm	t	f	2026-08-06 13:27:00.306866	2026-08-06 13:39:15.644024	62	\N	\N	f	f
+4842	2	2	CHEM-00239	Triethanol amine	80	\N	48	332	0	830	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.306872	2026-08-06 13:39:15.644027	62	\N	\N	f	f
+4843	2	2	CHEM-00240	Tween 20	80	\N	48	478	0	1072	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.306878	2026-08-06 13:39:15.644029	62	\N	\N	f	f
+4844	2	2	CHEM-00241	tween 80	80	\N	48	319	0	1150	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.306884	2026-08-06 13:39:15.644032	62	\N	\N	f	f
+4845	2	2	CHEM-00242	Vanillin	80	\N	47	301	0	1377	\N	General	\N	18	Consumable	Packaging: 100gm	t	f	2026-08-06 13:27:00.306891	2026-08-06 13:39:15.644035	62	\N	\N	f	f
+4846	2	2	CHEM-00243	Wager's reagent	80	\N	48	68	0	1124	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.306897	2026-08-06 13:39:15.644038	62	\N	\N	f	f
 \.
 
 
@@ -12237,6 +14262,65 @@ COPY public.purchase_order_approvals (id, po_id, approval_flow_id, approver_id, 
 54	252	67	3	{"678": {"quantity": 5.0, "remarks": null}}	\N	2026-07-27 12:29:44.723062
 55	252	18	3	{"678": {"quantity": 5.0, "remarks": null}}	\N	2026-07-27 12:29:51.435668
 56	252	71	3	{"678": {"quantity": 5.0, "remarks": null}}	\N	2026-07-27 12:29:51.435697
+57	254	79	3	{"680": {"quantity": 5.0, "remarks": null}}	\N	2026-08-03 15:54:53.781664
+58	254	18	3	{"680": {"quantity": 5.0, "remarks": null}}	\N	2026-08-03 15:55:11.74769
+59	254	83	3	{"680": {"quantity": 5.0, "remarks": null}}	\N	2026-08-03 15:55:11.747729
+60	255	79	3	{"681": {"quantity": 10.0, "remarks": null}}	\N	2026-08-03 17:18:47.682443
+61	255	18	3	{"681": {"quantity": 10.0, "remarks": null}}	\N	2026-08-03 17:18:55.173677
+62	255	83	3	{"681": {"quantity": 10.0, "remarks": null}}	\N	2026-08-03 17:18:55.173716
+63	257	79	3	{"688": {"quantity": 4.0, "remarks": null}}	\N	2026-08-04 17:41:46.444999
+64	257	18	3	{"688": {"quantity": 3.0, "remarks": null}}	\N	2026-08-04 17:42:19.001637
+65	257	83	3	{"688": {"quantity": 3.0, "remarks": null}}	\N	2026-08-04 17:42:19.001677
+66	256	79	3	{"685": {"quantity": 5.0, "remarks": null}}	\N	2026-08-04 17:42:44.331761
+67	256	18	3	{"685": {"quantity": 5.0, "remarks": null}}	\N	2026-08-04 17:42:50.778794
+68	256	83	3	{"685": {"quantity": 5.0, "remarks": null}}	\N	2026-08-04 17:42:50.778863
+69	253	79	3	{"687": {"quantity": 10.0, "remarks": null}}	\N	2026-08-04 17:43:07.249054
+70	253	18	3	{"687": {"quantity": 10.0, "remarks": null}}	\N	2026-08-04 17:43:22.256575
+71	253	83	3	{"687": {"quantity": 10.0, "remarks": null}}	\N	2026-08-04 17:43:22.256615
+72	258	79	3	{"690": {"quantity": 10.0, "remarks": null}}	\N	2026-08-05 10:27:00.012281
+73	258	18	3	{"690": {"quantity": 10.0, "remarks": null}}	\N	2026-08-05 10:27:17.96806
+74	258	83	3	{"690": {"quantity": 10.0, "remarks": null}}	\N	2026-08-05 10:27:17.968098
+75	259	79	3	{"691": {"quantity": 10.0, "remarks": null}, "692": {"quantity": 10.0, "remarks": null}}	\N	2026-08-05 10:32:21.021222
+76	259	18	3	{"691": {"quantity": 10.0, "remarks": null}, "692": {"quantity": 10.0, "remarks": null}}	\N	2026-08-05 10:32:31.496491
+77	259	83	3	{"691": {"quantity": 10.0, "remarks": null}, "692": {"quantity": 10.0, "remarks": null}}	\N	2026-08-05 10:32:31.496532
+78	260	79	3	{"693": {"quantity": 15.0, "remarks": null}}	\N	2026-08-05 10:40:46.921129
+79	260	18	3	{"693": {"quantity": 15.0, "remarks": null}}	\N	2026-08-05 10:40:54.648665
+80	260	83	3	{"693": {"quantity": 15.0, "remarks": null}}	\N	2026-08-05 10:40:54.648706
+81	261	79	3	{"694": {"quantity": 11.0, "remarks": null}}	\N	2026-08-05 10:45:34.839475
+82	261	18	3	{"694": {"quantity": 11.0, "remarks": null}}	\N	2026-08-05 10:45:40.90089
+83	261	83	3	{"694": {"quantity": 11.0, "remarks": null}}	\N	2026-08-05 10:45:40.900931
+84	262	79	3	{"695": {"quantity": 22.0, "remarks": null}}	\N	2026-08-05 10:48:20.872696
+85	262	18	3	{"695": {"quantity": 22.0, "remarks": null}}	\N	2026-08-05 10:48:27.899802
+86	262	83	3	{"695": {"quantity": 22.0, "remarks": null}}	\N	2026-08-05 10:48:27.899841
+88	263	18	3	{"696": {"quantity": 45.0, "remarks": null}}	\N	2026-08-05 10:51:39.142161
+89	263	83	3	{"696": {"quantity": 45.0, "remarks": null}}	\N	2026-08-05 10:51:39.142172
+87	263	79	3	{"696": {"quantity": 45.0, "remarks": null}}	\N	2026-08-05 10:51:32.705244
+90	264	79	3	{"697": {"quantity": 5.0, "remarks": null}}	\N	2026-08-05 10:59:26.176273
+91	264	18	3	{"697": {"quantity": 5.0, "remarks": null}}	\N	2026-08-05 10:59:30.440072
+92	264	83	3	{"697": {"quantity": 5.0, "remarks": null}}	\N	2026-08-05 10:59:30.440113
+93	266	79	3	{"699": {"quantity": 56.0, "remarks": null}}	\N	2026-08-05 11:36:21.255108
+94	266	18	3	{"699": {"quantity": 56.0, "remarks": null}}	\N	2026-08-05 11:36:28.267438
+95	266	83	3	{"699": {"quantity": 56.0, "remarks": null}}	\N	2026-08-05 11:36:28.267478
+96	268	79	3	{"702": {"quantity": 35.0, "remarks": null}}	\N	2026-08-05 11:42:34.248245
+97	268	18	3	{"702": {"quantity": 35.0, "remarks": null}}	\N	2026-08-05 11:42:43.239038
+98	268	83	3	{"702": {"quantity": 35.0, "remarks": null}}	\N	2026-08-05 11:42:43.239056
+99	270	79	3	{"704": {"quantity": 35.0, "remarks": null}}	\N	2026-08-05 18:28:35.535511
+100	270	18	3	{"704": {"quantity": 35.0, "remarks": null}}	\N	2026-08-05 18:28:42.018266
+101	270	83	3	{"704": {"quantity": 35.0, "remarks": null}}	\N	2026-08-05 18:28:42.018303
+102	271	79	3	{"705": {"quantity": 30.0, "remarks": null}}	\N	2026-08-05 18:40:49.035209
+103	271	18	3	{"705": {"quantity": 30.0, "remarks": null}}	\N	2026-08-05 18:40:54.931348
+104	271	83	3	{"705": {"quantity": 30.0, "remarks": null}}	\N	2026-08-05 18:40:54.931386
+105	272	79	3	{"706": {"quantity": 40.0, "remarks": null}}	\N	2026-08-05 18:43:12.056338
+106	272	18	3	{"706": {"quantity": 40.0, "remarks": null}}	\N	2026-08-05 18:43:19.014759
+107	272	83	3	{"706": {"quantity": 40.0, "remarks": null}}	\N	2026-08-05 18:43:19.0148
+108	273	79	3	{"707": {"quantity": 40.0, "remarks": null}}	\N	2026-08-05 18:45:52.848745
+109	273	18	3	{"707": {"quantity": 40.0, "remarks": null}}	\N	2026-08-05 18:45:59.571837
+110	273	83	3	{"707": {"quantity": 40.0, "remarks": null}}	\N	2026-08-05 18:45:59.571873
+111	269	79	3	{"703": {"quantity": 4.0, "remarks": null}}	\N	2026-08-06 11:46:24.1987
+112	227	79	3	{"617": {"quantity": 8.0, "remarks": "none"}}	\N	2026-08-06 12:34:37.837236
+113	267	79	3	{"701": {"quantity": 9.0, "remarks": "none"}}	\N	2026-08-06 12:37:33.271748
+114	269	18	3	{"703": {"quantity": 6.0, "remarks": null}}	\N	2026-08-06 13:30:16.577555
+115	269	83	3	{"703": {"quantity": 6.0, "remarks": null}}	\N	2026-08-06 13:30:16.577595
 \.
 
 
@@ -12363,7 +14447,6 @@ COPY public.purchase_order_items (id, po_id, material_id, quantity, rate, amount
 609	229	2751	3	100	300	0	\N	0	9	9	0	f	\N
 610	228	3507	6	100	600	0	\N	0	6	6	0	f	\N
 613	222	3475	10	400	4000	0	\N	0	9	9	0	f	10
-617	227	2751	3	123	369	0	\N	0	9	9	0	f	\N
 619	226	3507	6	224	1344	0	\N	0	6	6	0	f	\N
 620	225	3501	1	293000	293000	0	\N	0	9	9	0	f	\N
 621	225	3503	1	202996	202996	0	\N	0	9	9	0	f	\N
@@ -12411,6 +14494,295 @@ COPY public.purchase_order_items (id, po_id, material_id, quantity, rate, amount
 660	223	2469	1	644900	644900	0	\N	0	9	9	0	f	\N
 677	251	2564	2	16526.16	33052.32	0	\N	0	6	6	0	f	2
 678	252	3507	5	4349	21745	0	\N	0	6	6	0	f	5
+680	254	2564	5	16526.16	82630.8	0	\N	10	6	6	0	t	5
+681	255	2751	10	10443.43	104434.3	0	\N	10	9	9	0	f	10
+691	259	2565	10	26703.28	267032.8	0	\N	10	6	6	0	f	10
+688	257	2564	5	16526.16	82630.8	0	\N	10	6	6	0	f	3
+685	256	3507	5	4349	21745	0	\N	0	6	6	0	f	5
+687	253	2564	100	45	4500	0	\N	0	9	9	0	f	10
+690	258	2564	10	23	230	0	\N	10	6	6	0	f	10
+692	259	2751	16	10443.43	167094.88	0	\N	14	9	9	0	f	10
+693	260	3507	15	4349	65235	0	\N	5	6	6	0	f	15
+694	261	2751	11	10443.43	114877.73	0	\N	8	9	9	0	f	11
+695	262	3503	22	1051.65	23136.3	0	\N	6	9	9	0	f	22
+696	263	3505	45	761.41	34263.45	0	\N	8	9	9	0	f	45
+697	264	3492	5	3477.26	17386.3	0	\N	3	9	9	0	f	5
+698	265	3475	56	4602.71	257751.76	0	\N	9	9	9	0	f	\N
+699	266	3474	56	3262.58	182704.48	0	\N	14	9	9	0	f	56
+704	270	3507	35	4349	152215	0	\N	6	6	6	0	f	35
+705	271	3507	30	4349	130470	0	\N	10	6	6	0	f	30
+706	272	3473	40	1416.91	56676.4	0	\N	15	9	9	0	f	40
+707	273	3504	40	2319.88	92795.2	0	\N	8	9	9	0	f	40
+702	268	3501	35	4379.25	153273.75	35	\N	6	9	9	0	f	35
+617	227	2751	3	123	369	0	\N	0	9	9	0	f	8
+701	267	2565	1	26703.28	26703.28	0	\N	0	6	6	0	f	9
+703	269	2751	6	10443.43	62660.58	0	\N	2	9	9	0	f	6
+708	274	4621	500	2988.96	1494480	0	\N	0	9	9	0	f	\N
+709	274	4622	500	235.34	117670	0	\N	0	9	9	0	f	\N
+710	274	4623	500	490.33	245165	0	\N	0	9	9	0	f	\N
+711	274	4624	500	4233.92	2116960	0	\N	0	9	9	0	f	\N
+712	274	4625	500	3397.36	1698680	0	\N	0	9	9	0	f	\N
+713	274	4626	100	1463.83	146383	0	\N	0	9	9	0	f	\N
+714	274	4627	500	3751.36	1875680	0	\N	0	9	9	0	f	\N
+715	274	4628	500	430.52	215260	0	\N	0	9	9	0	f	\N
+716	274	4636	500	3773.43	1886715	0	\N	0	9	9	0	f	\N
+717	274	4637	500	0	0	0	\N	0	9	9	0	f	\N
+718	274	4638	250	2196.68	549170	0	\N	0	9	9	0	f	\N
+719	274	4639	500	4681.49	2340745	0	\N	0	9	9	0	f	\N
+720	274	4640	500	3582.72	1791360	0	\N	0	9	9	0	f	\N
+721	274	4641	100	1193.39	119339	0	\N	0	9	9	0	f	\N
+722	274	4629	100	4999.99	499999	0	\N	0	9	9	0	f	\N
+723	274	4630	500	3158.44	1579220	0	\N	0	9	9	0	f	\N
+724	274	4631	500	4955.08	2477540	0	\N	0	9	9	0	f	\N
+725	274	4632	500	2662.17	1331085	0	\N	0	9	9	0	f	\N
+726	274	4633	500	4077.88	2038940	0	\N	0	9	9	0	f	\N
+727	274	4634	500	4040.93	2020465	0	\N	0	9	9	0	f	\N
+728	274	4635	500	872.18	436090	0	\N	0	9	9	0	f	\N
+729	274	4642	125	3168.88	396110	0	\N	0	9	9	0	f	\N
+730	274	4643	500	2411.16	1205580	0	\N	0	9	9	0	f	\N
+731	274	4644	125	1613.77	201721.25	0	\N	0	9	9	0	f	\N
+732	274	4645	125	235.21	29401.25	0	\N	0	9	9	0	f	\N
+733	274	4646	125	2579.77	322471.25	0	\N	0	9	9	0	f	\N
+734	274	4647	125	254.59	31823.75	0	\N	0	9	9	0	f	\N
+735	274	4648	125	4000.08	500010	0	\N	0	9	9	0	f	\N
+736	274	4649	125	0	0	0	\N	0	9	9	0	f	\N
+737	274	4650	500	887.48	443740	0	\N	0	9	9	0	f	\N
+738	274	4651	500	1945.11	972555	0	\N	0	9	9	0	f	\N
+739	274	4652	500	2213.33	1106665	0	\N	0	9	9	0	f	\N
+740	274	4653	500	1890.07	945035	0	\N	0	9	9	0	f	\N
+741	274	4654	100	698.06	69806	0	\N	0	9	9	0	f	\N
+742	274	4655	1000	4792.59	4792590	0	\N	0	9	9	0	f	\N
+743	274	4656	7	2800.08	19600.56	0	\N	0	9	9	0	f	\N
+744	274	4657	500	4497.35	2248675	0	\N	0	9	9	0	f	\N
+745	274	4658	100	1780.18	178018	0	\N	0	9	9	0	f	\N
+746	274	4659	500	908.41	454205	0	\N	0	9	9	0	f	\N
+747	274	4660	500	4518.19	2259095	0	\N	0	9	9	0	f	\N
+748	274	4661	12	4551.4	54616.8	0	\N	0	9	9	0	f	\N
+749	274	4662	100	2911.26	291126	0	\N	0	9	9	0	f	\N
+750	274	4663	500	4705.08	2352540	0	\N	0	9	9	0	f	\N
+751	274	4664	500	781.32	390660	0	\N	0	9	9	0	f	\N
+752	274	4665	125	2380.55	297568.75	0	\N	0	9	9	0	f	\N
+753	274	4666	125	3176.8	397100	0	\N	0	9	9	0	f	\N
+754	274	4667	100	3934.94	393494	0	\N	0	9	9	0	f	\N
+755	274	4668	500	4169.9	2084950	0	\N	0	9	9	0	f	\N
+756	274	4669	500	1225.21	612605	0	\N	0	9	9	0	f	\N
+757	274	4670	100	3516.97	351697	0	\N	0	9	9	0	f	\N
+758	274	4671	500	3884.87	1942435	0	\N	0	9	9	0	f	\N
+759	274	4672	500	4113.04	2056520	0	\N	0	9	9	0	f	\N
+760	274	4673	500	3361.64	1680820	0	\N	0	9	9	0	f	\N
+761	274	4674	500	3039.2	1519600	0	\N	0	9	9	0	f	\N
+762	274	4675	500	1987.45	993725	0	\N	0	9	9	0	f	\N
+763	274	4676	500	4981.41	2490705	0	\N	0	9	9	0	f	\N
+764	274	4677	500	524.29	262145	0	\N	0	9	9	0	f	\N
+765	274	4678	500	630.47	315235	0	\N	0	9	9	0	f	\N
+766	274	4679	500	702.31	351155	0	\N	0	9	9	0	f	\N
+767	274	4680	100	2424.17	242417	0	\N	0	9	9	0	f	\N
+768	274	4681	10	399.07	3990.7	0	\N	0	9	9	0	f	\N
+769	274	4682	500	1339.43	669715	0	\N	0	9	9	0	f	\N
+770	274	4683	500	1749.85	874925	0	\N	0	9	9	0	f	\N
+771	274	4684	1	4659.12	4659.12	0	\N	0	9	9	0	f	\N
+772	274	4685	500	1843.39	921695	0	\N	0	9	9	0	f	\N
+773	274	4686	500	3280.85	1640425	0	\N	0	9	9	0	f	\N
+774	274	4687	500	0	0	0	\N	0	9	9	0	f	\N
+775	274	4688	500	0	0	0	\N	0	9	9	0	f	\N
+776	274	4689	500	4717.26	2358630	0	\N	0	9	9	0	f	\N
+777	274	4690	250	1005.67	251417.5	0	\N	0	9	9	0	f	\N
+778	274	4691	500	4024.53	2012265	0	\N	0	9	9	0	f	\N
+779	274	4692	250	3837	959250	0	\N	0	9	9	0	f	\N
+780	274	4693	500	873.32	436660	0	\N	0	9	9	0	f	\N
+781	274	4694	500	1129.43	564715	0	\N	0	9	9	0	f	\N
+782	274	4695	500	1570.42	785210	0	\N	0	9	9	0	f	\N
+783	274	4696	250	142.1	35525	0	\N	0	9	9	0	f	\N
+784	274	4697	500	2009.16	1004580	0	\N	0	9	9	0	f	\N
+785	274	4698	500	3078.58	1539290	0	\N	0	9	9	0	f	\N
+786	274	4699	8	3666.06	29328.48	0	\N	0	9	9	0	f	\N
+787	274	4700	5	3267.57	16337.85	0	\N	0	9	9	0	f	\N
+788	274	4701	13	616.77	8018.01	0	\N	0	9	9	0	f	\N
+789	274	4702	100	831.47	83147	0	\N	0	9	9	0	f	\N
+790	274	4703	500	691.74	345870	0	\N	0	9	9	0	f	\N
+791	274	4704	500	1841.62	920810	0	\N	0	9	9	0	f	\N
+792	274	4705	5	3089.61	15448.05	0	\N	0	9	9	0	f	\N
+793	274	4706	500	2079.25	1039625	0	\N	0	9	9	0	f	\N
+794	274	4707	500	747.3	373650	0	\N	0	9	9	0	f	\N
+795	274	4708	500	0	0	0	\N	0	9	9	0	f	\N
+796	274	4709	500	4267.63	2133815	0	\N	0	9	9	0	f	\N
+797	274	4710	500	1854.68	927340	0	\N	0	9	9	0	f	\N
+798	274	4711	125	4577.17	572146.25	0	\N	0	9	9	0	f	\N
+799	274	4712	100	1169.68	116968	0	\N	0	9	9	0	f	\N
+800	274	4713	500	2348.59	1174295	0	\N	0	9	9	0	f	\N
+801	274	4714	500	1444.76	722380	0	\N	0	9	9	0	f	\N
+802	274	4715	125	2440.65	305081.25	0	\N	0	9	9	0	f	\N
+803	274	4716	500	2880.22	1440110	0	\N	0	9	9	0	f	\N
+804	274	4717	1000	887.7	887700	0	\N	0	9	9	0	f	\N
+805	274	4718	500	3108.09	1554045	0	\N	0	9	9	0	f	\N
+806	274	4719	4	157.93	631.72	0	\N	0	9	9	0	f	\N
+807	274	4720	5	487.82	2439.1	0	\N	0	9	9	0	f	\N
+808	274	4721	500	126.64	63320	0	\N	0	9	9	0	f	\N
+809	274	4722	500	672.18	336090	0	\N	0	9	9	0	f	\N
+810	274	4723	500	836.88	418440	0	\N	0	9	9	0	f	\N
+811	274	4724	500	4227.13	2113565	0	\N	0	9	9	0	f	\N
+812	274	4725	500	1950.51	975255	0	\N	0	9	9	0	f	\N
+813	274	4726	500	2934.48	1467240	0	\N	0	9	9	0	f	\N
+814	274	4727	500	327.11	163555	0	\N	0	9	9	0	f	\N
+815	274	4728	500	1350.96	675480	0	\N	0	9	9	0	f	\N
+816	274	4729	500	724.81	362405	0	\N	0	9	9	0	f	\N
+817	274	4730	500	2472.16	1236080	0	\N	0	9	9	0	f	\N
+818	274	4731	250	4766.17	1191542.5	0	\N	0	9	9	0	f	\N
+819	274	4732	500	4864.16	2432080	0	\N	0	9	9	0	f	\N
+820	274	4733	500	4193.38	2096690	0	\N	0	9	9	0	f	\N
+821	274	4734	9	4423.39	39810.51	0	\N	0	9	9	0	f	\N
+822	274	4735	500	1842.8	921400	0	\N	0	9	9	0	f	\N
+823	274	4736	500	4760.3	2380150	0	\N	0	9	9	0	f	\N
+824	274	4737	500	0	0	0	\N	0	9	9	0	f	\N
+825	274	4738	500	2743.46	1371730	0	\N	0	9	9	0	f	\N
+826	274	4739	500	2965.97	1482985	0	\N	0	9	9	0	f	\N
+827	274	4740	500	4048.67	2024335	0	\N	0	9	9	0	f	\N
+828	274	4741	125	3444.66	430582.5	0	\N	0	9	9	0	f	\N
+829	274	4742	100	648.76	64876	0	\N	0	9	9	0	f	\N
+830	274	4743	500	4097.06	2048530	0	\N	0	9	9	0	f	\N
+831	274	4744	250	1583.94	395985	0	\N	0	9	9	0	f	\N
+832	274	4745	500	121.09	60545	0	\N	0	9	9	0	f	\N
+833	274	4746	500	0	0	0	\N	0	9	9	0	f	\N
+834	274	4747	500	0	0	0	\N	0	9	9	0	f	\N
+835	274	4748	500	3054.99	1527495	0	\N	0	9	9	0	f	\N
+836	274	4749	500	3584.69	1792345	0	\N	0	9	9	0	f	\N
+837	274	4750	100	2288.67	228867	0	\N	0	9	9	0	f	\N
+838	274	4751	500	3965.53	1982765	0	\N	0	9	9	0	f	\N
+839	274	4752	500	1255.01	627505	0	\N	0	9	9	0	f	\N
+840	274	4753	500	562.15	281075	0	\N	0	9	9	0	f	\N
+841	274	4754	500	4670.17	2335085	0	\N	0	9	9	0	f	\N
+842	274	4755	100	1795.33	179533	0	\N	0	9	9	0	f	\N
+843	274	4756	14	2681.2	37536.8	0	\N	0	9	9	0	f	\N
+844	274	4757	500	937.97	468985	0	\N	0	9	9	0	f	\N
+845	274	4758	4	4359.01	17436.04	0	\N	0	9	9	0	f	\N
+846	274	4759	500	4751.63	2375815	0	\N	0	9	9	0	f	\N
+847	274	4760	500	3812.85	1906425	0	\N	0	9	9	0	f	\N
+848	274	4761	100	1425.29	142529	0	\N	0	9	9	0	f	\N
+849	274	4762	500	1596.94	798470	0	\N	0	9	9	0	f	\N
+850	274	4763	500	4481	2240500	0	\N	0	9	9	0	f	\N
+851	274	4764	500	4268.6	2134300	0	\N	0	9	9	0	f	\N
+852	274	4765	500	2866.38	1433190	0	\N	0	9	9	0	f	\N
+853	274	4766	25	4937.55	123438.75	0	\N	0	9	9	0	f	\N
+854	274	4767	6	2385.87	14315.22	0	\N	0	9	9	0	f	\N
+855	274	4768	500	1654.61	827305	0	\N	0	9	9	0	f	\N
+856	274	4769	125	1072.53	134066.25	0	\N	0	9	9	0	f	\N
+857	274	4770	500	3092.6	1546300	0	\N	0	9	9	0	f	\N
+858	274	4771	500	4210.61	2105305	0	\N	0	9	9	0	f	\N
+859	274	4772	4	2307.35	9229.4	0	\N	0	9	9	0	f	\N
+860	274	4773	500	1738.5	869250	0	\N	0	9	9	0	f	\N
+861	274	4774	500	2339.12	1169560	0	\N	0	9	9	0	f	\N
+862	274	4775	9	3026.49	27238.41	0	\N	0	9	9	0	f	\N
+863	274	4776	500	2743.1	1371550	0	\N	0	9	9	0	f	\N
+864	274	4777	500	1892.16	946080	0	\N	0	9	9	0	f	\N
+865	274	4778	500	593.31	296655	0	\N	0	9	9	0	f	\N
+866	274	4779	500	179.45	89725	0	\N	0	9	9	0	f	\N
+867	274	4780	500	422.83	211415	0	\N	0	9	9	0	f	\N
+868	274	4781	500	2534.73	1267365	0	\N	0	9	9	0	f	\N
+869	274	4782	1	2859.61	2859.61	0	\N	0	9	9	0	f	\N
+870	274	4783	500	4700.21	2350105	0	\N	0	9	9	0	f	\N
+871	274	4784	500	3989.63	1994815	0	\N	0	9	9	0	f	\N
+872	274	4785	500	2632.21	1316105	0	\N	0	9	9	0	f	\N
+873	274	4786	500	4270.12	2135060	0	\N	0	9	9	0	f	\N
+874	274	4787	500	3953.99	1976995	0	\N	0	9	9	0	f	\N
+875	274	4788	2	1257.19	2514.38	0	\N	0	9	9	0	f	\N
+876	274	4789	100	2685.95	268595	0	\N	0	9	9	0	f	\N
+877	274	4790	500	1186.68	593340	0	\N	0	9	9	0	f	\N
+878	274	4791	500	2027.78	1013890	0	\N	0	9	9	0	f	\N
+879	274	4792	500	988.87	494435	0	\N	0	9	9	0	f	\N
+880	274	4793	500	4591.68	2295840	0	\N	0	9	9	0	f	\N
+881	274	4794	500	2598.69	1299345	0	\N	0	9	9	0	f	\N
+882	274	4795	5	2348.61	11743.05	0	\N	0	9	9	0	f	\N
+883	274	4796	500	2724.62	1362310	0	\N	0	9	9	0	f	\N
+884	274	4797	500	3212.59	1606295	0	\N	0	9	9	0	f	\N
+885	274	4798	500	4036.98	2018490	0	\N	0	9	9	0	f	\N
+886	274	4799	100	4104.45	410445	0	\N	0	9	9	0	f	\N
+887	274	4800	1	2021.15	2021.15	0	\N	0	9	9	0	f	\N
+888	274	4801	125	1713.27	214158.75	0	\N	0	9	9	0	f	\N
+889	274	4802	25	1131.09	28277.25	0	\N	0	9	9	0	f	\N
+890	274	4803	500	2980.04	1490020	0	\N	0	9	9	0	f	\N
+891	274	4804	5	64.39	321.95	0	\N	0	9	9	0	f	\N
+892	274	4805	500	4152.02	2076010	0	\N	0	9	9	0	f	\N
+893	274	4806	500	2188.17	1094085	0	\N	0	9	9	0	f	\N
+894	274	4807	500	1712.26	856130	0	\N	0	9	9	0	f	\N
+895	274	4808	500	202.54	101270	0	\N	0	9	9	0	f	\N
+896	274	4809	500	4245.72	2122860	0	\N	0	9	9	0	f	\N
+897	274	4810	500	3090.79	1545395	0	\N	0	9	9	0	f	\N
+898	274	4811	500	0	0	0	\N	0	9	9	0	f	\N
+899	274	4812	500	4223.82	2111910	0	\N	0	9	9	0	f	\N
+900	274	4813	500	1511.94	755970	0	\N	0	9	9	0	f	\N
+901	274	4814	500	3639.21	1819605	0	\N	0	9	9	0	f	\N
+902	274	4815	500	4935.92	2467960	0	\N	0	9	9	0	f	\N
+903	274	4816	500	2321.16	1160580	0	\N	0	9	9	0	f	\N
+904	274	4819	500	4333.56	2166780	0	\N	0	9	9	0	f	\N
+905	274	4820	500	550.51	275255	0	\N	0	9	9	0	f	\N
+906	274	4821	100	4131.6	413160	0	\N	0	9	9	0	f	\N
+907	274	4822	15	2384.64	35769.6	0	\N	0	9	9	0	f	\N
+908	274	4823	100	2129.09	212909	0	\N	0	9	9	0	f	\N
+909	274	4824	250	1593.04	398260	0	\N	0	9	9	0	f	\N
+910	274	4825	500	1842.06	921030	0	\N	0	9	9	0	f	\N
+911	274	4826	500	2052.41	1026205	0	\N	0	9	9	0	f	\N
+912	274	4827	500	3742.76	1871380	0	\N	0	9	9	0	f	\N
+913	274	4828	500	1960.71	980355	0	\N	0	9	9	0	f	\N
+914	274	4829	500	0	0	0	\N	0	9	9	0	f	\N
+915	274	4830	500	2918.26	1459130	0	\N	0	9	9	0	f	\N
+916	274	4831	500	2495.33	1247665	0	\N	0	9	9	0	f	\N
+917	274	4832	500	1075.72	537860	0	\N	0	9	9	0	f	\N
+918	274	4833	500	3201.2	1600600	0	\N	0	9	9	0	f	\N
+919	274	4834	500	1722.33	861165	0	\N	0	9	9	0	f	\N
+920	274	4835	500	2497.51	1248755	0	\N	0	9	9	0	f	\N
+921	274	4847	125	4377.46	547182.5	0	\N	0	9	9	0	f	\N
+922	274	4848	500	1220.87	610435	0	\N	0	9	9	0	f	\N
+923	274	4849	500	2676.7	1338350	0	\N	0	9	9	0	f	\N
+924	274	4850	500	193.92	96960	0	\N	0	9	9	0	f	\N
+925	274	4817	500	4844.47	2422235	0	\N	0	9	9	0	f	\N
+926	274	4818	500	4117.35	2058675	0	\N	0	9	9	0	f	\N
+927	274	4869	14	1811.8	25365.2	0	\N	0	9	9	0	f	\N
+928	274	4616	125	906.45	113306.25	0	\N	0	9	9	0	f	\N
+929	274	4617	500	59.6	29800	0	\N	0	9	9	0	f	\N
+930	274	4618	500	3347.45	1673725	0	\N	0	9	9	0	f	\N
+931	274	4619	500	3917.72	1958860	0	\N	0	9	9	0	f	\N
+932	274	4620	13	4460.71	57989.23	0	\N	0	9	9	0	f	\N
+933	274	4851	500	2789.03	1394515	0	\N	0	9	9	0	f	\N
+934	274	4852	500	3662.24	1831120	0	\N	0	9	9	0	f	\N
+935	274	4853	500	3251.51	1625755	0	\N	0	9	9	0	f	\N
+936	274	4854	5	4112.16	20560.8	0	\N	0	9	9	0	f	\N
+937	274	4855	9	2493.15	22438.35	0	\N	0	9	9	0	f	\N
+938	274	4856	13	192.43	2501.59	0	\N	0	9	9	0	f	\N
+939	274	4857	11	1577.1	17348.1	0	\N	0	9	9	0	f	\N
+940	274	4858	10	1010.46	10104.6	0	\N	0	9	9	0	f	\N
+941	274	4859	500	4010.73	2005365	0	\N	0	9	9	0	f	\N
+942	274	4860	10	2238.89	22388.9	0	\N	0	9	9	0	f	\N
+943	274	4861	5	65.98	329.9	0	\N	0	9	9	0	f	\N
+944	274	4862	6	4843.66	29061.96	0	\N	0	9	9	0	f	\N
+945	274	4863	9	626.53	5638.77	0	\N	0	9	9	0	f	\N
+946	274	4864	2	207.65	415.3	0	\N	0	9	9	0	f	\N
+947	274	4865	6	515.9	3095.4	0	\N	0	9	9	0	f	\N
+948	274	4866	8	4407.54	35260.32	0	\N	0	9	9	0	f	\N
+949	274	4867	10	1353.63	13536.3	0	\N	0	9	9	0	f	\N
+950	274	4868	11	4022.43	44246.73	0	\N	0	9	9	0	f	\N
+951	274	4604	500	4552.86	2276430	0	\N	0	9	9	0	f	\N
+952	274	4605	5	3425.83	17129.15	0	\N	0	9	9	0	f	\N
+953	274	4606	500	3600.05	1800025	0	\N	0	9	9	0	f	\N
+954	274	4607	500	123	61500	0	\N	0	9	9	0	f	\N
+955	274	4608	500	232	116000	0	\N	0	9	9	0	f	\N
+956	274	4609	250	1371.08	342770	0	\N	0	9	9	0	f	\N
+957	274	4610	500	3463.49	1731745	0	\N	0	9	9	0	f	\N
+958	274	4611	500	1928.42	964210	0	\N	0	9	9	0	f	\N
+959	274	4612	500	3893.98	1946990	0	\N	0	9	9	0	f	\N
+960	274	4613	500	491.21	245605	0	\N	0	9	9	0	f	\N
+961	274	4614	500	2829.44	1414720	0	\N	0	9	9	0	f	\N
+962	274	4615	500	1054.28	527140	0	\N	0	9	9	0	f	\N
+963	274	4836	500	1539.97	769985	0	\N	0	9	9	0	f	\N
+964	274	4837	125	963.08	120385	0	\N	0	9	9	0	f	\N
+965	274	4838	10	2235.47	22354.7	0	\N	0	9	9	0	f	\N
+966	274	4839	500	1938.06	969030	0	\N	0	9	9	0	f	\N
+967	274	4840	500	646.51	323255	0	\N	0	9	9	0	f	\N
+968	274	4841	100	1698.62	169862	0	\N	0	9	9	0	f	\N
+969	274	4842	500	4524.01	2262005	0	\N	0	9	9	0	f	\N
+970	274	4843	500	2857.83	1428915	0	\N	0	9	9	0	f	\N
+971	274	4844	500	2418.49	1209245	0	\N	0	9	9	0	f	\N
+972	274	4845	100	1547.65	154765	0	\N	0	9	9	0	f	\N
+973	274	4846	500	2856.55	1428275	0	\N	0	9	9	0	f	\N
 \.
 
 
@@ -12418,87 +14790,109 @@ COPY public.purchase_order_items (id, po_id, material_id, quantity, rate, amount
 -- Data for Name: purchase_orders; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.purchase_orders (id, tenant_id, site_id, po_number, vendor_id, project_id, pr_id, indent_id, qr_id, po_type, total_amount, delivery_date, status, terms, created_by_id, approved_by_id, approved_at, is_deleted, created_at, updated_at, current_approval_level, annexure, remarks, institution_id, is_cash_purchase, advance_percentage, contract_id, rental_agreement_number, rental_start_date, rental_end_date, billing_frequency, security_deposit, cost_per_test, linked_reagent_agreement, vendor_maintenance_responsibility, return_conditions, renewal_terms, procurement_type, rental_type) FROM stdin;
-184	3	3	PO-00015	52	1	\N	\N	182	Formal	81643.63	\N	Closed	\N	4	\N	\N	f	2026-05-05 18:52:30.375564	2026-06-02 18:01:24.106204	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-188	3	3	PO-00023	53	1	\N	\N	179	Formal	7057	\N	Sent to Vendor	\N	4	4	2026-06-09 06:02:25.803756	f	2026-05-25 18:43:27.659778	2026-06-09 11:32:29.137317	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-185	3	3	PO-00020	56	1	\N	188	\N	Formal	505620	\N	Sent to Vendor	\N	4	4	2026-06-09 06:03:28.427074	f	2026-05-20 11:09:40.396549	2026-06-09 12:03:22.436884	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-213	3	3	PO-00048	53	1	\N	\N	\N	Informal	59815.35	2026-07-01	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-10 18:09:04.764216	2026-06-10 18:09:04.786544	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-183	3	3	PO-00014	52	1	\N	\N	181	Formal	38878.18	\N	Closed	\N	4	\N	\N	f	2026-05-04 18:52:30.375564	2026-06-09 11:11:19.17997	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-186	3	3	PO-00021	51	1	185	\N	\N	Formal	2029750	2026-06-03	Sent to Vendor		4	4	2026-05-20 07:11:03.64198	f	2026-05-20 12:31:17.847185	2026-06-09 11:28:51.718097	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-187	3	3	PO-00022	59	1	\N	195	\N	Formal	6500000	\N	Sent to Vendor	\N	4	4	2026-06-09 06:01:45.255291	f	2026-05-20 12:44:10.329878	2026-06-09 11:31:54.352679	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-172	3	3	PO-00003	54	1	\N	181	\N	Formal	41190.84	\N	Closed	\N	4	\N	\N	f	2026-04-23 18:52:30.375564	2026-05-15 18:52:30.668781	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-173	3	3	PO-00004	51	1	\N	182	\N	Formal	158700.81	\N	Approved	\N	4	\N	\N	f	2026-04-24 18:52:30.375564	2026-05-15 18:52:30.673538	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-174	3	3	PO-00005	59	1	\N	183	\N	Formal	94040.94	\N	Approved	\N	4	\N	\N	f	2026-04-25 18:52:30.375564	2026-05-15 18:52:30.677358	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-175	3	3	PO-00006	60	1	175	\N	\N	Formal	106458.67	\N	Closed	\N	4	\N	\N	f	2026-04-26 18:52:30.375564	2026-05-15 18:52:30.680082	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-176	3	3	PO-00007	56	1	176	\N	\N	Formal	154430.78	\N	Approved	\N	4	\N	\N	f	2026-04-27 18:52:30.375564	2026-05-15 18:52:30.683986	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-177	3	3	PO-00008	52	1	177	\N	\N	Formal	65342.52	\N	Closed	\N	4	\N	\N	f	2026-04-28 18:52:30.375564	2026-05-15 18:52:30.687165	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-178	3	3	PO-00009	60	1	178	\N	\N	Formal	147399.23	\N	Partially Received	\N	4	\N	\N	f	2026-04-29 18:52:30.375564	2026-05-15 18:52:30.691324	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-179	3	3	PO-00010	60	1	179	\N	\N	Formal	85728.76	\N	Sent to Vendor	\N	4	\N	\N	f	2026-04-30 18:52:30.375564	2026-05-15 18:52:30.694624	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-180	3	3	PO-00011	58	1	\N	\N	178	Formal	60541.49	\N	Partially Received	\N	4	\N	\N	f	2026-05-01 18:52:30.375564	2026-05-15 18:52:30.696708	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-181	3	3	PO-00012	53	1	\N	\N	179	Formal	124991.86	\N	Closed	\N	4	\N	\N	f	2026-05-02 18:52:30.375564	2026-05-15 18:52:30.700679	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-182	3	3	PO-00013	55	1	\N	\N	180	Formal	150499.81	\N	Partially Received	\N	4	\N	\N	f	2026-05-03 18:52:30.375564	2026-05-15 18:52:30.703739	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-171	3	3	PO-00002	53	1	\N	180	\N	Formal	90907.27	\N	Partially Received	\N	4	\N	\N	f	2026-04-22 18:52:30.375564	2026-05-15 18:52:30.664194	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-190	3	3	PO-00025	56	1	179	\N	\N	Formal	6853250	2026-06-15	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 15:23:31.597258	2026-06-08 18:55:17.925857	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-191	3	3	PO-00026	53	1	\N	197	\N	Formal	1298	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 16:03:23.716584	2026-06-08 18:55:17.942199	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-192	3	3	PO-00027	54	1	\N	196	\N	Formal	2507.5	\N	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-01 11:07:15.238732	f	2026-06-01 16:36:50.172223	2026-06-01 16:37:32.738439	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-193	3	3	PO-00028	57	1	178	\N	\N	Formal	3813570	2026-06-15	Submitted		4	\N	\N	f	2026-06-01 16:39:26.934331	2026-06-08 18:55:17.975319	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-194	3	3	PO-00029	54	1	\N	201	\N	Formal	100800	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 16:58:23.591671	2026-06-08 18:55:17.992417	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-195	3	3	PO-00030	59	1	188	\N	\N	Formal	3250	2026-06-15	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 17:03:57.421434	2026-06-08 18:55:18.042481	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-196	3	3	PO-00031	53	1	\N	202	\N	Formal	226800	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 17:07:08.990299	2026-06-08 18:55:18.059001	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-197	3	3	PO-00032	53	1	187	\N	185	Formal	225000	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 17:32:30.423259	2026-06-08 18:55:18.075356	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-198	3	3	PO-00033	53	1	\N	\N	175	Formal	20438	\N	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 07:11:54.780151	f	2026-06-01 17:37:01.162383	2026-06-09 12:41:54.78066	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-210	3	3	PO-00045	53	1	186	\N	\N	Formal	389.4	2026-06-22	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 06:39:44.953387	f	2026-06-08 16:14:50.262386	2026-06-09 12:09:51.002593	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-203	3	3	PO-00038	53	1	\N	\N	\N	Informal	18000	2026-06-23	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-02 13:25:01.313929	2026-06-02 13:25:01.322517	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-200	3	3	PO-00035	53	1	\N	\N	\N	Informal	196	2026-06-22	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-02 06:01:19.439678	f	2026-06-01 19:52:04.979427	2026-06-09 11:23:05.561822	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-199	3	3	PO-00034	59	1	\N	\N	175	Formal	2042	\N	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 05:13:04.621484	f	2026-06-01 17:37:01.189809	2026-06-09 11:26:24.208347	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-170	3	3	PO-00001	54	1	\N	179	\N	Formal	59200.55	\N	Approved	\N	4	\N	\N	f	2026-04-21 18:52:30.375564	2026-05-15 18:52:30.658953	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-204	3	3	PO-00039	53	1	\N	\N	\N	Informal	19800	2026-06-23	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-02 17:42:31.823143	2026-06-02 17:42:31.82497	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-189	3	3	PO-00024	54	1	\N	\N	179	Formal	33629	\N	Closed	\N	4	4	2026-05-25 13:22:18.605025	f	2026-05-25 18:43:27.751179	2026-06-02 18:01:36.986163	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-201	3	3	PO-00036	54	1	\N	\N	\N	Formal	135778.84	2026-06-22	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-02 06:00:37.696127	f	2026-06-01 19:53:47.799287	2026-06-09 11:19:25.214361	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-234	2	2	PO-00018	63	3	\N	\N	\N	Informal	277639.49	2026-07-01	Rejected	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-01 15:00:00.254964	2026-07-01 18:04:06.457384	2	\N	\n[Rejected: Rejection at level 2]	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-222	2	2	PO-00006	63	3	\N	\N	187	Formal	4720	2026-07-08	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 13:35:57.94273	f	2026-06-15 19:05:16.095226	2026-07-01 19:05:57.944684	2	Annexure test for PO-00006	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-223	2	2	PO-00007	62	3	200	\N	193	Formal	12176733.86	2026-07-16	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-18 12:45:51.479268	2026-07-06 12:23:20.866753	1		\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-221	2	2	PO-00005	62	3	\N	\N	187	Formal	2714	2026-07-07	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-06-16 06:48:21.751249	f	2026-06-15 19:05:16.037647	2026-06-16 12:18:21.752515	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-208	3	3	PO-00043	54	1	\N	194	\N	Formal	12455543.1	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-05 18:10:20.039447	2026-06-17 10:43:51.159152	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-205	3	3	PO-00040	54	1	189	\N	\N	Formal	48160	2026-06-17	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-03 14:31:01.896958	2026-06-17 10:46:25.147151	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-202	3	3	PO-00037	54	1	\N	200	\N	Formal	5605	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-02 13:18:45.56214	2026-06-17 10:48:13.245105	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-224	2	2	PO-00008	64	3	200	\N	193	Formal	545699.26	2026-07-09	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-18 12:45:51.568488	2026-07-06 12:22:05.675855	1		\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-225	2	2	PO-00009	63	3	200	\N	193	Formal	6152405.54	2026-07-21	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-18 12:45:51.584007	2026-07-06 12:21:58.113873	1		\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-226	2	2	PO-00010	63	3	\N	\N	194	Formal	1505.28	2026-07-07	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-19 12:06:49.124341	2026-07-06 12:21:36.203158	1		\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-227	2	2	PO-00011	62	3	\N	\N	194	Formal	435.42	2026-07-02	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-19 12:06:49.200936	2026-07-02 18:33:01.972288	1		\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-230	2	2	PO-00014	63	3	\N	\N	197	Formal	155.76	2026-07-08	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-22 12:15:32.505776	2026-07-01 18:53:22.407591	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-207	3	3	PO-00042	53	1	\N	\N	\N	Informal	10560	2026-06-25	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 07:31:48.001221	f	2026-06-04 14:19:18.399032	2026-06-11 15:05:34.851646	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-206	3	3	PO-00041	53	1	\N	\N	\N	Informal	181500	2026-06-24	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-03 09:03:42.850278	f	2026-06-03 14:33:32.175397	2026-06-11 16:24:46.272972	\N	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-233	2	2	PO-00017	63	3	\N	\N	\N	Informal	37018.6	2026-07-21	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: 15 Days\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-30 18:07:22.323788	2026-06-30 18:40:52.129145	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-231	2	2	PO-00015	62	3	\N	\N	197	Formal	130.98	2026-07-24	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-22 12:15:32.547787	2026-07-01 18:50:47.282773	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-212	3	3	PO-00047	59	1	\N	\N	\N	Informal	389.4	2026-06-29	Short Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-08 12:47:36.231711	f	2026-06-08 17:19:34.563694	2026-06-08 19:19:46.178721	\N	\N	short closed \n	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-235	2	2	PO-00019	63	3	\N	\N	\N	Informal	48416.97	2026-07-22	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 10:11:11.544124	f	2026-07-01 15:07:59.921516	2026-07-06 16:37:47.788958	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-244	2	2	PO-00028	62	3	203	\N	\N	Formal	612466	2026-07-21	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-07 19:04:31.282046	2026-07-07 19:04:31.300742	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-232	2	2	PO-00016	64	3	\N	\N	198	Formal	11.2	2026-07-21	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-22 12:18:25.580101	2026-06-30 20:00:31.707939	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-245	2	2	PO-00029	63	3	\N	\N	190	Formal	444	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-08 11:51:20.874685	2026-07-08 11:51:20.886838	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-243	2	2	PO-00027	62	3	\N	\N	\N	Informal	138151.99	2026-07-02	Partially Received	dfgfdgdgdfg	3	\N	\N	f	2026-07-02 18:30:35.966725	2026-07-08 12:25:10.086539	1		\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-242	2	2	PO-00026	63	3	\N	\N	\N	Informal	33428.88	2026-07-22	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 12:42:10.050112	f	2026-07-01 16:02:34.765014	2026-07-01 18:12:10.051203	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-237	2	2	PO-00021	62	3	\N	\N	\N	Informal	48416.97	2026-07-22	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 10:08:14.685627	f	2026-07-01 15:30:32.968379	2026-07-01 15:38:14.686254	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-247	2	2	PO-00031	62	3	\N	\N	\N	Formal	119630.69	2026-07-09	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-09 12:36:38.03989	2026-07-09 12:36:38.061011	1	dkflkdflkdlfkdlfk dhfjhdfjhdfjh	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-209	3	3	PO-00044	55	1	\N	208	\N	Formal	109928.8	\N	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: 15 Days\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 07:25:55.019454	f	2026-06-08 14:45:41.037419	2026-06-11 15:04:41.081091	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-250	2	2	PO-00034	62	3	201	\N	202	Formal	2740	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-13 13:23:47.299697	2026-07-13 13:23:47.303365	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-229	2	2	PO-00013	63	3	\N	\N	195	Formal	354	2026-07-08	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-19 13:08:12.440185	2026-07-01 18:54:50.910476	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-228	2	2	PO-00012	62	3	\N	\N	195	Formal	672	2026-07-08	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-19 13:08:12.417753	2026-07-01 18:56:48.12993	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-239	2	2	PO-00023	63	3	\N	\N	\N	Informal	18509.3	2026-07-22	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-01 15:38:54.315286	2026-07-06 16:37:10.220548	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-248	2	2	PO-00032	62	3	\N	\N	\N	Formal	119630.69	2026-07-15	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-09 12:40:54.374172	2026-07-09 12:40:54.375548	1		\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-249	2	2	PO-00033	64	3	201	\N	202	Formal	0	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-13 13:23:47.23686	2026-07-13 13:23:47.236872	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-246	2	2	PO-00030	63	3	\N	\N	\N	Informal	141354.26	2026-07-23	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-08 18:17:14.016477	2026-07-08 18:46:38.942509	1		\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-214	2	2	PO-00001	62	3	194	\N	\N	Formal	38491.6	2026-06-26	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-06-11 19:46:17.594031	f	2026-06-12 01:00:29.585057	2026-06-12 01:17:08.524505	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-216	2	2	PO-00003	62	3	\N	\N	186	Formal	23600	2026-07-03	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-12 01:40:11.44893	2026-06-12 02:20:17.559248	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-217	2	2	PO-00004	63	3	\N	\N	186	Formal	23321.52	2026-07-03	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-06-16 06:09:10.505248	f	2026-06-12 01:40:11.463052	2026-06-16 11:39:10.508746	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-215	2	2	PO-00002	62	3	\N	\N	\N	Informal	59815.35	2026-07-03	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	11	2026-06-11 19:55:57.036519	f	2026-06-12 01:18:50.982636	2026-06-12 01:27:26.343947	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-211	3	3	PO-00046	53	1	\N	\N	\N	Informal	149060.07	2026-06-29	Short Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 04:59:33.248268	f	2026-06-08 17:18:43.689083	2026-06-17 11:21:46.51598	2	\N	mistaken	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-241	2	2	PO-00025	63	3	\N	\N	\N	Informal	118308.5	\N	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 12:45:36.264791	f	2026-07-01 15:58:53.716577	2026-07-01 18:15:36.265807	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-240	2	2	PO-00024	62	3	\N	\N	\N	Informal	18509.3	2026-07-22	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-01 15:54:08.411103	2026-07-01 18:40:54.712499	1	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-236	2	2	PO-00020	63	3	\N	\N	\N	Informal	30282.87	2026-07-22	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-01 15:09:29.245234	2026-07-06 16:58:25.718872	1	\N	Rejected for testing	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-238	2	2	PO-00022	63	3	\N	\N	\N	Informal	37018.6	2026-07-01	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 10:14:55.636414	f	2026-07-01 15:32:32.73684	2026-07-01 15:44:55.636716	2	\N	\N	\N	f	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-251	2	2	EPAHS/PO-00001	63	3	\N	\N	\N	Informal	37018.6	2026-07-29	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-27 06:36:54.952309	f	2026-07-27 12:06:20.027605	2026-07-27 12:06:54.953664	2		\N	11	f	50	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-252	2	2	EPCET/PO-00001	62	3	\N	\N	\N	Informal	24354.4	2026-07-31	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-27 06:59:51.469033	f	2026-07-27 12:28:49.264211	2026-07-27 12:29:51.470607	2		\N	3	f	25	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+COPY public.purchase_orders (id, tenant_id, site_id, po_number, vendor_id, project_id, pr_id, indent_id, qr_id, po_type, total_amount, delivery_date, status, terms, created_by_id, approved_by_id, approved_at, is_deleted, created_at, updated_at, current_approval_level, annexure, remarks, institution_id, advance_percentage, contract_id, rental_agreement_number, rental_start_date, rental_end_date, billing_frequency, security_deposit, cost_per_test, linked_reagent_agreement, vendor_maintenance_responsibility, return_conditions, renewal_terms, procurement_type, rental_type, purchase_mode, marketplace_name, rental_agreement_document) FROM stdin;
+256	2	2	EPCET/PO-00003	63	3	\N	\N	\N	Informal	24354.4	2026-08-12	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-04 12:12:50.812176	f	2026-08-04 17:33:44.578465	2026-08-04 17:42:50.813296	2		\N	3	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Cash Purchase		\N
+258	2	2	EPCET/PO-00005	66	3	\N	\N	\N	Formal	231.84	2026-08-10	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-05 04:57:18.025467	f	2026-08-05 10:26:35.662538	2026-08-05 10:27:18.028031	2		\N	3	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Credit Purchase		\N
+264	2	2	EPCPT/PO-00001	63	3	\N	\N	\N	Formal	19900.36	2026-08-14	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: 15 Days\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-05 05:29:30.46517	f	2026-08-05 10:59:16.0404	2026-08-05 12:35:49.887845	2		\N	10	0	\N	12.42	2026-08-14	2027-08-14	Half Yearly	10000	\N	\N	t	\N	\N	Rental	Equipment Rental	Credit Purchase		\N
+265	2	2	EPCP/PO-00002	66	3	\N	\N	\N	Formal	276773.84	2026-08-14	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: 15 Days\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-08-05 11:29:56.46896	2026-08-05 12:35:49.88786	1		\N	4	0	\N	65454	2026-08-14	2027-08-14	Quarterly	100000	\N	\N	t	\N	\N	Rental	Equipment Rental	Cash Purchase		\N
+266	2	2	EPCPT/PO-00002	66	3	\N	\N	\N	Formal	185408.5	2026-08-12	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-05 06:06:28.299643	f	2026-08-05 11:35:48.317506	2026-08-05 12:35:49.887865	2		\N	10	0	\N	23453	2026-08-12	2026-10-12	Monthly	10000	\N	\N	t	\N	\N	Rental	Equipment Rental	Cash Purchase		\N
+257	2	2	EPCET/PO-00004	63	3	\N	\N	\N	Informal	83291.85	2026-08-10	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-04 12:12:19.037993	f	2026-08-04 17:41:23.513139	2026-08-04 17:42:19.040393	2		\N	3	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Cash Purchase		\N
+259	2	2	EPCET/PO-00006	63	3	\N	\N	\N	Formal	438736.95	2026-08-11	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-05 05:02:31.529046	f	2026-08-05 10:31:55.526081	2026-08-05 10:32:31.530168	2		\N	3	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Cash Purchase		\N
+260	2	2	EPAHS/PO-00002	62	3	\N	\N	\N	Formal	69410.04	2026-08-11	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: 15 Days\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-05 05:10:54.678029	f	2026-08-05 10:40:21.598785	2026-08-05 10:40:54.679164	2		\N	11	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Petty Cash		\N
+261	2	2	EPCP/PO-00001	62	3	\N	\N	\N	Formal	124711.26	2026-08-12	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-05 05:15:40.920133	f	2026-08-05 10:43:27.233217	2026-08-05 10:45:40.922168	2		\N	4	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Online Marketplace	google pay	\N
+262	2	2	EPH/PO-00002	64	3	\N	\N	\N	Formal	25662.78	2026-08-12	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: 15 Days\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-05 05:18:27.932542	f	2026-08-05 10:47:54.197415	2026-08-05 10:48:27.933701	2		\N	2	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Emergency Purchase		\N
+255	2	2	EPCET/PO-00002	63	3	\N	\N	\N	Informal	110909.23	2026-08-15	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-03 11:48:55.203196	f	2026-08-03 17:15:40.231582	2026-08-03 17:18:55.20532	2		\N	3	12	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Cash Purchase	\N	\N
+184	3	3	PO-00015	52	1	\N	\N	182	Formal	81643.63	\N	Closed	\N	4	\N	\N	f	2026-05-05 18:52:30.375564	2026-06-02 18:01:24.106204	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+188	3	3	PO-00023	53	1	\N	\N	179	Formal	7057	\N	Sent to Vendor	\N	4	4	2026-06-09 06:02:25.803756	f	2026-05-25 18:43:27.659778	2026-06-09 11:32:29.137317	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+185	3	3	PO-00020	56	1	\N	188	\N	Formal	505620	\N	Sent to Vendor	\N	4	4	2026-06-09 06:03:28.427074	f	2026-05-20 11:09:40.396549	2026-06-09 12:03:22.436884	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+253	2	2	PO-00035	63	3	\N	\N	214	Formal	5310	2026-08-20	Approved	Test PO Terms	1	3	2026-08-04 12:13:22.286017	f	2026-08-03 14:11:21.328412	2026-08-04 17:43:22.287146	2		\N	3	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Cash Purchase		\N
+251	2	2	EPAHS/PO-00001	63	3	\N	\N	\N	Informal	37018.6	2026-07-29	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-27 06:36:54.952309	f	2026-07-27 12:06:20.027605	2026-07-27 12:06:54.953664	2		\N	11	50	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+213	3	3	PO-00048	53	1	\N	\N	\N	Informal	59815.35	2026-07-01	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-10 18:09:04.764216	2026-06-10 18:09:04.786544	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+183	3	3	PO-00014	52	1	\N	\N	181	Formal	38878.18	\N	Closed	\N	4	\N	\N	f	2026-05-04 18:52:30.375564	2026-06-09 11:11:19.17997	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+186	3	3	PO-00021	51	1	185	\N	\N	Formal	2029750	2026-06-03	Sent to Vendor		4	4	2026-05-20 07:11:03.64198	f	2026-05-20 12:31:17.847185	2026-06-09 11:28:51.718097	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+187	3	3	PO-00022	59	1	\N	195	\N	Formal	6500000	\N	Sent to Vendor	\N	4	4	2026-06-09 06:01:45.255291	f	2026-05-20 12:44:10.329878	2026-06-09 11:31:54.352679	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+268	2	2	EPCPT/PO-00003	64	3	\N	\N	\N	Formal	170011.25	2026-08-10	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-05 06:12:43.250669	f	2026-08-05 11:42:24.803737	2026-08-06 15:02:28.573307	2		\N	10	48	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Rental	Equipment Rental	Advance Payment		\N
+172	3	3	PO-00003	54	1	\N	181	\N	Formal	41190.84	\N	Closed	\N	4	\N	\N	f	2026-04-23 18:52:30.375564	2026-05-15 18:52:30.668781	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+173	3	3	PO-00004	51	1	\N	182	\N	Formal	158700.81	\N	Approved	\N	4	\N	\N	f	2026-04-24 18:52:30.375564	2026-05-15 18:52:30.673538	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+174	3	3	PO-00005	59	1	\N	183	\N	Formal	94040.94	\N	Approved	\N	4	\N	\N	f	2026-04-25 18:52:30.375564	2026-05-15 18:52:30.677358	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+175	3	3	PO-00006	60	1	175	\N	\N	Formal	106458.67	\N	Closed	\N	4	\N	\N	f	2026-04-26 18:52:30.375564	2026-05-15 18:52:30.680082	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+176	3	3	PO-00007	56	1	176	\N	\N	Formal	154430.78	\N	Approved	\N	4	\N	\N	f	2026-04-27 18:52:30.375564	2026-05-15 18:52:30.683986	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+177	3	3	PO-00008	52	1	177	\N	\N	Formal	65342.52	\N	Closed	\N	4	\N	\N	f	2026-04-28 18:52:30.375564	2026-05-15 18:52:30.687165	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+178	3	3	PO-00009	60	1	178	\N	\N	Formal	147399.23	\N	Partially Received	\N	4	\N	\N	f	2026-04-29 18:52:30.375564	2026-05-15 18:52:30.691324	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+179	3	3	PO-00010	60	1	179	\N	\N	Formal	85728.76	\N	Sent to Vendor	\N	4	\N	\N	f	2026-04-30 18:52:30.375564	2026-05-15 18:52:30.694624	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+180	3	3	PO-00011	58	1	\N	\N	178	Formal	60541.49	\N	Partially Received	\N	4	\N	\N	f	2026-05-01 18:52:30.375564	2026-05-15 18:52:30.696708	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+181	3	3	PO-00012	53	1	\N	\N	179	Formal	124991.86	\N	Closed	\N	4	\N	\N	f	2026-05-02 18:52:30.375564	2026-05-15 18:52:30.700679	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+182	3	3	PO-00013	55	1	\N	\N	180	Formal	150499.81	\N	Partially Received	\N	4	\N	\N	f	2026-05-03 18:52:30.375564	2026-05-15 18:52:30.703739	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+171	3	3	PO-00002	53	1	\N	180	\N	Formal	90907.27	\N	Partially Received	\N	4	\N	\N	f	2026-04-22 18:52:30.375564	2026-05-15 18:52:30.664194	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+190	3	3	PO-00025	56	1	179	\N	\N	Formal	6853250	2026-06-15	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 15:23:31.597258	2026-06-08 18:55:17.925857	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+191	3	3	PO-00026	53	1	\N	197	\N	Formal	1298	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 16:03:23.716584	2026-06-08 18:55:17.942199	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+192	3	3	PO-00027	54	1	\N	196	\N	Formal	2507.5	\N	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-01 11:07:15.238732	f	2026-06-01 16:36:50.172223	2026-06-01 16:37:32.738439	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+193	3	3	PO-00028	57	1	178	\N	\N	Formal	3813570	2026-06-15	Submitted		4	\N	\N	f	2026-06-01 16:39:26.934331	2026-06-08 18:55:17.975319	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+194	3	3	PO-00029	54	1	\N	201	\N	Formal	100800	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 16:58:23.591671	2026-06-08 18:55:17.992417	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+195	3	3	PO-00030	59	1	188	\N	\N	Formal	3250	2026-06-15	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 17:03:57.421434	2026-06-08 18:55:18.042481	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+196	3	3	PO-00031	53	1	\N	202	\N	Formal	226800	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 17:07:08.990299	2026-06-08 18:55:18.059001	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+197	3	3	PO-00032	53	1	187	\N	185	Formal	225000	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-01 17:32:30.423259	2026-06-08 18:55:18.075356	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+198	3	3	PO-00033	53	1	\N	\N	175	Formal	20438	\N	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 07:11:54.780151	f	2026-06-01 17:37:01.162383	2026-06-09 12:41:54.78066	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+210	3	3	PO-00045	53	1	186	\N	\N	Formal	389.4	2026-06-22	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 06:39:44.953387	f	2026-06-08 16:14:50.262386	2026-06-09 12:09:51.002593	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+203	3	3	PO-00038	53	1	\N	\N	\N	Informal	18000	2026-06-23	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-02 13:25:01.313929	2026-06-02 13:25:01.322517	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+200	3	3	PO-00035	53	1	\N	\N	\N	Informal	196	2026-06-22	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-02 06:01:19.439678	f	2026-06-01 19:52:04.979427	2026-06-09 11:23:05.561822	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+199	3	3	PO-00034	59	1	\N	\N	175	Formal	2042	\N	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 05:13:04.621484	f	2026-06-01 17:37:01.189809	2026-06-09 11:26:24.208347	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+170	3	3	PO-00001	54	1	\N	179	\N	Formal	59200.55	\N	Approved	\N	4	\N	\N	f	2026-04-21 18:52:30.375564	2026-05-15 18:52:30.658953	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+204	3	3	PO-00039	53	1	\N	\N	\N	Informal	19800	2026-06-23	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-02 17:42:31.823143	2026-06-02 17:42:31.82497	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+189	3	3	PO-00024	54	1	\N	\N	179	Formal	33629	\N	Closed	\N	4	4	2026-05-25 13:22:18.605025	f	2026-05-25 18:43:27.751179	2026-06-02 18:01:36.986163	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+201	3	3	PO-00036	54	1	\N	\N	\N	Formal	135778.84	2026-06-22	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-02 06:00:37.696127	f	2026-06-01 19:53:47.799287	2026-06-09 11:19:25.214361	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+234	2	2	PO-00018	63	3	\N	\N	\N	Informal	277639.49	2026-07-01	Rejected	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-01 15:00:00.254964	2026-07-01 18:04:06.457384	2	\N	\n[Rejected: Rejection at level 2]	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+222	2	2	PO-00006	63	3	\N	\N	187	Formal	4720	2026-07-08	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 13:35:57.94273	f	2026-06-15 19:05:16.095226	2026-07-01 19:05:57.944684	2	Annexure test for PO-00006	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+223	2	2	PO-00007	62	3	200	\N	193	Formal	12176733.86	2026-07-16	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-18 12:45:51.479268	2026-07-06 12:23:20.866753	1		\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+221	2	2	PO-00005	62	3	\N	\N	187	Formal	2714	2026-07-07	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-06-16 06:48:21.751249	f	2026-06-15 19:05:16.037647	2026-06-16 12:18:21.752515	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+208	3	3	PO-00043	54	1	\N	194	\N	Formal	12455543.1	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-05 18:10:20.039447	2026-06-17 10:43:51.159152	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+205	3	3	PO-00040	54	1	189	\N	\N	Formal	48160	2026-06-17	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-03 14:31:01.896958	2026-06-17 10:46:25.147151	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+202	3	3	PO-00037	54	1	\N	200	\N	Formal	5605	\N	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	\N	\N	f	2026-06-02 13:18:45.56214	2026-06-17 10:48:13.245105	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+224	2	2	PO-00008	64	3	200	\N	193	Formal	545699.26	2026-07-09	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-18 12:45:51.568488	2026-07-06 12:22:05.675855	1		\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+225	2	2	PO-00009	63	3	200	\N	193	Formal	6152405.54	2026-07-21	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-18 12:45:51.584007	2026-07-06 12:21:58.113873	1		\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+226	2	2	PO-00010	63	3	\N	\N	194	Formal	1505.28	2026-07-07	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-19 12:06:49.124341	2026-07-06 12:21:36.203158	1		\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+230	2	2	PO-00014	63	3	\N	\N	197	Formal	155.76	2026-07-08	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-22 12:15:32.505776	2026-07-01 18:53:22.407591	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+207	3	3	PO-00042	53	1	\N	\N	\N	Informal	10560	2026-06-25	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 07:31:48.001221	f	2026-06-04 14:19:18.399032	2026-06-11 15:05:34.851646	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+206	3	3	PO-00041	53	1	\N	\N	\N	Informal	181500	2026-06-24	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-03 09:03:42.850278	f	2026-06-03 14:33:32.175397	2026-06-11 16:24:46.272972	\N	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+233	2	2	PO-00017	63	3	\N	\N	\N	Informal	37018.6	2026-07-21	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: 15 Days\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-30 18:07:22.323788	2026-06-30 18:40:52.129145	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+231	2	2	PO-00015	62	3	\N	\N	197	Formal	130.98	2026-07-24	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-22 12:15:32.547787	2026-07-01 18:50:47.282773	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+212	3	3	PO-00047	59	1	\N	\N	\N	Informal	389.4	2026-06-29	Short Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-08 12:47:36.231711	f	2026-06-08 17:19:34.563694	2026-06-08 19:19:46.178721	\N	\N	short closed \n	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+235	2	2	PO-00019	63	3	\N	\N	\N	Informal	48416.97	2026-07-22	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 10:11:11.544124	f	2026-07-01 15:07:59.921516	2026-07-06 16:37:47.788958	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+244	2	2	PO-00028	62	3	203	\N	\N	Formal	612466	2026-07-21	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-07 19:04:31.282046	2026-07-07 19:04:31.300742	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+232	2	2	PO-00016	64	3	\N	\N	198	Formal	11.2	2026-07-21	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-22 12:18:25.580101	2026-06-30 20:00:31.707939	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+245	2	2	PO-00029	63	3	\N	\N	190	Formal	444	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-08 11:51:20.874685	2026-07-08 11:51:20.886838	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+243	2	2	PO-00027	62	3	\N	\N	\N	Informal	138151.99	2026-07-02	Partially Received	dfgfdgdgdfg	3	\N	\N	f	2026-07-02 18:30:35.966725	2026-07-08 12:25:10.086539	1		\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+242	2	2	PO-00026	63	3	\N	\N	\N	Informal	33428.88	2026-07-22	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 12:42:10.050112	f	2026-07-01 16:02:34.765014	2026-07-01 18:12:10.051203	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+237	2	2	PO-00021	62	3	\N	\N	\N	Informal	48416.97	2026-07-22	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 10:08:14.685627	f	2026-07-01 15:30:32.968379	2026-07-01 15:38:14.686254	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+247	2	2	PO-00031	62	3	\N	\N	\N	Formal	119630.69	2026-07-09	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-09 12:36:38.03989	2026-07-09 12:36:38.061011	1	dkflkdflkdlfkdlfk dhfjhdfjhdfjh	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+209	3	3	PO-00044	55	1	\N	208	\N	Formal	109928.8	\N	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: 15 Days\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 07:25:55.019454	f	2026-06-08 14:45:41.037419	2026-06-11 15:04:41.081091	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+250	2	2	PO-00034	62	3	201	\N	202	Formal	2740	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-13 13:23:47.299697	2026-07-13 13:23:47.303365	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+229	2	2	PO-00013	63	3	\N	\N	195	Formal	354	2026-07-08	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-19 13:08:12.440185	2026-07-01 18:54:50.910476	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+228	2	2	PO-00012	62	3	\N	\N	195	Formal	672	2026-07-08	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-19 13:08:12.417753	2026-07-01 18:56:48.12993	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+239	2	2	PO-00023	63	3	\N	\N	\N	Informal	18509.3	2026-07-22	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-01 15:38:54.315286	2026-07-06 16:37:10.220548	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+248	2	2	PO-00032	62	3	\N	\N	\N	Formal	119630.69	2026-07-15	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-09 12:40:54.374172	2026-07-09 12:40:54.375548	1		\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+249	2	2	PO-00033	64	3	201	\N	202	Formal	0	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-13 13:23:47.23686	2026-07-13 13:23:47.236872	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+246	2	2	PO-00030	63	3	\N	\N	\N	Informal	141354.26	2026-07-23	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-08 18:17:14.016477	2026-07-08 18:46:38.942509	1		\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+214	2	2	PO-00001	62	3	194	\N	\N	Formal	38491.6	2026-06-26	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-06-11 19:46:17.594031	f	2026-06-12 01:00:29.585057	2026-06-12 01:17:08.524505	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+216	2	2	PO-00003	62	3	\N	\N	186	Formal	23600	2026-07-03	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-12 01:40:11.44893	2026-06-12 02:20:17.559248	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+217	2	2	PO-00004	63	3	\N	\N	186	Formal	23321.52	2026-07-03	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-06-16 06:09:10.505248	f	2026-06-12 01:40:11.463052	2026-06-16 11:39:10.508746	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+215	2	2	PO-00002	62	3	\N	\N	\N	Informal	59815.35	2026-07-03	Sent to Vendor	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	11	2026-06-11 19:55:57.036519	f	2026-06-12 01:18:50.982636	2026-06-12 01:27:26.343947	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+211	3	3	PO-00046	53	1	\N	\N	\N	Informal	149060.07	2026-06-29	Short Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 04:59:33.248268	f	2026-06-08 17:18:43.689083	2026-06-17 11:21:46.51598	2	\N	mistaken	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+241	2	2	PO-00025	63	3	\N	\N	\N	Informal	118308.5	\N	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 12:45:36.264791	f	2026-07-01 15:58:53.716577	2026-07-01 18:15:36.265807	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+240	2	2	PO-00024	62	3	\N	\N	\N	Informal	18509.3	2026-07-22	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-01 15:54:08.411103	2026-07-01 18:40:54.712499	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+236	2	2	PO-00020	63	3	\N	\N	\N	Informal	30282.87	2026-07-22	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-01 15:09:29.245234	2026-07-06 16:58:25.718872	1	\N	Rejected for testing	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+238	2	2	PO-00022	63	3	\N	\N	\N	Informal	37018.6	2026-07-01	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 10:14:55.636414	f	2026-07-01 15:32:32.73684	2026-07-01 15:44:55.636716	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+252	2	2	EPCET/PO-00001	62	3	\N	\N	\N	Informal	24354.4	2026-07-31	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-27 06:59:51.469033	f	2026-07-27 12:28:49.264211	2026-07-27 12:29:51.470607	2		\N	3	25	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+254	2	2	EPH/PO-00001	66	3	\N	\N	\N	Formal	74367.72	2026-08-10	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-03 10:25:11.779205	f	2026-08-03 15:54:06.373976	2026-08-03 15:55:11.781203	2		\N	2	4	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Credit Purchase	\N	\N
+263	2	2	NRCN/PO-00001	64	3	\N	\N	\N	Formal	37196.4	2026-08-13	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: 15 Days\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-05 05:21:39.178771	f	2026-08-05 10:51:22.376748	2026-08-05 10:51:39.179118	2		\N	9	50	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Advance Payment		\N
+272	2	2	EPCHE/PO-00001	66	3	\N	\N	\N	Formal	56846.43	2026-08-11	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-05 13:13:19.045494	f	2026-08-05 18:43:03.577828	2026-08-05 18:43:19.046601	2		\N	5	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Rental	Reagent Rental	Credit Purchase		\N
+270	2	2	NRCN/PO-00003	62	3	\N	\N	\N	Formal	160251.95	2026-08-10	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-05 12:58:42.050352	f	2026-08-05 18:28:24.916362	2026-08-05 18:28:42.052383	2		\N	9	0	\N	\N	\N	\N	\N	0	1000	\N	f	\N	\N	Rental	Cost Per Test	Credit Purchase		\N
+269	2	2	NRCN/PO-00002	63	3	\N	\N	\N	Formal	72460.7	2026-08-17	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: 15 Days\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-06 08:00:16.622049	f	2026-08-05 12:02:19.403333	2026-08-06 13:30:16.625102	2		\N	9	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Rental	Equipment Rental	Credit Purchase		\N
+271	2	2	EPSN/PO-00001	63	3	\N	\N	\N	Formal	131513.76	2026-08-11	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: 15 Days\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-05 13:10:54.958487	f	2026-08-05 18:40:40.019803	2026-08-05 18:40:54.959577	2		\N	8	36	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Rental	Cost Per Test	Advance Payment		\N
+273	2	2	EPSN/PO-00002	64	3	\N	\N	\N	Formal	100738.46	2026-08-12	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-05 13:15:59.599432	f	2026-08-05 18:45:43.618127	2026-08-05 18:45:59.600538	2		\N	8	30	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Rental	Reagent Rental	Advance Payment		\N
+274	2	2	PO-00036	72	3	\N	\N	222	Formal	235817567.81	\N	Draft	1. Bill/Invoices in the name of East Point Allied Health Sciences managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-08-06 20:46:26.409431	2026-08-06 20:46:26.421156	1	\N	\N	\N	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Credit Purchase	\N	\N
+227	2	2	PO-00011	62	3	\N	\N	194	Formal	435.42	2026-07-02	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-19 12:06:49.200936	2026-08-06 12:34:37.876037	2		\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+267	2	2	EPAHS/PO-00003	66	3	\N	\N	\N	Formal	29907.67	2026-08-18	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-08-05 11:40:02.891809	2026-08-06 12:37:33.316717	2		\N	11	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Credit Purchase		\N
 \.
 
 
@@ -12539,6 +14933,14 @@ COPY public.purchase_request_approvals (id, pr_id, approval_flow_id, approver_id
 30	203	63	3	{"618": {"quantity": 32.0, "remarks": null}, "619": {"quantity": 1.2, "remarks": null}}	\N	2026-07-07 19:03:09.792334
 31	199	17	3	{"600": {"quantity": 4.0, "remarks": "Packaging Charges"}}	\N	2026-07-07 19:05:58.582046
 32	199	63	3	{"600": {"quantity": 4.0, "remarks": "Packaging Charges"}}	\N	2026-07-07 19:05:58.582062
+33	204	19	3	{"620": {"quantity": 5.0, "remarks": null}}	\N	2026-08-03 15:51:48.404829
+34	204	78	3	{"620": {"quantity": 5.0, "remarks": null}}	\N	2026-08-03 15:51:48.404869
+35	204	17	3	{"620": {"quantity": 5.0, "remarks": null}}	\N	2026-08-03 15:51:59.305839
+36	204	82	3	{"620": {"quantity": 5.0, "remarks": null}}	\N	2026-08-03 15:51:59.30588
+37	205	19	3	{"621": {"quantity": 5.0, "remarks": null}}	\N	2026-08-03 17:03:43.552754
+38	205	78	3	{"621": {"quantity": 5.0, "remarks": null}}	\N	2026-08-03 17:03:43.552764
+39	205	17	3	{"621": {"quantity": 5.0, "remarks": null}}	\N	2026-08-03 17:03:53.735047
+40	205	82	3	{"621": {"quantity": 5.0, "remarks": null}}	\N	2026-08-03 17:03:53.735086
 \.
 
 
@@ -12623,6 +15025,8 @@ COPY public.purchase_request_items (id, pr_id, material_id, quantity, approved_q
 617	202	3503	2	\N
 618	203	2564	32	32
 619	203	2860	1.5	1.2
+620	204	2469	5	5
+621	205	2435	5	5
 \.
 
 
@@ -12665,6 +15069,8 @@ COPY public.purchase_requests (id, tenant_id, site_id, pr_number, requester_id, 
 196	2	2	PR-00003	10	\N	\N	Mechanical	3	2026-06-26	\n[Rejected: no needed now]	Rejected	\N	\N	f	2026-06-12 00:56:37.980796	2026-07-08 11:21:18.029881	2	\N	\N	\N	\N	\N	\N	\N	\N
 199	2	2	PR-00006	3	\N	\N	\N	3	2026-06-30	\n[Short Closed: already pr raised ]	Short Closed	3	2026-07-07 13:35:58.620752	f	2026-06-16 11:01:07.031945	2026-07-08 11:22:24.991438	2	\N	\N	\N	\N	\N	\N	\N	\N
 201	2	2	PR-00008	3	\N	8	HEALTH 	3	2026-07-14		Converted to PO	3	2026-07-01 09:57:24.949598	f	2026-06-30 18:33:51.277817	2026-07-13 13:23:47.302281	2	\N	\N	\N	\N	\N	\N	\N	\N
+204	2	2	PR-00011	3	\N	\N	Biochemistry	3	2026-08-10		Approved	3	2026-08-03 10:21:59.342786	f	2026-08-03 15:51:29.219193	2026-08-03 15:51:59.34475	2	Purchase	\N	\N	\N	\N	\N	f	\N
+205	2	2	PR-00012	3	\N	8	HEALTH 	3	2026-08-15		Approved	3	2026-08-03 11:33:53.755286	f	2026-08-03 16:57:20.120584	2026-08-03 17:03:53.757181	2	Purchase	\N	\N	\N	\N	\N	f	\N
 \.
 
 
@@ -12768,6 +15174,274 @@ COPY public.quotation_comparisons (id, qr_id, qr_item_id, material_id, selected_
 116	207	467	3507	63	63	f	\N	\N	\N
 117	207	468	2751	63	63	f	\N	\N	\N
 118	206	465	2752	64	64	f	\N	\N	\N
+120	214	482	2564	63	63	f	\N	\N	\N
+119	213	480	2564	66	66	f	\N	\N	\N
+129	222	3994	4621	72	72	f	\N	3	2026-08-06 20:39:56.036196
+130	222	3995	4622	72	72	f	\N	3	2026-08-06 20:39:56.036202
+131	222	3996	4623	72	72	f	\N	3	2026-08-06 20:39:56.036207
+132	222	3997	4624	72	72	f	\N	3	2026-08-06 20:39:56.036212
+133	222	3998	4625	72	72	f	\N	3	2026-08-06 20:39:56.036217
+134	222	3999	4626	72	72	f	\N	3	2026-08-06 20:39:56.036222
+135	222	4000	4627	72	72	f	\N	3	2026-08-06 20:39:56.036227
+136	222	4001	4628	72	72	f	\N	3	2026-08-06 20:39:56.036232
+144	222	4009	4636	72	72	f	\N	3	2026-08-06 20:39:56.036237
+145	222	4010	4637	72	72	f	\N	3	2026-08-06 20:39:56.036095
+146	222	4011	4638	72	72	f	\N	3	2026-08-06 20:39:56.036242
+147	222	4012	4639	72	72	f	\N	3	2026-08-06 20:39:56.036247
+148	222	4013	4640	72	72	f	\N	3	2026-08-06 20:39:56.036252
+149	222	4014	4641	72	72	f	\N	3	2026-08-06 20:39:56.036257
+137	222	4002	4629	72	72	f	\N	3	2026-08-06 20:39:56.036021
+138	222	4003	4630	72	72	f	\N	3	2026-08-06 20:39:56.03604
+139	222	4004	4631	72	72	f	\N	3	2026-08-06 20:39:56.036048
+140	222	4005	4632	72	72	f	\N	3	2026-08-06 20:39:56.036055
+141	222	4006	4633	72	72	f	\N	3	2026-08-06 20:39:56.03606
+142	222	4007	4634	72	72	f	\N	3	2026-08-06 20:39:56.036065
+143	222	4008	4635	72	72	f	\N	3	2026-08-06 20:39:56.03607
+150	222	4015	4642	72	72	f	\N	3	2026-08-06 20:39:56.036262
+151	222	4016	4643	72	72	f	\N	3	2026-08-06 20:39:56.036268
+152	222	4017	4644	72	72	f	\N	3	2026-08-06 20:39:56.036272
+153	222	4018	4645	72	72	f	\N	3	2026-08-06 20:39:56.036277
+154	222	4019	4646	72	72	f	\N	3	2026-08-06 20:39:56.036282
+155	222	4020	4647	72	72	f	\N	3	2026-08-06 20:39:56.036288
+156	222	4021	4648	72	72	f	\N	3	2026-08-06 20:39:56.036293
+157	222	4022	4649	72	72	f	\N	3	2026-08-06 20:39:56.0361
+158	222	4023	4650	72	72	f	\N	3	2026-08-06 20:39:56.036298
+159	222	4024	4651	72	72	f	\N	3	2026-08-06 20:39:56.036303
+160	222	4025	4652	72	72	f	\N	3	2026-08-06 20:39:56.036308
+161	222	4026	4653	72	72	f	\N	3	2026-08-06 20:39:56.036313
+162	222	4027	4654	72	72	f	\N	3	2026-08-06 20:39:56.036318
+163	222	4028	4655	72	72	f	\N	3	2026-08-06 20:39:56.036323
+164	222	4029	4656	72	72	f	\N	3	2026-08-06 20:39:56.036328
+165	222	4030	4657	72	72	f	\N	3	2026-08-06 20:39:56.036333
+166	222	4031	4658	72	72	f	\N	3	2026-08-06 20:39:56.036338
+167	222	4032	4659	72	72	f	\N	3	2026-08-06 20:39:56.036343
+168	222	4033	4660	72	72	f	\N	3	2026-08-06 20:39:56.036348
+169	222	4034	4661	72	72	f	\N	3	2026-08-06 20:39:56.036353
+170	222	4035	4662	72	72	f	\N	3	2026-08-06 20:39:56.036358
+171	222	4036	4663	72	72	f	\N	3	2026-08-06 20:39:56.036363
+172	222	4037	4664	72	72	f	\N	3	2026-08-06 20:39:56.036368
+173	222	4038	4665	72	72	f	\N	3	2026-08-06 20:39:56.036373
+174	222	4039	4666	72	72	f	\N	3	2026-08-06 20:39:56.036378
+175	222	4040	4667	72	72	f	\N	3	2026-08-06 20:39:56.036383
+176	222	4041	4668	72	72	f	\N	3	2026-08-06 20:39:56.036388
+177	222	4042	4669	72	72	f	\N	3	2026-08-06 20:39:56.036393
+178	222	4043	4670	72	72	f	\N	3	2026-08-06 20:39:56.036398
+179	222	4044	4671	72	72	f	\N	3	2026-08-06 20:39:56.036403
+180	222	4045	4672	72	72	f	\N	3	2026-08-06 20:39:56.036408
+181	222	4046	4673	72	72	f	\N	3	2026-08-06 20:39:56.036413
+182	222	4047	4674	72	72	f	\N	3	2026-08-06 20:39:56.036418
+183	222	4048	4675	72	72	f	\N	3	2026-08-06 20:39:56.036424
+184	222	4049	4676	72	72	f	\N	3	2026-08-06 20:39:56.036429
+185	222	4050	4677	72	72	f	\N	3	2026-08-06 20:39:56.036434
+186	222	4051	4678	72	72	f	\N	3	2026-08-06 20:39:56.03644
+187	222	4052	4679	72	72	f	\N	3	2026-08-06 20:39:56.036445
+188	222	4053	4680	72	72	f	\N	3	2026-08-06 20:39:56.03645
+189	222	4054	4681	72	72	f	\N	3	2026-08-06 20:39:56.036455
+190	222	4055	4682	72	72	f	\N	3	2026-08-06 20:39:56.03646
+191	222	4056	4683	72	72	f	\N	3	2026-08-06 20:39:56.036465
+192	222	4057	4684	72	72	f	\N	3	2026-08-06 20:39:56.03647
+193	222	4058	4685	72	72	f	\N	3	2026-08-06 20:39:56.036475
+194	222	4059	4686	72	72	f	\N	3	2026-08-06 20:39:56.03648
+195	222	4060	4687	72	72	f	\N	3	2026-08-06 20:39:56.036105
+196	222	4061	4688	72	72	f	\N	3	2026-08-06 20:39:56.03611
+197	222	4062	4689	72	72	f	\N	3	2026-08-06 20:39:56.036485
+198	222	4063	4690	72	72	f	\N	3	2026-08-06 20:39:56.03649
+199	222	4064	4691	72	72	f	\N	3	2026-08-06 20:39:56.036495
+200	222	4065	4692	72	72	f	\N	3	2026-08-06 20:39:56.0365
+201	222	4066	4693	72	72	f	\N	3	2026-08-06 20:39:56.036505
+202	222	4067	4694	72	72	f	\N	3	2026-08-06 20:39:56.036509
+203	222	4068	4695	72	72	f	\N	3	2026-08-06 20:39:56.036515
+204	222	4069	4696	72	72	f	\N	3	2026-08-06 20:39:56.03652
+205	222	4070	4697	72	72	f	\N	3	2026-08-06 20:39:56.036525
+206	222	4071	4698	72	72	f	\N	3	2026-08-06 20:39:56.03653
+207	222	4072	4699	72	72	f	\N	3	2026-08-06 20:39:56.036535
+208	222	4073	4700	72	72	f	\N	3	2026-08-06 20:39:56.03654
+209	222	4074	4701	72	72	f	\N	3	2026-08-06 20:39:56.036544
+210	222	4075	4702	72	72	f	\N	3	2026-08-06 20:39:56.03655
+211	222	4076	4703	72	72	f	\N	3	2026-08-06 20:39:56.036555
+212	222	4077	4704	72	72	f	\N	3	2026-08-06 20:39:56.03656
+213	222	4078	4705	72	72	f	\N	3	2026-08-06 20:39:56.036565
+214	222	4079	4706	72	72	f	\N	3	2026-08-06 20:39:56.03657
+215	222	4080	4707	72	72	f	\N	3	2026-08-06 20:39:56.036575
+216	222	4081	4708	72	72	f	\N	3	2026-08-06 20:39:56.036115
+217	222	4082	4709	72	72	f	\N	3	2026-08-06 20:39:56.03658
+218	222	4083	4710	72	72	f	\N	3	2026-08-06 20:39:56.036585
+219	222	4084	4711	72	72	f	\N	3	2026-08-06 20:39:56.03659
+220	222	4085	4712	72	72	f	\N	3	2026-08-06 20:39:56.036595
+221	222	4086	4713	72	72	f	\N	3	2026-08-06 20:39:56.0366
+222	222	4087	4714	72	72	f	\N	3	2026-08-06 20:39:56.036605
+223	222	4088	4715	72	72	f	\N	3	2026-08-06 20:39:56.036611
+224	222	4089	4716	72	72	f	\N	3	2026-08-06 20:39:56.036616
+225	222	4090	4717	72	72	f	\N	3	2026-08-06 20:39:56.036621
+226	222	4091	4718	72	72	f	\N	3	2026-08-06 20:39:56.036626
+227	222	4092	4719	72	72	f	\N	3	2026-08-06 20:39:56.036631
+228	222	4093	4720	72	72	f	\N	3	2026-08-06 20:39:56.036636
+229	222	4094	4721	72	72	f	\N	3	2026-08-06 20:39:56.036641
+230	222	4095	4722	72	72	f	\N	3	2026-08-06 20:39:56.036646
+231	222	4096	4723	72	72	f	\N	3	2026-08-06 20:39:56.036651
+232	222	4097	4724	72	72	f	\N	3	2026-08-06 20:39:56.036656
+233	222	4098	4725	72	72	f	\N	3	2026-08-06 20:39:56.036661
+234	222	4099	4726	72	72	f	\N	3	2026-08-06 20:39:56.036666
+235	222	4100	4727	72	72	f	\N	3	2026-08-06 20:39:56.036671
+236	222	4101	4728	72	72	f	\N	3	2026-08-06 20:39:56.036676
+237	222	4102	4729	72	72	f	\N	3	2026-08-06 20:39:56.036681
+238	222	4103	4730	72	72	f	\N	3	2026-08-06 20:39:56.036686
+239	222	4104	4731	72	72	f	\N	3	2026-08-06 20:39:56.036691
+240	222	4105	4732	72	72	f	\N	3	2026-08-06 20:39:56.036696
+241	222	4106	4733	72	72	f	\N	3	2026-08-06 20:39:56.036701
+242	222	4107	4734	72	72	f	\N	3	2026-08-06 20:39:56.036706
+243	222	4108	4735	72	72	f	\N	3	2026-08-06 20:39:56.036711
+244	222	4109	4736	72	72	f	\N	3	2026-08-06 20:39:56.036716
+245	222	4110	4737	72	72	f	\N	3	2026-08-06 20:39:56.03612
+246	222	4111	4738	72	72	f	\N	3	2026-08-06 20:39:56.036721
+247	222	4112	4739	72	72	f	\N	3	2026-08-06 20:39:56.036726
+248	222	4113	4740	72	72	f	\N	3	2026-08-06 20:39:56.036731
+249	222	4114	4741	72	72	f	\N	3	2026-08-06 20:39:56.036738
+250	222	4115	4742	72	72	f	\N	3	2026-08-06 20:39:56.036743
+251	222	4116	4743	72	72	f	\N	3	2026-08-06 20:39:56.036784
+252	222	4117	4744	72	72	f	\N	3	2026-08-06 20:39:56.036791
+253	222	4118	4745	72	72	f	\N	3	2026-08-06 20:39:56.036796
+254	222	4119	4746	72	72	f	\N	3	2026-08-06 20:39:56.036126
+255	222	4120	4747	72	72	f	\N	3	2026-08-06 20:39:56.036131
+256	222	4121	4748	72	72	f	\N	3	2026-08-06 20:39:56.036801
+257	222	4122	4749	72	72	f	\N	3	2026-08-06 20:39:56.03608
+258	222	4123	4750	72	72	f	\N	3	2026-08-06 20:39:56.036085
+259	222	4124	4751	72	72	f	\N	3	2026-08-06 20:39:56.03609
+260	222	4125	4752	72	72	f	\N	3	2026-08-06 20:39:56.036806
+261	222	4126	4753	72	72	f	\N	3	2026-08-06 20:39:56.036811
+262	222	4127	4754	72	72	f	\N	3	2026-08-06 20:39:56.036815
+263	222	4128	4755	72	72	f	\N	3	2026-08-06 20:39:56.03682
+264	222	4129	4756	72	72	f	\N	3	2026-08-06 20:39:56.036825
+265	222	4130	4757	72	72	f	\N	3	2026-08-06 20:39:56.03683
+266	222	4131	4758	72	72	f	\N	3	2026-08-06 20:39:56.036835
+267	222	4132	4759	72	72	f	\N	3	2026-08-06 20:39:56.03684
+268	222	4133	4760	72	72	f	\N	3	2026-08-06 20:39:56.036845
+269	222	4134	4761	72	72	f	\N	3	2026-08-06 20:39:56.03685
+270	222	4135	4762	72	72	f	\N	3	2026-08-06 20:39:56.036855
+271	222	4136	4763	72	72	f	\N	3	2026-08-06 20:39:56.03686
+272	222	4137	4764	72	72	f	\N	3	2026-08-06 20:39:56.036865
+273	222	4138	4765	72	72	f	\N	3	2026-08-06 20:39:56.03687
+274	222	4139	4766	72	72	f	\N	3	2026-08-06 20:39:56.036875
+275	222	4140	4767	72	72	f	\N	3	2026-08-06 20:39:56.03688
+276	222	4141	4768	72	72	f	\N	3	2026-08-06 20:39:56.036885
+277	222	4142	4769	72	72	f	\N	3	2026-08-06 20:39:56.03689
+278	222	4143	4770	72	72	f	\N	3	2026-08-06 20:39:56.036894
+279	222	4144	4771	72	72	f	\N	3	2026-08-06 20:39:56.036899
+280	222	4145	4772	72	72	f	\N	3	2026-08-06 20:39:56.036904
+281	222	4146	4773	72	72	f	\N	3	2026-08-06 20:39:56.036909
+282	222	4147	4774	72	72	f	\N	3	2026-08-06 20:39:56.036914
+283	222	4148	4775	72	72	f	\N	3	2026-08-06 20:39:56.036919
+284	222	4149	4776	72	72	f	\N	3	2026-08-06 20:39:56.036924
+285	222	4150	4777	72	72	f	\N	3	2026-08-06 20:39:56.036929
+286	222	4151	4778	72	72	f	\N	3	2026-08-06 20:39:56.036934
+287	222	4152	4779	72	72	f	\N	3	2026-08-06 20:39:56.036939
+288	222	4153	4780	72	72	f	\N	3	2026-08-06 20:39:56.036944
+289	222	4154	4781	72	72	f	\N	3	2026-08-06 20:39:56.036949
+290	222	4155	4782	72	72	f	\N	3	2026-08-06 20:39:56.036954
+291	222	4156	4783	72	72	f	\N	3	2026-08-06 20:39:56.036959
+292	222	4157	4784	72	72	f	\N	3	2026-08-06 20:39:56.036964
+293	222	4158	4785	72	72	f	\N	3	2026-08-06 20:39:56.036969
+294	222	4159	4786	72	72	f	\N	3	2026-08-06 20:39:56.036973
+295	222	4160	4787	72	72	f	\N	3	2026-08-06 20:39:56.036978
+296	222	4161	4788	72	72	f	\N	3	2026-08-06 20:39:56.036983
+297	222	4162	4789	72	72	f	\N	3	2026-08-06 20:39:56.036988
+298	222	4163	4790	72	72	f	\N	3	2026-08-06 20:39:56.036993
+299	222	4164	4791	72	72	f	\N	3	2026-08-06 20:39:56.036998
+300	222	4165	4792	72	72	f	\N	3	2026-08-06 20:39:56.037003
+301	222	4166	4793	72	72	f	\N	3	2026-08-06 20:39:56.037008
+302	222	4167	4794	72	72	f	\N	3	2026-08-06 20:39:56.037012
+303	222	4168	4795	72	72	f	\N	3	2026-08-06 20:39:56.037017
+304	222	4169	4796	72	72	f	\N	3	2026-08-06 20:39:56.037023
+305	222	4170	4797	72	72	f	\N	3	2026-08-06 20:39:56.037028
+306	222	4171	4798	72	72	f	\N	3	2026-08-06 20:39:56.037032
+307	222	4172	4799	72	72	f	\N	3	2026-08-06 20:39:56.037037
+308	222	4173	4800	72	72	f	\N	3	2026-08-06 20:39:56.037042
+309	222	4174	4801	72	72	f	\N	3	2026-08-06 20:39:56.037047
+310	222	4175	4802	72	72	f	\N	3	2026-08-06 20:39:56.037052
+311	222	4176	4803	72	72	f	\N	3	2026-08-06 20:39:56.037057
+312	222	4177	4804	72	72	f	\N	3	2026-08-06 20:39:56.037062
+313	222	4178	4805	72	72	f	\N	3	2026-08-06 20:39:56.037067
+314	222	4179	4806	72	72	f	\N	3	2026-08-06 20:39:56.037072
+315	222	4180	4807	72	72	f	\N	3	2026-08-06 20:39:56.037081
+316	222	4181	4808	72	72	f	\N	3	2026-08-06 20:39:56.037086
+317	222	4182	4809	72	72	f	\N	3	2026-08-06 20:39:56.037091
+318	222	4183	4810	72	72	f	\N	3	2026-08-06 20:39:56.037096
+319	222	4184	4811	72	72	f	\N	3	2026-08-06 20:39:56.036137
+320	222	4185	4812	72	72	f	\N	3	2026-08-06 20:39:56.037101
+321	222	4186	4813	72	72	f	\N	3	2026-08-06 20:39:56.037106
+322	222	4187	4814	72	72	f	\N	3	2026-08-06 20:39:56.037111
+323	222	4188	4815	72	72	f	\N	3	2026-08-06 20:39:56.037116
+324	222	4189	4816	72	72	f	\N	3	2026-08-06 20:39:56.037121
+325	222	4190	4819	72	72	f	\N	3	2026-08-06 20:39:56.037126
+326	222	4191	4820	72	72	f	\N	3	2026-08-06 20:39:56.037131
+327	222	4192	4821	72	72	f	\N	3	2026-08-06 20:39:56.037136
+328	222	4193	4822	72	72	f	\N	3	2026-08-06 20:39:56.037141
+329	222	4194	4823	72	72	f	\N	3	2026-08-06 20:39:56.037146
+330	222	4195	4824	72	72	f	\N	3	2026-08-06 20:39:56.037151
+331	222	4196	4825	72	72	f	\N	3	2026-08-06 20:39:56.037156
+332	222	4197	4826	72	72	f	\N	3	2026-08-06 20:39:56.037161
+333	222	4198	4827	72	72	f	\N	3	2026-08-06 20:39:56.037166
+334	222	4199	4828	72	72	f	\N	3	2026-08-06 20:39:56.037171
+335	222	4200	4829	72	72	f	\N	3	2026-08-06 20:39:56.036142
+336	222	4201	4830	72	72	f	\N	3	2026-08-06 20:39:56.037177
+337	222	4202	4831	72	72	f	\N	3	2026-08-06 20:39:56.037182
+338	222	4203	4832	72	72	f	\N	3	2026-08-06 20:39:56.037187
+339	222	4204	4833	72	72	f	\N	3	2026-08-06 20:39:56.037192
+340	222	4205	4834	72	72	f	\N	3	2026-08-06 20:39:56.037197
+341	222	4206	4835	72	72	f	\N	3	2026-08-06 20:39:56.037202
+342	222	4207	4847	72	72	f	\N	3	2026-08-06 20:39:56.037206
+343	222	4208	4848	72	72	f	\N	3	2026-08-06 20:39:56.037212
+344	222	4209	4849	72	72	f	\N	3	2026-08-06 20:39:56.037217
+345	222	4210	4850	72	72	f	\N	3	2026-08-06 20:39:56.037222
+121	222	3986	4817	72	72	f	\N	3	2026-08-06 20:39:56.036157
+122	222	3987	4818	72	72	f	\N	3	2026-08-06 20:39:56.036162
+123	222	3988	4869	72	72	f	\N	3	2026-08-06 20:39:56.036167
+124	222	3989	4616	72	72	f	\N	3	2026-08-06 20:39:56.036172
+125	222	3990	4617	72	72	f	\N	3	2026-08-06 20:39:56.036177
+126	222	3991	4618	72	72	f	\N	3	2026-08-06 20:39:56.036182
+127	222	3992	4619	72	72	f	\N	3	2026-08-06 20:39:56.036187
+128	222	3993	4620	72	72	f	\N	3	2026-08-06 20:39:56.036192
+346	222	4211	4851	72	72	f	\N	3	2026-08-06 20:39:56.037227
+347	222	4212	4852	72	72	f	\N	3	2026-08-06 20:39:56.037232
+348	222	4213	4853	72	72	f	\N	3	2026-08-06 20:39:56.037237
+349	222	4214	4854	72	72	f	\N	3	2026-08-06 20:39:56.037242
+350	222	4215	4855	72	72	f	\N	3	2026-08-06 20:39:56.037247
+351	222	4216	4856	72	72	f	\N	3	2026-08-06 20:39:56.037252
+352	222	4217	4857	72	72	f	\N	3	2026-08-06 20:39:56.037257
+353	222	4218	4858	72	72	f	\N	3	2026-08-06 20:39:56.037262
+354	222	4219	4859	72	72	f	\N	3	2026-08-06 20:39:56.037267
+355	222	4220	4860	72	72	f	\N	3	2026-08-06 20:39:56.037272
+356	222	4221	4861	72	72	f	\N	3	2026-08-06 20:39:56.037277
+357	222	4222	4862	72	72	f	\N	3	2026-08-06 20:39:56.037282
+358	222	4223	4863	72	72	f	\N	3	2026-08-06 20:39:56.037288
+359	222	4224	4864	72	72	f	\N	3	2026-08-06 20:39:56.037293
+360	222	4225	4865	72	72	f	\N	3	2026-08-06 20:39:56.037298
+361	222	4226	4866	72	72	f	\N	3	2026-08-06 20:39:56.037303
+362	222	4227	4867	72	72	f	\N	3	2026-08-06 20:39:56.037308
+363	222	4228	4868	72	72	f	\N	3	2026-08-06 20:39:56.037313
+364	222	4229	4604	72	72	f	\N	3	2026-08-06 20:39:56.037318
+365	222	4230	4605	72	72	f	\N	3	2026-08-06 20:39:56.037323
+366	222	4231	4606	72	72	f	\N	3	2026-08-06 20:39:56.037328
+367	222	4232	4607	72	72	f	\N	3	2026-08-06 20:39:56.036147
+368	222	4233	4608	72	72	f	\N	3	2026-08-06 20:39:56.036152
+369	222	4234	4609	72	72	f	\N	3	2026-08-06 20:39:56.037333
+370	222	4235	4610	72	72	f	\N	3	2026-08-06 20:39:56.037338
+371	222	4236	4611	72	72	f	\N	3	2026-08-06 20:39:56.037343
+372	222	4237	4612	72	72	f	\N	3	2026-08-06 20:39:56.037348
+373	222	4238	4613	72	72	f	\N	3	2026-08-06 20:39:56.037353
+374	222	4239	4614	72	72	f	\N	3	2026-08-06 20:39:56.037358
+375	222	4240	4615	72	72	f	\N	3	2026-08-06 20:39:56.037364
+376	222	4241	4836	72	72	f	\N	3	2026-08-06 20:39:56.037369
+377	222	4242	4837	72	72	f	\N	3	2026-08-06 20:39:56.037374
+378	222	4243	4838	72	72	f	\N	3	2026-08-06 20:39:56.037379
+379	222	4244	4839	72	72	f	\N	3	2026-08-06 20:39:56.037384
+380	222	4245	4840	72	72	f	\N	3	2026-08-06 20:39:56.037389
+381	222	4246	4841	72	72	f	\N	3	2026-08-06 20:39:56.037394
+382	222	4247	4842	72	72	f	\N	3	2026-08-06 20:39:56.037399
+383	222	4248	4843	72	72	f	\N	3	2026-08-06 20:39:56.037404
+384	222	4249	4844	72	72	f	\N	3	2026-08-06 20:39:56.037409
+385	222	4250	4845	72	72	f	\N	3	2026-08-06 20:39:56.037414
+386	222	4251	4846	72	72	f	\N	3	2026-08-06 20:39:56.037419
 \.
 
 
@@ -12777,6 +15451,22 @@ COPY public.quotation_comparisons (id, qr_id, qr_item_id, material_id, selected_
 
 COPY public.quotation_negotiation_history (id, qr_id, vendor_id, discount_percent, remarks, created_by_id, created_at, item_discounts) FROM stdin;
 1	191	63	10		3	2026-07-21 12:33:03.576446	\N
+2	207	62	10		3	2026-08-03 15:19:59.817234	{"466": 0.0, "467": 0.0, "468": 0.0}
+3	207	63	10		3	2026-08-03 15:20:36.223371	{"466": 0.0, "467": 0.0, "468": 0.0}
+4	207	62	10		3	2026-08-03 15:31:21.592623	{}
+5	207	62	2		3	2026-08-03 15:32:45.035981	{"466": 10.0, "467": 10.0, "468": 10.0}
+6	207	63	5		3	2026-08-03 15:42:51.863719	{}
+7	213	66	0		3	2026-08-03 15:45:27.084938	{"480": 12.0}
+8	213	63	0		3	2026-08-03 15:47:39.432356	{"480": 5.0}
+9	213	63	0		3	2026-08-03 15:50:50.512592	{"480": 10.0}
+10	213	63	0		3	2026-08-03 15:51:40.759121	{"480": 25.0}
+11	213	63	0		3	2026-08-03 15:52:00.623442	{"480": 2.0}
+12	213	66	0		3	2026-08-03 15:59:23.702202	{"480": 12.0}
+13	213	66	0		3	2026-08-03 15:59:37.681951	{"480": 13.0}
+14	191	63	3		3	2026-08-03 16:19:47.791098	{}
+15	191	63	11		3	2026-08-03 16:19:59.324099	{}
+16	222	72	10		3	2026-08-06 20:36:24.187298	{}
+17	222	69	5		3	2026-08-06 20:37:46.112051	{}
 \.
 
 
@@ -12893,6 +15583,563 @@ COPY public.quotation_request_item_sources (id, qr_item_id, source, source_pr_id
 113	471	Manual	\N	10
 114	472	Manual	\N	1
 115	473	Manual	\N	1
+116	474	Manual	\N	100
+118	476	Manual	\N	100
+120	478	Manual	\N	100
+122	480	Manual	\N	100
+124	482	Manual	\N	100
+125	483	Manual	\N	1
+126	484	PR	204	5
+127	485	Manual	\N	1
+128	486	PR	205	5
+129	487	Manual	\N	1
+130	488	Manual	\N	1
+131	489	PR	205	5
+132	490	Manual	\N	1
+133	491	Manual	\N	1
+134	492	PR	205	5
+135	493	Manual	\N	1
+136	494	Manual	\N	1
+137	495	PR	205	5
+138	496	Manual	\N	1
+139	497	Manual	\N	1
+140	498	PR	205	5
+144	502	Manual	\N	1
+145	503	Manual	\N	1
+146	504	Manual	\N	5
+147	504	PR	205	5
+3633	3986	Imported	\N	500
+3634	3987	Imported	\N	500
+3635	3988	Imported	\N	14
+3636	3989	Imported	\N	125
+3637	3990	Imported	\N	500
+3638	3991	Imported	\N	500
+3639	3992	Imported	\N	500
+3640	3993	Imported	\N	13
+3641	3994	Imported	\N	500
+3642	3995	Imported	\N	500
+3643	3996	Imported	\N	500
+3644	3997	Imported	\N	500
+3645	3998	Imported	\N	500
+3646	3999	Imported	\N	100
+3647	4000	Imported	\N	500
+3648	4001	Imported	\N	500
+3649	4002	Imported	\N	100
+3650	4003	Imported	\N	500
+3651	4004	Imported	\N	500
+3652	4005	Imported	\N	500
+3653	4006	Imported	\N	500
+3654	4007	Imported	\N	500
+3655	4008	Imported	\N	500
+3656	4009	Imported	\N	500
+3657	4010	Imported	\N	500
+3658	4011	Imported	\N	250
+3367	3720	Imported	\N	502
+3368	3721	Imported	\N	508
+3369	3722	Imported	\N	28
+3370	3723	Imported	\N	136
+3371	3724	Imported	\N	507
+3372	3725	Imported	\N	503
+3373	3726	Imported	\N	503
+3374	3727	Imported	\N	26
+3375	3728	Imported	\N	515
+3376	3729	Imported	\N	511
+3377	3730	Imported	\N	502
+3378	3731	Imported	\N	502
+3379	3732	Imported	\N	514
+3380	3733	Imported	\N	102
+3381	3734	Imported	\N	513
+3382	3735	Imported	\N	501
+3383	3736	Imported	\N	111
+3384	3737	Imported	\N	511
+3385	3738	Imported	\N	505
+3386	3739	Imported	\N	510
+3387	3740	Imported	\N	515
+3388	3741	Imported	\N	512
+3389	3742	Imported	\N	509
+3390	3743	Imported	\N	506
+3391	3744	Imported	\N	514
+3392	3745	Imported	\N	254
+3393	3746	Imported	\N	506
+3394	3747	Imported	\N	511
+3395	3748	Imported	\N	109
+3396	3749	Imported	\N	138
+3397	3750	Imported	\N	515
+3398	3751	Imported	\N	129
+3399	3752	Imported	\N	139
+3400	3753	Imported	\N	136
+3401	3754	Imported	\N	132
+3402	3755	Imported	\N	128
+3403	3756	Imported	\N	133
+3404	3757	Imported	\N	505
+3405	3758	Imported	\N	511
+3406	3759	Imported	\N	502
+3407	3760	Imported	\N	515
+3408	3761	Imported	\N	106
+3409	3762	Imported	\N	1004
+3410	3763	Imported	\N	14
+3411	3764	Imported	\N	515
+3412	3765	Imported	\N	101
+3413	3766	Imported	\N	502
+3414	3767	Imported	\N	514
+3415	3768	Imported	\N	24
+3416	3769	Imported	\N	108
+3417	3770	Imported	\N	510
+3418	3771	Imported	\N	512
+3419	3772	Imported	\N	136
+3420	3773	Imported	\N	131
+3421	3774	Imported	\N	103
+3422	3775	Imported	\N	515
+3423	3776	Imported	\N	512
+3424	3777	Imported	\N	103
+3425	3778	Imported	\N	503
+3426	3779	Imported	\N	514
+3427	3780	Imported	\N	510
+3428	3781	Imported	\N	513
+3429	3782	Imported	\N	514
+3430	3783	Imported	\N	507
+3431	3784	Imported	\N	501
+3432	3785	Imported	\N	514
+3433	3786	Imported	\N	509
+3434	3787	Imported	\N	106
+3435	3788	Imported	\N	17
+3436	3789	Imported	\N	506
+3437	3790	Imported	\N	515
+3438	3791	Imported	\N	2
+3439	3792	Imported	\N	513
+3440	3793	Imported	\N	506
+3441	3794	Imported	\N	506
+3442	3795	Imported	\N	505
+3443	3796	Imported	\N	507
+3444	3797	Imported	\N	263
+3445	3798	Imported	\N	515
+3446	3799	Imported	\N	257
+3447	3800	Imported	\N	509
+3448	3801	Imported	\N	512
+3449	3802	Imported	\N	504
+3450	3803	Imported	\N	259
+3451	3804	Imported	\N	503
+3452	3805	Imported	\N	507
+3453	3806	Imported	\N	16
+3454	3807	Imported	\N	10
+3455	3808	Imported	\N	26
+3456	3809	Imported	\N	112
+3457	3810	Imported	\N	515
+3458	3811	Imported	\N	502
+3459	3812	Imported	\N	10
+3460	3813	Imported	\N	501
+3461	3814	Imported	\N	501
+3462	3815	Imported	\N	502
+3463	3816	Imported	\N	503
+3464	3817	Imported	\N	513
+3465	3818	Imported	\N	138
+3466	3819	Imported	\N	112
+3467	3820	Imported	\N	501
+3468	3821	Imported	\N	512
+3469	3822	Imported	\N	127
+3470	3823	Imported	\N	513
+3471	3824	Imported	\N	1013
+3472	3825	Imported	\N	503
+3473	3826	Imported	\N	8
+3474	3827	Imported	\N	14
+3475	3828	Imported	\N	501
+3476	3829	Imported	\N	502
+3477	3830	Imported	\N	510
+3478	3831	Imported	\N	511
+3479	3832	Imported	\N	514
+3480	3833	Imported	\N	513
+3481	3834	Imported	\N	513
+3482	3835	Imported	\N	514
+3483	3836	Imported	\N	506
+3484	3837	Imported	\N	515
+3485	3838	Imported	\N	253
+3486	3839	Imported	\N	512
+3487	3840	Imported	\N	512
+3488	3841	Imported	\N	18
+3489	3842	Imported	\N	510
+3490	3843	Imported	\N	512
+3491	3844	Imported	\N	511
+3492	3845	Imported	\N	507
+3493	3846	Imported	\N	510
+3494	3847	Imported	\N	515
+3495	3848	Imported	\N	131
+3496	3849	Imported	\N	113
+3497	3850	Imported	\N	508
+3498	3851	Imported	\N	261
+3499	3852	Imported	\N	515
+3500	3853	Imported	\N	506
+3501	3854	Imported	\N	515
+3502	3855	Imported	\N	509
+3503	3856	Imported	\N	505
+3504	3857	Imported	\N	113
+3505	3858	Imported	\N	502
+3506	3859	Imported	\N	507
+3507	3860	Imported	\N	511
+3508	3861	Imported	\N	506
+3509	3862	Imported	\N	115
+3510	3863	Imported	\N	28
+3511	3864	Imported	\N	513
+3512	3865	Imported	\N	8
+3513	3866	Imported	\N	513
+3514	3867	Imported	\N	507
+3515	3868	Imported	\N	112
+3516	3869	Imported	\N	510
+3517	3870	Imported	\N	508
+3518	3871	Imported	\N	507
+3519	3872	Imported	\N	509
+3520	3873	Imported	\N	31
+3521	3874	Imported	\N	12
+3522	3875	Imported	\N	510
+3523	3876	Imported	\N	131
+3524	3877	Imported	\N	503
+3525	3878	Imported	\N	501
+3526	3879	Imported	\N	8
+3527	3880	Imported	\N	504
+3528	3881	Imported	\N	505
+3529	3882	Imported	\N	18
+3530	3883	Imported	\N	502
+3531	3884	Imported	\N	505
+3532	3885	Imported	\N	502
+3533	3886	Imported	\N	512
+3534	3887	Imported	\N	506
+3535	3888	Imported	\N	511
+3536	3889	Imported	\N	2
+3537	3890	Imported	\N	502
+3538	3891	Imported	\N	514
+3539	3892	Imported	\N	504
+3540	3893	Imported	\N	515
+3541	3894	Imported	\N	510
+3542	3895	Imported	\N	4
+3543	3896	Imported	\N	108
+3544	3897	Imported	\N	506
+3545	3898	Imported	\N	506
+3546	3899	Imported	\N	508
+3547	3900	Imported	\N	507
+3548	3901	Imported	\N	509
+3549	3902	Imported	\N	10
+3550	3903	Imported	\N	501
+3551	3904	Imported	\N	505
+3552	3905	Imported	\N	507
+3553	3906	Imported	\N	102
+3554	3907	Imported	\N	12
+3555	3908	Imported	\N	140
+3556	3909	Imported	\N	37
+3557	3910	Imported	\N	505
+3558	3911	Imported	\N	10
+3559	3912	Imported	\N	509
+3560	3913	Imported	\N	514
+3561	3914	Imported	\N	504
+3562	3915	Imported	\N	502
+3563	3916	Imported	\N	506
+3564	3917	Imported	\N	507
+3565	3918	Imported	\N	509
+3566	3919	Imported	\N	506
+3567	3920	Imported	\N	507
+3568	3921	Imported	\N	507
+3569	3922	Imported	\N	504
+3570	3923	Imported	\N	512
+3571	3924	Imported	\N	509
+3572	3925	Imported	\N	510
+3659	4012	Imported	\N	500
+3660	4013	Imported	\N	500
+3661	4014	Imported	\N	100
+3662	4015	Imported	\N	125
+3663	4016	Imported	\N	500
+3664	4017	Imported	\N	125
+3665	4018	Imported	\N	125
+3666	4019	Imported	\N	125
+3667	4020	Imported	\N	125
+3668	4021	Imported	\N	125
+3669	4022	Imported	\N	125
+3670	4023	Imported	\N	500
+3671	4024	Imported	\N	500
+3672	4025	Imported	\N	500
+3673	4026	Imported	\N	500
+3674	4027	Imported	\N	100
+3675	4028	Imported	\N	1000
+3676	4029	Imported	\N	7
+3677	4030	Imported	\N	500
+3678	4031	Imported	\N	100
+3679	4032	Imported	\N	500
+3680	4033	Imported	\N	500
+3681	4034	Imported	\N	12
+3682	4035	Imported	\N	100
+3683	4036	Imported	\N	500
+3684	4037	Imported	\N	500
+3685	4038	Imported	\N	125
+3686	4039	Imported	\N	125
+3687	4040	Imported	\N	100
+3688	4041	Imported	\N	500
+3689	4042	Imported	\N	500
+3690	4043	Imported	\N	100
+3691	4044	Imported	\N	500
+3692	4045	Imported	\N	500
+3693	4046	Imported	\N	500
+3694	4047	Imported	\N	500
+3695	4048	Imported	\N	500
+3696	4049	Imported	\N	500
+3697	4050	Imported	\N	500
+3698	4051	Imported	\N	500
+3699	4052	Imported	\N	500
+3700	4053	Imported	\N	100
+3701	4054	Imported	\N	10
+3702	4055	Imported	\N	500
+3703	4056	Imported	\N	500
+3704	4057	Imported	\N	1
+3705	4058	Imported	\N	500
+3706	4059	Imported	\N	500
+3707	4060	Imported	\N	500
+3708	4061	Imported	\N	500
+3709	4062	Imported	\N	500
+3710	4063	Imported	\N	250
+3711	4064	Imported	\N	500
+3712	4065	Imported	\N	250
+3713	4066	Imported	\N	500
+3714	4067	Imported	\N	500
+3715	4068	Imported	\N	500
+3716	4069	Imported	\N	250
+3717	4070	Imported	\N	500
+3718	4071	Imported	\N	500
+3719	4072	Imported	\N	8
+3720	4073	Imported	\N	5
+3721	4074	Imported	\N	13
+3722	4075	Imported	\N	100
+3723	4076	Imported	\N	500
+3724	4077	Imported	\N	500
+3725	4078	Imported	\N	5
+3726	4079	Imported	\N	500
+3727	4080	Imported	\N	500
+3728	4081	Imported	\N	500
+3729	4082	Imported	\N	500
+3730	4083	Imported	\N	500
+3731	4084	Imported	\N	125
+3732	4085	Imported	\N	100
+3733	4086	Imported	\N	500
+3734	4087	Imported	\N	500
+3735	4088	Imported	\N	125
+3736	4089	Imported	\N	500
+3737	4090	Imported	\N	1000
+3738	4091	Imported	\N	500
+3739	4092	Imported	\N	4
+3740	4093	Imported	\N	5
+3741	4094	Imported	\N	500
+3742	4095	Imported	\N	500
+3743	4096	Imported	\N	500
+3744	4097	Imported	\N	500
+3745	4098	Imported	\N	500
+3746	4099	Imported	\N	500
+3747	4100	Imported	\N	500
+3748	4101	Imported	\N	500
+3749	4102	Imported	\N	500
+3750	4103	Imported	\N	500
+3751	4104	Imported	\N	250
+3752	4105	Imported	\N	500
+3753	4106	Imported	\N	500
+3754	4107	Imported	\N	9
+3755	4108	Imported	\N	500
+3756	4109	Imported	\N	500
+3757	4110	Imported	\N	500
+3758	4111	Imported	\N	500
+3759	4112	Imported	\N	500
+3760	4113	Imported	\N	500
+3761	4114	Imported	\N	125
+3762	4115	Imported	\N	100
+3763	4116	Imported	\N	500
+3764	4117	Imported	\N	250
+3765	4118	Imported	\N	500
+3766	4119	Imported	\N	500
+3767	4120	Imported	\N	500
+3768	4121	Imported	\N	500
+3769	4122	Imported	\N	500
+3770	4123	Imported	\N	100
+3771	4124	Imported	\N	500
+3772	4125	Imported	\N	500
+3773	4126	Imported	\N	500
+3774	4127	Imported	\N	500
+3775	4128	Imported	\N	100
+3776	4129	Imported	\N	14
+3777	4130	Imported	\N	500
+3778	4131	Imported	\N	4
+3779	4132	Imported	\N	500
+3780	4133	Imported	\N	500
+3781	4134	Imported	\N	100
+3782	4135	Imported	\N	500
+3783	4136	Imported	\N	500
+3784	4137	Imported	\N	500
+3785	4138	Imported	\N	500
+3786	4139	Imported	\N	25
+3787	4140	Imported	\N	6
+3788	4141	Imported	\N	500
+3789	4142	Imported	\N	125
+3790	4143	Imported	\N	500
+3791	4144	Imported	\N	500
+3792	4145	Imported	\N	4
+3793	4146	Imported	\N	500
+3794	4147	Imported	\N	500
+3795	4148	Imported	\N	9
+3796	4149	Imported	\N	500
+3797	4150	Imported	\N	500
+3798	4151	Imported	\N	500
+3799	4152	Imported	\N	500
+3800	4153	Imported	\N	500
+3801	4154	Imported	\N	500
+3802	4155	Imported	\N	1
+3803	4156	Imported	\N	500
+3804	4157	Imported	\N	500
+3805	4158	Imported	\N	500
+3806	4159	Imported	\N	500
+3807	4160	Imported	\N	500
+3808	4161	Imported	\N	2
+3809	4162	Imported	\N	100
+3810	4163	Imported	\N	500
+3811	4164	Imported	\N	500
+3812	4165	Imported	\N	500
+3813	4166	Imported	\N	500
+3814	4167	Imported	\N	500
+3815	4168	Imported	\N	5
+3816	4169	Imported	\N	500
+3817	4170	Imported	\N	500
+3818	4171	Imported	\N	500
+3819	4172	Imported	\N	100
+3820	4173	Imported	\N	1
+3821	4174	Imported	\N	125
+3822	4175	Imported	\N	25
+3823	4176	Imported	\N	500
+3824	4177	Imported	\N	5
+3825	4178	Imported	\N	500
+3826	4179	Imported	\N	500
+3827	4180	Imported	\N	500
+3828	4181	Imported	\N	500
+3829	4182	Imported	\N	500
+3830	4183	Imported	\N	500
+3831	4184	Imported	\N	500
+3832	4185	Imported	\N	500
+3833	4186	Imported	\N	500
+3834	4187	Imported	\N	500
+3835	4188	Imported	\N	500
+3836	4189	Imported	\N	500
+3837	4190	Imported	\N	500
+3838	4191	Imported	\N	500
+3839	4192	Imported	\N	100
+3840	4193	Imported	\N	15
+3841	4194	Imported	\N	100
+3842	4195	Imported	\N	250
+3843	4196	Imported	\N	500
+3844	4197	Imported	\N	500
+3845	4198	Imported	\N	500
+3846	4199	Imported	\N	500
+3847	4200	Imported	\N	500
+3848	4201	Imported	\N	500
+3849	4202	Imported	\N	500
+3850	4203	Imported	\N	500
+3851	4204	Imported	\N	500
+3852	4205	Imported	\N	500
+3853	4206	Imported	\N	500
+3854	4207	Imported	\N	125
+3855	4208	Imported	\N	500
+3856	4209	Imported	\N	500
+3857	4210	Imported	\N	500
+3858	4211	Imported	\N	500
+3859	4212	Imported	\N	500
+3860	4213	Imported	\N	500
+3861	4214	Imported	\N	5
+3862	4215	Imported	\N	9
+3863	4216	Imported	\N	13
+3864	4217	Imported	\N	11
+3865	4218	Imported	\N	10
+3866	4219	Imported	\N	500
+3867	4220	Imported	\N	10
+3868	4221	Imported	\N	5
+3869	4222	Imported	\N	6
+3870	4223	Imported	\N	9
+3871	4224	Imported	\N	2
+3872	4225	Imported	\N	6
+3873	4226	Imported	\N	8
+3874	4227	Imported	\N	10
+3875	4228	Imported	\N	11
+3876	4229	Imported	\N	500
+3877	4230	Imported	\N	5
+3878	4231	Imported	\N	500
+3879	4232	Imported	\N	500
+3880	4233	Imported	\N	500
+3881	4234	Imported	\N	250
+3882	4235	Imported	\N	500
+3883	4236	Imported	\N	500
+3884	4237	Imported	\N	500
+3885	4238	Imported	\N	500
+3886	4239	Imported	\N	500
+3887	4240	Imported	\N	500
+3888	4241	Imported	\N	500
+3889	4242	Imported	\N	125
+3890	4243	Imported	\N	10
+3891	4244	Imported	\N	500
+3892	4245	Imported	\N	500
+3893	4246	Imported	\N	100
+3894	4247	Imported	\N	500
+3895	4248	Imported	\N	500
+3896	4249	Imported	\N	500
+3897	4250	Imported	\N	100
+3898	4251	Imported	\N	500
+3573	3926	Imported	\N	111
+3574	3927	Imported	\N	30
+3575	3928	Imported	\N	110
+3576	3929	Imported	\N	254
+3577	3930	Imported	\N	505
+3578	3931	Imported	\N	503
+3579	3932	Imported	\N	504
+3580	3933	Imported	\N	515
+3581	3934	Imported	\N	504
+3582	3935	Imported	\N	508
+3583	3936	Imported	\N	509
+3584	3937	Imported	\N	512
+3585	3938	Imported	\N	502
+3586	3939	Imported	\N	501
+3587	3940	Imported	\N	512
+3588	3941	Imported	\N	127
+3589	3942	Imported	\N	511
+3590	3943	Imported	\N	513
+3591	3944	Imported	\N	501
+3592	3945	Imported	\N	514
+3593	3946	Imported	\N	510
+3594	3947	Imported	\N	508
+3595	3948	Imported	\N	10
+3596	3949	Imported	\N	18
+3597	3950	Imported	\N	26
+3598	3951	Imported	\N	22
+3599	3952	Imported	\N	20
+3600	3953	Imported	\N	512
+3601	3954	Imported	\N	20
+3602	3955	Imported	\N	10
+3603	3956	Imported	\N	12
+3604	3957	Imported	\N	18
+3605	3958	Imported	\N	4
+3606	3959	Imported	\N	12
+3607	3960	Imported	\N	16
+3608	3961	Imported	\N	20
+3609	3962	Imported	\N	22
+3610	3963	Imported	\N	504
+3611	3964	Imported	\N	10
+3612	3965	Imported	\N	515
+3613	3966	Imported	\N	511
+3614	3967	Imported	\N	501
+3615	3968	Imported	\N	261
+3616	3969	Imported	\N	505
+3617	3970	Imported	\N	511
+3618	3971	Imported	\N	506
+3619	3972	Imported	\N	508
+3620	3973	Imported	\N	513
+3621	3974	Imported	\N	509
+3622	3975	Imported	\N	509
+3623	3976	Imported	\N	127
+3624	3977	Imported	\N	20
+3625	3978	Imported	\N	507
+3626	3979	Imported	\N	513
+3627	3980	Imported	\N	109
+3628	3981	Imported	\N	512
+3629	3982	Imported	\N	508
+3630	3983	Imported	\N	503
+3631	3984	Imported	\N	105
+3632	3985	Imported	\N	515
 \.
 
 
@@ -13037,6 +16284,562 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 471	209	2357	10	Manual	\N
 472	208	2564	1	Manual	\N
 473	208	2565	1	Manual	\N
+474	210	2564	100	Manual	\N
+476	211	2564	100	Manual	\N
+478	212	2564	100	Manual	\N
+480	213	2564	100	Manual	\N
+482	214	2564	100	Manual	\N
+483	215	2564	1	Manual	\N
+484	215	2469	5	PR	204
+485	216	3474	1	Manual	\N
+486	216	2435	5	PR	205
+487	217	2565	1	Manual	\N
+488	217	2564	1	Manual	\N
+489	217	2435	5	PR	205
+490	218	2565	1	Manual	\N
+491	218	2564	1	Manual	\N
+492	218	2435	5	PR	205
+493	219	2565	1	Manual	\N
+494	219	2564	1	Manual	\N
+495	219	2435	5	PR	205
+496	220	2565	1	Manual	\N
+497	220	2564	1	Manual	\N
+498	220	2435	5	PR	205
+502	221	2565	1	Manual	\N
+503	221	2564	1	Manual	\N
+504	221	2435	10	Manual	\N
+3986	222	4817	500	Imported	\N
+3987	222	4818	500	Imported	\N
+3988	222	4869	14	Imported	\N
+3989	222	4616	125	Imported	\N
+3990	222	4617	500	Imported	\N
+3991	222	4618	500	Imported	\N
+3992	222	4619	500	Imported	\N
+3993	222	4620	13	Imported	\N
+3994	222	4621	500	Imported	\N
+3995	222	4622	500	Imported	\N
+3996	222	4623	500	Imported	\N
+3997	222	4624	500	Imported	\N
+3998	222	4625	500	Imported	\N
+3999	222	4626	100	Imported	\N
+4000	222	4627	500	Imported	\N
+4001	222	4628	500	Imported	\N
+4002	222	4629	100	Imported	\N
+4003	222	4630	500	Imported	\N
+4004	222	4631	500	Imported	\N
+4005	222	4632	500	Imported	\N
+4006	222	4633	500	Imported	\N
+4007	222	4634	500	Imported	\N
+4008	222	4635	500	Imported	\N
+4009	222	4636	500	Imported	\N
+4010	222	4637	500	Imported	\N
+4011	222	4638	250	Imported	\N
+4012	222	4639	500	Imported	\N
+4013	222	4640	500	Imported	\N
+4014	222	4641	100	Imported	\N
+4015	222	4642	125	Imported	\N
+4016	222	4643	500	Imported	\N
+4017	222	4644	125	Imported	\N
+4018	222	4645	125	Imported	\N
+4019	222	4646	125	Imported	\N
+4020	222	4647	125	Imported	\N
+4021	222	4648	125	Imported	\N
+4022	222	4649	125	Imported	\N
+4023	222	4650	500	Imported	\N
+4024	222	4651	500	Imported	\N
+4025	222	4652	500	Imported	\N
+4026	222	4653	500	Imported	\N
+4027	222	4654	100	Imported	\N
+4028	222	4655	1000	Imported	\N
+4029	222	4656	7	Imported	\N
+4030	222	4657	500	Imported	\N
+4031	222	4658	100	Imported	\N
+4032	222	4659	500	Imported	\N
+4033	222	4660	500	Imported	\N
+4034	222	4661	12	Imported	\N
+4035	222	4662	100	Imported	\N
+4036	222	4663	500	Imported	\N
+4037	222	4664	500	Imported	\N
+4038	222	4665	125	Imported	\N
+4039	222	4666	125	Imported	\N
+4040	222	4667	100	Imported	\N
+4041	222	4668	500	Imported	\N
+4042	222	4669	500	Imported	\N
+4043	222	4670	100	Imported	\N
+4044	222	4671	500	Imported	\N
+4045	222	4672	500	Imported	\N
+4046	222	4673	500	Imported	\N
+4047	222	4674	500	Imported	\N
+4048	222	4675	500	Imported	\N
+4049	222	4676	500	Imported	\N
+4050	222	4677	500	Imported	\N
+4051	222	4678	500	Imported	\N
+4052	222	4679	500	Imported	\N
+4053	222	4680	100	Imported	\N
+4054	222	4681	10	Imported	\N
+4055	222	4682	500	Imported	\N
+4056	222	4683	500	Imported	\N
+4057	222	4684	1	Imported	\N
+4058	222	4685	500	Imported	\N
+4059	222	4686	500	Imported	\N
+4060	222	4687	500	Imported	\N
+4061	222	4688	500	Imported	\N
+4062	222	4689	500	Imported	\N
+4063	222	4690	250	Imported	\N
+4064	222	4691	500	Imported	\N
+4065	222	4692	250	Imported	\N
+4066	222	4693	500	Imported	\N
+4067	222	4694	500	Imported	\N
+4068	222	4695	500	Imported	\N
+4069	222	4696	250	Imported	\N
+4070	222	4697	500	Imported	\N
+4071	222	4698	500	Imported	\N
+4072	222	4699	8	Imported	\N
+4073	222	4700	5	Imported	\N
+4074	222	4701	13	Imported	\N
+4075	222	4702	100	Imported	\N
+4076	222	4703	500	Imported	\N
+4077	222	4704	500	Imported	\N
+4078	222	4705	5	Imported	\N
+4079	222	4706	500	Imported	\N
+4080	222	4707	500	Imported	\N
+4081	222	4708	500	Imported	\N
+4082	222	4709	500	Imported	\N
+4083	222	4710	500	Imported	\N
+4084	222	4711	125	Imported	\N
+4085	222	4712	100	Imported	\N
+4086	222	4713	500	Imported	\N
+4087	222	4714	500	Imported	\N
+4088	222	4715	125	Imported	\N
+4089	222	4716	500	Imported	\N
+4090	222	4717	1000	Imported	\N
+4091	222	4718	500	Imported	\N
+4092	222	4719	4	Imported	\N
+4093	222	4720	5	Imported	\N
+4094	222	4721	500	Imported	\N
+4095	222	4722	500	Imported	\N
+4096	222	4723	500	Imported	\N
+4097	222	4724	500	Imported	\N
+4098	222	4725	500	Imported	\N
+4099	222	4726	500	Imported	\N
+4100	222	4727	500	Imported	\N
+4101	222	4728	500	Imported	\N
+4102	222	4729	500	Imported	\N
+4103	222	4730	500	Imported	\N
+4104	222	4731	250	Imported	\N
+4105	222	4732	500	Imported	\N
+4106	222	4733	500	Imported	\N
+4107	222	4734	9	Imported	\N
+4108	222	4735	500	Imported	\N
+4109	222	4736	500	Imported	\N
+4110	222	4737	500	Imported	\N
+4111	222	4738	500	Imported	\N
+4112	222	4739	500	Imported	\N
+4113	222	4740	500	Imported	\N
+4114	222	4741	125	Imported	\N
+4115	222	4742	100	Imported	\N
+4116	222	4743	500	Imported	\N
+4117	222	4744	250	Imported	\N
+4118	222	4745	500	Imported	\N
+4119	222	4746	500	Imported	\N
+4120	222	4747	500	Imported	\N
+4121	222	4748	500	Imported	\N
+4122	222	4749	500	Imported	\N
+4123	222	4750	100	Imported	\N
+4124	222	4751	500	Imported	\N
+4125	222	4752	500	Imported	\N
+4126	222	4753	500	Imported	\N
+4127	222	4754	500	Imported	\N
+4128	222	4755	100	Imported	\N
+4129	222	4756	14	Imported	\N
+4130	222	4757	500	Imported	\N
+4131	222	4758	4	Imported	\N
+4132	222	4759	500	Imported	\N
+4133	222	4760	500	Imported	\N
+4134	222	4761	100	Imported	\N
+4135	222	4762	500	Imported	\N
+4136	222	4763	500	Imported	\N
+4137	222	4764	500	Imported	\N
+4138	222	4765	500	Imported	\N
+4139	222	4766	25	Imported	\N
+4140	222	4767	6	Imported	\N
+4141	222	4768	500	Imported	\N
+4142	222	4769	125	Imported	\N
+4143	222	4770	500	Imported	\N
+4144	222	4771	500	Imported	\N
+4145	222	4772	4	Imported	\N
+4146	222	4773	500	Imported	\N
+4147	222	4774	500	Imported	\N
+4148	222	4775	9	Imported	\N
+3873	223	4766	31	Imported	\N
+3874	223	4767	12	Imported	\N
+3875	223	4768	510	Imported	\N
+3876	223	4769	131	Imported	\N
+3877	223	4770	503	Imported	\N
+3878	223	4771	501	Imported	\N
+3879	223	4772	8	Imported	\N
+3880	223	4773	504	Imported	\N
+3881	223	4774	505	Imported	\N
+3882	223	4775	18	Imported	\N
+3883	223	4776	502	Imported	\N
+3884	223	4777	505	Imported	\N
+3885	223	4778	502	Imported	\N
+3886	223	4779	512	Imported	\N
+3887	223	4780	506	Imported	\N
+3888	223	4781	511	Imported	\N
+3889	223	4782	2	Imported	\N
+3890	223	4783	502	Imported	\N
+3891	223	4784	514	Imported	\N
+3892	223	4785	504	Imported	\N
+3893	223	4786	515	Imported	\N
+3894	223	4787	510	Imported	\N
+3895	223	4788	4	Imported	\N
+3896	223	4789	108	Imported	\N
+3897	223	4790	506	Imported	\N
+3898	223	4791	506	Imported	\N
+3899	223	4792	508	Imported	\N
+3900	223	4793	507	Imported	\N
+3901	223	4794	509	Imported	\N
+4149	222	4776	500	Imported	\N
+4150	222	4777	500	Imported	\N
+4151	222	4778	500	Imported	\N
+4152	222	4779	500	Imported	\N
+4153	222	4780	500	Imported	\N
+4154	222	4781	500	Imported	\N
+4155	222	4782	1	Imported	\N
+4156	222	4783	500	Imported	\N
+4157	222	4784	500	Imported	\N
+4158	222	4785	500	Imported	\N
+4159	222	4786	500	Imported	\N
+4160	222	4787	500	Imported	\N
+4161	222	4788	2	Imported	\N
+4162	222	4789	100	Imported	\N
+4163	222	4790	500	Imported	\N
+4164	222	4791	500	Imported	\N
+4165	222	4792	500	Imported	\N
+4166	222	4793	500	Imported	\N
+4167	222	4794	500	Imported	\N
+4168	222	4795	5	Imported	\N
+4169	222	4796	500	Imported	\N
+4170	222	4797	500	Imported	\N
+4171	222	4798	500	Imported	\N
+4172	222	4799	100	Imported	\N
+4173	222	4800	1	Imported	\N
+4174	222	4801	125	Imported	\N
+4175	222	4802	25	Imported	\N
+4176	222	4803	500	Imported	\N
+4177	222	4804	5	Imported	\N
+3720	223	4817	502	Imported	\N
+3721	223	4818	508	Imported	\N
+3722	223	4869	28	Imported	\N
+3723	223	4616	136	Imported	\N
+3724	223	4617	507	Imported	\N
+3725	223	4618	503	Imported	\N
+3726	223	4619	503	Imported	\N
+3727	223	4620	26	Imported	\N
+3728	223	4621	515	Imported	\N
+3729	223	4622	511	Imported	\N
+3730	223	4623	502	Imported	\N
+3731	223	4624	502	Imported	\N
+3732	223	4625	514	Imported	\N
+3733	223	4626	102	Imported	\N
+3734	223	4627	513	Imported	\N
+3735	223	4628	501	Imported	\N
+3736	223	4629	111	Imported	\N
+3737	223	4630	511	Imported	\N
+3738	223	4631	505	Imported	\N
+3739	223	4632	510	Imported	\N
+3740	223	4633	515	Imported	\N
+3741	223	4634	512	Imported	\N
+3742	223	4635	509	Imported	\N
+3743	223	4636	506	Imported	\N
+3744	223	4637	514	Imported	\N
+3745	223	4638	254	Imported	\N
+3746	223	4639	506	Imported	\N
+3747	223	4640	511	Imported	\N
+3748	223	4641	109	Imported	\N
+3749	223	4642	138	Imported	\N
+3750	223	4643	515	Imported	\N
+3751	223	4644	129	Imported	\N
+3752	223	4645	139	Imported	\N
+3753	223	4646	136	Imported	\N
+3754	223	4647	132	Imported	\N
+3755	223	4648	128	Imported	\N
+3756	223	4649	133	Imported	\N
+3757	223	4650	505	Imported	\N
+3758	223	4651	511	Imported	\N
+3759	223	4652	502	Imported	\N
+4178	222	4805	500	Imported	\N
+4179	222	4806	500	Imported	\N
+4180	222	4807	500	Imported	\N
+4181	222	4808	500	Imported	\N
+4182	222	4809	500	Imported	\N
+4183	222	4810	500	Imported	\N
+4184	222	4811	500	Imported	\N
+4185	222	4812	500	Imported	\N
+4186	222	4813	500	Imported	\N
+4187	222	4814	500	Imported	\N
+4188	222	4815	500	Imported	\N
+4189	222	4816	500	Imported	\N
+4190	222	4819	500	Imported	\N
+4191	222	4820	500	Imported	\N
+4192	222	4821	100	Imported	\N
+4193	222	4822	15	Imported	\N
+4194	222	4823	100	Imported	\N
+4195	222	4824	250	Imported	\N
+4196	222	4825	500	Imported	\N
+4197	222	4826	500	Imported	\N
+4198	222	4827	500	Imported	\N
+4199	222	4828	500	Imported	\N
+4200	222	4829	500	Imported	\N
+4201	222	4830	500	Imported	\N
+4202	222	4831	500	Imported	\N
+4203	222	4832	500	Imported	\N
+4204	222	4833	500	Imported	\N
+4205	222	4834	500	Imported	\N
+4206	222	4835	500	Imported	\N
+4207	222	4847	125	Imported	\N
+4208	222	4848	500	Imported	\N
+4209	222	4849	500	Imported	\N
+4210	222	4850	500	Imported	\N
+4211	222	4851	500	Imported	\N
+4212	222	4852	500	Imported	\N
+4213	222	4853	500	Imported	\N
+4214	222	4854	5	Imported	\N
+4215	222	4855	9	Imported	\N
+4216	222	4856	13	Imported	\N
+4217	222	4857	11	Imported	\N
+4218	222	4858	10	Imported	\N
+4219	222	4859	500	Imported	\N
+4220	222	4860	10	Imported	\N
+4221	222	4861	5	Imported	\N
+4222	222	4862	6	Imported	\N
+4223	222	4863	9	Imported	\N
+4224	222	4864	2	Imported	\N
+4225	222	4865	6	Imported	\N
+4226	222	4866	8	Imported	\N
+4227	222	4867	10	Imported	\N
+4228	222	4868	11	Imported	\N
+4229	222	4604	500	Imported	\N
+4230	222	4605	5	Imported	\N
+4231	222	4606	500	Imported	\N
+4232	222	4607	500	Imported	\N
+4233	222	4608	500	Imported	\N
+4234	222	4609	250	Imported	\N
+4235	222	4610	500	Imported	\N
+4236	222	4611	500	Imported	\N
+4237	222	4612	500	Imported	\N
+4238	222	4613	500	Imported	\N
+4239	222	4614	500	Imported	\N
+4240	222	4615	500	Imported	\N
+4241	222	4836	500	Imported	\N
+4242	222	4837	125	Imported	\N
+4243	222	4838	10	Imported	\N
+4244	222	4839	500	Imported	\N
+4245	222	4840	500	Imported	\N
+4246	222	4841	100	Imported	\N
+4247	222	4842	500	Imported	\N
+4248	222	4843	500	Imported	\N
+4249	222	4844	500	Imported	\N
+4250	222	4845	100	Imported	\N
+4251	222	4846	500	Imported	\N
+3760	223	4653	515	Imported	\N
+3761	223	4654	106	Imported	\N
+3762	223	4655	1004	Imported	\N
+3763	223	4656	14	Imported	\N
+3764	223	4657	515	Imported	\N
+3765	223	4658	101	Imported	\N
+3766	223	4659	502	Imported	\N
+3767	223	4660	514	Imported	\N
+3768	223	4661	24	Imported	\N
+3769	223	4662	108	Imported	\N
+3770	223	4663	510	Imported	\N
+3771	223	4664	512	Imported	\N
+3772	223	4665	136	Imported	\N
+3773	223	4666	131	Imported	\N
+3774	223	4667	103	Imported	\N
+3775	223	4668	515	Imported	\N
+3776	223	4669	512	Imported	\N
+3777	223	4670	103	Imported	\N
+3778	223	4671	503	Imported	\N
+3779	223	4672	514	Imported	\N
+3780	223	4673	510	Imported	\N
+3781	223	4674	513	Imported	\N
+3782	223	4675	514	Imported	\N
+3783	223	4676	507	Imported	\N
+3784	223	4677	501	Imported	\N
+3785	223	4678	514	Imported	\N
+3786	223	4679	509	Imported	\N
+3787	223	4680	106	Imported	\N
+3788	223	4681	17	Imported	\N
+3789	223	4682	506	Imported	\N
+3790	223	4683	515	Imported	\N
+3791	223	4684	2	Imported	\N
+3792	223	4685	513	Imported	\N
+3793	223	4686	506	Imported	\N
+3794	223	4687	506	Imported	\N
+3795	223	4688	505	Imported	\N
+3796	223	4689	507	Imported	\N
+3797	223	4690	263	Imported	\N
+3798	223	4691	515	Imported	\N
+3799	223	4692	257	Imported	\N
+3800	223	4693	509	Imported	\N
+3801	223	4694	512	Imported	\N
+3802	223	4695	504	Imported	\N
+3803	223	4696	259	Imported	\N
+3804	223	4697	503	Imported	\N
+3805	223	4698	507	Imported	\N
+3806	223	4699	16	Imported	\N
+3807	223	4700	10	Imported	\N
+3808	223	4701	26	Imported	\N
+3809	223	4702	112	Imported	\N
+3810	223	4703	515	Imported	\N
+3811	223	4704	502	Imported	\N
+3812	223	4705	10	Imported	\N
+3813	223	4706	501	Imported	\N
+3814	223	4707	501	Imported	\N
+3815	223	4708	502	Imported	\N
+3816	223	4709	503	Imported	\N
+3817	223	4710	513	Imported	\N
+3818	223	4711	138	Imported	\N
+3819	223	4712	112	Imported	\N
+3820	223	4713	501	Imported	\N
+3821	223	4714	512	Imported	\N
+3822	223	4715	127	Imported	\N
+3823	223	4716	513	Imported	\N
+3824	223	4717	1013	Imported	\N
+3825	223	4718	503	Imported	\N
+3826	223	4719	8	Imported	\N
+3827	223	4720	14	Imported	\N
+3828	223	4721	501	Imported	\N
+3829	223	4722	502	Imported	\N
+3830	223	4723	510	Imported	\N
+3831	223	4724	511	Imported	\N
+3832	223	4725	514	Imported	\N
+3833	223	4726	513	Imported	\N
+3834	223	4727	513	Imported	\N
+3835	223	4728	514	Imported	\N
+3836	223	4729	506	Imported	\N
+3837	223	4730	515	Imported	\N
+3838	223	4731	253	Imported	\N
+3839	223	4732	512	Imported	\N
+3840	223	4733	512	Imported	\N
+3841	223	4734	18	Imported	\N
+3842	223	4735	510	Imported	\N
+3843	223	4736	512	Imported	\N
+3844	223	4737	511	Imported	\N
+3845	223	4738	507	Imported	\N
+3846	223	4739	510	Imported	\N
+3847	223	4740	515	Imported	\N
+3848	223	4741	131	Imported	\N
+3849	223	4742	113	Imported	\N
+3850	223	4743	508	Imported	\N
+3851	223	4744	261	Imported	\N
+3852	223	4745	515	Imported	\N
+3853	223	4746	506	Imported	\N
+3854	223	4747	515	Imported	\N
+3855	223	4748	509	Imported	\N
+3856	223	4749	505	Imported	\N
+3857	223	4750	113	Imported	\N
+3858	223	4751	502	Imported	\N
+3859	223	4752	507	Imported	\N
+3860	223	4753	511	Imported	\N
+3861	223	4754	506	Imported	\N
+3862	223	4755	115	Imported	\N
+3863	223	4756	28	Imported	\N
+3864	223	4757	513	Imported	\N
+3865	223	4758	8	Imported	\N
+3866	223	4759	513	Imported	\N
+3867	223	4760	507	Imported	\N
+3868	223	4761	112	Imported	\N
+3869	223	4762	510	Imported	\N
+3870	223	4763	508	Imported	\N
+3871	223	4764	507	Imported	\N
+3872	223	4765	509	Imported	\N
+3902	223	4795	10	Imported	\N
+3903	223	4796	501	Imported	\N
+3904	223	4797	505	Imported	\N
+3905	223	4798	507	Imported	\N
+3906	223	4799	102	Imported	\N
+3907	223	4800	12	Imported	\N
+3908	223	4801	140	Imported	\N
+3909	223	4802	37	Imported	\N
+3910	223	4803	505	Imported	\N
+3911	223	4804	10	Imported	\N
+3912	223	4805	509	Imported	\N
+3913	223	4806	514	Imported	\N
+3914	223	4807	504	Imported	\N
+3915	223	4808	502	Imported	\N
+3916	223	4809	506	Imported	\N
+3917	223	4810	507	Imported	\N
+3918	223	4811	509	Imported	\N
+3919	223	4812	506	Imported	\N
+3920	223	4813	507	Imported	\N
+3921	223	4814	507	Imported	\N
+3922	223	4815	504	Imported	\N
+3923	223	4816	512	Imported	\N
+3924	223	4819	509	Imported	\N
+3925	223	4820	510	Imported	\N
+3926	223	4821	111	Imported	\N
+3927	223	4822	30	Imported	\N
+3928	223	4823	110	Imported	\N
+3929	223	4824	254	Imported	\N
+3930	223	4825	505	Imported	\N
+3931	223	4826	503	Imported	\N
+3932	223	4827	504	Imported	\N
+3933	223	4828	515	Imported	\N
+3934	223	4829	504	Imported	\N
+3935	223	4830	508	Imported	\N
+3936	223	4831	509	Imported	\N
+3937	223	4832	512	Imported	\N
+3938	223	4833	502	Imported	\N
+3939	223	4834	501	Imported	\N
+3940	223	4835	512	Imported	\N
+3941	223	4847	127	Imported	\N
+3942	223	4848	511	Imported	\N
+3943	223	4849	513	Imported	\N
+3944	223	4850	501	Imported	\N
+3945	223	4851	514	Imported	\N
+3946	223	4852	510	Imported	\N
+3947	223	4853	508	Imported	\N
+3948	223	4854	10	Imported	\N
+3949	223	4855	18	Imported	\N
+3950	223	4856	26	Imported	\N
+3951	223	4857	22	Imported	\N
+3952	223	4858	20	Imported	\N
+3953	223	4859	512	Imported	\N
+3954	223	4860	20	Imported	\N
+3955	223	4861	10	Imported	\N
+3956	223	4862	12	Imported	\N
+3957	223	4863	18	Imported	\N
+3958	223	4864	4	Imported	\N
+3959	223	4865	12	Imported	\N
+3960	223	4866	16	Imported	\N
+3961	223	4867	20	Imported	\N
+3962	223	4868	22	Imported	\N
+3963	223	4604	504	Imported	\N
+3964	223	4605	10	Imported	\N
+3965	223	4606	515	Imported	\N
+3966	223	4607	511	Imported	\N
+3967	223	4608	501	Imported	\N
+3968	223	4609	261	Imported	\N
+3969	223	4610	505	Imported	\N
+3970	223	4611	511	Imported	\N
+3971	223	4612	506	Imported	\N
+3972	223	4613	508	Imported	\N
+3973	223	4614	513	Imported	\N
+3974	223	4615	509	Imported	\N
+3975	223	4836	509	Imported	\N
+3976	223	4837	127	Imported	\N
+3977	223	4838	20	Imported	\N
+3978	223	4839	507	Imported	\N
+3979	223	4840	513	Imported	\N
+3980	223	4841	109	Imported	\N
+3981	223	4842	512	Imported	\N
+3982	223	4843	508	Imported	\N
+3983	223	4844	503	Imported	\N
+3984	223	4845	105	Imported	\N
+3985	223	4846	515	Imported	\N
 \.
 
 
@@ -13056,6 +16859,13 @@ COPY public.quotation_request_prs (id, qr_id, pr_id) FROM stdin;
 12	199	201
 13	202	201
 14	203	201
+15	215	204
+16	216	205
+17	217	205
+18	218	205
+19	219	205
+20	220	205
+22	221	205
 \.
 
 
@@ -13097,9 +16907,6 @@ COPY public.quotation_request_vendors (id, qr_id, vendor_id, is_sent, sent_at, r
 353	178	54	t	2026-04-29 18:52:30.375564	Received
 354	178	53	t	2026-04-29 18:52:30.375564	Received
 355	178	51	t	2026-04-29 18:52:30.375564	Received
-356	179	52	t	2026-04-30 18:52:30.375564	Received
-357	179	53	t	2026-04-30 18:52:30.375564	Received
-358	179	54	t	2026-04-30 18:52:30.375564	Received
 359	180	52	t	2026-05-01 18:52:30.375564	Received
 360	180	57	t	2026-05-01 18:52:30.375564	Received
 361	180	58	t	2026-05-01 18:52:30.375564	Received
@@ -13169,6 +16976,51 @@ COPY public.quotation_request_vendors (id, qr_id, vendor_id, is_sent, sent_at, r
 395	193	62	t	2026-06-18 11:59:46.363836	Received
 428	208	62	f	\N	Pending
 429	208	63	f	\N	Pending
+430	210	66	f	\N	Pending
+431	210	63	f	\N	Pending
+434	211	66	f	\N	Pending
+435	211	63	f	\N	Pending
+438	212	66	t	2026-08-03 14:07:21.927254	Pending
+439	212	63	t	2026-08-03 14:07:26.715145	Pending
+443	213	63	t	2026-08-03 14:10:09.18917	Received
+442	213	66	t	2026-08-03 14:10:04.437937	Received
+447	214	63	t	2026-08-03 14:11:16.21223	Received
+446	214	66	t	2026-08-03 14:11:11.352251	Received
+452	216	66	t	2026-08-03 17:30:29.220412	Pending
+455	217	63	f	\N	Pending
+456	217	62	f	\N	Pending
+453	216	63	t	2026-08-03 17:30:35.028194	Received
+356	179	52	t	2026-08-06 19:21:05.22436	Received
+454	216	62	t	2026-08-03 17:30:39.766265	Received
+357	179	53	t	2026-08-06 19:21:11.486933	Received
+358	179	54	t	2026-08-06 19:21:16.818211	Received
+457	217	66	f	\N	Pending
+458	218	63	f	\N	Pending
+459	218	62	f	\N	Pending
+460	218	66	f	\N	Pending
+461	219	63	f	\N	Pending
+462	219	62	f	\N	Pending
+463	219	66	f	\N	Pending
+464	220	63	f	\N	Pending
+465	220	62	f	\N	Pending
+466	220	66	f	\N	Pending
+448	215	66	t	2026-08-06 11:34:23.6649	Pending
+449	215	63	t	2026-08-06 11:34:28.560753	Pending
+450	215	62	t	2026-08-06 11:34:33.46199	Pending
+451	215	64	t	2026-08-06 11:34:38.382053	Pending
+470	221	63	t	2026-08-06 13:28:30.804924	Pending
+471	221	62	t	2026-08-06 13:28:35.737024	Pending
+472	221	66	t	2026-08-06 13:28:40.46755	Pending
+500	223	69	f	\N	Pending
+501	223	71	f	\N	Pending
+502	223	70	f	\N	Pending
+503	223	73	f	\N	Pending
+504	223	72	f	\N	Pending
+505	222	69	t	2026-08-06 19:22:50.042749	Received
+509	222	72	t	2026-08-06 19:23:14.987431	Received
+506	222	71	t	2026-08-06 19:22:56.263246	Not Required
+507	222	70	t	2026-08-06 19:23:02.922813	Not Required
+508	222	73	t	2026-08-06 19:23:08.569771	Not Required
 \.
 
 
@@ -13212,13 +17064,27 @@ COPY public.quotation_requests (id, tenant_id, site_id, qr_number, project_id, c
 198	2	2	QR-00012	3	3	2026-06-20	\N	Ordered	3	2026-06-22 12:18:20.748677	f	2026-06-22 12:16:42.672721	2026-06-22 12:18:25.583148	good deal
 190	2	2	QR-00004	3	3	\N	\N	Ordered	3	2026-06-19 12:53:41.998685	f	2026-06-17 14:18:29.904675	2026-07-08 11:51:20.885545	\N
 194	2	2	QR-00008	3	3	2026-06-26	\N	Ordered	3	2026-06-19 12:05:59.42952	f	2026-06-19 11:59:03.645342	2026-06-19 12:06:49.205285	\N
-192	2	2	QR-00006	3	3	2026-06-19	\N	Approved	3	2026-07-08 13:30:40.181022	f	2026-06-18 11:30:27.394513	2026-07-08 13:30:40.182464	done
 205	2	2	QR-00019	3	3	2026-07-28	\N	Received	\N	\N	f	2026-07-14 15:50:48.689075	2026-07-14 15:51:28.909975	\N
 200	2	2	QR-00014	3	3	2026-07-15	\N	Received	\N	\N	f	2026-07-08 14:50:39.937075	2026-07-08 14:52:03.907683	\N
 206	2	2	QR-00020	3	3	2026-07-21	\N	Received	\N	\N	f	2026-07-14 17:25:58.264911	2026-07-14 17:27:47.94298	\N
 207	2	2	QR-00021	3	3	2026-07-22	\N	Entered	\N	\N	f	2026-07-21 11:33:07.588869	2026-07-21 12:18:59.282538	\N
 209	2	2	QR-00023	3	3	\N	\N	Draft	\N	\N	f	2026-07-31 12:58:40.692541	2026-07-31 12:58:40.692554	\N
 208	2	2	QR-00022	3	3	2026-08-28	\N	Submitted	\N	\N	f	2026-07-31 12:40:56.760103	2026-07-31 15:27:58.233349	\N
+210	2	2	QR-00024	3	1	2027-01-01	Test Workflow Automated	Draft	\N	\N	f	2026-08-03 14:04:43.415291	2026-08-03 14:04:43.41531	\N
+211	2	2	QR-00025	3	1	2027-01-01	Test Workflow Automated	Submitted	\N	\N	f	2026-08-03 14:05:47.764882	2026-08-03 14:05:47.875313	\N
+217	2	2	QR-00031	3	3	2026-08-28	\N	Draft	\N	\N	f	2026-08-05 11:15:30.531936	2026-08-05 11:15:30.53195	\N
+212	2	2	QR-00026	3	1	2027-01-01	Test Workflow Automated	Requested	\N	\N	f	2026-08-03 14:07:21.84323	2026-08-03 14:07:31.480751	\N
+218	2	2	QR-00032	3	3	2026-08-28	\N	Draft	\N	\N	f	2026-08-05 11:16:30.586522	2026-08-05 11:16:30.586563	\N
+219	2	2	QR-00033	3	3	2026-08-28	\N	Draft	\N	\N	f	2026-08-05 11:16:30.674818	2026-08-05 11:16:30.674861	\N
+220	2	2	QR-00034	3	3	2026-08-28	\N	Draft	\N	\N	f	2026-08-05 11:16:30.813284	2026-08-05 11:16:30.813308	\N
+214	2	2	QR-00028	3	1	2027-01-01	Test Workflow Automated	Ordered	1	2026-08-03 14:11:21.266147	f	2026-08-03 14:11:11.276594	2026-08-03 14:11:21.347406	Looks good, test passed
+213	2	2	QR-00027	3	1	2027-01-01	Test Workflow Automated	Compared	\N	\N	f	2026-08-03 14:10:04.35094	2026-08-03 15:45:27.080029	Looks good, test passed
+215	2	2	QR-00029	3	3	2026-08-15	\N	Requested	\N	\N	f	2026-08-03 15:56:39.62116	2026-08-06 11:34:43.307783	\N
+216	2	2	QR-00030	3	3	2026-08-10	\N	Received	\N	\N	f	2026-08-03 17:06:10.944789	2026-08-06 11:34:50.891908	\N
+221	2	2	QR-00035	3	3	2026-08-28	\N	Requested	\N	\N	f	2026-08-05 11:18:31.523925	2026-08-06 13:28:45.354247	\N
+192	2	2	QR-00006	3	3	2026-06-19	\N	Ordered	3	2026-07-08 13:30:40.181022	f	2026-06-18 11:30:27.394513	2026-08-06 13:29:34.798721	done
+223	2	2	QR-00037	3	3	2026-08-21	\N	Draft	\N	\N	f	2026-08-06 17:40:04.70899	2026-08-06 17:47:31.373096	\N
+222	2	2	QR-00036	3	3	2026-08-28	\N	Ordered	3	2026-08-06 20:39:56.033549	f	2026-08-06 16:13:56.000606	2026-08-06 20:46:26.419905	TESTING APPROVAL
 \.
 
 
@@ -13234,7 +17100,7 @@ COPY public.reagent_consumption_logs (id, tenant_id, site_id, equipment_id, cons
 -- Data for Name: repair_work_orders; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.repair_work_orders (id, tenant_id, site_id, rwo_number, complaint_id, equipment_id, vendor_id, contract_id, technician_name, sla_details, problem_description, target_completion_date, status, created_by_id, is_deleted, created_at, updated_at) FROM stdin;
+COPY public.repair_work_orders (id, tenant_id, site_id, rwo_number, complaint_id, equipment_id, vendor_id, contract_id, technician_name, sla_details, problem_description, target_completion_date, status, created_by_id, is_deleted, created_at, updated_at, material_required) FROM stdin;
 \.
 
 
@@ -16662,6 +20528,11 @@ COPY public.stock_ledger (id, tenant_id, site_id, material_id, warehouse_id, tra
 4269	2	2	3475	62	Write Off	-1	83	WriteOff	8	WO-00006	\N	\N	\N	3	2026-07-08 15:49:59.464593
 4270	2	2	2435	62	Write Off	-2	115	WriteOff	10	WO-00008	\N	\N	\N	3	2026-07-09 13:21:15.68285
 4271	2	2	2338	62	GRN	1	51	GRN	213	GRN-00010	3	\N	\N	3	2026-07-27 18:24:17.616879
+4272	2	2	3474	62	Issue	-4	64	Issue	239	ISS-00009	1	237	\N	3	2026-08-06 11:44:10.006994
+4273	2	2	2751	62	Return	1	25	Return	25	RET-00003	3	\N	\N	3	2026-08-06 14:48:11.144312
+4274	2	2	2565	63	Transfer Out	-4	1	Transfer	20	TRF-00002	3	\N	\N	3	2026-08-06 14:53:32.833089
+4275	2	2	2565	62	Transfer In	4	54	Transfer	20	TRF-00002	3	\N	\N	3	2026-08-06 14:53:32.833132
+4276	2	2	3501	62	GRN	35	44	GRN	216	GRN-00013	3	\N	\N	3	2026-08-06 15:02:28.573808
 \.
 
 
@@ -16680,7 +20551,7 @@ COPY public.stock_transfer_items (id, transfer_id, material_id, quantity, remark
 8	18	2565	5		5	0	
 10	28	1191	1	Candy canes topping liquorice wafer cake shortbread chupa chups sesame snaps carrot cake. Fruitcake candy tiramisu sugar plum jujubes icing marzipan candy. Bonbon marzipan brownie tiramisu sesame snaps cheesecake macaroon gummies cake. Pudding oat cake chocolate tiramisu powder dessert. Lollipop jelly beans gummi bears sugar plum gummi bears bear claw cupcake cake croissant. Bear claw marshmallow candy pudding jujubes tootsie roll. Pie topping apple pie oat cake topping. Tart sesame snaps croissant carrot cake biscuit halvah caramels macaroon danish. Tootsie roll dragée donut cotton candy macaroon ice cream oat cake. Danish soufflé lemon drops danish dessert ice cream muffin. Candy dragée wafer cheesecake lemon drops icing. Candy canes jelly beans cake fruitcake cheesecake. Donut fruitcake gummies cheesecake pastry cake fruitcake. Brownie oat cake bonbon wafer tart tootsie roll. Lemon drops jelly beans wafer cake chocolate cake chocolate donut cake pastry. Sweet roll icing cotton candy carrot cake cookie sugar plum liquorice chupa chups. Jujubes chocolate bar chocolate marshmallow liquorice. Apple pie marzipan muffin oat cake sesame snaps. Jelly-o cookie tart pudding gummi bears tart pastry chocolate cake sugar plum. Ice cream danish tiramisu sweet cookie tiramisu cotton candy liquorice liquorice. Cotton candy apple pie fruitcake pudding gingerbread apple pie. Dessert oat cake caramels dessert carrot cake chupa chups cake chocolate cake. Sesame snaps gummi bears marshmallow candy lollipop marshmallow oat cake marshmallow. Cheesecake lollipop fruitcake halvah jelly caramels biscuit cake. Icing apple pie cake candy tootsie roll donut bonbon. Powder macaroon gummies toffee tart bonbon jelly muffin cheesecake. Brownie liquorice cookie topping macaroon halvah marshmallow. Sesame snaps oat cake lemon drops cupcake cotton candy toffee gummies liquorice. Icing donut sweet roll soufflé candy canes. Pie jelly jelly beans sesame snaps sweet marshmallow caramels. Gummies bear claw topping bear claw muffin. Jelly-o wafer powder cotton candy toffee jelly beans dessert muffin macaroon. Chocolate liquorice apple pie tart fruitcake chocolate cake gingerbread toffee sesame snaps. Soufflé fruitcake cupcake biscuit pastry cheesecake cake jelly-o. Pastry gingerbread sweet biscuit gingerbread sweet roll jujubes. Topping soufflé carrot cake candy canes oat cake tootsie roll. Wafer shortbread liquorice shortbread cotton candy donut. Bonbon liquorice jelly beans jujubes icing. Gummies chocolate cake tiramisu croissant bonbon tart sweet roll sweet brownie. Pudding lemon drops croissant liquorice chocolate jelly beans tiramisu biscuit. Ice cream marshmallow marshmallow cheesecake icing. Tart carrot cake chocolate cake cookie halvah tiramisu sesame snaps. Gummies gummi bears candy canes biscuit marzipan danish liquorice bear claw chocolate cake. Tiramisu chocolate halvah cotton candy pudding fruitcake. Tart sweet shortbread apple pie carrot cake pie cheesecake jelly-o. Lollipop cake gummi bears pastry marshmallow pastry muffin chocolate tootsie roll. Gummies toffee danish donut bear claw. Bear claw wafer cake biscuit lemon drops cookie chocolate cake gummi bears jujubes. Lollipop wafer cotton candy bonbon jelly beans shortbread cotton candy pudding. Croissant cake gingerbread pastry jelly. Tart jujubes bear claw croissant cookie. Macaroon carrot cake dragée powder chocolate cake. Sweet pastry oat cake bear claw lollipop donut croissant tootsie roll cupcake. Tart cookie donut candy canes shortbread dessert lollipop. Jelly-o pudding tootsie roll gingerbread sesame snaps sweet roll tootsie roll. Lollipop sugar plum pudding cake bonbon pastry marshmallow. Cake dessert cupcake jelly-o tiramisu oat cake biscuit marzipan caramels. Cupcake sweet liquorice cookie dragée chocolate bar wafer tootsie roll. Gingerbread gingerbread oat cake marzipan tootsie roll cheesecake lollipop. Sweet muffin candy jelly cake cotton candy brownie pudding. Donut pie cupcake cotton candy donut gummi bears. Marshmallow tiramisu cookie candy cotton candy dragée cheesecake. Cake sweet roll dessert powder dragée macaroon marshmallow. Tootsie roll croissant danish cookie powder. Topping gingerbread chocolate cupcake cotton candy. Cotton candy wafer chocolate bar sweet bear claw jelly beans tootsie roll.	1	0	Candy canes topping liquorice wafer cake shortbread chupa chups sesame snaps carrot cake. Fruitcake candy tiramisu sugar plum jujubes icing marzipan candy. Bonbon marzipan brownie tiramisu sesame snaps cheesecake macaroon gummies cake. Pudding oat cake chocolate tiramisu powder dessert. Lollipop jelly beans gummi bears sugar plum gummi bears bear claw cupcake cake croissant. Bear claw marshmallow candy pudding jujubes tootsie roll. Pie topping apple pie oat cake topping. Tart sesame snaps croissant carrot cake biscuit halvah caramels macaroon danish. Tootsie roll dragée donut cotton candy macaroon ice cream oat cake. Danish soufflé lemon drops danish dessert ice cream muffin. Candy dragée wafer cheesecake lemon drops icing. Candy canes jelly beans cake fruitcake cheesecake. Donut fruitcake gummies cheesecake pastry cake fruitcake. Brownie oat cake bonbon wafer tart tootsie roll. Lemon drops jelly beans wafer cake chocolate cake chocolate donut cake pastry. Sweet roll icing cotton candy carrot cake cookie sugar plum liquorice chupa chups. Jujubes chocolate bar chocolate marshmallow liquorice. Apple pie marzipan muffin oat cake sesame snaps. Jelly-o cookie tart pudding gummi bears tart pastry chocolate cake sugar plum. Ice cream danish tiramisu sweet cookie tiramisu cotton candy liquorice liquorice. Cotton candy apple pie fruitcake pudding gingerbread apple pie. Dessert oat cake caramels dessert carrot cake chupa chups cake chocolate cake. Sesame snaps gummi bears marshmallow candy lollipop marshmallow oat cake marshmallow. Cheesecake lollipop fruitcake halvah jelly caramels biscuit cake. Icing apple pie cake candy tootsie roll donut bonbon. Powder macaroon gummies toffee tart bonbon jelly muffin cheesecake. Brownie liquorice cookie topping macaroon halvah marshmallow. Sesame snaps oat cake lemon drops cupcake cotton candy toffee gummies liquorice. Icing donut sweet roll soufflé candy canes. Pie jelly jelly beans sesame snaps sweet marshmallow caramels. Gummies bear claw topping bear claw muffin. Jelly-o wafer powder cotton candy toffee jelly beans dessert muffin macaroon. Chocolate liquorice apple pie tart fruitcake chocolate cake gingerbread toffee sesame snaps. Soufflé fruitcake cupcake biscuit pastry cheesecake cake jelly-o. Pastry gingerbread sweet biscuit gingerbread sweet roll jujubes. Topping soufflé carrot cake candy canes oat cake tootsie roll. Wafer shortbread liquorice shortbread cotton candy donut. Bonbon liquorice jelly beans jujubes icing. Gummies chocolate cake tiramisu croissant bonbon tart sweet roll sweet brownie. Pudding lemon drops croissant liquorice chocolate jelly beans tiramisu biscuit. Ice cream marshmallow marshmallow cheesecake icing. Tart carrot cake chocolate cake cookie halvah tiramisu sesame snaps. Gummies gummi bears candy canes biscuit marzipan danish liquorice bear claw chocolate cake. Tiramisu chocolate halvah cotton candy pudding fruitcake. Tart sweet shortbread apple pie carrot cake pie cheesecake jelly-o. Lollipop cake gummi bears pastry marshmallow pastry muffin chocolate tootsie roll. Gummies toffee danish donut bear claw. Bear claw wafer cake biscuit lemon drops cookie chocolate cake gummi bears jujubes. Lollipop wafer cotton candy bonbon jelly beans shortbread cotton candy pudding. Croissant cake gingerbread pastry jelly. Tart jujubes bear claw croissant cookie. Macaroon carrot cake dragée powder chocolate cake. Sweet pastry oat cake bear claw lollipop donut croissant tootsie roll cupcake. Tart cookie donut candy canes shortbread dessert lollipop. Jelly-o pudding tootsie roll gingerbread sesame snaps sweet roll tootsie roll. Lollipop sugar plum pudding cake bonbon pastry marshmallow. Cake dessert cupcake jelly-o tiramisu oat cake biscuit marzipan caramels. Cupcake sweet liquorice cookie dragée chocolate bar wafer tootsie roll. Gingerbread gingerbread oat cake marzipan tootsie roll cheesecake lollipop. Sweet muffin candy jelly cake cotton candy brownie pudding. Donut pie cupcake cotton candy donut gummi bears. Marshmallow tiramisu cookie candy cotton candy dragée cheesecake. Cake sweet roll dessert powder dragée macaroon marshmallow. Tootsie roll croissant danish cookie powder. Topping gingerbread chocolate cupcake cotton candy. Cotton candy wafer chocolate bar sweet bear claw jelly beans tootsie roll.
 11	33	1062	7	no	\N	\N	\N
-9	20	2565	5		0	-5	
+9	20	2565	5		4	-1	
 \.
 
 
@@ -16696,9 +20567,9 @@ COPY public.stock_transfers (id, tenant_id, site_id, transfer_number, from_wareh
 16	3	3	TRF-00005	51	55	1	Completed		4	f	2026-06-10 17:46:46.628573	2026-06-10 12:19:34.997562	4	2026-06-10 12:19:34.997601
 18	2	2	TRF-00001	62	63	3	Completed		3	f	2026-06-12 02:01:12.858358	2026-06-11 20:31:32.993351	3	2026-06-11 20:31:32.993393
 17	3	3	TRF-00006	51	55	1	Partially Received		4	f	2026-06-10 17:50:40.664258	\N	4	2026-06-17 06:57:15.106721
-20	2	2	TRF-00002	63	62	3	Partially Received		3	f	2026-06-12 02:02:28.867836	\N	3	2026-07-06 07:18:49.362958
 28	3	3	TRF-00007	59	47	1	Completed	Candy canes topping liquorice wafer cake shortbread chupa chups sesame snaps carrot cake. Fruitcake candy tiramisu sugar plum jujubes icing marzipan candy. Bonbon marzipan brownie tiramisu sesame snaps cheesecake macaroon gummies cake. Pudding oat cake chocolate tiramisu powder dessert. Lollipop jelly beans gummi bears sugar plum gummi bears bear claw cupcake cake croissant. Bear claw marshmallow candy pudding jujubes tootsie roll. Pie topping apple pie oat cake topping. Tart sesame snaps croissant carrot cake biscuit halvah caramels macaroon danish. Tootsie roll dragée donut cotton candy macaroon ice cream oat cake. Danish soufflé lemon drops danish dessert ice cream muffin. Candy dragée wafer cheesecake lemon drops icing. Candy canes jelly beans cake fruitcake cheesecake. Donut fruitcake gummies cheesecake pastry cake fruitcake. Brownie oat cake bonbon wafer tart tootsie roll. Lemon drops jelly beans wafer cake chocolate cake chocolate donut cake pastry. Sweet roll icing cotton candy carrot cake cookie sugar plum liquorice chupa chups. Jujubes chocolate bar chocolate marshmallow liquorice. Apple pie marzipan muffin oat cake sesame snaps. Jelly-o cookie tart pudding gummi bears tart pastry chocolate cake sugar plum. Ice cream danish tiramisu sweet cookie tiramisu cotton candy liquorice liquorice. Cotton candy apple pie fruitcake pudding gingerbread apple pie. Dessert oat cake caramels dessert carrot cake chupa chups cake chocolate cake. Sesame snaps gummi bears marshmallow candy lollipop marshmallow oat cake marshmallow. Cheesecake lollipop fruitcake halvah jelly caramels biscuit cake. Icing apple pie cake candy tootsie roll donut bonbon. Powder macaroon gummies toffee tart bonbon jelly muffin cheesecake. Brownie liquorice cookie topping macaroon halvah marshmallow. Sesame snaps oat cake lemon drops cupcake cotton candy toffee gummies liquorice. Icing donut sweet roll soufflé candy canes. Pie jelly jelly beans sesame snaps sweet marshmallow caramels. Gummies bear claw topping bear claw muffin. Jelly-o wafer powder cotton candy toffee jelly beans dessert muffin macaroon. Chocolate liquorice apple pie tart fruitcake chocolate cake gingerbread toffee sesame snaps. Soufflé fruitcake cupcake biscuit pastry cheesecake cake jelly-o. Pastry gingerbread sweet biscuit gingerbread sweet roll jujubes. Topping soufflé carrot cake candy canes oat cake tootsie roll. Wafer shortbread liquorice shortbread cotton candy donut. Bonbon liquorice jelly beans jujubes icing. Gummies chocolate cake tiramisu croissant bonbon tart sweet roll sweet brownie. Pudding lemon drops croissant liquorice chocolate jelly beans tiramisu biscuit. Ice cream marshmallow marshmallow cheesecake icing. Tart carrot cake chocolate cake cookie halvah tiramisu sesame snaps. Gummies gummi bears candy canes biscuit marzipan danish liquorice bear claw chocolate cake. Tiramisu chocolate halvah cotton candy pudding fruitcake. Tart sweet shortbread apple pie carrot cake pie cheesecake jelly-o. Lollipop cake gummi bears pastry marshmallow pastry muffin chocolate tootsie roll. Gummies toffee danish donut bear claw. Bear claw wafer cake biscuit lemon drops cookie chocolate cake gummi bears jujubes. Lollipop wafer cotton candy bonbon jelly beans shortbread cotton candy pudding. Croissant cake gingerbread pastry jelly. Tart jujubes bear claw croissant cookie. Macaroon carrot cake dragée powder chocolate cake. Sweet pastry oat cake bear claw lollipop donut croissant tootsie roll cupcake. Tart cookie donut candy canes shortbread dessert lollipop. Jelly-o pudding tootsie roll gingerbread sesame snaps sweet roll tootsie roll. Lollipop sugar plum pudding cake bonbon pastry marshmallow. Cake dessert cupcake jelly-o tiramisu oat cake biscuit marzipan caramels. Cupcake sweet liquorice cookie dragée chocolate bar wafer tootsie roll. Gingerbread gingerbread oat cake marzipan tootsie roll cheesecake lollipop. Sweet muffin candy jelly cake cotton candy brownie pudding. Donut pie cupcake cotton candy donut gummi bears. Marshmallow tiramisu cookie candy cotton candy dragée cheesecake. Cake sweet roll dessert powder dragée macaroon marshmallow. Tootsie roll croissant danish cookie powder. Topping gingerbread chocolate cupcake cotton candy. Cotton candy wafer chocolate bar sweet bear claw jelly beans tootsie roll.	4	f	2026-06-17 12:19:08.949634	2026-06-17 06:51:58.420032	4	2026-06-17 06:51:58.420105
 33	3	3	TRF-00008	59	48	1	Initiated		4	f	2026-06-17 18:22:24.785236	\N	\N	\N
+20	2	2	TRF-00002	63	62	3	Partially Received		3	f	2026-06-12 02:02:28.867836	\N	3	2026-08-06 09:23:32.830791
 \.
 
 
@@ -16803,6 +20674,8 @@ COPY public.subcategories (id, tenant_id, site_id, name, category_id, is_active,
 95	2	2	GEN	76	t	f
 96	2	2	LAB	76	t	f
 78	2	2	BIOCHEMISTRY	71	t	f
+97	2	2	ELECTRICAL	69	f	f
+98	2	2	Pipe	73	t	f
 \.
 
 
@@ -16839,7 +20712,6 @@ COPY public.tenant_memberships (id, user_id, tenant_id, is_active, joined_at) FR
 15	8	2	t	2026-06-11 22:31:29.188852
 16	9	2	t	2026-06-11 22:31:29.188855
 17	10	2	t	2026-06-11 22:31:29.188859
-18	11	2	t	2026-06-11 22:31:29.188862
 19	12	2	t	2026-06-11 22:31:29.188865
 20	13	1	t	2026-06-12 03:34:23.667347
 21	14	1	t	2026-06-12 03:34:23.898851
@@ -16865,6 +20737,7 @@ COPY public.tenant_memberships (id, user_id, tenant_id, is_active, joined_at) FR
 41	34	2	t	2026-06-18 12:56:37.895513
 42	35	2	t	2026-06-18 12:58:55.587118
 43	36	4	t	2026-07-03 12:43:37.514624
+18	11	2	t	2026-06-11 22:31:29.188862
 \.
 
 
@@ -16889,6 +20762,17 @@ COPY public.terms_and_conditions (id, tenant_id, site_id, name, content, is_defa
 2	3	3	Eastpoint1	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: 15 Days\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	f	t	2026-06-04 14:20:11.999692
 3	2	2	EastPoint	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	t	t	2026-06-11 22:24:08.266738
 4	2	2	Eastpoint1	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: 15 Days\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	f	t	2026-06-11 22:24:37.007466
+9	2	2	East Point College of Pharmacy	1. Bill/Invoices in the name of East Point College of Pharmacy managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	f	t	2026-08-06 16:06:43.913332
+8	2	2	East Point College of Physiotherapy	1. Bill/Invoices in the name of East Point College of Physiotherapy managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	f	t	2026-08-06 16:06:38.373596
+5	2	2	East Point Medical College Hospital	1. Bill/Invoices in the name of East Point Medical College Hospital managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	f	t	2026-08-06 16:05:59.057588
+6	2	2	East Point Pre-University College	1. Bill/Invoices in the name of East Point Pre-University College managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	f	t	2026-08-06 16:06:04.260336
+7	2	2	East Point School of Nursing	1. Bill/Invoices in the name of East Point School of Nursing managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	f	t	2026-08-06 16:06:33.908529
+15	2	2	East Point Allied Health Sciences	1. Bill/Invoices in the name of East Point Allied Health Sciences managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	f	t	2026-08-06 16:07:10.285264
+13	2	2	East Point College of Engineering & Technology	1. Bill/Invoices in the name of East Point College of Engineering & Technology managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	f	t	2026-08-06 16:07:03.179223
+12	2	2	East Point College of Higher Education	1. Bill/Invoices in the name of East Point College of Higher Education managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	f	t	2026-08-06 16:06:59.3786
+11	2	2	East Point College of Medical Sciences & Research Centre	1. Bill/Invoices in the name of East Point College of Medical Sciences & Research Centre managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	f	t	2026-08-06 16:06:55.459767
+10	2	2	East Point College of Nursing	1. Bill/Invoices in the name of East Point College of Nursing managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	f	t	2026-08-06 16:06:50.538566
+14	2	2	New Royal College of Nursing	1. Bill/Invoices in the name of New Royal College of Nursing managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	f	t	2026-08-06 16:07:06.739413
 \.
 
 
@@ -16925,7 +20809,6 @@ COPY public.uom (id, tenant_id, site_id, name, abbreviation, is_active, is_delet
 27	3	3	Prs	PRS	t	f	f
 28	2	2	Bags	BAG	t	f	f
 29	2	2	Numbers	NOS	t	f	f
-32	2	2	Bundles	BDL	t	f	f
 33	2	2	Rolls	ROL	t	f	f
 34	2	2	Sets	SET	t	f	f
 35	2	2	Boxes	BOX	t	f	f
@@ -16937,6 +20820,14 @@ COPY public.uom (id, tenant_id, site_id, name, abbreviation, is_active, is_delet
 39	2	2	Meter	MTR	t	f	t
 41	2	2	Prs	PRS	t	f	f
 30	2	2	Kilograms	KG	t	f	t
+32	2	2	Bundles	BDL	f	f	f
+42	1	1	Grams	gm	t	f	t
+43	1	1	Milliliters	ml	t	f	t
+44	1	1	Liters	ltr	t	f	t
+45	1	1	Numbers	nos	t	f	t
+46	3	3	Milliliters	ml	t	f	t
+47	2	2	Grams	gm	t	f	t
+48	2	2	Milliliters	ml	t	f	t
 \.
 
 
@@ -16959,7 +20850,6 @@ COPY public.user_role_assignments (id, user_id, tenant_id, role_id, site_id, ass
 47	8	2	16	\N	2026-06-11 22:31:29.191112
 48	9	2	19	2	2026-06-11 22:31:29.191115
 49	10	2	17	\N	2026-06-11 22:31:29.191118
-50	11	2	15	\N	2026-06-11 22:31:29.191121
 51	12	2	18	\N	2026-06-11 22:31:29.191124
 52	3	2	11	2	2026-06-11 22:37:52.57721
 53	16	2	20	\N	2026-06-12 04:18:31.35666
@@ -16985,6 +20875,7 @@ COPY public.user_role_assignments (id, user_id, tenant_id, role_id, site_id, ass
 75	34	2	22	\N	2026-06-18 12:56:37.896609
 76	35	2	22	\N	2026-06-18 12:58:55.587561
 78	36	4	23	4	2026-07-03 12:48:15.944929
+80	11	2	15	\N	2026-08-06 11:49:40.832767
 \.
 
 
@@ -16995,7 +20886,6 @@ COPY public.user_role_assignments (id, user_id, tenant_id, role_id, site_id, ass
 COPY public.users (id, username, email, full_name, hashed_password, is_active, is_platform_admin, is_deleted, created_at, updated_at, department, institution) FROM stdin;
 8	Babu	babu@nissigrid.com	Babu Gate Keeper	$2b$12$Z34d.KjP2.hJzkCocjOGLu8/h9p8e5JxvE6BGmbiDt5RFykPt4YnS	t	f	f	2026-06-01 10:46:37.253944	2026-06-05 11:31:33.223406	ADMIN	\N
 10	Pandi	pandi@nissigrid.com	Pandiyarajan	$2b$12$i3RkkBez7lXz6lNzd.cDhuE8rVsQh8UhOPYLZd6ZEqCHHbAV4rXTa	t	f	f	2026-06-01 10:48:25.009621	2026-06-05 11:31:33.223412	ADMIN	\N
-11	CEO	ceo@nissigrid.com	CEO Approver	$2b$12$5vPyjKr71cO08Ma3BwERGOTLchViQYVYB6nUDmhEaBBD44zDf9DR2	t	f	f	2026-06-01 10:50:02.222821	2026-06-05 11:31:33.223414	\N	\N
 12	Kumar	kumar@nissigrid.com	Kumar	$2b$12$bejX..ps1x3o4JQKv6g7QuMoEO6pxkwtQ8tbwcWMkBIlJMmYA1x8m	t	f	f	2026-06-01 11:17:37.74726	2026-06-05 11:31:33.223417	\N	\N
 1	superadmin	super@nissigrid.com	Super Admin	$2b$12$fp9H8Wu0e2cQNvrXetPzUeg1n1ATh2rp.Ja3HTK.VLRxp2G7qnH.q	t	t	f	2026-05-15 10:36:51.375798	2026-06-05 11:31:33.223369	\N	\N
 4	gradmin	fredrick.antony@nissigrid.com	Fredrick	$2b$12$9VXAuU4uDZ46q3kz.Ajp2.OvUmw49ua2IZjgXTozTC6nGg1HfbuhW	t	f	f	2026-05-15 12:07:07.024311	2026-06-05 11:31:33.223394	\N	\N
@@ -17028,7 +20918,8 @@ COPY public.users (id, username, email, full_name, hashed_password, is_active, i
 35	Ravi	ravi@nissigrid.com	Ravi	$2b$12$vX3Vfk3pCjoJKYN4ysARVO7XWE8mLqo/zKBKjbOQS1fumt/EBrT1S	t	f	f	2026-06-18 12:58:55.586339	2026-06-18 12:58:55.586352	\N	\N
 36	ntadmin	ku699444mar@gmail.com	Newtest Admin	$2b$12$oXSG73bVsEk7MU4QacpW9O5R54VYO/5W3ism7L9NmjjM7MFhDLxFq	t	f	f	2026-07-03 12:43:37.512671	2026-07-03 12:43:37.512684	\N	\N
 2	admin	pradnesh@nissigrid.com	NG Admin	$2b$12$4ftTuLMHa8t89FRB8q1cXudA/JE8XMZW6TyavLGrjdrefD8S5QEBG	t	f	f	2026-05-15 10:39:02.648701	2026-07-06 12:03:52.456418	\N	\N
-3	epadmin	ilangkumaran@nissigrid.com	EastPoint Admin	$2b$12$Gvd/LKk4DY0CP73r/1JX6utnFf//2DkMIHU./7stZOxL.E3GXaEpC	t	f	f	2026-05-15 10:52:51.952583	2026-07-28 18:27:54.354226	\N	\N
+3	epadmin	ilangkumaran@nissigrid.com	EastPoint Admin	$2b$12$9AY1Wm27CFtBKrAyk275aO4KGhy2BmWiBdnuCwNa5g6CFUtNklRdm	t	f	f	2026-05-15 10:52:51.952583	2026-08-05 11:22:02.172623	\N	\N
+11	CEO	ceo@nissigrid.com	CEO Approver	$2b$12$5vPyjKr71cO08Ma3BwERGOTLchViQYVYB6nUDmhEaBBD44zDf9DR2	t	f	f	2026-06-01 10:50:02.222821	2026-08-06 11:49:40.830647	\N	\N
 \.
 
 
@@ -17037,6 +20928,13 @@ COPY public.users (id, username, email, full_name, hashed_password, is_active, i
 --
 
 COPY public.vendor_approvals (id, vendor_id, approval_flow_id, approver_id, remarks, approved_at) FROM stdin;
+2	67	86	3	\N	2026-08-06 11:25:34.484602
+3	68	86	3	\N	2026-08-06 13:25:39.34398
+6	70	86	3	\N	2026-08-06 17:42:41.862654
+7	73	86	3	\N	2026-08-06 17:42:44.562893
+8	72	86	3	\N	2026-08-06 17:42:45.835967
+9	69	86	3	\N	2026-08-06 19:15:24.787192
+10	71	86	3	\N	2026-08-06 19:16:16.628292
 \.
 
 
@@ -17067,10 +20965,30 @@ COPY public.vendor_categories (id, vendor_id, category_id) FROM stdin;
 129	63	68
 130	63	73
 131	63	74
-148	66	71
-149	66	70
-152	65	66
-153	65	67
+154	67	66
+155	67	67
+156	67	76
+157	67	69
+158	67	70
+159	66	71
+160	66	70
+161	65	66
+162	65	67
+163	68	66
+164	68	76
+165	68	68
+175	72	80
+182	70	80
+183	70	67
+184	70	68
+185	73	80
+186	73	67
+187	69	80
+188	69	67
+189	69	68
+190	71	80
+191	71	67
+192	71	68
 \.
 
 
@@ -17088,6 +21006,38 @@ COPY public.vendor_history (id, vendor_id, action, changes, remarks, action_by_i
 7	65	Fully Approved	\N	\N	3	2026-07-31 10:52:38.315485
 8	65	Edited and Resubmitted	{"is_active": {"old": true, "new": false}}	\N	3	2026-07-31 10:57:53.754384
 9	65	Fully Approved	\N	\N	3	2026-07-31 10:57:58.153601
+10	67	Created	\N	\N	3	2026-08-04 13:01:06.076598
+11	67	Approved at Level 1	\N	\N	3	2026-08-06 11:25:32.747472
+12	67	Fully Approved	\N	\N	3	2026-08-06 11:25:34.507817
+13	65	Edited and Resubmitted	{"is_active": {"old": false, "new": true}}	\N	3	2026-08-06 11:25:49.709564
+14	65	Rejected	\N	none	3	2026-08-06 11:26:13.099166
+15	68	Created	\N	\N	3	2026-08-06 13:25:15.698904
+16	68	Approved at Level 1	\N	\N	3	2026-08-06 13:25:30.093434
+17	68	Fully Approved	\N	\N	3	2026-08-06 13:25:39.383677
+18	69	Created	\N	\N	3	2026-08-06 16:45:15.344679
+19	70	Created	\N	\N	3	2026-08-06 16:51:28.046714
+20	71	Created	\N	\N	3	2026-08-06 16:54:45.794579
+21	72	Created	\N	\N	3	2026-08-06 16:59:08.114792
+22	69	Edited	{"email": {"old": "customercare.ka@aicgroup.in", "new": "customercare.ka@nissigrid.in"}}	\N	3	2026-08-06 16:59:32.548426
+23	71	Edited	{"email": {"old": "isiriscientifics@gmail.com", "new": "isiriscientifics@nissigrid.com"}}	\N	3	2026-08-06 16:59:52.999544
+24	70	Edited	{"email": {"old": "JaiMaruthiScientific@gmail.com", "new": "JaiMaruthiScientific@nissigrid.com"}}	\N	3	2026-08-06 17:00:06.088251
+25	73	Created	\N	\N	3	2026-08-06 17:02:54.330237
+26	69	Approved at Level 1	\N	\N	3	2026-08-06 17:42:37.28542
+27	69	Fully Approved	\N	\N	3	2026-08-06 17:42:39.006978
+28	71	Approved at Level 1	\N	\N	3	2026-08-06 17:42:40.534115
+29	71	Fully Approved	\N	\N	3	2026-08-06 17:42:40.88995
+30	70	Approved at Level 1	\N	\N	3	2026-08-06 17:42:41.63423
+31	70	Fully Approved	\N	\N	3	2026-08-06 17:42:41.872681
+32	73	Approved at Level 1	\N	\N	3	2026-08-06 17:42:44.364127
+33	73	Fully Approved	\N	\N	3	2026-08-06 17:42:44.614658
+34	72	Approved at Level 1	\N	\N	3	2026-08-06 17:42:45.563533
+35	72	Fully Approved	\N	\N	3	2026-08-06 17:42:45.856062
+36	69	Edited and Resubmitted	{"email": {"old": "customercare.ka@nissigrid.in", "new": "ilangkumaran@nissigrid.in"}}	\N	3	2026-08-06 19:15:14.378859
+37	69	Approved at Level 1	\N	\N	3	2026-08-06 19:15:17.357743
+38	69	Fully Approved	\N	\N	3	2026-08-06 19:15:24.812039
+39	71	Edited and Resubmitted	{"email": {"old": "isiriscientifics@nissigrid.com", "new": "pradnesh@nissigrid.com"}}	\N	3	2026-08-06 19:16:09.832795
+40	71	Approved at Level 1	\N	\N	3	2026-08-06 19:16:13.43698
+41	71	Fully Approved	\N	\N	3	2026-08-06 19:16:16.643246
 \.
 
 
@@ -17367,16 +21317,554 @@ COPY public.vendor_quotation_items (id, vendor_quotation_id, qr_item_id, materia
 1265	570	462	2356	46.88	10	f			Numbers	1	0
 1266	570	463	3082	1399.7	15	f			Numbers	1	0
 1267	570	464	3504	890	10	f			Numbers	1	0
-1274	572	466	2565	2345	7	f		BranD1	Nos	1	0
-1275	572	467	3507	225	7	f		BR1	Nos	1	0
-1276	572	468	2751	345	7	f		XC1	Nos	1	0
-1280	571	466	2565	1234	7	f		BranD1	Nos	1	0
-1281	571	467	3507	550	7	f		BR1	Nos	1	0
-1282	571	468	2751	759	7	f		XC1	Nos	1	0
 1284	573	465	2752	852	2	f			NOS	1	0
-1098	550	389	3507	15000000	15	f		\N	\N	\N	10
-1099	550	390	3504	1400000	45	f		\N	\N	\N	10
-1100	550	391	2361	999999	30	f		\N	\N	\N	10
+1285	574	478	2564	50	10	f	\N	\N	\N	1	0
+1286	575	478	2564	45	12	f	\N	\N	\N	1	0
+1289	578	482	2564	50	10	f	\N	\N	\N	1	0
+1290	579	482	2564	45	12	f	\N	\N	\N	1	0
+1291	571	466	2565	1234	7	f		BranD1	Nos	1	10
+1292	571	467	3507	550	7	f		BR1	Nos	1	10
+1293	571	468	2751	759	7	f		XC1	Nos	1	10
+1274	572	466	2565	2345	7	f		BranD1	Nos	1	5
+1275	572	467	3507	225	7	f		BR1	Nos	1	5
+1276	572	468	2751	345	7	f		XC1	Nos	1	5
+1288	577	480	2564	45	12	f	\N	\N	\N	1	2
+1287	576	480	2564	50	10	f	\N	\N	\N	1	13
+1098	550	389	3507	15000000	15	f		\N	\N	\N	11
+1099	550	390	3504	1400000	45	f		\N	\N	\N	11
+1100	550	391	2361	999999	30	f		\N	\N	\N	11
+1593	580	4019	4646	2579.77	7	f		Sigma	nos	1	5
+1594	580	4020	4647	254.59	7	f		Qualigens	ml	1	5
+1595	580	4021	4648	4000.08	21	f		Qualigens	ltr	1	5
+1596	580	4022	4649	6766	43	f			ml	1	5
+1597	580	4023	4650	887.48	21	f		Loba Chemie	gm	1	5
+1598	580	4024	4651	1945.11	10	f		Sigma	nos	1	5
+1599	580	4025	4652	2213.33	14	f		SDFine	kg	1	5
+1600	580	4026	4653	1890.07	30	f		Thermo Fisher	gm	1	5
+1601	580	4027	4654	698.06	10	f		Qualigens	ltr	1	5
+1602	580	4028	4655	4792.59	7	f		Qualigens	box	1	5
+1603	580	4029	4656	2800.08	30	f		Loba Chemie	nos	1	5
+1604	580	4030	4657	4497.35	10	f			kg	1	5
+1605	580	4031	4658	1780.18	30	f			box	1	5
+1606	580	4032	4659	908.41	7	f		SDFine	ltr	1	5
+1607	580	4033	4660	4518.19	21	f		Thermo Fisher	kg	1	5
+1608	580	4034	4661	4551.4	30	f			ltr	1	5
+1609	580	4035	4662	2911.26	7	f		Thermo Fisher	kg	1	5
+1610	580	4036	4663	4705.08	21	f		SDFine	kg	1	5
+1611	580	4037	4664	781.32	21	f		Qualigens	nos	1	5
+1612	580	4038	4665	2380.55	10	f		Qualigens	ml	1	5
+1613	580	4039	4666	3176.8	14	f		Merck	gm	1	5
+1614	580	4040	4667	3934.94	21	f		Thermo Fisher	ltr	1	5
+1615	580	4041	4668	4169.9	21	f		Sigma	ml	1	5
+1616	580	4042	4669	1225.21	14	f		Sigma	kg	1	5
+1617	580	4043	4670	3516.97	30	f		Thermo Fisher	gm	1	5
+1618	580	4044	4671	3884.87	7	f		Loba Chemie	ltr	1	5
+1619	580	4045	4672	4113.04	30	f		Thermo Fisher	box	1	5
+1620	580	4046	4673	3361.64	21	f		Loba Chemie	ml	1	5
+1621	580	4047	4674	3039.2	30	f		Thermo Fisher	ml	1	5
+1622	580	4048	4675	1987.45	10	f		Loba Chemie	nos	1	5
+1623	580	4049	4676	4981.41	14	f		SDFine	kg	1	5
+1624	580	4050	4677	524.29	30	f		Thermo Fisher	ltr	1	5
+1625	580	4051	4678	630.47	30	f		Thermo Fisher	nos	1	5
+1626	580	4052	4679	702.31	7	f			gm	1	5
+1627	580	4053	4680	2424.17	21	f		Loba Chemie	kg	1	5
+1628	580	4054	4681	399.07	14	f		Loba Chemie	box	1	5
+1629	580	4055	4682	1339.43	21	f		Merck	ml	1	5
+1630	580	4056	4683	1749.85	30	f		Thermo Fisher	nos	1	5
+1631	580	4057	4684	4659.12	10	f		Qualigens	nos	1	5
+1632	580	4058	4685	1843.39	30	f		Qualigens	nos	1	5
+1633	580	4059	4686	3280.85	30	f		Sigma	gm	1	5
+1634	580	4060	4687	23434	23	f			ml	1	5
+1635	580	4061	4688	435544	23	f			ml	1	5
+1636	580	4062	4689	4717.26	14	f		Qualigens	box	1	5
+1637	580	4063	4690	1005.67	21	f		Sigma	nos	1	5
+1638	580	4064	4691	4024.53	14	f		Merck	kg	1	5
+1639	580	4065	4692	3837	30	f		Merck	box	1	5
+1640	580	4066	4693	873.32	7	f		SDFine	ml	1	5
+1641	580	4067	4694	1129.43	10	f		Loba Chemie	box	1	5
+1642	580	4068	4695	1570.42	10	f		Loba Chemie	ltr	1	5
+1643	580	4069	4696	142.1	10	f		SDFine	nos	1	5
+1644	580	4070	4697	2009.16	10	f		Merck	ltr	1	5
+1645	580	4071	4698	3078.58	10	f		Thermo Fisher	ltr	1	5
+1646	580	4072	4699	3666.06	21	f		Thermo Fisher	kg	1	5
+1647	580	4073	4700	3267.57	30	f		Loba Chemie	gm	1	5
+1648	580	4074	4701	616.77	10	f		Sigma	nos	1	5
+1649	580	4075	4702	831.47	30	f		Merck	box	1	5
+1650	580	4076	4703	691.74	30	f		Sigma	gm	1	5
+1651	580	4077	4704	1841.62	7	f		Loba Chemie	nos	1	5
+1652	580	4078	4705	3089.61	10	f			ml	1	5
+1653	580	4079	4706	2079.25	14	f		Qualigens	ml	1	5
+1654	580	4080	4707	747.3	21	f		SDFine	kg	1	5
+1655	580	4081	4708	546	21	f			gm	1	5
+1656	580	4082	4709	4267.63	21	f		Thermo Fisher	gm	1	5
+1657	580	4083	4710	1854.68	21	f		Qualigens	nos	1	5
+1658	580	4084	4711	4577.17	21	f		Loba Chemie	box	1	5
+1659	580	4085	4712	1169.68	10	f		Loba Chemie	nos	1	5
+1660	580	4086	4713	2348.59	14	f		Merck	ml	1	5
+1661	580	4087	4714	1444.76	14	f		Qualigens	kg	1	5
+1662	580	4088	4715	2440.65	21	f		Loba Chemie	kg	1	5
+1663	580	4089	4716	2880.22	7	f		Thermo Fisher	nos	1	5
+1664	580	4090	4717	887.7	30	f		SDFine	nos	1	5
+1665	580	4091	4718	3108.09	14	f		Loba Chemie	nos	1	5
+1666	580	4092	4719	157.93	10	f		Loba Chemie	nos	1	5
+1667	580	4093	4720	487.82	7	f		Thermo Fisher	kg	1	5
+1668	580	4094	4721	126.64	7	f		Loba Chemie	nos	1	5
+1669	580	4095	4722	672.18	21	f		Thermo Fisher	ltr	1	5
+1670	580	4096	4723	836.88	21	f		Loba Chemie	kg	1	5
+1671	580	4097	4724	4227.13	21	f		Qualigens	ml	1	5
+1672	580	4098	4725	1950.51	10	f		Merck	kg	1	5
+1673	580	4099	4726	2934.48	7	f		Loba Chemie	ml	1	5
+1674	580	4100	4727	327.11	14	f		Sigma	ltr	1	5
+1675	580	4101	4728	1350.96	7	f		SDFine	kg	1	5
+1676	580	4102	4729	724.81	10	f		SDFine	gm	1	5
+1677	580	4103	4730	2472.16	21	f		SDFine	ml	1	5
+1678	580	4104	4731	4766.17	30	f		Thermo Fisher	box	1	5
+1679	580	4105	4732	4864.16	7	f			ml	1	5
+1680	580	4106	4733	4193.38	10	f			ltr	1	5
+1681	580	4107	4734	4423.39	14	f			kg	1	5
+1682	580	4108	4735	1842.8	30	f		Sigma	ml	1	5
+1683	580	4109	4736	4760.3	21	f			nos	1	5
+1684	580	4110	4737	3545	35456	f			gm	1	5
+1685	580	4111	4738	2743.46	10	f		SDFine	box	1	5
+1686	580	4112	4739	2965.97	30	f		Merck	ml	1	5
+1687	580	4113	4740	4048.67	10	f		Merck	ltr	1	5
+1688	580	4114	4741	3444.66	21	f		Qualigens	ltr	1	5
+1689	580	4115	4742	648.76	21	f			ml	1	5
+1690	580	4116	4743	4097.06	14	f		Sigma	nos	1	5
+1691	580	4117	4744	1583.94	21	f		Sigma	ltr	1	5
+1692	580	4118	4745	121.09	21	f		Merck	nos	1	5
+1693	580	4119	4746	48.9	10	f			ml	1	5
+1694	580	4120	4747	2322	10	f			ml	1	5
+1695	580	4121	4748	3054.99	10	f		Qualigens	box	1	5
+1696	580	4122	4749	3584.69	7	f		Loba Chemie	gm	1	5
+1697	580	4123	4750	2288.67	7	f		Loba Chemie	nos	1	5
+1698	580	4124	4751	3965.53	30	f		Loba Chemie	gm	1	5
+1699	580	4125	4752	1255.01	14	f		Thermo Fisher	ltr	1	5
+1700	580	4126	4753	562.15	10	f		Sigma	kg	1	5
+1701	580	4127	4754	4670.17	7	f		Thermo Fisher	ml	1	5
+1702	580	4128	4755	1795.33	30	f		Thermo Fisher	gm	1	5
+1703	580	4129	4756	2681.2	14	f			kg	1	5
+1704	580	4130	4757	937.97	30	f			ltr	1	5
+1705	580	4131	4758	4359.01	10	f		SDFine	ltr	1	5
+1706	580	4132	4759	4751.63	30	f		Merck	nos	1	5
+1707	580	4133	4760	3812.85	7	f		Loba Chemie	ltr	1	5
+1708	580	4134	4761	1425.29	30	f		Merck	ml	1	5
+1709	580	4135	4762	1596.94	7	f		Merck	box	1	5
+1710	580	4136	4763	4481	21	f		SDFine	box	1	5
+1711	580	4137	4764	4268.6	10	f			gm	1	5
+1712	580	4138	4765	2866.38	10	f		Sigma	gm	1	5
+1713	580	4139	4766	4937.55	14	f		SDFine	ml	1	5
+1714	580	4140	4767	2385.87	21	f		Thermo Fisher	kg	1	5
+1715	580	4141	4768	1654.61	30	f		Thermo Fisher	nos	1	5
+1716	580	4142	4769	1072.53	21	f			box	1	5
+1717	580	4143	4770	3092.6	21	f		SDFine	box	1	5
+1718	580	4144	4771	4210.61	21	f		Merck	nos	1	5
+1719	580	4145	4772	2307.35	7	f		SDFine	box	1	5
+1720	580	4146	4773	1738.5	10	f		Qualigens	ltr	1	5
+1721	580	4147	4774	2339.12	7	f		SDFine	box	1	5
+1722	580	4148	4775	3026.49	30	f		Sigma	ml	1	5
+1723	580	4149	4776	2743.1	30	f		SDFine	nos	1	5
+1724	580	4150	4777	1892.16	21	f		Thermo Fisher	gm	1	5
+1725	580	4151	4778	593.31	21	f		Merck	ltr	1	5
+1726	580	4152	4779	179.45	14	f		Merck	nos	1	5
+1727	580	4153	4780	422.83	21	f		Sigma	nos	1	5
+1728	580	4154	4781	2534.73	14	f		SDFine	kg	1	5
+1729	580	4155	4782	2859.61	21	f		Loba Chemie	ml	1	5
+1730	580	4156	4783	4700.21	21	f		Qualigens	ml	1	5
+1731	580	4157	4784	3989.63	14	f		Merck	kg	1	5
+1732	580	4158	4785	2632.21	10	f			ml	1	5
+1733	580	4159	4786	4270.12	30	f			ml	1	5
+1734	580	4160	4787	3953.99	21	f		SDFine	nos	1	5
+1735	580	4161	4788	1257.19	30	f		SDFine	box	1	5
+1736	580	4162	4789	2685.95	21	f		Sigma	ltr	1	5
+1737	580	4163	4790	1186.68	14	f		Thermo Fisher	ml	1	5
+1738	580	4164	4791	2027.78	10	f		Qualigens	ltr	1	5
+1739	580	4165	4792	988.87	21	f		Qualigens	kg	1	5
+1740	580	4166	4793	4591.68	10	f		Thermo Fisher	ml	1	5
+1741	580	4167	4794	2598.69	10	f		Loba Chemie	gm	1	5
+1742	580	4168	4795	2348.61	10	f		Qualigens	ml	1	5
+1743	580	4169	4796	2724.62	30	f		Thermo Fisher	ltr	1	5
+1744	580	4170	4797	3212.59	21	f		Qualigens	kg	1	5
+1745	580	4171	4798	4036.98	14	f		Merck	ltr	1	5
+1746	580	4172	4799	4104.45	10	f		SDFine	box	1	5
+1747	580	4173	4800	2021.15	7	f		Sigma	kg	1	5
+1748	580	4174	4801	1713.27	10	f		Qualigens	box	1	5
+1749	580	4175	4802	1131.09	10	f		Sigma	kg	1	5
+1750	580	4176	4803	2980.04	14	f		Loba Chemie	gm	1	5
+1751	580	4177	4804	64.39	7	f		Qualigens	nos	1	5
+1752	580	4178	4805	4152.02	14	f		Sigma	gm	1	5
+1753	580	4179	4806	2188.17	14	f			ltr	1	5
+1754	580	4180	4807	1712.26	21	f		Sigma	ltr	1	5
+1755	580	4181	4808	202.54	10	f		SDFine	kg	1	5
+1756	580	4182	4809	4245.72	7	f		SDFine	nos	1	5
+1757	580	4183	4810	3090.79	21	f		Loba Chemie	ml	1	5
+1758	580	4184	4811	547	32	f			gm	1	5
+1759	580	4185	4812	4223.82	14	f		Qualigens	gm	1	5
+1760	580	4186	4813	1511.94	7	f		SDFine	ltr	1	5
+1761	580	4187	4814	3639.21	21	f		Qualigens	nos	1	5
+1762	580	4188	4815	4935.92	7	f		Qualigens	ml	1	5
+1763	580	4189	4816	2321.16	14	f		Sigma	ml	1	5
+1764	580	4190	4819	4333.56	14	f		SDFine	gm	1	5
+1765	580	4191	4820	550.51	21	f		Qualigens	gm	1	5
+1766	580	4192	4821	4131.6	21	f		Qualigens	gm	1	5
+1767	580	4193	4822	2384.64	10	f		Sigma	kg	1	5
+1768	580	4194	4823	2129.09	7	f		SDFine	ltr	1	5
+1769	580	4195	4824	1593.04	7	f		Thermo Fisher	nos	1	5
+1770	580	4196	4825	1842.06	7	f		Thermo Fisher	nos	1	5
+1771	580	4197	4826	2052.41	7	f			ltr	1	5
+1772	580	4198	4827	3742.76	30	f		Thermo Fisher	ml	1	5
+1773	580	4199	4828	1960.71	30	f		Merck	box	1	5
+1774	580	4200	4829	1234	21	f			gm	1	5
+1775	580	4201	4830	2918.26	21	f		SDFine	box	1	5
+1776	580	4202	4831	2495.33	10	f		SDFine	ml	1	5
+1777	580	4203	4832	1075.72	7	f			box	1	5
+1778	580	4204	4833	3201.2	14	f		Thermo Fisher	ml	1	5
+1779	580	4205	4834	1722.33	21	f			nos	1	5
+1780	580	4206	4835	2497.51	30	f		Sigma	ml	1	5
+1781	580	4207	4847	4377.46	30	f		Qualigens	gm	1	5
+1782	580	4208	4848	1220.87	7	f			nos	1	5
+1783	580	4209	4849	2676.7	7	f		Sigma	nos	1	5
+1784	580	4210	4850	193.92	7	f			nos	1	5
+1785	580	4211	4851	2789.03	10	f			gm	1	5
+1786	580	4212	4852	3662.24	10	f		Loba Chemie	gm	1	5
+1787	580	4213	4853	3251.51	7	f		Qualigens	nos	1	5
+1788	580	4214	4854	4112.16	14	f			nos	1	5
+1789	580	4215	4855	2493.15	14	f		Thermo Fisher	kg	1	5
+1790	580	4216	4856	192.43	21	f		Loba Chemie	kg	1	5
+1791	580	4217	4857	1577.1	30	f		Qualigens	gm	1	5
+1792	580	4218	4858	1010.46	21	f		SDFine	nos	1	5
+1793	580	4219	4859	4010.73	7	f		SDFine	kg	1	5
+1794	580	4220	4860	2238.89	10	f		Sigma	nos	1	5
+1795	580	4221	4861	65.98	14	f		Loba Chemie	nos	1	5
+1796	580	4222	4862	4843.66	30	f		Thermo Fisher	ml	1	5
+1797	580	4223	4863	626.53	21	f		Qualigens	box	1	5
+1798	580	4224	4864	207.65	14	f		Sigma	box	1	5
+1799	580	4225	4865	515.9	30	f			kg	1	5
+1800	580	4226	4866	4407.54	21	f			nos	1	5
+1801	580	4227	4867	1353.63	10	f		Sigma	box	1	5
+1802	580	4228	4868	4022.43	21	f		Qualigens	box	1	5
+1803	580	4229	4604	4552.86	21	f		Thermo Fisher	ltr	1	5
+1804	580	4230	4605	3425.83	10	f		Sigma	ml	1	5
+1805	580	4231	4606	3600.05	21	f		Sigma	gm	1	5
+1806	580	4232	4607	2324	21	f			ml	1	5
+1807	580	4233	4608	1243	19	f			ml	1	5
+1808	580	4234	4609	1371.08	21	f		Qualigens	ltr	1	5
+1809	580	4235	4610	3463.49	21	f		Loba Chemie	nos	1	5
+1810	580	4236	4611	1928.42	21	f		Sigma	gm	1	5
+1811	580	4237	4612	3893.98	14	f		Loba Chemie	ml	1	5
+1812	580	4238	4613	491.21	21	f		Merck	kg	1	5
+1813	580	4239	4614	2829.44	10	f		Thermo Fisher	ml	1	5
+1814	580	4240	4615	1054.28	10	f		Qualigens	box	1	5
+1815	580	4241	4836	1539.97	30	f		SDFine	ltr	1	5
+1816	580	4242	4837	963.08	30	f		Thermo Fisher	ltr	1	5
+1817	580	4243	4838	2235.47	10	f		Loba Chemie	gm	1	5
+1818	580	4244	4839	1938.06	14	f			ml	1	5
+1819	580	4245	4840	646.51	14	f		Qualigens	kg	1	5
+1820	580	4246	4841	1698.62	21	f		Sigma	ml	1	5
+1821	580	4247	4842	4524.01	7	f		Qualigens	nos	1	5
+1822	580	4248	4843	2857.83	30	f		Loba Chemie	kg	1	5
+1823	580	4249	4844	2418.49	10	f		Qualigens	ml	1	5
+1824	580	4250	4845	1547.65	30	f		Qualigens	nos	1	5
+1825	580	4251	4846	2856.55	14	f		Merck	ml	1	5
+1560	580	3986	4817	4844.47	21	f		Loba Chemie	box	1	5
+1561	580	3987	4818	4117.35	7	f		Loba Chemie	kg	1	5
+1562	580	3988	4869	1811.8	7	f		Merck	gm	1	5
+1563	580	3989	4616	906.45	21	f		Merck	gm	1	5
+1564	580	3990	4617	59.6	10	f		Merck	nos	1	5
+1565	580	3991	4618	3347.45	7	f		Qualigens	ltr	1	5
+1566	580	3992	4619	3917.72	21	f		Merck	ml	1	5
+1567	580	3993	4620	4460.71	30	f		Loba Chemie	box	1	5
+1568	580	3994	4621	2988.96	10	f		Merck	box	1	5
+1569	580	3995	4622	235.34	30	f		Sigma	ltr	1	5
+1570	580	3996	4623	490.33	14	f		Qualigens	gm	1	5
+1571	580	3997	4624	4233.92	21	f		Merck	gm	1	5
+1572	580	3998	4625	3397.36	10	f		Sigma	box	1	5
+1573	580	3999	4626	1463.83	21	f		Merck	nos	1	5
+1574	580	4000	4627	3751.36	21	f			ml	1	5
+1575	580	4001	4628	430.52	14	f		Thermo Fisher	kg	1	5
+1576	580	4002	4629	4999.99	10	f		Loba Chemie	ml	1	5
+1577	580	4003	4630	3158.44	7	f			gm	1	5
+1578	580	4004	4631	4955.08	10	f		Loba Chemie	ml	1	5
+1579	580	4005	4632	2662.17	30	f		Merck	kg	1	5
+1580	580	4006	4633	4077.88	14	f		Sigma	ml	1	5
+1581	580	4007	4634	4040.93	21	f		Loba Chemie	gm	1	5
+1582	580	4008	4635	872.18	10	f		SDFine	kg	1	5
+1583	580	4009	4636	3773.43	30	f			ml	1	5
+1584	580	4010	4637	6776	6	f			ml	1	5
+1585	580	4011	4638	2196.68	14	f		Sigma	ml	1	5
+1586	580	4012	4639	4681.49	30	f		Loba Chemie	ml	1	5
+1587	580	4013	4640	3582.72	10	f		Merck	ml	1	5
+1588	580	4014	4641	1193.39	14	f		Qualigens	box	1	5
+1589	580	4015	4642	3168.88	10	f		Qualigens	ml	1	5
+1590	580	4016	4643	2411.16	14	f		SDFine	ml	1	5
+1591	580	4017	4644	1613.77	10	f			box	1	5
+1592	580	4018	4645	235.21	10	f		Qualigens	ltr	1	5
+1826	581	3986	4817	4844.47	21	f		Loba Chemie	box	1	10
+1827	581	3987	4818	4117.35	7	f		Loba Chemie	kg	1	10
+1828	581	3988	4869	1811.8	7	f		Merck	gm	1	10
+1829	581	3989	4616	906.45	21	f		Merck	gm	1	10
+1830	581	3990	4617	59.6	10	f		Merck	nos	1	10
+1831	581	3991	4618	3347.45	7	f		Qualigens	ltr	1	10
+1832	581	3992	4619	3917.72	21	f		Merck	ml	1	10
+1833	581	3993	4620	4460.71	30	f		Loba Chemie	box	1	10
+1834	581	3994	4621	2988.96	10	f		Merck	box	1	10
+1835	581	3995	4622	235.34	30	f		Sigma	ltr	1	10
+1836	581	3996	4623	490.33	14	f		Qualigens	gm	1	10
+1837	581	3997	4624	4233.92	21	f		Merck	gm	1	10
+1838	581	3998	4625	3397.36	10	f		Sigma	box	1	10
+1839	581	3999	4626	1463.83	21	f		Merck	nos	1	10
+1840	581	4000	4627	3751.36	21	f			ml	1	10
+1841	581	4001	4628	430.52	14	f		Thermo Fisher	kg	1	10
+1842	581	4002	4629	4999.99	10	f		Loba Chemie	ml	1	10
+1843	581	4003	4630	3158.44	7	f			gm	1	10
+1844	581	4004	4631	4955.08	10	f		Loba Chemie	ml	1	10
+1845	581	4005	4632	2662.17	30	f		Merck	kg	1	10
+1846	581	4006	4633	4077.88	14	f		Sigma	ml	1	10
+1847	581	4007	4634	4040.93	21	f		Loba Chemie	gm	1	10
+1848	581	4008	4635	872.18	10	f		SDFine	kg	1	10
+1849	581	4009	4636	3773.43	30	f			ml	1	10
+1850	581	4010	4637	0	\N	f			ml	1	10
+1851	581	4011	4638	2196.68	14	f		Sigma	ml	1	10
+1852	581	4012	4639	4681.49	30	f		Loba Chemie	ml	1	10
+1853	581	4013	4640	3582.72	10	f		Merck	ml	1	10
+1854	581	4014	4641	1193.39	14	f		Qualigens	box	1	10
+1855	581	4015	4642	3168.88	10	f		Qualigens	ml	1	10
+1856	581	4016	4643	2411.16	14	f		SDFine	ml	1	10
+1857	581	4017	4644	1613.77	10	f			box	1	10
+1858	581	4018	4645	235.21	10	f		Qualigens	ltr	1	10
+1859	581	4019	4646	2579.77	7	f		Sigma	nos	1	10
+1860	581	4020	4647	254.59	7	f		Qualigens	ml	1	10
+1861	581	4021	4648	4000.08	21	f		Qualigens	ltr	1	10
+1862	581	4022	4649	0	\N	f			ml	1	10
+1863	581	4023	4650	887.48	21	f		Loba Chemie	gm	1	10
+1864	581	4024	4651	1945.11	10	f		Sigma	nos	1	10
+1865	581	4025	4652	2213.33	14	f		SDFine	kg	1	10
+1866	581	4026	4653	1890.07	30	f		Thermo Fisher	gm	1	10
+1867	581	4027	4654	698.06	10	f		Qualigens	ltr	1	10
+1868	581	4028	4655	4792.59	7	f		Qualigens	box	1	10
+1869	581	4029	4656	2800.08	30	f		Loba Chemie	nos	1	10
+1870	581	4030	4657	4497.35	10	f			kg	1	10
+1871	581	4031	4658	1780.18	30	f			box	1	10
+1872	581	4032	4659	908.41	7	f		SDFine	ltr	1	10
+1873	581	4033	4660	4518.19	21	f		Thermo Fisher	kg	1	10
+1874	581	4034	4661	4551.4	30	f			ltr	1	10
+1875	581	4035	4662	2911.26	7	f		Thermo Fisher	kg	1	10
+1876	581	4036	4663	4705.08	21	f		SDFine	kg	1	10
+1877	581	4037	4664	781.32	21	f		Qualigens	nos	1	10
+1878	581	4038	4665	2380.55	10	f		Qualigens	ml	1	10
+1879	581	4039	4666	3176.8	14	f		Merck	gm	1	10
+1880	581	4040	4667	3934.94	21	f		Thermo Fisher	ltr	1	10
+1881	581	4041	4668	4169.9	21	f		Sigma	ml	1	10
+1882	581	4042	4669	1225.21	14	f		Sigma	kg	1	10
+1883	581	4043	4670	3516.97	30	f		Thermo Fisher	gm	1	10
+1884	581	4044	4671	3884.87	7	f		Loba Chemie	ltr	1	10
+1885	581	4045	4672	4113.04	30	f		Thermo Fisher	box	1	10
+1886	581	4046	4673	3361.64	21	f		Loba Chemie	ml	1	10
+1887	581	4047	4674	3039.2	30	f		Thermo Fisher	ml	1	10
+1888	581	4048	4675	1987.45	10	f		Loba Chemie	nos	1	10
+1889	581	4049	4676	4981.41	14	f		SDFine	kg	1	10
+1890	581	4050	4677	524.29	30	f		Thermo Fisher	ltr	1	10
+1891	581	4051	4678	630.47	30	f		Thermo Fisher	nos	1	10
+1892	581	4052	4679	702.31	7	f			gm	1	10
+1893	581	4053	4680	2424.17	21	f		Loba Chemie	kg	1	10
+1894	581	4054	4681	399.07	14	f		Loba Chemie	box	1	10
+1895	581	4055	4682	1339.43	21	f		Merck	ml	1	10
+1896	581	4056	4683	1749.85	30	f		Thermo Fisher	nos	1	10
+1897	581	4057	4684	4659.12	10	f		Qualigens	nos	1	10
+1898	581	4058	4685	1843.39	30	f		Qualigens	nos	1	10
+1899	581	4059	4686	3280.85	30	f		Sigma	gm	1	10
+1900	581	4060	4687	0	\N	f			ml	1	10
+1901	581	4061	4688	0	\N	f			ml	1	10
+1902	581	4062	4689	4717.26	14	f		Qualigens	box	1	10
+1903	581	4063	4690	1005.67	21	f		Sigma	nos	1	10
+1904	581	4064	4691	4024.53	14	f		Merck	kg	1	10
+1905	581	4065	4692	3837	30	f		Merck	box	1	10
+1906	581	4066	4693	873.32	7	f		SDFine	ml	1	10
+1907	581	4067	4694	1129.43	10	f		Loba Chemie	box	1	10
+1908	581	4068	4695	1570.42	10	f		Loba Chemie	ltr	1	10
+1909	581	4069	4696	142.1	10	f		SDFine	nos	1	10
+1910	581	4070	4697	2009.16	10	f		Merck	ltr	1	10
+1911	581	4071	4698	3078.58	10	f		Thermo Fisher	ltr	1	10
+1912	581	4072	4699	3666.06	21	f		Thermo Fisher	kg	1	10
+1913	581	4073	4700	3267.57	30	f		Loba Chemie	gm	1	10
+1914	581	4074	4701	616.77	10	f		Sigma	nos	1	10
+1915	581	4075	4702	831.47	30	f		Merck	box	1	10
+1916	581	4076	4703	691.74	30	f		Sigma	gm	1	10
+1917	581	4077	4704	1841.62	7	f		Loba Chemie	nos	1	10
+1918	581	4078	4705	3089.61	10	f			ml	1	10
+1919	581	4079	4706	2079.25	14	f		Qualigens	ml	1	10
+1920	581	4080	4707	747.3	21	f		SDFine	kg	1	10
+1921	581	4081	4708	0	\N	f			gm	1	10
+1922	581	4082	4709	4267.63	21	f		Thermo Fisher	gm	1	10
+1923	581	4083	4710	1854.68	21	f		Qualigens	nos	1	10
+1924	581	4084	4711	4577.17	21	f		Loba Chemie	box	1	10
+1925	581	4085	4712	1169.68	10	f		Loba Chemie	nos	1	10
+1926	581	4086	4713	2348.59	14	f		Merck	ml	1	10
+1927	581	4087	4714	1444.76	14	f		Qualigens	kg	1	10
+1928	581	4088	4715	2440.65	21	f		Loba Chemie	kg	1	10
+1929	581	4089	4716	2880.22	7	f		Thermo Fisher	nos	1	10
+1930	581	4090	4717	887.7	30	f		SDFine	nos	1	10
+1931	581	4091	4718	3108.09	14	f		Loba Chemie	nos	1	10
+1932	581	4092	4719	157.93	10	f		Loba Chemie	nos	1	10
+1933	581	4093	4720	487.82	7	f		Thermo Fisher	kg	1	10
+1934	581	4094	4721	126.64	7	f		Loba Chemie	nos	1	10
+1935	581	4095	4722	672.18	21	f		Thermo Fisher	ltr	1	10
+1936	581	4096	4723	836.88	21	f		Loba Chemie	kg	1	10
+1937	581	4097	4724	4227.13	21	f		Qualigens	ml	1	10
+1938	581	4098	4725	1950.51	10	f		Merck	kg	1	10
+1939	581	4099	4726	2934.48	7	f		Loba Chemie	ml	1	10
+1940	581	4100	4727	327.11	14	f		Sigma	ltr	1	10
+1941	581	4101	4728	1350.96	7	f		SDFine	kg	1	10
+1942	581	4102	4729	724.81	10	f		SDFine	gm	1	10
+1943	581	4103	4730	2472.16	21	f		SDFine	ml	1	10
+1944	581	4104	4731	4766.17	30	f		Thermo Fisher	box	1	10
+1945	581	4105	4732	4864.16	7	f			ml	1	10
+1946	581	4106	4733	4193.38	10	f			ltr	1	10
+1947	581	4107	4734	4423.39	14	f			kg	1	10
+1948	581	4108	4735	1842.8	30	f		Sigma	ml	1	10
+1949	581	4109	4736	4760.3	21	f			nos	1	10
+1950	581	4110	4737	0	\N	f			gm	1	10
+1951	581	4111	4738	2743.46	10	f		SDFine	box	1	10
+1952	581	4112	4739	2965.97	30	f		Merck	ml	1	10
+1953	581	4113	4740	4048.67	10	f		Merck	ltr	1	10
+1954	581	4114	4741	3444.66	21	f		Qualigens	ltr	1	10
+1955	581	4115	4742	648.76	21	f			ml	1	10
+1956	581	4116	4743	4097.06	14	f		Sigma	nos	1	10
+1957	581	4117	4744	1583.94	21	f		Sigma	ltr	1	10
+1958	581	4118	4745	121.09	21	f		Merck	nos	1	10
+1959	581	4119	4746	0	\N	f			ml	1	10
+1960	581	4120	4747	0	\N	f			ml	1	10
+1961	581	4121	4748	3054.99	10	f		Qualigens	box	1	10
+1962	581	4122	4749	3584.69	7	f		Loba Chemie	gm	1	10
+1963	581	4123	4750	2288.67	7	f		Loba Chemie	nos	1	10
+1964	581	4124	4751	3965.53	30	f		Loba Chemie	gm	1	10
+1965	581	4125	4752	1255.01	14	f		Thermo Fisher	ltr	1	10
+1966	581	4126	4753	562.15	10	f		Sigma	kg	1	10
+1967	581	4127	4754	4670.17	7	f		Thermo Fisher	ml	1	10
+1968	581	4128	4755	1795.33	30	f		Thermo Fisher	gm	1	10
+1969	581	4129	4756	2681.2	14	f			kg	1	10
+1970	581	4130	4757	937.97	30	f			ltr	1	10
+1971	581	4131	4758	4359.01	10	f		SDFine	ltr	1	10
+1972	581	4132	4759	4751.63	30	f		Merck	nos	1	10
+1973	581	4133	4760	3812.85	7	f		Loba Chemie	ltr	1	10
+1974	581	4134	4761	1425.29	30	f		Merck	ml	1	10
+1975	581	4135	4762	1596.94	7	f		Merck	box	1	10
+1976	581	4136	4763	4481	21	f		SDFine	box	1	10
+1977	581	4137	4764	4268.6	10	f			gm	1	10
+1978	581	4138	4765	2866.38	10	f		Sigma	gm	1	10
+1979	581	4139	4766	4937.55	14	f		SDFine	ml	1	10
+1980	581	4140	4767	2385.87	21	f		Thermo Fisher	kg	1	10
+1981	581	4141	4768	1654.61	30	f		Thermo Fisher	nos	1	10
+1982	581	4142	4769	1072.53	21	f			box	1	10
+1983	581	4143	4770	3092.6	21	f		SDFine	box	1	10
+1984	581	4144	4771	4210.61	21	f		Merck	nos	1	10
+1985	581	4145	4772	2307.35	7	f		SDFine	box	1	10
+1986	581	4146	4773	1738.5	10	f		Qualigens	ltr	1	10
+1987	581	4147	4774	2339.12	7	f		SDFine	box	1	10
+1988	581	4148	4775	3026.49	30	f		Sigma	ml	1	10
+1989	581	4149	4776	2743.1	30	f		SDFine	nos	1	10
+1990	581	4150	4777	1892.16	21	f		Thermo Fisher	gm	1	10
+1991	581	4151	4778	593.31	21	f		Merck	ltr	1	10
+1992	581	4152	4779	179.45	14	f		Merck	nos	1	10
+1993	581	4153	4780	422.83	21	f		Sigma	nos	1	10
+1994	581	4154	4781	2534.73	14	f		SDFine	kg	1	10
+1995	581	4155	4782	2859.61	21	f		Loba Chemie	ml	1	10
+1996	581	4156	4783	4700.21	21	f		Qualigens	ml	1	10
+1997	581	4157	4784	3989.63	14	f		Merck	kg	1	10
+1998	581	4158	4785	2632.21	10	f			ml	1	10
+1999	581	4159	4786	4270.12	30	f			ml	1	10
+2000	581	4160	4787	3953.99	21	f		SDFine	nos	1	10
+2001	581	4161	4788	1257.19	30	f		SDFine	box	1	10
+2002	581	4162	4789	2685.95	21	f		Sigma	ltr	1	10
+2003	581	4163	4790	1186.68	14	f		Thermo Fisher	ml	1	10
+2004	581	4164	4791	2027.78	10	f		Qualigens	ltr	1	10
+2005	581	4165	4792	988.87	21	f		Qualigens	kg	1	10
+2006	581	4166	4793	4591.68	10	f		Thermo Fisher	ml	1	10
+2007	581	4167	4794	2598.69	10	f		Loba Chemie	gm	1	10
+2008	581	4168	4795	2348.61	10	f		Qualigens	ml	1	10
+2009	581	4169	4796	2724.62	30	f		Thermo Fisher	ltr	1	10
+2010	581	4170	4797	3212.59	21	f		Qualigens	kg	1	10
+2011	581	4171	4798	4036.98	14	f		Merck	ltr	1	10
+2012	581	4172	4799	4104.45	10	f		SDFine	box	1	10
+2013	581	4173	4800	2021.15	7	f		Sigma	kg	1	10
+2014	581	4174	4801	1713.27	10	f		Qualigens	box	1	10
+2015	581	4175	4802	1131.09	10	f		Sigma	kg	1	10
+2016	581	4176	4803	2980.04	14	f		Loba Chemie	gm	1	10
+2017	581	4177	4804	64.39	7	f		Qualigens	nos	1	10
+2018	581	4178	4805	4152.02	14	f		Sigma	gm	1	10
+2019	581	4179	4806	2188.17	14	f			ltr	1	10
+2020	581	4180	4807	1712.26	21	f		Sigma	ltr	1	10
+2021	581	4181	4808	202.54	10	f		SDFine	kg	1	10
+2022	581	4182	4809	4245.72	7	f		SDFine	nos	1	10
+2023	581	4183	4810	3090.79	21	f		Loba Chemie	ml	1	10
+2024	581	4184	4811	0	\N	f			gm	1	10
+2025	581	4185	4812	4223.82	14	f		Qualigens	gm	1	10
+2026	581	4186	4813	1511.94	7	f		SDFine	ltr	1	10
+2027	581	4187	4814	3639.21	21	f		Qualigens	nos	1	10
+2028	581	4188	4815	4935.92	7	f		Qualigens	ml	1	10
+2029	581	4189	4816	2321.16	14	f		Sigma	ml	1	10
+2030	581	4190	4819	4333.56	14	f		SDFine	gm	1	10
+2031	581	4191	4820	550.51	21	f		Qualigens	gm	1	10
+2032	581	4192	4821	4131.6	21	f		Qualigens	gm	1	10
+2033	581	4193	4822	2384.64	10	f		Sigma	kg	1	10
+2034	581	4194	4823	2129.09	7	f		SDFine	ltr	1	10
+2035	581	4195	4824	1593.04	7	f		Thermo Fisher	nos	1	10
+2036	581	4196	4825	1842.06	7	f		Thermo Fisher	nos	1	10
+2037	581	4197	4826	2052.41	7	f			ltr	1	10
+2038	581	4198	4827	3742.76	30	f		Thermo Fisher	ml	1	10
+2039	581	4199	4828	1960.71	30	f		Merck	box	1	10
+2040	581	4200	4829	0	\N	f			gm	1	10
+2041	581	4201	4830	2918.26	21	f		SDFine	box	1	10
+2042	581	4202	4831	2495.33	10	f		SDFine	ml	1	10
+2043	581	4203	4832	1075.72	7	f			box	1	10
+2044	581	4204	4833	3201.2	14	f		Thermo Fisher	ml	1	10
+2045	581	4205	4834	1722.33	21	f			nos	1	10
+2046	581	4206	4835	2497.51	30	f		Sigma	ml	1	10
+2047	581	4207	4847	4377.46	30	f		Qualigens	gm	1	10
+2048	581	4208	4848	1220.87	7	f			nos	1	10
+2049	581	4209	4849	2676.7	7	f		Sigma	nos	1	10
+2050	581	4210	4850	193.92	7	f			nos	1	10
+2051	581	4211	4851	2789.03	10	f			gm	1	10
+2052	581	4212	4852	3662.24	10	f		Loba Chemie	gm	1	10
+2053	581	4213	4853	3251.51	7	f		Qualigens	nos	1	10
+2054	581	4214	4854	4112.16	14	f			nos	1	10
+2055	581	4215	4855	2493.15	14	f		Thermo Fisher	kg	1	10
+2056	581	4216	4856	192.43	21	f		Loba Chemie	kg	1	10
+2057	581	4217	4857	1577.1	30	f		Qualigens	gm	1	10
+2058	581	4218	4858	1010.46	21	f		SDFine	nos	1	10
+2059	581	4219	4859	4010.73	7	f		SDFine	kg	1	10
+2060	581	4220	4860	2238.89	10	f		Sigma	nos	1	10
+2061	581	4221	4861	65.98	14	f		Loba Chemie	nos	1	10
+2062	581	4222	4862	4843.66	30	f		Thermo Fisher	ml	1	10
+2063	581	4223	4863	626.53	21	f		Qualigens	box	1	10
+2064	581	4224	4864	207.65	14	f		Sigma	box	1	10
+2065	581	4225	4865	515.9	30	f			kg	1	10
+2066	581	4226	4866	4407.54	21	f			nos	1	10
+2067	581	4227	4867	1353.63	10	f		Sigma	box	1	10
+2068	581	4228	4868	4022.43	21	f		Qualigens	box	1	10
+2069	581	4229	4604	4552.86	21	f		Thermo Fisher	ltr	1	10
+2070	581	4230	4605	3425.83	10	f		Sigma	ml	1	10
+2071	581	4231	4606	3600.05	21	f		Sigma	gm	1	10
+2072	581	4232	4607	123	11	f			ml	1	10
+2073	581	4233	4608	232	11	f			ml	1	10
+2074	581	4234	4609	1371.08	21	f		Qualigens	ltr	1	10
+2075	581	4235	4610	3463.49	21	f		Loba Chemie	nos	1	10
+2076	581	4236	4611	1928.42	21	f		Sigma	gm	1	10
+2077	581	4237	4612	3893.98	14	f		Loba Chemie	ml	1	10
+2078	581	4238	4613	491.21	21	f		Merck	kg	1	10
+2079	581	4239	4614	2829.44	10	f		Thermo Fisher	ml	1	10
+2080	581	4240	4615	1054.28	10	f		Qualigens	box	1	10
+2081	581	4241	4836	1539.97	30	f		SDFine	ltr	1	10
+2082	581	4242	4837	963.08	30	f		Thermo Fisher	ltr	1	10
+2083	581	4243	4838	2235.47	10	f		Loba Chemie	gm	1	10
+2084	581	4244	4839	1938.06	14	f			ml	1	10
+2085	581	4245	4840	646.51	14	f		Qualigens	kg	1	10
+2086	581	4246	4841	1698.62	21	f		Sigma	ml	1	10
+2087	581	4247	4842	4524.01	7	f		Qualigens	nos	1	10
+2088	581	4248	4843	2857.83	30	f		Loba Chemie	kg	1	10
+2089	581	4249	4844	2418.49	10	f		Qualigens	ml	1	10
+2090	581	4250	4845	1547.65	30	f		Qualigens	nos	1	10
+2091	581	4251	4846	2856.55	14	f		Merck	ml	1	10
 \.
 
 
@@ -17462,6 +21950,14 @@ COPY public.vendor_quotations (id, qr_id, vendor_id, quotation_number, quotation
 572	207	63	Quo2	2026-07-14	2026-07-21	/api/uploads/quotations/qr_207_v_63_Quo1.xlsx		Received	3	2026-07-21 12:07:38.871856
 571	207	62	quo1	2026-07-09	2026-07-21	/api/uploads/quotations/qr_207_v_62_Quo1.xlsx		Received	3	2026-07-21 12:04:19.177675
 573	206	64	inv00020	2026-07-15	2026-07-21	/api/uploads/quotations/qr_206_v_64_BRITTO INDUSTRIES.pdf		Received	3	2026-07-21 12:26:25.680799
+574	212	66	VQ-TEST-001	2026-08-01	2026-08-03	\N	Automated VQ 1	Received	1	2026-08-03 14:07:31.567925
+575	212	63	VQ-TEST-002	2026-08-01	2026-08-03	\N	Automated VQ 2	Received	1	2026-08-03 14:07:31.607342
+576	213	66	VQ-TEST-001	2026-08-01	2026-08-03	\N	Automated VQ 1	Received	1	2026-08-03 14:10:13.966678
+577	213	63	VQ-TEST-002	2026-08-01	2026-08-03	\N	Automated VQ 2	Received	1	2026-08-03 14:10:13.986425
+578	214	66	VQ-TEST-001	2026-08-01	2026-08-03	\N	Automated VQ 1	Received	1	2026-08-03 14:11:21.215844
+579	214	63	VQ-TEST-002	2026-08-01	2026-08-03	\N	Automated VQ 2	Received	1	2026-08-03 14:11:21.234216
+580	222	69	123	2026-08-06	2026-08-06	/api/uploads/quotations/qr_222_v_69_sample_quotation_full.pdf		Received	3	2026-08-06 20:19:54.796089
+581	222	72		\N	2026-08-06	/api/uploads/quotations/qr_222_v_72_sample_quotation_full.xlsx		Draft	3	2026-08-06 20:34:34.63301
 \.
 
 
@@ -17483,9 +21979,16 @@ COPY public.vendors (id, tenant_id, site_id, name, code, contact_person, phone, 
 61	3	3	samsung	VND-00011	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	t	f	2026-06-11 16:11:48.285063	2026-06-11 16:11:48.285095	\N	\N	Approved	1	\N	\N	\N	\N	\N	\N	\N	\N	\N
 64	2	2	Royal Hardware & Electricals	VND-00003	Kumar	37878738723	ilangkumaran@yahoo.com	29AACCE9951B1ZR	\N	Bangalore	29 - Karnataka	560049	\N	\N	\N	4.5	t	f	2026-06-12 01:34:04.150106	2026-06-12 01:34:04.150149	Ground Floor, Sri Lakshminivasareswara Nilaya,	Avalahalli, Ittamadu Main Road, Virgonagar Post,	Approved	1	\N	\N	\N	\N	\N	\N	\N	\N	\N
 62	2	2	Mataji Electricals	VND-00001	Lal	9898989898	pradnesh@nissigrid.com	29AFHPC7600L1ZD	\N	Bangalore	29 - Karnataka	560075	\N	\N	\N	4.5	t	f	2026-06-11 22:01:38.68366	2026-06-17 14:24:10.031865	Shop No. 1, Door No.  31, Malleshpalaya Main Road	New Thippasandra PO	Approved	1	\N	\N	\N	\N	\N	\N	\N	\N	\N
-65	2	2	havells pvt limited	VND-00004	Pradnesh A	56954664565	pradnesha1234@gmail.com	29AACCE9951H1ZR	\N	bangalore	29 - Karnataka	560016	\N	\N	\N	4.5	f	f	2026-07-21 15:30:53.78455	2026-07-31 10:57:58.151211	old madras road,pai layout		Approved	1	3	2026-07-31 05:27:58.148619	\N	\N	\N	Approved	3	2026-07-31 05:22:38.310385	{"is_active": {"old": true, "new": false}}
 63	2	2	ELCAB ENGINEERS PRIVATE LIMITED	VND-00002	Bala	47347347837	pradnesha12345@gmail.com	29AACCE9951H1ZR	\N	Bangalore	29 - Karnataka	560060	\N	\N	\N	4.5	t	f	2026-06-12 01:31:58.140808	2026-07-22 12:37:44.763392	V R Cindem Complex, Sy. No. 1193/34/4, Kengeri Main Road,	Behind Mr Prem Bun, Ramasandra Village,	Approved	1	\N	\N	\N	\N	\N	\N	\N	\N	\N
 66	2	2	dell laptops 	VND-00005	Pradnesh A	25484656448	pradnesha1234@gmail.com	29AACCE9951H1ZY	\N	bangalore 	29 - Karnataka	560016	\N	\N	\N	4.5	t	f	2026-07-21 16:45:27.700736	2026-07-31 10:51:31.498809	new madras road , pai layout		Approved	1	3	2026-07-31 05:21:31.496168	\N	\N	\N	Rejected	\N	\N	{"categories": {"old": ["LAB", "HOUSE KEEPING", "IT"], "new": ["LAB", "IT"]}}
+73	2	2	ROBLIN SCIENTIFIC	VND-00012	Roblin	7348954963	roblinscientific@nissigrid.com	29AGEPR8249L1ZK	\N	Bangalore	29 - Karnataka	560077	\N	\N	\N	5	t	f	2026-08-06 17:02:54.328776	2026-08-06 17:42:44.613869	#12, Shop No:05 First Floor	NearAnjineya Temple, Byrathi,Kothanur Post, Bangalore East	Approved	2	3	2026-08-06 12:12:44.613434	\N	\N	\N	\N	\N	\N	\N
+67	2	2	Test	VND-00006	Sam	81928198291	sam@nissigrid.com	22AAAAA0000A1Z9	\N	Bengaluru	29 - Karnataka	560016	\N	\N	\N	3.5	t	f	2026-08-04 13:01:06.060685	2026-08-06 11:25:34.505163	Addr1		Approved	2	3	2026-08-06 05:55:34.50251	\N	\N	\N	\N	\N	\N	\N
+70	2	2	Jai Maruthi Scientific	VND-00009	JAI	9379566366	JaiMaruthiScientific@nissigrid.com	29ASBPJ7427R1Z0	\N	Bangalore	29 - Karnataka	560079	\N	\N	\N	4	t	f	2026-08-06 16:51:28.044047	2026-08-06 17:42:41.872169	      #147,2nd Main Road,  	Near RES Convent, Kaveripura, Kamakshipalya  	Approved	2	3	2026-08-06 12:12:41.871755	\N	\N	\N	\N	\N	\N	\N
+65	2	2	havells pvt limited	VND-00004	Pradnesh A	56954664565	pradnesha1234@gmail.com	29AACCE9951H1ZR	\N	bangalore	29 - Karnataka	560016	\N	\N	\N	4.5	f	f	2026-07-21 15:30:53.78455	2026-08-06 11:26:13.096498	old madras road,pai layout		Rejected	1	3	2026-07-31 05:27:58.148619	none	3	2026-08-06 05:56:13.093826	Approved	3	2026-07-31 05:27:58.148619	{"is_active": {"old": false, "new": true}}
+68	2	2	vik	VND-00007	vvik	0987654321	gfdjkghj@gmail.com	29ABCDE1234F1Z5	\N	chennai	33 - Tamil Nadu	600001	\N	\N	\N	0	t	f	2026-08-06 13:25:15.684843	2026-08-06 13:25:39.380776	main road,chennai		Approved	2	3	2026-08-06 07:55:39.378217	\N	\N	\N	\N	\N	\N	\N
+72	2	2	THE PRINCE CHEMICAL CO	VND-00011	Prince	64375443788	theprincechem@nissigrid.com	22AAAAA0000A1Z5	\N	Bangalore 	29 - Karnataka	56002	\N	\N	\N	4.5	t	f	2026-08-06 16:59:08.113193	2026-08-06 17:42:45.855548	      NO,19,5th cross, H.Siddaiah road 		Approved	2	3	2026-08-06 12:12:45.855115	\N	\N	\N	\N	\N	\N	\N
+71	2	2	ISIRI SCIENTIFICS	VND-00010	ISIRI	8884483838	pradnesh@nissigrid.com	29AXXPD1835A1ZH	\N	Bangalore	29 - Karnataka	560086	\N	\N	\N	5	t	f	2026-08-06 16:54:45.792264	2026-08-06 19:16:16.642761	No.189/18,Coressponding no.17,	6th Cross,Ravi English school road	Approved	2	3	2026-08-06 13:46:16.642283	\N	\N	\N	Approved	3	2026-08-06 12:12:40.888623	{"email": {"old": "isiriscientifics@nissigrid.com", "new": "pradnesh@nissigrid.com"}}
+69	2	2	AIC ENTERPRISES PVT LTD	VND-00008	AICENT	9742270172	ilangkumaran@nissigrid.in	29AASCA0900A1Z3	\N	Bangalore	29 - Karnataka	560058	\N	\N	\N	4.5	t	f	2026-08-06 16:45:15.340276	2026-08-06 19:15:24.8115	V-79A and V-79B, 1ST A Main Road	2nd Stage, Peenya Industrial Estate	Approved	2	3	2026-08-06 13:45:24.810803	\N	\N	\N	Approved	3	2026-08-06 12:12:39.00556	{"email": {"old": "customercare.ka@nissigrid.in", "new": "ilangkumaran@nissigrid.in"}}
 \.
 
 
@@ -17517,11 +22020,11 @@ COPY public.warehouses (id, tenant_id, site_id, name, code, project_id, warehous
 66	2	2	HOSPITAL Store	WH-00004	3	Store		\N		\N	t	f	2026-06-12 01:57:44.267901
 67	2	2	HOUSE KEEPING Store	WH-00005	3	Central		\N		\N	t	f	2026-06-12 01:57:58.672985
 68	2	2	IT Store	WH-00006	3	Store		\N		\N	t	f	2026-06-12 01:58:54.090386
-69	2	2	Plumbing Store	WH-00007	3	Store		\N		\N	t	f	2026-06-12 01:59:25.241904
 70	2	2	STATIONERY Store	WH-00008	3	Store		\N		\N	t	f	2026-06-12 01:59:50.536638
 71	2	2	HOSPITAL INSTRUMENTS Store	WH-00009	3	Store		\N		\N	t	f	2026-06-12 02:00:13.855034
 72	2	2	RADIOLOGY Store	WH-00010	3	Store		\N		\N	t	f	2026-06-12 02:00:34.488911
 73	2	2	Scrap Store	WH-00011	3	Central	Bangalore	\N		\N	t	f	2026-06-15 18:22:59.575527
+69	2	2	Plumbing Store	WH-00007	3	De centralized		\N		\N	f	t	2026-06-12 01:59:25.241904
 \.
 
 
@@ -17529,15 +22032,17 @@ COPY public.warehouses (id, tenant_id, site_id, name, code, project_id, warehous
 -- Data for Name: write_off_items; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.write_off_items (id, write_off_id, material_id, warehouse_id, quantity, rate, amount, has_buyback, buyback_amount) FROM stdin;
-1	1	2564	62	5	16526.16	82630.8	\N	\N
-2	2	3507	62	2	4349	8698	\N	\N
-3	3	2435	62	1	4657.57	4657.57	\N	\N
-4	6	2472	62	1	3782.04	3782.04	\N	\N
-5	7	2450	62	1	4429.23	4429.23	\N	\N
-6	8	3475	62	1	4602.71	4602.71	\N	\N
-7	9	3507	62	1	4349	4349	\N	\N
-10	10	2435	62	2	4657.57	9315.14	\N	\N
+COPY public.write_off_items (id, write_off_id, material_id, warehouse_id, quantity, rate, amount, has_buyback, buyback_amount, equipment_id, location_id) FROM stdin;
+1	1	2564	62	5	16526.16	82630.8	\N	\N	\N	\N
+2	2	3507	62	2	4349	8698	\N	\N	\N	\N
+3	3	2435	62	1	4657.57	4657.57	\N	\N	\N	\N
+4	6	2472	62	1	3782.04	3782.04	\N	\N	\N	\N
+5	7	2450	62	1	4429.23	4429.23	\N	\N	\N	\N
+6	8	3475	62	1	4602.71	4602.71	\N	\N	\N	\N
+7	9	3507	62	1	4349	4349	\N	\N	\N	\N
+10	10	2435	62	2	4657.57	9315.14	\N	\N	\N	\N
+11	11	2338	62	1	4352.49	4352.49	f	0	1	1
+12	12	2338	62	1	4352.49	4352.49	f	0	1	1
 \.
 
 
@@ -17554,6 +22059,8 @@ COPY public.write_offs (id, tenant_id, site_id, write_off_number, date, reason, 
 8	2	2	WO-00006	2026-07-08	qwert	Approved	1	3	3	2026-07-08 10:19:59.460906	f	2026-07-08 15:49:51.845229	2026-07-08 15:49:59.465678	Damaged in Handling		\N	\N
 9	2	2	WO-00007	2026-07-10	damaged 	Rejected	1	3	\N	\N	f	2026-07-09 13:09:09.338244	2026-07-09 13:20:58.29659	Damaged in Handling		\N	\N
 10	2	2	WO-00008	2026-07-09	lost 	Approved	1	3	3	2026-07-09 07:51:15.64808	f	2026-07-09 13:20:30.394309	2026-07-09 13:21:15.743396	Lost / Stolen		\N	\N
+11	2	2	WO-00009	2026-08-03	Equipment Write Off	Rejected	1	3	\N	\N	f	2026-08-03 18:55:32.87775	2026-08-03 19:15:50.964498	Damaged in Handling			
+12	2	2	EWO-00001	2026-08-03	Equipment Write Off	Submitted	1	3	\N	\N	f	2026-08-03 19:15:13.906801	2026-08-03 19:32:48.593828	Damaged in Handling			
 \.
 
 
@@ -17561,21 +22068,21 @@ COPY public.write_offs (id, tenant_id, site_id, write_off_number, date, reason, 
 -- Name: alerts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.alerts_id_seq', 44, true);
+SELECT pg_catalog.setval('public.alerts_id_seq', 65, true);
 
 
 --
 -- Name: approval_flows_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.approval_flows_id_seq', 85, true);
+SELECT pg_catalog.setval('public.approval_flows_id_seq', 87, true);
 
 
 --
 -- Name: audit_logs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.audit_logs_id_seq', 456, true);
+SELECT pg_catalog.setval('public.audit_logs_id_seq', 548, true);
 
 
 --
@@ -17589,7 +22096,7 @@ SELECT pg_catalog.setval('public.buildings_id_seq', 12, true);
 -- Name: categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.categories_id_seq', 76, true);
+SELECT pg_catalog.setval('public.categories_id_seq', 80, true);
 
 
 --
@@ -17603,49 +22110,49 @@ SELECT pg_catalog.setval('public.company_addresses_id_seq', 6, true);
 -- Name: complaint_documents_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.complaint_documents_id_seq', 1, false);
+SELECT pg_catalog.setval('public.complaint_documents_id_seq', 4, true);
 
 
 --
 -- Name: complaint_images_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.complaint_images_id_seq', 19, true);
+SELECT pg_catalog.setval('public.complaint_images_id_seq', 22, true);
 
 
 --
 -- Name: complaints_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.complaints_id_seq', 15, true);
+SELECT pg_catalog.setval('public.complaints_id_seq', 18, true);
 
 
 --
 -- Name: contract_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.contract_approvals_id_seq', 1, true);
+SELECT pg_catalog.setval('public.contract_approvals_id_seq', 3, true);
 
 
 --
 -- Name: contract_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.contract_items_id_seq', 2, true);
+SELECT pg_catalog.setval('public.contract_items_id_seq', 3, true);
 
 
 --
 -- Name: contracts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.contracts_id_seq', 2, true);
+SELECT pg_catalog.setval('public.contracts_id_seq', 3, true);
 
 
 --
 -- Name: current_stock_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.current_stock_id_seq', 3869, true);
+SELECT pg_catalog.setval('public.current_stock_id_seq', 4401, true);
 
 
 --
@@ -17666,7 +22173,7 @@ SELECT pg_catalog.setval('public.departments_id_seq', 335, true);
 -- Name: document_sequences_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.document_sequences_id_seq', 98, true);
+SELECT pg_catalog.setval('public.document_sequences_id_seq', 111, true);
 
 
 --
@@ -17680,7 +22187,7 @@ SELECT pg_catalog.setval('public.equipment_history_id_seq', 2, true);
 -- Name: equipment_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.equipment_items_id_seq', 1, true);
+SELECT pg_catalog.setval('public.equipment_items_id_seq', 1605, true);
 
 
 --
@@ -17701,7 +22208,7 @@ SELECT pg_catalog.setval('public.floors_id_seq', 30, true);
 -- Name: gate_entries_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.gate_entries_id_seq', 201, true);
+SELECT pg_catalog.setval('public.gate_entries_id_seq', 206, true);
 
 
 --
@@ -17722,35 +22229,35 @@ SELECT pg_catalog.setval('public.gate_passes_id_seq', 22, true);
 -- Name: grn_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.grn_id_seq', 213, true);
+SELECT pg_catalog.setval('public.grn_id_seq', 217, true);
 
 
 --
 -- Name: grn_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.grn_items_id_seq', 520, true);
+SELECT pg_catalog.setval('public.grn_items_id_seq', 521, true);
 
 
 --
 -- Name: indent_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.indent_approvals_id_seq', 66, true);
+SELECT pg_catalog.setval('public.indent_approvals_id_seq', 78, true);
 
 
 --
 -- Name: indent_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.indent_items_id_seq', 515, true);
+SELECT pg_catalog.setval('public.indent_items_id_seq', 520, true);
 
 
 --
 -- Name: indents_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.indents_id_seq', 234, true);
+SELECT pg_catalog.setval('public.indents_id_seq', 238, true);
 
 
 --
@@ -17778,42 +22285,42 @@ SELECT pg_catalog.setval('public.invoices_id_seq', 12, true);
 -- Name: location_master_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.location_master_id_seq', 1, true);
+SELECT pg_catalog.setval('public.location_master_id_seq', 149, true);
 
 
 --
 -- Name: material_issue_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.material_issue_items_id_seq', 218, true);
+SELECT pg_catalog.setval('public.material_issue_items_id_seq', 219, true);
 
 
 --
 -- Name: material_issues_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.material_issues_id_seq', 238, true);
+SELECT pg_catalog.setval('public.material_issues_id_seq', 239, true);
 
 
 --
 -- Name: material_return_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.material_return_items_id_seq', 15, true);
+SELECT pg_catalog.setval('public.material_return_items_id_seq', 16, true);
 
 
 --
 -- Name: material_returns_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.material_returns_id_seq', 24, true);
+SELECT pg_catalog.setval('public.material_returns_id_seq', 25, true);
 
 
 --
 -- Name: materials_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.materials_id_seq', 3717, true);
+SELECT pg_catalog.setval('public.materials_id_seq', 4869, true);
 
 
 --
@@ -17848,91 +22355,91 @@ SELECT pg_catalog.setval('public.projects_id_seq', 9, true);
 -- Name: purchase_order_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_order_approvals_id_seq', 56, true);
+SELECT pg_catalog.setval('public.purchase_order_approvals_id_seq', 115, true);
 
 
 --
 -- Name: purchase_order_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_order_items_id_seq', 678, true);
+SELECT pg_catalog.setval('public.purchase_order_items_id_seq', 973, true);
 
 
 --
 -- Name: purchase_orders_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_orders_id_seq', 252, true);
+SELECT pg_catalog.setval('public.purchase_orders_id_seq', 274, true);
 
 
 --
 -- Name: purchase_request_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_request_approvals_id_seq', 32, true);
+SELECT pg_catalog.setval('public.purchase_request_approvals_id_seq', 40, true);
 
 
 --
 -- Name: purchase_request_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_request_items_id_seq', 619, true);
+SELECT pg_catalog.setval('public.purchase_request_items_id_seq', 621, true);
 
 
 --
 -- Name: purchase_requests_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_requests_id_seq', 203, true);
+SELECT pg_catalog.setval('public.purchase_requests_id_seq', 205, true);
 
 
 --
 -- Name: quotation_comparisons_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_comparisons_id_seq', 118, true);
+SELECT pg_catalog.setval('public.quotation_comparisons_id_seq', 386, true);
 
 
 --
 -- Name: quotation_negotiation_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_negotiation_history_id_seq', 1, true);
+SELECT pg_catalog.setval('public.quotation_negotiation_history_id_seq', 17, true);
 
 
 --
 -- Name: quotation_request_item_sources_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_request_item_sources_id_seq', 115, true);
+SELECT pg_catalog.setval('public.quotation_request_item_sources_id_seq', 3898, true);
 
 
 --
 -- Name: quotation_request_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_request_items_id_seq', 473, true);
+SELECT pg_catalog.setval('public.quotation_request_items_id_seq', 4251, true);
 
 
 --
 -- Name: quotation_request_prs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_request_prs_id_seq', 14, true);
+SELECT pg_catalog.setval('public.quotation_request_prs_id_seq', 31, true);
 
 
 --
 -- Name: quotation_request_vendors_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_request_vendors_id_seq', 429, true);
+SELECT pg_catalog.setval('public.quotation_request_vendors_id_seq', 509, true);
 
 
 --
 -- Name: quotation_requests_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_requests_id_seq', 209, true);
+SELECT pg_catalog.setval('public.quotation_requests_id_seq', 223, true);
 
 
 --
@@ -17981,7 +22488,7 @@ SELECT pg_catalog.setval('public.sites_id_seq', 4, true);
 -- Name: stock_ledger_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.stock_ledger_id_seq', 4271, true);
+SELECT pg_catalog.setval('public.stock_ledger_id_seq', 4276, true);
 
 
 --
@@ -17995,14 +22502,14 @@ SELECT pg_catalog.setval('public.stock_transfer_items_id_seq', 11, true);
 -- Name: stock_transfers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.stock_transfers_id_seq', 33, true);
+SELECT pg_catalog.setval('public.stock_transfers_id_seq', 38, true);
 
 
 --
 -- Name: subcategories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.subcategories_id_seq', 96, true);
+SELECT pg_catalog.setval('public.subcategories_id_seq', 98, true);
 
 
 --
@@ -18030,21 +22537,21 @@ SELECT pg_catalog.setval('public.tenants_id_seq', 4, true);
 -- Name: terms_and_conditions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.terms_and_conditions_id_seq', 4, true);
+SELECT pg_catalog.setval('public.terms_and_conditions_id_seq', 15, true);
 
 
 --
 -- Name: uom_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.uom_id_seq', 41, true);
+SELECT pg_catalog.setval('public.uom_id_seq', 48, true);
 
 
 --
 -- Name: user_role_assignments_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.user_role_assignments_id_seq', 78, true);
+SELECT pg_catalog.setval('public.user_role_assignments_id_seq', 80, true);
 
 
 --
@@ -18058,63 +22565,63 @@ SELECT pg_catalog.setval('public.users_id_seq', 36, true);
 -- Name: vendor_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_approvals_id_seq', 1, true);
+SELECT pg_catalog.setval('public.vendor_approvals_id_seq', 10, true);
 
 
 --
 -- Name: vendor_categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_categories_id_seq', 153, true);
+SELECT pg_catalog.setval('public.vendor_categories_id_seq', 192, true);
 
 
 --
 -- Name: vendor_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_history_id_seq', 9, true);
+SELECT pg_catalog.setval('public.vendor_history_id_seq', 41, true);
 
 
 --
 -- Name: vendor_quotation_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_quotation_items_id_seq', 1284, true);
+SELECT pg_catalog.setval('public.vendor_quotation_items_id_seq', 2091, true);
 
 
 --
 -- Name: vendor_quotations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_quotations_id_seq', 573, true);
+SELECT pg_catalog.setval('public.vendor_quotations_id_seq', 581, true);
 
 
 --
 -- Name: vendors_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendors_id_seq', 66, true);
+SELECT pg_catalog.setval('public.vendors_id_seq', 73, true);
 
 
 --
 -- Name: warehouses_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.warehouses_id_seq', 73, true);
+SELECT pg_catalog.setval('public.warehouses_id_seq', 74, true);
 
 
 --
 -- Name: write_off_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.write_off_items_id_seq', 10, true);
+SELECT pg_catalog.setval('public.write_off_items_id_seq', 12, true);
 
 
 --
 -- Name: write_offs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.write_offs_id_seq', 10, true);
+SELECT pg_catalog.setval('public.write_offs_id_seq', 13, true);
 
 
 --
@@ -20896,6 +25403,14 @@ ALTER TABLE ONLY public.invoices
 
 
 --
+-- Name: invoices invoices_institution_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.invoices
+    ADD CONSTRAINT invoices_institution_id_fkey FOREIGN KEY (institution_id) REFERENCES public.institutions(id);
+
+
+--
 -- Name: invoices invoices_payment_completed_by_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -22192,6 +26707,22 @@ ALTER TABLE ONLY public.warehouses
 
 
 --
+-- Name: write_off_items write_off_items_equipment_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.write_off_items
+    ADD CONSTRAINT write_off_items_equipment_id_fkey FOREIGN KEY (equipment_id) REFERENCES public.equipment_items(id);
+
+
+--
+-- Name: write_off_items write_off_items_location_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.write_off_items
+    ADD CONSTRAINT write_off_items_location_id_fkey FOREIGN KEY (location_id) REFERENCES public.location_master(id);
+
+
+--
 -- Name: write_off_items write_off_items_material_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -22259,5 +26790,5 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 9iuJfEW5oM6ybQ2wDseboBXkqKeEqvdnCwqmqyt6ZZ9QPPIkaAZZcG9o6f6lXNh
+\unrestrict QKV6L1lAyfkzhPL2cC2RjBohFGldJxjsmiaSl3sIWEmaKukLaJuScaeTRffRXWj
 

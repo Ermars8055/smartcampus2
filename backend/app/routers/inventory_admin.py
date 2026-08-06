@@ -164,7 +164,7 @@ def stock_report(
     if warehouse_id:
         q = q.filter(CurrentStock.warehouse_id == warehouse_id)
 
-    results = q.group_by(Material.code, Material.name, UOM.name).all()
+    results = q.group_by(Material.code, Material.name, UOM.abbreviation).all()
     return [
         {
             "material_code": r[0], "material_name": r[1], "uom": r[2],

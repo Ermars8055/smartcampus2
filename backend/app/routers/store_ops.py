@@ -1044,7 +1044,10 @@ def list_write_offs(
             items.append(WriteOffItemOut(
                 id=item.id, material_id=item.material_id,
                 warehouse_id=item.warehouse_id,
+                equipment_id=item.equipment_id,
+                location_id=item.location_id,
                 warehouse_name=wh.name if wh else None,
+                location_name=item.location.location_name if item.location else None,
                 quantity=item.quantity, rate=item.rate, amount=item.amount,
                 material_name=mat.name if mat else None,
                 material_code=mat.code if mat else None,
@@ -1077,7 +1080,10 @@ def create_write_off(
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
-    write_off_number = get_next_number(db, tenant_id, site_id, "WRITE_OFF", "WO")
+    is_equipment = any(item.equipment_id is not None for item in data.items)
+    seq_type = "EQUIPMENT_WRITE_OFF" if is_equipment else "WRITE_OFF"
+    seq_prefix = "EWO" if is_equipment else "WO"
+    write_off_number = get_next_number(db, tenant_id, site_id, seq_type, seq_prefix)
     
     wo = WriteOff(
         tenant_id=tenant_id,
@@ -1119,6 +1125,8 @@ def create_write_off(
             write_off_id=wo.id,
             material_id=item_data.material_id,
             warehouse_id=wh_id,
+            equipment_id=item_data.equipment_id,
+            location_id=item_data.location_id,
             quantity=item_data.quantity,
             rate=rate,
             amount=amount,
@@ -1179,6 +1187,8 @@ def update_write_off(
             write_off_id=wo.id,
             material_id=item_data.material_id,
             warehouse_id=wh_id,
+            equipment_id=item_data.equipment_id,
+            location_id=item_data.location_id,
             quantity=item_data.quantity,
             rate=rate,
             amount=amount,
@@ -1265,6 +1275,16 @@ def approve_write_off(
             user_id=current_user.id
         )
         
+        if item.equipment_id:
+            from app.models import EquipmentItem
+            equipment = db.query(EquipmentItem).filter(
+                EquipmentItem.id == item.equipment_id,
+                EquipmentItem.tenant_id == tenant_id,
+                EquipmentItem.site_id == site_id
+            ).first()
+            if equipment:
+                equipment.status = "Written Off"
+                
     db.commit()
     return {"message": "Write Off approved and stock updated successfully"}
 

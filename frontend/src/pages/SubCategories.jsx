@@ -138,7 +138,7 @@ export default function SubCategories() {
                     <IconButton size="small" onClick={() => {
                       setEditing(s.id); setForm({ name: s.name, category_id: s.category_id, is_active: s.is_active !== false }); setErrors({}); setDialog('subcat');
                     }} sx={{ color: '#64748B' }}>
-                      <Edit fontSize="small" />
+                      <Edit color="primary" fontSize="small" />
                     </IconButton>
                   </TableCell>
                 </TableRow>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { formatDate, formatDateTime } from '../utils/dateUtils';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, Grid, Tab, Tabs, FormControl, InputLabel,
@@ -6,6 +7,7 @@ import {
 } from '@mui/material';
 import { Download, Assessment } from '@mui/icons-material';
 import api from '../services/api';
+import EquipmentCountReport from './EquipmentCountReport';
 
 export default function Reports() {
   const [tab, setTab] = useState(0);
@@ -16,7 +18,8 @@ export default function Reports() {
   useEffect(() => { api.get('/api/warehouses').then(r => setWarehouses(r.data)); }, []);
 
   useEffect(() => {
-    const endpoints = ['/api/reports/stock', '/api/reports/consumption', '/api/reports/pr-status', '/api/reports/po-status', '/api/reports/movement', '/api/equipment/reports/count'];
+    if (tab === 5) return; // Managed by EquipmentCountReport component
+    const endpoints = ['/api/reports/stock', '/api/reports/consumption', '/api/reports/pr-status', '/api/reports/po-status', '/api/reports/movement'];
     const params = tab === 0 && whFilter ? { warehouse_id: whFilter } : {};
     api.get(endpoints[tab], { params }).then(r => setData(r.data));
   }, [tab, whFilter]);
@@ -24,7 +27,14 @@ export default function Reports() {
   const downloadCSV = () => {
     if (!data.length) return;
     const headers = Object.keys(data[0]);
-    const csv = [headers.join(','), ...data.map(r => headers.map(h => `"${r[h] || ''}"`).join(','))].join('\n');
+    const csv = [headers.join(','), ...data.map(r => headers.map(h => {
+      let val = r[h] ?? '';
+      if (val) {
+        if (h.toLowerCase() === 'created_at' || h.toLowerCase() === 'updated_at') val = formatDateTime(val);
+        else if (h.toLowerCase().includes('date')) val = formatDate(val);
+      }
+      return `"${val}"`;
+    }).join(','))].join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -38,15 +48,17 @@ export default function Reports() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
-        <Box>
-          <Typography variant="h5" sx={{ fontWeight: 700 }}>Reports</Typography>
-          <Typography variant="body2" sx={{ color: '#64748B' }}>Download and analyze operational data</Typography>
+      {tab !== 5 && (
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
+          <Box>
+            <Typography variant="h5" sx={{ fontWeight: 700 }}>Reports</Typography>
+            <Typography variant="body2" sx={{ color: '#64748B' }}>Download and analyze operational data</Typography>
+          </Box>
+          <Button variant="contained" startIcon={<Download />} onClick={downloadCSV} disabled={!data.length}>
+            Export CSV
+          </Button>
         </Box>
-        <Button variant="contained" startIcon={<Download />} onClick={downloadCSV} disabled={!data.length}>
-          Export CSV
-        </Button>
-      </Box>
+      )}
 
       <Card sx={{ mb: 2 }}>
         <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="scrollable" sx={{ borderBottom: 1, borderColor: 'divider' }}>
@@ -56,17 +68,22 @@ export default function Reports() {
         </Tabs>
       </Card>
 
-      {tab === 0 && (
-        <Card sx={{ mb: 2, p: 2 }}>
-          <FormControl size="small" sx={{ minWidth: 200 }}>
-            <InputLabel>Store</InputLabel>
-            <Select value={whFilter} label="Store" onChange={e => setWhFilter(e.target.value)}>
-              <MenuItem value="">All</MenuItem>
-              {warehouses.map(w => <MenuItem key={w.id} value={w.id}>{w.name}</MenuItem>)}
-            </Select>
-          </FormControl>
-        </Card>
-      )}
+      {tab === 5 ? (
+        <EquipmentCountReport />
+      ) : (
+        <>
+          {tab === 0 && (
+            <Card sx={{ mb: 2, p: 2 }}>
+              <FormControl size="small" sx={{ minWidth: 200 }}>
+                <InputLabel>Store</InputLabel>
+                <Select value={whFilter} label="Store" onChange={e => setWhFilter(e.target.value)}>
+                  <MenuItem value="">All</MenuItem>
+                  {warehouses.map(w => <MenuItem key={w.id} value={w.id}>{w.name}</MenuItem>)}
+                </Select>
+              </FormControl>
+            </Card>
+          )}
+
 
       <Card>
         <TableContainer sx={{ maxHeight: 600 }}>
@@ -99,8 +116,12 @@ export default function Reports() {
                       {h === 'status' ? (
                         <Chip label={row[h]} size="small" color={row[h] === 'Low' ? 'error' : row[h] === 'OK' ? 'success' :
                           row[h] === 'Approved' ? 'success' : row[h] === 'Closed' ? 'default' : 'warning'} sx={{ fontSize: '0.7rem' }} />
-                      ) : typeof row[h] === 'number' && h.includes('amount') || h.includes('cost') || h.includes('value') ? (
+                      ) : typeof row[h] === 'number' && (h.includes('amount') || h.includes('cost') || h.includes('value')) ? (
                         `₹${row[h]?.toLocaleString('en-IN')}`
+                      ) : (h.toLowerCase() === 'created_at' || h.toLowerCase() === 'updated_at') && row[h] ? (
+                        formatDateTime(row[h])
+                      ) : h.toLowerCase().includes('date') && row[h] ? (
+                        formatDate(row[h])
                       ) : (
                         String(row[h] ?? '')
                       )}
@@ -119,6 +140,8 @@ export default function Reports() {
           <Typography variant="caption" sx={{ color: '#64748B' }}>Eastpoint Smart Campus | Powered by NissiGrid</Typography>
         </Box>
       </Card>
-    </Box>
-  );
+    </>
+  )}
+</Box>
+);
 }

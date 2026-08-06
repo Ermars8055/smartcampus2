@@ -20,20 +20,39 @@ def fuzzy_match_material(extracted_name: str, qr_items: list) -> tuple:
     if not extracted_name or not isinstance(extracted_name, str):
         return None, 0.0
         
-    names = [item.material.name for item in qr_items if item.material]
-    extracted_name = str(extracted_name).strip()
+    extracted_clean = re.sub(r'[^a-zA-Z0-9\s]', '', str(extracted_name)).lower().strip()
     
-    matches = difflib.get_close_matches(extracted_name, names, n=1, cutoff=0.5)
+    best_item = None
+    best_score = 0.0
     
-    if matches:
-        best_name = matches[0]
-        # Calculate a simple confidence score
-        confidence = difflib.SequenceMatcher(None, extracted_name.lower(), best_name.lower()).ratio()
+    for item in qr_items:
+        if not item.material: continue
+        mat_clean = re.sub(r'[^a-zA-Z0-9\s]', '', item.material.name).lower().strip()
         
-        for item in qr_items:
-            if item.material and item.material.name == best_name:
-                return item, round(confidence, 2)
-                
+        # Exact match
+        if extracted_clean == mat_clean:
+            return item, 1.0
+            
+        # Partial match score using SequenceMatcher
+        score = difflib.SequenceMatcher(None, extracted_clean, mat_clean).ratio()
+        
+        # Token set ratio equivalent logic (checking if all words in one are in the other)
+        ext_words = set(extracted_clean.split())
+        mat_words = set(mat_clean.split())
+        
+        if ext_words and mat_words:
+            intersection = ext_words.intersection(mat_words)
+            token_score = len(intersection) / max(len(ext_words), len(mat_words))
+            # Boost score if token overlap is high
+            score = max(score, token_score)
+            
+        if score > best_score:
+            best_score = score
+            best_item = item
+            
+    if best_item and best_score >= 0.4:
+        return best_item, round(best_score, 2)
+        
     return None, 0.0
 
 
@@ -41,10 +60,27 @@ def extract_from_excel(file_path: str, qr_items: list) -> List[ExtractionResultI
     results = []
     try:
         if file_path.endswith('.csv'):
-            df = pd.read_csv(file_path)
+            df = pd.read_csv(file_path, header=None)
         else:
-            df = pd.read_excel(file_path)
+            df = pd.read_excel(file_path, header=None)
             
+        # Try to find header row dynamically in first 10 rows
+        header_idx = 0
+        best_match_count = 0
+        for i in range(min(10, len(df))):
+            row_vals = [str(x).lower() for x in df.iloc[i].values if pd.notna(x)]
+            match_count = sum(1 for v in row_vals if any(k in v for k in ['item', 'material', 'description', 'rate', 'price', 'brand', 'qty', 'quantity']))
+            if match_count > best_match_count:
+                best_match_count = match_count
+                header_idx = i
+                
+        if best_match_count >= 2:
+            # Re-read with correct header
+            if file_path.endswith('.csv'):
+                df = pd.read_csv(file_path, header=header_idx)
+            else:
+                df = pd.read_excel(file_path, header=header_idx)
+        
         # Basic mapping heuristic for column headers
         col_map = {
             'material': None,
@@ -56,15 +92,15 @@ def extract_from_excel(file_path: str, qr_items: list) -> List[ExtractionResultI
         
         for col in df.columns:
             col_lower = str(col).lower()
-            if any(x in col_lower for x in ['item', 'material', 'description', 'name']):
+            if not col_map['material'] and any(x in col_lower for x in ['item', 'material', 'description', 'name', 'particular']):
                 col_map['material'] = col
-            elif any(x in col_lower for x in ['rate', 'price', 'unit price', 'cost']):
+            elif not col_map['rate'] and any(x in col_lower for x in ['rate', 'price', 'unit price', 'cost']):
                 col_map['rate'] = col
-            elif 'brand' in col_lower or 'make' in col_lower:
+            elif not col_map['brand'] and ('brand' in col_lower or 'make' in col_lower):
                 col_map['brand'] = col
-            elif any(x in col_lower for x in ['unit', 'uom', 'measure']):
+            elif not col_map['uom'] and any(x in col_lower for x in ['unit', 'uom', 'measure']):
                 col_map['uom'] = col
-            elif any(x in col_lower for x in ['delivery', 'days', 'lead time']):
+            elif not col_map['delivery'] and any(x in col_lower for x in ['delivery', 'days', 'lead time']):
                 col_map['delivery'] = col
                 
         if not col_map['material']:
@@ -86,6 +122,11 @@ def extract_from_excel(file_path: str, qr_items: list) -> List[ExtractionResultI
         for index, row in df.iterrows():
             mat_name = str(row[col_map['material']]) if col_map['material'] and pd.notna(row[col_map['material']]) else ""
             if not mat_name or mat_name.lower() == 'nan':
+                continue
+                
+            # Skip summary rows
+            mat_lower = mat_name.lower()
+            if any(skip in mat_lower for skip in ['total', 'subtotal', 'tax', 'cgst', 'sgst', 'igst', 'discount', 'freight', 'amount']):
                 continue
                 
             rate_val = row[col_map['rate']] if col_map['rate'] and pd.notna(row[col_map['rate']]) else 0.0
@@ -158,35 +199,96 @@ def extract_from_pdf(file_path: str, qr_items: list) -> List[ExtractionResultIte
         with pdfplumber.open(file_path) as pdf:
             for page in pdf.pages:
                 tables = page.extract_tables()
+                if not tables:
+                    # Fallback to text parsing if no tables found
+                    text = page.extract_text()
+                    if text:
+                        lines = text.split('\n')
+                        for line in lines:
+                            money_match = re.search(r'(?:Rs\.?|INR|\$|£)?\s*(\d+(?:,\d+)*(?:\.\d+)?)\b', line)
+                            if money_match:
+                                rate_val = 0.0
+                                try:
+                                    rate_val = float(money_match.group(1).replace(',', ''))
+                                except: pass
+                                
+                                mat_name = line.replace(money_match.group(0), '').strip()
+                                mat_name = re.sub(r'[^a-zA-Z0-9\s\(\)]+$', '', mat_name).strip()
+                                
+                                if len(mat_name) > 3:
+                                    if any(skip in mat_name.lower() for skip in ['total', 'subtotal', 'tax', 'cgst', 'sgst', 'igst', 'amount']):
+                                        continue
+                                    matched_item, conf = fuzzy_match_material(mat_name, qr_items)
+                                    # Contextual brand/uom extraction could go here
+                                    brand_match = re.search(r'(?i)make:\s*([a-zA-Z0-9]+)', line)
+                                    brand_val = brand_match.group(1) if brand_match else None
+                                    
+                                    results.append(ExtractionResultItem(
+                                        material_id=matched_item.material_id if matched_item else None,
+                                        material_name=matched_item.material.name if matched_item else mat_name,
+                                        quoted_rate=rate_val,
+                                        brand=brand_val,
+                                        confidence_score=conf,
+                                        raw_text=line
+                                    ))
+                    continue
+                    
                 for table in tables:
                     for row in table:
                         if not row or not any(row): continue
                         
-                        # Very basic heuristic: 
-                        # Longest text is probably material, first numeric is probably rate
                         row_texts = [str(cell).strip().replace('\n', ' ') for cell in row if cell]
                         
                         mat_name = ""
                         rate_val = 0.0
+                        brand_val = None
+                        uom_val = None
                         
-                        for text in row_texts:
-                            if len(text) > len(mat_name) and not text.replace('.', '', 1).isdigit():
+                        for i, text in enumerate(row_texts):
+                            if len(text) > len(mat_name) and not text.replace('.', '', 1).isdigit() and len(text) > 3:
                                 mat_name = text
                                 
-                            # Extract rate
-                            money_match = re.search(r'(?:Rs\.?|INR|\$|£)?\s*(\d+(?:,\d+)*(?:\.\d+)?)', text)
-                            if money_match and rate_val == 0.0:
+                            money_match = re.search(r'(?:Rs\.?|INR|\$|£)\s*(\d+(?:,\d+)*(?:\.\d+)?)\b', text, re.IGNORECASE)
+                            decimal_match = re.search(r'\b(\d+(?:,\d+)*\.\d{2,})\b', text)
+                            generic_match = re.search(r'\b(\d+(?:,\d+)*)\b', text)
+                            
+                            val_str = None
+                            if money_match:
+                                val_str = money_match.group(1)
+                            elif decimal_match:
+                                val_str = decimal_match.group(1)
+                            elif generic_match and i > 1 and rate_val == 0.0: # skip first two cols usually Sl No and Desc
+                                val_str = generic_match.group(1)
+                                
+                            if val_str:
                                 try:
-                                    rate_val = float(money_match.group(1).replace(',', ''))
-                                except:
-                                    pass
-                                    
+                                    val = float(val_str.replace(',', ''))
+                                    if val > 0:
+                                        # Override generic rate if we find a stricter match later in the row
+                                        if (money_match or decimal_match) or rate_val == 0.0:
+                                            rate_val = val
+                                except: pass
+                                
+                            if text.lower() in ['nos', 'kg', 'ltr', 'box', 'pc', 'pcs', 'pack', 'gm', 'mg', 'ml']:
+                                uom_val = text
+                                
+                            if 'make' in text.lower() or 'brand' in text.lower():
+                                brand_val = text.split(':')[-1].strip()
+
                         if mat_name:
+                            # Skip summary rows in pdf tables too
+                            if any(skip in mat_name.lower() for skip in ['total', 'subtotal', 'tax', 'cgst', 'sgst', 'igst', 'amount']):
+                                continue
+                                
                             matched_item, conf = fuzzy_match_material(mat_name, qr_items)
+                            if rate_val > 0 and conf > 0.0: conf = min(1.0, conf + 0.1)
+                            
                             results.append(ExtractionResultItem(
                                 material_id=matched_item.material_id if matched_item else None,
                                 material_name=matched_item.material.name if matched_item else mat_name,
                                 quoted_rate=rate_val,
+                                brand=brand_val,
+                                vendor_uom_name=uom_val,
                                 confidence_score=conf,
                                 raw_text=mat_name
                             ))

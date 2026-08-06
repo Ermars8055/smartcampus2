@@ -24,7 +24,7 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
     switch (status) {
       case 'Draft':
         return const Color(0xFF64748B);
-      case 'Awaiting Approval':
+      case 'Submitted':
         return const Color(0xFFD97706);
       case 'Approved':
         return const Color(0xFF059669);
@@ -422,7 +422,7 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
   }
 
   Widget? _buildBottomActionBar() {
-    if (widget.indent.status == 'Awaiting Approval') {
+    if (widget.indent.status == 'Submitted') {
       return Container(
         padding: const EdgeInsets.all(16),
         decoration: const BoxDecoration(

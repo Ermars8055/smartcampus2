@@ -2052,6 +2052,9 @@ class ComplaintCloseRequest(BaseModel):
     resolution_entered: str
     closure_reason: str
     document_urls: List[str] = [] # For supporting documents
+    equipment_photo_url: Optional[str] = None
+    serial_number_photo_url: Optional[str] = None
+    installation_report_url: Optional[str] = None
 
 class ComplaintApproveRequest(BaseModel):
     approval_type: str # 'admin' or 'manager'
@@ -2363,6 +2366,7 @@ class RepairWorkOrderBase(BaseModel):
     sla_details: Optional[str] = None
     problem_description: Optional[str] = None
     target_completion_date: Optional[date] = None
+    material_required: bool = False
 
 class RepairWorkOrderCreate(RepairWorkOrderBase):
     pass
@@ -2372,6 +2376,7 @@ class RepairWorkOrderUpdate(BaseModel):
     problem_description: Optional[str] = None
     target_completion_date: Optional[date] = None
     status: Optional[str] = None
+    material_required: Optional[bool] = None
 
 class RepairWorkOrderOut(RepairWorkOrderBase):
     id: int
@@ -2382,6 +2387,7 @@ class RepairWorkOrderOut(RepairWorkOrderBase):
     equipment_code: Optional[str] = None
     equipment_serial: Optional[str] = None
     vendor_name: Optional[str] = None
+    material_required: bool = False
     contract_number: Optional[str] = None
     docket_no: Optional[str] = None
     complaint_docket: Optional[str] = None

@@ -1957,6 +1957,7 @@ class RepairWorkOrder(Base):
     target_completion_date = Column(Date, nullable=True)
     status = Column(String(50), default="Assigned") # Assigned, In Progress, Awaiting Spare Parts, Completed, Closed
     created_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    material_required = Column(Boolean, default=False)
     is_deleted = Column(Boolean, default=False)
     created_at = Column(DateTime, default=_get_now)
     updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)

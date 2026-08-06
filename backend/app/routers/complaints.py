@@ -538,6 +538,15 @@ def close_complaint(
             detail=f"Cannot initiate closure from status '{complaint.status}'."
         )
 
+    if complaint.complaint_type == "Installation":
+        if not payload.equipment_photo_url or not payload.serial_number_photo_url or not payload.installation_report_url:
+            raise HTTPException(status_code=400, detail="Equipment photo, Serial Number photo, and Installation Report are mandatory for Installation complaints.")
+        
+        if complaint.equipment:
+            complaint.equipment.equipment_photo_url = payload.equipment_photo_url
+            complaint.equipment.serial_number_photo_url = payload.serial_number_photo_url
+            complaint.equipment.installation_report_url = payload.installation_report_url
+
     complaint.resolution_entered = payload.resolution_entered
     complaint.closure_reason = payload.closure_reason
     complaint.status = "Pending Approval"
@@ -591,6 +600,22 @@ def approve_closure(
             elif complaint.complaint_type == "Calibration":
                 eq.last_calibration_date = datetime.utcnow().date()
                 eq.next_calibration_due_date = eq.last_calibration_date + timedelta(days=365) # Default to 1 year
+
+        # Auto-update Equipment Installation Status
+        if complaint.complaint_type == "Installation" and complaint.equipment:
+            eq = complaint.equipment
+            eq.installation_status = "Installed"
+            eq.status = "Operational"
+            if not eq.installation_date:
+                eq.installation_date = datetime.utcnow()
+            
+            from app.models import EquipmentHistory
+            db.add(EquipmentHistory(
+                equipment_id=eq.id,
+                event_type="Installation",
+                description=f"Installation completed via Complaint Ticket {complaint.docket_no}",
+                created_by_id=current_user.id
+            ))
 
     db.commit()
     db.refresh(complaint)

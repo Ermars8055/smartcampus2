@@ -24,6 +24,7 @@ def generate_indent_number(db: Session, tenant_id: int, site_id: int) -> str:
 def list_indents(
     search: str = None,
     complaint_id: Optional[int] = None,
+    rwo_id: Optional[int] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("indents", "read")),
     tenant_id: int = Depends(get_tenant_id),
@@ -32,6 +33,8 @@ def list_indents(
     query = db.query(Indent).filter(Indent.tenant_id == tenant_id, Indent.site_id == site_id)
     if complaint_id:
         query = query.filter(Indent.complaint_id == complaint_id)
+    if rwo_id:
+        query = query.filter(Indent.rwo_id == rwo_id)
     
     # --- ROW-LEVEL SECURITY / DATA SCOPING ---
     is_platform_admin = getattr(current_user, "_is_platform_admin", False)
@@ -605,6 +608,14 @@ def update_draft_indent(
         db.add(item)
 
     indent.total_amount = round(total, 2)
+    
+    # Check if tied to a Repair Work Order and update its status
+    if data.rwo_id:
+        from app.models import RepairWorkOrder
+        rwo = db.query(RepairWorkOrder).filter(RepairWorkOrder.id == data.rwo_id, RepairWorkOrder.tenant_id == tenant_id, RepairWorkOrder.site_id == site_id).first()
+        if rwo and rwo.status == "Assigned":
+            rwo.status = "Awaiting Spare Parts"
+
     db.commit()
     db.refresh(indent)
     

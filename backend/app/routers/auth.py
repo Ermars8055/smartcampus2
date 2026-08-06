@@ -162,7 +162,6 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
         "site_ids": site_ids,
         "active_site_id": active_site_id,
         "roles": roles,
-        "permissions": permissions,
         "is_platform_admin": user.is_platform_admin,
         "data_access_scope": data_access_scope
     })

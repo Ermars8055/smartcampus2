@@ -13,6 +13,22 @@ from datetime import datetime
 
 router = APIRouter(prefix="/api/rwos", tags=["Repair Work Orders"])
 
+def _format_rwo_out(r: RepairWorkOrder) -> RepairWorkOrderOut:
+    out = RepairWorkOrderOut.model_validate(r)
+    if r.complaint:
+        out.docket_no = r.complaint.docket_no
+        out.complaint_docket = r.complaint.docket_no
+    if r.equipment:
+        out.equipment_code = r.equipment.equipment_code
+        out.equipment_serial = r.equipment.serial_number
+        eq_name = r.equipment.material.name if (r.equipment.material and hasattr(r.equipment.material, 'name')) else None
+        out.equipment_name = eq_name or r.equipment.equipment_code
+    if r.vendor:
+        out.vendor_name = r.vendor.name
+    if r.contract:
+        out.contract_number = r.contract.contract_number
+    return out
+
 @router.get("")
 def list_rwos(
     search: Optional[str] = None,
@@ -33,15 +49,7 @@ def list_rwos(
         ))
     rwos = q.order_by(RepairWorkOrder.id.desc()).all()
     
-    result = []
-    for r in rwos:
-        out = RepairWorkOrderOut.model_validate(r)
-        out.docket_no = r.complaint.docket_no if r.complaint else None
-        out.equipment_serial = r.equipment.serial_number or r.equipment.name if r.equipment else None
-        out.vendor_name = r.vendor.name if r.vendor else None
-        out.contract_number = r.contract.contract_number if r.contract else None
-        result.append(out)
-    return result
+    return [_format_rwo_out(r) for r in rwos]
 
 @router.get("/{id}")
 def get_rwo(
@@ -56,13 +64,7 @@ def get_rwo(
     if not r:
         raise HTTPException(status_code=404, detail="Repair Work Order not found")
         
-    out = RepairWorkOrderOut.model_validate(r)
-    out.docket_no = r.complaint.docket_no if r.complaint else None
-    out.equipment_serial = r.equipment.serial_number or r.equipment.name if r.equipment else None
-    out.vendor_name = r.vendor.name if r.vendor else None
-    out.contract_number = r.contract.contract_number if r.contract else None
-            
-    return out
+    return _format_rwo_out(r)
 
 @router.post("")
 def create_rwo(

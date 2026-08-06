@@ -5,12 +5,14 @@ import {
   TableContainer, Button, TextField, InputAdornment, Chip, Dialog, DialogTitle,
   DialogContent, DialogActions, Grid, MenuItem, Select, FormControl, InputLabel,
   Tabs, Tab, IconButton, Tooltip, useTheme, useMediaQuery, Alert,
-  Autocomplete, createFilterOptions, Switch, FormControlLabel, Divider, TablePagination, TableSortLabel
+  Autocomplete, createFilterOptions, Switch, FormControlLabel, Divider, TablePagination, TableSortLabel,
+  CircularProgress, Paper
 } from '@mui/material';
 import {
   Search, Build, QrCode, UploadFile, CheckCircle, Warning, OpenInNew,
-  LocalHospital, PrecisionManufacturing, Edit, FilterList, Refresh, Assignment, DeleteOutline, Print, Science, CompareArrows, Add
+  LocalHospital, PrecisionManufacturing, Edit, FilterList, Refresh, Assignment, DeleteOutline, Print, Science, CompareArrows, Add, History
 } from '@mui/icons-material';
+import dayjs from 'dayjs';
 import api, { getFileUrl } from '../services/api';
 import { formatDate } from '../utils/dateUtils';
 import { useAuth } from '../context/AuthContext';
@@ -18,6 +20,7 @@ import { useMessage } from '../context/MessageContext';
 import { QRCodeSVG } from 'qrcode.react';
 
 export default function Equipment() {
+
   const { showMessage } = useMessage();
   const { hasAction } = useAuth();
   const theme = useTheme();
@@ -84,9 +87,25 @@ export default function Equipment() {
 
   // View/Edit Dialogs
   const [viewDialog, setViewDialog] = useState(null);
+  const [historyList, setHistoryList] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+
+  useEffect(() => {
+    if (viewDialog?.id) {
+      setHistoryLoading(true);
+      api.get(`/api/equipment/${viewDialog.id}/history`)
+        .then(res => setHistoryList(res.data || []))
+        .catch(() => setHistoryList([]))
+        .finally(() => setHistoryLoading(false));
+    } else {
+      setHistoryList([]);
+    }
+  }, [viewDialog]);
+
   const [editDialog, setEditDialog] = useState(null);
   const [editForm, setEditForm] = useState({});
   const [editSubmitting, setEditSubmitting] = useState(false);
+
 
   const [addDialog, setAddDialog] = useState(false);
   const [addForm, setAddForm] = useState({});
@@ -1459,12 +1478,70 @@ export default function Equipment() {
                   </TableBody>
                 </Table>
               </Grid>
+
+              {/* Equipment Lifecycle History & Audit Trail */}
+              <Grid item xs={12}>
+                <Divider sx={{ my: 1 }} />
+                <Typography variant="subtitle2" color="primary" sx={{ mb: 1, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <History sx={{ fontSize: 20 }} /> Equipment Lifecycle History & Audit Trail
+                </Typography>
+
+                {historyLoading ? (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
+                    <CircularProgress size={24} />
+                  </Box>
+                ) : historyList.length === 0 ? (
+                  <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', py: 1 }}>
+                    No history events logged yet for this equipment.
+                  </Typography>
+                ) : (
+                  <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2, maxHeight: 250 }}>
+                    <Table size="small" stickyHeader>
+                      <TableHead sx={{ bgcolor: '#F8FAFC' }}>
+                        <TableRow>
+                          <TableCell sx={{ fontWeight: 700 }}>Event Type</TableCell>
+                          <TableCell sx={{ fontWeight: 700 }}>Date & Time</TableCell>
+                          <TableCell sx={{ fontWeight: 700 }}>Description</TableCell>
+                          <TableCell sx={{ fontWeight: 700 }}>Ref #</TableCell>
+                          <TableCell sx={{ fontWeight: 700 }}>Action By</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {historyList.map(h => (
+                          <TableRow key={h.id} hover>
+                            <TableCell>
+                              <Chip 
+                                label={h.event_type} 
+                                size="small" 
+                                color={
+                                  h.event_type === 'Installation' ? 'success' :
+                                  h.event_type === 'Relocation' ? 'secondary' :
+                                  h.event_type === 'Calibration' ? 'info' :
+                                  h.event_type === 'Write-off' ? 'error' : 'primary'
+                                }
+                                sx={{ fontWeight: 600, fontSize: '0.72rem' }}
+                              />
+                            </TableCell>
+                            <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.78rem' }}>
+                              {h.event_date ? dayjs(h.event_date).format('DD-MMM-YYYY HH:mm') : '-'}
+                            </TableCell>
+                            <TableCell sx={{ fontSize: '0.78rem' }}>{h.description || '-'}</TableCell>
+                            <TableCell sx={{ fontSize: '0.78rem' }}>{h.reference_id || '-'}</TableCell>
+                            <TableCell sx={{ fontSize: '0.78rem' }}>{h.created_by_name || 'System'}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                )}
+              </Grid>
             </Grid>
           )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setViewDialog(null)}>Close</Button>
         </DialogActions>
+
       </Dialog>
 
       {/* Add Equipment Dialog */}

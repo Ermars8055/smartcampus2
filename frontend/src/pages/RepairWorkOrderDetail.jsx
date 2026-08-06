@@ -3,10 +3,11 @@ import {
   Box, Typography, Card, Grid, Button, IconButton, Chip,
   Divider, TextField
 } from '@mui/material';
-import { ArrowBack, Assignment, Handyman, CheckCircle, VerifiedUser } from '@mui/icons-material';
+import { ArrowBack, Assignment, Handyman, CheckCircle, VerifiedUser, Print } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '../services/api';
 import { useMessage } from '../context/MessageContext';
+import { printRwo } from '../utils/rwoPrint';
 
 export default function RepairWorkOrderDetail() {
   const { id } = useParams();
@@ -47,24 +48,36 @@ export default function RepairWorkOrderDetail() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, gap: 2 }}>
-        <IconButton onClick={() => navigate('/rwos')} sx={{ bgcolor: 'white', boxShadow: 1 }}>
-          <ArrowBack />
-        </IconButton>
-        <Box>
-          <Typography variant="h5" sx={{ fontWeight: 700, color: '#1E293B', display: 'flex', alignItems: 'center', gap: 1 }}>
-            Repair Work Order: {rwo.rwo_number}
-            <Chip 
-              label={rwo.status}
-              size="small"
-              sx={{
-                bgcolor: rwo.status === 'Closed' ? '#ECFDF5' : (rwo.status === 'Completed' ? '#DBEAFE' : (rwo.status === 'Assigned' ? '#FEF9C3' : '#F1F5F9')),
-                color: rwo.status === 'Closed' ? '#10B981' : (rwo.status === 'Completed' ? '#2563EB' : (rwo.status === 'Assigned' ? '#CA8A04' : '#64748B')),
-                fontWeight: 600, ml: 2
-              }}
-            />
-          </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <IconButton onClick={() => navigate('/rwos')} sx={{ bgcolor: 'white', boxShadow: 1 }}>
+            <ArrowBack />
+          </IconButton>
+          <Box>
+            <Typography variant="h5" sx={{ fontWeight: 700, color: '#1E293B', display: 'flex', alignItems: 'center', gap: 1 }}>
+              Repair Work Order: {rwo.rwo_number}
+              <Chip 
+                label={rwo.status}
+                size="small"
+                sx={{
+                  bgcolor: rwo.status === 'Closed' ? '#ECFDF5' : (rwo.status === 'Completed' ? '#DBEAFE' : (rwo.status === 'Assigned' ? '#FEF9C3' : '#F1F5F9')),
+                  color: rwo.status === 'Closed' ? '#10B981' : (rwo.status === 'Completed' ? '#2563EB' : (rwo.status === 'Assigned' ? '#CA8A04' : '#64748B')),
+                  fontWeight: 600, ml: 2
+                }}
+              />
+            </Typography>
+          </Box>
         </Box>
+
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<Print />}
+          onClick={() => printRwo(rwo)}
+          sx={{ fontWeight: 600, borderRadius: 2 }}
+        >
+          Print Work Order
+        </Button>
       </Box>
 
       <Grid container spacing={3}>
@@ -82,7 +95,7 @@ export default function RepairWorkOrderDetail() {
               </Grid>
               <Grid item xs={12}>
                 <Typography variant="caption" sx={{ color: '#64748B' }}>Equipment Details</Typography>
-                <Typography variant="body1" sx={{ fontWeight: 500 }}>{rwo.equipment_serial || '-'}</Typography>
+                <Typography variant="body1" sx={{ fontWeight: 500 }}>{rwo.equipment_name ? `${rwo.equipment_name}${rwo.equipment_serial ? ` (SN: ${rwo.equipment_serial})` : (rwo.equipment_code ? ` (${rwo.equipment_code})` : '')}` : (rwo.equipment_serial || rwo.equipment_code || '-')}</Typography>
               </Grid>
               <Grid item xs={12}>
                 <Typography variant="caption" sx={{ color: '#64748B' }}>Problem Description</Typography>

@@ -3,11 +3,12 @@ import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Chip, TextField, IconButton, Tooltip, Tabs, Tab
 } from '@mui/material';
-import { Search, RemoveRedEye } from '@mui/icons-material';
+import { Search, RemoveRedEye, Print } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useMessage } from '../context/MessageContext';
 import { formatDate } from '../utils/dateUtils';
+import { printRwo } from '../utils/rwoPrint';
 
 export default function RepairWorkOrders() {
   const { showMessage } = useMessage();
@@ -140,6 +141,11 @@ export default function RepairWorkOrders() {
                     />
                   </TableCell>
                   <TableCell align="right">
+                    <Tooltip title="Print RWO">
+                      <IconButton size="small" onClick={(e) => { e.stopPropagation(); printRwo(rwo); }} sx={{ color: '#2563EB', mr: 0.5 }}>
+                        <Print fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
                     <Tooltip title="View Details">
                       <IconButton size="small" onClick={(e) => { e.stopPropagation(); navigate(`/rwos/${rwo.id}`); }} sx={{ color: '#64748B' }}>
                         <RemoveRedEye fontSize="small" />

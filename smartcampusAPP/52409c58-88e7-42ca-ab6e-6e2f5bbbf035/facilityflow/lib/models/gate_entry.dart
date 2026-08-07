@@ -14,6 +14,13 @@ class GateEntry {
     required this.arrivalTime,
     required this.remarks,
     required this.invoiceScanUrl,
+    this.dcNumber,
+    this.dcDate,
+    this.dcScanUrl,
+    this.tareWeight,
+    this.grossWeight,
+    this.netWeight,
+    this.weightReportUrl,
   });
 
   factory GateEntry.fromJson(Map<String, dynamic> json) {
@@ -33,6 +40,15 @@ class GateEntry {
           : DateTime.now(),
       remarks: json['remarks'] as String? ?? '',
       invoiceScanUrl: json['invoice_scan_url'] as String? ?? '',
+      dcNumber: json['dc_number'] as String?,
+      dcDate: json['dc_date'] != null
+          ? DateTime.parse(json['dc_date'] as String)
+          : null,
+      dcScanUrl: json['dc_scan_url'] as String?,
+      tareWeight: (json['tare_weight'] as num?)?.toDouble(),
+      grossWeight: (json['gross_weight'] as num?)?.toDouble(),
+      netWeight: (json['net_weight'] as num?)?.toDouble(),
+      weightReportUrl: json['weight_report_url'] as String?,
     );
   }
 
@@ -47,6 +63,13 @@ class GateEntry {
   final DateTime arrivalTime;
   final String remarks;
   final String invoiceScanUrl;
+  final String? dcNumber;
+  final DateTime? dcDate;
+  final String? dcScanUrl;
+  final double? tareWeight;
+  final double? grossWeight;
+  final double? netWeight;
+  final String? weightReportUrl;
 
   Map<String, dynamic> toJson() {
     return {
@@ -61,6 +84,13 @@ class GateEntry {
       'arrival_time': arrivalTime.toIso8601String(),
       'remarks': remarks,
       'invoice_scan_url': invoiceScanUrl,
+      if (dcNumber != null) 'dc_number': dcNumber,
+      if (dcDate != null) 'dc_date': dcDate!.toIso8601String(),
+      if (dcScanUrl != null) 'dc_scan_url': dcScanUrl,
+      if (tareWeight != null) 'tare_weight': tareWeight,
+      if (grossWeight != null) 'gross_weight': grossWeight,
+      if (netWeight != null) 'net_weight': netWeight,
+      if (weightReportUrl != null) 'weight_report_url': weightReportUrl,
     };
   }
 }

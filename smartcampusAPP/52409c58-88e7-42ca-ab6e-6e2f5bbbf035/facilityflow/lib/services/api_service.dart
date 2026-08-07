@@ -13,7 +13,7 @@ class ApiService {
 
   ApiService._internal() {
     // Load API URL from .env file
-    String baseUrl = dotenv.env['API_URL'] ?? 'http://192.168.0.5:8007';
+    String baseUrl = dotenv.env['API_URL'] ?? 'https://staging-smartcampus.ermarscastar.in';
 
     dio = Dio(
       BaseOptions(

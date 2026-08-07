@@ -8,6 +8,7 @@ import 'package:facilityflow/models/indent_item.dart';
 import 'package:facilityflow/models/gate_entry.dart';
 import 'package:facilityflow/models/repair_work_order.dart';
 import 'package:provider/provider.dart';
+import 'package:dio/dio.dart';
 
 import 'package:facilityflow/services/api_service.dart';
 
@@ -154,6 +155,7 @@ class AppState extends ChangeNotifier {
   final List<GateEntry> _gateEntries = [];
 
   bool _isLoadingGateEntries = false;
+  String? _gateEntriesError;
 
   List<GateEntry> get gateEntries {
     return List.unmodifiable(_gateEntries);
@@ -163,8 +165,13 @@ class AppState extends ChangeNotifier {
     return _isLoadingGateEntries;
   }
 
+  String? get gateEntriesError {
+    return _gateEntriesError;
+  }
+
   Future<void> fetchGateEntries() async {
     _isLoadingGateEntries = true;
+    _gateEntriesError = null;
     notifyListeners();
     try {
       final response = await ApiService().getGateEntries();
@@ -172,8 +179,13 @@ class AppState extends ChangeNotifier {
       _gateEntries.clear();
       _gateEntries
           .addAll(data.map((json) => GateEntry.fromJson(json)).toList());
-    } catch (e) {
+    } catch (e, stack) {
       debugPrint('Error fetching gate entries: $e');
+      if (e is DioException && e.response?.statusCode == 403) {
+        _gateEntriesError = 'You do not have permission to view Gate Entries.';
+      } else {
+        _gateEntriesError = 'An error occurred while loading. Please try again.';
+      }
     } finally {
       _isLoadingGateEntries = false;
       notifyListeners();

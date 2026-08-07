@@ -3,7 +3,7 @@ import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, Chip, Dialog, DialogTitle,
   DialogContent, DialogActions, TextField, IconButton, Tooltip,
-  Tabs, Tab, Alert, useTheme, useMediaQuery, MenuItem, TableSortLabel
+  Tabs, Tab, Alert, useTheme, useMediaQuery, MenuItem, TableSortLabel, Grid, CircularProgress, Paper
 } from '@mui/material';
 import {
   Add, Edit, Search, Description, CheckCircle, Cancel, RemoveRedEye
@@ -22,6 +22,10 @@ export default function Contracts() {
   const [rejectDialog, setRejectDialog] = useState(false);
   const [rejectRemarks, setRejectRemarks] = useState('');
   const [rejectingContract, setRejectingContract] = useState(null);
+  
+  const [approveDialog, setApproveDialog] = useState(false);
+  const [contractToApprove, setContractToApprove] = useState(null);
+  const [loadingDetails, setLoadingDetails] = useState(false);
 
   const statusColor = {
     'Draft': 'default', 
@@ -95,11 +99,36 @@ export default function Contracts() {
     load();
   }, [search, selectedInstitution, selectedDepartment]);
 
-  const handleApprove = async (id, e) => {
+  const handleOpenApproveDialog = async (id, e) => {
     e.stopPropagation();
+    setApproveDialog(true);
+    setLoadingDetails(true);
+    setContractToApprove(null);
     try {
-      const res = await api.post(`/api/contracts/${id}/approve`);
+      const res = await api.get(`/api/contracts/${id}`);
+      setContractToApprove(res.data);
+    } catch (err) {
+      showMessage('Error loading contract details', 'Error', 'error');
+      setApproveDialog(false);
+    } finally {
+      setLoadingDetails(false);
+    }
+  };
+
+  const handleOpenRejectFromApprove = () => {
+    if (contractToApprove) {
+      setRejectingContract(contractToApprove.id);
+      setApproveDialog(false);
+      setRejectDialog(true);
+    }
+  };
+
+  const handleConfirmApprove = async () => {
+    if (!contractToApprove) return;
+    try {
+      const res = await api.post(`/api/contracts/${contractToApprove.id}/approve`);
       showMessage(res.data.message || 'Contract approved successfully', 'Success', 'success');
+      setApproveDialog(false);
       load();
     } catch (err) {
       showMessage(err.response?.data?.detail || 'Error approving contract', 'Error', 'error');
@@ -324,7 +353,7 @@ export default function Contracts() {
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5 }} onClick={(e) => e.stopPropagation()}>
                       <Tooltip title={c.status !== 'Submitted' ? "Only submitted contracts can be approved" : (c.can_user_approve ? "Approve" : "Not authorized to approve at this level")}>
                         <span>
-                          <IconButton size="small" color="success" disabled={c.status !== 'Submitted' || !c.can_user_approve} onClick={(e) => handleApprove(c.id, e)} sx={{ bgcolor: 'transparent', '&:hover': { bgcolor: 'rgba(16, 185, 129, 0.1)' } }}>
+                          <IconButton size="small" color="success" disabled={c.status !== 'Submitted' || !c.can_user_approve} onClick={(e) => handleOpenApproveDialog(c.id, e)} sx={{ bgcolor: 'transparent', '&:hover': { bgcolor: 'rgba(16, 185, 129, 0.1)' } }}>
                             <CheckCircle fontSize="small" />
                           </IconButton>
                         </span>
@@ -336,9 +365,9 @@ export default function Contracts() {
                           </IconButton>
                         </span>
                       </Tooltip>
-                      <Tooltip title={c.status === 'Active' || c.status === 'Closed' ? "View Details" : "Edit Contract"}>
+                      <Tooltip title={c.status === 'Active' || c.status === 'Closed' || c.current_approval_level > 1 || c.status === 'Approved' || c.status === 'Rejected' ? "View Details" : "Edit Contract"}>
                         <IconButton size="small" onClick={(e) => { e.stopPropagation(); navigate(`/contracts/edit/${c.id}`); }} sx={{ color: '#64748B' }}>
-                          {c.status === 'Active' || c.status === 'Closed' ? <RemoveRedEye fontSize="small" /> : <Edit color="primary" fontSize="small" />}
+                          {c.status === 'Active' || c.status === 'Closed' || c.current_approval_level > 1 || c.status === 'Approved' || c.status === 'Rejected' ? <RemoveRedEye fontSize="small" /> : <Edit color="primary" fontSize="small" />}
                         </IconButton>
                       </Tooltip>
                     </Box>
@@ -377,6 +406,162 @@ export default function Contracts() {
           >
             Confirm Rejection
           </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={approveDialog} onClose={() => setApproveDialog(false)} maxWidth="md" fullWidth>
+        <DialogTitle sx={{ pb: 1, pt: 3, px: 4 }}>
+          <Typography variant="h6" sx={{ fontWeight: 700 }}>
+            {contractToApprove ? `Review Contract Details - ${contractToApprove.contract_number}` : 'Review Contract Details'}
+          </Typography>
+        </DialogTitle>
+        <DialogContent sx={{ p: 4 }}>
+          {loadingDetails ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+              <CircularProgress />
+            </Box>
+          ) : contractToApprove ? (
+            <Box>
+              <Grid container spacing={2} sx={{ mb: 3 }}>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="caption" color="text.secondary">Institution</Typography>
+                  <Typography variant="body2" fontWeight="600">{institutions.find(i => i.id === contractToApprove.institution_id)?.name || contractToApprove.institution_id || '-'}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="caption" color="text.secondary">Department</Typography>
+                  <Typography variant="body2" fontWeight="600">{allDepartments.find(d => d.id === contractToApprove.department_id)?.name || contractToApprove.department_id || '-'}</Typography>
+                </Grid>
+                <Grid item xs={6} sm={3}>
+                  <Typography variant="caption" color="text.secondary">Contract No</Typography>
+                  <Typography variant="body2" fontWeight="600">{contractToApprove.contract_number}</Typography>
+                </Grid>
+                <Grid item xs={6} sm={3}>
+                  <Typography variant="caption" color="text.secondary">Vendor</Typography>
+                  <Typography variant="body2" fontWeight="600">{contractToApprove.vendor_name || '-'}</Typography>
+                </Grid>
+                <Grid item xs={6} sm={3}>
+                  <Typography variant="caption" color="text.secondary">Type</Typography>
+                  <Typography variant="body2" fontWeight="600">{contractToApprove.contract_type}</Typography>
+                </Grid>
+                <Grid item xs={6} sm={3}>
+                  <Typography variant="caption" color="text.secondary">Total Value</Typography>
+                  <Typography variant="body2" fontWeight="600">₹{contractToApprove.contract_value?.toLocaleString() || 0}</Typography>
+                </Grid>
+                <Grid item xs={6} sm={3}>
+                  <Typography variant="caption" color="text.secondary">Start Date</Typography>
+                  <Typography variant="body2" fontWeight="600">{formatDate(contractToApprove.start_date)}</Typography>
+                </Grid>
+                <Grid item xs={6} sm={3}>
+                  <Typography variant="caption" color="text.secondary">End Date</Typography>
+                  <Typography variant="body2" fontWeight="600">{formatDate(contractToApprove.end_date)}</Typography>
+                </Grid>
+              </Grid>
+
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5 }}>Contract Items ({contractToApprove.contract_type})</Typography>
+              <TableContainer component={Paper} variant="outlined" sx={{ mb: 3 }}>
+                <Table size="small">
+                  <TableHead sx={{ bgcolor: '#F8FAFC' }}>
+                    <TableRow>
+                      {contractToApprove.contract_type === 'RC' ? (
+                        <>
+                          <TableCell sx={{ fontWeight: 700 }}>MATERIAL</TableCell>
+                          <TableCell sx={{ fontWeight: 700 }}>UOM</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 700 }}>RATE (₹)</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 700 }}>GST %</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 700 }}>MAX QTY</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 700 }}>LEAD TIME (DAYS)</TableCell>
+                        </>
+                      ) : (
+                        <>
+                          <TableCell sx={{ fontWeight: 700 }}>EQUIPMENT</TableCell>
+                          <TableCell sx={{ fontWeight: 700 }}>COVERED</TableCell>
+                          <TableCell sx={{ fontWeight: 700 }}>EXCLUDED</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 700 }}>RATE (₹)</TableCell>
+                        </>
+                      )}
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {contractToApprove.items?.map((item, idx) => (
+                      <TableRow key={idx}>
+                        {contractToApprove.contract_type === 'RC' ? (
+                          <>
+                            <TableCell>{item.material?.name || item.material_id}</TableCell>
+                            <TableCell>{item.uom || '-'}</TableCell>
+                            <TableCell align="right">₹{item.rate?.toLocaleString()}</TableCell>
+                            <TableCell align="right">{item.gst || 0}%</TableCell>
+                            <TableCell align="right">{item.contract_quantity || '-'}</TableCell>
+                            <TableCell align="right">{item.delivery_lead_time || '-'}</TableCell>
+                          </>
+                        ) : (
+                          <>
+                            <TableCell>{item.equipment?.material_name || item.equipment_id}</TableCell>
+                            <TableCell>{item.covered_components || '-'}</TableCell>
+                            <TableCell>{item.excluded_components || '-'}</TableCell>
+                            <TableCell align="right">₹{item.rate?.toLocaleString()}</TableCell>
+                          </>
+                        )}
+                      </TableRow>
+                    ))}
+                    {(!contractToApprove.items || contractToApprove.items.length === 0) && (
+                      <TableRow>
+                        <TableCell colSpan={contractToApprove.contract_type === 'RC' ? 6 : 4} align="center" sx={{ py: 2, color: 'text.secondary' }}>No items found</TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+              
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5 }}>Terms & Conditions</Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="caption" color="text.secondary">Payment Terms</Typography>
+                  <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>{contractToApprove.payment_terms || '-'}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="caption" color="text.secondary">Exclusions</Typography>
+                  <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>{contractToApprove.exclusions || '-'}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="caption" color="text.secondary">SLA Details</Typography>
+                  <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>{contractToApprove.sla_details || '-'}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="caption" color="text.secondary">Renewal Terms</Typography>
+                  <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>{contractToApprove.renewal_terms || '-'}</Typography>
+                </Grid>
+              </Grid>
+            </Box>
+          ) : (
+            <Box sx={{ p: 4, textAlign: 'center' }}>
+              <Typography color="error">Failed to load contract details.</Typography>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ px: 4, pb: 4, gap: 1 }}>
+          <Button onClick={() => setApproveDialog(false)} sx={{ color: '#64748B' }}>Close</Button>
+          {contractToApprove && (
+            <>
+              <Button 
+                onClick={handleConfirmApprove} 
+                variant="contained" 
+                color="success" 
+                disabled={loadingDetails}
+                startIcon={<CheckCircle />}
+              >
+                Approve
+              </Button>
+              <Button 
+                onClick={handleOpenRejectFromApprove} 
+                variant="contained" 
+                color="error" 
+                disabled={loadingDetails}
+                startIcon={<Cancel />}
+              >
+                Reject
+              </Button>
+            </>
+          )}
         </DialogActions>
       </Dialog>
     </Box>

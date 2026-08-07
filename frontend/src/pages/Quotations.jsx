@@ -2174,7 +2174,44 @@ const Quotations = () => {
                     <TableCell sx={{ fontWeight: 600 }}>Conv. Factor</TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>Quoted Rate (₹)</TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>Disc %</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Delivery Days</TableCell>
+                    <TableCell sx={{ fontWeight: 600, minWidth: 100, textAlign: 'center' }}>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, fontSize: '0.875rem' }}>Delivery Days</Typography>
+                        <Tooltip title="Apply to all items">
+                          <Box sx={{ display: 'flex', alignItems: 'center', bgcolor: 'background.paper', borderRadius: 1, p: 0.25, border: '1px solid #e2e8f0' }}>
+                             <TextField 
+                                id="apply-all-delivery"
+                                type="number"
+                                size="small"
+                                variant="standard"
+                                InputProps={{ disableUnderline: true }}
+                                sx={{ width: 40, px: 0.5, '& input': { p: 0, fontSize: '0.75rem', textAlign: 'center' } }}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    const val = e.target.value;
+                                    if (val && /^\d*$/.test(val)) {
+                                      const newItems = newQuote.items.map(it => it.is_excluded ? it : { ...it, delivery_days: val });
+                                      setNewQuote({ ...newQuote, items: newItems });
+                                      e.target.value = '';
+                                    }
+                                  }
+                                }}
+                             />
+                             <IconButton size="small" sx={{ p: 0 }} onClick={() => {
+                                const el = document.getElementById('apply-all-delivery');
+                                if (el && el.value) {
+                                    const newItems = newQuote.items.map(it => it.is_excluded ? it : { ...it, delivery_days: el.value });
+                                    setNewQuote({ ...newQuote, items: newItems });
+                                    el.value = '';
+                                }
+                             }}>
+                               <CheckCircleIcon fontSize="small" color="primary" sx={{ width: 16, height: 16 }} />
+                             </IconButton>
+                          </Box>
+                        </Tooltip>
+                      </Box>
+                    </TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>Remarks</TableCell>
                     <TableCell align="center" sx={{ fontWeight: 600 }}>Exclude</TableCell>
                   </TableRow>
@@ -2247,7 +2284,6 @@ const Quotations = () => {
                         id={`delivery-days-${idx}`}
                         size="small"
                         type="number"
-                        error={!it.is_excluded && !it.delivery_days}
                         disabled={it.is_excluded}
                         onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()}
                         value={it.delivery_days}
@@ -2320,7 +2356,7 @@ const Quotations = () => {
                 onClick={() => handleEnterQuote(true)}
                 variant="outlined"
                 color="primary"
-                disabled={!newQuote.quotation_number && !newQuote.quotation_date && !(newQuote.file || newQuote.existing_file) && newQuote.items.every(i => !i.quoted_rate && !i.delivery_days)}
+                disabled={!newQuote.quotation_number && !newQuote.quotation_date && !(newQuote.file || newQuote.existing_file) && newQuote.items.every(i => !i.quoted_rate)}
               >
                 Save as Draft
               </Button>
@@ -2331,14 +2367,14 @@ const Quotations = () => {
               const missingDate = !newQuote.quotation_date;
               const missingFile = !(newQuote.file || newQuote.existing_file);
               const allExcluded = newQuote.items.every(i => i.is_excluded);
-              const incompleteItemsCount = newQuote.items.filter(i => !i.is_excluded && (!i.quoted_rate || !i.delivery_days)).length;
+              const incompleteItemsCount = newQuote.items.filter(i => !i.is_excluded && (!i.quoted_rate)).length;
               
               const errors = [];
               if (missingNumber) errors.push("Quot. No.");
               if (missingDate) errors.push("Date");
               if (missingFile) errors.push("File");
               if (allExcluded) errors.push("All items excluded");
-              if (incompleteItemsCount > 0) errors.push(`${incompleteItemsCount} items missing rate/delivery`);
+              if (incompleteItemsCount > 0) errors.push(`${incompleteItemsCount} items missing rate`);
 
               if (errors.length > 0) {
                 return (
@@ -2351,12 +2387,12 @@ const Quotations = () => {
                         size="small"
                         sx={{ ml: 1, textTransform: 'none', py: 0, minHeight: 0 }}
                         onClick={() => {
-                          const firstMissingIdx = newQuote.items.findIndex(i => !i.is_excluded && (!i.quoted_rate || !i.delivery_days));
+                          const firstMissingIdx = newQuote.items.findIndex(i => !i.is_excluded && (!i.quoted_rate));
                           if (firstMissingIdx !== -1) {
                             setQuotePage(Math.floor(firstMissingIdx / quoteRowsPerPage));
                             setTimeout(() => {
                               const item = newQuote.items[firstMissingIdx];
-                              const elId = !item.quoted_rate ? `quoted-rate-${firstMissingIdx}` : `delivery-days-${firstMissingIdx}`;
+                              const elId = `quoted-rate-${firstMissingIdx}`;
                               const el = document.getElementById(elId);
                               if (el) {
                                 el.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -2381,7 +2417,7 @@ const Quotations = () => {
                 !newQuote.quotation_number ||
                 !newQuote.quotation_date ||
                 !(newQuote.file || newQuote.existing_file) ||
-                newQuote.items.some(i => !i.is_excluded && (!i.quoted_rate || !i.delivery_days)) ||
+                newQuote.items.some(i => !i.is_excluded && (!i.quoted_rate)) ||
                 newQuote.items.every(i => i.is_excluded)
               }
             >

@@ -32,8 +32,12 @@ export default function ContractForm() {
     sla_details: '',
     spare_parts_included: false,
     consumables_included: false,
+    status: 'Draft',
+    current_approval_level: 1,
     items: []
   });
+
+  const isViewMode = isEdit && (form.status === 'Active' || form.status === 'Closed' || form.status === 'Approved' || form.status === 'Rejected' || form.current_approval_level > 1);
 
   const [vendors, setVendors] = useState([]);
   const [institutions, setInstitutions] = useState([]);
@@ -153,7 +157,7 @@ export default function ContractForm() {
           <ArrowBack />
         </IconButton>
         <Typography variant="h5" sx={{ fontWeight: 700, color: '#1E293B' }}>
-          {isEdit ? 'Edit Contract' : 'Create New Contract'}
+          {isViewMode ? 'View Contract' : (isEdit ? 'Edit Contract' : 'Create New Contract')}
         </Typography>
       </Box>
 
@@ -167,6 +171,7 @@ export default function ContractForm() {
               label="Institution"
               value={form.institution_id}
               onChange={e => setForm({ ...form, institution_id: e.target.value, department_id: '' })}
+              disabled={isViewMode}
             >
               <MenuItem value=""><em>None</em></MenuItem>
               {institutions.map(i => <MenuItem key={i.id} value={i.id}>{i.name}</MenuItem>)}
@@ -179,7 +184,7 @@ export default function ContractForm() {
               label="Department"
               value={form.department_id}
               onChange={e => setForm({ ...form, department_id: e.target.value })}
-              disabled={!form.institution_id}
+              disabled={!form.institution_id || isViewMode}
             >
               <MenuItem value=""><em>None</em></MenuItem>
               {departments.map(d => <MenuItem key={d.id} value={d.id}>{d.name}</MenuItem>)}
@@ -211,6 +216,7 @@ export default function ContractForm() {
               error={!!errors.vendor_id}
               helperText={errors.vendor_id}
               required
+              disabled={isViewMode}
             >
               {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.code} - {v.name}</MenuItem>)}
             </TextField>
@@ -222,6 +228,7 @@ export default function ContractForm() {
               type="number"
               value={form.contract_value}
               onChange={e => setForm({ ...form, contract_value: parseFloat(e.target.value) || '' })}
+              disabled={isViewMode}
             />
           </Grid>
 
@@ -231,6 +238,7 @@ export default function ContractForm() {
               value={form.start_date ? dayjs(form.start_date) : null}
               onChange={val => setForm({ ...form, start_date: val })}
               format="DD-MMM-YYYY"
+              disabled={isViewMode}
               localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
               slotProps={{
                 textField: {
@@ -248,6 +256,7 @@ export default function ContractForm() {
               value={form.end_date ? dayjs(form.end_date) : null}
               onChange={val => setForm({ ...form, end_date: val })}
               format="DD-MMM-YYYY"
+              disabled={isViewMode}
               localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
               slotProps={{
                 textField: {
@@ -262,11 +271,11 @@ export default function ContractForm() {
           {(form.contract_type === 'AMC' || form.contract_type === 'CMC') && (
             <Grid item xs={12} sx={{ display: 'flex', gap: 4 }}>
               <FormControlLabel
-                control={<Switch disabled={form.contract_type === 'AMC'} checked={form.contract_type === 'AMC' ? false : form.spare_parts_included} onChange={e => setForm({ ...form, spare_parts_included: e.target.checked })} />}
+                control={<Switch disabled={form.contract_type === 'AMC' || isViewMode} checked={form.contract_type === 'AMC' ? false : form.spare_parts_included} onChange={e => setForm({ ...form, spare_parts_included: e.target.checked })} />}
                 label="Spare Parts Included"
               />
               <FormControlLabel
-                control={<Switch disabled={form.contract_type === 'AMC'} checked={form.contract_type === 'AMC' ? false : form.consumables_included} onChange={e => setForm({ ...form, consumables_included: e.target.checked })} />}
+                control={<Switch disabled={form.contract_type === 'AMC' || isViewMode} checked={form.contract_type === 'AMC' ? false : form.consumables_included} onChange={e => setForm({ ...form, consumables_included: e.target.checked })} />}
                 label="Consumables Included"
               />
             </Grid>
@@ -300,7 +309,7 @@ export default function ContractForm() {
                     <TableCell>COST (₹)</TableCell>
                   </>
                 )}
-                <TableCell align="center">ACTION</TableCell>
+                {!isViewMode && <TableCell align="center">ACTION</TableCell>}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -313,6 +322,7 @@ export default function ContractForm() {
                           options={materials}
                           getOptionLabel={(option) => `${option.code} - ${option.name}`}
                           value={materials.find(m => m.id === item.material_id) || null}
+                          disabled={isViewMode}
                           onChange={(e, val) => {
                             updateItem(index, 'material_id', val?.id || null);
                             updateItem(index, 'uom', val?.uom?.abbreviation || '');
@@ -321,16 +331,16 @@ export default function ContractForm() {
                         />
                       </TableCell>
                       <TableCell>
-                        <TextField size="small" type="number" value={item.rate} onChange={e => updateItem(index, 'rate', parseFloat(e.target.value) || 0)} sx={{ width: 100 }} />
+                        <TextField size="small" type="number" disabled={isViewMode} value={item.rate} onChange={e => updateItem(index, 'rate', parseFloat(e.target.value) || 0)} sx={{ width: 100 }} />
                       </TableCell>
                       <TableCell>
-                        <TextField size="small" type="number" value={item.gst} onChange={e => updateItem(index, 'gst', parseFloat(e.target.value) || 0)} sx={{ width: 80 }} />
+                        <TextField size="small" type="number" disabled={isViewMode} value={item.gst} onChange={e => updateItem(index, 'gst', parseFloat(e.target.value) || 0)} sx={{ width: 80 }} />
                       </TableCell>
                       <TableCell>
-                        <TextField size="small" type="number" placeholder="Optional" value={item.contract_quantity || ''} onChange={e => updateItem(index, 'contract_quantity', parseFloat(e.target.value) || null)} sx={{ width: 100 }} />
+                        <TextField size="small" type="number" disabled={isViewMode} placeholder="Optional" value={item.contract_quantity || ''} onChange={e => updateItem(index, 'contract_quantity', parseFloat(e.target.value) || null)} sx={{ width: 100 }} />
                       </TableCell>
                       <TableCell>
-                        <TextField size="small" type="number" placeholder="Days" value={item.delivery_lead_time || ''} onChange={e => updateItem(index, 'delivery_lead_time', parseInt(e.target.value) || null)} sx={{ width: 100 }} />
+                        <TextField size="small" type="number" disabled={isViewMode} placeholder="Days" value={item.delivery_lead_time || ''} onChange={e => updateItem(index, 'delivery_lead_time', parseInt(e.target.value) || null)} sx={{ width: 100 }} />
                       </TableCell>
                     </>
                   ) : (
@@ -340,55 +350,60 @@ export default function ContractForm() {
                           options={equipment}
                           getOptionLabel={(option) => `${option.equipment_code} - ${option.material_name} (${option.serial_number || 'No SN'})`}
                           value={equipment.find(e => e.id === item.equipment_id) || null}
+                          disabled={isViewMode}
                           onChange={(e, val) => updateItem(index, 'equipment_id', val?.id || null)}
                           renderInput={(params) => <TextField {...params} size="small" placeholder="Select Equipment" />}
                         />
                       </TableCell>
                       <TableCell>
-                        <TextField size="small" fullWidth value={item.covered_components || ''} onChange={e => updateItem(index, 'covered_components', e.target.value)} />
+                        <TextField size="small" fullWidth disabled={isViewMode} value={item.covered_components || ''} onChange={e => updateItem(index, 'covered_components', e.target.value)} />
                       </TableCell>
                       <TableCell>
-                        <TextField size="small" fullWidth value={item.excluded_components || ''} onChange={e => updateItem(index, 'excluded_components', e.target.value)} />
+                        <TextField size="small" fullWidth disabled={isViewMode} value={item.excluded_components || ''} onChange={e => updateItem(index, 'excluded_components', e.target.value)} />
                       </TableCell>
                       <TableCell>
-                        <TextField size="small" type="number" value={item.rate} onChange={e => updateItem(index, 'rate', parseFloat(e.target.value) || 0)} sx={{ width: 100 }} />
+                        <TextField size="small" type="number" disabled={isViewMode} value={item.rate} onChange={e => updateItem(index, 'rate', parseFloat(e.target.value) || 0)} sx={{ width: 100 }} />
                       </TableCell>
                     </>
                   )}
-                  <TableCell align="center">
-                    <Tooltip title="Remove">
-                      <IconButton color="error" size="small" onClick={() => removeItem(index)}><Delete fontSize="small" /></IconButton>
-                    </Tooltip>
-                  </TableCell>
+                  {!isViewMode && (
+                    <TableCell align="center">
+                      <Tooltip title="Remove">
+                        <IconButton color="error" size="small" onClick={() => removeItem(index)}><Delete fontSize="small" /></IconButton>
+                      </Tooltip>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
               {form.items.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={form.contract_type === 'RC' ? 6 : 5} align="center" sx={{ py: 3, color: '#94A3B8' }}>No items added yet</TableCell>
+                  <TableCell colSpan={isViewMode ? (form.contract_type === 'RC' ? 5 : 4) : (form.contract_type === 'RC' ? 6 : 5)} align="center" sx={{ py: 3, color: '#94A3B8' }}>No items added yet</TableCell>
                 </TableRow>
               )}
-              <TableRow>
-                <TableCell colSpan={form.contract_type === 'RC' ? 6 : 5} align="center" sx={{ py: 2 }}>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    startIcon={<Add />}
-                    onClick={addItem}
-                    sx={{ 
-                      textTransform: 'none', 
-                      fontWeight: 600, 
-                      borderStyle: 'dashed', 
-                      width: '100%', 
-                      color: '#2563EB', 
-                      fontSize: '0.95rem',
-                      borderColor: '#cbd5e1', 
-                      '&:hover': { borderColor: '#94a3b8', bgcolor: '#f8fafc' } 
-                    }}
-                  >
-                    Add Another Item
-                  </Button>
-                </TableCell>
-              </TableRow>
+              {!isViewMode && (
+                <TableRow>
+                  <TableCell colSpan={form.contract_type === 'RC' ? 6 : 5} align="center" sx={{ py: 2 }}>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<Add />}
+                      onClick={addItem}
+                      sx={{ 
+                        textTransform: 'none', 
+                        fontWeight: 600, 
+                        borderStyle: 'dashed', 
+                        width: '100%', 
+                        color: '#2563EB', 
+                        fontSize: '0.95rem',
+                        borderColor: '#cbd5e1', 
+                        '&:hover': { borderColor: '#94a3b8', bgcolor: '#f8fafc' } 
+                      }}
+                    >
+                      Add Another Item
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </TableContainer>
@@ -404,6 +419,7 @@ export default function ContractForm() {
               label="Payment Terms"
               value={form.payment_terms}
               onChange={e => setForm({ ...form, payment_terms: e.target.value })}
+              disabled={isViewMode}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -414,6 +430,7 @@ export default function ContractForm() {
               label="Exclusions"
               value={form.exclusions}
               onChange={e => setForm({ ...form, exclusions: e.target.value })}
+              disabled={isViewMode}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -424,6 +441,7 @@ export default function ContractForm() {
               label="SLA Details"
               value={form.sla_details}
               onChange={e => setForm({ ...form, sla_details: e.target.value })}
+              disabled={isViewMode}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -434,6 +452,7 @@ export default function ContractForm() {
               label="Renewal Terms"
               value={form.renewal_terms}
               onChange={e => setForm({ ...form, renewal_terms: e.target.value })}
+              disabled={isViewMode}
             />
           </Grid>
         </Grid>
@@ -441,25 +460,29 @@ export default function ContractForm() {
 
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
         <Button onClick={() => navigate('/contracts')} sx={{ fontWeight: 600, color: '#64748B' }}>
-          Cancel
+          {isViewMode ? 'Close' : 'Cancel'}
         </Button>
-        <Button
-          variant="outlined"
-          onClick={() => handleSave(true)}
-          disabled={loading}
-          sx={{ fontWeight: 700, borderRadius: 2, px: 4 }}
-        >
-          Save as Draft
-        </Button>
-        <Button
-          variant="contained"
-          startIcon={<Save />}
-          onClick={() => handleSave(false)}
-          disabled={loading}
-          sx={{ fontWeight: 700, borderRadius: 2, px: 4 }}
-        >
-          {isEdit ? 'Update Contract' : 'Create Contract'}
-        </Button>
+        {!isViewMode && (
+          <>
+            <Button
+              variant="outlined"
+              onClick={() => handleSave(true)}
+              disabled={loading}
+              sx={{ fontWeight: 700, borderRadius: 2, px: 4 }}
+            >
+              Save as Draft
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={<Save />}
+              onClick={() => handleSave(false)}
+              disabled={loading}
+              sx={{ fontWeight: 700, borderRadius: 2, px: 4 }}
+            >
+              {isEdit ? 'Update Contract' : 'Create Contract'}
+            </Button>
+          </>
+        )}
       </Box>
     </Box>
   );

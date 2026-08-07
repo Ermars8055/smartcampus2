@@ -353,15 +353,17 @@ export default function Vendors() {
                         {v.categories?.length > 2 && <Typography variant="caption" sx={{ color: '#64748B', ml: 0.5 }}>+{v.categories.length - 2}</Typography>}
                       </Box>
                       <Box onClick={(e) => e.stopPropagation()}>
-                        <Tooltip title="Edit Vendor">
-                          <IconButton size="small" onClick={(e) => { e.stopPropagation(); openEdit(v, false); }} sx={{ color: '#64748B' }}>
-                            <Edit color="primary" fontSize="small" />
-                          </IconButton>
+                        <Tooltip title={v.current_approval_level > 1 || v.status === 'Approved' || v.status === 'Rejected' ? "Cannot edit after L1 approval" : "Edit Vendor"}>
+                          <span>
+                            <IconButton size="small" disabled={v.current_approval_level > 1 || v.status === 'Approved' || v.status === 'Rejected'} onClick={(e) => { e.stopPropagation(); openEdit(v, false); }} sx={{ color: '#64748B' }}>
+                              <Edit color={v.current_approval_level > 1 || v.status === 'Approved' || v.status === 'Rejected' ? "action" : "primary"} fontSize="small" />
+                            </IconButton>
+                          </span>
                         </Tooltip>
                         {v.can_user_approve && (
                           <>
                             <Tooltip title="Approve">
-                              <IconButton size="small" color="success" onClick={(e) => handleApprove(v.id, e)} sx={{ ml: 0.5, bgcolor: 'transparent', '&:hover': { bgcolor: 'rgba(16, 185, 129, 0.1)' } }}>
+                              <IconButton size="small" color="success" onClick={(e) => { e.stopPropagation(); openEdit(v, true); }} sx={{ ml: 0.5, bgcolor: 'transparent', '&:hover': { bgcolor: 'rgba(16, 185, 129, 0.1)' } }}>
                                 <CheckCircle fontSize="small" />
                               </IconButton>
                             </Tooltip>
@@ -477,15 +479,17 @@ export default function Vendors() {
 
                         <TableCell align="right">
                           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5 }} onClick={(e) => e.stopPropagation()}>
-                            <Tooltip title="Edit Vendor">
-                              <IconButton size="small" onClick={(e) => { e.stopPropagation(); openEdit(v, false); }} sx={{ color: '#64748B' }}>
-                                <Edit color="primary" fontSize="small" />
-                              </IconButton>
+                            <Tooltip title={v.current_approval_level > 1 || v.status === 'Approved' || v.status === 'Rejected' ? "Cannot edit after L1 approval" : "Edit Vendor"}>
+                              <span>
+                                <IconButton size="small" disabled={v.current_approval_level > 1 || v.status === 'Approved' || v.status === 'Rejected'} onClick={(e) => { e.stopPropagation(); openEdit(v, false); }} sx={{ color: '#64748B' }}>
+                                  <Edit color={v.current_approval_level > 1 || v.status === 'Approved' || v.status === 'Rejected' ? "action" : "primary"} fontSize="small" />
+                                </IconButton>
+                              </span>
                             </Tooltip>
                             {v.can_user_approve && (
                               <>
                                 <Tooltip title="Approve">
-                                  <IconButton size="small" color="success" onClick={(e) => handleApprove(v.id, e)} sx={{ ml: 0.5, bgcolor: 'transparent', '&:hover': { bgcolor: 'rgba(16, 185, 129, 0.1)' } }}>
+                                  <IconButton size="small" color="success" onClick={(e) => { e.stopPropagation(); openEdit(v, true); }} sx={{ ml: 0.5, bgcolor: 'transparent', '&:hover': { bgcolor: 'rgba(16, 185, 129, 0.1)' } }}>
                                     <CheckCircle fontSize="small" />
                                   </IconButton>
                                 </Tooltip>
@@ -792,7 +796,11 @@ export default function Vendors() {
             </Box>
           )}
         </DialogContent>
-        <DialogActions sx={{ px: 4, pb: 4, pt: 2, justifyContent: 'flex-end', gap: 2 }}>
+        <DialogActions sx={{ px: 4, pb: 4, pt: 2, gap: 2 }}>
+          <Button onClick={() => setDialog(false)} sx={{ color: '#64748B', fontWeight: 600 }}>
+            Cancel
+          </Button>
+          <Box sx={{ flexGrow: 1 }} />
           {viewOnly && form.can_user_approve && (
             <>
               <Button
@@ -813,9 +821,6 @@ export default function Vendors() {
               </Button>
             </>
           )}
-          <Button onClick={() => setDialog(false)} sx={{ color: '#64748B', fontWeight: 600 }}>
-            Cancel
-          </Button>
           <Button
             variant="contained"
             onClick={handleSave}

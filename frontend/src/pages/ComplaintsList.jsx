@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Box, Typography, Paper, Table, TableBody, TableCell, TableContainer,
   TableHead, TableRow, Button, IconButton, Chip, TextField, MenuItem, Select, FormControl, InputLabel, Tooltip,
-  Dialog, DialogTitle, DialogContent, DialogActions, Card, Tabs, Tab
+  Dialog, DialogTitle, DialogContent, DialogActions, Card, Tabs, Tab, TablePagination
 } from '@mui/material';
 import { Add, Edit, Cancel, ArrowBack } from '@mui/icons-material';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
@@ -22,13 +22,16 @@ export default function ComplaintsList() {
   const [shortCloseDialog, setShortCloseDialog] = useState({ open: false, complaintId: null });
   const [shortCloseRemarks, setShortCloseRemarks] = useState('');
 
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
   useEffect(() => {
     fetchComplaints();
-  }, [statusFilter]);
+  }, []);
 
   const fetchComplaints = async () => {
     try {
-      const res = await api.get('/api/complaints', { params: { status: statusFilter || undefined } });
+      const res = await api.get('/api/complaints');
       setComplaints(res.data);
     } catch (error) {
       console.error('Failed to fetch complaints', error);
@@ -42,9 +45,16 @@ export default function ComplaintsList() {
         return false;
       }
     }
-    return c.docket_no.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    
+    const matchesSearch = c.docket_no.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (c.nature_of_complaint && c.nature_of_complaint.toLowerCase().includes(searchQuery.toLowerCase()));
+      
+    const matchesStatus = statusFilter ? c.status === statusFilter : true;
+    
+    return matchesSearch && matchesStatus;
   });
+
+  const paginatedComplaints = filteredComplaints.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -116,13 +126,13 @@ export default function ComplaintsList() {
               variant="outlined"
               size="small"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              sx={{ flex: 1 }}
+              onChange={(e) => { setSearchQuery(e.target.value); setPage(0); }}
+              sx={{ flex: 1, maxWidth: 400 }}
             />
           </Box>
           <Tabs
             value={statusFilter}
-            onChange={(e, newVal) => setStatusFilter(newVal)}
+            onChange={(e, newVal) => { setStatusFilter(newVal); setPage(0); }}
             variant="scrollable"
             scrollButtons={false}
             sx={{ 
@@ -191,14 +201,16 @@ export default function ComplaintsList() {
                 </TableCell>
               </TableRow>
             ) : (
-              filteredComplaints.map((row) => (
+              paginatedComplaints.map((row) => (
                 <TableRow 
                   key={row.id} 
                   hover 
                   onClick={() => navigate(`/complaints/${row.id}`)}
                   sx={{ cursor: 'pointer', '&:hover': { backgroundColor: '#f1f5f9' } }}
                 >
-                  <TableCell sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.7rem', whiteSpace: 'nowrap', px: 2 }}>{row.docket_no}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap', px: 2 }}>
+                    <Typography sx={{ fontWeight: 600, color: '#2563EB', fontSize: '0.7rem' }}>{row.docket_no}</Typography>
+                  </TableCell>
                   <TableCell sx={{ fontSize: '0.7rem', whiteSpace: 'nowrap' }}>
                     {dayjs(row.complaint_date).format('DD MMM YYYY')} {row.complaint_time}
                   </TableCell>
@@ -251,6 +263,18 @@ export default function ComplaintsList() {
           </TableBody>
         </Table>
       </TableContainer>
+        <TablePagination
+          component="div"
+          count={filteredComplaints.length}
+          page={page}
+          onPageChange={(e, newPage) => setPage(newPage)}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={(e) => {
+            setRowsPerPage(parseInt(e.target.value, 10));
+            setPage(0);
+          }}
+          rowsPerPageOptions={[10, 20, 50, 100]}
+        />
       </Card>
 
       {/* Short Close Dialog */}

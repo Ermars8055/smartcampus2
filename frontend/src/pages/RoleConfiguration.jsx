@@ -30,7 +30,10 @@ const MODULE_TREE = [
       { label: 'Categories', resource: 'categories' },
       { label: 'Sub Categories', resource: 'subcategories' },
       { label: 'UOM', resource: 'uom' },
-      { label: 'Vendors', resource: 'vendors' },
+      { label: 'Vendors', resource: 'vendors', extendedActions: [
+        { key: 'can_approve', label: 'Approve', color: '#10B981' },
+        { key: 'can_reject', label: 'Reject', color: '#EF4444' },
+      ]},
       { label: 'Stores', resource: 'warehouses' },
     ],
   },
@@ -126,14 +129,26 @@ const MODULE_TREE = [
     module: 'Equipment',
     icon: 'build',
     children: [
-      { label: 'Equipment Master', resource: 'equipment' },
+      { label: 'Equipment Master', resource: 'equipment', extendedActions: [
+        { key: 'generate_calls', label: 'Generate Calls', color: '#3B82F6' },
+      ]},
     ],
   },
   {
     module: 'Maintenance',
     icon: 'build',
     children: [
-      { label: 'Complaints', resource: 'complaints' },
+      { label: 'Complaints', resource: 'complaints', extendedActions: [
+        { key: 'can_assign', label: 'Assign', color: '#3B82F6' },
+        { key: 'can_approve_level1', label: 'Level 1 Approve', color: '#10B981' },
+        { key: 'can_approve_level2', label: 'Level 2 Approve', color: '#10B981' },
+      ]},
+      { label: 'PM Schedule', resource: 'pm_schedule', extendedActions: [
+        { key: 'generate_calls', label: 'Generate Calls', color: '#3B82F6' },
+      ]},
+      { label: 'Calibration Schedule', resource: 'calibration_schedule', extendedActions: [
+        { key: 'generate_calls', label: 'Generate Calls', color: '#3B82F6' },
+      ]},
       { label: 'Repair Work Orders', resource: 'rwos', extendedActions: [
         { key: 'can_close', label: 'Close RWO', color: '#10B981' }
       ]},
@@ -163,6 +178,7 @@ const MODULE_TREE = [
       { label: 'General Reports', resource: 'reports', actions: ['read'] },
       { label: 'Issue Summary', resource: 'report_issue_summary', actions: ['read'] },
       { label: 'Rate Analysis', resource: 'report_rate_analysis', actions: ['read'] },
+      { label: 'Equipment Count', resource: 'report_equipment_count', actions: ['read'] },
       { label: 'Receipt Summary', resource: 'report_receipt_summary', actions: ['read'] },
       { label: 'Dept. Inventory', resource: 'report_dept_inventory', actions: ['read'] },
       { label: 'Finance Reports', resource: 'report_finance', actions: ['read'] },
@@ -181,8 +197,6 @@ const MODULE_TREE = [
       { label: 'Configurations', resource: 'configurations' },
       { label: 'Locations', resource: 'locations' },
       { label: 'Projects', resource: 'projects' },
-      { label: 'Organizations', resource: 'organizations' },
-      { label: 'Departments', resource: 'departments' },
       { label: 'Company Addresses', resource: 'company_addresses' },
       { label: 'Terms & Conditions', resource: 'terms' },
     ],
@@ -198,6 +212,8 @@ const DOCUMENT_TYPES = [
   { value: 'PURCHASE_REQUEST', label: 'Purchase Request' },
   { value: 'PURCHASE_ORDER', label: 'Purchase Order' },
   { value: 'CONTRACT', label: 'Contract' },
+  { value: 'VENDOR', label: 'Vendor' },
+  { value: 'WRITE_OFF', label: 'Write Off' },
 ];
 
 // ── Helper: Build a flat map of resource → { can_read, can_create, ... } ──

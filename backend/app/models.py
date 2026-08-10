@@ -213,6 +213,7 @@ class TenantConfiguration(Base):
     base_state = Column(String(100), nullable=False)
     cgst_share_percent = Column(Float, nullable=False)
     sgst_share_percent = Column(Float, nullable=False)
+    po_short_close_notify_roles = Column(JSON, default=list)
     created_at = Column(DateTime, default=_get_now)
     updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)
     tenant = relationship("Tenant")
@@ -1969,7 +1970,7 @@ class RepairWorkOrder(Base):
     tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
     site_id = Column(Integer, ForeignKey("sites.id", ondelete="CASCADE"), nullable=False)
     rwo_number = Column(String(50), nullable=False, index=True)
-    complaint_id = Column(Integer, ForeignKey("complaints.id"), nullable=False)
+    complaint_id = Column(Integer, ForeignKey("complaints.id"), nullable=True)
     equipment_id = Column(Integer, ForeignKey("equipment_items.id"), nullable=False)
     vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=False)
     contract_id = Column(Integer, ForeignKey("contracts.id"), nullable=True) # Nullable if not under AMC/CMC? Requirements say generated for AMC/CMC

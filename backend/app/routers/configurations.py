@@ -50,12 +50,15 @@ def update_tenant_configuration(
         config.base_state = config_in.base_state
         config.cgst_share_percent = config_in.cgst_share_percent
         config.sgst_share_percent = config_in.sgst_share_percent
+        if hasattr(config_in, 'po_short_close_notify_roles') and config_in.po_short_close_notify_roles is not None:
+            config.po_short_close_notify_roles = config_in.po_short_close_notify_roles
     else:
         config = TenantConfiguration(
             tenant_id=tenant_id,
             base_state=config_in.base_state,
             cgst_share_percent=config_in.cgst_share_percent,
-            sgst_share_percent=config_in.sgst_share_percent
+            sgst_share_percent=config_in.sgst_share_percent,
+            po_short_close_notify_roles=config_in.po_short_close_notify_roles if hasattr(config_in, 'po_short_close_notify_roles') else []
         )
         db.add(config)
         

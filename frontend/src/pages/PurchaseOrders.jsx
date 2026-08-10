@@ -494,6 +494,42 @@ export default function PurchaseOrders() {
   }, [location.state, projects, location.pathname, navigate]);
 
   useEffect(() => {
+    if (location.state?.reagentRentalData && projects.length > 0) {
+      const data = location.state.reagentRentalData;
+      setForm({
+        vendor_id: data.vendor_id || '',
+        project_id: data.project_id || projects[0]?.id || '',
+        institution_id: data.institution_id || '',
+        delivery_date: null,
+        terms: '', annexure: '',
+        purchase_mode: 'Direct',
+        marketplace_name: '',
+        advance_percentage: 0,
+        procurement_type: 'Purchase', rental_type: '', rental_agreement_number: '', rental_start_date: null, rental_end_date: null, billing_frequency: '', security_deposit: 0, cost_per_test: '', linked_reagent_agreement: data.rental_agreement_number || data.po_number || data.equipment_code || '', vendor_maintenance_responsibility: false, return_conditions: '', renewal_terms: '', remarks: `Auto-generated for Equipment: ${data.equipment_code}`,
+        items: data.items.map(it => {
+          const mat = materials.find(m => m.id === it.material_id);
+          return {
+            material_id: it.material_id,
+            quantity: it.quantity,
+            rate: '',
+            discount_percent: '',
+            cgst_percentage: 0,
+            sgst_percentage: 0,
+            igst_percentage: 0,
+            is_gst_inclusive: false,
+            uom_name: mat ? mat.uom_name : '',
+            uom_allow_decimal: mat ? mat.uom_allow_decimal : false,
+            base_rate: 0
+          };
+        })
+      });
+      setItemErrors({});
+      setDialog(true);
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location.state, projects, materials, location.pathname, navigate]);
+
+  useEffect(() => {
     if (location.state?.openPOId && pos.length > 0) {
       const poToOpen = pos.find(p => p.id === location.state.openPOId);
       if (poToOpen) {
@@ -2210,6 +2246,25 @@ export default function PurchaseOrders() {
               </Button>
             )}
           </Box>
+          <Divider sx={{ my: 2 }} />
+          <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b', mb: 1.5 }}>Additional Details</Typography>
+          <Grid container spacing={2} sx={{ mb: 2 }}>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth size="small" label="Linked Reagent Agreement / Reference"
+                value={form.linked_reagent_agreement || ''}
+                onChange={e => setForm({ ...form, linked_reagent_agreement: e.target.value })}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth size="small" label="Remarks"
+                value={form.remarks || ''}
+                onChange={e => setForm({ ...form, remarks: e.target.value })}
+              />
+            </Grid>
+          </Grid>
+
           <Divider sx={{ my: 2 }} />
           <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b', mb: 1.5 }}>Terms & Conditions *</Typography>
           <FormControl fullWidth size="small" sx={{ mb: 2 }}>

@@ -13,6 +13,7 @@ import {
   LocalHospital, PrecisionManufacturing, Edit, FilterList, Refresh, Assignment, DeleteOutline, Print, Science, CompareArrows, Add, History
 } from '@mui/icons-material';
 import dayjs from 'dayjs';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import api, { getFileUrl } from '../services/api';
 import { formatDate } from '../utils/dateUtils';
 import { useAuth } from '../context/AuthContext';
@@ -32,6 +33,7 @@ export default function Equipment() {
   const [locations, setLocations] = useState([]);
   const [materials, setMaterials] = useState([]);
   const [institutions, setInstitutions] = useState([]);
+  const [purchaseOrders, setPurchaseOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('all'); // 'all', 'pending_serial', 'pending_installation'
   const [search, setSearch] = useState('');
@@ -51,8 +53,7 @@ export default function Equipment() {
   const [qrDialog, setQrDialog] = useState(null);
   const [qrData, setQrData] = useState(null);
   const [printLabelCount, setPrintLabelCount] = useState(1);
-  const [labelFormat, setLabelFormat] = useState(1);
-  
+
   // Write Off Dialog
   const [writeOffDialog, setWriteOffDialog] = useState(null);
   const [writeOffDate, setWriteOffDate] = useState('');
@@ -102,18 +103,20 @@ export default function Equipment() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [eqRes, whRes, locRes, matRes, instRes] = await Promise.all([
+      const [eqRes, whRes, locRes, matRes, instRes, poRes] = await Promise.all([
         api.get('/api/equipment'),
         api.get('/api/warehouses'),
         api.get('/api/configurations/locations'),
         api.get('/api/materials', { params: { limit: 10000 } }),
-        api.get('/api/institutions')
+        api.get('/api/institutions'),
+        api.get('/api/procurement/po', { params: { limit: 10000 } })
       ]);
       setEquipmentList(eqRes.data || []);
       setWarehouses(whRes.data || []);
       setLocations(locRes.data || []);
       setMaterials(matRes.data?.items || matRes.data || []);
       setInstitutions(instRes.data || []);
+      setPurchaseOrders(poRes.data?.items || poRes.data || []);
     } catch (err) {
       showMessage(err.response?.data?.detail || 'Failed to load equipment data', 'Error', 'error');
     }
@@ -147,7 +150,7 @@ export default function Equipment() {
 
       // Status filter
       if (selectedStatus && item.status !== selectedStatus) {
-         return false;
+        return false;
       }
 
       // Search
@@ -165,31 +168,31 @@ export default function Equipment() {
 
       return true;
     });
-    
+
     // Apply sorting
     if (sortConfig.key) {
       filtered.sort((a, b) => {
         let valA = a[sortConfig.key];
         let valB = b[sortConfig.key];
-        
+
         // Handle nulls
         if (valA === null || valA === undefined) valA = '';
         if (valB === null || valB === undefined) valB = '';
-        
+
         // String comparison
         if (typeof valA === 'string' && typeof valB === 'string') {
-          return sortConfig.direction === 'asc' 
+          return sortConfig.direction === 'asc'
             ? valA.localeCompare(valB)
             : valB.localeCompare(valA);
         }
-        
+
         // Number comparison
         if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
         if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
         return 0;
       });
     }
-    
+
     return filtered;
   }, [equipmentList, activeTab, selectedStatus, search, sortConfig]);
 
@@ -259,7 +262,6 @@ export default function Equipment() {
       const res = await api.get(`/api/equipment/${item.id}/qr`);
       setQrData(res.data);
       setPrintLabelCount(1);
-      setLabelFormat(1);
       setQrDialog(item);
     } catch (err) {
       showMessage('Failed to load QR data', 'Error', 'error');
@@ -268,30 +270,45 @@ export default function Equipment() {
 
   const handlePrintQr = () => {
     if (!qrData || !qrDialog) return;
-    const printWindow = window.open('', '', 'width=800,height=800');
-    
+    const printWindow = window.open('', '', 'width=600,height=400');
+
     const svgElement = document.getElementById('equipment-qr-svg');
     const svgHtml = svgElement ? svgElement.outerHTML : '';
-    
-    const formatConfigs = {
-      1: { columns: 1, height: '95vh', svgSize: 250, titleSize: '1.8rem', nameSize: '1.4rem', textSize: '1.2rem', padding: '40px', gap: '20px' },
-      2: { columns: 1, height: '46vh', svgSize: 180, titleSize: '1.4rem', nameSize: '1.1rem', textSize: '0.9rem', padding: '30px', gap: '20px' },
-      4: { columns: 2, height: '46vh', svgSize: 150, titleSize: '1.2rem', nameSize: '1rem', textSize: '0.85rem', padding: '20px', gap: '20px' },
-      8: { columns: 2, height: '23vh', svgSize: 120, titleSize: '1rem', nameSize: '0.85rem', textSize: '0.75rem', padding: '15px', gap: '15px' },
-      12: { columns: 3, height: '23vh', svgSize: 100, titleSize: '0.9rem', nameSize: '0.8rem', textSize: '0.65rem', padding: '12px', gap: '15px' },
-      16: { columns: 4, height: '23vh', svgSize: 85, titleSize: '0.8rem', nameSize: '0.7rem', textSize: '0.6rem', padding: '10px', gap: '10px' },
-      32: { columns: 4, height: '11.5vh', svgSize: 60, titleSize: '0.6rem', nameSize: '0.55rem', textSize: '0.45rem', padding: '5px', gap: '5px' }
-    };
-    
-    const config = formatConfigs[labelFormat] || formatConfigs[32];
 
     let labelsHtml = '';
     for (let i = 0; i < printLabelCount; i++) {
       labelsHtml += `
         <div class="label-container">
-          <div class="department-header">BIOMEDICAL ENGINEERING DEPARTMENT</div>
-          <div class="equipment-name">${qrData.equipment_name}</div>
-          <div class="qr-code-container">${svgHtml}</div>
+          <div class="header">
+            <span class="equipment-name">${qrData.equipment_name || 'Equipment'}</span>
+            <span class="hospital-name">${qrData.institution_name || 'Hospital'}</span>
+          </div>
+          <div class="content">
+            <div class="qr-col">
+              ${svgHtml}
+            </div>
+            <div class="details-col">
+              <div class="asset-id">${qrData.asset_id || ''}</div>
+              
+              <div class="detail-row">
+                <div class="label">DEPARTMENT</div>
+                <div class="value">${qrData.department_used || qrData.department || ''}</div>
+              </div>
+              
+              <div class="detail-row">
+                <div class="label">MAKE & MODEL</div>
+                <div class="value">${qrData.make_model || ''}</div>
+              </div>
+              
+              <div class="detail-row no-border">
+                <div class="label">SERIAL NUMBER</div>
+                <div class="value">${qrData.serial_number || ''}</div>
+              </div>
+            </div>
+          </div>
+          <div class="footer">
+            Scan to raise a service ticket
+          </div>
         </div>
       `;
     }
@@ -301,62 +318,120 @@ export default function Equipment() {
         <head>
           <title>Print Equipment QR Label</title>
           <style>
-            @page { margin: 0; size: auto; }
-            body { 
-              font-family: sans-serif; 
-              margin: 0; 
-              padding: 15px; 
-              box-sizing: border-box;
+            @page { 
+              size: auto; 
+              margin: 10mm; 
             }
-            .grid-container {
-              display: grid;
-              grid-template-columns: repeat(${config.columns}, 1fr);
-              gap: ${config.gap};
-              justify-content: start;
-              align-content: start;
+            body { 
+              font-family: Arial, sans-serif; 
+              margin: 0; 
+              padding: 0; 
+              box-sizing: border-box;
             }
             .label-container { 
-              text-align: center; 
-              border: 1px dashed #999; 
-              padding: ${config.padding}; 
-              border-radius: 4px; 
-              page-break-inside: avoid; 
-              background: #fff;
-              overflow: hidden;
-              height: ${config.height};
+              width: 9cm;
+              height: 4.5cm;
+              border: 1px solid #000;
+              border-radius: 4px;
+              box-sizing: border-box;
               display: flex;
               flex-direction: column;
-              justify-content: center;
-              align-items: center;
-              box-sizing: border-box;
+              padding: 2mm 3mm;
+              page-break-inside: avoid;
+              overflow: hidden;
+              background: #fff;
+              float: left;
+              margin: 2mm;
             }
-            .department-header { 
-              font-weight: 800; 
-              font-size: ${config.titleSize}; 
-              margin-bottom: 4px; 
+            @media print {
+              * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              }
             }
-            .qr-code-container { margin: 4px 0; }
-            .qr-code-container svg { width: ${config.svgSize}px; height: ${config.svgSize}px; }
-            .equipment-name {
+            .header {
+              display: flex;
+              justify-content: space-between;
+              font-size: 8pt;
               font-weight: bold;
-              font-size: ${config.nameSize};
-              margin-top: 4px;
-              margin-bottom: 6px;
-              white-space: nowrap; 
-              overflow: hidden; 
+              color: #737373 !important;
+              margin-bottom: 2mm;
+            }
+            .equipment-name {
+              text-align: left;
+              max-width: 50%;
+              white-space: nowrap;
+              overflow: hidden;
               text-overflow: ellipsis;
-              width: 100%;
+            }
+            .hospital-name {
+              text-align: right;
+              max-width: 50%;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+            .content {
+              display: flex;
+              flex: 1;
+            }
+            .qr-col {
+              flex: 0 0 2.5cm;
+              display: flex;
+              justify-content: flex-start;
+              align-items: center;
+            }
+            .qr-col svg {
+              width: 2.2cm;
+              height: 2.2cm;
+            }
+            .details-col {
+              flex: 1;
+              display: flex;
+              flex-direction: column;
+              justify-content: flex-start;
+              padding-left: 2mm;
+              border-left: 1px dotted #ccc;
+            }
+            .asset-id {
+              font-size: 11pt;
+              font-weight: 900;
+              padding-bottom: 1.5mm;
+              margin-bottom: 1mm;
+              border-bottom: 1px dotted #ccc;
+            }
+            .detail-row {
+              padding-bottom: 1mm;
+              margin-bottom: 1mm;
+              border-bottom: 1px dotted #ccc;
+            }
+            .detail-row.no-border {
+              border-bottom: none;
+              margin-bottom: 0;
+            }
+            .label {
+              font-size: 6.5pt;
+              font-weight: 700;
+              text-transform: uppercase;
+              margin-bottom: 0.5mm;
+            }
+            .value {
+              font-size: 7.5pt;
+              margin-bottom: 0px;
+            }
+            .footer {
+              text-align: center;
+              font-size: 6.5pt;
+              margin-top: auto;
             }
           </style>
         </head>
         <body>
-          <div class="grid-container">
-            ${labelsHtml}
-          </div>
+          ${labelsHtml}
         </body>
       </html>
     `);
-    
+
     printWindow.document.close();
     printWindow.focus();
     setTimeout(() => {
@@ -382,7 +457,7 @@ export default function Equipment() {
         finalLocationId = newLocRes.data.id;
         setLocations(prev => [...prev, newLocRes.data]);
       }
-      
+
       await api.post(`/api/equipment/${relocateDialog.id}/relocate`, {
         new_location_id: finalLocationId,
         relocation_date: relocateDate,
@@ -438,6 +513,44 @@ export default function Equipment() {
     setConsumptionSubmitting(false);
   };
 
+  const handleAddReagent = () => {
+    const currentReagents = editForm.linked_reagents || [];
+    setEditForm({
+      ...editForm,
+      linked_reagents: [...currentReagents, { material_id: '', quantity: '' }]
+    });
+  };
+
+  const handleUpdateReagent = (idx, field, value) => {
+    const currentReagents = [...(editForm.linked_reagents || [])];
+    currentReagents[idx][field] = value;
+    setEditForm({ ...editForm, linked_reagents: currentReagents });
+  };
+
+  const handleRemoveReagent = (idx) => {
+    const currentReagents = [...(editForm.linked_reagents || [])];
+    currentReagents.splice(idx, 1);
+    setEditForm({ ...editForm, linked_reagents: currentReagents });
+  };
+
+  const handleCreateReagentPO = () => {
+    if (!editForm.linked_reagents || editForm.linked_reagents.length === 0) {
+      showMessage('No reagents added to create a PO', 'Warning', 'warning');
+      return;
+    }
+    const reagentRentalData = {
+      equipment_id: editForm.id,
+      equipment_code: editForm.equipment_code,
+      rental_agreement_number: editForm.rental_agreement_number,
+      po_number: editForm.po_number,
+      vendor_id: editForm.rental_vendor_id,
+      items: editForm.linked_reagents,
+      project_id: editForm.project_id,
+      institution_id: editForm.institution_id
+    };
+    navigate('/purchase-orders', { state: { reagentRentalData } });
+  };
+
   const handleEditSubmit = async () => {
     setEditSubmitting(true);
     try {
@@ -475,6 +588,55 @@ export default function Equipment() {
     });
     setAddDialog(true);
   };
+  const handlePOSelection = async (newValue, isEdit) => {
+    const form = isEdit ? editForm : addForm;
+    const setForm = isEdit ? setEditForm : setAddForm;
+    
+    if (!newValue) {
+      setForm({
+        ...form,
+        po_id: null,
+        po_number: '',
+        procurement_type: 'Purchase',
+        rental_type: null,
+        rental_agreement_number: null,
+        rental_vendor_id: null,
+        rental_start_date: null,
+        rental_end_date: null,
+        billing_frequency: null,
+        cost_per_test: null,
+      });
+      return;
+    }
+
+    try {
+      const res = await api.get(`/api/procurement/po/${newValue.id}`);
+      const po = res.data;
+      
+      const updates = {
+        po_id: po.id,
+        po_number: po.po_number,
+      };
+
+      if (po.procurement_type && po.procurement_type !== 'Purchase') {
+        updates.procurement_type = po.procurement_type;
+        updates.rental_type = po.rental_type;
+        updates.rental_agreement_number = po.rental_agreement_number;
+        updates.rental_vendor_id = po.vendor_id;
+        updates.rental_start_date = po.rental_start_date;
+        updates.rental_end_date = po.rental_end_date;
+        updates.billing_frequency = po.billing_frequency;
+        updates.cost_per_test = po.cost_per_test;
+      } else {
+        updates.procurement_type = 'Purchase';
+      }
+      
+      setForm({ ...form, ...updates });
+    } catch (err) {
+      showMessage('Failed to fetch PO details', 'Error', 'error');
+    }
+  };
+
 
   const handleAddSubmit = async () => {
     if (!addForm.equipment_code || !addForm.material_id) {
@@ -514,6 +676,9 @@ export default function Equipment() {
           <Button variant="outlined" startIcon={<Refresh />} onClick={loadData} size="small" sx={{ height: 38 }}>
             Refresh
           </Button>
+          <Button variant="outlined" startIcon={<QrCode />} onClick={() => navigate('/equipment/print-qr')} size="small" sx={{ height: 38 }}>
+            Bulk Print QR
+          </Button>
           <Button variant="contained" color="primary" startIcon={<Add />} onClick={openAddDialog} size="small" sx={{ height: 38 }}>
             Add Equipment
           </Button>
@@ -529,9 +694,9 @@ export default function Equipment() {
             placeholder="Search code, serial, material..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            sx={{ 
-              width: 320, 
-              '& input:focus::placeholder': { color: 'transparent' } 
+            sx={{
+              width: 320,
+              '& input:focus::placeholder': { color: 'transparent' }
             }}
             InputProps={{ startAdornment: <InputAdornment position="start"><Search sx={{ color: '#94A3B8' }} /></InputAdornment> }}
           />
@@ -687,8 +852,8 @@ export default function Equipment() {
                     </Button>
                   )}
                   {item.status !== 'Written Off' && (
-                    <Button size="small" variant="outlined" color="error" startIcon={<DeleteOutline />} onClick={(e) => { 
-                      e.stopPropagation(); 
+                    <Button size="small" variant="outlined" color="error" startIcon={<DeleteOutline />} onClick={(e) => {
+                      e.stopPropagation();
                       navigate('/write-offs', {
                         state: {
                           isEquipmentMode: true,
@@ -789,13 +954,13 @@ export default function Equipment() {
                         <Chip label={item.serial_number} size="small" color="success" variant="outlined" sx={{ fontWeight: 600 }} />
                       ) : (
                         <Tooltip title="Update Serial Number">
-                          <Chip 
-                            label="Pending Update" 
-                            size="small" 
-                            color="warning" 
+                          <Chip
+                            label="Pending Update"
+                            size="small"
+                            color="warning"
                             clickable
                             onClick={(e) => { e.stopPropagation(); setSerialDialog(item); setSerialInput(''); }}
-                            sx={{ fontWeight: 600, fontSize: '0.7rem' }} 
+                            sx={{ fontWeight: 600, fontSize: '0.7rem' }}
                           />
                         </Tooltip>
                       )}
@@ -856,8 +1021,8 @@ export default function Equipment() {
                             </IconButton>
                           </Tooltip>
                         )}
-                        {item.status === 'Operational' && (item.cost_per_test > 0 || item.rental_type === 'Reagent Rental') && (
-                          <Tooltip title="Log Reagent Usage">
+                        {item.status === 'Operational' && item.rental_type === 'Cost per test' && (
+                          <Tooltip title="Log Usage">
                             <IconButton size="small" color="secondary" onClick={(e) => { e.stopPropagation(); setConsumptionDialog(item); setConsumptionDate(new Date().toISOString().split('T')[0]); setTestsPerformed(''); setConsumptionRemarks(''); }}>
                               <Science fontSize="small" />
                             </IconButton>
@@ -872,8 +1037,8 @@ export default function Equipment() {
                         )}
                         {item.status === 'Operational' && (
                           <Tooltip title="Write-off Equipment">
-                            <IconButton size="small" color="error" onClick={(e) => { 
-                              e.stopPropagation(); 
+                            <IconButton size="small" color="error" onClick={(e) => {
+                              e.stopPropagation();
                               navigate('/write-offs', {
                                 state: {
                                   isEquipmentMode: true,
@@ -957,7 +1122,7 @@ export default function Equipment() {
                 Asset ID: {qrData.asset_id}
               </Typography>
               <Box sx={{ p: 2, bgcolor: '#fff', borderRadius: 2, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
-                <QRCodeSVG 
+                <QRCodeSVG
                   id="equipment-qr-svg"
                   value={`${window.location.origin}/equipment/${qrData.asset_id}`}
                   size={200}
@@ -968,22 +1133,6 @@ export default function Equipment() {
                 {qrData.equipment_name}
               </Typography>
               <Box sx={{ display: 'flex', gap: 2, mt: 3, flexWrap: 'wrap', justifyContent: 'center' }}>
-                <FormControl size="small" sx={{ minWidth: 180 }}>
-                  <InputLabel>Format (Labels/Page)</InputLabel>
-                  <Select
-                    value={labelFormat}
-                    label="Format (Labels/Page)"
-                    onChange={e => setLabelFormat(e.target.value)}
-                  >
-                    <MenuItem value={1}>1 Label (Full Page)</MenuItem>
-                    <MenuItem value={2}>2 Labels per page</MenuItem>
-                    <MenuItem value={4}>4 Labels per page</MenuItem>
-                    <MenuItem value={8}>8 Labels per page</MenuItem>
-                    <MenuItem value={12}>12 Labels per page</MenuItem>
-                    <MenuItem value={16}>16 Labels per page</MenuItem>
-                    <MenuItem value={32}>32 Labels per page</MenuItem>
-                  </Select>
-                </FormControl>
                 <TextField
                   type="number"
                   label="Total to Print"
@@ -1008,9 +1157,9 @@ export default function Equipment() {
           <Button variant="outlined" onClick={() => setQrDialog(null)} sx={{ borderRadius: 2, fontWeight: 600 }}>
             Close
           </Button>
-          <Button 
-            variant="contained" 
-            startIcon={<Print />} 
+          <Button
+            variant="contained"
+            startIcon={<Print />}
             onClick={handlePrintQr}
             sx={{ borderRadius: 2, fontWeight: 700, boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)' }}
           >
@@ -1027,15 +1176,12 @@ export default function Equipment() {
             <Alert severity="info">
               Relocating <strong>{relocateDialog?.equipment_code}</strong>. Its asset ID will remain unchanged.
             </Alert>
-            <TextField
-              type="date"
-              size="small"
+            <DatePicker
               label="Relocation Date"
-              InputLabelProps={{ shrink: true }}
-              value={relocateDate}
-              onChange={e => setRelocateDate(e.target.value)}
-              fullWidth
-              required
+              format="DD-MMM-YYYY"
+              value={relocateDate ? dayjs(relocateDate) : null}
+              onChange={(newValue) => setRelocateDate(newValue ? newValue.format('YYYY-MM-DD') : '')}
+              slotProps={{ textField: { size: 'small', fullWidth: true } }}
             />
             <Autocomplete
               freeSolo
@@ -1077,7 +1223,7 @@ export default function Equipment() {
           </Button>
         </DialogActions>
       </Dialog>
-      
+
       {/* Write Off Dialog */}
       <Dialog open={!!writeOffDialog} onClose={() => setWriteOffDialog(null)} maxWidth="xs" fullWidth>
         <DialogTitle sx={{ fontWeight: 700, color: '#E11D48' }}>Equipment Write-Off</DialogTitle>
@@ -1086,15 +1232,12 @@ export default function Equipment() {
             <Alert severity="warning">
               This action will mark the equipment <strong>{writeOffDialog?.equipment_code}</strong> as written off and remove it from operational status permanently.
             </Alert>
-            <TextField
-              type="date"
-              size="small"
+            <DatePicker
               label="Write-Off Date"
-              InputLabelProps={{ shrink: true }}
-              value={writeOffDate}
-              onChange={e => setWriteOffDate(e.target.value)}
-              fullWidth
-              required
+              format="DD-MMM-YYYY"
+              value={writeOffDate ? dayjs(writeOffDate) : null}
+              onChange={(newValue) => setWriteOffDate(newValue ? newValue.format('YYYY-MM-DD') : '')}
+              slotProps={{ textField: { size: 'small', fullWidth: true } }}
             />
             <TextField
               size="small"
@@ -1118,22 +1261,19 @@ export default function Equipment() {
 
       {/* Reagent Consumption Dialog */}
       <Dialog open={!!consumptionDialog} onClose={() => setConsumptionDialog(null)} maxWidth="xs" fullWidth>
-        <DialogTitle sx={{ fontWeight: 700, color: '#2563EB' }}>Log Reagent Usage</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 700, color: '#2563EB' }}>Log Usage</DialogTitle>
         <DialogContent>
           <Box sx={{ pt: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
             <Alert severity="info" sx={{ mb: 1 }}>
-              Logging consumption for <strong>{consumptionDialog?.equipment_code}</strong> 
+              Logging consumption for <strong>{consumptionDialog?.equipment_code}</strong>
               (Cost per test: ₹{consumptionDialog?.cost_per_test || 0}).
             </Alert>
-            <TextField
-              type="date"
-              size="small"
+            <DatePicker
               label="Date of Consumption"
-              InputLabelProps={{ shrink: true }}
-              value={consumptionDate}
-              onChange={e => setConsumptionDate(e.target.value)}
-              fullWidth
-              required
+              format="DD-MMM-YYYY"
+              value={consumptionDate ? dayjs(consumptionDate) : null}
+              onChange={(newValue) => setConsumptionDate(newValue ? newValue.format('YYYY-MM-DD') : '')}
+              slotProps={{ textField: { size: 'small', fullWidth: true } }}
             />
             <TextField
               type="number"
@@ -1173,7 +1313,7 @@ export default function Equipment() {
         </DialogActions>
       </Dialog>
 
-    {/* View Equipment Dialog */}
+      {/* View Equipment Dialog */}
       <Dialog open={!!viewDialog} onClose={() => setViewDialog(null)} maxWidth="md" fullWidth>
         <DialogTitle sx={{ fontWeight: 700, color: '#1E293B' }}>Equipment Details: {viewDialog?.equipment_code}</DialogTitle>
         <DialogContent dividers>
@@ -1190,6 +1330,8 @@ export default function Equipment() {
                     <TableRow><TableCell sx={{ fontWeight: 600 }}>Make / Model</TableCell><TableCell>{viewDialog.make || '-'} / {viewDialog.model || '-'}</TableCell></TableRow>
                     <TableRow><TableCell sx={{ fontWeight: 600 }}>Machine Type</TableCell><TableCell>{viewDialog.machine_type || '-'}</TableCell></TableRow>
                     <TableRow><TableCell sx={{ fontWeight: 600 }}>Machine Cost</TableCell><TableCell>{viewDialog.machine_cost ? `₹${viewDialog.machine_cost}` : '-'}</TableCell></TableRow>
+                    <TableRow><TableCell sx={{ fontWeight: 600 }}>Year of Purchase</TableCell><TableCell>{viewDialog.year_of_purchase || '-'}</TableCell></TableRow>
+                    <TableRow><TableCell sx={{ fontWeight: 600 }}>PO Number</TableCell><TableCell>{viewDialog.po_number || '-'}</TableCell></TableRow>
                     <TableRow><TableCell sx={{ fontWeight: 600 }}>GRN Number</TableCell><TableCell>{viewDialog.grn_number || '-'}</TableCell></TableRow>
                     <TableRow><TableCell sx={{ fontWeight: 600 }}>Installation Date</TableCell><TableCell>{viewDialog.installation_date ? formatDate(viewDialog.installation_date) : '-'}</TableCell></TableRow>
                   </TableBody>
@@ -1265,14 +1407,14 @@ export default function Equipment() {
                         {historyList.map(h => (
                           <TableRow key={h.id} hover>
                             <TableCell>
-                              <Chip 
-                                label={h.event_type} 
-                                size="small" 
+                              <Chip
+                                label={h.event_type}
+                                size="small"
                                 color={
                                   h.event_type === 'Installation' ? 'success' :
-                                  h.event_type === 'Relocation' ? 'secondary' :
-                                  h.event_type === 'Calibration' ? 'info' :
-                                  h.event_type === 'Write-off' ? 'error' : 'primary'
+                                    h.event_type === 'Relocation' ? 'secondary' :
+                                      h.event_type === 'Calibration' ? 'info' :
+                                        h.event_type === 'Write-off' ? 'error' : 'primary'
                                 }
                                 sx={{ fontWeight: 600, fontSize: '0.72rem' }}
                               />
@@ -1309,10 +1451,10 @@ export default function Equipment() {
                 <Typography variant="subtitle2" color="primary" sx={{ mb: -1 }}>Core Details</Typography>
               </Grid>
               <Grid item xs={12} sm={4}>
-                <TextField 
-                  fullWidth size="small" label="Equipment Code *" 
-                  value={addForm.equipment_code || ''} 
-                  onChange={e => setAddForm({ ...addForm, equipment_code: e.target.value })} 
+                <TextField
+                  fullWidth size="small" label="Equipment Code *"
+                  value={addForm.equipment_code || ''}
+                  onChange={e => setAddForm({ ...addForm, equipment_code: e.target.value })}
                 />
               </Grid>
               <Grid item xs={12} sm={8}>
@@ -1375,7 +1517,7 @@ export default function Equipment() {
                 <Divider sx={{ my: 1 }} />
                 <Typography variant="subtitle2" color="primary" sx={{ mb: -1 }}>Editable Details</Typography>
               </Grid>
-              
+
               <Grid item xs={12} sm={6}>
                 <TextField fullWidth size="small" label="Serial Number" value={addForm.serial_number || ''} onChange={e => setAddForm({ ...addForm, serial_number: e.target.value })} />
               </Grid>
@@ -1391,12 +1533,69 @@ export default function Equipment() {
               <Grid item xs={12} sm={6}>
                 <TextField fullWidth size="small" label="Machine Cost" type="number" inputProps={{ min: "0", step: "0.01" }} value={addForm.machine_cost || ''} onChange={e => setAddForm({ ...addForm, machine_cost: e.target.value === '' ? '' : parseFloat(e.target.value) })} />
               </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField fullWidth size="small" label="Year of Purchase" type="number" placeholder="e.g. 2026" inputProps={{ min: "1900", max: new Date().getFullYear(), step: "1" }} value={addForm.year_of_purchase || ''} onChange={e => { if (e.target.value.length <= 4) setAddForm({ ...addForm, year_of_purchase: e.target.value === '' ? '' : parseInt(e.target.value) }); }} error={addForm.year_of_purchase > new Date().getFullYear()} helperText={addForm.year_of_purchase > new Date().getFullYear() ? "Cannot be a future year" : ""} />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Autocomplete
+                  freeSolo
+                  size="small"
+                  options={purchaseOrders}
+                  getOptionLabel={(option) => typeof option === 'string' ? option : option.po_number || ''}
+                  value={purchaseOrders.find(p => p.id === addForm.po_id) || addForm.po_number || null}
+                  onChange={(e, newValue) => {
+                    if (typeof newValue === 'string') {
+                      setAddForm({ ...addForm, po_number: newValue, po_id: null });
+                    } else {
+                      handlePOSelection(newValue, false);
+                    }
+                  }}
+                  renderInput={(params) => <TextField {...params} label="PO Number" />}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField select fullWidth size="small" label="Procurement Type" value={addForm.procurement_type || 'Purchase'} onChange={e => setAddForm({ ...addForm, procurement_type: e.target.value })}>
+                  <MenuItem value="Purchase">Purchase</MenuItem>
+                  <MenuItem value="Rental">Rental</MenuItem>
+                  <MenuItem value="Lease">Lease</MenuItem>
+                  <MenuItem value="Reagent Tie-up">Reagent Tie-up</MenuItem>
+                </TextField>
+              </Grid>
+              {addForm.procurement_type && addForm.procurement_type !== 'Purchase' && (
+                <>
+                  <Grid item xs={12}>
+                    <Divider sx={{ my: 1 }} />
+                    <Typography variant="subtitle2" color="primary">Rental Details</Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField fullWidth size="small" label="Rental Agreement Number" value={addForm.rental_agreement_number || ''} InputProps={{ readOnly: true }} />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField fullWidth size="small" label="Rental Model" value={addForm.rental_type || ''} InputProps={{ readOnly: true }} />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <DatePicker label="Rental Start Date" format="DD-MMM-YYYY" readOnly slotProps={{ textField: { size: 'small', fullWidth: true } }} value={addForm.rental_start_date ? dayjs(addForm.rental_start_date) : null} />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <DatePicker label="Rental End Date" format="DD-MMM-YYYY" readOnly slotProps={{ textField: { size: 'small', fullWidth: true } }} value={addForm.rental_end_date ? dayjs(addForm.rental_end_date) : null} />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField fullWidth size="small" label="Billing Frequency" value={addForm.billing_frequency || ''} InputProps={{ readOnly: true }} />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField fullWidth size="small" type="number" label="Cost per Test" value={addForm.cost_per_test || ''} InputProps={{ readOnly: true }} />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField fullWidth size="small" type="number" label="Rental Cost" value={addForm.rental_cost || ''} InputProps={{ readOnly: true }} />
+                  </Grid>
+                </>
+              )}
 
               <Grid item xs={12}>
                 <Divider sx={{ my: 1 }} />
                 <Typography variant="subtitle2" color="primary" sx={{ mb: -1 }}>Maintenance & Warranty</Typography>
               </Grid>
-              
+
               <Grid item xs={12} sm={6}>
                 <FormControlLabel
                   control={<Switch size="small" checked={!!addForm.warranty_available} onChange={e => setAddForm({ ...addForm, warranty_available: e.target.checked })} />}
@@ -1404,7 +1603,7 @@ export default function Equipment() {
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField fullWidth size="small" type="date" label="Warranty Expiry Date" InputLabelProps={{ shrink: true }} value={addForm.warranty_expiry_date ? addForm.warranty_expiry_date.substring(0, 10) : ''} onChange={e => setAddForm({ ...addForm, warranty_expiry_date: e.target.value })} disabled={!addForm.warranty_available} />
+                <DatePicker label="Warranty Expiry Date" format="DD-MMM-YYYY" value={addForm.warranty_expiry_date ? dayjs(addForm.warranty_expiry_date) : null} onChange={(newValue) => setAddForm({ ...addForm, warranty_expiry_date: newValue ? newValue.format('YYYY-MM-DD') : null })} disabled={!addForm.warranty_available} slotProps={{ textField: { size: 'small', fullWidth: true } }} />
               </Grid>
 
               <Grid item xs={12} sm={6}>
@@ -1418,7 +1617,7 @@ export default function Equipment() {
                 </FormControl>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField fullWidth size="small" type="date" label="AMC/CMC End Date" InputLabelProps={{ shrink: true }} value={addForm.amc_cmc_end_date ? addForm.amc_cmc_end_date.substring(0, 10) : ''} onChange={e => setAddForm({ ...addForm, amc_cmc_end_date: e.target.value })} disabled={addForm.amc_cmc_status === 'None'} />
+                <DatePicker label="AMC/CMC End Date" format="DD-MMM-YYYY" value={addForm.amc_cmc_end_date ? dayjs(addForm.amc_cmc_end_date) : null} onChange={(newValue) => setAddForm({ ...addForm, amc_cmc_end_date: newValue ? newValue.format('YYYY-MM-DD') : null })} disabled={addForm.amc_cmc_status === 'None'} slotProps={{ textField: { size: 'small', fullWidth: true } }} />
               </Grid>
 
               <Grid item xs={12} sm={6}>
@@ -1438,7 +1637,7 @@ export default function Equipment() {
         </DialogContent>
         <DialogActions sx={{ p: 3, pt: 2 }}>
           <Button onClick={() => setAddDialog(false)} color="inherit" sx={{ fontWeight: 600 }}>Cancel</Button>
-          <Button onClick={handleAddSubmit} variant="contained" color="primary" disabled={addSubmitting}>
+          <Button onClick={handleAddSubmit} variant="contained" color="primary" disabled={addSubmitting || (addForm.year_of_purchase > new Date().getFullYear())}>
             {addSubmitting ? 'Saving...' : 'Save Equipment'}
           </Button>
         </DialogActions>
@@ -1469,10 +1668,7 @@ export default function Equipment() {
               <Grid item xs={12} sm={4}>
                 <TextField fullWidth size="small" label="Status" value={editForm.status || ''} InputProps={{ readOnly: true }} variant="filled" />
               </Grid>
-              <Grid item xs={12} sm={4}>
-                <TextField fullWidth size="small" label="Procurement Type" value={editForm.procurement_type || '-'} InputProps={{ readOnly: true }} variant="filled" />
-              </Grid>
-              <Grid item xs={12} sm={4}>
+              <Grid item xs={12} sm={6}>
                 <TextField fullWidth size="small" label="GRN Number" value={editForm.grn_number || '-'} InputProps={{ readOnly: true }} variant="filled" />
               </Grid>
               <Grid item xs={12} sm={4}>
@@ -1484,12 +1680,12 @@ export default function Equipment() {
               <Grid item xs={12} sm={4}>
                 <TextField fullWidth size="small" label="Calibration Due Date" value={editForm.next_calibration_due_date ? editForm.next_calibration_due_date.substring(0, 10) : '-'} InputProps={{ readOnly: true }} variant="filled" />
               </Grid>
-              
+
               <Grid item xs={12}>
                 <Divider sx={{ my: 1 }} />
                 <Typography variant="subtitle2" color="primary" sx={{ mb: -1 }}>Editable Details</Typography>
               </Grid>
-              
+
               <Grid item xs={12} sm={6}>
                 <TextField fullWidth size="small" label="Make" value={editForm.make || ''} onChange={e => setEditForm({ ...editForm, make: e.target.value })} />
               </Grid>
@@ -1502,7 +1698,148 @@ export default function Equipment() {
               <Grid item xs={12} sm={6}>
                 <TextField fullWidth size="small" label="Machine Cost" type="number" inputProps={{ min: "0", step: "0.01" }} value={editForm.machine_cost || ''} onChange={e => setEditForm({ ...editForm, machine_cost: e.target.value === '' ? null : parseFloat(e.target.value) })} />
               </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField fullWidth size="small" label="Year of Purchase" type="number" placeholder="e.g. 2026" inputProps={{ min: "1900", max: new Date().getFullYear(), step: "1" }} value={editForm.year_of_purchase || ''} onChange={e => { if (e.target.value.length <= 4) setEditForm({ ...editForm, year_of_purchase: e.target.value === '' ? null : parseInt(e.target.value) }); }} error={editForm.year_of_purchase > new Date().getFullYear()} helperText={editForm.year_of_purchase > new Date().getFullYear() ? "Cannot be a future year" : ""} />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Autocomplete
+                  freeSolo
+                  size="small"
+                  options={purchaseOrders}
+                  getOptionLabel={(option) => typeof option === 'string' ? option : option.po_number || ''}
+                  value={purchaseOrders.find(p => p.id === editForm.po_id) || editForm.po_number || null}
+                  onChange={(e, newValue) => {
+                    if (typeof newValue === 'string') {
+                      setEditForm({ ...editForm, po_number: newValue, po_id: null });
+                    } else {
+                      handlePOSelection(newValue, true);
+                    }
+                  }}
+                  renderInput={(params) => <TextField {...params} label="PO Number" />}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField select fullWidth size="small" label="Procurement Type" value={editForm.procurement_type || 'Purchase'} onChange={e => setEditForm({ ...editForm, procurement_type: e.target.value })}>
+                  <MenuItem value="Purchase">Purchase</MenuItem>
+                  <MenuItem value="Rental">Rental</MenuItem>
+                  <MenuItem value="Lease">Lease</MenuItem>
+                  <MenuItem value="Reagent Tie-up">Reagent Tie-up</MenuItem>
+                </TextField>
+              </Grid>
+              {editForm.procurement_type && editForm.procurement_type !== 'Purchase' && (
+                <>
+                  <Grid item xs={12}>
+                    <Divider sx={{ my: 1 }} />
+                    <Typography variant="subtitle2" color="primary">Rental Details</Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField fullWidth size="small" label="Rental Agreement Number" value={editForm.rental_agreement_number || ''} InputProps={{ readOnly: true }} />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField fullWidth size="small" label="Rental Model" value={editForm.rental_type || ''} InputProps={{ readOnly: true }} />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <DatePicker label="Rental Start Date" format="DD-MMM-YYYY" readOnly slotProps={{ textField: { size: 'small', fullWidth: true } }} value={editForm.rental_start_date ? dayjs(editForm.rental_start_date) : null} />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <DatePicker label="Rental End Date" format="DD-MMM-YYYY" readOnly slotProps={{ textField: { size: 'small', fullWidth: true } }} value={editForm.rental_end_date ? dayjs(editForm.rental_end_date) : null} />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField fullWidth size="small" label="Billing Frequency" value={editForm.billing_frequency || ''} InputProps={{ readOnly: true }} />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField fullWidth size="small" type="number" label="Cost per Test" value={editForm.cost_per_test || ''} InputProps={{ readOnly: true }} />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField fullWidth size="small" type="number" label="Rental Cost" value={editForm.rental_cost || ''} InputProps={{ readOnly: true }} />
+                  </Grid>
+                </>
+              )}
               
+              {(editForm.rental_type === 'Reagent Rental' || editForm.procurement_type === 'Reagent Tie-up') && (
+                <Grid item xs={12}>
+                  <Divider sx={{ my: 2 }} />
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b' }}>Reagents Required</Typography>
+                    <Button variant="contained" size="small" color="secondary" onClick={handleCreateReagentPO} disabled={!editForm.linked_reagents?.length}>
+                      Create PO
+                    </Button>
+                  </Box>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                    {(!editForm.linked_reagents || editForm.linked_reagents.length === 0) ? (
+                      <Typography variant="body2" sx={{ color: 'text.secondary', textAlign: 'center', py: 2 }}>No reagents added yet</Typography>
+                    ) : (
+                      editForm.linked_reagents.map((item, i) => {
+                        const mat = materials.find(m => m.id === item.material_id);
+                        return (
+                          <Box key={i} sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr 1fr' }, gap: 1.5, p: 1.5, border: '1px solid #e2e8f0', borderRadius: 2, bgcolor: '#f8fafc', position: 'relative' }}>
+                            <Box>
+                              <Autocomplete
+                                options={materials.filter(m => m.is_active || m.id === item.material_id)}
+                                getOptionLabel={(option) => `${option.code} - ${option.name}`}
+                                value={materials.find(m => m.id === item.material_id) || null}
+                                onChange={(e, newValue) => {
+                                  const mId = newValue ? newValue.id : '';
+                                  handleUpdateReagent(i, 'material_id', mId);
+                                }}
+                                renderInput={(params) => <TextField {...params} label="Material *" size="small" />}
+                                fullWidth
+                                size="small"
+                                disableClearable
+                              />
+                            </Box>
+                            <TextField size="small" label="Unit" value={mat?.uom_name || '-'} InputProps={{ readOnly: true }} />
+                            <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+                              <TextField
+                                disabled={!item.material_id}
+                                size="small"
+                                label="Qty"
+                                type="number"
+                                value={item.quantity}
+                                onKeyDown={e => {
+                                  const blockList = ['-', '+', 'e', 'E'];
+                                  if (!mat?.uom_allow_decimal) blockList.push('.');
+                                  if (blockList.includes(e.key)) e.preventDefault();
+                                }}
+                                onChange={e => {
+                                  let val = e.target.value.replace(/-/g, '');
+                                  if (!mat?.uom_allow_decimal) val = val.replace(/\./g, '');
+                                  handleUpdateReagent(i, 'quantity', val);
+                                }}
+                                inputProps={{ min: 0, step: mat?.uom_allow_decimal ? "any" : "1" }}
+                                fullWidth
+                              />
+                              <IconButton size="small" color="error" onClick={() => handleRemoveReagent(i)} sx={{ mt: 0.5 }}>
+                                <DeleteOutline fontSize="small" />
+                              </IconButton>
+                            </Box>
+                          </Box>
+                        );
+                      })
+                    )}
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<Add />}
+                      onClick={handleAddReagent}
+                      sx={{
+                        textTransform: 'none',
+                        fontWeight: 600,
+                        borderStyle: 'dashed',
+                        width: '100%',
+                        py: 1.5,
+                        color: '#2563EB',
+                        fontSize: '0.95rem',
+                        borderColor: '#cbd5e1',
+                        '&:hover': { borderColor: '#94a3b8', bgcolor: '#f8fafc' }
+                      }}
+                    >
+                      Add Another Item
+                    </Button>
+                  </Box>
+                </Grid>
+              )}
+
               <Grid item xs={12} sm={6}>
                 <FormControlLabel
                   control={<Switch size="small" checked={!!editForm.warranty_available} onChange={e => setEditForm({ ...editForm, warranty_available: e.target.checked })} />}
@@ -1510,7 +1847,7 @@ export default function Equipment() {
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField fullWidth size="small" type="date" label="Warranty Expiry Date" InputLabelProps={{ shrink: true }} value={editForm.warranty_expiry_date ? editForm.warranty_expiry_date.substring(0, 10) : ''} onChange={e => setEditForm({ ...editForm, warranty_expiry_date: e.target.value || null })} disabled={!editForm.warranty_available} />
+                <DatePicker label="Warranty Expiry Date" format="DD-MMM-YYYY" value={editForm.warranty_expiry_date ? dayjs(editForm.warranty_expiry_date) : null} onChange={(newValue) => setEditForm({ ...editForm, warranty_expiry_date: newValue ? newValue.format('YYYY-MM-DD') : null })} disabled={!editForm.warranty_available} slotProps={{ textField: { size: 'small', fullWidth: true } }} />
               </Grid>
 
               <Grid item xs={12} sm={6}>
@@ -1524,7 +1861,7 @@ export default function Equipment() {
                 </FormControl>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField fullWidth size="small" type="date" label="AMC/CMC End Date" InputLabelProps={{ shrink: true }} value={editForm.amc_cmc_end_date ? editForm.amc_cmc_end_date.substring(0, 10) : ''} onChange={e => setEditForm({ ...editForm, amc_cmc_end_date: e.target.value || null })} disabled={!editForm.amc_cmc_status || editForm.amc_cmc_status === 'None'} />
+                <DatePicker label="AMC/CMC End Date" format="DD-MMM-YYYY" value={editForm.amc_cmc_end_date ? dayjs(editForm.amc_cmc_end_date) : null} onChange={(newValue) => setEditForm({ ...editForm, amc_cmc_end_date: newValue ? newValue.format('YYYY-MM-DD') : null })} disabled={!editForm.amc_cmc_status || editForm.amc_cmc_status === 'None'} slotProps={{ textField: { size: 'small', fullWidth: true } }} />
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField fullWidth size="small" label="AMC PO Number" value={editForm.amc_po_number || ''} onChange={e => setEditForm({ ...editForm, amc_po_number: e.target.value })} disabled={!editForm.amc_cmc_status || editForm.amc_cmc_status === 'None'} />
@@ -1559,7 +1896,7 @@ export default function Equipment() {
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
           <Button onClick={() => setEditDialog(null)} color="inherit">Cancel</Button>
-          <Button onClick={handleEditSubmit} variant="contained" color="primary" disabled={editSubmitting}>
+          <Button onClick={handleEditSubmit} variant="contained" color="primary" disabled={editSubmitting || (editForm.year_of_purchase > new Date().getFullYear())}>
             {editSubmitting ? 'Saving...' : 'Save Changes'}
           </Button>
         </DialogActions>

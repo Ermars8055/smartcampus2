@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import Optional, List
 from app.database import get_db
 from app.models import EquipmentItem, Material, GRN, Warehouse, Project, User, AuditLog
-from app.schemas import EquipmentItemOut, EquipmentItemCreate, EquipmentUpdateSerial, EquipmentInstallationUpdate, PMScheduleOut, PMScheduleUpdate, EquipmentUpdate
+from app.schemas import EquipmentItemOut, EquipmentItemCreate, EquipmentUpdateSerial, EquipmentInstallationUpdate, PMScheduleOut, PMScheduleUpdate, EquipmentUpdate, EquipmentBulkQRRequest
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
 import os
 import uuid
@@ -682,8 +682,46 @@ def get_qr_data(
         "serial_number": item.serial_number or "",
         "machine_type": item.machine_type or "",
         "grn_number": item.grn.grn_number if item.grn else "",
-        "pm_due_date": item.next_pm_due_date.isoformat() if item.next_pm_due_date else ""
+        "pm_due_date": item.next_pm_due_date.isoformat() if item.next_pm_due_date else "",
+        "institution_name": item.institution.name if item.institution else ""
     }
+
+@router.post("/qr/bulk")
+def get_bulk_qr_data(
+    req: EquipmentBulkQRRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("equipment", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    query = db.query(EquipmentItem).filter(
+        EquipmentItem.tenant_id == tenant_id,
+        EquipmentItem.site_id == site_id
+    )
+
+    if not req.is_all:
+        if not req.equipment_ids:
+            return []
+        query = query.filter(EquipmentItem.id.in_(req.equipment_ids))
+
+    items = query.all()
+    
+    result = []
+    for item in items:
+        result.append({
+            "id": item.id,
+            "asset_id": item.equipment_code,
+            "equipment_name": item.material.name if item.material else "",
+            "department": item.location.location_name if item.location else "",
+            "department_used": item.location.location_name if item.location else "",
+            "make_model": f"{item.make or ''} / {item.model or ''}".strip(" /"),
+            "serial_number": item.serial_number or "",
+            "machine_type": item.machine_type or "",
+            "grn_number": item.grn.grn_number if item.grn else "",
+            "pm_due_date": item.next_pm_due_date.isoformat() if item.next_pm_due_date else "",
+            "institution_name": item.institution.name if item.institution else ""
+        })
+    return result
 
 @router.get("/by-code/{asset_code}")
 def get_equipment_by_code(

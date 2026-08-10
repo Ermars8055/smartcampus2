@@ -2111,7 +2111,19 @@ class EquipmentUpdate(BaseModel):
     pm_required: Optional[bool] = None
     calibration_required: Optional[bool] = None
     battery_details: Optional[str] = None
-
+    year_of_purchase: Optional[int] = None
+    po_number: Optional[str] = None
+    po_id: Optional[int] = None
+    procurement_type: Optional[str] = None
+    rental_type: Optional[str] = None
+    rental_agreement_number: Optional[str] = None
+    rental_vendor_id: Optional[int] = None
+    rental_start_date: Optional[date] = None
+    rental_end_date: Optional[date] = None
+    rental_cost: Optional[float] = None
+    billing_frequency: Optional[str] = None
+    cost_per_test: Optional[float] = None
+    linked_reagents: Optional[List[dict]] = None
 class EquipmentInstallationUpdate(BaseModel):
     serial_number: Optional[str] = None
     installation_date: Optional[datetime] = None
@@ -2140,6 +2152,22 @@ class EquipmentItemCreate(BaseModel):
     status: str = "Operational"
     is_biomedical: bool = False
     requires_installation: bool = False
+    year_of_purchase: Optional[int] = None
+    po_number: Optional[str] = None
+    po_id: Optional[int] = None
+    procurement_type: str = "Purchase"
+    rental_type: Optional[str] = None
+    rental_agreement_number: Optional[str] = None
+    rental_vendor_id: Optional[int] = None
+    rental_start_date: Optional[date] = None
+    rental_end_date: Optional[date] = None
+    rental_cost: Optional[float] = None
+    billing_frequency: Optional[str] = None
+    cost_per_test: Optional[float] = None
+    linked_reagents: Optional[List[dict]] = None
+class EquipmentBulkQRRequest(BaseModel):
+    is_all: bool = False
+    equipment_ids: List[int] = []
 
 class EquipmentItemOut(BaseModel):
     id: int
@@ -2193,11 +2221,13 @@ class EquipmentItemOut(BaseModel):
     rental_cost: Optional[float] = None
     billing_frequency: Optional[str] = None
     cost_per_test: Optional[float] = None
-    linked_reagents: Optional[List[int]] = None
+    linked_reagents: Optional[List[dict]] = None
     agreement_status: Optional[str] = None
     renewal_date: Optional[date] = None
     expected_return_date: Optional[date] = None
     rental_status: Optional[str] = None
+    year_of_purchase: Optional[int] = None
+    po_number: Optional[str] = None
     warranty_end_date: Optional[date] = None
     amc_cmc_status: Optional[str] = None
     rental_vendor_name: Optional[str] = None

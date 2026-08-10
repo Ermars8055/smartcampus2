@@ -105,13 +105,5 @@ def update_rwo(
     for k, v in update_data.items():
         setattr(rwo, k, v)
         
-    # Also update Complaint status if closed
-    if update_data.get("status") == "Closed":
-        if rwo.complaint:
-            rwo.complaint.status = "Resolved"
-            rwo.complaint.resolved_at = datetime.utcnow()
-            rwo.complaint.resolved_by_id = current_user.id
-            rwo.complaint.resolution_remarks = rwo.problem_description
-            
     db.commit()
     return {"message": "Repair Work Order updated successfully"}

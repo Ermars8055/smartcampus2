@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   Box, Typography, Paper, Grid, TextField, Button, IconButton, Divider, Snackbar, Alert, CircularProgress,
-  Autocomplete, FormControl, InputLabel, Select, MenuItem, Dialog, DialogTitle, DialogContent
+  Autocomplete, FormControl, InputLabel, Select, MenuItem, Dialog, DialogTitle, DialogContent, Card
 } from '@mui/material';
 import { ArrowBack, PhotoCamera, Close, CloudUpload } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -264,12 +264,12 @@ export default function ComplaintForm() {
         <IconButton onClick={() => navigate('/complaints')}>
           <ArrowBack />
         </IconButton>
-        <Typography variant="h5" sx={{ fontWeight: 600 }}>{id ? 'Edit Complaint' : 'Raise New Complaint'}</Typography>
+        <Typography variant="h5" sx={{ fontWeight: 700 }}>{id ? 'Edit Complaint' : 'Raise New Complaint'}</Typography>
       </Box>
 
-      <Paper sx={{ p: { xs: 2, md: 4 } }}>
+      <Card sx={{ p: { xs: 2, md: 4 } }}>
         <form onSubmit={handleSubmit}>
-          <Typography variant="h6" sx={{ mb: 2, color: '#1E3A8A' }}>Complaint Slip Details</Typography>
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: 700 }}>Complaint Slip Details</Typography>
           <Grid container spacing={3}>
             {id && (
               <Grid item xs={12} sm={6} md={3}>
@@ -357,17 +357,10 @@ export default function ComplaintForm() {
                   onChange={handleChange}
                   required
                 >
-                  <MenuItem value="Warranty Call/Complaint">Warranty Call/Complaint</MenuItem>
-                  <MenuItem value="AMC call/Complaint">AMC call/Complaint</MenuItem>
-                  <MenuItem value="CMC call/Complaint">CMC call/Complaint</MenuItem>
-                  <MenuItem value="Out of warranty call/complaint">Out of warranty call/complaint</MenuItem>
-                  <MenuItem value="Not working Call/Complaint">Not working Call/Complaint</MenuItem>
-                  <MenuItem value="User Training Call/Complaint">User Training Call/Complaint</MenuItem>
-                  <MenuItem value="Preventive Maintenance Call">Preventive Maintenance Call/Complaint</MenuItem>
-                  <MenuItem value="Calibration Call">Calibration Call/Complaint</MenuItem>
-                  <MenuItem value="General Repair">General Repair</MenuItem>
+                  <MenuItem value="General Complaint">General Complaint</MenuItem>
+                  <MenuItem value="Machine Not Working">Machine Not Working</MenuItem>
                   <MenuItem value="Installation">Installation</MenuItem>
-                  <MenuItem value="Other">Other</MenuItem>
+                  <MenuItem value="User Training">User Training</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -383,7 +376,7 @@ export default function ComplaintForm() {
 
           <Divider sx={{ my: 4 }} />
 
-          <Typography variant="h6" sx={{ mb: 2, color: '#1E3A8A' }}>Photo Attachments</Typography>
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: 700 }}>Photo Attachments</Typography>
           
           <Box sx={{ border: '2px dashed #CBD5E1', borderRadius: 2, p: 3, textAlign: 'center', bgcolor: '#F8FAFC', mb: 3 }}>
              <input
@@ -434,7 +427,7 @@ export default function ComplaintForm() {
             </Button>
           </Box>
         </form>
-      </Paper>
+      </Card>
 
       <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={() => setSnackbar({ ...snackbar, open: false })}>
         <Alert severity={snackbar.severity} sx={{ width: '100%' }}>{snackbar.message}</Alert>

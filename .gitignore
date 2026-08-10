@@ -43,3 +43,4 @@ EQUIPMENT LIST master.xlsx
 # Test files and samples
 backend/test_pdf.py
 sample_quotation_full.pdf
+samplefiles/

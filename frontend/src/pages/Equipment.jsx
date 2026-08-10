@@ -779,7 +779,7 @@ export default function Equipment() {
                   <Chip
                     label={item.status}
                     size="small"
-                    color={item.status === 'Operational' ? 'success' : item.status === 'Pending Installation' ? 'info' : 'default'}
+                    color={['Operational', 'Working'].includes(item.status) ? 'success' : item.status === 'Pending Installation' ? 'info' : 'default'}
                     sx={{ height: 20, fontSize: '0.65rem' }}
                   />
                 </Box>
@@ -841,12 +841,12 @@ export default function Equipment() {
                       Report
                     </Button>
                   )}
-                  {item.status === 'Operational' && (item.cost_per_test > 0 || item.rental_type === 'Reagent Rental') && (
+                  {['Operational', 'Working'].includes(item.status) && (item.cost_per_test > 0 || item.rental_type === 'Reagent Rental') && (
                     <Button size="small" variant="outlined" color="secondary" startIcon={<Science />} onClick={(e) => { e.stopPropagation(); setConsumptionDialog(item); setConsumptionDate(new Date().toISOString().split('T')[0]); setTestsPerformed(''); setConsumptionRemarks(''); }}>
                       Log Usage
                     </Button>
                   )}
-                  {item.status === 'Operational' && (
+                  {['Operational', 'Working'].includes(item.status) && (
                     <Button size="small" variant="outlined" color="primary" startIcon={<CompareArrows />} onClick={(e) => { e.stopPropagation(); setRelocateDialog(item); setRelocateDate(new Date().toISOString().split('T')[0]); setRelocateLocation(item.location_id || ''); setRelocateRemarks(''); }}>
                       Relocate
                     </Button>
@@ -982,7 +982,7 @@ export default function Equipment() {
                       <Chip
                         label={item.status}
                         size="small"
-                        color={item.status === 'Operational' ? 'success' : (item.status === 'Pending Installation' || item.installation_status === 'Installation Requested') ? 'info' : 'default'}
+                        color={['Operational', 'Working'].includes(item.status) ? 'success' : (item.status === 'Pending Installation' || item.installation_status === 'Installation Requested') ? 'info' : 'default'}
                         sx={{ fontSize: '0.75rem' }}
                       />
                     </TableCell>
@@ -1014,28 +1014,28 @@ export default function Equipment() {
                             </IconButton>
                           </Tooltip>
                         )}
-                        {item.status === 'Operational' && (
+                        {['Operational', 'Working'].includes(item.status) && (
                           <Tooltip title="Print QR Code">
                             <IconButton size="small" color="primary" onClick={(e) => { e.stopPropagation(); handleOpenQr(item); }}>
                               <QrCode fontSize="small" />
                             </IconButton>
                           </Tooltip>
                         )}
-                        {item.status === 'Operational' && item.rental_type === 'Cost per test' && (
+                        {['Operational', 'Working'].includes(item.status) && (item.cost_per_test > 0 || item.rental_type === 'Reagent Rental' || item.rental_type === 'Cost per test') && (
                           <Tooltip title="Log Usage">
                             <IconButton size="small" color="secondary" onClick={(e) => { e.stopPropagation(); setConsumptionDialog(item); setConsumptionDate(new Date().toISOString().split('T')[0]); setTestsPerformed(''); setConsumptionRemarks(''); }}>
                               <Science fontSize="small" />
                             </IconButton>
                           </Tooltip>
                         )}
-                        {item.status === 'Operational' && (
+                        {['Operational', 'Working'].includes(item.status) && (
                           <Tooltip title="Relocate Equipment">
                             <IconButton size="small" color="primary" onClick={(e) => { e.stopPropagation(); setRelocateDialog(item); setRelocateDate(new Date().toISOString().split('T')[0]); setRelocateLocation(item.location_id || ''); setRelocateRemarks(''); }}>
                               <CompareArrows fontSize="small" />
                             </IconButton>
                           </Tooltip>
                         )}
-                        {item.status === 'Operational' && (
+                        {item.status !== 'Written Off' && (
                           <Tooltip title="Write-off Equipment">
                             <IconButton size="small" color="error" onClick={(e) => {
                               e.stopPropagation();

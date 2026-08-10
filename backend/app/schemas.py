@@ -139,6 +139,7 @@ class TenantConfigurationBase(BaseModel):
     base_state: str
     cgst_share_percent: float
     sgst_share_percent: float
+    po_short_close_notify_roles: Optional[List[str]] = []
 
 class TenantConfigurationCreate(TenantConfigurationBase):
     pass
@@ -2052,12 +2053,16 @@ class ComplaintCloseRequest(BaseModel):
     resolution_entered: str
     closure_reason: str
     document_urls: List[str] = [] # For supporting documents
+    resolution_image_urls: List[str] = [] # For post repair photos
     equipment_photo_url: Optional[str] = None
     serial_number_photo_url: Optional[str] = None
     installation_report_url: Optional[str] = None
 
 class ComplaintApproveRequest(BaseModel):
     approval_type: str # 'admin' or 'manager'
+
+class ComplaintReopenRequest(BaseModel):
+    reason: str = Field(..., max_length=255)
 
 class ComplaintOut(ComplaintBase):
     id: int
@@ -2086,6 +2091,7 @@ class ComplaintOut(ComplaintBase):
     admin_approved_by_name: Optional[str] = None
     manager_approved_by_name: Optional[str] = None
     equipment_code: Optional[str] = None
+    equipment_warranty_status: Optional[str] = None
     images: List[ComplaintImageOut] = []
     documents: List[ComplaintDocumentOut] = []
     class Config:
@@ -2282,6 +2288,33 @@ class PMScheduleOut(PMScheduleBase):
     id: int
     tenant_id: int
     created_at: datetime
+    monthly_calls: Dict[str, int] = {}
+    class Config:
+        from_attributes = True
+
+class CalibrationScheduleBase(BaseModel):
+    department_name: str
+    jan: bool = False
+    feb: bool = False
+    mar: bool = False
+    apr: bool = False
+    may: bool = False
+    jun: bool = False
+    jul: bool = False
+    aug: bool = False
+    sep: bool = False
+    oct: bool = False
+    nov: bool = False
+    dec: bool = False
+
+class CalibrationScheduleUpdate(CalibrationScheduleBase):
+    pass
+
+class CalibrationScheduleOut(CalibrationScheduleBase):
+    id: int
+    tenant_id: int
+    created_at: datetime
+    monthly_calls: Dict[str, int] = {}
     class Config:
         from_attributes = True
 
@@ -2388,7 +2421,7 @@ class ContractOut(ContractBase):
 # == Repair Work Orders ==
 
 class RepairWorkOrderBase(BaseModel):
-    complaint_id: int
+    complaint_id: Optional[int] = None
     equipment_id: int
     vendor_id: int
     contract_id: Optional[int] = None

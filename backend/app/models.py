@@ -213,6 +213,7 @@ class TenantConfiguration(Base):
     base_state = Column(String(100), nullable=False)
     cgst_share_percent = Column(Float, nullable=False)
     sgst_share_percent = Column(Float, nullable=False)
+    po_short_close_notify_roles = Column(JSON, default=list)
     created_at = Column(DateTime, default=_get_now)
     updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)
     tenant = relationship("Tenant")
@@ -561,6 +562,28 @@ class PMSchedule(Base):
     created_at = Column(DateTime, default=_get_now)
     updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)
     __table_args__ = (UniqueConstraint("tenant_id", "department_name", name="uq_pm_dept_per_tenant"),)
+
+
+class CalibrationSchedule(Base):
+    __tablename__ = "calibration_schedules"
+    id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
+    department_name = Column(String(255), nullable=False)
+    jan = Column(Boolean, default=False)
+    feb = Column(Boolean, default=False)
+    mar = Column(Boolean, default=False)
+    apr = Column(Boolean, default=False)
+    may = Column(Boolean, default=False)
+    jun = Column(Boolean, default=False)
+    jul = Column(Boolean, default=False)
+    aug = Column(Boolean, default=False)
+    sep = Column(Boolean, default=False)
+    oct = Column(Boolean, default=False)
+    nov = Column(Boolean, default=False)
+    dec = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=_get_now)
+    updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)
+    __table_args__ = (UniqueConstraint("tenant_id", "department_name", name="uq_cal_dept_per_tenant"),)
 
 
 
@@ -1948,7 +1971,7 @@ class RepairWorkOrder(Base):
     tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
     site_id = Column(Integer, ForeignKey("sites.id", ondelete="CASCADE"), nullable=False)
     rwo_number = Column(String(50), nullable=False, index=True)
-    complaint_id = Column(Integer, ForeignKey("complaints.id"), nullable=False)
+    complaint_id = Column(Integer, ForeignKey("complaints.id"), nullable=True)
     equipment_id = Column(Integer, ForeignKey("equipment_items.id"), nullable=False)
     vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=False)
     contract_id = Column(Integer, ForeignKey("contracts.id"), nullable=True) # Nullable if not under AMC/CMC? Requirements say generated for AMC/CMC

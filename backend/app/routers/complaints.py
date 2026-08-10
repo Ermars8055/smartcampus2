@@ -30,6 +30,19 @@ def _enrich(complaint: Complaint, db: Session = None):
     complaint.admin_approved_by_name = complaint.admin_approver.full_name if complaint.admin_approver else None
     complaint.manager_approved_by_name = complaint.manager_approver.full_name if complaint.manager_approver else None
     complaint.equipment_code = complaint.equipment.equipment_code if complaint.equipment else None
+    
+    complaint.equipment_warranty_status = None
+    if complaint.equipment:
+        eq = complaint.equipment
+        now_date = datetime.now().date()
+        if eq.warranty_available and eq.warranty_expiry_date and eq.warranty_expiry_date >= now_date:
+            complaint.equipment_warranty_status = "Warranty"
+        elif eq.amc_cmc_status == "AMC" and eq.amc_cmc_end_date and eq.amc_cmc_end_date >= now_date:
+            complaint.equipment_warranty_status = "AMC"
+        elif eq.amc_cmc_status == "CMC" and eq.amc_cmc_end_date and eq.amc_cmc_end_date >= now_date:
+            complaint.equipment_warranty_status = "CMC"
+        else:
+            complaint.equipment_warranty_status = "Out of Warranty"
 
     # Derive institution_id and floor_id from room -> floor -> building -> institution
     complaint.floor_id = None
@@ -121,7 +134,7 @@ def create_complaint(
         db.flush() # To get the ID for images
 
         if complaint_in.equipment_id:
-            from app.models import ContractItem, Contract, RepairWorkOrder
+            from app.models import ContractItem, Contract
             c_item = db.query(ContractItem).join(Contract).filter(
                 ContractItem.equipment_id == complaint_in.equipment_id,
                 Contract.status == "Active",
@@ -130,24 +143,6 @@ def create_complaint(
 
             if c_item:
                 new_complaint.contract_id = c_item.contract_id
-                rwo_number = get_next_number(db, tenant_id, site_id, "REPAIR_WORK_ORDER", "RWO")
-                rwo = RepairWorkOrder(
-                    rwo_number=rwo_number,
-                    complaint_id=new_complaint.id,
-                    equipment_id=complaint_in.equipment_id,
-                    vendor_id=c_item.contract.vendor_id,
-                    contract_id=c_item.contract_id,
-                    status="Assigned",
-                    problem_description=complaint_in.nature_of_complaint,
-                    created_by_id=current_user.id,
-                    tenant_id=tenant_id,
-                    site_id=site_id
-                )
-                db.add(rwo)
-                db.flush()
-                
-                new_complaint.rwo_id = rwo.id
-                new_complaint.status = ComplaintStatus.ASSIGNED.value
 
         for img_url in complaint_in.image_urls:
             new_img = ComplaintImage(
@@ -511,7 +506,7 @@ def verify_complaint(
     db.refresh(complaint)
     return _enrich(complaint, db)
 
-from app.schemas import ComplaintCloseRequest, ComplaintApproveRequest
+from app.schemas import ComplaintCloseRequest, ComplaintApproveRequest, ComplaintReopenRequest
 from app.models import ComplaintDocument
 
 @router.post("/{complaint_id}/close", response_model=ComplaintOut)
@@ -559,6 +554,14 @@ def close_complaint(
             uploaded_by_id=current_user.id
         )
         db.add(doc)
+        
+    for img_url in payload.resolution_image_urls:
+        new_img = ComplaintImage(
+            complaint_id=complaint.id,
+            image_url=img_url,
+            is_resolution_image=True
+        )
+        db.add(new_img)
 
     db.commit()
     db.refresh(complaint)
@@ -617,6 +620,42 @@ def approve_closure(
                 created_by_id=current_user.id
             ))
 
+    db.commit()
+    db.refresh(complaint)
+    return _enrich(complaint, db)
+
+@router.post("/{complaint_id}/reopen", response_model=ComplaintOut)
+def reopen_complaint(
+    complaint_id: int,
+    payload: ComplaintReopenRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("complaints", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    """Reopen a closed complaint."""
+    complaint = _get_complaint(db, complaint_id, tenant_id, site_id)
+    
+    if complaint.status != ComplaintStatus.CLOSED.value:
+        raise HTTPException(status_code=400, detail="Only closed complaints can be reopened.")
+        
+    complaint.status = ComplaintStatus.REOPENED.value
+    
+    # Reset approval fields
+    complaint.admin_approved_by_id = None
+    complaint.manager_approved_by_id = None
+    complaint.admin_approved_at = None
+    complaint.manager_approved_at = None
+    
+    # Append reopen reason
+    timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    reopen_msg = f"Reopened on {timestamp} by {current_user.full_name}. Reason: {payload.reason}"
+    
+    if complaint.rejection_remarks:
+        complaint.rejection_remarks = f"{complaint.rejection_remarks}\n\n{reopen_msg}"
+    else:
+        complaint.rejection_remarks = reopen_msg
+        
     db.commit()
     db.refresh(complaint)
     return _enrich(complaint, db)

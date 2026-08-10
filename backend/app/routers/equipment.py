@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import Optional, List
 from app.database import get_db
 from app.models import EquipmentItem, Material, GRN, Warehouse, Project, User, AuditLog
-from app.schemas import EquipmentItemOut, EquipmentItemCreate, EquipmentUpdateSerial, EquipmentInstallationUpdate, PMScheduleOut, PMScheduleUpdate, EquipmentUpdate, EquipmentBulkQRRequest
+from app.schemas import EquipmentItemOut, EquipmentItemCreate, EquipmentUpdateSerial, EquipmentInstallationUpdate, PMScheduleOut, PMScheduleUpdate, CalibrationScheduleOut, CalibrationScheduleUpdate, EquipmentUpdate, EquipmentBulkQRRequest
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
 import os
 import uuid
@@ -139,10 +139,22 @@ def create_equipment(
 def get_pm_schedule(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("equipment", "read")),
-    tenant_id: int = Depends(get_tenant_id)
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
 ):
-    from app.models import PMSchedule
+    from app.models import PMSchedule, Complaint
+    from sqlalchemy import func
+    
+    # Auto-generate pending calls for current month
+    _auto_generate_calls(db, tenant_id, site_id, current_user.id)
+    
     schedules = db.query(PMSchedule).filter(PMSchedule.tenant_id == tenant_id).all()
+    
+    dept_order = [
+        "EMERGENCY", "ICU", "OT", "LABOUR ROOM/POST OP", "CATH LAB", "CENTRAL LAB",
+        "BLOOD BANK/IMD", "DIALYSIS", "RADIOLOGY", "CSSD/PHYSIOTHERAPY", "OPD'S", "WARDS"
+    ]
+
     if not schedules:
         # Seed default data
         defaults = [
@@ -163,6 +175,41 @@ def get_pm_schedule(
             db.add(PMSchedule(tenant_id=tenant_id, **d))
         db.commit()
         schedules = db.query(PMSchedule).filter(PMSchedule.tenant_id == tenant_id).all()
+    
+    # Compute monthly call counts for the current year
+    from datetime import date
+    current_year = date.today().year
+    month_names = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
+    
+    complaint_counts = db.query(
+        Complaint.department_name,
+        func.extract('month', Complaint.complaint_date).label('month'),
+        func.count(Complaint.id).label('count')
+    ).filter(
+        Complaint.tenant_id == tenant_id,
+        Complaint.site_id == site_id,
+        Complaint.complaint_type == "Preventive Maintenance Call",
+        func.extract('year', Complaint.complaint_date) == current_year
+    ).group_by(
+        Complaint.department_name,
+        func.extract('month', Complaint.complaint_date)
+    ).all()
+    
+    count_map = {}
+    for row in complaint_counts:
+        dept = row.department_name
+        m_idx = int(row.month) - 1
+        cnt = row.count
+        if 0 <= m_idx < 12:
+            m_key = month_names[m_idx]
+            if dept not in count_map:
+                count_map[dept] = {}
+            count_map[dept][m_key] = cnt
+            
+    schedules.sort(key=lambda x: dept_order.index(x.department_name) if x.department_name in dept_order else 999)
+    for s in schedules:
+        setattr(s, "monthly_calls", count_map.get(s.department_name, {}))
+        
     return schedules
 
 @router.put("/pm-schedule")
@@ -188,6 +235,108 @@ def update_pm_schedule(
             
     db.commit()
     return {"message": "PM Schedule updated successfully"}
+
+
+@router.get("/calibration-schedule", response_model=List[CalibrationScheduleOut])
+def get_calibration_schedule(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("equipment", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    from app.models import CalibrationSchedule, Complaint
+    from sqlalchemy import func
+    
+    # Auto-generate pending calls for current month
+    _auto_generate_calls(db, tenant_id, site_id, current_user.id)
+    
+    schedules = db.query(CalibrationSchedule).filter(CalibrationSchedule.tenant_id == tenant_id).all()
+    
+    dept_order = [
+        "EMERGENCY", "ICU", "OT", "LABOUR ROOM/POST OP", "CATH LAB", "CENTRAL LAB",
+        "BLOOD BANK/IMD", "DIALYSIS", "RADIOLOGY", "CSSD/PHYSIOTHERAPY", "OPD'S", "WARDS"
+    ]
+
+    if not schedules:
+        # Seed default data
+        defaults = [
+            {"department_name": "EMERGENCY", "apr": True},
+            {"department_name": "ICU", "apr": True},
+            {"department_name": "OT", "apr": True},
+            {"department_name": "LABOUR ROOM/POST OP", "apr": True},
+            {"department_name": "CATH LAB", "apr": True},
+            {"department_name": "CENTRAL LAB", "apr": True},
+            {"department_name": "BLOOD BANK/IMD", "apr": True},
+            {"department_name": "DIALYSIS", "apr": True},
+            {"department_name": "RADIOLOGY", "apr": True},
+            {"department_name": "CSSD/PHYSIOTHERAPY", "apr": True},
+            {"department_name": "OPD'S", "apr": True},
+            {"department_name": "WARDS", "apr": True}
+        ]
+        for d in defaults:
+            db.add(CalibrationSchedule(tenant_id=tenant_id, **d))
+        db.commit()
+        schedules = db.query(CalibrationSchedule).filter(CalibrationSchedule.tenant_id == tenant_id).all()
+        
+    # Compute monthly call counts for the current year
+    from datetime import date
+    current_year = date.today().year
+    month_names = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
+    
+    complaint_counts = db.query(
+        Complaint.department_name,
+        func.extract('month', Complaint.complaint_date).label('month'),
+        func.count(Complaint.id).label('count')
+    ).filter(
+        Complaint.tenant_id == tenant_id,
+        Complaint.site_id == site_id,
+        Complaint.complaint_type == "Calibration Call",
+        func.extract('year', Complaint.complaint_date) == current_year
+    ).group_by(
+        Complaint.department_name,
+        func.extract('month', Complaint.complaint_date)
+    ).all()
+    
+    count_map = {}
+    for row in complaint_counts:
+        dept = row.department_name
+        m_idx = int(row.month) - 1
+        cnt = row.count
+        if 0 <= m_idx < 12:
+            m_key = month_names[m_idx]
+            if dept not in count_map:
+                count_map[dept] = {}
+            count_map[dept][m_key] = cnt
+
+    schedules.sort(key=lambda x: dept_order.index(x.department_name) if x.department_name in dept_order else 999)
+    for s in schedules:
+        setattr(s, "monthly_calls", count_map.get(s.department_name, {}))
+        
+    return schedules
+
+@router.put("/calibration-schedule")
+def update_calibration_schedule(
+    payload: List[CalibrationScheduleUpdate],
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("equipment", "update")),
+    tenant_id: int = Depends(get_tenant_id)
+):
+    from app.models import CalibrationSchedule
+    for update_data in payload:
+        record = db.query(CalibrationSchedule).filter(
+            CalibrationSchedule.tenant_id == tenant_id,
+            CalibrationSchedule.department_name == update_data.department_name
+        ).first()
+        if record:
+            for key, value in update_data.model_dump().items():
+                if key != "department_name":
+                    setattr(record, key, value)
+        else:
+            new_record = CalibrationSchedule(tenant_id=tenant_id, **update_data.model_dump())
+            db.add(new_record)
+            
+    db.commit()
+    return {"message": "Calibration Schedule updated successfully"}
 
 def _matches_department(dept_name: str, loc_name: str) -> bool:
     d = dept_name.lower().strip()
@@ -218,7 +367,15 @@ def generate_maintenance_calls(
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
-    from app.models import Complaint, LocationMaster, PMSchedule
+    pm_count, cal_count = _auto_generate_calls(db, tenant_id, site_id, current_user.id)
+    return {
+        "message": "Maintenance generation complete", 
+        "pm_calls_generated": pm_count,
+        "calibration_calls_generated": cal_count
+    }
+
+def _auto_generate_calls(db: Session, tenant_id: int, site_id: int, user_id: int):
+    from app.models import Complaint, LocationMaster, PMSchedule, CalibrationSchedule
     from datetime import date
     from sqlalchemy import func
     
@@ -275,13 +432,19 @@ def generate_maintenance_calls(
                                 complaint_type="Preventive Maintenance Call",
                                 status="Open",
                                 is_pm_calibration_call=True,
-                                created_by_id=current_user.id
+                                created_by_id=user_id
                             )
                             db.add(new_complaint)
                             eq.pm_required = True
                             generated_count += 1
                         
     # Handle Calibration Generation
+    cal_schedules = db.query(CalibrationSchedule).filter(
+        CalibrationSchedule.tenant_id == tenant_id,
+        getattr(CalibrationSchedule, current_month_col) == True
+    ).all()
+    cal_scheduled_depts = [s.department_name for s in cal_schedules]
+
     cal_equipments = db.query(EquipmentItem).filter(
         EquipmentItem.tenant_id == tenant_id,
         EquipmentItem.site_id == site_id,
@@ -291,43 +454,43 @@ def generate_maintenance_calls(
     
     cal_generated_count = 0
     for eq in cal_equipments:
-        if not eq.next_calibration_due_date or eq.next_calibration_due_date <= date.today():
-            existing = db.query(Complaint).filter(
-                Complaint.equipment_id == eq.id,
-                Complaint.complaint_type == "Calibration Call",
-                Complaint.status != "Closed"
-            ).first()
-            if not existing:
-                recent_cal = db.query(Complaint).filter(
-                    Complaint.equipment_id == eq.id,
-                    Complaint.complaint_type == "Calibration Call",
-                    func.extract('month', Complaint.complaint_date) == current_month_index,
-                    func.extract('year', Complaint.complaint_date) == date.today().year
-                ).first()
-                if not recent_cal:
-                    loc = db.query(LocationMaster).filter(LocationMaster.id == eq.location_id).first() if eq.location_id else None
-                    new_complaint = Complaint(
-                        tenant_id=tenant_id,
-                        site_id=site_id,
-                        docket_no=f"CAL-{date.today().strftime('%Y%m')}-{eq.equipment_code}",
-                        complaint_date=date.today(),
-                        department_name=loc.location_name if loc else "Biomedical",
-                        equipment_id=eq.id,
-                        nature_of_complaint="Scheduled Calibration",
-                        complaint_type="Calibration Call",
-                        status="Open",
-                        is_pm_calibration_call=True,
-                        created_by_id=current_user.id
-                    )
-                    db.add(new_complaint)
-                    cal_generated_count += 1
+        if eq.location_id:
+            loc = db.query(LocationMaster).filter(LocationMaster.id == eq.location_id).first()
+            if loc:
+                matched = any(_matches_department(dept, loc.location_name) for dept in cal_scheduled_depts)
+                if matched:
+                    if not eq.next_calibration_due_date or eq.next_calibration_due_date <= date.today():
+                        existing = db.query(Complaint).filter(
+                            Complaint.equipment_id == eq.id,
+                            Complaint.complaint_type == "Calibration Call",
+                            Complaint.status != "Closed"
+                        ).first()
+                        if not existing:
+                            recent_cal = db.query(Complaint).filter(
+                                Complaint.equipment_id == eq.id,
+                                Complaint.complaint_type == "Calibration Call",
+                                func.extract('month', Complaint.complaint_date) == current_month_index,
+                                func.extract('year', Complaint.complaint_date) == date.today().year
+                            ).first()
+                            if not recent_cal:
+                                new_complaint = Complaint(
+                                    tenant_id=tenant_id,
+                                    site_id=site_id,
+                                    docket_no=f"CAL-{date.today().strftime('%Y%m')}-{eq.equipment_code}",
+                                    complaint_date=date.today(),
+                                    department_name=loc.location_name,
+                                    equipment_id=eq.id,
+                                    nature_of_complaint="Scheduled Calibration",
+                                    complaint_type="Calibration Call",
+                                    status="Open",
+                                    is_pm_calibration_call=True,
+                                    created_by_id=user_id
+                                )
+                                db.add(new_complaint)
+                                cal_generated_count += 1
                     
     db.commit()
-    return {
-        "message": "Maintenance generation complete", 
-        "pm_calls_generated": generated_count,
-        "calibration_calls_generated": cal_generated_count
-    }
+    return generated_count, cal_generated_count
 
 @router.get("/{id}", response_model=EquipmentItemOut)
 def get_equipment_item(

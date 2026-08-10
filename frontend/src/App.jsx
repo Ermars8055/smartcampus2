@@ -75,6 +75,7 @@ import VendorPendingPaymentsReport from './pages/VendorPendingPaymentsReport';
 import QREquipmentView from './pages/QREquipmentView';
 import QRMaterialView from './pages/QRMaterialView';
 import PMSchedule from './pages/PMSchedule';
+import CalibrationSchedule from './pages/CalibrationSchedule';
 import ChatBot from './components/ChatBot';
 import { Box, CircularProgress } from '@mui/material';
 
@@ -150,6 +151,7 @@ function AppRoutes() {
         <Route path="equipment" element={<Equipment />} />
         <Route path="equipment/print-qr" element={<EquipmentQRPrint />} />
         <Route path="equipment/pm-schedule" element={<PMSchedule />} />
+        <Route path="equipment/calibration-schedule" element={<CalibrationSchedule />} />
         <Route path="issues" element={<MaterialIssue />} />
         <Route path="pending-acknowledgments" element={<PendingAcknowledgments />} />
         <Route path="returns" element={<Returns />} />

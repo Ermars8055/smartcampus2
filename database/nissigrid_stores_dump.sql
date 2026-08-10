@@ -2,10 +2,10 @@
 -- PostgreSQL database dump
 --
 
-\restrict QKV6L1lAyfkzhPL2cC2RjBohFGldJxjsmiaSl3sIWEmaKukLaJuScaeTRffRXWj
+\restrict 5G3CqZvAYEw4TWkQpvSuHSbDCyoq0rOfQX9YZH3E50R71nks0srcaoGWyeXvJhW
 
 -- Dumped from database version 17.10 (Ubuntu 17.10-1.pgdg22.04+1)
--- Dumped by pg_dump version 17.10 (Ubuntu 17.10-1.pgdg22.04+1)
+-- Dumped by pg_dump version 18.4 (Ubuntu 18.4-1.pgdg22.04+1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -26,7 +26,7 @@ SET row_security = off;
 -- *not* creating schema, since initdb creates it
 
 
-ALTER SCHEMA public OWNER TO nissigrid;
+ALTER SCHEMA public OWNER TO postgres;
 
 --
 -- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: postgres
@@ -48,7 +48,7 @@ CREATE TABLE public.alembic_version (
 );
 
 
-ALTER TABLE public.alembic_version OWNER TO nissigrid;
+ALTER TABLE public.alembic_version OWNER TO postgres;
 
 --
 -- Name: alerts; Type: TABLE; Schema: public; Owner: postgres
@@ -73,7 +73,7 @@ CREATE TABLE public.alerts (
 );
 
 
-ALTER TABLE public.alerts OWNER TO nissigrid;
+ALTER TABLE public.alerts OWNER TO postgres;
 
 --
 -- Name: alerts_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -88,7 +88,7 @@ CREATE SEQUENCE public.alerts_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.alerts_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.alerts_id_seq OWNER TO postgres;
 
 --
 -- Name: alerts_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -115,7 +115,7 @@ CREATE TABLE public.approval_flows (
 );
 
 
-ALTER TABLE public.approval_flows OWNER TO nissigrid;
+ALTER TABLE public.approval_flows OWNER TO postgres;
 
 --
 -- Name: approval_flows_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -130,7 +130,7 @@ CREATE SEQUENCE public.approval_flows_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.approval_flows_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.approval_flows_id_seq OWNER TO postgres;
 
 --
 -- Name: approval_flows_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -158,7 +158,7 @@ CREATE TABLE public.audit_logs (
 );
 
 
-ALTER TABLE public.audit_logs OWNER TO nissigrid;
+ALTER TABLE public.audit_logs OWNER TO postgres;
 
 --
 -- Name: audit_logs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -173,7 +173,7 @@ CREATE SEQUENCE public.audit_logs_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.audit_logs_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.audit_logs_id_seq OWNER TO postgres;
 
 --
 -- Name: audit_logs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -201,7 +201,7 @@ CREATE TABLE public.buildings (
 );
 
 
-ALTER TABLE public.buildings OWNER TO nissigrid;
+ALTER TABLE public.buildings OWNER TO postgres;
 
 --
 -- Name: buildings_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -216,13 +216,62 @@ CREATE SEQUENCE public.buildings_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.buildings_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.buildings_id_seq OWNER TO postgres;
 
 --
 -- Name: buildings_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.buildings_id_seq OWNED BY public.buildings.id;
+
+
+--
+-- Name: calibration_schedules; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.calibration_schedules (
+    id integer NOT NULL,
+    tenant_id integer NOT NULL,
+    department_name character varying(255) NOT NULL,
+    jan boolean,
+    feb boolean,
+    mar boolean,
+    apr boolean,
+    may boolean,
+    jun boolean,
+    jul boolean,
+    aug boolean,
+    sep boolean,
+    oct boolean,
+    nov boolean,
+    "dec" boolean,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone
+);
+
+
+ALTER TABLE public.calibration_schedules OWNER TO postgres;
+
+--
+-- Name: calibration_schedules_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.calibration_schedules_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.calibration_schedules_id_seq OWNER TO postgres;
+
+--
+-- Name: calibration_schedules_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.calibration_schedules_id_seq OWNED BY public.calibration_schedules.id;
 
 
 --
@@ -243,7 +292,7 @@ CREATE TABLE public.categories (
 );
 
 
-ALTER TABLE public.categories OWNER TO nissigrid;
+ALTER TABLE public.categories OWNER TO postgres;
 
 --
 -- Name: categories_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -258,7 +307,7 @@ CREATE SEQUENCE public.categories_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.categories_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.categories_id_seq OWNER TO postgres;
 
 --
 -- Name: categories_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -297,7 +346,7 @@ CREATE TABLE public.company_addresses (
 );
 
 
-ALTER TABLE public.company_addresses OWNER TO nissigrid;
+ALTER TABLE public.company_addresses OWNER TO postgres;
 
 --
 -- Name: company_addresses_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -312,7 +361,7 @@ CREATE SEQUENCE public.company_addresses_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.company_addresses_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.company_addresses_id_seq OWNER TO postgres;
 
 --
 -- Name: company_addresses_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -335,7 +384,7 @@ CREATE TABLE public.complaint_documents (
 );
 
 
-ALTER TABLE public.complaint_documents OWNER TO nissigrid;
+ALTER TABLE public.complaint_documents OWNER TO postgres;
 
 --
 -- Name: complaint_documents_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -350,7 +399,7 @@ CREATE SEQUENCE public.complaint_documents_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.complaint_documents_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.complaint_documents_id_seq OWNER TO postgres;
 
 --
 -- Name: complaint_documents_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -372,7 +421,7 @@ CREATE TABLE public.complaint_images (
 );
 
 
-ALTER TABLE public.complaint_images OWNER TO nissigrid;
+ALTER TABLE public.complaint_images OWNER TO postgres;
 
 --
 -- Name: complaint_images_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -387,7 +436,7 @@ CREATE SEQUENCE public.complaint_images_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.complaint_images_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.complaint_images_id_seq OWNER TO postgres;
 
 --
 -- Name: complaint_images_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -443,7 +492,7 @@ CREATE TABLE public.complaints (
 );
 
 
-ALTER TABLE public.complaints OWNER TO nissigrid;
+ALTER TABLE public.complaints OWNER TO postgres;
 
 --
 -- Name: complaints_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -458,7 +507,7 @@ CREATE SEQUENCE public.complaints_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.complaints_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.complaints_id_seq OWNER TO postgres;
 
 --
 -- Name: complaints_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -481,7 +530,7 @@ CREATE TABLE public.contract_approvals (
 );
 
 
-ALTER TABLE public.contract_approvals OWNER TO nissigrid;
+ALTER TABLE public.contract_approvals OWNER TO postgres;
 
 --
 -- Name: contract_approvals_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -496,7 +545,7 @@ CREATE SEQUENCE public.contract_approvals_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.contract_approvals_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.contract_approvals_id_seq OWNER TO postgres;
 
 --
 -- Name: contract_approvals_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -526,7 +575,7 @@ CREATE TABLE public.contract_items (
 );
 
 
-ALTER TABLE public.contract_items OWNER TO nissigrid;
+ALTER TABLE public.contract_items OWNER TO postgres;
 
 --
 -- Name: contract_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -541,7 +590,7 @@ CREATE SEQUENCE public.contract_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.contract_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.contract_items_id_seq OWNER TO postgres;
 
 --
 -- Name: contract_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -583,7 +632,7 @@ CREATE TABLE public.contracts (
 );
 
 
-ALTER TABLE public.contracts OWNER TO nissigrid;
+ALTER TABLE public.contracts OWNER TO postgres;
 
 --
 -- Name: contracts_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -598,7 +647,7 @@ CREATE SEQUENCE public.contracts_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.contracts_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.contracts_id_seq OWNER TO postgres;
 
 --
 -- Name: contracts_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -622,7 +671,7 @@ CREATE TABLE public.current_stock (
 );
 
 
-ALTER TABLE public.current_stock OWNER TO nissigrid;
+ALTER TABLE public.current_stock OWNER TO postgres;
 
 --
 -- Name: current_stock_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -637,7 +686,7 @@ CREATE SEQUENCE public.current_stock_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.current_stock_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.current_stock_id_seq OWNER TO postgres;
 
 --
 -- Name: current_stock_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -662,7 +711,7 @@ CREATE TABLE public.department_material_limits (
 );
 
 
-ALTER TABLE public.department_material_limits OWNER TO nissigrid;
+ALTER TABLE public.department_material_limits OWNER TO postgres;
 
 --
 -- Name: department_material_limits_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -677,7 +726,7 @@ CREATE SEQUENCE public.department_material_limits_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.department_material_limits_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.department_material_limits_id_seq OWNER TO postgres;
 
 --
 -- Name: department_material_limits_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -705,7 +754,7 @@ CREATE TABLE public.departments (
 );
 
 
-ALTER TABLE public.departments OWNER TO nissigrid;
+ALTER TABLE public.departments OWNER TO postgres;
 
 --
 -- Name: departments_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -720,7 +769,7 @@ CREATE SEQUENCE public.departments_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.departments_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.departments_id_seq OWNER TO postgres;
 
 --
 -- Name: departments_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -743,7 +792,7 @@ CREATE TABLE public.document_sequences (
 );
 
 
-ALTER TABLE public.document_sequences OWNER TO nissigrid;
+ALTER TABLE public.document_sequences OWNER TO postgres;
 
 --
 -- Name: document_sequences_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -758,7 +807,7 @@ CREATE SEQUENCE public.document_sequences_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.document_sequences_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.document_sequences_id_seq OWNER TO postgres;
 
 --
 -- Name: document_sequences_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -782,7 +831,7 @@ CREATE TABLE public.equipment_history (
 );
 
 
-ALTER TABLE public.equipment_history OWNER TO nissigrid;
+ALTER TABLE public.equipment_history OWNER TO postgres;
 
 --
 -- Name: equipment_history_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -797,7 +846,7 @@ CREATE SEQUENCE public.equipment_history_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.equipment_history_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.equipment_history_id_seq OWNER TO postgres;
 
 --
 -- Name: equipment_history_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -874,7 +923,7 @@ CREATE TABLE public.equipment_items (
 );
 
 
-ALTER TABLE public.equipment_items OWNER TO nissigrid;
+ALTER TABLE public.equipment_items OWNER TO postgres;
 
 --
 -- Name: equipment_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -889,7 +938,7 @@ CREATE SEQUENCE public.equipment_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.equipment_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.equipment_items_id_seq OWNER TO postgres;
 
 --
 -- Name: equipment_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -914,7 +963,7 @@ CREATE TABLE public.equipment_writeoffs (
 );
 
 
-ALTER TABLE public.equipment_writeoffs OWNER TO nissigrid;
+ALTER TABLE public.equipment_writeoffs OWNER TO postgres;
 
 --
 -- Name: equipment_writeoffs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -929,7 +978,7 @@ CREATE SEQUENCE public.equipment_writeoffs_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.equipment_writeoffs_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.equipment_writeoffs_id_seq OWNER TO postgres;
 
 --
 -- Name: equipment_writeoffs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -956,7 +1005,7 @@ CREATE TABLE public.floors (
 );
 
 
-ALTER TABLE public.floors OWNER TO nissigrid;
+ALTER TABLE public.floors OWNER TO postgres;
 
 --
 -- Name: floors_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -971,7 +1020,7 @@ CREATE SEQUENCE public.floors_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.floors_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.floors_id_seq OWNER TO postgres;
 
 --
 -- Name: floors_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1021,7 +1070,7 @@ CREATE TABLE public.gate_entries (
 );
 
 
-ALTER TABLE public.gate_entries OWNER TO nissigrid;
+ALTER TABLE public.gate_entries OWNER TO postgres;
 
 --
 -- Name: gate_entries_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1036,7 +1085,7 @@ CREATE SEQUENCE public.gate_entries_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.gate_entries_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.gate_entries_id_seq OWNER TO postgres;
 
 --
 -- Name: gate_entries_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1058,7 +1107,7 @@ CREATE TABLE public.gate_pass_items (
 );
 
 
-ALTER TABLE public.gate_pass_items OWNER TO nissigrid;
+ALTER TABLE public.gate_pass_items OWNER TO postgres;
 
 --
 -- Name: gate_pass_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1073,7 +1122,7 @@ CREATE SEQUENCE public.gate_pass_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.gate_pass_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.gate_pass_items_id_seq OWNER TO postgres;
 
 --
 -- Name: gate_pass_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1113,7 +1162,7 @@ CREATE TABLE public.gate_passes (
 );
 
 
-ALTER TABLE public.gate_passes OWNER TO nissigrid;
+ALTER TABLE public.gate_passes OWNER TO postgres;
 
 --
 -- Name: gate_passes_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1128,7 +1177,7 @@ CREATE SEQUENCE public.gate_passes_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.gate_passes_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.gate_passes_id_seq OWNER TO postgres;
 
 --
 -- Name: gate_passes_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1178,7 +1227,7 @@ CREATE TABLE public.grn (
 );
 
 
-ALTER TABLE public.grn OWNER TO nissigrid;
+ALTER TABLE public.grn OWNER TO postgres;
 
 --
 -- Name: grn_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1193,7 +1242,7 @@ CREATE SEQUENCE public.grn_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.grn_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.grn_id_seq OWNER TO postgres;
 
 --
 -- Name: grn_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1229,7 +1278,7 @@ CREATE TABLE public.grn_items (
 );
 
 
-ALTER TABLE public.grn_items OWNER TO nissigrid;
+ALTER TABLE public.grn_items OWNER TO postgres;
 
 --
 -- Name: grn_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1244,7 +1293,7 @@ CREATE SEQUENCE public.grn_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.grn_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.grn_items_id_seq OWNER TO postgres;
 
 --
 -- Name: grn_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1268,7 +1317,7 @@ CREATE TABLE public.indent_approvals (
 );
 
 
-ALTER TABLE public.indent_approvals OWNER TO nissigrid;
+ALTER TABLE public.indent_approvals OWNER TO postgres;
 
 --
 -- Name: indent_approvals_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1283,7 +1332,7 @@ CREATE SEQUENCE public.indent_approvals_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.indent_approvals_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.indent_approvals_id_seq OWNER TO postgres;
 
 --
 -- Name: indent_approvals_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1307,7 +1356,7 @@ CREATE TABLE public.indent_items (
 );
 
 
-ALTER TABLE public.indent_items OWNER TO nissigrid;
+ALTER TABLE public.indent_items OWNER TO postgres;
 
 --
 -- Name: indent_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1322,7 +1371,7 @@ CREATE SEQUENCE public.indent_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.indent_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.indent_items_id_seq OWNER TO postgres;
 
 --
 -- Name: indent_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1361,7 +1410,7 @@ CREATE TABLE public.indents (
 );
 
 
-ALTER TABLE public.indents OWNER TO nissigrid;
+ALTER TABLE public.indents OWNER TO postgres;
 
 --
 -- Name: indents_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1376,7 +1425,7 @@ CREATE SEQUENCE public.indents_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.indents_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.indents_id_seq OWNER TO postgres;
 
 --
 -- Name: indents_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1402,7 +1451,7 @@ CREATE TABLE public.institutions (
 );
 
 
-ALTER TABLE public.institutions OWNER TO nissigrid;
+ALTER TABLE public.institutions OWNER TO postgres;
 
 --
 -- Name: institutions_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1417,7 +1466,7 @@ CREATE SEQUENCE public.institutions_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.institutions_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.institutions_id_seq OWNER TO postgres;
 
 --
 -- Name: institutions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1452,7 +1501,7 @@ CREATE TABLE public.invoice_items (
 );
 
 
-ALTER TABLE public.invoice_items OWNER TO nissigrid;
+ALTER TABLE public.invoice_items OWNER TO postgres;
 
 --
 -- Name: invoice_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1467,7 +1516,7 @@ CREATE SEQUENCE public.invoice_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.invoice_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.invoice_items_id_seq OWNER TO postgres;
 
 --
 -- Name: invoice_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1547,7 +1596,7 @@ CREATE TABLE public.invoices (
 );
 
 
-ALTER TABLE public.invoices OWNER TO nissigrid;
+ALTER TABLE public.invoices OWNER TO postgres;
 
 --
 -- Name: invoices_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1562,7 +1611,7 @@ CREATE SEQUENCE public.invoices_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.invoices_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.invoices_id_seq OWNER TO postgres;
 
 --
 -- Name: invoices_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1586,7 +1635,7 @@ CREATE TABLE public.location_master (
 );
 
 
-ALTER TABLE public.location_master OWNER TO nissigrid;
+ALTER TABLE public.location_master OWNER TO postgres;
 
 --
 -- Name: location_master_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1601,7 +1650,7 @@ CREATE SEQUENCE public.location_master_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.location_master_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.location_master_id_seq OWNER TO postgres;
 
 --
 -- Name: location_master_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1625,7 +1674,7 @@ CREATE TABLE public.material_issue_items (
 );
 
 
-ALTER TABLE public.material_issue_items OWNER TO nissigrid;
+ALTER TABLE public.material_issue_items OWNER TO postgres;
 
 --
 -- Name: material_issue_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1640,7 +1689,7 @@ CREATE SEQUENCE public.material_issue_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.material_issue_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.material_issue_items_id_seq OWNER TO postgres;
 
 --
 -- Name: material_issue_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1679,7 +1728,7 @@ CREATE TABLE public.material_issues (
 );
 
 
-ALTER TABLE public.material_issues OWNER TO nissigrid;
+ALTER TABLE public.material_issues OWNER TO postgres;
 
 --
 -- Name: material_issues_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1694,7 +1743,7 @@ CREATE SEQUENCE public.material_issues_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.material_issues_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.material_issues_id_seq OWNER TO postgres;
 
 --
 -- Name: material_issues_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1719,7 +1768,7 @@ CREATE TABLE public.material_return_items (
 );
 
 
-ALTER TABLE public.material_return_items OWNER TO nissigrid;
+ALTER TABLE public.material_return_items OWNER TO postgres;
 
 --
 -- Name: material_return_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1734,7 +1783,7 @@ CREATE SEQUENCE public.material_return_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.material_return_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.material_return_items_id_seq OWNER TO postgres;
 
 --
 -- Name: material_return_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1768,7 +1817,7 @@ CREATE TABLE public.material_returns (
 );
 
 
-ALTER TABLE public.material_returns OWNER TO nissigrid;
+ALTER TABLE public.material_returns OWNER TO postgres;
 
 --
 -- Name: material_returns_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1783,7 +1832,7 @@ CREATE SEQUENCE public.material_returns_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.material_returns_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.material_returns_id_seq OWNER TO postgres;
 
 --
 -- Name: material_returns_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1826,7 +1875,7 @@ CREATE TABLE public.materials (
 );
 
 
-ALTER TABLE public.materials OWNER TO nissigrid;
+ALTER TABLE public.materials OWNER TO postgres;
 
 --
 -- Name: materials_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1841,7 +1890,7 @@ CREATE SEQUENCE public.materials_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.materials_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.materials_id_seq OWNER TO postgres;
 
 --
 -- Name: materials_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1869,7 +1918,7 @@ CREATE TABLE public.organizations (
 );
 
 
-ALTER TABLE public.organizations OWNER TO nissigrid;
+ALTER TABLE public.organizations OWNER TO postgres;
 
 --
 -- Name: organizations_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1884,7 +1933,7 @@ CREATE SEQUENCE public.organizations_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.organizations_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.organizations_id_seq OWNER TO postgres;
 
 --
 -- Name: organizations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1906,7 +1955,7 @@ CREATE TABLE public.password_reset_tokens (
 );
 
 
-ALTER TABLE public.password_reset_tokens OWNER TO nissigrid;
+ALTER TABLE public.password_reset_tokens OWNER TO postgres;
 
 --
 -- Name: password_reset_tokens_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1921,7 +1970,7 @@ CREATE SEQUENCE public.password_reset_tokens_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.password_reset_tokens_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.password_reset_tokens_id_seq OWNER TO postgres;
 
 --
 -- Name: password_reset_tokens_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -1955,7 +2004,7 @@ CREATE TABLE public.pm_schedules (
 );
 
 
-ALTER TABLE public.pm_schedules OWNER TO nissigrid;
+ALTER TABLE public.pm_schedules OWNER TO postgres;
 
 --
 -- Name: pm_schedules_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -1970,7 +2019,7 @@ CREATE SEQUENCE public.pm_schedules_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.pm_schedules_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.pm_schedules_id_seq OWNER TO postgres;
 
 --
 -- Name: pm_schedules_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2001,7 +2050,7 @@ CREATE TABLE public.projects (
 );
 
 
-ALTER TABLE public.projects OWNER TO nissigrid;
+ALTER TABLE public.projects OWNER TO postgres;
 
 --
 -- Name: projects_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2016,7 +2065,7 @@ CREATE SEQUENCE public.projects_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.projects_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.projects_id_seq OWNER TO postgres;
 
 --
 -- Name: projects_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2040,7 +2089,7 @@ CREATE TABLE public.purchase_order_approvals (
 );
 
 
-ALTER TABLE public.purchase_order_approvals OWNER TO nissigrid;
+ALTER TABLE public.purchase_order_approvals OWNER TO postgres;
 
 --
 -- Name: purchase_order_approvals_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2055,7 +2104,7 @@ CREATE SEQUENCE public.purchase_order_approvals_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.purchase_order_approvals_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.purchase_order_approvals_id_seq OWNER TO postgres;
 
 --
 -- Name: purchase_order_approvals_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2086,7 +2135,7 @@ CREATE TABLE public.purchase_order_items (
 );
 
 
-ALTER TABLE public.purchase_order_items OWNER TO nissigrid;
+ALTER TABLE public.purchase_order_items OWNER TO postgres;
 
 --
 -- Name: purchase_order_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2101,7 +2150,7 @@ CREATE SEQUENCE public.purchase_order_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.purchase_order_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.purchase_order_items_id_seq OWNER TO postgres;
 
 --
 -- Name: purchase_order_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2159,7 +2208,7 @@ CREATE TABLE public.purchase_orders (
 );
 
 
-ALTER TABLE public.purchase_orders OWNER TO nissigrid;
+ALTER TABLE public.purchase_orders OWNER TO postgres;
 
 --
 -- Name: purchase_orders_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2174,7 +2223,7 @@ CREATE SEQUENCE public.purchase_orders_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.purchase_orders_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.purchase_orders_id_seq OWNER TO postgres;
 
 --
 -- Name: purchase_orders_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2198,7 +2247,7 @@ CREATE TABLE public.purchase_request_approvals (
 );
 
 
-ALTER TABLE public.purchase_request_approvals OWNER TO nissigrid;
+ALTER TABLE public.purchase_request_approvals OWNER TO postgres;
 
 --
 -- Name: purchase_request_approvals_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2213,7 +2262,7 @@ CREATE SEQUENCE public.purchase_request_approvals_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.purchase_request_approvals_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.purchase_request_approvals_id_seq OWNER TO postgres;
 
 --
 -- Name: purchase_request_approvals_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2235,7 +2284,7 @@ CREATE TABLE public.purchase_request_items (
 );
 
 
-ALTER TABLE public.purchase_request_items OWNER TO nissigrid;
+ALTER TABLE public.purchase_request_items OWNER TO postgres;
 
 --
 -- Name: purchase_request_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2250,7 +2299,7 @@ CREATE SEQUENCE public.purchase_request_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.purchase_request_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.purchase_request_items_id_seq OWNER TO postgres;
 
 --
 -- Name: purchase_request_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2293,7 +2342,7 @@ CREATE TABLE public.purchase_requests (
 );
 
 
-ALTER TABLE public.purchase_requests OWNER TO nissigrid;
+ALTER TABLE public.purchase_requests OWNER TO postgres;
 
 --
 -- Name: purchase_requests_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2308,7 +2357,7 @@ CREATE SEQUENCE public.purchase_requests_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.purchase_requests_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.purchase_requests_id_seq OWNER TO postgres;
 
 --
 -- Name: purchase_requests_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2335,7 +2384,7 @@ CREATE TABLE public.quotation_comparisons (
 );
 
 
-ALTER TABLE public.quotation_comparisons OWNER TO nissigrid;
+ALTER TABLE public.quotation_comparisons OWNER TO postgres;
 
 --
 -- Name: quotation_comparisons_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2350,7 +2399,7 @@ CREATE SEQUENCE public.quotation_comparisons_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.quotation_comparisons_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.quotation_comparisons_id_seq OWNER TO postgres;
 
 --
 -- Name: quotation_comparisons_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2375,7 +2424,7 @@ CREATE TABLE public.quotation_negotiation_history (
 );
 
 
-ALTER TABLE public.quotation_negotiation_history OWNER TO nissigrid;
+ALTER TABLE public.quotation_negotiation_history OWNER TO postgres;
 
 --
 -- Name: quotation_negotiation_history_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2390,7 +2439,7 @@ CREATE SEQUENCE public.quotation_negotiation_history_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.quotation_negotiation_history_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.quotation_negotiation_history_id_seq OWNER TO postgres;
 
 --
 -- Name: quotation_negotiation_history_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2412,7 +2461,7 @@ CREATE TABLE public.quotation_request_item_sources (
 );
 
 
-ALTER TABLE public.quotation_request_item_sources OWNER TO nissigrid;
+ALTER TABLE public.quotation_request_item_sources OWNER TO postgres;
 
 --
 -- Name: quotation_request_item_sources_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2427,7 +2476,7 @@ CREATE SEQUENCE public.quotation_request_item_sources_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.quotation_request_item_sources_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.quotation_request_item_sources_id_seq OWNER TO postgres;
 
 --
 -- Name: quotation_request_item_sources_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2450,7 +2499,7 @@ CREATE TABLE public.quotation_request_items (
 );
 
 
-ALTER TABLE public.quotation_request_items OWNER TO nissigrid;
+ALTER TABLE public.quotation_request_items OWNER TO postgres;
 
 --
 -- Name: quotation_request_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2465,7 +2514,7 @@ CREATE SEQUENCE public.quotation_request_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.quotation_request_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.quotation_request_items_id_seq OWNER TO postgres;
 
 --
 -- Name: quotation_request_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2485,7 +2534,7 @@ CREATE TABLE public.quotation_request_prs (
 );
 
 
-ALTER TABLE public.quotation_request_prs OWNER TO nissigrid;
+ALTER TABLE public.quotation_request_prs OWNER TO postgres;
 
 --
 -- Name: quotation_request_prs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2500,7 +2549,7 @@ CREATE SEQUENCE public.quotation_request_prs_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.quotation_request_prs_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.quotation_request_prs_id_seq OWNER TO postgres;
 
 --
 -- Name: quotation_request_prs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2523,7 +2572,7 @@ CREATE TABLE public.quotation_request_vendors (
 );
 
 
-ALTER TABLE public.quotation_request_vendors OWNER TO nissigrid;
+ALTER TABLE public.quotation_request_vendors OWNER TO postgres;
 
 --
 -- Name: quotation_request_vendors_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2538,7 +2587,7 @@ CREATE SEQUENCE public.quotation_request_vendors_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.quotation_request_vendors_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.quotation_request_vendors_id_seq OWNER TO postgres;
 
 --
 -- Name: quotation_request_vendors_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2570,7 +2619,7 @@ CREATE TABLE public.quotation_requests (
 );
 
 
-ALTER TABLE public.quotation_requests OWNER TO nissigrid;
+ALTER TABLE public.quotation_requests OWNER TO postgres;
 
 --
 -- Name: quotation_requests_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2585,7 +2634,7 @@ CREATE SEQUENCE public.quotation_requests_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.quotation_requests_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.quotation_requests_id_seq OWNER TO postgres;
 
 --
 -- Name: quotation_requests_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2613,7 +2662,7 @@ CREATE TABLE public.reagent_consumption_logs (
 );
 
 
-ALTER TABLE public.reagent_consumption_logs OWNER TO nissigrid;
+ALTER TABLE public.reagent_consumption_logs OWNER TO postgres;
 
 --
 -- Name: reagent_consumption_logs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2628,7 +2677,7 @@ CREATE SEQUENCE public.reagent_consumption_logs_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.reagent_consumption_logs_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.reagent_consumption_logs_id_seq OWNER TO postgres;
 
 --
 -- Name: reagent_consumption_logs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2663,7 +2712,7 @@ CREATE TABLE public.repair_work_orders (
 );
 
 
-ALTER TABLE public.repair_work_orders OWNER TO nissigrid;
+ALTER TABLE public.repair_work_orders OWNER TO postgres;
 
 --
 -- Name: repair_work_orders_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2678,7 +2727,7 @@ CREATE SEQUENCE public.repair_work_orders_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.repair_work_orders_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.repair_work_orders_id_seq OWNER TO postgres;
 
 --
 -- Name: repair_work_orders_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2703,7 +2752,7 @@ CREATE TABLE public.role_permissions (
 );
 
 
-ALTER TABLE public.role_permissions OWNER TO nissigrid;
+ALTER TABLE public.role_permissions OWNER TO postgres;
 
 --
 -- Name: role_permissions_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2718,7 +2767,7 @@ CREATE SEQUENCE public.role_permissions_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.role_permissions_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.role_permissions_id_seq OWNER TO postgres;
 
 --
 -- Name: role_permissions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2743,7 +2792,7 @@ CREATE TABLE public.roles (
 );
 
 
-ALTER TABLE public.roles OWNER TO nissigrid;
+ALTER TABLE public.roles OWNER TO postgres;
 
 --
 -- Name: roles_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2758,7 +2807,7 @@ CREATE SEQUENCE public.roles_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.roles_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.roles_id_seq OWNER TO postgres;
 
 --
 -- Name: roles_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2785,7 +2834,7 @@ CREATE TABLE public.rooms (
 );
 
 
-ALTER TABLE public.rooms OWNER TO nissigrid;
+ALTER TABLE public.rooms OWNER TO postgres;
 
 --
 -- Name: rooms_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2800,7 +2849,7 @@ CREATE SEQUENCE public.rooms_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.rooms_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.rooms_id_seq OWNER TO postgres;
 
 --
 -- Name: rooms_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2824,7 +2873,7 @@ CREATE TABLE public.sites (
 );
 
 
-ALTER TABLE public.sites OWNER TO nissigrid;
+ALTER TABLE public.sites OWNER TO postgres;
 
 --
 -- Name: sites_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2839,7 +2888,7 @@ CREATE SEQUENCE public.sites_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.sites_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.sites_id_seq OWNER TO postgres;
 
 --
 -- Name: sites_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2872,7 +2921,7 @@ CREATE TABLE public.stock_ledger (
 );
 
 
-ALTER TABLE public.stock_ledger OWNER TO nissigrid;
+ALTER TABLE public.stock_ledger OWNER TO postgres;
 
 --
 -- Name: stock_ledger_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2887,7 +2936,7 @@ CREATE SEQUENCE public.stock_ledger_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.stock_ledger_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.stock_ledger_id_seq OWNER TO postgres;
 
 --
 -- Name: stock_ledger_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2912,7 +2961,7 @@ CREATE TABLE public.stock_transfer_items (
 );
 
 
-ALTER TABLE public.stock_transfer_items OWNER TO nissigrid;
+ALTER TABLE public.stock_transfer_items OWNER TO postgres;
 
 --
 -- Name: stock_transfer_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2927,7 +2976,7 @@ CREATE SEQUENCE public.stock_transfer_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.stock_transfer_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.stock_transfer_items_id_seq OWNER TO postgres;
 
 --
 -- Name: stock_transfer_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2959,7 +3008,7 @@ CREATE TABLE public.stock_transfers (
 );
 
 
-ALTER TABLE public.stock_transfers OWNER TO nissigrid;
+ALTER TABLE public.stock_transfers OWNER TO postgres;
 
 --
 -- Name: stock_transfers_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2974,7 +3023,7 @@ CREATE SEQUENCE public.stock_transfers_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.stock_transfers_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.stock_transfers_id_seq OWNER TO postgres;
 
 --
 -- Name: stock_transfers_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -2998,7 +3047,7 @@ CREATE TABLE public.subcategories (
 );
 
 
-ALTER TABLE public.subcategories OWNER TO nissigrid;
+ALTER TABLE public.subcategories OWNER TO postgres;
 
 --
 -- Name: subcategories_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3013,7 +3062,7 @@ CREATE SEQUENCE public.subcategories_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.subcategories_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.subcategories_id_seq OWNER TO postgres;
 
 --
 -- Name: subcategories_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3037,7 +3086,7 @@ CREATE TABLE public.tenant_configurations (
 );
 
 
-ALTER TABLE public.tenant_configurations OWNER TO nissigrid;
+ALTER TABLE public.tenant_configurations OWNER TO postgres;
 
 --
 -- Name: tenant_configurations_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3052,7 +3101,7 @@ CREATE SEQUENCE public.tenant_configurations_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.tenant_configurations_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.tenant_configurations_id_seq OWNER TO postgres;
 
 --
 -- Name: tenant_configurations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3074,7 +3123,7 @@ CREATE TABLE public.tenant_memberships (
 );
 
 
-ALTER TABLE public.tenant_memberships OWNER TO nissigrid;
+ALTER TABLE public.tenant_memberships OWNER TO postgres;
 
 --
 -- Name: tenant_memberships_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3089,7 +3138,7 @@ CREATE SEQUENCE public.tenant_memberships_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.tenant_memberships_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.tenant_memberships_id_seq OWNER TO postgres;
 
 --
 -- Name: tenant_memberships_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3113,7 +3162,7 @@ CREATE TABLE public.tenants (
 );
 
 
-ALTER TABLE public.tenants OWNER TO nissigrid;
+ALTER TABLE public.tenants OWNER TO postgres;
 
 --
 -- Name: tenants_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3128,7 +3177,7 @@ CREATE SEQUENCE public.tenants_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.tenants_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.tenants_id_seq OWNER TO postgres;
 
 --
 -- Name: tenants_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3153,7 +3202,7 @@ CREATE TABLE public.terms_and_conditions (
 );
 
 
-ALTER TABLE public.terms_and_conditions OWNER TO nissigrid;
+ALTER TABLE public.terms_and_conditions OWNER TO postgres;
 
 --
 -- Name: terms_and_conditions_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3168,7 +3217,7 @@ CREATE SEQUENCE public.terms_and_conditions_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.terms_and_conditions_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.terms_and_conditions_id_seq OWNER TO postgres;
 
 --
 -- Name: terms_and_conditions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3193,7 +3242,7 @@ CREATE TABLE public.uom (
 );
 
 
-ALTER TABLE public.uom OWNER TO nissigrid;
+ALTER TABLE public.uom OWNER TO postgres;
 
 --
 -- Name: uom_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3208,7 +3257,7 @@ CREATE SEQUENCE public.uom_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.uom_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.uom_id_seq OWNER TO postgres;
 
 --
 -- Name: uom_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3231,7 +3280,7 @@ CREATE TABLE public.user_role_assignments (
 );
 
 
-ALTER TABLE public.user_role_assignments OWNER TO nissigrid;
+ALTER TABLE public.user_role_assignments OWNER TO postgres;
 
 --
 -- Name: user_role_assignments_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3246,7 +3295,7 @@ CREATE SEQUENCE public.user_role_assignments_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.user_role_assignments_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.user_role_assignments_id_seq OWNER TO postgres;
 
 --
 -- Name: user_role_assignments_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3275,7 +3324,7 @@ CREATE TABLE public.users (
 );
 
 
-ALTER TABLE public.users OWNER TO nissigrid;
+ALTER TABLE public.users OWNER TO postgres;
 
 --
 -- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3290,7 +3339,7 @@ CREATE SEQUENCE public.users_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.users_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.users_id_seq OWNER TO postgres;
 
 --
 -- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3313,7 +3362,7 @@ CREATE TABLE public.vendor_approvals (
 );
 
 
-ALTER TABLE public.vendor_approvals OWNER TO nissigrid;
+ALTER TABLE public.vendor_approvals OWNER TO postgres;
 
 --
 -- Name: vendor_approvals_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3328,7 +3377,7 @@ CREATE SEQUENCE public.vendor_approvals_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.vendor_approvals_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.vendor_approvals_id_seq OWNER TO postgres;
 
 --
 -- Name: vendor_approvals_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3348,7 +3397,7 @@ CREATE TABLE public.vendor_categories (
 );
 
 
-ALTER TABLE public.vendor_categories OWNER TO nissigrid;
+ALTER TABLE public.vendor_categories OWNER TO postgres;
 
 --
 -- Name: vendor_categories_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3363,7 +3412,7 @@ CREATE SEQUENCE public.vendor_categories_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.vendor_categories_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.vendor_categories_id_seq OWNER TO postgres;
 
 --
 -- Name: vendor_categories_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3387,7 +3436,7 @@ CREATE TABLE public.vendor_history (
 );
 
 
-ALTER TABLE public.vendor_history OWNER TO nissigrid;
+ALTER TABLE public.vendor_history OWNER TO postgres;
 
 --
 -- Name: vendor_history_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3402,7 +3451,7 @@ CREATE SEQUENCE public.vendor_history_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.vendor_history_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.vendor_history_id_seq OWNER TO postgres;
 
 --
 -- Name: vendor_history_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3431,7 +3480,7 @@ CREATE TABLE public.vendor_quotation_items (
 );
 
 
-ALTER TABLE public.vendor_quotation_items OWNER TO nissigrid;
+ALTER TABLE public.vendor_quotation_items OWNER TO postgres;
 
 --
 -- Name: vendor_quotation_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3446,7 +3495,7 @@ CREATE SEQUENCE public.vendor_quotation_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.vendor_quotation_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.vendor_quotation_items_id_seq OWNER TO postgres;
 
 --
 -- Name: vendor_quotation_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3474,7 +3523,7 @@ CREATE TABLE public.vendor_quotations (
 );
 
 
-ALTER TABLE public.vendor_quotations OWNER TO nissigrid;
+ALTER TABLE public.vendor_quotations OWNER TO postgres;
 
 --
 -- Name: vendor_quotations_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3489,7 +3538,7 @@ CREATE SEQUENCE public.vendor_quotations_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.vendor_quotations_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.vendor_quotations_id_seq OWNER TO postgres;
 
 --
 -- Name: vendor_quotations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3540,7 +3589,7 @@ CREATE TABLE public.vendors (
 );
 
 
-ALTER TABLE public.vendors OWNER TO nissigrid;
+ALTER TABLE public.vendors OWNER TO postgres;
 
 --
 -- Name: vendors_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3555,7 +3604,7 @@ CREATE SEQUENCE public.vendors_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.vendors_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.vendors_id_seq OWNER TO postgres;
 
 --
 -- Name: vendors_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3586,7 +3635,7 @@ CREATE TABLE public.warehouses (
 );
 
 
-ALTER TABLE public.warehouses OWNER TO nissigrid;
+ALTER TABLE public.warehouses OWNER TO postgres;
 
 --
 -- Name: warehouses_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3601,7 +3650,7 @@ CREATE SEQUENCE public.warehouses_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.warehouses_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.warehouses_id_seq OWNER TO postgres;
 
 --
 -- Name: warehouses_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3629,7 +3678,7 @@ CREATE TABLE public.write_off_items (
 );
 
 
-ALTER TABLE public.write_off_items OWNER TO nissigrid;
+ALTER TABLE public.write_off_items OWNER TO postgres;
 
 --
 -- Name: write_off_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3644,7 +3693,7 @@ CREATE SEQUENCE public.write_off_items_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.write_off_items_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.write_off_items_id_seq OWNER TO postgres;
 
 --
 -- Name: write_off_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3679,7 +3728,7 @@ CREATE TABLE public.write_offs (
 );
 
 
-ALTER TABLE public.write_offs OWNER TO nissigrid;
+ALTER TABLE public.write_offs OWNER TO postgres;
 
 --
 -- Name: write_offs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -3694,7 +3743,7 @@ CREATE SEQUENCE public.write_offs_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.write_offs_id_seq OWNER TO nissigrid;
+ALTER SEQUENCE public.write_offs_id_seq OWNER TO postgres;
 
 --
 -- Name: write_offs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -3729,6 +3778,13 @@ ALTER TABLE ONLY public.audit_logs ALTER COLUMN id SET DEFAULT nextval('public.a
 --
 
 ALTER TABLE ONLY public.buildings ALTER COLUMN id SET DEFAULT nextval('public.buildings_id_seq'::regclass);
+
+
+--
+-- Name: calibration_schedules id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.calibration_schedules ALTER COLUMN id SET DEFAULT nextval('public.calibration_schedules_id_seq'::regclass);
 
 
 --
@@ -4268,7 +4324,7 @@ ALTER TABLE ONLY public.write_offs ALTER COLUMN id SET DEFAULT nextval('public.w
 --
 
 COPY public.alembic_version (version_num) FROM stdin;
-59bd7bab6d53
+f1fda9be6662
 \.
 
 
@@ -4991,6 +5047,10 @@ COPY public.audit_logs (id, tenant_id, site_id, user_id, action, entity_type, en
 546	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-06 18:47:11.026043
 547	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-06 19:14:49.643764
 548	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-06 19:53:25.796767
+549	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-07 09:38:12.457338
+550	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-07 10:18:21.462083
+551	2	\N	3	LOGIN	User	3	\N	\N	\N	2026-08-10 10:11:13.520995
+552	2	2	3	UPDATE	EquipmentItem	1605	\N	Serial number updated for EPCMS-EMDR-DFEB-015 from 'None' to '2002001'	\N	2026-08-10 14:59:25.716856
 \.
 
 
@@ -5011,6 +5071,14 @@ COPY public.buildings (id, tenant_id, site_id, name, code, project_id, is_active
 10	3	3	CS1	BLDG-00006	\N	t	f	2026-06-16 10:59:00.547142	15	Computer Science
 11	2	2	BLOCK C	BLDG-00005	\N	f	t	2026-07-02 18:50:05.038095	11	
 12	2	2	C BLOCK 	BLDG-00006	\N	t	f	2026-07-02 18:50:38.966372	3	Chemistry
+\.
+
+
+--
+-- Data for Name: calibration_schedules; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.calibration_schedules (id, tenant_id, department_name, jan, feb, mar, apr, may, jun, jul, aug, sep, oct, nov, "dec", created_at, updated_at) FROM stdin;
 \.
 
 
@@ -5134,8 +5202,8 @@ COPY public.complaints (id, tenant_id, site_id, docket_no, complaint_date, compl
 10	2	2	CMP-00008	2026-06-22	11:42	HEALTH 	7	237		AC problem	AC IS NOT WORKING FROM YESTERDAY HEAVY RAIN 	SURESH	Closed	34	the new inverter is installed to the ac 	3	3	f	2026-06-22 11:42:25.966144	2026-06-22 11:53:11.669587	2026-06-22 06:19:15.588397	t	3	2026-06-22 06:23:11.668873	\N	found that the ac inverter got damaged and the current is not evenly supplied 	yes the technician worked good ac is working fine	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N
 15	2	2	CMP-00013	2026-07-02	19:02	Chemistry	\N	\N		fdgdfg	dfgdfgdg		Assigned	34	\N	17	\N	f	2026-07-02 19:02:12.361688	2026-08-03 15:58:20.999169	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N
 17	2	2	CMP-00015	2026-08-06	12:43	Management Studies - UG	\N	\N		not working properly	not working\n	vik	Closed	35	\N	3	\N	f	2026-08-06 12:43:10.85631	2026-08-06 12:43:45.858629	\N	f	\N	\N	\N	done	\N	\N	\N	\N	Calibration Call	f	3	2026-08-06 07:13:44.141331	3	2026-08-06 07:13:45.857491	yes	done
-18	2	2	CMP-00016	2026-08-06	12:44	Electrotherapy Lab	\N	\N		not working properly	none	vv	Closed	34	\N	3	\N	f	2026-08-06 12:44:25.652609	2026-08-06 12:45:15.149731	\N	f	\N	\N	\N		\N	\N	\N	\N	Preventive Maintenance Call	f	3	2026-08-06 07:15:06.700342	3	2026-08-06 07:15:15.148572	yes	done
 14	2	2	CMP-00012	2026-07-02	19:01	Chemistry	12	\N		Fault in Tap 	WATER NOT COMING		Pending Approval	35	\N	3	\N	f	2026-07-02 19:01:17.170755	2026-08-06 12:45:43.436516	\N	f	\N	\N	\N		\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	yes	done
+18	2	2	CMP-00016	2026-08-06	12:44	Electrotherapy Lab	\N	\N		not working properly	none	vv	Reopened	34	\N	3	\N	f	2026-08-06 12:44:25.652609	2026-08-10 15:52:41.976794	\N	f	\N	\N	Reopened on 2026-08-10 10:22:41 by EastPoint Admin. Reason: again pronblem		\N	\N	\N	\N	Preventive Maintenance Call	f	\N	\N	\N	\N	yes	done
 16	2	2	CMP-00014	2026-08-05	18:01	Electrotherapy Lab	\N	\N		install the product	fdgdf	vik	Closed	35	\N	3	\N	f	2026-08-05 18:01:15.200114	2026-08-06 12:39:13.995766	\N	f	\N	\N	\N	dfgdfhf	\N	\N	\N	\N	User Training Call/Complaint	f	3	2026-08-06 07:01:06.640766	3	2026-08-06 07:09:13.994849	yes	done
 \.
 
@@ -5148,6 +5216,7 @@ COPY public.contract_approvals (id, contract_id, approval_flow_id, approver_id, 
 1	2	81	3	\N	2026-07-31 16:55:48.473324
 2	3	81	3	\N	2026-08-03 17:11:36.288765
 3	3	84	3	\N	2026-08-03 17:11:44.837734
+4	1	81	3	\N	2026-08-07 10:03:05.198873
 \.
 
 
@@ -5167,9 +5236,9 @@ COPY public.contract_items (id, contract_id, material_id, equipment_id, uom, rat
 --
 
 COPY public.contracts (id, tenant_id, site_id, contract_number, contract_type, vendor_id, institution_id, department_id, start_date, end_date, contract_value, payment_terms, renewal_terms, sla_details, spare_parts_included, consumables_included, status, created_by_id, approved_by_id, approved_at, is_deleted, created_at, updated_at, exclusions, current_approval_level) FROM stdin;
-1	2	2	CNT-00001	RC	62	3	\N	2026-07-15	2026-07-30	2000000				f	f	Submitted	3	\N	\N	f	2026-07-27 18:05:33.916597	2026-07-31 15:43:03.683262	\N	\N
-2	2	2	CNT-00002	AMC	63	5	335	2026-07-22	2039-01-30	2502112				f	f	Submitted	3	\N	\N	f	2026-07-30 17:20:20.838762	2026-07-31 16:55:48.517737	\N	2
 3	2	2	CNT-00003	RC	66	5	271	2026-08-10	2026-08-20	15000				f	f	Submitted	3	3	2026-08-04 13:16:34.38435	f	2026-08-03 17:10:25.921051	2026-08-06 11:36:35.45186		2
+1	2	2	CNT-00001	RC	62	3	\N	2026-07-15	2026-07-30	2000000				f	f	Submitted	3	\N	\N	f	2026-07-27 18:05:33.916597	2026-08-07 10:03:05.17037	\N	2
+2	2	2	CNT-00002	AMC	63	5	335	2026-07-22	2039-01-31	2502112				f	f	Submitted	3	\N	\N	f	2026-07-30 17:20:20.838762	2026-08-07 10:21:08.900676	\N	2
 \.
 
 
@@ -8988,8 +9057,8 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 71	2	2	GATE_ENTRY	GE	11
 75	2	2	GRN	GRN	14
 65	2	2	VENDOR	VND	12
-70	2	2	QUOTATION_REQUEST	QR	37
 69	2	2	PURCHASE_ORDER	PO	36
+70	2	2	QUOTATION_REQUEST	QR	38
 \.
 
 
@@ -9009,7 +9078,37 @@ COPY public.equipment_history (id, equipment_id, event_type, event_date, descrip
 
 COPY public.equipment_items (id, tenant_id, site_id, equipment_code, material_id, grn_id, grn_item_id, serial_number, serial_number_status, is_biomedical, requires_installation, installation_status, installation_date, installation_report_url, installation_remarks, warehouse_id, project_id, status, created_at, updated_at, warranty_available, warranty_expiry_date, amc_cmc_status, amc_cmc_end_date, amc_po_number, last_pm_date, next_pm_due_date, last_calibration_date, next_calibration_due_date, rental_agreement_number, rental_start_date, rental_end_date, rental_vendor_id, location_id, contact_number, institution_id, po_id, make, model, machine_cost, machine_type, serial_number_photo_url, equipment_photo_url, installed_by, amc_cost, pm_required, calibration_required, battery_details, procurement_type, rental_type, rental_cost, billing_frequency, cost_per_test, linked_reagents, agreement_status, renewal_date, expected_return_date, rental_status, warranty_end_date, rental_agreement_document) FROM stdin;
 1	2	2	INST-RADIOLOGY-CIV-00001	2338	213	520	787379492	Captured	t	t	Installed	2026-07-28 00:00:00	/api/uploads/installation_reports/2/Invoice_INV2001.pdf	\N	62	3	Operational	2026-07-27 18:24:17.688288	2026-07-28 06:42:46.650147	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	7557805798	\N	\N	\N	\N	\N	\N	/api/uploads/serial_number_photos/2/20260728_064246_5039ec73.jpg	/api/uploads/equipment_photos/2/20260728_064246_3cf27324.png	Pradnesh A	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1605	2	2	EPCMS-EMDR-DFEB-015	3907	\N	\N	\N	Pending Update	t	f	Installed	2026-03-13 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:46.084289	2026-08-06 07:19:20.096991	t	2028-03-12	Under AMC	2026-08-22	\N	\N	\N	\N	\N	\N	\N	\N	\N	108	\N	\N	\N	BPL	RE LIFE 900	\N	\N	\N	\N	\N	\N	t	t	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+870	2	2	EPCMS-WD-18-PM-015	3899	\N	\N	B10W4A020	Captured	t	f	Installed	2026-03-23 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:39.599576	2026-08-10 14:55:48.896775	t	2029-03-22	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	95	\N	\N	\N	NiDEK	Bravo 10 G3M	\N	\N	\N	\N	Narayanan	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+871	2	2	EPCMS-WD-18-PM-016	3899	\N	\N	B10W4A019	Captured	t	f	Installed	2026-03-23 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:39.599581	2026-08-10 14:55:48.896775	t	2029-03-22	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	95	\N	\N	\N	NiDEK	Bravo 10 G3M	\N	\N	\N	\N	Narayanan	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+989	2	2	EPCMS-DIALYSIS-PM-041	3899	\N	\N	B10W4A013	Captured	t	f	Installed	2026-03-23 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:40.844405	2026-08-10 14:55:48.896775	t	2029-03-22	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	105	\N	\N	\N	NiDEK	Bravo 10 G3M	\N	\N	\N	\N	Narayanan	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1003	2	2	EPCMS-EICU-PM-048	3899	\N	\N	FT4-56023346	Captured	t	f	Installed	2025-10-15 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:40.903731	2026-08-10 14:55:48.896775	t	2028-10-14	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	106	\N	\N	\N	MINDRAY	UMEC 100	\N	\N	\N	\N	Devaraj K	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1004	2	2	EPCMS-EICU-PM-049	3899	\N	\N	FT4-56023378	Captured	t	f	Installed	2025-10-15 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:40.903737	2026-08-10 14:55:48.896775	t	2028-10-14	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	106	\N	\N	\N	MINDRAY	UMEC 100	\N	\N	\N	\N	Devaraj K	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1044	2	2	EPCMS-EMD_R-PM-064	3899	\N	\N	FT4-56023369	Captured	t	f	Installed	2025-10-15 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:41.035564	2026-08-10 14:55:48.896775	t	2028-10-14	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	108	\N	\N	\N	MINDRAY	UMEC 100	\N	\N	\N	\N	Devaraj K	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1166	2	2	EPCMS-MICU-VENT-026	3905	\N	\N	GB-57090707	Captured	t	f	Installed	2025-10-15 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:41.984587	2026-08-10 14:55:48.896775	t	2028-10-14	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	SV 300	\N	\N	\N	\N	Devaraj K	\N	f	f	Working	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1167	2	2	EPCMS-MICU-VENT-027	3905	\N	\N	GB-57090708	Captured	t	f	Installed	2025-10-15 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:41.984592	2026-08-10 14:55:48.896775	t	2028-10-14	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	SV 300	\N	\N	\N	\N	Devaraj K	\N	f	f	Working	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1168	2	2	EPCMS-MICU-VENT-028	3905	\N	\N	GB-57092132	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.984598	2026-08-10 14:55:48.896775	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	SV 300	\N	\N	\N	\N	Devaraj K	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1169	2	2	EPCMS-MICU-VENT-029	3905	\N	\N	GB-57092136	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.984603	2026-08-10 14:55:48.896775	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	SV 300	\N	\N	\N	\N	Devaraj K	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1170	2	2	EPCMS-MICU-VENT-030	3905	\N	\N	GB-57092129	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.984609	2026-08-10 14:55:48.896775	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	SV 300	\N	\N	\N	\N	Devaraj K	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1224	2	2	EPCMS-NICU-NWS-001	3971	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.288852	2026-08-10 14:55:48.896775	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	Essae	BS 250	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1228	2	2	EPCMS-NICU-PHTH-014	3968	\N	\N	IBAS-891705	Captured	t	f	Installed	2025-12-09 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:42.288881	2026-08-10 14:55:48.896775	t	2028-12-08	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	BILITRON 2006	\N	\N	\N	\N	PRAMOD	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1229	2	2	EPCMS-NICU-PHTH-015	3968	\N	\N	IBAS-891695	Captured	t	f	Installed	2025-12-09 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:42.288887	2026-08-10 14:55:48.896775	t	2028-12-08	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	BILITRON 2006	\N	\N	\N	\N	PRAMOD	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1230	2	2	EPCMS-NICU-PHTH-016	3968	\N	\N	IBAS-891704	Captured	t	f	Installed	2025-12-09 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:42.288892	2026-08-10 14:55:48.896775	t	2028-12-08	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	BILITRON 2006	\N	\N	\N	\N	PRAMOD	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1231	2	2	EPCMS-NICU-PHTH-017	3968	\N	\N	IBAS-891703	Captured	t	f	Installed	2025-12-09 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:42.288898	2026-08-10 14:55:48.896775	t	2028-12-08	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	BILITRON 2006	\N	\N	\N	\N	PRAMOD	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1232	2	2	EPCMS-NICU-BWRM-011	3960	\N	\N	IDAR-180305	Captured	t	f	Installed	2025-12-09 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:42.288903	2026-08-10 14:55:48.896775	t	2028-12-08	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	KANGAROO 1085	\N	\N	\N	\N	PRAMOD	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1233	2	2	EPCMS-NICU-BWRM-012	3960	\N	\N	IDAR-180306	Captured	t	f	Installed	2025-12-09 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:42.288908	2026-08-10 14:55:48.896775	t	2028-12-08	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	KANGAROO 1085	\N	\N	\N	\N	PRAMOD	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1234	2	2	EPCMS-NICU-BCPAP-005	3967	\N	\N	IBAV-111616	Captured	t	f	Installed	2025-12-09 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:42.288914	2026-08-10 14:55:48.896775	t	2028-12-08	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	BABYPAP 1150S	\N	\N	\N	\N	PRAMOD	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1235	2	2	EPCMS-NICU-BCPAP-006	3967	\N	\N	IBAV-111617	Captured	t	f	Installed	2025-12-09 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:42.288919	2026-08-10 14:55:48.896775	t	2028-12-08	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	BABYPAP 1150S	\N	\N	\N	\N	PRAMOD	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1326	2	2	EPCMS-OT_GEN-PM-092	3899	\N	\N	FT4-56023374	Captured	t	f	Installed	2025-10-15 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:43.581405	2026-08-10 14:55:48.896775	t	2028-10-14	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	128	\N	\N	\N	MINDRAY	UMEC 100	\N	\N	\N	\N	Devaraj K	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1378	2	2	EPCMS-OT_OBG-NWS-002	3971	\N	\N	H2600153913	Captured	t	f	Installed	2026-04-07 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:44.080321	2026-08-10 14:55:48.896775	t	2027-04-06	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	131	\N	\N	\N	Essae	BS 250	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1404	2	2	EPCMS-OT_ORTHO-STQ-001	4029	\N	\N	TRDG501	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.361029	2026-08-10 14:55:48.896775	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	133	\N	\N	\N	DIAMOND	DIAMOND	\N	\N	\N	\N	Manjunath	\N	f	f	Available	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1405	2	2	EPCMS-OT_ORTHO-STQ-002	4029	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.361041	2026-08-10 14:55:48.896775	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	133	\N	\N	\N	MEKTRONIC	\N	\N	\N	\N	\N	Jitheesh	\N	f	f	Available	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1474	2	2	EPCMS-PHYSIO-PM-104	3899	\N	\N	FT4-56023355	Captured	t	f	Installed	2025-10-15 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:45.314513	2026-08-10 14:55:48.896775	t	2028-10-14	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	141	\N	\N	\N	MINDRAY	UMEC 100	\N	\N	\N	\N	Devaraj K	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1494	2	2	EPCMS-POST OT -PM-108	3899	\N	\N	B10W4A014	Captured	t	f	Installed	2026-03-23 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:45.381651	2026-08-10 14:55:48.896775	t	2029-03-22	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	NiDEK	Bravo 10 G3M	\N	\N	\N	\N	Narayanan	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1495	2	2	EPCMS-POST OT -PM-109	3899	\N	\N	B10W4A015	Captured	t	f	Installed	2026-03-23 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:45.381657	2026-08-10 14:55:48.896775	t	2029-03-22	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	NiDEK	Bravo 10 G3M	\N	\N	\N	\N	Narayanan	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1595	2	2	EPCMS-SPL WD-PM-123	3899	\N	\N	B10W4A009	Captured	t	f	Installed	2026-03-23 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:46.06781	2026-08-10 14:55:48.896775	t	2029-03-22	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	148	\N	\N	\N	NiDEK	Bravo 10 G3M	\N	\N	\N	\N	Narayanan	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1596	2	2	EPCMS-SPL WD-PM-124	3899	\N	\N	B10W4A010	Captured	t	f	Installed	2026-03-23 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:46.067815	2026-08-10 14:55:48.896775	t	2029-03-22	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	148	\N	\N	\N	NiDEK	Bravo 10 G3M	\N	\N	\N	\N	Narayanan	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1597	2	2	EPCMS-SPL WD-PM-125	3899	\N	\N	B10W4A008	Captured	t	f	Installed	2026-03-23 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:46.067821	2026-08-10 14:55:48.896775	t	2029-03-22	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	148	\N	\N	\N	NiDEK	Bravo 10 G3M	\N	\N	\N	\N	Narayanan	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1605	2	2	EPCMS-EMDR-DFEB-015	3907	\N	\N	2002001	Captured	t	f	Installed	2026-03-13 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:46.084289	2026-08-10 09:29:25.715018	t	2028-03-12	Under AMC	2026-08-22	\N	\N	\N	\N	\N	\N	\N	\N	\N	108	\N	\N	\N	BPL	RE LIFE 900	\N	\N	\N	\N	\N	\N	t	t	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1599	2	2	EPCMS-BME-BPA-049	3895	\N	\N	RS0102058	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:46.084254	2026-08-05 19:04:46.084257	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	DISHA	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1600	2	2	EPCMS-BME-BPA-050	3903	\N	\N	202101_001468	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:46.08426	2026-08-05 19:04:46.084264	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	CARE TOUCH	CT8712	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1601	2	2	EPCMS-BME-BPA-051	3903	\N	\N	202309133P4VGI	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:46.084266	2026-08-05 19:04:46.084269	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	OMRON	HEM7124	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
@@ -9082,8 +9181,6 @@ COPY public.equipment_items (id, tenant_id, site_id, equipment_code, material_id
 867	2	2	EPCMS-WD-18-VBOX-009	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.599559	2026-08-05 19:04:39.599562	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	95	\N	\N	\N	\N	SINGLE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 868	2	2	EPCMS-WD-18-VBOX-010	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.599565	2026-08-05 19:04:39.599567	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	95	\N	\N	\N	\N	SINGLE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 869	2	2	EPCMS-WD-18-PM-014	3899	\N	\N	B10W4A024	Captured	t	f	Installed	2025-12-31 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:39.59957	2026-08-05 19:04:39.599573	t	2028-12-30	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	95	\N	\N	\N	NiDEK	Bravo 10 G3M	\N	\N	\N	\N	Narayanan	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-870	2	2	EPCMS-WD-18-PM-015	3899	\N	\N	B10W4A020	Captured	t	f	Installed	2026-03-23 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:39.599576	2026-08-05 19:04:39.599578	t	2029-03-22	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	95	\N	\N	\N	NiDEK	Bravo 10 G3M	\N	\N	\N	\N	Narayanan	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-871	2	2	EPCMS-WD-18-PM-016	3899	\N	\N	B10W4A019	Captured	t	f	Installed	2026-03-23 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:39.599581	2026-08-05 19:04:39.599584	t	2029-03-22	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	95	\N	\N	\N	NiDEK	Bravo 10 G3M	\N	\N	\N	\N	Narayanan	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 872	2	2	EPCMS-BME-BCM-001	3904	\N	\N	DHCM-811	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.647761	2026-08-05 19:04:39.647771	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	96	\N	\N	\N	REMI	BCM10ULTRA	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 873	2	2	EPCMS-BME-ECG-006	3902	\N	\N	106759-M13804740001	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.647775	2026-08-05 19:04:39.647778	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	96	\N	\N	\N	EDAN	SE1200	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 874	2	2	EPCMS-BME-INP-003	3898	\N	\N	160110557	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.647781	2026-08-05 19:04:39.647784	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	96	\N	\N	\N	FRESINIOUS KABI	INFUSIA VP7	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
@@ -9201,7 +9298,6 @@ COPY public.equipment_items (id, tenant_id, site_id, equipment_code, material_id
 986	2	2	EPCMS-DIALYSIS-PM-040	3899	\N	\N	CN12807160	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.83185	2026-08-05 19:04:40.831853	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	105	\N	\N	\N	PHILIPS (GOLDWAY)	UT 6000A	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 987	2	2	EPCMS-DIALYSIS-DRU-001	3940	\N	\N	2015A470	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.844385	2026-08-05 19:04:40.844395	f	\N	AMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	105	\N	\N	\N	RENACLEAN	RENACLEAN PLUSE	\N	\N	\N	\N	Elango G	\N	f	f	BUYBACK	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 988	2	2	EPCMS-DIALYSIS-DRU-002	3940	\N	\N	2025A1197	Captured	f	f	Installed	2025-05-21 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:40.844399	2026-08-05 19:04:40.844402	t	2026-11-20	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	105	\N	\N	\N	RENACLEAN	RENACLEAN PLUSE	\N	\N	\N	\N	Elango G	\N	f	f	Working	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-989	2	2	EPCMS-DIALYSIS-PM-041	3899	\N	\N	B10W4A013	Captured	t	f	Installed	2026-03-23 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:40.844405	2026-08-05 19:04:40.844408	t	2029-03-22	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	105	\N	\N	\N	NiDEK	Bravo 10 G3M	\N	\N	\N	\N	Narayanan	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 990	2	2	EPCMS-EICU-ECG-010	3902	\N	\N	DETE3A26884	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.88795	2026-08-05 19:04:40.887959	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	106	\N	\N	\N	BPL	CARIDO HEART 6208	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 991	2	2	EPCMS-EICU-PM-042	3899	\N	\N	FT4-45002892	Captured	t	f	Installed	2024-10-16 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:40.887962	2026-08-05 19:04:40.887965	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	106	\N	\N	\N	MINDRAY	UMEC 100	\N	\N	\N	\N	ADARSH	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 992	2	2	EPCMS-EICU-PM-043	3899	\N	\N	FT4-45002880	Captured	t	f	Installed	2024-10-16 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:40.887968	2026-08-05 19:04:40.887971	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	106	\N	\N	\N	MINDRAY	UMEC 100	\N	\N	\N	\N	ADARSH	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
@@ -9215,8 +9311,6 @@ COPY public.equipment_items (id, tenant_id, site_id, equipment_code, material_id
 1000	2	2	EPCMS-EICU-SYP-022	3900	\N	\N	SM3-4B034943	Captured	t	f	Installed	2025-11-02 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:40.888013	2026-08-05 19:04:40.888016	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	106	\N	\N	\N	MINDRAY	BENEVISION uSP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1001	2	2	EPCMS-RAD-MXR-001	3941	\N	\N	2K20110373SR-DX/HF	Captured	t	f	Installed	2019-09-24 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:40.903713	2026-08-05 19:04:40.903722	f	\N	AMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	106	\N	\N	\N	ALLENGERS	MARS 4.2 SR	\N	\N	\N	\N	MR.ANKUR SHARMA	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1002	2	2	EPCMS-EICU-INP-012	3898	\N	\N	SMI -38001771	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.903726	2026-08-05 19:04:40.903728	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	106	\N	\N	\N	MINDRAY	BENEFUSION uVP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1003	2	2	EPCMS-EICU-PM-048	3899	\N	\N	FT4-56023346	Captured	t	f	Installed	2025-10-15 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:40.903731	2026-08-05 19:04:40.903734	t	2028-10-14	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	106	\N	\N	\N	MINDRAY	UMEC 100	\N	\N	\N	\N	Devaraj K	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1004	2	2	EPCMS-EICU-PM-049	3899	\N	\N	FT4-56023378	Captured	t	f	Installed	2025-10-15 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:40.903737	2026-08-05 19:04:40.90374	t	2028-10-14	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	106	\N	\N	\N	MINDRAY	UMEC 100	\N	\N	\N	\N	Devaraj K	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1005	2	2	EPCMS-EMD -PM-050	3899	\N	\N	112613 M13804950010	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.926797	2026-08-05 19:04:40.926807	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	107	\N	\N	\N	EDAN	M3	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1006	2	2	EPCMS-EMD_G-PM-051	3899	\N	\N	301410M13804910003	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.92681	2026-08-05 19:04:40.926813	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	107	\N	\N	\N	EDAN	IM8	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1007	2	2	EPCMS-EMD_G-PM-052	3899	\N	\N	E7181214048B	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:40.926816	2026-08-05 19:04:40.926819	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	107	\N	\N	\N	COMEN	STAR8000	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
@@ -9256,7 +9350,6 @@ COPY public.equipment_items (id, tenant_id, site_id, equipment_code, material_id
 1041	2	2	EPCMS-RAD-USTD-004	3909	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.035545	2026-08-05 19:04:41.035548	f	\N	AMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	108	\N	\N	\N	SIEMENS	NX2_	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1042	2	2	EPCMS-RAD-USTD-005	3909	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.035551	2026-08-05 19:04:41.035554	f	\N	AMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	108	\N	\N	\N	SIEMENS	NX2_	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1043	2	2	EPCMS-RAD-USTD-006	3909	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.035558	2026-08-05 19:04:41.035561	f	\N	AMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	108	\N	\N	\N	SIEMENS	NX2_	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1044	2	2	EPCMS-EMD_R-PM-064	3899	\N	\N	FT4-56023369	Captured	t	f	Installed	2025-10-15 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:41.035564	2026-08-05 19:04:41.035567	t	2028-10-14	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	108	\N	\N	\N	MINDRAY	UMEC 100	\N	\N	\N	\N	Devaraj K	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1045	2	2	EPCMS-EMD_Y-ECG-012	3902	\N	\N	DUTB1M12572	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.058818	2026-08-05 19:04:41.058829	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	109	\N	\N	\N	BPL	CARDIO HEART 9108	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1046	2	2	EPCMS-EMD_Y-PM-065	3899	\N	\N	KN-36198088	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.058833	2026-08-05 19:04:41.058836	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	109	\N	\N	\N	MINDRAY	UMEC 10	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1047	2	2	EPCMS-EMD_Y-PM-066	3899	\N	\N	KN-36198089	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:41.05884	2026-08-05 19:04:41.058843	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	109	\N	\N	\N	MINDRAY	UMEC 10	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
@@ -9378,11 +9471,6 @@ COPY public.equipment_items (id, tenant_id, site_id, equipment_code, material_id
 1163	2	2	EPCMS-MICU-VENT-024	3905	\N	\N	GB-51087016	Captured	t	f	Installed	2025-03-06 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:41.98457	2026-08-05 19:04:41.984573	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	SV 300	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1164	2	2	EPCMS-MICU-VENT-025	3905	\N	\N	GB-51087018	Captured	t	f	Installed	2025-03-06 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:41.984576	2026-08-05 19:04:41.984579	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	SV 300	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1165	2	2	EPCMS-MICU-PTWM-002	3926	\N	\N	247504	Captured	t	f	Installed	2025-04-25 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:41.984582	2026-08-05 19:04:41.984584	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	3M	775	\N	\N	\N	\N	Mulari Gowda	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1166	2	2	EPCMS-MICU-VENT-026	3905	\N	\N	GB-57090707	Captured	t	f	Installed	2025-10-15 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:41.984587	2026-08-05 19:04:41.98459	t	2028-10-14	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	SV 300	\N	\N	\N	\N	Devaraj K	\N	f	f	Working	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1167	2	2	EPCMS-MICU-VENT-027	3905	\N	\N	GB-57090708	Captured	t	f	Installed	2025-10-15 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:41.984592	2026-08-05 19:04:41.984595	t	2028-10-14	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	SV 300	\N	\N	\N	\N	Devaraj K	\N	f	f	Working	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1168	2	2	EPCMS-MICU-VENT-028	3905	\N	\N	GB-57092132	Captured	t	f	Not Required	\N	\N	\N	62	\N	Working	2026-08-05 19:04:41.984598	2026-08-05 19:04:41.984601	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	SV 300	\N	\N	\N	\N	Devaraj K	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1169	2	2	EPCMS-MICU-VENT-029	3905	\N	\N	GB-57092136	Captured	t	f	Not Required	\N	\N	\N	62	\N	Working	2026-08-05 19:04:41.984603	2026-08-05 19:04:41.984606	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	SV 300	\N	\N	\N	\N	Devaraj K	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1170	2	2	EPCMS-MICU-VENT-030	3905	\N	\N	GB-57092129	Captured	t	f	Not Required	\N	\N	\N	62	\N	Working	2026-08-05 19:04:41.984609	2026-08-05 19:04:41.984612	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	MINDRAY	SV 300	\N	\N	\N	\N	Devaraj K	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1171	2	2	EPCMS-MICU-DFEB-007	3907	\N	\N	GSJJ6A2418	Captured	t	f	Installed	2026-03-13 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:41.984615	2026-08-05 19:04:41.984617	t	2028-03-12	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	116	\N	\N	\N	BPL	RE LIFE 900	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1172	2	2	EPCMS-MINOR OT-ANES-001	3965	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.011049	2026-08-05 19:04:42.011059	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	118	\N	\N	\N	RATAMETER	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1173	2	2	EPCMS-MINOR OT-ANES-002	3965	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.011062	2026-08-05 19:04:42.011065	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	118	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
@@ -9436,18 +9524,9 @@ COPY public.equipment_items (id, tenant_id, site_id, equipment_code, material_id
 1221	2	2	EPCMS-NICU-PM-085	3899	\N	\N	CN12807156	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.251336	2026-08-05 19:04:42.251339	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	PHILIPS (GOLDWAY)	UT 6000A	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1222	2	2	EPCMS-NICU-PM-086	3899	\N	\N	CN12807148	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.251342	2026-08-05 19:04:42.251344	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	PHILIPS (GOLDWAY)	UT 6000A	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1223	2	2	EPCMS-NICU-PM-087	3899	\N	\N	CN12801767	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.251347	2026-08-05 19:04:42.25135	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	PHILIPS (GOLDWAY)	UT 6000A	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1224	2	2	EPCMS-NICU-NWS-001	3971	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Working	2026-08-05 19:04:42.288852	2026-08-05 19:04:42.288861	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	Essae	BS 250	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1225	2	2	EPCMS-NICU-VENT-032	3905	\N	\N	ASPN - 0006	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.288865	2026-08-05 19:04:42.288867	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	DRAGER	BABYLOG VN600	\N	\N	\N	\N	JOEL /NANDHA	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1226	2	2	EPCMS-NICU-PM-088	3899	\N	\N	FT4-45002874	Captured	t	f	Installed	2024-10-16 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:42.28887	2026-08-05 19:04:42.288873	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	MINDRAY	UMEC 100	\N	\N	\N	\N	ADARSH	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1227	2	2	EPCMS-NICU-PM-089	3899	\N	\N	FT4-45002881	Captured	t	f	Installed	2024-10-16 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:42.288876	2026-08-05 19:04:42.288878	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	MINDRAY	UMEC 100	\N	\N	\N	\N	ADARSH	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1228	2	2	EPCMS-NICU-PHTH-014	3968	\N	\N	IBAS-891705	Captured	t	f	Installed	2025-12-09 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:42.288881	2026-08-05 19:04:42.288884	t	2028-12-08	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	BILITRON 2006	\N	\N	\N	\N	PRAMOD	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1229	2	2	EPCMS-NICU-PHTH-015	3968	\N	\N	IBAS-891695	Captured	t	f	Installed	2025-12-09 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:42.288887	2026-08-05 19:04:42.288889	t	2028-12-08	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	BILITRON 2006	\N	\N	\N	\N	PRAMOD	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1230	2	2	EPCMS-NICU-PHTH-016	3968	\N	\N	IBAS-891704	Captured	t	f	Installed	2025-12-09 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:42.288892	2026-08-05 19:04:42.288895	t	2028-12-08	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	BILITRON 2006	\N	\N	\N	\N	PRAMOD	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1231	2	2	EPCMS-NICU-PHTH-017	3968	\N	\N	IBAS-891703	Captured	t	f	Installed	2025-12-09 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:42.288898	2026-08-05 19:04:42.2889	t	2028-12-08	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	BILITRON 2006	\N	\N	\N	\N	PRAMOD	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1232	2	2	EPCMS-NICU-BWRM-011	3960	\N	\N	IDAR-180305	Captured	t	f	Installed	2025-12-09 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:42.288903	2026-08-05 19:04:42.288906	t	2028-12-08	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	KANGAROO 1085	\N	\N	\N	\N	PRAMOD	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1233	2	2	EPCMS-NICU-BWRM-012	3960	\N	\N	IDAR-180306	Captured	t	f	Installed	2025-12-09 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:42.288908	2026-08-05 19:04:42.288911	t	2028-12-08	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	KANGAROO 1085	\N	\N	\N	\N	PRAMOD	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1234	2	2	EPCMS-NICU-BCPAP-005	3967	\N	\N	IBAV-111616	Captured	t	f	Installed	2025-12-09 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:42.288914	2026-08-05 19:04:42.288917	t	2028-12-08	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	BABYPAP 1150S	\N	\N	\N	\N	PRAMOD	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1235	2	2	EPCMS-NICU-BCPAP-006	3967	\N	\N	IBAV-111617	Captured	t	f	Installed	2025-12-09 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:42.288919	2026-08-05 19:04:42.288922	t	2028-12-08	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	FANEM	BABYPAP 1150S	\N	\N	\N	\N	PRAMOD	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1236	2	2	EPCMS-NICU-VENT-033	3905	\N	\N	\N	Pending Update	t	f	Installed	2026-01-03 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:42.288925	2026-08-05 19:04:42.288928	t	2027-01-02	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	119	\N	\N	\N	DRAGER	BABYLOG VN600	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1237	2	2	EPCMS-OBG OPD-NST-004	3963	\N	\N	560034-M22305660002	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.366514	2026-08-05 19:04:42.366523	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	120	\N	\N	\N	EDAN	F3	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1238	2	2	EPCMS-OBG OPD-FD-003	3962	\N	\N	LMMA5C10939	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:42.366527	2026-08-05 19:04:42.366531	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	120	\N	\N	\N	BPL	FD9714	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
@@ -9538,7 +9617,6 @@ COPY public.equipment_items (id, tenant_id, site_id, equipment_code, material_id
 1323	2	2	EPCMS-OT_GEN-FUM-005	3919	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.553783	2026-08-05 19:04:43.553786	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	128	\N	\N	\N	AEROJET	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1324	2	2	EPCMS-OT_GEN-PTWM-005	3926	\N	\N	OEH1280	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.553789	2026-08-05 19:04:43.553791	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	128	\N	\N	\N	\N	ORPET	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1325	2	2	EPCMS-OT_GEN-GEN-012	4009	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.581393	2026-08-05 19:04:43.581401	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	128	\N	\N	\N	KING SYSTEM	KING VISION	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1326	2	2	EPCMS-OT_GEN-PM-092	3899	\N	\N	FT4-56023374	Captured	t	f	Installed	2025-10-15 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:43.581405	2026-08-05 19:04:43.581408	t	2028-10-14	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	128	\N	\N	\N	MINDRAY	UMEC 100	\N	\N	\N	\N	Devaraj K	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1327	2	2	EPCMS-OT_LAP-GEN-013	4010	\N	\N	240601009	Captured	t	f	Installed	2025-02-12 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:43.622171	2026-08-05 19:04:43.622183	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	129	\N	\N	\N	Lotus Endoscurgery	LUGEN	\N	\N	\N	\N	SHIVANARAYANA	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1328	2	2	EPCMS-OT_LAP-AWS-003	3996	\N	\N	SPC2152137WA	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.622198	2026-08-05 19:04:43.622202	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	129	\N	\N	\N	GE	DATEX-OHMEDA 9100C NXT	\N	\N	\N	\N	MR. SHYLENDER	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1329	2	2	EPCMS-OT_LAP-ESU-006	3952	\N	\N	1222B042	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.622204	2026-08-05 19:04:43.622207	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	129	\N	\N	\N	SHALYA	LX	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
@@ -9590,7 +9668,6 @@ COPY public.equipment_items (id, tenant_id, site_id, equipment_code, material_id
 1375	2	2	EPCMS-OT_OBG-OTLT-011	3964	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.080304	2026-08-05 19:04:44.080307	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	131	\N	\N	\N	LUMIX	L600	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1376	2	2	EPCMS-OT_OBG-PM-095	3899	\N	\N	30410M13804910002	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.08031	2026-08-05 19:04:44.080313	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	131	\N	\N	\N	EDAN	IM8	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1377	2	2	EPCMS-OT_OBG-OTT-009	3951	\N	\N	2808-08-2015	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.080315	2026-08-05 19:04:44.080318	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	131	\N	\N	\N	PALAKKAD SURGICALS	LEGEND	\N	\N	\N	\N	Sathish	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1378	2	2	EPCMS-OT_OBG-NWS-002	3971	\N	\N	H2600153913	Captured	t	f	Installed	2026-04-07 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:44.080321	2026-08-05 19:04:44.080324	t	2027-04-06	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	131	\N	\N	\N	Essae	BS 250	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1379	2	2	EPCMS-OT_OPTHAL-GEN-019	4022	\N	\N	21093085	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.105669	2026-08-05 19:04:44.105679	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	132	\N	\N	\N	APPASAMY	AA3	\N	\N	\N	\N	THILAK	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1380	2	2	EPCMS-OT_OPTHAL-ESU-011	4023	\N	\N	2701220066	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.13369	2026-08-05 19:04:44.1337	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	132	\N	\N	\N	MICRO SURGICALS	ACCO01	\N	\N	\N	\N	THILAK	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1381	2	2	EPCMS-OT_OPTHAL-ESU-012	4023	\N	\N	2701160287	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.133704	2026-08-05 19:04:44.133706	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	132	\N	\N	\N	MICRO SURGICALS	ACCO01	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
@@ -9616,8 +9693,6 @@ COPY public.equipment_items (id, tenant_id, site_id, equipment_code, material_id
 1401	2	2	EPCMS-OT_ORTHO-GEN-023	4027	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.270149	2026-08-05 19:04:44.270157	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	133	\N	\N	\N	CLAZ MEDICO	LITHOCLAZ	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1402	2	2	EPCMS-OT_ORTHO-GEN-024	4028	\N	\N	2127400029	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.346903	2026-08-05 19:04:44.346914	f	\N	CAMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	133	\N	\N	\N	STRYKER	CORE 2	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1403	2	2	EPCMS-OT_ORTHO-SYP-056	3900	\N	\N	0010312624A01754	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.346917	2026-08-05 19:04:44.34692	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	133	\N	\N	\N	BMS	SN50C6T	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1404	2	2	EPCMS-OT_ORTHO-STQ-001	4029	\N	\N	TRDG501	Captured	f	f	Not Required	\N	\N	\N	62	\N	Working	2026-08-05 19:04:44.361029	2026-08-05 19:04:44.361038	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	133	\N	\N	\N	DIAMOND	DIAMOND	\N	\N	\N	\N	Manjunath	\N	f	f	Available	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1405	2	2	EPCMS-OT_ORTHO-STQ-002	4029	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Working	2026-08-05 19:04:44.361041	2026-08-05 19:04:44.361044	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	133	\N	\N	\N	MEKTRONIC	\N	\N	\N	\N	\N	Jitheesh	\N	f	f	Available	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1406	2	2	EPCMS-OT_ORTHO-STQ-003	4029	\N	\N	000-66	Captured	f	f	Not Required	\N	\N	\N	62	\N	Not Working	2026-08-05 19:04:44.361047	2026-08-05 19:04:44.36105	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	133	\N	\N	\N	DIAMOND	DIAMOND	\N	\N	\N	\N	Manjunath	\N	f	f	Not available	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1407	2	2	EPCMS-OT_ORTHO-VBOX-024	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.361053	2026-08-05 19:04:44.361055	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	133	\N	\N	\N	LOCAL	DOUBLE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1408	2	2	EPCMS-OT PRE OP-PM-098	3899	\N	\N	8000313 0803221	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:44.366491	2026-08-05 19:04:44.366501	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	134	\N	\N	\N	SUN MONITOR	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
@@ -9686,7 +9761,6 @@ COPY public.equipment_items (id, tenant_id, site_id, equipment_code, material_id
 1471	2	2	EPCMS-PHYSIO-CMT-001	4053	\N	\N	14340506823	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.23648	2026-08-05 19:04:45.236489	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	141	\N	\N	\N	HMS MEDICAL SYSTEM	UNITS-55	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1472	2	2	EPCMS-PHYSIO-LASR-001	4054	\N	\N	DLB-1720	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.261414	2026-08-05 19:04:45.261424	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	141	\N	\N	\N	BMS	DIGILAZER PRO	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1473	2	2	EPCMS-PHYSIO-RRGV-001	4055	\N	\N	RB357PCA1M1D4826	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.314498	2026-08-05 19:04:45.314509	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	141	\N	\N	\N	SHENZHER	RRG-100	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1474	2	2	EPCMS-PHYSIO-PM-104	3899	\N	\N	FT4-56023355	Captured	t	f	Installed	2025-10-15 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:45.314513	2026-08-05 19:04:45.314516	t	2028-10-14	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	141	\N	\N	\N	MINDRAY	UMEC 100	\N	\N	\N	\N	Devaraj K	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1475	2	2	EPCMS-PICU-HFNC-002	3942	\N	\N	20072_7153219	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.314519	2026-08-05 19:04:45.314522	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	117	\N	\N	\N	FISCHER& PAYKAL	AIRVO2	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1476	2	2	EPCMS-PICU-HFNC-003	3942	\N	\N	20072_7153066	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.314525	2026-08-05 19:04:45.314528	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	117	\N	\N	\N	FISCHER& PAYKAL	AIRVO2	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1477	2	2	EPCMS-PICU-HFNC-004	3942	\N	\N	21050_4265346	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.314531	2026-08-05 19:04:45.314534	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	117	\N	\N	\N	FISCHER& PAYKAL	AIRVO2	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
@@ -9706,8 +9780,6 @@ COPY public.equipment_items (id, tenant_id, site_id, equipment_code, material_id
 1491	2	2	EPCMS-PICU-VENT-037	3905	\N	\N	BVACV 17977	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.314611	2026-08-05 19:04:45.314613	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	117	\N	\N	\N	BEL	CV200	\N	\N	\N	\N	\N	\N	f	f	Down	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1492	2	2	EPCMS-PICU-VBOX-030	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.314616	2026-08-05 19:04:45.314619	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	117	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1493	2	2	EPCMS-RAD-MXR-005	3941	\N	\N	2K16090455-BX/HF	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.381637	2026-08-05 19:04:45.381647	f	\N	AMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	ALLENGERS	MARS 4.2	\N	\N	\N	\N	MR.ANKUR SHARMA	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1494	2	2	EPCMS-POST OT -PM-108	3899	\N	\N	B10W4A014	Captured	t	f	Installed	2026-03-23 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:45.381651	2026-08-05 19:04:45.381654	t	2029-03-22	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	NiDEK	Bravo 10 G3M	\N	\N	\N	\N	Narayanan	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1495	2	2	EPCMS-POST OT -PM-109	3899	\N	\N	B10W4A015	Captured	t	f	Installed	2026-03-23 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:45.381657	2026-08-05 19:04:45.38166	t	2029-03-22	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	NiDEK	Bravo 10 G3M	\N	\N	\N	\N	Narayanan	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1496	2	2	EPCMS-POST OT -BPA-045	3895	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.381662	2026-08-05 19:04:45.381665	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	DIAMOND	DELUXE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1497	2	2	EPCMS-POST OT -DFEB-014	3907	\N	\N	BYMLAC6372	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.381668	2026-08-05 19:04:45.381671	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	BPL	DF 2509	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1498	2	2	EPCMS-POST OT -ECG-018	3902	\N	\N	DETE3A26883	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.381674	2026-08-05 19:04:45.381677	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	BPL	CARIDO HEART 6208	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
@@ -9807,9 +9879,6 @@ COPY public.equipment_items (id, tenant_id, site_id, equipment_code, material_id
 1592	2	2	EPCMS-SPL WD-SYP-066	3900	\N	\N	SM3-36004785	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:46.049979	2026-08-05 19:04:46.049983	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	148	\N	\N	\N	MINDRAY	BENEVISION uSP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1593	2	2	EPCMS-SPL WD-NCS-001	4071	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:46.06779	2026-08-05 19:04:46.067799	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	148	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1594	2	2	EPCMS-SPL WD-VBOX-045	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:46.067803	2026-08-05 19:04:46.067806	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	148	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1595	2	2	EPCMS-SPL WD-PM-123	3899	\N	\N	B10W4A009	Captured	t	f	Installed	2026-03-23 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:46.06781	2026-08-05 19:04:46.067813	t	2029-03-22	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	148	\N	\N	\N	NiDEK	Bravo 10 G3M	\N	\N	\N	\N	Narayanan	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1596	2	2	EPCMS-SPL WD-PM-124	3899	\N	\N	B10W4A010	Captured	t	f	Installed	2026-03-23 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:46.067815	2026-08-05 19:04:46.067818	t	2029-03-22	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	148	\N	\N	\N	NiDEK	Bravo 10 G3M	\N	\N	\N	\N	Narayanan	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1597	2	2	EPCMS-SPL WD-PM-125	3899	\N	\N	B10W4A008	Captured	t	f	Installed	2026-03-23 00:00:00	\N	\N	62	\N	Working	2026-08-05 19:04:46.067821	2026-08-05 19:04:46.067824	t	2029-03-22	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	148	\N	\N	\N	NiDEK	Bravo 10 G3M	\N	\N	\N	\N	Narayanan	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1598	2	2	EPCMS-RAD-MXR-006	3941	\N	\N	2K21030625SR-DX/LF	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:46.084239	2026-08-05 19:04:46.084251	f	\N	AMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	149	\N	\N	\N	ALLENGERS	100 SR	\N	\N	\N	\N	MR.ANKUR SHARMA	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 \.
 
@@ -15175,7 +15244,6 @@ COPY public.quotation_comparisons (id, qr_id, qr_item_id, material_id, selected_
 117	207	468	2751	63	63	f	\N	\N	\N
 118	206	465	2752	64	64	f	\N	\N	\N
 120	214	482	2564	63	63	f	\N	\N	\N
-119	213	480	2564	66	66	f	\N	\N	\N
 129	222	3994	4621	72	72	f	\N	3	2026-08-06 20:39:56.036196
 130	222	3995	4622	72	72	f	\N	3	2026-08-06 20:39:56.036202
 131	222	3996	4623	72	72	f	\N	3	2026-08-06 20:39:56.036207
@@ -15290,6 +15358,10 @@ COPY public.quotation_comparisons (id, qr_id, qr_item_id, material_id, selected_
 240	222	4105	4732	72	72	f	\N	3	2026-08-06 20:39:56.036696
 241	222	4106	4733	72	72	f	\N	3	2026-08-06 20:39:56.036701
 242	222	4107	4734	72	72	f	\N	3	2026-08-06 20:39:56.036706
+388	224	4253	4818	70	70	f	\N	\N	\N
+389	224	4254	4869	70	70	f	\N	\N	\N
+390	224	4255	4616	70	70	f	\N	\N	\N
+391	224	4256	4617	70	70	f	\N	\N	\N
 243	222	4108	4735	72	72	f	\N	3	2026-08-06 20:39:56.036711
 244	222	4109	4736	72	72	f	\N	3	2026-08-06 20:39:56.036716
 245	222	4110	4737	72	72	f	\N	3	2026-08-06 20:39:56.03612
@@ -15393,6 +15465,8 @@ COPY public.quotation_comparisons (id, qr_id, qr_item_id, material_id, selected_
 343	222	4208	4848	72	72	f	\N	3	2026-08-06 20:39:56.037212
 344	222	4209	4849	72	72	f	\N	3	2026-08-06 20:39:56.037217
 345	222	4210	4850	72	72	f	\N	3	2026-08-06 20:39:56.037222
+396	224	4261	4622	70	70	f	\N	\N	\N
+397	224	4262	4623	70	70	f	\N	\N	\N
 121	222	3986	4817	72	72	f	\N	3	2026-08-06 20:39:56.036157
 122	222	3987	4818	72	72	f	\N	3	2026-08-06 20:39:56.036162
 123	222	3988	4869	72	72	f	\N	3	2026-08-06 20:39:56.036167
@@ -15401,6 +15475,118 @@ COPY public.quotation_comparisons (id, qr_id, qr_item_id, material_id, selected_
 126	222	3991	4618	72	72	f	\N	3	2026-08-06 20:39:56.036182
 127	222	3992	4619	72	72	f	\N	3	2026-08-06 20:39:56.036187
 128	222	3993	4620	72	72	f	\N	3	2026-08-06 20:39:56.036192
+400	224	4265	4626	70	70	f	\N	\N	\N
+402	224	4267	4628	70	70	f	\N	\N	\N
+409	224	4274	4635	70	70	f	\N	\N	\N
+412	224	4277	4638	70	70	f	\N	\N	\N
+415	224	4280	4641	70	70	f	\N	\N	\N
+417	224	4282	4643	70	70	f	\N	\N	\N
+418	224	4283	4644	70	70	f	\N	\N	\N
+419	224	4284	4645	70	70	f	\N	\N	\N
+421	224	4286	4647	70	70	f	\N	\N	\N
+424	224	4289	4650	70	70	f	\N	\N	\N
+426	224	4291	4652	70	70	f	\N	\N	\N
+427	224	4292	4653	70	70	f	\N	\N	\N
+428	224	4293	4654	70	70	f	\N	\N	\N
+432	224	4297	4658	70	70	f	\N	\N	\N
+433	224	4298	4659	70	70	f	\N	\N	\N
+436	224	4301	4662	70	70	f	\N	\N	\N
+440	224	4305	4666	70	70	f	\N	\N	\N
+441	224	4306	4667	70	70	f	\N	\N	\N
+443	224	4308	4669	70	70	f	\N	\N	\N
+447	224	4312	4673	70	70	f	\N	\N	\N
+448	224	4313	4674	70	70	f	\N	\N	\N
+451	224	4316	4677	70	70	f	\N	\N	\N
+452	224	4317	4678	70	70	f	\N	\N	\N
+453	224	4318	4679	70	70	f	\N	\N	\N
+455	224	4320	4681	70	70	f	\N	\N	\N
+456	224	4321	4682	70	70	f	\N	\N	\N
+457	224	4322	4683	70	70	f	\N	\N	\N
+464	224	4329	4690	70	70	f	\N	\N	\N
+467	224	4332	4693	70	70	f	\N	\N	\N
+470	224	4335	4696	70	70	f	\N	\N	\N
+473	224	4338	4699	70	70	f	\N	\N	\N
+475	224	4340	4701	70	70	f	\N	\N	\N
+476	224	4341	4702	70	70	f	\N	\N	\N
+477	224	4342	4703	70	70	f	\N	\N	\N
+481	224	4346	4707	70	70	f	\N	\N	\N
+484	224	4349	4710	70	70	f	\N	\N	\N
+488	224	4353	4714	70	70	f	\N	\N	\N
+491	224	4356	4717	70	70	f	\N	\N	\N
+493	224	4358	4719	70	70	f	\N	\N	\N
+494	224	4359	4720	70	70	f	\N	\N	\N
+496	224	4361	4722	70	70	f	\N	\N	\N
+497	224	4362	4723	70	70	f	\N	\N	\N
+499	224	4364	4725	70	70	f	\N	\N	\N
+501	224	4366	4727	70	70	f	\N	\N	\N
+503	224	4368	4729	70	70	f	\N	\N	\N
+508	224	4373	4734	70	70	f	\N	\N	\N
+512	224	4377	4738	70	70	f	\N	\N	\N
+515	224	4380	4741	70	70	f	\N	\N	\N
+516	224	4381	4742	70	70	f	\N	\N	\N
+518	224	4383	4744	70	70	f	\N	\N	\N
+519	224	4384	4745	70	70	f	\N	\N	\N
+520	224	4387	4748	70	70	f	\N	\N	\N
+523	224	4392	4753	70	70	f	\N	\N	\N
+525	224	4396	4757	70	70	f	\N	\N	\N
+528	224	4400	4761	70	70	f	\N	\N	\N
+529	224	4401	4762	70	70	f	\N	\N	\N
+532	224	4406	4767	70	70	f	\N	\N	\N
+534	224	4410	4771	70	70	f	\N	\N	\N
+539	224	4417	4778	70	70	f	\N	\N	\N
+540	224	4418	4779	70	70	f	\N	\N	\N
+541	224	4419	4780	70	70	f	\N	\N	\N
+542	224	4420	4781	70	70	f	\N	\N	\N
+548	224	4429	4790	70	70	f	\N	\N	\N
+549	224	4430	4791	70	70	f	\N	\N	\N
+551	224	4433	4794	70	70	f	\N	\N	\N
+552	224	4434	4795	70	70	f	\N	\N	\N
+553	224	4435	4796	70	70	f	\N	\N	\N
+557	224	4442	4803	70	70	f	\N	\N	\N
+558	224	4443	4804	70	70	f	\N	\N	\N
+560	224	4445	4806	70	70	f	\N	\N	\N
+561	224	4447	4808	70	70	f	\N	\N	\N
+563	224	4452	4813	70	70	f	\N	\N	\N
+568	224	4460	4823	70	70	f	\N	\N	\N
+569	224	4461	4824	70	70	f	\N	\N	\N
+573	224	4468	4831	70	70	f	\N	\N	\N
+575	224	4471	4834	70	70	f	\N	\N	\N
+576	224	4472	4835	70	70	f	\N	\N	\N
+578	224	4476	4850	70	70	f	\N	\N	\N
+583	224	4483	4857	70	70	f	\N	\N	\N
+585	224	4487	4861	70	70	f	\N	\N	\N
+587	224	4490	4864	70	70	f	\N	\N	\N
+588	224	4491	4865	70	70	f	\N	\N	\N
+594	224	4502	4611	70	70	f	\N	\N	\N
+595	224	4503	4612	70	70	f	\N	\N	\N
+387	224	4252	4817	69	69	f	\N	\N	\N
+392	224	4257	4618	69	69	f	\N	\N	\N
+393	224	4258	4619	69	69	f	\N	\N	\N
+394	224	4259	4620	69	69	f	\N	\N	\N
+395	224	4260	4621	69	69	f	\N	\N	\N
+398	224	4263	4624	69	69	f	\N	\N	\N
+399	224	4264	4625	69	69	f	\N	\N	\N
+401	224	4266	4627	69	69	f	\N	\N	\N
+403	224	4268	4629	69	69	f	\N	\N	\N
+404	224	4269	4630	69	69	f	\N	\N	\N
+405	224	4270	4631	69	69	f	\N	\N	\N
+406	224	4271	4632	69	69	f	\N	\N	\N
+407	224	4272	4633	69	69	f	\N	\N	\N
+408	224	4273	4634	69	69	f	\N	\N	\N
+410	224	4275	4636	69	69	f	\N	\N	\N
+411	224	4276	4637	69	69	f	\N	\N	\N
+413	224	4278	4639	69	69	f	\N	\N	\N
+414	224	4279	4640	69	69	f	\N	\N	\N
+416	224	4281	4642	69	69	f	\N	\N	\N
+420	224	4285	4646	69	69	f	\N	\N	\N
+422	224	4287	4648	69	69	f	\N	\N	\N
+423	224	4288	4649	69	69	f	\N	\N	\N
+425	224	4290	4651	69	69	f	\N	\N	\N
+429	224	4294	4655	69	69	f	\N	\N	\N
+430	224	4295	4656	69	69	f	\N	\N	\N
+431	224	4296	4657	69	69	f	\N	\N	\N
+434	224	4299	4660	69	69	f	\N	\N	\N
+435	224	4300	4661	69	69	f	\N	\N	\N
 346	222	4211	4851	72	72	f	\N	3	2026-08-06 20:39:56.037227
 347	222	4212	4852	72	72	f	\N	3	2026-08-06 20:39:56.037232
 348	222	4213	4853	72	72	f	\N	3	2026-08-06 20:39:56.037237
@@ -15442,6 +15628,155 @@ COPY public.quotation_comparisons (id, qr_id, qr_item_id, material_id, selected_
 384	222	4249	4844	72	72	f	\N	3	2026-08-06 20:39:56.037409
 385	222	4250	4845	72	72	f	\N	3	2026-08-06 20:39:56.037414
 386	222	4251	4846	72	72	f	\N	3	2026-08-06 20:39:56.037419
+603	224	4391	4752	70	70	f	\N	\N	\N
+605	224	4394	4755	70	70	f	\N	\N	\N
+610	224	4409	4770	70	70	f	\N	\N	\N
+611	224	4411	4772	70	70	f	\N	\N	\N
+614	224	4427	4788	70	70	f	\N	\N	\N
+619	224	4441	4802	70	70	f	\N	\N	\N
+620	224	4446	4807	70	70	f	\N	\N	\N
+624	224	4455	4816	70	70	f	\N	\N	\N
+625	224	4457	4820	70	70	f	\N	\N	\N
+627	224	4462	4825	70	70	f	\N	\N	\N
+631	224	4474	4848	70	70	f	\N	\N	\N
+632	224	4475	4849	70	70	f	\N	\N	\N
+633	224	4477	4851	70	70	f	\N	\N	\N
+634	224	4481	4855	70	70	f	\N	\N	\N
+635	224	4484	4858	70	70	f	\N	\N	\N
+636	224	4486	4860	70	70	f	\N	\N	\N
+638	224	4493	4867	70	70	f	\N	\N	\N
+641	224	4500	4609	70	70	f	\N	\N	\N
+642	224	4501	4610	70	70	f	\N	\N	\N
+644	224	4507	4836	70	70	f	\N	\N	\N
+645	224	4508	4837	70	70	f	\N	\N	\N
+647	224	4510	4839	70	70	f	\N	\N	\N
+648	224	4511	4840	70	70	f	\N	\N	\N
+651	224	4516	4845	70	70	f	\N	\N	\N
+437	224	4302	4663	69	69	f	\N	\N	\N
+438	224	4303	4664	69	69	f	\N	\N	\N
+439	224	4304	4665	69	69	f	\N	\N	\N
+442	224	4307	4668	69	69	f	\N	\N	\N
+444	224	4309	4670	69	69	f	\N	\N	\N
+445	224	4310	4671	69	69	f	\N	\N	\N
+446	224	4311	4672	69	69	f	\N	\N	\N
+449	224	4314	4675	69	69	f	\N	\N	\N
+450	224	4315	4676	69	69	f	\N	\N	\N
+454	224	4319	4680	69	69	f	\N	\N	\N
+458	224	4323	4684	69	69	f	\N	\N	\N
+459	224	4324	4685	69	69	f	\N	\N	\N
+460	224	4325	4686	69	69	f	\N	\N	\N
+461	224	4326	4687	69	69	f	\N	\N	\N
+462	224	4327	4688	69	69	f	\N	\N	\N
+463	224	4328	4689	69	69	f	\N	\N	\N
+465	224	4330	4691	69	69	f	\N	\N	\N
+466	224	4331	4692	69	69	f	\N	\N	\N
+468	224	4333	4694	69	69	f	\N	\N	\N
+469	224	4334	4695	69	69	f	\N	\N	\N
+471	224	4336	4697	69	69	f	\N	\N	\N
+472	224	4337	4698	69	69	f	\N	\N	\N
+474	224	4339	4700	69	69	f	\N	\N	\N
+478	224	4343	4704	69	69	f	\N	\N	\N
+479	224	4344	4705	69	69	f	\N	\N	\N
+480	224	4345	4706	69	69	f	\N	\N	\N
+482	224	4347	4708	69	69	f	\N	\N	\N
+483	224	4348	4709	69	69	f	\N	\N	\N
+485	224	4350	4711	69	69	f	\N	\N	\N
+486	224	4351	4712	69	69	f	\N	\N	\N
+487	224	4352	4713	69	69	f	\N	\N	\N
+489	224	4354	4715	69	69	f	\N	\N	\N
+490	224	4355	4716	69	69	f	\N	\N	\N
+492	224	4357	4718	69	69	f	\N	\N	\N
+495	224	4360	4721	69	69	f	\N	\N	\N
+498	224	4363	4724	69	69	f	\N	\N	\N
+500	224	4365	4726	69	69	f	\N	\N	\N
+502	224	4367	4728	69	69	f	\N	\N	\N
+504	224	4369	4730	69	69	f	\N	\N	\N
+505	224	4370	4731	69	69	f	\N	\N	\N
+506	224	4371	4732	69	69	f	\N	\N	\N
+507	224	4372	4733	69	69	f	\N	\N	\N
+509	224	4374	4735	69	69	f	\N	\N	\N
+510	224	4375	4736	69	69	f	\N	\N	\N
+511	224	4376	4737	69	69	f	\N	\N	\N
+513	224	4378	4739	69	69	f	\N	\N	\N
+514	224	4379	4740	69	69	f	\N	\N	\N
+517	224	4382	4743	69	69	f	\N	\N	\N
+600	224	4385	4746	69	69	f	\N	\N	\N
+601	224	4386	4747	69	69	f	\N	\N	\N
+521	224	4388	4749	69	69	f	\N	\N	\N
+522	224	4389	4750	69	69	f	\N	\N	\N
+602	224	4390	4751	69	69	f	\N	\N	\N
+604	224	4393	4754	69	69	f	\N	\N	\N
+524	224	4395	4756	69	69	f	\N	\N	\N
+526	224	4397	4758	69	69	f	\N	\N	\N
+527	224	4398	4759	69	69	f	\N	\N	\N
+606	224	4399	4760	69	69	f	\N	\N	\N
+607	224	4402	4763	69	69	f	\N	\N	\N
+608	224	4403	4764	69	69	f	\N	\N	\N
+530	224	4404	4765	69	69	f	\N	\N	\N
+531	224	4405	4766	69	69	f	\N	\N	\N
+609	224	4407	4768	69	69	f	\N	\N	\N
+533	224	4408	4769	69	69	f	\N	\N	\N
+535	224	4412	4773	69	69	f	\N	\N	\N
+536	224	4413	4774	69	69	f	\N	\N	\N
+537	224	4414	4775	69	69	f	\N	\N	\N
+612	224	4415	4776	69	69	f	\N	\N	\N
+538	224	4416	4777	69	69	f	\N	\N	\N
+543	224	4421	4782	69	69	f	\N	\N	\N
+544	224	4422	4783	69	69	f	\N	\N	\N
+545	224	4423	4784	69	69	f	\N	\N	\N
+546	224	4424	4785	69	69	f	\N	\N	\N
+547	224	4425	4786	69	69	f	\N	\N	\N
+613	224	4426	4787	69	69	f	\N	\N	\N
+615	224	4428	4789	69	69	f	\N	\N	\N
+616	224	4431	4792	69	69	f	\N	\N	\N
+550	224	4432	4793	69	69	f	\N	\N	\N
+617	224	4436	4797	69	69	f	\N	\N	\N
+554	224	4437	4798	69	69	f	\N	\N	\N
+618	224	4438	4799	69	69	f	\N	\N	\N
+555	224	4439	4800	69	69	f	\N	\N	\N
+556	224	4440	4801	69	69	f	\N	\N	\N
+559	224	4444	4805	69	69	f	\N	\N	\N
+562	224	4448	4809	69	69	f	\N	\N	\N
+621	224	4449	4810	69	69	f	\N	\N	\N
+622	224	4450	4811	69	69	f	\N	\N	\N
+623	224	4451	4812	69	69	f	\N	\N	\N
+564	224	4453	4814	69	69	f	\N	\N	\N
+565	224	4454	4815	69	69	f	\N	\N	\N
+566	224	4456	4819	69	69	f	\N	\N	\N
+567	224	4458	4821	69	69	f	\N	\N	\N
+626	224	4459	4822	69	69	f	\N	\N	\N
+570	224	4463	4826	69	69	f	\N	\N	\N
+571	224	4464	4827	69	69	f	\N	\N	\N
+628	224	4465	4828	69	69	f	\N	\N	\N
+629	224	4466	4829	69	69	f	\N	\N	\N
+572	224	4467	4830	69	69	f	\N	\N	\N
+630	224	4469	4832	69	69	f	\N	\N	\N
+574	224	4470	4833	69	69	f	\N	\N	\N
+577	224	4473	4847	69	69	f	\N	\N	\N
+579	224	4478	4852	69	69	f	\N	\N	\N
+580	224	4479	4853	69	69	f	\N	\N	\N
+581	224	4480	4854	69	69	f	\N	\N	\N
+582	224	4482	4856	69	69	f	\N	\N	\N
+584	224	4485	4859	69	69	f	\N	\N	\N
+637	224	4488	4862	69	69	f	\N	\N	\N
+586	224	4489	4863	69	69	f	\N	\N	\N
+589	224	4492	4866	69	69	f	\N	\N	\N
+590	224	4494	4868	69	69	f	\N	\N	\N
+591	224	4495	4604	69	69	f	\N	\N	\N
+592	224	4496	4605	69	69	f	\N	\N	\N
+593	224	4497	4606	69	69	f	\N	\N	\N
+639	224	4498	4607	69	69	f	\N	\N	\N
+640	224	4499	4608	69	69	f	\N	\N	\N
+596	224	4504	4613	69	69	f	\N	\N	\N
+643	224	4505	4614	69	69	f	\N	\N	\N
+597	224	4506	4615	69	69	f	\N	\N	\N
+646	224	4509	4838	69	69	f	\N	\N	\N
+598	224	4512	4841	69	69	f	\N	\N	\N
+599	224	4513	4842	69	69	f	\N	\N	\N
+649	224	4514	4843	69	69	f	\N	\N	\N
+650	224	4515	4844	69	69	f	\N	\N	\N
+652	224	4517	4846	69	69	f	\N	\N	\N
+119	213	480	2564	66	66	f	\N	3	2026-08-10 11:28:56.393169
 \.
 
 
@@ -15604,10 +15939,276 @@ COPY public.quotation_request_item_sources (id, qr_item_id, source, source_pr_id
 138	496	Manual	\N	1
 139	497	Manual	\N	1
 140	498	PR	205	5
+3899	4252	Imported	\N	500
+3900	4253	Imported	\N	500
+3901	4254	Imported	\N	14
 144	502	Manual	\N	1
 145	503	Manual	\N	1
 146	504	Manual	\N	5
 147	504	PR	205	5
+3902	4255	Imported	\N	125
+3903	4256	Imported	\N	500
+3904	4257	Imported	\N	500
+3905	4258	Imported	\N	500
+3906	4259	Imported	\N	13
+3907	4260	Imported	\N	500
+3908	4261	Imported	\N	500
+3909	4262	Imported	\N	500
+3910	4263	Imported	\N	500
+3911	4264	Imported	\N	500
+3912	4265	Imported	\N	100
+3913	4266	Imported	\N	500
+3914	4267	Imported	\N	500
+3915	4268	Imported	\N	100
+3916	4269	Imported	\N	500
+3917	4270	Imported	\N	500
+3918	4271	Imported	\N	500
+3919	4272	Imported	\N	500
+3920	4273	Imported	\N	500
+3921	4274	Imported	\N	500
+3922	4275	Imported	\N	500
+3923	4276	Imported	\N	500
+3924	4277	Imported	\N	250
+3925	4278	Imported	\N	500
+3926	4279	Imported	\N	500
+3927	4280	Imported	\N	100
+3928	4281	Imported	\N	125
+3929	4282	Imported	\N	500
+3930	4283	Imported	\N	125
+3931	4284	Imported	\N	125
+3932	4285	Imported	\N	125
+3933	4286	Imported	\N	125
+3934	4287	Imported	\N	125
+3935	4288	Imported	\N	125
+3936	4289	Imported	\N	500
+3937	4290	Imported	\N	500
+3938	4291	Imported	\N	500
+3939	4292	Imported	\N	500
+3940	4293	Imported	\N	100
+3941	4294	Imported	\N	1000
+3942	4295	Imported	\N	7
+3943	4296	Imported	\N	500
+3944	4297	Imported	\N	100
+3945	4298	Imported	\N	500
+3946	4299	Imported	\N	500
+3947	4300	Imported	\N	12
+3948	4301	Imported	\N	100
+3949	4302	Imported	\N	500
+3950	4303	Imported	\N	500
+3951	4304	Imported	\N	125
+3952	4305	Imported	\N	125
+3953	4306	Imported	\N	100
+3954	4307	Imported	\N	500
+3955	4308	Imported	\N	500
+3956	4309	Imported	\N	100
+3957	4310	Imported	\N	500
+3958	4311	Imported	\N	500
+3959	4312	Imported	\N	500
+3960	4313	Imported	\N	500
+3961	4314	Imported	\N	500
+3962	4315	Imported	\N	500
+3963	4316	Imported	\N	500
+3964	4317	Imported	\N	500
+3965	4318	Imported	\N	500
+3966	4319	Imported	\N	100
+3967	4320	Imported	\N	10
+3968	4321	Imported	\N	500
+3969	4322	Imported	\N	500
+3970	4323	Imported	\N	1
+3971	4324	Imported	\N	500
+3972	4325	Imported	\N	500
+3973	4326	Imported	\N	500
+3974	4327	Imported	\N	500
+3975	4328	Imported	\N	500
+3976	4329	Imported	\N	250
+3977	4330	Imported	\N	500
+3978	4331	Imported	\N	250
+3979	4332	Imported	\N	500
+3980	4333	Imported	\N	500
+3981	4334	Imported	\N	500
+3982	4335	Imported	\N	250
+3983	4336	Imported	\N	500
+3984	4337	Imported	\N	500
+3985	4338	Imported	\N	8
+3986	4339	Imported	\N	5
+3987	4340	Imported	\N	13
+3988	4341	Imported	\N	100
+3989	4342	Imported	\N	500
+3990	4343	Imported	\N	500
+3991	4344	Imported	\N	5
+3992	4345	Imported	\N	500
+3993	4346	Imported	\N	500
+3994	4347	Imported	\N	500
+3995	4348	Imported	\N	500
+3996	4349	Imported	\N	500
+3997	4350	Imported	\N	125
+3998	4351	Imported	\N	100
+3999	4352	Imported	\N	500
+4000	4353	Imported	\N	500
+4001	4354	Imported	\N	125
+4002	4355	Imported	\N	500
+4003	4356	Imported	\N	1000
+4004	4357	Imported	\N	500
+4005	4358	Imported	\N	4
+4006	4359	Imported	\N	5
+4007	4360	Imported	\N	500
+4008	4361	Imported	\N	500
+4009	4362	Imported	\N	500
+4010	4363	Imported	\N	500
+4011	4364	Imported	\N	500
+4012	4365	Imported	\N	500
+4013	4366	Imported	\N	500
+4014	4367	Imported	\N	500
+4015	4368	Imported	\N	500
+4016	4369	Imported	\N	500
+4017	4370	Imported	\N	250
+4018	4371	Imported	\N	500
+4019	4372	Imported	\N	500
+4020	4373	Imported	\N	9
+4021	4374	Imported	\N	500
+4022	4375	Imported	\N	500
+4023	4376	Imported	\N	500
+4024	4377	Imported	\N	500
+4025	4378	Imported	\N	500
+4026	4379	Imported	\N	500
+4027	4380	Imported	\N	125
+4028	4381	Imported	\N	100
+4029	4382	Imported	\N	500
+4030	4383	Imported	\N	250
+4031	4384	Imported	\N	500
+4032	4385	Imported	\N	500
+4033	4386	Imported	\N	500
+4034	4387	Imported	\N	500
+4035	4388	Imported	\N	500
+4036	4389	Imported	\N	100
+4037	4390	Imported	\N	500
+4038	4391	Imported	\N	500
+4039	4392	Imported	\N	500
+4040	4393	Imported	\N	500
+4041	4394	Imported	\N	100
+4042	4395	Imported	\N	14
+4043	4396	Imported	\N	500
+4044	4397	Imported	\N	4
+4045	4398	Imported	\N	500
+4046	4399	Imported	\N	500
+4047	4400	Imported	\N	100
+4048	4401	Imported	\N	500
+4049	4402	Imported	\N	500
+4050	4403	Imported	\N	500
+4051	4404	Imported	\N	500
+4052	4405	Imported	\N	25
+4053	4406	Imported	\N	6
+4054	4407	Imported	\N	500
+4055	4408	Imported	\N	125
+4056	4409	Imported	\N	500
+4057	4410	Imported	\N	500
+4058	4411	Imported	\N	4
+4059	4412	Imported	\N	500
+4060	4413	Imported	\N	500
+4061	4414	Imported	\N	9
+4062	4415	Imported	\N	500
+4063	4416	Imported	\N	500
+4064	4417	Imported	\N	500
+4065	4418	Imported	\N	500
+4066	4419	Imported	\N	500
+4067	4420	Imported	\N	500
+4068	4421	Imported	\N	1
+4069	4422	Imported	\N	500
+4070	4423	Imported	\N	500
+4071	4424	Imported	\N	500
+4072	4425	Imported	\N	500
+4073	4426	Imported	\N	500
+4074	4427	Imported	\N	2
+4075	4428	Imported	\N	100
+4076	4429	Imported	\N	500
+4077	4430	Imported	\N	500
+4078	4431	Imported	\N	500
+4079	4432	Imported	\N	500
+4080	4433	Imported	\N	500
+4081	4434	Imported	\N	5
+4082	4435	Imported	\N	500
+4083	4436	Imported	\N	500
+4084	4437	Imported	\N	500
+4085	4438	Imported	\N	100
+4086	4439	Imported	\N	1
+4087	4440	Imported	\N	125
+4088	4441	Imported	\N	25
+4089	4442	Imported	\N	500
+4090	4443	Imported	\N	5
+4091	4444	Imported	\N	500
+4092	4445	Imported	\N	500
+4093	4446	Imported	\N	500
+4094	4447	Imported	\N	500
+4095	4448	Imported	\N	500
+4096	4449	Imported	\N	500
+4097	4450	Imported	\N	500
+4098	4451	Imported	\N	500
+4099	4452	Imported	\N	500
+4100	4453	Imported	\N	500
+4101	4454	Imported	\N	500
+4102	4455	Imported	\N	500
+4103	4456	Imported	\N	500
+4104	4457	Imported	\N	500
+4105	4458	Imported	\N	100
+4106	4459	Imported	\N	15
+4107	4460	Imported	\N	100
+4108	4461	Imported	\N	250
+4109	4462	Imported	\N	500
+4110	4463	Imported	\N	500
+4111	4464	Imported	\N	500
+4112	4465	Imported	\N	500
+4113	4466	Imported	\N	500
+4114	4467	Imported	\N	500
+4115	4468	Imported	\N	500
+4116	4469	Imported	\N	500
+4117	4470	Imported	\N	500
+4118	4471	Imported	\N	500
+4119	4472	Imported	\N	500
+4120	4473	Imported	\N	125
+4121	4474	Imported	\N	500
+4122	4475	Imported	\N	500
+4123	4476	Imported	\N	500
+4124	4477	Imported	\N	500
+4125	4478	Imported	\N	500
+4126	4479	Imported	\N	500
+4127	4480	Imported	\N	5
+4128	4481	Imported	\N	9
+4129	4482	Imported	\N	13
+4130	4483	Imported	\N	11
+4131	4484	Imported	\N	10
+4132	4485	Imported	\N	500
+4133	4486	Imported	\N	10
+4134	4487	Imported	\N	5
+4135	4488	Imported	\N	6
+4136	4489	Imported	\N	9
+4137	4490	Imported	\N	2
+4138	4491	Imported	\N	6
+4139	4492	Imported	\N	8
+4140	4493	Imported	\N	10
+4141	4494	Imported	\N	11
+4142	4495	Imported	\N	500
+4143	4496	Imported	\N	5
+4144	4497	Imported	\N	500
+4145	4498	Imported	\N	500
+4146	4499	Imported	\N	500
+4147	4500	Imported	\N	250
+4148	4501	Imported	\N	500
+4149	4502	Imported	\N	500
+4150	4503	Imported	\N	500
+4151	4504	Imported	\N	500
+4152	4505	Imported	\N	500
+4153	4506	Imported	\N	500
+4154	4507	Imported	\N	500
+4155	4508	Imported	\N	125
+4156	4509	Imported	\N	10
+4157	4510	Imported	\N	500
+4158	4511	Imported	\N	500
+4159	4512	Imported	\N	100
+4160	4513	Imported	\N	500
+4161	4514	Imported	\N	500
+4162	4515	Imported	\N	500
+4163	4516	Imported	\N	100
+4164	4517	Imported	\N	500
 3633	3986	Imported	\N	500
 3634	3987	Imported	\N	500
 3635	3988	Imported	\N	14
@@ -16305,9 +16906,43 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 496	220	2565	1	Manual	\N
 497	220	2564	1	Manual	\N
 498	220	2435	5	PR	205
+4252	224	4817	500	Imported	\N
 502	221	2565	1	Manual	\N
 503	221	2564	1	Manual	\N
 504	221	2435	10	Manual	\N
+4253	224	4818	500	Imported	\N
+4254	224	4869	14	Imported	\N
+4255	224	4616	125	Imported	\N
+4256	224	4617	500	Imported	\N
+4257	224	4618	500	Imported	\N
+4258	224	4619	500	Imported	\N
+4259	224	4620	13	Imported	\N
+4260	224	4621	500	Imported	\N
+4261	224	4622	500	Imported	\N
+4262	224	4623	500	Imported	\N
+4263	224	4624	500	Imported	\N
+4264	224	4625	500	Imported	\N
+4265	224	4626	100	Imported	\N
+4266	224	4627	500	Imported	\N
+4267	224	4628	500	Imported	\N
+4268	224	4629	100	Imported	\N
+4269	224	4630	500	Imported	\N
+4270	224	4631	500	Imported	\N
+4271	224	4632	500	Imported	\N
+4272	224	4633	500	Imported	\N
+4273	224	4634	500	Imported	\N
+4274	224	4635	500	Imported	\N
+4275	224	4636	500	Imported	\N
+4276	224	4637	500	Imported	\N
+4277	224	4638	250	Imported	\N
+4278	224	4639	500	Imported	\N
+4279	224	4640	500	Imported	\N
+4280	224	4641	100	Imported	\N
+4281	224	4642	125	Imported	\N
+4282	224	4643	500	Imported	\N
+4283	224	4644	125	Imported	\N
+4284	224	4645	125	Imported	\N
+4285	224	4646	125	Imported	\N
 3986	222	4817	500	Imported	\N
 3987	222	4818	500	Imported	\N
 3988	222	4869	14	Imported	\N
@@ -16335,6 +16970,48 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4010	222	4637	500	Imported	\N
 4011	222	4638	250	Imported	\N
 4012	222	4639	500	Imported	\N
+4286	224	4647	125	Imported	\N
+4287	224	4648	125	Imported	\N
+4288	224	4649	125	Imported	\N
+4289	224	4650	500	Imported	\N
+4290	224	4651	500	Imported	\N
+4291	224	4652	500	Imported	\N
+4292	224	4653	500	Imported	\N
+4293	224	4654	100	Imported	\N
+4294	224	4655	1000	Imported	\N
+4295	224	4656	7	Imported	\N
+4296	224	4657	500	Imported	\N
+4297	224	4658	100	Imported	\N
+4298	224	4659	500	Imported	\N
+4299	224	4660	500	Imported	\N
+4300	224	4661	12	Imported	\N
+4301	224	4662	100	Imported	\N
+4302	224	4663	500	Imported	\N
+4303	224	4664	500	Imported	\N
+4304	224	4665	125	Imported	\N
+4305	224	4666	125	Imported	\N
+4306	224	4667	100	Imported	\N
+4307	224	4668	500	Imported	\N
+4308	224	4669	500	Imported	\N
+4309	224	4670	100	Imported	\N
+4310	224	4671	500	Imported	\N
+4311	224	4672	500	Imported	\N
+4312	224	4673	500	Imported	\N
+4313	224	4674	500	Imported	\N
+4314	224	4675	500	Imported	\N
+4315	224	4676	500	Imported	\N
+4316	224	4677	500	Imported	\N
+4317	224	4678	500	Imported	\N
+4318	224	4679	500	Imported	\N
+4319	224	4680	100	Imported	\N
+4320	224	4681	10	Imported	\N
+4321	224	4682	500	Imported	\N
+4322	224	4683	500	Imported	\N
+4323	224	4684	1	Imported	\N
+4324	224	4685	500	Imported	\N
+4325	224	4686	500	Imported	\N
+4326	224	4687	500	Imported	\N
+4327	224	4688	500	Imported	\N
 4013	222	4640	500	Imported	\N
 4014	222	4641	100	Imported	\N
 4015	222	4642	125	Imported	\N
@@ -16369,6 +17046,48 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4044	222	4671	500	Imported	\N
 4045	222	4672	500	Imported	\N
 4046	222	4673	500	Imported	\N
+4328	224	4689	500	Imported	\N
+4329	224	4690	250	Imported	\N
+4330	224	4691	500	Imported	\N
+4331	224	4692	250	Imported	\N
+4332	224	4693	500	Imported	\N
+4333	224	4694	500	Imported	\N
+4334	224	4695	500	Imported	\N
+4335	224	4696	250	Imported	\N
+4336	224	4697	500	Imported	\N
+4337	224	4698	500	Imported	\N
+4338	224	4699	8	Imported	\N
+4339	224	4700	5	Imported	\N
+4340	224	4701	13	Imported	\N
+4341	224	4702	100	Imported	\N
+4342	224	4703	500	Imported	\N
+4343	224	4704	500	Imported	\N
+4344	224	4705	5	Imported	\N
+4345	224	4706	500	Imported	\N
+4346	224	4707	500	Imported	\N
+4347	224	4708	500	Imported	\N
+4348	224	4709	500	Imported	\N
+4349	224	4710	500	Imported	\N
+4350	224	4711	125	Imported	\N
+4351	224	4712	100	Imported	\N
+4352	224	4713	500	Imported	\N
+4353	224	4714	500	Imported	\N
+4354	224	4715	125	Imported	\N
+4355	224	4716	500	Imported	\N
+4356	224	4717	1000	Imported	\N
+4357	224	4718	500	Imported	\N
+4358	224	4719	4	Imported	\N
+4359	224	4720	5	Imported	\N
+4360	224	4721	500	Imported	\N
+4361	224	4722	500	Imported	\N
+4362	224	4723	500	Imported	\N
+4363	224	4724	500	Imported	\N
+4364	224	4725	500	Imported	\N
+4365	224	4726	500	Imported	\N
+4366	224	4727	500	Imported	\N
+4367	224	4728	500	Imported	\N
+4368	224	4729	500	Imported	\N
+4369	224	4730	500	Imported	\N
 4047	222	4674	500	Imported	\N
 4048	222	4675	500	Imported	\N
 4049	222	4676	500	Imported	\N
@@ -16402,6 +17121,48 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4077	222	4704	500	Imported	\N
 4078	222	4705	5	Imported	\N
 4079	222	4706	500	Imported	\N
+4370	224	4731	250	Imported	\N
+4371	224	4732	500	Imported	\N
+4372	224	4733	500	Imported	\N
+4373	224	4734	9	Imported	\N
+4374	224	4735	500	Imported	\N
+4375	224	4736	500	Imported	\N
+4376	224	4737	500	Imported	\N
+4377	224	4738	500	Imported	\N
+4378	224	4739	500	Imported	\N
+4379	224	4740	500	Imported	\N
+4380	224	4741	125	Imported	\N
+4381	224	4742	100	Imported	\N
+4382	224	4743	500	Imported	\N
+4383	224	4744	250	Imported	\N
+4384	224	4745	500	Imported	\N
+4385	224	4746	500	Imported	\N
+4386	224	4747	500	Imported	\N
+4387	224	4748	500	Imported	\N
+4388	224	4749	500	Imported	\N
+4389	224	4750	100	Imported	\N
+4390	224	4751	500	Imported	\N
+4391	224	4752	500	Imported	\N
+4392	224	4753	500	Imported	\N
+4393	224	4754	500	Imported	\N
+4394	224	4755	100	Imported	\N
+4395	224	4756	14	Imported	\N
+4396	224	4757	500	Imported	\N
+4397	224	4758	4	Imported	\N
+4398	224	4759	500	Imported	\N
+4399	224	4760	500	Imported	\N
+4400	224	4761	100	Imported	\N
+4401	224	4762	500	Imported	\N
+4402	224	4763	500	Imported	\N
+4403	224	4764	500	Imported	\N
+4404	224	4765	500	Imported	\N
+4405	224	4766	25	Imported	\N
+4406	224	4767	6	Imported	\N
+4407	224	4768	500	Imported	\N
+4408	224	4769	125	Imported	\N
+4409	224	4770	500	Imported	\N
+4410	224	4771	500	Imported	\N
+4411	224	4772	4	Imported	\N
 4080	222	4707	500	Imported	\N
 4081	222	4708	500	Imported	\N
 4082	222	4709	500	Imported	\N
@@ -16435,6 +17196,46 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4110	222	4737	500	Imported	\N
 4111	222	4738	500	Imported	\N
 4112	222	4739	500	Imported	\N
+4412	224	4773	500	Imported	\N
+4413	224	4774	500	Imported	\N
+4414	224	4775	9	Imported	\N
+4415	224	4776	500	Imported	\N
+4416	224	4777	500	Imported	\N
+4417	224	4778	500	Imported	\N
+4418	224	4779	500	Imported	\N
+4419	224	4780	500	Imported	\N
+4420	224	4781	500	Imported	\N
+4421	224	4782	1	Imported	\N
+4422	224	4783	500	Imported	\N
+4423	224	4784	500	Imported	\N
+4424	224	4785	500	Imported	\N
+4425	224	4786	500	Imported	\N
+4426	224	4787	500	Imported	\N
+4427	224	4788	2	Imported	\N
+4428	224	4789	100	Imported	\N
+4429	224	4790	500	Imported	\N
+4430	224	4791	500	Imported	\N
+4431	224	4792	500	Imported	\N
+4432	224	4793	500	Imported	\N
+4433	224	4794	500	Imported	\N
+4434	224	4795	5	Imported	\N
+4435	224	4796	500	Imported	\N
+4436	224	4797	500	Imported	\N
+4437	224	4798	500	Imported	\N
+4438	224	4799	100	Imported	\N
+4439	224	4800	1	Imported	\N
+4440	224	4801	125	Imported	\N
+4441	224	4802	25	Imported	\N
+4442	224	4803	500	Imported	\N
+4443	224	4804	5	Imported	\N
+4444	224	4805	500	Imported	\N
+4445	224	4806	500	Imported	\N
+4446	224	4807	500	Imported	\N
+4447	224	4808	500	Imported	\N
+4448	224	4809	500	Imported	\N
+4449	224	4810	500	Imported	\N
+4450	224	4811	500	Imported	\N
+4451	224	4812	500	Imported	\N
 4113	222	4740	500	Imported	\N
 4114	222	4741	125	Imported	\N
 4115	222	4742	100	Imported	\N
@@ -16471,6 +17272,35 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4146	222	4773	500	Imported	\N
 4147	222	4774	500	Imported	\N
 4148	222	4775	9	Imported	\N
+4452	224	4813	500	Imported	\N
+4453	224	4814	500	Imported	\N
+4454	224	4815	500	Imported	\N
+4455	224	4816	500	Imported	\N
+4456	224	4819	500	Imported	\N
+4457	224	4820	500	Imported	\N
+4458	224	4821	100	Imported	\N
+4459	224	4822	15	Imported	\N
+4460	224	4823	100	Imported	\N
+4461	224	4824	250	Imported	\N
+4462	224	4825	500	Imported	\N
+4463	224	4826	500	Imported	\N
+4464	224	4827	500	Imported	\N
+4465	224	4828	500	Imported	\N
+4466	224	4829	500	Imported	\N
+4467	224	4830	500	Imported	\N
+4468	224	4831	500	Imported	\N
+4469	224	4832	500	Imported	\N
+4470	224	4833	500	Imported	\N
+4471	224	4834	500	Imported	\N
+4472	224	4835	500	Imported	\N
+4473	224	4847	125	Imported	\N
+4474	224	4848	500	Imported	\N
+4475	224	4849	500	Imported	\N
+4476	224	4850	500	Imported	\N
+4477	224	4851	500	Imported	\N
+4478	224	4852	500	Imported	\N
+4479	224	4853	500	Imported	\N
+4480	224	4854	5	Imported	\N
 3873	223	4766	31	Imported	\N
 3874	223	4767	12	Imported	\N
 3875	223	4768	510	Imported	\N
@@ -16608,6 +17438,24 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4214	222	4854	5	Imported	\N
 4215	222	4855	9	Imported	\N
 4216	222	4856	13	Imported	\N
+4481	224	4855	9	Imported	\N
+4482	224	4856	13	Imported	\N
+4483	224	4857	11	Imported	\N
+4484	224	4858	10	Imported	\N
+4485	224	4859	500	Imported	\N
+4486	224	4860	10	Imported	\N
+4487	224	4861	5	Imported	\N
+4488	224	4862	6	Imported	\N
+4489	224	4863	9	Imported	\N
+4490	224	4864	2	Imported	\N
+4491	224	4865	6	Imported	\N
+4492	224	4866	8	Imported	\N
+4493	224	4867	10	Imported	\N
+4494	224	4868	11	Imported	\N
+4495	224	4604	500	Imported	\N
+4496	224	4605	5	Imported	\N
+4497	224	4606	500	Imported	\N
+4498	224	4607	500	Imported	\N
 4217	222	4857	11	Imported	\N
 4218	222	4858	10	Imported	\N
 4219	222	4859	500	Imported	\N
@@ -16643,6 +17491,25 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4249	222	4844	500	Imported	\N
 4250	222	4845	100	Imported	\N
 4251	222	4846	500	Imported	\N
+4499	224	4608	500	Imported	\N
+4500	224	4609	250	Imported	\N
+4501	224	4610	500	Imported	\N
+4502	224	4611	500	Imported	\N
+4503	224	4612	500	Imported	\N
+4504	224	4613	500	Imported	\N
+4505	224	4614	500	Imported	\N
+4506	224	4615	500	Imported	\N
+4507	224	4836	500	Imported	\N
+4508	224	4837	125	Imported	\N
+4509	224	4838	10	Imported	\N
+4510	224	4839	500	Imported	\N
+4511	224	4840	500	Imported	\N
+4512	224	4841	100	Imported	\N
+4513	224	4842	500	Imported	\N
+4514	224	4843	500	Imported	\N
+4515	224	4844	500	Imported	\N
+4516	224	4845	100	Imported	\N
+4517	224	4846	500	Imported	\N
 3760	223	4653	515	Imported	\N
 3761	223	4654	106	Imported	\N
 3762	223	4655	1004	Imported	\N
@@ -16974,8 +17841,6 @@ COPY public.quotation_request_vendors (id, qr_id, vendor_id, is_sent, sent_at, r
 394	193	63	t	2026-06-18 11:59:41.74718	Received
 396	193	64	t	2026-06-18 11:59:50.936598	Received
 395	193	62	t	2026-06-18 11:59:46.363836	Received
-428	208	62	f	\N	Pending
-429	208	63	f	\N	Pending
 430	210	66	f	\N	Pending
 431	210	63	f	\N	Pending
 434	211	66	f	\N	Pending
@@ -16994,6 +17859,8 @@ COPY public.quotation_request_vendors (id, qr_id, vendor_id, is_sent, sent_at, r
 454	216	62	t	2026-08-03 17:30:39.766265	Received
 357	179	53	t	2026-08-06 19:21:11.486933	Received
 358	179	54	t	2026-08-06 19:21:16.818211	Received
+428	208	62	t	2026-08-07 11:04:17.346975	Pending
+429	208	63	t	2026-08-07 11:04:22.313054	Pending
 457	217	66	f	\N	Pending
 458	218	63	f	\N	Pending
 459	218	62	f	\N	Pending
@@ -17021,6 +17888,11 @@ COPY public.quotation_request_vendors (id, qr_id, vendor_id, is_sent, sent_at, r
 506	222	71	t	2026-08-06 19:22:56.263246	Not Required
 507	222	70	t	2026-08-06 19:23:02.922813	Not Required
 508	222	73	t	2026-08-06 19:23:08.569771	Not Required
+510	224	69	t	2026-08-07 11:03:31.663978	Received
+512	224	70	t	2026-08-07 11:03:41.897906	Received
+511	224	71	t	2026-08-07 11:03:36.740884	Received
+513	224	73	t	2026-08-07 11:03:46.955778	Received
+514	224	72	t	2026-08-07 11:03:51.969133	Received
 \.
 
 
@@ -17069,7 +17941,6 @@ COPY public.quotation_requests (id, tenant_id, site_id, qr_number, project_id, c
 206	2	2	QR-00020	3	3	2026-07-21	\N	Received	\N	\N	f	2026-07-14 17:25:58.264911	2026-07-14 17:27:47.94298	\N
 207	2	2	QR-00021	3	3	2026-07-22	\N	Entered	\N	\N	f	2026-07-21 11:33:07.588869	2026-07-21 12:18:59.282538	\N
 209	2	2	QR-00023	3	3	\N	\N	Draft	\N	\N	f	2026-07-31 12:58:40.692541	2026-07-31 12:58:40.692554	\N
-208	2	2	QR-00022	3	3	2026-08-28	\N	Submitted	\N	\N	f	2026-07-31 12:40:56.760103	2026-07-31 15:27:58.233349	\N
 210	2	2	QR-00024	3	1	2027-01-01	Test Workflow Automated	Draft	\N	\N	f	2026-08-03 14:04:43.415291	2026-08-03 14:04:43.41531	\N
 211	2	2	QR-00025	3	1	2027-01-01	Test Workflow Automated	Submitted	\N	\N	f	2026-08-03 14:05:47.764882	2026-08-03 14:05:47.875313	\N
 217	2	2	QR-00031	3	3	2026-08-28	\N	Draft	\N	\N	f	2026-08-05 11:15:30.531936	2026-08-05 11:15:30.53195	\N
@@ -17078,13 +17949,15 @@ COPY public.quotation_requests (id, tenant_id, site_id, qr_number, project_id, c
 219	2	2	QR-00033	3	3	2026-08-28	\N	Draft	\N	\N	f	2026-08-05 11:16:30.674818	2026-08-05 11:16:30.674861	\N
 220	2	2	QR-00034	3	3	2026-08-28	\N	Draft	\N	\N	f	2026-08-05 11:16:30.813284	2026-08-05 11:16:30.813308	\N
 214	2	2	QR-00028	3	1	2027-01-01	Test Workflow Automated	Ordered	1	2026-08-03 14:11:21.266147	f	2026-08-03 14:11:11.276594	2026-08-03 14:11:21.347406	Looks good, test passed
-213	2	2	QR-00027	3	1	2027-01-01	Test Workflow Automated	Compared	\N	\N	f	2026-08-03 14:10:04.35094	2026-08-03 15:45:27.080029	Looks good, test passed
 215	2	2	QR-00029	3	3	2026-08-15	\N	Requested	\N	\N	f	2026-08-03 15:56:39.62116	2026-08-06 11:34:43.307783	\N
 216	2	2	QR-00030	3	3	2026-08-10	\N	Received	\N	\N	f	2026-08-03 17:06:10.944789	2026-08-06 11:34:50.891908	\N
 221	2	2	QR-00035	3	3	2026-08-28	\N	Requested	\N	\N	f	2026-08-05 11:18:31.523925	2026-08-06 13:28:45.354247	\N
 192	2	2	QR-00006	3	3	2026-06-19	\N	Ordered	3	2026-07-08 13:30:40.181022	f	2026-06-18 11:30:27.394513	2026-08-06 13:29:34.798721	done
+208	2	2	QR-00022	3	3	2026-08-28	\N	Requested	\N	\N	f	2026-07-31 12:40:56.760103	2026-08-07 11:04:27.16865	\N
 223	2	2	QR-00037	3	3	2026-08-21	\N	Draft	\N	\N	f	2026-08-06 17:40:04.70899	2026-08-06 17:47:31.373096	\N
 222	2	2	QR-00036	3	3	2026-08-28	\N	Ordered	3	2026-08-06 20:39:56.033549	f	2026-08-06 16:13:56.000606	2026-08-06 20:46:26.419905	TESTING APPROVAL
+224	2	2	QR-00038	3	3	2026-08-31	\N	Received	\N	\N	f	2026-08-07 11:01:32.919708	2026-08-07 11:04:13.415633	\N
+213	2	2	QR-00027	3	1	2027-01-01	Test Workflow Automated	Approved	3	2026-08-10 11:28:56.388485	f	2026-08-03 14:10:04.35094	2026-08-10 11:28:56.396606	Looks good, test passed
 \.
 
 
@@ -20972,8 +21845,6 @@ COPY public.vendor_categories (id, vendor_id, category_id) FROM stdin;
 158	67	70
 159	66	71
 160	66	70
-161	65	66
-162	65	67
 163	68	66
 164	68	76
 165	68	68
@@ -20989,6 +21860,8 @@ COPY public.vendor_categories (id, vendor_id, category_id) FROM stdin;
 190	71	80
 191	71	67
 192	71	68
+193	65	66
+194	65	67
 \.
 
 
@@ -21038,6 +21911,7 @@ COPY public.vendor_history (id, vendor_id, action, changes, remarks, action_by_i
 39	71	Edited and Resubmitted	{"email": {"old": "isiriscientifics@nissigrid.com", "new": "pradnesh@nissigrid.com"}}	\N	3	2026-08-06 19:16:09.832795
 40	71	Approved at Level 1	\N	\N	3	2026-08-06 19:16:13.43698
 41	71	Fully Approved	\N	\N	3	2026-08-06 19:16:16.643246
+42	65	Edited and Resubmitted	{"email": {"old": "pradnesha1234@gmail.com", "new": "pradnesha12345@gmail.com"}}	\N	3	2026-08-07 10:18:13.597356
 \.
 
 
@@ -21598,7 +22472,259 @@ COPY public.vendor_quotation_items (id, vendor_quotation_id, qr_item_id, materia
 1589	580	4015	4642	3168.88	10	f		Qualigens	ml	1	5
 1590	580	4016	4643	2411.16	14	f		SDFine	ml	1	5
 1591	580	4017	4644	1613.77	10	f			box	1	5
+2890	583	4252	4817	4124.69	\N	f		Merck	ml	1	0
+2891	583	4253	4818	4343.3	\N	f		Loba Chemie	ltr	1	0
+2892	583	4254	4869	4919.35	\N	f		Qualigens	nos	1	0
+2893	583	4255	4616	1211.71	\N	f			nos	1	0
+2894	583	4256	4617	1478.41	\N	f		SDFine	ml	1	0
+2895	583	4257	4618	86.9	\N	f		SDFine	ltr	1	0
+2896	583	4258	4619	129.03	\N	f		Sigma	kg	1	0
+2897	583	4259	4620	74.34	\N	f		Loba Chemie	ml	1	0
+2898	583	4260	4621	1633.74	\N	f		Merck	box	1	0
+2899	583	4261	4622	4507.25	\N	f		Loba Chemie	kg	1	0
+2900	583	4262	4623	3228.67	\N	f		Loba Chemie	ml	1	0
+2901	583	4263	4624	384.91	\N	f		Merck	nos	1	0
+2902	583	4264	4625	365.71	\N	f		Thermo Fisher	box	1	0
+2903	583	4265	4626	3433.07	\N	f		Merck	gm	1	0
+2904	583	4266	4627	1711.55	\N	f		Loba Chemie	box	1	0
+2905	583	4267	4628	4845.33	\N	f		Merck	gm	1	0
+2906	583	4268	4629	1966.6	\N	f		Loba Chemie	nos	1	0
+2907	583	4269	4630	2459.34	\N	f		Sigma	ltr	1	0
+2908	583	4270	4631	490.86	\N	f		SDFine	ltr	1	0
+2909	583	4271	4632	2286.53	\N	f		SDFine	box	1	0
+2910	583	4272	4633	2348.98	\N	f		Thermo Fisher	gm	1	0
+2911	583	4273	4634	1061.09	\N	f		Loba Chemie	box	1	0
+2912	583	4274	4635	2390.3	\N	f			ml	1	0
+2913	583	4275	4636	1559.72	\N	f		Merck	ltr	1	0
+2914	583	4276	4637	0	\N	f			ml	1	0
+2915	583	4277	4638	4521.33	\N	f			box	1	0
+2916	583	4278	4639	2594.81	\N	f		Thermo Fisher	ltr	1	0
 1592	580	4018	4645	235.21	10	f		Qualigens	ltr	1	5
+2917	583	4279	4640	456.61	\N	f		Loba Chemie	ltr	1	0
+2918	583	4280	4641	2384.08	\N	f		SDFine	nos	1	0
+2919	583	4281	4642	1890.87	\N	f		Merck	nos	1	0
+2920	583	4282	4643	4892.49	\N	f			gm	1	0
+2921	583	4283	4644	4763.95	\N	f		SDFine	box	1	0
+2922	583	4284	4645	3240.31	\N	f		Loba Chemie	gm	1	0
+2923	583	4285	4646	2442.06	\N	f		Sigma	kg	1	0
+2924	583	4286	4647	4376.89	\N	f			ltr	1	0
+2925	583	4287	4648	635.04	\N	f		Qualigens	kg	1	0
+2926	583	4288	4649	0	\N	f			ml	1	0
+2927	583	4289	4650	4339.28	\N	f		Qualigens	kg	1	0
+2928	583	4290	4651	369.33	\N	f		Sigma	kg	1	0
+2929	583	4291	4652	3403.14	\N	f		SDFine	nos	1	0
+2930	583	4292	4653	3220.24	\N	f		SDFine	gm	1	0
+2931	583	4293	4654	3914.57	\N	f		Loba Chemie	kg	1	0
+2932	583	4294	4655	4180.75	\N	f			nos	1	0
+2933	583	4295	4656	1627.45	\N	f		SDFine	ml	1	0
+2934	583	4296	4657	2200.18	\N	f		SDFine	ml	1	0
+2935	583	4297	4658	4907.5	\N	f		Sigma	box	1	0
+2936	583	4298	4659	1551.03	\N	f			ltr	1	0
+2937	583	4299	4660	2383.96	\N	f		SDFine	ml	1	0
+2938	583	4300	4661	467.42	\N	f			nos	1	0
+2939	583	4301	4662	3877.25	\N	f		Merck	ltr	1	0
+2940	583	4302	4663	756.54	\N	f			nos	1	0
+2941	583	4303	4664	0	\N	f			ml	1	0
+2942	583	4304	4665	1462.76	\N	f		SDFine	kg	1	0
+2943	583	4305	4666	3738.09	\N	f		Loba Chemie	ml	1	0
+2944	583	4306	4667	4830.77	\N	f		Thermo Fisher	ltr	1	0
+2945	583	4307	4668	546.64	\N	f		Loba Chemie	box	1	0
+2946	583	4308	4669	4515.36	\N	f			ltr	1	0
+2947	583	4309	4670	1260.09	\N	f		Qualigens	nos	1	0
+2948	583	4310	4671	2061.39	\N	f		Sigma	ltr	1	0
+2949	583	4311	4672	577.06	\N	f			ml	1	0
+2950	583	4312	4673	3745.53	\N	f		Loba Chemie	ml	1	0
+2951	583	4313	4674	3873.73	\N	f		Loba Chemie	kg	1	0
+2952	583	4314	4675	1539.45	\N	f		SDFine	ltr	1	0
+2953	583	4315	4676	4161.82	\N	f		Loba Chemie	gm	1	0
+2954	583	4316	4677	4099.53	\N	f		Sigma	gm	1	0
+2955	583	4317	4678	991.18	\N	f			box	1	0
+2956	583	4318	4679	2114.25	\N	f		SDFine	nos	1	0
+2957	583	4319	4680	1993.12	\N	f		SDFine	nos	1	0
+2958	583	4320	4681	1502.93	\N	f		Sigma	ml	1	0
+2959	583	4321	4682	3981.85	\N	f			ml	1	0
+2960	583	4322	4683	4944.06	\N	f		Thermo Fisher	kg	1	0
+2961	583	4323	4684	2736.29	\N	f		Loba Chemie	box	1	0
+2962	583	4324	4685	134.29	\N	f		Thermo Fisher	kg	1	0
+2963	583	4325	4686	391.12	\N	f		Sigma	nos	1	0
+2964	583	4326	4687	0	\N	f			ml	1	0
+2965	583	4327	4688	0	\N	f			ml	1	0
+2966	583	4328	4689	1909.05	\N	f		Thermo Fisher	gm	1	0
+2967	583	4329	4690	2537.85	\N	f		Qualigens	box	1	0
+2968	583	4330	4691	2149.52	\N	f		Qualigens	kg	1	0
+2969	583	4331	4692	1529.78	\N	f		Sigma	ml	1	0
+2970	583	4332	4693	4700.09	\N	f		SDFine	kg	1	0
+2971	583	4333	4694	958.55	\N	f		Qualigens	gm	1	0
+2972	583	4334	4695	1087.19	\N	f		Thermo Fisher	nos	1	0
+2973	583	4335	4696	4056.43	\N	f		Thermo Fisher	ml	1	0
+2974	583	4336	4697	316.23	\N	f		Loba Chemie	ltr	1	0
+2975	583	4337	4698	2310.99	\N	f		SDFine	kg	1	0
+2976	583	4338	4699	3903.83	\N	f		SDFine	ml	1	0
+2977	583	4339	4700	2280.5	\N	f		Merck	ltr	1	0
+2978	583	4340	4701	4361.02	\N	f		Sigma	ml	1	0
+2979	583	4341	4702	1875.58	\N	f		Thermo Fisher	gm	1	0
+2980	583	4342	4703	1176.44	\N	f		Sigma	ml	1	0
+2981	583	4343	4704	1418.52	\N	f		Merck	nos	1	0
+2982	583	4344	4705	1741.08	\N	f		Loba Chemie	box	1	0
+2983	583	4345	4706	245.82	\N	f		Loba Chemie	box	1	0
+2984	583	4346	4707	4218.39	\N	f		Qualigens	kg	1	0
+2985	583	4347	4708	0	\N	f			gm	1	0
+2986	583	4348	4709	1491.57	\N	f		Thermo Fisher	gm	1	0
+2987	583	4349	4710	2236.38	\N	f		Qualigens	nos	1	0
+2988	583	4350	4711	4183.5	\N	f		Merck	ltr	1	0
+2989	583	4351	4712	468.06	\N	f		Sigma	gm	1	0
+2990	583	4352	4713	1569.5	\N	f		Qualigens	nos	1	0
+2991	583	4353	4714	4140.63	\N	f		Thermo Fisher	nos	1	0
+2992	583	4354	4715	131.28	\N	f			gm	1	0
+2993	583	4355	4716	582.77	\N	f		Loba Chemie	ltr	1	0
+2994	583	4356	4717	1553.05	\N	f		Sigma	kg	1	0
+2995	583	4357	4718	2758.82	\N	f		Merck	kg	1	0
+2996	583	4358	4719	840.18	\N	f		Thermo Fisher	ltr	1	0
+2997	583	4359	4720	2038.78	\N	f			ml	1	0
+2998	583	4360	4721	97.93	\N	f		SDFine	ml	1	0
+2999	583	4361	4722	1464.71	\N	f		Sigma	ltr	1	0
+3000	583	4362	4723	3470.16	\N	f		Loba Chemie	kg	1	0
+3001	583	4363	4724	1325.45	\N	f		Merck	ml	1	0
+3002	583	4364	4725	4368.68	\N	f			ml	1	0
+3003	583	4365	4726	782.2	\N	f		Sigma	ml	1	0
+3004	583	4366	4727	2123.21	\N	f		SDFine	kg	1	0
+3005	583	4367	4728	345.11	\N	f		Qualigens	box	1	0
+3006	583	4368	4729	3721.86	\N	f		Merck	ltr	1	0
+3007	583	4369	4730	73.99	\N	f		Qualigens	ml	1	0
+3008	583	4370	4731	756.78	\N	f		Merck	gm	1	0
+3009	583	4371	4732	865.83	\N	f		SDFine	kg	1	0
+3010	583	4372	4733	2599.26	\N	f			nos	1	0
+3011	583	4373	4734	4511.9	\N	f		SDFine	ltr	1	0
+3012	583	4374	4735	488.83	\N	f			ltr	1	0
+3013	583	4375	4736	3626.2	\N	f			ltr	1	0
+3014	583	4376	4737	0	\N	f			gm	1	0
+3015	583	4377	4738	3015.85	\N	f		Qualigens	box	1	0
+3016	583	4378	4739	1006.24	\N	f		Merck	gm	1	0
+3017	583	4379	4740	3000.87	\N	f		Thermo Fisher	gm	1	0
+3018	583	4380	4741	3716.97	\N	f		Sigma	nos	1	0
+3019	583	4381	4742	1713.68	\N	f		SDFine	nos	1	0
+3020	583	4382	4743	1533.4	\N	f		Loba Chemie	ltr	1	0
+3021	583	4383	4744	2588.71	\N	f		Thermo Fisher	nos	1	0
+3022	583	4384	4745	3408.59	\N	f		Thermo Fisher	gm	1	0
+3023	583	4385	4746	0	\N	f			ml	1	0
+3024	583	4386	4747	0	\N	f			ml	1	0
+3025	583	4387	4748	3394.66	\N	f			gm	1	0
+3026	583	4388	4749	2786.09	\N	f		Qualigens	kg	1	0
+3027	583	4389	4750	223.43	\N	f		Qualigens	ml	1	0
+3028	583	4390	4751	254.09	\N	f		Loba Chemie	ml	1	0
+3029	583	4391	4752	2505.93	\N	f		Sigma	gm	1	0
+3030	583	4392	4753	1372.79	\N	f		SDFine	ml	1	0
+3031	583	4393	4754	1070.85	\N	f		Sigma	gm	1	0
+3032	583	4394	4755	3483.1	\N	f			nos	1	0
+3033	583	4395	4756	1969.71	\N	f			kg	1	0
+3034	583	4396	4757	1147.16	\N	f		Sigma	nos	1	0
+3035	583	4397	4758	1445.49	\N	f		Qualigens	ltr	1	0
+3036	583	4398	4759	4241.8	\N	f			kg	1	0
+3037	583	4399	4760	3252.52	\N	f		Merck	kg	1	0
+3038	583	4400	4761	4971.05	\N	f		Merck	box	1	0
+3039	583	4401	4762	1815.22	\N	f		Sigma	kg	1	0
+3040	583	4402	4763	4057.93	\N	f		SDFine	box	1	0
+3041	583	4403	4764	3194.2	\N	f			kg	1	0
+3042	583	4404	4765	622.67	\N	f		Loba Chemie	nos	1	0
+3043	583	4405	4766	2278.08	\N	f		Loba Chemie	gm	1	0
+3044	583	4406	4767	4530.71	\N	f		Sigma	ml	1	0
+3045	583	4407	4768	879.85	\N	f		Qualigens	gm	1	0
+3046	583	4408	4769	429.64	\N	f		SDFine	nos	1	0
+3047	583	4409	4770	4184.15	\N	f		Thermo Fisher	box	1	0
+3048	583	4410	4771	4592.78	\N	f		Thermo Fisher	box	1	0
+3049	583	4411	4772	3594.13	\N	f			ltr	1	0
+3050	583	4412	4773	148.37	\N	f		Sigma	kg	1	0
+3051	583	4413	4774	618.9	\N	f		Merck	gm	1	0
+3052	583	4414	4775	806.62	\N	f		SDFine	box	1	0
+3053	583	4415	4776	2390.96	\N	f		Sigma	nos	1	0
+3054	583	4416	4777	339.98	\N	f		Sigma	gm	1	0
+3055	583	4417	4778	4198.42	\N	f		Loba Chemie	nos	1	0
+3056	583	4418	4779	3775.08	\N	f			ml	1	0
+3057	583	4419	4780	4709.61	\N	f		Thermo Fisher	kg	1	0
+3058	583	4420	4781	4363.15	\N	f		Sigma	ltr	1	0
+3059	583	4421	4782	379.63	\N	f		Thermo Fisher	ltr	1	0
+3060	583	4422	4783	2016.33	\N	f		Loba Chemie	gm	1	0
+3061	583	4423	4784	3974.89	\N	f		Thermo Fisher	nos	1	0
+3062	583	4424	4785	1731.72	\N	f			kg	1	0
+3063	583	4425	4786	3290.23	\N	f		SDFine	gm	1	0
+3064	583	4426	4787	922.93	\N	f		SDFine	kg	1	0
+3065	583	4427	4788	1882.54	\N	f		Merck	ml	1	0
+3066	583	4428	4789	344.36	\N	f		Thermo Fisher	ltr	1	0
+3067	583	4429	4790	3058.31	\N	f		SDFine	gm	1	0
+3068	583	4430	4791	2084.72	\N	f		Merck	ml	1	0
+3069	583	4431	4792	816.07	\N	f		SDFine	ltr	1	0
+3070	583	4432	4793	2762.92	\N	f		Merck	kg	1	0
+3071	583	4433	4794	4652.52	\N	f		Loba Chemie	ml	1	0
+3072	583	4434	4795	2514.3	\N	f		Loba Chemie	gm	1	0
+3073	583	4435	4796	3625.5	\N	f			nos	1	0
+3074	583	4436	4797	1668.92	\N	f			box	1	0
+3075	583	4437	4798	540.83	\N	f			nos	1	0
+3076	583	4438	4799	2105.76	\N	f		Thermo Fisher	ltr	1	0
+3077	583	4439	4800	305.35	\N	f		Qualigens	nos	1	0
+3078	583	4440	4801	1103.51	\N	f		SDFine	gm	1	0
+3079	583	4441	4802	2725.6	\N	f		Qualigens	box	1	0
+3080	583	4442	4803	4224.03	\N	f		Merck	nos	1	0
+3081	583	4443	4804	4498.58	\N	f		Sigma	ltr	1	0
+3082	583	4444	4805	3884.16	\N	f		Qualigens	gm	1	0
+3083	583	4445	4806	4514.77	\N	f		Sigma	box	1	0
+3084	583	4446	4807	2274.42	\N	f			box	1	0
+3085	583	4447	4808	3239.13	\N	f		Thermo Fisher	kg	1	0
+3086	583	4448	4809	1901.31	\N	f			ltr	1	0
+3087	583	4449	4810	2808.57	\N	f		Merck	gm	1	0
+3088	583	4450	4811	0	\N	f			gm	1	0
+3089	583	4451	4812	0	\N	f			gm	1	0
+3090	583	4452	4813	2485.62	\N	f		Loba Chemie	ltr	1	0
+3091	583	4453	4814	2734.55	\N	f		Qualigens	nos	1	0
+3092	583	4454	4815	148.02	\N	f		SDFine	gm	1	0
+3093	583	4455	4816	4914.39	\N	f		Sigma	gm	1	0
+3094	583	4456	4819	1747.5	\N	f		Merck	gm	1	0
+3095	583	4457	4820	2393.69	\N	f		Qualigens	gm	1	0
+3096	583	4458	4821	2992.07	\N	f		SDFine	box	1	0
+3097	583	4459	4822	1510.85	\N	f		Merck	nos	1	0
+3098	583	4460	4823	3929.88	\N	f		Sigma	kg	1	0
+3099	583	4461	4824	4821.67	\N	f			box	1	0
+3100	583	4462	4825	3730.17	\N	f		Loba Chemie	ml	1	0
+3101	583	4463	4826	638.2	\N	f		Thermo Fisher	box	1	0
+3102	583	4464	4827	2155.22	\N	f		Thermo Fisher	ml	1	0
+3103	583	4465	4828	1347.53	\N	f		Loba Chemie	ml	1	0
+3104	583	4466	4829	0	\N	f			gm	1	0
+3105	583	4467	4830	1645.54	\N	f		Qualigens	nos	1	0
+3106	583	4468	4831	3136.64	\N	f		Qualigens	ml	1	0
+3107	583	4469	4832	0	\N	f			gm	1	0
+3108	583	4470	4833	106.59	\N	f		Sigma	box	1	0
+3109	583	4471	4834	3163.82	\N	f		Merck	ltr	1	0
+3110	583	4472	4835	4855.16	\N	f		SDFine	ml	1	0
+3111	583	4473	4847	1730.22	\N	f		Qualigens	ltr	1	0
+3112	583	4474	4848	2109.98	\N	f		Qualigens	gm	1	0
+3113	583	4475	4849	3869.47	\N	f		Thermo Fisher	kg	1	0
+3114	583	4476	4850	224.17	\N	f		Thermo Fisher	ltr	1	0
+3115	583	4477	4851	4965.59	\N	f		SDFine	ltr	1	0
+3116	583	4478	4852	673.78	\N	f		Merck	ltr	1	0
+3117	583	4479	4853	3001.74	\N	f		Merck	gm	1	0
+3118	583	4480	4854	2127.9	\N	f		Loba Chemie	ltr	1	0
+3119	583	4481	4855	4378.74	\N	f		SDFine	gm	1	0
+3120	583	4482	4856	176.46	\N	f			gm	1	0
+3121	583	4483	4857	1716.13	\N	f		Merck	ml	1	0
+3122	583	4484	4858	1716.96	\N	f		Merck	ltr	1	0
+3123	583	4485	4859	2980.76	\N	f			box	1	0
+3124	583	4486	4860	4332.12	\N	f			kg	1	0
+3125	583	4487	4861	1891.53	\N	f		Merck	box	1	0
+3126	583	4488	4862	1868.42	\N	f		Merck	box	1	0
+3127	583	4489	4863	267.34	\N	f		Loba Chemie	gm	1	0
+3128	583	4490	4864	4599.06	\N	f			nos	1	0
+3129	583	4491	4865	4331.92	\N	f		Loba Chemie	ml	1	0
+3130	583	4492	4866	2170.38	\N	f		Loba Chemie	ltr	1	0
+3131	583	4493	4867	2762.26	\N	f		Thermo Fisher	gm	1	0
+3132	583	4494	4868	2051.04	\N	f		SDFine	kg	1	0
+3133	583	4495	4604	3427.79	\N	f		Sigma	box	1	0
+3134	583	4496	4605	2909.21	\N	f			ltr	1	0
+3135	583	4497	4606	147.49	\N	f			ltr	1	0
+3136	583	4498	4607	0	\N	f			ml	1	0
+3137	583	4499	4608	0	\N	f			ml	1	0
+3138	583	4500	4609	1604.23	\N	f		Loba Chemie	gm	1	0
+3139	583	4501	4610	4928.28	\N	f		Loba Chemie	kg	1	0
+3140	583	4502	4611	4046.3	\N	f		Sigma	ml	1	0
+3141	583	4503	4612	4056.93	\N	f		Loba Chemie	nos	1	0
 1826	581	3986	4817	4844.47	21	f		Loba Chemie	box	1	10
 1827	581	3987	4818	4117.35	7	f		Loba Chemie	kg	1	10
 1828	581	3988	4869	1811.8	7	f		Merck	gm	1	10
@@ -21865,6 +22991,286 @@ COPY public.vendor_quotation_items (id, vendor_quotation_id, qr_item_id, materia
 2089	581	4249	4844	2418.49	10	f		Qualigens	ml	1	10
 2090	581	4250	4845	1547.65	30	f		Qualigens	nos	1	10
 2091	581	4251	4846	2856.55	14	f		Merck	ml	1	10
+3142	583	4504	4613	266.25	\N	f			ltr	1	0
+3143	583	4505	4614	2652.18	\N	f		Qualigens	ml	1	0
+3144	583	4506	4615	737.35	\N	f		Merck	ml	1	0
+3145	583	4507	4836	4042.04	\N	f			ml	1	0
+3146	583	4508	4837	3255.65	\N	f		Thermo Fisher	gm	1	0
+3147	583	4509	4838	1760.01	\N	f		Qualigens	ltr	1	0
+3148	583	4510	4839	2746.64	\N	f			ml	1	0
+3149	583	4511	4840	1730.2	\N	f		Sigma	gm	1	0
+3150	583	4512	4841	698.66	\N	f		Merck	ltr	1	0
+3151	583	4513	4842	3742.81	\N	f			ml	1	0
+3152	583	4514	4843	904.55	\N	f			ml	1	0
+3153	583	4515	4844	463.24	\N	f			ml	1	0
+3154	583	4516	4845	4387.41	\N	f		Merck	box	1	0
+3155	583	4517	4846	218.62	\N	f		Sigma	gm	1	0
+2624	582	4252	4817	4844.47	21	f		Loba Chemie	box	1	0
+2625	582	4253	4818	4117.35	7	f		Loba Chemie	kg	1	0
+2626	582	4254	4869	1811.8	7	f		Merck	gm	1	0
+2627	582	4255	4616	906.45	21	f		Merck	gm	1	0
+2628	582	4256	4617	59.6	10	f		Merck	nos	1	0
+2629	582	4257	4618	3347.45	7	f		Qualigens	ltr	1	0
+2630	582	4258	4619	3917.72	21	f		Merck	ml	1	0
+2631	582	4259	4620	4460.71	30	f		Loba Chemie	box	1	0
+2632	582	4260	4621	2988.96	10	f		Merck	box	1	0
+2633	582	4261	4622	235.34	30	f		Sigma	ltr	1	0
+2634	582	4262	4623	490.33	14	f		Qualigens	gm	1	0
+2635	582	4263	4624	4233.92	21	f		Merck	gm	1	0
+2636	582	4264	4625	3397.36	10	f		Sigma	box	1	0
+2637	582	4265	4626	1463.83	21	f		Merck	nos	1	0
+2638	582	4266	4627	3751.36	21	f		SRL	ml	1	0
+2639	582	4267	4628	430.52	14	f		Thermo Fisher	kg	1	0
+2640	582	4268	4629	4999.99	10	f		Loba Chemie	ml	1	0
+2641	582	4269	4630	3158.44	7	f		SRL	gm	1	0
+2642	582	4270	4631	4955.08	10	f		Loba Chemie	ml	1	0
+2643	582	4271	4632	2662.17	30	f		Merck	kg	1	0
+2644	582	4272	4633	4077.88	14	f		Sigma	ml	1	0
+2645	582	4273	4634	4040.93	21	f		Loba Chemie	gm	1	0
+2646	582	4274	4635	872.18	10	f		SDFine	kg	1	0
+2647	582	4275	4636	3773.43	30	f		NICE	ml	1	0
+2648	582	4276	4637	39	12	f		SRL	ml	1	0
+2649	582	4277	4638	2196.68	14	f		Sigma	ml	1	0
+2650	582	4278	4639	4681.49	30	f		Loba Chemie	ml	1	0
+2651	582	4279	4640	3582.72	10	f		Merck	ml	1	0
+2652	582	4280	4641	1193.39	14	f		Qualigens	box	1	0
+2653	582	4281	4642	3168.88	10	f		Qualigens	ml	1	0
+2654	582	4282	4643	2411.16	14	f		SDFine	ml	1	0
+2655	582	4283	4644	1613.77	10	f		LOBA	box	1	0
+2656	582	4284	4645	235.21	10	f		Qualigens	ltr	1	0
+2657	582	4285	4646	2579.77	7	f		Sigma	nos	1	0
+2658	582	4286	4647	254.59	7	f		Qualigens	ml	1	0
+2659	582	4287	4648	4000.08	21	f		Qualigens	ltr	1	0
+2660	582	4288	4649	56	12	f		Oxford	ml	1	0
+2661	582	4289	4650	887.48	21	f		Loba Chemie	gm	1	0
+2662	582	4290	4651	1945.11	10	f		Sigma	nos	1	0
+2663	582	4291	4652	2213.33	14	f		SDFine	kg	1	0
+2664	582	4292	4653	1890.07	30	f		Thermo Fisher	gm	1	0
+2665	582	4293	4654	698.06	10	f		Qualigens	ltr	1	0
+2666	582	4294	4655	4792.59	7	f		Qualigens	box	1	0
+2667	582	4295	4656	2800.08	30	f		Loba Chemie	nos	1	0
+2668	582	4296	4657	4497.35	10	f		SD FINE	kg	1	0
+2669	582	4297	4658	1780.18	30	f		Oxford	box	1	0
+2670	582	4298	4659	908.41	7	f		SDFine	ltr	1	0
+2671	582	4299	4660	4518.19	21	f		Thermo Fisher	kg	1	0
+2672	582	4300	4661	4551.4	30	f		TCI	ltr	1	0
+2673	582	4301	4662	2911.26	7	f		Thermo Fisher	kg	1	0
+2674	582	4302	4663	4705.08	21	f		SDFine	kg	1	0
+2675	582	4303	4664	781.32	21	f		Qualigens	nos	1	0
+2676	582	4304	4665	2380.55	10	f		Qualigens	ml	1	0
+2677	582	4305	4666	3176.8	14	f		Merck	gm	1	0
+2678	582	4306	4667	3934.94	21	f		Thermo Fisher	ltr	1	0
+2679	582	4307	4668	4169.9	21	f		Sigma	ml	1	0
+2680	582	4308	4669	1225.21	14	f		Sigma	kg	1	0
+2681	582	4309	4670	3516.97	30	f		Thermo Fisher	gm	1	0
+2682	582	4310	4671	3884.87	7	f		Loba Chemie	ltr	1	0
+2683	582	4311	4672	4113.04	30	f		Thermo Fisher	box	1	0
+2684	582	4312	4673	3361.64	21	f		Loba Chemie	ml	1	0
+2685	582	4313	4674	3039.2	30	f		Thermo Fisher	ml	1	0
+2686	582	4314	4675	1987.45	10	f		Loba Chemie	nos	1	0
+2687	582	4315	4676	4981.41	14	f		SDFine	kg	1	0
+2688	582	4316	4677	524.29	30	f		Thermo Fisher	ltr	1	0
+2689	582	4317	4678	630.47	30	f		Thermo Fisher	nos	1	0
+2690	582	4318	4679	702.31	7	f		Oxford	gm	1	0
+2691	582	4319	4680	2424.17	21	f		Loba Chemie	kg	1	0
+2692	582	4320	4681	399.07	14	f		Loba Chemie	box	1	0
+2693	582	4321	4682	1339.43	21	f		Merck	ml	1	0
+2694	582	4322	4683	1749.85	30	f		Thermo Fisher	nos	1	0
+2695	582	4323	4684	4659.12	10	f		Qualigens	nos	1	0
+2696	582	4324	4685	1843.39	30	f		Qualigens	nos	1	0
+2697	582	4325	4686	3280.85	30	f		Sigma	gm	1	0
+2698	582	4326	4687	127	12	f		Oxford	ml	1	0
+2699	582	4327	4688	139	12	f		CDH	ml	1	0
+2700	582	4328	4689	4717.26	14	f		Qualigens	box	1	0
+2701	582	4329	4690	1005.67	21	f		Sigma	nos	1	0
+2702	582	4330	4691	4024.53	14	f		Merck	kg	1	0
+2703	582	4331	4692	3837	30	f		Merck	box	1	0
+2704	582	4332	4693	873.32	7	f		SDFine	ml	1	0
+2705	582	4333	4694	1129.43	10	f		Loba Chemie	box	1	0
+2706	582	4334	4695	1570.42	10	f		Loba Chemie	ltr	1	0
+2707	582	4335	4696	142.1	10	f		SDFine	nos	1	0
+2708	582	4336	4697	2009.16	10	f		Merck	ltr	1	0
+2709	582	4337	4698	3078.58	10	f		Thermo Fisher	ltr	1	0
+2710	582	4338	4699	3666.06	21	f		Thermo Fisher	kg	1	0
+2711	582	4339	4700	3267.57	30	f		Loba Chemie	gm	1	0
+2712	582	4340	4701	616.77	10	f		Sigma	nos	1	0
+2713	582	4341	4702	831.47	30	f		Merck	box	1	0
+2714	582	4342	4703	691.74	30	f		Sigma	gm	1	0
+2715	582	4343	4704	1841.62	7	f		Loba Chemie	nos	1	0
+2716	582	4344	4705	3089.61	10	f		LOBA	ml	1	0
+2717	582	4345	4706	2079.25	14	f		Qualigens	ml	1	0
+2718	582	4346	4707	747.3	21	f		SDFine	kg	1	0
+2719	582	4347	4708	169	12	f		SD FINE	gm	1	0
+2720	582	4348	4709	4267.63	21	f		Thermo Fisher	gm	1	0
+2721	582	4349	4710	1854.68	21	f		Qualigens	nos	1	0
+2722	582	4350	4711	4577.17	21	f		Loba Chemie	box	1	0
+2723	582	4351	4712	1169.68	10	f		Loba Chemie	nos	1	0
+2724	582	4352	4713	2348.59	14	f		Merck	ml	1	0
+2725	582	4353	4714	1444.76	14	f		Qualigens	kg	1	0
+2726	582	4354	4715	2440.65	21	f		Loba Chemie	kg	1	0
+2727	582	4355	4716	2880.22	7	f		Thermo Fisher	nos	1	0
+2728	582	4356	4717	887.7	30	f		SDFine	nos	1	0
+2729	582	4357	4718	3108.09	14	f		Loba Chemie	nos	1	0
+2730	582	4358	4719	157.93	10	f		Loba Chemie	nos	1	0
+2731	582	4359	4720	487.82	7	f		Thermo Fisher	kg	1	0
+2732	582	4360	4721	126.64	7	f		Loba Chemie	nos	1	0
+2733	582	4361	4722	672.18	21	f		Thermo Fisher	ltr	1	0
+2734	582	4362	4723	836.88	21	f		Loba Chemie	kg	1	0
+2735	582	4363	4724	4227.13	21	f		Qualigens	ml	1	0
+2736	582	4364	4725	1950.51	10	f		Merck	kg	1	0
+2737	582	4365	4726	2934.48	7	f		Loba Chemie	ml	1	0
+2738	582	4366	4727	327.11	14	f		Sigma	ltr	1	0
+2739	582	4367	4728	1350.96	7	f		SDFine	kg	1	0
+2740	582	4368	4729	724.81	10	f		SDFine	gm	1	0
+2741	582	4369	4730	2472.16	21	f		SDFine	ml	1	0
+2742	582	4370	4731	4766.17	30	f		Thermo Fisher	box	1	0
+2743	582	4371	4732	4864.16	7	f		Oxford	ml	1	0
+2744	582	4372	4733	4193.38	10	f		S D FINE	ltr	1	0
+2745	582	4373	4734	4423.39	14	f			kg	1	0
+2746	582	4374	4735	1842.8	30	f		Sigma	ml	1	0
+2747	582	4375	4736	4760.3	21	f		Oxford	nos	1	0
+2748	582	4376	4737	242	12	f		CDH	gm	1	0
+2749	582	4377	4738	2743.46	10	f		SDFine	box	1	0
+2750	582	4378	4739	2965.97	30	f		Merck	ml	1	0
+2751	582	4379	4740	4048.67	10	f		Merck	ltr	1	0
+2752	582	4380	4741	3444.66	21	f		Qualigens	ltr	1	0
+2753	582	4381	4742	648.76	21	f		Oxford	ml	1	0
+2754	582	4382	4743	4097.06	14	f		Sigma	nos	1	0
+2755	582	4383	4744	1583.94	21	f		Sigma	ltr	1	0
+2756	582	4384	4745	121.09	21	f		Merck	nos	1	0
+2757	582	4385	4746	1111	12	f			ml	1	0
+2758	582	4386	4747	2121	12	f			ml	1	0
+2759	582	4387	4748	3054.99	10	f		Qualigens	box	1	0
+2760	582	4388	4749	3584.69	7	f		Loba Chemie	gm	1	0
+2761	582	4389	4750	2288.67	7	f		Loba Chemie	nos	1	0
+2762	582	4390	4751	3965.53	30	f		Loba Chemie	gm	1	0
+2763	582	4391	4752	1255.01	14	f		Thermo Fisher	ltr	1	0
+2764	582	4392	4753	562.15	10	f		Sigma	kg	1	0
+2765	582	4393	4754	4670.17	7	f		Thermo Fisher	ml	1	0
+2766	582	4394	4755	1795.33	30	f		Thermo Fisher	gm	1	0
+2767	582	4395	4756	2681.2	14	f		SIGMA	kg	1	0
+2768	582	4396	4757	937.97	30	f		NICE	ltr	1	0
+2769	582	4397	4758	4359.01	10	f		SDFine	ltr	1	0
+2770	582	4398	4759	4751.63	30	f		Merck	nos	1	0
+2771	582	4399	4760	3812.85	7	f		Loba Chemie	ltr	1	0
+2772	582	4400	4761	1425.29	30	f		Merck	ml	1	0
+2773	582	4401	4762	1596.94	7	f		Merck	box	1	0
+2774	582	4402	4763	4481	21	f		SDFine	box	1	0
+2775	582	4403	4764	4268.6	10	f			gm	1	0
+2776	582	4404	4765	2866.38	10	f		Sigma	gm	1	0
+2777	582	4405	4766	4937.55	14	f		SDFine	ml	1	0
+2778	582	4406	4767	2385.87	21	f		Thermo Fisher	kg	1	0
+2779	582	4407	4768	1654.61	30	f		Thermo Fisher	nos	1	0
+2780	582	4408	4769	1072.53	21	f		Oxford	box	1	0
+2781	582	4409	4770	3092.6	21	f		SDFine	box	1	0
+2782	582	4410	4771	4210.61	21	f		Merck	nos	1	0
+2783	582	4411	4772	2307.35	7	f		SDFine	box	1	0
+2784	582	4412	4773	1738.5	10	f		Qualigens	ltr	1	0
+2785	582	4413	4774	2339.12	7	f		SDFine	box	1	0
+2786	582	4414	4775	3026.49	30	f		Sigma	ml	1	0
+2787	582	4415	4776	2743.1	30	f		SDFine	nos	1	0
+2788	582	4416	4777	1892.16	21	f		Thermo Fisher	gm	1	0
+2789	582	4417	4778	593.31	21	f		Merck	ltr	1	0
+2790	582	4418	4779	179.45	14	f		Merck	nos	1	0
+2791	582	4419	4780	422.83	21	f		Sigma	nos	1	0
+2792	582	4420	4781	2534.73	14	f		SDFine	kg	1	0
+2793	582	4421	4782	2859.61	21	f		Loba Chemie	ml	1	0
+2794	582	4422	4783	4700.21	21	f		Qualigens	ml	1	0
+2795	582	4423	4784	3989.63	14	f		Merck	kg	1	0
+2796	582	4424	4785	2632.21	10	f		CDH	ml	1	0
+2797	582	4425	4786	4270.12	30	f		CDH	ml	1	0
+2798	582	4426	4787	3953.99	21	f		SDFine	nos	1	0
+2799	582	4427	4788	1257.19	30	f		SDFine	box	1	0
+2800	582	4428	4789	2685.95	21	f		Sigma	ltr	1	0
+2801	582	4429	4790	1186.68	14	f		Thermo Fisher	ml	1	0
+2802	582	4430	4791	2027.78	10	f		Qualigens	ltr	1	0
+2803	582	4431	4792	988.87	21	f		Qualigens	kg	1	0
+2804	582	4432	4793	4591.68	10	f		Thermo Fisher	ml	1	0
+2805	582	4433	4794	2598.69	10	f		Loba Chemie	gm	1	0
+2806	582	4434	4795	2348.61	10	f		Qualigens	ml	1	0
+2807	582	4435	4796	2724.62	30	f		Thermo Fisher	ltr	1	0
+2808	582	4436	4797	3212.59	21	f		Qualigens	kg	1	0
+2809	582	4437	4798	4036.98	14	f		Merck	ltr	1	0
+2810	582	4438	4799	4104.45	10	f		SDFine	box	1	0
+2811	582	4439	4800	2021.15	7	f		Sigma	kg	1	0
+2812	582	4440	4801	1713.27	10	f		Qualigens	box	1	0
+2813	582	4441	4802	1131.09	10	f		Sigma	kg	1	0
+2814	582	4442	4803	2980.04	14	f		Loba Chemie	gm	1	0
+2815	582	4443	4804	64.39	7	f		Qualigens	nos	1	0
+2816	582	4444	4805	4152.02	14	f		Sigma	gm	1	0
+2817	582	4445	4806	2188.17	14	f		CDH	ltr	1	0
+2818	582	4446	4807	1712.26	21	f		Sigma	ltr	1	0
+2819	582	4447	4808	202.54	10	f		SDFine	kg	1	0
+2820	582	4448	4809	4245.72	7	f		SDFine	nos	1	0
+2821	582	4449	4810	3090.79	21	f		Loba Chemie	ml	1	0
+2822	582	4450	4811	323	12	f			gm	1	0
+2823	582	4451	4812	4223.82	14	f		Qualigens	gm	1	0
+2824	582	4452	4813	1511.94	7	f		SDFine	ltr	1	0
+2825	582	4453	4814	3639.21	21	f		Qualigens	nos	1	0
+2826	582	4454	4815	4935.92	7	f		Qualigens	ml	1	0
+2827	582	4455	4816	2321.16	14	f		Sigma	ml	1	0
+2828	582	4456	4819	4333.56	14	f		SDFine	gm	1	0
+2829	582	4457	4820	550.51	21	f		Qualigens	gm	1	0
+2830	582	4458	4821	4131.6	21	f		Qualigens	gm	1	0
+2831	582	4459	4822	2384.64	10	f		Sigma	kg	1	0
+2832	582	4460	4823	2129.09	7	f		SDFine	ltr	1	0
+2833	582	4461	4824	1593.04	7	f		Thermo Fisher	nos	1	0
+2834	582	4462	4825	1842.06	7	f		Thermo Fisher	nos	1	0
+2835	582	4463	4826	2052.41	7	f		SRL	ltr	1	0
+2836	582	4464	4827	3742.76	30	f		Thermo Fisher	ml	1	0
+2837	582	4465	4828	1960.71	30	f		Merck	box	1	0
+2838	582	4466	4829	6542	12	f			gm	1	0
+2839	582	4467	4830	2918.26	21	f		SDFine	box	1	0
+2840	582	4468	4831	2495.33	10	f		SDFine	ml	1	0
+2841	582	4469	4832	1075.72	7	f			box	1	0
+2842	582	4470	4833	3201.2	14	f		Thermo Fisher	ml	1	0
+2843	582	4471	4834	1722.33	21	f		CDH	nos	1	0
+2844	582	4472	4835	2497.51	30	f		Sigma	ml	1	0
+2845	582	4473	4847	4377.46	30	f		Qualigens	gm	1	0
+2846	582	4474	4848	1220.87	7	f			nos	1	0
+2847	582	4475	4849	2676.7	7	f		Sigma	nos	1	0
+2848	582	4476	4850	193.92	7	f		Oxford	nos	1	0
+2849	582	4477	4851	2789.03	10	f			gm	1	0
+2850	582	4478	4852	3662.24	10	f		Loba Chemie	gm	1	0
+2851	582	4479	4853	3251.51	7	f		Qualigens	nos	1	0
+2852	582	4480	4854	4112.16	14	f		CDH	nos	1	0
+2853	582	4481	4855	2493.15	14	f		Thermo Fisher	kg	1	0
+2854	582	4482	4856	192.43	21	f		Loba Chemie	kg	1	0
+2855	582	4483	4857	1577.1	30	f		Qualigens	gm	1	0
+2856	582	4484	4858	1010.46	21	f		SDFine	nos	1	0
+2857	582	4485	4859	4010.73	7	f		SDFine	kg	1	0
+2858	582	4486	4860	2238.89	10	f		Sigma	nos	1	0
+2859	582	4487	4861	65.98	14	f		Loba Chemie	nos	1	0
+2860	582	4488	4862	4843.66	30	f		Thermo Fisher	ml	1	0
+2861	582	4489	4863	626.53	21	f		Qualigens	box	1	0
+2862	582	4490	4864	207.65	14	f		Sigma	box	1	0
+2863	582	4491	4865	515.9	30	f		CDH	kg	1	0
+2864	582	4492	4866	4407.54	21	f		SRL	nos	1	0
+2865	582	4493	4867	1353.63	10	f		Sigma	box	1	0
+2866	582	4494	4868	4022.43	21	f		Qualigens	box	1	0
+2867	582	4495	4604	4552.86	21	f		Thermo Fisher	ltr	1	0
+2868	582	4496	4605	3425.83	10	f		Sigma	ml	1	0
+2869	582	4497	4606	3600.05	21	f		Sigma	gm	1	0
+2870	582	4498	4607	500	12	f			ml	1	0
+2871	582	4499	4608	700	12	f			ml	1	0
+2872	582	4500	4609	1371.08	21	f		Qualigens	ltr	1	0
+2873	582	4501	4610	3463.49	21	f		Loba Chemie	nos	1	0
+2874	582	4502	4611	1928.42	21	f		Sigma	gm	1	0
+2875	582	4503	4612	3893.98	14	f		Loba Chemie	ml	1	0
+2876	582	4504	4613	491.21	21	f		Merck	kg	1	0
+2877	582	4505	4614	2829.44	10	f		Thermo Fisher	ml	1	0
+2878	582	4506	4615	1054.28	10	f		Qualigens	box	1	0
+2879	582	4507	4836	1539.97	30	f		SDFine	ltr	1	0
+2880	582	4508	4837	963.08	30	f		Thermo Fisher	ltr	1	0
+2881	582	4509	4838	2235.47	10	f		Loba Chemie	gm	1	0
+2882	582	4510	4839	1938.06	14	f			ml	1	0
+2883	582	4511	4840	646.51	14	f		Qualigens	kg	1	0
+2884	582	4512	4841	1698.62	21	f		Sigma	ml	1	0
+2885	582	4513	4842	4524.01	7	f		Qualigens	nos	1	0
+2886	582	4514	4843	2857.83	30	f		Loba Chemie	kg	1	0
+2887	582	4515	4844	2418.49	10	f		Qualigens	ml	1	0
+2888	582	4516	4845	1547.65	30	f		Qualigens	nos	1	0
+2889	582	4517	4846	2856.55	14	f		Merck	ml	1	0
 \.
 
 
@@ -21958,6 +23364,8 @@ COPY public.vendor_quotations (id, qr_id, vendor_id, quotation_number, quotation
 579	214	63	VQ-TEST-002	2026-08-01	2026-08-03	\N	Automated VQ 2	Received	1	2026-08-03 14:11:21.234216
 580	222	69	123	2026-08-06	2026-08-06	/api/uploads/quotations/qr_222_v_69_sample_quotation_full.pdf		Received	3	2026-08-06 20:19:54.796089
 581	222	72		\N	2026-08-06	/api/uploads/quotations/qr_222_v_72_sample_quotation_full.xlsx		Draft	3	2026-08-06 20:34:34.63301
+582	224	70	JM01	2026-08-06	2026-08-07	/api/uploads/quotations/qr_224_v_70_sample_quotation_full.xlsx		Received	3	2026-08-07 11:10:58.12859
+583	224	69		2026-08-04	2026-08-10	/api/uploads/quotations/qr_224_v_69_sample_quotation_full.pdf		Draft	3	2026-08-10 11:07:06.272719
 \.
 
 
@@ -21984,9 +23392,9 @@ COPY public.vendors (id, tenant_id, site_id, name, code, contact_person, phone, 
 73	2	2	ROBLIN SCIENTIFIC	VND-00012	Roblin	7348954963	roblinscientific@nissigrid.com	29AGEPR8249L1ZK	\N	Bangalore	29 - Karnataka	560077	\N	\N	\N	5	t	f	2026-08-06 17:02:54.328776	2026-08-06 17:42:44.613869	#12, Shop No:05 First Floor	NearAnjineya Temple, Byrathi,Kothanur Post, Bangalore East	Approved	2	3	2026-08-06 12:12:44.613434	\N	\N	\N	\N	\N	\N	\N
 67	2	2	Test	VND-00006	Sam	81928198291	sam@nissigrid.com	22AAAAA0000A1Z9	\N	Bengaluru	29 - Karnataka	560016	\N	\N	\N	3.5	t	f	2026-08-04 13:01:06.060685	2026-08-06 11:25:34.505163	Addr1		Approved	2	3	2026-08-06 05:55:34.50251	\N	\N	\N	\N	\N	\N	\N
 70	2	2	Jai Maruthi Scientific	VND-00009	JAI	9379566366	JaiMaruthiScientific@nissigrid.com	29ASBPJ7427R1Z0	\N	Bangalore	29 - Karnataka	560079	\N	\N	\N	4	t	f	2026-08-06 16:51:28.044047	2026-08-06 17:42:41.872169	      #147,2nd Main Road,  	Near RES Convent, Kaveripura, Kamakshipalya  	Approved	2	3	2026-08-06 12:12:41.871755	\N	\N	\N	\N	\N	\N	\N
-65	2	2	havells pvt limited	VND-00004	Pradnesh A	56954664565	pradnesha1234@gmail.com	29AACCE9951H1ZR	\N	bangalore	29 - Karnataka	560016	\N	\N	\N	4.5	f	f	2026-07-21 15:30:53.78455	2026-08-06 11:26:13.096498	old madras road,pai layout		Rejected	1	3	2026-07-31 05:27:58.148619	none	3	2026-08-06 05:56:13.093826	Approved	3	2026-07-31 05:27:58.148619	{"is_active": {"old": false, "new": true}}
 68	2	2	vik	VND-00007	vvik	0987654321	gfdjkghj@gmail.com	29ABCDE1234F1Z5	\N	chennai	33 - Tamil Nadu	600001	\N	\N	\N	0	t	f	2026-08-06 13:25:15.684843	2026-08-06 13:25:39.380776	main road,chennai		Approved	2	3	2026-08-06 07:55:39.378217	\N	\N	\N	\N	\N	\N	\N
 72	2	2	THE PRINCE CHEMICAL CO	VND-00011	Prince	64375443788	theprincechem@nissigrid.com	22AAAAA0000A1Z5	\N	Bangalore 	29 - Karnataka	56002	\N	\N	\N	4.5	t	f	2026-08-06 16:59:08.113193	2026-08-06 17:42:45.855548	      NO,19,5th cross, H.Siddaiah road 		Approved	2	3	2026-08-06 12:12:45.855115	\N	\N	\N	\N	\N	\N	\N
+65	2	2	havells pvt limited	VND-00004	Pradnesh A	56954664565	pradnesha12345@gmail.com	29AACCE9951H1ZR	\N	bangalore	29 - Karnataka	560016	\N	\N	\N	4.5	t	f	2026-07-21 15:30:53.78455	2026-08-07 10:18:13.57518	old madras road,pai layout		Submitted	1	3	2026-07-31 05:27:58.148619	\N	3	2026-08-06 05:56:13.093826	Rejected	3	2026-08-06 05:56:13.093826	{"email": {"old": "pradnesha1234@gmail.com", "new": "pradnesha12345@gmail.com"}}
 71	2	2	ISIRI SCIENTIFICS	VND-00010	ISIRI	8884483838	pradnesh@nissigrid.com	29AXXPD1835A1ZH	\N	Bangalore	29 - Karnataka	560086	\N	\N	\N	5	t	f	2026-08-06 16:54:45.792264	2026-08-06 19:16:16.642761	No.189/18,Coressponding no.17,	6th Cross,Ravi English school road	Approved	2	3	2026-08-06 13:46:16.642283	\N	\N	\N	Approved	3	2026-08-06 12:12:40.888623	{"email": {"old": "isiriscientifics@nissigrid.com", "new": "pradnesh@nissigrid.com"}}
 69	2	2	AIC ENTERPRISES PVT LTD	VND-00008	AICENT	9742270172	ilangkumaran@nissigrid.in	29AASCA0900A1Z3	\N	Bangalore	29 - Karnataka	560058	\N	\N	\N	4.5	t	f	2026-08-06 16:45:15.340276	2026-08-06 19:15:24.8115	V-79A and V-79B, 1ST A Main Road	2nd Stage, Peenya Industrial Estate	Approved	2	3	2026-08-06 13:45:24.810803	\N	\N	\N	Approved	3	2026-08-06 12:12:39.00556	{"email": {"old": "customercare.ka@nissigrid.in", "new": "ilangkumaran@nissigrid.in"}}
 \.
@@ -22082,7 +23490,7 @@ SELECT pg_catalog.setval('public.approval_flows_id_seq', 87, true);
 -- Name: audit_logs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.audit_logs_id_seq', 548, true);
+SELECT pg_catalog.setval('public.audit_logs_id_seq', 552, true);
 
 
 --
@@ -22090,6 +23498,13 @@ SELECT pg_catalog.setval('public.audit_logs_id_seq', 548, true);
 --
 
 SELECT pg_catalog.setval('public.buildings_id_seq', 12, true);
+
+
+--
+-- Name: calibration_schedules_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.calibration_schedules_id_seq', 1, false);
 
 
 --
@@ -22131,7 +23546,7 @@ SELECT pg_catalog.setval('public.complaints_id_seq', 18, true);
 -- Name: contract_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.contract_approvals_id_seq', 3, true);
+SELECT pg_catalog.setval('public.contract_approvals_id_seq', 4, true);
 
 
 --
@@ -22397,7 +23812,7 @@ SELECT pg_catalog.setval('public.purchase_requests_id_seq', 205, true);
 -- Name: quotation_comparisons_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_comparisons_id_seq', 386, true);
+SELECT pg_catalog.setval('public.quotation_comparisons_id_seq', 652, true);
 
 
 --
@@ -22411,14 +23826,14 @@ SELECT pg_catalog.setval('public.quotation_negotiation_history_id_seq', 17, true
 -- Name: quotation_request_item_sources_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_request_item_sources_id_seq', 3898, true);
+SELECT pg_catalog.setval('public.quotation_request_item_sources_id_seq', 4164, true);
 
 
 --
 -- Name: quotation_request_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_request_items_id_seq', 4251, true);
+SELECT pg_catalog.setval('public.quotation_request_items_id_seq', 4517, true);
 
 
 --
@@ -22432,14 +23847,14 @@ SELECT pg_catalog.setval('public.quotation_request_prs_id_seq', 31, true);
 -- Name: quotation_request_vendors_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_request_vendors_id_seq', 509, true);
+SELECT pg_catalog.setval('public.quotation_request_vendors_id_seq', 514, true);
 
 
 --
 -- Name: quotation_requests_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_requests_id_seq', 223, true);
+SELECT pg_catalog.setval('public.quotation_requests_id_seq', 224, true);
 
 
 --
@@ -22572,28 +23987,28 @@ SELECT pg_catalog.setval('public.vendor_approvals_id_seq', 10, true);
 -- Name: vendor_categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_categories_id_seq', 192, true);
+SELECT pg_catalog.setval('public.vendor_categories_id_seq', 194, true);
 
 
 --
 -- Name: vendor_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_history_id_seq', 41, true);
+SELECT pg_catalog.setval('public.vendor_history_id_seq', 42, true);
 
 
 --
 -- Name: vendor_quotation_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_quotation_items_id_seq', 2091, true);
+SELECT pg_catalog.setval('public.vendor_quotation_items_id_seq', 3155, true);
 
 
 --
 -- Name: vendor_quotations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_quotations_id_seq', 581, true);
+SELECT pg_catalog.setval('public.vendor_quotations_id_seq', 583, true);
 
 
 --
@@ -22662,6 +24077,14 @@ ALTER TABLE ONLY public.audit_logs
 
 ALTER TABLE ONLY public.buildings
     ADD CONSTRAINT buildings_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: calibration_schedules calibration_schedules_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.calibration_schedules
+    ADD CONSTRAINT calibration_schedules_pkey PRIMARY KEY (id);
 
 
 --
@@ -23201,6 +24624,14 @@ ALTER TABLE ONLY public.approval_flows
 
 
 --
+-- Name: calibration_schedules uq_cal_dept_per_tenant; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.calibration_schedules
+    ADD CONSTRAINT uq_cal_dept_per_tenant UNIQUE (tenant_id, department_name);
+
+
+--
 -- Name: categories uq_cat_per_site; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -23626,6 +25057,13 @@ CREATE INDEX ix_audit_logs_id ON public.audit_logs USING btree (id);
 --
 
 CREATE INDEX ix_buildings_id ON public.buildings USING btree (id);
+
+
+--
+-- Name: ix_calibration_schedules_id; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX ix_calibration_schedules_id ON public.calibration_schedules USING btree (id);
 
 
 --
@@ -24424,6 +25862,14 @@ ALTER TABLE ONLY public.buildings
 
 ALTER TABLE ONLY public.buildings
     ADD CONSTRAINT buildings_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES public.tenants(id) ON DELETE CASCADE;
+
+
+--
+-- Name: calibration_schedules calibration_schedules_tenant_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.calibration_schedules
+    ADD CONSTRAINT calibration_schedules_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES public.tenants(id) ON DELETE CASCADE;
 
 
 --
@@ -26790,5 +28236,5 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict QKV6L1lAyfkzhPL2cC2RjBohFGldJxjsmiaSl3sIWEmaKukLaJuScaeTRffRXWj
+\unrestrict 5G3CqZvAYEw4TWkQpvSuHSbDCyoq0rOfQX9YZH3E50R71nks0srcaoGWyeXvJhW
 

@@ -511,7 +511,7 @@ def verify_complaint(
     db.refresh(complaint)
     return _enrich(complaint, db)
 
-from app.schemas import ComplaintCloseRequest, ComplaintApproveRequest
+from app.schemas import ComplaintCloseRequest, ComplaintApproveRequest, ComplaintReopenRequest
 from app.models import ComplaintDocument
 
 @router.post("/{complaint_id}/close", response_model=ComplaintOut)
@@ -617,6 +617,42 @@ def approve_closure(
                 created_by_id=current_user.id
             ))
 
+    db.commit()
+    db.refresh(complaint)
+    return _enrich(complaint, db)
+
+@router.post("/{complaint_id}/reopen", response_model=ComplaintOut)
+def reopen_complaint(
+    complaint_id: int,
+    payload: ComplaintReopenRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("complaints", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    """Reopen a closed complaint."""
+    complaint = _get_complaint(db, complaint_id, tenant_id, site_id)
+    
+    if complaint.status != ComplaintStatus.CLOSED.value:
+        raise HTTPException(status_code=400, detail="Only closed complaints can be reopened.")
+        
+    complaint.status = ComplaintStatus.REOPENED.value
+    
+    # Reset approval fields
+    complaint.admin_approved_by_id = None
+    complaint.manager_approved_by_id = None
+    complaint.admin_approved_at = None
+    complaint.manager_approved_at = None
+    
+    # Append reopen reason
+    timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    reopen_msg = f"Reopened on {timestamp} by {current_user.full_name}. Reason: {payload.reason}"
+    
+    if complaint.rejection_remarks:
+        complaint.rejection_remarks = f"{complaint.rejection_remarks}\n\n{reopen_msg}"
+    else:
+        complaint.rejection_remarks = reopen_msg
+        
     db.commit()
     db.refresh(complaint)
     return _enrich(complaint, db)

@@ -60,6 +60,7 @@ const menuItems = [
     text: 'Maintenance', icon: <Build />, children: [
       { text: 'Complaints', icon: <Assignment />, path: '/complaints', resource: 'complaints' },
       { text: 'PM Schedule', icon: <AssignmentTurnedIn />, path: '/equipment/pm-schedule', resource: 'equipment' },
+      { text: 'Calibration Schedule', icon: <AssignmentTurnedIn />, path: '/equipment/calibration-schedule', resource: 'equipment' },
       { text: 'Repair Work Orders', icon: <Build />, path: '/rwos' },
     ]
   },

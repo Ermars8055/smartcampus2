@@ -3,7 +3,7 @@ import {
   Box, Typography, Paper, Grid, Divider, Chip, Button, IconButton, Dialog, DialogTitle,
   DialogContent, DialogActions, TextField, CircularProgress, Snackbar, Alert, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Switch, FormControlLabel, Stepper, Step, StepLabel, Select, MenuItem, FormControl, InputLabel
 } from '@mui/material';
-import { ArrowBack, CheckCircle, Assignment, PhotoCamera, Close, AddShoppingCart, Build, Search, VerifiedUser, Cancel } from '@mui/icons-material';
+import { ArrowBack, CheckCircle, Assignment, PhotoCamera, Close, AddShoppingCart, Build, Search, VerifiedUser, Cancel, Replay, Add } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
 import api, { getFileUrl } from '../services/api';
 import dayjs from 'dayjs';
@@ -27,8 +27,10 @@ export default function ComplaintDetail() {
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
   const [resolveDialogOpen, setResolveDialogOpen] = useState(false);
   const [inspectDialogOpen, setInspectDialogOpen] = useState(false);
+  const [reopenDialogOpen, setReopenDialogOpen] = useState(false);
 
   // Form States
+  const [reopenReason, setReopenReason] = useState('');
   const [technicians, setTechnicians] = useState([]);
   const [selectedTech, setSelectedTech] = useState('');
   const [materialRequired, setMaterialRequired] = useState(false);
@@ -140,6 +142,22 @@ export default function ComplaintDetail() {
       setActionLoading(false);
     }
   };
+
+  const handleReopen = async () => {
+    setActionLoading(true);
+    try {
+      await api.post(`/api/complaints/${id}/reopen`, { reason: reopenReason });
+      setSnackbar({ open: true, message: 'Complaint reopened successfully', severity: 'success' });
+      setReopenDialogOpen(false);
+      setReopenReason('');
+      fetchComplaintData();
+    } catch (error) {
+      setSnackbar({ open: true, message: error.response?.data?.detail || 'Failed to reopen complaint', severity: 'error' });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
 
   const handleInspect = async () => {
     setActionLoading(true);
@@ -371,7 +389,14 @@ export default function ComplaintDetail() {
             )}
             
             {complaint.status === 'Closed' && (
-              <Typography variant="body2" color="textSecondary">Complaint is closed.</Typography>
+              <>
+                <Typography variant="body2" color="textSecondary">Complaint is closed.</Typography>
+                {hasAction('complaints', 'update') && (
+                  <Button variant="outlined" color="error" startIcon={<Replay />} onClick={() => setReopenDialogOpen(true)}>
+                    Reopen Complaint
+                  </Button>
+                )}
+              </>
             )}
           </Paper>
 
@@ -536,18 +561,30 @@ export default function ComplaintDetail() {
             <>
               {/* Material Indents */}
               <Paper sx={{ p: 3, mb: 3 }}>
-             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, gap: 1 }}>
                <Typography variant="h6" sx={{ color: '#1E3A8A' }}>Material Indents</Typography>
-               {materialIndents.length === 0 && complaint.status === 'Material Pending' && (
-                 <Tooltip title="Create Indent">
-                   <IconButton color="primary" onClick={() => navigate(`/indents?new=true&complaint_id=${id}`)}>
-                      <Assignment />
-                   </IconButton>
-                 </Tooltip>
+               {['Material Pending', 'In Progress'].includes(complaint.status) && (
+                 <Button 
+                   variant="outlined" 
+                   color="primary" 
+                   size="small"
+                   startIcon={<Add />} 
+                   onClick={() => navigate(`/indents?new=true&complaint_id=${id}`)}
+                   sx={{ whiteSpace: 'nowrap' }}
+                 >
+                   Create Indent
+                 </Button>
                )}
              </Box>
              {materialIndents.length === 0 ? (
-               <Typography variant="body2" color="textSecondary">No indents created for this complaint.</Typography>
+               <Box>
+                 <Typography variant="body2" color="textSecondary">No indents created for this complaint.</Typography>
+                 {complaint.status === 'In Progress' && (
+                   <Alert severity="info" sx={{ mt: 2 }}>
+                     If you require materials but didn't select 'Material Required' during the inspection, you can still raise a Material Indent by clicking the '+ Create Indent' button above.
+                   </Alert>
+                 )}
+               </Box>
              ) : (
                <Table size="small">
                  <TableHead>
@@ -637,6 +674,30 @@ export default function ComplaintDetail() {
       </Grid>
 
       {/* Dialogs */}
+      
+      {/* Reopen Dialog */}
+      <Dialog open={reopenDialogOpen} onClose={() => !actionLoading && setReopenDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Reopen Complaint</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ mb: 2 }}>Are you sure you want to reopen this closed complaint? You must provide a reason.</Typography>
+          <TextField
+            autoFocus
+            fullWidth
+            label="Reason for Reopening"
+            placeholder="e.g. Issue not fully resolved, problem recurred"
+            multiline
+            rows={3}
+            value={reopenReason}
+            onChange={(e) => setReopenReason(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions sx={{ p: 2, pt: 0 }}>
+          <Button onClick={() => setReopenDialogOpen(false)} disabled={actionLoading}>Cancel</Button>
+          <Button onClick={handleReopen} variant="contained" color="error" disabled={!reopenReason || actionLoading}>
+            Confirm Reopen
+          </Button>
+        </DialogActions>
+      </Dialog>
       
       {/* Assign Dialog */}
       <Dialog open={assignDialogOpen} onClose={() => !actionLoading && setAssignDialogOpen(false)} maxWidth="sm" fullWidth>

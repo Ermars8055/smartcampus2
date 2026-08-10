@@ -2059,6 +2059,9 @@ class ComplaintCloseRequest(BaseModel):
 class ComplaintApproveRequest(BaseModel):
     approval_type: str # 'admin' or 'manager'
 
+class ComplaintReopenRequest(BaseModel):
+    reason: str = Field(..., max_length=255)
+
 class ComplaintOut(ComplaintBase):
     id: int
     created_at: datetime
@@ -2249,6 +2252,31 @@ class PMScheduleUpdate(PMScheduleBase):
     pass
 
 class PMScheduleOut(PMScheduleBase):
+    id: int
+    tenant_id: int
+    created_at: datetime
+    class Config:
+        from_attributes = True
+
+class CalibrationScheduleBase(BaseModel):
+    department_name: str
+    jan: bool = False
+    feb: bool = False
+    mar: bool = False
+    apr: bool = False
+    may: bool = False
+    jun: bool = False
+    jul: bool = False
+    aug: bool = False
+    sep: bool = False
+    oct: bool = False
+    nov: bool = False
+    dec: bool = False
+
+class CalibrationScheduleUpdate(CalibrationScheduleBase):
+    pass
+
+class CalibrationScheduleOut(CalibrationScheduleBase):
     id: int
     tenant_id: int
     created_at: datetime

@@ -14,7 +14,7 @@ const COMPLAINT_STEPS = ['Registered', 'Assigned', 'Under Inspection', 'In Progr
 export default function ComplaintDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user, hasAction } = useAuth();
+  const { user, hasAction, hasPermission } = useAuth();
   const fileInputRef = useRef(null);
 
   const [complaint, setComplaint] = useState(null);
@@ -197,23 +197,24 @@ export default function ComplaintDetail() {
   const handleResolve = async () => {
     setActionLoading(true);
     try {
-      const uploadedUrls = [];
+      const resolutionImageUrls = [];
       for (const file of resolutionImages) {
         const formDataUpload = new FormData();
         formDataUpload.append('file', file);
         const uploadRes = await api.post('/api/upload?folder=complaints', formDataUpload, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
-        uploadedUrls.push(uploadRes.data.url);
+        resolutionImageUrls.push(uploadRes.data.url);
       }
 
+      const documentUrls = [];
       for (const file of closureDocs) {
         const formDataUpload = new FormData();
         formDataUpload.append('file', file);
         const uploadRes = await api.post('/api/upload?folder=complaints', formDataUpload, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
-        uploadedUrls.push(uploadRes.data.url);
+        documentUrls.push(uploadRes.data.url);
       }
 
       let equipmentPhotoUrl = null;
@@ -244,7 +245,8 @@ export default function ComplaintDetail() {
       const payload = {
         resolution_entered: resolutionRemarks,
         closure_reason: closureReason,
-        document_urls: uploadedUrls
+        document_urls: documentUrls,
+        resolution_image_urls: resolutionImageUrls
       };
 
       if (complaint?.complaint_type === 'Installation') {
@@ -376,13 +378,13 @@ export default function ComplaintDetail() {
               </Button>
             )}
 
-            {(complaint.status === 'Pending Approval' || complaint.status === 'Pending Admin Approval') && !complaint.admin_approved_by_id && (
+            {(complaint.status === 'Pending Approval' || complaint.status === 'Pending Admin Approval') && !complaint.admin_approved_by_id && hasAction('complaints', 'can_approve_level1') && (
               <Button variant="contained" color="primary" startIcon={<VerifiedUser />} onClick={() => handleApprove('admin')}>
                 Level 1 Approve
               </Button>
             )}
 
-            {(complaint.status === 'Pending Approval' || complaint.status === 'Pending Admin Approval') && complaint.admin_approved_by_id && !complaint.manager_approved_by_id && (
+            {(complaint.status === 'Pending Approval' || complaint.status === 'Pending Admin Approval') && complaint.admin_approved_by_id && !complaint.manager_approved_by_id && hasAction('complaints', 'can_approve_level2') && (
               <Button variant="contained" color="secondary" startIcon={<VerifiedUser />} onClick={() => handleApprove('manager')}>
                 Level 2 Approve
               </Button>
@@ -391,7 +393,7 @@ export default function ComplaintDetail() {
             {complaint.status === 'Closed' && (
               <>
                 <Typography variant="body2" color="textSecondary">Complaint is closed.</Typography>
-                {hasAction('complaints', 'update') && (
+                {hasPermission('complaints', 'can_update') && (
                   <Button variant="outlined" color="error" startIcon={<Replay />} onClick={() => setReopenDialogOpen(true)}>
                     Reopen Complaint
                   </Button>
@@ -428,6 +430,25 @@ export default function ComplaintDetail() {
                 <Typography variant="caption" color="textSecondary">Raised By</Typography>
                 <Typography variant="body1" fontWeight={500}>{complaint.created_by_name || '-'}</Typography>
               </Grid>
+              
+              {complaint.equipment_warranty_status && (
+                <Grid item xs={12} sm={4}>
+                  <Typography variant="caption" color="textSecondary">Warranty Status</Typography>
+                  <Box sx={{ mt: 0.5 }}>
+                    <Chip 
+                      label={complaint.equipment_warranty_status} 
+                      size="small" 
+                      sx={{ 
+                        bgcolor: complaint.equipment_warranty_status === 'Warranty' ? '#DCFCE7' : 
+                                 complaint.equipment_warranty_status === 'Out of Warranty' ? '#FEE2E2' : '#DBEAFE',
+                        color: complaint.equipment_warranty_status === 'Warranty' ? '#166534' : 
+                               complaint.equipment_warranty_status === 'Out of Warranty' ? '#991B1B' : '#1E40AF',
+                        fontWeight: 600
+                      }} 
+                    />
+                  </Box>
+                </Grid>
+              )}
 
               <Grid item xs={12}>
                 <Typography variant="caption" color="textSecondary">Individual Detailed</Typography>
@@ -474,6 +495,21 @@ export default function ComplaintDetail() {
                   <Grid item xs={6} sm={4} key={img.id}>
                     <Box sx={{ position: 'relative', pt: '100%', borderRadius: 1, overflow: 'hidden', border: '1px solid #E2E8F0' }}>
                       <img src={getFileUrl(img.image_url)} alt="Pre Repair" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', cursor: 'pointer' }} onClick={() => setPreviewDialog({ open: true, url: getFileUrl(img.image_url) })} />
+                    </Box>
+                  </Grid>
+                ))}
+              </Grid>
+            </Paper>
+          )}
+
+          {postRepairImages.length > 0 && (
+            <Paper sx={{ p: 3, mb: 3 }}>
+              <Typography variant="h6" sx={{ color: '#1E3A8A', mb: 2 }}>Post-Repair Photos</Typography>
+              <Grid container spacing={2}>
+                {postRepairImages.map((img) => (
+                  <Grid item xs={6} sm={4} key={img.id}>
+                    <Box sx={{ position: 'relative', pt: '100%', borderRadius: 1, overflow: 'hidden', border: '1px solid #E2E8F0' }}>
+                      <img src={getFileUrl(img.image_url)} alt="Post Repair" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', cursor: 'pointer' }} onClick={() => setPreviewDialog({ open: true, url: getFileUrl(img.image_url) })} />
                     </Box>
                   </Grid>
                 ))}
@@ -791,7 +827,22 @@ export default function ComplaintDetail() {
             </Box>
           ) : (
             <>
-              <Typography variant="subtitle2" sx={{ mb: 1 }}>Upload Service Documents & Photos</Typography>
+              <Typography variant="subtitle2" sx={{ mb: 1 }}>Upload Post Repair Photos</Typography>
+              <Box sx={{ border: '2px dashed #CBD5E1', borderRadius: 2, p: 2, textAlign: 'center', bgcolor: '#F8FAFC', mb: 2 }}>
+                 <input type="file" multiple accept="image/*" style={{ display: 'none' }} id="resolution-images-input" onChange={handleResolutionImageChange} />
+                <Button variant="outlined" startIcon={<PhotoCamera />} onClick={() => document.getElementById('resolution-images-input').click()} size="small">
+                  Select Post Repair Photos
+                </Button>
+                {resolutionImages.length > 0 && (
+                  <Box sx={{ mt: 2, textAlign: 'left' }}>
+                    {resolutionImages.map((doc, idx) => (
+                      <Chip key={idx} label={doc.name} onDelete={() => removeResolutionImage(idx)} sx={{ m: 0.5 }} />
+                    ))}
+                  </Box>
+                )}
+              </Box>
+
+              <Typography variant="subtitle2" sx={{ mb: 1 }}>Upload Service Documents</Typography>
               <Box sx={{ border: '2px dashed #CBD5E1', borderRadius: 2, p: 2, textAlign: 'center', bgcolor: '#F8FAFC', mb: 2 }}>
                  <input type="file" multiple accept="*/*" style={{ display: 'none' }} ref={fileInputRef} onChange={(e) => {
                    if (e.target.files) {
@@ -799,8 +850,8 @@ export default function ComplaintDetail() {
                      setClosureDocs(prev => [...prev, ...filesArray]);
                    }
                  }} />
-                <Button variant="outlined" startIcon={<PhotoCamera />} onClick={() => fileInputRef.current.click()} size="small">
-                  Select Service Reports / Photos
+                <Button variant="outlined" startIcon={<Assignment />} onClick={() => fileInputRef.current.click()} size="small">
+                  Select Service Reports / Documents
                 </Button>
                 {closureDocs.length > 0 && (
                   <Box sx={{ mt: 2, textAlign: 'left' }}>

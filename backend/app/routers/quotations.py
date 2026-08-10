@@ -987,7 +987,7 @@ def convert_to_pos(
         vendor_items[c.selected_vendor_id].append({
             "material_id": c.material_id,
             "quantity": c.qr_item.quantity,
-            "rate": item_data.get(c.qr_item_id).rate if c.qr_item_id in item_data else (vqi.quoted_rate if vqi else 0),
+            "rate": item_data.get(c.qr_item_id).rate if c.qr_item_id in item_data else ((vqi.quoted_rate / (vqi.uom_conversion_factor or 1.0)) if vqi else 0),
             "discount_percent": item_data.get(c.qr_item_id).discount_percent if c.qr_item_id in item_data else 0,
             "cgst_percentage": item_data.get(c.qr_item_id).cgst_percentage if c.qr_item_id in item_data else 0,
             "sgst_percentage": item_data.get(c.qr_item_id).sgst_percentage if c.qr_item_id in item_data else 0,

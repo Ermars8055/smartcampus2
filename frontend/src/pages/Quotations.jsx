@@ -10,7 +10,7 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions, FormControl, FormHelperText,
   InputLabel, Select, MenuItem, Chip, OutlinedInput, Checkbox, ListItemText, Autocomplete,
   Alert, CircularProgress, Accordion, AccordionSummary, AccordionDetails, Card,
-  Grid, InputAdornment, Tooltip, createFilterOptions
+  Grid, InputAdornment, Tooltip, createFilterOptions, Collapse
 } from '@mui/material';
 import {
   Add as AddIcon, Send as SendIcon, CloudUpload as CloudUploadIcon,
@@ -18,7 +18,8 @@ import {
   Download as DownloadIcon, ExpandMore as ExpandMoreIcon, ArrowBack as ArrowBackIcon,
   AccountTree as ProjectIcon, Event as DateIcon, Group as VendorIcon, Description as RemarkIcon, Link as LinkIcon, Inventory as InventoryIcon,
   EditNote as ProcessIcon, Balance as CompareIcon, FactCheck as ApproveIcon, ShoppingCart as OrderIcon, Send as BlastIcon,
-  ArrowDropUp, ArrowDropDown, Search, Delete as DeleteIcon, AutoFixHigh as AutoFixHighIcon
+  ArrowDropUp, ArrowDropDown, Search, Delete as DeleteIcon, AutoFixHigh as AutoFixHighIcon,
+  ExpandLess as ExpandLessIcon
 } from '@mui/icons-material';
 import api, { getFileUrl } from '../services/api';
 import { formatDate } from '../utils/dateUtils';
@@ -47,6 +48,7 @@ const Quotations = () => {
   const [filterVendor, setFilterVendor] = useState(null);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+  const [isMaterialsSummaryOpen, setIsMaterialsSummaryOpen] = useState(false);
 
   // Create QR state
   const [createQRDialogOpen, setCreateQRDialogOpen] = useState(false);
@@ -84,7 +86,7 @@ const Quotations = () => {
     items: []
   });
   const [quotePage, setQuotePage] = useState(0);
-  const [quoteRowsPerPage, setQuoteRowsPerPage] = useState(10);
+  const [quoteRowsPerPage, setQuoteRowsPerPage] = useState(20);
 
   // Tab 3: Comparison
   const [comparisonData, setComparisonData] = useState(null);
@@ -150,15 +152,15 @@ const Quotations = () => {
   }, [selectedQR?.id, selectedQR?.status]);
 
   useEffect(() => {
-    if (selectedQR && detailSection) {
+    if (selectedQR && detailSection && !loading) {
       setTimeout(() => {
         const element = document.getElementById(`${detailSection}-section`);
         if (element) {
-          element.scrollIntoView({ behavior: 'smooth' });
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-      }, 500); // Wait for data to load and render
+      }, 100);
     }
-  }, [selectedQR?.id, detailSection]);
+  }, [selectedQR?.id, detailSection, loading]);
 
   useEffect(() => {
     if (selectedQR && selectedQR.status === 'Ordered') {
@@ -205,12 +207,13 @@ const Quotations = () => {
 
   const fetchComparison = async (qrId) => {
     if (qrId) {
-      api.get(`/api/quotations/${qrId}/comparison`)
-        .then(res => setComparisonData(res.data))
-        .catch(err => {
-          console.error(err);
-          showMessage('Failed to fetch comparison data', 'Error', 'error');
-        });
+      try {
+        const res = await api.get(`/api/quotations/${qrId}/comparison`);
+        setComparisonData(res.data);
+      } catch (err) {
+        console.error(err);
+        showMessage('Failed to fetch comparison data', 'Error', 'error');
+      }
     }
   };
 
@@ -1252,68 +1255,78 @@ const Quotations = () => {
 
             {/* Materials Summary — Consolidated list of all items */}
             <Box mb={4}>
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>Materials Summary</Typography>
-              <TableContainer component={Paper} variant="outlined" sx={{ maxHeight: 600, overflowY: 'auto' }}>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
-                      <TableCell sx={{ fontWeight: 'bold', width: 40 }}>#</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold' }}>Material Code</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold' }}>Material Name</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold' }} align="right">Quantity</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold' }}>UOM</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold' }}>Source</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {sortQRItems(selectedQR.items).map((item, idx) => (
-                      <TableRow key={item.id} hover>
-                        <TableCell sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>{idx + 1}</TableCell>
-                        <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{item.material_code}</TableCell>
-                        <TableCell sx={{ fontWeight: 500 }}>{item.material_name}</TableCell>
-                        <TableCell align="right" sx={{ fontWeight: 600 }}>{item.quantity}</TableCell>
-                        <TableCell sx={{ color: 'text.secondary' }}>{item.uom_name}</TableCell>
-                        <TableCell>
-                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                            {item.sources && item.sources.length > 0 ? (() => {
-                              // Force Filter: If any PR source exists, ignore Manual entirely
-                              const hasPR = item.sources.some(s => s.source === 'PR' && s.source_pr_number);
-                              const displaySources = item.sources.filter(s => {
-                                if ((s.source === 'Manual' || s.source === 'Imported') && hasPR) return false;
-                                return (s.source === 'PR' && s.source_pr_number) || s.source === 'Manual' || s.source === 'Imported';
-                              });
-
-                              return Array.from(new Set(displaySources.map(s =>
-                                s.source === 'PR' ? `PR:${s.source_pr_number}` : s.source
-                              ))).map((srcKey, sIdx) => {
-                                const isPR = srcKey.startsWith('PR:');
-                                const label = isPR ? srcKey.replace('PR:', '') : srcKey;
-                                const color = isPR ? "primary" : (label === 'Imported' ? "info" : "default");
-                                return (
-                                  <Chip
-                                    key={sIdx}
-                                    size="small"
-                                    label={label}
-                                    color={color}
-                                    sx={{ fontSize: '0.7rem', height: 20 }}
-                                  />
-                                );
-                              });
-                            })() : (
-                              <Chip
-                                size="small"
-                                label={item.source === 'PR' && item.source_pr_number ? item.source_pr_number : (item.source === 'Imported' ? 'Imported' : 'Manual')}
-                                color={item.source === 'PR' ? "primary" : (item.source === 'Imported' ? "info" : "default")}
-                                sx={{ fontSize: '0.7rem', height: 20 }}
-                              />
-                            )}
-                          </Box>
-                        </TableCell>
+              <Box 
+                sx={{ display: 'flex', alignItems: 'center', mb: 2, cursor: 'pointer', userSelect: 'none', width: 'fit-content' }} 
+                onClick={() => setIsMaterialsSummaryOpen(!isMaterialsSummaryOpen)}
+              >
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>Materials Summary</Typography>
+                <IconButton size="small" sx={{ ml: 1, p: 0 }}>
+                  {isMaterialsSummaryOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                </IconButton>
+              </Box>
+              <Collapse in={isMaterialsSummaryOpen}>
+                <TableContainer component={Paper} variant="outlined" sx={{ maxHeight: 600, overflowY: 'auto' }}>
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
+                        <TableCell sx={{ fontWeight: 'bold', width: 40 }}>#</TableCell>
+                        <TableCell sx={{ fontWeight: 'bold' }}>Material Code</TableCell>
+                        <TableCell sx={{ fontWeight: 'bold' }}>Material Name</TableCell>
+                        <TableCell sx={{ fontWeight: 'bold' }} align="right">Quantity</TableCell>
+                        <TableCell sx={{ fontWeight: 'bold' }}>UOM</TableCell>
+                        <TableCell sx={{ fontWeight: 'bold' }}>Source</TableCell>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+                    </TableHead>
+                    <TableBody>
+                      {sortQRItems(selectedQR.items).map((item, idx) => (
+                        <TableRow key={item.id} hover>
+                          <TableCell sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>{idx + 1}</TableCell>
+                          <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{item.material_code}</TableCell>
+                          <TableCell sx={{ fontWeight: 500 }}>{item.material_name}</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 600 }}>{item.quantity}</TableCell>
+                          <TableCell sx={{ color: 'text.secondary' }}>{item.uom_name}</TableCell>
+                          <TableCell>
+                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                              {item.sources && item.sources.length > 0 ? (() => {
+                                // Force Filter: If any PR source exists, ignore Manual entirely
+                                const hasPR = item.sources.some(s => s.source === 'PR' && s.source_pr_number);
+                                const displaySources = item.sources.filter(s => {
+                                  if ((s.source === 'Manual' || s.source === 'Imported') && hasPR) return false;
+                                  return (s.source === 'PR' && s.source_pr_number) || s.source === 'Manual' || s.source === 'Imported';
+                                });
+
+                                return Array.from(new Set(displaySources.map(s =>
+                                  s.source === 'PR' ? `PR:${s.source_pr_number}` : s.source
+                                ))).map((srcKey, sIdx) => {
+                                  const isPR = srcKey.startsWith('PR:');
+                                  const label = isPR ? srcKey.replace('PR:', '') : srcKey;
+                                  const color = isPR ? "primary" : (label === 'Imported' ? "info" : "default");
+                                  return (
+                                    <Chip
+                                      key={sIdx}
+                                      size="small"
+                                      label={label}
+                                      color={color}
+                                      sx={{ fontSize: '0.7rem', height: 20 }}
+                                    />
+                                  );
+                                });
+                              })() : (
+                                <Chip
+                                  size="small"
+                                  label={item.source === 'PR' && item.source_pr_number ? item.source_pr_number : (item.source === 'Imported' ? 'Imported' : 'Manual')}
+                                  color={item.source === 'PR' ? "primary" : (item.source === 'Imported' ? "info" : "default")}
+                                  sx={{ fontSize: '0.7rem', height: 20 }}
+                                />
+                              )}
+                            </Box>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Collapse>
             </Box>
 
             {/* 1. Vendor Management & Quotations */}
@@ -1484,7 +1497,7 @@ const Quotations = () => {
 
             {/* Phase 4: Material-Wise Comparison (Visible when Entered or Compared) */}
             {['Received', 'Entered', 'Compared', 'Approved', 'Ordered'].includes(selectedQR.status) && comparisonData && (
-              <Box mb={4} id="comparison-section">
+              <Box mb={4} id="comparison-section" sx={{ scrollMarginTop: '100px' }}>
                 <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>2. Technical Comparison (Item-Wise)</Typography>
                 {comparisonData.materials.slice(compPage * compRowsPerPage, compPage * compRowsPerPage + compRowsPerPage).map(mat => (
                   <Accordion key={mat.qr_item_id} variant="outlined" sx={{ mb: 1.5, borderRadius: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.04)', '&:before': { display: 'none' } }} defaultExpanded>
@@ -1573,7 +1586,7 @@ const Quotations = () => {
 
             {/* Phase 5: Final Comparative Statement (Visible when Received or beyond) */}
             {['Received', 'Entered', 'Compared', 'Approved', 'Ordered'].includes(selectedQR.status) && comparisonData && (
-              <Box id="approval-section">
+              <Box id="approval-section" sx={{ scrollMarginTop: '100px' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                   <Typography variant="h6" sx={{ fontWeight: 600 }}>3. Comparative Statement & Approval</Typography>
                   <Box>
@@ -1610,7 +1623,7 @@ const Quotations = () => {
                               quantity: mat.quantity,
                               uom_name: mat.uom_name,
                               vendor_name: mat.selected_vendor_name,
-                              rate: quote ? quote.quoted_rate : 0,
+                              rate: quote ? quote.effective_rate : 0,
                               discount_percent: 0,
                               cgst_percentage,
                               sgst_percentage,
@@ -2165,15 +2178,55 @@ const Quotations = () => {
             </Box>
 
             <TableContainer sx={{ overflowX: 'auto', mt: 2, mb: 1 }}>
-              <Table size="small" sx={{ minWidth: 1000 }}>
+              <Table size="small" sx={{ minWidth: 700 }}>
                 <TableHead>
                   <TableRow>
                     <TableCell sx={{ fontWeight: 600 }}>Material</TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>Brand</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Vendor UOM</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Conv. Factor</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Quoted Rate (₹)</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Disc %</TableCell>
+                    <TableCell sx={{ fontWeight: 600, lineHeight: 1.2 }}>Vendor<br/>UOM</TableCell>
+                    <TableCell sx={{ fontWeight: 600, lineHeight: 1.2 }}>Conv.<br/>Factor</TableCell>
+                    <TableCell sx={{ fontWeight: 600, lineHeight: 1.2 }}>Quoted<br/>Rate (₹)</TableCell>
+                    <TableCell sx={{ fontWeight: 600, minWidth: 100, textAlign: 'center' }}>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, fontSize: '0.875rem' }}>Disc %</Typography>
+                        <Tooltip title="Apply to all items">
+                          <Box sx={{ display: 'flex', alignItems: 'center', bgcolor: 'background.paper', borderRadius: 1, p: 0.25, border: '1px solid #e2e8f0' }}>
+                             <TextField 
+                                id="apply-all-discount"
+                                type="number"
+                                size="small"
+                                variant="standard"
+                                InputProps={{ disableUnderline: true }}
+                                sx={{ width: 40, px: 0.5, '& input': { p: 0, fontSize: '0.75rem', textAlign: 'center' } }}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    const val = e.target.value;
+                                    if (val && /^\d*\.?\d{0,2}$/.test(val)) {
+                                      const newItems = newQuote.items.map(it => it.is_excluded ? it : { ...it, discount_percent: val });
+                                      setNewQuote({ ...newQuote, items: newItems });
+                                      e.target.value = '';
+                                    }
+                                  }
+                                }}
+                             />
+                             <IconButton size="small" sx={{ p: 0 }} onClick={() => {
+                                const el = document.getElementById('apply-all-discount');
+                                if (el && el.value) {
+                                    const val = el.value;
+                                    if (/^\d*\.?\d{0,2}$/.test(val)) {
+                                      const newItems = newQuote.items.map(it => it.is_excluded ? it : { ...it, discount_percent: val });
+                                      setNewQuote({ ...newQuote, items: newItems });
+                                      el.value = '';
+                                    }
+                                }
+                             }}>
+                               <CheckCircleIcon fontSize="small" color="primary" sx={{ width: 16, height: 16 }} />
+                             </IconButton>
+                          </Box>
+                        </Tooltip>
+                      </Box>
+                    </TableCell>
                     <TableCell sx={{ fontWeight: 600, minWidth: 100, textAlign: 'center' }}>
                       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
                         <Typography variant="subtitle2" sx={{ fontWeight: 600, fontSize: '0.875rem' }}>Delivery Days</Typography>
@@ -2213,30 +2266,30 @@ const Quotations = () => {
                       </Box>
                     </TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>Remarks</TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 600 }}>Exclude</TableCell>
+                    <TableCell align="center" sx={{ fontWeight: 600, position: 'sticky', right: 0, bgcolor: 'background.paper', zIndex: 2 }}>Exclude</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {newQuote.items.slice(quotePage * quoteRowsPerPage, quotePage * quoteRowsPerPage + quoteRowsPerPage).map((it, localIdx) => {
                     const idx = quotePage * quoteRowsPerPage + localIdx;
                     return (
-                      <TableRow key={idx} sx={{ opacity: it.is_excluded ? 0.5 : 1, bgcolor: it.confidence ? '#fff7ed' : 'inherit', outline: it.confidence ? '1px solid #f97316' : 'none', outlineOffset: '-1px' }}>
+                      <TableRow key={localIdx} sx={{ opacity: it.is_excluded ? 0.5 : 1, bgcolor: (!it.is_excluded && !it.quoted_rate) ? '#fff7ed' : 'inherit', outline: (!it.is_excluded && !it.quoted_rate) ? '1px solid #f97316' : 'none', outlineOffset: '-1px' }}>
                         <TableCell>{it.material_code} - {it.material_name}</TableCell>
                     <TableCell>
                       <TextField size="small" disabled={it.is_excluded} value={it.brand || ''} onChange={(e) => {
                         const newItems = [...newQuote.items]; newItems[idx].brand = e.target.value; setNewQuote({ ...newQuote, items: newItems });
-                      }} sx={{ width: 100 }} />
+                      }} sx={{ width: 80 }} />
                     </TableCell>
                     <TableCell>
                       <TextField size="small" disabled={it.is_excluded} value={it.vendor_uom_name || ''} onChange={(e) => {
                         const newItems = [...newQuote.items]; newItems[idx].vendor_uom_name = e.target.value; setNewQuote({ ...newQuote, items: newItems });
-                      }} sx={{ width: 80 }} />
+                      }} sx={{ width: 60 }} />
                     </TableCell>
                     <TableCell>
                       <Tooltip title="e.g. If Requested UOM is L but Vendor quotes per 500ml, Conversion factor is 0.5">
                         <TextField size="small" type="number" className="no-spin" disabled={it.is_excluded} value={it.uom_conversion_factor} onChange={(e) => {
                           const newItems = [...newQuote.items]; newItems[idx].uom_conversion_factor = parseFloat(e.target.value) || 1.0; setNewQuote({ ...newQuote, items: newItems });
-                        }} sx={{ width: 80 }} />
+                        }} sx={{ width: 60 }} />
                       </Tooltip>
                     </TableCell>
                     <TableCell>
@@ -2257,7 +2310,7 @@ const Quotations = () => {
                             setNewQuote({ ...newQuote, items: newItems });
                           }
                         }}
-                        sx={{ width: 120 }}
+                        sx={{ width: 90 }}
                       />
                     </TableCell>
                     <TableCell>
@@ -2276,7 +2329,7 @@ const Quotations = () => {
                             setNewQuote({ ...newQuote, items: newItems });
                           }
                         }}
-                        sx={{ width: 80 }}
+                        sx={{ width: 60 }}
                       />
                     </TableCell>
                     <TableCell>
@@ -2295,13 +2348,14 @@ const Quotations = () => {
                             setNewQuote({ ...newQuote, items: newItems });
                           }
                         }}
-                        sx={{ width: 80 }}
+                        sx={{ width: 60 }}
                       />
                     </TableCell>
                     <TableCell>
                       <TextField inputProps={{ maxLength: 255 }}
                         size="small"
                         disabled={it.is_excluded}
+                        sx={{ width: 100 }}
                         value={it.remarks}
                         onChange={(e) => {
                           const newItems = [...newQuote.items];
@@ -2310,7 +2364,7 @@ const Quotations = () => {
                         }}
                       />
                     </TableCell>
-                    <TableCell align="center">
+                    <TableCell align="center" sx={{ position: 'sticky', right: 0, bgcolor: (!it.is_excluded && !it.quoted_rate) ? '#fff7ed' : 'background.paper', zIndex: 1 }}>
                       <Tooltip title={selectedQR?.invited_vendors?.length <= 2 ? 'Exclude is only available when more than 2 vendors are invited' : ''}>
                         <span>
                           <Checkbox
@@ -2346,7 +2400,7 @@ const Quotations = () => {
                 setQuoteRowsPerPage(parseInt(e.target.value, 10));
                 setQuotePage(0);
               }}
-              rowsPerPageOptions={[10, 25, 50, 100]}
+              rowsPerPageOptions={[20, 40, 60]}
             />
           </DialogContent>
           <DialogActions sx={{ p: 3 }}>
@@ -2395,10 +2449,10 @@ const Quotations = () => {
                               const elId = `quoted-rate-${firstMissingIdx}`;
                               const el = document.getElementById(elId);
                               if (el) {
-                                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                el.scrollIntoView({ behavior: 'auto', block: 'center' });
                                 el.focus();
                               }
-                            }, 100);
+                            }, 50);
                           }
                         }}
                       >
@@ -2462,6 +2516,28 @@ const Quotations = () => {
               <Box>
                 <Typography><strong>Status:</strong> {viewingQR.status === 'Sent to Vendors' ? 'Request to Vendors' : viewingQR.status}</Typography>
 
+                <Typography variant="h6" sx={{ fontWeight: 600, mt: 3, mb: 1.5 }}>Vendors Requested</Typography>
+                <TableContainer component={Paper} variant="outlined" sx={{ mb: 2 }}>
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
+                        <TableCell sx={{ fontWeight: 'bold' }}>Vendor Name</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {viewingQR.invited_vendors && viewingQR.invited_vendors.length > 0 ? (
+                        viewingQR.invited_vendors.map(v => (
+                          <TableRow key={v.vendor_id}>
+                            <TableCell sx={{ fontWeight: 500 }}>{v.vendor_name}</TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow><TableCell align="center">No vendors invited yet.</TableCell></TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+
                 <Typography variant="h6" sx={{ fontWeight: 600, mt: 3, mb: 1.5 }}>Materials Summary</Typography>
                 <TableContainer component={Paper} variant="outlined" sx={{ mb: 2, maxHeight: 600, overflowY: 'auto' }}>
                   <Table size="small">
@@ -2519,28 +2595,6 @@ const Quotations = () => {
                           </TableCell>
                         </TableRow>
                       ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-
-                <Typography variant="h6" sx={{ fontWeight: 600, mt: 3, mb: 1.5 }}>Vendors Requested</Typography>
-                <TableContainer component={Paper} variant="outlined">
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
-                        <TableCell sx={{ fontWeight: 'bold' }}>Vendor Name</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {viewingQR.invited_vendors && viewingQR.invited_vendors.length > 0 ? (
-                        viewingQR.invited_vendors.map(v => (
-                          <TableRow key={v.vendor_id}>
-                            <TableCell sx={{ fontWeight: 500 }}>{v.vendor_name}</TableCell>
-                          </TableRow>
-                        ))
-                      ) : (
-                        <TableRow><TableCell align="center">No vendors invited yet.</TableCell></TableRow>
-                      )}
                     </TableBody>
                   </Table>
                 </TableContainer>

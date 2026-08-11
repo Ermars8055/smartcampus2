@@ -30,6 +30,7 @@ const menuItems = [
       { text: 'UOM', icon: <Straighten />, path: '/uom', resource: 'uom' },
       { text: 'Vendors', icon: <People />, path: '/vendors', resource: 'vendors' },
       { text: 'Stores', icon: <Warehouse />, path: '/warehouses', resource: 'warehouses' },
+      { text: 'Equipment', icon: <Build />, path: '/equipment', resource: 'equipment' },
     ]
   },
   {
@@ -37,8 +38,9 @@ const menuItems = [
       { text: 'Indents', icon: <Assignment />, path: '/indents', resource: 'indents' },
       { text: 'Purchase Requests', icon: <Assignment />, path: '/purchase-requests', resource: 'purchase_requests' },
       { text: 'Quotations', icon: <RequestQuote />, path: '/quotations', resource: 'quotations' },
-      { text: 'Contracts', icon: <AssignmentTurnedIn />, path: '/contracts' },
+      { text: 'Contracts', icon: <AssignmentTurnedIn />, path: '/contracts', resource: 'contracts' },
       { text: 'Purchase Orders', icon: <ReceiptLong />, path: '/purchase-orders', resource: 'purchase_orders' },
+      { text: 'Work Orders', icon: <Build />, path: '/work-orders', resource: 'work_orders' },
     ]
   },
   {
@@ -46,7 +48,6 @@ const menuItems = [
       { text: 'Gate Entry', icon: <Security />, path: '/gate-entry', resource: 'gate_entry' },
       { text: 'Invoices', icon: <ReceiptLong />, path: '/invoices', resource: 'invoice' },
       { text: 'GRN', icon: <LocalShipping />, path: '/grn', resource: 'grn' },
-      { text: 'Equipment', icon: <Build />, path: '/equipment', resource: 'equipment' },
       { text: 'Material Issue', icon: <Inventory2 />, path: '/issues', resource: 'issues' },
       { text: 'Returns', icon: <Undo />, path: '/returns', resource: 'returns' },
       { text: 'Stock Transfer', icon: <SwapHoriz />, path: '/transfers', resource: 'transfers' },
@@ -59,8 +60,8 @@ const menuItems = [
   {
     text: 'Maintenance', icon: <Build />, children: [
       { text: 'Complaints', icon: <Assignment />, path: '/complaints', resource: 'complaints' },
-      { text: 'PM Schedule', icon: <AssignmentTurnedIn />, path: '/equipment/pm-schedule', resource: 'equipment' },
-      { text: 'Repair Work Orders', icon: <Build />, path: '/rwos' },
+      { text: 'PM Schedule', icon: <AssignmentTurnedIn />, path: '/equipment/pm-schedule', resource: 'pm_schedule' },
+      { text: 'Calibration Schedule', icon: <AssignmentTurnedIn />, path: '/equipment/calibration-schedule', resource: 'calibration_schedule' },
     ]
   },
   { text: 'Intelligence', icon: <Build />, path: '/intelligence', resource: 'intelligence' },
@@ -79,7 +80,9 @@ const menuItems = [
       { text: 'Equipment Count', icon: <Assessment />, path: '/reports/equipment-count', resource: 'report_equipment_count' },
       { text: 'Receipt Summary', icon: <Assessment />, path: '/reports/receipt-summary', resource: 'report_receipt_summary' },
       { text: 'Department Inventory', icon: <Assessment />, path: '/reports/department-inventory', resource: 'report_dept_inventory' },
+      { text: 'Department Equipment', icon: <Assessment />, path: '/reports/department-equipment', resource: 'report_dept_inventory' },
       { text: 'Pending Gatepass Returns', icon: <Assessment />, path: '/reports/pending-gatepass-returns', resource: 'report_pending_gatepass' },
+      { text: 'Call Status', icon: <Assessment />, path: '/reports/call-status', resource: 'reports' },
     ]
   },
   {
@@ -90,7 +93,7 @@ const menuItems = [
       { text: 'Roles', icon: <Security />, path: '/admin/roles', resource: 'admin_roles' },
       { text: 'Material Allowances', icon: <Inventory2 />, path: '/admin/material-allowances', resource: 'material_allowances' },
       { text: 'Configurations', icon: <Settings />, path: '/admin/configurations', resource: 'configurations' },
-      { text: 'Locations', icon: <Business />, path: '/admin/locations', resource: 'configurations' },
+      { text: 'Locations', icon: <Business />, path: '/admin/locations', resource: 'locations' },
       { text: 'Projects', icon: <AccountTree />, path: '/projects', resource: 'projects' },
       { text: 'Terms & Conditions', icon: <Assignment />, path: '/terms', resource: 'terms' },
       { text: 'Company Addresses', icon: <Business />, path: '/company-addresses', resource: 'company_addresses' },
@@ -108,7 +111,7 @@ const getSubmoduleStyle = (isActivePath) => ({
   borderLeft: isActivePath ? '3px solid #60A5FA' : '3px solid transparent',
   py: 0.6,
   pl: isActivePath ? 4.5 : 5,
-  color: isActivePath ? '#60A5FA' : '#94A3B8',
+  color: isActivePath ? '#60A5FA' : '#CBD5E1',
   background: isActivePath ? 'rgba(37,99,235,0.15)' : 'transparent',
   transition: 'all 0.3s ease',
   '&:hover': { 
@@ -260,17 +263,17 @@ export default function Layout() {
                     borderRadius: 2,
                     py: 0.8,
                     px: 1.5,
-                    color: isParentActive(item) ? '#fff' : '#94A3B8',
+                    color: isParentActive(item) ? '#fff' : '#CBD5E1',
                     background: isParentActive(item) ? 'linear-gradient(90deg, rgba(37,99,235,0.3), rgba(37,99,235,0.1))' : 'transparent',
                     borderLeft: isParentActive(item) ? '3px solid #2563EB' : '3px solid transparent',
                     '&:hover': {
                       background: 'rgba(37,99,235,0.1)',
-                      color: '#E2E8F0',
+                      color: '#F8FAFC',
                     },
                     transition: 'all 0.2s',
                   }}
                 >
-                  <ListItemIcon sx={{ color: isParentActive(item) ? '#60A5FA' : '#64748B', minWidth: 36, '& svg': { fontSize: '1.2rem' } }}>
+                  <ListItemIcon sx={{ color: isParentActive(item) ? '#60A5FA' : '#94A3B8', minWidth: 36, '& svg': { fontSize: '1.2rem' } }}>
                     {item.icon}
                   </ListItemIcon>
                   <ListItemText primary={item.text} primaryTypographyProps={{ sx: { fontSize: '0.82rem', fontWeight: isParentActive(item) ? 600 : 400 } }} />

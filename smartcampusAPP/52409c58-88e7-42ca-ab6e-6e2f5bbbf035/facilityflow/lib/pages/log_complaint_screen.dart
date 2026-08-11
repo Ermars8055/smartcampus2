@@ -35,6 +35,14 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
   String? _selectedBuildingId;
   String? _selectedFloorId;
   String? _selectedRoomId;
+  
+  String? _selectedComplaintType;
+  final List<String> _complaintTypes = [
+    'General Complaint',
+    'Machine Not Working',
+    'Installation',
+    'User Training'
+  ];
 
   final List<File> _attachedImages = [];
   final ImagePicker _picker = ImagePicker();
@@ -299,6 +307,13 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
       return;
     }
 
+    if (_selectedComplaintType == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select a Call Type / Complaint Type')),
+      );
+      return;
+    }
+
     final selectedFloor = _floorsList.firstWhere(
         (f) => f['id'].toString() == _selectedFloorId,
         orElse: () => null);
@@ -322,6 +337,7 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
       'nature_of_complaint': nature,
       'individual_detailed': description,
       'name_and_trade': _nameTradeController.text.trim(),
+      'complaint_type': _selectedComplaintType,
     };
 
     showDialog(
@@ -572,6 +588,19 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
                   ),
                 ),
                 const SizedBox(height: 12),
+                _buildDropdownField(
+                  label: 'Call Type / Complaint Type *',
+                  icon: Icons.assignment_outlined,
+                  selectedName: _selectedComplaintType,
+                  onTap: () => _showBottomPicker(
+                    title: 'Select Call Type',
+                    items: _complaintTypes.map((type) => {'id': type, 'name': type}).toList(),
+                    selectedValue: _selectedComplaintType,
+                    idField: 'id',
+                    nameField: 'name',
+                    onSelect: (val) => setState(() => _selectedComplaintType = val),
+                  ),
+                ),
                 TextFormField(
                   controller: _natureController,
                   decoration: const InputDecoration(

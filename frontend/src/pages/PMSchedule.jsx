@@ -6,6 +6,7 @@ import {
 import { Save, Refresh } from '@mui/icons-material';
 import api from '../services/api';
 import { useMessage } from '../context/MessageContext';
+import { useAuth } from '../context/AuthContext';
 
 const months = [
   { key: 'jan', label: 'Jan' },
@@ -24,6 +25,7 @@ const months = [
 
 export default function PMSchedule() {
   const { showMessage } = useMessage();
+  const { hasAction } = useAuth();
   const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -64,10 +66,12 @@ export default function PMSchedule() {
     try {
       const res = await api.post('/api/equipment/generate-maintenance-calls');
       showMessage(`${res.data.pm_calls_generated} PM and ${res.data.calibration_calls_generated} Calibration calls generated!`, 'Success', 'success');
+      loadData();
     } catch (err) {
       showMessage('Failed to generate maintenance calls', 'Error', 'error');
     }
   };
+
 
   if (loading) {
     return (
@@ -84,15 +88,17 @@ export default function PMSchedule() {
           Preventive Maintenance Schedule
         </Typography>
         <Box sx={{ display: 'flex', gap: 2 }}>
-          <Button
-            variant="outlined"
-            color="primary"
-            startIcon={<Refresh />}
-            onClick={handleGenerate}
-            title="Generate PM & Calibration Complaints for the current month"
-          >
-            Generate Calls
-          </Button>
+          {hasAction('pm_schedule', 'generate_calls') && (
+            <Button
+              variant="outlined"
+              color="primary"
+              startIcon={<Refresh />}
+              onClick={handleGenerate}
+              title="Generate PM & Calibration Complaints for the current month"
+            >
+              Generate Calls
+            </Button>
+          )}
           <Button
             variant="contained"
             color="primary"
@@ -128,16 +134,29 @@ export default function PMSchedule() {
                   <TableCell sx={{ fontWeight: 600, color: '#334155' }}>
                     {row.department_name}
                   </TableCell>
-                  {months.map(m => (
-                    <TableCell key={m.key} align="center" sx={{ padding: '4px' }}>
-                      <Checkbox
-                        checked={row[m.key]}
-                        onChange={() => handleCheckboxChange(index, m.key)}
-                        color="primary"
-                        size="small"
-                      />
+                  {months.map((m, mIndex) => {
+                    const isPastMonth = mIndex < new Date().getMonth();
+                    const callsGenerated = row.monthly_calls && row.monthly_calls[m.key] > 0;
+                    const isDisabled = isPastMonth || callsGenerated;
+                    return (
+                    <TableCell key={m.key} align="center" sx={{ padding: '4px', bgcolor: callsGenerated ? '#f0fdf4' : 'transparent' }}>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <Checkbox
+                          checked={row[m.key] || callsGenerated}
+                          onChange={() => handleCheckboxChange(index, m.key)}
+                          color="primary"
+                          size="small"
+                          disabled={isDisabled}
+                        />
+                        {callsGenerated && (
+                          <Typography variant="caption" sx={{ color: 'success.main', fontWeight: 700, mt: -0.5, bgcolor: '#dcfce3', px: 1, borderRadius: 1, border: '1px solid #bbf7d0' }}>
+                            Generated
+                          </Typography>
+                        )}
+                      </Box>
                     </TableCell>
-                  ))}
+                    );
+                  })}
                 </TableRow>
               ))}
               {schedules.length === 0 && (

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Box, Typography, Card, Button, TextField, MenuItem, InputAdornment, Grid, Alert } from '@mui/material';
-import { Save, PinDrop, Percent } from '@mui/icons-material';
+import { Box, Typography, Card, Button, TextField, MenuItem, InputAdornment, Grid, Alert, Autocomplete, Chip } from '@mui/material';
+import { Save, PinDrop, Percent, NotificationsActive } from '@mui/icons-material';
 import api from '../services/api';
 import { useMessage } from '../context/MessageContext';
 
@@ -49,15 +49,27 @@ export default function Configurations() {
   const [form, setForm] = useState({
     base_state: '',
     cgst_share_percent: 50,
-    sgst_share_percent: 50
+    sgst_share_percent: 50,
+    po_short_close_notify_roles: []
   });
   const [errors, setErrors] = useState({});
   const { showMessage } = useMessage();
   const [loading, setLoading] = useState(false);
+  const [roles, setRoles] = useState([]);
 
   useEffect(() => {
     loadConfig();
+    loadRoles();
   }, []);
+
+  const loadRoles = async () => {
+    try {
+      const res = await api.get('/api/rbac/roles');
+      setRoles(res.data || []);
+    } catch (err) {
+      console.error('Failed to fetch roles:', err);
+    }
+  };
 
   const loadConfig = async () => {
     try {
@@ -66,7 +78,8 @@ export default function Configurations() {
         setForm({
           base_state: res.data.base_state || '',
           cgst_share_percent: res.data.cgst_share_percent !== undefined ? res.data.cgst_share_percent : 50,
-          sgst_share_percent: res.data.sgst_share_percent !== undefined ? res.data.sgst_share_percent : 50
+          sgst_share_percent: res.data.sgst_share_percent !== undefined ? res.data.sgst_share_percent : 50,
+          po_short_close_notify_roles: res.data.po_short_close_notify_roles || []
         });
       }
     } catch (err) {
@@ -105,8 +118,9 @@ export default function Configurations() {
     try {
       const payload = {
         base_state: form.base_state,
-        cgst_share_percent: parseFloat(form.cgst_share_percent).toFixed(2),
-        sgst_share_percent: parseFloat(form.sgst_share_percent).toFixed(2)
+        cgst_share_percent: Number(parseFloat(form.cgst_share_percent).toFixed(2)),
+        sgst_share_percent: Number(parseFloat(form.sgst_share_percent).toFixed(2)),
+        po_short_close_notify_roles: form.po_short_close_notify_roles
       };
 
       await api.put('/api/configurations', payload);
@@ -122,10 +136,11 @@ export default function Configurations() {
     <Box>
       <Typography variant="h5" sx={{ fontWeight: 700, mb: 3 }}>Configurations</Typography>
 
-      <Card sx={{ p: 3, maxWidth: 600, borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-        <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, color: '#1E293B' }}>
-          Tax Settings
-        </Typography>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, maxWidth: 600 }}>
+        <Card sx={{ p: 3, borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, color: '#1E293B' }}>
+            Tax Settings
+          </Typography>
 
         <Grid container spacing={3}>
           <Grid item xs={12}>
@@ -185,7 +200,48 @@ export default function Configurations() {
           </Grid>
         </Grid>
 
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 4 }}>
+        </Card>
+
+        <Card sx={{ p: 3, borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, color: '#1E293B' }}>
+            Notification Settings
+          </Typography>
+
+        <Grid container spacing={3}>
+          <Grid item xs={12}>
+            <Autocomplete
+              multiple
+              options={roles.map(r => r.name)}
+              value={form.po_short_close_notify_roles}
+              onChange={(e, newValue) => setForm({ ...form, po_short_close_notify_roles: newValue })}
+              renderTags={(value, getTagProps) =>
+                value.map((option, index) => (
+                  <Chip variant="outlined" label={option} {...getTagProps({ index })} />
+                ))
+              }
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="PO Short Close Notification Roles"
+                  placeholder="Select roles to notify"
+                  InputProps={{
+                    ...params.InputProps,
+                    startAdornment: (
+                      <>
+                        <InputAdornment position="start"><NotificationsActive sx={{ color: '#94A3B8', ml: 1 }} /></InputAdornment>
+                        {params.InputProps.startAdornment}
+                      </>
+                    ),
+                  }}
+                />
+              )}
+            />
+          </Grid>
+        </Grid>
+
+        </Card>
+
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
           <Button
             variant="contained"
             color="primary"
@@ -197,7 +253,7 @@ export default function Configurations() {
             {loading ? 'Saving...' : 'Save Configuration'}
           </Button>
         </Box>
-      </Card>
+      </Box>
     </Box>
   );
 }

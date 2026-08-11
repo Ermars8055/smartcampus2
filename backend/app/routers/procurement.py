@@ -1335,6 +1335,52 @@ def _build_po_email_template(po):
     """
     return subject, html_body
 
+def _build_po_short_close_email_template(po, remarks, closed_by_user):
+    """Build subject + html_body for a PO short-close notification email."""
+    subject = f"Notification: Purchase Order {po.po_number} Short Closed"
+    vendor_name = f"{po.vendor.code} - {po.vendor.name}" if po.vendor else "Unknown Vendor"
+    
+    if getattr(po, "advance_percentage", 0) > 0:
+        advance_msg = "An advance payment has been made against the above Purchase Order. Please review the advance payment details and take the necessary action regarding the payment/adjustment."
+    else:
+        advance_msg = "Please review the Purchase Order and take any necessary action, if required."
+
+    html_body = f"""
+    <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333;">
+        <p>Hello,</p>
+        <p>
+            Please be informed that the following Purchase Order has been Short Closed by {closed_by_user.full_name}.
+        </p>
+        <table style="margin: 16px 0; border-collapse: collapse; font-size: 13px;">
+            <tr>
+                <td style="padding: 4px 12px 4px 0; font-weight: bold;">PO Number</td>
+                <td style="padding: 4px 0;">{po.po_number}</td>
+            </tr>
+            <tr>
+                <td style="padding: 4px 12px 4px 0; font-weight: bold;">Vendor</td>
+                <td style="padding: 4px 0;">{vendor_name}</td>
+            </tr>
+            <tr>
+                <td style="padding: 4px 12px 4px 0; font-weight: bold;">Total Amount</td>
+                <td style="padding: 4px 0;">₹{po.total_amount:,.2f}</td>
+            </tr>
+            <tr>
+                <td style="padding: 4px 12px 4px 0; font-weight: bold;">Remarks</td>
+                <td style="padding: 4px 0;">{remarks or 'N/A'}</td>
+            </tr>
+        </table>
+        <p>{advance_msg}</p>
+        <br/>
+        <p>Regards,<br/>{closed_by_user.full_name}</p>
+        <hr style="border: none; border-top: 1px solid #e2e8f0; margin-top: 24px;"/>
+        <p style="font-size: 11px; color: #94a3b8;">
+            This is a system-generated email from Eastpoint Smart Campus | Powered by NissiGrid Technologies.
+            Please do not reply to this email.
+        </p>
+    </div>
+    """
+    return subject, html_body
+
 
 @router.get("/po/{id}/email-preview")
 def get_po_email_preview(
@@ -1455,6 +1501,34 @@ def short_close_po(
     if body.remarks:
         po.remarks = (po.remarks or '') + f'\n[Short Closed: {body.remarks}]'
     db.commit()
+
+    # Trigger short close notification
+    try:
+        from app.models import TenantConfiguration, UserRoleAssignment, Role
+        from app.utils.email_utils import send_html_email
+        import threading
+        
+        config = db.query(TenantConfiguration).filter(TenantConfiguration.tenant_id == tenant_id).first()
+        notify_roles = config.po_short_close_notify_roles if config and config.po_short_close_notify_roles else []
+        
+        if notify_roles:
+            users_to_notify = db.query(User).join(UserRoleAssignment).join(Role).filter(
+                User.is_active == True,
+                User.email.isnot(None),
+                Role.name.in_(notify_roles)
+            ).distinct().all()
+            
+            if users_to_notify:
+                subject, html_body = _build_po_short_close_email_template(po, body.remarks, current_user)
+                for u in users_to_notify:
+                    threading.Thread(
+                        target=send_html_email,
+                        args=(u.email, subject, html_body)
+                    ).start()
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"Failed to send short close notifications for PO {po.po_number}: {e}")
+
     return {"message": "PO Short Closed"}
 
 @router.post("/po/{id}/cancel")

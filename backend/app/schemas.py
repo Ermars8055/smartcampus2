@@ -139,6 +139,7 @@ class TenantConfigurationBase(BaseModel):
     base_state: str
     cgst_share_percent: float
     sgst_share_percent: float
+    po_short_close_notify_roles: Optional[List[str]] = []
 
 class TenantConfigurationCreate(TenantConfigurationBase):
     pass
@@ -717,6 +718,121 @@ class POOut(BaseModel):
     institution_name: Optional[str] = None
     can_user_approve: Optional[bool] = False
     items: List[POItemOut] = []
+    class Config:
+        from_attributes = True
+
+
+# ── Work Orders ──────────────────────────────────────────────────────────
+
+class WorkOrderItemBase(BaseModel):
+    material_id: int
+    quantity: float = Field(..., gt=0)
+    rate: float = Field(..., ge=0)
+    discount_percent: float = 0
+    cgst_percentage: float = 0
+    sgst_percentage: float = 0
+    igst_percentage: float = 0
+    is_gst_inclusive: bool = False
+
+class WorkOrderItemOut(WorkOrderItemBase):
+    id: int
+    amount: float
+    received_quantity: float
+    approved_quantity: Optional[float] = None
+    material_name: Optional[str] = None
+    material_code: Optional[str] = None
+    uom_name: Optional[str] = None
+    uom_allow_decimal: Optional[bool] = False
+    class Config:
+        from_attributes = True
+
+class WorkOrderBase(BaseModel):
+    vendor_id: int
+    project_id: int
+    institution_id: Optional[int] = None
+    contract_id: Optional[int] = None
+    equipment_id: Optional[int] = None
+    wo_type: str = "AMC"
+    advance_percentage: float = Field(default=0, ge=0, le=100)
+    target_completion_date: Optional[date] = None
+    terms: Optional[str] = None
+    annexure: Optional[str] = None
+    items: List[WorkOrderItemBase] = []
+
+class WorkOrderCreate(WorkOrderBase):
+    status: Optional[str] = None
+
+class WorkOrderUpdate(BaseModel):
+    status: Optional[str] = None
+    remarks: Optional[str] = None
+
+class WorkOrderFullUpdate(BaseModel):
+    status: Optional[str] = None
+    vendor_id: Optional[int] = None
+    project_id: Optional[int] = None
+    institution_id: Optional[int] = None
+    contract_id: Optional[int] = None
+    equipment_id: Optional[int] = None
+    wo_type: Optional[str] = None
+    advance_percentage: Optional[float] = None
+    target_completion_date: Optional[date] = None
+    terms: Optional[str] = None
+    annexure: Optional[str] = None
+    items: Optional[List[WorkOrderItemBase]] = None
+
+class WorkOrderApproveItemRequest(BaseModel):
+    wo_item_id: int
+    approved_quantity: float = Field(..., ge=0)
+    remarks: Optional[str] = Field(None, max_length=255)
+
+class WorkOrderApproveRequest(BaseModel):
+    items: List[WorkOrderApproveItemRequest] = []
+    remarks: Optional[str] = Field(None, max_length=255)
+    @model_validator(mode='after')
+    def check_approval_quantities(self):
+        if not self.items:
+            return self
+        if len(self.items) == 1 and self.items[0].approved_quantity == 0:
+            raise ValueError("Approved quantity must be greater than 0 for a single-item document. Please use the Reject button instead.")
+        if len(self.items) > 1 and sum(item.approved_quantity for item in self.items) == 0:
+            raise ValueError("You cannot approve 0 quantity for all items. Please use the Reject button instead.")
+        return self
+
+class WorkOrderOut(BaseModel):
+    id: int
+    wo_number: str
+    vendor_id: int
+    project_id: int
+    institution_id: Optional[int] = None
+    contract_id: Optional[int] = None
+    equipment_id: Optional[int] = None
+    wo_type: str
+    advance_percentage: float
+    total_amount: float
+    target_completion_date: Optional[date] = None
+    status: str
+    current_approval_level: int
+    terms: Optional[str] = None
+    annexure: Optional[str] = None
+    remarks: Optional[str] = None
+    created_at: datetime
+    
+    vendor_name: Optional[str] = None
+    vendor_address: Optional[str] = None
+    vendor_city: Optional[str] = None
+    vendor_state: Optional[str] = None
+    vendor_pincode: Optional[str] = None
+    vendor_gst_number: Optional[str] = None
+    vendor_phone: Optional[str] = None
+    vendor_email: Optional[str] = None
+    project_name: Optional[str] = None
+    institution_name: Optional[str] = None
+    contract_number: Optional[str] = None
+    equipment_name: Optional[str] = None
+    equipment_code: Optional[str] = None
+    
+    can_user_approve: Optional[bool] = False
+    items: List[WorkOrderItemOut] = []
     class Config:
         from_attributes = True
 
@@ -2052,12 +2168,16 @@ class ComplaintCloseRequest(BaseModel):
     resolution_entered: str
     closure_reason: str
     document_urls: List[str] = [] # For supporting documents
+    resolution_image_urls: List[str] = [] # For post repair photos
     equipment_photo_url: Optional[str] = None
     serial_number_photo_url: Optional[str] = None
     installation_report_url: Optional[str] = None
 
 class ComplaintApproveRequest(BaseModel):
     approval_type: str # 'admin' or 'manager'
+
+class ComplaintReopenRequest(BaseModel):
+    reason: str = Field(..., max_length=255)
 
 class ComplaintOut(ComplaintBase):
     id: int
@@ -2086,6 +2206,7 @@ class ComplaintOut(ComplaintBase):
     admin_approved_by_name: Optional[str] = None
     manager_approved_by_name: Optional[str] = None
     equipment_code: Optional[str] = None
+    equipment_warranty_status: Optional[str] = None
     images: List[ComplaintImageOut] = []
     documents: List[ComplaintDocumentOut] = []
     class Config:
@@ -2111,7 +2232,19 @@ class EquipmentUpdate(BaseModel):
     pm_required: Optional[bool] = None
     calibration_required: Optional[bool] = None
     battery_details: Optional[str] = None
-
+    year_of_purchase: Optional[int] = None
+    po_number: Optional[str] = None
+    po_id: Optional[int] = None
+    procurement_type: Optional[str] = None
+    rental_type: Optional[str] = None
+    rental_agreement_number: Optional[str] = None
+    rental_vendor_id: Optional[int] = None
+    rental_start_date: Optional[date] = None
+    rental_end_date: Optional[date] = None
+    rental_cost: Optional[float] = None
+    billing_frequency: Optional[str] = None
+    cost_per_test: Optional[float] = None
+    linked_reagents: Optional[List[dict]] = None
 class EquipmentInstallationUpdate(BaseModel):
     serial_number: Optional[str] = None
     installation_date: Optional[datetime] = None
@@ -2140,6 +2273,22 @@ class EquipmentItemCreate(BaseModel):
     status: str = "Operational"
     is_biomedical: bool = False
     requires_installation: bool = False
+    year_of_purchase: Optional[int] = None
+    po_number: Optional[str] = None
+    po_id: Optional[int] = None
+    procurement_type: str = "Purchase"
+    rental_type: Optional[str] = None
+    rental_agreement_number: Optional[str] = None
+    rental_vendor_id: Optional[int] = None
+    rental_start_date: Optional[date] = None
+    rental_end_date: Optional[date] = None
+    rental_cost: Optional[float] = None
+    billing_frequency: Optional[str] = None
+    cost_per_test: Optional[float] = None
+    linked_reagents: Optional[List[dict]] = None
+class EquipmentBulkQRRequest(BaseModel):
+    is_all: bool = False
+    equipment_ids: List[int] = []
 
 class EquipmentItemOut(BaseModel):
     id: int
@@ -2193,11 +2342,13 @@ class EquipmentItemOut(BaseModel):
     rental_cost: Optional[float] = None
     billing_frequency: Optional[str] = None
     cost_per_test: Optional[float] = None
-    linked_reagents: Optional[List[int]] = None
+    linked_reagents: Optional[List[dict]] = None
     agreement_status: Optional[str] = None
     renewal_date: Optional[date] = None
     expected_return_date: Optional[date] = None
     rental_status: Optional[str] = None
+    year_of_purchase: Optional[int] = None
+    po_number: Optional[str] = None
     warranty_end_date: Optional[date] = None
     amc_cmc_status: Optional[str] = None
     rental_vendor_name: Optional[str] = None
@@ -2217,6 +2368,7 @@ class EquipmentItemOut(BaseModel):
 class LocationMasterBase(BaseModel):
     location_name: str
     location_code: str
+    department_name: Optional[str] = None
     is_active: bool = True
 
 class LocationMasterCreate(LocationMasterBase):
@@ -2252,6 +2404,33 @@ class PMScheduleOut(PMScheduleBase):
     id: int
     tenant_id: int
     created_at: datetime
+    monthly_calls: Dict[str, int] = {}
+    class Config:
+        from_attributes = True
+
+class CalibrationScheduleBase(BaseModel):
+    department_name: str
+    jan: bool = False
+    feb: bool = False
+    mar: bool = False
+    apr: bool = False
+    may: bool = False
+    jun: bool = False
+    jul: bool = False
+    aug: bool = False
+    sep: bool = False
+    oct: bool = False
+    nov: bool = False
+    dec: bool = False
+
+class CalibrationScheduleUpdate(CalibrationScheduleBase):
+    pass
+
+class CalibrationScheduleOut(CalibrationScheduleBase):
+    id: int
+    tenant_id: int
+    created_at: datetime
+    monthly_calls: Dict[str, int] = {}
     class Config:
         from_attributes = True
 
@@ -2358,7 +2537,7 @@ class ContractOut(ContractBase):
 # == Repair Work Orders ==
 
 class RepairWorkOrderBase(BaseModel):
-    complaint_id: int
+    complaint_id: Optional[int] = None
     equipment_id: int
     vendor_id: int
     contract_id: Optional[int] = None

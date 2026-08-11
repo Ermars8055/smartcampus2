@@ -50,12 +50,15 @@ def update_tenant_configuration(
         config.base_state = config_in.base_state
         config.cgst_share_percent = config_in.cgst_share_percent
         config.sgst_share_percent = config_in.sgst_share_percent
+        if hasattr(config_in, 'po_short_close_notify_roles') and config_in.po_short_close_notify_roles is not None:
+            config.po_short_close_notify_roles = config_in.po_short_close_notify_roles
     else:
         config = TenantConfiguration(
             tenant_id=tenant_id,
             base_state=config_in.base_state,
             cgst_share_percent=config_in.cgst_share_percent,
-            sgst_share_percent=config_in.sgst_share_percent
+            sgst_share_percent=config_in.sgst_share_percent,
+            po_short_close_notify_roles=config_in.po_short_close_notify_roles if hasattr(config_in, 'po_short_close_notify_roles') else []
         )
         db.add(config)
         
@@ -89,6 +92,7 @@ def create_location(
         site_id=site_id,
         location_name=location_in.location_name,
         location_code=location_in.location_code,
+        department_name=location_in.department_name,
         is_active=location_in.is_active
     )
     db.add(location)
@@ -115,6 +119,7 @@ def update_location(
         
     location.location_name = location_in.location_name
     location.location_code = location_in.location_code
+    location.department_name = location_in.department_name
     location.is_active = location_in.is_active
     db.commit()
     db.refresh(location)

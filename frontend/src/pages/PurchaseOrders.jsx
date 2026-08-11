@@ -1959,7 +1959,7 @@ export default function PurchaseOrders() {
                 <Grid item xs={12} sm={4}>
                   <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                     <TextField
-                      fullWidth size="small" label="Rental Document URL"
+                      fullWidth size="small" label="Rental Document"
                       value={form.rental_agreement_document || ''}
                       InputProps={{ readOnly: true }}
                     />
@@ -1977,6 +1977,7 @@ export default function PurchaseOrders() {
                     format="DD-MMM-YYYY"
                     localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
                     slotProps={{ textField: { fullWidth: true, size: "small" } }}
+                    disablePast
                   />
                 </Grid>
                 <Grid item xs={12} sm={4}>
@@ -1987,13 +1988,26 @@ export default function PurchaseOrders() {
                     format="DD-MMM-YYYY"
                     localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
                     slotProps={{ textField: { fullWidth: true, size: "small" } }}
+                    disablePast
+                    minDate={form.rental_start_date ? dayjs(form.rental_start_date).add(1, 'day') : dayjs().add(1, 'day')}
                   />
                 </Grid>
                 <Grid item xs={12} sm={4}>
                   <TextField
-                    fullWidth size="small" label="Security Deposit Amount" type="number"
+                    fullWidth size="small" label="Security Deposit Amount (₹)" type="number"
                     value={form.security_deposit || ''}
-                    onChange={e => setForm({ ...form, security_deposit: e.target.value })}
+                    onChange={e => {
+                      const val = e.target.value;
+                      if (val === '' || /^\d*\.?\d{0,2}$/.test(val)) {
+                        setForm({ ...form, security_deposit: val });
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (['e', 'E', '+', '-'].includes(e.key)) {
+                        e.preventDefault();
+                      }
+                    }}
+                    inputProps={{ min: "0", step: "0.01" }}
                   />
                 </Grid>
                 {form.rental_type === 'Reagent Rental' && (
@@ -2040,9 +2054,20 @@ export default function PurchaseOrders() {
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
                   <TextField
-                    fullWidth size="small" label="Cost Per Test" type="number"
+                    fullWidth size="small" label="Cost Per Test (₹)" type="number"
                     value={form.cost_per_test || ''}
-                    onChange={e => setForm({ ...form, cost_per_test: e.target.value })}
+                    onChange={e => {
+                      const val = e.target.value;
+                      if (val === '' || /^\d*\.?\d{0,2}$/.test(val)) {
+                        setForm({ ...form, cost_per_test: val });
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (['e', 'E', '+', '-'].includes(e.key)) {
+                        e.preventDefault();
+                      }
+                    }}
+                    inputProps={{ min: "0", step: "0.01" }}
                   />
                 </Grid>
               </Grid>

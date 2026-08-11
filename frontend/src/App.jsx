@@ -47,6 +47,7 @@ import IssueSummaryReport from './pages/IssueSummaryReport';
 import RateAnalysisReport from './pages/RateAnalysisReport';
 import ReceiptSummaryReport from './pages/ReceiptSummaryReport';
 import DepartmentWiseInventoryReport from './pages/DepartmentWiseInventoryReport';
+import DepartmentWiseEquipmentReport from './pages/DepartmentWiseEquipmentReport';
 import EquipmentCountReport from './pages/EquipmentCountReport';
 import PendingGatepassReturnsReport from './pages/PendingGatepassReturnsReport';
 import Users from './pages/Users';
@@ -166,6 +167,7 @@ function AppRoutes() {
         <Route path="reports/equipment-count" element={<EquipmentCountReport />} />
         <Route path="reports/receipt-summary" element={<ReceiptSummaryReport />} />
         <Route path="reports/department-inventory" element={<DepartmentWiseInventoryReport />} />
+        <Route path="reports/department-equipment" element={<DepartmentWiseEquipmentReport />} />
         <Route path="reports/pending-gatepass-returns" element={<PendingGatepassReturnsReport />} />
         <Route path="admin" element={<Navigate to="/admin/configurations" replace />} />
         <Route path="admin/users" element={<Users />} />

@@ -118,8 +118,8 @@ export default function Configurations() {
     try {
       const payload = {
         base_state: form.base_state,
-        cgst_share_percent: parseFloat(form.cgst_share_percent).toFixed(2),
-        sgst_share_percent: parseFloat(form.sgst_share_percent).toFixed(2),
+        cgst_share_percent: Number(parseFloat(form.cgst_share_percent).toFixed(2)),
+        sgst_share_percent: Number(parseFloat(form.sgst_share_percent).toFixed(2)),
         po_short_close_notify_roles: form.po_short_close_notify_roles
       };
 

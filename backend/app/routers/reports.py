@@ -1128,3 +1128,105 @@ def get_equipment_count_report(
         for r in results
     ]
 
+
+@router.get("/department-equipment")
+def get_department_equipment_report(
+    category_id: Optional[int] = None,
+    search: Optional[str] = None,
+    department_id: Optional[str] = None,
+    institution_id: Optional[int] = None,
+    only_with_stock: bool = False,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("report_dept_inventory", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    from app.models import EquipmentItem, LocationMaster, Material, UOM, Institution
+    from sqlalchemy import func
+
+    mat_query = db.query(Material, UOM.abbreviation.label("uom_name")).join(UOM, Material.uom_id == UOM.id).join(
+        EquipmentItem, EquipmentItem.material_id == Material.id
+    ).filter(
+        Material.tenant_id == tenant_id,
+        Material.site_id == site_id,
+        Material.is_deleted == False,
+        EquipmentItem.status != "Written Off",
+        EquipmentItem.status != "Transferred"
+    )
+    if category_id:
+        mat_query = mat_query.filter(Material.category_id == category_id)
+    if search:
+        search_term = f"%{search}%"
+        mat_query = mat_query.filter((Material.code.ilike(search_term)) | (Material.name.ilike(search_term)))
+    
+    mat_query = mat_query.distinct()
+    materials = mat_query.all()
+    material_ids = [m.Material.id for m in materials]
+    
+    if not material_ids:
+        return {"departments": [], "data": []}
+
+    loc_query = db.query(LocationMaster).filter(
+        LocationMaster.tenant_id == tenant_id,
+        LocationMaster.site_id == site_id,
+        LocationMaster.is_active == True
+    )
+    if department_id:
+        loc_ids = [int(id.strip()) for id in department_id.split(',')]
+        loc_query = loc_query.filter(LocationMaster.id.in_(loc_ids))
+        
+    all_locs = loc_query.order_by(LocationMaster.location_name).all()
+    loc_names = [l.location_name for l in all_locs]
+
+    count_query = db.query(
+        EquipmentItem.material_id,
+        LocationMaster.location_name,
+        func.count(EquipmentItem.id).label("total_qty")
+    ).join(LocationMaster, EquipmentItem.location_id == LocationMaster.id).filter(
+        EquipmentItem.tenant_id == tenant_id,
+        EquipmentItem.site_id == site_id,
+        EquipmentItem.status != "Written Off",
+        EquipmentItem.status != "Transferred",
+        EquipmentItem.material_id.in_(material_ids)
+    )
+    if institution_id:
+        count_query = count_query.filter(EquipmentItem.institution_id == institution_id)
+        
+    count_query = count_query.group_by(EquipmentItem.material_id, LocationMaster.location_name).all()
+
+    count_map = {} 
+    for row in count_query:
+        loc = row.location_name.upper() if row.location_name else "UNKNOWN"
+        count_map[(row.material_id, loc)] = row.total_qty
+
+    final_data = []
+    for m in materials:
+        mat = m.Material
+        uom = m.uom_name
+        
+        dept_inventory = {}
+        total_mat_inv = 0
+        
+        for loc_name in loc_names:
+            qty = count_map.get((mat.id, loc_name.upper()), 0)
+            dept_inventory[loc_name] = qty
+            total_mat_inv += qty
+            
+        if only_with_stock and total_mat_inv <= 0:
+            continue
+            
+        final_data.append({
+            "material_code": mat.code,
+            "material_name": mat.name,
+            "uom": uom,
+            "category": getattr(mat.category, 'name', 'N/A') if hasattr(mat, 'category') else 'N/A',
+            "total_inventory": total_mat_inv,
+            "department_inventory": dept_inventory
+        })
+
+    return {
+        "departments": loc_names,
+        "data": final_data,
+        "generated_at": get_now_ist().strftime("%d-%b-%Y %H:%M:%S"),
+        "generated_by": current_user.full_name
+    }

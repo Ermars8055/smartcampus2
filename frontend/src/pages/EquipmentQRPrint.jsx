@@ -268,7 +268,7 @@ export default function EquipmentQRPrint() {
               multiple
               disableCloseOnSelect
               options={equipments}
-              getOptionLabel={(option) => `${option.equipment_code} - ${option.material?.name || 'Unknown'}`}
+              getOptionLabel={(option) => `${option.equipment_code} - ${option.material_name || 'Unknown'}`}
               isOptionEqualToValue={(option, value) => option.id === value.id}
               value={selectedEquipments}
               onChange={(e, newValue) => setSelectedEquipments(newValue)}
@@ -283,7 +283,7 @@ export default function EquipmentQRPrint() {
                       style={{ marginRight: 8 }}
                       checked={selected}
                     />
-                    {option.equipment_code} - {option.material?.name || 'Unknown'}
+                    {option.equipment_code} - {option.material_name || 'Unknown'}
                   </li>
                 );
               }}

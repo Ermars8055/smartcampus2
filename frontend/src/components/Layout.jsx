@@ -40,6 +40,7 @@ const menuItems = [
       { text: 'Quotations', icon: <RequestQuote />, path: '/quotations', resource: 'quotations' },
       { text: 'Contracts', icon: <AssignmentTurnedIn />, path: '/contracts', resource: 'contracts' },
       { text: 'Purchase Orders', icon: <ReceiptLong />, path: '/purchase-orders', resource: 'purchase_orders' },
+      { text: 'Work Orders', icon: <Build />, path: '/work-orders', resource: 'work_orders' },
     ]
   },
   {
@@ -61,7 +62,6 @@ const menuItems = [
       { text: 'Complaints', icon: <Assignment />, path: '/complaints', resource: 'complaints' },
       { text: 'PM Schedule', icon: <AssignmentTurnedIn />, path: '/equipment/pm-schedule', resource: 'pm_schedule' },
       { text: 'Calibration Schedule', icon: <AssignmentTurnedIn />, path: '/equipment/calibration-schedule', resource: 'calibration_schedule' },
-      { text: 'Repair Work Orders', icon: <Build />, path: '/rwos', resource: 'rwos' },
     ]
   },
   { text: 'Intelligence', icon: <Build />, path: '/intelligence', resource: 'intelligence' },
@@ -82,6 +82,7 @@ const menuItems = [
       { text: 'Department Inventory', icon: <Assessment />, path: '/reports/department-inventory', resource: 'report_dept_inventory' },
       { text: 'Department Equipment', icon: <Assessment />, path: '/reports/department-equipment', resource: 'report_dept_inventory' },
       { text: 'Pending Gatepass Returns', icon: <Assessment />, path: '/reports/pending-gatepass-returns', resource: 'report_pending_gatepass' },
+      { text: 'Call Status', icon: <Assessment />, path: '/reports/call-status', resource: 'reports' },
     ]
   },
   {

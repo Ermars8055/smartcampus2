@@ -63,12 +63,13 @@ export default function Vendors() {
   const [vendors, setVendors] = useState([]);
   const [search, setSearch] = useState('');
   const [tabValue, setTabValue] = useState('All');
+  const [activeFilter, setActiveFilter] = useState('All');
   const [dialog, setDialog] = useState(false);
   const [editing, setEditing] = useState(null);
   const [categories, setCategories] = useState([]);
   const [form, setForm] = useState({
     name: '', code: '', contact_person: '', phone: '', email: '',
-    gst_number: '', address_line_1: '', address_line_2: '', city: '', pincode: '', state: '', category_ids: [], rating: 0, is_active: true
+    gst_number: '', address_line_1: '', address_line_2: '', city: '', pincode: '', state: '', category_ids: [], rating: 0, is_active: false
   });
   const [viewOnly, setViewOnly] = useState(false);
   const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'asc' });
@@ -249,7 +250,7 @@ export default function Vendors() {
             setDialogTab(0);
             setForm({
               name: '', code: '', contact_person: '', phone: '', email: '',
-              gst_number: '', address_line_1: '', address_line_2: '', city: '', pincode: '', state: '', category_ids: [], rating: 0, is_active: true
+              gst_number: '', address_line_1: '', address_line_2: '', city: '', pincode: '', state: '', category_ids: [], rating: 0, is_active: false
             });
             setDialog(true);
           }}
@@ -260,17 +261,30 @@ export default function Vendors() {
       </Box>
 
       <Card sx={{ mb: 3, p: 2, pb: 0, borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-        <TextField
-          size="small"
-          placeholder="Search vendors by Code/Name"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          sx={{ minWidth: 350, mb: 2 }}
-          InputProps={{
-            startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} />,
-            sx: { borderRadius: 2 }
-          }}
-        />
+        <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap' }}>
+          <TextField
+            size="small"
+            placeholder="Search vendors by Code/Name"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            sx={{ width: { xs: '100%', sm: 350 } }}
+            InputProps={{
+              startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} />,
+              sx: { borderRadius: 2 }
+            }}
+          />
+          <FormControl size="small" sx={{ minWidth: 150 }}>
+            <Select
+              value={activeFilter}
+              onChange={e => setActiveFilter(e.target.value)}
+              sx={{ borderRadius: 2 }}
+            >
+              <MenuItem value="All">All Statuses</MenuItem>
+              <MenuItem value="Active">Active</MenuItem>
+              <MenuItem value="Inactive">Inactive</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
         <Tabs
           value={tabValue}
           onChange={(e, v) => setTabValue(v)}
@@ -278,12 +292,15 @@ export default function Vendors() {
           scrollButtons={false}
           sx={{ borderTop: 1, borderColor: 'divider' }}
         >
-          {['Submitted', 'Approved', 'Rejected', 'Active', 'Inactive', 'All'].map(s => {
+          {['Submitted', 'Approved', 'Rejected', 'All'].map(s => {
+            const tempVendors = vendors.filter(v => {
+              if (activeFilter === 'Active' && !v.is_active) return false;
+              if (activeFilter === 'Inactive' && v.is_active) return false;
+              return true;
+            });
             let count = 0;
-            if (s === 'All') count = vendors.length;
-            else if (s === 'Active') count = vendors.filter(v => v.is_active).length;
-            else if (s === 'Inactive') count = vendors.filter(v => !v.is_active).length;
-            else count = vendors.filter(v => v.status === s).length;
+            if (s === 'All') count = tempVendors.length;
+            else count = tempVendors.filter(v => v.status === s).length;
             
             if (s !== 'All' && count === 0 && !['Submitted', 'Approved'].includes(s)) return null;
             return (
@@ -309,9 +326,10 @@ export default function Vendors() {
 
       {(() => {
         const filteredVendors = vendors.filter(v => {
+          if (activeFilter === 'Active' && !v.is_active) return false;
+          if (activeFilter === 'Inactive' && v.is_active) return false;
+          
           if (tabValue === 'All') return true;
-          if (tabValue === 'Active') return v.is_active;
-          if (tabValue === 'Inactive') return !v.is_active;
           return v.status === tabValue;
         });
         return (
@@ -347,16 +365,12 @@ export default function Vendors() {
                     <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#334155' }}><strong>Contact:</strong> {v.contact_person} | {v.phone}</Typography>
 
                     <Typography variant="caption" sx={{ display: 'block', mb: 1.5, color: '#64748B' }}>Email: {v.email || '-'}</Typography>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', flex: 1 }}>
-                        {v.categories?.slice(0, 2).map((c, i) => <Chip key={i} label={c} size="small" variant="outlined" sx={{ fontSize: '0.65rem', height: 20 }} />)}
-                        {v.categories?.length > 2 && <Typography variant="caption" sx={{ color: '#64748B', ml: 0.5 }}>+{v.categories.length - 2}</Typography>}
-                      </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
                       <Box onClick={(e) => e.stopPropagation()}>
-                        <Tooltip title={v.current_approval_level > 1 || v.status === 'Approved' || v.status === 'Rejected' ? "Cannot edit after L1 approval" : "Edit Vendor"}>
+                        <Tooltip title={v.status === 'Submitted' && v.current_approval_level > 1 ? "Cannot edit after L1 approval" : "Edit Vendor"}>
                           <span>
-                            <IconButton size="small" disabled={v.current_approval_level > 1 || v.status === 'Approved' || v.status === 'Rejected'} onClick={(e) => { e.stopPropagation(); openEdit(v, false); }} sx={{ color: '#64748B' }}>
-                              <Edit color={v.current_approval_level > 1 || v.status === 'Approved' || v.status === 'Rejected' ? "action" : "primary"} fontSize="small" />
+                            <IconButton size="small" disabled={v.status === 'Submitted' && v.current_approval_level > 1} onClick={(e) => { e.stopPropagation(); openEdit(v, false); }} sx={{ color: '#64748B' }}>
+                              <Edit color={v.status === 'Submitted' && v.current_approval_level > 1 ? "action" : "primary"} fontSize="small" />
                             </IconButton>
                           </span>
                         </Tooltip>
@@ -430,7 +444,6 @@ export default function Vendors() {
                         </TableSortLabel>
                       </TableCell>
 
-                      <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2 }}>CATEGORIES</TableCell>
                       <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2 }}>APPROVAL</TableCell>
                       <TableCell align="center" sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', py: 2 }}>LVL</TableCell>
 
@@ -457,11 +470,7 @@ export default function Vendors() {
                         <TableCell sx={{ fontSize: '0.8rem', whiteSpace: 'normal', wordBreak: 'break-word' }}>{v.contact_person}</TableCell>
                         <TableCell sx={{ fontSize: '0.8rem', whiteSpace: 'normal', wordBreak: 'break-word' }}>{v.phone}</TableCell>
                         <TableCell sx={{ fontSize: '0.75rem', color: '#64748B', whiteSpace: 'normal', wordBreak: 'break-all', minWidth: '100px' }}>{v.email}</TableCell>
-                        <TableCell>
-                          <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-                            {v.categories?.map((c, i) => <Chip key={i} label={c} size="small" variant="outlined" sx={{ fontSize: '0.65rem', height: 20 }} />)}
-                          </Box>
-                        </TableCell>
+
 
                         <TableCell>
                           <Chip
@@ -479,10 +488,10 @@ export default function Vendors() {
 
                         <TableCell align="right">
                           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5 }} onClick={(e) => e.stopPropagation()}>
-                            <Tooltip title={v.current_approval_level > 1 || v.status === 'Approved' || v.status === 'Rejected' ? "Cannot edit after L1 approval" : "Edit Vendor"}>
+                            <Tooltip title={v.status === 'Submitted' && v.current_approval_level > 1 ? "Cannot edit after L1 approval" : "Edit Vendor"}>
                               <span>
-                                <IconButton size="small" disabled={v.current_approval_level > 1 || v.status === 'Approved' || v.status === 'Rejected'} onClick={(e) => { e.stopPropagation(); openEdit(v, false); }} sx={{ color: '#64748B' }}>
-                                  <Edit color={v.current_approval_level > 1 || v.status === 'Approved' || v.status === 'Rejected' ? "action" : "primary"} fontSize="small" />
+                                <IconButton size="small" disabled={v.status === 'Submitted' && v.current_approval_level > 1} onClick={(e) => { e.stopPropagation(); openEdit(v, false); }} sx={{ color: '#64748B' }}>
+                                  <Edit color={v.status === 'Submitted' && v.current_approval_level > 1 ? "action" : "primary"} fontSize="small" />
                                 </IconButton>
                               </span>
                             </Tooltip>
@@ -745,7 +754,7 @@ export default function Vendors() {
                 ))}
               </TextField>
               <FormControlLabel
-                control={<Switch checked={form.is_active !== false} onChange={e => setForm({ ...form, is_active: e.target.checked })} disabled={viewOnly} color="success" />}
+                control={<Switch checked={form.is_active !== false} onChange={e => setForm({ ...form, is_active: e.target.checked })} disabled={viewOnly || !editing} color="success" />}
                 label="Active Status"
                 sx={{ gridColumn: { xs: '1fr', sm: 'span 3' }, ml: 1, mt: 1 }}
               />

@@ -17,7 +17,8 @@ from app.routers import (
     saas_admin, rbac, sites, auto_pr, alerts, intelligence,
     indents, approval_flows, quotations, reports, uploads, terms,
     admin_users, invoices, company_addresses, material_limits, configurations,
-    complaints, finance, quotation_extraction, equipment, contracts, repair_work_orders, rentals
+    complaints, finance, quotation_extraction, equipment, contracts, repair_work_orders, rentals,
+    work_orders
 )
 
 logging.basicConfig(level=logging.INFO)
@@ -34,7 +35,13 @@ async def lifespan(app: FastAPI):
         seed_database(db)
     finally:
         db.close()
+        
+    from app.scheduler import start_scheduler, shutdown_scheduler
+    start_scheduler()
+    
     yield
+    
+    shutdown_scheduler()
 
 
 app = FastAPI(
@@ -101,6 +108,7 @@ app.include_router(finance.router)
 app.include_router(contracts.router)
 app.include_router(repair_work_orders.router)
 app.include_router(rentals.router)
+app.include_router(work_orders.router)
 @app.get("/api/health")
 def health_check():
     return {

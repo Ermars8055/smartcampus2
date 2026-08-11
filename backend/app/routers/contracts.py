@@ -115,12 +115,47 @@ def check_materials_active_rates(
     for c in contracts:
         for item in c.items:
             if item.material_id in data.material_ids:
-                rc_info[item.material_id] = {
-                    "vendor_name": c.vendor.name if c.vendor else "Unknown",
-                    "valid_to": c.end_date.isoformat() if c.end_date else None,
-                    "rate": item.rate
-                }
+                if item.material_id not in rc_info or item.rate < rc_info[item.material_id]["rate"]:
+                    rc_info[item.material_id] = {
+                        "vendor_id": c.vendor_id,
+                        "vendor_name": c.vendor.name if c.vendor else "Unknown",
+                        "valid_to": c.end_date.isoformat() if c.end_date else None,
+                        "rate": item.rate
+                    }
     return rc_info
+
+@router.get("/vendor/{vendor_id}/active-details")
+def get_vendor_active_contract_details(
+    vendor_id: int, 
+    db: Session = Depends(get_db), 
+    current_user: User = Depends(get_current_user),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    contracts = db.query(Contract).filter(
+        Contract.tenant_id == tenant_id,
+        Contract.site_id == site_id,
+        Contract.vendor_id == vendor_id,
+        Contract.status == "Active",
+        Contract.is_deleted == False
+    ).all()
+
+    result = []
+    for c in contracts:
+        out = ContractOut.model_validate(c)
+        out.vendor_name = c.vendor.name if c.vendor else None
+        out.institution_name = c.institution.name if c.institution else None
+        out.department_name = c.department.name if c.department else None
+        
+        for idx, item in enumerate(out.items):
+            db_item = c.items[idx]
+            if db_item.material:
+                item.material_name = db_item.material.name
+            if db_item.equipment:
+                item.equipment_serial = db_item.equipment.serial_number or db_item.equipment.name
+                
+        result.append(out)
+    return result
 
 @router.get("/{id}")
 def get_contract(

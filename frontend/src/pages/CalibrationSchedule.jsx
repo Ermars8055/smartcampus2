@@ -134,23 +134,29 @@ export default function CalibrationSchedule() {
                   <TableCell sx={{ fontWeight: 600, color: '#334155' }}>
                     {row.department_name}
                   </TableCell>
-                  {months.map(m => (
-                    <TableCell key={m.key} align="center" sx={{ padding: '4px' }}>
+                  {months.map((m, mIndex) => {
+                    const isPastMonth = mIndex < new Date().getMonth();
+                    const callsGenerated = row.monthly_calls && row.monthly_calls[m.key] > 0;
+                    const isDisabled = isPastMonth || callsGenerated;
+                    return (
+                    <TableCell key={m.key} align="center" sx={{ padding: '4px', bgcolor: callsGenerated ? '#f0fdf4' : 'transparent' }}>
                       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                         <Checkbox
-                          checked={row[m.key]}
+                          checked={row[m.key] || callsGenerated}
                           onChange={() => handleCheckboxChange(index, m.key)}
                           color="primary"
                           size="small"
+                          disabled={isDisabled}
                         />
-                        {row.monthly_calls && row.monthly_calls[m.key] > 0 && (
-                          <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 600, mt: -0.5 }}>
-                            {row.monthly_calls[m.key]} calls
+                        {callsGenerated && (
+                          <Typography variant="caption" sx={{ color: 'success.main', fontWeight: 700, mt: -0.5, bgcolor: '#dcfce3', px: 1, borderRadius: 1, border: '1px solid #bbf7d0' }}>
+                            Generated
                           </Typography>
                         )}
                       </Box>
                     </TableCell>
-                  ))}
+                    );
+                  })}
                 </TableRow>
               ))}
               {schedules.length === 0 && (

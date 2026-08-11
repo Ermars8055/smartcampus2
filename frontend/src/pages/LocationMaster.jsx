@@ -14,6 +14,7 @@ export default function LocationMaster() {
   const [formData, setFormData] = useState({
     location_name: '',
     location_code: '',
+    department_name: '',
     is_active: true
   });
   const { showMessage } = useMessage();
@@ -37,6 +38,7 @@ export default function LocationMaster() {
       setFormData({
         location_name: loc.location_name,
         location_code: loc.location_code,
+        department_name: loc.department_name || '',
         is_active: loc.is_active
       });
     } else {
@@ -44,6 +46,7 @@ export default function LocationMaster() {
       setFormData({
         location_name: '',
         location_code: '',
+        department_name: '',
         is_active: true
       });
     }
@@ -87,9 +90,10 @@ export default function LocationMaster() {
         <Table>
           <TableHead sx={{ backgroundColor: '#f8fafc' }}>
             <TableRow>
-              <TableCell sx={{ fontWeight: 600 }}>ID</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>S.No</TableCell>
               <TableCell sx={{ fontWeight: 600 }}>Location Name</TableCell>
               <TableCell sx={{ fontWeight: 600 }}>Location Code</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>PM Department</TableCell>
               <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
               <TableCell sx={{ fontWeight: 600 }} align="right">Actions</TableCell>
             </TableRow>
@@ -102,11 +106,12 @@ export default function LocationMaster() {
                 </TableCell>
               </TableRow>
             ) : (
-              locations.map((loc) => (
+              locations.map((loc, index) => (
                 <TableRow key={loc.id} hover>
-                  <TableCell>{loc.id}</TableCell>
+                  <TableCell>{index + 1}</TableCell>
                   <TableCell>{loc.location_name}</TableCell>
                   <TableCell>{loc.location_code}</TableCell>
+                  <TableCell>{loc.department_name || '-'}</TableCell>
                   <TableCell>
                     <Box sx={{
                       display: 'inline-block',
@@ -147,6 +152,13 @@ export default function LocationMaster() {
               fullWidth
               required
               helperText="E.g. WD17 for Ward 17"
+            />
+            <TextField
+              label="PM Schedule Department"
+              value={formData.department_name}
+              onChange={(e) => setFormData({ ...formData, department_name: e.target.value })}
+              fullWidth
+              helperText="E.g. ICU, OT, DIALYSIS (Must exactly match PM Schedule categories)"
             />
             <FormControlLabel
               control={<Switch checked={formData.is_active} onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })} color="primary" />}

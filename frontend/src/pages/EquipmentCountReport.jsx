@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Button, Grid, FormControl, InputLabel, Select, MenuItem,
-  TextField, FormControlLabel, Switch, CircularProgress, Paper, Divider, Stack
+  TextField, FormControlLabel, Switch, CircularProgress, Paper, Divider, Stack, TablePagination
 } from '@mui/material';
 import {
   Search, Assessment, FileDownload, PictureAsPdf, Print, Refresh, Inventory2
@@ -26,6 +26,8 @@ export default function EquipmentCountReport() {
   
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   
   const [filters, setFilters] = useState({
     institutionId: '',
@@ -57,6 +59,7 @@ export default function EquipmentCountReport() {
 
       const res = await api.get('/api/equipment/reports/count', { params });
       setData(res.data || []);
+      setPage(0);
     } catch (err) {
       console.error(err);
       showMessage('Failed to load equipment count report data', 'Error', 'error');
@@ -537,10 +540,10 @@ export default function EquipmentCountReport() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {data.map((row, index) => (
+                {data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                   <TableRow key={index} hover sx={{ borderBottom: '1px solid #E2E8F0' }}>
                     <TableCell sx={{ fontWeight: 600, color: '#475569', borderRight: '1px solid #E2E8F0', py: 1 }}>
-                      {index + 1}
+                      {page * rowsPerPage + index + 1}
                     </TableCell>
                     <TableCell sx={{ fontWeight: 600, color: '#1E293B', borderRight: '1px solid #E2E8F0', py: 1 }}>
                       {row.equipment_name}
@@ -575,6 +578,21 @@ export default function EquipmentCountReport() {
             </Table>
           </TableContainer>
         )}
+        
+        <TablePagination
+          className="no-print"
+          rowsPerPageOptions={[10, 25, 50, 100]}
+          component="div"
+          count={data.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={(e, newPage) => setPage(newPage)}
+          onRowsPerPageChange={(e) => {
+            setRowsPerPage(parseInt(e.target.value, 10));
+            setPage(0);
+          }}
+          sx={{ borderTop: '1px solid #E2E8F0', bgcolor: '#F8FAFC' }}
+        />
 
         <Box className="no-print" sx={{ p: 2, borderTop: '1px solid #E2E8F0', bgcolor: '#F8FAFC', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 500 }}>

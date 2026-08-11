@@ -50,6 +50,7 @@ import DepartmentWiseInventoryReport from './pages/DepartmentWiseInventoryReport
 import DepartmentWiseEquipmentReport from './pages/DepartmentWiseEquipmentReport';
 import EquipmentCountReport from './pages/EquipmentCountReport';
 import PendingGatepassReturnsReport from './pages/PendingGatepassReturnsReport';
+import CallStatusReport from './pages/CallStatusReport';
 import Users from './pages/Users';
 import AuditLogs from './pages/AuditLogs';
 import ApprovalFlows from './pages/ApprovalFlows';
@@ -68,8 +69,7 @@ import ComplaintForm from './pages/ComplaintForm';
 import ComplaintDetail from './pages/ComplaintDetail';
 import Contracts from './pages/Contracts';
 import ContractForm from './pages/ContractForm';
-import RepairWorkOrders from './pages/RepairWorkOrders';
-import RepairWorkOrderDetail from './pages/RepairWorkOrderDetail';
+import WorkOrders from './pages/WorkOrders';
 
 import VendorPendingInvoicesReport from './pages/VendorPendingInvoicesReport';
 import VendorPendingPaymentsReport from './pages/VendorPendingPaymentsReport';
@@ -143,6 +143,7 @@ function AppRoutes() {
         <Route path="purchase-requests" element={<PurchaseRequests />} />
         <Route path="quotations" element={<Quotations />} />
         <Route path="purchase-orders" element={<PurchaseOrders />} />
+        <Route path="work-orders" element={<WorkOrders />} />
         <Route path="gate-entry" element={<GateEntry />} />
         <Route path="invoices" element={<Invoices />} />
         <Route path="invoice-tracking" element={<InvoiceTracking />} />
@@ -169,6 +170,7 @@ function AppRoutes() {
         <Route path="reports/department-inventory" element={<DepartmentWiseInventoryReport />} />
         <Route path="reports/department-equipment" element={<DepartmentWiseEquipmentReport />} />
         <Route path="reports/pending-gatepass-returns" element={<PendingGatepassReturnsReport />} />
+        <Route path="reports/call-status" element={<CallStatusReport />} />
         <Route path="admin" element={<Navigate to="/admin/configurations" replace />} />
         <Route path="admin/users" element={<Users />} />
         <Route path="admin/audit-logs" element={<AuditLogs />} />
@@ -191,9 +193,7 @@ function AppRoutes() {
         <Route path="contracts" element={<Contracts />} />
         <Route path="contracts/new" element={<ContractForm />} />
         <Route path="contracts/edit/:id" element={<ContractForm />} />
-        
-        <Route path="rwos" element={<RepairWorkOrders />} />
-        <Route path="rwos/:id" element={<RepairWorkOrderDetail />} />
+        <Route path="contracts/:id" element={<ContractForm />} />
 
         <Route path="finance/reports/pending-invoices" element={<VendorPendingInvoicesReport />} />
         <Route path="finance/reports/pending-payments" element={<VendorPendingPaymentsReport />} />

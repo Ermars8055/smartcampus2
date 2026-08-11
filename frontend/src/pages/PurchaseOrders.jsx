@@ -6,7 +6,7 @@ import {
   TableContainer, Button, TextField, Chip, Dialog, DialogTitle,
   InputLabel, IconButton, Tooltip, Divider, InputAdornment, Paper, TableSortLabel, useTheme, useMediaQuery,
   DialogContent, DialogActions, Grid, MenuItem, Select, FormControl, Link,
-  Accordion, AccordionSummary, AccordionDetails, Tab, Tabs, Autocomplete, FormControlLabel, Checkbox, TablePagination
+  Accordion, AccordionSummary, AccordionDetails, Tab, Tabs, Autocomplete, FormControlLabel, Checkbox, TablePagination, FormHelperText
 } from '@mui/material';
 import { Add, Delete, CheckCircle, Archive, Send, Cancel, Search, ShoppingCart, Store, Assignment, CalendarMonth, ArrowDropDown, Inventory, History, ExpandMore, Textsms, AttachFile, Email, Visibility, ArrowBack, Block, Science } from '@mui/icons-material';
 import api from '../services/api';
@@ -48,6 +48,7 @@ export default function PurchaseOrders() {
   const [errors, setErrors] = useState({});
   const [itemErrors, setItemErrors] = useState({});
   const [vendorRates, setVendorRates] = useState({});
+  const [bestAlternativeRates, setBestAlternativeRates] = useState({});
   const [uploading, setUploading] = useState(false);
 
   const handleUpload = async (file) => {
@@ -262,6 +263,16 @@ export default function PurchaseOrders() {
     }
   }, [form.vendor_id, materials]);
 
+  useEffect(() => {
+    const materialIds = form.items.map(it => parseInt(it.material_id, 10)).filter(id => !isNaN(id) && id > 0);
+    if (materialIds.length > 0) {
+      api.post('/api/contracts/active-rates/check', { material_ids: materialIds })
+        .then(res => setBestAlternativeRates(res.data))
+        .catch(err => console.error(err));
+    } else {
+      setBestAlternativeRates({});
+    }
+  }, [form.items.map(it => it.material_id).join(',')]);
 
 
   // Auto-clear resolved errors
@@ -750,7 +761,7 @@ export default function PurchaseOrders() {
   const canReject = (s) => s === 'Submitted';
   const canSend = (s) => s === 'Approved';
   const canShortClose = (s) => s === 'Approved' || s === 'Sent to Vendor' || s === 'Partially Received';
-  const canCancel = (s) => s === 'Draft' || s === 'Submitted';
+  const canCancel = (s) => ['Draft', 'Submitted', 'Approved', 'Sent to Vendor'].includes(s);
 
   const numberToWords = (num) => {
     const a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
@@ -2106,19 +2117,23 @@ export default function PurchaseOrders() {
               const igstAmt = taxableAmt * (igstPercent / 100);
               const netAmt = item.is_gst_inclusive ? netAmtAfterDisc : (taxableAmt + cgstAmt + sgstAmt + igstAmt);
 
+              const bestRate = bestAlternativeRates[item.material_id];
+              const hasBetterRate = bestRate && parseInt(bestRate.vendor_id, 10) !== parseInt(form.vendor_id, 10) && bestRate.rate < inputRate;
+
               return (
-                <Box key={i} id={`item-row-${i}`} sx={{
-                  display: 'grid',
-                  gridTemplateColumns: { xs: '1fr', md: '1.5fr 0.5fr 0.8fr 1fr 0.8fr' },
-                  gap: 1.5,
-                  p: 1.5,
-                  bgcolor: '#f8fafc',
-                  borderRadius: 2,
-                  border: '1px solid #e2e8f0',
-                  position: 'relative'
-                }}>
-                  <Box>
-                    <MaterialSelect
+                <Box key={i} sx={{ display: 'flex', flexDirection: 'column' }}>
+                  <Box id={`item-row-${i}`} sx={{
+                    display: 'grid',
+                    gridTemplateColumns: { xs: '1fr', md: '1.5fr 0.5fr 0.8fr 1fr 0.8fr' },
+                    gap: 1.5,
+                    p: 1.5,
+                    bgcolor: '#f8fafc',
+                    borderRadius: hasBetterRate ? '8px 8px 0 0' : 2,
+                    border: '1px solid #e2e8f0',
+                    position: 'relative'
+                  }}>
+                    <Box>
+                      <MaterialSelect
                       disabled={!form.vendor_id}
                       materials={materials.filter(m => !form.items.some((it, idx) => idx !== i && it.material_id === m.id))}
                       value={item.material_id}
@@ -2186,11 +2201,16 @@ export default function PurchaseOrders() {
                     }} inputProps={{ min: 0, step: item.uom_allow_decimal ? "any" : "1" }} />
                   <Box>
                     <TextField disabled={!item.material_id} sx={noSpinSx} fullWidth size="small" label="Rate (₹)" type="number" value={item.rate}
+                      InputProps={{ readOnly: vendorRates[item.material_id] !== undefined }}
                       error={!!itemErrors[i]?.rate} helperText={itemErrors[i]?.rate}
                       onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'rate', e.target.value.replace(/-/g, ''))}
                       onBlur={() => handleRateBlur(i, item.rate, item.base_rate)}
                       inputProps={{ min: 0, step: "0.01" }} />
-                    {item.base_rate > 0 && <Typography variant="caption" sx={{ color: '#64748B', display: 'block', mt: 0.5 }}>Base Rate: ₹{item.base_rate}</Typography>}
+                    {vendorRates[item.material_id] !== undefined ? (
+                       <Typography variant="caption" sx={{ color: '#059669', display: 'block', mt: 0.5, fontWeight: 500 }}>Rate Contract Rate: ₹{vendorRates[item.material_id]}</Typography>
+                    ) : item.base_rate > 0 ? (
+                       <Typography variant="caption" sx={{ color: '#64748B', display: 'block', mt: 0.5 }}>Base Rate: ₹{item.base_rate}</Typography>
+                    ) : null}
                   </Box>
                   <FormControl size="small">
                     <InputLabel>GST</InputLabel>
@@ -2219,6 +2239,14 @@ export default function PurchaseOrders() {
                     </Box>
                   </Box>
 
+                  {hasBetterRate && (
+                    <Box sx={{ gridColumn: '1 / -1', p: 1, px: 2, bgcolor: '#fff0f0', borderRadius: 1, border: '1px solid #fee2e2' }}>
+                      <Typography variant="caption" color="error" display="block" sx={{ fontWeight: 500 }}>
+                        This material has a rate contract with {bestRate.vendor_name} valid up to {formatDate(bestRate.valid_to)}.
+                      </Typography>
+                    </Box>
+                  )}
+
                   <Box sx={{ gridColumn: { xs: '1 / -1', md: '1 / -1' }, display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1, pt: 1, borderTop: '1px dashed #e2e8f0' }}>
                     {form.items.length > 1 ? (
                       <Button size="small" color="error" startIcon={<Delete />} onClick={() => removeItem(i)}>Remove</Button>
@@ -2231,8 +2259,9 @@ export default function PurchaseOrders() {
                     </Box>
                   </Box>
                 </Box>
-              );
-            })}
+              </Box>
+            );
+          })}
             
             {form.items && form.items.length > 0 && (
               <TablePagination

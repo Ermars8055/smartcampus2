@@ -1339,13 +1339,17 @@ def _build_po_short_close_email_template(po, remarks, closed_by_user):
     """Build subject + html_body for a PO short-close notification email."""
     subject = f"Notification: Purchase Order {po.po_number} Short Closed"
     vendor_name = f"{po.vendor.code} - {po.vendor.name}" if po.vendor else "Unknown Vendor"
+    
+    if getattr(po, "advance_percentage", 0) > 0:
+        advance_msg = "An advance payment has been made against the above Purchase Order. Please review the advance payment details and take the necessary action regarding the payment/adjustment."
+    else:
+        advance_msg = "Please review the Purchase Order and take any necessary action, if required."
+
     html_body = f"""
     <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333;">
-        <h2 style="color: #EAB308;">Purchase Order Short Closed</h2>
         <p>Hello,</p>
         <p>
-            Please be informed that Purchase Order <strong>{po.po_number}</strong>
-            has been <strong>Short Closed</strong> by {closed_by_user.full_name}.
+            Please be informed that the following Purchase Order has been Short Closed by {closed_by_user.full_name}.
         </p>
         <table style="margin: 16px 0; border-collapse: collapse; font-size: 13px;">
             <tr>
@@ -1358,15 +1362,16 @@ def _build_po_short_close_email_template(po, remarks, closed_by_user):
             </tr>
             <tr>
                 <td style="padding: 4px 12px 4px 0; font-weight: bold;">Total Amount</td>
-                <td style="padding: 4px 0;">₹ {po.total_amount:,.2f}</td>
+                <td style="padding: 4px 0;">₹{po.total_amount:,.2f}</td>
             </tr>
             <tr>
                 <td style="padding: 4px 12px 4px 0; font-weight: bold;">Remarks</td>
                 <td style="padding: 4px 0;">{remarks or 'N/A'}</td>
             </tr>
         </table>
-        <p>Advance payments are often made against POs, so please take any necessary action.</p>
+        <p>{advance_msg}</p>
         <br/>
+        <p>Regards,<br/>{closed_by_user.full_name}</p>
         <hr style="border: none; border-top: 1px solid #e2e8f0; margin-top: 24px;"/>
         <p style="font-size: 11px; color: #94a3b8;">
             This is a system-generated email from Eastpoint Smart Campus | Powered by NissiGrid Technologies.

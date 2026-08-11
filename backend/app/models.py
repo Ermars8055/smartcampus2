@@ -537,6 +537,7 @@ class LocationMaster(Base):
     site_id = Column(Integer, ForeignKey("sites.id", ondelete="CASCADE"), nullable=False)
     location_name = Column(String(255), nullable=False)
     location_code = Column(String(50), nullable=False)
+    department_name = Column(String(255), nullable=True)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=_get_now)
     __table_args__ = (UniqueConstraint("tenant_id", "location_code", name="uq_location_code_per_tenant"),)
@@ -891,6 +892,76 @@ class PurchaseOrderItem(Base):
     remarks = Column(Text)
     purchase_order = relationship("PurchaseOrder", back_populates="items")
     material = relationship("Material")
+
+class WorkOrder(Base):
+    __tablename__ = "work_orders"
+    id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
+    site_id = Column(Integer, ForeignKey("sites.id", ondelete="CASCADE"), nullable=False)
+    wo_number = Column(String(50), nullable=False, index=True)
+    vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=False)
+    project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
+    institution_id = Column(Integer, ForeignKey("institutions.id"), nullable=True)
+    contract_id = Column(Integer, ForeignKey("contracts.id"), nullable=True)
+    equipment_id = Column(Integer, ForeignKey("equipment_items.id"), nullable=True)
+    wo_type = Column(String(50), default="AMC") # AMC, CMC, Repair
+    advance_percentage = Column(Float, default=0)
+    total_amount = Column(Float, default=0)
+    target_completion_date = Column(Date, nullable=True)
+    status = Column(String(50), default="Draft") # Draft, Submitted, Approved, Sent to Vendor, Completed, Closed, Short Closed, Cancelled
+    current_approval_level = Column(Integer, default=1)
+    terms = Column(Text)
+    remarks = Column(Text, nullable=True)
+    annexure = Column(Text, nullable=True)
+    created_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    approved_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    approved_at = Column(DateTime, nullable=True)
+    is_deleted = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=_get_now)
+    updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)
+    
+    vendor = relationship("Vendor")
+    project = relationship("Project")
+    institution = relationship("Institution")
+    contract = relationship("Contract")
+    equipment = relationship("EquipmentItem")
+    created_by = relationship("User", foreign_keys=[created_by_id])
+    approver = relationship("User", foreign_keys=[approved_by_id])
+    items = relationship("WorkOrderItem", back_populates="work_order", cascade="all, delete-orphan")
+    __table_args__ = (UniqueConstraint("tenant_id", "wo_number", name="uq_wo_per_tenant"),)
+
+class WorkOrderItem(Base):
+    __tablename__ = "work_order_items"
+    id = Column(Integer, primary_key=True, index=True)
+    wo_id = Column(Integer, ForeignKey("work_orders.id"), nullable=False)
+    material_id = Column(Integer, ForeignKey("materials.id"), nullable=False)
+    quantity = Column(Float, nullable=False)
+    rate = Column(Float, nullable=False)
+    amount = Column(Float, nullable=False)
+    received_quantity = Column(Float, default=0)
+    approved_quantity = Column(Float, nullable=True)
+    discount_percent = Column(Float, default=0)
+    cgst_percentage = Column(Float, default=0)
+    sgst_percentage = Column(Float, default=0)
+    igst_percentage = Column(Float, default=0)
+    is_gst_inclusive = Column(Boolean, default=False)
+    remarks = Column(Text)
+    work_order = relationship("WorkOrder", back_populates="items")
+    material = relationship("Material")
+
+class WorkOrderApproval(Base):
+    __tablename__ = "work_order_approvals"
+    id = Column(Integer, primary_key=True, index=True)
+    wo_id = Column(Integer, ForeignKey("work_orders.id", ondelete="CASCADE"), nullable=False)
+    approval_flow_id = Column(Integer, ForeignKey("approval_flows.id"), nullable=False)
+    approver_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    approved_quantities = Column(JSON, nullable=True) 
+    remarks = Column(Text, nullable=True)
+    approved_at = Column(DateTime, default=_get_now)
+    work_order = relationship("WorkOrder")
+    flow = relationship("ApprovalFlow")
+    approver = relationship("User")
+
 
 
 # == Gate Entry ==

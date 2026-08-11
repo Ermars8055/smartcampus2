@@ -167,6 +167,7 @@ def create_vendor(
         ).first()
         if existing:
             raise HTTPException(status_code=400, detail="Vendor code already exists")
+    vendor_data["is_active"] = False
     vendor = Vendor(**vendor_data, status=VendorStatus.SUBMITTED.value, current_approval_level=1, tenant_id=tenant_id, site_id=site_id)
     db.add(vendor)
     db.flush()
@@ -224,8 +225,7 @@ def update_vendor(
         update_data["status"] = VendorStatus.SUBMITTED.value
         update_data["current_approval_level"] = 1
         update_data["rejection_remarks"] = None
-        if vendor.status == VendorStatus.REJECTED.value and "is_active" not in changes:
-            update_data["is_active"] = True
+        update_data["is_active"] = False
         
         db.query(VendorApproval).filter(VendorApproval.vendor_id == vendor.id).delete()
         
@@ -337,6 +337,7 @@ def handle_vendor_next_level(db, vendor, tenant_id, site_id, user_id=None):
         return {"message": f"Moved to level {next_level}", "status": vendor.status, "current_level": vendor.current_approval_level}
     else:
         vendor.status = VendorStatus.APPROVED.value
+        vendor.is_active = True
         vendor.approved_by_id = user_id
         vendor.approved_at = datetime.utcnow()
         db.add(VendorHistory(vendor_id=vendor.id, action="Fully Approved", action_by_id=user_id))

@@ -109,10 +109,10 @@ export default function DepartmentWiseEquipmentReport() {
     const totalCols = orderedDepts.length + 4; // 3 prefix + orderedDepts + 1 suffix
 
     // Filters and Titles
-    ws.addRow(['EQUIPMENT WISE DEPARTMENT WISE REPORT']);
+    ws.addRow(['DEPARTMENT-WISE EQUIPMENT COUNT']);
     ws.mergeCells(1, 1, 1, totalCols);
     const titleCell = ws.getCell(1, 1);
-    titleCell.value = 'EQUIPMENT WISE DEPARTMENT WISE REPORT';
+    titleCell.value = 'DEPARTMENT-WISE EQUIPMENT COUNT';
     titleCell.font = { size: 14, bold: true };
     titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
 
@@ -211,7 +211,7 @@ export default function DepartmentWiseEquipmentReport() {
 
     // Data Rows
     reportData.data.forEach((row, i) => {
-      const rowData = [i + 1, `${row.material_code} - ${row.material_name}`, row.uom];
+      const rowData = [i + 1, `${row.material_code} - ${row.material_name}`, 'NOS'];
       orderedDepts.forEach(d => {
         rowData.push(row.department_inventory[d] || '');
       });
@@ -278,7 +278,7 @@ export default function DepartmentWiseEquipmentReport() {
 
     const pageWidth = doc.internal.pageSize.getWidth();
     doc.setFontSize(16);
-    doc.text('EQUIPMENT WISE DEPARTMENT WISE REPORT', pageWidth / 2, 15, { align: 'center' });
+    doc.text('DEPARTMENT-WISE EQUIPMENT COUNT', pageWidth / 2, 15, { align: 'center' });
     doc.setFontSize(10);
     doc.text(`INVENTORY AS ON: ${reportData.generated_at}`, pageWidth / 2, 22, { align: 'center' });
 
@@ -294,7 +294,7 @@ export default function DepartmentWiseEquipmentReport() {
       const rowData = [
         index + 1,
         `${row.material_code} - ${row.material_name}`,
-        row.uom
+        'NOS'
       ];
       orderedDepts.forEach(d => rowData.push(formatQty(row.department_inventory[d] || 0)));
       rowData.push(formatQty(row.total_inventory));
@@ -345,7 +345,7 @@ export default function DepartmentWiseEquipmentReport() {
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, '@media print': { display: 'none' } }}>
         <Typography variant="h5" sx={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Assessment color="primary" /> Equipment Wise Department Wise Report
+          <Assessment color="primary" /> Department-Wise Equipment Count
         </Typography>
       </Box>
 
@@ -440,7 +440,7 @@ export default function DepartmentWiseEquipmentReport() {
           {/* Header Section */}
           <Box sx={{ mb: 3, textAlign: 'center' }}>
             <Typography variant="h5" sx={{ fontWeight: 800, color: '#1E293B', mb: 0.5, letterSpacing: '0.05em' }}>
-              EQUIPMENT WISE DEPARTMENT WISE REPORT
+              DEPARTMENT-WISE EQUIPMENT COUNT
             </Typography>
             <Typography variant="subtitle1" sx={{ color: '#475569', fontWeight: 600 }}>
               INVENTORY AS ON : {reportData.generated_at}
@@ -486,7 +486,7 @@ export default function DepartmentWiseEquipmentReport() {
                       <TableCell sx={{ ...stickyStyle(50, false), minWidth: 250 }}>
                         {row.material_code} - {row.material_name}
                       </TableCell>
-                      <TableCell align="center" sx={stickyStyle(300, false)}>{row.uom}</TableCell>
+                      <TableCell align="center" sx={stickyStyle(300, false)}>NOS</TableCell>
 
                       {reportData.departments.map((dept, i) => (
                         <TableCell key={`loc-${dept}-${i}`} align="center">

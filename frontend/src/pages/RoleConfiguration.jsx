@@ -70,6 +70,12 @@ const MODULE_TREE = [
         { key: 'can_send_to_vendor', label: 'Send to Vendor', color: '#3B82F6' },
         { key: 'can_short_close', label: 'Short Close', color: '#F97316' },
       ]},
+      { label: 'Work Orders', resource: 'work_orders', extendedActions: [
+        { key: 'can_approve', label: 'Approve', color: '#10B981' },
+        { key: 'can_reject', label: 'Reject', color: '#EF4444' },
+        { key: 'can_send_to_vendor', label: 'Send to Vendor', color: '#3B82F6' },
+        { key: 'can_short_close', label: 'Short Close', color: '#F97316' },
+      ]},
       { label: 'Contracts', resource: 'contracts', extendedActions: [
         { key: 'can_approve', label: 'Approve', color: '#10B981' },
         { key: 'can_reject', label: 'Reject', color: '#EF4444' },
@@ -148,10 +154,7 @@ const MODULE_TREE = [
       ]},
       { label: 'Calibration Schedule', resource: 'calibration_schedule', extendedActions: [
         { key: 'generate_calls', label: 'Generate Calls', color: '#3B82F6' },
-      ]},
-      { label: 'Repair Work Orders', resource: 'rwos', extendedActions: [
-        { key: 'can_close', label: 'Close RWO', color: '#10B981' }
-      ]},
+      ]}
     ],
   },
   {

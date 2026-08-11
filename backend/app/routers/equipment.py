@@ -145,8 +145,6 @@ def get_pm_schedule(
     from app.models import PMSchedule, Complaint
     from sqlalchemy import func
     
-    # Auto-generate pending calls for current month
-    _auto_generate_calls(db, tenant_id, site_id, current_user.id)
     
     schedules = db.query(PMSchedule).filter(PMSchedule.tenant_id == tenant_id).all()
     
@@ -182,29 +180,34 @@ def get_pm_schedule(
     month_names = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
     
     complaint_counts = db.query(
-        Complaint.department_name,
+        LocationMaster.department_name.label('sched_dept'),
         func.extract('month', Complaint.complaint_date).label('month'),
         func.count(Complaint.id).label('count')
+    ).join(
+        EquipmentItem, Complaint.equipment_id == EquipmentItem.id
+    ).join(
+        LocationMaster, EquipmentItem.location_id == LocationMaster.id
     ).filter(
         Complaint.tenant_id == tenant_id,
         Complaint.site_id == site_id,
         Complaint.complaint_type == "Preventive Maintenance Call",
-        func.extract('year', Complaint.complaint_date) == current_year
+        func.extract('year', Complaint.complaint_date) == current_year,
+        LocationMaster.department_name.isnot(None)
     ).group_by(
-        Complaint.department_name,
+        LocationMaster.department_name,
         func.extract('month', Complaint.complaint_date)
     ).all()
     
     count_map = {}
     for row in complaint_counts:
-        dept = row.department_name
+        sched_dept = row.sched_dept
         m_idx = int(row.month) - 1
         cnt = row.count
         if 0 <= m_idx < 12:
             m_key = month_names[m_idx]
-            if dept not in count_map:
-                count_map[dept] = {}
-            count_map[dept][m_key] = cnt
+            if sched_dept not in count_map:
+                count_map[sched_dept] = {}
+            count_map[sched_dept][m_key] = count_map[sched_dept].get(m_key, 0) + cnt
             
     schedules.sort(key=lambda x: dept_order.index(x.department_name) if x.department_name in dept_order else 999)
     for s in schedules:
@@ -247,8 +250,6 @@ def get_calibration_schedule(
     from app.models import CalibrationSchedule, Complaint
     from sqlalchemy import func
     
-    # Auto-generate pending calls for current month
-    _auto_generate_calls(db, tenant_id, site_id, current_user.id)
     
     schedules = db.query(CalibrationSchedule).filter(CalibrationSchedule.tenant_id == tenant_id).all()
     
@@ -284,29 +285,34 @@ def get_calibration_schedule(
     month_names = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
     
     complaint_counts = db.query(
-        Complaint.department_name,
+        LocationMaster.department_name.label('sched_dept'),
         func.extract('month', Complaint.complaint_date).label('month'),
         func.count(Complaint.id).label('count')
+    ).join(
+        EquipmentItem, Complaint.equipment_id == EquipmentItem.id
+    ).join(
+        LocationMaster, EquipmentItem.location_id == LocationMaster.id
     ).filter(
         Complaint.tenant_id == tenant_id,
         Complaint.site_id == site_id,
         Complaint.complaint_type == "Calibration Call",
-        func.extract('year', Complaint.complaint_date) == current_year
+        func.extract('year', Complaint.complaint_date) == current_year,
+        LocationMaster.department_name.isnot(None)
     ).group_by(
-        Complaint.department_name,
+        LocationMaster.department_name,
         func.extract('month', Complaint.complaint_date)
     ).all()
     
     count_map = {}
     for row in complaint_counts:
-        dept = row.department_name
+        sched_dept = row.sched_dept
         m_idx = int(row.month) - 1
         cnt = row.count
         if 0 <= m_idx < 12:
             m_key = month_names[m_idx]
-            if dept not in count_map:
-                count_map[dept] = {}
-            count_map[dept][m_key] = cnt
+            if sched_dept not in count_map:
+                count_map[sched_dept] = {}
+            count_map[sched_dept][m_key] = count_map[sched_dept].get(m_key, 0) + cnt
 
     schedules.sort(key=lambda x: dept_order.index(x.department_name) if x.department_name in dept_order else 999)
     for s in schedules:
@@ -338,27 +344,7 @@ def update_calibration_schedule(
     db.commit()
     return {"message": "Calibration Schedule updated successfully"}
 
-def _matches_department(dept_name: str, loc_name: str) -> bool:
-    d = dept_name.lower().strip()
-    l = loc_name.lower().strip()
-    if d == l:
-        return True
-    d_clean = d.replace("'s", "").replace("’s", "")
-    tokens = [t.strip() for t in d_clean.split('/')]
-    for t in tokens:
-        if len(t) >= 2 and t in l:
-            return True
-    if d_clean == "emergency" and ("emd" in l or "emergency" in l):
-        return True
-    if d_clean == "icu" and ("icu" in l or l == "ccu"):
-        return True
-    if d_clean == "ot" and ("ot" in l):
-        return True
-    if "opd" in d_clean and "opd" in l:
-        return True
-    if "ward" in d_clean and "ward" in l:
-        return True
-    return False
+
 
 @router.post("/generate-maintenance-calls")
 def generate_maintenance_calls(
@@ -390,11 +376,20 @@ def _auto_generate_calls(db: Session, tenant_id: int, site_id: int, user_id: int
     ).all()
     scheduled_depts = [s.department_name for s in schedules]
     
+    # Get Location IDs that belong to the scheduled departments
+    valid_locations = db.query(LocationMaster.id).filter(
+        LocationMaster.tenant_id == tenant_id,
+        LocationMaster.site_id == site_id,
+        LocationMaster.department_name.in_(scheduled_depts)
+    ).all()
+    valid_location_ids = [loc[0] for loc in valid_locations] if scheduled_depts else []
+    
     # Find all operational/working equipment needing PM in scheduled departments
     equipments = db.query(EquipmentItem).filter(
         EquipmentItem.tenant_id == tenant_id,
         EquipmentItem.site_id == site_id,
-        EquipmentItem.status.in_(["Operational", "Working"])
+        EquipmentItem.status.in_(["Operational", "Working"]),
+        EquipmentItem.location_id.in_(valid_location_ids)
     ).all()
     
     generated_count = 0
@@ -402,9 +397,7 @@ def _auto_generate_calls(db: Session, tenant_id: int, site_id: int, user_id: int
         if eq.location_id:
             loc = db.query(LocationMaster).filter(LocationMaster.id == eq.location_id).first()
             if loc:
-                matched = any(_matches_department(dept, loc.location_name) for dept in scheduled_depts)
-                if matched:
-                    # Check if an open PM complaint already exists for this equipment
+                # Check if an open PM complaint already exists for this equipment
                     existing = db.query(Complaint).filter(
                         Complaint.equipment_id == eq.id,
                         Complaint.complaint_type == "Preventive Maintenance Call",
@@ -437,7 +430,6 @@ def _auto_generate_calls(db: Session, tenant_id: int, site_id: int, user_id: int
                             db.add(new_complaint)
                             eq.pm_required = True
                             generated_count += 1
-                        
     # Handle Calibration Generation
     cal_schedules = db.query(CalibrationSchedule).filter(
         CalibrationSchedule.tenant_id == tenant_id,
@@ -445,11 +437,19 @@ def _auto_generate_calls(db: Session, tenant_id: int, site_id: int, user_id: int
     ).all()
     cal_scheduled_depts = [s.department_name for s in cal_schedules]
 
+    cal_valid_locations = db.query(LocationMaster.id).filter(
+        LocationMaster.tenant_id == tenant_id,
+        LocationMaster.site_id == site_id,
+        LocationMaster.department_name.in_(cal_scheduled_depts)
+    ).all()
+    cal_valid_location_ids = [loc[0] for loc in cal_valid_locations] if cal_scheduled_depts else []
+
     cal_equipments = db.query(EquipmentItem).filter(
         EquipmentItem.tenant_id == tenant_id,
         EquipmentItem.site_id == site_id,
         EquipmentItem.status.in_(["Operational", "Working"]),
-        EquipmentItem.calibration_required == True
+        EquipmentItem.calibration_required == True,
+        EquipmentItem.location_id.in_(cal_valid_location_ids)
     ).all()
     
     cal_generated_count = 0
@@ -457,9 +457,7 @@ def _auto_generate_calls(db: Session, tenant_id: int, site_id: int, user_id: int
         if eq.location_id:
             loc = db.query(LocationMaster).filter(LocationMaster.id == eq.location_id).first()
             if loc:
-                matched = any(_matches_department(dept, loc.location_name) for dept in cal_scheduled_depts)
-                if matched:
-                    if not eq.next_calibration_due_date or eq.next_calibration_due_date <= date.today():
+                if not eq.next_calibration_due_date or eq.next_calibration_due_date <= date.today():
                         existing = db.query(Complaint).filter(
                             Complaint.equipment_id == eq.id,
                             Complaint.complaint_type == "Calibration Call",
@@ -488,7 +486,6 @@ def _auto_generate_calls(db: Session, tenant_id: int, site_id: int, user_id: int
                                 )
                                 db.add(new_complaint)
                                 cal_generated_count += 1
-                    
     db.commit()
     return generated_count, cal_generated_count
 

@@ -92,6 +92,7 @@ def create_location(
         site_id=site_id,
         location_name=location_in.location_name,
         location_code=location_in.location_code,
+        department_name=location_in.department_name,
         is_active=location_in.is_active
     )
     db.add(location)
@@ -118,6 +119,7 @@ def update_location(
         
     location.location_name = location_in.location_name
     location.location_code = location_in.location_code
+    location.department_name = location_in.department_name
     location.is_active = location_in.is_active
     db.commit()
     db.refresh(location)

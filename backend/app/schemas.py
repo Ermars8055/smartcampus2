@@ -722,6 +722,121 @@ class POOut(BaseModel):
         from_attributes = True
 
 
+# ── Work Orders ──────────────────────────────────────────────────────────
+
+class WorkOrderItemBase(BaseModel):
+    material_id: int
+    quantity: float = Field(..., gt=0)
+    rate: float = Field(..., ge=0)
+    discount_percent: float = 0
+    cgst_percentage: float = 0
+    sgst_percentage: float = 0
+    igst_percentage: float = 0
+    is_gst_inclusive: bool = False
+
+class WorkOrderItemOut(WorkOrderItemBase):
+    id: int
+    amount: float
+    received_quantity: float
+    approved_quantity: Optional[float] = None
+    material_name: Optional[str] = None
+    material_code: Optional[str] = None
+    uom_name: Optional[str] = None
+    uom_allow_decimal: Optional[bool] = False
+    class Config:
+        from_attributes = True
+
+class WorkOrderBase(BaseModel):
+    vendor_id: int
+    project_id: int
+    institution_id: Optional[int] = None
+    contract_id: Optional[int] = None
+    equipment_id: Optional[int] = None
+    wo_type: str = "AMC"
+    advance_percentage: float = Field(default=0, ge=0, le=100)
+    target_completion_date: Optional[date] = None
+    terms: Optional[str] = None
+    annexure: Optional[str] = None
+    items: List[WorkOrderItemBase] = []
+
+class WorkOrderCreate(WorkOrderBase):
+    status: Optional[str] = None
+
+class WorkOrderUpdate(BaseModel):
+    status: Optional[str] = None
+    remarks: Optional[str] = None
+
+class WorkOrderFullUpdate(BaseModel):
+    status: Optional[str] = None
+    vendor_id: Optional[int] = None
+    project_id: Optional[int] = None
+    institution_id: Optional[int] = None
+    contract_id: Optional[int] = None
+    equipment_id: Optional[int] = None
+    wo_type: Optional[str] = None
+    advance_percentage: Optional[float] = None
+    target_completion_date: Optional[date] = None
+    terms: Optional[str] = None
+    annexure: Optional[str] = None
+    items: Optional[List[WorkOrderItemBase]] = None
+
+class WorkOrderApproveItemRequest(BaseModel):
+    wo_item_id: int
+    approved_quantity: float = Field(..., ge=0)
+    remarks: Optional[str] = Field(None, max_length=255)
+
+class WorkOrderApproveRequest(BaseModel):
+    items: List[WorkOrderApproveItemRequest] = []
+    remarks: Optional[str] = Field(None, max_length=255)
+    @model_validator(mode='after')
+    def check_approval_quantities(self):
+        if not self.items:
+            return self
+        if len(self.items) == 1 and self.items[0].approved_quantity == 0:
+            raise ValueError("Approved quantity must be greater than 0 for a single-item document. Please use the Reject button instead.")
+        if len(self.items) > 1 and sum(item.approved_quantity for item in self.items) == 0:
+            raise ValueError("You cannot approve 0 quantity for all items. Please use the Reject button instead.")
+        return self
+
+class WorkOrderOut(BaseModel):
+    id: int
+    wo_number: str
+    vendor_id: int
+    project_id: int
+    institution_id: Optional[int] = None
+    contract_id: Optional[int] = None
+    equipment_id: Optional[int] = None
+    wo_type: str
+    advance_percentage: float
+    total_amount: float
+    target_completion_date: Optional[date] = None
+    status: str
+    current_approval_level: int
+    terms: Optional[str] = None
+    annexure: Optional[str] = None
+    remarks: Optional[str] = None
+    created_at: datetime
+    
+    vendor_name: Optional[str] = None
+    vendor_address: Optional[str] = None
+    vendor_city: Optional[str] = None
+    vendor_state: Optional[str] = None
+    vendor_pincode: Optional[str] = None
+    vendor_gst_number: Optional[str] = None
+    vendor_phone: Optional[str] = None
+    vendor_email: Optional[str] = None
+    project_name: Optional[str] = None
+    institution_name: Optional[str] = None
+    contract_number: Optional[str] = None
+    equipment_name: Optional[str] = None
+    equipment_code: Optional[str] = None
+    
+    can_user_approve: Optional[bool] = False
+    items: List[WorkOrderItemOut] = []
+    class Config:
+        from_attributes = True
+
+
 # ── Gate Entry ───────────────────────────────────────────────────────────
 
 class GateEntryBase(BaseModel):
@@ -2253,6 +2368,7 @@ class EquipmentItemOut(BaseModel):
 class LocationMasterBase(BaseModel):
     location_name: str
     location_code: str
+    department_name: Optional[str] = None
     is_active: bool = True
 
 class LocationMasterCreate(LocationMasterBase):

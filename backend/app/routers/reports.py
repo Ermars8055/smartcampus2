@@ -1230,3 +1230,101 @@ def get_department_equipment_report(
         "generated_at": get_now_ist().strftime("%d-%b-%Y %H:%M:%S"),
         "generated_by": current_user.full_name
     }
+
+
+# ==========================================
+# CALL STATUS REPORT
+# ==========================================
+
+@router.get("/call-status")
+def get_call_status_report(
+    start_date: Optional[str] = Query(None, description="Start Date (YYYY-MM-DD)"),
+    end_date: Optional[str] = Query(None, description="End Date (YYYY-MM-DD)"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("reports", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    """Report for Maintenance Call Statuses (AMC, CMC, Warranty, No Contract)"""
+    from app.models import Complaint, EquipmentItem
+    from datetime import timedelta
+    from app.routers.complaints import _enrich
+    
+    now = get_now_ist()
+    
+    if start_date:
+        dt_start = datetime.strptime(start_date, "%Y-%m-%d").replace(hour=0, minute=0, second=0)
+    else:
+        dt_start = (now - timedelta(days=30)).replace(hour=0, minute=0, second=0)
+        
+    if end_date:
+        dt_end = datetime.strptime(end_date, "%Y-%m-%d").replace(hour=23, minute=59, second=59)
+    else:
+        dt_end = now.replace(hour=23, minute=59, second=59)
+
+    query = db.query(Complaint).outerjoin(EquipmentItem).filter(
+        Complaint.tenant_id == tenant_id,
+        Complaint.site_id == site_id,
+        Complaint.is_deleted == False,
+        Complaint.created_at >= dt_start,
+        Complaint.created_at <= dt_end
+    )
+    
+    complaints = query.order_by(Complaint.created_at.desc()).all()
+    
+    summary = {
+        "AMC": 0,
+        "CMC": 0,
+        "Warranty": 0,
+        "Out of Warranty": 0,
+        "Preventive Maintenance": 0,
+        "Calibration": 0,
+        "Installation": 0
+    }
+    
+    history = []
+    
+    for c in complaints:
+        enriched_c = _enrich(c, db)
+        status = enriched_c.equipment_warranty_status
+        ctype = c.complaint_type or "Breakdown"
+        
+        if status == "AMC":
+            display_status = "AMC"
+            summary["AMC"] += 1
+        elif status == "CMC":
+            display_status = "CMC"
+            summary["CMC"] += 1
+        elif status == "Warranty":
+            display_status = "Warranty"
+            summary["Warranty"] += 1
+        else:
+            if ctype in ("PM", "Preventive Maintenance Call"):
+                display_status = "Preventive Maintenance"
+                summary["Preventive Maintenance"] += 1
+            elif ctype in ("Calibration", "Calibration Call"):
+                display_status = "Calibration"
+                summary["Calibration"] += 1
+            elif ctype == "Installation":
+                display_status = "Installation"
+                summary["Installation"] += 1
+            else:
+                display_status = "Out of Warranty"
+                summary["Out of Warranty"] += 1
+            
+        history.append({
+            "docket_no": enriched_c.docket_no,
+            "created_at": enriched_c.created_at.strftime("%Y-%m-%d %H:%M") if enriched_c.created_at else "",
+            "department": enriched_c.department_name or "-",
+            "nature_of_complaint": enriched_c.nature_of_complaint or "-",
+            "assigned_to": enriched_c.assigned_to_name or "-",
+            "status": enriched_c.status,
+            "service_category": display_status,
+            "equipment_code": enriched_c.equipment_code or "-",
+            "resolved_at": enriched_c.resolved_at.strftime("%Y-%m-%d %H:%M") if enriched_c.resolved_at else "-"
+        })
+        
+    return {
+        "summary": summary,
+        "history": history
+    }

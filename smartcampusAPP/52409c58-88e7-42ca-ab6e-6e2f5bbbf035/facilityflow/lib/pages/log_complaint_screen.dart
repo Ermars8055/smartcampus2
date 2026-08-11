@@ -38,17 +38,10 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
   
   String? _selectedComplaintType;
   final List<String> _complaintTypes = [
-    'Warranty Call/Complaint',
-    'AMC call/Complaint',
-    'CMC call/Complaint',
-    'Out of warranty call/complaint',
-    'Not working Call/Complaint',
-    'User Training Call/Complaint',
-    'Preventive Maintenance Call/Complaint',
-    'Calibration Call/Complaint',
-    'General Repair',
+    'General Complaint',
+    'Machine Not Working',
     'Installation',
-    'Other'
+    'User Training'
   ];
 
   final List<File> _attachedImages = [];

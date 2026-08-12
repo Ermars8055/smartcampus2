@@ -15,196 +15,7 @@ import {
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
-// ── Module / Sub-module tree definition ─────────────────────────────────
-const MODULE_TREE = [
-  {
-    module: 'Dashboard',
-    icon: 'dashboard',
-    children: [{ label: 'Dashboard', resource: 'dashboard', actions: ['read'] }],
-  },
-  {
-    module: 'Master Data',
-    icon: 'category',
-    children: [
-      { label: 'Materials', resource: 'materials' },
-      { label: 'Categories', resource: 'categories' },
-      { label: 'Sub Categories', resource: 'subcategories' },
-      { label: 'UOM', resource: 'uom' },
-      { label: 'Vendors', resource: 'vendors', extendedActions: [
-        { key: 'can_approve', label: 'Approve', color: '#10B981' },
-        { key: 'can_reject', label: 'Reject', color: '#EF4444' },
-      ]},
-      { label: 'Stores', resource: 'warehouses' },
-    ],
-  },
-  {
-    module: 'Procurement',
-    icon: 'shopping_cart',
-    children: [
-      { label: 'Indents', resource: 'indents', extendedActions: [
-        { key: 'can_approve', label: 'Approve', color: '#10B981' },
-        { key: 'can_reject', label: 'Reject', color: '#EF4444' },
-        { key: 'can_convert_to_po', label: 'Convert to PO', color: '#3B82F6' },
-        { key: 'can_acknowledge', label: 'Acknowledge', color: '#F59E0B' },
-      ]},
-      { label: 'Purchase Requests', resource: 'purchase_requests', extendedActions: [
-        { key: 'can_submit', label: 'Submit', color: '#3B82F6' },
-        { key: 'can_approve', label: 'Approve', color: '#10B981' },
-        { key: 'can_reject', label: 'Reject', color: '#EF4444' },
-        { key: 'can_convert_to_po', label: 'Convert to PO', color: '#3B82F6' },
-        { key: 'can_hold', label: 'Hold', color: '#F59E0B' },
-        { key: 'can_short_close', label: 'Short Close', color: '#F97316' },
-      ]},
-      { label: 'Quotations', resource: 'quotations', extendedActions: [
-        { key: 'can_send_to_vendors', label: 'Send to Vendors', color: '#3B82F6' },
-        { key: 'can_receive', label: 'Receive', color: '#10B981' },
-        { key: 'can_enter_quotes', label: 'Enter Quotes', color: '#F59E0B' },
-        { key: 'can_compare', label: 'Compare', color: '#8B5CF6' },
-        { key: 'can_approve', label: 'Approve', color: '#10B981' },
-        { key: 'can_convert_to_po', label: 'Convert to PO', color: '#3B82F6' },
-      ]},
-      { label: 'Purchase Orders', resource: 'purchase_orders', extendedActions: [
-        { key: 'can_approve', label: 'Approve', color: '#10B981' },
-        { key: 'can_reject', label: 'Reject', color: '#EF4444' },
-        { key: 'can_hold', label: 'Hold', color: '#F59E0B' },
-        { key: 'can_send_to_vendor', label: 'Send to Vendor', color: '#3B82F6' },
-        { key: 'can_short_close', label: 'Short Close', color: '#F97316' },
-      ]},
-      { label: 'Work Orders', resource: 'work_orders', extendedActions: [
-        { key: 'can_approve', label: 'Approve', color: '#10B981' },
-        { key: 'can_reject', label: 'Reject', color: '#EF4444' },
-        { key: 'can_send_to_vendor', label: 'Send to Vendor', color: '#3B82F6' },
-        { key: 'can_short_close', label: 'Short Close', color: '#F97316' },
-      ]},
-      { label: 'Contracts', resource: 'contracts', extendedActions: [
-        { key: 'can_approve', label: 'Approve', color: '#10B981' },
-        { key: 'can_reject', label: 'Reject', color: '#EF4444' },
-      ]},
-    ],
-  },
-  {
-    module: 'Store Operations',
-    icon: 'store',
-    children: [
-      { label: 'Gate Entry', resource: 'gate_entry', extendedActions: [
-        { key: 'can_record_entry', label: 'Record Entry', color: '#3B82F6' },
-        { key: 'can_verify', label: 'Verify', color: '#10B981' },
-      ]},
-      { label: 'Invoices', resource: 'invoice', extendedActions: [
-        { key: 'can_register', label: 'Register', color: '#3B82F6' },
-        { key: 'can_approve', label: 'Approve', color: '#10B981' },
-        { key: 'can_reject', label: 'Reject', color: '#EF4444' },
-        { key: 'can_print', label: 'Print', color: '#8B5CF6' },
-      ]},
-      { label: 'GRN', resource: 'grn', extendedActions: [
-        { key: 'can_create_grn', label: 'Create GRN', color: '#3B82F6' },
-        { key: 'can_complete', label: 'Complete', color: '#10B981' },
-      ]},
-      { label: 'Material Issue', resource: 'issues', extendedActions: [
-        { key: 'can_issue', label: 'Issue Materials', color: '#3B82F6' },
-        { key: 'can_direct_issue', label: 'Direct Issue', color: '#10B981' },
-        { key: 'can_print', label: 'Print', color: '#8B5CF6' },
-      ]},
-      { label: 'Returns', resource: 'returns', extendedActions: [
-        { key: 'can_return', label: 'Return Materials', color: '#3B82F6' },
-        { key: 'receive', label: 'Receive Return', color: '#10B981' },
-      ]},
-      { label: 'Stock Transfer', resource: 'transfers', extendedActions: [
-        { key: 'can_transfer', label: 'Transfer Stock', color: '#3B82F6' },
-      ]},
-      { label: 'Write Offs', resource: 'write_offs', extendedActions: [
-        { key: 'can_submit', label: 'Submit', color: '#3B82F6' },
-        { key: 'can_approve', label: 'Approve', color: '#10B981' },
-        { key: 'can_reject', label: 'Reject', color: '#EF4444' },
-      ]},
-      { label: 'Gate Passes', resource: 'gate_passes', extendedActions: [
-        { key: 'can_create', label: 'Create', color: '#3B82F6' },
-        { key: 'can_print', label: 'Print', color: '#8B5CF6' },
-      ]},
-      { label: 'Issue Acknowledgement', resource: 'acknowledgements', extendedActions: [
-        { key: 'can_acknowledge', label: 'Acknowledge Receipt', color: '#F59E0B' },
-      ]},
-    ],
-  },
-  {
-    module: 'Inventory',
-    icon: 'warehouse',
-    children: [{ label: 'Inventory', resource: 'inventory' }],
-  },
-  {
-    module: 'Equipment',
-    icon: 'build',
-    children: [
-      { label: 'Equipment Master', resource: 'equipment', extendedActions: [
-        { key: 'generate_calls', label: 'Generate Calls', color: '#3B82F6' },
-      ]},
-    ],
-  },
-  {
-    module: 'Maintenance',
-    icon: 'build',
-    children: [
-      { label: 'Complaints', resource: 'complaints', extendedActions: [
-        { key: 'can_assign', label: 'Assign', color: '#3B82F6' },
-        { key: 'can_approve_level1', label: 'Level 1 Approve', color: '#10B981' },
-        { key: 'can_approve_level2', label: 'Level 2 Approve', color: '#10B981' },
-      ]},
-      { label: 'PM Schedule', resource: 'pm_schedule', extendedActions: [
-        { key: 'generate_calls', label: 'Generate Calls', color: '#3B82F6' },
-      ]},
-      { label: 'Calibration Schedule', resource: 'calibration_schedule', extendedActions: [
-        { key: 'generate_calls', label: 'Generate Calls', color: '#3B82F6' },
-      ]}
-    ],
-  },
-  {
-    module: 'Intelligence',
-    icon: 'build',
-    children: [{ label: 'Intelligence', resource: 'intelligence', actions: ['read'] }],
-  },
-  {
-    module: 'Finance',
-    icon: 'account_balance',
-    children: [
-      { label: 'Invoices & Payments', resource: 'finance_invoices', extendedActions: [
-        { key: 'can_send_hard_copy', label: 'Send Hard Copy', color: '#3B82F6' },
-        { key: 'can_receive_hard_copy', label: 'Receive Hard Copy', color: '#10B981' },
-        { key: 'can_send_for_payment', label: 'Send for Payment', color: '#F59E0B' },
-        { key: 'can_mark_paid', label: 'Mark as Paid', color: '#8B5CF6' }
-      ]}
-    ],
-  },
-  {
-    module: 'Reports',
-    icon: 'assessment',
-    children: [
-      { label: 'General Reports', resource: 'reports', actions: ['read'] },
-      { label: 'Issue Summary', resource: 'report_issue_summary', actions: ['read'] },
-      { label: 'Rate Analysis', resource: 'report_rate_analysis', actions: ['read'] },
-      { label: 'Equipment Count', resource: 'report_equipment_count', actions: ['read'] },
-      { label: 'Receipt Summary', resource: 'report_receipt_summary', actions: ['read'] },
-      { label: 'Dept. Inventory', resource: 'report_dept_inventory', actions: ['read'] },
-      { label: 'Finance Reports', resource: 'report_finance', actions: ['read'] },
-      { label: 'Pending Gatepass Returns', resource: 'report_pending_gatepass', actions: ['read'] },
-    ],
-  },
-  {
-    module: 'Admin',
-    icon: 'settings',
-    children: [
-      { label: 'User Management', resource: 'admin_users' },
-      { label: 'Role Management', resource: 'admin_roles' },
-      { label: 'Audit Logs', resource: 'audit_logs', actions: ['read'] },
-      { label: 'Approval Flows', resource: 'approval_flows' },
-      { label: 'Material Allowances', resource: 'material_allowances' },
-      { label: 'Configurations', resource: 'configurations' },
-      { label: 'Locations', resource: 'locations' },
-      { label: 'Projects', resource: 'projects' },
-      { label: 'Company Addresses', resource: 'company_addresses' },
-      { label: 'Terms & Conditions', resource: 'terms' },
-    ],
-  },
-];
+// Modules will be fetched dynamically
 
 const ALL_ACTIONS = ['read', 'create', 'update', 'delete'];
 const ACTION_LABELS = { read: 'View', create: 'Create', update: 'Edit', delete: 'Delete' };
@@ -262,17 +73,54 @@ export default function RoleConfiguration() {
   const [dataAccessScope, setDataAccessScope] = useState('Self Only');
   const [permMap, setPermMap] = useState({});
   const [workflowRules, setWorkflowRules] = useState([]);
-  const [expandedModules, setExpandedModules] = useState(
-    Object.fromEntries(MODULE_TREE.map((m) => [m.module, true]))
-  );
+  const [expandedModules, setExpandedModules] = useState({});
+  const [moduleTree, setModuleTree] = useState([]);
 
-  // ── Load existing role ────────────────────────────────────────────────
+  // Fetch menus and role
   useEffect(() => {
-    if (!isEditing) return;
     setLoading(true);
-    api
-      .get(`/api/rbac/roles/${id}`)
+    // Fetch menus first to build the dynamic module tree
+    api.get('/api/menus')
+      .then(res => {
+        const menus = res.data;
+        const dynamicTree = menus
+          .filter(m => !m.platform_only) // Only show non-platform menus
+          .map(m => {
+            const children = (m.children || []).map(c => ({
+              label: c.text,
+              resource: c.resource,
+              actions: c.basic_actions && c.basic_actions.length > 0 ? c.basic_actions : ['read', 'create', 'update', 'delete'],
+              extendedActions: c.extended_actions || []
+            })).filter(c => c.resource); // Only keep children that have a resource
+
+            // If a parent has a resource but no children, treat it as its own child
+            if (m.resource && children.length === 0) {
+              children.push({
+                label: m.text,
+                resource: m.resource,
+                actions: m.basic_actions && m.basic_actions.length > 0 ? m.basic_actions : ['read', 'create', 'update', 'delete'],
+                extendedActions: m.extended_actions || []
+              });
+            }
+
+            return {
+              module: m.text,
+              icon: m.icon_name,
+              children
+            };
+          }).filter(m => m.children.length > 0);
+        
+        setModuleTree(dynamicTree);
+        setExpandedModules(Object.fromEntries(dynamicTree.map((m) => [m.module, true])));
+        
+        if (!isEditing) {
+          setLoading(false);
+        } else {
+          return api.get(`/api/rbac/roles/${id}`);
+        }
+      })
       .then((r) => {
+        if (!r) return;
         const data = r.data;
         setRoleName(data.name || '');
         setRoleCode(data.code || '');
@@ -282,9 +130,12 @@ export default function RoleConfiguration() {
         setWorkflowRules(
           (data.workflow_rules || []).map((w, i) => ({ ...w, _key: i }))
         );
+        setLoading(false);
       })
-      .catch((err) => setError(err.response?.data?.detail || 'Failed to load role'))
-      .finally(() => setLoading(false));
+      .catch((err) => {
+        setError(err.response?.data?.detail || 'Failed to load role');
+        setLoading(false);
+      });
   }, [id, isEditing]);
 
   // ── Permission toggles ───────────────────────────────────────────────
@@ -382,7 +233,7 @@ export default function RoleConfiguration() {
   // Global select-all / revoke-all
   const grantAll = () => {
     const next = {};
-    MODULE_TREE.forEach((mod) =>
+    moduleTree.forEach((mod) =>
       mod.children.forEach((c) => {
         const actions = c.actions || ALL_ACTIONS;
         const perms = { extended_actions: {} };
@@ -615,7 +466,7 @@ export default function RoleConfiguration() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {MODULE_TREE.map((mod) => (
+              {moduleTree.map((mod) => (
                 <ModuleGroup
                   key={mod.module}
                   mod={mod}

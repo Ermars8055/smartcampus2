@@ -59,6 +59,7 @@ import MaterialAllowances from './pages/MaterialAllowances';
 import Configurations from './pages/Configurations';
 import RoleConfiguration from './pages/RoleConfiguration';
 import SaasAdmin from './pages/SaasAdmin';
+import MenuSettings from './pages/Admin/MenuSettings';
 import Alerts from './pages/Alerts';
 import PlatformLogin from './pages/PlatformLogin';
 import TermsAndConditions from './pages/TermsAndConditions';
@@ -184,6 +185,7 @@ function AppRoutes() {
         <Route path="terms" element={<TermsAndConditions />} />
         <Route path="company-addresses" element={<CompanyAddresses />} />
         <Route path="saas-admin" element={<SaasAdmin />} />
+        <Route path="saas-admin/menus" element={<MenuSettings />} />
         <Route path="alerts" element={<Alerts />} />
         <Route path="complaints" element={<ComplaintsList />} />
         <Route path="complaints/new" element={<ComplaintForm />} />

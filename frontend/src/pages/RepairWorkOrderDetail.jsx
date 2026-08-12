@@ -261,9 +261,9 @@ export default function RepairWorkOrderDetail() {
                   {materialIndents.map(ind => (
                     <TableRow key={ind.id}>
                       <TableCell>{ind.indent_number}</TableCell>
-                      <TableCell>{new Date(ind.created_at).toLocaleDateString()}</TableCell>
+                      <TableCell>{dayjs(ind.created_at).format('DD-MMM-YYYY')}</TableCell>
                       <TableCell><Chip size="small" label={ind.status} color="default" /></TableCell>
-                      <TableCell>${ind.total_amount?.toFixed(2)}</TableCell>
+                      <TableCell>${Number(ind.total_amount?.toFixed(2))}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

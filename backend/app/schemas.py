@@ -140,6 +140,7 @@ class TenantConfigurationBase(BaseModel):
     cgst_share_percent: float
     sgst_share_percent: float
     po_short_close_notify_roles: Optional[List[str]] = []
+    wo_short_close_notify_roles: Optional[List[str]] = []
 
 class TenantConfigurationCreate(TenantConfigurationBase):
     pass
@@ -2605,4 +2606,44 @@ class EquipmentCalibration(BaseModel):
     agency_name: Optional[str] = None
     certificate_number: Optional[str] = None
     remarks: Optional[str] = None
+
+# == System Configuration (Menus) ==
+
+class MenuItemBase(BaseModel):
+    text: str = Field(..., max_length=100)
+    icon_name: Optional[str] = Field(None, max_length=50)
+    path: Optional[str] = Field(None, max_length=255)
+    resource: Optional[str] = Field(None, max_length=100)
+    platform_only: bool = False
+    parent_id: Optional[int] = None
+    order: int = 0
+    is_active: bool = True
+    basic_actions: List[str] = ["read", "create", "update", "delete"]
+    extended_actions: List[Dict[str, Any]] = []
+
+class MenuItemCreate(MenuItemBase):
+    pass
+
+class MenuItemUpdate(BaseModel):
+    text: Optional[str] = Field(None, max_length=100)
+    icon_name: Optional[str] = Field(None, max_length=50)
+    path: Optional[str] = Field(None, max_length=255)
+    resource: Optional[str] = Field(None, max_length=100)
+    platform_only: Optional[bool] = None
+    parent_id: Optional[int] = None
+    order: Optional[int] = None
+    is_active: Optional[bool] = None
+    basic_actions: Optional[List[str]] = None
+    extended_actions: Optional[List[Dict[str, Any]]] = None
+
+class MenuItemResponse(MenuItemBase):
+    id: int
+    created_at: datetime
+    updated_at: datetime
+    children: List['MenuItemResponse'] = []
+
+    class Config:
+        from_attributes = True
+
+MenuItemResponse.update_forward_refs()
 

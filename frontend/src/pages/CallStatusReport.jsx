@@ -153,7 +153,7 @@ export default function CallStatusReport() {
               value={filters.startDate}
               onChange={(newValue) => setFilters({ ...filters, startDate: newValue })}
               slotProps={{ textField: { size: 'small', fullWidth: true } }}
-              format="DD/MM/YYYY"
+              format="DD-MMM-YYYY" localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
             />
           </Grid>
           <Grid item xs={12} sm={4} md={3}>
@@ -162,7 +162,7 @@ export default function CallStatusReport() {
               value={filters.endDate}
               onChange={(newValue) => setFilters({ ...filters, endDate: newValue })}
               slotProps={{ textField: { size: 'small', fullWidth: true } }}
-              format="DD/MM/YYYY"
+              format="DD-MMM-YYYY" localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
               minDate={filters.startDate}
             />
           </Grid>

@@ -572,7 +572,7 @@ export default function GRNPage() {
                     helperText={(() => {
                       const expected = form.items.reduce((s, i) => s + (i.accepted_quantity || 0) * (i.rate || 0), 0);
                       if (form.invoice_amount > 0 && expected > 0 && Math.abs(form.invoice_amount - expected) > 2) {
-                        return `Note: Items sum is ₹${expected.toFixed(2)}`;
+                        return `Note: Items sum is ₹${Number(expected.toFixed(2))}`;
                       }
                       return "";
                     })()}
@@ -606,7 +606,7 @@ export default function GRNPage() {
                       </FormControl>
                     </Grid>
                     <Grid item xs={12} sm={6}>
-                      <TextField fullWidth size="small" label="PO Amount (₹)" value={pos.find(p => p.id === form.po_id)?.total_amount?.toFixed(2) || '0.00'} InputProps={{ readOnly: true, sx: { bgcolor: '#f8fafc', color: '#64748b' } }} />
+                      <TextField fullWidth size="small" label="PO Amount (₹)" value={Number(pos.find(p => p.id === form.po_id)?.total_amount?.toFixed(2)) || '0.00'} InputProps={{ readOnly: true, sx: { bgcolor: '#f8fafc', color: '#64748b' } }} />
                     </Grid>
                   </>
                 )}

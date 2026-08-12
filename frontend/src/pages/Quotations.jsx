@@ -991,16 +991,14 @@ const Quotations = () => {
                   label="Start Date"
                   value={startDate}
                   onChange={(val) => setStartDate(val)}
-                  format="DD-MMM-YYYY"
-                  localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
+                  format="DD-MMM-YYYY" localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
                   slotProps={{ textField: { size: 'small', sx: { width: 200 }, placeholder: "DD-MMM-YYYY" } }}
                 />
                 <DatePicker
                   label="End Date"
                   value={endDate}
                   onChange={(val) => setEndDate(val)}
-                  format="DD-MMM-YYYY"
-                  localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
+                  format="DD-MMM-YYYY" localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
                   slotProps={{ textField: { size: 'small', sx: { width: 200 }, placeholder: "DD-MMM-YYYY" } }}
                 />
               </Box>
@@ -1525,7 +1523,7 @@ const Quotations = () => {
                               <TableRow key={q.vendor_id} sx={{ backgroundColor: isSelected ? '#f0fdf4' : 'inherit', outline: isSelected ? '1px solid #4ade80' : 'none', outlineOffset: '-1px', '&:last-child td, &:last-child th': { border: 0 } }}>
                                 <TableCell sx={{ py: 1.5, fontWeight: isSelected ? 600 : 400 }}>{q.vendor_name}</TableCell>
                                 <TableCell sx={{ py: 1.5 }}>{q.brand || '-'}</TableCell>
-                                <TableCell sx={{ py: 1.5, fontWeight: 500 }}>₹{Number(q.quoted_rate).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                                <TableCell sx={{ py: 1.5, fontWeight: 500 }}>₹{Number(Number(q.quoted_rate).toFixed(2)).toLocaleString('en-IN')}</TableCell>
                                 <TableCell sx={{ py: 1.5 }}>{q.delivery_days || '-'} days</TableCell>
                                 <TableCell sx={{ py: 1.5 }}><Chip size="small" label={isSelected ? `${q.rank_label} Selected` : q.rank_label} color={isSelected ? "success" : "default"} variant={isSelected ? "filled" : "outlined"} sx={{ fontWeight: isSelected ? 600 : 400 }} /></TableCell>
                                 <TableCell align="right" sx={{ py: 1.5 }}>
@@ -1689,11 +1687,11 @@ const Quotations = () => {
                                   {quote ? (
                                     <>
                                       <Typography variant="body2">
-                                        ₹{Number(quote.effective_rate).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        ₹{Number(Number(quote.effective_rate).toFixed(2)).toLocaleString('en-IN')}
                                       </Typography>
                                       {quote.discount_percent > 0 && (
                                         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontSize: '0.65rem' }}>
-                                          ({quote.discount_percent}% off ₹{Number(quote.quoted_rate).toLocaleString('en-IN')})
+                                          ({quote.discount_percent}% off ₹{Number(Number(quote.quoted_rate).toFixed(2)).toLocaleString('en-IN')})
                                         </Typography>
                                       )}
                                       <Chip
@@ -2117,8 +2115,7 @@ const Quotations = () => {
                 <DatePicker
                   value={newQuote.quotation_date ? dayjs(newQuote.quotation_date) : null}
                   onChange={(val) => setNewQuote({ ...newQuote, quotation_date: val ? val.format('YYYY-MM-DD') : '' })}
-                  format="DD-MMM-YYYY"
-                  localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
+                  format="DD-MMM-YYYY" localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
                   disableFuture
                   slotProps={{
                     textField: {
@@ -2931,7 +2928,7 @@ const Quotations = () => {
                           {item.uom_name || '-'}
                         </TableCell>
                         <TableCell align="right" sx={{ fontSize: '0.8rem' }}>
-                          ₹{item.quoted_rate?.toLocaleString()}
+                          ₹{item.quoted_rate != null ? Number(Number(item.quoted_rate).toFixed(2)).toLocaleString('en-IN') : ''}
                         </TableCell>
                         <TableCell>
                           <TextField

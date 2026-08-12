@@ -1178,7 +1178,7 @@ export default function Equipment() {
             </Alert>
             <DatePicker
               label="Relocation Date"
-              format="DD-MMM-YYYY"
+              format="DD-MMM-YYYY" localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
               value={relocateDate ? dayjs(relocateDate) : null}
               onChange={(newValue) => setRelocateDate(newValue ? newValue.format('YYYY-MM-DD') : '')}
               slotProps={{ textField: { size: 'small', fullWidth: true } }}
@@ -1234,7 +1234,7 @@ export default function Equipment() {
             </Alert>
             <DatePicker
               label="Write-Off Date"
-              format="DD-MMM-YYYY"
+              format="DD-MMM-YYYY" localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
               value={writeOffDate ? dayjs(writeOffDate) : null}
               onChange={(newValue) => setWriteOffDate(newValue ? newValue.format('YYYY-MM-DD') : '')}
               slotProps={{ textField: { size: 'small', fullWidth: true } }}
@@ -1270,7 +1270,7 @@ export default function Equipment() {
             </Alert>
             <DatePicker
               label="Date of Consumption"
-              format="DD-MMM-YYYY"
+              format="DD-MMM-YYYY" localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
               value={consumptionDate ? dayjs(consumptionDate) : null}
               onChange={(newValue) => setConsumptionDate(newValue ? newValue.format('YYYY-MM-DD') : '')}
               slotProps={{ textField: { size: 'small', fullWidth: true } }}
@@ -1574,10 +1574,10 @@ export default function Equipment() {
                     <TextField fullWidth size="small" label="Rental Model" value={addForm.rental_type || ''} InputProps={{ readOnly: true }} />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <DatePicker label="Rental Start Date" format="DD-MMM-YYYY" readOnly slotProps={{ textField: { size: 'small', fullWidth: true } }} value={addForm.rental_start_date ? dayjs(addForm.rental_start_date) : null} />
+                    <DatePicker label="Rental Start Date" format="DD-MMM-YYYY" localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }} readOnly slotProps={{ textField: { size: 'small', fullWidth: true } }} value={addForm.rental_start_date ? dayjs(addForm.rental_start_date) : null} />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <DatePicker label="Rental End Date" format="DD-MMM-YYYY" readOnly slotProps={{ textField: { size: 'small', fullWidth: true } }} value={addForm.rental_end_date ? dayjs(addForm.rental_end_date) : null} />
+                    <DatePicker label="Rental End Date" format="DD-MMM-YYYY" localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }} readOnly slotProps={{ textField: { size: 'small', fullWidth: true } }} value={addForm.rental_end_date ? dayjs(addForm.rental_end_date) : null} />
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <TextField fullWidth size="small" label="Billing Frequency" value={addForm.billing_frequency || ''} InputProps={{ readOnly: true }} />
@@ -1603,7 +1603,7 @@ export default function Equipment() {
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <DatePicker label="Warranty Expiry Date" format="DD-MMM-YYYY" value={addForm.warranty_expiry_date ? dayjs(addForm.warranty_expiry_date) : null} onChange={(newValue) => setAddForm({ ...addForm, warranty_expiry_date: newValue ? newValue.format('YYYY-MM-DD') : null })} disabled={!addForm.warranty_available} slotProps={{ textField: { size: 'small', fullWidth: true } }} />
+                <DatePicker label="Warranty Expiry Date" format="DD-MMM-YYYY" localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }} value={addForm.warranty_expiry_date ? dayjs(addForm.warranty_expiry_date) : null} onChange={(newValue) => setAddForm({ ...addForm, warranty_expiry_date: newValue ? newValue.format('YYYY-MM-DD') : null })} disabled={!addForm.warranty_available} slotProps={{ textField: { size: 'small', fullWidth: true } }} />
               </Grid>
 
               <Grid item xs={12} sm={6}>
@@ -1617,7 +1617,7 @@ export default function Equipment() {
                 </FormControl>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <DatePicker label="AMC/CMC End Date" format="DD-MMM-YYYY" value={addForm.amc_cmc_end_date ? dayjs(addForm.amc_cmc_end_date) : null} onChange={(newValue) => setAddForm({ ...addForm, amc_cmc_end_date: newValue ? newValue.format('YYYY-MM-DD') : null })} disabled={addForm.amc_cmc_status === 'None'} slotProps={{ textField: { size: 'small', fullWidth: true } }} />
+                <DatePicker label="AMC/CMC End Date" format="DD-MMM-YYYY" localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }} value={addForm.amc_cmc_end_date ? dayjs(addForm.amc_cmc_end_date) : null} onChange={(newValue) => setAddForm({ ...addForm, amc_cmc_end_date: newValue ? newValue.format('YYYY-MM-DD') : null })} disabled={addForm.amc_cmc_status === 'None'} slotProps={{ textField: { size: 'small', fullWidth: true } }} />
               </Grid>
 
               <Grid item xs={12} sm={6}>
@@ -1739,10 +1739,10 @@ export default function Equipment() {
                     <TextField fullWidth size="small" label="Rental Model" value={editForm.rental_type || ''} InputProps={{ readOnly: true }} />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <DatePicker label="Rental Start Date" format="DD-MMM-YYYY" readOnly slotProps={{ textField: { size: 'small', fullWidth: true } }} value={editForm.rental_start_date ? dayjs(editForm.rental_start_date) : null} />
+                    <DatePicker label="Rental Start Date" format="DD-MMM-YYYY" localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }} readOnly slotProps={{ textField: { size: 'small', fullWidth: true } }} value={editForm.rental_start_date ? dayjs(editForm.rental_start_date) : null} />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <DatePicker label="Rental End Date" format="DD-MMM-YYYY" readOnly slotProps={{ textField: { size: 'small', fullWidth: true } }} value={editForm.rental_end_date ? dayjs(editForm.rental_end_date) : null} />
+                    <DatePicker label="Rental End Date" format="DD-MMM-YYYY" localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }} readOnly slotProps={{ textField: { size: 'small', fullWidth: true } }} value={editForm.rental_end_date ? dayjs(editForm.rental_end_date) : null} />
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <TextField fullWidth size="small" label="Billing Frequency" value={editForm.billing_frequency || ''} InputProps={{ readOnly: true }} />
@@ -1847,7 +1847,7 @@ export default function Equipment() {
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <DatePicker label="Warranty Expiry Date" format="DD-MMM-YYYY" value={editForm.warranty_expiry_date ? dayjs(editForm.warranty_expiry_date) : null} onChange={(newValue) => setEditForm({ ...editForm, warranty_expiry_date: newValue ? newValue.format('YYYY-MM-DD') : null })} disabled={!editForm.warranty_available} slotProps={{ textField: { size: 'small', fullWidth: true } }} />
+                <DatePicker label="Warranty Expiry Date" format="DD-MMM-YYYY" localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }} value={editForm.warranty_expiry_date ? dayjs(editForm.warranty_expiry_date) : null} onChange={(newValue) => setEditForm({ ...editForm, warranty_expiry_date: newValue ? newValue.format('YYYY-MM-DD') : null })} disabled={!editForm.warranty_available} slotProps={{ textField: { size: 'small', fullWidth: true } }} />
               </Grid>
 
               <Grid item xs={12} sm={6}>
@@ -1861,7 +1861,7 @@ export default function Equipment() {
                 </FormControl>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <DatePicker label="AMC/CMC End Date" format="DD-MMM-YYYY" value={editForm.amc_cmc_end_date ? dayjs(editForm.amc_cmc_end_date) : null} onChange={(newValue) => setEditForm({ ...editForm, amc_cmc_end_date: newValue ? newValue.format('YYYY-MM-DD') : null })} disabled={!editForm.amc_cmc_status || editForm.amc_cmc_status === 'None'} slotProps={{ textField: { size: 'small', fullWidth: true } }} />
+                <DatePicker label="AMC/CMC End Date" format="DD-MMM-YYYY" localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }} value={editForm.amc_cmc_end_date ? dayjs(editForm.amc_cmc_end_date) : null} onChange={(newValue) => setEditForm({ ...editForm, amc_cmc_end_date: newValue ? newValue.format('YYYY-MM-DD') : null })} disabled={!editForm.amc_cmc_status || editForm.amc_cmc_status === 'None'} slotProps={{ textField: { size: 'small', fullWidth: true } }} />
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField fullWidth size="small" label="AMC PO Number" value={editForm.amc_po_number || ''} onChange={e => setEditForm({ ...editForm, amc_po_number: e.target.value })} disabled={!editForm.amc_cmc_status || editForm.amc_cmc_status === 'None'} />

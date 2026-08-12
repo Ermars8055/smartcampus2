@@ -214,6 +214,7 @@ class TenantConfiguration(Base):
     cgst_share_percent = Column(Float, nullable=False)
     sgst_share_percent = Column(Float, nullable=False)
     po_short_close_notify_roles = Column(JSON, default=list)
+    wo_short_close_notify_roles = Column(JSON, default=list)
     created_at = Column(DateTime, default=_get_now)
     updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)
     tenant = relationship("Tenant")
@@ -454,6 +455,16 @@ class Warehouse(Base):
 
 
 # == Master Data ==
+
+class SystemLookup(Base):
+    __tablename__ = "system_lookups"
+    id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
+    lookup_type = Column(String(100), nullable=False, index=True) # e.g., 'ComplaintType'
+    lookup_value = Column(String(255), nullable=False)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=_get_now)
+    __table_args__ = (UniqueConstraint("tenant_id", "lookup_type", "lookup_value", name="uq_sys_lookup_val"),)
 
 class Category(Base):
     __tablename__ = "categories"
@@ -2083,3 +2094,25 @@ class ReagentConsumptionLog(Base):
 
     equipment = relationship("EquipmentItem")
     logged_by = relationship("User", foreign_keys=[logged_by_id])
+
+
+# == System Configuration ==
+
+class MenuItem(Base):
+    __tablename__ = "menu_items"
+    id = Column(Integer, primary_key=True, index=True)
+    text = Column(String(100), nullable=False)
+    icon_name = Column(String(50), nullable=True)
+    path = Column(String(255), nullable=True)
+    resource = Column(String(100), nullable=True)
+    platform_only = Column(Boolean, default=False)
+    parent_id = Column(Integer, ForeignKey("menu_items.id", ondelete="CASCADE"), nullable=True)
+    order = Column(Integer, default=0)
+    is_active = Column(Boolean, default=True)
+    basic_actions = Column(JSON, default=list) # e.g. ["read", "create", "update", "delete"]
+    extended_actions = Column(JSON, default=list) # e.g. [{"key": "can_approve", "label": "Approve", "color": "#10B981"}]
+    created_at = Column(DateTime, default=_get_now)
+    updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)
+    
+    parent = relationship("MenuItem", remote_side=[id], back_populates="children")
+    children = relationship("MenuItem", back_populates="parent", order_by="MenuItem.order", cascade="all, delete-orphan")

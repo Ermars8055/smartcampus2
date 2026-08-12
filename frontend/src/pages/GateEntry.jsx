@@ -286,7 +286,7 @@ export default function GateEntry() {
                     {e.vehicle_number || e.delivery_person_name || '—'}
                   </TableCell>
                   <TableCell sx={{ fontSize: '0.8rem' }}>{[e.invoice_number ? 'INV: ' + e.invoice_number : '', e.dc_number ? 'DC: ' + e.dc_number : ''].filter(Boolean).join(' | ') || '—'}</TableCell>
-                  <TableCell align="right" sx={{ fontSize: '0.8rem' }}>₹{e.invoice_amount?.toFixed(2) || '0.00'}</TableCell>
+                  <TableCell align="right" sx={{ fontSize: '0.8rem' }}>₹{Number(e.invoice_amount?.toFixed(2)) || '0.00'}</TableCell>
                   <TableCell sx={{ fontSize: '0.75rem' }}>{formatDateTime(e.arrival_time)}</TableCell>
                   <TableCell><Chip label={e.status} size="small" color={statusColor[e.status] || 'default'} sx={{ fontSize: '0.7rem' }} /></TableCell>
                 </TableRow>
@@ -309,7 +309,7 @@ export default function GateEntry() {
                 <Grid item xs={12}><Typography variant="subtitle2" sx={{ mt: 1, fontWeight: 600, color: '#1E3A8A' }}>Invoice Details</Typography></Grid>
                 <Grid item xs={4}><Typography variant="caption" color="textSecondary">Invoice Number</Typography><Typography>{detailDialog.invoice_number}</Typography></Grid>
                 <Grid item xs={4}><Typography variant="caption" color="textSecondary">Invoice Date</Typography><Typography>{formatDate(detailDialog.invoice_date)}</Typography></Grid>
-                <Grid item xs={4}><Typography variant="caption" color="textSecondary">Amount</Typography><Typography>₹{detailDialog.invoice_amount?.toFixed(2) || '0.00'}</Typography></Grid>
+                <Grid item xs={4}><Typography variant="caption" color="textSecondary">Amount</Typography><Typography>₹{Number(detailDialog.invoice_amount?.toFixed(2)) || '0.00'}</Typography></Grid>
               </>
             )}
             {detailDialog?.dc_number && (
@@ -523,7 +523,7 @@ export default function GateEntry() {
                 <Grid item xs={12} sm={3}>
                   <TextField fullWidth className="no-spin" label="Tare Weight (Empty)" type="number" inputProps={{ step: "0.01", min: "0" }} value={form.tare_weight} onChange={e => {
                     const val = e.target.value;
-                    const net = (form.gross_weight && val) ? (parseFloat(form.gross_weight) - parseFloat(val)).toFixed(2) : '';
+                    const net = (form.gross_weight && val) ? Number((parseFloat(form.gross_weight) - parseFloat(val)).toFixed(2)) : '';
                     setForm({ ...form, tare_weight: val, net_weight: net });
                     setErrors(prev => ({ ...prev, gross_weight: null }));
                   }} />
@@ -531,7 +531,7 @@ export default function GateEntry() {
                 <Grid item xs={12} sm={3}>
                   <TextField fullWidth className="no-spin" label="Gross Weight (Loaded)" type="number" inputProps={{ step: "0.01", min: "0" }} value={form.gross_weight} onChange={e => {
                     const val = e.target.value;
-                    const net = (val && form.tare_weight) ? (parseFloat(val) - parseFloat(form.tare_weight)).toFixed(2) : '';
+                    const net = (val && form.tare_weight) ? Number((parseFloat(val) - parseFloat(form.tare_weight)).toFixed(2)) : '';
                     setForm({ ...form, gross_weight: val, net_weight: net });
                     setErrors(prev => ({ ...prev, gross_weight: null }));
                   }} error={!!errors.gross_weight} helperText={errors.gross_weight} />

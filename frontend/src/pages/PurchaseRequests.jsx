@@ -1410,8 +1410,7 @@ export default function PurchaseRequests() {
                       label="Delivery Date"
                       value={dayjs(convertDialog.delivery_date)}
                       onChange={val => setConvertDialog({ ...convertDialog, delivery_date: val })}
-                      format="DD-MMM-YYYY"
-                      localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
+                      format="DD-MMM-YYYY" localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
                       slotProps={{
                         textField: {
                           fullWidth: true,

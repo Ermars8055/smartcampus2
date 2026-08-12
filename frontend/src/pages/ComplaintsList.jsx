@@ -12,6 +12,7 @@ import dayjs from 'dayjs';
 
 export default function ComplaintsList() {
   const [complaints, setComplaints] = useState([]);
+  const [statusTabs, setStatusTabs] = useState(['Registered', 'Open', 'Assigned', 'Under Inspection', 'Material Pending', 'In Progress', 'Pending Approval', 'Closed', 'Reopened', 'All']);
   const [searchParams] = useSearchParams();
   const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || '');
   const [searchQuery, setSearchQuery] = useState('');
@@ -33,6 +34,15 @@ export default function ComplaintsList() {
     try {
       const res = await api.get('/api/complaints');
       setComplaints(res.data);
+      
+      try {
+        const metadataRes = await api.get('/api/complaints/metadata/statuses');
+        if (metadataRes.data && metadataRes.data.length > 0) {
+          setStatusTabs(metadataRes.data);
+        }
+      } catch (metadataError) {
+        console.warn('Failed to fetch status metadata, using default tabs', metadataError);
+      }
     } catch (error) {
       console.error('Failed to fetch complaints', error);
     }
@@ -91,11 +101,6 @@ export default function ComplaintsList() {
     return complaints.filter(c => c.status === statusName).length;
   };
 
-  const STATUS_TABS = [
-    'Registered', 'Assigned', 'Under Inspection', 'Material Pending', 
-    'In Progress', 'Pending Approval', 'Closed', 'Reopened', 'All'
-  ];
-
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
@@ -133,31 +138,37 @@ export default function ComplaintsList() {
           <Tabs
             value={statusFilter}
             onChange={(e, newVal) => { setStatusFilter(newVal); setPage(0); }}
-            variant="scrollable"
-            scrollButtons={false}
+            variant="standard"
             sx={{ 
-              minHeight: 40, 
+              minHeight: 48, 
               borderBottom: 1, 
               borderColor: 'divider', 
               '& .MuiTab-root': { 
                 textTransform: 'none', 
-                fontWeight: 600,
                 minWidth: 'auto',
-                px: 1.5,
-                minHeight: 40,
-                fontSize: '0.85rem'
+                px: 0.75,
+                minHeight: 48,
               } 
             }}
           >
-            {STATUS_TABS.map(tab => {
+            {statusTabs.map(tab => {
               const val = tab === 'All' ? '' : tab;
               return (
                 <Tab 
                   key={tab}
                   value={val}
                   label={
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      {tab}
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <Typography sx={{ 
+                        fontSize: '0.8rem', 
+                        fontWeight: 600, 
+                        whiteSpace: 'normal', 
+                        lineHeight: 1.1, 
+                        textAlign: 'left', 
+                        width: 'min-content'
+                      }}>
+                        {tab}
+                      </Typography>
                       <Chip
                         label={getStatusCount(tab)}
                         size="small"
@@ -237,7 +248,7 @@ export default function ComplaintsList() {
                             size="small" 
                             color="primary"
                             onClick={() => navigate(`/complaints/edit/${row.id}`)} 
-                            disabled={!['Registered', 'Open', 'Reopened'].includes(row.status)}
+                            disabled={!['Registered', 'Open', 'Reopened'].includes(row.status) || row.is_pm_calibration_call}
                           >
                             <Edit fontSize="small" />
                           </IconButton>
@@ -249,7 +260,7 @@ export default function ComplaintsList() {
                             size="small" 
                             onClick={() => setShortCloseDialog({ open: true, complaintId: row.id })} 
                             color="error"
-                            disabled={!['Registered', 'Open'].includes(row.status)}
+                            disabled={!['Registered', 'Open'].includes(row.status) || row.is_pm_calibration_call}
                           >
                             <Cancel fontSize="small" />
                           </IconButton>

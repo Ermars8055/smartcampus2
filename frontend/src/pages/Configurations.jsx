@@ -50,7 +50,8 @@ export default function Configurations() {
     base_state: '',
     cgst_share_percent: 50,
     sgst_share_percent: 50,
-    po_short_close_notify_roles: []
+    po_short_close_notify_roles: [],
+    wo_short_close_notify_roles: []
   });
   const [errors, setErrors] = useState({});
   const { showMessage } = useMessage();
@@ -79,7 +80,8 @@ export default function Configurations() {
           base_state: res.data.base_state || '',
           cgst_share_percent: res.data.cgst_share_percent !== undefined ? res.data.cgst_share_percent : 50,
           sgst_share_percent: res.data.sgst_share_percent !== undefined ? res.data.sgst_share_percent : 50,
-          po_short_close_notify_roles: res.data.po_short_close_notify_roles || []
+          po_short_close_notify_roles: res.data.po_short_close_notify_roles || [],
+          wo_short_close_notify_roles: res.data.wo_short_close_notify_roles || []
         });
       }
     } catch (err) {
@@ -120,7 +122,8 @@ export default function Configurations() {
         base_state: form.base_state,
         cgst_share_percent: Number(parseFloat(form.cgst_share_percent).toFixed(2)),
         sgst_share_percent: Number(parseFloat(form.sgst_share_percent).toFixed(2)),
-        po_short_close_notify_roles: form.po_short_close_notify_roles
+        po_short_close_notify_roles: form.po_short_close_notify_roles,
+        wo_short_close_notify_roles: form.wo_short_close_notify_roles
       };
 
       await api.put('/api/configurations', payload);
@@ -208,7 +211,7 @@ export default function Configurations() {
           </Typography>
 
         <Grid container spacing={3}>
-          <Grid item xs={12}>
+          <Grid item xs={12} md={6}>
             <Autocomplete
               multiple
               options={roles.map(r => r.name)}
@@ -223,7 +226,36 @@ export default function Configurations() {
                 <TextField
                   {...params}
                   label="PO Short Close Notification Roles"
-                  placeholder="Select roles to notify"
+                  placeholder="Select roles"
+                  InputProps={{
+                    ...params.InputProps,
+                    startAdornment: (
+                      <>
+                        <InputAdornment position="start"><NotificationsActive sx={{ color: '#94A3B8', ml: 1 }} /></InputAdornment>
+                        {params.InputProps.startAdornment}
+                      </>
+                    ),
+                  }}
+                />
+              )}
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Autocomplete
+              multiple
+              options={roles.map(r => r.name)}
+              value={form.wo_short_close_notify_roles}
+              onChange={(e, newValue) => setForm({ ...form, wo_short_close_notify_roles: newValue })}
+              renderTags={(value, getTagProps) =>
+                value.map((option, index) => (
+                  <Chip variant="outlined" label={option} {...getTagProps({ index })} />
+                ))
+              }
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="WO Short Close Notification Roles"
+                  placeholder="Select roles"
                   InputProps={{
                     ...params.InputProps,
                     startAdornment: (

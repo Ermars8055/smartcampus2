@@ -159,10 +159,10 @@ export default function ComplaintDetail() {
   };
 
 
-  const handleInspect = async () => {
+  const handleCompleteInspection = async () => {
     setActionLoading(true);
     try {
-      await api.post(`/api/complaints/${id}/inspect`, { 
+      await api.post(`/api/complaints/${id}/complete-inspection`, { 
         material_required: materialRequired,
         inspection_details: inspectionDetails 
       });
@@ -176,6 +176,19 @@ export default function ComplaintDetail() {
       }
     } catch (error) {
       setSnackbar({ open: true, message: error.response?.data?.detail || 'Failed to complete inspection', severity: 'error' });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleStartInspection = async () => {
+    setActionLoading(true);
+    try {
+      await api.post(`/api/complaints/${id}/inspect`);
+      setSnackbar({ open: true, message: 'Inspection started', severity: 'success' });
+      fetchComplaintData();
+    } catch (error) {
+      setSnackbar({ open: true, message: error.response?.data?.detail || 'Failed to start inspection', severity: 'error' });
     } finally {
       setActionLoading(false);
     }
@@ -357,8 +370,21 @@ export default function ComplaintDetail() {
             )}
 
             {complaint.status === 'Assigned' && (
-              <Button variant="contained" color="info" startIcon={<Search />} onClick={() => setInspectDialogOpen(true)}>
-                Start Inspection
+              <>
+                <Button variant="contained" color="info" startIcon={<Search />} onClick={handleStartInspection} disabled={actionLoading}>
+                  Start Inspection
+                </Button>
+                {hasAction('complaints', 'can_assign') && (
+                  <Button variant="outlined" color="primary" startIcon={<Assignment />} onClick={() => setAssignDialogOpen(true)}>
+                    Reassign
+                  </Button>
+                )}
+              </>
+            )}
+
+            {complaint.status === 'Under Inspection' && (
+              <Button variant="contained" color="primary" startIcon={<Search />} onClick={() => setInspectDialogOpen(true)}>
+                Complete Inspection
               </Button>
             )}
 
@@ -756,7 +782,7 @@ export default function ComplaintDetail() {
 
       {/* Inspect Dialog */}
       <Dialog open={inspectDialogOpen} onClose={() => !actionLoading && setInspectDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Start Inspection</DialogTitle>
+        <DialogTitle>Complete Inspection</DialogTitle>
         <DialogContent>
           <Typography variant="body2" sx={{ mb: 2 }}>Have you inspected the issue? Is additional material required to fix this?</Typography>
           <TextField
@@ -776,7 +802,7 @@ export default function ComplaintDetail() {
         </DialogContent>
         <DialogActions sx={{ p: 2, pt: 0 }}>
           <Button onClick={() => setInspectDialogOpen(false)} disabled={actionLoading}>Cancel</Button>
-          <Button onClick={handleInspect} variant="contained" color="primary" disabled={actionLoading}>Confirm Inspection</Button>
+          <Button onClick={handleCompleteInspection} variant="contained" color="primary" disabled={actionLoading}>Confirm Inspection</Button>
         </DialogActions>
       </Dialog>
 

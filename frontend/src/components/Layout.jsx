@@ -20,87 +20,20 @@ import logoImg from '../assets/logo.png';
 
 const DRAWER_WIDTH = 260;
 
-const menuItems = [
-  { text: 'Dashboard', icon: <Dashboard />, path: '/', resource: 'dashboard' },
-  {
-    text: 'Master Data', icon: <Category />, children: [
-      { text: 'Materials', icon: <Inventory2 />, path: '/materials', resource: 'materials' },
-      { text: 'Categories', icon: <Category />, path: '/categories', resource: 'categories' },
-      { text: 'Sub Categories', icon: <Category />, path: '/subcategories', resource: 'subcategories' },
-      { text: 'UOM', icon: <Straighten />, path: '/uom', resource: 'uom' },
-      { text: 'Vendors', icon: <People />, path: '/vendors', resource: 'vendors' },
-      { text: 'Stores', icon: <Warehouse />, path: '/warehouses', resource: 'warehouses' },
-      { text: 'Equipment', icon: <Build />, path: '/equipment', resource: 'equipment' },
-    ]
-  },
-  {
-    text: 'Procurement', icon: <ShoppingCart />, children: [
-      { text: 'Indents', icon: <Assignment />, path: '/indents', resource: 'indents' },
-      { text: 'Purchase Requests', icon: <Assignment />, path: '/purchase-requests', resource: 'purchase_requests' },
-      { text: 'Quotations', icon: <RequestQuote />, path: '/quotations', resource: 'quotations' },
-      { text: 'Contracts', icon: <AssignmentTurnedIn />, path: '/contracts', resource: 'contracts' },
-      { text: 'Purchase Orders', icon: <ReceiptLong />, path: '/purchase-orders', resource: 'purchase_orders' },
-      { text: 'Work Orders', icon: <Build />, path: '/work-orders', resource: 'work_orders' },
-    ]
-  },
-  {
-    text: 'Store Operations', icon: <Store />, children: [
-      { text: 'Gate Entry', icon: <Security />, path: '/gate-entry', resource: 'gate_entry' },
-      { text: 'Invoices', icon: <ReceiptLong />, path: '/invoices', resource: 'invoice' },
-      { text: 'GRN', icon: <LocalShipping />, path: '/grn', resource: 'grn' },
-      { text: 'Material Issue', icon: <Inventory2 />, path: '/issues', resource: 'issues' },
-      { text: 'Returns', icon: <Undo />, path: '/returns', resource: 'returns' },
-      { text: 'Stock Transfer', icon: <SwapHoriz />, path: '/transfers', resource: 'transfers' },
-      { text: 'Write Off', icon: <RemoveCircleOutline />, path: '/write-offs', resource: 'write_offs' },
-      { text: 'Gate Pass', icon: <LocalShipping />, path: '/gate-passes', resource: 'gate_passes' },
-      { text: 'Issue Acknowledgement', icon: <AssignmentTurnedIn />, path: '/pending-acknowledgments', resource: 'acknowledgements' },
-    ]
-  },
-  { text: 'Inventory', icon: <Warehouse />, path: '/inventory', resource: 'inventory' },
-  {
-    text: 'Maintenance', icon: <Build />, children: [
-      { text: 'Complaints', icon: <Assignment />, path: '/complaints', resource: 'complaints' },
-      { text: 'PM Schedule', icon: <AssignmentTurnedIn />, path: '/equipment/pm-schedule', resource: 'pm_schedule' },
-      { text: 'Calibration Schedule', icon: <AssignmentTurnedIn />, path: '/equipment/calibration-schedule', resource: 'calibration_schedule' },
-    ]
-  },
-  { text: 'Intelligence', icon: <Build />, path: '/intelligence', resource: 'intelligence' },
-  {
-    text: 'Finance', icon: <AccountBalance />, children: [
-      { text: 'Invoice Tracking', icon: <AssignmentTurnedIn />, path: '/invoice-tracking', resource: 'finance_invoices' },
-      { text: 'Pending Invoices Report', icon: <Assessment />, path: '/finance/reports/pending-invoices', resource: 'report_finance' },
-      { text: 'Pending Payments Report', icon: <Assessment />, path: '/finance/reports/pending-payments', resource: 'report_finance' },
-    ]
-  },
-  {
-    text: 'Reports', icon: <Assessment />, children: [
-      { text: 'General Reports', icon: <Assessment />, path: '/reports', resource: 'reports' },
-      { text: 'Issue Summary', icon: <Assessment />, path: '/reports/issue-summary', resource: 'report_issue_summary' },
-      { text: 'Rate Analysis', icon: <Assessment />, path: '/reports/rate-analysis', resource: 'report_rate_analysis' },
-      { text: 'Equipment Count', icon: <Assessment />, path: '/reports/equipment-count', resource: 'report_equipment_count' },
-      { text: 'Receipt Summary', icon: <Assessment />, path: '/reports/receipt-summary', resource: 'report_receipt_summary' },
-      { text: 'Department Inventory', icon: <Assessment />, path: '/reports/department-inventory', resource: 'report_dept_inventory' },
-      { text: 'Department Equipment', icon: <Assessment />, path: '/reports/department-equipment', resource: 'report_dept_inventory' },
-      { text: 'Pending Gatepass Returns', icon: <Assessment />, path: '/reports/pending-gatepass-returns', resource: 'report_pending_gatepass' },
-      { text: 'Call Status', icon: <Assessment />, path: '/reports/call-status', resource: 'reports' },
-    ]
-  },
-  {
-    text: 'Admin', icon: <Settings />, children: [
-      { text: 'Users', icon: <People />, path: '/admin/users', resource: 'admin_users' },
-      { text: 'Audit Logs', icon: <Assessment />, path: '/admin/audit-logs', resource: 'audit_logs' },
-      { text: 'Approval Flows', icon: <AccountTree />, path: '/admin/approval-flows', resource: 'approval_flows' },
-      { text: 'Roles', icon: <Security />, path: '/admin/roles', resource: 'admin_roles' },
-      { text: 'Material Allowances', icon: <Inventory2 />, path: '/admin/material-allowances', resource: 'material_allowances' },
-      { text: 'Configurations', icon: <Settings />, path: '/admin/configurations', resource: 'configurations' },
-      { text: 'Locations', icon: <Business />, path: '/admin/locations', resource: 'locations' },
-      { text: 'Projects', icon: <AccountTree />, path: '/projects', resource: 'projects' },
-      { text: 'Terms & Conditions', icon: <Assignment />, path: '/terms', resource: 'terms' },
-      { text: 'Company Addresses', icon: <Business />, path: '/company-addresses', resource: 'company_addresses' },
-    ]
-  },
-  { text: 'SaaS Admin', icon: <Security />, path: '/saas-admin', platformOnly: true },
-];
+const ALL_ICONS = {
+  MenuIcon, Dashboard, Inventory2, ShoppingCart, Warehouse,
+  LocalShipping, People, Assessment, Settings, Notifications,
+  ExpandLess, ExpandMore, Logout, Person, Store, Assignment,
+  SwapHoriz, Undo, Security, ReceiptLong, AccountTree, Category,
+  Build, ChevronLeft, RequestQuote, Business, AssignmentTurnedIn, Straighten,
+  AccountBalance, Campaign, RemoveCircleOutline
+};
+
+const resolveIcon = (iconName) => {
+  if (!iconName) return <Category />;
+  const IconComponent = ALL_ICONS[iconName];
+  return IconComponent ? <IconComponent /> : <Category />;
+};
 
 function SlideTransition(props) {
   return <Slide {...props} direction="left" />;
@@ -130,16 +63,25 @@ export default function Layout() {
   const [alertCount, setAlertCount] = useState(0);
   const [activeAlerts, setActiveAlerts] = useState([]);
   const [showMarquee, setShowMarquee] = useState(() => localStorage.getItem('hideMarquee') !== 'true');
+  const [menuItems, setMenuItems] = useState([]);
   const { user, tenant, roles, sites, activeSite, activeSiteId, setActiveSiteId, logout, hasPermission } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
+  useEffect(() => {
+    api.get('/api/menus').then((res) => {
+      setMenuItems(res.data);
+    }).catch(err => {
+      console.error("Failed to fetch menus", err);
+    });
+  }, []);
+
   const visibleMenuItems = useMemo(() => {
     return menuItems.map(item => {
-      if (item.platformOnly && !user?.is_platform_admin) return null;
+      if (item.platform_only && !user?.is_platform_admin) return null;
       if (item.text === 'SaaS Admin') return item;
 
-      if (item.children) {
+      if (item.children && item.children.length > 0) {
         const visibleChildren = item.children.filter(child => !child.resource || hasPermission(child.resource, 'can_read'));
         if (visibleChildren.length === 0) return null;
         return { ...item, children: visibleChildren };
@@ -148,7 +90,7 @@ export default function Layout() {
         return item;
       }
     }).filter(Boolean);
-  }, [user, hasPermission]);
+  }, [user, hasPermission, menuItems]);
 
   useEffect(() => {
     let interval;
@@ -274,13 +216,13 @@ export default function Layout() {
                   }}
                 >
                   <ListItemIcon sx={{ color: isParentActive(item) ? '#60A5FA' : '#94A3B8', minWidth: 36, '& svg': { fontSize: '1.2rem' } }}>
-                    {item.icon}
+                    {resolveIcon(item.icon_name)}
                   </ListItemIcon>
                   <ListItemText primary={item.text} primaryTypographyProps={{ sx: { fontSize: '0.82rem', fontWeight: isParentActive(item) ? 600 : 400 } }} />
-                  {item.children && (openMenus[item.text] ? <ExpandLess sx={{ fontSize: 18 }} /> : <ExpandMore sx={{ fontSize: 18 }} />)}
+                  {item.children && item.children.length > 0 && (openMenus[item.text] ? <ExpandLess sx={{ fontSize: 18 }} /> : <ExpandMore sx={{ fontSize: 18 }} />)}
                 </ListItemButton>
               </ListItem>
-              {item.children && (
+              {item.children && item.children.length > 0 && (
                 <Collapse in={openMenus[item.text]} timeout="auto">
                   <List disablePadding>
                     {item.children.map((child) => (

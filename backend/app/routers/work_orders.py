@@ -106,15 +106,18 @@ def list_work_orders(
         
         can_user_approve = False
         if wo.status == "Submitted":
-            total_amount = wo.total_amount
-            applicable_flows = [
-                f for f in flows
-                if f.level == (wo.current_approval_level or 1) and
-                   f.min_amount <= total_amount and
-                   (f.max_amount is None or f.max_amount >= total_amount) and
-                   (can_override or (f.user_id == current_user.id) or (not f.user_id and f.role_name in user_roles))
-            ]
-            can_user_approve = len(applicable_flows) > 0
+            if not flows:
+                can_user_approve = True
+            else:
+                total_amount = wo.total_amount
+                applicable_flows = [
+                    f for f in flows
+                    if f.level == (wo.current_approval_level or 1) and
+                       f.min_amount <= total_amount and
+                       (f.max_amount is None or f.max_amount >= total_amount) and
+                       (can_override or (f.user_id == current_user.id) or (not f.user_id and f.role_name in user_roles))
+                ]
+                can_user_approve = len(applicable_flows) > 0
 
         result.append(WorkOrderOut(
             id=wo.id, wo_number=wo.wo_number,
@@ -189,15 +192,18 @@ def get_work_order(
 
     can_user_approve = False
     if wo.status == "Submitted":
-        total_amount = wo.total_amount
-        applicable_flows = [
-            f for f in flows
-            if f.level == (wo.current_approval_level or 1) and
-               f.min_amount <= total_amount and
-               (f.max_amount is None or f.max_amount >= total_amount) and
-               (can_override or (f.user_id == current_user.id) or (not f.user_id and f.role_name in user_roles))
-        ]
-        can_user_approve = len(applicable_flows) > 0
+        if not flows:
+            can_user_approve = True
+        else:
+            total_amount = wo.total_amount
+            applicable_flows = [
+                f for f in flows
+                if f.level == (wo.current_approval_level or 1) and
+                   f.min_amount <= total_amount and
+                   (f.max_amount is None or f.max_amount >= total_amount) and
+                   (can_override or (f.user_id == current_user.id) or (not f.user_id and f.role_name in user_roles))
+            ]
+            can_user_approve = len(applicable_flows) > 0
 
     return WorkOrderOut(
         id=wo.id, wo_number=wo.wo_number,
@@ -443,6 +449,138 @@ def approve_work_order(
 
     return {"message": "Approval recorded", "status": wo.status, "current_level": wo.current_approval_level}
 
+@router.get("/{id}/approval-history")
+def get_wo_approval_history(
+    id: int, db: Session = Depends(get_db), 
+    current_user: User = Depends(require_permission("work_orders", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    wo = db.query(WorkOrder).filter(
+        WorkOrder.id == id, WorkOrder.tenant_id == tenant_id, WorkOrder.site_id == site_id
+    ).first()
+    if not wo:
+        raise HTTPException(status_code=404, detail="Work Order not found")
+
+    approvals = db.query(WorkOrderApproval).filter(
+        WorkOrderApproval.wo_id == id
+    ).order_by(WorkOrderApproval.approved_at.asc()).all()
+
+    entries = []
+    latest_approved_quantities = {}
+    
+    for approval in approvals:
+        flow = approval.flow
+        approver = approval.approver
+
+        if approval.approved_quantities:
+            for it_id, it_data in approval.approved_quantities.items():
+                if isinstance(it_data, dict):
+                    latest_approved_quantities[it_id] = it_data.get("quantity")
+                else:
+                    latest_approved_quantities[it_id] = it_data
+
+        items = []
+        for item in wo.items:
+            item_id_str = str(item.id)
+            qty_val = (approval.approved_quantities or {}).get(item_id_str)
+            if isinstance(qty_val, dict):
+                qty = qty_val.get("quantity")
+                item_rem = qty_val.get("remarks")
+            else:
+                qty = qty_val
+                item_rem = None
+
+            items.append({
+                "material_id": item.material_id,
+                "material_name": item.material.name if item.material else None,
+                "material_code": item.material.code if item.material else None,
+                "uom_name": item.material.uom.abbreviation if item.material and item.material.uom else None,
+                "requested_quantity": item.quantity,
+                "approved_quantity": qty,
+                "remarks": item_rem
+            })
+
+        status = "Approved"
+
+        entries.append({
+            "level": flow.level if flow else 0,
+            "approver_name": approver.full_name if approver else "Unknown",
+            "role_name": flow.role_name if flow else "Unknown",
+            "approved_at": approval.approved_at,
+            "remarks": approval.remarks,
+            "status": status,
+            "items": items
+        })
+
+    if not entries and wo.approved_at:
+        approver = db.query(User).filter(User.id == wo.approved_by_id).first() if wo.approved_by_id else None
+        items = []
+        for item in wo.items:
+            items.append({
+                "material_id": item.material_id,
+                "material_name": item.material.name if item.material else None,
+                "material_code": item.material.code if item.material else None,
+                "uom_name": item.material.uom.abbreviation if item.material and item.material.uom else None,
+                "requested_quantity": item.quantity,
+                "approved_quantity": item.approved_quantity or item.quantity,
+                "remarks": "System Bypass"
+            })
+        entries.append({
+            "level": 1,
+            "approver_name": approver.full_name if approver else "System",
+            "role_name": "Direct Approval",
+            "approved_at": wo.approved_at,
+            "remarks": "Approved directly (No flows configured)",
+            "status": "Approved",
+            "items": items
+        })
+
+    deduped = {}
+    for entry in entries:
+        level = entry["level"]
+        if level not in deduped:
+            deduped[level] = entry
+        else:
+            deduped[level] = entry
+    deduped_entries = list(deduped.values())
+
+    if wo.status == "Rejected":
+        rejection_log = db.query(AuditLog).filter(
+            AuditLog.entity_type == "WorkOrder",
+            AuditLog.entity_id == id,
+            AuditLog.action == "REJECT"
+        ).order_by(AuditLog.created_at.desc()).first()
+
+        rej_items = []
+        for item in wo.items:
+            rej_items.append({
+                "material_id": item.material_id,
+                "material_name": item.material.name if item.material else None,
+                "material_code": item.material.code if item.material else None,
+                "uom_name": item.material.uom.abbreviation if item.material and item.material.uom else None,
+                "requested_quantity": item.quantity,
+                "approved_quantity": None,
+                "remarks": None
+            })
+
+        deduped_entries.append({
+            "level": wo.current_approval_level or 0,
+            "approver_name": rejection_log.user.full_name if rejection_log and rejection_log.user else "Unknown",
+            "role_name": "Rejector",
+            "approved_at": rejection_log.created_at if rejection_log else wo.updated_at,
+            "remarks": wo.remarks,
+            "status": "Rejected",
+            "items": rej_items
+        })
+
+    return {
+        "wo_id": wo.id,
+        "wo_number": wo.wo_number,
+        "current_approval_level": wo.current_approval_level,
+        "entries": deduped_entries
+    }
+
 @router.post("/{id}/reject")
 def reject_work_order(
     id: int, body: RejectBody = RejectBody(), db: Session = Depends(get_db), 
@@ -461,9 +599,140 @@ def reject_work_order(
     db.commit()
     return {"message": "Work Order rejected"}
 
+# ── Email template helper ────────────────────────────────────────────────
+ORG_NAME = "EASTPOINT GROUP OF INSTITUTIONS"
+
+def _build_wo_email_template(wo):
+    """Build subject + html_body for a WO email. Reused by preview and send."""
+    subject = f"Work Order {wo.wo_number} — {ORG_NAME}"
+    html_body = f"""
+    <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333;">
+        <h2 style="color: #2563EB;">Work Order — {wo.wo_number}</h2>
+        <p>Dear Sir/Madam,</p>
+        <p>
+            Please find attached the Work Order <strong>{wo.wo_number}</strong>
+            dated <strong>{wo.created_at.strftime('%d-%b-%Y') if wo.created_at else '-'}</strong>.
+        </p>
+        <p>
+            Kindly acknowledge receipt of this order and confirm the schedule
+            at the earliest.
+        </p>
+        <table style="margin: 16px 0; border-collapse: collapse; font-size: 13px;">
+            <tr>
+                <td style="padding: 4px 12px 4px 0; font-weight: bold;">WO Number</td>
+                <td style="padding: 4px 0;">{wo.wo_number}</td>
+            </tr>
+            <tr>
+                <td style="padding: 4px 12px 4px 0; font-weight: bold;">Target Completion</td>
+                <td style="padding: 4px 0;">{wo.target_completion_date.strftime('%d-%b-%Y') if getattr(wo, 'target_completion_date', None) else 'As per WO'}</td>
+            </tr>
+            <tr>
+                <td style="padding: 4px 12px 4px 0; font-weight: bold;">Total Amount</td>
+                <td style="padding: 4px 0;">₹ {wo.total_amount:,.2f}</td>
+            </tr>
+        </table>
+        <p>Please expedite the work accordingly.</p>
+        <br/>
+        <p>Regards,</p>
+        <p><strong>{ORG_NAME}</strong></p>
+        <hr style="border: none; border-top: 1px solid #e2e8f0; margin-top: 24px;"/>
+        <p style="font-size: 11px; color: #94a3b8;">
+            This is a system-generated email from Eastpoint Smart Campus | Powered by NissiGrid Technologies.
+            Please do not reply to this email.
+        </p>
+    </div>
+    """
+    return subject, html_body
+
+def _build_wo_short_close_email_template(wo, remarks, closed_by_user):
+    """Build subject + html_body for a WO short-close notification email."""
+    subject = f"Notification: Work Order {wo.wo_number} Short Closed"
+    vendor_name = f"{wo.vendor.code} - {wo.vendor.name}" if wo.vendor else "Unknown Vendor"
+    
+    if getattr(wo, "advance_percentage", 0) > 0:
+        advance_msg = "An advance payment has been made against the above Work Order. Please review the advance payment details and take the necessary action regarding the payment/adjustment."
+    else:
+        advance_msg = "Please review the Work Order and take any necessary action, if required."
+
+    html_body = f"""
+    <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333;">
+        <p>Hello,</p>
+        <p>
+            Please be informed that the following Work Order has been Short Closed by {closed_by_user.full_name}.
+        </p>
+        <table style="margin: 16px 0; border-collapse: collapse; font-size: 13px;">
+            <tr>
+                <td style="padding: 4px 12px 4px 0; font-weight: bold;">WO Number</td>
+                <td style="padding: 4px 0;">{wo.wo_number}</td>
+            </tr>
+            <tr>
+                <td style="padding: 4px 12px 4px 0; font-weight: bold;">Vendor</td>
+                <td style="padding: 4px 0;">{vendor_name}</td>
+            </tr>
+            <tr>
+                <td style="padding: 4px 12px 4px 0; font-weight: bold;">Total Amount</td>
+                <td style="padding: 4px 0;">₹{wo.total_amount:,.2f}</td>
+            </tr>
+            <tr>
+                <td style="padding: 4px 12px 4px 0; font-weight: bold;">Remarks</td>
+                <td style="padding: 4px 0;">{remarks or 'N/A'}</td>
+            </tr>
+        </table>
+        <p>{advance_msg}</p>
+        <br/>
+        <p>Regards,<br/>{closed_by_user.full_name}</p>
+        <hr style="border: none; border-top: 1px solid #e2e8f0; margin-top: 24px;"/>
+        <p style="font-size: 11px; color: #94a3b8;">
+            This is a system-generated email from Eastpoint Smart Campus | Powered by NissiGrid Technologies.
+            Please do not reply to this email.
+        </p>
+    </div>
+    """
+    return subject, html_body
+
+@router.get("/{id}/email-preview")
+def get_wo_email_preview(
+    id: int, db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("work_orders", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    """Return email preview data for the Send to Vendor dialog."""
+    from app.config import SMTP_FROM_EMAIL, SMTP_FROM_NAME, TEST_EMAIL_OVERRIDE
+
+    wo = db.query(WorkOrder).filter(
+        WorkOrder.id == id, WorkOrder.tenant_id == tenant_id, WorkOrder.site_id == site_id
+    ).first()
+    if not wo:
+        raise HTTPException(status_code=404, detail="Work Order not found")
+
+    vendor = wo.vendor
+    vendor_email = vendor.email if vendor else ""
+    vendor_name = vendor.name if vendor else "Vendor"
+    actual_to = TEST_EMAIL_OVERRIDE if TEST_EMAIL_OVERRIDE else vendor_email
+
+    subject, html_body = _build_wo_email_template(wo)
+
+    return {
+        "from_name": SMTP_FROM_NAME,
+        "from_email": SMTP_FROM_EMAIL,
+        "to_email": actual_to,
+        "vendor_email": vendor_email,
+        "vendor_name": vendor_name,
+        "subject": subject,
+        "html_body": html_body,
+        "attachment_filename": f"{wo.wo_number}.pdf",
+        "test_mode": bool(TEST_EMAIL_OVERRIDE),
+    }
+
+from pydantic import BaseModel
+class SendWORequest(BaseModel):
+    cc: Optional[str] = ""
+    bcc: Optional[str] = ""
+
 @router.post("/{id}/send")
 def send_work_order(
-    id: int, db: Session = Depends(get_db), 
+    id: int, body: SendWORequest = SendWORequest(), db: Session = Depends(get_db), 
     current_user: User = Depends(require_permission("work_orders", "update")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
@@ -475,9 +744,45 @@ def send_work_order(
         raise HTTPException(status_code=404, detail="Work Order not found")
     if wo.status != "Approved":
         raise HTTPException(status_code=400, detail="Only Approved Work Orders can be Sent")
+    
     wo.status = "Sent to Vendor"
     db.commit()
-    return {"message": "Work Order Sent to Vendor"}
+
+    email_status = {"success": False, "message": "Email not attempted"}
+    try:
+        from app.utils.pdf_utils import generate_wo_pdf
+        from app.utils.email_utils import send_email_with_attachment
+
+        pdf_bytes = generate_wo_pdf(wo)
+
+        vendor = wo.vendor
+        vendor_email = vendor.email if vendor else ""
+        vendor_name = vendor.name if vendor else "Vendor"
+
+        subject, html_body = _build_wo_email_template(wo)
+
+        email_status = send_email_with_attachment(
+            to_email=vendor_email,
+            subject=subject,
+            html_body=html_body,
+            attachment_bytes=pdf_bytes,
+            attachment_filename=f"{wo.wo_number}.pdf",
+            vendor_name=vendor_name,
+            cc=body.cc or "",
+            bcc=body.bcc or "",
+        )
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error("Error generating/sending WO email for %s: %s", wo.wo_number, e, exc_info=True)
+        email_status = {"success": False, "message": f"Email error: {str(e)}"}
+
+    response = {"message": f"Work Order {wo.wo_number} sent to Vendor successfully."}
+    if email_status.get("success"):
+        response["email_status"] = "Email sent successfully"
+    else:
+        response["email_status"] = f"Email not sent: {email_status.get('message', 'Unknown error')}"
+
+    return response
 
 @router.post("/{id}/short-close")
 def short_close_work_order(
@@ -497,6 +802,33 @@ def short_close_work_order(
     if body.remarks:
         wo.remarks = (wo.remarks or '') + f'\n[Short Closed: {body.remarks}]'
     db.commit()
+
+    try:
+        from app.models import TenantConfiguration, UserRoleAssignment, Role
+        from app.utils.email_utils import send_html_email
+        import threading
+        
+        config = db.query(TenantConfiguration).filter(TenantConfiguration.tenant_id == tenant_id).first()
+        notify_roles = config.wo_short_close_notify_roles if config and config.wo_short_close_notify_roles else []
+        
+        if notify_roles:
+            users_to_notify = db.query(User).join(UserRoleAssignment).join(Role).filter(
+                User.is_active == True,
+                User.email.isnot(None),
+                Role.name.in_(notify_roles)
+            ).distinct().all()
+            
+            if users_to_notify:
+                subject, html_body = _build_wo_short_close_email_template(wo, body.remarks, current_user)
+                for u in users_to_notify:
+                    threading.Thread(
+                        target=send_html_email,
+                        args=(u.email, subject, html_body)
+                    ).start()
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"Failed to send short close notifications for WO {wo.wo_number}: {e}")
+
     return {"message": "Work Order Short Closed"}
 
 @router.post("/{id}/cancel")

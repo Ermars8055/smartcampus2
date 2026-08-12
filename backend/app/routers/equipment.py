@@ -361,7 +361,7 @@ def generate_maintenance_calls(
     }
 
 def _auto_generate_calls(db: Session, tenant_id: int, site_id: int, user_id: int):
-    from app.models import Complaint, LocationMaster, PMSchedule, CalibrationSchedule
+    from app.models import Complaint, LocationMaster, PMSchedule, CalibrationSchedule, ComplaintStatus
     from datetime import date
     from sqlalchemy import func
     
@@ -423,7 +423,7 @@ def _auto_generate_calls(db: Session, tenant_id: int, site_id: int, user_id: int
                                 equipment_id=eq.id,
                                 nature_of_complaint="Scheduled Preventive Maintenance",
                                 complaint_type="Preventive Maintenance Call",
-                                status="Open",
+                                status=ComplaintStatus.REGISTERED.value,
                                 is_pm_calibration_call=True,
                                 created_by_id=user_id
                             )
@@ -480,7 +480,7 @@ def _auto_generate_calls(db: Session, tenant_id: int, site_id: int, user_id: int
                                     equipment_id=eq.id,
                                     nature_of_complaint="Scheduled Calibration",
                                     complaint_type="Calibration Call",
-                                    status="Open",
+                                    status=ComplaintStatus.REGISTERED.value,
                                     is_pm_calibration_call=True,
                                     created_by_id=user_id
                                 )

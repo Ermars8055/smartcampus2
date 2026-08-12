@@ -107,14 +107,24 @@ export default function SaasAdmin() {
             Manage workspaces, subscriptions, and platform-level infrastructure.
           </Typography>
         </Box>
-        <Button 
-          variant="contained" 
-          onClick={loadTenants} 
-          startIcon={<Refresh />}
-          sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
-        >
-          Refresh Data
-        </Button>
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <Button 
+            variant="outlined" 
+            onClick={() => window.location.href = '/saas-admin/menus'}
+            startIcon={<Subscriptions />}
+            sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
+          >
+            Menu Settings
+          </Button>
+          <Button 
+            variant="contained" 
+            onClick={loadTenants} 
+            startIcon={<Refresh />}
+            sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
+          >
+            Refresh Data
+          </Button>
+        </Box>
       </Box>
 
       {/* Stats Summary */}

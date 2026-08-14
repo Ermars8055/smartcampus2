@@ -71,6 +71,8 @@ import ComplaintDetail from './pages/ComplaintDetail';
 import Contracts from './pages/Contracts';
 import ContractForm from './pages/ContractForm';
 import WorkOrders from './pages/WorkOrders';
+import VendorWorkOrders from './pages/VendorWorkOrders';
+import VendorWorkOrderDetail from './pages/VendorWorkOrderDetail';
 
 import VendorPendingInvoicesReport from './pages/VendorPendingInvoicesReport';
 import VendorPendingPaymentsReport from './pages/VendorPendingPaymentsReport';
@@ -145,6 +147,8 @@ function AppRoutes() {
         <Route path="quotations" element={<Quotations />} />
         <Route path="purchase-orders" element={<PurchaseOrders />} />
         <Route path="work-orders" element={<WorkOrders />} />
+        <Route path="procurement/vendor-work-orders" element={<VendorWorkOrders />} />
+        <Route path="procurement/vendor-work-orders/:id" element={<VendorWorkOrderDetail />} />
         <Route path="gate-entry" element={<GateEntry />} />
         <Route path="invoices" element={<Invoices />} />
         <Route path="invoice-tracking" element={<InvoiceTracking />} />

@@ -1134,7 +1134,7 @@ export default function WorkOrders() {
     }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
         <Box>
-          <Typography variant="h5" sx={{ fontWeight: 700 }}>Work Orders</Typography>
+          <Typography variant="h5" sx={{ fontWeight: 700 }}>Work Orders (Old)</Typography>
           <Typography variant="body2" sx={{ color: '#64748B' }}>{wos.length} orders</Typography>
         </Box>
         <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>

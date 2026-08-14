@@ -76,12 +76,15 @@ def get_vendor_active_rates(
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
+    today = datetime.utcnow().date()
     contracts = db.query(Contract).filter(
         Contract.tenant_id == tenant_id,
         Contract.site_id == site_id,
         Contract.vendor_id == vendor_id,
         Contract.contract_type == "RC",
-        Contract.status == "Active",
+        Contract.status.in_(["Approved", "Active"]),
+        Contract.start_date <= today,
+        Contract.end_date >= today,
         Contract.is_deleted == False
     ).all()
 
@@ -102,11 +105,14 @@ def check_materials_active_rates(
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
+    today = datetime.utcnow().date()
     contracts = db.query(Contract).join(ContractItem).filter(
         Contract.tenant_id == tenant_id,
         Contract.site_id == site_id,
         Contract.contract_type == "RC",
-        Contract.status == "Active",
+        Contract.status.in_(["Approved", "Active"]),
+        Contract.start_date <= today,
+        Contract.end_date >= today,
         Contract.is_deleted == False,
         ContractItem.material_id.in_(data.material_ids)
     ).all()
@@ -132,11 +138,14 @@ def get_vendor_active_contract_details(
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
+    today = datetime.utcnow().date()
     contracts = db.query(Contract).filter(
         Contract.tenant_id == tenant_id,
         Contract.site_id == site_id,
         Contract.vendor_id == vendor_id,
-        Contract.status == "Active",
+        Contract.status.in_(["Approved", "Active"]),
+        Contract.start_date <= today,
+        Contract.end_date >= today,
         Contract.is_deleted == False
     ).all()
 

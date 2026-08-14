@@ -2235,6 +2235,7 @@ class EquipmentUpdate(BaseModel):
     battery_details: Optional[str] = None
     year_of_purchase: Optional[int] = None
     po_number: Optional[str] = None
+    po_date: Optional[date] = None
     po_id: Optional[int] = None
     procurement_type: Optional[str] = None
     rental_type: Optional[str] = None
@@ -2276,6 +2277,7 @@ class EquipmentItemCreate(BaseModel):
     requires_installation: bool = False
     year_of_purchase: Optional[int] = None
     po_number: Optional[str] = None
+    po_date: Optional[date] = None
     po_id: Optional[int] = None
     procurement_type: str = "Purchase"
     rental_type: Optional[str] = None
@@ -2350,6 +2352,7 @@ class EquipmentItemOut(BaseModel):
     rental_status: Optional[str] = None
     year_of_purchase: Optional[int] = None
     po_number: Optional[str] = None
+    po_date: Optional[date] = None
     warranty_end_date: Optional[date] = None
     amc_cmc_status: Optional[str] = None
     rental_vendor_name: Optional[str] = None

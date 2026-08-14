@@ -11,6 +11,8 @@ from sqlalchemy.orm import Session
 from app.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 from app.database import get_db
 
+from app.core.context import current_user_id, current_tenant_id, current_site_id
+
 log = logging.getLogger(__name__)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -97,6 +99,12 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     else:
         user._data_access_scope = payload.get("data_access_scope", "Self Only")
 
+    current_user_id.set(user.id)
+    if user._tenant_id:
+        current_tenant_id.set(user._tenant_id)
+    if user._active_site_id:
+        current_site_id.set(user._active_site_id)
+
     log.debug("Auth: user=%s tenant=%s site=%s", username, user._tenant_id, user._active_site_id)
     return user
 
@@ -114,6 +122,7 @@ def get_site_id(current_user = Depends(get_current_user), x_site_id: Optional[st
                 if sid not in getattr(current_user, '_site_ids', []):
                     log.error("Site Access Denied: User %s has no access to site %s", current_user.username, sid)
                     raise HTTPException(403, "No access to this site")
+            current_site_id.set(sid)
             return sid
         except ValueError:
             raise HTTPException(400, "Invalid X-Site-Id header")
@@ -121,11 +130,13 @@ def get_site_id(current_user = Depends(get_current_user), x_site_id: Optional[st
     # If header is missing, check JWT active site
     active = getattr(current_user, '_active_site_id', None)
     if active:
+        current_site_id.set(active)
         return active
 
     # Fallback to site list if only one site exists
     sites = getattr(current_user, '_site_ids', [])
     if len(sites) == 1:
+        current_site_id.set(sites[0])
         return sites[0]
     
     if getattr(current_user, '_is_platform_admin', False):

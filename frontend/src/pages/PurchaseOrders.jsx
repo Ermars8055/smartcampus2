@@ -913,7 +913,7 @@ export default function PurchaseOrders() {
               </button>
             </div>
             <div class="header-container">
-            <h2 class="org-title">${po.institution_name || 'EAST POINT COLLEGE OF MEDICAL SCIENCES & RESEARCH CENTER'}</h2>
+            <h2 class="org-title">${po.institution_name ? (po.institution_name.match(/\((.*?)\)/) ? po.institution_name.match(/\((.*?)\)/)[1].trim() : po.institution_name) : 'EAST POINT COLLEGE OF MEDICAL SCIENCES & RESEARCH CENTER'}</h2>
             <p class="org-address">113, JNANA PRABHA CAMPUS, BIDARAHALLI, VIRGO NAGAR POST, BANGALORE - 560049</p>
             <div class="doc-title">PURCHASE ORDER</div>
           </div>

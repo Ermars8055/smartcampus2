@@ -541,7 +541,7 @@ export default function GateEntry() {
                 </Grid>
                 <Grid item xs={12} sm={3}>
                   {form.weight_report_url ? (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, p: 1, border: '1px solid #E2E8F0', borderRadius: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1, height: '100%', minHeight: 56, border: '1px solid #E2E8F0', borderRadius: 1 }}>
                       <AttachFile sx={{ color: '#475569' }} />
                       <Typography variant="body2" sx={{ flexGrow: 1, fontWeight: 600, color: '#475569' }}>Report ✓</Typography>
                       <Button size="small" variant="outlined" onClick={() => window.open(getFileUrl(form.weight_report_url), '_blank')}>View</Button>
@@ -549,8 +549,21 @@ export default function GateEntry() {
                     </Box>
                   ) : (
                     <Button fullWidth variant="outlined" component="label" disabled={uploading}
-                      sx={{ py: 1.5, borderStyle: 'dashed', borderWidth: 3, color: '#475569', borderColor: '#475569' }}>
-                      {uploading ? 'Uploading...' : '📎 Upload Weight Report'}
+                      sx={{
+                        height: '100%',
+                        minHeight: 56,
+                        p: 1,
+                        borderStyle: 'dashed',
+                        borderWidth: 2,
+                        color: '#475569',
+                        borderColor: '#94A3B8',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center'
+                      }}>
+                      <Typography sx={{ fontWeight: 600, fontSize: '0.8rem', textAlign: 'center', lineHeight: 1.2, textTransform: 'none' }}>
+                        {uploading ? 'Uploading...' : '📎 Upload Weight Report'}
+                      </Typography>
                       <input type="file" hidden accept="image/*,application/pdf" capture="environment"
                         onChange={e => handleUpload(e.target.files[0], 'weight_report_url')} />
                     </Button>

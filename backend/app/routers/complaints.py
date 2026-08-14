@@ -153,9 +153,13 @@ def create_complaint(
 
         if complaint_in.equipment_id:
             from app.models import ContractItem, Contract
+            from datetime import datetime
+            today = datetime.utcnow().date()
             c_item = db.query(ContractItem).join(Contract).filter(
                 ContractItem.equipment_id == complaint_in.equipment_id,
-                Contract.status == "Active",
+                Contract.status.in_(["Approved", "Active"]),
+                Contract.start_date <= today,
+                Contract.end_date >= today,
                 Contract.contract_type.in_(["AMC", "CMC"])
             ).first()
 

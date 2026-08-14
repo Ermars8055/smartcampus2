@@ -939,8 +939,8 @@ export default function WorkOrders() {
               </button>
             </div>
             <div class="header-container">
-            <h2 class="org-title">${wo.institution_name || 'EAST POINT COLLEGE OF MEDICAL SCIENCES & RESEARCH CENTER'}</h2>
-            <p class="org-address">113, JNANA PRABHA CAMPUS, BIDARAHALLI, VIRGO NAGAR WOST, BANGALORE - 560049</p>
+            <h2 class="org-title">${wo.institution_name ? (wo.institution_name.match(/\((.*?)\)/) ? wo.institution_name.match(/\((.*?)\)/)[1].trim() : wo.institution_name) : 'EAST POINT COLLEGE OF MEDICAL SCIENCES & RESEARCH CENTER'}</h2>
+            <p class="org-address">113, JNANA PRABHA CAMPUS, BIDARAHALLI, VIRGO NAGAR POST, BANGALORE - 560049</p>
             <div class="doc-title">WORK ORDER for ${wo.wo_type || 'AMC'}</div>
             ${wo.equipment_name ? `<div style="text-align: center; font-size: 13px; font-weight: bold; margin-top: 8px;">Target Equipment: ${wo.equipment_name} (${wo.equipment_code})</div>` : ''}
           </div>

@@ -665,6 +665,7 @@ class EquipmentItem(Base):
     warranty_end_date = Column(Date, nullable=True)
     year_of_purchase = Column(Integer, nullable=True)
     po_number = Column(String(100), nullable=True)
+    po_date = Column(Date, nullable=True)
     created_at = Column(DateTime, default=_get_now)
     updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)
 

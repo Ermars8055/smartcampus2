@@ -7,7 +7,7 @@ import {
 import { Visibility, VisibilityOff, Lock, Person, Business, Security, VpnKey, Email } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
-import logoImg from '../assets/logo.png';
+import logoImg from '../assets/Eastpoint-White-Logo.png';
 
 export default function Login() {
   const [view, setView] = useState('login'); // login | forgot_password | verify_otp | reset_password
@@ -124,7 +124,7 @@ export default function Login() {
               src={logoImg}
               alt="Eastpoint"
               sx={{
-                width: 36, height: 36, objectFit: 'contain',
+                width: 48, height: 48, objectFit: 'contain',
                 filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))'
               }}
             />

@@ -679,7 +679,7 @@ export default function Equipment() {
           <Button variant="outlined" startIcon={<QrCode />} onClick={() => navigate('/equipment/print-qr')} size="small" sx={{ height: 38 }}>
             Bulk Print QR
           </Button>
-          <Button variant="contained" color="primary" startIcon={<Add />} onClick={openAddDialog} size="small" sx={{ height: 38 }}>
+          <Button variant="contained" startIcon={<Add />} onClick={openAddDialog}>
             Add Equipment
           </Button>
         </Box>

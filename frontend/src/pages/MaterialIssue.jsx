@@ -491,7 +491,6 @@ export default function MaterialIssue() {
               variant="contained"
               startIcon={<Add />}
               onClick={openDirectIssueModal}
-              sx={{ textTransform: 'none', borderRadius: 2, fontWeight: 700, px: 3, bgcolor: '#2563EB' }}
             >
               New Issue
             </Button>

@@ -179,7 +179,6 @@ export default function Contracts() {
           variant="contained" 
           startIcon={<Add />} 
           onClick={() => navigate('/contracts/new')}
-          sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
         >
           Create Contract
         </Button>

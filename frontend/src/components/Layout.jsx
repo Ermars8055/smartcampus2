@@ -16,7 +16,7 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
-import logoImg from '../assets/logo.png';
+import logoImg from '../assets/Eastpoint-White-Logo.png';
 
 const DRAWER_WIDTH = 260;
 
@@ -156,7 +156,7 @@ export default function Layout() {
           src={logoImg}
           alt="Eastpoint"
           sx={{
-            width: 44, height: 44, objectFit: 'contain',
+            width: 56, height: 56, objectFit: 'contain',
             filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
             mb: 0.5
           }}
@@ -246,9 +246,9 @@ export default function Layout() {
 
       {/* Attribution */}
       <Box sx={{ p: 2, borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 1.5 }}>
-        <Box component="img" src="/nissigrid_logo.jpg" sx={{ height: 32, objectFit: 'contain', opacity: 0.9 }} />
+        <Box component="img" src="/NissiGrid-Logo.png" sx={{ height: 48, objectFit: 'contain', opacity: 1 }} />
         <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-          <Typography variant="body2" sx={{ color: '#CBD5E1', fontSize: '0.75rem', lineHeight: 1.2 }}>
+          <Typography variant="body2" sx={{ color: '#FFFFFF', fontSize: '0.75rem', lineHeight: 1.2, fontStyle: 'oblique' }}>
             Powered by
           </Typography>
           <Typography variant="body2" sx={{ color: '#CBD5E1', fontSize: '0.85rem', fontWeight: 700, lineHeight: 1.2 }}>

@@ -80,10 +80,9 @@ export default function SubCategories() {
             Sub Categories
           </Typography>
           <Button 
-            variant="text" 
+            variant="contained" 
             startIcon={<Add />} 
             onClick={() => { setEditing(null); setForm({ name: '', category_id: '', is_active: true }); setErrors({}); setDialog('subcat'); }}
-            sx={{ textTransform: 'none', fontWeight: 600, color: '#2563EB' }}
           >
             Add Sub Category
           </Button>

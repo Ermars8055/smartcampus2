@@ -1,146 +1,69 @@
 """Master data routes: Materials, Categories, UOM, Subcategories."""
-
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import or_
 from typing import Optional, List
 from app.database import get_db
 from app.models import Material, Category, SubCategory, UOM, CurrentStock, User, AuditLog
-from app.schemas import (
-    MaterialCreate, MaterialUpdate, MaterialOut,
-    CategoryCreate, CategoryOut,
-    SubCategoryCreate, SubCategoryOut,
-    UOMCreate, UOMOut
-)
+from app.schemas import MaterialCreate, MaterialUpdate, MaterialOut, CategoryCreate, CategoryOut, SubCategoryCreate, SubCategoryOut, UOMCreate, UOMOut
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
 from app.utils.sequences import get_next_number, get_next_sequence
+router = APIRouter(prefix='/api', tags=['Master Data'])
 
-router = APIRouter(prefix="/api", tags=["Master Data"])
-
-
-# ── Categories ───────────────────────────────────────────────────────────
-
-@router.get("/categories", response_model=List[CategoryOut])
-def list_categories(
-    include_inactive: bool = False,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-    tenant_id: int = Depends(get_tenant_id),
-    site_id: int = Depends(get_site_id)
-):
-    q = db.query(Category).filter(
-        Category.tenant_id == tenant_id,
-        Category.site_id == site_id,
-        Category.is_deleted == False
-    )
+@router.get('/categories', response_model=List[CategoryOut])
+def list_categories(include_inactive: bool=False, db: Session=Depends(get_db), current_user: User=Depends(get_current_user), tenant_id: int=Depends(get_tenant_id), site_id: int=Depends(get_site_id)):
+    q = db.query(Category).filter(Category.tenant_id == tenant_id, Category.site_id == site_id, Category.is_deleted == False)
     if not include_inactive:
         q = q.filter(Category.is_active == True)
-        
     categories = q.order_by(Category.name).all()
-    
     for c in categories:
         c.has_materials = db.query(Material).filter(Material.category_id == c.id, Material.is_active == True).first() is not None
-        
     return categories
 
-
-@router.post("/categories", response_model=CategoryOut)
-def create_category(
-    data: CategoryCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("categories", "create")),
-    tenant_id: int = Depends(get_tenant_id),
-    site_id: int = Depends(get_site_id)
-):
+@router.post('/categories', response_model=CategoryOut)
+def create_category(data: CategoryCreate, db: Session=Depends(get_db), current_user: User=Depends(require_permission('categories', 'create')), tenant_id: int=Depends(get_tenant_id), site_id: int=Depends(get_site_id)):
     if data.material_code_prefix:
-        existing = db.query(Category).filter(
-            Category.tenant_id == tenant_id,
-            Category.site_id == site_id,
-            Category.is_active == True,
-            Category.material_code_prefix == data.material_code_prefix
-        ).first()
+        existing = db.query(Category).filter(Category.tenant_id == tenant_id, Category.site_id == site_id, Category.is_active == True, Category.material_code_prefix == data.material_code_prefix).first()
         if existing:
-            raise HTTPException(status_code=400, detail="Material code prefix is already used by another category.")
-
-    seq = get_next_sequence(db, tenant_id, site_id, "CATEGORY")
-    cat_code = f"CAT-{seq:04d}"
+            raise HTTPException(status_code=400, detail='Material code prefix is already used by another category.')
+    seq = get_next_sequence(db, tenant_id, site_id, 'CATEGORY')
+    cat_code = f'CAT-{seq:04d}'
     cat = Category(**data.model_dump(), tenant_id=tenant_id, site_id=site_id, sequence_number=seq, code=cat_code)
     db.add(cat)
     db.commit()
     db.refresh(cat)
     return cat
 
-
-@router.put("/categories/{id}", response_model=CategoryOut)
-def update_category(
-    id: int,
-    data: CategoryCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("categories", "update")),
-    tenant_id: int = Depends(get_tenant_id),
-    site_id: int = Depends(get_site_id)
-):
-    cat = db.query(Category).filter(
-        Category.id == id, Category.tenant_id == tenant_id, Category.site_id == site_id
-    ).first()
+@router.put('/categories/{id}', response_model=CategoryOut)
+def update_category(id: int, data: CategoryCreate, db: Session=Depends(get_db), current_user: User=Depends(require_permission('categories', 'update')), tenant_id: int=Depends(get_tenant_id), site_id: int=Depends(get_site_id)):
+    cat = db.query(Category).filter(Category.id == id, Category.tenant_id == tenant_id, Category.site_id == site_id).first()
     if not cat:
-        raise HTTPException(status_code=404, detail="Category not found")
-        
+        raise HTTPException(status_code=404, detail='Category not found')
     if data.material_code_prefix and data.material_code_prefix != cat.material_code_prefix:
         has_materials = db.query(Material).filter(Material.category_id == id, Material.is_active == True).first() is not None
         if has_materials:
-            raise HTTPException(status_code=400, detail="Cannot modify material prefix: materials already exist for this category.")
-
-        existing = db.query(Category).filter(
-            Category.tenant_id == tenant_id,
-            Category.site_id == site_id,
-            Category.is_active == True,
-            Category.material_code_prefix == data.material_code_prefix
-        ).first()
+            raise HTTPException(status_code=400, detail='Cannot modify material prefix: materials already exist for this category.')
+        existing = db.query(Category).filter(Category.tenant_id == tenant_id, Category.site_id == site_id, Category.is_active == True, Category.material_code_prefix == data.material_code_prefix).first()
         if existing:
-            raise HTTPException(status_code=400, detail="Material code prefix is already used by another category.")
-            
+            raise HTTPException(status_code=400, detail='Material code prefix is already used by another category.')
     for k, v in data.model_dump().items():
         setattr(cat, k, v)
     db.commit()
     db.refresh(cat)
     return cat
 
-
-@router.delete("/categories/{id}")
-def delete_category(
-    id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("categories", "delete")),
-    tenant_id: int = Depends(get_tenant_id),
-    site_id: int = Depends(get_site_id)
-):
-    cat = db.query(Category).filter(
-        Category.id == id, Category.tenant_id == tenant_id, Category.site_id == site_id
-    ).first()
+@router.delete('/categories/{id}')
+def delete_category(id: int, db: Session=Depends(get_db), current_user: User=Depends(require_permission('categories', 'delete')), tenant_id: int=Depends(get_tenant_id), site_id: int=Depends(get_site_id)):
+    cat = db.query(Category).filter(Category.id == id, Category.tenant_id == tenant_id, Category.site_id == site_id).first()
     if not cat:
-        raise HTTPException(status_code=404, detail="Category not found")
+        raise HTTPException(status_code=404, detail='Category not found')
     cat.is_active = False
     db.commit()
-    return {"message": "Category deactivated"}
+    return {'message': 'Category deactivated'}
 
-
-# ── Subcategories ────────────────────────────────────────────────────────
-
-@router.get("/subcategories", response_model=List[SubCategoryOut])
-def list_subcategories(
-    category_id: Optional[int] = None,
-    include_inactive: bool = False,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-    tenant_id: int = Depends(get_tenant_id),
-    site_id: int = Depends(get_site_id)
-):
-    q = db.query(SubCategory).filter(
-        SubCategory.tenant_id == tenant_id,
-        SubCategory.site_id == site_id,
-        SubCategory.is_deleted == False
-    )
+@router.get('/subcategories', response_model=List[SubCategoryOut])
+def list_subcategories(category_id: Optional[int]=None, include_inactive: bool=False, db: Session=Depends(get_db), current_user: User=Depends(get_current_user), tenant_id: int=Depends(get_tenant_id), site_id: int=Depends(get_site_id)):
+    q = db.query(SubCategory).filter(SubCategory.tenant_id == tenant_id, SubCategory.site_id == site_id, SubCategory.is_deleted == False)
     if not include_inactive:
         q = q.filter(SubCategory.is_active == True)
     if category_id:
@@ -148,46 +71,23 @@ def list_subcategories(
     subs = q.order_by(SubCategory.name).all()
     result = []
     for s in subs:
-        out = SubCategoryOut(
-            id=s.id, name=s.name, category_id=s.category_id,
-            is_active=s.is_active,
-            category_name=s.category.name if s.category else None
-        )
+        out = SubCategoryOut(id=s.id, name=s.name, category_id=s.category_id, is_active=s.is_active, category_name=s.category.name if s.category else None)
         result.append(out)
     return result
 
-
-@router.post("/subcategories", response_model=SubCategoryOut)
-def create_subcategory(
-    data: SubCategoryCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("subcategories", "create")),
-    tenant_id: int = Depends(get_tenant_id),
-    site_id: int = Depends(get_site_id)
-):
+@router.post('/subcategories', response_model=SubCategoryOut)
+def create_subcategory(data: SubCategoryCreate, db: Session=Depends(get_db), current_user: User=Depends(require_permission('subcategories', 'create')), tenant_id: int=Depends(get_tenant_id), site_id: int=Depends(get_site_id)):
     sub = SubCategory(**data.model_dump(), tenant_id=tenant_id, site_id=site_id)
     db.add(sub)
     db.commit()
     db.refresh(sub)
     return SubCategoryOut(id=sub.id, name=sub.name, category_id=sub.category_id, is_active=sub.is_active)
 
-@router.put("/subcategories/{subcategory_id}", response_model=SubCategoryOut)
-def update_subcategory(
-    subcategory_id: int,
-    data: SubCategoryCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("subcategories", "update")),
-    tenant_id: int = Depends(get_tenant_id),
-    site_id: int = Depends(get_site_id)
-):
-    sub = db.query(SubCategory).filter(
-        SubCategory.id == subcategory_id,
-        SubCategory.tenant_id == tenant_id,
-        SubCategory.site_id == site_id
-    ).first()
+@router.put('/subcategories/{subcategory_id}', response_model=SubCategoryOut)
+def update_subcategory(subcategory_id: int, data: SubCategoryCreate, db: Session=Depends(get_db), current_user: User=Depends(require_permission('subcategories', 'update')), tenant_id: int=Depends(get_tenant_id), site_id: int=Depends(get_site_id)):
+    sub = db.query(SubCategory).filter(SubCategory.id == subcategory_id, SubCategory.tenant_id == tenant_id, SubCategory.site_id == site_id).first()
     if not sub:
-        raise HTTPException(status_code=404, detail="Subcategory not found")
-    
+        raise HTTPException(status_code=404, detail='Subcategory not found')
     sub.name = data.name
     sub.category_id = data.category_id
     if data.is_active is not None:
@@ -196,59 +96,26 @@ def update_subcategory(
     db.refresh(sub)
     return SubCategoryOut(id=sub.id, name=sub.name, category_id=sub.category_id, is_active=sub.is_active)
 
-
-# ── UOM ──────────────────────────────────────────────────────────────────
-
-@router.get("/uom", response_model=List[UOMOut])
-def list_uom(
-    include_inactive: bool = False,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-    tenant_id: int = Depends(get_tenant_id),
-    site_id: int = Depends(get_site_id)
-):
-    q = db.query(UOM).filter(
-        UOM.tenant_id == tenant_id,
-        UOM.site_id == site_id,
-        UOM.is_deleted == False
-    )
+@router.get('/uom', response_model=List[UOMOut])
+def list_uom(include_inactive: bool=False, db: Session=Depends(get_db), current_user: User=Depends(get_current_user), tenant_id: int=Depends(get_tenant_id), site_id: int=Depends(get_site_id)):
+    q = db.query(UOM).filter(UOM.tenant_id == tenant_id, UOM.site_id == site_id, UOM.is_deleted == False)
     if not include_inactive:
         q = q.filter(UOM.is_active == True)
     return q.order_by(UOM.name).all()
 
-
-@router.post("/uom", response_model=UOMOut)
-def create_uom(
-    data: UOMCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("uom", "create")),
-    tenant_id: int = Depends(get_tenant_id),
-    site_id: int = Depends(get_site_id)
-):
+@router.post('/uom', response_model=UOMOut)
+def create_uom(data: UOMCreate, db: Session=Depends(get_db), current_user: User=Depends(require_permission('uom', 'create')), tenant_id: int=Depends(get_tenant_id), site_id: int=Depends(get_site_id)):
     uom = UOM(**data.model_dump(), tenant_id=tenant_id, site_id=site_id)
     db.add(uom)
     db.commit()
     db.refresh(uom)
     return uom
 
-
-@router.put("/uom/{id}", response_model=UOMOut)
-def update_uom(
-    id: int,
-    data: UOMCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("uom", "update")),
-    tenant_id: int = Depends(get_tenant_id),
-    site_id: int = Depends(get_site_id)
-):
-    uom = db.query(UOM).filter(
-        UOM.id == id,
-        UOM.tenant_id == tenant_id,
-        UOM.site_id == site_id
-    ).first()
+@router.put('/uom/{id}', response_model=UOMOut)
+def update_uom(id: int, data: UOMCreate, db: Session=Depends(get_db), current_user: User=Depends(require_permission('uom', 'update')), tenant_id: int=Depends(get_tenant_id), site_id: int=Depends(get_site_id)):
+    uom = db.query(UOM).filter(UOM.id == id, UOM.tenant_id == tenant_id, UOM.site_id == site_id).first()
     if not uom:
-        raise HTTPException(status_code=404, detail="UOM not found")
-        
+        raise HTTPException(status_code=404, detail='UOM not found')
     uom.name = data.name
     uom.abbreviation = data.abbreviation
     uom.allow_decimal = data.allow_decimal
@@ -258,264 +125,110 @@ def update_uom(
     db.refresh(uom)
     return uom
 
-
-# ── Materials ────────────────────────────────────────────────────────────
-
-@router.get("/materials")
-def list_materials(
-    search: Optional[str] = None,
-    category_id: Optional[int] = None,
-    warehouse_id: Optional[int] = None,
-    include_inactive: bool = False,
-    sort_by: Optional[str] = "name",
-    sort_desc: Optional[bool] = False,
-    skip: int = 0,
-    limit: int = 100,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-    tenant_id: int = Depends(get_tenant_id),
-    site_id: int = Depends(get_site_id)
-):
-    q = db.query(Material).filter(
-        Material.tenant_id == tenant_id,
-        Material.site_id == site_id,
-        Material.is_deleted == False
-    )
+@router.get('/materials')
+def list_materials(search: Optional[str]=None, category_id: Optional[int]=None, warehouse_id: Optional[int]=None, include_inactive: bool=False, sort_by: Optional[str]='name', sort_desc: Optional[bool]=False, skip: int=0, limit: int=100, db: Session=Depends(get_db), current_user: User=Depends(get_current_user), tenant_id: int=Depends(get_tenant_id), site_id: int=Depends(get_site_id)):
+    q = db.query(Material).filter(Material.tenant_id == tenant_id, Material.site_id == site_id, Material.is_deleted == False)
     if not include_inactive:
         q = q.filter(Material.is_active == True)
     if search:
-        q = q.filter(or_(
-            Material.name.ilike(f"%{search}%"),
-            Material.code.ilike(f"%{search}%"),
-            Material.alias.ilike(f"%{search}%")
-        ))
+        q = q.filter(or_(Material.name.ilike(f'%{search}%'), Material.code.ilike(f'%{search}%'), Material.alias.ilike(f'%{search}%')))
     if category_id:
         q = q.filter(Material.category_id == category_id)
     if warehouse_id:
         q = q.filter(Material.warehouse_id == warehouse_id)
-
     total = q.count()
-    
-    q = q.options(
-        joinedload(Material.category),
-        joinedload(Material.subcategory),
-        joinedload(Material.uom),
-        joinedload(Material.preferred_vendor),
-        joinedload(Material.warehouse)
-    )
-
-    if sort_by == "code":
+    q = q.options(joinedload(Material.category), joinedload(Material.subcategory), joinedload(Material.uom), joinedload(Material.preferred_vendor), joinedload(Material.warehouse))
+    if sort_by == 'code':
         q = q.order_by(Material.code.desc() if sort_desc else Material.code.asc())
-    elif sort_by == "category":
+    elif sort_by == 'category':
         q = q.join(Category).order_by(Category.name.desc() if sort_desc else Category.name.asc())
-    elif sort_by == "uom":
+    elif sort_by == 'uom':
         q = q.join(UOM).order_by(UOM.name.desc() if sort_desc else UOM.name.asc())
-    elif sort_by == "gst_rate":
+    elif sort_by == 'gst_rate':
         q = q.order_by(Material.gst_rate.desc() if sort_desc else Material.gst_rate.asc())
-    elif sort_by == "standard_cost":
+    elif sort_by == 'standard_cost':
         q = q.order_by(Material.standard_cost.desc() if sort_desc else Material.standard_cost.asc())
-    elif sort_by == "reorder_level":
+    elif sort_by == 'reorder_level':
         q = q.order_by(Material.reorder_level.desc() if sort_desc else Material.reorder_level.asc())
-    elif sort_by == "material_type":
+    elif sort_by == 'material_type':
         q = q.order_by(Material.material_type.desc() if sort_desc else Material.material_type.asc())
-    elif sort_by == "is_active":
+    elif sort_by == 'is_active':
         q = q.order_by(Material.is_active.desc() if sort_desc else Material.is_active.asc())
     else:
         q = q.order_by(Material.name.desc() if sort_desc else Material.name.asc())
-
     materials = q.offset(skip).limit(limit).all()
-
     material_ids = [m.id for m in materials]
     stock_map = {}
     if material_ids:
-        stocks = db.query(CurrentStock).filter(
-            CurrentStock.material_id.in_(material_ids),
-            CurrentStock.site_id == site_id
-        ).all()
+        stocks = db.query(CurrentStock).filter(CurrentStock.material_id.in_(material_ids), CurrentStock.site_id == site_id).all()
         for s in stocks:
             stock_map[s.material_id] = stock_map.get(s.material_id, 0) + s.quantity
-
     result = []
     for m in materials:
         total_stock = round(stock_map.get(m.id, 0))
-        result.append(MaterialOut(
-            id=m.id, code=m.code, name=m.name,
-            alias=m.alias, reference_no=m.reference_no,
-            category_id=m.category_id, subcategory_id=m.subcategory_id,
-            uom_id=m.uom_id, reorder_level=round(m.reorder_level or 0),
-            maximum_level=m.maximum_level, standard_cost=m.standard_cost,
-            preferred_vendor_id=m.preferred_vendor_id,
-            storage_type=m.storage_type, hsn_code=m.hsn_code, gst_rate=m.gst_rate or 0,
-            description=m.description, is_active=m.is_active,
-            material_type=m.material_type,
-            created_at=m.created_at,
-            category_name=m.category.name if m.category else None,
-            subcategory_name=m.subcategory.name if m.subcategory else None,
-            uom_name=m.uom.abbreviation if m.uom else None,
-            uom_allow_decimal=m.uom.allow_decimal if m.uom else False,
-            vendor_name=f"{m.preferred_vendor.code} - {m.preferred_vendor.name}" if m.preferred_vendor else None,
-            warehouse_id=m.warehouse_id,
-            warehouse_name=m.warehouse.name if m.warehouse else None,
-            current_stock=total_stock
-        ))
-    return {"items": result, "total": total}
+        result.append(MaterialOut(id=m.id, code=m.code, name=m.name, alias=m.alias, reference_no=m.reference_no, category_id=m.category_id, subcategory_id=m.subcategory_id, uom_id=m.uom_id, reorder_level=round(m.reorder_level or 0), maximum_level=m.maximum_level, standard_cost=m.standard_cost, preferred_vendor_id=m.preferred_vendor_id, storage_type=m.storage_type, hsn_code=m.hsn_code, gst_rate=m.gst_rate or 0, description=m.description, is_active=m.is_active, material_type=m.material_type, created_at=m.created_at, category_name=m.category.name if m.category else None, subcategory_name=m.subcategory.name if m.subcategory else None, uom_name=m.uom.abbreviation if m.uom else None, uom_allow_decimal=m.uom.allow_decimal if m.uom else False, vendor_name=f'{m.preferred_vendor.code} - {m.preferred_vendor.name}' if m.preferred_vendor else None, warehouse_id=m.warehouse_id, warehouse_name=m.warehouse.name if m.warehouse else None, current_stock=total_stock))
+    return {'items': result, 'total': total}
 
-
-@router.get("/materials/{id}")
-def get_material(
-    id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-    tenant_id: int = Depends(get_tenant_id),
-    site_id: int = Depends(get_site_id)
-):
-    m = db.query(Material).filter(
-        Material.id == id, Material.tenant_id == tenant_id, Material.site_id == site_id
-    ).first()
+@router.get('/materials/{id}')
+def get_material(id: int, db: Session=Depends(get_db), current_user: User=Depends(get_current_user), tenant_id: int=Depends(get_tenant_id), site_id: int=Depends(get_site_id)):
+    m = db.query(Material).filter(Material.id == id, Material.tenant_id == tenant_id, Material.site_id == site_id).first()
     if not m:
-        raise HTTPException(status_code=404, detail="Material not found")
+        raise HTTPException(status_code=404, detail='Material not found')
     stock = db.query(CurrentStock).filter(CurrentStock.material_id == m.id, CurrentStock.site_id == site_id).all()
-    total_stock = round(sum(s.quantity for s in stock))
-    return MaterialOut(
-        id=m.id, code=m.code, name=m.name,
-        alias=m.alias, reference_no=m.reference_no,
-        category_id=m.category_id, subcategory_id=m.subcategory_id,
-        uom_id=m.uom_id, reorder_level=round(m.reorder_level or 0),
-        maximum_level=m.maximum_level, standard_cost=m.standard_cost,
-        preferred_vendor_id=m.preferred_vendor_id,
-        storage_type=m.storage_type, hsn_code=m.hsn_code, gst_rate=m.gst_rate or 0,
-        description=m.description, is_active=m.is_active,
-        material_type=m.material_type,
-        created_at=m.created_at,
-        category_name=m.category.name if m.category else None,
-        subcategory_name=m.subcategory.name if m.subcategory else None,
-        uom_name=m.uom.abbreviation if m.uom else None,
-        uom_allow_decimal=m.uom.allow_decimal if m.uom else False,
-        vendor_name=f"{m.preferred_vendor.code} - {m.preferred_vendor.name}" if m.preferred_vendor else None,
-        warehouse_id=m.warehouse_id,
-        warehouse_name=m.warehouse.name if m.warehouse else None,
-        current_stock=total_stock
-    )
+    total_stock = round(sum((s.quantity for s in stock)))
+    return MaterialOut(id=m.id, code=m.code, name=m.name, alias=m.alias, reference_no=m.reference_no, category_id=m.category_id, subcategory_id=m.subcategory_id, uom_id=m.uom_id, reorder_level=round(m.reorder_level or 0), maximum_level=m.maximum_level, standard_cost=m.standard_cost, preferred_vendor_id=m.preferred_vendor_id, storage_type=m.storage_type, hsn_code=m.hsn_code, gst_rate=m.gst_rate or 0, description=m.description, is_active=m.is_active, material_type=m.material_type, created_at=m.created_at, category_name=m.category.name if m.category else None, subcategory_name=m.subcategory.name if m.subcategory else None, uom_name=m.uom.abbreviation if m.uom else None, uom_allow_decimal=m.uom.allow_decimal if m.uom else False, vendor_name=f'{m.preferred_vendor.code} - {m.preferred_vendor.name}' if m.preferred_vendor else None, warehouse_id=m.warehouse_id, warehouse_name=m.warehouse.name if m.warehouse else None, current_stock=total_stock)
 
-@router.get("/materials/by-code/{material_code}")
-def get_material_by_code(
-    material_code: str, 
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-    tenant_id: int = Depends(get_tenant_id),
-    site_id: int = Depends(get_site_id)
-):
-    m = db.query(Material).filter(
-        Material.code == material_code,
-        Material.tenant_id == tenant_id,
-        Material.site_id == site_id
-    ).first()
+@router.get('/materials/by-code/{material_code}')
+def get_material_by_code(material_code: str, db: Session=Depends(get_db), current_user: User=Depends(get_current_user), tenant_id: int=Depends(get_tenant_id), site_id: int=Depends(get_site_id)):
+    m = db.query(Material).filter(Material.code == material_code, Material.tenant_id == tenant_id, Material.site_id == site_id).first()
     if not m:
-        raise HTTPException(status_code=404, detail="Material not found")
-        
-    return {
-        "code": m.code,
-        "name": m.name,
-        "category_name": m.category.name if m.category else "N/A",
-        "subcategory_name": m.subcategory.name if m.subcategory else "N/A",
-        "uom_name": m.uom.abbreviation if m.uom else "N/A",
-        "material_type": m.material_type,
-        "storage_type": m.storage_type or "N/A",
-        "is_active": m.is_active
-    }
+        raise HTTPException(status_code=404, detail='Material not found')
+    return {'code': m.code, 'name': m.name, 'category_name': m.category.name if m.category else 'N/A', 'subcategory_name': m.subcategory.name if m.subcategory else 'N/A', 'uom_name': m.uom.abbreviation if m.uom else 'N/A', 'material_type': m.material_type, 'storage_type': m.storage_type or 'N/A', 'is_active': m.is_active}
 
-
-@router.post("/materials")
-def create_material(
-    data: MaterialCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("materials", "create")),
-    tenant_id: int = Depends(get_tenant_id),
-    site_id: int = Depends(get_site_id)
-):
+@router.post('/materials')
+def create_material(data: MaterialCreate, db: Session=Depends(get_db), current_user: User=Depends(require_permission('materials', 'create')), tenant_id: int=Depends(get_tenant_id), site_id: int=Depends(get_site_id)):
     mat_data = data.model_dump()
-    # Auto-generate code if not provided
-    if not mat_data.get("code"):
-        cat = db.query(Category).get(mat_data["category_id"])
-        prefix = cat.material_code_prefix if cat and cat.material_code_prefix else "MAT"
-        doc_type = f"MATERIAL_{cat.id}" if cat else "MATERIAL"
-        
-        # Robust generation: loop until a unique code is found to auto-heal sequence sync issues
+    if not mat_data.get('code'):
+        cat = db.query(Category).get(mat_data['category_id'])
+        prefix = cat.material_code_prefix if cat and cat.material_code_prefix else 'MAT'
+        doc_type = f'MATERIAL_{cat.id}' if cat else 'MATERIAL'
         max_attempts = 10
         for _ in range(max_attempts):
             generated_code = get_next_number(db, tenant_id, site_id, doc_type, prefix)
-            existing = db.query(Material).filter(
-                Material.code == generated_code, Material.tenant_id == tenant_id, Material.site_id == site_id
-            ).first()
+            existing = db.query(Material).filter(Material.code == generated_code, Material.tenant_id == tenant_id, Material.site_id == site_id).first()
             if not existing:
-                mat_data["code"] = generated_code
+                mat_data['code'] = generated_code
                 break
         else:
-            raise HTTPException(status_code=500, detail="Failed to generate a unique material code. Please try again.")
+            raise HTTPException(status_code=500, detail='Failed to generate a unique material code. Please try again.')
     else:
-        existing = db.query(Material).filter(
-            Material.code == mat_data["code"], Material.tenant_id == tenant_id, Material.site_id == site_id
-        ).first()
+        existing = db.query(Material).filter(Material.code == mat_data['code'], Material.tenant_id == tenant_id, Material.site_id == site_id).first()
         if existing:
-            raise HTTPException(status_code=400, detail="Material code already exists in this site")
-    
+            raise HTTPException(status_code=400, detail='Material code already exists in this site')
     mat = Material(**mat_data, tenant_id=tenant_id, site_id=site_id)
     db.add(mat)
     db.flush()
-    
-    db.add(AuditLog(
-        tenant_id=tenant_id, site_id=site_id, user_id=current_user.id,
-        action="CREATE", entity_type="Material", entity_id=mat.id,
-        new_values=f"Created material: {mat.name}"
-    ))
     db.commit()
-    return {"id": mat.id, "code": mat.code, "message": "Material created successfully"}
+    return {'id': mat.id, 'code': mat.code, 'message': 'Material created successfully'}
 
-
-@router.put("/materials/{id}")
-def update_material(
-    id: int,
-    data: MaterialUpdate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("materials", "update")),
-    tenant_id: int = Depends(get_tenant_id),
-    site_id: int = Depends(get_site_id)
-):
-    mat = db.query(Material).filter(
-        Material.id == id, Material.tenant_id == tenant_id, Material.site_id == site_id
-    ).first()
+@router.put('/materials/{id}')
+def update_material(id: int, data: MaterialUpdate, db: Session=Depends(get_db), current_user: User=Depends(require_permission('materials', 'update')), tenant_id: int=Depends(get_tenant_id), site_id: int=Depends(get_site_id)):
+    mat = db.query(Material).filter(Material.id == id, Material.tenant_id == tenant_id, Material.site_id == site_id).first()
     if not mat:
-        raise HTTPException(status_code=404, detail="Material not found")
+        raise HTTPException(status_code=404, detail='Material not found')
     update_data = data.model_dump(exclude_unset=True)
     for k, v in update_data.items():
         setattr(mat, k, v)
     db.commit()
-    db.add(AuditLog(
-        tenant_id=tenant_id, site_id=site_id, user_id=current_user.id,
-        action="UPDATE", entity_type="Material", entity_id=id
-    ))
     db.commit()
-    return {"message": "Material updated successfully"}
+    return {'message': 'Material updated successfully'}
 
-
-@router.delete("/materials/{id}")
-def delete_material(
-    id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("materials", "delete")),
-    tenant_id: int = Depends(get_tenant_id),
-    site_id: int = Depends(get_site_id)
-):
-    mat = db.query(Material).filter(
-        Material.id == id, Material.tenant_id == tenant_id, Material.site_id == site_id
-    ).first()
+@router.delete('/materials/{id}')
+def delete_material(id: int, db: Session=Depends(get_db), current_user: User=Depends(require_permission('materials', 'delete')), tenant_id: int=Depends(get_tenant_id), site_id: int=Depends(get_site_id)):
+    mat = db.query(Material).filter(Material.id == id, Material.tenant_id == tenant_id, Material.site_id == site_id).first()
     if not mat:
-        raise HTTPException(status_code=404, detail="Material not found")
+        raise HTTPException(status_code=404, detail='Material not found')
     mat.is_active = False
     db.commit()
-    db.add(AuditLog(
-        tenant_id=tenant_id, site_id=site_id, user_id=current_user.id,
-        action="DELETE", entity_type="Material", entity_id=id
-    ))
     db.commit()
-    return {"message": "Material deactivated"}
+    return {'message': 'Material deactivated'}

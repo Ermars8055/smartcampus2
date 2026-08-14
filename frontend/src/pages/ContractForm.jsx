@@ -160,6 +160,29 @@ export default function ContractForm() {
     setForm({ ...form, items: newItems });
   };
 
+  const getDuration = () => {
+    if (form.start_date && form.end_date) {
+      const start = dayjs(form.start_date);
+      const end = dayjs(form.end_date);
+      if (end.isBefore(start, 'day')) return "End date cannot be before start date.";
+      
+      const years = end.diff(start, 'year');
+      const startAfterYears = start.add(years, 'year');
+      const months = end.diff(startAfterYears, 'month');
+      const startAfterMonths = startAfterYears.add(months, 'month');
+      const days = end.diff(startAfterMonths, 'day');
+      
+      let durationStr = [];
+      if (years > 0) durationStr.push(`${years} year${years > 1 ? 's' : ''}`);
+      if (months > 0) durationStr.push(`${months} month${months > 1 ? 's' : ''}`);
+      if (days > 0) durationStr.push(`${days} day${days > 1 ? 's' : ''}`);
+      
+      if (durationStr.length === 0) return "Duration: 0 days";
+      return `Duration: ${durationStr.join(', ')}`;
+    }
+    return null;
+  };
+
   return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, gap: 2 }}>
@@ -289,6 +312,13 @@ export default function ContractForm() {
               }}
             />
           </Grid>
+          {getDuration() && (
+            <Grid item xs={12} sx={{ mt: -1 }}>
+              <Typography variant="caption" sx={{ color: 'error.main', fontWeight: 600 }}>
+                {getDuration()}
+              </Typography>
+            </Grid>
+          )}
           {(form.contract_type === 'AMC' || form.contract_type === 'CMC') && (
             <Grid item xs={12} sx={{ display: 'flex', gap: 4 }}>
               <FormControlLabel

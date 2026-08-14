@@ -297,7 +297,8 @@ def create_work_order(
         db.add(wo_item)
     db.commit()
     db.refresh(wo)
-    db.add(AuditLog(tenant_id=tenant_id, site_id=site_id, user_id=current_user.id, action="CREATE", entity_type="WorkOrder", entity_id=wo.id))
+        # Removed manual AuditLog
+        # db.add(AuditLog(tenant_id=tenant_id, site_id=site_id, user_id=current_user.id, action="CREATE", entity_type="WorkOrder", entity_id=wo.id))
     db.commit()
     return {"id": wo.id, "wo_number": wo.wo_number, "message": "Work Order created"}
 
@@ -359,7 +360,8 @@ def update_work_order(
         wo.total_amount = round(total_amount)
         
     db.commit()
-    db.add(AuditLog(tenant_id=tenant_id, site_id=site_id, user_id=current_user.id, action="UPDATE", entity_type="WorkOrder", entity_id=wo.id))
+        # Removed manual AuditLog
+        # db.add(AuditLog(tenant_id=tenant_id, site_id=site_id, user_id=current_user.id, action="UPDATE", entity_type="WorkOrder", entity_id=wo.id))
     db.commit()
     return {"message": "Work Order updated successfully"}
 
@@ -440,8 +442,8 @@ def approve_work_order(
 
     if new_approvals == 0:
         raise HTTPException(400, "You have already approved this WO at the current level")
-
-    db.add(AuditLog(tenant_id=tenant_id, site_id=site_id, user_id=current_user.id, action="APPROVE", entity_type="WorkOrder", entity_id=id))
+        # Removed manual AuditLog
+        # db.add(AuditLog(tenant_id=tenant_id, site_id=site_id, user_id=current_user.id, action="APPROVE", entity_type="WorkOrder", entity_id=id))
     db.commit()
 
     if new_approvals > 0:

@@ -33,7 +33,7 @@ export default function ComplaintDetail() {
   const [reopenReason, setReopenReason] = useState('');
   const [technicians, setTechnicians] = useState([]);
   const [selectedTech, setSelectedTech] = useState('');
-  const [materialRequired, setMaterialRequired] = useState(false);
+  const [repairMethod, setRepairMethod] = useState('');
   const [inspectionDetails, setInspectionDetails] = useState('');
   const [resolutionRemarks, setResolutionRemarks] = useState('');
   const [resolutionImages, setResolutionImages] = useState([]);
@@ -163,14 +163,16 @@ export default function ComplaintDetail() {
     setActionLoading(true);
     try {
       await api.post(`/api/complaints/${id}/complete-inspection`, { 
-        material_required: materialRequired,
+        repair_method: repairMethod,
         inspection_details: inspectionDetails 
       });
       setSnackbar({ open: true, message: 'Inspection completed', severity: 'success' });
       setInspectDialogOpen(false);
       
-      if (materialRequired) {
+      if (repairMethod === 'Internal With Material') {
         navigate(`/indents?new=true&complaint_id=${id}`);
+      } else if (repairMethod === 'External Vendor Service') {
+        navigate(`/procurement/vendor-work-orders/new`, { state: { complaint: complaint } });
       } else {
         fetchComplaintData();
       }
@@ -613,10 +615,10 @@ export default function ComplaintDetail() {
                 Material requirement will be determined during inspection.
               </Typography>
             </Paper>
-          ) : !complaint.material_required ? (
+          ) : complaint.repair_method === 'Internal Without Material' || complaint.repair_method === 'External Vendor Service' ? (
             <Paper sx={{ p: 3, mb: 3, bgcolor: '#F8FAFC', textAlign: 'center', border: '1px solid #E2E8F0' }}>
               <Typography variant="body2" color="textSecondary">
-                Material is not required for this complaint.
+                Material is not required for this complaint or is handled by an external vendor.
               </Typography>
             </Paper>
           ) : (
@@ -795,14 +797,24 @@ export default function ComplaintDetail() {
             onChange={(e) => setInspectionDetails(e.target.value)}
             sx={{ mb: 2 }}
           />
-          <FormControlLabel
-            control={<Switch checked={materialRequired} onChange={(e) => setMaterialRequired(e.target.checked)} />}
-            label="Material Required"
-          />
+          <FormControl fullWidth margin="dense">
+            <InputLabel>Action Required</InputLabel>
+            <Select 
+              value={repairMethod} 
+              label="Action Required" 
+              onChange={(e) => setRepairMethod(e.target.value)}
+            >
+              <MenuItem value="Internal Without Material">Internal Repair (No material needed)</MenuItem>
+              <MenuItem value="Internal With Material">Internal Repair (Material needed)</MenuItem>
+              <MenuItem value="External Vendor Service">External Vendor Service (Requires WO)</MenuItem>
+            </Select>
+          </FormControl>
         </DialogContent>
         <DialogActions sx={{ p: 2, pt: 0 }}>
           <Button onClick={() => setInspectDialogOpen(false)} disabled={actionLoading}>Cancel</Button>
-          <Button onClick={handleCompleteInspection} variant="contained" color="primary" disabled={actionLoading}>Confirm Inspection</Button>
+          <Button onClick={handleCompleteInspection} variant="contained" disabled={!repairMethod || actionLoading}>
+            Submit Inspection
+          </Button>
         </DialogActions>
       </Dialog>
 

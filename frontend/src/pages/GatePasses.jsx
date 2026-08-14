@@ -453,7 +453,6 @@ export default function GatePasses() {
           startIcon={<Add />}
           onClick={openGpModal}
           disabled={!hasAction('gate_passes', 'can_create') && !hasAction('issues', 'can_issue')} // Fallback
-          sx={{ textTransform: 'none', borderRadius: 2, fontWeight: 700, px: 3, bgcolor: '#2563EB', height: 40 }}
         >
           Create Gate Pass
         </Button>

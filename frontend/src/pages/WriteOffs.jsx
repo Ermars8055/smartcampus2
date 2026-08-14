@@ -318,7 +318,6 @@ export default function WriteOffs() {
           startIcon={<Add />}
           onClick={openCreateModal}
           disabled={!hasPermission('write_offs', 'can_create')}
-          sx={{ textTransform: 'none', borderRadius: 2, fontWeight: 700, px: 3, bgcolor: '#2563EB' }}
         >
           New Write Off
         </Button>

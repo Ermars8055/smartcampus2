@@ -179,7 +179,7 @@ export default function GateEntry() {
     let list = entries;
     if (search) {
       const q = search.toLowerCase();
-      list = list.filter(e => 
+      list = list.filter(e =>
         e.entry_number?.toLowerCase().includes(q) ||
         e.vehicle_number?.toLowerCase().includes(q) ||
         e.delivery_person_name?.toLowerCase().includes(q) ||
@@ -194,15 +194,15 @@ export default function GateEntry() {
     return [...list].sort((a, b) => {
       let valA = a[sortConfig.key];
       let valB = b[sortConfig.key];
-  
+
       if (sortConfig.key === 'vehicle_person') {
         valA = a.vehicle_number || a.delivery_person_name;
         valB = b.vehicle_number || b.delivery_person_name;
       }
-  
+
       if (valA == null) valA = '';
       if (valB == null) valB = '';
-  
+
       if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
       if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
       return 0;
@@ -385,13 +385,13 @@ export default function GateEntry() {
             </Box>
           </Box>
         </DialogTitle>
-                <DialogContent sx={{ px: 4, py: 2 }}>
+        <DialogContent sx={{ px: 4, py: 2 }}>
           <Grid container spacing={3}>
             {/* DC Section (Left Half) */}
             <Grid item xs={12} md={6}>
               <Box sx={{ p: 2, border: '1px solid #E2E8F0', borderRadius: 2, bgcolor: '#F8FAFC', height: '100%' }}>
                 <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
-                  Delivery Challan Details {(form.dc_number || form.dc_date || form.dc_scan_url) ? <span style={{color: '#d32f2f'}}>*</span> : ''}
+                  Delivery Challan Details {(form.dc_number || form.dc_date || form.dc_scan_url) ? <span style={{ color: '#d32f2f' }}>*</span> : ''}
                 </Typography>
                 <Grid container spacing={2}>
                   <Grid item xs={12}>
@@ -446,7 +446,7 @@ export default function GateEntry() {
             <Grid item xs={12} md={6}>
               <Box sx={{ p: 2, border: '1px solid #E2E8F0', borderRadius: 2, bgcolor: '#F8FAFC', height: '100%' }}>
                 <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
-                  Invoice Details {(form.invoice_number || form.invoice_date || form.invoice_amount || form.invoice_scan_url) ? <span style={{color: '#d32f2f'}}>*</span> : ''}
+                  Invoice Details {(form.invoice_number || form.invoice_date || form.invoice_amount || form.invoice_scan_url) ? <span style={{ color: '#d32f2f' }}>*</span> : ''}
                 </Typography>
                 <Grid container spacing={2}>
                   <Grid item xs={12}>
@@ -541,7 +541,7 @@ export default function GateEntry() {
                 </Grid>
                 <Grid item xs={12} sm={3}>
                   {form.weight_report_url ? (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, p: 1, border: '1px solid #E2E8F0', borderRadius: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1, height: '100%', minHeight: 56, border: '1px solid #E2E8F0', borderRadius: 1 }}>
                       <AttachFile sx={{ color: '#475569' }} />
                       <Typography variant="body2" sx={{ flexGrow: 1, fontWeight: 600, color: '#475569' }}>Report ✓</Typography>
                       <Button size="small" variant="outlined" onClick={() => window.open(getFileUrl(form.weight_report_url), '_blank')}>View</Button>
@@ -549,8 +549,21 @@ export default function GateEntry() {
                     </Box>
                   ) : (
                     <Button fullWidth variant="outlined" component="label" disabled={uploading}
-                      sx={{ py: 1.5, borderStyle: 'dashed', borderWidth: 2, color: '#475569', borderColor: '#475569' }}>
-                      {uploading ? 'Uploading...' : '📎 Upload Report'}
+                      sx={{
+                        height: '100%',
+                        minHeight: 56,
+                        p: 1,
+                        borderStyle: 'dashed',
+                        borderWidth: 2,
+                        color: '#475569',
+                        borderColor: '#94A3B8',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center'
+                      }}>
+                      <Typography sx={{ fontWeight: 600, fontSize: '0.8rem', textAlign: 'center', lineHeight: 1.2, textTransform: 'none' }}>
+                        {uploading ? 'Uploading...' : '📎 Upload Weight Report'}
+                      </Typography>
                       <input type="file" hidden accept="image/*,application/pdf" capture="environment"
                         onChange={e => handleUpload(e.target.files[0], 'weight_report_url')} />
                     </Button>

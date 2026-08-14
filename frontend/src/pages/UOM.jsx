@@ -78,10 +78,9 @@ export default function UOM() {
             Units of Measure
           </Typography>
           <Button 
-            variant="text" 
+            variant="contained" 
             startIcon={<Add />} 
             onClick={() => { setEditing(null); setForm({ name: '', abbreviation: '', allow_decimal: false, is_active: true }); setErrors({}); setDialog('uom'); }}
-            sx={{ textTransform: 'none', fontWeight: 600, color: '#2563EB' }}
           >
             Add UOM
           </Button>

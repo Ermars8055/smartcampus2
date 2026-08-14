@@ -74,6 +74,17 @@ export default function Equipment() {
   const [consumptionRemarks, setConsumptionRemarks] = useState('');
   const [consumptionSubmitting, setConsumptionSubmitting] = useState(false);
 
+  // Installation Dialog
+  const [installDialog, setInstallDialog] = useState(null);
+  const [installForm, setInstallForm] = useState({ serial_number: '', installation_date: '', installed_by: '', contact_number: '', location_id: '', installation_remarks: '' });
+  const [installFiles, setInstallFiles] = useState({ file: null, equipment_photo: null, serial_number_photo: null });
+  const [installSubmitting, setInstallSubmitting] = useState(false);
+
+  // Upload Docs Dialog
+  const [uploadDocsDialog, setUploadDocsDialog] = useState(null);
+  const [uploadDocsFiles, setUploadDocsFiles] = useState({ file: null, equipment_photo: null, serial_number_photo: null });
+  const [uploadDocsSubmitting, setUploadDocsSubmitting] = useState(false);
+
   // View/Edit Dialogs
   const [viewDialog, setViewDialog] = useState(null);
   const [historyList, setHistoryList] = useState([]);
@@ -492,6 +503,61 @@ export default function Equipment() {
     setWriteOffSubmitting(false);
   };
 
+  const handleInstallSubmit = async () => {
+    if (!installForm.installed_by || !installForm.contact_number || !installForm.location_id || !installForm.installation_date || (!installForm.serial_number && !installDialog.serial_number)) {
+      showMessage('Please fill all required fields including Serial Number.', 'Validation Error', 'warning');
+      return;
+    }
+    setInstallSubmitting(true);
+    try {
+      const formData = new FormData();
+      formData.append('serial_number', installForm.serial_number || installDialog.serial_number || '');
+      formData.append('installation_date', installForm.installation_date + 'T12:00:00Z');
+      formData.append('installed_by', installForm.installed_by);
+      formData.append('contact_number', installForm.contact_number);
+      formData.append('location_id', installForm.location_id);
+      if (installForm.installation_remarks) formData.append('installation_remarks', installForm.installation_remarks);
+      
+      if (installFiles.file) formData.append('file', installFiles.file);
+      if (installFiles.equipment_photo) formData.append('equipment_photo', installFiles.equipment_photo);
+      if (installFiles.serial_number_photo) formData.append('serial_number_photo', installFiles.serial_number_photo);
+
+      await api.post(`/api/equipment/${installDialog.id}/installation`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      showMessage('Installation completed successfully', 'Success', 'success');
+      setInstallDialog(null);
+      loadData();
+    } catch (err) {
+      showMessage(err.response?.data?.detail || 'Failed to complete installation', 'Error', 'error');
+    }
+    setInstallSubmitting(false);
+  };
+
+  const handleUploadDocsSubmit = async () => {
+    if (!uploadDocsFiles.file && !uploadDocsFiles.equipment_photo && !uploadDocsFiles.serial_number_photo) {
+      showMessage('Please select at least one file to upload.', 'Validation Error', 'warning');
+      return;
+    }
+    setUploadDocsSubmitting(true);
+    try {
+      const formData = new FormData();
+      if (uploadDocsFiles.file) formData.append('file', uploadDocsFiles.file);
+      if (uploadDocsFiles.equipment_photo) formData.append('equipment_photo', uploadDocsFiles.equipment_photo);
+      if (uploadDocsFiles.serial_number_photo) formData.append('serial_number_photo', uploadDocsFiles.serial_number_photo);
+
+      await api.post(`/api/equipment/${uploadDocsDialog.id}/upload-docs`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      showMessage('Documents uploaded successfully', 'Success', 'success');
+      setUploadDocsDialog(null);
+      loadData();
+    } catch (err) {
+      showMessage(err.response?.data?.detail || 'Failed to upload documents', 'Error', 'error');
+    }
+    setUploadDocsSubmitting(false);
+  };
+
   const handleConsumptionSubmit = async () => {
     if (!consumptionDate || !testsPerformed || parseInt(testsPerformed, 10) <= 0) {
       showMessage('Please enter a valid date and number of tests.', 'Warning', 'warning');
@@ -552,6 +618,10 @@ export default function Equipment() {
   };
 
   const handleEditSubmit = async () => {
+    if (editForm.po_number && !editForm.po_date) {
+      showMessage('PO Date is required when PO Number is provided', 'Validation Error', 'warning');
+      return;
+    }
     setEditSubmitting(true);
     try {
       await api.put(`/api/equipment/${editDialog.id}`, editForm);
@@ -597,6 +667,7 @@ export default function Equipment() {
         ...form,
         po_id: null,
         po_number: '',
+        po_date: '',
         procurement_type: 'Purchase',
         rental_type: null,
         rental_agreement_number: null,
@@ -616,6 +687,7 @@ export default function Equipment() {
       const updates = {
         po_id: po.id,
         po_number: po.po_number,
+        po_date: po.created_at ? po.created_at.split('T')[0] : null,
       };
 
       if (po.procurement_type && po.procurement_type !== 'Purchase') {
@@ -641,6 +713,10 @@ export default function Equipment() {
   const handleAddSubmit = async () => {
     if (!addForm.equipment_code || !addForm.material_id) {
       showMessage('Equipment Code and Material are required', 'Validation Error', 'warning');
+      return;
+    }
+    if (addForm.po_number && !addForm.po_date) {
+      showMessage('PO Date is required when PO Number is provided', 'Validation Error', 'warning');
       return;
     }
     setAddSubmitting(true);
@@ -679,7 +755,7 @@ export default function Equipment() {
           <Button variant="outlined" startIcon={<QrCode />} onClick={() => navigate('/equipment/print-qr')} size="small" sx={{ height: 38 }}>
             Bulk Print QR
           </Button>
-          <Button variant="contained" color="primary" startIcon={<Add />} onClick={openAddDialog} size="small" sx={{ height: 38 }}>
+          <Button variant="contained" startIcon={<Add />} onClick={openAddDialog}>
             Add Equipment
           </Button>
         </Box>
@@ -826,6 +902,11 @@ export default function Equipment() {
                   <Button size="small" variant="outlined" color="primary" startIcon={<Edit color="primary" />} onClick={(e) => { e.stopPropagation(); setEditForm(item); setEditDialog(item); }}>
                     Edit
                   </Button>
+                  {(item.installation_status === 'Pending Installation' || item.installation_status === 'Installation Requested') && (
+                    <Button size="small" variant="contained" color="secondary" startIcon={<Build />} onClick={(e) => { e.stopPropagation(); setInstallForm({ ...installForm, serial_number: item.serial_number || '' }); setInstallFiles({ file: null, equipment_photo: null, serial_number_photo: null }); setInstallDialog(item); }}>
+                      Complete Install
+                    </Button>
+                  )}
                   {item.installation_status === 'Pending Installation' && (
                     <Button size="small" variant="contained" color="primary" startIcon={<Assignment />} onClick={(e) => { e.stopPropagation(); handleRequestInstallation(item); }}>
                       Request Installation Call
@@ -834,6 +915,11 @@ export default function Equipment() {
                   {item.installation_status === 'Installation Requested' && (
                     <Button size="small" variant="contained" color="inherit" disabled startIcon={<Assignment />}>
                       Ticket Raised
+                    </Button>
+                  )}
+                  {item.installation_status === 'Installed' && (
+                    <Button size="small" variant="outlined" color="primary" startIcon={<UploadFile />} onClick={(e) => { e.stopPropagation(); setUploadDocsFiles({ file: null, equipment_photo: null, serial_number_photo: null }); setUploadDocsDialog(item); }}>
+                      Upload Docs
                     </Button>
                   )}
                   {item.installation_report_url && (
@@ -993,6 +1079,13 @@ export default function Equipment() {
                             <Edit color="primary" fontSize="small" />
                           </IconButton>
                         </Tooltip>
+                        {(item.installation_status === 'Pending Installation' || item.installation_status === 'Installation Requested') && (
+                          <Tooltip title="Complete Installation">
+                            <IconButton size="small" color="secondary" onClick={(e) => { e.stopPropagation(); setInstallForm({ ...installForm, serial_number: item.serial_number || '' }); setInstallFiles({ file: null, equipment_photo: null, serial_number_photo: null }); setInstallDialog(item); }}>
+                              <Build fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        )}
                         {item.installation_status === 'Pending Installation' && (
                           <Tooltip title="Request Installation Call">
                             <Button size="small" variant="contained" color="primary" sx={{ textTransform: 'none', py: 0.5 }} onClick={(e) => { e.stopPropagation(); handleRequestInstallation(item); }}>
@@ -1005,6 +1098,13 @@ export default function Equipment() {
                             <Button size="small" variant="contained" color="inherit" disabled sx={{ textTransform: 'none', py: 0.5 }}>
                               Ticket Raised
                             </Button>
+                          </Tooltip>
+                        )}
+                        {item.installation_status === 'Installed' && (
+                          <Tooltip title="Upload Documents">
+                            <IconButton size="small" color="primary" onClick={(e) => { e.stopPropagation(); setUploadDocsFiles({ file: null, equipment_photo: null, serial_number_photo: null }); setUploadDocsDialog(item); }}>
+                              <UploadFile fontSize="small" />
+                            </IconButton>
                           </Tooltip>
                         )}
                         {item.installation_report_url && (
@@ -1115,23 +1215,69 @@ export default function Equipment() {
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 3 }}>
           {qrData ? (
             <>
-              <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 0.5, textAlign: 'center' }}>
-                {qrData.department}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                Asset ID: {qrData.asset_id}
-              </Typography>
-              <Box sx={{ p: 2, bgcolor: '#fff', borderRadius: 2, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
-                <QRCodeSVG
-                  id="equipment-qr-svg"
-                  value={`${window.location.origin}/equipment/${qrData.asset_id}`}
-                  size={200}
-                  level="M"
-                />
+              <Box
+                sx={{
+                  width: '340px',
+                  height: '170px',
+                  border: '1px solid #000',
+                  borderRadius: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  p: '8px 11px',
+                  bgcolor: '#fff',
+                  boxSizing: 'border-box'
+                }}
+              >
+                {/* Header */}
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: '8px' }}>
+                  <Typography sx={{ fontSize: '0.65rem', fontWeight: 700, color: '#737373', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '50%' }}>
+                    {qrData.equipment_name || 'Equipment'}
+                  </Typography>
+                  <Typography sx={{ fontSize: '0.65rem', fontWeight: 700, color: '#737373', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '50%' }}>
+                    {qrData.institution_name || 'Hospital'}
+                  </Typography>
+                </Box>
+                
+                {/* Content */}
+                <Box sx={{ display: 'flex', flex: 1 }}>
+                  {/* QR Code */}
+                  <Box sx={{ flex: '0 0 90px', display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+                    <QRCodeSVG
+                      id="equipment-qr-svg"
+                      value={`${window.location.origin}/equipment/${qrData.asset_id}`}
+                      size={83}
+                      level="M"
+                    />
+                  </Box>
+                  
+                  {/* Details */}
+                  <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', pl: 1, borderLeft: '1px dotted #ccc' }}>
+                    <Typography sx={{ fontSize: '0.9rem', fontWeight: 900, pb: '4px', mb: '4px', borderBottom: '1px dotted #ccc', lineHeight: 1.2 }}>
+                      {qrData.asset_id || ''}
+                    </Typography>
+                    
+                    <Box sx={{ pb: '4px', mb: '4px', borderBottom: '1px dotted #ccc' }}>
+                      <Typography sx={{ fontSize: '0.55rem', fontWeight: 700, lineHeight: 1, mb: '2px' }}>DEPARTMENT</Typography>
+                      <Typography sx={{ fontSize: '0.65rem', lineHeight: 1 }}>{qrData.department_used || qrData.department || ''}</Typography>
+                    </Box>
+                    
+                    <Box sx={{ pb: '4px', mb: '4px', borderBottom: '1px dotted #ccc' }}>
+                      <Typography sx={{ fontSize: '0.55rem', fontWeight: 700, lineHeight: 1, mb: '2px' }}>MAKE & MODEL</Typography>
+                      <Typography sx={{ fontSize: '0.65rem', lineHeight: 1 }}>{qrData.make_model || ''}</Typography>
+                    </Box>
+                    
+                    <Box>
+                      <Typography sx={{ fontSize: '0.55rem', fontWeight: 700, lineHeight: 1, mb: '2px' }}>SERIAL NUMBER</Typography>
+                      <Typography sx={{ fontSize: '0.65rem', lineHeight: 1 }}>{qrData.serial_number || ''}</Typography>
+                    </Box>
+                  </Box>
+                </Box>
+                
+                {/* Footer */}
+                <Typography sx={{ textAlign: 'center', fontSize: '0.55rem', mt: 'auto', pt: '4px' }}>
+                  Scan to raise a service ticket
+                </Typography>
               </Box>
-              <Typography variant="caption" sx={{ mt: 3, color: '#64748B', textAlign: 'center', fontWeight: 'bold' }}>
-                {qrData.equipment_name}
-              </Typography>
               <Box sx={{ display: 'flex', gap: 2, mt: 3, flexWrap: 'wrap', justifyContent: 'center' }}>
                 <TextField
                   type="number"
@@ -1545,7 +1691,7 @@ export default function Equipment() {
                   value={purchaseOrders.find(p => p.id === addForm.po_id) || addForm.po_number || null}
                   onChange={(e, newValue) => {
                     if (typeof newValue === 'string') {
-                      setAddForm({ ...addForm, po_number: newValue, po_id: null });
+                      setAddForm({ ...addForm, po_number: newValue, po_id: null, po_date: '' });
                     } else {
                       handlePOSelection(newValue, false);
                     }
@@ -1553,6 +1699,17 @@ export default function Equipment() {
                   renderInput={(params) => <TextField {...params} label="PO Number" />}
                 />
               </Grid>
+              {addForm.po_number && (
+                <Grid item xs={12} sm={6}>
+                  <DatePicker
+                    label="PO Date *"
+                    format="DD-MMM-YYYY" localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
+                    value={addForm.po_date ? dayjs(addForm.po_date) : null}
+                    onChange={(newValue) => setAddForm({ ...addForm, po_date: newValue ? newValue.format('YYYY-MM-DD') : '' })}
+                    slotProps={{ textField: { size: 'small', fullWidth: true, required: true } }}
+                  />
+                </Grid>
+              )}
               <Grid item xs={12} sm={6}>
                 <TextField select fullWidth size="small" label="Procurement Type" value={addForm.procurement_type || 'Purchase'} onChange={e => setAddForm({ ...addForm, procurement_type: e.target.value })}>
                   <MenuItem value="Purchase">Purchase</MenuItem>
@@ -1672,13 +1829,13 @@ export default function Equipment() {
                 <TextField fullWidth size="small" label="GRN Number" value={editForm.grn_number || '-'} InputProps={{ readOnly: true }} variant="filled" />
               </Grid>
               <Grid item xs={12} sm={4}>
-                <TextField fullWidth size="small" label="Installation Date" value={editForm.installation_date ? editForm.installation_date.substring(0, 10) : '-'} InputProps={{ readOnly: true }} variant="filled" />
+                <TextField fullWidth size="small" label="Installation Date" value={editForm.installation_date ? formatDate(editForm.installation_date) : '-'} InputProps={{ readOnly: true }} variant="filled" />
               </Grid>
               <Grid item xs={12} sm={4}>
-                <TextField fullWidth size="small" label="PM Due Date" value={editForm.next_pm_due_date ? editForm.next_pm_due_date.substring(0, 10) : '-'} InputProps={{ readOnly: true }} variant="filled" />
+                <TextField fullWidth size="small" label="PM Due Date" value={editForm.next_pm_due_date ? formatDate(editForm.next_pm_due_date) : '-'} InputProps={{ readOnly: true }} variant="filled" />
               </Grid>
               <Grid item xs={12} sm={4}>
-                <TextField fullWidth size="small" label="Calibration Due Date" value={editForm.next_calibration_due_date ? editForm.next_calibration_due_date.substring(0, 10) : '-'} InputProps={{ readOnly: true }} variant="filled" />
+                <TextField fullWidth size="small" label="Calibration Due Date" value={editForm.next_calibration_due_date ? formatDate(editForm.next_calibration_due_date) : '-'} InputProps={{ readOnly: true }} variant="filled" />
               </Grid>
 
               <Grid item xs={12}>
@@ -1710,7 +1867,7 @@ export default function Equipment() {
                   value={purchaseOrders.find(p => p.id === editForm.po_id) || editForm.po_number || null}
                   onChange={(e, newValue) => {
                     if (typeof newValue === 'string') {
-                      setEditForm({ ...editForm, po_number: newValue, po_id: null });
+                      setEditForm({ ...editForm, po_number: newValue, po_id: null, po_date: '' });
                     } else {
                       handlePOSelection(newValue, true);
                     }
@@ -1718,6 +1875,17 @@ export default function Equipment() {
                   renderInput={(params) => <TextField {...params} label="PO Number" />}
                 />
               </Grid>
+              {editForm.po_number && (
+                <Grid item xs={12} sm={6}>
+                  <DatePicker
+                    label="PO Date *"
+                    format="DD-MMM-YYYY" localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
+                    value={editForm.po_date ? dayjs(editForm.po_date) : null}
+                    onChange={(newValue) => setEditForm({ ...editForm, po_date: newValue ? newValue.format('YYYY-MM-DD') : '' })}
+                    slotProps={{ textField: { size: 'small', fullWidth: true, required: true } }}
+                  />
+                </Grid>
+              )}
               <Grid item xs={12} sm={6}>
                 <TextField select fullWidth size="small" label="Procurement Type" value={editForm.procurement_type || 'Purchase'} onChange={e => setEditForm({ ...editForm, procurement_type: e.target.value })}>
                   <MenuItem value="Purchase">Purchase</MenuItem>
@@ -1898,6 +2066,80 @@ export default function Equipment() {
           <Button onClick={() => setEditDialog(null)} color="inherit">Cancel</Button>
           <Button onClick={handleEditSubmit} variant="contained" color="primary" disabled={editSubmitting || (editForm.year_of_purchase > new Date().getFullYear())}>
             {editSubmitting ? 'Saving...' : 'Save Changes'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Install Equipment Dialog */}
+      <Dialog open={!!installDialog} onClose={() => setInstallDialog(null)} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700, color: '#1E293B' }}>Complete Installation: {installDialog?.equipment_code}</DialogTitle>
+        <DialogContent dividers>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+            <TextField fullWidth size="small" label="Serial Number" value={installForm.serial_number || ''} onChange={e => setInstallForm({ ...installForm, serial_number: e.target.value })} required />
+            <DatePicker label="Installation Date *" format="DD-MMM-YYYY" localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }} value={installForm.installation_date ? dayjs(installForm.installation_date) : null} onChange={(newValue) => setInstallForm({ ...installForm, installation_date: newValue ? newValue.format('YYYY-MM-DD') : '' })} slotProps={{ textField: { size: 'small', fullWidth: true, required: true } }} />
+            <TextField fullWidth size="small" label="Installed By *" value={installForm.installed_by || ''} onChange={e => setInstallForm({ ...installForm, installed_by: e.target.value })} required />
+            <TextField fullWidth size="small" label="Contact Number *" value={installForm.contact_number || ''} onChange={e => setInstallForm({ ...installForm, contact_number: e.target.value })} required />
+            <Autocomplete
+              size="small"
+              options={locations}
+              getOptionLabel={(option) => option.location_name}
+              value={locations.find(l => l.id === installForm.location_id) || null}
+              onChange={(e, newValue) => setInstallForm({ ...installForm, location_id: newValue ? newValue.id : '' })}
+              renderInput={(params) => <TextField {...params} label="Location/Department *" required />}
+              fullWidth
+            />
+            <TextField fullWidth size="small" multiline rows={2} label="Installation Remarks" value={installForm.installation_remarks || ''} onChange={e => setInstallForm({ ...installForm, installation_remarks: e.target.value })} />
+            
+            <Divider sx={{ my: 1 }} />
+            <Typography variant="subtitle2" color="primary">Upload Documents (Optional)</Typography>
+            
+            <Box>
+              <Typography variant="caption" sx={{ mb: 0.5, display: 'block', fontWeight: 600 }}>Installation Report (PDF/Image)</Typography>
+              <TextField type="file" size="small" fullWidth inputProps={{ accept: '.pdf,image/*' }} onChange={e => setInstallFiles({ ...installFiles, file: e.target.files[0] })} />
+            </Box>
+            <Box>
+              <Typography variant="caption" sx={{ mb: 0.5, display: 'block', fontWeight: 600 }}>Equipment Photo</Typography>
+              <TextField type="file" size="small" fullWidth inputProps={{ accept: 'image/*' }} onChange={e => setInstallFiles({ ...installFiles, equipment_photo: e.target.files[0] })} />
+            </Box>
+            <Box>
+              <Typography variant="caption" sx={{ mb: 0.5, display: 'block', fontWeight: 600 }}>Serial Number Photo</Typography>
+              <TextField type="file" size="small" fullWidth inputProps={{ accept: 'image/*' }} onChange={e => setInstallFiles({ ...installFiles, serial_number_photo: e.target.files[0] })} />
+            </Box>
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setInstallDialog(null)} color="inherit">Cancel</Button>
+          <Button onClick={handleInstallSubmit} variant="contained" color="secondary" disabled={installSubmitting}>
+            {installSubmitting ? 'Saving...' : 'Complete Installation'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Upload Documents Dialog */}
+      <Dialog open={!!uploadDocsDialog} onClose={() => setUploadDocsDialog(null)} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700, color: '#1E293B' }}>Upload Documents: {uploadDocsDialog?.equipment_code}</DialogTitle>
+        <DialogContent dividers>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+            <Alert severity="info" sx={{ mb: 1 }}>Upload missing installation reports or photos for this equipment.</Alert>
+            
+            <Box>
+              <Typography variant="caption" sx={{ mb: 0.5, display: 'block', fontWeight: 600 }}>Installation Report (PDF/Image)</Typography>
+              <TextField type="file" size="small" fullWidth inputProps={{ accept: '.pdf,image/*' }} onChange={e => setUploadDocsFiles({ ...uploadDocsFiles, file: e.target.files[0] })} />
+            </Box>
+            <Box>
+              <Typography variant="caption" sx={{ mb: 0.5, display: 'block', fontWeight: 600 }}>Equipment Photo</Typography>
+              <TextField type="file" size="small" fullWidth inputProps={{ accept: 'image/*' }} onChange={e => setUploadDocsFiles({ ...uploadDocsFiles, equipment_photo: e.target.files[0] })} />
+            </Box>
+            <Box>
+              <Typography variant="caption" sx={{ mb: 0.5, display: 'block', fontWeight: 600 }}>Serial Number Photo</Typography>
+              <TextField type="file" size="small" fullWidth inputProps={{ accept: 'image/*' }} onChange={e => setUploadDocsFiles({ ...uploadDocsFiles, serial_number_photo: e.target.files[0] })} />
+            </Box>
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setUploadDocsDialog(null)} color="inherit">Cancel</Button>
+          <Button onClick={handleUploadDocsSubmit} variant="contained" color="primary" disabled={uploadDocsSubmitting}>
+            {uploadDocsSubmitting ? 'Uploading...' : 'Upload Documents'}
           </Button>
         </DialogActions>
       </Dialog>

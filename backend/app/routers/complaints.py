@@ -153,9 +153,13 @@ def create_complaint(
 
         if complaint_in.equipment_id:
             from app.models import ContractItem, Contract
+            from datetime import datetime
+            today = datetime.utcnow().date()
             c_item = db.query(ContractItem).join(Contract).filter(
                 ContractItem.equipment_id == complaint_in.equipment_id,
-                Contract.status == "Active",
+                Contract.status.in_(["Approved", "Active"]),
+                Contract.start_date <= today,
+                Contract.end_date >= today,
                 Contract.contract_type.in_(["AMC", "CMC"])
             ).first()
 
@@ -415,11 +419,16 @@ def complete_inspection(
             detail=f"Cannot complete inspection from status '{complaint.status}'. Must be 'Under Inspection'."
         )
 
-    complaint.material_required = payload.material_required
+    complaint.repair_method = payload.repair_method
+    if payload.repair_method == 'Internal With Material':
+        complaint.material_required = True
+    else:
+        complaint.material_required = False
+
     if payload.inspection_details is not None:
         complaint.inspection_details = payload.inspection_details
 
-    if payload.material_required:
+    if payload.repair_method == 'Internal With Material':
         complaint.status = ComplaintStatus.MATERIAL_PENDING.value
     else:
         complaint.status = ComplaintStatus.IN_PROGRESS.value

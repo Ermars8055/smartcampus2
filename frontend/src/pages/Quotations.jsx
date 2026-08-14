@@ -681,19 +681,31 @@ const Quotations = () => {
       const res = await api.get(`/api/quotations/${selectedQR.id}/vendor-quotations/${vendorId}/negotiation-history`);
       const vq = vendorQuotes.find(q => q.vendor_id === vendorId);
       const items = vq?.items?.filter(it => !it.is_excluded) || [];
+      const historyData = res.data || [];
+      const latestHistory = historyData.length > 0 ? historyData[0] : null;
+      const initialGlobalDiscount = latestHistory && latestHistory.discount_percent ? latestHistory.discount_percent.toString() : '';
+
       const itemDiscounts = {};
-      items.forEach(it => { itemDiscounts[it.qr_item_id] = it.discount_percent || ''; });
+      if (latestHistory && latestHistory.item_discounts) {
+        Object.keys(latestHistory.item_discounts).forEach(k => {
+          itemDiscounts[k] = latestHistory.item_discounts[k] !== null ? latestHistory.item_discounts[k].toString() : '';
+        });
+      } else {
+        items.forEach(it => { 
+          itemDiscounts[it.qr_item_id] = it.discount_percent ? it.discount_percent.toString() : ''; 
+        });
+      }
       
       setNegPage(0);
       setNegotiateDialog({
         open: true,
         vendorId,
         vendorName,
-        discountPercent: '',
+        discountPercent: initialGlobalDiscount,
         itemDiscounts,
         items,
         remarks: '',
-        history: res.data
+        history: historyData
       });
     } catch (err) {
       showMessage(err.response?.data?.detail || 'Failed to fetch history', 'Error', 'error');
@@ -707,9 +719,7 @@ const Quotations = () => {
       const payloadItemDiscounts = {};
       Object.keys(negotiateDialog.itemDiscounts).forEach(k => {
         const val = negotiateDialog.itemDiscounts[k];
-        if (val !== '' && val !== null && val !== undefined) {
-          payloadItemDiscounts[k] = parseFloat(val);
-        }
+        payloadItemDiscounts[k] = val !== '' ? parseFloat(val) : 0;
       });
       await api.put(`/api/quotations/${selectedQR.id}/vendor-quotations/${negotiateDialog.vendorId}/discounts`, {
         discount_percent: parseFloat(negotiateDialog.discountPercent || 0),
@@ -2200,7 +2210,7 @@ const Quotations = () => {
                                     e.preventDefault();
                                     const val = e.target.value;
                                     if (val && /^\d*\.?\d{0,2}$/.test(val)) {
-                                      const newItems = newQuote.items.map(it => it.is_excluded ? it : { ...it, discount_percent: val });
+                                      const newItems = newQuote.items.map(it => (it.is_excluded || !it.quoted_rate) ? it : { ...it, discount_percent: val });
                                       setNewQuote({ ...newQuote, items: newItems });
                                       e.target.value = '';
                                     }
@@ -2212,7 +2222,7 @@ const Quotations = () => {
                                 if (el && el.value) {
                                     const val = el.value;
                                     if (/^\d*\.?\d{0,2}$/.test(val)) {
-                                      const newItems = newQuote.items.map(it => it.is_excluded ? it : { ...it, discount_percent: val });
+                                      const newItems = newQuote.items.map(it => (it.is_excluded || !it.quoted_rate) ? it : { ...it, discount_percent: val });
                                       setNewQuote({ ...newQuote, items: newItems });
                                       el.value = '';
                                     }
@@ -2241,7 +2251,7 @@ const Quotations = () => {
                                     e.preventDefault();
                                     const val = e.target.value;
                                     if (val && /^\d*$/.test(val)) {
-                                      const newItems = newQuote.items.map(it => it.is_excluded ? it : { ...it, delivery_days: val });
+                                      const newItems = newQuote.items.map(it => (it.is_excluded || !it.quoted_rate) ? it : { ...it, delivery_days: val });
                                       setNewQuote({ ...newQuote, items: newItems });
                                       e.target.value = '';
                                     }
@@ -2251,7 +2261,7 @@ const Quotations = () => {
                              <IconButton size="small" sx={{ p: 0 }} onClick={() => {
                                 const el = document.getElementById('apply-all-delivery');
                                 if (el && el.value) {
-                                    const newItems = newQuote.items.map(it => it.is_excluded ? it : { ...it, delivery_days: el.value });
+                                    const newItems = newQuote.items.map(it => (it.is_excluded || !it.quoted_rate) ? it : { ...it, delivery_days: el.value });
                                     setNewQuote({ ...newQuote, items: newItems });
                                     el.value = '';
                                 }
@@ -2304,6 +2314,10 @@ const Quotations = () => {
                           if (val === '' || (/^\d*\.?\d{0,2}$/.test(val))) {
                             const newItems = [...newQuote.items];
                             newItems[idx].quoted_rate = val;
+                            if (val === '') {
+                              newItems[idx].discount_percent = '';
+                              newItems[idx].delivery_days = '';
+                            }
                             setNewQuote({ ...newQuote, items: newItems });
                           }
                         }}
@@ -2315,7 +2329,7 @@ const Quotations = () => {
                         size="small"
                         type="number"
                         className="no-spin"
-                        disabled={it.is_excluded}
+                        disabled={it.is_excluded || !it.quoted_rate}
                         onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()}
                         value={it.discount_percent}
                         onChange={(e) => {
@@ -2334,7 +2348,7 @@ const Quotations = () => {
                         id={`delivery-days-${idx}`}
                         size="small"
                         type="number"
-                        disabled={it.is_excluded}
+                        disabled={it.is_excluded || !it.quoted_rate}
                         onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()}
                         value={it.delivery_days}
                         onChange={(e) => {
@@ -2901,7 +2915,13 @@ const Quotations = () => {
                   if (parseFloat(val) > 100) val = '100';
                   if (parseFloat(val) < 0) val = '0';
                 }
-                setNegotiateDialog(prev => ({ ...prev, discountPercent: val }));
+                setNegotiateDialog(prev => {
+                  const newDiscounts = { ...prev.itemDiscounts };
+                  prev.items.forEach(it => {
+                    newDiscounts[it.qr_item_id] = val;
+                  });
+                  return { ...prev, discountPercent: val, itemDiscounts: newDiscounts };
+                });
               }}
               placeholder="e.g. 5"
               InputProps={{
@@ -2947,7 +2967,6 @@ const Quotations = () => {
                                 itemDiscounts: { ...prev.itemDiscounts, [item.qr_item_id]: val }
                               }));
                             }}
-                            placeholder="Common"
                             inputProps={{ step: "0.1", min: "0", max: "100" }}
                             sx={{ '& .MuiInputBase-input': { p: 1, fontSize: '0.8rem' } }}
                           />

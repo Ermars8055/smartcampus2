@@ -943,9 +943,7 @@ export default function Indents() {
             handleDepartmentChange(defaultDept, defaultInst);
           }
           setShowForm(true);
-        }}
-          sx={{ textTransform: 'none', fontWeight: 600, borderRadius: 2, px: 2.5 }}
-        >New Indent</Button>
+        }}>New Indent</Button>
       </Box>
 
       <Card sx={{ mb: 3 }}>

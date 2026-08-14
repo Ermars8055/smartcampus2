@@ -282,15 +282,49 @@ def material_movement_report(
 def list_audit_logs(
     skip: int = 0,
     limit: int = 100,
+    search: Optional[str] = None,
+    sort_by: Optional[str] = None,
+    sort_order: Optional[str] = "desc",
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("audit_logs", "read")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
-    total = db.query(AuditLog).filter(AuditLog.tenant_id == tenant_id, AuditLog.site_id == site_id).count()
-    logs = db.query(AuditLog).filter(
+    q = db.query(AuditLog).outerjoin(User, AuditLog.user_id == User.id).filter(
         AuditLog.tenant_id == tenant_id, AuditLog.site_id == site_id
-    ).order_by(AuditLog.created_at.desc()).offset(skip).limit(limit).all()
+    )
+
+    if search:
+        q = q.filter(
+            or_(
+                User.full_name.ilike(f"%{search}%"),
+                User.username.ilike(f"%{search}%"),
+                AuditLog.entity_type.ilike(f"%{search}%"),
+                AuditLog.action.ilike(f"%{search}%")
+            )
+        )
+
+    total = q.count()
+
+    if sort_by:
+        if sort_by == 'action':
+            order_col = AuditLog.action
+        elif sort_by == 'entity_type':
+            order_col = AuditLog.entity_type
+        elif sort_by == 'username':
+            order_col = User.full_name
+        else:
+            order_col = AuditLog.created_at
+            
+        if sort_order == "asc":
+            q = q.order_by(order_col.asc())
+        else:
+            q = q.order_by(order_col.desc())
+    else:
+        q = q.order_by(AuditLog.created_at.desc())
+        
+    logs = q.offset(skip).limit(limit).all()
+    
     return {
         "items": [
             AuditLogOut(

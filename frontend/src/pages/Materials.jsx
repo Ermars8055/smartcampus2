@@ -327,10 +327,29 @@ export default function Materials() {
     for (let i = 0; i < printLabelCount; i++) {
       labelsHtml += `
         <div class="label-container">
-          <div class="material-name" title="${selectedQrMaterial.name}">${selectedQrMaterial.name}</div>
-          <div class="material-code">${selectedQrMaterial.code}</div>
-          <div class="qr-code-container">${svgHtml}</div>
-          <div class="uom">UOM: ${selectedQrMaterial.uom_name}</div>
+          <div class="header">
+            <span class="material-name" title="${selectedQrMaterial.name}">${selectedQrMaterial.name}</span>
+            <span class="hospital-name">${selectedQrMaterial.category_name || ''}</span>
+          </div>
+          <div class="content">
+            <div class="qr-col">
+              ${svgHtml}
+            </div>
+            <div class="details-col">
+              <div class="asset-id">${selectedQrMaterial.code}</div>
+              <div class="detail-row">
+                <div class="label">TYPE</div>
+                <div class="value">${selectedQrMaterial.material_type || '-'}</div>
+              </div>
+              <div class="detail-row no-border">
+                <div class="label">UOM</div>
+                <div class="value">${selectedQrMaterial.uom_name || '-'}</div>
+              </div>
+            </div>
+          </div>
+          <div class="footer">
+            Scan for material details and inventory
+          </div>
         </div>
       `;
     }
@@ -355,8 +374,7 @@ export default function Materials() {
               align-content: start;
             }
             .label-container { 
-              text-align: center; 
-              border: 1px dashed #999; 
+              border: 1px solid #000; 
               padding: ${config.padding}; 
               border-radius: 4px; 
               page-break-inside: avoid; 
@@ -365,21 +383,90 @@ export default function Materials() {
               height: ${config.height};
               display: flex;
               flex-direction: column;
-              justify-content: center;
-              align-items: center;
               box-sizing: border-box;
             }
-            .material-name { 
-              font-weight: bold; 
-              font-size: ${config.nameSize}; 
-              margin-bottom: 2px; 
-              white-space: nowrap; 
-              overflow: hidden; 
-              text-overflow: ellipsis; 
+            @media print {
+              * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              }
             }
-            .material-code { color: #666; margin-bottom: 5px; font-size: ${config.codeSize}; }
-            .uom { font-size: ${config.uomSize}; margin-top: 3px; color: #444; }
-            .qr-code-container svg { width: ${config.svgSize}px; height: ${config.svgSize}px; }
+            .header {
+              display: flex;
+              justify-content: space-between;
+              font-size: ${config.uomSize};
+              font-weight: bold;
+              color: #737373 !important;
+              margin-bottom: 2mm;
+            }
+            .material-name {
+              text-align: left;
+              max-width: 60%;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+            .hospital-name {
+              text-align: right;
+              max-width: 35%;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+            .content {
+              display: flex;
+              flex: 1;
+              align-items: center;
+            }
+            .qr-col {
+              display: flex;
+              justify-content: flex-start;
+              align-items: center;
+            }
+            .qr-col svg {
+              width: ${config.svgSize}px;
+              height: ${config.svgSize}px;
+            }
+            .details-col {
+              flex: 1;
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              padding-left: 2mm;
+              margin-left: 2mm;
+              border-left: 1px dotted #ccc;
+            }
+            .asset-id {
+              font-size: ${config.nameSize}; 
+              font-weight: 900;
+              padding-bottom: 1.5mm;
+              margin-bottom: 1mm;
+              border-bottom: 1px dotted #ccc;
+            }
+            .detail-row {
+              padding-bottom: 1mm;
+              margin-bottom: 1mm;
+              border-bottom: 1px dotted #ccc;
+            }
+            .detail-row.no-border {
+              border-bottom: none;
+              margin-bottom: 0;
+            }
+            .label {
+              font-size: calc(${config.uomSize} * 0.7);
+              font-weight: 700;
+              text-transform: uppercase;
+              margin-bottom: 0.5mm;
+            }
+            .value {
+              font-size: ${config.codeSize};
+              margin-bottom: 0px;
+            }
+            .footer {
+              text-align: center;
+              font-size: calc(${config.uomSize} * 0.8);
+              margin-top: auto;
+            }
           </style>
         </head>
         <body>
@@ -997,23 +1084,52 @@ export default function Materials() {
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 3 }}>
           {selectedQrMaterial && (
             <>
-              <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 0.5, textAlign: 'center' }}>
-                {selectedQrMaterial.name}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                {selectedQrMaterial.code}
-              </Typography>
-              <Box sx={{ p: 2, bgcolor: '#fff', borderRadius: 2, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
-                <QRCodeSVG 
-                  id="material-qr-svg"
-                  value={`${window.location.origin}/materials/${selectedQrMaterial.code}`}
-                  size={200}
-                  level="M"
-                />
+              <Box sx={{ 
+                width: '340px', 
+                height: '170px', 
+                border: '1px solid #ccc', 
+                borderRadius: 1, 
+                bgcolor: '#fff',
+                display: 'flex',
+                flexDirection: 'column',
+                p: 1.5,
+                boxSizing: 'border-box'
+              }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                  <Typography sx={{ fontSize: '0.65rem', fontWeight: 700, color: '#737373', maxWidth: '60%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {selectedQrMaterial.name}
+                  </Typography>
+                  <Typography sx={{ fontSize: '0.65rem', fontWeight: 700, color: '#737373', maxWidth: '35%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textAlign: 'right' }}>
+                    {selectedQrMaterial.category_name || 'Category'}
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', flex: 1, alignItems: 'center' }}>
+                  <Box sx={{ flex: '0 0 90px', display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+                    <QRCodeSVG 
+                      id="material-qr-svg"
+                      value={`${window.location.origin}/materials/${selectedQrMaterial.code}`}
+                      size={85}
+                      level="M"
+                    />
+                  </Box>
+                  <Box sx={{ flex: 1, pl: 1, ml: 1, borderLeft: '1px dotted #ccc', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                    <Typography sx={{ fontSize: '1rem', fontWeight: 900, pb: 0.5, mb: 0.5, borderBottom: '1px dotted #ccc' }}>
+                      {selectedQrMaterial.code}
+                    </Typography>
+                    <Box sx={{ pb: 0.5, mb: 0.5, borderBottom: '1px dotted #ccc' }}>
+                      <Typography sx={{ fontSize: '0.5rem', fontWeight: 700, color: '#000' }}>TYPE</Typography>
+                      <Typography sx={{ fontSize: '0.65rem', color: '#000' }}>{selectedQrMaterial.material_type || '-'}</Typography>
+                    </Box>
+                    <Box>
+                      <Typography sx={{ fontSize: '0.5rem', fontWeight: 700, color: '#000' }}>UOM</Typography>
+                      <Typography sx={{ fontSize: '0.65rem', color: '#000' }}>{selectedQrMaterial.uom_name || '-'}</Typography>
+                    </Box>
+                  </Box>
+                </Box>
+                <Typography sx={{ fontSize: '0.5rem', textAlign: 'center', mt: 'auto', color: '#000' }}>
+                  Scan for material details and inventory
+                </Typography>
               </Box>
-              <Typography variant="caption" sx={{ mt: 3, color: '#64748B' }}>
-                UOM: {selectedQrMaterial.uom_name}
-              </Typography>
               <Box sx={{ display: 'flex', gap: 2, mt: 3, flexWrap: 'wrap', justifyContent: 'center' }}>
                 <FormControl size="small" sx={{ minWidth: 180 }}>
                   <InputLabel>Format (Labels/Page)</InputLabel>

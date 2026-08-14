@@ -2117,6 +2117,8 @@ class ComplaintBase(BaseModel):
     closure_reason: Optional[str] = None
     resolution_entered: Optional[str] = None
     is_pm_calibration_call: bool = False
+    repair_method: Optional[str] = None
+    linked_vwo_id: Optional[int] = None
 
 class ComplaintCreate(BaseModel):
     docket_no: Optional[str] = None
@@ -2153,7 +2155,7 @@ class ComplaintAssign(BaseModel):
     assigned_to_id: int
 
 class ComplaintInspect(BaseModel):
-    material_required: bool = False
+    repair_method: Optional[str] = None
     inspection_details: Optional[str] = None
 
 class ComplaintResolve(BaseModel):
@@ -2235,6 +2237,7 @@ class EquipmentUpdate(BaseModel):
     battery_details: Optional[str] = None
     year_of_purchase: Optional[int] = None
     po_number: Optional[str] = None
+    po_date: Optional[date] = None
     po_id: Optional[int] = None
     procurement_type: Optional[str] = None
     rental_type: Optional[str] = None
@@ -2276,6 +2279,7 @@ class EquipmentItemCreate(BaseModel):
     requires_installation: bool = False
     year_of_purchase: Optional[int] = None
     po_number: Optional[str] = None
+    po_date: Optional[date] = None
     po_id: Optional[int] = None
     procurement_type: str = "Purchase"
     rental_type: Optional[str] = None
@@ -2350,6 +2354,7 @@ class EquipmentItemOut(BaseModel):
     rental_status: Optional[str] = None
     year_of_purchase: Optional[int] = None
     po_number: Optional[str] = None
+    po_date: Optional[date] = None
     warranty_end_date: Optional[date] = None
     amc_cmc_status: Optional[str] = None
     rental_vendor_name: Optional[str] = None
@@ -2607,6 +2612,94 @@ class EquipmentCalibration(BaseModel):
     certificate_number: Optional[str] = None
     remarks: Optional[str] = None
 
+# ── Vendor Work Orders ──────────────────────────────────────────────────────────────
+
+class VendorWorkOrderItemBase(BaseModel):
+    material_id: Optional[int] = None
+    description: Optional[str] = None
+    quantity: float = 1
+    rate: float = 0
+    amount: float = 0
+
+class VendorWorkOrderItemOut(VendorWorkOrderItemBase):
+    id: int
+    material_name: Optional[str] = None
+    material_code: Optional[str] = None
+    uom_name: Optional[str] = None
+    class Config:
+        from_attributes = True
+
+class VendorWorkOrderImageOut(BaseModel):
+    id: int
+    image_type: Optional[str] = None
+    image_url: str
+    uploaded_at: datetime
+    class Config:
+        from_attributes = True
+
+class VendorWorkOrderDocumentOut(BaseModel):
+    id: int
+    document_type: Optional[str] = None
+    file_url: str
+    uploaded_at: datetime
+    uploaded_by_name: Optional[str] = None
+    class Config:
+        from_attributes = True
+
+class VendorWorkOrderBase(BaseModel):
+    vendor_id: int
+    complaint_id: Optional[int] = None
+    equipment_id: int
+    priority: str = "Normal"
+    target_date: date
+    service_type: str
+    scope_of_work: str
+    vendor_instructions: Optional[str] = None
+    quotation_no: Optional[str] = None
+    vendor_quote_amount: float = 0
+    labour_charges: float = 0
+    service_charges: float = 0
+    tax: float = 0
+    total_approved_amount: float = 0
+    status: str = "Draft"
+
+class VendorWorkOrderCreate(VendorWorkOrderBase):
+    items: List[VendorWorkOrderItemBase] = []
+
+class VendorWorkOrderUpdate(BaseModel):
+    priority: Optional[str] = None
+    target_date: Optional[date] = None
+    service_type: Optional[str] = None
+    scope_of_work: Optional[str] = None
+    vendor_instructions: Optional[str] = None
+    quotation_no: Optional[str] = None
+    vendor_quote_amount: Optional[float] = None
+    labour_charges: Optional[float] = None
+    service_charges: Optional[float] = None
+    tax: Optional[float] = None
+    total_approved_amount: Optional[float] = None
+    status: Optional[str] = None
+
+class VendorWorkOrderOut(VendorWorkOrderBase):
+    id: int
+    vwo_number: str
+    institution_id: Optional[int] = None
+    institution_name: Optional[str] = None
+    vendor_name: Optional[str] = None
+    complaint_docket: Optional[str] = None
+    equipment_code: Optional[str] = None
+    equipment_name: Optional[str] = None
+    created_by_id: int
+    created_by_name: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+    items: List[VendorWorkOrderItemOut] = []
+    images: List[VendorWorkOrderImageOut] = []
+    documents: List[VendorWorkOrderDocumentOut] = []
+    class Config:
+        from_attributes = True
+
+
 # == System Configuration (Menus) ==
 
 class MenuItemBase(BaseModel):
@@ -2614,10 +2707,10 @@ class MenuItemBase(BaseModel):
     icon_name: Optional[str] = Field(None, max_length=50)
     path: Optional[str] = Field(None, max_length=255)
     resource: Optional[str] = Field(None, max_length=100)
-    platform_only: bool = False
+    platform_only: Optional[bool] = False
     parent_id: Optional[int] = None
     order: int = 0
-    is_active: bool = True
+    is_active: Optional[bool] = True
     basic_actions: List[str] = ["read", "create", "update", "delete"]
     extended_actions: List[Dict[str, Any]] = []
 

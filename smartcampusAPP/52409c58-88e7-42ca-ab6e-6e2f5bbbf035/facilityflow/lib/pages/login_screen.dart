@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:facilityflow/services/api_service.dart';
 import 'package:facilityflow/globals/app_state.dart';
 
@@ -46,10 +47,14 @@ class _LoginScreenState extends State<LoginScreen> {
         final fullName = data['user']['full_name'];
 
         // Securely store the Native JWT Token
+        const storage = FlutterSecureStorage();
+        await storage.write(key: 'jwt_token', value: token);
+        await storage.write(key: 'user_email', value: email);
+        await storage.write(key: 'user_fullname', value: fullName);
+
+        // Keep is_logged_in in SharedPreferences for synchronous router checks
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('jwt_token', token);
-        await prefs.setString('user_email', email);
-        await prefs.setString('user_fullname', fullName);
+        await prefs.setBool('is_logged_in', true);
 
         // Fetch data now that we have a valid token
         if (mounted) {

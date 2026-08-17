@@ -4,7 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import '../services/api_service.dart';
 
 class GateEntryScreen extends StatefulWidget {
-  const GateEntryScreen({Key? key}) : super(key: key);
+  const GateEntryScreen({super.key});
 
   @override
   State<GateEntryScreen> createState() => _GateEntryScreenState();

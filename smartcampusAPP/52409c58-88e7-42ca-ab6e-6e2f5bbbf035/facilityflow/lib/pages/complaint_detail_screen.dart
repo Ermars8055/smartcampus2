@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:facilityflow/models/complaint.dart';
 import 'package:nowa_runtime/nowa_runtime.dart';
 import 'package:facilityflow/globals/app_state.dart';
@@ -42,9 +41,12 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
   }
 
   Future<void> _refreshComplaints() async {
+    if (!mounted) return;
     final appState = AppState.of(context, listen: false);
     await appState.fetchComplaints();
-    if (mounted) Navigator.pop(context);
+    if (mounted && Navigator.canPop(context)) {
+      Navigator.pop(context);
+    }
   }
 
   void _showAssignDialog() async {
@@ -58,26 +60,28 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
               t['role_name'].toString().toLowerCase().contains('technician'))
           .toList();
     } catch (e) {
-      if (mounted)
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to load technicians: $e')));
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load technicians: $e')));
     }
     setState(() => _isLoading = false);
 
-    if (!mounted || technicians.isEmpty) return;
+    if (!mounted || technicians.isEmpty) {
+      return;
+    }
 
     showDialog(
         context: context,
         builder: (ctx) {
           String? selectedTech;
           bool isSubmitting = false;
-          return StatefulBuilder(builder: (context, setStateDialog) {
+          return StatefulBuilder(builder: (dialogContext, setStateDialog) {
             return AlertDialog(
               title: const Text('Assign Technician'),
               content: DropdownButtonFormField<String>(
                 decoration:
                     const InputDecoration(labelText: 'Select Technician'),
-                value: selectedTech,
+                initialValue: selectedTech,
                 items: technicians
                     .map((t) => DropdownMenuItem<String>(
                           value: t['id'].toString(),
@@ -98,14 +102,14 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                           try {
                             await ApiService().assignTechnician(
                                 widget.complaint.id, int.parse(selectedTech!));
-                            if (mounted) {
+                            if (ctx.mounted) {
                               Navigator.pop(ctx);
-                              _refreshComplaints();
                             }
+                            _refreshComplaints();
                           } catch (e) {
-                            if (mounted)
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Failed: $e')));
+                            if (!mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Failed: $e')));
                             setStateDialog(() => isSubmitting = false);
                           }
                         },
@@ -127,7 +131,7 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
         context: context,
         builder: (ctx) {
           bool isSubmitting = false;
-          return StatefulBuilder(builder: (context, setStateDialog) {
+          return StatefulBuilder(builder: (dialogContext, setStateDialog) {
             return AlertDialog(
               title: const Text('Start Inspection'),
               content: Column(
@@ -162,14 +166,14 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                                 widget.complaint.id,
                                 materialRequired,
                                 controller.text);
-                            if (mounted) {
+                            if (ctx.mounted) {
                               Navigator.pop(ctx);
-                              _refreshComplaints();
                             }
+                            _refreshComplaints();
                           } catch (e) {
-                            if (mounted)
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Failed: $e')));
+                            if (!mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Failed: $e')));
                             setStateDialog(() => isSubmitting = false);
                           }
                         },
@@ -189,11 +193,13 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
       await ApiService().startRepair(widget.complaint.id);
       _refreshComplaints();
     } catch (e) {
-      if (mounted)
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Failed: $e')));
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Failed: $e')));
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -206,7 +212,7 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
         context: context,
         builder: (ctx) {
           bool isSubmitting = false;
-          return StatefulBuilder(builder: (context, setStateDialog) {
+          return StatefulBuilder(builder: (dialogContext, setStateDialog) {
             return AlertDialog(
               title: const Text('Resolve Complaint'),
               content: SingleChildScrollView(
@@ -249,7 +255,7 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                                         onTap: () => setStateDialog(
                                             () => images.remove(img)),
                                         child: Container(
-                                          color: Colors.white.withOpacity(0.8),
+                                          color: Colors.white.withValues(alpha: 0.8),
                                           child: const Icon(Icons.close,
                                               color: Colors.red, size: 20),
                                         ),
@@ -281,14 +287,14 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                             }
                             await api.resolveComplaint(widget.complaint.id,
                                 controller.text, imageUrls);
-                            if (mounted) {
+                            if (ctx.mounted) {
                               Navigator.pop(ctx);
-                              _refreshComplaints();
                             }
+                            _refreshComplaints();
                           } catch (e) {
-                            if (mounted)
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Failed: $e')));
+                            if (!mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Failed: $e')));
                             setStateDialog(() => isSubmitting = false);
                           }
                         },
@@ -347,7 +353,7 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 10, vertical: 4),
                                   decoration: BoxDecoration(
-                                    color: statusColor.withOpacity(0.1),
+                                    color: statusColor.withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(100),
                                     border: Border.all(
                                         color: statusColor, width: 1),
@@ -543,8 +549,9 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
 
   Widget? _buildBottomActionBar(bool isRegistered, bool isAssigned,
       bool isMaterialPending, bool isInProgress) {
-    if (!isRegistered && !isAssigned && !isMaterialPending && !isInProgress)
+    if (!isRegistered && !isAssigned && !isMaterialPending && !isInProgress) {
       return null;
+    }
 
     return Container(
       padding: const EdgeInsets.all(16),

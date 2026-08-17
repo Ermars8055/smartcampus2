@@ -73,22 +73,21 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
           await api.cancelIndent(widget.indent.id);
         }
 
-        if (mounted) {
-          final appState = AppState.of(context, listen: false);
-          await appState.fetchIndents();
-          Navigator.pop(context); // Go back
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content:
-                    Text('Indent ${action.toLowerCase()}ed successfully.')),
-          );
-        }
+        if (!mounted) return;
+        final appState = AppState.of(context, listen: false);
+        await appState.fetchIndents();
+        if (!mounted) return;
+        Navigator.pop(context); // Go back
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content:
+                  Text('Indent ${action.toLowerCase()}ed successfully.')),
+        );
       } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to perform action: $e')),
-          );
-        }
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to perform action: $e')),
+        );
       } finally {
         if (mounted) setState(() => _isLoading = false);
       }
@@ -116,7 +115,7 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
       context: context,
       builder: (ctx) {
         bool isSubmitting = false;
-        return StatefulBuilder(builder: (context, setStateDialog) {
+        return StatefulBuilder(builder: (dialogContext, setStateDialog) {
           return AlertDialog(
             title: const Text('Approve Indent'),
             content: SizedBox(
@@ -131,7 +130,7 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
                     child: ListView.builder(
                       shrinkWrap: true,
                       itemCount: widget.indent.items.length,
-                      itemBuilder: (context, idx) {
+                      itemBuilder: (itemContext, idx) {
                         final item = widget.indent.items[idx];
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 12.0),
@@ -207,24 +206,23 @@ class _IndentDetailScreenState extends State<IndentDetailScreen> {
                           final api = ApiService();
                           await api.approveIndent(
                               widget.indent.id, approvalPayload);
-                          if (mounted) {
-                            final appState =
-                                AppState.of(context, listen: false);
-                            await appState.fetchIndents();
-                            Navigator.pop(ctx); // Close dialog
-                            Navigator.pop(context); // Go back from details
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content:
-                                      Text('Indent approved successfully.')),
-                            );
-                          }
+                          if (!mounted) return;
+                          final appState =
+                              AppState.of(context, listen: false);
+                          await appState.fetchIndents();
+                          if (!mounted) return;
+                          if (ctx.mounted) Navigator.pop(ctx); // Close dialog
+                          if (Navigator.canPop(context)) Navigator.pop(context); // Go back from details
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content:
+                                    Text('Indent approved successfully.')),
+                          );
                         } catch (e) {
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Failed to approve: $e')),
-                            );
-                          }
+                          if (!mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Failed to approve: $e')),
+                          );
                         } finally {
                           setStateDialog(() => isSubmitting = false);
                         }

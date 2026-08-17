@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nowa_runtime/nowa_runtime.dart';
 import 'package:facilityflow/globals/app_state.dart';
-import 'package:facilityflow/models/indent_item.dart';
 import 'package:facilityflow/services/api_service.dart';
 
 @NowaGenerated()
@@ -78,12 +77,11 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
         });
       }
     } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to load form data')),
-        );
-      }
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to load form data')),
+      );
     }
   }
 
@@ -308,7 +306,7 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
         orElse: () => null);
 
     final payload = {
-      'institution_id': int.tryParse(_selectedInstitutionId!) ?? null,
+      'institution_id': int.tryParse(_selectedInstitutionId!),
       'department': _selectedDepartmentName,
       'building_id': _selectedBuildingId != null
           ? int.tryParse(_selectedBuildingId!)
@@ -350,29 +348,30 @@ class _CreateIndentScreenState extends State<CreateIndentScreen> {
       final api = ApiService();
       await api.dio.post('/api/indents', data: payload);
 
+      if (!mounted) return;
       final appState = AppState.of(context, listen: false);
       await appState.fetchIndents(); // Refresh list
 
-      if (mounted) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Indent request created successfully!'),
-            backgroundColor: Color(0xFF059669),
-          ),
-        );
+      if (!mounted) return;
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Indent request created successfully!'),
+          backgroundColor: Color(0xFF059669),
+        ),
+      );
+      if (Navigator.canPop(context)) {
         Navigator.pop(context);
       }
     } catch (e) {
-      if (mounted) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to submit request. Please try again.'),
-            backgroundColor: Color(0xFFDC2626),
-          ),
-        );
-      }
+      if (!mounted) return;
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to submit request. Please try again.'),
+          backgroundColor: Color(0xFFDC2626),
+        ),
+      );
     }
   }
 

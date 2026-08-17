@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:facilityflow/pages/gate_entry_screen.dart';
+import 'package:facilityflow/services/api_service.dart';
 
 @NowaGenerated()
 class GateEntriesListScreen extends StatelessWidget {
@@ -89,7 +90,7 @@ class GateEntriesListScreen extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
-                            color: _getStatusColor(entry.status).withOpacity(0.1),
+                            color: _getStatusColor(entry.status).withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(100),
                             border: Border.all(color: _getStatusColor(entry.status), width: 1),
                           ),
@@ -167,9 +168,11 @@ class GateEntriesListScreen extends StatelessWidget {
       backgroundColor: Colors.blue.shade50,
       side: BorderSide(color: Colors.blue.shade200),
       onPressed: () async {
+        String baseUrl = ApiService().dio.options.baseUrl;
+        if (baseUrl.endsWith('/')) baseUrl = baseUrl.substring(0, baseUrl.length - 1);
         String finalUrl = url.startsWith('http')
             ? url
-            : 'https://staging-smartcampus.ermarscastar.in$url';
+            : '$baseUrl$url';
         final uri = Uri.parse(finalUrl);
         if (await canLaunchUrl(uri)) {
           await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -239,7 +242,7 @@ class GateEntriesListScreen extends StatelessWidget {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
-                                color: _getStatusColor(entry.status).withOpacity(0.1),
+                                color: _getStatusColor(entry.status).withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(100),
                               ),
                               child: Text(

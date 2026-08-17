@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:facilityflow/globals/router.dart';
 
 class ApiService {
   static final ApiService _instance = ApiService._internal();
@@ -13,7 +15,10 @@ class ApiService {
 
   ApiService._internal() {
     // Load API URL from .env file
-    String baseUrl = dotenv.env['API_URL'] ?? 'https://staging-smartcampus.ermarscastar.in';
+    String baseUrl = dotenv.env['API_URL'] ?? '';
+    if (baseUrl.isEmpty) {
+      throw Exception('API_URL not found in .env file');
+    }
 
     dio = Dio(
       BaseOptions(
@@ -31,16 +36,23 @@ class ApiService {
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          // Fetch the .NET JWT token from local storage
-          final prefs = await SharedPreferences.getInstance();
-          final token = prefs.getString('jwt_token');
+          // Fetch the .NET JWT token from secure storage
+          const storage = FlutterSecureStorage();
+          final token = await storage.read(key: 'jwt_token');
           if (token != null) {
             options.headers['Authorization'] = 'Bearer $token';
           }
           return handler.next(options);
         },
-        onError: (DioException e, handler) {
+        onError: (DioException e, handler) async {
           // Handle global API errors here (e.g., 401 Unauthorized -> logout)
+          if (e.response?.statusCode == 401) {
+            const storage = FlutterSecureStorage();
+            await storage.deleteAll();
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.clear();
+            appRouter.go('/login');
+          }
           return handler.next(e);
         },
       ),
@@ -84,6 +96,10 @@ class ApiService {
           queryParameters: {'department_name': departmentName});
     }
     return await dio.get('/api/rooms');
+  }
+
+  Future<Response> getComplaintTypes() async {
+    return await dio.get('/api/configurations/lookups/ComplaintType');
   }
 
   Future<Response> getMaterials({int limit = 10000}) async {

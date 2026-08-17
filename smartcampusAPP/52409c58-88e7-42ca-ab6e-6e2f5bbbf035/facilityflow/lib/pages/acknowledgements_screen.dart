@@ -69,7 +69,7 @@ class AcknowledgementsScreen extends StatelessWidget {
                       padding: EdgeInsets.all(24),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
-                        children: const [
+                        children: [
                           CircularProgressIndicator(),
                           SizedBox(height: 16),
                           Text('Confirming Receipt...'),
@@ -111,7 +111,6 @@ class AcknowledgementsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appState = AppState.of(context, listen: true);
-    final theme = Theme.of(context);
     final issues = appState.materialIssues;
     final pendingIssues =
         issues.where((issue) => !issue.isAcknowledged).toList();
@@ -147,7 +146,7 @@ class AcknowledgementsScreen extends StatelessWidget {
             indicatorColor: Colors.white,
             labelColor: Colors.white,
             unselectedLabelColor: Color(0xFF93C5FD),
-            tabs: const [
+            tabs: [
               Tab(text: 'Pending Receipts'),
               Tab(text: 'Acknowledged History'),
             ],

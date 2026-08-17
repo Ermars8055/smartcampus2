@@ -22,16 +22,15 @@ class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
 
   final List<Widget> _screens = const [
-    const IndentsListScreen(),
-    const MaintenanceHomeScreen(),
-    const AcknowledgementsScreen(),
-    const GateEntriesListScreen(),
-    const ProfileScreen(),
+    IndentsListScreen(),
+    MaintenanceHomeScreen(),
+    AcknowledgementsScreen(),
+    GateEntriesListScreen(),
+    ProfileScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Scaffold(
       body: IndexedStack(index: _currentIndex, children: _screens),
       bottomNavigationBar: Container(

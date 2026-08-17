@@ -90,7 +90,7 @@ class _ComplaintsListScreenState extends State<ComplaintsListScreen> {
             indicatorColor: Colors.white,
             labelColor: Colors.white,
             unselectedLabelColor: Color(0xFF93C5FD),
-            tabs: const [
+            tabs: [
               Tab(text: 'Open / Assigned'),
               Tab(text: 'In Progress'),
               Tab(text: 'Closed'),

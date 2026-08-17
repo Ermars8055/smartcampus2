@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -20,10 +21,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _loadProfileData() async {
-    final prefs = await SharedPreferences.getInstance();
+    const storage = FlutterSecureStorage();
+    final email = await storage.read(key: 'user_email');
+    final fullName = await storage.read(key: 'user_fullname');
     setState(() {
-      _email = prefs.getString('user_email') ?? 'No email associated';
-      _fullName = prefs.getString('user_fullname') ?? 'Smartcampus User';
+      _email = email ?? 'No email associated';
+      _fullName = fullName ?? 'Smartcampus User';
     });
   }
 
@@ -35,11 +38,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const Center(child: CircularProgressIndicator(color: Colors.white)),
     );
     try {
+      const storage = FlutterSecureStorage();
+      await storage.deleteAll();
+
       final prefs = await SharedPreferences.getInstance();
       await prefs.clear(); // Wipe the JWT token and profile data
 
       if (context.mounted) {
-        context.go('/'); // Route back to the Login Screen
+        context.go('/login'); // Route back to the Login Screen
       }
     } catch (e) {
       if (context.mounted) {

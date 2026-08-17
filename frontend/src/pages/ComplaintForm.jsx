@@ -1,15 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   Box, Typography, Paper, Grid, TextField, Button, IconButton, Divider, Snackbar, Alert, CircularProgress,
-  Autocomplete, FormControl, InputLabel, Select, MenuItem, Dialog, DialogTitle, DialogContent, Card
+  Autocomplete, FormControl, InputLabel, Select, MenuItem, Dialog, DialogTitle, DialogContent, Card, Chip
 } from '@mui/material';
 import { ArrowBack, PhotoCamera, Close, CloudUpload } from '@mui/icons-material';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import api, { getFileUrl } from '../services/api';
 
 export default function ComplaintForm() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const fileInputRef = useRef(null);
 
   const [formData, setFormData] = useState({
@@ -19,6 +20,7 @@ export default function ComplaintForm() {
     building_id: '',
     floor_id: '',
     room_id: '',
+    equipment_id: '',
     location: '',
     nature_of_complaint: '',
     individual_detailed: '',
@@ -33,6 +35,34 @@ export default function ComplaintForm() {
   const [floors, setFloors] = useState([]);
   const [rooms, setRooms] = useState([]);
   const [complaintTypes, setComplaintTypes] = useState([]);
+  const [equipmentList, setEquipmentList] = useState([]);
+  const [selectedEquipment, setSelectedEquipment] = useState(null);
+
+  useEffect(() => {
+    api.get('/api/equipment')
+      .then(res => {
+        const eqData = res.data || [];
+        setEquipmentList(eqData);
+        
+        const eqCodeFromQuery = searchParams.get('equipment_code');
+
+        if (formData.equipment_id) {
+          const eq = eqData.find(e => e.id === formData.equipment_id);
+          if (eq) setSelectedEquipment(eq);
+        } else if (eqCodeFromQuery) {
+          const eq = eqData.find(e => e.equipment_code === eqCodeFromQuery);
+          if (eq) {
+            setSelectedEquipment(eq);
+            setFormData(prev => ({ 
+              ...prev, 
+              equipment_id: eq.id,
+              institution_id: eq.institution_id || prev.institution_id
+            }));
+          }
+        }
+      })
+      .catch(err => console.error('Failed to load equipment', err));
+  }, [searchParams]); // Fetch all equipment on mount
 
   useEffect(() => {
     let fetchedInsts = [];
@@ -61,6 +91,7 @@ export default function ComplaintForm() {
             building_id: c.building_id || '',
             floor_id: c.floor_id || '',
             room_id: c.room_id || '',
+            equipment_id: c.equipment_id || '',
             location: c.location || '',
             nature_of_complaint: c.nature_of_complaint || '',
             individual_detailed: c.individual_detailed || '',
@@ -101,10 +132,23 @@ export default function ComplaintForm() {
           setSnackbar({ open: true, message: 'Failed to fetch complaint details', severity: 'error' });
         });
       } else {
-        if (instId || deptName) {
-          setFormData(prev => ({ ...prev, institution_id: instId, department_name: deptName }));
-          if (deptName) {
-            api.get(`/api/rooms?department_name=${encodeURIComponent(deptName)}`).then(r => {
+        let initialInstId = instId;
+        let initialDeptName = deptName;
+        
+        const departmentQuery = searchParams.get('department');
+        if (departmentQuery) {
+          initialDeptName = departmentQuery;
+        }
+
+        if (initialInstId || initialDeptName) {
+          setFormData(prev => ({ 
+            ...prev, 
+            institution_id: prev.institution_id || initialInstId, 
+            department_name: initialDeptName 
+          }));
+          
+          if (initialDeptName) {
+            api.get(`/api/rooms?department_name=${encodeURIComponent(initialDeptName)}`).then(r => {
               const fetchedRooms = r.data || [];
               const uniqueBuildings = new Map();
               const uniqueFloors = new Map();
@@ -112,12 +156,12 @@ export default function ComplaintForm() {
                 if (room.building_id && room.building_name) uniqueBuildings.set(room.building_id, { id: room.building_id, name: room.building_name });
                 if (room.floor_id && room.floor_name) uniqueFloors.set(room.floor_id, { id: room.floor_id, name: room.floor_name, building_id: room.building_id });
               });
-              const masterDepts = fetchedDepts.filter(d => d.name === deptName);
+              const masterDepts = fetchedDepts.filter(d => d.name === initialDeptName);
               masterDepts.forEach(d => {
                 if (d.building_id && d.building_name) uniqueBuildings.set(d.building_id, { id: d.building_id, name: d.building_name });
               });
               fetchedBldgs.forEach(b => {
-                if (b.department_name === deptName && (!instId || b.institution_id === instId)) {
+                if (b.department_name === initialDeptName && (!initialInstId || b.institution_id === initialInstId)) {
                   uniqueBuildings.set(b.id, { id: b.id, name: b.name });
                 }
               });
@@ -129,7 +173,7 @@ export default function ComplaintForm() {
         }
       }
     });
-  }, [id]);
+  }, [id, searchParams]);
 
   const filteredDepartments = formData.institution_id 
     ? Array.from(new Set(allDepartments.filter(d => d.institution_id === formData.institution_id).map(d => d.name)))
@@ -254,7 +298,22 @@ export default function ComplaintForm() {
 
     } catch (error) {
       console.error('Submit error:', error);
-      setSnackbar({ open: true, message: error.response?.data?.detail || 'Failed to submit complaint', severity: 'error' });
+      let errMsg = 'Failed to submit complaint';
+      if (error.response?.data) {
+        if (error.response.data.detail) {
+          errMsg = typeof error.response.data.detail === 'string'
+            ? error.response.data.detail
+            : JSON.stringify(error.response.data.detail);
+        } else if (typeof error.response.data === 'string') {
+          // Sometimes FastAPI returns raw HTML on 500 errors
+          errMsg = error.response.data.slice(0, 100);
+        } else {
+          errMsg = JSON.stringify(error.response.data);
+        }
+      } else if (error.message) {
+        errMsg = error.message;
+      }
+      setSnackbar({ open: true, message: errMsg, severity: 'error' });
     } finally {
       setUploading(false);
     }
@@ -345,6 +404,31 @@ export default function ComplaintForm() {
                   {rooms.filter(rm => !formData.floor_id || rm.floor_id === formData.floor_id).map(r => <MenuItem key={r.id} value={r.id}>{r.name}</MenuItem>)}
                 </Select>
               </FormControl>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Autocomplete
+                options={equipmentList}
+                getOptionLabel={(option) => `${option.equipment_code} - ${option.material_name || option.make || ''}`}
+                value={selectedEquipment}
+                onChange={(e, val) => {
+                  setSelectedEquipment(val);
+                  setFormData(prev => ({ ...prev, equipment_id: val ? val.id : '' }));
+                }}
+                renderInput={(params) => <TextField {...params} label="Equipment (Optional)" placeholder="Select equipment..." />}
+              />
+              {selectedEquipment && (
+                <Box sx={{ mt: 1 }}>
+                  <Chip 
+                    label={selectedEquipment.amc_cmc_status && selectedEquipment.amc_cmc_status !== 'None' 
+                      ? `${selectedEquipment.amc_cmc_status} Active until ${selectedEquipment.amc_cmc_end_date ? selectedEquipment.amc_cmc_end_date.split('T')[0] : 'N/A'}` 
+                      : selectedEquipment.warranty_available 
+                        ? `Warranty Active until ${selectedEquipment.warranty_expiry_date ? selectedEquipment.warranty_expiry_date.split('T')[0] : 'N/A'}`
+                        : 'No Active AMC/CMC/Warranty'}
+                    color={selectedEquipment.amc_cmc_status && selectedEquipment.amc_cmc_status !== 'None' ? 'primary' : selectedEquipment.warranty_available ? 'success' : 'default'}
+                    size="small"
+                  />
+                </Box>
+              )}
             </Grid>
             <Grid item xs={12} md={6}>
               <TextField fullWidth label="Name (Occupant / Trade)" name="name_and_trade" value={formData.name_and_trade} onChange={handleChange} />

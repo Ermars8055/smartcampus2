@@ -152,9 +152,9 @@ def create_complaint(
         db.flush() # To get the ID for images
 
         if complaint_in.equipment_id:
-            from app.models import ContractItem, Contract
-            from datetime import datetime
+            from app.models import ContractItem, Contract, VendorWorkOrder, EquipmentItem
             today = datetime.utcnow().date()
+            eq = db.query(EquipmentItem).filter(EquipmentItem.id == complaint_in.equipment_id).first()
             c_item = db.query(ContractItem).join(Contract).filter(
                 ContractItem.equipment_id == complaint_in.equipment_id,
                 Contract.status.in_(["Approved", "Active"]),
@@ -163,8 +163,43 @@ def create_complaint(
                 Contract.contract_type.in_(["AMC", "CMC"])
             ).first()
 
+            vendor_id = None
+            has_amc = False
+            contract_type = "AMC/CMC"
+            
             if c_item:
                 new_complaint.contract_id = c_item.contract_id
+                vendor_id = c_item.contract.vendor_id
+                has_amc = True
+                contract_type = c_item.contract.contract_type
+            elif eq and eq.amc_cmc_status in ["AMC", "CMC"]:
+                has_amc = True
+                contract_type = eq.amc_cmc_status
+                if eq.grn and eq.grn.vendor_id:
+                    vendor_id = eq.grn.vendor_id
+
+            if has_amc:
+                # Auto-generate Vendor Work Order
+                from datetime import timedelta
+                vwo_number = get_next_number(db, tenant_id, site_id, "VENDOR_WORK_ORDER", "VWO")
+                new_vwo = VendorWorkOrder(
+                    tenant_id=tenant_id,
+                    site_id=site_id,
+                    vwo_number=vwo_number,
+                    institution_id=eq.institution_id if eq else None,
+                    vendor_id=vendor_id,
+                    complaint_id=new_complaint.id,
+                    equipment_id=complaint_in.equipment_id,
+                    priority="Normal",
+                    target_date=today + timedelta(days=3),
+                    service_type="Repair",
+                    scope_of_work=complaint_in.nature_of_complaint or f"Maintenance required for {contract_type}",
+                    status="Draft",
+                    created_by_id=current_user.id
+                )
+                db.add(new_vwo)
+                db.flush() # Get VWO ID
+                new_complaint.linked_vwo_id = new_vwo.id
 
         for img_url in complaint_in.image_urls:
             new_img = ComplaintImage(

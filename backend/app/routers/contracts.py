@@ -161,7 +161,8 @@ def get_vendor_active_contract_details(
             if db_item.material:
                 item.material_name = db_item.material.name
             if db_item.equipment:
-                item.equipment_serial = db_item.equipment.serial_number or db_item.equipment.name
+                item.material_name = db_item.equipment.material.name if db_item.equipment.material else None
+                item.equipment_serial = db_item.equipment.equipment_code
                 
         result.append(out)
     return result
@@ -209,7 +210,8 @@ def get_contract(
         if db_item.material:
             item.material_name = db_item.material.name
         if db_item.equipment:
-            item.equipment_serial = db_item.equipment.serial_number or db_item.equipment.name
+            item.material_name = db_item.equipment.material.name if db_item.equipment.material else None
+            item.equipment_serial = db_item.equipment.equipment_code
             
     return out
 

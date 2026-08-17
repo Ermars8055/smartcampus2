@@ -636,7 +636,6 @@ export default function Equipment() {
 
   const openAddDialog = () => {
     setAddForm({
-      equipment_code: '',
       material_id: '',
       warehouse_id: '',
       location_id: '',
@@ -711,8 +710,8 @@ export default function Equipment() {
 
 
   const handleAddSubmit = async () => {
-    if (!addForm.equipment_code || !addForm.material_id) {
-      showMessage('Equipment Code and Material are required', 'Validation Error', 'warning');
+    if (!addForm.material_id || !addForm.institution_id || !addForm.location_id) {
+      showMessage('Material, Institution, and Location are required', 'Validation Error', 'warning');
       return;
     }
     if (addForm.po_number && !addForm.po_date) {
@@ -1598,9 +1597,9 @@ export default function Equipment() {
               </Grid>
               <Grid item xs={12} sm={4}>
                 <TextField
-                  fullWidth size="small" label="Equipment Code *"
-                  value={addForm.equipment_code || ''}
-                  onChange={e => setAddForm({ ...addForm, equipment_code: e.target.value })}
+                  fullWidth size="small" label="Equipment Code"
+                  value="Auto-generated"
+                  disabled
                 />
               </Grid>
               <Grid item xs={12} sm={8}>
@@ -1628,10 +1627,10 @@ export default function Equipment() {
               </Grid>
               <Grid item xs={12} sm={4}>
                 <FormControl fullWidth size="small">
-                  <InputLabel>Institution</InputLabel>
+                  <InputLabel>Institution *</InputLabel>
                   <Select
                     value={addForm.institution_id || ''}
-                    label="Institution"
+                    label="Institution *"
                     onChange={e => setAddForm({ ...addForm, institution_id: e.target.value })}
                   >
                     <MenuItem value=""><em>None</em></MenuItem>
@@ -1641,10 +1640,10 @@ export default function Equipment() {
               </Grid>
               <Grid item xs={12} sm={4}>
                 <FormControl fullWidth size="small">
-                  <InputLabel>Location</InputLabel>
+                  <InputLabel>Location *</InputLabel>
                   <Select
                     value={addForm.location_id || ''}
-                    label="Location"
+                    label="Location *"
                     onChange={e => setAddForm({ ...addForm, location_id: e.target.value })}
                   >
                     <MenuItem value=""><em>None</em></MenuItem>
@@ -1814,13 +1813,7 @@ export default function Equipment() {
                 <TextField fullWidth size="small" label="Equipment Name" value={editForm.material_name || ''} InputProps={{ readOnly: true }} variant="filled" />
               </Grid>
               <Grid item xs={12} sm={4}>
-                <TextField fullWidth size="small" label="Asset Code" value={editForm.equipment_code || ''} InputProps={{ readOnly: true }} variant="filled" />
-              </Grid>
-              <Grid item xs={12} sm={4}>
                 <TextField fullWidth size="small" label="Serial Number" value={editForm.serial_number || 'Pending'} InputProps={{ readOnly: true }} variant="filled" />
-              </Grid>
-              <Grid item xs={12} sm={4}>
-                <TextField fullWidth size="small" label="Location" value={editForm.location_name || '-'} InputProps={{ readOnly: true }} variant="filled" />
               </Grid>
               <Grid item xs={12} sm={4}>
                 <TextField fullWidth size="small" label="Status" value={editForm.status || ''} InputProps={{ readOnly: true }} variant="filled" />
@@ -1843,6 +1836,22 @@ export default function Equipment() {
                 <Typography variant="subtitle2" color="primary" sx={{ mb: -1 }}>Editable Details</Typography>
               </Grid>
 
+              <Grid item xs={12} sm={6}>
+                <TextField fullWidth size="small" label="Asset Code" value={editForm.equipment_code || ''} onChange={e => setEditForm({ ...editForm, equipment_code: e.target.value })} />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Location</InputLabel>
+                  <Select
+                    value={editForm.location_id || ''}
+                    label="Location"
+                    onChange={e => setEditForm({ ...editForm, location_id: e.target.value })}
+                  >
+                    <MenuItem value=""><em>None</em></MenuItem>
+                    {locations.map(l => <MenuItem key={l.id} value={l.id}>{l.location_name}</MenuItem>)}
+                  </Select>
+                </FormControl>
+              </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField fullWidth size="small" label="Make" value={editForm.make || ''} onChange={e => setEditForm({ ...editForm, make: e.target.value })} />
               </Grid>

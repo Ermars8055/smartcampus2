@@ -4,8 +4,8 @@ from app.database import get_db
 from app.models import TenantConfiguration
 from app.schemas import TenantConfigurationOut, TenantConfigurationCreate, TenantConfigurationUpdate
 from app.auth import get_tenant_id, get_site_id, require_permission, get_current_user
-from app.models import LocationMaster, User
-from app.schemas import LocationMasterOut, LocationMasterCreate
+from app.models import LocationMaster, User, SystemLookup
+from app.schemas import LocationMasterOut, LocationMasterCreate, SystemLookupOut
 from typing import List
 
 router = APIRouter(prefix="/api/configurations", tags=["Configurations"])
@@ -124,3 +124,35 @@ def update_location(
     db.commit()
     db.refresh(location)
     return location
+
+@router.get("/lookups/{lookup_type}", response_model=List[SystemLookupOut])
+def get_system_lookups(
+    lookup_type: str,
+    db: Session = Depends(get_db),
+    tenant_id: int = Depends(get_tenant_id),
+    current_user: User = Depends(get_current_user)
+):
+    lookups = db.query(SystemLookup).filter(
+        SystemLookup.tenant_id == tenant_id,
+        SystemLookup.lookup_type == lookup_type
+    ).all()
+
+    # Auto-seed defaults for ComplaintType if none exist
+    if not lookups and lookup_type == "ComplaintType":
+        default_complaints = ["General Complaint", "Machine Not Working", "Installation", "User Training"]
+        new_lookups = []
+        for val in default_complaints:
+            sl = SystemLookup(
+                tenant_id=tenant_id,
+                lookup_type=lookup_type,
+                lookup_value=val,
+                is_active=True
+            )
+            db.add(sl)
+            new_lookups.append(sl)
+        db.commit()
+        for sl in new_lookups:
+            db.refresh(sl)
+        lookups = new_lookups
+
+    return lookups

@@ -32,6 +32,7 @@ export default function ComplaintForm() {
   const [buildings, setBuildings] = useState([]);
   const [floors, setFloors] = useState([]);
   const [rooms, setRooms] = useState([]);
+  const [complaintTypes, setComplaintTypes] = useState([]);
 
   useEffect(() => {
     let fetchedInsts = [];
@@ -41,7 +42,8 @@ export default function ComplaintForm() {
     Promise.all([
       api.get('/api/institutions').then(r => { fetchedInsts = r.data; setInstitutions(r.data); }).catch(() => setInstitutions([])),
       api.get('/api/departments').then(r => { fetchedDepts = r.data; setAllDepartments(r.data); }).catch(() => setAllDepartments([])),
-      api.get('/api/buildings').then(r => { fetchedBldgs = r.data; setAllBuildings(r.data); }).catch(() => setAllBuildings([]))
+      api.get('/api/buildings').then(r => { fetchedBldgs = r.data; setAllBuildings(r.data); }).catch(() => setAllBuildings([])),
+      api.get('/api/configurations/lookups/ComplaintType').then(r => setComplaintTypes(r.data || [])).catch(() => setComplaintTypes([]))
     ]).then(() => {
       let instId = fetchedInsts.length === 1 ? fetchedInsts[0].id : '';
       let deptName = '';
@@ -357,10 +359,10 @@ export default function ComplaintForm() {
                   onChange={handleChange}
                   required
                 >
-                  <MenuItem value="General Complaint">General Complaint</MenuItem>
-                  <MenuItem value="Machine Not Working">Machine Not Working</MenuItem>
-                  <MenuItem value="Installation">Installation</MenuItem>
-                  <MenuItem value="User Training">User Training</MenuItem>
+                  <MenuItem value="" disabled><em>Select Type</em></MenuItem>
+                  {complaintTypes.map((type) => (
+                    <MenuItem key={type.id} value={type.lookup_value}>{type.lookup_value}</MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Grid>

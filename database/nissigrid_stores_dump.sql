@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict 3ZZjJWQj4XV2hCERfv0HInS5P4f5nXE1dotUFrvSpHJXC6kEgj8NDvfXLmwcOVO
+\restrict PXoR8FfDxRLR5JsYRSBbkPzgLFaaGnH0CxVC6g2e2BUuBKchWh11LZtZhaI3mHc
 
 -- Dumped from database version 17.10 (Ubuntu 17.10-1.pgdg22.04+1)
 -- Dumped by pg_dump version 18.4 (Ubuntu 18.4-1.pgdg22.04+1)
@@ -4789,7 +4789,7 @@ ALTER TABLE ONLY public.write_offs ALTER COLUMN id SET DEFAULT nextval('public.w
 --
 
 COPY public.alembic_version (version_num) FROM stdin;
-c8b63bd0efef
+7df8f75c6d3e
 \.
 
 
@@ -4877,6 +4877,7 @@ COPY public.alerts (id, tenant_id, site_id, alert_type, severity, title, message
 77	2	2	Contract Approved	Success	Contract CNT-00005 Approved	The contract (CNT-00005) has been approved by EastPoint Admin.	ContractApproved	5	\N	f	f	2026-08-12 14:39:55.144645	\N	3
 78	2	2	Pending Action	Warning	Action Required: Issue Acknowledgement	Materials for your indent (IND-00024) have been issued. Please review and acknowledge receipt.	IndentIssued	239	\N	f	f	2026-08-14 12:56:12.823547	\N	3
 79	2	2	Complaint Assigned	Info	Complaint Assigned: PM-202608-EPCMS-POST OT -SYP-061	You have been assigned to complaint PM-202608-EPCMS-POST OT -SYP-061. Nature of complaint: Scheduled Preventive Maintenance	ComplaintAssigned	442	\N	f	f	2026-08-14 16:10:42.482907	\N	34
+80	2	2	Indent Approved	Success	Indent IND-00027 Approved	The indent (IND-00027) has been approved by EastPoint Admin.	IndentApproved	242	\N	f	f	2026-08-17 10:40:12.240706	\N	3
 \.
 
 
@@ -6485,6 +6486,7 @@ COPY public.contract_approvals (id, contract_id, approval_flow_id, approver_id, 
 8	4	84	3	\N	2026-08-11 19:28:39.624489
 9	5	105	3	\N	2026-08-12 14:39:41.360869
 10	5	84	3	\N	2026-08-12 14:39:55.146447
+11	6	105	3	\N	2026-08-17 10:47:06.197723
 \.
 
 
@@ -6512,7 +6514,7 @@ COPY public.contracts (id, tenant_id, site_id, contract_number, contract_type, v
 3	2	2	CNT-00003	RC	66	5	271	2026-08-10	2026-08-20	15000				f	f	Active	3	3	2026-08-11 13:46:44.953434	f	2026-08-03 17:10:25.921051	2026-08-11 19:22:59.222655		2
 4	2	2	CNT-00004	RC	66	11	\N	2026-08-10	2026-08-31	120000				f	f	Approved	3	3	2026-08-11 13:58:39.622117	f	2026-08-11 19:28:23.844588	2026-08-11 19:28:39.623956		2
 5	2	2	CNT-00005	AMC	69	1	\N	2026-08-31	2027-08-11	16780				f	f	Approved	3	3	2026-08-12 09:09:55.143196	f	2026-08-12 12:28:13.107764	2026-08-12 14:39:55.145898		2
-6	2	2	CNT-00006	RC	69	\N	\N	2026-08-01	2027-08-17	\N				f	f	Submitted	3	\N	\N	f	2026-08-14 14:57:37.256088	2026-08-14 16:05:03.558721		1
+6	2	2	CNT-00006	RC	69	\N	\N	2026-08-01	2027-08-17	\N				f	f	Submitted	3	\N	\N	f	2026-08-14 14:57:37.256088	2026-08-17 10:47:06.193768		2
 \.
 
 
@@ -9357,13 +9359,13 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 326	3	3	228	55	3380	2026-06-17 18:12:13.813019
 2412	3	3	2102	59	27	2026-06-17 18:19:11.656207
 3651	2	2	3462	62	47	2026-06-18 11:11:57.168045
-2854	2	2	2564	62	44	2026-07-08 12:25:10.075655
 3690	2	2	3507	62	83	2026-07-08 12:25:10.075718
 3660	2	2	3474	62	64	2026-08-06 11:44:09.973896
 2855	2	2	2565	62	54	2026-08-06 14:53:32.831495
 3868	2	2	2565	63	1	2026-08-06 14:53:32.831506
 3867	2	2	2338	62	50	2026-08-12 11:07:29.314793
 3013	2	2	2751	62	22	2026-08-14 12:56:12.832462
+2854	2	2	2564	62	42	2026-08-17 10:07:34.275435
 4136	2	2	4604	62	522	2026-08-06 13:36:11.191772
 4137	2	2	4605	62	655	2026-08-06 13:36:11.191784
 4138	2	2	4606	62	192	2026-08-06 13:36:11.191787
@@ -10298,7 +10300,6 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 30	2	2	DEPARTMENT	DEPT	74
 62	2	2	ROOM	RM	3
 90	4	4	ORGANIZATION	ORG	2
-72	2	2	WAREHOUSE	WH	11
 91	4	4	PROJECT	PROJ	5
 92	4	4	INSTITUTION	INST	5
 79	3	3	INSTITUTION	INST	1
@@ -10317,24 +10318,26 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 93	2	2	WRITE_OFF	WO	9
 100	2	2	EQUIPMENT_WRITE_OFF	EWO	1
 94	2	2	PURCHASE_ORDER_11	EPAHS/PO	3
-103	2	2	PURCHASE_ORDER_10	EPCPT/PO	3
+103	2	2	PURCHASE_ORDER_10	EPCPT/PO	4
 102	2	2	PURCHASE_ORDER_9	NRCN/PO	3
 78	2	2	COMPLAINT	CMP	17
 105	2	2	PURCHASE_ORDER_5	EPCHE/PO	1
 104	2	2	PURCHASE_ORDER_8	EPSN/PO	2
-112	2	2	WORK_ORDER	WO	1
+112	2	2	WORK_ORDER	WO	2
 113	1	1	WORK_ORDER	WO-	3
-66	2	2	INDENT	IND	26
-68	2	2	PURCHASE_REQUEST	PR	13
 76	2	2	INVOICE_REF	INV	7
-67	2	2	ISSUE	ISS	10
 96	2	2	CONTRACT	CNT	6
 74	2	2	RETURN	RET	3
 71	2	2	GATE_ENTRY	GE	11
 75	2	2	GRN	GRN	14
 69	2	2	PURCHASE_ORDER	PO	36
 70	2	2	QUOTATION_REQUEST	QR	38
-65	2	2	VENDOR	VND	13
+115	2	2	PURCHASE_ORDER_7	EPCN/PO	1
+67	2	2	ISSUE	ISS	11
+65	2	2	VENDOR	VND	14
+72	2	2	WAREHOUSE	WH	13
+66	2	2	INDENT	IND	27
+68	2	2	PURCHASE_REQUEST	PR	14
 \.
 
 
@@ -11506,6 +11509,10 @@ COPY public.indent_approvals (id, indent_id, approval_flow_id, approver_id, appr
 86	240	108	3	2026-08-12 10:38:48.167088	{"522": {"quantity": 1.0, "remarks": "Final "}}	\N
 87	241	104	3	2026-08-14 12:31:43.787545	{"523": {"quantity": 2.0, "remarks": "Limited"}}	nil
 88	241	44	3	2026-08-14 12:31:43.787589	{"523": {"quantity": 2.0, "remarks": "Limited"}}	nil
+89	242	104	3	2026-08-17 10:40:05.59495	{"524": {"quantity": 4.0, "remarks": null}}	\N
+90	242	44	3	2026-08-17 10:40:05.594963	{"524": {"quantity": 4.0, "remarks": null}}	\N
+91	242	16	3	2026-08-17 10:40:12.218487	{"524": {"quantity": 4.0, "remarks": null}}	\N
+92	242	108	3	2026-08-17 10:40:12.218501	{"524": {"quantity": 4.0, "remarks": null}}	\N
 \.
 
 
@@ -11619,6 +11626,7 @@ COPY public.indent_items (id, indent_id, material_id, requested_quantity, issued
 522	240	2564	4	0	0	1
 523	241	2564	1	0	0	2
 521	239	2751	1	3	0	3
+524	242	3474	4	0	0	4
 \.
 
 
@@ -11690,6 +11698,7 @@ COPY public.indents (id, tenant_id, site_id, indent_number, requester_id, room_i
 240	2	2	IND-00025	3	237	7	FIRST FLOOR	ROOM101	HEALTH 		66104.64	Approved	2	3	2026-08-12 05:08:48.18428	f	2026-08-12 10:32:16.427408	2026-08-12 10:38:48.186197	11	\N	\N
 241	2	2	IND-00026	3	237	7	FIRST FLOOR	ROOM101	HEALTH 		16526.16	Submitted	2	\N	\N	f	2026-08-14 12:29:53.625013	2026-08-14 12:31:43.853423	11	\N	\N
 239	2	2	IND-00024	3	\N	\N			Chemistry	Complaint CMP-00013 - fdgdfg	10443.43	Issued	2	3	2026-08-12 04:48:14.16361	f	2026-08-10 16:47:23.026424	2026-08-14 12:56:12.833616	3	15	\N
+242	2	2	IND-00027	3	\N	\N			Child Health Nursing (Pediatric Nursing)		13050.32	Approved	2	3	2026-08-17 05:10:12.238591	f	2026-08-17 10:39:56.617303	2026-08-17 10:40:12.289145	7	\N	\N
 \.
 
 
@@ -11992,6 +12001,7 @@ COPY public.material_issue_items (id, issue_id, material_id, quantity, rate, rem
 218	238	2435	1	4657.57	\N	62
 219	239	3474	4	3262.58	\N	62
 220	240	2751	3	10443.43	\N	62
+221	241	2564	2	16526.16	\N	62
 \.
 
 
@@ -12051,6 +12061,7 @@ COPY public.material_issues (id, tenant_id, site_id, issue_number, warehouse_id,
 236	2	2	ISS-00006	62	1	222	7	237	HEALTH 	\N	Fulfillment for IND-00009	Completed	3	\N	t	2026-08-06 06:16:07.894689	3	\N	f	2026-06-18 12:26:45.177543	\N
 235	2	2	ISS-00005	62	1	228	7	237	HEALTH 	\N	Fulfillment for IND-00013	Completed	3	\N	t	2026-08-06 06:16:11.434167	3	\N	f	2026-06-18 12:23:35.498019	\N
 240	2	2	ISS-00010	62	3	239	\N	\N	Chemistry	\N	Fulfillment for IND-00024	Completed	3	\N	f	\N	\N	\N	f	2026-08-14 12:56:12.787431	\N
+241	2	2	ISS-00011	62	3	\N	7	237	HEALTH 	\N	Direct Issue	Completed	3	\N	f	\N	\N	\N	f	2026-08-17 10:07:34.247759	\N
 \.
 
 
@@ -15770,6 +15781,12 @@ COPY public.purchase_order_approvals (id, po_id, approval_flow_id, approver_id, 
 113	267	79	3	{"701": {"quantity": 9.0, "remarks": "none"}}	\N	2026-08-06 12:37:33.271748
 114	269	18	3	{"703": {"quantity": 6.0, "remarks": null}}	\N	2026-08-06 13:30:16.577555
 115	269	83	3	{"703": {"quantity": 6.0, "remarks": null}}	\N	2026-08-06 13:30:16.577595
+116	275	106	3	{"1745": {"quantity": 5.0, "remarks": null}}	\N	2026-08-17 10:01:34.858425
+117	275	18	3	{"1745": {"quantity": 5.0, "remarks": null}}	\N	2026-08-17 10:01:39.695667
+118	275	110	3	{"1745": {"quantity": 5.0, "remarks": null}}	\N	2026-08-17 10:01:39.695708
+119	276	106	3	{"1746": {"quantity": 10.0, "remarks": null}}	\N	2026-08-17 10:49:45.10218
+120	276	18	3	{"1746": {"quantity": 5.0, "remarks": null}}	\N	2026-08-17 10:49:53.086235
+121	276	110	3	{"1746": {"quantity": 5.0, "remarks": null}}	\N	2026-08-17 10:49:53.086253
 \.
 
 
@@ -15969,6 +15986,8 @@ COPY public.purchase_order_items (id, po_id, material_id, quantity, rate, amount
 1742	274	4648	125	200	25000	0	\N	0	9	9	0	f	\N
 1743	274	4649	125	200	25000	0	\N	0	9	9	0	f	\N
 1744	274	4680	100	800	80000	0	\N	0	9	9	0	f	\N
+1745	275	3474	5	3262.58	16312.9	0	\N	3	9	9	0	f	5
+1746	276	2564	10	23	230	0	\N	2	6	6	0	f	5
 \.
 
 
@@ -16079,6 +16098,8 @@ COPY public.purchase_orders (id, tenant_id, site_id, po_number, vendor_id, proje
 272	2	2	EPCHE/PO-00001	66	3	\N	\N	\N	Formal	56846.43	2026-08-11	Short Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-05 13:13:19.045494	f	2026-08-05 18:43:03.577828	2026-08-11 13:33:30.881564	2		\n[Short Closed: the requirement got satified already]	5	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Rental	Reagent Rental	Credit Purchase		\N
 215	2	2	PO-00002	62	3	\N	\N	\N	Informal	59815.35	2026-07-03	Short Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	11	2026-06-11 19:55:57.036519	f	2026-06-12 01:18:50.982636	2026-08-14 11:32:27.99556	2	\N	\n[Short Closed: teflon wire is already available in central store-2 ]	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
 263	2	2	NRCN/PO-00001	64	3	\N	\N	\N	Formal	37196.4	2026-08-13	Short Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: 15 Days\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-05 05:21:39.178771	f	2026-08-05 10:51:22.376748	2026-08-14 11:34:11.607683	2		\n[Short Closed: vendor support is poor so callinbg off]	9	50	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Advance Payment		\N
+275	2	2	EPCN/PO-00001	70	3	\N	\N	\N	Formal	18671.74	2026-08-24	Approved	1. Bill/Invoices in the name of East Point College of Nursing managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-17 04:31:39.731856	f	2026-08-17 10:01:02.299007	2026-08-17 10:01:39.733905	2		\N	7	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Cash Purchase		\N
+276	2	2	EPCPT/PO-00004	66	3	\N	\N	\N	Formal	252.45	2026-08-18	Approved	1. Bill/Invoices in the name of East Point College of Physiotherapy managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-17 05:19:53.112341	f	2026-08-17 10:49:29.283407	2026-08-17 10:49:53.113125	2		\N	10	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Rental	Equipment Rental	Credit Purchase		\N
 \.
 
 
@@ -16133,6 +16154,10 @@ COPY public.purchase_request_approvals (id, pr_id, approval_flow_id, approver_id
 44	206	107	3	{"622": {"quantity": 2.0, "remarks": "1"}}	\N	2026-08-14 12:39:50.92457
 45	206	17	3	{"622": {"quantity": 1.0, "remarks": null}}	\N	2026-08-14 12:40:05.275643
 46	206	109	3	{"622": {"quantity": 1.0, "remarks": null}}	\N	2026-08-14 12:40:05.275683
+47	207	19	3	{"626": {"quantity": 5.0, "remarks": null}}	\N	2026-08-17 10:41:46.387994
+48	207	107	3	{"626": {"quantity": 5.0, "remarks": null}}	\N	2026-08-17 10:41:46.388011
+49	207	17	3	{"626": {"quantity": 5.0, "remarks": null}}	\N	2026-08-17 10:41:52.588213
+50	207	109	3	{"626": {"quantity": 5.0, "remarks": null}}	\N	2026-08-17 10:41:52.588234
 \.
 
 
@@ -16220,6 +16245,7 @@ COPY public.purchase_request_items (id, pr_id, material_id, quantity, approved_q
 623	202	2564	1	\N
 624	202	3507	1	\N
 625	202	3503	2	\N
+626	207	2751	5	5
 \.
 
 
@@ -16265,6 +16291,7 @@ COPY public.purchase_requests (id, tenant_id, site_id, pr_number, requester_id, 
 198	2	2	PR-00005	3	\N	7	HEALTH 	3	2026-06-30		Submitted	\N	\N	f	2026-06-16 10:57:43.196702	2026-08-12 11:22:20.71394	2	\N	\N	\N	\N	\N	\N	\N	\N
 206	2	2	PR-00013	3	\N	7	HEALTH 	3	2026-08-14		Approved	3	2026-08-14 07:10:05.305418	f	2026-08-14 12:37:45.391061	2026-08-14 12:40:05.307372	2	Rental	Standard Rental	\N	Months	\N	\N	f	\N
 202	2	2	PR-00009	3	\N	12	Chemistry	3	2026-08-21		Submitted	\N	\N	f	2026-07-03 11:46:40.099177	2026-08-14 12:44:56.275727	1	\N	\N	\N	\N	\N	\N	\N	\N
+207	2	2	PR-00014	3	\N	\N	Nursing Foundation	3	2026-08-18		Approved	3	2026-08-17 05:11:52.603847	f	2026-08-17 10:41:37.019811	2026-08-17 10:41:52.604441	2	Purchase	\N	\N	\N	\N	\N	f	\N
 \.
 
 
@@ -17366,212 +17393,6 @@ COPY public.quotation_request_item_sources (id, qr_item_id, source, source_pr_id
 3656	4009	Imported	\N	500
 3657	4010	Imported	\N	500
 3658	4011	Imported	\N	250
-3367	3720	Imported	\N	502
-3368	3721	Imported	\N	508
-3369	3722	Imported	\N	28
-3370	3723	Imported	\N	136
-3371	3724	Imported	\N	507
-3372	3725	Imported	\N	503
-3373	3726	Imported	\N	503
-3374	3727	Imported	\N	26
-3375	3728	Imported	\N	515
-3376	3729	Imported	\N	511
-3377	3730	Imported	\N	502
-3378	3731	Imported	\N	502
-3379	3732	Imported	\N	514
-3380	3733	Imported	\N	102
-3381	3734	Imported	\N	513
-3382	3735	Imported	\N	501
-3383	3736	Imported	\N	111
-3384	3737	Imported	\N	511
-3385	3738	Imported	\N	505
-3386	3739	Imported	\N	510
-3387	3740	Imported	\N	515
-3388	3741	Imported	\N	512
-3389	3742	Imported	\N	509
-3390	3743	Imported	\N	506
-3391	3744	Imported	\N	514
-3392	3745	Imported	\N	254
-3393	3746	Imported	\N	506
-3394	3747	Imported	\N	511
-3395	3748	Imported	\N	109
-3396	3749	Imported	\N	138
-3397	3750	Imported	\N	515
-3398	3751	Imported	\N	129
-3399	3752	Imported	\N	139
-3400	3753	Imported	\N	136
-3401	3754	Imported	\N	132
-3402	3755	Imported	\N	128
-3403	3756	Imported	\N	133
-3404	3757	Imported	\N	505
-3405	3758	Imported	\N	511
-3406	3759	Imported	\N	502
-3407	3760	Imported	\N	515
-3408	3761	Imported	\N	106
-3409	3762	Imported	\N	1004
-3410	3763	Imported	\N	14
-3411	3764	Imported	\N	515
-3412	3765	Imported	\N	101
-3413	3766	Imported	\N	502
-3414	3767	Imported	\N	514
-3415	3768	Imported	\N	24
-3416	3769	Imported	\N	108
-3417	3770	Imported	\N	510
-3418	3771	Imported	\N	512
-3419	3772	Imported	\N	136
-3420	3773	Imported	\N	131
-3421	3774	Imported	\N	103
-3422	3775	Imported	\N	515
-3423	3776	Imported	\N	512
-3424	3777	Imported	\N	103
-3425	3778	Imported	\N	503
-3426	3779	Imported	\N	514
-3427	3780	Imported	\N	510
-3428	3781	Imported	\N	513
-3429	3782	Imported	\N	514
-3430	3783	Imported	\N	507
-3431	3784	Imported	\N	501
-3432	3785	Imported	\N	514
-3433	3786	Imported	\N	509
-3434	3787	Imported	\N	106
-3435	3788	Imported	\N	17
-3436	3789	Imported	\N	506
-3437	3790	Imported	\N	515
-3438	3791	Imported	\N	2
-3439	3792	Imported	\N	513
-3440	3793	Imported	\N	506
-3441	3794	Imported	\N	506
-3442	3795	Imported	\N	505
-3443	3796	Imported	\N	507
-3444	3797	Imported	\N	263
-3445	3798	Imported	\N	515
-3446	3799	Imported	\N	257
-3447	3800	Imported	\N	509
-3448	3801	Imported	\N	512
-3449	3802	Imported	\N	504
-3450	3803	Imported	\N	259
-3451	3804	Imported	\N	503
-3452	3805	Imported	\N	507
-3453	3806	Imported	\N	16
-3454	3807	Imported	\N	10
-3455	3808	Imported	\N	26
-3456	3809	Imported	\N	112
-3457	3810	Imported	\N	515
-3458	3811	Imported	\N	502
-3459	3812	Imported	\N	10
-3460	3813	Imported	\N	501
-3461	3814	Imported	\N	501
-3462	3815	Imported	\N	502
-3463	3816	Imported	\N	503
-3464	3817	Imported	\N	513
-3465	3818	Imported	\N	138
-3466	3819	Imported	\N	112
-3467	3820	Imported	\N	501
-3468	3821	Imported	\N	512
-3469	3822	Imported	\N	127
-3470	3823	Imported	\N	513
-3471	3824	Imported	\N	1013
-3472	3825	Imported	\N	503
-3473	3826	Imported	\N	8
-3474	3827	Imported	\N	14
-3475	3828	Imported	\N	501
-3476	3829	Imported	\N	502
-3477	3830	Imported	\N	510
-3478	3831	Imported	\N	511
-3479	3832	Imported	\N	514
-3480	3833	Imported	\N	513
-3481	3834	Imported	\N	513
-3482	3835	Imported	\N	514
-3483	3836	Imported	\N	506
-3484	3837	Imported	\N	515
-3485	3838	Imported	\N	253
-3486	3839	Imported	\N	512
-3487	3840	Imported	\N	512
-3488	3841	Imported	\N	18
-3489	3842	Imported	\N	510
-3490	3843	Imported	\N	512
-3491	3844	Imported	\N	511
-3492	3845	Imported	\N	507
-3493	3846	Imported	\N	510
-3494	3847	Imported	\N	515
-3495	3848	Imported	\N	131
-3496	3849	Imported	\N	113
-3497	3850	Imported	\N	508
-3498	3851	Imported	\N	261
-3499	3852	Imported	\N	515
-3500	3853	Imported	\N	506
-3501	3854	Imported	\N	515
-3502	3855	Imported	\N	509
-3503	3856	Imported	\N	505
-3504	3857	Imported	\N	113
-3505	3858	Imported	\N	502
-3506	3859	Imported	\N	507
-3507	3860	Imported	\N	511
-3508	3861	Imported	\N	506
-3509	3862	Imported	\N	115
-3510	3863	Imported	\N	28
-3511	3864	Imported	\N	513
-3512	3865	Imported	\N	8
-3513	3866	Imported	\N	513
-3514	3867	Imported	\N	507
-3515	3868	Imported	\N	112
-3516	3869	Imported	\N	510
-3517	3870	Imported	\N	508
-3518	3871	Imported	\N	507
-3519	3872	Imported	\N	509
-3520	3873	Imported	\N	31
-3521	3874	Imported	\N	12
-3522	3875	Imported	\N	510
-3523	3876	Imported	\N	131
-3524	3877	Imported	\N	503
-3525	3878	Imported	\N	501
-3526	3879	Imported	\N	8
-3527	3880	Imported	\N	504
-3528	3881	Imported	\N	505
-3529	3882	Imported	\N	18
-3530	3883	Imported	\N	502
-3531	3884	Imported	\N	505
-3532	3885	Imported	\N	502
-3533	3886	Imported	\N	512
-3534	3887	Imported	\N	506
-3535	3888	Imported	\N	511
-3536	3889	Imported	\N	2
-3537	3890	Imported	\N	502
-3538	3891	Imported	\N	514
-3539	3892	Imported	\N	504
-3540	3893	Imported	\N	515
-3541	3894	Imported	\N	510
-3542	3895	Imported	\N	4
-3543	3896	Imported	\N	108
-3544	3897	Imported	\N	506
-3545	3898	Imported	\N	506
-3546	3899	Imported	\N	508
-3547	3900	Imported	\N	507
-3548	3901	Imported	\N	509
-3549	3902	Imported	\N	10
-3550	3903	Imported	\N	501
-3551	3904	Imported	\N	505
-3552	3905	Imported	\N	507
-3553	3906	Imported	\N	102
-3554	3907	Imported	\N	12
-3555	3908	Imported	\N	140
-3556	3909	Imported	\N	37
-3557	3910	Imported	\N	505
-3558	3911	Imported	\N	10
-3559	3912	Imported	\N	509
-3560	3913	Imported	\N	514
-3561	3914	Imported	\N	504
-3562	3915	Imported	\N	502
-3563	3916	Imported	\N	506
-3564	3917	Imported	\N	507
-3565	3918	Imported	\N	509
-3566	3919	Imported	\N	506
-3567	3920	Imported	\N	507
-3568	3921	Imported	\N	507
-3569	3922	Imported	\N	504
-3570	3923	Imported	\N	512
-3571	3924	Imported	\N	509
-3572	3925	Imported	\N	510
 3659	4012	Imported	\N	500
 3660	4013	Imported	\N	500
 3661	4014	Imported	\N	100
@@ -17812,66 +17633,272 @@ COPY public.quotation_request_item_sources (id, qr_item_id, source, source_pr_id
 3896	4249	Imported	\N	500
 3897	4250	Imported	\N	100
 3898	4251	Imported	\N	500
-3573	3926	Imported	\N	111
-3574	3927	Imported	\N	30
-3575	3928	Imported	\N	110
-3576	3929	Imported	\N	254
-3577	3930	Imported	\N	505
-3578	3931	Imported	\N	503
-3579	3932	Imported	\N	504
-3580	3933	Imported	\N	515
-3581	3934	Imported	\N	504
-3582	3935	Imported	\N	508
-3583	3936	Imported	\N	509
-3584	3937	Imported	\N	512
-3585	3938	Imported	\N	502
-3586	3939	Imported	\N	501
-3587	3940	Imported	\N	512
-3588	3941	Imported	\N	127
-3589	3942	Imported	\N	511
-3590	3943	Imported	\N	513
-3591	3944	Imported	\N	501
-3592	3945	Imported	\N	514
-3593	3946	Imported	\N	510
-3594	3947	Imported	\N	508
-3595	3948	Imported	\N	10
-3596	3949	Imported	\N	18
-3597	3950	Imported	\N	26
-3598	3951	Imported	\N	22
-3599	3952	Imported	\N	20
-3600	3953	Imported	\N	512
-3601	3954	Imported	\N	20
-3602	3955	Imported	\N	10
-3603	3956	Imported	\N	12
-3604	3957	Imported	\N	18
-3605	3958	Imported	\N	4
-3606	3959	Imported	\N	12
-3607	3960	Imported	\N	16
-3608	3961	Imported	\N	20
-3609	3962	Imported	\N	22
-3610	3963	Imported	\N	504
-3611	3964	Imported	\N	10
-3612	3965	Imported	\N	515
-3613	3966	Imported	\N	511
-3614	3967	Imported	\N	501
-3615	3968	Imported	\N	261
-3616	3969	Imported	\N	505
-3617	3970	Imported	\N	511
-3618	3971	Imported	\N	506
-3619	3972	Imported	\N	508
-3620	3973	Imported	\N	513
-3621	3974	Imported	\N	509
-3622	3975	Imported	\N	509
-3623	3976	Imported	\N	127
-3624	3977	Imported	\N	20
-3625	3978	Imported	\N	507
-3626	3979	Imported	\N	513
-3627	3980	Imported	\N	109
-3628	3981	Imported	\N	512
-3629	3982	Imported	\N	508
-3630	3983	Imported	\N	503
-3631	3984	Imported	\N	105
-3632	3985	Imported	\N	515
+4165	4518	Imported	\N	31
+4166	4519	Imported	\N	12
+4167	4520	Imported	\N	510
+4168	4521	Imported	\N	131
+4169	4522	Imported	\N	503
+4170	4523	Imported	\N	501
+4171	4524	Imported	\N	8
+4172	4525	Imported	\N	504
+4173	4526	Imported	\N	505
+4174	4527	Imported	\N	18
+4175	4528	Imported	\N	502
+4176	4529	Imported	\N	505
+4177	4530	Imported	\N	502
+4178	4531	Imported	\N	512
+4179	4532	Imported	\N	506
+4180	4533	Imported	\N	511
+4181	4534	Imported	\N	2
+4182	4535	Imported	\N	502
+4183	4536	Imported	\N	514
+4184	4537	Imported	\N	504
+4185	4538	Imported	\N	515
+4186	4539	Imported	\N	510
+4187	4540	Imported	\N	4
+4188	4541	Imported	\N	108
+4189	4542	Imported	\N	506
+4190	4543	Imported	\N	506
+4191	4544	Imported	\N	508
+4192	4545	Imported	\N	507
+4193	4546	Imported	\N	509
+4194	4547	Imported	\N	502
+4195	4548	Imported	\N	508
+4196	4549	Imported	\N	28
+4197	4550	Imported	\N	136
+4198	4551	Imported	\N	507
+4199	4552	Imported	\N	503
+4200	4553	Imported	\N	503
+4201	4554	Imported	\N	26
+4202	4555	Imported	\N	515
+4203	4556	Imported	\N	511
+4204	4557	Imported	\N	502
+4205	4558	Imported	\N	502
+4206	4559	Imported	\N	514
+4207	4560	Imported	\N	102
+4208	4561	Imported	\N	513
+4209	4562	Imported	\N	501
+4210	4563	Imported	\N	111
+4211	4564	Imported	\N	511
+4212	4565	Imported	\N	505
+4213	4566	Imported	\N	510
+4214	4567	Imported	\N	515
+4215	4568	Imported	\N	512
+4216	4569	Imported	\N	509
+4217	4570	Imported	\N	506
+4218	4571	Imported	\N	514
+4219	4572	Imported	\N	254
+4220	4573	Imported	\N	506
+4221	4574	Imported	\N	511
+4222	4575	Imported	\N	109
+4223	4576	Imported	\N	138
+4224	4577	Imported	\N	515
+4225	4578	Imported	\N	129
+4226	4579	Imported	\N	139
+4227	4580	Imported	\N	136
+4228	4581	Imported	\N	132
+4229	4582	Imported	\N	128
+4230	4583	Imported	\N	133
+4231	4584	Imported	\N	505
+4232	4585	Imported	\N	511
+4233	4586	Imported	\N	502
+4234	4587	Imported	\N	515
+4235	4588	Imported	\N	106
+4236	4589	Imported	\N	1004
+4237	4590	Imported	\N	14
+4238	4591	Imported	\N	515
+4239	4592	Imported	\N	101
+4240	4593	Imported	\N	502
+4241	4594	Imported	\N	514
+4242	4595	Imported	\N	24
+4243	4596	Imported	\N	108
+4244	4597	Imported	\N	510
+4245	4598	Imported	\N	512
+4246	4599	Imported	\N	136
+4247	4600	Imported	\N	131
+4248	4601	Imported	\N	103
+4249	4602	Imported	\N	515
+4250	4603	Imported	\N	512
+4251	4604	Imported	\N	103
+4252	4605	Imported	\N	503
+4253	4606	Imported	\N	514
+4254	4607	Imported	\N	510
+4255	4608	Imported	\N	513
+4256	4609	Imported	\N	514
+4257	4610	Imported	\N	507
+4258	4611	Imported	\N	501
+4259	4612	Imported	\N	514
+4260	4613	Imported	\N	509
+4261	4614	Imported	\N	106
+4262	4615	Imported	\N	17
+4263	4616	Imported	\N	506
+4264	4617	Imported	\N	515
+4265	4618	Imported	\N	2
+4266	4619	Imported	\N	513
+4267	4620	Imported	\N	506
+4268	4621	Imported	\N	506
+4269	4622	Imported	\N	505
+4270	4623	Imported	\N	507
+4271	4624	Imported	\N	263
+4272	4625	Imported	\N	515
+4273	4626	Imported	\N	257
+4274	4627	Imported	\N	509
+4275	4628	Imported	\N	512
+4276	4629	Imported	\N	504
+4277	4630	Imported	\N	259
+4278	4631	Imported	\N	503
+4279	4632	Imported	\N	507
+4280	4633	Imported	\N	16
+4281	4634	Imported	\N	10
+4282	4635	Imported	\N	26
+4283	4636	Imported	\N	112
+4284	4637	Imported	\N	515
+4285	4638	Imported	\N	502
+4286	4639	Imported	\N	10
+4287	4640	Imported	\N	501
+4288	4641	Imported	\N	501
+4289	4642	Imported	\N	502
+4290	4643	Imported	\N	503
+4291	4644	Imported	\N	513
+4292	4645	Imported	\N	138
+4293	4646	Imported	\N	112
+4294	4647	Imported	\N	501
+4295	4648	Imported	\N	512
+4296	4649	Imported	\N	127
+4297	4650	Imported	\N	513
+4298	4651	Imported	\N	1013
+4299	4652	Imported	\N	503
+4300	4653	Imported	\N	8
+4301	4654	Imported	\N	14
+4302	4655	Imported	\N	501
+4303	4656	Imported	\N	502
+4304	4657	Imported	\N	510
+4305	4658	Imported	\N	511
+4306	4659	Imported	\N	514
+4307	4660	Imported	\N	513
+4308	4661	Imported	\N	513
+4309	4662	Imported	\N	514
+4310	4663	Imported	\N	506
+4311	4664	Imported	\N	515
+4312	4665	Imported	\N	253
+4313	4666	Imported	\N	512
+4314	4667	Imported	\N	512
+4315	4668	Imported	\N	18
+4316	4669	Imported	\N	510
+4317	4670	Imported	\N	512
+4318	4671	Imported	\N	511
+4319	4672	Imported	\N	507
+4320	4673	Imported	\N	510
+4321	4674	Imported	\N	515
+4322	4675	Imported	\N	131
+4323	4676	Imported	\N	113
+4324	4677	Imported	\N	508
+4325	4678	Imported	\N	261
+4326	4679	Imported	\N	515
+4327	4680	Imported	\N	506
+4328	4681	Imported	\N	515
+4329	4682	Imported	\N	509
+4330	4683	Imported	\N	505
+4331	4684	Imported	\N	113
+4332	4685	Imported	\N	502
+4333	4686	Imported	\N	507
+4334	4687	Imported	\N	511
+4335	4688	Imported	\N	506
+4336	4689	Imported	\N	115
+4337	4690	Imported	\N	28
+4338	4691	Imported	\N	513
+4339	4692	Imported	\N	8
+4340	4693	Imported	\N	513
+4341	4694	Imported	\N	507
+4342	4695	Imported	\N	112
+4343	4696	Imported	\N	510
+4344	4697	Imported	\N	508
+4345	4698	Imported	\N	507
+4346	4699	Imported	\N	509
+4347	4700	Imported	\N	10
+4348	4701	Imported	\N	501
+4349	4702	Imported	\N	505
+4350	4703	Imported	\N	507
+4351	4704	Imported	\N	102
+4352	4705	Imported	\N	12
+4353	4706	Imported	\N	140
+4354	4707	Imported	\N	37
+4355	4708	Imported	\N	505
+4356	4709	Imported	\N	10
+4357	4710	Imported	\N	509
+4358	4711	Imported	\N	514
+4359	4712	Imported	\N	504
+4360	4713	Imported	\N	502
+4361	4714	Imported	\N	506
+4362	4715	Imported	\N	507
+4363	4716	Imported	\N	509
+4364	4717	Imported	\N	506
+4365	4718	Imported	\N	507
+4366	4719	Imported	\N	507
+4367	4720	Imported	\N	504
+4368	4721	Imported	\N	512
+4369	4722	Imported	\N	509
+4370	4723	Imported	\N	510
+4371	4724	Imported	\N	111
+4372	4725	Imported	\N	30
+4373	4726	Imported	\N	110
+4374	4727	Imported	\N	254
+4375	4728	Imported	\N	505
+4376	4729	Imported	\N	503
+4377	4730	Imported	\N	504
+4378	4731	Imported	\N	515
+4379	4732	Imported	\N	504
+4380	4733	Imported	\N	508
+4381	4734	Imported	\N	509
+4382	4735	Imported	\N	512
+4383	4736	Imported	\N	502
+4384	4737	Imported	\N	501
+4385	4738	Imported	\N	512
+4386	4739	Imported	\N	127
+4387	4740	Imported	\N	511
+4388	4741	Imported	\N	513
+4389	4742	Imported	\N	501
+4390	4743	Imported	\N	514
+4391	4744	Imported	\N	510
+4392	4745	Imported	\N	508
+4393	4746	Imported	\N	10
+4394	4747	Imported	\N	18
+4395	4748	Imported	\N	26
+4396	4749	Imported	\N	22
+4397	4750	Imported	\N	20
+4398	4751	Imported	\N	512
+4399	4752	Imported	\N	20
+4400	4753	Imported	\N	10
+4401	4754	Imported	\N	12
+4402	4755	Imported	\N	18
+4403	4756	Imported	\N	4
+4404	4757	Imported	\N	12
+4405	4758	Imported	\N	16
+4406	4759	Imported	\N	20
+4407	4760	Imported	\N	22
+4408	4761	Imported	\N	504
+4409	4762	Imported	\N	10
+4410	4763	Imported	\N	515
+4411	4764	Imported	\N	511
+4412	4765	Imported	\N	501
+4413	4766	Imported	\N	261
+4414	4767	Imported	\N	505
+4415	4768	Imported	\N	511
+4416	4769	Imported	\N	506
+4417	4770	Imported	\N	508
+4418	4771	Imported	\N	513
+4419	4772	Imported	\N	509
+4420	4773	Imported	\N	509
+4421	4774	Imported	\N	127
+4422	4775	Imported	\N	20
+4423	4776	Imported	\N	507
+4424	4777	Imported	\N	513
+4425	4778	Imported	\N	109
+4426	4779	Imported	\N	512
+4427	4780	Imported	\N	508
+4428	4781	Imported	\N	503
+4429	4782	Imported	\N	105
+4430	4783	Imported	\N	515
 \.
 
 
@@ -18432,35 +18459,6 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4478	224	4852	500	Imported	\N
 4479	224	4853	500	Imported	\N
 4480	224	4854	5	Imported	\N
-3873	223	4766	31	Imported	\N
-3874	223	4767	12	Imported	\N
-3875	223	4768	510	Imported	\N
-3876	223	4769	131	Imported	\N
-3877	223	4770	503	Imported	\N
-3878	223	4771	501	Imported	\N
-3879	223	4772	8	Imported	\N
-3880	223	4773	504	Imported	\N
-3881	223	4774	505	Imported	\N
-3882	223	4775	18	Imported	\N
-3883	223	4776	502	Imported	\N
-3884	223	4777	505	Imported	\N
-3885	223	4778	502	Imported	\N
-3886	223	4779	512	Imported	\N
-3887	223	4780	506	Imported	\N
-3888	223	4781	511	Imported	\N
-3889	223	4782	2	Imported	\N
-3890	223	4783	502	Imported	\N
-3891	223	4784	514	Imported	\N
-3892	223	4785	504	Imported	\N
-3893	223	4786	515	Imported	\N
-3894	223	4787	510	Imported	\N
-3895	223	4788	4	Imported	\N
-3896	223	4789	108	Imported	\N
-3897	223	4790	506	Imported	\N
-3898	223	4791	506	Imported	\N
-3899	223	4792	508	Imported	\N
-3900	223	4793	507	Imported	\N
-3901	223	4794	509	Imported	\N
 4149	222	4776	500	Imported	\N
 4150	222	4777	500	Imported	\N
 4151	222	4778	500	Imported	\N
@@ -18490,46 +18488,6 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4175	222	4802	25	Imported	\N
 4176	222	4803	500	Imported	\N
 4177	222	4804	5	Imported	\N
-3720	223	4817	502	Imported	\N
-3721	223	4818	508	Imported	\N
-3722	223	4869	28	Imported	\N
-3723	223	4616	136	Imported	\N
-3724	223	4617	507	Imported	\N
-3725	223	4618	503	Imported	\N
-3726	223	4619	503	Imported	\N
-3727	223	4620	26	Imported	\N
-3728	223	4621	515	Imported	\N
-3729	223	4622	511	Imported	\N
-3730	223	4623	502	Imported	\N
-3731	223	4624	502	Imported	\N
-3732	223	4625	514	Imported	\N
-3733	223	4626	102	Imported	\N
-3734	223	4627	513	Imported	\N
-3735	223	4628	501	Imported	\N
-3736	223	4629	111	Imported	\N
-3737	223	4630	511	Imported	\N
-3738	223	4631	505	Imported	\N
-3739	223	4632	510	Imported	\N
-3740	223	4633	515	Imported	\N
-3741	223	4634	512	Imported	\N
-3742	223	4635	509	Imported	\N
-3743	223	4636	506	Imported	\N
-3744	223	4637	514	Imported	\N
-3745	223	4638	254	Imported	\N
-3746	223	4639	506	Imported	\N
-3747	223	4640	511	Imported	\N
-3748	223	4641	109	Imported	\N
-3749	223	4642	138	Imported	\N
-3750	223	4643	515	Imported	\N
-3751	223	4644	129	Imported	\N
-3752	223	4645	139	Imported	\N
-3753	223	4646	136	Imported	\N
-3754	223	4647	132	Imported	\N
-3755	223	4648	128	Imported	\N
-3756	223	4649	133	Imported	\N
-3757	223	4650	505	Imported	\N
-3758	223	4651	511	Imported	\N
-3759	223	4652	502	Imported	\N
 4178	222	4805	500	Imported	\N
 4179	222	4806	500	Imported	\N
 4180	222	4807	500	Imported	\N
@@ -18641,203 +18599,272 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4515	224	4844	500	Imported	\N
 4516	224	4845	100	Imported	\N
 4517	224	4846	500	Imported	\N
-3760	223	4653	515	Imported	\N
-3761	223	4654	106	Imported	\N
-3762	223	4655	1004	Imported	\N
-3763	223	4656	14	Imported	\N
-3764	223	4657	515	Imported	\N
-3765	223	4658	101	Imported	\N
-3766	223	4659	502	Imported	\N
-3767	223	4660	514	Imported	\N
-3768	223	4661	24	Imported	\N
-3769	223	4662	108	Imported	\N
-3770	223	4663	510	Imported	\N
-3771	223	4664	512	Imported	\N
-3772	223	4665	136	Imported	\N
-3773	223	4666	131	Imported	\N
-3774	223	4667	103	Imported	\N
-3775	223	4668	515	Imported	\N
-3776	223	4669	512	Imported	\N
-3777	223	4670	103	Imported	\N
-3778	223	4671	503	Imported	\N
-3779	223	4672	514	Imported	\N
-3780	223	4673	510	Imported	\N
-3781	223	4674	513	Imported	\N
-3782	223	4675	514	Imported	\N
-3783	223	4676	507	Imported	\N
-3784	223	4677	501	Imported	\N
-3785	223	4678	514	Imported	\N
-3786	223	4679	509	Imported	\N
-3787	223	4680	106	Imported	\N
-3788	223	4681	17	Imported	\N
-3789	223	4682	506	Imported	\N
-3790	223	4683	515	Imported	\N
-3791	223	4684	2	Imported	\N
-3792	223	4685	513	Imported	\N
-3793	223	4686	506	Imported	\N
-3794	223	4687	506	Imported	\N
-3795	223	4688	505	Imported	\N
-3796	223	4689	507	Imported	\N
-3797	223	4690	263	Imported	\N
-3798	223	4691	515	Imported	\N
-3799	223	4692	257	Imported	\N
-3800	223	4693	509	Imported	\N
-3801	223	4694	512	Imported	\N
-3802	223	4695	504	Imported	\N
-3803	223	4696	259	Imported	\N
-3804	223	4697	503	Imported	\N
-3805	223	4698	507	Imported	\N
-3806	223	4699	16	Imported	\N
-3807	223	4700	10	Imported	\N
-3808	223	4701	26	Imported	\N
-3809	223	4702	112	Imported	\N
-3810	223	4703	515	Imported	\N
-3811	223	4704	502	Imported	\N
-3812	223	4705	10	Imported	\N
-3813	223	4706	501	Imported	\N
-3814	223	4707	501	Imported	\N
-3815	223	4708	502	Imported	\N
-3816	223	4709	503	Imported	\N
-3817	223	4710	513	Imported	\N
-3818	223	4711	138	Imported	\N
-3819	223	4712	112	Imported	\N
-3820	223	4713	501	Imported	\N
-3821	223	4714	512	Imported	\N
-3822	223	4715	127	Imported	\N
-3823	223	4716	513	Imported	\N
-3824	223	4717	1013	Imported	\N
-3825	223	4718	503	Imported	\N
-3826	223	4719	8	Imported	\N
-3827	223	4720	14	Imported	\N
-3828	223	4721	501	Imported	\N
-3829	223	4722	502	Imported	\N
-3830	223	4723	510	Imported	\N
-3831	223	4724	511	Imported	\N
-3832	223	4725	514	Imported	\N
-3833	223	4726	513	Imported	\N
-3834	223	4727	513	Imported	\N
-3835	223	4728	514	Imported	\N
-3836	223	4729	506	Imported	\N
-3837	223	4730	515	Imported	\N
-3838	223	4731	253	Imported	\N
-3839	223	4732	512	Imported	\N
-3840	223	4733	512	Imported	\N
-3841	223	4734	18	Imported	\N
-3842	223	4735	510	Imported	\N
-3843	223	4736	512	Imported	\N
-3844	223	4737	511	Imported	\N
-3845	223	4738	507	Imported	\N
-3846	223	4739	510	Imported	\N
-3847	223	4740	515	Imported	\N
-3848	223	4741	131	Imported	\N
-3849	223	4742	113	Imported	\N
-3850	223	4743	508	Imported	\N
-3851	223	4744	261	Imported	\N
-3852	223	4745	515	Imported	\N
-3853	223	4746	506	Imported	\N
-3854	223	4747	515	Imported	\N
-3855	223	4748	509	Imported	\N
-3856	223	4749	505	Imported	\N
-3857	223	4750	113	Imported	\N
-3858	223	4751	502	Imported	\N
-3859	223	4752	507	Imported	\N
-3860	223	4753	511	Imported	\N
-3861	223	4754	506	Imported	\N
-3862	223	4755	115	Imported	\N
-3863	223	4756	28	Imported	\N
-3864	223	4757	513	Imported	\N
-3865	223	4758	8	Imported	\N
-3866	223	4759	513	Imported	\N
-3867	223	4760	507	Imported	\N
-3868	223	4761	112	Imported	\N
-3869	223	4762	510	Imported	\N
-3870	223	4763	508	Imported	\N
-3871	223	4764	507	Imported	\N
-3872	223	4765	509	Imported	\N
-3902	223	4795	10	Imported	\N
-3903	223	4796	501	Imported	\N
-3904	223	4797	505	Imported	\N
-3905	223	4798	507	Imported	\N
-3906	223	4799	102	Imported	\N
-3907	223	4800	12	Imported	\N
-3908	223	4801	140	Imported	\N
-3909	223	4802	37	Imported	\N
-3910	223	4803	505	Imported	\N
-3911	223	4804	10	Imported	\N
-3912	223	4805	509	Imported	\N
-3913	223	4806	514	Imported	\N
-3914	223	4807	504	Imported	\N
-3915	223	4808	502	Imported	\N
-3916	223	4809	506	Imported	\N
-3917	223	4810	507	Imported	\N
-3918	223	4811	509	Imported	\N
-3919	223	4812	506	Imported	\N
-3920	223	4813	507	Imported	\N
-3921	223	4814	507	Imported	\N
-3922	223	4815	504	Imported	\N
-3923	223	4816	512	Imported	\N
-3924	223	4819	509	Imported	\N
-3925	223	4820	510	Imported	\N
-3926	223	4821	111	Imported	\N
-3927	223	4822	30	Imported	\N
-3928	223	4823	110	Imported	\N
-3929	223	4824	254	Imported	\N
-3930	223	4825	505	Imported	\N
-3931	223	4826	503	Imported	\N
-3932	223	4827	504	Imported	\N
-3933	223	4828	515	Imported	\N
-3934	223	4829	504	Imported	\N
-3935	223	4830	508	Imported	\N
-3936	223	4831	509	Imported	\N
-3937	223	4832	512	Imported	\N
-3938	223	4833	502	Imported	\N
-3939	223	4834	501	Imported	\N
-3940	223	4835	512	Imported	\N
-3941	223	4847	127	Imported	\N
-3942	223	4848	511	Imported	\N
-3943	223	4849	513	Imported	\N
-3944	223	4850	501	Imported	\N
-3945	223	4851	514	Imported	\N
-3946	223	4852	510	Imported	\N
-3947	223	4853	508	Imported	\N
-3948	223	4854	10	Imported	\N
-3949	223	4855	18	Imported	\N
-3950	223	4856	26	Imported	\N
-3951	223	4857	22	Imported	\N
-3952	223	4858	20	Imported	\N
-3953	223	4859	512	Imported	\N
-3954	223	4860	20	Imported	\N
-3955	223	4861	10	Imported	\N
-3956	223	4862	12	Imported	\N
-3957	223	4863	18	Imported	\N
-3958	223	4864	4	Imported	\N
-3959	223	4865	12	Imported	\N
-3960	223	4866	16	Imported	\N
-3961	223	4867	20	Imported	\N
-3962	223	4868	22	Imported	\N
-3963	223	4604	504	Imported	\N
-3964	223	4605	10	Imported	\N
-3965	223	4606	515	Imported	\N
-3966	223	4607	511	Imported	\N
-3967	223	4608	501	Imported	\N
-3968	223	4609	261	Imported	\N
-3969	223	4610	505	Imported	\N
-3970	223	4611	511	Imported	\N
-3971	223	4612	506	Imported	\N
-3972	223	4613	508	Imported	\N
-3973	223	4614	513	Imported	\N
-3974	223	4615	509	Imported	\N
-3975	223	4836	509	Imported	\N
-3976	223	4837	127	Imported	\N
-3977	223	4838	20	Imported	\N
-3978	223	4839	507	Imported	\N
-3979	223	4840	513	Imported	\N
-3980	223	4841	109	Imported	\N
-3981	223	4842	512	Imported	\N
-3982	223	4843	508	Imported	\N
-3983	223	4844	503	Imported	\N
-3984	223	4845	105	Imported	\N
-3985	223	4846	515	Imported	\N
+4666	223	4732	512	Imported	\N
+4667	223	4733	512	Imported	\N
+4668	223	4734	18	Imported	\N
+4669	223	4735	510	Imported	\N
+4670	223	4736	512	Imported	\N
+4671	223	4737	511	Imported	\N
+4672	223	4738	507	Imported	\N
+4673	223	4739	510	Imported	\N
+4674	223	4740	515	Imported	\N
+4675	223	4741	131	Imported	\N
+4676	223	4742	113	Imported	\N
+4677	223	4743	508	Imported	\N
+4678	223	4744	261	Imported	\N
+4679	223	4745	515	Imported	\N
+4680	223	4746	506	Imported	\N
+4681	223	4747	515	Imported	\N
+4682	223	4748	509	Imported	\N
+4518	223	4766	31	Imported	\N
+4519	223	4767	12	Imported	\N
+4520	223	4768	510	Imported	\N
+4521	223	4769	131	Imported	\N
+4522	223	4770	503	Imported	\N
+4523	223	4771	501	Imported	\N
+4524	223	4772	8	Imported	\N
+4525	223	4773	504	Imported	\N
+4526	223	4774	505	Imported	\N
+4527	223	4775	18	Imported	\N
+4528	223	4776	502	Imported	\N
+4529	223	4777	505	Imported	\N
+4530	223	4778	502	Imported	\N
+4531	223	4779	512	Imported	\N
+4532	223	4780	506	Imported	\N
+4533	223	4781	511	Imported	\N
+4534	223	4782	2	Imported	\N
+4535	223	4783	502	Imported	\N
+4536	223	4784	514	Imported	\N
+4537	223	4785	504	Imported	\N
+4538	223	4786	515	Imported	\N
+4539	223	4787	510	Imported	\N
+4540	223	4788	4	Imported	\N
+4541	223	4789	108	Imported	\N
+4542	223	4790	506	Imported	\N
+4543	223	4791	506	Imported	\N
+4544	223	4792	508	Imported	\N
+4545	223	4793	507	Imported	\N
+4546	223	4794	509	Imported	\N
+4547	223	4817	502	Imported	\N
+4548	223	4818	508	Imported	\N
+4549	223	4869	28	Imported	\N
+4550	223	4616	136	Imported	\N
+4551	223	4617	507	Imported	\N
+4552	223	4618	503	Imported	\N
+4553	223	4619	503	Imported	\N
+4554	223	4620	26	Imported	\N
+4555	223	4621	515	Imported	\N
+4556	223	4622	511	Imported	\N
+4557	223	4623	502	Imported	\N
+4558	223	4624	502	Imported	\N
+4559	223	4625	514	Imported	\N
+4560	223	4626	102	Imported	\N
+4561	223	4627	513	Imported	\N
+4562	223	4628	501	Imported	\N
+4563	223	4629	111	Imported	\N
+4564	223	4630	511	Imported	\N
+4565	223	4631	505	Imported	\N
+4566	223	4632	510	Imported	\N
+4567	223	4633	515	Imported	\N
+4568	223	4634	512	Imported	\N
+4569	223	4635	509	Imported	\N
+4570	223	4636	506	Imported	\N
+4571	223	4637	514	Imported	\N
+4572	223	4638	254	Imported	\N
+4573	223	4639	506	Imported	\N
+4574	223	4640	511	Imported	\N
+4575	223	4641	109	Imported	\N
+4576	223	4642	138	Imported	\N
+4577	223	4643	515	Imported	\N
+4578	223	4644	129	Imported	\N
+4579	223	4645	139	Imported	\N
+4580	223	4646	136	Imported	\N
+4581	223	4647	132	Imported	\N
+4582	223	4648	128	Imported	\N
+4583	223	4649	133	Imported	\N
+4584	223	4650	505	Imported	\N
+4585	223	4651	511	Imported	\N
+4586	223	4652	502	Imported	\N
+4587	223	4653	515	Imported	\N
+4588	223	4654	106	Imported	\N
+4589	223	4655	1004	Imported	\N
+4590	223	4656	14	Imported	\N
+4591	223	4657	515	Imported	\N
+4592	223	4658	101	Imported	\N
+4593	223	4659	502	Imported	\N
+4594	223	4660	514	Imported	\N
+4595	223	4661	24	Imported	\N
+4596	223	4662	108	Imported	\N
+4597	223	4663	510	Imported	\N
+4598	223	4664	512	Imported	\N
+4599	223	4665	136	Imported	\N
+4600	223	4666	131	Imported	\N
+4601	223	4667	103	Imported	\N
+4602	223	4668	515	Imported	\N
+4603	223	4669	512	Imported	\N
+4604	223	4670	103	Imported	\N
+4605	223	4671	503	Imported	\N
+4606	223	4672	514	Imported	\N
+4607	223	4673	510	Imported	\N
+4608	223	4674	513	Imported	\N
+4609	223	4675	514	Imported	\N
+4610	223	4676	507	Imported	\N
+4611	223	4677	501	Imported	\N
+4612	223	4678	514	Imported	\N
+4613	223	4679	509	Imported	\N
+4614	223	4680	106	Imported	\N
+4615	223	4681	17	Imported	\N
+4616	223	4682	506	Imported	\N
+4617	223	4683	515	Imported	\N
+4618	223	4684	2	Imported	\N
+4619	223	4685	513	Imported	\N
+4620	223	4686	506	Imported	\N
+4621	223	4687	506	Imported	\N
+4622	223	4688	505	Imported	\N
+4623	223	4689	507	Imported	\N
+4624	223	4690	263	Imported	\N
+4625	223	4691	515	Imported	\N
+4626	223	4692	257	Imported	\N
+4627	223	4693	509	Imported	\N
+4628	223	4694	512	Imported	\N
+4629	223	4695	504	Imported	\N
+4630	223	4696	259	Imported	\N
+4631	223	4697	503	Imported	\N
+4632	223	4698	507	Imported	\N
+4633	223	4699	16	Imported	\N
+4634	223	4700	10	Imported	\N
+4635	223	4701	26	Imported	\N
+4636	223	4702	112	Imported	\N
+4637	223	4703	515	Imported	\N
+4638	223	4704	502	Imported	\N
+4639	223	4705	10	Imported	\N
+4640	223	4706	501	Imported	\N
+4641	223	4707	501	Imported	\N
+4642	223	4708	502	Imported	\N
+4643	223	4709	503	Imported	\N
+4644	223	4710	513	Imported	\N
+4645	223	4711	138	Imported	\N
+4646	223	4712	112	Imported	\N
+4647	223	4713	501	Imported	\N
+4648	223	4714	512	Imported	\N
+4649	223	4715	127	Imported	\N
+4650	223	4716	513	Imported	\N
+4651	223	4717	1013	Imported	\N
+4652	223	4718	503	Imported	\N
+4653	223	4719	8	Imported	\N
+4654	223	4720	14	Imported	\N
+4655	223	4721	501	Imported	\N
+4656	223	4722	502	Imported	\N
+4657	223	4723	510	Imported	\N
+4658	223	4724	511	Imported	\N
+4659	223	4725	514	Imported	\N
+4660	223	4726	513	Imported	\N
+4661	223	4727	513	Imported	\N
+4662	223	4728	514	Imported	\N
+4663	223	4729	506	Imported	\N
+4664	223	4730	515	Imported	\N
+4665	223	4731	253	Imported	\N
+4683	223	4749	505	Imported	\N
+4684	223	4750	113	Imported	\N
+4685	223	4751	502	Imported	\N
+4686	223	4752	507	Imported	\N
+4687	223	4753	511	Imported	\N
+4688	223	4754	506	Imported	\N
+4689	223	4755	115	Imported	\N
+4690	223	4756	28	Imported	\N
+4691	223	4757	513	Imported	\N
+4692	223	4758	8	Imported	\N
+4693	223	4759	513	Imported	\N
+4694	223	4760	507	Imported	\N
+4695	223	4761	112	Imported	\N
+4696	223	4762	510	Imported	\N
+4697	223	4763	508	Imported	\N
+4698	223	4764	507	Imported	\N
+4699	223	4765	509	Imported	\N
+4700	223	4795	10	Imported	\N
+4701	223	4796	501	Imported	\N
+4702	223	4797	505	Imported	\N
+4703	223	4798	507	Imported	\N
+4704	223	4799	102	Imported	\N
+4705	223	4800	12	Imported	\N
+4706	223	4801	140	Imported	\N
+4707	223	4802	37	Imported	\N
+4708	223	4803	505	Imported	\N
+4709	223	4804	10	Imported	\N
+4710	223	4805	509	Imported	\N
+4711	223	4806	514	Imported	\N
+4712	223	4807	504	Imported	\N
+4713	223	4808	502	Imported	\N
+4714	223	4809	506	Imported	\N
+4715	223	4810	507	Imported	\N
+4716	223	4811	509	Imported	\N
+4717	223	4812	506	Imported	\N
+4718	223	4813	507	Imported	\N
+4719	223	4814	507	Imported	\N
+4720	223	4815	504	Imported	\N
+4721	223	4816	512	Imported	\N
+4722	223	4819	509	Imported	\N
+4723	223	4820	510	Imported	\N
+4724	223	4821	111	Imported	\N
+4725	223	4822	30	Imported	\N
+4726	223	4823	110	Imported	\N
+4727	223	4824	254	Imported	\N
+4728	223	4825	505	Imported	\N
+4729	223	4826	503	Imported	\N
+4730	223	4827	504	Imported	\N
+4731	223	4828	515	Imported	\N
+4732	223	4829	504	Imported	\N
+4733	223	4830	508	Imported	\N
+4734	223	4831	509	Imported	\N
+4735	223	4832	512	Imported	\N
+4736	223	4833	502	Imported	\N
+4737	223	4834	501	Imported	\N
+4738	223	4835	512	Imported	\N
+4739	223	4847	127	Imported	\N
+4740	223	4848	511	Imported	\N
+4741	223	4849	513	Imported	\N
+4742	223	4850	501	Imported	\N
+4743	223	4851	514	Imported	\N
+4744	223	4852	510	Imported	\N
+4745	223	4853	508	Imported	\N
+4746	223	4854	10	Imported	\N
+4747	223	4855	18	Imported	\N
+4748	223	4856	26	Imported	\N
+4749	223	4857	22	Imported	\N
+4750	223	4858	20	Imported	\N
+4751	223	4859	512	Imported	\N
+4752	223	4860	20	Imported	\N
+4753	223	4861	10	Imported	\N
+4754	223	4862	12	Imported	\N
+4755	223	4863	18	Imported	\N
+4756	223	4864	4	Imported	\N
+4757	223	4865	12	Imported	\N
+4758	223	4866	16	Imported	\N
+4759	223	4867	20	Imported	\N
+4760	223	4868	22	Imported	\N
+4761	223	4604	504	Imported	\N
+4762	223	4605	10	Imported	\N
+4763	223	4606	515	Imported	\N
+4764	223	4607	511	Imported	\N
+4765	223	4608	501	Imported	\N
+4766	223	4609	261	Imported	\N
+4767	223	4610	505	Imported	\N
+4768	223	4611	511	Imported	\N
+4769	223	4612	506	Imported	\N
+4770	223	4613	508	Imported	\N
+4771	223	4614	513	Imported	\N
+4772	223	4615	509	Imported	\N
+4773	223	4836	509	Imported	\N
+4774	223	4837	127	Imported	\N
+4775	223	4838	20	Imported	\N
+4776	223	4839	507	Imported	\N
+4777	223	4840	513	Imported	\N
+4778	223	4841	109	Imported	\N
+4779	223	4842	512	Imported	\N
+4780	223	4843	508	Imported	\N
+4781	223	4844	503	Imported	\N
+4782	223	4845	105	Imported	\N
+4783	223	4846	515	Imported	\N
 \.
 
 
@@ -19009,11 +19036,6 @@ COPY public.quotation_request_vendors (id, qr_id, vendor_id, is_sent, sent_at, r
 470	221	63	t	2026-08-06 13:28:30.804924	Pending
 471	221	62	t	2026-08-06 13:28:35.737024	Pending
 472	221	66	t	2026-08-06 13:28:40.46755	Pending
-500	223	69	f	\N	Pending
-501	223	71	f	\N	Pending
-502	223	70	f	\N	Pending
-503	223	73	f	\N	Pending
-504	223	72	f	\N	Pending
 505	222	69	t	2026-08-06 19:22:50.042749	Received
 509	222	72	t	2026-08-06 19:23:14.987431	Received
 506	222	71	t	2026-08-06 19:22:56.263246	Not Required
@@ -19024,6 +19046,11 @@ COPY public.quotation_request_vendors (id, qr_id, vendor_id, is_sent, sent_at, r
 511	224	71	t	2026-08-07 11:03:36.740884	Received
 513	224	73	t	2026-08-07 11:03:46.955778	Received
 514	224	72	t	2026-08-07 11:03:51.969133	Received
+515	223	69	f	\N	Pending
+516	223	71	f	\N	Pending
+517	223	70	f	\N	Pending
+518	223	73	f	\N	Pending
+519	223	72	f	\N	Pending
 \.
 
 
@@ -19085,10 +19112,10 @@ COPY public.quotation_requests (id, tenant_id, site_id, qr_number, project_id, c
 221	2	2	QR-00035	3	3	2026-08-28	\N	Requested	\N	\N	f	2026-08-05 11:18:31.523925	2026-08-06 13:28:45.354247	\N
 192	2	2	QR-00006	3	3	2026-06-19	\N	Ordered	3	2026-07-08 13:30:40.181022	f	2026-06-18 11:30:27.394513	2026-08-06 13:29:34.798721	done
 208	2	2	QR-00022	3	3	2026-08-28	\N	Requested	\N	\N	f	2026-07-31 12:40:56.760103	2026-08-07 11:04:27.16865	\N
-223	2	2	QR-00037	3	3	2026-08-21	\N	Draft	\N	\N	f	2026-08-06 17:40:04.70899	2026-08-06 17:47:31.373096	\N
 222	2	2	QR-00036	3	3	2026-08-28	\N	Ordered	3	2026-08-06 20:39:56.033549	f	2026-08-06 16:13:56.000606	2026-08-06 20:46:26.419905	TESTING APPROVAL
 224	2	2	QR-00038	3	3	2026-08-31	\N	Received	\N	\N	f	2026-08-07 11:01:32.919708	2026-08-07 11:04:13.415633	\N
 213	2	2	QR-00027	3	1	2027-01-01	Test Workflow Automated	Approved	3	2026-08-10 11:28:56.388485	f	2026-08-03 14:10:04.35094	2026-08-10 11:28:56.396606	Looks good, test passed
+223	2	2	QR-00037	3	3	2026-08-21	\N	Submitted	\N	\N	f	2026-08-06 17:40:04.70899	2026-08-17 10:45:08.236597	\N
 \.
 
 
@@ -22563,6 +22590,7 @@ COPY public.stock_ledger (id, tenant_id, site_id, material_id, warehouse_id, tra
 4276	2	2	3501	62	GRN	35	44	GRN	216	GRN-00013	3	\N	\N	3	2026-08-06 15:02:28.573808
 4277	2	2	2338	62	Write Off	-1	50	WriteOff	12	EWO-00001	\N	\N	\N	3	2026-08-12 11:07:29.349262
 4278	2	2	2751	62	Issue	-3	22	Issue	240	ISS-00010	3	\N	\N	3	2026-08-14 12:56:12.836422
+4279	2	2	2564	62	Issue	-2	42	Issue	241	ISS-00011	3	237	\N	3	2026-08-17 10:07:34.301916
 \.
 
 
@@ -22714,6 +22742,10 @@ COPY public.subcategories (id, tenant_id, site_id, name, category_id, is_active,
 --
 
 COPY public.system_lookups (id, tenant_id, lookup_type, lookup_value, is_active, created_at) FROM stdin;
+1	2	ComplaintType	General Complaint	t	2026-08-17 10:30:58.567678
+2	2	ComplaintType	Machine Not Working	t	2026-08-17 10:30:58.567697
+3	2	ComplaintType	Installation	t	2026-08-17 10:30:58.567703
+4	2	ComplaintType	User Training	t	2026-08-17 10:30:58.567706
 \.
 
 
@@ -22973,6 +23005,8 @@ COPY public.vendor_approvals (id, vendor_id, approval_flow_id, approver_id, rema
 10	71	86	3	\N	2026-08-06 19:16:16.628292
 11	65	111	3	\N	2026-08-11 18:08:44.815888
 12	74	65	3	\N	2026-08-11 18:13:30.970628
+13	63	65	3	\N	2026-08-17 10:29:40.676976
+14	75	65	3	\N	2026-08-17 10:33:38.713024
 \.
 
 
@@ -23030,6 +23064,8 @@ COPY public.vendor_categories (id, vendor_id, category_id) FROM stdin;
 220	63	68
 221	63	73
 222	63	74
+223	75	80
+224	75	68
 \.
 
 
@@ -23090,6 +23126,9 @@ COPY public.vendor_history (id, vendor_id, action, changes, remarks, action_by_i
 50	67	Rejected	\N	currently not in markety\n	3	2026-08-11 18:45:40.957968
 51	68	Rejected	\N	no needed	3	2026-08-11 18:46:00.830654
 52	63	Edited and Resubmitted	{"phone": {"old": "47347347837", "new": "47347347833"}}	\N	3	2026-08-11 18:47:12.167885
+53	63	Fully Approved	\N	\N	3	2026-08-17 10:29:40.713446
+54	75	Created	\N	\N	3	2026-08-17 10:33:12.476616
+55	75	Fully Approved	\N	\N	3	2026-08-17 10:33:38.729447
 \.
 
 
@@ -24606,8 +24645,9 @@ COPY public.vendors (id, tenant_id, site_id, name, code, contact_person, phone, 
 72	2	2	THE PRINCE CHEMICAL CO	VND-00011	Prince	64375443788	theprincechem@nissigrid.com	22AAAAA0000A1Z5	\N	Bangalore 	29 - Karnataka	56002	\N	\N	\N	4.5	t	f	2026-08-06 16:59:08.113193	2026-08-06 17:42:45.855548	      NO,19,5th cross, H.Siddaiah road 		Approved	2	3	2026-08-06 12:12:45.855115	\N	\N	\N	\N	\N	\N	\N
 65	2	2	havells pvt limited	VND-00004	Pradnesh A	56954664565	pradnesha12345@gmail.com	29AACCE9951H1ZR	\N	bangalore	29 - Karnataka	560016	\N	\N	\N	4.5	f	f	2026-07-21 15:30:53.78455	2026-08-11 18:08:45.055856	old madras road,pai layout		Approved	2	3	2026-08-11 12:38:45.053197	\N	3	2026-08-06 05:56:13.093826	Rejected	3	2026-08-06 05:56:13.093826	{"email": {"old": "pradnesha1234@gmail.com", "new": "pradnesha12345@gmail.com"}}
 71	2	2	ISIRI SCIENTIFICS	VND-00010	ISIRI	8884483838	pradnesh@nissigrid.com	29AXXPD1835A1ZH	\N	Bangalore	29 - Karnataka	560086	\N	\N	\N	5	t	f	2026-08-06 16:54:45.792264	2026-08-06 19:16:16.642761	No.189/18,Coressponding no.17,	6th Cross,Ravi English school road	Approved	2	3	2026-08-06 13:46:16.642283	\N	\N	\N	Approved	3	2026-08-06 12:12:40.888623	{"email": {"old": "isiriscientifics@nissigrid.com", "new": "pradnesh@nissigrid.com"}}
-63	2	2	ELCAB ENGINEERS PRIVATE LIMITED	VND-00002	Bala	47347347833	pradnesha12345@gmail.com	29AACCE9951H1ZR	\N	Bangalore	29 - Karnataka	560060	\N	\N	\N	4.5	f	f	2026-06-12 01:31:58.140808	2026-08-11 18:47:12.16609	V R Cindem Complex, Sy. No. 1193/34/4, Kengeri Main Road,	Behind Mr Prem Bun, Ramasandra Village,	Submitted	1	\N	\N	\N	\N	\N	Approved	\N	\N	{"phone": {"old": "47347347837", "new": "47347347833"}}
 69	2	2	AIC ENTERPRISES PVT LTD	VND-00008	AICENT	9742270172	ilangkumaran@nissigrid.in	29AASCA0900A1Z3	\N	Bangalore	29 - Karnataka	560058	\N	\N	\N	4.5	t	f	2026-08-06 16:45:15.340276	2026-08-06 19:15:24.8115	V-79A and V-79B, 1ST A Main Road	2nd Stage, Peenya Industrial Estate	Approved	2	3	2026-08-06 13:45:24.810803	\N	\N	\N	Approved	3	2026-08-06 12:12:39.00556	{"email": {"old": "customercare.ka@nissigrid.in", "new": "ilangkumaran@nissigrid.in"}}
+63	2	2	ELCAB ENGINEERS PRIVATE LIMITED	VND-00002	Bala	47347347833	pradnesha12345@gmail.com	29AACCE9951H1ZR	\N	Bangalore	29 - Karnataka	560060	\N	\N	\N	4.5	t	f	2026-06-12 01:31:58.140808	2026-08-17 10:29:40.712343	V R Cindem Complex, Sy. No. 1193/34/4, Kengeri Main Road,	Behind Mr Prem Bun, Ramasandra Village,	Approved	1	3	2026-08-17 04:59:40.711144	\N	\N	\N	Approved	\N	\N	{"phone": {"old": "47347347837", "new": "47347347833"}}
+75	2	2	sam	VND-00014	sam	0987123898	sam@gmail.com	27ABCDE1234F2Z5	\N	chennai	33 - Tamil Nadu	600094	\N	\N	\N	5	t	f	2026-08-17 10:33:12.443748	2026-08-17 10:33:38.728703	main road, north street.		Approved	1	3	2026-08-17 05:03:38.727901	\N	\N	\N	\N	\N	\N	\N
 \.
 
 
@@ -24644,6 +24684,8 @@ COPY public.warehouses (id, tenant_id, site_id, name, code, project_id, warehous
 72	2	2	RADIOLOGY Store	WH-00010	3	Store		\N		\N	t	f	2026-06-12 02:00:34.488911
 73	2	2	Scrap Store	WH-00011	3	Central	Bangalore	\N		\N	t	f	2026-06-15 18:22:59.575527
 69	2	2	Plumbing Store	WH-00007	3	De centralized		\N		\N	f	t	2026-06-12 01:59:25.241904
+75	2	2	IT store	WH-00012	3	Central	chennai	\N	aadhav	\N	t	f	2026-08-17 10:37:19.182694
+76	2	2	ram	WH-00013	3	Central	banglore	\N	ramanan	\N	f	f	2026-08-17 10:37:57.209012
 \.
 
 
@@ -24661,6 +24703,7 @@ COPY public.work_order_approvals (id, wo_id, approval_flow_id, approver_id, appr
 
 COPY public.work_order_items (id, wo_id, material_id, quantity, rate, amount, received_quantity, approved_quantity, discount_percent, cgst_percentage, sgst_percentage, igst_percentage, is_gst_inclusive, remarks) FROM stdin;
 1	1	2564	4	16526.16	66105	0	\N	0	6	6	0	t	\N
+4	6	2564	100	23	2499	0	\N	3	6	6	0	f	\N
 \.
 
 
@@ -24670,6 +24713,7 @@ COPY public.work_order_items (id, wo_id, material_id, quantity, rate, amount, re
 
 COPY public.work_orders (id, tenant_id, site_id, wo_number, vendor_id, project_id, institution_id, contract_id, equipment_id, wo_type, advance_percentage, total_amount, target_completion_date, status, current_approval_level, terms, remarks, annexure, created_by_id, approved_by_id, approved_at, is_deleted, created_at, updated_at) FROM stdin;
 1	2	2	WO-00001	69	3	11	\N	1605	AMC	0	66105	\N	Sent to Vendor	1	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	\N		3	3	2026-08-12 08:23:56.194158	f	2026-08-12 11:26:55.501055	2026-08-12 13:54:54.028142
+6	2	2	WO-00002	66	3	10	3	1604	AMC	0	2499	\N	Approved	1	1. Bill/Invoices in the name of East Point College of Physiotherapy managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	\N		3	3	2026-08-17 05:21:07.90497	f	2026-08-17 10:50:58.117879	2026-08-17 10:51:07.905554
 \.
 
 
@@ -24713,7 +24757,7 @@ COPY public.write_offs (id, tenant_id, site_id, write_off_number, date, reason, 
 -- Name: alerts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.alerts_id_seq', 79, true);
+SELECT pg_catalog.setval('public.alerts_id_seq', 80, true);
 
 
 --
@@ -24783,7 +24827,7 @@ SELECT pg_catalog.setval('public.complaints_id_seq', 445, true);
 -- Name: contract_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.contract_approvals_id_seq', 10, true);
+SELECT pg_catalog.setval('public.contract_approvals_id_seq', 11, true);
 
 
 --
@@ -24825,7 +24869,7 @@ SELECT pg_catalog.setval('public.departments_id_seq', 335, true);
 -- Name: document_sequences_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.document_sequences_id_seq', 113, true);
+SELECT pg_catalog.setval('public.document_sequences_id_seq', 115, true);
 
 
 --
@@ -24895,21 +24939,21 @@ SELECT pg_catalog.setval('public.grn_items_id_seq', 521, true);
 -- Name: indent_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.indent_approvals_id_seq', 88, true);
+SELECT pg_catalog.setval('public.indent_approvals_id_seq', 92, true);
 
 
 --
 -- Name: indent_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.indent_items_id_seq', 523, true);
+SELECT pg_catalog.setval('public.indent_items_id_seq', 524, true);
 
 
 --
 -- Name: indents_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.indents_id_seq', 241, true);
+SELECT pg_catalog.setval('public.indents_id_seq', 242, true);
 
 
 --
@@ -24944,14 +24988,14 @@ SELECT pg_catalog.setval('public.location_master_id_seq', 149, true);
 -- Name: material_issue_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.material_issue_items_id_seq', 220, true);
+SELECT pg_catalog.setval('public.material_issue_items_id_seq', 221, true);
 
 
 --
 -- Name: material_issues_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.material_issues_id_seq', 240, true);
+SELECT pg_catalog.setval('public.material_issues_id_seq', 241, true);
 
 
 --
@@ -25014,42 +25058,42 @@ SELECT pg_catalog.setval('public.projects_id_seq', 9, true);
 -- Name: purchase_order_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_order_approvals_id_seq', 115, true);
+SELECT pg_catalog.setval('public.purchase_order_approvals_id_seq', 121, true);
 
 
 --
 -- Name: purchase_order_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_order_items_id_seq', 1744, true);
+SELECT pg_catalog.setval('public.purchase_order_items_id_seq', 1746, true);
 
 
 --
 -- Name: purchase_orders_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_orders_id_seq', 274, true);
+SELECT pg_catalog.setval('public.purchase_orders_id_seq', 276, true);
 
 
 --
 -- Name: purchase_request_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_request_approvals_id_seq', 46, true);
+SELECT pg_catalog.setval('public.purchase_request_approvals_id_seq', 50, true);
 
 
 --
 -- Name: purchase_request_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_request_items_id_seq', 625, true);
+SELECT pg_catalog.setval('public.purchase_request_items_id_seq', 626, true);
 
 
 --
 -- Name: purchase_requests_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_requests_id_seq', 206, true);
+SELECT pg_catalog.setval('public.purchase_requests_id_seq', 207, true);
 
 
 --
@@ -25070,14 +25114,14 @@ SELECT pg_catalog.setval('public.quotation_negotiation_history_id_seq', 23, true
 -- Name: quotation_request_item_sources_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_request_item_sources_id_seq', 4164, true);
+SELECT pg_catalog.setval('public.quotation_request_item_sources_id_seq', 4430, true);
 
 
 --
 -- Name: quotation_request_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_request_items_id_seq', 4517, true);
+SELECT pg_catalog.setval('public.quotation_request_items_id_seq', 4783, true);
 
 
 --
@@ -25091,7 +25135,7 @@ SELECT pg_catalog.setval('public.quotation_request_prs_id_seq', 31, true);
 -- Name: quotation_request_vendors_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_request_vendors_id_seq', 514, true);
+SELECT pg_catalog.setval('public.quotation_request_vendors_id_seq', 519, true);
 
 
 --
@@ -25147,7 +25191,7 @@ SELECT pg_catalog.setval('public.sites_id_seq', 4, true);
 -- Name: stock_ledger_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.stock_ledger_id_seq', 4278, true);
+SELECT pg_catalog.setval('public.stock_ledger_id_seq', 4279, true);
 
 
 --
@@ -25175,7 +25219,7 @@ SELECT pg_catalog.setval('public.subcategories_id_seq', 98, true);
 -- Name: system_lookups_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.system_lookups_id_seq', 1, false);
+SELECT pg_catalog.setval('public.system_lookups_id_seq', 4, true);
 
 
 --
@@ -25231,21 +25275,21 @@ SELECT pg_catalog.setval('public.users_id_seq', 36, true);
 -- Name: vendor_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_approvals_id_seq', 12, true);
+SELECT pg_catalog.setval('public.vendor_approvals_id_seq', 14, true);
 
 
 --
 -- Name: vendor_categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_categories_id_seq', 222, true);
+SELECT pg_catalog.setval('public.vendor_categories_id_seq', 224, true);
 
 
 --
 -- Name: vendor_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_history_id_seq', 52, true);
+SELECT pg_catalog.setval('public.vendor_history_id_seq', 55, true);
 
 
 --
@@ -25294,14 +25338,14 @@ SELECT pg_catalog.setval('public.vendor_work_orders_id_seq', 1, false);
 -- Name: vendors_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendors_id_seq', 74, true);
+SELECT pg_catalog.setval('public.vendors_id_seq', 75, true);
 
 
 --
 -- Name: warehouses_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.warehouses_id_seq', 74, true);
+SELECT pg_catalog.setval('public.warehouses_id_seq', 76, true);
 
 
 --
@@ -25315,14 +25359,14 @@ SELECT pg_catalog.setval('public.work_order_approvals_id_seq', 1, false);
 -- Name: work_order_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.work_order_items_id_seq', 3, true);
+SELECT pg_catalog.setval('public.work_order_items_id_seq', 4, true);
 
 
 --
 -- Name: work_orders_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.work_orders_id_seq', 5, true);
+SELECT pg_catalog.setval('public.work_orders_id_seq', 6, true);
 
 
 --
@@ -29948,5 +29992,5 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 3ZZjJWQj4XV2hCERfv0HInS5P4f5nXE1dotUFrvSpHJXC6kEgj8NDvfXLmwcOVO
+\unrestrict PXoR8FfDxRLR5JsYRSBbkPzgLFaaGnH0CxVC6g2e2BUuBKchWh11LZtZhaI3mHc
 

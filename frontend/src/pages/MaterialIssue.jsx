@@ -407,10 +407,10 @@ export default function MaterialIssue() {
       const payload = {
         warehouse_id: issueModal.isDirect ? issueModal.warehouse_id : issueModal.items[0]?.warehouse_id,
         project_id: issueModal.isDirect ? selectedProjId : (issueModal.indent?.project_id || 1),
-        indent_id: issueModal.indent?.id,
+        indent_id: issueModal.indent?.id || null,
         issued_to_department: issueModal.isDirect ? issueModal.department : undefined,
-        building_id: issueModal.isDirect ? issueModal.building_id : undefined,
-        issued_to_room_id: issueModal.isDirect ? (issueModal.room_id || null) : issueModal.indent?.room_id,
+        building_id: issueModal.isDirect ? (issueModal.building_id || null) : undefined,
+        issued_to_room_id: issueModal.isDirect ? (issueModal.room_id || null) : (issueModal.indent?.room_id || null),
         purpose: issueModal.remarks || (issueModal.isDirect ? 'Direct Issue' : `Fulfillment for ${issueModal.indent?.indent_number}`),
         items: validItems.map(it => ({
           material_id: it.material_id,

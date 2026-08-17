@@ -1246,6 +1246,12 @@ class GRNOut(BaseModel):
     invoice_date: Optional[date] = None
     invoice_amount: float
     invoice_scan_url: Optional[str] = None
+    dc_number: Optional[str] = None
+    dc_date: Optional[date] = None
+    dc_scan_url: Optional[str] = None
+    gate_entry_id: Optional[int] = None
+    gate_entry_number: Optional[str] = None
+    remarks: Optional[str] = None
     vendor_gstin: Optional[str] = None
     total_taxable_amount: float = 0
     total_cgst: float = 0

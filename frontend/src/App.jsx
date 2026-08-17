@@ -59,6 +59,7 @@ import MaterialAllowances from './pages/MaterialAllowances';
 import Configurations from './pages/Configurations';
 import RoleConfiguration from './pages/RoleConfiguration';
 import SaasAdmin from './pages/SaasAdmin';
+import MenuSettings from './pages/Admin/MenuSettings';
 import Alerts from './pages/Alerts';
 import PlatformLogin from './pages/PlatformLogin';
 import TermsAndConditions from './pages/TermsAndConditions';
@@ -70,6 +71,8 @@ import ComplaintDetail from './pages/ComplaintDetail';
 import Contracts from './pages/Contracts';
 import ContractForm from './pages/ContractForm';
 import WorkOrders from './pages/WorkOrders';
+import VendorWorkOrders from './pages/VendorWorkOrders';
+import VendorWorkOrderDetail from './pages/VendorWorkOrderDetail';
 
 import VendorPendingInvoicesReport from './pages/VendorPendingInvoicesReport';
 import VendorPendingPaymentsReport from './pages/VendorPendingPaymentsReport';
@@ -144,6 +147,8 @@ function AppRoutes() {
         <Route path="quotations" element={<Quotations />} />
         <Route path="purchase-orders" element={<PurchaseOrders />} />
         <Route path="work-orders" element={<WorkOrders />} />
+        <Route path="procurement/vendor-work-orders" element={<VendorWorkOrders />} />
+        <Route path="procurement/vendor-work-orders/:id" element={<VendorWorkOrderDetail />} />
         <Route path="gate-entry" element={<GateEntry />} />
         <Route path="invoices" element={<Invoices />} />
         <Route path="invoice-tracking" element={<InvoiceTracking />} />
@@ -184,6 +189,7 @@ function AppRoutes() {
         <Route path="terms" element={<TermsAndConditions />} />
         <Route path="company-addresses" element={<CompanyAddresses />} />
         <Route path="saas-admin" element={<SaasAdmin />} />
+        <Route path="saas-admin/menus" element={<MenuSettings />} />
         <Route path="alerts" element={<Alerts />} />
         <Route path="complaints" element={<ComplaintsList />} />
         <Route path="complaints/new" element={<ComplaintForm />} />

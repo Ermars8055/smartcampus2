@@ -775,7 +775,7 @@ export default function RegisterInvoice() {
                 <Grid item xs={2.5}>
                   <TextField disabled={!item.material_id} fullWidth placeholder="Remarks" value={item.remarks || ''} onChange={e => updateItem(idx, 'remarks', e.target.value)} size="small" variant="standard" inputProps={{ maxLength: 255, style: { fontSize: '0.8rem' } }} />
                 </Grid>
-                <Grid item xs={3} sx={{ textAlign: 'right', fontWeight: 600, fontSize: '0.8rem' }}>₹{totals.items[idx]?.amount.toFixed(2)}</Grid>
+                <Grid item xs={3} sx={{ textAlign: 'right', fontWeight: 600, fontSize: '0.8rem' }}>₹{Number(totals.items[idx]?.amount.toFixed(2))}</Grid>
                 <Grid item xs={1} sx={{ textAlign: 'center' }}>
                   <IconButton color="error" size="small" onClick={() => removeItem(idx)} sx={{ p: 0.5 }}><Delete fontSize="small" /></IconButton>
                 </Grid>
@@ -828,7 +828,7 @@ export default function RegisterInvoice() {
                      const cg = tx * ((parseFloat(form.transport_cgst_rate) || 0) / 100);
                      const sg = tx * ((parseFloat(form.transport_sgst_rate) || 0) / 100);
                      const ig = tx * ((parseFloat(form.transport_igst_rate) || 0) / 100);
-                     return (tx + cg + sg + ig).toFixed(2);
+                     return Number((tx + cg + sg + ig).toFixed(2));
                    })()
                 }
               </Grid>
@@ -865,13 +865,13 @@ export default function RegisterInvoice() {
         <Grid container justifyContent="flex-end">
           <Grid item xs={12} sm={8} md={5}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>Invoice Summary</Typography>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}><Typography color="textSecondary">Total Taxable Value</Typography><Typography>₹{totals.total_taxable_amount.toFixed(2)}</Typography></Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}><Typography color="textSecondary">Total CGST</Typography><Typography>₹{totals.total_cgst.toFixed(2)}</Typography></Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}><Typography color="textSecondary">Total SGST</Typography><Typography>₹{totals.total_sgst.toFixed(2)}</Typography></Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}><Typography color="textSecondary">Total IGST</Typography><Typography>₹{totals.total_igst.toFixed(2)}</Typography></Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}><Typography color="textSecondary">Transport Charges</Typography><Typography>₹{totals.transport_charges.toFixed(2)}</Typography></Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}><Typography color="textSecondary">Total Taxable Value</Typography><Typography>₹{Number(totals.total_taxable_amount.toFixed(2))}</Typography></Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}><Typography color="textSecondary">Total CGST</Typography><Typography>₹{Number(totals.total_cgst.toFixed(2))}</Typography></Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}><Typography color="textSecondary">Total SGST</Typography><Typography>₹{Number(totals.total_sgst.toFixed(2))}</Typography></Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}><Typography color="textSecondary">Total IGST</Typography><Typography>₹{Number(totals.total_igst.toFixed(2))}</Typography></Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}><Typography color="textSecondary">Transport Charges</Typography><Typography>₹{Number(totals.transport_charges.toFixed(2))}</Typography></Box>
             <Divider sx={{ mb: 2 }} />
-            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}><Typography variant="h6" sx={{ fontWeight: 700 }}>Grand Total</Typography><Typography variant="h6" sx={{ fontWeight: 700, color: '#059669' }}>₹{totals.total_amount.toFixed(2)}</Typography></Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}><Typography variant="h6" sx={{ fontWeight: 700 }}>Grand Total</Typography><Typography variant="h6" sx={{ fontWeight: 700, color: '#059669' }}>₹{Number(totals.total_amount.toFixed(2))}</Typography></Box>
           </Grid>
         </Grid>
       </Card>

@@ -214,6 +214,7 @@ class TenantConfiguration(Base):
     cgst_share_percent = Column(Float, nullable=False)
     sgst_share_percent = Column(Float, nullable=False)
     po_short_close_notify_roles = Column(JSON, default=list)
+    wo_short_close_notify_roles = Column(JSON, default=list)
     created_at = Column(DateTime, default=_get_now)
     updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)
     tenant = relationship("Tenant")
@@ -455,6 +456,16 @@ class Warehouse(Base):
 
 # == Master Data ==
 
+class SystemLookup(Base):
+    __tablename__ = "system_lookups"
+    id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
+    lookup_type = Column(String(100), nullable=False, index=True) # e.g., 'ComplaintType'
+    lookup_value = Column(String(255), nullable=False)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=_get_now)
+    __table_args__ = (UniqueConstraint("tenant_id", "lookup_type", "lookup_value", name="uq_sys_lookup_val"),)
+
 class Category(Base):
     __tablename__ = "categories"
     id = Column(Integer, primary_key=True, index=True)
@@ -654,6 +665,7 @@ class EquipmentItem(Base):
     warranty_end_date = Column(Date, nullable=True)
     year_of_purchase = Column(Integer, nullable=True)
     po_number = Column(String(100), nullable=True)
+    po_date = Column(Date, nullable=True)
     created_at = Column(DateTime, default=_get_now)
     updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)
 
@@ -1080,6 +1092,8 @@ class Complaint(Base):
     manager_approved_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     manager_approved_at = Column(DateTime, nullable=True)
     is_pm_calibration_call = Column(Boolean, default=False)
+    repair_method = Column(String(100), nullable=True)
+    linked_vwo_id = Column(Integer, ForeignKey("vendor_work_orders.id"), nullable=True)
 
     created_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     resolved_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
@@ -2083,3 +2097,107 @@ class ReagentConsumptionLog(Base):
 
     equipment = relationship("EquipmentItem")
     logged_by = relationship("User", foreign_keys=[logged_by_id])
+
+
+# == Vendor Work Orders ==
+
+class VendorWorkOrder(Base):
+    __tablename__ = "vendor_work_orders"
+    id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
+    site_id = Column(Integer, ForeignKey("sites.id", ondelete="CASCADE"), nullable=False)
+    vwo_number = Column(String(50), nullable=False, index=True)
+    institution_id = Column(Integer, ForeignKey("institutions.id"), nullable=True)
+    vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=False)
+    complaint_id = Column(Integer, ForeignKey("complaints.id"), nullable=True)
+    equipment_id = Column(Integer, ForeignKey("equipment_items.id"), nullable=False)
+    priority = Column(String(50), nullable=False, default="Normal")
+    target_date = Column(Date, nullable=False)
+
+    service_type = Column(String(100), nullable=False) # Repair, Installation, Calibration, PM Visit, Vendor Inspection
+    scope_of_work = Column(Text, nullable=False)
+    vendor_instructions = Column(Text, nullable=True)
+
+    quotation_no = Column(String(100), nullable=True)
+    vendor_quote_amount = Column(Float, default=0)
+    labour_charges = Column(Float, default=0)
+    service_charges = Column(Float, default=0)
+    tax = Column(Float, default=0)
+    total_approved_amount = Column(Float, default=0)
+
+    status = Column(String(50), default="Draft") # Draft, Approved, Sent to Vendor, Accepted, Work In Progress, Completed, Verified, Closed
+    created_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    is_deleted = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=_get_now)
+    updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)
+
+    institution = relationship("Institution")
+    vendor = relationship("Vendor")
+    complaint = relationship("Complaint", foreign_keys=[complaint_id])
+    equipment = relationship("EquipmentItem")
+    created_by = relationship("User", foreign_keys=[created_by_id])
+    items = relationship("VendorWorkOrderItem", back_populates="vwo", cascade="all, delete-orphan")
+    images = relationship("VendorWorkOrderImage", back_populates="vwo", cascade="all, delete-orphan")
+    documents = relationship("VendorWorkOrderDocument", back_populates="vwo", cascade="all, delete-orphan")
+
+    __table_args__ = (UniqueConstraint("tenant_id", "vwo_number", name="uq_vwo_per_tenant"),)
+
+
+class VendorWorkOrderItem(Base):
+    __tablename__ = "vendor_work_order_items"
+    id = Column(Integer, primary_key=True, index=True)
+    vwo_id = Column(Integer, ForeignKey("vendor_work_orders.id", ondelete="CASCADE"), nullable=False)
+    material_id = Column(Integer, ForeignKey("materials.id"), nullable=True)
+    description = Column(String(255), nullable=True)
+    quantity = Column(Float, nullable=False, default=1)
+    rate = Column(Float, nullable=False, default=0)
+    amount = Column(Float, nullable=False, default=0)
+
+    vwo = relationship("VendorWorkOrder", back_populates="items")
+    material = relationship("Material")
+
+
+class VendorWorkOrderImage(Base):
+    __tablename__ = "vendor_work_order_images"
+    id = Column(Integer, primary_key=True, index=True)
+    vwo_id = Column(Integer, ForeignKey("vendor_work_orders.id", ondelete="CASCADE"), nullable=False)
+    image_type = Column(String(100), nullable=True) # Before Photo, After Photo
+    image_url = Column(String(500), nullable=False)
+    uploaded_at = Column(DateTime, default=_get_now)
+    
+    vwo = relationship("VendorWorkOrder", back_populates="images")
+
+
+class VendorWorkOrderDocument(Base):
+    __tablename__ = "vendor_work_order_documents"
+    id = Column(Integer, primary_key=True, index=True)
+    vwo_id = Column(Integer, ForeignKey("vendor_work_orders.id", ondelete="CASCADE"), nullable=False)
+    document_type = Column(String(100), nullable=True) # Vendor Quotation, Inspection Report, Service Report, Vendor Invoice
+    file_url = Column(String(500), nullable=False)
+    uploaded_at = Column(DateTime, default=_get_now)
+    uploaded_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+
+    vwo = relationship("VendorWorkOrder", back_populates="documents")
+    uploaded_by = relationship("User")
+
+
+# == System Configuration ==
+
+class MenuItem(Base):
+    __tablename__ = "menu_items"
+    id = Column(Integer, primary_key=True, index=True)
+    text = Column(String(100), nullable=False)
+    icon_name = Column(String(50), nullable=True)
+    path = Column(String(255), nullable=True)
+    resource = Column(String(100), nullable=True)
+    platform_only = Column(Boolean, default=False)
+    parent_id = Column(Integer, ForeignKey("menu_items.id", ondelete="CASCADE"), nullable=True)
+    order = Column(Integer, default=0)
+    is_active = Column(Boolean, default=True)
+    basic_actions = Column(JSON, default=list) # e.g. ["read", "create", "update", "delete"]
+    extended_actions = Column(JSON, default=list) # e.g. [{"key": "can_approve", "label": "Approve", "color": "#10B981"}]
+    created_at = Column(DateTime, default=_get_now)
+    updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)
+    
+    parent = relationship("MenuItem", remote_side=[id], back_populates="children")
+    children = relationship("MenuItem", back_populates="parent", order_by="MenuItem.order", cascade="all, delete-orphan")

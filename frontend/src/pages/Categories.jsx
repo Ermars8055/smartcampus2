@@ -95,10 +95,9 @@ export default function Categories() {
             Material Categories
           </Typography>
           <Button 
-            variant="text" 
+            variant="contained" 
             startIcon={<Add />} 
             onClick={() => { setEditing(null); setForm({ name: '', description: '', material_code_prefix: '', code: '', has_materials: false, is_active: true }); setErrors({}); setDialog('category'); }}
-            sx={{ textTransform: 'none', fontWeight: 600, color: '#2563EB' }}
           >
             Add Category
           </Button>

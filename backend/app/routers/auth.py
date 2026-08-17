@@ -69,7 +69,8 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
             "tenant_id": None, "site_ids": [], "roles": [], "permissions": {},
             "data_access_scope": "Full Administrative Access"
         })
-        db.add(AuditLog(user_id=user.id, action="LOGIN", entity_type="User", entity_id=user.id))
+        # Removed manual AuditLog
+        # db.add(AuditLog(user_id=user.id, action="LOGIN", entity_type="User", entity_id=user.id))
         db.commit()
         return {
             "access_token": token,
@@ -165,8 +166,8 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
         "is_platform_admin": user.is_platform_admin,
         "data_access_scope": data_access_scope
     })
-
-    db.add(AuditLog(tenant_id=tenant.id, user_id=user.id, action="LOGIN", entity_type="User", entity_id=user.id))
+        # Removed manual AuditLog
+        # db.add(AuditLog(tenant_id=tenant.id, user_id=user.id, action="LOGIN", entity_type="User", entity_id=user.id))
     db.commit()
 
     return {

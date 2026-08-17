@@ -228,7 +228,6 @@ export default function Returns() {
           startIcon={<Add />}
           onClick={openReturnModal}
           disabled={!hasAction('returns', 'can_return') && !hasAction('issues', 'can_issue')} // Fallback to issues permission if returns not defined yet
-          sx={{ textTransform: 'none', borderRadius: 2, fontWeight: 700, px: 3, bgcolor: '#2563EB' }}
         >
           Initiate Return
         </Button>

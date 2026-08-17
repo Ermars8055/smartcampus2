@@ -96,6 +96,7 @@ export default function ContractForm() {
     if (!form.vendor_id) newErrs.vendor_id = 'Required';
     if (!form.start_date) newErrs.start_date = 'Required';
     if (!form.end_date) newErrs.end_date = 'Required';
+    if (form.contract_type !== 'RC' && !form.contract_value) newErrs.contract_value = 'Required';
     if (form.items.length === 0) newErrs.items = 'At least one item is required';
     setErrors(newErrs);
     return Object.keys(newErrs).length === 0;
@@ -112,8 +113,17 @@ export default function ContractForm() {
       if (!payload.institution_id) delete payload.institution_id;
       if (!payload.department_id) delete payload.department_id;
       if (!payload.contract_value) delete payload.contract_value;
+      else payload.contract_value = parseFloat(payload.contract_value);
       if (payload.start_date) payload.start_date = dayjs(payload.start_date).format('YYYY-MM-DD');
       if (payload.end_date) payload.end_date = dayjs(payload.end_date).format('YYYY-MM-DD');
+
+      payload.items = payload.items.map(item => ({
+        ...item,
+        rate: item.rate !== '' && item.rate != null ? parseFloat(item.rate) : 0,
+        gst: item.gst !== '' && item.gst != null ? parseFloat(item.gst) : 0,
+        contract_quantity: item.contract_quantity !== '' && item.contract_quantity != null ? parseFloat(item.contract_quantity) : null,
+        delivery_lead_time: item.delivery_lead_time !== '' && item.delivery_lead_time != null ? parseInt(item.delivery_lead_time) : null
+      }));
 
       if (isEdit) {
         await api.put(`/api/contracts/${id}`, payload);
@@ -133,8 +143,8 @@ export default function ContractForm() {
     setForm(prev => ({
       ...prev,
       items: [...prev.items, {
-        material_id: null, equipment_id: null, uom: '', rate: 0, gst: 0,
-        delivery_lead_time: null, contract_quantity: null, covered_components: '', excluded_components: ''
+        material_id: null, equipment_id: null, uom: '', allow_decimal: false, rate: '', gst: '',
+        delivery_lead_time: '', contract_quantity: '', covered_components: '', excluded_components: ''
       }]
     }));
   };
@@ -148,6 +158,29 @@ export default function ContractForm() {
   const removeItem = (index) => {
     const newItems = form.items.filter((_, i) => i !== index);
     setForm({ ...form, items: newItems });
+  };
+
+  const getDuration = () => {
+    if (form.start_date && form.end_date) {
+      const start = dayjs(form.start_date);
+      const end = dayjs(form.end_date);
+      if (end.isBefore(start, 'day')) return "End date cannot be before start date.";
+      
+      const years = end.diff(start, 'year');
+      const startAfterYears = start.add(years, 'year');
+      const months = end.diff(startAfterYears, 'month');
+      const startAfterMonths = startAfterYears.add(months, 'month');
+      const days = end.diff(startAfterMonths, 'day');
+      
+      let durationStr = [];
+      if (years > 0) durationStr.push(`${years} year${years > 1 ? 's' : ''}`);
+      if (months > 0) durationStr.push(`${months} month${months > 1 ? 's' : ''}`);
+      if (days > 0) durationStr.push(`${days} day${days > 1 ? 's' : ''}`);
+      
+      if (durationStr.length === 0) return "Duration: 0 days";
+      return `Duration: ${durationStr.join(', ')}`;
+    }
+    return null;
   };
 
   return (
@@ -191,7 +224,7 @@ export default function ContractForm() {
             </TextField>
           </Grid>
 
-          <Grid item xs={12} sm={4}>
+          <Grid item xs={12} sm={form.contract_type === 'RC' ? 6 : 4}>
             <TextField
               select
               fullWidth
@@ -206,7 +239,7 @@ export default function ContractForm() {
               <MenuItem value="CMC">Comprehensive Maintenance Contract (CMC)</MenuItem>
             </TextField>
           </Grid>
-          <Grid item xs={12} sm={4}>
+          <Grid item xs={12} sm={form.contract_type === 'RC' ? 6 : 4}>
             <TextField
               select
               fullWidth
@@ -221,16 +254,27 @@ export default function ContractForm() {
               {vendors.map(v => <MenuItem key={v.id} value={v.id}>{v.code} - {v.name}</MenuItem>)}
             </TextField>
           </Grid>
-          <Grid item xs={12} sm={4}>
-            <TextField
-              fullWidth
-              label="Total Contract Value (₹)"
-              type="number"
-              value={form.contract_value}
-              onChange={e => setForm({ ...form, contract_value: parseFloat(e.target.value) || '' })}
-              disabled={isViewMode}
-            />
-          </Grid>
+          {form.contract_type !== 'RC' && (
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                label="Total Contract Value (₹) *"
+                type="number"
+                inputProps={{ step: "0.01" }}
+                value={form.contract_value}
+                onChange={e => {
+                  let val = e.target.value;
+                  if (val.length > 1 && val.startsWith('0') && val[1] !== '.') val = val.replace(/^0+/, '');
+                  if (val === '' || /^\d*\.?\d{0,2}$/.test(val)) {
+                    setForm({ ...form, contract_value: val });
+                  }
+                }}
+                error={!!errors.contract_value}
+                helperText={errors.contract_value}
+                disabled={isViewMode}
+              />
+            </Grid>
+          )}
 
           <Grid item xs={12} sm={6}>
             <DatePicker
@@ -268,6 +312,13 @@ export default function ContractForm() {
               }}
             />
           </Grid>
+          {getDuration() && (
+            <Grid item xs={12} sx={{ mt: -1 }}>
+              <Typography variant="caption" sx={{ color: 'error.main', fontWeight: 600 }}>
+                {getDuration()}
+              </Typography>
+            </Grid>
+          )}
           {(form.contract_type === 'AMC' || form.contract_type === 'CMC') && (
             <Grid item xs={12} sx={{ display: 'flex', gap: 4 }}>
               <FormControlLabel
@@ -296,6 +347,7 @@ export default function ContractForm() {
                 {form.contract_type === 'RC' ? (
                   <>
                     <TableCell>MATERIAL</TableCell>
+                    <TableCell>UOM</TableCell>
                     <TableCell>RATE (₹)</TableCell>
                     <TableCell>GST %</TableCell>
                     <TableCell>MAX QTY</TableCell>
@@ -304,8 +356,6 @@ export default function ContractForm() {
                 ) : (
                   <>
                     <TableCell>EQUIPMENT</TableCell>
-                    <TableCell>COVERED</TableCell>
-                    <TableCell>EXCLUDED</TableCell>
                     <TableCell>COST (₹)</TableCell>
                   </>
                 )}
@@ -325,27 +375,94 @@ export default function ContractForm() {
                           disabled={isViewMode}
                           onChange={(e, val) => {
                             updateItem(index, 'material_id', val?.id || null);
-                            updateItem(index, 'uom', val?.uom?.abbreviation || '');
+                            updateItem(index, 'uom', val?.uom_name || '');
+                            updateItem(index, 'allow_decimal', val?.uom_allow_decimal || false);
                           }}
                           renderInput={(params) => <TextField {...params} size="small" placeholder="Select Material" />}
                         />
                       </TableCell>
                       <TableCell>
-                        <TextField size="small" type="number" disabled={isViewMode} value={item.rate} onChange={e => updateItem(index, 'rate', parseFloat(e.target.value) || 0)} sx={{ width: 100 }} />
+                        <Typography variant="body2" sx={{ color: '#64748B', fontWeight: 500 }}>
+                          {item.uom || materials.find(m => m.id === item.material_id)?.uom_name || '-'}
+                        </Typography>
                       </TableCell>
                       <TableCell>
-                        <TextField size="small" type="number" disabled={isViewMode} value={item.gst} onChange={e => updateItem(index, 'gst', parseFloat(e.target.value) || 0)} sx={{ width: 80 }} />
+                        <TextField 
+                          size="small" 
+                          type="number" 
+                          inputProps={{ step: "0.01" }}
+                          disabled={isViewMode} 
+                          value={item.rate} 
+                          onChange={e => {
+                            let val = e.target.value;
+                            if (val.length > 1 && val.startsWith('0') && val[1] !== '.') val = val.replace(/^0+/, '');
+                            if (val === '' || /^\d*\.?\d{0,2}$/.test(val)) {
+                              updateItem(index, 'rate', val);
+                            }
+                          }} 
+                          sx={{ width: 100 }} 
+                        />
                       </TableCell>
                       <TableCell>
-                        <TextField size="small" type="number" disabled={isViewMode} placeholder="Optional" value={item.contract_quantity || ''} onChange={e => updateItem(index, 'contract_quantity', parseFloat(e.target.value) || null)} sx={{ width: 100 }} />
+                        <TextField 
+                          size="small" 
+                          type="number" 
+                          disabled={isViewMode} 
+                          value={item.gst} 
+                          onChange={e => {
+                            let val = e.target.value;
+                            if (val.length > 1 && val.startsWith('0') && val[1] !== '.') val = val.replace(/^0+/, '');
+                            if (val === '' || val === '.') {
+                              updateItem(index, 'gst', val);
+                            } else if (/^\d*\.?\d{0,2}$/.test(val)) {
+                              if (parseFloat(val) <= 100) {
+                                updateItem(index, 'gst', val);
+                              }
+                            }
+                          }} 
+                          sx={{ width: 80 }} 
+                        />
                       </TableCell>
                       <TableCell>
-                        <TextField size="small" type="number" disabled={isViewMode} placeholder="Days" value={item.delivery_lead_time || ''} onChange={e => updateItem(index, 'delivery_lead_time', parseInt(e.target.value) || null)} sx={{ width: 100 }} />
+                        <TextField 
+                          size="small" 
+                          type="number" 
+                          disabled={isViewMode} 
+                          placeholder="Optional" 
+                          value={item.contract_quantity || ''} 
+                          onChange={e => {
+                            let val = e.target.value;
+                            if (val.length > 1 && val.startsWith('0') && val[1] !== '.') val = val.replace(/^0+/, '');
+                            const allow_decimal = item.allow_decimal !== undefined ? item.allow_decimal : materials.find(m => m.id === item.material_id)?.uom_allow_decimal || false;
+                            if (allow_decimal) {
+                              if (val === '' || /^\d*\.?\d*$/.test(val)) updateItem(index, 'contract_quantity', val);
+                            } else {
+                              if (val === '' || /^\d*$/.test(val)) updateItem(index, 'contract_quantity', val);
+                            }
+                          }} 
+                          sx={{ width: 100 }} 
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <TextField 
+                          size="small" 
+                          type="number" 
+                          disabled={isViewMode} 
+                          placeholder="Days" 
+                          value={item.delivery_lead_time || ''} 
+                          onChange={e => {
+                            let val = e.target.value;
+                            if (val === '' || /^\d{0,3}$/.test(val)) {
+                              updateItem(index, 'delivery_lead_time', val);
+                            }
+                          }} 
+                          sx={{ width: 100 }} 
+                        />
                       </TableCell>
                     </>
                   ) : (
                     <>
-                      <TableCell sx={{ minWidth: 250 }}>
+                      <TableCell sx={{ minWidth: 450, width: '60%' }}>
                         <Autocomplete
                           options={equipment}
                           getOptionLabel={(option) => `${option.equipment_code} - ${option.material_name} (${option.serial_number || 'No SN'})`}
@@ -356,13 +473,21 @@ export default function ContractForm() {
                         />
                       </TableCell>
                       <TableCell>
-                        <TextField size="small" fullWidth disabled={isViewMode} value={item.covered_components || ''} onChange={e => updateItem(index, 'covered_components', e.target.value)} />
-                      </TableCell>
-                      <TableCell>
-                        <TextField size="small" fullWidth disabled={isViewMode} value={item.excluded_components || ''} onChange={e => updateItem(index, 'excluded_components', e.target.value)} />
-                      </TableCell>
-                      <TableCell>
-                        <TextField size="small" type="number" disabled={isViewMode} value={item.rate} onChange={e => updateItem(index, 'rate', parseFloat(e.target.value) || 0)} sx={{ width: 100 }} />
+                        <TextField 
+                          size="small" 
+                          type="number" 
+                          inputProps={{ step: "0.01" }}
+                          disabled={isViewMode} 
+                          value={item.rate} 
+                          onChange={e => {
+                            let val = e.target.value;
+                            if (val.length > 1 && val.startsWith('0') && val[1] !== '.') val = val.replace(/^0+/, '');
+                            if (val === '' || /^\d*\.?\d{0,2}$/.test(val)) {
+                              updateItem(index, 'rate', val);
+                            }
+                          }} 
+                          sx={{ width: 100 }} 
+                        />
                       </TableCell>
                     </>
                   )}
@@ -377,12 +502,12 @@ export default function ContractForm() {
               ))}
               {form.items.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={isViewMode ? (form.contract_type === 'RC' ? 5 : 4) : (form.contract_type === 'RC' ? 6 : 5)} align="center" sx={{ py: 3, color: '#94A3B8' }}>No items added yet</TableCell>
+                  <TableCell colSpan={isViewMode ? (form.contract_type === 'RC' ? 6 : 2) : (form.contract_type === 'RC' ? 7 : 3)} align="center" sx={{ py: 3, color: '#94A3B8' }}>No items added yet</TableCell>
                 </TableRow>
               )}
               {!isViewMode && (
                 <TableRow>
-                  <TableCell colSpan={form.contract_type === 'RC' ? 6 : 5} align="center" sx={{ py: 2 }}>
+                  <TableCell colSpan={form.contract_type === 'RC' ? 7 : 3} align="center" sx={{ py: 2 }}>
                     <Button
                       variant="outlined"
                       size="small"

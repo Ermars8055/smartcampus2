@@ -179,7 +179,7 @@ class AppState extends ChangeNotifier {
       _gateEntries.clear();
       _gateEntries
           .addAll(data.map((json) => GateEntry.fromJson(json)).toList());
-    } catch (e, stack) {
+    } catch (e) {
       debugPrint('Error fetching gate entries: $e');
       if (e is DioException && e.response?.statusCode == 403) {
         _gateEntriesError = 'You do not have permission to view Gate Entries.';
@@ -195,10 +195,6 @@ class AppState extends ChangeNotifier {
   void changeTheme(ThemeData theme) {
     _theme = theme;
     notifyListeners();
-  }
-
-  void _initializeMockData() {
-    // Intentionally left blank to force reliance on real database data
   }
 
   Future<bool> createIndent({

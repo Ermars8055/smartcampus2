@@ -179,7 +179,7 @@ export default function GateEntry() {
     let list = entries;
     if (search) {
       const q = search.toLowerCase();
-      list = list.filter(e => 
+      list = list.filter(e =>
         e.entry_number?.toLowerCase().includes(q) ||
         e.vehicle_number?.toLowerCase().includes(q) ||
         e.delivery_person_name?.toLowerCase().includes(q) ||
@@ -194,15 +194,15 @@ export default function GateEntry() {
     return [...list].sort((a, b) => {
       let valA = a[sortConfig.key];
       let valB = b[sortConfig.key];
-  
+
       if (sortConfig.key === 'vehicle_person') {
         valA = a.vehicle_number || a.delivery_person_name;
         valB = b.vehicle_number || b.delivery_person_name;
       }
-  
+
       if (valA == null) valA = '';
       if (valB == null) valB = '';
-  
+
       if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
       if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
       return 0;
@@ -286,7 +286,7 @@ export default function GateEntry() {
                     {e.vehicle_number || e.delivery_person_name || '—'}
                   </TableCell>
                   <TableCell sx={{ fontSize: '0.8rem' }}>{[e.invoice_number ? 'INV: ' + e.invoice_number : '', e.dc_number ? 'DC: ' + e.dc_number : ''].filter(Boolean).join(' | ') || '—'}</TableCell>
-                  <TableCell align="right" sx={{ fontSize: '0.8rem' }}>₹{e.invoice_amount?.toFixed(2) || '0.00'}</TableCell>
+                  <TableCell align="right" sx={{ fontSize: '0.8rem' }}>₹{Number(e.invoice_amount?.toFixed(2)) || '0.00'}</TableCell>
                   <TableCell sx={{ fontSize: '0.75rem' }}>{formatDateTime(e.arrival_time)}</TableCell>
                   <TableCell><Chip label={e.status} size="small" color={statusColor[e.status] || 'default'} sx={{ fontSize: '0.7rem' }} /></TableCell>
                 </TableRow>
@@ -309,7 +309,7 @@ export default function GateEntry() {
                 <Grid item xs={12}><Typography variant="subtitle2" sx={{ mt: 1, fontWeight: 600, color: '#1E3A8A' }}>Invoice Details</Typography></Grid>
                 <Grid item xs={4}><Typography variant="caption" color="textSecondary">Invoice Number</Typography><Typography>{detailDialog.invoice_number}</Typography></Grid>
                 <Grid item xs={4}><Typography variant="caption" color="textSecondary">Invoice Date</Typography><Typography>{formatDate(detailDialog.invoice_date)}</Typography></Grid>
-                <Grid item xs={4}><Typography variant="caption" color="textSecondary">Amount</Typography><Typography>₹{detailDialog.invoice_amount?.toFixed(2) || '0.00'}</Typography></Grid>
+                <Grid item xs={4}><Typography variant="caption" color="textSecondary">Amount</Typography><Typography>₹{Number(detailDialog.invoice_amount?.toFixed(2)) || '0.00'}</Typography></Grid>
               </>
             )}
             {detailDialog?.dc_number && (
@@ -385,13 +385,13 @@ export default function GateEntry() {
             </Box>
           </Box>
         </DialogTitle>
-                <DialogContent sx={{ px: 4, py: 2 }}>
+        <DialogContent sx={{ px: 4, py: 2 }}>
           <Grid container spacing={3}>
             {/* DC Section (Left Half) */}
             <Grid item xs={12} md={6}>
               <Box sx={{ p: 2, border: '1px solid #E2E8F0', borderRadius: 2, bgcolor: '#F8FAFC', height: '100%' }}>
                 <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
-                  Delivery Challan Details {(form.dc_number || form.dc_date || form.dc_scan_url) ? <span style={{color: '#d32f2f'}}>*</span> : ''}
+                  Delivery Challan Details {(form.dc_number || form.dc_date || form.dc_scan_url) ? <span style={{ color: '#d32f2f' }}>*</span> : ''}
                 </Typography>
                 <Grid container spacing={2}>
                   <Grid item xs={12}>
@@ -446,7 +446,7 @@ export default function GateEntry() {
             <Grid item xs={12} md={6}>
               <Box sx={{ p: 2, border: '1px solid #E2E8F0', borderRadius: 2, bgcolor: '#F8FAFC', height: '100%' }}>
                 <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
-                  Invoice Details {(form.invoice_number || form.invoice_date || form.invoice_amount || form.invoice_scan_url) ? <span style={{color: '#d32f2f'}}>*</span> : ''}
+                  Invoice Details {(form.invoice_number || form.invoice_date || form.invoice_amount || form.invoice_scan_url) ? <span style={{ color: '#d32f2f' }}>*</span> : ''}
                 </Typography>
                 <Grid container spacing={2}>
                   <Grid item xs={12}>
@@ -523,7 +523,7 @@ export default function GateEntry() {
                 <Grid item xs={12} sm={3}>
                   <TextField fullWidth className="no-spin" label="Tare Weight (Empty)" type="number" inputProps={{ step: "0.01", min: "0" }} value={form.tare_weight} onChange={e => {
                     const val = e.target.value;
-                    const net = (form.gross_weight && val) ? (parseFloat(form.gross_weight) - parseFloat(val)).toFixed(2) : '';
+                    const net = (form.gross_weight && val) ? Number((parseFloat(form.gross_weight) - parseFloat(val)).toFixed(2)) : '';
                     setForm({ ...form, tare_weight: val, net_weight: net });
                     setErrors(prev => ({ ...prev, gross_weight: null }));
                   }} />
@@ -531,7 +531,7 @@ export default function GateEntry() {
                 <Grid item xs={12} sm={3}>
                   <TextField fullWidth className="no-spin" label="Gross Weight (Loaded)" type="number" inputProps={{ step: "0.01", min: "0" }} value={form.gross_weight} onChange={e => {
                     const val = e.target.value;
-                    const net = (val && form.tare_weight) ? (parseFloat(val) - parseFloat(form.tare_weight)).toFixed(2) : '';
+                    const net = (val && form.tare_weight) ? Number((parseFloat(val) - parseFloat(form.tare_weight)).toFixed(2)) : '';
                     setForm({ ...form, gross_weight: val, net_weight: net });
                     setErrors(prev => ({ ...prev, gross_weight: null }));
                   }} error={!!errors.gross_weight} helperText={errors.gross_weight} />
@@ -541,7 +541,7 @@ export default function GateEntry() {
                 </Grid>
                 <Grid item xs={12} sm={3}>
                   {form.weight_report_url ? (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, p: 1, border: '1px solid #E2E8F0', borderRadius: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1, height: '100%', minHeight: 56, border: '1px solid #E2E8F0', borderRadius: 1 }}>
                       <AttachFile sx={{ color: '#475569' }} />
                       <Typography variant="body2" sx={{ flexGrow: 1, fontWeight: 600, color: '#475569' }}>Report ✓</Typography>
                       <Button size="small" variant="outlined" onClick={() => window.open(getFileUrl(form.weight_report_url), '_blank')}>View</Button>
@@ -549,8 +549,21 @@ export default function GateEntry() {
                     </Box>
                   ) : (
                     <Button fullWidth variant="outlined" component="label" disabled={uploading}
-                      sx={{ py: 1.5, borderStyle: 'dashed', borderWidth: 2, color: '#475569', borderColor: '#475569' }}>
-                      {uploading ? 'Uploading...' : '📎 Upload Report'}
+                      sx={{
+                        height: '100%',
+                        minHeight: 56,
+                        p: 1,
+                        borderStyle: 'dashed',
+                        borderWidth: 2,
+                        color: '#475569',
+                        borderColor: '#94A3B8',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center'
+                      }}>
+                      <Typography sx={{ fontWeight: 600, fontSize: '0.8rem', textAlign: 'center', lineHeight: 1.2, textTransform: 'none' }}>
+                        {uploading ? 'Uploading...' : '📎 Upload Weight Report'}
+                      </Typography>
                       <input type="file" hidden accept="image/*,application/pdf" capture="environment"
                         onChange={e => handleUpload(e.target.files[0], 'weight_report_url')} />
                     </Button>

@@ -96,7 +96,7 @@ export default function WorkOrders() {
     const payloadItems = wo.items.map(it => {
       const itemData = items[it.id] || {};
       return {
-        po_item_id: it.id,
+        wo_item_id: it.id,
         approved_quantity: parseFloat(itemData.qty !== undefined ? itemData.qty : it.quantity),
         remarks: itemData.rem || null
       };
@@ -225,9 +225,8 @@ export default function WorkOrders() {
   const [tabValue, setTabValue] = useState(searchParams.get('tab') || 'Draft');
   const [editingWOId, setEditingWOId] = useState(null);
   const [form, setForm] = useState({
-    wo_number: '', vendor_id: '', contract_id: '', project_id: '', institution_id: '', delivery_date: null, terms: '', annexure: '', purchase_mode: 'Credit Purchase', marketplace_name: '', advance_percentage: 0,
-    procurement_type: 'Purchase', rental_type: '', rental_agreement_number: '', rental_agreement_document: '', rental_start_date: null, rental_end_date: null, billing_frequency: '', security_dewosit: 0, cost_per_test: '', linked_reagent_agreement: '', vendor_maintenance_responsibility: false, return_conditions: '', renewal_terms: '',
-    wo_type: 'AMC', equipment_id: '',
+    wo_number: '', vendor_id: '', contract_id: '', project_id: '', institution_id: '', target_completion_date: null, terms: '', annexure: '', advance_percentage: 0,
+    wo_type: 'AMC', equipment_id: '', remarks: '',
     items: [{ material_id: '', quantity: '', rate: '', discount_percent: '', cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }]
   });
   const [formPage, setFormPage] = useState(0);
@@ -580,6 +579,9 @@ export default function WorkOrders() {
   const removeItem = (i) => setForm({ ...form, items: form.items.filter((_, idx) => idx !== i) });
   const updateItem = (i, field, val) => {
     let finalVal = val;
+    if (['discount_percent', 'cgst_percentage', 'sgst_percentage', 'igst_percentage'].includes(field)) {
+      if (finalVal !== '' && Number(finalVal) > 100) return;
+    }
     if (field === 'rate' && finalVal !== '') {
       const parts = String(finalVal).split('.');
       if (parts[1] && parts[1].length > 2) {
@@ -665,6 +667,7 @@ export default function WorkOrders() {
     if (!form.vendor_id) newErrors.vendor_id = "Please select a Vendor.";
     if (!form.project_id) newErrors.project_id = "Project is required.";
     if (!form.institution_id) newErrors.institution_id = "Institution is required.";
+    if (['AMC', 'CMC'].includes(form.wo_type) && !form.equipment_id) newErrors.equipment_id = "Target Equipment is required for AMC/CMC.";
     if (!form.terms || !form.terms.trim()) newErrors.terms = "Terms and Conditions are mandatory.";
 
     if (form.advance_percentage !== '' && (parseFloat(form.advance_percentage) < 0 || parseFloat(form.advance_percentage) > 100)) {
@@ -731,20 +734,7 @@ export default function WorkOrders() {
         project_id: parseInt(form.project_id, 10),
         institution_id: parseInt(form.institution_id, 10),
         advance_percentage: parseFloat(form.advance_percentage) || 0,
-        delivery_date: form.delivery_date ? dayjs(form.delivery_date).format('YYYY-MM-DD') : null,
-        procurement_type: form.procurement_type || '',
-        rental_type: form.procurement_type === 'Rental' ? form.rental_type || null : null,
-        rental_start_date: (form.procurement_type === 'Rental' && form.rental_start_date) ? dayjs(form.rental_start_date).format('YYYY-MM-DD') : null,
-        rental_end_date: (form.procurement_type === 'Rental' && form.rental_end_date) ? dayjs(form.rental_end_date).format('YYYY-MM-DD') : null,
-        rental_agreement_number: form.procurement_type === 'Rental' ? form.rental_agreement_number || null : null,
-        rental_agreement_document: form.procurement_type === 'Rental' ? form.rental_agreement_document || null : null,
-        billing_frequency: form.procurement_type === 'Rental' ? form.billing_frequency || null : null,
-        security_dewosit: form.procurement_type === 'Rental' ? parseFloat(form.security_dewosit) || 0 : 0,
-        cost_per_test: (form.procurement_type === 'Rental' && form.rental_type === 'Cost Per Test') ? (form.cost_per_test ? parseFloat(form.cost_per_test) : null) : null,
-        linked_reagent_agreement: form.procurement_type === 'Rental' ? form.linked_reagent_agreement || null : null,
-        vendor_maintenance_responsibility: form.procurement_type === 'Rental' ? form.vendor_maintenance_responsibility : false,
-        return_conditions: form.procurement_type === 'Rental' ? form.return_conditions || null : null,
-        renewal_terms: form.procurement_type === 'Rental' ? form.renewal_terms || null : null,
+        target_completion_date: form.target_completion_date ? dayjs(form.target_completion_date).format('YYYY-MM-DD') : null,
         status: isDraft ? 'Draft' : 'Submitted',
         items: mappedItems
       };
@@ -880,24 +870,23 @@ export default function WorkOrders() {
           <td>${idx + 1}</td>
           <td>
             ${item.material_name}
-            ${wo.equipment_name && idx === 0 ? `<br/><span style="font-size: 9px; color: #555;">Equipment: ${wo.equipment_name} (${wo.equipment_code})</span>` : ''}
           </td>
           <td>-</td>
-          <td>${item.uom_allow_decimal ? qty.toFixed(2) : Math.round(qty)}</td>
+          <td>${item.uom_allow_decimal ? Number(qty.toFixed(2)) : Math.round(qty)}</td>
           <td>${item.uom_name || 'NOS'}</td>
-          <td style="text-align:right">${rate.toFixed(2)}</td>
-          <td style="text-align:right">${(item.discount_percent || 0).toFixed(2)}</td>
-          <td style="text-align:right">${(item.cgst_percentage || 0).toFixed(2)}<br/><span style="font-size: 8px;">${item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</span></td>
-          <td style="text-align:right">${(item.sgst_percentage || 0).toFixed(2)}<br/><span style="font-size: 8px;">${item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</span></td>
-          <td style="text-align:right">${(item.igst_percentage || 0).toFixed(2)}<br/><span style="font-size: 8px;">${item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</span></td>
-          <td style="text-align:right">${itemBaseAmount.toFixed(2)}</td>
+          <td style="text-align:right">${Number(rate.toFixed(2))}</td>
+          <td style="text-align:right">${Number((item.discount_percent || 0).toFixed(2))}</td>
+          <td style="text-align:right">${Number((item.cgst_percentage || 0).toFixed(2))}<br/><span style="font-size: 8px;">${item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</span></td>
+          <td style="text-align:right">${Number((item.sgst_percentage || 0).toFixed(2))}<br/><span style="font-size: 8px;">${item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</span></td>
+          <td style="text-align:right">${Number((item.igst_percentage || 0).toFixed(2))}<br/><span style="font-size: 8px;">${item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</span></td>
+          <td style="text-align:right">${Number(itemBaseAmount.toFixed(2))}</td>
         </tr>
       `;
     });
 
     const grandTotalWithTax = totalNetAmountSum;
-    const roundOff = (Math.round(grandTotalWithTax) - grandTotalWithTax).toFixed(2);
-    const totalNetAmount = Math.round(grandTotalWithTax).toFixed(2);
+    const roundOff = Number((Math.round(grandTotalWithTax) - grandTotalWithTax).toFixed(2));
+    const totalNetAmount = Number(Math.round(grandTotalWithTax).toFixed(2));
     const activeTerms = wo.terms || termsTemplates.find(t => t.is_default)?.content || (termsTemplates.length > 0 ? termsTemplates[0].content : '');
     const termsHtml = (activeTerms || '').split('\n').filter(t => t.trim()).map(t => `<li>${t}</li>`).join('');
     const annexureHtml = wo.annexure ? (wo.annexure.includes('<') ? wo.annexure : wo.annexure.replace(/\n/g, '<br/>')) : '';
@@ -950,9 +939,10 @@ export default function WorkOrders() {
               </button>
             </div>
             <div class="header-container">
-            <h2 class="org-title">${wo.institution_name || 'EAST POINT COLLEGE OF MEDICAL SCIENCES & RESEARCH CENTER'}</h2>
-            <p class="org-address">113, JNANA PRABHA CAMPUS, BIDARAHALLI, VIRGO NAGAR WOST, BANGALORE - 560049</p>
+            <h2 class="org-title">${wo.institution_name ? (wo.institution_name.match(/\((.*?)\)/) ? wo.institution_name.match(/\((.*?)\)/)[1].trim() : wo.institution_name) : 'EAST POINT COLLEGE OF MEDICAL SCIENCES & RESEARCH CENTER'}</h2>
+            <p class="org-address">113, JNANA PRABHA CAMPUS, BIDARAHALLI, VIRGO NAGAR POST, BANGALORE - 560049</p>
             <div class="doc-title">WORK ORDER for ${wo.wo_type || 'AMC'}</div>
+            ${wo.equipment_name ? `<div style="text-align: center; font-size: 13px; font-weight: bold; margin-top: 8px;">Target Equipment: ${wo.equipment_name} (${wo.equipment_code})</div>` : ''}
           </div>
           
           <table class="info-table">
@@ -1007,7 +997,7 @@ export default function WorkOrders() {
             </div>
             <div style="width: 40%">
               <table style="width:100%; border-collapse: collapse;">
-                <tr><td style="text-align:right">Total Amount</td><td style="text-align:right; width: 100px;">: ${(totalTaxable + totalDiscount + totalCgst + totalSgst + totalIgst).toFixed(2)}</td></tr>
+                <tr><td style="text-align:right">Total Amount</td><td style="text-align:right; width: 100px;">: ${Number((totalTaxable + totalDiscount + totalCgst + totalSgst + totalIgst).toFixed(2))}</td></tr>
                 <tr><td style="text-align:right">Round Off</td><td style="text-align:right">: ${roundOff}</td></tr>
                 <tr><td style="text-align:right"><b>Total Net Amount</b></td><td style="text-align:right"><b>: ${totalNetAmount}</b></td></tr>
               </table>
@@ -1098,13 +1088,13 @@ export default function WorkOrders() {
     });
 
     const grandTotalWithTax = totalNetAmountSum;
-    const roundOff = (Math.round(grandTotalWithTax) - grandTotalWithTax).toFixed(2);
-    const totalNetAmount = Math.round(grandTotalWithTax).toFixed(2);
+    const roundOff = Number((Math.round(grandTotalWithTax) - grandTotalWithTax).toFixed(2));
+    const totalNetAmount = Number(Math.round(grandTotalWithTax).toFixed(2));
     const activeTerms = detailDialog.terms || termsTemplates.find(t => t.is_default)?.content || (termsTemplates.length > 0 ? termsTemplates[0].content : '');
 
     const advancePercentage = detailDialog.advance_percentage || 0;
-    const advanceAmount = Math.round((Math.round(grandTotalWithTax) * advancePercentage) / 100).toFixed(2);
-    const balanceAmount = (Math.round(grandTotalWithTax) - parseFloat(advanceAmount)).toFixed(2);
+    const advanceAmount = Number(Math.round((Math.round(grandTotalWithTax) * advancePercentage) / 100).toFixed(2));
+    const balanceAmount = Number((Math.round(grandTotalWithTax) - parseFloat(advanceAmount)).toFixed(2));
 
     return {
       grandTotal,
@@ -1144,7 +1134,7 @@ export default function WorkOrders() {
     }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
         <Box>
-          <Typography variant="h5" sx={{ fontWeight: 700 }}>Work Orders</Typography>
+          <Typography variant="h5" sx={{ fontWeight: 700 }}>Work Orders (Old)</Typography>
           <Typography variant="body2" sx={{ color: '#64748B' }}>{wos.length} orders</Typography>
         </Box>
         <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
@@ -1420,70 +1410,49 @@ export default function WorkOrders() {
         <DialogContent sx={{ p: 0 }}>
           <Box sx={{ p: 3 }}>
             <Grid container spacing={2.5} sx={{ mb: 3 }}>
-              <Grid item xs={3}>
+              <Grid item xs={4}>
                 <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>VENDOR</Typography>
                 <Typography sx={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>{detailDialog?.vendor_name}</Typography>
                 {detailDialog?.vendor_gst_number && (
                   <Typography variant="caption" sx={{ color: '#64748B', display: 'block' }}>GSTIN: {detailDialog.vendor_gst_number}</Typography>
                 )}
               </Grid>
-              <Grid item xs={3}>
-                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>PR</Typography>
-                {detailDialog?.pr_number ? (
-                  <Link component="button" variant="body2" sx={{ fontWeight: 600, color: '#7c3aed', fontSize: '0.9rem', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }} onClick={(e) => { e.stopPropagation(); fetchAndShowPR(detailDialog.pr_id); }}>
-                    {detailDialog.pr_number}
-                  </Link>
-                ) : (
-                  <Typography sx={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>-</Typography>
-                )}
+              <Grid item xs={4}>
+                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>WO TYPE</Typography>
+                <Typography sx={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>{detailDialog?.wo_type || '—'}</Typography>
               </Grid>
-              <Grid item xs={3}>
-                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>QUOTATION</Typography>
-                {detailDialog?.qr_number ? (
-                  <Link component="button" variant="body2" sx={{ fontWeight: 600, color: '#d97706', fontSize: '0.9rem', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }} onClick={(e) => { e.stopPropagation(); fetchAndShowQR(detailDialog.qr_id); }}>
-                    {detailDialog.qr_number}
-                  </Link>
-                ) : (
-                  <Typography sx={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>-</Typography>
-                )}
-              </Grid>
-              <Grid item xs={3}>
+              <Grid item xs={4}>
                 <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>STATUS</Typography>
                 <Chip label={detailDialog?.status} size="small" color={statusColor[detailDialog?.status] || 'default'} sx={{ fontWeight: 600, fontSize: '0.65rem', height: 20 }} />
               </Grid>
 
-              <Grid item xs={3}>
-                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>INSTITUTION</Typography>
-                <Typography sx={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>{detailDialog?.institution_name || '—'}</Typography>
-              </Grid>
-              <Grid item xs={3}>
-                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>PROCUREMENT TYPE</Typography>
+              <Grid item xs={4}>
+                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>INSTITUTION / PROJECT</Typography>
                 <Typography sx={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>
-                  {detailDialog?.procurement_type === 'Purchase' ? 'Standard Purchase' : (detailDialog?.procurement_type || '—')}
-                  {detailDialog?.procurement_type === 'Rental' && detailDialog?.rental_type ? ` (${detailDialog.rental_type})` : ''}
+                  {detailDialog?.institution_name || detailDialog?.project_name || '—'}
                 </Typography>
-                {detailDialog?.billing_frequency && (
-                  <Typography variant="caption" sx={{ color: '#64748B', display: 'block' }}>Billing: {detailDialog.billing_frequency}</Typography>
-                )}
-                {detailDialog?.cost_per_test > 0 && (
-                  <Typography variant="caption" sx={{ color: '#64748B', display: 'block' }}>Cost/Test: ₹{detailDialog.cost_per_test}</Typography>
+              </Grid>
+              <Grid item xs={4}>
+                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>EQUIPMENT</Typography>
+                <Typography sx={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>{detailDialog?.equipment_name || '—'}</Typography>
+                {detailDialog?.equipment_code && (
+                  <Typography variant="caption" sx={{ color: '#64748B', display: 'block' }}>Code: {detailDialog.equipment_code}</Typography>
                 )}
               </Grid>
-              <Grid item xs={3}>
-                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>PURCHASE MODE</Typography>
-                <Typography sx={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>{detailDialog?.purchase_mode || '—'}</Typography>
-                {detailDialog?.marketplace_name && <Typography variant="caption" sx={{ color: '#64748B', display: 'block' }}>Marketplace: {detailDialog.marketplace_name}</Typography>}
-                {detailDialog?.advance_percentage > 0 && <Typography variant="caption" sx={{ color: '#64748B', display: 'block' }}>Advance: {detailDialog.advance_percentage}%</Typography>}
+              <Grid item xs={4}>
+                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>CONTRACT</Typography>
+                <Typography sx={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>{detailDialog?.contract_number || '—'}</Typography>
               </Grid>
-              <Grid item xs={3}>
+              
+              <Grid item xs={4}>
                 <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>WO DATE</Typography>
                 <Typography sx={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>{formatDate(detailDialog?.created_at)}</Typography>
               </Grid>
-              <Grid item xs={3}>
-                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>DELIVERY</Typography>
-                <Typography sx={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>{formatDate(detailDialog?.delivery_date) || '-'}</Typography>
+              <Grid item xs={4}>
+                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>TARGET COMPLETION</Typography>
+                <Typography sx={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>{formatDate(detailDialog?.target_completion_date) || '-'}</Typography>
               </Grid>
-              <Grid item xs={6}>
+              <Grid item xs={4}>
                 <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>TOTAL NET AMOUNT</Typography>
                 <Typography sx={{ fontWeight: 700, color: '#059669', fontSize: '1.2rem' }}>{formatCurrency(calculateWOTotalNet(detailDialog))}</Typography>
               </Grid>
@@ -1524,21 +1493,21 @@ export default function WorkOrders() {
                           <Typography variant="caption" sx={{ color: '#64748B' }}>{item.material_code}</Typography>
                         </TableCell>
                         <TableCell sx={{ fontSize: '0.75rem' }}>-</TableCell>
-                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{parseFloat(item.quantity || 0).toFixed(2)}</TableCell>
+                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{Number(parseFloat(item.quantity || 0).toFixed(2))}</TableCell>
                         <TableCell align="right" sx={{ fontSize: '0.75rem', fontWeight: 600, color: '#1d4ed8' }}>
-                          {item.approved_quantity !== null && item.approved_quantity !== undefined ? parseFloat(item.approved_quantity).toFixed(2) : '-'}
+                          {item.approved_quantity !== null && item.approved_quantity !== undefined ? Number(parseFloat(item.approved_quantity).toFixed(2)) : '-'}
                         </TableCell>
                         <TableCell sx={{ fontSize: '0.75rem' }}>{item.uom_name || 'NOS'}</TableCell>
-                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{rate.toFixed(2)}</TableCell>
-                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{(item.discount_percent || 0).toFixed(2)}</TableCell>
+                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{Number(rate.toFixed(2))}</TableCell>
+                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{Number((item.discount_percent || 0).toFixed(2))}</TableCell>
                         <TableCell align="right" sx={{ fontSize: '0.75rem' }}>
-                          {(item.cgst_percentage || 0).toFixed(2)}<br /><Typography variant="caption" sx={{ fontSize: '0.6rem', color: '#64748B' }}>{item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</Typography>
+                          {Number((item.cgst_percentage || 0).toFixed(2))}<br /><Typography variant="caption" sx={{ fontSize: '0.6rem', color: '#64748B' }}>{item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</Typography>
                         </TableCell>
                         <TableCell align="right" sx={{ fontSize: '0.75rem' }}>
-                          {(item.sgst_percentage || 0).toFixed(2)}<br /><Typography variant="caption" sx={{ fontSize: '0.6rem', color: '#64748B' }}>{item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</Typography>
+                          {Number((item.sgst_percentage || 0).toFixed(2))}<br /><Typography variant="caption" sx={{ fontSize: '0.6rem', color: '#64748B' }}>{item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</Typography>
                         </TableCell>
                         <TableCell align="right" sx={{ fontSize: '0.75rem' }}>
-                          {(item.igst_percentage || 0).toFixed(2)}<br /><Typography variant="caption" sx={{ fontSize: '0.6rem', color: '#64748B' }}>{item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</Typography>
+                          {Number((item.igst_percentage || 0).toFixed(2))}<br /><Typography variant="caption" sx={{ fontSize: '0.6rem', color: '#64748B' }}>{item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</Typography>
                         </TableCell>
                         <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem' }}>
                           {(() => {
@@ -1547,7 +1516,7 @@ export default function WorkOrders() {
                             if (item.is_gst_inclusive && totalGst > 0) {
                               itemBaseAmount = amount / (1 + (totalGst / 100));
                             }
-                            return itemBaseAmount.toFixed(2);
+                            return Number(itemBaseAmount.toFixed(2));
                           })()}
                         </TableCell>
                         <TableCell align="right">
@@ -1582,28 +1551,28 @@ export default function WorkOrders() {
                     <TableBody>
                       <TableRow>
                         <TableCell align="right" sx={{ color: '#64748B', fontWeight: 600 }}>Total Amount</TableCell>
-                        <TableCell align="right" sx={{ width: '120px' }}>: {(detailData.totalTaxable + detailData.totalDiscount).toFixed(2)}</TableCell>
+                        <TableCell align="right" sx={{ width: '120px' }}>: {Number((detailData.totalTaxable + detailData.totalDiscount).toFixed(2))}</TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell align="right" sx={{ color: '#d97706', fontWeight: 600 }}>Less: Discount</TableCell>
-                        <TableCell align="right" sx={{ color: '#d97706' }}>: {detailData.totalDiscount.toFixed(2)}</TableCell>
+                        <TableCell align="right" sx={{ color: '#d97706' }}>: {Number(detailData.totalDiscount.toFixed(2))}</TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell align="right" sx={{ color: '#64748B', fontWeight: 600 }}>Taxable Amount</TableCell>
-                        <TableCell align="right">: {detailData.totalTaxable.toFixed(2)}</TableCell>
+                        <TableCell align="right">: {Number(detailData.totalTaxable.toFixed(2))}</TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell align="right" sx={{ color: '#64748B', fontWeight: 600 }}>Add: CGST</TableCell>
-                        <TableCell align="right">: {detailData.totalCgst.toFixed(2)}</TableCell>
+                        <TableCell align="right">: {Number(detailData.totalCgst.toFixed(2))}</TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell align="right" sx={{ color: '#64748B', fontWeight: 600 }}>Add: SGST</TableCell>
-                        <TableCell align="right">: {detailData.totalSgst.toFixed(2)}</TableCell>
+                        <TableCell align="right">: {Number(detailData.totalSgst.toFixed(2))}</TableCell>
                       </TableRow>
                       {detailData.totalIgst > 0 && (
                         <TableRow>
                           <TableCell align="right" sx={{ color: '#64748B', fontWeight: 600 }}>Add: IGST</TableCell>
-                          <TableCell align="right">: {detailData.totalIgst.toFixed(2)}</TableCell>
+                          <TableCell align="right">: {Number(detailData.totalIgst.toFixed(2))}</TableCell>
                         </TableRow>
                       )}
                       <TableRow>
@@ -1899,7 +1868,7 @@ export default function WorkOrders() {
                 getOptionLabel={(option) => `${option.equipment_code} - ${option.material_name || ''}`}
                 value={equipments.find(e => e.id === form.equipment_id) || null}
                 onChange={(e, newValue) => setForm({ ...form, equipment_id: newValue ? newValue.id : '' })}
-                renderInput={(params) => <TextField {...params} label="Target Equipment (Optional)" size="small" />}
+                renderInput={(params) => <TextField {...params} label={['AMC', 'CMC'].includes(form.wo_type) ? "Target Equipment *" : "Target Equipment (Optional)"} size="small" error={!!errors.equipment_id} helperText={errors.equipment_id} />}
                 fullWidth
                 size="small"
               />
@@ -1909,150 +1878,6 @@ export default function WorkOrders() {
           </Box>
 
 
-
-          {form.procurement_type === 'Rental' && (
-            <Box sx={{ p: 2, mb: 2, bgcolor: '#F8FAFC', borderRadius: 2, border: '1px solid #E2E8F0' }}>
-              <Typography variant="subtitle2" sx={{ mb: 2, color: '#334155', fontWeight: 600 }}>Rental Agreement Details</Typography>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={4}>
-                  <TextField
-                    fullWidth size="small" label="Rental Agreement No."
-                    value={form.rental_agreement_number || ''}
-                    onChange={e => setForm({ ...form, rental_agreement_number: e.target.value })}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>Billing Frequency</InputLabel>
-                    <Select
-                      value={form.billing_frequency || ''}
-                      label="Billing Frequency"
-                      onChange={e => setForm({ ...form, billing_frequency: e.target.value })}
-                    >
-                      <MenuItem value="Monthly">Monthly</MenuItem>
-                      <MenuItem value="Quarterly">Quarterly</MenuItem>
-                      <MenuItem value="Half Yearly">Half Yearly</MenuItem>
-                      <MenuItem value="Annually">Annually</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                    <TextField
-                      fullWidth size="small" label="Rental Document"
-                      value={form.rental_agreement_document || ''}
-                      InputProps={{ readOnly: true }}
-                    />
-                    <Button variant="outlined" component="label" disabled={uploading} sx={{ whiteSpace: 'nowrap', height: '40px' }}>
-                      {uploading ? '...' : 'Upload'}
-                      <input type="file" hidden accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp" onChange={e => handleUpload(e.target.files[0])} />
-                    </Button>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <DatePicker
-                    label="Rental Start Date"
-                    value={form.rental_start_date ? dayjs(form.rental_start_date) : null}
-                    onChange={val => setForm({ ...form, rental_start_date: val })}
-                    format="DD-MMM-YYYY"
-                    localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
-                    slotProps={{ textField: { fullWidth: true, size: "small" } }}
-                    disablePast
-                  />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <DatePicker
-                    label="Rental End Date"
-                    value={form.rental_end_date ? dayjs(form.rental_end_date) : null}
-                    onChange={val => setForm({ ...form, rental_end_date: val })}
-                    format="DD-MMM-YYYY"
-                    localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
-                    slotProps={{ textField: { fullWidth: true, size: "small" } }}
-                    disablePast
-                    minDate={form.rental_start_date ? dayjs(form.rental_start_date).add(1, 'day') : dayjs().add(1, 'day')}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <TextField
-                    fullWidth size="small" label="Security Dewosit Amount (₹)" type="number"
-                    value={form.security_dewosit || ''}
-                    onChange={e => {
-                      const val = e.target.value;
-                      if (val === '' || /^\d*\.?\d{0,2}$/.test(val)) {
-                        setForm({ ...form, security_dewosit: val });
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (['e', 'E', '+', '-'].includes(e.key)) {
-                        e.preventDefault();
-                      }
-                    }}
-                    inputProps={{ min: "0", step: "0.01" }}
-                  />
-                </Grid>
-                {form.rental_type === 'Reagent Rental' && (
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      fullWidth size="small" label="Linked Reagent Agreement"
-                      value={form.linked_reagent_agreement || ''}
-                      onChange={e => setForm({ ...form, linked_reagent_agreement: e.target.value })}
-                    />
-                  </Grid>
-                )}
-                <Grid item xs={12} sm={form.rental_type === 'Reagent Rental' ? 6 : 12}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={form.vendor_maintenance_responsibility || false}
-                        onChange={(e) => setForm({ ...form, vendor_maintenance_responsibility: e.target.checked })}
-                      />
-                    }
-                    label="Vendor Maintenance Responsibility"
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth size="small" label="Return Conditions" multiline rows={2}
-                    value={form.return_conditions || ''}
-                    onChange={e => setForm({ ...form, return_conditions: e.target.value })}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth size="small" label="Renewal Terms" multiline rows={2}
-                    value={form.renewal_terms || ''}
-                    onChange={e => setForm({ ...form, renewal_terms: e.target.value })}
-                  />
-                </Grid>
-              </Grid>
-            </Box>
-          )}
-
-          {form.procurement_type === 'Rental' && form.rental_type === 'Cost Per Test' && (
-            <Box sx={{ p: 2, mb: 2, bgcolor: '#F8FAFC', borderRadius: 2, border: '1px solid #E2E8F0' }}>
-              <Typography variant="subtitle2" sx={{ mb: 2, color: '#334155', fontWeight: 600 }}>Cost Per Test Details</Typography>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth size="small" label="Cost Per Test (₹)" type="number"
-                    value={form.cost_per_test || ''}
-                    onChange={e => {
-                      const val = e.target.value;
-                      if (val === '' || /^\d*\.?\d{0,2}$/.test(val)) {
-                        setForm({ ...form, cost_per_test: val });
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (['e', 'E', '+', '-'].includes(e.key)) {
-                        e.preventDefault();
-                      }
-                    }}
-                    inputProps={{ min: "0", step: "0.01" }}
-                  />
-                </Grid>
-              </Grid>
-            </Box>
-          )}
 
           <Divider sx={{ mb: 2 }} />
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
@@ -2183,19 +2008,19 @@ export default function WorkOrders() {
                   <Box sx={{ gridColumn: { xs: '1 / -1', md: '1 / -1' }, display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', md: '1fr 1fr 1fr 1fr' }, gap: 1.5 }}>
                     <Box display="flex" gap={1}>
                       <TextField disabled={!item.material_id} sx={{ ...noSpinSx, flex: 1 }} size="small" label="Disc %" type="number" value={item.discount_percent} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onFocus={(e) => { if (item.discount_percent === 0 || item.discount_percent === '0') updateItem(i, 'discount_percent', ''); }} onBlur={(e) => { if (item.discount_percent === '') updateItem(i, 'discount_percent', 0); }} onChange={e => updateItem(i, 'discount_percent', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100, step: "any" }} />
-                      <TextField size="small" label="Disc (₹)" value={discAmt.toFixed(2)} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
+                      <TextField size="small" label="Disc (₹)" value={Number(discAmt.toFixed(2))} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
                     </Box>
                     <Box display="flex" gap={1}>
                       <TextField sx={{ ...noSpinSx, flex: 1 }} size="small" label="CGST %" type="number" value={item.cgst_percentage} disabled={parseFloat(item.igst_percentage) > 0} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'cgst_percentage', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100, step: "any" }} InputProps={{ readOnly: true }} />
-                      <TextField size="small" label="CGST (₹)" value={cgstAmt.toFixed(2)} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
+                      <TextField size="small" label="CGST (₹)" value={Number(cgstAmt.toFixed(2))} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
                     </Box>
                     <Box display="flex" gap={1}>
                       <TextField sx={{ ...noSpinSx, flex: 1 }} size="small" label="SGST %" type="number" value={item.sgst_percentage} disabled={parseFloat(item.igst_percentage) > 0} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'sgst_percentage', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100, step: "any" }} InputProps={{ readOnly: true }} />
-                      <TextField size="small" label="SGST (₹)" value={sgstAmt.toFixed(2)} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
+                      <TextField size="small" label="SGST (₹)" value={Number(sgstAmt.toFixed(2))} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
                     </Box>
                     <Box display="flex" gap={1}>
                       <TextField sx={{ ...noSpinSx, flex: 1 }} size="small" label="IGST %" type="number" value={item.igst_percentage} disabled={parseFloat(item.cgst_percentage) > 0 || parseFloat(item.sgst_percentage) > 0} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'igst_percentage', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100, step: "any" }} InputProps={{ readOnly: true }} />
-                      <TextField size="small" label="IGST (₹)" value={igstAmt.toFixed(2)} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
+                      <TextField size="small" label="IGST (₹)" value={Number(igstAmt.toFixed(2))} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
                     </Box>
                   </Box>
 
@@ -2254,14 +2079,32 @@ export default function WorkOrders() {
           <Divider sx={{ my: 2 }} />
           <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b', mb: 1.5 }}>Additional Details</Typography>
           <Grid container spacing={2} sx={{ mb: 2 }}>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={4}>
               <TextField
-                fullWidth size="small" label="Linked Reagent Agreement / Reference"
-                value={form.linked_reagent_agreement || ''}
-                onChange={e => setForm({ ...form, linked_reagent_agreement: e.target.value })}
+                fullWidth size="small" label="Advance Percentage (%)" type="number"
+                value={form.advance_percentage || ''}
+                onChange={e => {
+                  const val = e.target.value;
+                  if (val === '' || /^\d*\.?\d{0,2}$/.test(val)) {
+                    if (val !== '' && Number(val) > 100) return;
+                    setForm({ ...form, advance_percentage: val });
+                  }
+                }}
+                inputProps={{ min: "0", max: "100", step: "0.01" }}
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={4}>
+              <DatePicker
+                label="Target Completion Date"
+                value={form.target_completion_date ? dayjs(form.target_completion_date) : null}
+                onChange={val => setForm({ ...form, target_completion_date: val })}
+                format="DD-MMM-YYYY"
+                slotProps={{ textField: { fullWidth: true, size: "small" } }}
+                localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
+                disablePast
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
               <TextField
                 fullWidth size="small" label="Remarks"
                 value={form.remarks || ''}

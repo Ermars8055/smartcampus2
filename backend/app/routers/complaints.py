@@ -93,6 +93,24 @@ def _get_complaint(db: Session, complaint_id: int, tenant_id: int, site_id: int)
     return complaint
 
 
+# ── Metadata endpoints ───────────────────────────────────────────────────────
+
+@router.get("/metadata/statuses", response_model=List[str])
+def get_complaint_statuses():
+    """Return the ordered list of active complaint statuses for the frontend UI."""
+    return [
+        ComplaintStatus.REGISTERED.value,
+        ComplaintStatus.OPEN.value,
+        ComplaintStatus.ASSIGNED.value,
+        ComplaintStatus.UNDER_INSPECTION.value,
+        ComplaintStatus.MATERIAL_PENDING.value,
+        ComplaintStatus.IN_PROGRESS.value,
+        "Pending Approval",
+        ComplaintStatus.CLOSED.value,
+        ComplaintStatus.REOPENED.value,
+        "All"
+    ]
+
 # ── CRUD endpoints ───────────────────────────────────────────────────────
 
 @router.post("", response_model=ComplaintOut)
@@ -135,9 +153,13 @@ def create_complaint(
 
         if complaint_in.equipment_id:
             from app.models import ContractItem, Contract
+            from datetime import datetime
+            today = datetime.utcnow().date()
             c_item = db.query(ContractItem).join(Contract).filter(
                 ContractItem.equipment_id == complaint_in.equipment_id,
-                Contract.status == "Active",
+                Contract.status.in_(["Approved", "Active"]),
+                Contract.start_date <= today,
+                Contract.end_date >= today,
                 Contract.contract_type.in_(["AMC", "CMC"])
             ).first()
 
@@ -309,13 +331,14 @@ def assign_complaint(
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
-    """Assign a technician. Valid from: Registered, Open, Reopened."""
+    """Assign a technician. Valid from: Registered, Open, Reopened, Assigned (for reassignment)."""
     complaint = _get_complaint(db, complaint_id, tenant_id, site_id)
 
     allowed = [
         ComplaintStatus.REGISTERED.value,
         ComplaintStatus.OPEN.value,
         ComplaintStatus.REOPENED.value,
+        ComplaintStatus.ASSIGNED.value,
     ]
     if complaint.status not in allowed:
         raise HTTPException(
@@ -355,28 +378,57 @@ def assign_complaint(
 @router.post("/{complaint_id}/inspect", response_model=ComplaintOut)
 def inspect_complaint(
     complaint_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("complaints", "update")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    """Start inspection. Valid from: Assigned. Transitions to Under Inspection."""
+    complaint = _get_complaint(db, complaint_id, tenant_id, site_id)
+
+    if complaint.status != ComplaintStatus.ASSIGNED.value:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Cannot start inspection from status '{complaint.status}'. Must be 'Assigned'."
+        )
+
+    complaint.status = ComplaintStatus.UNDER_INSPECTION.value
+
+    db.commit()
+    db.refresh(complaint)
+    return _enrich(complaint, db)
+
+
+@router.post("/{complaint_id}/complete-inspection", response_model=ComplaintOut)
+def complete_inspection(
+    complaint_id: int,
     payload: ComplaintInspect,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("complaints", "update")),
     tenant_id: int = Depends(get_tenant_id),
     site_id: int = Depends(get_site_id)
 ):
-    """Start inspection and decide if material is needed.
-    Valid from: Assigned.
+    """Complete inspection and decide if material is needed.
+    Valid from: Under Inspection.
     If material_required → Material Pending, else → In Progress."""
     complaint = _get_complaint(db, complaint_id, tenant_id, site_id)
 
-    if complaint.status != ComplaintStatus.ASSIGNED.value:
+    if complaint.status != ComplaintStatus.UNDER_INSPECTION.value:
         raise HTTPException(
             status_code=400,
-            detail=f"Cannot inspect from status '{complaint.status}'. Must be 'Assigned'."
+            detail=f"Cannot complete inspection from status '{complaint.status}'. Must be 'Under Inspection'."
         )
 
-    complaint.material_required = payload.material_required
+    complaint.repair_method = payload.repair_method
+    if payload.repair_method == 'Internal With Material':
+        complaint.material_required = True
+    else:
+        complaint.material_required = False
+
     if payload.inspection_details is not None:
         complaint.inspection_details = payload.inspection_details
 
-    if payload.material_required:
+    if payload.repair_method == 'Internal With Material':
         complaint.status = ComplaintStatus.MATERIAL_PENDING.value
     else:
         complaint.status = ComplaintStatus.IN_PROGRESS.value

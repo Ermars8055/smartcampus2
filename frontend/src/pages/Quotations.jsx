@@ -681,19 +681,31 @@ const Quotations = () => {
       const res = await api.get(`/api/quotations/${selectedQR.id}/vendor-quotations/${vendorId}/negotiation-history`);
       const vq = vendorQuotes.find(q => q.vendor_id === vendorId);
       const items = vq?.items?.filter(it => !it.is_excluded) || [];
+      const historyData = res.data || [];
+      const latestHistory = historyData.length > 0 ? historyData[0] : null;
+      const initialGlobalDiscount = latestHistory && latestHistory.discount_percent ? latestHistory.discount_percent.toString() : '';
+
       const itemDiscounts = {};
-      items.forEach(it => { itemDiscounts[it.qr_item_id] = it.discount_percent || ''; });
+      if (latestHistory && latestHistory.item_discounts) {
+        Object.keys(latestHistory.item_discounts).forEach(k => {
+          itemDiscounts[k] = latestHistory.item_discounts[k] !== null ? latestHistory.item_discounts[k].toString() : '';
+        });
+      } else {
+        items.forEach(it => { 
+          itemDiscounts[it.qr_item_id] = it.discount_percent ? it.discount_percent.toString() : ''; 
+        });
+      }
       
       setNegPage(0);
       setNegotiateDialog({
         open: true,
         vendorId,
         vendorName,
-        discountPercent: '',
+        discountPercent: initialGlobalDiscount,
         itemDiscounts,
         items,
         remarks: '',
-        history: res.data
+        history: historyData
       });
     } catch (err) {
       showMessage(err.response?.data?.detail || 'Failed to fetch history', 'Error', 'error');
@@ -707,9 +719,7 @@ const Quotations = () => {
       const payloadItemDiscounts = {};
       Object.keys(negotiateDialog.itemDiscounts).forEach(k => {
         const val = negotiateDialog.itemDiscounts[k];
-        if (val !== '' && val !== null && val !== undefined) {
-          payloadItemDiscounts[k] = parseFloat(val);
-        }
+        payloadItemDiscounts[k] = val !== '' ? parseFloat(val) : 0;
       });
       await api.put(`/api/quotations/${selectedQR.id}/vendor-quotations/${negotiateDialog.vendorId}/discounts`, {
         discount_percent: parseFloat(negotiateDialog.discountPercent || 0),
@@ -991,16 +1001,14 @@ const Quotations = () => {
                   label="Start Date"
                   value={startDate}
                   onChange={(val) => setStartDate(val)}
-                  format="DD-MMM-YYYY"
-                  localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
+                  format="DD-MMM-YYYY" localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
                   slotProps={{ textField: { size: 'small', sx: { width: 200 }, placeholder: "DD-MMM-YYYY" } }}
                 />
                 <DatePicker
                   label="End Date"
                   value={endDate}
                   onChange={(val) => setEndDate(val)}
-                  format="DD-MMM-YYYY"
-                  localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
+                  format="DD-MMM-YYYY" localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
                   slotProps={{ textField: { size: 'small', sx: { width: 200 }, placeholder: "DD-MMM-YYYY" } }}
                 />
               </Box>
@@ -1525,7 +1533,7 @@ const Quotations = () => {
                               <TableRow key={q.vendor_id} sx={{ backgroundColor: isSelected ? '#f0fdf4' : 'inherit', outline: isSelected ? '1px solid #4ade80' : 'none', outlineOffset: '-1px', '&:last-child td, &:last-child th': { border: 0 } }}>
                                 <TableCell sx={{ py: 1.5, fontWeight: isSelected ? 600 : 400 }}>{q.vendor_name}</TableCell>
                                 <TableCell sx={{ py: 1.5 }}>{q.brand || '-'}</TableCell>
-                                <TableCell sx={{ py: 1.5, fontWeight: 500 }}>₹{Number(q.quoted_rate).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                                <TableCell sx={{ py: 1.5, fontWeight: 500 }}>₹{Number(Number(q.quoted_rate).toFixed(2)).toLocaleString('en-IN')}</TableCell>
                                 <TableCell sx={{ py: 1.5 }}>{q.delivery_days || '-'} days</TableCell>
                                 <TableCell sx={{ py: 1.5 }}><Chip size="small" label={isSelected ? `${q.rank_label} Selected` : q.rank_label} color={isSelected ? "success" : "default"} variant={isSelected ? "filled" : "outlined"} sx={{ fontWeight: isSelected ? 600 : 400 }} /></TableCell>
                                 <TableCell align="right" sx={{ py: 1.5 }}>
@@ -1689,11 +1697,11 @@ const Quotations = () => {
                                   {quote ? (
                                     <>
                                       <Typography variant="body2">
-                                        ₹{Number(quote.effective_rate).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        ₹{Number(Number(quote.effective_rate).toFixed(2)).toLocaleString('en-IN')}
                                       </Typography>
                                       {quote.discount_percent > 0 && (
                                         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontSize: '0.65rem' }}>
-                                          ({quote.discount_percent}% off ₹{Number(quote.quoted_rate).toLocaleString('en-IN')})
+                                          ({quote.discount_percent}% off ₹{Number(Number(quote.quoted_rate).toFixed(2)).toLocaleString('en-IN')})
                                         </Typography>
                                       )}
                                       <Chip
@@ -2117,8 +2125,7 @@ const Quotations = () => {
                 <DatePicker
                   value={newQuote.quotation_date ? dayjs(newQuote.quotation_date) : null}
                   onChange={(val) => setNewQuote({ ...newQuote, quotation_date: val ? val.format('YYYY-MM-DD') : '' })}
-                  format="DD-MMM-YYYY"
-                  localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
+                  format="DD-MMM-YYYY" localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
                   disableFuture
                   slotProps={{
                     textField: {
@@ -2203,7 +2210,7 @@ const Quotations = () => {
                                     e.preventDefault();
                                     const val = e.target.value;
                                     if (val && /^\d*\.?\d{0,2}$/.test(val)) {
-                                      const newItems = newQuote.items.map(it => it.is_excluded ? it : { ...it, discount_percent: val });
+                                      const newItems = newQuote.items.map(it => (it.is_excluded || !it.quoted_rate) ? it : { ...it, discount_percent: val });
                                       setNewQuote({ ...newQuote, items: newItems });
                                       e.target.value = '';
                                     }
@@ -2215,7 +2222,7 @@ const Quotations = () => {
                                 if (el && el.value) {
                                     const val = el.value;
                                     if (/^\d*\.?\d{0,2}$/.test(val)) {
-                                      const newItems = newQuote.items.map(it => it.is_excluded ? it : { ...it, discount_percent: val });
+                                      const newItems = newQuote.items.map(it => (it.is_excluded || !it.quoted_rate) ? it : { ...it, discount_percent: val });
                                       setNewQuote({ ...newQuote, items: newItems });
                                       el.value = '';
                                     }
@@ -2244,7 +2251,7 @@ const Quotations = () => {
                                     e.preventDefault();
                                     const val = e.target.value;
                                     if (val && /^\d*$/.test(val)) {
-                                      const newItems = newQuote.items.map(it => it.is_excluded ? it : { ...it, delivery_days: val });
+                                      const newItems = newQuote.items.map(it => (it.is_excluded || !it.quoted_rate) ? it : { ...it, delivery_days: val });
                                       setNewQuote({ ...newQuote, items: newItems });
                                       e.target.value = '';
                                     }
@@ -2254,7 +2261,7 @@ const Quotations = () => {
                              <IconButton size="small" sx={{ p: 0 }} onClick={() => {
                                 const el = document.getElementById('apply-all-delivery');
                                 if (el && el.value) {
-                                    const newItems = newQuote.items.map(it => it.is_excluded ? it : { ...it, delivery_days: el.value });
+                                    const newItems = newQuote.items.map(it => (it.is_excluded || !it.quoted_rate) ? it : { ...it, delivery_days: el.value });
                                     setNewQuote({ ...newQuote, items: newItems });
                                     el.value = '';
                                 }
@@ -2307,6 +2314,10 @@ const Quotations = () => {
                           if (val === '' || (/^\d*\.?\d{0,2}$/.test(val))) {
                             const newItems = [...newQuote.items];
                             newItems[idx].quoted_rate = val;
+                            if (val === '') {
+                              newItems[idx].discount_percent = '';
+                              newItems[idx].delivery_days = '';
+                            }
                             setNewQuote({ ...newQuote, items: newItems });
                           }
                         }}
@@ -2318,7 +2329,7 @@ const Quotations = () => {
                         size="small"
                         type="number"
                         className="no-spin"
-                        disabled={it.is_excluded}
+                        disabled={it.is_excluded || !it.quoted_rate}
                         onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()}
                         value={it.discount_percent}
                         onChange={(e) => {
@@ -2337,7 +2348,7 @@ const Quotations = () => {
                         id={`delivery-days-${idx}`}
                         size="small"
                         type="number"
-                        disabled={it.is_excluded}
+                        disabled={it.is_excluded || !it.quoted_rate}
                         onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()}
                         value={it.delivery_days}
                         onChange={(e) => {
@@ -2904,7 +2915,13 @@ const Quotations = () => {
                   if (parseFloat(val) > 100) val = '100';
                   if (parseFloat(val) < 0) val = '0';
                 }
-                setNegotiateDialog(prev => ({ ...prev, discountPercent: val }));
+                setNegotiateDialog(prev => {
+                  const newDiscounts = { ...prev.itemDiscounts };
+                  prev.items.forEach(it => {
+                    newDiscounts[it.qr_item_id] = val;
+                  });
+                  return { ...prev, discountPercent: val, itemDiscounts: newDiscounts };
+                });
               }}
               placeholder="e.g. 5"
               InputProps={{
@@ -2931,7 +2948,7 @@ const Quotations = () => {
                           {item.uom_name || '-'}
                         </TableCell>
                         <TableCell align="right" sx={{ fontSize: '0.8rem' }}>
-                          ₹{item.quoted_rate?.toLocaleString()}
+                          ₹{item.quoted_rate != null ? Number(Number(item.quoted_rate).toFixed(2)).toLocaleString('en-IN') : ''}
                         </TableCell>
                         <TableCell>
                           <TextField
@@ -2950,7 +2967,6 @@ const Quotations = () => {
                                 itemDiscounts: { ...prev.itemDiscounts, [item.qr_item_id]: val }
                               }));
                             }}
-                            placeholder="Common"
                             inputProps={{ step: "0.1", min: "0", max: "100" }}
                             sx={{ '& .MuiInputBase-input': { p: 1, fontSize: '0.8rem' } }}
                           />

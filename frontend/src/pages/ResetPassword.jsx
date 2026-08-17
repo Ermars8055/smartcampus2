@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Box, Card, TextField, Button, Typography, Alert, CircularProgress, InputAdornment, IconButton } from '@mui/material';
 import { Visibility, VisibilityOff, Lock, Security } from '@mui/icons-material';
 import api from '../services/api';
-import logoImg from '../assets/logo.png';
+import logoImg from '../assets/Eastpoint-White-Logo.png';
 
 export default function ResetPassword() {
   const [searchParams] = useSearchParams();
@@ -87,7 +87,7 @@ export default function ResetPassword() {
           textAlign: 'center', mb: 3,
         }}>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1.5 }}>
-            <Box component="img" src={logoImg} alt="Eastpoint" sx={{ width: 36, height: 36, objectFit: 'contain', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }} />
+            <Box component="img" src={logoImg} alt="Eastpoint" sx={{ width: 48, height: 48, objectFit: 'contain', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }} />
             <Typography variant="h5" sx={{ color: '#fff', fontWeight: 700, letterSpacing: 0.5 }}>
               Eastpoint SmartCampus
             </Typography>

@@ -254,7 +254,6 @@ export default function Vendors() {
             });
             setDialog(true);
           }}
-          sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
         >
           Add Vendor
         </Button>

@@ -42,7 +42,7 @@ let theme = createTheme({
           textTransform: 'none',
           fontWeight: 600,
           borderRadius: 8,
-          padding: '8px 20px',
+          padding: '6px 16px',
         },
         contained: {
           boxShadow: '0 2px 8px rgba(30, 58, 138, 0.15)',

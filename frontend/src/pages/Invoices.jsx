@@ -130,12 +130,12 @@ export default function Invoices() {
                     </td>
                     <td>${item.hsn_sac || '-'}</td>
                     <td class="text-right">${item.quantity} ${item.uom}</td>
-                    <td class="text-right">₹${item.rate?.toFixed(2) || '0.00'}</td>
-                    <td class="text-right">${item.discount_percent?.toFixed(2) || '0.00'}%</td>
-                    <td class="text-right">${item.cgst_rate?.toFixed(2) || '0.00'}%</td>
-                    <td class="text-right">${item.sgst_rate?.toFixed(2) || '0.00'}%</td>
-                    <td class="text-right">${item.igst_rate?.toFixed(2) || '0.00'}%</td>
-                    <td class="text-right">₹${item.amount?.toFixed(2) || '0.00'}</td>
+                    <td class="text-right">₹${Number(item.rate?.toFixed(2)) || '0.00'}</td>
+                    <td class="text-right">${Number(item.discount_percent?.toFixed(2)) || '0.00'}%</td>
+                    <td class="text-right">${Number(item.cgst_rate?.toFixed(2)) || '0.00'}%</td>
+                    <td class="text-right">${Number(item.sgst_rate?.toFixed(2)) || '0.00'}%</td>
+                    <td class="text-right">${Number(item.igst_rate?.toFixed(2)) || '0.00'}%</td>
+                    <td class="text-right">₹${Number(item.amount?.toFixed(2)) || '0.00'}</td>
                   </tr>
                 `).join('')}
                 ${(!inv.items || inv.items.length === 0) ? '<tr><td colspan="9" class="text-center">No line items found.</td></tr>' : ''}
@@ -143,12 +143,12 @@ export default function Invoices() {
             </table>
 
             <div class="summary-box">
-              <div class="summary-row"><span class="info-label">Total Taxable Value</span> <span>₹${inv.total_taxable_amount?.toFixed(2) || '0.00'}</span></div>
-              <div class="summary-row"><span class="info-label">Total CGST</span> <span>₹${inv.total_cgst?.toFixed(2) || '0.00'}</span></div>
-              <div class="summary-row"><span class="info-label">Total SGST</span> <span>₹${inv.total_sgst?.toFixed(2) || '0.00'}</span></div>
-              <div class="summary-row"><span class="info-label">Total IGST</span> <span>₹${inv.total_igst?.toFixed(2) || '0.00'}</span></div>
-              <div class="summary-row"><span class="info-label">Transport Charges</span> <span>₹${inv.transport_charges?.toFixed(2) || '0.00'}</span></div>
-              <div class="summary-row total"><span class="info-label" style="color: #059669;">Grand Total</span> <span>₹${inv.total_amount?.toFixed(2) || '0.00'}</span></div>
+              <div class="summary-row"><span class="info-label">Total Taxable Value</span> <span>₹${Number(inv.total_taxable_amount?.toFixed(2)) || '0.00'}</span></div>
+              <div class="summary-row"><span class="info-label">Total CGST</span> <span>₹${Number(inv.total_cgst?.toFixed(2)) || '0.00'}</span></div>
+              <div class="summary-row"><span class="info-label">Total SGST</span> <span>₹${Number(inv.total_sgst?.toFixed(2)) || '0.00'}</span></div>
+              <div class="summary-row"><span class="info-label">Total IGST</span> <span>₹${Number(inv.total_igst?.toFixed(2)) || '0.00'}</span></div>
+              <div class="summary-row"><span class="info-label">Transport Charges</span> <span>₹${Number(inv.transport_charges?.toFixed(2)) || '0.00'}</span></div>
+              <div class="summary-row total"><span class="info-label" style="color: #059669;">Grand Total</span> <span>₹${Number(inv.total_amount?.toFixed(2)) || '0.00'}</span></div>
             </div>
             
             <div class="clear"></div>
@@ -253,7 +253,7 @@ export default function Invoices() {
                   <TableCell sx={{ fontSize: '0.8rem' }}>{formatDate(i.invoice_date)}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem' }}>{i.vendor_name}</TableCell>
                   <TableCell sx={{ fontSize: '0.8rem', color: '#64748B' }}>{i.po_number || '-'}</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.8rem' }}>₹{i.total_amount?.toFixed(2)}</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.8rem' }}>₹{Number(i.total_amount?.toFixed(2))}</TableCell>
                   <TableCell><Chip label={i.status} size="small" color={statusColor[i.status] || 'default'} sx={{ fontSize: '0.7rem' }} /></TableCell>
                   <TableCell align="center" sx={{ whiteSpace: 'nowrap' }}>
                     <Tooltip title="Edit">
@@ -373,12 +373,12 @@ export default function Invoices() {
                       </TableCell>
                       <TableCell sx={{ fontSize: '0.8rem' }}>{item.hsn_sac || '-'}</TableCell>
                       <TableCell align="right" sx={{ fontSize: '0.8rem' }}>{item.quantity} {item.uom}</TableCell>
-                      <TableCell align="right" sx={{ fontSize: '0.8rem' }}>₹{item.rate?.toFixed(2)}</TableCell>
-                      <TableCell align="right" sx={{ fontSize: '0.8rem' }}>{item.discount_percent?.toFixed(2)}%</TableCell>
-                      <TableCell align="right" sx={{ fontSize: '0.8rem' }}>{item.cgst_rate?.toFixed(2)}%</TableCell>
-                      <TableCell align="right" sx={{ fontSize: '0.8rem' }}>{item.sgst_rate?.toFixed(2)}%</TableCell>
-                      <TableCell align="right" sx={{ fontSize: '0.8rem' }}>{item.igst_rate?.toFixed(2)}%</TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.8rem' }}>₹{item.amount?.toFixed(2)}</TableCell>
+                      <TableCell align="right" sx={{ fontSize: '0.8rem' }}>₹{Number(item.rate?.toFixed(2))}</TableCell>
+                      <TableCell align="right" sx={{ fontSize: '0.8rem' }}>{Number(item.discount_percent?.toFixed(2))}%</TableCell>
+                      <TableCell align="right" sx={{ fontSize: '0.8rem' }}>{Number(item.cgst_rate?.toFixed(2))}%</TableCell>
+                      <TableCell align="right" sx={{ fontSize: '0.8rem' }}>{Number(item.sgst_rate?.toFixed(2))}%</TableCell>
+                      <TableCell align="right" sx={{ fontSize: '0.8rem' }}>{Number(item.igst_rate?.toFixed(2))}%</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.8rem' }}>₹{Number(item.amount?.toFixed(2))}</TableCell>
                     </TableRow>
                   ))}
                   {(!detailDialog?.items || detailDialog?.items.length === 0) && (
@@ -394,13 +394,13 @@ export default function Invoices() {
             <Grid container justifyContent="flex-end">
               <Grid item xs={12} sm={8} md={5}>
                 <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>Invoice Summary</Typography>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}><Typography color="textSecondary">Total Taxable Value</Typography><Typography>₹{detailDialog?.total_taxable_amount?.toFixed(2)}</Typography></Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}><Typography color="textSecondary">Total CGST</Typography><Typography>₹{detailDialog?.total_cgst?.toFixed(2)}</Typography></Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}><Typography color="textSecondary">Total SGST</Typography><Typography>₹{detailDialog?.total_sgst?.toFixed(2)}</Typography></Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}><Typography color="textSecondary">Total IGST</Typography><Typography>₹{detailDialog?.total_igst?.toFixed(2)}</Typography></Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}><Typography color="textSecondary">Transport Charges</Typography><Typography>₹{detailDialog?.transport_charges?.toFixed(2) || '0.00'}</Typography></Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}><Typography color="textSecondary">Total Taxable Value</Typography><Typography>₹{Number(detailDialog?.total_taxable_amount?.toFixed(2))}</Typography></Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}><Typography color="textSecondary">Total CGST</Typography><Typography>₹{Number(detailDialog?.total_cgst?.toFixed(2))}</Typography></Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}><Typography color="textSecondary">Total SGST</Typography><Typography>₹{Number(detailDialog?.total_sgst?.toFixed(2))}</Typography></Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}><Typography color="textSecondary">Total IGST</Typography><Typography>₹{Number(detailDialog?.total_igst?.toFixed(2))}</Typography></Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}><Typography color="textSecondary">Transport Charges</Typography><Typography>₹{Number(detailDialog?.transport_charges?.toFixed(2)) || '0.00'}</Typography></Box>
                 <Divider sx={{ mb: 2 }} />
-                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}><Typography variant="h6" sx={{ fontWeight: 700 }}>Grand Total</Typography><Typography variant="h6" sx={{ fontWeight: 700, color: '#059669' }}>₹{detailDialog?.total_amount?.toFixed(2)}</Typography></Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}><Typography variant="h6" sx={{ fontWeight: 700 }}>Grand Total</Typography><Typography variant="h6" sx={{ fontWeight: 700, color: '#059669' }}>₹{Number(detailDialog?.total_amount?.toFixed(2))}</Typography></Box>
               </Grid>
             </Grid>
           </Card>

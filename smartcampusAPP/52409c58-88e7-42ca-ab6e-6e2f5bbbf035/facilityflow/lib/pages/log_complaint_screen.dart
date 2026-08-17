@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:nowa_runtime/nowa_runtime.dart';
 import 'package:facilityflow/globals/app_state.dart';
 import 'package:facilityflow/services/api_service.dart';
-import 'package:image_picker/image_picker.dart';
 
 @NowaGenerated()
 class LogComplaintScreen extends StatefulWidget {
@@ -37,12 +36,7 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
   String? _selectedRoomId;
   
   String? _selectedComplaintType;
-  final List<String> _complaintTypes = [
-    'General Complaint',
-    'Machine Not Working',
-    'Installation',
-    'User Training'
-  ];
+  List<String> _complaintTypes = [];  // Loaded dynamically from API
 
   final List<File> _attachedImages = [];
   final ImagePicker _picker = ImagePicker();
@@ -58,15 +52,22 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
   Future<void> _fetchLookups() async {
     try {
       final api = ApiService();
-      final instRes = await api.getInstitutions();
-      final deptRes = await api.getDepartments();
-      final bldgRes = await api.getBuildings();
+      final results = await Future.wait([
+        api.getInstitutions(),
+        api.getDepartments(),
+        api.getBuildings(),
+        api.getComplaintTypes(),
+      ]);
 
       if (mounted) {
         setState(() {
-          _institutions = instRes.data ?? [];
-          _allDepartments = deptRes.data ?? [];
-          _allBuildings = bldgRes.data ?? [];
+          _institutions = results[0].data ?? [];
+          _allDepartments = results[1].data ?? [];
+          _allBuildings = results[2].data ?? [];
+          _complaintTypes = ((results[3].data ?? []) as List)
+              .map((e) => e['lookup_value']?.toString() ?? '')
+              .where((v) => v.isNotEmpty)
+              .toList();
 
           if (_institutions.length == 1) {
             _selectedInstitutionId = _institutions[0]['id'].toString();
@@ -79,12 +80,11 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
         });
       }
     } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to load form data')),
-        );
-      }
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to load form data')),
+      );
     }
   }
 
@@ -209,6 +209,7 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
         });
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Failed to pick image')),
       );
@@ -322,7 +323,7 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
         orElse: () => null);
 
     final payload = <String, dynamic>{
-      'institution_id': int.tryParse(_selectedInstitutionId!) ?? null,
+      'institution_id': int.tryParse(_selectedInstitutionId!),
       'department_name': _selectedDepartmentName,
       'building_id': _selectedBuildingId != null
           ? int.tryParse(_selectedBuildingId!)
@@ -372,29 +373,28 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
 
       await api.dio.post('/api/complaints', data: payload);
 
+      if (!mounted) return;
       final appState = AppState.of(context, listen: false);
       await appState.fetchComplaints();
 
-      if (mounted) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Complaint registered successfully!'),
-            backgroundColor: Color(0xFF059669),
-          ),
-        );
-        Navigator.pop(context);
-      }
+      if (!mounted) return;
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Complaint registered successfully!'),
+          backgroundColor: Color(0xFF059669),
+        ),
+      );
+      if (Navigator.canPop(context)) Navigator.pop(context);
     } catch (e) {
-      if (mounted) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to log issue. Please try again.'),
-            backgroundColor: Color(0xFFDC2626),
-          ),
-        );
-      }
+      if (!mounted) return;
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to log issue. Please try again.'),
+          backgroundColor: Color(0xFFDC2626),
+        ),
+      );
     }
   }
 

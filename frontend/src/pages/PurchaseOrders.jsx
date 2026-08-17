@@ -405,8 +405,10 @@ export default function PurchaseOrders() {
       setForm({
         po_number: po.po_number || '',
         vendor_id: po.vendor_id || '',
+        _vendor_name: po.vendor_name || '',
         project_id: po.project_id || (projects.length > 0 ? projects[0].id : ''),
-        institution_id: po.institution_id || '',
+        institution_id: po.institution_id || (institutions.length === 1 ? institutions[0].id : ''),
+        _institution_name: po.institution_name || '',
         delivery_date: po.delivery_date ? dayjs(po.delivery_date) : null,
         terms: po.terms || '',
         annexure: po.annexure || '',
@@ -565,6 +567,9 @@ export default function PurchaseOrders() {
   const removeItem = (i) => setForm({ ...form, items: form.items.filter((_, idx) => idx !== i) });
   const updateItem = (i, field, val) => {
     let finalVal = val;
+    if (['discount_percent', 'cgst_percentage', 'sgst_percentage', 'igst_percentage'].includes(field)) {
+      if (finalVal !== '' && Number(finalVal) > 100) return;
+    }
     if (field === 'rate' && finalVal !== '') {
       const parts = String(finalVal).split('.');
       if (parts[1] && parts[1].length > 2) {
@@ -610,13 +615,16 @@ export default function PurchaseOrders() {
     if (!form.purchase_mode) newErrors.purchase_mode = "Purchase Mode is required.";
     if (!form.procurement_type) newErrors.procurement_type = "Procurement Type is required.";
     if (!form.project_id) newErrors.project_id = "Project is required.";
-    if (!form.institution_id) newErrors.institution_id = "Institution is required.";
-    if (!form.delivery_date) {
-      newErrors.delivery_date = "Delivery Date is required.";
-    } else if (dayjs(form.delivery_date).isBefore(dayjs(), 'day')) {
-      newErrors.delivery_date = "Delivery Date cannot be in the past.";
+    
+    if (!isDraft) {
+      if (!form.institution_id) newErrors.institution_id = "Institution is required.";
+      if (!form.delivery_date) {
+        newErrors.delivery_date = "Delivery Date is required.";
+      } else if (dayjs(form.delivery_date).isBefore(dayjs(), 'day')) {
+        newErrors.delivery_date = "Delivery Date cannot be in the past.";
+      }
+      if (!form.terms || !form.terms.trim()) newErrors.terms = "Terms and Conditions are mandatory.";
     }
-    if (!form.terms || !form.terms.trim()) newErrors.terms = "Terms and Conditions are mandatory.";
 
     if (form.advance_percentage !== '' && (parseFloat(form.advance_percentage) < 0 || parseFloat(form.advance_percentage) > 100)) {
       newErrors.advance_percentage = "Advance percentage must be between 0 and 100.";
@@ -633,8 +641,11 @@ export default function PurchaseOrders() {
       let rowErrors = {};
       
       if (!it.material_id) rowErrors.material_id = 'Material is required';
-      if (qty <= 0) rowErrors.quantity = 'Quantity must be > 0';
-      if (rate <= 0) rowErrors.rate = 'Rate must be > 0';
+      
+      if (!isDraft) {
+        if (qty <= 0) rowErrors.quantity = 'Quantity must be > 0';
+        if (rate <= 0) rowErrors.rate = 'Rate must be > 0';
+      }
       
       if (Object.keys(rowErrors).length > 0) {
         newItemErrors[i] = rowErrors;
@@ -650,12 +661,16 @@ export default function PurchaseOrders() {
         const el = document.getElementById(`field-${firstErrorField}`);
         if (el) {
           el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+          showMessage(`Validation error: ${newErrors[firstErrorField]}`, "Error", "error");
         }
       } else if (Object.keys(newItemErrors).length > 0) {
         const firstErrorIdx = Object.keys(newItemErrors)[0];
         const el = document.getElementById(`item-row-${firstErrorIdx}`);
         if (el) {
           el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+          showMessage(`Validation error on line item ${parseInt(firstErrorIdx) + 1}`, "Error", "error");
         }
       }
       return;
@@ -831,21 +846,21 @@ export default function PurchaseOrders() {
           <td>${idx + 1}</td>
           <td>${item.material_name}</td>
           <td>-</td>
-          <td>${item.uom_allow_decimal ? qty.toFixed(2) : Math.round(qty)}</td>
+          <td>${item.uom_allow_decimal ? Number(qty.toFixed(2)) : Math.round(qty)}</td>
           <td>${item.uom_name || 'NOS'}</td>
-          <td style="text-align:right">${rate.toFixed(2)}</td>
-          <td style="text-align:right">${(item.discount_percent || 0).toFixed(2)}</td>
-          <td style="text-align:right">${(item.cgst_percentage || 0).toFixed(2)}<br/><span style="font-size: 8px;">${item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</span></td>
-          <td style="text-align:right">${(item.sgst_percentage || 0).toFixed(2)}<br/><span style="font-size: 8px;">${item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</span></td>
-          <td style="text-align:right">${(item.igst_percentage || 0).toFixed(2)}<br/><span style="font-size: 8px;">${item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</span></td>
-          <td style="text-align:right">${itemBaseAmount.toFixed(2)}</td>
+          <td style="text-align:right">${Number(rate.toFixed(2))}</td>
+          <td style="text-align:right">${Number((item.discount_percent || 0).toFixed(2))}</td>
+          <td style="text-align:right">${Number((item.cgst_percentage || 0).toFixed(2))}<br/><span style="font-size: 8px;">${item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</span></td>
+          <td style="text-align:right">${Number((item.sgst_percentage || 0).toFixed(2))}<br/><span style="font-size: 8px;">${item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</span></td>
+          <td style="text-align:right">${Number((item.igst_percentage || 0).toFixed(2))}<br/><span style="font-size: 8px;">${item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</span></td>
+          <td style="text-align:right">${Number(itemBaseAmount.toFixed(2))}</td>
         </tr>
       `;
     });
 
     const grandTotalWithTax = totalNetAmountSum;
-    const roundOff = (Math.round(grandTotalWithTax) - grandTotalWithTax).toFixed(2);
-    const totalNetAmount = Math.round(grandTotalWithTax).toFixed(2);
+    const roundOff = Number((Math.round(grandTotalWithTax) - grandTotalWithTax).toFixed(2));
+    const totalNetAmount = Number(Math.round(grandTotalWithTax).toFixed(2));
     const activeTerms = po.terms || termsTemplates.find(t => t.is_default)?.content || (termsTemplates.length > 0 ? termsTemplates[0].content : '');
     const termsHtml = (activeTerms || '').split('\n').filter(t => t.trim()).map(t => `<li>${t}</li>`).join('');
     const annexureHtml = po.annexure ? (po.annexure.includes('<') ? po.annexure : po.annexure.replace(/\n/g, '<br/>')) : '';
@@ -898,7 +913,7 @@ export default function PurchaseOrders() {
               </button>
             </div>
             <div class="header-container">
-            <h2 class="org-title">${po.institution_name || 'EAST POINT COLLEGE OF MEDICAL SCIENCES & RESEARCH CENTER'}</h2>
+            <h2 class="org-title">${po.institution_name ? (po.institution_name.match(/\((.*?)\)/) ? po.institution_name.match(/\((.*?)\)/)[1].trim() : po.institution_name) : 'EAST POINT COLLEGE OF MEDICAL SCIENCES & RESEARCH CENTER'}</h2>
             <p class="org-address">113, JNANA PRABHA CAMPUS, BIDARAHALLI, VIRGO NAGAR POST, BANGALORE - 560049</p>
             <div class="doc-title">PURCHASE ORDER</div>
           </div>
@@ -956,16 +971,16 @@ export default function PurchaseOrders() {
             </div>
             <div style="width: 40%">
               <table style="width:100%; border-collapse: collapse;">
-                <tr><td style="text-align:right">Total Amount</td><td style="text-align:right; width: 100px;">: ${(totalTaxable + totalDiscount).toFixed(2)}</td></tr>
-                <tr><td style="text-align:right; color: #d97706;">Less: Discount</td><td style="text-align:right; color: #d97706;">: ${totalDiscount.toFixed(2)}</td></tr>
-                <tr><td style="text-align:right">Taxable Amount</td><td style="text-align:right">: ${totalTaxable.toFixed(2)}</td></tr>
-                <tr><td style="text-align:right">Add: CGST</td><td style="text-align:right">: ${totalCgst.toFixed(2)}</td></tr>
-                <tr><td style="text-align:right">Add: SGST</td><td style="text-align:right">: ${totalSgst.toFixed(2)}</td></tr>
-                ${totalIgst > 0 ? `<tr><td style="text-align:right">Add: IGST</td><td style="text-align:right">: ${totalIgst.toFixed(2)}</td></tr>` : ''}
+                <tr><td style="text-align:right">Total Amount</td><td style="text-align:right; width: 100px;">: ${Number((totalTaxable + totalDiscount).toFixed(2))}</td></tr>
+                <tr><td style="text-align:right; color: #d97706;">Less: Discount</td><td style="text-align:right; color: #d97706;">: ${Number(totalDiscount.toFixed(2))}</td></tr>
+                <tr><td style="text-align:right">Taxable Amount</td><td style="text-align:right">: ${Number(totalTaxable.toFixed(2))}</td></tr>
+                <tr><td style="text-align:right">Add: CGST</td><td style="text-align:right">: ${Number(totalCgst.toFixed(2))}</td></tr>
+                <tr><td style="text-align:right">Add: SGST</td><td style="text-align:right">: ${Number(totalSgst.toFixed(2))}</td></tr>
+                ${totalIgst > 0 ? `<tr><td style="text-align:right">Add: IGST</td><td style="text-align:right">: ${Number(totalIgst.toFixed(2))}</td></tr>` : ''}
                 <tr><td style="text-align:right">Round Off</td><td style="text-align:right">: ${roundOff}</td></tr>
                 <tr><td style="text-align:right"><b>Total Net Amount</b></td><td style="text-align:right"><b>: ${totalNetAmount}</b></td></tr>
                 ${po.advance_percentage > 0 ? `
-                  <tr><td style="text-align:right; color: #d97706;">Advance Amount (${po.advance_percentage}%)</td><td style="text-align:right; color: #d97706;">: ${Math.round((Math.round(grandTotalWithTax) * po.advance_percentage) / 100).toFixed(2)}</td></tr>
+                  <tr><td style="text-align:right; color: #d97706;">Advance Amount (${po.advance_percentage}%)</td><td style="text-align:right; color: #d97706;">: ${Number(Math.round((Math.round(grandTotalWithTax) * po.advance_percentage) / 100).toFixed(2))}</td></tr>
                 ` : ''}
               </table>
             </div>
@@ -1050,13 +1065,13 @@ export default function PurchaseOrders() {
     });
 
     const grandTotalWithTax = totalNetAmountSum;
-    const roundOff = (Math.round(grandTotalWithTax) - grandTotalWithTax).toFixed(2);
-    const totalNetAmount = Math.round(grandTotalWithTax).toFixed(2);
+    const roundOff = Number((Math.round(grandTotalWithTax) - grandTotalWithTax).toFixed(2));
+    const totalNetAmount = Number(Math.round(grandTotalWithTax).toFixed(2));
     const activeTerms = detailDialog.terms || termsTemplates.find(t => t.is_default)?.content || (termsTemplates.length > 0 ? termsTemplates[0].content : '');
 
     const advancePercentage = detailDialog.advance_percentage || 0;
-    const advanceAmount = Math.round((Math.round(grandTotalWithTax) * advancePercentage) / 100).toFixed(2);
-    const balanceAmount = (Math.round(grandTotalWithTax) - parseFloat(advanceAmount)).toFixed(2);
+    const advanceAmount = Number(Math.round((Math.round(grandTotalWithTax) * advancePercentage) / 100).toFixed(2));
+    const balanceAmount = Number((Math.round(grandTotalWithTax) - parseFloat(advanceAmount)).toFixed(2));
 
     return {
       grandTotal,
@@ -1404,7 +1419,7 @@ export default function PurchaseOrders() {
             <Grid container spacing={2.5} sx={{ mb: 3 }}>
               <Grid item xs={3}>
                 <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>VENDOR</Typography>
-                <Typography sx={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>{detailDialog?.vendor_name}</Typography>
+                <Typography sx={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>{detailDialog?.vendor_name || '—'}</Typography>
                 {detailDialog?.vendor_gst_number && (
                   <Typography variant="caption" sx={{ color: '#64748B', display: 'block' }}>GSTIN: {detailDialog.vendor_gst_number}</Typography>
                 )}
@@ -1506,21 +1521,21 @@ export default function PurchaseOrders() {
                           <Typography variant="caption" sx={{ color: '#64748B' }}>{item.material_code}</Typography>
                         </TableCell>
                         <TableCell sx={{ fontSize: '0.75rem' }}>-</TableCell>
-                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{parseFloat(item.quantity || 0).toFixed(2)}</TableCell>
+                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{Number(parseFloat(item.quantity || 0).toFixed(2))}</TableCell>
                         <TableCell align="right" sx={{ fontSize: '0.75rem', fontWeight: 600, color: '#1d4ed8' }}>
-                          {item.approved_quantity !== null && item.approved_quantity !== undefined ? parseFloat(item.approved_quantity).toFixed(2) : '-'}
+                          {item.approved_quantity !== null && item.approved_quantity !== undefined ? Number(parseFloat(item.approved_quantity).toFixed(2)) : '-'}
                         </TableCell>
                         <TableCell sx={{ fontSize: '0.75rem' }}>{item.uom_name || 'NOS'}</TableCell>
-                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{rate.toFixed(2)}</TableCell>
-                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{(item.discount_percent || 0).toFixed(2)}</TableCell>
+                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{Number(rate.toFixed(2))}</TableCell>
+                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{Number((item.discount_percent || 0).toFixed(2))}</TableCell>
                         <TableCell align="right" sx={{ fontSize: '0.75rem' }}>
-                          {(item.cgst_percentage || 0).toFixed(2)}<br /><Typography variant="caption" sx={{ fontSize: '0.6rem', color: '#64748B' }}>{item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</Typography>
+                          {Number((item.cgst_percentage || 0).toFixed(2))}<br /><Typography variant="caption" sx={{ fontSize: '0.6rem', color: '#64748B' }}>{item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</Typography>
                         </TableCell>
                         <TableCell align="right" sx={{ fontSize: '0.75rem' }}>
-                          {(item.sgst_percentage || 0).toFixed(2)}<br /><Typography variant="caption" sx={{ fontSize: '0.6rem', color: '#64748B' }}>{item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</Typography>
+                          {Number((item.sgst_percentage || 0).toFixed(2))}<br /><Typography variant="caption" sx={{ fontSize: '0.6rem', color: '#64748B' }}>{item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</Typography>
                         </TableCell>
                         <TableCell align="right" sx={{ fontSize: '0.75rem' }}>
-                          {(item.igst_percentage || 0).toFixed(2)}<br /><Typography variant="caption" sx={{ fontSize: '0.6rem', color: '#64748B' }}>{item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</Typography>
+                          {Number((item.igst_percentage || 0).toFixed(2))}<br /><Typography variant="caption" sx={{ fontSize: '0.6rem', color: '#64748B' }}>{item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</Typography>
                         </TableCell>
                         <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem' }}>
                           {(() => {
@@ -1529,7 +1544,7 @@ export default function PurchaseOrders() {
                             if (item.is_gst_inclusive && totalGst > 0) {
                               itemBaseAmount = amount / (1 + (totalGst / 100));
                             }
-                            return itemBaseAmount.toFixed(2);
+                            return Number(itemBaseAmount.toFixed(2));
                           })()}
                         </TableCell>
                         <TableCell align="right">
@@ -1564,28 +1579,28 @@ export default function PurchaseOrders() {
                     <TableBody>
                       <TableRow>
                         <TableCell align="right" sx={{ color: '#64748B', fontWeight: 600 }}>Total Amount</TableCell>
-                        <TableCell align="right" sx={{ width: '120px' }}>: {(detailData.totalTaxable + detailData.totalDiscount).toFixed(2)}</TableCell>
+                        <TableCell align="right" sx={{ width: '120px' }}>: {Number((detailData.totalTaxable + detailData.totalDiscount).toFixed(2))}</TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell align="right" sx={{ color: '#d97706', fontWeight: 600 }}>Less: Discount</TableCell>
-                        <TableCell align="right" sx={{ color: '#d97706' }}>: {detailData.totalDiscount.toFixed(2)}</TableCell>
+                        <TableCell align="right" sx={{ color: '#d97706' }}>: {Number(detailData.totalDiscount.toFixed(2))}</TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell align="right" sx={{ color: '#64748B', fontWeight: 600 }}>Taxable Amount</TableCell>
-                        <TableCell align="right">: {detailData.totalTaxable.toFixed(2)}</TableCell>
+                        <TableCell align="right">: {Number(detailData.totalTaxable.toFixed(2))}</TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell align="right" sx={{ color: '#64748B', fontWeight: 600 }}>Add: CGST</TableCell>
-                        <TableCell align="right">: {detailData.totalCgst.toFixed(2)}</TableCell>
+                        <TableCell align="right">: {Number(detailData.totalCgst.toFixed(2))}</TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell align="right" sx={{ color: '#64748B', fontWeight: 600 }}>Add: SGST</TableCell>
-                        <TableCell align="right">: {detailData.totalSgst.toFixed(2)}</TableCell>
+                        <TableCell align="right">: {Number(detailData.totalSgst.toFixed(2))}</TableCell>
                       </TableRow>
                       {detailData.totalIgst > 0 && (
                         <TableRow>
                           <TableCell align="right" sx={{ color: '#64748B', fontWeight: 600 }}>Add: IGST</TableCell>
-                          <TableCell align="right">: {detailData.totalIgst.toFixed(2)}</TableCell>
+                          <TableCell align="right">: {Number(detailData.totalIgst.toFixed(2))}</TableCell>
                         </TableRow>
                       )}
                       <TableRow>
@@ -1774,6 +1789,9 @@ export default function PurchaseOrders() {
                 onChange={e => setForm({ ...form, institution_id: e.target.value })}
                 startAdornment={<InputAdornment position="start"><Store sx={{ color: '#94A3B8' }} /></InputAdornment>}
               >
+                {!institutions.some(i => i.id === form.institution_id) && form.institution_id && form._institution_name ? (
+                  <MenuItem key={form.institution_id} value={form.institution_id}>{form._institution_name}</MenuItem>
+                ) : null}
                 {institutions.map(inst => (
                   <MenuItem key={inst.id} value={inst.id}>{inst.code} - {inst.name}</MenuItem>
                 ))}
@@ -1782,9 +1800,9 @@ export default function PurchaseOrders() {
             </FormControl>
             <Box id="field-vendor_id">
               <Autocomplete
-                options={vendors}
+                options={vendors.some(v => v.id === form.vendor_id) ? vendors : (form.vendor_id && form._vendor_name ? [...vendors, { id: form.vendor_id, code: form._vendor_name.split(' - ')[0] || '', name: form._vendor_name.split(' - ').slice(1).join(' - ') || form._vendor_name }] : vendors)}
                 getOptionLabel={(option) => `${option.code} - ${option.name}`}
-                value={vendors.find(v => v.id === form.vendor_id) || null}
+                value={(vendors.some(v => v.id === form.vendor_id) ? vendors : (form.vendor_id && form._vendor_name ? [...vendors, { id: form.vendor_id, code: form._vendor_name.split(' - ')[0] || '', name: form._vendor_name.split(' - ').slice(1).join(' - ') || form._vendor_name }] : vendors)).find(v => v.id === form.vendor_id) || null}
                 onChange={(e, newValue) => {
                   const vId = newValue ? newValue.id : '';
                   const vendor = newValue;
@@ -1909,7 +1927,13 @@ export default function PurchaseOrders() {
                 label="Advance Payment (%)"
                 type="number"
                 value={form.advance_percentage}
-                onChange={(e) => setForm({ ...form, advance_percentage: e.target.value })}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === '' || /^\d*\.?\d{0,2}$/.test(val)) {
+                    if (val !== '' && Number(val) > 100) return;
+                    setForm({ ...form, advance_percentage: val });
+                  }
+                }}
                 inputProps={{ min: 0, max: 100, step: 'any' }}
                 error={!!errors.advance_percentage}
                 helperText={errors.advance_percentage}
@@ -1921,8 +1945,7 @@ export default function PurchaseOrders() {
                 label="Delivery Date *"
               value={form.delivery_date ? dayjs(form.delivery_date) : null}
               onChange={val => setForm({ ...form, delivery_date: val })}
-              format="DD-MMM-YYYY"
-              localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
+              format="DD-MMM-YYYY" localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
               disablePast
               slotProps={{
                 textField: {
@@ -1985,8 +2008,7 @@ export default function PurchaseOrders() {
                     label="Rental Start Date"
                     value={form.rental_start_date ? dayjs(form.rental_start_date) : null}
                     onChange={val => setForm({ ...form, rental_start_date: val })}
-                    format="DD-MMM-YYYY"
-                    localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
+                    format="DD-MMM-YYYY" localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
                     slotProps={{ textField: { fullWidth: true, size: "small" } }}
                     disablePast
                   />
@@ -1996,8 +2018,7 @@ export default function PurchaseOrders() {
                     label="Rental End Date"
                     value={form.rental_end_date ? dayjs(form.rental_end_date) : null}
                     onChange={val => setForm({ ...form, rental_end_date: val })}
-                    format="DD-MMM-YYYY"
-                    localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
+                    format="DD-MMM-YYYY" localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
                     slotProps={{ textField: { fullWidth: true, size: "small" } }}
                     disablePast
                     minDate={form.rental_start_date ? dayjs(form.rental_start_date).add(1, 'day') : dayjs().add(1, 'day')}
@@ -2223,19 +2244,19 @@ export default function PurchaseOrders() {
                   <Box sx={{ gridColumn: { xs: '1 / -1', md: '1 / -1' }, display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', md: '1fr 1fr 1fr 1fr' }, gap: 1.5 }}>
                     <Box display="flex" gap={1}>
                       <TextField disabled={!item.material_id} sx={{ ...noSpinSx, flex: 1 }} size="small" label="Disc %" type="number" value={item.discount_percent} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onFocus={(e) => { if (item.discount_percent === 0 || item.discount_percent === '0') updateItem(i, 'discount_percent', ''); }} onBlur={(e) => { if (item.discount_percent === '') updateItem(i, 'discount_percent', 0); }} onChange={e => updateItem(i, 'discount_percent', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100, step: "any" }} />
-                      <TextField size="small" label="Disc (₹)" value={discAmt.toFixed(2)} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
+                      <TextField size="small" label="Disc (₹)" value={Number(discAmt.toFixed(2))} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
                     </Box>
                     <Box display="flex" gap={1}>
                       <TextField sx={{ ...noSpinSx, flex: 1 }} size="small" label="CGST %" type="number" value={item.cgst_percentage} disabled={parseFloat(item.igst_percentage) > 0} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'cgst_percentage', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100, step: "any" }} InputProps={{ readOnly: true }} />
-                      <TextField size="small" label="CGST (₹)" value={cgstAmt.toFixed(2)} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
+                      <TextField size="small" label="CGST (₹)" value={Number(cgstAmt.toFixed(2))} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
                     </Box>
                     <Box display="flex" gap={1}>
                       <TextField sx={{ ...noSpinSx, flex: 1 }} size="small" label="SGST %" type="number" value={item.sgst_percentage} disabled={parseFloat(item.igst_percentage) > 0} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'sgst_percentage', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100, step: "any" }} InputProps={{ readOnly: true }} />
-                      <TextField size="small" label="SGST (₹)" value={sgstAmt.toFixed(2)} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
+                      <TextField size="small" label="SGST (₹)" value={Number(sgstAmt.toFixed(2))} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
                     </Box>
                     <Box display="flex" gap={1}>
                       <TextField sx={{ ...noSpinSx, flex: 1 }} size="small" label="IGST %" type="number" value={item.igst_percentage} disabled={parseFloat(item.cgst_percentage) > 0 || parseFloat(item.sgst_percentage) > 0} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'igst_percentage', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100, step: "any" }} InputProps={{ readOnly: true }} />
-                      <TextField size="small" label="IGST (₹)" value={igstAmt.toFixed(2)} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
+                      <TextField size="small" label="IGST (₹)" value={Number(igstAmt.toFixed(2))} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
                     </Box>
                   </Box>
 

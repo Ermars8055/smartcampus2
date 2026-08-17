@@ -229,7 +229,6 @@ export default function StockTransfers() {
           startIcon={<Add />}
           onClick={openTransferModal}
           disabled={!hasAction('transfers', 'can_transfer') && !hasAction('issues', 'can_issue')} // Fallback
-          sx={{ textTransform: 'none', borderRadius: 2, fontWeight: 700, px: 3, bgcolor: '#2563EB' }}
         >
           New Transfer
         </Button>

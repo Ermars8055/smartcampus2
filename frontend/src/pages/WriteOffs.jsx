@@ -318,7 +318,6 @@ export default function WriteOffs() {
           startIcon={<Add />}
           onClick={openCreateModal}
           disabled={!hasPermission('write_offs', 'can_create')}
-          sx={{ textTransform: 'none', borderRadius: 2, fontWeight: 700, px: 3, bgcolor: '#2563EB' }}
         >
           New Write Off
         </Button>
@@ -554,7 +553,7 @@ export default function WriteOffs() {
                 label="Date *"
                 value={createModal.date ? dayjs(createModal.date) : null}
                 onChange={val => setCreateModal({ ...createModal, date: val ? val.format('YYYY-MM-DD') : '' })}
-                format="DD-MMM-YYYY"
+                format="DD-MMM-YYYY" localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
                 disablePast
                 slotProps={{
                   textField: {
@@ -915,19 +914,19 @@ export default function WriteOffs() {
                         <TableCell align="center">{item.warehouse_name || '-'}</TableCell>
                         <TableCell align="center">{item.uom_name || 'unit'}</TableCell>
                         <TableCell align="center"><Typography variant="body2" sx={{ fontWeight: 700 }}>{item.quantity}</Typography></TableCell>
-                        <TableCell align="right">₹{item.rate?.toFixed(2) || '0.00'}</TableCell>
+                        <TableCell align="right">₹{Number(item.rate?.toFixed(2)) || '0.00'}</TableCell>
                         <TableCell align="right" sx={{ bgcolor: '#EFF6FF' }}>
                           {item.has_buyback ? (
-                            <Typography variant="body2" color="primary.main" sx={{ fontWeight: 700 }}>₹{item.buyback_amount?.toFixed(2) || '0.00'}</Typography>
+                            <Typography variant="body2" color="primary.main" sx={{ fontWeight: 700 }}>₹{Number(item.buyback_amount?.toFixed(2)) || '0.00'}</Typography>
                           ) : '-'}
                         </TableCell>
-                        <TableCell align="right">₹{item.amount?.toFixed(2) || '0.00'}</TableCell>
+                        <TableCell align="right">₹{Number(item.amount?.toFixed(2)) || '0.00'}</TableCell>
                       </TableRow>
                     ))}
                     <TableRow>
                       <TableCell colSpan={6} align="right" sx={{ fontWeight: 800 }}>Grand Total:</TableCell>
                       <TableCell align="right" sx={{ fontWeight: 800, color: '#10B981' }}>
-                        ₹{viewModal.writeOff.items.reduce((sum, item) => sum + (item.amount || 0), 0).toFixed(2)}
+                        ₹{Number(viewModal.writeOff.items.reduce((sum, item) => sum + (item.amount || 0), 0).toFixed(2))}
                       </TableCell>
                     </TableRow>
                   </TableBody>

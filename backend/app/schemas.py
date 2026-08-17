@@ -157,6 +157,18 @@ class TenantConfigurationOut(TenantConfigurationBase):
 
 # ── Master Data ──────────────────────────────────────────────────────────
 
+class SystemLookupBase(BaseModel):
+    lookup_type: str
+    lookup_value: str
+    is_active: bool = True
+
+class SystemLookupOut(SystemLookupBase):
+    id: int
+    tenant_id: int
+    created_at: datetime
+    class Config:
+        from_attributes = True
+
 class CategoryBase(BaseModel):
     name: str = Field(..., min_length=1)
     material_code_prefix: str = Field(..., min_length=3, max_length=3, pattern=r"^[A-Za-z]{3}$")

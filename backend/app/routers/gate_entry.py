@@ -2,6 +2,7 @@
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy import or_
 from datetime import datetime, timezone
 from app.utils.tz import get_now_ist
 from typing import Optional
@@ -40,7 +41,16 @@ def list_gate_entries(
             q = q.filter(GateEntry.recorded_by_id == current_user.id)
             
     if search:
-        q = q.filter(GateEntry.entry_number.ilike(f"%{search}%"))
+        search_pattern = f"%{search}%"
+        q = q.filter(
+            or_(
+                GateEntry.entry_number.ilike(search_pattern),
+                GateEntry.vehicle_number.ilike(search_pattern),
+                GateEntry.delivery_person_name.ilike(search_pattern),
+                GateEntry.invoice_number.ilike(search_pattern),
+                GateEntry.dc_number.ilike(search_pattern)
+            )
+        )
     if status:
         q = q.filter(GateEntry.status == status)
     if project_id:

@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict PXoR8FfDxRLR5JsYRSBbkPzgLFaaGnH0CxVC6g2e2BUuBKchWh11LZtZhaI3mHc
+\restrict B4W5fuCNNS2naZDkKbrboHlwXlEn9fQFc0aATHMHVouzcn8ohwZu01LTvU2j0F1
 
 -- Dumped from database version 17.10 (Ubuntu 17.10-1.pgdg22.04+1)
 -- Dumped by pg_dump version 18.4 (Ubuntu 18.4-1.pgdg22.04+1)
@@ -3762,7 +3762,7 @@ CREATE TABLE public.vendor_work_orders (
     site_id integer NOT NULL,
     vwo_number character varying(50) NOT NULL,
     institution_id integer,
-    vendor_id integer NOT NULL,
+    vendor_id integer,
     complaint_id integer,
     equipment_id integer NOT NULL,
     priority character varying(50) NOT NULL,
@@ -4878,6 +4878,10 @@ COPY public.alerts (id, tenant_id, site_id, alert_type, severity, title, message
 78	2	2	Pending Action	Warning	Action Required: Issue Acknowledgement	Materials for your indent (IND-00024) have been issued. Please review and acknowledge receipt.	IndentIssued	239	\N	f	f	2026-08-14 12:56:12.823547	\N	3
 79	2	2	Complaint Assigned	Info	Complaint Assigned: PM-202608-EPCMS-POST OT -SYP-061	You have been assigned to complaint PM-202608-EPCMS-POST OT -SYP-061. Nature of complaint: Scheduled Preventive Maintenance	ComplaintAssigned	442	\N	f	f	2026-08-14 16:10:42.482907	\N	34
 80	2	2	Indent Approved	Success	Indent IND-00027 Approved	The indent (IND-00027) has been approved by EastPoint Admin.	IndentApproved	242	\N	f	f	2026-08-17 10:40:12.240706	\N	3
+81	2	2	Pending Action	Warning	Action Required: Issue Acknowledgement	Materials for your indent (IND-00027) have been issued. Please review and acknowledge receipt.	IndentIssued	242	\N	f	f	2026-08-17 11:06:47.911668	\N	3
+82	2	2	Complaint Assigned	Info	Complaint Assigned: CMP-00019	You have been assigned to complaint CMP-00019. Nature of complaint: Install machine 01	ComplaintAssigned	449	\N	f	f	2026-08-17 11:55:49.245213	\N	34
+83	2	2	Contract Approved	Success	Contract CNT-00006 Approved	The contract (CNT-00006) has been approved by EastPoint Admin.	ContractApproved	6	\N	f	f	2026-08-17 13:04:42.294988	\N	3
+84	2	2	Indent Approved	Success	Indent IND-00028 Approved	The indent (IND-00028) has been approved by EastPoint Admin.	IndentApproved	243	\N	f	f	2026-08-17 13:06:45.166122	\N	3
 \.
 
 
@@ -5949,7 +5953,6 @@ COPY public.categories (id, tenant_id, site_id, name, sequence_number, code, des
 72	2	2	LINEN	8	CAT-0008	Hospital category: LINEN	t	f	LIN
 74	2	2	RADIOLOGY	10	CAT-0010	Hospital category: RADIOLOGY	t	f	RAD
 67	2	2	HOSP EQPT	3	CAT-0003	Hospital category: HOSP EQPT	t	f	HEQ
-69	2	2	HOUSE KEEPING	5	CAT-0005	Hospital category: HOUSE KEEPING	t	f	HSK
 70	2	2	IT	6	CAT-0006	Hospital category: IT	t	f	ITI
 75	2	2	STATIONERY	11	CAT-0011	Hospital category: STATIONERY	t	f	STY
 76	2	2	HOSPITAL INSTRUMENTS	12	CAT-0012	Hospital Category: HOSPITAL INSTRUMENTS	t	f	HOI
@@ -5958,6 +5961,7 @@ COPY public.categories (id, tenant_id, site_id, name, sequence_number, code, des
 66	2	2	ELECTRICAL	2	CAT-0002	Hospital category: ELECTRICAL	t	f	ELE
 73	2	2	PLUMBING	9	CAT-0009	Hospital category: PLUMBING	t	f	PLB
 80	2	2	CHEMICALS	\N	CHEM	Chemical Materials	t	f	CHE
+69	2	2	HOUSE KEEPING	5	CAT-0005	Hospital category: HOUSE KEEPING	t	f	HSK
 \.
 
 
@@ -5985,6 +5989,7 @@ COPY public.complaint_documents (id, complaint_id, document_type, file_url, uplo
 3	18	\N	/api/uploads/complaints/2/20260806_071451_7ebc33e5.jpeg	2026-08-06 12:44:51.072629	3
 4	14	\N	/api/uploads/complaints/2/20260806_071543_0e8b603f.jpeg	2026-08-06 12:45:43.437025	3
 5	11	\N	/api/uploads/complaints/2/20260810_124029_64c33737.pdf	2026-08-10 18:10:29.41236	3
+6	445	\N	/api/uploads/complaints/2/20260817_055447_45a69a68.jpg	2026-08-17 11:24:47.945934	3
 \.
 
 
@@ -6015,6 +6020,8 @@ COPY public.complaint_images (id, complaint_id, image_url, is_resolution_image, 
 21	17	/api/uploads/complaints/2/20260806_071310_cf26feef.jpeg	f	2026-08-06 12:43:10.873784
 22	18	/api/uploads/complaints/2/20260806_071425_cbb6d498.jpeg	f	2026-08-06 12:44:25.653768
 23	11	/api/uploads/complaints/2/20260810_124029_8c5b40f2.png	t	2026-08-10 18:10:29.413458
+24	445	/api/uploads/complaints/2/20260817_055447_0a1dfaae.jpg	t	2026-08-17 11:24:47.947337
+25	450	/api/uploads/complaints/2/20260817_071146_17c57717.jpg	f	2026-08-17 12:41:46.601178
 \.
 
 
@@ -6465,9 +6472,16 @@ COPY public.complaints (id, tenant_id, site_id, docket_no, complaint_date, compl
 440	2	2	PM-202608-EPCMS-POST OT -PM-115	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684752	2026-08-11 18:37:11.684758	\N	f	\N	\N	\N	\N	\N	\N	\N	1504	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
 441	2	2	PM-202608-EPCMS-POST OT -SYP-060	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684765	2026-08-11 18:37:11.684771	\N	f	\N	\N	\N	\N	\N	\N	\N	1505	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
 443	2	2	PM-202608-EPCMS-POST OT -PM-116	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684791	2026-08-11 18:37:11.684798	\N	f	\N	\N	\N	\N	\N	\N	\N	1507	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-445	2	2	CMP-00017	2026-08-12	11:09	HEALTH 	7	237		issue	general issue		In Progress	34	\N	3	\N	f	2026-08-12 11:09:14.018811	2026-08-12 11:12:15.687959	\N	f	\N	\N	\N		\N	\N	\N	\N	General Complaint	f	\N	\N	\N	\N	\N	\N	\N	\N
 444	2	2	PM-202608-EPCMS-POST OT -PM-117	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Assigned	35	\N	3	\N	f	2026-08-11 18:37:11.684805	2026-08-12 12:09:46.430096	\N	f	\N	\N	\N	\N	\N	\N	\N	1508	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
 442	2	2	PM-202608-EPCMS-POST OT -SYP-061	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Under Inspection	34	\N	3	\N	f	2026-08-11 18:37:11.684778	2026-08-14 16:10:48.13972	\N	f	\N	\N	\N	\N	\N	\N	\N	1506	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
+445	2	2	CMP-00017	2026-08-12	11:09	HEALTH 	7	237		issue	general issue		Closed	34	\N	3	\N	f	2026-08-12 11:09:14.018811	2026-08-17 11:24:51.865397	\N	f	\N	\N	\N		\N	\N	\N	\N	General Complaint	f	3	2026-08-17 05:54:50.316926	3	2026-08-17 05:54:51.863207	product repaired succesfully	finished	\N	\N
+446	3	3	CMP-99999	2026-08-17	11:32	Test Dept	\N	\N		Testing the issue	Test detail	John Doe	Registered	\N	\N	4	\N	f	2026-08-17 11:32:26.592734	2026-08-17 11:32:26.592747	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N	\N	\N
+447	3	3	CMP-00001	2026-08-17	11:53	Test Dept	\N	\N		Testing the issue	Test detail	John Doe	Registered	\N	\N	4	\N	f	2026-08-17 11:53:06.922996	2026-08-17 11:53:06.923009	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	General Complaint	f	\N	\N	\N	\N	\N	\N	\N	\N
+448	2	2	CMP-00018	2026-08-17	11:54	HEALTH 	\N	\N		AC problem	AC problem		Registered	\N	\N	3	\N	f	2026-08-17 11:54:09.653717	2026-08-17 11:54:09.653728	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	General Complaint	f	\N	\N	\N	\N	\N	\N	\N	\N
+449	2	2	CMP-00019	2026-08-17	11:55	Civil Engineering	\N	\N		Install machine 01	Install machine 01		Assigned	34	\N	3	\N	f	2026-08-17 11:55:38.243275	2026-08-17 11:55:49.251175	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	Installation	f	\N	\N	\N	\N	\N	\N	\N	\N
+450	2	2	CMP-00020	2026-08-17	12:41	Anatomy Lab	\N	\N		not working properly	not working		Registered	\N	\N	3	\N	f	2026-08-17 12:41:46.59815	2026-08-17 12:41:46.598169	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	Machine Not Working	f	\N	\N	\N	\N	\N	\N	\N	\N
+451	2	2	CMP-00021	2026-08-17	13:59	Computer Science & Engineering	\N	\N		AA3 SUPER DELUX CRYO IS BOT WORKING PROPERLY	AA3 SUPER DELUX CRYO IS BOT WORKING PROPERLY	Pradnesh A	Registered	\N	\N	3	\N	f	2026-08-17 13:59:13.002169	2026-08-17 13:59:13.002185	\N	f	\N	\N	\N	\N	\N	\N	\N	1609	General Complaint	f	\N	\N	\N	\N	\N	\N	\N	\N
+454	1	1	CMP-00001	2026-08-17	14:26	\N	\N	\N	\N	Testing Auto Vendor Work Order generation for AMC Equipment	Equipment is under AMC. Need to verify that the draft work order is automatically created.	\N	Registered	\N	\N	8	\N	f	2026-08-17 14:26:38.06647	2026-08-17 14:26:38.105689	\N	f	\N	\N	\N	\N	\N	\N	\N	1609	Breakdown	f	\N	\N	\N	\N	\N	\N	\N	1
 \.
 
 
@@ -6487,6 +6501,7 @@ COPY public.contract_approvals (id, contract_id, approval_flow_id, approver_id, 
 9	5	105	3	\N	2026-08-12 14:39:41.360869
 10	5	84	3	\N	2026-08-12 14:39:55.146447
 11	6	105	3	\N	2026-08-17 10:47:06.197723
+12	6	84	3	\N	2026-08-17 13:04:42.318008
 \.
 
 
@@ -6514,7 +6529,7 @@ COPY public.contracts (id, tenant_id, site_id, contract_number, contract_type, v
 3	2	2	CNT-00003	RC	66	5	271	2026-08-10	2026-08-20	15000				f	f	Active	3	3	2026-08-11 13:46:44.953434	f	2026-08-03 17:10:25.921051	2026-08-11 19:22:59.222655		2
 4	2	2	CNT-00004	RC	66	11	\N	2026-08-10	2026-08-31	120000				f	f	Approved	3	3	2026-08-11 13:58:39.622117	f	2026-08-11 19:28:23.844588	2026-08-11 19:28:39.623956		2
 5	2	2	CNT-00005	AMC	69	1	\N	2026-08-31	2027-08-11	16780				f	f	Approved	3	3	2026-08-12 09:09:55.143196	f	2026-08-12 12:28:13.107764	2026-08-12 14:39:55.145898		2
-6	2	2	CNT-00006	RC	69	\N	\N	2026-08-01	2027-08-17	\N				f	f	Submitted	3	\N	\N	f	2026-08-14 14:57:37.256088	2026-08-17 10:47:06.193768		2
+6	2	2	CNT-00006	RC	69	\N	\N	2026-08-01	2027-08-17	\N				f	f	Approved	3	3	2026-08-17 07:34:42.28912	f	2026-08-14 14:57:37.256088	2026-08-17 13:04:42.314296		2
 \.
 
 
@@ -9360,21 +9375,21 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 2412	3	3	2102	59	27	2026-06-17 18:19:11.656207
 3651	2	2	3462	62	47	2026-06-18 11:11:57.168045
 3690	2	2	3507	62	83	2026-07-08 12:25:10.075718
-3660	2	2	3474	62	64	2026-08-06 11:44:09.973896
-2855	2	2	2565	62	54	2026-08-06 14:53:32.831495
 3868	2	2	2565	63	1	2026-08-06 14:53:32.831506
 3867	2	2	2338	62	50	2026-08-12 11:07:29.314793
 3013	2	2	2751	62	22	2026-08-14 12:56:12.832462
-2854	2	2	2564	62	42	2026-08-17 10:07:34.275435
+3660	2	2	3474	62	60	2026-08-17 11:06:47.913802
+2855	2	2	2565	62	52	2026-08-17 17:11:21.411574
+2854	2	2	2564	62	24	2026-08-17 19:04:31.749018
 4136	2	2	4604	62	522	2026-08-06 13:36:11.191772
 4137	2	2	4605	62	655	2026-08-06 13:36:11.191784
 4138	2	2	4606	62	192	2026-08-06 13:36:11.191787
 4139	2	2	4607	62	289	2026-08-06 13:36:11.19179
-4140	2	2	4608	62	298	2026-08-06 13:36:11.191793
 4141	2	2	4609	62	409	2026-08-06 13:36:11.191796
 4142	2	2	4610	62	160	2026-08-06 13:36:11.191799
 4143	2	2	4611	62	545	2026-08-06 13:36:11.191802
 4144	2	2	4612	62	348	2026-08-06 13:36:11.191805
+4140	2	2	4608	62	297	2026-08-17 14:39:06.577492
 4145	2	2	4613	62	74	2026-08-06 13:36:11.191807
 4146	2	2	4614	62	92	2026-08-06 13:36:11.19181
 4147	2	2	4615	62	571	2026-08-06 13:36:11.191813
@@ -9633,6 +9648,8 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 4400	2	2	4868	62	828	2026-08-06 13:36:11.192522
 4401	2	2	4869	62	85	2026-08-06 13:36:11.192524
 3684	2	2	3501	62	44	2026-08-06 15:02:28.57246
+4402	2	2	2564	63	10	2026-08-17 11:27:19.33176
+4403	2	2	3910	62	1	2026-08-17 12:13:02.014073
 \.
 
 
@@ -10273,7 +10290,6 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 47	3	3	MATERIAL_53	HEQ	67
 48	3	3	MATERIAL_54	HOU	399
 49	3	3	MATERIAL_63	HOI	36
-50	3	3	MATERIAL_56	HSK	67
 51	3	3	MATERIAL_58	LAB	267
 52	3	3	MATERIAL_59	LIN	36
 53	3	3	MATERIAL_60	PLB	99
@@ -10291,7 +10307,6 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 19	3	3	VENDOR	VND	11
 15	3	3	GRN	GRN	22
 14	3	3	GATE_ENTRY	GE	30
-73	2	2	TRANSFER	TRF	2
 29	2	2	BUILDING	BLDG	6
 11	3	3	ISSUE	ISS	45
 63	2	2	INSTITUTION	INST	14
@@ -10309,35 +10324,56 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 16	3	3	QUOTATION_REQUEST	QR	21
 5	3	3	INDENT	IND	42
 40	3	3	MATERIAL_46	EES	3
-77	2	2	GATEPASS	GP	3
-95	2	2	PURCHASE_ORDER_3	EPCET/PO	6
-97	2	2	EQP	EQP	1
 98	2	2	EQP_RADIOLOGY_	EQP_RADIOLOGY_	1
 99	2	2	PURCHASE_ORDER_2	EPH/PO	2
 101	2	2	PURCHASE_ORDER_4	EPCP/PO	2
-93	2	2	WRITE_OFF	WO	9
-100	2	2	EQUIPMENT_WRITE_OFF	EWO	1
 94	2	2	PURCHASE_ORDER_11	EPAHS/PO	3
 103	2	2	PURCHASE_ORDER_10	EPCPT/PO	4
 102	2	2	PURCHASE_ORDER_9	NRCN/PO	3
-78	2	2	COMPLAINT	CMP	17
+126	2	2	MATERIAL_71	LAB	267
 105	2	2	PURCHASE_ORDER_5	EPCHE/PO	1
 104	2	2	PURCHASE_ORDER_8	EPSN/PO	2
-112	2	2	WORK_ORDER	WO	2
+127	2	2	MATERIAL_72	LIN	36
+137	2	2	EQP_BME	EQP_BME	2
+128	2	2	MATERIAL_74	RAD	5
+129	2	2	MATERIAL_67	HEQ	67
 113	1	1	WORK_ORDER	WO-	3
-76	2	2	INVOICE_REF	INV	7
+73	2	2	TRANSFER	TRF	3
+143	1	1	COMPLAINT	CMP	1
+77	2	2	GATEPASS	GP	4
+130	2	2	MATERIAL_70	ITI	39
 96	2	2	CONTRACT	CNT	6
 74	2	2	RETURN	RET	3
-71	2	2	GATE_ENTRY	GE	11
-75	2	2	GRN	GRN	14
+131	2	2	MATERIAL_75	STY	195
+132	2	2	MATERIAL_76	HOI	36
+133	2	2	MATERIAL_68	HOS	399
+135	2	2	MATERIAL_73	PLB	99
+76	2	2	INVOICE_REF	INV	8
+134	2	2	MATERIAL_66	ELE	89
+93	2	2	WRITE_OFF	WO	10
 69	2	2	PURCHASE_ORDER	PO	36
-70	2	2	QUOTATION_REQUEST	QR	38
+78	2	2	COMPLAINT	CMP	21
 115	2	2	PURCHASE_ORDER_7	EPCN/PO	1
-67	2	2	ISSUE	ISS	11
+136	2	2	MATERIAL_69	HSK	69
 65	2	2	VENDOR	VND	14
+50	3	3	MATERIAL_56	HSK	68
 72	2	2	WAREHOUSE	WH	13
-66	2	2	INDENT	IND	27
 68	2	2	PURCHASE_REQUEST	PR	14
+119	3	3	COMPLAINT	CMP	1
+95	2	2	PURCHASE_ORDER_3	EPCET/PO	7
+144	1	1	VENDOR_WORK_ORDER	VWO	1
+120	2	2	MATERIAL_80	CHE	1
+71	2	2	GATE_ENTRY	GE	13
+75	2	2	GRN	GRN	16
+138	2	2	EQP_110	EQP_110	2
+67	2	2	ISSUE	ISS	16
+97	2	2	EQP	EQP	2
+125	2	2	MATERIAL_65	CIV	77
+112	2	2	WORK_ORDER	WO	6
+70	2	2	QUOTATION_REQUEST	QR	39
+66	2	2	INDENT	IND	28
+145	2	2	EQP_109	EQP_109	1
+100	2	2	EQUIPMENT_WRITE_OFF	EWO	2
 \.
 
 
@@ -10348,6 +10384,13 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 COPY public.equipment_history (id, equipment_id, event_type, event_date, description, reference_id, created_by_id) FROM stdin;
 1	1	Installation	2026-07-28 11:34:51.840188	Installed by Unknown at 2026-07-28 00:00:00	\N	3
 2	1	Installation	2026-07-28 12:12:46.6889	Installed by Pradnesh A at 2026-07-28 00:00:00	\N	3
+3	1607	Manual Registration	2026-08-17 12:44:55.97195	Equipment added manually	\N	3
+4	1608	Manual Registration	2026-08-17 12:48:24.47849	Equipment added manually	\N	3
+5	1609	Manual Registration	2026-08-17 13:08:06.26073	Equipment added manually	\N	3
+6	1610	Manual Registration	2026-08-17 14:31:33.647609	Equipment added manually	\N	3
+7	1610	Relocation	2026-08-17 00:00:00	Relocated from 110 to 110. Remarks: None	\N	3
+8	1611	Manual Registration	2026-08-17 14:38:26.150672	Equipment added manually	\N	3
+9	1610	Relocation	2026-08-17 00:00:00	Relocated from 110 to 216. Remarks: None	\N	3
 \.
 
 
@@ -10741,6 +10784,12 @@ COPY public.equipment_items (id, tenant_id, site_id, equipment_code, material_id
 1494	2	2	EPCMS-POST OT -PM-108	3899	\N	\N	B10W4A014	Captured	t	f	Installed	2026-03-23 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:45.381651	2026-08-11 18:37:11.375222	t	2029-03-22	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	NiDEK	Bravo 10 G3M	\N	\N	\N	\N	Narayanan	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1495	2	2	EPCMS-POST OT -PM-109	3899	\N	\N	B10W4A015	Captured	t	f	Installed	2026-03-23 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:45.381657	2026-08-11 18:37:11.375224	t	2029-03-22	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	NiDEK	Bravo 10 G3M	\N	\N	\N	\N	Narayanan	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1508	2	2	EPCMS-POST OT -PM-117	3899	\N	\N	301410M1380490004	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.38173	2026-08-11 18:37:11.375267	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	EDAN	IM8	\N	\N	\N	\N	\N	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1606	2	2	EQP-00002	3910	219	522	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	3	In Store	2026-08-17 12:13:02.027106	2026-08-17 07:04:50.973266	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	110	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1607	2	2	EPCET-BME-3OTG-00001	3993	\N	\N	\N	Pending Update	f	t	Not Required	\N	\N	\N	62	\N	Operational	2026-08-17 12:44:55.931347	2026-08-17 13:32:51.43847	f	\N	None	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	97	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	null	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1608	2	2	EPAHS-CW-18AF-00001	3507	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-17 12:48:24.45775	2026-08-17 13:32:51.441658	f	\N	None	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	99	\N	11	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	null	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1609	2	2	EPAHS-ER-ASDC-00002	4022	\N	\N	\N	Pending Update	f	t	Not Required	\N	\N	\N	62	\N	Operational	2026-08-17 13:08:06.237234	2026-08-17 13:32:51.443189	t	2027-08-17	AMC	2028-08-17	\N	\N	\N	\N	\N	\N	\N	\N	\N	110	\N	11	\N	\N	\N	\N	\N	\N	\N	\N	\N	t	t	\N	Purchase	\N	\N	\N	\N	null	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1610	2	2	EPCP-110-18AF-00002	3507	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-17 14:31:33.62432	2026-08-17 17:31:51.77191	f	\N	None	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	91	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	null	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1611	2	2	NRCN-109-ACET-00001	4608	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Written Off	2026-08-17 14:38:26.121154	2026-08-17 14:39:06.606657	f	\N	None	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	79	\N	9	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	null	\N	\N	\N	\N	\N	\N	\N	\N	\N
 804	2	2	EPCMS-102-BPA-001	3895	\N	\N	13660	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.195829	2026-08-05 19:04:39.195839	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	76	\N	\N	\N	DIAMOND	DELUXE	\N	\N	\N	\N	\N	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 805	2	2	EPCMS-102-ESA-001	3896	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.217136	2026-08-05 19:04:39.217145	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	76	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 806	2	2	EPCMS-102-GEN-001	3897	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.223687	2026-08-05 19:04:39.223696	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	76	\N	\N	\N	MURPHY	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
@@ -11252,6 +11301,8 @@ COPY public.gate_entries (id, tenant_id, site_id, entry_number, vehicle_number, 
 204	2	2	GE-00009	TN 08 N 4567	\N	\N	\N	\N	\N	2026-08-06 14:56:45.52839	NOS	\N	NOS	Standard	\N	/api/uploads/invoices/2/20260806_092619_1796e5e4.png		Completed	3	f	2026-08-06 14:56:45.529696	A566S54	2026-08-03	60606	\N	\N	\N		/api/uploads/invoices/2/20260806_092552_24c3c8d0.png	88888	2026-08-02	\N
 205	2	2	GE-00010	TN 09 M 8901	\N	\N	\N	\N	\N	2026-08-06 15:01:27.215344	done	\N	done	Standard	\N	/api/uploads/invoices/2/20260806_093046_c67c0c7d.png		Completed	3	f	2026-08-06 15:01:27.215882	C67G98VV	2026-08-05	90990	\N	\N	\N		/api/uploads/invoices/2/20260806_093010_ac01d917.png	56565656	2026-08-01	\N
 206	2	2	GE-00011	TN 09 K 3455	\N	\N	\N	\N	\N	2026-08-06 15:58:17.736877	aaa	\N	aaa	Standard	\N	/api/uploads/invoices/2/20260806_102745_cdade1c9.png		Completed	3	f	2026-08-06 15:58:17.738267	L78I876	2026-08-04	655660	\N	\N	\N		/api/uploads/invoices/2/20260806_102710_c7dc314a.png	789045	2026-07-27	\N
+207	2	2	GE-00012	TN 09 N 1234	\N	\N	\N	\N	\N	2026-08-17 11:05:56.207301	udhay	\N	udhay	Standard	\N	/api/uploads/invoices/2/20260817_053552_b931067d.webp		Completed	3	f	2026-08-17 11:05:56.20925	A4576C56	2026-08-11	100000	\N	\N	\N		/api/uploads/invoices/2/20260817_053405_974aef41.png	4546745	2026-08-10	\N
+208	2	2	GE-00013	KA 02 EX 1234	\N	\N	\N	\N	\N	2026-08-17 12:12:05.350568	Ram	\N	Ram	Standard	\N			Completed	3	f	2026-08-17 12:12:05.351843		\N	0	1700	2500	800	/api/uploads/invoices/2/20260817_064203_39a6471d.png	/api/uploads/invoices/2/20260817_064120_6c6f0417.png	DC5463	2026-08-16	\N
 \.
 
 
@@ -11278,6 +11329,7 @@ COPY public.gate_pass_items (id, gate_pass_id, material_id, quantity, remarks) F
 21	20	2427	3	Broken
 22	21	984	40	Candy canes topping liquorice wafer cake shortbread chupa chups sesame snaps carrot cake. Fruitcake candy tiramisu sugar plum jujubes icing marzipan candy. Bonbon marzipan brownie tiramisu sesame snaps cheesecake macaroon gummies cake. Pudding oat cake chocolate tiramisu powder dessert. Lollipop jelly beans gummi bears sugar plum gummi bears bear claw cupcake cake croissant. Bear claw marshmallow candy pudding jujubes tootsie roll. Pie topping apple pie oat cake topping. Tart sesame snaps croissant carrot cake biscuit halvah caramels macaroon danish. Tootsie roll dragée donut cotton candy macaroon ice cream oat cake. Danish soufflé lemon drops danish dessert ice cream muffin. Candy dragée wafer cheesecake lemon drops icing. Candy canes jelly beans cake fruitcake cheesecake. Donut fruitcake gummies cheesecake pastry cake fruitcake. Brownie oat cake bonbon wafer tart tootsie roll. Lemon drops jelly beans wafer cake chocolate cake chocolate donut cake pastry. Sweet roll icing cotton candy carrot cake cookie sugar plum liquorice chupa chups. Jujubes chocolate bar chocolate marshmallow liquorice. Apple pie marzipan muffin oat cake sesame snaps. Jelly-o cookie tart pudding gummi bears tart pastry chocolate cake sugar plum. Ice cream danish tiramisu sweet cookie tiramisu cotton candy liquorice liquorice. Cotton candy apple pie fruitcake pudding gingerbread apple pie. Dessert oat cake caramels dessert carrot cake chupa chups cake chocolate cake. Sesame snaps gummi bears marshmallow candy lollipop marshmallow oat cake marshmallow. Cheesecake lollipop fruitcake halvah jelly caramels biscuit cake. Icing apple pie cake candy tootsie roll donut bonbon. Powder macaroon gummies toffee tart bonbon jelly muffin cheesecake. Brownie liquorice cookie topping macaroon halvah marshmallow. Sesame snaps oat cake lemon drops cupcake cotton candy toffee gummies liquorice. Icing donut sweet roll soufflé candy canes. Pie jelly jelly beans sesame snaps sweet marshmallow caramels. Gummies bear claw topping bear claw muffin. Jelly-o wafer powder cotton candy toffee jelly beans dessert muffin macaroon. Chocolate liquorice apple pie tart fruitcake chocolate cake gingerbread toffee sesame snaps. Soufflé fruitcake cupcake biscuit pastry cheesecake cake jelly-o. Pastry gingerbread sweet biscuit gingerbread sweet roll jujubes. Topping soufflé carrot cake candy canes oat cake tootsie roll. Wafer shortbread liquorice shortbread cotton candy donut. Bonbon liquorice jelly beans jujubes icing. Gummies chocolate cake tiramisu croissant bonbon tart sweet roll sweet brownie. Pudding lemon drops croissant liquorice chocolate jelly beans tiramisu biscuit. Ice cream marshmallow marshmallow cheesecake icing. Tart carrot cake chocolate cake cookie halvah tiramisu sesame snaps. Gummies gummi bears candy canes biscuit marzipan danish liquorice bear claw chocolate cake. Tiramisu chocolate halvah cotton candy pudding fruitcake. Tart sweet shortbread apple pie carrot cake pie cheesecake jelly-o. Lollipop cake gummi bears pastry marshmallow pastry muffin chocolate tootsie roll. Gummies toffee danish donut bear claw. Bear claw wafer cake biscuit lemon drops cookie chocolate cake gummi bears jujubes. Lollipop wafer cotton candy bonbon jelly beans shortbread cotton candy pudding. Croissant cake gingerbread pastry jelly. Tart jujubes bear claw croissant cookie. Macaroon carrot cake dragée powder chocolate cake. Sweet pastry oat cake bear claw lollipop donut croissant tootsie roll cupcake. Tart cookie donut candy canes shortbread dessert lollipop. Jelly-o pudding tootsie roll gingerbread sesame snaps sweet roll tootsie roll. Lollipop sugar plum pudding cake bonbon pastry marshmallow. Cake dessert cupcake jelly-o tiramisu oat cake biscuit marzipan caramels. Cupcake sweet liquorice cookie dragée chocolate bar wafer tootsie roll. Gingerbread gingerbread oat cake marzipan tootsie roll cheesecake lollipop. Sweet muffin candy jelly cake cotton candy brownie pudding. Donut pie cupcake cotton candy donut gummi bears. Marshmallow tiramisu cookie candy cotton candy dragée cheesecake. Cake sweet roll dessert powder dragée macaroon marshmallow. Tootsie roll croissant danish cookie powder. Topping gingerbread chocolate cupcake cotton candy. Cotton candy wafer chocolate bar sweet bear claw jelly beans tootsie roll.
 23	22	2751	2	\N
+24	23	2751	10	\N
 \.
 
 
@@ -11303,6 +11355,7 @@ COPY public.gate_passes (id, tenant_id, site_id, gate_pass_number, return_id, pr
 21	3	3	GP-00014	\N	1	\N	Yet to Receive	Returnable	\N	\N	Candy canes topping liquorice wafer cake shortbread chupa chups sesame snaps carrot cake. Fruitcake candy tiramisu sugar plum jujubes icing marzipan candy. Bonbon marzipan brownie tiramisu sesame snaps cheesecake macaroon gummies cake. Pudding oat cake chocolate tiramisu powder dessert. Lollipop jelly beans gummi bears sugar plum gummi bears bear claw cupcake cake croissant. Bear claw marshmallow candy pudding jujubes tootsie roll. Pie topping apple pie oat cake topping. Tart sesame snaps croissant carrot cake biscuit halvah caramels macaroon danish. Tootsie roll dragée donut cotton candy macaroon ice cream oat cake. Danish soufflé lemon drops danish dessert ice cream muffin. Candy dragée wafer cheesecake lemon drops icing. Candy canes jelly beans cake fruitcake cheesecake. Donut fruitcake gummies cheesecake pastry cake fruitcake. Brownie oat cake bonbon wafer tart tootsie roll. Lemon drops jelly beans wafer cake chocolate cake chocolate donut cake pastry. Sweet roll icing cotton candy carrot cake cookie sugar plum liquorice chupa chups. Jujubes chocolate bar chocolate marshmallow liquorice. Apple pie marzipan muffin oat cake sesame snaps. Jelly-o cookie tart pudding gummi bears tart pastry chocolate cake sugar plum. Ice cream danish tiramisu sweet cookie tiramisu cotton candy liquorice liquorice. Cotton candy apple pie fruitcake pudding gingerbread apple pie. Dessert oat cake caramels dessert carrot cake chupa chups cake chocolate cake. Sesame snaps gummi bears marshmallow candy lollipop marshmallow oat cake marshmallow. Cheesecake lollipop fruitcake halvah jelly caramels biscuit cake. Icing apple pie cake candy tootsie roll donut bonbon. Powder macaroon gummies toffee tart bonbon jelly muffin cheesecake. Brownie liquorice cookie topping macaroon halvah marshmallow. Sesame snaps oat cake lemon drops cupcake cotton candy toffee gummies liquorice. Icing donut sweet roll soufflé candy canes. Pie jelly jelly beans sesame snaps sweet marshmallow caramels. Gummies bear claw topping bear claw muffin. Jelly-o wafer powder cotton candy toffee jelly beans dessert muffin macaroon. Chocolate liquorice apple pie tart fruitcake chocolate cake gingerbread toffee sesame snaps. Soufflé fruitcake cupcake biscuit pastry cheesecake cake jelly-o. Pastry gingerbread sweet biscuit gingerbread sweet roll jujubes. Topping soufflé carrot cake candy canes oat cake tootsie roll. Wafer shortbread liquorice shortbread cotton candy donut. Bonbon liquorice jelly beans jujubes icing. Gummies chocolate cake tiramisu croissant bonbon tart sweet roll sweet brownie. Pudding lemon drops croissant liquorice chocolate jelly beans tiramisu biscuit. Ice cream marshmallow marshmallow cheesecake icing. Tart carrot cake chocolate cake cookie halvah tiramisu sesame snaps. Gummies gummi bears candy canes biscuit marzipan danish liquorice bear claw chocolate cake. Tiramisu chocolate halvah cotton candy pudding fruitcake. Tart sweet shortbread apple pie carrot cake pie cheesecake jelly-o. Lollipop cake gummi bears pastry marshmallow pastry muffin chocolate tootsie roll. Gummies toffee danish donut bear claw. Bear claw wafer cake biscuit lemon drops cookie chocolate cake gummi bears jujubes. Lollipop wafer cotton candy bonbon jelly beans shortbread cotton candy pudding. Croissant cake gingerbread pastry jelly. Tart jujubes bear claw croissant cookie. Macaroon carrot cake dragée powder chocolate cake. Sweet pastry oat cake bear claw lollipop donut croissant tootsie roll cupcake. Tart cookie donut candy canes shortbread dessert lollipop. Jelly-o pudding tootsie roll gingerbread sesame snaps sweet roll tootsie roll. Lollipop sugar plum pudding cake bonbon pastry marshmallow. Cake dessert cupcake jelly-o tiramisu oat cake biscuit marzipan caramels. Cupcake sweet liquorice cookie dragée chocolate bar wafer tootsie roll. Gingerbread gingerbread oat cake marzipan tootsie roll cheesecake lollipop. Sweet muffin candy jelly cake cotton candy brownie pudding. Donut pie cupcake cotton candy donut gummi bears. Marshmallow tiramisu cookie candy cotton candy dragée cheesecake. Cake sweet roll dessert powder dragée macaroon marshmallow. Tootsie roll croissant danish cookie powder. Topping gingerbread chocolate cupcake cotton candy. Cotton candy wafer chocolate bar sweet bear claw jelly beans tootsie roll.	4	2026-06-17 12:10:19.253046	Pradnesh	Dubai Main road	Computer Science	\N	\N	\N	TRANSFER	\N	\N
 19	2	2	GP-00001	\N	3	64	Received	Returnable	\N	\N	\N	3	2026-06-12 02:13:36.805231	Royal Hardware & Electricals	Ground Floor, Sri Lakshminivasareswara Nilaya, Avalahalli, Ittamadu Main Road, Virgonagar Post, Bangalore, Karnataka - 560049	\N	Central Store	ram	2026-06-17 12:44:40.276	REPAIR	GE-00003	GRN-00003
 22	2	2	GP-00003	\N	3	63	Yet to Receive	Returnable	\N	\N	PPC Cement	3	2026-06-17 13:14:47.945966	ELCAB ENGINEERS PRIVATE LIMITED	V R Cindem Complex, Sy. No. 1193/34/4, Kengeri Main Road, Behind Mr Prem Bun, Ramasandra Village, Bangalore, Karnataka - 560056	Anatomy	\N	\N	\N	TRANSFER	\N	\N
+23	2	2	GP-00004	\N	3	66	Yet to Receive	Returnable	\N	\N	\N	3	2026-08-17 11:28:15.017776	dell laptops 	new madras road , pai layout, bangalore, Karnataka - 560016	Admin	\N	\N	\N	REPAIR	\N	\N
 \.
 
 
@@ -11346,6 +11399,8 @@ COPY public.grn (id, tenant_id, site_id, grn_number, po_id, gate_entry_id, wareh
 215	2	2	GRN-00012	\N	204	62	3	64	Direct Invoice	A566S54	2026-08-03	60606	/api/uploads/invoices/2/20260806_092619_1796e5e4.png	\N	0	0	0	0	0	\N	Pending	Completed	\N	3	f	2026-08-06 14:57:09.61217	2026-08-06 09:27:09.613865	\N	\N	88888	2026-08-02	/api/uploads/invoices/2/20260806_092552_24c3c8d0.png
 216	2	2	GRN-00013	268	205	62	3	64	PO-Based	C67G98VV	2026-08-05	153273	/api/uploads/invoices/2/20260806_093046_c67c0c7d.png	\N	153273.75	0	0	0	0	\N	Not Applicable	Completed	\N	3	f	2026-08-06 15:02:28.544141	2026-08-06 09:32:28.568138	\N	\N	56565656	2026-08-01	/api/uploads/invoices/2/20260806_093010_ac01d917.png
 217	2	2	GRN-00014	\N	206	62	3	67	Direct Invoice	L78I876	2026-08-04	655660	/api/uploads/invoices/2/20260806_102745_cdade1c9.png	\N	0	0	0	0	0	\N	Pending	Completed	\N	3	f	2026-08-06 15:58:41.318646	2026-08-06 10:28:41.32044	\N	\N	789045	2026-07-27	/api/uploads/invoices/2/20260806_102710_c7dc314a.png
+218	2	2	GRN-00015	\N	207	62	3	66	Direct Invoice	A4576C56	2026-08-11	100000	/api/uploads/invoices/2/20260817_053552_b931067d.webp	\N	0	0	0	0	0	\N	Pending	Completed	\N	3	f	2026-08-17 11:06:30.964927	2026-08-17 05:36:30.98859	\N	\N	4546745	2026-08-10	/api/uploads/invoices/2/20260817_053405_974aef41.png
+219	2	2	GRN-00016	277	208	62	3	63	PO-Based		\N	100		\N	100	0	0	0	0	\N	Not Applicable	Completed	\N	3	f	2026-08-17 12:13:01.989646	2026-08-17 06:43:02.018181	\N	\N	DC5463	2026-08-16	/api/uploads/invoices/2/20260817_064120_6c6f0417.png
 \.
 
 
@@ -11413,6 +11468,7 @@ COPY public.grn_items (id, grn_id, material_id, po_item_id, ordered_quantity, re
 519	212	3507	616	1	1	1	0	12	\N	0	0	0	0	0	0	12	0	\N
 520	213	2338	\N	0	1	1	0	1500	\N	0	0	0	0	0	0	1500	0	\N
 521	216	3501	702	35	35	35	0	4379.25	\N	0	0	0	0	0	0	153273.75	0	\N
+522	219	3910	1747	1	1	1	0	100	\N	0	0	0	0	0	0	100	0	\N
 \.
 
 
@@ -11513,6 +11569,10 @@ COPY public.indent_approvals (id, indent_id, approval_flow_id, approver_id, appr
 90	242	44	3	2026-08-17 10:40:05.594963	{"524": {"quantity": 4.0, "remarks": null}}	\N
 91	242	16	3	2026-08-17 10:40:12.218487	{"524": {"quantity": 4.0, "remarks": null}}	\N
 92	242	108	3	2026-08-17 10:40:12.218501	{"524": {"quantity": 4.0, "remarks": null}}	\N
+93	243	104	3	2026-08-17 13:06:37.691392	{"525": {"quantity": 10.0, "remarks": null}}	\N
+94	243	44	3	2026-08-17 13:06:37.691404	{"525": {"quantity": 10.0, "remarks": null}}	\N
+95	243	16	3	2026-08-17 13:06:45.13779	{"525": {"quantity": 10.0, "remarks": null}}	\N
+96	243	108	3	2026-08-17 13:06:45.137833	{"525": {"quantity": 10.0, "remarks": null}}	\N
 \.
 
 
@@ -11626,7 +11686,8 @@ COPY public.indent_items (id, indent_id, material_id, requested_quantity, issued
 522	240	2564	4	0	0	1
 523	241	2564	1	0	0	2
 521	239	2751	1	3	0	3
-524	242	3474	4	0	0	4
+524	242	3474	4	4	4	4
+525	243	3475	10	0	0	10
 \.
 
 
@@ -11698,7 +11759,8 @@ COPY public.indents (id, tenant_id, site_id, indent_number, requester_id, room_i
 240	2	2	IND-00025	3	237	7	FIRST FLOOR	ROOM101	HEALTH 		66104.64	Approved	2	3	2026-08-12 05:08:48.18428	f	2026-08-12 10:32:16.427408	2026-08-12 10:38:48.186197	11	\N	\N
 241	2	2	IND-00026	3	237	7	FIRST FLOOR	ROOM101	HEALTH 		16526.16	Submitted	2	\N	\N	f	2026-08-14 12:29:53.625013	2026-08-14 12:31:43.853423	11	\N	\N
 239	2	2	IND-00024	3	\N	\N			Chemistry	Complaint CMP-00013 - fdgdfg	10443.43	Issued	2	3	2026-08-12 04:48:14.16361	f	2026-08-10 16:47:23.026424	2026-08-14 12:56:12.833616	3	15	\N
-242	2	2	IND-00027	3	\N	\N			Child Health Nursing (Pediatric Nursing)		13050.32	Approved	2	3	2026-08-17 05:10:12.238591	f	2026-08-17 10:39:56.617303	2026-08-17 10:40:12.289145	7	\N	\N
+242	2	2	IND-00027	3	\N	\N			Child Health Nursing (Pediatric Nursing)		13050.32	Issued	2	3	2026-08-17 05:10:12.238591	f	2026-08-17 10:39:56.617303	2026-08-17 11:06:47.934818	7	\N	\N
+243	2	2	IND-00028	3	\N	\N			Exercise Therapy Lab		46027.1	Approved	2	3	2026-08-17 07:36:45.162629	f	2026-08-17 13:06:23.961804	2026-08-17 13:06:45.170121	10	\N	\N
 \.
 
 
@@ -11762,6 +11824,9 @@ COPY public.invoice_items (id, invoice_id, material_id, description, hsn_sac, qu
 63	13	4648	Bromothymol blue solution		125	200	ml	0	9	9	0	2250	2250	0	25000	29500	\N
 64	13	4649	Bromothymol blue solution		125	200	ml	0	9	9	0	2250	2250	0	25000	29500	\N
 65	13	4680	DL- Alanine		100	800	gm	0	9	9	0	7200	7200	0	80000	94400	\N
+66	14	4648	Bromothymol blue solution		125	200	ml	0	9	9	0	2250	2250	0	25000	29500	\N
+67	14	4649	Bromothymol blue solution		125	200	ml	0	9	9	0	2250	2250	0	25000	29500	\N
+68	14	4680	DL- Alanine		100	800	gm	0	9	9	0	7200	7200	0	80000	94400	\N
 \.
 
 
@@ -11776,12 +11841,13 @@ COPY public.invoices (id, tenant_id, site_id, invoice_number, invoice_date, gate
 3	3	3	in4324	2026-06-02	\N	57	193	4500112.6	686442.6	Approved	/uploads/invoices/3/20260610_133541_e49271d3.png		4	f	2026-06-10 19:03:01.323243	2026-06-11 13:57:09.017903			\N	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR		\N							3813670	343221.3	343221.3	0	0	\N	\N	INV-00002				\N	100		0	0	0	0	INV-00002	Pending	\N	\N	t	2026-06-11 13:57:09.01705	4		\N	\N	\N	t	2026-06-11 13:08:50.988039	4	\N	\N
 7	2	2	In4576	2026-06-05	\N	64	\N	17356.084000000003	2632.2840000000006	Approved	/uploads/invoices/2/20260611_203554_530219c4.png		3	f	2026-06-12 02:07:03.464238	2026-06-12 02:24:45.194078			\N			\N							14723.800000000001	1316.1420000000003	1316.1420000000003	0	0	6	6	INV-00001				\N	100		0	0	0	0	INV-00001	Paid	2026-06-12 02:08:23.943898	3	t	2026-06-12 02:08:15.631662	3		2026-06-12 02:24:45.191254	3	\N	t	2026-06-12 02:07:54.878713	3	\N	\N
 5	3	3	wuq2389482394	2026-06-03	\N	56	\N	607638.11	65458.409999999996	Change Required	/uploads/invoices/3/20260610_135918_d988d4be.png		4	f	2026-06-10 19:30:10.241491	2026-06-17 18:13:44.501525			\N			\N							542179.7	32729.204999999998	32729.204999999998	0	0	\N	\N	INV-00004				\N	500		0	0	0	0	INV-00004	Pending	\N	\N	f	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N
-8	2	2	Bill123	2026-06-01	\N	62	216	23600	3600	Approved	/uploads/invoices/2/20260611_204044_3143a815.png		3	f	2026-06-12 02:10:49.116917	2026-06-12 04:01:24.649063			\N	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR		\N							20000	1800	1800	0	0	6	6	INV-00002				\N	0		0	0	0	0	INV-00002	Sent for Payment	2026-06-12 04:01:24.647438	3	t	2026-06-12 04:01:13.455078	3		\N	\N	\N	t	2026-06-12 02:24:34.027603	3	\N	\N
 9	2	2	B45	2026-06-04	\N	63	\N	55308.4528	8383.4928	Approved	/uploads/invoices/2/20260611_204745_c5c1a4cf.png		3	f	2026-06-12 02:17:50.148925	2026-06-18 11:23:09.740162			\N			\N							46924.96	4191.7464	4191.7464	0	0	6	4	INV-00003				\N	350		0	0	0	0	INV-00003	Pending	\N	\N	f	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N
 11	2	2	JK78	2026-06-01	\N	63	\N	36716.467000000004	5600.816999999999	Approved	/uploads/invoices/2/20260611_223421_8d3f5c41.png		3	f	2026-06-12 04:04:55.885776	2026-08-12 12:09:16.966595			\N			\N							31115.65	2800.4084999999995	2800.4084999999995	0	0	6	6	INV-00005				\N	0		0	0	0	0	INV-00005	Pending	\N	\N	t	2026-08-12 12:09:16.965585	3	done	\N	\N	\N	t	2026-06-12 04:31:48.254311	3	\N	\N
 12	2	2	INV2001	2026-06-30	\N	64	232	178414.33000000002	22927.230000000003	Approved	/api/uploads/invoices/2/20260630_090821_292826f8.pdf		3	f	2026-06-30 14:41:01.013675	2026-08-12 12:44:13.719128	231432525	DELIVERED SUCESSFULLY	2026-06-30	UPI		\N					KA 23 AS 2122		155487.1	11463.615000000002	11463.615000000002	0	0	6	4	INV-00006				2026-06-30	500		0	0	0	0	INV-00006	Pending	\N	\N	f	\N	\N	\N	\N	\N	\N	t	2026-08-12 12:44:13.714805	3	\N	\N
 10	2	2	BH565	2026-06-04	\N	64	\N	19824.708	3024.1079999999997	Approved	/uploads/invoices/2/20260611_223240_2b902a7f.png		3	f	2026-06-12 04:02:47.052948	2026-08-14 11:36:19.809287			\N			\N							16800.6	1512.0539999999999	1512.0539999999999	0	0	\N	\N	INV-00004				\N	0		0	0	0	0	INV-00004	Pending	\N	\N	t	2026-08-14 11:36:19.807035	3		\N	\N	\N	t	2026-08-06 11:09:04.785362	3	\N	\N
 13	2	2	76525445	2026-08-14	\N	72	274	153400	23400	Submitted	/api/uploads/invoices/2/20260814_072358_61dfd0c2.png		3	f	2026-08-14 12:54:10.184285	2026-08-14 12:54:10.184303			\N	1. Bill/Invoices in the name of East Point Allied Health Sciences managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR		\N							130000	11700	11700	0	0	5	5	INV-00007				\N	0		0	0	0	0	INV-00007	Pending	\N	\N	f	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N
+8	2	2	Bill123	2026-06-01	\N	62	216	23600	3600	Approved	/uploads/invoices/2/20260611_204044_3143a815.png		3	f	2026-06-12 02:10:49.116917	2026-08-17 11:34:00.788382			\N	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR		\N							20000	1800	1800	0	0	6	6	INV-00002				\N	0		0	0	0	0	INV-00002	Paid	2026-06-12 04:01:24.647438	3	t	2026-06-12 04:01:13.455078	3		2026-08-17 11:34:00.786976	3	623012345678	t	2026-06-12 02:24:34.027603	3	\N	\N
+14	2	2	VJ2398Y845	2026-08-10	\N	72	274	153400	23400	Approved	/api/uploads/invoices/2/20260817_074112_a75ca0e6.pdf		3	f	2026-08-17 13:11:17.66674	2026-08-17 13:11:36.627554			\N	1. Bill/Invoices in the name of East Point Allied Health Sciences managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR		\N							130000	11700	11700	0	0	5	5	INV-00008				\N	0		0	0	0	0	INV-00008	Pending	\N	\N	f	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N
 \.
 
 
@@ -12002,6 +12068,11 @@ COPY public.material_issue_items (id, issue_id, material_id, quantity, rate, rem
 219	239	3474	4	3262.58	\N	62
 220	240	2751	3	10443.43	\N	62
 221	241	2564	2	16526.16	\N	62
+222	242	3474	4	3262.58	\N	62
+223	243	2564	2	16526.16	\N	62
+224	244	2564	4	16526.16	\N	62
+225	245	2565	2	26703.28	\N	62
+226	246	2564	1	16526.16	\N	62
 \.
 
 
@@ -12062,6 +12133,11 @@ COPY public.material_issues (id, tenant_id, site_id, issue_number, warehouse_id,
 235	2	2	ISS-00005	62	1	228	7	237	HEALTH 	\N	Fulfillment for IND-00013	Completed	3	\N	t	2026-08-06 06:16:11.434167	3	\N	f	2026-06-18 12:23:35.498019	\N
 240	2	2	ISS-00010	62	3	239	\N	\N	Chemistry	\N	Fulfillment for IND-00024	Completed	3	\N	f	\N	\N	\N	f	2026-08-14 12:56:12.787431	\N
 241	2	2	ISS-00011	62	3	\N	7	237	HEALTH 	\N	Direct Issue	Completed	3	\N	f	\N	\N	\N	f	2026-08-17 10:07:34.247759	\N
+243	2	2	ISS-00013	62	3	\N	7	237	HEALTH 	\N	Direct Issue	Completed	3	\N	f	\N	\N	\N	f	2026-08-17 11:07:14.787568	\N
+242	2	2	ISS-00012	62	3	242	\N	\N	Child Health Nursing (Pediatric Nursing)	\N	Fulfillment for IND-00027	Completed	3	\N	t	2026-08-17 06:01:09.722782	3	\N	f	2026-08-17 11:06:47.890891	\N
+244	2	2	ISS-00014	62	3	\N	7	237	HEALTH 	\N	Direct Issue	Completed	3	\N	f	\N	\N	\N	f	2026-08-17 17:10:14.397872	\N
+245	2	2	ISS-00015	62	3	\N	7	237	HEALTH 	\N	Direct Issue	Completed	3	\N	f	\N	\N	\N	f	2026-08-17 17:11:21.408677	\N
+246	2	2	ISS-00016	62	3	\N	\N	\N	Chemistry	\N	Direct Issue	Completed	3	\N	f	\N	\N	\N	f	2026-08-17 19:04:31.741633	\N
 \.
 
 
@@ -12108,8 +12184,8 @@ COPY public.material_returns (id, tenant_id, site_id, return_number, warehouse_i
 21	3	3	RET-00011	59	1	\N	203 WARD	Unused	General Remark1	Suresh	4	f	2026-06-09 16:54:33.084703	Partially Received	2026-06-10 12:22:39.346884	4
 22	2	2	RET-00001	62	3	\N	HEALTH 	Unused			3	f	2026-06-12 02:03:45.953947	Completed	2026-06-11 20:34:33.074148	3
 24	3	3	RET-00012	59	1	\N	202 WARD	Unused		Pradnesh	4	f	2026-06-17 12:02:37.001097	Partially Received	2026-06-17 06:35:45.076371	4
-23	2	2	RET-00002	62	3	\N	HEALTH 	Unused			3	f	2026-06-12 02:04:24.390151	Partially Received	2026-08-06 06:14:34.591748	3
 25	2	2	RET-00003	62	3	\N	Cardiothoracic Lab	Unused		vik	3	f	2026-08-06 14:48:02.906889	Completed	2026-08-06 09:18:11.140767	3
+23	2	2	RET-00002	62	3	\N	HEALTH 	Unused			3	f	2026-06-12 02:04:24.390151	Partially Received	2026-08-17 05:56:27.492976	3
 \.
 
 
@@ -12315,6 +12391,7 @@ COPY public.materials (id, tenant_id, site_id, code, name, category_id, subcateg
 1120	3	3	ELE-00081	4" Cutt off Wheel	52	14	5	10	34	1419.92	\N	Covered	\N	18	Consumable	4" Cutt off Wheel	t	f	2026-06-03 12:31:54.174787	2026-06-05 16:47:46.70249	59	\N	ELE0081	f	f
 1121	3	3	ELE-00082	Bulk Head LED light	52	14	5	369	952	612.75	\N	Covered	\N	18	Consumable	Bulk Head LED light	t	f	2026-06-03 12:31:54.176707	2026-06-05 16:47:46.702493	59	\N	ELE0082	f	f
 1122	3	3	ELE-00083	Strip light (Luker)	52	14	5	31	118	3732.83	\N	Covered	\N	18	Consumable	Strip light (Luker)	t	f	2026-06-03 12:31:54.178849	2026-06-05 16:47:46.702495	59	\N	ELE0083	f	f
+4874	2	2	HSK-00069	ladder	69	\N	29	20	100	1435	\N	General		18	Furniture		t	f	2026-08-17 12:43:15.859262	2026-08-17 12:44:11.225792	62			f	f
 1123	3	3	ELE-00084	Double Door MCB Box	52	14	5	84	288	60.8	\N	Covered	\N	18	Consumable	Double Door MCB Box	t	f	2026-06-03 12:31:54.180832	2026-06-05 16:47:46.702498	59	\N	ELE0084	f	f
 1124	3	3	ELE-00085	LED Strip outdoor connector	52	14	5	39	142	3395	\N	Covered	\N	18	Consumable	LED Strip outdoor connector	t	f	2026-06-03 12:31:54.182948	2026-06-05 16:47:46.702501	59	\N	ELE0085	f	f
 1125	3	3	ELE-00086	Cat 6 Cable	52	14	5	59	194	353.27	\N	Covered	\N	18	Consumable	Cat 6 Cable	t	f	2026-06-03 12:31:54.185013	2026-06-05 16:47:46.702504	59	\N	ELE0086	f	f
@@ -15272,6 +15349,7 @@ COPY public.materials (id, tenant_id, site_id, code, name, category_id, subcateg
 3772	3	3	MAT-00055	LITHO DEVICE	42	\N	5	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:24.141983	2026-08-05 19:00:24.141995	46	\N	\N	f	f
 3773	3	3	MAT-00056	VIDEOSCOPE CABLE	42	\N	5	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:00:24.166938	2026-08-05 19:00:24.16695	46	\N	\N	f	f
 3774	3	3	MAT-00057	OT TABLE	42	\N	5	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:00:24.19305	2026-08-05 19:00:24.193062	46	\N	\N	f	f
+4870	2	2	CHE-00001	test material	80	\N	29	100	1000	300	\N			18	Consumable		t	f	2026-08-17 11:57:30.58261	2026-08-17 11:57:30.582622	65			f	f
 3775	3	3	MAT-00058	Electrosurgical Unit	42	\N	5	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:24.216992	2026-08-05 19:00:24.217006	46	\N	\N	f	f
 3776	3	3	MAT-00059	BERA	42	\N	5	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:24.240085	2026-08-05 19:00:24.240097	46	\N	\N	f	f
 3777	3	3	MAT-00060	SREENING OAE+AABR	42	\N	5	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:24.263387	2026-08-05 19:00:24.263399	46	\N	\N	f	f
@@ -15517,6 +15595,9 @@ COPY public.materials (id, tenant_id, site_id, code, name, category_id, subcateg
 4069	2	2	MAT-00175	DLCO	65	\N	29	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:45.884222	2026-08-05 19:04:45.884235	62	\N	\N	f	f
 4070	2	2	MAT-00176	PFT	65	\N	29	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:45.909455	2026-08-05 19:04:45.909468	62	\N	\N	f	f
 4071	2	2	MAT-00177	NURSING CALLING SYSTEM	65	\N	29	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:04:46.048891	2026-08-05 19:04:46.048909	62	\N	\N	f	f
+4871	3	3	HSK-00068	ladder	56	\N	1	0	0	200	\N	General (Unspecified)	\N	18	Furniture	\N	t	f	2026-08-17 12:06:50.321898	2026-08-17 12:06:50.321912	\N	\N	\N	f	f
+4872	2	2	HSK-00068	big ladder	69	\N	29	2	5	200	\N	General		18	Furniture		t	f	2026-08-17 12:16:25.893221	2026-08-17 12:16:50.191279	62			f	f
+4873	2	2	ELE-00089	New Matl	66	57	29	5	50	450	\N	Rack Storage		18	Consumable		t	f	2026-08-17 12:20:40.251923	2026-08-17 12:20:40.251967	62			f	f
 \.
 
 
@@ -15787,6 +15868,9 @@ COPY public.purchase_order_approvals (id, po_id, approval_flow_id, approver_id, 
 119	276	106	3	{"1746": {"quantity": 10.0, "remarks": null}}	\N	2026-08-17 10:49:45.10218
 120	276	18	3	{"1746": {"quantity": 5.0, "remarks": null}}	\N	2026-08-17 10:49:53.086235
 121	276	110	3	{"1746": {"quantity": 5.0, "remarks": null}}	\N	2026-08-17 10:49:53.086253
+122	277	106	3	{"1747": {"quantity": 1.0, "remarks": null}}	\N	2026-08-17 12:09:25.407199
+123	277	18	3	{"1747": {"quantity": 1.0, "remarks": null}}	\N	2026-08-17 12:09:30.207831
+124	277	110	3	{"1747": {"quantity": 1.0, "remarks": null}}	\N	2026-08-17 12:09:30.207876
 \.
 
 
@@ -15988,6 +16072,7 @@ COPY public.purchase_order_items (id, po_id, material_id, quantity, rate, amount
 1744	274	4680	100	800	80000	0	\N	0	9	9	0	f	\N
 1745	275	3474	5	3262.58	16312.9	0	\N	3	9	9	0	f	5
 1746	276	2564	10	23	230	0	\N	2	6	6	0	f	5
+1747	277	3910	1	100	100	1	\N	0	9	9	0	f	1
 \.
 
 
@@ -16100,6 +16185,7 @@ COPY public.purchase_orders (id, tenant_id, site_id, po_number, vendor_id, proje
 263	2	2	NRCN/PO-00001	64	3	\N	\N	\N	Formal	37196.4	2026-08-13	Short Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: 15 Days\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-05 05:21:39.178771	f	2026-08-05 10:51:22.376748	2026-08-14 11:34:11.607683	2		\n[Short Closed: vendor support is poor so callinbg off]	9	50	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Advance Payment		\N
 275	2	2	EPCN/PO-00001	70	3	\N	\N	\N	Formal	18671.74	2026-08-24	Approved	1. Bill/Invoices in the name of East Point College of Nursing managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-17 04:31:39.731856	f	2026-08-17 10:01:02.299007	2026-08-17 10:01:39.733905	2		\N	7	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Cash Purchase		\N
 276	2	2	EPCPT/PO-00004	66	3	\N	\N	\N	Formal	252.45	2026-08-18	Approved	1. Bill/Invoices in the name of East Point College of Physiotherapy managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-17 05:19:53.112341	f	2026-08-17 10:49:29.283407	2026-08-17 10:49:53.113125	2		\N	10	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Rental	Equipment Rental	Credit Purchase		\N
+277	2	2	EPCET/PO-00007	63	3	\N	\N	\N	Formal	118	2026-08-18	Closed	1. Bill/Invoices in the name of East Point College of Engineering & Technology managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-17 06:39:30.245864	f	2026-08-17 12:09:13.192308	2026-08-17 12:13:02.022457	2		\N	3	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Credit Purchase		\N
 \.
 
 
@@ -17393,6 +17479,8 @@ COPY public.quotation_request_item_sources (id, qr_item_id, source, source_pr_id
 3656	4009	Imported	\N	500
 3657	4010	Imported	\N	500
 3658	4011	Imported	\N	250
+4431	4784	Manual	\N	1
+4432	4785	PR	207	5
 3659	4012	Imported	\N	500
 3660	4013	Imported	\N	500
 3661	4014	Imported	\N	100
@@ -18101,6 +18189,8 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4283	224	4644	125	Imported	\N
 4284	224	4645	125	Imported	\N
 4285	224	4646	125	Imported	\N
+4784	225	2564	1	Manual	\N
+4785	225	2751	5	PR	207
 3986	222	4817	500	Imported	\N
 3987	222	4818	500	Imported	\N
 3988	222	4869	14	Imported	\N
@@ -18891,6 +18981,7 @@ COPY public.quotation_request_prs (id, qr_id, pr_id) FROM stdin;
 19	219	205
 20	220	205
 22	221	205
+32	225	207
 \.
 
 
@@ -19051,6 +19142,9 @@ COPY public.quotation_request_vendors (id, qr_id, vendor_id, is_sent, sent_at, r
 517	223	70	f	\N	Pending
 518	223	73	f	\N	Pending
 519	223	72	f	\N	Pending
+520	225	66	f	\N	Pending
+521	225	63	f	\N	Pending
+522	225	69	f	\N	Pending
 \.
 
 
@@ -19116,6 +19210,7 @@ COPY public.quotation_requests (id, tenant_id, site_id, qr_number, project_id, c
 224	2	2	QR-00038	3	3	2026-08-31	\N	Received	\N	\N	f	2026-08-07 11:01:32.919708	2026-08-07 11:04:13.415633	\N
 213	2	2	QR-00027	3	1	2027-01-01	Test Workflow Automated	Approved	3	2026-08-10 11:28:56.388485	f	2026-08-03 14:10:04.35094	2026-08-10 11:28:56.396606	Looks good, test passed
 223	2	2	QR-00037	3	3	2026-08-21	\N	Submitted	\N	\N	f	2026-08-06 17:40:04.70899	2026-08-17 10:45:08.236597	\N
+225	2	2	QR-00039	3	3	2026-08-18	\N	Submitted	\N	\N	f	2026-08-17 13:03:15.263456	2026-08-17 13:03:15.263499	\N
 \.
 
 
@@ -19430,6 +19525,7 @@ COPY public.role_permissions (id, role_id, resource, can_read, can_create, can_u
 1222	7	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
 1223	3	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
 1470	10	vendor_work_orders	t	t	t	t	{}
+1491	7	complaints	t	t	f	f	{}
 1224	8	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
 1225	5	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
 1226	4	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
@@ -22591,6 +22687,16 @@ COPY public.stock_ledger (id, tenant_id, site_id, material_id, warehouse_id, tra
 4277	2	2	2338	62	Write Off	-1	50	WriteOff	12	EWO-00001	\N	\N	\N	3	2026-08-12 11:07:29.349262
 4278	2	2	2751	62	Issue	-3	22	Issue	240	ISS-00010	3	\N	\N	3	2026-08-14 12:56:12.836422
 4279	2	2	2564	62	Issue	-2	42	Issue	241	ISS-00011	3	237	\N	3	2026-08-17 10:07:34.301916
+4280	2	2	3474	62	Issue	-4	60	Issue	242	ISS-00012	3	\N	\N	3	2026-08-17 11:06:47.942135
+4281	2	2	2564	62	Issue	-2	40	Issue	243	ISS-00013	3	237	\N	3	2026-08-17 11:07:14.801683
+4282	2	2	2564	62	Transfer Out	-10	30	Transfer	39	TRF-00003	3	\N	\N	3	2026-08-17 11:27:19.321239
+4283	2	2	2564	63	Transfer In	10	10	Transfer	39	TRF-00003	3	\N	\N	3	2026-08-17 11:27:19.333792
+4284	2	2	3910	62	GRN	1	1	GRN	219	GRN-00016	3	\N	\N	3	2026-08-17 12:13:02.016343
+4285	2	2	2564	62	Write Off	-1	29	WriteOff	14	WO-00010	\N	\N	\N	3	2026-08-17 12:38:21.856723
+4286	2	2	4608	62	Write Off	-1	297	WriteOff	18	EWO-00002	\N	\N	\N	3	2026-08-17 14:39:06.610501
+4287	2	2	2564	62	Issue	-4	25	Issue	244	ISS-00014	3	237	\N	3	2026-08-17 17:10:14.404003
+4288	2	2	2565	62	Issue	-2	52	Issue	245	ISS-00015	3	237	\N	3	2026-08-17 17:11:21.412642
+4289	2	2	2564	62	Issue	-1	24	Issue	246	ISS-00016	3	\N	\N	3	2026-08-17 19:04:31.750985
 \.
 
 
@@ -22610,6 +22716,7 @@ COPY public.stock_transfer_items (id, transfer_id, material_id, quantity, remark
 10	28	1191	1	Candy canes topping liquorice wafer cake shortbread chupa chups sesame snaps carrot cake. Fruitcake candy tiramisu sugar plum jujubes icing marzipan candy. Bonbon marzipan brownie tiramisu sesame snaps cheesecake macaroon gummies cake. Pudding oat cake chocolate tiramisu powder dessert. Lollipop jelly beans gummi bears sugar plum gummi bears bear claw cupcake cake croissant. Bear claw marshmallow candy pudding jujubes tootsie roll. Pie topping apple pie oat cake topping. Tart sesame snaps croissant carrot cake biscuit halvah caramels macaroon danish. Tootsie roll dragée donut cotton candy macaroon ice cream oat cake. Danish soufflé lemon drops danish dessert ice cream muffin. Candy dragée wafer cheesecake lemon drops icing. Candy canes jelly beans cake fruitcake cheesecake. Donut fruitcake gummies cheesecake pastry cake fruitcake. Brownie oat cake bonbon wafer tart tootsie roll. Lemon drops jelly beans wafer cake chocolate cake chocolate donut cake pastry. Sweet roll icing cotton candy carrot cake cookie sugar plum liquorice chupa chups. Jujubes chocolate bar chocolate marshmallow liquorice. Apple pie marzipan muffin oat cake sesame snaps. Jelly-o cookie tart pudding gummi bears tart pastry chocolate cake sugar plum. Ice cream danish tiramisu sweet cookie tiramisu cotton candy liquorice liquorice. Cotton candy apple pie fruitcake pudding gingerbread apple pie. Dessert oat cake caramels dessert carrot cake chupa chups cake chocolate cake. Sesame snaps gummi bears marshmallow candy lollipop marshmallow oat cake marshmallow. Cheesecake lollipop fruitcake halvah jelly caramels biscuit cake. Icing apple pie cake candy tootsie roll donut bonbon. Powder macaroon gummies toffee tart bonbon jelly muffin cheesecake. Brownie liquorice cookie topping macaroon halvah marshmallow. Sesame snaps oat cake lemon drops cupcake cotton candy toffee gummies liquorice. Icing donut sweet roll soufflé candy canes. Pie jelly jelly beans sesame snaps sweet marshmallow caramels. Gummies bear claw topping bear claw muffin. Jelly-o wafer powder cotton candy toffee jelly beans dessert muffin macaroon. Chocolate liquorice apple pie tart fruitcake chocolate cake gingerbread toffee sesame snaps. Soufflé fruitcake cupcake biscuit pastry cheesecake cake jelly-o. Pastry gingerbread sweet biscuit gingerbread sweet roll jujubes. Topping soufflé carrot cake candy canes oat cake tootsie roll. Wafer shortbread liquorice shortbread cotton candy donut. Bonbon liquorice jelly beans jujubes icing. Gummies chocolate cake tiramisu croissant bonbon tart sweet roll sweet brownie. Pudding lemon drops croissant liquorice chocolate jelly beans tiramisu biscuit. Ice cream marshmallow marshmallow cheesecake icing. Tart carrot cake chocolate cake cookie halvah tiramisu sesame snaps. Gummies gummi bears candy canes biscuit marzipan danish liquorice bear claw chocolate cake. Tiramisu chocolate halvah cotton candy pudding fruitcake. Tart sweet shortbread apple pie carrot cake pie cheesecake jelly-o. Lollipop cake gummi bears pastry marshmallow pastry muffin chocolate tootsie roll. Gummies toffee danish donut bear claw. Bear claw wafer cake biscuit lemon drops cookie chocolate cake gummi bears jujubes. Lollipop wafer cotton candy bonbon jelly beans shortbread cotton candy pudding. Croissant cake gingerbread pastry jelly. Tart jujubes bear claw croissant cookie. Macaroon carrot cake dragée powder chocolate cake. Sweet pastry oat cake bear claw lollipop donut croissant tootsie roll cupcake. Tart cookie donut candy canes shortbread dessert lollipop. Jelly-o pudding tootsie roll gingerbread sesame snaps sweet roll tootsie roll. Lollipop sugar plum pudding cake bonbon pastry marshmallow. Cake dessert cupcake jelly-o tiramisu oat cake biscuit marzipan caramels. Cupcake sweet liquorice cookie dragée chocolate bar wafer tootsie roll. Gingerbread gingerbread oat cake marzipan tootsie roll cheesecake lollipop. Sweet muffin candy jelly cake cotton candy brownie pudding. Donut pie cupcake cotton candy donut gummi bears. Marshmallow tiramisu cookie candy cotton candy dragée cheesecake. Cake sweet roll dessert powder dragée macaroon marshmallow. Tootsie roll croissant danish cookie powder. Topping gingerbread chocolate cupcake cotton candy. Cotton candy wafer chocolate bar sweet bear claw jelly beans tootsie roll.	1	0	Candy canes topping liquorice wafer cake shortbread chupa chups sesame snaps carrot cake. Fruitcake candy tiramisu sugar plum jujubes icing marzipan candy. Bonbon marzipan brownie tiramisu sesame snaps cheesecake macaroon gummies cake. Pudding oat cake chocolate tiramisu powder dessert. Lollipop jelly beans gummi bears sugar plum gummi bears bear claw cupcake cake croissant. Bear claw marshmallow candy pudding jujubes tootsie roll. Pie topping apple pie oat cake topping. Tart sesame snaps croissant carrot cake biscuit halvah caramels macaroon danish. Tootsie roll dragée donut cotton candy macaroon ice cream oat cake. Danish soufflé lemon drops danish dessert ice cream muffin. Candy dragée wafer cheesecake lemon drops icing. Candy canes jelly beans cake fruitcake cheesecake. Donut fruitcake gummies cheesecake pastry cake fruitcake. Brownie oat cake bonbon wafer tart tootsie roll. Lemon drops jelly beans wafer cake chocolate cake chocolate donut cake pastry. Sweet roll icing cotton candy carrot cake cookie sugar plum liquorice chupa chups. Jujubes chocolate bar chocolate marshmallow liquorice. Apple pie marzipan muffin oat cake sesame snaps. Jelly-o cookie tart pudding gummi bears tart pastry chocolate cake sugar plum. Ice cream danish tiramisu sweet cookie tiramisu cotton candy liquorice liquorice. Cotton candy apple pie fruitcake pudding gingerbread apple pie. Dessert oat cake caramels dessert carrot cake chupa chups cake chocolate cake. Sesame snaps gummi bears marshmallow candy lollipop marshmallow oat cake marshmallow. Cheesecake lollipop fruitcake halvah jelly caramels biscuit cake. Icing apple pie cake candy tootsie roll donut bonbon. Powder macaroon gummies toffee tart bonbon jelly muffin cheesecake. Brownie liquorice cookie topping macaroon halvah marshmallow. Sesame snaps oat cake lemon drops cupcake cotton candy toffee gummies liquorice. Icing donut sweet roll soufflé candy canes. Pie jelly jelly beans sesame snaps sweet marshmallow caramels. Gummies bear claw topping bear claw muffin. Jelly-o wafer powder cotton candy toffee jelly beans dessert muffin macaroon. Chocolate liquorice apple pie tart fruitcake chocolate cake gingerbread toffee sesame snaps. Soufflé fruitcake cupcake biscuit pastry cheesecake cake jelly-o. Pastry gingerbread sweet biscuit gingerbread sweet roll jujubes. Topping soufflé carrot cake candy canes oat cake tootsie roll. Wafer shortbread liquorice shortbread cotton candy donut. Bonbon liquorice jelly beans jujubes icing. Gummies chocolate cake tiramisu croissant bonbon tart sweet roll sweet brownie. Pudding lemon drops croissant liquorice chocolate jelly beans tiramisu biscuit. Ice cream marshmallow marshmallow cheesecake icing. Tart carrot cake chocolate cake cookie halvah tiramisu sesame snaps. Gummies gummi bears candy canes biscuit marzipan danish liquorice bear claw chocolate cake. Tiramisu chocolate halvah cotton candy pudding fruitcake. Tart sweet shortbread apple pie carrot cake pie cheesecake jelly-o. Lollipop cake gummi bears pastry marshmallow pastry muffin chocolate tootsie roll. Gummies toffee danish donut bear claw. Bear claw wafer cake biscuit lemon drops cookie chocolate cake gummi bears jujubes. Lollipop wafer cotton candy bonbon jelly beans shortbread cotton candy pudding. Croissant cake gingerbread pastry jelly. Tart jujubes bear claw croissant cookie. Macaroon carrot cake dragée powder chocolate cake. Sweet pastry oat cake bear claw lollipop donut croissant tootsie roll cupcake. Tart cookie donut candy canes shortbread dessert lollipop. Jelly-o pudding tootsie roll gingerbread sesame snaps sweet roll tootsie roll. Lollipop sugar plum pudding cake bonbon pastry marshmallow. Cake dessert cupcake jelly-o tiramisu oat cake biscuit marzipan caramels. Cupcake sweet liquorice cookie dragée chocolate bar wafer tootsie roll. Gingerbread gingerbread oat cake marzipan tootsie roll cheesecake lollipop. Sweet muffin candy jelly cake cotton candy brownie pudding. Donut pie cupcake cotton candy donut gummi bears. Marshmallow tiramisu cookie candy cotton candy dragée cheesecake. Cake sweet roll dessert powder dragée macaroon marshmallow. Tootsie roll croissant danish cookie powder. Topping gingerbread chocolate cupcake cotton candy. Cotton candy wafer chocolate bar sweet bear claw jelly beans tootsie roll.
 11	33	1062	7	no	\N	\N	\N
 9	20	2565	5		4	-1	proceed
+12	39	2564	10	needs	10	0	
 \.
 
 
@@ -22628,6 +22735,7 @@ COPY public.stock_transfers (id, tenant_id, site_id, transfer_number, from_wareh
 28	3	3	TRF-00007	59	47	1	Completed	Candy canes topping liquorice wafer cake shortbread chupa chups sesame snaps carrot cake. Fruitcake candy tiramisu sugar plum jujubes icing marzipan candy. Bonbon marzipan brownie tiramisu sesame snaps cheesecake macaroon gummies cake. Pudding oat cake chocolate tiramisu powder dessert. Lollipop jelly beans gummi bears sugar plum gummi bears bear claw cupcake cake croissant. Bear claw marshmallow candy pudding jujubes tootsie roll. Pie topping apple pie oat cake topping. Tart sesame snaps croissant carrot cake biscuit halvah caramels macaroon danish. Tootsie roll dragée donut cotton candy macaroon ice cream oat cake. Danish soufflé lemon drops danish dessert ice cream muffin. Candy dragée wafer cheesecake lemon drops icing. Candy canes jelly beans cake fruitcake cheesecake. Donut fruitcake gummies cheesecake pastry cake fruitcake. Brownie oat cake bonbon wafer tart tootsie roll. Lemon drops jelly beans wafer cake chocolate cake chocolate donut cake pastry. Sweet roll icing cotton candy carrot cake cookie sugar plum liquorice chupa chups. Jujubes chocolate bar chocolate marshmallow liquorice. Apple pie marzipan muffin oat cake sesame snaps. Jelly-o cookie tart pudding gummi bears tart pastry chocolate cake sugar plum. Ice cream danish tiramisu sweet cookie tiramisu cotton candy liquorice liquorice. Cotton candy apple pie fruitcake pudding gingerbread apple pie. Dessert oat cake caramels dessert carrot cake chupa chups cake chocolate cake. Sesame snaps gummi bears marshmallow candy lollipop marshmallow oat cake marshmallow. Cheesecake lollipop fruitcake halvah jelly caramels biscuit cake. Icing apple pie cake candy tootsie roll donut bonbon. Powder macaroon gummies toffee tart bonbon jelly muffin cheesecake. Brownie liquorice cookie topping macaroon halvah marshmallow. Sesame snaps oat cake lemon drops cupcake cotton candy toffee gummies liquorice. Icing donut sweet roll soufflé candy canes. Pie jelly jelly beans sesame snaps sweet marshmallow caramels. Gummies bear claw topping bear claw muffin. Jelly-o wafer powder cotton candy toffee jelly beans dessert muffin macaroon. Chocolate liquorice apple pie tart fruitcake chocolate cake gingerbread toffee sesame snaps. Soufflé fruitcake cupcake biscuit pastry cheesecake cake jelly-o. Pastry gingerbread sweet biscuit gingerbread sweet roll jujubes. Topping soufflé carrot cake candy canes oat cake tootsie roll. Wafer shortbread liquorice shortbread cotton candy donut. Bonbon liquorice jelly beans jujubes icing. Gummies chocolate cake tiramisu croissant bonbon tart sweet roll sweet brownie. Pudding lemon drops croissant liquorice chocolate jelly beans tiramisu biscuit. Ice cream marshmallow marshmallow cheesecake icing. Tart carrot cake chocolate cake cookie halvah tiramisu sesame snaps. Gummies gummi bears candy canes biscuit marzipan danish liquorice bear claw chocolate cake. Tiramisu chocolate halvah cotton candy pudding fruitcake. Tart sweet shortbread apple pie carrot cake pie cheesecake jelly-o. Lollipop cake gummi bears pastry marshmallow pastry muffin chocolate tootsie roll. Gummies toffee danish donut bear claw. Bear claw wafer cake biscuit lemon drops cookie chocolate cake gummi bears jujubes. Lollipop wafer cotton candy bonbon jelly beans shortbread cotton candy pudding. Croissant cake gingerbread pastry jelly. Tart jujubes bear claw croissant cookie. Macaroon carrot cake dragée powder chocolate cake. Sweet pastry oat cake bear claw lollipop donut croissant tootsie roll cupcake. Tart cookie donut candy canes shortbread dessert lollipop. Jelly-o pudding tootsie roll gingerbread sesame snaps sweet roll tootsie roll. Lollipop sugar plum pudding cake bonbon pastry marshmallow. Cake dessert cupcake jelly-o tiramisu oat cake biscuit marzipan caramels. Cupcake sweet liquorice cookie dragée chocolate bar wafer tootsie roll. Gingerbread gingerbread oat cake marzipan tootsie roll cheesecake lollipop. Sweet muffin candy jelly cake cotton candy brownie pudding. Donut pie cupcake cotton candy donut gummi bears. Marshmallow tiramisu cookie candy cotton candy dragée cheesecake. Cake sweet roll dessert powder dragée macaroon marshmallow. Tootsie roll croissant danish cookie powder. Topping gingerbread chocolate cupcake cotton candy. Cotton candy wafer chocolate bar sweet bear claw jelly beans tootsie roll.	4	f	2026-06-17 12:19:08.949634	2026-06-17 06:51:58.420032	4	2026-06-17 06:51:58.420105
 33	3	3	TRF-00008	59	48	1	Initiated		4	f	2026-06-17 18:22:24.785236	\N	\N	\N
 20	2	2	TRF-00002	63	62	3	Partially Received		3	f	2026-06-12 02:02:28.867836	\N	3	2026-08-12 06:06:54.95339
+39	2	2	TRF-00003	62	63	3	Completed	need	3	f	2026-08-17 11:27:11.257558	2026-08-17 05:57:19.33041	3	2026-08-17 05:57:19.330482
 \.
 
 
@@ -22731,9 +22839,9 @@ COPY public.subcategories (id, tenant_id, site_id, name, category_id, is_active,
 94	2	2	STATIONERY	75	t	f
 95	2	2	GEN	76	t	f
 96	2	2	LAB	76	t	f
-78	2	2	BIOCHEMISTRY	71	t	f
 97	2	2	ELECTRICAL	69	f	f
 98	2	2	Pipe	73	t	f
+78	2	2	BIOCHEMISTRY	71	t	f
 \.
 
 
@@ -22877,7 +22985,6 @@ COPY public.uom (id, tenant_id, site_id, name, abbreviation, is_active, is_delet
 24	3	3	Meter	MTR	t	f	f
 25	3	3	Bottle	BTL	t	f	f
 27	3	3	Prs	PRS	t	f	f
-28	2	2	Bags	BAG	t	f	f
 29	2	2	Numbers	NOS	t	f	f
 33	2	2	Rolls	ROL	t	f	f
 34	2	2	Sets	SET	t	f	f
@@ -22898,6 +23005,7 @@ COPY public.uom (id, tenant_id, site_id, name, abbreviation, is_active, is_delet
 46	3	3	Milliliters	ml	t	f	t
 47	2	2	Grams	gm	t	f	t
 48	2	2	Milliliters	ml	t	f	t
+28	2	2	Bags	BAG	t	f	f
 \.
 
 
@@ -22946,6 +23054,7 @@ COPY public.user_role_assignments (id, user_id, tenant_id, role_id, site_id, ass
 76	35	2	22	\N	2026-06-18 12:58:55.587561
 78	36	4	23	4	2026-07-03 12:48:15.944929
 80	11	2	15	\N	2026-08-06 11:49:40.832767
+81	4	3	7	3	2026-08-17 11:51:52.235161
 \.
 
 
@@ -24615,6 +24724,7 @@ COPY public.vendor_work_order_items (id, vwo_id, material_id, description, quant
 --
 
 COPY public.vendor_work_orders (id, tenant_id, site_id, vwo_number, institution_id, vendor_id, complaint_id, equipment_id, priority, target_date, service_type, scope_of_work, vendor_instructions, quotation_no, vendor_quote_amount, labour_charges, service_charges, tax, total_approved_amount, status, created_by_id, is_deleted, created_at, updated_at) FROM stdin;
+1	1	1	VWO-00001	11	\N	454	1609	Normal	2026-08-20	Repair	Testing Auto Vendor Work Order generation for AMC Equipment	\N	\N	0	0	0	0	0	Draft	8	f	2026-08-17 14:26:38.074955	2026-08-17 14:26:38.074969
 \.
 
 
@@ -24673,7 +24783,6 @@ COPY public.warehouses (id, tenant_id, site_id, name, code, project_id, warehous
 60	3	3	Regional Store	STO-0015	1	Regional	Bangalore	\N	\N	4	t	f	2026-05-15 15:19:36.650066
 61	3	3	Scrap Store	SCRAP	1	Scrap	\N	\N	\N	\N	t	f	2026-05-20 12:59:53.29867
 62	2	2	Central Store	WH-CENTRAL	3	Main	\N	\N	\N	\N	t	f	2026-06-11 21:58:45.403171
-63	2	2	Civil Store	WH-00001	3	Store		\N		\N	t	f	2026-06-12 01:56:21.68741
 64	2	2	Electrical Store	WH-00002	3	Store		\N		\N	t	f	2026-06-12 01:57:08.636245
 65	2	2	HOSP EQPT	WH-00003	3	Store		\N		\N	t	f	2026-06-12 01:57:26.731566
 66	2	2	HOSPITAL Store	WH-00004	3	Store		\N		\N	t	f	2026-06-12 01:57:44.267901
@@ -24686,6 +24795,7 @@ COPY public.warehouses (id, tenant_id, site_id, name, code, project_id, warehous
 69	2	2	Plumbing Store	WH-00007	3	De centralized		\N		\N	f	t	2026-06-12 01:59:25.241904
 75	2	2	IT store	WH-00012	3	Central	chennai	\N	aadhav	\N	t	f	2026-08-17 10:37:19.182694
 76	2	2	ram	WH-00013	3	Central	banglore	\N	ramanan	\N	f	f	2026-08-17 10:37:57.209012
+63	2	2	Civil Store	WH-00001	3	Store		\N		\N	t	f	2026-06-12 01:56:21.68741
 \.
 
 
@@ -24704,6 +24814,10 @@ COPY public.work_order_approvals (id, wo_id, approval_flow_id, approver_id, appr
 COPY public.work_order_items (id, wo_id, material_id, quantity, rate, amount, received_quantity, approved_quantity, discount_percent, cgst_percentage, sgst_percentage, igst_percentage, is_gst_inclusive, remarks) FROM stdin;
 1	1	2564	4	16526.16	66105	0	\N	0	6	6	0	t	\N
 4	6	2564	100	23	2499	0	\N	3	6	6	0	f	\N
+5	7	2564	100	23	2524	0	\N	2	6	6	0	f	\N
+6	8	2564	100	23	2473	0	\N	4	6	6	0	f	\N
+7	9	2565	5	26703.28	145052	0	\N	3	6	6	0	f	\N
+8	10	2751	10	10443.43	118303	0	\N	4	9	9	0	f	\N
 \.
 
 
@@ -24714,6 +24828,10 @@ COPY public.work_order_items (id, wo_id, material_id, quantity, rate, amount, re
 COPY public.work_orders (id, tenant_id, site_id, wo_number, vendor_id, project_id, institution_id, contract_id, equipment_id, wo_type, advance_percentage, total_amount, target_completion_date, status, current_approval_level, terms, remarks, annexure, created_by_id, approved_by_id, approved_at, is_deleted, created_at, updated_at) FROM stdin;
 1	2	2	WO-00001	69	3	11	\N	1605	AMC	0	66105	\N	Sent to Vendor	1	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	\N		3	3	2026-08-12 08:23:56.194158	f	2026-08-12 11:26:55.501055	2026-08-12 13:54:54.028142
 6	2	2	WO-00002	66	3	10	3	1604	AMC	0	2499	\N	Approved	1	1. Bill/Invoices in the name of East Point College of Physiotherapy managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	\N		3	3	2026-08-17 05:21:07.90497	f	2026-08-17 10:50:58.117879	2026-08-17 10:51:07.905554
+7	2	2	WO-00003	66	3	12	3	1608	CMC	0	2524	\N	Submitted	1	1. Bill/Invoices in the name of East Point Pre-University College managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	\N		3	\N	\N	f	2026-08-17 12:52:36.985471	2026-08-17 12:52:36.98552
+8	2	2	WO-00004	66	3	11	3	\N	AMC	0	2473	\N	Submitted	1	1. Bill/Invoices in the name of East Point Allied Health Sciences managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	\N		3	\N	\N	f	2026-08-17 12:53:18.241895	2026-08-17 12:53:18.241937
+9	2	2	WO-00005	66	3	12	3	\N	AMC	0	145052	\N	Submitted	1	1. Bill/Invoices in the name of East Point Pre-University College managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	\N		3	\N	\N	f	2026-08-17 12:53:55.611555	2026-08-17 12:53:55.611599
+10	2	2	WO-00006	63	3	9	2	\N	AMC	0	118303	\N	Approved	1	1. Bill/Invoices in the name of New Royal College of Nursing managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	\N		3	3	2026-08-17 07:25:28.080236	f	2026-08-17 12:54:58.988485	2026-08-17 12:55:28.08275
 \.
 
 
@@ -24732,6 +24850,8 @@ COPY public.write_off_items (id, write_off_id, material_id, warehouse_id, quanti
 10	10	2435	62	2	4657.57	9315.14	\N	\N	\N	\N
 11	11	2338	62	1	4352.49	4352.49	f	0	1	1
 12	12	2338	62	1	4352.49	4352.49	f	0	1	1
+13	14	2564	62	1	16526.16	16526.16	f	0	\N	\N
+14	18	4608	62	1	460	460	f	0	1611	79
 \.
 
 
@@ -24750,6 +24870,8 @@ COPY public.write_offs (id, tenant_id, site_id, write_off_number, date, reason, 
 10	2	2	WO-00008	2026-07-09	lost 	Approved	1	3	3	2026-07-09 07:51:15.64808	f	2026-07-09 13:20:30.394309	2026-07-09 13:21:15.743396	Lost / Stolen		\N	\N
 11	2	2	WO-00009	2026-08-03	Equipment Write Off	Rejected	1	3	\N	\N	f	2026-08-03 18:55:32.87775	2026-08-03 19:15:50.964498	Damaged in Handling			
 12	2	2	EWO-00001	2026-08-03	Equipment Write Off	Approved	1	3	3	2026-08-12 05:37:29.303859	f	2026-08-03 19:15:13.906801	2026-08-12 11:07:29.402274	Damaged in Handling			
+14	2	2	WO-00010	2026-08-17	product expired	Approved	1	3	3	2026-08-17 07:08:21.843444	f	2026-08-17 12:38:07.43634	2026-08-17 12:38:21.859441	Expired / Shelf-life	/api/uploads/write_offs/2/20260817_070731_5e50efd2.pdf	Biochemistry	/api/uploads/write_offs/2/20260817_070740_771c2d16.pdf
+18	2	2	EWO-00002	2026-08-17	Equipment Write Off	Approved	1	3	3	2026-08-17 09:09:06.563911	f	2026-08-17 14:38:54.402781	2026-08-17 14:39:06.615689	Damaged in Handling	/api/uploads/write_offs/2/20260817_090846_274e2fbb.pdf		/api/uploads/write_offs/2/20260817_090851_dd1b7c8e.pdf
 \.
 
 
@@ -24757,7 +24879,7 @@ COPY public.write_offs (id, tenant_id, site_id, write_off_number, date, reason, 
 -- Name: alerts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.alerts_id_seq', 80, true);
+SELECT pg_catalog.setval('public.alerts_id_seq', 84, true);
 
 
 --
@@ -24806,28 +24928,28 @@ SELECT pg_catalog.setval('public.company_addresses_id_seq', 6, true);
 -- Name: complaint_documents_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.complaint_documents_id_seq', 5, true);
+SELECT pg_catalog.setval('public.complaint_documents_id_seq', 6, true);
 
 
 --
 -- Name: complaint_images_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.complaint_images_id_seq', 23, true);
+SELECT pg_catalog.setval('public.complaint_images_id_seq', 25, true);
 
 
 --
 -- Name: complaints_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.complaints_id_seq', 445, true);
+SELECT pg_catalog.setval('public.complaints_id_seq', 454, true);
 
 
 --
 -- Name: contract_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.contract_approvals_id_seq', 11, true);
+SELECT pg_catalog.setval('public.contract_approvals_id_seq', 12, true);
 
 
 --
@@ -24848,7 +24970,7 @@ SELECT pg_catalog.setval('public.contracts_id_seq', 6, true);
 -- Name: current_stock_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.current_stock_id_seq', 4401, true);
+SELECT pg_catalog.setval('public.current_stock_id_seq', 4403, true);
 
 
 --
@@ -24869,21 +24991,21 @@ SELECT pg_catalog.setval('public.departments_id_seq', 335, true);
 -- Name: document_sequences_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.document_sequences_id_seq', 115, true);
+SELECT pg_catalog.setval('public.document_sequences_id_seq', 145, true);
 
 
 --
 -- Name: equipment_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.equipment_history_id_seq', 2, true);
+SELECT pg_catalog.setval('public.equipment_history_id_seq', 9, true);
 
 
 --
 -- Name: equipment_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.equipment_items_id_seq', 1605, true);
+SELECT pg_catalog.setval('public.equipment_items_id_seq', 1611, true);
 
 
 --
@@ -24904,56 +25026,56 @@ SELECT pg_catalog.setval('public.floors_id_seq', 30, true);
 -- Name: gate_entries_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.gate_entries_id_seq', 206, true);
+SELECT pg_catalog.setval('public.gate_entries_id_seq', 208, true);
 
 
 --
 -- Name: gate_pass_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.gate_pass_items_id_seq', 23, true);
+SELECT pg_catalog.setval('public.gate_pass_items_id_seq', 24, true);
 
 
 --
 -- Name: gate_passes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.gate_passes_id_seq', 22, true);
+SELECT pg_catalog.setval('public.gate_passes_id_seq', 23, true);
 
 
 --
 -- Name: grn_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.grn_id_seq', 217, true);
+SELECT pg_catalog.setval('public.grn_id_seq', 219, true);
 
 
 --
 -- Name: grn_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.grn_items_id_seq', 521, true);
+SELECT pg_catalog.setval('public.grn_items_id_seq', 522, true);
 
 
 --
 -- Name: indent_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.indent_approvals_id_seq', 92, true);
+SELECT pg_catalog.setval('public.indent_approvals_id_seq', 96, true);
 
 
 --
 -- Name: indent_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.indent_items_id_seq', 524, true);
+SELECT pg_catalog.setval('public.indent_items_id_seq', 525, true);
 
 
 --
 -- Name: indents_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.indents_id_seq', 242, true);
+SELECT pg_catalog.setval('public.indents_id_seq', 243, true);
 
 
 --
@@ -24967,14 +25089,14 @@ SELECT pg_catalog.setval('public.institutions_id_seq', 20, true);
 -- Name: invoice_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.invoice_items_id_seq', 65, true);
+SELECT pg_catalog.setval('public.invoice_items_id_seq', 68, true);
 
 
 --
 -- Name: invoices_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.invoices_id_seq', 13, true);
+SELECT pg_catalog.setval('public.invoices_id_seq', 14, true);
 
 
 --
@@ -24988,14 +25110,14 @@ SELECT pg_catalog.setval('public.location_master_id_seq', 149, true);
 -- Name: material_issue_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.material_issue_items_id_seq', 221, true);
+SELECT pg_catalog.setval('public.material_issue_items_id_seq', 226, true);
 
 
 --
 -- Name: material_issues_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.material_issues_id_seq', 241, true);
+SELECT pg_catalog.setval('public.material_issues_id_seq', 246, true);
 
 
 --
@@ -25016,7 +25138,7 @@ SELECT pg_catalog.setval('public.material_returns_id_seq', 25, true);
 -- Name: materials_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.materials_id_seq', 4869, true);
+SELECT pg_catalog.setval('public.materials_id_seq', 4874, true);
 
 
 --
@@ -25058,21 +25180,21 @@ SELECT pg_catalog.setval('public.projects_id_seq', 9, true);
 -- Name: purchase_order_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_order_approvals_id_seq', 121, true);
+SELECT pg_catalog.setval('public.purchase_order_approvals_id_seq', 124, true);
 
 
 --
 -- Name: purchase_order_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_order_items_id_seq', 1746, true);
+SELECT pg_catalog.setval('public.purchase_order_items_id_seq', 1747, true);
 
 
 --
 -- Name: purchase_orders_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_orders_id_seq', 276, true);
+SELECT pg_catalog.setval('public.purchase_orders_id_seq', 277, true);
 
 
 --
@@ -25114,35 +25236,35 @@ SELECT pg_catalog.setval('public.quotation_negotiation_history_id_seq', 23, true
 -- Name: quotation_request_item_sources_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_request_item_sources_id_seq', 4430, true);
+SELECT pg_catalog.setval('public.quotation_request_item_sources_id_seq', 4432, true);
 
 
 --
 -- Name: quotation_request_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_request_items_id_seq', 4783, true);
+SELECT pg_catalog.setval('public.quotation_request_items_id_seq', 4785, true);
 
 
 --
 -- Name: quotation_request_prs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_request_prs_id_seq', 31, true);
+SELECT pg_catalog.setval('public.quotation_request_prs_id_seq', 32, true);
 
 
 --
 -- Name: quotation_request_vendors_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_request_vendors_id_seq', 519, true);
+SELECT pg_catalog.setval('public.quotation_request_vendors_id_seq', 522, true);
 
 
 --
 -- Name: quotation_requests_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_requests_id_seq', 224, true);
+SELECT pg_catalog.setval('public.quotation_requests_id_seq', 225, true);
 
 
 --
@@ -25163,7 +25285,7 @@ SELECT pg_catalog.setval('public.repair_work_orders_id_seq', 1, false);
 -- Name: role_permissions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.role_permissions_id_seq', 1490, true);
+SELECT pg_catalog.setval('public.role_permissions_id_seq', 1491, true);
 
 
 --
@@ -25191,21 +25313,21 @@ SELECT pg_catalog.setval('public.sites_id_seq', 4, true);
 -- Name: stock_ledger_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.stock_ledger_id_seq', 4279, true);
+SELECT pg_catalog.setval('public.stock_ledger_id_seq', 4289, true);
 
 
 --
 -- Name: stock_transfer_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.stock_transfer_items_id_seq', 11, true);
+SELECT pg_catalog.setval('public.stock_transfer_items_id_seq', 12, true);
 
 
 --
 -- Name: stock_transfers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.stock_transfers_id_seq', 38, true);
+SELECT pg_catalog.setval('public.stock_transfers_id_seq', 39, true);
 
 
 --
@@ -25261,7 +25383,7 @@ SELECT pg_catalog.setval('public.uom_id_seq', 48, true);
 -- Name: user_role_assignments_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.user_role_assignments_id_seq', 80, true);
+SELECT pg_catalog.setval('public.user_role_assignments_id_seq', 81, true);
 
 
 --
@@ -25331,7 +25453,7 @@ SELECT pg_catalog.setval('public.vendor_work_order_items_id_seq', 1, false);
 -- Name: vendor_work_orders_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_work_orders_id_seq', 1, false);
+SELECT pg_catalog.setval('public.vendor_work_orders_id_seq', 1, true);
 
 
 --
@@ -25359,28 +25481,28 @@ SELECT pg_catalog.setval('public.work_order_approvals_id_seq', 1, false);
 -- Name: work_order_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.work_order_items_id_seq', 4, true);
+SELECT pg_catalog.setval('public.work_order_items_id_seq', 8, true);
 
 
 --
 -- Name: work_orders_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.work_orders_id_seq', 6, true);
+SELECT pg_catalog.setval('public.work_orders_id_seq', 10, true);
 
 
 --
 -- Name: write_off_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.write_off_items_id_seq', 12, true);
+SELECT pg_catalog.setval('public.write_off_items_id_seq', 14, true);
 
 
 --
 -- Name: write_offs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.write_offs_id_seq', 13, true);
+SELECT pg_catalog.setval('public.write_offs_id_seq', 18, true);
 
 
 --
@@ -29992,5 +30114,5 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict PXoR8FfDxRLR5JsYRSBbkPzgLFaaGnH0CxVC6g2e2BUuBKchWh11LZtZhaI3mHc
+\unrestrict B4W5fuCNNS2naZDkKbrboHlwXlEn9fQFc0aATHMHVouzcn8ohwZu01LTvU2j0F1
 

@@ -433,10 +433,19 @@ export default function GRNPage() {
         <DialogTitle sx={{ fontWeight: 600 }}>{detailDialog?.grn_number} — GRN Details</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mb: 2 }}>
-            <Grid item xs={3}><Typography variant="caption" color="textSecondary">Vendor</Typography><Typography sx={{ fontWeight: 600, fontSize: '0.9rem' }}>{detailDialog?.vendor_name}</Typography></Grid>
-            <Grid item xs={3}><Typography variant="caption" color="textSecondary">Store</Typography><Typography sx={{ fontWeight: 600, fontSize: '0.9rem' }}>{detailDialog?.warehouse_name}</Typography></Grid>
-            <Grid item xs={3}><Typography variant="caption" color="textSecondary">Invoice / DC</Typography><Typography sx={{ fontSize: '0.9rem' }}>{[detailDialog?.invoice_number ? 'INV: ' + detailDialog.invoice_number : '', detailDialog?.dc_number ? 'DC: ' + detailDialog.dc_number : ''].filter(Boolean).join(' | ') || '—'}</Typography></Grid>
-            <Grid item xs={3}><Typography variant="caption" color="textSecondary">Received By</Typography><Typography sx={{ fontSize: '0.9rem' }}>{detailDialog?.received_by_name}</Typography></Grid>
+            <Grid item xs={12} sm={6} md={3}><Typography variant="caption" color="textSecondary">Date</Typography><Typography sx={{ fontWeight: 600, fontSize: '0.9rem' }}>{formatDate(detailDialog?.created_at)}</Typography></Grid>
+            <Grid item xs={12} sm={6} md={3}><Typography variant="caption" color="textSecondary">Vendor</Typography><Typography sx={{ fontWeight: 600, fontSize: '0.9rem' }}>{detailDialog?.vendor_name}</Typography></Grid>
+            <Grid item xs={12} sm={6} md={3}><Typography variant="caption" color="textSecondary">Store</Typography><Typography sx={{ fontWeight: 600, fontSize: '0.9rem' }}>{detailDialog?.warehouse_name}</Typography></Grid>
+            <Grid item xs={12} sm={6} md={3}><Typography variant="caption" color="textSecondary">Project</Typography><Typography sx={{ fontSize: '0.9rem' }}>{detailDialog?.project_name || '—'}</Typography></Grid>
+            
+            <Grid item xs={12} sm={6} md={3}><Typography variant="caption" color="textSecondary">Invoice Number</Typography><Typography sx={{ fontSize: '0.9rem' }}>{detailDialog?.invoice_number || '—'}</Typography></Grid>
+            <Grid item xs={12} sm={6} md={3}><Typography variant="caption" color="textSecondary">Delivery Challan</Typography><Typography sx={{ fontSize: '0.9rem' }}>{detailDialog?.dc_number || '—'}</Typography></Grid>
+            <Grid item xs={12} sm={6} md={3}><Typography variant="caption" color="textSecondary">Gate Entry No</Typography><Typography sx={{ fontSize: '0.9rem' }}>{detailDialog?.gate_entry_number || '—'}</Typography></Grid>
+            <Grid item xs={12} sm={6} md={3}><Typography variant="caption" color="textSecondary">Received By</Typography><Typography sx={{ fontSize: '0.9rem' }}>{detailDialog?.received_by_name}</Typography></Grid>
+
+            {detailDialog?.remarks && (
+              <Grid item xs={12}><Typography variant="caption" color="textSecondary">Remarks</Typography><Typography sx={{ fontSize: '0.9rem' }}>{detailDialog.remarks}</Typography></Grid>
+            )}
             
             <Grid item xs={12}>
               <Grid container spacing={2}>

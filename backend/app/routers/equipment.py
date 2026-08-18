@@ -12,7 +12,8 @@ import uuid
 router = APIRouter(prefix='/api/equipment', tags=['Equipment'])
 
 @router.get('', response_model=List[EquipmentItemOut])
-def list_equipment(search: Optional[str]=None, tab: Optional[str]='all', warehouse_id: Optional[int]=None, is_biomedical: Optional[bool]=None, requires_installation: Optional[bool]=None, status: Optional[str]=None, db: Session=Depends(get_db), current_user: User=Depends(require_permission('equipment', 'read')), tenant_id: int=Depends(get_tenant_id), site_id: int=Depends(get_site_id)):
+def list_equipment(search: Optional[str]=None, tab: Optional[str]='all', warehouse_id: Optional[int]=None, is_biomedical: Optional[bool]=None, requires_installation: Optional[bool]=None, status: Optional[str]=None, institution_id: Optional[int]=None, department_name: Optional[str]=None, db: Session=Depends(get_db), current_user: User=Depends(require_permission('equipment', 'read')), tenant_id: int=Depends(get_tenant_id), site_id: int=Depends(get_site_id)):
+    from app.models import LocationMaster
     q = db.query(EquipmentItem).filter(EquipmentItem.tenant_id == tenant_id, EquipmentItem.site_id == site_id)
     if tab == 'pending_serial':
         q = q.filter((EquipmentItem.serial_number_status == 'Pending Update') | (EquipmentItem.serial_number == None) | (EquipmentItem.serial_number == ''))
@@ -20,6 +21,10 @@ def list_equipment(search: Optional[str]=None, tab: Optional[str]='all', warehou
         q = q.filter(EquipmentItem.installation_status.in_(['Pending Installation', 'Installation Requested']))
     if warehouse_id:
         q = q.filter(EquipmentItem.warehouse_id == warehouse_id)
+    if institution_id:
+        q = q.filter(EquipmentItem.institution_id == institution_id)
+    if department_name:
+        q = q.outerjoin(LocationMaster, EquipmentItem.location_id == LocationMaster.id).filter(LocationMaster.department_name == department_name)
     if is_biomedical is not None:
         q = q.filter(EquipmentItem.is_biomedical == is_biomedical)
     if requires_installation is not None:
@@ -49,7 +54,59 @@ def list_equipment(search: Optional[str]=None, tab: Optional[str]='all', warehou
 
 @router.post('', response_model=EquipmentItemOut)
 def create_equipment(item_in: EquipmentItemCreate, db: Session=Depends(get_db), current_user: User=Depends(require_permission('equipment', 'create')), tenant_id: int=Depends(get_tenant_id), site_id: int=Depends(get_site_id)):
-    from app.models import EquipmentHistory
+    from app.models import EquipmentHistory, LocationMaster, Institution
+    from app.utils.sequences import get_next_number
+    
+    # Generate Equipment Code if not provided
+    equipment_code = item_in.equipment_code
+    if not equipment_code:
+        if not item_in.location_id or not item_in.institution_id:
+            raise HTTPException(status_code=400, detail='Institution and Location are required to auto-generate Equipment Code.')
+        
+        loc = db.query(LocationMaster).filter(LocationMaster.id == item_in.location_id).first()
+        inst = db.query(Institution).filter(Institution.id == item_in.institution_id).first()
+        mat = db.query(Material).filter(Material.id == item_in.material_id).first()
+        
+        loc_code = loc.location_code.rstrip('_').rstrip('-') if loc and loc.location_code else 'LOC'
+        if len(loc_code) > 4 and loc and loc.location_name:
+            import re
+            words = re.findall(r'[a-zA-Z0-9]+', loc.location_name)
+            if len(words) == 1:
+                loc_code = words[0][:4].upper()
+            elif len(words) > 1:
+                loc_code = ''.join([w[0].upper() for w in words])[:4]
+        inst_code = inst.name.split('(')[0].strip() if inst and inst.name else 'INST'
+        from app.utils.equipment_codes import EQUIPMENT_ASSET_CODES
+        
+        mat_prefix = None
+        if mat and mat.name:
+            mat_name_lower = mat.name.lower()
+            # Sort keys by length descending to match the most specific (longest) name first
+            for key, code in sorted(EQUIPMENT_ASSET_CODES.items(), key=lambda x: len(x[0]), reverse=True):
+                if key.lower() in mat_name_lower:
+                    mat_prefix = code
+                    break
+                    
+        if not mat_prefix:
+            if mat and mat.name:
+                import re
+                words = re.findall(r'[a-zA-Z0-9]+', mat.name)
+                if len(words) == 1:
+                    mat_prefix = words[0][:4].upper()
+                elif len(words) > 1:
+                    mat_prefix = ''.join([w[0].upper() for w in words])[:4]
+                    
+        if not mat_prefix:
+            mat_code_full = mat.code if mat and mat.code else 'EQP'
+            mat_prefix = mat_code_full.split('-')[0] if '-' in mat_code_full else mat_code_full
+        
+        seq_num = get_next_number(db, tenant_id, site_id, f'EQP_{loc_code}', f'EQP_{loc_code}')
+        seq = seq_num.split('-')[-1] if '-' in seq_num else seq_num[-3:]
+        equipment_code = f'{inst_code}-{loc_code}-{mat_prefix}-{seq}'
+        
+        # update the item_in object with the generated code
+        item_in.equipment_code = equipment_code
+
     existing = db.query(EquipmentItem).filter(EquipmentItem.tenant_id == tenant_id, EquipmentItem.equipment_code == item_in.equipment_code).first()
     if existing:
         raise HTTPException(status_code=400, detail='Equipment Code already exists in this tenant.')
@@ -273,19 +330,8 @@ def complete_installation(id: int, serial_number: str=Form(...), installation_da
     item.installed_by = installed_by
     item.contact_number = contact_number
     item.location_id = location_id
-    from app.models import LocationMaster, Institution
-    from app.utils.sequences import get_next_number
+    from app.models import LocationMaster
     loc = db.query(LocationMaster).filter(LocationMaster.id == location_id).first()
-    inst = db.query(Institution).filter(Institution.id == item.institution_id).first() if item.institution_id else None
-    loc_code = loc.location_code.rstrip('_').rstrip('-') if loc and loc.location_code else 'LOC'
-    inst_code = inst.code if inst else 'INST'
-    mat_code_full = item.material.code if item.material else 'EQP'
-    mat_prefix = mat_code_full.split('-')[0] if '-' in mat_code_full else mat_code_full
-    if loc and item.status != 'Operational':
-        seq_num = get_next_number(db, tenant_id, site_id, f'EQP_{loc_code}', f'EQP_{loc_code}')
-        seq = seq_num.split('-')[-1] if '-' in seq_num else seq_num[-3:]
-        new_asset_code = f'{inst_code}-{loc_code}-{mat_prefix}-{seq}'
-        item.equipment_code = new_asset_code
 
     def handle_upload(upload_file: UploadFile, folder: str):
         allowed_types = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg', 'image/webp']

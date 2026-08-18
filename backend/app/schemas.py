@@ -1246,6 +1246,12 @@ class GRNOut(BaseModel):
     invoice_date: Optional[date] = None
     invoice_amount: float
     invoice_scan_url: Optional[str] = None
+    dc_number: Optional[str] = None
+    dc_date: Optional[date] = None
+    dc_scan_url: Optional[str] = None
+    gate_entry_id: Optional[int] = None
+    gate_entry_number: Optional[str] = None
+    remarks: Optional[str] = None
     vendor_gstin: Optional[str] = None
     total_taxable_amount: float = 0
     total_cgst: float = 0
@@ -2234,6 +2240,8 @@ class EquipmentUpdateSerial(BaseModel):
     serial_number: str = Field(..., min_length=1)
 
 class EquipmentUpdate(BaseModel):
+    equipment_code: Optional[str] = None
+    location_id: Optional[int] = None
     make: Optional[str] = None
     model: Optional[str] = None
     machine_cost: Optional[float] = None
@@ -2268,7 +2276,7 @@ class EquipmentInstallationUpdate(BaseModel):
     installation_remarks: Optional[str] = None
 
 class EquipmentItemCreate(BaseModel):
-    equipment_code: str
+    equipment_code: Optional[str] = None
     material_id: int
     warehouse_id: Optional[int] = None
     location_id: Optional[int] = None
@@ -2659,7 +2667,7 @@ class VendorWorkOrderDocumentOut(BaseModel):
         from_attributes = True
 
 class VendorWorkOrderBase(BaseModel):
-    vendor_id: int
+    vendor_id: Optional[int] = None
     complaint_id: Optional[int] = None
     equipment_id: int
     priority: str = "Normal"

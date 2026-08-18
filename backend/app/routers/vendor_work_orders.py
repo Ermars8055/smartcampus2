@@ -15,7 +15,7 @@ from app.models import (
 from app import schemas
 from app.utils.sequences import get_next_number
 
-router = APIRouter(prefix="/vendor-work-orders", tags=["Vendor Work Orders"])
+router = APIRouter(prefix="/api/vendor-work-orders", tags=["Vendor Work Orders"])
 
 @router.get("/", response_model=List[schemas.VendorWorkOrderOut])
 def get_vendor_work_orders(
@@ -41,6 +41,7 @@ def get_vendor_work_orders(
         query = query.filter(VendorWorkOrder.status == status)
         
     vwos = query.order_by(desc(VendorWorkOrder.created_at)).offset(skip).limit(limit).all()
+    print("VWO count in db query:", len(vwos), "Tenant:", tenant_id, "Site:", site_id)
     
     # Enrich with names
     result = []

@@ -21,6 +21,8 @@ import {
 import { ArrowBack as ArrowBackIcon, Add as AddIcon, Delete as DeleteIcon, Save as SaveIcon } from '@mui/icons-material';
 import vendorWorkOrderService from '../services/vendorWorkOrderService';
 import api from '../services/api';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import dayjs from 'dayjs';
 
 const VendorWorkOrderDetail = () => {
   const { id } = useParams();
@@ -221,15 +223,13 @@ const VendorWorkOrderDetail = () => {
                 </TextField>
               </Grid>
               <Grid item xs={12} sm={3}>
-                <TextField
-                  fullWidth
-                  type="date"
-                  label="Target Date *"
-                  InputLabelProps={{ shrink: true }}
-                  value={formData.target_date}
-                  onChange={(e) => handleInputChange('target_date', e.target.value)}
-                  disabled={isReadOnly}
-                  size="small"
+                <DatePicker 
+                  label="Target Date *" 
+                  format="DD MMM YYYY" 
+                  value={formData.target_date ? dayjs(formData.target_date) : null} 
+                  onChange={(newValue) => handleInputChange('target_date', newValue ? newValue.format('YYYY-MM-DD') : '')} 
+                  disabled={isReadOnly} 
+                  slotProps={{ textField: { size: 'small', fullWidth: true, InputLabelProps: { shrink: true } } }} 
                 />
               </Grid>
             </Grid>

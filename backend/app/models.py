@@ -2108,7 +2108,7 @@ class VendorWorkOrder(Base):
     site_id = Column(Integer, ForeignKey("sites.id", ondelete="CASCADE"), nullable=False)
     vwo_number = Column(String(50), nullable=False, index=True)
     institution_id = Column(Integer, ForeignKey("institutions.id"), nullable=True)
-    vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=False)
+    vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=True)
     complaint_id = Column(Integer, ForeignKey("complaints.id"), nullable=True)
     equipment_id = Column(Integer, ForeignKey("equipment_items.id"), nullable=False)
     priority = Column(String(50), nullable=False, default="Normal")

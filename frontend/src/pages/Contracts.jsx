@@ -199,7 +199,7 @@ export default function Contracts() {
       itemsHtml = contractToView.items?.map((item, idx) => `
         <tr>
           <td>${idx + 1}</td>
-          <td style="text-align: left;">${item.equipment?.material_name || item.equipment_id}</td>
+          <td style="text-align: left;">${item.material_name || item.equipment_serial || item.equipment_id}</td>
           <td>${item.covered_components || '-'}</td>
           <td>${item.excluded_components || '-'}</td>
           <td style="text-align: right;">${item.rate?.toLocaleString()}</td>
@@ -685,7 +685,7 @@ export default function Contracts() {
                           </>
                         ) : (
                           <>
-                            <TableCell>{item.equipment?.material_name || item.equipment_id}</TableCell>
+                            <TableCell>{item.material_name || item.equipment_serial || item.equipment_id}</TableCell>
                             <TableCell>{item.covered_components || '-'}</TableCell>
                             <TableCell>{item.excluded_components || '-'}</TableCell>
                             <TableCell align="right">₹{item.rate?.toLocaleString()}</TableCell>

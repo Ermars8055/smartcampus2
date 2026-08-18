@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict B4W5fuCNNS2naZDkKbrboHlwXlEn9fQFc0aATHMHVouzcn8ohwZu01LTvU2j0F1
+\restrict b4TyOTV3bv1b3HJrEWrqY8ScMI4RkP5IwDowoWnNIW5GtuqbfUttUjJXxay6oIn
 
 -- Dumped from database version 17.10 (Ubuntu 17.10-1.pgdg22.04+1)
 -- Dumped by pg_dump version 18.4 (Ubuntu 18.4-1.pgdg22.04+1)
@@ -4882,6 +4882,11 @@ COPY public.alerts (id, tenant_id, site_id, alert_type, severity, title, message
 82	2	2	Complaint Assigned	Info	Complaint Assigned: CMP-00019	You have been assigned to complaint CMP-00019. Nature of complaint: Install machine 01	ComplaintAssigned	449	\N	f	f	2026-08-17 11:55:49.245213	\N	34
 83	2	2	Contract Approved	Success	Contract CNT-00006 Approved	The contract (CNT-00006) has been approved by EastPoint Admin.	ContractApproved	6	\N	f	f	2026-08-17 13:04:42.294988	\N	3
 84	2	2	Indent Approved	Success	Indent IND-00028 Approved	The indent (IND-00028) has been approved by EastPoint Admin.	IndentApproved	243	\N	f	f	2026-08-17 13:06:45.166122	\N	3
+85	2	2	Indent Approved	Success	Indent IND-00029 Approved	The indent (IND-00029) has been approved by EastPoint Admin.	IndentApproved	244	\N	f	f	2026-08-18 11:08:46.346522	\N	3
+86	2	2	Pending Action	Warning	Action Required: Issue Acknowledgement	Materials for your indent (IND-00018) have been issued. Please review and acknowledge receipt.	IndentIssued	233	\N	f	f	2026-08-18 11:25:58.077225	\N	3
+87	2	2	Pending Action	Warning	Action Required: Issue Acknowledgement	Materials for your indent (IND-00018) have been issued. Please review and acknowledge receipt.	IndentIssued	233	\N	f	f	2026-08-18 11:31:20.876122	\N	3
+88	2	2	Contract Approved	Success	Contract CNT-00007 Approved	The contract (CNT-00007) has been approved by EastPoint Admin.	ContractApproved	7	\N	f	f	2026-08-18 12:48:18.023912	\N	3
+89	2	2	Contract Approved	Success	Contract CNT-00008 Approved	The contract (CNT-00008) has been approved by EastPoint Admin.	ContractApproved	8	\N	f	t	2026-08-18 12:51:33.118737	2026-08-18 12:52:23.325348	3
 \.
 
 
@@ -5962,6 +5967,7 @@ COPY public.categories (id, tenant_id, site_id, name, sequence_number, code, des
 73	2	2	PLUMBING	9	CAT-0009	Hospital category: PLUMBING	t	f	PLB
 80	2	2	CHEMICALS	\N	CHEM	Chemical Materials	t	f	CHE
 69	2	2	HOUSE KEEPING	5	CAT-0005	Hospital category: HOUSE KEEPING	t	f	HSK
+81	2	2	Electricals	1	CAT-0001		t	f	ELC
 \.
 
 
@@ -6022,6 +6028,7 @@ COPY public.complaint_images (id, complaint_id, image_url, is_resolution_image, 
 23	11	/api/uploads/complaints/2/20260810_124029_8c5b40f2.png	t	2026-08-10 18:10:29.413458
 24	445	/api/uploads/complaints/2/20260817_055447_0a1dfaae.jpg	t	2026-08-17 11:24:47.947337
 25	450	/api/uploads/complaints/2/20260817_071146_17c57717.jpg	f	2026-08-17 12:41:46.601178
+26	455	/api/uploads/complaints/2/20260818_071149_16b1d1b3.jpg	f	2026-08-18 12:41:50.028994
 \.
 
 
@@ -6478,10 +6485,11 @@ COPY public.complaints (id, tenant_id, site_id, docket_no, complaint_date, compl
 446	3	3	CMP-99999	2026-08-17	11:32	Test Dept	\N	\N		Testing the issue	Test detail	John Doe	Registered	\N	\N	4	\N	f	2026-08-17 11:32:26.592734	2026-08-17 11:32:26.592747	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N	\N	\N
 447	3	3	CMP-00001	2026-08-17	11:53	Test Dept	\N	\N		Testing the issue	Test detail	John Doe	Registered	\N	\N	4	\N	f	2026-08-17 11:53:06.922996	2026-08-17 11:53:06.923009	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	General Complaint	f	\N	\N	\N	\N	\N	\N	\N	\N
 448	2	2	CMP-00018	2026-08-17	11:54	HEALTH 	\N	\N		AC problem	AC problem		Registered	\N	\N	3	\N	f	2026-08-17 11:54:09.653717	2026-08-17 11:54:09.653728	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	General Complaint	f	\N	\N	\N	\N	\N	\N	\N	\N
-449	2	2	CMP-00019	2026-08-17	11:55	Civil Engineering	\N	\N		Install machine 01	Install machine 01		Assigned	34	\N	3	\N	f	2026-08-17 11:55:38.243275	2026-08-17 11:55:49.251175	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	Installation	f	\N	\N	\N	\N	\N	\N	\N	\N
 450	2	2	CMP-00020	2026-08-17	12:41	Anatomy Lab	\N	\N		not working properly	not working		Registered	\N	\N	3	\N	f	2026-08-17 12:41:46.59815	2026-08-17 12:41:46.598169	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	Machine Not Working	f	\N	\N	\N	\N	\N	\N	\N	\N
 451	2	2	CMP-00021	2026-08-17	13:59	Computer Science & Engineering	\N	\N		AA3 SUPER DELUX CRYO IS BOT WORKING PROPERLY	AA3 SUPER DELUX CRYO IS BOT WORKING PROPERLY	Pradnesh A	Registered	\N	\N	3	\N	f	2026-08-17 13:59:13.002169	2026-08-17 13:59:13.002185	\N	f	\N	\N	\N	\N	\N	\N	\N	1609	General Complaint	f	\N	\N	\N	\N	\N	\N	\N	\N
 454	1	1	CMP-00001	2026-08-17	14:26	\N	\N	\N	\N	Testing Auto Vendor Work Order generation for AMC Equipment	Equipment is under AMC. Need to verify that the draft work order is automatically created.	\N	Registered	\N	\N	8	\N	f	2026-08-17 14:26:38.06647	2026-08-17 14:26:38.105689	\N	f	\N	\N	\N	\N	\N	\N	\N	1609	Breakdown	f	\N	\N	\N	\N	\N	\N	\N	1
+449	2	2	CMP-00019	2026-08-17	11:55	Civil Engineering	\N	\N		Install machine 01	Install machine 01		In Progress	34	\N	3	\N	f	2026-08-17 11:55:38.243275	2026-08-18 12:09:02.993781	\N	f	\N	\N	\N		\N	\N	\N	\N	Installation	f	\N	\N	\N	\N	\N	\N	External Vendor Service	\N
+455	2	2	CMP-00022	2026-08-18	12:41	Child Health Nursing (Pediatric Nursing)	\N	\N		not working properly	not working	vik	Registered	\N	\N	3	\N	f	2026-08-18 12:41:49.953614	2026-08-18 12:41:49.953655	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	General Complaint	f	\N	\N	\N	\N	\N	\N	\N	\N
 \.
 
 
@@ -6502,6 +6510,10 @@ COPY public.contract_approvals (id, contract_id, approval_flow_id, approver_id, 
 10	5	84	3	\N	2026-08-12 14:39:55.146447
 11	6	105	3	\N	2026-08-17 10:47:06.197723
 12	6	84	3	\N	2026-08-17 13:04:42.318008
+13	7	105	3	\N	2026-08-18 12:48:13.756341
+14	7	84	3	\N	2026-08-18 12:48:18.029566
+15	8	105	3	\N	2026-08-18 12:51:26.963132
+16	8	84	3	\N	2026-08-18 12:51:33.123283
 \.
 
 
@@ -6516,6 +6528,8 @@ COPY public.contract_items (id, contract_id, material_id, equipment_id, uom, rat
 4	4	2751	\N		2500	18	10	1	0	1		
 5	5	\N	1604		17000	0	\N	\N	0	\N		
 6	6	2354	\N	NOS	0	0	\N	\N	0	\N		
+7	7	3507	\N	NOS	101515.19	12	30	10	0	10		
+8	8	3474	\N	NOS	1098	12	\N	\N	0	\N		
 \.
 
 
@@ -6530,6 +6544,8 @@ COPY public.contracts (id, tenant_id, site_id, contract_number, contract_type, v
 4	2	2	CNT-00004	RC	66	11	\N	2026-08-10	2026-08-31	120000				f	f	Approved	3	3	2026-08-11 13:58:39.622117	f	2026-08-11 19:28:23.844588	2026-08-11 19:28:39.623956		2
 5	2	2	CNT-00005	AMC	69	1	\N	2026-08-31	2027-08-11	16780				f	f	Approved	3	3	2026-08-12 09:09:55.143196	f	2026-08-12 12:28:13.107764	2026-08-12 14:39:55.145898		2
 6	2	2	CNT-00006	RC	69	\N	\N	2026-08-01	2027-08-17	\N				f	f	Approved	3	3	2026-08-17 07:34:42.28912	f	2026-08-14 14:57:37.256088	2026-08-17 13:04:42.314296		2
+7	2	2	CNT-00007	RC	76	3	301	2026-08-24	2026-09-24	\N				f	f	Approved	3	3	2026-08-18 07:18:18.020239	f	2026-08-18 12:47:40.794077	2026-08-18 12:48:18.027478		2
+8	2	2	CNT-00008	RC	73	3	304	2026-08-10	2026-08-19	\N				f	f	Approved	3	3	2026-08-18 07:21:33.115157	f	2026-08-18 12:51:02.449778	2026-08-18 12:51:33.121418		2
 \.
 
 
@@ -8280,7 +8296,6 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 2771	2	2	2475	62	266	2026-06-11 21:58:45.849263
 2773	2	2	2477	62	35	2026-06-11 21:58:45.849268
 2774	2	2	2480	62	89	2026-06-11 21:58:45.849271
-2775	2	2	2481	62	28	2026-06-11 21:58:45.849274
 2776	2	2	2482	62	61	2026-06-11 21:58:45.849277
 2777	2	2	2483	62	34	2026-06-11 21:58:45.84928
 2778	2	2	2484	62	140	2026-06-11 21:58:45.849282
@@ -9165,7 +9180,6 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 3658	2	2	3472	62	96	2026-06-11 21:58:45.851781
 3659	2	2	3473	62	14	2026-06-11 21:58:45.851783
 3662	2	2	3476	62	65	2026-06-11 21:58:45.851792
-3661	2	2	3475	62	83	2026-07-08 15:49:59.463999
 3663	2	2	3478	62	85	2026-06-11 21:58:45.851795
 3664	2	2	3479	62	21	2026-06-11 21:58:45.851798
 3665	2	2	3480	62	41	2026-06-11 21:58:45.8518
@@ -9177,6 +9191,7 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 3671	2	2	3486	62	50	2026-06-11 21:58:45.851817
 3672	2	2	3487	62	106	2026-06-11 21:58:45.85182
 3673	2	2	3489	62	487	2026-06-11 21:58:45.851823
+3661	2	2	3475	62	82	2026-08-18 11:31:20.878565
 3674	2	2	3490	62	36	2026-06-11 21:58:45.851825
 3675	2	2	3491	62	503	2026-06-11 21:58:45.851828
 3676	2	2	3492	62	28	2026-06-11 21:58:45.851831
@@ -9374,13 +9389,13 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 326	3	3	228	55	3380	2026-06-17 18:12:13.813019
 2412	3	3	2102	59	27	2026-06-17 18:19:11.656207
 3651	2	2	3462	62	47	2026-06-18 11:11:57.168045
-3690	2	2	3507	62	83	2026-07-08 12:25:10.075718
 3868	2	2	2565	63	1	2026-08-06 14:53:32.831506
 3867	2	2	2338	62	50	2026-08-12 11:07:29.314793
 3013	2	2	2751	62	22	2026-08-14 12:56:12.832462
 3660	2	2	3474	62	60	2026-08-17 11:06:47.913802
-2855	2	2	2565	62	52	2026-08-17 17:11:21.411574
-2854	2	2	2564	62	24	2026-08-17 19:04:31.749018
+2854	2	2	2564	62	24	2026-08-18 11:24:08.807234
+3690	2	2	3507	62	81	2026-08-18 11:25:58.079746
+2855	2	2	2565	62	51	2026-08-18 11:31:10.256609
 4136	2	2	4604	62	522	2026-08-06 13:36:11.191772
 4137	2	2	4605	62	655	2026-08-06 13:36:11.191784
 4138	2	2	4606	62	192	2026-08-06 13:36:11.191787
@@ -9650,6 +9665,7 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 3684	2	2	3501	62	44	2026-08-06 15:02:28.57246
 4402	2	2	2564	63	10	2026-08-17 11:27:19.33176
 4403	2	2	3910	62	1	2026-08-17 12:13:02.014073
+2775	2	2	2481	62	27	2026-08-18 11:13:00.275373
 \.
 
 
@@ -9919,6 +9935,9 @@ COPY public.department_material_limits (id, tenant_id, site_id, department, mate
 260	2	2	Civil	3013	20	2026-06-12 02:26:19.195636	3
 261	2	2	HEALTH 	3013	20	2026-06-12 02:26:19.219395	3
 262	2	2	Mechanical	3013	20	2026-06-12 02:26:19.226209	3
+263	2	2	HEALTH 	2564	20	2026-08-18 11:01:04.070905	3
+264	2	2	Computer Application	2564	20	2026-08-18 11:01:04.123503	3
+265	2	2	Computer Science & Engineering	2564	20	2026-08-18 11:01:04.13217	3
 \.
 
 
@@ -10327,7 +10346,6 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 98	2	2	EQP_RADIOLOGY_	EQP_RADIOLOGY_	1
 99	2	2	PURCHASE_ORDER_2	EPH/PO	2
 101	2	2	PURCHASE_ORDER_4	EPCP/PO	2
-94	2	2	PURCHASE_ORDER_11	EPAHS/PO	3
 103	2	2	PURCHASE_ORDER_10	EPCPT/PO	4
 102	2	2	PURCHASE_ORDER_9	NRCN/PO	3
 126	2	2	MATERIAL_71	LAB	267
@@ -10338,42 +10356,45 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 128	2	2	MATERIAL_74	RAD	5
 129	2	2	MATERIAL_67	HEQ	67
 113	1	1	WORK_ORDER	WO-	3
-73	2	2	TRANSFER	TRF	3
+74	2	2	RETURN	RET	4
 143	1	1	COMPLAINT	CMP	1
-77	2	2	GATEPASS	GP	4
+78	2	2	COMPLAINT	CMP	22
 130	2	2	MATERIAL_70	ITI	39
-96	2	2	CONTRACT	CNT	6
-74	2	2	RETURN	RET	3
+112	2	2	WORK_ORDER	WO	7
 131	2	2	MATERIAL_75	STY	195
 132	2	2	MATERIAL_76	HOI	36
 133	2	2	MATERIAL_68	HOS	399
 135	2	2	MATERIAL_73	PLB	99
-76	2	2	INVOICE_REF	INV	8
 134	2	2	MATERIAL_66	ELE	89
-93	2	2	WRITE_OFF	WO	10
+71	2	2	GATE_ENTRY	GE	14
 69	2	2	PURCHASE_ORDER	PO	36
-78	2	2	COMPLAINT	CMP	21
 115	2	2	PURCHASE_ORDER_7	EPCN/PO	1
-136	2	2	MATERIAL_69	HSK	69
-65	2	2	VENDOR	VND	14
+77	2	2	GATEPASS	GP	5
+73	2	2	TRANSFER	TRF	4
 50	3	3	MATERIAL_56	HSK	68
-72	2	2	WAREHOUSE	WH	13
-68	2	2	PURCHASE_REQUEST	PR	14
+147	2	2	EQP_108	EQP_108	1
 119	3	3	COMPLAINT	CMP	1
 95	2	2	PURCHASE_ORDER_3	EPCET/PO	7
 144	1	1	VENDOR_WORK_ORDER	VWO	1
 120	2	2	MATERIAL_80	CHE	1
-71	2	2	GATE_ENTRY	GE	13
 75	2	2	GRN	GRN	16
 138	2	2	EQP_110	EQP_110	2
-67	2	2	ISSUE	ISS	16
+68	2	2	PURCHASE_REQUEST	PR	16
+136	2	2	MATERIAL_69	HSK	70
 97	2	2	EQP	EQP	2
 125	2	2	MATERIAL_65	CIV	77
-112	2	2	WORK_ORDER	WO	6
-70	2	2	QUOTATION_REQUEST	QR	39
-66	2	2	INDENT	IND	28
+96	2	2	CONTRACT	CNT	8
+76	2	2	INVOICE_REF	INV	9
+93	2	2	WRITE_OFF	WO	11
+146	2	2	CATEGORY		1
 145	2	2	EQP_109	EQP_109	1
 100	2	2	EQUIPMENT_WRITE_OFF	EWO	2
+67	2	2	ISSUE	ISS	20
+72	2	2	WAREHOUSE	WH	14
+65	2	2	VENDOR	VND	15
+66	2	2	INDENT	IND	29
+94	2	2	PURCHASE_ORDER_11	EPAHS/PO	4
+70	2	2	QUOTATION_REQUEST	QR	41
 \.
 
 
@@ -10391,6 +10412,7 @@ COPY public.equipment_history (id, equipment_id, event_type, event_date, descrip
 7	1610	Relocation	2026-08-17 00:00:00	Relocated from 110 to 110. Remarks: None	\N	3
 8	1611	Manual Registration	2026-08-17 14:38:26.150672	Equipment added manually	\N	3
 9	1610	Relocation	2026-08-17 00:00:00	Relocated from 110 to 216. Remarks: None	\N	3
+10	1612	Manual Registration	2026-08-18 12:08:17.863527	Equipment added manually	\N	3
 \.
 
 
@@ -10785,11 +10807,12 @@ COPY public.equipment_items (id, tenant_id, site_id, equipment_code, material_id
 1495	2	2	EPCMS-POST OT -PM-109	3899	\N	\N	B10W4A015	Captured	t	f	Installed	2026-03-23 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:45.381657	2026-08-11 18:37:11.375224	t	2029-03-22	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	NiDEK	Bravo 10 G3M	\N	\N	\N	\N	Narayanan	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1508	2	2	EPCMS-POST OT -PM-117	3899	\N	\N	301410M1380490004	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.38173	2026-08-11 18:37:11.375267	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	EDAN	IM8	\N	\N	\N	\N	\N	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1606	2	2	EQP-00002	3910	219	522	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	3	In Store	2026-08-17 12:13:02.027106	2026-08-17 07:04:50.973266	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	110	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1612	2	2	EPSN-108-1DTP-00001	3475	\N	\N	01	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-18 12:08:17.765623	2026-08-18 12:08:17.765639	t	2027-08-31	AMC	2027-08-31	\N	\N	\N	\N	\N	\N	\N	\N	\N	78	\N	8	\N	\N	\N	10000	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	null	\N	\N	\N	\N	\N	\N	2026	\N	\N
 1607	2	2	EPCET-BME-3OTG-00001	3993	\N	\N	\N	Pending Update	f	t	Not Required	\N	\N	\N	62	\N	Operational	2026-08-17 12:44:55.931347	2026-08-17 13:32:51.43847	f	\N	None	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	97	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	null	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1608	2	2	EPAHS-CW-18AF-00001	3507	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-17 12:48:24.45775	2026-08-17 13:32:51.441658	f	\N	None	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	99	\N	11	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	null	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1609	2	2	EPAHS-ER-ASDC-00002	4022	\N	\N	\N	Pending Update	f	t	Not Required	\N	\N	\N	62	\N	Operational	2026-08-17 13:08:06.237234	2026-08-17 13:32:51.443189	t	2027-08-17	AMC	2028-08-17	\N	\N	\N	\N	\N	\N	\N	\N	\N	110	\N	11	\N	\N	\N	\N	\N	\N	\N	\N	\N	t	t	\N	Purchase	\N	\N	\N	\N	null	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1610	2	2	EPCP-110-18AF-00002	3507	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-17 14:31:33.62432	2026-08-17 17:31:51.77191	f	\N	None	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	91	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	null	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1611	2	2	NRCN-109-ACET-00001	4608	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Written Off	2026-08-17 14:38:26.121154	2026-08-17 14:39:06.606657	f	\N	None	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	79	\N	9	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	null	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1611	2	2	NRCN-109-ACET-00001	4608	\N	\N	2002001	Captured	f	f	Not Required	\N	\N	\N	62	\N	Written Off	2026-08-17 14:38:26.121154	2026-08-18 06:28:42.140849	f	\N	None	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	79	\N	9	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	null	\N	\N	\N	\N	\N	\N	\N	\N	\N
 804	2	2	EPCMS-102-BPA-001	3895	\N	\N	13660	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.195829	2026-08-05 19:04:39.195839	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	76	\N	\N	\N	DIAMOND	DELUXE	\N	\N	\N	\N	\N	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 805	2	2	EPCMS-102-ESA-001	3896	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.217136	2026-08-05 19:04:39.217145	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	76	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 806	2	2	EPCMS-102-GEN-001	3897	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.223687	2026-08-05 19:04:39.223696	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	76	\N	\N	\N	MURPHY	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
@@ -11303,6 +11326,7 @@ COPY public.gate_entries (id, tenant_id, site_id, entry_number, vehicle_number, 
 206	2	2	GE-00011	TN 09 K 3455	\N	\N	\N	\N	\N	2026-08-06 15:58:17.736877	aaa	\N	aaa	Standard	\N	/api/uploads/invoices/2/20260806_102745_cdade1c9.png		Completed	3	f	2026-08-06 15:58:17.738267	L78I876	2026-08-04	655660	\N	\N	\N		/api/uploads/invoices/2/20260806_102710_c7dc314a.png	789045	2026-07-27	\N
 207	2	2	GE-00012	TN 09 N 1234	\N	\N	\N	\N	\N	2026-08-17 11:05:56.207301	udhay	\N	udhay	Standard	\N	/api/uploads/invoices/2/20260817_053552_b931067d.webp		Completed	3	f	2026-08-17 11:05:56.20925	A4576C56	2026-08-11	100000	\N	\N	\N		/api/uploads/invoices/2/20260817_053405_974aef41.png	4546745	2026-08-10	\N
 208	2	2	GE-00013	KA 02 EX 1234	\N	\N	\N	\N	\N	2026-08-17 12:12:05.350568	Ram	\N	Ram	Standard	\N			Completed	3	f	2026-08-17 12:12:05.351843		\N	0	1700	2500	800	/api/uploads/invoices/2/20260817_064203_39a6471d.png	/api/uploads/invoices/2/20260817_064120_6c6f0417.png	DC5463	2026-08-16	\N
+209	2	2	GE-00014	TN 08 V 2508	\N	\N	\N	\N	\N	2026-08-18 11:56:36.527989	giri	\N	giri	Standard	\N	/api/uploads/invoices/2/20260818_062605_6be797fa.png		Awaiting GRN	3	f	2026-08-18 11:56:36.529581	A89B7655	2026-08-10	20000	\N	\N	\N		/api/uploads/invoices/2/20260818_062532_d6fd3d5a.png	12657	2026-08-10	\N
 \.
 
 
@@ -11330,6 +11354,7 @@ COPY public.gate_pass_items (id, gate_pass_id, material_id, quantity, remarks) F
 22	21	984	40	Candy canes topping liquorice wafer cake shortbread chupa chups sesame snaps carrot cake. Fruitcake candy tiramisu sugar plum jujubes icing marzipan candy. Bonbon marzipan brownie tiramisu sesame snaps cheesecake macaroon gummies cake. Pudding oat cake chocolate tiramisu powder dessert. Lollipop jelly beans gummi bears sugar plum gummi bears bear claw cupcake cake croissant. Bear claw marshmallow candy pudding jujubes tootsie roll. Pie topping apple pie oat cake topping. Tart sesame snaps croissant carrot cake biscuit halvah caramels macaroon danish. Tootsie roll dragée donut cotton candy macaroon ice cream oat cake. Danish soufflé lemon drops danish dessert ice cream muffin. Candy dragée wafer cheesecake lemon drops icing. Candy canes jelly beans cake fruitcake cheesecake. Donut fruitcake gummies cheesecake pastry cake fruitcake. Brownie oat cake bonbon wafer tart tootsie roll. Lemon drops jelly beans wafer cake chocolate cake chocolate donut cake pastry. Sweet roll icing cotton candy carrot cake cookie sugar plum liquorice chupa chups. Jujubes chocolate bar chocolate marshmallow liquorice. Apple pie marzipan muffin oat cake sesame snaps. Jelly-o cookie tart pudding gummi bears tart pastry chocolate cake sugar plum. Ice cream danish tiramisu sweet cookie tiramisu cotton candy liquorice liquorice. Cotton candy apple pie fruitcake pudding gingerbread apple pie. Dessert oat cake caramels dessert carrot cake chupa chups cake chocolate cake. Sesame snaps gummi bears marshmallow candy lollipop marshmallow oat cake marshmallow. Cheesecake lollipop fruitcake halvah jelly caramels biscuit cake. Icing apple pie cake candy tootsie roll donut bonbon. Powder macaroon gummies toffee tart bonbon jelly muffin cheesecake. Brownie liquorice cookie topping macaroon halvah marshmallow. Sesame snaps oat cake lemon drops cupcake cotton candy toffee gummies liquorice. Icing donut sweet roll soufflé candy canes. Pie jelly jelly beans sesame snaps sweet marshmallow caramels. Gummies bear claw topping bear claw muffin. Jelly-o wafer powder cotton candy toffee jelly beans dessert muffin macaroon. Chocolate liquorice apple pie tart fruitcake chocolate cake gingerbread toffee sesame snaps. Soufflé fruitcake cupcake biscuit pastry cheesecake cake jelly-o. Pastry gingerbread sweet biscuit gingerbread sweet roll jujubes. Topping soufflé carrot cake candy canes oat cake tootsie roll. Wafer shortbread liquorice shortbread cotton candy donut. Bonbon liquorice jelly beans jujubes icing. Gummies chocolate cake tiramisu croissant bonbon tart sweet roll sweet brownie. Pudding lemon drops croissant liquorice chocolate jelly beans tiramisu biscuit. Ice cream marshmallow marshmallow cheesecake icing. Tart carrot cake chocolate cake cookie halvah tiramisu sesame snaps. Gummies gummi bears candy canes biscuit marzipan danish liquorice bear claw chocolate cake. Tiramisu chocolate halvah cotton candy pudding fruitcake. Tart sweet shortbread apple pie carrot cake pie cheesecake jelly-o. Lollipop cake gummi bears pastry marshmallow pastry muffin chocolate tootsie roll. Gummies toffee danish donut bear claw. Bear claw wafer cake biscuit lemon drops cookie chocolate cake gummi bears jujubes. Lollipop wafer cotton candy bonbon jelly beans shortbread cotton candy pudding. Croissant cake gingerbread pastry jelly. Tart jujubes bear claw croissant cookie. Macaroon carrot cake dragée powder chocolate cake. Sweet pastry oat cake bear claw lollipop donut croissant tootsie roll cupcake. Tart cookie donut candy canes shortbread dessert lollipop. Jelly-o pudding tootsie roll gingerbread sesame snaps sweet roll tootsie roll. Lollipop sugar plum pudding cake bonbon pastry marshmallow. Cake dessert cupcake jelly-o tiramisu oat cake biscuit marzipan caramels. Cupcake sweet liquorice cookie dragée chocolate bar wafer tootsie roll. Gingerbread gingerbread oat cake marzipan tootsie roll cheesecake lollipop. Sweet muffin candy jelly cake cotton candy brownie pudding. Donut pie cupcake cotton candy donut gummi bears. Marshmallow tiramisu cookie candy cotton candy dragée cheesecake. Cake sweet roll dessert powder dragée macaroon marshmallow. Tootsie roll croissant danish cookie powder. Topping gingerbread chocolate cupcake cotton candy. Cotton candy wafer chocolate bar sweet bear claw jelly beans tootsie roll.
 23	22	2751	2	\N
 24	23	2751	10	\N
+25	24	2435	5	\N
 \.
 
 
@@ -11356,6 +11381,7 @@ COPY public.gate_passes (id, tenant_id, site_id, gate_pass_number, return_id, pr
 19	2	2	GP-00001	\N	3	64	Received	Returnable	\N	\N	\N	3	2026-06-12 02:13:36.805231	Royal Hardware & Electricals	Ground Floor, Sri Lakshminivasareswara Nilaya, Avalahalli, Ittamadu Main Road, Virgonagar Post, Bangalore, Karnataka - 560049	\N	Central Store	ram	2026-06-17 12:44:40.276	REPAIR	GE-00003	GRN-00003
 22	2	2	GP-00003	\N	3	63	Yet to Receive	Returnable	\N	\N	PPC Cement	3	2026-06-17 13:14:47.945966	ELCAB ENGINEERS PRIVATE LIMITED	V R Cindem Complex, Sy. No. 1193/34/4, Kengeri Main Road, Behind Mr Prem Bun, Ramasandra Village, Bangalore, Karnataka - 560056	Anatomy	\N	\N	\N	TRANSFER	\N	\N
 23	2	2	GP-00004	\N	3	66	Yet to Receive	Returnable	\N	\N	\N	3	2026-08-17 11:28:15.017776	dell laptops 	new madras road , pai layout, bangalore, Karnataka - 560016	Admin	\N	\N	\N	REPAIR	\N	\N
+24	2	2	GP-00005	\N	3	66	Yet to Receive	Returnable	\N	\N	\N	3	2026-08-18 11:58:33.645875	dell laptops 	new madras road , pai layout, bangalore, Karnataka - 560016	Admin	\N	\N	\N	REPAIR	\N	\N
 \.
 
 
@@ -11573,6 +11599,10 @@ COPY public.indent_approvals (id, indent_id, approval_flow_id, approver_id, appr
 94	243	44	3	2026-08-17 13:06:37.691404	{"525": {"quantity": 10.0, "remarks": null}}	\N
 95	243	16	3	2026-08-17 13:06:45.13779	{"525": {"quantity": 10.0, "remarks": null}}	\N
 96	243	108	3	2026-08-17 13:06:45.137833	{"525": {"quantity": 10.0, "remarks": null}}	\N
+97	244	104	3	2026-08-18 11:08:38.063746	{"528": {"quantity": 7.0, "remarks": null}}	\N
+98	244	44	3	2026-08-18 11:08:38.063788	{"528": {"quantity": 7.0, "remarks": null}}	\N
+99	244	16	3	2026-08-18 11:08:46.308906	{"528": {"quantity": 7.0, "remarks": null}}	\N
+100	244	108	3	2026-08-18 11:08:46.308933	{"528": {"quantity": 7.0, "remarks": null}}	\N
 \.
 
 
@@ -11670,8 +11700,6 @@ COPY public.indent_items (id, indent_id, material_id, requested_quantity, issued
 511	232	2974	2	0	0	\N
 499	225	2427	4	0	0	3
 500	225	2431	2	0	0	2
-512	233	3507	4	0	0	2
-513	233	3475	2	0	0	1
 514	234	3501	1	0	0	\N
 515	234	3475	560061	0	0	\N
 516	235	3421	3	0	0	3
@@ -11688,6 +11716,9 @@ COPY public.indent_items (id, indent_id, material_id, requested_quantity, issued
 521	239	2751	1	3	0	3
 524	242	3474	4	4	4	4
 525	243	3475	10	0	0	10
+528	244	3475	7	0	0	7
+512	233	3507	4	2	0	2
+513	233	3475	2	1	0	1
 \.
 
 
@@ -11748,14 +11779,15 @@ COPY public.indents (id, tenant_id, site_id, indent_number, requester_id, room_i
 230	2	2	IND-00015	34	237	7	FIRST FLOOR	ROOM101	HEALTH 	Complaint CMP-00007 - AC problem	4657.57	Issued	2	3	2026-06-19 09:14:37.130349	f	2026-06-18 19:01:24.165689	2026-06-19 14:45:14.701106	11	9	\N
 231	2	2	IND-00016	3	237	7	FIRST FLOOR	ROOM101	HEALTH 	Complaint CMP-00008 - AC problem	4657.57	Issued	2	3	2026-06-22 06:17:58.262371	f	2026-06-22 11:44:48.408071	2026-06-22 11:48:20.964653	11	10	\N
 225	2	2	IND-00010	17	\N	\N			Computer Science & Engineering		8260.56	Approved	2	3	2026-06-30 12:45:16.350597	f	2026-06-18 10:44:25.957294	2026-06-30 18:15:16.373652	3	\N	\N
-233	2	2	IND-00018	3	237	7	FIRST FLOOR	ROOM101	HEALTH 		26601.42	Approved	2	3	2026-06-30 13:00:01.16276	f	2026-06-30 18:29:09.052074	2026-06-30 18:30:01.165439	11	\N	\N
 232	2	2	IND-00017	3	\N	7			HEALTH 	Complaint CMP-00010 - DOOR IS NOT LOCKING PROPERLY\n[Rejected: test rejection]	99513.94	Rejected	1	\N	\N	f	2026-06-22 12:29:05.009417	2026-07-22 14:55:42.208401	11	12	\N
 235	2	2	IND-00020	3	\N	\N			Community Health Nursing		8174.01	Approved	2	3	2026-08-03 10:19:09.679963	f	2026-08-03 15:48:12.849868	2026-08-03 15:49:09.691051	9	\N	\N
 236	2	2	IND-00021	3	\N	\N			Commerce		16312.9	Approved	2	3	2026-08-03 11:25:53.773212	f	2026-08-03 16:52:50.609615	2026-08-03 16:55:53.782488	5	\N	\N
 226	2	2	IND-00011	17	\N	\N			Mechanical Engineering		86458.88	Submitted	1	\N	\N	f	2026-06-18 10:48:16.861751	2026-06-18 10:48:16.861803	3	\N	\N
 234	2	2	IND-00019	3	\N	\N			Anatomy	Complaint CMP-00005 - FAN NOT WORKING	2577802744.56	Submitted	1	\N	\N	f	2026-07-02 18:40:42.679828	2026-07-02 18:40:42.67987	1	7	\N
 238	2	2	IND-00023	3	\N	\N			CSE - Data Science	maintenence	22238.85	Draft	1	\N	\N	f	2026-08-06 10:56:24.284791	2026-08-06 10:56:24.284834	3	\N	\N
+244	2	2	IND-00029	3	\N	\N			Pharmacognosy		32218.97	Approved	2	3	2026-08-18 05:38:46.339413	f	2026-08-18 11:04:43.225558	2026-08-18 11:08:46.362432	4	\N	\N
 237	2	2	IND-00022	3	237	7	FIRST FLOOR	ROOM101	HEALTH 		16312.9	Issued	2	3	2026-08-06 05:58:43.472805	f	2026-08-03 17:54:01.502805	2026-08-06 11:44:09.997714	11	\N	\N
+233	2	2	IND-00018	3	237	7	FIRST FLOOR	ROOM101	HEALTH 		26601.42	Issued	2	3	2026-06-30 13:00:01.16276	f	2026-06-30 18:29:09.052074	2026-08-18 11:31:20.880019	11	\N	\N
 240	2	2	IND-00025	3	237	7	FIRST FLOOR	ROOM101	HEALTH 		66104.64	Approved	2	3	2026-08-12 05:08:48.18428	f	2026-08-12 10:32:16.427408	2026-08-12 10:38:48.186197	11	\N	\N
 241	2	2	IND-00026	3	237	7	FIRST FLOOR	ROOM101	HEALTH 		16526.16	Submitted	2	\N	\N	f	2026-08-14 12:29:53.625013	2026-08-14 12:31:43.853423	11	\N	\N
 239	2	2	IND-00024	3	\N	\N			Chemistry	Complaint CMP-00013 - fdgdfg	10443.43	Issued	2	3	2026-08-12 04:48:14.16361	f	2026-08-10 16:47:23.026424	2026-08-14 12:56:12.833616	3	15	\N
@@ -11827,6 +11859,7 @@ COPY public.invoice_items (id, invoice_id, material_id, description, hsn_sac, qu
 66	14	4648	Bromothymol blue solution		125	200	ml	0	9	9	0	2250	2250	0	25000	29500	\N
 67	14	4649	Bromothymol blue solution		125	200	ml	0	9	9	0	2250	2250	0	25000	29500	\N
 68	14	4680	DL- Alanine		100	800	gm	0	9	9	0	7200	7200	0	80000	94400	\N
+70	15	3474	110 Door Bend PVC		5	3262.58	NOS	3	9	9	0	1424.1161699999998	1424.1161699999998	0	15823.512999999999	18671.74534	
 \.
 
 
@@ -11841,13 +11874,14 @@ COPY public.invoices (id, tenant_id, site_id, invoice_number, invoice_date, gate
 3	3	3	in4324	2026-06-02	\N	57	193	4500112.6	686442.6	Approved	/uploads/invoices/3/20260610_133541_e49271d3.png		4	f	2026-06-10 19:03:01.323243	2026-06-11 13:57:09.017903			\N	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR		\N							3813670	343221.3	343221.3	0	0	\N	\N	INV-00002				\N	100		0	0	0	0	INV-00002	Pending	\N	\N	t	2026-06-11 13:57:09.01705	4		\N	\N	\N	t	2026-06-11 13:08:50.988039	4	\N	\N
 7	2	2	In4576	2026-06-05	\N	64	\N	17356.084000000003	2632.2840000000006	Approved	/uploads/invoices/2/20260611_203554_530219c4.png		3	f	2026-06-12 02:07:03.464238	2026-06-12 02:24:45.194078			\N			\N							14723.800000000001	1316.1420000000003	1316.1420000000003	0	0	6	6	INV-00001				\N	100		0	0	0	0	INV-00001	Paid	2026-06-12 02:08:23.943898	3	t	2026-06-12 02:08:15.631662	3		2026-06-12 02:24:45.191254	3	\N	t	2026-06-12 02:07:54.878713	3	\N	\N
 5	3	3	wuq2389482394	2026-06-03	\N	56	\N	607638.11	65458.409999999996	Change Required	/uploads/invoices/3/20260610_135918_d988d4be.png		4	f	2026-06-10 19:30:10.241491	2026-06-17 18:13:44.501525			\N			\N							542179.7	32729.204999999998	32729.204999999998	0	0	\N	\N	INV-00004				\N	500		0	0	0	0	INV-00004	Pending	\N	\N	f	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N
-9	2	2	B45	2026-06-04	\N	63	\N	55308.4528	8383.4928	Approved	/uploads/invoices/2/20260611_204745_c5c1a4cf.png		3	f	2026-06-12 02:17:50.148925	2026-06-18 11:23:09.740162			\N			\N							46924.96	4191.7464	4191.7464	0	0	6	4	INV-00003				\N	350		0	0	0	0	INV-00003	Pending	\N	\N	f	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N
 11	2	2	JK78	2026-06-01	\N	63	\N	36716.467000000004	5600.816999999999	Approved	/uploads/invoices/2/20260611_223421_8d3f5c41.png		3	f	2026-06-12 04:04:55.885776	2026-08-12 12:09:16.966595			\N			\N							31115.65	2800.4084999999995	2800.4084999999995	0	0	6	6	INV-00005				\N	0		0	0	0	0	INV-00005	Pending	\N	\N	t	2026-08-12 12:09:16.965585	3	done	\N	\N	\N	t	2026-06-12 04:31:48.254311	3	\N	\N
 12	2	2	INV2001	2026-06-30	\N	64	232	178414.33000000002	22927.230000000003	Approved	/api/uploads/invoices/2/20260630_090821_292826f8.pdf		3	f	2026-06-30 14:41:01.013675	2026-08-12 12:44:13.719128	231432525	DELIVERED SUCESSFULLY	2026-06-30	UPI		\N					KA 23 AS 2122		155487.1	11463.615000000002	11463.615000000002	0	0	6	4	INV-00006				2026-06-30	500		0	0	0	0	INV-00006	Pending	\N	\N	f	\N	\N	\N	\N	\N	\N	t	2026-08-12 12:44:13.714805	3	\N	\N
 10	2	2	BH565	2026-06-04	\N	64	\N	19824.708	3024.1079999999997	Approved	/uploads/invoices/2/20260611_223240_2b902a7f.png		3	f	2026-06-12 04:02:47.052948	2026-08-14 11:36:19.809287			\N			\N							16800.6	1512.0539999999999	1512.0539999999999	0	0	\N	\N	INV-00004				\N	0		0	0	0	0	INV-00004	Pending	\N	\N	t	2026-08-14 11:36:19.807035	3		\N	\N	\N	t	2026-08-06 11:09:04.785362	3	\N	\N
 13	2	2	76525445	2026-08-14	\N	72	274	153400	23400	Submitted	/api/uploads/invoices/2/20260814_072358_61dfd0c2.png		3	f	2026-08-14 12:54:10.184285	2026-08-14 12:54:10.184303			\N	1. Bill/Invoices in the name of East Point Allied Health Sciences managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR		\N							130000	11700	11700	0	0	5	5	INV-00007				\N	0		0	0	0	0	INV-00007	Pending	\N	\N	f	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N
 8	2	2	Bill123	2026-06-01	\N	62	216	23600	3600	Approved	/uploads/invoices/2/20260611_204044_3143a815.png		3	f	2026-06-12 02:10:49.116917	2026-08-17 11:34:00.788382			\N	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR		\N							20000	1800	1800	0	0	6	6	INV-00002				\N	0		0	0	0	0	INV-00002	Paid	2026-06-12 04:01:24.647438	3	t	2026-06-12 04:01:13.455078	3		2026-08-17 11:34:00.786976	3	623012345678	t	2026-06-12 02:24:34.027603	3	\N	\N
 14	2	2	VJ2398Y845	2026-08-10	\N	72	274	153400	23400	Approved	/api/uploads/invoices/2/20260817_074112_a75ca0e6.pdf		3	f	2026-08-17 13:11:17.66674	2026-08-17 13:11:36.627554			\N	1. Bill/Invoices in the name of East Point Allied Health Sciences managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR		\N							130000	11700	11700	0	0	5	5	INV-00008				\N	0		0	0	0	0	INV-00008	Pending	\N	\N	f	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N
+9	2	2	B45	2026-06-04	\N	63	\N	55308.4528	8383.4928	Approved	/uploads/invoices/2/20260611_204745_c5c1a4cf.png		3	f	2026-06-12 02:17:50.148925	2026-08-18 13:02:35.323661			\N			\N							46924.96	4191.7464	4191.7464	0	0	6	4	INV-00003				\N	350		0	0	0	0	INV-00003	Paid	2026-08-18 13:02:28.036656	3	t	2026-08-18 13:02:02.40623	3		2026-08-18 13:02:35.321338	3	\N	t	2026-08-18 13:01:50.96442	3	\N	\N
+15	2	2	VJ2398Y845	2026-08-10	\N	70	275	18671.745339999998	2848.2323399999996	Approved	/api/uploads/invoices/2/20260818_072540_277f42ca.pdf		3	f	2026-08-18 12:56:00.939708	2026-08-18 13:00:43.794566			\N	1. Bill/Invoices in the name of East Point College of Nursing managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR		\N							15823.512999999999	1424.1161699999998	1424.1161699999998	0	489.38699999999994	\N	\N	INV-00009				\N	0		0	0	0	0	INV-00009	Pending	\N	\N	f	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	5
 \.
 
 
@@ -12073,6 +12107,10 @@ COPY public.material_issue_items (id, issue_id, material_id, quantity, rate, rem
 224	244	2564	4	16526.16	\N	62
 225	245	2565	2	26703.28	\N	62
 226	246	2564	1	16526.16	\N	62
+227	247	2481	1	2336.93	\N	62
+228	248	2564	1	16526.16	\N	62
+229	249	3507	2	4349	\N	62
+230	250	3475	1	4602.71	\N	62
 \.
 
 
@@ -12138,6 +12176,10 @@ COPY public.material_issues (id, tenant_id, site_id, issue_number, warehouse_id,
 244	2	2	ISS-00014	62	3	\N	7	237	HEALTH 	\N	Direct Issue	Completed	3	\N	f	\N	\N	\N	f	2026-08-17 17:10:14.397872	\N
 245	2	2	ISS-00015	62	3	\N	7	237	HEALTH 	\N	Direct Issue	Completed	3	\N	f	\N	\N	\N	f	2026-08-17 17:11:21.408677	\N
 246	2	2	ISS-00016	62	3	\N	\N	\N	Chemistry	\N	Direct Issue	Completed	3	\N	f	\N	\N	\N	f	2026-08-17 19:04:31.741633	\N
+247	2	2	ISS-00017	62	3	\N	7	237	HEALTH 	\N	Direct Issue	Completed	3	\N	f	\N	\N	\N	f	2026-08-18 11:13:00.243514	\N
+248	2	2	ISS-00018	62	3	\N	\N	\N	Chemistry	\N	Direct Issue	Completed	3	\N	f	\N	\N	\N	f	2026-08-18 11:24:08.797846	\N
+249	2	2	ISS-00019	62	1	233	7	237	HEALTH 	\N	Fulfillment for IND-00018	Completed	3	\N	f	\N	\N	\N	f	2026-08-18 11:25:58.056751	\N
+250	2	2	ISS-00020	62	1	233	7	237	HEALTH 	\N	Fulfillment for IND-00018	Completed	3	\N	f	\N	\N	\N	f	2026-08-18 11:31:20.858115	\N
 \.
 
 
@@ -12162,6 +12204,7 @@ COPY public.material_return_items (id, return_id, material_id, returned_qty, rem
 15	24	1192	40	Candy canes topping liquorice wafer cake shortbread chupa chups sesame snaps carrot cake. Fruitcake candy tiramisu sugar plum jujubes icing marzipan candy. Bonbon marzipan brownie tiramisu sesame snaps cheesecake macaroon gummies cake. Pudding oat cake chocolate tiramisu powder dessert. Lollipop jelly beans gummi bears sugar plum gummi bears bear claw cupcake cake croissant. Bear claw marshmallow candy pudding jujubes tootsie roll. Pie topping apple pie oat cake topping. Tart sesame snaps croissant carrot cake biscuit halvah caramels macaroon danish. Tootsie roll dragée donut cotton candy macaroon ice cream oat cake. Danish soufflé lemon drops danish dessert ice cream muffin. Candy dragée wafer cheesecake lemon drops icing. Candy canes jelly beans cake fruitcake cheesecake. Donut fruitcake gummies cheesecake pastry cake fruitcake. Brownie oat cake bonbon wafer tart tootsie roll. Lemon drops jelly beans wafer cake chocolate cake chocolate donut cake pastry. Sweet roll icing cotton candy carrot cake cookie sugar plum liquorice chupa chups. Jujubes chocolate bar chocolate marshmallow liquorice. Apple pie marzipan muffin oat cake sesame snaps. Jelly-o cookie tart pudding gummi bears tart pastry chocolate cake sugar plum. Ice cream danish tiramisu sweet cookie tiramisu cotton candy liquorice liquorice. Cotton candy apple pie fruitcake pudding gingerbread apple pie. Dessert oat cake caramels dessert carrot cake chupa chups cake chocolate cake. Sesame snaps gummi bears marshmallow candy lollipop marshmallow oat cake marshmallow. Cheesecake lollipop fruitcake halvah jelly caramels biscuit cake. Icing apple pie cake candy tootsie roll donut bonbon. Powder macaroon gummies toffee tart bonbon jelly muffin cheesecake. Brownie liquorice cookie topping macaroon halvah marshmallow. Sesame snaps oat cake lemon drops cupcake cotton candy toffee gummies liquorice. Icing donut sweet roll soufflé candy canes. Pie jelly jelly beans sesame snaps sweet marshmallow caramels. Gummies bear claw topping bear claw muffin. Jelly-o wafer powder cotton candy toffee jelly beans dessert muffin macaroon. Chocolate liquorice apple pie tart fruitcake chocolate cake gingerbread toffee sesame snaps. Soufflé fruitcake cupcake biscuit pastry cheesecake cake jelly-o. Pastry gingerbread sweet biscuit gingerbread sweet roll jujubes. Topping soufflé carrot cake candy canes oat cake tootsie roll. Wafer shortbread liquorice shortbread cotton candy donut. Bonbon liquorice jelly beans jujubes icing. Gummies chocolate cake tiramisu croissant bonbon tart sweet roll sweet brownie. Pudding lemon drops croissant liquorice chocolate jelly beans tiramisu biscuit. Ice cream marshmallow marshmallow cheesecake icing. Tart carrot cake chocolate cake cookie halvah tiramisu sesame snaps. Gummies gummi bears candy canes biscuit marzipan danish liquorice bear claw chocolate cake. Tiramisu chocolate halvah cotton candy pudding fruitcake. Tart sweet shortbread apple pie carrot cake pie cheesecake jelly-o. Lollipop cake gummi bears pastry marshmallow pastry muffin chocolate tootsie roll. Gummies toffee danish donut bear claw. Bear claw wafer cake biscuit lemon drops cookie chocolate cake gummi bears jujubes. Lollipop wafer cotton candy bonbon jelly beans shortbread cotton candy pudding. Croissant cake gingerbread pastry jelly. Tart jujubes bear claw croissant cookie. Macaroon carrot cake dragée powder chocolate cake. Sweet pastry oat cake bear claw lollipop donut croissant tootsie roll cupcake. Tart cookie donut candy canes shortbread dessert lollipop. Jelly-o pudding tootsie roll gingerbread sesame snaps sweet roll tootsie roll. Lollipop sugar plum pudding cake bonbon pastry marshmallow. Cake dessert cupcake jelly-o tiramisu oat cake biscuit marzipan caramels. Cupcake sweet liquorice cookie dragée chocolate bar wafer tootsie roll. Gingerbread gingerbread oat cake marzipan tootsie roll cheesecake lollipop. Sweet muffin candy jelly cake cotton candy brownie pudding. Donut pie cupcake cotton candy donut gummi bears. Marshmallow tiramisu cookie candy cotton candy dragée cheesecake. Cake sweet roll dessert powder dragée macaroon marshmallow. Tootsie roll croissant danish cookie powder. Topping gingerbread chocolate cupcake cotton candy. Cotton candy wafer chocolate bar sweet bear claw jelly beans tootsie roll.	0	-40	
 14	23	2565	5		4	-1	none
 16	25	2751	1	no need	1	0	
+17	26	2564	1		1	0	
 \.
 
 
@@ -12186,6 +12229,7 @@ COPY public.material_returns (id, tenant_id, site_id, return_number, warehouse_i
 24	3	3	RET-00012	59	1	\N	202 WARD	Unused		Pradnesh	4	f	2026-06-17 12:02:37.001097	Partially Received	2026-06-17 06:35:45.076371	4
 25	2	2	RET-00003	62	3	\N	Cardiothoracic Lab	Unused		vik	3	f	2026-08-06 14:48:02.906889	Completed	2026-08-06 09:18:11.140767	3
 23	2	2	RET-00002	62	3	\N	HEALTH 	Unused			3	f	2026-06-12 02:04:24.390151	Partially Received	2026-08-17 05:56:27.492976	3
+26	2	2	RET-00004	62	3	\N	Admin	Unused		vikky	3	f	2026-08-18 11:19:42.572711	Completed	2026-08-18 05:49:52.043785	3
 \.
 
 
@@ -15386,6 +15430,7 @@ COPY public.materials (id, tenant_id, site_id, code, name, category_id, subcateg
 3808	3	3	MAT-00091	NON MYDRIIATIC CAMERA	42	\N	5	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:25.639402	2026-08-05 19:00:25.639417	46	\N	\N	f	f
 3809	3	3	MAT-00092	OPTHALMIC REFRACTION UNIT	42	\N	5	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:25.664928	2026-08-05 19:00:25.664941	46	\N	\N	f	f
 3810	3	3	MAT-00093	OPTHALOMOSCOPE	42	\N	5	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:25.688137	2026-08-05 19:00:25.688149	46	\N	\N	f	f
+4875	2	2	HSK-00070	table	69	\N	29	10	100	890	\N	General		16	Furniture		t	f	2026-08-18 10:30:46.046606	2026-08-18 10:30:46.046648	62			f	f
 3811	3	3	MAT-00094	GREEN LASER	42	\N	5	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:25.71123	2026-08-05 19:00:25.711243	46	\N	\N	f	f
 3812	3	3	MAT-00095	REICHART AUTO TONOMETER	42	\N	5	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:25.733683	2026-08-05 19:00:25.733694	46	\N	\N	f	f
 3813	3	3	MAT-00096	RETENOSCOPE	42	\N	5	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:25.757169	2026-08-05 19:00:25.757181	46	\N	\N	f	f
@@ -16073,6 +16118,7 @@ COPY public.purchase_order_items (id, po_id, material_id, quantity, rate, amount
 1745	275	3474	5	3262.58	16312.9	0	\N	3	9	9	0	f	5
 1746	276	2564	10	23	230	0	\N	2	6	6	0	f	5
 1747	277	3910	1	100	100	1	\N	0	9	9	0	f	1
+1748	278	2751	10	15000	150000	0	\N	0	9	9	0	f	\N
 \.
 
 
@@ -16151,7 +16197,6 @@ COPY public.purchase_orders (id, tenant_id, site_id, po_number, vendor_id, proje
 244	2	2	PO-00028	62	3	203	\N	\N	Formal	612466	2026-07-21	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-07 19:04:31.282046	2026-07-07 19:04:31.300742	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
 232	2	2	PO-00016	64	3	\N	\N	198	Formal	11.2	2026-07-21	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-22 12:18:25.580101	2026-06-30 20:00:31.707939	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
 245	2	2	PO-00029	63	3	\N	\N	190	Formal	444	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-08 11:51:20.874685	2026-07-08 11:51:20.886838	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
-243	2	2	PO-00027	62	3	\N	\N	\N	Informal	138151.99	2026-07-02	Partially Received	dfgfdgdgdfg	3	\N	\N	f	2026-07-02 18:30:35.966725	2026-07-08 12:25:10.086539	1		\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
 242	2	2	PO-00026	63	3	\N	\N	\N	Informal	33428.88	2026-07-22	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 12:42:10.050112	f	2026-07-01 16:02:34.765014	2026-07-01 18:12:10.051203	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
 237	2	2	PO-00021	62	3	\N	\N	\N	Informal	48416.97	2026-07-22	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 10:08:14.685627	f	2026-07-01 15:30:32.968379	2026-07-01 15:38:14.686254	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
 247	2	2	PO-00031	62	3	\N	\N	\N	Formal	119630.69	2026-07-09	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-09 12:36:38.03989	2026-07-09 12:36:38.061011	1	dkflkdflkdlfkdlfk dhfjhdfjhdfjh	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
@@ -16168,6 +16213,7 @@ COPY public.purchase_orders (id, tenant_id, site_id, po_number, vendor_id, proje
 217	2	2	PO-00004	63	3	\N	\N	186	Formal	23321.52	2026-07-03	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-06-16 06:09:10.505248	f	2026-06-12 01:40:11.463052	2026-06-16 11:39:10.508746	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
 211	3	3	PO-00046	53	1	\N	\N	\N	Informal	149060.07	2026-06-29	Short Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 04:59:33.248268	f	2026-06-08 17:18:43.689083	2026-06-17 11:21:46.51598	2	\N	mistaken	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
 241	2	2	PO-00025	63	3	\N	\N	\N	Informal	118308.5	\N	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 12:45:36.264791	f	2026-07-01 15:58:53.716577	2026-07-01 18:15:36.265807	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+243	2	2	PO-00027	62	3	\N	\N	\N	Informal	138151.99	2026-07-02	Short Closed	dfgfdgdgdfg	3	\N	\N	f	2026-07-02 18:30:35.966725	2026-08-18 11:50:27.70609	1		\n[Short Closed: no need ]	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
 240	2	2	PO-00024	62	3	\N	\N	\N	Informal	18509.3	2026-07-22	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-01 15:54:08.411103	2026-07-01 18:40:54.712499	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
 236	2	2	PO-00020	63	3	\N	\N	\N	Informal	30282.87	2026-07-22	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-01 15:09:29.245234	2026-07-06 16:58:25.718872	1	\N	Rejected for testing	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
 238	2	2	PO-00022	63	3	\N	\N	\N	Informal	37018.6	2026-07-01	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 10:14:55.636414	f	2026-07-01 15:32:32.73684	2026-07-01 15:44:55.636716	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
@@ -16186,6 +16232,7 @@ COPY public.purchase_orders (id, tenant_id, site_id, po_number, vendor_id, proje
 275	2	2	EPCN/PO-00001	70	3	\N	\N	\N	Formal	18671.74	2026-08-24	Approved	1. Bill/Invoices in the name of East Point College of Nursing managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-17 04:31:39.731856	f	2026-08-17 10:01:02.299007	2026-08-17 10:01:39.733905	2		\N	7	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Cash Purchase		\N
 276	2	2	EPCPT/PO-00004	66	3	\N	\N	\N	Formal	252.45	2026-08-18	Approved	1. Bill/Invoices in the name of East Point College of Physiotherapy managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-17 05:19:53.112341	f	2026-08-17 10:49:29.283407	2026-08-17 10:49:53.113125	2		\N	10	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Rental	Equipment Rental	Credit Purchase		\N
 277	2	2	EPCET/PO-00007	63	3	\N	\N	\N	Formal	118	2026-08-18	Closed	1. Bill/Invoices in the name of East Point College of Engineering & Technology managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-17 06:39:30.245864	f	2026-08-17 12:09:13.192308	2026-08-17 12:13:02.022457	2		\N	3	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Credit Purchase		\N
+278	2	2	EPAHS/PO-00004	69	3	208	\N	\N	Formal	177000	2026-09-01	Draft	1. Bill/Invoices in the name of East Point Allied Health Sciences managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-08-18 12:40:59.667636	2026-08-18 12:40:59.722144	1	\N	\N	11	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Credit Purchase	\N	\N
 \.
 
 
@@ -16244,6 +16291,10 @@ COPY public.purchase_request_approvals (id, pr_id, approval_flow_id, approver_id
 48	207	107	3	{"626": {"quantity": 5.0, "remarks": null}}	\N	2026-08-17 10:41:46.388011
 49	207	17	3	{"626": {"quantity": 5.0, "remarks": null}}	\N	2026-08-17 10:41:52.588213
 50	207	109	3	{"626": {"quantity": 5.0, "remarks": null}}	\N	2026-08-17 10:41:52.588234
+51	208	19	3	{"627": {"quantity": 10.0, "remarks": null}}	\N	2026-08-18 11:38:36.135389
+52	208	107	3	{"627": {"quantity": 10.0, "remarks": null}}	\N	2026-08-18 11:38:36.135433
+53	208	17	3	{"627": {"quantity": 10.0, "remarks": null}}	\N	2026-08-18 11:38:43.146184
+54	208	109	3	{"627": {"quantity": 10.0, "remarks": null}}	\N	2026-08-18 11:38:43.146228
 \.
 
 
@@ -16332,6 +16383,8 @@ COPY public.purchase_request_items (id, pr_id, material_id, quantity, approved_q
 624	202	3507	1	\N
 625	202	3503	2	\N
 626	207	2751	5	5
+627	208	2751	10	10
+628	209	2564	1	\N
 \.
 
 
@@ -16378,6 +16431,8 @@ COPY public.purchase_requests (id, tenant_id, site_id, pr_number, requester_id, 
 206	2	2	PR-00013	3	\N	7	HEALTH 	3	2026-08-14		Approved	3	2026-08-14 07:10:05.305418	f	2026-08-14 12:37:45.391061	2026-08-14 12:40:05.307372	2	Rental	Standard Rental	\N	Months	\N	\N	f	\N
 202	2	2	PR-00009	3	\N	12	Chemistry	3	2026-08-21		Submitted	\N	\N	f	2026-07-03 11:46:40.099177	2026-08-14 12:44:56.275727	1	\N	\N	\N	\N	\N	\N	\N	\N
 207	2	2	PR-00014	3	\N	\N	Nursing Foundation	3	2026-08-18		Approved	3	2026-08-17 05:11:52.603847	f	2026-08-17 10:41:37.019811	2026-08-17 10:41:52.604441	2	Purchase	\N	\N	\N	\N	\N	f	\N
+209	2	2	PR-00016	3	\N	7	HEALTH 	3	2026-08-18		Submitted	\N	\N	f	2026-08-18 12:23:32.937762	2026-08-18 12:23:32.937775	1	Purchase	\N	\N	\N	\N	\N	f	\N
+208	2	2	PR-00015	3	\N	\N	Child Health Nursing	3	2026-08-19		Converted to PO	3	2026-08-18 06:08:43.17722	f	2026-08-18 11:35:51.789742	2026-08-18 12:40:59.719751	2	Purchase	\N	\N	\N	\N	\N	f	\N
 \.
 
 
@@ -17159,7 +17214,6 @@ COPY public.quotation_request_item_sources (id, qr_item_id, source, source_pr_id
 108	466	Manual	\N	1
 109	467	Manual	\N	1
 110	468	Manual	\N	1
-113	471	Manual	\N	10
 114	472	Manual	\N	1
 115	473	Manual	\N	1
 116	474	Manual	\N	100
@@ -17481,6 +17535,210 @@ COPY public.quotation_request_item_sources (id, qr_item_id, source, source_pr_id
 3658	4011	Imported	\N	250
 4431	4784	Manual	\N	1
 4432	4785	PR	207	5
+4433	4786	PR	208	10
+4608	4961	Imported	\N	500
+4609	4962	Imported	\N	2
+4610	4963	Imported	\N	100
+4611	4964	Imported	\N	500
+4612	4965	Imported	\N	500
+4613	4966	Imported	\N	500
+4614	4967	Imported	\N	500
+4615	4968	Imported	\N	500
+4616	4969	Imported	\N	5
+4617	4970	Imported	\N	500
+4618	4971	Imported	\N	500
+4619	4972	Imported	\N	500
+4620	4973	Imported	\N	100
+4621	4974	Imported	\N	1
+4622	4975	Imported	\N	125
+4623	4976	Imported	\N	25
+4624	4977	Imported	\N	500
+4625	4978	Imported	\N	5
+4626	4979	Imported	\N	500
+4627	4980	Imported	\N	500
+4628	4981	Imported	\N	500
+4629	4982	Imported	\N	500
+4630	4983	Imported	\N	500
+4631	4984	Imported	\N	500
+4632	4985	Imported	\N	500
+4633	4986	Imported	\N	500
+4634	4987	Imported	\N	500
+4635	4988	Imported	\N	500
+4636	4989	Imported	\N	500
+4637	4990	Imported	\N	500
+4638	4991	Imported	\N	500
+4639	4992	Imported	\N	500
+4640	4993	Imported	\N	100
+4641	4994	Imported	\N	15
+4642	4995	Imported	\N	100
+4643	4996	Imported	\N	250
+4644	4997	Imported	\N	500
+4645	4998	Imported	\N	500
+4646	4999	Imported	\N	500
+4647	5000	Imported	\N	500
+4648	5001	Imported	\N	500
+4649	5002	Imported	\N	500
+4650	5003	Imported	\N	500
+4651	5004	Imported	\N	500
+4652	5005	Imported	\N	500
+4653	5006	Imported	\N	500
+4654	5007	Imported	\N	500
+4655	5008	Imported	\N	125
+4656	5009	Imported	\N	500
+4657	5010	Imported	\N	500
+4658	5011	Imported	\N	500
+4659	5012	Imported	\N	500
+4660	5013	Imported	\N	500
+4661	5014	Imported	\N	500
+4662	5015	Imported	\N	5
+4663	5016	Imported	\N	9
+4664	5017	Imported	\N	13
+4665	5018	Imported	\N	11
+4666	5019	Imported	\N	10
+4667	5020	Imported	\N	500
+4668	5021	Imported	\N	10
+4669	5022	Imported	\N	5
+4670	5023	Imported	\N	6
+4671	5024	Imported	\N	9
+4672	5025	Imported	\N	2
+4673	5026	Imported	\N	6
+4674	5027	Imported	\N	8
+4675	5028	Imported	\N	10
+4676	5029	Imported	\N	11
+4677	5030	Imported	\N	500
+4678	5031	Imported	\N	5
+4679	5032	Imported	\N	500
+4680	5033	Imported	\N	500
+4681	5034	Imported	\N	500
+4682	5035	Imported	\N	250
+4683	5036	Imported	\N	500
+4684	5037	Imported	\N	500
+4685	5038	Imported	\N	500
+4686	5039	Imported	\N	500
+4687	5040	Imported	\N	500
+4688	5041	Imported	\N	500
+4689	5042	Imported	\N	500
+4690	5043	Imported	\N	125
+4691	5044	Imported	\N	10
+4692	5045	Imported	\N	500
+4693	5046	Imported	\N	500
+4694	5047	Imported	\N	100
+4695	5048	Imported	\N	500
+4696	5049	Imported	\N	500
+4697	5050	Imported	\N	500
+4698	5051	Imported	\N	100
+4699	5052	Imported	\N	500
+4700	5053	Imported	\N	500
+4701	5054	Imported	\N	500
+4702	5055	Imported	\N	14
+4703	5056	Imported	\N	125
+4704	5057	Imported	\N	500
+4705	5058	Imported	\N	500
+4706	5059	Imported	\N	500
+4707	5060	Imported	\N	13
+4708	5061	Imported	\N	500
+4709	5062	Imported	\N	500
+4710	5063	Imported	\N	500
+4711	5064	Imported	\N	500
+4712	5065	Imported	\N	500
+4713	5066	Imported	\N	100
+4714	5067	Imported	\N	500
+4715	5068	Imported	\N	500
+4716	5069	Imported	\N	100
+4717	5070	Imported	\N	500
+4718	5071	Imported	\N	500
+4719	5072	Imported	\N	500
+4720	5073	Imported	\N	500
+4721	5074	Imported	\N	500
+4722	5075	Imported	\N	500
+4723	5076	Imported	\N	500
+4724	5077	Imported	\N	500
+4725	5078	Imported	\N	250
+4726	5079	Imported	\N	500
+4727	5080	Imported	\N	500
+4728	5081	Imported	\N	100
+4729	5082	Imported	\N	125
+4730	5083	Imported	\N	500
+4731	5084	Imported	\N	125
+4732	5085	Imported	\N	125
+4733	5086	Imported	\N	125
+4734	5087	Imported	\N	125
+4735	5088	Imported	\N	125
+4736	5089	Imported	\N	125
+4737	5090	Imported	\N	500
+4738	5091	Imported	\N	500
+4739	5092	Imported	\N	500
+4740	5093	Imported	\N	500
+4434	4787	Imported	\N	500
+4435	4788	Imported	\N	500
+4436	4789	Imported	\N	14
+4437	4790	Imported	\N	125
+4438	4791	Imported	\N	500
+4439	4792	Imported	\N	500
+4440	4793	Imported	\N	500
+4441	4794	Imported	\N	13
+4442	4795	Imported	\N	500
+4443	4796	Imported	\N	500
+4444	4797	Imported	\N	500
+4445	4798	Imported	\N	500
+4446	4799	Imported	\N	500
+4447	4800	Imported	\N	100
+4448	4801	Imported	\N	500
+4449	4802	Imported	\N	500
+4450	4803	Imported	\N	100
+4451	4804	Imported	\N	500
+4452	4805	Imported	\N	500
+4453	4806	Imported	\N	500
+4454	4807	Imported	\N	500
+4455	4808	Imported	\N	500
+4456	4809	Imported	\N	500
+4457	4810	Imported	\N	500
+4458	4811	Imported	\N	500
+4459	4812	Imported	\N	250
+4460	4813	Imported	\N	500
+4461	4814	Imported	\N	500
+4462	4815	Imported	\N	100
+4463	4816	Imported	\N	125
+4464	4817	Imported	\N	500
+4465	4818	Imported	\N	125
+4466	4819	Imported	\N	125
+4467	4820	Imported	\N	125
+4468	4821	Imported	\N	125
+4469	4822	Imported	\N	125
+4470	4823	Imported	\N	125
+4471	4824	Imported	\N	500
+4472	4825	Imported	\N	500
+4473	4826	Imported	\N	500
+4474	4827	Imported	\N	500
+4475	4828	Imported	\N	100
+4476	4829	Imported	\N	1000
+4477	4830	Imported	\N	7
+4478	4831	Imported	\N	500
+4479	4832	Imported	\N	100
+4480	4833	Imported	\N	500
+4481	4834	Imported	\N	500
+4482	4835	Imported	\N	12
+4483	4836	Imported	\N	100
+4484	4837	Imported	\N	500
+4485	4838	Imported	\N	500
+4486	4839	Imported	\N	125
+4487	4840	Imported	\N	125
+4488	4841	Imported	\N	100
+4489	4842	Imported	\N	500
+4490	4843	Imported	\N	500
+4491	4844	Imported	\N	100
+4492	4845	Imported	\N	500
+4493	4846	Imported	\N	500
+4494	4847	Imported	\N	500
+4495	4848	Imported	\N	500
+4496	4849	Imported	\N	500
+4497	4850	Imported	\N	500
+4498	4851	Imported	\N	500
+4499	4852	Imported	\N	500
+4500	4853	Imported	\N	500
+4501	4854	Imported	\N	100
+4502	4855	Imported	\N	10
+4503	4856	Imported	\N	500
 3659	4012	Imported	\N	500
 3660	4013	Imported	\N	500
 3661	4014	Imported	\N	100
@@ -17747,6 +18005,66 @@ COPY public.quotation_request_item_sources (id, qr_item_id, source, source_pr_id
 4188	4541	Imported	\N	108
 4189	4542	Imported	\N	506
 4190	4543	Imported	\N	506
+4504	4857	Imported	\N	500
+4505	4858	Imported	\N	1
+4506	4859	Imported	\N	500
+4507	4860	Imported	\N	500
+4508	4861	Imported	\N	500
+4509	4862	Imported	\N	500
+4510	4863	Imported	\N	500
+4511	4864	Imported	\N	250
+4512	4865	Imported	\N	500
+4513	4866	Imported	\N	250
+4514	4867	Imported	\N	500
+4515	4868	Imported	\N	500
+4516	4869	Imported	\N	500
+4517	4870	Imported	\N	250
+4518	4871	Imported	\N	500
+4519	4872	Imported	\N	500
+4520	4873	Imported	\N	8
+4521	4874	Imported	\N	5
+4522	4875	Imported	\N	13
+4523	4876	Imported	\N	100
+4524	4877	Imported	\N	500
+4525	4878	Imported	\N	500
+4526	4879	Imported	\N	5
+4527	4880	Imported	\N	500
+4528	4881	Imported	\N	500
+4529	4882	Imported	\N	500
+4530	4883	Imported	\N	500
+4531	4884	Imported	\N	500
+4532	4885	Imported	\N	125
+4533	4886	Imported	\N	100
+4534	4887	Imported	\N	500
+4535	4888	Imported	\N	500
+4536	4889	Imported	\N	125
+4537	4890	Imported	\N	500
+4538	4891	Imported	\N	1000
+4539	4892	Imported	\N	500
+4540	4893	Imported	\N	4
+4541	4894	Imported	\N	5
+4542	4895	Imported	\N	500
+4543	4896	Imported	\N	500
+4544	4897	Imported	\N	500
+4545	4898	Imported	\N	500
+4546	4899	Imported	\N	500
+4547	4900	Imported	\N	500
+4548	4901	Imported	\N	500
+4549	4902	Imported	\N	500
+4550	4903	Imported	\N	500
+4551	4904	Imported	\N	500
+4552	4905	Imported	\N	250
+4553	4906	Imported	\N	500
+4554	4907	Imported	\N	500
+4555	4908	Imported	\N	9
+4556	4909	Imported	\N	500
+4557	4910	Imported	\N	500
+4558	4911	Imported	\N	500
+4559	4912	Imported	\N	500
+4560	4913	Imported	\N	500
+4561	4914	Imported	\N	500
+4562	4915	Imported	\N	125
+4563	4916	Imported	\N	100
 4191	4544	Imported	\N	508
 4192	4545	Imported	\N	507
 4193	4546	Imported	\N	509
@@ -17987,6 +18305,275 @@ COPY public.quotation_request_item_sources (id, qr_item_id, source, source_pr_id
 4428	4781	Imported	\N	503
 4429	4782	Imported	\N	105
 4430	4783	Imported	\N	515
+4564	4917	Imported	\N	500
+4565	4918	Imported	\N	250
+4566	4919	Imported	\N	500
+4567	4920	Imported	\N	500
+4568	4921	Imported	\N	500
+4569	4922	Imported	\N	500
+4570	4923	Imported	\N	500
+4571	4924	Imported	\N	100
+4572	4925	Imported	\N	500
+4573	4926	Imported	\N	500
+4574	4927	Imported	\N	500
+4575	4928	Imported	\N	500
+4576	4929	Imported	\N	100
+4577	4930	Imported	\N	14
+4578	4931	Imported	\N	500
+4579	4932	Imported	\N	4
+4580	4933	Imported	\N	500
+4581	4934	Imported	\N	500
+4582	4935	Imported	\N	100
+4583	4936	Imported	\N	500
+4584	4937	Imported	\N	500
+4585	4938	Imported	\N	500
+4586	4939	Imported	\N	500
+4587	4940	Imported	\N	25
+4588	4941	Imported	\N	6
+4589	4942	Imported	\N	500
+4590	4943	Imported	\N	125
+4591	4944	Imported	\N	500
+4592	4945	Imported	\N	500
+4593	4946	Imported	\N	4
+4594	4947	Imported	\N	500
+4595	4948	Imported	\N	500
+4596	4949	Imported	\N	9
+4597	4950	Imported	\N	500
+4598	4951	Imported	\N	500
+4599	4952	Imported	\N	500
+4600	4953	Imported	\N	500
+4601	4954	Imported	\N	500
+4602	4955	Imported	\N	500
+4603	4956	Imported	\N	1
+4604	4957	Imported	\N	500
+4605	4958	Imported	\N	500
+4606	4959	Imported	\N	500
+4607	4960	Imported	\N	500
+4741	5094	Imported	\N	100
+4742	5095	Imported	\N	1000
+4743	5096	Imported	\N	7
+4744	5097	Imported	\N	500
+4745	5098	Imported	\N	100
+4746	5099	Imported	\N	500
+4747	5100	Imported	\N	500
+4748	5101	Imported	\N	12
+4749	5102	Imported	\N	100
+4750	5103	Imported	\N	500
+4751	5104	Imported	\N	500
+4752	5105	Imported	\N	125
+4753	5106	Imported	\N	125
+4754	5107	Imported	\N	100
+4755	5108	Imported	\N	500
+4756	5109	Imported	\N	500
+4757	5110	Imported	\N	100
+4758	5111	Imported	\N	500
+4759	5112	Imported	\N	500
+4760	5113	Imported	\N	500
+4761	5114	Imported	\N	500
+4762	5115	Imported	\N	500
+4763	5116	Imported	\N	500
+4764	5117	Imported	\N	500
+4765	5118	Imported	\N	500
+4766	5119	Imported	\N	500
+4767	5120	Imported	\N	100
+4768	5121	Imported	\N	10
+4769	5122	Imported	\N	500
+4770	5123	Imported	\N	500
+4771	5124	Imported	\N	1
+4772	5125	Imported	\N	500
+4773	5126	Imported	\N	500
+4774	5127	Imported	\N	500
+4775	5128	Imported	\N	500
+4776	5129	Imported	\N	500
+4777	5130	Imported	\N	250
+4778	5131	Imported	\N	500
+4779	5132	Imported	\N	250
+4780	5133	Imported	\N	500
+4781	5134	Imported	\N	500
+4782	5135	Imported	\N	500
+4783	5136	Imported	\N	250
+4784	5137	Imported	\N	500
+4785	5138	Imported	\N	500
+4786	5139	Imported	\N	8
+4787	5140	Imported	\N	5
+4788	5141	Imported	\N	13
+4789	5142	Imported	\N	100
+4790	5143	Imported	\N	500
+4791	5144	Imported	\N	500
+4792	5145	Imported	\N	5
+4793	5146	Imported	\N	500
+4794	5147	Imported	\N	500
+4795	5148	Imported	\N	500
+4796	5149	Imported	\N	500
+4797	5150	Imported	\N	500
+4798	5151	Imported	\N	125
+4799	5152	Imported	\N	100
+4800	5153	Imported	\N	500
+4801	5154	Imported	\N	500
+4802	5155	Imported	\N	125
+4803	5156	Imported	\N	500
+4804	5157	Imported	\N	1000
+4805	5158	Imported	\N	500
+4806	5159	Imported	\N	4
+4807	5160	Imported	\N	5
+4808	5161	Imported	\N	500
+4809	5162	Imported	\N	500
+4810	5163	Imported	\N	500
+4811	5164	Imported	\N	500
+4812	5165	Imported	\N	500
+4813	5166	Imported	\N	500
+4814	5167	Imported	\N	500
+4815	5168	Imported	\N	500
+4816	5169	Imported	\N	500
+4817	5170	Imported	\N	500
+4818	5171	Imported	\N	250
+4819	5172	Imported	\N	500
+4820	5173	Imported	\N	500
+4821	5174	Imported	\N	9
+4822	5175	Imported	\N	500
+4823	5176	Imported	\N	500
+4824	5177	Imported	\N	500
+4825	5178	Imported	\N	500
+4826	5179	Imported	\N	500
+4827	5180	Imported	\N	500
+4828	5181	Imported	\N	125
+4829	5182	Imported	\N	100
+4830	5183	Imported	\N	500
+4831	5184	Imported	\N	250
+4832	5185	Imported	\N	500
+4833	5186	Imported	\N	500
+4834	5187	Imported	\N	500
+4835	5188	Imported	\N	500
+4836	5189	Imported	\N	500
+4837	5190	Imported	\N	100
+4838	5191	Imported	\N	500
+4839	5192	Imported	\N	500
+4840	5193	Imported	\N	500
+4841	5194	Imported	\N	500
+4842	5195	Imported	\N	100
+4843	5196	Imported	\N	14
+4844	5197	Imported	\N	500
+4845	5198	Imported	\N	4
+4846	5199	Imported	\N	500
+4847	5200	Imported	\N	500
+4848	5201	Imported	\N	100
+4849	5202	Imported	\N	500
+4850	5203	Imported	\N	500
+4851	5204	Imported	\N	500
+4852	5205	Imported	\N	500
+4853	5206	Imported	\N	25
+4854	5207	Imported	\N	6
+4855	5208	Imported	\N	500
+4856	5209	Imported	\N	125
+4857	5210	Imported	\N	500
+4858	5211	Imported	\N	500
+4859	5212	Imported	\N	4
+4860	5213	Imported	\N	500
+4861	5214	Imported	\N	500
+4862	5215	Imported	\N	9
+4863	5216	Imported	\N	500
+4864	5217	Imported	\N	500
+4865	5218	Imported	\N	500
+4866	5219	Imported	\N	500
+4867	5220	Imported	\N	500
+4868	5221	Imported	\N	500
+4869	5222	Imported	\N	1
+4870	5223	Imported	\N	500
+4871	5224	Imported	\N	500
+4872	5225	Imported	\N	500
+4873	5226	Imported	\N	500
+4874	5227	Imported	\N	500
+4875	5228	Imported	\N	2
+4876	5229	Imported	\N	100
+4877	5230	Imported	\N	500
+4878	5231	Imported	\N	500
+4879	5232	Imported	\N	500
+4880	5233	Imported	\N	500
+4881	5234	Imported	\N	500
+4882	5235	Imported	\N	5
+4883	5236	Imported	\N	500
+4884	5237	Imported	\N	500
+4885	5238	Imported	\N	500
+4886	5239	Imported	\N	100
+4887	5240	Imported	\N	1
+4888	5241	Imported	\N	125
+4889	5242	Imported	\N	25
+4890	5243	Imported	\N	500
+4891	5244	Imported	\N	5
+4892	5245	Imported	\N	500
+4893	5246	Imported	\N	500
+4894	5247	Imported	\N	500
+4895	5248	Imported	\N	500
+4896	5249	Imported	\N	500
+4897	5250	Imported	\N	500
+4898	5251	Imported	\N	500
+4899	5252	Imported	\N	500
+4900	5253	Imported	\N	500
+4901	5254	Imported	\N	500
+4902	5255	Imported	\N	500
+4903	5256	Imported	\N	500
+4904	5257	Imported	\N	500
+4905	5258	Imported	\N	500
+4906	5259	Imported	\N	100
+4907	5260	Imported	\N	15
+4908	5261	Imported	\N	100
+4909	5262	Imported	\N	250
+4910	5263	Imported	\N	500
+4911	5264	Imported	\N	500
+4912	5265	Imported	\N	500
+4913	5266	Imported	\N	500
+4914	5267	Imported	\N	500
+4915	5268	Imported	\N	500
+4916	5269	Imported	\N	500
+4917	5270	Imported	\N	500
+4918	5271	Imported	\N	500
+4919	5272	Imported	\N	500
+4920	5273	Imported	\N	500
+4921	5274	Imported	\N	125
+4922	5275	Imported	\N	500
+4923	5276	Imported	\N	500
+4924	5277	Imported	\N	500
+4925	5278	Imported	\N	500
+4926	5279	Imported	\N	500
+4927	5280	Imported	\N	500
+4928	5281	Imported	\N	5
+4929	5282	Imported	\N	9
+4930	5283	Imported	\N	13
+4931	5284	Imported	\N	11
+4932	5285	Imported	\N	10
+4933	5286	Imported	\N	500
+4934	5287	Imported	\N	10
+4935	5288	Imported	\N	5
+4936	5289	Imported	\N	6
+4937	5290	Imported	\N	9
+4938	5291	Imported	\N	2
+4939	5292	Imported	\N	6
+4940	5293	Imported	\N	8
+4941	5294	Imported	\N	10
+4942	5295	Imported	\N	11
+4943	5296	Imported	\N	500
+4944	5297	Imported	\N	5
+4945	5298	Imported	\N	500
+4946	5299	Imported	\N	500
+4947	5300	Imported	\N	500
+4948	5301	Imported	\N	250
+4949	5302	Imported	\N	500
+4950	5303	Imported	\N	500
+4951	5304	Imported	\N	500
+4952	5305	Imported	\N	500
+4953	5306	Imported	\N	500
+4954	5307	Imported	\N	500
+4955	5308	Imported	\N	500
+4956	5309	Imported	\N	125
+4957	5310	Imported	\N	10
+4958	5311	Imported	\N	500
+4959	5312	Imported	\N	500
+4960	5313	Imported	\N	100
+4961	5314	Imported	\N	500
+4962	5315	Imported	\N	500
+4963	5316	Imported	\N	500
+4964	5317	Imported	\N	100
+4965	5318	Imported	\N	500
 \.
 
 
@@ -18128,7 +18715,6 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 466	207	2565	1	Manual	\N
 467	207	3507	1	Manual	\N
 468	207	2751	1	Manual	\N
-471	209	2357	10	Manual	\N
 472	208	2564	1	Manual	\N
 473	208	2565	1	Manual	\N
 474	210	2564	100	Manual	\N
@@ -18191,6 +18777,11 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4285	224	4646	125	Imported	\N
 4784	225	2564	1	Manual	\N
 4785	225	2751	5	PR	207
+4786	226	2751	10	PR	208
+5154	209	4714	500	Imported	\N
+5155	209	4715	125	Imported	\N
+5156	209	4716	500	Imported	\N
+5157	209	4717	1000	Imported	\N
 3986	222	4817	500	Imported	\N
 3987	222	4818	500	Imported	\N
 3988	222	4869	14	Imported	\N
@@ -18218,6 +18809,17 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4010	222	4637	500	Imported	\N
 4011	222	4638	250	Imported	\N
 4012	222	4639	500	Imported	\N
+5158	209	4718	500	Imported	\N
+5159	209	4719	4	Imported	\N
+5160	209	4720	5	Imported	\N
+5161	209	4721	500	Imported	\N
+5162	209	4722	500	Imported	\N
+5163	209	4723	500	Imported	\N
+5164	209	4724	500	Imported	\N
+5165	209	4725	500	Imported	\N
+5166	209	4726	500	Imported	\N
+5167	209	4727	500	Imported	\N
+5168	209	4728	500	Imported	\N
 4286	224	4647	125	Imported	\N
 4287	224	4648	125	Imported	\N
 4288	224	4649	125	Imported	\N
@@ -18260,6 +18862,14 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4325	224	4686	500	Imported	\N
 4326	224	4687	500	Imported	\N
 4327	224	4688	500	Imported	\N
+4787	227	4817	500	Imported	\N
+4788	227	4818	500	Imported	\N
+4789	227	4869	14	Imported	\N
+4790	227	4616	125	Imported	\N
+4791	227	4617	500	Imported	\N
+4792	227	4618	500	Imported	\N
+4793	227	4619	500	Imported	\N
+4794	227	4620	13	Imported	\N
 4013	222	4640	500	Imported	\N
 4014	222	4641	100	Imported	\N
 4015	222	4642	125	Imported	\N
@@ -18294,6 +18904,17 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4044	222	4671	500	Imported	\N
 4045	222	4672	500	Imported	\N
 4046	222	4673	500	Imported	\N
+4795	227	4621	500	Imported	\N
+4796	227	4622	500	Imported	\N
+4797	227	4623	500	Imported	\N
+4798	227	4624	500	Imported	\N
+4799	227	4625	500	Imported	\N
+4800	227	4626	100	Imported	\N
+4801	227	4627	500	Imported	\N
+4802	227	4628	500	Imported	\N
+4803	227	4629	100	Imported	\N
+4804	227	4630	500	Imported	\N
+4805	227	4631	500	Imported	\N
 4328	224	4689	500	Imported	\N
 4329	224	4690	250	Imported	\N
 4330	224	4691	500	Imported	\N
@@ -18336,6 +18957,15 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4367	224	4728	500	Imported	\N
 4368	224	4729	500	Imported	\N
 4369	224	4730	500	Imported	\N
+4806	227	4632	500	Imported	\N
+4807	227	4633	500	Imported	\N
+4808	227	4634	500	Imported	\N
+4809	227	4635	500	Imported	\N
+4810	227	4636	500	Imported	\N
+4811	227	4637	500	Imported	\N
+4812	227	4638	250	Imported	\N
+4813	227	4639	500	Imported	\N
+4814	227	4640	500	Imported	\N
 4047	222	4674	500	Imported	\N
 4048	222	4675	500	Imported	\N
 4049	222	4676	500	Imported	\N
@@ -18369,6 +18999,17 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4077	222	4704	500	Imported	\N
 4078	222	4705	5	Imported	\N
 4079	222	4706	500	Imported	\N
+4815	227	4641	100	Imported	\N
+4816	227	4642	125	Imported	\N
+4817	227	4643	500	Imported	\N
+4818	227	4644	125	Imported	\N
+4819	227	4645	125	Imported	\N
+4820	227	4646	125	Imported	\N
+4821	227	4647	125	Imported	\N
+4822	227	4648	125	Imported	\N
+4823	227	4649	125	Imported	\N
+4824	227	4650	500	Imported	\N
+4825	227	4651	500	Imported	\N
 4370	224	4731	250	Imported	\N
 4371	224	4732	500	Imported	\N
 4372	224	4733	500	Imported	\N
@@ -18411,6 +19052,14 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4409	224	4770	500	Imported	\N
 4410	224	4771	500	Imported	\N
 4411	224	4772	4	Imported	\N
+4826	227	4652	500	Imported	\N
+4827	227	4653	500	Imported	\N
+4828	227	4654	100	Imported	\N
+4829	227	4655	1000	Imported	\N
+4830	227	4656	7	Imported	\N
+4831	227	4657	500	Imported	\N
+4832	227	4658	100	Imported	\N
+4833	227	4659	500	Imported	\N
 4080	222	4707	500	Imported	\N
 4081	222	4708	500	Imported	\N
 4082	222	4709	500	Imported	\N
@@ -18444,6 +19093,18 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4110	222	4737	500	Imported	\N
 4111	222	4738	500	Imported	\N
 4112	222	4739	500	Imported	\N
+4834	227	4660	500	Imported	\N
+4835	227	4661	12	Imported	\N
+4836	227	4662	100	Imported	\N
+4837	227	4663	500	Imported	\N
+4838	227	4664	500	Imported	\N
+4839	227	4665	125	Imported	\N
+4840	227	4666	125	Imported	\N
+4841	227	4667	100	Imported	\N
+4842	227	4668	500	Imported	\N
+4843	227	4669	500	Imported	\N
+4844	227	4670	100	Imported	\N
+4845	227	4671	500	Imported	\N
 4412	224	4773	500	Imported	\N
 4413	224	4774	500	Imported	\N
 4414	224	4775	9	Imported	\N
@@ -18484,6 +19145,11 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4449	224	4810	500	Imported	\N
 4450	224	4811	500	Imported	\N
 4451	224	4812	500	Imported	\N
+4846	227	4672	500	Imported	\N
+4847	227	4673	500	Imported	\N
+4848	227	4674	500	Imported	\N
+4849	227	4675	500	Imported	\N
+4850	227	4676	500	Imported	\N
 4113	222	4740	500	Imported	\N
 4114	222	4741	125	Imported	\N
 4115	222	4742	100	Imported	\N
@@ -18520,6 +19186,21 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4146	222	4773	500	Imported	\N
 4147	222	4774	500	Imported	\N
 4148	222	4775	9	Imported	\N
+4851	227	4677	500	Imported	\N
+4852	227	4678	500	Imported	\N
+4853	227	4679	500	Imported	\N
+4854	227	4680	100	Imported	\N
+4855	227	4681	10	Imported	\N
+4856	227	4682	500	Imported	\N
+4857	227	4683	500	Imported	\N
+4858	227	4684	1	Imported	\N
+4859	227	4685	500	Imported	\N
+4860	227	4686	500	Imported	\N
+4861	227	4687	500	Imported	\N
+4862	227	4688	500	Imported	\N
+4863	227	4689	500	Imported	\N
+4864	227	4690	250	Imported	\N
+4865	227	4691	500	Imported	\N
 4452	224	4813	500	Imported	\N
 4453	224	4814	500	Imported	\N
 4454	224	4815	500	Imported	\N
@@ -18549,6 +19230,35 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4478	224	4852	500	Imported	\N
 4479	224	4853	500	Imported	\N
 4480	224	4854	5	Imported	\N
+4866	227	4692	250	Imported	\N
+4867	227	4693	500	Imported	\N
+4868	227	4694	500	Imported	\N
+4869	227	4695	500	Imported	\N
+4870	227	4696	250	Imported	\N
+4871	227	4697	500	Imported	\N
+4872	227	4698	500	Imported	\N
+4873	227	4699	8	Imported	\N
+4874	227	4700	5	Imported	\N
+4875	227	4701	13	Imported	\N
+4876	227	4702	100	Imported	\N
+4877	227	4703	500	Imported	\N
+4878	227	4704	500	Imported	\N
+4879	227	4705	5	Imported	\N
+4880	227	4706	500	Imported	\N
+4881	227	4707	500	Imported	\N
+4882	227	4708	500	Imported	\N
+4883	227	4709	500	Imported	\N
+4884	227	4710	500	Imported	\N
+4885	227	4711	125	Imported	\N
+4886	227	4712	100	Imported	\N
+4887	227	4713	500	Imported	\N
+4888	227	4714	500	Imported	\N
+4889	227	4715	125	Imported	\N
+4890	227	4716	500	Imported	\N
+4891	227	4717	1000	Imported	\N
+4892	227	4718	500	Imported	\N
+4893	227	4719	4	Imported	\N
+4894	227	4720	5	Imported	\N
 4149	222	4776	500	Imported	\N
 4150	222	4777	500	Imported	\N
 4151	222	4778	500	Imported	\N
@@ -18578,6 +19288,35 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4175	222	4802	25	Imported	\N
 4176	222	4803	500	Imported	\N
 4177	222	4804	5	Imported	\N
+4895	227	4721	500	Imported	\N
+4896	227	4722	500	Imported	\N
+4897	227	4723	500	Imported	\N
+4898	227	4724	500	Imported	\N
+4899	227	4725	500	Imported	\N
+4900	227	4726	500	Imported	\N
+4901	227	4727	500	Imported	\N
+4902	227	4728	500	Imported	\N
+4903	227	4729	500	Imported	\N
+4904	227	4730	500	Imported	\N
+4905	227	4731	250	Imported	\N
+4906	227	4732	500	Imported	\N
+4907	227	4733	500	Imported	\N
+4908	227	4734	9	Imported	\N
+4909	227	4735	500	Imported	\N
+4910	227	4736	500	Imported	\N
+4911	227	4737	500	Imported	\N
+4912	227	4738	500	Imported	\N
+4913	227	4739	500	Imported	\N
+4914	227	4740	500	Imported	\N
+4915	227	4741	125	Imported	\N
+4916	227	4742	100	Imported	\N
+4917	227	4743	500	Imported	\N
+4918	227	4744	250	Imported	\N
+4919	227	4745	500	Imported	\N
+4920	227	4746	500	Imported	\N
+4921	227	4747	500	Imported	\N
+4922	227	4748	500	Imported	\N
+4923	227	4749	500	Imported	\N
 4178	222	4805	500	Imported	\N
 4179	222	4806	500	Imported	\N
 4180	222	4807	500	Imported	\N
@@ -18695,6 +19434,28 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4669	223	4735	510	Imported	\N
 4670	223	4736	512	Imported	\N
 4671	223	4737	511	Imported	\N
+4924	227	4750	100	Imported	\N
+4925	227	4751	500	Imported	\N
+4926	227	4752	500	Imported	\N
+4927	227	4753	500	Imported	\N
+4928	227	4754	500	Imported	\N
+4929	227	4755	100	Imported	\N
+4930	227	4756	14	Imported	\N
+4931	227	4757	500	Imported	\N
+4932	227	4758	4	Imported	\N
+4933	227	4759	500	Imported	\N
+4934	227	4760	500	Imported	\N
+4935	227	4761	100	Imported	\N
+4936	227	4762	500	Imported	\N
+4937	227	4763	500	Imported	\N
+4938	227	4764	500	Imported	\N
+4939	227	4765	500	Imported	\N
+4940	227	4766	25	Imported	\N
+4941	227	4767	6	Imported	\N
+4942	227	4768	500	Imported	\N
+4943	227	4769	125	Imported	\N
+4944	227	4770	500	Imported	\N
+4945	227	4771	500	Imported	\N
 4672	223	4738	507	Imported	\N
 4673	223	4739	510	Imported	\N
 4674	223	4740	515	Imported	\N
@@ -18750,10 +19511,90 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4559	223	4625	514	Imported	\N
 4560	223	4626	102	Imported	\N
 4561	223	4627	513	Imported	\N
+4946	227	4772	4	Imported	\N
+4947	227	4773	500	Imported	\N
+4948	227	4774	500	Imported	\N
+4949	227	4775	9	Imported	\N
+4950	227	4776	500	Imported	\N
+4951	227	4777	500	Imported	\N
+4952	227	4778	500	Imported	\N
+4953	227	4779	500	Imported	\N
+4954	227	4780	500	Imported	\N
+4955	227	4781	500	Imported	\N
+4956	227	4782	1	Imported	\N
+4957	227	4783	500	Imported	\N
+4958	227	4784	500	Imported	\N
+4959	227	4785	500	Imported	\N
+4960	227	4786	500	Imported	\N
+4961	227	4787	500	Imported	\N
+4962	227	4788	2	Imported	\N
+4963	227	4789	100	Imported	\N
+4964	227	4790	500	Imported	\N
+4965	227	4791	500	Imported	\N
+4966	227	4792	500	Imported	\N
+4967	227	4793	500	Imported	\N
+4968	227	4794	500	Imported	\N
+4969	227	4795	5	Imported	\N
+4970	227	4796	500	Imported	\N
+4971	227	4797	500	Imported	\N
+4972	227	4798	500	Imported	\N
+4973	227	4799	100	Imported	\N
+4974	227	4800	1	Imported	\N
+4975	227	4801	125	Imported	\N
+4976	227	4802	25	Imported	\N
+4977	227	4803	500	Imported	\N
+4978	227	4804	5	Imported	\N
+4979	227	4805	500	Imported	\N
+4980	227	4806	500	Imported	\N
+4981	227	4807	500	Imported	\N
 4562	223	4628	501	Imported	\N
 4563	223	4629	111	Imported	\N
 4564	223	4630	511	Imported	\N
 4565	223	4631	505	Imported	\N
+4982	227	4808	500	Imported	\N
+4983	227	4809	500	Imported	\N
+4984	227	4810	500	Imported	\N
+4985	227	4811	500	Imported	\N
+4986	227	4812	500	Imported	\N
+4987	227	4813	500	Imported	\N
+4988	227	4814	500	Imported	\N
+4989	227	4815	500	Imported	\N
+4990	227	4816	500	Imported	\N
+4991	227	4819	500	Imported	\N
+4992	227	4820	500	Imported	\N
+4993	227	4821	100	Imported	\N
+4994	227	4822	15	Imported	\N
+4995	227	4823	100	Imported	\N
+4996	227	4824	250	Imported	\N
+4997	227	4825	500	Imported	\N
+4998	227	4826	500	Imported	\N
+4999	227	4827	500	Imported	\N
+5000	227	4828	500	Imported	\N
+5001	227	4829	500	Imported	\N
+5002	227	4830	500	Imported	\N
+5003	227	4831	500	Imported	\N
+5004	227	4832	500	Imported	\N
+5005	227	4833	500	Imported	\N
+5006	227	4834	500	Imported	\N
+5007	227	4835	500	Imported	\N
+5008	227	4847	125	Imported	\N
+5009	227	4848	500	Imported	\N
+5010	227	4849	500	Imported	\N
+5011	227	4850	500	Imported	\N
+5012	227	4851	500	Imported	\N
+5013	227	4852	500	Imported	\N
+5014	227	4853	500	Imported	\N
+5015	227	4854	5	Imported	\N
+5016	227	4855	9	Imported	\N
+5017	227	4856	13	Imported	\N
+5018	227	4857	11	Imported	\N
+5019	227	4858	10	Imported	\N
+5020	227	4859	500	Imported	\N
+5021	227	4860	10	Imported	\N
+5022	227	4861	5	Imported	\N
+5023	227	4862	6	Imported	\N
+5024	227	4863	9	Imported	\N
+5025	227	4864	2	Imported	\N
 4566	223	4632	510	Imported	\N
 4567	223	4633	515	Imported	\N
 4568	223	4634	512	Imported	\N
@@ -18779,6 +19620,64 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4588	223	4654	106	Imported	\N
 4589	223	4655	1004	Imported	\N
 4590	223	4656	14	Imported	\N
+5026	227	4865	6	Imported	\N
+5027	227	4866	8	Imported	\N
+5028	227	4867	10	Imported	\N
+5029	227	4868	11	Imported	\N
+5030	227	4604	500	Imported	\N
+5031	227	4605	5	Imported	\N
+5032	227	4606	500	Imported	\N
+5033	227	4607	500	Imported	\N
+5034	227	4608	500	Imported	\N
+5035	227	4609	250	Imported	\N
+5036	227	4610	500	Imported	\N
+5037	227	4611	500	Imported	\N
+5038	227	4612	500	Imported	\N
+5039	227	4613	500	Imported	\N
+5040	227	4614	500	Imported	\N
+5041	227	4615	500	Imported	\N
+5042	227	4836	500	Imported	\N
+5043	227	4837	125	Imported	\N
+5044	227	4838	10	Imported	\N
+5045	227	4839	500	Imported	\N
+5046	227	4840	500	Imported	\N
+5047	227	4841	100	Imported	\N
+5048	227	4842	500	Imported	\N
+5049	227	4843	500	Imported	\N
+5050	227	4844	500	Imported	\N
+5051	227	4845	100	Imported	\N
+5052	227	4846	500	Imported	\N
+5169	209	4729	500	Imported	\N
+5170	209	4730	500	Imported	\N
+5171	209	4731	250	Imported	\N
+5172	209	4732	500	Imported	\N
+5173	209	4733	500	Imported	\N
+5174	209	4734	9	Imported	\N
+5175	209	4735	500	Imported	\N
+5176	209	4736	500	Imported	\N
+5177	209	4737	500	Imported	\N
+5178	209	4738	500	Imported	\N
+5179	209	4739	500	Imported	\N
+5180	209	4740	500	Imported	\N
+5181	209	4741	125	Imported	\N
+5182	209	4742	100	Imported	\N
+5183	209	4743	500	Imported	\N
+5184	209	4744	250	Imported	\N
+5185	209	4745	500	Imported	\N
+5186	209	4746	500	Imported	\N
+5187	209	4747	500	Imported	\N
+5188	209	4748	500	Imported	\N
+5189	209	4749	500	Imported	\N
+5190	209	4750	100	Imported	\N
+5191	209	4751	500	Imported	\N
+5192	209	4752	500	Imported	\N
+5193	209	4753	500	Imported	\N
+5194	209	4754	500	Imported	\N
+5195	209	4755	100	Imported	\N
+5196	209	4756	14	Imported	\N
+5197	209	4757	500	Imported	\N
+5198	209	4758	4	Imported	\N
+5199	209	4759	500	Imported	\N
 4591	223	4657	515	Imported	\N
 4592	223	4658	101	Imported	\N
 4593	223	4659	502	Imported	\N
@@ -18807,6 +19706,29 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4616	223	4682	506	Imported	\N
 4617	223	4683	515	Imported	\N
 4618	223	4684	2	Imported	\N
+5053	209	4817	500	Imported	\N
+5054	209	4818	500	Imported	\N
+5055	209	4869	14	Imported	\N
+5056	209	4616	125	Imported	\N
+5057	209	4617	500	Imported	\N
+5058	209	4618	500	Imported	\N
+5059	209	4619	500	Imported	\N
+5060	209	4620	13	Imported	\N
+5061	209	4621	500	Imported	\N
+5062	209	4622	500	Imported	\N
+5063	209	4623	500	Imported	\N
+5064	209	4624	500	Imported	\N
+5065	209	4625	500	Imported	\N
+5066	209	4626	100	Imported	\N
+5067	209	4627	500	Imported	\N
+5068	209	4628	500	Imported	\N
+5069	209	4629	100	Imported	\N
+5070	209	4630	500	Imported	\N
+5071	209	4631	500	Imported	\N
+5072	209	4632	500	Imported	\N
+5073	209	4633	500	Imported	\N
+5074	209	4634	500	Imported	\N
+5075	209	4635	500	Imported	\N
 4619	223	4685	513	Imported	\N
 4620	223	4686	506	Imported	\N
 4621	223	4687	506	Imported	\N
@@ -18854,6 +19776,18 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4663	223	4729	506	Imported	\N
 4664	223	4730	515	Imported	\N
 4665	223	4731	253	Imported	\N
+5076	209	4636	500	Imported	\N
+5077	209	4637	500	Imported	\N
+5078	209	4638	250	Imported	\N
+5079	209	4639	500	Imported	\N
+5080	209	4640	500	Imported	\N
+5081	209	4641	100	Imported	\N
+5082	209	4642	125	Imported	\N
+5083	209	4643	500	Imported	\N
+5084	209	4644	125	Imported	\N
+5085	209	4645	125	Imported	\N
+5086	209	4646	125	Imported	\N
+5087	209	4647	125	Imported	\N
 4683	223	4749	505	Imported	\N
 4684	223	4750	113	Imported	\N
 4685	223	4751	502	Imported	\N
@@ -18914,6 +19848,34 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4740	223	4848	511	Imported	\N
 4741	223	4849	513	Imported	\N
 4742	223	4850	501	Imported	\N
+5088	209	4648	125	Imported	\N
+5089	209	4649	125	Imported	\N
+5090	209	4650	500	Imported	\N
+5091	209	4651	500	Imported	\N
+5092	209	4652	500	Imported	\N
+5093	209	4653	500	Imported	\N
+5094	209	4654	100	Imported	\N
+5095	209	4655	1000	Imported	\N
+5096	209	4656	7	Imported	\N
+5097	209	4657	500	Imported	\N
+5098	209	4658	100	Imported	\N
+5099	209	4659	500	Imported	\N
+5100	209	4660	500	Imported	\N
+5101	209	4661	12	Imported	\N
+5102	209	4662	100	Imported	\N
+5103	209	4663	500	Imported	\N
+5104	209	4664	500	Imported	\N
+5105	209	4665	125	Imported	\N
+5106	209	4666	125	Imported	\N
+5107	209	4667	100	Imported	\N
+5108	209	4668	500	Imported	\N
+5109	209	4669	500	Imported	\N
+5110	209	4670	100	Imported	\N
+5111	209	4671	500	Imported	\N
+5112	209	4672	500	Imported	\N
+5113	209	4673	500	Imported	\N
+5114	209	4674	500	Imported	\N
+5115	209	4675	500	Imported	\N
 4743	223	4851	514	Imported	\N
 4744	223	4852	510	Imported	\N
 4745	223	4853	508	Imported	\N
@@ -18955,6 +19917,163 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4781	223	4844	503	Imported	\N
 4782	223	4845	105	Imported	\N
 4783	223	4846	515	Imported	\N
+5116	209	4676	500	Imported	\N
+5117	209	4677	500	Imported	\N
+5118	209	4678	500	Imported	\N
+5119	209	4679	500	Imported	\N
+5120	209	4680	100	Imported	\N
+5121	209	4681	10	Imported	\N
+5122	209	4682	500	Imported	\N
+5123	209	4683	500	Imported	\N
+5124	209	4684	1	Imported	\N
+5125	209	4685	500	Imported	\N
+5126	209	4686	500	Imported	\N
+5127	209	4687	500	Imported	\N
+5128	209	4688	500	Imported	\N
+5129	209	4689	500	Imported	\N
+5130	209	4690	250	Imported	\N
+5131	209	4691	500	Imported	\N
+5132	209	4692	250	Imported	\N
+5133	209	4693	500	Imported	\N
+5134	209	4694	500	Imported	\N
+5135	209	4695	500	Imported	\N
+5136	209	4696	250	Imported	\N
+5137	209	4697	500	Imported	\N
+5138	209	4698	500	Imported	\N
+5139	209	4699	8	Imported	\N
+5140	209	4700	5	Imported	\N
+5141	209	4701	13	Imported	\N
+5142	209	4702	100	Imported	\N
+5143	209	4703	500	Imported	\N
+5144	209	4704	500	Imported	\N
+5145	209	4705	5	Imported	\N
+5146	209	4706	500	Imported	\N
+5147	209	4707	500	Imported	\N
+5148	209	4708	500	Imported	\N
+5149	209	4709	500	Imported	\N
+5150	209	4710	500	Imported	\N
+5151	209	4711	125	Imported	\N
+5152	209	4712	100	Imported	\N
+5153	209	4713	500	Imported	\N
+5200	209	4760	500	Imported	\N
+5201	209	4761	100	Imported	\N
+5202	209	4762	500	Imported	\N
+5203	209	4763	500	Imported	\N
+5204	209	4764	500	Imported	\N
+5205	209	4765	500	Imported	\N
+5206	209	4766	25	Imported	\N
+5207	209	4767	6	Imported	\N
+5208	209	4768	500	Imported	\N
+5209	209	4769	125	Imported	\N
+5210	209	4770	500	Imported	\N
+5211	209	4771	500	Imported	\N
+5212	209	4772	4	Imported	\N
+5213	209	4773	500	Imported	\N
+5214	209	4774	500	Imported	\N
+5215	209	4775	9	Imported	\N
+5216	209	4776	500	Imported	\N
+5217	209	4777	500	Imported	\N
+5218	209	4778	500	Imported	\N
+5219	209	4779	500	Imported	\N
+5220	209	4780	500	Imported	\N
+5221	209	4781	500	Imported	\N
+5222	209	4782	1	Imported	\N
+5223	209	4783	500	Imported	\N
+5224	209	4784	500	Imported	\N
+5225	209	4785	500	Imported	\N
+5226	209	4786	500	Imported	\N
+5227	209	4787	500	Imported	\N
+5228	209	4788	2	Imported	\N
+5229	209	4789	100	Imported	\N
+5230	209	4790	500	Imported	\N
+5231	209	4791	500	Imported	\N
+5232	209	4792	500	Imported	\N
+5233	209	4793	500	Imported	\N
+5234	209	4794	500	Imported	\N
+5235	209	4795	5	Imported	\N
+5236	209	4796	500	Imported	\N
+5237	209	4797	500	Imported	\N
+5238	209	4798	500	Imported	\N
+5239	209	4799	100	Imported	\N
+5240	209	4800	1	Imported	\N
+5241	209	4801	125	Imported	\N
+5242	209	4802	25	Imported	\N
+5243	209	4803	500	Imported	\N
+5244	209	4804	5	Imported	\N
+5245	209	4805	500	Imported	\N
+5246	209	4806	500	Imported	\N
+5247	209	4807	500	Imported	\N
+5248	209	4808	500	Imported	\N
+5249	209	4809	500	Imported	\N
+5250	209	4810	500	Imported	\N
+5251	209	4811	500	Imported	\N
+5252	209	4812	500	Imported	\N
+5253	209	4813	500	Imported	\N
+5254	209	4814	500	Imported	\N
+5255	209	4815	500	Imported	\N
+5256	209	4816	500	Imported	\N
+5257	209	4819	500	Imported	\N
+5258	209	4820	500	Imported	\N
+5259	209	4821	100	Imported	\N
+5260	209	4822	15	Imported	\N
+5261	209	4823	100	Imported	\N
+5262	209	4824	250	Imported	\N
+5263	209	4825	500	Imported	\N
+5264	209	4826	500	Imported	\N
+5265	209	4827	500	Imported	\N
+5266	209	4828	500	Imported	\N
+5267	209	4829	500	Imported	\N
+5268	209	4830	500	Imported	\N
+5269	209	4831	500	Imported	\N
+5270	209	4832	500	Imported	\N
+5271	209	4833	500	Imported	\N
+5272	209	4834	500	Imported	\N
+5273	209	4835	500	Imported	\N
+5274	209	4847	125	Imported	\N
+5275	209	4848	500	Imported	\N
+5276	209	4849	500	Imported	\N
+5277	209	4850	500	Imported	\N
+5278	209	4851	500	Imported	\N
+5279	209	4852	500	Imported	\N
+5280	209	4853	500	Imported	\N
+5281	209	4854	5	Imported	\N
+5282	209	4855	9	Imported	\N
+5283	209	4856	13	Imported	\N
+5284	209	4857	11	Imported	\N
+5285	209	4858	10	Imported	\N
+5286	209	4859	500	Imported	\N
+5287	209	4860	10	Imported	\N
+5288	209	4861	5	Imported	\N
+5289	209	4862	6	Imported	\N
+5290	209	4863	9	Imported	\N
+5291	209	4864	2	Imported	\N
+5292	209	4865	6	Imported	\N
+5293	209	4866	8	Imported	\N
+5294	209	4867	10	Imported	\N
+5295	209	4868	11	Imported	\N
+5296	209	4604	500	Imported	\N
+5297	209	4605	5	Imported	\N
+5298	209	4606	500	Imported	\N
+5299	209	4607	500	Imported	\N
+5300	209	4608	500	Imported	\N
+5301	209	4609	250	Imported	\N
+5302	209	4610	500	Imported	\N
+5303	209	4611	500	Imported	\N
+5304	209	4612	500	Imported	\N
+5305	209	4613	500	Imported	\N
+5306	209	4614	500	Imported	\N
+5307	209	4615	500	Imported	\N
+5308	209	4836	500	Imported	\N
+5309	209	4837	125	Imported	\N
+5310	209	4838	10	Imported	\N
+5311	209	4839	500	Imported	\N
+5312	209	4840	500	Imported	\N
+5313	209	4841	100	Imported	\N
+5314	209	4842	500	Imported	\N
+5315	209	4843	500	Imported	\N
+5316	209	4844	500	Imported	\N
+5317	209	4845	100	Imported	\N
+5318	209	4846	500	Imported	\N
 \.
 
 
@@ -18982,6 +20101,7 @@ COPY public.quotation_request_prs (id, qr_id, pr_id) FROM stdin;
 20	220	205
 22	221	205
 32	225	207
+33	226	208
 \.
 
 
@@ -19127,6 +20247,11 @@ COPY public.quotation_request_vendors (id, qr_id, vendor_id, is_sent, sent_at, r
 470	221	63	t	2026-08-06 13:28:30.804924	Pending
 471	221	62	t	2026-08-06 13:28:35.737024	Pending
 472	221	66	t	2026-08-06 13:28:40.46755	Pending
+531	209	69	t	2026-08-18 13:29:09.667254	Pending
+532	209	71	t	2026-08-18 13:29:09.668594	Pending
+533	209	70	t	2026-08-18 13:29:09.669243	Pending
+534	209	73	t	2026-08-18 13:29:09.669829	Pending
+535	209	72	t	2026-08-18 13:29:09.670444	Pending
 505	222	69	t	2026-08-06 19:22:50.042749	Received
 509	222	72	t	2026-08-06 19:23:14.987431	Received
 506	222	71	t	2026-08-06 19:22:56.263246	Not Required
@@ -19142,9 +20267,17 @@ COPY public.quotation_request_vendors (id, qr_id, vendor_id, is_sent, sent_at, r
 517	223	70	f	\N	Pending
 518	223	73	f	\N	Pending
 519	223	72	f	\N	Pending
-520	225	66	f	\N	Pending
-521	225	63	f	\N	Pending
-522	225	69	f	\N	Pending
+523	226	63	t	2026-08-18 11:40:07.561597	Pending
+524	226	71	t	2026-08-18 11:40:12.607124	Pending
+525	226	66	t	2026-08-18 11:40:17.418571	Pending
+526	227	69	t	2026-08-18 13:09:51.178409	Pending
+527	227	71	t	2026-08-18 13:09:56.324944	Pending
+528	227	70	t	2026-08-18 13:10:01.36993	Pending
+529	227	73	t	2026-08-18 13:10:06.198221	Pending
+530	227	72	t	2026-08-18 13:10:11.260878	Pending
+520	225	66	t	2026-08-18 13:12:07.945853	Pending
+521	225	63	t	2026-08-18 13:12:12.884211	Pending
+522	225	69	t	2026-08-18 13:12:17.716729	Pending
 \.
 
 
@@ -19192,7 +20325,6 @@ COPY public.quotation_requests (id, tenant_id, site_id, qr_number, project_id, c
 200	2	2	QR-00014	3	3	2026-07-15	\N	Received	\N	\N	f	2026-07-08 14:50:39.937075	2026-07-08 14:52:03.907683	\N
 206	2	2	QR-00020	3	3	2026-07-21	\N	Received	\N	\N	f	2026-07-14 17:25:58.264911	2026-07-14 17:27:47.94298	\N
 207	2	2	QR-00021	3	3	2026-07-22	\N	Entered	\N	\N	f	2026-07-21 11:33:07.588869	2026-07-21 12:18:59.282538	\N
-209	2	2	QR-00023	3	3	\N	\N	Draft	\N	\N	f	2026-07-31 12:58:40.692541	2026-07-31 12:58:40.692554	\N
 210	2	2	QR-00024	3	1	2027-01-01	Test Workflow Automated	Draft	\N	\N	f	2026-08-03 14:04:43.415291	2026-08-03 14:04:43.41531	\N
 211	2	2	QR-00025	3	1	2027-01-01	Test Workflow Automated	Submitted	\N	\N	f	2026-08-03 14:05:47.764882	2026-08-03 14:05:47.875313	\N
 217	2	2	QR-00031	3	3	2026-08-28	\N	Draft	\N	\N	f	2026-08-05 11:15:30.531936	2026-08-05 11:15:30.53195	\N
@@ -19210,7 +20342,10 @@ COPY public.quotation_requests (id, tenant_id, site_id, qr_number, project_id, c
 224	2	2	QR-00038	3	3	2026-08-31	\N	Received	\N	\N	f	2026-08-07 11:01:32.919708	2026-08-07 11:04:13.415633	\N
 213	2	2	QR-00027	3	1	2027-01-01	Test Workflow Automated	Approved	3	2026-08-10 11:28:56.388485	f	2026-08-03 14:10:04.35094	2026-08-10 11:28:56.396606	Looks good, test passed
 223	2	2	QR-00037	3	3	2026-08-21	\N	Submitted	\N	\N	f	2026-08-06 17:40:04.70899	2026-08-17 10:45:08.236597	\N
-225	2	2	QR-00039	3	3	2026-08-18	\N	Submitted	\N	\N	f	2026-08-17 13:03:15.263456	2026-08-17 13:03:15.263499	\N
+226	2	2	QR-00040	3	3	2026-08-19	\N	Requested	\N	\N	f	2026-08-18 11:39:57.427236	2026-08-18 11:40:22.091828	\N
+227	2	2	QR-00041	3	3	2026-08-31	\N	Requested	\N	\N	f	2026-08-18 13:06:34.325547	2026-08-18 13:09:47.49473	\N
+225	2	2	QR-00039	3	3	2026-08-18	\N	Requested	\N	\N	f	2026-08-17 13:03:15.263456	2026-08-18 13:12:22.696077	\N
+209	2	2	QR-00023	3	3	2026-08-25	\N	Requested	\N	\N	f	2026-07-31 12:58:40.692541	2026-08-18 13:29:09.671873	\N
 \.
 
 
@@ -22697,6 +23832,12 @@ COPY public.stock_ledger (id, tenant_id, site_id, material_id, warehouse_id, tra
 4287	2	2	2564	62	Issue	-4	25	Issue	244	ISS-00014	3	237	\N	3	2026-08-17 17:10:14.404003
 4288	2	2	2565	62	Issue	-2	52	Issue	245	ISS-00015	3	237	\N	3	2026-08-17 17:11:21.412642
 4289	2	2	2564	62	Issue	-1	24	Issue	246	ISS-00016	3	\N	\N	3	2026-08-17 19:04:31.750985
+4290	2	2	2481	62	Issue	-1	27	Issue	247	ISS-00017	3	237	\N	3	2026-08-18 11:13:00.31119
+4291	2	2	2564	62	Return	1	25	Return	26	RET-00004	3	\N	\N	3	2026-08-18 11:19:52.049843
+4292	2	2	2564	62	Issue	-1	24	Issue	248	ISS-00018	3	\N	\N	3	2026-08-18 11:24:08.811043
+4293	2	2	3507	62	Issue	-2	81	Issue	249	ISS-00019	1	237	\N	3	2026-08-18 11:25:58.107783
+4294	2	2	2565	62	Write Off	-1	51	WriteOff	19	WO-00011	\N	\N	\N	3	2026-08-18 11:31:10.258024
+4295	2	2	3475	62	Issue	-1	82	Issue	250	ISS-00020	1	237	\N	3	2026-08-18 11:31:20.884081
 \.
 
 
@@ -22717,6 +23858,7 @@ COPY public.stock_transfer_items (id, transfer_id, material_id, quantity, remark
 11	33	1062	7	no	\N	\N	\N
 9	20	2565	5		4	-1	proceed
 12	39	2564	10	needs	10	0	
+13	41	2435	50		\N	\N	\N
 \.
 
 
@@ -22736,6 +23878,7 @@ COPY public.stock_transfers (id, tenant_id, site_id, transfer_number, from_wareh
 33	3	3	TRF-00008	59	48	1	Initiated		4	f	2026-06-17 18:22:24.785236	\N	\N	\N
 20	2	2	TRF-00002	63	62	3	Partially Received		3	f	2026-06-12 02:02:28.867836	\N	3	2026-08-12 06:06:54.95339
 39	2	2	TRF-00003	62	63	3	Completed	need	3	f	2026-08-17 11:27:11.257558	2026-08-17 05:57:19.33041	3	2026-08-17 05:57:19.330482
+41	2	2	TRF-00004	62	77	3	Initiated		3	f	2026-08-18 11:23:09.168032	\N	\N	\N
 \.
 
 
@@ -22842,6 +23985,7 @@ COPY public.subcategories (id, tenant_id, site_id, name, category_id, is_active,
 97	2	2	ELECTRICAL	69	f	f
 98	2	2	Pipe	73	t	f
 78	2	2	BIOCHEMISTRY	71	t	f
+99	2	2	Wiring	81	t	f
 \.
 
 
@@ -22916,6 +24060,7 @@ COPY public.tenant_memberships (id, user_id, tenant_id, is_active, joined_at) FR
 42	35	2	t	2026-06-18 12:58:55.587118
 43	36	4	t	2026-07-03 12:43:37.514624
 18	11	2	t	2026-06-11 22:31:29.188862
+44	37	2	t	2026-08-18 10:25:10.713338
 \.
 
 
@@ -23055,6 +24200,7 @@ COPY public.user_role_assignments (id, user_id, tenant_id, role_id, site_id, ass
 78	36	4	23	4	2026-07-03 12:48:15.944929
 80	11	2	15	\N	2026-08-06 11:49:40.832767
 81	4	3	7	3	2026-08-17 11:51:52.235161
+82	37	2	11	\N	2026-08-18 10:25:10.714899
 \.
 
 
@@ -23098,6 +24244,7 @@ COPY public.users (id, username, email, full_name, hashed_password, is_active, i
 36	ntadmin	ku699444mar@gmail.com	Newtest Admin	$2b$12$oXSG73bVsEk7MU4QacpW9O5R54VYO/5W3ism7L9NmjjM7MFhDLxFq	t	f	f	2026-07-03 12:43:37.512671	2026-07-03 12:43:37.512684	\N	\N
 2	admin	pradnesh@nissigrid.com	NG Admin	$2b$12$4ftTuLMHa8t89FRB8q1cXudA/JE8XMZW6TyavLGrjdrefD8S5QEBG	t	f	f	2026-05-15 10:39:02.648701	2026-07-06 12:03:52.456418	\N	\N
 3	epadmin	ilangkumaran@nissigrid.com	EastPoint Admin	$2b$12$9AY1Wm27CFtBKrAyk275aO4KGhy2BmWiBdnuCwNa5g6CFUtNklRdm	t	f	f	2026-05-15 10:52:51.952583	2026-08-05 11:22:02.172623	\N	\N
+37	vikky	GVIKKY242@gmail.com	vikky	$2b$12$J2ArEc3tE3m9oB4S2PUHOOrnlxai/2kh4CxuxPXCQwyuxgVs7bLeC	t	f	f	2026-08-18 10:25:10.665199	2026-08-18 10:26:00.402788	\N	\N
 11	CEO	ceo@nissigrid.com	CEO Approver	$2b$12$5vPyjKr71cO08Ma3BwERGOTLchViQYVYB6nUDmhEaBBD44zDf9DR2	t	f	f	2026-06-01 10:50:02.222821	2026-08-06 11:49:40.830647	\N	\N
 \.
 
@@ -23116,6 +24263,7 @@ COPY public.vendor_approvals (id, vendor_id, approval_flow_id, approver_id, rema
 12	74	65	3	\N	2026-08-11 18:13:30.970628
 13	63	65	3	\N	2026-08-17 10:29:40.676976
 14	75	65	3	\N	2026-08-17 10:33:38.713024
+15	76	65	3	\N	2026-08-18 10:56:17.53842
 \.
 
 
@@ -23164,9 +24312,6 @@ COPY public.vendor_categories (id, vendor_id, category_id) FROM stdin;
 205	67	76
 206	67	69
 207	67	70
-208	68	66
-209	68	76
-210	68	68
 217	63	65
 218	63	66
 219	63	67
@@ -23175,6 +24320,10 @@ COPY public.vendor_categories (id, vendor_id, category_id) FROM stdin;
 222	63	74
 223	75	80
 224	75	68
+225	68	66
+226	68	76
+227	68	68
+228	76	81
 \.
 
 
@@ -23238,6 +24387,8 @@ COPY public.vendor_history (id, vendor_id, action, changes, remarks, action_by_i
 53	63	Fully Approved	\N	\N	3	2026-08-17 10:29:40.713446
 54	75	Created	\N	\N	3	2026-08-17 10:33:12.476616
 55	75	Fully Approved	\N	\N	3	2026-08-17 10:33:38.729447
+56	76	Created	\N	\N	3	2026-08-18 10:55:42.675233
+57	76	Fully Approved	\N	\N	3	2026-08-18 10:56:17.578254
 \.
 
 
@@ -24758,6 +25909,7 @@ COPY public.vendors (id, tenant_id, site_id, name, code, contact_person, phone, 
 69	2	2	AIC ENTERPRISES PVT LTD	VND-00008	AICENT	9742270172	ilangkumaran@nissigrid.in	29AASCA0900A1Z3	\N	Bangalore	29 - Karnataka	560058	\N	\N	\N	4.5	t	f	2026-08-06 16:45:15.340276	2026-08-06 19:15:24.8115	V-79A and V-79B, 1ST A Main Road	2nd Stage, Peenya Industrial Estate	Approved	2	3	2026-08-06 13:45:24.810803	\N	\N	\N	Approved	3	2026-08-06 12:12:39.00556	{"email": {"old": "customercare.ka@nissigrid.in", "new": "ilangkumaran@nissigrid.in"}}
 63	2	2	ELCAB ENGINEERS PRIVATE LIMITED	VND-00002	Bala	47347347833	pradnesha12345@gmail.com	29AACCE9951H1ZR	\N	Bangalore	29 - Karnataka	560060	\N	\N	\N	4.5	t	f	2026-06-12 01:31:58.140808	2026-08-17 10:29:40.712343	V R Cindem Complex, Sy. No. 1193/34/4, Kengeri Main Road,	Behind Mr Prem Bun, Ramasandra Village,	Approved	1	3	2026-08-17 04:59:40.711144	\N	\N	\N	Approved	\N	\N	{"phone": {"old": "47347347837", "new": "47347347833"}}
 75	2	2	sam	VND-00014	sam	0987123898	sam@gmail.com	27ABCDE1234F2Z5	\N	chennai	33 - Tamil Nadu	600094	\N	\N	\N	5	t	f	2026-08-17 10:33:12.443748	2026-08-17 10:33:38.728703	main road, north street.		Approved	1	3	2026-08-17 05:03:38.727901	\N	\N	\N	\N	\N	\N	\N
+76	2	2	Sakthi	VND-00015	sakthi	9835863778	sakthi@gmail.com	29ABCDE1234F1Z5	\N	Bengaluru	29 - Karnataka	500001	\N	\N	\N	5	t	f	2026-08-18 10:55:42.660685	2026-08-18 10:56:17.576042	north street, main road		Approved	1	3	2026-08-18 05:26:17.572458	\N	\N	\N	\N	\N	\N	\N
 \.
 
 
@@ -24796,6 +25948,7 @@ COPY public.warehouses (id, tenant_id, site_id, name, code, project_id, warehous
 75	2	2	IT store	WH-00012	3	Central	chennai	\N	aadhav	\N	t	f	2026-08-17 10:37:19.182694
 76	2	2	ram	WH-00013	3	Central	banglore	\N	ramanan	\N	f	f	2026-08-17 10:37:57.209012
 63	2	2	Civil Store	WH-00001	3	Store		\N		\N	t	f	2026-06-12 01:56:21.68741
+77	2	2	Electricals	WH-00014	3	Central	Chennai	\N	giri	\N	t	f	2026-08-18 10:46:38.068462
 \.
 
 
@@ -24818,6 +25971,7 @@ COPY public.work_order_items (id, wo_id, material_id, quantity, rate, amount, re
 6	8	2564	100	23	2473	0	\N	4	6	6	0	f	\N
 7	9	2565	5	26703.28	145052	0	\N	3	6	6	0	f	\N
 8	10	2751	10	10443.43	118303	0	\N	4	9	9	0	f	\N
+9	11	2751	4	10443.43	47814	0	\N	3	9	9	0	f	\N
 \.
 
 
@@ -24832,6 +25986,7 @@ COPY public.work_orders (id, tenant_id, site_id, wo_number, vendor_id, project_i
 8	2	2	WO-00004	66	3	11	3	\N	AMC	0	2473	\N	Submitted	1	1. Bill/Invoices in the name of East Point Allied Health Sciences managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	\N		3	\N	\N	f	2026-08-17 12:53:18.241895	2026-08-17 12:53:18.241937
 9	2	2	WO-00005	66	3	12	3	\N	AMC	0	145052	\N	Submitted	1	1. Bill/Invoices in the name of East Point Pre-University College managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	\N		3	\N	\N	f	2026-08-17 12:53:55.611555	2026-08-17 12:53:55.611599
 10	2	2	WO-00006	63	3	9	2	\N	AMC	0	118303	\N	Approved	1	1. Bill/Invoices in the name of New Royal College of Nursing managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	\N		3	3	2026-08-17 07:25:28.080236	f	2026-08-17 12:54:58.988485	2026-08-17 12:55:28.08275
+11	2	2	WO-00007	63	3	10	2	\N	AMC	0	47814	\N	Approved	1	1. Bill/Invoices in the name of East Point College of Physiotherapy managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	\N		3	3	2026-08-18 06:22:55.464803	f	2026-08-18 11:52:24.877197	2026-08-18 11:52:55.465517
 \.
 
 
@@ -24852,6 +26007,7 @@ COPY public.write_off_items (id, write_off_id, material_id, warehouse_id, quanti
 12	12	2338	62	1	4352.49	4352.49	f	0	1	1
 13	14	2564	62	1	16526.16	16526.16	f	0	\N	\N
 14	18	4608	62	1	460	460	f	0	1611	79
+15	19	2565	62	1	26703.28	26703.28	f	0	\N	\N
 \.
 
 
@@ -24872,6 +26028,7 @@ COPY public.write_offs (id, tenant_id, site_id, write_off_number, date, reason, 
 12	2	2	EWO-00001	2026-08-03	Equipment Write Off	Approved	1	3	3	2026-08-12 05:37:29.303859	f	2026-08-03 19:15:13.906801	2026-08-12 11:07:29.402274	Damaged in Handling			
 14	2	2	WO-00010	2026-08-17	product expired	Approved	1	3	3	2026-08-17 07:08:21.843444	f	2026-08-17 12:38:07.43634	2026-08-17 12:38:21.859441	Expired / Shelf-life	/api/uploads/write_offs/2/20260817_070731_5e50efd2.pdf	Biochemistry	/api/uploads/write_offs/2/20260817_070740_771c2d16.pdf
 18	2	2	EWO-00002	2026-08-17	Equipment Write Off	Approved	1	3	3	2026-08-17 09:09:06.563911	f	2026-08-17 14:38:54.402781	2026-08-17 14:39:06.615689	Damaged in Handling	/api/uploads/write_offs/2/20260817_090846_274e2fbb.pdf		/api/uploads/write_offs/2/20260817_090851_dd1b7c8e.pdf
+19	2	2	WO-00011	2026-08-18	damaged	Approved	1	3	3	2026-08-18 06:01:10.247606	f	2026-08-18 11:30:51.049822	2026-08-18 11:31:10.261171	Damaged in Handling	/api/uploads/write_offs/2/20260818_060034_6192c0e4.pdf	Admin	/api/uploads/write_offs/2/20260818_060043_8b013ed9.pdf
 \.
 
 
@@ -24879,7 +26036,7 @@ COPY public.write_offs (id, tenant_id, site_id, write_off_number, date, reason, 
 -- Name: alerts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.alerts_id_seq', 84, true);
+SELECT pg_catalog.setval('public.alerts_id_seq', 89, true);
 
 
 --
@@ -24914,7 +26071,7 @@ SELECT pg_catalog.setval('public.calibration_schedules_id_seq', 24, true);
 -- Name: categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.categories_id_seq', 80, true);
+SELECT pg_catalog.setval('public.categories_id_seq', 81, true);
 
 
 --
@@ -24935,35 +26092,35 @@ SELECT pg_catalog.setval('public.complaint_documents_id_seq', 6, true);
 -- Name: complaint_images_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.complaint_images_id_seq', 25, true);
+SELECT pg_catalog.setval('public.complaint_images_id_seq', 26, true);
 
 
 --
 -- Name: complaints_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.complaints_id_seq', 454, true);
+SELECT pg_catalog.setval('public.complaints_id_seq', 455, true);
 
 
 --
 -- Name: contract_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.contract_approvals_id_seq', 12, true);
+SELECT pg_catalog.setval('public.contract_approvals_id_seq', 16, true);
 
 
 --
 -- Name: contract_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.contract_items_id_seq', 6, true);
+SELECT pg_catalog.setval('public.contract_items_id_seq', 8, true);
 
 
 --
 -- Name: contracts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.contracts_id_seq', 6, true);
+SELECT pg_catalog.setval('public.contracts_id_seq', 8, true);
 
 
 --
@@ -24977,7 +26134,7 @@ SELECT pg_catalog.setval('public.current_stock_id_seq', 4403, true);
 -- Name: department_material_limits_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.department_material_limits_id_seq', 262, true);
+SELECT pg_catalog.setval('public.department_material_limits_id_seq', 265, true);
 
 
 --
@@ -24991,21 +26148,21 @@ SELECT pg_catalog.setval('public.departments_id_seq', 335, true);
 -- Name: document_sequences_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.document_sequences_id_seq', 145, true);
+SELECT pg_catalog.setval('public.document_sequences_id_seq', 147, true);
 
 
 --
 -- Name: equipment_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.equipment_history_id_seq', 9, true);
+SELECT pg_catalog.setval('public.equipment_history_id_seq', 10, true);
 
 
 --
 -- Name: equipment_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.equipment_items_id_seq', 1611, true);
+SELECT pg_catalog.setval('public.equipment_items_id_seq', 1612, true);
 
 
 --
@@ -25026,21 +26183,21 @@ SELECT pg_catalog.setval('public.floors_id_seq', 30, true);
 -- Name: gate_entries_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.gate_entries_id_seq', 208, true);
+SELECT pg_catalog.setval('public.gate_entries_id_seq', 209, true);
 
 
 --
 -- Name: gate_pass_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.gate_pass_items_id_seq', 24, true);
+SELECT pg_catalog.setval('public.gate_pass_items_id_seq', 25, true);
 
 
 --
 -- Name: gate_passes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.gate_passes_id_seq', 23, true);
+SELECT pg_catalog.setval('public.gate_passes_id_seq', 24, true);
 
 
 --
@@ -25061,21 +26218,21 @@ SELECT pg_catalog.setval('public.grn_items_id_seq', 522, true);
 -- Name: indent_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.indent_approvals_id_seq', 96, true);
+SELECT pg_catalog.setval('public.indent_approvals_id_seq', 100, true);
 
 
 --
 -- Name: indent_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.indent_items_id_seq', 525, true);
+SELECT pg_catalog.setval('public.indent_items_id_seq', 528, true);
 
 
 --
 -- Name: indents_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.indents_id_seq', 243, true);
+SELECT pg_catalog.setval('public.indents_id_seq', 244, true);
 
 
 --
@@ -25089,14 +26246,14 @@ SELECT pg_catalog.setval('public.institutions_id_seq', 20, true);
 -- Name: invoice_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.invoice_items_id_seq', 68, true);
+SELECT pg_catalog.setval('public.invoice_items_id_seq', 70, true);
 
 
 --
 -- Name: invoices_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.invoices_id_seq', 14, true);
+SELECT pg_catalog.setval('public.invoices_id_seq', 15, true);
 
 
 --
@@ -25110,35 +26267,35 @@ SELECT pg_catalog.setval('public.location_master_id_seq', 149, true);
 -- Name: material_issue_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.material_issue_items_id_seq', 226, true);
+SELECT pg_catalog.setval('public.material_issue_items_id_seq', 230, true);
 
 
 --
 -- Name: material_issues_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.material_issues_id_seq', 246, true);
+SELECT pg_catalog.setval('public.material_issues_id_seq', 250, true);
 
 
 --
 -- Name: material_return_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.material_return_items_id_seq', 16, true);
+SELECT pg_catalog.setval('public.material_return_items_id_seq', 17, true);
 
 
 --
 -- Name: material_returns_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.material_returns_id_seq', 25, true);
+SELECT pg_catalog.setval('public.material_returns_id_seq', 26, true);
 
 
 --
 -- Name: materials_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.materials_id_seq', 4874, true);
+SELECT pg_catalog.setval('public.materials_id_seq', 4875, true);
 
 
 --
@@ -25159,7 +26316,7 @@ SELECT pg_catalog.setval('public.organizations_id_seq', 4, true);
 -- Name: password_reset_tokens_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.password_reset_tokens_id_seq', 8, true);
+SELECT pg_catalog.setval('public.password_reset_tokens_id_seq', 9, true);
 
 
 --
@@ -25187,35 +26344,35 @@ SELECT pg_catalog.setval('public.purchase_order_approvals_id_seq', 124, true);
 -- Name: purchase_order_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_order_items_id_seq', 1747, true);
+SELECT pg_catalog.setval('public.purchase_order_items_id_seq', 1748, true);
 
 
 --
 -- Name: purchase_orders_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_orders_id_seq', 277, true);
+SELECT pg_catalog.setval('public.purchase_orders_id_seq', 278, true);
 
 
 --
 -- Name: purchase_request_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_request_approvals_id_seq', 50, true);
+SELECT pg_catalog.setval('public.purchase_request_approvals_id_seq', 54, true);
 
 
 --
 -- Name: purchase_request_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_request_items_id_seq', 626, true);
+SELECT pg_catalog.setval('public.purchase_request_items_id_seq', 628, true);
 
 
 --
 -- Name: purchase_requests_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_requests_id_seq', 207, true);
+SELECT pg_catalog.setval('public.purchase_requests_id_seq', 209, true);
 
 
 --
@@ -25236,35 +26393,35 @@ SELECT pg_catalog.setval('public.quotation_negotiation_history_id_seq', 23, true
 -- Name: quotation_request_item_sources_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_request_item_sources_id_seq', 4432, true);
+SELECT pg_catalog.setval('public.quotation_request_item_sources_id_seq', 4965, true);
 
 
 --
 -- Name: quotation_request_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_request_items_id_seq', 4785, true);
+SELECT pg_catalog.setval('public.quotation_request_items_id_seq', 5318, true);
 
 
 --
 -- Name: quotation_request_prs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_request_prs_id_seq', 32, true);
+SELECT pg_catalog.setval('public.quotation_request_prs_id_seq', 33, true);
 
 
 --
 -- Name: quotation_request_vendors_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_request_vendors_id_seq', 522, true);
+SELECT pg_catalog.setval('public.quotation_request_vendors_id_seq', 535, true);
 
 
 --
 -- Name: quotation_requests_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_requests_id_seq', 225, true);
+SELECT pg_catalog.setval('public.quotation_requests_id_seq', 227, true);
 
 
 --
@@ -25313,28 +26470,28 @@ SELECT pg_catalog.setval('public.sites_id_seq', 4, true);
 -- Name: stock_ledger_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.stock_ledger_id_seq', 4289, true);
+SELECT pg_catalog.setval('public.stock_ledger_id_seq', 4295, true);
 
 
 --
 -- Name: stock_transfer_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.stock_transfer_items_id_seq', 12, true);
+SELECT pg_catalog.setval('public.stock_transfer_items_id_seq', 13, true);
 
 
 --
 -- Name: stock_transfers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.stock_transfers_id_seq', 39, true);
+SELECT pg_catalog.setval('public.stock_transfers_id_seq', 41, true);
 
 
 --
 -- Name: subcategories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.subcategories_id_seq', 98, true);
+SELECT pg_catalog.setval('public.subcategories_id_seq', 99, true);
 
 
 --
@@ -25355,7 +26512,7 @@ SELECT pg_catalog.setval('public.tenant_configurations_id_seq', 3, true);
 -- Name: tenant_memberships_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.tenant_memberships_id_seq', 43, true);
+SELECT pg_catalog.setval('public.tenant_memberships_id_seq', 44, true);
 
 
 --
@@ -25383,35 +26540,35 @@ SELECT pg_catalog.setval('public.uom_id_seq', 48, true);
 -- Name: user_role_assignments_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.user_role_assignments_id_seq', 81, true);
+SELECT pg_catalog.setval('public.user_role_assignments_id_seq', 82, true);
 
 
 --
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.users_id_seq', 36, true);
+SELECT pg_catalog.setval('public.users_id_seq', 37, true);
 
 
 --
 -- Name: vendor_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_approvals_id_seq', 14, true);
+SELECT pg_catalog.setval('public.vendor_approvals_id_seq', 15, true);
 
 
 --
 -- Name: vendor_categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_categories_id_seq', 224, true);
+SELECT pg_catalog.setval('public.vendor_categories_id_seq', 228, true);
 
 
 --
 -- Name: vendor_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_history_id_seq', 55, true);
+SELECT pg_catalog.setval('public.vendor_history_id_seq', 57, true);
 
 
 --
@@ -25460,14 +26617,14 @@ SELECT pg_catalog.setval('public.vendor_work_orders_id_seq', 1, true);
 -- Name: vendors_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendors_id_seq', 75, true);
+SELECT pg_catalog.setval('public.vendors_id_seq', 76, true);
 
 
 --
 -- Name: warehouses_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.warehouses_id_seq', 76, true);
+SELECT pg_catalog.setval('public.warehouses_id_seq', 77, true);
 
 
 --
@@ -25481,28 +26638,28 @@ SELECT pg_catalog.setval('public.work_order_approvals_id_seq', 1, false);
 -- Name: work_order_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.work_order_items_id_seq', 8, true);
+SELECT pg_catalog.setval('public.work_order_items_id_seq', 9, true);
 
 
 --
 -- Name: work_orders_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.work_orders_id_seq', 10, true);
+SELECT pg_catalog.setval('public.work_orders_id_seq', 11, true);
 
 
 --
 -- Name: write_off_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.write_off_items_id_seq', 14, true);
+SELECT pg_catalog.setval('public.write_off_items_id_seq', 15, true);
 
 
 --
 -- Name: write_offs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.write_offs_id_seq', 18, true);
+SELECT pg_catalog.setval('public.write_offs_id_seq', 19, true);
 
 
 --
@@ -30114,5 +31271,5 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict B4W5fuCNNS2naZDkKbrboHlwXlEn9fQFc0aATHMHVouzcn8ohwZu01LTvU2j0F1
+\unrestrict b4TyOTV3bv1b3HJrEWrqY8ScMI4RkP5IwDowoWnNIW5GtuqbfUttUjJXxay6oIn
 

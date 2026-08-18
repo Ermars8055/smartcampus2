@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict PXoR8FfDxRLR5JsYRSBbkPzgLFaaGnH0CxVC6g2e2BUuBKchWh11LZtZhaI3mHc
+\restrict P0ICVmlgFS0afyQXcztNnQXEqYbD23ydbXbU7SkiwXSzDfzmaSsjWfGZAvpq451
 
 -- Dumped from database version 17.10 (Ubuntu 17.10-1.pgdg22.04+1)
 -- Dumped by pg_dump version 18.4 (Ubuntu 18.4-1.pgdg22.04+1)
@@ -489,8 +489,7 @@ CREATE TABLE public.complaints (
     manager_approved_at timestamp without time zone,
     resolution_entered text,
     closure_reason character varying(255),
-    repair_method character varying(100),
-    linked_vwo_id integer
+    repair_method character varying(100)
 );
 
 
@@ -3762,8 +3761,7 @@ CREATE TABLE public.vendor_work_orders (
     site_id integer NOT NULL,
     vwo_number character varying(50) NOT NULL,
     institution_id integer,
-    vendor_id integer NOT NULL,
-    complaint_id integer,
+    vendor_id integer,
     equipment_id integer NOT NULL,
     priority character varying(50) NOT NULL,
     target_date date NOT NULL,
@@ -4789,7 +4787,7 @@ ALTER TABLE ONLY public.write_offs ALTER COLUMN id SET DEFAULT nextval('public.w
 --
 
 COPY public.alembic_version (version_num) FROM stdin;
-7df8f75c6d3e
+73f7ccebeff4
 \.
 
 
@@ -4878,6 +4876,17 @@ COPY public.alerts (id, tenant_id, site_id, alert_type, severity, title, message
 78	2	2	Pending Action	Warning	Action Required: Issue Acknowledgement	Materials for your indent (IND-00024) have been issued. Please review and acknowledge receipt.	IndentIssued	239	\N	f	f	2026-08-14 12:56:12.823547	\N	3
 79	2	2	Complaint Assigned	Info	Complaint Assigned: PM-202608-EPCMS-POST OT -SYP-061	You have been assigned to complaint PM-202608-EPCMS-POST OT -SYP-061. Nature of complaint: Scheduled Preventive Maintenance	ComplaintAssigned	442	\N	f	f	2026-08-14 16:10:42.482907	\N	34
 80	2	2	Indent Approved	Success	Indent IND-00027 Approved	The indent (IND-00027) has been approved by EastPoint Admin.	IndentApproved	242	\N	f	f	2026-08-17 10:40:12.240706	\N	3
+81	2	2	Pending Action	Warning	Action Required: Issue Acknowledgement	Materials for your indent (IND-00027) have been issued. Please review and acknowledge receipt.	IndentIssued	242	\N	f	f	2026-08-17 11:06:47.911668	\N	3
+82	2	2	Complaint Assigned	Info	Complaint Assigned: CMP-00019	You have been assigned to complaint CMP-00019. Nature of complaint: Install machine 01	ComplaintAssigned	449	\N	f	f	2026-08-17 11:55:49.245213	\N	34
+83	2	2	Contract Approved	Success	Contract CNT-00006 Approved	The contract (CNT-00006) has been approved by EastPoint Admin.	ContractApproved	6	\N	f	f	2026-08-17 13:04:42.294988	\N	3
+84	2	2	Indent Approved	Success	Indent IND-00028 Approved	The indent (IND-00028) has been approved by EastPoint Admin.	IndentApproved	243	\N	f	f	2026-08-17 13:06:45.166122	\N	3
+85	2	2	Indent Approved	Success	Indent IND-00029 Approved	The indent (IND-00029) has been approved by EastPoint Admin.	IndentApproved	244	\N	f	f	2026-08-18 11:08:46.346522	\N	3
+86	2	2	Pending Action	Warning	Action Required: Issue Acknowledgement	Materials for your indent (IND-00018) have been issued. Please review and acknowledge receipt.	IndentIssued	233	\N	f	f	2026-08-18 11:25:58.077225	\N	3
+87	2	2	Pending Action	Warning	Action Required: Issue Acknowledgement	Materials for your indent (IND-00018) have been issued. Please review and acknowledge receipt.	IndentIssued	233	\N	f	f	2026-08-18 11:31:20.876122	\N	3
+88	2	2	Contract Approved	Success	Contract CNT-00007 Approved	The contract (CNT-00007) has been approved by EastPoint Admin.	ContractApproved	7	\N	f	f	2026-08-18 12:48:18.023912	\N	3
+89	2	2	Contract Approved	Success	Contract CNT-00008 Approved	The contract (CNT-00008) has been approved by EastPoint Admin.	ContractApproved	8	\N	f	t	2026-08-18 12:51:33.118737	2026-08-18 12:52:23.325348	3
+90	2	2	Complaint Assigned	Info	Complaint Assigned: TEST-CMP-1787064166-1	You have been assigned to complaint TEST-CMP-1787064166-1. Nature of complaint: Automated test - Material Req	ComplaintAssigned	457	\N	f	f	2026-08-18 20:12:46.905126	\N	8
+91	2	2	Complaint Assigned	Info	Complaint Assigned: TEST-CMP-1787064167-0	You have been assigned to complaint TEST-CMP-1787064167-0. Nature of complaint: Automated test - Material Not Req	ComplaintAssigned	458	\N	f	f	2026-08-18 20:12:47.073019	\N	8
 \.
 
 
@@ -4897,15 +4906,12 @@ COPY public.approval_flows (id, tenant_id, site_id, document_type, level, role_n
 17	2	2	PURCHASE_REQUEST	2	CEO	0	\N	\N	t
 18	2	2	PURCHASE_ORDER	2	CEO	0	\N	\N	t
 19	2	2	PURCHASE_REQUEST	1	Store Manager	0	\N	\N	t
-10	2	2	INDENT	1	Admin	0	\N	\N	f
 45	2	2	INDENT	1	Department Head	0	\N	\N	f
-11	2	2	INDENT	2	Admin	0	\N	\N	f
-12	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
 48	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
-49	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
 50	2	2	INDENT	2	Admin	0	\N	\N	f
-51	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
-52	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
+44	2	2	INDENT	1	CEO	0	\N	19	t
+46	2	2	INDENT	1	Institution Head	0	\N	\N	f
+87	2	2	PURCHASE_ORDER	1	Technician	5000	123456789	\N	f
 53	2	2	INDENT	1	Admin	0	\N	\N	f
 54	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
 55	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
@@ -4932,7 +4938,6 @@ COPY public.approval_flows (id, tenant_id, site_id, document_type, level, role_n
 77	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
 85	2	2	INDENT	2	Admin	0	\N	\N	f
 88	2	2	INDENT	1	Admin	0	\N	\N	f
-89	2	2	CONTRACT	1	Admin	0	\N	\N	f
 90	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
 91	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
 92	2	2	INDENT	2	Admin	0	\N	\N	f
@@ -4947,19 +4952,14 @@ COPY public.approval_flows (id, tenant_id, site_id, document_type, level, role_n
 101	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
 102	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
 103	2	2	VENDOR	2	Admin	0	\N	\N	f
-104	2	2	INDENT	1	Admin	0	\N	\N	t
-105	2	2	CONTRACT	1	Admin	0	\N	\N	t
-106	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	t
-107	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	t
-108	2	2	INDENT	2	Admin	0	\N	\N	t
-109	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	t
-110	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	t
+104	2	2	INDENT	1	Admin	0	\N	\N	f
+105	2	2	CONTRACT	1	Admin	0	\N	\N	f
+106	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
+107	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
+108	2	2	INDENT	2	Admin	0	\N	\N	f
+109	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
+110	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
 111	2	2	VENDOR	2	Admin	0	\N	\N	f
-65	2	2	VENDOR	1	Admin	0	\N	3	t
-84	2	2	CONTRACT	2	Admin	0	\N	\N	t
-44	2	2	INDENT	1	CEO	0	\N	19	t
-46	2	2	INDENT	1	Institution Head	0	\N	\N	f
-87	2	2	PURCHASE_ORDER	1	Technician	5000	123456789	\N	f
 13	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
 14	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
 15	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
@@ -4974,6 +4974,15 @@ COPY public.approval_flows (id, tenant_id, site_id, document_type, level, role_n
 28	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
 29	2	2	INDENT	2	Admin	0	\N	\N	f
 30	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
+10	2	2	INDENT	1	Admin	0	\N	\N	t
+11	2	2	INDENT	2	Admin	0	\N	\N	t
+12	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	t
+49	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	t
+51	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	t
+52	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	t
+65	2	2	VENDOR	1	Admin	0	\N	3	t
+84	2	2	CONTRACT	2	Admin	0	\N	\N	t
+89	2	2	CONTRACT	1	Admin	0	\N	\N	t
 31	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
 32	2	2	INDENT	1	Admin	0	\N	\N	f
 33	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
@@ -5949,7 +5958,6 @@ COPY public.categories (id, tenant_id, site_id, name, sequence_number, code, des
 72	2	2	LINEN	8	CAT-0008	Hospital category: LINEN	t	f	LIN
 74	2	2	RADIOLOGY	10	CAT-0010	Hospital category: RADIOLOGY	t	f	RAD
 67	2	2	HOSP EQPT	3	CAT-0003	Hospital category: HOSP EQPT	t	f	HEQ
-69	2	2	HOUSE KEEPING	5	CAT-0005	Hospital category: HOUSE KEEPING	t	f	HSK
 70	2	2	IT	6	CAT-0006	Hospital category: IT	t	f	ITI
 75	2	2	STATIONERY	11	CAT-0011	Hospital category: STATIONERY	t	f	STY
 76	2	2	HOSPITAL INSTRUMENTS	12	CAT-0012	Hospital Category: HOSPITAL INSTRUMENTS	t	f	HOI
@@ -5958,6 +5966,8 @@ COPY public.categories (id, tenant_id, site_id, name, sequence_number, code, des
 66	2	2	ELECTRICAL	2	CAT-0002	Hospital category: ELECTRICAL	t	f	ELE
 73	2	2	PLUMBING	9	CAT-0009	Hospital category: PLUMBING	t	f	PLB
 80	2	2	CHEMICALS	\N	CHEM	Chemical Materials	t	f	CHE
+69	2	2	HOUSE KEEPING	5	CAT-0005	Hospital category: HOUSE KEEPING	t	f	HSK
+81	2	2	Electricals	1	CAT-0001		t	f	ELC
 \.
 
 
@@ -5985,6 +5995,9 @@ COPY public.complaint_documents (id, complaint_id, document_type, file_url, uplo
 3	18	\N	/api/uploads/complaints/2/20260806_071451_7ebc33e5.jpeg	2026-08-06 12:44:51.072629	3
 4	14	\N	/api/uploads/complaints/2/20260806_071543_0e8b603f.jpeg	2026-08-06 12:45:43.437025	3
 5	11	\N	/api/uploads/complaints/2/20260810_124029_64c33737.pdf	2026-08-10 18:10:29.41236	3
+6	445	\N	/api/uploads/complaints/2/20260817_055447_45a69a68.jpg	2026-08-17 11:24:47.945934	3
+7	457	\N	/uploads/dummy.pdf	2026-08-18 20:12:46.981639	8
+8	458	\N	/uploads/dummy.pdf	2026-08-18 20:12:47.169688	8
 \.
 
 
@@ -6015,6 +6028,9 @@ COPY public.complaint_images (id, complaint_id, image_url, is_resolution_image, 
 21	17	/api/uploads/complaints/2/20260806_071310_cf26feef.jpeg	f	2026-08-06 12:43:10.873784
 22	18	/api/uploads/complaints/2/20260806_071425_cbb6d498.jpeg	f	2026-08-06 12:44:25.653768
 23	11	/api/uploads/complaints/2/20260810_124029_8c5b40f2.png	t	2026-08-10 18:10:29.413458
+24	445	/api/uploads/complaints/2/20260817_055447_0a1dfaae.jpg	t	2026-08-17 11:24:47.947337
+25	450	/api/uploads/complaints/2/20260817_071146_17c57717.jpg	f	2026-08-17 12:41:46.601178
+26	455	/api/uploads/complaints/2/20260818_071149_16b1d1b3.jpg	f	2026-08-18 12:41:50.028994
 \.
 
 
@@ -6022,452 +6038,462 @@ COPY public.complaint_images (id, complaint_id, image_url, is_resolution_image, 
 -- Data for Name: complaints; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.complaints (id, tenant_id, site_id, docket_no, complaint_date, complaint_time, department_name, building_id, room_id, location, nature_of_complaint, individual_detailed, name_and_trade, status, assigned_to_id, resolution_remarks, created_by_id, resolved_by_id, is_deleted, created_at, updated_at, resolved_at, material_required, verified_by_id, verified_at, rejection_remarks, inspection_details, feedback, contract_id, rwo_id, equipment_id, complaint_type, is_pm_calibration_call, admin_approved_by_id, admin_approved_at, manager_approved_by_id, manager_approved_at, resolution_entered, closure_reason, repair_method, linked_vwo_id) FROM stdin;
-1	3	3	123	2026-06-11	11:33	eng college	\N	\N	1	Broken chair	Chair is broken		In Progress	\N	\N	4	\N	f	2026-06-11 11:33:55.08691	2026-06-11 11:36:53.102193	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N	\N	\N
-2	3	3	124	2026-06-11	11:38	eng college	\N	\N	2	Machine is not working	Machine is not working		Open	\N	\N	4	\N	f	2026-06-11 11:39:32.822274	2026-06-11 11:39:32.822295	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N	\N	\N
-3	2	2	CMP-00001	2026-06-12	03:30	Civil	\N	\N		Machine is not working	Machine is not working	Hari	In Progress	10	\N	3	\N	f	2026-06-12 03:30:36.68306	2026-06-12 03:34:27.090925	\N	t	\N	\N	\N	\N	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N	\N	\N
-12	2	2	CMP-00010	2026-06-22	12:28	HEALTH 	7	\N		DOOR IS NOT LOCKING PROPERLY	door alignment got changed	ram	Material Pending	35	\N	3	\N	f	2026-06-22 12:28:31.544287	2026-06-22 12:28:55.831237	\N	t	\N	\N	\N	hinge needed	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N	\N	\N
-5	2	2	CMP-00003	2026-06-12	03:43	HEALTH 	\N	\N		Fan is not working	Fan is not working		Closed	10	Replaced	3	3	f	2026-06-12 03:43:19.039499	2026-06-12 04:15:21.884638	2026-06-11 22:45:17.188685	t	3	2026-06-11 22:45:21.883987	\N	\N	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N	\N	\N
-4	2	2	CMP-00002	2026-06-12	03:37	Mechanical	\N	\N		Broken chair	broken chair		In Progress	10	\N	3	\N	f	2026-06-12 03:37:42.695272	2026-06-18 13:07:49.102381	\N	t	\N	\N	\N	\N	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N	\N	\N
-7	2	2	CMP-00005	2026-06-18	13:22	Anatomy	\N	\N		FAN NOT WORKING			Material Pending	34	\N	3	\N	f	2026-06-18 13:22:07.124473	2026-07-02 18:39:51.104738	\N	t	\N	\N	\N		\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N	\N	\N
-6	2	2	CMP-00004	2026-06-18	10:40	HEALTH 	7	237					Material Pending	34	\N	3	\N	f	2026-06-18 10:40:28.426938	2026-06-18 13:09:14.492096	\N	t	\N	\N	\N	\N	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N	\N	\N
-13	2	2	CMP-00011	2026-07-02	18:55	Chemistry	12	\N		AC problem	.	Hari	Closed	\N	dfgdfg	17	\N	f	2026-07-02 18:55:44.946756	2026-07-02 19:02:37.864302	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N	\N	\N
-8	2	2	CMP-00006	2026-06-18	13:27	HEALTH 	7	237		DOOR IS NOT LOCKING PROPERLY		SURESH	Resolved	34	Fixed	3	34	f	2026-06-18 13:27:19.541485	2026-06-18 19:19:17.297948	2026-06-18 13:49:17.297068	f	\N	\N	\N	Inspection completed.   	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N	\N	\N
-9	2	2	CMP-00007	2026-06-18	17:39	HEALTH 	7	237		AC problem	AC is not working	Hari	Closed	34	Replaced	3	3	f	2026-06-18 17:39:02.3167	2026-06-19 15:35:45.320529	2026-06-19 09:44:42.841679	t	3	2026-06-19 10:05:45.319397	\N	Inspection done. Material need to be ordered	No issues after fix	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N	\N	\N
-10	2	2	CMP-00008	2026-06-22	11:42	HEALTH 	7	237		AC problem	AC IS NOT WORKING FROM YESTERDAY HEAVY RAIN 	SURESH	Closed	34	the new inverter is installed to the ac 	3	3	f	2026-06-22 11:42:25.966144	2026-06-22 11:53:11.669587	2026-06-22 06:19:15.588397	t	3	2026-06-22 06:23:11.668873	\N	found that the ac inverter got damaged and the current is not evenly supplied 	yes the technician worked good ac is working fine	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N	\N	\N
-11	2	2	CMP-00009	2026-06-22	12:04	Electronics & Communication Engineering	\N	\N		Water leakage	Water leakage	Pari	Pending Approval	35	\N	3	\N	f	2026-06-22 12:04:52.119096	2026-08-10 18:10:29.411011	\N	t	\N	\N	\N	started	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	water issue resolved 	water issue resolved 	\N	\N
-17	2	2	CMP-00015	2026-08-06	12:43	Management Studies - UG	\N	\N		not working properly	not working\n	vik	Closed	35	\N	3	\N	f	2026-08-06 12:43:10.85631	2026-08-06 12:43:45.858629	\N	f	\N	\N	\N	done	\N	\N	\N	\N	Calibration Call	f	3	2026-08-06 07:13:44.141331	3	2026-08-06 07:13:45.857491	yes	done	\N	\N
-14	2	2	CMP-00012	2026-07-02	19:01	Chemistry	12	\N		Fault in Tap 	WATER NOT COMING		Pending Approval	35	\N	3	\N	f	2026-07-02 19:01:17.170755	2026-08-06 12:45:43.436516	\N	f	\N	\N	\N		\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	yes	done	\N	\N
-18	2	2	CMP-00016	2026-08-06	12:44	Electrotherapy Lab	\N	\N		not working properly	none	vv	Reopened	34	\N	3	\N	f	2026-08-06 12:44:25.652609	2026-08-10 15:52:41.976794	\N	f	\N	\N	Reopened on 2026-08-10 10:22:41 by EastPoint Admin. Reason: again pronblem		\N	\N	\N	\N	Preventive Maintenance Call	f	\N	\N	\N	\N	yes	done	\N	\N
-15	2	2	CMP-00013	2026-07-02	19:02	Chemistry	\N	\N		fdgdfg	dfgdfgdg		Material Pending	34	\N	17	\N	f	2026-07-02 19:02:12.361688	2026-08-10 16:47:07.711575	\N	t	\N	\N	\N	inspected	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N	\N	\N
-16	2	2	CMP-00014	2026-08-05	18:01	Electrotherapy Lab	\N	\N		install the product	fdgdf	vik	Closed	35	\N	3	\N	f	2026-08-05 18:01:15.200114	2026-08-06 12:39:13.995766	\N	f	\N	\N	\N	dfgdfhf	\N	\N	\N	\N	User Training Call/Complaint	f	3	2026-08-06 07:01:06.640766	3	2026-08-06 07:09:13.994849	yes	done	\N	\N
-19	2	2	PM-202608-EPCMS-DIALYSIS-PM-041	2026-08-10	\N	Dialysis	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310229	2026-08-10 17:17:54.310242	\N	f	\N	\N	\N	\N	\N	\N	\N	989	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-20	2	2	PM-202608-EPCMS-EICU-PM-048	2026-08-10	\N	EICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310247	2026-08-10 17:17:54.31025	\N	f	\N	\N	\N	\N	\N	\N	\N	1003	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-21	2	2	PM-202608-EPCMS-EICU-PM-049	2026-08-10	\N	EICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310253	2026-08-10 17:17:54.310256	\N	f	\N	\N	\N	\N	\N	\N	\N	1004	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-22	2	2	PM-202608-EPCMS-MICU-VENT-026	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310259	2026-08-10 17:17:54.310262	\N	f	\N	\N	\N	\N	\N	\N	\N	1166	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-23	2	2	PM-202608-EPCMS-MICU-VENT-027	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310265	2026-08-10 17:17:54.310267	\N	f	\N	\N	\N	\N	\N	\N	\N	1167	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-24	2	2	PM-202608-EPCMS-MICU-VENT-028	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310271	2026-08-10 17:17:54.310273	\N	f	\N	\N	\N	\N	\N	\N	\N	1168	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-25	2	2	PM-202608-EPCMS-MICU-VENT-029	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310276	2026-08-10 17:17:54.310279	\N	f	\N	\N	\N	\N	\N	\N	\N	1169	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-26	2	2	PM-202608-EPCMS-MICU-VENT-030	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310282	2026-08-10 17:17:54.310285	\N	f	\N	\N	\N	\N	\N	\N	\N	1170	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-27	2	2	PM-202608-EPCMS-NICU-NWS-001	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310288	2026-08-10 17:17:54.310291	\N	f	\N	\N	\N	\N	\N	\N	\N	1224	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-28	2	2	PM-202608-EPCMS-NICU-PHTH-014	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310294	2026-08-10 17:17:54.310296	\N	f	\N	\N	\N	\N	\N	\N	\N	1228	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-29	2	2	PM-202608-EPCMS-NICU-PHTH-015	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.3103	2026-08-10 17:17:54.310302	\N	f	\N	\N	\N	\N	\N	\N	\N	1229	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-30	2	2	PM-202608-EPCMS-NICU-PHTH-016	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310305	2026-08-10 17:17:54.310308	\N	f	\N	\N	\N	\N	\N	\N	\N	1230	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-31	2	2	PM-202608-EPCMS-NICU-PHTH-017	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310311	2026-08-10 17:17:54.310315	\N	f	\N	\N	\N	\N	\N	\N	\N	1231	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-32	2	2	PM-202608-EPCMS-NICU-BWRM-011	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310318	2026-08-10 17:17:54.31032	\N	f	\N	\N	\N	\N	\N	\N	\N	1232	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-33	2	2	PM-202608-EPCMS-NICU-BWRM-012	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310323	2026-08-10 17:17:54.310326	\N	f	\N	\N	\N	\N	\N	\N	\N	1233	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-34	2	2	PM-202608-EPCMS-NICU-BCPAP-005	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310332	2026-08-10 17:17:54.310335	\N	f	\N	\N	\N	\N	\N	\N	\N	1234	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-35	2	2	PM-202608-EPCMS-NICU-BCPAP-006	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310338	2026-08-10 17:17:54.310341	\N	f	\N	\N	\N	\N	\N	\N	\N	1235	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-36	2	2	PM-202608-EPCMS-RAD-USG-002	2026-08-10	\N	CCU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310344	2026-08-10 17:17:54.310347	\N	f	\N	\N	\N	\N	\N	\N	\N	909	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-37	2	2	PM-202608-EPCMS-CCU-DFEB-003	2026-08-10	\N	CCU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31035	2026-08-10 17:17:54.310353	\N	f	\N	\N	\N	\N	\N	\N	\N	910	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-38	2	2	PM-202608-EPCMS-CCU-ECG-009	2026-08-10	\N	CCU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310357	2026-08-10 17:17:54.310359	\N	f	\N	\N	\N	\N	\N	\N	\N	911	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-39	2	2	PM-202608-EPCMS-CCU-PM-028	2026-08-10	\N	CCU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310362	2026-08-10 17:17:54.310365	\N	f	\N	\N	\N	\N	\N	\N	\N	912	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-40	2	2	PM-202608-EPCMS-CCU-PM-029	2026-08-10	\N	CCU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310368	2026-08-10 17:17:54.310371	\N	f	\N	\N	\N	\N	\N	\N	\N	913	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-41	2	2	PM-202608-EPCMS-CCU-PM-030	2026-08-10	\N	CCU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310374	2026-08-10 17:17:54.310377	\N	f	\N	\N	\N	\N	\N	\N	\N	914	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-42	2	2	PM-202608-EPCMS-CCU-PM-031	2026-08-10	\N	CCU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31038	2026-08-10 17:17:54.310383	\N	f	\N	\N	\N	\N	\N	\N	\N	915	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-43	2	2	PM-202608-EPCMS-CCU-PM-032	2026-08-10	\N	CCU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310386	2026-08-10 17:17:54.310389	\N	f	\N	\N	\N	\N	\N	\N	\N	916	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-44	2	2	PM-202608-EPCMS-CCU-PM-033	2026-08-10	\N	CCU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310392	2026-08-10 17:17:54.310394	\N	f	\N	\N	\N	\N	\N	\N	\N	917	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-45	2	2	PM-202608-EPCMS-CCU-SYP-010	2026-08-10	\N	CCU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310398	2026-08-10 17:17:54.310401	\N	f	\N	\N	\N	\N	\N	\N	\N	918	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-46	2	2	PM-202608-EPCMS-CCU-SYP-011	2026-08-10	\N	CCU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310404	2026-08-10 17:17:54.310407	\N	f	\N	\N	\N	\N	\N	\N	\N	919	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-47	2	2	PM-202608-EPCMS-CCU-SYP-012	2026-08-10	\N	CCU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31041	2026-08-10 17:17:54.310413	\N	f	\N	\N	\N	\N	\N	\N	\N	920	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-48	2	2	PM-202608-EPCMS-CCU-SYP-013	2026-08-10	\N	CCU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310416	2026-08-10 17:17:54.310419	\N	f	\N	\N	\N	\N	\N	\N	\N	921	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-49	2	2	PM-202608-EPCMS-CCU-SYP-014	2026-08-10	\N	CCU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310422	2026-08-10 17:17:54.310424	\N	f	\N	\N	\N	\N	\N	\N	\N	922	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-50	2	2	PM-202608-EPCMS-CTVS ICU-VENT-003	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310427	2026-08-10 17:17:54.31043	\N	f	\N	\N	\N	\N	\N	\N	\N	923	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-51	2	2	PM-202608-EPCMS-CCU-VENT-004	2026-08-10	\N	CCU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310433	2026-08-10 17:17:54.310436	\N	f	\N	\N	\N	\N	\N	\N	\N	924	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-52	2	2	PM-202608-EPCMS-CCU-VENT-005	2026-08-10	\N	CCU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310439	2026-08-10 17:17:54.310442	\N	f	\N	\N	\N	\N	\N	\N	\N	925	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-53	2	2	PM-202608-EPCMS-CCU-VENT-006	2026-08-10	\N	CCU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310445	2026-08-10 17:17:54.310448	\N	f	\N	\N	\N	\N	\N	\N	\N	926	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-54	2	2	PM-202608-EPCMS-CCU-INP-005	2026-08-10	\N	CCU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310451	2026-08-10 17:17:54.310453	\N	f	\N	\N	\N	\N	\N	\N	\N	927	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-55	2	2	PM-202608-EPCMS-CCU-INP-006	2026-08-10	\N	CCU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310456	2026-08-10 17:17:54.310459	\N	f	\N	\N	\N	\N	\N	\N	\N	928	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-56	2	2	PM-202608-EPCMS-CTVS ICU-BC-001	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310462	2026-08-10 17:17:54.310465	\N	f	\N	\N	\N	\N	\N	\N	\N	936	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-57	2	2	PM-202608-EPCMS-CTVS ICU-DFEB-004	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310468	2026-08-10 17:17:54.310471	\N	f	\N	\N	\N	\N	\N	\N	\N	937	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-58	2	2	PM-202608-EPCMS-CTVS ICU-ESA-003	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310474	2026-08-10 17:17:54.310477	\N	f	\N	\N	\N	\N	\N	\N	\N	938	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-59	2	2	PM-202608-EPCMS-CTVS ICU-FWM-001	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31048	2026-08-10 17:17:54.310483	\N	f	\N	\N	\N	\N	\N	\N	\N	939	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-60	2	2	PM-202608-EPCMS-CTVS ICU-FWM-002	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310486	2026-08-10 17:17:54.310492	\N	f	\N	\N	\N	\N	\N	\N	\N	940	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-61	2	2	PM-202608-EPCMS-CTVS ICU-HTM-001	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310495	2026-08-10 17:17:54.310498	\N	f	\N	\N	\N	\N	\N	\N	\N	941	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-62	2	2	PM-202608-EPCMS-CTVS ICU-HLM-001	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310501	2026-08-10 17:17:54.310504	\N	f	\N	\N	\N	\N	\N	\N	\N	942	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-63	2	2	PM-202608-EPCMS-CTVS ICU-INP-007	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310507	2026-08-10 17:17:54.31051	\N	f	\N	\N	\N	\N	\N	\N	\N	943	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-64	2	2	PM-202608-EPCMS-CTVS ICU-INP-008	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310513	2026-08-10 17:17:54.310516	\N	f	\N	\N	\N	\N	\N	\N	\N	944	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-65	2	2	PM-202608-EPCMS-CTVS ICU-INP-009	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310519	2026-08-10 17:17:54.310522	\N	f	\N	\N	\N	\N	\N	\N	\N	945	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-66	2	2	PM-202608-EPCMS-CTVS ICU-INP-010	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310525	2026-08-10 17:17:54.310528	\N	f	\N	\N	\N	\N	\N	\N	\N	946	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-67	2	2	PM-202608-EPCMS-CTVS ICU-INP-011	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310531	2026-08-10 17:17:54.310534	\N	f	\N	\N	\N	\N	\N	\N	\N	947	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-68	2	2	PM-202608-EPCMS-CTVS ICU-PM-034	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310537	2026-08-10 17:17:54.31054	\N	f	\N	\N	\N	\N	\N	\N	\N	948	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-69	2	2	PM-202608-EPCMS-CTVS ICU-PM-035	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310543	2026-08-10 17:17:54.310546	\N	f	\N	\N	\N	\N	\N	\N	\N	949	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-70	2	2	PM-202608-EPCMS-CTVS ICU-PM-036	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310549	2026-08-10 17:17:54.310552	\N	f	\N	\N	\N	\N	\N	\N	\N	950	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-71	2	2	PM-202608-EPCMS-CTVS ICU-PM-037	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310555	2026-08-10 17:17:54.310557	\N	f	\N	\N	\N	\N	\N	\N	\N	951	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-72	2	2	PM-202608-EPCMS-CTVS ICU-PM-038	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31056	2026-08-10 17:17:54.310563	\N	f	\N	\N	\N	\N	\N	\N	\N	952	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-73	2	2	PM-202608-EPCMS-CTVS ICU-PTWM-001	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310566	2026-08-10 17:17:54.310569	\N	f	\N	\N	\N	\N	\N	\N	\N	954	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-74	2	2	PM-202608-EPCMS-CTVS ICU-BPA-028	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310573	2026-08-10 17:17:54.310576	\N	f	\N	\N	\N	\N	\N	\N	\N	955	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-75	2	2	PM-202608-EPCMS-CTVS ICU-SHL-001	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310579	2026-08-10 17:17:54.310582	\N	f	\N	\N	\N	\N	\N	\N	\N	956	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-76	2	2	PM-202608-EPCMS-CTVS ICU-SYP-015	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310585	2026-08-10 17:17:54.310587	\N	f	\N	\N	\N	\N	\N	\N	\N	957	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-77	2	2	PM-202608-EPCMS-CTVS ICU-SYP-016	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31059	2026-08-10 17:17:54.310593	\N	f	\N	\N	\N	\N	\N	\N	\N	958	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-78	2	2	PM-202608-EPCMS-CTVS ICU-DOP-001	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310596	2026-08-10 17:17:54.310599	\N	f	\N	\N	\N	\N	\N	\N	\N	959	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-79	2	2	PM-202608-EPCMS-CTVS ICU-DOP-002	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310602	2026-08-10 17:17:54.310605	\N	f	\N	\N	\N	\N	\N	\N	\N	960	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-80	2	2	PM-202608-EPCMS-CTVS ICU-DOP-003	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310608	2026-08-10 17:17:54.31061	\N	f	\N	\N	\N	\N	\N	\N	\N	961	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-81	2	2	PM-202608-EPCMS-CTVS ICU-SYP-017	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310613	2026-08-10 17:17:54.310616	\N	f	\N	\N	\N	\N	\N	\N	\N	962	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-82	2	2	PM-202608-EPCMS-CTVS ICU-SYP-018	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310619	2026-08-10 17:17:54.310622	\N	f	\N	\N	\N	\N	\N	\N	\N	963	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-83	2	2	PM-202608-EPCMS-CTVS ICU-VBOX-011	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310625	2026-08-10 17:17:54.310628	\N	f	\N	\N	\N	\N	\N	\N	\N	964	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-84	2	2	PM-202608-EPCMS-DIALYSIS-BPA-030	2026-08-10	\N	Dialysis	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310631	2026-08-10 17:17:54.310634	\N	f	\N	\N	\N	\N	\N	\N	\N	978	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-85	2	2	PM-202608-EPCMS-DIALYSIS-HD-001	2026-08-10	\N	Dialysis	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310637	2026-08-10 17:17:54.310639	\N	f	\N	\N	\N	\N	\N	\N	\N	979	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-86	2	2	PM-202608-EPCMS-DIALYSIS-HD-002	2026-08-10	\N	Dialysis	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310642	2026-08-10 17:17:54.310645	\N	f	\N	\N	\N	\N	\N	\N	\N	980	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-87	2	2	PM-202608-EPCMS-DIALYSIS-HD-003	2026-08-10	\N	Dialysis	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310648	2026-08-10 17:17:54.310651	\N	f	\N	\N	\N	\N	\N	\N	\N	981	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-88	2	2	PM-202608-EPCMS-DIALYSIS-HD-004	2026-08-10	\N	Dialysis	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310654	2026-08-10 17:17:54.310657	\N	f	\N	\N	\N	\N	\N	\N	\N	982	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-89	2	2	PM-202608-EPCMS-DIALYSIS-HD-005	2026-08-10	\N	Dialysis	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31066	2026-08-10 17:17:54.310663	\N	f	\N	\N	\N	\N	\N	\N	\N	983	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-90	2	2	PM-202608-EPCMS-DIALYSIS-HD-006	2026-08-10	\N	Dialysis	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310666	2026-08-10 17:17:54.310669	\N	f	\N	\N	\N	\N	\N	\N	\N	984	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-91	2	2	PM-202608-EPCMS-DIALYSIS-HD-007	2026-08-10	\N	Dialysis	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310672	2026-08-10 17:17:54.310674	\N	f	\N	\N	\N	\N	\N	\N	\N	985	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-92	2	2	PM-202608-EPCMS-DIALYSIS-PM-040	2026-08-10	\N	Dialysis	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310677	2026-08-10 17:17:54.31068	\N	f	\N	\N	\N	\N	\N	\N	\N	986	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-93	2	2	PM-202608-EPCMS-DIALYSIS-DRU-001	2026-08-10	\N	Dialysis	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310683	2026-08-10 17:17:54.310686	\N	f	\N	\N	\N	\N	\N	\N	\N	987	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-94	2	2	PM-202608-EPCMS-DIALYSIS-DRU-002	2026-08-10	\N	Dialysis	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310689	2026-08-10 17:17:54.310692	\N	f	\N	\N	\N	\N	\N	\N	\N	988	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-95	2	2	PM-202608-EPCMS-EICU-ECG-010	2026-08-10	\N	EICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310695	2026-08-10 17:17:54.310697	\N	f	\N	\N	\N	\N	\N	\N	\N	990	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-96	2	2	PM-202608-EPCMS-EICU-PM-042	2026-08-10	\N	EICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.3107	2026-08-10 17:17:54.310703	\N	f	\N	\N	\N	\N	\N	\N	\N	991	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-97	2	2	PM-202608-EPCMS-EICU-PM-043	2026-08-10	\N	EICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310706	2026-08-10 17:17:54.310709	\N	f	\N	\N	\N	\N	\N	\N	\N	992	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-98	2	2	PM-202608-EPCMS-EICU-PM-044	2026-08-10	\N	EICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310712	2026-08-10 17:17:54.310715	\N	f	\N	\N	\N	\N	\N	\N	\N	993	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-99	2	2	PM-202608-EPCMS-EICU-PM-045	2026-08-10	\N	EICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310718	2026-08-10 17:17:54.310721	\N	f	\N	\N	\N	\N	\N	\N	\N	994	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-100	2	2	PM-202608-EPCMS-EICU-PM-046	2026-08-10	\N	EICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310724	2026-08-10 17:17:54.310726	\N	f	\N	\N	\N	\N	\N	\N	\N	995	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-101	2	2	PM-202608-EPCMS-EICU-PM-047	2026-08-10	\N	EICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310729	2026-08-10 17:17:54.310732	\N	f	\N	\N	\N	\N	\N	\N	\N	996	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-102	2	2	PM-202608-EPCMS-EICU-SYP-019	2026-08-10	\N	EICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310735	2026-08-10 17:17:54.310738	\N	f	\N	\N	\N	\N	\N	\N	\N	997	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-103	2	2	PM-202608-EPCMS-EICU-SYP-020	2026-08-10	\N	EICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310741	2026-08-10 17:17:54.310744	\N	f	\N	\N	\N	\N	\N	\N	\N	998	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-104	2	2	PM-202608-EPCMS-EICU-SYP-021	2026-08-10	\N	EICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310747	2026-08-10 17:17:54.31075	\N	f	\N	\N	\N	\N	\N	\N	\N	999	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-105	2	2	PM-202608-EPCMS-EICU-SYP-022	2026-08-10	\N	EICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310753	2026-08-10 17:17:54.310756	\N	f	\N	\N	\N	\N	\N	\N	\N	1000	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-106	2	2	PM-202608-EPCMS-RAD-MXR-001	2026-08-10	\N	EICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310759	2026-08-10 17:17:54.310761	\N	f	\N	\N	\N	\N	\N	\N	\N	1001	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-107	2	2	PM-202608-EPCMS-EICU-INP-012	2026-08-10	\N	EICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310764	2026-08-10 17:17:54.310767	\N	f	\N	\N	\N	\N	\N	\N	\N	1002	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-108	2	2	PM-202608-EPCMS-MICU-HD-008	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31077	2026-08-10 17:17:54.310773	\N	f	\N	\N	\N	\N	\N	\N	\N	1110	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-109	2	2	PM-202608-EPCMS-RAD-USTD-007	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310776	2026-08-10 17:17:54.310779	\N	f	\N	\N	\N	\N	\N	\N	\N	1111	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-110	2	2	PM-202608-EPCMS-RAD-USTD-008	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310782	2026-08-10 17:17:54.310784	\N	f	\N	\N	\N	\N	\N	\N	\N	1112	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-111	2	2	PM-202608-EPCMS-RAD-USTD-009	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310788	2026-08-10 17:17:54.31079	\N	f	\N	\N	\N	\N	\N	\N	\N	1113	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-112	2	2	PM-202608-EPCMS-MICU-INP-017	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310793	2026-08-10 17:17:54.310796	\N	f	\N	\N	\N	\N	\N	\N	\N	1114	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-113	2	2	PM-202608-EPCMS-MICU-INP-018	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310799	2026-08-10 17:17:54.310802	\N	f	\N	\N	\N	\N	\N	\N	\N	1115	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-114	2	2	PM-202608-EPCMS-MICU-INP-019	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310805	2026-08-10 17:17:54.310808	\N	f	\N	\N	\N	\N	\N	\N	\N	1116	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-115	2	2	PM-202608-EPCMS-MICU-PM-074	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310811	2026-08-10 17:17:54.310814	\N	f	\N	\N	\N	\N	\N	\N	\N	1119	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-116	2	2	PM-202608-EPCMS-MICU-PM-075	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310817	2026-08-10 17:17:54.31082	\N	f	\N	\N	\N	\N	\N	\N	\N	1120	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-117	2	2	PM-202608-EPCMS-MICU-PM-076	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310823	2026-08-10 17:17:54.310826	\N	f	\N	\N	\N	\N	\N	\N	\N	1121	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-118	2	2	PM-202608-EPCMS-MICU-PM-077	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310829	2026-08-10 17:17:54.310831	\N	f	\N	\N	\N	\N	\N	\N	\N	1122	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-119	2	2	PM-202608-EPCMS-MICU-PM-078	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310835	2026-08-10 17:17:54.310837	\N	f	\N	\N	\N	\N	\N	\N	\N	1123	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-120	2	2	PM-202608-EPCMS-MICU-PM-079	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31084	2026-08-10 17:17:54.310843	\N	f	\N	\N	\N	\N	\N	\N	\N	1124	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-121	2	2	PM-202608-EPCMS-MICU-PM-080	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310846	2026-08-10 17:17:54.310849	\N	f	\N	\N	\N	\N	\N	\N	\N	1125	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-122	2	2	PM-202608-EPCMS-MICU-PM-081	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310852	2026-08-10 17:17:54.310855	\N	f	\N	\N	\N	\N	\N	\N	\N	1126	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-123	2	2	PM-202608-EPCMS-MICU-PM-082	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310858	2026-08-10 17:17:54.310861	\N	f	\N	\N	\N	\N	\N	\N	\N	1127	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-124	2	2	PM-202608-EPCMS-MICU-PM-083	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310864	2026-08-10 17:17:54.310867	\N	f	\N	\N	\N	\N	\N	\N	\N	1128	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-125	2	2	PM-202608-EPCMS-MICU-SYP-031	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31087	2026-08-10 17:17:54.310873	\N	f	\N	\N	\N	\N	\N	\N	\N	1129	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-126	2	2	PM-202608-EPCMS-MICU-SYP-032	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310876	2026-08-10 17:17:54.310878	\N	f	\N	\N	\N	\N	\N	\N	\N	1130	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-127	2	2	PM-202608-EPCMS-MICU-SYP-033	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310881	2026-08-10 17:17:54.310884	\N	f	\N	\N	\N	\N	\N	\N	\N	1131	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-128	2	2	PM-202608-EPCMS-MICU-SYP-034	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310887	2026-08-10 17:17:54.31089	\N	f	\N	\N	\N	\N	\N	\N	\N	1132	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-129	2	2	PM-202608-EPCMS-MICU-SYP-035	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310893	2026-08-10 17:17:54.310896	\N	f	\N	\N	\N	\N	\N	\N	\N	1133	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-130	2	2	PM-202608-EPCMS-MICU-SYP-036	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310899	2026-08-10 17:17:54.310902	\N	f	\N	\N	\N	\N	\N	\N	\N	1134	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-131	2	2	PM-202608-EPCMS-MICU-SYP-037	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310905	2026-08-10 17:17:54.310907	\N	f	\N	\N	\N	\N	\N	\N	\N	1135	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-132	2	2	PM-202608-EPCMS-MICU-SYP-038	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31091	2026-08-10 17:17:54.310913	\N	f	\N	\N	\N	\N	\N	\N	\N	1136	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-133	2	2	PM-202608-EPCMS-MICU-SYP-039	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310916	2026-08-10 17:17:54.310919	\N	f	\N	\N	\N	\N	\N	\N	\N	1137	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-134	2	2	PM-202608-EPCMS-MICU-SYP-040	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310922	2026-08-10 17:17:54.310925	\N	f	\N	\N	\N	\N	\N	\N	\N	1138	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-135	2	2	PM-202608-EPCMS-MICU-SYP-041	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310928	2026-08-10 17:17:54.310931	\N	f	\N	\N	\N	\N	\N	\N	\N	1139	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-136	2	2	PM-202608-EPCMS-MICU-SYP-042	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310934	2026-08-10 17:17:54.310937	\N	f	\N	\N	\N	\N	\N	\N	\N	1140	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-137	2	2	PM-202608-EPCMS-MICU-SYP-043	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31094	2026-08-10 17:17:54.310942	\N	f	\N	\N	\N	\N	\N	\N	\N	1141	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-138	2	2	PM-202608-EPCMS-MICU-SYP-044	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310945	2026-08-10 17:17:54.310948	\N	f	\N	\N	\N	\N	\N	\N	\N	1142	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-139	2	2	PM-202608-EPCMS-MICU-SYP-045	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310951	2026-08-10 17:17:54.310954	\N	f	\N	\N	\N	\N	\N	\N	\N	1143	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-140	2	2	PM-202608-EPCMS-MICU-SYP-046	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310957	2026-08-10 17:17:54.31096	\N	f	\N	\N	\N	\N	\N	\N	\N	1144	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-141	2	2	PM-202608-EPCMS-MICU-SYP-047	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310963	2026-08-10 17:17:54.310966	\N	f	\N	\N	\N	\N	\N	\N	\N	1145	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-142	2	2	PM-202608-EPCMS-RAD-USG-004	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310969	2026-08-10 17:17:54.310972	\N	f	\N	\N	\N	\N	\N	\N	\N	1146	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-143	2	2	PM-202608-EPCMS-MICU-VENT-009	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310975	2026-08-10 17:17:54.310977	\N	f	\N	\N	\N	\N	\N	\N	\N	1147	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-144	2	2	PM-202608-EPCMS-MICU-VENT-010	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31098	2026-08-10 17:17:54.310983	\N	f	\N	\N	\N	\N	\N	\N	\N	1148	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-145	2	2	PM-202608-EPCMS-MICU-VENT-011	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310986	2026-08-10 17:17:54.310989	\N	f	\N	\N	\N	\N	\N	\N	\N	1149	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-146	2	2	PM-202608-EPCMS-PICU-VENT-012	2026-08-10	\N	PICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310992	2026-08-10 17:17:54.310995	\N	f	\N	\N	\N	\N	\N	\N	\N	1150	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-147	2	2	PM-202608-EPCMS-MICU-VENT-013	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310998	2026-08-10 17:17:54.311001	\N	f	\N	\N	\N	\N	\N	\N	\N	1151	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-148	2	2	PM-202608-EPCMS-MICU-VENT-014	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311004	2026-08-10 17:17:54.311006	\N	f	\N	\N	\N	\N	\N	\N	\N	1152	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-149	2	2	PM-202608-EPCMS-MICU-VENT-015	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311009	2026-08-10 17:17:54.311012	\N	f	\N	\N	\N	\N	\N	\N	\N	1153	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-150	2	2	PM-202608-EPCMS-MICU-VENT-016	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311015	2026-08-10 17:17:54.311018	\N	f	\N	\N	\N	\N	\N	\N	\N	1154	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-151	2	2	PM-202608-EPCMS-MICU-VENT-017	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311021	2026-08-10 17:17:54.311024	\N	f	\N	\N	\N	\N	\N	\N	\N	1155	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-152	2	2	PM-202608-EPCMS-MICU-VENT-018	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311027	2026-08-10 17:17:54.31103	\N	f	\N	\N	\N	\N	\N	\N	\N	1156	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-153	2	2	PM-202608-EPCMS-MICU-VENT-019	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311033	2026-08-10 17:17:54.311036	\N	f	\N	\N	\N	\N	\N	\N	\N	1157	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-154	2	2	PM-202608-EPCMS-MICU-VENT-020	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311039	2026-08-10 17:17:54.311041	\N	f	\N	\N	\N	\N	\N	\N	\N	1158	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-155	2	2	PM-202608-EPCMS-MICU-VENT-021	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311044	2026-08-10 17:17:54.311047	\N	f	\N	\N	\N	\N	\N	\N	\N	1159	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-156	2	2	PM-202608-EPCMS-MICU-VENT-022	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31105	2026-08-10 17:17:54.311053	\N	f	\N	\N	\N	\N	\N	\N	\N	1160	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-157	2	2	PM-202608-EPCMS-RAD-MXR-003	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311056	2026-08-10 17:17:54.311059	\N	f	\N	\N	\N	\N	\N	\N	\N	1161	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-158	2	2	PM-202608-EPCMS-MICU-VENT-023	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311062	2026-08-10 17:17:54.311065	\N	f	\N	\N	\N	\N	\N	\N	\N	1162	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-159	2	2	PM-202608-EPCMS-MICU-VENT-024	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311068	2026-08-10 17:17:54.311071	\N	f	\N	\N	\N	\N	\N	\N	\N	1163	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-160	2	2	PM-202608-EPCMS-MICU-VENT-025	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311074	2026-08-10 17:17:54.311077	\N	f	\N	\N	\N	\N	\N	\N	\N	1164	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-161	2	2	PM-202608-EPCMS-MICU-PTWM-002	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31108	2026-08-10 17:17:54.311082	\N	f	\N	\N	\N	\N	\N	\N	\N	1165	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-162	2	2	PM-202608-EPCMS-MICU-DFEB-007	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311086	2026-08-10 17:17:54.311088	\N	f	\N	\N	\N	\N	\N	\N	\N	1171	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-163	2	2	PM-202608-EPCMS-RAD-MXR-004	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311091	2026-08-10 17:17:54.311094	\N	f	\N	\N	\N	\N	\N	\N	\N	1179	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-164	2	2	PM-202608-EPCMS-NICU-BWRM-002	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311097	2026-08-10 17:17:54.3111	\N	f	\N	\N	\N	\N	\N	\N	\N	1180	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-165	2	2	PM-202608-EPCMS-NICU-BWRM-003	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311103	2026-08-10 17:17:54.311105	\N	f	\N	\N	\N	\N	\N	\N	\N	1181	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-166	2	2	PM-202608-EPCMS-NICU-BWRM-004	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311108	2026-08-10 17:17:54.311111	\N	f	\N	\N	\N	\N	\N	\N	\N	1182	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-167	2	2	PM-202608-EPCMS-NICU-VENT-031	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311114	2026-08-10 17:17:54.311117	\N	f	\N	\N	\N	\N	\N	\N	\N	1183	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-168	2	2	PM-202608-EPCMS-NICU-INRS-001	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31112	2026-08-10 17:17:54.311122	\N	f	\N	\N	\N	\N	\N	\N	\N	1184	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-169	2	2	PM-202608-EPCMS-NICU-BCPAP-001	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311125	2026-08-10 17:17:54.311128	\N	f	\N	\N	\N	\N	\N	\N	\N	1185	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-170	2	2	PM-202608-EPCMS-NICU-BCPAP-002	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311131	2026-08-10 17:17:54.311134	\N	f	\N	\N	\N	\N	\N	\N	\N	1186	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-171	2	2	PM-202608-EPCMS-NICU-BCPAP-003	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311137	2026-08-10 17:17:54.31114	\N	f	\N	\N	\N	\N	\N	\N	\N	1187	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-172	2	2	PM-202608-EPCMS-NICU-BCPAP-004	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311143	2026-08-10 17:17:54.311145	\N	f	\N	\N	\N	\N	\N	\N	\N	1188	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-173	2	2	PM-202608-EPCMS-NICU-SYP-048	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311148	2026-08-10 17:17:54.311151	\N	f	\N	\N	\N	\N	\N	\N	\N	1189	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-174	2	2	PM-202608-EPCMS-NICU-SYP-049	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311154	2026-08-10 17:17:54.311157	\N	f	\N	\N	\N	\N	\N	\N	\N	1190	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-175	2	2	PM-202608-EPCMS-NICU-SYP-050	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31116	2026-08-10 17:17:54.311162	\N	f	\N	\N	\N	\N	\N	\N	\N	1191	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-176	2	2	PM-202608-EPCMS-NICU-PHTH-001	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311166	2026-08-10 17:17:54.311168	\N	f	\N	\N	\N	\N	\N	\N	\N	1192	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-177	2	2	PM-202608-EPCMS-NICU-PHTH-002	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311171	2026-08-10 17:17:54.311174	\N	f	\N	\N	\N	\N	\N	\N	\N	1193	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-178	2	2	PM-202608-EPCMS-NICU-PHTH-003	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311177	2026-08-10 17:17:54.31118	\N	f	\N	\N	\N	\N	\N	\N	\N	1194	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-179	2	2	PM-202608-EPCMS-NICU-PHTH-004	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311183	2026-08-10 17:17:54.311186	\N	f	\N	\N	\N	\N	\N	\N	\N	1195	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-180	2	2	PM-202608-EPCMS-NICU-PHTH-005	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311189	2026-08-10 17:17:54.311191	\N	f	\N	\N	\N	\N	\N	\N	\N	1196	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-181	2	2	PM-202608-EPCMS-NICU-PHTH-006	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311194	2026-08-10 17:17:54.311197	\N	f	\N	\N	\N	\N	\N	\N	\N	1197	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-182	2	2	PM-202608-EPCMS-NICU-PHTH-007	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.3112	2026-08-10 17:17:54.311203	\N	f	\N	\N	\N	\N	\N	\N	\N	1198	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-183	2	2	PM-202608-EPCMS-NICU-PHTH-008	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311206	2026-08-10 17:17:54.311209	\N	f	\N	\N	\N	\N	\N	\N	\N	1199	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-184	2	2	PM-202608-EPCMS-NICU-PHTH-009	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311212	2026-08-10 17:17:54.311215	\N	f	\N	\N	\N	\N	\N	\N	\N	1200	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-185	2	2	PM-202608-EPCMS-NICU-PHTH-010	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311218	2026-08-10 17:17:54.31122	\N	f	\N	\N	\N	\N	\N	\N	\N	1201	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-186	2	2	PM-202608-EPCMS-NICU-INCU-001	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311223	2026-08-10 17:17:54.311226	\N	f	\N	\N	\N	\N	\N	\N	\N	1202	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-187	2	2	PM-202608-EPCMS-NICU-BWRM-005	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311229	2026-08-10 17:17:54.311232	\N	f	\N	\N	\N	\N	\N	\N	\N	1203	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-188	2	2	PM-202608-EPCMS-NICU-BWRM-006	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311235	2026-08-10 17:17:54.311237	\N	f	\N	\N	\N	\N	\N	\N	\N	1204	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-189	2	2	PM-202608-EPCMS-NICU-BWRM-007	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31124	2026-08-10 17:17:54.311243	\N	f	\N	\N	\N	\N	\N	\N	\N	1205	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-190	2	2	PM-202608-EPCMS-NICU-BWRM-008	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311246	2026-08-10 17:17:54.311249	\N	f	\N	\N	\N	\N	\N	\N	\N	1206	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-191	2	2	PM-202608-EPCMS-NICU-BWRM-009	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311252	2026-08-10 17:17:54.311255	\N	f	\N	\N	\N	\N	\N	\N	\N	1207	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-192	2	2	PM-202608-EPCMS-NICU-BWRM-010	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311258	2026-08-10 17:17:54.31126	\N	f	\N	\N	\N	\N	\N	\N	\N	1208	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-193	2	2	PM-202608-EPCMS-NICU-PHTH-011	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311263	2026-08-10 17:17:54.311266	\N	f	\N	\N	\N	\N	\N	\N	\N	1209	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-194	2	2	PM-202608-EPCMS-NICU-PHTH-012	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311269	2026-08-10 17:17:54.311272	\N	f	\N	\N	\N	\N	\N	\N	\N	1210	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-195	2	2	PM-202608-EPCMS-NICU-PHTH-013	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311275	2026-08-10 17:17:54.311278	\N	f	\N	\N	\N	\N	\N	\N	\N	1211	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-196	2	2	PM-202608-EPCMS-NICU-INRS-002	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311281	2026-08-10 17:17:54.311284	\N	f	\N	\N	\N	\N	\N	\N	\N	1212	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-197	2	2	PM-202608-EPCMS-NICU-INRS-003	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311287	2026-08-10 17:17:54.311289	\N	f	\N	\N	\N	\N	\N	\N	\N	1213	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-198	2	2	PM-202608-EPCMS-NICU-INRS-004	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311292	2026-08-10 17:17:54.311295	\N	f	\N	\N	\N	\N	\N	\N	\N	1214	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-199	2	2	PM-202608-EPCMS-NICU-PINC-001	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311298	2026-08-10 17:17:54.311301	\N	f	\N	\N	\N	\N	\N	\N	\N	1215	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-200	2	2	PM-202608-EPCMS-NICU-SYP-051	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311304	2026-08-10 17:17:54.311307	\N	f	\N	\N	\N	\N	\N	\N	\N	1216	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-201	2	2	PM-202608-EPCMS-NICU-SYP-052	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31131	2026-08-10 17:17:54.311312	\N	f	\N	\N	\N	\N	\N	\N	\N	1217	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-202	2	2	PM-202608-EPCMS-NICU-SYP-053	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311315	2026-08-10 17:17:54.311318	\N	f	\N	\N	\N	\N	\N	\N	\N	1218	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-203	2	2	PM-202608-EPCMS-NICU-SYP-054	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311321	2026-08-10 17:17:54.311324	\N	f	\N	\N	\N	\N	\N	\N	\N	1219	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-204	2	2	PM-202608-EPCMS-NICU-PM-084	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311327	2026-08-10 17:17:54.31133	\N	f	\N	\N	\N	\N	\N	\N	\N	1220	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-205	2	2	PM-202608-EPCMS-NICU-PM-085	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311333	2026-08-10 17:17:54.311336	\N	f	\N	\N	\N	\N	\N	\N	\N	1221	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-206	2	2	PM-202608-EPCMS-NICU-PM-086	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311339	2026-08-10 17:17:54.311341	\N	f	\N	\N	\N	\N	\N	\N	\N	1222	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-207	2	2	PM-202608-EPCMS-NICU-PM-087	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311344	2026-08-10 17:17:54.311347	\N	f	\N	\N	\N	\N	\N	\N	\N	1223	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-208	2	2	PM-202608-EPCMS-NICU-VENT-032	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31135	2026-08-10 17:17:54.311353	\N	f	\N	\N	\N	\N	\N	\N	\N	1225	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-209	2	2	PM-202608-EPCMS-NICU-PM-088	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311356	2026-08-10 17:17:54.311358	\N	f	\N	\N	\N	\N	\N	\N	\N	1226	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-210	2	2	PM-202608-EPCMS-NICU-PM-089	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311361	2026-08-10 17:17:54.311364	\N	f	\N	\N	\N	\N	\N	\N	\N	1227	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-211	2	2	PM-202608-EPCMS-NICU-VENT-033	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311367	2026-08-10 17:17:54.31137	\N	f	\N	\N	\N	\N	\N	\N	\N	1236	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-212	2	2	PM-202608-EPCMS-PICU-HFNC-002	2026-08-10	\N	PICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311373	2026-08-10 17:17:54.311376	\N	f	\N	\N	\N	\N	\N	\N	\N	1475	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-213	2	2	PM-202608-EPCMS-PICU-HFNC-003	2026-08-10	\N	PICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311379	2026-08-10 17:17:54.311381	\N	f	\N	\N	\N	\N	\N	\N	\N	1476	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-214	2	2	PM-202608-EPCMS-PICU-HFNC-004	2026-08-10	\N	PICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311384	2026-08-10 17:17:54.311387	\N	f	\N	\N	\N	\N	\N	\N	\N	1477	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-215	2	2	PM-202608-EPCMS-PICU-HFNC-005	2026-08-10	\N	PICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31139	2026-08-10 17:17:54.311393	\N	f	\N	\N	\N	\N	\N	\N	\N	1478	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-216	2	2	PM-202608-EPCMS-PICU-HFNC-006	2026-08-10	\N	PICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311396	2026-08-10 17:17:54.311399	\N	f	\N	\N	\N	\N	\N	\N	\N	1479	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-217	2	2	PM-202608-EPCMS-PICU-HFNC-007	2026-08-10	\N	PICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311402	2026-08-10 17:17:54.311404	\N	f	\N	\N	\N	\N	\N	\N	\N	1480	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-218	2	2	PM-202608-EPCMS-PICU-INP-020	2026-08-10	\N	PICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311407	2026-08-10 17:17:54.31141	\N	f	\N	\N	\N	\N	\N	\N	\N	1481	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-219	2	2	PM-202608-EPCMS-PICU-PM-105	2026-08-10	\N	PICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311413	2026-08-10 17:17:54.311416	\N	f	\N	\N	\N	\N	\N	\N	\N	1482	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-220	2	2	PM-202608-EPCMS-PICU-PM-106	2026-08-10	\N	PICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311419	2026-08-10 17:17:54.311421	\N	f	\N	\N	\N	\N	\N	\N	\N	1483	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-221	2	2	PM-202608-EPCMS-PICU-PM-107	2026-08-10	\N	PICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311424	2026-08-10 17:17:54.311427	\N	f	\N	\N	\N	\N	\N	\N	\N	1484	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-222	2	2	PM-202608-EPCMS-PICU-SYP-057	2026-08-10	\N	PICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31143	2026-08-10 17:17:54.311433	\N	f	\N	\N	\N	\N	\N	\N	\N	1485	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-223	2	2	PM-202608-EPCMS-PICU-SYP-058	2026-08-10	\N	PICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311437	2026-08-10 17:17:54.31144	\N	f	\N	\N	\N	\N	\N	\N	\N	1486	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-224	2	2	PM-202608-EPCMS-PICU-SYP-059	2026-08-10	\N	PICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311443	2026-08-10 17:17:54.311446	\N	f	\N	\N	\N	\N	\N	\N	\N	1487	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-225	2	2	PM-202608-EPCMS-MICU-VENT-034	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311449	2026-08-10 17:17:54.311451	\N	f	\N	\N	\N	\N	\N	\N	\N	1488	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-226	2	2	PM-202608-EPCMS-MICU-VENT-035	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311454	2026-08-10 17:17:54.311457	\N	f	\N	\N	\N	\N	\N	\N	\N	1489	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-227	2	2	PM-202608-EPCMS-PICU-VENT-036	2026-08-10	\N	PICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31146	2026-08-10 17:17:54.311463	\N	f	\N	\N	\N	\N	\N	\N	\N	1490	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-228	2	2	PM-202608-EPCMS-PICU-VENT-037	2026-08-10	\N	PICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311466	2026-08-10 17:17:54.311468	\N	f	\N	\N	\N	\N	\N	\N	\N	1491	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-229	2	2	PM-202608-EPCMS-PICU-VBOX-030	2026-08-10	\N	PICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311471	2026-08-10 17:17:54.311474	\N	f	\N	\N	\N	\N	\N	\N	\N	1492	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-230	2	2	PM-202608-EPCMS-SICU-PM-118	2026-08-10	\N	SICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311477	2026-08-10 17:17:54.31148	\N	f	\N	\N	\N	\N	\N	\N	\N	1579	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-231	2	2	PM-202608-EPCMS-SICU-PM-119	2026-08-10	\N	SICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311483	2026-08-10 17:17:54.311486	\N	f	\N	\N	\N	\N	\N	\N	\N	1580	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-232	2	2	PM-202608-EPCMS-SICU-PM-120	2026-08-10	\N	SICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311492	2026-08-10 17:17:54.311495	\N	f	\N	\N	\N	\N	\N	\N	\N	1581	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-233	2	2	PM-202608-EPCMS-SICU-PM-121	2026-08-10	\N	SICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311498	2026-08-10 17:17:54.3115	\N	f	\N	\N	\N	\N	\N	\N	\N	1582	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-234	2	2	PM-202608-EPCMS-SICU-PM-122	2026-08-10	\N	SICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311503	2026-08-10 17:17:54.311506	\N	f	\N	\N	\N	\N	\N	\N	\N	1583	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-235	2	2	PM-202608-EPCMS-SICU-SYP-062	2026-08-10	\N	SICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311509	2026-08-10 17:17:54.311512	\N	f	\N	\N	\N	\N	\N	\N	\N	1584	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-236	2	2	PM-202608-EPCMS-SICU-SYP-063	2026-08-10	\N	SICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311515	2026-08-10 17:17:54.311518	\N	f	\N	\N	\N	\N	\N	\N	\N	1585	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-237	2	2	PM-202608-EPCMS-SICU-SYP-064	2026-08-10	\N	SICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311521	2026-08-10 17:17:54.311523	\N	f	\N	\N	\N	\N	\N	\N	\N	1586	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-238	2	2	PM-202608-EPCMS-SICU-SYP-065	2026-08-10	\N	SICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311526	2026-08-10 17:17:54.311529	\N	f	\N	\N	\N	\N	\N	\N	\N	1587	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-239	2	2	PM-202608-EPCMS-SICU-VENT-038	2026-08-10	\N	SICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311532	2026-08-10 17:17:54.311535	\N	f	\N	\N	\N	\N	\N	\N	\N	1588	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-240	2	2	PM-202608-EPCMS-SICU-VENT-039	2026-08-10	\N	SICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311538	2026-08-10 17:17:54.311541	\N	f	\N	\N	\N	\N	\N	\N	\N	1589	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-241	2	2	PM-202608-EPCMS-SICU-VBOX-044	2026-08-10	\N	SICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311544	2026-08-10 17:17:54.311546	\N	f	\N	\N	\N	\N	\N	\N	\N	1590	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-242	2	2	PM-202608-EPCMS-OT_GEN-PM-092	2026-08-11	\N	OT General	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682083	2026-08-11 18:37:11.682106	\N	f	\N	\N	\N	\N	\N	\N	\N	1326	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-243	2	2	PM-202608-EPCMS-OT_OBG-NWS-002	2026-08-11	\N	OT OBG	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682116	2026-08-11 18:37:11.682122	\N	f	\N	\N	\N	\N	\N	\N	\N	1378	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-244	2	2	PM-202608-EPCMS-OT_ORTHO-STQ-001	2026-08-11	\N	OT ORTHO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.68213	2026-08-11 18:37:11.682136	\N	f	\N	\N	\N	\N	\N	\N	\N	1404	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-245	2	2	PM-202608-EPCMS-OT_ORTHO-STQ-002	2026-08-11	\N	OT ORTHO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682143	2026-08-11 18:37:11.682149	\N	f	\N	\N	\N	\N	\N	\N	\N	1405	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-246	2	2	PM-202608-EPCMS-PHYSIO-PM-104	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682156	2026-08-11 18:37:11.682163	\N	f	\N	\N	\N	\N	\N	\N	\N	1474	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-247	2	2	PM-202608-EPCMS-POST OT -PM-108	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.68217	2026-08-11 18:37:11.682176	\N	f	\N	\N	\N	\N	\N	\N	\N	1494	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-248	2	2	PM-202608-EPCMS-POST OT -PM-109	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682183	2026-08-11 18:37:11.682189	\N	f	\N	\N	\N	\N	\N	\N	\N	1495	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-249	2	2	PM-202608-EPCMS-MINOR OT-ANES-001	2026-08-11	\N	MINOR OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682196	2026-08-11 18:37:11.682202	\N	f	\N	\N	\N	\N	\N	\N	\N	1172	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-250	2	2	PM-202608-EPCMS-MINOR OT-ANES-002	2026-08-11	\N	MINOR OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682209	2026-08-11 18:37:11.682216	\N	f	\N	\N	\N	\N	\N	\N	\N	1173	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-251	2	2	PM-202608-EPCMS-MINOR OT-OTLT-003	2026-08-11	\N	MINOR OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682222	2026-08-11 18:37:11.682236	\N	f	\N	\N	\N	\N	\N	\N	\N	1174	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-252	2	2	PM-202608-EPCMS-MINOR OT-OTLT-004	2026-08-11	\N	MINOR OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682244	2026-08-11 18:37:11.682251	\N	f	\N	\N	\N	\N	\N	\N	\N	1175	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-253	2	2	PM-202608-EPCMS-MINOR OT-OTLT-005	2026-08-11	\N	MINOR OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682259	2026-08-11 18:37:11.682266	\N	f	\N	\N	\N	\N	\N	\N	\N	1176	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-254	2	2	PM-202608-EPCMS-MINOR OT-SPLT-003	2026-08-11	\N	MINOR OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682273	2026-08-11 18:37:11.682279	\N	f	\N	\N	\N	\N	\N	\N	\N	1177	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-255	2	2	PM-202608-EPCMS-MINOR OT-SPLT-004	2026-08-11	\N	MINOR OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682286	2026-08-11 18:37:11.682292	\N	f	\N	\N	\N	\N	\N	\N	\N	1178	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-256	2	2	PM-202608-EPCMS-OT ANES-PM-090	2026-08-11	\N	OT Anaesthesia	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682299	2026-08-11 18:37:11.682305	\N	f	\N	\N	\N	\N	\N	\N	\N	1282	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-257	2	2	PM-202608-EPCMS-RAD-USTD-010	2026-08-11	\N	OT Anaesthesia	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682312	2026-08-11 18:37:11.682319	\N	f	\N	\N	\N	\N	\N	\N	\N	1283	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-258	2	2	PM-202608-EPCMS-RAD-USTD-011	2026-08-11	\N	OT Anaesthesia	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682326	2026-08-11 18:37:11.682332	\N	f	\N	\N	\N	\N	\N	\N	\N	1284	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-259	2	2	PM-202608-EPCMS-RAD-USTD-012	2026-08-11	\N	OT Anaesthesia	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682339	2026-08-11 18:37:11.682345	\N	f	\N	\N	\N	\N	\N	\N	\N	1285	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-260	2	2	PM-202608-EPCMS-RAD-USTD-013	2026-08-11	\N	OT Anaesthesia	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682352	2026-08-11 18:37:11.682358	\N	f	\N	\N	\N	\N	\N	\N	\N	1286	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-261	2	2	PM-202608-EPCMS-RAD-USG-005	2026-08-11	\N	OT Anaesthesia	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682365	2026-08-11 18:37:11.682371	\N	f	\N	\N	\N	\N	\N	\N	\N	1287	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-262	2	2	PM-202608-EPCMS-CTVS OT-ESU-002	2026-08-11	\N	OT CTVS	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682378	2026-08-11 18:37:11.682385	\N	f	\N	\N	\N	\N	\N	\N	\N	1288	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-263	2	2	PM-202608-EPCMS-CTVS OT-DFEB-008	2026-08-11	\N	OT CTVS	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682392	2026-08-11 18:37:11.682398	\N	f	\N	\N	\N	\N	\N	\N	\N	1289	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-264	2	2	PM-202608-EPCMS-OT_EMER-AWS-001	2026-08-11	\N	OT Emergency	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682407	2026-08-11 18:37:11.682413	\N	f	\N	\N	\N	\N	\N	\N	\N	1290	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-265	2	2	PM-202608-EPCMS-OT_EMER-DFEB-009	2026-08-11	\N	OT Emergency	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.68242	2026-08-11 18:37:11.682427	\N	f	\N	\N	\N	\N	\N	\N	\N	1291	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-266	2	2	PM-202608-EPCMS-OT_ENT-AWS-002	2026-08-11	\N	OT Emergency	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682434	2026-08-11 18:37:11.68244	\N	f	\N	\N	\N	\N	\N	\N	\N	1292	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-267	2	2	PM-202608-EPCMS-OT_SEPTIC 2-ESU-003	2026-08-11	\N	OT Emergency	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682447	2026-08-11 18:37:11.682453	\N	f	\N	\N	\N	\N	\N	\N	\N	1293	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-268	2	2	PM-202608-EPCMS-OT_SEPTIC 2-OTCPL-001	2026-08-11	\N	OT Emergency	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682461	2026-08-11 18:37:11.682467	\N	f	\N	\N	\N	\N	\N	\N	\N	1294	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-269	2	2	PM-202608-EPCMS-OT_SEPTIC 2-OTLT-006	2026-08-11	\N	OT Emergency	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682474	2026-08-11 18:37:11.682481	\N	f	\N	\N	\N	\N	\N	\N	\N	1295	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-270	2	2	PM-202608-EPCMS-OT_SEPTIC 2-OTT-002	2026-08-11	\N	OT Emergency	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682488	2026-08-11 18:37:11.682494	\N	f	\N	\N	\N	\N	\N	\N	\N	1296	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-271	2	2	PM-202608-EPCMS-OT_EMER-DFEB-010	2026-08-11	\N	OT Emergency	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682501	2026-08-11 18:37:11.682507	\N	f	\N	\N	\N	\N	\N	\N	\N	1297	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-272	2	2	PM-202608-EPCMS-OT_ENT-GEN-005	2026-08-11	\N	OT ENT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682514	2026-08-11 18:37:11.68252	\N	f	\N	\N	\N	\N	\N	\N	\N	1298	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-273	2	2	PM-202608-EPCMS-OT_ENT-ESU-004	2026-08-11	\N	OT ENT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682527	2026-08-11 18:37:11.682533	\N	f	\N	\N	\N	\N	\N	\N	\N	1299	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-274	2	2	PM-202608-EPCMS-OT_ENT-ESA-005	2026-08-11	\N	OT ENT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.68254	2026-08-11 18:37:11.682546	\N	f	\N	\N	\N	\N	\N	\N	\N	1300	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-275	2	2	PM-202608-EPCMS-OT_ENT-GEN-006	2026-08-11	\N	OT ENT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682553	2026-08-11 18:37:11.682559	\N	f	\N	\N	\N	\N	\N	\N	\N	1301	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-276	2	2	PM-202608-EPCMS-OT_ENT-FHDC-001	2026-08-11	\N	OT ENT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682566	2026-08-11 18:37:11.682572	\N	f	\N	\N	\N	\N	\N	\N	\N	1302	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-277	2	2	PM-202608-EPCMS-OT_ENT-LS-001	2026-08-11	\N	OT ENT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682579	2026-08-11 18:37:11.682585	\N	f	\N	\N	\N	\N	\N	\N	\N	1303	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-278	2	2	PM-202608-EPCMS-OT_ENT-GEN-007	2026-08-11	\N	OT ENT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682592	2026-08-11 18:37:11.682599	\N	f	\N	\N	\N	\N	\N	\N	\N	1304	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-279	2	2	PM-202608-EPCMS-OT_ENT-OPMC-003	2026-08-11	\N	OT ENT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682606	2026-08-11 18:37:11.682612	\N	f	\N	\N	\N	\N	\N	\N	\N	1305	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-280	2	2	PM-202608-EPCMS-OT_ENT-OTLT-007	2026-08-11	\N	OT ENT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682619	2026-08-11 18:37:11.682625	\N	f	\N	\N	\N	\N	\N	\N	\N	1306	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-281	2	2	PM-202608-EPCMS-OT_ENT-PM-091	2026-08-11	\N	OT ENT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682632	2026-08-11 18:37:11.682638	\N	f	\N	\N	\N	\N	\N	\N	\N	1307	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-282	2	2	PM-202608-EPCMS-OT_ENT-OTT-003	2026-08-11	\N	OT ENT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682645	2026-08-11 18:37:11.682651	\N	f	\N	\N	\N	\N	\N	\N	\N	1308	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-283	2	2	PM-202608-EPCMS-OT-GEN-008	2026-08-11	\N	OT General	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682658	2026-08-11 18:37:11.682665	\N	f	\N	\N	\N	\N	\N	\N	\N	1309	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-284	2	2	PM-202608-EPCMS-OT-ESU-005	2026-08-11	\N	OT General	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682671	2026-08-11 18:37:11.682678	\N	f	\N	\N	\N	\N	\N	\N	\N	1310	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-285	2	2	PM-202608-EPCMS-OT-LAP-001	2026-08-11	\N	OT General	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682685	2026-08-11 18:37:11.682691	\N	f	\N	\N	\N	\N	\N	\N	\N	1311	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-286	2	2	PM-202608-EPCMS-OT-CO2INF-001	2026-08-11	\N	OT General	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682698	2026-08-11 18:37:11.682704	\N	f	\N	\N	\N	\N	\N	\N	\N	1312	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-287	2	2	PM-202608-EPCMS-OT-CO2INF-002	2026-08-11	\N	OT General	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682711	2026-08-11 18:37:11.682717	\N	f	\N	\N	\N	\N	\N	\N	\N	1313	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-288	2	2	PM-202608-EPCMS-OT-GEN-009	2026-08-11	\N	OT General	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682724	2026-08-11 18:37:11.68273	\N	f	\N	\N	\N	\N	\N	\N	\N	1314	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-289	2	2	PM-202608-EPCMS-OT-GEN-010	2026-08-11	\N	OT General	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682737	2026-08-11 18:37:11.682744	\N	f	\N	\N	\N	\N	\N	\N	\N	1315	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-290	2	2	PM-202608-EPCMS-OT_GEN-PTWM-003	2026-08-11	\N	OT General	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.68275	2026-08-11 18:37:11.682757	\N	f	\N	\N	\N	\N	\N	\N	\N	1316	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-291	2	2	PM-202608-EPCMS-OT_GEN-PTWM-004	2026-08-11	\N	OT General	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682764	2026-08-11 18:37:11.68277	\N	f	\N	\N	\N	\N	\N	\N	\N	1317	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-292	2	2	PM-202608-EPCMS-OT-OTT-004	2026-08-11	\N	OT General	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682777	2026-08-11 18:37:11.682783	\N	f	\N	\N	\N	\N	\N	\N	\N	1318	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-293	2	2	PM-202608-EPCMS-OT EXTRA-OTT-005	2026-08-11	\N	OT General	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.68279	2026-08-11 18:37:11.682796	\N	f	\N	\N	\N	\N	\N	\N	\N	1319	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-294	2	2	PM-202608-EPCMS-OT_GEN-GEN-011	2026-08-11	\N	OT General	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682803	2026-08-11 18:37:11.682809	\N	f	\N	\N	\N	\N	\N	\N	\N	1320	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-295	2	2	PM-202608-EPCMS-OT_GEN-FWM-005	2026-08-11	\N	OT General	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682816	2026-08-11 18:37:11.682822	\N	f	\N	\N	\N	\N	\N	\N	\N	1321	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-296	2	2	PM-202608-EPCMS-OT_GEN-FUM-004	2026-08-11	\N	OT General	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682829	2026-08-11 18:37:11.682836	\N	f	\N	\N	\N	\N	\N	\N	\N	1322	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-297	2	2	PM-202608-EPCMS-OT_GEN-FUM-005	2026-08-11	\N	OT General	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682842	2026-08-11 18:37:11.682849	\N	f	\N	\N	\N	\N	\N	\N	\N	1323	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-298	2	2	PM-202608-EPCMS-OT_GEN-PTWM-005	2026-08-11	\N	OT General	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682856	2026-08-11 18:37:11.682862	\N	f	\N	\N	\N	\N	\N	\N	\N	1324	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-299	2	2	PM-202608-EPCMS-OT_GEN-GEN-012	2026-08-11	\N	OT General	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682869	2026-08-11 18:37:11.682875	\N	f	\N	\N	\N	\N	\N	\N	\N	1325	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-300	2	2	PM-202608-EPCMS-OT_LAP-GEN-013	2026-08-11	\N	OT LAP	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682882	2026-08-11 18:37:11.682889	\N	f	\N	\N	\N	\N	\N	\N	\N	1327	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-301	2	2	PM-202608-EPCMS-OT_LAP-AWS-003	2026-08-11	\N	OT LAP	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682895	2026-08-11 18:37:11.682902	\N	f	\N	\N	\N	\N	\N	\N	\N	1328	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-302	2	2	PM-202608-EPCMS-OT_LAP-ESU-006	2026-08-11	\N	OT LAP	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682909	2026-08-11 18:37:11.682915	\N	f	\N	\N	\N	\N	\N	\N	\N	1329	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-303	2	2	PM-202608-EPCMS-OT_LAP-CO2INF-003	2026-08-11	\N	OT LAP	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682922	2026-08-11 18:37:11.682928	\N	f	\N	\N	\N	\N	\N	\N	\N	1330	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-304	2	2	PM-202608-EPCMS-OT_LAP-ESA-006	2026-08-11	\N	OT LAP	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682935	2026-08-11 18:37:11.682941	\N	f	\N	\N	\N	\N	\N	\N	\N	1331	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-305	2	2	PM-202608-EPCMS-OT_LAP-LAP-002	2026-08-11	\N	OT LAP	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682948	2026-08-11 18:37:11.682954	\N	f	\N	\N	\N	\N	\N	\N	\N	1332	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-306	2	2	PM-202608-EPCMS-OT_LAP-ESU-007	2026-08-11	\N	OT LAP	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682961	2026-08-11 18:37:11.682968	\N	f	\N	\N	\N	\N	\N	\N	\N	1333	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-307	2	2	PM-202608-EPCMS-OT_LAP-CO2INF-004	2026-08-11	\N	OT LAP	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682975	2026-08-11 18:37:11.682981	\N	f	\N	\N	\N	\N	\N	\N	\N	1334	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-308	2	2	PM-202608-EPCMS-OT_LAP-LS-002	2026-08-11	\N	OT LAP	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682988	2026-08-11 18:37:11.682994	\N	f	\N	\N	\N	\N	\N	\N	\N	1335	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-309	2	2	PM-202608-EPCMS-OT_LAP-OTCPL-002	2026-08-11	\N	OT LAP	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683001	2026-08-11 18:37:11.683008	\N	f	\N	\N	\N	\N	\N	\N	\N	1336	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-310	2	2	PM-202608-EPCMS-OT_LAP-OTCPL-003	2026-08-11	\N	OT LAP	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683014	2026-08-11 18:37:11.683021	\N	f	\N	\N	\N	\N	\N	\N	\N	1337	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-311	2	2	PM-202608-EPCMS-OT_LAP-OTLT-008	2026-08-11	\N	OT LAP	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683028	2026-08-11 18:37:11.683034	\N	f	\N	\N	\N	\N	\N	\N	\N	1338	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-312	2	2	PM-202608-EPCMS-OT_LAP-PM-093	2026-08-11	\N	OT LAP	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683041	2026-08-11 18:37:11.683047	\N	f	\N	\N	\N	\N	\N	\N	\N	1339	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-313	2	2	PM-202608-EPCMS-OT_LAP-GEN-014	2026-08-11	\N	OT LAP	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683054	2026-08-11 18:37:11.68306	\N	f	\N	\N	\N	\N	\N	\N	\N	1340	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-314	2	2	PM-202608-EPCMS-OT_NEURO-AWS-004	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683068	2026-08-11 18:37:11.683074	\N	f	\N	\N	\N	\N	\N	\N	\N	1341	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-315	2	2	PM-202608-EPCMS-RAD-CARM-001	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683081	2026-08-11 18:37:11.683087	\N	f	\N	\N	\N	\N	\N	\N	\N	1342	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-316	2	2	PM-202608-EPCMS-OT_NEURO-ESU-008	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683094	2026-08-11 18:37:11.6831	\N	f	\N	\N	\N	\N	\N	\N	\N	1343	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-317	2	2	PM-202608-EPCMS-OT_NEURO-ESU-009	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683107	2026-08-11 18:37:11.683114	\N	f	\N	\N	\N	\N	\N	\N	\N	1344	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-318	2	2	PM-202608-EPCMS-OT_NEURO-ESA-007	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683121	2026-08-11 18:37:11.683127	\N	f	\N	\N	\N	\N	\N	\N	\N	1345	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-319	2	2	PM-202608-EPCMS-OT_NEURO-MMD-001	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683134	2026-08-11 18:37:11.68314	\N	f	\N	\N	\N	\N	\N	\N	\N	1346	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-320	2	2	PM-202608-EPCMS-OT_NEURO-MMD-002	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683147	2026-08-11 18:37:11.683154	\N	f	\N	\N	\N	\N	\N	\N	\N	1347	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-321	2	2	PM-202608-EPCMS-OT_NEURO-GEN-015	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683161	2026-08-11 18:37:11.683167	\N	f	\N	\N	\N	\N	\N	\N	\N	1348	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-322	2	2	PM-202608-EPCMS-OT_NEURO-LAP-003	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683174	2026-08-11 18:37:11.683181	\N	f	\N	\N	\N	\N	\N	\N	\N	1349	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-323	2	2	PM-202608-EPCMS-OT_NEURO-CO2INF-005	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683187	2026-08-11 18:37:11.683194	\N	f	\N	\N	\N	\N	\N	\N	\N	1350	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-324	2	2	PM-202608-EPCMS-OT_NEURO-GEN-016	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683201	2026-08-11 18:37:11.683207	\N	f	\N	\N	\N	\N	\N	\N	\N	1351	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-325	2	2	PM-202608-EPCMS-OT_NEURO-LS-003	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683214	2026-08-11 18:37:11.68322	\N	f	\N	\N	\N	\N	\N	\N	\N	1352	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-326	2	2	PM-202608-EPCMS-OT_NEURO-OPMC-004	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683227	2026-08-11 18:37:11.683241	\N	f	\N	\N	\N	\N	\N	\N	\N	1353	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-327	2	2	PM-202608-EPCMS-OT_NEURO-OTCPL-004	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683248	2026-08-11 18:37:11.683254	\N	f	\N	\N	\N	\N	\N	\N	\N	1354	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-328	2	2	PM-202608-EPCMS-OT_NEURO-OTLT-009	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683261	2026-08-11 18:37:11.683268	\N	f	\N	\N	\N	\N	\N	\N	\N	1355	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-329	2	2	PM-202608-EPCMS-OT_NEURO-OTLT-010	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683275	2026-08-11 18:37:11.683281	\N	f	\N	\N	\N	\N	\N	\N	\N	1356	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-330	2	2	PM-202608-EPCMS-OT_LAP-OTT-006	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683288	2026-08-11 18:37:11.683294	\N	f	\N	\N	\N	\N	\N	\N	\N	1357	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-331	2	2	PM-202608-EPCMS-OT_NEURO-PM-094	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683301	2026-08-11 18:37:11.683307	\N	f	\N	\N	\N	\N	\N	\N	\N	1358	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-332	2	2	PM-202608-EPCMS-OT_NEURO-GEN-017	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683314	2026-08-11 18:37:11.683321	\N	f	\N	\N	\N	\N	\N	\N	\N	1359	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-333	2	2	PM-202608-EPCMS-OT_NEURO-GEN-018	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683328	2026-08-11 18:37:11.683334	\N	f	\N	\N	\N	\N	\N	\N	\N	1360	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-334	2	2	PM-202608-EPCMS-OT_NEURO-SYP-055	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683341	2026-08-11 18:37:11.683347	\N	f	\N	\N	\N	\N	\N	\N	\N	1361	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-335	2	2	PM-202608-EPCMS-OT_NEURO-SRC-001	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683354	2026-08-11 18:37:11.683361	\N	f	\N	\N	\N	\N	\N	\N	\N	1362	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-336	2	2	PM-202608-EPCMS-OT_NEURO-OTT-007	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683368	2026-08-11 18:37:11.683374	\N	f	\N	\N	\N	\N	\N	\N	\N	1363	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-337	2	2	PM-202608-EPCMS-OT_NEURO-NAVI-001	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683381	2026-08-11 18:37:11.683387	\N	f	\N	\N	\N	\N	\N	\N	\N	1364	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-338	2	2	PM-202608-EPCMS-OT_NEURO-OTT-008	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683394	2026-08-11 18:37:11.6834	\N	f	\N	\N	\N	\N	\N	\N	\N	1365	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-339	2	2	PM-202608-EPCMS-OT_ORTHO-MMD-003	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683407	2026-08-11 18:37:11.683413	\N	f	\N	\N	\N	\N	\N	\N	\N	1366	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-340	2	2	PM-202608-EPCMS-OT_ORTHO-MMD-004	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.68342	2026-08-11 18:37:11.683426	\N	f	\N	\N	\N	\N	\N	\N	\N	1367	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-341	2	2	PM-202608-EPCMS-OT_ORTHO-MMD-005	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683433	2026-08-11 18:37:11.68344	\N	f	\N	\N	\N	\N	\N	\N	\N	1368	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-342	2	2	PM-202608-EPCMS-OT_ORTHO-MMD-006	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683447	2026-08-11 18:37:11.683453	\N	f	\N	\N	\N	\N	\N	\N	\N	1369	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-343	2	2	PM-202608-EPCMS-OT_OBG-AWS-005	2026-08-11	\N	OT OBG	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.68346	2026-08-11 18:37:11.683466	\N	f	\N	\N	\N	\N	\N	\N	\N	1370	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-344	2	2	PM-202608-EPCMS-OT_OBG-BWER-001	2026-08-11	\N	OT OBG	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683473	2026-08-11 18:37:11.68348	\N	f	\N	\N	\N	\N	\N	\N	\N	1371	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-345	2	2	PM-202608-EPCMS-OT_OBG-ESU-010	2026-08-11	\N	OT OBG	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683487	2026-08-11 18:37:11.683493	\N	f	\N	\N	\N	\N	\N	\N	\N	1372	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-346	2	2	PM-202608-EPCMS-OT_OBG-DFEB-011	2026-08-11	\N	OT OBG	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.6835	2026-08-11 18:37:11.683507	\N	f	\N	\N	\N	\N	\N	\N	\N	1373	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-347	2	2	PM-202608-EPCMS-OT_OBG-ESA-008	2026-08-11	\N	OT OBG	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683513	2026-08-11 18:37:11.68352	\N	f	\N	\N	\N	\N	\N	\N	\N	1374	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-348	2	2	PM-202608-EPCMS-OT_OBG-OTLT-011	2026-08-11	\N	OT OBG	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683527	2026-08-11 18:37:11.683533	\N	f	\N	\N	\N	\N	\N	\N	\N	1375	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-349	2	2	PM-202608-EPCMS-OT_OBG-PM-095	2026-08-11	\N	OT OBG	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.68354	2026-08-11 18:37:11.683546	\N	f	\N	\N	\N	\N	\N	\N	\N	1376	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-350	2	2	PM-202608-EPCMS-OT_OBG-OTT-009	2026-08-11	\N	OT OBG	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683553	2026-08-11 18:37:11.683559	\N	f	\N	\N	\N	\N	\N	\N	\N	1377	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-351	2	2	PM-202608-EPCMS-OT_OPTHAL-GEN-019	2026-08-11	\N	OT Ophthal	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683566	2026-08-11 18:37:11.683573	\N	f	\N	\N	\N	\N	\N	\N	\N	1379	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-352	2	2	PM-202608-EPCMS-OT_OPTHAL-ESU-011	2026-08-11	\N	OT Ophthal	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.68358	2026-08-11 18:37:11.683586	\N	f	\N	\N	\N	\N	\N	\N	\N	1380	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-353	2	2	PM-202608-EPCMS-OT_OPTHAL-ESU-012	2026-08-11	\N	OT Ophthal	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683593	2026-08-11 18:37:11.683599	\N	f	\N	\N	\N	\N	\N	\N	\N	1381	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-354	2	2	PM-202608-EPCMS-OT_OPTHAL-AWS-006	2026-08-11	\N	OT Ophthal	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683606	2026-08-11 18:37:11.683612	\N	f	\N	\N	\N	\N	\N	\N	\N	1382	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-355	2	2	PM-202608-EPCMS-OT_OPTHAL-GEN-020	2026-08-11	\N	OT Ophthal	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683619	2026-08-11 18:37:11.683626	\N	f	\N	\N	\N	\N	\N	\N	\N	1383	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-356	2	2	PM-202608-EPCMS-OT_OPTHAL-GEN-021	2026-08-11	\N	OT Ophthal	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683633	2026-08-11 18:37:11.683639	\N	f	\N	\N	\N	\N	\N	\N	\N	1384	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-357	2	2	PM-202608-EPCMS-OT_OPTHAL-ESA-009	2026-08-11	\N	OT Ophthal	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683646	2026-08-11 18:37:11.683652	\N	f	\N	\N	\N	\N	\N	\N	\N	1385	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-358	2	2	PM-202608-EPCMS-OT_OPTHAL-OPMC-005	2026-08-11	\N	OT Ophthal	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683659	2026-08-11 18:37:11.683665	\N	f	\N	\N	\N	\N	\N	\N	\N	1386	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-359	2	2	PM-202608-EPCMS-OT_OPTHAL-OPMC-006	2026-08-11	\N	OT Ophthal	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683672	2026-08-11 18:37:11.683679	\N	f	\N	\N	\N	\N	\N	\N	\N	1387	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-360	2	2	PM-202608-EPCMS-OT_OPTHAL-OTCPL-005	2026-08-11	\N	OT Ophthal	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683686	2026-08-11 18:37:11.683692	\N	f	\N	\N	\N	\N	\N	\N	\N	1388	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-361	2	2	PM-202608-EPCMS-OT_OPTHAL-OTT-010	2026-08-11	\N	OT Ophthal	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683699	2026-08-11 18:37:11.683705	\N	f	\N	\N	\N	\N	\N	\N	\N	1389	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-362	2	2	PM-202608-EPCMS-OT_OPTHAL-PM-096	2026-08-11	\N	OT Ophthal	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683712	2026-08-11 18:37:11.683718	\N	f	\N	\N	\N	\N	\N	\N	\N	1390	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-363	2	2	PM-202608-EPCMS-OT_OPTHAL-GEN-022	2026-08-11	\N	OT Ophthal	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683725	2026-08-11 18:37:11.683731	\N	f	\N	\N	\N	\N	\N	\N	\N	1391	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-364	2	2	PM-202608-EPCMS-OT_OPTHAL-OTT-011	2026-08-11	\N	OT Ophthal	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683738	2026-08-11 18:37:11.683744	\N	f	\N	\N	\N	\N	\N	\N	\N	1392	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-365	2	2	PM-202608-EPCMS-OT_ORTHO-OTT-012	2026-08-11	\N	OT ORTHO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683752	2026-08-11 18:37:11.683758	\N	f	\N	\N	\N	\N	\N	\N	\N	1393	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-366	2	2	PM-202608-EPCMS-OT_ORTHO-AWS-007	2026-08-11	\N	OT ORTHO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683765	2026-08-11 18:37:11.683771	\N	f	\N	\N	\N	\N	\N	\N	\N	1394	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-367	2	2	PM-202608-EPCMS-RAD-CARM-002	2026-08-11	\N	OT ORTHO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683778	2026-08-11 18:37:11.683784	\N	f	\N	\N	\N	\N	\N	\N	\N	1395	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-368	2	2	PM-202608-EPCMS-OT_ORTHO-ESU-013	2026-08-11	\N	OT ORTHO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683791	2026-08-11 18:37:11.683797	\N	f	\N	\N	\N	\N	\N	\N	\N	1396	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-369	2	2	PM-202608-EPCMS-OT_ORTHO-ESA-010	2026-08-11	\N	OT ORTHO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683804	2026-08-11 18:37:11.68381	\N	f	\N	\N	\N	\N	\N	\N	\N	1397	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-370	2	2	PM-202608-EPCMS-OT_ORTHO-OTCPL-006	2026-08-11	\N	OT ORTHO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683817	2026-08-11 18:37:11.683823	\N	f	\N	\N	\N	\N	\N	\N	\N	1398	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-371	2	2	PM-202608-EPCMS-OT_ORTHO-OTLT-012	2026-08-11	\N	OT ORTHO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.68383	2026-08-11 18:37:11.683837	\N	f	\N	\N	\N	\N	\N	\N	\N	1399	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-372	2	2	PM-202608-EPCMS-OT_ORTHO-GEN-023	2026-08-11	\N	OT ORTHO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683844	2026-08-11 18:37:11.68385	\N	f	\N	\N	\N	\N	\N	\N	\N	1401	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-373	2	2	PM-202608-EPCMS-OT_ORTHO-GEN-024	2026-08-11	\N	OT ORTHO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683857	2026-08-11 18:37:11.683863	\N	f	\N	\N	\N	\N	\N	\N	\N	1402	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-374	2	2	PM-202608-EPCMS-OT_ORTHO-SYP-056	2026-08-11	\N	OT ORTHO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.68387	2026-08-11 18:37:11.683877	\N	f	\N	\N	\N	\N	\N	\N	\N	1403	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-375	2	2	PM-202608-EPCMS-OT_ORTHO-VBOX-024	2026-08-11	\N	OT ORTHO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683883	2026-08-11 18:37:11.68389	\N	f	\N	\N	\N	\N	\N	\N	\N	1407	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-376	2	2	PM-202608-EPCMS-OT PRE OP-PM-098	2026-08-11	\N	OT PRE OP	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683897	2026-08-11 18:37:11.683903	\N	f	\N	\N	\N	\N	\N	\N	\N	1408	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-377	2	2	PM-202608-EPCMS-OT_SEPTIC 1-AWS-008	2026-08-11	\N	OT SEPTIC 1	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.68391	2026-08-11 18:37:11.683916	\N	f	\N	\N	\N	\N	\N	\N	\N	1409	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-378	2	2	PM-202608-EPCMS-OT_SEPTIC 1-ESU-014	2026-08-11	\N	OT SEPTIC 1	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683923	2026-08-11 18:37:11.68393	\N	f	\N	\N	\N	\N	\N	\N	\N	1410	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-379	2	2	PM-202608-EPCMS-OT_SEPTIC 1-DFEB-012	2026-08-11	\N	OT SEPTIC 1	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683936	2026-08-11 18:37:11.683943	\N	f	\N	\N	\N	\N	\N	\N	\N	1411	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-380	2	2	PM-202608-EPCMS-OT_SEPTIC 1-ESA-011	2026-08-11	\N	OT SEPTIC 1	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.68395	2026-08-11 18:37:11.683956	\N	f	\N	\N	\N	\N	\N	\N	\N	1412	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-381	2	2	PM-202608-EPCMS-OT_SEPTIC 1-ESA-012	2026-08-11	\N	OT SEPTIC 1	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683963	2026-08-11 18:37:11.683969	\N	f	\N	\N	\N	\N	\N	\N	\N	1413	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-382	2	2	PM-202608-EPCMS-OT_SEPTIC 1-OTCPL-007	2026-08-11	\N	OT SEPTIC 1	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683976	2026-08-11 18:37:11.683982	\N	f	\N	\N	\N	\N	\N	\N	\N	1414	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-383	2	2	PM-202608-EPCMS-OT_SEPTIC 1-OTLT-013	2026-08-11	\N	OT SEPTIC 1	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683989	2026-08-11 18:37:11.683996	\N	f	\N	\N	\N	\N	\N	\N	\N	1415	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-384	2	2	PM-202608-EPCMS-OT_SEPTIC 1-OTT-013	2026-08-11	\N	OT SEPTIC 1	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684003	2026-08-11 18:37:11.684009	\N	f	\N	\N	\N	\N	\N	\N	\N	1416	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-385	2	2	PM-202608-EPCMS-OT SUR-AWS-009	2026-08-11	\N	OT SURGERY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684016	2026-08-11 18:37:11.684022	\N	f	\N	\N	\N	\N	\N	\N	\N	1418	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-386	2	2	PM-202608-EPCMS-OT_SUR-ESU-015	2026-08-11	\N	OT SURGERY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684029	2026-08-11 18:37:11.684035	\N	f	\N	\N	\N	\N	\N	\N	\N	1419	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-387	2	2	PM-202608-EPCMS-OT_SUR-ESA-013	2026-08-11	\N	OT SURGERY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684042	2026-08-11 18:37:11.684049	\N	f	\N	\N	\N	\N	\N	\N	\N	1421	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-388	2	2	PM-202608-EPCMS-OT_SUR-OTCPL-008	2026-08-11	\N	OT SURGERY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684056	2026-08-11 18:37:11.684062	\N	f	\N	\N	\N	\N	\N	\N	\N	1422	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-389	2	2	PM-202608-EPCMS-OT_SUR-OTLT-014	2026-08-11	\N	OT SURGERY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684069	2026-08-11 18:37:11.684075	\N	f	\N	\N	\N	\N	\N	\N	\N	1423	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-390	2	2	PM-202608-EPCMS-OT_SUR-OTLT-015	2026-08-11	\N	OT SURGERY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684082	2026-08-11 18:37:11.684088	\N	f	\N	\N	\N	\N	\N	\N	\N	1424	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-391	2	2	PM-202608-EPCMS-OT_SUR-OTT-014	2026-08-11	\N	OT SURGERY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684096	2026-08-11 18:37:11.684103	\N	f	\N	\N	\N	\N	\N	\N	\N	1425	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-392	2	2	PM-202608-EPCMS-OT_SUR-PM-100	2026-08-11	\N	OT SURGERY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.68411	2026-08-11 18:37:11.684116	\N	f	\N	\N	\N	\N	\N	\N	\N	1426	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-393	2	2	PM-202608-EPCMS-OT_SUR-PM-101	2026-08-11	\N	OT SURGERY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684123	2026-08-11 18:37:11.684129	\N	f	\N	\N	\N	\N	\N	\N	\N	1427	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-394	2	2	PM-202608-EPCMS-OT_URO-OTLT-016	2026-08-11	\N	OT URO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684136	2026-08-11 18:37:11.684142	\N	f	\N	\N	\N	\N	\N	\N	\N	1428	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-395	2	2	PM-202608-EPCMS-OT_URO-AWS-010	2026-08-11	\N	OT URO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684149	2026-08-11 18:37:11.684156	\N	f	\N	\N	\N	\N	\N	\N	\N	1429	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-396	2	2	PM-202608-EPCMS-OT_URO-SRC-002	2026-08-11	\N	OT URO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684162	2026-08-11 18:37:11.684169	\N	f	\N	\N	\N	\N	\N	\N	\N	1430	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-397	2	2	PM-202608-EPCMS-OT_URO-OTT-015	2026-08-11	\N	OT URO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684176	2026-08-11 18:37:11.684182	\N	f	\N	\N	\N	\N	\N	\N	\N	1431	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-398	2	2	PM-202608-EPCMS-OT_URO-HARM-001	2026-08-11	\N	OT URO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684189	2026-08-11 18:37:11.684195	\N	f	\N	\N	\N	\N	\N	\N	\N	1432	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-399	2	2	PM-202608-EPCMS-OT_URO-IST-001	2026-08-11	\N	OT URO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684202	2026-08-11 18:37:11.684208	\N	f	\N	\N	\N	\N	\N	\N	\N	1433	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-400	2	2	PM-202608-EPCMS-OT_URO-LITHO-001	2026-08-11	\N	OT URO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684215	2026-08-11 18:37:11.684222	\N	f	\N	\N	\N	\N	\N	\N	\N	1434	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-401	2	2	PM-202608-EPCMS-OT_URO-LITHO-002	2026-08-11	\N	OT URO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684236	2026-08-11 18:37:11.684242	\N	f	\N	\N	\N	\N	\N	\N	\N	1435	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-402	2	2	PM-202608-EPCMS-OT_SEPTIC 2-PM-102	2026-08-11	\N	OT_SEPTIC 2	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684249	2026-08-11 18:37:11.684255	\N	f	\N	\N	\N	\N	\N	\N	\N	1436	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-403	2	2	PM-202608-EPCMS-OT_URO-LITHO-003	2026-08-11	\N	OT URO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684262	2026-08-11 18:37:11.684269	\N	f	\N	\N	\N	\N	\N	\N	\N	1437	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-404	2	2	PM-202608-EPCMS-OT_URO-TB-001	2026-08-11	\N	OT URO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684276	2026-08-11 18:37:11.684282	\N	f	\N	\N	\N	\N	\N	\N	\N	1438	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-405	2	2	PM-202608-EPCMS-PHYSIO-FTMS-001	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684289	2026-08-11 18:37:11.684295	\N	f	\N	\N	\N	\N	\N	\N	\N	1448	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-406	2	2	PM-202608-EPCMS-PHYSIO-ITTR-001	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684302	2026-08-11 18:37:11.684308	\N	f	\N	\N	\N	\N	\N	\N	\N	1449	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-407	2	2	PM-202608-EPCMS-PHYSIO-MSTI-001	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684315	2026-08-11 18:37:11.684321	\N	f	\N	\N	\N	\N	\N	\N	\N	1450	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-408	2	2	PM-202608-EPCMS-PHYSIO-PM-103	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684328	2026-08-11 18:37:11.684334	\N	f	\N	\N	\N	\N	\N	\N	\N	1451	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-409	2	2	PM-202608-EPCMS-PHYSIO-QDCH-001	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684341	2026-08-11 18:37:11.684347	\N	f	\N	\N	\N	\N	\N	\N	\N	1452	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-410	2	2	PM-202608-EPCMS-PHYSIO-SWD-001	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684354	2026-08-11 18:37:11.684361	\N	f	\N	\N	\N	\N	\N	\N	\N	1453	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-411	2	2	PM-202608-EPCMS-PHYSIO-SHWL-001	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684367	2026-08-11 18:37:11.684374	\N	f	\N	\N	\N	\N	\N	\N	\N	1454	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-412	2	2	PM-202608-EPCMS-PHYSIO-SUSP-001	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684381	2026-08-11 18:37:11.684387	\N	f	\N	\N	\N	\N	\N	\N	\N	1455	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-413	2	2	PM-202608-EPCMS-PHYSIO-USTH-001	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684394	2026-08-11 18:37:11.6844	\N	f	\N	\N	\N	\N	\N	\N	\N	1456	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-414	2	2	PM-202608-EPCMS-PHYSIO-WAXB-001	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684407	2026-08-11 18:37:11.684413	\N	f	\N	\N	\N	\N	\N	\N	\N	1457	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-415	2	2	PM-202608-EPCMS-PHYSIO-TENS-001	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.68442	2026-08-11 18:37:11.684426	\N	f	\N	\N	\N	\N	\N	\N	\N	1458	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-416	2	2	PM-202608-EPCMS-PHYSIO-TENS-002	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684434	2026-08-11 18:37:11.68444	\N	f	\N	\N	\N	\N	\N	\N	\N	1459	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-417	2	2	PM-202608-EPCMS-PHYSIO-TENS-003	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684447	2026-08-11 18:37:11.684453	\N	f	\N	\N	\N	\N	\N	\N	\N	1460	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-418	2	2	PM-202608-EPCMS-PHYSIO-TENS-004	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.68446	2026-08-11 18:37:11.684466	\N	f	\N	\N	\N	\N	\N	\N	\N	1461	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-419	2	2	PM-202608-EPCMS-PHYSIO-TENS-005	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684473	2026-08-11 18:37:11.684479	\N	f	\N	\N	\N	\N	\N	\N	\N	1462	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-420	2	2	PM-202608-EPCMS-PHYSIO-TENS-006	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684486	2026-08-11 18:37:11.684493	\N	f	\N	\N	\N	\N	\N	\N	\N	1463	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-421	2	2	PM-202608-EPCMS-PHYSIO-USTH-002	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.6845	2026-08-11 18:37:11.684506	\N	f	\N	\N	\N	\N	\N	\N	\N	1464	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-422	2	2	PM-202608-EPCMS-PHYSIO-TMT-003	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684513	2026-08-11 18:37:11.684519	\N	f	\N	\N	\N	\N	\N	\N	\N	1465	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-423	2	2	PM-202608-EPCMS-PHYSIO-CPM-001	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684526	2026-08-11 18:37:11.684532	\N	f	\N	\N	\N	\N	\N	\N	\N	1466	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-424	2	2	PM-202608-EPCMS-PHYSIO-MHTH-001	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684539	2026-08-11 18:37:11.684545	\N	f	\N	\N	\N	\N	\N	\N	\N	1467	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-425	2	2	PM-202608-EPCMS-PHYSIO-TRAC-001	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684552	2026-08-11 18:37:11.684559	\N	f	\N	\N	\N	\N	\N	\N	\N	1468	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-426	2	2	PM-202608-EPCMS-PHYSIO-SIMU-001	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684566	2026-08-11 18:37:11.684572	\N	f	\N	\N	\N	\N	\N	\N	\N	1469	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-427	2	2	PM-202608-EPCMS-PHYSIO-SIMU-002	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684579	2026-08-11 18:37:11.684585	\N	f	\N	\N	\N	\N	\N	\N	\N	1470	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-428	2	2	PM-202608-EPCMS-PHYSIO-CMT-001	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684592	2026-08-11 18:37:11.684599	\N	f	\N	\N	\N	\N	\N	\N	\N	1471	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-429	2	2	PM-202608-EPCMS-PHYSIO-LASR-001	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684606	2026-08-11 18:37:11.684612	\N	f	\N	\N	\N	\N	\N	\N	\N	1472	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-430	2	2	PM-202608-EPCMS-PHYSIO-RRGV-001	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684619	2026-08-11 18:37:11.684625	\N	f	\N	\N	\N	\N	\N	\N	\N	1473	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-431	2	2	PM-202608-EPCMS-RAD-MXR-005	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684632	2026-08-11 18:37:11.684638	\N	f	\N	\N	\N	\N	\N	\N	\N	1493	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-432	2	2	PM-202608-EPCMS-POST OT -BPA-045	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684645	2026-08-11 18:37:11.684651	\N	f	\N	\N	\N	\N	\N	\N	\N	1496	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-433	2	2	PM-202608-EPCMS-POST OT -DFEB-014	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684658	2026-08-11 18:37:11.684665	\N	f	\N	\N	\N	\N	\N	\N	\N	1497	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-434	2	2	PM-202608-EPCMS-POST OT -ECG-018	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684672	2026-08-11 18:37:11.684678	\N	f	\N	\N	\N	\N	\N	\N	\N	1498	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-435	2	2	PM-202608-EPCMS-POST OT -PM-110	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684685	2026-08-11 18:37:11.684691	\N	f	\N	\N	\N	\N	\N	\N	\N	1499	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-436	2	2	PM-202608-EPCMS-POST OT -PM-111	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684698	2026-08-11 18:37:11.684705	\N	f	\N	\N	\N	\N	\N	\N	\N	1500	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-437	2	2	PM-202608-EPCMS-POST OT -PM-112	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684712	2026-08-11 18:37:11.684718	\N	f	\N	\N	\N	\N	\N	\N	\N	1501	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-438	2	2	PM-202608-EPCMS-POST OT -PM-113	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684725	2026-08-11 18:37:11.684732	\N	f	\N	\N	\N	\N	\N	\N	\N	1502	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-439	2	2	PM-202608-EPCMS-POST OT -PM-114	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684738	2026-08-11 18:37:11.684745	\N	f	\N	\N	\N	\N	\N	\N	\N	1503	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-440	2	2	PM-202608-EPCMS-POST OT -PM-115	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684752	2026-08-11 18:37:11.684758	\N	f	\N	\N	\N	\N	\N	\N	\N	1504	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-441	2	2	PM-202608-EPCMS-POST OT -SYP-060	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684765	2026-08-11 18:37:11.684771	\N	f	\N	\N	\N	\N	\N	\N	\N	1505	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-443	2	2	PM-202608-EPCMS-POST OT -PM-116	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684791	2026-08-11 18:37:11.684798	\N	f	\N	\N	\N	\N	\N	\N	\N	1507	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-445	2	2	CMP-00017	2026-08-12	11:09	HEALTH 	7	237		issue	general issue		In Progress	34	\N	3	\N	f	2026-08-12 11:09:14.018811	2026-08-12 11:12:15.687959	\N	f	\N	\N	\N		\N	\N	\N	\N	General Complaint	f	\N	\N	\N	\N	\N	\N	\N	\N
-444	2	2	PM-202608-EPCMS-POST OT -PM-117	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Assigned	35	\N	3	\N	f	2026-08-11 18:37:11.684805	2026-08-12 12:09:46.430096	\N	f	\N	\N	\N	\N	\N	\N	\N	1508	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
-442	2	2	PM-202608-EPCMS-POST OT -SYP-061	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Under Inspection	34	\N	3	\N	f	2026-08-11 18:37:11.684778	2026-08-14 16:10:48.13972	\N	f	\N	\N	\N	\N	\N	\N	\N	1506	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N
+COPY public.complaints (id, tenant_id, site_id, docket_no, complaint_date, complaint_time, department_name, building_id, room_id, location, nature_of_complaint, individual_detailed, name_and_trade, status, assigned_to_id, resolution_remarks, created_by_id, resolved_by_id, is_deleted, created_at, updated_at, resolved_at, material_required, verified_by_id, verified_at, rejection_remarks, inspection_details, feedback, contract_id, rwo_id, equipment_id, complaint_type, is_pm_calibration_call, admin_approved_by_id, admin_approved_at, manager_approved_by_id, manager_approved_at, resolution_entered, closure_reason, repair_method) FROM stdin;
+1	3	3	123	2026-06-11	11:33	eng college	\N	\N	1	Broken chair	Chair is broken		In Progress	\N	\N	4	\N	f	2026-06-11 11:33:55.08691	2026-06-11 11:36:53.102193	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N	\N
+2	3	3	124	2026-06-11	11:38	eng college	\N	\N	2	Machine is not working	Machine is not working		Open	\N	\N	4	\N	f	2026-06-11 11:39:32.822274	2026-06-11 11:39:32.822295	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N	\N
+3	2	2	CMP-00001	2026-06-12	03:30	Civil	\N	\N		Machine is not working	Machine is not working	Hari	In Progress	10	\N	3	\N	f	2026-06-12 03:30:36.68306	2026-06-12 03:34:27.090925	\N	t	\N	\N	\N	\N	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N	\N
+12	2	2	CMP-00010	2026-06-22	12:28	HEALTH 	7	\N		DOOR IS NOT LOCKING PROPERLY	door alignment got changed	ram	Material Pending	35	\N	3	\N	f	2026-06-22 12:28:31.544287	2026-06-22 12:28:55.831237	\N	t	\N	\N	\N	hinge needed	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N	\N
+5	2	2	CMP-00003	2026-06-12	03:43	HEALTH 	\N	\N		Fan is not working	Fan is not working		Closed	10	Replaced	3	3	f	2026-06-12 03:43:19.039499	2026-06-12 04:15:21.884638	2026-06-11 22:45:17.188685	t	3	2026-06-11 22:45:21.883987	\N	\N	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N	\N
+4	2	2	CMP-00002	2026-06-12	03:37	Mechanical	\N	\N		Broken chair	broken chair		In Progress	10	\N	3	\N	f	2026-06-12 03:37:42.695272	2026-06-18 13:07:49.102381	\N	t	\N	\N	\N	\N	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N	\N
+7	2	2	CMP-00005	2026-06-18	13:22	Anatomy	\N	\N		FAN NOT WORKING			Material Pending	34	\N	3	\N	f	2026-06-18 13:22:07.124473	2026-07-02 18:39:51.104738	\N	t	\N	\N	\N		\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N	\N
+6	2	2	CMP-00004	2026-06-18	10:40	HEALTH 	7	237					Material Pending	34	\N	3	\N	f	2026-06-18 10:40:28.426938	2026-06-18 13:09:14.492096	\N	t	\N	\N	\N	\N	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N	\N
+13	2	2	CMP-00011	2026-07-02	18:55	Chemistry	12	\N		AC problem	.	Hari	Closed	\N	dfgdfg	17	\N	f	2026-07-02 18:55:44.946756	2026-07-02 19:02:37.864302	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N	\N
+8	2	2	CMP-00006	2026-06-18	13:27	HEALTH 	7	237		DOOR IS NOT LOCKING PROPERLY		SURESH	Resolved	34	Fixed	3	34	f	2026-06-18 13:27:19.541485	2026-06-18 19:19:17.297948	2026-06-18 13:49:17.297068	f	\N	\N	\N	Inspection completed.   	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N	\N
+9	2	2	CMP-00007	2026-06-18	17:39	HEALTH 	7	237		AC problem	AC is not working	Hari	Closed	34	Replaced	3	3	f	2026-06-18 17:39:02.3167	2026-06-19 15:35:45.320529	2026-06-19 09:44:42.841679	t	3	2026-06-19 10:05:45.319397	\N	Inspection done. Material need to be ordered	No issues after fix	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N	\N
+10	2	2	CMP-00008	2026-06-22	11:42	HEALTH 	7	237		AC problem	AC IS NOT WORKING FROM YESTERDAY HEAVY RAIN 	SURESH	Closed	34	the new inverter is installed to the ac 	3	3	f	2026-06-22 11:42:25.966144	2026-06-22 11:53:11.669587	2026-06-22 06:19:15.588397	t	3	2026-06-22 06:23:11.668873	\N	found that the ac inverter got damaged and the current is not evenly supplied 	yes the technician worked good ac is working fine	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N	\N
+11	2	2	CMP-00009	2026-06-22	12:04	Electronics & Communication Engineering	\N	\N		Water leakage	Water leakage	Pari	Pending Approval	35	\N	3	\N	f	2026-06-22 12:04:52.119096	2026-08-10 18:10:29.411011	\N	t	\N	\N	\N	started	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	water issue resolved 	water issue resolved 	\N
+17	2	2	CMP-00015	2026-08-06	12:43	Management Studies - UG	\N	\N		not working properly	not working\n	vik	Closed	35	\N	3	\N	f	2026-08-06 12:43:10.85631	2026-08-06 12:43:45.858629	\N	f	\N	\N	\N	done	\N	\N	\N	\N	Calibration Call	f	3	2026-08-06 07:13:44.141331	3	2026-08-06 07:13:45.857491	yes	done	\N
+14	2	2	CMP-00012	2026-07-02	19:01	Chemistry	12	\N		Fault in Tap 	WATER NOT COMING		Pending Approval	35	\N	3	\N	f	2026-07-02 19:01:17.170755	2026-08-06 12:45:43.436516	\N	f	\N	\N	\N		\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	yes	done	\N
+18	2	2	CMP-00016	2026-08-06	12:44	Electrotherapy Lab	\N	\N		not working properly	none	vv	Reopened	34	\N	3	\N	f	2026-08-06 12:44:25.652609	2026-08-10 15:52:41.976794	\N	f	\N	\N	Reopened on 2026-08-10 10:22:41 by EastPoint Admin. Reason: again pronblem		\N	\N	\N	\N	Preventive Maintenance Call	f	\N	\N	\N	\N	yes	done	\N
+15	2	2	CMP-00013	2026-07-02	19:02	Chemistry	\N	\N		fdgdfg	dfgdfgdg		Material Pending	34	\N	17	\N	f	2026-07-02 19:02:12.361688	2026-08-10 16:47:07.711575	\N	t	\N	\N	\N	inspected	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N	\N
+16	2	2	CMP-00014	2026-08-05	18:01	Electrotherapy Lab	\N	\N		install the product	fdgdf	vik	Closed	35	\N	3	\N	f	2026-08-05 18:01:15.200114	2026-08-06 12:39:13.995766	\N	f	\N	\N	\N	dfgdfhf	\N	\N	\N	\N	User Training Call/Complaint	f	3	2026-08-06 07:01:06.640766	3	2026-08-06 07:09:13.994849	yes	done	\N
+19	2	2	PM-202608-EPCMS-DIALYSIS-PM-041	2026-08-10	\N	Dialysis	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310229	2026-08-10 17:17:54.310242	\N	f	\N	\N	\N	\N	\N	\N	\N	989	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+20	2	2	PM-202608-EPCMS-EICU-PM-048	2026-08-10	\N	EICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310247	2026-08-10 17:17:54.31025	\N	f	\N	\N	\N	\N	\N	\N	\N	1003	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+21	2	2	PM-202608-EPCMS-EICU-PM-049	2026-08-10	\N	EICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310253	2026-08-10 17:17:54.310256	\N	f	\N	\N	\N	\N	\N	\N	\N	1004	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+22	2	2	PM-202608-EPCMS-MICU-VENT-026	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310259	2026-08-10 17:17:54.310262	\N	f	\N	\N	\N	\N	\N	\N	\N	1166	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+23	2	2	PM-202608-EPCMS-MICU-VENT-027	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310265	2026-08-10 17:17:54.310267	\N	f	\N	\N	\N	\N	\N	\N	\N	1167	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+24	2	2	PM-202608-EPCMS-MICU-VENT-028	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310271	2026-08-10 17:17:54.310273	\N	f	\N	\N	\N	\N	\N	\N	\N	1168	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+25	2	2	PM-202608-EPCMS-MICU-VENT-029	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310276	2026-08-10 17:17:54.310279	\N	f	\N	\N	\N	\N	\N	\N	\N	1169	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+26	2	2	PM-202608-EPCMS-MICU-VENT-030	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310282	2026-08-10 17:17:54.310285	\N	f	\N	\N	\N	\N	\N	\N	\N	1170	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+27	2	2	PM-202608-EPCMS-NICU-NWS-001	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310288	2026-08-10 17:17:54.310291	\N	f	\N	\N	\N	\N	\N	\N	\N	1224	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+28	2	2	PM-202608-EPCMS-NICU-PHTH-014	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310294	2026-08-10 17:17:54.310296	\N	f	\N	\N	\N	\N	\N	\N	\N	1228	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+29	2	2	PM-202608-EPCMS-NICU-PHTH-015	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.3103	2026-08-10 17:17:54.310302	\N	f	\N	\N	\N	\N	\N	\N	\N	1229	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+30	2	2	PM-202608-EPCMS-NICU-PHTH-016	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310305	2026-08-10 17:17:54.310308	\N	f	\N	\N	\N	\N	\N	\N	\N	1230	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+31	2	2	PM-202608-EPCMS-NICU-PHTH-017	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310311	2026-08-10 17:17:54.310315	\N	f	\N	\N	\N	\N	\N	\N	\N	1231	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+32	2	2	PM-202608-EPCMS-NICU-BWRM-011	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310318	2026-08-10 17:17:54.31032	\N	f	\N	\N	\N	\N	\N	\N	\N	1232	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+33	2	2	PM-202608-EPCMS-NICU-BWRM-012	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310323	2026-08-10 17:17:54.310326	\N	f	\N	\N	\N	\N	\N	\N	\N	1233	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+34	2	2	PM-202608-EPCMS-NICU-BCPAP-005	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310332	2026-08-10 17:17:54.310335	\N	f	\N	\N	\N	\N	\N	\N	\N	1234	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+35	2	2	PM-202608-EPCMS-NICU-BCPAP-006	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310338	2026-08-10 17:17:54.310341	\N	f	\N	\N	\N	\N	\N	\N	\N	1235	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+36	2	2	PM-202608-EPCMS-RAD-USG-002	2026-08-10	\N	CCU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310344	2026-08-10 17:17:54.310347	\N	f	\N	\N	\N	\N	\N	\N	\N	909	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+37	2	2	PM-202608-EPCMS-CCU-DFEB-003	2026-08-10	\N	CCU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31035	2026-08-10 17:17:54.310353	\N	f	\N	\N	\N	\N	\N	\N	\N	910	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+38	2	2	PM-202608-EPCMS-CCU-ECG-009	2026-08-10	\N	CCU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310357	2026-08-10 17:17:54.310359	\N	f	\N	\N	\N	\N	\N	\N	\N	911	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+39	2	2	PM-202608-EPCMS-CCU-PM-028	2026-08-10	\N	CCU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310362	2026-08-10 17:17:54.310365	\N	f	\N	\N	\N	\N	\N	\N	\N	912	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+40	2	2	PM-202608-EPCMS-CCU-PM-029	2026-08-10	\N	CCU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310368	2026-08-10 17:17:54.310371	\N	f	\N	\N	\N	\N	\N	\N	\N	913	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+41	2	2	PM-202608-EPCMS-CCU-PM-030	2026-08-10	\N	CCU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310374	2026-08-10 17:17:54.310377	\N	f	\N	\N	\N	\N	\N	\N	\N	914	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+42	2	2	PM-202608-EPCMS-CCU-PM-031	2026-08-10	\N	CCU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31038	2026-08-10 17:17:54.310383	\N	f	\N	\N	\N	\N	\N	\N	\N	915	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+43	2	2	PM-202608-EPCMS-CCU-PM-032	2026-08-10	\N	CCU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310386	2026-08-10 17:17:54.310389	\N	f	\N	\N	\N	\N	\N	\N	\N	916	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+44	2	2	PM-202608-EPCMS-CCU-PM-033	2026-08-10	\N	CCU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310392	2026-08-10 17:17:54.310394	\N	f	\N	\N	\N	\N	\N	\N	\N	917	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+45	2	2	PM-202608-EPCMS-CCU-SYP-010	2026-08-10	\N	CCU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310398	2026-08-10 17:17:54.310401	\N	f	\N	\N	\N	\N	\N	\N	\N	918	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+46	2	2	PM-202608-EPCMS-CCU-SYP-011	2026-08-10	\N	CCU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310404	2026-08-10 17:17:54.310407	\N	f	\N	\N	\N	\N	\N	\N	\N	919	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+47	2	2	PM-202608-EPCMS-CCU-SYP-012	2026-08-10	\N	CCU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31041	2026-08-10 17:17:54.310413	\N	f	\N	\N	\N	\N	\N	\N	\N	920	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+48	2	2	PM-202608-EPCMS-CCU-SYP-013	2026-08-10	\N	CCU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310416	2026-08-10 17:17:54.310419	\N	f	\N	\N	\N	\N	\N	\N	\N	921	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+49	2	2	PM-202608-EPCMS-CCU-SYP-014	2026-08-10	\N	CCU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310422	2026-08-10 17:17:54.310424	\N	f	\N	\N	\N	\N	\N	\N	\N	922	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+50	2	2	PM-202608-EPCMS-CTVS ICU-VENT-003	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310427	2026-08-10 17:17:54.31043	\N	f	\N	\N	\N	\N	\N	\N	\N	923	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+51	2	2	PM-202608-EPCMS-CCU-VENT-004	2026-08-10	\N	CCU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310433	2026-08-10 17:17:54.310436	\N	f	\N	\N	\N	\N	\N	\N	\N	924	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+52	2	2	PM-202608-EPCMS-CCU-VENT-005	2026-08-10	\N	CCU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310439	2026-08-10 17:17:54.310442	\N	f	\N	\N	\N	\N	\N	\N	\N	925	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+53	2	2	PM-202608-EPCMS-CCU-VENT-006	2026-08-10	\N	CCU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310445	2026-08-10 17:17:54.310448	\N	f	\N	\N	\N	\N	\N	\N	\N	926	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+54	2	2	PM-202608-EPCMS-CCU-INP-005	2026-08-10	\N	CCU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310451	2026-08-10 17:17:54.310453	\N	f	\N	\N	\N	\N	\N	\N	\N	927	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+55	2	2	PM-202608-EPCMS-CCU-INP-006	2026-08-10	\N	CCU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310456	2026-08-10 17:17:54.310459	\N	f	\N	\N	\N	\N	\N	\N	\N	928	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+56	2	2	PM-202608-EPCMS-CTVS ICU-BC-001	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310462	2026-08-10 17:17:54.310465	\N	f	\N	\N	\N	\N	\N	\N	\N	936	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+57	2	2	PM-202608-EPCMS-CTVS ICU-DFEB-004	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310468	2026-08-10 17:17:54.310471	\N	f	\N	\N	\N	\N	\N	\N	\N	937	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+58	2	2	PM-202608-EPCMS-CTVS ICU-ESA-003	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310474	2026-08-10 17:17:54.310477	\N	f	\N	\N	\N	\N	\N	\N	\N	938	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+59	2	2	PM-202608-EPCMS-CTVS ICU-FWM-001	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31048	2026-08-10 17:17:54.310483	\N	f	\N	\N	\N	\N	\N	\N	\N	939	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+60	2	2	PM-202608-EPCMS-CTVS ICU-FWM-002	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310486	2026-08-10 17:17:54.310492	\N	f	\N	\N	\N	\N	\N	\N	\N	940	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+61	2	2	PM-202608-EPCMS-CTVS ICU-HTM-001	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310495	2026-08-10 17:17:54.310498	\N	f	\N	\N	\N	\N	\N	\N	\N	941	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+62	2	2	PM-202608-EPCMS-CTVS ICU-HLM-001	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310501	2026-08-10 17:17:54.310504	\N	f	\N	\N	\N	\N	\N	\N	\N	942	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+63	2	2	PM-202608-EPCMS-CTVS ICU-INP-007	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310507	2026-08-10 17:17:54.31051	\N	f	\N	\N	\N	\N	\N	\N	\N	943	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+64	2	2	PM-202608-EPCMS-CTVS ICU-INP-008	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310513	2026-08-10 17:17:54.310516	\N	f	\N	\N	\N	\N	\N	\N	\N	944	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+65	2	2	PM-202608-EPCMS-CTVS ICU-INP-009	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310519	2026-08-10 17:17:54.310522	\N	f	\N	\N	\N	\N	\N	\N	\N	945	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+66	2	2	PM-202608-EPCMS-CTVS ICU-INP-010	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310525	2026-08-10 17:17:54.310528	\N	f	\N	\N	\N	\N	\N	\N	\N	946	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+67	2	2	PM-202608-EPCMS-CTVS ICU-INP-011	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310531	2026-08-10 17:17:54.310534	\N	f	\N	\N	\N	\N	\N	\N	\N	947	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+68	2	2	PM-202608-EPCMS-CTVS ICU-PM-034	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310537	2026-08-10 17:17:54.31054	\N	f	\N	\N	\N	\N	\N	\N	\N	948	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+69	2	2	PM-202608-EPCMS-CTVS ICU-PM-035	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310543	2026-08-10 17:17:54.310546	\N	f	\N	\N	\N	\N	\N	\N	\N	949	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+70	2	2	PM-202608-EPCMS-CTVS ICU-PM-036	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310549	2026-08-10 17:17:54.310552	\N	f	\N	\N	\N	\N	\N	\N	\N	950	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+71	2	2	PM-202608-EPCMS-CTVS ICU-PM-037	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310555	2026-08-10 17:17:54.310557	\N	f	\N	\N	\N	\N	\N	\N	\N	951	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+72	2	2	PM-202608-EPCMS-CTVS ICU-PM-038	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31056	2026-08-10 17:17:54.310563	\N	f	\N	\N	\N	\N	\N	\N	\N	952	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+73	2	2	PM-202608-EPCMS-CTVS ICU-PTWM-001	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310566	2026-08-10 17:17:54.310569	\N	f	\N	\N	\N	\N	\N	\N	\N	954	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+74	2	2	PM-202608-EPCMS-CTVS ICU-BPA-028	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310573	2026-08-10 17:17:54.310576	\N	f	\N	\N	\N	\N	\N	\N	\N	955	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+75	2	2	PM-202608-EPCMS-CTVS ICU-SHL-001	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310579	2026-08-10 17:17:54.310582	\N	f	\N	\N	\N	\N	\N	\N	\N	956	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+76	2	2	PM-202608-EPCMS-CTVS ICU-SYP-015	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310585	2026-08-10 17:17:54.310587	\N	f	\N	\N	\N	\N	\N	\N	\N	957	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+77	2	2	PM-202608-EPCMS-CTVS ICU-SYP-016	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31059	2026-08-10 17:17:54.310593	\N	f	\N	\N	\N	\N	\N	\N	\N	958	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+78	2	2	PM-202608-EPCMS-CTVS ICU-DOP-001	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310596	2026-08-10 17:17:54.310599	\N	f	\N	\N	\N	\N	\N	\N	\N	959	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+79	2	2	PM-202608-EPCMS-CTVS ICU-DOP-002	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310602	2026-08-10 17:17:54.310605	\N	f	\N	\N	\N	\N	\N	\N	\N	960	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+80	2	2	PM-202608-EPCMS-CTVS ICU-DOP-003	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310608	2026-08-10 17:17:54.31061	\N	f	\N	\N	\N	\N	\N	\N	\N	961	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+81	2	2	PM-202608-EPCMS-CTVS ICU-SYP-017	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310613	2026-08-10 17:17:54.310616	\N	f	\N	\N	\N	\N	\N	\N	\N	962	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+82	2	2	PM-202608-EPCMS-CTVS ICU-SYP-018	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310619	2026-08-10 17:17:54.310622	\N	f	\N	\N	\N	\N	\N	\N	\N	963	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+83	2	2	PM-202608-EPCMS-CTVS ICU-VBOX-011	2026-08-10	\N	CTVS ICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310625	2026-08-10 17:17:54.310628	\N	f	\N	\N	\N	\N	\N	\N	\N	964	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+84	2	2	PM-202608-EPCMS-DIALYSIS-BPA-030	2026-08-10	\N	Dialysis	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310631	2026-08-10 17:17:54.310634	\N	f	\N	\N	\N	\N	\N	\N	\N	978	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+85	2	2	PM-202608-EPCMS-DIALYSIS-HD-001	2026-08-10	\N	Dialysis	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310637	2026-08-10 17:17:54.310639	\N	f	\N	\N	\N	\N	\N	\N	\N	979	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+86	2	2	PM-202608-EPCMS-DIALYSIS-HD-002	2026-08-10	\N	Dialysis	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310642	2026-08-10 17:17:54.310645	\N	f	\N	\N	\N	\N	\N	\N	\N	980	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+87	2	2	PM-202608-EPCMS-DIALYSIS-HD-003	2026-08-10	\N	Dialysis	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310648	2026-08-10 17:17:54.310651	\N	f	\N	\N	\N	\N	\N	\N	\N	981	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+88	2	2	PM-202608-EPCMS-DIALYSIS-HD-004	2026-08-10	\N	Dialysis	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310654	2026-08-10 17:17:54.310657	\N	f	\N	\N	\N	\N	\N	\N	\N	982	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+89	2	2	PM-202608-EPCMS-DIALYSIS-HD-005	2026-08-10	\N	Dialysis	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31066	2026-08-10 17:17:54.310663	\N	f	\N	\N	\N	\N	\N	\N	\N	983	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+90	2	2	PM-202608-EPCMS-DIALYSIS-HD-006	2026-08-10	\N	Dialysis	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310666	2026-08-10 17:17:54.310669	\N	f	\N	\N	\N	\N	\N	\N	\N	984	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+91	2	2	PM-202608-EPCMS-DIALYSIS-HD-007	2026-08-10	\N	Dialysis	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310672	2026-08-10 17:17:54.310674	\N	f	\N	\N	\N	\N	\N	\N	\N	985	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+92	2	2	PM-202608-EPCMS-DIALYSIS-PM-040	2026-08-10	\N	Dialysis	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310677	2026-08-10 17:17:54.31068	\N	f	\N	\N	\N	\N	\N	\N	\N	986	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+93	2	2	PM-202608-EPCMS-DIALYSIS-DRU-001	2026-08-10	\N	Dialysis	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310683	2026-08-10 17:17:54.310686	\N	f	\N	\N	\N	\N	\N	\N	\N	987	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+94	2	2	PM-202608-EPCMS-DIALYSIS-DRU-002	2026-08-10	\N	Dialysis	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310689	2026-08-10 17:17:54.310692	\N	f	\N	\N	\N	\N	\N	\N	\N	988	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+95	2	2	PM-202608-EPCMS-EICU-ECG-010	2026-08-10	\N	EICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310695	2026-08-10 17:17:54.310697	\N	f	\N	\N	\N	\N	\N	\N	\N	990	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+96	2	2	PM-202608-EPCMS-EICU-PM-042	2026-08-10	\N	EICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.3107	2026-08-10 17:17:54.310703	\N	f	\N	\N	\N	\N	\N	\N	\N	991	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+97	2	2	PM-202608-EPCMS-EICU-PM-043	2026-08-10	\N	EICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310706	2026-08-10 17:17:54.310709	\N	f	\N	\N	\N	\N	\N	\N	\N	992	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+98	2	2	PM-202608-EPCMS-EICU-PM-044	2026-08-10	\N	EICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310712	2026-08-10 17:17:54.310715	\N	f	\N	\N	\N	\N	\N	\N	\N	993	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+99	2	2	PM-202608-EPCMS-EICU-PM-045	2026-08-10	\N	EICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310718	2026-08-10 17:17:54.310721	\N	f	\N	\N	\N	\N	\N	\N	\N	994	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+100	2	2	PM-202608-EPCMS-EICU-PM-046	2026-08-10	\N	EICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310724	2026-08-10 17:17:54.310726	\N	f	\N	\N	\N	\N	\N	\N	\N	995	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+101	2	2	PM-202608-EPCMS-EICU-PM-047	2026-08-10	\N	EICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310729	2026-08-10 17:17:54.310732	\N	f	\N	\N	\N	\N	\N	\N	\N	996	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+102	2	2	PM-202608-EPCMS-EICU-SYP-019	2026-08-10	\N	EICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310735	2026-08-10 17:17:54.310738	\N	f	\N	\N	\N	\N	\N	\N	\N	997	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+103	2	2	PM-202608-EPCMS-EICU-SYP-020	2026-08-10	\N	EICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310741	2026-08-10 17:17:54.310744	\N	f	\N	\N	\N	\N	\N	\N	\N	998	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+104	2	2	PM-202608-EPCMS-EICU-SYP-021	2026-08-10	\N	EICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310747	2026-08-10 17:17:54.31075	\N	f	\N	\N	\N	\N	\N	\N	\N	999	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+105	2	2	PM-202608-EPCMS-EICU-SYP-022	2026-08-10	\N	EICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310753	2026-08-10 17:17:54.310756	\N	f	\N	\N	\N	\N	\N	\N	\N	1000	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+106	2	2	PM-202608-EPCMS-RAD-MXR-001	2026-08-10	\N	EICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310759	2026-08-10 17:17:54.310761	\N	f	\N	\N	\N	\N	\N	\N	\N	1001	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+107	2	2	PM-202608-EPCMS-EICU-INP-012	2026-08-10	\N	EICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310764	2026-08-10 17:17:54.310767	\N	f	\N	\N	\N	\N	\N	\N	\N	1002	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+108	2	2	PM-202608-EPCMS-MICU-HD-008	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31077	2026-08-10 17:17:54.310773	\N	f	\N	\N	\N	\N	\N	\N	\N	1110	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+109	2	2	PM-202608-EPCMS-RAD-USTD-007	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310776	2026-08-10 17:17:54.310779	\N	f	\N	\N	\N	\N	\N	\N	\N	1111	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+110	2	2	PM-202608-EPCMS-RAD-USTD-008	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310782	2026-08-10 17:17:54.310784	\N	f	\N	\N	\N	\N	\N	\N	\N	1112	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+111	2	2	PM-202608-EPCMS-RAD-USTD-009	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310788	2026-08-10 17:17:54.31079	\N	f	\N	\N	\N	\N	\N	\N	\N	1113	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+112	2	2	PM-202608-EPCMS-MICU-INP-017	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310793	2026-08-10 17:17:54.310796	\N	f	\N	\N	\N	\N	\N	\N	\N	1114	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+113	2	2	PM-202608-EPCMS-MICU-INP-018	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310799	2026-08-10 17:17:54.310802	\N	f	\N	\N	\N	\N	\N	\N	\N	1115	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+114	2	2	PM-202608-EPCMS-MICU-INP-019	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310805	2026-08-10 17:17:54.310808	\N	f	\N	\N	\N	\N	\N	\N	\N	1116	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+115	2	2	PM-202608-EPCMS-MICU-PM-074	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310811	2026-08-10 17:17:54.310814	\N	f	\N	\N	\N	\N	\N	\N	\N	1119	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+116	2	2	PM-202608-EPCMS-MICU-PM-075	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310817	2026-08-10 17:17:54.31082	\N	f	\N	\N	\N	\N	\N	\N	\N	1120	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+117	2	2	PM-202608-EPCMS-MICU-PM-076	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310823	2026-08-10 17:17:54.310826	\N	f	\N	\N	\N	\N	\N	\N	\N	1121	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+118	2	2	PM-202608-EPCMS-MICU-PM-077	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310829	2026-08-10 17:17:54.310831	\N	f	\N	\N	\N	\N	\N	\N	\N	1122	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+119	2	2	PM-202608-EPCMS-MICU-PM-078	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310835	2026-08-10 17:17:54.310837	\N	f	\N	\N	\N	\N	\N	\N	\N	1123	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+120	2	2	PM-202608-EPCMS-MICU-PM-079	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31084	2026-08-10 17:17:54.310843	\N	f	\N	\N	\N	\N	\N	\N	\N	1124	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+121	2	2	PM-202608-EPCMS-MICU-PM-080	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310846	2026-08-10 17:17:54.310849	\N	f	\N	\N	\N	\N	\N	\N	\N	1125	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+122	2	2	PM-202608-EPCMS-MICU-PM-081	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310852	2026-08-10 17:17:54.310855	\N	f	\N	\N	\N	\N	\N	\N	\N	1126	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+123	2	2	PM-202608-EPCMS-MICU-PM-082	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310858	2026-08-10 17:17:54.310861	\N	f	\N	\N	\N	\N	\N	\N	\N	1127	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+124	2	2	PM-202608-EPCMS-MICU-PM-083	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310864	2026-08-10 17:17:54.310867	\N	f	\N	\N	\N	\N	\N	\N	\N	1128	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+125	2	2	PM-202608-EPCMS-MICU-SYP-031	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31087	2026-08-10 17:17:54.310873	\N	f	\N	\N	\N	\N	\N	\N	\N	1129	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+126	2	2	PM-202608-EPCMS-MICU-SYP-032	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310876	2026-08-10 17:17:54.310878	\N	f	\N	\N	\N	\N	\N	\N	\N	1130	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+127	2	2	PM-202608-EPCMS-MICU-SYP-033	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310881	2026-08-10 17:17:54.310884	\N	f	\N	\N	\N	\N	\N	\N	\N	1131	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+128	2	2	PM-202608-EPCMS-MICU-SYP-034	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310887	2026-08-10 17:17:54.31089	\N	f	\N	\N	\N	\N	\N	\N	\N	1132	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+129	2	2	PM-202608-EPCMS-MICU-SYP-035	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310893	2026-08-10 17:17:54.310896	\N	f	\N	\N	\N	\N	\N	\N	\N	1133	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+130	2	2	PM-202608-EPCMS-MICU-SYP-036	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310899	2026-08-10 17:17:54.310902	\N	f	\N	\N	\N	\N	\N	\N	\N	1134	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+131	2	2	PM-202608-EPCMS-MICU-SYP-037	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310905	2026-08-10 17:17:54.310907	\N	f	\N	\N	\N	\N	\N	\N	\N	1135	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+132	2	2	PM-202608-EPCMS-MICU-SYP-038	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31091	2026-08-10 17:17:54.310913	\N	f	\N	\N	\N	\N	\N	\N	\N	1136	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+133	2	2	PM-202608-EPCMS-MICU-SYP-039	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310916	2026-08-10 17:17:54.310919	\N	f	\N	\N	\N	\N	\N	\N	\N	1137	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+134	2	2	PM-202608-EPCMS-MICU-SYP-040	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310922	2026-08-10 17:17:54.310925	\N	f	\N	\N	\N	\N	\N	\N	\N	1138	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+135	2	2	PM-202608-EPCMS-MICU-SYP-041	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310928	2026-08-10 17:17:54.310931	\N	f	\N	\N	\N	\N	\N	\N	\N	1139	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+136	2	2	PM-202608-EPCMS-MICU-SYP-042	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310934	2026-08-10 17:17:54.310937	\N	f	\N	\N	\N	\N	\N	\N	\N	1140	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+137	2	2	PM-202608-EPCMS-MICU-SYP-043	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31094	2026-08-10 17:17:54.310942	\N	f	\N	\N	\N	\N	\N	\N	\N	1141	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+138	2	2	PM-202608-EPCMS-MICU-SYP-044	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310945	2026-08-10 17:17:54.310948	\N	f	\N	\N	\N	\N	\N	\N	\N	1142	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+139	2	2	PM-202608-EPCMS-MICU-SYP-045	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310951	2026-08-10 17:17:54.310954	\N	f	\N	\N	\N	\N	\N	\N	\N	1143	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+140	2	2	PM-202608-EPCMS-MICU-SYP-046	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310957	2026-08-10 17:17:54.31096	\N	f	\N	\N	\N	\N	\N	\N	\N	1144	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+141	2	2	PM-202608-EPCMS-MICU-SYP-047	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310963	2026-08-10 17:17:54.310966	\N	f	\N	\N	\N	\N	\N	\N	\N	1145	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+142	2	2	PM-202608-EPCMS-RAD-USG-004	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310969	2026-08-10 17:17:54.310972	\N	f	\N	\N	\N	\N	\N	\N	\N	1146	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+143	2	2	PM-202608-EPCMS-MICU-VENT-009	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310975	2026-08-10 17:17:54.310977	\N	f	\N	\N	\N	\N	\N	\N	\N	1147	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+144	2	2	PM-202608-EPCMS-MICU-VENT-010	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31098	2026-08-10 17:17:54.310983	\N	f	\N	\N	\N	\N	\N	\N	\N	1148	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+145	2	2	PM-202608-EPCMS-MICU-VENT-011	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310986	2026-08-10 17:17:54.310989	\N	f	\N	\N	\N	\N	\N	\N	\N	1149	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+146	2	2	PM-202608-EPCMS-PICU-VENT-012	2026-08-10	\N	PICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310992	2026-08-10 17:17:54.310995	\N	f	\N	\N	\N	\N	\N	\N	\N	1150	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+147	2	2	PM-202608-EPCMS-MICU-VENT-013	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.310998	2026-08-10 17:17:54.311001	\N	f	\N	\N	\N	\N	\N	\N	\N	1151	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+148	2	2	PM-202608-EPCMS-MICU-VENT-014	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311004	2026-08-10 17:17:54.311006	\N	f	\N	\N	\N	\N	\N	\N	\N	1152	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+149	2	2	PM-202608-EPCMS-MICU-VENT-015	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311009	2026-08-10 17:17:54.311012	\N	f	\N	\N	\N	\N	\N	\N	\N	1153	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+150	2	2	PM-202608-EPCMS-MICU-VENT-016	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311015	2026-08-10 17:17:54.311018	\N	f	\N	\N	\N	\N	\N	\N	\N	1154	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+151	2	2	PM-202608-EPCMS-MICU-VENT-017	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311021	2026-08-10 17:17:54.311024	\N	f	\N	\N	\N	\N	\N	\N	\N	1155	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+152	2	2	PM-202608-EPCMS-MICU-VENT-018	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311027	2026-08-10 17:17:54.31103	\N	f	\N	\N	\N	\N	\N	\N	\N	1156	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+153	2	2	PM-202608-EPCMS-MICU-VENT-019	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311033	2026-08-10 17:17:54.311036	\N	f	\N	\N	\N	\N	\N	\N	\N	1157	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+154	2	2	PM-202608-EPCMS-MICU-VENT-020	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311039	2026-08-10 17:17:54.311041	\N	f	\N	\N	\N	\N	\N	\N	\N	1158	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+155	2	2	PM-202608-EPCMS-MICU-VENT-021	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311044	2026-08-10 17:17:54.311047	\N	f	\N	\N	\N	\N	\N	\N	\N	1159	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+156	2	2	PM-202608-EPCMS-MICU-VENT-022	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31105	2026-08-10 17:17:54.311053	\N	f	\N	\N	\N	\N	\N	\N	\N	1160	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+157	2	2	PM-202608-EPCMS-RAD-MXR-003	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311056	2026-08-10 17:17:54.311059	\N	f	\N	\N	\N	\N	\N	\N	\N	1161	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+158	2	2	PM-202608-EPCMS-MICU-VENT-023	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311062	2026-08-10 17:17:54.311065	\N	f	\N	\N	\N	\N	\N	\N	\N	1162	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+159	2	2	PM-202608-EPCMS-MICU-VENT-024	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311068	2026-08-10 17:17:54.311071	\N	f	\N	\N	\N	\N	\N	\N	\N	1163	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+160	2	2	PM-202608-EPCMS-MICU-VENT-025	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311074	2026-08-10 17:17:54.311077	\N	f	\N	\N	\N	\N	\N	\N	\N	1164	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+161	2	2	PM-202608-EPCMS-MICU-PTWM-002	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31108	2026-08-10 17:17:54.311082	\N	f	\N	\N	\N	\N	\N	\N	\N	1165	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+162	2	2	PM-202608-EPCMS-MICU-DFEB-007	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311086	2026-08-10 17:17:54.311088	\N	f	\N	\N	\N	\N	\N	\N	\N	1171	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+163	2	2	PM-202608-EPCMS-RAD-MXR-004	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311091	2026-08-10 17:17:54.311094	\N	f	\N	\N	\N	\N	\N	\N	\N	1179	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+164	2	2	PM-202608-EPCMS-NICU-BWRM-002	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311097	2026-08-10 17:17:54.3111	\N	f	\N	\N	\N	\N	\N	\N	\N	1180	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+165	2	2	PM-202608-EPCMS-NICU-BWRM-003	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311103	2026-08-10 17:17:54.311105	\N	f	\N	\N	\N	\N	\N	\N	\N	1181	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+166	2	2	PM-202608-EPCMS-NICU-BWRM-004	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311108	2026-08-10 17:17:54.311111	\N	f	\N	\N	\N	\N	\N	\N	\N	1182	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+167	2	2	PM-202608-EPCMS-NICU-VENT-031	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311114	2026-08-10 17:17:54.311117	\N	f	\N	\N	\N	\N	\N	\N	\N	1183	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+168	2	2	PM-202608-EPCMS-NICU-INRS-001	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31112	2026-08-10 17:17:54.311122	\N	f	\N	\N	\N	\N	\N	\N	\N	1184	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+169	2	2	PM-202608-EPCMS-NICU-BCPAP-001	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311125	2026-08-10 17:17:54.311128	\N	f	\N	\N	\N	\N	\N	\N	\N	1185	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+170	2	2	PM-202608-EPCMS-NICU-BCPAP-002	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311131	2026-08-10 17:17:54.311134	\N	f	\N	\N	\N	\N	\N	\N	\N	1186	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+171	2	2	PM-202608-EPCMS-NICU-BCPAP-003	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311137	2026-08-10 17:17:54.31114	\N	f	\N	\N	\N	\N	\N	\N	\N	1187	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+172	2	2	PM-202608-EPCMS-NICU-BCPAP-004	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311143	2026-08-10 17:17:54.311145	\N	f	\N	\N	\N	\N	\N	\N	\N	1188	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+173	2	2	PM-202608-EPCMS-NICU-SYP-048	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311148	2026-08-10 17:17:54.311151	\N	f	\N	\N	\N	\N	\N	\N	\N	1189	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+174	2	2	PM-202608-EPCMS-NICU-SYP-049	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311154	2026-08-10 17:17:54.311157	\N	f	\N	\N	\N	\N	\N	\N	\N	1190	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+175	2	2	PM-202608-EPCMS-NICU-SYP-050	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31116	2026-08-10 17:17:54.311162	\N	f	\N	\N	\N	\N	\N	\N	\N	1191	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+176	2	2	PM-202608-EPCMS-NICU-PHTH-001	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311166	2026-08-10 17:17:54.311168	\N	f	\N	\N	\N	\N	\N	\N	\N	1192	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+177	2	2	PM-202608-EPCMS-NICU-PHTH-002	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311171	2026-08-10 17:17:54.311174	\N	f	\N	\N	\N	\N	\N	\N	\N	1193	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+178	2	2	PM-202608-EPCMS-NICU-PHTH-003	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311177	2026-08-10 17:17:54.31118	\N	f	\N	\N	\N	\N	\N	\N	\N	1194	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+179	2	2	PM-202608-EPCMS-NICU-PHTH-004	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311183	2026-08-10 17:17:54.311186	\N	f	\N	\N	\N	\N	\N	\N	\N	1195	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+180	2	2	PM-202608-EPCMS-NICU-PHTH-005	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311189	2026-08-10 17:17:54.311191	\N	f	\N	\N	\N	\N	\N	\N	\N	1196	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+181	2	2	PM-202608-EPCMS-NICU-PHTH-006	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311194	2026-08-10 17:17:54.311197	\N	f	\N	\N	\N	\N	\N	\N	\N	1197	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+182	2	2	PM-202608-EPCMS-NICU-PHTH-007	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.3112	2026-08-10 17:17:54.311203	\N	f	\N	\N	\N	\N	\N	\N	\N	1198	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+183	2	2	PM-202608-EPCMS-NICU-PHTH-008	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311206	2026-08-10 17:17:54.311209	\N	f	\N	\N	\N	\N	\N	\N	\N	1199	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+184	2	2	PM-202608-EPCMS-NICU-PHTH-009	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311212	2026-08-10 17:17:54.311215	\N	f	\N	\N	\N	\N	\N	\N	\N	1200	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+185	2	2	PM-202608-EPCMS-NICU-PHTH-010	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311218	2026-08-10 17:17:54.31122	\N	f	\N	\N	\N	\N	\N	\N	\N	1201	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+186	2	2	PM-202608-EPCMS-NICU-INCU-001	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311223	2026-08-10 17:17:54.311226	\N	f	\N	\N	\N	\N	\N	\N	\N	1202	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+187	2	2	PM-202608-EPCMS-NICU-BWRM-005	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311229	2026-08-10 17:17:54.311232	\N	f	\N	\N	\N	\N	\N	\N	\N	1203	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+188	2	2	PM-202608-EPCMS-NICU-BWRM-006	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311235	2026-08-10 17:17:54.311237	\N	f	\N	\N	\N	\N	\N	\N	\N	1204	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+189	2	2	PM-202608-EPCMS-NICU-BWRM-007	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31124	2026-08-10 17:17:54.311243	\N	f	\N	\N	\N	\N	\N	\N	\N	1205	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+190	2	2	PM-202608-EPCMS-NICU-BWRM-008	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311246	2026-08-10 17:17:54.311249	\N	f	\N	\N	\N	\N	\N	\N	\N	1206	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+191	2	2	PM-202608-EPCMS-NICU-BWRM-009	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311252	2026-08-10 17:17:54.311255	\N	f	\N	\N	\N	\N	\N	\N	\N	1207	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+192	2	2	PM-202608-EPCMS-NICU-BWRM-010	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311258	2026-08-10 17:17:54.31126	\N	f	\N	\N	\N	\N	\N	\N	\N	1208	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+193	2	2	PM-202608-EPCMS-NICU-PHTH-011	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311263	2026-08-10 17:17:54.311266	\N	f	\N	\N	\N	\N	\N	\N	\N	1209	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+194	2	2	PM-202608-EPCMS-NICU-PHTH-012	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311269	2026-08-10 17:17:54.311272	\N	f	\N	\N	\N	\N	\N	\N	\N	1210	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+195	2	2	PM-202608-EPCMS-NICU-PHTH-013	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311275	2026-08-10 17:17:54.311278	\N	f	\N	\N	\N	\N	\N	\N	\N	1211	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+196	2	2	PM-202608-EPCMS-NICU-INRS-002	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311281	2026-08-10 17:17:54.311284	\N	f	\N	\N	\N	\N	\N	\N	\N	1212	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+197	2	2	PM-202608-EPCMS-NICU-INRS-003	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311287	2026-08-10 17:17:54.311289	\N	f	\N	\N	\N	\N	\N	\N	\N	1213	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+198	2	2	PM-202608-EPCMS-NICU-INRS-004	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311292	2026-08-10 17:17:54.311295	\N	f	\N	\N	\N	\N	\N	\N	\N	1214	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+199	2	2	PM-202608-EPCMS-NICU-PINC-001	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311298	2026-08-10 17:17:54.311301	\N	f	\N	\N	\N	\N	\N	\N	\N	1215	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+200	2	2	PM-202608-EPCMS-NICU-SYP-051	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311304	2026-08-10 17:17:54.311307	\N	f	\N	\N	\N	\N	\N	\N	\N	1216	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+201	2	2	PM-202608-EPCMS-NICU-SYP-052	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31131	2026-08-10 17:17:54.311312	\N	f	\N	\N	\N	\N	\N	\N	\N	1217	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+202	2	2	PM-202608-EPCMS-NICU-SYP-053	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311315	2026-08-10 17:17:54.311318	\N	f	\N	\N	\N	\N	\N	\N	\N	1218	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+203	2	2	PM-202608-EPCMS-NICU-SYP-054	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311321	2026-08-10 17:17:54.311324	\N	f	\N	\N	\N	\N	\N	\N	\N	1219	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+204	2	2	PM-202608-EPCMS-NICU-PM-084	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311327	2026-08-10 17:17:54.31133	\N	f	\N	\N	\N	\N	\N	\N	\N	1220	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+205	2	2	PM-202608-EPCMS-NICU-PM-085	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311333	2026-08-10 17:17:54.311336	\N	f	\N	\N	\N	\N	\N	\N	\N	1221	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+206	2	2	PM-202608-EPCMS-NICU-PM-086	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311339	2026-08-10 17:17:54.311341	\N	f	\N	\N	\N	\N	\N	\N	\N	1222	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+207	2	2	PM-202608-EPCMS-NICU-PM-087	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311344	2026-08-10 17:17:54.311347	\N	f	\N	\N	\N	\N	\N	\N	\N	1223	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+208	2	2	PM-202608-EPCMS-NICU-VENT-032	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31135	2026-08-10 17:17:54.311353	\N	f	\N	\N	\N	\N	\N	\N	\N	1225	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+209	2	2	PM-202608-EPCMS-NICU-PM-088	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311356	2026-08-10 17:17:54.311358	\N	f	\N	\N	\N	\N	\N	\N	\N	1226	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+210	2	2	PM-202608-EPCMS-NICU-PM-089	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311361	2026-08-10 17:17:54.311364	\N	f	\N	\N	\N	\N	\N	\N	\N	1227	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+211	2	2	PM-202608-EPCMS-NICU-VENT-033	2026-08-10	\N	NICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311367	2026-08-10 17:17:54.31137	\N	f	\N	\N	\N	\N	\N	\N	\N	1236	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+212	2	2	PM-202608-EPCMS-PICU-HFNC-002	2026-08-10	\N	PICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311373	2026-08-10 17:17:54.311376	\N	f	\N	\N	\N	\N	\N	\N	\N	1475	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+213	2	2	PM-202608-EPCMS-PICU-HFNC-003	2026-08-10	\N	PICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311379	2026-08-10 17:17:54.311381	\N	f	\N	\N	\N	\N	\N	\N	\N	1476	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+214	2	2	PM-202608-EPCMS-PICU-HFNC-004	2026-08-10	\N	PICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311384	2026-08-10 17:17:54.311387	\N	f	\N	\N	\N	\N	\N	\N	\N	1477	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+215	2	2	PM-202608-EPCMS-PICU-HFNC-005	2026-08-10	\N	PICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31139	2026-08-10 17:17:54.311393	\N	f	\N	\N	\N	\N	\N	\N	\N	1478	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+216	2	2	PM-202608-EPCMS-PICU-HFNC-006	2026-08-10	\N	PICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311396	2026-08-10 17:17:54.311399	\N	f	\N	\N	\N	\N	\N	\N	\N	1479	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+217	2	2	PM-202608-EPCMS-PICU-HFNC-007	2026-08-10	\N	PICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311402	2026-08-10 17:17:54.311404	\N	f	\N	\N	\N	\N	\N	\N	\N	1480	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+218	2	2	PM-202608-EPCMS-PICU-INP-020	2026-08-10	\N	PICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311407	2026-08-10 17:17:54.31141	\N	f	\N	\N	\N	\N	\N	\N	\N	1481	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+219	2	2	PM-202608-EPCMS-PICU-PM-105	2026-08-10	\N	PICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311413	2026-08-10 17:17:54.311416	\N	f	\N	\N	\N	\N	\N	\N	\N	1482	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+220	2	2	PM-202608-EPCMS-PICU-PM-106	2026-08-10	\N	PICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311419	2026-08-10 17:17:54.311421	\N	f	\N	\N	\N	\N	\N	\N	\N	1483	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+221	2	2	PM-202608-EPCMS-PICU-PM-107	2026-08-10	\N	PICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311424	2026-08-10 17:17:54.311427	\N	f	\N	\N	\N	\N	\N	\N	\N	1484	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+222	2	2	PM-202608-EPCMS-PICU-SYP-057	2026-08-10	\N	PICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31143	2026-08-10 17:17:54.311433	\N	f	\N	\N	\N	\N	\N	\N	\N	1485	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+223	2	2	PM-202608-EPCMS-PICU-SYP-058	2026-08-10	\N	PICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311437	2026-08-10 17:17:54.31144	\N	f	\N	\N	\N	\N	\N	\N	\N	1486	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+224	2	2	PM-202608-EPCMS-PICU-SYP-059	2026-08-10	\N	PICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311443	2026-08-10 17:17:54.311446	\N	f	\N	\N	\N	\N	\N	\N	\N	1487	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+225	2	2	PM-202608-EPCMS-MICU-VENT-034	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311449	2026-08-10 17:17:54.311451	\N	f	\N	\N	\N	\N	\N	\N	\N	1488	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+226	2	2	PM-202608-EPCMS-MICU-VENT-035	2026-08-10	\N	MICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311454	2026-08-10 17:17:54.311457	\N	f	\N	\N	\N	\N	\N	\N	\N	1489	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+227	2	2	PM-202608-EPCMS-PICU-VENT-036	2026-08-10	\N	PICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.31146	2026-08-10 17:17:54.311463	\N	f	\N	\N	\N	\N	\N	\N	\N	1490	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+228	2	2	PM-202608-EPCMS-PICU-VENT-037	2026-08-10	\N	PICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311466	2026-08-10 17:17:54.311468	\N	f	\N	\N	\N	\N	\N	\N	\N	1491	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+229	2	2	PM-202608-EPCMS-PICU-VBOX-030	2026-08-10	\N	PICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311471	2026-08-10 17:17:54.311474	\N	f	\N	\N	\N	\N	\N	\N	\N	1492	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+230	2	2	PM-202608-EPCMS-SICU-PM-118	2026-08-10	\N	SICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311477	2026-08-10 17:17:54.31148	\N	f	\N	\N	\N	\N	\N	\N	\N	1579	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+231	2	2	PM-202608-EPCMS-SICU-PM-119	2026-08-10	\N	SICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311483	2026-08-10 17:17:54.311486	\N	f	\N	\N	\N	\N	\N	\N	\N	1580	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+232	2	2	PM-202608-EPCMS-SICU-PM-120	2026-08-10	\N	SICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311492	2026-08-10 17:17:54.311495	\N	f	\N	\N	\N	\N	\N	\N	\N	1581	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+233	2	2	PM-202608-EPCMS-SICU-PM-121	2026-08-10	\N	SICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311498	2026-08-10 17:17:54.3115	\N	f	\N	\N	\N	\N	\N	\N	\N	1582	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+234	2	2	PM-202608-EPCMS-SICU-PM-122	2026-08-10	\N	SICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311503	2026-08-10 17:17:54.311506	\N	f	\N	\N	\N	\N	\N	\N	\N	1583	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+235	2	2	PM-202608-EPCMS-SICU-SYP-062	2026-08-10	\N	SICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311509	2026-08-10 17:17:54.311512	\N	f	\N	\N	\N	\N	\N	\N	\N	1584	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+236	2	2	PM-202608-EPCMS-SICU-SYP-063	2026-08-10	\N	SICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311515	2026-08-10 17:17:54.311518	\N	f	\N	\N	\N	\N	\N	\N	\N	1585	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+237	2	2	PM-202608-EPCMS-SICU-SYP-064	2026-08-10	\N	SICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311521	2026-08-10 17:17:54.311523	\N	f	\N	\N	\N	\N	\N	\N	\N	1586	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+238	2	2	PM-202608-EPCMS-SICU-SYP-065	2026-08-10	\N	SICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311526	2026-08-10 17:17:54.311529	\N	f	\N	\N	\N	\N	\N	\N	\N	1587	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+239	2	2	PM-202608-EPCMS-SICU-VENT-038	2026-08-10	\N	SICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311532	2026-08-10 17:17:54.311535	\N	f	\N	\N	\N	\N	\N	\N	\N	1588	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+240	2	2	PM-202608-EPCMS-SICU-VENT-039	2026-08-10	\N	SICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311538	2026-08-10 17:17:54.311541	\N	f	\N	\N	\N	\N	\N	\N	\N	1589	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+241	2	2	PM-202608-EPCMS-SICU-VBOX-044	2026-08-10	\N	SICU	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-10 17:17:54.311544	2026-08-10 17:17:54.311546	\N	f	\N	\N	\N	\N	\N	\N	\N	1590	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+242	2	2	PM-202608-EPCMS-OT_GEN-PM-092	2026-08-11	\N	OT General	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682083	2026-08-11 18:37:11.682106	\N	f	\N	\N	\N	\N	\N	\N	\N	1326	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+243	2	2	PM-202608-EPCMS-OT_OBG-NWS-002	2026-08-11	\N	OT OBG	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682116	2026-08-11 18:37:11.682122	\N	f	\N	\N	\N	\N	\N	\N	\N	1378	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+244	2	2	PM-202608-EPCMS-OT_ORTHO-STQ-001	2026-08-11	\N	OT ORTHO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.68213	2026-08-11 18:37:11.682136	\N	f	\N	\N	\N	\N	\N	\N	\N	1404	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+245	2	2	PM-202608-EPCMS-OT_ORTHO-STQ-002	2026-08-11	\N	OT ORTHO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682143	2026-08-11 18:37:11.682149	\N	f	\N	\N	\N	\N	\N	\N	\N	1405	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+246	2	2	PM-202608-EPCMS-PHYSIO-PM-104	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682156	2026-08-11 18:37:11.682163	\N	f	\N	\N	\N	\N	\N	\N	\N	1474	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+247	2	2	PM-202608-EPCMS-POST OT -PM-108	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.68217	2026-08-11 18:37:11.682176	\N	f	\N	\N	\N	\N	\N	\N	\N	1494	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+248	2	2	PM-202608-EPCMS-POST OT -PM-109	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682183	2026-08-11 18:37:11.682189	\N	f	\N	\N	\N	\N	\N	\N	\N	1495	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+249	2	2	PM-202608-EPCMS-MINOR OT-ANES-001	2026-08-11	\N	MINOR OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682196	2026-08-11 18:37:11.682202	\N	f	\N	\N	\N	\N	\N	\N	\N	1172	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+250	2	2	PM-202608-EPCMS-MINOR OT-ANES-002	2026-08-11	\N	MINOR OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682209	2026-08-11 18:37:11.682216	\N	f	\N	\N	\N	\N	\N	\N	\N	1173	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+251	2	2	PM-202608-EPCMS-MINOR OT-OTLT-003	2026-08-11	\N	MINOR OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682222	2026-08-11 18:37:11.682236	\N	f	\N	\N	\N	\N	\N	\N	\N	1174	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+252	2	2	PM-202608-EPCMS-MINOR OT-OTLT-004	2026-08-11	\N	MINOR OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682244	2026-08-11 18:37:11.682251	\N	f	\N	\N	\N	\N	\N	\N	\N	1175	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+253	2	2	PM-202608-EPCMS-MINOR OT-OTLT-005	2026-08-11	\N	MINOR OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682259	2026-08-11 18:37:11.682266	\N	f	\N	\N	\N	\N	\N	\N	\N	1176	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+254	2	2	PM-202608-EPCMS-MINOR OT-SPLT-003	2026-08-11	\N	MINOR OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682273	2026-08-11 18:37:11.682279	\N	f	\N	\N	\N	\N	\N	\N	\N	1177	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+255	2	2	PM-202608-EPCMS-MINOR OT-SPLT-004	2026-08-11	\N	MINOR OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682286	2026-08-11 18:37:11.682292	\N	f	\N	\N	\N	\N	\N	\N	\N	1178	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+256	2	2	PM-202608-EPCMS-OT ANES-PM-090	2026-08-11	\N	OT Anaesthesia	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682299	2026-08-11 18:37:11.682305	\N	f	\N	\N	\N	\N	\N	\N	\N	1282	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+257	2	2	PM-202608-EPCMS-RAD-USTD-010	2026-08-11	\N	OT Anaesthesia	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682312	2026-08-11 18:37:11.682319	\N	f	\N	\N	\N	\N	\N	\N	\N	1283	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+258	2	2	PM-202608-EPCMS-RAD-USTD-011	2026-08-11	\N	OT Anaesthesia	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682326	2026-08-11 18:37:11.682332	\N	f	\N	\N	\N	\N	\N	\N	\N	1284	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+259	2	2	PM-202608-EPCMS-RAD-USTD-012	2026-08-11	\N	OT Anaesthesia	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682339	2026-08-11 18:37:11.682345	\N	f	\N	\N	\N	\N	\N	\N	\N	1285	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+260	2	2	PM-202608-EPCMS-RAD-USTD-013	2026-08-11	\N	OT Anaesthesia	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682352	2026-08-11 18:37:11.682358	\N	f	\N	\N	\N	\N	\N	\N	\N	1286	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+261	2	2	PM-202608-EPCMS-RAD-USG-005	2026-08-11	\N	OT Anaesthesia	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682365	2026-08-11 18:37:11.682371	\N	f	\N	\N	\N	\N	\N	\N	\N	1287	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+262	2	2	PM-202608-EPCMS-CTVS OT-ESU-002	2026-08-11	\N	OT CTVS	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682378	2026-08-11 18:37:11.682385	\N	f	\N	\N	\N	\N	\N	\N	\N	1288	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+263	2	2	PM-202608-EPCMS-CTVS OT-DFEB-008	2026-08-11	\N	OT CTVS	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682392	2026-08-11 18:37:11.682398	\N	f	\N	\N	\N	\N	\N	\N	\N	1289	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+264	2	2	PM-202608-EPCMS-OT_EMER-AWS-001	2026-08-11	\N	OT Emergency	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682407	2026-08-11 18:37:11.682413	\N	f	\N	\N	\N	\N	\N	\N	\N	1290	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+265	2	2	PM-202608-EPCMS-OT_EMER-DFEB-009	2026-08-11	\N	OT Emergency	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.68242	2026-08-11 18:37:11.682427	\N	f	\N	\N	\N	\N	\N	\N	\N	1291	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+266	2	2	PM-202608-EPCMS-OT_ENT-AWS-002	2026-08-11	\N	OT Emergency	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682434	2026-08-11 18:37:11.68244	\N	f	\N	\N	\N	\N	\N	\N	\N	1292	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+267	2	2	PM-202608-EPCMS-OT_SEPTIC 2-ESU-003	2026-08-11	\N	OT Emergency	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682447	2026-08-11 18:37:11.682453	\N	f	\N	\N	\N	\N	\N	\N	\N	1293	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+268	2	2	PM-202608-EPCMS-OT_SEPTIC 2-OTCPL-001	2026-08-11	\N	OT Emergency	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682461	2026-08-11 18:37:11.682467	\N	f	\N	\N	\N	\N	\N	\N	\N	1294	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+269	2	2	PM-202608-EPCMS-OT_SEPTIC 2-OTLT-006	2026-08-11	\N	OT Emergency	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682474	2026-08-11 18:37:11.682481	\N	f	\N	\N	\N	\N	\N	\N	\N	1295	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+270	2	2	PM-202608-EPCMS-OT_SEPTIC 2-OTT-002	2026-08-11	\N	OT Emergency	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682488	2026-08-11 18:37:11.682494	\N	f	\N	\N	\N	\N	\N	\N	\N	1296	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+271	2	2	PM-202608-EPCMS-OT_EMER-DFEB-010	2026-08-11	\N	OT Emergency	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682501	2026-08-11 18:37:11.682507	\N	f	\N	\N	\N	\N	\N	\N	\N	1297	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+272	2	2	PM-202608-EPCMS-OT_ENT-GEN-005	2026-08-11	\N	OT ENT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682514	2026-08-11 18:37:11.68252	\N	f	\N	\N	\N	\N	\N	\N	\N	1298	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+273	2	2	PM-202608-EPCMS-OT_ENT-ESU-004	2026-08-11	\N	OT ENT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682527	2026-08-11 18:37:11.682533	\N	f	\N	\N	\N	\N	\N	\N	\N	1299	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+274	2	2	PM-202608-EPCMS-OT_ENT-ESA-005	2026-08-11	\N	OT ENT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.68254	2026-08-11 18:37:11.682546	\N	f	\N	\N	\N	\N	\N	\N	\N	1300	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+275	2	2	PM-202608-EPCMS-OT_ENT-GEN-006	2026-08-11	\N	OT ENT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682553	2026-08-11 18:37:11.682559	\N	f	\N	\N	\N	\N	\N	\N	\N	1301	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+276	2	2	PM-202608-EPCMS-OT_ENT-FHDC-001	2026-08-11	\N	OT ENT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682566	2026-08-11 18:37:11.682572	\N	f	\N	\N	\N	\N	\N	\N	\N	1302	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+277	2	2	PM-202608-EPCMS-OT_ENT-LS-001	2026-08-11	\N	OT ENT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682579	2026-08-11 18:37:11.682585	\N	f	\N	\N	\N	\N	\N	\N	\N	1303	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+278	2	2	PM-202608-EPCMS-OT_ENT-GEN-007	2026-08-11	\N	OT ENT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682592	2026-08-11 18:37:11.682599	\N	f	\N	\N	\N	\N	\N	\N	\N	1304	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+279	2	2	PM-202608-EPCMS-OT_ENT-OPMC-003	2026-08-11	\N	OT ENT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682606	2026-08-11 18:37:11.682612	\N	f	\N	\N	\N	\N	\N	\N	\N	1305	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+280	2	2	PM-202608-EPCMS-OT_ENT-OTLT-007	2026-08-11	\N	OT ENT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682619	2026-08-11 18:37:11.682625	\N	f	\N	\N	\N	\N	\N	\N	\N	1306	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+281	2	2	PM-202608-EPCMS-OT_ENT-PM-091	2026-08-11	\N	OT ENT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682632	2026-08-11 18:37:11.682638	\N	f	\N	\N	\N	\N	\N	\N	\N	1307	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+282	2	2	PM-202608-EPCMS-OT_ENT-OTT-003	2026-08-11	\N	OT ENT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682645	2026-08-11 18:37:11.682651	\N	f	\N	\N	\N	\N	\N	\N	\N	1308	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+283	2	2	PM-202608-EPCMS-OT-GEN-008	2026-08-11	\N	OT General	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682658	2026-08-11 18:37:11.682665	\N	f	\N	\N	\N	\N	\N	\N	\N	1309	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+284	2	2	PM-202608-EPCMS-OT-ESU-005	2026-08-11	\N	OT General	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682671	2026-08-11 18:37:11.682678	\N	f	\N	\N	\N	\N	\N	\N	\N	1310	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+285	2	2	PM-202608-EPCMS-OT-LAP-001	2026-08-11	\N	OT General	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682685	2026-08-11 18:37:11.682691	\N	f	\N	\N	\N	\N	\N	\N	\N	1311	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+286	2	2	PM-202608-EPCMS-OT-CO2INF-001	2026-08-11	\N	OT General	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682698	2026-08-11 18:37:11.682704	\N	f	\N	\N	\N	\N	\N	\N	\N	1312	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+287	2	2	PM-202608-EPCMS-OT-CO2INF-002	2026-08-11	\N	OT General	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682711	2026-08-11 18:37:11.682717	\N	f	\N	\N	\N	\N	\N	\N	\N	1313	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+288	2	2	PM-202608-EPCMS-OT-GEN-009	2026-08-11	\N	OT General	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682724	2026-08-11 18:37:11.68273	\N	f	\N	\N	\N	\N	\N	\N	\N	1314	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+289	2	2	PM-202608-EPCMS-OT-GEN-010	2026-08-11	\N	OT General	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682737	2026-08-11 18:37:11.682744	\N	f	\N	\N	\N	\N	\N	\N	\N	1315	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+290	2	2	PM-202608-EPCMS-OT_GEN-PTWM-003	2026-08-11	\N	OT General	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.68275	2026-08-11 18:37:11.682757	\N	f	\N	\N	\N	\N	\N	\N	\N	1316	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+291	2	2	PM-202608-EPCMS-OT_GEN-PTWM-004	2026-08-11	\N	OT General	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682764	2026-08-11 18:37:11.68277	\N	f	\N	\N	\N	\N	\N	\N	\N	1317	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+292	2	2	PM-202608-EPCMS-OT-OTT-004	2026-08-11	\N	OT General	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682777	2026-08-11 18:37:11.682783	\N	f	\N	\N	\N	\N	\N	\N	\N	1318	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+293	2	2	PM-202608-EPCMS-OT EXTRA-OTT-005	2026-08-11	\N	OT General	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.68279	2026-08-11 18:37:11.682796	\N	f	\N	\N	\N	\N	\N	\N	\N	1319	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+294	2	2	PM-202608-EPCMS-OT_GEN-GEN-011	2026-08-11	\N	OT General	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682803	2026-08-11 18:37:11.682809	\N	f	\N	\N	\N	\N	\N	\N	\N	1320	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+295	2	2	PM-202608-EPCMS-OT_GEN-FWM-005	2026-08-11	\N	OT General	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682816	2026-08-11 18:37:11.682822	\N	f	\N	\N	\N	\N	\N	\N	\N	1321	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+296	2	2	PM-202608-EPCMS-OT_GEN-FUM-004	2026-08-11	\N	OT General	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682829	2026-08-11 18:37:11.682836	\N	f	\N	\N	\N	\N	\N	\N	\N	1322	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+297	2	2	PM-202608-EPCMS-OT_GEN-FUM-005	2026-08-11	\N	OT General	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682842	2026-08-11 18:37:11.682849	\N	f	\N	\N	\N	\N	\N	\N	\N	1323	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+298	2	2	PM-202608-EPCMS-OT_GEN-PTWM-005	2026-08-11	\N	OT General	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682856	2026-08-11 18:37:11.682862	\N	f	\N	\N	\N	\N	\N	\N	\N	1324	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+299	2	2	PM-202608-EPCMS-OT_GEN-GEN-012	2026-08-11	\N	OT General	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682869	2026-08-11 18:37:11.682875	\N	f	\N	\N	\N	\N	\N	\N	\N	1325	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+300	2	2	PM-202608-EPCMS-OT_LAP-GEN-013	2026-08-11	\N	OT LAP	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682882	2026-08-11 18:37:11.682889	\N	f	\N	\N	\N	\N	\N	\N	\N	1327	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+301	2	2	PM-202608-EPCMS-OT_LAP-AWS-003	2026-08-11	\N	OT LAP	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682895	2026-08-11 18:37:11.682902	\N	f	\N	\N	\N	\N	\N	\N	\N	1328	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+302	2	2	PM-202608-EPCMS-OT_LAP-ESU-006	2026-08-11	\N	OT LAP	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682909	2026-08-11 18:37:11.682915	\N	f	\N	\N	\N	\N	\N	\N	\N	1329	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+303	2	2	PM-202608-EPCMS-OT_LAP-CO2INF-003	2026-08-11	\N	OT LAP	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682922	2026-08-11 18:37:11.682928	\N	f	\N	\N	\N	\N	\N	\N	\N	1330	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+304	2	2	PM-202608-EPCMS-OT_LAP-ESA-006	2026-08-11	\N	OT LAP	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682935	2026-08-11 18:37:11.682941	\N	f	\N	\N	\N	\N	\N	\N	\N	1331	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+305	2	2	PM-202608-EPCMS-OT_LAP-LAP-002	2026-08-11	\N	OT LAP	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682948	2026-08-11 18:37:11.682954	\N	f	\N	\N	\N	\N	\N	\N	\N	1332	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+306	2	2	PM-202608-EPCMS-OT_LAP-ESU-007	2026-08-11	\N	OT LAP	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682961	2026-08-11 18:37:11.682968	\N	f	\N	\N	\N	\N	\N	\N	\N	1333	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+307	2	2	PM-202608-EPCMS-OT_LAP-CO2INF-004	2026-08-11	\N	OT LAP	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682975	2026-08-11 18:37:11.682981	\N	f	\N	\N	\N	\N	\N	\N	\N	1334	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+308	2	2	PM-202608-EPCMS-OT_LAP-LS-002	2026-08-11	\N	OT LAP	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.682988	2026-08-11 18:37:11.682994	\N	f	\N	\N	\N	\N	\N	\N	\N	1335	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+309	2	2	PM-202608-EPCMS-OT_LAP-OTCPL-002	2026-08-11	\N	OT LAP	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683001	2026-08-11 18:37:11.683008	\N	f	\N	\N	\N	\N	\N	\N	\N	1336	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+310	2	2	PM-202608-EPCMS-OT_LAP-OTCPL-003	2026-08-11	\N	OT LAP	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683014	2026-08-11 18:37:11.683021	\N	f	\N	\N	\N	\N	\N	\N	\N	1337	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+311	2	2	PM-202608-EPCMS-OT_LAP-OTLT-008	2026-08-11	\N	OT LAP	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683028	2026-08-11 18:37:11.683034	\N	f	\N	\N	\N	\N	\N	\N	\N	1338	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+312	2	2	PM-202608-EPCMS-OT_LAP-PM-093	2026-08-11	\N	OT LAP	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683041	2026-08-11 18:37:11.683047	\N	f	\N	\N	\N	\N	\N	\N	\N	1339	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+313	2	2	PM-202608-EPCMS-OT_LAP-GEN-014	2026-08-11	\N	OT LAP	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683054	2026-08-11 18:37:11.68306	\N	f	\N	\N	\N	\N	\N	\N	\N	1340	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+314	2	2	PM-202608-EPCMS-OT_NEURO-AWS-004	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683068	2026-08-11 18:37:11.683074	\N	f	\N	\N	\N	\N	\N	\N	\N	1341	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+315	2	2	PM-202608-EPCMS-RAD-CARM-001	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683081	2026-08-11 18:37:11.683087	\N	f	\N	\N	\N	\N	\N	\N	\N	1342	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+316	2	2	PM-202608-EPCMS-OT_NEURO-ESU-008	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683094	2026-08-11 18:37:11.6831	\N	f	\N	\N	\N	\N	\N	\N	\N	1343	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+317	2	2	PM-202608-EPCMS-OT_NEURO-ESU-009	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683107	2026-08-11 18:37:11.683114	\N	f	\N	\N	\N	\N	\N	\N	\N	1344	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+318	2	2	PM-202608-EPCMS-OT_NEURO-ESA-007	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683121	2026-08-11 18:37:11.683127	\N	f	\N	\N	\N	\N	\N	\N	\N	1345	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+319	2	2	PM-202608-EPCMS-OT_NEURO-MMD-001	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683134	2026-08-11 18:37:11.68314	\N	f	\N	\N	\N	\N	\N	\N	\N	1346	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+320	2	2	PM-202608-EPCMS-OT_NEURO-MMD-002	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683147	2026-08-11 18:37:11.683154	\N	f	\N	\N	\N	\N	\N	\N	\N	1347	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+321	2	2	PM-202608-EPCMS-OT_NEURO-GEN-015	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683161	2026-08-11 18:37:11.683167	\N	f	\N	\N	\N	\N	\N	\N	\N	1348	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+322	2	2	PM-202608-EPCMS-OT_NEURO-LAP-003	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683174	2026-08-11 18:37:11.683181	\N	f	\N	\N	\N	\N	\N	\N	\N	1349	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+323	2	2	PM-202608-EPCMS-OT_NEURO-CO2INF-005	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683187	2026-08-11 18:37:11.683194	\N	f	\N	\N	\N	\N	\N	\N	\N	1350	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+324	2	2	PM-202608-EPCMS-OT_NEURO-GEN-016	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683201	2026-08-11 18:37:11.683207	\N	f	\N	\N	\N	\N	\N	\N	\N	1351	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+325	2	2	PM-202608-EPCMS-OT_NEURO-LS-003	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683214	2026-08-11 18:37:11.68322	\N	f	\N	\N	\N	\N	\N	\N	\N	1352	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+326	2	2	PM-202608-EPCMS-OT_NEURO-OPMC-004	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683227	2026-08-11 18:37:11.683241	\N	f	\N	\N	\N	\N	\N	\N	\N	1353	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+327	2	2	PM-202608-EPCMS-OT_NEURO-OTCPL-004	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683248	2026-08-11 18:37:11.683254	\N	f	\N	\N	\N	\N	\N	\N	\N	1354	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+328	2	2	PM-202608-EPCMS-OT_NEURO-OTLT-009	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683261	2026-08-11 18:37:11.683268	\N	f	\N	\N	\N	\N	\N	\N	\N	1355	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+329	2	2	PM-202608-EPCMS-OT_NEURO-OTLT-010	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683275	2026-08-11 18:37:11.683281	\N	f	\N	\N	\N	\N	\N	\N	\N	1356	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+330	2	2	PM-202608-EPCMS-OT_LAP-OTT-006	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683288	2026-08-11 18:37:11.683294	\N	f	\N	\N	\N	\N	\N	\N	\N	1357	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+331	2	2	PM-202608-EPCMS-OT_NEURO-PM-094	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683301	2026-08-11 18:37:11.683307	\N	f	\N	\N	\N	\N	\N	\N	\N	1358	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+332	2	2	PM-202608-EPCMS-OT_NEURO-GEN-017	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683314	2026-08-11 18:37:11.683321	\N	f	\N	\N	\N	\N	\N	\N	\N	1359	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+333	2	2	PM-202608-EPCMS-OT_NEURO-GEN-018	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683328	2026-08-11 18:37:11.683334	\N	f	\N	\N	\N	\N	\N	\N	\N	1360	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+334	2	2	PM-202608-EPCMS-OT_NEURO-SYP-055	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683341	2026-08-11 18:37:11.683347	\N	f	\N	\N	\N	\N	\N	\N	\N	1361	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+335	2	2	PM-202608-EPCMS-OT_NEURO-SRC-001	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683354	2026-08-11 18:37:11.683361	\N	f	\N	\N	\N	\N	\N	\N	\N	1362	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+336	2	2	PM-202608-EPCMS-OT_NEURO-OTT-007	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683368	2026-08-11 18:37:11.683374	\N	f	\N	\N	\N	\N	\N	\N	\N	1363	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+337	2	2	PM-202608-EPCMS-OT_NEURO-NAVI-001	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683381	2026-08-11 18:37:11.683387	\N	f	\N	\N	\N	\N	\N	\N	\N	1364	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+338	2	2	PM-202608-EPCMS-OT_NEURO-OTT-008	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683394	2026-08-11 18:37:11.6834	\N	f	\N	\N	\N	\N	\N	\N	\N	1365	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+339	2	2	PM-202608-EPCMS-OT_ORTHO-MMD-003	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683407	2026-08-11 18:37:11.683413	\N	f	\N	\N	\N	\N	\N	\N	\N	1366	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+340	2	2	PM-202608-EPCMS-OT_ORTHO-MMD-004	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.68342	2026-08-11 18:37:11.683426	\N	f	\N	\N	\N	\N	\N	\N	\N	1367	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+341	2	2	PM-202608-EPCMS-OT_ORTHO-MMD-005	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683433	2026-08-11 18:37:11.68344	\N	f	\N	\N	\N	\N	\N	\N	\N	1368	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+342	2	2	PM-202608-EPCMS-OT_ORTHO-MMD-006	2026-08-11	\N	OT NEURO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683447	2026-08-11 18:37:11.683453	\N	f	\N	\N	\N	\N	\N	\N	\N	1369	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+343	2	2	PM-202608-EPCMS-OT_OBG-AWS-005	2026-08-11	\N	OT OBG	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.68346	2026-08-11 18:37:11.683466	\N	f	\N	\N	\N	\N	\N	\N	\N	1370	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+344	2	2	PM-202608-EPCMS-OT_OBG-BWER-001	2026-08-11	\N	OT OBG	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683473	2026-08-11 18:37:11.68348	\N	f	\N	\N	\N	\N	\N	\N	\N	1371	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+345	2	2	PM-202608-EPCMS-OT_OBG-ESU-010	2026-08-11	\N	OT OBG	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683487	2026-08-11 18:37:11.683493	\N	f	\N	\N	\N	\N	\N	\N	\N	1372	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+346	2	2	PM-202608-EPCMS-OT_OBG-DFEB-011	2026-08-11	\N	OT OBG	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.6835	2026-08-11 18:37:11.683507	\N	f	\N	\N	\N	\N	\N	\N	\N	1373	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+347	2	2	PM-202608-EPCMS-OT_OBG-ESA-008	2026-08-11	\N	OT OBG	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683513	2026-08-11 18:37:11.68352	\N	f	\N	\N	\N	\N	\N	\N	\N	1374	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+348	2	2	PM-202608-EPCMS-OT_OBG-OTLT-011	2026-08-11	\N	OT OBG	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683527	2026-08-11 18:37:11.683533	\N	f	\N	\N	\N	\N	\N	\N	\N	1375	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+349	2	2	PM-202608-EPCMS-OT_OBG-PM-095	2026-08-11	\N	OT OBG	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.68354	2026-08-11 18:37:11.683546	\N	f	\N	\N	\N	\N	\N	\N	\N	1376	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+350	2	2	PM-202608-EPCMS-OT_OBG-OTT-009	2026-08-11	\N	OT OBG	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683553	2026-08-11 18:37:11.683559	\N	f	\N	\N	\N	\N	\N	\N	\N	1377	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+351	2	2	PM-202608-EPCMS-OT_OPTHAL-GEN-019	2026-08-11	\N	OT Ophthal	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683566	2026-08-11 18:37:11.683573	\N	f	\N	\N	\N	\N	\N	\N	\N	1379	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+352	2	2	PM-202608-EPCMS-OT_OPTHAL-ESU-011	2026-08-11	\N	OT Ophthal	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.68358	2026-08-11 18:37:11.683586	\N	f	\N	\N	\N	\N	\N	\N	\N	1380	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+353	2	2	PM-202608-EPCMS-OT_OPTHAL-ESU-012	2026-08-11	\N	OT Ophthal	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683593	2026-08-11 18:37:11.683599	\N	f	\N	\N	\N	\N	\N	\N	\N	1381	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+354	2	2	PM-202608-EPCMS-OT_OPTHAL-AWS-006	2026-08-11	\N	OT Ophthal	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683606	2026-08-11 18:37:11.683612	\N	f	\N	\N	\N	\N	\N	\N	\N	1382	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+355	2	2	PM-202608-EPCMS-OT_OPTHAL-GEN-020	2026-08-11	\N	OT Ophthal	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683619	2026-08-11 18:37:11.683626	\N	f	\N	\N	\N	\N	\N	\N	\N	1383	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+356	2	2	PM-202608-EPCMS-OT_OPTHAL-GEN-021	2026-08-11	\N	OT Ophthal	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683633	2026-08-11 18:37:11.683639	\N	f	\N	\N	\N	\N	\N	\N	\N	1384	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+357	2	2	PM-202608-EPCMS-OT_OPTHAL-ESA-009	2026-08-11	\N	OT Ophthal	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683646	2026-08-11 18:37:11.683652	\N	f	\N	\N	\N	\N	\N	\N	\N	1385	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+358	2	2	PM-202608-EPCMS-OT_OPTHAL-OPMC-005	2026-08-11	\N	OT Ophthal	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683659	2026-08-11 18:37:11.683665	\N	f	\N	\N	\N	\N	\N	\N	\N	1386	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+359	2	2	PM-202608-EPCMS-OT_OPTHAL-OPMC-006	2026-08-11	\N	OT Ophthal	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683672	2026-08-11 18:37:11.683679	\N	f	\N	\N	\N	\N	\N	\N	\N	1387	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+360	2	2	PM-202608-EPCMS-OT_OPTHAL-OTCPL-005	2026-08-11	\N	OT Ophthal	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683686	2026-08-11 18:37:11.683692	\N	f	\N	\N	\N	\N	\N	\N	\N	1388	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+361	2	2	PM-202608-EPCMS-OT_OPTHAL-OTT-010	2026-08-11	\N	OT Ophthal	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683699	2026-08-11 18:37:11.683705	\N	f	\N	\N	\N	\N	\N	\N	\N	1389	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+362	2	2	PM-202608-EPCMS-OT_OPTHAL-PM-096	2026-08-11	\N	OT Ophthal	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683712	2026-08-11 18:37:11.683718	\N	f	\N	\N	\N	\N	\N	\N	\N	1390	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+363	2	2	PM-202608-EPCMS-OT_OPTHAL-GEN-022	2026-08-11	\N	OT Ophthal	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683725	2026-08-11 18:37:11.683731	\N	f	\N	\N	\N	\N	\N	\N	\N	1391	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+364	2	2	PM-202608-EPCMS-OT_OPTHAL-OTT-011	2026-08-11	\N	OT Ophthal	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683738	2026-08-11 18:37:11.683744	\N	f	\N	\N	\N	\N	\N	\N	\N	1392	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+365	2	2	PM-202608-EPCMS-OT_ORTHO-OTT-012	2026-08-11	\N	OT ORTHO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683752	2026-08-11 18:37:11.683758	\N	f	\N	\N	\N	\N	\N	\N	\N	1393	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+366	2	2	PM-202608-EPCMS-OT_ORTHO-AWS-007	2026-08-11	\N	OT ORTHO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683765	2026-08-11 18:37:11.683771	\N	f	\N	\N	\N	\N	\N	\N	\N	1394	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+367	2	2	PM-202608-EPCMS-RAD-CARM-002	2026-08-11	\N	OT ORTHO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683778	2026-08-11 18:37:11.683784	\N	f	\N	\N	\N	\N	\N	\N	\N	1395	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+368	2	2	PM-202608-EPCMS-OT_ORTHO-ESU-013	2026-08-11	\N	OT ORTHO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683791	2026-08-11 18:37:11.683797	\N	f	\N	\N	\N	\N	\N	\N	\N	1396	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+369	2	2	PM-202608-EPCMS-OT_ORTHO-ESA-010	2026-08-11	\N	OT ORTHO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683804	2026-08-11 18:37:11.68381	\N	f	\N	\N	\N	\N	\N	\N	\N	1397	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+370	2	2	PM-202608-EPCMS-OT_ORTHO-OTCPL-006	2026-08-11	\N	OT ORTHO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683817	2026-08-11 18:37:11.683823	\N	f	\N	\N	\N	\N	\N	\N	\N	1398	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+371	2	2	PM-202608-EPCMS-OT_ORTHO-OTLT-012	2026-08-11	\N	OT ORTHO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.68383	2026-08-11 18:37:11.683837	\N	f	\N	\N	\N	\N	\N	\N	\N	1399	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+372	2	2	PM-202608-EPCMS-OT_ORTHO-GEN-023	2026-08-11	\N	OT ORTHO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683844	2026-08-11 18:37:11.68385	\N	f	\N	\N	\N	\N	\N	\N	\N	1401	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+373	2	2	PM-202608-EPCMS-OT_ORTHO-GEN-024	2026-08-11	\N	OT ORTHO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683857	2026-08-11 18:37:11.683863	\N	f	\N	\N	\N	\N	\N	\N	\N	1402	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+374	2	2	PM-202608-EPCMS-OT_ORTHO-SYP-056	2026-08-11	\N	OT ORTHO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.68387	2026-08-11 18:37:11.683877	\N	f	\N	\N	\N	\N	\N	\N	\N	1403	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+375	2	2	PM-202608-EPCMS-OT_ORTHO-VBOX-024	2026-08-11	\N	OT ORTHO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683883	2026-08-11 18:37:11.68389	\N	f	\N	\N	\N	\N	\N	\N	\N	1407	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+376	2	2	PM-202608-EPCMS-OT PRE OP-PM-098	2026-08-11	\N	OT PRE OP	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683897	2026-08-11 18:37:11.683903	\N	f	\N	\N	\N	\N	\N	\N	\N	1408	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+377	2	2	PM-202608-EPCMS-OT_SEPTIC 1-AWS-008	2026-08-11	\N	OT SEPTIC 1	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.68391	2026-08-11 18:37:11.683916	\N	f	\N	\N	\N	\N	\N	\N	\N	1409	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+378	2	2	PM-202608-EPCMS-OT_SEPTIC 1-ESU-014	2026-08-11	\N	OT SEPTIC 1	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683923	2026-08-11 18:37:11.68393	\N	f	\N	\N	\N	\N	\N	\N	\N	1410	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+379	2	2	PM-202608-EPCMS-OT_SEPTIC 1-DFEB-012	2026-08-11	\N	OT SEPTIC 1	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683936	2026-08-11 18:37:11.683943	\N	f	\N	\N	\N	\N	\N	\N	\N	1411	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+380	2	2	PM-202608-EPCMS-OT_SEPTIC 1-ESA-011	2026-08-11	\N	OT SEPTIC 1	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.68395	2026-08-11 18:37:11.683956	\N	f	\N	\N	\N	\N	\N	\N	\N	1412	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+381	2	2	PM-202608-EPCMS-OT_SEPTIC 1-ESA-012	2026-08-11	\N	OT SEPTIC 1	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683963	2026-08-11 18:37:11.683969	\N	f	\N	\N	\N	\N	\N	\N	\N	1413	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+382	2	2	PM-202608-EPCMS-OT_SEPTIC 1-OTCPL-007	2026-08-11	\N	OT SEPTIC 1	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683976	2026-08-11 18:37:11.683982	\N	f	\N	\N	\N	\N	\N	\N	\N	1414	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+383	2	2	PM-202608-EPCMS-OT_SEPTIC 1-OTLT-013	2026-08-11	\N	OT SEPTIC 1	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.683989	2026-08-11 18:37:11.683996	\N	f	\N	\N	\N	\N	\N	\N	\N	1415	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+384	2	2	PM-202608-EPCMS-OT_SEPTIC 1-OTT-013	2026-08-11	\N	OT SEPTIC 1	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684003	2026-08-11 18:37:11.684009	\N	f	\N	\N	\N	\N	\N	\N	\N	1416	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+385	2	2	PM-202608-EPCMS-OT SUR-AWS-009	2026-08-11	\N	OT SURGERY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684016	2026-08-11 18:37:11.684022	\N	f	\N	\N	\N	\N	\N	\N	\N	1418	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+386	2	2	PM-202608-EPCMS-OT_SUR-ESU-015	2026-08-11	\N	OT SURGERY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684029	2026-08-11 18:37:11.684035	\N	f	\N	\N	\N	\N	\N	\N	\N	1419	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+387	2	2	PM-202608-EPCMS-OT_SUR-ESA-013	2026-08-11	\N	OT SURGERY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684042	2026-08-11 18:37:11.684049	\N	f	\N	\N	\N	\N	\N	\N	\N	1421	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+388	2	2	PM-202608-EPCMS-OT_SUR-OTCPL-008	2026-08-11	\N	OT SURGERY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684056	2026-08-11 18:37:11.684062	\N	f	\N	\N	\N	\N	\N	\N	\N	1422	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+389	2	2	PM-202608-EPCMS-OT_SUR-OTLT-014	2026-08-11	\N	OT SURGERY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684069	2026-08-11 18:37:11.684075	\N	f	\N	\N	\N	\N	\N	\N	\N	1423	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+390	2	2	PM-202608-EPCMS-OT_SUR-OTLT-015	2026-08-11	\N	OT SURGERY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684082	2026-08-11 18:37:11.684088	\N	f	\N	\N	\N	\N	\N	\N	\N	1424	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+391	2	2	PM-202608-EPCMS-OT_SUR-OTT-014	2026-08-11	\N	OT SURGERY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684096	2026-08-11 18:37:11.684103	\N	f	\N	\N	\N	\N	\N	\N	\N	1425	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+392	2	2	PM-202608-EPCMS-OT_SUR-PM-100	2026-08-11	\N	OT SURGERY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.68411	2026-08-11 18:37:11.684116	\N	f	\N	\N	\N	\N	\N	\N	\N	1426	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+393	2	2	PM-202608-EPCMS-OT_SUR-PM-101	2026-08-11	\N	OT SURGERY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684123	2026-08-11 18:37:11.684129	\N	f	\N	\N	\N	\N	\N	\N	\N	1427	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+394	2	2	PM-202608-EPCMS-OT_URO-OTLT-016	2026-08-11	\N	OT URO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684136	2026-08-11 18:37:11.684142	\N	f	\N	\N	\N	\N	\N	\N	\N	1428	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+395	2	2	PM-202608-EPCMS-OT_URO-AWS-010	2026-08-11	\N	OT URO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684149	2026-08-11 18:37:11.684156	\N	f	\N	\N	\N	\N	\N	\N	\N	1429	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+396	2	2	PM-202608-EPCMS-OT_URO-SRC-002	2026-08-11	\N	OT URO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684162	2026-08-11 18:37:11.684169	\N	f	\N	\N	\N	\N	\N	\N	\N	1430	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+397	2	2	PM-202608-EPCMS-OT_URO-OTT-015	2026-08-11	\N	OT URO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684176	2026-08-11 18:37:11.684182	\N	f	\N	\N	\N	\N	\N	\N	\N	1431	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+398	2	2	PM-202608-EPCMS-OT_URO-HARM-001	2026-08-11	\N	OT URO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684189	2026-08-11 18:37:11.684195	\N	f	\N	\N	\N	\N	\N	\N	\N	1432	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+399	2	2	PM-202608-EPCMS-OT_URO-IST-001	2026-08-11	\N	OT URO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684202	2026-08-11 18:37:11.684208	\N	f	\N	\N	\N	\N	\N	\N	\N	1433	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+400	2	2	PM-202608-EPCMS-OT_URO-LITHO-001	2026-08-11	\N	OT URO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684215	2026-08-11 18:37:11.684222	\N	f	\N	\N	\N	\N	\N	\N	\N	1434	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+401	2	2	PM-202608-EPCMS-OT_URO-LITHO-002	2026-08-11	\N	OT URO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684236	2026-08-11 18:37:11.684242	\N	f	\N	\N	\N	\N	\N	\N	\N	1435	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+402	2	2	PM-202608-EPCMS-OT_SEPTIC 2-PM-102	2026-08-11	\N	OT_SEPTIC 2	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684249	2026-08-11 18:37:11.684255	\N	f	\N	\N	\N	\N	\N	\N	\N	1436	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+403	2	2	PM-202608-EPCMS-OT_URO-LITHO-003	2026-08-11	\N	OT URO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684262	2026-08-11 18:37:11.684269	\N	f	\N	\N	\N	\N	\N	\N	\N	1437	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+404	2	2	PM-202608-EPCMS-OT_URO-TB-001	2026-08-11	\N	OT URO	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684276	2026-08-11 18:37:11.684282	\N	f	\N	\N	\N	\N	\N	\N	\N	1438	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+405	2	2	PM-202608-EPCMS-PHYSIO-FTMS-001	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684289	2026-08-11 18:37:11.684295	\N	f	\N	\N	\N	\N	\N	\N	\N	1448	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+406	2	2	PM-202608-EPCMS-PHYSIO-ITTR-001	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684302	2026-08-11 18:37:11.684308	\N	f	\N	\N	\N	\N	\N	\N	\N	1449	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+407	2	2	PM-202608-EPCMS-PHYSIO-MSTI-001	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684315	2026-08-11 18:37:11.684321	\N	f	\N	\N	\N	\N	\N	\N	\N	1450	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+408	2	2	PM-202608-EPCMS-PHYSIO-PM-103	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684328	2026-08-11 18:37:11.684334	\N	f	\N	\N	\N	\N	\N	\N	\N	1451	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+409	2	2	PM-202608-EPCMS-PHYSIO-QDCH-001	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684341	2026-08-11 18:37:11.684347	\N	f	\N	\N	\N	\N	\N	\N	\N	1452	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+410	2	2	PM-202608-EPCMS-PHYSIO-SWD-001	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684354	2026-08-11 18:37:11.684361	\N	f	\N	\N	\N	\N	\N	\N	\N	1453	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+411	2	2	PM-202608-EPCMS-PHYSIO-SHWL-001	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684367	2026-08-11 18:37:11.684374	\N	f	\N	\N	\N	\N	\N	\N	\N	1454	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+412	2	2	PM-202608-EPCMS-PHYSIO-SUSP-001	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684381	2026-08-11 18:37:11.684387	\N	f	\N	\N	\N	\N	\N	\N	\N	1455	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+413	2	2	PM-202608-EPCMS-PHYSIO-USTH-001	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684394	2026-08-11 18:37:11.6844	\N	f	\N	\N	\N	\N	\N	\N	\N	1456	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+414	2	2	PM-202608-EPCMS-PHYSIO-WAXB-001	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684407	2026-08-11 18:37:11.684413	\N	f	\N	\N	\N	\N	\N	\N	\N	1457	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+415	2	2	PM-202608-EPCMS-PHYSIO-TENS-001	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.68442	2026-08-11 18:37:11.684426	\N	f	\N	\N	\N	\N	\N	\N	\N	1458	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+416	2	2	PM-202608-EPCMS-PHYSIO-TENS-002	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684434	2026-08-11 18:37:11.68444	\N	f	\N	\N	\N	\N	\N	\N	\N	1459	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+417	2	2	PM-202608-EPCMS-PHYSIO-TENS-003	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684447	2026-08-11 18:37:11.684453	\N	f	\N	\N	\N	\N	\N	\N	\N	1460	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+418	2	2	PM-202608-EPCMS-PHYSIO-TENS-004	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.68446	2026-08-11 18:37:11.684466	\N	f	\N	\N	\N	\N	\N	\N	\N	1461	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+419	2	2	PM-202608-EPCMS-PHYSIO-TENS-005	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684473	2026-08-11 18:37:11.684479	\N	f	\N	\N	\N	\N	\N	\N	\N	1462	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+420	2	2	PM-202608-EPCMS-PHYSIO-TENS-006	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684486	2026-08-11 18:37:11.684493	\N	f	\N	\N	\N	\N	\N	\N	\N	1463	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+421	2	2	PM-202608-EPCMS-PHYSIO-USTH-002	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.6845	2026-08-11 18:37:11.684506	\N	f	\N	\N	\N	\N	\N	\N	\N	1464	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+422	2	2	PM-202608-EPCMS-PHYSIO-TMT-003	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684513	2026-08-11 18:37:11.684519	\N	f	\N	\N	\N	\N	\N	\N	\N	1465	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+423	2	2	PM-202608-EPCMS-PHYSIO-CPM-001	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684526	2026-08-11 18:37:11.684532	\N	f	\N	\N	\N	\N	\N	\N	\N	1466	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+424	2	2	PM-202608-EPCMS-PHYSIO-MHTH-001	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684539	2026-08-11 18:37:11.684545	\N	f	\N	\N	\N	\N	\N	\N	\N	1467	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+425	2	2	PM-202608-EPCMS-PHYSIO-TRAC-001	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684552	2026-08-11 18:37:11.684559	\N	f	\N	\N	\N	\N	\N	\N	\N	1468	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+426	2	2	PM-202608-EPCMS-PHYSIO-SIMU-001	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684566	2026-08-11 18:37:11.684572	\N	f	\N	\N	\N	\N	\N	\N	\N	1469	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+427	2	2	PM-202608-EPCMS-PHYSIO-SIMU-002	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684579	2026-08-11 18:37:11.684585	\N	f	\N	\N	\N	\N	\N	\N	\N	1470	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+428	2	2	PM-202608-EPCMS-PHYSIO-CMT-001	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684592	2026-08-11 18:37:11.684599	\N	f	\N	\N	\N	\N	\N	\N	\N	1471	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+429	2	2	PM-202608-EPCMS-PHYSIO-LASR-001	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684606	2026-08-11 18:37:11.684612	\N	f	\N	\N	\N	\N	\N	\N	\N	1472	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+430	2	2	PM-202608-EPCMS-PHYSIO-RRGV-001	2026-08-11	\N	PHYSIOTHERAPY	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684619	2026-08-11 18:37:11.684625	\N	f	\N	\N	\N	\N	\N	\N	\N	1473	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+431	2	2	PM-202608-EPCMS-RAD-MXR-005	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684632	2026-08-11 18:37:11.684638	\N	f	\N	\N	\N	\N	\N	\N	\N	1493	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+432	2	2	PM-202608-EPCMS-POST OT -BPA-045	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684645	2026-08-11 18:37:11.684651	\N	f	\N	\N	\N	\N	\N	\N	\N	1496	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+433	2	2	PM-202608-EPCMS-POST OT -DFEB-014	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684658	2026-08-11 18:37:11.684665	\N	f	\N	\N	\N	\N	\N	\N	\N	1497	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+434	2	2	PM-202608-EPCMS-POST OT -ECG-018	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684672	2026-08-11 18:37:11.684678	\N	f	\N	\N	\N	\N	\N	\N	\N	1498	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+435	2	2	PM-202608-EPCMS-POST OT -PM-110	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684685	2026-08-11 18:37:11.684691	\N	f	\N	\N	\N	\N	\N	\N	\N	1499	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+436	2	2	PM-202608-EPCMS-POST OT -PM-111	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684698	2026-08-11 18:37:11.684705	\N	f	\N	\N	\N	\N	\N	\N	\N	1500	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+437	2	2	PM-202608-EPCMS-POST OT -PM-112	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684712	2026-08-11 18:37:11.684718	\N	f	\N	\N	\N	\N	\N	\N	\N	1501	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+438	2	2	PM-202608-EPCMS-POST OT -PM-113	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684725	2026-08-11 18:37:11.684732	\N	f	\N	\N	\N	\N	\N	\N	\N	1502	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+439	2	2	PM-202608-EPCMS-POST OT -PM-114	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684738	2026-08-11 18:37:11.684745	\N	f	\N	\N	\N	\N	\N	\N	\N	1503	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+440	2	2	PM-202608-EPCMS-POST OT -PM-115	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684752	2026-08-11 18:37:11.684758	\N	f	\N	\N	\N	\N	\N	\N	\N	1504	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+441	2	2	PM-202608-EPCMS-POST OT -SYP-060	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684765	2026-08-11 18:37:11.684771	\N	f	\N	\N	\N	\N	\N	\N	\N	1505	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+443	2	2	PM-202608-EPCMS-POST OT -PM-116	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684791	2026-08-11 18:37:11.684798	\N	f	\N	\N	\N	\N	\N	\N	\N	1507	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+444	2	2	PM-202608-EPCMS-POST OT -PM-117	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Assigned	35	\N	3	\N	f	2026-08-11 18:37:11.684805	2026-08-12 12:09:46.430096	\N	f	\N	\N	\N	\N	\N	\N	\N	1508	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+442	2	2	PM-202608-EPCMS-POST OT -SYP-061	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Under Inspection	34	\N	3	\N	f	2026-08-11 18:37:11.684778	2026-08-14 16:10:48.13972	\N	f	\N	\N	\N	\N	\N	\N	\N	1506	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N
+457	2	2	TEST-CMP-1787064166-1	2026-08-18	20:12	Testing	\N	\N	\N	Automated test - Material Req	\N	\N	Closed	8	\N	8	\N	f	2026-08-18 20:12:46.86473	2026-08-18 20:12:47.020047	\N	t	\N	\N	\N	Looks like an automated test.	\N	\N	\N	\N	Breakdown	f	8	2026-08-18 14:42:47.003066	8	2026-08-18 14:42:47.019418	Fixed it via script	Automated closure	Material Required
+445	2	2	CMP-00017	2026-08-12	11:09	HEALTH 	7	237		issue	general issue		Closed	34	\N	3	\N	f	2026-08-12 11:09:14.018811	2026-08-17 11:24:51.865397	\N	f	\N	\N	\N		\N	\N	\N	\N	General Complaint	f	3	2026-08-17 05:54:50.316926	3	2026-08-17 05:54:51.863207	product repaired succesfully	finished	\N
+446	3	3	CMP-99999	2026-08-17	11:32	Test Dept	\N	\N		Testing the issue	Test detail	John Doe	Registered	\N	\N	4	\N	f	2026-08-17 11:32:26.592734	2026-08-17 11:32:26.592747	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N	\N
+447	3	3	CMP-00001	2026-08-17	11:53	Test Dept	\N	\N		Testing the issue	Test detail	John Doe	Registered	\N	\N	4	\N	f	2026-08-17 11:53:06.922996	2026-08-17 11:53:06.923009	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	General Complaint	f	\N	\N	\N	\N	\N	\N	\N
+448	2	2	CMP-00018	2026-08-17	11:54	HEALTH 	\N	\N		AC problem	AC problem		Registered	\N	\N	3	\N	f	2026-08-17 11:54:09.653717	2026-08-17 11:54:09.653728	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	General Complaint	f	\N	\N	\N	\N	\N	\N	\N
+450	2	2	CMP-00020	2026-08-17	12:41	Anatomy Lab	\N	\N		not working properly	not working		Registered	\N	\N	3	\N	f	2026-08-17 12:41:46.59815	2026-08-17 12:41:46.598169	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	Machine Not Working	f	\N	\N	\N	\N	\N	\N	\N
+451	2	2	CMP-00021	2026-08-17	13:59	Computer Science & Engineering	\N	\N		AA3 SUPER DELUX CRYO IS BOT WORKING PROPERLY	AA3 SUPER DELUX CRYO IS BOT WORKING PROPERLY	Pradnesh A	Registered	\N	\N	3	\N	f	2026-08-17 13:59:13.002169	2026-08-17 13:59:13.002185	\N	f	\N	\N	\N	\N	\N	\N	\N	1609	General Complaint	f	\N	\N	\N	\N	\N	\N	\N
+454	1	1	CMP-00001	2026-08-17	14:26	\N	\N	\N	\N	Testing Auto Vendor Work Order generation for AMC Equipment	Equipment is under AMC. Need to verify that the draft work order is automatically created.	\N	Registered	\N	\N	8	\N	f	2026-08-17 14:26:38.06647	2026-08-17 14:26:38.105689	\N	f	\N	\N	\N	\N	\N	\N	\N	1609	Breakdown	f	\N	\N	\N	\N	\N	\N	\N
+449	2	2	CMP-00019	2026-08-17	11:55	Civil Engineering	\N	\N		Install machine 01	Install machine 01		In Progress	34	\N	3	\N	f	2026-08-17 11:55:38.243275	2026-08-18 12:09:02.993781	\N	f	\N	\N	\N		\N	\N	\N	\N	Installation	f	\N	\N	\N	\N	\N	\N	External Vendor Service
+455	2	2	CMP-00022	2026-08-18	12:41	Child Health Nursing (Pediatric Nursing)	\N	\N		not working properly	not working	vik	Registered	\N	\N	3	\N	f	2026-08-18 12:41:49.953614	2026-08-18 12:41:49.953655	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	General Complaint	f	\N	\N	\N	\N	\N	\N	\N
+458	2	2	TEST-CMP-1787064167-0	2026-08-18	20:12	Testing	\N	\N	\N	Automated test - Material Not Req	\N	\N	Closed	8	\N	8	\N	f	2026-08-18 20:12:47.041115	2026-08-18 20:12:47.20242	\N	f	\N	\N	\N	Looks like an automated test.	\N	\N	\N	\N	Breakdown	f	8	2026-08-18 14:42:47.185469	8	2026-08-18 14:42:47.202072	Fixed it via script	Automated closure	Material Not Required
 \.
 
 
@@ -6487,6 +6513,11 @@ COPY public.contract_approvals (id, contract_id, approval_flow_id, approver_id, 
 9	5	105	3	\N	2026-08-12 14:39:41.360869
 10	5	84	3	\N	2026-08-12 14:39:55.146447
 11	6	105	3	\N	2026-08-17 10:47:06.197723
+12	6	84	3	\N	2026-08-17 13:04:42.318008
+13	7	105	3	\N	2026-08-18 12:48:13.756341
+14	7	84	3	\N	2026-08-18 12:48:18.029566
+15	8	105	3	\N	2026-08-18 12:51:26.963132
+16	8	84	3	\N	2026-08-18 12:51:33.123283
 \.
 
 
@@ -6501,6 +6532,8 @@ COPY public.contract_items (id, contract_id, material_id, equipment_id, uom, rat
 4	4	2751	\N		2500	18	10	1	0	1		
 5	5	\N	1604		17000	0	\N	\N	0	\N		
 6	6	2354	\N	NOS	0	0	\N	\N	0	\N		
+7	7	3507	\N	NOS	101515.19	12	30	10	0	10		
+8	8	3474	\N	NOS	1098	12	\N	\N	0	\N		
 \.
 
 
@@ -6514,7 +6547,9 @@ COPY public.contracts (id, tenant_id, site_id, contract_number, contract_type, v
 3	2	2	CNT-00003	RC	66	5	271	2026-08-10	2026-08-20	15000				f	f	Active	3	3	2026-08-11 13:46:44.953434	f	2026-08-03 17:10:25.921051	2026-08-11 19:22:59.222655		2
 4	2	2	CNT-00004	RC	66	11	\N	2026-08-10	2026-08-31	120000				f	f	Approved	3	3	2026-08-11 13:58:39.622117	f	2026-08-11 19:28:23.844588	2026-08-11 19:28:39.623956		2
 5	2	2	CNT-00005	AMC	69	1	\N	2026-08-31	2027-08-11	16780				f	f	Approved	3	3	2026-08-12 09:09:55.143196	f	2026-08-12 12:28:13.107764	2026-08-12 14:39:55.145898		2
-6	2	2	CNT-00006	RC	69	\N	\N	2026-08-01	2027-08-17	\N				f	f	Submitted	3	\N	\N	f	2026-08-14 14:57:37.256088	2026-08-17 10:47:06.193768		2
+6	2	2	CNT-00006	RC	69	\N	\N	2026-08-01	2027-08-17	\N				f	f	Approved	3	3	2026-08-17 07:34:42.28912	f	2026-08-14 14:57:37.256088	2026-08-17 13:04:42.314296		2
+7	2	2	CNT-00007	RC	76	3	301	2026-08-24	2026-09-24	\N				f	f	Approved	3	3	2026-08-18 07:18:18.020239	f	2026-08-18 12:47:40.794077	2026-08-18 12:48:18.027478		2
+8	2	2	CNT-00008	RC	73	3	304	2026-08-10	2026-08-19	\N				f	f	Approved	3	3	2026-08-18 07:21:33.115157	f	2026-08-18 12:51:02.449778	2026-08-18 12:51:33.121418		2
 \.
 
 
@@ -8265,7 +8300,6 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 2771	2	2	2475	62	266	2026-06-11 21:58:45.849263
 2773	2	2	2477	62	35	2026-06-11 21:58:45.849268
 2774	2	2	2480	62	89	2026-06-11 21:58:45.849271
-2775	2	2	2481	62	28	2026-06-11 21:58:45.849274
 2776	2	2	2482	62	61	2026-06-11 21:58:45.849277
 2777	2	2	2483	62	34	2026-06-11 21:58:45.84928
 2778	2	2	2484	62	140	2026-06-11 21:58:45.849282
@@ -8315,7 +8349,6 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 2822	2	2	2530	62	63	2026-06-11 21:58:45.849412
 2725	2	2	2426	62	142	2026-06-12 02:15:29.61047
 2755	2	2	2458	62	14	2026-06-12 02:19:12.368129
-2734	2	2	2435	62	115	2026-07-09 13:21:15.658763
 2823	2	2	2532	62	91	2026-06-11 21:58:45.849415
 2824	2	2	2533	62	85	2026-06-11 21:58:45.849418
 2825	2	2	2534	62	73	2026-06-11 21:58:45.84942
@@ -8323,6 +8356,7 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 2827	2	2	2536	62	82	2026-06-11 21:58:45.849426
 2828	2	2	2538	62	51	2026-06-11 21:58:45.849429
 2829	2	2	2539	62	18	2026-06-11 21:58:45.849431
+2734	2	2	2435	62	195	2026-08-18 14:55:09.133582
 2830	2	2	2540	62	91	2026-06-11 21:58:45.849434
 2831	2	2	2541	62	50	2026-06-11 21:58:45.849437
 2832	2	2	2542	62	38	2026-06-11 21:58:45.84944
@@ -9150,7 +9184,6 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 3658	2	2	3472	62	96	2026-06-11 21:58:45.851781
 3659	2	2	3473	62	14	2026-06-11 21:58:45.851783
 3662	2	2	3476	62	65	2026-06-11 21:58:45.851792
-3661	2	2	3475	62	83	2026-07-08 15:49:59.463999
 3663	2	2	3478	62	85	2026-06-11 21:58:45.851795
 3664	2	2	3479	62	21	2026-06-11 21:58:45.851798
 3665	2	2	3480	62	41	2026-06-11 21:58:45.8518
@@ -9162,6 +9195,7 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 3671	2	2	3486	62	50	2026-06-11 21:58:45.851817
 3672	2	2	3487	62	106	2026-06-11 21:58:45.85182
 3673	2	2	3489	62	487	2026-06-11 21:58:45.851823
+3661	2	2	3475	62	82	2026-08-18 11:31:20.878565
 3674	2	2	3490	62	36	2026-06-11 21:58:45.851825
 3675	2	2	3491	62	503	2026-06-11 21:58:45.851828
 3676	2	2	3492	62	28	2026-06-11 21:58:45.851831
@@ -9359,22 +9393,22 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 326	3	3	228	55	3380	2026-06-17 18:12:13.813019
 2412	3	3	2102	59	27	2026-06-17 18:19:11.656207
 3651	2	2	3462	62	47	2026-06-18 11:11:57.168045
-3690	2	2	3507	62	83	2026-07-08 12:25:10.075718
-3660	2	2	3474	62	64	2026-08-06 11:44:09.973896
-2855	2	2	2565	62	54	2026-08-06 14:53:32.831495
 3868	2	2	2565	63	1	2026-08-06 14:53:32.831506
 3867	2	2	2338	62	50	2026-08-12 11:07:29.314793
 3013	2	2	2751	62	22	2026-08-14 12:56:12.832462
-2854	2	2	2564	62	42	2026-08-17 10:07:34.275435
+3660	2	2	3474	62	60	2026-08-17 11:06:47.913802
+2854	2	2	2564	62	24	2026-08-18 11:24:08.807234
+3690	2	2	3507	62	81	2026-08-18 11:25:58.079746
+2855	2	2	2565	62	51	2026-08-18 11:31:10.256609
 4136	2	2	4604	62	522	2026-08-06 13:36:11.191772
 4137	2	2	4605	62	655	2026-08-06 13:36:11.191784
 4138	2	2	4606	62	192	2026-08-06 13:36:11.191787
 4139	2	2	4607	62	289	2026-08-06 13:36:11.19179
-4140	2	2	4608	62	298	2026-08-06 13:36:11.191793
 4141	2	2	4609	62	409	2026-08-06 13:36:11.191796
 4142	2	2	4610	62	160	2026-08-06 13:36:11.191799
 4143	2	2	4611	62	545	2026-08-06 13:36:11.191802
 4144	2	2	4612	62	348	2026-08-06 13:36:11.191805
+4140	2	2	4608	62	297	2026-08-17 14:39:06.577492
 4145	2	2	4613	62	74	2026-08-06 13:36:11.191807
 4146	2	2	4614	62	92	2026-08-06 13:36:11.19181
 4147	2	2	4615	62	571	2026-08-06 13:36:11.191813
@@ -9633,6 +9667,9 @@ COPY public.current_stock (id, tenant_id, site_id, material_id, warehouse_id, qu
 4400	2	2	4868	62	828	2026-08-06 13:36:11.192522
 4401	2	2	4869	62	85	2026-08-06 13:36:11.192524
 3684	2	2	3501	62	44	2026-08-06 15:02:28.57246
+4402	2	2	2564	63	10	2026-08-17 11:27:19.33176
+4403	2	2	3910	62	1	2026-08-17 12:13:02.014073
+2775	2	2	2481	62	27	2026-08-18 11:13:00.275373
 \.
 
 
@@ -9902,6 +9939,9 @@ COPY public.department_material_limits (id, tenant_id, site_id, department, mate
 260	2	2	Civil	3013	20	2026-06-12 02:26:19.195636	3
 261	2	2	HEALTH 	3013	20	2026-06-12 02:26:19.219395	3
 262	2	2	Mechanical	3013	20	2026-06-12 02:26:19.226209	3
+263	2	2	HEALTH 	2564	20	2026-08-18 11:01:04.070905	3
+264	2	2	Computer Application	2564	20	2026-08-18 11:01:04.123503	3
+265	2	2	Computer Science & Engineering	2564	20	2026-08-18 11:01:04.13217	3
 \.
 
 
@@ -10273,7 +10313,6 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 47	3	3	MATERIAL_53	HEQ	67
 48	3	3	MATERIAL_54	HOU	399
 49	3	3	MATERIAL_63	HOI	36
-50	3	3	MATERIAL_56	HSK	67
 51	3	3	MATERIAL_58	LAB	267
 52	3	3	MATERIAL_59	LIN	36
 53	3	3	MATERIAL_60	PLB	99
@@ -10291,7 +10330,6 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 19	3	3	VENDOR	VND	11
 15	3	3	GRN	GRN	22
 14	3	3	GATE_ENTRY	GE	30
-73	2	2	TRANSFER	TRF	2
 29	2	2	BUILDING	BLDG	6
 11	3	3	ISSUE	ISS	45
 63	2	2	INSTITUTION	INST	14
@@ -10309,35 +10347,58 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 16	3	3	QUOTATION_REQUEST	QR	21
 5	3	3	INDENT	IND	42
 40	3	3	MATERIAL_46	EES	3
-77	2	2	GATEPASS	GP	3
-95	2	2	PURCHASE_ORDER_3	EPCET/PO	6
-97	2	2	EQP	EQP	1
 98	2	2	EQP_RADIOLOGY_	EQP_RADIOLOGY_	1
 99	2	2	PURCHASE_ORDER_2	EPH/PO	2
 101	2	2	PURCHASE_ORDER_4	EPCP/PO	2
-93	2	2	WRITE_OFF	WO	9
-100	2	2	EQUIPMENT_WRITE_OFF	EWO	1
-94	2	2	PURCHASE_ORDER_11	EPAHS/PO	3
 103	2	2	PURCHASE_ORDER_10	EPCPT/PO	4
 102	2	2	PURCHASE_ORDER_9	NRCN/PO	3
-78	2	2	COMPLAINT	CMP	17
+126	2	2	MATERIAL_71	LAB	267
 105	2	2	PURCHASE_ORDER_5	EPCHE/PO	1
 104	2	2	PURCHASE_ORDER_8	EPSN/PO	2
-112	2	2	WORK_ORDER	WO	2
+127	2	2	MATERIAL_72	LIN	36
+137	2	2	EQP_BME	EQP_BME	2
+128	2	2	MATERIAL_74	RAD	5
+129	2	2	MATERIAL_67	HEQ	67
 113	1	1	WORK_ORDER	WO-	3
-76	2	2	INVOICE_REF	INV	7
-96	2	2	CONTRACT	CNT	6
-74	2	2	RETURN	RET	3
-71	2	2	GATE_ENTRY	GE	11
-75	2	2	GRN	GRN	14
+74	2	2	RETURN	RET	4
+143	1	1	COMPLAINT	CMP	1
+78	2	2	COMPLAINT	CMP	22
+130	2	2	MATERIAL_70	ITI	39
+131	2	2	MATERIAL_75	STY	195
+132	2	2	MATERIAL_76	HOI	36
+133	2	2	MATERIAL_68	HOS	399
+135	2	2	MATERIAL_73	PLB	99
+134	2	2	MATERIAL_66	ELE	89
+71	2	2	GATE_ENTRY	GE	14
 69	2	2	PURCHASE_ORDER	PO	36
-70	2	2	QUOTATION_REQUEST	QR	38
 115	2	2	PURCHASE_ORDER_7	EPCN/PO	1
-67	2	2	ISSUE	ISS	11
-65	2	2	VENDOR	VND	14
-72	2	2	WAREHOUSE	WH	13
-66	2	2	INDENT	IND	27
-68	2	2	PURCHASE_REQUEST	PR	14
+77	2	2	GATEPASS	GP	5
+73	2	2	TRANSFER	TRF	4
+50	3	3	MATERIAL_56	HSK	68
+147	2	2	EQP_108	EQP_108	1
+119	3	3	COMPLAINT	CMP	1
+95	2	2	PURCHASE_ORDER_3	EPCET/PO	7
+144	1	1	VENDOR_WORK_ORDER	VWO	1
+120	2	2	MATERIAL_80	CHE	1
+138	2	2	EQP_110	EQP_110	2
+68	2	2	PURCHASE_REQUEST	PR	16
+136	2	2	MATERIAL_69	HSK	70
+97	2	2	EQP	EQP	2
+125	2	2	MATERIAL_65	CIV	77
+96	2	2	CONTRACT	CNT	8
+76	2	2	INVOICE_REF	INV	9
+93	2	2	WRITE_OFF	WO	11
+146	2	2	CATEGORY		1
+145	2	2	EQP_109	EQP_109	1
+100	2	2	EQUIPMENT_WRITE_OFF	EWO	2
+67	2	2	ISSUE	ISS	20
+72	2	2	WAREHOUSE	WH	14
+65	2	2	VENDOR	VND	15
+66	2	2	INDENT	IND	29
+94	2	2	PURCHASE_ORDER_11	EPAHS/PO	4
+70	2	2	QUOTATION_REQUEST	QR	41
+75	2	2	GRN	GRN	17
+112	2	2	WORK_ORDER	WO	8
 \.
 
 
@@ -10348,6 +10409,14 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 COPY public.equipment_history (id, equipment_id, event_type, event_date, description, reference_id, created_by_id) FROM stdin;
 1	1	Installation	2026-07-28 11:34:51.840188	Installed by Unknown at 2026-07-28 00:00:00	\N	3
 2	1	Installation	2026-07-28 12:12:46.6889	Installed by Pradnesh A at 2026-07-28 00:00:00	\N	3
+3	1607	Manual Registration	2026-08-17 12:44:55.97195	Equipment added manually	\N	3
+4	1608	Manual Registration	2026-08-17 12:48:24.47849	Equipment added manually	\N	3
+5	1609	Manual Registration	2026-08-17 13:08:06.26073	Equipment added manually	\N	3
+6	1610	Manual Registration	2026-08-17 14:31:33.647609	Equipment added manually	\N	3
+7	1610	Relocation	2026-08-17 00:00:00	Relocated from 110 to 110. Remarks: None	\N	3
+8	1611	Manual Registration	2026-08-17 14:38:26.150672	Equipment added manually	\N	3
+9	1610	Relocation	2026-08-17 00:00:00	Relocated from 110 to 216. Remarks: None	\N	3
+10	1612	Manual Registration	2026-08-18 12:08:17.863527	Equipment added manually	\N	3
 \.
 
 
@@ -10741,6 +10810,13 @@ COPY public.equipment_items (id, tenant_id, site_id, equipment_code, material_id
 1494	2	2	EPCMS-POST OT -PM-108	3899	\N	\N	B10W4A014	Captured	t	f	Installed	2026-03-23 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:45.381651	2026-08-11 18:37:11.375222	t	2029-03-22	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	NiDEK	Bravo 10 G3M	\N	\N	\N	\N	Narayanan	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1495	2	2	EPCMS-POST OT -PM-109	3899	\N	\N	B10W4A015	Captured	t	f	Installed	2026-03-23 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:45.381657	2026-08-11 18:37:11.375224	t	2029-03-22	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	NiDEK	Bravo 10 G3M	\N	\N	\N	\N	Narayanan	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1508	2	2	EPCMS-POST OT -PM-117	3899	\N	\N	301410M1380490004	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.38173	2026-08-11 18:37:11.375267	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	EDAN	IM8	\N	\N	\N	\N	\N	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1612	2	2	EPSN-108-1DTP-00001	3475	\N	\N	01	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-18 12:08:17.765623	2026-08-18 12:08:17.765639	t	2027-08-31	AMC	2027-08-31	\N	\N	\N	\N	\N	\N	\N	\N	\N	78	\N	8	\N	\N	\N	10000	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	null	\N	\N	\N	\N	\N	\N	2026	\N	\N
+1606	2	2	EQP-00002	3910	219	522	2002004	Captured	f	f	Not Required	\N	\N	\N	62	3	In Store	2026-08-17 12:13:02.027106	2026-08-18 15:24:06.655791	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	110	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1607	2	2	EPCET-BME-3OTG-00001	3993	\N	\N	2002003	Captured	f	t	Not Required	\N	\N	\N	62	\N	Operational	2026-08-17 12:44:55.931347	2026-08-18 15:22:28.856526	f	\N	None	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	97	\N	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	null	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1608	2	2	EPAHS-CW-18AF-00001	3507	\N	\N	NA	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-17 12:48:24.45775	2026-08-18 15:22:15.073832	f	\N	None	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	99	\N	11	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	null	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1609	2	2	EPAHS-ER-ASDC-00002	4022	\N	\N	NA	Captured	f	t	Not Required	\N	\N	\N	62	\N	Operational	2026-08-17 13:08:06.237234	2026-08-18 15:20:16.791525	t	2027-08-17	AMC	2028-08-17	\N	\N	\N	\N	\N	\N	\N	\N	\N	110	\N	11	\N	\N	\N	\N	\N	\N	\N	\N	\N	t	t	\N	Purchase	\N	\N	\N	\N	null	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1610	2	2	EPCP-110-18AF-00002	3507	\N	\N	NA	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-17 14:31:33.62432	2026-08-18 15:19:47.842241	f	\N	None	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	91	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	null	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1611	2	2	NRCN-109-ACET-00001	4608	\N	\N	2002002	Captured	f	f	Not Required	\N	\N	\N	62	\N	Written Off	2026-08-17 14:38:26.121154	2026-08-18 20:45:38.547385	f	\N	None	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	79	\N	9	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	null	\N	\N	\N	\N	\N	\N	\N	\N	\N
 804	2	2	EPCMS-102-BPA-001	3895	\N	\N	13660	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.195829	2026-08-05 19:04:39.195839	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	76	\N	\N	\N	DIAMOND	DELUXE	\N	\N	\N	\N	\N	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 805	2	2	EPCMS-102-ESA-001	3896	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.217136	2026-08-05 19:04:39.217145	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	76	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 806	2	2	EPCMS-102-GEN-001	3897	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.223687	2026-08-05 19:04:39.223696	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	76	\N	\N	\N	MURPHY	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
@@ -11151,10 +11227,10 @@ COPY public.equipment_items (id, tenant_id, site_id, equipment_code, material_id
 1576	2	2	EPCMS-RESP OPD-VBOX-041	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.930194	2026-08-05 19:04:45.930197	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	146	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1577	2	2	EPCMS-RESP OPD-VBOX-042	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.9302	2026-08-05 19:04:45.930202	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	146	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1578	2	2	EPCMS-RESP OPD-VBOX-043	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.930205	2026-08-05 19:04:45.930208	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	146	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1594	2	2	EPCMS-SPL WD-VBOX-045	3901	\N	\N	2002005	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:46.067803	2026-08-18 15:24:45.689364	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	148	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1593	2	2	EPCMS-SPL WD-NCS-001	4071	\N	\N	NA	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:46.06779	2026-08-18 15:24:54.651727	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	148	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1591	2	2	EPCMS-SPL WD-BPA-048	3895	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:46.049963	2026-08-05 19:04:46.049975	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	148	\N	\N	\N	DIAMOND	DELUXE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1592	2	2	EPCMS-SPL WD-SYP-066	3900	\N	\N	SM3-36004785	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:46.049979	2026-08-05 19:04:46.049983	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	148	\N	\N	\N	MINDRAY	BENEVISION uSP	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1593	2	2	EPCMS-SPL WD-NCS-001	4071	\N	\N	\N	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:46.06779	2026-08-05 19:04:46.067799	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	148	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1594	2	2	EPCMS-SPL WD-VBOX-045	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:46.067803	2026-08-05 19:04:46.067806	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	148	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1598	2	2	EPCMS-RAD-MXR-006	3941	\N	\N	2K21030625SR-DX/LF	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:46.084239	2026-08-05 19:04:46.084251	f	\N	AMC	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	149	\N	\N	\N	ALLENGERS	100 SR	\N	\N	\N	\N	MR.ANKUR SHARMA	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1579	2	2	EPCMS-SICU-PM-118	3899	\N	\N	FG-11071417	Captured	t	f	Installed	2021-05-22 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:45.96432	2026-08-10 17:17:54.221802	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	147	\N	\N	\N	MINDRAY	IPM 10	\N	\N	\N	\N	SUDHAKAR B	\N	t	f	No	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1580	2	2	EPCMS-SICU-PM-119	3899	\N	\N	FG-11071431	Captured	t	f	Installed	2021-05-22 00:00:00	\N	\N	62	\N	Operational	2026-08-05 19:04:45.964335	2026-08-10 17:17:54.221805	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	147	\N	\N	\N	MINDRAY	IPM 10	\N	\N	\N	\N	SUDHAKAR B	\N	t	f	No	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
@@ -11252,6 +11328,9 @@ COPY public.gate_entries (id, tenant_id, site_id, entry_number, vehicle_number, 
 204	2	2	GE-00009	TN 08 N 4567	\N	\N	\N	\N	\N	2026-08-06 14:56:45.52839	NOS	\N	NOS	Standard	\N	/api/uploads/invoices/2/20260806_092619_1796e5e4.png		Completed	3	f	2026-08-06 14:56:45.529696	A566S54	2026-08-03	60606	\N	\N	\N		/api/uploads/invoices/2/20260806_092552_24c3c8d0.png	88888	2026-08-02	\N
 205	2	2	GE-00010	TN 09 M 8901	\N	\N	\N	\N	\N	2026-08-06 15:01:27.215344	done	\N	done	Standard	\N	/api/uploads/invoices/2/20260806_093046_c67c0c7d.png		Completed	3	f	2026-08-06 15:01:27.215882	C67G98VV	2026-08-05	90990	\N	\N	\N		/api/uploads/invoices/2/20260806_093010_ac01d917.png	56565656	2026-08-01	\N
 206	2	2	GE-00011	TN 09 K 3455	\N	\N	\N	\N	\N	2026-08-06 15:58:17.736877	aaa	\N	aaa	Standard	\N	/api/uploads/invoices/2/20260806_102745_cdade1c9.png		Completed	3	f	2026-08-06 15:58:17.738267	L78I876	2026-08-04	655660	\N	\N	\N		/api/uploads/invoices/2/20260806_102710_c7dc314a.png	789045	2026-07-27	\N
+207	2	2	GE-00012	TN 09 N 1234	\N	\N	\N	\N	\N	2026-08-17 11:05:56.207301	udhay	\N	udhay	Standard	\N	/api/uploads/invoices/2/20260817_053552_b931067d.webp		Completed	3	f	2026-08-17 11:05:56.20925	A4576C56	2026-08-11	100000	\N	\N	\N		/api/uploads/invoices/2/20260817_053405_974aef41.png	4546745	2026-08-10	\N
+208	2	2	GE-00013	KA 02 EX 1234	\N	\N	\N	\N	\N	2026-08-17 12:12:05.350568	Ram	\N	Ram	Standard	\N			Completed	3	f	2026-08-17 12:12:05.351843		\N	0	1700	2500	800	/api/uploads/invoices/2/20260817_064203_39a6471d.png	/api/uploads/invoices/2/20260817_064120_6c6f0417.png	DC5463	2026-08-16	\N
+209	2	2	GE-00014	TN 08 V 2508	\N	\N	\N	\N	\N	2026-08-18 11:56:36.527989	giri	\N	giri	Standard	\N	/api/uploads/invoices/2/20260818_062605_6be797fa.png		Completed	3	f	2026-08-18 11:56:36.529581	A89B7655	2026-08-10	20000	\N	\N	\N		/api/uploads/invoices/2/20260818_062532_d6fd3d5a.png	12657	2026-08-10	\N
 \.
 
 
@@ -11278,6 +11357,8 @@ COPY public.gate_pass_items (id, gate_pass_id, material_id, quantity, remarks) F
 21	20	2427	3	Broken
 22	21	984	40	Candy canes topping liquorice wafer cake shortbread chupa chups sesame snaps carrot cake. Fruitcake candy tiramisu sugar plum jujubes icing marzipan candy. Bonbon marzipan brownie tiramisu sesame snaps cheesecake macaroon gummies cake. Pudding oat cake chocolate tiramisu powder dessert. Lollipop jelly beans gummi bears sugar plum gummi bears bear claw cupcake cake croissant. Bear claw marshmallow candy pudding jujubes tootsie roll. Pie topping apple pie oat cake topping. Tart sesame snaps croissant carrot cake biscuit halvah caramels macaroon danish. Tootsie roll dragée donut cotton candy macaroon ice cream oat cake. Danish soufflé lemon drops danish dessert ice cream muffin. Candy dragée wafer cheesecake lemon drops icing. Candy canes jelly beans cake fruitcake cheesecake. Donut fruitcake gummies cheesecake pastry cake fruitcake. Brownie oat cake bonbon wafer tart tootsie roll. Lemon drops jelly beans wafer cake chocolate cake chocolate donut cake pastry. Sweet roll icing cotton candy carrot cake cookie sugar plum liquorice chupa chups. Jujubes chocolate bar chocolate marshmallow liquorice. Apple pie marzipan muffin oat cake sesame snaps. Jelly-o cookie tart pudding gummi bears tart pastry chocolate cake sugar plum. Ice cream danish tiramisu sweet cookie tiramisu cotton candy liquorice liquorice. Cotton candy apple pie fruitcake pudding gingerbread apple pie. Dessert oat cake caramels dessert carrot cake chupa chups cake chocolate cake. Sesame snaps gummi bears marshmallow candy lollipop marshmallow oat cake marshmallow. Cheesecake lollipop fruitcake halvah jelly caramels biscuit cake. Icing apple pie cake candy tootsie roll donut bonbon. Powder macaroon gummies toffee tart bonbon jelly muffin cheesecake. Brownie liquorice cookie topping macaroon halvah marshmallow. Sesame snaps oat cake lemon drops cupcake cotton candy toffee gummies liquorice. Icing donut sweet roll soufflé candy canes. Pie jelly jelly beans sesame snaps sweet marshmallow caramels. Gummies bear claw topping bear claw muffin. Jelly-o wafer powder cotton candy toffee jelly beans dessert muffin macaroon. Chocolate liquorice apple pie tart fruitcake chocolate cake gingerbread toffee sesame snaps. Soufflé fruitcake cupcake biscuit pastry cheesecake cake jelly-o. Pastry gingerbread sweet biscuit gingerbread sweet roll jujubes. Topping soufflé carrot cake candy canes oat cake tootsie roll. Wafer shortbread liquorice shortbread cotton candy donut. Bonbon liquorice jelly beans jujubes icing. Gummies chocolate cake tiramisu croissant bonbon tart sweet roll sweet brownie. Pudding lemon drops croissant liquorice chocolate jelly beans tiramisu biscuit. Ice cream marshmallow marshmallow cheesecake icing. Tart carrot cake chocolate cake cookie halvah tiramisu sesame snaps. Gummies gummi bears candy canes biscuit marzipan danish liquorice bear claw chocolate cake. Tiramisu chocolate halvah cotton candy pudding fruitcake. Tart sweet shortbread apple pie carrot cake pie cheesecake jelly-o. Lollipop cake gummi bears pastry marshmallow pastry muffin chocolate tootsie roll. Gummies toffee danish donut bear claw. Bear claw wafer cake biscuit lemon drops cookie chocolate cake gummi bears jujubes. Lollipop wafer cotton candy bonbon jelly beans shortbread cotton candy pudding. Croissant cake gingerbread pastry jelly. Tart jujubes bear claw croissant cookie. Macaroon carrot cake dragée powder chocolate cake. Sweet pastry oat cake bear claw lollipop donut croissant tootsie roll cupcake. Tart cookie donut candy canes shortbread dessert lollipop. Jelly-o pudding tootsie roll gingerbread sesame snaps sweet roll tootsie roll. Lollipop sugar plum pudding cake bonbon pastry marshmallow. Cake dessert cupcake jelly-o tiramisu oat cake biscuit marzipan caramels. Cupcake sweet liquorice cookie dragée chocolate bar wafer tootsie roll. Gingerbread gingerbread oat cake marzipan tootsie roll cheesecake lollipop. Sweet muffin candy jelly cake cotton candy brownie pudding. Donut pie cupcake cotton candy donut gummi bears. Marshmallow tiramisu cookie candy cotton candy dragée cheesecake. Cake sweet roll dessert powder dragée macaroon marshmallow. Tootsie roll croissant danish cookie powder. Topping gingerbread chocolate cupcake cotton candy. Cotton candy wafer chocolate bar sweet bear claw jelly beans tootsie roll.
 23	22	2751	2	\N
+24	23	2751	10	\N
+25	24	2435	5	\N
 \.
 
 
@@ -11303,6 +11384,8 @@ COPY public.gate_passes (id, tenant_id, site_id, gate_pass_number, return_id, pr
 21	3	3	GP-00014	\N	1	\N	Yet to Receive	Returnable	\N	\N	Candy canes topping liquorice wafer cake shortbread chupa chups sesame snaps carrot cake. Fruitcake candy tiramisu sugar plum jujubes icing marzipan candy. Bonbon marzipan brownie tiramisu sesame snaps cheesecake macaroon gummies cake. Pudding oat cake chocolate tiramisu powder dessert. Lollipop jelly beans gummi bears sugar plum gummi bears bear claw cupcake cake croissant. Bear claw marshmallow candy pudding jujubes tootsie roll. Pie topping apple pie oat cake topping. Tart sesame snaps croissant carrot cake biscuit halvah caramels macaroon danish. Tootsie roll dragée donut cotton candy macaroon ice cream oat cake. Danish soufflé lemon drops danish dessert ice cream muffin. Candy dragée wafer cheesecake lemon drops icing. Candy canes jelly beans cake fruitcake cheesecake. Donut fruitcake gummies cheesecake pastry cake fruitcake. Brownie oat cake bonbon wafer tart tootsie roll. Lemon drops jelly beans wafer cake chocolate cake chocolate donut cake pastry. Sweet roll icing cotton candy carrot cake cookie sugar plum liquorice chupa chups. Jujubes chocolate bar chocolate marshmallow liquorice. Apple pie marzipan muffin oat cake sesame snaps. Jelly-o cookie tart pudding gummi bears tart pastry chocolate cake sugar plum. Ice cream danish tiramisu sweet cookie tiramisu cotton candy liquorice liquorice. Cotton candy apple pie fruitcake pudding gingerbread apple pie. Dessert oat cake caramels dessert carrot cake chupa chups cake chocolate cake. Sesame snaps gummi bears marshmallow candy lollipop marshmallow oat cake marshmallow. Cheesecake lollipop fruitcake halvah jelly caramels biscuit cake. Icing apple pie cake candy tootsie roll donut bonbon. Powder macaroon gummies toffee tart bonbon jelly muffin cheesecake. Brownie liquorice cookie topping macaroon halvah marshmallow. Sesame snaps oat cake lemon drops cupcake cotton candy toffee gummies liquorice. Icing donut sweet roll soufflé candy canes. Pie jelly jelly beans sesame snaps sweet marshmallow caramels. Gummies bear claw topping bear claw muffin. Jelly-o wafer powder cotton candy toffee jelly beans dessert muffin macaroon. Chocolate liquorice apple pie tart fruitcake chocolate cake gingerbread toffee sesame snaps. Soufflé fruitcake cupcake biscuit pastry cheesecake cake jelly-o. Pastry gingerbread sweet biscuit gingerbread sweet roll jujubes. Topping soufflé carrot cake candy canes oat cake tootsie roll. Wafer shortbread liquorice shortbread cotton candy donut. Bonbon liquorice jelly beans jujubes icing. Gummies chocolate cake tiramisu croissant bonbon tart sweet roll sweet brownie. Pudding lemon drops croissant liquorice chocolate jelly beans tiramisu biscuit. Ice cream marshmallow marshmallow cheesecake icing. Tart carrot cake chocolate cake cookie halvah tiramisu sesame snaps. Gummies gummi bears candy canes biscuit marzipan danish liquorice bear claw chocolate cake. Tiramisu chocolate halvah cotton candy pudding fruitcake. Tart sweet shortbread apple pie carrot cake pie cheesecake jelly-o. Lollipop cake gummi bears pastry marshmallow pastry muffin chocolate tootsie roll. Gummies toffee danish donut bear claw. Bear claw wafer cake biscuit lemon drops cookie chocolate cake gummi bears jujubes. Lollipop wafer cotton candy bonbon jelly beans shortbread cotton candy pudding. Croissant cake gingerbread pastry jelly. Tart jujubes bear claw croissant cookie. Macaroon carrot cake dragée powder chocolate cake. Sweet pastry oat cake bear claw lollipop donut croissant tootsie roll cupcake. Tart cookie donut candy canes shortbread dessert lollipop. Jelly-o pudding tootsie roll gingerbread sesame snaps sweet roll tootsie roll. Lollipop sugar plum pudding cake bonbon pastry marshmallow. Cake dessert cupcake jelly-o tiramisu oat cake biscuit marzipan caramels. Cupcake sweet liquorice cookie dragée chocolate bar wafer tootsie roll. Gingerbread gingerbread oat cake marzipan tootsie roll cheesecake lollipop. Sweet muffin candy jelly cake cotton candy brownie pudding. Donut pie cupcake cotton candy donut gummi bears. Marshmallow tiramisu cookie candy cotton candy dragée cheesecake. Cake sweet roll dessert powder dragée macaroon marshmallow. Tootsie roll croissant danish cookie powder. Topping gingerbread chocolate cupcake cotton candy. Cotton candy wafer chocolate bar sweet bear claw jelly beans tootsie roll.	4	2026-06-17 12:10:19.253046	Pradnesh	Dubai Main road	Computer Science	\N	\N	\N	TRANSFER	\N	\N
 19	2	2	GP-00001	\N	3	64	Received	Returnable	\N	\N	\N	3	2026-06-12 02:13:36.805231	Royal Hardware & Electricals	Ground Floor, Sri Lakshminivasareswara Nilaya, Avalahalli, Ittamadu Main Road, Virgonagar Post, Bangalore, Karnataka - 560049	\N	Central Store	ram	2026-06-17 12:44:40.276	REPAIR	GE-00003	GRN-00003
 22	2	2	GP-00003	\N	3	63	Yet to Receive	Returnable	\N	\N	PPC Cement	3	2026-06-17 13:14:47.945966	ELCAB ENGINEERS PRIVATE LIMITED	V R Cindem Complex, Sy. No. 1193/34/4, Kengeri Main Road, Behind Mr Prem Bun, Ramasandra Village, Bangalore, Karnataka - 560056	Anatomy	\N	\N	\N	TRANSFER	\N	\N
+23	2	2	GP-00004	\N	3	66	Yet to Receive	Returnable	\N	\N	\N	3	2026-08-17 11:28:15.017776	dell laptops 	new madras road , pai layout, bangalore, Karnataka - 560016	Admin	\N	\N	\N	REPAIR	\N	\N
+24	2	2	GP-00005	\N	3	66	Yet to Receive	Returnable	\N	\N	\N	3	2026-08-18 11:58:33.645875	dell laptops 	new madras road , pai layout, bangalore, Karnataka - 560016	Admin	\N	\N	\N	REPAIR	\N	\N
 \.
 
 
@@ -11346,6 +11429,9 @@ COPY public.grn (id, tenant_id, site_id, grn_number, po_id, gate_entry_id, wareh
 215	2	2	GRN-00012	\N	204	62	3	64	Direct Invoice	A566S54	2026-08-03	60606	/api/uploads/invoices/2/20260806_092619_1796e5e4.png	\N	0	0	0	0	0	\N	Pending	Completed	\N	3	f	2026-08-06 14:57:09.61217	2026-08-06 09:27:09.613865	\N	\N	88888	2026-08-02	/api/uploads/invoices/2/20260806_092552_24c3c8d0.png
 216	2	2	GRN-00013	268	205	62	3	64	PO-Based	C67G98VV	2026-08-05	153273	/api/uploads/invoices/2/20260806_093046_c67c0c7d.png	\N	153273.75	0	0	0	0	\N	Not Applicable	Completed	\N	3	f	2026-08-06 15:02:28.544141	2026-08-06 09:32:28.568138	\N	\N	56565656	2026-08-01	/api/uploads/invoices/2/20260806_093010_ac01d917.png
 217	2	2	GRN-00014	\N	206	62	3	67	Direct Invoice	L78I876	2026-08-04	655660	/api/uploads/invoices/2/20260806_102745_cdade1c9.png	\N	0	0	0	0	0	\N	Pending	Completed	\N	3	f	2026-08-06 15:58:41.318646	2026-08-06 10:28:41.32044	\N	\N	789045	2026-07-27	/api/uploads/invoices/2/20260806_102710_c7dc314a.png
+218	2	2	GRN-00015	\N	207	62	3	66	Direct Invoice	A4576C56	2026-08-11	100000	/api/uploads/invoices/2/20260817_053552_b931067d.webp	\N	0	0	0	0	0	\N	Pending	Completed	\N	3	f	2026-08-17 11:06:30.964927	2026-08-17 05:36:30.98859	\N	\N	4546745	2026-08-10	/api/uploads/invoices/2/20260817_053405_974aef41.png
+219	2	2	GRN-00016	277	208	62	3	63	PO-Based		\N	100		\N	100	0	0	0	0	\N	Not Applicable	Completed	\N	3	f	2026-08-17 12:13:01.989646	2026-08-17 06:43:02.018181	\N	\N	DC5463	2026-08-16	/api/uploads/invoices/2/20260817_064120_6c6f0417.png
+220	2	2	GRN-00017	\N	209	62	3	76	Direct Invoice	A89B7655	2026-08-10	20000	/api/uploads/invoices/2/20260818_062605_6be797fa.png	\N	0	0	0	0	0	\N	Pending	Completed	\N	3	f	2026-08-18 14:55:09.045809	2026-08-18 09:25:09.124023	\N	\N	12657	2026-08-10	/api/uploads/invoices/2/20260818_062532_d6fd3d5a.png
 \.
 
 
@@ -11413,6 +11499,8 @@ COPY public.grn_items (id, grn_id, material_id, po_item_id, ordered_quantity, re
 519	212	3507	616	1	1	1	0	12	\N	0	0	0	0	0	0	12	0	\N
 520	213	2338	\N	0	1	1	0	1500	\N	0	0	0	0	0	0	1500	0	\N
 521	216	3501	702	35	35	35	0	4379.25	\N	0	0	0	0	0	0	153273.75	0	\N
+522	219	3910	1747	1	1	1	0	100	\N	0	0	0	0	0	0	100	0	\N
+523	220	2435	\N	0	100	80	20	0	\N	0	0	0	0	0	0	0	0	\N
 \.
 
 
@@ -11513,6 +11601,14 @@ COPY public.indent_approvals (id, indent_id, approval_flow_id, approver_id, appr
 90	242	44	3	2026-08-17 10:40:05.594963	{"524": {"quantity": 4.0, "remarks": null}}	\N
 91	242	16	3	2026-08-17 10:40:12.218487	{"524": {"quantity": 4.0, "remarks": null}}	\N
 92	242	108	3	2026-08-17 10:40:12.218501	{"524": {"quantity": 4.0, "remarks": null}}	\N
+93	243	104	3	2026-08-17 13:06:37.691392	{"525": {"quantity": 10.0, "remarks": null}}	\N
+94	243	44	3	2026-08-17 13:06:37.691404	{"525": {"quantity": 10.0, "remarks": null}}	\N
+95	243	16	3	2026-08-17 13:06:45.13779	{"525": {"quantity": 10.0, "remarks": null}}	\N
+96	243	108	3	2026-08-17 13:06:45.137833	{"525": {"quantity": 10.0, "remarks": null}}	\N
+97	244	104	3	2026-08-18 11:08:38.063746	{"528": {"quantity": 7.0, "remarks": null}}	\N
+98	244	44	3	2026-08-18 11:08:38.063788	{"528": {"quantity": 7.0, "remarks": null}}	\N
+99	244	16	3	2026-08-18 11:08:46.308906	{"528": {"quantity": 7.0, "remarks": null}}	\N
+100	244	108	3	2026-08-18 11:08:46.308933	{"528": {"quantity": 7.0, "remarks": null}}	\N
 \.
 
 
@@ -11610,8 +11706,6 @@ COPY public.indent_items (id, indent_id, material_id, requested_quantity, issued
 511	232	2974	2	0	0	\N
 499	225	2427	4	0	0	3
 500	225	2431	2	0	0	2
-512	233	3507	4	0	0	2
-513	233	3475	2	0	0	1
 514	234	3501	1	0	0	\N
 515	234	3475	560061	0	0	\N
 516	235	3421	3	0	0	3
@@ -11626,7 +11720,11 @@ COPY public.indent_items (id, indent_id, material_id, requested_quantity, issued
 522	240	2564	4	0	0	1
 523	241	2564	1	0	0	2
 521	239	2751	1	3	0	3
-524	242	3474	4	0	0	4
+524	242	3474	4	4	4	4
+525	243	3475	10	0	0	10
+528	244	3475	7	0	0	7
+512	233	3507	4	2	0	2
+513	233	3475	2	1	0	1
 \.
 
 
@@ -11687,18 +11785,20 @@ COPY public.indents (id, tenant_id, site_id, indent_number, requester_id, room_i
 230	2	2	IND-00015	34	237	7	FIRST FLOOR	ROOM101	HEALTH 	Complaint CMP-00007 - AC problem	4657.57	Issued	2	3	2026-06-19 09:14:37.130349	f	2026-06-18 19:01:24.165689	2026-06-19 14:45:14.701106	11	9	\N
 231	2	2	IND-00016	3	237	7	FIRST FLOOR	ROOM101	HEALTH 	Complaint CMP-00008 - AC problem	4657.57	Issued	2	3	2026-06-22 06:17:58.262371	f	2026-06-22 11:44:48.408071	2026-06-22 11:48:20.964653	11	10	\N
 225	2	2	IND-00010	17	\N	\N			Computer Science & Engineering		8260.56	Approved	2	3	2026-06-30 12:45:16.350597	f	2026-06-18 10:44:25.957294	2026-06-30 18:15:16.373652	3	\N	\N
-233	2	2	IND-00018	3	237	7	FIRST FLOOR	ROOM101	HEALTH 		26601.42	Approved	2	3	2026-06-30 13:00:01.16276	f	2026-06-30 18:29:09.052074	2026-06-30 18:30:01.165439	11	\N	\N
 232	2	2	IND-00017	3	\N	7			HEALTH 	Complaint CMP-00010 - DOOR IS NOT LOCKING PROPERLY\n[Rejected: test rejection]	99513.94	Rejected	1	\N	\N	f	2026-06-22 12:29:05.009417	2026-07-22 14:55:42.208401	11	12	\N
 235	2	2	IND-00020	3	\N	\N			Community Health Nursing		8174.01	Approved	2	3	2026-08-03 10:19:09.679963	f	2026-08-03 15:48:12.849868	2026-08-03 15:49:09.691051	9	\N	\N
 236	2	2	IND-00021	3	\N	\N			Commerce		16312.9	Approved	2	3	2026-08-03 11:25:53.773212	f	2026-08-03 16:52:50.609615	2026-08-03 16:55:53.782488	5	\N	\N
 226	2	2	IND-00011	17	\N	\N			Mechanical Engineering		86458.88	Submitted	1	\N	\N	f	2026-06-18 10:48:16.861751	2026-06-18 10:48:16.861803	3	\N	\N
 234	2	2	IND-00019	3	\N	\N			Anatomy	Complaint CMP-00005 - FAN NOT WORKING	2577802744.56	Submitted	1	\N	\N	f	2026-07-02 18:40:42.679828	2026-07-02 18:40:42.67987	1	7	\N
 238	2	2	IND-00023	3	\N	\N			CSE - Data Science	maintenence	22238.85	Draft	1	\N	\N	f	2026-08-06 10:56:24.284791	2026-08-06 10:56:24.284834	3	\N	\N
+244	2	2	IND-00029	3	\N	\N			Pharmacognosy		32218.97	Approved	2	3	2026-08-18 05:38:46.339413	f	2026-08-18 11:04:43.225558	2026-08-18 11:08:46.362432	4	\N	\N
 237	2	2	IND-00022	3	237	7	FIRST FLOOR	ROOM101	HEALTH 		16312.9	Issued	2	3	2026-08-06 05:58:43.472805	f	2026-08-03 17:54:01.502805	2026-08-06 11:44:09.997714	11	\N	\N
+233	2	2	IND-00018	3	237	7	FIRST FLOOR	ROOM101	HEALTH 		26601.42	Issued	2	3	2026-06-30 13:00:01.16276	f	2026-06-30 18:29:09.052074	2026-08-18 11:31:20.880019	11	\N	\N
 240	2	2	IND-00025	3	237	7	FIRST FLOOR	ROOM101	HEALTH 		66104.64	Approved	2	3	2026-08-12 05:08:48.18428	f	2026-08-12 10:32:16.427408	2026-08-12 10:38:48.186197	11	\N	\N
 241	2	2	IND-00026	3	237	7	FIRST FLOOR	ROOM101	HEALTH 		16526.16	Submitted	2	\N	\N	f	2026-08-14 12:29:53.625013	2026-08-14 12:31:43.853423	11	\N	\N
 239	2	2	IND-00024	3	\N	\N			Chemistry	Complaint CMP-00013 - fdgdfg	10443.43	Issued	2	3	2026-08-12 04:48:14.16361	f	2026-08-10 16:47:23.026424	2026-08-14 12:56:12.833616	3	15	\N
-242	2	2	IND-00027	3	\N	\N			Child Health Nursing (Pediatric Nursing)		13050.32	Approved	2	3	2026-08-17 05:10:12.238591	f	2026-08-17 10:39:56.617303	2026-08-17 10:40:12.289145	7	\N	\N
+242	2	2	IND-00027	3	\N	\N			Child Health Nursing (Pediatric Nursing)		13050.32	Issued	2	3	2026-08-17 05:10:12.238591	f	2026-08-17 10:39:56.617303	2026-08-17 11:06:47.934818	7	\N	\N
+243	2	2	IND-00028	3	\N	\N			Exercise Therapy Lab		46027.1	Approved	2	3	2026-08-17 07:36:45.162629	f	2026-08-17 13:06:23.961804	2026-08-17 13:06:45.170121	10	\N	\N
 \.
 
 
@@ -11762,6 +11862,10 @@ COPY public.invoice_items (id, invoice_id, material_id, description, hsn_sac, qu
 63	13	4648	Bromothymol blue solution		125	200	ml	0	9	9	0	2250	2250	0	25000	29500	\N
 64	13	4649	Bromothymol blue solution		125	200	ml	0	9	9	0	2250	2250	0	25000	29500	\N
 65	13	4680	DL- Alanine		100	800	gm	0	9	9	0	7200	7200	0	80000	94400	\N
+66	14	4648	Bromothymol blue solution		125	200	ml	0	9	9	0	2250	2250	0	25000	29500	\N
+67	14	4649	Bromothymol blue solution		125	200	ml	0	9	9	0	2250	2250	0	25000	29500	\N
+68	14	4680	DL- Alanine		100	800	gm	0	9	9	0	7200	7200	0	80000	94400	\N
+70	15	3474	110 Door Bend PVC		5	3262.58	NOS	3	9	9	0	1424.1161699999998	1424.1161699999998	0	15823.512999999999	18671.74534	
 \.
 
 
@@ -11776,12 +11880,14 @@ COPY public.invoices (id, tenant_id, site_id, invoice_number, invoice_date, gate
 3	3	3	in4324	2026-06-02	\N	57	193	4500112.6	686442.6	Approved	/uploads/invoices/3/20260610_133541_e49271d3.png		4	f	2026-06-10 19:03:01.323243	2026-06-11 13:57:09.017903			\N	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR		\N							3813670	343221.3	343221.3	0	0	\N	\N	INV-00002				\N	100		0	0	0	0	INV-00002	Pending	\N	\N	t	2026-06-11 13:57:09.01705	4		\N	\N	\N	t	2026-06-11 13:08:50.988039	4	\N	\N
 7	2	2	In4576	2026-06-05	\N	64	\N	17356.084000000003	2632.2840000000006	Approved	/uploads/invoices/2/20260611_203554_530219c4.png		3	f	2026-06-12 02:07:03.464238	2026-06-12 02:24:45.194078			\N			\N							14723.800000000001	1316.1420000000003	1316.1420000000003	0	0	6	6	INV-00001				\N	100		0	0	0	0	INV-00001	Paid	2026-06-12 02:08:23.943898	3	t	2026-06-12 02:08:15.631662	3		2026-06-12 02:24:45.191254	3	\N	t	2026-06-12 02:07:54.878713	3	\N	\N
 5	3	3	wuq2389482394	2026-06-03	\N	56	\N	607638.11	65458.409999999996	Change Required	/uploads/invoices/3/20260610_135918_d988d4be.png		4	f	2026-06-10 19:30:10.241491	2026-06-17 18:13:44.501525			\N			\N							542179.7	32729.204999999998	32729.204999999998	0	0	\N	\N	INV-00004				\N	500		0	0	0	0	INV-00004	Pending	\N	\N	f	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N
-8	2	2	Bill123	2026-06-01	\N	62	216	23600	3600	Approved	/uploads/invoices/2/20260611_204044_3143a815.png		3	f	2026-06-12 02:10:49.116917	2026-06-12 04:01:24.649063			\N	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR		\N							20000	1800	1800	0	0	6	6	INV-00002				\N	0		0	0	0	0	INV-00002	Sent for Payment	2026-06-12 04:01:24.647438	3	t	2026-06-12 04:01:13.455078	3		\N	\N	\N	t	2026-06-12 02:24:34.027603	3	\N	\N
-9	2	2	B45	2026-06-04	\N	63	\N	55308.4528	8383.4928	Approved	/uploads/invoices/2/20260611_204745_c5c1a4cf.png		3	f	2026-06-12 02:17:50.148925	2026-06-18 11:23:09.740162			\N			\N							46924.96	4191.7464	4191.7464	0	0	6	4	INV-00003				\N	350		0	0	0	0	INV-00003	Pending	\N	\N	f	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N
 11	2	2	JK78	2026-06-01	\N	63	\N	36716.467000000004	5600.816999999999	Approved	/uploads/invoices/2/20260611_223421_8d3f5c41.png		3	f	2026-06-12 04:04:55.885776	2026-08-12 12:09:16.966595			\N			\N							31115.65	2800.4084999999995	2800.4084999999995	0	0	6	6	INV-00005				\N	0		0	0	0	0	INV-00005	Pending	\N	\N	t	2026-08-12 12:09:16.965585	3	done	\N	\N	\N	t	2026-06-12 04:31:48.254311	3	\N	\N
 12	2	2	INV2001	2026-06-30	\N	64	232	178414.33000000002	22927.230000000003	Approved	/api/uploads/invoices/2/20260630_090821_292826f8.pdf		3	f	2026-06-30 14:41:01.013675	2026-08-12 12:44:13.719128	231432525	DELIVERED SUCESSFULLY	2026-06-30	UPI		\N					KA 23 AS 2122		155487.1	11463.615000000002	11463.615000000002	0	0	6	4	INV-00006				2026-06-30	500		0	0	0	0	INV-00006	Pending	\N	\N	f	\N	\N	\N	\N	\N	\N	t	2026-08-12 12:44:13.714805	3	\N	\N
 10	2	2	BH565	2026-06-04	\N	64	\N	19824.708	3024.1079999999997	Approved	/uploads/invoices/2/20260611_223240_2b902a7f.png		3	f	2026-06-12 04:02:47.052948	2026-08-14 11:36:19.809287			\N			\N							16800.6	1512.0539999999999	1512.0539999999999	0	0	\N	\N	INV-00004				\N	0		0	0	0	0	INV-00004	Pending	\N	\N	t	2026-08-14 11:36:19.807035	3		\N	\N	\N	t	2026-08-06 11:09:04.785362	3	\N	\N
 13	2	2	76525445	2026-08-14	\N	72	274	153400	23400	Submitted	/api/uploads/invoices/2/20260814_072358_61dfd0c2.png		3	f	2026-08-14 12:54:10.184285	2026-08-14 12:54:10.184303			\N	1. Bill/Invoices in the name of East Point Allied Health Sciences managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR		\N							130000	11700	11700	0	0	5	5	INV-00007				\N	0		0	0	0	0	INV-00007	Pending	\N	\N	f	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N
+8	2	2	Bill123	2026-06-01	\N	62	216	23600	3600	Approved	/uploads/invoices/2/20260611_204044_3143a815.png		3	f	2026-06-12 02:10:49.116917	2026-08-17 11:34:00.788382			\N	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR		\N							20000	1800	1800	0	0	6	6	INV-00002				\N	0		0	0	0	0	INV-00002	Paid	2026-06-12 04:01:24.647438	3	t	2026-06-12 04:01:13.455078	3		2026-08-17 11:34:00.786976	3	623012345678	t	2026-06-12 02:24:34.027603	3	\N	\N
+14	2	2	VJ2398Y845	2026-08-10	\N	72	274	153400	23400	Approved	/api/uploads/invoices/2/20260817_074112_a75ca0e6.pdf		3	f	2026-08-17 13:11:17.66674	2026-08-17 13:11:36.627554			\N	1. Bill/Invoices in the name of East Point Allied Health Sciences managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR		\N							130000	11700	11700	0	0	5	5	INV-00008				\N	0		0	0	0	0	INV-00008	Pending	\N	\N	f	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N
+9	2	2	B45	2026-06-04	\N	63	\N	55308.4528	8383.4928	Approved	/uploads/invoices/2/20260611_204745_c5c1a4cf.png		3	f	2026-06-12 02:17:50.148925	2026-08-18 13:02:35.323661			\N			\N							46924.96	4191.7464	4191.7464	0	0	6	4	INV-00003				\N	350		0	0	0	0	INV-00003	Paid	2026-08-18 13:02:28.036656	3	t	2026-08-18 13:02:02.40623	3		2026-08-18 13:02:35.321338	3	\N	t	2026-08-18 13:01:50.96442	3	\N	\N
+15	2	2	VJ2398Y845	2026-08-10	\N	70	275	18671.745339999998	2848.2323399999996	Approved	/api/uploads/invoices/2/20260818_072540_277f42ca.pdf		3	f	2026-08-18 12:56:00.939708	2026-08-18 13:00:43.794566			\N	1. Bill/Invoices in the name of East Point College of Nursing managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR		\N							15823.512999999999	1424.1161699999998	1424.1161699999998	0	489.38699999999994	\N	\N	INV-00009				\N	0		0	0	0	0	INV-00009	Pending	\N	\N	f	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	5
 \.
 
 
@@ -12002,6 +12108,15 @@ COPY public.material_issue_items (id, issue_id, material_id, quantity, rate, rem
 219	239	3474	4	3262.58	\N	62
 220	240	2751	3	10443.43	\N	62
 221	241	2564	2	16526.16	\N	62
+222	242	3474	4	3262.58	\N	62
+223	243	2564	2	16526.16	\N	62
+224	244	2564	4	16526.16	\N	62
+225	245	2565	2	26703.28	\N	62
+226	246	2564	1	16526.16	\N	62
+227	247	2481	1	2336.93	\N	62
+228	248	2564	1	16526.16	\N	62
+229	249	3507	2	4349	\N	62
+230	250	3475	1	4602.71	\N	62
 \.
 
 
@@ -12062,6 +12177,15 @@ COPY public.material_issues (id, tenant_id, site_id, issue_number, warehouse_id,
 235	2	2	ISS-00005	62	1	228	7	237	HEALTH 	\N	Fulfillment for IND-00013	Completed	3	\N	t	2026-08-06 06:16:11.434167	3	\N	f	2026-06-18 12:23:35.498019	\N
 240	2	2	ISS-00010	62	3	239	\N	\N	Chemistry	\N	Fulfillment for IND-00024	Completed	3	\N	f	\N	\N	\N	f	2026-08-14 12:56:12.787431	\N
 241	2	2	ISS-00011	62	3	\N	7	237	HEALTH 	\N	Direct Issue	Completed	3	\N	f	\N	\N	\N	f	2026-08-17 10:07:34.247759	\N
+243	2	2	ISS-00013	62	3	\N	7	237	HEALTH 	\N	Direct Issue	Completed	3	\N	f	\N	\N	\N	f	2026-08-17 11:07:14.787568	\N
+242	2	2	ISS-00012	62	3	242	\N	\N	Child Health Nursing (Pediatric Nursing)	\N	Fulfillment for IND-00027	Completed	3	\N	t	2026-08-17 06:01:09.722782	3	\N	f	2026-08-17 11:06:47.890891	\N
+244	2	2	ISS-00014	62	3	\N	7	237	HEALTH 	\N	Direct Issue	Completed	3	\N	f	\N	\N	\N	f	2026-08-17 17:10:14.397872	\N
+245	2	2	ISS-00015	62	3	\N	7	237	HEALTH 	\N	Direct Issue	Completed	3	\N	f	\N	\N	\N	f	2026-08-17 17:11:21.408677	\N
+246	2	2	ISS-00016	62	3	\N	\N	\N	Chemistry	\N	Direct Issue	Completed	3	\N	f	\N	\N	\N	f	2026-08-17 19:04:31.741633	\N
+247	2	2	ISS-00017	62	3	\N	7	237	HEALTH 	\N	Direct Issue	Completed	3	\N	f	\N	\N	\N	f	2026-08-18 11:13:00.243514	\N
+248	2	2	ISS-00018	62	3	\N	\N	\N	Chemistry	\N	Direct Issue	Completed	3	\N	f	\N	\N	\N	f	2026-08-18 11:24:08.797846	\N
+249	2	2	ISS-00019	62	1	233	7	237	HEALTH 	\N	Fulfillment for IND-00018	Completed	3	\N	f	\N	\N	\N	f	2026-08-18 11:25:58.056751	\N
+250	2	2	ISS-00020	62	1	233	7	237	HEALTH 	\N	Fulfillment for IND-00018	Completed	3	\N	f	\N	\N	\N	f	2026-08-18 11:31:20.858115	\N
 \.
 
 
@@ -12086,6 +12210,7 @@ COPY public.material_return_items (id, return_id, material_id, returned_qty, rem
 15	24	1192	40	Candy canes topping liquorice wafer cake shortbread chupa chups sesame snaps carrot cake. Fruitcake candy tiramisu sugar plum jujubes icing marzipan candy. Bonbon marzipan brownie tiramisu sesame snaps cheesecake macaroon gummies cake. Pudding oat cake chocolate tiramisu powder dessert. Lollipop jelly beans gummi bears sugar plum gummi bears bear claw cupcake cake croissant. Bear claw marshmallow candy pudding jujubes tootsie roll. Pie topping apple pie oat cake topping. Tart sesame snaps croissant carrot cake biscuit halvah caramels macaroon danish. Tootsie roll dragée donut cotton candy macaroon ice cream oat cake. Danish soufflé lemon drops danish dessert ice cream muffin. Candy dragée wafer cheesecake lemon drops icing. Candy canes jelly beans cake fruitcake cheesecake. Donut fruitcake gummies cheesecake pastry cake fruitcake. Brownie oat cake bonbon wafer tart tootsie roll. Lemon drops jelly beans wafer cake chocolate cake chocolate donut cake pastry. Sweet roll icing cotton candy carrot cake cookie sugar plum liquorice chupa chups. Jujubes chocolate bar chocolate marshmallow liquorice. Apple pie marzipan muffin oat cake sesame snaps. Jelly-o cookie tart pudding gummi bears tart pastry chocolate cake sugar plum. Ice cream danish tiramisu sweet cookie tiramisu cotton candy liquorice liquorice. Cotton candy apple pie fruitcake pudding gingerbread apple pie. Dessert oat cake caramels dessert carrot cake chupa chups cake chocolate cake. Sesame snaps gummi bears marshmallow candy lollipop marshmallow oat cake marshmallow. Cheesecake lollipop fruitcake halvah jelly caramels biscuit cake. Icing apple pie cake candy tootsie roll donut bonbon. Powder macaroon gummies toffee tart bonbon jelly muffin cheesecake. Brownie liquorice cookie topping macaroon halvah marshmallow. Sesame snaps oat cake lemon drops cupcake cotton candy toffee gummies liquorice. Icing donut sweet roll soufflé candy canes. Pie jelly jelly beans sesame snaps sweet marshmallow caramels. Gummies bear claw topping bear claw muffin. Jelly-o wafer powder cotton candy toffee jelly beans dessert muffin macaroon. Chocolate liquorice apple pie tart fruitcake chocolate cake gingerbread toffee sesame snaps. Soufflé fruitcake cupcake biscuit pastry cheesecake cake jelly-o. Pastry gingerbread sweet biscuit gingerbread sweet roll jujubes. Topping soufflé carrot cake candy canes oat cake tootsie roll. Wafer shortbread liquorice shortbread cotton candy donut. Bonbon liquorice jelly beans jujubes icing. Gummies chocolate cake tiramisu croissant bonbon tart sweet roll sweet brownie. Pudding lemon drops croissant liquorice chocolate jelly beans tiramisu biscuit. Ice cream marshmallow marshmallow cheesecake icing. Tart carrot cake chocolate cake cookie halvah tiramisu sesame snaps. Gummies gummi bears candy canes biscuit marzipan danish liquorice bear claw chocolate cake. Tiramisu chocolate halvah cotton candy pudding fruitcake. Tart sweet shortbread apple pie carrot cake pie cheesecake jelly-o. Lollipop cake gummi bears pastry marshmallow pastry muffin chocolate tootsie roll. Gummies toffee danish donut bear claw. Bear claw wafer cake biscuit lemon drops cookie chocolate cake gummi bears jujubes. Lollipop wafer cotton candy bonbon jelly beans shortbread cotton candy pudding. Croissant cake gingerbread pastry jelly. Tart jujubes bear claw croissant cookie. Macaroon carrot cake dragée powder chocolate cake. Sweet pastry oat cake bear claw lollipop donut croissant tootsie roll cupcake. Tart cookie donut candy canes shortbread dessert lollipop. Jelly-o pudding tootsie roll gingerbread sesame snaps sweet roll tootsie roll. Lollipop sugar plum pudding cake bonbon pastry marshmallow. Cake dessert cupcake jelly-o tiramisu oat cake biscuit marzipan caramels. Cupcake sweet liquorice cookie dragée chocolate bar wafer tootsie roll. Gingerbread gingerbread oat cake marzipan tootsie roll cheesecake lollipop. Sweet muffin candy jelly cake cotton candy brownie pudding. Donut pie cupcake cotton candy donut gummi bears. Marshmallow tiramisu cookie candy cotton candy dragée cheesecake. Cake sweet roll dessert powder dragée macaroon marshmallow. Tootsie roll croissant danish cookie powder. Topping gingerbread chocolate cupcake cotton candy. Cotton candy wafer chocolate bar sweet bear claw jelly beans tootsie roll.	0	-40	
 14	23	2565	5		4	-1	none
 16	25	2751	1	no need	1	0	
+17	26	2564	1		1	0	
 \.
 
 
@@ -12108,8 +12233,9 @@ COPY public.material_returns (id, tenant_id, site_id, return_number, warehouse_i
 21	3	3	RET-00011	59	1	\N	203 WARD	Unused	General Remark1	Suresh	4	f	2026-06-09 16:54:33.084703	Partially Received	2026-06-10 12:22:39.346884	4
 22	2	2	RET-00001	62	3	\N	HEALTH 	Unused			3	f	2026-06-12 02:03:45.953947	Completed	2026-06-11 20:34:33.074148	3
 24	3	3	RET-00012	59	1	\N	202 WARD	Unused		Pradnesh	4	f	2026-06-17 12:02:37.001097	Partially Received	2026-06-17 06:35:45.076371	4
-23	2	2	RET-00002	62	3	\N	HEALTH 	Unused			3	f	2026-06-12 02:04:24.390151	Partially Received	2026-08-06 06:14:34.591748	3
 25	2	2	RET-00003	62	3	\N	Cardiothoracic Lab	Unused		vik	3	f	2026-08-06 14:48:02.906889	Completed	2026-08-06 09:18:11.140767	3
+23	2	2	RET-00002	62	3	\N	HEALTH 	Unused			3	f	2026-06-12 02:04:24.390151	Partially Received	2026-08-17 05:56:27.492976	3
+26	2	2	RET-00004	62	3	\N	Admin	Unused		vikky	3	f	2026-08-18 11:19:42.572711	Completed	2026-08-18 05:49:52.043785	3
 \.
 
 
@@ -12315,6 +12441,7 @@ COPY public.materials (id, tenant_id, site_id, code, name, category_id, subcateg
 1120	3	3	ELE-00081	4" Cutt off Wheel	52	14	5	10	34	1419.92	\N	Covered	\N	18	Consumable	4" Cutt off Wheel	t	f	2026-06-03 12:31:54.174787	2026-06-05 16:47:46.70249	59	\N	ELE0081	f	f
 1121	3	3	ELE-00082	Bulk Head LED light	52	14	5	369	952	612.75	\N	Covered	\N	18	Consumable	Bulk Head LED light	t	f	2026-06-03 12:31:54.176707	2026-06-05 16:47:46.702493	59	\N	ELE0082	f	f
 1122	3	3	ELE-00083	Strip light (Luker)	52	14	5	31	118	3732.83	\N	Covered	\N	18	Consumable	Strip light (Luker)	t	f	2026-06-03 12:31:54.178849	2026-06-05 16:47:46.702495	59	\N	ELE0083	f	f
+4874	2	2	HSK-00069	ladder	69	\N	29	20	100	1435	\N	General		18	Furniture		t	f	2026-08-17 12:43:15.859262	2026-08-17 12:44:11.225792	62			f	f
 1123	3	3	ELE-00084	Double Door MCB Box	52	14	5	84	288	60.8	\N	Covered	\N	18	Consumable	Double Door MCB Box	t	f	2026-06-03 12:31:54.180832	2026-06-05 16:47:46.702498	59	\N	ELE0084	f	f
 1124	3	3	ELE-00085	LED Strip outdoor connector	52	14	5	39	142	3395	\N	Covered	\N	18	Consumable	LED Strip outdoor connector	t	f	2026-06-03 12:31:54.182948	2026-06-05 16:47:46.702501	59	\N	ELE0085	f	f
 1125	3	3	ELE-00086	Cat 6 Cable	52	14	5	59	194	353.27	\N	Covered	\N	18	Consumable	Cat 6 Cable	t	f	2026-06-03 12:31:54.185013	2026-06-05 16:47:46.702504	59	\N	ELE0086	f	f
@@ -15272,6 +15399,7 @@ COPY public.materials (id, tenant_id, site_id, code, name, category_id, subcateg
 3772	3	3	MAT-00055	LITHO DEVICE	42	\N	5	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:24.141983	2026-08-05 19:00:24.141995	46	\N	\N	f	f
 3773	3	3	MAT-00056	VIDEOSCOPE CABLE	42	\N	5	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:00:24.166938	2026-08-05 19:00:24.16695	46	\N	\N	f	f
 3774	3	3	MAT-00057	OT TABLE	42	\N	5	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:00:24.19305	2026-08-05 19:00:24.193062	46	\N	\N	f	f
+4870	2	2	CHE-00001	test material	80	\N	29	100	1000	300	\N			18	Consumable		t	f	2026-08-17 11:57:30.58261	2026-08-17 11:57:30.582622	65			f	f
 3775	3	3	MAT-00058	Electrosurgical Unit	42	\N	5	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:24.216992	2026-08-05 19:00:24.217006	46	\N	\N	f	f
 3776	3	3	MAT-00059	BERA	42	\N	5	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:24.240085	2026-08-05 19:00:24.240097	46	\N	\N	f	f
 3777	3	3	MAT-00060	SREENING OAE+AABR	42	\N	5	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:24.263387	2026-08-05 19:00:24.263399	46	\N	\N	f	f
@@ -15308,6 +15436,7 @@ COPY public.materials (id, tenant_id, site_id, code, name, category_id, subcateg
 3808	3	3	MAT-00091	NON MYDRIIATIC CAMERA	42	\N	5	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:25.639402	2026-08-05 19:00:25.639417	46	\N	\N	f	f
 3809	3	3	MAT-00092	OPTHALMIC REFRACTION UNIT	42	\N	5	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:25.664928	2026-08-05 19:00:25.664941	46	\N	\N	f	f
 3810	3	3	MAT-00093	OPTHALOMOSCOPE	42	\N	5	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:25.688137	2026-08-05 19:00:25.688149	46	\N	\N	f	f
+4875	2	2	HSK-00070	table	69	\N	29	10	100	890	\N	General		16	Furniture		t	f	2026-08-18 10:30:46.046606	2026-08-18 10:30:46.046648	62			f	f
 3811	3	3	MAT-00094	GREEN LASER	42	\N	5	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Therapeutic Equipment	t	f	2026-08-05 19:00:25.71123	2026-08-05 19:00:25.711243	46	\N	\N	f	f
 3812	3	3	MAT-00095	REICHART AUTO TONOMETER	42	\N	5	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:25.733683	2026-08-05 19:00:25.733694	46	\N	\N	f	f
 3813	3	3	MAT-00096	RETENOSCOPE	42	\N	5	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:00:25.757169	2026-08-05 19:00:25.757181	46	\N	\N	f	f
@@ -15517,6 +15646,9 @@ COPY public.materials (id, tenant_id, site_id, code, name, category_id, subcateg
 4069	2	2	MAT-00175	DLCO	65	\N	29	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:45.884222	2026-08-05 19:04:45.884235	62	\N	\N	f	f
 4070	2	2	MAT-00176	PFT	65	\N	29	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Diagnostic Equipment	t	f	2026-08-05 19:04:45.909455	2026-08-05 19:04:45.909468	62	\N	\N	f	f
 4071	2	2	MAT-00177	NURSING CALLING SYSTEM	65	\N	29	1	10	100	\N	Covered	\N	18	Equipment	Auto-created from equipment import: Support Equipment	t	f	2026-08-05 19:04:46.048891	2026-08-05 19:04:46.048909	62	\N	\N	f	f
+4871	3	3	HSK-00068	ladder	56	\N	1	0	0	200	\N	General (Unspecified)	\N	18	Furniture	\N	t	f	2026-08-17 12:06:50.321898	2026-08-17 12:06:50.321912	\N	\N	\N	f	f
+4872	2	2	HSK-00068	big ladder	69	\N	29	2	5	200	\N	General		18	Furniture		t	f	2026-08-17 12:16:25.893221	2026-08-17 12:16:50.191279	62			f	f
+4873	2	2	ELE-00089	New Matl	66	57	29	5	50	450	\N	Rack Storage		18	Consumable		t	f	2026-08-17 12:20:40.251923	2026-08-17 12:20:40.251967	62			f	f
 \.
 
 
@@ -15585,8 +15717,8 @@ COPY public.menu_items (id, text, icon_name, path, resource, platform_only, pare
 59	Terms & Conditions	\N	/terms	terms	f	50	8	t	["read", "create", "update", "delete"]	[]	2026-08-12 10:42:10.023694	2026-08-12 10:42:10.023697
 60	Company Addresses	\N	/company-addresses	company_addresses	f	50	9	t	["read", "create", "update", "delete"]	[]	2026-08-12 10:42:10.0237	2026-08-12 10:42:10.023703
 61	SaaS Admin	Security	/saas-admin	\N	t	\N	10	t	[]	[]	2026-08-12 10:42:10.024748	2026-08-12 10:42:10.02476
-17	Work Orders (Old)	\N	/work-orders	work_orders	f	11	5	t	["read", "create", "update", "delete"]	[{"key": "can_approve", "label": "Approve", "color": "#10B981"}, {"key": "can_reject", "label": "Reject", "color": "#EF4444"}, {"key": "can_send_to_vendor", "label": "Send to Vendor", "color": "#3B82F6"}, {"key": "can_short_close", "label": "Short Close", "color": "#F97316"}]	2026-08-12 10:42:10.012469	2026-08-12 10:42:10.012472
 62	Vendor Work Orders	assignment_turned_in	/procurement/vendor-work-orders	vendor_work_orders	\N	11	6	t	["read", "create", "update", "delete"]	[]	2026-08-14 13:34:38.683854	2026-08-14 13:34:38.683854
+17	Work Orders	\N	/work-orders	work_orders	f	11	5	t	["read", "create", "update", "delete"]	[{"key": "can_approve", "label": "Approve", "color": "#10B981"}, {"key": "can_reject", "label": "Reject", "color": "#EF4444"}, {"key": "can_send_to_vendor", "label": "Send to Vendor", "color": "#3B82F6"}, {"key": "can_short_close", "label": "Short Close", "color": "#F97316"}]	2026-08-12 10:42:10.012469	2026-08-12 10:42:10.012472
 \.
 
 
@@ -15787,6 +15919,9 @@ COPY public.purchase_order_approvals (id, po_id, approval_flow_id, approver_id, 
 119	276	106	3	{"1746": {"quantity": 10.0, "remarks": null}}	\N	2026-08-17 10:49:45.10218
 120	276	18	3	{"1746": {"quantity": 5.0, "remarks": null}}	\N	2026-08-17 10:49:53.086235
 121	276	110	3	{"1746": {"quantity": 5.0, "remarks": null}}	\N	2026-08-17 10:49:53.086253
+122	277	106	3	{"1747": {"quantity": 1.0, "remarks": null}}	\N	2026-08-17 12:09:25.407199
+123	277	18	3	{"1747": {"quantity": 1.0, "remarks": null}}	\N	2026-08-17 12:09:30.207831
+124	277	110	3	{"1747": {"quantity": 1.0, "remarks": null}}	\N	2026-08-17 12:09:30.207876
 \.
 
 
@@ -15988,6 +16123,8 @@ COPY public.purchase_order_items (id, po_id, material_id, quantity, rate, amount
 1744	274	4680	100	800	80000	0	\N	0	9	9	0	f	\N
 1745	275	3474	5	3262.58	16312.9	0	\N	3	9	9	0	f	5
 1746	276	2564	10	23	230	0	\N	2	6	6	0	f	5
+1747	277	3910	1	100	100	1	\N	0	9	9	0	f	1
+1748	278	2751	10	15000	150000	0	\N	0	9	9	0	f	\N
 \.
 
 
@@ -16066,7 +16203,6 @@ COPY public.purchase_orders (id, tenant_id, site_id, po_number, vendor_id, proje
 244	2	2	PO-00028	62	3	203	\N	\N	Formal	612466	2026-07-21	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-07 19:04:31.282046	2026-07-07 19:04:31.300742	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
 232	2	2	PO-00016	64	3	\N	\N	198	Formal	11.2	2026-07-21	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-06-22 12:18:25.580101	2026-06-30 20:00:31.707939	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
 245	2	2	PO-00029	63	3	\N	\N	190	Formal	444	\N	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-08 11:51:20.874685	2026-07-08 11:51:20.886838	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
-243	2	2	PO-00027	62	3	\N	\N	\N	Informal	138151.99	2026-07-02	Partially Received	dfgfdgdgdfg	3	\N	\N	f	2026-07-02 18:30:35.966725	2026-07-08 12:25:10.086539	1		\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
 242	2	2	PO-00026	63	3	\N	\N	\N	Informal	33428.88	2026-07-22	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 12:42:10.050112	f	2026-07-01 16:02:34.765014	2026-07-01 18:12:10.051203	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
 237	2	2	PO-00021	62	3	\N	\N	\N	Informal	48416.97	2026-07-22	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 10:08:14.685627	f	2026-07-01 15:30:32.968379	2026-07-01 15:38:14.686254	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
 247	2	2	PO-00031	62	3	\N	\N	\N	Formal	119630.69	2026-07-09	Draft	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-09 12:36:38.03989	2026-07-09 12:36:38.061011	1	dkflkdflkdlfkdlfk dhfjhdfjhdfjh	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
@@ -16083,6 +16219,7 @@ COPY public.purchase_orders (id, tenant_id, site_id, po_number, vendor_id, proje
 217	2	2	PO-00004	63	3	\N	\N	186	Formal	23321.52	2026-07-03	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-06-16 06:09:10.505248	f	2026-06-12 01:40:11.463052	2026-06-16 11:39:10.508746	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
 211	3	3	PO-00046	53	1	\N	\N	\N	Informal	149060.07	2026-06-29	Short Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	4	4	2026-06-09 04:59:33.248268	f	2026-06-08 17:18:43.689083	2026-06-17 11:21:46.51598	2	\N	mistaken	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
 241	2	2	PO-00025	63	3	\N	\N	\N	Informal	118308.5	\N	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 12:45:36.264791	f	2026-07-01 15:58:53.716577	2026-07-01 18:15:36.265807	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
+243	2	2	PO-00027	62	3	\N	\N	\N	Informal	138151.99	2026-07-02	Short Closed	dfgfdgdgdfg	3	\N	\N	f	2026-07-02 18:30:35.966725	2026-08-18 11:50:27.70609	1		\n[Short Closed: no need ]	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
 240	2	2	PO-00024	62	3	\N	\N	\N	Informal	18509.3	2026-07-22	Submitted	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-01 15:54:08.411103	2026-07-01 18:40:54.712499	1	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
 236	2	2	PO-00020	63	3	\N	\N	\N	Informal	30282.87	2026-07-22	Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-07-01 15:09:29.245234	2026-07-06 16:58:25.718872	1	\N	Rejected for testing	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
 238	2	2	PO-00022	63	3	\N	\N	\N	Informal	37018.6	2026-07-01	Approved	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-07-01 10:14:55.636414	f	2026-07-01 15:32:32.73684	2026-07-01 15:44:55.636716	2	\N	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	Credit Purchase	\N	\N
@@ -16100,6 +16237,8 @@ COPY public.purchase_orders (id, tenant_id, site_id, po_number, vendor_id, proje
 263	2	2	NRCN/PO-00001	64	3	\N	\N	\N	Formal	37196.4	2026-08-13	Short Closed	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: 15 Days\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-05 05:21:39.178771	f	2026-08-05 10:51:22.376748	2026-08-14 11:34:11.607683	2		\n[Short Closed: vendor support is poor so callinbg off]	9	50	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Advance Payment		\N
 275	2	2	EPCN/PO-00001	70	3	\N	\N	\N	Formal	18671.74	2026-08-24	Approved	1. Bill/Invoices in the name of East Point College of Nursing managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-17 04:31:39.731856	f	2026-08-17 10:01:02.299007	2026-08-17 10:01:39.733905	2		\N	7	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Cash Purchase		\N
 276	2	2	EPCPT/PO-00004	66	3	\N	\N	\N	Formal	252.45	2026-08-18	Approved	1. Bill/Invoices in the name of East Point College of Physiotherapy managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-17 05:19:53.112341	f	2026-08-17 10:49:29.283407	2026-08-17 10:49:53.113125	2		\N	10	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Rental	Equipment Rental	Credit Purchase		\N
+277	2	2	EPCET/PO-00007	63	3	\N	\N	\N	Formal	118	2026-08-18	Closed	1. Bill/Invoices in the name of East Point College of Engineering & Technology managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-17 06:39:30.245864	f	2026-08-17 12:09:13.192308	2026-08-17 12:13:02.022457	2		\N	3	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Credit Purchase		\N
+278	2	2	EPAHS/PO-00004	69	3	208	\N	\N	Formal	177000	2026-09-01	Draft	1. Bill/Invoices in the name of East Point Allied Health Sciences managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-08-18 12:40:59.667636	2026-08-18 12:40:59.722144	1	\N	\N	11	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Credit Purchase	\N	\N
 \.
 
 
@@ -16158,6 +16297,10 @@ COPY public.purchase_request_approvals (id, pr_id, approval_flow_id, approver_id
 48	207	107	3	{"626": {"quantity": 5.0, "remarks": null}}	\N	2026-08-17 10:41:46.388011
 49	207	17	3	{"626": {"quantity": 5.0, "remarks": null}}	\N	2026-08-17 10:41:52.588213
 50	207	109	3	{"626": {"quantity": 5.0, "remarks": null}}	\N	2026-08-17 10:41:52.588234
+51	208	19	3	{"627": {"quantity": 10.0, "remarks": null}}	\N	2026-08-18 11:38:36.135389
+52	208	107	3	{"627": {"quantity": 10.0, "remarks": null}}	\N	2026-08-18 11:38:36.135433
+53	208	17	3	{"627": {"quantity": 10.0, "remarks": null}}	\N	2026-08-18 11:38:43.146184
+54	208	109	3	{"627": {"quantity": 10.0, "remarks": null}}	\N	2026-08-18 11:38:43.146228
 \.
 
 
@@ -16246,6 +16389,8 @@ COPY public.purchase_request_items (id, pr_id, material_id, quantity, approved_q
 624	202	3507	1	\N
 625	202	3503	2	\N
 626	207	2751	5	5
+627	208	2751	10	10
+628	209	2564	1	\N
 \.
 
 
@@ -16292,6 +16437,8 @@ COPY public.purchase_requests (id, tenant_id, site_id, pr_number, requester_id, 
 206	2	2	PR-00013	3	\N	7	HEALTH 	3	2026-08-14		Approved	3	2026-08-14 07:10:05.305418	f	2026-08-14 12:37:45.391061	2026-08-14 12:40:05.307372	2	Rental	Standard Rental	\N	Months	\N	\N	f	\N
 202	2	2	PR-00009	3	\N	12	Chemistry	3	2026-08-21		Submitted	\N	\N	f	2026-07-03 11:46:40.099177	2026-08-14 12:44:56.275727	1	\N	\N	\N	\N	\N	\N	\N	\N
 207	2	2	PR-00014	3	\N	\N	Nursing Foundation	3	2026-08-18		Approved	3	2026-08-17 05:11:52.603847	f	2026-08-17 10:41:37.019811	2026-08-17 10:41:52.604441	2	Purchase	\N	\N	\N	\N	\N	f	\N
+209	2	2	PR-00016	3	\N	7	HEALTH 	3	2026-08-18		Submitted	\N	\N	f	2026-08-18 12:23:32.937762	2026-08-18 12:23:32.937775	1	Purchase	\N	\N	\N	\N	\N	f	\N
+208	2	2	PR-00015	3	\N	\N	Child Health Nursing	3	2026-08-19		Converted to PO	3	2026-08-18 06:08:43.17722	f	2026-08-18 11:35:51.789742	2026-08-18 12:40:59.719751	2	Purchase	\N	\N	\N	\N	\N	f	\N
 \.
 
 
@@ -16510,10 +16657,9 @@ COPY public.quotation_comparisons (id, qr_id, qr_item_id, material_id, selected_
 240	222	4105	4732	72	72	f	\N	3	2026-08-06 20:39:56.036696
 241	222	4106	4733	72	72	f	\N	3	2026-08-06 20:39:56.036701
 242	222	4107	4734	72	72	f	\N	3	2026-08-06 20:39:56.036706
-389	224	4254	4869	70	70	f	\N	\N	\N
-390	224	4255	4616	70	70	f	\N	\N	\N
-391	224	4256	4617	70	70	f	\N	\N	\N
-388	224	4253	4818	69	69	f	\N	\N	\N
+388	224	4253	4818	71	71	f	\N	\N	\N
+389	224	4254	4869	72	72	f	\N	\N	\N
+390	224	4255	4616	71	71	f	\N	\N	\N
 243	222	4108	4735	72	72	f	\N	3	2026-08-06 20:39:56.036711
 244	222	4109	4736	72	72	f	\N	3	2026-08-06 20:39:56.036716
 245	222	4110	4737	72	72	f	\N	3	2026-08-06 20:39:56.03612
@@ -16617,8 +16763,8 @@ COPY public.quotation_comparisons (id, qr_id, qr_item_id, material_id, selected_
 343	222	4208	4848	72	72	f	\N	3	2026-08-06 20:39:56.037212
 344	222	4209	4849	72	72	f	\N	3	2026-08-06 20:39:56.037217
 345	222	4210	4850	72	72	f	\N	3	2026-08-06 20:39:56.037222
-396	224	4261	4622	70	70	f	\N	\N	\N
-397	224	4262	4623	70	70	f	\N	\N	\N
+396	224	4261	4622	72	72	f	\N	\N	\N
+397	224	4262	4623	71	71	f	\N	\N	\N
 121	222	3986	4817	72	72	f	\N	3	2026-08-06 20:39:56.036157
 122	222	3987	4818	72	72	f	\N	3	2026-08-06 20:39:56.036162
 123	222	3988	4869	72	72	f	\N	3	2026-08-06 20:39:56.036167
@@ -16627,118 +16773,113 @@ COPY public.quotation_comparisons (id, qr_id, qr_item_id, material_id, selected_
 126	222	3991	4618	72	72	f	\N	3	2026-08-06 20:39:56.036182
 127	222	3992	4619	72	72	f	\N	3	2026-08-06 20:39:56.036187
 128	222	3993	4620	72	72	f	\N	3	2026-08-06 20:39:56.036192
-400	224	4265	4626	70	70	f	\N	\N	\N
-402	224	4267	4628	70	70	f	\N	\N	\N
-409	224	4274	4635	70	70	f	\N	\N	\N
-412	224	4277	4638	70	70	f	\N	\N	\N
-415	224	4280	4641	70	70	f	\N	\N	\N
-417	224	4282	4643	70	70	f	\N	\N	\N
-418	224	4283	4644	70	70	f	\N	\N	\N
-419	224	4284	4645	70	70	f	\N	\N	\N
-421	224	4286	4647	70	70	f	\N	\N	\N
-424	224	4289	4650	70	70	f	\N	\N	\N
-426	224	4291	4652	70	70	f	\N	\N	\N
-427	224	4292	4653	70	70	f	\N	\N	\N
-428	224	4293	4654	70	70	f	\N	\N	\N
-432	224	4297	4658	70	70	f	\N	\N	\N
-433	224	4298	4659	70	70	f	\N	\N	\N
-436	224	4301	4662	70	70	f	\N	\N	\N
-440	224	4305	4666	70	70	f	\N	\N	\N
-441	224	4306	4667	70	70	f	\N	\N	\N
-443	224	4308	4669	70	70	f	\N	\N	\N
-448	224	4313	4674	70	70	f	\N	\N	\N
-451	224	4316	4677	70	70	f	\N	\N	\N
-452	224	4317	4678	70	70	f	\N	\N	\N
-453	224	4318	4679	70	70	f	\N	\N	\N
-455	224	4320	4681	70	70	f	\N	\N	\N
-456	224	4321	4682	70	70	f	\N	\N	\N
-457	224	4322	4683	70	70	f	\N	\N	\N
-464	224	4329	4690	70	70	f	\N	\N	\N
-467	224	4332	4693	70	70	f	\N	\N	\N
-470	224	4335	4696	70	70	f	\N	\N	\N
-475	224	4340	4701	70	70	f	\N	\N	\N
-476	224	4341	4702	70	70	f	\N	\N	\N
-477	224	4342	4703	70	70	f	\N	\N	\N
-481	224	4346	4707	70	70	f	\N	\N	\N
-484	224	4349	4710	70	70	f	\N	\N	\N
-488	224	4353	4714	70	70	f	\N	\N	\N
-491	224	4356	4717	70	70	f	\N	\N	\N
-493	224	4358	4719	70	70	f	\N	\N	\N
-494	224	4359	4720	70	70	f	\N	\N	\N
-496	224	4361	4722	70	70	f	\N	\N	\N
-497	224	4362	4723	70	70	f	\N	\N	\N
-499	224	4364	4725	70	70	f	\N	\N	\N
-501	224	4366	4727	70	70	f	\N	\N	\N
-503	224	4368	4729	70	70	f	\N	\N	\N
-473	224	4338	4699	69	69	f	\N	\N	\N
-447	224	4312	4673	70	70	f	\N	\N	\N
-516	224	4381	4742	70	70	f	\N	\N	\N
-518	224	4383	4744	70	70	f	\N	\N	\N
-519	224	4384	4745	70	70	f	\N	\N	\N
-523	224	4392	4753	70	70	f	\N	\N	\N
-525	224	4396	4757	70	70	f	\N	\N	\N
-528	224	4400	4761	70	70	f	\N	\N	\N
-529	224	4401	4762	70	70	f	\N	\N	\N
-532	224	4406	4767	70	70	f	\N	\N	\N
-539	224	4417	4778	70	70	f	\N	\N	\N
-540	224	4418	4779	70	70	f	\N	\N	\N
-541	224	4419	4780	70	70	f	\N	\N	\N
-542	224	4420	4781	70	70	f	\N	\N	\N
-548	224	4429	4790	70	70	f	\N	\N	\N
-551	224	4433	4794	70	70	f	\N	\N	\N
-553	224	4435	4796	70	70	f	\N	\N	\N
-557	224	4442	4803	70	70	f	\N	\N	\N
-558	224	4443	4804	70	70	f	\N	\N	\N
-560	224	4445	4806	70	70	f	\N	\N	\N
-561	224	4447	4808	70	70	f	\N	\N	\N
-563	224	4452	4813	70	70	f	\N	\N	\N
-568	224	4460	4823	70	70	f	\N	\N	\N
-569	224	4461	4824	70	70	f	\N	\N	\N
-573	224	4468	4831	70	70	f	\N	\N	\N
-575	224	4471	4834	70	70	f	\N	\N	\N
-576	224	4472	4835	70	70	f	\N	\N	\N
-578	224	4476	4850	70	70	f	\N	\N	\N
-585	224	4487	4861	70	70	f	\N	\N	\N
-587	224	4490	4864	70	70	f	\N	\N	\N
+400	224	4265	4626	72	72	f	\N	\N	\N
+402	224	4267	4628	72	72	f	\N	\N	\N
+409	224	4274	4635	71	71	f	\N	\N	\N
+412	224	4277	4638	72	72	f	\N	\N	\N
+415	224	4280	4641	72	72	f	\N	\N	\N
+417	224	4282	4643	71	71	f	\N	\N	\N
+418	224	4283	4644	71	71	f	\N	\N	\N
+419	224	4284	4645	72	72	f	\N	\N	\N
+421	224	4286	4647	72	72	f	\N	\N	\N
+424	224	4289	4650	72	72	f	\N	\N	\N
+426	224	4291	4652	72	72	f	\N	\N	\N
+427	224	4292	4653	72	72	f	\N	\N	\N
+428	224	4293	4654	72	72	f	\N	\N	\N
+432	224	4297	4658	71	71	f	\N	\N	\N
+433	224	4298	4659	72	72	f	\N	\N	\N
+436	224	4301	4662	72	72	f	\N	\N	\N
+440	224	4305	4666	71	71	f	\N	\N	\N
+441	224	4306	4667	72	72	f	\N	\N	\N
+443	224	4308	4669	71	71	f	\N	\N	\N
+447	224	4312	4673	71	71	f	\N	\N	\N
+448	224	4313	4674	71	71	f	\N	\N	\N
+451	224	4316	4677	72	72	f	\N	\N	\N
+452	224	4317	4678	72	72	f	\N	\N	\N
+453	224	4318	4679	72	72	f	\N	\N	\N
+455	224	4320	4681	72	72	f	\N	\N	\N
+456	224	4321	4682	72	72	f	\N	\N	\N
+457	224	4322	4683	72	72	f	\N	\N	\N
+464	224	4329	4690	72	72	f	\N	\N	\N
+467	224	4332	4693	71	71	f	\N	\N	\N
+470	224	4335	4696	72	72	f	\N	\N	\N
+473	224	4338	4699	71	71	f	\N	\N	\N
+475	224	4340	4701	71	71	f	\N	\N	\N
+476	224	4341	4702	71	71	f	\N	\N	\N
+477	224	4342	4703	72	72	f	\N	\N	\N
+481	224	4346	4707	72	72	f	\N	\N	\N
+484	224	4349	4710	71	71	f	\N	\N	\N
+488	224	4353	4714	71	71	f	\N	\N	\N
+491	224	4356	4717	72	72	f	\N	\N	\N
+493	224	4358	4719	71	71	f	\N	\N	\N
+494	224	4359	4720	72	72	f	\N	\N	\N
+496	224	4361	4722	72	72	f	\N	\N	\N
+497	224	4362	4723	71	71	f	\N	\N	\N
+499	224	4364	4725	71	71	f	\N	\N	\N
+501	224	4366	4727	72	72	f	\N	\N	\N
+503	224	4368	4729	72	72	f	\N	\N	\N
 588	224	4491	4865	70	70	f	\N	\N	\N
-594	224	4502	4611	70	70	f	\N	\N	\N
-387	224	4252	4817	69	69	f	\N	\N	\N
 392	224	4257	4618	69	69	f	\N	\N	\N
 393	224	4258	4619	69	69	f	\N	\N	\N
 394	224	4259	4620	69	69	f	\N	\N	\N
-395	224	4260	4621	69	69	f	\N	\N	\N
 398	224	4263	4624	69	69	f	\N	\N	\N
 399	224	4264	4625	69	69	f	\N	\N	\N
 401	224	4266	4627	69	69	f	\N	\N	\N
 403	224	4268	4629	69	69	f	\N	\N	\N
-404	224	4269	4630	69	69	f	\N	\N	\N
 405	224	4270	4631	69	69	f	\N	\N	\N
-406	224	4271	4632	69	69	f	\N	\N	\N
-407	224	4272	4633	69	69	f	\N	\N	\N
-408	224	4273	4634	69	69	f	\N	\N	\N
-410	224	4275	4636	69	69	f	\N	\N	\N
 411	224	4276	4637	69	69	f	\N	\N	\N
-413	224	4278	4639	69	69	f	\N	\N	\N
 414	224	4279	4640	69	69	f	\N	\N	\N
-416	224	4281	4642	69	69	f	\N	\N	\N
-420	224	4285	4646	69	69	f	\N	\N	\N
-422	224	4287	4648	69	69	f	\N	\N	\N
 423	224	4288	4649	69	69	f	\N	\N	\N
 425	224	4290	4651	69	69	f	\N	\N	\N
-429	224	4294	4655	69	69	f	\N	\N	\N
-430	224	4295	4656	69	69	f	\N	\N	\N
-431	224	4296	4657	69	69	f	\N	\N	\N
-434	224	4299	4660	69	69	f	\N	\N	\N
-435	224	4300	4661	69	69	f	\N	\N	\N
-508	224	4373	4734	69	69	f	\N	\N	\N
-512	224	4377	4738	69	69	f	\N	\N	\N
-515	224	4380	4741	69	69	f	\N	\N	\N
-534	224	4410	4771	69	69	f	\N	\N	\N
-549	224	4430	4791	69	69	f	\N	\N	\N
-552	224	4434	4795	69	69	f	\N	\N	\N
-583	224	4483	4857	69	69	f	\N	\N	\N
-595	224	4503	4612	69	69	f	\N	\N	\N
-520	224	4387	4748	70	70	f	\N	\N	\N
+534	224	4410	4771	71	71	f	\N	\N	\N
+387	224	4252	4817	71	71	f	\N	\N	\N
+395	224	4260	4621	71	71	f	\N	\N	\N
+404	224	4269	4630	71	71	f	\N	\N	\N
+406	224	4271	4632	71	71	f	\N	\N	\N
+407	224	4272	4633	71	71	f	\N	\N	\N
+408	224	4273	4634	71	71	f	\N	\N	\N
+410	224	4275	4636	71	71	f	\N	\N	\N
+413	224	4278	4639	71	71	f	\N	\N	\N
+416	224	4281	4642	71	71	f	\N	\N	\N
+420	224	4285	4646	71	71	f	\N	\N	\N
+422	224	4287	4648	71	71	f	\N	\N	\N
+429	224	4294	4655	71	71	f	\N	\N	\N
+430	224	4295	4656	71	71	f	\N	\N	\N
+431	224	4296	4657	71	71	f	\N	\N	\N
+434	224	4299	4660	71	71	f	\N	\N	\N
+435	224	4300	4661	71	71	f	\N	\N	\N
+508	224	4373	4734	71	71	f	\N	\N	\N
+512	224	4377	4738	71	71	f	\N	\N	\N
+515	224	4380	4741	71	71	f	\N	\N	\N
+516	224	4381	4742	72	72	f	\N	\N	\N
+518	224	4383	4744	72	72	f	\N	\N	\N
+519	224	4384	4745	72	72	f	\N	\N	\N
+520	224	4387	4748	71	71	f	\N	\N	\N
+523	224	4392	4753	72	72	f	\N	\N	\N
+525	224	4396	4757	72	72	f	\N	\N	\N
+528	224	4400	4761	72	72	f	\N	\N	\N
+529	224	4401	4762	71	71	f	\N	\N	\N
+532	224	4406	4767	71	71	f	\N	\N	\N
+539	224	4417	4778	72	72	f	\N	\N	\N
+540	224	4418	4779	72	72	f	\N	\N	\N
+541	224	4419	4780	72	72	f	\N	\N	\N
+542	224	4420	4781	71	71	f	\N	\N	\N
+548	224	4429	4790	72	72	f	\N	\N	\N
+549	224	4430	4791	71	71	f	\N	\N	\N
+551	224	4433	4794	71	71	f	\N	\N	\N
+552	224	4434	4795	71	71	f	\N	\N	\N
+553	224	4435	4796	71	71	f	\N	\N	\N
+557	224	4442	4803	71	71	f	\N	\N	\N
+558	224	4443	4804	71	71	f	\N	\N	\N
+560	224	4445	4806	71	71	f	\N	\N	\N
+561	224	4447	4808	72	72	f	\N	\N	\N
+563	224	4452	4813	71	71	f	\N	\N	\N
+568	224	4460	4823	71	71	f	\N	\N	\N
+569	224	4461	4824	72	72	f	\N	\N	\N
+573	224	4468	4831	71	71	f	\N	\N	\N
+575	224	4471	4834	72	72	f	\N	\N	\N
+576	224	4472	4835	71	71	f	\N	\N	\N
+578	224	4476	4850	72	72	f	\N	\N	\N
 346	222	4211	4851	72	72	f	\N	3	2026-08-06 20:39:56.037227
 347	222	4212	4852	72	72	f	\N	3	2026-08-06 20:39:56.037232
 348	222	4213	4853	72	72	f	\N	3	2026-08-06 20:39:56.037237
@@ -16780,155 +16921,161 @@ COPY public.quotation_comparisons (id, qr_id, qr_item_id, material_id, selected_
 384	222	4249	4844	72	72	f	\N	3	2026-08-06 20:39:56.037409
 385	222	4250	4845	72	72	f	\N	3	2026-08-06 20:39:56.037414
 386	222	4251	4846	72	72	f	\N	3	2026-08-06 20:39:56.037419
-603	224	4391	4752	70	70	f	\N	\N	\N
-605	224	4394	4755	70	70	f	\N	\N	\N
-610	224	4409	4770	70	70	f	\N	\N	\N
-611	224	4411	4772	70	70	f	\N	\N	\N
-614	224	4427	4788	70	70	f	\N	\N	\N
-619	224	4441	4802	70	70	f	\N	\N	\N
-620	224	4446	4807	70	70	f	\N	\N	\N
-624	224	4455	4816	70	70	f	\N	\N	\N
-625	224	4457	4820	70	70	f	\N	\N	\N
-627	224	4462	4825	70	70	f	\N	\N	\N
-631	224	4474	4848	70	70	f	\N	\N	\N
-632	224	4475	4849	70	70	f	\N	\N	\N
-633	224	4477	4851	70	70	f	\N	\N	\N
-634	224	4481	4855	70	70	f	\N	\N	\N
-635	224	4484	4858	70	70	f	\N	\N	\N
-636	224	4486	4860	70	70	f	\N	\N	\N
-638	224	4493	4867	70	70	f	\N	\N	\N
-641	224	4500	4609	70	70	f	\N	\N	\N
-642	224	4501	4610	70	70	f	\N	\N	\N
-644	224	4507	4836	70	70	f	\N	\N	\N
-645	224	4508	4837	70	70	f	\N	\N	\N
-647	224	4510	4839	70	70	f	\N	\N	\N
-648	224	4511	4840	70	70	f	\N	\N	\N
-651	224	4516	4845	70	70	f	\N	\N	\N
-437	224	4302	4663	69	69	f	\N	\N	\N
 438	224	4303	4664	69	69	f	\N	\N	\N
-439	224	4304	4665	69	69	f	\N	\N	\N
 442	224	4307	4668	69	69	f	\N	\N	\N
 444	224	4309	4670	69	69	f	\N	\N	\N
-445	224	4310	4671	69	69	f	\N	\N	\N
 446	224	4311	4672	69	69	f	\N	\N	\N
 449	224	4314	4675	69	69	f	\N	\N	\N
-450	224	4315	4676	69	69	f	\N	\N	\N
-454	224	4319	4680	69	69	f	\N	\N	\N
-458	224	4323	4684	69	69	f	\N	\N	\N
 459	224	4324	4685	69	69	f	\N	\N	\N
 460	224	4325	4686	69	69	f	\N	\N	\N
 461	224	4326	4687	69	69	f	\N	\N	\N
 462	224	4327	4688	69	69	f	\N	\N	\N
-463	224	4328	4689	69	69	f	\N	\N	\N
-465	224	4330	4691	69	69	f	\N	\N	\N
 466	224	4331	4692	69	69	f	\N	\N	\N
-468	224	4333	4694	69	69	f	\N	\N	\N
-469	224	4334	4695	69	69	f	\N	\N	\N
+437	224	4302	4663	71	71	f	\N	\N	\N
+439	224	4304	4665	71	71	f	\N	\N	\N
+445	224	4310	4671	71	71	f	\N	\N	\N
+450	224	4315	4676	71	71	f	\N	\N	\N
+454	224	4319	4680	71	71	f	\N	\N	\N
+458	224	4323	4684	71	71	f	\N	\N	\N
+463	224	4328	4689	71	71	f	\N	\N	\N
+465	224	4330	4691	71	71	f	\N	\N	\N
+468	224	4333	4694	71	71	f	\N	\N	\N
+603	224	4391	4752	71	71	f	\N	\N	\N
+605	224	4394	4755	71	71	f	\N	\N	\N
+610	224	4409	4770	72	72	f	\N	\N	\N
+611	224	4411	4772	71	71	f	\N	\N	\N
+614	224	4427	4788	71	71	f	\N	\N	\N
+619	224	4441	4802	71	71	f	\N	\N	\N
+620	224	4446	4807	71	71	f	\N	\N	\N
+624	224	4455	4816	72	72	f	\N	\N	\N
+625	224	4457	4820	72	72	f	\N	\N	\N
+627	224	4462	4825	71	71	f	\N	\N	\N
+631	224	4474	4848	72	72	f	\N	\N	\N
+632	224	4475	4849	71	71	f	\N	\N	\N
+633	224	4477	4851	71	71	f	\N	\N	\N
+634	224	4481	4855	71	71	f	\N	\N	\N
+635	224	4484	4858	71	71	f	\N	\N	\N
+636	224	4486	4860	71	71	f	\N	\N	\N
+638	224	4493	4867	71	71	f	\N	\N	\N
+641	224	4500	4609	72	72	f	\N	\N	\N
+642	224	4501	4610	72	72	f	\N	\N	\N
 471	224	4336	4697	69	69	f	\N	\N	\N
-472	224	4337	4698	69	69	f	\N	\N	\N
-474	224	4339	4700	69	69	f	\N	\N	\N
-478	224	4343	4704	69	69	f	\N	\N	\N
-479	224	4344	4705	69	69	f	\N	\N	\N
 480	224	4345	4706	69	69	f	\N	\N	\N
 482	224	4347	4708	69	69	f	\N	\N	\N
-483	224	4348	4709	69	69	f	\N	\N	\N
-485	224	4350	4711	69	69	f	\N	\N	\N
 486	224	4351	4712	69	69	f	\N	\N	\N
-487	224	4352	4713	69	69	f	\N	\N	\N
 489	224	4354	4715	69	69	f	\N	\N	\N
-490	224	4355	4716	69	69	f	\N	\N	\N
-492	224	4357	4718	69	69	f	\N	\N	\N
 495	224	4360	4721	69	69	f	\N	\N	\N
-498	224	4363	4724	69	69	f	\N	\N	\N
-500	224	4365	4726	69	69	f	\N	\N	\N
 502	224	4367	4728	69	69	f	\N	\N	\N
 504	224	4369	4730	69	69	f	\N	\N	\N
 505	224	4370	4731	69	69	f	\N	\N	\N
-506	224	4371	4732	69	69	f	\N	\N	\N
-507	224	4372	4733	69	69	f	\N	\N	\N
 509	224	4374	4735	69	69	f	\N	\N	\N
-510	224	4375	4736	69	69	f	\N	\N	\N
 511	224	4376	4737	69	69	f	\N	\N	\N
 513	224	4378	4739	69	69	f	\N	\N	\N
-514	224	4379	4740	69	69	f	\N	\N	\N
 517	224	4382	4743	69	69	f	\N	\N	\N
 600	224	4385	4746	69	69	f	\N	\N	\N
 601	224	4386	4747	69	69	f	\N	\N	\N
-521	224	4388	4749	69	69	f	\N	\N	\N
 522	224	4389	4750	69	69	f	\N	\N	\N
 602	224	4390	4751	69	69	f	\N	\N	\N
-604	224	4393	4754	69	69	f	\N	\N	\N
-524	224	4395	4756	69	69	f	\N	\N	\N
-526	224	4397	4758	69	69	f	\N	\N	\N
-527	224	4398	4759	69	69	f	\N	\N	\N
 606	224	4399	4760	69	69	f	\N	\N	\N
-607	224	4402	4763	69	69	f	\N	\N	\N
-608	224	4403	4764	69	69	f	\N	\N	\N
 530	224	4404	4765	69	69	f	\N	\N	\N
 531	224	4405	4766	69	69	f	\N	\N	\N
-609	224	4407	4768	69	69	f	\N	\N	\N
-533	224	4408	4769	69	69	f	\N	\N	\N
 535	224	4412	4773	69	69	f	\N	\N	\N
 536	224	4413	4774	69	69	f	\N	\N	\N
-537	224	4414	4775	69	69	f	\N	\N	\N
-612	224	4415	4776	69	69	f	\N	\N	\N
 538	224	4416	4777	69	69	f	\N	\N	\N
-543	224	4421	4782	69	69	f	\N	\N	\N
-544	224	4422	4783	69	69	f	\N	\N	\N
-545	224	4423	4784	69	69	f	\N	\N	\N
-546	224	4424	4785	69	69	f	\N	\N	\N
-547	224	4425	4786	69	69	f	\N	\N	\N
 613	224	4426	4787	69	69	f	\N	\N	\N
 615	224	4428	4789	69	69	f	\N	\N	\N
-616	224	4431	4792	69	69	f	\N	\N	\N
 550	224	4432	4793	69	69	f	\N	\N	\N
-617	224	4436	4797	69	69	f	\N	\N	\N
 554	224	4437	4798	69	69	f	\N	\N	\N
-618	224	4438	4799	69	69	f	\N	\N	\N
 555	224	4439	4800	69	69	f	\N	\N	\N
-556	224	4440	4801	69	69	f	\N	\N	\N
 559	224	4444	4805	69	69	f	\N	\N	\N
-562	224	4448	4809	69	69	f	\N	\N	\N
-621	224	4449	4810	69	69	f	\N	\N	\N
 622	224	4450	4811	69	69	f	\N	\N	\N
 623	224	4451	4812	69	69	f	\N	\N	\N
-564	224	4453	4814	69	69	f	\N	\N	\N
 565	224	4454	4815	69	69	f	\N	\N	\N
 566	224	4456	4819	69	69	f	\N	\N	\N
-567	224	4458	4821	69	69	f	\N	\N	\N
-626	224	4459	4822	69	69	f	\N	\N	\N
 570	224	4463	4826	69	69	f	\N	\N	\N
-571	224	4464	4827	69	69	f	\N	\N	\N
-628	224	4465	4828	69	69	f	\N	\N	\N
 629	224	4466	4829	69	69	f	\N	\N	\N
-572	224	4467	4830	69	69	f	\N	\N	\N
 630	224	4469	4832	69	69	f	\N	\N	\N
 574	224	4470	4833	69	69	f	\N	\N	\N
-577	224	4473	4847	69	69	f	\N	\N	\N
 579	224	4478	4852	69	69	f	\N	\N	\N
-580	224	4479	4853	69	69	f	\N	\N	\N
-581	224	4480	4854	69	69	f	\N	\N	\N
 582	224	4482	4856	69	69	f	\N	\N	\N
-584	224	4485	4859	69	69	f	\N	\N	\N
-637	224	4488	4862	69	69	f	\N	\N	\N
 586	224	4489	4863	69	69	f	\N	\N	\N
-589	224	4492	4866	69	69	f	\N	\N	\N
-590	224	4494	4868	69	69	f	\N	\N	\N
-591	224	4495	4604	69	69	f	\N	\N	\N
-592	224	4496	4605	69	69	f	\N	\N	\N
 593	224	4497	4606	69	69	f	\N	\N	\N
 639	224	4498	4607	69	69	f	\N	\N	\N
 640	224	4499	4608	69	69	f	\N	\N	\N
 596	224	4504	4613	69	69	f	\N	\N	\N
-643	224	4505	4614	69	69	f	\N	\N	\N
-597	224	4506	4615	69	69	f	\N	\N	\N
-646	224	4509	4838	69	69	f	\N	\N	\N
-598	224	4512	4841	69	69	f	\N	\N	\N
-599	224	4513	4842	69	69	f	\N	\N	\N
 649	224	4514	4843	69	69	f	\N	\N	\N
 650	224	4515	4844	69	69	f	\N	\N	\N
 652	224	4517	4846	69	69	f	\N	\N	\N
 119	213	480	2564	66	66	f	\N	3	2026-08-10 11:28:56.393169
+391	224	4256	4617	72	72	f	\N	\N	\N
+469	224	4334	4695	71	71	f	\N	\N	\N
+472	224	4337	4698	71	71	f	\N	\N	\N
+474	224	4339	4700	71	71	f	\N	\N	\N
+478	224	4343	4704	71	71	f	\N	\N	\N
+479	224	4344	4705	71	71	f	\N	\N	\N
+483	224	4348	4709	71	71	f	\N	\N	\N
+485	224	4350	4711	71	71	f	\N	\N	\N
+487	224	4352	4713	71	71	f	\N	\N	\N
+490	224	4355	4716	71	71	f	\N	\N	\N
+492	224	4357	4718	71	71	f	\N	\N	\N
+498	224	4363	4724	71	71	f	\N	\N	\N
+500	224	4365	4726	71	71	f	\N	\N	\N
+506	224	4371	4732	71	71	f	\N	\N	\N
+507	224	4372	4733	71	71	f	\N	\N	\N
+510	224	4375	4736	71	71	f	\N	\N	\N
+514	224	4379	4740	71	71	f	\N	\N	\N
+521	224	4388	4749	71	71	f	\N	\N	\N
+604	224	4393	4754	71	71	f	\N	\N	\N
+524	224	4395	4756	71	71	f	\N	\N	\N
+526	224	4397	4758	71	71	f	\N	\N	\N
+527	224	4398	4759	71	71	f	\N	\N	\N
+607	224	4402	4763	71	71	f	\N	\N	\N
+608	224	4403	4764	71	71	f	\N	\N	\N
+609	224	4407	4768	71	71	f	\N	\N	\N
+533	224	4408	4769	71	71	f	\N	\N	\N
+537	224	4414	4775	71	71	f	\N	\N	\N
+612	224	4415	4776	71	71	f	\N	\N	\N
+543	224	4421	4782	71	71	f	\N	\N	\N
+544	224	4422	4783	71	71	f	\N	\N	\N
+545	224	4423	4784	71	71	f	\N	\N	\N
+546	224	4424	4785	71	71	f	\N	\N	\N
+547	224	4425	4786	71	71	f	\N	\N	\N
+616	224	4431	4792	71	71	f	\N	\N	\N
+617	224	4436	4797	71	71	f	\N	\N	\N
+618	224	4438	4799	71	71	f	\N	\N	\N
+556	224	4440	4801	71	71	f	\N	\N	\N
+562	224	4448	4809	71	71	f	\N	\N	\N
+621	224	4449	4810	71	71	f	\N	\N	\N
+564	224	4453	4814	71	71	f	\N	\N	\N
+567	224	4458	4821	71	71	f	\N	\N	\N
+626	224	4459	4822	71	71	f	\N	\N	\N
+571	224	4464	4827	71	71	f	\N	\N	\N
+628	224	4465	4828	71	71	f	\N	\N	\N
+572	224	4467	4830	71	71	f	\N	\N	\N
+577	224	4473	4847	71	71	f	\N	\N	\N
+580	224	4479	4853	71	71	f	\N	\N	\N
+581	224	4480	4854	71	71	f	\N	\N	\N
+583	224	4483	4857	71	71	f	\N	\N	\N
+584	224	4485	4859	71	71	f	\N	\N	\N
+585	224	4487	4861	72	72	f	\N	\N	\N
+637	224	4488	4862	71	71	f	\N	\N	\N
+587	224	4490	4864	72	72	f	\N	\N	\N
+589	224	4492	4866	73	73	f	\N	\N	\N
+590	224	4494	4868	71	71	f	\N	\N	\N
+591	224	4495	4604	71	71	f	\N	\N	\N
+592	224	4496	4605	71	71	f	\N	\N	\N
+594	224	4502	4611	71	71	f	\N	\N	\N
+595	224	4503	4612	71	71	f	\N	\N	\N
+643	224	4505	4614	71	71	f	\N	\N	\N
+597	224	4506	4615	71	71	f	\N	\N	\N
+644	224	4507	4836	71	71	f	\N	\N	\N
+645	224	4508	4837	71	71	f	\N	\N	\N
+646	224	4509	4838	71	71	f	\N	\N	\N
+647	224	4510	4839	71	71	f	\N	\N	\N
+648	224	4511	4840	72	72	f	\N	\N	\N
+598	224	4512	4841	71	71	f	\N	\N	\N
+599	224	4513	4842	71	71	f	\N	\N	\N
+651	224	4516	4845	71	71	f	\N	\N	\N
 \.
 
 
@@ -17073,7 +17220,6 @@ COPY public.quotation_request_item_sources (id, qr_item_id, source, source_pr_id
 108	466	Manual	\N	1
 109	467	Manual	\N	1
 110	468	Manual	\N	1
-113	471	Manual	\N	10
 114	472	Manual	\N	1
 115	473	Manual	\N	1
 116	474	Manual	\N	100
@@ -17393,6 +17539,212 @@ COPY public.quotation_request_item_sources (id, qr_item_id, source, source_pr_id
 3656	4009	Imported	\N	500
 3657	4010	Imported	\N	500
 3658	4011	Imported	\N	250
+4431	4784	Manual	\N	1
+4432	4785	PR	207	5
+4433	4786	PR	208	10
+4608	4961	Imported	\N	500
+4609	4962	Imported	\N	2
+4610	4963	Imported	\N	100
+4611	4964	Imported	\N	500
+4612	4965	Imported	\N	500
+4613	4966	Imported	\N	500
+4614	4967	Imported	\N	500
+4615	4968	Imported	\N	500
+4616	4969	Imported	\N	5
+4617	4970	Imported	\N	500
+4618	4971	Imported	\N	500
+4619	4972	Imported	\N	500
+4620	4973	Imported	\N	100
+4621	4974	Imported	\N	1
+4622	4975	Imported	\N	125
+4623	4976	Imported	\N	25
+4624	4977	Imported	\N	500
+4625	4978	Imported	\N	5
+4626	4979	Imported	\N	500
+4627	4980	Imported	\N	500
+4628	4981	Imported	\N	500
+4629	4982	Imported	\N	500
+4630	4983	Imported	\N	500
+4631	4984	Imported	\N	500
+4632	4985	Imported	\N	500
+4633	4986	Imported	\N	500
+4634	4987	Imported	\N	500
+4635	4988	Imported	\N	500
+4636	4989	Imported	\N	500
+4637	4990	Imported	\N	500
+4638	4991	Imported	\N	500
+4639	4992	Imported	\N	500
+4640	4993	Imported	\N	100
+4641	4994	Imported	\N	15
+4642	4995	Imported	\N	100
+4643	4996	Imported	\N	250
+4644	4997	Imported	\N	500
+4645	4998	Imported	\N	500
+4646	4999	Imported	\N	500
+4647	5000	Imported	\N	500
+4648	5001	Imported	\N	500
+4649	5002	Imported	\N	500
+4650	5003	Imported	\N	500
+4651	5004	Imported	\N	500
+4652	5005	Imported	\N	500
+4653	5006	Imported	\N	500
+4654	5007	Imported	\N	500
+4655	5008	Imported	\N	125
+4656	5009	Imported	\N	500
+4657	5010	Imported	\N	500
+4658	5011	Imported	\N	500
+4659	5012	Imported	\N	500
+4660	5013	Imported	\N	500
+4661	5014	Imported	\N	500
+4662	5015	Imported	\N	5
+4663	5016	Imported	\N	9
+4664	5017	Imported	\N	13
+4665	5018	Imported	\N	11
+4666	5019	Imported	\N	10
+4667	5020	Imported	\N	500
+4668	5021	Imported	\N	10
+4669	5022	Imported	\N	5
+4670	5023	Imported	\N	6
+4671	5024	Imported	\N	9
+4672	5025	Imported	\N	2
+4673	5026	Imported	\N	6
+4674	5027	Imported	\N	8
+4675	5028	Imported	\N	10
+4676	5029	Imported	\N	11
+4677	5030	Imported	\N	500
+4678	5031	Imported	\N	5
+4679	5032	Imported	\N	500
+4680	5033	Imported	\N	500
+4681	5034	Imported	\N	500
+4682	5035	Imported	\N	250
+4683	5036	Imported	\N	500
+4684	5037	Imported	\N	500
+4685	5038	Imported	\N	500
+4686	5039	Imported	\N	500
+4687	5040	Imported	\N	500
+4688	5041	Imported	\N	500
+4689	5042	Imported	\N	500
+4690	5043	Imported	\N	125
+4691	5044	Imported	\N	10
+4692	5045	Imported	\N	500
+4693	5046	Imported	\N	500
+4694	5047	Imported	\N	100
+4695	5048	Imported	\N	500
+4696	5049	Imported	\N	500
+4697	5050	Imported	\N	500
+4698	5051	Imported	\N	100
+4699	5052	Imported	\N	500
+4700	5053	Imported	\N	500
+4701	5054	Imported	\N	500
+4702	5055	Imported	\N	14
+4703	5056	Imported	\N	125
+4704	5057	Imported	\N	500
+4705	5058	Imported	\N	500
+4706	5059	Imported	\N	500
+4707	5060	Imported	\N	13
+4708	5061	Imported	\N	500
+4709	5062	Imported	\N	500
+4710	5063	Imported	\N	500
+4711	5064	Imported	\N	500
+4712	5065	Imported	\N	500
+4713	5066	Imported	\N	100
+4714	5067	Imported	\N	500
+4715	5068	Imported	\N	500
+4716	5069	Imported	\N	100
+4717	5070	Imported	\N	500
+4718	5071	Imported	\N	500
+4719	5072	Imported	\N	500
+4720	5073	Imported	\N	500
+4721	5074	Imported	\N	500
+4722	5075	Imported	\N	500
+4723	5076	Imported	\N	500
+4724	5077	Imported	\N	500
+4725	5078	Imported	\N	250
+4726	5079	Imported	\N	500
+4727	5080	Imported	\N	500
+4728	5081	Imported	\N	100
+4729	5082	Imported	\N	125
+4730	5083	Imported	\N	500
+4731	5084	Imported	\N	125
+4732	5085	Imported	\N	125
+4733	5086	Imported	\N	125
+4734	5087	Imported	\N	125
+4735	5088	Imported	\N	125
+4736	5089	Imported	\N	125
+4737	5090	Imported	\N	500
+4738	5091	Imported	\N	500
+4739	5092	Imported	\N	500
+4740	5093	Imported	\N	500
+4434	4787	Imported	\N	500
+4435	4788	Imported	\N	500
+4436	4789	Imported	\N	14
+4437	4790	Imported	\N	125
+4438	4791	Imported	\N	500
+4439	4792	Imported	\N	500
+4440	4793	Imported	\N	500
+4441	4794	Imported	\N	13
+4442	4795	Imported	\N	500
+4443	4796	Imported	\N	500
+4444	4797	Imported	\N	500
+4445	4798	Imported	\N	500
+4446	4799	Imported	\N	500
+4447	4800	Imported	\N	100
+4448	4801	Imported	\N	500
+4449	4802	Imported	\N	500
+4450	4803	Imported	\N	100
+4451	4804	Imported	\N	500
+4452	4805	Imported	\N	500
+4453	4806	Imported	\N	500
+4454	4807	Imported	\N	500
+4455	4808	Imported	\N	500
+4456	4809	Imported	\N	500
+4457	4810	Imported	\N	500
+4458	4811	Imported	\N	500
+4459	4812	Imported	\N	250
+4460	4813	Imported	\N	500
+4461	4814	Imported	\N	500
+4462	4815	Imported	\N	100
+4463	4816	Imported	\N	125
+4464	4817	Imported	\N	500
+4465	4818	Imported	\N	125
+4466	4819	Imported	\N	125
+4467	4820	Imported	\N	125
+4468	4821	Imported	\N	125
+4469	4822	Imported	\N	125
+4470	4823	Imported	\N	125
+4471	4824	Imported	\N	500
+4472	4825	Imported	\N	500
+4473	4826	Imported	\N	500
+4474	4827	Imported	\N	500
+4475	4828	Imported	\N	100
+4476	4829	Imported	\N	1000
+4477	4830	Imported	\N	7
+4478	4831	Imported	\N	500
+4479	4832	Imported	\N	100
+4480	4833	Imported	\N	500
+4481	4834	Imported	\N	500
+4482	4835	Imported	\N	12
+4483	4836	Imported	\N	100
+4484	4837	Imported	\N	500
+4485	4838	Imported	\N	500
+4486	4839	Imported	\N	125
+4487	4840	Imported	\N	125
+4488	4841	Imported	\N	100
+4489	4842	Imported	\N	500
+4490	4843	Imported	\N	500
+4491	4844	Imported	\N	100
+4492	4845	Imported	\N	500
+4493	4846	Imported	\N	500
+4494	4847	Imported	\N	500
+4495	4848	Imported	\N	500
+4496	4849	Imported	\N	500
+4497	4850	Imported	\N	500
+4498	4851	Imported	\N	500
+4499	4852	Imported	\N	500
+4500	4853	Imported	\N	500
+4501	4854	Imported	\N	100
+4502	4855	Imported	\N	10
+4503	4856	Imported	\N	500
 3659	4012	Imported	\N	500
 3660	4013	Imported	\N	500
 3661	4014	Imported	\N	100
@@ -17659,6 +18011,66 @@ COPY public.quotation_request_item_sources (id, qr_item_id, source, source_pr_id
 4188	4541	Imported	\N	108
 4189	4542	Imported	\N	506
 4190	4543	Imported	\N	506
+4504	4857	Imported	\N	500
+4505	4858	Imported	\N	1
+4506	4859	Imported	\N	500
+4507	4860	Imported	\N	500
+4508	4861	Imported	\N	500
+4509	4862	Imported	\N	500
+4510	4863	Imported	\N	500
+4511	4864	Imported	\N	250
+4512	4865	Imported	\N	500
+4513	4866	Imported	\N	250
+4514	4867	Imported	\N	500
+4515	4868	Imported	\N	500
+4516	4869	Imported	\N	500
+4517	4870	Imported	\N	250
+4518	4871	Imported	\N	500
+4519	4872	Imported	\N	500
+4520	4873	Imported	\N	8
+4521	4874	Imported	\N	5
+4522	4875	Imported	\N	13
+4523	4876	Imported	\N	100
+4524	4877	Imported	\N	500
+4525	4878	Imported	\N	500
+4526	4879	Imported	\N	5
+4527	4880	Imported	\N	500
+4528	4881	Imported	\N	500
+4529	4882	Imported	\N	500
+4530	4883	Imported	\N	500
+4531	4884	Imported	\N	500
+4532	4885	Imported	\N	125
+4533	4886	Imported	\N	100
+4534	4887	Imported	\N	500
+4535	4888	Imported	\N	500
+4536	4889	Imported	\N	125
+4537	4890	Imported	\N	500
+4538	4891	Imported	\N	1000
+4539	4892	Imported	\N	500
+4540	4893	Imported	\N	4
+4541	4894	Imported	\N	5
+4542	4895	Imported	\N	500
+4543	4896	Imported	\N	500
+4544	4897	Imported	\N	500
+4545	4898	Imported	\N	500
+4546	4899	Imported	\N	500
+4547	4900	Imported	\N	500
+4548	4901	Imported	\N	500
+4549	4902	Imported	\N	500
+4550	4903	Imported	\N	500
+4551	4904	Imported	\N	500
+4552	4905	Imported	\N	250
+4553	4906	Imported	\N	500
+4554	4907	Imported	\N	500
+4555	4908	Imported	\N	9
+4556	4909	Imported	\N	500
+4557	4910	Imported	\N	500
+4558	4911	Imported	\N	500
+4559	4912	Imported	\N	500
+4560	4913	Imported	\N	500
+4561	4914	Imported	\N	500
+4562	4915	Imported	\N	125
+4563	4916	Imported	\N	100
 4191	4544	Imported	\N	508
 4192	4545	Imported	\N	507
 4193	4546	Imported	\N	509
@@ -17899,6 +18311,275 @@ COPY public.quotation_request_item_sources (id, qr_item_id, source, source_pr_id
 4428	4781	Imported	\N	503
 4429	4782	Imported	\N	105
 4430	4783	Imported	\N	515
+4564	4917	Imported	\N	500
+4565	4918	Imported	\N	250
+4566	4919	Imported	\N	500
+4567	4920	Imported	\N	500
+4568	4921	Imported	\N	500
+4569	4922	Imported	\N	500
+4570	4923	Imported	\N	500
+4571	4924	Imported	\N	100
+4572	4925	Imported	\N	500
+4573	4926	Imported	\N	500
+4574	4927	Imported	\N	500
+4575	4928	Imported	\N	500
+4576	4929	Imported	\N	100
+4577	4930	Imported	\N	14
+4578	4931	Imported	\N	500
+4579	4932	Imported	\N	4
+4580	4933	Imported	\N	500
+4581	4934	Imported	\N	500
+4582	4935	Imported	\N	100
+4583	4936	Imported	\N	500
+4584	4937	Imported	\N	500
+4585	4938	Imported	\N	500
+4586	4939	Imported	\N	500
+4587	4940	Imported	\N	25
+4588	4941	Imported	\N	6
+4589	4942	Imported	\N	500
+4590	4943	Imported	\N	125
+4591	4944	Imported	\N	500
+4592	4945	Imported	\N	500
+4593	4946	Imported	\N	4
+4594	4947	Imported	\N	500
+4595	4948	Imported	\N	500
+4596	4949	Imported	\N	9
+4597	4950	Imported	\N	500
+4598	4951	Imported	\N	500
+4599	4952	Imported	\N	500
+4600	4953	Imported	\N	500
+4601	4954	Imported	\N	500
+4602	4955	Imported	\N	500
+4603	4956	Imported	\N	1
+4604	4957	Imported	\N	500
+4605	4958	Imported	\N	500
+4606	4959	Imported	\N	500
+4607	4960	Imported	\N	500
+4741	5094	Imported	\N	100
+4742	5095	Imported	\N	1000
+4743	5096	Imported	\N	7
+4744	5097	Imported	\N	500
+4745	5098	Imported	\N	100
+4746	5099	Imported	\N	500
+4747	5100	Imported	\N	500
+4748	5101	Imported	\N	12
+4749	5102	Imported	\N	100
+4750	5103	Imported	\N	500
+4751	5104	Imported	\N	500
+4752	5105	Imported	\N	125
+4753	5106	Imported	\N	125
+4754	5107	Imported	\N	100
+4755	5108	Imported	\N	500
+4756	5109	Imported	\N	500
+4757	5110	Imported	\N	100
+4758	5111	Imported	\N	500
+4759	5112	Imported	\N	500
+4760	5113	Imported	\N	500
+4761	5114	Imported	\N	500
+4762	5115	Imported	\N	500
+4763	5116	Imported	\N	500
+4764	5117	Imported	\N	500
+4765	5118	Imported	\N	500
+4766	5119	Imported	\N	500
+4767	5120	Imported	\N	100
+4768	5121	Imported	\N	10
+4769	5122	Imported	\N	500
+4770	5123	Imported	\N	500
+4771	5124	Imported	\N	1
+4772	5125	Imported	\N	500
+4773	5126	Imported	\N	500
+4774	5127	Imported	\N	500
+4775	5128	Imported	\N	500
+4776	5129	Imported	\N	500
+4777	5130	Imported	\N	250
+4778	5131	Imported	\N	500
+4779	5132	Imported	\N	250
+4780	5133	Imported	\N	500
+4781	5134	Imported	\N	500
+4782	5135	Imported	\N	500
+4783	5136	Imported	\N	250
+4784	5137	Imported	\N	500
+4785	5138	Imported	\N	500
+4786	5139	Imported	\N	8
+4787	5140	Imported	\N	5
+4788	5141	Imported	\N	13
+4789	5142	Imported	\N	100
+4790	5143	Imported	\N	500
+4791	5144	Imported	\N	500
+4792	5145	Imported	\N	5
+4793	5146	Imported	\N	500
+4794	5147	Imported	\N	500
+4795	5148	Imported	\N	500
+4796	5149	Imported	\N	500
+4797	5150	Imported	\N	500
+4798	5151	Imported	\N	125
+4799	5152	Imported	\N	100
+4800	5153	Imported	\N	500
+4801	5154	Imported	\N	500
+4802	5155	Imported	\N	125
+4803	5156	Imported	\N	500
+4804	5157	Imported	\N	1000
+4805	5158	Imported	\N	500
+4806	5159	Imported	\N	4
+4807	5160	Imported	\N	5
+4808	5161	Imported	\N	500
+4809	5162	Imported	\N	500
+4810	5163	Imported	\N	500
+4811	5164	Imported	\N	500
+4812	5165	Imported	\N	500
+4813	5166	Imported	\N	500
+4814	5167	Imported	\N	500
+4815	5168	Imported	\N	500
+4816	5169	Imported	\N	500
+4817	5170	Imported	\N	500
+4818	5171	Imported	\N	250
+4819	5172	Imported	\N	500
+4820	5173	Imported	\N	500
+4821	5174	Imported	\N	9
+4822	5175	Imported	\N	500
+4823	5176	Imported	\N	500
+4824	5177	Imported	\N	500
+4825	5178	Imported	\N	500
+4826	5179	Imported	\N	500
+4827	5180	Imported	\N	500
+4828	5181	Imported	\N	125
+4829	5182	Imported	\N	100
+4830	5183	Imported	\N	500
+4831	5184	Imported	\N	250
+4832	5185	Imported	\N	500
+4833	5186	Imported	\N	500
+4834	5187	Imported	\N	500
+4835	5188	Imported	\N	500
+4836	5189	Imported	\N	500
+4837	5190	Imported	\N	100
+4838	5191	Imported	\N	500
+4839	5192	Imported	\N	500
+4840	5193	Imported	\N	500
+4841	5194	Imported	\N	500
+4842	5195	Imported	\N	100
+4843	5196	Imported	\N	14
+4844	5197	Imported	\N	500
+4845	5198	Imported	\N	4
+4846	5199	Imported	\N	500
+4847	5200	Imported	\N	500
+4848	5201	Imported	\N	100
+4849	5202	Imported	\N	500
+4850	5203	Imported	\N	500
+4851	5204	Imported	\N	500
+4852	5205	Imported	\N	500
+4853	5206	Imported	\N	25
+4854	5207	Imported	\N	6
+4855	5208	Imported	\N	500
+4856	5209	Imported	\N	125
+4857	5210	Imported	\N	500
+4858	5211	Imported	\N	500
+4859	5212	Imported	\N	4
+4860	5213	Imported	\N	500
+4861	5214	Imported	\N	500
+4862	5215	Imported	\N	9
+4863	5216	Imported	\N	500
+4864	5217	Imported	\N	500
+4865	5218	Imported	\N	500
+4866	5219	Imported	\N	500
+4867	5220	Imported	\N	500
+4868	5221	Imported	\N	500
+4869	5222	Imported	\N	1
+4870	5223	Imported	\N	500
+4871	5224	Imported	\N	500
+4872	5225	Imported	\N	500
+4873	5226	Imported	\N	500
+4874	5227	Imported	\N	500
+4875	5228	Imported	\N	2
+4876	5229	Imported	\N	100
+4877	5230	Imported	\N	500
+4878	5231	Imported	\N	500
+4879	5232	Imported	\N	500
+4880	5233	Imported	\N	500
+4881	5234	Imported	\N	500
+4882	5235	Imported	\N	5
+4883	5236	Imported	\N	500
+4884	5237	Imported	\N	500
+4885	5238	Imported	\N	500
+4886	5239	Imported	\N	100
+4887	5240	Imported	\N	1
+4888	5241	Imported	\N	125
+4889	5242	Imported	\N	25
+4890	5243	Imported	\N	500
+4891	5244	Imported	\N	5
+4892	5245	Imported	\N	500
+4893	5246	Imported	\N	500
+4894	5247	Imported	\N	500
+4895	5248	Imported	\N	500
+4896	5249	Imported	\N	500
+4897	5250	Imported	\N	500
+4898	5251	Imported	\N	500
+4899	5252	Imported	\N	500
+4900	5253	Imported	\N	500
+4901	5254	Imported	\N	500
+4902	5255	Imported	\N	500
+4903	5256	Imported	\N	500
+4904	5257	Imported	\N	500
+4905	5258	Imported	\N	500
+4906	5259	Imported	\N	100
+4907	5260	Imported	\N	15
+4908	5261	Imported	\N	100
+4909	5262	Imported	\N	250
+4910	5263	Imported	\N	500
+4911	5264	Imported	\N	500
+4912	5265	Imported	\N	500
+4913	5266	Imported	\N	500
+4914	5267	Imported	\N	500
+4915	5268	Imported	\N	500
+4916	5269	Imported	\N	500
+4917	5270	Imported	\N	500
+4918	5271	Imported	\N	500
+4919	5272	Imported	\N	500
+4920	5273	Imported	\N	500
+4921	5274	Imported	\N	125
+4922	5275	Imported	\N	500
+4923	5276	Imported	\N	500
+4924	5277	Imported	\N	500
+4925	5278	Imported	\N	500
+4926	5279	Imported	\N	500
+4927	5280	Imported	\N	500
+4928	5281	Imported	\N	5
+4929	5282	Imported	\N	9
+4930	5283	Imported	\N	13
+4931	5284	Imported	\N	11
+4932	5285	Imported	\N	10
+4933	5286	Imported	\N	500
+4934	5287	Imported	\N	10
+4935	5288	Imported	\N	5
+4936	5289	Imported	\N	6
+4937	5290	Imported	\N	9
+4938	5291	Imported	\N	2
+4939	5292	Imported	\N	6
+4940	5293	Imported	\N	8
+4941	5294	Imported	\N	10
+4942	5295	Imported	\N	11
+4943	5296	Imported	\N	500
+4944	5297	Imported	\N	5
+4945	5298	Imported	\N	500
+4946	5299	Imported	\N	500
+4947	5300	Imported	\N	500
+4948	5301	Imported	\N	250
+4949	5302	Imported	\N	500
+4950	5303	Imported	\N	500
+4951	5304	Imported	\N	500
+4952	5305	Imported	\N	500
+4953	5306	Imported	\N	500
+4954	5307	Imported	\N	500
+4955	5308	Imported	\N	500
+4956	5309	Imported	\N	125
+4957	5310	Imported	\N	10
+4958	5311	Imported	\N	500
+4959	5312	Imported	\N	500
+4960	5313	Imported	\N	100
+4961	5314	Imported	\N	500
+4962	5315	Imported	\N	500
+4963	5316	Imported	\N	500
+4964	5317	Imported	\N	100
+4965	5318	Imported	\N	500
 \.
 
 
@@ -18040,7 +18721,6 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 466	207	2565	1	Manual	\N
 467	207	3507	1	Manual	\N
 468	207	2751	1	Manual	\N
-471	209	2357	10	Manual	\N
 472	208	2564	1	Manual	\N
 473	208	2565	1	Manual	\N
 474	210	2564	100	Manual	\N
@@ -18101,6 +18781,13 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4283	224	4644	125	Imported	\N
 4284	224	4645	125	Imported	\N
 4285	224	4646	125	Imported	\N
+4784	225	2564	1	Manual	\N
+4785	225	2751	5	PR	207
+4786	226	2751	10	PR	208
+5154	209	4714	500	Imported	\N
+5155	209	4715	125	Imported	\N
+5156	209	4716	500	Imported	\N
+5157	209	4717	1000	Imported	\N
 3986	222	4817	500	Imported	\N
 3987	222	4818	500	Imported	\N
 3988	222	4869	14	Imported	\N
@@ -18128,6 +18815,17 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4010	222	4637	500	Imported	\N
 4011	222	4638	250	Imported	\N
 4012	222	4639	500	Imported	\N
+5158	209	4718	500	Imported	\N
+5159	209	4719	4	Imported	\N
+5160	209	4720	5	Imported	\N
+5161	209	4721	500	Imported	\N
+5162	209	4722	500	Imported	\N
+5163	209	4723	500	Imported	\N
+5164	209	4724	500	Imported	\N
+5165	209	4725	500	Imported	\N
+5166	209	4726	500	Imported	\N
+5167	209	4727	500	Imported	\N
+5168	209	4728	500	Imported	\N
 4286	224	4647	125	Imported	\N
 4287	224	4648	125	Imported	\N
 4288	224	4649	125	Imported	\N
@@ -18170,6 +18868,14 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4325	224	4686	500	Imported	\N
 4326	224	4687	500	Imported	\N
 4327	224	4688	500	Imported	\N
+4787	227	4817	500	Imported	\N
+4788	227	4818	500	Imported	\N
+4789	227	4869	14	Imported	\N
+4790	227	4616	125	Imported	\N
+4791	227	4617	500	Imported	\N
+4792	227	4618	500	Imported	\N
+4793	227	4619	500	Imported	\N
+4794	227	4620	13	Imported	\N
 4013	222	4640	500	Imported	\N
 4014	222	4641	100	Imported	\N
 4015	222	4642	125	Imported	\N
@@ -18204,6 +18910,17 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4044	222	4671	500	Imported	\N
 4045	222	4672	500	Imported	\N
 4046	222	4673	500	Imported	\N
+4795	227	4621	500	Imported	\N
+4796	227	4622	500	Imported	\N
+4797	227	4623	500	Imported	\N
+4798	227	4624	500	Imported	\N
+4799	227	4625	500	Imported	\N
+4800	227	4626	100	Imported	\N
+4801	227	4627	500	Imported	\N
+4802	227	4628	500	Imported	\N
+4803	227	4629	100	Imported	\N
+4804	227	4630	500	Imported	\N
+4805	227	4631	500	Imported	\N
 4328	224	4689	500	Imported	\N
 4329	224	4690	250	Imported	\N
 4330	224	4691	500	Imported	\N
@@ -18246,6 +18963,15 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4367	224	4728	500	Imported	\N
 4368	224	4729	500	Imported	\N
 4369	224	4730	500	Imported	\N
+4806	227	4632	500	Imported	\N
+4807	227	4633	500	Imported	\N
+4808	227	4634	500	Imported	\N
+4809	227	4635	500	Imported	\N
+4810	227	4636	500	Imported	\N
+4811	227	4637	500	Imported	\N
+4812	227	4638	250	Imported	\N
+4813	227	4639	500	Imported	\N
+4814	227	4640	500	Imported	\N
 4047	222	4674	500	Imported	\N
 4048	222	4675	500	Imported	\N
 4049	222	4676	500	Imported	\N
@@ -18279,6 +19005,17 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4077	222	4704	500	Imported	\N
 4078	222	4705	5	Imported	\N
 4079	222	4706	500	Imported	\N
+4815	227	4641	100	Imported	\N
+4816	227	4642	125	Imported	\N
+4817	227	4643	500	Imported	\N
+4818	227	4644	125	Imported	\N
+4819	227	4645	125	Imported	\N
+4820	227	4646	125	Imported	\N
+4821	227	4647	125	Imported	\N
+4822	227	4648	125	Imported	\N
+4823	227	4649	125	Imported	\N
+4824	227	4650	500	Imported	\N
+4825	227	4651	500	Imported	\N
 4370	224	4731	250	Imported	\N
 4371	224	4732	500	Imported	\N
 4372	224	4733	500	Imported	\N
@@ -18321,6 +19058,14 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4409	224	4770	500	Imported	\N
 4410	224	4771	500	Imported	\N
 4411	224	4772	4	Imported	\N
+4826	227	4652	500	Imported	\N
+4827	227	4653	500	Imported	\N
+4828	227	4654	100	Imported	\N
+4829	227	4655	1000	Imported	\N
+4830	227	4656	7	Imported	\N
+4831	227	4657	500	Imported	\N
+4832	227	4658	100	Imported	\N
+4833	227	4659	500	Imported	\N
 4080	222	4707	500	Imported	\N
 4081	222	4708	500	Imported	\N
 4082	222	4709	500	Imported	\N
@@ -18354,6 +19099,18 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4110	222	4737	500	Imported	\N
 4111	222	4738	500	Imported	\N
 4112	222	4739	500	Imported	\N
+4834	227	4660	500	Imported	\N
+4835	227	4661	12	Imported	\N
+4836	227	4662	100	Imported	\N
+4837	227	4663	500	Imported	\N
+4838	227	4664	500	Imported	\N
+4839	227	4665	125	Imported	\N
+4840	227	4666	125	Imported	\N
+4841	227	4667	100	Imported	\N
+4842	227	4668	500	Imported	\N
+4843	227	4669	500	Imported	\N
+4844	227	4670	100	Imported	\N
+4845	227	4671	500	Imported	\N
 4412	224	4773	500	Imported	\N
 4413	224	4774	500	Imported	\N
 4414	224	4775	9	Imported	\N
@@ -18394,6 +19151,11 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4449	224	4810	500	Imported	\N
 4450	224	4811	500	Imported	\N
 4451	224	4812	500	Imported	\N
+4846	227	4672	500	Imported	\N
+4847	227	4673	500	Imported	\N
+4848	227	4674	500	Imported	\N
+4849	227	4675	500	Imported	\N
+4850	227	4676	500	Imported	\N
 4113	222	4740	500	Imported	\N
 4114	222	4741	125	Imported	\N
 4115	222	4742	100	Imported	\N
@@ -18430,6 +19192,21 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4146	222	4773	500	Imported	\N
 4147	222	4774	500	Imported	\N
 4148	222	4775	9	Imported	\N
+4851	227	4677	500	Imported	\N
+4852	227	4678	500	Imported	\N
+4853	227	4679	500	Imported	\N
+4854	227	4680	100	Imported	\N
+4855	227	4681	10	Imported	\N
+4856	227	4682	500	Imported	\N
+4857	227	4683	500	Imported	\N
+4858	227	4684	1	Imported	\N
+4859	227	4685	500	Imported	\N
+4860	227	4686	500	Imported	\N
+4861	227	4687	500	Imported	\N
+4862	227	4688	500	Imported	\N
+4863	227	4689	500	Imported	\N
+4864	227	4690	250	Imported	\N
+4865	227	4691	500	Imported	\N
 4452	224	4813	500	Imported	\N
 4453	224	4814	500	Imported	\N
 4454	224	4815	500	Imported	\N
@@ -18459,6 +19236,35 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4478	224	4852	500	Imported	\N
 4479	224	4853	500	Imported	\N
 4480	224	4854	5	Imported	\N
+4866	227	4692	250	Imported	\N
+4867	227	4693	500	Imported	\N
+4868	227	4694	500	Imported	\N
+4869	227	4695	500	Imported	\N
+4870	227	4696	250	Imported	\N
+4871	227	4697	500	Imported	\N
+4872	227	4698	500	Imported	\N
+4873	227	4699	8	Imported	\N
+4874	227	4700	5	Imported	\N
+4875	227	4701	13	Imported	\N
+4876	227	4702	100	Imported	\N
+4877	227	4703	500	Imported	\N
+4878	227	4704	500	Imported	\N
+4879	227	4705	5	Imported	\N
+4880	227	4706	500	Imported	\N
+4881	227	4707	500	Imported	\N
+4882	227	4708	500	Imported	\N
+4883	227	4709	500	Imported	\N
+4884	227	4710	500	Imported	\N
+4885	227	4711	125	Imported	\N
+4886	227	4712	100	Imported	\N
+4887	227	4713	500	Imported	\N
+4888	227	4714	500	Imported	\N
+4889	227	4715	125	Imported	\N
+4890	227	4716	500	Imported	\N
+4891	227	4717	1000	Imported	\N
+4892	227	4718	500	Imported	\N
+4893	227	4719	4	Imported	\N
+4894	227	4720	5	Imported	\N
 4149	222	4776	500	Imported	\N
 4150	222	4777	500	Imported	\N
 4151	222	4778	500	Imported	\N
@@ -18488,6 +19294,35 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4175	222	4802	25	Imported	\N
 4176	222	4803	500	Imported	\N
 4177	222	4804	5	Imported	\N
+4895	227	4721	500	Imported	\N
+4896	227	4722	500	Imported	\N
+4897	227	4723	500	Imported	\N
+4898	227	4724	500	Imported	\N
+4899	227	4725	500	Imported	\N
+4900	227	4726	500	Imported	\N
+4901	227	4727	500	Imported	\N
+4902	227	4728	500	Imported	\N
+4903	227	4729	500	Imported	\N
+4904	227	4730	500	Imported	\N
+4905	227	4731	250	Imported	\N
+4906	227	4732	500	Imported	\N
+4907	227	4733	500	Imported	\N
+4908	227	4734	9	Imported	\N
+4909	227	4735	500	Imported	\N
+4910	227	4736	500	Imported	\N
+4911	227	4737	500	Imported	\N
+4912	227	4738	500	Imported	\N
+4913	227	4739	500	Imported	\N
+4914	227	4740	500	Imported	\N
+4915	227	4741	125	Imported	\N
+4916	227	4742	100	Imported	\N
+4917	227	4743	500	Imported	\N
+4918	227	4744	250	Imported	\N
+4919	227	4745	500	Imported	\N
+4920	227	4746	500	Imported	\N
+4921	227	4747	500	Imported	\N
+4922	227	4748	500	Imported	\N
+4923	227	4749	500	Imported	\N
 4178	222	4805	500	Imported	\N
 4179	222	4806	500	Imported	\N
 4180	222	4807	500	Imported	\N
@@ -18605,6 +19440,28 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4669	223	4735	510	Imported	\N
 4670	223	4736	512	Imported	\N
 4671	223	4737	511	Imported	\N
+4924	227	4750	100	Imported	\N
+4925	227	4751	500	Imported	\N
+4926	227	4752	500	Imported	\N
+4927	227	4753	500	Imported	\N
+4928	227	4754	500	Imported	\N
+4929	227	4755	100	Imported	\N
+4930	227	4756	14	Imported	\N
+4931	227	4757	500	Imported	\N
+4932	227	4758	4	Imported	\N
+4933	227	4759	500	Imported	\N
+4934	227	4760	500	Imported	\N
+4935	227	4761	100	Imported	\N
+4936	227	4762	500	Imported	\N
+4937	227	4763	500	Imported	\N
+4938	227	4764	500	Imported	\N
+4939	227	4765	500	Imported	\N
+4940	227	4766	25	Imported	\N
+4941	227	4767	6	Imported	\N
+4942	227	4768	500	Imported	\N
+4943	227	4769	125	Imported	\N
+4944	227	4770	500	Imported	\N
+4945	227	4771	500	Imported	\N
 4672	223	4738	507	Imported	\N
 4673	223	4739	510	Imported	\N
 4674	223	4740	515	Imported	\N
@@ -18660,10 +19517,90 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4559	223	4625	514	Imported	\N
 4560	223	4626	102	Imported	\N
 4561	223	4627	513	Imported	\N
+4946	227	4772	4	Imported	\N
+4947	227	4773	500	Imported	\N
+4948	227	4774	500	Imported	\N
+4949	227	4775	9	Imported	\N
+4950	227	4776	500	Imported	\N
+4951	227	4777	500	Imported	\N
+4952	227	4778	500	Imported	\N
+4953	227	4779	500	Imported	\N
+4954	227	4780	500	Imported	\N
+4955	227	4781	500	Imported	\N
+4956	227	4782	1	Imported	\N
+4957	227	4783	500	Imported	\N
+4958	227	4784	500	Imported	\N
+4959	227	4785	500	Imported	\N
+4960	227	4786	500	Imported	\N
+4961	227	4787	500	Imported	\N
+4962	227	4788	2	Imported	\N
+4963	227	4789	100	Imported	\N
+4964	227	4790	500	Imported	\N
+4965	227	4791	500	Imported	\N
+4966	227	4792	500	Imported	\N
+4967	227	4793	500	Imported	\N
+4968	227	4794	500	Imported	\N
+4969	227	4795	5	Imported	\N
+4970	227	4796	500	Imported	\N
+4971	227	4797	500	Imported	\N
+4972	227	4798	500	Imported	\N
+4973	227	4799	100	Imported	\N
+4974	227	4800	1	Imported	\N
+4975	227	4801	125	Imported	\N
+4976	227	4802	25	Imported	\N
+4977	227	4803	500	Imported	\N
+4978	227	4804	5	Imported	\N
+4979	227	4805	500	Imported	\N
+4980	227	4806	500	Imported	\N
+4981	227	4807	500	Imported	\N
 4562	223	4628	501	Imported	\N
 4563	223	4629	111	Imported	\N
 4564	223	4630	511	Imported	\N
 4565	223	4631	505	Imported	\N
+4982	227	4808	500	Imported	\N
+4983	227	4809	500	Imported	\N
+4984	227	4810	500	Imported	\N
+4985	227	4811	500	Imported	\N
+4986	227	4812	500	Imported	\N
+4987	227	4813	500	Imported	\N
+4988	227	4814	500	Imported	\N
+4989	227	4815	500	Imported	\N
+4990	227	4816	500	Imported	\N
+4991	227	4819	500	Imported	\N
+4992	227	4820	500	Imported	\N
+4993	227	4821	100	Imported	\N
+4994	227	4822	15	Imported	\N
+4995	227	4823	100	Imported	\N
+4996	227	4824	250	Imported	\N
+4997	227	4825	500	Imported	\N
+4998	227	4826	500	Imported	\N
+4999	227	4827	500	Imported	\N
+5000	227	4828	500	Imported	\N
+5001	227	4829	500	Imported	\N
+5002	227	4830	500	Imported	\N
+5003	227	4831	500	Imported	\N
+5004	227	4832	500	Imported	\N
+5005	227	4833	500	Imported	\N
+5006	227	4834	500	Imported	\N
+5007	227	4835	500	Imported	\N
+5008	227	4847	125	Imported	\N
+5009	227	4848	500	Imported	\N
+5010	227	4849	500	Imported	\N
+5011	227	4850	500	Imported	\N
+5012	227	4851	500	Imported	\N
+5013	227	4852	500	Imported	\N
+5014	227	4853	500	Imported	\N
+5015	227	4854	5	Imported	\N
+5016	227	4855	9	Imported	\N
+5017	227	4856	13	Imported	\N
+5018	227	4857	11	Imported	\N
+5019	227	4858	10	Imported	\N
+5020	227	4859	500	Imported	\N
+5021	227	4860	10	Imported	\N
+5022	227	4861	5	Imported	\N
+5023	227	4862	6	Imported	\N
+5024	227	4863	9	Imported	\N
+5025	227	4864	2	Imported	\N
 4566	223	4632	510	Imported	\N
 4567	223	4633	515	Imported	\N
 4568	223	4634	512	Imported	\N
@@ -18689,6 +19626,64 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4588	223	4654	106	Imported	\N
 4589	223	4655	1004	Imported	\N
 4590	223	4656	14	Imported	\N
+5026	227	4865	6	Imported	\N
+5027	227	4866	8	Imported	\N
+5028	227	4867	10	Imported	\N
+5029	227	4868	11	Imported	\N
+5030	227	4604	500	Imported	\N
+5031	227	4605	5	Imported	\N
+5032	227	4606	500	Imported	\N
+5033	227	4607	500	Imported	\N
+5034	227	4608	500	Imported	\N
+5035	227	4609	250	Imported	\N
+5036	227	4610	500	Imported	\N
+5037	227	4611	500	Imported	\N
+5038	227	4612	500	Imported	\N
+5039	227	4613	500	Imported	\N
+5040	227	4614	500	Imported	\N
+5041	227	4615	500	Imported	\N
+5042	227	4836	500	Imported	\N
+5043	227	4837	125	Imported	\N
+5044	227	4838	10	Imported	\N
+5045	227	4839	500	Imported	\N
+5046	227	4840	500	Imported	\N
+5047	227	4841	100	Imported	\N
+5048	227	4842	500	Imported	\N
+5049	227	4843	500	Imported	\N
+5050	227	4844	500	Imported	\N
+5051	227	4845	100	Imported	\N
+5052	227	4846	500	Imported	\N
+5169	209	4729	500	Imported	\N
+5170	209	4730	500	Imported	\N
+5171	209	4731	250	Imported	\N
+5172	209	4732	500	Imported	\N
+5173	209	4733	500	Imported	\N
+5174	209	4734	9	Imported	\N
+5175	209	4735	500	Imported	\N
+5176	209	4736	500	Imported	\N
+5177	209	4737	500	Imported	\N
+5178	209	4738	500	Imported	\N
+5179	209	4739	500	Imported	\N
+5180	209	4740	500	Imported	\N
+5181	209	4741	125	Imported	\N
+5182	209	4742	100	Imported	\N
+5183	209	4743	500	Imported	\N
+5184	209	4744	250	Imported	\N
+5185	209	4745	500	Imported	\N
+5186	209	4746	500	Imported	\N
+5187	209	4747	500	Imported	\N
+5188	209	4748	500	Imported	\N
+5189	209	4749	500	Imported	\N
+5190	209	4750	100	Imported	\N
+5191	209	4751	500	Imported	\N
+5192	209	4752	500	Imported	\N
+5193	209	4753	500	Imported	\N
+5194	209	4754	500	Imported	\N
+5195	209	4755	100	Imported	\N
+5196	209	4756	14	Imported	\N
+5197	209	4757	500	Imported	\N
+5198	209	4758	4	Imported	\N
+5199	209	4759	500	Imported	\N
 4591	223	4657	515	Imported	\N
 4592	223	4658	101	Imported	\N
 4593	223	4659	502	Imported	\N
@@ -18717,6 +19712,29 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4616	223	4682	506	Imported	\N
 4617	223	4683	515	Imported	\N
 4618	223	4684	2	Imported	\N
+5053	209	4817	500	Imported	\N
+5054	209	4818	500	Imported	\N
+5055	209	4869	14	Imported	\N
+5056	209	4616	125	Imported	\N
+5057	209	4617	500	Imported	\N
+5058	209	4618	500	Imported	\N
+5059	209	4619	500	Imported	\N
+5060	209	4620	13	Imported	\N
+5061	209	4621	500	Imported	\N
+5062	209	4622	500	Imported	\N
+5063	209	4623	500	Imported	\N
+5064	209	4624	500	Imported	\N
+5065	209	4625	500	Imported	\N
+5066	209	4626	100	Imported	\N
+5067	209	4627	500	Imported	\N
+5068	209	4628	500	Imported	\N
+5069	209	4629	100	Imported	\N
+5070	209	4630	500	Imported	\N
+5071	209	4631	500	Imported	\N
+5072	209	4632	500	Imported	\N
+5073	209	4633	500	Imported	\N
+5074	209	4634	500	Imported	\N
+5075	209	4635	500	Imported	\N
 4619	223	4685	513	Imported	\N
 4620	223	4686	506	Imported	\N
 4621	223	4687	506	Imported	\N
@@ -18764,6 +19782,18 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4663	223	4729	506	Imported	\N
 4664	223	4730	515	Imported	\N
 4665	223	4731	253	Imported	\N
+5076	209	4636	500	Imported	\N
+5077	209	4637	500	Imported	\N
+5078	209	4638	250	Imported	\N
+5079	209	4639	500	Imported	\N
+5080	209	4640	500	Imported	\N
+5081	209	4641	100	Imported	\N
+5082	209	4642	125	Imported	\N
+5083	209	4643	500	Imported	\N
+5084	209	4644	125	Imported	\N
+5085	209	4645	125	Imported	\N
+5086	209	4646	125	Imported	\N
+5087	209	4647	125	Imported	\N
 4683	223	4749	505	Imported	\N
 4684	223	4750	113	Imported	\N
 4685	223	4751	502	Imported	\N
@@ -18824,6 +19854,34 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4740	223	4848	511	Imported	\N
 4741	223	4849	513	Imported	\N
 4742	223	4850	501	Imported	\N
+5088	209	4648	125	Imported	\N
+5089	209	4649	125	Imported	\N
+5090	209	4650	500	Imported	\N
+5091	209	4651	500	Imported	\N
+5092	209	4652	500	Imported	\N
+5093	209	4653	500	Imported	\N
+5094	209	4654	100	Imported	\N
+5095	209	4655	1000	Imported	\N
+5096	209	4656	7	Imported	\N
+5097	209	4657	500	Imported	\N
+5098	209	4658	100	Imported	\N
+5099	209	4659	500	Imported	\N
+5100	209	4660	500	Imported	\N
+5101	209	4661	12	Imported	\N
+5102	209	4662	100	Imported	\N
+5103	209	4663	500	Imported	\N
+5104	209	4664	500	Imported	\N
+5105	209	4665	125	Imported	\N
+5106	209	4666	125	Imported	\N
+5107	209	4667	100	Imported	\N
+5108	209	4668	500	Imported	\N
+5109	209	4669	500	Imported	\N
+5110	209	4670	100	Imported	\N
+5111	209	4671	500	Imported	\N
+5112	209	4672	500	Imported	\N
+5113	209	4673	500	Imported	\N
+5114	209	4674	500	Imported	\N
+5115	209	4675	500	Imported	\N
 4743	223	4851	514	Imported	\N
 4744	223	4852	510	Imported	\N
 4745	223	4853	508	Imported	\N
@@ -18865,6 +19923,163 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 4781	223	4844	503	Imported	\N
 4782	223	4845	105	Imported	\N
 4783	223	4846	515	Imported	\N
+5116	209	4676	500	Imported	\N
+5117	209	4677	500	Imported	\N
+5118	209	4678	500	Imported	\N
+5119	209	4679	500	Imported	\N
+5120	209	4680	100	Imported	\N
+5121	209	4681	10	Imported	\N
+5122	209	4682	500	Imported	\N
+5123	209	4683	500	Imported	\N
+5124	209	4684	1	Imported	\N
+5125	209	4685	500	Imported	\N
+5126	209	4686	500	Imported	\N
+5127	209	4687	500	Imported	\N
+5128	209	4688	500	Imported	\N
+5129	209	4689	500	Imported	\N
+5130	209	4690	250	Imported	\N
+5131	209	4691	500	Imported	\N
+5132	209	4692	250	Imported	\N
+5133	209	4693	500	Imported	\N
+5134	209	4694	500	Imported	\N
+5135	209	4695	500	Imported	\N
+5136	209	4696	250	Imported	\N
+5137	209	4697	500	Imported	\N
+5138	209	4698	500	Imported	\N
+5139	209	4699	8	Imported	\N
+5140	209	4700	5	Imported	\N
+5141	209	4701	13	Imported	\N
+5142	209	4702	100	Imported	\N
+5143	209	4703	500	Imported	\N
+5144	209	4704	500	Imported	\N
+5145	209	4705	5	Imported	\N
+5146	209	4706	500	Imported	\N
+5147	209	4707	500	Imported	\N
+5148	209	4708	500	Imported	\N
+5149	209	4709	500	Imported	\N
+5150	209	4710	500	Imported	\N
+5151	209	4711	125	Imported	\N
+5152	209	4712	100	Imported	\N
+5153	209	4713	500	Imported	\N
+5200	209	4760	500	Imported	\N
+5201	209	4761	100	Imported	\N
+5202	209	4762	500	Imported	\N
+5203	209	4763	500	Imported	\N
+5204	209	4764	500	Imported	\N
+5205	209	4765	500	Imported	\N
+5206	209	4766	25	Imported	\N
+5207	209	4767	6	Imported	\N
+5208	209	4768	500	Imported	\N
+5209	209	4769	125	Imported	\N
+5210	209	4770	500	Imported	\N
+5211	209	4771	500	Imported	\N
+5212	209	4772	4	Imported	\N
+5213	209	4773	500	Imported	\N
+5214	209	4774	500	Imported	\N
+5215	209	4775	9	Imported	\N
+5216	209	4776	500	Imported	\N
+5217	209	4777	500	Imported	\N
+5218	209	4778	500	Imported	\N
+5219	209	4779	500	Imported	\N
+5220	209	4780	500	Imported	\N
+5221	209	4781	500	Imported	\N
+5222	209	4782	1	Imported	\N
+5223	209	4783	500	Imported	\N
+5224	209	4784	500	Imported	\N
+5225	209	4785	500	Imported	\N
+5226	209	4786	500	Imported	\N
+5227	209	4787	500	Imported	\N
+5228	209	4788	2	Imported	\N
+5229	209	4789	100	Imported	\N
+5230	209	4790	500	Imported	\N
+5231	209	4791	500	Imported	\N
+5232	209	4792	500	Imported	\N
+5233	209	4793	500	Imported	\N
+5234	209	4794	500	Imported	\N
+5235	209	4795	5	Imported	\N
+5236	209	4796	500	Imported	\N
+5237	209	4797	500	Imported	\N
+5238	209	4798	500	Imported	\N
+5239	209	4799	100	Imported	\N
+5240	209	4800	1	Imported	\N
+5241	209	4801	125	Imported	\N
+5242	209	4802	25	Imported	\N
+5243	209	4803	500	Imported	\N
+5244	209	4804	5	Imported	\N
+5245	209	4805	500	Imported	\N
+5246	209	4806	500	Imported	\N
+5247	209	4807	500	Imported	\N
+5248	209	4808	500	Imported	\N
+5249	209	4809	500	Imported	\N
+5250	209	4810	500	Imported	\N
+5251	209	4811	500	Imported	\N
+5252	209	4812	500	Imported	\N
+5253	209	4813	500	Imported	\N
+5254	209	4814	500	Imported	\N
+5255	209	4815	500	Imported	\N
+5256	209	4816	500	Imported	\N
+5257	209	4819	500	Imported	\N
+5258	209	4820	500	Imported	\N
+5259	209	4821	100	Imported	\N
+5260	209	4822	15	Imported	\N
+5261	209	4823	100	Imported	\N
+5262	209	4824	250	Imported	\N
+5263	209	4825	500	Imported	\N
+5264	209	4826	500	Imported	\N
+5265	209	4827	500	Imported	\N
+5266	209	4828	500	Imported	\N
+5267	209	4829	500	Imported	\N
+5268	209	4830	500	Imported	\N
+5269	209	4831	500	Imported	\N
+5270	209	4832	500	Imported	\N
+5271	209	4833	500	Imported	\N
+5272	209	4834	500	Imported	\N
+5273	209	4835	500	Imported	\N
+5274	209	4847	125	Imported	\N
+5275	209	4848	500	Imported	\N
+5276	209	4849	500	Imported	\N
+5277	209	4850	500	Imported	\N
+5278	209	4851	500	Imported	\N
+5279	209	4852	500	Imported	\N
+5280	209	4853	500	Imported	\N
+5281	209	4854	5	Imported	\N
+5282	209	4855	9	Imported	\N
+5283	209	4856	13	Imported	\N
+5284	209	4857	11	Imported	\N
+5285	209	4858	10	Imported	\N
+5286	209	4859	500	Imported	\N
+5287	209	4860	10	Imported	\N
+5288	209	4861	5	Imported	\N
+5289	209	4862	6	Imported	\N
+5290	209	4863	9	Imported	\N
+5291	209	4864	2	Imported	\N
+5292	209	4865	6	Imported	\N
+5293	209	4866	8	Imported	\N
+5294	209	4867	10	Imported	\N
+5295	209	4868	11	Imported	\N
+5296	209	4604	500	Imported	\N
+5297	209	4605	5	Imported	\N
+5298	209	4606	500	Imported	\N
+5299	209	4607	500	Imported	\N
+5300	209	4608	500	Imported	\N
+5301	209	4609	250	Imported	\N
+5302	209	4610	500	Imported	\N
+5303	209	4611	500	Imported	\N
+5304	209	4612	500	Imported	\N
+5305	209	4613	500	Imported	\N
+5306	209	4614	500	Imported	\N
+5307	209	4615	500	Imported	\N
+5308	209	4836	500	Imported	\N
+5309	209	4837	125	Imported	\N
+5310	209	4838	10	Imported	\N
+5311	209	4839	500	Imported	\N
+5312	209	4840	500	Imported	\N
+5313	209	4841	100	Imported	\N
+5314	209	4842	500	Imported	\N
+5315	209	4843	500	Imported	\N
+5316	209	4844	500	Imported	\N
+5317	209	4845	100	Imported	\N
+5318	209	4846	500	Imported	\N
 \.
 
 
@@ -18891,6 +20106,8 @@ COPY public.quotation_request_prs (id, qr_id, pr_id) FROM stdin;
 19	219	205
 20	220	205
 22	221	205
+32	225	207
+33	226	208
 \.
 
 
@@ -19036,6 +20253,12 @@ COPY public.quotation_request_vendors (id, qr_id, vendor_id, is_sent, sent_at, r
 470	221	63	t	2026-08-06 13:28:30.804924	Pending
 471	221	62	t	2026-08-06 13:28:35.737024	Pending
 472	221	66	t	2026-08-06 13:28:40.46755	Pending
+531	209	69	t	2026-08-18 13:29:09.667254	Pending
+532	209	71	t	2026-08-18 13:29:09.668594	Pending
+533	209	70	t	2026-08-18 13:29:09.669243	Pending
+534	209	73	t	2026-08-18 13:29:09.669829	Pending
+535	209	72	t	2026-08-18 13:29:09.670444	Pending
+526	227	69	t	2026-08-18 13:09:51.178409	Received
 505	222	69	t	2026-08-06 19:22:50.042749	Received
 509	222	72	t	2026-08-06 19:23:14.987431	Received
 506	222	71	t	2026-08-06 19:22:56.263246	Not Required
@@ -19051,6 +20274,16 @@ COPY public.quotation_request_vendors (id, qr_id, vendor_id, is_sent, sent_at, r
 517	223	70	f	\N	Pending
 518	223	73	f	\N	Pending
 519	223	72	f	\N	Pending
+523	226	63	t	2026-08-18 11:40:07.561597	Pending
+524	226	71	t	2026-08-18 11:40:12.607124	Pending
+525	226	66	t	2026-08-18 11:40:17.418571	Pending
+527	227	71	t	2026-08-18 13:09:56.324944	Pending
+528	227	70	t	2026-08-18 13:10:01.36993	Pending
+529	227	73	t	2026-08-18 13:10:06.198221	Pending
+530	227	72	t	2026-08-18 13:10:11.260878	Pending
+520	225	66	t	2026-08-18 13:12:07.945853	Pending
+521	225	63	t	2026-08-18 13:12:12.884211	Pending
+522	225	69	t	2026-08-18 13:12:17.716729	Pending
 \.
 
 
@@ -19098,7 +20331,6 @@ COPY public.quotation_requests (id, tenant_id, site_id, qr_number, project_id, c
 200	2	2	QR-00014	3	3	2026-07-15	\N	Received	\N	\N	f	2026-07-08 14:50:39.937075	2026-07-08 14:52:03.907683	\N
 206	2	2	QR-00020	3	3	2026-07-21	\N	Received	\N	\N	f	2026-07-14 17:25:58.264911	2026-07-14 17:27:47.94298	\N
 207	2	2	QR-00021	3	3	2026-07-22	\N	Entered	\N	\N	f	2026-07-21 11:33:07.588869	2026-07-21 12:18:59.282538	\N
-209	2	2	QR-00023	3	3	\N	\N	Draft	\N	\N	f	2026-07-31 12:58:40.692541	2026-07-31 12:58:40.692554	\N
 210	2	2	QR-00024	3	1	2027-01-01	Test Workflow Automated	Draft	\N	\N	f	2026-08-03 14:04:43.415291	2026-08-03 14:04:43.41531	\N
 211	2	2	QR-00025	3	1	2027-01-01	Test Workflow Automated	Submitted	\N	\N	f	2026-08-03 14:05:47.764882	2026-08-03 14:05:47.875313	\N
 217	2	2	QR-00031	3	3	2026-08-28	\N	Draft	\N	\N	f	2026-08-05 11:15:30.531936	2026-08-05 11:15:30.53195	\N
@@ -19116,6 +20348,10 @@ COPY public.quotation_requests (id, tenant_id, site_id, qr_number, project_id, c
 224	2	2	QR-00038	3	3	2026-08-31	\N	Received	\N	\N	f	2026-08-07 11:01:32.919708	2026-08-07 11:04:13.415633	\N
 213	2	2	QR-00027	3	1	2027-01-01	Test Workflow Automated	Approved	3	2026-08-10 11:28:56.388485	f	2026-08-03 14:10:04.35094	2026-08-10 11:28:56.396606	Looks good, test passed
 223	2	2	QR-00037	3	3	2026-08-21	\N	Submitted	\N	\N	f	2026-08-06 17:40:04.70899	2026-08-17 10:45:08.236597	\N
+226	2	2	QR-00040	3	3	2026-08-19	\N	Requested	\N	\N	f	2026-08-18 11:39:57.427236	2026-08-18 11:40:22.091828	\N
+225	2	2	QR-00039	3	3	2026-08-18	\N	Requested	\N	\N	f	2026-08-17 13:03:15.263456	2026-08-18 13:12:22.696077	\N
+227	2	2	QR-00041	3	3	2026-08-31	\N	Received	\N	\N	f	2026-08-18 13:06:34.325547	2026-08-18 15:25:36.004837	\N
+209	2	2	QR-00023	3	3	2026-08-25	\N	Requested	\N	\N	f	2026-07-31 12:58:40.692541	2026-08-18 13:29:09.671873	\N
 \.
 
 
@@ -19430,6 +20666,7 @@ COPY public.role_permissions (id, role_id, resource, can_read, can_create, can_u
 1222	7	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
 1223	3	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
 1470	10	vendor_work_orders	t	t	t	t	{}
+1491	7	complaints	t	t	f	f	{}
 1224	8	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
 1225	5	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
 1226	4	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
@@ -19442,7 +20679,6 @@ COPY public.role_permissions (id, role_id, resource, can_read, can_create, can_u
 1234	21	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
 1235	13	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
 1236	23	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
-1471	11	vendor_work_orders	t	t	t	t	{}
 1469	20	finance_invoices	t	t	t	t	{"can_send_hard_copy": false, "can_send_for_payment": true, "can_receive_hard_copy": true, "can_mark_paid": true}
 1472	7	vendor_work_orders	t	t	t	t	{}
 1473	3	vendor_work_orders	t	t	t	t	{}
@@ -19463,54 +20699,54 @@ COPY public.role_permissions (id, role_id, resource, can_read, can_create, can_u
 1488	13	vendor_work_orders	t	t	t	t	{}
 1489	22	vendor_work_orders	t	t	t	t	{}
 1490	23	vendor_work_orders	t	t	t	t	{}
-1420	11	dashboard	t	f	f	f	{}
-1421	11	materials	t	t	t	t	{}
-1422	11	categories	t	t	t	t	{}
-1423	11	subcategories	t	t	t	t	{}
-1424	11	uom	t	t	t	t	{}
-1425	11	vendors	t	t	t	t	{"can_approve": true, "can_reject": true}
-1426	11	warehouses	t	t	t	t	{}
-1427	11	indents	t	t	t	t	{"can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_acknowledge": true}
-1428	11	purchase_requests	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_hold": true, "can_short_close": true}
-1429	11	quotations	t	t	t	t	{"can_send_to_vendors": true, "can_receive": true, "can_enter_quotes": true, "can_compare": true, "can_approve": true, "can_convert_to_po": true}
-1430	11	purchase_orders	t	t	t	t	{"can_approve": true, "can_reject": true, "can_hold": true, "can_send_to_vendor": true, "can_short_close": true}
-1431	11	contracts	t	t	t	t	{"can_approve": true, "can_reject": true}
-1432	11	gate_entry	t	t	t	t	{"can_record_entry": true, "can_verify": true}
-1433	11	invoice	t	t	t	t	{"can_register": true, "can_approve": true, "can_reject": true, "can_print": true}
-1434	11	grn	t	t	t	t	{"can_create_grn": true, "can_complete": true}
-1435	11	issues	t	t	t	t	{"can_issue": true, "can_direct_issue": true, "can_print": true}
-1436	11	returns	t	t	t	t	{"can_return": true, "receive": true}
-1437	11	transfers	t	t	t	t	{"can_transfer": true}
-1438	11	write_offs	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true}
-1439	11	gate_passes	t	t	t	t	{"can_create": true, "can_print": true}
-1440	11	acknowledgements	t	t	t	t	{"can_acknowledge": true}
-1441	11	inventory	t	t	t	t	{}
-1442	11	equipment	t	t	t	t	{"generate_calls": true}
-1443	11	complaints	t	t	t	t	{"can_assign": true, "can_approve_level1": true, "can_approve_level2": true}
-1444	11	pm_schedule	t	t	t	t	{"generate_calls": true}
-1445	11	calibration_schedule	t	t	t	t	{"generate_calls": true}
-1446	11	rwos	t	t	t	t	{"can_close": true}
-1447	11	intelligence	t	f	f	f	{}
-1448	11	finance_invoices	t	t	t	t	{"can_send_hard_copy": true, "can_receive_hard_copy": true, "can_send_for_payment": true, "can_mark_paid": true}
-1449	11	reports	t	f	f	f	{}
-1450	11	report_issue_summary	t	f	f	f	{}
-1451	11	report_rate_analysis	t	f	f	f	{}
-1452	11	report_equipment_count	t	f	f	f	{}
-1453	11	report_receipt_summary	t	f	f	f	{}
-1454	11	report_dept_inventory	t	f	f	f	{}
-1455	11	report_finance	t	f	f	f	{}
-1456	11	report_pending_gatepass	t	f	f	f	{}
-1457	11	admin_users	t	t	t	t	{}
-1458	11	admin_roles	t	t	t	t	{}
-1459	11	audit_logs	t	f	f	f	{}
-1460	11	approval_flows	t	t	t	t	{}
-1461	11	material_allowances	t	t	t	t	{}
-1462	11	configurations	t	t	t	t	{}
-1463	11	locations	t	t	t	t	{}
-1464	11	projects	t	t	t	t	{}
-1465	11	company_addresses	t	t	t	t	{}
-1466	11	terms	t	t	t	t	{}
-1467	11	work_orders	t	t	t	t	{"can_approve": true, "can_reject": true, "can_send_to_vendor": true, "can_short_close": true}
+1494	11	dashboard	t	f	f	f	{}
+1495	11	materials	t	t	t	t	{}
+1496	11	categories	t	t	t	t	{}
+1497	11	subcategories	t	t	t	t	{}
+1498	11	uom	t	t	t	t	{}
+1499	11	vendors	t	t	t	t	{"can_approve": true, "can_reject": true}
+1500	11	warehouses	t	t	t	t	{}
+1501	11	indents	t	t	t	t	{"can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_acknowledge": true}
+1502	11	purchase_requests	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_hold": true, "can_short_close": true}
+1503	11	quotations	t	t	t	t	{"can_send_to_vendors": true, "can_receive": true, "can_enter_quotes": true, "can_compare": true, "can_approve": true, "can_convert_to_po": true}
+1504	11	purchase_orders	t	t	t	t	{"can_approve": true, "can_reject": true, "can_hold": true, "can_send_to_vendor": true, "can_short_close": true}
+1505	11	contracts	t	t	t	t	{"can_approve": true, "can_reject": true}
+1506	11	gate_entry	t	t	t	t	{"can_record_entry": true, "can_verify": true}
+1507	11	invoice	t	t	t	t	{"can_register": true, "can_approve": true, "can_reject": true, "can_print": true}
+1508	11	grn	t	t	t	t	{"can_create_grn": true, "can_complete": true}
+1509	11	issues	t	t	t	t	{"can_issue": true, "can_direct_issue": true, "can_print": true}
+1510	11	returns	t	t	t	t	{"can_return": true, "receive": true}
+1511	11	transfers	t	t	t	t	{"can_transfer": true}
+1512	11	write_offs	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true}
+1513	11	gate_passes	t	t	t	t	{"can_create": true, "can_print": true}
+1514	11	acknowledgements	t	t	t	t	{"can_acknowledge": true}
+1515	11	inventory	t	t	t	t	{}
+1516	11	equipment	t	t	t	t	{"generate_calls": true}
+1517	11	complaints	t	t	t	t	{"can_assign": true, "can_approve_level1": true, "can_approve_level2": true}
+1518	11	pm_schedule	t	t	t	t	{"generate_calls": true}
+1519	11	calibration_schedule	t	t	t	t	{"generate_calls": true}
+1520	11	rwos	t	t	t	t	{"can_close": true}
+1521	11	intelligence	t	f	f	f	{}
+1522	11	finance_invoices	t	t	t	t	{"can_send_hard_copy": true, "can_receive_hard_copy": true, "can_send_for_payment": true, "can_mark_paid": true}
+1523	11	reports	t	f	f	f	{}
+1524	11	report_issue_summary	t	f	f	f	{}
+1525	11	report_rate_analysis	t	f	f	f	{}
+1526	11	report_equipment_count	t	f	f	f	{}
+1527	11	report_receipt_summary	t	f	f	f	{}
+1528	11	report_dept_inventory	t	f	f	f	{}
+1529	11	report_finance	t	f	f	f	{}
+1530	11	report_pending_gatepass	t	f	f	f	{}
+1531	11	admin_users	t	t	t	t	{}
+1532	11	admin_roles	t	t	t	t	{}
+1533	11	audit_logs	t	f	f	f	{}
+1534	11	approval_flows	t	t	t	t	{}
+1535	11	material_allowances	t	t	t	t	{}
+1536	11	configurations	t	t	t	t	{}
+1537	11	locations	t	t	t	t	{}
+1538	11	projects	t	t	t	t	{}
+1539	11	company_addresses	t	t	t	t	{}
+1540	11	terms	t	t	t	t	{}
+1541	11	work_orders	t	t	t	t	{"can_approve": true, "can_reject": true, "can_send_to_vendor": true, "can_short_close": true}
 \.
 
 
@@ -22591,6 +23827,23 @@ COPY public.stock_ledger (id, tenant_id, site_id, material_id, warehouse_id, tra
 4277	2	2	2338	62	Write Off	-1	50	WriteOff	12	EWO-00001	\N	\N	\N	3	2026-08-12 11:07:29.349262
 4278	2	2	2751	62	Issue	-3	22	Issue	240	ISS-00010	3	\N	\N	3	2026-08-14 12:56:12.836422
 4279	2	2	2564	62	Issue	-2	42	Issue	241	ISS-00011	3	237	\N	3	2026-08-17 10:07:34.301916
+4280	2	2	3474	62	Issue	-4	60	Issue	242	ISS-00012	3	\N	\N	3	2026-08-17 11:06:47.942135
+4281	2	2	2564	62	Issue	-2	40	Issue	243	ISS-00013	3	237	\N	3	2026-08-17 11:07:14.801683
+4282	2	2	2564	62	Transfer Out	-10	30	Transfer	39	TRF-00003	3	\N	\N	3	2026-08-17 11:27:19.321239
+4283	2	2	2564	63	Transfer In	10	10	Transfer	39	TRF-00003	3	\N	\N	3	2026-08-17 11:27:19.333792
+4284	2	2	3910	62	GRN	1	1	GRN	219	GRN-00016	3	\N	\N	3	2026-08-17 12:13:02.016343
+4285	2	2	2564	62	Write Off	-1	29	WriteOff	14	WO-00010	\N	\N	\N	3	2026-08-17 12:38:21.856723
+4286	2	2	4608	62	Write Off	-1	297	WriteOff	18	EWO-00002	\N	\N	\N	3	2026-08-17 14:39:06.610501
+4287	2	2	2564	62	Issue	-4	25	Issue	244	ISS-00014	3	237	\N	3	2026-08-17 17:10:14.404003
+4288	2	2	2565	62	Issue	-2	52	Issue	245	ISS-00015	3	237	\N	3	2026-08-17 17:11:21.412642
+4289	2	2	2564	62	Issue	-1	24	Issue	246	ISS-00016	3	\N	\N	3	2026-08-17 19:04:31.750985
+4290	2	2	2481	62	Issue	-1	27	Issue	247	ISS-00017	3	237	\N	3	2026-08-18 11:13:00.31119
+4291	2	2	2564	62	Return	1	25	Return	26	RET-00004	3	\N	\N	3	2026-08-18 11:19:52.049843
+4292	2	2	2564	62	Issue	-1	24	Issue	248	ISS-00018	3	\N	\N	3	2026-08-18 11:24:08.811043
+4293	2	2	3507	62	Issue	-2	81	Issue	249	ISS-00019	1	237	\N	3	2026-08-18 11:25:58.107783
+4294	2	2	2565	62	Write Off	-1	51	WriteOff	19	WO-00011	\N	\N	\N	3	2026-08-18 11:31:10.258024
+4295	2	2	3475	62	Issue	-1	82	Issue	250	ISS-00020	1	237	\N	3	2026-08-18 11:31:20.884081
+4296	2	2	2435	62	GRN	80	195	GRN	220	GRN-00017	3	\N	\N	3	2026-08-18 14:55:09.140812
 \.
 
 
@@ -22610,6 +23863,8 @@ COPY public.stock_transfer_items (id, transfer_id, material_id, quantity, remark
 10	28	1191	1	Candy canes topping liquorice wafer cake shortbread chupa chups sesame snaps carrot cake. Fruitcake candy tiramisu sugar plum jujubes icing marzipan candy. Bonbon marzipan brownie tiramisu sesame snaps cheesecake macaroon gummies cake. Pudding oat cake chocolate tiramisu powder dessert. Lollipop jelly beans gummi bears sugar plum gummi bears bear claw cupcake cake croissant. Bear claw marshmallow candy pudding jujubes tootsie roll. Pie topping apple pie oat cake topping. Tart sesame snaps croissant carrot cake biscuit halvah caramels macaroon danish. Tootsie roll dragée donut cotton candy macaroon ice cream oat cake. Danish soufflé lemon drops danish dessert ice cream muffin. Candy dragée wafer cheesecake lemon drops icing. Candy canes jelly beans cake fruitcake cheesecake. Donut fruitcake gummies cheesecake pastry cake fruitcake. Brownie oat cake bonbon wafer tart tootsie roll. Lemon drops jelly beans wafer cake chocolate cake chocolate donut cake pastry. Sweet roll icing cotton candy carrot cake cookie sugar plum liquorice chupa chups. Jujubes chocolate bar chocolate marshmallow liquorice. Apple pie marzipan muffin oat cake sesame snaps. Jelly-o cookie tart pudding gummi bears tart pastry chocolate cake sugar plum. Ice cream danish tiramisu sweet cookie tiramisu cotton candy liquorice liquorice. Cotton candy apple pie fruitcake pudding gingerbread apple pie. Dessert oat cake caramels dessert carrot cake chupa chups cake chocolate cake. Sesame snaps gummi bears marshmallow candy lollipop marshmallow oat cake marshmallow. Cheesecake lollipop fruitcake halvah jelly caramels biscuit cake. Icing apple pie cake candy tootsie roll donut bonbon. Powder macaroon gummies toffee tart bonbon jelly muffin cheesecake. Brownie liquorice cookie topping macaroon halvah marshmallow. Sesame snaps oat cake lemon drops cupcake cotton candy toffee gummies liquorice. Icing donut sweet roll soufflé candy canes. Pie jelly jelly beans sesame snaps sweet marshmallow caramels. Gummies bear claw topping bear claw muffin. Jelly-o wafer powder cotton candy toffee jelly beans dessert muffin macaroon. Chocolate liquorice apple pie tart fruitcake chocolate cake gingerbread toffee sesame snaps. Soufflé fruitcake cupcake biscuit pastry cheesecake cake jelly-o. Pastry gingerbread sweet biscuit gingerbread sweet roll jujubes. Topping soufflé carrot cake candy canes oat cake tootsie roll. Wafer shortbread liquorice shortbread cotton candy donut. Bonbon liquorice jelly beans jujubes icing. Gummies chocolate cake tiramisu croissant bonbon tart sweet roll sweet brownie. Pudding lemon drops croissant liquorice chocolate jelly beans tiramisu biscuit. Ice cream marshmallow marshmallow cheesecake icing. Tart carrot cake chocolate cake cookie halvah tiramisu sesame snaps. Gummies gummi bears candy canes biscuit marzipan danish liquorice bear claw chocolate cake. Tiramisu chocolate halvah cotton candy pudding fruitcake. Tart sweet shortbread apple pie carrot cake pie cheesecake jelly-o. Lollipop cake gummi bears pastry marshmallow pastry muffin chocolate tootsie roll. Gummies toffee danish donut bear claw. Bear claw wafer cake biscuit lemon drops cookie chocolate cake gummi bears jujubes. Lollipop wafer cotton candy bonbon jelly beans shortbread cotton candy pudding. Croissant cake gingerbread pastry jelly. Tart jujubes bear claw croissant cookie. Macaroon carrot cake dragée powder chocolate cake. Sweet pastry oat cake bear claw lollipop donut croissant tootsie roll cupcake. Tart cookie donut candy canes shortbread dessert lollipop. Jelly-o pudding tootsie roll gingerbread sesame snaps sweet roll tootsie roll. Lollipop sugar plum pudding cake bonbon pastry marshmallow. Cake dessert cupcake jelly-o tiramisu oat cake biscuit marzipan caramels. Cupcake sweet liquorice cookie dragée chocolate bar wafer tootsie roll. Gingerbread gingerbread oat cake marzipan tootsie roll cheesecake lollipop. Sweet muffin candy jelly cake cotton candy brownie pudding. Donut pie cupcake cotton candy donut gummi bears. Marshmallow tiramisu cookie candy cotton candy dragée cheesecake. Cake sweet roll dessert powder dragée macaroon marshmallow. Tootsie roll croissant danish cookie powder. Topping gingerbread chocolate cupcake cotton candy. Cotton candy wafer chocolate bar sweet bear claw jelly beans tootsie roll.	1	0	Candy canes topping liquorice wafer cake shortbread chupa chups sesame snaps carrot cake. Fruitcake candy tiramisu sugar plum jujubes icing marzipan candy. Bonbon marzipan brownie tiramisu sesame snaps cheesecake macaroon gummies cake. Pudding oat cake chocolate tiramisu powder dessert. Lollipop jelly beans gummi bears sugar plum gummi bears bear claw cupcake cake croissant. Bear claw marshmallow candy pudding jujubes tootsie roll. Pie topping apple pie oat cake topping. Tart sesame snaps croissant carrot cake biscuit halvah caramels macaroon danish. Tootsie roll dragée donut cotton candy macaroon ice cream oat cake. Danish soufflé lemon drops danish dessert ice cream muffin. Candy dragée wafer cheesecake lemon drops icing. Candy canes jelly beans cake fruitcake cheesecake. Donut fruitcake gummies cheesecake pastry cake fruitcake. Brownie oat cake bonbon wafer tart tootsie roll. Lemon drops jelly beans wafer cake chocolate cake chocolate donut cake pastry. Sweet roll icing cotton candy carrot cake cookie sugar plum liquorice chupa chups. Jujubes chocolate bar chocolate marshmallow liquorice. Apple pie marzipan muffin oat cake sesame snaps. Jelly-o cookie tart pudding gummi bears tart pastry chocolate cake sugar plum. Ice cream danish tiramisu sweet cookie tiramisu cotton candy liquorice liquorice. Cotton candy apple pie fruitcake pudding gingerbread apple pie. Dessert oat cake caramels dessert carrot cake chupa chups cake chocolate cake. Sesame snaps gummi bears marshmallow candy lollipop marshmallow oat cake marshmallow. Cheesecake lollipop fruitcake halvah jelly caramels biscuit cake. Icing apple pie cake candy tootsie roll donut bonbon. Powder macaroon gummies toffee tart bonbon jelly muffin cheesecake. Brownie liquorice cookie topping macaroon halvah marshmallow. Sesame snaps oat cake lemon drops cupcake cotton candy toffee gummies liquorice. Icing donut sweet roll soufflé candy canes. Pie jelly jelly beans sesame snaps sweet marshmallow caramels. Gummies bear claw topping bear claw muffin. Jelly-o wafer powder cotton candy toffee jelly beans dessert muffin macaroon. Chocolate liquorice apple pie tart fruitcake chocolate cake gingerbread toffee sesame snaps. Soufflé fruitcake cupcake biscuit pastry cheesecake cake jelly-o. Pastry gingerbread sweet biscuit gingerbread sweet roll jujubes. Topping soufflé carrot cake candy canes oat cake tootsie roll. Wafer shortbread liquorice shortbread cotton candy donut. Bonbon liquorice jelly beans jujubes icing. Gummies chocolate cake tiramisu croissant bonbon tart sweet roll sweet brownie. Pudding lemon drops croissant liquorice chocolate jelly beans tiramisu biscuit. Ice cream marshmallow marshmallow cheesecake icing. Tart carrot cake chocolate cake cookie halvah tiramisu sesame snaps. Gummies gummi bears candy canes biscuit marzipan danish liquorice bear claw chocolate cake. Tiramisu chocolate halvah cotton candy pudding fruitcake. Tart sweet shortbread apple pie carrot cake pie cheesecake jelly-o. Lollipop cake gummi bears pastry marshmallow pastry muffin chocolate tootsie roll. Gummies toffee danish donut bear claw. Bear claw wafer cake biscuit lemon drops cookie chocolate cake gummi bears jujubes. Lollipop wafer cotton candy bonbon jelly beans shortbread cotton candy pudding. Croissant cake gingerbread pastry jelly. Tart jujubes bear claw croissant cookie. Macaroon carrot cake dragée powder chocolate cake. Sweet pastry oat cake bear claw lollipop donut croissant tootsie roll cupcake. Tart cookie donut candy canes shortbread dessert lollipop. Jelly-o pudding tootsie roll gingerbread sesame snaps sweet roll tootsie roll. Lollipop sugar plum pudding cake bonbon pastry marshmallow. Cake dessert cupcake jelly-o tiramisu oat cake biscuit marzipan caramels. Cupcake sweet liquorice cookie dragée chocolate bar wafer tootsie roll. Gingerbread gingerbread oat cake marzipan tootsie roll cheesecake lollipop. Sweet muffin candy jelly cake cotton candy brownie pudding. Donut pie cupcake cotton candy donut gummi bears. Marshmallow tiramisu cookie candy cotton candy dragée cheesecake. Cake sweet roll dessert powder dragée macaroon marshmallow. Tootsie roll croissant danish cookie powder. Topping gingerbread chocolate cupcake cotton candy. Cotton candy wafer chocolate bar sweet bear claw jelly beans tootsie roll.
 11	33	1062	7	no	\N	\N	\N
 9	20	2565	5		4	-1	proceed
+12	39	2564	10	needs	10	0	
+13	41	2435	50		\N	\N	\N
 \.
 
 
@@ -22628,6 +23883,8 @@ COPY public.stock_transfers (id, tenant_id, site_id, transfer_number, from_wareh
 28	3	3	TRF-00007	59	47	1	Completed	Candy canes topping liquorice wafer cake shortbread chupa chups sesame snaps carrot cake. Fruitcake candy tiramisu sugar plum jujubes icing marzipan candy. Bonbon marzipan brownie tiramisu sesame snaps cheesecake macaroon gummies cake. Pudding oat cake chocolate tiramisu powder dessert. Lollipop jelly beans gummi bears sugar plum gummi bears bear claw cupcake cake croissant. Bear claw marshmallow candy pudding jujubes tootsie roll. Pie topping apple pie oat cake topping. Tart sesame snaps croissant carrot cake biscuit halvah caramels macaroon danish. Tootsie roll dragée donut cotton candy macaroon ice cream oat cake. Danish soufflé lemon drops danish dessert ice cream muffin. Candy dragée wafer cheesecake lemon drops icing. Candy canes jelly beans cake fruitcake cheesecake. Donut fruitcake gummies cheesecake pastry cake fruitcake. Brownie oat cake bonbon wafer tart tootsie roll. Lemon drops jelly beans wafer cake chocolate cake chocolate donut cake pastry. Sweet roll icing cotton candy carrot cake cookie sugar plum liquorice chupa chups. Jujubes chocolate bar chocolate marshmallow liquorice. Apple pie marzipan muffin oat cake sesame snaps. Jelly-o cookie tart pudding gummi bears tart pastry chocolate cake sugar plum. Ice cream danish tiramisu sweet cookie tiramisu cotton candy liquorice liquorice. Cotton candy apple pie fruitcake pudding gingerbread apple pie. Dessert oat cake caramels dessert carrot cake chupa chups cake chocolate cake. Sesame snaps gummi bears marshmallow candy lollipop marshmallow oat cake marshmallow. Cheesecake lollipop fruitcake halvah jelly caramels biscuit cake. Icing apple pie cake candy tootsie roll donut bonbon. Powder macaroon gummies toffee tart bonbon jelly muffin cheesecake. Brownie liquorice cookie topping macaroon halvah marshmallow. Sesame snaps oat cake lemon drops cupcake cotton candy toffee gummies liquorice. Icing donut sweet roll soufflé candy canes. Pie jelly jelly beans sesame snaps sweet marshmallow caramels. Gummies bear claw topping bear claw muffin. Jelly-o wafer powder cotton candy toffee jelly beans dessert muffin macaroon. Chocolate liquorice apple pie tart fruitcake chocolate cake gingerbread toffee sesame snaps. Soufflé fruitcake cupcake biscuit pastry cheesecake cake jelly-o. Pastry gingerbread sweet biscuit gingerbread sweet roll jujubes. Topping soufflé carrot cake candy canes oat cake tootsie roll. Wafer shortbread liquorice shortbread cotton candy donut. Bonbon liquorice jelly beans jujubes icing. Gummies chocolate cake tiramisu croissant bonbon tart sweet roll sweet brownie. Pudding lemon drops croissant liquorice chocolate jelly beans tiramisu biscuit. Ice cream marshmallow marshmallow cheesecake icing. Tart carrot cake chocolate cake cookie halvah tiramisu sesame snaps. Gummies gummi bears candy canes biscuit marzipan danish liquorice bear claw chocolate cake. Tiramisu chocolate halvah cotton candy pudding fruitcake. Tart sweet shortbread apple pie carrot cake pie cheesecake jelly-o. Lollipop cake gummi bears pastry marshmallow pastry muffin chocolate tootsie roll. Gummies toffee danish donut bear claw. Bear claw wafer cake biscuit lemon drops cookie chocolate cake gummi bears jujubes. Lollipop wafer cotton candy bonbon jelly beans shortbread cotton candy pudding. Croissant cake gingerbread pastry jelly. Tart jujubes bear claw croissant cookie. Macaroon carrot cake dragée powder chocolate cake. Sweet pastry oat cake bear claw lollipop donut croissant tootsie roll cupcake. Tart cookie donut candy canes shortbread dessert lollipop. Jelly-o pudding tootsie roll gingerbread sesame snaps sweet roll tootsie roll. Lollipop sugar plum pudding cake bonbon pastry marshmallow. Cake dessert cupcake jelly-o tiramisu oat cake biscuit marzipan caramels. Cupcake sweet liquorice cookie dragée chocolate bar wafer tootsie roll. Gingerbread gingerbread oat cake marzipan tootsie roll cheesecake lollipop. Sweet muffin candy jelly cake cotton candy brownie pudding. Donut pie cupcake cotton candy donut gummi bears. Marshmallow tiramisu cookie candy cotton candy dragée cheesecake. Cake sweet roll dessert powder dragée macaroon marshmallow. Tootsie roll croissant danish cookie powder. Topping gingerbread chocolate cupcake cotton candy. Cotton candy wafer chocolate bar sweet bear claw jelly beans tootsie roll.	4	f	2026-06-17 12:19:08.949634	2026-06-17 06:51:58.420032	4	2026-06-17 06:51:58.420105
 33	3	3	TRF-00008	59	48	1	Initiated		4	f	2026-06-17 18:22:24.785236	\N	\N	\N
 20	2	2	TRF-00002	63	62	3	Partially Received		3	f	2026-06-12 02:02:28.867836	\N	3	2026-08-12 06:06:54.95339
+39	2	2	TRF-00003	62	63	3	Completed	need	3	f	2026-08-17 11:27:11.257558	2026-08-17 05:57:19.33041	3	2026-08-17 05:57:19.330482
+41	2	2	TRF-00004	62	77	3	Initiated		3	f	2026-08-18 11:23:09.168032	\N	\N	\N
 \.
 
 
@@ -22731,9 +23988,10 @@ COPY public.subcategories (id, tenant_id, site_id, name, category_id, is_active,
 94	2	2	STATIONERY	75	t	f
 95	2	2	GEN	76	t	f
 96	2	2	LAB	76	t	f
-78	2	2	BIOCHEMISTRY	71	t	f
 97	2	2	ELECTRICAL	69	f	f
 98	2	2	Pipe	73	t	f
+78	2	2	BIOCHEMISTRY	71	t	f
+99	2	2	Wiring	81	t	f
 \.
 
 
@@ -22808,6 +24066,7 @@ COPY public.tenant_memberships (id, user_id, tenant_id, is_active, joined_at) FR
 42	35	2	t	2026-06-18 12:58:55.587118
 43	36	4	t	2026-07-03 12:43:37.514624
 18	11	2	t	2026-06-11 22:31:29.188862
+44	37	2	t	2026-08-18 10:25:10.713338
 \.
 
 
@@ -22877,7 +24136,6 @@ COPY public.uom (id, tenant_id, site_id, name, abbreviation, is_active, is_delet
 24	3	3	Meter	MTR	t	f	f
 25	3	3	Bottle	BTL	t	f	f
 27	3	3	Prs	PRS	t	f	f
-28	2	2	Bags	BAG	t	f	f
 29	2	2	Numbers	NOS	t	f	f
 33	2	2	Rolls	ROL	t	f	f
 34	2	2	Sets	SET	t	f	f
@@ -22898,6 +24156,7 @@ COPY public.uom (id, tenant_id, site_id, name, abbreviation, is_active, is_delet
 46	3	3	Milliliters	ml	t	f	t
 47	2	2	Grams	gm	t	f	t
 48	2	2	Milliliters	ml	t	f	t
+28	2	2	Bags	BAG	t	f	f
 \.
 
 
@@ -22946,6 +24205,8 @@ COPY public.user_role_assignments (id, user_id, tenant_id, role_id, site_id, ass
 76	35	2	22	\N	2026-06-18 12:58:55.587561
 78	36	4	23	4	2026-07-03 12:48:15.944929
 80	11	2	15	\N	2026-08-06 11:49:40.832767
+81	4	3	7	3	2026-08-17 11:51:52.235161
+82	37	2	11	\N	2026-08-18 10:25:10.714899
 \.
 
 
@@ -22954,7 +24215,6 @@ COPY public.user_role_assignments (id, user_id, tenant_id, role_id, site_id, ass
 --
 
 COPY public.users (id, username, email, full_name, hashed_password, is_active, is_platform_admin, is_deleted, created_at, updated_at, department, institution) FROM stdin;
-8	Babu	babu@nissigrid.com	Babu Gate Keeper	$2b$12$Z34d.KjP2.hJzkCocjOGLu8/h9p8e5JxvE6BGmbiDt5RFykPt4YnS	t	f	f	2026-06-01 10:46:37.253944	2026-06-05 11:31:33.223406	ADMIN	\N
 10	Pandi	pandi@nissigrid.com	Pandiyarajan	$2b$12$i3RkkBez7lXz6lNzd.cDhuE8rVsQh8UhOPYLZd6ZEqCHHbAV4rXTa	t	f	f	2026-06-01 10:48:25.009621	2026-06-05 11:31:33.223412	ADMIN	\N
 12	Kumar	kumar@nissigrid.com	Kumar	$2b$12$bejX..ps1x3o4JQKv6g7QuMoEO6pxkwtQ8tbwcWMkBIlJMmYA1x8m	t	f	f	2026-06-01 11:17:37.74726	2026-06-05 11:31:33.223417	\N	\N
 1	superadmin	super@nissigrid.com	Super Admin	$2b$12$fp9H8Wu0e2cQNvrXetPzUeg1n1ATh2rp.Ja3HTK.VLRxp2G7qnH.q	t	t	f	2026-05-15 10:36:51.375798	2026-06-05 11:31:33.223369	\N	\N
@@ -22989,7 +24249,9 @@ COPY public.users (id, username, email, full_name, hashed_password, is_active, i
 36	ntadmin	ku699444mar@gmail.com	Newtest Admin	$2b$12$oXSG73bVsEk7MU4QacpW9O5R54VYO/5W3ism7L9NmjjM7MFhDLxFq	t	f	f	2026-07-03 12:43:37.512671	2026-07-03 12:43:37.512684	\N	\N
 2	admin	pradnesh@nissigrid.com	NG Admin	$2b$12$4ftTuLMHa8t89FRB8q1cXudA/JE8XMZW6TyavLGrjdrefD8S5QEBG	t	f	f	2026-05-15 10:39:02.648701	2026-07-06 12:03:52.456418	\N	\N
 3	epadmin	ilangkumaran@nissigrid.com	EastPoint Admin	$2b$12$9AY1Wm27CFtBKrAyk275aO4KGhy2BmWiBdnuCwNa5g6CFUtNklRdm	t	f	f	2026-05-15 10:52:51.952583	2026-08-05 11:22:02.172623	\N	\N
+37	vikky	GVIKKY242@gmail.com	vikky	$2b$12$J2ArEc3tE3m9oB4S2PUHOOrnlxai/2kh4CxuxPXCQwyuxgVs7bLeC	t	f	f	2026-08-18 10:25:10.665199	2026-08-18 10:26:00.402788	\N	\N
 11	CEO	ceo@nissigrid.com	CEO Approver	$2b$12$5vPyjKr71cO08Ma3BwERGOTLchViQYVYB6nUDmhEaBBD44zDf9DR2	t	f	f	2026-06-01 10:50:02.222821	2026-08-06 11:49:40.830647	\N	\N
+8	Babu	babu@nissigrid.com	Babu Gate Keeper	$2b$12$b48jMuLrVQXEfxE.QCfg/uIX2.90LesRlbj7mGGXIDVEot4HBchY6	t	t	f	2026-06-01 10:46:37.253944	2026-08-18 20:12:35.176263	ADMIN	\N
 \.
 
 
@@ -23007,6 +24269,7 @@ COPY public.vendor_approvals (id, vendor_id, approval_flow_id, approver_id, rema
 12	74	65	3	\N	2026-08-11 18:13:30.970628
 13	63	65	3	\N	2026-08-17 10:29:40.676976
 14	75	65	3	\N	2026-08-17 10:33:38.713024
+15	76	65	3	\N	2026-08-18 10:56:17.53842
 \.
 
 
@@ -23055,9 +24318,6 @@ COPY public.vendor_categories (id, vendor_id, category_id) FROM stdin;
 205	67	76
 206	67	69
 207	67	70
-208	68	66
-209	68	76
-210	68	68
 217	63	65
 218	63	66
 219	63	67
@@ -23066,6 +24326,10 @@ COPY public.vendor_categories (id, vendor_id, category_id) FROM stdin;
 222	63	74
 223	75	80
 224	75	68
+225	68	66
+226	68	76
+227	68	68
+228	76	81
 \.
 
 
@@ -23129,6 +24393,8 @@ COPY public.vendor_history (id, vendor_id, action, changes, remarks, action_by_i
 53	63	Fully Approved	\N	\N	3	2026-08-17 10:29:40.713446
 54	75	Created	\N	\N	3	2026-08-17 10:33:12.476616
 55	75	Fully Approved	\N	\N	3	2026-08-17 10:33:38.729447
+56	76	Created	\N	\N	3	2026-08-18 10:55:42.675233
+57	76	Fully Approved	\N	\N	3	2026-08-18 10:56:17.578254
 \.
 
 
@@ -23689,7 +24955,281 @@ COPY public.vendor_quotation_items (id, vendor_quotation_id, qr_item_id, materia
 1589	580	4015	4642	3168.88	10	f		Qualigens	ml	1	5
 1590	580	4016	4643	2411.16	14	f		SDFine	ml	1	5
 1591	580	4017	4644	1613.77	10	f			box	1	5
+3156	584	4252	4817	749	5	f			500gm	1	10
+3157	584	4253	4818	850	5	f			500gm	1	10
+3158	584	4254	4869	0	\N	t			NOS	1	0
+3159	584	4255	4616	212	5	f			125ml	1	10
+3160	584	4256	4617	480	5	f			500gm	1	10
+3161	584	4257	4618	380	5	f			500gm	1	10
+3162	584	4258	4619	1630	5	f			500gm	1	10
+3163	584	4259	4620	0	\N	t			Regret	1	0
+3164	584	4260	4621	840	5	f			500gm	1	10
+3165	584	4261	4622	6600	5	f			500gm	1	10
+3166	584	4262	4623	320	5	f			500ml	1	10
+3167	584	4263	4624	640	5	f			500ml	1	10
+3168	584	4264	4625	785	5	f			500ml	1	10
+3169	584	4265	4626	0	\N	t			100ml	1	0
+3170	584	4266	4627	2678	5	f			500gm	1	10
+3171	584	4267	4628	0	\N	t			500gm	1	0
+3172	584	4268	4629	35760	5	f			100gm	1	10
+3173	584	4269	4630	485	5	f			500gm	1	10
+3174	584	4270	4631	660	5	f			500gm	1	10
+3175	584	4271	4632	380	5	f			500gm	1	10
+3176	584	4272	4633	1420	5	f			500ml	1	10
+3177	584	4273	4634	330	5	f			500ml	1	10
+3178	584	4274	4635	460	5	f			500ml	1	10
+3179	584	4275	4636	830	5	f			500ml	1	10
+3180	584	4276	4637	0	\N	f			ml	1	0
+3181	584	4277	4638	3857	5	f			250gm	1	10
+3182	584	4278	4639	580	5	f			500gm	1	10
 1592	580	4018	4645	235.21	10	f		Qualigens	ltr	1	5
+3183	584	4279	4640	780	5	f			500ml	1	10
+3184	584	4280	4641	1430	5	f			100gm	1	10
+3185	584	4281	4642	220	5	f			125ml	1	10
+3186	584	4282	4643	460	5	f			500gm	1	10
+3187	584	4283	4644	170	5	f			125ml	1	10
+3188	584	4284	4645	230	5	f			125ml	1	10
+3189	584	4285	4646	260	5	f			125ml	1	10
+3190	584	4286	4647	320	5	f			125ml	1	10
+3191	584	4287	4648	200	5	f			125ml	1	10
+3192	584	4288	4649	0	\N	f			ml	1	0
+3193	584	4289	4650	1865	5	f			500gm	1	10
+3194	584	4290	4651	5940	5	f			500gm	1	10
+3195	584	4291	4652	3300	5	f			500gm	1	10
+3196	584	4292	4653	2430	5	f			500ml	1	10
+3197	584	4293	4654	974	5	f			100gm	1	10
+3198	584	4294	4655	0	\N	f			will qut ltr	1	0
+3199	584	4295	4656	0	\N	f			will qut ltr	1	0
+3200	584	4296	4657	768	5	f			500ml	1	10
+3201	584	4297	4658	1607	5	f			100ml	1	10
+3202	584	4298	4659	4870	5	f			500gm	1	10
+3203	584	4299	4660	678	5	f			500ml	1	10
+3204	584	4300	4661	0	\N	f			Qut.Lrt	1	0
+3205	584	4301	4662	25954	5	f			100gm	1	10
+3206	584	4302	4663	0	\N	f			Qut.Lrt	1	0
+3207	584	4303	4664	2230	5	f			500ml	1	10
+3208	584	4304	4665	240	5	f			125ml	1	10
+3209	584	4305	4666	240	5	f			125ml	1	10
+3210	584	4306	4667	8555	5	f			100gm	1	10
+3211	584	4307	4668	580	5	f			500ml	1	10
+3212	584	4308	4669	460	5	f			500gm	1	10
+3213	584	4309	4670	2266	5	f			100gm	1	10
+3214	584	4310	4671	658	5	f			500ml	1	10
+3215	584	4311	4672	850	5	f			500gm	1	10
+3216	584	4312	4673	680	5	f			500ml	1	10
+3217	584	4313	4674	890	5	f			500ml	1	10
+3218	584	4314	4675	4235	5	f			500gm	1	10
+3219	584	4315	4676	1031	5	f			500gm	1	10
+3220	584	4316	4677	850	5	f			500gm	1	10
+3221	584	4317	4678	850	5	f			500gm	1	10
+3222	584	4318	4679	850	5	f			500gm	1	10
+3223	584	4319	4680	800	5	f			100gm	1	10
+3224	584	4320	4681	92306	5	f			10gm	1	10
+3225	584	4321	4682	4800	5	f			500ml	1	10
+3226	584	4322	4683	2650	5	f			500gm	1	10
+3227	584	4323	4684	0	\N	f			Qut.Lrt	1	0
+3228	584	4324	4685	640	5	f			500ml	1	10
+3229	584	4325	4686	1850	5	f			2.5ltr	1	10
+3230	584	4326	4687	0	\N	f			ml	1	0
+3231	584	4327	4688	0	\N	f			ml	1	0
+3232	584	4328	4689	1240	5	f			500ml	1	10
+3233	584	4329	4690	18540	5	f			250ml	1	10
+3234	584	4330	4691	640	5	f			500ml	1	10
+3235	584	4331	4692	8710	5	f			250gm	1	10
+3236	584	4332	4693	320	5	f			500ml	1	10
+3237	584	4333	4694	580	5	f			500ml	1	10
+3238	584	4334	4695	380	5	f			500gm	1	10
+3239	584	4335	4696	2750	5	f			250ml	1	10
+3240	584	4336	4697	380	5	f			500gm	1	10
+3241	584	4337	4698	385	5	f			500gm	1	10
+3242	584	4338	4699	0	\N	f			Qut.Lrt	1	0
+3243	584	4339	4700	0	\N	f			Qut.Lrt	1	0
+3244	584	4340	4701	0	\N	f			Qut.Lrt	1	0
+3245	584	4341	4702	615	5	f			100ml	1	10
+3246	584	4342	4703	2410	5	f			500ml	1	10
+3247	584	4343	4704	1080	5	f			500ml	1	10
+3248	584	4344	4705	0	\N	f			Qut.Lrt	1	0
+3249	584	4345	4706	830	5	f			500gm	1	10
+3250	584	4346	4707	1780	5	f			500gm	1	10
+3251	584	4347	4708	0	\N	f			gm	1	0
+3252	584	4348	4709	455	5	f			500gm	1	10
+3253	584	4349	4710	1280	5	f			500ml	1	10
+3254	584	4350	4711	360	5	f			125ml	1	10
+3255	584	4351	4712	2777	5	f			100gm	1	10
+3256	584	4352	4713	655	5	f			500gm	1	10
+3257	584	4353	4714	820	5	f			500gm	1	10
+3258	584	4354	4715	210	5	f			125ml	1	10
+3259	584	4355	4716	555	5	f			500ml	1	10
+3260	584	4356	4717	1300	5	f			500gm	1	10
+3261	584	4357	4718	2210	5	f			500gm	1	10
+3262	584	4358	4719	0	2	f		Loba Chemie	Qut.Lrt	1	0
+3263	584	4359	4720	6432	5	f			5gm	1	10
+3264	584	4360	4721	430	5	f			500ml	1	10
+3265	584	4361	4722	18700	5	f			500gm	1	10
+3266	584	4362	4723	710	5	f			500gm	1	10
+3267	584	4363	4724	766	5	f			500ml	1	10
+3268	584	4364	4725	300	5	f			500gm	1	10
+3269	584	4365	4726	750	5	f			500gm	1	10
+3270	584	4366	4727	810	5	f			500gm	1	10
+3271	584	4367	4728	1265	5	f			500gm	1	10
+3272	584	4368	4729	980	5	f			500gm	1	10
+3273	584	4369	4730	2430	5	f			500ml	1	10
+3274	584	4370	4731	1003	5	f			250gm	1	10
+3275	584	4371	4732	655	5	f			500gm	1	10
+3276	584	4372	4733	655	5	f			500ml	1	10
+3277	584	4373	4734	0	\N	f			Qut.Lrt	1	0
+3278	584	4374	4735	780	5	f			500gm	1	10
+3279	584	4375	4736	260	5	f			500gm	1	10
+3280	584	4376	4737	0	\N	f			gm	1	0
+3281	584	4377	4738	1278	5	f			500gm	1	10
+3282	584	4378	4739	1630	5	f			500gm	1	10
+3283	584	4379	4740	980	5	f			500ml	1	10
+3284	584	4380	4741	370	5	f			125ml	1	10
+3285	584	4381	4742	1285	5	f			100gm	1	10
+3286	584	4382	4743	68700	5	f			500gm	1	10
+3287	584	4383	4744	50069	5	f			250gm	1	10
+3288	584	4384	4745	385	5	f			500ml	1	10
+3289	584	4385	4746	0	\N	f			ml	1	0
+3290	584	4386	4747	0	\N	f			ml	1	0
+3291	584	4387	4748	745	5	f			500ml	1	10
+3292	584	4388	4749	1230	5	f			500gm	1	10
+3293	584	4389	4750	29273	5	f			100gm	1	10
+3294	584	4390	4751	1717	5	f			500gm	1	10
+3295	584	4391	4752	655	5	f			500ml	1	10
+3296	584	4392	4753	1137	5	f			500ml	1	10
+3297	584	4393	4754	850	5	f			500gm	1	10
+3298	584	4394	4755	1062	5	f			100gm	1	10
+3299	584	4395	4756	0	\N	f			Qut.Lrt	1	0
+3300	584	4396	4757	4606	5	f			500gm	1	10
+3301	584	4397	4758	0	\N	f			Qut.Lrt	1	0
+3302	584	4398	4759	2983	5	f			500ml	1	10
+3303	584	4399	4760	3651	5	f			500gm	1	10
+3304	584	4400	4761	1430	5	f			100gm	1	10
+3305	584	4401	4762	0	\N	f			Qut.Lrt	1	0
+3306	584	4402	4763	3780	5	f			500gm	1	10
+3307	584	4403	4764	775	5	f			500ml	1	10
+3308	584	4404	4765	680	5	f			500ml	1	10
+3309	584	4405	4766	4976	5	f			25gm	1	10
+3310	584	4406	4767	0	\N	f			Qut.Lrt	1	0
+3311	584	4407	4768	767	5	f			500gm	1	10
+3312	584	4408	4769	255	5	f			125ml	1	10
+3313	584	4409	4770	4650	5	f			500ml	1	10
+3314	584	4410	4771	1031	5	f			500gm	1	10
+3315	584	4411	4772	0	\N	f			Qut.Lrt	1	0
+3316	584	4412	4773	23122	5	f			500gm	1	10
+3317	584	4413	4774	670	5	f			500gm	1	10
+3318	584	4414	4775	0	\N	f			Qut.Lrt	1	0
+3319	584	4415	4776	1860	5	f			500gm	1	10
+3320	584	4416	4777	10800	5	f			500gm	1	10
+3321	584	4417	4778	8600	5	f			500gm	1	10
+3322	584	4418	4779	1100	5	f			500gm	1	10
+3323	584	4419	4780	760	5	f			500gm	1	10
+3324	584	4420	4781	1290	5	f			500gm	1	10
+3325	584	4421	4782	0	\N	f			Qut.Lrt	1	0
+3326	584	4422	4783	589	5	f			500gm	1	10
+3327	584	4423	4784	0	\N	f			Qut.Lrt	1	0
+3328	584	4424	4785	460	5	f			500gm	1	10
+3329	584	4425	4786	1240	5	f			500gm	1	10
+3330	584	4426	4787	1031	5	f			500gm	1	10
+3331	584	4427	4788	0	\N	f			Qut.Lrt	1	0
+3332	584	4428	4789	8532	5	f			100gm	1	10
+3333	584	4429	4790	14950	5	f			500gm	1	10
+3334	584	4430	4791	1031	5	f			500gm	1	10
+3335	584	4431	4792	680	5	f			500gm	1	10
+3336	584	4432	4793	34614	5	f			500gm	1	10
+3337	584	4433	4794	1031	5	f			500gm	1	10
+3338	584	4434	4795	0	\N	f			Qut.Lrt	1	0
+3339	584	4435	4796	830	5	f			500ml	1	10
+3340	584	4436	4797	1132	5	f			500ml	1	10
+3341	584	4437	4798	29145	5	f			500gm	1	10
+3342	584	4438	4799	0	\N	f			Qut.Lrt	1	0
+3343	584	4439	4800	12890	5	f			1gm	1	10
+3344	584	4440	4801	216	5	f			125ml	1	10
+3345	584	4441	4802	870	5	f			25gm	1	10
+3346	584	4442	4803	770	5	f			500gm	1	10
+3347	584	4443	4804	0	\N	f			Qut.Lrt	1	0
+3348	584	4444	4805	5750	5	f			500gm	1	10
+3349	584	4445	4806	586	5	f			500gm	1	10
+3350	584	4446	4807	740	5	f			500gm	1	10
+3351	584	4447	4808	369	5	f			500gm	1	10
+3352	584	4448	4809	288	5	f			500gm	1	10
+3353	584	4449	4810	755	5	f			500gm	1	10
+3354	584	4450	4811	0	\N	f			gm	1	0
+3355	584	4451	4812	1100	5	f			500gm	1	10
+3356	584	4452	4813	433	5	f			500gm	1	10
+3357	584	4453	4814	280	5	f			500ml	1	10
+3358	584	4454	4815	560	5	f			500gm	1	10
+3359	584	4455	4816	5749	5	f			500gm	1	10
+3360	584	4456	4819	2940	5	f			500gm	1	10
+3361	584	4457	4820	620	5	f			500gm	1	10
+3362	584	4458	4821	2508	5	f			100gm	1	10
+3363	584	4459	4822	0	\N	f			Qut.Lrt	1	0
+3364	584	4460	4823	800	5	f			100gm	1	10
+3365	584	4461	4824	2825	5	f			250gm	1	10
+3366	584	4462	4825	1320	5	f			500gm	1	10
+3367	584	4463	4826	1320	5	f			500gm	1	10
+3368	584	4464	4827	890	5	f			500gm	1	10
+3369	584	4465	4828	360	5	f			500gm	1	10
+3370	584	4466	4829	0	\N	f			gm	1	0
+3371	584	4467	4830	900	5	f			500gm	1	10
+3372	584	4468	4831	1465	5	f			500gm	1	10
+3373	584	4469	4832	270	5	f			500gm	1	10
+3374	584	4470	4833	1496	5	f			500gm	1	10
+3375	584	4471	4834	3877	5	f			500l	1	10
+3376	584	4472	4835	1149	5	f			500ml	1	10
+3377	584	4473	4847	356	5	f			125ml	1	10
+3378	584	4474	4848	1193	5	f			500gm	1	10
+3379	584	4475	4849	1193	5	f			500gm	1	10
+3380	584	4476	4850	630	5	f			500gm	1	10
+3381	584	4477	4851	1923	5	f			500gm	1	10
+3382	584	4478	4852	1430	5	f			500gm	1	10
+3383	584	4479	4853	1318	5	f			500gm	1	10
+3384	584	4480	4854	1808	5	f			2.5ltr	1	10
+3385	584	4481	4855	1678	5	f			2.5ltr	1	10
+3386	584	4482	4856	2655	5	f			500ml	1	10
+3387	584	4483	4857	430	5	f			500ml	1	10
+3388	584	4484	4858	420	5	f			500ml	1	10
+3389	584	4485	4859	460	5	f			500ml	1	10
+3390	584	4486	4860	610	5	f			500ml	1	10
+3391	584	4487	4861	420	5	f			500ml	1	10
+3392	584	4488	4862	666	5	f			500ml	1	10
+3393	584	4489	4863	480	5	f			500ml	1	10
+3394	584	4490	4864	655	5	f			500ml	1	10
+3395	584	4491	4865	900	5	f			500ml	1	10
+3396	584	4492	4866	98	5	f			NOS	1	10
+3397	584	4493	4867	0	\N	f			NOS	1	0
+3398	584	4494	4868	144	5	f			NOS	1	10
+3399	584	4495	4604	3280	5	f			500gm	1	10
+3400	584	4496	4605	0	\N	f			kit	1	0
+3401	584	4497	4606	2450	5	f			500ml	1	10
+3402	584	4498	4607	0	\N	f			ml	1	0
+3403	584	4499	4608	0	\N	f			ml	1	0
+3404	584	4500	4609	12300	5	f			250gm	1	10
+3405	584	4501	4610	5200	5	f			500gm	1	10
+3406	584	4502	4611	775	5	f			500gm	1	10
+3407	584	4503	4612	3200	5	f			500gm	1	10
+3408	584	4504	4613	3180	5	f			500ml	1	10
+3409	584	4505	4614	530	5	f			500gm	1	10
+3410	584	4506	4615	560	5	f			500ml	1	10
+3411	584	4507	4836	1024	5	f			500gm	1	10
+3412	584	4508	4837	296	5	f			125ml	1	10
+3413	584	4509	4838	0	\N	f			Qut.Lrt	1	0
+3414	584	4510	4839	640	5	f			500ml	1	10
+3415	584	4511	4840	980	5	f			500gm	1	10
+3416	584	4512	4841	380	5	f			100gm	1	10
+3417	584	4513	4842	830	5	f			500ml	1	10
+3418	584	4514	4843	1072	5	f			500ml	1	10
+3419	584	4515	4844	1150	5	f			500ml	1	10
+3420	584	4516	4845	1377	5	f			100gm	1	10
+3421	584	4517	4846	1124	5	f			500ml	1	10
+3778	586	4342	4703	691.74	6	f		Sigma	gm	1	15
+3779	586	4343	4704	1841.62	6	f		Loba Chemie	nos	1	15
+3780	586	4344	4705	3089.61	6	f			ml	1	15
+3781	586	4345	4706	2079.25	6	f		Qualigens	ml	1	15
+3782	586	4346	4707	747.3	6	f		SDFine	kg	1	15
+3783	586	4347	4708	0	\N	t			gm	1	0
+3784	586	4348	4709	4267.63	6	f		Thermo Fisher	gm	1	15
+3785	586	4349	4710	1854.68	6	f		Qualigens	nos	1	15
 1826	581	3986	4817	4844.47	21	f		Loba Chemie	box	1	10
 1827	581	3987	4818	4117.35	7	f		Loba Chemie	kg	1	10
 1828	581	3988	4869	1811.8	7	f		Merck	gm	1	10
@@ -23760,6 +25300,7 @@ COPY public.vendor_quotation_items (id, vendor_quotation_id, qr_item_id, materia
 1893	581	4053	4680	2424.17	21	f		Loba Chemie	kg	1	10
 1894	581	4054	4681	399.07	14	f		Loba Chemie	box	1	10
 1895	581	4055	4682	1339.43	21	f		Merck	ml	1	10
+3786	586	4350	4711	4577.17	6	f		Loba Chemie	box	1	15
 1896	581	4056	4683	1749.85	30	f		Thermo Fisher	nos	1	10
 1897	581	4057	4684	4659.12	10	f		Qualigens	nos	1	10
 1898	581	4058	4685	1843.39	30	f		Qualigens	nos	1	10
@@ -23956,6 +25497,9 @@ COPY public.vendor_quotation_items (id, vendor_quotation_id, qr_item_id, materia
 2089	581	4249	4844	2418.49	10	f		Qualigens	ml	1	10
 2090	581	4250	4845	1547.65	30	f		Qualigens	nos	1	10
 2091	581	4251	4846	2856.55	14	f		Merck	ml	1	10
+3422	585	4252	4817	4844.47	21	f		Loba Chemie	box	1	0
+3423	585	4253	4818	4117.35	7	f		Loba Chemie	kg	1	0
+3424	585	4254	4869	1811.8	7	f		Merck	gm	1	0
 3145	583	4507	4836	4042.04	\N	f			ml	1	12
 3146	583	4508	4837	3255.65	\N	f		Thermo Fisher	gm	1	12
 3147	583	4509	4838	1760.01	\N	f		Qualigens	ltr	1	12
@@ -24019,9 +25563,19 @@ COPY public.vendor_quotation_items (id, vendor_quotation_id, qr_item_id, materia
 2673	582	4301	4662	2911.26	7	f		Thermo Fisher	kg	1	3
 2674	582	4302	4663	4705.08	21	f		SDFine	kg	1	3
 2675	582	4303	4664	781.32	21	f		Qualigens	nos	1	3
+3425	585	4255	4616	906.45	21	f		Merck	gm	1	0
+3426	585	4256	4617	59.6	10	f		Merck	nos	1	0
 3142	583	4504	4613	266.25	\N	f			ltr	1	13
 3144	583	4506	4615	737.35	\N	f		Merck	ml	1	13
 3143	583	4505	4614	2652.18	\N	f		Qualigens	ml	1	14
+3427	585	4257	4618	3347.45	7	f		Qualigens	ltr	1	0
+3428	585	4258	4619	3917.72	21	f		Merck	ml	1	0
+3429	585	4259	4620	4460.71	30	f		Loba Chemie	box	1	0
+3430	585	4260	4621	2988.96	10	f		Merck	box	1	0
+3431	585	4261	4622	235.34	30	f		Sigma	ltr	1	0
+3432	585	4262	4623	490.33	14	f		Qualigens	gm	1	0
+3433	585	4263	4624	4233.92	21	f		Merck	gm	1	0
+3434	585	4264	4625	3397.36	10	f		Sigma	box	1	0
 2890	583	4252	4817	4124.69	\N	f		Merck	ml	1	14
 2891	583	4253	4818	4343.3	\N	f		Loba Chemie	ltr	1	12
 2892	583	4254	4869	4919.35	\N	f		Qualigens	nos	1	12
@@ -24213,6 +25767,272 @@ COPY public.vendor_quotation_items (id, vendor_quotation_id, qr_item_id, materia
 3078	583	4440	4801	1103.51	\N	f		SDFine	gm	1	12
 3079	583	4441	4802	2725.6	\N	f		Qualigens	box	1	12
 3080	583	4442	4803	4224.03	\N	f		Merck	nos	1	12
+3435	585	4265	4626	1463.83	21	f		Merck	nos	1	0
+3436	585	4266	4627	3751.36	21	f			ml	1	0
+3437	585	4267	4628	430.52	14	f		Thermo Fisher	kg	1	0
+3438	585	4268	4629	4999.99	10	f		Loba Chemie	ml	1	0
+3439	585	4269	4630	3158.44	7	f			gm	1	0
+3440	585	4270	4631	4955.08	10	f		Loba Chemie	ml	1	0
+3441	585	4271	4632	2662.17	30	f		Merck	kg	1	0
+3442	585	4272	4633	4077.88	14	f		Sigma	ml	1	0
+3443	585	4273	4634	4040.93	21	f		Loba Chemie	gm	1	0
+3444	585	4274	4635	872.18	10	f		SDFine	kg	1	0
+3445	585	4275	4636	3773.43	30	f			ml	1	0
+3446	585	4276	4637	0	\N	f			ml	1	0
+3447	585	4277	4638	2196.68	14	f		Sigma	ml	1	0
+3448	585	4278	4639	4681.49	30	f		Loba Chemie	ml	1	0
+3449	585	4279	4640	3582.72	10	f		Merck	ml	1	0
+3450	585	4280	4641	1193.39	14	f		Qualigens	box	1	0
+3451	585	4281	4642	3168.88	10	f		Qualigens	ml	1	0
+3452	585	4282	4643	2411.16	14	f		SDFine	ml	1	0
+3453	585	4283	4644	1613.77	10	f			box	1	0
+3454	585	4284	4645	235.21	10	f		Qualigens	ltr	1	0
+3455	585	4285	4646	2579.77	7	f		Sigma	nos	1	0
+3456	585	4286	4647	254.59	7	f		Qualigens	ml	1	0
+3457	585	4287	4648	4000.08	21	f		Qualigens	ltr	1	0
+3458	585	4288	4649	0	\N	f			ml	1	0
+3459	585	4289	4650	887.48	21	f		Loba Chemie	gm	1	0
+3460	585	4290	4651	1945.11	10	f		Sigma	nos	1	0
+3461	585	4291	4652	2213.33	14	f		SDFine	kg	1	0
+3462	585	4292	4653	1890.07	30	f		Thermo Fisher	gm	1	0
+3463	585	4293	4654	698.06	10	f		Qualigens	ltr	1	0
+3464	585	4294	4655	4792.59	7	f		Qualigens	box	1	0
+3465	585	4295	4656	2800.08	30	f		Loba Chemie	nos	1	0
+3466	585	4296	4657	4497.35	10	f			kg	1	0
+3467	585	4297	4658	1780.18	30	f			box	1	0
+3468	585	4298	4659	908.41	7	f		SDFine	ltr	1	0
+3469	585	4299	4660	4518.19	21	f		Thermo Fisher	kg	1	0
+3470	585	4300	4661	4551.4	30	f			ltr	1	0
+3471	585	4301	4662	2911.26	7	f		Thermo Fisher	kg	1	0
+3472	585	4302	4663	4705.08	21	f		SDFine	kg	1	0
+3473	585	4303	4664	781.32	21	f		Qualigens	nos	1	0
+3474	585	4304	4665	2380.55	10	f		Qualigens	ml	1	0
+3475	585	4305	4666	3176.8	14	f		Merck	gm	1	0
+3476	585	4306	4667	3934.94	21	f		Thermo Fisher	ltr	1	0
+3477	585	4307	4668	4169.9	21	f		Sigma	ml	1	0
+3478	585	4308	4669	1225.21	14	f		Sigma	kg	1	0
+3479	585	4309	4670	3516.97	30	f		Thermo Fisher	gm	1	0
+3480	585	4310	4671	3884.87	7	f		Loba Chemie	ltr	1	0
+3481	585	4311	4672	4113.04	30	f		Thermo Fisher	box	1	0
+3482	585	4312	4673	3361.64	21	f		Loba Chemie	ml	1	0
+3483	585	4313	4674	3039.2	30	f		Thermo Fisher	ml	1	0
+3484	585	4314	4675	1987.45	10	f		Loba Chemie	nos	1	0
+3485	585	4315	4676	4981.41	14	f		SDFine	kg	1	0
+3486	585	4316	4677	524.29	30	f		Thermo Fisher	ltr	1	0
+3487	585	4317	4678	630.47	30	f		Thermo Fisher	nos	1	0
+3488	585	4318	4679	702.31	7	f			gm	1	0
+3489	585	4319	4680	2424.17	21	f		Loba Chemie	kg	1	0
+3490	585	4320	4681	399.07	14	f		Loba Chemie	box	1	0
+3491	585	4321	4682	1339.43	21	f		Merck	ml	1	0
+3492	585	4322	4683	1749.85	30	f		Thermo Fisher	nos	1	0
+3493	585	4323	4684	4659.12	10	f		Qualigens	nos	1	0
+3494	585	4324	4685	1843.39	30	f		Qualigens	nos	1	0
+3495	585	4325	4686	3280.85	30	f		Sigma	gm	1	0
+3496	585	4326	4687	0	\N	f			ml	1	0
+3497	585	4327	4688	0	\N	f			ml	1	0
+3498	585	4328	4689	4717.26	14	f		Qualigens	box	1	0
+3499	585	4329	4690	1005.67	21	f		Sigma	nos	1	0
+3500	585	4330	4691	4024.53	14	f		Merck	kg	1	0
+3501	585	4331	4692	3837	30	f		Merck	box	1	0
+3502	585	4332	4693	873.32	7	f		SDFine	ml	1	0
+3503	585	4333	4694	1129.43	10	f		Loba Chemie	box	1	0
+3504	585	4334	4695	1570.42	10	f		Loba Chemie	ltr	1	0
+3505	585	4335	4696	142.1	10	f		SDFine	nos	1	0
+3506	585	4336	4697	2009.16	10	f		Merck	ltr	1	0
+3507	585	4337	4698	3078.58	10	f		Thermo Fisher	ltr	1	0
+3508	585	4338	4699	3666.06	21	f		Thermo Fisher	kg	1	0
+3509	585	4339	4700	3267.57	30	f		Loba Chemie	gm	1	0
+3510	585	4340	4701	616.77	10	f		Sigma	nos	1	0
+3511	585	4341	4702	831.47	30	f		Merck	box	1	0
+3512	585	4342	4703	691.74	30	f		Sigma	gm	1	0
+3513	585	4343	4704	1841.62	7	f		Loba Chemie	nos	1	0
+3514	585	4344	4705	3089.61	10	f			ml	1	0
+3515	585	4345	4706	2079.25	14	f		Qualigens	ml	1	0
+3516	585	4346	4707	747.3	21	f		SDFine	kg	1	0
+3517	585	4347	4708	0	\N	f			gm	1	0
+3518	585	4348	4709	4267.63	21	f		Thermo Fisher	gm	1	0
+3519	585	4349	4710	1854.68	21	f		Qualigens	nos	1	0
+3520	585	4350	4711	4577.17	21	f		Loba Chemie	box	1	0
+3521	585	4351	4712	1169.68	10	f		Loba Chemie	nos	1	0
+3522	585	4352	4713	2348.59	14	f		Merck	ml	1	0
+3523	585	4353	4714	1444.76	14	f		Qualigens	kg	1	0
+3524	585	4354	4715	2440.65	21	f		Loba Chemie	kg	1	0
+3525	585	4355	4716	2880.22	7	f		Thermo Fisher	nos	1	0
+3526	585	4356	4717	887.7	30	f		SDFine	nos	1	0
+3527	585	4357	4718	3108.09	14	f		Loba Chemie	nos	1	0
+3528	585	4358	4719	157.93	10	f		Loba Chemie	nos	1	0
+3529	585	4359	4720	487.82	7	f		Thermo Fisher	kg	1	0
+3530	585	4360	4721	126.64	7	f		Loba Chemie	nos	1	0
+3531	585	4361	4722	672.18	21	f		Thermo Fisher	ltr	1	0
+3532	585	4362	4723	836.88	21	f		Loba Chemie	kg	1	0
+3533	585	4363	4724	4227.13	21	f		Qualigens	ml	1	0
+3534	585	4364	4725	1950.51	10	f		Merck	kg	1	0
+3535	585	4365	4726	2934.48	7	f		Loba Chemie	ml	1	0
+3536	585	4366	4727	327.11	14	f		Sigma	ltr	1	0
+3537	585	4367	4728	1350.96	7	f		SDFine	kg	1	0
+3538	585	4368	4729	724.81	10	f		SDFine	gm	1	0
+3539	585	4369	4730	2472.16	21	f		SDFine	ml	1	0
+3540	585	4370	4731	4766.17	30	f		Thermo Fisher	box	1	0
+3541	585	4371	4732	4864.16	7	f			ml	1	0
+3542	585	4372	4733	4193.38	10	f			ltr	1	0
+3543	585	4373	4734	4423.39	14	f			kg	1	0
+3544	585	4374	4735	1842.8	30	f		Sigma	ml	1	0
+3545	585	4375	4736	4760.3	21	f			nos	1	0
+3546	585	4376	4737	0	\N	f			gm	1	0
+3547	585	4377	4738	2743.46	10	f		SDFine	box	1	0
+3548	585	4378	4739	2965.97	30	f		Merck	ml	1	0
+3549	585	4379	4740	4048.67	10	f		Merck	ltr	1	0
+3550	585	4380	4741	3444.66	21	f		Qualigens	ltr	1	0
+3551	585	4381	4742	648.76	21	f			ml	1	0
+3552	585	4382	4743	4097.06	14	f		Sigma	nos	1	0
+3553	585	4383	4744	1583.94	21	f		Sigma	ltr	1	0
+3554	585	4384	4745	121.09	21	f		Merck	nos	1	0
+3555	585	4385	4746	0	\N	f			ml	1	0
+3556	585	4386	4747	0	\N	f			ml	1	0
+3557	585	4387	4748	3054.99	10	f		Qualigens	box	1	0
+3558	585	4388	4749	3584.69	7	f		Loba Chemie	gm	1	0
+3559	585	4389	4750	2288.67	7	f		Loba Chemie	nos	1	0
+3560	585	4390	4751	3965.53	30	f		Loba Chemie	gm	1	0
+3561	585	4391	4752	1255.01	14	f		Thermo Fisher	ltr	1	0
+3562	585	4392	4753	562.15	10	f		Sigma	kg	1	0
+3563	585	4393	4754	4670.17	7	f		Thermo Fisher	ml	1	0
+3564	585	4394	4755	1795.33	30	f		Thermo Fisher	gm	1	0
+3565	585	4395	4756	2681.2	14	f			kg	1	0
+3566	585	4396	4757	937.97	30	f			ltr	1	0
+3567	585	4397	4758	4359.01	10	f		SDFine	ltr	1	0
+3568	585	4398	4759	4751.63	30	f		Merck	nos	1	0
+3569	585	4399	4760	3812.85	7	f		Loba Chemie	ltr	1	0
+3570	585	4400	4761	1425.29	30	f		Merck	ml	1	0
+3571	585	4401	4762	1596.94	7	f		Merck	box	1	0
+3572	585	4402	4763	4481	21	f		SDFine	box	1	0
+3573	585	4403	4764	4268.6	10	f			gm	1	0
+3574	585	4404	4765	2866.38	10	f		Sigma	gm	1	0
+3575	585	4405	4766	4937.55	14	f		SDFine	ml	1	0
+3576	585	4406	4767	2385.87	21	f		Thermo Fisher	kg	1	0
+3577	585	4407	4768	1654.61	30	f		Thermo Fisher	nos	1	0
+3578	585	4408	4769	1072.53	21	f			box	1	0
+3579	585	4409	4770	3092.6	21	f		SDFine	box	1	0
+3580	585	4410	4771	4210.61	21	f		Merck	nos	1	0
+3581	585	4411	4772	2307.35	7	f		SDFine	box	1	0
+3582	585	4412	4773	1738.5	10	f		Qualigens	ltr	1	0
+3583	585	4413	4774	2339.12	7	f		SDFine	box	1	0
+3584	585	4414	4775	3026.49	30	f		Sigma	ml	1	0
+3585	585	4415	4776	2743.1	30	f		SDFine	nos	1	0
+3586	585	4416	4777	1892.16	21	f		Thermo Fisher	gm	1	0
+3587	585	4417	4778	593.31	21	f		Merck	ltr	1	0
+3588	585	4418	4779	179.45	14	f		Merck	nos	1	0
+3589	585	4419	4780	422.83	21	f		Sigma	nos	1	0
+3590	585	4420	4781	2534.73	14	f		SDFine	kg	1	0
+3591	585	4421	4782	2859.61	21	f		Loba Chemie	ml	1	0
+3592	585	4422	4783	4700.21	21	f		Qualigens	ml	1	0
+3593	585	4423	4784	3989.63	14	f		Merck	kg	1	0
+3594	585	4424	4785	2632.21	10	f			ml	1	0
+3595	585	4425	4786	4270.12	30	f			ml	1	0
+3596	585	4426	4787	3953.99	21	f		SDFine	nos	1	0
+3597	585	4427	4788	1257.19	30	f		SDFine	box	1	0
+3598	585	4428	4789	2685.95	21	f		Sigma	ltr	1	0
+3599	585	4429	4790	1186.68	14	f		Thermo Fisher	ml	1	0
+3600	585	4430	4791	2027.78	10	f		Qualigens	ltr	1	0
+3601	585	4431	4792	988.87	21	f		Qualigens	kg	1	0
+3602	585	4432	4793	4591.68	10	f		Thermo Fisher	ml	1	0
+3603	585	4433	4794	2598.69	10	f		Loba Chemie	gm	1	0
+3604	585	4434	4795	2348.61	10	f		Qualigens	ml	1	0
+3605	585	4435	4796	2724.62	30	f		Thermo Fisher	ltr	1	0
+3606	585	4436	4797	3212.59	21	f		Qualigens	kg	1	0
+3607	585	4437	4798	4036.98	14	f		Merck	ltr	1	0
+3608	585	4438	4799	4104.45	10	f		SDFine	box	1	0
+3609	585	4439	4800	2021.15	7	f		Sigma	kg	1	0
+3610	585	4440	4801	1713.27	10	f		Qualigens	box	1	0
+3611	585	4441	4802	1131.09	10	f		Sigma	kg	1	0
+3612	585	4442	4803	2980.04	14	f		Loba Chemie	gm	1	0
+3613	585	4443	4804	64.39	7	f		Qualigens	nos	1	0
+3614	585	4444	4805	4152.02	14	f		Sigma	gm	1	0
+3615	585	4445	4806	2188.17	14	f			ltr	1	0
+3616	585	4446	4807	1712.26	21	f		Sigma	ltr	1	0
+3617	585	4447	4808	202.54	10	f		SDFine	kg	1	0
+3618	585	4448	4809	4245.72	7	f		SDFine	nos	1	0
+3619	585	4449	4810	3090.79	21	f		Loba Chemie	ml	1	0
+3620	585	4450	4811	0	\N	f			gm	1	0
+3621	585	4451	4812	4223.82	14	f		Qualigens	gm	1	0
+3622	585	4452	4813	1511.94	7	f		SDFine	ltr	1	0
+3623	585	4453	4814	3639.21	21	f		Qualigens	nos	1	0
+3624	585	4454	4815	4935.92	7	f		Qualigens	ml	1	0
+3625	585	4455	4816	2321.16	14	f		Sigma	ml	1	0
+3626	585	4456	4819	4333.56	14	f		SDFine	gm	1	0
+3627	585	4457	4820	550.51	21	f		Qualigens	gm	1	0
+3628	585	4458	4821	4131.6	21	f		Qualigens	gm	1	0
+3629	585	4459	4822	2384.64	10	f		Sigma	kg	1	0
+3630	585	4460	4823	2129.09	7	f		SDFine	ltr	1	0
+3631	585	4461	4824	1593.04	7	f		Thermo Fisher	nos	1	0
+3632	585	4462	4825	1842.06	7	f		Thermo Fisher	nos	1	0
+3633	585	4463	4826	2052.41	7	f			ltr	1	0
+3634	585	4464	4827	3742.76	30	f		Thermo Fisher	ml	1	0
+3635	585	4465	4828	1960.71	30	f		Merck	box	1	0
+3636	585	4466	4829	0	\N	f			gm	1	0
+3637	585	4467	4830	2918.26	21	f		SDFine	box	1	0
+3638	585	4468	4831	2495.33	10	f		SDFine	ml	1	0
+3639	585	4469	4832	1075.72	7	f			box	1	0
+3640	585	4470	4833	3201.2	14	f		Thermo Fisher	ml	1	0
+3641	585	4471	4834	1722.33	21	f			nos	1	0
+3642	585	4472	4835	2497.51	30	f		Sigma	ml	1	0
+3643	585	4473	4847	4377.46	30	f		Qualigens	gm	1	0
+3644	585	4474	4848	1220.87	7	f			nos	1	0
+3645	585	4475	4849	2676.7	7	f		Sigma	nos	1	0
+3646	585	4476	4850	193.92	7	f			nos	1	0
+3647	585	4477	4851	2789.03	10	f			gm	1	0
+3648	585	4478	4852	3662.24	10	f		Loba Chemie	gm	1	0
+3649	585	4479	4853	3251.51	7	f		Qualigens	nos	1	0
+3650	585	4480	4854	4112.16	14	f			nos	1	0
+3651	585	4481	4855	2493.15	14	f		Thermo Fisher	kg	1	0
+3652	585	4482	4856	192.43	21	f		Loba Chemie	kg	1	0
+3653	585	4483	4857	1577.1	30	f		Qualigens	gm	1	0
+3654	585	4484	4858	1010.46	21	f		SDFine	nos	1	0
+3655	585	4485	4859	515.9	30	f			kg	1	0
+3656	585	4486	4860	2238.89	10	f		Sigma	nos	1	0
+3657	585	4487	4861	65.98	14	f		Loba Chemie	nos	1	0
+3658	585	4488	4862	4843.66	30	f		Thermo Fisher	ml	1	0
+3659	585	4489	4863	626.53	21	f		Qualigens	box	1	0
+3660	585	4490	4864	207.65	14	f		Sigma	box	1	0
+3661	585	4491	4865	1497.85	30	f		Loba Chemie	box	1	0
+3662	585	4492	4866	0	\N	f			NOS	1	0
+3663	585	4493	4867	1353.63	10	f		Sigma	box	1	0
+3664	585	4494	4868	4022.43	21	f		Qualigens	box	1	0
+3665	585	4495	4604	4552.86	21	f		Thermo Fisher	ltr	1	0
+3666	585	4496	4605	3425.83	10	f		Sigma	ml	1	0
+3667	585	4497	4606	3600.05	21	f		Sigma	gm	1	0
+3668	585	4498	4607	0	\N	f			ml	1	0
+3669	585	4499	4608	0	\N	f			ml	1	0
+3670	585	4500	4609	1371.08	21	f		Qualigens	ltr	1	0
+3671	585	4501	4610	3463.49	21	f		Loba Chemie	nos	1	0
+3672	585	4502	4611	1928.42	21	f		Sigma	gm	1	0
+3673	585	4503	4612	3893.98	14	f		Loba Chemie	ml	1	0
+3674	585	4504	4613	491.21	21	f		Merck	kg	1	0
+3675	585	4505	4614	2829.44	10	f		Thermo Fisher	ml	1	0
+3676	585	4506	4615	1054.28	10	f		Qualigens	box	1	0
+3677	585	4507	4836	1539.97	30	f		SDFine	ltr	1	0
+3678	585	4508	4837	963.08	30	f		Thermo Fisher	ltr	1	0
+3679	585	4509	4838	2235.47	10	f		Loba Chemie	gm	1	0
+3680	585	4510	4839	1938.06	14	f			ml	1	0
+3681	585	4511	4840	646.51	14	f		Qualigens	kg	1	0
+3682	585	4512	4841	1698.62	21	f		Sigma	ml	1	0
+3683	585	4513	4842	4524.01	7	f		Qualigens	nos	1	0
+3684	585	4514	4843	2857.83	30	f		Loba Chemie	kg	1	0
+3685	585	4515	4844	2418.49	10	f		Qualigens	ml	1	0
+3686	585	4516	4845	1547.65	30	f		Qualigens	nos	1	0
+3687	585	4517	4846	2856.55	14	f		Merck	ml	1	0
+3787	586	4351	4712	1169.68	6	f		Loba Chemie	nos	1	15
+3788	586	4352	4713	2348.59	6	f		Merck	ml	1	15
+3789	586	4353	4714	1444.76	6	f		Qualigens	kg	1	15
+3790	586	4354	4715	2440.65	6	f		Loba Chemie	kg	1	15
+3791	586	4355	4716	2880.22	6	f		Thermo Fisher	nos	1	15
+3792	586	4356	4717	887.7	6	f		SDFine	nos	1	15
+3793	586	4357	4718	3108.09	6	f		Loba Chemie	nos	1	15
+3688	586	4252	4817	4844.47	6	f		Loba Chemie	box	1	15
+3689	586	4253	4818	4117.35	6	f		Loba Chemie	kg	1	15
+3690	586	4254	4869	1811.8	6	f		Merck	gm	1	15
+3691	586	4255	4616	906.45	6	f		Merck	gm	1	15
+3692	586	4256	4617	59.6	6	f		Merck	nos	1	15
+3693	586	4257	4618	3347.45	6	f		Qualigens	ltr	1	15
 3081	583	4443	4804	4498.58	\N	f		Sigma	ltr	1	12
 3082	583	4444	4805	3884.16	\N	f		Qualigens	gm	1	12
 3083	583	4445	4806	4514.77	\N	f		Sigma	box	1	12
@@ -24488,6 +26308,250 @@ COPY public.vendor_quotation_items (id, vendor_quotation_id, qr_item_id, materia
 2887	582	4515	4844	2418.49	10	f		Qualigens	ml	1	3
 2888	582	4516	4845	1547.65	30	f		Qualigens	nos	1	3
 2889	582	4517	4846	2856.55	14	f		Merck	ml	1	3
+3694	586	4258	4619	3917.72	6	f		Merck	ml	1	15
+3695	586	4259	4620	4460.71	6	f		Loba Chemie	box	1	15
+3696	586	4260	4621	2988.96	6	f		Merck	box	1	15
+3697	586	4261	4622	235.34	6	f		Sigma	ltr	1	15
+3698	586	4262	4623	490.33	6	f		Qualigens	gm	1	15
+3699	586	4263	4624	4233.92	6	f		Merck	gm	1	15
+3700	586	4264	4625	3397.36	6	f		Sigma	box	1	15
+3701	586	4265	4626	1463.83	6	f		Merck	nos	1	15
+3702	586	4266	4627	3751.36	6	f			ml	1	15
+3703	586	4267	4628	430.52	6	f		Thermo Fisher	kg	1	15
+3704	586	4268	4629	4999.99	6	f		Loba Chemie	ml	1	15
+3705	586	4269	4630	3158.44	6	f			gm	1	15
+3706	586	4270	4631	4955.08	6	f		Loba Chemie	ml	1	15
+3707	586	4271	4632	2662.17	6	f		Merck	kg	1	15
+3708	586	4272	4633	4077.88	6	f		Sigma	ml	1	15
+3709	586	4273	4634	4040.93	6	f		Loba Chemie	gm	1	15
+3710	586	4274	4635	872.18	6	f		SDFine	kg	1	15
+3711	586	4275	4636	3773.43	6	f			ml	1	15
+3712	586	4276	4637	0	\N	t			ml	1	0
+3713	586	4277	4638	2196.68	6	f		Sigma	ml	1	15
+3714	586	4278	4639	4681.49	6	f		Loba Chemie	ml	1	15
+3715	586	4279	4640	3582.72	6	f		Merck	ml	1	15
+3716	586	4280	4641	1193.39	6	f		Qualigens	box	1	15
+3717	586	4281	4642	3168.88	6	f		Qualigens	ml	1	15
+3718	586	4282	4643	2411.16	6	f		SDFine	ml	1	15
+3719	586	4283	4644	1613.77	6	f			box	1	15
+3720	586	4284	4645	235.21	6	f		Qualigens	ltr	1	15
+3721	586	4285	4646	2579.77	6	f		Sigma	nos	1	15
+3722	586	4286	4647	254.59	6	f		Qualigens	ml	1	15
+3723	586	4287	4648	4000.08	6	f		Qualigens	ltr	1	15
+3724	586	4288	4649	0	\N	t			ml	1	0
+3725	586	4289	4650	887.48	6	f		Loba Chemie	gm	1	15
+3726	586	4290	4651	1945.11	6	f		Sigma	nos	1	15
+3727	586	4291	4652	2213.33	6	f		SDFine	kg	1	15
+3728	586	4292	4653	1890.07	6	f		Thermo Fisher	gm	1	15
+3729	586	4293	4654	698.06	6	f		Qualigens	ltr	1	15
+3730	586	4294	4655	4792.59	6	f		Qualigens	box	1	15
+3731	586	4295	4656	2800.08	6	f		Loba Chemie	nos	1	15
+3732	586	4296	4657	4497.35	6	f			kg	1	15
+3733	586	4297	4658	1780.18	6	f			box	1	15
+3734	586	4298	4659	908.41	6	f		SDFine	ltr	1	15
+3735	586	4299	4660	4518.19	6	f		Thermo Fisher	kg	1	15
+3736	586	4300	4661	4551.4	6	f			ltr	1	15
+3737	586	4301	4662	2911.26	6	f		Thermo Fisher	kg	1	15
+3738	586	4302	4663	4705.08	6	f		SDFine	kg	1	15
+3739	586	4303	4664	781.32	6	f		Qualigens	nos	1	15
+3740	586	4304	4665	2380.55	6	f		Qualigens	ml	1	15
+3741	586	4305	4666	3176.8	6	f		Merck	gm	1	15
+3742	586	4306	4667	3934.94	6	f		Thermo Fisher	ltr	1	15
+3743	586	4307	4668	4169.9	6	f		Sigma	ml	1	15
+3744	586	4308	4669	1225.21	6	f		Sigma	kg	1	15
+3745	586	4309	4670	3516.97	6	f		Thermo Fisher	gm	1	15
+3746	586	4310	4671	3884.87	6	f		Loba Chemie	ltr	1	15
+3747	586	4311	4672	4113.04	6	f		Thermo Fisher	box	1	15
+3748	586	4312	4673	3361.64	6	f		Loba Chemie	ml	1	15
+3749	586	4313	4674	3039.2	6	f		Thermo Fisher	ml	1	15
+3750	586	4314	4675	1987.45	6	f		Loba Chemie	nos	1	15
+3751	586	4315	4676	4981.41	6	f		SDFine	kg	1	15
+3752	586	4316	4677	524.29	6	f		Thermo Fisher	ltr	1	15
+3753	586	4317	4678	630.47	6	f		Thermo Fisher	nos	1	15
+3754	586	4318	4679	702.31	6	f			gm	1	15
+3755	586	4319	4680	2424.17	6	f		Loba Chemie	kg	1	15
+3756	586	4320	4681	399.07	6	f		Loba Chemie	box	1	15
+3757	586	4321	4682	1339.43	6	f		Merck	ml	1	15
+3758	586	4322	4683	1749.85	6	f		Thermo Fisher	nos	1	15
+3759	586	4323	4684	4659.12	6	f		Qualigens	nos	1	15
+3760	586	4324	4685	1843.39	6	f		Qualigens	nos	1	15
+3761	586	4325	4686	3280.85	6	f		Sigma	gm	1	15
+3762	586	4326	4687	0	\N	t			ml	1	0
+3763	586	4327	4688	0	\N	t			ml	1	0
+3764	586	4328	4689	4717.26	6	f		Qualigens	box	1	15
+3765	586	4329	4690	1005.67	6	f		Sigma	nos	1	15
+3766	586	4330	4691	4024.53	6	f		Merck	kg	1	15
+3767	586	4331	4692	3837	6	f		Merck	box	1	15
+3768	586	4332	4693	873.32	6	f		SDFine	ml	1	15
+3769	586	4333	4694	1129.43	6	f		Loba Chemie	box	1	15
+3770	586	4334	4695	1570.42	6	f		Loba Chemie	ltr	1	15
+3771	586	4335	4696	142.1	6	f		SDFine	nos	1	15
+3772	586	4336	4697	2009.16	6	f		Merck	ltr	1	15
+3773	586	4337	4698	3078.58	6	f		Thermo Fisher	ltr	1	15
+3774	586	4338	4699	3666.06	6	f		Thermo Fisher	kg	1	15
+3775	586	4339	4700	3267.57	6	f		Loba Chemie	gm	1	15
+3776	586	4340	4701	616.77	6	f		Sigma	nos	1	15
+3777	586	4341	4702	831.47	6	f		Merck	box	1	15
+3794	586	4358	4719	157.93	6	f		Loba Chemie	nos	1	15
+3795	586	4359	4720	487.82	6	f		Thermo Fisher	kg	1	15
+3796	586	4360	4721	126.64	6	f		Loba Chemie	nos	1	15
+3797	586	4361	4722	672.18	6	f		Thermo Fisher	ltr	1	15
+3798	586	4362	4723	836.88	6	f		Loba Chemie	kg	1	15
+3799	586	4363	4724	4227.13	6	f		Qualigens	ml	1	15
+3800	586	4364	4725	1950.51	6	f		Merck	kg	1	15
+3801	586	4365	4726	2934.48	6	f		Loba Chemie	ml	1	15
+3802	586	4366	4727	327.11	6	f		Sigma	ltr	1	15
+3803	586	4367	4728	1350.96	6	f		SDFine	kg	1	15
+3804	586	4368	4729	724.81	6	f		SDFine	gm	1	15
+3805	586	4369	4730	2472.16	6	f		SDFine	ml	1	15
+3806	586	4370	4731	4766.17	6	f		Thermo Fisher	box	1	15
+3807	586	4371	4732	4864.16	6	f			ml	1	15
+3808	586	4372	4733	4193.38	6	f			ltr	1	15
+3809	586	4373	4734	4423.39	6	f			kg	1	15
+3810	586	4374	4735	1842.8	6	f		Sigma	ml	1	15
+3811	586	4375	4736	4760.3	6	f			nos	1	15
+3812	586	4376	4737	0	\N	t			gm	1	0
+3813	586	4377	4738	2743.46	6	f		SDFine	box	1	15
+3814	586	4378	4739	2965.97	6	f		Merck	ml	1	15
+3815	586	4379	4740	4048.67	6	f		Merck	ltr	1	15
+3816	586	4380	4741	3444.66	6	f		Qualigens	ltr	1	15
+3817	586	4381	4742	648.76	6	f			ml	1	15
+3818	586	4382	4743	4097.06	6	f		Sigma	nos	1	15
+3819	586	4383	4744	1583.94	6	f		Sigma	ltr	1	15
+3820	586	4384	4745	121.09	6	f		Merck	nos	1	15
+3821	586	4385	4746	0	\N	t			ml	1	0
+3822	586	4386	4747	0	\N	t			ml	1	0
+3823	586	4387	4748	3054.99	6	f		Qualigens	box	1	15
+3824	586	4388	4749	3584.69	6	f		Loba Chemie	gm	1	15
+3825	586	4389	4750	2288.67	6	f		Loba Chemie	nos	1	15
+3826	586	4390	4751	3965.53	6	f		Loba Chemie	gm	1	15
+3827	586	4391	4752	1255.01	6	f		Thermo Fisher	ltr	1	15
+3828	586	4392	4753	562.15	6	f		Sigma	kg	1	15
+3829	586	4393	4754	4670.17	6	f		Thermo Fisher	ml	1	15
+3830	586	4394	4755	1795.33	6	f		Thermo Fisher	gm	1	15
+3831	586	4395	4756	2681.2	6	f			kg	1	15
+3832	586	4396	4757	937.97	6	f			ltr	1	15
+3833	586	4397	4758	4359.01	6	f		SDFine	ltr	1	15
+3834	586	4398	4759	4751.63	6	f		Merck	nos	1	15
+3835	586	4399	4760	3812.85	6	f		Loba Chemie	ltr	1	15
+3836	586	4400	4761	1425.29	6	f		Merck	ml	1	15
+3837	586	4401	4762	1596.94	6	f		Merck	box	1	15
+3838	586	4402	4763	4481	6	f		SDFine	box	1	15
+3839	586	4403	4764	4268.6	6	f			gm	1	15
+3840	586	4404	4765	2866.38	6	f		Sigma	gm	1	15
+3841	586	4405	4766	4937.55	6	f		SDFine	ml	1	15
+3842	586	4406	4767	2385.87	6	f		Thermo Fisher	kg	1	15
+3843	586	4407	4768	1654.61	6	f		Thermo Fisher	nos	1	15
+3844	586	4408	4769	1072.53	6	f			box	1	15
+3845	586	4409	4770	3092.6	6	f		SDFine	box	1	15
+3846	586	4410	4771	4210.61	6	f		Merck	nos	1	15
+3847	586	4411	4772	2307.35	6	f		SDFine	box	1	15
+3848	586	4412	4773	1738.5	6	f		Qualigens	ltr	1	15
+3849	586	4413	4774	2339.12	6	f		SDFine	box	1	15
+3850	586	4414	4775	3026.49	6	f		Sigma	ml	1	15
+3851	586	4415	4776	2743.1	6	f		SDFine	nos	1	15
+3852	586	4416	4777	1892.16	6	f		Thermo Fisher	gm	1	15
+3853	586	4417	4778	593.31	6	f		Merck	ltr	1	15
+3854	586	4418	4779	179.45	6	f		Merck	nos	1	15
+3855	586	4419	4780	422.83	6	f		Sigma	nos	1	15
+3856	586	4420	4781	2534.73	6	f		SDFine	kg	1	15
+3857	586	4421	4782	2859.61	6	f		Loba Chemie	ml	1	15
+3858	586	4422	4783	4700.21	6	f		Qualigens	ml	1	15
+3859	586	4423	4784	3989.63	6	f		Merck	kg	1	15
+3860	586	4424	4785	2632.21	6	f			ml	1	15
+3861	586	4425	4786	4270.12	6	f			ml	1	15
+3862	586	4426	4787	3953.99	6	f		SDFine	nos	1	15
+3863	586	4427	4788	1257.19	6	f		SDFine	box	1	15
+3864	586	4428	4789	2685.95	6	f		Sigma	ltr	1	15
+3865	586	4429	4790	1186.68	6	f		Thermo Fisher	ml	1	15
+3866	586	4430	4791	2027.78	6	f		Qualigens	ltr	1	15
+3867	586	4431	4792	988.87	6	f		Qualigens	kg	1	15
+3868	586	4432	4793	4591.68	6	f		Thermo Fisher	ml	1	15
+3869	586	4433	4794	2598.69	6	f		Loba Chemie	gm	1	15
+3870	586	4434	4795	2348.61	6	f		Qualigens	ml	1	15
+3871	586	4435	4796	2724.62	6	f		Thermo Fisher	ltr	1	15
+3872	586	4436	4797	3212.59	6	f		Qualigens	kg	1	15
+3873	586	4437	4798	4036.98	6	f		Merck	ltr	1	15
+3874	586	4438	4799	4104.45	6	f		SDFine	box	1	15
+3875	586	4439	4800	2021.15	6	f		Sigma	kg	1	15
+3876	586	4440	4801	1713.27	6	f		Qualigens	box	1	15
+3877	586	4441	4802	1131.09	6	f		Sigma	kg	1	15
+3878	586	4442	4803	2980.04	6	f		Loba Chemie	gm	1	15
+3879	586	4443	4804	64.39	6	f		Qualigens	nos	1	15
+3880	586	4444	4805	4152.02	6	f		Sigma	gm	1	15
+3881	586	4445	4806	2188.17	6	f			ltr	1	15
+3882	586	4446	4807	1712.26	6	f		Sigma	ltr	1	15
+3883	586	4447	4808	202.54	6	f		SDFine	kg	1	15
+3884	586	4448	4809	4245.72	6	f		SDFine	nos	1	15
+3885	586	4449	4810	3090.79	6	f		Loba Chemie	ml	1	15
+3886	586	4450	4811	0	\N	t			gm	1	0
+3887	586	4451	4812	4223.82	6	f		Qualigens	gm	1	15
+3888	586	4452	4813	1511.94	6	f		SDFine	ltr	1	15
+3889	586	4453	4814	3639.21	6	f		Qualigens	nos	1	15
+3890	586	4454	4815	4935.92	6	f		Qualigens	ml	1	15
+3891	586	4455	4816	2321.16	6	f		Sigma	ml	1	15
+3892	586	4456	4819	4333.56	6	f		SDFine	gm	1	15
+3893	586	4457	4820	550.51	6	f		Qualigens	gm	1	15
+3894	586	4458	4821	4131.6	6	f		Qualigens	gm	1	15
+3895	586	4459	4822	2384.64	6	f		Sigma	kg	1	15
+3896	586	4460	4823	2129.09	6	f		SDFine	ltr	1	15
+3897	586	4461	4824	1593.04	6	f		Thermo Fisher	nos	1	15
+3898	586	4462	4825	1842.06	6	f		Thermo Fisher	nos	1	15
+3899	586	4463	4826	2052.41	6	f			ltr	1	15
+3900	586	4464	4827	3742.76	6	f		Thermo Fisher	ml	1	15
+3901	586	4465	4828	1960.71	6	f		Merck	box	1	15
+3902	586	4466	4829	0	\N	t			gm	1	0
+3903	586	4467	4830	2918.26	6	f		SDFine	box	1	15
+3904	586	4468	4831	2495.33	6	f		SDFine	ml	1	15
+3905	586	4469	4832	1075.72	6	f			box	1	15
+3906	586	4470	4833	3201.2	6	f		Thermo Fisher	ml	1	15
+3907	586	4471	4834	1722.33	6	f			nos	1	15
+3908	586	4472	4835	2497.51	6	f		Sigma	ml	1	15
+3909	586	4473	4847	4377.46	6	f		Qualigens	gm	1	15
+3910	586	4474	4848	1220.87	6	f			nos	1	15
+3911	586	4475	4849	2676.7	6	f		Sigma	nos	1	15
+3912	586	4476	4850	193.92	6	f			nos	1	15
+3913	586	4477	4851	2789.03	6	f			gm	1	15
+3914	586	4478	4852	3662.24	6	f		Loba Chemie	gm	1	15
+3915	586	4479	4853	3251.51	6	f		Qualigens	nos	1	15
+3916	586	4480	4854	4112.16	6	f			nos	1	15
+3917	586	4481	4855	2493.15	6	f		Thermo Fisher	kg	1	15
+3918	586	4482	4856	192.43	6	f		Loba Chemie	kg	1	15
+3919	586	4483	4857	1577.1	6	f		Qualigens	gm	1	15
+3920	586	4484	4858	1010.46	6	f		SDFine	nos	1	15
+3921	586	4485	4859	515.9	6	f			kg	1	15
+3922	586	4486	4860	2238.89	6	f		Sigma	nos	1	15
+3923	586	4487	4861	65.98	6	f		Loba Chemie	nos	1	15
+3924	586	4488	4862	4843.66	6	f		Thermo Fisher	ml	1	15
+3925	586	4489	4863	626.53	6	f		Qualigens	box	1	15
+3926	586	4490	4864	207.65	6	f		Sigma	box	1	15
+3927	586	4491	4865	1497.85	6	f		Loba Chemie	box	1	15
+3928	586	4492	4866	0	\N	t			NOS	1	0
+3929	586	4493	4867	1353.63	6	f		Sigma	box	1	15
+3930	586	4494	4868	4022.43	6	f		Qualigens	box	1	15
+3931	586	4495	4604	4552.86	6	f		Thermo Fisher	ltr	1	15
+3932	586	4496	4605	3425.83	6	f		Sigma	ml	1	15
+3933	586	4497	4606	3600.05	6	f		Sigma	gm	1	15
+3934	586	4498	4607	0	\N	t			ml	1	0
+3935	586	4499	4608	0	\N	t			ml	1	0
+3936	586	4500	4609	1371.08	6	f		Qualigens	ltr	1	15
+3937	586	4501	4610	3463.49	6	f		Loba Chemie	nos	1	15
+3938	586	4502	4611	1928.42	6	f		Sigma	gm	1	15
+3939	586	4503	4612	3893.98	6	f		Loba Chemie	ml	1	15
+3940	586	4504	4613	491.21	6	f		Merck	kg	1	15
+3941	586	4505	4614	2829.44	6	f		Thermo Fisher	ml	1	15
+3942	586	4506	4615	1054.28	6	f		Qualigens	box	1	15
+3943	586	4507	4836	1539.97	6	f		SDFine	ltr	1	15
+3944	586	4508	4837	963.08	6	f		Thermo Fisher	ltr	1	15
+3945	586	4509	4838	2235.47	6	f		Loba Chemie	gm	1	15
+3946	586	4510	4839	1938.06	6	f			ml	1	15
+3947	586	4511	4840	646.51	6	f		Qualigens	kg	1	15
+3948	586	4512	4841	1698.62	6	f		Sigma	ml	1	15
+3949	586	4513	4842	4524.01	6	f		Qualigens	nos	1	15
+3950	586	4514	4843	2857.83	6	f		Loba Chemie	kg	1	15
+3951	586	4515	4844	2418.49	6	f		Qualigens	ml	1	15
+3952	586	4516	4845	1547.65	6	f		Qualigens	nos	1	15
+3953	586	4517	4846	2856.55	6	f		Merck	ml	1	15
 \.
 
 
@@ -24583,6 +26647,9 @@ COPY public.vendor_quotations (id, qr_id, vendor_id, quotation_number, quotation
 581	222	72		\N	2026-08-06	/api/uploads/quotations/qr_222_v_72_sample_quotation_full.xlsx		Draft	3	2026-08-06 20:34:34.63301
 582	224	70	JM01	2026-08-06	2026-08-07	/api/uploads/quotations/qr_224_v_70_sample_quotation_full.xlsx		Received	3	2026-08-07 11:10:58.12859
 583	224	69		2026-08-04	2026-08-10	/api/uploads/quotations/qr_224_v_69_sample_quotation_full.pdf		Draft	3	2026-08-10 11:07:06.272719
+584	224	71		\N	2026-08-18	/api/uploads/quotations/qr_224_v_71_Isiri.xlsx		Draft	3	2026-08-18 13:54:16.256477
+585	224	73		\N	2026-08-18	/api/uploads/quotations/qr_224_v_73_sample_quotation_full.xlsx		Draft	3	2026-08-18 13:55:18.262152
+586	224	72	QUO4132	2026-08-17	2026-08-18	/api/uploads/quotations/qr_224_v_72_sample_quotation_full.xlsx		Received	3	2026-08-18 13:57:49.739569
 \.
 
 
@@ -24614,7 +26681,8 @@ COPY public.vendor_work_order_items (id, vwo_id, material_id, description, quant
 -- Data for Name: vendor_work_orders; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.vendor_work_orders (id, tenant_id, site_id, vwo_number, institution_id, vendor_id, complaint_id, equipment_id, priority, target_date, service_type, scope_of_work, vendor_instructions, quotation_no, vendor_quote_amount, labour_charges, service_charges, tax, total_approved_amount, status, created_by_id, is_deleted, created_at, updated_at) FROM stdin;
+COPY public.vendor_work_orders (id, tenant_id, site_id, vwo_number, institution_id, vendor_id, equipment_id, priority, target_date, service_type, scope_of_work, vendor_instructions, quotation_no, vendor_quote_amount, labour_charges, service_charges, tax, total_approved_amount, status, created_by_id, is_deleted, created_at, updated_at) FROM stdin;
+1	1	1	VWO-00001	11	\N	1609	Normal	2026-08-20	Repair	Testing Auto Vendor Work Order generation for AMC Equipment	\N	\N	0	0	0	0	0	Draft	8	f	2026-08-17 14:26:38.074955	2026-08-17 14:26:38.074969
 \.
 
 
@@ -24648,6 +26716,7 @@ COPY public.vendors (id, tenant_id, site_id, name, code, contact_person, phone, 
 69	2	2	AIC ENTERPRISES PVT LTD	VND-00008	AICENT	9742270172	ilangkumaran@nissigrid.in	29AASCA0900A1Z3	\N	Bangalore	29 - Karnataka	560058	\N	\N	\N	4.5	t	f	2026-08-06 16:45:15.340276	2026-08-06 19:15:24.8115	V-79A and V-79B, 1ST A Main Road	2nd Stage, Peenya Industrial Estate	Approved	2	3	2026-08-06 13:45:24.810803	\N	\N	\N	Approved	3	2026-08-06 12:12:39.00556	{"email": {"old": "customercare.ka@nissigrid.in", "new": "ilangkumaran@nissigrid.in"}}
 63	2	2	ELCAB ENGINEERS PRIVATE LIMITED	VND-00002	Bala	47347347833	pradnesha12345@gmail.com	29AACCE9951H1ZR	\N	Bangalore	29 - Karnataka	560060	\N	\N	\N	4.5	t	f	2026-06-12 01:31:58.140808	2026-08-17 10:29:40.712343	V R Cindem Complex, Sy. No. 1193/34/4, Kengeri Main Road,	Behind Mr Prem Bun, Ramasandra Village,	Approved	1	3	2026-08-17 04:59:40.711144	\N	\N	\N	Approved	\N	\N	{"phone": {"old": "47347347837", "new": "47347347833"}}
 75	2	2	sam	VND-00014	sam	0987123898	sam@gmail.com	27ABCDE1234F2Z5	\N	chennai	33 - Tamil Nadu	600094	\N	\N	\N	5	t	f	2026-08-17 10:33:12.443748	2026-08-17 10:33:38.728703	main road, north street.		Approved	1	3	2026-08-17 05:03:38.727901	\N	\N	\N	\N	\N	\N	\N
+76	2	2	Sakthi	VND-00015	sakthi	9835863778	sakthi@gmail.com	29ABCDE1234F1Z5	\N	Bengaluru	29 - Karnataka	500001	\N	\N	\N	5	t	f	2026-08-18 10:55:42.660685	2026-08-18 10:56:17.576042	north street, main road		Approved	1	3	2026-08-18 05:26:17.572458	\N	\N	\N	\N	\N	\N	\N
 \.
 
 
@@ -24673,7 +26742,6 @@ COPY public.warehouses (id, tenant_id, site_id, name, code, project_id, warehous
 60	3	3	Regional Store	STO-0015	1	Regional	Bangalore	\N	\N	4	t	f	2026-05-15 15:19:36.650066
 61	3	3	Scrap Store	SCRAP	1	Scrap	\N	\N	\N	\N	t	f	2026-05-20 12:59:53.29867
 62	2	2	Central Store	WH-CENTRAL	3	Main	\N	\N	\N	\N	t	f	2026-06-11 21:58:45.403171
-63	2	2	Civil Store	WH-00001	3	Store		\N		\N	t	f	2026-06-12 01:56:21.68741
 64	2	2	Electrical Store	WH-00002	3	Store		\N		\N	t	f	2026-06-12 01:57:08.636245
 65	2	2	HOSP EQPT	WH-00003	3	Store		\N		\N	t	f	2026-06-12 01:57:26.731566
 66	2	2	HOSPITAL Store	WH-00004	3	Store		\N		\N	t	f	2026-06-12 01:57:44.267901
@@ -24686,6 +26754,8 @@ COPY public.warehouses (id, tenant_id, site_id, name, code, project_id, warehous
 69	2	2	Plumbing Store	WH-00007	3	De centralized		\N		\N	f	t	2026-06-12 01:59:25.241904
 75	2	2	IT store	WH-00012	3	Central	chennai	\N	aadhav	\N	t	f	2026-08-17 10:37:19.182694
 76	2	2	ram	WH-00013	3	Central	banglore	\N	ramanan	\N	f	f	2026-08-17 10:37:57.209012
+63	2	2	Civil Store	WH-00001	3	Store		\N		\N	t	f	2026-06-12 01:56:21.68741
+77	2	2	Electricals	WH-00014	3	Central	Chennai	\N	giri	\N	t	f	2026-08-18 10:46:38.068462
 \.
 
 
@@ -24704,6 +26774,11 @@ COPY public.work_order_approvals (id, wo_id, approval_flow_id, approver_id, appr
 COPY public.work_order_items (id, wo_id, material_id, quantity, rate, amount, received_quantity, approved_quantity, discount_percent, cgst_percentage, sgst_percentage, igst_percentage, is_gst_inclusive, remarks) FROM stdin;
 1	1	2564	4	16526.16	66105	0	\N	0	6	6	0	t	\N
 4	6	2564	100	23	2499	0	\N	3	6	6	0	f	\N
+5	7	2564	100	23	2524	0	\N	2	6	6	0	f	\N
+6	8	2564	100	23	2473	0	\N	4	6	6	0	f	\N
+7	9	2565	5	26703.28	145052	0	\N	3	6	6	0	f	\N
+8	10	2751	10	10443.43	118303	0	\N	4	9	9	0	f	\N
+9	11	2751	4	10443.43	47814	0	\N	3	9	9	0	f	\N
 \.
 
 
@@ -24714,6 +26789,12 @@ COPY public.work_order_items (id, wo_id, material_id, quantity, rate, amount, re
 COPY public.work_orders (id, tenant_id, site_id, wo_number, vendor_id, project_id, institution_id, contract_id, equipment_id, wo_type, advance_percentage, total_amount, target_completion_date, status, current_approval_level, terms, remarks, annexure, created_by_id, approved_by_id, approved_at, is_deleted, created_at, updated_at) FROM stdin;
 1	2	2	WO-00001	69	3	11	\N	1605	AMC	0	66105	\N	Sent to Vendor	1	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	\N		3	3	2026-08-12 08:23:56.194158	f	2026-08-12 11:26:55.501055	2026-08-12 13:54:54.028142
 6	2	2	WO-00002	66	3	10	3	1604	AMC	0	2499	\N	Approved	1	1. Bill/Invoices in the name of East Point College of Physiotherapy managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	\N		3	3	2026-08-17 05:21:07.90497	f	2026-08-17 10:50:58.117879	2026-08-17 10:51:07.905554
+7	2	2	WO-00003	66	3	12	3	1608	CMC	0	2524	\N	Submitted	1	1. Bill/Invoices in the name of East Point Pre-University College managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	\N		3	\N	\N	f	2026-08-17 12:52:36.985471	2026-08-17 12:52:36.98552
+8	2	2	WO-00004	66	3	11	3	\N	AMC	0	2473	\N	Submitted	1	1. Bill/Invoices in the name of East Point Allied Health Sciences managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	\N		3	\N	\N	f	2026-08-17 12:53:18.241895	2026-08-17 12:53:18.241937
+9	2	2	WO-00005	66	3	12	3	\N	AMC	0	145052	\N	Submitted	1	1. Bill/Invoices in the name of East Point Pre-University College managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	\N		3	\N	\N	f	2026-08-17 12:53:55.611555	2026-08-17 12:53:55.611599
+10	2	2	WO-00006	63	3	9	2	\N	AMC	0	118303	\N	Approved	1	1. Bill/Invoices in the name of New Royal College of Nursing managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	\N		3	3	2026-08-17 07:25:28.080236	f	2026-08-17 12:54:58.988485	2026-08-17 12:55:28.08275
+11	2	2	WO-00007	63	3	10	2	\N	AMC	0	47814	\N	Approved	1	1. Bill/Invoices in the name of East Point College of Physiotherapy managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	\N		3	3	2026-08-18 06:22:55.464803	f	2026-08-18 11:52:24.877197	2026-08-18 11:52:55.465517
+12	2	2	WO-00008	63	3	11	2	1	AMC	0	1545454	\N	Approved	1	1. Bill/Invoices in the name of EAST POINT HOSPITAL managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	\N		3	3	2026-08-18 17:59:07.164155	f	2026-08-18 23:25:51.645155	2026-08-18 23:29:07.164849
 \.
 
 
@@ -24732,6 +26813,9 @@ COPY public.write_off_items (id, write_off_id, material_id, warehouse_id, quanti
 10	10	2435	62	2	4657.57	9315.14	\N	\N	\N	\N
 11	11	2338	62	1	4352.49	4352.49	f	0	1	1
 12	12	2338	62	1	4352.49	4352.49	f	0	1	1
+13	14	2564	62	1	16526.16	16526.16	f	0	\N	\N
+14	18	4608	62	1	460	460	f	0	1611	79
+15	19	2565	62	1	26703.28	26703.28	f	0	\N	\N
 \.
 
 
@@ -24750,6 +26834,9 @@ COPY public.write_offs (id, tenant_id, site_id, write_off_number, date, reason, 
 10	2	2	WO-00008	2026-07-09	lost 	Approved	1	3	3	2026-07-09 07:51:15.64808	f	2026-07-09 13:20:30.394309	2026-07-09 13:21:15.743396	Lost / Stolen		\N	\N
 11	2	2	WO-00009	2026-08-03	Equipment Write Off	Rejected	1	3	\N	\N	f	2026-08-03 18:55:32.87775	2026-08-03 19:15:50.964498	Damaged in Handling			
 12	2	2	EWO-00001	2026-08-03	Equipment Write Off	Approved	1	3	3	2026-08-12 05:37:29.303859	f	2026-08-03 19:15:13.906801	2026-08-12 11:07:29.402274	Damaged in Handling			
+14	2	2	WO-00010	2026-08-17	product expired	Approved	1	3	3	2026-08-17 07:08:21.843444	f	2026-08-17 12:38:07.43634	2026-08-17 12:38:21.859441	Expired / Shelf-life	/api/uploads/write_offs/2/20260817_070731_5e50efd2.pdf	Biochemistry	/api/uploads/write_offs/2/20260817_070740_771c2d16.pdf
+18	2	2	EWO-00002	2026-08-17	Equipment Write Off	Approved	1	3	3	2026-08-17 09:09:06.563911	f	2026-08-17 14:38:54.402781	2026-08-17 14:39:06.615689	Damaged in Handling	/api/uploads/write_offs/2/20260817_090846_274e2fbb.pdf		/api/uploads/write_offs/2/20260817_090851_dd1b7c8e.pdf
+19	2	2	WO-00011	2026-08-18	damaged	Approved	1	3	3	2026-08-18 06:01:10.247606	f	2026-08-18 11:30:51.049822	2026-08-18 11:31:10.261171	Damaged in Handling	/api/uploads/write_offs/2/20260818_060034_6192c0e4.pdf	Admin	/api/uploads/write_offs/2/20260818_060043_8b013ed9.pdf
 \.
 
 
@@ -24757,14 +26844,14 @@ COPY public.write_offs (id, tenant_id, site_id, write_off_number, date, reason, 
 -- Name: alerts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.alerts_id_seq', 80, true);
+SELECT pg_catalog.setval('public.alerts_id_seq', 91, true);
 
 
 --
 -- Name: approval_flows_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.approval_flows_id_seq', 123, true);
+SELECT pg_catalog.setval('public.approval_flows_id_seq', 138, true);
 
 
 --
@@ -24792,7 +26879,7 @@ SELECT pg_catalog.setval('public.calibration_schedules_id_seq', 24, true);
 -- Name: categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.categories_id_seq', 80, true);
+SELECT pg_catalog.setval('public.categories_id_seq', 81, true);
 
 
 --
@@ -24806,56 +26893,56 @@ SELECT pg_catalog.setval('public.company_addresses_id_seq', 6, true);
 -- Name: complaint_documents_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.complaint_documents_id_seq', 5, true);
+SELECT pg_catalog.setval('public.complaint_documents_id_seq', 8, true);
 
 
 --
 -- Name: complaint_images_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.complaint_images_id_seq', 23, true);
+SELECT pg_catalog.setval('public.complaint_images_id_seq', 26, true);
 
 
 --
 -- Name: complaints_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.complaints_id_seq', 445, true);
+SELECT pg_catalog.setval('public.complaints_id_seq', 458, true);
 
 
 --
 -- Name: contract_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.contract_approvals_id_seq', 11, true);
+SELECT pg_catalog.setval('public.contract_approvals_id_seq', 16, true);
 
 
 --
 -- Name: contract_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.contract_items_id_seq', 6, true);
+SELECT pg_catalog.setval('public.contract_items_id_seq', 8, true);
 
 
 --
 -- Name: contracts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.contracts_id_seq', 6, true);
+SELECT pg_catalog.setval('public.contracts_id_seq', 8, true);
 
 
 --
 -- Name: current_stock_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.current_stock_id_seq', 4401, true);
+SELECT pg_catalog.setval('public.current_stock_id_seq', 4403, true);
 
 
 --
 -- Name: department_material_limits_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.department_material_limits_id_seq', 262, true);
+SELECT pg_catalog.setval('public.department_material_limits_id_seq', 265, true);
 
 
 --
@@ -24869,21 +26956,21 @@ SELECT pg_catalog.setval('public.departments_id_seq', 335, true);
 -- Name: document_sequences_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.document_sequences_id_seq', 115, true);
+SELECT pg_catalog.setval('public.document_sequences_id_seq', 148, true);
 
 
 --
 -- Name: equipment_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.equipment_history_id_seq', 2, true);
+SELECT pg_catalog.setval('public.equipment_history_id_seq', 10, true);
 
 
 --
 -- Name: equipment_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.equipment_items_id_seq', 1605, true);
+SELECT pg_catalog.setval('public.equipment_items_id_seq', 1612, true);
 
 
 --
@@ -24904,56 +26991,56 @@ SELECT pg_catalog.setval('public.floors_id_seq', 30, true);
 -- Name: gate_entries_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.gate_entries_id_seq', 206, true);
+SELECT pg_catalog.setval('public.gate_entries_id_seq', 209, true);
 
 
 --
 -- Name: gate_pass_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.gate_pass_items_id_seq', 23, true);
+SELECT pg_catalog.setval('public.gate_pass_items_id_seq', 25, true);
 
 
 --
 -- Name: gate_passes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.gate_passes_id_seq', 22, true);
+SELECT pg_catalog.setval('public.gate_passes_id_seq', 24, true);
 
 
 --
 -- Name: grn_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.grn_id_seq', 217, true);
+SELECT pg_catalog.setval('public.grn_id_seq', 220, true);
 
 
 --
 -- Name: grn_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.grn_items_id_seq', 521, true);
+SELECT pg_catalog.setval('public.grn_items_id_seq', 523, true);
 
 
 --
 -- Name: indent_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.indent_approvals_id_seq', 92, true);
+SELECT pg_catalog.setval('public.indent_approvals_id_seq', 100, true);
 
 
 --
 -- Name: indent_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.indent_items_id_seq', 524, true);
+SELECT pg_catalog.setval('public.indent_items_id_seq', 528, true);
 
 
 --
 -- Name: indents_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.indents_id_seq', 242, true);
+SELECT pg_catalog.setval('public.indents_id_seq', 244, true);
 
 
 --
@@ -24967,14 +27054,14 @@ SELECT pg_catalog.setval('public.institutions_id_seq', 20, true);
 -- Name: invoice_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.invoice_items_id_seq', 65, true);
+SELECT pg_catalog.setval('public.invoice_items_id_seq', 70, true);
 
 
 --
 -- Name: invoices_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.invoices_id_seq', 13, true);
+SELECT pg_catalog.setval('public.invoices_id_seq', 15, true);
 
 
 --
@@ -24988,35 +27075,35 @@ SELECT pg_catalog.setval('public.location_master_id_seq', 149, true);
 -- Name: material_issue_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.material_issue_items_id_seq', 221, true);
+SELECT pg_catalog.setval('public.material_issue_items_id_seq', 230, true);
 
 
 --
 -- Name: material_issues_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.material_issues_id_seq', 241, true);
+SELECT pg_catalog.setval('public.material_issues_id_seq', 250, true);
 
 
 --
 -- Name: material_return_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.material_return_items_id_seq', 16, true);
+SELECT pg_catalog.setval('public.material_return_items_id_seq', 17, true);
 
 
 --
 -- Name: material_returns_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.material_returns_id_seq', 25, true);
+SELECT pg_catalog.setval('public.material_returns_id_seq', 26, true);
 
 
 --
 -- Name: materials_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.materials_id_seq', 4869, true);
+SELECT pg_catalog.setval('public.materials_id_seq', 4875, true);
 
 
 --
@@ -25037,7 +27124,7 @@ SELECT pg_catalog.setval('public.organizations_id_seq', 4, true);
 -- Name: password_reset_tokens_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.password_reset_tokens_id_seq', 8, true);
+SELECT pg_catalog.setval('public.password_reset_tokens_id_seq', 9, true);
 
 
 --
@@ -25058,42 +27145,42 @@ SELECT pg_catalog.setval('public.projects_id_seq', 9, true);
 -- Name: purchase_order_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_order_approvals_id_seq', 121, true);
+SELECT pg_catalog.setval('public.purchase_order_approvals_id_seq', 124, true);
 
 
 --
 -- Name: purchase_order_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_order_items_id_seq', 1746, true);
+SELECT pg_catalog.setval('public.purchase_order_items_id_seq', 1748, true);
 
 
 --
 -- Name: purchase_orders_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_orders_id_seq', 276, true);
+SELECT pg_catalog.setval('public.purchase_orders_id_seq', 278, true);
 
 
 --
 -- Name: purchase_request_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_request_approvals_id_seq', 50, true);
+SELECT pg_catalog.setval('public.purchase_request_approvals_id_seq', 54, true);
 
 
 --
 -- Name: purchase_request_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_request_items_id_seq', 626, true);
+SELECT pg_catalog.setval('public.purchase_request_items_id_seq', 628, true);
 
 
 --
 -- Name: purchase_requests_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_requests_id_seq', 207, true);
+SELECT pg_catalog.setval('public.purchase_requests_id_seq', 209, true);
 
 
 --
@@ -25114,35 +27201,35 @@ SELECT pg_catalog.setval('public.quotation_negotiation_history_id_seq', 23, true
 -- Name: quotation_request_item_sources_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_request_item_sources_id_seq', 4430, true);
+SELECT pg_catalog.setval('public.quotation_request_item_sources_id_seq', 4965, true);
 
 
 --
 -- Name: quotation_request_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_request_items_id_seq', 4783, true);
+SELECT pg_catalog.setval('public.quotation_request_items_id_seq', 5318, true);
 
 
 --
 -- Name: quotation_request_prs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_request_prs_id_seq', 31, true);
+SELECT pg_catalog.setval('public.quotation_request_prs_id_seq', 33, true);
 
 
 --
 -- Name: quotation_request_vendors_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_request_vendors_id_seq', 519, true);
+SELECT pg_catalog.setval('public.quotation_request_vendors_id_seq', 535, true);
 
 
 --
 -- Name: quotation_requests_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_requests_id_seq', 224, true);
+SELECT pg_catalog.setval('public.quotation_requests_id_seq', 227, true);
 
 
 --
@@ -25163,7 +27250,7 @@ SELECT pg_catalog.setval('public.repair_work_orders_id_seq', 1, false);
 -- Name: role_permissions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.role_permissions_id_seq', 1490, true);
+SELECT pg_catalog.setval('public.role_permissions_id_seq', 1541, true);
 
 
 --
@@ -25191,28 +27278,28 @@ SELECT pg_catalog.setval('public.sites_id_seq', 4, true);
 -- Name: stock_ledger_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.stock_ledger_id_seq', 4279, true);
+SELECT pg_catalog.setval('public.stock_ledger_id_seq', 4296, true);
 
 
 --
 -- Name: stock_transfer_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.stock_transfer_items_id_seq', 11, true);
+SELECT pg_catalog.setval('public.stock_transfer_items_id_seq', 13, true);
 
 
 --
 -- Name: stock_transfers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.stock_transfers_id_seq', 38, true);
+SELECT pg_catalog.setval('public.stock_transfers_id_seq', 41, true);
 
 
 --
 -- Name: subcategories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.subcategories_id_seq', 98, true);
+SELECT pg_catalog.setval('public.subcategories_id_seq', 99, true);
 
 
 --
@@ -25233,7 +27320,7 @@ SELECT pg_catalog.setval('public.tenant_configurations_id_seq', 3, true);
 -- Name: tenant_memberships_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.tenant_memberships_id_seq', 43, true);
+SELECT pg_catalog.setval('public.tenant_memberships_id_seq', 44, true);
 
 
 --
@@ -25261,49 +27348,49 @@ SELECT pg_catalog.setval('public.uom_id_seq', 48, true);
 -- Name: user_role_assignments_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.user_role_assignments_id_seq', 80, true);
+SELECT pg_catalog.setval('public.user_role_assignments_id_seq', 82, true);
 
 
 --
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.users_id_seq', 36, true);
+SELECT pg_catalog.setval('public.users_id_seq', 37, true);
 
 
 --
 -- Name: vendor_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_approvals_id_seq', 14, true);
+SELECT pg_catalog.setval('public.vendor_approvals_id_seq', 15, true);
 
 
 --
 -- Name: vendor_categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_categories_id_seq', 224, true);
+SELECT pg_catalog.setval('public.vendor_categories_id_seq', 228, true);
 
 
 --
 -- Name: vendor_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_history_id_seq', 55, true);
+SELECT pg_catalog.setval('public.vendor_history_id_seq', 57, true);
 
 
 --
 -- Name: vendor_quotation_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_quotation_items_id_seq', 3155, true);
+SELECT pg_catalog.setval('public.vendor_quotation_items_id_seq', 3953, true);
 
 
 --
 -- Name: vendor_quotations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_quotations_id_seq', 583, true);
+SELECT pg_catalog.setval('public.vendor_quotations_id_seq', 586, true);
 
 
 --
@@ -25331,21 +27418,21 @@ SELECT pg_catalog.setval('public.vendor_work_order_items_id_seq', 1, false);
 -- Name: vendor_work_orders_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_work_orders_id_seq', 1, false);
+SELECT pg_catalog.setval('public.vendor_work_orders_id_seq', 1, true);
 
 
 --
 -- Name: vendors_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendors_id_seq', 75, true);
+SELECT pg_catalog.setval('public.vendors_id_seq', 76, true);
 
 
 --
 -- Name: warehouses_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.warehouses_id_seq', 76, true);
+SELECT pg_catalog.setval('public.warehouses_id_seq', 77, true);
 
 
 --
@@ -25359,28 +27446,28 @@ SELECT pg_catalog.setval('public.work_order_approvals_id_seq', 1, false);
 -- Name: work_order_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.work_order_items_id_seq', 4, true);
+SELECT pg_catalog.setval('public.work_order_items_id_seq', 9, true);
 
 
 --
 -- Name: work_orders_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.work_orders_id_seq', 6, true);
+SELECT pg_catalog.setval('public.work_orders_id_seq', 12, true);
 
 
 --
 -- Name: write_off_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.write_off_items_id_seq', 12, true);
+SELECT pg_catalog.setval('public.write_off_items_id_seq', 15, true);
 
 
 --
 -- Name: write_offs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.write_offs_id_seq', 13, true);
+SELECT pg_catalog.setval('public.write_offs_id_seq', 19, true);
 
 
 --
@@ -27498,14 +29585,6 @@ ALTER TABLE ONLY public.complaints
 
 ALTER TABLE ONLY public.complaints
     ADD CONSTRAINT complaints_equipment_id_fkey FOREIGN KEY (equipment_id) REFERENCES public.equipment_items(id);
-
-
---
--- Name: complaints complaints_linked_vwo_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.complaints
-    ADD CONSTRAINT complaints_linked_vwo_id_fkey FOREIGN KEY (linked_vwo_id) REFERENCES public.vendor_work_orders(id);
 
 
 --
@@ -29669,14 +31748,6 @@ ALTER TABLE ONLY public.vendor_work_order_items
 
 
 --
--- Name: vendor_work_orders vendor_work_orders_complaint_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.vendor_work_orders
-    ADD CONSTRAINT vendor_work_orders_complaint_id_fkey FOREIGN KEY (complaint_id) REFERENCES public.complaints(id);
-
-
---
 -- Name: vendor_work_orders vendor_work_orders_created_by_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -29992,5 +32063,5 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict PXoR8FfDxRLR5JsYRSBbkPzgLFaaGnH0CxVC6g2e2BUuBKchWh11LZtZhaI3mHc
+\unrestrict P0ICVmlgFS0afyQXcztNnQXEqYbD23ydbXbU7SkiwXSzDfzmaSsjWfGZAvpq451
 

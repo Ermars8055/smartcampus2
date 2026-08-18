@@ -145,45 +145,49 @@ export default function Layout() {
   const drawer = (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'linear-gradient(180deg, #0F172A 0%, #1E293B 100%)' }}>
       {/* Logo Area */}
-      <Box sx={{ p: 1.5, borderBottom: '1px solid rgba(255,255,255,0.08)', textAlign: 'center' }}>
+      <Box sx={{ p: 1.5, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
         {isMobile && (
           <IconButton onClick={() => setMobileOpen(false)} sx={{ position: 'absolute', right: 8, top: 8, color: '#94A3B8', p: 0.5 }}>
             <ChevronLeft />
           </IconButton>
         )}
-        <Box
-          component="img"
-          src={logoImg}
-          alt="Eastpoint"
-          sx={{
-            width: 56, height: 56, objectFit: 'contain',
-            filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
-            mb: 0.5
-          }}
-        />
-        <Typography variant="subtitle2" sx={{ 
-          fontWeight: 800, 
-          fontSize: '1rem', 
-          lineHeight: 1.2, 
-          letterSpacing: '0.02em',
-          background: 'linear-gradient(90deg, #60A5FA, #E2E8F0)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.2))'
-        }}>
-          Eastpoint SmartCampus
-        </Typography>
-        <Typography variant="caption" sx={{ 
-          color: '#CBD5E1', 
-          fontSize: '0.7rem', 
-          fontWeight: 600, 
-          display: 'block', 
-          lineHeight: 1.2, 
-          mt: 0.5, 
-          letterSpacing: '0.02em' 
-        }}>
-          Material Governance Platform
-        </Typography>
+        <Box sx={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'stretch' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box
+              component="img"
+              src={logoImg}
+              alt="Eastpoint"
+              sx={{
+                width: 48, height: 48, objectFit: 'contain',
+                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
+              }}
+            />
+            <Typography variant="subtitle2" sx={{ 
+              fontWeight: 800, 
+              fontSize: '1.15rem', 
+              lineHeight: 1.1, 
+              letterSpacing: '0.02em',
+              background: 'linear-gradient(90deg, #60A5FA, #E2E8F0)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.2))'
+            }}>
+              Eastpoint<br/>SmartCampus
+            </Typography>
+          </Box>
+          <Typography variant="caption" sx={{ 
+            color: '#CBD5E1', 
+            fontSize: '0.8rem', 
+            fontWeight: 600, 
+            display: 'block', 
+            lineHeight: 1.2, 
+            mt: 0.5, 
+            letterSpacing: '0.02em',
+            textAlign: 'center'
+          }}>
+            Material Governance Platform
+          </Typography>
+        </Box>
       </Box>
 
       {/* Navigation */}
@@ -265,12 +269,12 @@ export default function Layout() {
       {isMobile ? (
         <Drawer variant="temporary" open={mobileOpen} onClose={() => setMobileOpen(false)}
           ModalProps={{ keepMounted: true }}
-          sx={{ '@media print': { display: 'none' }, '& .MuiDrawer-paper': { width: DRAWER_WIDTH, border: 'none' } }}>
+          sx={{ '@media print': { display: 'none' }, '& .MuiDrawer-paper': { width: DRAWER_WIDTH, border: 'none', backgroundColor: '#0F172A', borderRadius: 0 } }}>
           {drawer}
         </Drawer>
       ) : (
         <Drawer variant="permanent"
-          sx={{ '@media print': { display: 'none' }, width: DRAWER_WIDTH, flexShrink: 0, '& .MuiDrawer-paper': { width: DRAWER_WIDTH, border: 'none' } }}>
+          sx={{ '@media print': { display: 'none' }, width: DRAWER_WIDTH, flexShrink: 0, '& .MuiDrawer-paper': { width: DRAWER_WIDTH, border: 'none', backgroundColor: '#0F172A', borderRadius: 0 } }}>
           {drawer}
         </Drawer>
       )}

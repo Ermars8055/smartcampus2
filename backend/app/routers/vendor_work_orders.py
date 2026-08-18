@@ -15,7 +15,7 @@ from app.models import (
 from app import schemas
 from app.utils.sequences import get_next_number
 
-router = APIRouter(prefix="/vendor-work-orders", tags=["Vendor Work Orders"])
+router = APIRouter(prefix="/api/vendor-work-orders", tags=["Vendor Work Orders"])
 
 @router.get("/", response_model=List[schemas.VendorWorkOrderOut])
 def get_vendor_work_orders(
@@ -41,6 +41,7 @@ def get_vendor_work_orders(
         query = query.filter(VendorWorkOrder.status == status)
         
     vwos = query.order_by(desc(VendorWorkOrder.created_at)).offset(skip).limit(limit).all()
+    print("VWO count in db query:", len(vwos), "Tenant:", tenant_id, "Site:", site_id)
     
     # Enrich with names
     result = []
@@ -56,11 +57,7 @@ def get_vendor_work_orders(
             inst = db.query(Institution).filter(Institution.id == vwo.institution_id).first()
             out_dict['institution_name'] = inst.name if inst else None
             
-        # Complaint Docket
-        if vwo.complaint_id:
-            comp = db.query(Complaint).filter(Complaint.id == vwo.complaint_id).first()
-            out_dict['complaint_docket'] = comp.docket_no if comp else None
-            
+
         # Equipment info
         equip = db.query(EquipmentItem).filter(EquipmentItem.id == vwo.equipment_id).first()
         if equip:
@@ -94,7 +91,7 @@ def create_vendor_work_order(
         vwo_number=vwo_number,
         institution_id=vwo.institution_id if hasattr(vwo, 'institution_id') else None,
         vendor_id=vwo.vendor_id,
-        complaint_id=vwo.complaint_id,
+
         equipment_id=vwo.equipment_id,
         priority=vwo.priority,
         target_date=vwo.target_date,
@@ -127,13 +124,7 @@ def create_vendor_work_order(
         )
         db.add(db_item)
         
-    # Update linked complaint
-    if db_vwo.complaint_id:
-        complaint = db.query(Complaint).filter(Complaint.id == db_vwo.complaint_id).first()
-        if complaint:
-            complaint.linked_vwo_id = db_vwo.id
-            db.add(complaint)
-            
+
     db.commit()
     return get_vwo_detail(db_vwo.id, db)
 
@@ -193,10 +184,7 @@ def get_vwo_detail(vwo_id: int, db: Session):
         inst = db.query(Institution).filter(Institution.id == vwo.institution_id).first()
         out_dict['institution_name'] = inst.name if inst else None
         
-    if vwo.complaint_id:
-        comp = db.query(Complaint).filter(Complaint.id == vwo.complaint_id).first()
-        out_dict['complaint_docket'] = comp.docket_no if comp else None
-        
+
     equip = db.query(EquipmentItem).filter(EquipmentItem.id == vwo.equipment_id).first()
     if equip:
         out_dict['equipment_code'] = equip.equipment_code

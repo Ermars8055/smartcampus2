@@ -230,7 +230,7 @@ export default function GateEntry() {
             placeholder="Search entry number, vehicle, or document..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            sx={{ width: 380 }}
+            sx={{ width: 480 }}
             InputProps={{ startAdornment: <Search sx={{ mr: 1, color: '#94A3B8' }} /> }}
           />
         </Box>

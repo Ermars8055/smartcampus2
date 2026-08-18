@@ -433,10 +433,19 @@ export default function GRNPage() {
         <DialogTitle sx={{ fontWeight: 600 }}>{detailDialog?.grn_number} — GRN Details</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mb: 2 }}>
-            <Grid item xs={3}><Typography variant="caption" color="textSecondary">Vendor</Typography><Typography sx={{ fontWeight: 600, fontSize: '0.9rem' }}>{detailDialog?.vendor_name}</Typography></Grid>
-            <Grid item xs={3}><Typography variant="caption" color="textSecondary">Store</Typography><Typography sx={{ fontWeight: 600, fontSize: '0.9rem' }}>{detailDialog?.warehouse_name}</Typography></Grid>
-            <Grid item xs={3}><Typography variant="caption" color="textSecondary">Invoice / DC</Typography><Typography sx={{ fontSize: '0.9rem' }}>{[detailDialog?.invoice_number ? 'INV: ' + detailDialog.invoice_number : '', detailDialog?.dc_number ? 'DC: ' + detailDialog.dc_number : ''].filter(Boolean).join(' | ') || '—'}</Typography></Grid>
-            <Grid item xs={3}><Typography variant="caption" color="textSecondary">Received By</Typography><Typography sx={{ fontSize: '0.9rem' }}>{detailDialog?.received_by_name}</Typography></Grid>
+            <Grid item xs={12} sm={6} md={3}><Typography variant="caption" color="textSecondary">Date</Typography><Typography sx={{ fontWeight: 600, fontSize: '0.9rem' }}>{formatDate(detailDialog?.created_at)}</Typography></Grid>
+            <Grid item xs={12} sm={6} md={3}><Typography variant="caption" color="textSecondary">Vendor</Typography><Typography sx={{ fontWeight: 600, fontSize: '0.9rem' }}>{detailDialog?.vendor_name}</Typography></Grid>
+            <Grid item xs={12} sm={6} md={3}><Typography variant="caption" color="textSecondary">Store</Typography><Typography sx={{ fontWeight: 600, fontSize: '0.9rem' }}>{detailDialog?.warehouse_name}</Typography></Grid>
+            <Grid item xs={12} sm={6} md={3}><Typography variant="caption" color="textSecondary">Project</Typography><Typography sx={{ fontSize: '0.9rem' }}>{detailDialog?.project_name || '—'}</Typography></Grid>
+            
+            <Grid item xs={12} sm={6} md={3}><Typography variant="caption" color="textSecondary">Invoice Number</Typography><Typography sx={{ fontSize: '0.9rem' }}>{detailDialog?.invoice_number || '—'}</Typography></Grid>
+            <Grid item xs={12} sm={6} md={3}><Typography variant="caption" color="textSecondary">Delivery Challan</Typography><Typography sx={{ fontSize: '0.9rem' }}>{detailDialog?.dc_number || '—'}</Typography></Grid>
+            <Grid item xs={12} sm={6} md={3}><Typography variant="caption" color="textSecondary">Gate Entry No</Typography><Typography sx={{ fontSize: '0.9rem' }}>{detailDialog?.gate_entry_number || '—'}</Typography></Grid>
+            <Grid item xs={12} sm={6} md={3}><Typography variant="caption" color="textSecondary">Received By</Typography><Typography sx={{ fontSize: '0.9rem' }}>{detailDialog?.received_by_name}</Typography></Grid>
+
+            {detailDialog?.remarks && (
+              <Grid item xs={12}><Typography variant="caption" color="textSecondary">Remarks</Typography><Typography sx={{ fontSize: '0.9rem' }}>{detailDialog.remarks}</Typography></Grid>
+            )}
             
             <Grid item xs={12}>
               <Grid container spacing={2}>
@@ -734,9 +743,9 @@ export default function GRNPage() {
                 <TableHead><TableRow>
                   <TableCell>Material</TableCell>
                   <TableCell>UOM</TableCell>
-                  {form.receipt_type === 'PO-Based' && <TableCell align="right">Ordered</TableCell>}
-                  <TableCell align="right">Received</TableCell><TableCell align="right">Accepted</TableCell>
-                  <TableCell align="right">Rejected</TableCell><TableCell align="right">Rate</TableCell>
+                  {form.receipt_type === 'PO-Based' && <TableCell align="center">Ordered</TableCell>}
+                  <TableCell align="center">Received</TableCell><TableCell align="center">Accepted</TableCell>
+                  <TableCell align="center">Rejected</TableCell><TableCell align="right">Rate</TableCell>
                   {form.receipt_type === 'Direct Invoice' && <TableCell width={40}></TableCell>}
                 </TableRow></TableHead>
                 <TableBody>
@@ -776,11 +785,13 @@ export default function GRNPage() {
                         )}
                       </TableCell>
                       <TableCell sx={{ color: '#64748B', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
-                        {item.uom_name || selectedMaterial?.uom_name || '-'}
+                        <Box sx={{ height: 40, display: 'flex', alignItems: 'center' }}>
+                          {item.uom_name || selectedMaterial?.uom_name || '-'}
+                        </Box>
                       </TableCell>
-                      {form.receipt_type === 'PO-Based' && <TableCell align="right">{item.ordered_quantity}</TableCell>}
-                      <TableCell align="right">
-                        <TextField size="small" type="number" inputProps={{ step: "1", min: "0" }} value={item.received_quantity ?? ''} sx={{ width: 80 }}
+                      {form.receipt_type === 'PO-Based' && <TableCell align="center"><Box sx={{ height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{item.ordered_quantity}</Box></TableCell>}
+                      <TableCell align="center">
+                        <TextField size="small" type="number" inputProps={{ step: "1", min: "0", style: { textAlign: 'center' } }} value={item.received_quantity ?? ''} sx={{ width: 80 }}
                           error={!!itemErrors[i]?.received_quantity}
                           onChange={e => {
                             const items = [...form.items];
@@ -789,8 +800,8 @@ export default function GRNPage() {
                             setForm({ ...form, items });
                           }} />
                       </TableCell>
-                      <TableCell align="right">
-                        <TextField size="small" type="number" inputProps={{ step: "1", min: "0" }} value={item.accepted_quantity ?? ''} sx={{ width: 80 }}
+                      <TableCell align="center">
+                        <TextField size="small" type="number" inputProps={{ step: "1", min: "0", style: { textAlign: 'center' } }} value={item.accepted_quantity ?? ''} sx={{ width: 80 }}
                           error={!!itemErrors[i]?.accepted_quantity}
                           onChange={e => {
                             const items = [...form.items];
@@ -799,20 +810,22 @@ export default function GRNPage() {
                             setForm({ ...form, items });
                           }} />
                       </TableCell>
-                      <TableCell align="right">
-                        <TextField size="small" type="number" InputProps={{ readOnly: true, sx: { bgcolor: '#f8fafc', color: '#64748b' } }} value={item.rejected_quantity ?? ''} sx={{ width: 80 }}
+                      <TableCell align="center">
+                        <TextField size="small" type="number" InputProps={{ readOnly: true, sx: { bgcolor: '#f8fafc', color: '#64748b' } }} inputProps={{ style: { textAlign: 'center' } }} value={item.rejected_quantity ?? ''} sx={{ width: 80 }}
                           error={!!itemErrors[i]?.rejected_quantity} />
                       </TableCell>
                       <TableCell align="right">
                         {form.receipt_type === 'Direct Invoice' ? (
-                          <TextField size="small" type="number" inputProps={{ step: "0.01", min: "0" }} value={item.rate ?? ''} sx={{ width: 80 }}
+                          <TextField size="small" type="number" inputProps={{ step: "0.01", min: "0", style: { textAlign: 'right' } }} value={item.rate ?? ''} sx={{ width: 80 }}
                             onChange={e => {
                               const items = [...form.items];
                               items[i].rate = Math.max(0, parseFloat(e.target.value) || 0);
                               setForm({ ...form, items });
                             }} />
                         ) : (
-                          `₹${item.rate?.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                          <Box sx={{ height: 40, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                            {`₹${item.rate?.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                          </Box>
                         )}
                       </TableCell>
                       {form.receipt_type === 'Direct Invoice' && (

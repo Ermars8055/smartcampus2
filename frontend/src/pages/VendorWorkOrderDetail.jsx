@@ -21,6 +21,8 @@ import {
 import { ArrowBack as ArrowBackIcon, Add as AddIcon, Delete as DeleteIcon, Save as SaveIcon } from '@mui/icons-material';
 import vendorWorkOrderService from '../services/vendorWorkOrderService';
 import api from '../services/api';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import dayjs from 'dayjs';
 
 const VendorWorkOrderDetail = () => {
   const { id } = useParams();
@@ -34,13 +36,9 @@ const VendorWorkOrderDetail = () => {
   const [vendors, setVendors] = useState([]);
   const [equipments, setEquipments] = useState([]);
 
-  // Determine if it was opened from a complaint
-  const complaintContext = location.state?.complaint || null;
-
   const [formData, setFormData] = useState({
     vendor_id: '',
-    equipment_id: complaintContext ? complaintContext.equipment_id : '',
-    complaint_id: complaintContext ? complaintContext.id : '',
+    equipment_id: '',
     priority: 'Normal',
     target_date: '',
     service_type: '',
@@ -56,7 +54,6 @@ const VendorWorkOrderDetail = () => {
     items: [],
   });
 
-  const [complaintDetails, setComplaintDetails] = useState(complaintContext);
 
   useEffect(() => {
     fetchInitialData();
@@ -75,12 +72,6 @@ const VendorWorkOrderDetail = () => {
       if (!isNew) {
         const data = await vendorWorkOrderService.getVendorWorkOrder(id);
         setFormData(data);
-        if (data.complaint_id) {
-          const compRes = await api.get(`/api/complaints/${data.complaint_id}`);
-          setComplaintDetails(compRes.data);
-        }
-      } else if (complaintContext) {
-        // We already have context
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -89,14 +80,6 @@ const VendorWorkOrderDetail = () => {
     }
   };
 
-  const fetchComplaintDetails = async (compId) => {
-    try {
-      const compRes = await api.get(`/api/complaints/${compId}`);
-      setComplaintDetails(compRes.data);
-    } catch (err) {
-      console.error("Failed to fetch complaint", err);
-    }
-  };
 
   const handleInputChange = (field, value) => {
     setFormData(prev => {
@@ -112,10 +95,6 @@ const VendorWorkOrderDetail = () => {
       }
       return updated;
     });
-
-    if (field === 'complaint_id' && value) {
-      fetchComplaintDetails(value);
-    }
   };
 
   const handleSave = async (status = null) => {
@@ -179,17 +158,7 @@ const VendorWorkOrderDetail = () => {
                   ))}
                 </TextField>
               </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Linked Complaint Docket"
-                  value={formData.complaint_id}
-                  onChange={(e) => handleInputChange('complaint_id', e.target.value)}
-                  disabled={isReadOnly || !!complaintContext}
-                  size="small"
-                  helperText="Enter Complaint ID (if applicable)"
-                />
-              </Grid>
+
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
@@ -197,7 +166,7 @@ const VendorWorkOrderDetail = () => {
                   label="Equipment *"
                   value={formData.equipment_id}
                   onChange={(e) => handleInputChange('equipment_id', e.target.value)}
-                  disabled={isReadOnly || !!complaintContext}
+                  disabled={isReadOnly}
                   size="small"
                 >
                   {equipments.map(e => (
@@ -221,15 +190,13 @@ const VendorWorkOrderDetail = () => {
                 </TextField>
               </Grid>
               <Grid item xs={12} sm={3}>
-                <TextField
-                  fullWidth
-                  type="date"
-                  label="Target Date *"
-                  InputLabelProps={{ shrink: true }}
-                  value={formData.target_date}
-                  onChange={(e) => handleInputChange('target_date', e.target.value)}
-                  disabled={isReadOnly}
-                  size="small"
+                <DatePicker 
+                  label="Target Date *" 
+                  format="DD MMM YYYY" 
+                  value={formData.target_date ? dayjs(formData.target_date) : null} 
+                  onChange={(newValue) => handleInputChange('target_date', newValue ? newValue.format('YYYY-MM-DD') : '')} 
+                  disabled={isReadOnly} 
+                  slotProps={{ textField: { size: 'small', fullWidth: true, InputLabelProps: { shrink: true } } }} 
                 />
               </Grid>
             </Grid>
@@ -356,31 +323,6 @@ const VendorWorkOrderDetail = () => {
         </Grid>
 
         <Grid item xs={12} md={4}>
-          <Card sx={{ p: 3, mb: 3, borderRadius: 2, backgroundColor: 'action.hover' }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>Complaint Information</Typography>
-            {complaintDetails ? (
-              <Box>
-                <Typography variant="body2" color="text.secondary">Docket No</Typography>
-                <Typography variant="body1" sx={{ mb: 1, fontWeight: 500 }}>{complaintDetails.docket_no}</Typography>
-                
-                <Typography variant="body2" color="text.secondary">Type</Typography>
-                <Typography variant="body1" sx={{ mb: 1 }}>{complaintDetails.complaint_type || '-'}</Typography>
-                
-                <Typography variant="body2" color="text.secondary">Nature of Complaint</Typography>
-                <Typography variant="body1" sx={{ mb: 1 }}>{complaintDetails.nature_of_complaint}</Typography>
-                
-                <Typography variant="body2" color="text.secondary">Assigned Tech</Typography>
-                <Typography variant="body1" sx={{ mb: 1 }}>{complaintDetails.assigned_to_name || 'Unassigned'}</Typography>
-                
-                <Typography variant="body2" color="text.secondary">Inspection Findings</Typography>
-                <Box sx={{ p: 1, bgcolor: 'background.paper', borderRadius: 1, border: '1px dashed #ccc' }}>
-                  <Typography variant="body2">{complaintDetails.inspection_details || 'No findings recorded'}</Typography>
-                </Box>
-              </Box>
-            ) : (
-              <Typography variant="body2" color="text.secondary">No complaint linked</Typography>
-            )}
-          </Card>
 
           <Card sx={{ p: 3, borderRadius: 2 }}>
             <Typography variant="h6" sx={{ mb: 2 }}>Actions</Typography>

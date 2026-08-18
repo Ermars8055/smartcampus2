@@ -1,6 +1,6 @@
 """Quotation Management routes."""
 
-from fastapi import APIRouter, Depends, HTTPException, File, UploadFile, Form
+from fastapi import APIRouter, Depends, HTTPException, File, UploadFile, Form, BackgroundTasks
 from sqlalchemy.orm import Session, selectinload
 from sqlalchemy import or_
 from datetime import datetime
@@ -438,9 +438,28 @@ def preview_quotation_request_pdf(
     return Response(content=pdf_bytes, media_type="application/pdf")
 
 
+def _send_qr_emails_background(vendor_data: list, subject: str, html_message: str, pdf_bytes: bytes, pdf_filename: str):
+    import logging
+    logger = logging.getLogger(__name__)
+    for email, vendor_name in vendor_data:
+        try:
+            send_email_with_attachment(
+                to_email=email,
+                subject=subject,
+                html_body=html_message,
+                attachment_bytes=pdf_bytes,
+                attachment_filename=pdf_filename,
+                vendor_name=vendor_name
+            )
+        except Exception as e:
+            logger.error(f"Failed to send QR email to {email}: {e}", exc_info=True)
+
+
 @router.post("/requests/{id}/send")
 def send_quotation_request(
-    id: int, data: SendQuotationRequest = SendQuotationRequest(),
+    id: int,
+    background_tasks: BackgroundTasks,
+    data: SendQuotationRequest = SendQuotationRequest(),
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("purchase_requests", "update")),
     tenant_id: int = Depends(get_tenant_id),
@@ -459,24 +478,30 @@ def send_quotation_request(
         pdf_bytes = generate_qr_pdf(qr)
         pdf_filename = f"Quotation_Request_{qr.qr_number}.pdf"
         
+        vendor_data = []
         for v in qr.invited_vendors:
             v.is_sent = True
             v.sent_at = get_now_ist()
             
-            # Send actual email to the vendor
+            # Collect email info
             if v.vendor and v.vendor.email:
-                # Convert newlines to HTML breaks for basic formatting
-                html_message = data.message.replace('\n', '<br>')
-                send_email_with_attachment(
-                    to_email=v.vendor.email,
-                    subject=f"Request for Quotation: {qr.qr_number}",
-                    html_body=html_message,
-                    attachment_bytes=pdf_bytes,
-                    attachment_filename=pdf_filename,
-                    vendor_name=v.vendor.name
-                )
+                vendor_data.append((v.vendor.email, v.vendor.name))
             
         db.commit()
+        
+        # Convert newlines to HTML breaks for basic formatting
+        html_message = data.message.replace('\n', '<br>')
+        
+        # Schedule the email sending task to run in the background
+        background_tasks.add_task(
+            _send_qr_emails_background,
+            vendor_data,
+            f"Request for Quotation: {qr.qr_number}",
+            html_message,
+            pdf_bytes,
+            pdf_filename
+        )
+        
         return {"message": "Quotation Request sent to vendors"}
     except Exception as e:
         import traceback

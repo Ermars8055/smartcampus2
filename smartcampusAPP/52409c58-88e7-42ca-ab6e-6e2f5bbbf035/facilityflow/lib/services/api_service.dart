@@ -159,7 +159,7 @@ class ApiService {
   Future<Response> inspectComplaint(
       int id, bool materialRequired, String inspectionDetails) async {
     return await dio.post('/api/complaints/$id/inspect', data: {
-      'material_required': materialRequired,
+      'repair_method': materialRequired ? 'Material Required' : 'Internal',
       'inspection_details': inspectionDetails
     });
   }

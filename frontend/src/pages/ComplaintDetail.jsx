@@ -169,10 +169,8 @@ export default function ComplaintDetail() {
       setSnackbar({ open: true, message: 'Inspection completed', severity: 'success' });
       setInspectDialogOpen(false);
       
-      if (repairMethod === 'Internal With Material') {
+      if (repairMethod === 'Material Required') {
         navigate(`/indents?new=true&complaint_id=${id}`);
-      } else if (repairMethod === 'External Vendor Service') {
-        navigate(`/procurement/vendor-work-orders/new`, { state: { complaint: complaint } });
       } else {
         fetchComplaintData();
       }
@@ -615,10 +613,10 @@ export default function ComplaintDetail() {
                 Material requirement will be determined during inspection.
               </Typography>
             </Paper>
-          ) : complaint.repair_method === 'Internal Without Material' || complaint.repair_method === 'External Vendor Service' ? (
+          ) : complaint.repair_method === 'Material Not Required' ? (
             <Paper sx={{ p: 3, mb: 3, bgcolor: '#F8FAFC', textAlign: 'center', border: '1px solid #E2E8F0' }}>
               <Typography variant="body2" color="textSecondary">
-                Material is not required for this complaint or is handled by an external vendor.
+                Material is not required for this complaint.
               </Typography>
             </Paper>
           ) : (
@@ -804,9 +802,8 @@ export default function ComplaintDetail() {
               label="Action Required" 
               onChange={(e) => setRepairMethod(e.target.value)}
             >
-              <MenuItem value="Internal Without Material">Internal Repair (No material needed)</MenuItem>
-              <MenuItem value="Internal With Material">Internal Repair (Material needed)</MenuItem>
-              <MenuItem value="External Vendor Service">External Vendor Service (Requires WO)</MenuItem>
+              <MenuItem value="Material Required">Material Required</MenuItem>
+              <MenuItem value="Material Not Required">Material Not Required</MenuItem>
             </Select>
           </FormControl>
         </DialogContent>

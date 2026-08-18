@@ -282,6 +282,7 @@ export default function ComplaintForm() {
         ...formData,
         building_id: formData.building_id ? parseInt(formData.building_id) : null,
         room_id: formData.room_id ? parseInt(formData.room_id) : null,
+        equipment_id: formData.equipment_id ? parseInt(formData.equipment_id) : null,
         image_urls: [...existingUrlsToKeep, ...uploadedUrls]
       };
       delete payload.institution_id;

@@ -743,9 +743,9 @@ export default function GRNPage() {
                 <TableHead><TableRow>
                   <TableCell>Material</TableCell>
                   <TableCell>UOM</TableCell>
-                  {form.receipt_type === 'PO-Based' && <TableCell align="right">Ordered</TableCell>}
-                  <TableCell align="right">Received</TableCell><TableCell align="right">Accepted</TableCell>
-                  <TableCell align="right">Rejected</TableCell><TableCell align="right">Rate</TableCell>
+                  {form.receipt_type === 'PO-Based' && <TableCell align="center">Ordered</TableCell>}
+                  <TableCell align="center">Received</TableCell><TableCell align="center">Accepted</TableCell>
+                  <TableCell align="center">Rejected</TableCell><TableCell align="right">Rate</TableCell>
                   {form.receipt_type === 'Direct Invoice' && <TableCell width={40}></TableCell>}
                 </TableRow></TableHead>
                 <TableBody>
@@ -785,11 +785,13 @@ export default function GRNPage() {
                         )}
                       </TableCell>
                       <TableCell sx={{ color: '#64748B', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
-                        {item.uom_name || selectedMaterial?.uom_name || '-'}
+                        <Box sx={{ height: 40, display: 'flex', alignItems: 'center' }}>
+                          {item.uom_name || selectedMaterial?.uom_name || '-'}
+                        </Box>
                       </TableCell>
-                      {form.receipt_type === 'PO-Based' && <TableCell align="right">{item.ordered_quantity}</TableCell>}
-                      <TableCell align="right">
-                        <TextField size="small" type="number" inputProps={{ step: "1", min: "0" }} value={item.received_quantity ?? ''} sx={{ width: 80 }}
+                      {form.receipt_type === 'PO-Based' && <TableCell align="center"><Box sx={{ height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{item.ordered_quantity}</Box></TableCell>}
+                      <TableCell align="center">
+                        <TextField size="small" type="number" inputProps={{ step: "1", min: "0", style: { textAlign: 'center' } }} value={item.received_quantity ?? ''} sx={{ width: 80 }}
                           error={!!itemErrors[i]?.received_quantity}
                           onChange={e => {
                             const items = [...form.items];
@@ -798,8 +800,8 @@ export default function GRNPage() {
                             setForm({ ...form, items });
                           }} />
                       </TableCell>
-                      <TableCell align="right">
-                        <TextField size="small" type="number" inputProps={{ step: "1", min: "0" }} value={item.accepted_quantity ?? ''} sx={{ width: 80 }}
+                      <TableCell align="center">
+                        <TextField size="small" type="number" inputProps={{ step: "1", min: "0", style: { textAlign: 'center' } }} value={item.accepted_quantity ?? ''} sx={{ width: 80 }}
                           error={!!itemErrors[i]?.accepted_quantity}
                           onChange={e => {
                             const items = [...form.items];
@@ -808,20 +810,22 @@ export default function GRNPage() {
                             setForm({ ...form, items });
                           }} />
                       </TableCell>
-                      <TableCell align="right">
-                        <TextField size="small" type="number" InputProps={{ readOnly: true, sx: { bgcolor: '#f8fafc', color: '#64748b' } }} value={item.rejected_quantity ?? ''} sx={{ width: 80 }}
+                      <TableCell align="center">
+                        <TextField size="small" type="number" InputProps={{ readOnly: true, sx: { bgcolor: '#f8fafc', color: '#64748b' } }} inputProps={{ style: { textAlign: 'center' } }} value={item.rejected_quantity ?? ''} sx={{ width: 80 }}
                           error={!!itemErrors[i]?.rejected_quantity} />
                       </TableCell>
                       <TableCell align="right">
                         {form.receipt_type === 'Direct Invoice' ? (
-                          <TextField size="small" type="number" inputProps={{ step: "0.01", min: "0" }} value={item.rate ?? ''} sx={{ width: 80 }}
+                          <TextField size="small" type="number" inputProps={{ step: "0.01", min: "0", style: { textAlign: 'right' } }} value={item.rate ?? ''} sx={{ width: 80 }}
                             onChange={e => {
                               const items = [...form.items];
                               items[i].rate = Math.max(0, parseFloat(e.target.value) || 0);
                               setForm({ ...form, items });
                             }} />
                         ) : (
-                          `₹${item.rate?.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                          <Box sx={{ height: 40, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                            {`₹${item.rate?.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                          </Box>
                         )}
                       </TableCell>
                       {form.receipt_type === 'Direct Invoice' && (

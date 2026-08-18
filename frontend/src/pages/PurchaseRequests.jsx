@@ -480,9 +480,11 @@ export default function PurchaseRequests() {
     }
 
     try {
+      const inst = institutions.find(i => i.project_id === convertDialog.pr.project_id);
       const payload = {
         vendor_id: convertDialog.vendor_id,
         project_id: convertDialog.pr.project_id,
+        institution_id: inst ? inst.id : null,
         pr_id: convertDialog.pr.id,
         delivery_date: convertDialog.delivery_date ? dayjs(convertDialog.delivery_date).format('YYYY-MM-DD') : null,
         terms: convertDialog.terms,

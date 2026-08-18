@@ -15,7 +15,7 @@ from app.schemas import ExtractionResultItem
 router = APIRouter(prefix="/api/quotations", tags=["Quotation Extraction"])
 
 # Column Extraction Keyword Dictionaries
-MATERIAL_KEYWORDS = ['item', 'material', 'description', 'name', 'particular', 'goods', 'descrip', 'product', 'code', 'part', 'spec', 'chemical']
+MATERIAL_KEYWORDS = ['item', 'material', 'description', 'name', 'particular', 'goods', 'descrip', 'product', 'chemical']
 RATE_KEYWORDS = ['rate', 'price', 'cost', 'unitprice', 'basicprice', 'unitcost', 'quotedrate', 'mrp', 'amount', 'amt', 'value']
 BRAND_KEYWORDS = ['brand', 'make', 'mfg', 'manufacturer', 'company', 'brandname']
 UOM_KEYWORDS = ['unit', 'uom', 'measure', 'per', 'packing', 'pack', 'pkg', 'size']
@@ -25,14 +25,14 @@ ALL_KEYWORDS = MATERIAL_KEYWORDS + RATE_KEYWORDS + BRAND_KEYWORDS + UOM_KEYWORDS
 
 
 def fuzzy_match_material(extracted_name: str, qr_items: list) -> tuple:
-    """Returns (best_match_item, confidence_score)"""
+    """Returns (list_of_best_match_items, confidence_score)"""
     if not extracted_name or not isinstance(extracted_name, str):
-        return None, 0.0
+        return [], 0.0
     extracted_clean = re.sub(r'[^a-zA-Z0-9\s]', '', str(extracted_name)).lower().strip()
     # Strip common chemical suffixes and grades to improve matching
     extracted_clean = re.sub(r'\b(lr|ar|extrapure|pure|assay|min|max|gr|grade|anhydrous|purified|molychem|srl|extra pure)\b', '', extracted_clean).strip()
     extracted_clean = re.sub(r'\s+', ' ', extracted_clean)
-    best_item = None
+    best_items = []
     best_score = 0.0
     
     for item in qr_items:
@@ -41,29 +41,39 @@ def fuzzy_match_material(extracted_name: str, qr_items: list) -> tuple:
         
         # Exact match
         if extracted_clean == mat_clean:
-            return item, 1.0
+            score = 1.0
+        else:
+            # Partial match score using SequenceMatcher
+            score = difflib.SequenceMatcher(None, extracted_clean, mat_clean).ratio()
             
-        # Partial match score using SequenceMatcher
-        score = difflib.SequenceMatcher(None, extracted_clean, mat_clean).ratio()
-        
-        # Token set ratio equivalent logic (checking if all words in one are in the other)
-        ext_words = set(extracted_clean.split())
-        mat_words = set(mat_clean.split())
-        
-        if ext_words and mat_words:
-            intersection = ext_words.intersection(mat_words)
-            token_score = len(intersection) / max(len(ext_words), len(mat_words))
-            # Boost score if token overlap is high
-            score = max(score, token_score)
+            # Boost if one is a substring of another (space-agnostic)
+            mat_no_space = mat_clean.replace(' ', '')
+            ext_no_space = extracted_clean.replace(' ', '')
+            if len(mat_no_space) > 3 and mat_no_space in ext_no_space:
+                score += 0.3
+            elif len(ext_no_space) > 3 and ext_no_space in mat_no_space:
+                score += 0.3
+            
+            # Token set ratio equivalent logic (checking if all words in one are in the other)
+            ext_words = set(extracted_clean.split())
+            mat_words = set(mat_clean.split())
+            
+            if ext_words and mat_words:
+                intersection = ext_words.intersection(mat_words)
+                token_score = len(intersection) / max(len(ext_words), len(mat_words))
+                # Boost score if token overlap is high
+                score = max(score, token_score)
             
         if score > best_score:
             best_score = score
-            best_item = item
+            best_items = [item]
+        elif score == best_score and score > 0:
+            best_items.append(item)
             
-    if best_item and best_score >= 0.4:
-        return best_item, round(best_score, 2)
+    if best_items and best_score >= 0.4:
+        return best_items, round(best_score, 2)
         
-    return None, 0.0
+    return [], 0.0
 
 
 def extract_from_excel(file_path: str, qr_items: list) -> List[ExtractionResultItem]:
@@ -174,7 +184,7 @@ def extract_from_excel(file_path: str, qr_items: list) -> List[ExtractionResultI
                 except:
                     pass
 
-            matched_item, conf = fuzzy_match_material(mat_name, qr_items)
+            matched_items, conf = fuzzy_match_material(mat_name, qr_items)
             
             parsed_rows.append({
                 'mat_name': mat_name,
@@ -183,11 +193,12 @@ def extract_from_excel(file_path: str, qr_items: list) -> List[ExtractionResultI
                 'uom': uom_val,
                 'delivery': delivery_val,
                 'discount': discount_val,
-                'matched_item': matched_item,
+                'matched_items': matched_items,
                 'confidence': conf
             })
-            if matched_item:
-                matched_qr_ids.add(matched_item.id)
+            if matched_items:
+                for m_item in matched_items:
+                    matched_qr_ids.add(m_item.id)
 
         # Unmatched QR items in order
         unmatched_qr_items = [item for item in qr_items if item.id not in matched_qr_ids]
@@ -195,29 +206,67 @@ def extract_from_excel(file_path: str, qr_items: list) -> List[ExtractionResultI
         # Pass 2: Fallback for rows that had no fuzzy match
         unmatched_idx = 0
         for p_row in parsed_rows:
-            if not p_row['matched_item'] and unmatched_idx < len(unmatched_qr_items):
-                p_row['matched_item'] = unmatched_qr_items[unmatched_idx]
+            if not p_row.get('matched_items') and unmatched_idx < len(unmatched_qr_items):
+                p_row['matched_items'] = [unmatched_qr_items[unmatched_idx]]
                 p_row['confidence'] = 0.5  # default/fallback confidence
                 unmatched_idx += 1
                 
             # Append to final results
-            matched_item = p_row['matched_item']
-            results.append(ExtractionResultItem(
-                material_id=matched_item.material_id if matched_item else None,
-                material_name=matched_item.material.name if matched_item else p_row['mat_name'],
-                quoted_rate=p_row['rate'],
-                brand=p_row['brand'],
-                vendor_uom_name=p_row['uom'],
-                delivery_days=p_row['delivery'],
-                discount_percent=p_row.get('discount', 0.0),
-                confidence_score=p_row['confidence'],
-                raw_text=p_row['mat_name']
-            ))
+            if p_row.get('matched_items'):
+                for matched_item in p_row['matched_items']:
+                    results.append(ExtractionResultItem(
+                        material_id=matched_item.material_id,
+                        material_name=matched_item.material.name,
+                        quoted_rate=p_row['rate'],
+                        brand=p_row['brand'],
+                        vendor_uom_name=p_row['uom'],
+                        delivery_days=p_row['delivery'],
+                        discount_percent=p_row.get('discount', 0.0),
+                        confidence_score=p_row['confidence'],
+                        raw_text=p_row['mat_name']
+                    ))
+            else:
+                results.append(ExtractionResultItem(
+                    material_id=None,
+                    material_name=p_row['mat_name'],
+                    quoted_rate=p_row['rate'],
+                    brand=p_row['brand'],
+                    vendor_uom_name=p_row['uom'],
+                    delivery_days=p_row['delivery'],
+                    discount_percent=p_row.get('discount', 0.0),
+                    confidence_score=p_row['confidence'],
+                    raw_text=p_row['mat_name']
+                ))
             
     except Exception as e:
         print(f"Excel extraction error: {e}")
         
     return results
+
+
+def explode_table_row(row):
+    if not any(cell and '\n' in str(cell) for cell in row):
+        return [row]
+    
+    split_cells = [str(cell).split('\n') if cell is not None else [] for cell in row]
+    max_lines = max((len(c) for c in split_cells), default=0)
+    multiline_count = sum(1 for c in split_cells if len(c) > 1)
+    
+    # Heuristic: if it looks like grouped rows (multiple columns have multiple lines, and max_lines is decent)
+    if multiline_count >= 2 and max_lines >= 2:
+        exploded = []
+        for i in range(max_lines):
+            new_row = []
+            for cell_parts in split_cells:
+                if i < len(cell_parts):
+                    new_row.append(cell_parts[i].strip())
+                else:
+                    new_row.append("")
+            exploded.append(new_row)
+        return exploded
+    else:
+        # Just replace \n with space (wrapped text)
+        return [[str(c).replace('\n', ' ') if c else c for c in row]]
 
 
 def extract_from_pdf(file_path: str, qr_items: list) -> List[ExtractionResultItem]:
@@ -238,81 +287,100 @@ def extract_from_pdf(file_path: str, qr_items: list) -> List[ExtractionResultIte
                         }
                         header_found = False
                         
-                        for row in table:
-                            if not row or not any(row): continue
+                        for row_orig in table:
+                            if not row_orig or not any(row_orig): continue
                             
-                            row_texts = [str(cell).strip().replace('\n', ' ') for cell in row if cell]
+                            exploded_rows = explode_table_row(row_orig)
                             
-                            if not header_found:
-                                match_count = sum(1 for v in row_texts if any(k in re.sub(r'[^a-z]', '', v.lower()) for k in ALL_KEYWORDS))
-                                if match_count >= 2:
-                                    header_found = True
-                                    valid_table_found = True
-                                for i, cell in enumerate(row):
-                                    if not cell: continue
-                                    col_clean = re.sub(r'[^a-z]', '', str(cell).lower())
-                                    if col_map['material'] is None and any(x in col_clean for x in MATERIAL_KEYWORDS):
-                                        col_map['material'] = i
-                                    elif col_map['rate'] is None and any(x in col_clean for x in RATE_KEYWORDS):
-                                        col_map['rate'] = i
-                                    elif col_map['brand'] is None and any(x in col_clean for x in BRAND_KEYWORDS):
-                                        col_map['brand'] = i
-                                    elif col_map['uom'] is None and any(x in col_clean for x in UOM_KEYWORDS):
-                                        col_map['uom'] = i
-                                    elif col_map['delivery'] is None and any(x in col_clean for x in DELIVERY_KEYWORDS):
-                                        col_map['delivery'] = i
-                                    elif col_map['discount'] is None and any(x in col_clean for x in DISCOUNT_KEYWORDS):
-                                        col_map['discount'] = i
-                                continue # Skip processing data for header row
+                            for row in exploded_rows:
+                                if not any(row): continue
                                 
-                        mat_name = ""
-                        rate_val = 0.0
-                        brand_val = None
-                        uom_val = None
-                        delivery_val = None
-                        discount_val = 0.0
-                        
-                        if header_found and col_map['material'] is not None:
-                            # Extract using mapped indices
-                            if col_map['material'] < len(row) and row[col_map['material']]:
-                                mat_name = str(row[col_map['material']]).strip().replace('\n', ' ')
-                            if col_map['rate'] is not None and col_map['rate'] < len(row) and row[col_map['rate']]:
-                                try: rate_val = float(str(row[col_map['rate']]).replace(',', '').strip())
-                                except: pass
-                            if col_map['brand'] is not None and col_map['brand'] < len(row) and row[col_map['brand']]:
-                                brand_val = str(row[col_map['brand']]).strip().replace('\n', ' ')
-                            if col_map['uom'] is not None and col_map['uom'] < len(row) and row[col_map['uom']]:
-                                uom_val = str(row[col_map['uom']]).strip().replace('\n', ' ')
-                            if col_map['delivery'] is not None and col_map['delivery'] < len(row) and row[col_map['delivery']]:
-                                try: 
-                                    num_match = re.search(r'\d+', str(row[col_map['delivery']]))
-                                    if num_match: delivery_val = int(num_match.group(0))
-                                except: pass
-                            if col_map['discount'] is not None and col_map['discount'] < len(row) and row[col_map['discount']]:
-                                try: 
-                                    disc_match = re.search(r'(\d+(?:\.\d+)?)', str(row[col_map['discount']]))
-                                    if disc_match: discount_val = float(disc_match.group(1))
-                                except: pass
+                                row_texts = [str(cell).strip().replace('\n', ' ') for cell in row if cell]
                                 
-                            if mat_name:
-                                # Skip summary rows in pdf tables too
-                                if any(skip in mat_name.lower() for skip in ['total', 'subtotal', 'tax', 'cgst', 'sgst', 'igst', 'amount']):
-                                    continue
+                                if not header_found:
+                                    match_count = sum(1 for v in row_texts if any(k in re.sub(r'[^a-z]', '', v.lower()) for k in ALL_KEYWORDS))
+                                    if match_count >= 2:
+                                        header_found = True
+                                        valid_table_found = True
+                                    for i, cell in enumerate(row):
+                                        if not cell: continue
+                                        col_clean = re.sub(r'[^a-z]', '', str(cell).lower())
+                                        if col_map['material'] is None and any(x in col_clean for x in MATERIAL_KEYWORDS):
+                                            col_map['material'] = i
+                                        elif col_map['rate'] is None and any(x in col_clean for x in RATE_KEYWORDS):
+                                            col_map['rate'] = i
+                                        elif col_map['brand'] is None and any(x in col_clean for x in BRAND_KEYWORDS):
+                                            col_map['brand'] = i
+                                        elif col_map['uom'] is None and any(x in col_clean for x in UOM_KEYWORDS):
+                                            col_map['uom'] = i
+                                        elif col_map['delivery'] is None and any(x in col_clean for x in DELIVERY_KEYWORDS):
+                                            col_map['delivery'] = i
+                                        elif col_map['discount'] is None and any(x in col_clean for x in DISCOUNT_KEYWORDS):
+                                            col_map['discount'] = i
+                                    continue # Skip processing data for header row
                                     
-                                matched_item, conf = fuzzy_match_material(mat_name, qr_items)
-                                if rate_val > 0 and conf > 0.0: conf = min(1.0, conf + 0.1)
+                                mat_name = ""
+                                rate_val = 0.0
+                                brand_val = None
+                                uom_val = None
+                                delivery_val = None
+                                discount_val = 0.0
                                 
-                                page_results.append(ExtractionResultItem(
-                                    material_id=matched_item.material_id if matched_item else None,
-                                    material_name=matched_item.material.name if matched_item else mat_name,
-                                    quoted_rate=rate_val,
-                                    brand=brand_val,
-                                    vendor_uom_name=uom_val,
-                                    delivery_days=delivery_val,
-                                    discount_percent=discount_val,
-                                    confidence_score=conf,
-                                    raw_text=mat_name
-                                ))
+                                if header_found and col_map['material'] is not None:
+                                    # Extract using mapped indices
+                                    if col_map['material'] < len(row) and row[col_map['material']]:
+                                        mat_name = str(row[col_map['material']]).strip().replace('\n', ' ')
+                                    if col_map['rate'] is not None and col_map['rate'] < len(row) and row[col_map['rate']]:
+                                        try: rate_val = float(str(row[col_map['rate']]).replace(',', '').strip())
+                                        except: pass
+                                    if col_map['brand'] is not None and col_map['brand'] < len(row) and row[col_map['brand']]:
+                                        brand_val = str(row[col_map['brand']]).strip().replace('\n', ' ')
+                                    if col_map['uom'] is not None and col_map['uom'] < len(row) and row[col_map['uom']]:
+                                        uom_val = str(row[col_map['uom']]).strip().replace('\n', ' ')
+                                    if col_map['delivery'] is not None and col_map['delivery'] < len(row) and row[col_map['delivery']]:
+                                        try: 
+                                            num_match = re.search(r'\d+', str(row[col_map['delivery']]))
+                                            if num_match: delivery_val = int(num_match.group(0))
+                                        except: pass
+                                    if col_map['discount'] is not None and col_map['discount'] < len(row) and row[col_map['discount']]:
+                                        try: 
+                                            disc_match = re.search(r'(\d+(?:\.\d+)?)', str(row[col_map['discount']]))
+                                            if disc_match: discount_val = float(disc_match.group(1))
+                                        except: pass
+                                        
+                                    if mat_name:
+                                        # Skip summary rows in pdf tables too
+                                        if any(skip in mat_name.lower() for skip in ['total', 'subtotal', 'tax', 'cgst', 'sgst', 'igst', 'amount']):
+                                            continue
+                                            
+                                        matched_items, conf = fuzzy_match_material(mat_name, qr_items)
+                                        if rate_val > 0 and conf > 0.0: conf = min(1.0, conf + 0.1)
+                                        
+                                        if matched_items:
+                                            for matched_item in matched_items:
+                                                page_results.append(ExtractionResultItem(
+                                                    material_id=matched_item.material_id,
+                                                    material_name=matched_item.material.name,
+                                                    quoted_rate=rate_val,
+                                                    brand=brand_val,
+                                                    vendor_uom_name=uom_val,
+                                                    delivery_days=delivery_val,
+                                                    discount_percent=discount_val,
+                                                    confidence_score=conf,
+                                                    raw_text=mat_name
+                                                ))
+                                        else:
+                                            page_results.append(ExtractionResultItem(
+                                                material_id=None,
+                                                material_name=mat_name,
+                                                quoted_rate=rate_val,
+                                                brand=brand_val,
+                                                vendor_uom_name=uom_val,
+                                                delivery_days=delivery_val,
+                                                discount_percent=discount_val,
+                                                confidence_score=conf,
+                                                raw_text=mat_name
+                                            ))
                                 
                         # Check for vertical merge or garbage table: if valid_table_found is True but we didn't extract any valid rates
                         if valid_table_found and not any(r.quoted_rate and r.quoted_rate > 0 for r in page_results):
@@ -339,7 +407,9 @@ def extract_from_pdf(file_path: str, qr_items: list) -> List[ExtractionResultIte
                             valid_money = []
                             for idx, m in enumerate(money_matches):
                                 m_clean = m.replace(',', '')
-                                if '.' in m_clean or float(m_clean) > 100 or idx > 0:
+                                if '.' in m_clean or float(m_clean) > 50:
+                                    if idx == 0 and not '.' in m_clean and float(m_clean) < 1000:
+                                        continue
                                     valid_money.append(m_clean)
                                     
                             if valid_money:
@@ -362,18 +432,29 @@ def extract_from_pdf(file_path: str, qr_items: list) -> List[ExtractionResultIte
                             if len(mat_name) > 3:
                                 if any(skip in mat_name.lower() for skip in ['total', 'subtotal', 'tax', 'cgst', 'sgst', 'igst', 'amount', 'hsnsac']):
                                     continue
-                                matched_item, conf = fuzzy_match_material(mat_name, qr_items)
+                                matched_items, conf = fuzzy_match_material(mat_name, qr_items)
                                 brand_match = re.search(r'(?i)make:\s*([a-zA-Z0-9]+)', line)
                                 brand_val = brand_match.group(1) if brand_match else None
                                 
-                                results.append(ExtractionResultItem(
-                                    material_id=matched_item.material_id if matched_item else None,
-                                    material_name=matched_item.material.name if matched_item else mat_name,
-                                    quoted_rate=rate_val,
-                                    brand=brand_val,
-                                    confidence_score=conf,
-                                    raw_text=line
-                                ))
+                                if matched_items:
+                                    for matched_item in matched_items:
+                                        results.append(ExtractionResultItem(
+                                            material_id=matched_item.material_id,
+                                            material_name=matched_item.material.name,
+                                            quoted_rate=rate_val,
+                                            brand=brand_val,
+                                            confidence_score=conf,
+                                            raw_text=line
+                                        ))
+                                else:
+                                    results.append(ExtractionResultItem(
+                                        material_id=None,
+                                        material_name=mat_name,
+                                        quoted_rate=rate_val,
+                                        brand=brand_val,
+                                        confidence_score=conf,
+                                        raw_text=line
+                                    ))
     except Exception as e:
         print(f"PDF extraction error: {e}")
         
@@ -460,6 +541,8 @@ def extract_quotation_data(
         else:
             raise HTTPException(status_code=400, detail="Unsupported file format. Please upload Excel, PDF, or Image.")
             
+        # Sort descending by quoted_rate to prevent zero-rates from shadowing valid rates in the frontend
+        results.sort(key=lambda r: (r.quoted_rate or 0.0), reverse=True)
         return results
         
     finally:

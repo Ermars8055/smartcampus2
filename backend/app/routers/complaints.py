@@ -455,7 +455,7 @@ def complete_inspection(
         )
 
     complaint.repair_method = payload.repair_method
-    if payload.repair_method == 'Internal With Material':
+    if payload.repair_method == 'Material Required':
         complaint.material_required = True
     else:
         complaint.material_required = False
@@ -463,7 +463,7 @@ def complete_inspection(
     if payload.inspection_details is not None:
         complaint.inspection_details = payload.inspection_details
 
-    if payload.repair_method == 'Internal With Material':
+    if payload.repair_method == 'Material Required':
         complaint.status = ComplaintStatus.MATERIAL_PENDING.value
     else:
         complaint.status = ComplaintStatus.IN_PROGRESS.value

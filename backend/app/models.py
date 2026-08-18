@@ -1093,7 +1093,7 @@ class Complaint(Base):
     manager_approved_at = Column(DateTime, nullable=True)
     is_pm_calibration_call = Column(Boolean, default=False)
     repair_method = Column(String(100), nullable=True)
-    linked_vwo_id = Column(Integer, ForeignKey("vendor_work_orders.id"), nullable=True)
+
 
     created_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     resolved_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
@@ -2109,7 +2109,7 @@ class VendorWorkOrder(Base):
     vwo_number = Column(String(50), nullable=False, index=True)
     institution_id = Column(Integer, ForeignKey("institutions.id"), nullable=True)
     vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=True)
-    complaint_id = Column(Integer, ForeignKey("complaints.id"), nullable=True)
+
     equipment_id = Column(Integer, ForeignKey("equipment_items.id"), nullable=False)
     priority = Column(String(50), nullable=False, default="Normal")
     target_date = Column(Date, nullable=False)
@@ -2133,7 +2133,7 @@ class VendorWorkOrder(Base):
 
     institution = relationship("Institution")
     vendor = relationship("Vendor")
-    complaint = relationship("Complaint", foreign_keys=[complaint_id])
+
     equipment = relationship("EquipmentItem")
     created_by = relationship("User", foreign_keys=[created_by_id])
     items = relationship("VendorWorkOrderItem", back_populates="vwo", cascade="all, delete-orphan")

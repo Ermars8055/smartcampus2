@@ -450,7 +450,15 @@ export default function RoleConfiguration() {
           </Box>
         </Box>
 
-        <TableContainer>
+        <TableContainer 
+          sx={{ 
+            maxHeight: '60vh', 
+            overflowY: 'auto',
+            '&::-webkit-scrollbar': { width: 6, height: 6 },
+            '&::-webkit-scrollbar-track': { backgroundColor: '#F1F5F9' },
+            '&::-webkit-scrollbar-thumb': { backgroundColor: '#CBD5E1', borderRadius: 3, '&:hover': { backgroundColor: '#94A3B8' } }
+          }}
+        >
           <Table size="small">
             <TableHead>
               <TableRow sx={{ bgcolor: '#F8FAFC' }}>

@@ -514,7 +514,8 @@ const Quotations = () => {
       const formData = new FormData();
       formData.append('file', file);
       const res = await api.post(`/api/quotations/${selectedQR.id}/vendor-quotation/extract`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 120000 // 2 minutes timeout for large PDFs
       });
       
       const extractedItems = res.data;

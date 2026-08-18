@@ -305,8 +305,22 @@ def update_serial_number(id: int, payload: EquipmentUpdateSerial, db: Session=De
     item = db.query(EquipmentItem).filter(EquipmentItem.id == id, EquipmentItem.tenant_id == tenant_id, EquipmentItem.site_id == site_id).first()
     if not item:
         raise HTTPException(status_code=404, detail='Equipment item not found')
+    sn = payload.serial_number.strip()
+    
+    if sn.upper() != 'NA' and sn != '':
+        existing = db.query(EquipmentItem).filter(
+            EquipmentItem.tenant_id == tenant_id,
+            EquipmentItem.serial_number == sn,
+            EquipmentItem.id != id
+        ).first()
+        if existing:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Serial number '{sn}' is already assigned to equipment '{existing.equipment_code}'."
+            )
+
     old_sn = item.serial_number
-    item.serial_number = payload.serial_number.strip()
+    item.serial_number = sn
     item.serial_number_status = 'Captured'
     item.updated_at = datetime.utcnow()
     db.commit()

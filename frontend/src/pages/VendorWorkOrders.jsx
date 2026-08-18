@@ -75,7 +75,6 @@ const VendorWorkOrders = () => {
                 <TableCell>VWO No</TableCell>
                 <TableCell>Date</TableCell>
                 <TableCell>Vendor</TableCell>
-                <TableCell>Complaint</TableCell>
                 <TableCell>Equipment</TableCell>
                 <TableCell>Priority</TableCell>
                 <TableCell align="right">Amount</TableCell>
@@ -86,7 +85,7 @@ const VendorWorkOrders = () => {
             <TableBody>
               {workOrders.length === 0 && !loading && (
                 <TableRow>
-                  <TableCell colSpan={9} align="center" sx={{ py: 3 }}>
+                  <TableCell colSpan={8} align="center" sx={{ py: 3 }}>
                     <Typography color="text.secondary">No vendor work orders found</Typography>
                   </TableCell>
                 </TableRow>
@@ -96,7 +95,6 @@ const VendorWorkOrders = () => {
                   <TableCell sx={{ fontWeight: 500 }}>{wo.vwo_number}</TableCell>
                   <TableCell>{formatDate(wo.created_at)}</TableCell>
                   <TableCell>{wo.vendor_name}</TableCell>
-                  <TableCell>{wo.complaint_docket || '-'}</TableCell>
                   <TableCell>{wo.equipment_code}</TableCell>
                   <TableCell>
                     <Chip 

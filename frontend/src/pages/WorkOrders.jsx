@@ -225,12 +225,9 @@ export default function WorkOrders() {
   const [tabValue, setTabValue] = useState(searchParams.get('tab') || 'Draft');
   const [editingWOId, setEditingWOId] = useState(null);
   const [form, setForm] = useState({
-    wo_number: '', vendor_id: '', contract_id: '', project_id: '', institution_id: '', target_completion_date: null, terms: '', annexure: '', advance_percentage: 0,
-    wo_type: 'AMC', equipment_id: '', remarks: '',
-    items: [{ material_id: '', quantity: '', rate: '', discount_percent: '', cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }]
+    wo_number: '', vendor_id: '', contract_id: '', equipment_id: '', project_id: '', institution_id: '', target_completion_date: null, terms: '', annexure: '', advance_percentage: 0,
+    wo_type: 'AMC', remarks: ''
   });
-  const [formPage, setFormPage] = useState(0);
-  const [formRowsPerPage, setFormRowsPerPage] = useState(10);
 
   useEffect(() => {
     if (form.vendor_id) {
@@ -240,51 +237,37 @@ export default function WorkOrders() {
           console.error("Error fetching vendor active contract details", err);
           setVendorContracts([]);
         });
-
-      api.get(`/api/contracts/active-rates/${form.vendor_id}`)
-        .then(res => {
-          setVendorRates(res.data);
-          setForm(prevForm => {
-            const newItems = prevForm.items.map(it => {
-              if (it.material_id) {
-                const contractRate = res.data[it.material_id];
-                const mat = materials.find(m => m.id === it.material_id);
-                const baseRate = contractRate !== undefined ? contractRate : (mat?.standard_cost || 0);
-                const newRate = contractRate !== undefined ? contractRate : (mat?.standard_cost || 0);
-                return {
-                  ...it,
-                  base_rate: baseRate,
-                  rate: newRate
-                };
-              }
-              return it;
-            });
-            return { ...prevForm, items: newItems };
-          });
-        })
-        .catch(err => {
-          console.error("Error fetching vendor active rates", err);
-          setVendorRates({});
-        });
     } else {
       setVendorContracts([]);
-      setVendorRates({});
     }
   }, [form.vendor_id, materials]);
 
-  useEffect(() => {
-    if (form.contract_id && vendorContracts.length > 0) {
-      const selected = vendorContracts.find(c => c.id === form.contract_id);
-      if (selected) {
-        const newTerms = [selected.payment_terms, selected.sla_details].filter(Boolean).join('\n\n');
-        setForm(prev => ({
-          ...prev,
-          terms: newTerms || prev.terms,
-          annexure: selected.exclusions || prev.annexure
-        }));
+  const availableEquipment = useMemo(() => {
+    if (!form.vendor_id || !form.wo_type || vendorContracts.length === 0) return [];
+    const matchingContracts = vendorContracts.filter(c => c.contract_type === form.wo_type);
+    const eqs = [];
+    matchingContracts.forEach(c => {
+      if(c.items) {
+        c.items.forEach(item => {
+          if (item.equipment_id) {
+            eqs.push({
+              contract_id: c.id,
+              contract_number: c.contract_number,
+              contract_item_id: item.id,
+              equipment_id: item.equipment_id,
+              equipment_serial: item.equipment_serial,
+              material_name: item.material_name,
+              rate: item.rate,
+              payment_terms: c.payment_terms,
+              sla_details: c.sla_details,
+              exclusions: c.exclusions
+            });
+          }
+        });
       }
-    }
-  }, [form.contract_id, vendorContracts]);
+    });
+    return eqs;
+  }, [form.vendor_id, form.wo_type, vendorContracts]);
 
 
 
@@ -341,7 +324,10 @@ export default function WorkOrders() {
   }, [wos, search, filterVendor, filterProcurementType, searchParams]);
 
   const calculateWOTotalNet = (wo) => {
-    if (!wo || !wo.items) return 0;
+    if (!wo) return 0;
+    if (!wo.items || wo.items.length === 0) {
+      return Math.round(wo.total_amount || 0);
+    }
     let totalNetAmountSum = 0;
     wo.items.forEach(item => {
       const effQty = item.approved_quantity !== null && item.approved_quantity !== undefined ? item.approved_quantity : item.quantity;
@@ -420,41 +406,16 @@ export default function WorkOrders() {
         vendor_id: wo.vendor_id || '',
         project_id: wo.project_id || (projects.length > 0 ? projects[0].id : ''),
         institution_id: wo.institution_id || '',
-        delivery_date: wo.delivery_date ? dayjs(wo.delivery_date) : null,
+        contract_id: wo.contract_id || '',
+        equipment_id: wo.equipment_id || '',
+        wo_type: wo.wo_type || 'AMC',
+        target_completion_date: wo.target_completion_date ? dayjs(wo.target_completion_date) : null,
         terms: wo.terms || '',
         annexure: wo.annexure || '',
-        purchase_mode: wo.purchase_mode || '',
-        marketplace_name: wo.marketplace_name || '',
         advance_percentage: wo.advance_percentage || 0,
-        procurement_type: wo.procurement_type || '',
-        rental_type: wo.rental_type || '',
-        rental_agreement_number: wo.rental_agreement_number || '',
-        rental_agreement_document: wo.rental_agreement_document || '',
-        rental_start_date: wo.rental_start_date ? dayjs(wo.rental_start_date) : null,
-        rental_end_date: wo.rental_end_date ? dayjs(wo.rental_end_date) : null,
-        billing_frequency: wo.billing_frequency || '',
-        security_dewosit: wo.security_dewosit || 0,
-        cost_per_test: wo.cost_per_test || '',
-        linked_reagent_agreement: wo.linked_reagent_agreement || '',
-        vendor_maintenance_responsibility: wo.vendor_maintenance_responsibility || false,
-        return_conditions: wo.return_conditions || '',
-        renewal_terms: wo.renewal_terms || '',
-        items: wo.items && wo.items.length > 0 ? wo.items.map(it => ({
-          material_id: it.material_id,
-          quantity: it.quantity,
-          rate: it.rate,
-          discount_percent: it.discount_percent || 0,
-          cgst_percentage: it.cgst_percentage || 0,
-          sgst_percentage: it.sgst_percentage || 0,
-          igst_percentage: it.igst_percentage || 0,
-          is_gst_inclusive: it.is_gst_inclusive || false,
-          uom_name: it.uom_name || '',
-          base_rate: materials.find(m => m.id === it.material_id)?.standard_cost || 0
-        })) : [{ material_id: '', quantity: '', rate: '', discount_percent: '', cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }]
+        remarks: wo.remarks || ''
       });
       setEditingWOId(wo.id);
-      setItemErrors({});
-      setFormPage(0);
       setDialog(true);
     } else {
       setDetailPage(0);
@@ -522,37 +483,22 @@ export default function WorkOrders() {
     if (location.state?.reagentRentalData && projects.length > 0) {
       const data = location.state.reagentRentalData;
       setForm({
+        wo_number: '',
         vendor_id: data.vendor_id || '',
         project_id: data.project_id || projects[0]?.id || '',
         institution_id: data.institution_id || '',
-        delivery_date: null,
+        contract_id: '',
+        equipment_id: '',
+        target_completion_date: null,
         terms: '', annexure: '',
-        purchase_mode: 'Direct',
-        marketplace_name: '',
         advance_percentage: 0,
-        procurement_type: 'Purchase', rental_type: '', rental_agreement_number: '', rental_start_date: null, rental_end_date: null, billing_frequency: '', security_dewosit: 0, cost_per_test: '', linked_reagent_agreement: data.rental_agreement_number || data.wo_number || data.equipment_code || '', vendor_maintenance_responsibility: false, return_conditions: '', renewal_terms: '', remarks: `Auto-generated for Equipment: ${data.equipment_code}`,
-        items: data.items.map(it => {
-          const mat = materials.find(m => m.id === it.material_id);
-          return {
-            material_id: it.material_id,
-            quantity: it.quantity,
-            rate: '',
-            discount_percent: '',
-            cgst_percentage: 0,
-            sgst_percentage: 0,
-            igst_percentage: 0,
-            is_gst_inclusive: false,
-            uom_name: mat ? mat.uom_name : '',
-            uom_allow_decimal: mat ? mat.uom_allow_decimal : false,
-            base_rate: 0
-          };
-        })
+        wo_type: 'AMC',
+        remarks: `Auto-generated for Equipment: ${data.equipment_code}`
       });
-      setItemErrors({});
       setDialog(true);
       navigate(location.pathname, { replace: true });
     }
-  }, [location.state, projects, materials, location.pathname, navigate]);
+  }, [location.state, projects, location.pathname, navigate]);
 
   useEffect(() => {
     if (location.state?.openWOId && wos.length > 0) {
@@ -568,175 +514,42 @@ export default function WorkOrders() {
     }
   }, [location.state, wos, location.pathname, navigate, hasAction]);
 
-  const addItem = () => {
-    const emptyCount = form.items.filter(it => !it.material_id).length;
-    if (emptyCount >= 5) {
-      showMessage("Please select materials for the existing empty rows before adding more. Limit reached (5).", "Limit Reached", "warning");
-      return;
-    }
-    setForm({ ...form, items: [...form.items, { material_id: '', quantity: '', rate: '', discount_percent: '', cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }] });
-  };
-  const removeItem = (i) => setForm({ ...form, items: form.items.filter((_, idx) => idx !== i) });
-  const updateItem = (i, field, val) => {
-    let finalVal = val;
-    if (['discount_percent', 'cgst_percentage', 'sgst_percentage', 'igst_percentage'].includes(field)) {
-      if (finalVal !== '' && Number(finalVal) > 100) return;
-    }
-    if (field === 'rate' && finalVal !== '') {
-      const parts = String(finalVal).split('.');
-      if (parts[1] && parts[1].length > 2) {
-        finalVal = `${parts[0]}.${parts[1].slice(0, 2)}`;
-      }
-    }
-    if (['discount_percent', 'cgst_percentage', 'sgst_percentage', 'igst_percentage'].includes(field)) {
-      if (finalVal !== '' && parseFloat(finalVal) > 100) {
-        finalVal = '100';
-      }
-    }
-    const items = [...form.items];
-    items[i] = { ...items[i], [field]: finalVal };
-    if (field === 'cgst_percentage') {
-      items[i].sgst_percentage = finalVal;
-      items[i].igst_percentage = 0;
-    } else if (field === 'sgst_percentage') {
-      items[i].cgst_percentage = finalVal;
-      items[i].igst_percentage = 0;
-    } else if (field === 'igst_percentage') {
-      if (finalVal !== '' && finalVal !== '0' && parseFloat(finalVal) !== 0) {
-        items[i].cgst_percentage = 0;
-        items[i].sgst_percentage = 0;
-      }
-    }
-    if (field === 'material_id') {
-      const mat = materials.find(m => m.id === finalVal);
-      if (mat) {
-        items[i].uom_name = mat.uom_name || '';
-        let contractRate = vendorRates[finalVal];
-        let contractGst = 0;
 
-        let autoContractId = form.contract_id;
-        
-        if (!autoContractId && vendorContracts.length > 0) {
-          const matchingContract = vendorContracts.find(c => c.items.some(ci => ci.material_id === finalVal));
-          if (matchingContract) {
-            autoContractId = matchingContract.id;
-          }
-        }
-
-        if (autoContractId && vendorContracts.length > 0) {
-          const selectedContract = vendorContracts.find(c => c.id === autoContractId);
-          if (selectedContract) {
-            const contractItem = selectedContract.items.find(ci => ci.material_id === finalVal);
-            if (contractItem) {
-              contractRate = contractItem.rate;
-              contractGst = contractItem.gst || 0;
-            }
-          }
-        }
-
-        items[i].base_rate = contractRate !== undefined ? contractRate : (mat.standard_cost || 0);
-        if (contractRate !== undefined) {
-          items[i].rate = contractRate;
-        }
-
-        if (contractGst > 0) {
-          items[i].cgst_percentage = contractGst / 2;
-          items[i].sgst_percentage = contractGst / 2;
-          items[i].igst_percentage = 0;
-        }
-        
-        let newForm = { ...form, items };
-        if (autoContractId !== form.contract_id) {
-          newForm.contract_id = autoContractId;
-          const selected = vendorContracts.find(c => c.id === autoContractId);
-          if (selected) {
-            const newTerms = [selected.payment_terms, selected.sla_details].filter(Boolean).join('\n\n');
-            newForm.terms = newTerms || form.terms;
-            newForm.annexure = selected.exclusions || form.annexure;
-          }
-        }
-        setForm(newForm);
-        return;
-      }
-    }
-    setForm({ ...form, items });
-  };
 
   const handleSave = async (isDraft = false) => {
     const newErrors = {};
     if (!form.vendor_id) newErrors.vendor_id = "Please select a Vendor.";
     if (!form.project_id) newErrors.project_id = "Project is required.";
     if (!form.institution_id) newErrors.institution_id = "Institution is required.";
-    if (['AMC', 'CMC'].includes(form.wo_type) && !form.equipment_id) newErrors.equipment_id = "Target Equipment is required for AMC/CMC.";
     if (!form.terms || !form.terms.trim()) newErrors.terms = "Terms and Conditions are mandatory.";
 
     if (form.advance_percentage !== '' && (parseFloat(form.advance_percentage) < 0 || parseFloat(form.advance_percentage) > 100)) {
       newErrors.advance_percentage = "Advance percentage must be between 0 and 100.";
     }
 
-    if (form.items.length === 0) {
-      newErrors.items = "Please add at least one line item.";
-    }
-
-    const newItemErrors = {};
-    form.items.forEach((it, i) => {
-      const qty = parseFloat(it.quantity) || 0;
-      const rate = parseFloat(it.rate) || 0;
-      let rowErrors = {};
-
-      if (!it.material_id) rowErrors.material_id = 'Material is required';
-      if (qty <= 0) rowErrors.quantity = 'Quantity must be > 0';
-      if (rate <= 0) rowErrors.rate = 'Rate must be > 0';
-
-      if (Object.keys(rowErrors).length > 0) {
-        newItemErrors[i] = rowErrors;
-      }
-    });
-
     setErrors(newErrors);
-    setItemErrors(newItemErrors);
 
-    if (Object.keys(newErrors).length > 0 || Object.keys(newItemErrors).length > 0) {
-      if (Object.keys(newErrors).length > 0) {
-        const firstErrorField = Object.keys(newErrors)[0];
-        const el = document.getElementById(`field-${firstErrorField}`);
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-      } else if (Object.keys(newItemErrors).length > 0) {
-        const firstErrorIdx = Object.keys(newItemErrors)[0];
-        const el = document.getElementById(`item-row-${firstErrorIdx}`);
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
+    if (Object.keys(newErrors).length > 0) {
+      const firstErrorField = Object.keys(newErrors)[0];
+      const el = document.getElementById(`field-${firstErrorField}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
       return;
     }
 
     try {
-      const mappedItems = form.items.map(it => {
-        const inputRate = parseFloat(it.rate) || 0;
-        const totalGstPercent = (parseFloat(it.cgst_percentage) || 0) + (parseFloat(it.sgst_percentage) || 0) + (parseFloat(it.igst_percentage) || 0);
-        return {
-          material_id: parseInt(it.material_id, 10),
-          quantity: parseFloat(it.quantity) || 0,
-          rate: inputRate,
-          discount_percent: parseFloat(it.discount_percent) || 0,
-          cgst_percentage: parseFloat(it.cgst_percentage) || 0,
-          sgst_percentage: parseFloat(it.sgst_percentage) || 0,
-          igst_percentage: parseFloat(it.igst_percentage) || 0,
-          is_gst_inclusive: it.is_gst_inclusive || false
-        };
-      });
       const payload = {
         ...form,
         vendor_id: parseInt(form.vendor_id, 10),
         project_id: parseInt(form.project_id, 10),
         institution_id: parseInt(form.institution_id, 10),
+        equipment_id: form.equipment_id ? parseInt(form.equipment_id, 10) : null,
+        contract_id: form.contract_id ? parseInt(form.contract_id, 10) : null,
         advance_percentage: parseFloat(form.advance_percentage) || 0,
         target_completion_date: form.target_completion_date ? dayjs(form.target_completion_date).format('YYYY-MM-DD') : null,
         status: isDraft ? 'Draft' : 'Submitted',
-        items: mappedItems
+        items: []
       };
 
       let res;
@@ -829,60 +642,85 @@ export default function WorkOrders() {
     let totalTaxable = 0;
     let totalNetAmountSum = 0;
 
-    wo.items.forEach((item, idx) => {
-      const effQty = item.approved_quantity !== null && item.approved_quantity !== undefined ? item.approved_quantity : item.quantity;
-      const qty = parseFloat(effQty) || 0;
-      const rate = parseFloat(item.rate) || 0;
-      const amount = qty * rate;
-      const discAmt = amount * ((item.discount_percent || 0) / 100);
-      const netAmtAfterDisc = amount - discAmt;
+    if (wo.items && wo.items.length > 0) {
+      wo.items.forEach((item, idx) => {
+        const effQty = item.approved_quantity !== null && item.approved_quantity !== undefined ? item.approved_quantity : item.quantity;
+        const qty = parseFloat(effQty) || 0;
+        const rate = parseFloat(item.rate) || 0;
+        const amount = qty * rate;
+        const discAmt = amount * ((item.discount_percent || 0) / 100);
+        const netAmtAfterDisc = amount - discAmt;
 
-      let taxable = netAmtAfterDisc;
-      const totalGst = (item.cgst_percentage || 0) + (item.sgst_percentage || 0) + (item.igst_percentage || 0);
-      if (item.is_gst_inclusive && totalGst > 0) {
-        taxable = netAmtAfterDisc / (1 + (totalGst / 100));
-      }
+        let taxable = netAmtAfterDisc;
+        const totalGst = (item.cgst_percentage || 0) + (item.sgst_percentage || 0) + (item.igst_percentage || 0);
+        if (item.is_gst_inclusive && totalGst > 0) {
+          taxable = netAmtAfterDisc / (1 + (totalGst / 100));
+        }
 
-      const cgstVal = taxable * ((item.cgst_percentage || 0) / 100);
-      const sgstVal = taxable * ((item.sgst_percentage || 0) / 100);
-      const igstVal = taxable * ((item.igst_percentage || 0) / 100);
+        const cgstVal = taxable * ((item.cgst_percentage || 0) / 100);
+        const sgstVal = taxable * ((item.sgst_percentage || 0) / 100);
+        const igstVal = taxable * ((item.igst_percentage || 0) / 100);
 
-      let itemBaseAmount = amount;
-      if (item.is_gst_inclusive && totalGst > 0) {
-        itemBaseAmount = amount / (1 + (totalGst / 100));
-      }
+        let itemBaseAmount = amount;
+        if (item.is_gst_inclusive && totalGst > 0) {
+          itemBaseAmount = amount / (1 + (totalGst / 100));
+        }
 
-      totalCgst += cgstVal;
-      totalSgst += sgstVal;
-      totalIgst += igstVal;
-      totalDiscount += discAmt;
-      totalTaxable += taxable;
-      grandTotal += amount;
+        totalCgst += cgstVal;
+        totalSgst += sgstVal;
+        totalIgst += igstVal;
+        totalDiscount += discAmt;
+        totalTaxable += taxable;
+        grandTotal += amount;
 
-      if (item.is_gst_inclusive) {
-        totalNetAmountSum += netAmtAfterDisc;
-      } else {
-        totalNetAmountSum += (netAmtAfterDisc + cgstVal + sgstVal + igstVal);
-      }
+        if (item.is_gst_inclusive) {
+          totalNetAmountSum += netAmtAfterDisc;
+        } else {
+          totalNetAmountSum += (netAmtAfterDisc + cgstVal + sgstVal + igstVal);
+        }
 
-      rowsHtml += `
+        rowsHtml += `
+          <tr>
+            <td>${idx + 1}</td>
+            <td>
+              ${item.material_name}
+            </td>
+            <td>-</td>
+            <td>${item.uom_allow_decimal ? Number(qty.toFixed(2)) : Math.round(qty)}</td>
+            <td>${item.uom_name || 'NOS'}</td>
+            <td style="text-align:right">${Number(rate.toFixed(2))}</td>
+            <td style="text-align:right">${Number((item.discount_percent || 0).toFixed(2))}</td>
+            <td style="text-align:right">${Number((item.cgst_percentage || 0).toFixed(2))}<br/><span style="font-size: 8px;">${item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</span></td>
+            <td style="text-align:right">${Number((item.sgst_percentage || 0).toFixed(2))}<br/><span style="font-size: 8px;">${item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</span></td>
+            <td style="text-align:right">${Number((item.igst_percentage || 0).toFixed(2))}<br/><span style="font-size: 8px;">${item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</span></td>
+            <td style="text-align:right">${Number(itemBaseAmount.toFixed(2))}</td>
+          </tr>
+        `;
+      });
+    } else if (wo.equipment_name) {
+      const rate = parseFloat(wo.total_amount) || 0;
+      rowsHtml = `
         <tr>
-          <td>${idx + 1}</td>
-          <td>
-            ${item.material_name}
+          <td>1</td>
+          <td style="text-align:left;">
+            <b>${wo.equipment_name}</b><br/>
+            <span style="font-size: 10px; color: #555;">Code: ${wo.equipment_code || 'N/A'}</span>
           </td>
           <td>-</td>
-          <td>${item.uom_allow_decimal ? Number(qty.toFixed(2)) : Math.round(qty)}</td>
-          <td>${item.uom_name || 'NOS'}</td>
-          <td style="text-align:right">${Number(rate.toFixed(2))}</td>
-          <td style="text-align:right">${Number((item.discount_percent || 0).toFixed(2))}</td>
-          <td style="text-align:right">${Number((item.cgst_percentage || 0).toFixed(2))}<br/><span style="font-size: 8px;">${item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</span></td>
-          <td style="text-align:right">${Number((item.sgst_percentage || 0).toFixed(2))}<br/><span style="font-size: 8px;">${item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</span></td>
-          <td style="text-align:right">${Number((item.igst_percentage || 0).toFixed(2))}<br/><span style="font-size: 8px;">${item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</span></td>
-          <td style="text-align:right">${Number(itemBaseAmount.toFixed(2))}</td>
+          <td>1</td>
+          <td>NOS</td>
+          <td style="text-align:right">${Number(rate).toFixed(2)}</td>
+          <td style="text-align:right">0.00</td>
+          <td style="text-align:right">0.00</td>
+          <td style="text-align:right">0.00</td>
+          <td style="text-align:right">0.00</td>
+          <td style="text-align:right">${Number(rate).toFixed(2)}</td>
         </tr>
       `;
-    });
+      totalTaxable = rate;
+      totalNetAmountSum = rate;
+      grandTotal = rate;
+    }
 
     const grandTotalWithTax = totalNetAmountSum;
     const roundOff = Number((Math.round(grandTotalWithTax) - grandTotalWithTax).toFixed(2));
@@ -1134,7 +972,7 @@ export default function WorkOrders() {
     }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
         <Box>
-          <Typography variant="h5" sx={{ fontWeight: 700 }}>Work Orders (Old)</Typography>
+          <Typography variant="h5" sx={{ fontWeight: 700 }}>Work Orders</Typography>
           <Typography variant="body2" sx={{ color: '#64748B' }}>{wos.length} orders</Typography>
         </Box>
         <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
@@ -1147,12 +985,9 @@ export default function WorkOrders() {
             <Button variant="contained" startIcon={<Add />} onClick={() => {
               setEditingWOId(null);
               setForm({
-                wo_number: '', vendor_id: '', project_id: projects.length > 0 ? projects[0].id : '', institution_id: '', delivery_date: null, terms: '', annexure: '', purchase_mode: '', marketplace_name: '', advance_percentage: 0,
-                procurement_type: '', rental_type: '', rental_agreement_number: '', rental_agreement_document: null, rental_start_date: null, rental_end_date: null, billing_frequency: '', security_dewosit: 0, cost_per_test: '', linked_reagent_agreement: '', vendor_maintenance_responsibility: false, return_conditions: '', renewal_terms: '',
-                items: [{ material_id: '', quantity: '', rate: '', discount_percent: '', cgst_percentage: 0, sgst_percentage: 0, igst_percentage: 0, is_gst_inclusive: false, uom_name: '', base_rate: 0 }]
+                wo_number: '', vendor_id: '', contract_id: '', equipment_id: '', project_id: projects.length > 0 ? projects[0].id : '', institution_id: '', target_completion_date: null, terms: '', annexure: '', advance_percentage: 0,
+                wo_type: 'AMC', remarks: ''
               });
-              setItemErrors({});
-              setFormPage(0);
               setDialog(true);
             }}>Create WO</Button>
           )}
@@ -1249,7 +1084,7 @@ export default function WorkOrders() {
                 </Box>
                 <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#334155' }}><strong>Vendor:</strong> {wo.vendor_name}</Typography>
                 <Typography variant="caption" sx={{ display: 'block', mb: 0.5, color: '#334155' }}><strong>Amount:</strong> <span style={{ color: '#059669', fontWeight: 600 }}>{formatCurrency(calculateWOTotalNet(wo))}</span></Typography>
-                <Typography variant="caption" sx={{ display: 'block', mb: 1.5, color: '#64748B' }}>{formatDate(wo.created_at)} • {wo.items?.length || 0} items</Typography>
+                <Typography variant="caption" sx={{ display: 'block', mb: 1.5, color: '#64748B' }}>{formatDate(wo.created_at)} • {wo.equipment_id ? 1 : (wo.items?.length || 0)} items</Typography>
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
                   <Box sx={{ display: 'flex', gap: 0.5 }} onClick={e => e.stopPropagation()}>
                     <Tooltip title="Approve">
@@ -1353,7 +1188,7 @@ export default function WorkOrders() {
 
 
                     <TableCell sx={{ fontSize: '0.7rem' }}>{wo.vendor_name}</TableCell>
-                    <TableCell align="right" sx={{ fontSize: '0.7rem' }}>{wo.items?.length || 0}</TableCell>
+                    <TableCell align="right" sx={{ fontSize: '0.7rem' }}>{wo.equipment_id ? 1 : (wo.items?.length || 0)}</TableCell>
                     <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.7rem', pr: 4 }}>{formatCurrency(calculateWOTotalNet(wo))}</TableCell>
                     <TableCell sx={{ fontSize: '0.7rem', whiteSpace: 'nowrap' }}>{formatDate(wo.created_at)}</TableCell>
 
@@ -1448,152 +1283,11 @@ export default function WorkOrders() {
                 <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>WO DATE</Typography>
                 <Typography sx={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>{formatDate(detailDialog?.created_at)}</Typography>
               </Grid>
-              <Grid item xs={4}>
-                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>TARGET COMPLETION</Typography>
-                <Typography sx={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>{formatDate(detailDialog?.target_completion_date) || '-'}</Typography>
-              </Grid>
-              <Grid item xs={4}>
-                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>TOTAL NET AMOUNT</Typography>
-                <Typography sx={{ fontWeight: 700, color: '#059669', fontSize: '1.2rem' }}>{formatCurrency(calculateWOTotalNet(detailDialog))}</Typography>
-              </Grid>
             </Grid>
+            
             <Divider sx={{ mb: 3 }} />
-            <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2, color: '#1e293b' }}>Material Items</Typography>
-            <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2 }}>
-              <Table size="small">
-                <TableHead>
-                  <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
-                    <TableCell sx={{ fontWeight: 700, fontSize: '0.7rem' }}>Sr. No.</TableCell>
-                    <TableCell sx={{ fontWeight: 700, fontSize: '0.7rem' }}>Item Description</TableCell>
-                    <TableCell sx={{ fontWeight: 700, fontSize: '0.7rem' }}>HSN Code</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.7rem' }}>REQ QTY</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.7rem' }}>APPROVED QTY</TableCell>
-                    <TableCell sx={{ fontWeight: 700, fontSize: '0.7rem' }}>UOM</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.7rem' }}>RATE</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.7rem' }}>Disc. %</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.7rem' }}>CGST %</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.7rem' }}>SGST %</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.7rem' }}>IGST %</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.7rem' }}>Item Amt.</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.7rem' }}>Received</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {detailDialog?.items?.slice(detailPage * detailRowsPerPage, detailPage * detailRowsPerPage + detailRowsPerPage).map((item, localIdx) => {
-                    const idx = detailPage * detailRowsPerPage + localIdx;
-                    const effQty = item.approved_quantity !== null && item.approved_quantity !== undefined ? item.approved_quantity : item.quantity;
-                    const qty = parseFloat(effQty) || 0;
-                    const rate = parseFloat(item.rate) || 0;
-                    const amount = qty * rate;
-                    return (
-                      <TableRow key={item.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                        <TableCell sx={{ fontSize: '0.75rem' }}>{idx + 1}</TableCell>
-                        <TableCell sx={{ fontSize: '0.75rem' }}>
-                          {item.material_name}<br />
-                          <Typography variant="caption" sx={{ color: '#64748B' }}>{item.material_code}</Typography>
-                        </TableCell>
-                        <TableCell sx={{ fontSize: '0.75rem' }}>-</TableCell>
-                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{Number(parseFloat(item.quantity || 0).toFixed(2))}</TableCell>
-                        <TableCell align="right" sx={{ fontSize: '0.75rem', fontWeight: 600, color: '#1d4ed8' }}>
-                          {item.approved_quantity !== null && item.approved_quantity !== undefined ? Number(parseFloat(item.approved_quantity).toFixed(2)) : '-'}
-                        </TableCell>
-                        <TableCell sx={{ fontSize: '0.75rem' }}>{item.uom_name || 'NOS'}</TableCell>
-                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{Number(rate.toFixed(2))}</TableCell>
-                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>{Number((item.discount_percent || 0).toFixed(2))}</TableCell>
-                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>
-                          {Number((item.cgst_percentage || 0).toFixed(2))}<br /><Typography variant="caption" sx={{ fontSize: '0.6rem', color: '#64748B' }}>{item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</Typography>
-                        </TableCell>
-                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>
-                          {Number((item.sgst_percentage || 0).toFixed(2))}<br /><Typography variant="caption" sx={{ fontSize: '0.6rem', color: '#64748B' }}>{item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</Typography>
-                        </TableCell>
-                        <TableCell align="right" sx={{ fontSize: '0.75rem' }}>
-                          {Number((item.igst_percentage || 0).toFixed(2))}<br /><Typography variant="caption" sx={{ fontSize: '0.6rem', color: '#64748B' }}>{item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</Typography>
-                        </TableCell>
-                        <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem' }}>
-                          {(() => {
-                            const totalGst = (item.cgst_percentage || 0) + (item.sgst_percentage || 0) + (item.igst_percentage || 0);
-                            let itemBaseAmount = amount;
-                            if (item.is_gst_inclusive && totalGst > 0) {
-                              itemBaseAmount = amount / (1 + (totalGst / 100));
-                            }
-                            return Number(itemBaseAmount.toFixed(2));
-                          })()}
-                        </TableCell>
-                        <TableCell align="right">
-                          <Chip label={item.received_quantity} size="small" color={item.received_quantity >= item.quantity ? 'success' : 'warning'} sx={{ fontSize: '0.65rem', height: 20 }} />
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </TableContainer>
 
-            {detailDialog?.items && detailDialog.items.length > 0 && (
-              <TablePagination
-                component="div"
-                count={detailDialog.items.length}
-                page={detailPage}
-                onPageChange={(e, newPage) => setDetailPage(newPage)}
-                rowsPerPage={detailRowsPerPage}
-                onRowsPerPageChange={(e) => {
-                  setDetailRowsPerPage(parseInt(e.target.value, 10));
-                  setDetailPage(0);
-                }}
-                rowsPerPageOptions={[5, 10, 25, 50]}
-              />
-            )}
 
-            {detailData && (
-              <Box sx={{ mt: 3, display: 'flex', flexDirection: { xs: 'column', md: 'row' }, justifyContent: 'flex-end', alignItems: 'flex-start', borderBottom: '1px dashed #cbd5e1', pb: 2, gap: 3 }}>
-                <Box sx={{ width: { xs: '100%', md: '40%' } }}>
-                  <Table size="small" sx={{ '& td': { borderBottom: 'none', py: 0.5, px: 1 } }}>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell align="right" sx={{ color: '#64748B', fontWeight: 600 }}>Total Amount</TableCell>
-                        <TableCell align="right" sx={{ width: '120px' }}>: {Number((detailData.totalTaxable + detailData.totalDiscount).toFixed(2))}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell align="right" sx={{ color: '#d97706', fontWeight: 600 }}>Less: Discount</TableCell>
-                        <TableCell align="right" sx={{ color: '#d97706' }}>: {Number(detailData.totalDiscount.toFixed(2))}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell align="right" sx={{ color: '#64748B', fontWeight: 600 }}>Taxable Amount</TableCell>
-                        <TableCell align="right">: {Number(detailData.totalTaxable.toFixed(2))}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell align="right" sx={{ color: '#64748B', fontWeight: 600 }}>Add: CGST</TableCell>
-                        <TableCell align="right">: {Number(detailData.totalCgst.toFixed(2))}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell align="right" sx={{ color: '#64748B', fontWeight: 600 }}>Add: SGST</TableCell>
-                        <TableCell align="right">: {Number(detailData.totalSgst.toFixed(2))}</TableCell>
-                      </TableRow>
-                      {detailData.totalIgst > 0 && (
-                        <TableRow>
-                          <TableCell align="right" sx={{ color: '#64748B', fontWeight: 600 }}>Add: IGST</TableCell>
-                          <TableCell align="right">: {Number(detailData.totalIgst.toFixed(2))}</TableCell>
-                        </TableRow>
-                      )}
-                      <TableRow>
-                        <TableCell align="right" sx={{ color: '#64748B', fontWeight: 600 }}>Round Off</TableCell>
-                        <TableCell align="right">: {detailData.roundOff}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell align="right" sx={{ fontWeight: 700, fontSize: '1rem', color: '#1e293b' }}>Total Net Amount</TableCell>
-                        <TableCell align="right" sx={{ fontWeight: 700, fontSize: '1rem', color: '#1e293b' }}>: {detailData.totalNetAmount}</TableCell>
-                      </TableRow>
-                      {detailData.advancePercentage > 0 && (
-                        <TableRow>
-                          <TableCell align="right" sx={{ color: '#d97706', fontWeight: 600 }}>Advance Amount ({detailData.advancePercentage}%)</TableCell>
-                          <TableCell align="right" sx={{ color: '#d97706', fontWeight: 600 }}>: {detailData.advanceAmount}</TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </Box>
-              </Box>
-            )}
 
             {detailData && detailData.activeTerms && (
               <Box sx={{ mt: 3 }}>
@@ -1777,18 +1471,7 @@ export default function WorkOrders() {
                   const vendor = newValue;
                   const vendorState = vendor?.state || '';
 
-                  const updatedItems = form.items.map(it => {
-                    const material = materials.find(m => m.id === it.material_id);
-                    if (!material) return it;
-                    const gstRate = material.gst_rate || 0;
-                    const { cgst_percentage, sgst_percentage, igst_percentage } = computeGstSplit(
-                      gstRate, vendorState, tenantConfig?.base_state,
-                      tenantConfig?.cgst_share_percent, tenantConfig?.sgst_share_percent
-                    );
-                    return { ...it, cgst_percentage, sgst_percentage, igst_percentage };
-                  });
-
-                  setForm({ ...form, vendor_id: vId, items: updatedItems });
+                  setForm({ ...form, vendor_id: vId });
                 }}
                 renderInput={(params) => (
                   <TextField
@@ -1810,50 +1493,15 @@ export default function WorkOrders() {
               ) : null}
             </Box>
 
-            <Box id="field-contract_id">
-              <Autocomplete
-                options={vendorContracts}
-                getOptionLabel={(option) => `${option.contract_number} ${option.contract_value ? `- ₹${option.contract_value}` : ''}`}
-                value={vendorContracts.find(c => c.id === form.contract_id) || null}
-                onChange={(e, newValue) => {
-                  const contractId = newValue ? newValue.id : '';
-                  if (contractId && newValue) {
-                    setForm(prevForm => {
-                      const newItems = prevForm.items.map(it => {
-                        if (it.material_id) {
-                          const contractItem = newValue.items.find(ci => ci.material_id === it.material_id);
-                          if (contractItem) {
-                            return { ...it, rate: contractItem.rate, cgst_percentage: (contractItem.gst || 0) / 2, sgst_percentage: (contractItem.gst || 0) / 2, igst_percentage: 0 };
-                          }
-                        }
-                        return it;
-                      });
-                      return { ...prevForm, contract_id: contractId, items: newItems, terms: newValue.terms_conditions || prevForm.terms, annexure: newValue.payment_terms || prevForm.annexure };
-                    });
-                  } else {
-                    setForm({ ...form, contract_id: contractId });
-                  }
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Linked Contract"
-                    size="small"
-                  />
-                )}
-                fullWidth
-                size="small"
-                disabled={!form.vendor_id}
-              />
-            </Box>
-
             <Box id="field-wo_type">
               <FormControl fullWidth size="small">
                 <InputLabel>WO Type</InputLabel>
                 <Select
                   value={form.wo_type || 'AMC'}
                   label="WO Type"
-                  onChange={(e) => setForm({ ...form, wo_type: e.target.value })}
+                  onChange={(e) => {
+                    setForm({ ...form, wo_type: e.target.value, contract_id: '' });
+                  }}
                 >
                   <MenuItem value="AMC">AMC</MenuItem>
                   <MenuItem value="CMC">CMC</MenuItem>
@@ -1864,254 +1512,41 @@ export default function WorkOrders() {
 
             <Box id="field-equipment_id">
               <Autocomplete
-                options={equipments}
-                getOptionLabel={(option) => `${option.equipment_code} - ${option.material_name || ''}`}
-                value={equipments.find(e => e.id === form.equipment_id) || null}
-                onChange={(e, newValue) => setForm({ ...form, equipment_id: newValue ? newValue.id : '' })}
-                renderInput={(params) => <TextField {...params} label={['AMC', 'CMC'].includes(form.wo_type) ? "Target Equipment *" : "Target Equipment (Optional)"} size="small" error={!!errors.equipment_id} helperText={errors.equipment_id} />}
-                fullWidth
-                size="small"
-              />
-            </Box>
-
-
-          </Box>
-
-
-
-          <Divider sx={{ mb: 2 }} />
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
-            <Box>
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b' }}>Line Items</Typography>
-              {errors.items && <Typography variant="caption" color="error">{errors.items}</Typography>}
-            </Box>
-          </Box>
-
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-            {form.items.slice(formPage * formRowsPerPage, formPage * formRowsPerPage + formRowsPerPage).map((item, localIdx) => {
-              const i = formPage * formRowsPerPage + localIdx;
-              const qty = parseFloat(item.quantity) || 0;
-              const inputRate = parseFloat(item.rate) || 0;
-              const discPercent = parseFloat(item.discount_percent) || 0;
-              const cgstPercent = parseFloat(item.cgst_percentage) || 0;
-              const sgstPercent = parseFloat(item.sgst_percentage) || 0;
-              const igstPercent = parseFloat(item.igst_percentage) || 0;
-              const totalGstPercent = cgstPercent + sgstPercent + igstPercent;
-
-              const grossAmt = qty * inputRate;
-              const discAmt = grossAmt * (discPercent / 100);
-              const netAmtAfterDisc = grossAmt - discAmt;
-
-              let taxableAmt = netAmtAfterDisc;
-              if (item.is_gst_inclusive && totalGstPercent > 0) {
-                taxableAmt = netAmtAfterDisc / (1 + (totalGstPercent / 100));
-              }
-              const cgstAmt = taxableAmt * (cgstPercent / 100);
-              const sgstAmt = taxableAmt * (sgstPercent / 100);
-              const igstAmt = taxableAmt * (igstPercent / 100);
-              const netAmt = item.is_gst_inclusive ? netAmtAfterDisc : (taxableAmt + cgstAmt + sgstAmt + igstAmt);
-
-              return (
-                <Box key={i} id={`item-row-${i}`} sx={{
-                  display: 'grid',
-                  gridTemplateColumns: { xs: '1fr', md: '1.5fr 0.5fr 0.8fr 1fr 0.8fr' },
-                  gap: 1.5,
-                  p: 1.5,
-                  bgcolor: '#f8fafc',
-                  borderRadius: 2,
-                  border: '1px solid #e2e8f0',
-                  wosition: 'relative'
-                }}>
-                  <Box>
-                    <MaterialSelect
-                      disabled={!form.vendor_id}
-                      materials={materials.filter(m => !form.items.some((it, idx) => idx !== i && it.material_id === m.id))}
-                      value={item.material_id}
-                      onChange={val => {
-                        const material = materials.find(m => m.id === val);
-                        if (material) {
-                          const vendor = vendors.find(v => v.id === form.vendor_id);
-                          const vendorState = vendor?.state || '';
-                          const gstRate = material.gst_rate || 0;
-                          const { cgst_percentage, sgst_percentage, igst_percentage } = computeGstSplit(
-                            gstRate, vendorState, tenantConfig?.base_state,
-                            tenantConfig?.cgst_share_percent, tenantConfig?.sgst_share_percent
-                          );
-                          const contractRate = vendorRates[val];
-                          const baseRate = contractRate !== undefined ? contractRate : (material.standard_cost || 0);
-                          const newRate = contractRate !== undefined ? contractRate : (material.standard_cost || 0);
-
-                          const newItems = [...form.items];
-                          newItems[i] = {
-                            ...newItems[i],
-                            material_id: val,
-                            uom_name: material.uom_name || '',
-                            uom_allow_decimal: material.uom_allow_decimal || false,
-                            rate: newRate,
-                            base_rate: baseRate,
-                            cgst_percentage,
-                            sgst_percentage,
-                            igst_percentage
-                          };
-                          setForm({ ...form, items: newItems });
-                        } else {
-                          const newItems = [...form.items];
-                          newItems[i] = {
-                            ...newItems[i],
-                            material_id: '',
-                            uom_name: '',
-                            uom_allow_decimal: false,
-                            rate: 0,
-                            base_rate: 0,
-                            cgst_percentage: 0,
-                            sgst_percentage: 0,
-                            igst_percentage: 0,
-                            discount_percent: 0,
-                            is_gst_inclusive: false
-                          };
-                          setForm({ ...form, items: newItems });
-                        }
-                      }}
-                      size="small"
-                      error={!!itemErrors[i]?.material_id}
-                      helperText={itemErrors[i]?.material_id}
-                    />
-                  </Box>
-                  <TextField size="small" label="Unit" value={item.uom_name || '-'} InputProps={{ readOnly: true }} />
-                  <TextField disabled={!item.material_id} size="small" label="Qty" type="number" value={item.quantity}
-                    error={!!itemErrors[i]?.quantity} helperText={itemErrors[i]?.quantity}
-                    onKeyDown={e => {
-                      const blockList = ['-', '+', 'e', 'E'];
-                      if (!item.uom_allow_decimal) blockList.push('.');
-                      if (blockList.includes(e.key)) e.preventDefault();
-                    }} onChange={e => {
-                      let val = e.target.value.replace(/-/g, '');
-                      if (!item.uom_allow_decimal) val = val.replace(/\./g, '');
-                      updateItem(i, 'quantity', val);
-                    }} inputProps={{ min: 0, step: item.uom_allow_decimal ? "any" : "1" }} />
-                  <Box>
-                    <TextField disabled={!item.material_id} sx={noSpinSx} fullWidth size="small" label="Rate (₹)" type="number" value={item.rate}
-                      error={!!itemErrors[i]?.rate} helperText={itemErrors[i]?.rate}
-                      onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'rate', e.target.value.replace(/-/g, ''))}
-                      onBlur={() => handleRateBlur(i, item.rate, item.base_rate)}
-                      inputProps={{ min: 0, step: "0.01" }} />
-                    {item.base_rate > 0 && <Typography variant="caption" sx={{ color: '#64748B', display: 'block', mt: 0.5 }}>Base Rate: ₹{item.base_rate}</Typography>}
-                  </Box>
-                  <FormControl size="small">
-                    <InputLabel>GST</InputLabel>
-                    <Select disabled={!item.material_id} label="GST" value={item.is_gst_inclusive ? 'inclusive' : 'exclusive'} onChange={e => updateItem(i, 'is_gst_inclusive', e.target.value === 'inclusive')}>
-                      <MenuItem value="exclusive">Exclusive</MenuItem>
-                      <MenuItem value="inclusive">Inclusive</MenuItem>
-                    </Select>
-                  </FormControl>
-
-                  <Box sx={{ gridColumn: { xs: '1 / -1', md: '1 / -1' }, display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', md: '1fr 1fr 1fr 1fr' }, gap: 1.5 }}>
-                    <Box display="flex" gap={1}>
-                      <TextField disabled={!item.material_id} sx={{ ...noSpinSx, flex: 1 }} size="small" label="Disc %" type="number" value={item.discount_percent} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onFocus={(e) => { if (item.discount_percent === 0 || item.discount_percent === '0') updateItem(i, 'discount_percent', ''); }} onBlur={(e) => { if (item.discount_percent === '') updateItem(i, 'discount_percent', 0); }} onChange={e => updateItem(i, 'discount_percent', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100, step: "any" }} />
-                      <TextField size="small" label="Disc (₹)" value={Number(discAmt.toFixed(2))} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
-                    </Box>
-                    <Box display="flex" gap={1}>
-                      <TextField sx={{ ...noSpinSx, flex: 1 }} size="small" label="CGST %" type="number" value={item.cgst_percentage} disabled={parseFloat(item.igst_percentage) > 0} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'cgst_percentage', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100, step: "any" }} InputProps={{ readOnly: true }} />
-                      <TextField size="small" label="CGST (₹)" value={Number(cgstAmt.toFixed(2))} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
-                    </Box>
-                    <Box display="flex" gap={1}>
-                      <TextField sx={{ ...noSpinSx, flex: 1 }} size="small" label="SGST %" type="number" value={item.sgst_percentage} disabled={parseFloat(item.igst_percentage) > 0} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'sgst_percentage', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100, step: "any" }} InputProps={{ readOnly: true }} />
-                      <TextField size="small" label="SGST (₹)" value={Number(sgstAmt.toFixed(2))} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
-                    </Box>
-                    <Box display="flex" gap={1}>
-                      <TextField sx={{ ...noSpinSx, flex: 1 }} size="small" label="IGST %" type="number" value={item.igst_percentage} disabled={parseFloat(item.cgst_percentage) > 0 || parseFloat(item.sgst_percentage) > 0} onKeyDown={e => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()} onChange={e => updateItem(i, 'igst_percentage', e.target.value.replace(/-/g, ''))} inputProps={{ min: 0, max: 100, step: "any" }} InputProps={{ readOnly: true }} />
-                      <TextField size="small" label="IGST (₹)" value={Number(igstAmt.toFixed(2))} InputProps={{ readOnly: true, sx: { bgcolor: '#f1f5f9', color: '#64748b' } }} sx={{ flex: 1 }} />
-                    </Box>
-                  </Box>
-
-                  <Box sx={{ gridColumn: { xs: '1 / -1', md: '1 / -1' }, display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1, pt: 1, borderTop: '1px dashed #e2e8f0' }}>
-                    {form.items.length > 1 ? (
-                      <Button size="small" color="error" startIcon={<Delete />} onClick={() => removeItem(i)}>Remove</Button>
-                    ) : <Box />}
-                    <Box sx={{ textAlign: 'right' }}>
-                      <Typography variant="caption" sx={{ color: '#64748B', display: 'block', fontSize: '0.65rem', fontWeight: 600 }}>NET AMOUNT</Typography>
-                      <Typography sx={{ fontSize: '1rem', fontWeight: 700, color: '#1e293b' }}>
-                        ₹{netAmt.toLocaleString('en-IN', { maximumFractionDigits: 2, minimumFractionDigits: 2 })}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Box>
-              );
-            })}
-
-            {form.items && form.items.length > 0 && (
-              <TablePagination
-                component="div"
-                count={form.items.length}
-                page={formPage}
-                onPageChange={(e, newPage) => setFormPage(newPage)}
-                rowsPerPage={formRowsPerPage}
-                onRowsPerPageChange={(e) => {
-                  setFormRowsPerPage(parseInt(e.target.value, 10));
-                  setFormPage(0);
-                }}
-                rowsPerPageOptions={[5, 10, 25, 50, 100]}
-              />
-            )}
-
-            {!form.indent_id && (
-              <Button
-                variant="outlined"
-                size="small"
-                startIcon={<Add />}
-                onClick={addItem}
-                sx={{
-                  textTransform: 'none',
-                  fontWeight: 600,
-                  borderStyle: 'dashed',
-                  width: '100%',
-                  py: 1.5,
-                  color: '#2563EB',
-                  fontSize: '0.95rem',
-                  borderColor: '#cbd5e1',
-                  '&:hover': { borderColor: '#94a3b8', bgcolor: '#f8fafc' }
-                }}
-              >
-                Add Another Item
-              </Button>
-            )}
-          </Box>
-          <Divider sx={{ my: 2 }} />
-          <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b', mb: 1.5 }}>Additional Details</Typography>
-          <Grid container spacing={2} sx={{ mb: 2 }}>
-            <Grid item xs={12} sm={4}>
-              <TextField
-                fullWidth size="small" label="Advance Percentage (%)" type="number"
-                value={form.advance_percentage || ''}
-                onChange={e => {
-                  const val = e.target.value;
-                  if (val === '' || /^\d*\.?\d{0,2}$/.test(val)) {
-                    if (val !== '' && Number(val) > 100) return;
-                    setForm({ ...form, advance_percentage: val });
+                options={availableEquipment}
+                getOptionLabel={(option) => `${option.equipment_serial || option.equipment_id} - ${option.material_name || 'Equipment'}`}
+                value={availableEquipment.find(e => e.equipment_id === form.equipment_id) || null}
+                onChange={(e, newValue) => {
+                  if (newValue) {
+                    const newTerms = [newValue.payment_terms, newValue.sla_details].filter(Boolean).join('\n\n');
+                    setForm(prevForm => ({
+                      ...prevForm,
+                      equipment_id: newValue.equipment_id,
+                      contract_id: newValue.contract_id,
+                      terms: newTerms || prevForm.terms,
+                      annexure: newValue.exclusions || prevForm.annexure
+                    }));
+                  } else {
+                    setForm({ ...form, equipment_id: '', contract_id: '' });
                   }
                 }}
-                inputProps={{ min: "0", max: "100", step: "0.01" }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Equipment *"
+                    size="small"
+                  />
+                )}
+                fullWidth
+                size="small"
+                disabled={!form.vendor_id || !form.wo_type}
               />
-            </Grid>
-            <Grid item xs={12} sm={4}>
-              <DatePicker
-                label="Target Completion Date"
-                value={form.target_completion_date ? dayjs(form.target_completion_date) : null}
-                onChange={val => setForm({ ...form, target_completion_date: val })}
-                format="DD-MMM-YYYY"
-                slotProps={{ textField: { fullWidth: true, size: "small" } }}
-                localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
-                disablePast
-              />
-            </Grid>
-            <Grid item xs={12} sm={4}>
-              <TextField
-                fullWidth size="small" label="Remarks"
-                value={form.remarks || ''}
-                onChange={e => setForm({ ...form, remarks: e.target.value })}
-              />
-            </Grid>
-          </Grid>
+            </Box>
+
+
+          </Box>
+
+
+
 
           <Divider sx={{ my: 2 }} />
           <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b', mb: 1.5 }}>Terms & Conditions *</Typography>

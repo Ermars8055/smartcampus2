@@ -165,11 +165,13 @@ def update_role(
     role.description = data.description
     role.data_access_scope = data.data_access_scope
 
-    # Replace permissions
-    db.query(RolePermission).filter(RolePermission.role_id == id).delete()
+    # Replace permissions via ORM to trigger delete-orphan cascade properly
+    # We flush immediately after clearing to avoid UniqueConstraint violations during insert
+    role.permissions.clear()
+    db.flush()
+    
     for perm_data in data.permissions:
         perm = RolePermission(
-            role_id=role.id,
             resource=perm_data.resource,
             can_read=perm_data.can_read,
             can_create=perm_data.can_create,
@@ -177,28 +179,52 @@ def update_role(
             can_delete=perm_data.can_delete,
             extended_actions=perm_data.extended_actions or {},
         )
-        db.add(perm)
+        role.permissions.append(perm)
 
     # Replace workflow rules for this role
     if site_id:
+        if old_name != data.name:
+            db.query(ApprovalFlow).filter(
+                ApprovalFlow.tenant_id == tenant_id,
+                ApprovalFlow.site_id == site_id,
+                ApprovalFlow.role_name == old_name,
+            ).update({"role_name": data.name})
+
         db.query(ApprovalFlow).filter(
             ApprovalFlow.tenant_id == tenant_id,
             ApprovalFlow.site_id == site_id,
-            ApprovalFlow.role_name == old_name,
+            ApprovalFlow.role_name == data.name,
         ).update({"is_active": False})
+        
         for rule in data.workflow_rules:
-            flow = ApprovalFlow(
-                tenant_id=tenant_id,
-                site_id=site_id,
-                document_type=rule.document_type,
-                level=rule.level,
-                role_name=data.name,
-                min_amount=rule.min_amount,
-                max_amount=rule.max_amount,
-                user_id=rule.user_id,
-                is_active=rule.is_active,
-            )
-            db.add(flow)
+            uid_filter = ApprovalFlow.user_id == rule.user_id if rule.user_id is not None else ApprovalFlow.user_id.is_(None)
+            
+            existing_flow = db.query(ApprovalFlow).filter(
+                ApprovalFlow.tenant_id == tenant_id,
+                ApprovalFlow.site_id == site_id,
+                ApprovalFlow.document_type == rule.document_type,
+                ApprovalFlow.level == rule.level,
+                ApprovalFlow.role_name == data.name,
+                uid_filter
+            ).first()
+            
+            if existing_flow:
+                existing_flow.is_active = rule.is_active
+                existing_flow.min_amount = rule.min_amount
+                existing_flow.max_amount = rule.max_amount
+            else:
+                flow = ApprovalFlow(
+                    tenant_id=tenant_id,
+                    site_id=site_id,
+                    document_type=rule.document_type,
+                    level=rule.level,
+                    role_name=data.name,
+                    min_amount=rule.min_amount,
+                    max_amount=rule.max_amount,
+                    user_id=rule.user_id,
+                    is_active=rule.is_active,
+                )
+                db.add(flow)
 
     db.commit()
     db.refresh(role)

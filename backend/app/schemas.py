@@ -2668,7 +2668,7 @@ class VendorWorkOrderDocumentOut(BaseModel):
 
 class VendorWorkOrderBase(BaseModel):
     vendor_id: Optional[int] = None
-    complaint_id: Optional[int] = None
+
     equipment_id: int
     priority: str = "Normal"
     target_date: date
@@ -2706,7 +2706,7 @@ class VendorWorkOrderOut(VendorWorkOrderBase):
     institution_id: Optional[int] = None
     institution_name: Optional[str] = None
     vendor_name: Optional[str] = None
-    complaint_docket: Optional[str] = None
+
     equipment_code: Optional[str] = None
     equipment_name: Optional[str] = None
     created_by_id: int

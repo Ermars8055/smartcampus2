@@ -38,6 +38,7 @@ export default function Equipment() {
   const [activeTab, setActiveTab] = useState('all'); // 'all', 'pending_serial', 'pending_installation'
   const [search, setSearch] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('');
+  const [selectedInstitution, setSelectedInstitution] = useState('');
 
   // Pagination states
   const [page, setPage] = useState(0);
@@ -47,6 +48,7 @@ export default function Equipment() {
   // Dialog states
   const [serialDialog, setSerialDialog] = useState(null); // Equipment object
   const [serialInput, setSerialInput] = useState('');
+  const [serialNotAvailable, setSerialNotAvailable] = useState(false);
   const [serialSubmitting, setSerialSubmitting] = useState(false);
 
   // QR Dialog
@@ -151,7 +153,7 @@ export default function Equipment() {
 
   // Filtered Equipment List
   const filteredEquipment = useMemo(() => {
-    return equipmentList.filter(item => {
+    let filtered = equipmentList.filter(item => {
       // Tab filter
       if (activeTab === 'pending_serial') {
         if (item.serial_number_status !== 'Pending Update' && item.serial_number) return false;
@@ -161,6 +163,11 @@ export default function Equipment() {
 
       // Status filter
       if (selectedStatus && item.status !== selectedStatus) {
+        return false;
+      }
+
+      // Institution filter
+      if (selectedInstitution && item.institution_id !== selectedInstitution) {
         return false;
       }
 
@@ -205,7 +212,7 @@ export default function Equipment() {
     }
 
     return filtered;
-  }, [equipmentList, activeTab, selectedStatus, search, sortConfig]);
+  }, [equipmentList, activeTab, selectedStatus, selectedInstitution, search, sortConfig]);
 
   const handleSort = (key) => {
     let direction = 'asc';
@@ -228,7 +235,7 @@ export default function Equipment() {
   // Reset page to 0 when filters change
   useEffect(() => {
     setPage(0);
-  }, [activeTab, selectedStatus, search]);
+  }, [activeTab, selectedStatus, selectedInstitution, search]);
 
   const paginatedEquipment = useMemo(() => {
     return filteredEquipment.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
@@ -236,21 +243,24 @@ export default function Equipment() {
 
   // Handle Serial Number Update Submit
   const handleSerialSubmit = async () => {
-    if (!serialInput.trim()) {
+    const finalSerial = serialNotAvailable ? 'NA' : serialInput.trim();
+    if (!finalSerial) {
       showMessage('Serial number is required', 'Validation Error', 'warning');
       return;
     }
     setSerialSubmitting(true);
     try {
       await api.put(`/api/equipment/${serialDialog.id}/serial-number`, {
-        serial_number: serialInput.trim()
+        serial_number: finalSerial
       });
-      showMessage('Serial number updated successfully!', 'Success', 'success');
+      const successMessage = finalSerial === 'NA' ? 'Serial number - updated as NA' : `Serial number updated successfully to '${finalSerial}'`;
+      showMessage(successMessage, 'Success', 'success');
       setSerialDialog(null);
       setSerialInput('');
+      setSerialNotAvailable(false);
       loadData();
     } catch (err) {
-      showMessage(err.response?.data?.detail || 'Failed to update serial number', 'Error', 'error');
+      showMessage(err.response?.data?.detail || 'Failed to update serial number', 'Duplicate Found', 'warning');
     }
     setSerialSubmitting(false);
   };
@@ -517,7 +527,7 @@ export default function Equipment() {
       formData.append('contact_number', installForm.contact_number);
       formData.append('location_id', installForm.location_id);
       if (installForm.installation_remarks) formData.append('installation_remarks', installForm.installation_remarks);
-      
+
       if (installFiles.file) formData.append('file', installFiles.file);
       if (installFiles.equipment_photo) formData.append('equipment_photo', installFiles.equipment_photo);
       if (installFiles.serial_number_photo) formData.append('serial_number_photo', installFiles.serial_number_photo);
@@ -660,7 +670,7 @@ export default function Equipment() {
   const handlePOSelection = async (newValue, isEdit) => {
     const form = isEdit ? editForm : addForm;
     const setForm = isEdit ? setEditForm : setAddForm;
-    
+
     if (!newValue) {
       setForm({
         ...form,
@@ -682,7 +692,7 @@ export default function Equipment() {
     try {
       const res = await api.get(`/api/procurement/po/${newValue.id}`);
       const po = res.data;
-      
+
       const updates = {
         po_id: po.id,
         po_number: po.po_number,
@@ -701,7 +711,7 @@ export default function Equipment() {
       } else {
         updates.procurement_type = 'Purchase';
       }
-      
+
       setForm({ ...form, ...updates });
     } catch (err) {
       showMessage('Failed to fetch PO details', 'Error', 'error');
@@ -777,13 +787,21 @@ export default function Equipment() {
           />
 
           <FormControl size="small" sx={{ minWidth: 180 }}>
-            <InputLabel>Equipment Status</InputLabel>
-            <Select value={selectedStatus} onChange={e => setSelectedStatus(e.target.value)} label="Equipment Status">
+            <Select value={selectedStatus} onChange={e => setSelectedStatus(e.target.value)} displayEmpty>
               <MenuItem value="">All Statuses</MenuItem>
               <MenuItem value="Operational">Operational</MenuItem>
               <MenuItem value="Pending Installation">Pending Installation</MenuItem>
               <MenuItem value="Under Repair">Under Repair</MenuItem>
               <MenuItem value="Written Off">Written Off</MenuItem>
+            </Select>
+          </FormControl>
+
+          <FormControl size="small" sx={{ minWidth: 180 }}>
+            <Select value={selectedInstitution} onChange={e => setSelectedInstitution(e.target.value)} displayEmpty>
+              <MenuItem value="">All Institutions</MenuItem>
+              {institutions.map(inst => (
+                <MenuItem key={inst.id} value={inst.id}>{inst.name}</MenuItem>
+              ))}
             </Select>
           </FormControl>
         </Box>
@@ -894,7 +912,7 @@ export default function Equipment() {
 
                 <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                   {item.serial_number_status === 'Pending Update' && (
-                    <Button size="small" variant="outlined" color="warning" startIcon={<Edit color="warning" />} onClick={(e) => { e.stopPropagation(); setSerialDialog(item); setSerialInput(''); }}>
+                    <Button size="small" variant="outlined" color="warning" startIcon={<Edit color="warning" />} onClick={(e) => { e.stopPropagation(); setSerialDialog(item); setSerialInput(''); setSerialNotAvailable(false); }}>
                       Update Serial
                     </Button>
                   )}
@@ -1044,7 +1062,7 @@ export default function Equipment() {
                             size="small"
                             color="warning"
                             clickable
-                            onClick={(e) => { e.stopPropagation(); setSerialDialog(item); setSerialInput(''); }}
+                            onClick={(e) => { e.stopPropagation(); setSerialDialog(item); setSerialInput(''); setSerialNotAvailable(false); }}
                             sx={{ fontWeight: 600, fontSize: '0.7rem' }}
                           />
                         </Tooltip>
@@ -1176,7 +1194,7 @@ export default function Equipment() {
       </Card>
 
       {/* Dialog 1: Update Serial Number */}
-      <Dialog open={!!serialDialog} onClose={() => setSerialDialog(null)} maxWidth="xs" fullWidth>
+      <Dialog open={!!serialDialog} onClose={() => { setSerialDialog(null); setSerialNotAvailable(false); }} maxWidth="xs" fullWidth>
         <DialogTitle sx={{ fontWeight: 700 }}>Update Serial Number</DialogTitle>
         <DialogContent>
           <Box sx={{ pt: 1 }}>
@@ -1193,12 +1211,27 @@ export default function Equipment() {
               placeholder="Enter equipment serial number"
               value={serialInput}
               onChange={e => setSerialInput(e.target.value)}
+              disabled={serialNotAvailable}
               autoFocus
+            />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={serialNotAvailable}
+                  onChange={(e) => {
+                    setSerialNotAvailable(e.target.checked);
+                    if (e.target.checked) setSerialInput('');
+                  }}
+                  color="primary"
+                />
+              }
+              label="Serial Number Not Available"
+              sx={{ mt: 2 }}
             />
           </Box>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 3 }}>
-          <Button onClick={() => setSerialDialog(null)} color="inherit">Cancel</Button>
+          <Button onClick={() => { setSerialDialog(null); setSerialNotAvailable(false); }} color="inherit">Cancel</Button>
           <Button variant="contained" color="primary" disabled={serialSubmitting} onClick={handleSerialSubmit}>
             {serialSubmitting ? 'Saving...' : 'Save Serial Number'}
           </Button>
@@ -1236,7 +1269,7 @@ export default function Equipment() {
                     {qrData.institution_name || 'Hospital'}
                   </Typography>
                 </Box>
-                
+
                 {/* Content */}
                 <Box sx={{ display: 'flex', flex: 1 }}>
                   {/* QR Code */}
@@ -1248,30 +1281,30 @@ export default function Equipment() {
                       level="M"
                     />
                   </Box>
-                  
+
                   {/* Details */}
                   <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', pl: 1, borderLeft: '1px dotted #ccc' }}>
                     <Typography sx={{ fontSize: '0.9rem', fontWeight: 900, pb: '4px', mb: '4px', borderBottom: '1px dotted #ccc', lineHeight: 1.2 }}>
                       {qrData.asset_id || ''}
                     </Typography>
-                    
+
                     <Box sx={{ pb: '4px', mb: '4px', borderBottom: '1px dotted #ccc' }}>
                       <Typography sx={{ fontSize: '0.55rem', fontWeight: 700, lineHeight: 1, mb: '2px' }}>DEPARTMENT</Typography>
                       <Typography sx={{ fontSize: '0.65rem', lineHeight: 1 }}>{qrData.department_used || qrData.department || ''}</Typography>
                     </Box>
-                    
+
                     <Box sx={{ pb: '4px', mb: '4px', borderBottom: '1px dotted #ccc' }}>
                       <Typography sx={{ fontSize: '0.55rem', fontWeight: 700, lineHeight: 1, mb: '2px' }}>MAKE & MODEL</Typography>
                       <Typography sx={{ fontSize: '0.65rem', lineHeight: 1 }}>{qrData.make_model || ''}</Typography>
                     </Box>
-                    
+
                     <Box>
                       <Typography sx={{ fontSize: '0.55rem', fontWeight: 700, lineHeight: 1, mb: '2px' }}>SERIAL NUMBER</Typography>
                       <Typography sx={{ fontSize: '0.65rem', lineHeight: 1 }}>{qrData.serial_number || ''}</Typography>
                     </Box>
                   </Box>
                 </Box>
-                
+
                 {/* Footer */}
                 <Typography sx={{ textAlign: 'center', fontSize: '0.55rem', mt: 'auto', pt: '4px' }}>
                   Scan to raise a service ticket
@@ -1932,7 +1965,7 @@ export default function Equipment() {
                   </Grid>
                 </>
               )}
-              
+
               {(editForm.rental_type === 'Reagent Rental' || editForm.procurement_type === 'Reagent Tie-up') && (
                 <Grid item xs={12}>
                   <Divider sx={{ my: 2 }} />
@@ -2098,10 +2131,10 @@ export default function Equipment() {
               fullWidth
             />
             <TextField fullWidth size="small" multiline rows={2} label="Installation Remarks" value={installForm.installation_remarks || ''} onChange={e => setInstallForm({ ...installForm, installation_remarks: e.target.value })} />
-            
+
             <Divider sx={{ my: 1 }} />
             <Typography variant="subtitle2" color="primary">Upload Documents (Optional)</Typography>
-            
+
             <Box>
               <Typography variant="caption" sx={{ mb: 0.5, display: 'block', fontWeight: 600 }}>Installation Report (PDF/Image)</Typography>
               <TextField type="file" size="small" fullWidth inputProps={{ accept: '.pdf,image/*' }} onChange={e => setInstallFiles({ ...installFiles, file: e.target.files[0] })} />
@@ -2130,7 +2163,7 @@ export default function Equipment() {
         <DialogContent dividers>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
             <Alert severity="info" sx={{ mb: 1 }}>Upload missing installation reports or photos for this equipment.</Alert>
-            
+
             <Box>
               <Typography variant="caption" sx={{ mb: 0.5, display: 'block', fontWeight: 600 }}>Installation Report (PDF/Image)</Typography>
               <TextField type="file" size="small" fullWidth inputProps={{ accept: '.pdf,image/*' }} onChange={e => setUploadDocsFiles({ ...uploadDocsFiles, file: e.target.files[0] })} />

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from typing import List, Optional
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 
 from app.database import get_db
 from app.auth import get_current_user, require_permission, get_tenant_id, get_site_id
@@ -180,7 +180,7 @@ def create_complaint(
 
             if has_amc:
                 # Auto-generate Vendor Work Order
-                from datetime import timedelta
+
                 vwo_number = get_next_number(db, tenant_id, site_id, "VENDOR_WORK_ORDER", "VWO")
                 new_vwo = VendorWorkOrder(
                     tenant_id=tenant_id,

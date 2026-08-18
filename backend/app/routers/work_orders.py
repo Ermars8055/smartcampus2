@@ -8,7 +8,7 @@ from typing import Optional
 from app.database import get_db
 from app.models import (
     WorkOrder, WorkOrderItem, WorkOrderApproval,
-    EquipmentItem, Contract, Project, Vendor, AuditLog, ApprovalFlow, User
+    EquipmentItem, Contract, ContractItem, Project, Vendor, AuditLog, ApprovalFlow, User
 )
 from app.schemas import (
     WorkOrderCreate, WorkOrderUpdate, WorkOrderFullUpdate, WorkOrderOut, WorkOrderItemOut,
@@ -242,15 +242,28 @@ def create_work_order(
     site_id: int = Depends(get_site_id)
 ):
     total_amount = 0
-    for item in data.items:
-        net_amt = (item.quantity * item.rate) * (1 - (item.discount_percent or 0) / 100)
-        total_gst = (item.cgst_percentage or 0) + (item.sgst_percentage or 0) + (item.igst_percentage or 0)
-        if item.is_gst_inclusive and total_gst > 0:
-            taxable = net_amt / (1 + (total_gst / 100))
-            total_amount += net_amt
+    if not data.items and data.contract_id:
+        if data.equipment_id:
+            contract_item = db.query(ContractItem).filter(
+                ContractItem.contract_id == data.contract_id,
+                ContractItem.equipment_id == data.equipment_id
+            ).first()
+            if contract_item and contract_item.rate:
+                total_amount = contract_item.rate
         else:
-            taxable = net_amt
-            total_amount += taxable + (taxable * (total_gst / 100))
+            contract = db.query(Contract).filter(Contract.id == data.contract_id).first()
+            if contract and contract.contract_value:
+                total_amount = contract.contract_value
+    else:
+        for item in data.items:
+            net_amt = (item.quantity * item.rate) * (1 - (item.discount_percent or 0) / 100)
+            total_gst = (item.cgst_percentage or 0) + (item.sgst_percentage or 0) + (item.igst_percentage or 0)
+            if item.is_gst_inclusive and total_gst > 0:
+                taxable = net_amt / (1 + (total_gst / 100))
+                total_amount += net_amt
+            else:
+                taxable = net_amt
+                total_amount += taxable + (taxable * (total_gst / 100))
             
     wo = WorkOrder(
         wo_number=get_next_number(db, tenant_id, site_id, "WORK_ORDER", "WO"),
@@ -329,35 +342,52 @@ def update_work_order(
         if k in update_data:
             setattr(wo, k, update_data[k])
             
-    if "items" in update_data and update_data["items"]:
+    if "items" in update_data and update_data["items"] is not None:
         db.query(WorkOrderItem).filter(WorkOrderItem.wo_id == id).delete()
         total_amount = 0
-        for item in data.items:
-            net_amt = (item.quantity * item.rate) * (1 - (item.discount_percent or 0) / 100)
-            total_gst = (item.cgst_percentage or 0) + (item.sgst_percentage or 0) + (item.igst_percentage or 0)
-            if item.is_gst_inclusive and total_gst > 0:
-                taxable = net_amt / (1 + (total_gst / 100))
-                item_total = net_amt
+        if not update_data["items"] and wo.contract_id:
+            if wo.equipment_id:
+                contract_item = db.query(ContractItem).filter(
+                    ContractItem.contract_id == wo.contract_id,
+                    ContractItem.equipment_id == wo.equipment_id
+                ).first()
+                if contract_item and contract_item.rate:
+                    total_amount = contract_item.rate
             else:
-                taxable = net_amt
-                item_total = taxable + (taxable * (total_gst / 100))
+                contract = db.query(Contract).filter(Contract.id == wo.contract_id).first()
+                if contract and contract.contract_value:
+                    total_amount = contract.contract_value
+        else:
+            for item in data.items:
+                net_amt = (item.quantity * item.rate) * (1 - (item.discount_percent or 0) / 100)
+                total_gst = (item.cgst_percentage or 0) + (item.sgst_percentage or 0) + (item.igst_percentage or 0)
+                if item.is_gst_inclusive and total_gst > 0:
+                    taxable = net_amt / (1 + (total_gst / 100))
+                    item_total = net_amt
+                else:
+                    taxable = net_amt
+                    item_total = taxable + (taxable * (total_gst / 100))
+                    
+                total_amount += item_total
                 
-            total_amount += item_total
-            
-            wo_item = WorkOrderItem(
-                wo_id=wo.id,
-                material_id=item.material_id,
-                quantity=item.quantity,
-                rate=item.rate,
-                amount=round(item_total),
-                discount_percent=item.discount_percent,
-                cgst_percentage=item.cgst_percentage,
-                sgst_percentage=item.sgst_percentage,
-                igst_percentage=item.igst_percentage,
-                is_gst_inclusive=item.is_gst_inclusive
-            )
-            db.add(wo_item)
+                wo_item = WorkOrderItem(
+                    wo_id=wo.id,
+                    material_id=item.material_id,
+                    quantity=item.quantity,
+                    rate=item.rate,
+                    amount=round(item_total),
+                    discount_percent=item.discount_percent,
+                    cgst_percentage=item.cgst_percentage,
+                    sgst_percentage=item.sgst_percentage,
+                    igst_percentage=item.igst_percentage,
+                    is_gst_inclusive=item.is_gst_inclusive
+                )
+                db.add(wo_item)
         wo.total_amount = round(total_amount)
+    elif wo.contract_id and not db.query(WorkOrderItem).filter(WorkOrderItem.wo_id == id).first():
+        contract = db.query(Contract).filter(Contract.id == wo.contract_id).first()
+        if contract and contract.contract_value:
+            wo.total_amount = round(contract.contract_value)
         
     db.commit()
         # Removed manual AuditLog

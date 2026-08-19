@@ -12,7 +12,7 @@ import {
   ExpandLess, ExpandMore, Logout, Person, Store, Assignment,
   SwapHoriz, Undo, Security, ReceiptLong, AccountTree, Category,
   Build, ChevronLeft, RequestQuote, Business, AssignmentTurnedIn, Straighten,
-  AccountBalance, Campaign, RemoveCircleOutline
+  AccountBalance, Campaign, RemoveCircleOutline, Insights
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
@@ -26,7 +26,7 @@ const ALL_ICONS = {
   ExpandLess, ExpandMore, Logout, Person, Store, Assignment,
   SwapHoriz, Undo, Security, ReceiptLong, AccountTree, Category,
   Build, ChevronLeft, RequestQuote, Business, AssignmentTurnedIn, Straighten,
-  AccountBalance, Campaign, RemoveCircleOutline
+  AccountBalance, Campaign, RemoveCircleOutline, Insights
 };
 
 const resolveIcon = (iconName) => {

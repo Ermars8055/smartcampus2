@@ -3,12 +3,14 @@ import {
   Box, Typography, Card, Grid, TextField, Button, MenuItem,
   IconButton, Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, Autocomplete, FormControlLabel, Switch, Divider,
-  InputAdornment, Tooltip
+  InputAdornment, Tooltip, FormControl, Select
 } from '@mui/material';
 import { Add, Delete, Save, ArrowBack } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '../services/api';
 import { useMessage } from '../context/MessageContext';
+import { useConfig } from '../context/ConfigContext';
+import { computeGstSplit } from '../utils/gstCalculations';
 import { DatePicker } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
 
@@ -16,7 +18,13 @@ export default function ContractForm() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { showMessage } = useMessage();
+  const { tenantConfig } = useConfig();
   const isEdit = !!id;
+
+  const emptyItem = {
+    material_id: null, equipment_id: null, uom: '', allow_decimal: false, rate: '', discount_percent: '', cgst: '', sgst: '', igst: '',
+    contract_quantity: '', covered_components: '', excluded_components: '', is_gst_inclusive: false
+  };
 
   const [form, setForm] = useState({
     contract_type: 'RC',
@@ -34,7 +42,7 @@ export default function ContractForm() {
     consumables_included: false,
     status: 'Draft',
     current_approval_level: 1,
-    items: []
+    items: [{ ...emptyItem }]
   });
 
   const isViewMode = isEdit && (form.status === 'Active' || form.status === 'Closed' || form.status === 'Approved' || form.status === 'Rejected' || form.current_approval_level > 1);
@@ -78,18 +86,34 @@ export default function ContractForm() {
 
   useEffect(() => {
     if (isEdit) {
-      api.get(`/api/contracts/${id}`).then(res => {
+      api.get(`/api/contracts/${id}`).then(async res => {
+        let vState = null;
+        if (res.data.vendor_id) {
+          try {
+            const vRes = await api.get(`/api/vendors/${res.data.vendor_id}`);
+            vState = vRes.data.state;
+          } catch(e) {}
+        }
         setForm({
           ...res.data,
           vendor_id: res.data.vendor_id || '',
           institution_id: res.data.institution_id || '',
           department_id: res.data.department_id || '',
           contract_value: res.data.contract_value || '',
-          items: res.data.items || []
+          items: res.data.items && res.data.items.length > 0 ? res.data.items.map(item => {
+            const split = computeGstSplit(item.gst, vState, tenantConfig?.base_state, tenantConfig?.cgst_share_percent, tenantConfig?.sgst_share_percent);
+            return {
+              ...item,
+              cgst: split.cgst_percentage > 0 ? split.cgst_percentage : '',
+              sgst: split.sgst_percentage > 0 ? split.sgst_percentage : '',
+              igst: split.igst_percentage > 0 ? split.igst_percentage : '',
+              is_gst_inclusive: item.is_gst_inclusive || false
+            };
+          }) : [{ ...emptyItem }]
         });
       });
     }
-  }, [id]);
+  }, [id, tenantConfig]);
 
   const validate = () => {
     const newErrs = {};
@@ -117,13 +141,20 @@ export default function ContractForm() {
       if (payload.start_date) payload.start_date = dayjs(payload.start_date).format('YYYY-MM-DD');
       if (payload.end_date) payload.end_date = dayjs(payload.end_date).format('YYYY-MM-DD');
 
-      payload.items = payload.items.map(item => ({
-        ...item,
-        rate: item.rate !== '' && item.rate != null ? parseFloat(item.rate) : 0,
-        gst: item.gst !== '' && item.gst != null ? parseFloat(item.gst) : 0,
-        contract_quantity: item.contract_quantity !== '' && item.contract_quantity != null ? parseFloat(item.contract_quantity) : null,
-        delivery_lead_time: item.delivery_lead_time !== '' && item.delivery_lead_time != null ? parseInt(item.delivery_lead_time) : null
-      }));
+      payload.items = payload.items.map(item => {
+        const payloadItem = {
+          ...item,
+          rate: item.rate !== '' && item.rate != null ? parseFloat(item.rate) : 0,
+          discount_percent: item.discount_percent !== '' && item.discount_percent != null ? parseFloat(item.discount_percent) : 0,
+          gst: (parseFloat(item.cgst) || 0) + (parseFloat(item.sgst) || 0) + (parseFloat(item.igst) || 0),
+          contract_quantity: item.contract_quantity !== '' && item.contract_quantity != null ? parseFloat(item.contract_quantity) : null
+        };
+        delete payloadItem.cgst;
+        delete payloadItem.sgst;
+        delete payloadItem.igst;
+        delete payloadItem.delivery_lead_time; // ensuring cleanup
+        return payloadItem;
+      });
 
       if (isEdit) {
         await api.put(`/api/contracts/${id}`, payload);
@@ -142,10 +173,7 @@ export default function ContractForm() {
   const addItem = () => {
     setForm(prev => ({
       ...prev,
-      items: [...prev.items, {
-        material_id: null, equipment_id: null, uom: '', allow_decimal: false, rate: '', gst: '',
-        delivery_lead_time: '', contract_quantity: '', covered_components: '', excluded_components: ''
-      }]
+      items: [...prev.items, { ...emptyItem }]
     }));
   };
 
@@ -162,9 +190,12 @@ export default function ContractForm() {
 
   const getDuration = () => {
     if (form.start_date && form.end_date) {
-      const start = dayjs(form.start_date);
-      const end = dayjs(form.end_date);
+      const start = dayjs(form.start_date).startOf('day');
+      let end = dayjs(form.end_date).startOf('day');
       if (end.isBefore(start, 'day')) return "End date cannot be before start date.";
+      
+      // Add 1 day to end date to make the duration inclusive of both start and end days
+      end = end.add(1, 'day');
       
       const years = end.diff(start, 'year');
       const startAfterYears = start.add(years, 'year');
@@ -230,7 +261,16 @@ export default function ContractForm() {
               fullWidth
               label="Contract Type"
               value={form.contract_type}
-              onChange={e => setForm({ ...form, contract_type: e.target.value, items: [] })}
+              onChange={e => {
+                const type = e.target.value;
+                setForm({ 
+                  ...form, 
+                  contract_type: type, 
+                  items: [{ ...emptyItem }],
+                  spare_parts_included: type === 'CMC',
+                  consumables_included: type === 'CMC'
+                });
+              }}
               disabled={isEdit}
               required
             >
@@ -349,14 +389,21 @@ export default function ContractForm() {
                     <TableCell>MATERIAL</TableCell>
                     <TableCell>UOM</TableCell>
                     <TableCell>RATE (₹)</TableCell>
-                    <TableCell>GST %</TableCell>
-                    <TableCell>MAX QTY</TableCell>
-                    <TableCell>LEAD TIME (Days)</TableCell>
+                    <TableCell>GST TYPE</TableCell>
+                    <TableCell>CGST %</TableCell>
+                    <TableCell>SGST %</TableCell>
+                    <TableCell>IGST %</TableCell>
+                    <TableCell>Qty</TableCell>
                   </>
                 ) : (
                   <>
                     <TableCell>EQUIPMENT</TableCell>
-                    <TableCell>COST (₹)</TableCell>
+                    <TableCell>RATE (₹)</TableCell>
+                    <TableCell>DISC %</TableCell>
+                    <TableCell>GST TYPE</TableCell>
+                    <TableCell>CGST %</TableCell>
+                    <TableCell>SGST %</TableCell>
+                    <TableCell>IGST %</TableCell>
                   </>
                 )}
                 {!isViewMode && <TableCell align="center">ACTION</TableCell>}
@@ -364,7 +411,7 @@ export default function ContractForm() {
             </TableHead>
             <TableBody>
               {form.items.map((item, index) => (
-                <TableRow key={index}>
+                <TableRow key={index} sx={{ '& td': { verticalAlign: 'top', pt: 2 } }}>
                   {form.contract_type === 'RC' ? (
                     <>
                       <TableCell sx={{ minWidth: 250 }}>
@@ -374,15 +421,27 @@ export default function ContractForm() {
                           value={materials.find(m => m.id === item.material_id) || null}
                           disabled={isViewMode}
                           onChange={(e, val) => {
-                            updateItem(index, 'material_id', val?.id || null);
-                            updateItem(index, 'uom', val?.uom_name || '');
-                            updateItem(index, 'allow_decimal', val?.uom_allow_decimal || false);
+                            const newItems = [...form.items];
+                            const vendor = vendors.find(v => v.id == form.vendor_id);
+                            const split = computeGstSplit(val?.gst_rate || 0, vendor?.state, tenantConfig?.base_state, tenantConfig?.cgst_share_percent, tenantConfig?.sgst_share_percent);
+                            
+                            newItems[index] = {
+                              ...newItems[index],
+                              material_id: val?.id || null,
+                              uom: val?.uom_name || '',
+                              allow_decimal: val?.uom_allow_decimal || false,
+                              rate: '',
+                              cgst: split.cgst_percentage !== undefined ? split.cgst_percentage : '',
+                              sgst: split.sgst_percentage !== undefined ? split.sgst_percentage : '',
+                              igst: split.igst_percentage !== undefined ? split.igst_percentage : ''
+                            };
+                            setForm({ ...form, items: newItems });
                           }}
                           renderInput={(params) => <TextField {...params} size="small" placeholder="Select Material" />}
                         />
                       </TableCell>
                       <TableCell>
-                        <Typography variant="body2" sx={{ color: '#64748B', fontWeight: 500 }}>
+                        <Typography variant="body2" sx={{ color: '#64748B', fontWeight: 500, mt: 1 }}>
                           {item.uom || materials.find(m => m.id === item.material_id)?.uom_name || '-'}
                         </Typography>
                       </TableCell>
@@ -402,25 +461,75 @@ export default function ContractForm() {
                           }} 
                           sx={{ width: 100 }} 
                         />
+                        {item.material_id && (
+                          <Typography variant="caption" sx={{ color: '#64748B', display: 'block', mt: 0.5 }}>
+                            Base Rate: ₹{materials.find(m => m.id === item.material_id)?.standard_cost || 0}
+                          </Typography>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <FormControl size="small">
+                          <Select disabled={isViewMode || !item.material_id} value={item.is_gst_inclusive ? 'inclusive' : 'exclusive'} onChange={e => updateItem(index, 'is_gst_inclusive', e.target.value === 'inclusive')} sx={{ width: 100, fontSize: '0.875rem' }}>
+                            <MenuItem value="exclusive" sx={{ fontSize: '0.875rem' }}>Exclusive</MenuItem>
+                            <MenuItem value="inclusive" sx={{ fontSize: '0.875rem' }}>Inclusive</MenuItem>
+                          </Select>
+                        </FormControl>
                       </TableCell>
                       <TableCell>
                         <TextField 
                           size="small" 
                           type="number" 
-                          disabled={isViewMode} 
-                          value={item.gst} 
+                          disabled={isViewMode || parseFloat(item.igst) > 0}
+                          InputProps={{ readOnly: !!item.material_id }}
+                          value={item.cgst} 
                           onChange={e => {
                             let val = e.target.value;
                             if (val.length > 1 && val.startsWith('0') && val[1] !== '.') val = val.replace(/^0+/, '');
                             if (val === '' || val === '.') {
-                              updateItem(index, 'gst', val);
-                            } else if (/^\d*\.?\d{0,2}$/.test(val)) {
-                              if (parseFloat(val) <= 100) {
-                                updateItem(index, 'gst', val);
-                              }
+                              updateItem(index, 'cgst', val);
+                            } else if (/^\d*\.?\d{0,2}$/.test(val) && parseFloat(val) <= 100) {
+                              updateItem(index, 'cgst', val);
                             }
                           }} 
-                          sx={{ width: 80 }} 
+                          sx={{ width: 70 }} 
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <TextField 
+                          size="small" 
+                          type="number" 
+                          disabled={isViewMode || parseFloat(item.igst) > 0}
+                          InputProps={{ readOnly: !!item.material_id }}
+                          value={item.sgst} 
+                          onChange={e => {
+                            let val = e.target.value;
+                            if (val.length > 1 && val.startsWith('0') && val[1] !== '.') val = val.replace(/^0+/, '');
+                            if (val === '' || val === '.') {
+                              updateItem(index, 'sgst', val);
+                            } else if (/^\d*\.?\d{0,2}$/.test(val) && parseFloat(val) <= 100) {
+                              updateItem(index, 'sgst', val);
+                            }
+                          }} 
+                          sx={{ width: 70 }} 
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <TextField 
+                          size="small" 
+                          type="number" 
+                          disabled={isViewMode || parseFloat(item.cgst) > 0 || parseFloat(item.sgst) > 0}
+                          InputProps={{ readOnly: !!item.material_id }}
+                          value={item.igst} 
+                          onChange={e => {
+                            let val = e.target.value;
+                            if (val.length > 1 && val.startsWith('0') && val[1] !== '.') val = val.replace(/^0+/, '');
+                            if (val === '' || val === '.') {
+                              updateItem(index, 'igst', val);
+                            } else if (/^\d*\.?\d{0,2}$/.test(val) && parseFloat(val) <= 100) {
+                              updateItem(index, 'igst', val);
+                            }
+                          }} 
+                          sx={{ width: 70 }} 
                         />
                       </TableCell>
                       <TableCell>
@@ -428,7 +537,7 @@ export default function ContractForm() {
                           size="small" 
                           type="number" 
                           disabled={isViewMode} 
-                          placeholder="Optional" 
+                          placeholder="Qty" 
                           value={item.contract_quantity || ''} 
                           onChange={e => {
                             let val = e.target.value;
@@ -443,32 +552,34 @@ export default function ContractForm() {
                           sx={{ width: 100 }} 
                         />
                       </TableCell>
-                      <TableCell>
-                        <TextField 
-                          size="small" 
-                          type="number" 
-                          disabled={isViewMode} 
-                          placeholder="Days" 
-                          value={item.delivery_lead_time || ''} 
-                          onChange={e => {
-                            let val = e.target.value;
-                            if (val === '' || /^\d{0,3}$/.test(val)) {
-                              updateItem(index, 'delivery_lead_time', val);
-                            }
-                          }} 
-                          sx={{ width: 100 }} 
-                        />
-                      </TableCell>
                     </>
                   ) : (
                     <>
-                      <TableCell sx={{ minWidth: 450, width: '60%' }}>
+                      <TableCell sx={{ minWidth: 450, width: '40%' }}>
                         <Autocomplete
                           options={equipment}
                           getOptionLabel={(option) => `${option.equipment_code} - ${option.material_name} (${option.serial_number || 'No SN'})`}
                           value={equipment.find(e => e.id === item.equipment_id) || null}
                           disabled={isViewMode}
-                          onChange={(e, val) => updateItem(index, 'equipment_id', val?.id || null)}
+                          onChange={(e, val) => {
+                            const newItems = [...form.items];
+                            const vendor = vendors.find(v => v.id == form.vendor_id);
+                            
+                            // Find the material for this equipment to get its GST rate
+                            const mat = materials.find(m => m.id === val?.material_id);
+                            const split = computeGstSplit(mat?.gst_rate || 0, vendor?.state, tenantConfig?.base_state, tenantConfig?.cgst_share_percent, tenantConfig?.sgst_share_percent);
+
+                            newItems[index] = {
+                              ...newItems[index],
+                              equipment_id: val?.id || null,
+                              rate: '',
+                              discount_percent: '',
+                              cgst: split.cgst_percentage !== undefined ? split.cgst_percentage : '',
+                              sgst: split.sgst_percentage !== undefined ? split.sgst_percentage : '',
+                              igst: split.igst_percentage !== undefined ? split.igst_percentage : ''
+                            };
+                            setForm({ ...form, items: newItems });
+                          }}
                           renderInput={(params) => <TextField {...params} size="small" placeholder="Select Equipment" />}
                         />
                       </TableCell>
@@ -488,6 +599,99 @@ export default function ContractForm() {
                           }} 
                           sx={{ width: 100 }} 
                         />
+                        {item.equipment_id && (() => {
+                           const equip = equipment.find(e => e.id === item.equipment_id);
+                           const mat = materials.find(m => m.id === equip?.material_id);
+                           const baseRate = equip?.machine_cost || mat?.standard_cost || 0;
+                           return (
+                             <Typography variant="caption" sx={{ color: '#64748B', display: 'block', mt: 0.5 }}>
+                               Base Rate: ₹{baseRate}
+                             </Typography>
+                           );
+                        })()}
+                      </TableCell>
+                      <TableCell>
+                        <TextField 
+                          size="small" 
+                          type="number" 
+                          disabled={isViewMode} 
+                          value={item.discount_percent} 
+                          onChange={e => {
+                            let val = e.target.value;
+                            if (val.length > 1 && val.startsWith('0') && val[1] !== '.') val = val.replace(/^0+/, '');
+                            if (val === '' || val === '.') {
+                              updateItem(index, 'discount_percent', val);
+                            } else if (/^\d*\.?\d{0,2}$/.test(val) && parseFloat(val) <= 100) {
+                              updateItem(index, 'discount_percent', val);
+                            }
+                          }} 
+                          sx={{ width: 70 }} 
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <FormControl size="small">
+                          <Select disabled={isViewMode || !item.equipment_id} value={item.is_gst_inclusive ? 'inclusive' : 'exclusive'} onChange={e => updateItem(index, 'is_gst_inclusive', e.target.value === 'inclusive')} sx={{ width: 100, fontSize: '0.875rem' }}>
+                            <MenuItem value="exclusive" sx={{ fontSize: '0.875rem' }}>Exclusive</MenuItem>
+                            <MenuItem value="inclusive" sx={{ fontSize: '0.875rem' }}>Inclusive</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </TableCell>
+                      <TableCell>
+                        <TextField 
+                          size="small" 
+                          type="number" 
+                          disabled={isViewMode || parseFloat(item.igst) > 0}
+                          InputProps={{ readOnly: !!item.equipment_id }}
+                          value={item.cgst} 
+                          onChange={e => {
+                            let val = e.target.value;
+                            if (val.length > 1 && val.startsWith('0') && val[1] !== '.') val = val.replace(/^0+/, '');
+                            if (val === '' || val === '.') {
+                              updateItem(index, 'cgst', val);
+                            } else if (/^\d*\.?\d{0,2}$/.test(val) && parseFloat(val) <= 100) {
+                              updateItem(index, 'cgst', val);
+                            }
+                          }} 
+                          sx={{ width: 70 }} 
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <TextField 
+                          size="small" 
+                          type="number" 
+                          disabled={isViewMode || parseFloat(item.igst) > 0}
+                          InputProps={{ readOnly: !!item.equipment_id }}
+                          value={item.sgst} 
+                          onChange={e => {
+                            let val = e.target.value;
+                            if (val.length > 1 && val.startsWith('0') && val[1] !== '.') val = val.replace(/^0+/, '');
+                            if (val === '' || val === '.') {
+                              updateItem(index, 'sgst', val);
+                            } else if (/^\d*\.?\d{0,2}$/.test(val) && parseFloat(val) <= 100) {
+                              updateItem(index, 'sgst', val);
+                            }
+                          }} 
+                          sx={{ width: 70 }} 
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <TextField 
+                          size="small" 
+                          type="number" 
+                          disabled={isViewMode || parseFloat(item.cgst) > 0 || parseFloat(item.sgst) > 0}
+                          InputProps={{ readOnly: !!item.equipment_id }}
+                          value={item.igst} 
+                          onChange={e => {
+                            let val = e.target.value;
+                            if (val.length > 1 && val.startsWith('0') && val[1] !== '.') val = val.replace(/^0+/, '');
+                            if (val === '' || val === '.') {
+                              updateItem(index, 'igst', val);
+                            } else if (/^\d*\.?\d{0,2}$/.test(val) && parseFloat(val) <= 100) {
+                              updateItem(index, 'igst', val);
+                            }
+                          }} 
+                          sx={{ width: 70 }} 
+                        />
                       </TableCell>
                     </>
                   )}
@@ -502,12 +706,12 @@ export default function ContractForm() {
               ))}
               {form.items.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={isViewMode ? (form.contract_type === 'RC' ? 6 : 2) : (form.contract_type === 'RC' ? 7 : 3)} align="center" sx={{ py: 3, color: '#94A3B8' }}>No items added yet</TableCell>
+                  <TableCell colSpan={isViewMode ? (form.contract_type === 'RC' ? 7 : 6) : (form.contract_type === 'RC' ? 8 : 7)} align="center" sx={{ py: 3, color: '#94A3B8' }}>No items added yet</TableCell>
                 </TableRow>
               )}
               {!isViewMode && (
                 <TableRow>
-                  <TableCell colSpan={form.contract_type === 'RC' ? 7 : 3} align="center" sx={{ py: 2 }}>
+                  <TableCell colSpan={form.contract_type === 'RC' ? 8 : 7} align="center" sx={{ py: 2 }}>
                     <Button
                       variant="outlined"
                       size="small"

@@ -508,6 +508,9 @@ export default function PurchaseOrders() {
 
   useEffect(() => {
     if (location.state?.reagentRentalData && projects.length > 0) {
+      if (location.state.reagentRentalData.items?.length > 0 && materials.length === 0) {
+        return;
+      }
       const data = location.state.reagentRentalData;
       setForm({
         vendor_id: data.vendor_id || '',
@@ -532,7 +535,7 @@ export default function PurchaseOrders() {
             is_gst_inclusive: false,
             uom_name: mat ? mat.uom_name : '',
             uom_allow_decimal: mat ? mat.uom_allow_decimal : false,
-            base_rate: 0
+            base_rate: mat?.standard_cost || 0
           };
         })
       });
@@ -659,19 +662,11 @@ export default function PurchaseOrders() {
       if (Object.keys(newErrors).length > 0) {
         const firstErrorField = Object.keys(newErrors)[0];
         const el = document.getElementById(`field-${firstErrorField}`);
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        } else {
-          showMessage(`Validation error: ${newErrors[firstErrorField]}`, "Error", "error");
-        }
+        el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       } else if (Object.keys(newItemErrors).length > 0) {
         const firstErrorIdx = Object.keys(newItemErrors)[0];
         const el = document.getElementById(`item-row-${firstErrorIdx}`);
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        } else {
-          showMessage(`Validation error on line item ${parseInt(firstErrorIdx) + 1}`, "Error", "error");
-        }
+        el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
       return;
     }
@@ -931,7 +926,7 @@ export default function PurchaseOrders() {
                 <table style="width: 100%">
                   <tr><td style="width: 45%">PO Number</td><td>: <b>${po.po_number}</b></td></tr>
                   <tr><td>PO Date</td><td>: ${formatDate(po.created_at)}</td></tr>
-                  <tr><td>Procurement Type</td><td>: <b>${po.procurement_type === 'Purchase' ? 'Standard Purchase' : (po.procurement_type === 'Rental' ? 'Rental' + (po.rental_type ? ' (' + po.rental_type + ')' : '') : (po.procurement_type || '—'))}</b></td></tr>
+                  <tr><td>Procurement Type</td><td>: <b>${po.procurement_type === 'Purchase' ? 'Purchase' : (po.procurement_type === 'Rental' ? 'Rental' + (po.rental_type ? ' (' + po.rental_type + ')' : '') : (po.procurement_type || '—'))}</b></td></tr>
                   ${po.purchase_mode ? `<tr><td>Purchase Mode</td><td>: <b>${po.purchase_mode}</b></td></tr>` : ''}
                   ${po.advance_percentage > 0 ? `<tr><td>Advance</td><td>: <b>${po.advance_percentage}%</b></td></tr>` : ''}
                 </table>
@@ -1159,11 +1154,11 @@ export default function PurchaseOrders() {
                 if (!selected) {
                   return <span style={{ color: '#9ca3af' }}>All Procurement Types</span>;
                 }
-                return selected === 'Purchase' ? 'Standard Purchase' : 'Rental';
+                return selected === 'Purchase' ? 'Purchase' : 'Rental';
               }}
             >
               <MenuItem value="">All Procurement Types</MenuItem>
-              <MenuItem value="Purchase">Standard Purchase</MenuItem>
+              <MenuItem value="Purchase">Purchase</MenuItem>
               <MenuItem value="Rental">Rental</MenuItem>
             </Select>
           </FormControl>
@@ -1456,7 +1451,7 @@ export default function PurchaseOrders() {
               <Grid item xs={3}>
                 <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, display: 'block', mb: 0.5 }}>PROCUREMENT TYPE</Typography>
                 <Typography sx={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>
-                   {detailDialog?.procurement_type === 'Purchase' ? 'Standard Purchase' : (detailDialog?.procurement_type || '—')}
+                   {detailDialog?.procurement_type === 'Purchase' ? 'Purchase' : (detailDialog?.procurement_type || '—')}
                    {detailDialog?.procurement_type === 'Rental' && detailDialog?.rental_type ? ` (${detailDialog.rental_type})` : ''}
                 </Typography>
                 {detailDialog?.billing_frequency && (
@@ -1807,6 +1802,8 @@ export default function PurchaseOrders() {
                   const vId = newValue ? newValue.id : '';
                   const vendor = newValue;
                   const vendorState = vendor?.state || '';
+                  
+                  const isMarketplace = vendor && (vendor.name.toLowerCase().includes('amazon') || vendor.name.toLowerCase().includes('flipkart'));
 
                   const updatedItems = form.items.map(it => {
                     const material = materials.find(m => m.id === it.material_id);
@@ -1819,7 +1816,13 @@ export default function PurchaseOrders() {
                     return { ...it, cgst_percentage, sgst_percentage, igst_percentage };
                   });
 
-                  setForm({ ...form, vendor_id: vId, items: updatedItems });
+                  setForm(prev => ({ 
+                    ...prev, 
+                    vendor_id: vId, 
+                    items: updatedItems,
+                    purchase_mode: isMarketplace ? 'Cash Purchase' : prev.purchase_mode,
+                    procurement_type: isMarketplace ? 'Purchase' : prev.procurement_type
+                  }));
                 }}
                 renderInput={(params) => (
                   <TextField 
@@ -1846,12 +1849,17 @@ export default function PurchaseOrders() {
               <Select
                 value={form.procurement_type || ''}
                 label="Procurement Type *"
+                disabled={(() => {
+                  const vendor = vendors.find(v => v.id === form.vendor_id);
+                  const vName = vendor ? vendor.name.toLowerCase() : (form._vendor_name || '').toLowerCase();
+                  return vName.includes('amazon') || vName.includes('flipkart');
+                })()}
                 onChange={e => {
                   const val = e.target.value;
                   setForm(prev => {
                     let newMode = prev.purchase_mode;
-                    if (val === 'Rental' && newMode !== 'Credit Purchase' && newMode !== 'Advance Payment') {
-                      newMode = '';
+                    if (val === 'Rental') {
+                      newMode = 'Credit Purchase';
                     }
                     return { 
                       ...prev, 
@@ -1863,7 +1871,7 @@ export default function PurchaseOrders() {
                 }}
               >
                 <MenuItem value="" disabled><em>Select Type</em></MenuItem>
-                <MenuItem value="Purchase">Standard Purchase</MenuItem>
+                <MenuItem value="Purchase">Purchase</MenuItem>
                 <MenuItem value="Rental">Rental</MenuItem>
               </Select>
               {errors.procurement_type && <FormHelperText>{errors.procurement_type}</FormHelperText>}
@@ -1885,36 +1893,36 @@ export default function PurchaseOrders() {
             )}
 
             <FormControl fullWidth size="small" error={!!errors.purchase_mode}>
-              <InputLabel>Purchase Mode *</InputLabel>
+              <InputLabel>{form.procurement_type === 'Rental' ? 'Rental Mode *' : 'Purchase Mode *'}</InputLabel>
               <Select
                 value={form.purchase_mode || ''}
-                label="Purchase Mode *"
+                label={form.procurement_type === 'Rental' ? 'Rental Mode *' : 'Purchase Mode *'}
                 onChange={e => {
                   const val = e.target.value;
                   setForm({ 
                     ...form, 
                     purchase_mode: val, 
-                    advance_percentage: val === 'Advance Payment' ? form.advance_percentage : 0,
-                    marketplace_name: val === 'Online Marketplace' ? form.marketplace_name : '' 
+                    advance_percentage: val === 'Advance Payment' ? form.advance_percentage : 0
                   });
                 }}
               >
                 <MenuItem value="" disabled><em>Select Mode</em></MenuItem>
                 <MenuItem value="Credit Purchase">Credit Purchase</MenuItem>
                 {form.procurement_type !== 'Rental' && <MenuItem value="Cash Purchase">Cash Purchase</MenuItem>}
-                {form.procurement_type !== 'Rental' && <MenuItem value="Petty Cash">Petty Cash</MenuItem>}
-                {form.procurement_type !== 'Rental' && <MenuItem value="Online Marketplace">Online Marketplace</MenuItem>}
-                {form.procurement_type !== 'Rental' && <MenuItem value="Emergency Purchase">Emergency Purchase</MenuItem>}
                 <MenuItem value="Advance Payment">Advance Payment</MenuItem>
               </Select>
               {errors.purchase_mode && <FormHelperText>{errors.purchase_mode}</FormHelperText>}
             </FormControl>
 
-            {form.purchase_mode === 'Online Marketplace' && (
+            {(() => {
+              const vendor = vendors.find(v => v.id === form.vendor_id);
+              const vName = vendor ? vendor.name.toLowerCase() : (form._vendor_name || '').toLowerCase();
+              return vName.includes('amazon') || vName.includes('flipkart');
+            })() && (
               <TextField
                 size="small"
                 fullWidth
-                label="Marketplace Name (e.g. Amazon, Flipkart)"
+                label="Seller Name"
                 value={form.marketplace_name || ''}
                 onChange={(e) => setForm({ ...form, marketplace_name: e.target.value })}
               />
@@ -2051,17 +2059,7 @@ export default function PurchaseOrders() {
                     />
                   </Grid>
                 )}
-                <Grid item xs={12} sm={form.rental_type === 'Reagent Rental' ? 6 : 12}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={form.vendor_maintenance_responsibility || false}
-                        onChange={(e) => setForm({ ...form, vendor_maintenance_responsibility: e.target.checked })}
-                      />
-                    }
-                    label="Vendor Maintenance Responsibility"
-                  />
-                </Grid>
+
                 <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth size="small" label="Return Conditions" multiline rows={2}
@@ -2155,8 +2153,12 @@ export default function PurchaseOrders() {
                   }}>
                     <Box>
                       <MaterialSelect
+                      label={form.procurement_type === 'Rental' ? 'Equipment' : 'Material'}
                       disabled={!form.vendor_id}
-                      materials={materials.filter(m => !form.items.some((it, idx) => idx !== i && it.material_id === m.id))}
+                      materials={materials.filter(m => 
+                        (form.procurement_type === 'Rental' ? m.material_type === 'Equipment' : true) && 
+                        !form.items.some((it, idx) => idx !== i && it.material_id === m.id)
+                      )}
                       value={item.material_id}
                       onChange={val => {
                         const material = materials.find(m => m.id === val);
@@ -2324,14 +2326,7 @@ export default function PurchaseOrders() {
           <Divider sx={{ my: 2 }} />
           <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b', mb: 1.5 }}>Additional Details</Typography>
           <Grid container spacing={2} sx={{ mb: 2 }}>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth size="small" label="Linked Reagent Agreement / Reference"
-                value={form.linked_reagent_agreement || ''}
-                onChange={e => setForm({ ...form, linked_reagent_agreement: e.target.value })}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12}>
               <TextField
                 fullWidth size="small" label="Remarks"
                 value={form.remarks || ''}

@@ -247,7 +247,7 @@ def _auto_generate_calls(db: Session, tenant_id: int, site_id: int, user_id: int
                 if not existing:
                     recent_pm = db.query(Complaint).filter(Complaint.equipment_id == eq.id, Complaint.complaint_type == 'Preventive Maintenance Call', func.extract('month', Complaint.complaint_date) == current_month_index, func.extract('year', Complaint.complaint_date) == date.today().year).first()
                     if not recent_pm:
-                        new_complaint = Complaint(tenant_id=tenant_id, site_id=site_id, docket_no=f'PM-{date.today().strftime('%Y%m')}-{eq.equipment_code}', complaint_date=date.today(), department_name=loc.location_name, equipment_id=eq.id, nature_of_complaint='Scheduled Preventive Maintenance', complaint_type='Preventive Maintenance Call', status=ComplaintStatus.REGISTERED.value, is_pm_calibration_call=True, created_by_id=user_id)
+                        new_complaint = Complaint(tenant_id=tenant_id, site_id=site_id, docket_no=f'PM-{date.today().strftime("%Y%m")}-{eq.equipment_code}', complaint_date=date.today(), department_name=loc.location_name, equipment_id=eq.id, nature_of_complaint='Scheduled Preventive Maintenance', complaint_type='Preventive Maintenance Call', status=ComplaintStatus.REGISTERED.value, is_pm_calibration_call=True, created_by_id=user_id)
                         db.add(new_complaint)
                         eq.pm_required = True
                         generated_count += 1

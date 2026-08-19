@@ -2171,6 +2171,7 @@ class ComplaintAssign(BaseModel):
     assigned_to_id: int
 
 class ComplaintInspect(BaseModel):
+    repair_method: str
     inspection_details: Optional[str] = None
 
 class ComplaintResolve(BaseModel):

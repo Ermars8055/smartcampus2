@@ -2,10 +2,10 @@
 -- PostgreSQL database dump
 --
 
-\restrict N3crTDmCTk2yIWSgFLLqjTRADG2lxby8Ba07ZCNE2CHUkdG1yEHLs96nsGv4ftb
+\restrict gRmnU4oAA9Zld00L65DGRSomyQnT2neam9ohkG2BcbHY4zQOOdu943ACxHk6tae
 
 -- Dumped from database version 17.10 (Ubuntu 17.10-1.pgdg22.04+1)
--- Dumped by pg_dump version 18.4 (Ubuntu 18.4-1.pgdg22.04+1)
+-- Dumped by pg_dump version 17.10 (Ubuntu 17.10-1.pgdg22.04+1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -19,867 +19,6 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
-ALTER TABLE IF EXISTS ONLY public.write_offs DROP CONSTRAINT IF EXISTS write_offs_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.write_offs DROP CONSTRAINT IF EXISTS write_offs_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.write_offs DROP CONSTRAINT IF EXISTS write_offs_created_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.write_offs DROP CONSTRAINT IF EXISTS write_offs_approved_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.write_off_items DROP CONSTRAINT IF EXISTS write_off_items_write_off_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.write_off_items DROP CONSTRAINT IF EXISTS write_off_items_warehouse_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.write_off_items DROP CONSTRAINT IF EXISTS write_off_items_material_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.write_off_items DROP CONSTRAINT IF EXISTS write_off_items_location_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.write_off_items DROP CONSTRAINT IF EXISTS write_off_items_equipment_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.work_orders DROP CONSTRAINT IF EXISTS work_orders_vendor_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.work_orders DROP CONSTRAINT IF EXISTS work_orders_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.work_orders DROP CONSTRAINT IF EXISTS work_orders_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.work_orders DROP CONSTRAINT IF EXISTS work_orders_project_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.work_orders DROP CONSTRAINT IF EXISTS work_orders_institution_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.work_orders DROP CONSTRAINT IF EXISTS work_orders_equipment_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.work_orders DROP CONSTRAINT IF EXISTS work_orders_created_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.work_orders DROP CONSTRAINT IF EXISTS work_orders_contract_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.work_orders DROP CONSTRAINT IF EXISTS work_orders_approved_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.work_order_items DROP CONSTRAINT IF EXISTS work_order_items_wo_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.work_order_items DROP CONSTRAINT IF EXISTS work_order_items_material_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.work_order_approvals DROP CONSTRAINT IF EXISTS work_order_approvals_wo_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.work_order_approvals DROP CONSTRAINT IF EXISTS work_order_approvals_approver_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.work_order_approvals DROP CONSTRAINT IF EXISTS work_order_approvals_approval_flow_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.warehouses DROP CONSTRAINT IF EXISTS warehouses_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.warehouses DROP CONSTRAINT IF EXISTS warehouses_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.warehouses DROP CONSTRAINT IF EXISTS warehouses_project_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.warehouses DROP CONSTRAINT IF EXISTS warehouses_manager_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.vendors DROP CONSTRAINT IF EXISTS vendors_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.vendors DROP CONSTRAINT IF EXISTS vendors_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.vendors DROP CONSTRAINT IF EXISTS vendors_rejected_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.vendors DROP CONSTRAINT IF EXISTS vendors_previous_status_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.vendors DROP CONSTRAINT IF EXISTS vendors_approved_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.vendor_work_orders DROP CONSTRAINT IF EXISTS vendor_work_orders_vendor_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.vendor_work_orders DROP CONSTRAINT IF EXISTS vendor_work_orders_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.vendor_work_orders DROP CONSTRAINT IF EXISTS vendor_work_orders_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.vendor_work_orders DROP CONSTRAINT IF EXISTS vendor_work_orders_institution_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.vendor_work_orders DROP CONSTRAINT IF EXISTS vendor_work_orders_equipment_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.vendor_work_orders DROP CONSTRAINT IF EXISTS vendor_work_orders_created_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.vendor_work_orders DROP CONSTRAINT IF EXISTS vendor_work_orders_complaint_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.vendor_work_order_items DROP CONSTRAINT IF EXISTS vendor_work_order_items_vwo_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.vendor_work_order_items DROP CONSTRAINT IF EXISTS vendor_work_order_items_material_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.vendor_work_order_images DROP CONSTRAINT IF EXISTS vendor_work_order_images_vwo_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.vendor_work_order_documents DROP CONSTRAINT IF EXISTS vendor_work_order_documents_vwo_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.vendor_work_order_documents DROP CONSTRAINT IF EXISTS vendor_work_order_documents_uploaded_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.vendor_quotations DROP CONSTRAINT IF EXISTS vendor_quotations_vendor_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.vendor_quotations DROP CONSTRAINT IF EXISTS vendor_quotations_qr_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.vendor_quotations DROP CONSTRAINT IF EXISTS vendor_quotations_entered_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.vendor_quotation_items DROP CONSTRAINT IF EXISTS vendor_quotation_items_vendor_quotation_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.vendor_quotation_items DROP CONSTRAINT IF EXISTS vendor_quotation_items_qr_item_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.vendor_quotation_items DROP CONSTRAINT IF EXISTS vendor_quotation_items_material_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.vendor_history DROP CONSTRAINT IF EXISTS vendor_history_vendor_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.vendor_history DROP CONSTRAINT IF EXISTS vendor_history_action_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.vendor_categories DROP CONSTRAINT IF EXISTS vendor_categories_vendor_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.vendor_categories DROP CONSTRAINT IF EXISTS vendor_categories_category_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.vendor_approvals DROP CONSTRAINT IF EXISTS vendor_approvals_vendor_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.vendor_approvals DROP CONSTRAINT IF EXISTS vendor_approvals_approver_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.vendor_approvals DROP CONSTRAINT IF EXISTS vendor_approvals_approval_flow_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.user_role_assignments DROP CONSTRAINT IF EXISTS user_role_assignments_user_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.user_role_assignments DROP CONSTRAINT IF EXISTS user_role_assignments_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.user_role_assignments DROP CONSTRAINT IF EXISTS user_role_assignments_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.user_role_assignments DROP CONSTRAINT IF EXISTS user_role_assignments_role_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.uom DROP CONSTRAINT IF EXISTS uom_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.uom DROP CONSTRAINT IF EXISTS uom_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.terms_and_conditions DROP CONSTRAINT IF EXISTS terms_and_conditions_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.terms_and_conditions DROP CONSTRAINT IF EXISTS terms_and_conditions_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.tenant_memberships DROP CONSTRAINT IF EXISTS tenant_memberships_user_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.tenant_memberships DROP CONSTRAINT IF EXISTS tenant_memberships_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.tenant_configurations DROP CONSTRAINT IF EXISTS tenant_configurations_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.system_lookups DROP CONSTRAINT IF EXISTS system_lookups_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.subcategories DROP CONSTRAINT IF EXISTS subcategories_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.subcategories DROP CONSTRAINT IF EXISTS subcategories_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.subcategories DROP CONSTRAINT IF EXISTS subcategories_category_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.stock_transfers DROP CONSTRAINT IF EXISTS stock_transfers_to_warehouse_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.stock_transfers DROP CONSTRAINT IF EXISTS stock_transfers_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.stock_transfers DROP CONSTRAINT IF EXISTS stock_transfers_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.stock_transfers DROP CONSTRAINT IF EXISTS stock_transfers_received_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.stock_transfers DROP CONSTRAINT IF EXISTS stock_transfers_project_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.stock_transfers DROP CONSTRAINT IF EXISTS stock_transfers_from_warehouse_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.stock_transfers DROP CONSTRAINT IF EXISTS stock_transfers_created_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.stock_transfer_items DROP CONSTRAINT IF EXISTS stock_transfer_items_transfer_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.stock_transfer_items DROP CONSTRAINT IF EXISTS stock_transfer_items_material_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.stock_ledger DROP CONSTRAINT IF EXISTS stock_ledger_warehouse_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.stock_ledger DROP CONSTRAINT IF EXISTS stock_ledger_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.stock_ledger DROP CONSTRAINT IF EXISTS stock_ledger_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.stock_ledger DROP CONSTRAINT IF EXISTS stock_ledger_room_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.stock_ledger DROP CONSTRAINT IF EXISTS stock_ledger_project_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.stock_ledger DROP CONSTRAINT IF EXISTS stock_ledger_material_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.stock_ledger DROP CONSTRAINT IF EXISTS stock_ledger_created_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.sites DROP CONSTRAINT IF EXISTS sites_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.rooms DROP CONSTRAINT IF EXISTS rooms_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.rooms DROP CONSTRAINT IF EXISTS rooms_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.rooms DROP CONSTRAINT IF EXISTS rooms_floor_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.roles DROP CONSTRAINT IF EXISTS roles_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.role_permissions DROP CONSTRAINT IF EXISTS role_permissions_role_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.repair_work_orders DROP CONSTRAINT IF EXISTS repair_work_orders_vendor_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.repair_work_orders DROP CONSTRAINT IF EXISTS repair_work_orders_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.repair_work_orders DROP CONSTRAINT IF EXISTS repair_work_orders_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.repair_work_orders DROP CONSTRAINT IF EXISTS repair_work_orders_equipment_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.repair_work_orders DROP CONSTRAINT IF EXISTS repair_work_orders_created_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.repair_work_orders DROP CONSTRAINT IF EXISTS repair_work_orders_contract_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.repair_work_orders DROP CONSTRAINT IF EXISTS repair_work_orders_complaint_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.reagent_consumption_logs DROP CONSTRAINT IF EXISTS reagent_consumption_logs_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.reagent_consumption_logs DROP CONSTRAINT IF EXISTS reagent_consumption_logs_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.reagent_consumption_logs DROP CONSTRAINT IF EXISTS reagent_consumption_logs_logged_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.reagent_consumption_logs DROP CONSTRAINT IF EXISTS reagent_consumption_logs_equipment_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.quotation_requests DROP CONSTRAINT IF EXISTS quotation_requests_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.quotation_requests DROP CONSTRAINT IF EXISTS quotation_requests_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.quotation_requests DROP CONSTRAINT IF EXISTS quotation_requests_project_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.quotation_requests DROP CONSTRAINT IF EXISTS quotation_requests_created_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.quotation_requests DROP CONSTRAINT IF EXISTS quotation_requests_approved_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.quotation_request_vendors DROP CONSTRAINT IF EXISTS quotation_request_vendors_vendor_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.quotation_request_vendors DROP CONSTRAINT IF EXISTS quotation_request_vendors_qr_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.quotation_request_prs DROP CONSTRAINT IF EXISTS quotation_request_prs_qr_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.quotation_request_prs DROP CONSTRAINT IF EXISTS quotation_request_prs_pr_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.quotation_request_items DROP CONSTRAINT IF EXISTS quotation_request_items_source_pr_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.quotation_request_items DROP CONSTRAINT IF EXISTS quotation_request_items_qr_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.quotation_request_items DROP CONSTRAINT IF EXISTS quotation_request_items_material_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.quotation_request_item_sources DROP CONSTRAINT IF EXISTS quotation_request_item_sources_source_pr_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.quotation_request_item_sources DROP CONSTRAINT IF EXISTS quotation_request_item_sources_qr_item_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.quotation_negotiation_history DROP CONSTRAINT IF EXISTS quotation_negotiation_history_vendor_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.quotation_negotiation_history DROP CONSTRAINT IF EXISTS quotation_negotiation_history_qr_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.quotation_negotiation_history DROP CONSTRAINT IF EXISTS quotation_negotiation_history_created_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.quotation_comparisons DROP CONSTRAINT IF EXISTS quotation_comparisons_selected_vendor_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.quotation_comparisons DROP CONSTRAINT IF EXISTS quotation_comparisons_qr_item_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.quotation_comparisons DROP CONSTRAINT IF EXISTS quotation_comparisons_qr_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.quotation_comparisons DROP CONSTRAINT IF EXISTS quotation_comparisons_material_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.quotation_comparisons DROP CONSTRAINT IF EXISTS quotation_comparisons_auto_rank_vendor_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.quotation_comparisons DROP CONSTRAINT IF EXISTS quotation_comparisons_approved_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.purchase_requests DROP CONSTRAINT IF EXISTS purchase_requests_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.purchase_requests DROP CONSTRAINT IF EXISTS purchase_requests_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.purchase_requests DROP CONSTRAINT IF EXISTS purchase_requests_required_for_room_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.purchase_requests DROP CONSTRAINT IF EXISTS purchase_requests_requester_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.purchase_requests DROP CONSTRAINT IF EXISTS purchase_requests_project_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.purchase_requests DROP CONSTRAINT IF EXISTS purchase_requests_building_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.purchase_requests DROP CONSTRAINT IF EXISTS purchase_requests_approved_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.purchase_request_items DROP CONSTRAINT IF EXISTS purchase_request_items_pr_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.purchase_request_items DROP CONSTRAINT IF EXISTS purchase_request_items_material_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.purchase_request_approvals DROP CONSTRAINT IF EXISTS purchase_request_approvals_pr_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.purchase_request_approvals DROP CONSTRAINT IF EXISTS purchase_request_approvals_approver_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.purchase_request_approvals DROP CONSTRAINT IF EXISTS purchase_request_approvals_approval_flow_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.purchase_orders DROP CONSTRAINT IF EXISTS purchase_orders_vendor_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.purchase_orders DROP CONSTRAINT IF EXISTS purchase_orders_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.purchase_orders DROP CONSTRAINT IF EXISTS purchase_orders_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.purchase_orders DROP CONSTRAINT IF EXISTS purchase_orders_qr_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.purchase_orders DROP CONSTRAINT IF EXISTS purchase_orders_project_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.purchase_orders DROP CONSTRAINT IF EXISTS purchase_orders_pr_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.purchase_orders DROP CONSTRAINT IF EXISTS purchase_orders_institution_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.purchase_orders DROP CONSTRAINT IF EXISTS purchase_orders_indent_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.purchase_orders DROP CONSTRAINT IF EXISTS purchase_orders_created_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.purchase_orders DROP CONSTRAINT IF EXISTS purchase_orders_contract_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.purchase_orders DROP CONSTRAINT IF EXISTS purchase_orders_approved_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.purchase_order_items DROP CONSTRAINT IF EXISTS purchase_order_items_po_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.purchase_order_items DROP CONSTRAINT IF EXISTS purchase_order_items_material_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.purchase_order_approvals DROP CONSTRAINT IF EXISTS purchase_order_approvals_po_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.purchase_order_approvals DROP CONSTRAINT IF EXISTS purchase_order_approvals_approver_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.purchase_order_approvals DROP CONSTRAINT IF EXISTS purchase_order_approvals_approval_flow_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.projects DROP CONSTRAINT IF EXISTS projects_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.projects DROP CONSTRAINT IF EXISTS projects_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.projects DROP CONSTRAINT IF EXISTS projects_organization_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.pm_schedules DROP CONSTRAINT IF EXISTS pm_schedules_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.password_reset_tokens DROP CONSTRAINT IF EXISTS password_reset_tokens_user_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.organizations DROP CONSTRAINT IF EXISTS organizations_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.organizations DROP CONSTRAINT IF EXISTS organizations_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.menu_items DROP CONSTRAINT IF EXISTS menu_items_parent_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.materials DROP CONSTRAINT IF EXISTS materials_uom_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.materials DROP CONSTRAINT IF EXISTS materials_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.materials DROP CONSTRAINT IF EXISTS materials_subcategory_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.materials DROP CONSTRAINT IF EXISTS materials_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.materials DROP CONSTRAINT IF EXISTS materials_preferred_vendor_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.materials DROP CONSTRAINT IF EXISTS materials_category_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.material_returns DROP CONSTRAINT IF EXISTS material_returns_warehouse_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.material_returns DROP CONSTRAINT IF EXISTS material_returns_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.material_returns DROP CONSTRAINT IF EXISTS material_returns_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.material_returns DROP CONSTRAINT IF EXISTS material_returns_returned_from_room_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.material_returns DROP CONSTRAINT IF EXISTS material_returns_received_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.material_returns DROP CONSTRAINT IF EXISTS material_returns_project_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.material_return_items DROP CONSTRAINT IF EXISTS material_return_items_return_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.material_return_items DROP CONSTRAINT IF EXISTS material_return_items_material_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.material_issues DROP CONSTRAINT IF EXISTS material_issues_warehouse_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.material_issues DROP CONSTRAINT IF EXISTS material_issues_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.material_issues DROP CONSTRAINT IF EXISTS material_issues_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.material_issues DROP CONSTRAINT IF EXISTS material_issues_project_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.material_issues DROP CONSTRAINT IF EXISTS material_issues_issued_to_room_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.material_issues DROP CONSTRAINT IF EXISTS material_issues_issued_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.material_issues DROP CONSTRAINT IF EXISTS material_issues_indent_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.material_issues DROP CONSTRAINT IF EXISTS material_issues_complaint_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.material_issues DROP CONSTRAINT IF EXISTS material_issues_building_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.material_issues DROP CONSTRAINT IF EXISTS material_issues_acknowledged_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.material_issue_items DROP CONSTRAINT IF EXISTS material_issue_items_warehouse_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.material_issue_items DROP CONSTRAINT IF EXISTS material_issue_items_material_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.material_issue_items DROP CONSTRAINT IF EXISTS material_issue_items_issue_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.location_master DROP CONSTRAINT IF EXISTS location_master_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.location_master DROP CONSTRAINT IF EXISTS location_master_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.invoices DROP CONSTRAINT IF EXISTS invoices_vendor_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.invoices DROP CONSTRAINT IF EXISTS invoices_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.invoices DROP CONSTRAINT IF EXISTS invoices_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.invoices DROP CONSTRAINT IF EXISTS invoices_sent_for_payment_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.invoices DROP CONSTRAINT IF EXISTS invoices_po_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.invoices DROP CONSTRAINT IF EXISTS invoices_payment_completed_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.invoices DROP CONSTRAINT IF EXISTS invoices_institution_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.invoices DROP CONSTRAINT IF EXISTS invoices_hard_copy_sent_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.invoices DROP CONSTRAINT IF EXISTS invoices_hard_copy_received_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.invoices DROP CONSTRAINT IF EXISTS invoices_gate_entry_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.invoices DROP CONSTRAINT IF EXISTS invoices_created_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.invoices DROP CONSTRAINT IF EXISTS invoices_contract_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.invoices DROP CONSTRAINT IF EXISTS invoices_consignee_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.invoices DROP CONSTRAINT IF EXISTS invoices_buyer_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.invoice_items DROP CONSTRAINT IF EXISTS invoice_items_material_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.invoice_items DROP CONSTRAINT IF EXISTS invoice_items_invoice_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.institutions DROP CONSTRAINT IF EXISTS institutions_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.institutions DROP CONSTRAINT IF EXISTS institutions_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.institutions DROP CONSTRAINT IF EXISTS institutions_project_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.indents DROP CONSTRAINT IF EXISTS indents_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.indents DROP CONSTRAINT IF EXISTS indents_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.indents DROP CONSTRAINT IF EXISTS indents_rwo_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.indents DROP CONSTRAINT IF EXISTS indents_room_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.indents DROP CONSTRAINT IF EXISTS indents_requester_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.indents DROP CONSTRAINT IF EXISTS indents_institution_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.indents DROP CONSTRAINT IF EXISTS indents_building_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.indents DROP CONSTRAINT IF EXISTS indents_approved_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.indent_items DROP CONSTRAINT IF EXISTS indent_items_material_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.indent_items DROP CONSTRAINT IF EXISTS indent_items_indent_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.indent_approvals DROP CONSTRAINT IF EXISTS indent_approvals_indent_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.indent_approvals DROP CONSTRAINT IF EXISTS indent_approvals_approver_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.indent_approvals DROP CONSTRAINT IF EXISTS indent_approvals_approval_flow_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.grn DROP CONSTRAINT IF EXISTS grn_warehouse_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.grn DROP CONSTRAINT IF EXISTS grn_vendor_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.grn DROP CONSTRAINT IF EXISTS grn_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.grn DROP CONSTRAINT IF EXISTS grn_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.grn DROP CONSTRAINT IF EXISTS grn_received_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.grn DROP CONSTRAINT IF EXISTS grn_project_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.grn DROP CONSTRAINT IF EXISTS grn_po_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.grn_items DROP CONSTRAINT IF EXISTS grn_items_po_item_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.grn_items DROP CONSTRAINT IF EXISTS grn_items_material_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.grn_items DROP CONSTRAINT IF EXISTS grn_items_grn_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.grn DROP CONSTRAINT IF EXISTS grn_invoice_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.grn DROP CONSTRAINT IF EXISTS grn_gate_entry_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.grn DROP CONSTRAINT IF EXISTS grn_contract_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.gate_passes DROP CONSTRAINT IF EXISTS gate_passes_vendor_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.gate_passes DROP CONSTRAINT IF EXISTS gate_passes_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.gate_passes DROP CONSTRAINT IF EXISTS gate_passes_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.gate_passes DROP CONSTRAINT IF EXISTS gate_passes_return_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.gate_passes DROP CONSTRAINT IF EXISTS gate_passes_project_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.gate_passes DROP CONSTRAINT IF EXISTS gate_passes_created_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.gate_pass_items DROP CONSTRAINT IF EXISTS gate_pass_items_material_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.gate_pass_items DROP CONSTRAINT IF EXISTS gate_pass_items_gate_pass_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.gate_entries DROP CONSTRAINT IF EXISTS gate_entries_vendor_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.gate_entries DROP CONSTRAINT IF EXISTS gate_entries_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.gate_entries DROP CONSTRAINT IF EXISTS gate_entries_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.gate_entries DROP CONSTRAINT IF EXISTS gate_entries_recorded_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.gate_entries DROP CONSTRAINT IF EXISTS gate_entries_project_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.gate_entries DROP CONSTRAINT IF EXISTS gate_entries_po_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.gate_entries DROP CONSTRAINT IF EXISTS gate_entries_material_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.gate_entries DROP CONSTRAINT IF EXISTS gate_entries_contract_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.floors DROP CONSTRAINT IF EXISTS floors_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.floors DROP CONSTRAINT IF EXISTS floors_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.floors DROP CONSTRAINT IF EXISTS floors_building_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.materials DROP CONSTRAINT IF EXISTS fk_materials_warehouse;
-ALTER TABLE IF EXISTS ONLY public.material_returns DROP CONSTRAINT IF EXISTS fk_material_returns_initiated_by;
-ALTER TABLE IF EXISTS ONLY public.indents DROP CONSTRAINT IF EXISTS fk_indents_complaints;
-ALTER TABLE IF EXISTS ONLY public.complaints DROP CONSTRAINT IF EXISTS fk_complaint_verified_by;
-ALTER TABLE IF EXISTS ONLY public.equipment_writeoffs DROP CONSTRAINT IF EXISTS equipment_writeoffs_equipment_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.equipment_writeoffs DROP CONSTRAINT IF EXISTS equipment_writeoffs_created_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.equipment_items DROP CONSTRAINT IF EXISTS equipment_items_warehouse_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.equipment_items DROP CONSTRAINT IF EXISTS equipment_items_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.equipment_items DROP CONSTRAINT IF EXISTS equipment_items_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.equipment_items DROP CONSTRAINT IF EXISTS equipment_items_rental_vendor_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.equipment_items DROP CONSTRAINT IF EXISTS equipment_items_project_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.equipment_items DROP CONSTRAINT IF EXISTS equipment_items_po_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.equipment_items DROP CONSTRAINT IF EXISTS equipment_items_material_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.equipment_items DROP CONSTRAINT IF EXISTS equipment_items_location_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.equipment_items DROP CONSTRAINT IF EXISTS equipment_items_institution_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.equipment_items DROP CONSTRAINT IF EXISTS equipment_items_grn_item_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.equipment_items DROP CONSTRAINT IF EXISTS equipment_items_grn_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.equipment_history DROP CONSTRAINT IF EXISTS equipment_history_equipment_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.equipment_history DROP CONSTRAINT IF EXISTS equipment_history_created_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.document_sequences DROP CONSTRAINT IF EXISTS document_sequences_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.document_sequences DROP CONSTRAINT IF EXISTS document_sequences_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.departments DROP CONSTRAINT IF EXISTS departments_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.departments DROP CONSTRAINT IF EXISTS departments_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.departments DROP CONSTRAINT IF EXISTS departments_institution_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.departments DROP CONSTRAINT IF EXISTS departments_building_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.department_material_limits DROP CONSTRAINT IF EXISTS department_material_limits_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.department_material_limits DROP CONSTRAINT IF EXISTS department_material_limits_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.department_material_limits DROP CONSTRAINT IF EXISTS department_material_limits_material_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.department_material_limits DROP CONSTRAINT IF EXISTS department_material_limits_created_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.current_stock DROP CONSTRAINT IF EXISTS current_stock_warehouse_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.current_stock DROP CONSTRAINT IF EXISTS current_stock_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.current_stock DROP CONSTRAINT IF EXISTS current_stock_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.current_stock DROP CONSTRAINT IF EXISTS current_stock_material_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.contracts DROP CONSTRAINT IF EXISTS contracts_vendor_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.contracts DROP CONSTRAINT IF EXISTS contracts_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.contracts DROP CONSTRAINT IF EXISTS contracts_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.contracts DROP CONSTRAINT IF EXISTS contracts_institution_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.contracts DROP CONSTRAINT IF EXISTS contracts_department_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.contracts DROP CONSTRAINT IF EXISTS contracts_created_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.contracts DROP CONSTRAINT IF EXISTS contracts_approved_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.contract_items DROP CONSTRAINT IF EXISTS contract_items_material_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.contract_items DROP CONSTRAINT IF EXISTS contract_items_equipment_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.contract_items DROP CONSTRAINT IF EXISTS contract_items_contract_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.contract_approvals DROP CONSTRAINT IF EXISTS contract_approvals_contract_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.contract_approvals DROP CONSTRAINT IF EXISTS contract_approvals_approver_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.contract_approvals DROP CONSTRAINT IF EXISTS contract_approvals_approval_flow_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.complaints DROP CONSTRAINT IF EXISTS complaints_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.complaints DROP CONSTRAINT IF EXISTS complaints_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.complaints DROP CONSTRAINT IF EXISTS complaints_rwo_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.complaints DROP CONSTRAINT IF EXISTS complaints_room_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.complaints DROP CONSTRAINT IF EXISTS complaints_resolved_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.complaints DROP CONSTRAINT IF EXISTS complaints_manager_approved_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.complaints DROP CONSTRAINT IF EXISTS complaints_linked_vwo_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.complaints DROP CONSTRAINT IF EXISTS complaints_equipment_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.complaints DROP CONSTRAINT IF EXISTS complaints_created_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.complaints DROP CONSTRAINT IF EXISTS complaints_contract_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.complaints DROP CONSTRAINT IF EXISTS complaints_building_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.complaints DROP CONSTRAINT IF EXISTS complaints_assigned_to_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.complaints DROP CONSTRAINT IF EXISTS complaints_admin_approved_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.complaint_images DROP CONSTRAINT IF EXISTS complaint_images_complaint_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.complaint_documents DROP CONSTRAINT IF EXISTS complaint_documents_uploaded_by_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.complaint_documents DROP CONSTRAINT IF EXISTS complaint_documents_complaint_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.company_addresses DROP CONSTRAINT IF EXISTS company_addresses_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.company_addresses DROP CONSTRAINT IF EXISTS company_addresses_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.categories DROP CONSTRAINT IF EXISTS categories_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.categories DROP CONSTRAINT IF EXISTS categories_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.calibration_schedules DROP CONSTRAINT IF EXISTS calibration_schedules_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.buildings DROP CONSTRAINT IF EXISTS buildings_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.buildings DROP CONSTRAINT IF EXISTS buildings_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.buildings DROP CONSTRAINT IF EXISTS buildings_project_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.buildings DROP CONSTRAINT IF EXISTS buildings_institution_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.audit_logs DROP CONSTRAINT IF EXISTS audit_logs_user_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.audit_logs DROP CONSTRAINT IF EXISTS audit_logs_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.audit_logs DROP CONSTRAINT IF EXISTS audit_logs_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.approval_flows DROP CONSTRAINT IF EXISTS approval_flows_user_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.approval_flows DROP CONSTRAINT IF EXISTS approval_flows_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.approval_flows DROP CONSTRAINT IF EXISTS approval_flows_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.alerts DROP CONSTRAINT IF EXISTS alerts_user_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.alerts DROP CONSTRAINT IF EXISTS alerts_tenant_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.alerts DROP CONSTRAINT IF EXISTS alerts_site_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.alerts DROP CONSTRAINT IF EXISTS alerts_project_id_fkey;
-DROP INDEX IF EXISTS public.ix_write_offs_write_off_number;
-DROP INDEX IF EXISTS public.ix_write_offs_id;
-DROP INDEX IF EXISTS public.ix_write_off_items_id;
-DROP INDEX IF EXISTS public.ix_work_orders_wo_number;
-DROP INDEX IF EXISTS public.ix_work_orders_id;
-DROP INDEX IF EXISTS public.ix_work_order_items_id;
-DROP INDEX IF EXISTS public.ix_work_order_approvals_id;
-DROP INDEX IF EXISTS public.ix_warehouses_id;
-DROP INDEX IF EXISTS public.ix_vendors_id;
-DROP INDEX IF EXISTS public.ix_vendor_work_orders_vwo_number;
-DROP INDEX IF EXISTS public.ix_vendor_work_orders_id;
-DROP INDEX IF EXISTS public.ix_vendor_work_order_items_id;
-DROP INDEX IF EXISTS public.ix_vendor_work_order_images_id;
-DROP INDEX IF EXISTS public.ix_vendor_work_order_documents_id;
-DROP INDEX IF EXISTS public.ix_vendor_quotations_id;
-DROP INDEX IF EXISTS public.ix_vendor_quotation_items_id;
-DROP INDEX IF EXISTS public.ix_vendor_history_id;
-DROP INDEX IF EXISTS public.ix_vendor_categories_id;
-DROP INDEX IF EXISTS public.ix_vendor_approvals_id;
-DROP INDEX IF EXISTS public.ix_users_username;
-DROP INDEX IF EXISTS public.ix_users_id;
-DROP INDEX IF EXISTS public.ix_user_role_assignments_id;
-DROP INDEX IF EXISTS public.ix_uom_id;
-DROP INDEX IF EXISTS public.ix_terms_and_conditions_id;
-DROP INDEX IF EXISTS public.ix_tenants_slug;
-DROP INDEX IF EXISTS public.ix_tenants_id;
-DROP INDEX IF EXISTS public.ix_tenant_memberships_id;
-DROP INDEX IF EXISTS public.ix_tenant_configurations_id;
-DROP INDEX IF EXISTS public.ix_system_lookups_lookup_type;
-DROP INDEX IF EXISTS public.ix_system_lookups_id;
-DROP INDEX IF EXISTS public.ix_subcategories_id;
-DROP INDEX IF EXISTS public.ix_stock_transfers_transfer_number;
-DROP INDEX IF EXISTS public.ix_stock_transfers_id;
-DROP INDEX IF EXISTS public.ix_stock_transfer_items_id;
-DROP INDEX IF EXISTS public.ix_stock_ledger_id;
-DROP INDEX IF EXISTS public.ix_sites_id;
-DROP INDEX IF EXISTS public.ix_rooms_id;
-DROP INDEX IF EXISTS public.ix_roles_id;
-DROP INDEX IF EXISTS public.ix_role_permissions_id;
-DROP INDEX IF EXISTS public.ix_repair_work_orders_rwo_number;
-DROP INDEX IF EXISTS public.ix_repair_work_orders_id;
-DROP INDEX IF EXISTS public.ix_reagent_consumption_logs_id;
-DROP INDEX IF EXISTS public.ix_quotation_requests_qr_number;
-DROP INDEX IF EXISTS public.ix_quotation_requests_id;
-DROP INDEX IF EXISTS public.ix_quotation_request_vendors_id;
-DROP INDEX IF EXISTS public.ix_quotation_request_prs_id;
-DROP INDEX IF EXISTS public.ix_quotation_request_items_id;
-DROP INDEX IF EXISTS public.ix_quotation_request_item_sources_id;
-DROP INDEX IF EXISTS public.ix_quotation_negotiation_history_id;
-DROP INDEX IF EXISTS public.ix_quotation_comparisons_id;
-DROP INDEX IF EXISTS public.ix_purchase_requests_pr_number;
-DROP INDEX IF EXISTS public.ix_purchase_requests_id;
-DROP INDEX IF EXISTS public.ix_purchase_request_items_id;
-DROP INDEX IF EXISTS public.ix_purchase_request_approvals_id;
-DROP INDEX IF EXISTS public.ix_purchase_orders_po_number;
-DROP INDEX IF EXISTS public.ix_purchase_orders_id;
-DROP INDEX IF EXISTS public.ix_purchase_order_items_id;
-DROP INDEX IF EXISTS public.ix_purchase_order_approvals_id;
-DROP INDEX IF EXISTS public.ix_projects_id;
-DROP INDEX IF EXISTS public.ix_pm_schedules_id;
-DROP INDEX IF EXISTS public.ix_password_reset_tokens_id;
-DROP INDEX IF EXISTS public.ix_organizations_id;
-DROP INDEX IF EXISTS public.ix_menu_items_id;
-DROP INDEX IF EXISTS public.ix_materials_reference_no;
-DROP INDEX IF EXISTS public.ix_materials_id;
-DROP INDEX IF EXISTS public.ix_materials_code;
-DROP INDEX IF EXISTS public.ix_material_returns_return_number;
-DROP INDEX IF EXISTS public.ix_material_returns_id;
-DROP INDEX IF EXISTS public.ix_material_return_items_id;
-DROP INDEX IF EXISTS public.ix_material_issues_issue_number;
-DROP INDEX IF EXISTS public.ix_material_issues_id;
-DROP INDEX IF EXISTS public.ix_material_issue_items_id;
-DROP INDEX IF EXISTS public.ix_location_master_id;
-DROP INDEX IF EXISTS public.ix_invoices_invoice_number;
-DROP INDEX IF EXISTS public.ix_invoices_id;
-DROP INDEX IF EXISTS public.ix_invoices_code;
-DROP INDEX IF EXISTS public.ix_invoice_items_id;
-DROP INDEX IF EXISTS public.ix_institutions_id;
-DROP INDEX IF EXISTS public.ix_indents_indent_number;
-DROP INDEX IF EXISTS public.ix_indents_id;
-DROP INDEX IF EXISTS public.ix_indent_items_id;
-DROP INDEX IF EXISTS public.ix_indent_approvals_id;
-DROP INDEX IF EXISTS public.ix_grn_items_id;
-DROP INDEX IF EXISTS public.ix_grn_id;
-DROP INDEX IF EXISTS public.ix_grn_grn_number;
-DROP INDEX IF EXISTS public.ix_gate_passes_id;
-DROP INDEX IF EXISTS public.ix_gate_passes_gate_pass_number;
-DROP INDEX IF EXISTS public.ix_gate_pass_items_id;
-DROP INDEX IF EXISTS public.ix_gate_entries_id;
-DROP INDEX IF EXISTS public.ix_gate_entries_entry_number;
-DROP INDEX IF EXISTS public.ix_floors_id;
-DROP INDEX IF EXISTS public.ix_equipment_writeoffs_id;
-DROP INDEX IF EXISTS public.ix_equipment_items_serial_number;
-DROP INDEX IF EXISTS public.ix_equipment_items_id;
-DROP INDEX IF EXISTS public.ix_equipment_items_equipment_code;
-DROP INDEX IF EXISTS public.ix_equipment_history_id;
-DROP INDEX IF EXISTS public.ix_document_sequences_id;
-DROP INDEX IF EXISTS public.ix_departments_id;
-DROP INDEX IF EXISTS public.ix_department_material_limits_id;
-DROP INDEX IF EXISTS public.ix_current_stock_id;
-DROP INDEX IF EXISTS public.ix_contracts_id;
-DROP INDEX IF EXISTS public.ix_contracts_contract_number;
-DROP INDEX IF EXISTS public.ix_contract_items_id;
-DROP INDEX IF EXISTS public.ix_contract_approvals_id;
-DROP INDEX IF EXISTS public.ix_complaints_id;
-DROP INDEX IF EXISTS public.ix_complaints_docket_no;
-DROP INDEX IF EXISTS public.ix_complaint_images_id;
-DROP INDEX IF EXISTS public.ix_complaint_documents_id;
-DROP INDEX IF EXISTS public.ix_company_addresses_id;
-DROP INDEX IF EXISTS public.ix_categories_id;
-DROP INDEX IF EXISTS public.ix_calibration_schedules_id;
-DROP INDEX IF EXISTS public.ix_buildings_id;
-DROP INDEX IF EXISTS public.ix_audit_logs_id;
-DROP INDEX IF EXISTS public.ix_approval_flows_id;
-DROP INDEX IF EXISTS public.ix_alerts_id;
-ALTER TABLE IF EXISTS ONLY public.write_offs DROP CONSTRAINT IF EXISTS write_offs_pkey;
-ALTER TABLE IF EXISTS ONLY public.write_off_items DROP CONSTRAINT IF EXISTS write_off_items_pkey;
-ALTER TABLE IF EXISTS ONLY public.work_orders DROP CONSTRAINT IF EXISTS work_orders_pkey;
-ALTER TABLE IF EXISTS ONLY public.work_order_items DROP CONSTRAINT IF EXISTS work_order_items_pkey;
-ALTER TABLE IF EXISTS ONLY public.work_order_approvals DROP CONSTRAINT IF EXISTS work_order_approvals_pkey;
-ALTER TABLE IF EXISTS ONLY public.warehouses DROP CONSTRAINT IF EXISTS warehouses_pkey;
-ALTER TABLE IF EXISTS ONLY public.vendors DROP CONSTRAINT IF EXISTS vendors_pkey;
-ALTER TABLE IF EXISTS ONLY public.vendor_work_orders DROP CONSTRAINT IF EXISTS vendor_work_orders_pkey;
-ALTER TABLE IF EXISTS ONLY public.vendor_work_order_items DROP CONSTRAINT IF EXISTS vendor_work_order_items_pkey;
-ALTER TABLE IF EXISTS ONLY public.vendor_work_order_images DROP CONSTRAINT IF EXISTS vendor_work_order_images_pkey;
-ALTER TABLE IF EXISTS ONLY public.vendor_work_order_documents DROP CONSTRAINT IF EXISTS vendor_work_order_documents_pkey;
-ALTER TABLE IF EXISTS ONLY public.vendor_quotations DROP CONSTRAINT IF EXISTS vendor_quotations_pkey;
-ALTER TABLE IF EXISTS ONLY public.vendor_quotation_items DROP CONSTRAINT IF EXISTS vendor_quotation_items_pkey;
-ALTER TABLE IF EXISTS ONLY public.vendor_history DROP CONSTRAINT IF EXISTS vendor_history_pkey;
-ALTER TABLE IF EXISTS ONLY public.vendor_categories DROP CONSTRAINT IF EXISTS vendor_categories_pkey;
-ALTER TABLE IF EXISTS ONLY public.vendor_approvals DROP CONSTRAINT IF EXISTS vendor_approvals_pkey;
-ALTER TABLE IF EXISTS ONLY public.users DROP CONSTRAINT IF EXISTS users_pkey;
-ALTER TABLE IF EXISTS ONLY public.users DROP CONSTRAINT IF EXISTS users_email_key;
-ALTER TABLE IF EXISTS ONLY public.user_role_assignments DROP CONSTRAINT IF EXISTS user_role_assignments_pkey;
-ALTER TABLE IF EXISTS ONLY public.write_offs DROP CONSTRAINT IF EXISTS uq_write_off_per_tenant;
-ALTER TABLE IF EXISTS ONLY public.work_orders DROP CONSTRAINT IF EXISTS uq_wo_per_tenant;
-ALTER TABLE IF EXISTS ONLY public.warehouses DROP CONSTRAINT IF EXISTS uq_wh_code_per_tenant;
-ALTER TABLE IF EXISTS ONLY public.vendor_work_orders DROP CONSTRAINT IF EXISTS uq_vwo_per_tenant;
-ALTER TABLE IF EXISTS ONLY public.vendors DROP CONSTRAINT IF EXISTS uq_vendor_code_per_site;
-ALTER TABLE IF EXISTS ONLY public.vendor_categories DROP CONSTRAINT IF EXISTS uq_vendor_category;
-ALTER TABLE IF EXISTS ONLY public.tenant_memberships DROP CONSTRAINT IF EXISTS uq_user_tenant;
-ALTER TABLE IF EXISTS ONLY public.uom DROP CONSTRAINT IF EXISTS uq_uom_per_site;
-ALTER TABLE IF EXISTS ONLY public.stock_transfers DROP CONSTRAINT IF EXISTS uq_trf_per_tenant;
-ALTER TABLE IF EXISTS ONLY public.system_lookups DROP CONSTRAINT IF EXISTS uq_sys_lookup_val;
-ALTER TABLE IF EXISTS ONLY public.sites DROP CONSTRAINT IF EXISTS uq_site_per_tenant;
-ALTER TABLE IF EXISTS ONLY public.repair_work_orders DROP CONSTRAINT IF EXISTS uq_rwo_per_tenant;
-ALTER TABLE IF EXISTS ONLY public.role_permissions DROP CONSTRAINT IF EXISTS uq_role_resource;
-ALTER TABLE IF EXISTS ONLY public.roles DROP CONSTRAINT IF EXISTS uq_role_code_per_tenant;
-ALTER TABLE IF EXISTS ONLY public.material_returns DROP CONSTRAINT IF EXISTS uq_ret_per_tenant;
-ALTER TABLE IF EXISTS ONLY public.quotation_request_vendors DROP CONSTRAINT IF EXISTS uq_qr_vendor;
-ALTER TABLE IF EXISTS ONLY public.quotation_request_prs DROP CONSTRAINT IF EXISTS uq_qr_pr;
-ALTER TABLE IF EXISTS ONLY public.quotation_requests DROP CONSTRAINT IF EXISTS uq_qr_per_tenant;
-ALTER TABLE IF EXISTS ONLY public.projects DROP CONSTRAINT IF EXISTS uq_proj_code_per_tenant;
-ALTER TABLE IF EXISTS ONLY public.purchase_requests DROP CONSTRAINT IF EXISTS uq_pr_per_tenant;
-ALTER TABLE IF EXISTS ONLY public.purchase_orders DROP CONSTRAINT IF EXISTS uq_po_per_tenant;
-ALTER TABLE IF EXISTS ONLY public.pm_schedules DROP CONSTRAINT IF EXISTS uq_pm_dept_per_tenant;
-ALTER TABLE IF EXISTS ONLY public.organizations DROP CONSTRAINT IF EXISTS uq_org_code_per_tenant;
-ALTER TABLE IF EXISTS ONLY public.current_stock DROP CONSTRAINT IF EXISTS uq_material_warehouse;
-ALTER TABLE IF EXISTS ONLY public.materials DROP CONSTRAINT IF EXISTS uq_mat_code_per_site;
-ALTER TABLE IF EXISTS ONLY public.location_master DROP CONSTRAINT IF EXISTS uq_location_code_per_tenant;
-ALTER TABLE IF EXISTS ONLY public.material_issues DROP CONSTRAINT IF EXISTS uq_issue_per_tenant;
-ALTER TABLE IF EXISTS ONLY public.invoices DROP CONSTRAINT IF EXISTS uq_invoice_per_vendor_tenant;
-ALTER TABLE IF EXISTS ONLY public.institutions DROP CONSTRAINT IF EXISTS uq_inst_code_per_tenant;
-ALTER TABLE IF EXISTS ONLY public.indents DROP CONSTRAINT IF EXISTS uq_indent_per_tenant;
-ALTER TABLE IF EXISTS ONLY public.grn DROP CONSTRAINT IF EXISTS uq_grn_per_tenant;
-ALTER TABLE IF EXISTS ONLY public.gate_entries DROP CONSTRAINT IF EXISTS uq_ge_per_tenant;
-ALTER TABLE IF EXISTS ONLY public.equipment_items DROP CONSTRAINT IF EXISTS uq_equipment_code_per_tenant;
-ALTER TABLE IF EXISTS ONLY public.document_sequences DROP CONSTRAINT IF EXISTS uq_doc_seq;
-ALTER TABLE IF EXISTS ONLY public.departments DROP CONSTRAINT IF EXISTS uq_dept_per_institution;
-ALTER TABLE IF EXISTS ONLY public.department_material_limits DROP CONSTRAINT IF EXISTS uq_dept_mat_limit;
-ALTER TABLE IF EXISTS ONLY public.contracts DROP CONSTRAINT IF EXISTS uq_contract_per_tenant;
-ALTER TABLE IF EXISTS ONLY public.complaints DROP CONSTRAINT IF EXISTS uq_complaint_docket_per_tenant;
-ALTER TABLE IF EXISTS ONLY public.quotation_comparisons DROP CONSTRAINT IF EXISTS uq_comparison_per_qr_item;
-ALTER TABLE IF EXISTS ONLY public.company_addresses DROP CONSTRAINT IF EXISTS uq_company_addr_per_site;
-ALTER TABLE IF EXISTS ONLY public.categories DROP CONSTRAINT IF EXISTS uq_cat_per_site;
-ALTER TABLE IF EXISTS ONLY public.calibration_schedules DROP CONSTRAINT IF EXISTS uq_cal_dept_per_tenant;
-ALTER TABLE IF EXISTS ONLY public.approval_flows DROP CONSTRAINT IF EXISTS uq_approval_flow_detailed;
-ALTER TABLE IF EXISTS ONLY public.uom DROP CONSTRAINT IF EXISTS uom_pkey;
-ALTER TABLE IF EXISTS ONLY public.terms_and_conditions DROP CONSTRAINT IF EXISTS terms_and_conditions_pkey;
-ALTER TABLE IF EXISTS ONLY public.tenants DROP CONSTRAINT IF EXISTS tenants_pkey;
-ALTER TABLE IF EXISTS ONLY public.tenant_memberships DROP CONSTRAINT IF EXISTS tenant_memberships_pkey;
-ALTER TABLE IF EXISTS ONLY public.tenant_configurations DROP CONSTRAINT IF EXISTS tenant_configurations_tenant_id_key;
-ALTER TABLE IF EXISTS ONLY public.tenant_configurations DROP CONSTRAINT IF EXISTS tenant_configurations_pkey;
-ALTER TABLE IF EXISTS ONLY public.system_lookups DROP CONSTRAINT IF EXISTS system_lookups_pkey;
-ALTER TABLE IF EXISTS ONLY public.subcategories DROP CONSTRAINT IF EXISTS subcategories_pkey;
-ALTER TABLE IF EXISTS ONLY public.stock_transfers DROP CONSTRAINT IF EXISTS stock_transfers_pkey;
-ALTER TABLE IF EXISTS ONLY public.stock_transfer_items DROP CONSTRAINT IF EXISTS stock_transfer_items_pkey;
-ALTER TABLE IF EXISTS ONLY public.stock_ledger DROP CONSTRAINT IF EXISTS stock_ledger_pkey;
-ALTER TABLE IF EXISTS ONLY public.sites DROP CONSTRAINT IF EXISTS sites_pkey;
-ALTER TABLE IF EXISTS ONLY public.rooms DROP CONSTRAINT IF EXISTS rooms_pkey;
-ALTER TABLE IF EXISTS ONLY public.roles DROP CONSTRAINT IF EXISTS roles_pkey;
-ALTER TABLE IF EXISTS ONLY public.role_permissions DROP CONSTRAINT IF EXISTS role_permissions_pkey;
-ALTER TABLE IF EXISTS ONLY public.repair_work_orders DROP CONSTRAINT IF EXISTS repair_work_orders_pkey;
-ALTER TABLE IF EXISTS ONLY public.reagent_consumption_logs DROP CONSTRAINT IF EXISTS reagent_consumption_logs_pkey;
-ALTER TABLE IF EXISTS ONLY public.quotation_requests DROP CONSTRAINT IF EXISTS quotation_requests_pkey;
-ALTER TABLE IF EXISTS ONLY public.quotation_request_vendors DROP CONSTRAINT IF EXISTS quotation_request_vendors_pkey;
-ALTER TABLE IF EXISTS ONLY public.quotation_request_prs DROP CONSTRAINT IF EXISTS quotation_request_prs_pkey;
-ALTER TABLE IF EXISTS ONLY public.quotation_request_items DROP CONSTRAINT IF EXISTS quotation_request_items_pkey;
-ALTER TABLE IF EXISTS ONLY public.quotation_request_item_sources DROP CONSTRAINT IF EXISTS quotation_request_item_sources_pkey;
-ALTER TABLE IF EXISTS ONLY public.quotation_negotiation_history DROP CONSTRAINT IF EXISTS quotation_negotiation_history_pkey;
-ALTER TABLE IF EXISTS ONLY public.quotation_comparisons DROP CONSTRAINT IF EXISTS quotation_comparisons_pkey;
-ALTER TABLE IF EXISTS ONLY public.purchase_requests DROP CONSTRAINT IF EXISTS purchase_requests_pkey;
-ALTER TABLE IF EXISTS ONLY public.purchase_request_items DROP CONSTRAINT IF EXISTS purchase_request_items_pkey;
-ALTER TABLE IF EXISTS ONLY public.purchase_request_approvals DROP CONSTRAINT IF EXISTS purchase_request_approvals_pkey;
-ALTER TABLE IF EXISTS ONLY public.purchase_orders DROP CONSTRAINT IF EXISTS purchase_orders_pkey;
-ALTER TABLE IF EXISTS ONLY public.purchase_order_items DROP CONSTRAINT IF EXISTS purchase_order_items_pkey;
-ALTER TABLE IF EXISTS ONLY public.purchase_order_approvals DROP CONSTRAINT IF EXISTS purchase_order_approvals_pkey;
-ALTER TABLE IF EXISTS ONLY public.projects DROP CONSTRAINT IF EXISTS projects_pkey;
-ALTER TABLE IF EXISTS ONLY public.pm_schedules DROP CONSTRAINT IF EXISTS pm_schedules_pkey;
-ALTER TABLE IF EXISTS ONLY public.password_reset_tokens DROP CONSTRAINT IF EXISTS password_reset_tokens_pkey;
-ALTER TABLE IF EXISTS ONLY public.organizations DROP CONSTRAINT IF EXISTS organizations_pkey;
-ALTER TABLE IF EXISTS ONLY public.menu_items DROP CONSTRAINT IF EXISTS menu_items_pkey;
-ALTER TABLE IF EXISTS ONLY public.materials DROP CONSTRAINT IF EXISTS materials_pkey;
-ALTER TABLE IF EXISTS ONLY public.material_returns DROP CONSTRAINT IF EXISTS material_returns_pkey;
-ALTER TABLE IF EXISTS ONLY public.material_return_items DROP CONSTRAINT IF EXISTS material_return_items_pkey;
-ALTER TABLE IF EXISTS ONLY public.material_issues DROP CONSTRAINT IF EXISTS material_issues_pkey;
-ALTER TABLE IF EXISTS ONLY public.material_issue_items DROP CONSTRAINT IF EXISTS material_issue_items_pkey;
-ALTER TABLE IF EXISTS ONLY public.location_master DROP CONSTRAINT IF EXISTS location_master_pkey;
-ALTER TABLE IF EXISTS ONLY public.invoices DROP CONSTRAINT IF EXISTS invoices_pkey;
-ALTER TABLE IF EXISTS ONLY public.invoice_items DROP CONSTRAINT IF EXISTS invoice_items_pkey;
-ALTER TABLE IF EXISTS ONLY public.institutions DROP CONSTRAINT IF EXISTS institutions_pkey;
-ALTER TABLE IF EXISTS ONLY public.indents DROP CONSTRAINT IF EXISTS indents_pkey;
-ALTER TABLE IF EXISTS ONLY public.indent_items DROP CONSTRAINT IF EXISTS indent_items_pkey;
-ALTER TABLE IF EXISTS ONLY public.indent_approvals DROP CONSTRAINT IF EXISTS indent_approvals_pkey;
-ALTER TABLE IF EXISTS ONLY public.grn DROP CONSTRAINT IF EXISTS grn_pkey;
-ALTER TABLE IF EXISTS ONLY public.grn_items DROP CONSTRAINT IF EXISTS grn_items_pkey;
-ALTER TABLE IF EXISTS ONLY public.gate_passes DROP CONSTRAINT IF EXISTS gate_passes_pkey;
-ALTER TABLE IF EXISTS ONLY public.gate_pass_items DROP CONSTRAINT IF EXISTS gate_pass_items_pkey;
-ALTER TABLE IF EXISTS ONLY public.gate_entries DROP CONSTRAINT IF EXISTS gate_entries_pkey;
-ALTER TABLE IF EXISTS ONLY public.floors DROP CONSTRAINT IF EXISTS floors_pkey;
-ALTER TABLE IF EXISTS ONLY public.equipment_writeoffs DROP CONSTRAINT IF EXISTS equipment_writeoffs_pkey;
-ALTER TABLE IF EXISTS ONLY public.equipment_items DROP CONSTRAINT IF EXISTS equipment_items_pkey;
-ALTER TABLE IF EXISTS ONLY public.equipment_history DROP CONSTRAINT IF EXISTS equipment_history_pkey;
-ALTER TABLE IF EXISTS ONLY public.document_sequences DROP CONSTRAINT IF EXISTS document_sequences_pkey;
-ALTER TABLE IF EXISTS ONLY public.departments DROP CONSTRAINT IF EXISTS departments_pkey;
-ALTER TABLE IF EXISTS ONLY public.department_material_limits DROP CONSTRAINT IF EXISTS department_material_limits_pkey;
-ALTER TABLE IF EXISTS ONLY public.current_stock DROP CONSTRAINT IF EXISTS current_stock_pkey;
-ALTER TABLE IF EXISTS ONLY public.contracts DROP CONSTRAINT IF EXISTS contracts_pkey;
-ALTER TABLE IF EXISTS ONLY public.contract_items DROP CONSTRAINT IF EXISTS contract_items_pkey;
-ALTER TABLE IF EXISTS ONLY public.contract_approvals DROP CONSTRAINT IF EXISTS contract_approvals_pkey;
-ALTER TABLE IF EXISTS ONLY public.complaints DROP CONSTRAINT IF EXISTS complaints_pkey;
-ALTER TABLE IF EXISTS ONLY public.complaint_images DROP CONSTRAINT IF EXISTS complaint_images_pkey;
-ALTER TABLE IF EXISTS ONLY public.complaint_documents DROP CONSTRAINT IF EXISTS complaint_documents_pkey;
-ALTER TABLE IF EXISTS ONLY public.company_addresses DROP CONSTRAINT IF EXISTS company_addresses_pkey;
-ALTER TABLE IF EXISTS ONLY public.categories DROP CONSTRAINT IF EXISTS categories_pkey;
-ALTER TABLE IF EXISTS ONLY public.calibration_schedules DROP CONSTRAINT IF EXISTS calibration_schedules_pkey;
-ALTER TABLE IF EXISTS ONLY public.buildings DROP CONSTRAINT IF EXISTS buildings_pkey;
-ALTER TABLE IF EXISTS ONLY public.audit_logs DROP CONSTRAINT IF EXISTS audit_logs_pkey;
-ALTER TABLE IF EXISTS ONLY public.approval_flows DROP CONSTRAINT IF EXISTS approval_flows_pkey;
-ALTER TABLE IF EXISTS ONLY public.alerts DROP CONSTRAINT IF EXISTS alerts_pkey;
-ALTER TABLE IF EXISTS ONLY public.alembic_version DROP CONSTRAINT IF EXISTS alembic_version_pkc;
-ALTER TABLE IF EXISTS public.write_offs ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.write_off_items ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.work_orders ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.work_order_items ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.work_order_approvals ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.warehouses ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.vendors ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.vendor_work_orders ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.vendor_work_order_items ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.vendor_work_order_images ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.vendor_work_order_documents ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.vendor_quotations ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.vendor_quotation_items ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.vendor_history ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.vendor_categories ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.vendor_approvals ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.users ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.user_role_assignments ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.uom ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.terms_and_conditions ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.tenants ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.tenant_memberships ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.tenant_configurations ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.system_lookups ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.subcategories ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.stock_transfers ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.stock_transfer_items ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.stock_ledger ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.sites ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.rooms ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.roles ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.role_permissions ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.repair_work_orders ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.reagent_consumption_logs ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.quotation_requests ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.quotation_request_vendors ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.quotation_request_prs ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.quotation_request_items ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.quotation_request_item_sources ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.quotation_negotiation_history ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.quotation_comparisons ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.purchase_requests ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.purchase_request_items ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.purchase_request_approvals ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.purchase_orders ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.purchase_order_items ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.purchase_order_approvals ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.projects ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.pm_schedules ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.password_reset_tokens ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.organizations ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.menu_items ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.materials ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.material_returns ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.material_return_items ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.material_issues ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.material_issue_items ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.location_master ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.invoices ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.invoice_items ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.institutions ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.indents ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.indent_items ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.indent_approvals ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.grn_items ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.grn ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.gate_passes ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.gate_pass_items ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.gate_entries ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.floors ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.equipment_writeoffs ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.equipment_items ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.equipment_history ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.document_sequences ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.departments ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.department_material_limits ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.current_stock ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.contracts ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.contract_items ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.contract_approvals ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.complaints ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.complaint_images ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.complaint_documents ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.company_addresses ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.categories ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.calibration_schedules ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.buildings ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.audit_logs ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.approval_flows ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.alerts ALTER COLUMN id DROP DEFAULT;
-DROP SEQUENCE IF EXISTS public.write_offs_id_seq;
-DROP TABLE IF EXISTS public.write_offs;
-DROP SEQUENCE IF EXISTS public.write_off_items_id_seq;
-DROP TABLE IF EXISTS public.write_off_items;
-DROP SEQUENCE IF EXISTS public.work_orders_id_seq;
-DROP TABLE IF EXISTS public.work_orders;
-DROP SEQUENCE IF EXISTS public.work_order_items_id_seq;
-DROP TABLE IF EXISTS public.work_order_items;
-DROP SEQUENCE IF EXISTS public.work_order_approvals_id_seq;
-DROP TABLE IF EXISTS public.work_order_approvals;
-DROP SEQUENCE IF EXISTS public.warehouses_id_seq;
-DROP TABLE IF EXISTS public.warehouses;
-DROP SEQUENCE IF EXISTS public.vendors_id_seq;
-DROP TABLE IF EXISTS public.vendors;
-DROP SEQUENCE IF EXISTS public.vendor_work_orders_id_seq;
-DROP TABLE IF EXISTS public.vendor_work_orders;
-DROP SEQUENCE IF EXISTS public.vendor_work_order_items_id_seq;
-DROP TABLE IF EXISTS public.vendor_work_order_items;
-DROP SEQUENCE IF EXISTS public.vendor_work_order_images_id_seq;
-DROP TABLE IF EXISTS public.vendor_work_order_images;
-DROP SEQUENCE IF EXISTS public.vendor_work_order_documents_id_seq;
-DROP TABLE IF EXISTS public.vendor_work_order_documents;
-DROP SEQUENCE IF EXISTS public.vendor_quotations_id_seq;
-DROP TABLE IF EXISTS public.vendor_quotations;
-DROP SEQUENCE IF EXISTS public.vendor_quotation_items_id_seq;
-DROP TABLE IF EXISTS public.vendor_quotation_items;
-DROP SEQUENCE IF EXISTS public.vendor_history_id_seq;
-DROP TABLE IF EXISTS public.vendor_history;
-DROP SEQUENCE IF EXISTS public.vendor_categories_id_seq;
-DROP TABLE IF EXISTS public.vendor_categories;
-DROP SEQUENCE IF EXISTS public.vendor_approvals_id_seq;
-DROP TABLE IF EXISTS public.vendor_approvals;
-DROP SEQUENCE IF EXISTS public.users_id_seq;
-DROP TABLE IF EXISTS public.users;
-DROP SEQUENCE IF EXISTS public.user_role_assignments_id_seq;
-DROP TABLE IF EXISTS public.user_role_assignments;
-DROP SEQUENCE IF EXISTS public.uom_id_seq;
-DROP TABLE IF EXISTS public.uom;
-DROP SEQUENCE IF EXISTS public.terms_and_conditions_id_seq;
-DROP TABLE IF EXISTS public.terms_and_conditions;
-DROP SEQUENCE IF EXISTS public.tenants_id_seq;
-DROP TABLE IF EXISTS public.tenants;
-DROP SEQUENCE IF EXISTS public.tenant_memberships_id_seq;
-DROP TABLE IF EXISTS public.tenant_memberships;
-DROP SEQUENCE IF EXISTS public.tenant_configurations_id_seq;
-DROP TABLE IF EXISTS public.tenant_configurations;
-DROP SEQUENCE IF EXISTS public.system_lookups_id_seq;
-DROP TABLE IF EXISTS public.system_lookups;
-DROP SEQUENCE IF EXISTS public.subcategories_id_seq;
-DROP TABLE IF EXISTS public.subcategories;
-DROP SEQUENCE IF EXISTS public.stock_transfers_id_seq;
-DROP TABLE IF EXISTS public.stock_transfers;
-DROP SEQUENCE IF EXISTS public.stock_transfer_items_id_seq;
-DROP TABLE IF EXISTS public.stock_transfer_items;
-DROP SEQUENCE IF EXISTS public.stock_ledger_id_seq;
-DROP TABLE IF EXISTS public.stock_ledger;
-DROP SEQUENCE IF EXISTS public.sites_id_seq;
-DROP TABLE IF EXISTS public.sites;
-DROP SEQUENCE IF EXISTS public.rooms_id_seq;
-DROP TABLE IF EXISTS public.rooms;
-DROP SEQUENCE IF EXISTS public.roles_id_seq;
-DROP TABLE IF EXISTS public.roles;
-DROP SEQUENCE IF EXISTS public.role_permissions_id_seq;
-DROP TABLE IF EXISTS public.role_permissions;
-DROP SEQUENCE IF EXISTS public.repair_work_orders_id_seq;
-DROP TABLE IF EXISTS public.repair_work_orders;
-DROP SEQUENCE IF EXISTS public.reagent_consumption_logs_id_seq;
-DROP TABLE IF EXISTS public.reagent_consumption_logs;
-DROP SEQUENCE IF EXISTS public.quotation_requests_id_seq;
-DROP TABLE IF EXISTS public.quotation_requests;
-DROP SEQUENCE IF EXISTS public.quotation_request_vendors_id_seq;
-DROP TABLE IF EXISTS public.quotation_request_vendors;
-DROP SEQUENCE IF EXISTS public.quotation_request_prs_id_seq;
-DROP TABLE IF EXISTS public.quotation_request_prs;
-DROP SEQUENCE IF EXISTS public.quotation_request_items_id_seq;
-DROP TABLE IF EXISTS public.quotation_request_items;
-DROP SEQUENCE IF EXISTS public.quotation_request_item_sources_id_seq;
-DROP TABLE IF EXISTS public.quotation_request_item_sources;
-DROP SEQUENCE IF EXISTS public.quotation_negotiation_history_id_seq;
-DROP TABLE IF EXISTS public.quotation_negotiation_history;
-DROP SEQUENCE IF EXISTS public.quotation_comparisons_id_seq;
-DROP TABLE IF EXISTS public.quotation_comparisons;
-DROP SEQUENCE IF EXISTS public.purchase_requests_id_seq;
-DROP TABLE IF EXISTS public.purchase_requests;
-DROP SEQUENCE IF EXISTS public.purchase_request_items_id_seq;
-DROP TABLE IF EXISTS public.purchase_request_items;
-DROP SEQUENCE IF EXISTS public.purchase_request_approvals_id_seq;
-DROP TABLE IF EXISTS public.purchase_request_approvals;
-DROP SEQUENCE IF EXISTS public.purchase_orders_id_seq;
-DROP TABLE IF EXISTS public.purchase_orders;
-DROP SEQUENCE IF EXISTS public.purchase_order_items_id_seq;
-DROP TABLE IF EXISTS public.purchase_order_items;
-DROP SEQUENCE IF EXISTS public.purchase_order_approvals_id_seq;
-DROP TABLE IF EXISTS public.purchase_order_approvals;
-DROP SEQUENCE IF EXISTS public.projects_id_seq;
-DROP TABLE IF EXISTS public.projects;
-DROP SEQUENCE IF EXISTS public.pm_schedules_id_seq;
-DROP TABLE IF EXISTS public.pm_schedules;
-DROP SEQUENCE IF EXISTS public.password_reset_tokens_id_seq;
-DROP TABLE IF EXISTS public.password_reset_tokens;
-DROP SEQUENCE IF EXISTS public.organizations_id_seq;
-DROP TABLE IF EXISTS public.organizations;
-DROP SEQUENCE IF EXISTS public.menu_items_id_seq;
-DROP TABLE IF EXISTS public.menu_items;
-DROP SEQUENCE IF EXISTS public.materials_id_seq;
-DROP TABLE IF EXISTS public.materials;
-DROP SEQUENCE IF EXISTS public.material_returns_id_seq;
-DROP TABLE IF EXISTS public.material_returns;
-DROP SEQUENCE IF EXISTS public.material_return_items_id_seq;
-DROP TABLE IF EXISTS public.material_return_items;
-DROP SEQUENCE IF EXISTS public.material_issues_id_seq;
-DROP TABLE IF EXISTS public.material_issues;
-DROP SEQUENCE IF EXISTS public.material_issue_items_id_seq;
-DROP TABLE IF EXISTS public.material_issue_items;
-DROP SEQUENCE IF EXISTS public.location_master_id_seq;
-DROP TABLE IF EXISTS public.location_master;
-DROP SEQUENCE IF EXISTS public.invoices_id_seq;
-DROP TABLE IF EXISTS public.invoices;
-DROP SEQUENCE IF EXISTS public.invoice_items_id_seq;
-DROP TABLE IF EXISTS public.invoice_items;
-DROP SEQUENCE IF EXISTS public.institutions_id_seq;
-DROP TABLE IF EXISTS public.institutions;
-DROP SEQUENCE IF EXISTS public.indents_id_seq;
-DROP TABLE IF EXISTS public.indents;
-DROP SEQUENCE IF EXISTS public.indent_items_id_seq;
-DROP TABLE IF EXISTS public.indent_items;
-DROP SEQUENCE IF EXISTS public.indent_approvals_id_seq;
-DROP TABLE IF EXISTS public.indent_approvals;
-DROP SEQUENCE IF EXISTS public.grn_items_id_seq;
-DROP TABLE IF EXISTS public.grn_items;
-DROP SEQUENCE IF EXISTS public.grn_id_seq;
-DROP TABLE IF EXISTS public.grn;
-DROP SEQUENCE IF EXISTS public.gate_passes_id_seq;
-DROP TABLE IF EXISTS public.gate_passes;
-DROP SEQUENCE IF EXISTS public.gate_pass_items_id_seq;
-DROP TABLE IF EXISTS public.gate_pass_items;
-DROP SEQUENCE IF EXISTS public.gate_entries_id_seq;
-DROP TABLE IF EXISTS public.gate_entries;
-DROP SEQUENCE IF EXISTS public.floors_id_seq;
-DROP TABLE IF EXISTS public.floors;
-DROP SEQUENCE IF EXISTS public.equipment_writeoffs_id_seq;
-DROP TABLE IF EXISTS public.equipment_writeoffs;
-DROP SEQUENCE IF EXISTS public.equipment_items_id_seq;
-DROP TABLE IF EXISTS public.equipment_items;
-DROP SEQUENCE IF EXISTS public.equipment_history_id_seq;
-DROP TABLE IF EXISTS public.equipment_history;
-DROP SEQUENCE IF EXISTS public.document_sequences_id_seq;
-DROP TABLE IF EXISTS public.document_sequences;
-DROP SEQUENCE IF EXISTS public.departments_id_seq;
-DROP TABLE IF EXISTS public.departments;
-DROP SEQUENCE IF EXISTS public.department_material_limits_id_seq;
-DROP TABLE IF EXISTS public.department_material_limits;
-DROP SEQUENCE IF EXISTS public.current_stock_id_seq;
-DROP TABLE IF EXISTS public.current_stock;
-DROP SEQUENCE IF EXISTS public.contracts_id_seq;
-DROP TABLE IF EXISTS public.contracts;
-DROP SEQUENCE IF EXISTS public.contract_items_id_seq;
-DROP TABLE IF EXISTS public.contract_items;
-DROP SEQUENCE IF EXISTS public.contract_approvals_id_seq;
-DROP TABLE IF EXISTS public.contract_approvals;
-DROP SEQUENCE IF EXISTS public.complaints_id_seq;
-DROP TABLE IF EXISTS public.complaints;
-DROP SEQUENCE IF EXISTS public.complaint_images_id_seq;
-DROP TABLE IF EXISTS public.complaint_images;
-DROP SEQUENCE IF EXISTS public.complaint_documents_id_seq;
-DROP TABLE IF EXISTS public.complaint_documents;
-DROP SEQUENCE IF EXISTS public.company_addresses_id_seq;
-DROP TABLE IF EXISTS public.company_addresses;
-DROP SEQUENCE IF EXISTS public.categories_id_seq;
-DROP TABLE IF EXISTS public.categories;
-DROP SEQUENCE IF EXISTS public.calibration_schedules_id_seq;
-DROP TABLE IF EXISTS public.calibration_schedules;
-DROP SEQUENCE IF EXISTS public.buildings_id_seq;
-DROP TABLE IF EXISTS public.buildings;
-DROP SEQUENCE IF EXISTS public.audit_logs_id_seq;
-DROP TABLE IF EXISTS public.audit_logs;
-DROP SEQUENCE IF EXISTS public.approval_flows_id_seq;
-DROP TABLE IF EXISTS public.approval_flows;
-DROP SEQUENCE IF EXISTS public.alerts_id_seq;
-DROP TABLE IF EXISTS public.alerts;
-DROP TABLE IF EXISTS public.alembic_version;
--- *not* dropping schema, since initdb creates it
 --
 -- Name: public; Type: SCHEMA; Schema: -; Owner: postgres
 --
@@ -5652,7 +4791,7 @@ ALTER TABLE ONLY public.write_offs ALTER COLUMN id SET DEFAULT nextval('public.w
 --
 
 COPY public.alembic_version (version_num) FROM stdin;
-eef19244a3af
+66ed97e88599
 \.
 
 
@@ -5758,12 +4897,15 @@ COPY public.alerts (id, tenant_id, site_id, alert_type, severity, title, message
 95	2	2	Complaint Assigned	Info	Complaint Assigned: CMP-00027	You have been assigned to complaint CMP-00027. Nature of complaint: Installation	ComplaintAssigned	463	\N	f	f	2026-08-19 17:03:34.680188	\N	35
 96	2	2	Complaint Assigned	Info	Complaint Assigned: CMP-00026	You have been assigned to complaint CMP-00026. Nature of complaint: Installation required	ComplaintAssigned	462	\N	f	f	2026-08-19 17:04:12.735079	\N	35
 97	2	2	Complaint Assigned	Info	Complaint Assigned: CMP-00029	You have been assigned to complaint CMP-00029. Nature of complaint: not working	ComplaintAssigned	465	\N	f	f	2026-08-19 17:04:27.027503	\N	34
-98	2	2	Indent Approved	Success	Indent IND-00031 Approved	The indent (IND-00031) has been approved by EastPoint Admin.	IndentApproved	246	\N	f	f	2026-08-19 17:05:12.989625	\N	3
 99	2	2	Indent Approved	Success	Indent IND-00030 Approved	The indent (IND-00030) has been approved by EastPoint Admin.	IndentApproved	245	\N	f	f	2026-08-19 17:05:33.323502	\N	3
 100	2	2	Pending Action	Warning	Action Required: Issue Acknowledgement	Materials for your indent (IND-00031) have been issued. Please review and acknowledge receipt.	IndentIssued	246	\N	f	f	2026-08-19 17:07:51.18118	\N	3
 101	2	2	Complaint Assigned	Info	Complaint Assigned: CMP-00030	You have been assigned to complaint CMP-00030. Nature of complaint: need training	ComplaintAssigned	466	\N	f	f	2026-08-19 17:32:45.270674	\N	35
 102	2	2	Complaint Assigned	Info	Complaint Assigned: CMP-00031	You have been assigned to complaint CMP-00031. Nature of complaint: not working	ComplaintAssigned	467	\N	f	f	2026-08-19 17:34:08.563385	\N	35
 103	2	2	Indent Approved	Success	Indent IND-00032 Approved	The indent (IND-00032) has been approved by EastPoint Admin.	IndentApproved	247	\N	f	f	2026-08-19 17:51:35.701871	\N	3
+104	2	2	Pending Action	Warning	Action Required: Vendor VND-00016 Approval	\N	Vendor	77	\N	t	t	2026-08-19 19:09:08.444675	2026-08-19 19:09:08.44437	\N
+98	2	2	Indent Approved	Success	Indent IND-00031 Approved	The indent (IND-00031) has been approved by EastPoint Admin.	IndentApproved	246	\N	t	t	2026-08-19 17:05:12.989625	2026-08-19 19:09:20.266283	3
+105	2	2	Contract Approved	Success	Contract CNT-00009 Approved	The contract (CNT-00009) has been approved by EastPoint Admin.	ContractApproved	9	\N	f	f	2026-08-19 19:17:25.43389	\N	3
+106	2	2	Contract Approved	Success	Contract CNT-00010 Approved	The contract (CNT-00010) has been approved by EastPoint Admin.	ContractApproved	10	\N	f	f	2026-08-19 19:27:39.740154	\N	3
 \.
 
 
@@ -5784,17 +4926,11 @@ COPY public.approval_flows (id, tenant_id, site_id, document_type, level, role_n
 18	2	2	PURCHASE_ORDER	2	CEO	0	\N	\N	t
 19	2	2	PURCHASE_REQUEST	1	Store Manager	0	\N	\N	t
 45	2	2	INDENT	1	Department Head	0	\N	\N	f
-48	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
-50	2	2	INDENT	2	Admin	0	\N	\N	f
 44	2	2	INDENT	1	CEO	0	\N	19	t
 46	2	2	INDENT	1	Institution Head	0	\N	\N	f
 87	2	2	PURCHASE_ORDER	1	Technician	5000	123456789	\N	f
-53	2	2	INDENT	1	Admin	0	\N	\N	f
 54	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
-55	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
 56	2	2	INDENT	2	Admin	0	\N	\N	f
-57	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
-58	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
 59	2	2	INDENT	1	Admin	0	\N	\N	f
 60	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
 61	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
@@ -5822,7 +4958,6 @@ COPY public.approval_flows (id, tenant_id, site_id, document_type, level, role_n
 94	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
 95	2	2	VENDOR	2	Admin	0	\N	\N	f
 96	2	2	INDENT	1	Admin	0	\N	\N	f
-97	2	2	CONTRACT	1	Admin	0	\N	\N	f
 98	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
 99	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
 100	2	2	INDENT	2	Admin	0	\N	\N	f
@@ -5851,15 +4986,13 @@ COPY public.approval_flows (id, tenant_id, site_id, document_type, level, role_n
 28	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
 29	2	2	INDENT	2	Admin	0	\N	\N	f
 30	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
-10	2	2	INDENT	1	Admin	0	\N	\N	t
-11	2	2	INDENT	2	Admin	0	\N	\N	t
-12	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	t
-49	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	t
-51	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	t
-52	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	t
-65	2	2	VENDOR	1	Admin	0	\N	3	t
-84	2	2	CONTRACT	2	Admin	0	\N	\N	t
-89	2	2	CONTRACT	1	Admin	0	\N	\N	t
+10	2	2	INDENT	1	Admin	0	\N	\N	f
+11	2	2	INDENT	2	Admin	0	\N	\N	f
+12	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
+49	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	f
+51	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
+52	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
+89	2	2	CONTRACT	1	Admin	0	\N	\N	f
 31	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
 32	2	2	INDENT	1	Admin	0	\N	\N	f
 33	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	f
@@ -5881,6 +5014,15 @@ COPY public.approval_flows (id, tenant_id, site_id, document_type, level, role_n
 42	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	f
 43	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	f
 47	2	2	INDENT	1	Admin	0	\N	\N	f
+48	2	2	PURCHASE_REQUEST	1	Admin	0	\N	\N	t
+50	2	2	INDENT	2	Admin	0	\N	\N	t
+53	2	2	INDENT	1	Admin	0	\N	\N	t
+55	2	2	PURCHASE_ORDER	1	Admin	0	\N	\N	t
+57	2	2	PURCHASE_REQUEST	2	Admin	0	\N	\N	t
+58	2	2	PURCHASE_ORDER	2	Admin	0	\N	\N	t
+65	2	2	VENDOR	1	Admin	0	\N	3	t
+84	2	2	CONTRACT	2	Admin	0	\N	\N	t
+97	2	2	CONTRACT	1	Admin	0	\N	\N	t
 \.
 
 
@@ -7421,6 +6563,10 @@ COPY public.contract_approvals (id, contract_id, approval_flow_id, approver_id, 
 14	7	84	3	\N	2026-08-18 12:48:18.029566
 15	8	105	3	\N	2026-08-18 12:51:26.963132
 16	8	84	3	\N	2026-08-18 12:51:33.123283
+17	9	89	3	\N	2026-08-19 19:17:19.035937
+18	9	84	3	\N	2026-08-19 19:17:25.435515
+19	10	89	3	\N	2026-08-19 19:27:35.307618
+20	10	84	3	\N	2026-08-19 19:27:39.74146
 \.
 
 
@@ -7437,6 +6583,8 @@ COPY public.contract_items (id, contract_id, material_id, equipment_id, uom, rat
 6	6	2354	\N	NOS	0	0	\N	\N	0	\N			\N	\N
 7	7	3507	\N	NOS	101515.19	12	30	10	0	10			\N	\N
 8	8	3474	\N	NOS	1098	12	\N	\N	0	\N			\N	\N
+9	9	\N	1401		100	18	\N	\N	0	\N			2	f
+10	10	\N	1614		3500	18	\N	\N	0	\N			0	f
 \.
 
 
@@ -7453,6 +6601,8 @@ COPY public.contracts (id, tenant_id, site_id, contract_number, contract_type, v
 6	2	2	CNT-00006	RC	69	\N	\N	2026-08-01	2027-08-17	\N				f	f	Approved	3	3	2026-08-17 07:34:42.28912	f	2026-08-14 14:57:37.256088	2026-08-17 13:04:42.314296		2
 7	2	2	CNT-00007	RC	76	3	301	2026-08-24	2026-09-24	\N				f	f	Approved	3	3	2026-08-18 07:18:18.020239	f	2026-08-18 12:47:40.794077	2026-08-18 12:48:18.027478		2
 8	2	2	CNT-00008	RC	73	3	304	2026-08-10	2026-08-19	\N				f	f	Approved	3	3	2026-08-18 07:21:33.115157	f	2026-08-18 12:51:02.449778	2026-08-18 12:51:33.121418		2
+9	2	2	CNT-00009	CMC	69	3	264	2026-08-19	2027-08-18	175000	Payment will be made quarterly against submission of valid invoices and satisfactory service reports. Payment shall be processed within 30 days from the date of invoice approval. Applicable taxes will be paid as per prevailing GST regulations. Any disputed invoice amount may be withheld until the discrepancy is resolved.	The contract is valid for one year from the start date and may be renewed subject to mutual written agreement between the institution and vendor. Renewal terms, pricing, scope of services, and SLA conditions shall be reviewed before renewal. Either party may initiate renewal discussions at least 30 days before the contract expiry date.	Vendor shall respond to critical service requests within 4 hours and commence corrective action within 8 hours. Preventive maintenance shall be performed as per the agreed maintenance schedule. Critical equipment downtime shall be minimized, and service reports must be submitted after each maintenance visit. Repeated SLA violations may result in applicable penalties.	t	t	Approved	3	3	2026-08-19 13:47:25.432999	f	2026-08-19 19:16:47.267736	2026-08-19 19:17:25.434851	The contract does not cover major equipment replacement, structural modifications, damage caused by misuse, accidents, natural disasters, unauthorized repairs, or consumables not specifically included in the contract. Any additional work outside the agreed scope will require prior approval and may be charged separately.	2
+10	2	2	CNT-00010	AMC	73	5	335	2026-08-19	2027-08-18	500000	Payment will be made quarterly against submission of valid invoices and satisfactory service reports. Payment shall be processed within 30 days from the date of invoice approval. Applicable taxes will be paid as per prevailing GST regulations. Any disputed invoice amount may be withheld until the discrepancy is resolved.	The contract is valid for one year from the start date and may be renewed subject to mutual written agreement between the institution and vendor. Renewal terms, pricing, scope of services, and SLA conditions shall be reviewed before renewal. Either party may initiate renewal discussions at least 30 days before the contract expiry date.	Vendor shall respond to critical service requests within 4 hours and commence corrective action within 8 hours. Preventive maintenance shall be performed as per the agreed maintenance schedule. Critical equipment downtime shall be minimized, and service reports must be submitted after each maintenance visit. Repeated SLA violations may result in applicable penalties.	f	f	Approved	3	3	2026-08-19 13:57:39.739207	f	2026-08-19 19:27:19.205109	2026-08-19 19:27:39.740907	The contract does not cover major equipment replacement, structural modifications, damage caused by misuse, accidents, natural disasters, unauthorized repairs, or consumables not specifically included in the contract. Any additional work outside the agreed scope will require prior approval and may be charged separately.	2
 \.
 
 
@@ -11283,7 +10433,6 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 136	2	2	MATERIAL_69	HSK	70
 97	2	2	EQP	EQP	2
 125	2	2	MATERIAL_65	CIV	77
-96	2	2	CONTRACT	CNT	8
 76	2	2	INVOICE_REF	INV	9
 93	2	2	WRITE_OFF	WO	11
 100	2	2	EQUIPMENT_WRITE_OFF	EWO	2
@@ -11291,7 +10440,6 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 75	2	2	GRN	GRN	17
 112	2	2	WORK_ORDER	WO	8
 149	2	2	PURCHASE_ORDER_1	EPCMSR/PO	1
-94	2	2	PURCHASE_ORDER_11	EPAHS/PO	5
 67	2	2	ISSUE	ISS	21
 145	2	2	EQP_109	EQP_109	2
 78	2	2	COMPLAINT	CMP	31
@@ -11299,11 +10447,13 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 146	2	2	CATEGORY		16
 130	2	2	MATERIAL_70	ITI	40
 138	2	2	EQP_110	EQP_110	3
-70	2	2	QUOTATION_REQUEST	QR	42
-69	2	2	PURCHASE_ORDER	PO	37
+94	2	2	PURCHASE_ORDER_11	EPAHS/PO	6
 65	2	2	VENDOR	VND	16
 66	2	2	INDENT	IND	32
+70	2	2	QUOTATION_REQUEST	QR	43
 68	2	2	PURCHASE_REQUEST	PR	18
+69	2	2	PURCHASE_ORDER	PO	39
+96	2	2	CONTRACT	CNT	10
 \.
 
 
@@ -16598,7 +15748,6 @@ COPY public.menu_items (id, text, icon_name, path, resource, platform_only, pare
 7	UOM	\N	/uom	uom	f	3	3	t	["read", "create", "update", "delete"]	[]	2026-08-12 10:42:10.010089	2026-08-12 10:42:10.010092
 8	Vendors	\N	/vendors	vendors	f	3	4	t	["read", "create", "update", "delete"]	[{"key": "can_approve", "label": "Approve", "color": "#10B981"}, {"key": "can_reject", "label": "Reject", "color": "#EF4444"}]	2026-08-12 10:42:10.010095	2026-08-12 10:42:10.010098
 9	Stores	\N	/warehouses	warehouses	f	3	5	t	["read", "create", "update", "delete"]	[]	2026-08-12 10:42:10.010101	2026-08-12 10:42:10.010104
-10	Equipment	\N	/equipment	equipment	f	3	6	t	["read", "create", "update", "delete"]	[]	2026-08-12 10:42:10.010107	2026-08-12 10:42:10.01011
 11	Procurement	ShoppingCart	\N	\N	f	\N	2	t	[]	[]	2026-08-12 10:42:10.01141	2026-08-12 10:42:10.011418
 12	Indents	\N	/indents	indents	f	11	0	t	["read", "create", "update", "delete"]	[{"key": "can_approve", "label": "Approve", "color": "#10B981"}, {"key": "can_reject", "label": "Reject", "color": "#EF4444"}, {"key": "can_convert_to_po", "label": "Convert to PO", "color": "#3B82F6"}, {"key": "can_acknowledge", "label": "Acknowledge", "color": "#F59E0B"}]	2026-08-12 10:42:10.012431	2026-08-12 10:42:10.01244
 13	Purchase Requests	\N	/purchase-requests	purchase_requests	f	11	1	t	["read", "create", "update", "delete"]	[{"key": "can_submit", "label": "Submit", "color": "#3B82F6"}, {"key": "can_approve", "label": "Approve", "color": "#10B981"}, {"key": "can_reject", "label": "Reject", "color": "#EF4444"}, {"key": "can_convert_to_po", "label": "Convert to PO", "color": "#3B82F6"}, {"key": "can_hold", "label": "Hold", "color": "#F59E0B"}, {"key": "can_short_close", "label": "Short Close", "color": "#F97316"}]	2026-08-12 10:42:10.012444	2026-08-12 10:42:10.012447
@@ -16651,6 +15800,7 @@ COPY public.menu_items (id, text, icon_name, path, resource, platform_only, pare
 61	SaaS Admin	Security	/saas-admin	\N	t	\N	10	t	[]	[]	2026-08-12 10:42:10.024748	2026-08-12 10:42:10.02476
 62	Vendor Work Orders	assignment_turned_in	/procurement/vendor-work-orders	vendor_work_orders	\N	11	6	t	["read", "create", "update", "delete"]	[]	2026-08-14 13:34:38.683854	2026-08-14 13:34:38.683854
 17	Work Orders	\N	/work-orders	work_orders	f	11	5	t	["read", "create", "update", "delete"]	[{"key": "can_approve", "label": "Approve", "color": "#10B981"}, {"key": "can_reject", "label": "Reject", "color": "#EF4444"}, {"key": "can_send_to_vendor", "label": "Send to Vendor", "color": "#3B82F6"}, {"key": "can_short_close", "label": "Short Close", "color": "#F97316"}]	2026-08-12 10:42:10.012469	2026-08-12 10:42:10.012472
+10	Equipment	\N	/equipment	equipment	f	3	6	t	["read", "create", "update", "delete"]	[{"key": "create_po", "label": "Create PO", "color": "#10B981"}]	2026-08-12 10:42:10.010107	2026-08-12 10:42:10.01011
 \.
 
 
@@ -17067,6 +16217,10 @@ COPY public.purchase_order_items (id, po_id, material_id, quantity, rate, amount
 1751	279	2453	25	1100.38	27509.5	0	\N	0	9	9	0	f	25
 1752	280	2751	5	70	350	0	\N	0	9	9	0	f	\N
 1753	281	2751	100	100	10000	0	\N	0	9	9	0	f	\N
+1754	282	2564	3	902.5	2707.5	0	\N	0	6	6	0	f	\N
+1755	283	2565	1	980	980	0	\N	0	6	6	0	f	\N
+1756	284	2564	1	16526.16	16526.16	0	\N	0	6	6	0	f	\N
+1757	284	3507	1	4349	4349	0	\N	0	6	6	0	f	\N
 \.
 
 
@@ -17184,6 +16338,9 @@ COPY public.purchase_orders (id, tenant_id, site_id, po_number, vendor_id, proje
 279	2	2	EPCMSR/PO-00001	63	3	\N	\N	\N	Formal	60036.98	2026-08-22	Short Closed	1. Bill/Invoices in the name of East Point College of Medical Sciences & Research Centre managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	3	2026-08-19 10:55:07.608609	f	2026-08-19 16:24:44.435215	2026-08-19 16:25:42.45251	2		\n[Short Closed: Not Required]	1	50	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Advance Payment		\N
 280	2	2	PO-00037	63	3	207	\N	228	Formal	350	\N	Draft	1. Bill/Invoices in the name of New Royal College of Nursing managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-08-19 17:42:17.276633	2026-08-19 17:42:17.292779	1	\N	\N	\N	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Credit Purchase	\N	\N
 281	2	2	EPAHS/PO-00005	69	3	210	\N	\N	Formal	11800	2026-09-02	Draft	1. Bill/Invoices in the name of East Point College of Physiotherapy managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-08-19 17:53:15.235833	2026-08-19 17:53:15.240396	1	\N	\N	11	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Credit Purchase	\N	\N
+282	2	2	PO-00038	66	3	206	\N	229	Formal	2707.5	\N	Draft	1. Bill/Invoices in the name of East Point Allied Health Sciences managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-08-19 19:10:17.624234	2026-08-19 19:10:17.627119	1	\N	\N	\N	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Credit Purchase	\N	\N
+283	2	2	PO-00039	63	3	206	\N	229	Formal	980	\N	Draft	1. Bill/Invoices in the name of East Point Allied Health Sciences managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-08-19 19:10:17.628818	2026-08-19 19:10:17.63177	1	\N	\N	\N	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Credit Purchase	\N	\N
+284	2	2	EPAHS/PO-00006	69	3	\N	\N	\N	Formal	23380.18	2026-08-31	Submitted	1. Bill/Invoices in the name of East Point Allied Health Sciences managed by M.G. Charitable Trust\n2. Delivery: Immediate\n3. Payments: After Delivery\n4. GST @ actuals\n5. Supply the same Make/Model provided in P.O.\n6. GST No.: 29AACTM0027H2ZR	3	\N	\N	f	2026-08-19 20:13:13.707776	2026-08-19 20:13:13.710153	1		\N	11	0	\N	\N	\N	\N	\N	0	\N	\N	f	\N	\N	Purchase	\N	Credit Purchase		\N
 \.
 
 
@@ -17384,7 +16541,6 @@ COPY public.purchase_requests (id, tenant_id, site_id, pr_number, requester_id, 
 201	2	2	PR-00008	3	\N	8	HEALTH 	3	2026-07-14		Converted to PO	3	2026-07-01 09:57:24.949598	f	2026-06-30 18:33:51.277817	2026-07-13 13:23:47.302281	2	\N	\N	\N	\N	\N	\N	\N	\N
 205	2	2	PR-00012	3	\N	8	HEALTH 	3	2026-08-15		Approved	3	2026-08-03 11:33:53.755286	f	2026-08-03 16:57:20.120584	2026-08-03 17:03:53.757181	2	Purchase	\N	\N	\N	\N	\N	f	\N
 198	2	2	PR-00005	3	\N	7	HEALTH 	3	2026-06-30		Submitted	\N	\N	f	2026-06-16 10:57:43.196702	2026-08-12 11:22:20.71394	2	\N	\N	\N	\N	\N	\N	\N	\N
-206	2	2	PR-00013	3	\N	7	HEALTH 	3	2026-08-14		Approved	3	2026-08-14 07:10:05.305418	f	2026-08-14 12:37:45.391061	2026-08-14 12:40:05.307372	2	Rental	Standard Rental	\N	Months	\N	\N	f	\N
 202	2	2	PR-00009	3	\N	12	Chemistry	3	2026-08-21		Submitted	\N	\N	f	2026-07-03 11:46:40.099177	2026-08-14 12:44:56.275727	1	\N	\N	\N	\N	\N	\N	\N	\N
 209	2	2	PR-00016	3	\N	7	HEALTH 	3	2026-08-18		Submitted	\N	\N	f	2026-08-18 12:23:32.937762	2026-08-18 12:23:32.937775	1	Purchase	\N	\N	\N	\N	\N	f	\N
 208	2	2	PR-00015	3	\N	\N	Child Health Nursing	3	2026-08-19		Converted to PO	3	2026-08-18 06:08:43.17722	f	2026-08-18 11:35:51.789742	2026-08-18 12:40:59.719751	2	Purchase	\N	\N	\N	\N	\N	f	\N
@@ -17392,6 +16548,7 @@ COPY public.purchase_requests (id, tenant_id, site_id, pr_number, requester_id, 
 211	2	2	PR-00018	3	\N	\N	Electrotherapy Lab	3	2026-08-26		Draft	\N	\N	f	2026-08-19 17:52:39.77309	2026-08-19 17:52:39.773103	1	Purchase	\N	\N	\N	\N	\N	f	\N
 210	2	2	PR-00017	3	\N	\N	Pharmacognosy	3	2026-08-21		Converted to PO	3	2026-08-19 12:22:54.898428	f	2026-08-19 17:52:11.12197	2026-08-19 17:53:15.23984	2	Purchase	\N	\N	\N	\N	\N	f	\N
 204	2	2	PR-00011	3	\N	\N	Biochemistry	3	2026-08-10	\n[Short Closed: none]	Short Closed	3	2026-08-03 10:21:59.342786	f	2026-08-03 15:51:29.219193	2026-08-19 17:53:45.592723	2	Purchase	\N	\N	\N	\N	\N	f	\N
+206	2	2	PR-00013	3	\N	7	HEALTH 	3	2026-08-14		Converted to PO	3	2026-08-14 07:10:05.305418	f	2026-08-14 12:37:45.391061	2026-08-19 19:10:17.630922	2	Rental	Standard Rental	\N	Months	\N	\N	f	\N
 \.
 
 
@@ -18030,6 +17187,8 @@ COPY public.quotation_comparisons (id, qr_id, qr_item_id, material_id, selected_
 599	224	4513	4842	71	71	f	\N	\N	\N
 651	224	4516	4845	71	71	f	\N	\N	\N
 653	228	5319	2751	63	63	f	\N	3	2026-08-19 17:41:56.512539
+654	229	5320	2564	66	66	f	\N	3	2026-08-19 19:09:57.430102
+655	229	5321	2565	63	63	f	\N	3	2026-08-19 19:09:57.430117
 \.
 
 
@@ -18194,9 +17353,6 @@ COPY public.quotation_request_item_sources (id, qr_item_id, source, source_pr_id
 135	493	Manual	\N	1
 136	494	Manual	\N	1
 137	495	PR	205	5
-138	496	Manual	\N	1
-139	497	Manual	\N	1
-140	498	PR	205	5
 3899	4252	Imported	\N	500
 3900	4253	Imported	\N	500
 3901	4254	Imported	\N	14
@@ -19535,6 +18691,12 @@ COPY public.quotation_request_item_sources (id, qr_item_id, source, source_pr_id
 4964	5317	Imported	\N	100
 4965	5318	Imported	\N	500
 4966	5319	PR	207	5
+4967	5320	Manual	\N	1
+4968	5321	Manual	\N	1
+4969	5320	PR	206	2
+4970	5322	Manual	\N	1
+4971	5323	Manual	\N	1
+4972	5324	PR	205	5
 \.
 
 
@@ -19696,9 +18858,6 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 493	219	2565	1	Manual	\N
 494	219	2564	1	Manual	\N
 495	219	2435	5	PR	205
-496	220	2565	1	Manual	\N
-497	220	2564	1	Manual	\N
-498	220	2435	5	PR	205
 4252	224	4817	500	Imported	\N
 502	221	2565	1	Manual	\N
 503	221	2564	1	Manual	\N
@@ -21036,6 +20195,11 @@ COPY public.quotation_request_items (id, qr_id, material_id, quantity, source, s
 5317	209	4845	100	Imported	\N
 5318	209	4846	500	Imported	\N
 5319	228	2751	5	PR	207
+5320	229	2564	3	Manual	\N
+5321	229	2565	1	Manual	\N
+5322	220	2565	1	Manual	\N
+5323	220	2564	1	Manual	\N
+5324	220	2435	5	PR	205
 \.
 
 
@@ -21060,11 +20224,12 @@ COPY public.quotation_request_prs (id, qr_id, pr_id) FROM stdin;
 17	217	205
 18	218	205
 19	219	205
-20	220	205
 22	221	205
 32	225	207
 33	226	208
 34	228	207
+35	229	206
+36	220	205
 \.
 
 
@@ -21200,9 +20365,6 @@ COPY public.quotation_request_vendors (id, qr_id, vendor_id, is_sent, sent_at, r
 461	219	63	f	\N	Pending
 462	219	62	f	\N	Pending
 463	219	66	f	\N	Pending
-464	220	63	f	\N	Pending
-465	220	62	f	\N	Pending
-466	220	66	f	\N	Pending
 448	215	66	t	2026-08-06 11:34:23.6649	Pending
 449	215	63	t	2026-08-06 11:34:28.560753	Pending
 450	215	62	t	2026-08-06 11:34:33.46199	Pending
@@ -21244,6 +20406,12 @@ COPY public.quotation_request_vendors (id, qr_id, vendor_id, is_sent, sent_at, r
 536	228	69	t	2026-08-19 17:38:05.824434	Received
 537	228	66	t	2026-08-19 17:38:05.826013	Received
 538	228	63	t	2026-08-19 17:38:05.826717	Received
+542	220	63	f	\N	Pending
+543	220	62	f	\N	Pending
+544	220	66	f	\N	Pending
+539	229	69	t	2026-08-19 18:56:31.057369	Received
+541	229	63	t	2026-08-19 18:56:31.059164	Received
+540	229	66	t	2026-08-19 18:56:31.058281	Received
 \.
 
 
@@ -21297,7 +20465,6 @@ COPY public.quotation_requests (id, tenant_id, site_id, qr_number, project_id, c
 212	2	2	QR-00026	3	1	2027-01-01	Test Workflow Automated	Requested	\N	\N	f	2026-08-03 14:07:21.84323	2026-08-03 14:07:31.480751	\N
 218	2	2	QR-00032	3	3	2026-08-28	\N	Draft	\N	\N	f	2026-08-05 11:16:30.586522	2026-08-05 11:16:30.586563	\N
 219	2	2	QR-00033	3	3	2026-08-28	\N	Draft	\N	\N	f	2026-08-05 11:16:30.674818	2026-08-05 11:16:30.674861	\N
-220	2	2	QR-00034	3	3	2026-08-28	\N	Draft	\N	\N	f	2026-08-05 11:16:30.813284	2026-08-05 11:16:30.813308	\N
 214	2	2	QR-00028	3	1	2027-01-01	Test Workflow Automated	Ordered	1	2026-08-03 14:11:21.266147	f	2026-08-03 14:11:11.276594	2026-08-03 14:11:21.347406	Looks good, test passed
 215	2	2	QR-00029	3	3	2026-08-15	\N	Requested	\N	\N	f	2026-08-03 15:56:39.62116	2026-08-06 11:34:43.307783	\N
 216	2	2	QR-00030	3	3	2026-08-10	\N	Received	\N	\N	f	2026-08-03 17:06:10.944789	2026-08-06 11:34:50.891908	\N
@@ -21313,6 +20480,8 @@ COPY public.quotation_requests (id, tenant_id, site_id, qr_number, project_id, c
 227	2	2	QR-00041	3	3	2026-08-31	\N	Received	\N	\N	f	2026-08-18 13:06:34.325547	2026-08-18 15:25:36.004837	\N
 209	2	2	QR-00023	3	3	2026-08-25	\N	Requested	\N	\N	f	2026-07-31 12:58:40.692541	2026-08-18 13:29:09.671873	\N
 228	2	2	QR-00042	3	3	2026-08-20	\N	Ordered	3	2026-08-19 17:41:56.511513	f	2026-08-19 17:37:55.339515	2026-08-19 17:42:17.290079	\N
+220	2	2	QR-00034	3	3	2026-08-28	\N	Submitted	\N	\N	f	2026-08-05 11:16:30.813284	2026-08-19 18:56:17.142838	\N
+229	2	2	QR-00043	3	3	2026-08-31	\N	Ordered	3	2026-08-19 19:09:57.429448	f	2026-08-19 18:55:45.888274	2026-08-19 19:10:17.631366	\N
 \.
 
 
@@ -21543,44 +20712,12 @@ COPY public.role_permissions (id, role_id, resource, can_read, can_create, can_u
 1101	23	uom	t	t	t	t	{}
 1102	23	vendors	t	t	t	t	{}
 1103	23	warehouses	t	t	t	t	{}
-937	21	dashboard	t	f	f	f	{}
-938	21	materials	t	t	t	t	{}
-939	21	categories	t	t	t	t	{}
-940	21	subcategories	t	t	t	t	{}
-941	21	uom	t	t	t	t	{}
-942	21	vendors	t	t	t	t	{}
 765	15	dashboard	t	f	f	f	{}
 766	15	quotations	t	f	t	f	{"can_approve": true}
 767	15	purchase_orders	t	f	t	f	{"can_approve": true, "can_reject": true}
 768	15	intelligence	t	f	f	f	{}
 769	15	purchase_requests	t	f	t	f	{"can_submit": false, "can_approve": true, "can_reject": true}
 770	15	indents	t	f	t	f	{"can_approve": true, "can_reject": true}
-943	21	warehouses	t	t	t	t	{}
-944	21	indents	t	t	t	t	{"can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_acknowledge": true}
-945	21	purchase_requests	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_hold": true, "can_short_close": true}
-946	21	quotations	t	t	t	t	{"can_send_to_vendors": true, "can_receive": true, "can_enter_quotes": true, "can_compare": true, "can_approve": true, "can_convert_to_po": true}
-947	21	purchase_orders	t	t	t	t	{"can_approve": true, "can_reject": true, "can_hold": true, "can_send_to_vendor": true, "can_short_close": true}
-948	21	gate_entry	t	t	t	t	{"can_record_entry": true, "can_verify": true}
-949	21	invoice	t	t	t	t	{"can_register": true, "can_approve": true, "can_reject": true}
-950	21	grn	t	t	t	t	{"can_create_grn": true, "can_complete": true}
-951	21	issues	t	t	t	t	{"can_issue": true, "can_direct_issue": true, "can_print": true}
-952	21	returns	t	t	t	t	{"can_return": true, "receive": true}
-953	21	transfers	t	t	t	t	{"can_transfer": true}
-954	21	gate_passes	t	t	t	t	{"can_create": true, "can_print": true}
-955	21	acknowledgements	t	t	t	t	{"can_acknowledge": true}
-956	21	inventory	t	t	t	t	{}
-957	21	complaints	t	t	t	t	{}
-958	21	intelligence	t	f	f	f	{}
-959	21	finance_invoices	t	t	t	t	{"can_send_hard_copy": true, "can_receive_hard_copy": true, "can_send_for_payment": true, "can_mark_paid": true}
-960	21	reports	t	f	f	f	{}
-961	21	report_issue_summary	t	f	f	f	{}
-962	21	report_rate_analysis	t	f	f	f	{}
-963	21	report_receipt_summary	t	f	f	f	{}
-964	21	report_dept_inventory	t	f	f	f	{}
-965	21	report_finance	t	f	f	f	{}
-966	21	report_pending_gatepass	t	f	f	f	{}
-967	21	material_allowances	t	t	t	t	{}
-968	21	terms	t	t	t	t	{}
 934	19	indents	t	t	t	t	{"can_acknowledge": false, "can_approve": false, "can_reject": false, "can_convert_to_po": false}
 935	19	acknowledgements	t	t	t	t	{"can_acknowledge": true}
 936	19	complaints	t	t	t	t	{}
@@ -21593,9 +20730,6 @@ COPY public.role_permissions (id, role_id, resource, can_read, can_create, can_u
 1107	23	purchase_orders	t	t	t	t	{"can_approve": true, "can_reject": true, "can_hold": true, "can_send_to_vendor": true, "can_short_close": true}
 1108	23	gate_entry	t	t	t	t	{"can_record_entry": true, "can_verify": true}
 1109	23	invoice	t	t	t	t	{"can_register": true, "can_approve": true, "can_reject": true, "can_print": true}
-985	22	complaints	t	t	t	f	{}
-986	22	indents	t	t	t	t	{"can_approve": false, "can_reject": false}
-987	22	acknowledgements	t	t	t	t	{"can_acknowledge": true}
 1110	23	grn	t	t	t	t	{"can_create_grn": true, "can_complete": true}
 1111	23	issues	t	t	t	t	{"can_issue": true, "can_direct_issue": true, "can_print": true}
 1112	23	returns	t	t	t	t	{"can_return": true, "receive": true}
@@ -21637,10 +20771,8 @@ COPY public.role_permissions (id, role_id, resource, can_read, can_create, can_u
 1231	15	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
 1232	17	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
 1233	18	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
-1234	21	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
 1235	13	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
 1236	23	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
-1469	20	finance_invoices	t	t	t	t	{"can_send_hard_copy": false, "can_send_for_payment": true, "can_receive_hard_copy": true, "can_mark_paid": true}
 1472	7	vendor_work_orders	t	t	t	t	{}
 1473	3	vendor_work_orders	t	t	t	t	{}
 1474	8	vendor_work_orders	t	t	t	t	{}
@@ -21655,59 +20787,96 @@ COPY public.role_permissions (id, role_id, resource, can_read, can_create, can_u
 1483	17	vendor_work_orders	t	t	t	t	{}
 1484	18	vendor_work_orders	t	t	t	t	{}
 1485	19	vendor_work_orders	t	t	t	t	{}
-1486	20	vendor_work_orders	t	t	t	t	{}
-1487	21	vendor_work_orders	t	t	t	t	{}
 1488	13	vendor_work_orders	t	t	t	t	{}
-1489	22	vendor_work_orders	t	t	t	t	{}
 1490	23	vendor_work_orders	t	t	t	t	{}
-1494	11	dashboard	t	f	f	f	{}
-1495	11	materials	t	t	t	t	{}
-1496	11	categories	t	t	t	t	{}
-1497	11	subcategories	t	t	t	t	{}
-1498	11	uom	t	t	t	t	{}
-1499	11	vendors	t	t	t	t	{"can_approve": true, "can_reject": true}
-1500	11	warehouses	t	t	t	t	{}
-1501	11	indents	t	t	t	t	{"can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_acknowledge": true}
-1502	11	purchase_requests	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_hold": true, "can_short_close": true}
-1503	11	quotations	t	t	t	t	{"can_send_to_vendors": true, "can_receive": true, "can_enter_quotes": true, "can_compare": true, "can_approve": true, "can_convert_to_po": true}
-1504	11	purchase_orders	t	t	t	t	{"can_approve": true, "can_reject": true, "can_hold": true, "can_send_to_vendor": true, "can_short_close": true}
-1505	11	contracts	t	t	t	t	{"can_approve": true, "can_reject": true}
-1506	11	gate_entry	t	t	t	t	{"can_record_entry": true, "can_verify": true}
-1507	11	invoice	t	t	t	t	{"can_register": true, "can_approve": true, "can_reject": true, "can_print": true}
-1508	11	grn	t	t	t	t	{"can_create_grn": true, "can_complete": true}
-1509	11	issues	t	t	t	t	{"can_issue": true, "can_direct_issue": true, "can_print": true}
-1510	11	returns	t	t	t	t	{"can_return": true, "receive": true}
-1511	11	transfers	t	t	t	t	{"can_transfer": true}
-1512	11	write_offs	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true}
-1513	11	gate_passes	t	t	t	t	{"can_create": true, "can_print": true}
-1514	11	acknowledgements	t	t	t	t	{"can_acknowledge": true}
-1515	11	inventory	t	t	t	t	{}
-1516	11	equipment	t	t	t	t	{"generate_calls": true}
-1517	11	complaints	t	t	t	t	{"can_assign": true, "can_approve_level1": true, "can_approve_level2": true}
-1518	11	pm_schedule	t	t	t	t	{"generate_calls": true}
-1519	11	calibration_schedule	t	t	t	t	{"generate_calls": true}
-1520	11	rwos	t	t	t	t	{"can_close": true}
-1521	11	intelligence	t	f	f	f	{}
-1522	11	finance_invoices	t	t	t	t	{"can_send_hard_copy": true, "can_receive_hard_copy": true, "can_send_for_payment": true, "can_mark_paid": true}
-1523	11	reports	t	f	f	f	{}
-1524	11	report_issue_summary	t	f	f	f	{}
-1525	11	report_rate_analysis	t	f	f	f	{}
-1526	11	report_equipment_count	t	f	f	f	{}
-1527	11	report_receipt_summary	t	f	f	f	{}
-1528	11	report_dept_inventory	t	f	f	f	{}
-1529	11	report_finance	t	f	f	f	{}
-1530	11	report_pending_gatepass	t	f	f	f	{}
-1531	11	admin_users	t	t	t	t	{}
-1532	11	admin_roles	t	t	t	t	{}
-1533	11	audit_logs	t	f	f	f	{}
-1534	11	approval_flows	t	t	t	t	{}
-1535	11	material_allowances	t	t	t	t	{}
-1536	11	configurations	t	t	t	t	{}
-1537	11	locations	t	t	t	t	{}
-1538	11	projects	t	t	t	t	{}
-1539	11	company_addresses	t	t	t	t	{}
-1540	11	terms	t	t	t	t	{}
-1541	11	work_orders	t	t	t	t	{"can_approve": true, "can_reject": true, "can_send_to_vendor": true, "can_short_close": true}
+1542	20	finance_invoices	t	t	t	t	{"can_send_hard_copy": false, "can_send_for_payment": true, "can_receive_hard_copy": true, "can_mark_paid": true}
+1543	20	vendor_work_orders	t	t	t	t	{}
+1544	22	complaints	t	t	t	f	{}
+1545	22	indents	t	t	t	t	{"can_approve": false, "can_reject": false}
+1546	22	acknowledgements	t	t	t	t	{"can_acknowledge": true}
+1547	22	vendor_work_orders	t	t	t	t	{}
+1548	21	dashboard	t	f	f	f	{}
+1549	21	materials	t	t	t	t	{}
+1550	21	categories	t	t	t	t	{}
+1551	21	subcategories	t	t	t	t	{}
+1552	21	uom	t	t	t	t	{}
+1553	21	vendors	t	t	t	t	{}
+1554	21	warehouses	t	t	t	t	{}
+1555	21	indents	t	t	t	t	{"can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_acknowledge": true}
+1556	21	purchase_requests	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_hold": true, "can_short_close": true}
+1557	21	quotations	t	t	t	t	{"can_send_to_vendors": true, "can_receive": true, "can_enter_quotes": true, "can_compare": true, "can_approve": true, "can_convert_to_po": true}
+1558	21	purchase_orders	t	t	t	t	{"can_approve": true, "can_reject": true, "can_hold": true, "can_send_to_vendor": true, "can_short_close": true}
+1559	21	gate_entry	t	t	t	t	{"can_record_entry": true, "can_verify": true}
+1560	21	invoice	t	t	t	t	{"can_register": true, "can_approve": true, "can_reject": true}
+1561	21	grn	t	t	t	t	{"can_create_grn": true, "can_complete": true}
+1562	21	issues	t	t	t	t	{"can_issue": true, "can_direct_issue": true, "can_print": true}
+1563	21	returns	t	t	t	t	{"can_return": true, "receive": true}
+1564	21	transfers	t	t	t	t	{"can_transfer": true}
+1565	21	gate_passes	t	t	t	t	{"can_create": true, "can_print": true}
+1566	21	acknowledgements	t	t	t	t	{"can_acknowledge": true}
+1567	21	inventory	t	t	t	t	{}
+1568	21	complaints	t	t	t	t	{}
+1569	21	intelligence	t	f	f	f	{}
+1570	21	finance_invoices	t	t	t	t	{"can_send_hard_copy": true, "can_receive_hard_copy": true, "can_send_for_payment": true, "can_mark_paid": true}
+1571	21	reports	t	f	f	f	{}
+1572	21	report_issue_summary	t	f	f	f	{}
+1573	21	report_rate_analysis	t	f	f	f	{}
+1574	21	report_receipt_summary	t	f	f	f	{}
+1575	21	report_dept_inventory	t	f	f	f	{}
+1576	21	report_finance	t	f	f	f	{}
+1577	21	report_pending_gatepass	t	f	f	f	{}
+1578	21	material_allowances	t	t	t	t	{}
+1579	21	terms	t	t	t	t	{}
+1580	21	equipment	t	t	t	t	{"can_update_serial": true, "can_install": true}
+1581	21	vendor_work_orders	t	t	t	t	{}
+1582	11	dashboard	t	f	f	f	{}
+1583	11	materials	t	t	t	t	{}
+1584	11	categories	t	t	t	t	{}
+1585	11	subcategories	t	t	t	t	{}
+1586	11	uom	t	t	t	t	{}
+1587	11	vendors	t	t	t	t	{"can_approve": true, "can_reject": true}
+1588	11	warehouses	t	t	t	t	{}
+1589	11	indents	t	t	t	t	{"can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_acknowledge": true}
+1590	11	purchase_requests	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true, "can_convert_to_po": true, "can_hold": true, "can_short_close": true}
+1591	11	quotations	t	t	t	t	{"can_send_to_vendors": true, "can_receive": true, "can_enter_quotes": true, "can_compare": true, "can_approve": true, "can_convert_to_po": true}
+1592	11	purchase_orders	t	t	t	t	{"can_approve": true, "can_reject": true, "can_hold": true, "can_send_to_vendor": true, "can_short_close": true}
+1593	11	contracts	t	t	t	t	{"can_approve": true, "can_reject": true}
+1594	11	gate_entry	t	t	t	t	{"can_record_entry": true, "can_verify": true}
+1595	11	invoice	t	t	t	t	{"can_register": true, "can_approve": true, "can_reject": true, "can_print": true}
+1596	11	grn	t	t	t	t	{"can_create_grn": true, "can_complete": true}
+1597	11	issues	t	t	t	t	{"can_issue": true, "can_direct_issue": true, "can_print": true}
+1598	11	returns	t	t	t	t	{"can_return": true, "receive": true}
+1599	11	transfers	t	t	t	t	{"can_transfer": true}
+1600	11	write_offs	t	t	t	t	{"can_submit": true, "can_approve": true, "can_reject": true}
+1601	11	gate_passes	t	t	t	t	{"can_create": true, "can_print": true}
+1602	11	acknowledgements	t	t	t	t	{"can_acknowledge": true}
+1603	11	inventory	t	t	t	t	{}
+1604	11	equipment	t	t	t	t	{"generate_calls": true, "create_po": true}
+1605	11	complaints	t	t	t	t	{"can_assign": true, "can_approve_level1": true, "can_approve_level2": true}
+1606	11	pm_schedule	t	t	t	t	{"generate_calls": true}
+1607	11	calibration_schedule	t	t	t	t	{"generate_calls": true}
+1608	11	rwos	t	t	t	t	{"can_close": true}
+1609	11	intelligence	t	f	f	f	{}
+1610	11	finance_invoices	t	t	t	t	{"can_send_hard_copy": true, "can_receive_hard_copy": true, "can_send_for_payment": true, "can_mark_paid": true}
+1611	11	reports	t	f	f	f	{}
+1612	11	report_issue_summary	t	f	f	f	{}
+1613	11	report_rate_analysis	t	f	f	f	{}
+1614	11	report_equipment_count	t	f	f	f	{}
+1615	11	report_receipt_summary	t	f	f	f	{}
+1616	11	report_dept_inventory	t	f	f	f	{}
+1617	11	report_finance	t	f	f	f	{}
+1618	11	report_pending_gatepass	t	f	f	f	{}
+1619	11	admin_users	t	t	t	t	{}
+1620	11	admin_roles	t	t	t	t	{}
+1621	11	audit_logs	t	f	f	f	{}
+1622	11	approval_flows	t	t	t	t	{}
+1623	11	material_allowances	t	t	t	t	{}
+1624	11	configurations	t	t	t	t	{}
+1625	11	locations	t	t	t	t	{}
+1626	11	projects	t	t	t	t	{}
+1627	11	company_addresses	t	t	t	t	{}
+1628	11	terms	t	t	t	t	{}
+1629	11	work_orders	t	t	t	t	{"can_approve": true, "can_reject": true, "can_send_to_vendor": true, "can_short_close": true}
 \.
 
 
@@ -21732,11 +20901,11 @@ COPY public.roles (id, tenant_id, name, code, description, is_system, created_at
 17	2	Store keeper	STOREKEEPER	the person takes care of material in store	f	2026-06-11 22:31:29.142898	Organization
 18	2	Store Manager	STOREMANAGER	The person responsible for all the store management	f	2026-06-11 22:31:29.150079	Organization
 19	2	Indenter	INDENTER	the person request for the materials required	f	2026-06-11 22:31:29.169807	Self Only
-20	2	Accountant	ACCOUNTANT	\N	f	2026-06-12 03:56:49.701247	Organization
-21	2	Co-Admin	COADMIN	\N	f	2026-06-17 17:24:10.030548	Full Administrative Access
 13	2	Institution Head	DEPARTMENTHEAD	Look after their department	f	2026-06-11 22:31:29.105279	Institution
-22	2	Technician	TECHNICIAN	\N	f	2026-06-18 12:55:23.728274	Self Only
 23	4	Admin	ADMIN	Full tenant access	f	2026-07-03 12:43:37.240173	Self Only
+20	2	Accountant	ACCOUNTANT	The person responsible for finance	f	2026-06-12 03:56:49.701247	Organization
+22	2	Technician	TECHNICIAN	the person who repair Equipment	f	2026-06-18 12:55:23.728274	Self Only
+21	2	Co-Admin	COADMIN	Co admin	f	2026-06-17 17:24:10.030548	Full Administrative Access
 \.
 
 
@@ -27521,6 +26690,12 @@ COPY public.vendor_quotation_items (id, vendor_quotation_id, qr_item_id, materia
 3954	587	5319	2751	100	\N	f			NOS	1	0
 3955	588	5319	2751	80	\N	f			NOS	1	0
 3956	589	5319	2751	70	\N	f			NOS	1	0
+3957	590	5320	2564	1200	3	f			NOS	1	2
+3958	590	5321	2565	1200	3	f			NOS	1	2
+3959	591	5320	2564	1000	3	f			NOS	1	2
+3960	591	5321	2565	1000	3	f			NOS	1	2
+3961	592	5320	2564	950	1	f			NOS	1	5
+3962	592	5321	2565	1150	1	f			NOS	1	5
 \.
 
 
@@ -27622,6 +26797,9 @@ COPY public.vendor_quotations (id, qr_id, vendor_id, quotation_number, quotation
 587	228	66	12345	2026-08-19	2026-08-19	/api/uploads/quotations/qr_228_v_66_invoice_VJ2398Y845.pdf		Received	3	2026-08-19 17:40:02.549267
 588	228	69	123456	2026-08-19	2026-08-19	/api/uploads/quotations/qr_228_v_69_invoice_VJ2398Y845.pdf		Received	3	2026-08-19 17:40:58.325991
 589	228	63	123	2026-08-19	2026-08-19	/api/uploads/quotations/qr_228_v_63_invoice_VJ2398Y845.pdf		Received	3	2026-08-19 17:41:19.04665
+590	229	69	QR-00043	2026-08-18	2026-08-19	/api/uploads/quotations/qr_229_v_69_AIC ENTERP Price list.pdf		Received	3	2026-08-19 18:57:46.553263
+591	229	63	QR-00043	2026-08-18	2026-08-19	/api/uploads/quotations/qr_229_v_63_AIC ENTERP Price list.pdf		Received	3	2026-08-19 18:58:34.285504
+592	229	66	QR-00043	2026-08-19	2026-08-19	/api/uploads/quotations/qr_229_v_66_AIC ENTERP Price list.pdf		Received	3	2026-08-19 18:59:11.056561
 \.
 
 
@@ -27817,7 +26995,7 @@ COPY public.write_offs (id, tenant_id, site_id, write_off_number, date, reason, 
 -- Name: alerts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.alerts_id_seq', 103, true);
+SELECT pg_catalog.setval('public.alerts_id_seq', 106, true);
 
 
 --
@@ -27887,21 +27065,21 @@ SELECT pg_catalog.setval('public.complaints_id_seq', 467, true);
 -- Name: contract_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.contract_approvals_id_seq', 16, true);
+SELECT pg_catalog.setval('public.contract_approvals_id_seq', 20, true);
 
 
 --
 -- Name: contract_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.contract_items_id_seq', 8, true);
+SELECT pg_catalog.setval('public.contract_items_id_seq', 10, true);
 
 
 --
 -- Name: contracts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.contracts_id_seq', 8, true);
+SELECT pg_catalog.setval('public.contracts_id_seq', 10, true);
 
 
 --
@@ -28125,14 +27303,14 @@ SELECT pg_catalog.setval('public.purchase_order_approvals_id_seq', 130, true);
 -- Name: purchase_order_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_order_items_id_seq', 1753, true);
+SELECT pg_catalog.setval('public.purchase_order_items_id_seq', 1757, true);
 
 
 --
 -- Name: purchase_orders_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.purchase_orders_id_seq', 281, true);
+SELECT pg_catalog.setval('public.purchase_orders_id_seq', 284, true);
 
 
 --
@@ -28160,7 +27338,7 @@ SELECT pg_catalog.setval('public.purchase_requests_id_seq', 211, true);
 -- Name: quotation_comparisons_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_comparisons_id_seq', 653, true);
+SELECT pg_catalog.setval('public.quotation_comparisons_id_seq', 655, true);
 
 
 --
@@ -28174,35 +27352,35 @@ SELECT pg_catalog.setval('public.quotation_negotiation_history_id_seq', 23, true
 -- Name: quotation_request_item_sources_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_request_item_sources_id_seq', 4966, true);
+SELECT pg_catalog.setval('public.quotation_request_item_sources_id_seq', 4972, true);
 
 
 --
 -- Name: quotation_request_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_request_items_id_seq', 5319, true);
+SELECT pg_catalog.setval('public.quotation_request_items_id_seq', 5324, true);
 
 
 --
 -- Name: quotation_request_prs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_request_prs_id_seq', 34, true);
+SELECT pg_catalog.setval('public.quotation_request_prs_id_seq', 36, true);
 
 
 --
 -- Name: quotation_request_vendors_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_request_vendors_id_seq', 538, true);
+SELECT pg_catalog.setval('public.quotation_request_vendors_id_seq', 544, true);
 
 
 --
 -- Name: quotation_requests_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quotation_requests_id_seq', 228, true);
+SELECT pg_catalog.setval('public.quotation_requests_id_seq', 229, true);
 
 
 --
@@ -28223,7 +27401,7 @@ SELECT pg_catalog.setval('public.repair_work_orders_id_seq', 1, false);
 -- Name: role_permissions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.role_permissions_id_seq', 1541, true);
+SELECT pg_catalog.setval('public.role_permissions_id_seq', 1629, true);
 
 
 --
@@ -28356,14 +27534,14 @@ SELECT pg_catalog.setval('public.vendor_history_id_seq', 58, true);
 -- Name: vendor_quotation_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_quotation_items_id_seq', 3956, true);
+SELECT pg_catalog.setval('public.vendor_quotation_items_id_seq', 3962, true);
 
 
 --
 -- Name: vendor_quotations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_quotations_id_seq', 589, true);
+SELECT pg_catalog.setval('public.vendor_quotations_id_seq', 592, true);
 
 
 --
@@ -33052,5 +32230,5 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict N3crTDmCTk2yIWSgFLLqjTRADG2lxby8Ba07ZCNE2CHUkdG1yEHLs96nsGv4ftb
+\unrestrict gRmnU4oAA9Zld00L65DGRSomyQnT2neam9ohkG2BcbHY4zQOOdu943ACxHk6tae
 

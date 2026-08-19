@@ -372,7 +372,7 @@ def complete_installation(id: int, serial_number: str=Form(...), installation_da
     item.status = 'Operational'
     item.updated_at = datetime.utcnow()
     from app.models import EquipmentHistory
-    db.add(EquipmentHistory(equipment_id=item.id, event_type='Installation', description=f'Installed by {installed_by or 'Unknown'} at {item.installation_date}', created_by_id=current_user.id))
+    db.add(EquipmentHistory(equipment_id=item.id, event_type='Installation', description=f'Installed by {installed_by or "Unknown"} at {item.installation_date}', created_by_id=current_user.id))
     db.commit()
     return {'message': 'Equipment installation completed successfully', 'equipment_code': item.equipment_code, 'serial_number': item.serial_number, 'installation_status': item.installation_status, 'status': item.status, 'installation_report_url': item.installation_report_url}
 
@@ -461,7 +461,7 @@ def get_qr_data(id: int, db: Session=Depends(get_db), current_user: User=Depends
     item = db.query(EquipmentItem).filter(EquipmentItem.id == id, EquipmentItem.tenant_id == tenant_id, EquipmentItem.site_id == site_id).first()
     if not item:
         raise HTTPException(status_code=404, detail='Equipment item not found')
-    return {'department': 'Biomedical Engineering Department' if item.is_biomedical else 'Facilities Department', 'asset_id': item.equipment_code, 'equipment_name': item.material.name if item.material else '', 'department_used': item.location.location_name if item.location else '', 'make_model': f'{item.make or ''} / {item.model or ''}'.strip(' /'), 'serial_number': item.serial_number or '', 'machine_type': item.machine_type or '', 'grn_number': item.grn.grn_number if item.grn else '', 'pm_due_date': item.next_pm_due_date.isoformat() if item.next_pm_due_date else '', 'institution_name': item.institution.name if item.institution else ''}
+    return {'department': 'Biomedical Engineering Department' if item.is_biomedical else 'Facilities Department', 'asset_id': item.equipment_code, 'equipment_name': item.material.name if item.material else '', 'department_used': item.location.location_name if item.location else '', 'make_model': f'{item.make or ""} / {item.model or ""}'.strip(' /'), 'serial_number': item.serial_number or '', 'machine_type': item.machine_type or '', 'grn_number': item.grn.grn_number if item.grn else '', 'pm_due_date': item.next_pm_due_date.isoformat() if item.next_pm_due_date else '', 'institution_name': item.institution.name if item.institution else ''}
 
 @router.post('/qr/bulk')
 def get_bulk_qr_data(req: EquipmentBulkQRRequest, db: Session=Depends(get_db), current_user: User=Depends(require_permission('equipment', 'read')), tenant_id: int=Depends(get_tenant_id), site_id: int=Depends(get_site_id)):
@@ -473,7 +473,7 @@ def get_bulk_qr_data(req: EquipmentBulkQRRequest, db: Session=Depends(get_db), c
     items = query.all()
     result = []
     for item in items:
-        result.append({'id': item.id, 'asset_id': item.equipment_code, 'equipment_name': item.material.name if item.material else '', 'department': item.location.location_name if item.location else '', 'department_used': item.location.location_name if item.location else '', 'make_model': f'{item.make or ''} / {item.model or ''}'.strip(' /'), 'serial_number': item.serial_number or '', 'machine_type': item.machine_type or '', 'grn_number': item.grn.grn_number if item.grn else '', 'pm_due_date': item.next_pm_due_date.isoformat() if item.next_pm_due_date else '', 'institution_name': item.institution.name if item.institution else ''})
+        result.append({'id': item.id, 'asset_id': item.equipment_code, 'equipment_name': item.material.name if item.material else '', 'department': item.location.location_name if item.location else '', 'department_used': item.location.location_name if item.location else '', 'make_model': f'{item.make or ""} / {item.model or ""}'.strip(' /'), 'serial_number': item.serial_number or '', 'machine_type': item.machine_type or '', 'grn_number': item.grn.grn_number if item.grn else '', 'pm_due_date': item.next_pm_due_date.isoformat() if item.next_pm_due_date else '', 'institution_name': item.institution.name if item.institution else ''})
     return result
 
 @router.get('/by-code/{asset_code}')
@@ -481,7 +481,7 @@ def get_equipment_by_code(asset_code: str, db: Session=Depends(get_db), current_
     item = db.query(EquipmentItem).filter(EquipmentItem.equipment_code == asset_code, EquipmentItem.tenant_id == tenant_id, EquipmentItem.site_id == site_id).first()
     if not item:
         raise HTTPException(status_code=404, detail='Equipment item not found')
-    return {'department': 'Biomedical Engineering Department' if item.is_biomedical else 'Facilities Department', 'asset_id': item.equipment_code, 'equipment_name': item.material.name if item.material else '', 'department_used': item.location.location_name if item.location else '', 'make_model': f'{item.make or ''} / {item.model or ''}'.strip(' /'), 'serial_number': item.serial_number or '', 'machine_type': item.machine_type or '', 'grn_number': item.grn.grn_number if item.grn else '', 'pm_due_date': item.next_pm_due_date.isoformat() if item.next_pm_due_date else '', 'status': item.status, 'installation_status': item.installation_status, 'warranty_available': item.warranty_available, 'warranty_expiry_date': item.warranty_expiry_date.isoformat() if item.warranty_expiry_date else '', 'amc_cmc_status': item.amc_cmc_status or 'None', 'amc_cmc_end_date': item.amc_cmc_end_date.isoformat() if item.amc_cmc_end_date else '', 'procurement_type': item.procurement_type, 'is_biomedical': item.is_biomedical, 'requires_installation': item.requires_installation}
+    return {'department': 'Biomedical Engineering Department' if item.is_biomedical else 'Facilities Department', 'asset_id': item.equipment_code, 'equipment_name': item.material.name if item.material else '', 'department_used': item.location.location_name if item.location else '', 'make_model': f'{item.make or ""} / {item.model or ""}'.strip(' /'), 'serial_number': item.serial_number or '', 'machine_type': item.machine_type or '', 'grn_number': item.grn.grn_number if item.grn else '', 'pm_due_date': item.next_pm_due_date.isoformat() if item.next_pm_due_date else '', 'status': item.status, 'installation_status': item.installation_status, 'warranty_available': item.warranty_available, 'warranty_expiry_date': item.warranty_expiry_date.isoformat() if item.warranty_expiry_date else '', 'amc_cmc_status': item.amc_cmc_status or 'None', 'amc_cmc_end_date': item.amc_cmc_end_date.isoformat() if item.amc_cmc_end_date else '', 'procurement_type': item.procurement_type, 'is_biomedical': item.is_biomedical, 'requires_installation': item.requires_installation}
 from pydantic import BaseModel
 
 class WriteOffRequest(BaseModel):
@@ -506,7 +506,7 @@ def relocate_equipment(id: int, payload: EquipmentRelocate, db: Session=Depends(
         raise HTTPException(status_code=404, detail='New location not found')
     old_loc_name = old_location.location_name if old_location else 'Unknown'
     item.location_id = payload.new_location_id
-    history = EquipmentHistory(equipment_id=item.id, event_type='Relocation', event_date=payload.relocation_date, description=f'Relocated from {old_loc_name} to {new_location.location_name}. Remarks: {payload.remarks or 'None'}', created_by_id=current_user.id)
+    history = EquipmentHistory(equipment_id=item.id, event_type='Relocation', event_date=payload.relocation_date, description=f'Relocated from {old_loc_name} to {new_location.location_name}. Remarks: {payload.remarks or "None"}', created_by_id=current_user.id)
     db.add(history)
     db.commit()
     db.refresh(item)
@@ -571,7 +571,7 @@ def record_calibration(id: int, payload: EquipmentCalibration, db: Session=Depen
         item.next_calibration_due_date = payload.next_due_date
     item.updated_at = datetime.utcnow()
     from app.models import EquipmentHistory
-    history = EquipmentHistory(equipment_id=item.id, event_type='Calibration', event_date=datetime.combine(payload.calibration_date, datetime.min.time()), description=f'Calibration recorded. Agency: {payload.agency_name or 'Authorized Agency'}. Cert #: {payload.certificate_number or 'N/A'}. Remarks: {payload.remarks or 'None'}', reference_id=payload.certificate_number, created_by_id=current_user.id)
+    history = EquipmentHistory(equipment_id=item.id, event_type='Calibration', event_date=datetime.combine(payload.calibration_date, datetime.min.time()), description=f'Calibration recorded. Agency: {payload.agency_name or "Authorized Agency"}. Cert #: {payload.certificate_number or "N/A"}. Remarks: {payload.remarks or "None"}', reference_id=payload.certificate_number, created_by_id=current_user.id)
     db.add(history)
     db.commit()
     return {'message': 'Equipment calibration recorded successfully', 'last_calibration_date': item.last_calibration_date, 'next_calibration_due_date': item.next_calibration_due_date}

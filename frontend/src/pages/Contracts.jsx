@@ -134,7 +134,11 @@ export default function Contracts() {
     setContractToView(null);
     try {
       const res = await api.get(`/api/contracts/${c.id}`);
-      setContractToView({ ...res.data, can_user_approve: c.can_user_approve });
+      let vendorRes = null;
+      if (res.data.vendor_id) {
+        vendorRes = await api.get(`/api/vendors/${res.data.vendor_id}`).catch(() => null);
+      }
+      setContractToView({ ...res.data, can_user_approve: c.can_user_approve, vendorDetails: vendorRes?.data });
     } catch (err) {
       showMessage('Error loading contract details', 'Error', 'error');
       setViewDialog(false);
@@ -705,9 +709,12 @@ export default function Contracts() {
                       ) : (
                         <>
                           <TableCell sx={{ fontWeight: 700 }}>EQUIPMENT</TableCell>
-                          <TableCell sx={{ fontWeight: 700 }}>COVERED</TableCell>
-                          <TableCell sx={{ fontWeight: 700 }}>EXCLUDED</TableCell>
                           <TableCell align="right" sx={{ fontWeight: 700 }}>RATE (₹)</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 700 }}>DISC %</TableCell>
+                          <TableCell sx={{ fontWeight: 700 }}>GST TYPE</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 700 }}>CGST %</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 700 }}>SGST %</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 700 }}>IGST %</TableCell>
                         </>
                       )}
                     </TableRow>
@@ -725,18 +732,26 @@ export default function Contracts() {
                             <TableCell align="right">{item.delivery_lead_time || '-'}</TableCell>
                           </>
                         ) : (
-                          <>
-                            <TableCell>{item.material_name || item.equipment_serial || item.equipment_id}</TableCell>
-                            <TableCell>{item.covered_components || '-'}</TableCell>
-                            <TableCell>{item.excluded_components || '-'}</TableCell>
-                            <TableCell align="right">₹{item.rate?.toLocaleString()}</TableCell>
-                          </>
+                          (() => {
+                            const split = computeGstSplit(item.gst || 0, contractToView.vendorDetails?.state, tenantConfig?.base_state, tenantConfig?.cgst_share_percent, tenantConfig?.sgst_share_percent);
+                            return (
+                              <>
+                                <TableCell>{item.material_name || item.equipment_serial || item.equipment_id}</TableCell>
+                                <TableCell align="right">₹{item.rate?.toLocaleString()}</TableCell>
+                                <TableCell align="right">{item.discount_percent || 0}%</TableCell>
+                                <TableCell>{item.is_gst_inclusive ? 'Inclusive' : 'Exclusive'}</TableCell>
+                                <TableCell align="right">{split.cgst_percentage !== undefined ? split.cgst_percentage : 0}%</TableCell>
+                                <TableCell align="right">{split.sgst_percentage !== undefined ? split.sgst_percentage : 0}%</TableCell>
+                                <TableCell align="right">{split.igst_percentage !== undefined ? split.igst_percentage : 0}%</TableCell>
+                              </>
+                            );
+                          })()
                         )}
                       </TableRow>
                     ))}
                     {(!contractToView.items || contractToView.items.length === 0) && (
                       <TableRow>
-                        <TableCell colSpan={contractToView.contract_type === 'RC' ? 6 : 4} align="center" sx={{ py: 2, color: 'text.secondary' }}>No items found</TableCell>
+                        <TableCell colSpan={contractToView.contract_type === 'RC' ? 6 : 7} align="center" sx={{ py: 2, color: 'text.secondary' }}>No items found</TableCell>
                       </TableRow>
                     )}
                   </TableBody>

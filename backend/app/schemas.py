@@ -607,7 +607,7 @@ class POItemBase(BaseModel):
     cgst_percentage: float = 0
     sgst_percentage: float = 0
     igst_percentage: float = 0
-    is_gst_inclusive: bool = False
+    is_gst_inclusive: Optional[bool] = False
 
 class POItemOut(POItemBase):
     id: int
@@ -745,7 +745,7 @@ class WorkOrderItemBase(BaseModel):
     cgst_percentage: float = 0
     sgst_percentage: float = 0
     igst_percentage: float = 0
-    is_gst_inclusive: bool = False
+    is_gst_inclusive: Optional[bool] = False
 
 class WorkOrderItemOut(WorkOrderItemBase):
     id: int
@@ -2135,8 +2135,6 @@ class ComplaintBase(BaseModel):
     closure_reason: Optional[str] = None
     resolution_entered: Optional[str] = None
     is_pm_calibration_call: bool = False
-    repair_method: Optional[str] = None
-    linked_vwo_id: Optional[int] = None
 
 class ComplaintCreate(BaseModel):
     docket_no: Optional[str] = None
@@ -2173,7 +2171,6 @@ class ComplaintAssign(BaseModel):
     assigned_to_id: int
 
 class ComplaintInspect(BaseModel):
-    repair_method: Optional[str] = None
     inspection_details: Optional[str] = None
 
 class ComplaintResolve(BaseModel):
@@ -2502,6 +2499,8 @@ class ContractItemBase(BaseModel):
     gst: float = 0
     delivery_lead_time: Optional[int] = None
     contract_quantity: Optional[float] = None
+    discount_percent: Optional[float] = 0
+    is_gst_inclusive: Optional[bool] = False
     covered_components: Optional[str] = None
     excluded_components: Optional[str] = None
 
@@ -2631,93 +2630,6 @@ class EquipmentCalibration(BaseModel):
     agency_name: Optional[str] = None
     certificate_number: Optional[str] = None
     remarks: Optional[str] = None
-
-# ── Vendor Work Orders ──────────────────────────────────────────────────────────────
-
-class VendorWorkOrderItemBase(BaseModel):
-    material_id: Optional[int] = None
-    description: Optional[str] = None
-    quantity: float = 1
-    rate: float = 0
-    amount: float = 0
-
-class VendorWorkOrderItemOut(VendorWorkOrderItemBase):
-    id: int
-    material_name: Optional[str] = None
-    material_code: Optional[str] = None
-    uom_name: Optional[str] = None
-    class Config:
-        from_attributes = True
-
-class VendorWorkOrderImageOut(BaseModel):
-    id: int
-    image_type: Optional[str] = None
-    image_url: str
-    uploaded_at: datetime
-    class Config:
-        from_attributes = True
-
-class VendorWorkOrderDocumentOut(BaseModel):
-    id: int
-    document_type: Optional[str] = None
-    file_url: str
-    uploaded_at: datetime
-    uploaded_by_name: Optional[str] = None
-    class Config:
-        from_attributes = True
-
-class VendorWorkOrderBase(BaseModel):
-    vendor_id: Optional[int] = None
-
-    equipment_id: int
-    priority: str = "Normal"
-    target_date: date
-    service_type: str
-    scope_of_work: str
-    vendor_instructions: Optional[str] = None
-    quotation_no: Optional[str] = None
-    vendor_quote_amount: float = 0
-    labour_charges: float = 0
-    service_charges: float = 0
-    tax: float = 0
-    total_approved_amount: float = 0
-    status: str = "Draft"
-
-class VendorWorkOrderCreate(VendorWorkOrderBase):
-    items: List[VendorWorkOrderItemBase] = []
-
-class VendorWorkOrderUpdate(BaseModel):
-    priority: Optional[str] = None
-    target_date: Optional[date] = None
-    service_type: Optional[str] = None
-    scope_of_work: Optional[str] = None
-    vendor_instructions: Optional[str] = None
-    quotation_no: Optional[str] = None
-    vendor_quote_amount: Optional[float] = None
-    labour_charges: Optional[float] = None
-    service_charges: Optional[float] = None
-    tax: Optional[float] = None
-    total_approved_amount: Optional[float] = None
-    status: Optional[str] = None
-
-class VendorWorkOrderOut(VendorWorkOrderBase):
-    id: int
-    vwo_number: str
-    institution_id: Optional[int] = None
-    institution_name: Optional[str] = None
-    vendor_name: Optional[str] = None
-
-    equipment_code: Optional[str] = None
-    equipment_name: Optional[str] = None
-    created_by_id: int
-    created_by_name: Optional[str] = None
-    created_at: datetime
-    updated_at: datetime
-    items: List[VendorWorkOrderItemOut] = []
-    images: List[VendorWorkOrderImageOut] = []
-    documents: List[VendorWorkOrderDocumentOut] = []
-    class Config:
-        from_attributes = True
 
 
 # == System Configuration (Menus) ==

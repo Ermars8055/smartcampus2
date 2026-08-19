@@ -12,10 +12,13 @@ import {
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useMessage } from '../context/MessageContext';
+import { useConfig } from '../context/ConfigContext';
 import { formatDate } from '../utils/dateUtils';
+import { computeGstSplit } from '../utils/gstCalculations';
 
 export default function Contracts() {
   const { showMessage } = useMessage();
+  const { tenantConfig } = useConfig();
   const navigate = useNavigate();
   const [contracts, setContracts] = useState([]);
   const [search, setSearch] = useState('');
@@ -38,11 +41,9 @@ export default function Contracts() {
     if (c.status === 'Inactive' || c.status === 'Expired') return true;
     if (c.status !== 'Approved') return false;
     if (!c.start_date || !c.end_date) return false;
-    const start = new Date(c.start_date);
-    start.setHours(0, 0, 0, 0);
     const end = new Date(c.end_date);
     end.setHours(23, 59, 59, 999);
-    return today < start || today > end;
+    return today > end;
   };
 
   const [tabValue, setTabValue] = useState('All');
@@ -176,41 +177,57 @@ export default function Contracts() {
     }
   };
 
-  const handlePrintContract = () => {
+  const handlePrintContract = async () => {
     if (!contractToView) return;
     const printWindow = window.open('', '_blank');
-    const institutionName = institutions.find(i => i.id === contractToView.institution_id)?.name || contractToView.institution_id || '-';
-    const departmentName = allDepartments.find(d => d.id === contractToView.department_id)?.name || contractToView.department_id || '-';
-
-    let itemsHtml = '';
-    if (contractToView.contract_type === 'RC') {
-      itemsHtml = contractToView.items?.map((item, idx) => `
-        <tr>
-          <td>${idx + 1}</td>
-          <td style="text-align: left;">${item.material?.name || item.material_id}</td>
-          <td>${item.uom || '-'}</td>
-          <td style="text-align: right;">${item.rate?.toLocaleString()}</td>
-          <td style="text-align: right;">${item.gst || 0}%</td>
-          <td style="text-align: right;">${item.contract_quantity || '-'}</td>
-          <td style="text-align: right;">${item.delivery_lead_time || '-'}</td>
-        </tr>
-      `).join('') || '<tr><td colSpan="7" style="text-align: center;">No items found</td></tr>';
-    } else {
-      itemsHtml = contractToView.items?.map((item, idx) => `
-        <tr>
-          <td>${idx + 1}</td>
-          <td style="text-align: left;">${item.material_name || item.equipment_serial || item.equipment_id}</td>
-          <td>${item.covered_components || '-'}</td>
-          <td>${item.excluded_components || '-'}</td>
-          <td style="text-align: right;">${item.rate?.toLocaleString()}</td>
-        </tr>
-      `).join('') || '<tr><td colSpan="5" style="text-align: center;">No items found</td></tr>';
+    printWindow.document.write('Loading document...');
+    
+    let vendor = null;
+    if (contractToView.vendor_id) {
+      try {
+        const vRes = await api.get(`/api/vendors/${contractToView.vendor_id}`);
+        vendor = vRes.data;
+      } catch(e) {}
     }
+
+    const institutionName = institutions.find(i => i.id === contractToView.institution_id)?.name || contractToView.institution_id || 'EAST POINT COLLEGE OF MEDICAL SCIENCES & RESEARCH CENTER';
+    const docTitle = contractToView.contract_type === 'RC' 
+      ? 'CONTRACT AGREEMENT (RC)' 
+      : `WORK ORDER for ${contractToView.contract_type}`;
+    
+    let totalNet = 0;
+    const itemsHtml = contractToView.items?.map((item, idx) => {
+      const split = computeGstSplit(item.gst || 0, vendor?.state, tenantConfig?.base_state, tenantConfig?.cgst_share_percent, tenantConfig?.sgst_share_percent);
+      const qty = item.contract_quantity || 1;
+      const rate = item.rate || 0;
+      const disc = item.discount_percent || 0;
+      const amt = (rate * qty) * (1 - disc / 100);
+      totalNet += amt;
+      
+      const itemName = contractToView.contract_type === 'RC' 
+        ? (item.material?.name || item.material_id)
+        : (item.material_name ? `${item.material_name} (${item.equipment_serial || 'No SN'})` : (item.equipment_serial || item.equipment_id));
+
+      return `
+        <tr>
+          <td>${idx + 1}</td>
+          <td style="text-align: left;">${itemName}</td>
+          <td>${qty}</td>
+          <td style="text-align: right;">${rate.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+          <td style="text-align: right;">${amt.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+          <td style="text-align: right;">${disc.toLocaleString(undefined, {minimumFractionDigits: 2})}%</td>
+          <td style="text-align: right;">${(split.cgst_percentage || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}%<br/><span style="font-size: 8px;">${item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</span></td>
+          <td style="text-align: right;">${(split.sgst_percentage || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}%<br/><span style="font-size: 8px;">${item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</span></td>
+          <td style="text-align: right;">${(split.igst_percentage || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}%<br/><span style="font-size: 8px;">${item.is_gst_inclusive ? '(Incl)' : '(Excl)'}</span></td>
+          <td>${item.uom || (contractToView.contract_type !== 'RC' ? 'NOS' : '-')}</td>
+        </tr>
+      `;
+    }).join('') || '<tr><td colSpan="10" style="text-align: center;">No items found</td></tr>';
 
     const html = `
       <html>
         <head>
-          <title>Contract - ${contractToView.contract_number}</title>
+          <title>${docTitle} - ${contractToView.contract_number}</title>
           <style>
             @media print {
               @page { size: A4; margin: 10mm; }
@@ -227,15 +244,24 @@ export default function Contracts() {
             .btn { padding: 8px 20px; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; border: none; display: flex; align-items: center; gap: 6px; }
             .btn-print { background: #2563EB; color: white; }
             .btn-close { background: #e2e8f0; color: #334155; }
-            .header-container { text-align: center; margin-bottom: 20px; }
-            .doc-title { font-size: 16px; font-weight: bold; text-decoration: underline; margin-bottom: 15px; }
-            .info-table { width: 100%; border: none; margin-bottom: 15px; }
-            .info-table td { vertical-align: top; padding: 4px; }
-            .items-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 11px; }
-            .items-table th, .items-table td { border: 1px solid #000; padding: 6px; text-align: center; }
+            .header-container { text-align: center; margin-bottom: 15px; }
+            .doc-title { font-size: 14px; font-weight: bold; text-decoration: underline; margin-bottom: 5px; }
+            .inst-name { font-size: 14px; font-weight: bold; }
+            
+            .address-table { width: 100%; border: none; margin-bottom: 15px; font-size: 11px; }
+            .address-table td { vertical-align: top; padding: 4px; }
+            
+            .items-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 10px; }
+            .items-table th, .items-table td { border: 1px solid #000; padding: 4px; text-align: center; }
             .items-table th { font-weight: bold; background-color: #f1f5f9; }
-            .section-title { font-weight: bold; margin-bottom: 5px; font-size: 12px; border-bottom: 1px solid #ccc; padding-bottom: 3px; }
-            .terms-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+            
+            .summary-table { width: 100%; border: none; margin-bottom: 20px; font-size: 11px; }
+            .summary-table td { padding: 4px; }
+            
+            .terms-title { font-weight: bold; margin-bottom: 5px; text-decoration: underline; }
+            .terms-list { margin-bottom: 20px; line-height: 1.5; }
+            
+            .signature-table { width: 100%; margin-top: 50px; text-align: center; font-weight: bold; }
           </style>
         </head>
         <body>
@@ -246,47 +272,46 @@ export default function Contracts() {
             </div>
             
             <div class="header-container">
-              <div class="doc-title">CONTRACT AGREEMENT</div>
+              <div class="inst-name">${institutionName}</div>
+              <div class="doc-title">${docTitle}</div>
             </div>
             
-            <table class="info-table">
+            <table class="address-table">
               <tr>
-                <td style="width: 50%;">
-                  <b>Institution:</b> ${institutionName}<br/>
-                  <b>Department:</b> ${departmentName}<br/>
-                  <b>Vendor:</b> ${contractToView.vendor_name || '-'}<br/>
+                <td style="width: 60%;">
+                  <b>${vendor?.name || contractToView.vendor_name || '-'}</b><br/>
+                  ${vendor?.address || ''}<br/>
+                  ${vendor?.city || ''}, ${vendor?.state || ''}<br/>
+                  PINCODE ${vendor?.pincode || ''}<br/>
+                  Phone No : ${vendor?.phone || '-'}<br/>
+                  E-MAIL : ${vendor?.email || '-'}
                 </td>
-                <td style="width: 50%;">
+                <td style="width: 40%;">
                   <table style="width: 100%">
-                    <tr><td style="width: 40%">Contract No</td><td>: <b>${contractToView.contract_number}</b></td></tr>
-                    <tr><td>Type</td><td>: <b>${contractToView.contract_type}</b></td></tr>
-                    ${contractToView.contract_type !== 'RC' ? `<tr><td>Total Value</td><td>: ₹${contractToView.contract_value?.toLocaleString() || 0}</td></tr>` : ''}
-                    <tr><td>Start Date</td><td>: ${formatDate(contractToView.start_date)}</td></tr>
-                    <tr><td>End Date</td><td>: ${formatDate(contractToView.end_date)}</td></tr>
+                    <tr><td style="width: 40%">WO Number</td><td>: <b>${contractToView.contract_number}</b></td></tr>
+                    <tr><td>WO Date</td><td>: ${formatDate(contractToView.start_date)}</td></tr>
+                    <tr><td>GSTIN</td><td>: ${vendor?.gstin || '-'}</td></tr>
                   </table>
                 </td>
               </tr>
             </table>
 
-            <div class="section-title">Contract Items (${contractToView.contract_type})</div>
+            <div>Dear Sir/Madam,</div>
+            <div style="margin-bottom: 10px;">We are pleased to place an order for the following items, terms & conditions mentioned below.</div>
+            
             <table class="items-table">
               <thead>
                 <tr>
-                  ${contractToView.contract_type === 'RC' ? `
-                    <th>Sr. No</th>
-                    <th style="text-align: left;">Material</th>
-                    <th>UOM</th>
-                    <th style="text-align: right;">Rate (₹)</th>
-                    <th style="text-align: right;">GST %</th>
-                    <th style="text-align: right;">Max Qty</th>
-                    <th style="text-align: right;">Lead Time</th>
-                  ` : `
-                    <th>Sr. No</th>
-                    <th style="text-align: left;">Equipment</th>
-                    <th>Covered</th>
-                    <th>Excluded</th>
-                    <th style="text-align: right;">Rate (₹)</th>
-                  `}
+                  <th>Sr. No.</th>
+                  <th style="text-align: left;">Item Description</th>
+                  <th>Qty</th>
+                  <th style="text-align: right;">RATE</th>
+                  <th style="text-align: right;">Amt.</th>
+                  <th style="text-align: right;">Disc. %</th>
+                  <th style="text-align: right;">CGST %</th>
+                  <th style="text-align: right;">SGST/UTGST %</th>
+                  <th style="text-align: right;">IGST %</th>
+                  <th>UOM</th>
                 </tr>
               </thead>
               <tbody>
@@ -294,25 +319,41 @@ export default function Contracts() {
               </tbody>
             </table>
             
-            <div class="section-title">Terms & Conditions</div>
-            <div class="terms-grid">
-              <div>
-                <b>Payment Terms:</b><br/>
-                <span style="white-space: pre-wrap;">${contractToView.payment_terms || '-'}</span>
-              </div>
-              <div>
-                <b>Exclusions:</b><br/>
-                <span style="white-space: pre-wrap;">${contractToView.exclusions || '-'}</span>
-              </div>
-              <div>
-                <b>SLA Details:</b><br/>
-                <span style="white-space: pre-wrap;">${contractToView.sla_details || '-'}</span>
-              </div>
-              <div>
-                <b>Renewal Terms:</b><br/>
-                <span style="white-space: pre-wrap;">${contractToView.renewal_terms || '-'}</span>
-              </div>
+            <table class="summary-table">
+              <tr>
+                <td style="width: 70%;">Pricing inclusive of GST</td>
+                <td style="text-align: right; width: 15%;"><b>Round Off :</b></td>
+                <td style="text-align: right; width: 15%;">0.00</td>
+              </tr>
+              <tr>
+                <td></td>
+                <td style="text-align: right;"><b>Total Amount :</b></td>
+                <td style="text-align: right;"><b>${totalNet.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</b></td>
+              </tr>
+            </table>
+            
+            <div class="terms-title">TERMS AND CONDITIONS:</div>
+            <div class="terms-list">
+              01. Bill/Invoices in the name of ${institutionName}<br/>
+              02. Period of agreement: ${formatDate(contractToView.start_date)} to ${formatDate(contractToView.end_date)}<br/>
+              03. Payment Terms: ${contractToView.payment_terms || '-'}<br/>
+              04. GST included<br/>
+              ${contractToView.contract_type !== 'RC' ? `05. Inclusions: Spare Parts (${contractToView.spare_parts_included ? 'Yes' : 'No'}), Consumables (${contractToView.consumables_included ? 'Yes' : 'No'})<br/>` : ''}
+              ${contractToView.contract_type !== 'RC' ? `06. Exclusions: ${contractToView.exclusions || '-'}<br/>` : ''}
+              ${contractToView.contract_type !== 'RC' ? `07. SLA Details: ${contractToView.sla_details || '-'}<br/>` : ''}
             </div>
+            
+            <div style="margin-bottom: 20px;">
+              Please expedite supplies accordingly, and arrange to send the bill of cost in duplicate for arranging payment of the same on receipt and inspection of materials at our end.
+            </div>
+            
+            <table class="signature-table">
+              <tr>
+                <td style="width: 33%; text-align: left;">Prepared By</td>
+                <td style="width: 33%;">CC: Manager Accounts</td>
+                <td style="width: 33%; text-align: right;">For ${institutionName}<br/><br/><br/>Authorized Signatory</td>
+              </tr>
+            </table>
             
           </div>
         </body>
@@ -328,7 +369,7 @@ export default function Contracts() {
 
   const filteredContracts = contracts.filter(c => {
     if (tabValue === 'All') return true;
-    if (tabValue === 'Approved') return isContractActive(c);
+    if (tabValue === 'Approved') return c.status === 'Approved' && !isContractInactive(c);
     if (tabValue === 'Expired') return isContractInactive(c);
     return c.status === tabValue;
   }).sort((a, b) => {
@@ -406,7 +447,7 @@ export default function Contracts() {
           >
             {['Draft', 'Submitted', 'Approved', 'Expired', 'Rejected', 'All'].map(s => {
               const count = s === 'All' ? contracts.length : contracts.filter(c => {
-                if (s === 'Approved') return isContractActive(c);
+                if (s === 'Approved') return c.status === 'Approved' && !isContractInactive(c);
                 if (s === 'Expired') return isContractInactive(c);
                 return c.status === s;
               }).length;
@@ -516,9 +557,9 @@ export default function Contracts() {
                   </TableCell>
                   <TableCell>
                     <Chip 
-                      label={isContractInactive(c) ? 'Expired' : (isContractActive(c) ? 'Approved' : c.status)}
+                      label={isContractInactive(c) ? 'Expired' : (isContractActive(c) ? 'Approved' : (c.status === 'Approved' ? 'Upcoming' : c.status))}
                       size="small"
-                      color={isContractInactive(c) ? 'default' : (statusColor[isContractActive(c) ? 'Approved' : c.status] || statusColor[c.status] || 'default')}
+                      color={isContractInactive(c) ? 'default' : (isContractActive(c) ? statusColor['Approved'] : (c.status === 'Approved' ? 'info' : (statusColor[c.status] || 'default')))}
                       sx={{ fontWeight: 600, fontSize: '0.7rem', height: 20 }}
                     />
                   </TableCell>
@@ -629,11 +670,11 @@ export default function Contracts() {
                   <Typography variant="caption" color="text.secondary">End Date</Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Typography variant="body2" fontWeight="600">{formatDate(contractToView.end_date)}</Typography>
-                    {(isContractActive(contractToView) || isContractInactive(contractToView)) && (
+                    {(contractToView.status === 'Approved' || contractToView.status === 'Expired' || contractToView.status === 'Inactive' || contractToView.status === 'Active') && (
                       <Chip 
-                        label={isContractActive(contractToView) ? 'Active' : 'Inactive'} 
+                        label={isContractInactive(contractToView) ? (contractToView.status === 'Inactive' ? 'Inactive' : 'Expired') : (isContractActive(contractToView) ? 'Active' : 'Upcoming')} 
                         size="small" 
-                        color={isContractActive(contractToView) ? 'success' : 'default'} 
+                        color={isContractActive(contractToView) ? 'success' : (isContractInactive(contractToView) ? 'default' : 'info')} 
                         sx={{ height: 18, fontSize: '0.65rem', fontWeight: 600 }} 
                       />
                     )}

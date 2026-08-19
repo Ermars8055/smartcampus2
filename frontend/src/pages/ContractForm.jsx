@@ -59,7 +59,7 @@ export default function ContractForm() {
     Promise.all([
       api.get('/api/vendors'),
       api.get('/api/institutions'),
-      api.get('/api/materials'),
+      api.get('/api/materials', { params: { limit: 10000 } }),
       api.get('/api/equipment')
     ]).then(([vRes, iRes, mRes, eRes]) => {
       setVendors(vRes.data);

@@ -419,7 +419,6 @@ def complete_inspection(
             detail=f"Cannot complete inspection from status '{complaint.status}'. Must be 'Under Inspection'."
         )
 
-    complaint.repair_method = payload.repair_method
     if payload.repair_method == 'Material Required':
         complaint.material_required = True
     else:

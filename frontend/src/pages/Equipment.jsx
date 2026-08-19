@@ -589,24 +589,30 @@ export default function Equipment() {
     setConsumptionSubmitting(false);
   };
 
-  const handleAddReagent = () => {
-    const currentReagents = editForm.linked_reagents || [];
-    setEditForm({
-      ...editForm,
+  const handleAddReagent = (isEdit = true) => {
+    const form = isEdit ? editForm : addForm;
+    const setForm = isEdit ? setEditForm : setAddForm;
+    const currentReagents = form.linked_reagents || [];
+    setForm({
+      ...form,
       linked_reagents: [...currentReagents, { material_id: '', quantity: '' }]
     });
   };
 
-  const handleUpdateReagent = (idx, field, value) => {
-    const currentReagents = [...(editForm.linked_reagents || [])];
+  const handleUpdateReagent = (idx, field, value, isEdit = true) => {
+    const form = isEdit ? editForm : addForm;
+    const setForm = isEdit ? setEditForm : setAddForm;
+    const currentReagents = [...(form.linked_reagents || [])];
     currentReagents[idx][field] = value;
-    setEditForm({ ...editForm, linked_reagents: currentReagents });
+    setForm({ ...form, linked_reagents: currentReagents });
   };
 
-  const handleRemoveReagent = (idx) => {
-    const currentReagents = [...(editForm.linked_reagents || [])];
+  const handleRemoveReagent = (idx, isEdit = true) => {
+    const form = isEdit ? editForm : addForm;
+    const setForm = isEdit ? setEditForm : setAddForm;
+    const currentReagents = [...(form.linked_reagents || [])];
     currentReagents.splice(idx, 1);
-    setEditForm({ ...editForm, linked_reagents: currentReagents });
+    setForm({ ...form, linked_reagents: currentReagents });
   };
 
   const handleCreateReagentPO = () => {
@@ -619,7 +625,7 @@ export default function Equipment() {
       equipment_code: editForm.equipment_code,
       rental_agreement_number: editForm.rental_agreement_number,
       po_number: editForm.po_number,
-      vendor_id: editForm.rental_vendor_id,
+      vendor_id: editForm.rental_vendor_id || '',
       items: editForm.linked_reagents,
       project_id: editForm.project_id,
       institution_id: editForm.institution_id
@@ -634,7 +640,11 @@ export default function Equipment() {
     }
     setEditSubmitting(true);
     try {
-      await api.put(`/api/equipment/${editDialog.id}`, editForm);
+      const payload = { ...editForm };
+      if (payload.linked_reagents) {
+        payload.linked_reagents = payload.linked_reagents.filter(r => r.material_id);
+      }
+      await api.put(`/api/equipment/${editDialog.id}`, payload);
       showMessage('Equipment updated successfully', 'Success', 'success');
       setEditDialog(null);
       loadData();
@@ -663,7 +673,9 @@ export default function Equipment() {
       calibration_required: false,
       status: 'Operational',
       is_biomedical: false,
-      requires_installation: false
+      requires_installation: false,
+      battery_details: '',
+      linked_reagents: []
     });
     setAddDialog(true);
   };
@@ -732,6 +744,9 @@ export default function Equipment() {
     try {
       // Clean up empty strings to null for integers/dates
       const payload = { ...addForm };
+      if (payload.linked_reagents) {
+        payload.linked_reagents = payload.linked_reagents.filter(r => r.material_id);
+      }
       Object.keys(payload).forEach(key => {
         if (payload[key] === '') payload[key] = null;
       });
@@ -916,7 +931,15 @@ export default function Equipment() {
                       Update Serial
                     </Button>
                   )}
-                  <Button size="small" variant="outlined" color="primary" startIcon={<Edit color="primary" />} onClick={(e) => { e.stopPropagation(); setEditForm(item); setEditDialog(item); }}>
+                  <Button size="small" variant="outlined" color="primary" startIcon={<Edit color="primary" />} onClick={(e) => { 
+                    e.stopPropagation(); 
+                    const itemToEdit = { ...item };
+                    if (!itemToEdit.linked_reagents || itemToEdit.linked_reagents.length === 0) {
+                      itemToEdit.linked_reagents = [{ material_id: '' }];
+                    }
+                    setEditForm(itemToEdit); 
+                    setEditDialog(item); 
+                  }}>
                     Edit
                   </Button>
                   {(item.installation_status === 'Pending Installation' || item.installation_status === 'Installation Requested') && (
@@ -1092,7 +1115,15 @@ export default function Equipment() {
                     <TableCell align="right">
                       <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'flex-end', alignItems: 'center' }}>
                         <Tooltip title="Edit Equipment">
-                          <IconButton size="small" color="primary" onClick={(e) => { e.stopPropagation(); setEditForm(item); setEditDialog(item); }}>
+                          <IconButton size="small" color="primary" onClick={(e) => { 
+                            e.stopPropagation(); 
+                            const itemToEdit = { ...item };
+                            if (!itemToEdit.linked_reagents || itemToEdit.linked_reagents.length === 0) {
+                              itemToEdit.linked_reagents = [{ material_id: '' }];
+                            }
+                            setEditForm(itemToEdit); 
+                            setEditDialog(item); 
+                          }}>
                             <Edit color="primary" fontSize="small" />
                           </IconButton>
                         </Tooltip>
@@ -1554,6 +1585,34 @@ export default function Equipment() {
                 </Table>
               </Grid>
 
+              {viewDialog.linked_reagents && viewDialog.linked_reagents.length > 0 && (
+                <Grid item xs={12}>
+                  <Divider sx={{ my: 1 }} />
+                  <Typography variant="subtitle2" color="primary" sx={{ mb: 1, fontWeight: 700 }}>
+                    Reagents
+                  </Typography>
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell sx={{ fontWeight: 600 }}>Material</TableCell>
+                        <TableCell sx={{ fontWeight: 600 }}>Unit</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {viewDialog.linked_reagents.map((item, idx) => {
+                        const mat = materials.find(m => m.id === item.material_id);
+                        return (
+                          <TableRow key={idx}>
+                            <TableCell>{mat ? `${mat.code} - ${mat.name}` : item.material_id}</TableCell>
+                            <TableCell>{mat?.uom_name || '-'}</TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </Grid>
+              )}
+
               {/* Equipment Lifecycle History & Audit Trail */}
               <Grid item xs={12}>
                 <Divider sx={{ my: 1 }} />
@@ -1780,6 +1839,8 @@ export default function Equipment() {
                 </>
               )}
 
+
+
               <Grid item xs={12}>
                 <Divider sx={{ my: 1 }} />
                 <Typography variant="subtitle2" color="primary" sx={{ mb: -1 }}>Maintenance & Warranty</Typography>
@@ -1821,6 +1882,73 @@ export default function Equipment() {
                   label="Calibration Required"
                 />
               </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControlLabel
+                  control={<Switch size="small" checked={!!addForm.requires_installation} onChange={e => setAddForm({ ...addForm, requires_installation: e.target.checked })} />}
+                  label="Requires Installation"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField fullWidth size="small" label="Battery Details" value={addForm.battery_details || ''} onChange={e => setAddForm({ ...addForm, battery_details: e.target.value })} placeholder="e.g. 12V 7Ah Lead Acid" />
+              </Grid>
+
+              <Grid item xs={12}>
+                <Divider sx={{ my: 2 }} />
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b' }}>Reagents</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                  {(!addForm.linked_reagents || addForm.linked_reagents.length === 0) ? (
+                    <Typography variant="body2" sx={{ color: 'text.secondary', textAlign: 'center', py: 2 }}>No reagents added yet</Typography>
+                  ) : (
+                    addForm.linked_reagents.map((item, i) => {
+                      const mat = materials.find(m => m.id === item.material_id);
+                      return (
+                        <Box key={i} sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr auto' }, gap: 1.5, p: 1.5, border: '1px solid #e2e8f0', borderRadius: 2, bgcolor: '#f8fafc', position: 'relative', alignItems: 'center' }}>
+                          <Box>
+                            <Autocomplete
+                              options={materials.filter(m => m.is_active || m.id === item.material_id)}
+                              getOptionLabel={(option) => `${option.code} - ${option.name}`}
+                              value={materials.find(m => m.id === item.material_id) || null}
+                              onChange={(e, newValue) => {
+                                const mId = newValue ? newValue.id : '';
+                                handleUpdateReagent(i, 'material_id', mId, false);
+                              }}
+                              renderInput={(params) => <TextField {...params} label="Material *" size="small" />}
+                              fullWidth
+                              size="small"
+                              disableClearable
+                            />
+                          </Box>
+                          <TextField size="small" label="Unit" value={mat?.uom_name || '-'} InputProps={{ readOnly: true }} />
+                          <IconButton size="small" color="error" onClick={() => handleRemoveReagent(i, false)}>
+                            <DeleteOutline fontSize="small" />
+                          </IconButton>
+                        </Box>
+                      );
+                    })
+                  )}
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<Add />}
+                    onClick={() => handleAddReagent(false)}
+                    sx={{
+                      textTransform: 'none',
+                      fontWeight: 600,
+                      borderStyle: 'dashed',
+                      width: '100%',
+                      py: 1.5,
+                      color: '#2563EB',
+                      fontSize: '0.95rem',
+                      borderColor: '#cbd5e1',
+                      '&:hover': { borderColor: '#94a3b8', bgcolor: '#f8fafc' }
+                    }}
+                  >
+                    Add Another Item
+                  </Button>
+                </Box>
+              </Grid>
             </Grid>
           </Box>
         </DialogContent>
@@ -1843,7 +1971,13 @@ export default function Equipment() {
                 <Typography variant="subtitle2" color="primary" sx={{ mb: -1, mt: 1 }}>System Information (Read-Only)</Typography>
               </Grid>
               <Grid item xs={12} sm={4}>
+                <TextField fullWidth size="small" label="Equipment Code" value={editForm.equipment_code || ''} InputProps={{ readOnly: true }} variant="filled" />
+              </Grid>
+              <Grid item xs={12} sm={4}>
                 <TextField fullWidth size="small" label="Equipment Name" value={editForm.material_name || ''} InputProps={{ readOnly: true }} variant="filled" />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField fullWidth size="small" label="Location" value={locations.find(l => l.id === editForm.location_id)?.location_name || '-'} InputProps={{ readOnly: true }} variant="filled" />
               </Grid>
               <Grid item xs={12} sm={4}>
                 <TextField fullWidth size="small" label="Serial Number" value={editForm.serial_number || 'Pending'} InputProps={{ readOnly: true }} variant="filled" />
@@ -1851,7 +1985,7 @@ export default function Equipment() {
               <Grid item xs={12} sm={4}>
                 <TextField fullWidth size="small" label="Status" value={editForm.status || ''} InputProps={{ readOnly: true }} variant="filled" />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={4}>
                 <TextField fullWidth size="small" label="GRN Number" value={editForm.grn_number || '-'} InputProps={{ readOnly: true }} variant="filled" />
               </Grid>
               <Grid item xs={12} sm={4}>
@@ -1867,23 +2001,6 @@ export default function Equipment() {
               <Grid item xs={12}>
                 <Divider sx={{ my: 1 }} />
                 <Typography variant="subtitle2" color="primary" sx={{ mb: -1 }}>Editable Details</Typography>
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField fullWidth size="small" label="Asset Code" value={editForm.equipment_code || ''} onChange={e => setEditForm({ ...editForm, equipment_code: e.target.value })} />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>Location</InputLabel>
-                  <Select
-                    value={editForm.location_id || ''}
-                    label="Location"
-                    onChange={e => setEditForm({ ...editForm, location_id: e.target.value })}
-                  >
-                    <MenuItem value=""><em>None</em></MenuItem>
-                    {locations.map(l => <MenuItem key={l.id} value={l.id}>{l.location_name}</MenuItem>)}
-                  </Select>
-                </FormControl>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField fullWidth size="small" label="Make" value={editForm.make || ''} onChange={e => setEditForm({ ...editForm, make: e.target.value })} />
@@ -1966,89 +2083,7 @@ export default function Equipment() {
                 </>
               )}
 
-              {(editForm.rental_type === 'Reagent Rental' || editForm.procurement_type === 'Reagent Tie-up') && (
-                <Grid item xs={12}>
-                  <Divider sx={{ my: 2 }} />
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b' }}>Reagents Required</Typography>
-                    <Button variant="contained" size="small" color="secondary" onClick={handleCreateReagentPO} disabled={!editForm.linked_reagents?.length}>
-                      Create PO
-                    </Button>
-                  </Box>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                    {(!editForm.linked_reagents || editForm.linked_reagents.length === 0) ? (
-                      <Typography variant="body2" sx={{ color: 'text.secondary', textAlign: 'center', py: 2 }}>No reagents added yet</Typography>
-                    ) : (
-                      editForm.linked_reagents.map((item, i) => {
-                        const mat = materials.find(m => m.id === item.material_id);
-                        return (
-                          <Box key={i} sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr 1fr' }, gap: 1.5, p: 1.5, border: '1px solid #e2e8f0', borderRadius: 2, bgcolor: '#f8fafc', position: 'relative' }}>
-                            <Box>
-                              <Autocomplete
-                                options={materials.filter(m => m.is_active || m.id === item.material_id)}
-                                getOptionLabel={(option) => `${option.code} - ${option.name}`}
-                                value={materials.find(m => m.id === item.material_id) || null}
-                                onChange={(e, newValue) => {
-                                  const mId = newValue ? newValue.id : '';
-                                  handleUpdateReagent(i, 'material_id', mId);
-                                }}
-                                renderInput={(params) => <TextField {...params} label="Material *" size="small" />}
-                                fullWidth
-                                size="small"
-                                disableClearable
-                              />
-                            </Box>
-                            <TextField size="small" label="Unit" value={mat?.uom_name || '-'} InputProps={{ readOnly: true }} />
-                            <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
-                              <TextField
-                                disabled={!item.material_id}
-                                size="small"
-                                label="Qty"
-                                type="number"
-                                value={item.quantity}
-                                onKeyDown={e => {
-                                  const blockList = ['-', '+', 'e', 'E'];
-                                  if (!mat?.uom_allow_decimal) blockList.push('.');
-                                  if (blockList.includes(e.key)) e.preventDefault();
-                                }}
-                                onChange={e => {
-                                  let val = e.target.value.replace(/-/g, '');
-                                  if (!mat?.uom_allow_decimal) val = val.replace(/\./g, '');
-                                  handleUpdateReagent(i, 'quantity', val);
-                                }}
-                                inputProps={{ min: 0, step: mat?.uom_allow_decimal ? "any" : "1" }}
-                                fullWidth
-                              />
-                              <IconButton size="small" color="error" onClick={() => handleRemoveReagent(i)} sx={{ mt: 0.5 }}>
-                                <DeleteOutline fontSize="small" />
-                              </IconButton>
-                            </Box>
-                          </Box>
-                        );
-                      })
-                    )}
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      startIcon={<Add />}
-                      onClick={handleAddReagent}
-                      sx={{
-                        textTransform: 'none',
-                        fontWeight: 600,
-                        borderStyle: 'dashed',
-                        width: '100%',
-                        py: 1.5,
-                        color: '#2563EB',
-                        fontSize: '0.95rem',
-                        borderColor: '#cbd5e1',
-                        '&:hover': { borderColor: '#94a3b8', bgcolor: '#f8fafc' }
-                      }}
-                    >
-                      Add Another Item
-                    </Button>
-                  </Box>
-                </Grid>
-              )}
+
 
               <Grid item xs={12} sm={6}>
                 <FormControlLabel
@@ -2100,6 +2135,69 @@ export default function Equipment() {
               </Grid>
               <Grid item xs={12}>
                 <TextField fullWidth size="small" label="Battery Details" value={editForm.battery_details || ''} onChange={e => setEditForm({ ...editForm, battery_details: e.target.value })} placeholder="e.g. 12V 7Ah Lead Acid" />
+              </Grid>
+
+              <Grid item xs={12}>
+                <Divider sx={{ my: 2 }} />
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b' }}>Reagents</Typography>
+                  {hasAction('equipment', 'create_po') && (
+                    <Button variant="contained" size="small" color="secondary" onClick={handleCreateReagentPO} disabled={!editForm.linked_reagents?.length}>
+                      Create PO
+                    </Button>
+                  )}
+                </Box>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                  {(!editForm.linked_reagents || editForm.linked_reagents.length === 0) ? (
+                    <Typography variant="body2" sx={{ color: 'text.secondary', textAlign: 'center', py: 2 }}>No reagents added yet</Typography>
+                  ) : (
+                    editForm.linked_reagents.map((item, i) => {
+                      const mat = materials.find(m => m.id === item.material_id);
+                      return (
+                        <Box key={i} sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr auto' }, gap: 1.5, p: 1.5, border: '1px solid #e2e8f0', borderRadius: 2, bgcolor: '#f8fafc', position: 'relative', alignItems: 'center' }}>
+                          <Box>
+                            <Autocomplete
+                              options={materials.filter(m => m.is_active || m.id === item.material_id)}
+                              getOptionLabel={(option) => `${option.code} - ${option.name}`}
+                              value={materials.find(m => m.id === item.material_id) || null}
+                              onChange={(e, newValue) => {
+                                const mId = newValue ? newValue.id : '';
+                                handleUpdateReagent(i, 'material_id', mId, true);
+                              }}
+                              renderInput={(params) => <TextField {...params} label="Material *" size="small" />}
+                              fullWidth
+                              size="small"
+                              disableClearable
+                            />
+                          </Box>
+                          <TextField size="small" label="Unit" value={mat?.uom_name || '-'} InputProps={{ readOnly: true }} />
+                          <IconButton size="small" color="error" onClick={() => handleRemoveReagent(i, true)}>
+                            <DeleteOutline fontSize="small" />
+                          </IconButton>
+                        </Box>
+                      );
+                    })
+                  )}
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<Add />}
+                    onClick={() => handleAddReagent(true)}
+                    sx={{
+                      textTransform: 'none',
+                      fontWeight: 600,
+                      borderStyle: 'dashed',
+                      width: '100%',
+                      py: 1.5,
+                      color: '#2563EB',
+                      fontSize: '0.95rem',
+                      borderColor: '#cbd5e1',
+                      '&:hover': { borderColor: '#94a3b8', bgcolor: '#f8fafc' }
+                    }}
+                  >
+                    Add Another Item
+                  </Button>
+                </Box>
               </Grid>
             </Grid>
           </Box>

@@ -203,12 +203,26 @@ class AcknowledgementsScreen extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      issue.issueNumber,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          issue.issueNumber,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: theme.colorScheme.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        if (issue.createdAt != null) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            '${issue.createdAt!.day}/${issue.createdAt!.month}/${issue.createdAt!.year}',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                     if (issue.isAcknowledged)
                       Container(

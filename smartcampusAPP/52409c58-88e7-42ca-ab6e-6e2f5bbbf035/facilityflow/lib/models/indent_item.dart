@@ -22,7 +22,7 @@ class IndentItem {
       materialName: json['material_name'] as String? ?? '',
       requestedQuantity: (json['requested_quantity'] as num?)?.toDouble() ?? 0,
       approvedQuantity: (json['approved_quantity'] as num?)?.toDouble() ?? 0,
-      issuedQuantity: (json['issued_quantity'] as num?)?.toDouble() ?? 0,
+      issuedQuantity: (json['issued_quantity'] as num?)?.toDouble() ?? (json['quantity'] as num?)?.toDouble() ?? 0,
       acknowledgedQuantity:
           (json['acknowledged_quantity'] as num?)?.toDouble() ?? 0,
       uomName: json['uom_name'] as String? ?? '',

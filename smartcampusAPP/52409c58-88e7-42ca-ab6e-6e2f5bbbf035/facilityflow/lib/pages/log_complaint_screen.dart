@@ -200,9 +200,9 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
     super.dispose();
   }
 
-  Future<void> _pickImage() async {
+  Future<void> _pickImage(ImageSource source) async {
     try {
-      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+      final XFile? image = await _picker.pickImage(source: source);
       if (image != null) {
         setState(() {
           _attachedImages.add(File(image.path));
@@ -214,6 +214,40 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
         const SnackBar(content: Text('Failed to pick image')),
       );
     }
+  }
+
+  void _showImageSourceActionSheet() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text('Take a Photo'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.camera);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Choose from Gallery'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.gallery);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   void _removeAttachedPhoto(int index) {
@@ -634,7 +668,7 @@ class _LogComplaintScreenState extends State<LogComplaintScreen> {
                 Row(
                   children: [
                     ElevatedButton.icon(
-                      onPressed: _pickImage,
+                      onPressed: _showImageSourceActionSheet,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: theme.colorScheme.secondary,
                         foregroundColor: Colors.white,

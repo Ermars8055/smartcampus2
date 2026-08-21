@@ -335,23 +335,29 @@ export default function Returns() {
                       <Chip label={ret.status} size="small" color={ret.status === 'Completed' ? 'success' : (ret.status === 'Partially Received' ? 'warning' : (ret.status === 'Initiated' ? 'primary' : 'default'))} sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }} />
                     </TableCell>
                     <TableCell align="right" sx={{ px: 2, whiteSpace: 'nowrap' }}>
-                      <IconButton
-                        size="small"
-                        disabled={ret.status === 'Completed'}
-                        onClick={(e) => { e.stopPropagation(); openViewModal(ret); }}
-                        sx={{ color: ret.status === 'Completed' ? 'action.disabled' : '#10B981', mr: 1 }}
-                      >
-                        <CheckCircle fontSize="small" />
-                      </IconButton>
-                      <Tooltip title="Complete Return">
-                        <IconButton
-                          size="small"
-                          disabled={ret.status === 'Completed'}
-                          onClick={(e) => { e.stopPropagation(); openViewModal(ret); }}
-                          sx={{ color: ret.status === 'Completed' ? 'action.disabled' : '#EF4444' }}
-                        >
-                          <Lock fontSize="small" />
-                        </IconButton>
+                      <Tooltip title="Receive Return" arrow placement="top">
+                        <span>
+                          <IconButton
+                            size="small"
+                            disabled={ret.status === 'Completed'}
+                            onClick={(e) => { e.stopPropagation(); openViewModal(ret); }}
+                            sx={{ color: ret.status === 'Completed' ? 'action.disabled' : '#10B981', mr: 1 }}
+                          >
+                            <CheckCircle fontSize="small" />
+                          </IconButton>
+                        </span>
+                      </Tooltip>
+                      <Tooltip title="Complete Return" arrow placement="top">
+                        <span>
+                          <IconButton
+                            size="small"
+                            disabled={ret.status === 'Completed'}
+                            onClick={(e) => { e.stopPropagation(); openViewModal(ret); }}
+                            sx={{ color: ret.status === 'Completed' ? 'action.disabled' : '#EF4444' }}
+                          >
+                            <Lock fontSize="small" />
+                          </IconButton>
+                        </span>
                       </Tooltip>
                     </TableCell>
                   </TableRow>

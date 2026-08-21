@@ -513,6 +513,7 @@ class Material(Base):
     code = Column(String(50), nullable=False, index=True)
     name = Column(String(255), nullable=False)
     alias = Column(String(500), nullable=True)
+    brand = Column(String(255), nullable=True)
     reference_no = Column(String(50), nullable=True, index=True)
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
     subcategory_id = Column(Integer, ForeignKey("subcategories.id"), nullable=True)

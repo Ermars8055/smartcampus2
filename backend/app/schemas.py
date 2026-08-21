@@ -223,6 +223,7 @@ class MaterialBase(BaseModel):
     category_id: int
     subcategory_id: Optional[int] = None
     uom_id: int
+    brand: Optional[str] = Field(None, max_length=100)
     material_type: str = "Consumable"
     is_biomedical: bool = False
     requires_installation: bool = False
@@ -255,6 +256,7 @@ class MaterialUpdate(BaseModel):
     category_id: Optional[int] = None
     subcategory_id: Optional[int] = None
     uom_id: Optional[int] = None
+    brand: Optional[str] = Field(None, max_length=100)
     material_type: Optional[str] = None
     is_biomedical: Optional[bool] = None
     requires_installation: Optional[bool] = None

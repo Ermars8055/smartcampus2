@@ -602,11 +602,32 @@ export default function ContractForm() {
                         {item.equipment_id && (() => {
                            const equip = equipment.find(e => e.id === item.equipment_id);
                            const mat = materials.find(m => m.id === equip?.material_id);
-                           const baseRate = equip?.machine_cost || mat?.standard_cost || 0;
+                           const baseRate = equip?.equipment_cost || equip?.machine_cost || mat?.standard_cost || 0;
+                           
+                           let recommendation = null;
+                           if (baseRate > 0) {
+                             if (form.contract_type === 'AMC') {
+                               const min = (baseRate * 0.03).toFixed(2);
+                               const max = (baseRate * 0.05).toFixed(2);
+                               recommendation = `Recommended AMC: ₹${min} - ₹${max} (3-5%)`;
+                             } else if (form.contract_type === 'CMC') {
+                               const min = (baseRate * 0.08).toFixed(2);
+                               const max = (baseRate * 0.12).toFixed(2);
+                               recommendation = `Recommended CMC: ₹${min} - ₹${max} (8-12%)`;
+                             }
+                           }
+
                            return (
-                             <Typography variant="caption" sx={{ color: '#64748B', display: 'block', mt: 0.5 }}>
-                               Base Rate: ₹{baseRate}
-                             </Typography>
+                             <>
+                               <Typography variant="caption" sx={{ color: '#64748B', display: 'block', mt: 0.5 }}>
+                                 Equipment Cost: ₹{baseRate}
+                               </Typography>
+                               {recommendation && (
+                                 <Typography variant="caption" sx={{ color: '#10B981', display: 'block', mt: 0.25, fontWeight: 500 }}>
+                                   {recommendation}
+                                 </Typography>
+                               )}
+                             </>
                            );
                         })()}
                       </TableCell>

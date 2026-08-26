@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
-  TableContainer, Button, Checkbox, CircularProgress, Alert
+  TableContainer, Button, Checkbox, CircularProgress, Alert, IconButton,
+  Dialog, DialogTitle, DialogContent, DialogActions, FormControlLabel,
+  Select, MenuItem, InputLabel, FormControl, OutlinedInput, ListItemText, TextField
 } from '@mui/material';
-import { Save, Refresh } from '@mui/icons-material';
+import { Save, Refresh, Settings } from '@mui/icons-material';
 import api from '../services/api';
 import { useMessage } from '../context/MessageContext';
 import { useAuth } from '../context/AuthContext';
@@ -29,12 +31,23 @@ export default function PMSchedule() {
   const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [selectedRowIndex, setSelectedRowIndex] = useState(null);
+  const [roles, setRoles] = useState([]);
+  const [users, setUsers] = useState([]);
 
   const loadData = async () => {
     setLoading(true);
     try {
       const res = await api.get('/api/equipment/pm-schedule');
-      setSchedules(res.data || []);
+      const data = res.data || [];
+      // Ensure arrays are initialized
+      data.forEach(d => {
+        d.advance_email_roles = d.advance_email_roles || [];
+        d.advance_email_users = d.advance_email_users || [];
+      });
+      setSchedules(data);
     } catch (err) {
       showMessage('Failed to load PM Schedule', 'Error', 'error');
     }
@@ -43,6 +56,8 @@ export default function PMSchedule() {
 
   useEffect(() => {
     loadData();
+    api.get('/api/rbac/roles').then(r => setRoles(r.data || [])).catch(e => console.error(e));
+    api.get('/api/admin/users').then(r => setUsers(r.data || [])).catch(e => console.error(e));
   }, []);
 
   const handleCheckboxChange = (index, monthKey) => {
@@ -72,6 +87,21 @@ export default function PMSchedule() {
     }
   };
 
+  const handleOpenSettings = (index) => {
+    setSelectedRowIndex(index);
+    setSettingsOpen(true);
+  };
+
+  const handleCloseSettings = () => {
+    setSettingsOpen(false);
+    setSelectedRowIndex(null);
+  };
+
+  const handleSettingChange = (field, value) => {
+    const updated = [...schedules];
+    updated[selectedRowIndex][field] = value;
+    setSchedules(updated);
+  };
 
   if (loading) {
     return (
@@ -81,8 +111,10 @@ export default function PMSchedule() {
     );
   }
 
+  const selectedSchedule = selectedRowIndex !== null ? schedules[selectedRowIndex] : null;
+
   return (
-    <Box sx={{ p: { xs: 1, md: 3 }, maxWidth: 1200, margin: '0 auto' }}>
+    <Box sx={{ p: { xs: 1, md: 3 }, maxWidth: 1400, margin: '0 auto' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h5" sx={{ fontWeight: 800, color: '#1E293B' }}>
           Preventive Maintenance Schedule
@@ -126,6 +158,7 @@ export default function PMSchedule() {
                     {m.label}
                   </TableCell>
                 ))}
+                <TableCell align="center" sx={{ fontWeight: 700 }}>Settings</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -157,11 +190,16 @@ export default function PMSchedule() {
                     </TableCell>
                     );
                   })}
+                  <TableCell align="center">
+                    <IconButton onClick={() => handleOpenSettings(index)} color={row.advance_email_enabled ? 'primary' : 'default'} title="Email Notification Settings">
+                      <Settings fontSize="small" />
+                    </IconButton>
+                  </TableCell>
                 </TableRow>
               ))}
               {schedules.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={13} align="center" sx={{ py: 3, color: '#94A3B8' }}>
+                  <TableCell colSpan={14} align="center" sx={{ py: 3, color: '#94A3B8' }}>
                     No schedule matrix found.
                   </TableCell>
                 </TableRow>
@@ -170,6 +208,101 @@ export default function PMSchedule() {
           </Table>
         </TableContainer>
       </Card>
+
+      {/* Settings Dialog */}
+      <Dialog open={settingsOpen} onClose={handleCloseSettings} fullWidth maxWidth="sm">
+        <DialogTitle>Notification Settings - {selectedSchedule?.department_name}</DialogTitle>
+        <DialogContent dividers>
+          {selectedSchedule && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 1 }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={selectedSchedule.advance_email_enabled || false}
+                    onChange={(e) => handleSettingChange('advance_email_enabled', e.target.checked)}
+                  />
+                }
+                label="Enable Advance Email Notification"
+              />
+
+              {selectedSchedule.advance_email_enabled && (
+                <>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Notification Timing</InputLabel>
+                    <Select
+                      value={selectedSchedule.advance_email_type || 'One Month'}
+                      label="Notification Timing"
+                      onChange={(e) => handleSettingChange('advance_email_type', e.target.value)}
+                    >
+                      <MenuItem value="One Month">One Month</MenuItem>
+                      <MenuItem value="One Week">One Week</MenuItem>
+                      <MenuItem value="Custom Days">Custom Days</MenuItem>
+                    </Select>
+                  </FormControl>
+
+                  {selectedSchedule.advance_email_type === 'Custom Days' && (
+                    <TextField
+                      label="No. of days in advance"
+                      type="number"
+                      size="small"
+                      fullWidth
+                      value={selectedSchedule.advance_email_days || ''}
+                      onChange={(e) => handleSettingChange('advance_email_days', parseInt(e.target.value) || 0)}
+                    />
+                  )}
+
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Notify Roles</InputLabel>
+                    <Select
+                      multiple
+                      value={selectedSchedule.advance_email_roles || []}
+                      onChange={(e) => handleSettingChange('advance_email_roles', e.target.value)}
+                      input={<OutlinedInput label="Notify Roles" />}
+                      renderValue={(selected) => selected.map(code => {
+                        const r = roles.find(rl => rl.code === code);
+                        return r ? r.name : code;
+                      }).join(', ')}
+                    >
+                      {roles.map((r) => (
+                        <MenuItem key={r.code} value={r.code}>
+                          <Checkbox checked={(selectedSchedule.advance_email_roles || []).indexOf(r.code) > -1} />
+                          <ListItemText primary={r.name} />
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Notify Users</InputLabel>
+                    <Select
+                      multiple
+                      value={selectedSchedule.advance_email_users || []}
+                      onChange={(e) => handleSettingChange('advance_email_users', e.target.value)}
+                      input={<OutlinedInput label="Notify Users" />}
+                      renderValue={(selected) => selected.map(id => {
+                        const u = users.find(us => us.id === id);
+                        return u ? u.full_name : id;
+                      }).join(', ')}
+                    >
+                      {users.map((u) => (
+                        <MenuItem key={u.id} value={u.id}>
+                          <Checkbox checked={(selectedSchedule.advance_email_users || []).indexOf(u.id) > -1} />
+                          <ListItemText primary={u.full_name} secondary={u.email} />
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </>
+              )}
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseSettings} color="primary" variant="contained">
+            Done
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

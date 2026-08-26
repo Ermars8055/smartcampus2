@@ -121,7 +121,7 @@ def create_grn(data: GRNCreate, db: Session=Depends(get_db), current_user: User=
                         is_bio = getattr(mat_obj, 'is_biomedical', False) or False
                         req_inst = getattr(mat_obj, 'requires_installation', False) or False
                         inst_status = 'Pending Installation' if is_bio or req_inst else 'Not Required'
-                        eq_status = 'Pending Installation' if inst_status == 'Pending Installation' else 'In Store'
+                        eq_status = 'Pending Installation' if inst_status == 'Pending Installation' else 'Operational'
                         eq_code = get_next_number(db, tenant_id, site_id, 'EQP', 'EQP')
                         po_ref = po if not is_direct else None
                         proc_type = po_ref.procurement_type if po_ref else 'Purchase'

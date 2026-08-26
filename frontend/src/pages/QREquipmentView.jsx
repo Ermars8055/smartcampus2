@@ -45,6 +45,16 @@ export default function QREquipmentView() {
     );
   }
 
+  if (data && data.status === 'RBER') {
+    return (
+      <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', bgcolor: '#F8FAFC', p: 3 }}>
+        <ReportProblem color="error" sx={{ fontSize: 64, mb: 2 }} />
+        <Typography variant="h5" color="error" sx={{ fontWeight: 700, mb: 1 }}>Equipment Unavailable</Typography>
+        <Typography color="text.secondary" align="center" variant="h6">Contact Bio medical</Typography>
+      </Box>
+    );
+  }
+
   const isOperational = data.status === 'Operational';
 
   return (
@@ -119,9 +129,9 @@ export default function QREquipmentView() {
             </Grid>
 
             <Grid item xs={6}>
-              <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>Machine Type</Typography>
+              <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>Equipment Category</Typography>
               <Typography variant="body1" sx={{ fontWeight: 600, color: '#1E293B', mt: 0.5 }}>
-                {data.machine_type || 'N/A'}
+                {data.equipment_category || 'N/A'}
               </Typography>
             </Grid>
             <Grid item xs={6}>

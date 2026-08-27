@@ -1,5 +1,8 @@
 import React from 'react';
 import { Box, Typography, Grid, FormControl, InputLabel, Select, MenuItem, TextField } from '@mui/material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import dayjs from 'dayjs';
 
 const CHECKBOX_OPTIONS = ['Pass', 'Fail', 'NA'];
 
@@ -27,7 +30,7 @@ export default function PMChecklistForm({ data, onChange }) {
         </Grid>
       </Grid>
       
-      <Typography variant="subtitle2" sx={{ mt: 3, mb: 1, fontWeight: 'bold' }}>Section 1</Typography>
+      <Typography variant="subtitle2" sx={{ mt: 3, mb: 1, fontWeight: 'bold' }}>GENERAL MAINTENANCE</Typography>
       <Grid container spacing={2}>
         <Grid item xs={12} sm={6}>
           <FormCheckbox label="1) INTERNAL CLEANING" value={data.internal_cleaning} onChange={handleChange('internal_cleaning')} />
@@ -41,7 +44,7 @@ export default function PMChecklistForm({ data, onChange }) {
         </Grid>
       </Grid>
 
-      <Typography variant="subtitle2" sx={{ mt: 3, mb: 1, fontWeight: 'bold' }}>Section 2</Typography>
+      <Typography variant="subtitle2" sx={{ mt: 3, mb: 1, fontWeight: 'bold' }}>COMPONENT INSPECTION</Typography>
       <Grid container spacing={2}>
         <Grid item xs={12} sm={6}>
           <FormCheckbox label="1) FILTERS" value={data.filters} onChange={handleChange('filters')} />
@@ -68,7 +71,7 @@ export default function PMChecklistForm({ data, onChange }) {
         </Grid>
       </Grid>
 
-      <Typography variant="subtitle2" sx={{ mt: 3, mb: 1, fontWeight: 'bold' }}>Safety Test</Typography>
+      <Typography variant="subtitle2" sx={{ mt: 3, mb: 1, fontWeight: 'bold' }}>SAFETY TEST</Typography>
       <Grid container spacing={2}>
         <Grid item xs={12} sm={6}>
           <FormCheckbox label="1) ELECTRICAL" value={data.electrical} onChange={handleChange('electrical')} />
@@ -88,18 +91,40 @@ export default function PMChecklistForm({ data, onChange }) {
       <Typography variant="subtitle2" sx={{ mt: 3, mb: 1, fontWeight: 'bold' }}>Footer Details</Typography>
       <Grid container spacing={2}>
         <Grid item xs={12} sm={6}>
-           <TextField fullWidth size="small" type="datetime-local" InputLabelProps={{ shrink: true }} label="PM Start Date/Time" value={data.pm_start_date_time || ''} onChange={handleChange('pm_start_date_time')} />
+           <DateTimePicker 
+              label="PM Start Date/Time" 
+              format="DD-MMM-YYYY hh:mm A"
+              localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
+              value={data.pm_start_date_time ? dayjs(data.pm_start_date_time) : null} 
+              onChange={(newValue) => onChange({ ...data, pm_start_date_time: newValue ? newValue.format('YYYY-MM-DDTHH:mm') : '' })} 
+              slotProps={{ textField: { size: 'small', fullWidth: true, required: true } }} 
+           />
         </Grid>
         <Grid item xs={12} sm={6}>
-           <TextField fullWidth size="small" type="date" InputLabelProps={{ shrink: true }} label="PM Completed Date" value={data.pm_completed_date || ''} onChange={handleChange('pm_completed_date')} />
+           <DateTimePicker 
+              label="PM Completed Date/Time" 
+              format="DD-MMM-YYYY hh:mm A"
+              localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
+              minDateTime={data.pm_start_date_time ? dayjs(data.pm_start_date_time) : undefined}
+              value={data.pm_completed_date ? dayjs(data.pm_completed_date) : null} 
+              onChange={(newValue) => onChange({ ...data, pm_completed_date: newValue ? newValue.format('YYYY-MM-DDTHH:mm') : '' })} 
+              slotProps={{ textField: { size: 'small', fullWidth: true, required: true } }} 
+           />
         </Grid>
         <Grid item xs={12} sm={6}>
-           <TextField fullWidth size="small" type="date" InputLabelProps={{ shrink: true }} label="Next PM Due On" value={data.next_pm_due_on || ''} onChange={handleChange('next_pm_due_on')} />
+           <DatePicker 
+              label="Next PM Due On" 
+              format="DD-MMM-YYYY"
+              localeText={{ fieldYearPlaceholder: () => 'YYYY', fieldMonthPlaceholder: () => 'MMM', fieldDayPlaceholder: () => 'DD' }}
+              value={data.next_pm_due_on ? dayjs(data.next_pm_due_on) : null} 
+              onChange={(newValue) => onChange({ ...data, next_pm_due_on: newValue ? newValue.format('YYYY-MM-DD') : '' })} 
+              slotProps={{ textField: { size: 'small', fullWidth: true, required: true } }} 
+           />
         </Grid>
         <Grid item xs={12} sm={6}>
            <FormControl fullWidth size="small">
-             <InputLabel>Status</InputLabel>
-             <Select value={data.status || ''} label="Status" onChange={handleChange('status')}>
+             <InputLabel required>Status</InputLabel>
+             <Select required value={data.status || ''} label="Status *" onChange={handleChange('status')}>
                <MenuItem value="COMPLETED">COMPLETED</MenuItem>
                <MenuItem value="PENDING">PENDING</MenuItem>
                <MenuItem value="PREPOND">PREPOND</MenuItem>
@@ -109,8 +134,8 @@ export default function PMChecklistForm({ data, onChange }) {
         </Grid>
         <Grid item xs={12} sm={6}>
            <FormControl fullWidth size="small">
-             <InputLabel>Accepted For Use</InputLabel>
-             <Select value={data.accepted_for_use || ''} label="Accepted For Use" onChange={handleChange('accepted_for_use')}>
+             <InputLabel required>Accepted For Use</InputLabel>
+             <Select required value={data.accepted_for_use || ''} label="Accepted For Use *" onChange={handleChange('accepted_for_use')}>
                <MenuItem value="Yes">Yes</MenuItem>
                <MenuItem value="No">No</MenuItem>
              </Select>

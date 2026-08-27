@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict bA9JoLeZHcPrlhxoHi5HlW0eWeHfDs49P5gzZ2vCf3b8HGGwr6MocVxshwda7Fi
+\restrict Rqlne0BBAYxxvSII2G8UurRoTaBMgWJEDbya3kbEtgASfOtbIbn6kLHWWzujQNh
 
 -- Dumped from database version 17.10 (Ubuntu 17.10-1.pgdg22.04+1)
 -- Dumped by pg_dump version 18.4 (Ubuntu 18.4-1.pgdg22.04+1)
@@ -2060,12 +2060,7 @@ CREATE TABLE public.pm_schedules (
     nov boolean,
     "dec" boolean,
     created_at timestamp without time zone,
-    updated_at timestamp without time zone,
-    advance_email_enabled boolean,
-    advance_email_type character varying(50),
-    advance_email_days integer,
-    advance_email_roles json,
-    advance_email_users json
+    updated_at timestamp without time zone
 );
 
 
@@ -3187,7 +3182,11 @@ CREATE TABLE public.tenant_configurations (
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
     po_short_close_notify_roles json,
-    wo_short_close_notify_roles json
+    pm_advance_email_enabled boolean,
+    pm_advance_email_types json,
+    pm_advance_email_days integer,
+    pm_advance_email_roles json,
+    pm_advance_email_users json
 );
 
 
@@ -4605,7 +4604,7 @@ ALTER TABLE ONLY public.write_offs ALTER COLUMN id SET DEFAULT nextval('public.w
 --
 
 COPY public.alembic_version (version_num) FROM stdin;
-c1ecf03edf09
+fffe4e467573
 \.
 
 
@@ -4725,6 +4724,8 @@ COPY public.alerts (id, tenant_id, site_id, alert_type, severity, title, message
 109	2	2	Pending Action	Warning	Action Required: Issue Acknowledgement	Materials for your indent (IND-00033) have been issued. Please review and acknowledge receipt.	IndentIssued	248	\N	f	f	2026-08-26 15:31:43.29696	\N	3
 110	2	2	Indent Approved	Success	Indent IND-00034 Approved	The indent (IND-00034) has been approved by EastPoint Admin.	IndentApproved	249	\N	f	f	2026-08-26 17:53:57.445622	\N	3
 111	2	2	Pending Action	Warning	Action Required: Issue Acknowledgement	Materials for your indent (IND-00034) have been issued. Please review and acknowledge receipt.	IndentIssued	249	\N	f	f	2026-08-26 17:54:44.356557	\N	3
+112	2	2	Complaint Assigned	Info	Complaint Assigned: PM-202608-EPCMS-POST OT -PM-116	You have been assigned to complaint PM-202608-EPCMS-POST OT -PM-116. Nature of complaint: Scheduled Preventive Maintenance	ComplaintAssigned	443	\N	f	f	2026-08-27 12:06:47.975241	\N	34
+113	2	2	Complaint Assigned	Info	Complaint Assigned: CMP-00033	You have been assigned to complaint CMP-00033. Nature of complaint: need installation	ComplaintAssigned	469	\N	f	f	2026-08-27 13:04:01.430553	\N	35
 \.
 
 
@@ -6337,9 +6338,9 @@ COPY public.complaints (id, tenant_id, site_id, docket_no, complaint_date, compl
 439	2	2	PM-202608-EPCMS-POST OT -PM-114	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684738	2026-08-11 18:37:11.684745	\N	f	\N	\N	\N	\N	\N	\N	\N	1503	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 440	2	2	PM-202608-EPCMS-POST OT -PM-115	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684752	2026-08-11 18:37:11.684758	\N	f	\N	\N	\N	\N	\N	\N	\N	1504	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 441	2	2	PM-202608-EPCMS-POST OT -SYP-060	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684765	2026-08-11 18:37:11.684771	\N	f	\N	\N	\N	\N	\N	\N	\N	1505	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-443	2	2	PM-202608-EPCMS-POST OT -PM-116	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Open	\N	\N	3	\N	f	2026-08-11 18:37:11.684791	2026-08-11 18:37:11.684798	\N	f	\N	\N	\N	\N	\N	\N	\N	1507	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 444	2	2	PM-202608-EPCMS-POST OT -PM-117	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	Assigned	35	\N	3	\N	f	2026-08-11 18:37:11.684805	2026-08-12 12:09:46.430096	\N	f	\N	\N	\N	\N	\N	\N	\N	1508	Preventive Maintenance Call	t	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 457	2	2	TEST-CMP-1787064166-1	2026-08-18	20:12	Testing	\N	\N	\N	Automated test - Material Req	\N	\N	Closed	8	\N	8	\N	f	2026-08-18 20:12:46.86473	2026-08-18 20:12:47.020047	\N	t	\N	\N	\N	Looks like an automated test.	\N	\N	\N	\N	Breakdown	f	8	2026-08-18 14:42:47.003066	8	2026-08-18 14:42:47.019418	Fixed it via script	Automated closure	\N	\N	\N	\N	\N
+443	2	2	PM-202608-EPCMS-POST OT -PM-116	2026-08-11	\N	Post OT	\N	\N	\N	Scheduled Preventive Maintenance	\N	\N	In Progress	34	\N	3	\N	f	2026-08-11 18:37:11.684791	2026-08-27 14:02:33.464354	\N	f	\N	\N	\N		\N	\N	\N	1507	Preventive Maintenance Call	t	\N	\N	\N	\N				t	2026-08-27	14:01	\N
 445	2	2	CMP-00017	2026-08-12	11:09	HEALTH 	7	237		issue	general issue		Closed	34	\N	3	\N	f	2026-08-12 11:09:14.018811	2026-08-17 11:24:51.865397	\N	f	\N	\N	\N		\N	\N	\N	\N	General Complaint	f	3	2026-08-17 05:54:50.316926	3	2026-08-17 05:54:51.863207	product repaired succesfully	finished	\N	\N	\N	\N	\N
 446	3	3	CMP-99999	2026-08-17	11:32	Test Dept	\N	\N		Testing the issue	Test detail	John Doe	Registered	\N	\N	4	\N	f	2026-08-17 11:32:26.592734	2026-08-17 11:32:26.592747	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	Breakdown	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 447	3	3	CMP-00001	2026-08-17	11:53	Test Dept	\N	\N		Testing the issue	Test detail	John Doe	Registered	\N	\N	4	\N	f	2026-08-17 11:53:06.922996	2026-08-17 11:53:06.923009	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	General Complaint	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
@@ -6352,6 +6353,7 @@ COPY public.complaints (id, tenant_id, site_id, docket_no, complaint_date, compl
 458	2	2	TEST-CMP-1787064167-0	2026-08-18	20:12	Testing	\N	\N	\N	Automated test - Material Not Req	\N	\N	Closed	8	\N	8	\N	f	2026-08-18 20:12:47.041115	2026-08-18 20:12:47.20242	\N	f	\N	\N	\N	Looks like an automated test.	\N	\N	\N	\N	Breakdown	f	8	2026-08-18 14:42:47.185469	8	2026-08-18 14:42:47.202072	Fixed it via script	Automated closure	\N	\N	\N	\N	\N
 459	2	2	CMP-00023	2026-08-19	16:43	Computer Application	\N	\N		install the product	need installation	messi	Under Inspection	34	\N	3	\N	f	2026-08-19 16:43:50.854239	2026-08-19 16:44:13.799306	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	Installation	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 461	2	2	CMP-00025	2026-08-19	16:47	Computer Science & Engineering	\N	\N		Fan is not working	Fan is not working		Registered	\N	\N	3	\N	f	2026-08-19 16:47:41.27962	2026-08-19 16:47:41.279665	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	General Complaint	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+469	2	2	CMP-00033	2026-08-27	13:03	Child Health Nursing	\N	\N		need installation	installation\n		Closed	35	\N	3	\N	f	2026-08-27 13:03:47.494949	2026-08-27 13:07:24.691489	\N	f	\N	\N	\N		\N	\N	\N	\N	Installation	f	3	2026-08-27 07:37:23.627213	3	2026-08-27 07:37:24.689061	fied	installed		t	2026-08-27	13:06	{}
 464	2	2	CMP-00028	2026-08-19	16:53	Medical Surgical Nursing	\N	\N		need training	how to use it	usain	Closed	35	\N	3	\N	f	2026-08-19 16:53:58.079011	2026-08-19 17:03:11.806033	\N	f	\N	\N	\N	trained	\N	\N	\N	\N	User Training	f	3	2026-08-19 11:33:10.929709	3	2026-08-19 11:33:11.804801	done	trained	\N	\N	\N	\N	\N
 466	2	2	CMP-00030	2026-08-19	17:32	Electrotherapy Lab	\N	\N		need training	need training	messi	Closed	35	\N	3	\N	f	2026-08-19 17:32:37.906319	2026-08-19 17:33:27.708296	\N	f	\N	\N	\N	done	\N	\N	\N	\N	User Training	f	3	2026-08-19 12:03:27.081112	3	2026-08-19 12:03:27.707708	yes	trained	\N	\N	\N	\N	\N
 467	2	2	CMP-00031	2026-08-19	17:33	Mental Health Nursing	\N	\N		not working	not working	suraj	Closed	35	\N	3	\N	f	2026-08-19 17:33:59.011076	2026-08-19 17:34:51.469115	\N	f	\N	\N	\N	done	\N	\N	\N	\N	Machine Not Working	f	3	2026-08-19 12:04:51.006803	3	2026-08-19 12:04:51.468779	done	fixed	\N	\N	\N	\N	\N
@@ -10251,7 +10253,6 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 119	3	3	COMPLAINT	CMP	1
 95	2	2	PURCHASE_ORDER_3	EPCET/PO	7
 144	1	1	VENDOR_WORK_ORDER	VWO	1
-136	2	2	MATERIAL_69	HSK	70
 97	2	2	EQP	EQP	2
 125	2	2	MATERIAL_65	CIV	77
 76	2	2	INVOICE_REF	INV	9
@@ -10261,6 +10262,8 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 75	2	2	GRN	GRN	17
 112	2	2	WORK_ORDER	WO	8
 149	2	2	PURCHASE_ORDER_1	EPCMSR/PO	1
+136	2	2	MATERIAL_69	HSK	71
+65	2	2	VENDOR	VND	17
 145	2	2	EQP_109	EQP_109	2
 150	2	2	EQP_111	EQP_111	1
 146	2	2	CATEGORY		16
@@ -10268,10 +10271,10 @@ COPY public.document_sequences (id, tenant_id, site_id, document_type, prefix, c
 138	2	2	EQP_110	EQP_110	3
 94	2	2	PURCHASE_ORDER_11	EPAHS/PO	6
 120	2	2	MATERIAL_80	CHE	267
-65	2	2	VENDOR	VND	16
+151	2	2	EQP_208	EQP_208	1
 70	2	2	QUOTATION_REQUEST	QR	43
-78	2	2	COMPLAINT	CMP	32
 68	2	2	PURCHASE_REQUEST	PR	18
+78	2	2	COMPLAINT	CMP	33
 69	2	2	PURCHASE_ORDER	PO	39
 96	2	2	CONTRACT	CNT	10
 66	2	2	INDENT	IND	34
@@ -10298,6 +10301,7 @@ COPY public.equipment_history (id, equipment_id, event_type, event_date, descrip
 12	1614	Manual Registration	2026-08-19 17:36:35.538466	Equipment added manually	\N	3
 13	1615	Manual Registration	2026-08-19 17:42:55.813968	Equipment added manually	\N	3
 14	1608	Marked as RBER	2026-08-26 00:00:00	Beyond the worth of equipment 	\N	3
+15	1616	Manual Registration	2026-08-27 13:00:36.332362	Equipment added manually	\N	3
 \.
 
 
@@ -10306,6 +10310,8 @@ COPY public.equipment_history (id, equipment_id, event_type, event_date, descrip
 --
 
 COPY public.equipment_items (id, tenant_id, site_id, equipment_code, material_id, grn_id, grn_item_id, serial_number, serial_number_status, is_biomedical, requires_installation, installation_status, installation_date, installation_report_url, installation_remarks, warehouse_id, project_id, status, created_at, updated_at, warranty_available, warranty_expiry_date, amc_cmc_status, amc_cmc_end_date, amc_po_number, last_pm_date, next_pm_due_date, last_calibration_date, next_calibration_due_date, rental_agreement_number, rental_start_date, rental_end_date, rental_vendor_id, location_id, contact_number, institution_id, po_id, make, model, equipment_cost, equipment_category, serial_number_photo_url, equipment_photo_url, installed_by, amc_cost, pm_required, calibration_required, battery_details, procurement_type, rental_type, rental_cost, billing_frequency, cost_per_test, linked_reagents, agreement_status, renewal_date, expected_return_date, rental_status, warranty_end_date, rental_agreement_document, year_of_purchase, po_number, po_date, rber_reason, amc_cmc_required, amc_cmc_start_date) FROM stdin;
+1507	2	2	EPCMS-POST OT -PM-116	3899	\N	\N	301410M1380490002	Captured	t	f	Not Required	\N	\N	\N	62	\N	Under maintenance	2026-08-05 19:04:45.381725	2026-08-27 12:07:08.960642	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	EDAN	IM8	\N	\N	\N	\N	\N	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
+1616	2	2	EPSN-208-CHAI-00001	4877	\N	\N	38579C	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-27 13:00:36.277739	2026-08-27 07:46:00.479182	t	2030-08-27	None	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	85	\N	8	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	[]	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 1469	2	2	EPCMS-PHYSIO-SIMU-001	4052	\N	\N	PSD-1824	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.211283	2026-08-11 18:37:11.375202	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	141	\N	\N	\N	BMS	PHYSIOSTM 1	\N	\N	\N	\N	\N	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 1277	2	2	EPCMS-ORTHO OPD-VBOX-019	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.050995	2026-08-05 19:04:43.050998	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	123	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 1278	2	2	EPCMS-ORTHO OPD-VBOX-020	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:43.051	2026-08-05 19:04:43.051003	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	123	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
@@ -10698,7 +10704,6 @@ COPY public.equipment_items (id, tenant_id, site_id, equipment_code, material_id
 1508	2	2	EPCMS-POST OT -PM-117	3899	\N	\N	301410M1380490004	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.38173	2026-08-11 18:37:11.375267	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	EDAN	IM8	\N	\N	\N	\N	\N	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 1612	2	2	EPSN-108-1DTP-00001	3475	\N	\N	01	Pending Update	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-18 12:08:17.765623	2026-08-18 12:08:17.765639	t	2027-08-31	AMC	2027-08-31	\N	\N	\N	\N	\N	\N	\N	\N	\N	78	\N	8	\N	\N	\N	10000	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	null	\N	\N	\N	\N	\N	\N	2026	\N	\N	\N	f	\N
 1606	2	2	EQP-00002	3910	219	522	2002004	Captured	f	f	Not Required	\N	\N	\N	62	3	In Store	2026-08-17 12:13:02.027106	2026-08-18 15:24:06.655791	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	110	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
-1609	2	2	EPAHS-ER-ASDC-00002	4022	\N	\N	NA	Captured	f	t	Not Required	\N	\N	\N	62	\N	Operational	2026-08-17 13:08:06.237234	2026-08-18 15:20:16.791525	t	2027-08-17	AMC	2028-08-17	\N	\N	\N	\N	\N	\N	\N	\N	\N	110	\N	11	\N	\N	\N	\N	\N	\N	\N	\N	\N	t	t	\N	Purchase	\N	\N	\N	\N	null	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 1610	2	2	EPCP-110-18AF-00002	3507	\N	\N	NA	Captured	f	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-17 14:31:33.62432	2026-08-18 15:19:47.842241	f	\N	None	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	91	\N	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	null	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 1611	2	2	NRCN-109-ACET-00001	4608	\N	\N	2002002	Captured	f	f	Not Required	\N	\N	\N	62	\N	Written Off	2026-08-17 14:38:26.121154	2026-08-18 20:45:38.547385	f	\N	None	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	79	\N	9	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	null	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 804	2	2	EPCMS-102-BPA-001	3895	\N	\N	13660	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.195829	2026-08-05 19:04:39.195839	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	76	\N	\N	\N	DIAMOND	DELUXE	\N	\N	\N	\N	\N	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
@@ -10737,6 +10742,7 @@ COPY public.equipment_items (id, tenant_id, site_id, equipment_code, material_id
 805	2	2	EPCMS-102-ESA-001	3896	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.217136	2026-08-26 10:46:52.466917	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	76	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	[]	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 837	2	2	EPCMS-213-BPA-016	3903	\N	\N	BPM 202105 3102878	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.491005	2026-08-05 19:04:39.491014	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	89	\N	\N	\N	MI EVIDA	MI HEART 101	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 838	2	2	EPCMS-213-VBOX-007	3901	\N	\N	\N	Pending Update	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.491018	2026-08-05 19:04:39.491021	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	89	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
+1609	2	2	EPAHS-ER-ASDC-00002	4022	\N	\N	NA	Captured	f	t	Not Required	\N	\N	\N	62	\N	Operational	2026-08-17 13:08:06.237234	2026-08-27 07:00:31.987789	t	2027-08-17	AMC	2028-08-17	\N	\N	\N	\N	\N	\N	\N	\N	\N	110	\N	11	\N	\N	\N	\N	\N	\N	\N	\N	\N	t	t	\N	Purchase	\N	\N	\N	\N	[]	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	t	\N
 839	2	2	EPCMS-214-ECG-003	3902	\N	\N	DETE3A26885	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.495765	2026-08-05 19:04:39.495774	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	90	\N	\N	\N	BPL	CARIDO HEART 6208	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 840	2	2	EPCMS-216-BPA-017	3895	\N	\N	RH014060	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.502132	2026-08-05 19:04:39.50214	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	91	\N	\N	\N	DIAMOND	DELUXE	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 841	2	2	EPCMS-216-ECG-004	3902	\N	\N	106759-M13804740003	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:39.502144	2026-08-05 19:04:39.502147	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	91	\N	\N	\N	EDAN	SE1200	\N	\N	\N	\N	\N	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
@@ -11034,7 +11040,6 @@ COPY public.equipment_items (id, tenant_id, site_id, equipment_code, material_id
 1503	2	2	EPCMS-POST OT -PM-114	3899	\N	\N	E7181214066B	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.381702	2026-08-11 18:37:11.375253	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	COMEN	STAR8000	\N	\N	\N	\N	\N	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 1504	2	2	EPCMS-POST OT -PM-115	3899	\N	\N	112613M13804950009	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.381708	2026-08-11 18:37:11.375256	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	EDAN	M3	\N	\N	\N	\N	\N	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 1505	2	2	EPCMS-POST OT -SYP-060	3900	\N	\N	160560460	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.381714	2026-08-11 18:37:11.375259	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	FRESINIOUS KABI	INFUSIA SP7	\N	\N	\N	\N	\N	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
-1507	2	2	EPCMS-POST OT -PM-116	3899	\N	\N	301410M1380490002	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.381725	2026-08-11 18:37:11.375264	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	142	\N	\N	\N	EDAN	IM8	\N	\N	\N	\N	\N	\N	t	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 1509	2	2	EPCMS-PSY OPD-BIOF-001	4056	\N	\N	RELAX2203013	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.410308	2026-08-05 19:04:45.410318	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	143	\N	\N	\N	RMS	RELAX 701	\N	\N	\N	\N	DANNY	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 1510	2	2	EPCMS-PSY OPD-EEG-001	4057	\N	\N	mx242202060	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.433912	2026-08-05 19:04:45.433922	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	143	\N	\N	\N	RMS	maximus 24	\N	\N	\N	\N	DANNY	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 1511	2	2	EPCMS-PSY OPD-ECT-001	4058	\N	\N	ECTON220200G	Captured	t	f	Not Required	\N	\N	\N	62	\N	Operational	2026-08-05 19:04:45.441235	2026-08-05 19:04:45.441244	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	143	\N	\N	\N	RMS	ECTON	\N	\N	\N	\N	DANNY	\N	f	f	\N	Purchase	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
@@ -15570,6 +15575,7 @@ COPY public.materials (id, tenant_id, site_id, code, name, category_id, subcateg
 4844	2	2	CHE-00241	tween 80	80	\N	48	319	0	1150	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.306884	2026-08-06 13:39:15.644032	62	\N	\N	f	f	\N
 4845	2	2	CHE-00242	Vanillin	80	\N	47	301	0	1377	\N	General	\N	18	Consumable	Packaging: 100gm	t	f	2026-08-06 13:27:00.306891	2026-08-06 13:39:15.644035	62	\N	\N	f	f	\N
 4846	2	2	CHE-00243	Wager's reagent	80	\N	48	68	0	1124	\N	General	\N	18	Consumable	Packaging: 500ml	t	f	2026-08-06 13:27:00.306897	2026-08-06 13:39:15.644038	62	\N	\N	f	f	\N
+4877	2	2	HSK-00071	chair	69	\N	29	10	30	680	\N	General		18	Furniture		t	f	2026-08-27 12:39:41.211811	2026-08-27 12:40:33.301802	62			f	f	
 \.
 
 
@@ -15670,31 +15676,31 @@ COPY public.password_reset_tokens (id, user_id, otp, expires_at, created_at) FRO
 -- Data for Name: pm_schedules; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.pm_schedules (id, tenant_id, department_name, jan, feb, mar, apr, may, jun, jul, aug, sep, oct, nov, "dec", created_at, updated_at, advance_email_enabled, advance_email_type, advance_email_days, advance_email_roles, advance_email_users) FROM stdin;
-1	2	EMERGENCY	t	f	f	f	f	f	t	f	f	f	f	f	2026-07-28 18:45:47.970158	2026-07-28 18:45:47.970169	\N	\N	\N	\N	\N
-2	2	ICU	f	t	f	f	f	f	f	t	f	f	f	f	2026-07-28 18:45:47.971207	2026-07-28 18:45:47.971216	\N	\N	\N	\N	\N
-4	2	LABOUR ROOM/POST OP	f	f	f	t	f	f	f	f	f	t	f	f	2026-07-28 18:45:47.972535	2026-07-28 18:45:47.972543	\N	\N	\N	\N	\N
-5	2	CATH LAB	f	f	f	f	t	f	f	f	f	f	t	f	2026-07-28 18:45:47.973242	2026-07-28 18:45:47.97325	\N	\N	\N	\N	\N
-6	2	CENTRAL LAB	f	f	f	f	f	t	f	f	f	f	f	t	2026-07-28 18:45:47.973997	2026-07-28 18:45:47.974005	\N	\N	\N	\N	\N
-7	2	BLOOD BANK/IMD	t	f	f	f	f	f	t	f	f	f	f	f	2026-07-28 18:45:47.974411	2026-07-28 18:45:47.974419	\N	\N	\N	\N	\N
-8	2	DIALYSIS	f	t	f	f	f	f	f	t	f	f	f	f	2026-07-28 18:45:47.974756	2026-07-28 18:45:47.974768	\N	\N	\N	\N	\N
-9	2	RADIOLOGY	f	f	t	f	f	f	f	f	t	f	f	f	2026-07-28 18:45:47.975112	2026-07-28 18:45:47.97512	\N	\N	\N	\N	\N
-10	2	CSSD/PHYSIOTHERAPY	f	f	f	t	f	f	f	f	f	t	f	f	2026-07-28 18:45:47.975459	2026-07-28 18:45:47.975466	\N	\N	\N	\N	\N
-11	2	OPD'S	f	f	f	f	t	f	f	f	f	f	t	f	2026-07-28 18:45:47.975806	2026-07-28 18:45:47.975813	\N	\N	\N	\N	\N
-12	2	WARDS	f	f	f	f	f	t	f	f	f	f	f	t	2026-07-28 18:45:47.976167	2026-07-28 18:45:47.976176	\N	\N	\N	\N	\N
-13	1	EMERGENCY	t	f	f	f	f	f	t	f	f	f	f	f	2026-08-11 14:44:20.738516	2026-08-11 14:44:20.73853	\N	\N	\N	\N	\N
-14	1	ICU	f	t	f	f	f	f	f	t	f	f	f	f	2026-08-11 14:44:20.749622	2026-08-11 14:44:20.749635	\N	\N	\N	\N	\N
-15	1	OT	f	f	t	f	f	f	f	f	t	f	f	f	2026-08-11 14:44:20.750377	2026-08-11 14:44:20.750386	\N	\N	\N	\N	\N
-16	1	LABOUR ROOM/POST OP	f	f	f	t	f	f	f	f	f	t	f	f	2026-08-11 14:44:20.751313	2026-08-11 14:44:20.751325	\N	\N	\N	\N	\N
-17	1	CATH LAB	f	f	f	f	t	f	f	f	f	f	t	f	2026-08-11 14:44:20.752305	2026-08-11 14:44:20.752316	\N	\N	\N	\N	\N
-18	1	CENTRAL LAB	f	f	f	f	f	t	f	f	f	f	f	t	2026-08-11 14:44:20.753022	2026-08-11 14:44:20.753031	\N	\N	\N	\N	\N
-19	1	BLOOD BANK/IMD	t	f	f	f	f	f	t	f	f	f	f	f	2026-08-11 14:44:20.753414	2026-08-11 14:44:20.753422	\N	\N	\N	\N	\N
-20	1	DIALYSIS	f	t	f	f	f	f	f	t	f	f	f	f	2026-08-11 14:44:20.753785	2026-08-11 14:44:20.753794	\N	\N	\N	\N	\N
-21	1	RADIOLOGY	f	f	t	f	f	f	f	f	t	f	f	f	2026-08-11 14:44:20.754157	2026-08-11 14:44:20.754165	\N	\N	\N	\N	\N
-22	1	CSSD/PHYSIOTHERAPY	f	f	f	t	f	f	f	f	f	t	f	f	2026-08-11 14:44:20.754503	2026-08-11 14:44:20.754512	\N	\N	\N	\N	\N
-23	1	OPD'S	f	f	f	f	t	f	f	f	f	f	t	f	2026-08-11 14:44:20.7549	2026-08-11 14:44:20.754913	\N	\N	\N	\N	\N
-24	1	WARDS	f	f	f	f	f	t	f	f	f	f	f	t	2026-08-11 14:44:20.755254	2026-08-11 14:44:20.755263	\N	\N	\N	\N	\N
-3	2	OT	f	f	t	f	f	f	f	f	t	f	f	f	2026-07-28 18:45:47.971875	2026-08-11 18:50:00.507176	\N	\N	\N	\N	\N
+COPY public.pm_schedules (id, tenant_id, department_name, jan, feb, mar, apr, may, jun, jul, aug, sep, oct, nov, "dec", created_at, updated_at) FROM stdin;
+1	2	EMERGENCY	t	f	f	f	f	f	t	f	f	f	f	f	2026-07-28 18:45:47.970158	2026-07-28 18:45:47.970169
+2	2	ICU	f	t	f	f	f	f	f	t	f	f	f	f	2026-07-28 18:45:47.971207	2026-07-28 18:45:47.971216
+4	2	LABOUR ROOM/POST OP	f	f	f	t	f	f	f	f	f	t	f	f	2026-07-28 18:45:47.972535	2026-07-28 18:45:47.972543
+5	2	CATH LAB	f	f	f	f	t	f	f	f	f	f	t	f	2026-07-28 18:45:47.973242	2026-07-28 18:45:47.97325
+6	2	CENTRAL LAB	f	f	f	f	f	t	f	f	f	f	f	t	2026-07-28 18:45:47.973997	2026-07-28 18:45:47.974005
+7	2	BLOOD BANK/IMD	t	f	f	f	f	f	t	f	f	f	f	f	2026-07-28 18:45:47.974411	2026-07-28 18:45:47.974419
+8	2	DIALYSIS	f	t	f	f	f	f	f	t	f	f	f	f	2026-07-28 18:45:47.974756	2026-07-28 18:45:47.974768
+9	2	RADIOLOGY	f	f	t	f	f	f	f	f	t	f	f	f	2026-07-28 18:45:47.975112	2026-07-28 18:45:47.97512
+10	2	CSSD/PHYSIOTHERAPY	f	f	f	t	f	f	f	f	f	t	f	f	2026-07-28 18:45:47.975459	2026-07-28 18:45:47.975466
+11	2	OPD'S	f	f	f	f	t	f	f	f	f	f	t	f	2026-07-28 18:45:47.975806	2026-07-28 18:45:47.975813
+12	2	WARDS	f	f	f	f	f	t	f	f	f	f	f	t	2026-07-28 18:45:47.976167	2026-07-28 18:45:47.976176
+13	1	EMERGENCY	t	f	f	f	f	f	t	f	f	f	f	f	2026-08-11 14:44:20.738516	2026-08-11 14:44:20.73853
+14	1	ICU	f	t	f	f	f	f	f	t	f	f	f	f	2026-08-11 14:44:20.749622	2026-08-11 14:44:20.749635
+15	1	OT	f	f	t	f	f	f	f	f	t	f	f	f	2026-08-11 14:44:20.750377	2026-08-11 14:44:20.750386
+16	1	LABOUR ROOM/POST OP	f	f	f	t	f	f	f	f	f	t	f	f	2026-08-11 14:44:20.751313	2026-08-11 14:44:20.751325
+17	1	CATH LAB	f	f	f	f	t	f	f	f	f	f	t	f	2026-08-11 14:44:20.752305	2026-08-11 14:44:20.752316
+18	1	CENTRAL LAB	f	f	f	f	f	t	f	f	f	f	f	t	2026-08-11 14:44:20.753022	2026-08-11 14:44:20.753031
+19	1	BLOOD BANK/IMD	t	f	f	f	f	f	t	f	f	f	f	f	2026-08-11 14:44:20.753414	2026-08-11 14:44:20.753422
+20	1	DIALYSIS	f	t	f	f	f	f	f	t	f	f	f	f	2026-08-11 14:44:20.753785	2026-08-11 14:44:20.753794
+21	1	RADIOLOGY	f	f	t	f	f	f	f	f	t	f	f	f	2026-08-11 14:44:20.754157	2026-08-11 14:44:20.754165
+22	1	CSSD/PHYSIOTHERAPY	f	f	f	t	f	f	f	f	f	t	f	f	2026-08-11 14:44:20.754503	2026-08-11 14:44:20.754512
+23	1	OPD'S	f	f	f	f	t	f	f	f	f	f	t	f	2026-08-11 14:44:20.7549	2026-08-11 14:44:20.754913
+24	1	WARDS	f	f	f	f	f	t	f	f	f	f	f	t	2026-08-11 14:44:20.755254	2026-08-11 14:44:20.755263
+3	2	OT	f	f	t	f	f	f	f	f	t	f	f	f	2026-07-28 18:45:47.971875	2026-08-11 18:50:00.507176
 \.
 
 
@@ -23982,10 +23988,10 @@ COPY public.system_lookups (id, tenant_id, lookup_type, lookup_value, is_active,
 -- Data for Name: tenant_configurations; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.tenant_configurations (id, tenant_id, base_state, cgst_share_percent, sgst_share_percent, created_at, updated_at, po_short_close_notify_roles, wo_short_close_notify_roles) FROM stdin;
-1	3	29 - Karnataka	50	50	2026-06-08 12:39:42.146831	2026-06-08 17:11:25.816677	\N	\N
-3	4	29 - Karnataka	50	50	2026-07-03 12:57:39.558417	2026-07-03 12:57:39.558461	\N	\N
-2	2	29 - Karnataka	50	50	2026-06-11 12:21:04.216136	2026-08-11 13:32:05.980726	["Admin"]	\N
+COPY public.tenant_configurations (id, tenant_id, base_state, cgst_share_percent, sgst_share_percent, created_at, updated_at, po_short_close_notify_roles, pm_advance_email_enabled, pm_advance_email_types, pm_advance_email_days, pm_advance_email_roles, pm_advance_email_users) FROM stdin;
+1	3	29 - Karnataka	50	50	2026-06-08 12:39:42.146831	2026-06-08 17:11:25.816677	\N	\N	\N	\N	\N	\N
+3	4	29 - Karnataka	50	50	2026-07-03 12:57:39.558417	2026-07-03 12:57:39.558461	\N	\N	\N	\N	\N	\N
+2	2	29 - Karnataka	50	50	2026-06-11 12:21:04.216136	2026-08-27 11:22:36.971152	["Admin"]	t	["Before One Month", "Before One Week"]	2	["ADMIN"]	[]
 \.
 
 
@@ -24241,6 +24247,7 @@ COPY public.vendor_approvals (id, vendor_id, approval_flow_id, approver_id, rema
 15	76	65	3	\N	2026-08-18 10:56:17.53842
 16	63	65	3	\N	2026-08-19 20:59:48.969861
 17	69	65	3	\N	2026-08-19 21:26:29.904241
+18	78	65	3	\N	2026-08-27 12:58:33.781782
 \.
 
 
@@ -24304,6 +24311,8 @@ COPY public.vendor_categories (id, vendor_id, category_id) FROM stdin;
 241	69	80
 242	69	67
 243	69	68
+246	78	66
+247	78	81
 \.
 
 
@@ -24375,6 +24384,8 @@ COPY public.vendor_history (id, vendor_id, action, changes, remarks, action_by_i
 61	63	Fully Approved	\N	\N	3	2026-08-19 20:59:49.01836
 62	69	Edited and Resubmitted	{"gst_number": {"old": "29AASCA0900A1Z3", "new": "29AASCA0900A1Z4"}}	\N	3	2026-08-19 21:26:20.080549
 63	69	Fully Approved	\N	\N	3	2026-08-19 21:26:29.921341
+64	78	Created	\N	\N	3	2026-08-27 12:58:18.124993
+65	78	Fully Approved	\N	\N	3	2026-08-27 12:58:33.824699
 \.
 
 
@@ -26680,6 +26691,7 @@ COPY public.vendors (id, tenant_id, site_id, name, code, contact_person, phone, 
 77	2	2	ronaldo	VND-00016	ronaldo	77710101077	ronaldomessi@gmail.com	29AAAAA1111A1Z1	\N	chennai	33 - Tamil Nadu	600009	\N	\N	\N	0	f	f	2026-08-19 17:50:20.497753	2026-08-19 20:56:15.70306	new no, south st		Rejected	1	\N	\N	Not Required	3	2026-08-19 15:26:15.701679	\N	\N	\N	\N
 69	2	2	AIC ENTERPRISES PVT LTD	VND-00008	AICENT	9742270172	ilangkumaran@nissigrid.in	29AASCA0900A1Z4	\N	Bangalore	29 - Karnataka	560058	\N	\N	\N	4.5	t	f	2026-08-06 16:45:15.340276	2026-08-19 21:26:29.920903	V-79A and V-79B, 1ST A Main Road	2nd Stage, Peenya Industrial Estate	Approved	1	3	2026-08-19 15:56:29.920469	\N	\N	\N	Approved	3	2026-08-06 13:45:24.810803	{"gst_number": {"old": "29AASCA0900A1Z3", "new": "29AASCA0900A1Z4"}}
 63	2	2	ELCAB ENGINEERS PRIVATE LIMITED	VND-00002	Bala	47347347833	pradnesha12345@gmail.com	29AACCE9951H1ZQ	\N	Bangalore	29 - Karnataka	560060	\N	\N	\N	4.5	t	f	2026-06-12 01:31:58.140808	2026-08-19 20:59:49.017862	V R Cindem Complex, Sy. No. 1193/34/4, Kengeri Main Road,	Behind Mr Prem Bun, Ramasandra Village,	Approved	1	3	2026-08-19 15:29:49.016949	\N	\N	\N	Approved	3	2026-08-17 04:59:40.711144	{"gst_number": {"old": "29AACCE9951H1ZR", "new": "29AACCE9951H1ZQ"}}
+78	2	2	ramesh	VND-00017	ramesh	9988656468	ramesh@gmail.com	29ABCDE1284F1Z5	\N	chennai	33 - Tamil Nadu	600004	\N	\N	\N	2.5	t	f	2026-08-27 12:58:18.080665	2026-08-27 12:58:33.821894	main road, north street		Approved	1	3	2026-08-27 07:28:33.818029	\N	\N	\N	\N	\N	\N	\N
 \.
 
 
@@ -26807,7 +26819,7 @@ COPY public.write_offs (id, tenant_id, site_id, write_off_number, date, reason, 
 -- Name: alerts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.alerts_id_seq', 111, true);
+SELECT pg_catalog.setval('public.alerts_id_seq', 113, true);
 
 
 --
@@ -26870,7 +26882,7 @@ SELECT pg_catalog.setval('public.complaint_images_id_seq', 37, true);
 -- Name: complaints_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.complaints_id_seq', 468, true);
+SELECT pg_catalog.setval('public.complaints_id_seq', 469, true);
 
 
 --
@@ -26919,21 +26931,21 @@ SELECT pg_catalog.setval('public.departments_id_seq', 335, true);
 -- Name: document_sequences_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.document_sequences_id_seq', 150, true);
+SELECT pg_catalog.setval('public.document_sequences_id_seq', 151, true);
 
 
 --
 -- Name: equipment_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.equipment_history_id_seq', 14, true);
+SELECT pg_catalog.setval('public.equipment_history_id_seq', 15, true);
 
 
 --
 -- Name: equipment_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.equipment_items_id_seq', 1615, true);
+SELECT pg_catalog.setval('public.equipment_items_id_seq', 1616, true);
 
 
 --
@@ -27066,7 +27078,7 @@ SELECT pg_catalog.setval('public.material_returns_id_seq', 26, true);
 -- Name: materials_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.materials_id_seq', 4876, true);
+SELECT pg_catalog.setval('public.materials_id_seq', 4877, true);
 
 
 --
@@ -27325,21 +27337,21 @@ SELECT pg_catalog.setval('public.users_id_seq', 37, true);
 -- Name: vendor_approvals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_approvals_id_seq', 17, true);
+SELECT pg_catalog.setval('public.vendor_approvals_id_seq', 18, true);
 
 
 --
 -- Name: vendor_categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_categories_id_seq', 243, true);
+SELECT pg_catalog.setval('public.vendor_categories_id_seq', 247, true);
 
 
 --
 -- Name: vendor_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_history_id_seq', 63, true);
+SELECT pg_catalog.setval('public.vendor_history_id_seq', 65, true);
 
 
 --
@@ -27360,7 +27372,7 @@ SELECT pg_catalog.setval('public.vendor_quotations_id_seq', 592, true);
 -- Name: vendors_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendors_id_seq', 77, true);
+SELECT pg_catalog.setval('public.vendors_id_seq', 78, true);
 
 
 --
@@ -31835,5 +31847,5 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict bA9JoLeZHcPrlhxoHi5HlW0eWeHfDs49P5gzZ2vCf3b8HGGwr6MocVxshwda7Fi
+\unrestrict Rqlne0BBAYxxvSII2G8UurRoTaBMgWJEDbya3kbEtgASfOtbIbn6kLHWWzujQNh
 

@@ -93,9 +93,9 @@ def send_pm_advance_emails():
                     send_dates = []
                     types = config.pm_advance_email_types or []
                     
-                    if "One Month" in types:
+                    if "Before One Month" in types or "One Month" in types:
                         send_dates.append(first_day_of_target_month - relativedelta(months=1))
-                    if "One Week" in types:
+                    if "Before One Week" in types or "One Week" in types:
                         send_dates.append(first_day_of_target_month - timedelta(days=7))
                     if "Custom Days" in types and config.pm_advance_email_days:
                         send_dates.append(first_day_of_target_month - timedelta(days=config.pm_advance_email_days))

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Box, Typography, Card, Button, TextField, MenuItem, InputAdornment, Grid, Autocomplete, Chip, Tabs, Tab, Checkbox, FormControlLabel, FormControl, InputLabel, Select, OutlinedInput, ListItemText } from '@mui/material';
+import { Box, Typography, Card, Button, TextField, MenuItem, InputAdornment, Grid, Autocomplete, Chip, Tabs, Tab, Checkbox, FormControlLabel, FormControl, InputLabel, Select, OutlinedInput, ListItemText, FormHelperText } from '@mui/material';
 import { Save, PinDrop, Percent, NotificationsActive } from '@mui/icons-material';
 import api from '../services/api';
 import { useMessage } from '../context/MessageContext';
@@ -116,13 +116,19 @@ export default function Configurations() {
     try {
       const res = await api.get('/api/configurations');
       if (res.data) {
+        const fetchedTypes = res.data.pm_advance_email_types || [];
+        const mappedTypes = fetchedTypes.map(t => {
+          if (t === 'One Month') return 'Before One Month';
+          if (t === 'One Week') return 'Before One Week';
+          return t;
+        });
         setForm({
           base_state: res.data.base_state || '',
           cgst_share_percent: res.data.cgst_share_percent !== undefined ? res.data.cgst_share_percent : 50,
           sgst_share_percent: res.data.sgst_share_percent !== undefined ? res.data.sgst_share_percent : 50,
           po_short_close_notify_roles: res.data.po_short_close_notify_roles || [],
           pm_advance_email_enabled: res.data.pm_advance_email_enabled || false,
-          pm_advance_email_types: res.data.pm_advance_email_types || [],
+          pm_advance_email_types: mappedTypes,
           pm_advance_email_days: res.data.pm_advance_email_days || '',
           pm_advance_email_roles: res.data.pm_advance_email_roles || [],
           pm_advance_email_users: res.data.pm_advance_email_users || []
@@ -318,7 +324,7 @@ export default function Configurations() {
                       input={<OutlinedInput label="Notification Timing" />}
                       renderValue={(selected) => selected.join(', ')}
                     >
-                      {['One Month', 'One Week', 'Custom Days'].map((name) => (
+                      {['Before One Month', 'Before One Week', 'Custom Days'].map((name) => (
                         <MenuItem key={name} value={name}>
                           <Checkbox checked={form.pm_advance_email_types.indexOf(name) > -1} />
                           <ListItemText primary={name} />
@@ -356,27 +362,7 @@ export default function Configurations() {
                         </MenuItem>
                       ))}
                     </Select>
-                  </FormControl>
-
-                  <FormControl fullWidth>
-                    <InputLabel>Notify Users</InputLabel>
-                    <Select
-                      multiple
-                      value={form.pm_advance_email_users}
-                      onChange={(e) => setForm({ ...form, pm_advance_email_users: e.target.value })}
-                      input={<OutlinedInput label="Notify Users" />}
-                      renderValue={(selected) => selected.map(id => {
-                        const u = users.find(us => us.id === id);
-                        return u ? u.full_name : id;
-                      }).join(', ')}
-                    >
-                      {users.map((u) => (
-                        <MenuItem key={u.id} value={u.id}>
-                          <Checkbox checked={form.pm_advance_email_users.indexOf(u.id) > -1} />
-                          <ListItemText primary={u.full_name} secondary={u.email} />
-                        </MenuItem>
-                      ))}
-                    </Select>
+                    <FormHelperText>Note: This is common for all departments</FormHelperText>
                   </FormControl>
                 </>
               )}

@@ -31,9 +31,26 @@ def _enrich(complaint: Complaint, db: Session = None):
     complaint.manager_approved_by_name = complaint.manager_approver.full_name if complaint.manager_approver else None
     complaint.equipment_code = complaint.equipment.equipment_code if complaint.equipment else None
     
+    complaint.equipment_name = None
+    complaint.equipment_make = None
+    complaint.equipment_model = None
+    complaint.equipment_serial_number = None
+    complaint.equipment_photo_url = None
+    complaint.serial_number_photo_url = None
+    complaint.installation_report_url = None
+    
     complaint.equipment_warranty_status = None
     if complaint.equipment:
         eq = complaint.equipment
+        complaint.equipment_make = eq.make
+        complaint.equipment_model = eq.model
+        complaint.equipment_serial_number = eq.serial_number
+        complaint.equipment_photo_url = eq.equipment_photo_url
+        complaint.serial_number_photo_url = eq.serial_number_photo_url
+        complaint.installation_report_url = eq.installation_report_url
+        if eq.material:
+            complaint.equipment_name = eq.material.name
+            
         now_date = datetime.now().date()
         if eq.warranty_available and eq.warranty_expiry_date and eq.warranty_expiry_date >= now_date:
             complaint.equipment_warranty_status = "Warranty"
@@ -602,13 +619,22 @@ def close_complaint(
         )
 
     if complaint.complaint_type == "Installation":
-        if not payload.equipment_photo_url or not payload.serial_number_photo_url or not payload.installation_report_url:
-            raise HTTPException(status_code=400, detail="Equipment photo, Serial Number photo, and Installation Report are mandatory for Installation complaints.")
+        if not payload.equipment_photo_url or not payload.installation_report_url:
+            raise HTTPException(status_code=400, detail="Equipment photo and Installation Report are mandatory for Installation complaints.")
+            
+        if not payload.serial_number_photo_url and payload.serial_number != 'NA':
+            raise HTTPException(status_code=400, detail="Serial Number photo is mandatory unless Serial Number is NA.")
         
         if complaint.equipment:
             complaint.equipment.equipment_photo_url = payload.equipment_photo_url
-            complaint.equipment.serial_number_photo_url = payload.serial_number_photo_url
+            if payload.serial_number_photo_url:
+                complaint.equipment.serial_number_photo_url = payload.serial_number_photo_url
             complaint.equipment.installation_report_url = payload.installation_report_url
+            
+            if payload.serial_number and payload.serial_number != 'NA':
+                complaint.equipment.serial_number = payload.serial_number
+            elif payload.serial_number == 'NA':
+                complaint.equipment.serial_number = None
 
     complaint.resolution_entered = payload.resolution_entered
     complaint.closure_reason = payload.closure_reason

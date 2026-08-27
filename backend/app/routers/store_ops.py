@@ -97,6 +97,7 @@ def list_issues(
                 remarks=item.remarks,
                 material_name=mat.name if mat else None,
                 material_code=mat.code if mat else None,
+                material_hsn_code=mat.hsn_code if mat else None,
                 uom_name=mat.uom.abbreviation if mat and mat.uom else None
             ))
         room_name = iss.room.name if iss.room else None

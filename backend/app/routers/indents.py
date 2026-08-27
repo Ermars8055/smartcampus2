@@ -200,6 +200,12 @@ def create_indent(
             )
             db.add(item)
             
+        if data.complaint_id:
+            from app.models import Complaint
+            complaint = db.query(Complaint).filter(Complaint.id == data.complaint_id).first()
+            if complaint and complaint.equipment:
+                complaint.equipment.status = "Spare Requested"
+        
         db.commit()
         db.refresh(indent)
     except HTTPException:

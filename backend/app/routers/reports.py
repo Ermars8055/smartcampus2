@@ -1232,6 +1232,86 @@ def get_department_equipment_report(
     }
 
 
+@router.get("/department-equipment-details")
+def get_department_equipment_details_report(
+    category_id: Optional[int] = None,
+    search: Optional[str] = None,
+    department_id: Optional[str] = None,
+    institution_id: Optional[int] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("report_dept_inventory", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    from app.models import EquipmentItem, LocationMaster, Material, UOM
+    from sqlalchemy.orm import joinedload
+    
+    query = db.query(EquipmentItem).join(Material).outerjoin(LocationMaster).filter(
+        EquipmentItem.tenant_id == tenant_id,
+        EquipmentItem.site_id == site_id,
+        EquipmentItem.status != "Written Off",
+        EquipmentItem.status != "Transferred",
+        Material.is_deleted == False
+    ).options(
+        joinedload(EquipmentItem.material),
+        joinedload(EquipmentItem.location)
+    )
+    
+    if category_id:
+        query = query.filter(Material.category_id == category_id)
+    
+    if institution_id:
+        query = query.filter(EquipmentItem.institution_id == institution_id)
+        
+    if department_id:
+        loc_ids = [int(id.strip()) for id in department_id.split(',')]
+        query = query.filter(EquipmentItem.location_id.in_(loc_ids))
+        
+    if search:
+        search_term = f"%{search}%"
+        query = query.filter(
+            (Material.code.ilike(search_term)) | 
+            (Material.name.ilike(search_term)) | 
+            (EquipmentItem.serial_number.ilike(search_term)) | 
+            (EquipmentItem.equipment_code.ilike(search_term))
+        )
+        
+    equipments = query.all()
+    
+    departments_map = {}
+    
+    for eq in equipments:
+        dept_name = eq.location.location_name if eq.location and eq.location.location_name else "UNKNOWN"
+        
+        if dept_name not in departments_map:
+            departments_map[dept_name] = {
+                "department_name": dept_name,
+                "equipment_count": 0,
+                "equipments": []
+            }
+            
+        departments_map[dept_name]["equipment_count"] += 1
+        departments_map[dept_name]["equipments"].append({
+            "equipment_name": f"{eq.material.code} - {eq.material.name}" if eq.material else "-",
+            "make": eq.make or "-",
+            "model": eq.model or "-",
+            "serial_number": eq.serial_number or "-",
+            "last_pm_date": eq.last_pm_date.strftime("%Y-%m-%d") if eq.last_pm_date else "-",
+            "next_pm_due_date": eq.next_pm_due_date.strftime("%Y-%m-%d") if eq.next_pm_due_date else "-",
+            "last_calibration_date": eq.last_calibration_date.strftime("%Y-%m-%d") if eq.last_calibration_date else "-",
+            "next_calibration_due_date": eq.next_calibration_due_date.strftime("%Y-%m-%d") if eq.next_calibration_due_date else "-",
+            "status": eq.status or "-"
+        })
+        
+    sorted_departments = sorted(departments_map.values(), key=lambda x: x["department_name"])
+    
+    return {
+        "departments": sorted_departments,
+        "generated_at": get_now_ist().strftime("%d-%b-%Y %H:%M:%S"),
+        "generated_by": current_user.full_name
+    }
+
+
 # ==========================================
 # CALL STATUS REPORT
 # ==========================================

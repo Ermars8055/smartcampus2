@@ -6,7 +6,7 @@ import {
   DialogContent, DialogActions, Grid, Select, FormControl, TextField,
   InputLabel, IconButton, InputAdornment, MenuItem, Paper,
   Autocomplete, ListSubheader, createFilterOptions,
-  RadioGroup, FormControlLabel, Radio, Tabs, Tab
+  RadioGroup, FormControlLabel, Radio, Tabs, Tab, Tooltip
 } from '@mui/material';
 import { Close, TaskAlt, Print, LocalShipping, Add, Comment, Person, Numbers, AccountTree, Delete, Search } from '@mui/icons-material';
 import api from '../services/api';
@@ -589,18 +589,23 @@ export default function GatePasses() {
                       )}
                     </TableCell>
                     <TableCell align="right" onClick={e => e.stopPropagation()}>
-                      <IconButton size="small" color="primary" onClick={() => printGatePass(gp)}>
-                        <Print fontSize="small" />
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        color={['Issued', 'Pending Repair', 'Yet to Receive'].includes(gp.status) ? "success" : "default"}
-                        onClick={() => completeGatePass(gp.id, gp.gate_pass_type)}
-                        disabled={!['Issued', 'Pending Repair', 'Yet to Receive'].includes(gp.status)}
-                        title="Mark as Received"
-                      >
-                        <TaskAlt fontSize="small" />
-                      </IconButton>
+                      <Tooltip title="Print Gate Pass" arrow placement="top">
+                        <IconButton size="small" color="primary" onClick={() => printGatePass(gp)}>
+                          <Print fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Mark As Received" arrow placement="top">
+                        <span>
+                          <IconButton
+                            size="small"
+                            color={['Issued', 'Pending Repair', 'Yet to Receive'].includes(gp.status) ? "success" : "default"}
+                            onClick={() => completeGatePass(gp.id, gp.gate_pass_type)}
+                            disabled={!['Issued', 'Pending Repair', 'Yet to Receive'].includes(gp.status)}
+                          >
+                            <TaskAlt fontSize="small" />
+                          </IconButton>
+                        </span>
+                      </Tooltip>
                     </TableCell>
                   </TableRow>
                 ))}

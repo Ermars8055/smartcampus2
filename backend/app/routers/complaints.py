@@ -155,6 +155,9 @@ def create_complaint(
             from app.models import ContractItem, Contract, EquipmentItem
             today = datetime.utcnow().date()
             eq = db.query(EquipmentItem).filter(EquipmentItem.id == complaint_in.equipment_id).first()
+            if eq:
+                eq.status = "Under Repair"
+                
             c_item = db.query(ContractItem).join(Contract).filter(
                 ContractItem.equipment_id == complaint_in.equipment_id,
                 Contract.status.in_(["Approved", "Active"]),
@@ -279,6 +282,12 @@ def update_complaint(
     for field, value in update_data.items():
         if field not in ['image_urls', 'resolution_image_urls']:
             setattr(complaint, field, value)
+            if field == 'status' and value == ComplaintStatus.IN_PROGRESS.value:
+                if complaint.equipment:
+                    complaint.equipment.status = "Under maintenance"
+            if field == 'status' and value in [ComplaintStatus.CLOSED.value, ComplaintStatus.RESOLVED.value]:
+                if complaint.equipment:
+                    complaint.equipment.status = "Operational"
 
     if 'image_urls' in update_data:
         provided_urls = update_data['image_urls']
@@ -431,6 +440,8 @@ def complete_inspection(
         complaint.status = ComplaintStatus.MATERIAL_PENDING.value
     else:
         complaint.status = ComplaintStatus.IN_PROGRESS.value
+        if complaint.equipment:
+            complaint.equipment.status = "Under maintenance"
 
     db.commit()
     db.refresh(complaint)
@@ -459,6 +470,8 @@ def start_repair(
         )
 
     complaint.status = ComplaintStatus.IN_PROGRESS.value
+    if complaint.equipment:
+        complaint.equipment.status = "Under maintenance"
     db.commit()
     db.refresh(complaint)
     return _enrich(complaint, db)
@@ -488,6 +501,8 @@ def resolve_complaint(
         )
 
     complaint.status = ComplaintStatus.CLOSED.value
+    if complaint.equipment:
+        complaint.equipment.status = "Operational"
     complaint.resolved_at = datetime.utcnow()
     complaint.resolved_by_id = current_user.id
     
@@ -547,6 +562,8 @@ def verify_complaint(
 
     if payload.is_accepted:
         complaint.status = ComplaintStatus.CLOSED.value
+        if complaint.equipment:
+            complaint.equipment.status = "Operational"
         if payload.feedback:
             complaint.feedback = payload.feedback
     else:
@@ -595,6 +612,13 @@ def close_complaint(
 
     complaint.resolution_entered = payload.resolution_entered
     complaint.closure_reason = payload.closure_reason
+    complaint.status_on_work_completion = payload.status_on_work_completion
+    if payload.job_completed_satisfactorily is not None:
+        complaint.job_completed_satisfactorily = payload.job_completed_satisfactorily
+    complaint.completion_date = payload.completion_date
+    complaint.completion_time = payload.completion_time
+    if payload.pm_checklist_data is not None:
+        complaint.pm_checklist_data = payload.pm_checklist_data
     complaint.status = "Pending Approval"
     
     # Add documents
@@ -643,6 +667,8 @@ def approve_closure(
     # If both approved, move to closed and update equipment
     if complaint.admin_approved_by_id and complaint.manager_approved_by_id:
         complaint.status = ComplaintStatus.CLOSED.value
+        if complaint.equipment:
+            complaint.equipment.status = "Operational"
         
         # Auto-update PM/Calibration if applicable
         if complaint.is_pm_calibration_call and complaint.equipment:

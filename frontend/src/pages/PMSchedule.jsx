@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import {
   Box, Typography, Card, Table, TableHead, TableBody, TableRow, TableCell,
-  TableContainer, Button, Checkbox, CircularProgress, Alert
+  TableContainer, Button, Checkbox, CircularProgress, Alert, IconButton,
+  Dialog, DialogTitle, DialogContent, DialogActions, FormControlLabel,
+  Select, MenuItem, InputLabel, FormControl, OutlinedInput, ListItemText, TextField
 } from '@mui/material';
 import { Save, Refresh } from '@mui/icons-material';
 import api from '../services/api';
@@ -34,7 +36,8 @@ export default function PMSchedule() {
     setLoading(true);
     try {
       const res = await api.get('/api/equipment/pm-schedule');
-      setSchedules(res.data || []);
+      const data = res.data || [];
+      setSchedules(data);
     } catch (err) {
       showMessage('Failed to load PM Schedule', 'Error', 'error');
     }
@@ -72,7 +75,6 @@ export default function PMSchedule() {
     }
   };
 
-
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
@@ -81,8 +83,10 @@ export default function PMSchedule() {
     );
   }
 
+
+
   return (
-    <Box sx={{ p: { xs: 1, md: 3 }, maxWidth: 1200, margin: '0 auto' }}>
+    <Box sx={{ p: { xs: 1, md: 3 }, maxWidth: 1400, margin: '0 auto' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h5" sx={{ fontWeight: 800, color: '#1E293B' }}>
           Preventive Maintenance Schedule
@@ -161,7 +165,7 @@ export default function PMSchedule() {
               ))}
               {schedules.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={13} align="center" sx={{ py: 3, color: '#94A3B8' }}>
+                  <TableCell colSpan={14} align="center" sx={{ py: 3, color: '#94A3B8' }}>
                     No schedule matrix found.
                   </TableCell>
                 </TableRow>

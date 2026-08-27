@@ -214,7 +214,13 @@ class TenantConfiguration(Base):
     cgst_share_percent = Column(Float, nullable=False)
     sgst_share_percent = Column(Float, nullable=False)
     po_short_close_notify_roles = Column(JSON, default=list)
-    wo_short_close_notify_roles = Column(JSON, default=list)
+    
+    # PM Notification Settings
+    pm_advance_email_enabled = Column(Boolean, default=False)
+    pm_advance_email_types = Column(JSON, default=list)
+    pm_advance_email_days = Column(Integer, nullable=True)
+    pm_advance_email_roles = Column(JSON, default=list)
+    pm_advance_email_users = Column(JSON, default=list)
     created_at = Column(DateTime, default=_get_now)
     updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)
     tenant = relationship("Tenant")
@@ -513,6 +519,7 @@ class Material(Base):
     code = Column(String(50), nullable=False, index=True)
     name = Column(String(255), nullable=False)
     alias = Column(String(500), nullable=True)
+    brand = Column(String(255), nullable=True)
     reference_no = Column(String(50), nullable=True, index=True)
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
     subcategory_id = Column(Integer, ForeignKey("subcategories.id"), nullable=True)
@@ -613,8 +620,8 @@ class EquipmentItem(Base):
     location_id = Column(Integer, ForeignKey("location_master.id"), nullable=True)
     make = Column(String(100), nullable=True)
     model = Column(String(100), nullable=True)
-    machine_cost = Column(Float, nullable=True)
-    machine_type = Column(String(100), nullable=True)
+    equipment_cost = Column(Float, nullable=True)
+    equipment_category = Column(String(100), nullable=True)
     serial_number = Column(String(100), nullable=True, index=True)
     serial_number_status = Column(String(50), default="Pending Update") # "Captured", "Pending Update"
     serial_number_photo_url = Column(String(500), nullable=True)
@@ -629,11 +636,14 @@ class EquipmentItem(Base):
     installation_remarks = Column(Text, nullable=True)
     warehouse_id = Column(Integer, ForeignKey("warehouses.id"), nullable=True)
     project_id = Column(Integer, ForeignKey("projects.id"), nullable=True)
-    status = Column(String(50), default="In Store") # "In Store", "Pending Installation", "Operational", "Written Off"
+    status = Column(String(50), default="Operational") # "In Store", "Pending Installation", "Operational", "Written Off", "RBER"
+    rber_reason = Column(Text, nullable=True)
     
     # Maintenance & Warranty
     warranty_available = Column(Boolean, default=False)
     warranty_expiry_date = Column(Date, nullable=True)
+    amc_cmc_required = Column(Boolean, default=False)
+    amc_cmc_start_date = Column(Date, nullable=True)
     amc_cmc_status = Column(String(50), nullable=True)
     amc_cmc_end_date = Column(Date, nullable=True)
     amc_po_number = Column(String(50), nullable=True)
@@ -1087,12 +1097,19 @@ class Complaint(Base):
     complaint_type = Column(String(100), nullable=True)
     closure_reason = Column(String(255), nullable=True)
     resolution_entered = Column(Text, nullable=True)
+    
+    # Form completion fields
+    status_on_work_completion = Column(String(255), nullable=True)
+    job_completed_satisfactorily = Column(Boolean, default=True)
+    completion_date = Column(Date, nullable=True)
+    completion_time = Column(String(20), nullable=True)
+    
     admin_approved_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     admin_approved_at = Column(DateTime, nullable=True)
     manager_approved_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     manager_approved_at = Column(DateTime, nullable=True)
     is_pm_calibration_call = Column(Boolean, default=False)
-
+    pm_checklist_data = Column(JSON, nullable=True)
 
     created_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     resolved_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)

@@ -3,10 +3,13 @@ import {
   Box, Typography, Paper, Grid, Divider, Chip, Button, IconButton, Dialog, DialogTitle,
   DialogContent, DialogActions, TextField, CircularProgress, Snackbar, Alert, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Switch, FormControlLabel, Stepper, Step, StepLabel, Select, MenuItem, FormControl, InputLabel
 } from '@mui/material';
-import { ArrowBack, CheckCircle, Assignment, PhotoCamera, Close, AddShoppingCart, Build, Search, VerifiedUser, Cancel, Replay, Add } from '@mui/icons-material';
+import { ArrowBack, CheckCircle, Assignment, PhotoCamera, Close, AddShoppingCart, Build, Search, VerifiedUser, Cancel, Replay, Add, Print, Save } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
 import api, { getFileUrl } from '../services/api';
 import dayjs from 'dayjs';
+import EngineerEvaluationReport from '../components/EngineerEvaluationReport';
+import PreventiveMaintenanceReport from '../components/PreventiveMaintenanceReport';
+import PMChecklistForm from '../components/PMChecklistForm';
 import { useAuth } from '../context/AuthContext';
 
 const COMPLAINT_STEPS = ['Registered', 'Assigned', 'Under Inspection', 'In Progress', 'Pending Approval', 'Closed'];
@@ -45,12 +48,21 @@ export default function ComplaintDetail() {
 
   // Closure States
   const [closureReason, setClosureReason] = useState('');
+  const [statusOnWorkCompletion, setStatusOnWorkCompletion] = useState('');
+  const [jobCompletedSatisfactorily, setJobCompletedSatisfactorily] = useState(true);
+  const [completionDate, setCompletionDate] = useState(dayjs().format('YYYY-MM-DD'));
+  const [completionTime, setCompletionTime] = useState(dayjs().format('HH:mm'));
   const [closureDocs, setClosureDocs] = useState([]);
+  const [pmChecklistData, setPmChecklistData] = useState({});
+  const isPM = complaint?.complaint_type?.includes('PM') || complaint?.complaint_type?.includes('Preventive Maintenance') || complaint?.is_pm_calibration_call;
   
   // Installation Specific States
   const [equipmentPhoto, setEquipmentPhoto] = useState(null);
   const [serialNumberPhoto, setSerialNumberPhoto] = useState(null);
   const [installationReport, setInstallationReport] = useState(null);
+  const [signedReport, setSignedReport] = useState(null);
+  const [isPrinting, setIsPrinting] = useState(false);
+  const printableReportRef = useRef(null);
 
   useEffect(() => {
     fetchComplaintData();
@@ -63,6 +75,15 @@ export default function ComplaintDetail() {
 
     return () => clearInterval(interval);
   }, [id]);
+
+  useEffect(() => {
+    if (isPrinting) {
+      setTimeout(() => {
+        window.print();
+        setIsPrinting(false);
+      }, 500);
+    }
+  }, [isPrinting]);
 
   const fetchComplaintData = async (isPolling = false) => {
     try {
@@ -207,6 +228,26 @@ export default function ComplaintDetail() {
     }
   };
 
+  const handleSaveDetails = async () => {
+    setActionLoading(true);
+    try {
+      await api.put(`/api/complaints/${id}`, {
+        resolution_entered: resolutionRemarks,
+        closure_reason: closureReason,
+        status_on_work_completion: statusOnWorkCompletion,
+        job_completed_satisfactorily: jobCompletedSatisfactorily,
+        completion_date: completionDate,
+        completion_time: completionTime
+      });
+      setSnackbar({ open: true, message: 'Details saved successfully', severity: 'success' });
+      fetchComplaintData();
+    } catch (error) {
+      setSnackbar({ open: true, message: 'Failed to save details', severity: 'error' });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const handleResolve = async () => {
     setActionLoading(true);
     try {
@@ -224,6 +265,15 @@ export default function ComplaintDetail() {
       for (const file of closureDocs) {
         const formDataUpload = new FormData();
         formDataUpload.append('file', file);
+        const uploadRes = await api.post('/api/upload?folder=complaints', formDataUpload, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        documentUrls.push(uploadRes.data.url);
+      }
+      
+      if (signedReport) {
+        const formDataUpload = new FormData();
+        formDataUpload.append('file', signedReport);
         const uploadRes = await api.post('/api/upload?folder=complaints', formDataUpload, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
@@ -258,8 +308,13 @@ export default function ComplaintDetail() {
       const payload = {
         resolution_entered: resolutionRemarks,
         closure_reason: closureReason,
+        status_on_work_completion: statusOnWorkCompletion,
+        job_completed_satisfactorily: jobCompletedSatisfactorily,
+        completion_date: completionDate,
+        completion_time: completionTime,
         document_urls: documentUrls,
-        resolution_image_urls: resolutionImageUrls
+        resolution_image_urls: resolutionImageUrls,
+        pm_checklist_data: pmChecklistData
       };
 
       if (complaint?.complaint_type === 'Installation') {
@@ -333,9 +388,13 @@ export default function ComplaintDetail() {
 
   const canStartRepair = materialIssues.length > 0 && materialIssues.every(issue => issue.is_acknowledged);
   const isCreator = user && complaint && String(user.id) === String(complaint.created_by_id);
+  
+  const canClose = materialIssues.every(issue => issue.is_acknowledged) && 
+                   materialIndents.every(indent => ['Issued', 'Rejected', 'Partially Issued', 'Completed'].includes(indent.status));
 
   return (
-    <Box sx={{ maxWidth: 1000, mx: 'auto', pb: 5 }}>
+    <>
+    <Box sx={{ display: isPrinting ? 'none' : 'block', maxWidth: 1000, mx: 'auto', pb: 5 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <IconButton onClick={() => navigate('/complaints')}><ArrowBack /></IconButton>
@@ -399,9 +458,22 @@ export default function ComplaintDetail() {
             )}
 
             {(complaint.status === 'In Progress' || (complaint.status === 'Open' && complaint.assigned_to_id) || complaint.status === 'Resolved') && (
-              <Button variant="contained" color="success" startIcon={<CheckCircle />} onClick={() => setResolveDialogOpen(true)}>
-                Initiate Closure Workflow
-              </Button>
+              <Tooltip title={!canClose ? "Cannot close: There are pending material requests or unacknowledged materials." : ""}>
+                <span>
+                  <Button variant="contained" color="success" startIcon={<CheckCircle />} onClick={() => {
+                    setResolutionRemarks(complaint.resolution_entered || '');
+                    setClosureReason(complaint.closure_reason || '');
+                    setStatusOnWorkCompletion(complaint.status_on_work_completion || '');
+                    setJobCompletedSatisfactorily(complaint.job_completed_satisfactorily !== false);
+                    setCompletionDate(complaint.completion_date || dayjs().format('YYYY-MM-DD'));
+                    setCompletionTime(complaint.completion_time || dayjs().format('HH:mm'));
+                    setPmChecklistData(complaint.pm_checklist_data || {});
+                    setResolveDialogOpen(true);
+                  }} disabled={!canClose}>
+                    Initiate Closure Workflow
+                  </Button>
+                </span>
+              </Tooltip>
             )}
 
             {(complaint.status === 'Pending Approval' || complaint.status === 'Pending Admin Approval') && !complaint.admin_approved_by_id && hasAction('complaints', 'can_approve_level1') && (
@@ -667,69 +739,74 @@ export default function ComplaintDetail() {
              )}
           </Paper>
 
-          {/* Materials Issued */}
-          <Paper sx={{ p: 3, mb: 3 }}>
-             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-               <Typography variant="h6" sx={{ color: '#1E3A8A' }}>Materials Issued</Typography>
-             </Box>
-             {materialIssues.length === 0 ? (
-               <Typography variant="body2" color="textSecondary">No materials issued for this complaint.</Typography>
-             ) : (
-               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                 {materialIssues.map((issue) => (
-                   <Paper key={issue.id} variant="outlined" sx={{ p: 2 }}>
-                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                       <Typography variant="subtitle2" fontWeight="bold">{issue.issue_number}</Typography>
-                       <Chip size="small" label={issue.status} color={issue.status === 'Completed' ? 'success' : 'default'} />
-                     </Box>
-                     <Divider sx={{ my: 1 }} />
-                     <Table size="small">
-                       <TableHead>
-                         <TableRow>
-                           <TableCell>Code</TableCell>
-                           <TableCell>Name</TableCell>
-                           <TableCell align="right">Qty</TableCell>
-                         </TableRow>
-                       </TableHead>
-                       <TableBody>
-                         {(issue.items || []).map((item, idx) => (
-                           <TableRow key={idx}>
-                             <TableCell sx={{ fontSize: '0.8rem' }}>{item.material_code}</TableCell>
-                             <TableCell sx={{ fontSize: '0.8rem' }}>{item.material_name}</TableCell>
-                             <TableCell align="right" sx={{ fontSize: '0.8rem', fontWeight: 'bold' }}>{item.quantity} {item.uom_name}</TableCell>
-                           </TableRow>
-                         ))}
-                       </TableBody>
-                     </Table>
-                   </Paper>
-                 ))}
-               </Box>
-             )}
-          </Paper>
-
-          {/* Material Issue Acknowledgement Status */}
-          <Paper sx={{ p: 3, mb: 3 }}>
-            <Typography variant="h6" sx={{ color: '#1E3A8A', mb: 2 }}>Material Issue Acknowledgement Status</Typography>
-            {materialIssues.length === 0 ? (
-              <Typography variant="body2" color="textSecondary">No issues to acknowledge.</Typography>
-            ) : (
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                {materialIssues.map((issue) => (
-                  <Box key={issue.id} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1.5, border: '1px solid #E2E8F0', borderRadius: 1, bgcolor: issue.is_acknowledged ? '#F0FDF4' : '#FFFBEB' }}>
-                    <Box>
-                      <Typography variant="subtitle2" fontWeight="bold">{issue.issue_number}</Typography>
-                      {issue.is_acknowledged ? (
-                        <Typography variant="caption" color="textSecondary">Acknowledged by {issue.acknowledged_by_name || 'Technician'} on {issue.acknowledged_at ? dayjs(issue.acknowledged_at).format('DD MMM YYYY') : ''}</Typography>
-                      ) : (
-                        <Typography variant="caption" color="textSecondary">Awaiting Acknowledgement</Typography>
-                      )}
-                    </Box>
-                    <Chip size="small" label={issue.is_acknowledged ? 'Acknowledged' : 'Pending'} color={issue.is_acknowledged ? 'success' : 'warning'} />
+          {/* Materials Issued and Acknowledgement Status - conditionally rendered */}
+          {(materialIndents.length > 0 || materialIssues.length > 0) && (
+            <>
+              {/* Materials Issued */}
+              <Paper sx={{ p: 3, mb: 3 }}>
+                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                   <Typography variant="h6" sx={{ color: '#1E3A8A' }}>Materials Issued</Typography>
+                 </Box>
+                 {materialIssues.length === 0 ? (
+                   <Typography variant="body2" color="textSecondary">No materials issued for this complaint.</Typography>
+                 ) : (
+                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                     {materialIssues.map((issue) => (
+                       <Paper key={issue.id} variant="outlined" sx={{ p: 2 }}>
+                         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                           <Typography variant="subtitle2" fontWeight="bold">{issue.issue_number}</Typography>
+                           <Chip size="small" label={issue.status} color={issue.status === 'Completed' ? 'success' : 'default'} />
+                         </Box>
+                         <Divider sx={{ my: 1 }} />
+                         <Table size="small">
+                           <TableHead>
+                             <TableRow>
+                               <TableCell>Code</TableCell>
+                               <TableCell>Name</TableCell>
+                               <TableCell align="right">Qty</TableCell>
+                             </TableRow>
+                           </TableHead>
+                           <TableBody>
+                             {(issue.items || []).map((item, idx) => (
+                               <TableRow key={idx}>
+                                 <TableCell sx={{ fontSize: '0.8rem' }}>{item.material_code}</TableCell>
+                                 <TableCell sx={{ fontSize: '0.8rem' }}>{item.material_name}</TableCell>
+                                 <TableCell align="right" sx={{ fontSize: '0.8rem', fontWeight: 'bold' }}>{item.quantity} {item.uom_name}</TableCell>
+                               </TableRow>
+                             ))}
+                           </TableBody>
+                         </Table>
+                       </Paper>
+                     ))}
+                   </Box>
+                 )}
+              </Paper>
+    
+              {/* Material Issue Acknowledgement Status */}
+              <Paper sx={{ p: 3, mb: 3 }}>
+                <Typography variant="h6" sx={{ color: '#1E3A8A', mb: 2 }}>Material Issue Acknowledgement Status</Typography>
+                {materialIssues.length === 0 ? (
+                  <Typography variant="body2" color="textSecondary">No issues to acknowledge.</Typography>
+                ) : (
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                    {materialIssues.map((issue) => (
+                      <Box key={issue.id} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1.5, border: '1px solid #E2E8F0', borderRadius: 1, bgcolor: issue.is_acknowledged ? '#F0FDF4' : '#FFFBEB' }}>
+                        <Box>
+                          <Typography variant="subtitle2" fontWeight="bold">{issue.issue_number}</Typography>
+                          {issue.is_acknowledged ? (
+                            <Typography variant="caption" color="textSecondary">Acknowledged by {issue.acknowledged_by_name || 'Technician'} on {issue.acknowledged_at ? dayjs(issue.acknowledged_at).format('DD MMM YYYY') : ''}</Typography>
+                          ) : (
+                            <Typography variant="caption" color="textSecondary">Awaiting Acknowledgement</Typography>
+                          )}
+                        </Box>
+                        <Chip size="small" label={issue.is_acknowledged ? 'Acknowledged' : 'Pending'} color={issue.is_acknowledged ? 'success' : 'warning'} />
+                      </Box>
+                    ))}
                   </Box>
-                ))}
-              </Box>
-            )}
-          </Paper>
+                )}
+              </Paper>
+            </>
+          )}
           </>
           )}
         </Grid>
@@ -821,6 +898,7 @@ export default function ComplaintDetail() {
         <DialogContent>
           <TextField
             autoFocus
+            required
             margin="dense"
             label="Resolution Entered (Action Taken)"
             fullWidth
@@ -831,6 +909,7 @@ export default function ComplaintDetail() {
             sx={{ mb: 2, mt: 1 }}
           />
           <TextField
+            required
             margin="dense"
             label="Closure Reason"
             fullWidth
@@ -838,8 +917,75 @@ export default function ComplaintDetail() {
             rows={2}
             value={closureReason}
             onChange={(e) => setClosureReason(e.target.value)}
-            sx={{ mb: 3 }}
+            sx={{ mb: 2 }}
           />
+
+          <TextField
+            margin="dense"
+            label="Status on Work Completion"
+            fullWidth
+            value={statusOnWorkCompletion}
+            onChange={(e) => setStatusOnWorkCompletion(e.target.value)}
+            sx={{ mb: 2 }}
+          />
+          <FormControlLabel
+            control={<Switch checked={jobCompletedSatisfactorily} onChange={(e) => setJobCompletedSatisfactorily(e.target.checked)} color="success" />}
+            label="Job Completed Satisfactorily"
+            sx={{ mb: 2, display: 'block' }}
+          />
+          <Grid container spacing={2} sx={{ mb: 3 }}>
+            <Grid item xs={6}>
+              <TextField
+                margin="dense"
+                label="Completion Date"
+                type="date"
+                fullWidth
+                InputLabelProps={{ shrink: true }}
+                value={completionDate}
+                onChange={(e) => setCompletionDate(e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                margin="dense"
+                label="Completion Time"
+                type="time"
+                fullWidth
+                InputLabelProps={{ shrink: true }}
+                value={completionTime}
+                onChange={(e) => setCompletionTime(e.target.value)}
+              />
+            </Grid>
+          </Grid>
+
+          <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
+            <Button variant="outlined" color="primary" startIcon={<Save />} onClick={handleSaveDetails} disabled={actionLoading}>
+              Save Details
+            </Button>
+            {isPM ? (
+              <Button 
+                variant="contained" 
+                color="info" 
+                startIcon={<Print />} 
+                onClick={() => setIsPrinting(true)}
+              >
+                Generate Preventive Maintenance Report
+              </Button>
+            ) : (
+              <Button 
+                variant="contained" 
+                color="info" 
+                startIcon={<Print />} 
+                onClick={() => setIsPrinting(true)}
+              >
+                Generate Engineer Evaluation Report
+              </Button>
+            )}
+          </Box>
+          
+          {isPM && (
+             <PMChecklistForm data={pmChecklistData} onChange={setPmChecklistData} />
+          )}
           
           {complaint?.complaint_type === 'Installation' ? (
             <Box sx={{ border: '2px dashed #CBD5E1', borderRadius: 2, p: 2, bgcolor: '#F8FAFC', mb: 2 }}>
@@ -847,15 +993,15 @@ export default function ComplaintDetail() {
               
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <Box>
-                  <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>1. Equipment Photo</Typography>
+                  <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>1. Equipment Photo *</Typography>
                   <input type="file" accept="image/*" onChange={(e) => setEquipmentPhoto(e.target.files[0])} />
                 </Box>
                 <Box>
-                  <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>2. Serial Number Photo</Typography>
+                  <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>2. Serial Number Photo *</Typography>
                   <input type="file" accept="image/*" onChange={(e) => setSerialNumberPhoto(e.target.files[0])} />
                 </Box>
                 <Box>
-                  <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>3. Installation Report</Typography>
+                  <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>3. Installation Report *</Typography>
                   <input type="file" accept="*/*" onChange={(e) => setInstallationReport(e.target.files[0])} />
                 </Box>
               </Box>
@@ -877,7 +1023,20 @@ export default function ComplaintDetail() {
                 )}
               </Box>
 
-              <Typography variant="subtitle2" sx={{ mb: 1 }}>Upload Service Documents</Typography>
+              <Typography variant="subtitle2" sx={{ mb: 1 }}>{isPM ? 'Upload Signed PM Report *' : 'Upload Signed Engineer Evaluation Report *'}</Typography>
+              <Box sx={{ border: '2px dashed #CBD5E1', borderRadius: 2, p: 2, textAlign: 'center', bgcolor: '#F8FAFC', mb: 2 }}>
+                <input type="file" accept="*/*" style={{ display: 'none' }} id="signed-report-input" onChange={(e) => setSignedReport(e.target.files[0])} />
+                <Button variant="outlined" startIcon={<Assignment />} onClick={() => document.getElementById('signed-report-input').click()} size="small">
+                  {signedReport ? 'Change Signed Report' : 'Select Signed Report'}
+                </Button>
+                {signedReport && (
+                  <Box sx={{ mt: 2, textAlign: 'left' }}>
+                    <Chip label={signedReport.name} onDelete={() => setSignedReport(null)} sx={{ m: 0.5 }} />
+                  </Box>
+                )}
+              </Box>
+
+              <Typography variant="subtitle2" sx={{ mb: 1 }}>Upload Other Service Documents</Typography>
               <Box sx={{ border: '2px dashed #CBD5E1', borderRadius: 2, p: 2, textAlign: 'center', bgcolor: '#F8FAFC', mb: 2 }}>
                  <input type="file" multiple accept="*/*" style={{ display: 'none' }} ref={fileInputRef} onChange={(e) => {
                    if (e.target.files) {
@@ -905,17 +1064,17 @@ export default function ComplaintDetail() {
             onClick={handleResolve} 
             variant="contained" 
             color="success" 
-            disabled={actionLoading || !resolutionRemarks || !closureReason || (complaint?.complaint_type === 'Installation' ? (!equipmentPhoto || !serialNumberPhoto || !installationReport) : closureDocs.length === 0)} 
+            disabled={actionLoading || !resolutionRemarks || !closureReason || (complaint?.complaint_type === 'Installation' ? (!equipmentPhoto || !serialNumberPhoto || !installationReport) : !signedReport)} 
             startIcon={actionLoading ? <CircularProgress size={20} /> : <CheckCircle />}
           >
             Submit for Approval
           </Button>
         </DialogActions>
-        {(complaint?.complaint_type === 'Installation' ? (!equipmentPhoto || !serialNumberPhoto || !installationReport) : closureDocs.length === 0) && (
+        {(complaint?.complaint_type === 'Installation' ? (!equipmentPhoto || !serialNumberPhoto || !installationReport) : !signedReport) && (
             <Alert severity="warning" sx={{ m: 2, mt: 0 }}>
               {complaint?.complaint_type === 'Installation' 
                 ? "Equipment Photo, Serial Number Photo, and Installation Report are mandatory."
-                : "A service document or report must be uploaded to close the complaint."}
+                : (isPM ? "The Signed PM Report must be uploaded to close the complaint." : "The Signed Engineer Evaluation Report must be uploaded to close the complaint.")}
             </Alert>
         )}
       </Dialog>
@@ -938,5 +1097,30 @@ export default function ComplaintDetail() {
         </DialogContent>
       </Dialog>
     </Box>
+
+    {isPrinting && (
+      <Box sx={{ '@media print': { m: 0, p: 0 } }}>
+        {isPM ? (
+           <PreventiveMaintenanceReport complaint={{
+             ...complaint, 
+             resolution_entered: resolutionRemarks,
+             status_on_work_completion: statusOnWorkCompletion,
+             job_completed_satisfactorily: jobCompletedSatisfactorily,
+             completion_date: completionDate,
+             completion_time: completionTime
+           }} pmChecklistData={pmChecklistData} materialIssues={materialIssues} />
+        ) : (
+           <EngineerEvaluationReport complaint={{
+             ...complaint, 
+             resolution_entered: resolutionRemarks,
+             status_on_work_completion: statusOnWorkCompletion,
+             job_completed_satisfactorily: jobCompletedSatisfactorily,
+             completion_date: completionDate,
+             completion_time: completionTime
+           }} materialIssues={materialIssues} />
+        )}
+      </Box>
+    )}
+    </>
   );
 }

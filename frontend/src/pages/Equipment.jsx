@@ -57,6 +57,10 @@ export default function Equipment() {
   const [qrData, setQrData] = useState(null);
   const [printLabelCount, setPrintLabelCount] = useState(1);
 
+  // Request Installation Confirm Dialog
+  const [confirmInstallDialog, setConfirmInstallDialog] = useState(null);
+  const [confirmInstallSubmitting, setConfirmInstallSubmitting] = useState(false);
+
   // Write Off Dialog
   const [writeOffDialog, setWriteOffDialog] = useState(null);
   const [writeOffDate, setWriteOffDate] = useState('');
@@ -169,8 +173,11 @@ export default function Equipment() {
       }
 
       // Status filter
-      if (selectedStatus && item.status !== selectedStatus) {
-        return false;
+      if (selectedStatus) {
+        const effectiveStatus = (item.installation_status === 'Pending Installation' || item.installation_status === 'Installation Requested') ? 'Pending Installation' : item.status;
+        if (effectiveStatus !== selectedStatus) {
+          return false;
+        }
       }
 
       // Institution filter
@@ -278,15 +285,22 @@ export default function Equipment() {
   };
 
   // Handle Request Installation
-  const handleRequestInstallation = async (item) => {
-    if (window.confirm(`Are you sure you want to generate an Installation ticket for ${item.equipment_code}?`)) {
-      try {
-        await api.post(`/api/equipment/${item.id}/request-installation`);
-        showMessage('Installation ticket generated successfully!', 'Success', 'success');
-        loadData();
-      } catch (err) {
-        showMessage(err.response?.data?.detail || 'Failed to request installation', 'Error', 'error');
-      }
+  const handleRequestInstallation = (item) => {
+    setConfirmInstallDialog(item);
+  };
+
+  const executeRequestInstallation = async () => {
+    if (!confirmInstallDialog) return;
+    setConfirmInstallSubmitting(true);
+    try {
+      await api.post(`/api/equipment/${confirmInstallDialog.id}/request-installation`);
+      showMessage('Installation ticket generated successfully!', 'Success', 'success');
+      setConfirmInstallDialog(null);
+      loadData();
+    } catch (err) {
+      showMessage(err.response?.data?.detail || 'Failed to request installation', 'Error', 'error');
+    } finally {
+      setConfirmInstallSubmitting(false);
     }
   };
 
@@ -1152,19 +1166,49 @@ export default function Equipment() {
                       {item.installation_status === 'Installed' ? (
                         <Chip label="Installed" size="small" color="success" icon={<CheckCircle sx={{ fontSize: '14px !important' }} />} sx={{ fontSize: '0.75rem' }} />
                       ) : item.installation_status === 'Pending Installation' ? (
-                        <Chip label="Pending Installation" size="small" color="info" icon={<Warning sx={{ fontSize: '14px !important' }} />} sx={{ fontSize: '0.75rem' }} />
+                        <Chip 
+                          label="Required" 
+                          size="small" 
+                          color="info" 
+                          icon={<Warning sx={{ fontSize: '14px !important' }} />} 
+                          sx={{ fontSize: '0.75rem', cursor: 'pointer', '&:hover': { opacity: 0.8 } }} 
+                          onClick={(e) => { e.stopPropagation(); handleRequestInstallation(item); }}
+                        />
                       ) : item.installation_status === 'Installation Requested' ? (
-                        <Chip label="Ticket Raised" size="small" color="secondary" icon={<Assignment sx={{ fontSize: '14px !important' }} />} sx={{ fontSize: '0.75rem' }} />
+                        <Chip 
+                          label="Ticket Raised" 
+                          size="small" 
+                          color="secondary" 
+                          icon={<Assignment sx={{ fontSize: '14px !important' }} />} 
+                          sx={{ fontSize: '0.75rem', cursor: 'pointer', '&:hover': { opacity: 0.8 } }} 
+                          onClick={(e) => { e.stopPropagation(); setInstallForm({ ...installForm, serial_number: item.serial_number || '' }); setInstallFiles({ file: null, equipment_photo: null, serial_number_photo: null }); setInstallDialog(item); }}
+                        />
                       ) : (
                         <Chip label="Not Required" size="small" sx={{ bgcolor: '#F1F5F9', color: '#64748B', fontSize: '0.75rem' }} />
                       )}
                     </TableCell>
                     <TableCell>
                       <Chip
-                        label={item.status}
+                        label={(item.installation_status === 'Pending Installation' || item.installation_status === 'Installation Requested') ? 'Pending Installation' : item.status}
                         size="small"
-                        color={item.status === 'Operational' ? 'success' : item.status === 'Under Repair' ? 'error' : item.status === 'Under maintenance' ? 'warning' : item.status === 'Spare Requested' ? 'secondary' : (item.status === 'Pending Installation' || item.installation_status === 'Installation Requested') ? 'info' : 'default'}
-                        sx={{ fontSize: '0.75rem', height: 'auto', py: 0.5, '& .MuiChip-label': { display: 'block', whiteSpace: 'normal', textAlign: 'center' } }}
+                        sx={{ 
+                          fontSize: '0.75rem', 
+                          height: 'auto', 
+                          py: 0.5, 
+                          '& .MuiChip-label': { display: 'block', whiteSpace: 'normal', textAlign: 'center' },
+                          bgcolor: (() => {
+                            const effStatus = (item.installation_status === 'Pending Installation' || item.installation_status === 'Installation Requested') ? 'Pending Installation' : item.status;
+                            if (effStatus === 'Operational') return '#10b981';
+                            if (effStatus === 'Pending Installation') return '#3b82f6';
+                            if (effStatus === 'Under Repair') return '#ef4444';
+                            if (effStatus === 'Under maintenance') return '#f59e0b';
+                            if (effStatus === 'Spare Requested') return '#8b5cf6';
+                            if (effStatus === 'Written Off') return '#795548';
+                            if (effStatus === 'RBER') return '#374151';
+                            return '#94a3b8';
+                          })(),
+                          color: '#fff'
+                        }}
                       />
                     </TableCell>
                     <TableCell align="right">
@@ -1184,27 +1228,7 @@ export default function Equipment() {
                             </IconButton>
                           </span>
                         </Tooltip>
-                        {(item.installation_status === 'Pending Installation' || item.installation_status === 'Installation Requested') && (
-                          <Tooltip title="Complete Installation">
-                            <IconButton size="small" color="secondary" onClick={(e) => { e.stopPropagation(); setInstallForm({ ...installForm, serial_number: item.serial_number || '' }); setInstallFiles({ file: null, equipment_photo: null, serial_number_photo: null }); setInstallDialog(item); }}>
-                              <Build fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                        )}
-                        {item.installation_status === 'Pending Installation' && (
-                          <Tooltip title="Request Installation Call">
-                            <Button size="small" variant="contained" color="primary" sx={{ textTransform: 'none', py: 0.5 }} onClick={(e) => { e.stopPropagation(); handleRequestInstallation(item); }}>
-                              Request Install
-                            </Button>
-                          </Tooltip>
-                        )}
-                        {item.installation_status === 'Installation Requested' && (
-                          <Tooltip title="Ticket Raised">
-                            <Button size="small" variant="contained" color="inherit" disabled sx={{ textTransform: 'none', py: 0.5 }}>
-                              Ticket Raised
-                            </Button>
-                          </Tooltip>
-                        )}
+
                         {item.installation_status === 'Installed' && (
                           <Tooltip title="Upload Documents">
                             <IconButton size="small" color="primary" onClick={(e) => { e.stopPropagation(); setUploadDocsFiles({ file: null, equipment_photo: null, serial_number_photo: null }); setUploadDocsDialog(item); }}>
@@ -2427,6 +2451,23 @@ export default function Equipment() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Confirm Installation Request Dialog */}
+      <Dialog open={!!confirmInstallDialog} onClose={() => !confirmInstallSubmitting && setConfirmInstallDialog(null)} maxWidth="sm" fullWidth>
+        <DialogTitle>Request Installation Ticket</DialogTitle>
+        <DialogContent dividers>
+          <Typography>
+            Are you sure you want to generate an Installation ticket for <b>{confirmInstallDialog?.equipment_code}</b>?
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setConfirmInstallDialog(null)} color="inherit" disabled={confirmInstallSubmitting}>Cancel</Button>
+          <Button onClick={executeRequestInstallation} variant="contained" color="primary" disabled={confirmInstallSubmitting}>
+            {confirmInstallSubmitting ? 'Generating...' : 'Confirm'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
     </Box>
   );
 }

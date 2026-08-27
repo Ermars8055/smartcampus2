@@ -10,7 +10,7 @@ from app.models import (
     MaterialIssue, MaterialIssueItem, Material, UOM, StockLedger, User,
     GRN, GRNItem, Vendor, PurchaseOrder, Category, SubCategory, Warehouse,
     Department, MaterialReturn, MaterialReturnItem, GatePass, GatePassItem,
-    Institution
+    Institution, EquipmentItem, EquipmentWriteOff, Project
 )
 from app.auth import get_tenant_id, get_site_id, get_current_user, require_permission
 
@@ -1408,3 +1408,201 @@ def get_call_status_report(
         "summary": summary,
         "history": history
     }
+
+# ==========================================
+# CALIBRATION DETAIL REPORT
+# ==========================================
+
+@router.get("/calibration-details")
+def get_calibration_details(
+    from_date: Optional[str] = Query(None, description="From Date (YYYY-MM-DD) for next due date"),
+    to_date: Optional[str] = Query(None, description="To Date (YYYY-MM-DD) for next due date"),
+    department: Optional[str] = None,
+    search: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("report_equipment", "read")),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    try:
+        dt_from = datetime.strptime(from_date, "%Y-%m-%d").date() if from_date else None
+        dt_to = datetime.strptime(to_date, "%Y-%m-%d").date() if to_date else None
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD.")
+
+    from app.models import LocationMaster, EquipmentItem
+
+    query = db.query(
+        EquipmentItem,
+        Material.name.label("material_name"),
+        LocationMaster.department_name.label("location_department")
+    ).join(
+        Material, EquipmentItem.material_id == Material.id
+    ).outerjoin(
+        LocationMaster, EquipmentItem.location_id == LocationMaster.id
+    ).filter(
+        EquipmentItem.tenant_id == tenant_id,
+        EquipmentItem.site_id == site_id,
+        EquipmentItem.calibration_required == True,
+        EquipmentItem.status != "Written Off",
+        EquipmentItem.status != "RBER"
+    )
+
+    if dt_from:
+        query = query.filter(EquipmentItem.next_calibration_due_date >= dt_from)
+    if dt_to:
+        query = query.filter(EquipmentItem.next_calibration_due_date <= dt_to)
+        
+    if department:
+        query = query.filter(LocationMaster.department_name == department)
+
+    if search:
+        search_term = f"%{search}%"
+        query = query.filter(
+            (EquipmentItem.equipment_code.ilike(search_term)) | 
+            (Material.name.ilike(search_term)) |
+            (EquipmentItem.serial_number.ilike(search_term))
+        )
+
+    results = query.order_by(EquipmentItem.next_calibration_due_date.asc().nullslast()).all()
+    
+    data = []
+    for eq, mat_name, loc_dept in results:
+        data.append({
+            "id": eq.id,
+            "equipment_code": eq.equipment_code,
+            "equipment_name": mat_name,
+            "make": eq.make or "-",
+            "model": eq.model or "-",
+            "serial_number": eq.serial_number or "-",
+            "department": loc_dept or "-",
+            "last_calibration_date": eq.last_calibration_date.strftime("%Y-%m-%d") if eq.last_calibration_date else "-",
+            "next_calibration_due_date": eq.next_calibration_due_date.strftime("%Y-%m-%d") if eq.next_calibration_due_date else "-",
+            "status": eq.status
+        })
+
+    return {
+        "data": data,
+        "generated_at": get_now_ist().strftime("%d-%b-%Y %H:%M:%S"),
+        "total_count": len(data)
+    }
+
+# ==========================================
+# RETURN SUMMARY REPORT
+# ==========================================
+
+@router.get("/return-summary")
+def get_return_summary(
+    from_date: Optional[str] = None,
+    to_date: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    query = db.query(
+        MaterialReturn.return_number,
+        MaterialReturn.created_at,
+        MaterialReturn.status,
+        MaterialReturn.returned_from_department,
+        Warehouse.name.label("warehouse_name"),
+        Material.code.label("material_code"),
+        Material.name.label("material_name"),
+        MaterialReturnItem.returned_qty,
+        MaterialReturnItem.received_qty,
+        User.full_name.label("initiated_by")
+    ).join(
+        MaterialReturnItem, MaterialReturn.id == MaterialReturnItem.return_id
+    ).join(
+        Warehouse, MaterialReturn.warehouse_id == Warehouse.id
+    ).join(
+        Material, MaterialReturnItem.material_id == Material.id
+    ).outerjoin(
+        User, MaterialReturn.initiated_by_id == User.id
+    ).filter(
+        MaterialReturn.tenant_id == tenant_id,
+        MaterialReturn.site_id == site_id,
+        MaterialReturn.is_deleted == False
+    )
+    
+    if from_date and to_date:
+        try:
+            dt_from = datetime.strptime(from_date, "%Y-%m-%d").replace(hour=0, minute=0, second=0)
+            dt_to = datetime.strptime(to_date, "%Y-%m-%d").replace(hour=23, minute=59, second=59)
+            query = query.filter(
+                MaterialReturn.created_at >= dt_from,
+                MaterialReturn.created_at <= dt_to
+            )
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD.")
+
+    results = query.order_by(desc(MaterialReturn.created_at)).all()
+
+    data = []
+    for row in results:
+        data.append({
+            "return_number": row.return_number,
+            "date": row.created_at.isoformat() if row.created_at else "-",
+            "status": row.status,
+            "department": row.returned_from_department or "-",
+            "warehouse": row.warehouse_name or "-",
+            "material_code": row.material_code,
+            "material_name": row.material_name,
+            "returned_qty": row.returned_qty or 0,
+            "received_qty": row.received_qty or 0,
+            "initiated_by": row.initiated_by or "-"
+        })
+
+    return data
+
+
+# ==========================================
+# EQUIPMENT WRITE-OFF SUMMARY REPORT
+# ==========================================
+
+@router.get("/equipment-writeoffs")
+def get_equipment_writeoffs(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    tenant_id: int = Depends(get_tenant_id),
+    site_id: int = Depends(get_site_id)
+):
+    query = db.query(
+        EquipmentItem.equipment_code,
+        EquipmentItem.serial_number,
+        EquipmentItem.status,
+        EquipmentItem.rber_reason,
+        Material.name.label("material_name"),
+        EquipmentWriteOff.write_off_date,
+        EquipmentWriteOff.reason.label("write_off_reason"),
+        User.full_name.label("write_off_by")
+    ).join(
+        Material, EquipmentItem.material_id == Material.id
+    ).outerjoin(
+        EquipmentWriteOff, EquipmentItem.id == EquipmentWriteOff.equipment_id
+    ).outerjoin(
+        User, EquipmentWriteOff.created_by_id == User.id
+    ).filter(
+        EquipmentItem.tenant_id == tenant_id,
+        EquipmentItem.site_id == site_id,
+        EquipmentItem.status.in_(["Written Off", "RBER"])
+    )
+
+    results = query.order_by(asc(EquipmentItem.equipment_code)).all()
+
+    data = []
+    for row in results:
+        reason = row.write_off_reason or row.rber_reason or "-"
+        write_off_date = row.write_off_date.isoformat() if row.write_off_date else "-"
+        
+        data.append({
+            "equipment_code": row.equipment_code,
+            "material_name": row.material_name,
+            "serial_number": row.serial_number or "-",
+            "status": row.status,
+            "date": write_off_date,
+            "reason": reason,
+            "action_by": row.write_off_by or "-"
+        })
+
+    return data

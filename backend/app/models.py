@@ -73,6 +73,13 @@ class InvoiceStatus(str, enum.Enum):
     APPROVED = "Approved"
     CHANGE_REQUIRED = "Change Required"
 
+class CreditNoteStatus(str, enum.Enum):
+    DRAFT = "Draft"
+    SUBMITTED = "Submitted"
+    APPROVED = "Approved"
+    REJECTED = "Rejected"
+
+
 class InvoicePaymentStatus(str, enum.Enum):
     PENDING = "Pending"
     SENT_FOR_PAYMENT = "Sent for Payment"
@@ -1270,6 +1277,97 @@ class InvoiceItem(Base):
     
     invoice = relationship("Invoice", back_populates="items")
     material = relationship("Material")
+
+
+# == Credit Notes ==
+
+class CreditNote(Base):
+    __tablename__ = "credit_notes"
+    id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False)
+    site_id = Column(Integer, ForeignKey("sites.id", ondelete="CASCADE"), nullable=False)
+    credit_note_number = Column(String(100), nullable=False, index=True)
+    date = Column(Date, nullable=False)
+    vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=False)
+    invoice_id = Column(Integer, ForeignKey("invoices.id"), nullable=True) # Optional link to original invoice
+    consignee_id = Column(Integer, ForeignKey("company_addresses.id"), nullable=True)
+    buyer_id = Column(Integer, ForeignKey("company_addresses.id"), nullable=True)
+    
+    original_invoice_number = Column(String(100), nullable=True)
+    original_invoice_date = Column(Date, nullable=True)
+    reference_number = Column(String(100), nullable=True)
+    reference_date = Column(Date, nullable=True)
+    buyer_order_number = Column(String(100), nullable=True)
+    buyer_order_date = Column(Date, nullable=True)
+    
+    dispatch_doc_number = Column(String(100), nullable=True)
+    dispatched_through = Column(String(100), nullable=True)
+    destination = Column(String(255), nullable=True)
+    terms_of_delivery = Column(Text, nullable=True)
+
+    total_taxable_amount = Column(Float, default=0)
+    total_cgst = Column(Float, default=0)
+    total_sgst = Column(Float, default=0)
+    total_igst = Column(Float, default=0)
+    total_discount = Column(Float, default=0)
+    total_amount = Column(Float, default=0)
+    
+    status = Column(String(50), default=CreditNoteStatus.DRAFT.value)
+    current_approval_level = Column(Integer, default=1)
+    remarks = Column(Text, nullable=True)
+    scan_url = Column(String(500), nullable=True)
+    
+    created_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    approved_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    approved_at = Column(DateTime, nullable=True)
+    is_deleted = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=_get_now)
+    updated_at = Column(DateTime, default=_get_now, onupdate=_get_now)
+
+    vendor = relationship("Vendor")
+    invoice = relationship("Invoice")
+    consignee = relationship("CompanyAddress", foreign_keys=[consignee_id])
+    buyer = relationship("CompanyAddress", foreign_keys=[buyer_id])
+    created_by = relationship("User", foreign_keys=[created_by_id])
+    approver = relationship("User", foreign_keys=[approved_by_id])
+    items = relationship("CreditNoteItem", back_populates="credit_note", cascade="all, delete-orphan")
+    __table_args__ = (UniqueConstraint("tenant_id", "credit_note_number", "vendor_id", name="uq_cn_per_vendor_tenant"),)
+
+class CreditNoteItem(Base):
+    __tablename__ = "credit_note_items"
+    id = Column(Integer, primary_key=True, index=True)
+    credit_note_id = Column(Integer, ForeignKey("credit_notes.id", ondelete="CASCADE"), nullable=False)
+    material_id = Column(Integer, ForeignKey("materials.id"), nullable=True)
+    description = Column(String(255), nullable=True)
+    hsn_sac = Column(String(50), nullable=True)
+    quantity = Column(Float, nullable=False)
+    rate = Column(Float, nullable=False)
+    uom = Column(String(50), nullable=True)
+    discount_percent = Column(Float, default=0)
+    cgst_rate = Column(Float, default=0)
+    sgst_rate = Column(Float, default=0)
+    igst_rate = Column(Float, default=0)
+    cgst_amount = Column(Float, default=0)
+    sgst_amount = Column(Float, default=0)
+    igst_amount = Column(Float, default=0)
+    taxable_amount = Column(Float, default=0)
+    amount = Column(Float, nullable=False)
+    remarks = Column(Text, nullable=True)
+    
+    credit_note = relationship("CreditNote", back_populates="items")
+    material = relationship("Material")
+
+class CreditNoteApproval(Base):
+    __tablename__ = "credit_note_approvals"
+    id = Column(Integer, primary_key=True, index=True)
+    credit_note_id = Column(Integer, ForeignKey("credit_notes.id", ondelete="CASCADE"), nullable=False)
+    approval_flow_id = Column(Integer, ForeignKey("approval_flows.id"), nullable=False)
+    approver_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    remarks = Column(Text, nullable=True)
+    approved_at = Column(DateTime, default=_get_now)
+    credit_note = relationship("CreditNote")
+    flow = relationship("ApprovalFlow")
+    approver = relationship("User")
 
 
 # == GRN ==

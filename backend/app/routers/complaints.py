@@ -173,7 +173,8 @@ def create_complaint(
             today = datetime.utcnow().date()
             eq = db.query(EquipmentItem).filter(EquipmentItem.id == complaint_in.equipment_id).first()
             if eq:
-                eq.status = "Under Repair"
+                if complaint_in.complaint_type != "Installation":
+                    eq.status = "Under Repair"
                 
             c_item = db.query(ContractItem).join(Contract).filter(
                 ContractItem.equipment_id == complaint_in.equipment_id,
@@ -299,12 +300,16 @@ def update_complaint(
     for field, value in update_data.items():
         if field not in ['image_urls', 'resolution_image_urls']:
             setattr(complaint, field, value)
-            if field == 'status' and value == ComplaintStatus.IN_PROGRESS.value:
-                if complaint.equipment:
-                    complaint.equipment.status = "Under maintenance"
-            if field == 'status' and value in [ComplaintStatus.CLOSED.value, ComplaintStatus.RESOLVED.value]:
-                if complaint.equipment:
-                    complaint.equipment.status = "Operational"
+            if field == 'status':
+                if complaint.equipment and complaint.complaint_type != "Installation":
+                    if value in [ComplaintStatus.REGISTERED.value, ComplaintStatus.OPEN.value, ComplaintStatus.REOPENED.value, ComplaintStatus.ASSIGNED.value]:
+                        complaint.equipment.status = "Under Repair"
+                    elif value in [ComplaintStatus.UNDER_INSPECTION.value, ComplaintStatus.IN_PROGRESS.value, "Pending Approval"]:
+                        complaint.equipment.status = "Under maintenance"
+                    elif value == ComplaintStatus.MATERIAL_PENDING.value:
+                        complaint.equipment.status = "Spare Requested"
+                    elif value in [ComplaintStatus.CLOSED.value, ComplaintStatus.RESOLVED.value]:
+                        complaint.equipment.status = "Operational"
 
     if 'image_urls' in update_data:
         provided_urls = update_data['image_urls']
@@ -379,6 +384,8 @@ def assign_complaint(
 
     complaint.assigned_to_id = payload.assigned_to_id
     complaint.status = ComplaintStatus.ASSIGNED.value
+    if complaint.equipment and complaint.complaint_type != "Installation":
+        complaint.equipment.status = "Under Repair"
     
     from app.models import Alert
     alert = Alert(
@@ -419,6 +426,8 @@ def inspect_complaint(
         )
 
     complaint.status = ComplaintStatus.UNDER_INSPECTION.value
+    if complaint.equipment and complaint.complaint_type != "Installation":
+        complaint.equipment.status = "Under maintenance"
 
     db.commit()
     db.refresh(complaint)
@@ -455,9 +464,11 @@ def complete_inspection(
 
     if payload.repair_method == 'Material Required':
         complaint.status = ComplaintStatus.MATERIAL_PENDING.value
+        if complaint.equipment and complaint.complaint_type != "Installation":
+            complaint.equipment.status = "Spare Requested"
     else:
         complaint.status = ComplaintStatus.IN_PROGRESS.value
-        if complaint.equipment:
+        if complaint.equipment and complaint.complaint_type != "Installation":
             complaint.equipment.status = "Under maintenance"
 
     db.commit()
@@ -487,7 +498,7 @@ def start_repair(
         )
 
     complaint.status = ComplaintStatus.IN_PROGRESS.value
-    if complaint.equipment:
+    if complaint.equipment and complaint.complaint_type != "Installation":
         complaint.equipment.status = "Under maintenance"
     db.commit()
     db.refresh(complaint)
@@ -518,7 +529,7 @@ def resolve_complaint(
         )
 
     complaint.status = ComplaintStatus.CLOSED.value
-    if complaint.equipment:
+    if complaint.equipment and complaint.complaint_type != "Installation":
         complaint.equipment.status = "Operational"
     complaint.resolved_at = datetime.utcnow()
     complaint.resolved_by_id = current_user.id
@@ -579,12 +590,14 @@ def verify_complaint(
 
     if payload.is_accepted:
         complaint.status = ComplaintStatus.CLOSED.value
-        if complaint.equipment:
+        if complaint.equipment and complaint.complaint_type != "Installation":
             complaint.equipment.status = "Operational"
         if payload.feedback:
             complaint.feedback = payload.feedback
     else:
         complaint.status = ComplaintStatus.REOPENED.value
+        if complaint.equipment and complaint.complaint_type != "Installation":
+            complaint.equipment.status = "Under Repair"
         complaint.rejection_remarks = payload.rejection_remarks
 
     db.commit()
@@ -646,6 +659,8 @@ def close_complaint(
     if payload.pm_checklist_data is not None:
         complaint.pm_checklist_data = payload.pm_checklist_data
     complaint.status = "Pending Approval"
+    if complaint.equipment and complaint.complaint_type != "Installation":
+        complaint.equipment.status = "Under maintenance"
     
     # Add documents
     for url in payload.document_urls:
@@ -693,7 +708,7 @@ def approve_closure(
     # If both approved, move to closed and update equipment
     if complaint.admin_approved_by_id and complaint.manager_approved_by_id:
         complaint.status = ComplaintStatus.CLOSED.value
-        if complaint.equipment:
+        if complaint.equipment and complaint.complaint_type != "Installation":
             complaint.equipment.status = "Operational"
         
         # Auto-update PM/Calibration if applicable
@@ -743,6 +758,8 @@ def reopen_complaint(
         raise HTTPException(status_code=400, detail="Only closed complaints can be reopened.")
         
     complaint.status = ComplaintStatus.REOPENED.value
+    if complaint.equipment and complaint.complaint_type != "Installation":
+        complaint.equipment.status = "Under Repair"
     
     # Reset approval fields
     complaint.admin_approved_by_id = None

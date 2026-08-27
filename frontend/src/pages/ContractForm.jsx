@@ -398,6 +398,7 @@ export default function ContractForm() {
                 ) : (
                   <>
                     <TableCell>EQUIPMENT</TableCell>
+                    <TableCell>SERIAL NUMBER</TableCell>
                     <TableCell>RATE (₹)</TableCell>
                     <TableCell>DISC %</TableCell>
                     <TableCell>GST TYPE</TableCell>
@@ -414,7 +415,7 @@ export default function ContractForm() {
                 <TableRow key={index} sx={{ '& td': { verticalAlign: 'top', pt: 2 } }}>
                   {form.contract_type === 'RC' ? (
                     <>
-                      <TableCell sx={{ minWidth: 250 }}>
+                      <TableCell sx={{ minWidth: 220, width: '25%' }}>
                         <Autocomplete
                           options={materials}
                           getOptionLabel={(option) => `${option.code} - ${option.name}`}
@@ -437,7 +438,7 @@ export default function ContractForm() {
                             };
                             setForm({ ...form, items: newItems });
                           }}
-                          renderInput={(params) => <TextField {...params} size="small" placeholder="Select Material" />}
+                          renderInput={(params) => <TextField {...params} size="small" placeholder="Select Material" multiline maxRows={2} />}
                         />
                       </TableCell>
                       <TableCell>
@@ -555,7 +556,7 @@ export default function ContractForm() {
                     </>
                   ) : (
                     <>
-                      <TableCell sx={{ minWidth: 450, width: '40%' }}>
+                      <TableCell sx={{ minWidth: 280, width: '30%' }}>
                         <Autocomplete
                           options={equipment}
                           getOptionLabel={(option) => `${option.equipment_code} - ${option.material_name} (${option.serial_number || 'No SN'})`}
@@ -580,8 +581,13 @@ export default function ContractForm() {
                             };
                             setForm({ ...form, items: newItems });
                           }}
-                          renderInput={(params) => <TextField {...params} size="small" placeholder="Select Equipment" />}
+                          renderInput={(params) => <TextField {...params} size="small" placeholder="Select Equipment" multiline maxRows={2} />}
                         />
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2" sx={{ color: '#64748B', fontWeight: 500, mt: 1 }}>
+                          {item.equipment_id ? (equipment.find(e => e.id === item.equipment_id)?.serial_number || 'NA') : '-'}
+                        </Typography>
                       </TableCell>
                       <TableCell>
                         <TextField 
@@ -727,12 +733,12 @@ export default function ContractForm() {
               ))}
               {form.items.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={isViewMode ? (form.contract_type === 'RC' ? 7 : 6) : (form.contract_type === 'RC' ? 8 : 7)} align="center" sx={{ py: 3, color: '#94A3B8' }}>No items added yet</TableCell>
+                  <TableCell colSpan={isViewMode ? (form.contract_type === 'RC' ? 7 : 7) : (form.contract_type === 'RC' ? 8 : 8)} align="center" sx={{ py: 3, color: '#94A3B8' }}>No items added yet</TableCell>
                 </TableRow>
               )}
               {!isViewMode && (
                 <TableRow>
-                  <TableCell colSpan={form.contract_type === 'RC' ? 8 : 7} align="center" sx={{ py: 2 }}>
+                  <TableCell colSpan={form.contract_type === 'RC' ? 8 : 8} align="center" sx={{ py: 2 }}>
                     <Button
                       variant="outlined"
                       size="small"
